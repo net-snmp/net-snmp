@@ -1,6 +1,5 @@
-########################################################################
-## generic include for XXX. Don't use directly.
-##
+#############################################################  -*- c -*-
+## generic include for XXX. Do not use directly.
 ## $Id$
 ########################################################################
 @if $m2c_mark_boundary == 1@
@@ -25,7 +24,7 @@ config_require(${name}_data_set);
 #include "${name}_oids.h"
 
 /* enum definions */
-#include "${name}_enums.h"
+/* #include "${name}_enums.h" */
 
 /***********************************************************************
  * function declarations
@@ -38,7 +37,7 @@ void init_$name(void);
 @foreach $table table@
 @    include m2c_setup_table.m2i@
 @    include details-table.m2i@
-/*
+/***********************************************************************
  * When you register your mib, you get to provide a generic
  * pointer that will be passed back to you for most of the
  * functions calls.
@@ -49,8 +48,11 @@ void init_$name(void);
 @        eval $m2c_context_reg = "void *"@
 
 @    end@
-typedef $m2c_context_reg ${context}_reg;
+typedef $m2c_context_reg ${context}_reg_data;
 
+/***********************************************************************
+ * data context
+ */
 @    if "$m2c_data_context" eq ""@
 @        include generic-data-context.m2i@
 @    end@
@@ -59,25 +61,30 @@ typedef $m2c_context_reg ${context}_reg;
  */
 typedef $m2c_data_context ${context}_data;
 
-@    include generic-table-indexes.m2i@
+typedef struct ${table}_ref_data_s {
+    ${table}_data *data;
+} ${table}_ref_data;
 
-/*
+/***********************************************************************
+ * undo context
  * We're just going to use the same data structure for our
  * undo_context. If you want to do something more efficent,
  * define your typedef here.
  */
 typedef ${context}_data ${context}_undo_data;
 
-/*
+@    include generic-table-indexes.m2i@
+
+/***********************************************************************
+ * context
  * When your functions are called, you will be passed a
  * ${context}_ctx pointer.
  */
 typedef struct ${context}_ctx_s {
-    ${context}_reg    *reg;  /** registration */
-    ${context}_idx    *idx;  /** index */
-
+    netsnmp_index     oid_idx;
+    oid               oid_tmp[MAX_OID_LEN]; /* xxx-rks: shrink this */
+    ${context}_idx    tbl_idx;
     ${context}_data   *data; /** data */
-
     ${context}_undo_data * undo;
 
     /*
@@ -87,6 +94,19 @@ typedef struct ${context}_ctx_s {
     
 } ${context}_ctx;
 
+typedef struct ${table}_ref_ctx_s {
+    ${table}_ctx *ctx;
+} ${table}_ref_ctx;
+
+/***********************************************************************
+ * function prototypes
+ */
+netsnmp_container *${table}_container_init(netsnmp_mfd_registration *reg);
+
+@    include mfd-access-${m2c_table_access}-header.m2i@
+
+    ${table}_ctx *${table}_allocate_ctx(netsnmp_mfd_registration *reg);
+    ${context}_data *${context}_allocate_data(void);
 @end@
 
 @include generic-header-bottom.m2i@
@@ -100,10 +120,18 @@ typedef struct ${context}_ctx_s {
  */
 @include generic-source-includes.m2i@
 
+@foreach $table table@
+void initialize_table_$table(void);
+int ${table}_get_values(netsnmp_mfd_registration *mfdr,
+                        netsnmp_request_group *rg);
+@end@
+
 /* Initializes the $name module */
 void
 init_$name(void)
 { 
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
   /* here we initialize all the tables we're planning on supporting */
   @foreach $table table@
     if (should_init("$table"))
@@ -124,9 +152,12 @@ void
 initialize_table_$table(void)
 {
     static oid ${table}_oid[] = { $table.uc_OID };
-    netsnmp_table_registration_info *table_info;
     netsnmp_handler_registration *my_handler;
-    netsnmp_iterator_info *iinfo;
+    netsnmp_table_registration_info *table_info;
+    netsnmp_mfd_registration *mfdr;
+    netsnmp_container *container;
+
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
     /** create the table registration information structures */
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
@@ -139,9 +170,10 @@ initialize_table_$table(void)
     /** if your table is read only, it's easiest to change the
         HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
     my_handler = netsnmp_create_handler_registration("$table",
-                                             ${table}_handler,
+                                             NULL,
                                              ${table}_oid,
                                              OID_LENGTH(${table}_oid),
+                                             HANDLER_CAN_BABY_STEP |
 @if $m2c_table_writable == 1@
                                              HANDLER_CAN_RWRITE
 @else@
@@ -170,14 +202,31 @@ initialize_table_$table(void)
 
 
     /***************************************************
+     * create the table registration information structures
+     */
+    mfdr = SNMP_MALLOC_TYPEDEF(netsnmp_mfd_registration);
+    if (!mfdr) {
+        snmp_log(LOG_ERR, "mfd registration malloc failed in "
+                          "initialize_table_$table");
+        return; /** Serious error. */
+    }
+    mfdr->cbsm.get_values = ${table}_get_values;
+
+    /***************************************************
+     * set up container
+     */
+    container = ${table}_container_init(mfdr);
+
+    /***************************************************
      * registering the table with the master agent
      */
-    DEBUGMSGTL(("initialize_table_$table",
+    DEBUGMSGTL(("$name:init_$table",
                 "Registering $table as a mibs-for-dummies table.\n"));		 
-    netsnmp_register_table_mfd(my_handler, iinfo);
+    netsnmp_mfd_register_table(my_handler, table_info, container, mfdr);
 }
 
 @end@
+
 ########################################################################
 ## Do support files
 ########################################################################
@@ -186,6 +235,8 @@ initialize_table_$table(void)
 @run mfd-data-access.m2c@
 @run mfd-data-get.m2c@
 @run mfd-data-set.m2c@
+@run mfd-makefile.m2m@
+@run subagent.m2c@
 ##@run mib2c.column_enums.conf@
 ##
 ########################################################################
