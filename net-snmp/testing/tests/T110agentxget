@@ -20,9 +20,9 @@ AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib"
 STARTAGENT
 
 # test to see that the current agent doesn't support the system mib
-CAPTURE "snmpget $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost system.sysUpTime.0"
+CAPTURE "snmpget -On $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost .1.3.6.1.2.1.1.3.0"
 
-CHECK "system.sysUpTime.0 = No Such Object"
+CHECK ".1.3.6.1.2.1.1.3.0 = No Such Object"
 
 if test "$snmp_last_test_result" = 1; then
   # test the agentx subagent by first running it...
@@ -36,9 +36,9 @@ if test "$snmp_last_test_result" = 1; then
   STARTAGENT
 
   # test to see that the agent now supports setting the system mib
-  CAPTURE "snmpget $SNMP_FLAGS -t 3 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost system.sysUpTime.0"
+  CAPTURE "snmpget -On $SNMP_FLAGS -t 3 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost .1.3.6.1.2.1.1.3.0"
 
-  CHECK "system.sysUpTime.0 = Timeticks:"
+  CHECK ".1.3.6.1.2.1.1.3.0 = Timeticks:"
 
   # stop the subagent
   STOPAGENT
