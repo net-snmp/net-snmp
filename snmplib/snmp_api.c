@@ -555,6 +555,8 @@ register_default_handlers(void) {
 		     DS_LIBRARY_ID, DS_LIB_COMMUNITY);
   ds_register_premib(ASN_BOOLEAN, "snmp", "noTokenWarnings",
                      DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS);
+  ds_register_config(ASN_OCTET_STR, "snmp","noRangeCheck",
+		     DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE );
 }
 
 
@@ -4192,7 +4194,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 		break;
 	    }
 	}
-	if (tp && tp->ranges) {
+
+	if (tp && tp->ranges && !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE)) {
 	    rp = tp->ranges;
 	    while (rp) {
 		if (rp->low <= ltmp && ltmp <= rp->high) break;
@@ -4261,7 +4264,7 @@ snmp_add_var(struct snmp_pdu *pdu,
           break;
         }
 	tp = get_tree(name, name_length, get_tree_head());
-	if (tp && tp->ranges) {
+	if (tp && tp->ranges && !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE)) {
 	    rp = tp->ranges;
 	    while (rp) {
 		if (rp->low <= ltmp && ltmp <= rp->high) break;
