@@ -237,7 +237,7 @@ initialize_table_nlmLogVariableTable(void)
      * note: if you don't need a subhandler to deal with any aspects of
      * the request, change nlmLogVariableTable_handler to "NULL" 
      */
-    netsnmp_register_netsnmp_table_data_set(netsnmp_create_handler_registration
+    netsnmp_register_table_data_set(netsnmp_create_handler_registration
                             ("nlmLogVariableTable",
                              nlmLogVariableTable_handler,
                              nlmLogVariableTable_oid,
@@ -343,7 +343,7 @@ initialize_table_nlmLogTable(void)
      * note: if you don't need a subhandler to deal with any aspects of
      * the request, change nlmLogTable_handler to "NULL" 
      */
-    netsnmp_register_netsnmp_table_data_set(netsnmp_create_handler_registration
+    netsnmp_register_table_data_set(netsnmp_create_handler_registration
                             ("nlmLogTable", nlmLogTable_handler,
                              nlmLogTable_oid, nlmLogTable_oid_len,
                              HANDLER_CAN_RWRITE), nlmLogTable, NULL);

@@ -109,7 +109,7 @@ netsnmp_register_old_api(const char *moduleName,
 
 /** registers a row within a mib table */
 int 
-register_mib_netsnmp_table_row(const char *moduleName,
+netsnmp_register_mib_table_row(const char *moduleName,
                        struct variable *var,
                        size_t varsize,
                        size_t numvars,
@@ -156,9 +156,9 @@ register_mib_netsnmp_table_row(const char *moduleName,
         memcpy(r->rootoid, mibloc, mibloclen*sizeof(oid));
 	memcpy((u_char *)(r->rootoid + (var_subid - 1)), vr->name, 
 	       vr->namelen * sizeof(oid));
-	DEBUGMSGTL(("register_mib_netsnmp_table_row", "rootoid "));
-	DEBUGMSGOID(("register_mib_netsnmp_table_row", r->rootoid, r->rootoid_len));
-	DEBUGMSG(("register_mib_netsnmp_table_row", "\n"));
+	DEBUGMSGTL(("netsnmp_register_mib_table_row", "rootoid "));
+	DEBUGMSGOID(("netsnmp_register_mib_table_row", r->rootoid, r->rootoid_len));
+	DEBUGMSG(("netsnmp_register_mib_table_row", "\n"));
         r->handler->myvoid = (void *)malloc(varsize);
 	
 	if (r->handler->myvoid == NULL) {
@@ -184,7 +184,7 @@ register_mib_netsnmp_table_row(const char *moduleName,
 
         /*  Register this column and row  */
         if ((rc = netsnmp_register_handler_nocallback(r)) != MIB_REGISTERED_OK) {
-	    DEBUGMSGTL(("register_mib_netsnmp_table_row", "register failed %d\n", rc));
+	    DEBUGMSGTL(("netsnmp_register_mib_table_row", "register failed %d\n", rc));
 	    netsnmp_handler_registration_free(r);
 	    break;
 	}

@@ -69,12 +69,12 @@ netsnmp_create_table_data_set(const char *table_name)
 
 /** Given a netsnmp_table_data_set definition, create a handler for it */
 netsnmp_mib_handler *
-get_netsnmp_table_data_set_handler(netsnmp_table_data_set *data_set)
+netsnmp_get_table_data_set_handler(netsnmp_table_data_set *data_set)
 {
     netsnmp_mib_handler *ret = NULL;
 
     if (!data_set) {
-        snmp_log(LOG_INFO, "get_netsnmp_table_data_set_handler(NULL) called\n");
+        snmp_log(LOG_INFO, "netsnmp_get_table_data_set_handler(NULL) called\n");
         return NULL;
     }
     
@@ -92,7 +92,7 @@ get_netsnmp_table_data_set_handler(netsnmp_table_data_set *data_set)
     ever want to be called for SNMP operations.
 */
 int
-netsnmp_register_netsnmp_table_data_set(netsnmp_handler_registration *reginfo, netsnmp_table_data_set *data_set,
+netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo, netsnmp_table_data_set *data_set,
                         netsnmp_table_registration_info *table_info)
 {
     if (NULL == table_info) {
@@ -122,7 +122,7 @@ netsnmp_register_netsnmp_table_data_set(netsnmp_handler_registration *reginfo, n
             table_info->max_column = maxcol;
     }
 
-    netsnmp_inject_handler(reginfo, get_netsnmp_table_data_set_handler(data_set));
+    netsnmp_inject_handler(reginfo, netsnmp_get_table_data_set_handler(data_set));
     return netsnmp_register_table_data(reginfo, data_set->table, table_info);
 }
 
@@ -141,7 +141,7 @@ netsnmp_table_data_set_find_column(netsnmp_table_data_set_storage *start, unsign
  * extracts a netsnmp_table_data_set pointer from a given request
  */
 inline netsnmp_table_data_set *
-extract_netsnmp_table_data_set(netsnmp_request_info *request)
+netsnmp_extract_table_data_set(netsnmp_request_info *request)
 {
     return (netsnmp_table_data_set *)
         netsnmp_request_get_list_data(request, TABLE_DATA_SET_NAME);
@@ -344,7 +344,7 @@ netsnmp_table_data_set_helper_handler(
             continue;
 
         /* extract our stored data and table info */
-        row = netsnmp_extract_netsnmp_table_row(request);
+        row = netsnmp_extract_table_row(request);
         table_info = netsnmp_extract_table_info(request);
         suffix = requests->requestvb->name + reginfo->rootoid_len + 2;
         suffix_len = requests->requestvb->name_length -
@@ -673,7 +673,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
     }
 
     /* register the table */
-    netsnmp_register_netsnmp_table_data_set(
+    netsnmp_register_table_data_set(
         netsnmp_create_handler_registration(line, NULL, table_name, table_name_length,
                                     HANDLER_CAN_RWRITE),
         table_set, NULL);

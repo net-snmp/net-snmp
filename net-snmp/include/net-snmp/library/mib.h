@@ -114,7 +114,7 @@ struct enum_list;
 void print_mib(FILE *fp);
 void print_ascii_dump(FILE *);
 int read_objid(const char *, oid *, size_t *);
-void register_netsnmp_mib_handlers(void);
+void register_mib_handlers(void);
 void init_mib(void);
 void shutdown_mib(void);
 void print_description (oid *, size_t, int);

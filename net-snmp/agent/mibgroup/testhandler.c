@@ -144,7 +144,7 @@ init_testhandler(void) {
                                             3, ASN_OCTET_STR, 1, NULL, 0);
 
     /* register the table */
-    netsnmp_register_netsnmp_table_data_set(netsnmp_create_handler_registration("chairs",
+    netsnmp_register_table_data_set(netsnmp_create_handler_registration("chairs",
                                                         NULL,
                                                         my_data_table_set_oid,
                                                         4, HANDLER_CAN_RWRITE),
@@ -404,7 +404,7 @@ my_data_table_handler(
             continue;
 
         /* extract our stored data and table info */
-        row = netsnmp_extract_netsnmp_table_row(requests);
+        row = netsnmp_extract_table_row(requests);
         table_info = netsnmp_extract_table_info(requests);
         if (row)
             column3 = (char *) row->data;
