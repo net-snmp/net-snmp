@@ -4262,7 +4262,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
             vp->val_len = sizeof(long);
             asn_parse_int(var_val, &len, &vp->type,
                           (long *) vp->val.integer,
-                          sizeof(vp->val.integer));
+                          sizeof(*vp->val.integer));
             break;
         case ASN_COUNTER:
         case ASN_GAUGE:
