@@ -57,7 +57,6 @@ SOFTWARE.
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#include <stdio.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

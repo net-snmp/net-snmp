@@ -111,9 +111,7 @@ typedef long    fd_mask;
 #include "var_struct.h"
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
-#include "snmp_vars.h"
 #include "snmp_debug.h"
-#include "agent_read_config.h"
 
 #ifdef USE_LIBWRAP
 #include <syslog.h>
