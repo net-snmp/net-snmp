@@ -97,7 +97,7 @@ ifTable_init_data(ifTable_registration_ptr ifTable_reg)
 {
     static unsigned int my_columns[] = {
         COLUMN_IFINDEX, COLUMN_IFTYPE, COLUMN_IFPHYSADDRESS,
-        COLUMN_IFINOCTETS, COLUMN_IFINUCASTPKTS,
+        COLUMN_IFINOCTETS, COLUMN_IFINUCASTPKTS, COLUMN_IFMTU,
         COLUMN_IFOUTOCTETS, COLUMN_IFOUTUCASTPKTS };
     static netsnmp_column_info valid_columns;
 
@@ -107,10 +107,16 @@ ifTable_init_data(ifTable_registration_ptr ifTable_reg)
      ***************************************************
      ***             START EXAMPLE CODE              ***
      ***---------------------------------------------***/
+    /*
+     * we only want to process certain columns, and ignore
+     * anything else.
+     */
     valid_columns.isRange = 0;
     valid_columns.details.list = my_columns;
     valid_columns.list_count = sizeof(my_columns)/sizeof(int);
     ifTable_valid_columns_set(&valid_columns);
+
+    _choose_proc_format();
     /*
      ***---------------------------------------------***
      ***              END  EXAMPLE CODE              ***
@@ -183,12 +189,6 @@ ifTable_container_init(netsnmp_container ** container_ptr_ptr,
      * preload to assigne initial index values
      */
     cache->flags |= NETSNMP_CACHE_PRELOAD;
-
-    /*
-     * since we are going to preload, we need to know the
-     * proc format in advance.
-     */
-    _choose_proc_format();
 }
 
 /**
@@ -329,20 +329,6 @@ ifTable_cache_load(netsnmp_container * container)
             continue;
         }
 
-
-        /*
-         ***---------------------------------------------***
-         ***              END  EXAMPLE CODE              ***
-         ***************************************************/
-
-        /*
-         * allocate an row context and set the index(es)
-         */
-        rowreq_ctx = ifTable_allocate_rowreq_ctx();
-        if (NULL == rowreq_ctx) {
-            snmp_log(LOG_ERR, "memory allocation failed\n");
-            break;
-        }
         /*
          * If we've met this interface before, use the same index.
          * Otherwise find an unused index value and use that.
@@ -363,6 +349,20 @@ ifTable_cache_load(netsnmp_container * container)
             break;
         }
 
+        /*
+         ***---------------------------------------------***
+         ***              END  EXAMPLE CODE              ***
+         ***************************************************/
+
+        /*
+         * allocate an row context and set the index(es)
+         */
+        rowreq_ctx = ifTable_allocate_rowreq_ctx();
+        if (NULL == rowreq_ctx) {
+            snmp_log(LOG_ERR, "memory allocation failed\n");
+            rc = MFD_RESOURCE_UNAVAILABLE;
+            break;
+        }
         if (MFD_SUCCESS != ifTable_indexes_set(rowreq_ctx, ifIndex)) {
             snmp_log(LOG_ERR, "error setting index while loading "
                      "ifTable cache.\n");
