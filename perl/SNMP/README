@@ -84,13 +84,13 @@ Installation:
 Build and install the Net-SNMP package - see Net-SNMP README and
 INSTALL docs.
 
-(Note: you should ensure that any previous Net-SNMP, ucd-snmp or cmu
-snmp installation is located so that the wrong libsnmp or headers are
-not used by mistake).
+(Note: To ensure that any previous Net-SNMP, ucd-snmp or cmu snmp
+installation's library or headers are not used by mistake, use the
+-NET-SNMP-PATH directive to explicitly set the default path)
 
 Unix:
 
-perl Makefile.PL
+perl Makefile.PL [-NET-SNMP-PATH=/usr/local]
 make
 make test
 make install
@@ -104,12 +104,12 @@ First  run vcvars32.bat
 
 for ActiveState Perl  (tested with AS Perl5.005_03 (515))
 
-perl Makefile.PL CAPI=TRUE
+perl Makefile.PL CAPI=TRUE [-NET-SNMP-PATH=/usr]
 nmake
 nmake test
 nmake install
 
-OpenSSL note: see the ucd-snmp/README.win32 to compile libsnmp with
+OpenSSL note: see the net-snmp/README.win32 to compile libsnmp with
               libeay32 and see that libeay.lib is in usr\lib
 
 for the older perl5.004_02 distribution by gsarathy
@@ -378,8 +378,8 @@ SNMP package variables and functions:
  $SNMP::auto_init_mib - default '1', set to 0 to disable automatic reading
                         of the MIB upon session creation. set to non-zero
                         to call initMib at session creation which will result
-                        in MIB loading according to UCD env. variables (see
-                        man mib_api)
+                        in MIB loading according to Net-SNMP env. variables 
+			(see man mib_api)
 
  $SNMP::verbose       - default '0', controls warning/info output of
                         SNMP module, 0 => no output, 1 => enables warning/info
@@ -463,7 +463,7 @@ SNMP package variables and functions:
                          specification of mib file independent of environment
                          variables. called with no args acts like initMib,
                          loading MIBs indicated by environment variables (see
-                         ucd mib_api docs). passing non-zero second arg
+                         Net-SNMP mib_api docs). passing non-zero second arg
                          forces previous mib to be freed and replaced
                          (Note: second arg not working since freeing previous
                           Mib is more involved than before).
@@ -471,7 +471,8 @@ SNMP package variables and functions:
  &SNMP::initMib()     - calls library init_mib function if Mib not already
                         loaded - does nothing if Mib already loaded. will
                         parse directories and load modules according to
-                        environment variables described in UCD documentations.
+                        environment variables described in Net-SNMP
+                        documentations.
                         (see man mib_api, MIBDIRS, MIBS, MIBFILE(S), etc.)
 
  &SNMP::addMibDirs(<dir>,...) - calls library add_mibdir for each directory
@@ -556,10 +557,10 @@ Trouble Shooting:
 If problems occur there are number areas to look at to narrow down the
 possibilities.
 
-The first step should be to test the UCD SNMP installation
+The first step should be to test the Net-SNMP installation
 independently from the Perl5 SNMP interface.
 
-Try running the apps from the UCD SNMP distribution.
+Try running the apps from the Net-SNMP distribution.
 
 Make sure your agent (snmpd) is running and properly configured with
 read-write access for the community you are using.
@@ -567,31 +568,30 @@ read-write access for the community you are using.
 Ensure that your MIBs are installed and environment variables are set
 appropriately (see man mib_api)
 
-Be sure to remove old ucd-snmp installations and ensure headers and
-libraries from old CMU installations are not being used by mistake.
+Be sure to ensure headers and libraries from old CMU installations are
+not being used by mistake (see -NET-SNMP-PATH).
 
 If the problem occurs during compilation/linking check that the snmp
-library being linked is actually the UCD SNMP library (there have been
+library being linked is actually the Net-SNMP library (there have been
 name conflicts with existing snmp libs).
 
 Also check that the header files are correct and up to date.
 
-Sometimes compiling the UCD SNMP library with
+Sometimes compiling the Net-SNMP library with
 'position-independent-code' enabled is required (HPUX specifically).
 
 If you cannot resolve the problem you can post to
-comp.lang.perl.modules or email me at gmarzot@nortelnetworks.com
-and/or ucd-snmp-coders@ucd-snmp.ucdavis.edu.
+comp.lang.perl.modules or email net-snmp-coders@lists.sourceforge.net.
 
 please give sufficient information to analyze the problem (OS type,
-versions for OS/Perl/UCD/compiler, complete error output, etc.)
+versions for OS/Perl/net-SNMP/compiler, complete error output, etc.)
 
 Acknowledgments:
 
 Many thanks to all those who supplied patches, suggestions and
 feedback.
 
-Wes Hardaker and the ucd-coders
+Wes Hardaker and the net-snmp-coders
 Dave Perkins
 Marcel Wiget
 David Blackburn
