@@ -121,7 +121,7 @@ void swapmode(void)
   {
       file = fdopen(fd,"r");
 
-      while (fgets(ext.output,STRMAX,file) != NULL);
+      while (fgets(ext.output,sizeof(ext.output),file) != NULL);
       
       fclose(file);
       wait_on_exec(&ext);
