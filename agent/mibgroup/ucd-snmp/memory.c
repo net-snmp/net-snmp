@@ -259,6 +259,7 @@ unsigned** meminfo(void)
     static unsigned num[MAX_ROW * MAX_COL];	/* number storage */
     char *p;
     int i, j, k, l;
+    unsigned long m;
     
     FILE_TO_BUF(MEMINFO_FILE)
     if (!row[0])				/* init ptrs 1st time through */
@@ -271,7 +272,13 @@ unsigned** meminfo(void)
     for (i=0; i < MAX_ROW && *p; i++) {		/* loop over rows */
 	while(*p && !isdigit(*p)) p++;		/* skip chars until a digit */
 	for (j=0; j < MAX_COL && *p; j++) {	/* scanf column-by-column */
-	    l = sscanf(p, "%u%n", row[i] + j, &k);
+	    l = sscanf(p, "%u%n", &m, &k);
+	    m /= 1024;
+	    if (4294967295 > m) {
+	        *(row[i] + j) = 4294967295;
+	    } else {
+	        *(row[i] + j) = (unsigned) m;
+            }
 	    p += k;				/* step over used buffer */
 	    if (*p == '\n' || l < 1)		/* end of line/buffer */
 		break;
@@ -285,7 +292,7 @@ unsigned memory(int iindex)
 {
 	unsigned **mem = meminfo();
         if (mem != NULL)
-          return mem[meminfo_main][iindex] / 1024;
+          return mem[meminfo_main][iindex];
         else
           return -1;
 }
@@ -294,7 +301,7 @@ unsigned memswap(int iindex)
 {
 	unsigned **mem = meminfo();
         if (mem != NULL)
-          return mem[meminfo_swap][iindex] / 1024;
+          return mem[meminfo_swap][iindex];
         else
           return -1;
 }
