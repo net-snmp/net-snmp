@@ -722,6 +722,7 @@ usm_parse_create_usmUser(const char *token, char *line)
     struct usmUser *newuser;
     u_char          userKey[SNMP_MAXBUF_SMALL], *tmpp;
     size_t          userKeyLen = SNMP_MAXBUF_SMALL;
+    size_t          privKeyLen = 0;
     size_t          ret;
     int             testcase;
 
@@ -880,6 +881,8 @@ usm_parse_create_usmUser(const char *token, char *line)
         memcpy(newuser->privProtocol, usmDESPrivProtocol,
                sizeof(usmDESPrivProtocol));
         testcase = 1;
+	/* DES uses a 128 bit key, 64 bits of which is a salt */
+	privKeyLen = 16;
     }
 #endif
 #ifdef HAVE_AES
@@ -888,6 +891,7 @@ usm_parse_create_usmUser(const char *token, char *line)
         memcpy(newuser->privProtocol, usmAESPrivProtocol,
                sizeof(usmAESPrivProtocol));
         testcase = 1;
+	privKeyLen = 16;
     }
 #endif
     if (testcase == 0) {
@@ -971,6 +975,16 @@ usm_parse_create_usmUser(const char *token, char *line)
             }
         }
     }
+
+    if ((newuser->privKeyLen >= privKeyLen) || (privKeyLen == 0)){
+      newuser->privKeyLen = privKeyLen;
+    }
+    else {
+      /* The privKey length is smaller than required by privProtocol */
+      usm_free_user(newuser);
+      return;
+    }
+
   add:
     usm_add_user(newuser);
     DEBUGMSGTL(("usmUser", "created a new user %s at ", newuser->secName));
