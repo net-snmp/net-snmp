@@ -19,6 +19,10 @@
 
 #undef DEFAULT_MIBFILES
 
+/* should we compile to use special opaque types: float, double,
+   counter64, i64, ui64, union? */
+#undef OPAQUE_SPECIAL_TYPES
+
 
 /* Define if on AIX 3.
    System headers sometimes define this.

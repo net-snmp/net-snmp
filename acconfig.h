@@ -18,6 +18,10 @@
 
 #undef DEFAULT_MIBFILES
 
+/* should we compile to use special opaque types: float, double,
+   counter64, i64, ui64, union? */
+#undef OPAQUE_SPECIAL_TYPES
+
 @TOP@
 
 /* define the system type include file here */
