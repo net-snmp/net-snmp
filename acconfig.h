@@ -404,9 +404,6 @@
 /* define if you have getservbyname */
 #undef HAVE_GETSERVBYNAME
 
-/* Watch out for compilers that don't handle void properly. */
-#undef void
-
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_arch_require(x,y)
