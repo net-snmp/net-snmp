@@ -7,8 +7,8 @@ LIBTARG		= libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION) \
 	libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 USELIBS		= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 LOCAL_LIBS	= -L../snmplib -L.
-LIBS		= $(CC_RUNTIME_ARG) -lucdagent -lucdmibs -lsnmp @WRAPLIBS@ @LIBS@
-
+LIBS		= $(CC_RUNTIME_ARG) -lsnmp @WRAPLIBS@ @LIBS@
+AGENT_LIBS	= $(CC_RUNTIME_ARG) -lucdagent -lucdmibs -lsnmp @WRAPLIBS@ @LIBS@
 CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib		\
 		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
 
@@ -44,15 +44,15 @@ getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
 snmpd:	${AGENTOBJS} $(USELIBS) $(LIBTARG)
-	${CC} -o $@ ${AGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${LIBS}  
+	${CC} -o $@ ${AGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${AGENT_LIBS}  
 
 
-libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${LIBAGENTOBJS}
-	$(SHLIB_LD_CMD) libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ${LIBAGENTOBJS}
+libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${LIBAGENTOBJS} libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+	$(SHLIB_LD_CMD) libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ${LIBAGENTOBJS}  $(SHLIB_LD_LIBS)
 	$(RANLIB) libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 
-libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${MIBOBJS} 
-	$(SHLIB_LD_CMD) libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ${MIBOBJS} 
+libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${MIBOBJS}
+	$(SHLIB_LD_CMD) libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ${MIBOBJS}  $(SHLIB_LD_LIBS)
 	$(RANLIB) libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 
 clean:
@@ -65,6 +65,7 @@ install:  installdirs
 	@$(INSTALL) $(TARG) $(sbindir) ; echo "install:  installed $(TARG) in $(sbindir) "
 	@for i in $(INSTALLHEADERS) ; do $(INSTALL) $(srcdir)/$$i $(includedir) ; echo "install:  installed $$i in $(includedir)" ; done
 	@for i in $(LIBTARG) ; do $(INSTALL) $$i $(libdir) ; $(RANLIB) $(libdir)/$$i ; echo "install:  installed $$i in $(libdir)" ; done
+	$(SHLIB_LDCONFIG_CMD)
 #	cd dlmods ; $(MAKE) install; cd ..
 
 installdirs:
