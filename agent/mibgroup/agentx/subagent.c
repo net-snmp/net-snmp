@@ -350,6 +350,8 @@ handle_subagent_response(int op, struct snmp_session *session, int reqid,
 	    if (snmp_oid_compare(u->val.objid, u->val_len/sizeof(oid),
 				 nullOid, nullOidLen) != 0) {
 		/*  The master agent requested scoping for this variable.  */
+		rc = snmp_oid_compare(v->name, v->name_length,
+				      u->val.objid, u->val_len/sizeof(oid));
 		DEBUGMSGTL(("agentx/subagent", "result "));
 		DEBUGMSGOID(("agentx/subagent", v->name, v->name_length));
 		DEBUGMSG(("agentx/subagent", " scope to "));
