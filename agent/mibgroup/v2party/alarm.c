@@ -280,7 +280,7 @@ alarmDeleteRow(struct alarmEntry *alarm)
     
     /* KLF debugging */
     if (temp == NULL) {
- snmp_log(LOG_DEBUG, "alarmDeleteRow: didn't find row (%d) in alarmTab\n",
+ DEBUGMSGTL(("alarm", "alarmDeleteRow: didn't find row (%d) in alarmTab\n",
 	       alarm->index);
     }
     
@@ -469,7 +469,7 @@ alarmCommitRow(struct alarmEntry *alarm)
     
     if (alarm->next != nextPtr) {
 	/* KLF debugging */
- snmp_log(LOG_DEBUG, "alarmCommitRow(%d): next pointer was different\n",
+ DEBUGMSGTL(("alarm", "alarmCommitRow(%d): next pointer was different\n",
 	       alarm->index);
 	alarm->next = nextPtr;
     }

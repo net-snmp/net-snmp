@@ -169,7 +169,7 @@ auto_nlist_print_tree(int indent,
       return;
     sprintf(buf,"%%%ds\n",indent);
 /*    DEBUGMSGTL(("auto_nlist", "buf: %s\n",buf)); */
-    snmp_log(LOG_DEBUG, buf, ptr->symbol);
+    DEBUGMSGTL(("auto_nlist", buf, ptr->symbol));
     auto_nlist_print_tree(indent+2,ptr->left);
     auto_nlist_print_tree(indent+2,ptr->right);
   }
