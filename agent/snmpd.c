@@ -197,7 +197,6 @@ extern char  *argvrestartname;
 
 #ifdef USING_SMUX_MODULE
 static int sdlist[NUM_SOCKETS], sdlen = 0;
-int smux_listen_sd;
 #endif /* USING_SMUX_MODULE */
 
 /*
