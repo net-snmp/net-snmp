@@ -662,8 +662,14 @@ sh_count_procs(char *procname)
             /*
              * Zombie process 
              */
-        } else if (!strcmp(procname, info.pr_fname))
-            total++;
+        } else {
+            DEBUGMSGTL(("proc","Comparing wanted %s against %s\n",
+                        procname, info.pr_fname));
+            if (!strcmp(procname, info.pr_fname)) {
+                total++;
+                DEBUGMSGTL(("proc", " Matched.  total count now=%d\n", total));
+            }
+        }
 
         close(fd);
     }
