@@ -315,7 +315,7 @@ sub checkhost {
     my $host = shift;
     my ($tblh);
 
-    return 2 if ($dbh->do("select * from hosterrors where host = '$host'"));
+    return 2 if ($dbh->do("select * from hosterrors where host = '$host'") ne "0E0");
 
     # get a list of tables we want to display
     $tblh = getcursor("SELECT * FROM hosttables where (host = '$host' and groupname = '$group')");
