@@ -81,7 +81,7 @@ describe_cpu(int idx)
 
    }
 #else
-   return("An electronic chip that makes the computer work\n(but that's not important right now)");
+   return("An electronic chip that makes the computer work.");
 #endif
 }
 
