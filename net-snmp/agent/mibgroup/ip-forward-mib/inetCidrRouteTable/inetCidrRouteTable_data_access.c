@@ -172,7 +172,7 @@ _snarf_route_entry(netsnmp_route_entry *route_entry,
     else {
         if(rowreq_ctx) {
             snmp_log(LOG_ERR, "error setting index while loading "
-                     "ifTable cache.\n");
+                     "inetCidrRoute cache.\n");
             inetCidrRouteTable_release_rowreq_ctx(rowreq_ctx);
         }
         else
@@ -234,17 +234,17 @@ inetCidrRouteTable_cache_load(netsnmp_container * container)
     if (NULL == route_container)
         return MFD_RESOURCE_UNAVAILABLE; /* msg already logged */
 
-        /*
+    /*
      * we just got a fresh copy of route data. snarf data
-         */
+     */
     CONTAINER_FOR_EACH(route_container,
                        (netsnmp_container_obj_func*)_snarf_route_entry,
                        container);
 
-        /*
+    /*
      * free the container. we've either claimed each ifentry, or released it,
      * so the dal function doesn't need to clear the container.
-         */
+     */
     netsnmp_access_route_container_free(route_container,
                                         NETSNMP_ACCESS_ROUTE_FREE_DONT_CLEAR );
 
