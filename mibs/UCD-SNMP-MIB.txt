@@ -37,7 +37,11 @@ IMPORTS
         enterprises
 	    FROM RFC1155-SMI
         OBJECT-TYPE
-	    FROM RFC1212;
+	    FROM RFC-1212
+	DisplayString
+	    FROM RFC1213-MIB
+	TRAP-TYPE
+	    FROM RFC-1215;
 
 -- numerical definitions:
 ucdavis           OBJECT IDENTIFIER ::= { enterprises 2021 }
@@ -89,9 +93,7 @@ bsdi              OBJECT IDENTIFIER ::= { ucdSnmpAgent 11 }
 openbsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 12 }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
 
-DisplayString ::= OCTET STRING
-
-PrIndex ::= INTEGER
+PrIndex ::= INTEGER (0..6535)
 
 procTable OBJECT-TYPE
 	SYNTAX SEQUENCE OF PrEntry
@@ -112,7 +114,7 @@ prEntry OBJECT-TYPE
     STATUS mandatory
     DESCRIPTION
         "An entry containing a process and its statistics."
-    INDEX      { PrIndex }
+    INDEX      { prIndex }
     ::= { procTable  1 }
 
 
@@ -128,7 +130,7 @@ PrEntry ::= SEQUENCE {
 }
 
 prIndex OBJECT-TYPE
-	SYNTAX PRIndex
+	SYNTAX PrIndex
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -200,7 +202,7 @@ prErrFix OBJECT-TYPE
 		snmp operations."
 	::= { prEntry 102 }
 
-ExtIndex ::= INTEGER
+ExtIndex ::= INTEGER (0..6535)
 
 extTable OBJECT-TYPE
 	SYNTAX SEQUENCE OF ExtEntry
@@ -282,7 +284,7 @@ extErrFix OBJECT-TYPE
 		snmp operations."
 	::= { extEntry 102 }
 	
-memory ::= { ucdavis 4 }
+memory OBJECT IDENTIFIER ::= { ucdavis 4 }
 
 memIndex OBJECT-TYPE
      SYNTAX  INTEGER
@@ -422,7 +424,7 @@ memSwapErrorMsg OBJECT-TYPE
           "Error message describing the Error Flag condition"
      ::= { memory 101 } 
 
-DiskIndex ::= INTEGER
+DiskIndex ::= INTEGER (0..6535)
 
 diskTable	OBJECT-TYPE
 	SYNTAX SEQUENCE OF DskEntry
@@ -439,21 +441,21 @@ dskEntry OBJECT-TYPE
     STATUS     mandatory
     DESCRIPTION
         "An entry containing a disk and its statistics."
-    INDEX      { diskIndex }
+    INDEX      { dskIndex }
     ::= { diskTable  1 }
 
 DskEntry ::= SEQUENCE {
-   diskIndex   DiskIndex,
-   diskPath  DisplayString,
-   diskDevice  DisplayString,
-   diskMinimum  INTEGER,
-   diskMinPercent  INTEGER,
-   diskTotal  INTEGER,
-   diskAvail  INTEGER,
-   diskUsed  INTEGER,
-   diskPercent  INTEGER,
-   diskErrorFlag  INTEGER,
-   diskErrorMsg  DisplayString
+   dskIndex   DiskIndex,
+   dskPath  DisplayString,
+   dskDevice  DisplayString,
+   dskMinimum  INTEGER,
+   dskMinPercent  INTEGER,
+   dskTotal  INTEGER,
+   dskAvail  INTEGER,
+   dskUsed  INTEGER,
+   dskPercent  INTEGER,
+   dskErrorFlag  INTEGER,
+   dskErrorMsg  DisplayString
 }
 
 dskIndex OBJECT-TYPE
@@ -550,7 +552,7 @@ dskErrorMsg OBJECT-TYPE
           on the disk."
      ::= { dskEntry 101 } 
      
-LoadIndex ::= INTEGER
+LoadIndex ::= INTEGER (0..3)
 
 loadTable OBJECT-TYPE
 	SYNTAX SEQUENCE OF LaEntry
@@ -566,16 +568,16 @@ laEntry OBJECT-TYPE
     STATUS     mandatory
     DESCRIPTION
         "An entry containing a load average and its values."
-    INDEX      { loadIndex }
+    INDEX      { laIndex }
     ::= { loadTable  1 }
 
 LaEntry ::= SEQUENCE {
-   loadaveIndex  LoadIndex,
-   loadaveNames  DisplayString,
-   loadaveLoad   DisplayString,
-   loadaveConfig DisplayString,
-   loadaveErrorFlag  INTEGER,
-   loadaveErrMessage  DisplayString
+   laIndex  LoadIndex,
+   laNames  DisplayString,
+   laLoad   DisplayString,
+   laConfig DisplayString,
+   laErrorFlag  INTEGER,
+   laErrMessage  DisplayString
 }
 
 laIndex OBJECT-TYPE
@@ -631,7 +633,7 @@ laErrMessage OBJECT-TYPE
 		surpased watch-point value."
 	::= { laEntry 101 }
 
-version	::= { ucdavis 100 }
+version	OBJECT IDENTIFIER ::= { ucdavis 100 }
 
 versionIndex OBJECT-TYPE
      SYNTAX  INTEGER
@@ -706,7 +708,7 @@ versionDoDebugging OBJECT-TYPE
           to turn it off."
      ::= { version 20 } 
 
-snmperrs ::= { ucdavis 101 }
+snmperrs OBJECT IDENTIFIER ::= { ucdavis 101 }
 
 
 snmperrIndex OBJECT-TYPE
@@ -742,7 +744,7 @@ snmperrErrMessage OBJECT-TYPE
 		"An error message describing the problem (if one exists)."
 	::= { snmperrs 101 }
 
-MRIndex ::= OBJECT IDENTIFIER
+MrIndex ::= OBJECT IDENTIFIER
 
 mibRegistryTable OBJECT-TYPE
     SYNTAX SEQUENCE OF MrEntry
@@ -755,7 +757,7 @@ mibRegistryTable OBJECT-TYPE
     ::= { ucdavis  102 }
 
 mrEntry OBJECT-TYPE
-    SYNTAX     MREntry
+    SYNTAX     MrEntry
     ACCESS not-accessible
     STATUS     mandatory
     DESCRIPTION
@@ -766,13 +768,13 @@ mrEntry OBJECT-TYPE
 MrEntry ::=
     SEQUENCE {
         mrIndex
-            MRIndex,
+            MrIndex,
 	mrModuleName
             DisplayString
     }	    
 
 mrIndex OBJECT-TYPE
-    SYNTAX     MRIndex
+    SYNTAX     MrIndex
     ACCESS read-only
     STATUS     mandatory
     DESCRIPTION
@@ -787,7 +789,7 @@ mrModuleName OBJECT-TYPE
 	"The module name that registered this OID."
     ::= { mrEntry  2 }
 
-systemStats ::= { ucdavis 11 }
+systemStats OBJECT IDENTIFIER ::= { ucdavis 11 }
 
 ssIndex OBJECT-TYPE
 	SYNTAX INTEGER
@@ -895,5 +897,15 @@ ssCpuIdle OBJECT-TYPE
 --           "Error message describing the errorflag condition"
 --      ::= { systemStats 101 } 
 
+ucdTraps OBJECT IDENTIFIER ::= { ucdavis 251 }
+
+ucdStart TRAP-TYPE
+	ENTERPRISE ucdTraps
+	::= 1
+
+ucdShutdown TRAP-TYPE
+	ENTERPRISE ucdTraps
+	DESCRIPTION "This trap is sent when the agent terminates"
+	::= 2
 
 END

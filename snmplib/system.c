@@ -487,7 +487,6 @@ int setenv(name, value, overwrite)
     if (cp == NULL) return -1;
     sprintf(cp, "%s=%s", name, value);
     ret = putenv(cp);
-    free(cp);
     return ret;
 }
 #endif /* HAVE_SETENV */

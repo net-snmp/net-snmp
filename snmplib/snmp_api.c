@@ -1358,7 +1358,7 @@ snmp_async_send(session, pdu, callback, cb_data)
 	rp->request_id = pdu->reqid;
         rp->callback = callback;
         rp->cb_data = cb_data;
-	rp->retries = 1;
+	rp->retries = 0;
 	rp->timeout = session->timeout;
 	rp->time = tv;
 	tv.tv_usec += rp->timeout;
@@ -1696,10 +1696,6 @@ snmp_timeout __P((void))
 
 		    /* retransmit this pdu */
 		    rp->retries++;
-		    if (rp->retries > 3)
-			rp->timeout <<= 1;
-		    if (rp->timeout > 30000000L)
-			rp->timeout = 30000000L;
 		    if (snmp_build(sp, rp->pdu, packet, &length) < 0){
 			fprintf(stderr, "Error re-building packet\n");
 			/* this should never happen */
