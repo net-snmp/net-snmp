@@ -156,6 +156,7 @@ body>#LeftSide {width:150px;}
   padding:10px;
   background-color:#eee;
   border:1px dashed #999;
+  font-size: 0.8em;
 }
 /* Again, "be nice to Opera 5". */
 body>#Menu {width:150px;}
