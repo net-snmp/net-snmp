@@ -53,7 +53,7 @@ clean:
 	for i in $(SUBDIRS) ; do \
         ( cd $$i ; $(MAKE) clean ) \
 	done
-	rm -f mib.txt EXAMPLE.conf sedscript
+	rm -f mib.txt EXAMPLE.conf sedscript ece-mib.txt
 
 distclean: clean configclean
 
@@ -83,8 +83,11 @@ Makefile: Makefile.in config.status
 config.status: configure
 	$(srcdir)/config.status --no-create
 
-mib.txt: ece-mib.def mibII.txt sedscript
-	cat ece-mib.def | $(SED) -f sedscript | cat mibII.txt - > mib.txt
+mib.txt: ece-mib.txt mibII.txt
+	cat mibII.txt ece-mib.txt > mib.txt
+
+ece-mib.txt: ece-mib.def sedscript
+	cat ece-mib.def | $(SED) -f sedscript > ece-mib.txt
 
 EXAMPLE.conf: sedscript EXAMPLE.conf.def
 	$(SED) -f sedscript EXAMPLE.conf.def > EXAMPLE.conf
