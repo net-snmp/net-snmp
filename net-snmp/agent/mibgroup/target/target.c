@@ -47,7 +47,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
             continue;
         }
 
-	if (netnetsnmp_tdomain_support(targaddrs->tDomain, targaddrs->tDomainLen,
+	if (netsnmp_tdomain_support(targaddrs->tDomain, targaddrs->tDomainLen,
 				 NULL, NULL) == 0) {
             snmp_log(LOG_ERR,
                      "unsupported domain for target address table entry %s\n",
@@ -98,7 +98,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
 			       it to our return list */
 			    netsnmp_transport *t = NULL;
 
-			    t = netnetnetsnmp_tdomain_transport_oid(targaddrs->tDomain,
+			    t = netnetsnmp_tdomain_transport_oid(targaddrs->tDomain,
 							targaddrs->tDomainLen,
 						        targaddrs->tAddress,
 						        targaddrs->tAddressLen,

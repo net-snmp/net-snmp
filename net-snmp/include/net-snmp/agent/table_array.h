@@ -40,12 +40,12 @@ typedef struct array_group_item_s {
  * structure to keep a list of requests for each unique index
  */
 typedef struct array_group_s {
-    oid_array_header   index;
+    netsnmp_oid_array_header   index;
 
     oid_array          table;
 
-    oid_array_header   *old_row;
-    oid_array_header   *new_row;
+    netsnmp_oid_array_header   *old_row;
+    netsnmp_oid_array_header   *new_row;
 
     array_group_item   *list;
 
@@ -55,10 +55,10 @@ typedef struct array_group_s {
 } array_group;
 
 typedef int (UserOidCompare)(void *lhs, void *rhs);
-typedef int (UserGetProcessor)(netsnmp_request_info *, oid_array_header *,
+typedef int (UserGetProcessor)(netsnmp_request_info *, netsnmp_oid_array_header *,
                                table_netsnmp_request_info *);
-typedef oid_array_header * (UserRowMethod)(oid_array_header *);
-typedef int (UserRowAction)(oid_array_header *, oid_array_header *, array_group *);
+typedef netsnmp_oid_array_header * (UserRowMethod)(netsnmp_oid_array_header *);
+typedef int (UserRowAction)(netsnmp_oid_array_header *, netsnmp_oid_array_header *, array_group *);
 typedef void (UserGroupMethod)( array_group * );
 
 /*
@@ -97,13 +97,13 @@ oid_array *extract_array_context(netsnmp_request_info *);
 
 Netsnmp_Node_Handler table_array_helper_handler;
 
-const oid_array_header*
+const netsnmp_oid_array_header*
 table_array_get_by_index(netsnmp_handler_registration *reginfo,
-                         oid_array_header * hdr);
+                         netsnmp_oid_array_header * hdr);
 
-const oid_array_header**
+const netsnmp_oid_array_header**
 table_array_get_subset(netsnmp_handler_registration *reginfo,
-                       oid_array_header * hdr, int * len);
+                       netsnmp_oid_array_header * hdr, int * len);
 
 
 #ifdef __cplusplus

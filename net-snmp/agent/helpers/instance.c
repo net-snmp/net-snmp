@@ -199,8 +199,8 @@ instance_ulong_handler(
                                   SNMP_ERR_RESOURCEUNAVAILABLE);
                 return SNMP_ERR_NOERROR;
             }
-            netsnmp_request_add_list_data(requests,
-                                  create_data_list(INSTANCE_HANDLER_NAME,
+            netsnmp_request_netsnmp_add_list_data(requests,
+                                  netsnmp_create_netsnmp_data_list(INSTANCE_HANDLER_NAME,
                                                    it_save, free));
             break;
 
@@ -213,7 +213,7 @@ instance_ulong_handler(
             
         case MODE_SET_UNDO:
             *it =
-                *((u_long *) netsnmp_request_get_list_data(requests,
+                *((u_long *) netsnmp_request_netsnmp_get_list_data(requests,
                                                    INSTANCE_HANDLER_NAME));
             break;
 
@@ -289,8 +289,8 @@ instance_long_handler(
                                   SNMP_ERR_RESOURCEUNAVAILABLE);
                 return SNMP_ERR_NOERROR;
             }
-            netsnmp_request_add_list_data(requests,
-                                  create_data_list(INSTANCE_HANDLER_NAME,
+            netsnmp_request_netsnmp_add_list_data(requests,
+                                  netsnmp_create_netsnmp_data_list(INSTANCE_HANDLER_NAME,
                                                    it_save, free));
             break;
 
@@ -303,7 +303,7 @@ instance_long_handler(
             
         case MODE_SET_UNDO:
             *it =
-                *((u_long *) netsnmp_request_get_list_data(requests,
+                *((u_long *) netsnmp_request_netsnmp_get_list_data(requests,
                                                    INSTANCE_HANDLER_NAME));
             break;
 
@@ -350,8 +350,8 @@ instance_int_handler(
                                   SNMP_ERR_RESOURCEUNAVAILABLE);
                 return SNMP_ERR_NOERROR;
             }
-            netsnmp_request_add_list_data(requests,
-                                  create_data_list(INSTANCE_HANDLER_NAME,
+            netsnmp_request_netsnmp_add_list_data(requests,
+                                  netsnmp_create_netsnmp_data_list(INSTANCE_HANDLER_NAME,
                                                    it_save, free));
             break;
 
@@ -364,7 +364,7 @@ instance_int_handler(
             
         case MODE_SET_UNDO:
             *it =
-                *((u_int *) netsnmp_request_get_list_data(requests,
+                *((u_int *) netsnmp_request_netsnmp_get_list_data(requests,
                                                    INSTANCE_HANDLER_NAME));
             break;
 

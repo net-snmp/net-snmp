@@ -247,7 +247,7 @@ table_data_helper_handler(
                 }
                 if (row) {
                     valid_request = 1;
-                    netsnmp_request_add_list_data(request, create_data_list(TABLE_DATA_NAME, row, NULL));
+                    netsnmp_request_netsnmp_add_list_data(request, netsnmp_create_netsnmp_data_list(TABLE_DATA_NAME, row, NULL));
                 } else { /* no decent result found.  Give up. It's beyond us. */
                         request->processed = 1;
                 }
@@ -275,7 +275,7 @@ table_data_helper_handler(
                     break;
                 } else {
                     valid_request = 1;
-                    netsnmp_request_add_list_data(request, create_data_list(TABLE_DATA_NAME, row, NULL));
+                    netsnmp_request_netsnmp_add_list_data(request, netsnmp_create_netsnmp_data_list(TABLE_DATA_NAME, row, NULL));
                 }
                 break;
 
@@ -289,7 +289,7 @@ table_data_helper_handler(
                                              request->requestvb->name_length -
                                              reginfo->rootoid_len -
                                              2))) {
-                    netsnmp_request_add_list_data(request, create_data_list(TABLE_DATA_NAME, row, NULL));
+                    netsnmp_request_netsnmp_add_list_data(request, netsnmp_create_netsnmp_data_list(TABLE_DATA_NAME, row, NULL));
                 }
                 break;
 
@@ -330,7 +330,7 @@ create_table_data_row(void)
 /** extracts the row being accessed passed from the table_data helper */
 table_row *extract_table_row(netsnmp_request_info *request) 
 {
-    return (table_row *) netsnmp_request_get_list_data(request, TABLE_DATA_NAME);
+    return (table_row *) netsnmp_request_netsnmp_get_list_data(request, TABLE_DATA_NAME);
 }
 
 /** extracts the data from the row being accessed passed from the

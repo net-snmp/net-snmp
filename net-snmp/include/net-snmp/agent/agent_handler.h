@@ -106,10 +106,10 @@ inline netsnmp_delegated_cache *netsnmp_handler_check_cache(netsnmp_delegated_ca
 void netsnmp_register_handler_by_name(const char *, netsnmp_mib_handler *);
 
 inline void
-netsnmp_request_add_list_data(netsnmp_request_info *request, data_list *node);
+netsnmp_request_netsnmp_add_list_data(netsnmp_request_info *request, netsnmp_data_list *node);
 
 inline void *
-netsnmp_request_get_list_data(netsnmp_request_info *request, const char *name);
+netsnmp_request_netsnmp_get_list_data(netsnmp_request_info *request, const char *name);
 
 inline void
 netsnmp_free_request_data_set(netsnmp_request_info *request);
@@ -119,8 +119,8 @@ netsnmp_free_request_data_sets(netsnmp_request_info *request);
 
 void		      netsnmp_handler_free		    (netsnmp_mib_handler *);
 netsnmp_mib_handler	     *netsnmp_handler_dup		    (netsnmp_mib_handler *);
-netsnmp_handler_registration *snmp_netnetsnmp_handler_registration_dup (netsnmp_handler_registration *);
-void		      snmp_netnetsnmp_handler_registration_free(netsnmp_handler_registration *);
+netsnmp_handler_registration *snmp_netsnmp_handler_registration_dup (netsnmp_handler_registration *);
+void		      snmp_netsnmp_handler_registration_free(netsnmp_handler_registration *);
 
 #define REQUEST_IS_DELEGATED     1
 #define REQUEST_IS_NOT_DELEGATED 0

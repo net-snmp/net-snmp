@@ -62,7 +62,7 @@ register_table_iterator(netsnmp_handler_registration *reginfo,
 inline void *
 extract_iterator_context(netsnmp_request_info *request) 
 {
-    return netsnmp_request_get_list_data(request, TABLE_ITERATOR_NAME);
+    return netsnmp_request_netsnmp_get_list_data(request, TABLE_ITERATOR_NAME);
 }
 
 /** implements the table_iterator helper */
@@ -310,8 +310,8 @@ table_iterator_helper_handler(
             /* let set requsets use previously constructed data */
             snmp_free_var(results);
             if (callback_data_keep)
-                netsnmp_request_add_list_data(requests, create_data_list(TABLE_ITERATOR_NAME, callback_data_keep, NULL));
-            netsnmp_request_add_list_data(requests, create_data_list(TABLE_ITERATOR_LAST_CONTEXT, callback_loop_context, NULL));
+                netsnmp_request_netsnmp_add_list_data(requests, netsnmp_create_netsnmp_data_list(TABLE_ITERATOR_NAME, callback_data_keep, NULL));
+            netsnmp_request_netsnmp_add_list_data(requests, netsnmp_create_netsnmp_data_list(TABLE_ITERATOR_LAST_CONTEXT, callback_loop_context, NULL));
         }
         
         DEBUGMSGTL(("table_iterator", "doing mode: %s\n",
@@ -328,9 +328,9 @@ table_iterator_helper_handler(
         }
 
         callback_data_context =
-            netsnmp_request_get_list_data(requests, TABLE_ITERATOR_NAME);
+            netsnmp_request_netsnmp_get_list_data(requests, TABLE_ITERATOR_NAME);
         callback_loop_context =
-            netsnmp_request_get_list_data(requests, TABLE_ITERATOR_LAST_CONTEXT);
+            netsnmp_request_netsnmp_get_list_data(requests, TABLE_ITERATOR_LAST_CONTEXT);
 
         if (reqinfo->mode == MODE_GET ||
             reqinfo->mode == MODE_GETNEXT ||

@@ -363,8 +363,8 @@ my_test_instance_handler(
                                   SNMP_ERR_RESOURCEUNAVAILABLE);
                 return SNMP_ERR_NOERROR;
             }
-            netsnmp_request_add_list_data(requests,
-                                  create_data_list(TESTHANDLER_SET_NAME,
+            netsnmp_request_netsnmp_add_list_data(requests,
+                                  netsnmp_create_netsnmp_data_list(TESTHANDLER_SET_NAME,
                                                    accesses_cache, free));
             break;
 
@@ -376,7 +376,7 @@ my_test_instance_handler(
             
         case MODE_SET_UNDO:
             accesses =
-                *((u_long *) netsnmp_request_get_list_data(requests,
+                *((u_long *) netsnmp_request_netsnmp_get_list_data(requests,
                                                    TESTHANDLER_SET_NAME));
             break;
 
