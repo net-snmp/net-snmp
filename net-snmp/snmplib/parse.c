@@ -3,6 +3,22 @@
  *
  * Update: 1998-07-17 <jhy@gsu.edu>
  * Added print_subtree_oid_report* and related functions and variables.
+ *
+ * Update: 1998-09-22 <mslifcak@iss.net>
+ * Clear nbuckets in init_node_hash.
+ * New method xcalloc returns zeroed data structures.
+ * New method alloc_node encapsulates common node creation.
+ * New method to configure terminate comment at end of line.
+ * New method to configure accept underscore in labels.
+ *
+ * Update: 1998-10-10 <daves@csc.liv.ac.uk>
+ * fully qualified OID parsing patch
+ *
+ * Update: 1998-10-20 <daves@csc.liv.ac.uk>
+ * merge_anon_children patch
+ *
+ * Update: 1998-10-21 <mslifcak@iss.net>
+ * Merge_parse_objectid associates information with last node in chain.
  */
 /******************************************************************
         Copyright 1989, 1991, 1992 by Carnegie Mellon University
@@ -92,6 +108,8 @@ char *File;
 static int save_mib_descriptions = 0;
 static int mib_warnings = 0;
 static int anonymous = 0;
+static int mib_comment_term = 0; /* 0=strict, 1=EOL terminated */
+static int mib_parse_label = 0; /* 0=strict, 1=underscore OK in label */
 
 #define SYNTAX_MASK     0x80
 /* types of tokens
@@ -361,6 +379,7 @@ static struct tree *get_next_subid __P((u_long *, struct tree *tree));
 static void print_parent_labeledoid __P((FILE *, struct tree *));
 static void print_parent_oid __P((FILE *, struct tree *));
 static void print_parent_label __P((FILE *, struct tree *));
+static struct node *merge_parse_objectid __P((struct node *, FILE *, char *));
 
 void snmp_set_mib_warnings(warn)
     int warn;
@@ -372,6 +391,18 @@ void snmp_set_save_descriptions(save)
     int save;
 {
     save_mib_descriptions = save;
+}
+
+void snmp_set_mib_comment_term(save)
+    int save;
+{
+	mib_comment_term = save; /* 0=strict, 1=EOL terminated */
+}
+
+void snmp_set_mib_parse_label(save)
+    int save;
+{
+	mib_parse_label = save; /* 0=strict, 1=underscore OK in label */
 }
 
 static int
@@ -435,6 +466,7 @@ init_node_hash(nodes)
      register struct node *np, *nextp;
      register int hash;
 
+     memset(nbuckets, 0, sizeof(nbuckets));
      for(np = nodes; np;){
          nextp = np->next;
          hash = NBUCKET(name_hash(np->parent));
@@ -504,12 +536,39 @@ static char *xstrdup (s)
 }
 #endif
 
+/* like calloc, but uses our very own memory allocator. */
+static char *xcalloc (cnt, siz)
+    size_t cnt;
+    size_t siz;
+{
+    size_t sizeit = cnt * siz;
+    char *ss = (char *) xmalloc (sizeit);
+    if (ss == NULL)
+      return (NULL);
+
+    memset((void*)ss, 0, sizeit);
+    return ss;
+}
+
 static void xmalloc_stats(fp)
     FILE *fp;
 {
 #ifndef xmalloc
     fprintf (fp, "xmalloc: %ld calls, %ld bytes, %ld errors\n", xmalloc_calls, xmalloc_bytes, xmalloc_errors);
 #endif
+}
+
+static struct node *
+alloc_node(modid)
+    int modid;
+{
+    struct node *np;
+    np = (struct node *) xcalloc(1, sizeof(struct node));
+    if (np) {
+        np->tc_index = -1;
+        np->modid = modid;
+    }
+    return np;
 }
 
 static void
@@ -735,8 +794,8 @@ init_tree_roots()
         base_modid = which_module("RFC1213-MIB");
 
     /* build root node */
-    tp = (struct tree *) xmalloc(sizeof(struct tree));
-    memset(tp, 0, sizeof(struct tree));
+    tp = (struct tree *) xcalloc(1, sizeof(struct tree));
+    if (tp == NULL) return;
     tp->label = xstrdup("joint-iso-ccitt");
     tp->modid = base_modid;
     tp->number_modules = 1;
@@ -752,9 +811,8 @@ init_tree_roots()
     root_imports[0].modid = base_modid;
 
     /* build root node */
-    tp = (struct tree *) xmalloc(sizeof(struct tree));
+    tp = (struct tree *) xcalloc(1, sizeof(struct tree));
     if (tp == NULL) return;
-    memset(tp, 0, sizeof(struct tree));
     tp->next_peer = lasttp;
     tp->label = xstrdup("ccitt");
     tp->modid = base_modid;
@@ -770,9 +828,8 @@ init_tree_roots()
     root_imports[1].modid = base_modid;
 
     /* build root node */
-    tp = (struct tree *) xmalloc(sizeof(struct tree));
+    tp = (struct tree *) xcalloc(1, sizeof(struct tree));
     if (tp == NULL) return;
-    memset(tp, 0, sizeof(struct tree));
     tp->next_peer = lasttp;
     tp->modid = base_modid;
     tp->number_modules = 1;
@@ -788,7 +845,6 @@ init_tree_roots()
     root_imports[2].modid = base_modid;
 
     tree_head = tp;
-
 }
 
 #ifdef STRICT_MIB_PARSEING
@@ -969,7 +1025,7 @@ do_subtree(root, nodes)
         if (tp) {
 	    if (!label_compare (tp->label, np->label)) {
 		    /* Update list of modules */
-                int_p = (int *) xmalloc((tp->number_modules+1) * sizeof(int));
+                int_p = (int *) xcalloc((tp->number_modules+1), sizeof(int));
                 if (int_p == NULL) return;
                 memcpy(int_p, tp->module_list, tp->number_modules*sizeof(int));
                 int_p[tp->number_modules] = np->modid;
@@ -989,26 +1045,26 @@ do_subtree(root, nodes)
 		fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
 			root->label, np->subid, tp->label, np->label);
 	}
-        tp = (struct tree *) xmalloc(sizeof(struct tree));
+        tp = (struct tree *) xcalloc(1, sizeof(struct tree));
         if (tp == NULL) return;
         tp->parent = root;
-        tp->child_list = NULL;
-        tp->label = np->label;
-        np->label = NULL;
         tp->modid = np->modid;
         tp->number_modules = 1;
         tp->module_list = &(tp->modid);
         tp->subid = np->subid;
         tp->tc_index = np->tc_index;
         tp->type = translation_table[np->type];
-        tp->enums = np->enums;
-        np->enums = NULL;       /* so we don't free them later */
-        tp->hint = np->hint;
-	np->hint = NULL;
-	tp->units = np->units;
-	np->units = NULL;
-        tp->description = np->description; /* steals memory from np */
-        np->description = NULL; /* so we don't free it later */
+
+        /*
+         * move pointers for alloc'd data from np to tp.
+         * this prevents them from being freed when np is released.
+         */
+        tp->label = np->label;  np->label = NULL;
+        tp->enums = np->enums;  np->enums = NULL;
+        tp->hint = np->hint;  np->hint = NULL;
+        tp->units = np->units;  np->units = NULL;
+        tp->description = np->description;  np->description = NULL;
+
 	tp->access = np->access;
 	tp->status = np->status;
         set_function(tp);	/* from mib.c */
@@ -1201,10 +1257,26 @@ getoid(fp, id,  length)
 }
 
 /*
- * Parse an entry of the form:
- * label OBJECT IDENTIFIER ::= { parent 2 }
+ * Parse a sequence of object subidentifiers for the given name.
  * The "label OBJECT IDENTIFIER ::=" portion has already been parsed.
- * Returns NULL on error.
+ *
+ * The majority of cases take this form :
+ * label OBJECT IDENTIFIER ::= { parent 2 }
+ * where a parent label and a child subidentifier number are specified.
+ *
+ * Variations on the theme include cases where a number appears with
+ * the parent, or intermediate subidentifiers are specified by label,
+ * by number, or both.
+ *
+ * Here are some representative samples :
+ * internet        OBJECT IDENTIFIER ::= { iso org(3) dod(6) 1 }
+ * mgmt            OBJECT IDENTIFIER ::= { internet 2 }
+ * rptrInfoHealth  OBJECT IDENTIFIER ::= { snmpDot3RptrMgt 0 4 }
+ *
+ * Here is a very rare form :
+ * iso             OBJECT IDENTIFIER ::= { 1 }
+ *
+ * Returns NULL on error.  When this happens, memory may be leaked.
  */
 static struct node *
 parse_objectid(fp, name)
@@ -1215,96 +1287,84 @@ parse_objectid(fp, name)
     register struct subid *op, *nop;
     int length;
     struct subid loid[32];
-    struct node *np, *root, *oldnp = NULL;
+    struct node *np, *root = NULL, *oldnp = NULL;
     struct tree *tp;
 
-    if ((length = getoid(fp, loid, 32)) != 0){
-        np = root = (struct node *) xmalloc(sizeof(struct node));
-        if (np == NULL) return(NULL);
-        memset(np, 0, sizeof(struct node));
-
-	/*
-	 * Handle numeric-only object identifiers,
-	 *  by labelling the first sub-identifier
-	 */
-        if ( !loid->label )
-           for ( tp = tree_head ; tp ; tp=tp->next_peer )
-               if ( (int)tp->subid == loid->subid ) {
-                   loid->label = xstrdup(tp->label);
-                   break;
-               }
-
-        /*
-         * For each parent-child subid pair in the subid array,
-         * create a node and link it into the node list.
-         */
-        for(count = 0, op = loid, nop=loid+1; count < (length - 2); count++,
-            op++, nop++){
-            /* every node must have parent's name and child's name or number */
-            if (op->label && (nop->label || (nop->subid != -1))){
-                np->parent = xstrdup (op->label);
-                if (!nop->label) {
-		    nop->label = (char *) xmalloc(20);
-		    if (nop->label == NULL) return(NULL);
- 		    sprintf(nop->label, "%s%d", ANON, anonymous++);
-                }
-                np->label = xstrdup (nop->label);
-                np->modid = nop->modid;
-                if (nop->subid != -1)
-                    np->subid = nop->subid;
-                np->tc_index = -1;
-                np->type = 0;
-                np->enums = NULL;
-                /* set up next entry */
-                np->next = (struct node *) xmalloc(sizeof(*np->next));
-		if (np->next == NULL) return(NULL);
-                memset(np->next, 0, sizeof(struct node));
-                oldnp = np;
-                np = np->next;
-            }
-        }
-        np->next = NULL;
-        np->tc_index = -1;
-        /*
-         * The above loop took care of all but the last pair.  This pair is taken
-         * care of here.  The name for this node is taken from the label for this
-         * entry.
-         * np still points to an unused entry.
-         */
-        if (count == (length - 2)){
-            if (op->label){
-                np->parent = xstrdup (op->label);
-                np->label = xstrdup (name);
-                np->modid = nop->modid;
-                if (nop->subid != -1)
-                    np->subid = nop->subid;
-                else
-                    print_error("Warning: This entry is pretty silly",
-                                np->label, CONTINUE);
-            } else {
-                free_node(np);
-                if (oldnp)
-                    oldnp->next = NULL;
-                else
-                    return NULL;
-            }
-        } else {
-            print_error("Missing end of OID", NULL, CONTINUE);
-            free_node(np);   /* the last node allocated wasn't used */
-            if (oldnp)
-                oldnp->next = NULL;
-            return NULL;
-        }
-        /* free the loid array */
-        for(count = 0, op = loid; count < length; count++, op++){
-            if (op->label)
-                free(op->label);
-        }
-        return root;
-    } else {
+    if ((length = getoid(fp, loid, 32)) == 0){
         print_error("Bad object identifier", NULL, CONTINUE);
         return NULL;
     }
+
+    /*
+     * Handle numeric-only object identifiers,
+     *  by labelling the first sub-identifier
+     */
+    op = loid;
+    if ( !op->label )
+      for ( tp = tree_head ; tp ; tp=tp->next_peer )
+        if ( (int)tp->subid == op->subid ) {
+            op->label = xstrdup(tp->label);
+            break;
+        }
+
+    /*
+     * Handle  "label OBJECT-IDENTIFIER ::= { subid }"
+     */
+    if (length == 1) {
+        op = loid;
+        np = alloc_node(op->modid);
+        if (np == NULL) return(NULL);
+        np->subid = op->subid;
+        np->label = xstrdup(name);
+        if (op->label) free(op->label);
+        return np;
+    }
+
+    /*
+     * For each parent-child subid pair in the subid array,
+     * create a node and link it into the node list.
+     */
+    for(count = 0, op = loid, nop=loid+1; count < (length - 1);
+      count++, op++, nop++){
+        /* every node must have parent's name and child's name or number */
+/* XX the next statement is always true -- does it matter ?? */
+        if (op->label && (nop->label || (nop->subid != -1))){
+            np = alloc_node(nop->modid);
+            if (np == NULL) return(NULL);
+            if (root == NULL) root = np;
+
+            np->parent = xstrdup (op->label);
+            if (count == (length - 2)) {
+                /* The name for this node is the label for this entry */
+                np->label = xstrdup (name);
+            }
+            else {
+                if (!nop->label) {
+                    nop->label = (char *) xmalloc(20 + ANON_LEN);
+                    if (nop->label == NULL) return(NULL);
+                    sprintf(nop->label, "%s%d", ANON, anonymous++);
+                }
+                np->label = xstrdup (nop->label);
+            }
+            if (nop->subid != -1)
+                np->subid = nop->subid;
+            else
+                print_error("Warning: This entry is pretty silly",
+                                np->label, CONTINUE);
+
+            /* set up next entry */
+            if (oldnp) oldnp->next = np;
+            oldnp = np;
+        } /* end if(op->label... */
+    }
+
+    /* free the loid array */
+    for(count = 0, op = loid; count < length; count++, op++){
+        if (op->label)
+            free(op->label);
+    }
+
+    return root;
 }
 
 static int
@@ -1316,37 +1376,15 @@ get_tc(descriptor, modid, ep, hint)
 {
     int i;
     struct tc *tcp;
-    struct module *mp;
-    struct module_import *mip;
 
-	/*
-	 * Check that the descriptor isn't imported
-	 *  by searching the import list
-	 */
-
-    for ( mp = module_head ; mp ; mp = mp->next )
-         if ( mp->modid == modid )
-             break;
-    if ( mp )
-         for ( i=0, mip=mp->imports ; i < mp->no_imports ; ++i, ++mip ) {
-             if ( !label_compare( mip->label, descriptor )) {
-				/* Found it - so amend the module ID */
-                  modid = mip->modid;
-                  break;
-             }
-         }
-
-
-    for(i = 0, tcp = tclist; i < MAXTC; i++, tcp++){
-        if (tcp->type == 0)
-            break;
-        if (!label_compare(descriptor, tcp->descriptor) &&
-		((modid == tcp->modid) || (modid==-1))){
-            *ep = tcp->enums;
-	    *hint = tcp->hint;
-            return tcp->type;
-        }
-    }
+    i = get_tc_index(descriptor, modid);
+    if (i != -1)
+      {
+ 	tcp = &tclist[i];
+        *ep = tcp->enums;
+        *hint = tcp->hint;
+        return tcp->type;
+      }
     return LABEL;
 }
 
@@ -1359,6 +1397,7 @@ get_tc_index(descriptor, modid)
     int modid;
 {
     int i;
+    struct tc *tcp;
     struct module *mp;
     struct module_import *mip;
 
@@ -1424,7 +1463,7 @@ parse_enumlist(fp)
             break;
         if (type == LABEL){
             /* this is an enumerated label */
-            rep = (struct enum_list *) xmalloc(sizeof(struct enum_list));
+            rep = (struct enum_list *) xcalloc(1, sizeof(struct enum_list));
             if (rep == NULL) return(NULL);
             rep->next = ep;
             ep = rep;
@@ -1582,11 +1621,8 @@ parse_objecttype(fp, name)
         print_error("Bad format for OBJECT-TYPE", token, type);
         return NULL;
     }
-    np = (struct node *) xmalloc(sizeof(struct node));
+    np = alloc_node(current_module);
     if (np == NULL) return(NULL);
-    memset(np, 0, sizeof(struct node));
-    np->tc_index = -1;
-    np->modid = current_module;
     type = get_token(fp, token, MAXTOKEN);
     if (type == LABEL){
         tctype = get_tc(token, current_module, &np->enums, &np->hint);
@@ -1777,19 +1813,8 @@ parse_objecttype(fp, name)
         free_node(np);
         return NULL;
     }
-    nnp = parse_objectid (fp, name);
-    if (nnp) {
-        np->label = nnp->label;
-        np->parent = nnp->parent;
-        np->next = nnp->next;
-        np->modid = nnp->modid;
-        np->subid = nnp->subid;
-        free(nnp);
-    }
-    else np = NULL;
-    return np;
+    return merge_parse_objectid(np, fp, name);
 }
-
 
 /*
  * Parses an OBJECT GROUP macro.
@@ -1808,11 +1833,8 @@ parse_objectgroup(fp, name)
     char quoted_string_buffer[MAXQUOTESTR];
     register struct node *np, *nnp;
 
-    np = (struct node *) xmalloc(sizeof(struct node));
+    np = alloc_node(current_module);
     if (np == NULL) return(NULL);
-    memset(np, 0, sizeof(struct node));
-    np->tc_index = -1;
-    np->modid = current_module;
     type = get_token(fp, token, MAXTOKEN);
     while (type != EQUALS && type != ENDOFFILE) {
       switch (type) {
@@ -1843,17 +1865,7 @@ parse_objectgroup(fp, name)
       }
       type = get_token(fp, token, MAXTOKEN);
     }
-    nnp = parse_objectid (fp, name);
-    if (nnp) {
-	np->parent = nnp->parent;
-	np->label = nnp->label;
-	np->next = nnp->next;
-	np->modid = nnp->modid;
-	np->subid = nnp->subid;
-	free(nnp);
-    }
-    else np = NULL;
-    return np;
+    return merge_parse_objectid(np, fp, name);
 }
 
 /*
@@ -1870,11 +1882,8 @@ parse_notificationDefinition(fp, name)
     char quoted_string_buffer[MAXQUOTESTR];
     register struct node *np, *nnp;
 
-    np = (struct node *) xmalloc(sizeof(struct node));
+    np = alloc_node(current_module);
     if (np == NULL) return(NULL);
-    memset(np, 0, sizeof(struct node));
-    np->tc_index = -1;
-    np->modid = current_module;
     type = get_token(fp, token, MAXTOKEN);
     while (type != EQUALS && type != ENDOFFILE) {
       switch (type) {
@@ -1896,17 +1905,7 @@ parse_notificationDefinition(fp, name)
       }
       type = get_token(fp, token, MAXTOKEN);
     }
-    nnp = parse_objectid (fp, name);
-    if (nnp) {
-	np->parent = nnp->parent;
-	np->label = nnp->label;
-	np->next = nnp->next;
-	np->modid = nnp->modid;
-	np->subid = nnp->subid;
-	free(nnp);
-    }
-    else np = NULL;
-    return np;
+    return merge_parse_objectid(np, fp, name);
 }
 
 /*
@@ -1923,11 +1922,8 @@ parse_trapDefinition(fp, name)
     char quoted_string_buffer[MAXQUOTESTR];
     register struct node *np;
 
-    np = (struct node *) xmalloc(sizeof(struct node));
+    np = alloc_node(current_module);
     if (np == NULL) return(NULL);
-    memset(np, 0, sizeof(struct node));
-    np->tc_index = -1;
-    np->modid = current_module;
     type = get_token(fp, token, MAXTOKEN);
     while (type != EQUALS && type != ENDOFFILE) {
         switch (type) {
@@ -1974,16 +1970,16 @@ parse_trapDefinition(fp, name)
         return NULL;
     }
     np->subid = atoi(token);
-    np->next = (struct node *)xmalloc(sizeof (struct node));
-    if (np->next == NULL) return(NULL);
-    memset(np->next, 0, sizeof(struct node));
+    np->next = alloc_node(current_module);
+    if (np->next == NULL)  {
+        free_node(np);
+        return(NULL);
+    }
     np->next->parent = np->parent;
-    np->next->modid = current_module;
-    np->next->tc_index = -1;
     np->parent = (char *)xmalloc(strlen(np->parent)+2);
     if (np->parent == NULL) {
-	free(np->next); free(np);
-	return(NULL);
+        free_node(np->next); free_node(np);
+        return(NULL);
     }
     strcpy(np->parent, np->next->parent);
     strcat(np->parent, "#");
@@ -2006,28 +2002,14 @@ parse_compliance(fp, name)
     char quoted_string_buffer[MAXQUOTESTR];
     register struct node *np, *nnp;
 
-    np = (struct node *) xmalloc(sizeof(struct node));
+    np = alloc_node(current_module);
     if (np == NULL) return(NULL);
-    memset(np, 0, sizeof(struct node));
-    np->tc_index = -1;
-    np->modid = current_module;
     type = get_token(fp, token, MAXTOKEN);
-    while (type != EQUALS && type != ENDOFFILE)
+    while (type != EQUALS && type != ENDOFFILE) {
         type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
-    nnp = parse_objectid (fp, name);
-    if (nnp) {
-	np->parent = nnp->parent;
-	np->label = nnp->label;
-	np->next = nnp->next;
-	np->modid = nnp->modid;
-	np->subid = nnp->subid;
-	free(nnp);
     }
-    else np = NULL;
-    return np;
+    return merge_parse_objectid(np, fp, name);
 }
-
-
 
 /*
  * Parses a module identity macro
@@ -2043,27 +2025,14 @@ parse_moduleIdentity(fp, name)
     char quoted_string_buffer[MAXQUOTESTR];
     register struct node *np, *nnp;
 
-    np = (struct node *) xmalloc (sizeof (struct node));
+    np = alloc_node(current_module);
     if (np == NULL) return(NULL);
-    memset(np, 0, sizeof(struct node));
-    np->tc_index = -1;
-    np->modid = current_module;
     type = get_token(fp, token, MAXTOKEN);
     while (type != EQUALS && type != ENDOFFILE) {
         type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
     }
-    nnp = parse_objectid(fp, name);
-    if (nnp) {
-	np->parent = nnp->parent;
-	np->label = nnp->label;
-	np->subid = nnp->subid;
-	np->next = nnp->next;
-	free (nnp);
-    }
-    else np = NULL;
-    return np;
+    return merge_parse_objectid(np, fp, name);
 }
-
 
 /*
  * Parses a module import clause
@@ -2151,7 +2120,7 @@ parse_imports(fp)
             if ( import_count == 0)
 		return;
             mp->imports = (struct module_import *)
-              xmalloc(import_count*sizeof(struct module_import));
+              xcalloc(import_count, sizeof(struct module_import));
             if (mp->imports == NULL) return;
 	    for ( i=0 ; i<import_count ; ++i ) {
 		mp->imports[i].label = import_list[i].label;
@@ -2242,7 +2211,7 @@ add_module_replacement( old_module, new_module, tag, len)
     struct module_compatability *mcp;
 
     mcp =  (struct module_compatability *)
-      xmalloc(sizeof( struct module_compatability));
+      xcalloc(1, sizeof( struct module_compatability));
     if (mcp == NULL) return;
 
     mcp->old_module = xstrdup( old_module );
@@ -2433,7 +2402,7 @@ new_module (name , file)
 
 	/* Add this module to the list */
     DEBUGP("  Module %s is in %s\n", name, file);
-    mp = (struct module *) xmalloc(sizeof(struct module));
+    mp = (struct module *) xcalloc(1, sizeof(struct module));
     if (mp == NULL) return;
     mp->name = xstrdup(name);
     mp->file = xstrdup(file);
@@ -2642,6 +2611,19 @@ static void unget_token (token)
     ungotten_token = token;
 }
 
+/* return zero if character is not a label character. */
+static int
+is_labelchar (ich)
+    int ich;
+{
+    if ((isalnum(ich)) || (ich == '-'))
+	    return 1;
+    if (ich == '_' && mib_parse_label)
+	    return 1;
+
+    return 0;
+}
+
 static int
 get_token(fp, token, maxtlen)
     register FILE *fp;
@@ -2741,12 +2723,12 @@ get_token(fp, token, maxtlen)
     case '-':
 	ch_next = getc(fp);
 	if (ch_next == '-') {
-#ifdef MIB_COMMENT_IS_EOL_TERMINATED
-            /* Treat the rest of this line as a comment. */
-            last = ' '; /* skip last char next time. */
-            while ((ch_next != EOF) && (ch_next != '\n'))
-              ch_next = getc(fp);
-#else
+	  if (mib_comment_term) {
+	    /* Treat the rest of this line as a comment. */
+	    last = ' '; /* skip last char next time. */
+	    while ((ch_next != EOF) && (ch_next != '\n'))
+	    ch_next = getc(fp);
+	  } else {
             /* Treat the rest of the line or until another '--' as a comment */
             /* (this is the "technically" correct way to parse comments) */
 	    ch = ' ';
@@ -2755,7 +2737,7 @@ get_token(fp, token, maxtlen)
 		(ch != '-' || ch_next != '-')) {
 		ch = ch_next; ch_next = getc(fp);
 	    }
-#endif
+	  }
 	    if (ch_next == EOF) return ENDOFFILE;
 	    if (ch_next == '\n') Line++;
 	    return get_token (fp, token, maxtlen);
@@ -2767,10 +2749,10 @@ get_token(fp, token, maxtlen)
 	 * match this token as a reserved word.  If a match is found, return the
 	 * type.  Else it is a label.
 	 */
-	if (!(isalnum(ch) || ch == '-')) return LABEL;
+	if (!is_labelchar(ch)) return LABEL;
 	hash += tolower(ch);
   more:
-	while (isalnum((ch_next = getc(fp))) || ch_next == '-') {
+	while (is_labelchar(ch_next = getc(fp))) {
 	    hash += tolower(ch_next);
 	    if (cp - token < maxtlen - 1) *cp++ = ch_next;
 	    else too_long = 1;
@@ -3242,3 +3224,47 @@ print_subtree_oid_report_disable_suffix __P((void))
 {
     print_subtree_oid_report_suffix = 0;
 }
+
+/*
+ * Merge the parsed object identifier with the existing node.
+ * If there is a problem with the identifier, release the existing node.
+ */
+static struct node *
+merge_parse_objectid(np, fp, name)
+    struct node *np;
+    FILE *fp;
+    char *name;
+{
+    struct node *nnp;
+
+    nnp = parse_objectid(fp, name);
+    if (nnp) {
+	/* apply last OID sub-identifier data to the information */
+	/* already collected for this node. */
+	struct node *headp, *nextp;
+	int ncount = 0;
+	nextp = headp = nnp;
+	while (nnp->next) {
+		nextp = nnp;
+		ncount++;
+		nnp = nnp->next;
+	}
+
+	np->label = nnp->label;
+	np->subid = nnp->subid;
+    np->modid = nnp->modid;
+	np->parent = nnp->parent;
+	free(nnp);
+
+	if (ncount) {
+		nextp->next = np;
+		np = headp;
+	}
+    }
+    else {
+        free_node(np); np = NULL;
+    }
+
+    return np;
+}
+
