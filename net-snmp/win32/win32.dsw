@@ -39,6 +39,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "snmpdelta"=".\snmpdelta\snmpdelta.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "snmpget"=".\snmpget\snmpget.dsp" - Package Owner=<4>
 
 Package=<5>
@@ -87,7 +99,31 @@ Package=<4>
 
 ###############################################################################
 
+Project: "snmptest"=".\snmptest\snmptest.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "snmptranslate"=".\snmptranslate\snmptranslate.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "snmptrap"=".\snmptrap\snmptrap.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{

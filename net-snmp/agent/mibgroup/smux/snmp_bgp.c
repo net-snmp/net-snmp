@@ -44,15 +44,18 @@
 #include <netinet/in.h>
 #endif
 
+#include "../../../snmplib/system.h"
 #include "asn1.h"
 #include "snmp.h"
 #include "mib.h"
+#include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_vars.h"
 #include "smux.h"
+#include "snmp_bgp.h"
 
-static u_int max_bgp_mib[] = {1, 3, 6, 1, 2, 1, 15, 5, 1, 6, 255, 255, 255, 255};
-static u_int min_bgp_mib[] = {1, 3, 6, 1, 2, 1, 15, 1, 0};
+static oid max_bgp_mib[] = {1, 3, 6, 1, 2, 1, 15, 5, 1, 6, 255, 255, 255, 255};
+static oid min_bgp_mib[] = {1, 3, 6, 1, 2, 1, 15, 1, 0};
 extern u_char smux_type;
 
 u_char *
@@ -62,7 +65,7 @@ var_bgp(vp, name, length, exact, var_len, write_method)
 	register int        *length;
 	int                 exact;
 	int                 *var_len;
-	int                 (**write_method)();
+	int                 (**write_method)__P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 	u_char *var;
 	int result;
@@ -135,7 +138,7 @@ var_bgp(vp, name, length, exact, var_len, write_method)
 	 * Any resullt returned should be within the bgp tree.
 	 * bgp_mib - static u_int bgp_mib[] = {1, 3, 6, 1, 2, 1, 15};
 	 */
-	if (bcmp(bgp_mib, name, sizeof(bgp_mib)) != 0) {
+	if (memcmp(bgp_mib, name, sizeof(bgp_mib)) != 0) {
 		return NULL;
 	}
 	else {

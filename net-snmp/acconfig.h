@@ -370,6 +370,12 @@
 /* define if you have librpm and libdb */
 #undef HAVE_LIBRPM
 
+/* define if you have gethostbyname */
+#undef HAVE_GETHOSTBYNAME
+
+/* define if you have getservbyname */
+#undef HAVE_GETSERVBYNAME
+
 /* Watch out for compilers that don't handle void properly. */
 #undef void
 

@@ -3,12 +3,15 @@ TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bi
 SUBDIRS = snmplib agent apps local ov man
 INSTALLDIRS = snmplib agent apps local man mibs
 
-CPP = @CPP@ -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
+CPP = @CPP@ -I$(srcdir)/agent/mibgroup -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
 
-all:	sedscript EXAMPLE.conf subdirs
+all:	sedscript EXAMPLE.conf subdirs ucd-snmp-config.h
 
 sedscript: sedscript.in config.h agent/mibgroup/mibdefs.h
 	$(CPP) -DPREFIX=$(prefix) -DLIBDIR=$(libdir) -DDATADIR=$(datadir) $(srcdir)/sedscript.in | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;' | egrep '^s[/#]' > sedscript
+
+ucd-snmp-config.h:
+	cp config.h ucd-snmp-config.h
 
 subdirs:
 	for i in $(SUBDIRS) ; do \
@@ -17,15 +20,15 @@ subdirs:
 
 distall: ${srcdir}/configure ${srcdir}/config.h 
 
-install:    subdirs installdirs
+install:    all installdirs
 	for i in $(INSTALLDIRS) ; do \
         ( cd $$i ; $(MAKE) install ) ; \
 	done
-	@if test -f $(snmplibdir)/mib.txt; then echo "*** warning: $(snmplibdir)/mib.txt exists, but is no longer needed.  You might wish to remove it as we will still try to read it even though its not necessary."; fi
-
+	@$(INSTALL) ucd-snmp-config.h $(includedir)
+	echo "install:  installed ucd-snmp-config.h in $(includedir)"
 
 installdirs:
-	@$(SHELL) $(srcdir)/mkinstalldirs $(snmplibdir) $(mibdir)
+	@$(SHELL) $(srcdir)/mkinstalldirs $(snmplibdir) $(mibdir) $(includedir)
 
 
 apps/snmpget apps/snmpgetnext apps/snmpset apps/snmptranslate apps/snmpwalk apps/snmpbulkwalk apps/snmptest apps/snmptrapd apps/snmpnetstat/snmpnetstat agent/snmpd: makeall

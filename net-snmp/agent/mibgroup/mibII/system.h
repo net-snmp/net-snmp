@@ -7,6 +7,8 @@
 
 config_require(util_funcs)
 
+extern char version_descr[];
+
 void init_system __P((void));
 u_char	*var_system __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 

@@ -94,7 +94,7 @@ static void sprint_float __P((char *, struct variable_list *, struct enum_list *
 static void sprint_double __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 #endif
 
-static int quick_print = 0;
+int quick_print = 0;
 static int full_objid = 0;
 static int suffix_only = 0;
 
@@ -931,8 +931,8 @@ unsigned char SECRETS_MIB_text[] = ".iso.org.dod.internet.snmpSecrets";
 extern struct tree *tree_head;
 struct tree *Mib;             /* Backwards compatibility */
 
-char Standard_Prefix[] = ".1.3.6.1.2.1.";
-char Prefix[128];
+static char Standard_Prefix[] = ".1.3.6.1.2.1.";
+static char *Prefix;
 
 
 struct tree *get_tree_head __P((void))
@@ -944,7 +944,7 @@ void
 init_mib __P((void))
 {
     char *prefix;
-    char  *env_var, *entry, path[300];
+    char  *env_var, *entry;
 
     if (Mib) return;
 
@@ -952,19 +952,19 @@ init_mib __P((void))
 
     env_var = getenv("MIBDIRS");
     if ( env_var == NULL ) {
-        strcpy(path, DEFAULT_MIBDIRS);
-	env_var = path;
+        env_var = strdup(DEFAULT_MIBDIRS);
     } else if ( *env_var == '+' ) {
-      strcpy(path, DEFAULT_MIBDIRS);
-      *env_var = ENV_SEPARATOR_CHAR;
-      strcat(path, env_var);
-      env_var = path ;
+      entry = (char *)malloc(strlen(DEFAULT_MIBDIRS)+strlen(env_var)+2);
+      sprintf(entry, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
+      env_var = entry;
     }
+    else env_var = strdup(env_var);
     entry = strtok( env_var, ENV_SEPARATOR );
     while ( entry ) {
         add_mibdir(entry);
         entry = strtok( NULL, ENV_SEPARATOR);
     }
+    free(env_var);
 
     init_mib_internals();
 
@@ -972,24 +972,25 @@ init_mib __P((void))
 
     env_var = getenv("MIBS");
     if ( env_var == NULL ) {
-        strcpy(path, DEFAULT_MIBS);
-	env_var = path;
+        env_var = DEFAULT_MIBS;
     }
     if (strcmp (env_var, "ALL") == 0) {
 	read_all_mibs();
     }
     else {
 	if ( *env_var == '+' ) {
-	    strcpy(path, DEFAULT_MIBS);
-	    *env_var = ENV_SEPARATOR_CHAR;
-	    strcat(path, env_var);
-	    env_var = path ;
+	    entry = (char *)malloc(strlen(DEFAULT_MIBS)+strlen(env_var)+2);
+	    sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR, env_var+1);
+	    env_var = entry;
 	}
+	else env_var = strdup(env_var);
 	entry = strtok( env_var, ENV_SEPARATOR );
 	while ( entry ) {
 	    read_module(entry);
 	    entry = strtok( NULL, ENV_SEPARATOR);
 	}
+	adopt_orphans();
+	free(env_var);
     }
 
     env_var = getenv("MIBFILES");
@@ -997,19 +998,18 @@ init_mib __P((void))
       env_var = getenv("MIBFILE");  /* backwards compatibility */
 #ifdef DEFAULT_MIBFILES
       if ( env_var == NULL ) {
-        strcpy(path, DEFAULT_MIBFILES);
-	env_var = path;
+        env_var = strdup(DEFAULT_MIBFILES);
       }
 #endif
     }
 #ifdef DEFAULT_MIBFILES
     else if ( *env_var == '+') {
-      strcpy(path, DEFAULT_MIBFILES);
-      *env_var = ENV_SEPARATOR_CHAR;
-      strcat(path, env_var);
-      env_var = path ;
+      entry = (char *)malloc(strlen(DEFAULT_MIBFILES)+strlen(env_var)+2);
+      sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR, env_var+1);
+      env_var = entry;
     }
 #endif
+    else env_var = strdup(env_var);
     
     if ( env_var != NULL ) {
       entry = strtok( env_var, ENV_SEPARATOR );
@@ -1018,12 +1018,14 @@ init_mib __P((void))
         entry = strtok( NULL, ENV_SEPARATOR);
       }
     }
+    free(env_var);
 
     prefix = getenv("PREFIX");
 
     if (!prefix)
         prefix = Standard_Prefix;
     if (prefix[0] == '.') prefix++;    /* get past leading dot. */
+    Prefix = malloc(strlen(prefix)+2);
     strcpy(Prefix, prefix);
     if (Prefix[strlen(Prefix) - 1] != '.')
         strcat(Prefix, ".");  /* add a trailing dot in case user didn't */ 
@@ -1256,24 +1258,24 @@ sprint_objid(buf, objid, objidlen)
     }
     else if (!full_objid) {
 	cp = tempbuf;
-	if (strlen(tempbuf) > strlen(RFC1213_MIB_text)
+	if (strlen(tempbuf) > strlen(Prefix)
+	    && !memcmp(tempbuf+1, Prefix, strlen(Prefix)-1))
+            cp += strlen(Prefix) + 1;
+	else if (strlen(tempbuf) > strlen(RFC1213_MIB_text)
 	    && !memcmp(tempbuf, RFC1213_MIB_text, strlen(RFC1213_MIB_text)))
 	    cp += sizeof(RFC1213_MIB_text);
-	if (strlen(tempbuf) > strlen(EXPERIMENTAL_MIB_text)
+	else if (strlen(tempbuf) > strlen(EXPERIMENTAL_MIB_text)
 	    && !memcmp(tempbuf, EXPERIMENTAL_MIB_text, strlen(EXPERIMENTAL_MIB_text)))
             cp += sizeof(EXPERIMENTAL_MIB_text);
-	if (strlen(tempbuf) > strlen(PRIVATE_MIB_text)
+	else if (strlen(tempbuf) > strlen(PRIVATE_MIB_text)
 	    && !memcmp(tempbuf, PRIVATE_MIB_text, strlen(PRIVATE_MIB_text)))
             cp += sizeof(PRIVATE_MIB_text);
-	if (strlen(tempbuf) > strlen(PARTY_MIB_text)
+	else if (strlen(tempbuf) > strlen(PARTY_MIB_text)
 	    && !memcmp(tempbuf, PARTY_MIB_text, strlen(PARTY_MIB_text)))
             cp += sizeof(PARTY_MIB_text);
-	if (strlen(tempbuf) > strlen(SECRETS_MIB_text)
+	else if (strlen(tempbuf) > strlen(SECRETS_MIB_text)
 	    && !memcmp(tempbuf, SECRETS_MIB_text, strlen(SECRETS_MIB_text)))
             cp += sizeof(SECRETS_MIB_text);
-	if (strlen(tempbuf) > strlen(Prefix)
-	    && !memcmp(tempbuf, Prefix, strlen(Prefix)))
-            cp += strlen(Prefix) + 1;
     }
     else cp = tempbuf;
     strcpy(buf, cp);

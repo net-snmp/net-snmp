@@ -98,8 +98,8 @@ EXPORTS
 	snmp_get_dump_packet
 	snmp_set_quick_print
 	snmp_get_quick_print
-    snmp_set_do_debugging
-    snmp_get_do_debugging
+	snmp_set_do_debugging
+	snmp_get_do_debugging
 	DEBUGP
 	snmp_perror	
 	snmp_add_null_var
@@ -122,8 +122,9 @@ EXPORTS
 	view_createEntry
  	get_tc_descriptor
 	setenv
+	find_module
  	snmp_async_send
-	Mib				DATA
+	Mib			DATA
 	tree_head		DATA
 	snmp_errno		DATA
 

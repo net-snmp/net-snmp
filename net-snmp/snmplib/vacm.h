@@ -1,3 +1,5 @@
+#ifndef VACM_H
+#define VACM_H
 /*
  * SNMPv3 View-based Access Control Model
  */
@@ -137,3 +139,4 @@ struct vacm_securityEntry * vacm_createSecurityEntry __P((char *));
 struct vacm_securityEntry *vacm_getSecurityEntry __P((char *));
 void vacm_scanSecurityInit __P((void));
 struct vacm_securityEntry *vacm_scanSecurityEntry __P((void));
+#endif /* VACM_H */

@@ -1,3 +1,684 @@
+Changes: V3.5 -> V3.5.1
+
+hardaker 22 Jun 98 09:16:32
+    - (main.c): Patch from Jerry G. DeLapp:
+      - commented out trailing #endif comment.
+
+hardaker 24 Jun 98 10:30:19
+    - (Makefile.in): man->html make specification.
+
+hardaker 24 Jun 98 11:08:41
+    - (UCD-SNMP-MIB.txt): Patch from Niels Baggesen:
+      - shutdown trap specifications.
+      - misc mib fixes.
+
+hardaker 26 Jun 98 10:42:32
+    - (disk.c): Patch from Michael Douglass:
+      - fix calculation of totaldisk by doing block division first to
+        protect against 32 bit overflows.
+
+hardaker 26 Jun 98 10:45:15
+    - (smux.c, snmp_bgp.c, snmp_ospf.c, snmp_rip2.c, snmp_rip2.h): Patch
+      from Niels Baggesen:
+      - Fix for new defines and proper header includes.
+
+hardaker 26 Jun 98 15:03:38
+    - (generic.h): put in a comment to keep compilers from complaining too much.
+
+hardaker  8 Jul 98 12:26:25
+    - (freebsd2.h): use _UTMP_PATH if available.
+
+hardaker  8 Jul 98 12:26:34
+    - (irix.h): define _KMEMUSER
+
+hardaker  8 Jul 98 12:27:12
+    - (win32.opt, libsnmp.dsp, libsnmp.plg, libsnmp.def, libsnmp_dll.plg,
+      snmpbulkwalk.dsp, snmpbulkwalk.plg, snmpget.dsp, snmpget.plg,
+      snmpgetnext.dsp, snmpgetnext.plg, snmpset.dsp, snmpset.plg,
+      snmpstatus.dsp, snmpstatus.plg, snmptranslate.dsp,
+      snmptranslate.plg, snmpwalk.dsp, snmpwalk.plg): Patch from Joe
+      Marzot:
+      - win32 update.
+
+hardaker  8 Jul 98 12:58:03
+    - (snmp_api.c): Patch from Joe Marzot:
+      - fix "number of retries" bug.
+      - remove odd timeout calculation code for retries > 3.
+hardaker  8 Jul 98 13:02:06
+    - (interfaces.c): make hp_interfaces structure static.
+
+hardaker  8 Jul 98 13:03:36
+    - (system.c): don't free env pointers that are created.
+
+hardaker  8 Jul 98 13:08:18
+    - (UCD-SNMP-MIB.txt): Patch from Niels Baggesen:
+      - fix for missing object identifier labels.
+
+hardaker  8 Jul 98 14:43:56
+    - (snmp_vars.c): include fixes.
+hardaker  8 Jul 98 14:44:34
+    - (pass.c): include sys/wait.h
+
+hardaker  8 Jul 98 14:44:41
+    - (versioninfo.c): include system.h
+
+hardaker  8 Jul 98 14:45:22
+    - (parse.c): include snmp_api.h
+
+hardaker  8 Jul 98 14:45:42
+    - (snmp_api.c): include fixes.
+
+hardaker 15 Jul 98 15:46:28
+    - (sedscript.in): using_module changes.
+
+hardaker 15 Jul 98 15:46:55
+    - (memory.h): MEMSWAPMINIMUM wasn't being used.
+
+hardaker 17 Jul 98 13:11:10
+    - (UCD-SNMP-MIB.inc, UCD-SNMP-MIB.txt):
+      - created smicng input file.
+      - fixed the UCD-SNMP mib to deal with most smic errors.
+
+hardaker 17 Jul 98 13:22:32
+    - (RFC-1215.txt): created an empty mib module for importing of TRAP-TYPE.
+
+hardaker 17 Jul 98 16:59:51
+    - (*): update for 3.5.1.
+
+hardaker 20 Jul 98 17:14:21
+    - (snmpcheck.def): work around for new multi-depth mib tables..
+
+hardaker 22 Jul 98 15:35:07
+    - (mib.c): don't change running environment variables with strtok.
+
+hardaker 22 Jul 98 16:23:45
+    - (Makefile.in, sedscript.in): fix sedscript includes.
+
+hardaker 24 Jul 98 09:25:33
+    - (disk.c): increment index by 1 so it doesn't start at 0.
+
+hardaker 24 Jul 98 10:02:14
+    - (snmpd.conf.5.def): various documenation updates and notes.
+
+hardaker 24 Jul 98 10:02:25
+    - (snmptranslate.1): nroff error.
+
+hardaker 24 Jul 98 10:25:44
+    - (snmptrapd.8): brought up to date.
+
+hardaker 24 Jul 98 12:10:07
+    - (snmp.c): include sys/select.h for AIX.
+
+hardaker 24 Jul 98 12:24:22
+    - (acl.h, asn1.h, md5.h, mib.h, parse.h, snmp.h, snmp_api.h,
+      snmp_client.h, snmp_impl.h, vacm.h, view.h):
+      - protect against multiple inclusions.
+
+hardaker 29 Jul 98 13:44:22
+    - (Makefile.in): make install should do a real make all first.
+
+hardaker 12 Aug 98 15:57:18
+    - (snmp_vars.c): ifdef fixes for v2part modules.
+
+hardaker 12 Aug 98 15:57:42
+    - (extensible.c, proc.c): fixit problems with array index wrong.
+
+hardaker 12 Aug 98 15:57:52
+    - (libsnmp.def): find_module added.
+
+hardaker 12 Aug 98 16:05:28
+    - (configure, configure.in):
+      - libwrap command line fixes.
+      - --with-ldflags command line option created.
+
+hardaker 12 Aug 98 16:55:32
+    - (mib_api.3, snmpd.1.def, variables.5): updates to remove mib.txt references.
+
+hardaker 12 Aug 98 16:58:11
+    - (acconfig.h, config.h.in, configure, configure.in):
+      - don't include libraries that aren't needed if gethostbyname isn't in one.
+
+hardaker 12 Aug 98 16:59:50
+    - (snmp_impl.h): Patch from Michael Slifcak:
+      - fix the ERROR_MSG() macro to use snmp_set_detail.
+
+hardaker 14 Aug 98 08:21:44
+    - (snmp_parse_args.c, snmptranslate.c): usage fixes and -m/-M to snmptranslate.
+
+hardaker 14 Aug 98 08:42:49
+    - (auto_nlist.c): fix for stupid aix kernels.
+
+hardaker 14 Aug 98 08:44:07
+    - (ucd_snmp.h, memory_freebsd2.c, vmstat_freebsd2.c): Patch from Jonas Olsson:
+      - make the memory and vmstat module work under freebsd2.
+
+hardaker 14 Aug 98 08:44:07
+    file memory_freebsd2.c was initially added on branch Ext-3-5-patches.
+
+hardaker 14 Aug 98 08:44:07
+    file vmstat_freebsd2.c was initially added on branch Ext-3-5-patches.
+
+hardaker 14 Aug 98 08:44:29
+    - (README): Added two new names to the thankyou list.
+
+hardaker 14 Aug 98 08:44:37
+    - (sedscript.in): correct include files.
+
+hardaker 14 Aug 98 08:44:52
+    - (Makefile.in): CPP needs to check agent/mibgroup for headers.
+
+hardaker 14 Aug 98 08:52:32
+    - (mib.c, parse.c): Patch from Dave Shield:
+      - adopt unknown children into the correct place if IMPORTS are screwed up.
+
+hardaker 14 Aug 98 09:32:45
+    - (snmptranslate.c): Patch from James H. Young:
+      - usage output clean up.
+
+hardaker 14 Aug 98 10:13:13
+    - (COPYING): copyright change.
+
+hardaker 14 Aug 98 10:14:06
+    - (parse.c): Patch from Niels Baggesen:
+      - Malloc -> xmalloc.
+      - parser changes.
+
+hardaker 14 Aug 98 10:14:59
+    - (at.c): fixes for linux.
+
+hardaker 31 Aug 98 13:03:02
+    - (interfaces.c): missing return on ifInErrors results.
+
+hardaker 31 Aug 98 13:32:43
+    - (snmptrapd.c): add a blank line to the end of the trapd output for parsing.
+
+hardaker 31 Aug 98 16:10:25
+    - (snmp_vars.c): in_a_view(): create new function, and use it.
+
+hardaker 31 Aug 98 16:10:50
+    - (snmp_agent.c, snmp_impl.h): fix read/write checks.
+
+hardaker 31 Aug 98 13:03:02
+    - (interfaces.c): missing return on ifInErrors results.
+
+hardaker 31 Aug 98 13:32:43
+    - (snmptrapd.c): add a blank line to the end of the trapd output for parsing.
+
+hardaker 31 Aug 98 16:10:25
+    - (snmp_vars.c): in_a_view(): create new function, and use it.
+
+hardaker 31 Aug 98 16:10:50
+    - (snmp_agent.c, snmp_impl.h): fix read/write checks.
+
+hardaker 31 Aug 98 16:37:04
+    - (ChangeLog, NEWS): update for 3.5.1.
+
+hardaker 31 Aug 98 16:37:15
+    version tag ( 3.5.1.pre1 )
+
+hardaker  2 Sep 98 10:55:52
+    - (configure, configure.in, read_config.c, snmp2p.c, snmp_agent.c,
+      snmp_vars.c, snmpd.c, snmpd.h, util_funcs.c, interfaces.c, system.h,
+      tcp.c, smux.c, snmp_bgp.c, snmp_bgp.h, snmp_ospf.c, snmp_ospf.h,
+      snmp_rip2.c, snmp_rip2.h, extensible.c, loadave.c,
+      snmp_parse_args.c, snmpdelta.c, snmptranslate.c, snmptrap.c,
+      snmptrapd.c, inet.c, main.c, netstat.h, mib_api.3, snmp_api.3,
+      snmpd.1.def, freebsd.h, freebsd2.h, netbsd.h, asn1.h, mib.c,
+      parse.c, parse.h, snmp_api.c, snmp_api.h, snmp_client.c): Patch from
+      Niels Baggesen:
+      - prototypes, as usual (when is everybody starting to use -Wall
+        -Wstrict-prototypes ....)
+      - snmpd send an enterprise specific trap when it terminates
+      - possibility for sending v2c traps (or informs), via trap2sink directive
+      - fixes to snmplib and snmptrapd for bugs uncovered when snmpd sends
+        an INFORM instead of a TRAP
+      - -m and -M option for snmptrapd
+      - -D option for snmptranslate
+      - fixes to configure to correctly call ALL module init functions
+      - major rework of tcp.c, for netbsd. I hope this is OK now, I havent had
+        time to test it on all platforms yet - but till friday :-)
+      - snmpnetstat prints udp socket table
+      - some CMU_COMPATIBLE stuff
+      - man page fixes, with an include list that works!
+
+hardaker  2 Sep 98 10:58:10
+    - (tcp.c): Patch from Dave Shield:
+    -  Combine the two (almost) identical non-solaris cases
+    -  Add support for the missing Linux entries (InErrs/OutRsts)
+    -  Add support for the missing Solaris entry (OutRsts)
+
+hardaker  2 Sep 98 11:03:33
+    - (tcp.c): reverse Dave's changes since they conflict with Niels'.
+
+hardaker  2 Sep 98 12:19:03
+    - (extensible.c, proc.c): use correct name index for lookups on writes.
+
+hardaker  2 Sep 98 12:19:33
+    - (snmp_agent.c): check to make sure operation is not a SET when
+      returning an error code such as noSuchName.
+
+hardaker  2 Sep 98 14:04:42
+    - (configure, configure.in): don't include modules not requested even
+      if required by another module.
+
+hardaker  2 Sep 98 14:10:53
+    version tag ( 3.5.1.pre2 )
+
+hardaker  2 Sep 98 18:43:30
+    - (TODO): added security checks.
+
+nba  3 Sep 98 14:29:03
+    - (fixproc): added comment to test CVS.
+
+hardaker  4 Sep 98 10:09:47
+    - (interfaces.c): fix for sgi's.
+
+hardaker  4 Sep 98 14:14:19
+    - (configure, configure.in, Makefile.in, Makefile.in):
+      - fix to allow non-source directory builds.
+
+hardaker  7 Sep 98 10:10:05
+    - (loadave.c): Patch from Niels Baggesen:
+      - ifdef re-ordering fixes for alpha/linux.
+
+hardaker  7 Sep 98 10:47:00
+    - (proc.c): Patch from Michael Slifcak:
+      - solaris 2.6 fixes.
+
+hardaker  7 Sep 98 10:48:09
+    - (asn1.c): Patch from Michael Slifcak:
+      - Catch subidentifier correctly.
+
+hardaker  7 Sep 98 10:49:08
+    - (asn1.h): remove __P() definition.
+
+hardaker  7 Sep 98 10:49:53
+    - (mib.c): Patch from Michael Slifcak:
+      - malloc corrections for ENV vars..
+
+hardaker  7 Sep 98 10:51:22
+    - (parse.c): Patch from Michael Slifcak:
+      - protect against multiple init_mib_internal() calls.
+
+hardaker  7 Sep 98 10:53:11
+    - (system.c): Patch from Michael Slifcak:
+      - exit -> return on win32 system routines.
+
+hardaker  7 Sep 98 10:55:51
+    - (snmp_api.c): Patch from Michael Slifcak:
+      - NULL return by malloc protected.
+
+hardaker  7 Sep 98 12:17:36
+    - (snmpd.conf.5.def): Patch from Niels Baggesen:
+      - better description of the view mask.
+
+hardaker  7 Sep 98 12:27:42
+    - (memory_freebsd2.h, vmstat_freebsd2.h): created from memory.h and vmstat.h
+
+hardaker  7 Sep 98 12:27:42
+    file memory_freebsd2.h was initially added on branch Ext-3-5-patches.
+
+hardaker  7 Sep 98 12:27:42
+    file vmstat_freebsd2.h was initially added on branch Ext-3-5-patches.
+
+hardaker  7 Sep 98 12:47:37
+    - (parse.c): include snmp_api.h for snmp_get_do_debugging().
+
+hardaker  7 Sep 98 12:54:16
+    - (snmp_api.c): Patch from Michael Slifcak:
+      - check malloc calls more carefully.
+      - misc bug fixes.
+
+hardaker  7 Sep 98 13:15:26
+    - (Makefile.in): install config.h as $(includedir)/ucd-snmp-config.h.
+
+hardaker  7 Sep 98 13:21:18
+    - (memory.c, memory.h):
+      - MEMUSEDREAL -> MEMAVAILREAL (typedef renaming to match functionality).
+
+hardaker  7 Sep 98 14:06:21
+    - (tcp.c): back out Niels' changes since they broke other architectures.
+
+hardaker  7 Sep 98 14:19:24
+    - (Makefile.in(s)): make depends.
+
+hardaker  7 Sep 98 16:39:59
+    - (icmp.c, interfaces.c, ip.c, tcp.c): 64bit long return clean ups.
+
+marz  7 Sep 98 19:01:01
+    update headers for win32, add return to main
+
+marz  7 Sep 98 19:02:01
+    update headers for win32, add return to main,fix win32 compile error w/ non integralswitch case
+
+marz  7 Sep 98 19:03:33
+    update headers for win32, add return to main, resolve conflict w/ std lib log function
+
+marz  7 Sep 98 19:30:11
+    rename and static link debug targets, dll to bin dir, added snmptest, snmptrap, snmpdelta projects
+
+marz  7 Sep 98 19:42:35
+    file snmpdelta.dsp was initially added on branch Ext-3-5-patches.
+
+marz  7 Sep 98 19:42:35
+    file snmpdelta.plg was initially added on branch Ext-3-5-patches.
+
+marz  7 Sep 98 19:42:35
+    file snmptest.dsp was initially added on branch Ext-3-5-patches.
+
+marz  7 Sep 98 19:42:35
+    file snmptest.plg was initially added on branch Ext-3-5-patches.
+
+marz  7 Sep 98 19:42:35
+    file snmptrap.dsp was initially added on branch Ext-3-5-patches.
+
+marz  7 Sep 98 19:42:35
+    file snmptrap.plg was initially added on branch Ext-3-5-patches.
+
+marz  7 Sep 98 19:42:35
+    rename and static link debug targets, dll to bin dir, added snmptest, snmptrap, snmpdelta projects
+
+hardaker  8 Sep 98 09:26:13
+    - (NEWS): update.
+
+-------------------------------------------------------------------------------
+
+Changes: V3.4 -> V3.5
+
+hardaker 24 May 98 15:22:21
+    - (FAQ): update to change a few things.
+
+hardaker 24 May 98 15:22:38
+    - (NEWS): change vacm news wording.
+
+hardaker 24 May 98 15:22:57
+    - (ip.c): Patch from Niels Baggesen:
+      - fix for netbsd < 1.3.
+
+hardaker 29 May 98 10:14:32
+    - (at.c): Patch from Chris Smith: fix for irix.
+
+hardaker 29 May 98 10:24:54
+    - (snmp_api.c, snmp_impl.h): Patch from Joe Marzot:
+      - fix community name length problems and increase size.
+
+hardaker 29 May 98 11:26:47
+    - (configure.in): patch from Niels: include sys/socket in if_mtu test.
+
+hardaker 29 May 98 11:27:59
+    - (configure): make of configure.
+
+hardaker 29 May 98 11:34:53
+    - (configure, configure.in, Makefile.in):
+      - Add a dependancy line for snmp_vars.o for all the module includes.
+
+hardaker 29 May 98 15:20:53
+    - (TODO): winSNMP mention.
+
+hardaker 29 May 98 15:21:13
+    - (snmp_parse_args.c): add ability to specify mib information on the cmd line.
+
+hardaker 29 May 98 16:21:08
+    - (configure, configure.in, agent/mibgroup/*):
+      - moved most mibgroup pieces into relevent sub-directories.
+        - changed all header file and #ifdef USING_* lines to reflect this.
+
+hardaker 29 May 98 16:21:51
+    - (snmp_impl.h): change pdu version from long to int.
+
+hardaker 31 May 98 17:55:45
+    - (asn1.c, asn1.h, int64.c, int64.h, mib.c, snmp.c, snmp_api.c,
+      snmp_api.h, snmp_impl.h):
+      - implement special data types via opaques: float, double, int64, uint64s.
+
+hardaker 31 May 98 17:56:07
+    - (snmpset.c): enable setting of opaque floats, doubles, int64s, uint64s.
+
+hardaker 31 May 98 17:56:55
+    - (acconfig.h, config.h.in, configure, configure.in):
+      - make it possible not to use opaque special types with new cmd line flag.
+
+hardaker  2 Jun 98 14:23:15
+    - (auto_nlist.c, auto_nlist.h, kernel.c, snmp_agent.c, snmpd.c,
+      hr_device.c, hr_disk.c, hr_filesys.c, hr_network.c, hr_other.c,
+      hr_partition.c, hr_print.c, hr_proc.c, hr_storage.c, hr_swinst.c,
+      hr_swrun.c, hr_system.c, hr_utils.c, at.c, interfaces.c,
+      var_route.c, snmp_parse_args.c, snmpdelta.c, snmptable.c,
+      snmptranslate.c, snmptrapd.c, freebsd2.h, hpux.h, linux.h, netbsd.h,
+      solaris.h, sysv.h, asn1.c, mib.c, parse.c, parse.h, snmp_auth.c,
+      snmp_impl.h): Patch from Niels Baggensen:
+      - make host resources work under NetBSD, FreeBSD, Solaris and Linux.
+        - SunOS4 almost works.
+      - Add -s/-S to command line options for printing of shorter oids.
+      - numerous bug fixes.
+
+hardaker  3 Jun 98 10:51:10
+    - (smux.c, smux.h, smux_gated.h, snmp_bgp.c, snmp_bgp.h, snmp_ospf.c,
+      snmp_ospf.h, snmp_rip2.c, snmp_rip2.h, smux.c, smux.h, snmp_bgp.c,
+      snmp_bgp.h, snmp_ospf.c, snmp_ospf.h, snmp_rip2.c, snmp_rip2.h):
+      - moved smux stuff into a smux sub-directory.
+
+hardaker  3 Jun 98 10:58:15
+    - (ipfwacc.c, ipfwacc.h, IPFWACC-MIB.txt, UCD-SNMP-MIB.txt):
+      - moved ipfwacc to ucdavis.13 and removed ^Ms and some blank lines.
+
+hardaker  3 Jun 98 10:58:44
+    - (INSTALL): mention ipfwacc
+
+hardaker  3 Jun 98 10:58:59
+    - (README): mention Cristian Estan in the coders list.
+
+hardaker  3 Jun 98 11:06:47
+    - (example.c, example.h, dlmod.c, dlmod.h): Patch from Eugene Polovnikov:
+      - implement a dynamic loading module for loading shared object mib modules.
+
+hardaker  3 Jun 98 11:10:48
+    - (README, example.c, example.h, wombat.c, wombat.h, example.c,
+      example.h, wombat.c, wombat.h):
+      - moved wombat and example to examples/ directory.
+
+hardaker  3 Jun 98 11:27:27
+    - (snmp_agent.c, snmpd.c): include mibII/snmp_mib.h.
+
+hardaker  3 Jun 98 11:29:04
+    - (mib.c): missed a needed OPAQUE_SPECIAL_TYPES ifdef.
+
+hardaker  3 Jun 98 12:17:00
+    - (snmp_agent.c, snmp_api.c, snmp_auth.c, snmp_impl.h):
+      - fix pdu->versions to be all ints.
+
+hardaker  3 Jun 98 13:39:12
+    - (configure, configure.in): New flags:
+      - --with-cc=CC
+      - --with-cflags=CFLAGS
+
+hardaker  3 Jun 98 13:43:47
+    - (config.h.in, configure, configure.in, snmptrapd.c):
+      - check for getdtablesize and use a generic if not available.
+
+hardaker  3 Jun 98 13:52:28
+    - (config.h.in, configure, configure.in, freebsd2.h):
+      - move configurable defines to configure rather than in freebsd2.h.
+
+hardaker  3 Jun 98 13:55:40
+    - (i386.h, i586.h, i686.h): removed these (unused) headers.
+
+hardaker  3 Jun 98 14:02:34
+    - (configure, configure.in): fix new --with-cc and --with-cflags arguments.
+
+hardaker  3 Jun 98 14:21:10
+    - (hr_disk.c, hr_swinst.c, hr_swrun.c, hr_system.c, snmpset.c, asn1.h,
+      int64.c, int64.h, mib.c, snmp_api.c):
+      - -Wall fixes.
+
+hardaker  3 Jun 98 14:23:14
+    - (Makefile.in's): make depend.
+
+hardaker  3 Jun 98 14:24:58
+    - (Makefile.in): read_config.o is mibmodule header dependant too.
+
+hardaker  3 Jun 98 14:26:10
+    version tag ( 3.5.pre1 )
+
+hardaker  5 Jun 98 10:52:11
+    - (configure, configure.in): Patch from Niels Baggesen:
+      - test for setenv.
+
+hardaker  5 Jun 98 10:52:40
+    - (maketarget): Patch from Niels Baggesen:
+      - support for larger tree depths.
+
+hardaker  5 Jun 98 10:54:31
+    - (asn1.c, mib.c, parse.h, system.c, system.h): Patch from Niels Baggesen:
+      - MIB_ACCESS define changes.
+      - setenv implementation.
+      - ifdef wrappers for OPAQUE_SPECIAL_TYPES.
+
+hardaker  8 Jun 98 10:50:12
+    - (FAQ): url type splitting.
+
+hardaker  8 Jun 98 12:34:09
+    - (Makefile.in): create a .c -> .o rule to make sure and place the
+      object files in the appropriate subdirectories.
+
+hardaker  8 Jun 98 13:59:08
+    - (README): Added Eugene's name.
+
+hardaker  8 Jun 98 13:59:25
+    - (snmpd.conf.5.def): update rfc # for vacm reference.
+
+hardaker  8 Jun 98 14:12:37
+    - (Makefile.in): Patch from Joe Marzot:
+      - remove more config created headers on make configclean.
+
+hardaker  8 Jun 98 14:16:26
+    - (libsnmp.def): Patch from Joe Marzot: w32 update.
+
+hardaker  8 Jun 98 14:22:50
+    - (parse.c, parse.h, snmp_api.c, snmp_api.h, snmp_client.c): Patch
+     from Joe Marzot:
+      - async stuff added.
+      - get_tc added.
+      - better comments in some places.
+
+hardaker  8 Jun 98 14:55:53
+    - (snmp_api.c): undid redo of comment of gettimeofday().
+
+hardaker 10 Jun 98 07:11:44
+    - (config.h.in): have_setenv.
+
+hardaker 10 Jun 98 08:53:53
+    - (Makefile.in, snmp2p.c, snmpd.c): Patch from Dave Shield:
+      -  starts to separate out the historic SNMPv2 stuff.
+      -  does a bit of 'code tidying'.
+      -  starts to move towards port-specific handlers.
+
+hardaker 10 Jun 98 14:15:47
+    version tag ( 3.5.pre2 )
+
+hardaker 10 Jun 98 15:30:59
+    - (TODO): added Dave's list.
+
+hardaker 10 Jun 98 15:31:12
+    - (NEWS): update.
+
+hardaker 10 Jun 98 15:47:59
+    - (snmp2p.c, snmpd.c, snmpd.h): -Wall cleanups.
+
+hardaker 12 Jun 98 08:52:28
+    - (EXAMPLE.conf.def, FAQ): Patch from Dave Shield:
+      - update for VACM stuff.
+
+hardaker 12 Jun 98 10:12:27
+    - (EXAMPLE.conf.def): show vacm example for public/private from anywhere.
+
+hardaker 12 Jun 98 10:12:40
+    - (NEWS): minor update.
+
+hardaker 12 Jun 98 13:13:12
+    - (snmp_api.c): trap types were int's not longs (failed under 64bit arch).
+
+hardaker 12 Jun 98 13:13:27
+    - (parse.c): function name typo.
+
+hardaker 12 Jun 98 13:13:39
+    - (win32/config.h): don't have setenv.
+
+hardaker 12 Jun 98 13:13:57
+    - (libsnmp.def): add setenv to the list.
+
+hardaker 12 Jun 98 13:43:41
+    - (NEWS): 64bit fix mentioned.
+
+hardaker 12 Jun 98 13:48:21
+    - (kernel.c): don't print klread errors unless in debugging mode.
+
+hardaker 12 Jun 98 15:17:47
+    - (ipfwacc.h, IPFWACC-MIB.txt, UCD-SNMP-MIB.txt):
+      - create and use a ucdExperimental section for the ipfwacc mib till
+        it stabilizes.
+
+hardaker 17 Jun 98 08:08:23
+    - (snmp2p.c, snmpd.c, snmpd.h): Patch from Niels Baggesen:
+      - misc type fixes.
+
+hardaker 17 Jun 98 08:08:58
+    - (snmpdelta.c): usage() update.
+
+hardaker 17 Jun 98 08:10:02
+    - (Makefile.in, snmpbulkwalk.1, snmpcmd.1, snmpdelta.1, snmpget.1,
+      snmpgetnext.1, snmpset.1, snmpstatus.1, snmptable.1, snmptrap.1,
+      snmpwalk.1): Patch from Niels Baggesen:
+      - documentation cleanup and centralization of common options.
+
+hardaker 17 Jun 98 08:10:54
+    - (asn1.c): Patch from Niels Baggesen:
+      - bcopy -> memcpy.
+
+hardaker 17 Jun 98 08:11:22
+    - (mib.h): Patch from Niels Baggesen:
+      - remove 2nd init_mib() prototype.
+
+hardaker 17 Jun 98 08:21:53
+    - (README, AddModuleForDummies.txt, DUMMY-MIB.txt, dummy.c, dummy.h):
+      Patch from Jakob Ellerstedt:
+      - mib module documentation and example for dummies.
+
+hardaker 17 Jun 98 15:27:13
+    - (README): mention dummy group.
+
+hardaker 19 Jun 98 08:41:00
+    - (FAQ): update from Dave Shield: not found modules with configure?.
+
+hardaker 19 Jun 98 08:46:31
+    - (configure, configure.in): warn BSDI users against /usr/ucb/cc.
+
+hardaker 19 Jun 98 08:58:05
+    - (EXAMPLE.conf.def): Patch from Cristian Estan:
+      - example output corrections.
+
+hardaker 19 Jun 98 08:59:53
+    - (Makefile.in): Patch from Cristian Estan:
+      - install IPFWACC mib.
+
+hardaker 19 Jun 98 12:03:48
+    - (snmp_vars.c): fix register_mib() to init pointers to null.
+
+hardaker 19 Jun 98 12:50:55
+    - (util_funcs.c): fix checkmib() in case we get called on a get when
+      we really shouldn't (bad artifact of new tree structure).
+
+hardaker 19 Jun 98 12:53:22
+    - (snmp_vars.c): memset to 0 the entire subtree struct.
+
+hardaker 19 Jun 98 13:01:47
+    - (Makefile.in): make depend.
+
+hardaker 19 Jun 98 13:12:55
+    - (NEWS): Last update for 3.5.
+
+
+	
 -------------------------------------------------------------------------------
 
 Changes: V3.3 -> V3.4

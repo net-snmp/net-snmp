@@ -44,15 +44,18 @@
 #include <netinet/in.h>
 #endif
 
+#include "../../../snmplib/system.h"
 #include "asn1.h"
 #include "snmp.h"
 #include "mib.h"
+#include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_vars.h"
 #include "smux.h"
+#include "snmp_ospf.h"
 
-static u_int max_ospf_mib[] = {1, 3, 6, 1, 2, 1, 14, 14, 1, 6, 0};
-static u_int min_ospf_mib[] = {1, 3, 6, 1, 2, 1, 14, 1, 1, 0, 0, 0, 0};
+static oid max_ospf_mib[] = {1, 3, 6, 1, 2, 1, 14, 14, 1, 6, 0};
+static oid min_ospf_mib[] = {1, 3, 6, 1, 2, 1, 14, 1, 1, 0, 0, 0, 0};
 extern u_char smux_type;
 
 u_char *
@@ -62,7 +65,7 @@ var_ospf(vp, name, length, exact, var_len, write_method)
 	register int        *length;
 	int                 exact;
 	int                 *var_len;
-	int                 (**write_method)();
+	int                 (**write_method)__P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 	u_char *var;
 	int result;
@@ -135,7 +138,7 @@ var_ospf(vp, name, length, exact, var_len, write_method)
 	 * Any resullt returned should be within the ospf tree.
 	 * ospf_mib - static u_int ospf_mib[] = {1, 3, 6, 1, 2, 1, 14};
 	 */
-	if (bcmp(ospf_mib, name, sizeof(ospf_mib)) != 0) {
+	if (memcmp(ospf_mib, name, sizeof(ospf_mib)) != 0) {
 		return NULL;
 	}
 	else {

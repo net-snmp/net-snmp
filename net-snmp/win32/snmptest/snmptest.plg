@@ -1,0 +1,16 @@
+--------------------Configuration: snmptest - Win32 Release--------------------
+Begining build with project "C:\usr\local\builds\ucd-snmp-3.5.1.pre2\win32\snmptest\snmptest.dsp", at root.
+Active configuration is Win32 (x86) Console Application (based on Win32 (x86) Console Application)
+
+Project's tools are:
+			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/snmptest.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c "
+			"Win32 Resource Compiler" with flags "/l 0x409 /d "NDEBUG" "
+			"Browser Database Maker" with flags "/nologo /o"Release/snmptest.bsc" "
+			"COFF Linker for 80x86" with flags "libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:no /pdb:"Release/snmptest.pdb" /machine:I386 /nodefaultlib /out:"../bin/snmptest.exe" /libpath:"..\lib" "
+			"Custom Build" with flags ""
+			"<Component 0xa>" with flags ""
+
+
+
+
+snmptest.exe - 0 error(s), 0 warning(s)

@@ -6,7 +6,7 @@
 bug_reports_to=ucd-snmp-coders@ece.ucdavis.edu
 
 # changed automagically
-VersionInfo="3.5.pre2";
+VersionInfo="3.5.1";
 
 #
 #   Check how to do echo without a new line
