@@ -1,6 +1,16 @@
 /*
  * snmp_parse_args.c
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright @ 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -178,9 +188,17 @@ handle_long_opt(const char *myoptarg)
 extern int      snmpv3_options(char *optarg, netsnmp_session * session,
                                char **Apsz, char **Xpsz, int argc,
                                char *const *argv);
+
+/*
+ * This method does the real work for snmp_parse_args.  It takes an
+ * extra argument, proxy, and uses this to decide how to handle the lack of
+ * of a community string.
+ */
 int
-snmp_parse_args(int argc, char **argv, netsnmp_session *session, 
-		const char *localOpts, void (*proc)(int, char *const *, int))
+snmp_do_parse_args(int argc,
+                   char *const *argv,
+                   netsnmp_session * session, const char *localOpts,
+                   void (*proc) (int, char *const *, int), int proxy)
 {
     static char	   *sensitive[4] = { NULL, NULL, NULL, NULL };
     int             arg, sp = 0, zero_sensitive = 1, testcase = 0;
@@ -713,6 +731,7 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
     /*
      * If v1 or v2c, check community has been set, either by a -c option above,
      * or via a default token somewhere.  
+     * If neither, it will be taken from the incoming request PDU.
      */
 
     if (session->version == SNMP_VERSION_1 ||
@@ -721,14 +740,50 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
             Cpsz = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					 NETSNMP_DS_LIB_COMMUNITY);
 	    if (Cpsz == NULL) {
-		fprintf(stderr, "No community name specified.\n");
-		return (-1);
+                if (proxy) {
+                    DEBUGMSGTL(("snmp_parse_args",
+                                "proxy, community string not present\n"));
+                    session->community = NULL;
+                    session->community_len = 0;
+                } else {
+                    fprintf(stderr, "No community name specified.\n");
+                    return (-1);
+                }
 	    }
-	}
-        session->community = (unsigned char *)Cpsz;
-        session->community_len = strlen(Cpsz);
+	} else {
+            session->community = (unsigned char *)Cpsz;
+            session->community_len = strlen(Cpsz);
+        }
     }
 #endif /* support for community based SNMP */
 
     return optind;
 }
+
+
+/*
+ * Functionality contained in snmp_do_parse_args, this function, by passing
+ * proxy value of 0, works as before.
+ */
+int
+snmp_parse_args(int argc, char **argv, netsnmp_session *session, 
+		const char *localOpts, void (*proc)(int, char *const *, int))
+{
+    /* Pass last parm, proxy, as 0.  If no community string, signal error. */
+    return (snmp_do_parse_args(argc, argv, session, localOpts, proc, 0));
+}
+
+/*
+ * Function called in proxy.c to support the parsing of arguments where no
+ * community string is specified.
+ */
+int
+snmp_proxy_parse_args(int argc,
+                      char *const *argv,
+                      netsnmp_session * session, const char *localOpts,
+                      void (*proc) (int, char *const *, int))
+{
+    /* Pass last parm, proxy, as 1.  If no community string, no error. */
+    return (snmp_do_parse_args(argc, argv, session, localOpts, proc, 1));
+}
+
