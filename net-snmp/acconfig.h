@@ -108,6 +108,9 @@
 /* If you don't have root access don't exit upon kmem errors */
 #undef NO_ROOT_ACCESS
 
+/* If you don't want the agent to report on variables it doesn't have data for */
+#undef NO_DUMMY_VALUES
+
 /* Define if statfs takes 2 args and the second argument has
    type struct fs_data. [Ultrix] */
 #undef STAT_STATFS_FS_DATA
