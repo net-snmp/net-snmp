@@ -713,6 +713,14 @@ receive(void)
 	    snmp_log(LOG_INFO, "Reconfiguring daemon\n");
 	    update_config();
         }
+
+	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
+	    if (external_signal_scheduled[i]) {
+		external_signal_scheduled[i]--;
+		external_signal_handler[i](i);
+	    }
+	}
+
 	tvp =  &timeout;
 	tvp->tv_sec = 0;
 	tvp->tv_usec = TIMETICK;
@@ -736,13 +744,6 @@ receive(void)
 	    }
 	}
 #endif	/* USING_SMUX_MODULE */
-
-	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
-	    if (external_signal_scheduled[i]) {
-		external_signal_scheduled[i]--;
-		external_signal_handler[i](i);
-	    }
-	}
 
 	for (i = 0; i < external_readfdlen; i++) {
 	    FD_SET(external_readfd[i], &readfds);
