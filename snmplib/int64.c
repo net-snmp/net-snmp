@@ -171,6 +171,21 @@ incrByU32(U64 *pu64,
     pu64->high++;
 }
 
+/* pu64out = pu64one - pu64two */
+void
+u64Subtract(U64 *pu64one,
+            U64 *pu64two,
+            U64 *pu64out)
+{
+  if (pu64one->low > pu64two->low) {
+    pu64out->low = 0xffffffff - pu64two->low + pu64one->low + 1;
+    pu64out->high = pu64one->high - pu64two->high - 1;
+  } else {
+    pu64out->low = pu64one->low - pu64two->low;
+    pu64out->high = pu64one->high - pu64two->high;
+  }
+}
+
 /** zeroU64 - set an unsigned 64-bit number to zero
 *
 * call with:
