@@ -284,6 +284,10 @@ extern          "C" {
         netsnmp_agent_add_list_data(netsnmp_agent_request_info *agent,
                                     netsnmp_data_list *node);
 
+    NETSNMP_INLINE int
+        netsnmp_agent_remove_list_data(netsnmp_agent_request_info *ari,
+                                       const char * name);
+
     NETSNMP_INLINE void *
             netsnmp_agent_get_list_data(netsnmp_agent_request_info
                                         *agent, const char *name);
