@@ -148,6 +148,22 @@ else
       shift
       outname=$1
       shift
+      if test $1 = "--norm" ; then
+        norm=1
+	shift
+      fi
+      if test $1 = "--cflags" ; then
+        shift
+	cflags=$1
+	echo "setting extra cflags: $cflags"
+	shift
+      fi
+      if test $1 = "--ldflags" ; then
+        shift
+	ldflags=$1
+	echo "setting extra ldflags: $ldflags"
+	shift
+      fi
       tmpfile=netsnmptmp.$$.c
       if test -f $tmpfile; then
 	echo "Ack.  Can't create $tmpfile: already exists"
@@ -156,13 +172,28 @@ else
       echo "generating the tmporary code file: $tmpfile"
       rm -f $tmp
       cat > $tmpfile <<EOF
+/* generated from net-snmp-config */
 #include <net-snmp/net-snmp-config.h>
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif /* HAVE_SIGNAL_H */
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+EOF
 
+    # add include files
+    while test "$1" != ""; do
+      cfiles="$cfiles $1"
+      name=`basename $1 | sed 's/\.[co]$/.h/'`
+      if test -f $name.h; then
+        if grep "init_$name" $name; then
+          echo "  #include\"$name\"" >> $tmpfile
+        fi
+      fi
+      shift
+    done
+
+      cat >> $tmpfile <<EOF
 static int keep_running;
 
 RETSIGTYPE
@@ -184,10 +215,10 @@ main (int argc, char **argv) {
 EOF
 
     # add init routines
-    while test "$1" != ""; do
-      cfiles="$cfiles $1"
-      name=`basename $1 | sed 's/\.[co]$//'`
-      if grep "init_$name" $1 ; then
+    for i in $cfiles ; do
+      name=`basename $i | sed 's/\.[co]$//'`
+      echo checking for init_$name in $i
+      if grep "init_$name" $i ; then
         echo "  init_${name}();" >> $tmpfile
       fi
       shift
@@ -224,11 +255,18 @@ EOF
 	exit 1
       fi
       prefix=@prefix@
-      cmd="@CC@ @CFLAGS@ -I. -I@includedir@ -o $outname $tmpfile $cfiles @LDFLAGS@ -L@exec_prefix@/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp @AGENTLIBS@ "
+      cmd="@CC@ $cflags @CFLAGS@ -I. -I@includedir@ -o $outname $tmpfile $cfiles @LDFLAGS@ -L@exec_prefix@/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp @AGENTLIBS@ $ldflags"
       echo "running: $cmd"
       `$cmd`
-      echo "removing the tmporary code file: $tmpfile"
-      rm -f $tmp
+      if test "x$norm" != "x1" ; then
+        echo "removing the tmporary code file: $tmpfile"
+        rm -f $tmpfile
+      else
+        echo "leaving the tmporary code file: $tmpfile"
+      fi
+      if test -f $outname ; then
+        echo "subagent program $outname created"
+      fi
       ;;
 
     *)
@@ -242,7 +280,7 @@ if test "x$usage" = "xyes"; then
   echo ""
   echo "Usage:"
   echo "  net-snmp-config [--cflags] [--agent-libs] [--libs] [--version]"
-  echo "                  [--compile-subagent outputname mibmodule1.c [...]]"
+  echo "                  ... [see below for complete flag list]"
   echo ""
   echo "    --version         displays the net-snmp version number"
   echo ""
@@ -253,6 +291,7 @@ if test "x$usage" = "xyes"; then
   echo ""
   echo "  These options produce the various compilation flags needed when"
   echo "  building external SNMP applications:"
+  echo ""
   echo "    --cflags          lists additional compilation flags needed"
   echo "    --libs            lists libraries needed for building applications"
   echo "    --agent-libs      lists libraries needed for building subagents"
@@ -262,9 +301,15 @@ if test "x$usage" = "xyes"; then
   echo "    --netsnmp-agent-libs  lists netsnmp specific agent libraries"
   echo "    --external-agent-libs lists libraries needed by netsnmp libs"
   echo ""
-  echo "  Automatted subagent building (produces an outputname binary file):"
+  echo "  Automatted subagent building (produces an OUTPUTNAME binary file):"
   echo "  [this feature has not been tested very well yet.  use at your risk.]"
-  echo "    --compile-subagent outputname mibmodule1.c [...]]"
+  echo ""
+  echo "    --compile-subagent OUTPUTNAME [--norm] [--cflags flags]"
+  echo "                                  [--ldflags flags] mibmodule1.c [...]]"
+  echo ""
+  echo "         --norm           leave the generated .c file around to read."
+  echo "         --cflags flags   extra cflags to use (e.g. -I...)."
+  echo "         --ldflags flags  extra ld flags to use (e.g. -L... -l...)."
   echo ""
   echo "  Details on how the net-nsmp package was compiled:"
   echo ""
