@@ -144,6 +144,7 @@ static oid default_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
 struct snmp_internal_session {
     int	    sd;		/* socket descriptor for this connection */
     snmp_ipaddr  addr;	/* address of connected peer */
+    snmp_ipaddr  me;	/* address of local socket */
     struct request_list *requests;/* Info about outstanding requests */
     struct request_list *requestsEnd; /* ptr to end of list */
     int (*hook_pre)  ( struct snmp_session*, snmp_ipaddr);
@@ -559,8 +560,7 @@ snmp_sess_open(struct snmp_session *in_session)
     oid *op;
     int sd;
     in_addr_t addr;
-    snmp_ipaddr me;
-    struct sockaddr_in *isp_addr, *meIp = (struct sockaddr_in *)&me;
+    struct sockaddr_in *isp_addr, *meIp;
     struct hostent *hp;
     struct snmp_pdu *pdu, *response;
     int status;
@@ -877,15 +877,16 @@ snmp_sess_open(struct snmp_session *in_session)
         }
     }
 
-    memset(&me, '\0', sizeof(me));
-    me.sa_family = isp->addr.sa_family;
-    if ( me.sa_family == AF_INET ) {
+    memset(&isp->me, '\0', sizeof(isp->me));
+    isp->me.sa_family = isp->addr.sa_family;
+    if ( isp->me.sa_family == AF_INET ) {
+        meIp = (struct sockaddr_in*)&(isp->me);
         meIp->sin_addr.s_addr = INADDR_ANY;
         meIp->sin_port = htons(session->local_port);
     }
 
     /* Set up connections */
-    sd = socket(me.sa_family, SOCK_DGRAM, 0);
+    sd = socket(isp->me.sa_family, SOCK_DGRAM, 0);
     if (sd < 0){
 	snmp_errno = SNMPERR_NO_SOCKET;
 	in_session->s_snmp_errno = SNMPERR_NO_SOCKET;
@@ -906,7 +907,7 @@ snmp_sess_open(struct snmp_session *in_session)
 	setsockopt(sd, SOL_SOCKET, SO_BSDCOMPAT, &one, sizeof(one));
     }
 #endif /* SO_BSDCOMPAT */
-    if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
+    if (bind(sd, (struct sockaddr *)&isp->me, sizeof(isp->me)) != 0){
 	snmp_errno = SNMPERR_BAD_LOCPORT;
 	in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
 	in_session->s_errno = errno;
