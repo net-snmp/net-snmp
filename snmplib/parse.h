@@ -62,6 +62,14 @@ struct index_list {
 };
 
 /*
+ * A linked list of varbinds
+ */
+struct varbind_list {
+    struct varbind_list *next;
+    char *vblabel;
+};
+
+/*
  * A linked list of nodes.
  */
 struct node {
@@ -77,6 +85,8 @@ struct node {
     struct enum_list *enums;    /* (optional) list of enumerated integers */
     struct range_list *ranges;
     struct index_list *indexes;
+    char *augments;
+    struct varbind_list *varbinds;
     char *hint;
     char *units;
     char *description;    	/* description (a quoted string) */
@@ -102,6 +112,8 @@ struct tree {
     struct enum_list *enums;    /* (optional) list of enumerated integers */
     struct range_list *ranges;
     struct index_list *indexes;
+    char *augments;
+    struct varbind_list *varbinds;
     char *hint;
     char *units;
     void (*printer) (char *, struct variable_list *, struct enum_list *,
@@ -154,6 +166,16 @@ struct module_compatability {
 #define TYPE_BITSTRING      12
 #define TYPE_NSAPADDRESS    13
 #define TYPE_UINTEGER       14
+
+#define TYPE_SIMPLE_LAST    14
+
+#define TYPE_TRAPTYPE	    15
+#define TYPE_NOTIFTYPE      16
+#define TYPE_OBJGROUP	    17
+#define TYPE_NOTIFGROUP	    18
+#define TYPE_MODID	    19
+#define TYPE_AGENTCAP       20
+#define TYPE_MODCOMP        21
 
 #define MIB_ACCESS_READONLY    18
 #define MIB_ACCESS_READWRITE   19
