@@ -93,7 +93,7 @@ void init_wombat(void)
 
 /* function which scans a given snmpd.conf line for information */
 
-void wombat_parse_config(char *word,
+void wombat_parse_config(char *token,
 			 char *line)
 {
 }

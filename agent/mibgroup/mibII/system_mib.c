@@ -56,7 +56,7 @@ int header_system(struct variable *,oid *, int *, int, int *, WriteMethod **);
 
 /* snmpd.conf config parsing */
 
-void system_parse_config_sysloc(char *word, 
+void system_parse_config_sysloc(char *token, 
 				char *cptr)
 {
   char tmpbuf[1024];
@@ -69,7 +69,7 @@ void system_parse_config_sysloc(char *word,
   }
 }
 
-void system_parse_config_syscon(char *word, 
+void system_parse_config_syscon(char *token, 
 				char *cptr)
 {
   char tmpbuf[1024];
