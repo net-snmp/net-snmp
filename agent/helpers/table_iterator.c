@@ -449,6 +449,10 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 }
             }
 
+            /* if sorted, pass in a hint */
+            if (iinfo->flags & NETSNMP_ITERATOR_FLAG_SORTED) {
+                callback_loop_context = table_info;
+            }
             index_search =
                 (iinfo->get_first_data_point) (&callback_loop_context,
                                                &callback_data_context,
