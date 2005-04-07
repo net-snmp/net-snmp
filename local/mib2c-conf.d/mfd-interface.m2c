@@ -1541,6 +1541,66 @@ _mfd_${context}_irreversible_commit(netsnmp_mib_handler *handler,
 @       include mfd-persistence.m2i@
 @    end@
 
+${context}_rowreq_ctx *
+${context}_row_find_by_mib_index(${context}_mib_index *mib_idx)
+{
+    ${context}_rowreq_ctx   *rowreq_ctx;
+    oid                      oid_tmp[MAX_OID_LEN];
+    netsnmp_index            oid_idx;
+    int                      rc;
+
+    /*
+     * set up storage for OID
+     */
+    oid_idx.oids = oid_tmp;
+    oid_idx.len = sizeof(oid_tmp)/sizeof(oid);
+
+    /*
+     * convert
+     */
+    rc = ${context}_index_to_oid(&oid_idx, mib_idx);
+    if (MFD_SUCCESS != rc)
+        return NULL;
+
+    rowreq_ctx = CONTAINER_FIND(${context}_if_ctx.container, &oid_idx);
+
+    return rowreq_ctx;
+}
+
+@   if $m2c_table_refcounts == 1@
+int
+${context}_row_ref_increment(${context}_rowreq_ctx *rowreq_ctx)
+{
+    if (NULL == rowreq_ctx)
+        return -1;
+    
+    ++rowreq_ctx->ref_count;
+    DEBUGMSGTL(("${context}:${context}_row_ref_increment",
+                "row %p ref count is %d\n",rowreq_ctx,
+                rowreq_ctx->ref_count));
+
+    return MFD_SUCCESS;
+}
+
+int
+${context}_row_ref_decrement(${context}_rowreq_ctx *rowreq_ctx)
+{
+    if (NULL == rowreq_ctx)
+        return -1;
+    
+    if (0 == rowreq_ctx->ref_count) {
+        snmp_log(LOG_WARNING,"attempt to decrement ref_count below 0\n");
+        return -2;
+    }
+    --rowreq_ctx->ref_count;
+    DEBUGMSGTL(("${context}:${context}_row_ref_decrement",
+                "row %p ref count is %d\n",rowreq_ctx,
+                rowreq_ctx->ref_count));
+
+    return MFD_SUCCESS;
+}
+    
+@   end@ // refcounts
 @end@ # foreach table
 ##
 ########################################################################
