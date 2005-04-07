@@ -673,7 +673,12 @@ snmp_enable_filelog(const char *logfilename, int dont_zero_log)
 {
     netsnmp_log_handler *logh;
 
-    snmp_disable_filelog();	/* XXX ??? */
+    // don't disable ALL filelogs whenever a new one is enabled.
+    // this prevents '-Lf file' from working in snmpd, as the
+    // call to set up /var/log/snmpd.log will disable the previous
+    // log setup. again, this new linked list of log handlers
+    // needs rethinking/cleanup. xxx-rks
+    //snmp_disable_filelog();	/* XXX ??? */
 
     if (logfilename) {
         logh = netsnmp_find_loghandler( logfilename );
