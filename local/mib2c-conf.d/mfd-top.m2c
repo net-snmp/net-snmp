@@ -130,6 +130,9 @@ typedef struct ${context}_rowreq_ctx_s {
      * for the user. See mfd.h for other flags.
      */
     u_int                       rowreq_flags;
+@   if $m2c_table_refcounts == 1@
+    u_int                       ref_count;
+@   end@
 
     /*
      * TODO:131:o: |   |-> Add useful data to $context rowreq context.
@@ -177,6 +180,14 @@ typedef struct ${context}_ref_rowreq_ctx_s {
 @      end@
 @   end@ # writable
 
+    ${context}_rowreq_ctx *
+                  ${context}_row_find_by_mib_index(${context}_mib_index *mib_idx);
+
+@   if $m2c_table_refcounts == 1@
+int ${context}_row_ref_increment(${context}_rowreq_ctx *rowreq_ctx);
+int ${context}_row_ref_decrement(${context}_rowreq_ctx *rowreq_ctx);
+
+@   end@
 extern oid ${context}_oid[];
 extern int ${context}_oid_size;
 
