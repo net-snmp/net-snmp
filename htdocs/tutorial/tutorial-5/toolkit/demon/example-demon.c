@@ -34,6 +34,9 @@ main (int argc, char **argv) {
   if (background && netsnmp_daemonize(1, !syslog))
       exit(1);
 
+  /* initialize tcpip, if necessary */
+  SOCK_STARTUP;
+
   /* initialize the agent library */
   init_agent("example-demon");
 
@@ -71,6 +74,7 @@ main (int argc, char **argv) {
 
   /* at shutdown time */
   snmp_shutdown("example-demon");
+  SOCK_CLEANUP;
 
   return 0;
 }

@@ -25,6 +25,9 @@ main () {
     ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, 1);
   }
 
+  /* initialize tcpip, if necessary */
+  SOCK_STARTUP;
+
   /* initialize the agent library */
   init_agent("ustMain");
 
@@ -52,5 +55,6 @@ main () {
 
   /* at shutdown time */
   snmp_shutdown("ustMain");
+  SOCK_SHUTDOWN;
 }
 
