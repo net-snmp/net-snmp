@@ -79,8 +79,18 @@ running indent on ifTable_data_access.h
 running indent on ifTable.c
 running indent on ifTable.h
 running indent on ifTable_data_set.h
-</td></tr>
-    </table>
+</td></tr><tr><td width=20></td><td><code>&nbsp</code></td><td bgcolor=CCCCCC>
+            <code><pre>$ <font color=blue>mib2c -c mfd-makefile.m2m ifTable</font>
+writing to ifTable_Makefile
+/usr/share/snmp/mib2c-data/mfd-makefile.m2m:120 contained a line that started with a @ but did not match any mib2c configuration tokens.
+(maybe missing the trailing @?)
+/usr/share/snmp/mib2c-data/mfd-makefile.m2m:120 [       @set -e; $(CC) -M $(COPTS) $(CFLAGS) $(CPPFLAGS) $< \
+]
+</td></tr><tr><td width=20></td><td><code>&nbsp</code></td><td bgcolor=CCCCCC>
+            <code><pre>$ <font color=blue>mib2c -c subagent.m2c ifTable</font>
+writing to ifTable_subagent.c
+running indent on ifTable_subagent.c
+    </td></tr></table>
     <p>
       When mib2c finishes, you should have several files. Here is a
       list, with links to the complete source for this tutorial:
@@ -91,7 +101,6 @@ running indent on ifTable_data_set.h
 <a href="source/ifTable-README-ifTable.txt">ifTable-README-ifTable.txt
 <a href="source/ifTable.c">ifTable.c</a>
 <a href="source/ifTable.h">ifTable.h</a>
-<a href="source/ifTable_Makefile">ifTable_Makefile</a>
 <a href="source/ifTable_data_access.c">ifTable_data_access.c</a>
 <a href="source/ifTable_data_access.h">ifTable_data_access.h</a>
 <a href="source/ifTable_data_get.c">ifTable_data_get.c</a>
@@ -102,6 +111,7 @@ running indent on ifTable_data_set.h
 <a href="source/ifTable_interface.c">ifTable_interface.c</a>
 <a href="source/ifTable_interface.h">ifTable_interface.h</a>
 <a href="source/ifTable_oids.h">ifTable_oids.h</a>
+<a href="source/ifTable_Makefile">ifTable_Makefile</a>
 <a href="source/ifTable_subagent.c">ifTable_subagent.c</a>
 </pre></td></tr></table>
     <p><var>ifTable-README-FIRST.txt</var> contains a basic overview of MFD,
@@ -130,7 +140,7 @@ running indent on ifTable_data_set.h
 Version $Revision$
 <!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
 <!-- hhmts start -->
-Last modified: Thu Sep  2 13:55:05 EDT 2004
+Last modified: Mon Apr 11 16:47:49 EDT 2005
 <!-- hhmts end -->
 <!--#include virtual="/sfbutton.html" -->
   </body>
