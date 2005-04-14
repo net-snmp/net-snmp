@@ -14,8 +14,8 @@
    int rc, utc_offset_direction, utc_offset_hours, utc_offset_minutes;
 
    /** we should have a pointer and enough storage */
-   netsnmp_assert( (NULL != ${node}_ptr_ptr) && (NULL != *${node}_ptr_ptr));
-   netsnmp_assert( (NULL != ${node}_len_ptr) && ((* ${node}_len_ptr) >= 11));
+   netsnmp_assert( (NULL != $m2c_node_param_ref_name) && (NULL != *$m2c_node_param_ref_name));
+   netsnmp_assert( (NULL != $m2c_node_param_ref_lname) && ((* $m2c_node_param_ref_lname) >= 11));
 
    /*
     * TODO:231:o: |-> copy $node data.
@@ -38,7 +38,8 @@
    utc_offset_minutes = -1; /* 0..59 */
 
    /* call convenience function to set data */
-   rc = netsnmp_dateandtime_set_buf_from_vars(*${node}_ptr_ptr, ${node}_len_ptr,
+   rc = netsnmp_dateandtime_set_buf_from_vars(*$m2c_node_param_ref_name,
+                                              $m2c_node_param_ref_lname,
                            year, month, day,
                            hour, minutes, seconds, deci_seconds,
                            utc_offset_direction, utc_offset_hours,
