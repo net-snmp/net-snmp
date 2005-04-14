@@ -12,10 +12,6 @@
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @if $m2c_processing_type eq 'h'@
 
-@   if $m2c_table_row_creation == 1@
-int ${context}_validate_index( ${context}_registration * ${context}_reg,
-                               ${context}_rowreq_ctx *rowreq_ctx);
-@   end@
 int ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx);
 int ${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx);
 int ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx);
@@ -123,66 +119,6 @@ int ${context}_irreversible_commit( ${context}_rowreq_ctx *rowreq_ctx);
      *
      */
 
-@if $m2c_table_row_creation == 1@
-/**
- * verify specified index is valid.
- *
- * This check is independent of whether or not the values specified for
- * the columns of the new row are valid. Column values and row consistency
- * will be checked later. At this point, only the index values should be
- * checked.
- *
- * All of the individual index validation functions have been called, so this
- * is the place to make sure they are valid as a whole when combined. If
- * you only have one index, 
- * 
- *
- *
- * @param ${context}_reg
- *        Pointer to the user registration data
- * @param ${context}_rowreq_ctx
- *        Pointer to the users context.
- * @retval MFD_SUCCESS            : success
- * @retval MFD_CANNOT_CREATE_NOW  : index not valid right now
- * @retval MFD_CANNOT_CREATE_EVER : index never valid
- */
-int
-${context}_validate_index( ${context}_registration * ${context}_reg,
-                           ${context}_rowreq_ctx *rowreq_ctx)
-{
-    int rc = MFD_SUCCESS;
-
-    DEBUGMSGTL(("verbose:${context}:${context}_validate_index","called\n"));
-
-    /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != rowreq_ctx );
-
-    /*
-     * TODO:430:M: |-> Validate potential $context index.
-     */
-    if(1) {
-        snmp_log(LOG_WARNING,"invalid index for a new row in the "
-                 "${context} table.\n");
-        /*
-         * determine failure type.
-         *
-         * If the index could not ever be created, return MFD_NOT_EVER
-         * If the index can not be created under the present circumstances
-         * (even though it could be created under other circumstances),
-         * return MFD_NOT_NOW.
-         */
-        if(0) {
-            return MFD_CANNOT_CREATE_EVER;
-        }
-        else {
-            return MFD_CANNOT_CREATE_NOW;
-        }
-    }
-
-    return rc;
-} /* ${context}_validate_index */
-
-@end@ # row creation
 ##----------------------------------------------------------------------
 /**
  * Setup up context with information needed to undo a set request.
