@@ -40,14 +40,6 @@
 @        next@ # skip to next table
 @    end@
 @    include details-table.m2i@
-@    foreach $node externalindex@
-@        include m2c_setup_node.m2i@
-    int ${context}_${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx ); /* external */
-@    end@ # foreach externalindex
-@    foreach $node internalindex@
-@        include m2c_setup_node.m2i@
-int ${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx ); /* internal */
-@    end@ # foreach internalindex
 
 @    include parent-set.m2i@
 
@@ -114,80 +106,6 @@ int ${context}_check_dependencies(${context}_rowreq_ctx *ctx);
 ########################################################################
 @        include parent-set.m2i@
 ########################################################################
-/*
- * TODO:420:r: Implement $context index validation.
- */
-@    foreach $node externalindex@
-@        include m2c_setup_node.m2i@
-@        if $m2c_report_progress == 1@
-@           print | |   +-> Processing index $node@
-@        end@
-@        include details-node.m2i@
-@        if $m2c_table_row_creation == 1@
-/**
- * check validity of ${node} external index portion
- *
- * NOTE: this is not the place to do any checks for the sanity
- *       of multiple indexes. Those types of checks should be done in the
- *       ${context}_validate_index() function.
- *
- * @retval MFD_SUCCESS   : the incoming value is legal
- * @retval MFD_BAD_VALUE : the incoming value is NOT legal
- */
-int
-${context}_${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
-{
-    DEBUGMSGTL(("verbose:${context}:${context}_${node}_check_index","called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-    /*
-     * TODO:424:M: |-> Check $context external index $node.
-     * check that index value in the table context (rowreq_ctx)
-     * for the external index $node is legal.
-     */
-
-    return MFD_SUCCESS; /*  external index $node ok */
-} /* ${context}_${node}_check_index */
-
-@        end@ # m2c_table_row_creation
-@    end@ # foreach externalindex
-########################################################################
-@  if $m2c_table_row_creation == 1@
-@    foreach $node internalindex@
-@        include m2c_setup_node.m2i@
-@        if $m2c_report_progress == 1@
-@           print | |   +-> Processing index $node@
-@        end@
-@        include details-node.m2i@
-/**
- * check validity of ${node} index portion
- *
- * @retval MFD_SUCCESS   : the incoming value is legal
- * @retval MFD_BAD_VALUE : the incoming value is NOT legal
- *
- * @note this is not the place to do any checks for the sanity
- *       of multiple indexes. Those types of checks should be done in the
- *       ${context}_validate_index() function.
- */
-int
-${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
-{
-    DEBUGMSGTL(("verbose:${context}:${node}_check_index","called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-    /*
-     * TODO:426:M: |-> Check $context index $node.
-     * check that index value in the table context (rowreq_ctx)
-     * for $node is legal.
-     */
-
-    return MFD_SUCCESS; /* $node index ok */
-} /* ${node}_check_index */
-
-@    end@ # foreach internalindex
-@  end@ # m2c_table_row_creation
 ########################################################################
 /*
  * TODO:440:M: Implement $context node value checks.
