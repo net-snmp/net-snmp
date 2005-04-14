@@ -203,11 +203,12 @@ static Netsnmp_Node_Handler _mfd_${context}_check_dependencies;
 
 NETSNMP_STATIC_INLINE int _${context}_undo_column( ${context}_rowreq_ctx *rowreq_ctx,
                                                    netsnmp_variable_list *var, int column );
-@if $m2c_table_row_creation == 1@
-NETSNMP_STATIC_INLINE int _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx);
-@end@
 
 @   end@ # writable
+@if ($m2c_table_persistent == 1) || ($m2c_table_row_creation == 1)@
+NETSNMP_STATIC_INLINE int _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx);
+
+@end@
 @   if ("$m2c_data_context" eq "generated") && (($m2c_undo_embed == 0) || ($m2c_data_allocate == 1))@
 ${context}_data *${context}_allocate_data(void);
 
@@ -610,6 +611,7 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
             ${context}_release_rowreq_ctx(rowreq_ctx);
         }
         else {
+@if $m2c_table_settable@
             if (rowreq_ctx->column_set_flags) {
 @if $m2c_table_sparse == 1@
                 DEBUGMSGTL(("internal:${context}:_mfd_post_request",
@@ -620,14 +622,17 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
                              rowreq_ctx->column_set_flags)));
                 rowreq_ctx->column_exists_flags |=
                     rowreq_ctx->column_set_flags;
-@end@
+@end@ # sparse
                 rowreq_ctx->column_set_flags = 0;
 
             }
+@end@ # settable
+@if ($m2c_table_row_creation == 1)@
             if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
                 rowreq_ctx->rowreq_flags &= ~MFD_ROW_CREATED;
                 CONTAINER_INSERT(${context}_if_ctx.container, rowreq_ctx);
             }
+@end@ # creation
         }
     }
 
@@ -933,6 +938,48 @@ _mfd_${context}_get_values(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 } /* _mfd_${context}_get_values */
 
+##----------------------------------------------------------------------
+@if ($m2c_table_row_creation == 1) || ($m2c_table_persistent == 1)@
+NETSNMP_STATIC_INLINE int
+_${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
+{
+    int                          rc;
+
+    DEBUGMSGTL(("internal:${context}:_${context}_check_indexes","called\n"));
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+##
+@if $m2c_table_external_indexes != 0@
+    /*
+     * check that the corresponding row exists
+     */
+@   foreach $node externalindex@
+@      include m2c_setup_node.m2i@
+
+    /* (INDEX) $m2c_node_summary */
+    rc = ${context}_${node}_check_index( rowreq_ctx );
+    if(MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+@   end@ # for each nonindex
+
+@end@ # external index
+@   foreach $node internalindex@
+@      include m2c_setup_node.m2i@
+
+    /* (INDEX) $m2c_node_summary */
+        rc = ${node}_check_index( rowreq_ctx );
+       if(MFD_SUCCESS != rc)
+           return SNMP_ERR_NOCREATION;
+@   end@ # for each internalindex
+
+    /*
+     * if individual parts look ok, check them as a whole
+     */
+    return ${context}_validate_index( ${context}_if_ctx.user_ctx, rowreq_ctx );
+} /* _${context}_check_indexes */
+@end@ # $m2c_table_row_creation
+
 ########################################################################
 ##
 /***********************************************************************
@@ -1044,48 +1091,6 @@ _mfd_${context}_check_objects(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 } /* _mfd_${context}_check_objects */
-
-##----------------------------------------------------------------------
-@if $m2c_table_row_creation == 1@
-NETSNMP_STATIC_INLINE int
-_${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
-{
-    int                          rc;
-
-    DEBUGMSGTL(("internal:${context}:_${context}_check_indexes","called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-##
-@if $m2c_table_external_indexes != 0@
-    /*
-     * check that the corresponding row exists
-     */
-@   foreach $node externalindex@
-@      include m2c_setup_node.m2i@
-
-    /* (INDEX) $m2c_node_summary */
-    rc = ${context}_${node}_check_index( rowreq_ctx );
-    if(MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-@   end@ # for each nonindex
-
-@end@ # external index
-@   foreach $node internalindex@
-@      include m2c_setup_node.m2i@
-
-    /* (INDEX) $m2c_node_summary */
-        rc = ${node}_check_index( rowreq_ctx );
-       if(MFD_SUCCESS != rc)
-           return SNMP_ERR_NOCREATION;
-@   end@ # for each internalindex
-
-    /*
-     * if individual parts look ok, check them as a whole
-     */
-    return ${context}_validate_index( ${context}_if_ctx.user_ctx, rowreq_ctx );
-} /* _${context}_check_indexes */
-@end@ # $m2c_table_row_creation
 
 
 @      if $m2c_table_dependencies == 1@
