@@ -51,7 +51,7 @@
 
     default:
         snmp_log(LOG_ERR,
-                 "couldn't map value %d for dAssignmentsRowStatus\n",
+                 "couldn't map value %ld for $node RowStatus\n",
                  $m2c_node_lh);
         return SNMP_ERR_GENERR;
     }
