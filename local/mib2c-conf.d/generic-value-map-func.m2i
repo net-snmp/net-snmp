@@ -81,7 +81,7 @@ ${node}_map($m2c_node_map_param)
 
 @    end@ # foreach
              default:
-                 snmp_log(LOG_ERR, "couldn't map value %d for $node\n", raw_$m2c_node_param_val_name );
+                 snmp_log(LOG_ERR, "couldn't map value %ld for $node\n", raw_$m2c_node_param_val_name );
                  return MFD_ERROR;
     }
 ##
