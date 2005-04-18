@@ -9,6 +9,63 @@
 @ifconf ${name}.m2d@
 @   include ${name}.m2d@
 @end@
+##
+## set up defaults
+##
+@foreach $table table@
+@    include default-mfd-top.m2c@ # get defaults
+@    eval $context = $table@
+##
+##   set up defaults
+##
+@    eval $m2c_context_reg = "$mfd_default_context_reg"@
+@    eval $m2c_data_allocate = $mfd_default_data_allocate@
+@    eval $m2c_data_cache = $mfd_default_data_cache@
+@    eval $m2c_data_context = "$mfd_default_data_context"@
+@    eval $m2c_data_init = $mfd_default_data_init@
+@    eval $m2c_data_transient = $mfd_default_data_transient@
+@    eval $m2c_include_examples = $mfd_default_include_examples@
+@    eval $m2c_irreversible_commit = 0@
+@    eval $m2c_table_access = "$mfd_default_table_access"@
+@    eval $m2c_table_dependencies = table_is_writable($context)@
+@    eval $m2c_table_persistent = 0@
+@    eval $m2c_table_row_creation = table_has_create($context)@
+@    eval $m2c_table_settable = table_is_writable($context)@
+@    eval $m2c_table_skip_mapping = -1@ # -1 = no default; based on type
+@    eval $m2c_table_sparse = 0@
+##
+##   allow for user override, or save defaults
+##
+@    ifconf default-table-${context}.m2d@
+@       print Warning: using defaults in current directory. Consider moving@
+@       print them to $m2c_defaults_dir.@
+@       eval $m2c_defaults_dir = "default-"@
+@    end@
+@    ifconf ${m2c_defaults_dir}table-${context}.m2d@
+@      if $mfd_interactive_setup == 1@
+@        print There are existing defaults for $context (${m2c_defaults_dir}table-${context}.m2d).@
+@        prompt $ans r)econfigure or u)se existing [default=u] : @
+@        if "x$ans" eq "xr"@
+@          eval $mfd_interactive_setup = -1@ # already asked to overwrite
+@          run -again mfd-interactive-setup.m2c@
+@        else@
+##          ## read in old, write them back (this should add any new vars
+@           include ${m2c_defaults_dir}table-${context}.m2d@
+@           include m2c_table_save_defaults.m2i@
+@        end@ 
+@      end@
+@    else@ # no existing defaults
+@      ifdir defaults@
+##       NOP
+@      else@
+@         perleval my $rc = mkdir(defaults,0775); return $rc != 1 @
+@      end@
+@      run mfd-interactive-setup.m2c@
+@    end@ # no conf file
+@    if $m2c_gen_table_defaults == 1@
+@       exit@
+@    end@
+@end@ # foreach table
 ########################################################################
 @eval $m2c_processing_type = 'h'@
 @open ${name}.h@
@@ -247,7 +304,12 @@ extern int ${context}_oid_size;
 oid ${context}_oid[] = { $context.uc_OID };
 int ${context}_oid_size = OID_LENGTH(${context}_oid);
 
+@    if "x$m2c_context_reg" ne "x"@
+    ${context}_registration  ${context}_user_context;
+@    end@
+
 void initialize_table_$context(void);
+void shutdown_table_$context(void);
 
 @end@
 
@@ -272,6 +334,19 @@ init_$name(void)
 
   @end@
 } /* init_$name */
+
+/**
+ * Shut-down the $name module (agent is exiting)
+ */
+void
+shutdown_$name(void)
+{
+  @foreach $table table@
+    if (should_init("$context"))
+        shutdown_table_$context();
+
+  @end@
+}
 
 ########################################################################
 ##
@@ -305,7 +380,7 @@ initialize_table_$context(void)
      */
     user_context = netsnmp_create_data_list("$context", NULL, NULL);
 @    else@
-    user_context = NULL;
+    user_context = &${context}_user_context;
 @   end@
     
     /*
@@ -319,6 +394,18 @@ initialize_table_$context(void)
      */
     _${context}_initialize_interface(user_context, flags);
 } /* initialize_table_$context */
+
+/**
+ * Shutdown the table $context 
+ */
+void
+shutdown_table_$context(void)
+{
+    /*
+     * call interface shutdown code
+     */
+    _${context}_shutdown_interface(&${context}_user_context);
+}
 
 ########################################################################
 @   if $m2c_data_init == 1@
