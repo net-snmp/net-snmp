@@ -12,14 +12,16 @@
 @eval $m2c_temp_dependencies = $m2c_temp_writable@
 @eval $m2c_temp_context_reg = "$mfd_default_context_reg"@
 @eval $m2c_temp_data_context = "$mfd_default_data_context"@
-@eval $m2c_temp_data_allocate = 0@
-@eval $m2c_temp_undo_embed = 0@
-@eval $m2c_temp_data_init = 0@
+@eval $m2c_temp_data_allocate = $mfd_default_data_allocate@
+@eval $m2c_temp_data_cache = $mfd_default_data_cache@
+@eval $m2c_temp_undo_embed = $mfd_default_undo_embed@
+@eval $m2c_temp_data_init = $mfd_default_data_init@
 @eval $m2c_temp_persistent = $m2c_temp_writable@
 @eval $m2c_temp_table_access = "$mfd_default_table_access"@
 @eval $m2c_temp_data_transient = $mfd_default_data_transient@
 @eval $m2c_temp_include_examples = $mfd_default_include_examples@
-@eval $m2c_conf_maybe_comment = "##"@
+@eval $m2c_temp_table_skip_mapping = $mfd_default_table_skip_mapping@
+@eval $m2c_temp_table_sparse = $mfd_default_data_sparse@
 ##
 @if $mfd_interactive_setup != 0@
 @open -@
@@ -34,10 +36,8 @@ There are no defaults for ${context}. Would you like to
 @   else@
 @      eval $ans = 2@
 @   end@
-@   print ans = $ans@
 @   if $ans == 1@
 @   else@
-@     eval $m2c_conf_maybe_comment = ""@
 
 
 ## ---------------------------------------------------
@@ -78,6 +78,7 @@ external source.
 @    end@ # persistent
 ## ---------------------------------------------------
 @    if $m2c_temp_dependencies == 1@
+@        eval $m2c_temp_dependencies = 0@
 Writable tables sometimes have dependencies beteen columns
 or with other tables. If there are no dependencies in this table, you
 probably do not want the extra code.
@@ -179,24 +180,49 @@ some non-MIB data for every row.)
 
 
 ## ---------------------------------------------------
+Do you plan on keeping all data in the format defined by the MIB? If so,
+no functions will be generated to map values. If some data will be
+stored in a different format, the mapping functions will be generated.
+If your MIB has integers with enumerations, mapping functions are more
+likely to be needed. (e.g. A TruthValue object will hold the value
+1 or 2, but a C boolean would be 1 or 0.)
+
+  1) All values will be stored as defined by the MIB [DEFAULT]
+  2) I need to map values to the format defined by the MIB.
+
+@        prompt $ans Select your choice : @
+@        if $ans == 2@
+@          eval $m2c_temp_skip_mapping = -1@
+@        end@
+
+
+## ---------------------------------------------------
 Which method would you like to use to gather data about available rows? 
 
-  1) container-cached : [DEFAULT]  This access method uses a
-     netsnmp_container to keep track of the indexes (and data, usually)
-     for each row. Thi method is best for:
+  1) container : [DEFAULT]  This access method uses a netsnmp_container
+     to store all row data in memory. This method is best for:
          - Internal data (maintained by the agent)
+         - Access speed is important
+         - Sufficient memory exists to contain all rows
+
+  2) container-cached : This access method uses a netsnmp_container
+     to keep track of the indexes (and data, usually) for each 
+     row. This method is best for:
          - External data (maintained by another process)
          - Access speed is important
-         - Sufficient memory exists to cache all indexes
+         - Sufficient memory exists to contain all indexes
      
-  2) unsorted-external : This access method iterates over all of your data
-     to find the row with the appropriate index. This method is best for
+  3) unsorted-external : This access method iterates over all of your data
+     to find the row with the appropriate index. This method is good for
          - External data (maintained by another process)
-         - Using less memory is more important than access speed
+         - Using less memory is much more important than access speed
      
 @      prompt $ans Select your choice : @
-@      if $ans == 2@
+@      if $ans == 3@
 @        eval $m2c_temp_table_access = "unsorted-external"@
+@      elsif $ans == 2@
+@        eval $m2c_temp_table_access = "container-cached"@
+@        eval $m2c_temp_data_cache = 1@
 @      else@
 @        eval $m2c_temp_table_access = "container-cached"@
 @      end@
@@ -239,102 +265,61 @@ Do you want example code to be generated?
 @        eval $m2c_temp_include_examples = 1@
 @      end@
 
+## ---------------------------------------------------
+Is your table sparse? (A sparse table is a table where some
+columns might not exist for all rows.)
+
+  1) No, all columns always exist for every row [DEFAULT]
+  2) Yes, my table is sparse
+
+@      prompt $ans Select your choice : @
+@      if $ans == 2@
+@        eval $m2c_temp_table_sparse = 1@
+@      end@
+
+## ---------------------------------------------------
+Do you want a makefile and AgentX subagent source file generated?
+This will let you test your table without having to link it into
+snmpd. (You can still link it in later.)
+
+  1) generate makefile/AgentX code [DEFAULT]
+  2) do not generate makefile/AgentX code
+
+@      prompt $ans Select your choice : @
+@      if $ans == 2@
+@        eval $mfd_generate_makefile = 1@
+@        eval $mfd_generate_subagent = 1@
+@      else@
+@        eval $mfd_generate_makefile = 0@
+@        eval $mfd_generate_subagent = 0@
+@      end@
+
 @   end@ # do not use hardcoded
 @end@ # $mfd_interactive_setup == 1
 ##################################
-@open ${m2c_defaults_dir}table-${context}.m2d@
-@eval $m2c_conf_comment = "##"@
-@eval $m2c_conf_comment_divider = "########################################################################"@
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment mib2c Table setting for $context
-$m2c_conf_comment
-$m2c_conf_comment Remove the '##' comment delimeter to change settings
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_table_settable = $m2c_temp_writable@
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_table_dependencies = $m2c_temp_dependencies@
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_table_persistent = $m2c_temp_persistent@
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_table_row_creation = $m2c_temp_create@
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_context_reg = "$m2c_temp_context_reg"@
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_data_context = "$m2c_temp_data_context"@ [generated|NAME]
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_data_allocate = $m2c_temp_data_allocate@
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_data_init = $m2c_temp_data_init@
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_table_access = "$m2c_temp_table_access"@
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_comment // 0:persistent, 1:semi-transient, 2:transient
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_data_transient = $m2c_temp_data_transient@
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_table_skip_mapping = $m2c_table_skip_mapping@
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_table_sparse = $m2c_table_sparse@
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_include_examples = $m2c_temp_include_examples@
-$m2c_conf_comment
-$m2c_conf_comment_divider
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_comment
-$m2c_conf_maybe_comment @eval $@m2c_irreversible_commit = $m2c_irreversible_commit@
-$m2c_conf_comment
-@close ${m2c_defaults_dir}table-${context}.m2d@
+##
+## save values
+##      Note: if you add a var here, add it in m2c_table_save_defaults.m2i too
+##
+@eval $@m2c_context_reg = "$m2c_temp_context_reg"@
+@eval $@m2c_data_allocate = $m2c_temp_data_allocate@
+@eval $@m2c_data_cache = $m2c_temp_data_cache@
+@eval $@m2c_data_context = "$m2c_temp_data_context"@ [generated|NAME]
+@eval $@m2c_data_init = $m2c_temp_data_init@
+@eval $@m2c_data_transient = $m2c_temp_data_transient@
+@eval $@m2c_include_examples = $m2c_temp_include_examples@
+@eval $@m2c_irreversible_commit = $m2c_irreversible_commit@
+@eval $@m2c_table_access = "$m2c_temp_table_access"@
+@eval $@m2c_table_dependencies = $m2c_temp_dependencies@
+@eval $@m2c_table_persistent = $m2c_temp_persistent@
+@eval $@m2c_table_row_creation = $m2c_temp_create@
+@eval $@m2c_table_settable = $m2c_temp_writable@
+@eval $@m2c_table_skip_mapping = $m2c_temp_table_skip_mapping@
+@eval $@m2c_table_sparse = $m2c_temp_table_sparse@
+##
+## write them back
+##
+@include m2c_table_save_defaults.m2i@
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
