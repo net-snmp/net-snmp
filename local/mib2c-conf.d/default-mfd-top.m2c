@@ -67,6 +67,12 @@
 @  eval $mfd_default_table_access = "$user_mfd_default_table_access"@
 @end@
 ##
+@if "x$user_mfd_default_table_skip_mapping" eq "x" @
+@  eval $mfd_default_table_skip_mapping = 1@
+@else@
+@  eval $mfd_default_table_skip_mapping = $user_mfd_default_table_skip_mapping@
+@end@
+##
 @if "x$user_mfd_default_data_context" eq "x" @
 @  eval $mfd_default_data_context = "generated"@
 @else@
@@ -83,6 +89,18 @@
 @  eval $mfd_default_data_allocate = 0@
 @else@
 @  eval $mfd_default_data_allocate = $user_mfd_default_data_allocate@
+@end@
+##
+@if "x$user_mfd_default_data_cache" eq "x" @
+@  eval $mfd_default_data_cache = 1@
+@else@
+@  eval $mfd_default_data_cache = $user_mfd_default_data_cache@
+@end@
+##
+@if "x$user_mfd_default_data_sparse" eq "x" @
+@  eval $mfd_default_data_sparse = 0@
+@else@
+@  eval $mfd_default_data_sparse = $user_mfd_default_data_sparse@
 @end@
 @if "x$user_mfd_default_undo_embed" eq "x" @
 @  eval $mfd_default_undo_embed = 0@
@@ -106,4 +124,7 @@
 @  eval $mfd_default_include_examples = 1@
 @else@
 @  eval $mfd_default_include_examples = $user_mfd_default_include_examples@
+@end@
+@if "x$m2c_data_cache" eq "x"@
+@   eval $m2c_data_cache = 0@
 @end@
