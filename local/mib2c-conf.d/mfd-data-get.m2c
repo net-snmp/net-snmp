@@ -127,7 +127,7 @@
 ##// internal only? how to know how to map external?
 @    foreach $node index@
 @        include m2c_setup_node.m2i@
-@        if $m2c_node_skip_mapping == 1@
+@        if $m2c_node_skip_mapping != 0@
 @           next@
 @        end@
 @        include details-node.m2i@
@@ -148,7 +148,7 @@
 @        if $m2c_report_progress == 1@
 @           print | |   +-> Processing nonindex $node@
 @        end@
-@        if $m2c_node_skip_mapping != 1@
+@        if $m2c_node_skip_mapping == 0@
 @           include generic-value-map-func.m2i@
 @        end@
 @        include node-get.m2i@
