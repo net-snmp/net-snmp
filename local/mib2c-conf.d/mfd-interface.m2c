@@ -45,6 +45,7 @@
 /* PUBLIC interface initialization routine */
 void _${context}_initialize_interface(${context}_registration * user_ctx,
                                     u_long flags);
+void _${context}_shutdown_interface(${context}_registration * user_ctx);
 
 ${context}_registration *
 ${context}_registration_get( void );
@@ -52,6 +53,7 @@ ${context}_registration_get( void );
 ${context}_registration *
 ${context}_registration_set( ${context}_registration * new );
 
+netsnmp_container *${context}_container_get( void );
 int ${context}_container_size( void );
 
 @   if $m2c_table_settable@
@@ -122,7 +124,9 @@ void ${context}_valid_columns_set(netsnmp_column_info *vc);
 typedef struct ${context}_interface_ctx_s {
 
    netsnmp_container              *container;
-   netsnmp_cache                  *cache; /* optional cache */
+@   if $m2c_data_cache == 1@
+   netsnmp_cache                  *cache;
+@   end@
 
    ${context}_registration *      user_ctx;
    
@@ -140,7 +144,15 @@ static ${context}_interface_ctx ${context}_if_ctx;
 
 static void _${context}_container_init(
     ${context}_interface_ctx *if_ctx);
+static void _${context}_container_shutdown(
+    ${context}_interface_ctx *if_ctx);
 
+
+netsnmp_container *
+${context}_container_get( void )
+{
+    return ${context}_if_ctx.container;
+}
 
 ${context}_registration *
 ${context}_registration_get( void )
@@ -387,6 +399,7 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
                                             TABLE_CONTAINER_KEY_NETSNMP_INDEX);
     netsnmp_inject_handler( reginfo, handler );
 
+@   if $m2c_data_cache == 1@
     /*************************************************
      *
      * inject cache helper
@@ -396,6 +409,7 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
         netsnmp_inject_handler( reginfo, handler );
     }
 
+@   end@
     /*
      * register table
      */
@@ -409,6 +423,19 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
     
 @end@
 } /* _${context}_initialize_interface */
+
+/**
+ * @internal
+ * Shutdown the table $context
+ */
+void
+_${context}_shutdown_interface(${context}_registration * reg_ptr)
+{
+    /*
+     * shutdown the container
+     */
+    _${context}_container_shutdown(&${context}_if_ctx);
+}
 
 void
 ${context}_valid_columns_set(netsnmp_column_info *vc)
