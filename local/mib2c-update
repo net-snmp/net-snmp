@@ -111,6 +111,9 @@ check_setup()
 #
 do_diff()
 {
+    DD_ORIG=$1
+    DD_CURR=$2
+    DD_OUTPUT=$3
     # u | c unified | context
     # r     recursive
     # b     ignore blank lines
@@ -120,13 +123,13 @@ do_diff()
     #    --exclude='*Makefile' --unidirectional-new-file
     local rc=0
     local rcs=0
-    safecd $1
+    safecd $DD_ORIG
     echo "  checking files in $1 ($PWD)"
-    files=`ls *$UPDATE_OID* 2>/dev/null | grep -v "^default"`
+    files=`ls *$UPDATE_OID* 2>/dev/null`
     if [ ! -z "$files" ]; then
         for f in $files; do
             diff -U $FUZZ -p -b -w --show-c-function \
-                -I "$Id$f $2/$f >> $3
+                -I "$""Id:" $f $DD_CURR/$f >> $DD_OUTPUT
             rc=$?
             (( rcs = $rcs + $rc ))
             if [ $rc -eq 1 ]; then
@@ -135,7 +138,7 @@ do_diff()
         done
     fi
     if [ $rcs -eq 0 ]; then
-        rm -f $3
+        rm -f $DD_OUTPUT
     fi
     safecd -
     return $rcs
@@ -171,7 +174,7 @@ do_cp()
 save_diff()
 {
     echo "Creating patch for your custom code"
-    cnt=`ls $UPDATE_CURR/*$UPDATE_OID* 2>/dev/null | egrep "(file|onf|m2d|txt|\.c|\.h)$" | grep -v "^default" | wc -l`
+    cnt=`ls $UPDATE_CURR/*$UPDATE_OID* 2>/dev/null | egrep "(file|onf|m2d|txt|\.c|\.h)$" | wc -l`
     if [ $cnt -eq 0 ]; then
         echo "   no custom code!"
         FIRST_RUN=1
@@ -188,15 +191,7 @@ save_diff()
 #
 gen_code()
 {
-    if [ -d defaults ]; then
-       rm -fR $UPDATE_NEW/default* 2>/dev/null
-       safecp -a defaults $UPDATE_NEW/
-    else
-        files=`ls default-*$UPDATE_OID* 2>/dev/null `
-        if [ ! -z "$files" ]; then
-           safecp $files $UPDATE_NEW/
-        fi
-    fi
+    copy_defaults . $UPDATE_NEW
 
     safecd $UPDATE_NEW
     files=`ls *$UPDATE_OID* 2>/dev/null | grep -v "^default"`
@@ -250,12 +245,30 @@ merge_code()
     fi
 }
 
+copy_defaults()
+{
+    SRC=$1
+    DST=$2
+    if [ -d $SRC/defaults ]; then
+       safecp -a $SRC/defaults/* $DST
+    else
+        files=`ls $SRC/default-*.m2d 2>/dev/null `
+        if [ ! -z "$files" ]; then
+           safecp $files $DST
+        fi
+    fi
+
+}
+
 copy_merged()
 {
     echo "Backing up current code to $UPDATE_BACKUP/curr"
     do_cp $UPDATE_CURR $UPDATE_BACKUP/curr/
+    copy_defaults . $UPDATE_BACKUP/curr/
+
     echo "Copying merged code to $UPDATE_CURR"
     do_cp $UPDATE_MERGED $UPDATE_CURR/
+
 
     echo "Backing up original code to $UPDATE_BACKUP/orig"
     do_cp $UPDATE_ORIG $UPDATE_BACKUP/orig/
@@ -267,6 +280,8 @@ copy_new()
 {
     echo "Copying code to $UPDATE_CURR"
     do_cp $UPDATE_NEW $UPDATE_CURR/
+    # copy defaults back to current dir (which may not be UPDATE_CURR)
+    copy_defaults $UPDATE_NEW .
 
     echo "Saving original code to $UPDATE_ORIG"
     do_cp $UPDATE_NEW $UPDATE_ORIG/
@@ -278,8 +293,10 @@ copy_code()
         copy_merged
     else
         copy_new
-        safecp -a $UPDATE_NEW/default* $UPDATE_CURR
     fi
+
+    # always get defaults from UPDATE_NEW, since those are what were used.
+    copy_defaults $UPDATE_NEW .
 }
 
 
@@ -325,7 +342,7 @@ if [ -f .M2C-UPDATE-MERGE-FAILED ]; then
                 exit 1
             fi
             rm .M2C-UPDATE-MERGE-FAILED
-            copy_merged
+            copy_code
             exit 0
         fi
     done
