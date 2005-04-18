@@ -380,7 +380,16 @@ File: ${name}_data_access.[c|h]
   -----------------
   TODO : Set MIB index values
   FUNC : ${context}_indexes_set
+  WHERE: ${context}_data_access.c
 
+  This is a convenience function for setting the index context from
+  the native C data. Where necessary, value mapping should be done.
+
+@if $mfd_readme_verbose == 1@
+  This function should update the table index values (found in
+  tbl_idx) for the given raw data.
+
+@end@
   
 @    eval $m2c_processing_type = 'r'@
 @    include mfd-access-${m2c_table_access}-defines.m2i@
