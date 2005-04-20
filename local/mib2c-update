@@ -250,7 +250,7 @@ copy_defaults()
     SRC=$1
     DST=$2
     if [ -d $SRC/defaults ]; then
-       safecp -a $SRC/defaults/* $DST
+       safecp -a $SRC/defaults $DST
     else
         files=`ls $SRC/default-*.m2d 2>/dev/null `
         if [ ! -z "$files" ]; then
