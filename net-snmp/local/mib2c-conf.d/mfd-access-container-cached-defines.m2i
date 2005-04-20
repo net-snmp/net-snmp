@@ -15,10 +15,10 @@
 void ${context}_container_init(netsnmp_container **container_ptr_ptr);
 @   else@
     /*
-     * TODO:180:o: Review ifTable cache timeout.
+     * TODO:180:o: Review ${context} cache timeout.
      * The number of seconds before the cache times out
      */
-#define IFTABLE_CACHE_TIMEOUT   60
+#define $context.uc_CACHE_TIMEOUT   60
 
 void ${context}_container_init(netsnmp_container **container_ptr_ptr,
                              netsnmp_cache *cache);
@@ -26,7 +26,6 @@ void ${context}_container_init(netsnmp_container **container_ptr_ptr,
 void ${context}_container_shutdown(netsnmp_container *container_ptr);
 
 int ${context}_container_load(netsnmp_container *container);
-void ${context}_container_free(netsnmp_container *container);
 void ${context}_container_free(netsnmp_container *container);
 
 @   if $m2c_data_cache == 1@
@@ -154,6 +153,11 @@ ${context}_container_shutdown(netsnmp_container *container_ptr)
  * load initial data
  *
  * TODO:350:M: Implement $context data load
+@   if $m2c_data_cache == 1@
+ * This function will also be called by the cache helper to load
+ * the container again (after the container free function has been
+ * called to free the previous contents).
+@   end@
  *
  * @param container container to which items should be inserted
  *
@@ -388,6 +392,8 @@ ${context}_container_free(netsnmp_container *container)
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @if $m2c_processing_type eq 'i'@
 @   if $m2c_data_cache == 1@
+static void _container_free(netsnmp_container *container);
+
 /**
  * @internal
  */
@@ -407,7 +413,7 @@ _cache_load(netsnmp_cache *cache, void *vmagic)
     /*
      * call user code
      */
-    return ${context}_cache_load((netsnmp_container*)cache->magic);
+    return ${context}_container_load((netsnmp_container*)cache->magic);
 } /* _cache_load */
 
 /**
@@ -531,11 +537,7 @@ _${context}_container_shutdown(${context}_interface_ctx *if_ctx)
 {
     DEBUGMSGTL(("internal:${context}:_${context}_container_shutdown","called\n"));
 
-@   if $m2c_data_cache != 1@
     ${context}_container_shutdown(if_ctx->container);
-@   else@
-    ${context}_container_shutdown(if_ctx->container, if_ctx->cache);
-@   end@
 
     _container_free(if_ctx->container);
 
