@@ -213,6 +213,14 @@ ${context}_${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
  * @note this is not the place to do any checks for the sanity
  *       of multiple indexes. Those types of checks should be done in the
  *       ${context}_validate_index() function.
+ *
+ * @note Also keep in mind that if the index refers to a row in this or
+ *       some other table, you can't check for that row here to make
+ *       decisions, since that row might not be created yet, but may
+ *       be created during the processing this request. If you have
+ *       such checks, they should be done in the check_dependencies
+ *       function, because any new/deleted/changed rows should be
+ *       available then.
  */
 int
 ${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
@@ -223,8 +231,8 @@ ${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
 
     /*
      * TODO:426:M: |-> Check $context index $node.
-     * check that index value in the table context (rowreq_ctx)
-     * for $node is legal.
+     * check that index value in the table context is legal.
+     * (rowreq_ctx->tbl_index.$node)
      */
 
     return MFD_SUCCESS; /* $node index ok */
@@ -241,8 +249,16 @@ ${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
  *
  * All of the individual index validation functions have been called, so this
  * is the place to make sure they are valid as a whole when combined. If
- * you only have one index, 
+ * you only have one index, then you probably don't need to do anything else
+ * here.
  * 
+ * @note Keep in mind that if the indexes refer to a row in this or
+ *       some other table, you can't check for that row here to make
+ *       decisions, since that row might not be created yet, but may
+ *       be created during the processing this request. If you have
+ *       such checks, they should be done in the check_dependencies
+ *       function, because any new/deleted/changed rows should be
+ *       available then.
  *
  *
  * @param ${context}_reg
