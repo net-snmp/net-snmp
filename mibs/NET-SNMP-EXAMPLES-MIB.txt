@@ -86,6 +86,21 @@ netSnmpExampleSleeper OBJECT-TYPE
     DEFVAL { 1 }
     ::= { netSnmpExampleScalars 2 }
 
+netSnmpExampleString OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"This is a simple object which merely houses a writable
+	 string.  It's only purposes is to hold the value of a single
+	 string.  Writing to it will simply change the value for
+	 subsequent GET/GETNEXT/GETBULK retrievals.
+
+	 This example object is implemented in the
+	 agent/mibgroup/examples/watched.c file."
+    DEFVAL { "So long, and thanks for all the fish!" }
+    ::= { netSnmpExampleScalars 3 }
+
 
 --
 --  Example Tables
