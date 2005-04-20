@@ -134,6 +134,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
 
         av_push(vba,tmparray[i]);
         av_push(vba,sv_2mortal(newSVpv(outbuf, oo_len)));
+        free(outbuf);
         av_push(vba,sv_2mortal(newSViv(vb->type)));
         av_push(varbinds, newRV((SV*)vba));
     }
