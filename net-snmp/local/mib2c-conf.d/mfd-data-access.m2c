@@ -221,6 +221,20 @@ ${context}_${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
  *       such checks, they should be done in the check_dependencies
  *       function, because any new/deleted/changed rows should be
  *       available then.
+ *
+ * The following checks have already been done for you:
+@if $node.enums == 1@
+ *    The value is one of $m2c_evals
+@elsif $node.ranges == 1@
+@    if ("$node.decl" eq "long") || ("$node.decl" eq "u_long")@
+@        eval $m2c_tmp_ns = "value"@
+@    else@
+@        eval $m2c_tmp_ns = "length"@
+@    end@
+ *    The $m2c_tmp_ns is in (one of) the range set(s): $m2c_evals
+@end@
+ *
+ * If there a no other checks you need to do, simply return MFD_SUCCESS.
  */
 int
 ${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
