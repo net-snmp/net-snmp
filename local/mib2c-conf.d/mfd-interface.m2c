@@ -668,6 +668,7 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
 
 ########################################################################
 ##
+@if $m2c_table_row_creation == 1@
 /**
  * @internal
  * wrapper
@@ -725,8 +726,10 @@ _mfd_${context}_rowreq_from_index(netsnmp_index *oid_idx, int * rc_ptr)
     }
 
     return rowreq_ctx;
-} /* _mfd_${context}_object_lookup */
+} /* _mfd_${context}_rowreq_from_index */
 
+
+@end@ # row creation
 /**
  * @internal
  * wrapper
@@ -970,7 +973,7 @@ _mfd_${context}_get_values(netsnmp_mib_handler *handler,
 NETSNMP_STATIC_INLINE int
 _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
 {
-    int                          rc;
+    int                          rc = SNMPERR_SUCCESS;
 
     DEBUGMSGTL(("internal:${context}:_${context}_check_indexes","called\n"));
 
@@ -979,7 +982,7 @@ _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
 ##
 @if $m2c_table_external_indexes != 0@
     /*
-     * check that the corresponding row exists
+     * check that the corresponding EXTERNAL row exists
      */
 @   foreach $node externalindex@
 @      include m2c_setup_node.m2i@
@@ -995,6 +998,12 @@ _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
 @      include m2c_setup_node.m2i@
 
     /* (INDEX) $m2c_node_summary */
+@   eval $m2c_nv_val = "rowreq_ctx->tbl_idx.$node"@
+@   eval $m2c_nv_len = "rowreq_ctx->tbl_idx.$node_len"@
+@   eval $m2c_nv_str = "rowreq_ctx->tbl_idx.$node"@
+@   include node-validate.m2i@
+       if (MFD_SUCCESS != rc)
+          return rc;
         rc = ${node}_check_index( rowreq_ctx );
        if(MFD_SUCCESS != rc)
            return SNMP_ERR_NOCREATION;
@@ -1041,19 +1050,23 @@ _${context}_check_column( ${context}_rowreq_ctx *rowreq_ctx,
     netsnmp_assert(NULL != rowreq_ctx);
 
     switch(column) {
+@   eval $m2c_nvv_item = "${m2c_context_item}tbl_idx."@
 @   foreach $node internalindex@
 @      include m2c_setup_node.m2i@
-@      if $node.settable == 1@
-
     /* (INDEX) $m2c_node_summary */
     case COLUMN_$node.uc:
-        return SNMP_ERR_NOTWRITABLE; /* can not change index of active row */
+        rc = SNMP_ERR_NOTWRITABLE; /* can not change index of active row */
         break;
-@      end@ ## settable
 @   end@ ## index
+@   eval $m2c_nvv_item = "$m2c_data_item"@
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
 @      if $node.settable == 0@
+
+    /* $m2c_node_summary */
+    case COLUMN_$node.uc:
+        rc = SNMP_ERR_NOTWRITABLE;
+        break;
 @          next@
 @      end@
 
