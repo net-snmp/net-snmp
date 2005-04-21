@@ -109,7 +109,7 @@
 @end@
 ##
 @if "x$user_mfd_default_data_init" eq "x" @
-@  eval $mfd_default_data_init = 0@
+@  eval $mfd_default_data_init = 1@
 @else@
 @  eval $mfd_default_data_init = $user_mfd_default_data_init@
 @end@
