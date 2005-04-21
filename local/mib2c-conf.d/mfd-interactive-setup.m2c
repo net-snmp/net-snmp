@@ -159,23 +159,20 @@ process) and you have pointers to the data, you probably want allocated.
 @        end@
 
 
-## ---------------------------------------------------
-Do you need to initialize elements in your '$m2c_temp_data_context'
-when a new instance is created, or do you plan on adding other
-structures that might need initialization to the row request context?
-@      else@ #
-Do you plan on adding any items to the default row request context
-that will require initialization/cleanup?
 @      end@ # ! default (generated)
-(The most common reason you might need to do this is if you want to keep
-some non-MIB data for every row.)
+## ---------------------------------------------------
+Do you need to initialize elements in the '$m2c_temp_data_context' when
+a new instance is created (eg default values, or other structures you are
+going to add that might need initialization to the row request context?
+(The most common reasons you might need to do this is are if you want to keep
+some non-MIB data for every row, or some columns have default values.)
 
-  1) no, no initialization needed [DEFAULT]
-  2) yes, initilization is needed
+  1) no, no initialization needed
+  2) yes, initilization is needed [DEFAULT]
 
 @        prompt $ans Select your choice : @
-@        if $ans == 2@
-@          eval $m2c_temp_data_init = 1@
+@        if $ans == 1@
+@          eval $m2c_temp_data_init = 0@
 @        end@
 
 
