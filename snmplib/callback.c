@@ -115,7 +115,7 @@ int
 snmp_register_callback(int major, int minor, SNMPCallback * new_callback,
                        void *arg)
 {
-    return netsnmp_register_callback( major, minor, new_callback, arg, 0);
+    return netsnmp_register_callback( major, minor, new_callback, arg, NETSNMP_CALLBACK_DEFAULT_PRIORITY);
 }
 
 int
