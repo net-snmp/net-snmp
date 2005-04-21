@@ -282,7 +282,8 @@ get_first_debug_entry(void **loop_context, void **data_context,
     int i;
 
     for (i=0; i<debug_num_tokens; i++) {
-        if (dbg_tokens[i].token_name)
+        /* skip excluded til mib is updated */
+        if (dbg_tokens[i].token_name && (dbg_tokens[i].enabled != 2))
             break;
     }
     if ( i==debug_num_tokens )
@@ -303,7 +304,8 @@ get_next_debug_entry(void **loop_context, void **data_context,
     int i = (int)*loop_context;
 
     for (i++; i<debug_num_tokens; i++) {
-        if (dbg_tokens[i].token_name)
+        /* skip excluded til mib is updated */
+        if (dbg_tokens[i].token_name && (dbg_tokens[i].enabled != 2))
             break;
     }
     if ( i==debug_num_tokens )
