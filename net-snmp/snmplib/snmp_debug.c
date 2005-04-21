@@ -35,11 +35,20 @@
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/snmp_api.h>
 
+#define SNMP_DEBUG_DISABLED           0
+#define SNMP_DEBUG_ACTIVE             1
+#define SNMP_DEBUG_EXCLUDED           2
+
 static int      dodebug = SNMP_ALWAYS_DEBUG;
 int             debug_num_tokens = 0;
+int             debug_num_excluded = 0;
 static int      debug_print_everything = 0;
 
 netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
+#define NETSNMP_DEBUG_STATS 0
+#ifdef NETSNMP_DEBUG_STATS
+netsnmp_container  *dbg_stats = NULL;
+#endif
 
 /*
  * indent debugging:  provide a space padded section to return an indent for 
@@ -104,6 +113,19 @@ snmp_debug_init(void)
     register_prenetsnmp_mib_handler("snmp", "debugTokens",
                                     debug_config_register_tokens, NULL,
                                     "token[,token...]");
+
+#ifdef NETSNMP_DEBUG_STATS
+    /*
+     * debug stats
+     */
+    dbg_stats = netsnmp_container_find("debug_exclude:table_container");
+    if (NULL != dbg_stats) {
+        dbg_stats->compare = _debug_cmp;
+        netsnmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                                  SNMP_CALLBACK_STORE_DATA,
+                                  _debug_stats_callback, dbg_stats, 1024);
+    }
+#endif
 }
 
 void
@@ -111,6 +133,7 @@ debug_register_tokens(char *tokens)
 {
     char           *newp, *cp;
     char           *st;
+    int             status;
 
     if (tokens == 0 || *tokens == 0)
         return;
@@ -122,8 +145,15 @@ debug_register_tokens(char *tokens)
             if (strcasecmp(cp, DEBUG_ALWAYS_TOKEN) == 0) {
                 debug_print_everything = 1;
             } else if (debug_num_tokens < MAX_DEBUG_TOKENS) {
+                if ('-' == *cp) {
+                    ++cp;
+                    status = SNMP_DEBUG_EXCLUDED;
+                }
+                else
+                    status = SNMP_DEBUG_ACTIVE;
                 dbg_tokens[debug_num_tokens].token_name = strdup(cp);
-                dbg_tokens[debug_num_tokens++].enabled  = 1;
+                dbg_tokens[debug_num_tokens++].enabled  = status;
+                snmp_log(LOG_NOTICE, "registered debug token %s, %d", cp, status);
             } else {
                 snmp_log(LOG_NOTICE, "Unable to register debug token %s", cp);
             }
@@ -170,7 +200,7 @@ debug_enable_token_logs (const char *token) {
             if (dbg_tokens[i].token_name &&
                 strncmp(dbg_tokens[i].token_name, token, 
                         strlen(dbg_tokens[i].token_name)) == 0) {
-                dbg_tokens[i].enabled = 1;
+                dbg_tokens[i].enabled = SNMP_DEBUG_ACTIVE;
                 return SNMPERR_SUCCESS;
             }
         }
@@ -196,7 +226,7 @@ debug_disable_token_logs (const char *token) {
         for(i=0; i < debug_num_tokens; i++) {
             if (strncmp(dbg_tokens[i].token_name, token, 
                   strlen(dbg_tokens[i].token_name)) == 0) {
-                dbg_tokens[i].enabled = 0;
+                dbg_tokens[i].enabled = SNMP_DEBUG_DISABLED;
                 return SNMPERR_SUCCESS;
             }
         }
@@ -216,7 +246,7 @@ debug_disable_token_logs (const char *token) {
 int
 debug_is_token_registered(const char *token)
 {
-    int             i;
+    int             i, rc;
 
     /*
      * debugging flag is on or off 
@@ -227,21 +257,49 @@ debug_is_token_registered(const char *token)
     if (debug_num_tokens == 0 || debug_print_everything) {
         /*
          * no tokens specified, print everything 
+         * (unless something might be excluded)
          */
-        return SNMPERR_SUCCESS;
-    } else {
-        for (i = 0; i < debug_num_tokens; i++) {
-            if (dbg_tokens[i].token_name &&
-                strncmp(dbg_tokens[i].token_name, token,
-                        strlen(dbg_tokens[i].token_name)) == 0) {
-                if (dbg_tokens[i].enabled)
-                    return SNMPERR_SUCCESS;
-                else
-                    return SNMPERR_GENERR;
-            }
+        if (debug_num_excluded) {
+            rc = SNMPERR_SUCCESS; /* ! found = success */
+        } else {
+            return SNMPERR_SUCCESS;
         }
     }
-    return SNMPERR_GENERR;
+    else
+        rc = SNMPERR_GENERR; /* ! found = err */
+
+    for (i = 0; i < debug_num_tokens; i++) {
+        if (SNMP_DEBUG_DISABLED == dbg_tokens[i].enabled)
+            continue;
+        if (dbg_tokens[i].token_name &&
+            strncmp(dbg_tokens[i].token_name, token,
+                    strlen(dbg_tokens[i].token_name)) == 0) {
+            if (SNMP_DEBUG_ACTIVE == dbg_tokens[i].enabled)
+                return SNMPERR_SUCCESS; /* active */
+            else
+                return SNMPERR_GENERR; /* excluded */
+        }
+    }
+
+#ifdef NETSNMP_DEBUG_STATS
+    if ((SNMPERR_SUCCESS == rc) && (NULL != dbg_stats)) {
+        netsnmp_token_descr td, *found;
+
+        td.token_name = token;
+        found = CONTAINER_FIND(dbg_stats, &td);
+        if (NULL == found) {
+            found = SNMP_MALLOC_TYPEDEF(netsnmp_token_descr);
+            netsnmp_assert(NULL != found);
+            found->token_name = strdup(token);
+            netsnmp_assert(0 == found->enabled);
+            CONTAINER_INSERT(dbg_stats, found);
+        }
+        ++found->enabled;
+//        snmp_log(LOG_ERR,"tok %s, %d hits\n", token, found->enabled);
+    }
+#endif
+
+    return rc;
 }
 
 void
@@ -470,7 +528,7 @@ void
 #if HAVE_STDARG_H
 debug_combo_nc(const char *token, const char *format, ...)
 #else
-debugmsgtoken(va_alist)
+debug_combo_nc(va_alist)
      va_dcl
 #endif
 {
@@ -507,3 +565,63 @@ snmp_get_do_debugging(void)
 {
     return dodebug;
 }
+
+#ifdef NETSNMP_DEBUG_STATS
+/************************************************************
+ * compare two context pointers here. Return -1 if lhs < rhs,
+ * 0 if lhs == rhs, and 1 if lhs > rhs.
+ */
+static int
+_debug_cmp( const void *lhs, const void *rhs )
+{
+    netsnmp_token_descr *dbg_l = (netsnmp_token_descr *)lhs;
+    netsnmp_token_descr *dbg_r = (netsnmp_token_descr *)rhs;
+
+//    snmp_log(LOG_ERR,"%s/%s\n",dbg_l->token_name, dbg_r->token_name);
+    return strcmp(dbg_l->token_name, dbg_r->token_name);
+}
+
+
+static int
+_save_debug_stat(netsnmp_token_descr *tb, void *type)
+{
+    char buf[256];
+
+    snprintf(buf, sizeof(buf), "debug_hits %s %d",
+             tb->token_name, tb->enabled);
+    read_config_store((char *) type, buf);
+
+    return SNMP_ERR_NOERROR;
+}
+
+static int
+_debug_stats_callback(int majorID, int minorID,
+                  void *serverarg, void *clientarg)
+{
+    char            sep[] =
+        "##############################################################";
+    char            buf[] =
+        "#\n" "# debug stats\n" "#";
+    char           *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                                 NETSNMP_DS_LIB_APPTYPE);
+
+    read_config_store((char *) type, sep);
+    read_config_store((char *) type, buf);
+
+    /*
+     * save all rows
+     */
+    CONTAINER_FOR_EACH((netsnmp_container *) clientarg,
+                       (netsnmp_container_obj_func *)
+                       _save_debug_stat, type);
+
+    read_config_store((char *) type, sep);
+    read_config_store((char *) type, "\n");
+
+    /*
+     * never fails 
+     */
+    return SNMPERR_SUCCESS;
+}
+#endif
+
