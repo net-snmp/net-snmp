@@ -38,7 +38,7 @@
  */
 #include "diskio.h"
 
-#define CACHE_TIMEOUT 10
+#define CACHE_TIMEOUT 1
 static time_t   cache_time = 0;
 
 #ifdef solaris2
@@ -149,9 +149,11 @@ init_diskio(void)
         {DISKIO_NWRITTEN, ASN_COUNTER, RONLY, var_diskio, 1, {4}},
         {DISKIO_READS, ASN_COUNTER, RONLY, var_diskio, 1, {5}},
         {DISKIO_WRITES, ASN_COUNTER, RONLY, var_diskio, 1, {6}},
-	{DISKIO_LA1, ASN_INTEGER, RONLY, var_diskio, 1, {9}},
+        {DISKIO_LA1, ASN_INTEGER, RONLY, var_diskio, 1, {9}},
         {DISKIO_LA5, ASN_INTEGER, RONLY, var_diskio, 1, {10}},
-        {DISKIO_LA15, ASN_INTEGER, RONLY, var_diskio, 1, {11}}
+        {DISKIO_LA15, ASN_INTEGER, RONLY, var_diskio, 1, {11}},
+        {DISKIO_NREADX, ASN_COUNTER64, RONLY, var_diskio, 1, {12}},
+        {DISKIO_NWRITTENX, ASN_COUNTER64, RONLY, var_diskio, 1, {13}},
     };
 
     /*
@@ -265,6 +267,7 @@ var_diskio(struct variable * vp,
      * define any variables we might return as static! 
      */
     static long     long_ret;
+    static struct counter64 c64_ret;
 
     if (header_simple_table
         (vp, name, length, exact, var_len, write_method, MAX_DISKS))
@@ -291,6 +294,16 @@ var_diskio(struct variable * vp,
     case DISKIO_NWRITTEN:
         long_ret = (uint32_t) kio.nwritten;
         return (u_char *) & long_ret;
+    case DISKIO_NREADX:
+        *var_len = 8;
+        c64_ret.low = kio.nread & 0xffffffff;;
+        c64_ret.high = kio.nread >> 32;
+        return (u_char *) & c64_ret;
+    case DISKIO_NWRITTENX:
+        *var_len = 8;
+        c64_ret.low = kio.nwritten & 0xffffffff;;
+        c64_ret.high = kio.nwritten >> 32;
+        return (u_char *) & c64_ret;
     case DISKIO_READS:
         long_ret = (uint32_t) kio.reads;
         return (u_char *) & long_ret;
@@ -556,6 +569,8 @@ var_diskio(struct variable * vp,
            int exact, size_t * var_len, WriteMethod ** write_method)
 {
     static long     long_ret;
+    static struct   counter64 c64_ret;
+    long long       longlong_ret;
     unsigned int    indx;
 
     if (getstats() == 1) {
@@ -594,6 +609,26 @@ var_diskio(struct variable * vp,
         long_ret = (signed long) stat->dinfo->devices[indx].bytes_written;
 #endif
         return (u_char *) & long_ret;
+    case DISKIO_NREADX:
+        *var_len = 8;
+#if defined(freebsd5) && __FreeBSD_version >= 500107
+        longlong_ret = stat->dinfo->devices[indx].bytes[DEVSTAT_READ];
+#else
+        longlong_ret = stat->dinfo->devices[indx].bytes_read;
+#endif
+        c64_ret.low = longlong_ret & 0xffffffff;
+        c64_ret.high = longlong_ret >> 32;
+        return (u_char *) & c64_ret;
+    case DISKIO_NWRITTENX:
+        *var_len = 8;
+#if defined(freebsd5) && __FreeBSD_version >= 500107
+        longlong_ret = stat->dinfo->devices[indx].bytes[DEVSTAT_WRITE];
+#else
+        longlong_ret = stat->dinfo->devices[indx].bytes_written;
+#endif
+        c64_ret.low = longlong_ret & 0xffffffff;
+        c64_ret.high = longlong_ret >> 32;
+        return (u_char *) & c64_ret;
     case DISKIO_READS:
 #if defined(freebsd5) && __FreeBSD_version >= 500107
         long_ret = (signed long) stat->dinfo->devices[indx].operations[DEVSTAT_READ];
@@ -1067,6 +1102,7 @@ var_diskio(struct variable * vp,
            int exact, size_t * var_len, WriteMethod ** write_method)
 {
     static long     long_ret;
+    static struct counter64 c64_ret;
     unsigned int    indx;
 
     /* get disk statistics */
@@ -1101,6 +1137,16 @@ var_diskio(struct variable * vp,
     case DISKIO_WRITES:
         long_ret = (signed long) 0;	/* AIX has just one value for read/write transfers */
         return (u_char *) & long_ret;
+    case DISKIO_NREADX:
+        *var_len = 8;
+        c64_ret.low = (ps_disk[indx].rblks * ps_disk[indx].bsize) & 0xffffffff;;
+        c64_ret.high = (ps_disk[indx].rblks * ps_disk[indx].bsize) >> 32;
+        return (u_char *) & c64_ret;
+    case DISKIO_NWRITTENX:
+        *var_len = 8;
+        c64_ret.low = (ps_disk[indx].wblks * ps_disk[indx].bsize) & 0xffffffff;;
+        c64_ret.high = (ps_disk[indx].wblks * ps_disk[indx].bsize) >> 32;
+        return (u_char *) & c64_ret;
 
     default:
         ERROR_MSG("diskio.c: don't know how to handle this request.");
