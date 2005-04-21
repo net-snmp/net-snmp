@@ -45,9 +45,13 @@ int             debug_num_excluded = 0;
 static int      debug_print_everything = 0;
 
 netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
-#define NETSNMP_DEBUG_STATS 0
+
 #ifdef NETSNMP_DEBUG_STATS
 netsnmp_container  *dbg_stats = NULL;
+ static int _debug_cmp( const void *lhs, const void *rhs );
+ static int _save_debug_stat(netsnmp_token_descr *tb, void *type);
+ static int _debug_stats_callback(int majorID, int minorID,
+                   void *serverarg, void *clientarg);
 #endif
 
 /*
