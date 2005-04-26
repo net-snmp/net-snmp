@@ -1690,6 +1690,12 @@ snmp_free_session(netsnmp_session * s)
         SNMP_FREE(s->securityName);
         SNMP_FREE(s->securityAuthProto);
         SNMP_FREE(s->securityPrivProto);
+
+        /*
+         * clear session from any callbacks
+         */
+        netsnmp_callback_clear_client_arg(s, 0, 0);
+
         free((char *) s);
     }
 }
