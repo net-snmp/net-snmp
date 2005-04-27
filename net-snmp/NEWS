@@ -1,6 +1,11 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.2.2*
+ Ports:
+   - Win32
+      - Cygwin compiler fixes
+
 
 *5.2.1*
  Fixes:
