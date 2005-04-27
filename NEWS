@@ -9,6 +9,11 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
      - bug 1055781: get-next fails to step into interfaces group correctly
      - bug 1056760: agent ignores ifspeed, type settings in snmpd.conf
 
+ Ports:
+   Win32:
+     - Cygwin compiler fixes
+
+
 *5.1.2*
  New:
    - Minor improvements to snmpdelta (error reporting)
