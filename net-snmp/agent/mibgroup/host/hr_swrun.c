@@ -604,7 +604,8 @@ var_hrswrun(struct variable * vp,
         strcpy(string, cp);
         fclose(fp);
 #elif defined(cygwin)
-        if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED))
+        /* if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED)) */
+        if (lowproc.process_state & PID_EXITED || (lowproc.exitcode & ~0xffff))
             strcpy(string, "<defunct>");
         else if (lowproc.ppid) {
             cygwin_conv_to_posix_path(lowproc.progname, string);
@@ -725,7 +726,8 @@ var_hrswrun(struct variable * vp,
         }
         fclose(fp);
 #elif defined(cygwin)
-        if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED))
+        /* if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED)) */
+        if (lowproc.process_state & PID_EXITED || (lowproc.exitcode & ~0xffff))
             strcpy(string, "<defunct>");
         else if (lowproc.ppid)
             cygwin_conv_to_posix_path(lowproc.progname, string);
@@ -864,7 +866,8 @@ var_hrswrun(struct variable * vp,
 #if defined(cygwin)
         if (lowproc.process_state & PID_STOPPED)
             long_return = 3;    /* notRunnable */
-        else if (lowproc.process_state & PID_ZOMBIE)
+        /* else if (lowproc.process_state & PID_ZOMBIE) */
+        else if (lowproc.exitcode & ~0xffff)
             long_return = 4;    /* invalid */
         else
             long_return = 1;    /* running */

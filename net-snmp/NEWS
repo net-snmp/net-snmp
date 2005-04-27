@@ -12,6 +12,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     mib2c:
       - mib2c.mfd.conf now generates code for persistence row storage
 
+ Ports:
+   Win32:
+     - Cygwin compiler fixes
+
 
 *5.2*
  New:
