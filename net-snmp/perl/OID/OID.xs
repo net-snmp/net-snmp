@@ -218,7 +218,12 @@ void
 nsop_DESTROY(oid1)
 	netsnmp_oid *oid1
     CODE:
-	free(oid1);
+{
+    if (oid1->name != oid1->namebuf) {
+	free(oid1->name);
+    }
+    free(oid1);
+}
         
 char *
 nsop_to_string(oid1)
