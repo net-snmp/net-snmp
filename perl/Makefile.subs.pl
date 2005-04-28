@@ -36,7 +36,10 @@ sub NetSNMPGetOpts {
       $basedir =~ /(.*?)\\perl.*/;
       $basedir = $1;
       print "Net-SNMP base directory: $basedir\n";
-
+      if ($basedir =~ / /) {
+        die "\nA space has been detected in the base directory.  This is not " .
+            "supported\nPlease rename the folder and try again.\n\n";
+      }
     }
     else
     {
