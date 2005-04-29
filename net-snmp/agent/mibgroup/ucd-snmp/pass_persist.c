@@ -86,9 +86,41 @@ void
 pass_persist_parse_config(const char *token, char *cptr)
 {
     struct extensible **ppass = &persistpassthrus, **etmp, *ptmp;
-    char           *tcptr;
-    int             i;
+    char           *tcptr, *endopt;
+    int             i, priority;
 
+    /*
+     * options
+     */
+    priority = DEFAULT_MIB_PRIORITY;
+    while (*cptr == '-') {
+      cptr++;
+      switch (*cptr) {
+      case 'p':
+	/* change priority level */
+	cptr++;
+	cptr = skip_white(cptr);
+	if (! isdigit(*cptr)) {
+	  config_perror("priority must be an integer");
+	  return;
+	}
+	priority = strtol((const char*) cptr, &endopt, 0);
+	if ((priority == LONG_MIN) || (priority == LONG_MAX)) {
+	  config_perror("priority under/overflow");
+	  return;
+	}
+	cptr = endopt;
+	cptr = skip_white(cptr);
+	break;
+      default:
+	config_perror("unknown option for pass directive");
+	return;
+      }
+    }
+
+    /*
+     * MIB
+     */
     if (*cptr == '.')
         cptr++;
     if (!isdigit(*cptr)) {
@@ -108,7 +140,7 @@ pass_persist_parse_config(const char *token, char *cptr)
     while (isdigit(*cptr) || *cptr == '.')
         cptr++;
     /*
-     * name 
+     * path
      */
     cptr = skip_white(cptr);
     if (cptr == NULL) {
@@ -124,10 +156,10 @@ pass_persist_parse_config(const char *token, char *cptr)
     (*ppass)->name[ sizeof((*ppass)->name)-1 ] = 0;
     (*ppass)->next = NULL;
 
-    register_mib("pass_persist",
+    register_mib_priority("pass_persist",
                  (struct variable *) extensible_persist_passthru_variables,
                  sizeof(struct variable2), 1, (*ppass)->miboid,
-                 (*ppass)->miblen);
+                 (*ppass)->miblen, priority);
 
     /*
      * argggg -- pasthrus must be sorted 
