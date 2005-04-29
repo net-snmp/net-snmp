@@ -141,6 +141,8 @@ typedef long    fd_mask;
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include <net-snmp/library/fd_event_manager.h>
+
 #include "m2m.h"
 #include <net-snmp/agent/mib_module_config.h>
 
@@ -1105,21 +1107,7 @@ receive(void)
         }
 #endif                          /* USING_SMUX_MODULE */
 
-        for (i = 0; i < external_readfdlen; i++) {
-            FD_SET(external_readfd[i], &readfds);
-            if (external_readfd[i] >= numfds)
-                numfds = external_readfd[i] + 1;
-        }
-        for (i = 0; i < external_writefdlen; i++) {
-            FD_SET(external_writefd[i], &writefds);
-            if (external_writefd[i] >= numfds)
-                numfds = external_writefd[i] + 1;
-        }
-        for (i = 0; i < external_exceptfdlen; i++) {
-            FD_SET(external_exceptfd[i], &exceptfds);
-            if (external_exceptfd[i] >= numfds)
-                numfds = external_exceptfd[i] + 1;
-        }
+        netsnmp_external_event_info(&numfds, &readfds, &writefds, &exceptfds);
 
     reselect:
         DEBUGMSGTL(("snmpd/select", "select( numfds=%d, ..., tvp=%p)\n",
@@ -1156,40 +1144,12 @@ receive(void)
                 }
             }
 #endif                          /* USING_SMUX_MODULE */
-
-            snmp_read(&readfds);
-
-            for (i = 0; count && (i < external_readfdlen); i++) {
-                if (FD_ISSET(external_readfd[i], &readfds)) {
-                    DEBUGMSGTL(("snmpd/select", "readfd[%d] = %d\n",
-                                i, external_readfd[i]));
-                    external_readfdfunc[i] (external_readfd[i],
-                                            external_readfd_data[i]);
-                    FD_CLR(external_readfd[i], &readfds);
-                    count--;
-                }
+            netsnmp_dispatch_external_events(&count, &readfds,
+                                           &writefds, &exceptfds);
+            /* If there are still events leftover, process them */
+            if (count > 0) {
+              snmp_read(&readfds);
             }
-            for (i = 0; count && (i < external_writefdlen); i++) {
-                if (FD_ISSET(external_writefd[i], &writefds)) {
-                    DEBUGMSGTL(("snmpd/select", "writefd[%d] = %d\n",
-                                i, external_writefd[i]));
-                    external_writefdfunc[i] (external_writefd[i],
-                                             external_writefd_data[i]);
-                    FD_CLR(external_writefd[i], &writefds);
-                    count--;
-                }
-            }
-            for (i = 0; count && (i < external_exceptfdlen); i++) {
-                if (FD_ISSET(external_exceptfd[i], &exceptfds)) {
-                    DEBUGMSGTL(("snmpd/select", "exceptfd[%d] = %d\n",
-                                i, external_exceptfd[i]));
-                    external_exceptfdfunc[i] (external_exceptfd[i],
-                                              external_exceptfd_data[i]);
-                    FD_CLR(external_exceptfd[i], &exceptfds);
-                    count--;
-                }
-            }
-
         } else
             switch (count) {
             case 0:

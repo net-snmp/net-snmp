@@ -54,6 +54,7 @@ INCLUDESUBDIRHEADERS=README \
 	factory.h \
 	data_list.h \
 	default_store.h \
+	fd_event_manager.h \
 	int64.h \
 	keytools.h \
 	mib.h \
@@ -135,7 +136,7 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	snmp_debug.c tools.c  snmp_logging.c			\
 	snmpv3.c lcd_time.c keytools.c		                \
 	scapi.c callback.c default_store.c snmp_alarm.c		\
-	data_list.c oid_stash.c 				\
+	data_list.c oid_stash.c fd_event_manager.c 		\
 	mt_support.c snmp_enum.c snmp-tc.c 			\
 	snprintf.c strlcpy.c strtol.c strtoul.c strtok_r.c	\
 	snmp_transport.c @transport_src_list@			\
@@ -150,7 +151,7 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	snmp_debug.o tools.o  snmp_logging.o			\
 	snmpv3.o lcd_time.o keytools.o		                \
 	scapi.o callback.o default_store.o snmp_alarm.o		\
-	data_list.o oid_stash.o 				\
+	data_list.o oid_stash.o fd_event_manager.o		\
 	mt_support.o snmp_enum.o snmp-tc.o 			\
 	snprintf.o strlcpy.o strtol.o strtoul.o strtok_r.o	\
 	snmp_transport.o @transport_obj_list@                   \
@@ -165,7 +166,7 @@ LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 		\
 	snmp_debug.lo tools.lo  snmp_logging.lo			\
 	snmpv3.lo lcd_time.lo keytools.lo		                \
 	scapi.lo callback.lo default_store.lo snmp_alarm.lo		\
-	data_list.lo oid_stash.lo 				\
+	data_list.lo oid_stash.lo fd_event_manager.lo		\
 	mt_support.lo snmp_enum.lo snmp-tc.lo 			\
 	snprintf.lo strlcpy.lo strtol.lo strtoul.lo strtok_r.lo	\
 	snmp_transport.lo @transport_lobj_list@                   \

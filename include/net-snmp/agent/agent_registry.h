@@ -8,6 +8,7 @@
 /***********************************************************************/
 
 #include <net-snmp/agent/snmp_agent.h>
+#include <net-snmp/library/fd_event_manager.h>
 
 #ifdef __cplusplus
 extern          "C" {
@@ -141,34 +142,6 @@ void            register_mib_detach	   (void);
                sizeof(var)/sizeof(struct vartype),                     \
                theoid, sizeof(theoid)/sizeof(oid)) != MIB_REGISTERED_OK ) \
 	DEBUGMSGTL(("register_mib", "%s registration failed\n", descr));
-
-
-
-#define NUM_EXTERNAL_FDS 32
-#define FD_REGISTERED_OK		 0
-#define FD_REGISTRATION_FAILED		-2
-#define FD_UNREGISTERED_OK		 0
-#define FD_NO_SUCH_REGISTRATION		-1
-
-extern int      external_readfd[NUM_EXTERNAL_FDS],   external_readfdlen;
-extern int      external_writefd[NUM_EXTERNAL_FDS],  external_writefdlen;
-extern int      external_exceptfd[NUM_EXTERNAL_FDS], external_exceptfdlen;
-
-extern void     (*external_readfdfunc[NUM_EXTERNAL_FDS])   (int, void *);
-extern void     (*external_writefdfunc[NUM_EXTERNAL_FDS])  (int, void *);
-extern void     (*external_exceptfdfunc[NUM_EXTERNAL_FDS]) (int, void *);
-
-extern void    *external_readfd_data[NUM_EXTERNAL_FDS];
-extern void    *external_writefd_data[NUM_EXTERNAL_FDS];
-extern void    *external_exceptfd_data[NUM_EXTERNAL_FDS];
-
-int             register_readfd(int, void (*func)(int, void *),   void *);
-int             register_writefd(int, void (*func)(int, void *),  void *);
-int             register_exceptfd(int, void (*func)(int, void *), void *);
-int             unregister_readfd(int);
-int             unregister_writefd(int);
-int             unregister_exceptfd(int);
-
 
 
 #define NUM_EXTERNAL_SIGS 32
