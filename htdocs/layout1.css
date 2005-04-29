@@ -12,6 +12,35 @@ BlueRobot.com, a comment in your source code would help other developers
 to find this resource. Enjoy.
 */
 
+table { 
+  border: 2;
+}
+
+td {
+  border: 2px;
+  background: #d0d0ff;
+  text-align: left;
+  border-color: #44a;
+}
+
+th {
+  border: 2px;
+  text-align: left;
+  border: solid;
+  border-style: outset;
+  background: #bbc;
+  border-color: #44a;
+}
+
+table { 
+  border: 2px;
+  text-align: left;
+  border: solid;
+  border-style: outset;
+  background: #bbb;
+  border-color: #44a;
+}
+
 body {
   margin:0px;
   padding:0px;
