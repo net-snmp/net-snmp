@@ -424,7 +424,11 @@ var_diskio(struct variable * vp,
 /* disk load average patch by Rojer */
 
 struct dev_la {
+if ! ( defined(freebsd5) && __FreeBSD_version >= 500107 )
+        struct bintime prev;
+#else
         struct timeval prev;
+#endif
         double la1,la5,la15;
         char name[DEVSTAT_NAME_LEN+5];
         };
@@ -432,6 +436,7 @@ struct dev_la {
 static struct dev_la *devloads = NULL;
 static int ndevs = 0;
 
+if ! ( defined(freebsd5) && __FreeBSD_version >= 500107 )
 double devla_timeval_diff(struct timeval *t1, struct timeval *t2) {
 
         double dt1 = (double) t1->tv_sec + (double) t1->tv_usec * 0.000001;
@@ -440,6 +445,7 @@ double devla_timeval_diff(struct timeval *t1, struct timeval *t2) {
         return dt2-dt1;
 
         }
+#endif
 
 void devla_getstats(unsigned int regno, void *dummy) {
 
@@ -458,8 +464,8 @@ void devla_getstats(unsigned int regno, void *dummy) {
 		    ERROR_MSG("Memory alloc failure - devla_getstats()\n");
 		    return;
 	    }
-	    memset(lastat->dinfo, 0, sizeof(struct devinfo));
 	}
+	memset(lastat->dinfo, 0, sizeof(struct devinfo));
 
         if ((GETDEVS(lastat)) == -1) {
                 ERROR_MSG("can't do getdevs()\n");
@@ -482,7 +488,8 @@ void devla_getstats(unsigned int regno, void *dummy) {
                 devloads = (struct dev_la *) malloc(ndevs * sizeof(struct dev_la));
                 bzero(devloads, ndevs * sizeof(struct dev_la));
                 for (i=0; i < ndevs; i++) {
-                        memcpy(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time, sizeof(struct timeval));
+                        devloads[i].la1 = devloads[i].la5 = devloads[i].la15 = 0;
+                        memcpy(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time, sizeof(devloads[i].prev));
                         snprintf(devloads[i].name, sizeof(devloads[i].name), "%s%d",
                                 lastat->dinfo->devices[i].device_name, lastat->dinfo->devices[i].unit_number);
                         }
@@ -492,13 +499,19 @@ void devla_getstats(unsigned int regno, void *dummy) {
                 }
 
         for (i=0; i<ndevs; i++) {
+#if defined(freebsd5) && __FreeBSD_version >= 500107
+                busy_time = devstat_compute_etime(&lastat->dinfo->devices[i].busy_time, &devloads[i].prev);
+#else
                 busy_time = devla_timeval_diff(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time);
+#endif
+                if ( busy_time < 0 )
+                    busy_time = 0;   /* Account for possible FP loss of precision near zero */
                 busy_percent = busy_time * 100 / DISKIO_SAMPLE_INTERVAL;
                 devloads[i].la1 = devloads[i].la1 * expon1 + busy_percent * (1 - expon1);
 /*		fprintf(stderr, "(%d) %s: update la1=%.2lf%%\n", i, devloads[i].name, expon1); */
                 devloads[i].la5 = devloads[i].la5 * expon5 + busy_percent * (1 - expon5);
                 devloads[i].la15 = devloads[i].la15 * expon15 + busy_percent * (1 - expon15);
-                memcpy(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time, sizeof(struct timeval));
+                memcpy(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time, sizeof(devloads[i].prev));
                 }
 
         }
