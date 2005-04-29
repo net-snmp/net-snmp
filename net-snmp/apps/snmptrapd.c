@@ -92,6 +92,7 @@ SOFTWARE.
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/fd_event_manager.h>
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
 #include "notification_log.h"
@@ -593,7 +594,7 @@ main(int argc, char *argv[])
     netsnmp_transport *transport = NULL;
     int             arg, i = 0;
     int             count, numfds, block;
-    fd_set          fdset;
+    fd_set          readfds,writefds,exceptfds;
     struct timeval  timeout, *tvp;
     char           *cp, *listen_ports = NULL;
     int             agentx_subagent = 1, depmsg = 0;
@@ -1188,18 +1189,27 @@ main(int argc, char *argv[])
             reconfig = 0;
         }
         numfds = 0;
-        FD_ZERO(&fdset);
+        FD_ZERO(&readfds);
+        FD_ZERO(&writefds);
+        FD_ZERO(&writefds);
         block = 0;
         tvp = &timeout;
         timerclear(tvp);
         tvp->tv_sec = 5;
-        snmp_select_info(&numfds, &fdset, tvp, &block);
+        snmp_select_info(&numfds, &readfds, tvp, &block);
         if (block == 1)
             tvp = NULL;         /* block without timeout */
-        count = select(numfds, &fdset, 0, 0, tvp);
+        netsnmp_external_event_info(&numfds, &readfds, &writefds, &exceptfds);
+        count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
         gettimeofday(&Now, 0);
         if (count > 0) {
-            snmp_read(&fdset);
+            netsnmp_dispatch_external_events(&count, &readfds, &writefds,
+                                             &exceptfds);
+            /* If there are any more events after external events, then
+             * try SNMP events. */
+            if (count > 0) {
+                snmp_read(&readfds);
+            }
         } else
             switch (count) {
             case 0:
