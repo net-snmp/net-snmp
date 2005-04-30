@@ -173,6 +173,10 @@ SOURCE=..\..\agent\helpers\table_dataset.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\helpers\table_dataset2.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\helpers\table_iterator.c
 # End Source File
 # Begin Source File
@@ -233,7 +237,15 @@ SOURCE="..\..\include\net-snmp\agent\table_data.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\include\net-snmp\agent\table_data2.h"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\include\net-snmp\agent\table_dataset.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\table_dataset2.h"
 # End Source File
 # Begin Source File
 
