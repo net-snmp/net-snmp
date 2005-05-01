@@ -43,6 +43,9 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#ifdef cygwin
+#include <windows.h>
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -921,7 +924,7 @@ timeval_tticks(struct timeval *tv)
 
 char *netsnmp_getenv(const char *name)
 {
-#ifndef WIN32
+#if !defined (WIN32) && !defined (cygwin)
   return (getenv(name));
 #else
   char *temp = NULL;  
