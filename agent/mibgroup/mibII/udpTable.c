@@ -54,7 +54,7 @@ struct netsnmp_udpEntry_s {
 #define	UDPTABLE_IS_LINKED_LIST
 #else
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
 #include <iphlpapi.h>
 #define	UDPTABLE_ENTRY_TYPE	MIB_UDPROW		/* ??? */
 #define	UDPTABLE_LOCALADDRESS	dwLocalAddr
@@ -83,7 +83,7 @@ struct netsnmp_inpcb_s {
 #endif
 #define	UDPTABLE_IS_LINKED_LIST
 
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */
 #endif                          /* solaris2 */
 #endif                          /* hpux11 */
 
@@ -137,9 +137,9 @@ init_udpTable(void)
     iinfo->get_first_data_point = udpTable_first_entry;
     iinfo->get_next_data_point  = udpTable_next_entry;
     iinfo->table_reginfo        = table_info;
-#if defined(WIN32) || defined(solaris2)
+#if defined (WIN32) || defined (cygwin) || defined (solaris2)
     iinfo->flags               |= NETSNMP_ITERATOR_FLAG_SORTED;
-#endif /* WIN32 || solaris2 */
+#endif /* WIN32 || cygwin || solaris2 */
 
 
     /*
@@ -278,7 +278,7 @@ udpTable_next_entry( void **loop_context,
     /*
      * Set up the indexing for the specified row...
      */
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     port = ntohl((u_long)udp_head[i].UDPTABLE_LOCALADDRESS);
     snmp_set_var_value(index, (u_char *)&port,
                                   sizeof(udp_head[i].UDPTABLE_LOCALADDRESS));
@@ -301,7 +301,7 @@ udpTable_next_entry( void **loop_context,
 void
 udpTable_free(netsnmp_cache *cache, void *magic)
 {
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     if (udp_head) {
 		/* the allocated structure is a count followed by table entries */
 		free((char *)(udp_head) - sizeof(DWORD));
@@ -554,7 +554,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
 }
 #else                           /* solaris2 */
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
 int
 udpTable_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -586,7 +586,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
 	free(pUdpTable);
     return -1;
 }
-#else                           /* WIN32 */
+#else                           /* WIN32 cygwin*/
 
 #if (defined(CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST))
 int
@@ -737,7 +737,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
 #endif				/* UDB_SYMBOL */
 #endif				/* PCB_TABLE */
 #endif		/* (defined(CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST)) */
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin*/
 #endif                          /* linux */
 #endif                          /* solaris2 */
 #endif                          /* hpux11 */

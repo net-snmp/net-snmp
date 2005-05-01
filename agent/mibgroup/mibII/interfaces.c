@@ -57,7 +57,7 @@
 #endif
 
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
+# if defined (WIN32) || defined (cygwin)
 #  include <sys/timeb.h>
 # else
 # include <sys/time.h>
@@ -167,7 +167,6 @@
 #endif                          /* hpux */
 
 #ifdef cygwin
-#define WIN32
 #include <windows.h>
 #endif
 
@@ -223,7 +222,7 @@ struct variable3 interfaces_variables[] = {
     {IFMTU, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 4}},
     {IFSPEED, ASN_GAUGE, RONLY, var_ifEntry, 3, {2, 1, 5}},
     {IFPHYSADDRESS, ASN_OCTET_STR, RONLY, var_ifEntry, 3, {2, 1, 6}},
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     {IFADMINSTATUS, ASN_INTEGER, RWRITE, var_ifEntry, 3, {2, 1, 7}},
 #else
     {IFADMINSTATUS, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 7}},
@@ -327,7 +326,7 @@ static struct ifnet *ifnetaddr_list;
  * write_method
  * 
  */
-#ifndef WIN32
+#if !defined (WIN32) && !defined (cygwin)
 static int
 header_ifEntry(struct variable *vp,
                oid * name,
@@ -2523,7 +2522,7 @@ var_ifEntry(struct variable * vp,
 #endif                          /* HAVE_NET_IF_MIB_H */
 #endif                          /* !USE_SYSCTL_IFLIST */
 
-#else                           /* WIN32 */
+#else                           /* WIN32 cygwin */
 #include <iphlpapi.h>
 
 WriteMethod     writeIfEntry;
@@ -2809,4 +2808,4 @@ writeIfEntry(int action,
     }
     return SNMP_ERR_NOERROR;
 }                               /* end of writeIfEntry */
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */
