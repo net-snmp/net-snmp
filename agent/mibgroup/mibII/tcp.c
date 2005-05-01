@@ -155,7 +155,7 @@ init_tcp(void)
 #define USES_SNMP_DESIGNED_TCPSTAT
 #endif
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
 #include <iphlpapi.h>
 #define TCP_STAT_STRUCTURE     MIB_TCPSTATS
 #endif
@@ -415,7 +415,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
         break;
 #else			/* hpux11 */
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     case TCPRTOALGORITHM:
         ret_value = tcpstat.dwRtoAlgorithm;
         type = ASN_INTEGER;
@@ -463,7 +463,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
     case TCPOUTRSTS:
         ret_value = tcpstat.dwOutRsts;
         break;
-#endif			/* WIN32 */
+#endif			/* WIN32 cygwin */
 #endif			/* hpux11 */
 #endif			/* USES_TRADITIONAL_TCPSTAT */
 #endif			/* USES_SNMP_DESIGNED_TCPSTAT */
@@ -640,7 +640,7 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     return ret_value;
 }
 #else                           /* solaris2 */
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
 int
 tcp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -655,7 +655,7 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else                           /* WIN32 */
+#else                           /* WIN32 cygwin */
 #if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_STATS))
 int
 tcp_load(netsnmp_cache *cache, void *vmagic)
@@ -721,7 +721,7 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
 #endif                          /* hpux11 */
 #endif                          /* linux */
 #endif                          /* solaris2 */
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */
 
 
 void

@@ -75,11 +75,10 @@
 #include "route_write.h"
 
 #ifdef cygwin
-#define WIN32
 #include <windows.h>
 #endif
 
-#ifndef WIN32
+#if !defined (WIN32) && !defined (cygwin)
 
 #ifndef STRUCT_RTENTRY_HAS_RT_DST
 #define rt_dst rt_nodes->rn_key
@@ -551,7 +550,7 @@ write_rte(int action,
     return SNMP_ERR_NOERROR;
 }
 
-#else                           /* WIN32 */
+#else                           /* WIN32 cygwin */
 #include <iphlpapi.h>
 
 extern PMIB_IPFORWARDROW route_row;
@@ -786,4 +785,4 @@ write_rte(int action,
     return retval;
 }
 
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */

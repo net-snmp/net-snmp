@@ -116,7 +116,7 @@ init_icmp(void)
 #define USES_SNMP_DESIGNED_ICMPSTAT
 #endif
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
 #include <iphlpapi.h>
 #define ICMP_STAT_STRUCTURE MIB_ICMP
 #endif
@@ -399,7 +399,7 @@ icmp_handler(netsnmp_mib_handler          *handler,
         break;
 #else                          /* hpux11 */
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     case ICMPINMSGS:
         ret_value = icmpstat.stats.icmpInStats.dwMsgs;
         break;
@@ -478,7 +478,7 @@ icmp_handler(netsnmp_mib_handler          *handler,
     case ICMPOUTADDRMASKREPS:
         ret_value = icmpstat.stats.icmpOutStats.dwAddrMaskReps;
         break;
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */
 #endif                          /* hpux11 */
 #endif                          /* USES_TRADITIONAL_ICMPSTAT */
 #endif                          /* USES_SNMP_DESIGNED_ICMPSTAT */
@@ -660,7 +660,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     return ret_value;
 }
 #else		/* solaris2 */
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
 int
 icmp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -675,7 +675,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else		/* WIN32 */
+#else		/* WIN32 cygwin */
 #if (defined(CAN_USE_SYSCTL) && defined(ICMPCTL_STATS))
 int
 icmp_load(netsnmp_cache *cache, void *vmagic)
@@ -740,7 +740,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
 #endif		/* ICMPSTAT_SYMBOL */
 #endif		/* HAVE_SYS_TCPIPSTATS_H */
 #endif		/* CAN_USE_SYSCTL && ICMPCTL_STATS */
-#endif		/* WIN32 */
+#endif		/* WIN32 cygwin */
 #endif		/* solaris2 */
 #endif		/* linux */
 #endif		/* hpux11 */
