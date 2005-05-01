@@ -121,7 +121,6 @@
 #include "sysORTable.h"
 
 #ifdef cygwin
-#define WIN32
 #include <windows.h>
 #endif
 
@@ -144,7 +143,7 @@
 	 *
 	 *********************/
 
-#ifndef WIN32
+#if !defined (WIN32) && !defined (cygwin)
 
 #if !defined(CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
 #ifndef solaris2
@@ -943,7 +942,7 @@ var_ipAddrEntry(struct variable *vp,
 
 #endif                          /* CAN_USE_SYSCTL && IPCTL_STATS */
 
-#else                           /* WIN32 */
+#else                           /* WIN32 cygwin */
 #include <iphlpapi.h>
 u_char         *
 var_ipAddrEntry(struct variable *vp,
@@ -1049,4 +1048,4 @@ var_ipAddrEntry(struct variable *vp,
     }
     return NULL;
 }
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */
