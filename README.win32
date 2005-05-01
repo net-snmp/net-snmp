@@ -30,6 +30,7 @@ MinGW - Building with OpenSSL
 Configuring Net-SNMP
 How to Register the Net-SNMP Agent and Trap Daemon as Windows services
 Notes on SET support for WIN32 ports
+Notes on preprocessor defines for MSVC, MinGW and Cygwin
 Acknowledgements
 
 
@@ -947,7 +948,10 @@ If you want to use IPv6 transports, add:
 	--enable-ipv6 --with-transports="TCPIPv6 UDPIPv6" \
 	--with-libs="-lws2_32" \
 
-
+Note:  The source code should *not* be in a folder that contains a space.  For
+       example, compiling in your 'My Documents' or your Desktop (usually
+       c:\Documents and Settings\xxxx\Desktop) is not supported.
+        
 This has been tested for Windows 98 and Windows NT 4.0.  In order for
 the process part of the host resources MIB to work under NT you will need
 to get hold of the PSAPI.DLL. This available under the download section
@@ -982,6 +986,10 @@ builds under MinGW with MSyS is available at:
 
         http://www.boedog.com/net-snmp/gnu_regex/regex-0-12-mingw-r2.tar.gz
 
+Note:  The source code should *not* be in a folder that contains a space.  For
+       example, compiling in your 'My Documents' or your Desktop (usually
+       c:\Documents and Settings\xxxx\Desktop) is not supported.
+       
 1.  Build and install GNU regex following the instructions in the 
     regex-0-12-mingw-r2 README.
 
@@ -1027,7 +1035,7 @@ builds under MinGW with MSyS is available at:
     system environment variables or registry keys as explained in the 
     'Configuration_Overview.html' file located in win32/dist/htmlhelp.
 
-
+       
 ***************************************************************************
 *
 * MinGW - Building with OpenSSL
@@ -1339,7 +1347,41 @@ tcpConnState of tcpConnTable is writable and the only value which may
 be set by a management station is deleteTCB(12)
 
 
+***************************************************************************
+*
+* Notes on preprocessor defines for MSVC, MinGW and Cygwin
+*
+***************************************************************************
 
+When adding Windows specific code, one or more of the following defines should
+be used:
+
+Define:                  Description:
+-------                  ------------
+WIN32                    Defined by MSVC & MinGW
+
+_MSC_VER                 Defined by MSVC only (standard MSVC macro)
+
+mingw32                  Defined by MinGW only
+
+cygwin                   Defined by Cygwin only
+
+HAVE_WIN32_PLATFORM_SDK  Should be defined if the Microsoft Platform SDK is
+                         installed and registered with MSVC or enabled for
+                         MinGW or Cygwin
+
+MinGW and Cygwin do not require the Microsoft Platform SDK as they both should
+contain most if not all of the functionality provided by the SDK.  When adding
+code that requires the PSDK under MSVC, the following can usually be used:
+
+ #if defined (HAVE_WIN32_PLATFORM_SDK) || defined (mingw32) || defined (cygwin)
+                         
+As listed above, Cygwin does NOT define WIN32.  When adding generic Windows 
+code that will work with MSVC, MinGW and Cygwin, the following should be used:
+
+ #if defined (WIN32) || defined (cygwin)
+
+  
 ***************************************************************************
 *
 * Acknowledgements
