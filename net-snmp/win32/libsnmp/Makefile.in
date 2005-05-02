@@ -26,6 +26,7 @@ CLEAN :
 	-@erase "$(INTDIR)\container_null.obj"
 	-@erase "$(INTDIR)\data_list.obj"
 	-@erase "$(INTDIR)\default_store.obj"
+	-@erase "$(INTDIR)\fd_event_manager.obj"
 	-@erase "$(INTDIR)\getopt.obj"
 	-@erase "$(INTDIR)\int64.obj"
 	-@erase "$(INTDIR)\inet_ntop.obj"
@@ -128,6 +129,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\container_null.obj" \
 	"$(INTDIR)\data_list.obj" \
 	"$(INTDIR)\default_store.obj" \
+	"$(INTDIR)\fd_event_manager.obj" \
 	"$(INTDIR)\getopt.obj" \
 	"$(INTDIR)\int64.obj" \
 	"$(INTDIR)\inet_ntop.obj" \
@@ -191,6 +193,7 @@ CLEAN :
 	-@erase "$(INTDIR)\container_null.obj"
 	-@erase "$(INTDIR)\data_list.obj"
 	-@erase "$(INTDIR)\default_store.obj"
+	-@erase "$(INTDIR)\fd_event_manager.obj"
 	-@erase "$(INTDIR)\getopt.obj"
 	-@erase "$(INTDIR)\int64.obj"
 	-@erase "$(INTDIR)\inet_ntop.obj"
@@ -294,6 +297,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\container_null.obj" \
 	"$(INTDIR)\data_list.obj" \
 	"$(INTDIR)\default_store.obj" \
+	"$(INTDIR)\fd_event_manager.obj" \
 	"$(INTDIR)\getopt.obj" \
 	"$(INTDIR)\int64.obj" \
 	"$(INTDIR)\inet_ntop.obj" \
@@ -416,6 +420,12 @@ SOURCE=..\..\snmplib\data_list.c
 SOURCE=..\..\snmplib\default_store.c
 
 "$(INTDIR)\default_store.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\snmplib\fd_event_manager.c
+
+"$(INTDIR)\fd_event_manager.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
