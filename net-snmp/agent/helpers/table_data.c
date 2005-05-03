@@ -258,6 +258,25 @@ netsnmp_table_data_get_from_oid(netsnmp_table_data *table,
     return NULL;
 }
 
+/** returns the first row in the table */
+netsnmp_table_row *
+netsnmp_table_data_get_first_row(netsnmp_table_data *table)
+{
+    if (!table)
+        return NULL;
+    return table->first_row;
+}
+
+/** returns the next row in the table */
+netsnmp_table_row *
+netsnmp_table_data_get_next_row(netsnmp_table_data *table,
+                                netsnmp_table_row  *row)
+{
+    if (!row)
+        return NULL;
+    return row->next;
+}
+
 /** Creates a table_data handler and returns it */
 netsnmp_mib_handler *
 netsnmp_get_table_data_handler(netsnmp_table_data *table)
