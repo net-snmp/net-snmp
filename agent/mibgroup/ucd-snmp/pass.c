@@ -20,6 +20,9 @@
 #if HAVE_SYS_WAIT_H
 # include <sys/wait.h>
 #endif
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
