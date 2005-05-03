@@ -39,6 +39,39 @@ int netsnmp_watched_timestamp_register(netsnmp_mib_handler *whandler,
 int netsnmp_register_watched_spinlock(netsnmp_handler_registration *reginfo,
                                       int *spinlock);    
 
+/*
+ * Convenience registration calls
+ */
+
+int netsnmp_register_ulong_scalar(const char *name,
+                              oid * reg_oid, size_t reg_oid_len,
+                              u_long * it,
+                              Netsnmp_Node_Handler * subhandler);
+int netsnmp_register_read_only_ulong_scalar(const char *name,
+                              oid * reg_oid, size_t reg_oid_len,
+                              u_long * it,
+                              Netsnmp_Node_Handler * subhandler);
+int netsnmp_register_long_scalar(const char *name,
+                              oid * reg_oid, size_t reg_oid_len,
+                              long * it,
+                              Netsnmp_Node_Handler * subhandler);
+int netsnmp_register_read_only_long_scalar(const char *name,
+                              oid * reg_oid, size_t reg_oid_len,
+                              long * it,
+                              Netsnmp_Node_Handler * subhandler);
+int netsnmp_register_int_scalar(const char *name,
+                              oid * reg_oid, size_t reg_oid_len,
+                              int * it,
+                              Netsnmp_Node_Handler * subhandler);
+int netsnmp_register_read_only_int_scalar(const char *name,
+                              oid * reg_oid, size_t reg_oid_len,
+                              int * it,
+                              Netsnmp_Node_Handler * subhandler);
+int netsnmp_register_read_only_counter32_scalar(const char *name,
+                              oid * reg_oid, size_t reg_oid_len,
+                              u_long * it,
+                              Netsnmp_Node_Handler * subhandler);
+
 #define WATCHER_HANDLER_NAME "watcher"
 
 netsnmp_mib_handler  *netsnmp_get_watcher_handler(void);
