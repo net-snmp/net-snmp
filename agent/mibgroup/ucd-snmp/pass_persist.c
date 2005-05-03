@@ -721,6 +721,26 @@ write_persist_pipe(int iindex, const char *data)
         return 0;
     }
 #endif                          /* HAVE_SIGNAL */
+#if defined(WIN32) && !defined (mingw32) && !defined (HAVE_SIGNAL)
+/* We have no signal here (maybe we can make a Thread?) so write may block, 
+ * but probably never will.
+ */
+    int wret = 0, werrno = 0;
+
+    /*
+     * Do the write 
+     */
+    wret = write(persist_pipes[iindex].fdOut, data,strlen(data));
+    werrno = errno;
+    
+    if (wret < 0) {
+      if (werrno != EINTR) {
+        DEBUGMSGTL(("ucd-snmp/pass_persist", "write_persist_pipe: write returned unknown error %d\n",errno));
+      }
+      close_persist_pipe(iindex);
+      return 0;
+    }
+#endif                          /* WIN32 */
     return 1;
 }
 

@@ -185,7 +185,7 @@ shell_command(struct extensible *ex)
 int
 exec_command(struct extensible *ex)
 {
-#if HAVE_EXECV
+#if defined (HAVE_EXECV) || defined (WIN32)
     int             fd;
     FILE           *file;
 
@@ -197,7 +197,7 @@ exec_command(struct extensible *ex)
         fclose(file);
         wait_on_exec(ex);
     } else
-#endif
+#endif /* HAVE_EXECV */
     {
         ex->output[0] = 0;
         ex->result = 0;
@@ -397,6 +397,98 @@ get_exec_output(struct extensible *ex)
 #endif
 
 #else                           /* !HAVE_EXECV */
+#if defined(WIN32) && !defined(HAVE_EXECV)
+/* MSVC and MinGW.  Cygwin already works as it has execv and fork */
+    int         fd;   
+    
+    /* Reference:  MS tech note: 190351 */
+    HANDLE hOutputReadTmp, hOutputRead, hOutputWrite = NULL;
+        
+    HANDLE hErrorWrite;
+    SECURITY_ATTRIBUTES sa;
+    PROCESS_INFORMATION pi;
+    STARTUPINFO si;
+    
+    sa.nLength= sizeof(SECURITY_ATTRIBUTES);
+    sa.lpSecurityDescriptor = NULL;
+    sa.bInheritHandle = TRUE;
+
+    DEBUGMSGTL(("exec:get_exec_output","calling %s\n", ex->command));
+    
+    /* Child temporary output pipe with Inheritance on (sa.bInheritHandle is true) */    
+    if (!CreatePipe(&hOutputReadTmp,&hOutputWrite,&sa,0)) {
+      DEBUGMSGTL(("util_funcs", "get_exec_pipes CreatePipe ChildOut: %d\n",
+            GetLastError()));
+      return -1;
+    }
+    
+    /* Copy the stdout handle to the stderr handle in case the child closes one of 
+     * its stdout handles. */
+    if (!DuplicateHandle(GetCurrentProcess(),hOutputWrite, GetCurrentProcess(),
+          &hErrorWrite,0, TRUE,DUPLICATE_SAME_ACCESS)) {
+      DEBUGMSGTL(("util_funcs", "get_exec_output DuplicateHandle: %d\n", GetLastError()));
+      return -1;
+    }
+
+    /* Create new copies of the input and output handles but set bInheritHandle to 
+     * FALSE so the new handle can not be inherited.  Otherwise the handles can not
+     * be closed.  */
+    if (!DuplicateHandle(GetCurrentProcess(), hOutputReadTmp, GetCurrentProcess(),
+          &hOutputRead, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
+      DEBUGMSGTL(("util_funcs", "get_exec_output DupliateHandle ChildOut: %d\n", GetLastError()));
+      CloseHandle(hErrorWrite);
+      return -1;
+    }   
+
+    /* Close the temporary output and input handles */
+    if (!CloseHandle(hOutputReadTmp)) {
+      DEBUGMSGTL(("util_funcs", "get_exec_output CloseHandle (hOutputReadTmp): %d\n", GetLastError()));
+      CloseHandle(hErrorWrite);
+      CloseHandle(hOutputRead);
+      return -1;
+    }
+    
+    /* Associates a C run-time file descriptor with an existing operating-system file handle. */
+    fd = _open_osfhandle((long) hOutputRead, 0);
+    
+    /* Set up STARTUPINFO for CreateProcess with the handles and have it hide the window
+     * for the new process. */
+    ZeroMemory(&si,sizeof(STARTUPINFO));
+    si.cb = sizeof(STARTUPINFO);
+    si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+    si.hStdOutput = hOutputWrite;
+    si.hStdError = hErrorWrite;
+    si.wShowWindow = SW_HIDE;
+   
+    /* Launch the process that you want to redirect.  Example snmpd.conf pass_persist:
+     * pass_persist    .1.3.6.1.4.1.2021.255  c:/perl/bin/perl c:/temp/pass_persisttest
+    */
+    if (!CreateProcess(NULL, ex->command, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
+      DEBUGMSGTL(("util_funcs","get_exec_output CreateProcess:'%s' %d\n",ex->command, GetLastError()));
+      CloseHandle(hErrorWrite);
+      CloseHandle(hOutputRead);
+      return -1;
+    }
+    
+    /* Set global child process handle */
+    ex->pid = (int)pi.hProcess;
+
+    /* Close pipe handles to make sure that no handles to the write end of the
+     * output pipe are maintained in this process or else the pipe will
+     * not close when the child process exits and any calls to ReadFile 
+     * will hang.
+     */
+
+    if (!CloseHandle(hOutputWrite)){
+      DEBUGMSGTL(("util_funcs","get_exec_output CloseHandle hOutputWrite: %d\n",ex->command, GetLastError()));
+      return -1;
+    }
+    if (!CloseHandle(hErrorWrite)) {
+      DEBUGMSGTL(("util_funcs","get_exec_output CloseHandle hErrorWrite: %d\n",ex->command, GetLastError()));
+      return -1;
+    }
+    return fd;
+#endif                          /* WIN32 */
     return -1;
 #endif
 }
@@ -482,6 +574,122 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
         return (1);             /* We are returning 0 for error... */
     }
 #endif                          /* !HAVE_EXECV */
+#if defined(WIN32) && !defined (mingw32) !defined(HAVE_EXECV)
+/* MSVC (MinGW not working but should use this code).  Cygwin already works as it has execv and fork */
+    /* Reference:  MS tech note: 190351 */
+    HANDLE hInputWriteTmp, hInputRead, hInputWrite = NULL;
+    HANDLE hOutputReadTmp, hOutputRead, hOutputWrite = NULL;
+        
+    HANDLE hErrorWrite;
+    SECURITY_ATTRIBUTES sa;
+    PROCESS_INFORMATION pi;
+    STARTUPINFO si;
+    
+    sa.nLength= sizeof(SECURITY_ATTRIBUTES);
+    sa.lpSecurityDescriptor = NULL;
+    sa.bInheritHandle = TRUE;
+
+    /* Child temporary output pipe with Inheritance on (sa.bInheritHandle is true) */    
+    if (!CreatePipe(&hOutputReadTmp,&hOutputWrite,&sa,0)) {
+      DEBUGMSGTL(("util_funcs", "get_exec_pipes CreatePipe ChildOut: %d\n",
+            GetLastError()));
+      return 0;
+    }
+    /* Child temporary input pipe with Inheritance on (sa.bInheritHandle is true) */    
+    if (!CreatePipe(&hInputRead,&hInputWriteTmp,&sa,0)) {
+      DEBUGMSGTL(("util_funcs", "get_exec_pipes CreatePipe ChildIn: %d\n", GetLastError()));
+      return 0;
+    }
+    
+    /* Copy the stdout handle to the stderr handle in case the child closes one of 
+     * its stdout handles. */
+    if (!DuplicateHandle(GetCurrentProcess(),hOutputWrite, GetCurrentProcess(),
+          &hErrorWrite,0, TRUE,DUPLICATE_SAME_ACCESS)) {
+      DEBUGMSGTL(("util_funcs", "get_exec_pipes DuplicateHandle: %d\n", GetLastError()));
+      return 0;
+    }
+
+    /* Create new copies of the input and output handles but set bInheritHandle to 
+     * FALSE so the new handle can not be inherited.  Otherwise the handles can not
+     * be closed.  */
+    if (!DuplicateHandle(GetCurrentProcess(), hOutputReadTmp, GetCurrentProcess(),
+          &hOutputRead, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
+      DEBUGMSGTL(("util_funcs", "get_exec_pipes DupliateHandle ChildOut: %d\n", GetLastError()));
+      CloseHandle(hErrorWrite);
+      return 0;
+    }   
+    if (!DuplicateHandle(GetCurrentProcess(),hInputWriteTmp,
+          GetCurrentProcess(), &hInputWrite, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
+      DEBUGMSGTL(("util_funcs","get_exec_pipes DupliateHandle ChildIn: %d\n", GetLastError()));
+      CloseHandle(hErrorWrite);
+      CloseHandle(hOutputRead);
+      return 0;
+    }
+
+    /* Close the temporary output and input handles */
+    if (!CloseHandle(hOutputReadTmp)) {
+      DEBUGMSGTL(("util_funcs", "get_exec_pipes CloseHandle (hOutputReadTmp): %d\n", GetLastError()));
+      CloseHandle(hErrorWrite);
+      CloseHandle(hOutputRead);
+      CloseHandle(hInputWrite);
+      return 0;
+    }
+    if (!CloseHandle(hInputWriteTmp)) {
+      DEBUGMSGTL(("util_funcs", "get_exec_pipes CloseHandle (hInputWriteTmp): %d\n", GetLastError()));
+      CloseHandle(hErrorWrite);
+      CloseHandle(hOutputRead);
+      CloseHandle(hInputWrite);
+      return 0;
+    }
+    
+    /* Associates a C run-time file descriptor with an existing operating-system file handle. */
+    *fdIn = _open_osfhandle((long) hOutputRead, 0);
+    *fdOut = _open_osfhandle((long) hInputWrite, 0);
+    
+    /* Set up STARTUPINFO for CreateProcess with the handles and have it hide the window
+     * for the new process. */
+    ZeroMemory(&si,sizeof(STARTUPINFO));
+    si.cb = sizeof(STARTUPINFO);
+    si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+    si.hStdOutput = hOutputWrite;
+    si.hStdInput = hInputRead;
+    si.hStdError = hErrorWrite;
+    si.wShowWindow = SW_HIDE;
+   
+    /* Launch the process that you want to redirect.  Example snmpd.conf pass_persist:
+     * pass_persist    .1.3.6.1.4.1.2021.255  c:/perl/bin/perl c:/temp/pass_persisttest
+    */
+    if (!CreateProcess(NULL, cmd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
+      DEBUGMSGTL(("util_funcs","get_exec_pipes CreateProcess:'%s' %d\n",cmd, GetLastError()));
+      CloseHandle(hErrorWrite);
+      CloseHandle(hOutputRead);
+      CloseHandle(hInputWrite);
+      return 0;
+    }
+    
+    /* Set global child process handle */
+    *pid = (int)pi.hProcess;
+
+    /* Close pipe handles to make sure that no handles to the write end of the
+     * output pipe are maintained in this process or else the pipe will
+     * not close when the child process exits and any calls to ReadFile 
+     * will hang.
+     */
+
+    if (!CloseHandle(hOutputWrite)){
+      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle hOutputWrite: %d\n",cmd, GetLastError()));
+      return 0;
+    }
+    if (!CloseHandle(hInputRead)) {
+      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle hInputRead: %d\n",cmd, GetLastError()));
+      return 0;
+    }
+    if (!CloseHandle(hErrorWrite)) {
+      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle hErrorWrite: %d\n",cmd, GetLastError()));
+      return 0;
+    }
+    return 1;
+#endif                          /* WIN32 */
     return 0;
 }
 
