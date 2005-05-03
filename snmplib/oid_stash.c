@@ -98,6 +98,9 @@ netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
         if (!*root)
             return SNMPERR_MALLOC;
     }
+    DEBUGMSGTL(( "oid_stash", "stash_add_data "));
+    DEBUGMSGOID(("oid_stash", lookup, lookup_len));
+    DEBUGMSG((   "oid_stash", "\n"));
     tmpp = NULL;
     for (curnode = *root, i = 0; i < lookup_len; i++) {
         tmpp = curnode->children[lookup[i] % curnode->children_size];
