@@ -5,7 +5,10 @@
 
 /* Define if compiling with the mibII module files.  */
 #define USING_MIBII_MODULE 1
- 
+
+/* Define if compiling with the ucd_snmp module files.  */
+#define USING_UCD_SNMP_MODULE 1
+
 /* Define if compiling with the snmpv3mibs module files.  */
 #define USING_SNMPV3MIBS_MODULE 1
  
