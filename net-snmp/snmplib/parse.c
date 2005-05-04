@@ -4657,6 +4657,7 @@ add_mibdir(const char *dirname)
     struct dirent  *file;
     char            tmpstr[300];
     int             count = 0;
+    int             fname_len = 0;
 #if !(defined(WIN32) || defined(cygwin))
     char            token[MAXTOKEN];
     char space;
@@ -4710,9 +4711,16 @@ add_mibdir(const char *dirname)
         ip = fopen(tmpstr, "w");
         while ((file = readdir(dir))) {
             /*
-             * Only parse file names not beginning with a '.' 
+             * Only parse file names that don't begin with a '.' 
+             * Also skip files ending in '~', or starting/ending
+             * with '#' which are typically editor backup files.
              */
-            if (file->d_name != NULL && file->d_name[0] != '.') {
+            if (file->d_name != NULL) {
+              fname_len = strlen( file->d_name );
+              if (fname_len > 0 && file->d_name[0] != '.' 
+                                && file->d_name[0] != '#'
+                                && file->d_name[fname_len-1] != '#'
+                                && file->d_name[fname_len-1] != '~') {
                 snprintf(tmpstr, sizeof(tmpstr), "%s/%s", dirname, file->d_name);
                 tmpstr[ sizeof(tmpstr)-1 ] = 0;
                 if ((dir2 = opendir(tmpstr))) {
@@ -4724,6 +4732,7 @@ add_mibdir(const char *dirname)
                     if ( add_mibfile( tmpstr, file->d_name, ip ))
                         count++;
                 }
+              }
             }
         }
         File = oldFile;
