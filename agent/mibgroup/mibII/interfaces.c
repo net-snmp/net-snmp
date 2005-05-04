@@ -2013,9 +2013,10 @@ Interface_Scan_Next(short *Index,
              *  Try to find an address for this interface
              */
 
-            auto_nlist(IFADDR_SYMBOL, (char *) &ia, sizeof(ia));
 #ifdef netbsd1
             ia = (struct in_ifaddr *) ifnet.if_addrlist.tqh_first;
+#else
+            auto_nlist(IFADDR_SYMBOL, (char *) &ia, sizeof(ia));
 #endif
             while (ia) {
                 klookup((unsigned long) ia, (char *) &in_ifaddr,
