@@ -245,9 +245,9 @@ snmp_clone_var(netsnmp_variable_list * var, netsnmp_variable_list * newvar)
         return 1;
 
     /*
-     * need a pointer and a length to copy a string value. 
+     * need a pointer to copy a string value. 
      */
-    if (var->val.string && var->val_len) {
+    if (var->val.string) {
         if (var->val.string != &var->buf[0]) {
             if (var->val_len <= sizeof(var->buf))
                 newvar->val.string = newvar->buf;
