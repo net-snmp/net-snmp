@@ -580,8 +580,11 @@ var_hrswrun(struct variable * vp,
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
 #elif defined(linux)
         sprintf(string, "/proc/%d/status", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            strcpy(string, "<exited>");
+            *var_len = strlen(string);
+            return (u_char *) string;
+        }
         fgets(buf, sizeof(buf), fp);    /* Name: process name */
         cp = buf;
         while (*cp != ':')
@@ -686,8 +689,11 @@ var_hrswrun(struct variable * vp,
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
 #elif defined(linux)
         sprintf(string, "/proc/%d/cmdline", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            strcpy(string, "<exited>");
+            *var_len = strlen(string);
+            return (u_char *) string;
+        }
         if (fgets(buf, sizeof(buf) - 1, fp))    /* argv[0] '\0' argv[1] '\0' .... */
             strcpy(string, buf);
         else {
@@ -787,8 +793,11 @@ var_hrswrun(struct variable * vp,
         }
 #elif defined(linux)
         sprintf(string, "/proc/%d/cmdline", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            strcpy(string, "");
+            *var_len = 0;
+            return (u_char *) string;
+        }
         memset(buf, 0, sizeof(buf));
 
         /*
@@ -976,8 +985,10 @@ var_hrswrun(struct variable * vp,
             proc_table[LowProcIndex].kp_proc.p_iticks;
 #elif defined(linux)
         sprintf(string, "/proc/%d/stat", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            long_return = 0;
+            return (u_char *) & long_return;
+        }
         fgets(buf, sizeof(buf), fp);
         cp = buf;
         for (i = 0; i < 13; ++i) {      /* skip 13 fields */
@@ -1053,8 +1064,10 @@ var_hrswrun(struct variable * vp,
 #endif
 #elif defined(linux)
         sprintf(string, "/proc/%d/stat", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            long_return = 0;
+            return (u_char *) & long_return;
+        }
         fgets(buf, sizeof(buf), fp);
         cp = buf;
         for (i = 0; i < 23; ++i) {      /* skip 23 fields */
