@@ -1729,10 +1729,10 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # save the configure arguments
 #
 cat >>confdefs.h <<_ACEOF
-#define CONFIGURE_OPTIONS "\"$ac_configure_args\""
+#define CONFIGURE_OPTIONS "$ac_configure_args"
 _ACEOF
 
-CONFIGURE_OPTIONS="\"$ac_configure_args\""
+CONFIGURE_OPTIONS="$ac_configure_args"
 
 
 #
