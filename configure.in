@@ -2183,7 +2183,14 @@ fi
 # AC_CHECK_LIB(des, main)
 AC_CHECK_LIB(m, asin)
 # nlist is needed for uptime on some sytems in the generic library
-AC_CHECK_LIB(elf, nlist)
+ AC_ARG_WITH(elf,
+  [  --without-elf           use elf libraries],[
+  if test "x$with_elf" != "xno"; then
+     AC_CHECK_LIB(elf, nlist)
+  fi
+  ])
+
+ 
 
 # On some platforms (Irix) libnsl and libsocket should not be used.
 AC_CHECK_FUNC(gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME),
@@ -2230,8 +2237,18 @@ if test "x$with_rpm" != "xno" && \
       CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
 
   # two variants of bzip2 need checking.
+  AC_ARG_WITH(bzip2,
+  [  --with-bzip2[=DIR]        use libbzip2 in DIR],[
+    if test -d "$withval"; then
+      CPPFLAGS="${CPPFLAGS} -I$withval/include"
+      LDFLAGS="${LDFLAGS} -L$withval/lib"
+    fi
+    if test "x$with_bzip2" != "xno"; then
   AC_CHECK_LIB(bz2, bzread, [_rpmlibs="$_rpmlibs -lbz2"],
      AC_CHECK_LIB(bz2, BZ2_bzread, [_rpmlibs="$_rpmlibs -lbz2"],))
+    fi
+  ])
+
 
   # two variants of db1 need checking.
   AC_CHECK_LIB(db1, dbopen, [_rpmlibs="-ldb1 $_rpmlibs"],
