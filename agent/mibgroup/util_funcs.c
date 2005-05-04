@@ -574,7 +574,7 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
         return (1);             /* We are returning 0 for error... */
     }
 #endif                          /* !HAVE_EXECV */
-#if defined(WIN32) && !defined (mingw32) !defined(HAVE_EXECV)
+#if defined(WIN32) && !defined (mingw32) && !defined(HAVE_EXECV)
 /* MSVC (MinGW not working but should use this code).  Cygwin already works as it has execv and fork */
     /* Reference:  MS tech note: 190351 */
     HANDLE hInputWriteTmp, hInputRead, hInputWrite = NULL;
