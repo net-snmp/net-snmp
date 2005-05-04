@@ -381,6 +381,7 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
 #ifdef USE_OPENSSL
     const EVP_MD         *hashfn;
     EVP_MD_CTX     ctx, *cptr;
+    unsigned int   tmp_len;
 #endif
 
     DEBUGTRACE;
@@ -426,13 +427,16 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
 
 /** do the final pass */
 #if defined(OLD_DES)
-    EVP_DigestFinal(cptr, MAC, MAC_len);
+    EVP_DigestFinal(cptr, MAC, &tmp_len);
+    *MAC_len = tmp_len;
 #else /* !OLD_DES */
     if (SSLeay() < 0x907000) {
-        EVP_DigestFinal(cptr, MAC, MAC_len);
+        EVP_DigestFinal(cptr, MAC, &tmp_len);
+        *MAC_len = tmp_len;
         free(cptr);
     } else {
-        EVP_DigestFinal_ex(cptr, MAC, MAC_len);
+        EVP_DigestFinal_ex(cptr, MAC, &tmp_len);
+        *MAC_len = tmp_len;
         EVP_MD_CTX_cleanup(cptr);
     }
 #endif                          /* OLD_DES */
