@@ -23,3 +23,5 @@
 
 #undef INP_NEXT_SYMBOL
 #define INP_NEXT_SYMBOL inp_next
+
+#undef IFNET_NEEDS_KERNEL
