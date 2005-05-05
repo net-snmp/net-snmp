@@ -77,6 +77,9 @@
 #if HAVE_RAISE
 #define alarm raise
 #endif
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 #include "mibincl.h"
 #include "struct.h"
 #include "util_funcs.h"
