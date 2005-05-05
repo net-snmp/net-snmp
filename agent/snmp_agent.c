@@ -791,6 +791,14 @@ handle_next_pass(struct agent_snmp_session  *asp)
 			req_p != NULL ; req_p = next_req ) {
 			
 			next_req = req_p->next_request;
+			if ( req_p->pdu ) {
+			   snmp_free_pdu( req_p->pdu );
+			   req_p->pdu = NULL;
+			}
+			if ( req_p->cb_data ) {
+			   free( req_p->cb_data );
+			   req_p->cb_data = NULL;
+			}
 			free( req_p );
 		}
 		asp->outstanding_requests = NULL;
