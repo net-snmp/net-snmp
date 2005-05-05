@@ -319,6 +319,7 @@ SOFTWARE.
 
 
     char           *uptime_string(u_long, char *);
+    char           *uptime_string_n(u_long, char *, size_t);
     void            xdump(const u_char *, size_t, const char *);
     u_char         *snmp_parse_var_op(u_char *, oid *, size_t *, u_char *,
                                       size_t *, u_char **, size_t *);
