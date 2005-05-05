@@ -301,6 +301,16 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
          * be INADDR_ANY, but certainly includes a port number.
          */
 
+#ifdef IPV6_V6ONLY
+        /* Try to restrict PF_INET6 socket to IPv6 communications only. */
+        {
+	  int one=1;
+	  if (setsockopt(t->sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&one, sizeof(one)) != 0) {
+	    DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_V6ONLY to %d bytes: %s\n", one, strerror(errno)));
+	  } 
+	}
+#endif
+
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
         t->local = malloc(18);
         if (t->local == NULL) {
