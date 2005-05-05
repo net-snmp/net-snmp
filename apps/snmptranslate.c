@@ -91,6 +91,7 @@ usage(void)
     fprintf(stderr, "\t\t\t  l:  enable labeled OID report\n");
     fprintf(stderr, "\t\t\t  o:  enable OID report\n");
     fprintf(stderr, "\t\t\t  s:  enable dotted symbolic report\n");
+    fprintf(stderr, "\t\t\t  z:  enable MIB child OID report\n");
     fprintf(stderr,
             "\t\t\t  t:  enable alternate format symbolic suffix report\n");
 #ifndef DISABLE_MIB_LOADING
@@ -198,6 +199,10 @@ main(int argc, char *argv[])
                 case 't':
                     print = 3;
                     print_oid_report_enable_suffix();
+                    break;
+                case 'z':
+                    print = 3;
+                    print_oid_report_enable_mibchildoid();
                     break;
 #endif /* DISABLE_MIB_LOADING */
                 case 'd':

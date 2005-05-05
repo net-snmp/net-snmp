@@ -94,6 +94,9 @@ Dump a symbolic form of all objects.
 .TP
 .B \-Tt
 Dump a tree form of the loaded MIBs (mostly useful for debugging).
+.TP
+.B \-Tz
+Dump a numeric and labeled form of all objects (compatible with MIB2SCHEMA format).
 .RE
 .TP
 .B -V
