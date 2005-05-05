@@ -77,7 +77,7 @@ netsnmp_container_free_list(void)
     /*
      * free memory used by each factory entry
      */
-    CONTAINER_FOR_EACH(containers, _factory_free, NULL);
+    CONTAINER_FOR_EACH(containers, ((netsnmp_container_obj_func *)_factory_free), NULL);
 
     /*
      * free factory container
@@ -91,7 +91,7 @@ netsnmp_container_register(const char* name, netsnmp_factory *f)
 {
     container_type *ct, tmp;
 
-    tmp.name = name;
+    tmp.name = (char *)name;
     ct = CONTAINER_FIND(containers, &tmp);
     if (NULL!=ct) {
         DEBUGMSGT(("container_registry",
