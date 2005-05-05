@@ -245,7 +245,7 @@ netsnmp_access_interface_entry_get_by_name(netsnmp_container *container,
         return NULL;
     }
 
-    tmp.name = name;
+    tmp.name = (char *)name;
     return CONTAINER_FIND(container->next, &tmp);
 }
 
