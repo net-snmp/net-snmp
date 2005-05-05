@@ -5514,6 +5514,7 @@ clear_tree_flags(register struct tree *tp)
 static int      print_subtree_oid_report_labeledoid = 0;
 static int      print_subtree_oid_report_oid = 0;
 static int      print_subtree_oid_report_symbolic = 0;
+static int      print_subtree_oid_report_mibchildoid = 0;
 static int      print_subtree_oid_report_suffix = 0;
 
 /*
@@ -5521,6 +5522,7 @@ static int      print_subtree_oid_report_suffix = 0;
  */
 static void     print_parent_labeledoid(FILE *, struct tree *);
 static void     print_parent_oid(FILE *, struct tree *);
+static void     print_parent_mibchildoid(FILE *, struct tree *);
 static void     print_parent_label(FILE *, struct tree *);
 static void     print_subtree_oid_report(FILE *, struct tree *, int);
 
@@ -5558,6 +5560,12 @@ print_oid_report_enable_symbolic(void)
     print_subtree_oid_report_symbolic = 1;
 }
 
+void
+print_oid_report_enable_mibchildoid(void)
+{
+    print_subtree_oid_report_mibchildoid = 1;
+}
+
 /*
  * helper methods for print_subtree_oid_report()
  * each one traverses back up the node tree
@@ -5586,6 +5594,30 @@ print_parent_oid(FILE * f, struct tree *tp)
             print_parent_oid(f, tp->parent);
          /*RECURSE*/}
         fprintf(f, ".%lu", tp->subid);
+    }
+}
+
+
+static void print_parent_mibchildoid(FILE * f, struct tree *tp)
+{
+    static struct tree *temp;
+    unsigned long elems[100];
+    int elem_cnt = 0;
+    int i = 0;
+    temp = tp;
+    if (temp) {
+        while (temp->parent) {
+                elems[elem_cnt++] = temp->subid;
+                temp = temp->parent;
+        }
+        elems[elem_cnt++] = temp->subid;
+    }
+    for (i = elem_cnt - 1; i >= 0; i--) {
+        if (i == elem_cnt - 1) {
+            fprintf(f, "%lu", elems[i]);           
+            } else {
+            fprintf(f, ".%lu", elems[i]);          
+        }
     }
 }
 
@@ -5658,6 +5690,12 @@ print_subtree_oid_report(FILE * f, struct tree *tree, int count)
         if (print_subtree_oid_report_symbolic) {
             print_parent_label(f, tp);
             fprintf(f, "\n");
+        }
+        if (print_subtree_oid_report_mibchildoid) {
+	    fprintf(f, "\"%s\"\t", tp->label);
+            fprintf(f, "\t\t\"");
+            print_parent_mibchildoid(f, tp);
+            fprintf(f, "\"\n");
         }
         if (print_subtree_oid_report_suffix) {
             int             i;
