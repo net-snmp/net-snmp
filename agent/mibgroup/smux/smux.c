@@ -500,7 +500,8 @@ smux_accept(int sd)
 	struct sockaddr_in in_socket;
 	struct timeval tv;
 	int fail, fd, alen;
-	size_t length, len;
+	int    length;
+	size_t len;
 
 	alen = sizeof(struct sockaddr_in);
 	/* this may be too high */
