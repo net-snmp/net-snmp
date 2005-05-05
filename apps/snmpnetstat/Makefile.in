@@ -68,30 +68,35 @@ makefileindepend: nosysdepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-
-if.lo: ../../config.h main.h ../../m/generic.h netstat.h ../../s/generic.h
-if.lo: ../../s/linux.h ../../snmplib/asn1.h ../../snmplib/getopt.h
-if.lo: ../../snmplib/mib.h ../../snmplib/snmp_api.h ../../snmplib/snmp_client.h
-if.lo: ../../snmplib/snmp_debug.h ../../snmplib/snmp.h
-if.lo: ../../snmplib/snmp_impl.h ../../snmplib/system.h ../../s/sysv.h
-inet6.lo: ../../config.h ../../m/generic.h ../../s/generic.h ../../s/linux.h
-inet6.lo: ../../s/sysv.h
-inet.lo: ../../config.h main.h ../../m/generic.h netstat.h ../../s/generic.h
-inet.lo: ../../s/linux.h ../../snmplib/asn1.h ../../snmplib/getopt.h
-inet.lo: ../../snmplib/mib.h ../../snmplib/snmp_api.h
-inet.lo: ../../snmplib/snmp_client.h ../../snmplib/snmp.h
-inet.lo: ../../snmplib/snmp_impl.h ../../s/sysv.h 
-main.lo: ../../config.h ../../m/generic.h netstat.h ../../s/generic.h
-main.lo: ../../s/linux.h ../../snmplib/asn1.h ../../snmplib/default_store.h
-main.lo: ../../snmplib/getopt.h ../../snmplib/mib.h ../../snmplib/snmp_api.h
-main.lo: ../../snmplib/snmp_client.h ../../snmplib/snmp_debug.h
-main.lo: ../../snmplib/snmp.h ../../snmplib/snmp_impl.h ../../snmplib/system.h
-main.lo: ../../s/sysv.h  
-main.lo: ../../version.h
-route.lo: ../../config.h main.h ../../m/generic.h netstat.h ../../s/generic.h
-route.lo: ../../s/linux.h ../../snmplib/asn1.h ../../snmplib/getopt.h
-route.lo: ../../snmplib/mib.h ../../snmplib/snmp_api.h
-route.lo: ../../snmplib/snmp_client.h ../../snmplib/snmp.h
-route.lo: ../../snmplib/snmp_impl.h ../../s/sysv.h 
-winstub.lo: ../../config.h ../../m/generic.h ../../s/generic.h ../../s/linux.h
-winstub.lo: ../../s/sysv.h
+if.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
+if.lo: ../../m/generic.h  
+if.lo:  main.h ./../../snmplib/asn1.h
+if.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
+if.lo: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h
+if.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
+if.lo: ../../snmplib/system.h netstat.h
+inet6.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
+inet6.lo: ../../m/generic.h
+inet.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
+inet.lo: ../../m/generic.h  
+inet.lo:  main.h ./../../snmplib/asn1.h
+inet.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
+inet.lo: ./../../snmplib/snmp_client.h ./../../snmplib/mib.h
+inet.lo: ./../../snmplib/snmp.h netstat.h
+main.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
+main.lo: ../../m/generic.h  
+main.lo:  ./../../snmplib/getopt.h
+main.lo:  ./../../snmplib/asn1.h
+main.lo: ./../../snmplib/mib.h ./../../snmplib/snmp.h
+main.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
+main.lo: ./../../snmplib/snmp_client.h ../../version.h
+main.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/system.h
+main.lo: ./../../snmplib/default_store.h netstat.h
+route.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
+route.lo: ../../m/generic.h  
+route.lo:  main.h ./../../snmplib/asn1.h
+route.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
+route.lo: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h
+route.lo: ./../../snmplib/mib.h netstat.h
+winstub.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
+winstub.lo: ../../m/generic.h

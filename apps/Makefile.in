@@ -128,115 +128,151 @@ makefileindepend: nosysdepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-
-encode_keychange.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-encode_keychange.lo: ../snmplib/asn1.h ../snmplib/callback.h
-encode_keychange.lo: ../snmplib/getopt.h ../snmplib/keytools.h
-encode_keychange.lo: ../snmplib/scapi.h ../snmplib/snmp_api.h
-encode_keychange.lo: ../snmplib/snmp_debug.h ../snmplib/snmpv3.h
-encode_keychange.lo: ../snmplib/tools.h ../snmplib/transform_oids.h ../s/sysv.h
-snmpbulkget.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmpbulkget.lo: ../snmplib/asn1.h ../snmplib/getopt.h ../snmplib/mib.h
-snmpbulkget.lo: ../snmplib/snmp_api.h ../snmplib/snmp_client.h
-snmpbulkget.lo: ../snmplib/snmp.h ../snmplib/snmp_impl.h
-snmpbulkget.lo: ../snmplib/snmp_parse_args.h ../snmplib/system.h ../s/sysv.h
-snmpbulkwalk.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmpbulkwalk.lo: ../snmplib/asn1.h ../snmplib/getopt.h ../snmplib/mib.h
-snmpbulkwalk.lo: ../snmplib/snmp_api.h ../snmplib/snmp_client.h
-snmpbulkwalk.lo: ../snmplib/snmp.h ../snmplib/snmp_impl.h
-snmpbulkwalk.lo: ../snmplib/snmp_parse_args.h ../snmplib/system.h ../s/sysv.h
-snmpdelta.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmpdelta.lo: ../snmplib/asn1.h ../snmplib/default_store.h ../snmplib/getopt.h
-snmpdelta.lo: ../snmplib/int64.h ../snmplib/mib.h ../snmplib/snmp_api.h
-snmpdelta.lo: ../snmplib/snmp_client.h ../snmplib/snmp.h ../snmplib/snmp_impl.h
-snmpdelta.lo: ../snmplib/snmp_logging.h ../snmplib/snmp_parse_args.h
-snmpdelta.lo: ../snmplib/system.h ../s/sysv.h 
-snmpdf.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmpdf.lo: ../snmplib/asn1.h ../snmplib/getopt.h ../snmplib/mib.h
-snmpdf.lo: ../snmplib/snmp_api.h ../snmplib/snmp_client.h
-snmpdf.lo: ../snmplib/snmp_debug.h ../snmplib/snmp.h ../snmplib/snmp_impl.h
-snmpdf.lo: ../snmplib/snmp_parse_args.h ../snmplib/system.h ../snmplib/tools.h
-snmpdf.lo: ../s/sysv.h  
-snmpgetnext.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmpgetnext.lo: ../snmplib/asn1.h ../snmplib/default_store.h
-snmpgetnext.lo: ../snmplib/getopt.h ../snmplib/mib.h ../snmplib/snmp_api.h
-snmpgetnext.lo: ../snmplib/snmp_client.h ../snmplib/snmp.h
-snmpgetnext.lo: ../snmplib/snmp_impl.h ../snmplib/snmp_parse_args.h
-snmpgetnext.lo: ../snmplib/system.h ../s/sysv.h 
-snmpget.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmpget.lo: ../snmplib/asn1.h ../snmplib/default_store.h ../snmplib/getopt.h
-snmpget.lo: ../snmplib/mib.h ../snmplib/snmp_api.h ../snmplib/snmp_client.h
-snmpget.lo: ../snmplib/snmp.h ../snmplib/snmp_impl.h
-snmpget.lo: ../snmplib/snmp_parse_args.h ../snmplib/system.h ../s/sysv.h
-snmpset.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmpset.lo: ../snmplib/asn1.h ../snmplib/getopt.h ../snmplib/int64.h
-snmpset.lo: ../snmplib/mib.h ../snmplib/snmp_api.h ../snmplib/snmp_client.h
-snmpset.lo: ../snmplib/snmp.h ../snmplib/snmp_impl.h
-snmpset.lo: ../snmplib/snmp_parse_args.h ../snmplib/system.h ../s/sysv.h
-snmpstatus.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmpstatus.lo: ../snmplib/asn1.h ../snmplib/default_store.h ../snmplib/getopt.h
-snmpstatus.lo: ../snmplib/mib.h ../snmplib/snmp_api.h ../snmplib/snmp_client.h
-snmpstatus.lo: ../snmplib/snmp.h ../snmplib/snmp_impl.h
-snmpstatus.lo: ../snmplib/snmp_parse_args.h ../snmplib/system.h
-snmpstatus.lo: ../snmplib/tools.h ../s/sysv.h 
-snmptable.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmptable.lo: ../snmplib/asn1.h ../snmplib/default_store.h ../snmplib/getopt.h
-snmptable.lo: ../snmplib/mib.h ../snmplib/parse.h ../snmplib/snmp_api.h
-snmptable.lo: ../snmplib/snmp_client.h ../snmplib/snmp.h ../snmplib/snmp_impl.h
-snmptable.lo: ../snmplib/snmp_parse_args.h ../snmplib/system.h ../s/sysv.h
-snmptest.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmptest.lo: ../snmplib/asn1.h ../snmplib/default_store.h ../snmplib/getopt.h
-snmptest.lo: ../snmplib/mib.h ../snmplib/snmp_api.h ../snmplib/snmp_client.h
-snmptest.lo: ../snmplib/snmp.h ../snmplib/snmp_impl.h
-snmptest.lo: ../snmplib/snmp_parse_args.h ../snmplib/system.h ../s/sysv.h
-snmptranslate.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmptranslate.lo: ../snmplib/asn1.h ../snmplib/default_store.h
-snmptranslate.lo: ../snmplib/getopt.h ../snmplib/mib.h ../snmplib/parse.h
-snmptranslate.lo: ../snmplib/snmp_api.h ../snmplib/snmp_client.h
-snmptranslate.lo: ../snmplib/snmp_debug.h ../snmplib/snmp.h
-snmptranslate.lo: ../snmplib/snmp_impl.h ../snmplib/system.h ../s/sysv.h
-snmptranslate.lo: ../version.h
-snmptrapd_handlers.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmptrapd_handlers.lo: ../snmplib/asn1.h ../snmplib/getopt.h ../snmplib/mib.h
-snmptrapd_handlers.lo: ../snmplib/read_config.h ../snmplib/snmp_api.h
-snmptrapd_handlers.lo: ../snmplib/snmp_debug.h ../s/sysv.h
-snmptrapd_log.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmptrapd_log.lo: ../snmplib/asn1.h ../snmplib/getopt.h ../snmplib/mib.h
-snmptrapd_log.lo: ../snmplib/snmp_api.h ../snmplib/snmp.h
-snmptrapd_log.lo: ../snmplib/snmp_impl.h ../snmplib/tools.h snmptrapd_log.h
-snmptrapd_log.lo: ../s/sysv.h  
-snmptrapd.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmptrapd.lo: ../snmplib/asn1.h ../snmplib/callback.h
-snmptrapd.lo: ../snmplib/default_store.h ../snmplib/getopt.h
-snmptrapd.lo: ../snmplib/lcd_time.h ../snmplib/mib.h ../snmplib/read_config.h
-snmptrapd.lo: ../snmplib/snmp_api.h ../snmplib/snmp_client.h
-snmptrapd.lo: ../snmplib/snmp_debug.h ../snmplib/snmp.h ../snmplib/snmp_impl.h
-snmptrapd.lo: ../snmplib/snmp_logging.h ../snmplib/snmpusm.h
-snmptrapd.lo: ../snmplib/snmpv3.h ../snmplib/system.h ../snmplib/tools.h
-snmptrapd.lo: ../snmplib/transform_oids.h snmptrapd_handlers.h snmptrapd_log.h
-snmptrapd.lo: ../s/sysv.h  
-snmptrapd.lo: ../version.h
-snmptrap.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmptrap.lo: ../snmplib/asn1.h ../snmplib/getopt.h ../snmplib/mib.h
-snmptrap.lo: ../snmplib/snmp_api.h ../snmplib/snmp_client.h ../snmplib/snmp.h
-snmptrap.lo: ../snmplib/snmp_impl.h ../snmplib/snmp_parse_args.h
-snmptrap.lo: ../snmplib/snmpv3.h ../snmplib/system.h ../s/sysv.h
-snmpusm.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmpusm.lo: ../snmplib/asn1.h ../snmplib/default_store.h ../snmplib/getopt.h
-snmpusm.lo: ../snmplib/int64.h ../snmplib/keytools.h ../snmplib/mib.h
-snmpusm.lo: ../snmplib/snmp_api.h ../snmplib/snmp_client.h ../snmplib/snmp.h
-snmpusm.lo: ../snmplib/snmp_impl.h ../snmplib/snmp_parse_args.h
-snmpusm.lo: ../snmplib/snmp-tc.h ../snmplib/snmpv3.h ../snmplib/system.h
-snmpusm.lo: ../snmplib/tools.h ../snmplib/transform_oids.h ../s/sysv.h
-snmpvacm.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmpvacm.lo: ../snmplib/asn1.h ../snmplib/default_store.h ../snmplib/getopt.h
-snmpvacm.lo: ../snmplib/int64.h ../snmplib/keytools.h ../snmplib/mib.h
-snmpvacm.lo: ../snmplib/snmp_api.h ../snmplib/snmp_client.h ../snmplib/snmp.h
-snmpvacm.lo: ../snmplib/snmp_impl.h ../snmplib/snmp_parse_args.h
-snmpvacm.lo: ../snmplib/snmp-tc.h ../snmplib/snmpv3.h ../snmplib/system.h
-snmpvacm.lo: ../snmplib/tools.h ../snmplib/vacm.h ../s/sysv.h
-snmpwalk.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
-snmpwalk.lo: ../snmplib/asn1.h ../snmplib/default_store.h ../snmplib/getopt.h
-snmpwalk.lo: ../snmplib/mib.h ../snmplib/snmp_api.h ../snmplib/snmp_client.h
-snmpwalk.lo: ../snmplib/snmp.h ../snmplib/snmp_impl.h
-snmpwalk.lo: ../snmplib/snmp_parse_args.h ../snmplib/system.h ../s/sysv.h
+encode_keychange.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+encode_keychange.lo: ../m/generic.h 
+encode_keychange.lo:  ./../snmplib/asn1.h
+encode_keychange.lo: ./../snmplib/snmp_api.h ./../snmplib/tools.h
+encode_keychange.lo: ./../snmplib/scapi.h ./../snmplib/snmpv3.h
+encode_keychange.lo: ./../snmplib/keytools.h ./../snmplib/snmp_debug.h
+encode_keychange.lo: ./../snmplib/callback.h ../snmplib/transform_oids.h
+snmpbulkget.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmpbulkget.lo: ../m/generic.h  
+snmpbulkget.lo:  ./../snmplib/getopt.h
+snmpbulkget.lo:  ./../snmplib/asn1.h
+snmpbulkget.lo: ./../snmplib/snmp_api.h ./../snmplib/snmp_client.h
+snmpbulkget.lo: ./../snmplib/mib.h ./../snmplib/snmp.h
+snmpbulkget.lo: ./../snmplib/snmp_impl.h ./../snmplib/system.h
+snmpbulkget.lo: ./../snmplib/snmp_parse_args.h
+snmpbulkwalk.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmpbulkwalk.lo: ../m/generic.h  
+snmpbulkwalk.lo: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+snmpbulkwalk.lo: ./../snmplib/snmp_client.h ./../snmplib/mib.h
+snmpbulkwalk.lo: ./../snmplib/snmp.h ./../snmplib/snmp_impl.h
+snmpbulkwalk.lo: ./../snmplib/system.h ./../snmplib/snmp_parse_args.h
+snmpdelta.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmpdelta.lo: ../m/generic.h  
+snmpdelta.lo:  ./../snmplib/getopt.h
+snmpdelta.lo: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+snmpdelta.lo: ./../snmplib/snmp_impl.h ./../snmplib/snmp_client.h
+snmpdelta.lo: ./../snmplib/mib.h ./../snmplib/snmp.h ./../snmplib/system.h
+snmpdelta.lo: ./../snmplib/int64.h ./../snmplib/snmp_parse_args.h
+snmpdelta.lo: ./../snmplib/snmp_logging.h 
+snmpdelta.lo:  ./../snmplib/default_store.h
+snmpdf.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
+snmpdf.lo:  ./../snmplib/asn1.h
+snmpdf.lo: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
+snmpdf.lo: ./../snmplib/snmp_client.h ./../snmplib/mib.h ./../snmplib/snmp.h
+snmpdf.lo: ./../snmplib/system.h ./../snmplib/snmp_parse_args.h
+snmpdf.lo: ./../snmplib/snmp_debug.h ./../snmplib/tools.h
+snmpdf.lo: ./../snmplib/getopt.h
+snmpget.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmpget.lo: ../m/generic.h  
+snmpget.lo:  ./../snmplib/getopt.h
+snmpget.lo: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+snmpget.lo: ./../snmplib/snmp_impl.h ./../snmplib/snmp_client.h
+snmpget.lo: ./../snmplib/mib.h ./../snmplib/snmp.h ./../snmplib/system.h
+snmpget.lo: ./../snmplib/snmp_parse_args.h ./../snmplib/default_store.h
+snmpgetnext.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmpgetnext.lo: ../m/generic.h  
+snmpgetnext.lo:  ./../snmplib/getopt.h
+snmpgetnext.lo: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+snmpgetnext.lo: ./../snmplib/snmp_impl.h ./../snmplib/snmp_client.h
+snmpgetnext.lo: ./../snmplib/snmp.h ./../snmplib/mib.h ./../snmplib/system.h
+snmpgetnext.lo: ./../snmplib/snmp_parse_args.h ./../snmplib/default_store.h
+snmpset.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmpset.lo: ../m/generic.h  
+snmpset.lo:  ./../snmplib/asn1.h
+snmpset.lo: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
+snmpset.lo: ./../snmplib/snmp_client.h ./../snmplib/mib.h ./../snmplib/snmp.h
+snmpset.lo: ./../snmplib/system.h ./../snmplib/snmp_parse_args.h
+snmpset.lo: ./../snmplib/snmp_debug.h ./../snmplib/int64.h
+snmpstatus.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmpstatus.lo: ../m/generic.h  
+snmpstatus.lo:  ./../snmplib/getopt.h
+snmpstatus.lo: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+snmpstatus.lo: ./../snmplib/snmp_impl.h ./../snmplib/snmp_client.h
+snmpstatus.lo: ./../snmplib/mib.h ./../snmplib/snmp.h ./../snmplib/system.h
+snmpstatus.lo: ./../snmplib/tools.h ./../snmplib/snmp_parse_args.h
+snmpstatus.lo: ./../snmplib/default_store.h
+snmptable.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmptable.lo: ../m/generic.h  
+snmptable.lo:  ./../snmplib/getopt.h
+snmptable.lo: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+snmptable.lo: ./../snmplib/snmp_client.h ./../snmplib/mib.h
+snmptable.lo: ./../snmplib/snmp.h ./../snmplib/snmp_impl.h
+snmptable.lo: ./../snmplib/default_store.h ./../snmplib/system.h
+snmptable.lo: ./../snmplib/snmp_parse_args.h ./../snmplib/parse.h
+snmptest.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmptest.lo: ../m/generic.h  
+snmptest.lo:  ./../snmplib/asn1.h
+snmptest.lo: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
+snmptest.lo: ./../snmplib/snmp_client.h ./../snmplib/mib.h
+snmptest.lo: ./../snmplib/snmp.h ./../snmplib/system.h
+snmptest.lo: ./../snmplib/snmp_parse_args.h ./../snmplib/default_store.h
+snmptranslate.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmptranslate.lo: ../m/generic.h 
+snmptranslate.lo: ./../snmplib/getopt.h ./../snmplib/asn1.h
+snmptranslate.lo: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
+snmptranslate.lo: ./../snmplib/snmp_client.h ./../snmplib/parse.h
+snmptranslate.lo: ./../snmplib/mib.h ./../snmplib/snmp.h
+snmptranslate.lo: ./../snmplib/snmp_debug.h ./../snmplib/default_store.h
+snmptranslate.lo: ./../snmplib/system.h ../version.h
+snmptrap.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmptrap.lo: ../m/generic.h  
+snmptrap.lo:  ./../snmplib/getopt.h
+snmptrap.lo: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+snmptrap.lo: ./../snmplib/snmp_client.h ./../snmplib/mib.h
+snmptrap.lo: ./../snmplib/snmp.h ./../snmplib/snmp_impl.h
+snmptrap.lo: ./../snmplib/system.h ./../snmplib/snmp_parse_args.h
+snmptrap.lo: ./../snmplib/snmpv3.h
+snmptrapd.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmptrapd.lo: ../m/generic.h  
+snmptrapd.lo:  ./../snmplib/getopt.h
+snmptrapd.lo: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+snmptrapd.lo: ./../snmplib/snmp_impl.h ./../snmplib/snmp_client.h
+snmptrapd.lo: ./../snmplib/mib.h ./../snmplib/snmp.h ./../snmplib/system.h
+snmptrapd.lo: ../version.h snmptrapd_handlers.h snmptrapd_log.h
+snmptrapd.lo: ./../snmplib/read_config.h ./../snmplib/snmp_debug.h
+snmptrapd.lo: ./../snmplib/snmp_logging.h ./../snmplib/callback.h
+snmptrapd.lo: ./../snmplib/snmpusm.h ./../snmplib/tools.h
+snmptrapd.lo: ./../snmplib/lcd_time.h ./../snmplib/transform_oids.h
+snmptrapd.lo: ./../snmplib/snmpv3.h ./../snmplib/default_store.h
+snmptrapd_handlers.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmptrapd_handlers.lo: ../m/generic.h 
+snmptrapd_handlers.lo:  ./../snmplib/asn1.h
+snmptrapd_handlers.lo: ./../snmplib/mib.h ./../snmplib/snmp_api.h
+snmptrapd_handlers.lo: ./../snmplib/read_config.h ./../snmplib/snmp_debug.h
+snmptrapd_log.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmptrapd_log.lo: ../m/generic.h 
+snmptrapd_log.lo:  ./../snmplib/asn1.h
+snmptrapd_log.lo: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
+snmptrapd_log.lo: ./../snmplib/mib.h ./../snmplib/snmp.h ./../snmplib/tools.h
+snmptrapd_log.lo: snmptrapd_log.h
+snmpusm.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmpusm.lo: ../m/generic.h  
+snmpusm.lo:  ./../snmplib/asn1.h
+snmpusm.lo: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
+snmpusm.lo: ./../snmplib/snmp_client.h ./../snmplib/mib.h ./../snmplib/snmp.h
+snmpusm.lo: ./../snmplib/system.h ./../snmplib/snmp_parse_args.h
+snmpusm.lo: ./../snmplib/int64.h ./../snmplib/tools.h ./../snmplib/keytools.h
+snmpusm.lo: ./../snmplib/snmp-tc.h ./../snmplib/transform_oids.h
+snmpusm.lo: ./../snmplib/snmpv3.h ./../snmplib/default_store.h
+snmpusm.lo: ./../snmplib/getopt.h
+snmpvacm.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmpvacm.lo: ../m/generic.h  
+snmpvacm.lo:  ./../snmplib/asn1.h
+snmpvacm.lo: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
+snmpvacm.lo: ./../snmplib/snmp_client.h ./../snmplib/mib.h
+snmpvacm.lo: ./../snmplib/snmp.h ./../snmplib/system.h
+snmpvacm.lo: ./../snmplib/snmp_parse_args.h ./../snmplib/int64.h
+snmpvacm.lo: ./../snmplib/tools.h ./../snmplib/keytools.h
+snmpvacm.lo: ./../snmplib/snmp-tc.h ./../snmplib/snmpv3.h
+snmpvacm.lo: ./../snmplib/default_store.h ./../snmplib/getopt.h
+snmpvacm.lo: ./../snmplib/vacm.h
+snmpwalk.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
+snmpwalk.lo: ../m/generic.h  
+snmpwalk.lo:  ./../snmplib/asn1.h
+snmpwalk.lo: ./../snmplib/snmp_api.h ./../snmplib/snmp_client.h
+snmpwalk.lo: ./../snmplib/mib.h ./../snmplib/snmp.h ./../snmplib/snmp_impl.h
+snmpwalk.lo: ./../snmplib/system.h ./../snmplib/default_store.h
+snmpwalk.lo: ./../snmplib/snmp_parse_args.h ./../snmplib/getopt.h
