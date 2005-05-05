@@ -57,8 +57,12 @@ static char proc_description[96]; /* buffer to hold description of current cpu*/
 extern void kstat_CPU(void);
 int proc_status(int);
 #else
-#define MAX_NUM_HRPROC  32
+#ifdef linux
+static char **proc_descriptions;
+#else
+# define MAX_NUM_HRPROC  32
 char proc_descriptions[MAX_NUM_HRPROC][BUFSIZ];
+#endif
 #endif  /*solaris 2*/
 
         /*********************
@@ -297,26 +301,43 @@ void detect_hrproc(void)
     int i;
     char tmpbuf[BUFSIZ], *cp;
     FILE *fp;
+    int nrprocs;
 
-    /*
-     * Clear the buffers...
-     */
-    for ( i=0 ; i<MAX_NUM_HRPROC; i++ ) {
-        memset( proc_descriptions[i], '\0', BUFSIZ);
-    }
+    DEBUGMSG(("hr_proc::detect_hrproc",""));
 
     /*
      * ... and try to interpret the CPU information
      */
     fp = fopen("/proc/cpuinfo", "r");
     if (!fp) {
-        sprintf( proc_descriptions[0],
-                 "An electronic chip that makes the computer work.");
+        DEBUGMSG(("hr_proc::detect_hrproc","could not open /proc/cpuinfo"));
+	nrprocs = 1;
+        proc_descriptions = (char**)malloc(sizeof(char*));
+        proc_descriptions[0] =
+            strdup("An electronic chip that makes the computer work.");
         return;
     }
-
-    i = 0;
+    nrprocs = 1;
+    proc_descriptions = (char**)malloc(sizeof(char*)*nrprocs);
+    if (!proc_descriptions)
+	return;
+    proc_descriptions[0] =
+        strdup("An electronic chip that makes the computer work.");
+    i = -1;
     while (fgets(tmpbuf, BUFSIZ, fp)) {
+	if (!strncmp(tmpbuf,"processor\t",strlen("processor\t")))
+		i++;
+	if (!strncmp(tmpbuf,"processor ",strlen("processor ")))
+		i++;
+        if ((i!=-1) && (i >= nrprocs)) {
+	    nrprocs++;
+    	    proc_descriptions = (char**)realloc(proc_descriptions, sizeof(char*)*nrprocs);
+	    if (!proc_descriptions)
+		return;
+	    proc_descriptions[i] = strdup("An electronic chip that makes the computer work."); /* will be overwritten */
+        }
+
+#if defined(__i386__) || defined(__x86_64__)
         if ( !strncmp( tmpbuf, "vendor_id", 9)) {
 	    /* Stomp on trailing newline... */
             cp = &tmpbuf[strlen(tmpbuf)-1];
@@ -326,9 +347,12 @@ void detect_hrproc(void)
 	    cp++;
 	    while ( cp && isspace(*cp))
 	        cp++;
-            snprintf( proc_descriptions[i], BUFSIZ, "%s", cp);
+            if (proc_descriptions[i])
+                free(proc_descriptions[i]);
+	    proc_descriptions[i] = strdup(cp);
         }
         if ( !strncmp( tmpbuf, "model name", 10)) {
+           char *s;
 	    /* Stomp on trailing newline... */
             cp = &tmpbuf[strlen(tmpbuf)-1];
 	    *cp = 0;
@@ -337,18 +361,64 @@ void detect_hrproc(void)
 	    cp++;
 	    while ( cp && isspace(*cp))
 	        cp++;
-            strncat( proc_descriptions[i], ": ",
-                     BUFSIZ-strlen(proc_descriptions[i]));
-            strncat( proc_descriptions[i], cp,
-                     BUFSIZ-strlen(proc_descriptions[i]));
-            i++;
-            if (i >= MAX_NUM_HRPROC) {
-                i--;
-                break;
+            if (!proc_descriptions[i]) {
+	        s = malloc(strlen(": ")+strlen(cp)+1);
+		strcpy(s,": ");
+                strcat(s,cp);
+		proc_descriptions[i] = s;
+            } else {
+		s = malloc(strlen(proc_descriptions[i])+strlen(": ")+strlen(cp)+1);
+		strcpy(s,proc_descriptions[i]);
+		strcat(s,": ");
+		strcat(s,cp);
+		free(proc_descriptions[i]);
+		proc_descriptions[i] = s;
             }
         }
+#endif
+#if defined(__powerpc__) || defined(__powerpc64__)
+        if ( !strncmp( tmpbuf, "cpu\t", 4)) {
+	    char *s;
+
+	    /* Stomp on trailing newline... */
+            cp = &tmpbuf[strlen(tmpbuf)-1];
+	    *cp = 0;
+	    /* ... and then extract the value */
+            cp = index( tmpbuf, ':');
+	    cp++;
+	    while ( cp && isspace(*cp))
+	        cp++;
+            if (proc_descriptions[i])
+                free(proc_descriptions[i]);
+	    proc_descriptions[i] = strdup(cp);
+	}
+#endif
+#if defined(__ia64__)
+	/* since vendor is always Intel ... we don't parse vendor */
+        if ( !strncmp( tmpbuf, "family\t", 6)) {
+	    char *s;
+
+	    /* Stomp on trailing newline... */
+            cp = &tmpbuf[strlen(tmpbuf)-1];
+	    *cp = 0;
+	    /* ... and then extract the value */
+            cp = index( tmpbuf, ':');
+	    cp++;
+	    while ( cp && isspace(*cp))
+	        cp++;
+            if (proc_descriptions[i])
+                free(proc_descriptions[i]);
+	    proc_descriptions[i] = strdup(cp);
+        }
+#endif
+#if defined(__s390__) || defined(__s390x__)
+	/* 2.4 kernel has stuff before the first processor line */
+ 	if (i != -1)
+            proc_descriptions[i] = strdup("An S/390 CPU");
+#endif
     }
-    HRP_max_index = i;
+    DEBUGMSG(("hr_proc::detect_hrproc","registered %d processors", nrprocs));
+    HRP_max_index = nrprocs;
     fclose(fp);
     return;
 }
