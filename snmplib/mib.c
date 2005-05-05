@@ -97,7 +97,7 @@ SOFTWARE.
  *  @{
  */
 
-static char    *uptimeString(u_long, char *);
+static char    *uptimeString(u_long, char *, size_t);
 
 static struct tree *_get_realloc_symbol(const oid * objid, size_t objidlen,
                                         struct tree *subtree,
@@ -187,12 +187,12 @@ enum inet_address_type {
  * @return The buffer.
  */
 static char    *
-uptimeString(u_long timeticks, char *buf)
+uptimeString(u_long timeticks, char *buf, size_t buflen)
 {
     int             centisecs, seconds, minutes, hours, days;
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS)) {
-        sprintf(buf, "%lu", timeticks);
+        snprintf(buf, buflen, "%lu", timeticks);
         return buf;
     }
 
@@ -209,17 +209,17 @@ uptimeString(u_long timeticks, char *buf)
     seconds = timeticks % 60;
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT))
-        sprintf(buf, "%d:%d:%02d:%02d.%02d",
+        snprintf(buf, buflen, "%d:%d:%02d:%02d.%02d",
                 days, hours, minutes, seconds, centisecs);
     else {
         if (days == 0) {
-            sprintf(buf, "%d:%02d:%02d.%02d",
+            snprintf(buf, buflen, "%d:%02d:%02d.%02d",
                     hours, minutes, seconds, centisecs);
         } else if (days == 1) {
-            sprintf(buf, "%d day, %d:%02d:%02d.%02d",
+            snprintf(buf, buflen, "%d day, %d:%02d:%02d.%02d",
                     days, hours, minutes, seconds, centisecs);
         } else {
-            sprintf(buf, "%d days, %d:%02d:%02d.%02d",
+            snprintf(buf, buflen, "%d days, %d:%02d:%02d.%02d",
                     days, hours, minutes, seconds, centisecs);
         }
     }
@@ -1179,7 +1179,7 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
             return 0;
         }
     }
-    uptimeString(*(u_long *) (var->val.integer), timebuf);
+    uptimeString(*(u_long *) (var->val.integer), timebuf, sizeof(timebuf));
     if (!snmp_strcat
         (buf, buf_len, out_len, allow_realloc, (const u_char *) timebuf)) {
         return 0;
@@ -5694,7 +5694,13 @@ print_subtree_oid_report(FILE * f, struct tree *tree, int count)
 char           *
 uptime_string(u_long timeticks, char *buf)
 {
-    uptimeString(timeticks, buf);
+    return uptime_string_n( timeticks, buf, 40);
+}
+
+char           *
+uptime_string_n(u_long timeticks, char *buf, size_t buflen)
+{
+    uptimeString(timeticks, buf, buflen);
 #ifdef CMU_COMPATIBLE
     {
     char *cp = strrchr(buf, '.');
