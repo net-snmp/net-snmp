@@ -1842,7 +1842,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
         } else {
             n = count;
         }
-        if ((r = count - n) < 0) {
+        if ((r = count - n) <= 0) {
             r = 0;
             asp->bulkcache = NULL;
         } else {
