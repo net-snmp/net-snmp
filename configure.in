@@ -1545,8 +1545,10 @@ fi
 # Install the various perl modules
 #
 
-if test "x$embed_perl" = "xyes" -a "x$install_perl" = "xno" ; then
-  install_perl="yes"
+if test "x$embed_perl" = "xyes" ; then
+  if test "x$install_perl" = "xno" -o "x$install_perl" = "x" ; then
+    install_perl="yes"
+  fi
 fi
 if test "x$install_perl" != "x" -a "x$install_perl" != "xno"; then
     PERLTARGS="perlmodules"
@@ -1554,7 +1556,11 @@ if test "x$install_perl" != "x" -a "x$install_perl" != "xno"; then
     AC_SUBST(PERLTARGS)
     AC_SUBST(PERLINSTALLTARGS)
     AC_SUBST(PERLARGS)
-    AC_MSG_CACHE_ADD(SNMP Perl modules:          enabled)
+    if test "x$embed_perl" = "xyes" ; then
+      AC_MSG_CACHE_ADD(SNMP Perl modules:          building -- embeddable)
+    else
+      AC_MSG_CACHE_ADD(SNMP Perl modules:          building -- not embeddable)
+    fi
 fi
 
 #
