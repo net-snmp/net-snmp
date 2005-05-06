@@ -84,7 +84,13 @@ int
 usm_check_secLevel_vs_protocols(int level,
                                 oid *authProtocol, u_int authProtocolLen,
                                 oid *privProtocol, u_int privProtocolLen);
-  
+int
+usm_calc_offsets ( size_t  globalDataLen,
+        int secLevel, size_t secEngineIDLen, size_t secNameLen, size_t scopedPduLen,
+        u_long engineboots, long engine_time, size_t *theTotalLength, 
+        size_t *authParamsOffset, size_t *privParamsOffset, size_t *dataOffset,
+        size_t *datalen, size_t *msgAuthParmLen, size_t *msgPrivParmLen,
+        size_t *otstlen, size_t *seq_len, size_t *msgSecParmLen);
 /* 
  * Set a given field of the secStateRef.
  *
@@ -1361,8 +1367,11 @@ usm_rgenerate_out_msg (
 	 */
     if (theSecLevel == SNMP_SEC_LEVEL_AUTHPRIV)
 	{
-            u_char cyphertext[SNMP_MAX_MSG_SIZE];
-            size_t cyphertextLen = SNMP_MAX_MSG_SIZE;
+            /* XXX: the max padding size supported is no more than 64 */
+            size_t cyphertextLen = scopedPduLen + 64; 
+            u_char *cyphertext = (u_char *) malloc(cyphertextLen);
+            if (!cyphertext)
+                return SNMPERR_MALLOC;
             
             /* XXX  Hardwired to seek into a 1DES private key!
              */
@@ -1375,6 +1384,7 @@ usm_rgenerate_out_msg (
 		{
                     DEBUGMSGTL(("usm","Can't set DES-CBC salt.\n"));
                     usm_free_usmStateReference (secStateRef);
+                    SNMP_FREE(cyphertext);
                     return SNMPERR_USM_GENERICERROR;
 		}
 
@@ -1395,12 +1405,14 @@ usm_rgenerate_out_msg (
 		{
                     DEBUGMSGTL(("usm","DES-CBC error.\n"));
                     usm_free_usmStateReference (secStateRef);
+                    SNMP_FREE(cyphertext);
                     return SNMPERR_USM_ENCRYPTIONERROR;
 		}
 
             if (cyphertextLen > *wholeMsgLen) {
                     DEBUGMSGTL(("usm","encrypted size too long.\n"));
                     usm_free_usmStateReference (secStateRef);
+                    SNMP_FREE(cyphertext);
                     return SNMPERR_TOO_LONG;
             }
             
@@ -1423,6 +1435,7 @@ usm_rgenerate_out_msg (
 #endif
 
             DEBUGMSGTL(("usm","Encryption successful.\n"));
+            SNMP_FREE(cyphertext);
 	}
 
     /* 
@@ -1774,6 +1787,15 @@ usm_parse_security_parameters (
 		return -1;
 	}
 
+	if (*secNameLen > 32) {
+		/*
+		 * This is a USM-specific limitation over and above the above
+		 * limitation (which will probably default to the length of an
+		 * SnmpAdminString, i.e. 255).  See RFC 2574, sec. 2.4.  
+		 */
+		return -1;
+	}
+
 	secName[*secNameLen] = '\0';
 
 	if (type_value != (u_char) (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR))
@@ -1818,13 +1840,13 @@ usm_parse_security_parameters (
 			salt, salt_length)) == NULL )
 	{
 		DEBUGINDENTLESS();
-                /* RETURN parse error */ return -1;
+                /* RETURN parse error */ return -2;
 	}
         DEBUGINDENTLESS();
 
 	if (type_value != (u_char) (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR))
 	{
-		/* RETURN parse error */ return -1;
+		/* RETURN parse error */ return -2;
 	}
 
 	return 0;
@@ -2074,9 +2096,9 @@ usm_process_in_msg (
 	u_char *data_ptr;
 	u_char *value_ptr;
 	u_char  type_value;
-	u_char *end_of_overhead;
+	u_char *end_of_overhead = NULL;
 	int     error;
-        int     i;
+        int     i, rc = 0;
 	struct usmStateReference **secStateRef = (struct usmStateReference **)secStateRf;
 
 	struct usmUser *user;
@@ -2101,20 +2123,26 @@ usm_process_in_msg (
 	 * Make sure the *secParms is an OCTET STRING.
 	 * Extract the user name, engine ID, and security level.
 	 */
-	if ( usm_parse_security_parameters (
+	if (( rc = usm_parse_security_parameters (
 		 secParams,		 remaining,
 		 secEngineID,		 secEngineIDLen,
 		&boots_uint,		&time_uint,
 		 secName,		 secNameLen,
 		 signature,		&signature_length,
 		 salt,			&salt_length,
-		 &data_ptr)
-			== -1 )
+		 &data_ptr)) < 0 )
 	{
-		DEBUGMSGTL(("usm","Parsing failed.\n"));
+		DEBUGMSGTL(("usm","Parsing failed (rc=%d).\n", rc));
+		if (rc == -2 ) {
+		    if (snmp_increment_statistic (STAT_USMSTATSDECRYPTIONERRORS)==0)
+		    {
+			DEBUGMSGTL(("usm","%s\n", "Failed to increment USM statistic."));
+		    }
+		    return SNMPERR_USM_DECRYPTIONERROR;
+		}
 		if (snmp_increment_statistic (STAT_SNMPINASNPARSEERRS)==0)
 		{
-			DEBUGMSGTL(("usm","%s\n", "Failed to increment statistic."));
+			DEBUGMSGTL(("usm","%s\n", "Failed to increment ASN statistic."));
 		}
 		return SNMPERR_USM_PARSEERROR;
 	}
@@ -2335,8 +2363,31 @@ usm_process_in_msg (
 				DEBUGMSGTL(("usm","%s\n",
 					"Failed increment statistic."));
 			}
+			usm_free_usmStateReference(*secStateRef);
+			*secStateRef = NULL;
 			return SNMPERR_USM_PARSEERROR;
 		}
+
+                /*
+                 * From RFC2574:
+                 * 
+                 * "Before decryption, the encrypted data length is verified.
+                 * If the length of the OCTET STRING to be decrypted is not
+                 * an integral multiple of 8 octets, the decryption process
+                 * is halted and an appropriate exception noted."  
+                 */
+    
+                if (remaining % 8 != 0) {
+                    DEBUGMSGTL(("usm",
+                                "Ciphertext is %lu bytes, not an integer multiple of 8 (rem %d)\n",
+                                remaining, remaining % 8));
+                    if (snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS) == 0) {
+                        DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
+                    }
+                    usm_free_usmStateReference(*secStateRef);
+                    *secStateRef = NULL;
+                    return SNMPERR_USM_DECRYPTIONERROR;
+                }
 
 		end_of_overhead = value_ptr;
 
@@ -3063,7 +3114,7 @@ usm_set_password(const char *token, char *line)
   size_t	  engineIDLen;
   struct usmUser *user;
 
-  cp = copy_word(line, nameBuf);
+  cp = copy_nword(line, nameBuf, sizeof(nameBuf));
   if (cp == NULL) {
     config_perror("invalid name specifier");
     return;

@@ -180,7 +180,6 @@ mtaStoredVolume OBJECT-TYPE
 
 mtaTransmittedVolume OBJECT-TYPE
    SYNTAX Counter32
-
    UNITS "K-octets"
    MAX-ACCESS read-only
    STATUS current

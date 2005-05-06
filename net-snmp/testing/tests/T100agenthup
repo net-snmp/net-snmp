@@ -18,9 +18,9 @@ STARTAGENT
 CONFIGAGENT syslocation not-anywhere-in-particular
 
 # kill -HUP the agent to get it to re-read the .conf file.
-sleep 1
-kill -HUP `cat $SNMP_SNMPD_PID_FILE`
-sleep 1
+DELAY
+kill -HUP `cat $SNMP_SNMPD_PID_FILE` > /dev/null 2>&1
+DELAY
 
 # And see if it has the new value.
 CAPTURE "snmpget $SNMP_FLAGS -v 1 localhost testcommunity system.sysLocation.0"

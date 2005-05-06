@@ -143,6 +143,7 @@ snmp_parse_var_op(u_char *data,
 			(ASN_SEQUENCE | ASN_CONSTRUCTOR), "var_op");
     if (data == NULL){
     	/* msg detail is set */
+        *var_name_len = 0;
 	return NULL;
     }
     DEBUGDUMPHEADER("recv","Name");
@@ -150,15 +151,20 @@ snmp_parse_var_op(u_char *data,
     DEBUGINDENTLESS();
     if (data == NULL){
 	ERROR_MSG("No OID for variable");
+        *var_name_len = 0;
 	return NULL;
     }
-    if (var_op_type != (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID))
+    if (var_op_type != (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID)) {
+        *var_name_len = 0;
 	return NULL;
+    }
+    
     *var_val = data;	/* save pointer to this object */
     /* find out what type of object this is */
     data = asn_parse_header(data, &var_op_len, var_val_type);
     if (data == NULL){
 	ERROR_MSG("No header for value");
+        *var_name_len = 0;
 	return NULL;
     }
     /* XXX no check for type! */

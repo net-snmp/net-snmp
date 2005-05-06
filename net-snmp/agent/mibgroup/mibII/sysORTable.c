@@ -30,6 +30,9 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -112,22 +115,21 @@ var_sysORTable(struct variable *vp,
 		size_t *var_len,
 		WriteMethod **write_method)
 {
-  int i;
-  struct sysORTable *ptr;
+  unsigned long i;
+  struct sysORTable *ptr = table;
 
   if (header_simple_table(vp, name, length, exact, var_len, write_method, numEntries))
     return NULL;
 
-  DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- "));
   for(i = 1, ptr=table; ptr != NULL && i < (int)name[*length-1];
       ptr = ptr->next, i++) {
-    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- %d != %d\n",i,name[*length-1]));
+    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- %lu != %d\n",i,name[*length-1]));
   }
   if (ptr == NULL) {
-    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- no match: %d\n",i));
+    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- no match: %lu\n",i));
     return NULL;
   }
-  DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- match: %d\n",i));
+  DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- match: %lu\n",i));
   
   switch (vp->magic){
     case SYSORTABLEID:
@@ -176,8 +178,8 @@ int register_sysORTable_sess(oid *oidin,
   (*ptr)->OR_oidlen = oidlen;
   (*ptr)->OR_oid = (oid *) malloc(sizeof(oid)*oidlen);
   if ( (*ptr)->OR_oid == NULL ) {
-	free( *ptr );
 	free( (*ptr)->OR_descr );
+	free( *ptr );
 	return SYS_ORTABLE_REGISTRATION_FAILED;
   }
   memcpy((*ptr)->OR_oid, oidin, sizeof(oid)*oidlen);
@@ -205,43 +207,42 @@ int register_sysORTable(oid *oidin,
 
 
 
-int unregister_sysORTable_sess(oid *oidin,
-			 size_t oidlen,
-			 struct snmp_session *ss)
+int unregister_sysORTable_sess(oid *oidin, size_t oidlen,
+			       struct snmp_session *ss)
 {
-  struct sysORTable **ptr=&table, *prev=NULL;
-  int found = SYS_ORTABLE_NO_SUCH_REGISTRATION;
+  struct sysORTable *ptr = table, **prev_next = &table;
   struct register_sysOR_parameters reg_sysOR_parms;
+  int found = SYS_ORTABLE_NO_SUCH_REGISTRATION;
 
-    DEBUGMSGTL(("mibII/sysORTable", "sysORTable unregistering: "));
-    DEBUGMSGOID(("mibII/sysORTable", oidin, oidlen));
-    DEBUGMSG(("mibII/sysORTable","\n"));
+  DEBUGMSGTL(("mibII/sysORTable", "sysORTable unregistering: "));
+  DEBUGMSGOID(("mibII/sysORTable", oidin, oidlen));
+  DEBUGMSG(("mibII/sysORTable","\n"));
 
-  while(*ptr != NULL) {
-    if ( snmp_oid_compare( oidin, oidlen, (*ptr)->OR_oid, (*ptr)->OR_oidlen) == 0 ) {
-      if ( (*ptr)->OR_sess != ss )
-	continue;	/* different session */
-      if ( prev == NULL )
-        table      = (*ptr)->next;
-      else 
-        prev->next = (*ptr)->next;
-
-      free( (*ptr)->OR_descr );
-      free( (*ptr)->OR_oid );
-      free( (*ptr) );
-      numEntries--;
-      gettimeofday(&(sysOR_lastchange), NULL);
-      found = SYS_ORTABLE_UNREGISTERED_OK;
-      break;
-    }
-    prev = *ptr;
-    ptr = &((*ptr)->next);
+  while (ptr != NULL) {
+    if (snmp_oid_compare(oidin, oidlen, ptr->OR_oid, ptr->OR_oidlen) == 0) {
+      if (ptr->OR_sess == ss) {
+	if (ptr->OR_descr != NULL) {
+	  free(ptr->OR_descr);
+	}
+	if (ptr->OR_oid != NULL) {
+	  free(ptr->OR_oid);
+	}
+	*prev_next = ptr->next;
+	free(ptr);
+	numEntries--;
+	gettimeofday(&(sysOR_lastchange), NULL);
+	found = SYS_ORTABLE_UNREGISTERED_OK;
+	break;
+      }
+    } 
+    prev_next = &(ptr->next);
+    ptr = ptr->next;
   }
 
   reg_sysOR_parms.name    = oidin;
   reg_sysOR_parms.namelen = oidlen;
   snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_UNREG_SYSOR,
-                                       &reg_sysOR_parms);
+		      &reg_sysOR_parms);
 
   return found;
 }
@@ -255,26 +256,28 @@ int unregister_sysORTable(oid *oidin,
 
 void unregister_sysORTable_by_session(struct snmp_session *ss)
 {
-  struct sysORTable *ptr=table, *prev=NULL, *next;
+  struct sysORTable *ptr = table, **prev_next = &table;
 
-  while ( ptr != NULL  ) {
-    next = ptr->next;
-    if (( (ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess == ss ) ||
-        (!(ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess &&
-                              ptr->OR_sess->subsession == ss )) {
-      if ( prev == NULL )
-          table = next;
-      else
-          prev->next = next;
-        free( ptr->OR_descr );
-        free( ptr->OR_oid );
-        free( ptr );
-        numEntries--;
-        gettimeofday(&(sysOR_lastchange), NULL);
-    } 
-    else
-      prev = ptr;
-    ptr = next;
+  while (ptr != NULL) {
+    if (((ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess == ss) ||
+        (!(ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess != NULL &&
+	 ptr->OR_sess->subsession == ss)) {
+
+      if (ptr->OR_descr != NULL) {
+	free(ptr->OR_descr);
+      }
+      if (ptr->OR_oid != NULL) {
+	free(ptr->OR_oid);
+      }
+      *prev_next = ptr->next;
+      free(ptr);
+      ptr = *prev_next;
+      numEntries--;
+      gettimeofday(&(sysOR_lastchange), NULL);
+    } else {
+      prev_next = &(ptr->next);
+      ptr = ptr->next;
+    }
   }
 }
 

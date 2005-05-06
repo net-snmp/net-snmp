@@ -44,9 +44,15 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 #if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
 # include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -73,7 +79,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
 #endif
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
@@ -87,7 +95,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
+#if HAVE_NET_ROUTE_H
 #include <net/route.h>
+#endif
 #undef	KERNEL
 #ifdef RTENTRY_4_4
 #ifndef STRUCT_RTENTRY_HAS_RT_UNIT
@@ -140,7 +150,15 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/sysctl.h>
 #endif
 #if HAVE_NET_IF_DL_H
+#ifndef dynix
 #include <net/if_dl.h>
+#else
+#include <sys/net/if_dl.h>
+#endif
+#endif
+
+#if HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 
 #if HAVE_NLIST_H
@@ -165,23 +183,38 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <dmalloc.h>
 #endif
 
+#ifdef cygwin
+#define WIN32
+#include <windows.h>
+#endif
 
 #define CACHE_TIME (120)	    /* Seconds */
 
 #include "mibincl.h"
-
+#include "system.h"
 #include "ip.h"
 #include "../kernel.h"
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
 
+/* Write is supported only for Windows. Thats why route_write.h included under WIN32 */
+#ifdef WIN32
+#include "route_write.h"
+#endif
+
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
 #endif
 
+#ifdef hpux11
+#include <sys/mib.h>
+#include <netinet/mib_kern.h>
+#endif /* hpux */
 
 extern WriteMethod write_rte;
+
+#ifndef WIN32
 
 #ifdef USE_SYSCTL_ROUTE_DUMP
 
@@ -220,7 +253,7 @@ var_ipRouteEntry(struct variable *vp,
   struct rt_msghdr *rtp, *saveRtp=0;
   register int Save_Valid, result;
   static int saveNameLen=0, saveExact=0;
-  static oid saveName[14], Current[14];
+  static oid saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
   u_char *cp; u_char *ap;
   oid *op;
 #if 0
@@ -309,7 +342,8 @@ var_ipRouteEntry(struct variable *vp,
     /*
      *  Save in the 'cache'
      */
-    memcpy( (char *) saveName,(char *) name, *length * sizeof(oid));
+    memcpy( (char *) saveName,(char *) name,
+            SNMP_MIN(*length, MAX_OID_LEN) * sizeof(oid));
     saveName[9] = '\0';
     saveNameLen = *length;
     saveExact = exact;
@@ -365,7 +399,7 @@ var_ipRouteEntry(struct variable *vp,
 				     rtp->rtm_addrs, RTA_GATEWAY);
   case IPROUTETYPE:
     long_return = (rtp->rtm_flags & RTF_UP)
-      ? (rtp->rtm_flags & RTF_UP) ? 4 : 3
+      ? (rtp->rtm_flags & RTF_GATEWAY) ? 4 : 3
       : 2;
     return (u_char *)&long_return;
   case IPROUTEPROTO:
@@ -402,10 +436,16 @@ var_ipRouteEntry(struct variable *vp,
 #else /* not USE_SYSCTL_ROUTE_DUMP */
 
 static void Route_Scan_Reload (void);
+
+#ifdef hpux11
+static int rtsize = 0;
+static mib_ipRouteEnt *rt = (mib_ipRouteEnt *)0;
+#else	/* hpux11 */
 static RTENTRY **rthead=0;
 static int rtsize=0, rtallocate=0;
+#endif	/* hpux11 */
 
-#if !(defined(linux) || defined(solaris2))
+#if !(defined(linux) || defined(solaris2) || defined(hpux11))
 #define NUM_ROUTE_SYMBOLS 2
 static char*  route_symbols[] = {
   RTHOST_SYMBOL,
@@ -510,13 +550,13 @@ var_ipRouteEntry(struct variable *vp,
      */
     register int Save_Valid, result, RtIndex;
     static int saveNameLen=0, saveExact=0, saveRtIndex=0;
-    static oid saveName[14], Current[14];
+    static oid saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
     u_char *cp;
     oid *op;
 #if NEED_KLGETSA
     struct sockaddr_in *sa;
 #endif
-#ifndef linux
+#if !defined(linux) && !defined(hpux11)
     struct ifnet     rt_ifnet;
     struct in_ifaddr rt_ifnetaddr;
 #endif
@@ -571,6 +611,8 @@ var_ipRouteEntry(struct variable *vp,
 #if NEED_KLGETSA
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    cp = (u_char *) &(sa->sin_addr.s_addr);
+#elif defined(hpux11)
+	    cp = (u_char *)&rt[RtIndex].Dest;
 #else
 	    cp = (u_char *)&(((struct sockaddr_in *) &(rthead[RtIndex]->rt_dst))->sin_addr.s_addr);
 #endif
@@ -589,7 +631,7 @@ var_ipRouteEntry(struct variable *vp,
 	/*
 	 *  Save in the 'cache'
 	 */
-	memcpy( (char *) saveName,(char *) name, *length * sizeof(oid));
+	memcpy( (char *) saveName,(char *) name, SNMP_MIN(*length,MAX_OID_LEN) * sizeof(oid));
 	saveName[9] = 0;
 	saveNameLen = *length;
 	saveExact = exact;
@@ -609,29 +651,49 @@ var_ipRouteEntry(struct variable *vp,
 #if NEED_KLGETSA
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    return(u_char *) &(sa->sin_addr.s_addr);
+#elif defined(hpux11)
+	    long_return = rt[RtIndex].Dest;
+	    return (u_char *)&long_return;
 #else
 	    return(u_char *) &((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr;
 #endif
 	case IPROUTEIFINDEX:
+#ifdef hpux11
+	    long_return = rt[RtIndex].IfIndex;
+#else
 	    long_return = (u_long)rthead[RtIndex]->rt_unit;
+#endif
 	    return (u_char *)&long_return;
 	case IPROUTEMETRIC1:
+#ifdef hpux11
+	    long_return = rt[RtIndex].Metric1;
+#else
 	    long_return = (rthead[RtIndex]->rt_flags & RTF_GATEWAY) ? 1 : 0;
+#endif
 	    return (u_char *)&long_return;
 	case IPROUTEMETRIC2:
-#if NO_DUMMY_VALUES
+#ifdef hpux11
+	    long_return = rt[RtIndex].Metric2;
+	    return (u_char *)&long_return;
+#elif defined(NO_DUMMY_VALUES)
 	    return NULL;
 #endif
 	    long_return = -1;
 	    return (u_char *)&long_return;
 	case IPROUTEMETRIC3:
-#if NO_DUMMY_VALUES
+#ifdef hpux11
+	    long_return = rt[RtIndex].Metric3;
+	    return (u_char *)&long_return;
+#elif defined(NO_DUMMY_VALUES)
 	    return NULL;
 #endif
 	    long_return = -1;
 	    return (u_char *)&long_return;
 	case IPROUTEMETRIC4:
-#if NO_DUMMY_VALUES
+#ifdef hpux11
+	    long_return = rt[RtIndex].Metric4;
+	    return (u_char *)&long_return;
+#elif defined(NO_DUMMY_VALUES)
 	    return NULL;
 #endif
 	    long_return = -1;
@@ -646,17 +708,33 @@ var_ipRouteEntry(struct variable *vp,
 #if NEED_KLGETSA
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
 	    return(u_char *) &(sa->sin_addr.s_addr);
+#elif defined(hpux11)
+	    long_return = rt[RtIndex].NextHop;
+	    return (u_char *)&long_return;
 #else
 	    return(u_char *) &((struct sockaddr_in *) &rthead[RtIndex]->rt_gateway)->sin_addr.s_addr;
 #endif /* *bsd */
 	case IPROUTETYPE:
-	    long_return = (rthead[RtIndex]->rt_flags & RTF_GATEWAY) ? 4 : 3;
+#ifdef hpux11
+	    long_return = rt[RtIndex].Type;
+#else
+            long_return = (rthead[RtIndex]->rt_flags & RTF_UP)
+              ? (rthead[RtIndex]->rt_flags & RTF_GATEWAY) ? 4 : 3
+              : 2;
+#endif
 	    return (u_char *)&long_return;
 	case IPROUTEPROTO:
+#ifdef hpux11
+	    long_return = rt[RtIndex].Proto;
+#else
 	    long_return = (rthead[RtIndex]->rt_flags & RTF_DYNAMIC) ? 4 : 2;
+#endif
 	    return (u_char *)&long_return;
 	case IPROUTEAGE:
-#if NO_DUMMY_VALUES
+#ifdef hpux11
+	    long_return = rt[RtIndex].Age;
+	    return (u_char *)&long_return;
+#elif defined(NO_DUMMY_VALUES)
 	    return NULL;
 #endif
 	    long_return = 0;
@@ -669,7 +747,10 @@ var_ipRouteEntry(struct variable *vp,
 	    return NULL;
 #endif
 	    long_return = 0;
-#else /*  NEED_KLGETSA */
+#elif defined(hpux11)
+	    long_return = rt[RtIndex].Mask;
+	    return (u_char *)&long_return;
+#else /* !NEED_KLGETSA && !hpux11 */
 	    if ( ((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr == 0 )
 		long_return = 0;	/* Default route */
 	    else {
@@ -816,6 +897,7 @@ var_ipRouteEntry(struct variable *vp,
     return (u_char *)&long_return;
   case IPROUTEPROTO:
     long_return = Lowentry.ipRouteProto;
+    if (long_return == -1) long_return = 1;
     return (u_char *)&long_return;
   case IPROUTEAGE:
     long_return = Lowentry.ipRouteAge;
@@ -832,12 +914,12 @@ var_ipRouteEntry(struct variable *vp,
 #endif /* solaris2 - var_IProute */
 
 #ifndef solaris2
-static int qsort_compare (RTENTRY **, RTENTRY **);
+static int qsort_compare (const void *, const void *);
 #endif
 
 #if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT)
 
-#ifdef RTENTRY_4_4
+#if defined(RTENTRY_4_4) && !defined(hpux11)
 void
 load_rtentries(struct radix_node *pt)
 {
@@ -915,10 +997,55 @@ load_rtentries(struct radix_node *pt)
       load_rtentries(node.rn_dupedkey);
   }
 }
-#endif /* RTENTRY_4_4 */
+#endif /* RTENTRY_4_4 && !hpux11 */
 
 static void Route_Scan_Reload (void)
 {
+#ifdef hpux11
+
+    int fd;
+    struct nmparms p;
+    int val;
+    unsigned int ulen;
+    int ret;
+
+    if (rt) free(rt);
+    rt = (mib_ipRouteEnt *)0;
+    rtsize = 0;
+
+    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) >= 0) {
+	p.objid = ID_ipRouteNumEnt;
+	p.buffer = (void *)&val;
+	ulen = sizeof(int);
+	p.len = &ulen;
+	if ((ret = get_mib_info(fd, &p)) == 0)
+	    rtsize = val;
+
+	if (rtsize > 0) {
+	    ulen = (unsigned)rtsize * sizeof(mib_ipRouteEnt);
+	    rt = (mib_ipRouteEnt *)malloc(ulen);
+	    p.objid = ID_ipRouteTable;
+	    p.buffer = (void *)rt;
+	    p.len = &ulen;
+	    if ((ret = get_mib_info(fd, &p)) < 0)
+		rtsize = 0;
+	}
+
+	close_mib(fd);
+    }
+
+    /*
+     *  Sort it!
+     */
+    qsort((char *) rt, rtsize, sizeof(rt[0]),
+#ifdef __STDC__
+	(int (*)(const void *, const void *))qsort_compare
+#else
+	qsort_compare
+#endif
+	);
+
+#else   /* hpux11 */
 #if defined(RTENTRY_4_4)
   struct radix_node_head head, *rt_table[AF_MAX+1];
   int i;
@@ -1026,13 +1153,14 @@ static void Route_Scan_Reload (void)
   /*
    *  Sort it!
    */
-  qsort((char *) rthead, rtsize, sizeof(rthead[0]),
+  qsort((char *) rthead, rtsize, sizeof(rthead[0]), 
 #ifdef __STDC__
-      (int (*)(const void *, const void *))qsort_compare
+        (int (*)(const void *, const void *))qsort_compare
 #else
-        qsort_compare
+	qsort_compare
 #endif
-    );
+	);
+#endif	/* hpux11 */
 }
 
 #else
@@ -1131,14 +1259,7 @@ static void Route_Scan_Reload (void)
 	/*
 	 *  Sort it!
 	 */
-	qsort((char *)rthead,rtsize,sizeof(rthead[0]),
-
-#ifdef __STDC__
-              (int (*)(const void *, const void *)) qsort_compare
-#else
-              qsort_compare
-#endif
-          );
+	qsort((char *)rthead,rtsize,sizeof(rthead[0]), qsort_compare);
 }
 #else
 #ifdef linux
@@ -1206,12 +1327,13 @@ static void Route_Scan_Reload (void)
 			     &(((struct sockaddr_in *) &(rtent.rt_genmask))->sin_addr.s_addr)))
 	      continue;
 	    
-	    strcpy (name, rt->rt_dev);
+	    strncpy (name, rt->rt_dev, sizeof(name));
+	    name[ sizeof(name)-1 ] = 0;
+
 	    /* linux says ``lo'', but the interface is stored as ``lo0'': */
 	    if (! strcmp (name, "lo"))
 	      strcat (name, "0");
 	    
-	    name[15] = '\0';
 
 	    rt->rt_flags = flags, rt->rt_refcnt = refcnt;
 	    rt->rt_use = use, rt->rt_metric = metric;
@@ -1244,13 +1366,7 @@ static void Route_Scan_Reload (void)
 	/*
 	 *  Sort it!
 	 */
-	qsort((char *)rthead,rtsize,sizeof(rthead[0]),
-#ifdef __STDC__
-              (int (*)(const void *, const void *)) qsort_compare
-#else
-              qsort_compare
-#endif
-          );
+	qsort((char *)rthead,rtsize,sizeof(rthead[0]), qsort_compare);
 }
 #endif
 #endif
@@ -1261,15 +1377,32 @@ static void Route_Scan_Reload (void)
 /*
  *	Create a host table
  */
-static int qsort_compare(RTENTRY **r1, 
-			 RTENTRY **r2)
+#ifdef hpux11
+static int qsort_compare(const void *v1,
+			 const void *v2)
 {
-#if NEED_KLGETSA
-	register u_long dst1 = ntohl(klgetsa((struct sockaddr_in *)(*r1)->rt_dst)->sin_addr.s_addr);
-	register u_long dst2 = ntohl(klgetsa((struct sockaddr_in *)(*r2)->rt_dst)->sin_addr.s_addr);
+	const mib_ipRouteEnt *r1 = (const mib_ipRouteEnt *) v1;
+	const mib_ipRouteEnt *r2 = (const mib_ipRouteEnt *) v2;
+
+	/*
+	 *	Do the comparison
+	 */
+	if (r1->Dest == r2->Dest) return(0);
+	if (r1->Dest >  r2->Dest) return(1);
+	return(-1);
+}
 #else
-	register u_long dst1 = ntohl(((struct sockaddr_in *) &((*r1)->rt_dst))->sin_addr.s_addr);
-	register u_long dst2 = ntohl(((struct sockaddr_in *) &((*r2)->rt_dst))->sin_addr.s_addr);
+static int qsort_compare(const void *v1,
+			 const void *v2)
+{
+	const RTENTRY **r1 = (const RTENTRY **) v1;
+	const RTENTRY **r2 = (const RTENTRY **) v2;
+#if NEED_KLGETSA
+	register u_long dst1 = ntohl(klgetsa((const struct sockaddr_in *)(*r1)->rt_dst)->sin_addr.s_addr);
+	register u_long dst2 = ntohl(klgetsa((const struct sockaddr_in *)(*r2)->rt_dst)->sin_addr.s_addr);
+#else
+	register u_long dst1 = ntohl(((const struct sockaddr_in *) &((*r1)->rt_dst))->sin_addr.s_addr);
+	register u_long dst2 = ntohl(((const struct sockaddr_in *) &((*r2)->rt_dst))->sin_addr.s_addr);
 #endif /* NEED_KLGETSA */
 
 	/*
@@ -1279,10 +1412,223 @@ static int qsort_compare(RTENTRY **r1,
 	if (dst1 > dst2) return(1);
 	return(-1);
 }
+#endif /* hpux11 */
 #endif /* not USE_SYSCTL_ROUTE_DUMP */
 
 #endif /* solaris2 */
 
+#else /* WIN32 */
+#include <iphlpapi.h>
+#ifndef MIB_IPPROTO_NETMGMT
+#define MIB_IPPROTO_NETMGMT 3
+#endif
+
+PMIB_IPFORWARDROW route_row;
+int create_flag;
+void init_var_route(void)
+{
+}
+
+u_char *
+var_ipRouteEntry(struct variable *vp,
+		oid *name,
+		size_t *length,
+		int exact,
+		size_t *var_len,
+		WriteMethod **write_method)
+{
+    /*
+     * object identifier is of form:
+     * 1.3.6.1.2.1.4.21.1.?.A.B.C.D,  where A.B.C.D is IP address.
+     * IPADDR starts at offset 10.
+     */
+    register int Save_Valid, result, RtIndex;
+    static int saveNameLen=0, saveExact=0, saveRtIndex=0, rtsize = 0;
+    static oid saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
+    u_char *cp;
+    oid *op;
+    DWORD status = NO_ERROR;
+    DWORD dwActualSize = 0;
+    static PMIB_IPFORWARDTABLE pIpRtrTable = NULL;
+    struct timeval now;
+    static long Time_Of_Last_Reload = 0;
+    u_char dest_addr[4];
+    MIB_IPFORWARDROW temp_row;
+
+
+    /** 
+     ** this optimisation fails, if there is only a single route avail.
+     ** it is a very special case, but better leave it out ...
+     **/
+#if NO_DUMMY_VALUES
+      saveNameLen = 0;
+#endif
+    if(route_row == NULL){
+        /* Free allocated memory in case of SET request's FREE phase */
+        route_row = (PMIB_IPFORWARDROW)malloc(sizeof(MIB_IPFORWARDROW));
+    }
+    gettimeofday (&now, (struct timezone *) 0);
+    if ((rtsize <= 1) || (Time_Of_Last_Reload + 5 <= now.tv_sec))
+      Save_Valid = 0;
+    else
+    /*
+     *	OPTIMIZATION:
+     *
+     *	If the name was the same as the last name, with the possible
+     *	exception of the [9]th token, then don't read the routing table
+     *
+     */
+
+    if ((saveNameLen == (int)*length) && (saveExact == exact)) {
+	register int temp=name[9];
+	name[9] = 0;
+	Save_Valid = (snmp_oid_compare(name, *length, saveName, saveNameLen) == 0);
+	name[9] = temp;
+    } else
+	Save_Valid = 0;
+
+    if (Save_Valid) {
+	register int temp=name[9];    /* Fix up 'lowest' found entry */
+	memcpy( (char *) name,(char *) Current, 14 * sizeof(oid));
+	name[9] = temp;
+	*length = 14;
+	RtIndex = saveRtIndex;
+    } else {
+	/* fill in object part of name for current(less sizeof instance part) */
+
+	memcpy( (char *)Current,(char *)vp->name, (int)(vp->namelen) * sizeof(oid));
+
+
+    if ((Time_Of_Last_Reload + 5 <= now.tv_sec) || (pIpRtrTable == NULL) )
+    {
+        if(pIpRtrTable != NULL)
+            free(pIpRtrTable);
+        Time_Of_Last_Reload = now.tv_sec;
+        /* query for buffer size needed */
+        status = GetIpForwardTable(pIpRtrTable, &dwActualSize, TRUE);
+        if (status == ERROR_INSUFFICIENT_BUFFER)
+        {
+            pIpRtrTable = (PMIB_IPFORWARDTABLE) malloc(dwActualSize);
+            if(pIpRtrTable != NULL){  
+                /* Get the sorted IP Route Table */
+                status = GetIpForwardTable(pIpRtrTable, &dwActualSize, TRUE);
+            }
+        }
+    }
+    if(status == NO_ERROR)
+    {
+      rtsize = pIpRtrTable->dwNumEntries;
+	    for(RtIndex=0; RtIndex < rtsize; RtIndex++) {
+        cp = (u_char *)&pIpRtrTable->table[RtIndex].dwForwardDest;
+	      op = Current + 10;
+	      *op++ = *cp++;
+	      *op++ = *cp++;
+	      *op++ = *cp++;
+	      *op++ = *cp++;
+
+	      result = snmp_oid_compare(name, *length, Current, 14);
+	      if ((exact && (result == 0)) || (!exact && (result < 0)))
+	    	break;
+      }
+    }
+  if (RtIndex >= rtsize){
+        /* for creation of new row, only ipNetToMediaTable case is considered */
+            if(*length == 14){
+                create_flag = 1; 
+                *write_method = write_rte;        
+                dest_addr[0] = (u_char)name[10];
+                dest_addr[1] = (u_char)name[11];
+                dest_addr[2] = (u_char)name[12];
+                dest_addr[3] = (u_char) name[13];
+                temp_row.dwForwardDest = *((DWORD *)dest_addr);             
+                temp_row.dwForwardPolicy = 0; 
+                temp_row.dwForwardProto = MIB_IPPROTO_NETMGMT;
+                *route_row = temp_row;
+            }  
+    free(pIpRtrTable);
+    pIpRtrTable = NULL;
+    rtsize = 0;
+	  return(NULL);
+  }
+        create_flag = 0;
+	/*
+	 *  Save in the 'cache'
+	 */
+	memcpy( (char *) saveName,(char *) name,
+                SNMP_MIN(*length,MAX_OID_LEN) * sizeof(oid));
+	saveName[9] = 0;
+	saveNameLen = *length;
+	saveExact = exact;
+	saveRtIndex = RtIndex;
+
+	/*
+	 *  Return the name
+	 */
+	memcpy( (char *) name,(char *) Current, 14 * sizeof(oid));
+	*length = 14;
+    }
+    *var_len = sizeof(long_return);
+    *route_row = pIpRtrTable->table[RtIndex];
+
+    switch(vp->magic){
+	    case IPROUTEDEST:
+	    *write_method = write_rte;
+	      long_return = pIpRtrTable->table[RtIndex].dwForwardDest;
+		    return (u_char *)&long_return;
+	    case IPROUTEIFINDEX:
+	    *write_method = write_rte;
+	      long_return = pIpRtrTable->table[RtIndex].dwForwardIfIndex;
+		    return (u_char *)&long_return;
+    	case IPROUTEMETRIC1:
+	    *write_method = write_rte;       
+	      long_return = pIpRtrTable->table[RtIndex].dwForwardMetric1;
+		    return (u_char *)&long_return;
+	    case IPROUTEMETRIC2:
+	    *write_method = write_rte;
+        long_return = pIpRtrTable->table[RtIndex].dwForwardMetric2;
+		    return (u_char *)&long_return;
+	    case IPROUTEMETRIC3:
+	    *write_method = write_rte;
+        long_return = pIpRtrTable->table[RtIndex].dwForwardMetric3;
+		    return (u_char *)&long_return;
+	    case IPROUTEMETRIC4:
+	    *write_method = write_rte;
+        long_return = pIpRtrTable->table[RtIndex].dwForwardMetric4;
+		    return (u_char *)&long_return;
+	    case IPROUTEMETRIC5:
+	    *write_method = write_rte;
+        long_return = pIpRtrTable->table[RtIndex].dwForwardMetric5;
+		    return (u_char *)&long_return;
+	    case IPROUTENEXTHOP:
+	    *write_method = write_rte;
+        long_return = pIpRtrTable->table[RtIndex].dwForwardNextHop;
+		    return (u_char *)&long_return;
+	    case IPROUTETYPE:
+	    *write_method = write_rte; 
+	      long_return = pIpRtrTable->table[RtIndex].dwForwardType;
+		    return (u_char *)&long_return;
+	    case IPROUTEPROTO:
+	      long_return = pIpRtrTable->table[RtIndex].dwForwardProto;
+		    return (u_char *)&long_return;
+	    case IPROUTEAGE:
+	    *write_method = write_rte;
+        long_return = pIpRtrTable->table[RtIndex].dwForwardAge;
+		    return (u_char *)&long_return;
+	    case IPROUTEMASK:
+	    *write_method = write_rte;
+        long_return = pIpRtrTable->table[RtIndex].dwForwardMask;
+		    return (u_char *)&long_return;
+    	case IPROUTEINFO:
+	      *var_len = nullOidLen;
+	      return (u_char *)nullOid;
+	    default:
+	      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n", vp->magic));
+   }
+   return NULL;
+}
+
+#endif /* WIN32 */
+ 
 #else /* CAN_USE_SYSCTL */
 
 #include <stddef.h>
@@ -1574,7 +1920,9 @@ var_ipRouteEntry(struct variable *vp,
 		return (u_char *)&long_return;
 
 	case IPROUTETYPE:
-		long_return = (rt->hdr->rtm_flags & RTF_GATEWAY) ? 4 : 3;
+                long_return = (rt->hdr->rtm_flags & RTF_UP)
+                  ? (rt->hdr->rtm_flags & RTF_GATEWAY) ? 4 : 3
+                  : 2;
 		return (u_char *)&long_return;
 
 	case IPROUTEPROTO:

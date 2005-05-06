@@ -98,9 +98,9 @@ typedef long	fd_mask;
 #define FD_ZERO(p)	memset((p), 0, sizeof(*(p)))
 #endif
 
-#define PARTY_MIB_BASE	 ".1.3.6.1.6.3.3.1.3.127.0.0.1.1"
-#define CONTEXT_MIB_BASE ".1.3.6.1.6.3.3.1.4.127.0.0.1.1"
-
+/* Prototype definitions */
+static int snmp_synch_input(int op, struct snmp_session *session, int reqid,
+                                struct snmp_pdu *pdu, void *magic);
 
 struct snmp_pdu *
 snmp_pdu_create(int command)
@@ -139,8 +139,7 @@ struct variable_list* snmp_add_null_var(struct snmp_pdu * pdu,
 }
 
 
-
-int
+static int
 snmp_synch_input(int op,
 		 struct snmp_session *session,
 		 int reqid,
@@ -150,7 +149,7 @@ snmp_synch_input(int op,
     struct synch_state *state = (struct synch_state *)magic;
     int rpt_type;
 
-    if (reqid != state->reqid && pdu->command != SNMP_MSG_REPORT)
+    if (reqid != state->reqid && pdu && pdu->command != SNMP_MSG_REPORT)
 	return 0;
 
     state->waiting = 0;
@@ -169,6 +168,10 @@ snmp_synch_input(int op,
 	state->pdu = snmp_clone_pdu(pdu);
 	state->status = STAT_SUCCESS;
 	session->s_snmp_errno = SNMPERR_SUCCESS;
+      }
+      else {
+        state->waiting = 1;
+	return 0;
       }
     } else if (op == TIMED_OUT){
 	state->pdu		 = NULL;
@@ -193,7 +196,7 @@ snmp_synch_input(int op,
 int
 snmp_clone_var(struct variable_list *var, struct variable_list *newvar)
 {
-    if (!newvar || !var) return 1;
+    if (!newvar || !var || !var->name) return 1;
 
     memmove(newvar, var, sizeof(struct variable_list));
     newvar->next_variable = 0; newvar->name = 0; newvar->val.string = 0;
@@ -537,6 +540,18 @@ snmp_set_var_objid (struct variable_list *vp,
 {
     size_t len = sizeof(oid) * name_length;
 
+    if (!vp)
+        return 1;
+
+    if (vp->name != vp->name_loc && vp->name != NULL &&
+        vp->name_length > (sizeof(vp->name_loc) / sizeof(oid))) {
+        /*
+         * Probably previously-allocated "big storage".  Better free it
+         * else memory leaks possible.  
+         */
+        free(vp->name);
+    }
+    
     /* use built-in storage for smaller values */
     if (len <= sizeof(vp->name_loc)) {
         vp->name = vp->name_loc;
@@ -741,17 +756,17 @@ const char *error_string[19] = {
     "(readOnly) The two parties used do not have access to use the specified SNMP PDU.",
     "(genError) A general failure occured",
     "noAccess",
-    "wrongType",
-    "wrongLength",
+    "(wrongType) The datatype set does not match the type expected by the agent",
+    "(wrongLength) The value set has an illegal length from that expected by the agent",
     "wrongEncoding",
-    "wrongValue",
-    "noCreation",
-    "inconsistentValue",
-    "resourceUnavailable",
+    "(wrongValue) The value set is illegal or unsupported in some way",
+    "(noCreation) That table does not support row creation",
+    "(inconsistentValue) The value set is not currently acceptable",
+    "(resourceUnavailable) Most probably a memory allocation failure within the agent",
     "commitFailed",
     "undoFailed",
-    "authorizationError",
-    "notWritable",
+    "(authorizationError) Access denied to that object",
+    "(notWritable) That object does not support modification",
     "inconsistentName"
 };
 

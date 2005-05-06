@@ -14,6 +14,9 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
 
 #include "mibincl.h"
 #include "registry.h"
@@ -75,9 +78,9 @@ header_registry(struct variable *vp,
       memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
       memcpy( (char *)name,(char *)newname,
               ((int)vp->namelen + 1) * sizeof(oid));
-      memcpy((char *)(name+vp->namelen), (char *)mine->name,
-            ((int)mine->namelen) * sizeof(oid));
-      *length = vp->namelen + mine->namelen;
+      memcpy((char *)(name+vp->namelen), (char *)mine->start,
+            ((int)mine->start_len) * sizeof(oid));
+      *length = vp->namelen + mine->start_len;
     }
 
     DEBUGMSGTL(("ucd-snmp/registry", "var_registry result: "));

@@ -10,6 +10,12 @@
 #include <strings.h>
 #endif
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "host_res.h"
 #include "hr_device.h"
 
@@ -227,9 +233,11 @@ var_hrdevice(struct variable *vp,
             *var_len = sizeof(device_type_id);
 	    return (u_char *)device_type_id;
 	case HRDEV_DESCR:
-	    if ( device_descr[ type ] != NULL )
-        	strcpy(string, ((*device_descr[type])(dev_idx)) );
-	    else
+	    if ( device_descr[ type ] != NULL ) {
+        	strncpy(string, ((*device_descr[type])(dev_idx)),
+                        sizeof(string)-1 );
+                string[ sizeof(string)-1 ] = 0;
+	    } else
 #if NO_DUMMY_VALUES
 		return NULL;
 #else

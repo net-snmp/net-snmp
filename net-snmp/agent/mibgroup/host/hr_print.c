@@ -9,8 +9,18 @@
 #else
 #include <strings.h>
 #endif
+
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "host_res.h"
 #include "hr_print.h"
+#include "struct.h"
+#include "tools.h"
+#include "util_funcs.h"
 
 #define HRPRINT_MONOTONICALLY_INCREASING
 
@@ -29,7 +39,9 @@ int printer_status(int);
 int printer_detail_status(int);
 int printer_errors(int);
 int header_hrprint (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
-
+#ifdef HAVE_LPSTAT
+FILE * run_lpstat(void);
+#endif
 
 	/*********************
 	 *
@@ -187,9 +199,11 @@ Init_HR_Print (void)
 {
 #if HAVE_LPSTAT || HAVE_CGETNEXT || HAVE_PRINTCAP
     int i;
-#if HAVE_CGETNEXT
+#if HAVE_LPSTAT
+    FILE *p;
+#elif HAVE_CGETNEXT
     const char *caps[] = {"/etc/printcap", NULL};
-#elif HAVE_LPSTAT || HAVE_PRINTCAP
+#elif HAVE_PRINTCAP
     FILE *p;
 #endif
 
@@ -199,18 +213,20 @@ Init_HR_Print (void)
     }
     else {
 	HRP_maxnames = 5;
-	HRP_name = calloc(HRP_maxnames, sizeof( char *));
+	HRP_name = (char **)calloc(HRP_maxnames, sizeof( char *));
+        if (!HRP_name)
+            return;
     }
   
 #if HAVE_LPSTAT
-    if ((p = popen(LPSTAT_PATH " -v", "r")) != NULL) {
+    if ((p = run_lpstat()) != NULL) {
 	char buf[BUFSIZ], ptr[BUFSIZ];
 	while (fgets(buf, sizeof buf, p)) {
 	    sscanf(buf, "%*s %*s %[^:]", ptr);
 #elif HAVE_CGETNEXT
     {
-	char *buf, *ptr;
-	while (cgetnext(&buf, caps)) {
+	char *buf = NULL, *ptr;
+	while (cgetnext(&buf, caps) > 0) {
 	    if ((ptr = strchr(buf, ':'))) *ptr = 0;
 	    if ((ptr = strchr(buf, '|'))) *ptr = 0;
 	    ptr = buf;
@@ -229,15 +245,19 @@ Init_HR_Print (void)
 	    if (HRP_names == HRP_maxnames) {
 		char **tmp;
 		HRP_maxnames += 5;
-		tmp = calloc(HRP_maxnames, sizeof(char *));
+		tmp = (char **)calloc(HRP_maxnames, sizeof(char *));
+                if (!tmp)
+                   goto finish;
 		memcpy(tmp, HRP_name, HRP_names*sizeof(char *));
 		HRP_name = tmp;
 	    }
 	    HRP_name[HRP_names++] = strdup(ptr);
 #if HAVE_CGETNEXT
-	    free(buf);
+	    if (buf)
+		free(buf);
 #endif
 	}
+finish:
 #if HAVE_LPSTAT
 	pclose(p);
 #elif HAVE_CGETNEXT
@@ -298,3 +318,25 @@ int printer_errors(int idx)
 {
     return 0;
 }
+
+#ifdef        HAVE_LPSTAT
+/*
+ * Run the lpstat command. If compiled with EXCACHE support, this
+ * will actually cache the output for a while which helps a lot
+ * with snmpbulkwalk (in fact, it keeps the client from exiting
+ * due to timeouts).
+ */
+FILE *
+run_lpstat(void)
+{
+    struct extensible	ex;
+    int			fd;
+
+    memset(&ex, 0, sizeof(ex));
+    strcpy(ex.command, LPSTAT_PATH " -v");
+    if ((fd = get_exec_output(&ex)) < 0)
+    	return NULL;
+
+    return fdopen(fd, "r");
+}
+#endif

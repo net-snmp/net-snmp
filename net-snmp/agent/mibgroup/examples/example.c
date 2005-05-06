@@ -33,6 +33,9 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 /* mibincl.h contains all the snmp specific headers to define the
    return types and various defines and structures. */
@@ -165,7 +168,7 @@ void init_example(void)
      *  Also set a default value for the string object.  Note that the
      *   example integer variable was initialised above.
      */
-  strcpy( example_str, EXAMPLE_STR_DEFAULT );
+  strncpy( example_str, EXAMPLE_STR_DEFAULT, EXAMPLE_STR_LEN);
 
   snmpd_register_config_handler( "exampleint",
 			example_parse_config_exampleint,
@@ -217,9 +220,10 @@ example_parse_config_examplestr( const char *token, char *cptr )
 		 * An alternative approach would be to log an error,
 		 *  and discard this value altogether.
 		 */
-	strncpy( example_str, cptr, EXAMPLE_STR_LEN-3 );
-	example_str[ EXAMPLE_STR_LEN-3 ] = 0;
+	strncpy( example_str, cptr, EXAMPLE_STR_LEN-4 );
+	example_str[ EXAMPLE_STR_LEN-4 ] = 0;
 	strcat(  example_str, "..." );
+	example_str[ EXAMPLE_STR_LEN-1 ] = 0;
     }
 }
 
@@ -362,7 +366,7 @@ var_example(struct variable *vp,
     case EXAMPLEIPADDRESS:
       /* ipaddresses get returned as a long.  ick */
       /* we're returning 127.0.0.1 */
-      long_ret = ((127 << (8*3)) + (0 << (8*2)) + (0 << (8*1)) + 1);
+      long_ret = ntohl(INADDR_LOOPBACK);
       return (u_char *) &long_ret;
       
     case EXAMPLECOUNTER:
@@ -568,7 +572,7 @@ write_exampletrap(int	action,
 			 */
             DEBUGMSGTL(("example","write_exampletrap sending the trap\n",
                         action));
-	    send_easy_trap( SNMP_TRAP_ENTERPRISESPECIFIC, 3 );
+	    send_easy_trap( SNMP_TRAP_ENTERPRISESPECIFIC, 99 );
             DEBUGMSGTL(("example","write_exampletrap trap sent\n",action));
 	    break;
 
@@ -584,13 +588,13 @@ write_exampletrap(int	action,
    The SNMPv2-Trap PDU contains at least a pair of object names and
    values: - sysUpTime.0 whose value is the time in hundredths of a
    second since the netwok management portion of system was last
-   reinitialized.  - snmpTrapIOD.0 which is part of the trap group SNMPv2
+   reinitialized.  - snmpTrapOID.0 which is part of the trap group SNMPv2
    MIB whose value is the object-id of the specific trap you have defined
    in your own MIB.  Other variables can be added to caracterize the
    trap.
 
    The function send_v2trap adds automaticallys the two objects but the
-   value of snmpTrapIOD.0 is 0.0 by default. If you want to add your trap
+   value of snmpTrapOID.0 is 0.0 by default. If you want to add your trap
    name, you have to reconstruct this object and to add your own
    variable.
 
@@ -610,7 +614,7 @@ write_exampletrap2(int	action,
     long intval;
 
     /* these variales will be used when we send the trap */
-    oid objid_snmptrap[] = { 1,3,6,1,6,3,1,1,4,1,0}; /* snmpTrapIOD.0 */
+    oid objid_snmptrap[] = { 1,3,6,1,6,3,1,1,4,1,0}; /* snmpTrapOID.0 */
     oid demo_trap[] = { 1,3,6,1,4,1,2021,13,990}; /*demo-trap */
     oid example_string_oid[] = { 1,3,6,1,4,1,2021,254,1,0 };
     static struct variable_list var_trap;
@@ -672,7 +676,7 @@ write_exampletrap2(int	action,
 /* trap definition objects */
 
             var_trap.next_variable = &var_obj; /* next variable */
-            var_trap.name = objid_snmptrap; /* snmpTrapIOD.0 */
+            var_trap.name = objid_snmptrap; /* snmpTrapOID.0 */
             var_trap.name_length = sizeof(objid_snmptrap)/sizeof(oid); /* number of sub-ids */
             var_trap.type = ASN_OBJECT_ID;
             var_trap.val.objid = demo_trap; /* demo-trap objid */

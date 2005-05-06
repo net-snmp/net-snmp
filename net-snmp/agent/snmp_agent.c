@@ -28,6 +28,9 @@ SOFTWARE.
 #include <config.h>
 
 #include <sys/types.h>
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -66,6 +69,10 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
+#ifdef USE_LIBWRAP
+#include <tcpd.h>
+#endif
+
 #define SNMP_NEED_REQUEST_LIST
 #include "mibincl.h"
 #include "snmp_client.h"
@@ -83,6 +90,10 @@ SOFTWARE.
 
 #ifdef USING_AGENTX_PROTOCOL_MODULE
 #include "agentx/protocol.h"
+#endif
+
+#ifdef USING_AGENTX_MASTER_MODULE
+#include "agentx/master.h"
 #endif
 
 static int snmp_vars_inc;
@@ -105,7 +116,7 @@ static void dump_var (
     temp_var.type = statType;
     temp_var.val.string = (u_char *)statP;
     temp_var.val_len = statLen;
-    sprint_variable (buf, var_name, var_name_len, &temp_var);
+    snprint_variable (buf, sizeof(buf), var_name, var_name_len, &temp_var);
     snmp_log(LOG_INFO, "    >> %s\n", buf);
 }
 
@@ -121,35 +132,41 @@ int
 agent_check_and_process(int block) {
   int numfds;
   fd_set fdset;
-  struct timeval	timeout, *tvp = &timeout;
+  struct timeval timeout = { LONG_MAX, 0 }, *tvp = &timeout;
   int count;
   int fakeblock=0;
   
-  tvp =  &timeout;
-
   numfds = 0;
   FD_ZERO(&fdset);
   snmp_select_info(&numfds, &fdset, tvp, &fakeblock);
-  if (block == 1)
-    tvp = NULL; /* block without timeout */
-  else if (block == 0) {
-      tvp->tv_sec = 0;
-      tvp->tv_usec = 0;
+  if (block != 0 && fakeblock != 0) {
+    /*  There are no alarms registered, and the caller asked for blocking, so
+	let select() block forever.  */
+
+    tvp = NULL;
+  } else if (block != 0 && fakeblock == 0) {
+    /*  The caller asked for blocking, but there is an alarm due sooner than
+	LONG_MAX seconds from now, so use the modified timeout returned by
+	snmp_select_info as the timeout for select().  */
+
+  } else if (block == 0) {
+    /*  The caller does not want us to block at all.  */
+
+    tvp->tv_sec  = 0;
+    tvp->tv_usec = 0;
   }
 
   count = select(numfds, &fdset, 0, 0, tvp);
 
-  if (count > 0){
+  if (count > 0) {
     /* packets found, process them */
     snmp_read(&fdset);
-  } else switch(count){
+  } else switch(count) {
     case 0:
       snmp_timeout();
       break;
     case -1:
-      if (errno == EINTR){
-        return -1;
-      } else {
+      if (errno != EINTR) {
         snmp_log_perror("select");
       }
       return -1;
@@ -158,7 +175,7 @@ agent_check_and_process(int block) {
       return -1;
   }  /* endif -- count>0 */
 
-  /* run requested alarms */
+  /*  Run requested alarms.  */
   run_alarms();
 
   return count;
@@ -195,17 +212,25 @@ init_master_agent(int dest_port,
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
 	return 0; /* no error if ! MASTER_AGENT */
 
+#ifdef USING_AGENTX_MASTER_MODULE
+    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER) == 1 )
+        real_init_master();
+#endif
+
     /* has something been specified before? */
     cptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
                       
     /* set the specification string up */
     if (cptr && dest_port)
         /* append to the older specification string */
-        sprintf(buf,"%d,%s", dest_port, cptr);
+        snprintf(buf, sizeof(buf), "%d,%s", dest_port, cptr);
     else if (cptr)
-        sprintf(buf,"%s",cptr);
+        snprintf(buf, sizeof(buf), "%s",cptr);
+    else if (dest_port)
+        sprintf(buf,"%d",dest_port);
     else
         sprintf(buf,"%d",SNMP_PORT);
+    buf[ sizeof(buf)-1 ] = 0;
 
     DEBUGMSGTL(("snmpd_ports","final port spec: %s\n", buf));
     cptr = strtok(buf, ",");
@@ -221,7 +246,7 @@ init_master_agent(int dest_port,
             if (strncasecmp(cptr,"tcp",3) == 0)
                 flags |= SNMP_FLAGS_STREAM_SOCKET;
             else if (strncasecmp(cptr,"udp",3) == 0)
-                flags ^= SNMP_FLAGS_STREAM_SOCKET; /* fix */
+                flags &= ~SNMP_FLAGS_STREAM_SOCKET;
             else {
                 snmp_log(LOG_ERR, "illegal port transport %s\n", buf);
                 return 1;
@@ -282,7 +307,7 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
 {
     struct agent_snmp_session  *asp;
 
-    asp = malloc( sizeof( struct agent_snmp_session ));
+    asp = (struct agent_snmp_session *) malloc( sizeof( struct agent_snmp_session ));
     if ( asp == NULL )
 	return NULL;
     asp->session = session;
@@ -336,7 +361,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
                    struct snmp_pdu *pdu, void *magic)
 {
     struct agent_snmp_session  *asp;
-    int status, allDone, i;
+    int status, allDone, i, error_index = 0;
     struct variable_list *var_ptr, *var_ptr2;
 
     if ( magic == NULL ) {
@@ -407,7 +432,37 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		     */
 	    if ( asp->pdu->errindex > 100 )
 	        asp->pdu->errindex = 100;
+
+	    if ( asp->pdu->errindex < 0 )
+	        asp->pdu->errindex = 0;
+	    if ( asp->pdu->errstat < 0 )
+	        asp->pdu->errstat = 0;
     
+		    /*
+		     * If max-repetitions is 0, we shouldn't
+		     *   process the non-nonrepeaters at all
+		     *   so set up 'asp->end' accordingly
+		     */
+	    if ( asp->pdu->errindex == 0 ) {
+		if ( asp->pdu->errstat == 0 ) {
+				/* Nothing to do at all */
+		    snmp_free_varbind(asp->pdu->variables);
+		    asp->pdu->variables=NULL;
+		    asp->start=NULL;
+		}
+		else {
+		    asp->end   = asp->pdu->variables;
+		    i = asp->pdu->errstat;
+		    while ( --i > 0 ) 
+			if ( asp->end )
+			    asp->end = asp->end->next_variable;
+                    if ( asp->end ) {
+                        snmp_free_varbind(asp->end->next_variable);
+                        asp->end->next_variable = NULL;
+                    }
+		}
+	    }
+
 	    status = handle_next_pass( asp );	/* First pass */
 	    asp->mode = RESERVE2;
 	    if ( status != SNMP_ERR_NOERROR )
@@ -481,8 +536,10 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 
 	    status = handle_next_pass( asp );
 
-	    if ( status != SNMP_ERR_NOERROR )
+            if ( status != SNMP_ERR_NOERROR ){
 	        asp->mode = FREE;
+                error_index = asp->index;
+            }
 	    else
 	        asp->mode = RESERVE2;
 
@@ -493,8 +550,10 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	if ( asp->mode == RESERVE2 ) {
 	    status = handle_next_pass( asp );
 
-	    if ( status != SNMP_ERR_NOERROR )
+	    if ( status != SNMP_ERR_NOERROR ){
 	        asp->mode = FREE;
+                error_index = asp->index;
+            }
 	    else
 	        asp->mode = ACTION;
 
@@ -505,8 +564,10 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	if ( asp->mode == ACTION ) {
 	    status = handle_next_pass( asp );
 
-	    if ( status != SNMP_ERR_NOERROR )
+	    if ( status != SNMP_ERR_NOERROR ){
 	        asp->mode = UNDO;
+                error_index = asp->index;
+            }
 	    else
 	        asp->mode = COMMIT;
 
@@ -520,6 +581,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	    if ( status != SNMP_ERR_NOERROR ) {
 		status    = SNMP_ERR_COMMITFAILED;
 	        asp->mode = FINISHED_FAILURE;
+                error_index = asp->index;
 	    }
 	    else
 	        asp->mode = FINISHED_SUCCESS;
@@ -529,18 +591,18 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	}
 
 	if ( asp->mode == UNDO ) {
-	    if (handle_next_pass( asp ) != SNMP_ERR_NOERROR )
+            if (handle_next_pass( asp ) != SNMP_ERR_NOERROR ) {
 		status = SNMP_ERR_UNDOFAILED;
+                error_index = 0;
+            }
 
 	    asp->mode = FINISHED_FAILURE;
-	    break;
 	}
 
 	if ( asp->mode == FREE ) {
 	    (void) handle_next_pass( asp );
-	    break;
 	}
-
+        asp->index = error_index;
 	break;
 
     case SNMP_MSG_RESPONSE:
@@ -568,7 +630,8 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		 * May need to "dumb down" a SET error status for a
 		 *  v1 query.  See RFC2576 - section 4.3
 		 */
-	if (( asp->pdu->command == SNMP_MSG_SET ) &&
+	if (( asp->pdu                          ) &&
+	    ( asp->pdu->command == SNMP_MSG_SET ) &&
 	    ( asp->pdu->version == SNMP_VERSION_1 )) {
 	    switch ( status ) {
 		case SNMP_ERR_WRONGVALUE:
@@ -597,7 +660,8 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		 *  types to throw an error for a v1 query.
 		 *  See RFC2576 - section 4.1.2.3
 		 */
-	if (( asp->pdu->command != SNMP_MSG_SET ) &&
+	if (( asp->pdu                          ) &&
+	    ( asp->pdu->command != SNMP_MSG_SET ) &&
 	    ( asp->pdu->version == SNMP_VERSION_1 )) {
 		for ( var_ptr = asp->pdu->variables, i=1 ;
 			var_ptr != NULL ;
@@ -613,7 +677,49 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		    }
 	    }
 	}
-	if ( status == SNMP_ERR_NOERROR ) {
+
+	    /*
+             * Update the snmp error-count statistics
+             *   XXX - should we include the V2 errors in this or not?
+             */
+#define INCLUDE_V2ERRORS_IN_V1STATS
+
+	switch ( status ) {
+#ifdef INCLUDE_V2ERRORS_IN_V1STATS
+	    case SNMP_ERR_WRONGVALUE:
+	    case SNMP_ERR_WRONGENCODING:
+	    case SNMP_ERR_WRONGTYPE:
+	    case SNMP_ERR_WRONGLENGTH:
+	    case SNMP_ERR_INCONSISTENTVALUE:
+#endif
+	    case SNMP_ERR_BADVALUE:
+                snmp_increment_statistic(STAT_SNMPOUTBADVALUES);
+	        break;
+#ifdef INCLUDE_V2ERRORS_IN_V1STATS
+	    case SNMP_ERR_NOACCESS:
+	    case SNMP_ERR_NOTWRITABLE:
+	    case SNMP_ERR_NOCREATION:
+	    case SNMP_ERR_INCONSISTENTNAME:
+	    case SNMP_ERR_AUTHORIZATIONERROR:
+#endif
+	    case SNMP_ERR_NOSUCHNAME:
+                snmp_increment_statistic(STAT_SNMPOUTNOSUCHNAMES);
+	        break;
+#ifdef INCLUDE_V2ERRORS_IN_V1STATS
+	    case SNMP_ERR_RESOURCEUNAVAILABLE:
+	    case SNMP_ERR_COMMITFAILED:
+	    case SNMP_ERR_UNDOFAILED:
+#endif
+	    case SNMP_ERR_GENERR:
+                snmp_increment_statistic(STAT_SNMPOUTGENERRS);
+	        break;
+
+	    case SNMP_ERR_TOOBIG:
+                snmp_increment_statistic(STAT_SNMPOUTTOOBIGS);
+	        break;
+	}
+
+	if (( status == SNMP_ERR_NOERROR ) && ( asp->pdu )) {
 	    snmp_increment_statistic_by(
 		(asp->pdu->command == SNMP_MSG_SET ?
 			STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS ),
@@ -628,15 +734,21 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	    asp->pdu = asp->orig_pdu;
 	    asp->orig_pdu = NULL;
 	}
-	asp->pdu->command  = SNMP_MSG_RESPONSE;
-	asp->pdu->errstat  = status;
-	asp->pdu->errindex = asp->index;
-	if (! snmp_send( asp->session, asp->pdu ))
-	    snmp_free_pdu(asp->pdu);
-	snmp_increment_statistic(STAT_SNMPOUTPKTS);
-	snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
-	asp->pdu = NULL;
-	free_agent_snmp_session( asp );
+	if ( asp->pdu ) {
+	    asp->pdu->command  = SNMP_MSG_RESPONSE;
+	    asp->pdu->errstat  = status;
+	    if (status == SNMP_ERR_NOERROR) {
+		asp->pdu->errindex = 0;
+	    } else {
+		asp->pdu->errindex = asp->index;
+	    }
+	    if (! snmp_send( asp->session, asp->pdu ))
+	        snmp_free_pdu(asp->pdu);
+	    snmp_increment_statistic(STAT_SNMPOUTPKTS);
+	    snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
+	    asp->pdu = NULL;
+	    free_agent_snmp_session( asp );
+	}
     }
 
     return 1;
@@ -669,6 +781,7 @@ handle_next_pass(struct agent_snmp_session  *asp)
 					 req_p->pdu->reqid,
 					 req_p->pdu,
 					 req_p->cb_data );
+			return SNMP_ERR_GENERR;
 		    }
 		}
 	    }
@@ -678,6 +791,14 @@ handle_next_pass(struct agent_snmp_session  *asp)
 			req_p != NULL ; req_p = next_req ) {
 			
 			next_req = req_p->next_request;
+			if ( req_p->pdu ) {
+			   snmp_free_pdu( req_p->pdu );
+			   req_p->pdu = NULL;
+			}
+			if ( req_p->cb_data ) {
+			   free( req_p->cb_data );
+			   req_p->cb_data = NULL;
+			}
 			free( req_p );
 		}
 		asp->outstanding_requests = NULL;
@@ -705,21 +826,28 @@ handle_var_list(struct agent_snmp_session  *asp)
 {
     struct variable_list *varbind_ptr;
     int     status;
+    int     saved_status = SNMP_ERR_NOERROR;
+    int     saved_index;
     int     count;
 
     count = 0;
     varbind_ptr = asp->start;
-    if ( !varbind_ptr ) {
-	return SNMP_ERR_NOERROR;
-    }
 
     while (1) {
+        if ( !varbind_ptr ) {
+	    break;
+        }
 	count++;
 	asp->index = count;
 	status = handle_one_var(asp, varbind_ptr);
 
 	if ( status != SNMP_ERR_NOERROR ) {
-	    return status;
+	    if (asp->rw == WRITE ) {
+	        saved_status = status;
+	        saved_index  = count;
+	    }
+	    else
+	        return status;
 	}
 
 	if ( varbind_ptr == asp->end )
@@ -727,9 +855,11 @@ handle_var_list(struct agent_snmp_session  *asp)
 	varbind_ptr = varbind_ptr->next_variable;
 	if ( asp->mode == RESERVE1 )
 	    snmp_vars_inc++;
-   }
-   asp->index = 0;
-   return SNMP_ERR_NOERROR;
+    }
+    if (saved_status != SNMP_ERR_NOERROR ) {
+       asp->index = saved_index;
+    }
+    return saved_status;
 }
 
 int
@@ -794,8 +924,9 @@ statp_loop:
 		 * In all other situations, this indicates failure.
 		 */
 	if (statP == NULL && (asp->rw != WRITE || write_method == NULL)) {
-	    	varbind_ptr->val.integer   = NULL;
-	    	varbind_ptr->val_len = 0;
+	        /*  Careful -- if the varbind was lengthy, it will have
+		    allocated some memory.  */
+	        snmp_set_var_value(varbind_ptr, NULL, 0);
 		if ( asp->exact ) {
 	            if ( noSuchObject == TRUE ){
 		        statType = SNMP_NOSUCHOBJECT;

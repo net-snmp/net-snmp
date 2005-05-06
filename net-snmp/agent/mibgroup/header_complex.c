@@ -1,7 +1,11 @@
 /* header complex:  More complex storage and data sorting for mib modules */
 
 #include <config.h>
+
 #include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -38,7 +42,7 @@ header_complex_generate_varoid(struct variable_list *var) {
         if (var->name == NULL)
             return SNMPERR_GENERR;
 
-        for(i = 0; i < var->name_length; i++)
+        for(i = 0; i < (int)var->name_length; i++)
           var->name[i] = var->val.objid[i];
         break;
 
@@ -49,7 +53,7 @@ header_complex_generate_varoid(struct variable_list *var) {
             return SNMPERR_GENERR;
 
         var->name[0] = var->name_length-1;
-        for(i = 0; i < var->name_length-1; i++)
+        for(i = 0; i < (int)var->name_length-1; i++)
           var->name[i+1] = var->val.objid[i];
         break;
         
@@ -59,7 +63,7 @@ header_complex_generate_varoid(struct variable_list *var) {
         if (var->name == NULL)
             return SNMPERR_GENERR;
 
-        for(i = 0; i < var->val_len; i++)
+        for(i = 0; i < (int)var->val_len; i++)
           var->name[i] = (oid) var->val.string[i];
         break;
 
@@ -71,7 +75,7 @@ header_complex_generate_varoid(struct variable_list *var) {
             return SNMPERR_GENERR;
 
         var->name[0] = (oid) var->val_len;
-        for(i = 0; i < var->val_len; i++)
+        for(i = 0; i < (int)var->val_len; i++)
           var->name[i+1] = (oid) var->val.string[i];
         break;
       
@@ -127,7 +131,7 @@ int header_complex_parse_oid(oid *oidIndex, size_t oidLen,
         } else {
             itmp = (long) *oidIndex++;
             oidLen--;
-            if (itmp > oidLen)
+            if (itmp > (int)oidLen)
                 return SNMPERR_GENERR;
         }
 
@@ -156,7 +160,7 @@ int header_complex_parse_oid(oid *oidIndex, size_t oidLen,
         } else {
             itmp = (long) *oidIndex++;
             oidLen--;
-            if (itmp > oidLen)
+            if (itmp > (int)oidLen)
                 return SNMPERR_GENERR;
         }
 

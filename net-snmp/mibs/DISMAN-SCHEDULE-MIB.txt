@@ -2,12 +2,11 @@ DISMAN-SCHEDULE-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
     MODULE-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE,
-    Integer32, Unsigned32, Counter32, mib-2
+    Integer32, Unsigned32, Counter32, mib-2, zeroDotZero
         FROM SNMPv2-SMI
 
     TEXTUAL-CONVENTION,
     DateAndTime, RowStatus, StorageType, VariablePointer
-
         FROM SNMPv2-TC
 
     MODULE-COMPLIANCE, OBJECT-GROUP, NOTIFICATION-GROUP
@@ -17,28 +16,53 @@ IMPORTS
         FROM SNMP-FRAMEWORK-MIB;
 
 schedMIB MODULE-IDENTITY
-    LAST-UPDATED "9811171800Z"
+    LAST-UPDATED "200201070000Z"
     ORGANIZATION "IETF Distributed Management Working Group"
     CONTACT-INFO
-        "David B. Levi
-         Nortel Networks
-         4401 Great America Parkway
-         Santa Clara, CA 95052-8185
-         U.S.A.
-         Tel: +1 423 686 0432
-         E-mail: dlevi@nortelnetworks.com
+        "WG EMail:  disman@dorothy.bmc.com
+         Subscribe: disman-request@dorothy.bmc.com
 
-         Juergen Schoenwaelder
-         TU Braunschweig
-         Bueltenweg 74/75
-         38106 Braunschweig
-         Germany
-         Tel: +49 531 391-3283
-         E-mail: schoenw@ibr.cs.tu-bs.de"
+         Chair:     Randy Presuhn
+                    BMC Software, Inc.
+         Postal:    Office 1-3141
+                    2141 North First Street
+                    San Jose,  California 95131
+                    USA
+         EMail:     rpresuhn@bmc.com
+         Phone:     +1 408 546-1006
+
+         Editor:    David B. Levi
+                    Nortel Networks
+         Postal:    4401 Great America Parkway
+                    Santa Clara, CA 95052-8185
+                    USA
+         EMail:     dlevi@nortelnetworks.com
+         Phone:     +1 865 686 0432
+
+         Editor:    Juergen Schoenwaelder
+                    TU Braunschweig
+         Postal:    Bueltenweg 74/75
+                    38106 Braunschweig
+                    Germany
+         EMail:     schoenw@ibr.cs.tu-bs.de
+         Phone:     +49 531 391-3283"
     DESCRIPTION
-        "This MIB module defines a MIB which provides mechanisms
-         to schedule SNMP set operations periodically or at
-         specific points in time."
+        "This MIB module defines a MIB which provides mechanisms to
+         schedule SNMP set operations periodically or at specific
+         points in time."
+    REVISION    "200201070000Z"
+    DESCRIPTION
+        "Revised version, published as RFC 3231.
+
+         This revision introduces a new object type called
+         schedTriggers.  Created new conformance and compliance
+         statements that take care of the new schedTriggers object.
+
+         Several clarifications have been added to remove ambiguities
+         that were discovered and reported by implementors."
+    REVISION    "199811171800Z"
+    DESCRIPTION
+        "Initial version, published as RFC 2591."
     ::= { mib-2 63 }
 
 --
@@ -57,7 +81,7 @@ SnmpPduErrorStatus ::= TEXTUAL-CONVENTION
     STATUS       current
     DESCRIPTION
         "This TC enumerates the SNMPv1 and SNMPv2 PDU error status
-         codes as defined in RFC 1157 and RFC 1905. It also adds a
+         codes as defined in RFC 1157 and RFC 1905.  It also adds a
          pseudo error status code `noResponse' which indicates a
          timeout condition."
     SYNTAX      INTEGER {
@@ -84,8 +108,7 @@ SnmpPduErrorStatus ::= TEXTUAL-CONVENTION
                 }
 
 --
--- Some scalars which provide information about the local time
--- zone.
+-- Some scalars which provide information about the local time zone.
 --
 
 schedLocalTime OBJECT-TYPE
@@ -93,9 +116,9 @@ schedLocalTime OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "The local time used by the scheduler. Schedules which
+        "The local time used by the scheduler.  Schedules which
          refer to calendar time will use the local time indicated
-         by this object. An implementation MUST return all 11 bytes
+         by this object.  An implementation MUST return all 11 bytes
          of the DateAndTime textual-convention so that a manager
          may retrieve the offset from GMT time."
     ::= { schedObjects 1 }
@@ -118,7 +141,15 @@ schedEntry OBJECT-TYPE
     MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
-        "An entry describing a particular scheduled action."
+        "An entry describing a particular scheduled action.
+
+         Unless noted otherwise, writable objects of this row
+         can be modified independent of the current value of
+         schedRowStatus, schedAdminStatus and schedOperStatus.
+         In particular, it is legal to modify schedInterval
+         and the objects in the schedCalendarGroup when
+         schedRowStatus is active and schedAdminStatus and
+         schedOperStatus are both enabled."
     INDEX { schedOwner, schedName }
     ::= { schedTable 1 }
 
@@ -142,7 +173,8 @@ SchedEntry ::= SEQUENCE {
     schedLastFailure    SnmpPduErrorStatus,
     schedLastFailed     DateAndTime,
     schedStorageType    StorageType,
-    schedRowStatus      RowStatus
+    schedRowStatus      RowStatus,
+    schedTriggers       Counter32
 }
 
 schedOwner OBJECT-TYPE
@@ -150,7 +182,7 @@ schedOwner OBJECT-TYPE
     MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
-        "The owner of this scheduling entry. The exact semantics of
+        "The owner of this scheduling entry.  The exact semantics of
          this string are subject to the security policy defined by
 
          the security administrator."
@@ -162,7 +194,7 @@ schedName OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "The locally-unique, administratively assigned name for this
-         scheduling entry. This object allows a schedOwner to have
+         scheduling entry.  This object allows a schedOwner to have
          multiple entries in the schedTable."
     ::= { schedEntry 2 }
 
@@ -173,7 +205,7 @@ schedDescr OBJECT-TYPE
     DESCRIPTION
         "The human readable description of the purpose of this
          scheduling entry."
-    DEFVAL { ''H }
+    DEFVAL      { "" }
     ::= { schedEntry 3 }
 
 schedInterval OBJECT-TYPE
@@ -183,25 +215,28 @@ schedInterval OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "The number of seconds between two action invocations of
-         a periodic scheduler. Implementations must guarantee
+         a periodic scheduler.  Implementations must guarantee
          that action invocations will not occur before at least
          schedInterval seconds have passed.
 
          The scheduler must ignore all periodic schedules that
-         have a schedInterval value of 0. A periodic schedule
+         have a schedInterval value of 0.  A periodic schedule
          with a scheduling interval of 0 seconds will therefore
          never invoke an action.
 
          Implementations may be forced to delay invocations in the
-         face of local constraints. A scheduled management function
+         face of local constraints.  A scheduled management function
          should therefore not rely on the accuracy provided by the
-         scheduler implementation."
-    DEFVAL { 0 }
+         scheduler implementation.
+
+         Note that implementations which maintain a list of pending
+         activations must re-calculate them when this object is
+         changed."
+    DEFVAL      { 0 }
     ::= { schedEntry 4 }
 
 schedWeekDay OBJECT-TYPE
     SYNTAX      BITS {
-
                     sunday(0),
                     monday(1),
                     tuesday(2),
@@ -214,11 +249,15 @@ schedWeekDay OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "The set of weekdays on which the scheduled action should
-         take place. Setting multiple bits will include several
+         take place.  Setting multiple bits will include several
          weekdays in the set of possible weekdays for this schedule.
          Setting all bits will cause the scheduler to ignore the
-         weekday."
-    DEFVAL { {} }
+         weekday.
+
+         Note that implementations which maintain a list of pending
+         activations must re-calculate them when this object is
+         changed."
+    DEFVAL      { {} }
     ::= { schedEntry 5 }
 
 schedMonth OBJECT-TYPE
@@ -240,11 +279,16 @@ schedMonth OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "The set of months during which the scheduled action should
-         take place. Setting multiple bits will include several
+         take place.  Setting multiple bits will include several
          months in the set of possible months for this schedule.
+
          Setting all bits will cause the scheduler to ignore the
-         month."
-    DEFVAL { {} }
+         month.
+
+         Note that implementations which maintain a list of pending
+         activations must re-calculate them when this object is
+         changed."
+    DEFVAL      { {} }
     ::= { schedEntry 6 }
 
 schedDay OBJECT-TYPE
@@ -268,7 +312,7 @@ schedDay OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "The set of days in a month on which a scheduled action
-         should take place. There are two sets of bits one can
+         should take place.  There are two sets of bits one can
          use to define the day within a month:
 
          Enumerations starting with the letter 'd' indicate a
@@ -279,17 +323,22 @@ schedDay OBJECT-TYPE
 
          Enumerations starting with the letter 'r' indicate a
          day in a month in reverse order, relative to the last
-         day of a month. The last day in the month can therefore
+         day of a month.  The last day in the month can therefore
          be specified by setting the bit r1(31) and r31(61) means
          the first day of a month with 31 days.
 
          Setting multiple bits will include several days in the set
-         of possible days for this schedule. Setting all bits will
+         of possible days for this schedule.  Setting all bits will
          cause the scheduler to ignore the day within a month.
+
          Setting all bits starting with the letter 'd' or the
          letter 'r' will also cause the scheduler to ignore the
-         day within a month."
-    DEFVAL { {} }
+         day within a month.
+
+         Note that implementations which maintain a list of pending
+         activations must re-calculate them when this object is
+         changed."
+    DEFVAL      { {} }
     ::= { schedEntry 7 }
 
 schedHour OBJECT-TYPE
@@ -304,8 +353,12 @@ schedHour OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "The set of hours within a day during which the scheduled
-         action should take place."
-    DEFVAL { {} }
+         action should take place.
+
+         Note that implementations which maintain a list of pending
+         activations must re-calculate them when this object is
+         changed."
+    DEFVAL      { {} }
     ::= { schedEntry 8 }
 
 schedMinute OBJECT-TYPE
@@ -327,8 +380,12 @@ schedMinute OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "The set of minutes within an hour when the scheduled action
-         should take place."
-    DEFVAL { {} }
+         should take place.
+
+         Note that implementations which maintain a list of pending
+         activations must re-calculate them when this object is
+         changed."
+    DEFVAL      { {} }
     ::= { schedEntry 9 }
 
 schedContextName OBJECT-TYPE
@@ -338,6 +395,7 @@ schedContextName OBJECT-TYPE
     DESCRIPTION
         "The context which contains the local MIB variable pointed
          to by schedVariable."
+    DEFVAL      { "" }
     ::= { schedEntry 10 }
 
 schedVariable OBJECT-TYPE
@@ -346,8 +404,8 @@ schedVariable OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "An object identifier pointing to a local MIB variable
-
          which resolves to an ASN.1 primitive type of INTEGER."
+    DEFVAL      { zeroDotZero }
     ::= { schedEntry 11 }
 
 schedValue OBJECT-TYPE
@@ -356,11 +414,16 @@ schedValue OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "The value which is written to the MIB object pointed to by
-         schedVariable when the scheduler invokes an action. The
+         schedVariable when the scheduler invokes an action.  The
          implementation shall enforce the use of access control
          rules when performing the set operation on schedVariable.
          This is accomplished by calling the isAccessAllowed abstract
-         service interface as defined in RFC 2271."
+         service interface as defined in RFC 2571.
+
+         Note that an implementation may choose to issue an SNMP Set
+         message to the SNMP engine and leave the access control
+         decision to the normal message processing procedure."
+    DEFVAL      { 0 }
     ::= { schedEntry 12 }
 
 schedType OBJECT-TYPE
@@ -372,29 +435,30 @@ schedType OBJECT-TYPE
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
-        "The type of this schedule. The value periodic(1) indicates
-         that this entry specifies a periodic schedule. A periodic
-         schedule is defined by the value of schedInterval. The
+        "The type of this schedule.  The value periodic(1) indicates
+         that this entry specifies a periodic schedule.  A periodic
+         schedule is defined by the value of schedInterval.  The
          values of schedWeekDay, schedMonth, schedDay, schedHour
          and schedMinute are ignored.
 
          The value calendar(2) indicates that this entry describes a
-         calendar schedule. A calendar schedule is defined by the
+         calendar schedule.  A calendar schedule is defined by the
          values of schedWeekDay, schedMonth, schedDay, schedHour and
-         schedMinute. The value of schedInterval is ignored. A
+         schedMinute.  The value of schedInterval is ignored.  A
          calendar schedule will trigger on all local times that
          satisfy the bits set in schedWeekDay, schedMonth, schedDay,
          schedHour and schedMinute.
 
          The value oneshot(3) indicates that this entry describes a
-         one-shot schedule. A one-shot schedule is similar to a
+         one-shot schedule.  A one-shot schedule is similar to a
          calendar schedule with the additional feature that it
          disables itself by changing in the `finished'
          schedOperStatus once the schedule triggers an action.
 
-         Changing a schedule's type is equivalent to deleting the
-         old-type schedule and creating a new-type one."
-    DEFVAL { periodic }
+         Note that implementations which maintain a list of pending
+         activations must re-calculate them when this object is
+         changed."
+    DEFVAL      { periodic }
     ::= { schedEntry 13 }
 
 schedAdminStatus OBJECT-TYPE
@@ -406,11 +470,12 @@ schedAdminStatus OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "The desired state of the schedule."
-    DEFVAL { disabled }
+    DEFVAL      { disabled }
     ::= { schedEntry 14 }
 
 schedOperStatus OBJECT-TYPE
     SYNTAX      INTEGER {
+
                     enabled(1),
                     disabled(2),
                     finished(3)
@@ -418,15 +483,18 @@ schedOperStatus OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "The current operational state of this schedule. The state
+        "The current operational state of this schedule.  The state
          enabled(1) indicates this entry is active and that the
-         scheduler will invoke actions at appropriate times. The
+         scheduler will invoke actions at appropriate times.  The
          disabled(2) state indicates that this entry is currently
-         inactive and ignored by the scheduler. The finished(3)
-         state indicates that the schedule has ended. Schedules
+         inactive and ignored by the scheduler.  The finished(3)
+         state indicates that the schedule has ended.  Schedules
          in the finished(3) state are ignored by the scheduler.
          A one-shot schedule enters the finished(3) state when it
-         deactivates itself."
+         deactivates itself.
+
+         Note that the operational state must not be enabled(1)
+         when the schedRowStatus is not active."
     ::= { schedEntry 15 }
 
 schedFailures OBJECT-TYPE
@@ -435,7 +503,8 @@ schedFailures OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "This variable counts the number of failures while invoking
-         the scheduled action."
+         the scheduled action.  This counter at most increments once
+         for a triggered action."
     ::= { schedEntry 16 }
 
 schedLastFailure OBJECT-TYPE
@@ -443,10 +512,10 @@ schedLastFailure OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "The most recent error that occured during the invocation of
-         a scheduled action. The value noError(0) is returned
+        "The most recent error that occurred during the invocation of
+         a scheduled action.  The value noError(0) is returned
          if no errors have occurred yet."
-    DEFVAL { noError }
+    DEFVAL      { noError }
     ::= { schedEntry 17 }
 
 schedLastFailed OBJECT-TYPE
@@ -454,10 +523,11 @@ schedLastFailed OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "The date and time when the most recent failure occured. The
-         value '0000000000000000'H is returned if no failure occured
-         since the last re-initialization of the scheduler."
-    DEFVAL { '0000000000000000'H }
+        "The date and time when the most recent failure occurred.
+
+         The value '0000000000000000'H is returned if no failure
+         occurred since the last re-initialization of the scheduler."
+    DEFVAL      { '0000000000000000'H }
     ::= { schedEntry 18 }
 
 schedStorageType OBJECT-TYPE
@@ -468,14 +538,15 @@ schedStorageType OBJECT-TYPE
         "This object defines whether this scheduled action is kept
          in volatile storage and lost upon reboot or if this row is
          backed up by non-volatile or permanent storage.
+
          Conceptual rows having the value `permanent' must allow
          write access to the columnar objects schedDescr,
          schedInterval, schedContextName, schedVariable, schedValue,
-         and schedAdminStatus. If an implementation supports the
+         and schedAdminStatus.  If an implementation supports the
          schedCalendarGroup, write access must be also allowed to
          the columnar objects schedWeekDay, schedMonth, schedDay,
          schedHour, schedMinute."
-    DEFVAL { volatile }
+    DEFVAL      { volatile }
     ::= { schedEntry 19 }
 
 schedRowStatus OBJECT-TYPE
@@ -483,16 +554,32 @@ schedRowStatus OBJECT-TYPE
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
-        "The status of this scheduled action. A control that allows
+        "The status of this scheduled action.  A control that allows
          entries to be added and removed from this table.
 
-         The miminum number of objects that need to be set during
-         row creation before a row can be set to `active' are
-         schedContextName, schedVariable and schedValue."
+         Note that the operational state must change to enabled
+         when the administrative state is enabled and the row
+         status changes to active(1).
+
+         Attempts to destroy(6) a row or to set a row
+         notInService(2) while the operational state is enabled
+         result in inconsistentValue errors.
+
+         The value of this object has no effect on whether other
+         objects in this conceptual row can be modified."
     ::= { schedEntry 20 }
 
+schedTriggers OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "This variable counts the number of attempts (either
+         successful or failed) to invoke the scheduled action."
+    ::= { schedEntry 21 }
+
 --
--- Notifications that are emitted to indicate failures. The
+-- Notifications that are emitted to indicate failures.  The
 -- definition of schedTraps makes notification registrations
 -- reversible (see STD 58, RFC 2578).
 --
@@ -514,14 +601,14 @@ schedGroups      OBJECT IDENTIFIER ::= { schedConformance 2 }
 
 -- compliance statements
 
-schedCompliance MODULE-COMPLIANCE
+schedCompliance2 MODULE-COMPLIANCE
     STATUS      current
     DESCRIPTION
         "The compliance statement for SNMP entities which implement
          the scheduling MIB."
     MODULE      -- this module
     MANDATORY-GROUPS {
-           schedGroup, schedNotificationsGroup
+           schedGroup2, schedNotificationsGroup
     }
     GROUP  schedCalendarGroup
     DESCRIPTION
@@ -531,40 +618,28 @@ schedCompliance MODULE-COMPLIANCE
     DESCRIPTION
         "The values calendar(2) or oneshot(3) are not valid for
          implementations that do not implement the
-         schedCalendarGroup. Such an implementation must return
+         schedCalendarGroup.  Such an implementation must return
          inconsistentValue error responses for attempts to set
          schedAdminStatus to calendar(2) or oneshot(3)."
-    ::= { schedCompliances 1 }
+    ::= { schedCompliances 2 }
 
-schedGroup OBJECT-GROUP
+schedGroup2 OBJECT-GROUP
     OBJECTS {
-        schedDescr,
-        schedInterval,
-        schedContextName,
-        schedVariable,
-        schedValue,
-        schedType,
-        schedAdminStatus,
-        schedOperStatus,
-        schedFailures,
-        schedLastFailure,
-        schedLastFailed,
-        schedStorageType,
-        schedRowStatus
+        schedDescr, schedInterval, schedContextName,
+        schedVariable, schedValue, schedType,
+        schedAdminStatus, schedOperStatus, schedFailures,
+        schedLastFailure, schedLastFailed, schedStorageType,
+        schedRowStatus, schedTriggers
     }
     STATUS      current
     DESCRIPTION
         "A collection of objects providing scheduling capabilities."
-    ::= { schedGroups 1 }
+    ::= { schedGroups 4 }
 
 schedCalendarGroup OBJECT-GROUP
     OBJECTS {
-        schedLocalTime,
-        schedWeekDay,
-        schedMonth,
-        schedDay,
-        schedHour,
-        schedMinute
+        schedLocalTime, schedWeekDay, schedMonth,
+        schedDay, schedHour, schedMinute
     }
     STATUS      current
     DESCRIPTION
@@ -579,5 +654,46 @@ schedNotificationsGroup NOTIFICATION-GROUP
     DESCRIPTION
         "The notifications emitted by the scheduler."
     ::= { schedGroups 3 }
+
+--
+-- Deprecated compliance and conformance group definitions
+-- from RFC 2591.
+--
+
+schedCompliance MODULE-COMPLIANCE
+    STATUS      deprecated
+    DESCRIPTION
+        "The compliance statement for SNMP entities which implement
+         the scheduling MIB."
+    MODULE      -- this module
+    MANDATORY-GROUPS {
+           schedGroup, schedNotificationsGroup
+    }
+
+    GROUP  schedCalendarGroup
+    DESCRIPTION
+        "The schedCalendarGroup is mandatory only for those
+         implementations that support calendar based schedules."
+    OBJECT schedType
+    DESCRIPTION
+        "The values calendar(2) or oneshot(3) are not valid for
+         implementations that do not implement the
+         schedCalendarGroup.  Such an implementation must return
+         inconsistentValue error responses for attempts to set
+         schedAdminStatus to calendar(2) or oneshot(3)."
+    ::= { schedCompliances 1 }
+
+schedGroup OBJECT-GROUP
+    OBJECTS {
+        schedDescr, schedInterval, schedContextName,
+        schedVariable, schedValue, schedType,
+        schedAdminStatus, schedOperStatus, schedFailures,
+        schedLastFailure, schedLastFailed, schedStorageType,
+        schedRowStatus
+    }
+    STATUS      deprecated
+    DESCRIPTION
+        "A collection of objects providing scheduling capabilities."
+    ::= { schedGroups 1 }
 
 END

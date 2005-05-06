@@ -17,14 +17,27 @@
 #include <strings.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
-#  include <sys/time.h>
+#  include <sys/time.h> 
 # else
 #  include <time.h>
 # endif
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #define SNMP_NEED_REQUEST_LIST
@@ -38,15 +51,14 @@
 #include "ds_agent.h"
 #include "default_store.h"
 
-#include "agentx/protocol.h"
-#include "agentx/client.h"
-#include "agentx/master.h"
+#include "protocol.h"
+#include "client.h"
+#include "master.h"
+#include "master_admin.h"
 #include "snmp_agent.h"
 #include "snmp_vars.h"
 #include "var_struct.h"
 #include "mibII/sysORTable.h"
-
-extern int close_agentx_session(struct snmp_session *session, int sessid);
 
 #define VARLIST_ITERATION	10
 
@@ -74,7 +86,7 @@ free_agentx_request(struct request_list *req, int free_cback)
     if ( req->cb_data && free_cback )
 	free ( req->cb_data );
 
-     free ( req );
+    free ( req );
 }
 
 void
@@ -84,7 +96,7 @@ free_agentx_varlist(struct ax_variable_list *vlist)
 	return;
     if ( vlist->variables )
 	free ( vlist->variables );
-     free ( vlist );
+    free ( vlist );
 }
 
 	/*
@@ -168,7 +180,7 @@ handle_agentx_response( int operation,
 		pdu->errindex = 0;
 		if (asp->pdu->command != SNMP_MSG_SET)
 		    asp->mode = RESERVE2;
-		break;
+		return 0;
 
 
 	case RECEIVED_MESSAGE:
@@ -207,7 +219,7 @@ handle_agentx_response( int operation,
 		DEBUGMSGOID(("agentx/master",vbp->name, vbp->name_length));
 		DEBUGMSG(("agentx/master","\n"));
 		if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) ) {
-		    sprint_variable (buf, vbp->name, vbp->name_length, vbp);
+		    snprint_variable (buf, sizeof(buf), vbp->name, vbp->name_length, vbp);
 		    DEBUGMSGTL(("snmp_agent", "    >> %s\n", buf));
 		}
 	    }
@@ -386,7 +398,10 @@ get_agentx_request(struct agent_snmp_session *asp,
     pdu->version     = AGENTX_VERSION_1;
     pdu->reqid       = snmp_get_next_transid();
     pdu->transid     = asp->pdu->transid;
-    pdu->sessid      = ax_session->sessid;
+    pdu->sessid      = ax_session->subsession->sessid;
+    if (ax_session->subsession->flags & AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER) {
+        pdu->flags |= AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER;
+    }
     switch (asp->pdu->command ) {
 	case SNMP_MSG_GET:
                 DEBUGMSGTL(("agentx/master","-> get\n"));
@@ -497,7 +512,7 @@ agentx_add_request( struct agent_snmp_session *asp,
 			   vbp->name, vbp->name_length, ASN_PRIV_EXCL_RANGE,
 			   (u_char*)sub->end, sub->end_len*sizeof(oid));
     }
-    if ( sub->timeout > request->pdu->time ) {
+    if ( sub->timeout > (int)request->pdu->time ) {
 	request->pdu->time = sub->timeout;
 	request->pdu->flags |= UCD_MSG_FLAG_PDU_TIMEOUT;
     }

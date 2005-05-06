@@ -1,4 +1,4 @@
-.TH SNMPD.CONF 5 "31 Oct 2000"
+.TH SNMPD.CONF 5 "28 Aug 2001"
 .ds )H U.C. Davis, ECE Dept.
 .ds ]W VVERSIONINFO
 .UC 4
@@ -14,6 +14,17 @@ operate and report mib entries.
 First, make sure you have read the snmp_config(5) manual page that
 describes how the ucd-snmp configuration files operate, where they
 are located and how they all work together.
+.PP
+Also, you might consider looking into the
+.I snmpconf
+application (perl script) which can help you build a snmpd.conf file
+by prompting you for information.  You should try it.  Really.  Go
+ahead.  Right now.  Run:
+.RS
+.IP "snmpconf -g basic_setup"
+.RE
+.PP
+to get you started.
 .SH EXTENSIBLE-MIB
 .PP
 The ucd-snmp SNMP agent reports much of its information through
@@ -41,8 +52,8 @@ be executed is configured in the config.h file at compile time.
 .IP
 Checks to see if the NAME'd processes are running on the agent's
 machine.  An error flag (1) and a description message are then passed
-to the EXTENSIBLEDOTMIB.PROCMIBNUM.ERRORFLAG and
-EXTENSIBLEDOTMIB.PROCMIBNUM.ERRORMSG mib tables (respectively) if the
+to the EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFLAG and
+EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORMSG mib columns (respectively) if the
 NAME'd program is not found in the process table as reported by PSCMD.
 .IP
 If MAX and MIN are not specified, MAX is assumed to be 
@@ -52,7 +63,7 @@ and MIN is assumed to be 1.
 If MAX is specified but MIN is not specified, MIN is assumed to be 0.
 .IP "procfix NAME PROG ARGS"
 This registers a command that knows how to fix errors with the given
-process NAME.  When EXTENSIBLEDOTMIB.PROCMIBNUM.ERRORFIX for a given
+process NAME.  When EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFIX for a given
 NAMEd program is set to the integer value of 1, this command will be
 called.  It defaults to a compiled value set using the PROCFIXCMD
 definition in the config.h file.
@@ -62,8 +73,8 @@ definition in the config.h file.
 If MIBNUM is not specified, the agent executes the named PROG with
 arguments of ARGS and returns the exit status and the first line of
 the STDOUT output of the PROG program to queries of the
-EXTENSIBLEDOTMIB.SHELLMIBNUM.ERRORFLAG and
-EXTENSIBLEDOTMIB.SHELLMIBNUM.ERRORMSG mib tables (respectively).  All
+EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFLAG and
+EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORMSG mib columns (respectively).  All
 STDOUT output beyond the first line is silently truncated.
 .IP
 If MIBNUM is specified, it acts as above but returns the exit status
@@ -75,8 +86,8 @@ at MIBNUM.ERRORMSG.2, etc...).
 .RS
 .IP Note:
 The MIBNUM must be specified in dotted-integer notation and can
-not be specified as ".iso.org.dod.internet..." (should instead be
-.1.3.6.1...).
+not be specified as ".iso.org.dod.internet..." (should instead
+be .1.3.6.1...).
 .IP Note: 
 The agent caches the exit status and STDOUT of the executed program
 for 30 seconds after the initial query.  This is to increase speed and
@@ -86,7 +97,7 @@ EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERCLEARCACHE.
 .RE
 .IP "execfix NAME PROG ARGS"
 This registers a command that knows how to fix errors with the given
-exec or sh NAME.  When EXTENSIBLEDOTMIB.SHELLMIBNUM.ERRORFIX for a
+exec or sh NAME.  When EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFIX for a
 given NAMEd entry is set to the integer value of 1, this command will
 be called.  It defaults to a compiled value set using the EXECFIXCMD
 definition in the config.h file.
@@ -97,29 +108,36 @@ Checks the named disks mounted at PATH for available disk space.  If
 the disk space is less than MINSPACE (kB) if specified or less than
 MINPERCENT (%) if a % sign is specified, or DEFDISKMINIMUMSPACE (kB)
 if not specified, the associated entry in the
-EXTENSIBLEDOTMIB.DISKMIBNUM.ERRORFLAG mib table will be set to (1) and
+EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORFLAG mib table will be set to (1) and
 a descriptive error message will be returned to queries of
-EXTENSIBLEDOTMIB.DISKMIBNUM.ERRORMSG.
+EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORMSG.
 .IP "load MAX1"
 .IP "load MAX1 MAX5"
 .IP "load MAX1 MAX5 MAX15"
 .IP
 Checks the load average of the machine and returns an error flag (1),
 and an text-string error message
-to queries of EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORFLAG and
-EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORMSG (respectively) when the
+to queries of EXTENSIBLEDOTMIB.LOADAVEMIBNUM.1.ERRORFLAG and
+EXTENSIBLEDOTMIB.LOADAVEMIBNUM.1.ERRORMSG (respectively) when the
 1-minute, 5-minute, or 15-minute averages exceed the associated
 maximum values.  If any of the MAX1, MAX5, or MAX15 values are
 unspecified, they default to a value of DEFMAXLOADAVE.
 .IP "file FILE [MAXSIZE]"
 Monitors file sizes and makes sure they don't grow beyond a certain
-size.  MAXSIZE defaults to infinite if not specified, and only
-monitors the size without reporting errors about it.
+size (in kilobytes).  MAXSIZE defaults to infinite if not specified,
+and only monitors the size without reporting errors about it.
+A maximum of 20 files can be monitored.
 .SS "Errors"
 .PP
 Any errors in obtaining the above information are reported via the
-EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORFLAG flag and the
-EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORMSG text-string description.
+EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORFLAG flag and the
+EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORMSG text-string description.
+.SH AGENTX SUB-AGENTS
+To enable AgentX support in the snmp master agent, put the following
+line in your snmpd.conf file:
+.IP "master agentx"
+Note that this support is still experimental, and should not be used
+on production systems.  See README.agentx for details.
 .SH SMUX SUB-AGENTS
 To enable and SMUX based sub-agent, such as
 .IR gated ,
@@ -276,12 +294,18 @@ command.
 .SH SETTING SYSTEM INFORMATION
 .IP "syslocation STRING"
 .IP "syscontact STRING"
-Sets the system location and the system contact for the agent.  This
-information is reported by the 'system' table in the mibII tree.
+.IP "sysname STRING"
+Sets the system location, system contact or system name for the agent.
+This information is reported in the 'system' group the mibII tree.
+Ordinarily these objects (sysLocation.0, sysContact.0 and sysName.0)
+are read-write.  However, specifying the value for one of these
+objects by giving the appropriate token makes the corresponding object
+read-only, and attempts to set the value of the object will result in
+a notWritable error response.
 .IP "sysservices NUMBER"
 Sets the value of the system.sysServices.0 object.
 For a host, a good value is 72.
-.IP agentaddress [(udp|tcp):]port[@address][,...]
+.IP "agentaddress [{udp|tcp}:]port[@address][,...]"
 Makes the agent list on the specified list of sockets instead of the
 default port, which is port 161.  Multiple ports can be separated by
 commas.  Transports can be specified by prepending the port number
@@ -297,7 +321,7 @@ associated with the localhost address.  Note that the
 flag changes the default transport mapping to use (in the
 above example, the default transport mapping is 
 .I udp.
-.IP agentgroup groupid
+.IP "agentgroup groupid"
 Change to this gid after opening port. The groupid may refer to a group
 by name or a number if the group number starts with '#'. For example,
 specifying
@@ -305,7 +329,7 @@ specifying
 will cause the agent to run as the snmp group or
 .I agentgroup #10
 will cause the agent to run as the group with groupid 10.
-.IP agentuser uid
+.IP "agentuser uid"
 Change to this uid after opening port. The userid may refer to a user
 by name or a number if the user number starts with '#'. For example,
 specifying
@@ -317,9 +341,59 @@ will cause the agent to run as the user with userid 10.
 For interfaces where the agent fails to guess correctly on the type and
 speed, this directive can supply additional information.
 TYPE is a type value as given in the IANAifType-MIB.
+.IP "ignoredisk STRING"
+When scanning for available disk devices the agent might block in trying
+to open all possible disk devices. This might lead to a timeout when
+walking the device tree. Sometimes the next walk will run without timeout,
+sometimes it will timeout every time you try it.
+.IP
+If you experience such behaviour you might add this directive and give all
+device names not to be checked (i.e. opened). You might have more than one
+such directive in your configuration file stating all devices not to be
+opened. You might also specify those devices using wildcards similar to
+the syntax you can use in a bourne shell (see examples below).
+.IP
+.B Note:
+For a list of devices scanned for every system please consult the sources
+(host/hr_disk.c) and check for the Add_HR_Disk_entry() calls relevant for
+your type of OS.
+.IP
+Examples:
+.IP
+ignoredisk /dev/rdsk/c0t2d0
+.IP
+This directive prevents the device /dev/rdsk/c0t2d0 from being scanned.
+.IP
+ignoredisk /dev/rdsk/c0t[!6]d0
+.IP
+This directive prevents all devices /dev/rdsk/c0tXd0 except .../c0t6d0
+from being scanned. For most systems similar is the following directive:
+.IP
+ignoredisk /dev/rdsk/c0t[0-57-9a-f]d0
+.IP
+ignoredisk /dev/rdsk/c1*
+.IP
+This directive prevents all devices whose device names start with /dev/rdsk/c1
+from being scanned.
+.IP
+ignoredisk /dev/rdsk/c?t0d0
+.IP
+This directive prevents all devices /dev/rdsk/cXt0d0 ('X' might be any char)
+from being scanned.
+.IP
+You might use more than one such wildcard expression in any such directive.
+.IP "storageUseNFS NUMBER"
+Setting storageUseNFS to 1 causes all NFS and NFS-like file systems to be
+marked as 'Network Disks' in the hrStorageTable. This is according to RFC 2790.
+Not setting storageUseNFS or setting it to 2 causes NFS and NFS-like file
+systems to be marked as 'Fixed Disks' as it has been in previous versions of
+the ucd-snmp SNMP agent.
 .IP "authtrapenable NUMBER"
 Setting authtrapenable to 1 enables generation of authentication failure
-traps. The default value is 2 (disable).
+traps.  The default value is disabled(2).  Ordinarily the corresponding
+object (snmpEnableAuthenTraps.0) is read-write, but setting its value
+via this token makes the object read-only, and attempts to set the
+value of the object will result in a notWritable error response.
 .IP "trapcommunity STRING"
 This defines the default community string to be used when sending traps.
 Note that this command must be used prior to any of the following three
@@ -337,7 +411,7 @@ inform notifications.
 If COMMUNITY is not specified, the string from a preceding \fItrapcommunity\fR
 directive will be used. If PORT is not specified, the well known SNMP trap
 port (162) will be used.
-.IP "trapsess [SNMPCMD ARGS] HOST [COMMUNITY]"
+.IP "trapsess [SNMPCMD_ARGS] HOST [COMMUNITY]"
 This is a more generic trap configuration token that allows any type
 of trap destination to be specified with any version of SNMP.  See the 
 .I snmpcmd(1)
@@ -426,6 +500,51 @@ communities are allowed write access are controlled by the RWRITE
 definition in the snmplib/snmp_impl.h source file.
 .RE
 .RE
+.IP
+Example (in snmpd.conf):
+.IP
+pass .1.3.6.1.4.1.2021.255 /path/to/local/passtest
+.RE
+.IP "pass_persist MIBOID EXEC"
+Passes entire control of MIBOID to the EXEC program.  
+Similar to pass, but the EXEC program continues to run after the initial
+request is answered.
+.IP
+Upon initialization, EXEC is passed the string "PING\\n" in stdin,
+and it should respond by printing "PONG\\n" to stdout.
+.IP
+For get and getnext requests, EXEC program is passed two lines,
+the command (get or getnext) and the mib OID.  It should return
+three lines, the mib OID, the TYPE of value returned,
+the VALUE corresponding with the returned TYPE.
+.IP
+For example, if the value for .1.3.6.1.4.100 was requested, the following
+2 lines would be passed in to stdin:
+.br
+.RS
+  get
+.br
+  .1.3.6.1.4.100  
+.RE
+.IP
+To return the value, say, 42, the script would write to stdout:
+.br
+.RS
+  .1.3.6.1.4.100
+.br
+  integer
+.br
+  42
+.RE
+.IP
+To indicate that the script is unable to comply with the request due
+to an end-of-mib condition or an invalid request, print "NONE\\n" to
+stdout.
+.IP
+Example (in snmpd.conf):
+.IP
+pass_persist .1.3.6.1.4.1.2021.255 /path/to/local/pass_persisttest
+.RE
 .SH "EXAMPLE"
 See the EXAMPLE.CONF file in the top level source directory for a more
 detailed example of how the above information is used in real
@@ -434,13 +553,14 @@ examples.
 The ucd-snmp agent can be forced to re-read its configuration files.
 It can be told to do so by one of two ways:
 .IP 1.
-An snmpset of integer(1) to EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERUPDATECONFIG.
+An snmpset of integer(1) to UCD-SNMP-MIB::versionUpdateConfig.0
+(.1.3.6.1.4.1.2021.100.11.0)
 .IP 2.
 A "kill -HUP" signal sent to the snmpd agent process.
 .SH "FILES"
 DATADIR/snmp/snmpd.conf
 .SH "SEE ALSO"
-snmp_config(5), snmpd(1), EXAMPLE.conf, read_config(3).
+snmpconf(1), snmp.conf(5), snmp_config(5), snmpd(1), EXAMPLE.conf, read_config(3).
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:

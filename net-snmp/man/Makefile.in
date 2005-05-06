@@ -11,6 +11,7 @@ MAN3 = snmp_agent_api.3 snmp_api.3 mib_api.3 snmp_sess_api.3 snmp_trap_api.3 \
 	snmp_sess_async_send.3 snmp_sess_close.3 snmp_sess_error.3 snmp_sess_init.3 \
 	snmp_sess_open.3 snmp_sess_read.3 snmp_sess_select_info.3 snmp_sess_send.3 \
 	snmp_sess_timeout.3 snmp_sess_session.3 \
+	snmp_perror.3 snmp_sess_perror.3 snmp_error.3 snmp_api_errstring.3 \
 	init_mib.3 add_mibdir.3 init_mib_internals.3 snmp_set_mib_warnings.3 \
 	read_module.3 read_all_mibs.3 read_mib.3 read_module_node.3 read_objid.3 \
 	add_module_replacement.3 \
@@ -29,6 +30,9 @@ MANALL = $(MAN1) $(MAN1G) $(MAN3) $(MAN3G) $(MAN5) $(MAN5G) $(MAN8)
 TARGETS = $(MAN5G) $(MAN1G) $(MAN3G)
 
 all: $(TARGETS)
+
+snmpcmd.1: snmpcmd.1.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/snmpcmd.1.def > snmpcmd.1
 
 snmpd.conf.5: snmpd.conf.5.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpd.conf.5.def > snmpd.conf.5

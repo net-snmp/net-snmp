@@ -1,6 +1,14 @@
 /* ucdDemoPublic.c */
 
 #include <config.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
@@ -114,7 +122,8 @@ var_ucdDemoPublic(
     case UCDDEMOUSERLIST:
       cp = string;
       for(i=0; i < num; i++) {
-        sprintf(cp, " %s", demoUsers[i]);
+        snprintf(cp, sizeof(string)-strlen(string), " %s", demoUsers[i]);
+        string[MYMAX] = 0;
         cp = cp + strlen(cp);
       }
       *var_len = strlen(string);
@@ -142,12 +151,14 @@ write_ucdDemoResetKeys(
 {
   /* variables we may use later */
   static long long_ret;
+#ifdef COMMENT
   static unsigned char string[1500];
   static oid objid[MAX_OID_LEN];
   static struct counter64 c64;
   int bigsize=1000;
+#endif
   unsigned char *engineID;
-  int engineIDLen;
+  size_t engineIDLen;
   int i;
   struct usmUser *user;
 

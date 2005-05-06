@@ -663,9 +663,10 @@ inet6name(struct in6_addr *in)
 	}
 	if (IN6_IS_ADDR_UNSPECIFIED(in))
 		strcpy(line, "*");
-	else if (cp)
-		strcpy(line, cp);
-	else
+	else if (cp) {
+		strncpy(line, cp, sizeof(line));
+		line[ sizeof(line)-1 ] = 0;
+	} else
 		inet_ntop(AF_INET6, in, line, sizeof(line));
 	return (line);
 }

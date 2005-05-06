@@ -1,5 +1,8 @@
 #include <config.h>
 
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -31,7 +34,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
     
     DEBUGMSGTL(("target_sessions","looking for: %s\n", taglist));
     for(cp = taglist; cp && numtags < MAX_TAGS;) {
-        cp = copy_word(cp, tags[numtags]);
+        cp = copy_nword(cp, tags[numtags], sizeof(tags[numtags]));
         DEBUGMSGTL(("target_sessions"," for: %d=%s\n", numtags,
                     tags[numtags]));
         numtags++;
@@ -61,7 +64,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
         if (targaddrs->tagList) {
             /* loop through tag list looking for requested tags */
             for(cp = targaddrs->tagList; cp; ) {
-                cp = copy_word(cp, buf);
+                cp = copy_nword(cp, buf, sizeof(buf));
                 for(i = 0; i < numtags; i++) {
                     if (strcmp(buf,tags[i]) == 0) {
                         /* found a valid target table entry */
@@ -106,7 +109,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                                     (int) targaddrs->tAddress[2],
                                     (int) targaddrs->tAddress[3]);
                             memset(&thissess,0,sizeof(thissess));
-                            thissess.peername = strdup(smbuf);
+                            thissess.peername = smbuf;
                             DEBUGMSGTL(("target_sessions","  to: %s:%d (%d*256+%d)\n",
                                         smbuf,
                                         (((unsigned int)
@@ -132,16 +135,14 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                             }
                             thissess.version = param->mpModel;
                             if (param->mpModel == SNMP_VERSION_3) {
-                                thissess.securityName =
-                                    strdup(param->secName);
+                                thissess.securityName = param->secName;
                                 thissess.securityNameLen =
                                     strlen(thissess.securityName);
                                 thissess.securityLevel = param->secLevel;
                             } else {
-                                thissess.community =
-                                    strdup(param->secName);
+                                thissess.community = param->secName;
                                 thissess.community_len =
-                                    strlen(thissess.community);
+                                    strlen((char *)thissess.community);
                             }
                             
                             targaddrs->sess = snmp_open(&thissess);

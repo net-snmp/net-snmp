@@ -8,6 +8,9 @@
 #ifdef CAN_USE_NLIST
 
 #include <sys/types.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -24,6 +27,12 @@
 #endif
 #if HAVE_KVM_H
 #include <kvm.h>
+#endif
+
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #endif
 
 #include "asn1.h"

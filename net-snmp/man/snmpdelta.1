@@ -1,62 +1,60 @@
-.TH SNMPDELTA 1 "17 Jun 1998"
+.TH SNMPDELTA 1 "12 Mar 2001"
 .UC 4
 .SH NAME
 snmpdelta \- Monitor deltas of integer valued SNMP variables
 .SH SYNOPSIS
-snmpdelta [ common arguments ] [ -t ] [ -s ] [ -S ] [ -m ] [ -f configfile ] [ -l ] [ -L
-SumFileName ] [ -p period ] [ -P Peaks ] [ -k ] [ -T ] oid
-[ oid ... ]
+snmpdelta [ common arguments ] [ -Ct ] [ -Cs ] [ -CS ] [ -Cm ] [ -CF configfile ] [ -Cl ] [ -CL SumFileName ] [ -Cp period ] [ -CP Peaks ] [ -Ck ] [ -CT ] oid [ oid ... ]
 .SH "DESCRIPTION"
 .B snmpdelta
 will monitor the specified integer valued OIDs, and report changes
 over time.
 .PP
 The
-.I -t
+.I -Ct
 flag will determine time interval from the monitored entity.
 .PP
 The
-.I -s
+.I -Cs
 flag will display a timestamp.
 .PP
 The
-.I -S
+.I -CS
 flag causes data to be logged into a Sum file.
 .PP
-.I -m
+.I -Cm
 prints the max value ever attained.
 .PP
-.I -f configfile
+.I -CF configfile
 tells
 .B snmpdelta
 to read it's configuration from the specified file.
 .PP
-.I -l
+.I -Cl
 tells
 .B snmpdelta
 to write it's configuration to files.
 .PP
-.I -L
+.I -CL
 specified the sum filename.
 .PP
-.I -p period
+.I -Cp period
 specifies the poll period.
 .PP
-.I -P peaks
+.I -CP peaks
 specifies the reporting period in number of polling periods
 .PP
-.I -k
+.I -Ck
 tells
 .B snmpdelta
 to keep seconds in it's output time format.
 .PP
-.I -T
+.I -CT
 makes 
 .B snmpdelta
 print its output in tabular form.
 .SH EXAMPLES
 .nf
-$ snmpdelta -R localhost public -s IF-MIB:ifinucastpkts.3 IF-MIB:ifoutucastpkts.3
+$ snmpdelta -c public -Cs localhost IF-MIB::ifinucastpkts.3 IF-MIB::ifoutucastpkts.3
 [20:15:43 6/14] ifInUcastPkts.3 /1 sec: 158
 [20:15:43 6/14] ifOutUcastPkts.3 /1 sec: 158
 [20:15:44 6/14] ifInUcastPkts.3 /1 sec: 184
@@ -72,7 +70,7 @@ $ snmpdelta -R localhost public -s IF-MIB:ifinucastpkts.3 IF-MIB:ifoutucastpkts.
 [20:15:49 6/14] ifInUcastPkts.3 /1 sec: 158
 [20:15:49 6/14] ifOutUcastPkts.3 /1 sec: 158
 ^C
-$ snmpdelta -R localhost public -s -T IF-MIB:ifinucastpkts.3 IF-MIB:ifoutcastpkts.3
+$ snmpdelta -c public -Cs -CT localhost IF-MIB:ifinucastpkts.3 IF-MIB:ifoutcastpkts.3
 localhost	ifInUcastPkts.3	ifOutUcastPkts.3
 [20:15:59 6/14]	184.00	184.00
 [20:16:00 6/14]	158.00	158.00
@@ -84,6 +82,6 @@ localhost	ifInUcastPkts.3	ifOutUcastPkts.3
 [20:16:06 6/14]	158.00	158.00
 ^C
 .fi
-$ snmpdelta interlink.sw.net.cmu.edu public -t -s -S -m -l -p 60 -P 60 .1.3.6.1.2.1.2.2.1.16.3 .1.3.6.1.2.1.2.2.1.16.4
+$ snmpdelta -c public -Ct -Cs -CS -Cm -Cl -Cp 60 -CP 60 interlink.sw.net.cmu.edu .1.3.6.1.2.1.2.2.1.16.3 .1.3.6.1.2.1.2.2.1.16.4
 .SH "SEE ALSO"
 snmpcmd(1), variables(5).

@@ -93,27 +93,27 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf,"UCD-snmp version: %s\n", VersionInfo);
   fprintf(outf, "  -h\t\tthis help message.\n");
   fprintf(outf, "  -H\t\tDisplay configuration file directives understood.\n");
-  fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -v 1|2c|3\tspecifies snmp version to use.\n");
+  fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "SNMP Version 1 or 2c specific\n");
   fprintf(outf, "  -c <c>\tset the community name (v1 or v2c)\n");
   fprintf(outf, "SNMP Version 3 specific\n");
-  fprintf(outf, "  -Z <B,T>\tset the destination engine boots/time for v3 requests.\n");
-  fprintf(outf, "  -e <E>\tsecurity engine ID (e.g., 800000020109840301).\n");
-  fprintf(outf, "  -E <E>\tcontext engine ID (e.g., 800000020109840301).\n");
-  fprintf(outf, "  -n <N>\tcontext name (e.g., bridge1).\n");
-  fprintf(outf, "  -u <U>\tsecurity name (e.g., bert).\n");
-  fprintf(outf, "  -l <L>\tsecurity level (noAuthNoPriv|authNoPriv|authPriv).\n");
   fprintf(outf, "  -a <A>\tauthentication protocol (MD5|SHA)\n");
   fprintf(outf, "  -A <P>\tauthentication protocol pass phrase.\n");
+  fprintf(outf, "  -e <E>\tsecurity engine ID (e.g., 800000020109840301).\n");
+  fprintf(outf, "  -E <E>\tcontext engine ID (e.g., 800000020109840301).\n");
+  fprintf(outf, "  -l <L>\tsecurity level (noAuthNoPriv|authNoPriv|authPriv).\n");
+  fprintf(outf, "  -n <N>\tcontext name (e.g., bridge1).\n");
+  fprintf(outf, "  -u <U>\tsecurity name (e.g., bert).\n");
   fprintf(outf, "  -x <X>\tprivacy protocol (DES).\n");
   fprintf(outf, "  -X <P>\tprivacy protocol pass phrase\n");
+  fprintf(outf, "  -Z <B,T>\tset the destination engine boots/time for v3 requests.\n");
   fprintf(outf, "General communication options\n");
   fprintf(outf, "  -p <P>\tuse port P instead of the default port.\n");
+  fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
+  fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
   fprintf(outf, "  -T <LAYER>\tuse LAYER for the network layer.\n");
   fprintf(outf, "\t\t\t(UDP or TCP).\n");
-  fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
-  fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
   fprintf(outf, "Debugging\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
   fprintf(outf, "  -D all | <TOKEN[,TOKEN,...]> \tturn on debugging output for the specified TOKENs.\n");
@@ -180,37 +180,37 @@ snmp_parse_args(int argc,
         return(-2);
 
       case 'm':
-        setenv("MIBS", optarg, 1);
+        snmp_setenv("MIBS", optarg, 1);
         break;
 
       case 'M':
-        setenv("MIBDIRS", optarg, 1);
+        snmp_setenv("MIBDIRS", optarg, 1);
         break;
 
 #ifndef DEPRECATED_CLI_OPTIONS
       case 'f':
 	fprintf(stderr, "Warning: -f option is deprecated - use -Of\n");
-	snmp_set_full_objid(1);
+	ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID, 1);
 	break;
 
       case 's':
 	fprintf(stderr, "Warning: -s option is deprecated - use -Os\n");
-	snmp_set_suffix_only(1);
+	ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
 	break;
 
       case 'S':
 	fprintf(stderr, "Warning: -S option is deprecated - use -OS\n");
-	snmp_set_suffix_only(2);
+	ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 2);
 	break;
 
       case 'q':
 	fprintf(stderr, "Warning: -q option is deprecated - use -Oq\n");
-	snmp_set_quick_print(1);
+	ds_set_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT, 1);
 	break;
 
       case 'R':
 	fprintf(stderr, "Warning: -R option is deprecated - use -IR\n");
-        snmp_set_random_access(1);
+        ds_set_boolean(DS_LIBRARY_ID, DS_LIB_RANDOM_ACCESS, 1);
         break;
 #endif /* DEPRECATED_CLI_OPTIONS */
 
@@ -339,12 +339,12 @@ snmp_parse_args(int argc,
         break;
 
       case 'n':
-	session->contextName = strdup(optarg);
+	session->contextName = optarg;
 	session->contextNameLen = strlen(optarg);
         break;
 
       case 'u':
-	session->securityName = strdup(optarg);
+	session->securityName = optarg;
 	session->securityNameLen = strlen(optarg);
         break;
 
@@ -433,7 +433,7 @@ snmp_parse_args(int argc,
                       session->securityAuthKey,
                       &session->securityAuthKeyLen) != SNMPERR_SUCCESS) {
           snmp_perror(argv[0]);
-          fprintf(stderr,"Error generating Ku from authentication pass phrase. \n");
+          fprintf(stderr,"Error generating a key (Ku) from the supplied authentication pass phrase. \n");
           return(-2);
       }
   }
@@ -455,7 +455,7 @@ snmp_parse_args(int argc,
                       session->securityPrivKey,
                       &session->securityPrivKeyLen) != SNMPERR_SUCCESS) {
           snmp_perror(argv[0]);
-          fprintf(stderr,"Error generating Ku from privacy pass phrase. \n");
+          fprintf(stderr,"Error generating a key (Ku) from the supplied privacy pass phrase. \n");
           return(-2);
       }
   }
@@ -484,35 +484,4 @@ snmp_parse_args(int argc,
     session->community_len = strlen(Cpsz);
   }
   return optind;
-}
-
-oid
-*snmp_parse_oid(const char *argv,
-		oid *root,
-		size_t *rootlen)
-{
-  size_t savlen = *rootlen;
-  if (snmp_get_random_access() || strchr(argv, ':')) {
-    if (get_node(argv,root,rootlen)) {
-      return root;
-    }
-  } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS)) {
-    if (get_wild_node(argv,root,rootlen)) {
-      return root;
-    }
-  } else {
-    if (read_objid(argv,root,rootlen)) {
-      return root;
-    }
-    *rootlen = savlen;
-    if (get_node(argv,root,rootlen)) {
-      return root;
-    }
-    *rootlen = savlen;
-    DEBUGMSGTL(("parse_oid","wildly parsing\n"));
-    if (get_wild_node(argv,root,rootlen)) {
-      return root;
-    }
-  }
-  return NULL;
 }

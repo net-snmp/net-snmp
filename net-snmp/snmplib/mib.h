@@ -278,21 +278,46 @@ void shutdown_mib (void);
 void print_variable (oid *, size_t, struct variable_list *);
 void fprint_variable (FILE *, oid *, size_t, struct variable_list *);
 void sprint_variable (char *, oid *, size_t, struct variable_list *);
+int snprint_variable		(char *buf, size_t buf_len,
+				 const oid *objid, size_t objidlen,
+				 struct variable_list *variable);
+
+int sprint_realloc_variable(u_char **buf, size_t *buf_len,
+			    size_t *out_len, int allow_realloc,
+			    const oid *objid, size_t objidlen,
+			    struct variable_list *variable);
+
+int sprint_realloc_objid   (u_char **buf, size_t *buf_len,
+			    size_t *out_len, int allow_realloc, 
+			    const oid *objid, size_t objidlen);
+
 void print_value (oid *, size_t, struct variable_list *);
 void fprint_value (FILE *, oid *, size_t, struct variable_list *);
 void sprint_value (char *, oid *, size_t, struct variable_list *);
+int snprint_value		(char *buf, size_t buf_len,
+				 const oid *objid, size_t objidlen,
+				 struct variable_list *variable);
+int
+sprint_realloc_value(u_char **buf, size_t *buf_len,
+		     size_t *out_len, int allow_realloc,
+		     const oid *objid, size_t objidlen,
+		     struct variable_list *variable);
 void print_objid (oid *, size_t);
 void fprint_objid (FILE *, oid *, size_t);
 char *sprint_objid (char *, oid *, size_t);
+int snprint_objid		(char *buf, size_t buf_len,
+				 const oid *objid, size_t objidlen);
 void print_description (oid *, size_t, int);
 void fprint_description (FILE *, oid *, size_t, int);
 int get_module_node (const char *, const char *, oid *, size_t *);
 int get_wild_node(const char *, oid *, size_t *);
 int get_node (const char *, oid *, size_t *);
+oid *snmp_parse_oid (const char *,oid *,size_t *);
 struct tree *get_symbol (oid *, size_t, struct tree *, char *);
-struct tree *get_tree (oid *, size_t, struct tree *);
+struct tree *get_tree (const oid *, size_t, struct tree *);
 struct tree *get_tree_head (void);
 void  set_function (struct tree *);
+
 void sprint_hexstring (char *, const u_char *, size_t);
 void sprint_asciistring(char *buf, const u_char *cp, size_t len);
 
@@ -336,6 +361,155 @@ void sprint_float (char *, struct variable_list *, struct enum_list *,
                    const char *, const char *);
 void sprint_double (char *, struct variable_list *, struct enum_list *,
                     const char *, const char *);
+#endif	/* OPAQUE_SPECIAL_TYPES */
+
+int snprint_hexstring (char *, size_t, const u_char *, size_t);
+int snprint_asciistring(char *, size_t, const u_char *, size_t);
+
+int snprint_by_type (char *, size_t, struct variable_list *, struct enum_list *,
+                     const char *, const char *);
+int snprint_octet_string (char *, size_t, struct variable_list *, struct enum_list *,
+                          const char *, const char *);
+int snprint_opaque (char *, size_t, struct variable_list *, struct enum_list *,
+                    const char *, const char *);
+int snprint_object_identifier (char *, size_t, struct variable_list *,
+                               struct enum_list *, const char *, const char *);
+int snprint_timeticks (char *, size_t, struct variable_list *, struct enum_list *,
+                       const char *, const char *);
+int snprint_hinted_integer (char *, size_t, long, const char *, const char *);
+int snprint_integer (char *, size_t, struct variable_list *, struct enum_list *,
+                     const char *, const char *);
+int snprint_uinteger (char *, size_t, struct variable_list *, struct enum_list *,
+                      const char *, const char *);
+int snprint_gauge (char *, size_t, struct variable_list *, struct enum_list *,
+                   const char *, const char *);
+int snprint_counter (char *, size_t, struct variable_list *, struct enum_list *,
+                     const char *, const char *);
+int snprint_networkaddress (char *, size_t, struct variable_list *,
+                            struct enum_list *, const char *, const char *);
+int snprint_ipaddress (char *, size_t, struct variable_list *, struct enum_list *,
+                       const char *, const char *);
+int snprint_null (char *, size_t, struct variable_list *, struct enum_list *,
+                  const char *, const char *);
+int snprint_bitstring (char *, size_t, struct variable_list *, struct enum_list *,
+                       const char *, const char *);
+int snprint_nsapaddress (char *, size_t, struct variable_list *, struct enum_list *,
+                         const char *, const char *);
+int snprint_counter64 (char *, size_t, struct variable_list *, struct enum_list *,
+                       const char *, const char *);
+int snprint_unknowntype (char *, size_t, struct variable_list *, struct enum_list *,
+                         const char *, const char *);
+int snprint_badtype (char *, size_t, struct variable_list *, struct enum_list *,
+                     const char *, const char *);
+#ifdef OPAQUE_SPECIAL_TYPES
+int snprint_float (char *, size_t, struct variable_list *, struct enum_list *,
+                   const char *, const char *);
+int snprint_double (char *, size_t, struct variable_list *, struct enum_list *,
+                    const char *, const char *);
+#endif	/* OPAQUE_SPECIAL_TYPES */
+
+int sprint_realloc_hexstring	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 const u_char *, size_t);
+
+int sprint_realloc_asciistring	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 const u_char *cp, size_t len);
+
+int sprint_realloc_by_type	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_octet_string (u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_opaque	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_object_identifier(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_timeticks	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_hinted_integer(u_char **buf, size_t *buf_len,
+				  size_t *out_len, int allow_realloc,
+				  long, const char, const char *,const char *);
+
+int sprint_realloc_integer	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_uinteger	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_gauge	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_counter	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_networkaddress(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_ipaddress	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_null 	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_bitstring	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_nsapaddress	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_counter64	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_badtype	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+#ifdef OPAQUE_SPECIAL_TYPES
+int sprint_realloc_float	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
+
+int sprint_realloc_double	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *, struct enum_list *,
+				 const char *, const char *);
 #endif
 
 void print_oid_report (FILE *);

@@ -75,7 +75,7 @@ ok($res eq 'IPADDR');
 ##########################  11  ##########################
 $res = $SNMP::MIB{atNetAddress}{syntax};
 #print("syntax is: $res\n");
-ok($res eq 'IPADDR');
+ok($res eq 'NETADDR');
 #print("\n");
 ########################   12  ###############################
 $res = $SNMP::MIB{ipReasmOKs}{syntax};

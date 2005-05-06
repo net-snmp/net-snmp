@@ -48,7 +48,8 @@
 #include "scapi.h"
 #include "snmp_impl.h"
 #include "system.h"
-
+#include "mib.h"
+#include "snmp_logging.h"
 #include "transform_oids.h"
 
 #ifdef USE_OPENSSL
@@ -508,6 +509,7 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 	 * Sanity check.
 	 */
 #if	!defined(SCAPI_AUTHPRIV)
+		snmp_log(LOG_ERR, "Encryption support not enabled.\n");
 		return SNMPERR_SC_NOT_CONFIGURED;
 #endif
 
@@ -524,15 +526,34 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 
 #ifdef SNMP_TESTING_CODE
 {
-        char buf[SNMP_MAXBUF];
+        size_t buf_len = 128, out_len = 0;
+        u_char *buf = (u_char *)malloc(buf_len);
 
-	sprint_hexstring(buf, iv, ivlen);
-        DEBUGMSGTL(("scapi", "encrypt: IV: %s/ ", buf));
-	sprint_hexstring(buf, key, keylen);
-        DEBUGMSG(("scapi","%s\n", buf));
-
-	sprint_hexstring(buf, plaintext, 16);
-        DEBUGMSGTL(("scapi","encrypt: string: %s\n", buf));
+	if (buf != NULL) {
+	    if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
+					 iv, ivlen)) {
+		DEBUGMSGTL(("scapi", "encrypt: IV: %s/", buf));
+	    } else {
+		DEBUGMSGTL(("scapi", "encrypt: IV: %s [TRUNCATED]/", buf));
+	    }
+	    out_len = 0;
+	    if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
+					 key, keylen)) {
+		DEBUGMSG(("scapi","%s\n", buf));
+	    } else {
+		DEBUGMSG(("scapi","%s [TRUNCATED]\n", buf));
+	    }
+	    out_len = 0;
+	    if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
+					 plaintext, 16)) {
+		DEBUGMSGTL(("scapi","encrypt: string: %s\n", buf));
+	    } else {
+		DEBUGMSGTL(("scapi","encrypt: string: %s [TRUNCATED]\n", buf));
+	    }
+	    free(buf);
+	} else {
+	    DEBUGMSGTL(("scapi", "encrypt: malloc fail for debug output\n"));
+	}
 }
 #endif /* SNMP_TESTING_CODE */
 
@@ -588,7 +609,11 @@ sc_encrypt_quit:
 	memset(my_iv, 0, sizeof(my_iv));
 	memset(pad_block, 0, sizeof(pad_block));
 	memset(key_struct, 0, sizeof(key_struct));
+#if (OPENSSL_VERSION_NUMBER < 0x0090700fL)
 	memset(key_sch, 0, sizeof(key_sch));
+#else
+	memset(&key_sch, 0, sizeof(key_sch));
+#endif
 	return rval;
 
 }  /* end sc_encrypt() */
@@ -597,6 +622,7 @@ sc_encrypt_quit:
 {
 #	if USE_INTERNAL_MD5
 	{
+		snmp_log(LOG_ERR, "Encryption support not enabled.\n");
 		DEBUGMSGTL(("scapi","Encrypt function not defined.\n"));
 		return SNMPERR_SC_GENERAL_FAILURE;
 	}
@@ -700,7 +726,11 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 
 /* exit cond */
 sc_decrypt_quit:
+#if (OPENSSL_VERSION_NUMBER < 0x0090700fL)
 	memset(key_sch, 0, sizeof(key_sch));
+#else
+	memset(&key_sch, 0, sizeof(key_sch));
+#endif
 	memset(key_struct, 0, sizeof(key_struct));
 	memset(my_iv, 0, sizeof(my_iv));
 	return rval;
@@ -708,6 +738,7 @@ sc_decrypt_quit:
 #else   /* USE OPEN_SSL */
 {
 #if	!defined(SCAPI_AUTHPRIV)
+		snmp_log(LOG_ERR, "Encryption support not enabled.\n");
 		return SNMPERR_SC_NOT_CONFIGURED;
 #else
 #	if USE_INTERNAL_MD5

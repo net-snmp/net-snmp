@@ -77,6 +77,7 @@ SOFTWARE.
 #include "snmp.h"
 #include "system.h"
 #include "snmp_parse_args.h"
+#include "snmp_debug.h"
 #include "int64.h"
 
 int failures = 0;
@@ -85,17 +86,23 @@ void usage(void)
 {
   fprintf(stderr,"Usage: snmpset ");
   snmp_parse_args_usage(stderr);
-  fprintf(stderr," [<objectID> <type> <value> ...]\n\n");
+  fprintf(stderr," OID TYPE VALUE [OID TYPE VALUE]...\n\n");
   snmp_parse_args_descriptions(stderr);
   fprintf(stderr, 
-    "  type - one of i, u, t, a, o, s, x, d, n\n");
+    "\n  TYPE - one of i, u, t, a, o, s, x, d, b%s\n",
+#ifdef OPAQUE_SPECIAL_TYPES
+        ", U, I, F, D"
+#else
+	""
+#endif
+    );
   fprintf(stderr,
-    "    i: INTEGER, u: unsigned INTEGER, t: TIMETICKS, a: IPADDRESS\n");
+    "\ti: INTEGER, u: unsigned INTEGER, t: TIMETICKS, a: IPADDRESS\n");
   fprintf(stderr,
-    "    o: OBJID, s: STRING, x: HEX STRING, d: DECIMAL STRING\n");
+    "\to: OBJID, s: STRING, x: HEX STRING, d: DECIMAL STRING, b: BITS\n");
 #ifdef OPAQUE_SPECIAL_TYPES
   fprintf(stderr,
-    "    U: unsigned int64, I: signed int64, F: float, D: double\n");
+    "\tU: unsigned int64, I: signed int64, F: float, D: double\n");
 #endif /* OPAQUE_SPECIAL_TYPES */
 
 }
@@ -118,6 +125,8 @@ int main(int argc, char *argv[])
     int status;
     int exitval = 0;
 
+    putenv(strdup("POSIXLY_CORRECT=1"));
+
     /* get the common command line arguments */
     switch (arg = snmp_parse_args(argc, argv, &session, NULL, NULL)) {
     case -2:
@@ -137,9 +146,13 @@ int main(int argc, char *argv[])
 
     /* get object names, types, and values */
     for(; arg < argc; arg++){
+      DEBUGMSGTL(("snmp_parse_args", "handling (#%d): %s %s %s\n",
+                  arg,argv[arg], arg+1 < argc ? argv[arg+1] : NULL,
+                  arg+2 < argc ? argv[arg+2] : NULL));
       names[current_name++] = argv[arg++];
       if (arg < argc) {
         switch(*argv[arg]){
+	case '=':
         case 'i':
         case 'u':
         case 't':

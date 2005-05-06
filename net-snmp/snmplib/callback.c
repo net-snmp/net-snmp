@@ -18,6 +18,12 @@
 #include <strings.h>
 #endif
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -106,3 +112,33 @@ snmp_call_callbacks(int major, int minor, void *caller_arg) {
 
   return SNMPERR_SUCCESS;
 }
+
+int
+snmp_count_callbacks(int major, int minor) {
+    int count = 0;
+    struct snmp_gen_callback *scp;
+
+    if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
+        return SNMPERR_GENERR;
+    }
+
+    for(scp = thecallbacks[major][minor]; scp != NULL; scp = scp->next) {
+        count++;
+    }
+    
+    return count;
+}
+
+int
+snmp_callback_available(int major, int minor) {
+    if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
+        return SNMPERR_GENERR;
+    }
+
+    if (thecallbacks[major][minor] != NULL) {
+        return SNMPERR_SUCCESS;
+    }
+    
+    return SNMPERR_GENERR;
+}
+

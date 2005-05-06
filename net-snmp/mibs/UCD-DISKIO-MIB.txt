@@ -20,17 +20,18 @@ ucdDiskIOMIB MODULE-IDENTITY
     LAST-UPDATED "200001260000Z"
     ORGANIZATION "University of California, Davis"
     CONTACT-INFO    
-        "The ucd-snmp-coders mailing list is the best place 
-         to write for public questions about the ucd-snmp
-         project: ucd-snmp-coders@ucd-snmp.ucdavis.edu
+	"This mib is no longer being maintained by the University of
+	 California and is now in life-support-mode and being
+	 maintained by the net-snmp project.  The best place to write
+	 for public questions about the net-snmp-coders mailing list
+	 at net-snmp-coders@lists.sourceforge.net.
 
-         Primary Contact: Wes Hardaker
+         postal:   Wes Hardaker
+                   P.O. Box 382
+                   Davis CA  95617
 
-         postal:    IT-DCAS
-                    UCDavis
-                    Davis CA  95616
-         phone:     +1 530 754-7571
-         email:     wjhardaker@ucdavis.edu"
+         email:    net-snmp-coders@lists.sourceforge.net
+        "
     DESCRIPTION
         "This MIB module defines objects for disk IO statistics."
     REVISION     "200001260000Z"

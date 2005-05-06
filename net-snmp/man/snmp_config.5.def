@@ -1,4 +1,4 @@
-.TH SNMP.CONF 5 "14 Apr 1999"
+.TH SNMP.CONF 5 "28 Aug 2001"
 .ds )H U.C. Davis
 .ds ]W VVERSIONINFO
 .UC 4
@@ -13,8 +13,8 @@ First off, there are numerous places that configuration files can be
 found and read from.  By default, the applications look for
 configuration files in the following 3 directories, in order:
 DATADIR/snmp, LIBDIR/snmp, and $HOME/.snmp.  In each of these
-directories, it looks for files with the extension of both .conf and
-\.local.conf (reading the second on last).  In this manner, there are 6 
+directories, it looks for files with the extension of both conf
+and local.conf (reading the second on last).  In this manner, there are 6 
 default places a configuration file can exist for any given
 configuration file type.
 .PP
@@ -46,8 +46,8 @@ It's possible to switch in mid-file the configuration type that the
 parser is supposed to be reading.  Since that sentence doesn't make
 much sense, lets give you an example: say that you wanted to turn on
 packet dumping output for the agent by default, but you didn't want to
-do that for the rest of the applications (ie, snmpget, snmpwalk,
-...).  Normally to enable packet dumping in the configuration file
+do that for the rest of the applications (ie, snmpget, snmpwalk, ...).
+Normally to enable packet dumping in the configuration file
 you'd need to put a line like:
 .PP
 .RS

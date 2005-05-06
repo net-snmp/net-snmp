@@ -46,7 +46,20 @@ SOFTWARE.
 #endif
 
 #include <sys/types.h>
-
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
@@ -83,6 +96,8 @@ SOFTWARE.
 #define	NO	0
 
 static void sidewaysintpr(unsigned int);
+static void timerSet(int interval_seconds);
+static void timerPause(void);
 
 static oid oid_ifname[] =	{1, 3, 6, 1, 2, 1, 2, 2, 1, 2, 1};
 static oid oid_ifinucastpkts[] ={1, 3, 6, 1, 2, 1, 2, 2, 1,11, 1};
@@ -188,7 +203,14 @@ intpr(int interval)
 		    switch (var->name [9]) {
 		    case IPIFINDEX:
 			ifindex = *var->val.integer;
-			for (cur_if = if_table; cur_if->ifindex != ifindex && cur_if->ifindex != 0; cur_if++) ;
+			for (cur_if = if_table;
+                             cur_if < (if_table + cfg_nnets) &&
+                                 cur_if->ifindex != ifindex &&
+                                 cur_if->ifindex != 0; cur_if++) ;
+ 			if (cur_if >= (if_table + cfg_nnets)) {
+                            fprintf(stderr, "Inconsistent reponse from server. Aborting.\n");
+                            exit (0);
+			}
 			cur_if->ifindex = ifindex;
 			break;
 		    case IPADDR:
@@ -264,6 +286,11 @@ intpr(int interval)
 		    case IFINDEX:
 			ifindex = *var->val.integer;
 			for (cur_if = if_table; cur_if->ifindex != ifindex && cur_if->ifindex != 0; cur_if++) ;
+			if (cur_if >= (if_table + cfg_nnets))
+			{
+				fprintf (stderr, "Inconsistent reponse from server. Aborting\n");
+				exit (0);
+			}
 			cur_if->ifindex = ifindex;
 			break;
 		    case OUTQLEN:

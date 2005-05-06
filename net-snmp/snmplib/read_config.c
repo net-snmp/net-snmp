@@ -227,9 +227,9 @@ unregister_config_handler(const char *type_param,
   while ((*ltmp)->next != NULL && strcmp((*ltmp)->next->config_token,token)) {
     ltmp = &((*ltmp)->next);
   }
-  if (*ltmp == NULL) {
-    free((*ltmp)->config_token);
-    SNMP_FREE((*ltmp)->help);
+  if ((*ltmp)->next != NULL) {
+    free((*ltmp)->next->config_token);
+    SNMP_FREE((*ltmp)->next->help);
     ltmp2 = (*ltmp)->next->next;
     free((*ltmp)->next);
     (*ltmp)->next = ltmp2;
@@ -326,7 +326,7 @@ void read_config(const char *filename,
 
   FILE *ifile;
   char line[STRINGMAX], token[STRINGMAX], tmpbuf[STRINGMAX];
-  char *cptr;
+  char *cptr, *cp;
   int i, done;
   struct config_line *lptr;
 
@@ -367,13 +367,15 @@ void read_config(const char *filename,
       /* check blank line or # comment */
       if ((cptr = skip_white(cptr)))
 	{
-          cptr = copy_word(cptr,token);
+          cptr = copy_nword(cptr,token, sizeof(token));
           if (token[0] == '[') {
               token[strlen(token)-1] = '\0';
               lptr = read_config_get_handlers(&token[1]);
               if (lptr == NULL) {
-                  sprintf(tmpbuf,"No handlers regestered for type %s.",
+                  snprintf(tmpbuf,  sizeof(tmpbuf),
+                          "No handlers regestered for type %s.",
                           &token[1]);
+                  tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
                   config_perror(tmpbuf);
                   continue;
               }
@@ -385,13 +387,14 @@ void read_config(const char *filename,
                   continue;
               } else {
                   /* the rest of this line only applies. */
-                  cptr = copy_word(cptr,token);
+                  cptr = copy_nword(cptr,token, sizeof(token));
               }
           } else {
               lptr = line_handler;
           }
           if (cptr == NULL) {
-            sprintf(tmpbuf,"Blank line following %s token.", token);
+            snprintf(tmpbuf,  sizeof(tmpbuf), "Blank line following %s token.", token);
+            tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
             config_perror(tmpbuf);
           } else {
               
@@ -401,6 +404,13 @@ void read_config(const char *filename,
                 if (when == EITHER_CONFIG || lptr->config_time == when) {
                     DEBUGMSGTL(("read_config", "%s:%d Parsing: %s\n",
                                 filename, linecount, line));
+               	    /*
+               	     * Stomp on any trailing whitespace
+               	     */
+               	    cp = &(cptr[strlen(cptr)-1]);
+                    while (isspace(*cp)) {
+                        *(cp--) = '\0';
+                    }
                     (*(lptr->parse_line))(token,cptr);
                 }
                 done = 1;
@@ -408,7 +418,8 @@ void read_config(const char *filename,
             }
             if (!done && when != PREMIB_CONFIG &&
                 !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS)) {
-              sprintf(tmpbuf,"Unknown token: %s.", token);
+              snprintf(tmpbuf, sizeof(tmpbuf), "Unknown token: %s.", token);
+              tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
               config_pwarn(tmpbuf);
             }
           }
@@ -476,7 +487,81 @@ read_premib_configs (void)
                       NULL);
 }
 
+/*******************************************************************-o-******
+ * set_configuration_directory
+ *
+ * Parameters:
+ *      char *dir - value of the directory
+ * Sets the configuration directory. Multiple directories can be
+ * specified, but need to be seperated by 'ENV_SEPARATOR_CHAR'.
+ */
+void set_configuration_directory(const char *dir)
+{
+    ds_set_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR, dir);
+}
 
+/*******************************************************************-o-******
+ * get_configuration_directory
+ *
+ * Parameters: -
+ * Retrieve the configuration directory or directories.
+ * (For backwards compatibility that is:
+ *       SNMPCONFPATH, SNMPSHAREPATH, SNMPLIBPATH, HOME/.snmp
+ * First check whether the value is set.
+ * If not set give it the default value.
+ * Return the value.
+ * We always retrieve it new, since we have to do it anyway if it is just set.
+ */
+const char *get_configuration_directory()
+{
+char defaultPath[SPRINT_MAX_LEN];
+char *homepath;
+
+    if (NULL == ds_get_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR)) {
+        homepath=getenv("HOME");
+        snprintf(defaultPath, sizeof(defaultPath),"%s%c%s%c%s%s%s%s",
+              SNMPCONFPATH, ENV_SEPARATOR_CHAR,
+              SNMPSHAREPATH, ENV_SEPARATOR_CHAR, SNMPLIBPATH,
+              ((homepath == NULL) ? "" : ENV_SEPARATOR),
+              ((homepath == NULL) ? "" : homepath),
+              ((homepath == NULL) ? "" : "/.snmp"));
+        defaultPath[ sizeof(defaultPath)-1 ] = 0;
+        set_configuration_directory(defaultPath);
+    }
+    return(ds_get_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR));
+}
+
+/*******************************************************************-o-******
+ * set_persistent_directory
+ *
+ * Parameters:
+ *      char *dir - value of the directory
+ * Sets the configuration directory. 
+ * No multiple directories may be specified.
+ * (However, this is not checked)
+ */
+void set_persistent_directory(const char *dir)
+{
+    ds_set_string(DS_LIBRARY_ID, DS_LIB_PERSISTENT_DIR, dir);
+}
+
+/*******************************************************************-o-******
+ * get_persistent_directory
+ *
+ * Parameters: -
+ * Function will retrieve the persisten directory value.
+ * First check whether the value is set.
+ * If not set give it the default value.
+ * Return the value. 
+ * We always retrieve it new, since we have to do it anyway if it is just set.
+ */
+const char *get_persistent_directory()
+{
+    if (NULL == ds_get_string(DS_LIBRARY_ID, DS_LIB_PERSISTENT_DIR)) {
+        set_persistent_directory(PERSISTENT_DIRECTORY);
+    }
+    return(ds_get_string(DS_LIBRARY_ID, DS_LIB_PERSISTENT_DIR));
+}
 
 
 /*******************************************************************-o-******
@@ -513,7 +598,8 @@ read_config_files (int when)
 {
   int i, j;
   char configfile[300];
-  char *envconfpath, *homepath;
+  char *envconfpath;
+  const char *confpath, *perspath;
   char *cptr1, *cptr2;
   char defaultPath[SPRINT_MAX_LEN];
 
@@ -526,6 +612,9 @@ read_config_files (int when)
   if (when == PREMIB_CONFIG)
     free_config();
 
+  confpath = get_configuration_directory();
+  perspath = get_persistent_directory();
+
   /* read all config file types */
   for(;ctmp != NULL; ctmp = ctmp->next) {
 
@@ -533,14 +622,11 @@ read_config_files (int when)
 
     /* read the config files */
     if ((envconfpath = getenv("SNMPCONFPATH")) == NULL) {
-      homepath=getenv("HOME");
-      sprintf(defaultPath,"%s%c%s%c%s%s%s%s%c%s",
-	      SNMPCONFPATH, ENV_SEPARATOR_CHAR,
-              SNMPSHAREPATH, ENV_SEPARATOR_CHAR, SNMPLIBPATH,
-              ((homepath == NULL) ? "" : ENV_SEPARATOR),
-              ((homepath == NULL) ? "" : homepath),
-              ((homepath == NULL) ? "" : "/.snmp"),
-              ENV_SEPARATOR_CHAR, PERSISTENT_DIRECTORY);
+      snprintf(defaultPath, sizeof(defaultPath), "%s%s%s",
+              ((confpath == NULL) ? "" : confpath),
+              ((perspath == NULL) ? "" : ENV_SEPARATOR),
+              ((perspath == NULL) ? "" : perspath));
+      defaultPath[ sizeof(defaultPath)-1 ] = 0;
       envconfpath = defaultPath;
     }
     envconfpath = strdup(envconfpath);  /* prevent actually writing in env */
@@ -561,14 +647,16 @@ read_config_files (int when)
        * then we read all the configuration files we can, starting with
        * the oldest first.
        */
-      if (strncmp(cptr2, PERSISTENT_DIRECTORY,
-                  strlen(PERSISTENT_DIRECTORY)) == 0 ||
+      if (strncmp(cptr2, perspath,
+                  strlen(perspath)) == 0 ||
           (getenv("SNMP_PERSISTENT_FILE") != NULL &&
            strncmp(cptr2, getenv("SNMP_PERSISTENT_FILE"),
                    strlen(getenv("SNMP_PERSISTENT_FILE"))) == 0)) {
         /* limit this to the known storage directory only */
         for(j=0; j <= MAX_PERSISTENT_BACKUPS; j++) {
-          sprintf(configfile,"%s/%s.%d.conf",cptr2, ctmp->fileHeader, j);
+          snprintf(configfile, sizeof(configfile),
+                   "%s/%s.%d.conf",cptr2, ctmp->fileHeader, j);
+          configfile[ sizeof(configfile)-1 ] = 0;
           if (stat(configfile, &statbuf) != 0) {
             /* file not there, continue */
             break;
@@ -579,9 +667,13 @@ read_config_files (int when)
           }
         }
       }
-      sprintf(configfile,"%s/%s.conf",cptr2, ctmp->fileHeader);
+      snprintf(configfile, sizeof(configfile),
+               "%s/%s.conf",cptr2, ctmp->fileHeader);
+      configfile[ sizeof(configfile)-1 ] = 0;
       read_config (configfile, ltmp, when);
-      sprintf(configfile,"%s/%s.local.conf",cptr2, ctmp->fileHeader);
+      snprintf(configfile, sizeof(configfile),
+               "%s/%s.local.conf",cptr2, ctmp->fileHeader);
+      configfile[ sizeof(configfile)-1 ] = 0;
       read_config (configfile, ltmp, when);
       cptr2 = ++cptr1;
     }
@@ -656,7 +748,9 @@ read_config_store(const char *type, const char *line)
      2. configured <PERSISTENT_DIRECTORY>/<type>.conf
   */
   if ((filep = getenv("SNMP_PERSISTENT_FILE")) == NULL) {
-    sprintf(file,"%s/%s.conf",PERSISTENT_DIRECTORY,type);
+    snprintf(file, sizeof(file),
+            "%s/%s.conf",get_persistent_directory(),type);
+    file[ sizeof(file)-1 ] = 0;
     filep = file;
   }
   
@@ -668,13 +762,13 @@ read_config_store(const char *type, const char *line)
                file);
   }
   if ((fout = fopen(filep, "a")) != NULL) {
-    fprintf(fout,line);
+    fprintf(fout, "%s", line);
     if (line[strlen(line)] != '\n')
       fprintf(fout,"\n");
     DEBUGMSGTL(("read_config","storing: %s\n",line));
     fclose(fout);
   } else {
-    DEBUGMSGTL(("read_config","open failure"));
+    snmp_log(LOG_ERR, "read_config_store open failure on %s", filep);
   }
 #ifdef PERSISTENT_MASK
   umask(oldmask);
@@ -719,22 +813,34 @@ snmp_save_persistent(const char *type)
   int j;
 
   DEBUGMSGTL(("snmp_save_persistent","saving %s files...\n", type));
-  sprintf(file,"%s/%s.conf", PERSISTENT_DIRECTORY, type);
+  snprintf(file, sizeof(file),
+           "%s/%s.conf",get_persistent_directory(),type);
+  file[ sizeof(file)-1 ] = 0;
   if (stat(file, &statbuf) == 0) {
     for(j=0; j <= MAX_PERSISTENT_BACKUPS; j++) {
-      sprintf(fileold,"%s/%s.%d.conf", PERSISTENT_DIRECTORY, type, j);
+      snprintf(fileold, sizeof(fileold),
+               "%s/%s.%d.conf", get_persistent_directory(), type, j);
+      file[ sizeof(file)-1 ] = 0;
       if (stat(fileold, &statbuf) != 0) {
         DEBUGMSGTL(("snmp_save_persistent"," saving old config file: %s -> %s.\n", file, fileold));
         if (rename(file, fileold)) {
-          unlink(file);/* moving it failed, try nuking it, as leaving
-                          it around is very bad. */
+          snmp_log(LOG_ERR, "Cannot rename %s to %s", file, fileold);
+          /*
+           * moving it failed, try nuking it, as leaving
+           * it around is very bad.
+           */
+          if (unlink(file) == -1)
+              snmp_log(LOG_ERR, "Cannot unlink %s", file);
         }
         break;
       }
     }
   }
   /* save a warning header to the top of the new file */
-  sprintf(fileold, "#\n# net-snmp (or ucd-snmp) persistent data file.\n#\n# DO NOT STORE CONFIGURATION ENTRIES HERE.\n# Please save normal configuration tokens for %s in SNMPCONFPATH/%s.conf.\n# Only \"createUser\" tokens should be placed here by %s administrators.\n#\n", type, type, type);
+  snprintf(fileold, sizeof(fileold),
+          "#\n# net-snmp (or ucd-snmp) persistent data file.\n#\n# DO NOT STORE CONFIGURATION ENTRIES HERE.\n# Please save normal configuration tokens for %s in SNMPCONFPATH/%s.conf.\n# Only \"createUser\" tokens should be placed here by %s administrators.\n#\n",
+           type, type, type);
+  fileold[ sizeof(fileold)-1 ] = 0;
   read_config_store(type, fileold);
 }
 
@@ -764,13 +870,18 @@ snmp_clean_persistent(const char *type)
   int j;
 
   DEBUGMSGTL(("snmp_clean_persistent","cleaning %s files...\n", type));
-  sprintf(file,"%s/%s.conf",PERSISTENT_DIRECTORY,type);
+  snprintf(file, sizeof(file),
+           "%s/%s.conf",get_persistent_directory(),type);
+  file[ sizeof(file)-1 ] = 0;
   if (stat(file, &statbuf) == 0) {
     for(j=0; j <= MAX_PERSISTENT_BACKUPS; j++) {
-      sprintf(file,"%s/%s.%d.conf", PERSISTENT_DIRECTORY, type, j);
+      snprintf(file, sizeof(file),
+               "%s/%s.%d.conf", get_persistent_directory(), type, j);
+      file[ sizeof(file)-1 ] = 0;
       if (stat(file, &statbuf) == 0) {
         DEBUGMSGTL(("snmp_clean_persistent"," removing old config file: %s\n", file));
-        unlink(file);
+        if (unlink(file) == -1)
+            snmp_log(LOG_ERR, "Cannot unlink %s", file);
       }
     }
   }
@@ -818,27 +929,41 @@ char *skip_token(char *ptr)
   return (ptr);
 }
 
-/* copy_word
-   copies the next 'token' from 'from' into 'to'.
+/* copy_nword
+   copies the next 'token' from 'from' into 'to', maximum len-1 characters
    currently a token is anything seperate by white space
    or within quotes (double or single) (i.e. "the red rose" 
    is one token, \"the red rose\" is three tokens)
    a '\' character will allow a quote character to be treated
    as a regular character 
    It returns a pointer to first non-white space after the end of the token
-   being copied or to 0 if we reach the end.*/
+   being copied or to 0 if we reach the end/
+   Note: partially copied words (greater than len) still returns a !NULL ptr
+   Note: partially copied words are, however, null terminated
+ */
 
-char *copy_word(char *from, char *to)
+char *copy_nword(char *from, char *to, int len)
 {
   char quote;
   if ( (*from == '\"') || (*from =='\'') ){
     quote = *(from++);
     while ( (*from != quote) && (*from != 0) ) {
       if ((*from == '\\') && (*(from+1) != 0)) {
-	*to++ = *(from+1);
+        if ( len > 0 ) { /* don't copy beyond len bytes */
+	  *to++ = *(from+1);
+          if ( --len == 0 )
+	    *(to-1) = '\0';  /* null protect the last spot */
+	}
 	from = from +2;
+      } else {
+        if ( len > 0 ) { /* don't copy beyond len bytes */
+	  *to++ = *from++;
+          if ( --len == 0 )
+	    *(to-1) = '\0';  /* null protect the last spot */
+	}
+        else
+            from++;
       }
-      else  *to++ = *from++;
     }
     if (*from == 0) {
       DEBUGMSGTL(("read_config_copy_word",
@@ -848,16 +973,40 @@ char *copy_word(char *from, char *to)
   else {
     while (*from != 0 && !isspace(*from)) {
       if ((*from == '\\') && (*(from+1) != 0)) {
-	*to++ = *(from+1);
+        if ( len > 0 ) { /* don't copy beyond len bytes */
+	  *to++ = *(from+1);
+          if ( --len == 0 )
+	    *(to-1) = '\0';  /* null protect the last spot */
+	}
 	from = from +2;
+      } else {
+        if ( len > 0 ) { /* don't copy beyond len bytes */
+	  *to++ = *from++;
+          if ( --len == 0 )
+	    *(to-1) = '\0';  /* null protect the last spot */
+	}
+        else
+            from++;
       }
-      else  *to++ = *from++;
     }
   }
-  *to = 0;
+  if ( len > 0)
+      *to = 0;
   from = skip_white(from);
   return(from);
-}  /* copy_word */
+}  /* copy_nword */
+
+
+static int have_warned = 0;
+char *copy_word(char *from, char *to)
+{
+  if (!have_warned) {
+    snmp_log(LOG_INFO, "copy_word() called.  Use copy_nword() instead.\n");
+    have_warned = 1;
+  }
+  return copy_nword(from, to, SPRINT_MAX_LEN);
+}
+
 
 /* read_config_save_octet_string(): saves an octet string as a length
    followed by a string of hex */
@@ -870,8 +1019,11 @@ char *read_config_save_octet_string(char *saveto, u_char *str, size_t len) {
           (isalpha(*cp) || isdigit(*cp) || *cp == ' '); cp++, i++);
 
   if (len != 0 && i == (int)len) {
-      sprintf(saveto, "\"%s\"", str);
-      saveto += strlen(saveto);
+      *saveto++ = '"';
+      memcpy(saveto, str, len);
+      saveto += len;
+      *saveto++ = '"';
+      *saveto = '\0';
   } else {
       if (str != NULL) {
           sprintf(saveto, "0x");
@@ -942,16 +1094,16 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
     /* malloc string space if needed (including NULL terminator) */
     if (*str == NULL) {
       char buf[SNMP_MAXBUF];
-      readfrom = copy_word(readfrom, buf);
+      readfrom = copy_nword(readfrom, buf, sizeof(buf));
 
       *len = strlen(buf);
-      if (*len > 0 && ((cptr = (u_char *) malloc(*len + 1)) == NULL))
+      if ((cptr = (u_char *) malloc(*len + 1)) == NULL)
         return NULL;
       *str = cptr;
       if (cptr)
         memcpy(cptr, buf, (*len+1));
     } else {
-      readfrom = copy_word(readfrom, (char *)*str);
+      readfrom = copy_nword(readfrom, (char *)*str, *len);
     }
   }
 
@@ -996,7 +1148,7 @@ char *read_config_read_objid(char *readfrom, oid **objid, size_t *len) {
   } else {
       /* qualify the string for read_objid */
       char buf[SPRINT_MAX_LEN];
-      copy_word(readfrom, buf);
+      copy_nword(readfrom, buf, sizeof(buf));
 
       if (!read_objid(buf, *objid, len)) {
         DEBUGMSGTL(("read_config_read_objid","Invalid OID"));

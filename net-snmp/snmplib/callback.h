@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 #define MAX_CALLBACK_IDS    2
-#define MAX_CALLBACK_SUBIDS 8
+#define MAX_CALLBACK_SUBIDS 16
 
 /* Callback Major Types */
 #define SNMP_CALLBACK_LIBRARY     0
@@ -35,6 +35,9 @@ void init_callbacks(void);
 int snmp_register_callback(int major, int minor, SNMPCallback *new_callback,
                            void *arg);
 int snmp_call_callbacks(int major, int minor, void *caller_arg);
+int snmp_callback_available(int major, int minor); /* is >1 available */
+int snmp_count_callbacks(int major, int minor); /* ret the number registered */
+    
 
 #ifdef __cplusplus
 }

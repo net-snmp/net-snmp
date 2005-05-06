@@ -44,7 +44,7 @@
 #include "callback.h"
 #include "snmp_alarm.h"
 
-static struct snmp_alarm *thealarms;
+static struct snmp_alarm *thealarms = NULL;
 static int start_alarms = 0;
 static unsigned int regnum = 1;
 
@@ -85,7 +85,8 @@ sa_update_entry(struct snmp_alarm *alrm) {
 }
 
 void
-snmp_alarm_unregister(unsigned int clientreg) {
+snmp_alarm_unregister(unsigned int clientreg)
+{
   struct snmp_alarm *sa_ptr, **prevNext = &thealarms;
 
   for (sa_ptr = thealarms;
@@ -103,7 +104,19 @@ snmp_alarm_unregister(unsigned int clientreg) {
     DEBUGMSGTL(("snmp_alarm_unregister","alarm %d doesn't exist\n",clientreg));
   }
 }
-  
+
+void
+snmp_alarm_unregister_all(void)
+{
+  struct snmp_alarm *sa_ptr, *sa_tmp;
+
+  for (sa_ptr = thealarms; sa_ptr != NULL; sa_ptr = sa_tmp) {
+    sa_tmp = sa_ptr->next;
+    free(sa_ptr);
+  }
+  DEBUGMSGTL(("snmp_alarm", "ALL alarms unregistered\n"));
+  thealarms = NULL;
+}  
 
 struct snmp_alarm *
 sa_find_next(void) {
@@ -135,7 +148,6 @@ run_alarms(void) {
 
   /* loop through everything we have repeatedly looking for the next
      thing to call until all events are finally in the future again */
-  DEBUGMSGTL(("snmp_alarm_run_alarms","looking for alarms to run...\n"));
   while(done == 0) {
     sa_ptr = sa_find_next();
     if (sa_ptr == NULL)
@@ -156,7 +168,6 @@ run_alarms(void) {
       done = 1;
     }
   }
-  DEBUGMSGTL(("snmp_alarm_run_alarms","Done.\n"));
 }
 
 
@@ -189,14 +200,11 @@ set_an_alarm(void) {
      expected they'll check the next alarm time and do their own
      calling of run_alarms(). */
   if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG) && nexttime) {
-#ifndef WIN32
 #ifdef SIGALRM
     alarm(nexttime);
     DEBUGMSGTL(("snmp_alarm_set_an_alarm","setting an alarm for %d seconds from now\n",nexttime));
     signal(SIGALRM, alarm_handler);
 #endif /* SIGALRM */
-#endif
-
   } else {
     DEBUGMSGTL(("snmp_alarm_set_an_alarm","no alarms found to handle\n"));
   }

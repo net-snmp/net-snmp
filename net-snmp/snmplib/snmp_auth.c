@@ -116,7 +116,7 @@ snmp_comstr_parse(u_char *data,
 {
     u_char   	type;
     long	ver;
-
+    size_t origlen = *slen;
 
     /* Message is an ASN.1 SEQUENCE.
      */
@@ -145,7 +145,7 @@ snmp_comstr_parse(u_char *data,
         ERROR_MSG("bad parse of community");
         return NULL;
     }
-    psid[*slen] = '\0';
+    psid[SNMP_MIN(*slen,origlen-1)] = '\0';
     return (u_char *)data;
 
 }  /* end snmp_comstr_parse() */
