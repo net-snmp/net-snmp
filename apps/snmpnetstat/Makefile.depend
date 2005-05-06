@@ -5,7 +5,7 @@
 ./if.lo: ../../include/net-snmp/system/sysv.h
 ./if.lo: ../../include/net-snmp/system/generic.h
 ./if.lo: ../../include/net-snmp/machine/generic.h 
-./if.lo:   main.h
+./if.lo:  main.h
 ./if.lo: ../../include/net-snmp/net-snmp-includes.h
 ./if.lo: ../../include/net-snmp/definitions.h ../../include/net-snmp/types.h
 ./if.lo: ../../include/net-snmp/library/snmp_api.h
@@ -15,7 +15,6 @@
 ./if.lo: ../../include/net-snmp/library/snmp-tc.h
 ./if.lo: ../../include/net-snmp/utilities.h
 ./if.lo: ../../include/net-snmp/library/snmp_client.h
-./if.lo: ../../include/net-snmp/library/getopt.h
 ./if.lo: ../../include/net-snmp/library/system.h
 ./if.lo: ../../include/net-snmp/library/tools.h
 ./if.lo: ../../include/net-snmp/library/int64.h
@@ -79,7 +78,6 @@
 ./inet.lo: ../../include/net-snmp/library/snmp-tc.h
 ./inet.lo: ../../include/net-snmp/utilities.h
 ./inet.lo: ../../include/net-snmp/library/snmp_client.h
-./inet.lo: ../../include/net-snmp/library/getopt.h
 ./inet.lo: ../../include/net-snmp/library/system.h
 ./inet.lo: ../../include/net-snmp/library/tools.h
 ./inet.lo: ../../include/net-snmp/library/int64.h
@@ -135,7 +133,6 @@
 ./main.lo: ../../include/net-snmp/library/snmp.h
 ./main.lo: ../../include/net-snmp/library/snmp-tc.h
 ./main.lo: ../../include/net-snmp/library/snmp_client.h
-./main.lo: ../../include/net-snmp/library/getopt.h
 ./main.lo: ../../include/net-snmp/library/system.h
 ./main.lo: ../../include/net-snmp/library/tools.h
 ./main.lo: ../../include/net-snmp/library/int64.h
@@ -195,7 +192,6 @@
 ./route.lo: ../../include/net-snmp/library/snmp-tc.h
 ./route.lo: ../../include/net-snmp/utilities.h
 ./route.lo: ../../include/net-snmp/library/snmp_client.h
-./route.lo: ../../include/net-snmp/library/getopt.h
 ./route.lo: ../../include/net-snmp/library/system.h
 ./route.lo: ../../include/net-snmp/library/tools.h
 ./route.lo: ../../include/net-snmp/library/int64.h
