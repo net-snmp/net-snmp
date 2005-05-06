@@ -2,6 +2,14 @@ This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *4.2.6*
+ Assorted bug fixes - mostly back-ported from the v5 code
+    - plug various memory leaks
+    - more robust on error situations
+    - improve 64-bit support (though v5 line is better still)
+    - Many other misc fixes.
+ Generally tidying up before this line is finally closed down.
+
+*4.2.6*
  Big fixes:
     - Fixes to the Tunnel mib.
     - Deprecated the non-raw objects in the system stats MIB portion.

@@ -1,4 +1,4 @@
-		      ucd-snmp Version: 4.2.6
+		      ucd-snmp Version: 4.2.7
 
 		     ******************************
 		     ***  IMPORTANT:  SECURITY  ***
@@ -11,7 +11,7 @@
   probably in the process of doing just that.
 
                       ****************************
-                      ***       IMPORTANT      ***
+                      ***    END OF v4 LINE    ***
                       ****************************
 
   The ucd-snmp project has now moved from UCDavis, and is now based
@@ -20,12 +20,19 @@
   4.2.1 and any subsequent ucd-snmp releases will be bug-fixes only.
   All further developments will be released under the net-snmp name.
 
-  The 4.2.5 release is intended as a 'bug-fix' update to the earlier 4.2.4
-  code, and there are no significant changes to the APIs in this release.
+  The 4.2.7 release is intended as a consolidated 'bug-fix' update
+  to the previous 4.2.6 version.  Active development has been
+  concentrating on the v5 'net-snmp' releases for some time, and
+  although some fixes have been applied to the v4 line, there are many
+  new features and bug fixes that are only available in v5 releases.
+  There are no significant changes to the APIs in this release.
 
-  The very first net-snmp release (5.0) has been made which
-  incorporates many new features not available in the ucd-snmp code
-  base, so you might consider checking it out instead.
+  This marks the end of development of the ucd-snmp v4 code. The
+  intention is that (barring major problems), this will be the last
+  release made under the 'ucd-snmp' banner.  All future development
+  will be applied to v5 lines only, and there will be no further
+  work on the v4 code.  Anyone still using this line is *strongly*
+  encouraged to upgrade as soon as possible.
 
 DISCLAIMER
 
