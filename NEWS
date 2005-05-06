@@ -2,9 +2,19 @@ This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.0.10*
+ Fixes:
+   - Many.  This is a final release of the 5.0.X line of the Net-SNMP
+     code base and we've accumulated a large number of fixes in this
+     branch.  5.0.10 will be the last release from this line.
+
  Ports:
+
    Win32:
      - Cygwin compiler fixes
+
+   Sun:
+     - Many improvements and fixes supplied by Sun as they changed
+       their SNMP agent from their's to ours for their Solaris X release.
 
 
 *5.0.9*
