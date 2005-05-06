@@ -2464,13 +2464,16 @@ AC_CHECK_HEADERS(ufs/ufs/dinode.h ufs/ufs/quota.h ufs/ufs/inode.h ufs/ffs/fs.h,,
 #endif
 ]])
 # FreeBSD required headers
-AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h sys/queue.h osreldate.h machine/types.h sys/socketvar.h sys/user.h sys/proc.h sys/mbuf.h sys/mount.h,,,
+AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h sys/queue.h osreldate.h machine/types.h sys/socketvar.h sys/user.h sys/proc.h sys/mbuf.h sys/mount.h vm/vm.h vm/swap_pager.h,,,
 [[
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
+#if HAVE_VM_VM_H
+#include <vm/vm.h>
 #endif
 ]])
 # Linux
