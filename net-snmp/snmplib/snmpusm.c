@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 /*
  * snmpusm.c
  *
@@ -56,6 +66,7 @@
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/callback.h>
+#include <net-snmp/library/tools.h>
 #include <net-snmp/library/keytools.h>
 #include <net-snmp/library/snmpv3.h>
 #include <net-snmp/library/lcd_time.h>
@@ -71,7 +82,7 @@ oid             usmHMACSHA1AuthProtocol[10] =
     { 1, 3, 6, 1, 6, 3, 10, 1, 1, 3 };
 oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
 oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
-oid             usmAES128PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,128 };
+oid             usmAES128PrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 4 };
 oid             usmAES192PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,192 };
 oid             usmAES256PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,256 };
 
@@ -1919,6 +1930,9 @@ usm_parse_security_parameters(u_char * secParams,
 
     *time_uint = (u_int) time_long;
 
+    if (*boots_uint > ENGINEBOOT_MAX || *time_uint > ENGINETIME_MAX) {
+        return -1;
+    }
 
     /*
      * Retrieve the secName.
@@ -2324,6 +2338,19 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         return SNMPERR_USM_PARSEERROR;
     }
 
+    /*
+     * RFC 2574 section 8.3.2
+     * 1)  If the privParameters field is not an 8-octet OCTET STRING,
+     * then an error indication (decryptionError) is returned to the
+     * calling module.
+     */
+    if ((secLevel == SNMP_SEC_LEVEL_AUTHPRIV) && (salt_length != 8)) {
+        if (snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS) == 
+            0) {
+            DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
+        }
+        return SNMPERR_USM_DECRYPTIONERROR;
+    }
 
     if (secLevel != SNMP_SEC_LEVEL_AUTHPRIV) {
         /*
@@ -2432,6 +2459,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                 DEBUGMSGTL(("usm", "%s\n",
                             "Failed to increment statistic."));
             }
+	    snmp_log(LOG_WARNING, "Authentication failed for %s\n",
+				user->name);
             return SNMPERR_USM_AUTHENTICATIONFAILURE;
         }
 
@@ -2690,8 +2719,10 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
                                          usmDESPrivProtocol,
                                          USM_LENGTH_OID_TRANSFORM);
 
-    SNMP_FREE(noNameUser->engineID);
-    noNameUser->engineIDLen = 0;
+    if ( noNameUser ) {
+        SNMP_FREE(noNameUser->engineID);
+        noNameUser->engineIDLen = 0;
+    }
 
     return SNMPERR_SUCCESS;
 }                               /* end init_usm_post_config() */
@@ -2878,7 +2909,7 @@ usm_add_user(struct usmUser *user)
 struct usmUser *
 usm_add_user_to_list(struct usmUser *user, struct usmUser *puserList)
 {
-    struct usmUser *nptr, *pptr;
+    struct usmUser *nptr, *pptr, *optr;
 
     /*
      * loop through puserList till we find the proper, sorted place to
@@ -2919,11 +2950,26 @@ usm_add_user_to_list(struct usmUser *user, struct usmUser *puserList)
                  memcmp(nptr->engineID, user->engineID,
                         user->engineIDLen) == 0)
                 && strlen(nptr->name) == strlen(user->name)
-                && strcmp(nptr->name, user->name) == 0)
+                && strcmp(nptr->name, user->name) == 0) {
                 /*
-                 * the user is an exact match of a previous entry.  Bail 
+                 * the user is an exact match of a previous entry.
+                 * Credentials may be different, though, so remove
+                 * the old entry (and add the new one)!
                  */
-                return NULL;
+                if (pptr) { /* change prev's next pointer */
+                  pptr->next = nptr->next;
+                }
+                if (nptr->next) { /* change next's prev pointer */
+                  nptr->next->prev = pptr;
+                } 
+                optr = nptr;
+                nptr = optr->next; /* add new user at this position */
+                /* free the old user */
+                optr->next=NULL;
+                optr->prev=NULL;
+                usm_free_user(optr); 
+                break; /* new user will be added below */
+            }
         }
     }
 
@@ -3000,7 +3046,7 @@ usm_remove_user_from_list(struct usmUser *user,
         }
     } else {
         /*
-         * user didn't exit 
+         * user didn't exist 
          */
         return NULL;
     }

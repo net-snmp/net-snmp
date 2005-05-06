@@ -3,6 +3,17 @@
  *
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && !defined(IFNET_NEEDS_KERNEL_LATE)
@@ -491,7 +502,8 @@ Interface_Scan_By_Index(int iindex,
     struct if_msghdr *ifp;
     int             have_ifinfo = 0, have_addr = 0;
 
-    memset(sifa, 0, sizeof(*sifa));
+    if (NULL != sifa)
+        memset(sifa, 0, sizeof(*sifa));
     for (cp = if_list; cp < if_list_end; cp += ifp->ifm_msglen) {
         ifp = (struct if_msghdr *) cp;
         DEBUGMSGTL(("mibII/interfaces", "ifm_type = %d, ifm_index = %d\n",
@@ -519,7 +531,7 @@ Interface_Scan_By_Index(int iindex,
             {
                 struct ifa_msghdr *ifap = (struct ifa_msghdr *) cp;
 
-                if (ifap->ifam_index == iindex) {
+                if ((NULL != sifa) && (ifap->ifam_index == iindex)) {
                     const struct in_addr *ia;
 
                     /*
@@ -557,7 +569,7 @@ Interface_Scan_By_Index(int iindex,
                         ifp->ifm_type));
         }
     }
-    if (have_ifinfo && have_addr) {
+    if (have_ifinfo && (NULL == sifa) || (have_addr)) {
         return 0;
     } else if (have_ifinfo && !(if_msg->ifm_flags & IFF_UP))
         return 0;
@@ -629,7 +641,7 @@ var_ifEntry(struct variable *vp,
     int             interface;
     struct if_msghdr if_msg;
     static char     if_name[100];
-    struct small_ifaddr sifa;
+    conf_if_list   *if_ptr = conf_list;;
     char           *cp;
 
     interface =
@@ -637,8 +649,10 @@ var_ifEntry(struct variable *vp,
     if (interface == MATCH_FAILED)
         return NULL;
 
-    if (Interface_Scan_By_Index(interface, &if_msg, if_name, &sifa) != 0)
+    if (Interface_Scan_By_Index(interface, &if_msg, if_name, NULL) != 0)
         return NULL;
+    while (if_ptr && strcmp(Name, if_ptr->name))
+        if_ptr = if_ptr->next;
 
     switch (vp->magic) {
     case IFINDEX:
@@ -649,18 +663,25 @@ var_ifEntry(struct variable *vp,
         *var_len = strlen(if_name);
         return (u_char *) cp;
     case IFTYPE:
+        if (if_ptr)
+            long_return = if_ptr->type;
+        else
         long_return = (long) if_msg.ifm_data.ifi_type;
         return (u_char *) & long_return;
     case IFMTU:
         long_return = (long) if_msg.ifm_data.ifi_mtu;
         return (u_char *) & long_return;
     case IFSPEED:
+        if (if_ptr)
+            long_return = if_ptr->speed;
+        else {
 #if STRUCT_IFNET_HAS_IF_BAUDRATE_IFS_VALUE
         long_return = (u_long) if_msg.ifm_data.ifi_baudrate.ifs_value <<
             if_msg.ifm_data.ifi_baudrate.ifs_log2;
 #else
         long_return = (u_long) if_msg.ifm_data.ifi_baudrate;
 #endif
+        }
         return (u_char *) & long_return;
     case IFPHYSADDRESS:
         /*
@@ -1033,7 +1054,7 @@ var_ifEntry(struct variable *vp,
     int             hp_fd;
     int             hp_len = sizeof(hp_ifEntry);
 #endif
-
+    conf_if_list   *if_ptr = conf_list;;
 
     interface =
         header_ifEntry(vp, name, length, exact, var_len, write_method);
@@ -1064,6 +1085,8 @@ var_ifEntry(struct variable *vp,
         }
     }
 #endif
+    while (if_ptr && strcmp(Name, if_ptr->name))
+        if_ptr = if_ptr->next;
 
     switch (vp->magic) {
     case IFINDEX:
@@ -1081,6 +1104,9 @@ var_ifEntry(struct variable *vp,
         *var_len = strlen(cp);
         return (u_char *) cp;
     case IFTYPE:
+        if (if_ptr)
+            long_return = if_ptr->type;
+        else {
 #if defined(hpux11)
         long_return = ifnet.if_entry.ifType;
 #else
@@ -1089,6 +1115,7 @@ var_ifEntry(struct variable *vp,
         else
             long_return = 1;    /* OTHER */
 #endif
+        }
         return (u_char *) & long_return;
     case IFMTU:{
 #if defined(hpux11)
@@ -1099,6 +1126,9 @@ var_ifEntry(struct variable *vp,
             return (u_char *) & long_return;
         }
     case IFSPEED:
+        if (if_ptr)
+            long_return = if_ptr->speed;
+        else {
 #if defined(hpux11)
         long_return = ifnet.if_entry.ifSpeed;
 #else
@@ -1107,6 +1137,7 @@ var_ifEntry(struct variable *vp,
         else
             long_return = (u_long) 1;   /* OTHER */
 #endif
+        }
         return (u_char *) & long_return;
     case IFPHYSADDRESS:
 #if defined(hpux11)
@@ -1287,7 +1318,7 @@ var_ifEntry(struct variable * vp,
 {
     int             interface;
     mib2_ifEntry_t  ifstat;
-
+    conf_if_list   *if_ptr = conf_list;
 
     interface =
         header_ifEntry(vp, name, length, exact, var_len, write_method);
@@ -1299,6 +1330,9 @@ var_ifEntry(struct variable * vp,
         DEBUGMSGTL(("mibII/interfaces", "... no mib stats\n"));
         return NULL;
     }
+    while (if_ptr && strcmp(Name, if_ptr->name))
+        if_ptr = if_ptr->next;
+
     switch (vp->magic) {
     case IFINDEX:
         long_return = ifstat.ifIndex;
@@ -1308,12 +1342,18 @@ var_ifEntry(struct variable * vp,
         (void) memcpy(return_buf, ifstat.ifDescr.o_bytes, *var_len);
         return (u_char *) return_buf;
     case IFTYPE:
+        if (if_ptr)
+            long_return = if_ptr->type;
+        else
         long_return = (u_long) ifstat.ifType;
         return (u_char *) & long_return;
     case IFMTU:
         long_return = (u_long) ifstat.ifMtu;
         return (u_char *) & long_return;
     case IFSPEED:
+        if (if_ptr)
+            long_return = if_ptr->speed;
+        else
         long_return = (u_long) ifstat.ifSpeed;
         return (u_char *) & long_return;
     case IFPHYSADDRESS:
@@ -1365,6 +1405,9 @@ var_ifEntry(struct variable * vp,
     case IFOUTQLEN:
         long_return = (u_long) ifstat.ifOutQLen;
         return (u_char *) & long_return;
+    case IFSPECIFIC:
+	long_return = (u_long) ifstat.ifSpecific;
+	return (u_char *) & long_return;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ifEntry\n",
                     vp->magic));
@@ -1394,6 +1437,95 @@ static char     saveName[16];
 #endif
 static int      saveIndex = 0;
 
+/**
+* Determines network interface speed. It is system specific. Only linux
+* realization is made. 
+*/
+unsigned int getIfSpeed(int fd, struct ifreq ifr){
+	unsigned int retspeed = 10000000;
+#ifdef linux
+/* the code is based on mii-diag utility by Donald Becker
+* see ftp://ftp.scyld.com/pub/diag/mii-diag.c
+*/
+	ushort *data = (ushort *)(&ifr.ifr_data);
+	unsigned phy_id;
+	unsigned char new_ioctl_nums = 0;
+	int mii_reg, i;
+	ushort mii_val[32];
+	ushort bmcr, bmsr, nway_advert, lkpar;
+	const unsigned int media_speeds[] = {10000000, 10000000, 100000000, 100000000, 10000000, 0};	
+/* It corresponds to "10baseT", "10baseT-FD", "100baseTx", "100baseTx-FD", "100baseT4", "Flow-control", 0, */
+
+
+	data[0] = 0;
+
+	if (ioctl(fd, 0x8947, &ifr) >= 0) {
+		new_ioctl_nums = 1;
+	} else if (ioctl(fd, SIOCDEVPRIVATE, &ifr) >= 0) {
+		new_ioctl_nums = 0;
+	} else {
+		DEBUGMSGTL(("mibII/interfaces", "SIOCGMIIPHY on %s failed\n", ifr.ifr_name));
+		return retspeed;
+	}
+/* Begin getting mii register values */
+	phy_id = data[0];
+	for (mii_reg = 0; mii_reg < 8; mii_reg++){
+		data[0] = phy_id;
+		data[1] = mii_reg;
+		if(ioctl(fd, new_ioctl_nums ? 0x8948 : SIOCDEVPRIVATE+1, &ifr) <0){
+			DEBUGMSGTL(("mibII/interfaces", "SIOCGMIIREG on %s failed\n", ifr.ifr_name));
+		}
+		mii_val[mii_reg] = data[3];		
+	}
+/*Parsing of mii values*/
+/*Invalid basic mode control register*/
+	if (mii_val[0] == 0xffff  ||  mii_val[1] == 0x0000) {
+		DEBUGMSGTL(("mibII/interfaces", "No MII transceiver present!.\n"));
+		return retspeed;
+	}
+	/* Descriptive rename. */
+	bmcr = mii_val[0]; 	  /*basic mode control register*/
+	bmsr = mii_val[1]; 	  /* basic mode status register*/
+	nway_advert = mii_val[4]; /* autonegotiation advertisement*/
+	lkpar = mii_val[5]; 	  /*link partner ability*/
+	
+/*Check for link existence, returns 0 if link is absent*/
+	if ((bmsr & 0x0016) != 0x0004){
+		DEBUGMSGTL(("mibII/interfaces", "No link...\n"));
+		retspeed = 0;
+		return retspeed;
+	}
+	
+	if(!(bmcr & 0x1000) ){
+		DEBUGMSGTL(("mibII/interfaces", "Auto-negotiation disabled.\n"));
+		retspeed = bmcr & 0x2000 ? 100000000 : 10000000;
+		return retspeed;
+	}
+/* Link partner got our advertised abilities */	
+	if (lkpar & 0x4000) {
+		int negotiated = nway_advert & lkpar & 0x3e0;
+		int max_capability = 0;
+		/* Scan for the highest negotiated capability, highest priority
+		   (100baseTx-FDX) to lowest (10baseT-HDX). */
+		int media_priority[] = {8, 9, 7, 6, 5}; 	/* media_names[i-5] */
+		for (i = 0; media_priority[i]; i++){
+			if (negotiated & (1 << media_priority[i])) {
+				max_capability = media_priority[i];
+				break;
+			}
+		}
+		if (max_capability)
+			retspeed = media_speeds[max_capability - 5];
+		else
+			DEBUGMSGTL(("mibII/interfaces", "No common media type was autonegotiated!\n"));
+	}
+	return retspeed;
+#else /*!linux*/			   
+	return retspeed;
+#endif 
+}
+
+
 void
 Interface_Scan_Init(void)
 {
@@ -1402,14 +1534,28 @@ Interface_Scan_Init(void)
     struct ifreq    ifrq;
     struct ifnet  **ifnetaddr_ptr;
     FILE           *devin;
-    unsigned long   rec_pkt, rec_oct, rec_err, rec_drop;
-    unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
     int             i, fd;
     conf_if_list   *if_ptr;
+#ifdef SCNuMAX
+    uintmax_t       rec_pkt, rec_oct, rec_err, rec_drop;
+    uintmax_t       snd_pkt, snd_oct, snd_err, snd_drop, coll;
+    const char     *scan_line_2_2 =
+        "%"   SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
+        " %*" SCNuMAX " %*" SCNuMAX " %*" SCNuMAX " %*" SCNuMAX
+        " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
+        " %*" SCNuMAX " %"  SCNuMAX;
+    const char     *scan_line_2_0 =
+        "%"   SCNuMAX " %"  SCNuMAX " %*" SCNuMAX " %*" SCNuMAX
+        " %*" SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %*" SCNuMAX
+        " %*" SCNuMAX " %"  SCNuMAX;
+#else
+    unsigned long   rec_pkt, rec_oct, rec_err, rec_drop;
+    unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
     const char     *scan_line_2_2 =
         "%lu %lu %lu %lu %*lu %*lu %*lu %*lu %lu %lu %lu %lu %*lu %lu";
     const char     *scan_line_2_0 =
         "%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
+#endif
     const char     *scan_line_to_use;
 
 #endif
@@ -1679,9 +1825,13 @@ Interface_Scan_Init(void)
              */
             if (!nnew->if_type)
                 nnew->if_type = if_type_from_name(nnew->if_name);
-            nnew->if_speed = nnew->if_type == 6 ? 10000000 :
+            nnew->if_speed = nnew->if_type == 6 ? getIfSpeed(fd, ifrq) :
                 nnew->if_type == 24 ? 10000000 :
                 nnew->if_type == 9 ? 4000000 : 0;
+            /*Zero speed means link problem*/
+            if(nnew->if_speed == 0 && nnew->if_flags & IFF_UP){
+                nnew->if_flags &= ~IFF_RUNNING;
+            }
         }
 
     }                           /* while (fgets ... */
@@ -1863,9 +2013,10 @@ Interface_Scan_Next(short *Index,
              *  Try to find an address for this interface
              */
 
-            auto_nlist(IFADDR_SYMBOL, (char *) &ia, sizeof(ia));
 #ifdef netbsd1
             ia = (struct in_ifaddr *) ifnet.if_addrlist.tqh_first;
+#else
+            auto_nlist(IFADDR_SYMBOL, (char *) &ia, sizeof(ia));
 #endif
             while (ia) {
                 klookup((unsigned long) ia, (char *) &in_ifaddr,
@@ -2381,6 +2532,7 @@ var_ifEntry(struct variable * vp,
     static struct ifmibdata ifmd;
     size_t          len;
     char           *cp;
+    conf_if_list   *if_ptr = conf_list;;
 
     interface = header_ifEntry(vp, name, length, exact, var_len,
                                write_method);
@@ -2391,6 +2543,8 @@ var_ifEntry(struct variable * vp,
     len = sizeof ifmd;
     if (sysctl(sname, 6, &ifmd, &len, 0, 0) < 0)
         return NULL;
+    while (if_ptr && strcmp(Name, if_ptr->name))
+        if_ptr = if_ptr->next;
 
     switch (vp->magic) {
     case IFINDEX:
@@ -2401,12 +2555,18 @@ var_ifEntry(struct variable * vp,
         *var_len = strlen(cp);
         return (u_char *) cp;
     case IFTYPE:
+        if (if_ptr)
+            long_return = if_ptr->type;
+        else
         long_return = ifmd.ifmd_data.ifi_type;
         return (u_char *) & long_return;
     case IFMTU:
         long_return = (long) ifmd.ifmd_data.ifi_mtu;
         return (u_char *) & long_return;
     case IFSPEED:
+        if (if_ptr)
+            long_return = if_ptr->speed;
+        else
         long_return = ifmd.ifmd_data.ifi_baudrate;
         return (u_char *) & long_return;
     case IFPHYSADDRESS:
@@ -2599,9 +2759,8 @@ var_ifEntry(struct variable * vp,
             int exact, size_t * var_len, WriteMethod ** write_method)
 {
     int             ifIndex;
-    static char     Name[16];
-    conf_if_list   *if_ptr = conf_list;
     static MIB_IFROW ifRow;
+    conf_if_list   *if_ptr = conf_list;;
 
     ifIndex =
         header_ifEntry(vp, name, length, exact, var_len, write_method);
@@ -2614,6 +2773,9 @@ var_ifEntry(struct variable * vp,
     ifRow.dwIndex = ifIndex;
     if (GetIfEntry(&ifRow) != NO_ERROR)
         return NULL;
+    while (if_ptr && strcmp(Name, if_ptr->name))
+        if_ptr = if_ptr->next;
+
     switch (vp->magic) {
     case IFINDEX:
         long_return = ifIndex;
@@ -2622,12 +2784,18 @@ var_ifEntry(struct variable * vp,
         *var_len = ifRow.dwDescrLen;
         return (u_char *) ifRow.bDescr;
     case IFTYPE:
+        if (if_ptr)
+            long_return = if_ptr->type;
+        else
         long_return = ifRow.dwType;
         return (u_char *) & long_return;
     case IFMTU:
         long_return = (long) ifRow.dwMtu;
         return (u_char *) & long_return;
     case IFSPEED:
+        if (if_ptr)
+            long_return = if_ptr->speed;
+        else
         long_return = (long) ifRow.dwSpeed;
         return (u_char *) & long_return;
     case IFPHYSADDRESS:

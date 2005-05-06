@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
@@ -466,7 +477,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
     char           *cp = NULL;
     const char     *strmask = NULL;
     com2SecEntry   *e = NULL;
-    unsigned long   network = 0, mask = 0;
+    in_addr_t   network = 0, mask = 0;
 
     /*
      * Get security, source address/netmask and community strings.  
@@ -531,7 +542,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
          */
         network = inet_addr(source);
 
-        if (network == (unsigned long) -1) {
+        if (network == (in_addr_t) -1) {
             /*
              * Nope, wasn't a dotted quad.  Must be a hostname.  
              */
@@ -545,7 +556,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
                     config_perror("no IP address for source hostname");
                     return;
                 }
-                network = *((unsigned long *) hp->h_addr);
+                network = *((in_addr_t *) hp->h_addr);
             }
 #else                           /*HAVE_GETHOSTBYNAME */
             /*
@@ -572,7 +583,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
              * Try to interpret mask as a dotted quad.  
              */
             mask = inet_addr(strmask);
-            if (mask == (unsigned long) -1 &&
+            if (mask == (in_addr_t) -1 &&
                 strncmp(strmask, "255.255.255.255", 15) != 0) {
                 config_perror("bad mask");
                 return;

@@ -155,7 +155,7 @@ netsnmp_container_add_index(netsnmp_container *primary,
     primary->next = new_index;
 }
 
-#ifdef DONT_INLINE_CONTAINER_MACROS /* default is to inline */
+#ifdef NETSNMP_NO_INLINE /* default is to inline */
 
 /*------------------------------------------------------------------
  * These functions should EXACTLY match the inline version in
@@ -171,8 +171,8 @@ int CONTAINER_INSERT(netsnmp_container *x, const void *k)
         int                rc2;
         while(tmp) {
             rc2 = tmp->insert(tmp,k);
-            if (rc)
-                snmp_log(LOG_ERR,"error on subcontainer remove (%d)", rc2);
+            if (rc2)
+                snmp_log(LOG_ERR,"error on subcontainer insert (%d)\n", rc2);
             tmp = tmp->next;
         }
     }
@@ -193,7 +193,7 @@ int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
         while(tmp) {
             rc = tmp->remove(tmp,k);
             if (rc)
-                snmp_log(LOG_ERR,"error on subcontainer remove (%d)", rc);
+                snmp_log(LOG_ERR,"error on subcontainer remove (%d)\n", rc);
             tmp = tmp->prev;
         }
     }
@@ -206,17 +206,17 @@ int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
  */
 int CONTAINER_FREE(netsnmp_container *x)
 {
-
     if (NULL != x->next) {
-        netsnmp_container *tmp = x->next;
+        netsnmp_container *prev, *tmp = x->next;
         int                rc;
         while(tmp->next)
             tmp = tmp->next;
         while(tmp) {
+            prev = tmp->prev;
             rc = tmp->cfree(tmp);
             if (rc)
-                snmp_log(LOG_ERR,"error on subcontainer free (%d)", rc);
-            tmp = tmp->prev;
+                snmp_log(LOG_ERR,"error on subcontainer free (%d)\n", rc);
+            tmp = prev;
         }
     }
     return x->cfree(x);
@@ -313,3 +313,19 @@ netsnmp_ncompare_cstring(const void * lhs, const void * rhs)
                    strlen(((const container_type*)rhs)->name));
 }
 
+int
+netsnmp_compare_mem(const char * lhs, size_t lhs_len,
+                    const char * rhs, size_t rhs_len)
+{
+    int rc, min = SNMP_MIN(lhs_len, rhs_len);
+
+    rc = memcmp(lhs, rhs, min);
+    if((rc==0) && (lhs_len != rhs_len)) {
+        if(lhs_len < rhs_len)
+            rc = -1;
+        else
+            rc = 1;
+    }
+
+    return rc;
+}

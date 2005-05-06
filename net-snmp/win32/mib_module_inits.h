@@ -35,7 +35,9 @@
   if (should_init("target_counters")) init_target_counters();
   if (should_init("nsTransactionTable")) init_nsTransactionTable();
   if (should_init("nsModuleTable")) init_nsModuleTable();
-  /* if (should_init("subagent")) init_subagent(); */
+#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
+  if (should_init("subagent")) init_subagent();
+#endif
   if (should_init("override")) init_override();
   if (should_init("vacm_context")) init_vacm_context();
   if (should_init("agentx_config")) init_agentx_config();
