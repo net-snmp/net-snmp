@@ -992,33 +992,33 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	if (!strchr(ifrp->ifr_name, ':')) {
 	    Counter l_tmp;
 
-	    if (getKstatInt(NULL,ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) < 0){
+	    if (getKstatInt(NULL,ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) == 0){
 		ret = -1;
 		goto Return;
 	    }
             
-	    if (getKstatInt(NULL,ifrp->ifr_name, "rbytes", &ifp->ifInOctets) < 0) {
-                    ifp->ifInOctets = ifp->ifInUcastPkts * 308; /* XXX */
+	    if (getKstatInt(NULL,ifrp->ifr_name, "wrbytes", &ifp->ifInOctets) == 0) {
+                    ifp->ifInOctets = ifp->ifInUcastPkts * 308; 
 	    }
             
-	    if (getKstatInt(NULL,ifrp->ifr_name, "opackets",&ifp->ifOutUcastPkts) < 0){
+	    if (getKstatInt(NULL,ifrp->ifr_name, "opackets",&ifp->ifOutUcastPkts) == 0){
 		ret = -1;
 		goto Return;
 	    }
             
-	    if (getKstatInt(NULL,ifrp->ifr_name, "obytes", &ifp->ifOutOctets) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "obytes", &ifp->ifOutOctets) == 0) {
 		ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;       /* XXX */
 	    }
 
 	    if (ifp->ifType == 24)  /* Loopback */
 		continue;
 
-	    if (getKstatInt(NULL,ifrp->ifr_name, "ierrors", &ifp->ifInErrors) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "ierrors", &ifp->ifInErrors) == 0) {
 		ret = -1;
 		goto Return;
 	    }
 
-	    if (getKstatInt(NULL,ifrp->ifr_name, "oerrors", &ifp->ifOutErrors) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "oerrors", &ifp->ifOutErrors) == 0) {
 		ret = -1;
 		goto Return;
 	    }
