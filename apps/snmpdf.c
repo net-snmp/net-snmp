@@ -239,6 +239,11 @@ main(int argc, char *argv[])
         break;
     }
 
+    if (arg != argc) {
+	fprintf(stderr, "snmpdf: extra argument: %s\n", argv[arg]);
+	exit(1);
+    }
+
     SOCK_STARTUP;
 
     /*
