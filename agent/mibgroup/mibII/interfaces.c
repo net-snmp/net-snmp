@@ -85,6 +85,9 @@
 #if HAVE_NET_IF_H
 #include <net/if.h>
 #endif
+#if HAVE_NETINET_IN_VAR_H
+#include <netinet/in_var.h>
+#endif
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
