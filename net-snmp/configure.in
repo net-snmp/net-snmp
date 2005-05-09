@@ -2286,7 +2286,7 @@ AC_CHECK_LIB(kvm, kvm_read)
 AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_FUNCS(dlopen)
 
-AC_CHECK_FUNCS(kvm_openfiles nlist knlist kvm_getprocs)
+AC_CHECK_FUNCS(kvm_openfiles nlist knlist kvm_getprocs kvm_getswapinfo)
 echo " $module_list " | grep " ucd-snmp/diskio " >/dev/null
 # whether we need -ldevstat for diskio MIB
 if test $? -eq 0 ; then
@@ -2389,10 +2389,13 @@ AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(stdarg.h string.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h sys/dmap.h machine/pte.h xti.h sys/sockio.h sys/socket.h sys/un.h fstab.h sys/fs.h mtab.h ufs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/time.h sys/times.h sys/swap.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/select.h mntent.h sys/mntent.h kstat.h utsname.h sys/utsname.h sys/cdefs.h getopt.h locale.h pthread.h sys/loadavg.h regex.h linux/tasks.h pwd.h grp.h utmpx.h)
 # Network headers
-AC_CHECK_HEADERS(arpa/inet.h netinet/in_systm.h netinet/in.h netinet/ip_var.h netinet/tcp.h netinet/tcpip.h netinet/udp.h netinet/in_var.h netinet/ip.h netinet/ip_icmp.h net/if.h net/if_arp.h net/if_mib.h net/if_var.h netinet/if_ether.h netinet/tcp_var.h netinet/udp_var.h netinet/icmp_var.h netdb.h net/route.h,,,
+AC_CHECK_HEADERS(arpa/inet.h netinet/in_systm.h netinet/in.h netinet/ip_var.h netinet/tcp.h netinet/tcpip.h netinet/udp.h net/if.h netinet/in_var.h netinet/ip.h netinet/ip_icmp.h net/if_arp.h net/if_mib.h net/if_var.h netinet/if_ether.h netinet/tcp_timer.h netinet/tcp_var.h netinet/udp_var.h netinet/icmp_var.h netdb.h net/route.h,,,
 [[
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
 #endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
@@ -2403,14 +2406,26 @@ AC_CHECK_HEADERS(arpa/inet.h netinet/in_systm.h netinet/in.h netinet/ip_var.h ne
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
+#if HAVE_NET_IF_H
+#include <net/if.h>
+#endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
+#endif
+#if HAVE_NETINET_IP_ICMP_H
+#include <netinet/ip_icmp.h>
 #endif
 #if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
 #endif
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
+#if HAVE_NETINET_UDP_H
+#include <netinet/udp.h>
+#endif
+#if HAVE_NETINET_TCP_TIMER_H
+#include <netinet/tcp_timer.h>
 #endif
 ]])
 # UFS headers
@@ -2437,13 +2452,18 @@ AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_t
 #endif
 ]])
 # Linux
-AC_CHECK_HEADERS(sys/conf.h netinet/tcp_timer.h netinet/tcp_fsm.h sys/protosw.h nlist.h ioctls.h asm/page.h netipx/ipx.h)
+AC_CHECK_HEADERS(sys/conf.h netinet/tcp_fsm.h sys/protosw.h nlist.h ioctls.h asm/page.h netipx/ipx.h)
 # Solaris
 AC_CHECK_HEADERS(inet/mib2.h)
 # NetBSD required headers
 AC_CHECK_HEADERS(kvm.h sys/pool.h uvm/uvm_param.h uvm/uvm_extern.h vm/vm_param.h vm/vm_extern.h)
 # BSDi2 headers
-AC_CHECK_HEADERS(vm/swap_pager.h)
+AC_CHECK_HEADERS(vm/swap_pager.h,,,
+[[
+#if HAVE_VM_VM_H
+#include <vm/vm.h>
+#endif
+]])
 # BSDi3 headers
 AC_CHECK_HEADERS(sys/stat.h sys/vnode.h)
 # irix headers
