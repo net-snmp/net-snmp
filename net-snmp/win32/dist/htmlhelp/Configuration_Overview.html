@@ -77,19 +77,19 @@ applications know where to find the configuration and supporting files:<br>
 <br>
 Method 1: Environment variables:<br>
 <ul>
-  <li>SNMPCONFPATH=c:/Net-SNMP/etc/snmp</li>
+  <li>SNMPCONFPATH=c:/Net-SNMP/etc/snmp;c:/Net-SNMP/snmp/persist</li>
   <li>SNMPSHAREPATH=c:/Net-SNMP/share/snmp</li>
 </ul>
 Method 2: Registry:<br>
 <ul>
-  <li>HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPCONFPATH=c:/Net-SNMP/etc/snmp</li>
+  <li>HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPCONFPATH=c:/Net-SNMP/etc/snmp;c:/Net-SNMP/snmp/persist</li>
   <li>HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPSHAREPATH=c:/Net-SNMP/share/snmp</li>
 </ul>
 During the installation of the Windows binary from the Net-SNMP site,
 the installer automatcially creates the following registry keys:<br>
 <ul>
   <li>HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPCONFPATH=(install
-folder)/etc/snmp</li>
+  folder)/etc/snmp;(install folder)/snmp/persist</li>
   <li>HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPSHAREPATH=(install
 folder)/share/snmp</li>
 </ul>
