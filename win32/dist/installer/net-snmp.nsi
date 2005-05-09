@@ -362,7 +362,7 @@ Function CreateSnmpConf
   ;Push "SNMPCONFPATH"
   ;Push "$R0/etc/snmp"
   ;Call WriteEnvStr
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "SNMPCONFPATH" "$R0/etc/snmp"
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "SNMPCONFPATH" "$R0/etc/snmp;$R0/snmp/persist"
   
   ;Push "SNMPSHAREPATH"
   ;Push "$R0/share/snmp"
