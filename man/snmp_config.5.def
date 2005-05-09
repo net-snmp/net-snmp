@@ -41,11 +41,6 @@ directory defined by
 persistentDir 
 snmp.conf variable
 .PP
-directory in 
-.B
-SNMP_PERSISTENT_DIR 
-environment variable
-.PP
 default 
 .B
 PERSISTENT_DIRECTORY 
@@ -64,11 +59,6 @@ directory defined by
 .B
 persistentDir 
 snmp.conf variable
-.PP
-directory in 
-.B
-SNMP_PERSISTENT_DIR 
-environment variable
 .PP
 default 
 .B
