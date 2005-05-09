@@ -136,14 +136,16 @@ smux_parse_smux_socket(const char *token, char *cptr)
 void
 smux_parse_peer_auth(const char *token, char *cptr)
 {
-    oid  oid_buf[MAX_OID_LEN];
-    size_t oid_len;
     smux_peer_auth *aptr;
 
     if ((aptr =
          (smux_peer_auth *) calloc(1, sizeof(smux_peer_auth))) == NULL) {
         snmp_log_perror("smux_parse_peer_auth: malloc");
         return;
+    }
+    if (nauths == SMUX_MAX_PEERS) {
+	config_perror("Too many smuxpeers");
+	return;
     }
     aptr->sa_active_fd = -1;
     if (!cptr) {
@@ -155,24 +157,16 @@ smux_parse_peer_auth(const char *token, char *cptr)
         return;
     }
 
-    if (*cptr == '.')
-        cptr++;
-
-    if (!isdigit(*cptr)) {
-        config_perror("second token is not an OID");
-        free((char *) aptr);
-        return;
-    }
     /*
      * oid 
      */
+    aptr->sa_oid_len = MAX_OID_LEN;
     read_objid( cptr, aptr->sa_oid, &aptr->sa_oid_len );
 
     DEBUGMSGTL(("smux_conf", "parsing registration for: %s\n", cptr));
 
-    while (isdigit(*cptr) || *cptr == '.')
-        cptr++;
-    cptr = skip_white(cptr);
+    cptr = skip_token(cptr);
+    DEBUGMSGTL(("smux_conf", "password is: %s\n", cptr ? cptr : "NULL"));
 
     /*
      * password 
