@@ -19,10 +19,10 @@
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
  
-#if defined(HAVE_UVM_UVM_PARAM_H) and defined(HAVE_UVM_UVM_EXTERN_H)
+#if defined(HAVE_UVM_UVM_PARAM_H) && defined(HAVE_UVM_UVM_EXTERN_H)
 #include <uvm/uvm_param.h>
 #include <uvm/uvm_extern.h>
-#elif defined(HAVE_VM_VM_PARAM_H) and defined(HAVE_VM_VM_EXTERN_H)
+#elif defined(HAVE_VM_VM_PARAM_H) && defined(HAVE_VM_VM_EXTERN_H)
 #include <vm/vm_param.h>
 #include <vm/vm_extern.h>
 #endif
