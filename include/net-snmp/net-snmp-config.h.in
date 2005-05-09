@@ -324,6 +324,9 @@
 /* Define to 1 if you have the `kvm_getprocs' function. */
 #undef HAVE_KVM_GETPROCS
 
+/* Define to 1 if you have the `kvm_getswapinfo' function. */
+#undef HAVE_KVM_GETSWAPINFO
+
 /* Define to 1 if you have the <kvm.h> header file. */
 #undef HAVE_KVM_H
 
@@ -1363,7 +1366,7 @@
 #ifdef HAVE_STRCHR
 #ifdef mingw32
 # define index(a,b) strchr(a,b)
-# define rindex(a,b) strrchr(a,b) 
+# define rindex(a,b) strrchr(a,b)
 #else
 # define index strchr
 # define rindex strrchr
