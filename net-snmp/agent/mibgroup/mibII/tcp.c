@@ -79,6 +79,7 @@
 int  hz = 1000;
 #endif
 
+extern int TCP_Count_Connections( void );
         /*********************
 	 *
 	 *  Initialisation & common implementation functions
