@@ -1,4 +1,4 @@
-.TH SNMPD 8 "7 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPD 8 "5 May 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
@@ -23,7 +23,10 @@ Append to the log file rather than truncating it.
 Read 
 .I FILE
 as a configuration file
-(or a comma-separated list of configuration files).
+(or a comma-separated list of configuration files).  Note that the loaded
+file will only understand snmpd.conf tokens, unless the configuration type
+is specified in the file as described in the snmp_config man page under
+SWITCHING CONFIGURATION TYPES IN MID-FILE.
 .TP
 .B -C
 Do not read any configuration files except the ones optionally specified by the 
@@ -274,6 +277,7 @@ subdirectories.
 .SH SEE ALSO
 (in recommended reading order)
 .PP
+snmp_config(5),
 snmp.conf(5),
 snmpd.conf(5)
 .\" Local Variables:
