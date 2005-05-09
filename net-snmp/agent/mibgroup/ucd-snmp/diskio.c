@@ -424,7 +424,7 @@ var_diskio(struct variable * vp,
 /* disk load average patch by Rojer */
 
 struct dev_la {
-if ! ( defined(freebsd5) && __FreeBSD_version >= 500107 )
+#if ( defined(freebsd5) && __FreeBSD_version >= 500107 )
         struct bintime prev;
 #else
         struct timeval prev;
@@ -436,7 +436,7 @@ if ! ( defined(freebsd5) && __FreeBSD_version >= 500107 )
 static struct dev_la *devloads = NULL;
 static int ndevs = 0;
 
-if ! ( defined(freebsd5) && __FreeBSD_version >= 500107 )
+#if ! ( defined(freebsd5) && __FreeBSD_version >= 500107 )
 double devla_timeval_diff(struct timeval *t1, struct timeval *t2) {
 
         double dt1 = (double) t1->tv_sec + (double) t1->tv_usec * 0.000001;
