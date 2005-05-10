@@ -253,6 +253,7 @@ subdirectories.
 .SH SEE ALSO
 (in recommended reading order)
 .PP
+snmp_config(5),
 snmp.conf(5),
 snmpd.conf(5)
 .\" Local Variables:
