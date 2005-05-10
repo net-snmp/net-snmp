@@ -42,7 +42,7 @@ INSTALLATION
     package into the installation folder (defaults to c:\usr). 
   - Adds (install folder)\bin to the system PATH. 
   - Adds the following system environment variables: 
-    - SNMPCONFPATH=(install folder)/etc/snmp
+    - SNMPCONFPATH=(install folder)/etc/snmp;(install folder)/snmp/persist
     - SNMPSHAREPATH=(install folder)/share/snmp
   - Creates an snmp.conf file in SNMPCONFPATH which defines: 
     - mibdirs (install folder)/share/snmp/mibs 
@@ -74,8 +74,9 @@ INSTALLATION
 
   If you get Module not found errors such as 'IP-MIB: Module not found', the application
   was not able to locate the mibs folder.  Verify that SNMPCONFPATH is set to the location
-  of the conf folder (c:/usr/etc/snmp for example).  Also verify that there is a snmp.conf
-  file in that folder that contains configuration values for mibdirs, persistentDir and
+  of the configuration folder and the persistent storage folder 
+  (c:/usr/etc/snmp;c:/usr/snmp/persist for example).  Also verify that there is an 
+  snmp.conf file that contains configuration values for mibdirs, persistentDir and 
   tempFilePattern.  For example:
 
     mibdirs c:/usr/share/snmp/mibs
@@ -190,13 +191,14 @@ BUILD INFORMATION
   The following are the default paths are used by the applications:
 
   ----------------------------------------------------------------------------
-  net-snmp-config.h define   | value                    | environment variable
+  net-snmp-config.h define   | value                    | optional environment
+                             |                          | variable
   ----------------------------------------------------------------------------
-  DEFAULT_MIBDIRS:           | c:/usr/share/snmp/mibs   | MIBDIRS
-  SNMPDLMODPATH:             | c:/usr/lib/dlmod         | SNMPDLMODPATH
-  SNMPLIBPATH:               | c:/usr/lib               | SNMPLIBPATH
-  SNMPSHAREPATH:             | c:/usr/share/snmp        | SNMPSHAREPATH
-  SNMPCONFPATH:              | c:/usr/etc/snmp          | SNMPCONFPATH
-  PERSISTENT_DIRECTORY:      | c:/usr/snmp/persist      | SNMP_PERSISTENT_FILE
-  NETSNMP_TEMP_FILE_PATTERN: | c:/usr/temp/snmpdXXXXXX  | 
+  DEFAULT_MIBDIRS            | c:/usr/share/snmp/mibs   | MIBDIRS
+  SNMPDLMODPATH              | c:/usr/lib/dlmod         | SNMPDLMODPATH
+  SNMPLIBPATH                | c:/usr/lib               | SNMPLIBPATH
+  SNMPSHAREPATH              | c:/usr/share/snmp        | SNMPSHAREPATH
+  SNMPCONFPATH               | c:/usr/etc/snmp          | SNMPCONFPATH
+  PERSISTENT_DIRECTORY       | c:/usr/snmp/persist      |
+  NETSNMP_TEMP_FILE_PATTERN  | c:/usr/temp/snmpdXXXXXX  | 
 

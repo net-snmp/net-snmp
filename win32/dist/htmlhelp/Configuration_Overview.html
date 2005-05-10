@@ -30,7 +30,7 @@ To run snmpconf, use the following command line:<br>
 </span><br>
 The following environment variables are defined during installation:<br>
 <ul>
-  <li>SNMPCONFPATH=(install folder)/etc/snmp</li>
+  <li>SNMPCONFPATH=(install folder)/etc/snmp;(install folder)/snmp/persist</li>
   <li>SNMPSHAREPATH=(install folder)/share/snmp</li>
 </ul>
 <div style="margin-left: 40px;"></div>
@@ -47,7 +47,17 @@ c:/net-snmp/share/snmp/mibs<br>
 persistentDir c:/net-snmp/snmp/persist<br>
 tempFilePattern c:/net-snmp/temp/snmpdXXXXXX<br>
 </div>
-<br>
+<p>Due to a limitation in the Windows Service Control Manager (SCM), if any system
+environment variables are changed, the system will need to be rebooted
+to allow the services to access the changed environment variables (see
+Microsoft knowledge base article 821761).&nbsp; Therefore, when running
+<span style="font-weight: bold;">snmpd </span>or <span
+ style="font-weight: bold;">snmptrapd </span>as a service, if <span
+ style="font-weight: bold;">SNMPCONFPATH</span> or <span
+ style="font-weight: bold;">SNMPSHAREPATH</span>
+is changed, a reboot will be required after setting the environment
+variables, otherwise the services may fail to.<br>
+</p>
 <span style="font-weight: bold;">Note: All paths contained in
 configuration files must use forward
 slashes (Unix convention), NOT back
