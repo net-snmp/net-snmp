@@ -126,13 +126,100 @@ if ($opts{'G'}) {
 }
 
 #
+# Expand the search path in case it contains multiple directories
+# separated by : (Unix) or ; (Win32)
+#
+my $ENV_SEPARATOR = ':';
+if ($^O eq 'MSWin32') {
+  $ENV_SEPARATOR = ';';
+}
+my @searchpath = split(/$ENV_SEPARATOR/, $confpath);
+push @searchpath, "/usr/local/etc/snmp";
+push @searchpath, ".";
+push @searchpath, "$home";
+
+# Remove trailing /'s or \'s
+for (my $i=0; $i <= $#searchpath; $i++) {
+  $searchpath[$i] =~ /(.*?)([\/\\])*$/;
+  $searchpath[$i] = $1;
+}
+
+# Determine persistent directory.  Order of preference:
+# 
+# file in SNMP_PERSISTENT_FILE environment variable
+# directory defined by persistentDir snmp.conf variable
+# directory in SNMP_PERSISTENT_DIR environment variable
+# default PERSISTENT_DIRECTORY directory
+my $persistentDir = "";
+my $persistentFile = "";
+
+# SNMP_PERSISTENT_FILE environment variable
+if (defined($ENV{SNMP_PERSISTENT_FILE})) {
+  $persistentFile = "$ENV{SNMP_PERSISTENT_FILE}";
+  debug ("persistent file: SNMP_PERSISTENT_FILE environment variable set\n");
+}
+
+# snmp.conf persistentDir
+if (!($persistentDir) && !($persistentFile)) {
+  foreach my $i (@searchpath) {
+    debug ("Searching file $i/snmp.conf for persistentDir\n");
+    my $temp = get_persistentDir($i);
+    if ($temp) {
+      debug("persistent directory: set to $temp in $i/snmp.conf\n");
+      $persistentDir = $temp;
+      last;
+    }
+  }
+}
+
+# SNMP_PERSISTENT_DIR environment variable
+if (!($persistentDir) && !($persistentFile)) {
+  if (defined($ENV{SNMP_PERSISTENT_DIR})) {
+    $persistentDir = "$ENV{SNMP_PERSISTENT_DIR}";
+    debug ("persistent directory: SNMP_PERSISTENT_DIR environment variable set\n");
+  }
+}
+
+# PERSISTENT_DIRECTORY default variable
+if (!($persistentDir) && !($persistentFile)) {
+  $persistentDir = "/var/net-snmp";
+  debug ("persistent directory: Using default value\n");
+}
+
+# Rebuild search path without persistent folder
+# Note:  persistent file handled in Find existing 
+# files to possibly read in section
+if ($persistentDir) {
+  # Remove trailing /'s or \'s
+  $persistentDir =~ /(.*?)([\/\\])*$/;
+  $persistentDir = $1;
+  debug ("persistent directory: $persistentDir\n");
+
+  my @searchpath_old = @searchpath;
+  @searchpath = ();
+  foreach my $path_temp (@searchpath_old) {
+    if ($path_temp eq $persistentDir) {
+      debug("skipping persistent directory $path_temp\n");
+      next;
+    }
+    push @searchpath, $path_temp;
+  }
+}
+
+# Reset $confpath to the first path
+$confpath = $searchpath[0];
+
+#
 # Find existing files to possibly read in.
 #
-my @searchpath = ("$confpath","/usr/local/etc/snmp", ".", "$home");
 push @searchpath, $opts{I} if ($opts{I});
 foreach my $i (@searchpath) {
     debug("searching $i\n");
     foreach my $ft (keys(%filetypes)) {
+        if ("$i/$ft" eq $persistentFile) {
+          debug("skipping persistent file $i/$ft\n");
+          next;
+        }
 	debug("searching for $i/$ft\n");
 	$knownfiles{"$i/$ft"} = $ft if (-f "$i/$ft");
 	my $localft = $ft;
@@ -791,6 +878,27 @@ sub my_Dumper {
     } else {
 	return "\n";
     }
+}
+
+sub get_persistentDir {
+    my $file = shift;
+    my $result = 0;
+    if (! -f $file) {
+	return 0;
+    }
+    open(I,$file);
+    while(<I>) {
+	next if (/^\s*\#/);
+	next if (/^\s*$/);
+	chomp;
+	my ($token, $rest) = /^\s*(\w+)\s+(.*)/;
+        if (lc($token) eq "persistentdir") {
+          $result = $rest;
+        }
+        next;
+    }
+    close(I);
+    return $result;
 }
 
 # Usage:   &win32_reg_read("key", "value")
