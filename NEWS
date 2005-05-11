@@ -8,6 +8,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
      - patch 1052460: fix agent deadlock on exec
      - bug 1055781: get-next fails to step into interfaces group correctly
      - bug 1056760: agent ignores ifspeed, type settings in snmpd.conf
+   - Persistent files in directory defined by snmp.conf persistentDir were 
+     not being loaded at startup
 
  Ports:
    Win32:
