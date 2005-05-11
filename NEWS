@@ -18,6 +18,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
      - MSVC: agent (snmpd) support for pass and pass_persist
      - MinGW: agent (snmpd) support for pass
 
+ Fixes:
+   - Persistent files in directory defined by snmp.conf persistentDir were 
+     not being loaded at startup
 
 *5.2*
  New:
