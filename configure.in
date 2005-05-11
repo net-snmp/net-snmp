@@ -3495,7 +3495,7 @@ AC_CHECK_STRUCT_FOR([
 ], ipstat, ips_reassembled)
 
 # check for the des_ks_struct.weak_key attribute, which indicates the 
-# older opensll version is being used.
+# older openssl version is being used.
 if test "x$ac_cv_header_openssl_des_h" = "xyes" ; then
 AC_CHECK_STRUCT_FOR([
 #include <openssl/des.h>
