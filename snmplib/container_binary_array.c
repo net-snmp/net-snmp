@@ -165,7 +165,7 @@ netsnmp_binary_array_initialize(void)
     t->max_size = 0;
     t->count = 0;
     t->dirty = 0;
-    t->data_size = 4;
+    t->data_size = sizeof(void*);
     t->data = NULL;
 
     return t;
@@ -482,7 +482,7 @@ static void
 _ba_for_each(netsnmp_container *container, netsnmp_container_obj_func *f,
              void *context)
 {
-    netsnmp_binary_array_for_each(container, f, context, 0);
+    netsnmp_binary_array_for_each(container, f, context, 1);
 }
 
 static netsnmp_void_array *
