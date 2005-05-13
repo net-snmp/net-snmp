@@ -1330,9 +1330,12 @@ var_ifEntry(struct variable * vp,
         DEBUGMSGTL(("mibII/interfaces", "... no mib stats\n"));
         return NULL;
     }
-    while (if_ptr && strcmp(Name, if_ptr->name))
-        if_ptr = if_ptr->next;
-
+    /*
+     * hmmm.. where to get the interface name to check overrides?
+     *
+     * while (if_ptr && strcmp(Name, if_ptr->name))
+     *    if_ptr = if_ptr->next;
+     */
     switch (vp->magic) {
     case IFINDEX:
         long_return = ifstat.ifIndex;
