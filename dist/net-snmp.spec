@@ -20,7 +20,7 @@
 #
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
-Version: 5.3.dev
+Version: 5.3.cvs20050331
 # update release for vendor release. (eg 1.rh9, 1.rh72, 1.ydl3, 1.ydl23)
 Release: 1
 URL: http://net-snmp.sourceforge.net/
@@ -32,6 +32,13 @@ Obsoletes: cmu-snmp ucd-snmp ucd-snmp-utils
 BuildRoot: /tmp/%{name}-root
 Packager: The Net-SNMP Coders <http://sourceforge.net/projects/net-snmp/>
 BuildRequires: perl
+# because perl(Tk) is optional we will never dependencies will never succeed:
+AutoReqProv: no
+Requires: openssl, popt, rpm, zlib, bzip2-libs, beecrypt, elfutils-libelf, glibc
+Provides: net-snmp, libnetsnmp.so.5, libnetsnmpagent.so.5, libnetsnmphelpers.so.5, libnetsnmpmibs.so.5, libnetsnmptrapd.so.5
+%if %{embedded_perl}
+Requires: perl
+%endif
 
 %description
 
@@ -49,6 +56,7 @@ This package includes embedded perl support within the agent
 %package devel
 Group: Development/Libraries
 Summary: The includes and static libraries from the Net-SNMP package.
+AutoReqProv: no
 Requires: net-snmp = %{version}
 Obsoletes: cmu-snmp-devel ucd-snmp-devel
 
@@ -60,6 +68,8 @@ useful for building SNMP applications, agents, and sub-agents.
 %package perlmods
 Group: System Environment/Libraries
 Summary: The perl modules provided with Net-SNMP
+AutoReqProv: no
+Provides: ASN.so, OID.so, SNMP.so, TrapReceiver.so, agent.so, default_store.so, perl(NetSNMP::ASN), perl(NetSNMP::OID), perl(NetSNMP::TrapReceiver), perl(NetSNMP::agent), perl(NetSNMP::agent::default_store), perl(NetSNMP::agent::netsnmp_request_infoPtr), perl(NetSNMP::default_store), perl(SNMP), perl(SNMP::DEBUGGING), perl(SNMP::DEBUG_INTERNALS), perl(SNMP::DUMP_PACKET), perl(SNMP::MIB), perl(SNMP::MIB::MIB_OPTIONS), perl(SNMP::MIB::NODE), perl(SNMP::MIB::REPLACE_NEWER), perl(SNMP::MIB::SAVE_DESCR), perl(SNMP::Session), perl(SNMP::TrapSession), perl(SNMP::VarList), perl(SNMP::Varbind), net-snmp-perlmods
 Requires: net-snmp = %{version}, perl
 
 %description perlmods
