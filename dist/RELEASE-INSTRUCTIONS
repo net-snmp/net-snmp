@@ -34,29 +34,12 @@ tag name.
 ***************************************************************************
 TESTING:
 
-  0) Update your source tree to catch everyones commits.  (I've forgotten this
+  1) Update your source tree to catch everyones commits.  (I've forgotten this
      step before.)
 
      $ cvs update
 
-  0b) run configure with as many modules as can be compiled on your
-      machine to make sure there are no compile errors in any of the
-      modules.  I frequently find some in the lesser developer-used
-      modules, like Rmon, etc.  Something like:
-
-      $ ./configure  '--with-mib-modules=host examples examples/example    \
-                              testhandler smux Rmon disman/event-mib'    \
-                   '--with-transports=UDPIPv6 TCPIPv6 IPX'               \
-                   --enable-embedded-perl --enable-shared
-
-      Alternatively, try using the new scripts in the dist directory, which
-      *try* to do the correct thing for various releases and architectures.
-      Assuming you are going to build in the source directory :
-
-      $ cd SOURCE-DIR
-      $ nsb-config -x -s $PWD
-
-  1) [This step is currently only for the 5.x versions]
+  2) [This step is currently only for the 5.x versions]
 
      Change the libtool version information in Makefile.top.  This may
      could be automated in the future, but libtool doesn't like you to
@@ -90,23 +73,40 @@ TESTING:
      snmplib; make' a minimum to check the version number in
      snmplib/.libs/ to see if it matches the release number.
 
-  1b) Change the configure script version number.  This isn't
+  3) Change the configure script version number.  This isn't
       autochanged either.  The line to change looks like this:
 
         AC_INIT([Net-SNMP], [5.1.2], [net-snmp-coders@lists.sourceforge.net])
 
       And then run autoconf and autoheader, as well as a CVS commit.
 
-  2) Log into as many machines types as you can and run "make test".
+  4) run configure with as many modules as can be compiled on your
+      machine to make sure there are no compile errors in any of the
+      modules.  I frequently find some in the lesser developer-used
+      modules, like Rmon, etc.  Something like:
+
+      $ ./configure  '--with-mib-modules=host examples examples/example    \
+                              testhandler smux Rmon disman/event-mib'    \
+                   '--with-transports=UDPIPv6 TCPIPv6 IPX'               \
+                   --enable-embedded-perl --enable-shared
+
+      Alternatively, try using the new scripts in the dist directory, which
+      *try* to do the correct thing for various releases and architectures.
+      Assuming you are going to build in the source directory :
+
+      $ cd SOURCE-DIR
+      $ nsb-config -x -s $PWD
+
+  5) Log into as many machines types as you can and run "make test".
      You should get perfect results.  If you don't, try running just
      those tests again with a slower sleep time (use the -S flag to
      testing/RUNTESTS).
 
-  3) Make sure installing works.
+  6) Make sure installing works.
 
      $ make install
 
-  4) ideally, run make in the tutorial directories to make sure they
+  7) ideally, run make in the tutorial directories to make sure they
      compile properly after running "make install".
 
 ***************************************************************************
