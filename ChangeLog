@@ -2,6 +2,54 @@
 
 Changes: V5.0.9 -> V5.0.10
 
+2005-05-16 12:09  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_bulk_to_next.3
+, netsnmp_debug.3, netsnmp_handler.3
+, netsnmp_instance.3, netsnmp_library.3
+, netsnmp_mib_utilities.3,
+     netsnmp_mode_end_call.3, netsnmp_multiplexer.3
+, netsnmp_old_api.3, netsnmp_read_only.3
+, netsnmp_scalar.3, netsnmp_serialize.3
+, netsnmp_table.3, netsnmp_table_array.3
+, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_iterator.3
+, netsnmp_todo.3, netsnmp_watcher.3:
+
+   documentation update
+
+2005-05-16 11:18  hardaker
+
+   * Makefile.top, configure:
+
+   version update
+
+2005-05-13 05:40  rstory
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   comment out solaris interface override, since we don't have a name
+
+2005-05-13 05:22  rstory
+
+   * agent/mibgroup/mibII/vacm_vars.c:
+
+   #if -> #ifdef
+
+2005-05-13 05:21  rstory
+
+   * snmplib/container_binary_array.c:
+
+   - don't hardcode data size
+   - sort container before for_each
+
+2005-05-09 17:02  alex_b
+
+   * man/: snmp_config.5.def, snmpd.8.def:
+
+   Update persistent storage sections of snmp_config and snmpd
+   man pages
+
 2005-05-06 11:33  hardaker
 
    * agent/helpers/Makefile.depend,
