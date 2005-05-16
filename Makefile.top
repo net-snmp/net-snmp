@@ -59,6 +59,7 @@ LIBAGE      = 0
 # generally, LIBCURRENT should stay the same unless major changes occur.
 # Increment REVISION every release.  
 # Increment AGE if new stuff is available.
+
 LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) -o
 LIB_EXTENSION   = la
 LIB_VERSION     =
