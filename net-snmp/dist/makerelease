@@ -1,0 +1,224 @@
+#!/usr/bin/perl
+
+use strict;
+
+
+my %opts;
+my $descr;
+
+LocalGetOptions(\%opts,
+	   ['r|regexp-ignore-steps=s','Ignore these REGEXP steps'],
+	   ['s|skip-until=s',         'Skip all steps until ARG'],
+	   ['i|interactive',          'Prompt whether to do each step'],
+	   ['n|dry-run',     'Dry run only.  Don\'t actually do anything.']);
+
+
+my $version = shift;
+die "No version suppiled" if (!$version);
+my $vtag = $version;
+$vtag =~ s/\./-/g;
+$vtag = "Ext-" . $vtag;
+
+# if in the dist directory, cd ..
+chdir("..") if (-f 'makerelease');
+
+# cvs update
+System("cvsupdate","cvs update");
+
+# modify Makefile.top and configure.in
+manualstep('human:version',
+	   "You need to edit Makefile.top and configure.in to update the version number.
+
+     Makefile.top:
+        See comments above LIBCURRENT, LIBAGE and LIBREVISION
+
+     Configure.in:
+          AC_INIT([Net-SNMP], [$version], [net-snmp-coders\@lists.sourceforge.net])
+                               ^^^^^
+  [I'll run autoconf for you after you're done]
+");
+
+System("version:autoconf","autoconf");
+System("version:commit",
+       "cvs commit -m \"version update\" Makefile.top configure.in configure");
+
+#
+# configure and build and test it
+#
+System("build:configure","./configure --with-defaults '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=UDPIPv6 TCPIPv6 IPX' --enable-embedded-perl --enable-shared");
+System("build:make","make");
+checkresult();
+System("build:test","make test");
+checkresult();
+
+#
+# checks and changes
+#
+System("docs:make","make docs");
+System("docs:mancp","make mancp");
+System("docs:commit","cvs commit -m \"documentation update\" man");
+
+#
+# code updates and checks
+#
+System("code:checkcomments","make checks");
+System("code:makedepend","make distdepend");
+System("code:commitdepend","cvs commit -m \"make depend\" `find . -name Makefile.depend`");
+
+
+#
+# ChangeLog generation and insertion.
+#
+my $branchargs = "-b --follow-only trunk";
+if (-f "CVS/Tag") {
+    my $tag = `cat CVS/Tag`;
+    chomp($tag);
+    $tag =~ s/^T//;
+    $branchargs = "-F $tag --no-ancestors";
+}
+System("changelog:cvs2cl",
+       "cvs2cl -r -f ChangeLog.add $branchargs --no-wrap -S");
+System("changelog:changelogfix",
+       "perl dist/changelogfix < ChangeLog.add > ChangeLog.reallyadd");
+
+manualstep("changelog:manualedit",
+"You need to manually insert the ChangeLog.reallyadd contents into the 
+ChangeLog file.  I'll run cvs commit for you afterwards");
+
+System("changelog:commit","cvs commit -m \"version update\" ChangeLog");
+
+#
+# doc update
+#
+manualstep("docs:README",
+	   "You should check or update the README and NEWS files.
+  [The version number will be auto-incremented later however]");
+
+System("docs:commit",
+       "cvs commit -m \"version update\" README NEWS");
+
+
+my $me = `whoami`;
+chomp($me);
+
+#
+# final build the release
+#
+System("release:makedist","make dist VERSION=$vtag CVSUSER=$me");
+my $pkg = "net-snmp-${version}.tar.gz";
+
+#
+# XXX: make in the tar dir?
+#
+
+my $sig;
+
+if ($me =~ /(rstory|hardaker)/) {
+    # currently only rstory and hardaker have the gpg keys till Wes
+    # sees someone else in person ;-)
+    $sig = "net-snmp-${version}.tar.gz.asc";
+    System("release:gpg","gpg -u net-snmp-admin -a --detach-sign $pkg");
+} else {
+    $sig = "net-snmp-${version}.tar.gz.md5";
+    System("release:md5","md5sum $pkg > $sig");
+}
+
+#
+# XXX: auto upload to SF?
+#
+System("release:upload",
+       "ncftpput upload.sf.net incoming net-snmp-${version}.tar.gz $sig");
+
+
+######################################################################
+sub System {
+    my $name = shift;
+    my $cmd = $descr = join(" ", @_);
+    if (dostep($name)) {
+	print STDERR "    running: ",$cmd,"\n";
+	system(@_) if (!$opts{'n'});
+    }
+}
+
+sub checkresult {
+    if ($?) {
+	print STDERR "The above STEP failed.  Continue anyway (y/n)?  ";
+	my $ans = <STDIN>;
+	if ($ans =~ /^n/) {
+	    print STDERR "  EXITING\n";
+	    exit;
+	}
+    }
+}
+
+sub dostep {
+    my $name = shift;
+    print STDERR "\n********** STEP: $name ******************************\n";
+    if ($descr) {
+	print STDERR "  [$descr]\n";
+	$descr = undef;
+    }
+    print "\n";
+    if ($opts{'s'} && $name ne $opts{'s'}) {
+	print STDERR "      [skipping]\n";
+	return 0;
+    }
+    $opts{'s'} = '';
+    if ($opts{r} && $name =~ /$opts{r}/) {
+	print STDERR "      [skipping]\n";
+	return 0;
+    } elsif ($opts{'i'}) {
+	print STDERR "  Do this step (y/n/q)?  ";
+	my $ans = <STDIN>;
+	if ($ans =~ /^n/) {
+	    print STDERR "      [skipping]\n";
+	    return 0;
+	}
+	if ($ans =~ /^q/) {
+	    print STDERR "      QUITTING\n";
+	    exit;
+	}
+    }
+    return 1;
+}
+
+sub manualstep {
+    my $tag = shift;
+
+    if (dostep($tag)) {
+	print STDERR "\n\n",join(" ",@_);
+
+	print STDERR "\n\n  Hit return when done:  ";
+
+	my $bogus = <STDIN>;
+	return 1;
+    }
+    return 0;
+}
+
+#######################################################################
+# getopt long gui portability code
+#
+sub LocalGetOptions {
+    if ($#ARGV == -1 && eval {require Getopt::Long::GUI;}) {
+	import Getopt::Long::GUI;
+	return GetOptions(@_);
+    } else {
+	require Getopt::Long;
+	import Getopt::Long;
+    }
+    GetOptions(LocalOptionsMap(@_));
+}
+
+sub LocalOptionsMap {
+    my ($st, $cb, @opts) = ((ref($_[0]) eq 'HASH')
+			    ? (1, 1, $_[0]) : (0, 2));
+    for (my $i = $st; $i <= $#_; $i += $cb) {
+	if ($_[$i]) {
+	    next if (ref($_[$i]) eq 'ARRAY' && $_[$i][0] =~ /^GUI:/);
+	    push @opts, ((ref($_[$i]) eq 'ARRAY') ? $_[$i][0] : $_[$i]);
+	    push @opts, $_[$i+1] if ($cb == 2);
+	}
+    }
+    return @opts;
+}
