@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
@@ -38,6 +49,9 @@
 
 /* define if you are using the MD5 code ...*/
 #undef USE_INTERNAL_MD5
+
+/* define if you are using the codeS11 library ...*/
+#undef USE_PKCS
 
 /* add in recent CMU library extensions (not complete) */
 #undef CMU_COMPATIBLE
@@ -303,7 +317,7 @@
 /* (typically its "can't fork, no mem" problems) */
 #define ERRORMIBNUM 101
 
-/* The sub id of EXENSIBLEMIB returned to queries of
+/* The sub id of EXTENSIBLEMIB returned to queries of
    .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 */
 #define AGENTID 250
 
@@ -575,6 +589,10 @@
     available.  */
 #undef SNMP_TRANSPORT_TCPIPV6_DOMAIN
 
+/*  This is defined if support for the callback transport domain is
+    available.  */
+#undef SNMP_TRANSPORT_CALLBACK_DOMAIN
+
 /* define this if the USM security module is available */
 #undef SNMP_SECMOD_USM
 
@@ -613,5 +631,13 @@
 #endif
 
 #undef INET6
+
+/* define if agentx transport is to use domain sockets only */
+#undef AGENTX_DOM_SOCK_ONLY
+
+#ifndef NETSNMP_INLINE
+#   define NETSNMP_NO_INLINE
+#   define NETSNMP_INLINE
+#endif
 
 #endif /* NET_SNMP_CONFIG_H */

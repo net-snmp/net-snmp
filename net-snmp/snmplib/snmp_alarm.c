@@ -1,8 +1,21 @@
 /*
- * snmp_alarm.c: generic library based alarm timers for various parts
- * of an application 
+ * snmp_alarm.c:
  */
-
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/** @defgroup snmp_alarm  generic library based alarm timers for various parts of an application 
+ *  @ingroup library
+ * 
+ *  @{
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_UNISTD_H
@@ -117,6 +130,19 @@ sa_update_entry(struct snmp_alarm *a)
     }
 }
 
+/**
+ * This function removes the callback function from a list of registered
+ * alarms, unregistering the alarm.
+ *
+ * @param clientreg is a unique unsigned integer representing a registered
+ *	alarm which the client wants to unregister.
+ *
+ * @return void
+ *
+ * @see snmp_alarm_register
+ * @see snmp_alarm_register_hr
+ * @see snmp_alarm_unregister_all
+ */
 void
 snmp_alarm_unregister(unsigned int clientreg)
 {
@@ -141,6 +167,15 @@ snmp_alarm_unregister(unsigned int clientreg)
     }
 }
 
+/**
+ * This function unregisters all alarms currently stored.
+ *
+ * @return void
+ *
+ * @see snmp_alarm_register
+ * @see snmp_alarm_register_hr
+ * @see snmp_alarm_unregister
+ */
 void
 snmp_alarm_unregister_all(void)
 {
@@ -330,7 +365,37 @@ set_an_alarm(void)
 }
 
 
-
+/**
+ * This function registers function callbacks to occur at a speciifc time
+ * in the future.
+ *
+ * @param when is an unsigned integer specifying when the callback function
+ *             will be called in seconds.
+ *
+ * @param flags is an unsigned integer that specifies how frequent the callback
+ *	function is called in seconds.  Should be SA_REPEAT or NULL.  If  
+ *	flags  is  set with SA_REPEAT, then the registered callback function
+ *	will be called every SA_REPEAT seconds.  If flags is NULL then the 
+ *	function will only be called once and then removed from the 
+ *	registered alarm list.
+ *
+ * @param thecallback is a pointer SNMPAlarmCallback which is the callback 
+ *	function being stored and registered.
+ *
+ * @param clientarg is a void pointer used by the callback function.  This 
+ *	pointer is assigned to snmp_alarm->clientarg and passed into the
+ *	callback function for the client's specifc needs.
+ *
+ * @return Returns a unique unsigned integer(which is also passed as the first 
+ *	argument of each callback), which can then be used to remove the
+ *	callback from the list at a later point in the future using the
+ *	snmp_alarm_unregister() function.  If memory could not be allocated
+ *	for the snmp_alarm struct 0 is returned.
+ *
+ * @see snmp_alarm_unregister
+ * @see snmp_alarm_register_hr
+ * @see snmp_alarm_unregister_all
+ */
 unsigned int
 snmp_alarm_register(unsigned int when, unsigned int flags,
                     SNMPAlarmCallback * thecallback, void *clientarg)
@@ -367,7 +432,42 @@ snmp_alarm_register(unsigned int when, unsigned int flags,
 }
 
 
-
+/**
+ * This function offers finer granularity as to when the callback 
+ * function is called by making use of t->tv_usec value forming the 
+ * "when" aspect of snmp_alarm_register().
+ *
+ * @param t is a timeval structure used to specify when the callback 
+ *	function(alarm) will be called.  Adds the ability to specify
+ *	microseconds.  t.tv_sec and t.tv_usec are assigned
+ *	to snmp_alarm->tv_sec and snmp_alarm->tv_usec respectively internally.
+ *	The snmp_alarm_register function only assigns seconds(it's when 
+ *	argument).
+ *
+ * @param flags is an unsigned integer that specifies how frequent the callback
+ *	function is called in seconds.  Should be SA_REPEAT or NULL.  If  
+ *	flags  is  set with SA_REPEAT, then the registered callback function
+ *	will be called every SA_REPEAT seconds.  If flags is NULL then the 
+ *	function will only be called once and then removed from the 
+ *	registered alarm list.
+ *
+ * @param cb is a pointer SNMPAlarmCallback which is the callback 
+ *	function being stored and registered.
+ *
+ * @param cd is a void pointer used by the callback function.  This 
+ *	pointer is assigned to snmp_alarm->clientarg and passed into the
+ *	callback function for the client's specifc needs.
+ *
+ * @return Returns a unique unsigned integer(which is also passed as the first 
+ *	argument of each callback), which can then be used to remove the
+ *	callback from the list at a later point in the future using the
+ *	snmp_alarm_unregister() function.  If memory could not be allocated
+ *	for the snmp_alarm struct 0 is returned.
+ *
+ * @see snmp_alarm_register
+ * @see snmp_alarm_unregister
+ * @see snmp_alarm_unregister_all
+ */
 unsigned int
 snmp_alarm_register_hr(struct timeval t, unsigned int flags,
                        SNMPAlarmCallback * cb, void *cd)
@@ -402,3 +502,4 @@ snmp_alarm_register_hr(struct timeval t, unsigned int flags,
 
     return (*s)->clientreg;
 }
+/**  @} */

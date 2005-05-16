@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\agent" /I "..\..\snmplib" /I "..\..\include" /I "..\..\agent\mibgroup" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\agent" /I "..\..\snmplib" /I "..\..\include" /I "..\..\agent\mibgroup" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "HAVE_WIN32_PLATFORM_SDK" /YX /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /I "..\..\agent" /I "..\..\agent\mibgroup" /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /I "..\..\agent" /I "..\..\agent\mibgroup" /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "HAVE_WIN32_PLATFORM_SDK" /FR /YX /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0xffffffff
 BSC32=bscmake.exe
@@ -84,6 +84,14 @@ LIB32=link.exe -lib
 
 # PROP Default_Filter ""
 # Begin Source File
+
++ SOURCE=..\..\agent\mibgroup\mibII\setSerialNo.c
+
++ # End Source File
+
++ # Begin Source File
+
++ 
 
 SOURCE=..\..\agent\mibgroup\mibII\snmp_mib.c
 # End Source File
@@ -182,67 +190,22 @@ SOURCE=..\..\agent\mibgroup\agentx\agentx_config.c
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\client.c
-
-!IF  "$(CFG)" == "netsnmpmibssdk - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "netsnmpmibssdk - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\master.c
-
-!IF  "$(CFG)" == "netsnmpmibssdk - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "netsnmpmibssdk - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\master_admin.c
-
-!IF  "$(CFG)" == "netsnmpmibssdk - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "netsnmpmibssdk - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\protocol.c
-
-!IF  "$(CFG)" == "netsnmpmibssdk - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "netsnmpmibssdk - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\subagent.c
-
-!IF  "$(CFG)" == "netsnmpmibssdk - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "netsnmpmibssdk - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # End Group
 # Begin Group "agent"

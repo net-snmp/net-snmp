@@ -2,6 +2,17 @@
  * table.c 
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_STRING_H
@@ -53,6 +64,20 @@ static void     table_data_free_func(void *data);
  *  You can use this table handler by injecting it into a calling
  *  chain.  When the handler gets called, it'll do processing and
  *  store it's information into the request->parent_data structure.
+ *
+ *  The table helper handler pulls out the column number and indexes from 
+ *  the request oid so that you don't have to do the complex work of
+ *  parsing within your own code.
+ *
+ *  @param tabreq is a pointer to a netsnmp_table_registration_info struct.
+ *	The table handler needs to know up front how your table is structured.
+ *	A netsnmp_table_registeration_info structure that is 
+ *	passed to the table handler should contain the asn index types for the 
+ *	table as well as the minimum and maximum column that should be used.
+ *
+ *  @return Returns a pointer to a netsnmp_mib_handler struct which contains
+ *	the handler's name and the access method
+ *
  */
 netsnmp_mib_handler *
 netsnmp_get_table_handler(netsnmp_table_registration_info *tabreq)
@@ -85,12 +110,16 @@ netsnmp_register_table(netsnmp_handler_registration *reginfo,
     return netsnmp_register_handler(reginfo);
 }
 
-/** extracts the processed table information from a given request.
- *  call this from subhandlers on a request to extract the processed
+/** Extracts the processed table information from a given request.
+ *  Call this from subhandlers on a request to extract the processed
  *  netsnmp_request_info information.  The resulting information includes the
  *  index values and the column number.
+ *
+ * @param request populated netsnmp request structure
+ *
+ * @return populated netsnmp_table_request_info structure
  */
-inline netsnmp_table_request_info *
+NETSNMP_INLINE netsnmp_table_request_info *
 netsnmp_extract_table_info(netsnmp_request_info *request)
 {
     return (netsnmp_table_request_info *)
@@ -118,7 +147,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_table_registration_info *tbl_info;
     int             oid_index_pos;
     unsigned int    oid_column_pos;
-    unsigned int    tmp_idx, tmp_len;
+    unsigned int    tmp_idx;
+    size_t	    tmp_len;
     int             incomplete, out_of_range, cleaned_up = 0;
     int             status = SNMP_ERR_NOERROR, need_processing = 0;
     oid            *tmp_name;
@@ -133,7 +163,9 @@ table_helper_handler(netsnmp_mib_handler *handler,
     tbl_info = (netsnmp_table_registration_info *) handler->myvoid;
 
     if ((!handler->myvoid) || (!tbl_info->indexes)) {
-        snmp_log(LOG_INFO, "improperly registered table found\n");
+        snmp_log(LOG_ERR, "improperly registered table found\n");
+        snmp_log(LOG_ERR, "name: %s, table info: %p, indexes: %p\n",
+                 handler->handler_name, handler->myvoid, tbl_info->indexes);
 
         /*
          * XXX-rks: unregister table? 
@@ -729,17 +761,18 @@ netsnmp_closest_column(unsigned int current,
     if (valid_columns == NULL)
         return 0;
 
-    do {
+    for( ; (!done && valid_columns); valid_columns = valid_columns->next) {
 
         if (valid_columns->isRange) {
 
             if (current < valid_columns->details.range[0]) {
-                if (valid_columns->details.range[0] < closest) {
+                if ( (0 == closest) ||
+                     (valid_columns->details.range[0] < closest)) {
                     closest = valid_columns->details.range[0];
                 }
             } else if (current <= valid_columns->details.range[1]) {
                 closest = current;
-                done = 1;       /* can not get any closer! */
+                break;       /* can not get any closer! */
             }
 
         } /* range */
@@ -759,23 +792,38 @@ netsnmp_closest_column(unsigned int current,
                 if (current == valid_columns->details.list[idx]) {
                     closest = current;
                     done = 1;   /* can not get any closer! */
-                    break;      /* for */
+                    break;      /* inner for */
                 } else if (current < valid_columns->details.list[idx]) {
                     if (valid_columns->details.list[idx] < closest)
                         closest = valid_columns->details.list[idx];
                     break;      /* list should be sorted */
                 }
-            }                   /* for */
-
+            }                   /* inner for */
         }                       /* list */
-
-        valid_columns = valid_columns->next;
-
-    } while (!done && valid_columns);
+    }                           /* outer for */
 
     return closest;
 }
 
+/**
+ * This function can be used to setup the table's definition within
+ * your module's initialize function, it takes a variable index parameter list
+ * for example: the table_info structure is followed by two integer index types
+ * netsnmp_table_helper_add_indexes(
+ *                  table_info,   
+ *	            ASN_INTEGER,  
+ *		    ASN_INTEGER,  
+ *		    0);
+ *
+ * @param tinfo is a pointer to a netsnmp_table_registration_info struct.
+ *	The table handler needs to know up front how your table is structured.
+ *	A netsnmp_table_registeration_info structure that is 
+ *	passed to the table handler should contain the asn index types for the 
+ *	table as well as the minimum and maximum column that should be used.
+ *
+ * @return void
+ *
+ */
 void
 #if HAVE_STDARG_H
 netsnmp_table_helper_add_indexes(netsnmp_table_registration_info *tinfo,

@@ -1,7 +1,7 @@
-.TH SNMPD.CONF 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPD.CONF 5 "28 Feb 2003" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-DATADIR/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent.
+SYSCONFDIR/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent.
 .SH DESCRIPTION
 .B snmpd.conf
 is the configuration file which defines how the Net-SNMP SNMP agent
@@ -46,7 +46,7 @@ This is a DISPLAY-STRING describing any error triggering the errorFlag above.
 If this entry is set to the integer value of 1 AND the errorFlag
 defined above is indeed a 1, a program or script will get executed
 with the table entry name from above as the argument.  The program to
-be executed is configured in the config.h file at compile time.
+be executed is configured in the net-snmp-config.h file at compile time.
 .SS Directives
 .IP "proc NAME"
 .IP "proc NAME MAX"
@@ -69,7 +69,7 @@ This registers a command that knows how to fix errors with the given
 process NAME.  When EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFIX for a given
 NAMEd program is set to the integer value of 1, this command will be
 called.  It defaults to a compiled value set using the PROCFIXCMD
-definition in the config.h file.
+definition in the net-snmp-config.h file.
 .IP "exec NAME PROG ARGS"
 .IP "exec MIBNUM NAME PROG ARGS"
 .IP
@@ -103,7 +103,7 @@ This registers a command that knows how to fix errors with the given
 exec or sh NAME.  When EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFIX for a
 given NAMEd entry is set to the integer value of 1, this command will
 be called.  It defaults to a compiled value set using the EXECFIXCMD
-definition in the config.h file.
+definition in the net-snmp-config.h file.
 .IP "disk PATH"
 .IP "disk PATH [ MINSPACE | MINPERCENT% ]"
 .IP
@@ -140,6 +140,23 @@ To enable AgentX support in the SNMP master agent, put the following
 line in your snmpd.conf file:
 .IP "master agentx"
 See README.agentx for further details.
+.IP "AgentXSocket addr"
+This defines the address the master agent listens at.
+The default is /var/agentx/master. By default the Unix Domain socket is
+accessible only to subagents which have the same userid as the agent.
+Another possibility is localhost:705
+.IP "AgentXTimeout addr"
+Defines the timeout period for an AgentX request.
+Default is 1 second.
+.IP "AgentXRetries addr"
+Defines the number of retries for an AgentX request.
+Default is 5 retries.
+.P
+You can also put the following in your subagent.conf file (where
+"subagent" is the name you used in your init_snmp("subagent") api call:
+.IP "agentPingInterval NUM"
+This makes the subagent try and reconnect every NUM seconds to the
+master if it ever becomes (or starts) disconnected.
 .SH SMUX SUB-AGENTS
 To enable and SMUX based sub-agent, such as
 .IR gated ,
@@ -292,13 +309,16 @@ engineID is configured with the first IP address found for the
 hostname of the machine.
 .IP "createUser username (MD5|SHA) authpassphrase [DES] [privpassphrase]"
 .IP
-MD5 and SHA are the authentication types to use, but you must have
-built the package with openssl installed in order to use SHA.  The
+MD5 and SHA are the authentication types to use.  The
 only privacy protocol currently supported is DES.  If the privacy
 passphrase is not specified, it is assumed to be the same as the
 authentication passphrase.  Note that the users created will be
 useless unless they are also added to the VACM access control tables
 described above.
+.IP
+SHA authentication and DES privacy require OpenSSL to be installed and
+the agent to be built with OpenSSL support.  MD5 authentication may be
+used without OpenSSL.
 .IP
 Warning: the minimum pass phrase length is 8 characters.
 .IP
@@ -345,7 +365,7 @@ listening addresses instead of the default behaviour, which is to
 listen on UDP port 161 on all IPv4 interfaces.  See the section 
 .B LISTENING ADDRESSES
 in the
-.I snmpd(1)
+.I snmpd(8)
 manual page for more information about the format of listening
 addresses.  For example, specifying
 .I "agentaddress 161,tcp:161,localhost:9161"
@@ -584,7 +604,7 @@ pass .1.3.6.1.4.1.2021.255 /path/to/local/passtest
 .IP "pass_persist MIBOID EXEC"
 Passes entire control of MIBOID to the EXEC program.  
 Similar to pass, but the EXEC program continues to run after the initial
-request is answered.
+request is answered.  Also, pass and pass_persist block till they return.
 .IP
 Upon initialization, EXEC is passed the string "PING\\n" in stdin,
 and it should respond by printing "PONG\\n" to stdout.
@@ -834,9 +854,9 @@ An snmpset of integer(1) to UCD-SNMP-MIB::versionUpdateConfig.0
 .IP 2.
 A "kill -HUP" signal sent to the snmpd agent process.
 .SH "FILES"
-DATADIR/snmp/snmpd.conf
+SYSCONFDIR/snmp/snmpd.conf
 .SH "SEE ALSO"
-snmpconf(1), snmpusm(1), snmp.conf(5), snmp_config(5), snmpd(1), EXAMPLE.conf, read_config(3).
+snmpconf(1), snmpusm(1), snmp.conf(5), snmp_config(5), snmpd(8), EXAMPLE.conf, read_config(3).
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:

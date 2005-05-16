@@ -1,3 +1,12 @@
+/* Portions of this file are subject to the following copyrights.  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
@@ -81,11 +90,23 @@ file_free_config(void)
 void
 file_parse_config(const char *token, char *cptr)
 {
+    char space;
+    char *cp;
+	
     if (fileCount < MAXFILE) {
         fileTable[fileCount].max = -1;
 
-        sscanf(cptr, "%s %d",
-               fileTable[fileCount].name, &fileTable[fileCount].max);
+        cp = copy_nword(cptr, fileTable[fileCount].name, FILE_NAME_MAX);
+
+	if (strlen(fileTable[fileCount].name) >= FILE_NAME_MAX - 1) {
+            config_perror("file name too long");
+            return;
+	}
+
+        if (cp)
+            fileTable[fileCount].max = strtoul(cp, NULL, 10);
+        else
+            fileTable[fileCount].max = -1;
 
         fileCount++;
     }
@@ -152,8 +173,8 @@ var_file_table(struct variable *vp,
 
     case FILE_MSG:
         if (file->max >= 0 && file->size > file->max)
-            sprintf(error, FILE_ERROR_MSG, file->name, file->max,
-                    file->size);
+            snprintf(error, sizeof(error), FILE_ERROR_MSG, file->name,
+		file->max, file->size);
         else
             strcpy(error, "");
 

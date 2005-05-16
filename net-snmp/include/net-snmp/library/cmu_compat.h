@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 /*
  *  CMU compatability definitions and structures.
  *
@@ -188,6 +199,8 @@ struct mib_ipAddrEntry {
     int             ipAdEntIfIndex;     /* IF for this entry */
     u_int           ipAdEntNetMask;     /* subnet mask of this entry */
     int             ipAdEntBcastAddr;   /* read the MIB for this one */
+    int 	    ipAdEntReasmMaxSize;
+		/* max size for dg reassembly   {ipAddrEntry 5} */
 };
 
 struct mib_ipRouteEntry {

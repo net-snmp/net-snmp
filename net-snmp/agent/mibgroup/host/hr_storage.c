@@ -148,6 +148,13 @@ extern struct mnttab *HRFS_entry;
 #define HRFS_mount	mnt_mountp
 #define HRFS_statfs	statvfs
 
+#elif defined(HAVE_STATVFS) && defined(__NetBSD__)
+
+extern struct statvfs *HRFS_entry;
+extern int      fscount;
+#define HRFS_statfs	statvfs
+#define HRFS_mount	f_mntonname
+
 #elif defined(HAVE_STATVFS)
 
 extern struct mntent *HRFS_entry;
@@ -459,7 +466,7 @@ var_hrstore(struct variable *vp,
     struct mbstat   mbstat;
 #endif
 #endif                          /* !linux */
-    static char     string[100];
+    static char     string[1024];
     struct HRFS_statfs stat_buf;
 
     if (vp->magic == HRSTORE_MEMSIZE) {
@@ -808,7 +815,7 @@ int
 linux_mem(int mem_type, int size_or_used)
 {
     FILE           *fp;
-    char            buf[100];
+    char            buf[1024];
     int             size = -1, used = -1;
 
     if ((fp = fopen("/proc/meminfo", "r")) == NULL)

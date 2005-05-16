@@ -21,7 +21,7 @@ STARTAGENT
 # give the agent more time to start up.  We only want to fire one
 # request (retries = 0) to make sure only one trap is sent.
 #DELAY
-CAPTURE "snmpget -On -r 0 -t 5 $SNMP_FLAGS -v 1 -c wrongcommunity udp:localhost:$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget -On -r 0 -t 5 $SNMP_FLAGS -v 1 -c wrongcommunity $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
 
 STOPAGENT
 

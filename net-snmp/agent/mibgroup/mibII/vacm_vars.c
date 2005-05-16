@@ -1,6 +1,16 @@
 /*
  * SNMPv3 View-based Access Control Model
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -732,7 +742,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
          */
 
         if (pdu->tDomain == netsnmpUDPDomain
-#if SNMP_TRANSPORT_TCP_DOMAIN
+#ifdef SNMP_TRANSPORT_TCP_DOMAIN
             || pdu->tDomain == netsnmp_snmpTCPDomain
 #endif
             ) {
@@ -754,21 +764,11 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             if (!netsnmp_udp6_getSecName(pdu->transport_data,
                                          pdu->transport_data_length,
                                          (char *) pdu->community,
-                                         pdu->community_len, &sn)
-                && !vacm_is_configured()) {
+                                         pdu->community_len, &sn)) {
                 /*
                  * There are no com2sec entries.  
                  */
-                DEBUGMSGTL(("mibII/vacm_vars",
-                            "vacm_in_view: accepted with no com2sec entries\n"));
-                switch (pdu->command) {
-                case SNMP_MSG_GET:
-                case SNMP_MSG_GETNEXT:
-                case SNMP_MSG_GETBULK:
-                    return 0;
-                default:
-                    return 1;
-                }
+                sn = NULL;
             }
 #endif
         } else {
@@ -869,18 +869,13 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     }
     DEBUGMSG(("mibII/vacm_vars", ", vn=%s", vn));
 
-    vp = vacm_getViewEntry(vn, name, namelen,
-                           (check_subtree) ? VACM_MODE_CHECK_SUBTREE :
-                           VACM_MODE_FIND);
     if (check_subtree) {
-        if (!vp) {
-            return VACM_SUBTREE_UNKNOWN;
-        }
-        if (vp->viewType == SNMP_VIEW_EXCLUDED) {
-            return VACM_NOTINVIEW;
-        }
-        return VACM_SUCCESS;
+        DEBUGMSG(("mibII/vacm_vars", "\n"));
+        return vacm_checkSubtree(vn, name, namelen);
     }
+
+    vp = vacm_getViewEntry(vn, name, namelen, VACM_MODE_FIND);
+
     if (vp == NULL) {
         DEBUGMSG(("mibII/vacm_vars", "\n"));
         return 4;
@@ -1633,6 +1628,10 @@ write_vacmSecurityToGroupStatus(int action,
                 long_ret = RS_NOTREADY;
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
+            if (long_ret == RS_DESTROY && geptr->storageType == ST_PERMANENT) {
+                free(newName);
+                return SNMP_ERR_WRONGVALUE;
+            }
         } else {
             if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
                 free(newName);
@@ -1911,6 +1910,11 @@ write_vacmAccessStatus(int action,
                 free(newGroupName);
                 free(newContextPrefix);
                 return SNMP_ERR_INCONSISTENTVALUE;
+            }
+            if (long_ret == RS_DESTROY && aptr->storageType == ST_PERMANENT) {
+                free(newGroupName);
+                free(newContextPrefix);
+                return SNMP_ERR_WRONGVALUE;
             }
         } else {
             if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
@@ -2398,6 +2402,11 @@ write_vacmViewStatus(int action,
                 free(newViewSubtree);
                 long_ret = RS_NOTREADY;
                 return SNMP_ERR_INCONSISTENTVALUE;
+            }
+            if (long_ret == RS_DESTROY && vptr->viewStorageType == ST_PERMANENT) {
+                free(newViewName);
+                free(newViewSubtree);
+                return SNMP_ERR_WRONGVALUE;
             }
         } else {
             if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {

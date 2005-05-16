@@ -630,7 +630,7 @@ Init_HR_Disk(void)
 int
 Get_Next_HR_Disk(void)
 {
-    char            string[100];
+    char            string[1024];
     int             fd, result;
     int             iindex;
     int             max_disks;
@@ -800,7 +800,7 @@ static void
 Save_HR_Disk_General(void)
 {
 #ifdef DIOC_DESCRIBE
-    strnncpy(HRD_savedModel, HRD_info.model_num, sizeof(HRD_savedModel)-1);
+    strncpy(HRD_savedModel, HRD_info.model_num, sizeof(HRD_savedModel)-1);
     HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
 #endif
 #ifdef DKIOCINFO
