@@ -245,8 +245,9 @@ parse_disk_config(const char *token, char *cptr)
     details_set    *d_set;
     char           *name, *p, *d_str, c;
     unsigned int    i, neg, c1, c2;
+    char           *st;
 
-    name = strtok(cptr, " \t");
+    name = strtok_r(cptr, " \t", &st);
     if (!name) {
         config_perror("Missing NAME parameter");
         return;

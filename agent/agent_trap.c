@@ -956,14 +956,15 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
 {
     char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
+    char            *st;
     int             sinkport;
 
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
-    sp = strtok(cptr, " \t\n");
-    cp = strtok(NULL, " \t\n");
+    sp = strtok_r(cptr, " \t\n", &st);
+    cp = strtok_r(NULL, " \t\n", &st);
     if (cp)
-        pp = strtok(NULL, " \t\n");
+        pp = strtok_r(NULL, " \t\n", &st);
     if (cp && pp) {
         sinkport = atoi(pp);
         if ((sinkport < 1) || (sinkport > 0xffff)) {
@@ -987,14 +988,15 @@ snmpd_parse_config_trap2sink(const char *word, char *cptr)
 {
     char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
+    char            *st;
     int             sinkport;
 
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
-    sp = strtok(cptr, " \t\n");
-    cp = strtok(NULL, " \t\n");
+    sp = strtok_r(cptr, " \t\n", &st);
+    cp = strtok_r(NULL, " \t\n", &st);
     if (cp)
-        pp = strtok(NULL, " \t\n");
+        pp = strtok_r(NULL, " \t\n", &st);
     if (cp && pp) {
         sinkport = atoi(pp);
         if ((sinkport < 1) || (sinkport > 0xffff)) {
@@ -1017,14 +1019,15 @@ snmpd_parse_config_informsink(const char *word, char *cptr)
 {
     char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
+    char            *st;
     int             sinkport;
 
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
-    sp = strtok(cptr, " \t\n");
-    cp = strtok(NULL, " \t\n");
+    sp = strtok_r(cptr, " \t\n", &st);
+    cp = strtok_r(NULL, " \t\n", &st);
     if (cp)
-        pp = strtok(NULL, " \t\n");
+        pp = strtok_r(NULL, " \t\n", &st);
     if (cp && pp) {
         sinkport = atoi(pp);
         if ((sinkport < 1) || (sinkport > 0xffff)) {

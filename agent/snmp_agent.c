@@ -1106,6 +1106,7 @@ init_master_agent(void)
 {
     netsnmp_transport *transport;
     char           *cptr;
+    char           *st;
     char            buf[SPRINT_MAX_LEN];
 
     /* default to a default cache size */
@@ -1148,7 +1149,7 @@ init_master_agent(void)
     }
 
     DEBUGMSGTL(("snmp_agent", "final port spec: %s\n", buf));
-    cptr = strtok(buf, ",");
+    cptr = strtok_r(buf, ",", &st);
     while (cptr) {
         /*
          * Specification format: 
@@ -1197,7 +1198,7 @@ init_master_agent(void)
         /*
          * Next transport please...  
          */
-        cptr = strtok(NULL, ",");
+        cptr = strtok_r(NULL, ",", &st);
     }
 
     return 0;

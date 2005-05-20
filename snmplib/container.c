@@ -130,17 +130,18 @@ netsnmp_container_find_factory(const char *type_list)
 {
     netsnmp_factory   *f = NULL;
     char              *list, *entry;
+    char              *st;
 
     if (NULL==type_list)
         return NULL;
 
     list = strdup(type_list);
-    entry = strtok(list, ":");
+    entry = strtok_r(list, ":", &st);
     while(entry) {
         f = netsnmp_container_get_factory(entry);
         if (NULL != f)
             break;
-        entry = strtok(NULL, ":");
+        entry = strtok_r(NULL, ":", &st);
     }
 
     free(list);

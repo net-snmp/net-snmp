@@ -10,6 +10,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
      - bug 1056760: agent ignores ifspeed, type settings in snmpd.conf
    - Persistent files in directory defined by snmp.conf persistentDir were 
      not being loaded at startup
+   - get rid of strtok (patch 1040330, backported by Thomas Anders, fixes 
+     bug 1040686)
 
  Ports:
    Win32:

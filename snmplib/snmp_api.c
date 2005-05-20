@@ -6420,6 +6420,7 @@ snmp_add_var(netsnmp_pdu *pdu,
 {
     const char     *cp;
     char           *ecp, *vp;
+    char           *st;
     int             result = SNMPERR_SUCCESS;
 #ifndef DISABLE_MIB_LOADING
     int             check = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
@@ -6708,7 +6709,7 @@ snmp_add_var(netsnmp_pdu *pdu,
 #endif /* DISABLE_MIB_LOADING */
 
 	vp = strdup(value);
-	for (cp = strtok(vp, " ,\t"); cp; cp = strtok(NULL, " ,\t")) {
+	for (cp = strtok_r(vp, " ,\t", &st); cp; cp = strtok_r(NULL, " ,\t", &st)) {
             int             ix, bit;
 
             ltmp = strtoul(cp, &ecp, 0);

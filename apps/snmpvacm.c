@@ -243,6 +243,7 @@ main(int argc, char *argv[])
     int             secModel, secLevel, contextMatch, val, i = 0;
     char           *mask, *groupName, *prefix;
     u_char          viewMask[VACMSTRINGLEN];
+    char           *st;
 
 
     /*
@@ -335,7 +336,7 @@ main(int argc, char *argv[])
          */
         if (arg + 3 == argc) {
             mask = argv[arg + 2];
-            for (mask = strtok(mask, ".:"); mask; mask = strtok(NULL, ".:")) {
+            for (mask = strtok_r(mask, ".:", &st); mask; mask = strtok_r(NULL, ".:", &st)) {
                 if (i >= sizeof(viewMask)) {
                     printf("MASK too long\n");
                     exit(1);

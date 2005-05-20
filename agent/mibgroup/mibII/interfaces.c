@@ -332,18 +332,19 @@ parse_interface_config(const char *token, char *cptr)
 {
     conf_if_list   *if_ptr, *if_new;
     char           *name, *type, *speed, *ecp;
+    char           *st;
 
-    name = strtok(cptr, " \t");
+    name = strtok_r(cptr, " \t", &st);
     if (!name) {
         config_perror("Missing NAME parameter");
         return;
     }
-    type = strtok(NULL, " \t");
+    type = strtok_r(NULL, " \t", &st);
     if (!type) {
         config_perror("Missing TYPE parameter");
         return;
     }
-    speed = strtok(NULL, " \t");
+    speed = strtok_r(NULL, " \t", &st);
     if (!speed) {
         config_perror("Missing SPEED parameter");
         return;
