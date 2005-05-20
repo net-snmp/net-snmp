@@ -187,6 +187,10 @@ struct timeval  Now;
 
 void            trapd_update_config(void);
 
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+void            init_subagent(void);
+#endif
+
 const char *
 trap_description(int trap)
 {
@@ -1023,6 +1027,10 @@ main(int argc, char *argv[])
             exit(0);
 
         case 'H':
+            init_agent("snmptrapd");
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+            init_subagent();
+#endif
             init_notification_log();
             init_snmp("snmptrapd");
             fprintf(stderr, "Configuration directives understood:\n");
