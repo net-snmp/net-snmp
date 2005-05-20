@@ -226,6 +226,10 @@ int __cdecl     _tmain(int argc, TCHAR * argv[]);
 int             main(int, char **);
 #endif
 
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+void            init_subagent(void);
+#endif
+
 void
 event_input(netsnmp_variable_list * vp)
 {
@@ -709,7 +713,14 @@ main(int argc, char *argv[])
             exit(0);
 
         case 'H':
+            init_agent("snmptrapd");
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+            init_subagent();
+#endif
             init_notification_log();
+#ifdef NETSNMP_EMBEDDED_PERL
+            init_perl();
+#endif
             init_snmp("snmptrapd");
             fprintf(stderr, "Configuration directives understood:\n");
             read_config_print_usage("  ");
@@ -952,7 +963,6 @@ main(int argc, char *argv[])
     if (agentx_subagent) {
         extern void init_register_usmUser_context(const char *);
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-	void  init_subagent(void);
         init_subagent();
 #endif
         /* register the notification log table */
