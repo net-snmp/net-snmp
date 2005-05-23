@@ -157,12 +157,12 @@ debug_register_tokens(char *tokens)
                     status = SNMP_DEBUG_ACTIVE;
                 dbg_tokens[debug_num_tokens].token_name = strdup(cp);
                 dbg_tokens[debug_num_tokens++].enabled  = status;
-                snmp_log(LOG_NOTICE, "registered debug token %s, %d", cp, status);
+                snmp_log(LOG_NOTICE, "registered debug token %s, %d\n", cp, status);
             } else {
-                snmp_log(LOG_NOTICE, "Unable to register debug token %s", cp);
+                snmp_log(LOG_NOTICE, "Unable to register debug token %s\n", cp);
             }
         } else {
-            snmp_log(LOG_NOTICE, "Debug token %s over length", cp);
+            snmp_log(LOG_NOTICE, "Debug token %s over length\n", cp);
         }
         cp = strtok_r(NULL, DEBUG_TOKEN_DELIMITER, &st);
     }
