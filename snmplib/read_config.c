@@ -201,6 +201,7 @@ register_config_handler(const char *type_param,
     struct config_files **ctmp = &config_files;
     struct config_line **ltmp;
     const char     *type = type_param;
+    char           *st;
 
     if (type == NULL) {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
@@ -285,6 +286,7 @@ unregister_config_handler(const char *type_param, const char *token)
     struct config_files **ctmp = &config_files;
     struct config_line **ltmp, *ltmp2;
     const char     *type = type_param;
+    char           *st;
 
     if (type == NULL) {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
@@ -467,6 +469,7 @@ int
 snmp_config_when(char *line, int when)
 {
     char           *cptr, buf[STRINGMAX], tmpbuf[STRINGMAX];
+    char           *st;
     struct config_line *lptr = NULL;
     struct config_files *ctmp = config_files;
 
@@ -477,7 +480,7 @@ snmp_config_when(char *line, int when)
 
     strncpy(buf, line, STRINGMAX);
     buf[STRINGMAX - 1] = '\0';
-    cptr = strtok(buf, SNMP_CONFIG_DELIMETERS);
+    cptr = strtok_r(buf, SNMP_CONFIG_DELIMETERS, &st);
     if (cptr && cptr[0] == '[') {
         if (cptr[strlen(cptr) - 1] != ']') {
             snprintf(tmpbuf, sizeof(tmpbuf),
@@ -497,7 +500,7 @@ snmp_config_when(char *line, int when)
             config_perror(tmpbuf);
             return SNMPERR_GENERR;
         }
-        cptr = strtok(NULL, SNMP_CONFIG_DELIMETERS);
+        cptr = strtok_r(NULL, SNMP_CONFIG_DELIMETERS, &st);
         lptr = read_config_find_handler(lptr, cptr);
     } else {
         /*
@@ -515,7 +518,7 @@ snmp_config_when(char *line, int when)
     }
 
     /*
-     * use the original string instead since strtok messed up the original 
+     * use the original string instead since strtok_r messed up the original 
      */
     line = skip_white(line + (cptr - buf) + strlen(cptr) + 1);
 
@@ -754,11 +757,11 @@ free_config(void)
 void
 read_configs(void)
 {
-
     char *optional_config = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					       NETSNMP_DS_LIB_OPTIONALCONFIG);
     char *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				       NETSNMP_DS_LIB_APPTYPE);
+    char *st;
 
     DEBUGMSGTL(("read_config", "reading normal configuration tokens\n"));
 

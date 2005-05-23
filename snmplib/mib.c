@@ -2091,8 +2091,9 @@ static void
 handle_print_numeric(const char *token, char *line)
 {
     const char *value;
+    char       *st;
 
-    value = strtok(line, " \t\n");
+    value = strtok_r(line, " \t\n", &st);
     if ((strcasecmp(value, "yes")  == 0) || 
 	(strcasecmp(value, "true") == 0) ||
 	(*value == '1')) {
@@ -2466,6 +2467,7 @@ init_mib(void)
 {
     const char     *prefix;
     char           *env_var, *entry;
+    char           *st;
     PrefixListPtr   pp = &mib_prefixes[0];
 
     if (Mib)
@@ -2482,10 +2484,10 @@ init_mib(void)
                 "Seen MIBDIRS: Looking in '%s' for mib dirs ...\n",
                 env_var));
 
-    entry = strtok(env_var, ENV_SEPARATOR);
+    entry = strtok_r(env_var, ENV_SEPARATOR, &st);
     while (entry) {
         add_mibdir(entry);
-        entry = strtok(NULL, ENV_SEPARATOR);
+        entry = strtok_r(NULL, ENV_SEPARATOR, &st);
     }
     free(env_var);
 
@@ -2520,7 +2522,7 @@ init_mib(void)
     DEBUGMSGTL(("init_mib",
                 "Seen MIBS: Looking in '%s' for mib files ...\n",
                 env_var));
-    entry = strtok(env_var, ENV_SEPARATOR);
+    entry = strtok_r(env_var, ENV_SEPARATOR, &st);
     while (entry) {
         if (strcasecmp(entry, DEBUG_ALWAYS_TOKEN) == 0) {
             read_all_mibs();
@@ -2529,7 +2531,7 @@ init_mib(void)
         } else {
             read_module(entry);
         }
-        entry = strtok(NULL, ENV_SEPARATOR);
+        entry = strtok_r(NULL, ENV_SEPARATOR, &st);
     }
     adopt_orphans();
     free(env_var);
@@ -2564,10 +2566,10 @@ init_mib(void)
         DEBUGMSGTL(("init_mib",
                     "Seen MIBFILES: Looking in '%s' for mib files ...\n",
                     env_var));
-        entry = strtok(env_var, ENV_SEPARATOR);
+        entry = strtok_r(env_var, ENV_SEPARATOR, &st);
         while (entry) {
             read_mib(entry);
-            entry = strtok(NULL, ENV_SEPARATOR);
+            entry = strtok_r(NULL, ENV_SEPARATOR, &st);
         }
         free(env_var);
     }

@@ -1234,9 +1234,10 @@ compute_match(const char *search_base, const char *key)
     char           *first = NULL, *result = NULL, *entry;
     const char     *position;
     char           *newkey = strdup(key);
+    char           *st;
 
 
-    entry = strtok(newkey, "*");
+    entry = strtok_r(newkey, "*", &st);
     position = search_base;
     while (entry) {
         result = strcasestr(position, entry);
@@ -1250,7 +1251,7 @@ compute_match(const char *search_base, const char *key)
             first = result;
 
         position = result + strlen(entry);
-        entry = strtok(NULL, "*");
+        entry = strtok_r(NULL, "*", &st);
     }
     free(newkey);
     if (result)

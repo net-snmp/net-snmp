@@ -6,6 +6,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
    - Many.  This is a final release of the 5.0.X line of the Net-SNMP
      code base and we've accumulated a large number of fixes in this
      branch.  5.0.10 will be the last release from this line.
+   - get rid of strtok (patch 1040330, backported by Thomas Anders, fixes 
+     bug 1040686)
 
  Ports:
 

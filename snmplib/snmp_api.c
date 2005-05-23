@@ -6376,6 +6376,7 @@ snmp_add_var(netsnmp_pdu *pdu,
 {
     const char     *cp;
     char           *ecp, *vp;
+    char           *st;
     int             result = SNMPERR_SUCCESS;
     int             check = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 					     NETSNMP_DS_LIB_DONT_CHECK_RANGE);
@@ -6630,7 +6631,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         }
 
 	vp = strdup(value);
-	for (cp = strtok(vp, " ,\t"); cp; cp = strtok(NULL, " ,\t")) {
+	for (cp = strtok_r(vp, " ,\t", &st); cp; cp = strtok_r(NULL, " ,\t", &st)) {
             int             ix, bit;
 
             ltmp = strtoul(cp, &ecp, 0);
