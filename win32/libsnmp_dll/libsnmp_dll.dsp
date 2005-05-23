@@ -280,6 +280,10 @@ SOURCE=..\..\snmplib\tools.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\strtok_r.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\ucd_compat.c
 # End Source File
 # Begin Source File
@@ -433,6 +437,10 @@ SOURCE="..\..\include\net-snmp\library\system.h"
 # Begin Source File
 
 SOURCE="..\..\include\net-snmp\library\tools.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\strtok_r.h"
 # End Source File
 # Begin Source File
 

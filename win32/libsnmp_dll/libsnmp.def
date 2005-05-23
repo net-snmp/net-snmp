@@ -401,4 +401,5 @@ EXPORTS
 	netsnmp_free
 	netsnmp_udp6_agent_config_tokens_register
         snmp_reset_var_buffers
+        strtok_r
 

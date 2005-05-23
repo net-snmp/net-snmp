@@ -62,6 +62,7 @@ CLEAN :
 	-@erase "$(INTDIR)\strlcpy.obj"
 	-@erase "$(INTDIR)\system.obj"
 	-@erase "$(INTDIR)\tools.obj"
+	-@erase "$(INTDIR)\strtok_r.obj"
 	-@erase "$(INTDIR)\ucd_compat.obj"
 	-@erase "$(INTDIR)\vacm.obj"
 	-@erase "$(INTDIR)\vc??.idb"
@@ -163,6 +164,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\strlcpy.obj" \
 	"$(INTDIR)\system.obj" \
 	"$(INTDIR)\tools.obj" \
+	"$(INTDIR)\strtok_r.obj" \
 	"$(INTDIR)\ucd_compat.obj" \
 	"$(INTDIR)\vacm.obj" \
 	"$(INTDIR)\winpipe.obj"
@@ -225,6 +227,7 @@ CLEAN :
 	-@erase "$(INTDIR)\strlcpy.obj"
 	-@erase "$(INTDIR)\system.obj"
 	-@erase "$(INTDIR)\tools.obj"
+	-@erase "$(INTDIR)\strtok_r.obj"
 	-@erase "$(INTDIR)\ucd_compat.obj"
 	-@erase "$(INTDIR)\vacm.obj"
 	-@erase "$(INTDIR)\vc??.idb"
@@ -327,6 +330,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\strlcpy.obj" \
 	"$(INTDIR)\system.obj" \
 	"$(INTDIR)\tools.obj" \
+	"$(INTDIR)\strtok_r.obj" \
 	"$(INTDIR)\ucd_compat.obj" \
 	"$(INTDIR)\vacm.obj" \
 	"$(INTDIR)\winpipe.obj"
@@ -628,6 +632,12 @@ SOURCE=..\..\snmplib\system.c
 SOURCE=..\..\snmplib\tools.c
 
 "$(INTDIR)\tools.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\snmplib\strtok_r.c
+
+"$(INTDIR)\strtok_r.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
