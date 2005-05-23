@@ -125,7 +125,6 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	data_list.c oid_stash.c 				\
 	mt_support.c snmp_enum.c snmp-tc.c 			\
 	snprintf.c strlcpy.c strtol.c strtoul.c	strtok_r.c	\
-	snprintf.c strlcpy.c strtol.c strtoul.c			\
 	snmp_transport.c                                        \
 	@transport_src_list@ \
 	snmp_secmod.c snmp_version.c                            \
@@ -142,7 +141,6 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	data_list.o oid_stash.o 				\
 	mt_support.o snmp_enum.o snmp-tc.o 			\
 	snprintf.o strlcpy.o strtol.o strtoul.o	strtok_r.o	\
-	snprintf.o strlcpy.o strtol.o strtoul.o			\
 	snmp_transport.o                                        \
 	@transport_obj_list@ \
 	snmp_secmod.o snmp_version.o                            \
@@ -159,7 +157,6 @@ LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 		\
 	data_list.lo oid_stash.lo 				\
 	mt_support.lo snmp_enum.lo snmp-tc.lo 			\
 	snprintf.lo strlcpy.lo strtol.lo strtoul.lo	strtok_r.lo	\
-	snprintf.lo strlcpy.lo strtol.lo strtoul.lo			\
 	snmp_transport.lo                                        \
 	@transport_lobj_list@ \
 	snmp_secmod.lo snmp_version.lo                            \
