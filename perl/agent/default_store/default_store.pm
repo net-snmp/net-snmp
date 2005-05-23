@@ -99,20 +99,16 @@ __END__
 
 =head1 NAME
 
-NetSNMP::agent::default_store - Perl extension for blah blah blah
+NetSNMP::agent::default_store - Perl extension for Net-SNMP agent default storage
 
 =head1 SYNOPSIS
 
-  use NetSNMP::agent::default_store;
-  blah blah blah
+  use NetSNMP::agent::default_store qw(:all);
 
 =head1 DESCRIPTION
 
-Stub documentation for NetSNMP::agent::default_store, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+The NetSNMP::agent::default_store module defines the agent-specific Net-SNMP
+default storage variables. 
 
 =head2 EXPORT
 
@@ -154,10 +150,10 @@ None by default.
 
 =head1 AUTHOR
 
-A. U. Thor, a.u.thor@a.galaxy.far.far.away
+Wes Hardaker, E<lt>hardaker@users.sourceforge.netE<gt>
 
 =head1 SEE ALSO
 
-perl(1).
+NetSNMP::default_store(3pm), NetSNMP::agent(3pm), perl(1).
 
 =cut
