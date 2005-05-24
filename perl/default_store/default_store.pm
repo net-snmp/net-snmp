@@ -189,11 +189,11 @@ __END__
 
 =head1 NAME
 
-NetSNMP::default_store - Perl extension for blah blah blah
+NetSNMP::default_store - Perl extension for Net-SNMP generic storage of global data
 
 =head1 SYNOPSIS
 
-  use NetSNMP::default_store;
+  use NetSNMP::default_store qw(:all);
   $port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT);
   netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT, 161);
 
