@@ -2,6 +2,10 @@ This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.0.10*
+ Security:
+   - If you use the fixproc script, you should immediately update to
+     the version in this release to fix a temporary file race condition.
+
  Fixes:
    - Many.  This is a final release of the 5.0.X line of the Net-SNMP
      code base and we've accumulated a large number of fixes in this
