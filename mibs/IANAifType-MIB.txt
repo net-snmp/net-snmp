@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "200503030000Z"  -- March 3, 2005
+       LAST-UPDATED "200505270000Z"  -- May 27, 2005
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -18,6 +18,9 @@
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "200505270000Z"  -- May 27, 2005
+       DESCRIPTION  "Registration of new IANA ifType 228."
 
        REVISION     "200503030000Z"  -- March 3, 2005
        DESCRIPTION  "Added the IANAtunnelType TC and deprecated
@@ -423,7 +426,8 @@
                    fcipLink (224), -- FCIP Link 
                    rpr (225), -- Resilient Packet Ring Interface Type
                    qam (226), -- RF Qam Interface
-                   lmp (227) -- Link Management Protocol
+                   lmp (227), -- Link Management Protocol
+                   cblVectaStar (228) -- Cambridge Broadband Limited VectaStar
     			   }
 
 IANAtunnelType ::= TEXTUAL-CONVENTION
