@@ -245,8 +245,9 @@ parse_disk_config(const char *token, char *cptr)
     details_set    *d_set;
     char           *name, *p, *d_str, c;
     unsigned int    i, neg, c1, c2;
+    char           *st;
 
-    name = strtok(cptr, " \t");
+    name = strtok_r(cptr, " \t", &st);
     if (!name) {
         config_perror("Missing NAME parameter");
         return;
@@ -630,7 +631,7 @@ Init_HR_Disk(void)
 int
 Get_Next_HR_Disk(void)
 {
-    char            string[100];
+    char            string[1024];
     int             fd, result;
     int             iindex;
     int             max_disks;
@@ -800,7 +801,7 @@ static void
 Save_HR_Disk_General(void)
 {
 #ifdef DIOC_DESCRIBE
-    strnncpy(HRD_savedModel, HRD_info.model_num, sizeof(HRD_savedModel)-1);
+    strncpy(HRD_savedModel, HRD_info.model_num, sizeof(HRD_savedModel)-1);
     HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
 #endif
 #ifdef DKIOCINFO

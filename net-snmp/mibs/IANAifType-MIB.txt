@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "200210170000Z"  -- Oct 17, 2002
+       LAST-UPDATED "200411220000Z"  -- June 17, 2004
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -18,6 +18,41 @@
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "200411220000Z"  -- November 22, 2004
+       DESCRIPTION  "Registration of new IANA ifType 227."
+
+       REVISION     "200406170000Z"  -- June 17, 2004
+       DESCRIPTION  "Registration of new IANA ifType 226."
+
+       REVISION     "200405120000Z"  -- May 12, 2004
+       DESCRIPTION  "Added description for IANAifType 6, and 
+	                 changed the descriptions for IANAifTypes
+                     180, 181, and 182."
+
+       REVISION     "200405070000Z"  -- May 7, 2004
+       DESCRIPTION  "Registration of new IANAifType 225."
+
+       REVISION     "200308250000Z"  -- Aug 25, 2003
+       DESCRIPTION  "Deprecated IANAifTypes 7 and 11. Obsoleted
+                    IANAifTypes 62, 69, and 117.  ethernetCsmacd (6)
+                    should be used instead of these values"
+
+       REVISION     "200308180000Z"  -- Aug 18, 2003
+       DESCRIPTION  "Registration of new IANAifType
+                    224."
+
+       REVISION     "200308070000Z"  -- Aug 7, 2003
+       DESCRIPTION  "Registration of new IANAifTypes
+                    222 and 223."
+
+       REVISION     "200303180000Z"  -- Mar 18, 2003
+       DESCRIPTION  "Registration of new IANAifType
+                    221."
+
+       REVISION     "200301130000Z"  -- Jan 13, 2003
+       DESCRIPTION  "Registration of new IANAifType
+                    220."
 
        REVISION     "200210170000Z"  -- Oct 17, 2002
        DESCRIPTION  "Registration of new IANAifType
@@ -159,12 +194,13 @@
                    hdh1822(3),
                    ddnX25(4),
                    rfc877x25(5),
-                   ethernetCsmacd(6),
-                   iso88023Csmacd(7),
+                   ethernetCsmacd(6), -- for all ethernet-like interfaces,
+                                      -- regardless of speed, as per RFC3635
+                   iso88023Csmacd(7), -- Deprecated via RFC-draft-ietf-hubmib-etherif-mib-v3  ethernetCsmacd (6) should be used instead
                    iso88024TokenBus(8),
                    iso88025TokenRing(9),
                    iso88026Man(10),
-                   starLan(11),
+                   starLan(11), -- Deprecated via RFC-draft-ietf-hubmib-etherif-mib-v3  ethernetCsmacd (6) should be used instead
                    proteon10Mbit(12),
                    proteon80Mbit(13),
                    hyperchannel(14),
@@ -217,14 +253,14 @@
                    aflane8023(59),     -- ATM Emulated LAN for 802.3
                    aflane8025(60),     -- ATM Emulated LAN for 802.5
                    cctEmul(61),        -- ATM Emulated circuit          
-                   fastEther(62),      -- Fast Ethernet (100BaseT)
+                   fastEther(62),      -- Obsoleted via RFC-draft-ietf-hubmib-etherif-mib-v3  ethernetCsmacd (6) should be used instead
                    isdn(63),           -- ISDN and X.25           
                    v11(64),            -- CCITT V.11/X.21             
                    v36(65),            -- CCITT V.36                  
                    g703at64k(66),      -- CCITT G703 at 64Kbps
                    g703at2mb(67),      -- Obsolete see DS1-MIB
                    qllc(68),           -- SNA QLLC                    
-                   fastEtherFX(69),    -- Fast Ethernet (100BaseFX)   
+                   fastEtherFX(69),    -- Obsoleted via RFC-draft-ietf-hubmib-etherif-mib-v3  ethernetCsmacd (6) should be used instead
                    channel(70),        -- channel                     
                    ieee80211(71),      -- radio spread spectrum       
 	           ibm370parChan(72),  -- IBM System 360/370 OEMI Channel
@@ -272,7 +308,7 @@
 		   ipOverAtm (114),    -- IBM ipOverAtm
 		   iso88025Fiber (115), -- ISO 802.5j Fiber Token Ring
 		   tdlc (116),	       -- IBM twinaxial data link control
-		   gigabitEthernet (117), -- Gigabit Ethernet
+		   gigabitEthernet (117), -- Obsoleted via RFC-draft-ietf-hubmib-etherif-mib-v3  ethernetCsmacd (6) should be used instead
 		   hdlc (118),         -- HDLC
 		   lapf (119),	       -- LAP F
 		   v37 (120),	       -- V.37
@@ -335,9 +371,9 @@
                    gr303RDT (177), -- Remote Digital Terminal
                    gr303IDT (178), -- Integrated Digital Terminal
                    isup (179), -- ISUP
-                   propDocsWirelessMaclayer (180), -- prop/Maclayer
-                   propDocsWirelessDownstream (181), -- prop/Downstream
-                   propDocsWirelessUpstream (182), -- prop/Upstream
+                   propDocsWirelessMaclayer (180), -- Cisco proprietary Maclayer
+                   propDocsWirelessDownstream (181), -- Cisco proprietary Downstream
+                   propDocsWirelessUpstream (182), -- Cisco proprietary Upstream
                    hiperlan2 (183), -- HIPERLAN Type 2 Radio Interface
                    propBWAp2Mp (184), -- PropBroadbandWirelessAccesspt2multipt
                    sonetOverheadChannel (185), -- SONET Overhead Channel
@@ -374,7 +410,15 @@
                    gtp (216), -- GTP (GPRS Tunneling Protocol)
                    pdnEtherLoop1 (217), -- Paradyne EtherLoop 1
                    pdnEtherLoop2 (218), -- Paradyne EtherLoop 2
-                   opticalChannelGroup (219) -- Optical Channel Group
+                   opticalChannelGroup (219), -- Optical Channel Group
+                   homepna (220), -- HomePNA ITU-T G.989				   
+                   gfp (221), -- Generic Framing Procedure (GFP)
+                   ciscoISLvlan (222), -- Layer 2 Virtual LAN using Cisco ISL
+                   actelisMetaLOOP (223), -- Acteleis proprietary MetaLOOP High Speed Link 
+                   fcipLink (224), -- FCIP Link 
+                   rpr (225), -- Resilient Packet Ring Interface Type
+                   qam (226), -- RF Qam Interface
+                   lmp (227) -- Link Management Protocol
     			   }
 
    END

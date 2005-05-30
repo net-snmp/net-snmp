@@ -128,6 +128,10 @@ bin2asc(char *p, size_t n)
     int             i, flag = 0;
     char            buffer[SNMP_MAXBUF];
 
+    /* prevent buffer overflow */
+    if ((int)n > (sizeof(buffer) - 1))
+        n = sizeof(buffer) - 1;
+
     for (i = 0; i < (int) n; i++) {
         buffer[i] = p[i];
         if (!isprint(p[i]))
@@ -145,14 +149,12 @@ bin2asc(char *p, size_t n)
     return 3 * n - 1;
 }
 
-
 void
 init_pass(void)
 {
     snmpd_register_config_handler("pass", pass_parse_config,
                                   pass_free_config, "miboid command");
 }
-
 
 void
 pass_parse_config(const char *token, char *cptr)
@@ -203,7 +205,7 @@ pass_parse_config(const char *token, char *cptr)
     /*
      * argggg -- pasthrus must be sorted 
      */
-    if (numpassthrus > 0) {
+    if (numpassthrus > 1) {
         etmp = (struct extensible **)
             malloc(((sizeof(struct extensible *)) * numpassthrus));
         if (etmp == NULL)
@@ -326,16 +328,12 @@ var_extensible_pass(struct variable *vp,
                     *var_len = strlen(buf2);
                     vp->type = ASN_OCTET_STR;
                     return ((unsigned char *) buf2);
-                } else if (!strncasecmp(buf, "opaque", 6)) {
-                    *var_len = asc2bin(buf2);
-                    vp->type = ASN_OPAQUE;
-                    return ((unsigned char *) buf2);
                 } else if (!strncasecmp(buf, "integer", 7)) {
                     *var_len = sizeof(long_ret);
                     long_ret = strtol(buf2, NULL, 10);
                     vp->type = ASN_INTEGER;
                     return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "unsigned", 7)) {
+                } else if (!strncasecmp(buf, "unsigned", 8)) {
                     *var_len = sizeof(long_ret);
                     long_ret = strtoul(buf2, NULL, 10);
                     vp->type = ASN_UNSIGNED;
@@ -348,6 +346,10 @@ var_extensible_pass(struct variable *vp,
                 } else if (!strncasecmp(buf, "octet", 5)) {
                     *var_len = asc2bin(buf2);
                     vp->type = ASN_OCTET_STR;
+                    return ((unsigned char *) buf2);
+                } else if (!strncasecmp(buf, "opaque", 6)) {
+                    *var_len = asc2bin(buf2);
+                    vp->type = ASN_OPAQUE;
                     return ((unsigned char *) buf2);
                 } else if (!strncasecmp(buf, "gauge", 5)) {
                     *var_len = sizeof(long_ret);
@@ -404,14 +406,13 @@ setPass(int action,
     char            buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
     long            tmp;
     unsigned long   utmp;
-    size_t          itmp;
 
     for (i = 1; i <= numpassthrus; i++) {
         passthru = get_exten_instance(passthrus, i);
         rtest = snmp_oid_min_compare(name, name_len,
                                      passthru->miboid, passthru->miblen);
         if (rtest <= 0) {
-            if (action != COMMIT)
+            if (action != ACTION)
                 return SNMP_ERR_NOERROR;
             /*
              * setup args 
@@ -421,7 +422,7 @@ setPass(int action,
             else
                 sprint_mib_oid(buf, name, name_len);
             snprintf(passthru->command, sizeof(passthru->command),
-                     "%s -s %s", passthru->name, buf);
+                     "%s -s %s ", passthru->name, buf);
             passthru->command[ sizeof(passthru->command)-1 ] = 0;
             switch (var_val_type) {
             case ASN_INTEGER:
@@ -431,53 +432,54 @@ setPass(int action,
                 tmp = *((long *) var_val);
                 switch (var_val_type) {
                 case ASN_INTEGER:
-                    sprintf(buf, "integer %d", (int) tmp);
+                    sprintf(buf, "integer %d\n", (int) tmp);
                     break;
                 case ASN_COUNTER:
-                    sprintf(buf, "counter %d", (int) tmp);
+                    sprintf(buf, "counter %d\n", (int) tmp);
                     break;
                 case ASN_GAUGE:
-                    sprintf(buf, "gauge %d", (int) tmp);
+                    sprintf(buf, "gauge %d\n", (int) tmp);
                     break;
                 case ASN_TIMETICKS:
-                    sprintf(buf, "timeticks %d", (int) tmp);
+                    sprintf(buf, "timeticks %d\n", (int) tmp);
                     break;
                 }
                 break;
             case ASN_IPADDRESS:
                 utmp = *((u_long *) var_val);
                 utmp = ntohl(utmp);
-                sprintf(buf, "ipaddress %d.%d.%d.%d",
+                sprintf(buf, "ipaddress %d.%d.%d.%d\n",
                         (int) ((utmp & 0xff000000) >> (8 * 3)),
                         (int) ((utmp & 0xff0000) >> (8 * 2)),
                         (int) ((utmp & 0xff00) >> (8)),
                         (int) ((utmp & 0xff)));
                 break;
             case ASN_OCTET_STR:
-                itmp = sizeof(buf2);
                 memcpy(buf2, var_val, var_val_len);
                 if (var_val_len == 0)
-                    sprintf(buf, "string \"\"");
+                    sprintf(buf, "string \"\"\n");
                 else if (bin2asc(buf2, var_val_len) == (int) var_val_len)
-                    snprintf(buf, sizeof(buf), "string \"%s\"", buf2);
+                    snprintf(buf, sizeof(buf), "string \"%s\"\n", buf2);
                 else
-                    snprintf(buf, sizeof(buf), "octet \"%s\"", buf2);
+                    snprintf(buf, sizeof(buf), "octet \"%s\"\n", buf2);
                 buf[ sizeof(buf)-1 ] = 0;
                 break;
             case ASN_OBJECT_ID:
                 sprint_mib_oid(buf2, (oid *) var_val, var_val_len);
-                snprintf(buf, sizeof(buf), "objectid \"%s\"", buf2);
+                snprintf(buf, sizeof(buf), "objectid \"%s\"\n", buf2);
                 buf[ sizeof(buf)-1 ] = 0;
                 break;
             }
             strncat(passthru->command, buf, sizeof(passthru->command));
             passthru->command[ sizeof(passthru->command)-1 ] = 0;
-            DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s\n",
+            DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s",
                         passthru->command));
             exec_command(passthru);
-            if (!strncasecmp(passthru->output, "not-writable", 11)) {
+            DEBUGMSGTL(("ucd-snmp/pass", "pass-running returned: %s",
+                        passthru->output));
+            if (!strncasecmp(passthru->output, "not-writable", 12)) {
                 return SNMP_ERR_NOTWRITABLE;
-            } else if (!strncasecmp(passthru->output, "wrong-type", 9)) {
+            } else if (!strncasecmp(passthru->output, "wrong-type", 10)) {
                 return SNMP_ERR_WRONGTYPE;
             }
             return SNMP_ERR_NOERROR;

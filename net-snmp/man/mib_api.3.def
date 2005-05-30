@@ -279,7 +279,6 @@ corresponding object identifier.
 .BR snprint_objid ,
 and
 .B sprint_realloc_objid
-.br
 take an object identifier (without an accompanying variable instance)
 and print out the textual representation.
 .PP
@@ -289,7 +288,7 @@ and
 take an object identifier (as for
 .B print_objid
 above) and print out the associated DESCRIPTION clause.
-.b
+.PP
 Note that there are no corresponding routines
 .B snprint_description
 or
@@ -297,7 +296,7 @@ or
 By default the parser does not save descriptions since they may be
 huge.  In order to be able to print them, you must call
 .BR snmp_set_save_descriptions(1) .
-
+.PP
 In general the parser is silent about what strangenesses it sees in
 the MIB files. To get warnings reported, call
 .B snmp_set_mib_warnings

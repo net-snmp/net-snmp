@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdlib.h>
@@ -22,6 +32,16 @@
  *  @ingroup handler
  *  @{
  */
+
+/**
+ * Creates an instance helper handler, calls netsnmp_create_handler, which
+ * then could be registered, using netsnmp_register_handler().
+ *
+ * @param void
+ *
+ * @return Returns a pointer to a netsnmp_mib_handler struct which contains
+ *	the handler's name and the access method
+ */
 netsnmp_mib_handler *
 netsnmp_get_instance_handler(void)
 {
@@ -29,6 +49,24 @@ netsnmp_get_instance_handler(void)
                                   netsnmp_instance_helper_handler);
 }
 
+/**
+ * This function registers an instance helper handler, which is a way of 
+ * registering an exact OID such that GENEXT requests are handled entirely
+ * by the helper. First need to inject it into the calling chain of the 
+ * handler defined by the netsnmp_handler_registration struct, reginfo.  
+ * The new handler is injected at the top of the list and will be the new
+ * handler to be called first.  This function also injects a serialize 
+ * handler before actually calling netsnmp_register_handle, registering 
+ * reginfo.
+ *
+ * @param reginfo a handler registration structure which could get created
+ *                using netsnmp_create_handler_registration.  Used to register
+ *                an instance helper handler.
+ *
+ * @return
+ *      MIB_REGISTERED_OK is returned if the registration was a success.
+ *	Failures are MIB_REGISTRATION_FAILED and MIB_DUPLICATE_REGISTRATION.
+ */
 int
 netsnmp_register_instance(netsnmp_handler_registration *reginfo)
 {
@@ -36,6 +74,24 @@ netsnmp_register_instance(netsnmp_handler_registration *reginfo)
     return netsnmp_register_serialize(reginfo);
 }
 
+/**
+ * This function injects a "read only" handler into the handler chain 
+ * prior to serializing/registering the handler.
+ *
+ * The only purpose of this "read only" handler is to return an
+ * appropriate error for any requests passed to it in a SET mode.
+ * Inserting it into your handler chain will ensure you're never
+ * asked to perform a SET request so you can ignore those error
+ * conditions.
+ *
+ * @param reginfo a handler registration structure which could get created
+ *                using netsnmp_create_handler_registration.  Used to register
+ *                a read only instance helper handler.
+ *
+ * @return
+ *      MIB_REGISTERED_OK is returned if the registration was a success.
+ *	Failures are MIB_REGISTRATION_FAILED and MIB_DUPLICATE_REGISTRATION.
+ */
 int
 netsnmp_register_read_only_instance(netsnmp_handler_registration *reginfo)
 {
@@ -174,6 +230,24 @@ register_read_only_int_instance(const char *name,
                                 it, subhandler);
 }
 
+/**
+ * This function registers an int helper handler to a specified OID.
+ *
+ * @param name         the name used for registration pruposes.
+ *
+ * @param reg_oid      the OID where you want to register your integer at
+ *
+ * @param reg_oid_len  the length of the OID
+ *
+ * @param it           the integer value to be registered during initialization
+ *
+ * @param subhandler   a handler to do whatever you want to do, otherwise use
+ *                     NULL to use the default int handler.
+ *
+ * @return
+ *      MIB_REGISTERED_OK is returned if the registration was a success.
+ *	Failures are MIB_REGISTRATION_FAILED and MIB_DUPLICATE_REGISTRATION.
+ */
 int
 netsnmp_register_int_instance(const char *name,
                               oid * reg_oid, size_t reg_oid_len,
@@ -382,9 +456,10 @@ netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
                              netsnmp_request_info *requests)
 {
 
-    int            *it = (u_int *) handler->myvoid;
-    int            *it_save;
-
+    int *it = (int *) handler->myvoid;
+    int *it_save;
+    long tmp_it;
+    
     DEBUGMSGTL(("netsnmp_instance_int_handler", "Got request:  %d\n",
                 reqinfo->mode));
 
@@ -393,8 +468,12 @@ netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
          * data requests 
          */
     case MODE_GET:
+	/*
+	 * Use a long here, otherwise on 64 bit use of an int would fail
+	 */
+	tmp_it = *it;
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) it, sizeof(*it));
+                                 (u_char *) &tmp_it, sizeof(long));
         break;
 
         /*
