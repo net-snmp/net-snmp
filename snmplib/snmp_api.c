@@ -704,6 +704,7 @@ snmp_sess_init(netsnmp_session * session)
     session->version = SNMP_DEFAULT_VERSION;
     session->securityModel = SNMP_DEFAULT_SECMODEL;
     session->rcvMsgMaxSize = SNMP_MAX_MSG_SIZE;
+    session->flags |= SNMP_FLAGS_DONT_PROBE;
 }
 
 
@@ -1251,7 +1252,21 @@ snmp_sess_copy(netsnmp_session * pss)
 }
 
 
-
+/**
+ * probe for peer engineID
+ *
+ * @param slp         session list pointer.
+ * @param in_session  session for errors
+ *
+ * @note
+ *  - called by _sess_open(), snmp_sess_add_ex()
+ *  - in_session is the user supplied session provided to those functions.
+ *  - the first session in slp should the internal allocated copy of in_session
+ *
+ * @return 0 : error
+ * @return 1 : ok
+ *
+ */
 int
 snmpv3_engineID_probe(struct session_list *slp,
                       netsnmp_session * in_session)
@@ -1283,6 +1298,7 @@ snmpv3_engineID_probe(struct session_list *slp,
                 return 0;
             }
             DEBUGMSGTL(("snmp_api", "probing for engineID...\n"));
+            session->flags |= SNMP_FLAGS_DONT_PROBE; /* prevent recursion */
             status = snmp_sess_synch_response(slp, pdu, &response);
 
             if ((response == NULL) && (status == STAT_SUCCESS)) {
@@ -1416,6 +1432,8 @@ _sess_open(netsnmp_session * in_session)
         snmp_sess_close(slp);
         return 0;
     }
+    session->flags &= ~SNMP_FLAGS_DONT_PROBE;
+
 
     return (void *) slp;
 }                               /* end snmp_sess_open() */
@@ -2076,6 +2094,54 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         return -1;
     }
 
+    /* Do we need to set the session security engineid? */
+    if (session->securityEngineIDLen == 0) {
+        if (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) {
+            /* The remote end is authoritative. Send a disovery packet to
+             * determine the remote engine id if necessary
+             */
+            DEBUGMSGTL(("snmpv3_build", "delayed probe for engineID\n"));
+            if (1 != snmpv3_engineID_probe(snmp_sess_pointer(session),
+                                           session)) {
+                session->s_snmp_errno = SNMPERR_USM_UNKNOWNENGINEID;
+                return(-1);
+            }
+        }
+        else {
+            session->securityEngineID =
+                snmpv3_generate_engineID(&session->securityEngineIDLen);
+            if ((NULL == session->securityEngineID) ||
+                (SNMPERR_SUCCESS != create_user_from_session(session))) {
+                session->s_snmp_errno = SNMPERR_USM_UNKNOWNENGINEID;
+                return(-1);
+            }
+        }
+    }
+    
+    /* Do we need to set the session context engineid? */
+    if (session->contextEngineIDLen == 0) {
+        if (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) {
+            /* The remote end is authoritative. Send a disovery packet to
+             * determine the remote engine id if necessary
+             */
+            DEBUGMSGTL(("snmpv3_build", "delayed probe for engineID\n"));
+            if (1 != snmpv3_engineID_probe(snmp_sess_pointer(session),
+                                           session)) {
+                session->s_snmp_errno = SNMPERR_USM_UNKNOWNENGINEID;
+                return(-1);
+            }
+        }
+        else {
+            /* We are the authoritative engine, so use our engineid */
+            session->contextEngineID =
+                snmpv3_generate_engineID(&session->contextEngineIDLen);
+            if (NULL == session->contextEngineID) {
+                session->s_snmp_errno = SNMPERR_USM_UNKNOWNENGINEID;
+                return(-1);
+            }
+        }
+    }
+    
     if (pdu->securityEngineIDLen == 0) {
         if (session->securityEngineIDLen) {
             snmpv3_clone_engineID(&pdu->securityEngineID,
