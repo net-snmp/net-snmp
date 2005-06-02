@@ -515,11 +515,10 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     default:
         snmp_log(LOG_WARNING, "cache_handler: Unrecognised mode (%d)\n",
                  reqinfo->mode);
-        netsnmp_set_all_requests_error(reqinfo, requests,
-                                       SNMP_ERR_GENERR);
+        netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
         return SNMP_ERR_GENERR;
     }
-    netsnmp_set_all_requests_error(reqinfo, requests, SNMP_ERR_GENERR);
+    netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
     return SNMP_ERR_GENERR;     /* should never get here */
 }
 

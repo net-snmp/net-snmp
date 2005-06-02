@@ -57,13 +57,11 @@ netsnmp_null_handler(netsnmp_mib_handler *handler,
         return SNMP_ERR_NOERROR;
 
     case MODE_GET:
-        netsnmp_set_all_requests_error(reqinfo, requests,
-                                       SNMP_NOSUCHOBJECT);
+        netsnmp_request_set_error_all(requests, SNMP_NOSUCHOBJECT);
         return SNMP_ERR_NOERROR;
 
     default:
-        netsnmp_set_all_requests_error(reqinfo, requests,
-                                       SNMP_ERR_NOSUCHNAME);
+        netsnmp_request_set_error_all(requests, SNMP_ERR_NOSUCHNAME);
         return SNMP_ERR_NOERROR;
     }
 }

@@ -59,8 +59,7 @@ netsnmp_read_only_helper(netsnmp_mib_handler *handler,
     case MODE_SET_COMMIT:
     case MODE_SET_FREE:
     case MODE_SET_UNDO:
-        netsnmp_set_all_requests_error(reqinfo, requests,
-                                       SNMP_ERR_NOTWRITABLE);
+        netsnmp_request_set_error_all(requests, SNMP_ERR_NOTWRITABLE);
         return SNMP_ERR_NOTWRITABLE;
 
     case MODE_GET:
@@ -70,11 +69,10 @@ netsnmp_read_only_helper(netsnmp_mib_handler *handler,
         return SNMP_ERR_NOERROR;
 
     default:
-        netsnmp_set_all_requests_error(reqinfo, requests,
-                                       SNMP_ERR_GENERR);
+        netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
         return SNMP_ERR_GENERR;
     }
-    netsnmp_set_all_requests_error(reqinfo, requests, SNMP_ERR_GENERR);
+    netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
     return SNMP_ERR_GENERR;     /* should never get here */
 }
 
