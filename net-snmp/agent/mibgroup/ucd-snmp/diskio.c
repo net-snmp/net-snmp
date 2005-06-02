@@ -464,8 +464,8 @@ void devla_getstats(unsigned int regno, void *dummy) {
 		    ERROR_MSG("Memory alloc failure - devla_getstats()\n");
 		    return;
 	    }
+	    memset(lastat->dinfo, 0, sizeof(struct devinfo));
 	}
-	memset(lastat->dinfo, 0, sizeof(struct devinfo));
 
         if ((GETDEVS(lastat)) == -1) {
                 ERROR_MSG("can't do getdevs()\n");
