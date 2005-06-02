@@ -422,8 +422,8 @@ getstats(void)
         	fprintf(stderr, "Memory alloc error - devinfo\n");
 		return 1;
 	}
+        memset(stat->dinfo, 0, sizeof(struct devinfo));
     }
-    memset(stat->dinfo, 0, sizeof(struct devinfo));
 
     if (GETDEVS(stat) == -1) {
         fprintf(stderr, "Can't get devices:%s\n", devstat_errbuf);
