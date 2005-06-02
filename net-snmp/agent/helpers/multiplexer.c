@@ -83,8 +83,7 @@ netsnmp_multiplexer_helper_handler(netsnmp_mib_handler *handler,
     case MODE_GET:
         handler = methods->get_handler;
         if (!handler) {
-            netsnmp_set_all_requests_error(reqinfo, requests,
-                                           SNMP_NOSUCHOBJECT);
+            netsnmp_request_set_error_all(requests, SNMP_NOSUCHOBJECT);
         }
         break;
 
@@ -96,8 +95,7 @@ netsnmp_multiplexer_helper_handler(netsnmp_mib_handler *handler,
     case MODE_SET_UNDO:
         handler = methods->set_handler;
         if (!handler) {
-            netsnmp_set_all_requests_error(reqinfo, requests,
-                                           SNMP_ERR_NOTWRITABLE);
+            netsnmp_request_set_error_all(requests, SNMP_ERR_NOTWRITABLE);
             return SNMP_ERR_NOERROR;
         }
         break;
