@@ -445,10 +445,51 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
     ch->orig_transport_data = pdu->transport_data;
     pdu->transport_data = ch;
     switch (pdu->command) {
+    case SNMP_MSG_GETBULK:
+        if (pdu->max_repetitions < 0) {
+            sp->s_snmp_errno = SNMPERR_BAD_REPETITIONS;
+            return -1;
+        }
+        if (pdu->non_repeaters < 0) {
+            sp->s_snmp_errno = SNMPERR_BAD_REPEATERS;
+            return -1;
+        }
+        break;
     case SNMP_MSG_RESPONSE:
     case SNMP_MSG_TRAP:
     case SNMP_MSG_TRAP2:
         pdu->flags &= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
+        /*
+         * Fallthrough
+         */
+    default:
+        if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
+            pdu->errstat = 0;
+        if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
+            pdu->errindex = 0;
+        break;
+    }
+
+    /*
+     * Copy missing values from session defaults
+     */
+    switch (pdu->version) {
+    case SNMP_VERSION_1:
+    case SNMP_VERSION_2c:
+        if (pdu->community_len == 0) {
+            if (sp->community_len == 0) {
+                sp->s_snmp_errno = SNMPERR_BAD_COMMUNITY;
+                return -1;
+            }
+            pdu->community = (u_char *) malloc(sp->community_len);
+            if (pdu->community == NULL) {
+                sp->s_snmp_errno = SNMPERR_MALLOC;
+                return -1;
+            }
+            memmove(pdu->community,
+                    sp->community, sp->community_len);
+            pdu->community_len = sp->community_len;
+        }
         break;
     }
     *len = 1;
