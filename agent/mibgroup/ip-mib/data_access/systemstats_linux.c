@@ -11,7 +11,9 @@
 #include <net-snmp/data_access/systemstats.h>
 
 static int _systemstats_v4(netsnmp_container* container, u_int load_flags);
+#if defined (INET6)
 static int _systemstats_v6(netsnmp_container* container, u_int load_flags);
+#endif
 
 
 void
@@ -51,7 +53,10 @@ int
 netsnmp_access_systemstats_container_arch_load(netsnmp_container* container,
                                              u_int load_flags)
 {
-    int rc1,rc2;
+    int rc1;
+#if defined (INET6)
+    int rc2;
+#endif
 
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for access_systemstats_\n");
@@ -65,11 +70,15 @@ netsnmp_access_systemstats_container_arch_load(netsnmp_container* container,
      * would have logged its own message.
      */
     rc1 = _systemstats_v4(container, load_flags);
+#if defined (INET6)
     rc2 = _systemstats_v6(container, load_flags);
     if ((rc1 == rc2) || (rc1 < rc2))
         return rc1;
         
     return rc2;
+#else
+    return rc1;
+#endif
 }
 
 static int
@@ -201,6 +210,7 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
     return 0;
 }
     
+#if defined (INET6)
 static int
 _systemstats_v6(netsnmp_container* container, u_int load_flags)
 {
@@ -354,3 +364,4 @@ _systemstats_v6(netsnmp_container* container, u_int load_flags)
 
     return rc;
 }
+#endif /* INET6 */
