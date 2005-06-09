@@ -6242,146 +6242,20 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
                           u_char type, const u_char * value, size_t len)
 {
     netsnmp_variable_list *vars, *vtmp;
-    int             largeval = 1;
-    const long     *val_long = NULL;
-    const int      *val_int  = NULL;
+    int rc;
 
     if (varlist == NULL)
         return NULL;
 
-    vars = (netsnmp_variable_list *) malloc(sizeof(netsnmp_variable_list));
+    vars = SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
     if (vars == NULL)
         return NULL;
 
-    vars->next_variable = 0;
-    vars->name = 0;
-    vars->name_length = 0;
-    vars->val.string = 0;
-    vars->data = 0;
-    vars->dataFreeHook = 0;
-    vars->index = 0;
-
-    /*
-     * use built-in storage for smaller values 
-     */
-    if (len <= (sizeof(vars->buf) - 1)) {
-        vars->val.string = (u_char *) vars->buf;
-        largeval = 0;
-    }
-
     vars->type = type;
-    vars->val_len = len;
-    switch (type) {
-    case ASN_INTEGER:
-    case ASN_UNSIGNED:
-    case ASN_TIMETICKS:
-    case ASN_IPADDRESS:
-    case ASN_COUNTER:
-        if (value) {
-            if (largeval) {
-                snmp_log(LOG_ERR,"bad size for integer-like type (%d)\n",
-                         vars->val_len);
-                snmp_free_var(vars);
-                return (0);
-            } else if (vars->val_len == sizeof(int)) {
-                val_int = (const int *) value;
-                *(vars->val.integer) = (long) *val_int;
-            } else {
-                val_long = (const long *) value;
-                *(vars->val.integer) = *val_long;
-            }
-        }
-        vars->val_len = sizeof(long);
-        break;
 
-    case ASN_OBJECT_ID:
-    case ASN_PRIV_IMPLIED_OBJECT_ID:
-    case ASN_PRIV_INCL_RANGE:
-    case ASN_PRIV_EXCL_RANGE:
-        if (largeval) {
-            vars->val.objid = (oid *) malloc(vars->val_len);
-        }
-        if (vars->val.objid == NULL) {
-            return NULL;
-        }
-        memmove(vars->val.objid, value, vars->val_len);
-        break;
-
-    case ASN_PRIV_IMPLIED_OCTET_STR:
-    case ASN_OCTET_STR:
-    case ASN_BIT_STR:
-    case ASN_OPAQUE:
-    case ASN_NSAP:
-        if (largeval) {
-            vars->val.string = (u_char *) malloc(vars->val_len + 1);
-        }
-        if (vars->val.string == NULL) {
-            return NULL;
-        }
-        memmove(vars->val.string, value, vars->val_len);
-        /*
-         * Make sure the string is zero-terminated; some bits of code make
-         * this assumption.  Easier to do this here than fix all these wrong
-         * assumptions.  
-         */
-        vars->val.string[vars->val_len] = '\0';
-        break;
-
-    case SNMP_NOSUCHOBJECT:
-    case SNMP_NOSUCHINSTANCE:
-    case SNMP_ENDOFMIBVIEW:
-    case ASN_NULL:
-        vars->val_len = 0;
-        vars->val.string = NULL;
-        break;
-
-#ifdef OPAQUE_SPECIAL_TYPES
-    case ASN_OPAQUE_U64:
-    case ASN_OPAQUE_I64:
-#endif                          /* OPAQUE_SPECIAL_TYPES */
-    case ASN_COUNTER64:
-        if (largeval) {
-            snmp_log(LOG_ERR,"bad size for counter 64 (%d)\n",
-                     vars->val_len);
-            snmp_free_var(vars);
-            return (0);
-        }
-        vars->val_len = sizeof(struct counter64);
-        memmove(vars->val.counter64, value, vars->val_len);
-        break;
-
-#ifdef OPAQUE_SPECIAL_TYPES
-    case ASN_OPAQUE_FLOAT:
-        if (largeval) {
-            snmp_log(LOG_ERR,"bad size for opaque float (%d)\n",
-                     vars->val_len);
-            snmp_free_var(vars);
-            return (0);
-        }
-        vars->val_len = sizeof(float);
-        memmove(vars->val.floatVal, value, vars->val_len);
-        break;
-
-    case ASN_OPAQUE_DOUBLE:
-        if (largeval) {
-            snmp_log(LOG_ERR,"bad size for opaque double (%d)\n",
-                     vars->val_len);
-            snmp_free_var(vars);
-            return (0);
-        }
-        vars->val_len = sizeof(double);
-        memmove(vars->val.doubleVal, value, vars->val_len);
-        break;
-
-#endif                          /* OPAQUE_SPECIAL_TYPES */
-
-    default:
-        snmp_set_detail("Internal error in type switching\n");
-        snmp_free_var(vars);
-        return (0);
-    }
-
-    if (name != NULL && snmp_set_var_objid(vars, name, name_length)) {
+    rc = snmp_set_var_value( vars, value, len );
+    if (( 0 != rc ) ||
+        (name != NULL && snmp_set_var_objid(vars, name, name_length))) {
         snmp_free_var(vars);
         return (0);
     }
