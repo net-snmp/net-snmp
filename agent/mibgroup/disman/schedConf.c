@@ -49,7 +49,7 @@ parse_sched_periodic( const char *token, char *line )
     long frequency;
     long value;
     size_t tmpint;
-    oid *variable;
+    oid  variable[MAX_OID_LEN], *var_ptr = variable;
     size_t var_len = MAX_OID_LEN;
     
     schedEntries++;
@@ -60,16 +60,27 @@ parse_sched_periodic( const char *token, char *line )
      *  Parse the configure directive line
      */
     line = read_config_read_data(ASN_INTEGER,   line, &frequency, &tmpint);
-    line = read_config_read_data(ASN_OBJECT_ID, line, &variable,  &var_len);
-    if ( *line == '=' ) {
+    line = read_config_read_data(ASN_OBJECT_ID, line, &var_ptr,   &var_len);
+    if (var_len == 0) {
+        config_perror("invalid specification for schedVariable");
+        return;
+    }
+    /*
+     * Skip over optional assignment in "var = value"
+     */
+    while (line && isspace(*line))
+        line++;
+    if (line && *line == '=' ) {
         line++;
         while (line && isspace(*line)) {
             line++;
         }
     }
     line = read_config_read_data(ASN_INTEGER,   line, &value, &tmpint);
-    /* XXX - Check for errors & bail out */
     
+    /*
+     * Create an entry in the schedTable
+     */
     row = schedTable_createEntry(schedTable, "snmpd.conf", strlen("snmpd.conf"),
                                              buf, strlen(buf), NULL );
     entry = (struct schedTable_entry *)row->data;
