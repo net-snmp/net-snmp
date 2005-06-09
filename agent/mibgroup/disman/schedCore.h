@@ -30,12 +30,12 @@ struct schedTable_entry {
     u_long          old_schedInterval;
     char            schedWeekDay;
     char            old_schedWeekDay;
-    char            schedMonth[3];
-    char            old_schedMonth[3];
+    char            schedMonth[2];
+    char            old_schedMonth[2];
     char            schedDay[4+4];
     char            old_schedDay[4+4];
-    char            schedHour[2];
-    char            old_schedHour[2];
+    char            schedHour[3];
+    char            old_schedHour[3];
     char            schedMinute[8];
     char            old_schedMinute[8];
     char            schedContextName[32];
