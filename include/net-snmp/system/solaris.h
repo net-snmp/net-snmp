@@ -28,3 +28,7 @@
 #ifndef __GNUC__
 #  define NETSNMP_NO_INLINE 1
 #endif
+
+/* get some required prototypes (strtok_r) from include files */
+#define __EXTENSIONS__
+
