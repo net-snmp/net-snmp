@@ -101,6 +101,63 @@ parse_sched_periodic( const char *token, char *line )
 
 
 /*
+ * Convert from a cron-style specification to the equivalent set of bits.
+ * Note that minute, hour and weekday crontab fields are 0-based,
+ * while day and month more naturally start from 1.
+ */
+void
+_sched_convert_bits( char *cron_spec, char *bit_buf,
+                     int  bit_buf_len, int max_val, int startAt1 ) {
+    char *cp = cron_spec;
+    char b[] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
+    int val, major, minor;
+ 
+    /*
+     * Wildcard field - set all bits
+     */
+    if ( *cp == '*' ) {
+        memset( bit_buf, 0xff, bit_buf_len );
+
+        /*
+         * An "all-bits" specification may not be an exact multiple of 8.
+         * Work out how far we've overshot things, and tidy up the excess.
+         */
+        int overshoot = 8*bit_buf_len-max_val;
+        while ( overshoot > 0 ) {
+            bit_buf[ bit_buf_len-1 ] ^= b[8-overshoot];
+            overshoot--;
+        }
+        return;
+    }
+
+    /*
+     * Otherwise, clear the bit string buffer,
+     * and start calculating which bits to set
+     */
+    memset( bit_buf, 0, bit_buf_len );
+
+    while (1) {
+        sscanf( cp, "%d", &val);
+        /* Handle negative day specification */
+        if ( val < 0 ) {
+            val = max_val - val; 
+        }
+        if ( startAt1 )
+            val--;
+        major = val/8;
+        minor = val%8;
+        bit_buf[ major ] |= b[minor];
+
+        /* XXX - ideally we should handle "X-Y" syntax as well */
+        while (*cp && *cp!=',')
+            cp++;
+        if (!*cp)
+            break;
+        cp++;
+    }
+}
+
+/*
  * Handle a "cron" or "at config directive, to set up a
  *     time-scheduled action
  */
@@ -109,17 +166,17 @@ parse_sched_timed( const char *token, char *line )
 {
     netsnmp_table_row *row;
     struct schedTable_entry *entry;
-    char buf[24];
+    char buf[24], *cp;
 
-    char *minConf;   size_t min_len;   char minVal[8];
-    char *hourConf;  size_t hour_len;  char hourVal[3];
-    char *dateConf;  size_t date_len;  char dateVal[8];
-    char *monConf;   size_t mon_len;   char monVal[2];
-    char *dayConf;   size_t day_len;   char dayVal;
+    char  minConf[512];  size_t  min_len = sizeof(minConf);  char  minVal[8];
+    char hourConf[512];  size_t hour_len = sizeof(hourConf); char hourVal[3];
+    char dateConf[512];  size_t date_len = sizeof(dateConf); char dateVal[8];
+    char  monConf[512];  size_t  mon_len = sizeof(monConf);  char  monVal[2];
+    char  dayConf[512];  size_t  day_len = sizeof(dayConf);  char  dayVal;
 
     long value;
     size_t tmpint;
-    oid *variable;
+    oid  variable[MAX_OID_LEN], *var_ptr = variable;
     size_t var_len = MAX_OID_LEN;
     
     schedEntries++;
@@ -129,13 +186,31 @@ parse_sched_timed( const char *token, char *line )
     /*
      *  Parse the configure directive line
      */
-    line = read_config_read_data(ASN_OCTET_STR, line, &minConf,   &min_len);
-    line = read_config_read_data(ASN_OCTET_STR, line, &hourConf,  &hour_len);
-    line = read_config_read_data(ASN_OCTET_STR, line, &dateConf,  &date_len);
-    line = read_config_read_data(ASN_OCTET_STR, line, &monConf,   &mon_len);
-    line = read_config_read_data(ASN_OCTET_STR, line, &dayConf,   &day_len);
+    cp       = minConf;
+    line = read_config_read_data(ASN_OCTET_STR, line, &cp,   &min_len);
+    cp       = hourConf;
+    line = read_config_read_data(ASN_OCTET_STR, line, &cp,  &hour_len);
+    cp       = dateConf;
+    line = read_config_read_data(ASN_OCTET_STR, line, &cp,  &date_len);
+    cp       = monConf;
+    line = read_config_read_data(ASN_OCTET_STR, line, &cp,   &mon_len);
+    cp       = dayConf;
+    line = read_config_read_data(ASN_OCTET_STR, line, &cp,   &day_len);
+    if (!line) {
+        config_perror("invalid schedule time specification");
+        return;
+    }
 
-    line = read_config_read_data(ASN_OBJECT_ID, line, &variable,  &var_len);
+    line = read_config_read_data(ASN_OBJECT_ID, line, &var_ptr,   &var_len);
+    if (var_len == 0) {
+        config_perror("invalid specification for schedVariable");
+        return;
+    }
+    /*
+     * Skip over optional assignment in "var = value"
+     */
+    while (line && isspace(*line))
+        line++;
     if ( *line == '=' ) {
         line++;
         while (line && isspace(*line)) {
@@ -143,21 +218,33 @@ parse_sched_timed( const char *token, char *line )
         }
     }
     line = read_config_read_data(ASN_INTEGER,   line, &value, &tmpint);
-    /* XXX - Check for errors & bail out */
 
-    /* XXX - Convert from cron-style spec into bits */
+    /*
+     * Convert from cron-style specifications into bits
+     */
+    _sched_convert_bits( minConf,  minVal,  8, 60, 0 );
+    _sched_convert_bits( hourConf, hourVal, 3, 24, 0 );
+    memset(dateVal+4, 0, 4); /* Clear the reverse day bits */
+    _sched_convert_bits( dateConf, dateVal, 4, 31, 1 );
+    _sched_convert_bits( monConf,  monVal,  2, 12, 1 );
+    _sched_convert_bits( dayConf, &dayVal,  1,  8, 0 );
+    if ( dayVal & 0x01 ) {  /* sunday(7) = sunday(0) */
+         dayVal |= 0x80;
+         dayVal &= 0xfe;
+    }
     
+    /*
+     * Create an entry in the schedTable
+     */
     row = schedTable_createEntry(schedTable, "snmpd.conf", strlen("snmpd.conf"),
                                              buf, strlen(buf), NULL );
     entry = (struct schedTable_entry *)row->data;
 
-/*
     entry->schedWeekDay = dayVal;
     memcpy(entry->schedMonth,  monVal,  2);
     memcpy(entry->schedDay,    dateVal, 4+4);
     memcpy(entry->schedHour,   hourVal, 3);
     memcpy(entry->schedMinute, minVal,  8);
- */
     
     memcpy(entry->schedVariable, variable, var_len*sizeof(oid));
     entry->schedVariable_len = var_len;
