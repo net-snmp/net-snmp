@@ -26,8 +26,7 @@ init_schedCore(void)
     DEBUGMSGTL(("sched", "Initializing core module\n"));
     schedTable = netsnmp_create_table_data("schedTable");
 
-#define TESTING
-#ifdef TESTING
+#ifdef NO_TESTING
     /*
      * Insert an entry into this table for testing 
      */
