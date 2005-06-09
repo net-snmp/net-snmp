@@ -14,6 +14,11 @@ extern          "C" {
 /*
  * structure definitions
  */
+#if defined( INET6 )
+#   define NETSNMP_ACCESS_IPADDRESS_BUF_SIZE 20 /* for ip6z */
+#else
+#   define NETSNMP_ACCESS_IPADDRESS_BUF_SIZE 4
+#endif
 
     /*
      * tcpconnLocalAddress(2)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h
@@ -30,26 +35,35 @@ extern          "C" {
  * netsnmp_tcpconn_entry
  *   - primary tcpconn structure for both ipv4 & ipv6
  */
-typedef struct netsnmp_tcpconn_s {
+    typedef struct netsnmp_tcpconn_s {
 
-   netsnmp_index oid_index;   /* MUST BE FIRST!! for container use */
-   oid           indexes[4];
+        netsnmp_index oid_index;   /* MUST BE FIRST!! for container use */
+        oid           arbitrary_index; /* arbitrary index */
 
-   int       flags; /* for net-snmp use */
+        int       flags; /* for net-snmp use */
 
-   /*
-    * mib related data (considered for
-    *  netsnmp_access_tcpconn_entry_update)
-    */
+        u_char    loc_addr[NETSNMP_ACCESS_IPADDRESS_BUF_SIZE];
+        u_char    rmt_addr[NETSNMP_ACCESS_IPADDRESS_BUF_SIZE];
+
+        u_char    loc_addr_len;/* address len, 4 | 16 */
+        u_char    rmt_addr_len;/* address len, 4 | 16 */
+
+        u_short   loc_port;
+        u_short   rmt_port;
+        
+        /*
+         * mib related data (considered for
+         *  netsnmp_access_tcpconn_entry_update)
+         */
    
-   /*
-    * tcpconnState(1)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
-    */
-   u_long          tcpConnState;
+        /*
+         * tcpconnState(1)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
+         */
+        u_long          tcpConnState;
    
-   netsnmp_data_list *arch_data;      /* arch specific data */
+        netsnmp_data_list *arch_data;      /* arch specific data */
    
-} netsnmp_tcpconn_entry;
+    } netsnmp_tcpconn_entry;
 
 
 /**---------------------------------------------------------------------*/
@@ -59,20 +73,19 @@ typedef struct netsnmp_tcpconn_s {
 /*
  * ifcontainer init
  */
-netsnmp_container * netsnmp_access_tcpconn_container_init(u_int init_flags);
+    netsnmp_container * netsnmp_access_tcpconn_container_init(u_int init_flags);
 #define NETSNMP_ACCESS_TCPCONN_INIT_NOFLAGS               0x0000
-#define NETSNMP_ACCESS_TCPCONN_INIT_ADDL_IDX_BY_ADDR      0x0001
 
 /*
  * ifcontainer load and free
  */
-netsnmp_container*
-netsnmp_access_tcpconn_container_load(netsnmp_container* container,
-                                      u_int load_flags);
+    netsnmp_container*
+    netsnmp_access_tcpconn_container_load(netsnmp_container* container,
+                                          u_int load_flags);
 #define NETSNMP_ACCESS_TCPCONN_LOAD_NOFLAGS               0x0000
 
-void netsnmp_access_tcpconn_container_free(netsnmp_container *container,
-                                           u_int free_flags);
+    void netsnmp_access_tcpconn_container_free(netsnmp_container *container,
+                                               u_int free_flags);
 #define NETSNMP_ACCESS_TCPCONN_FREE_NOFLAGS               0x0000
 #define NETSNMP_ACCESS_TCPCONN_FREE_DONT_CLEAR            0x0001
 #define NETSNMP_ACCESS_TCPCONN_FREE_KEEP_CONTAINER        0x0002
@@ -81,17 +94,17 @@ void netsnmp_access_tcpconn_container_free(netsnmp_container *container,
 /*
  * create/free a tcpconn entry
  */
-netsnmp_tcpconn_entry *
-netsnmp_access_tcpconn_entry_create(void);
+    netsnmp_tcpconn_entry *
+    netsnmp_access_tcpconn_entry_create(void);
 
-void netsnmp_access_tcpconn_entry_free(netsnmp_tcpconn_entry * entry);
+    void netsnmp_access_tcpconn_entry_free(netsnmp_tcpconn_entry * entry);
 
 /*
  * update/compare
  */
-int
-netsnmp_access_tcpconn_entry_update(netsnmp_tcpconn_entry *old, 
-                                      netsnmp_tcpconn_entry *new);
+    int
+    netsnmp_access_tcpconn_entry_update(netsnmp_tcpconn_entry *old, 
+                                        netsnmp_tcpconn_entry *new);
 
 /*
  * find entry in container
@@ -101,8 +114,8 @@ netsnmp_access_tcpconn_entry_update(netsnmp_tcpconn_entry *old,
 /*
  * create/change/delete
  */
-int
-netsnmp_access_tcpconn_entry_set(netsnmp_tcpconn_entry * entry);
+    int
+    netsnmp_access_tcpconn_entry_set(netsnmp_tcpconn_entry * entry);
 
 
 /*

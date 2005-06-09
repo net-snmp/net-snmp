@@ -9,7 +9,15 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/tcpConn.h>
 
-#include "tcp-mib/tcpConnTable/tcpConnTable_constants.h"
+//#include "tcp-mib/tcpConnTable/tcpConnTable_constants.h"
+
+static int
+linux_states[12] = { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
+
+static int _load4(netsnmp_container *container);
+#if defined (INET6)
+static int _load6(netsnmp_container *container);
+#endif
 
 /*
  * initialize arch specific storage
@@ -55,9 +63,10 @@ netsnmp_arch_tcpconn_delete(netsnmp_tcpconn_entry *entry)
 {
     if (NULL == entry)
         return -1;
-#warning "tcpConn delete"
+#warning "tcpConn delete not implemented"
     return -1;
 }
+
 
 /**
  *
@@ -67,11 +76,38 @@ netsnmp_arch_tcpconn_delete(netsnmp_tcpconn_entry *entry)
 int
 netsnmp_arch_tcpconn_container_load(netsnmp_container *container)
 {
+    int rc = 0;
+
+    rc = _load4(container);
+    if(rc < 0) {
+        u_int flags = NETSNMP_ACCESS_TCPCONN_FREE_KEEP_CONTAINER;
+        netsnmp_access_tcpconn_container_free(container, flags);
+        return rc;
+    }
+
+#if defined (INET6)
+    rc = _load6(container);
+    if(rc < 0) {
+        u_int flags = NETSNMP_ACCESS_TCPCONN_FREE_KEEP_CONTAINER;
+        netsnmp_access_tcpconn_container_free(container, flags);
+        return rc;
+    }
+#endif
+
+    return 0;
+}
+
+/**
+ *
+ * @retval  0 no errors
+ * @retval !0 errors
+ */
+static int
+_load4(netsnmp_container *container)
+{
     int             rc = 0;
     FILE           *in;
     char            line[160];
-    u_char          *buf;
-    netsnmp_tcpconn_entry *entry;
     
     netsnmp_assert(NULL != container);
 
@@ -89,9 +125,9 @@ netsnmp_arch_tcpconn_container_load(netsnmp_container *container)
      */
     while (fgets(line, sizeof(line), in)) {
         netsnmp_tcpconn_entry *entry;
-        static int      linux_states[12] =
-            { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
-        int             state, rc, local_port, remote_port;
+        int             state, rc, local_port, remote_port, buf_len, offset;
+        u_char          local_addr[10], remote_addr[10];
+        u_char         *tmp_ptr;
 
         /*
          */
@@ -101,11 +137,9 @@ netsnmp_arch_tcpconn_container_load(netsnmp_container *container)
             break;
         }
 
-        if (5 != (rc = sscanf(line, "%*d: %x:%x %x:%x %x",
-                              &entry->indexes[NETSNMP_TCPCONN_IDX_LOCAL_ADDR],
-                              &local_port,
-                              &entry->indexes[NETSNMP_TCPCONN_IDX_REMOTE_ADDR],
-                              &remote_port, &state))) {
+        if (5 != (rc = sscanf(line, "%*d: %8[0-9A-Z]:%x %8[0-9A-Z]:%x %x",
+                              local_addr, &local_port,
+                              remote_addr, &remote_port, &state))) {
             DEBUGMSGT(("access:tcpconn:container",
                        "error parsing line (%d != 5)\n", rc));
             DEBUGMSGT(("access:tcpconn:container"," line '%s'\n", line));
@@ -113,15 +147,45 @@ netsnmp_arch_tcpconn_container_load(netsnmp_container *container)
             continue;
         }
         DEBUGMSGT(("verbose:access:tcpconn:container"," line '%s'\n", line));
-        entry->indexes[NETSNMP_TCPCONN_IDX_LOCAL_PORT] =
-            htons((unsigned short) local_port);
-        entry->indexes[NETSNMP_TCPCONN_IDX_REMOTE_PORT] =
-            htons((unsigned short) remote_port);
+        entry->loc_port = htons((unsigned short) local_port);
+        entry->rmt_port = htons((unsigned short) remote_port);
         entry->tcpConnState = (state & 0xf) < 12 ? linux_states[state & 0xf] : 2;
+        buf_len = strlen(local_addr);
+        netsnmp_assert(8 == buf_len);
+        offset = 0;
+        tmp_ptr = entry->loc_addr;
+        rc = netsnmp_hex_to_binary(&tmp_ptr, &buf_len,
+                                   &offset, 0, local_addr, NULL);
+        entry->loc_addr_len = offset;
+        if ( 4 != entry->loc_addr_len ) {
+            DEBUGMSGT(("access:tcpconn:container",
+                       "error parsing local addr (%d != 4)\n",
+                       entry->loc_addr_len));
+            DEBUGMSGT(("access:tcpconn:container"," line '%s'\n", line));
+            netsnmp_access_tcpconn_entry_free(entry);
+            continue;
+        }
+
+        buf_len = strlen(remote_addr);
+        netsnmp_assert(8 == buf_len);
+        offset = 0;
+        tmp_ptr = entry->rmt_addr;
+        rc = netsnmp_hex_to_binary(&tmp_ptr, &buf_len,
+                                   &offset, 0, local_addr, NULL);
+        entry->rmt_addr_len = offset;
+        if ( 4 != entry->rmt_addr_len ) {
+            DEBUGMSGT(("access:tcpconn:container",
+                       "error parsing remote addr (%d != 4)\n",
+                       entry->rmt_addr_len));
+            DEBUGMSGT(("access:tcpconn:container"," line '%s'\n", line));
+            netsnmp_access_tcpconn_entry_free(entry);
+            continue;
+        }
 
         /*
          * add entry to container
          */
+        entry->arbitrary_index = CONTAINER_SIZE(container) + 1;
         CONTAINER_INSERT(container, entry);
     }
 
@@ -132,3 +196,106 @@ netsnmp_arch_tcpconn_container_load(netsnmp_container *container)
 
     return 0;
 }
+
+#if defined (INET6)
+/**
+ *
+ * @retval  0 no errors
+ * @retval !0 errors
+ */
+static int
+_load6(netsnmp_container *container)
+{
+    int             rc = 0;
+    FILE           *in;
+    char            line[180];
+    
+    netsnmp_assert(NULL != container);
+
+#undef PROCFILE
+#define PROCFILE "/proc/net/tcp6"
+    if (!(in = fopen(PROCFILE, "r"))) {
+        snmp_log(LOG_ERR,"could not open " PROCFILE "\n");
+        return -2;
+    }
+    
+    fgets(line, sizeof(line), in); /* skip header */
+
+    /*
+     *   sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+     *  0: 00000000000000000000000000000001:1466 00000000000000000000000000000000:0000 0A 00000000:00000000 00:00000000 00000000   500        0 326699 1 efb81580 3000 0 0 2 -1
+     */
+    while (fgets(line, sizeof(line), in)) {
+        netsnmp_tcpconn_entry *entry;
+        int             state, rc, local_port, remote_port, buf_len, offset;
+        u_char          local_addr[48], remote_addr[48];
+        u_char         *tmp_ptr;
+
+        /*
+         */
+        entry = netsnmp_access_tcpconn_entry_create();
+        if(NULL == entry) {
+            rc = -3;
+            break;
+        }
+
+        if (5 != (rc = sscanf(line, "%*d: %47[0-9A-Z]:%x %47[0-9A-Z]:%x %x",
+                              local_addr, &local_port,
+                              remote_addr, &remote_port, &state))) {
+            DEBUGMSGT(("access:tcpconn:container",
+                       "error parsing line (%d != 5)\n", rc));
+            DEBUGMSGT(("access:tcpconn:container"," line '%s'\n", line));
+            netsnmp_access_tcpconn_entry_free(entry);
+            continue;
+        }
+        DEBUGMSGT(("verbose:access:tcpconn:container"," line '%s'\n", line));
+        entry->loc_port = htons((unsigned short) local_port);
+        entry->rmt_port = htons((unsigned short) remote_port);
+        entry->tcpConnState = (state & 0xf) < 12 ? linux_states[state & 0xf] : 2;
+
+        buf_len = strlen(local_addr);
+        offset = 0;
+        tmp_ptr = entry->loc_addr;
+        rc = netsnmp_hex_to_binary(&tmp_ptr, &buf_len,
+                                   &offset, 0, local_addr, NULL);
+        entry->loc_addr_len = offset;
+        if (( 16 != entry->loc_addr_len ) && ( 20 != entry->loc_addr_len )) {
+            DEBUGMSGT(("access:tcpconn:container",
+                       "error parsing local addr (%d != 16|20)\n",
+                       entry->loc_addr_len));
+            DEBUGMSGT(("access:tcpconn:container"," line '%s'\n", line));
+            netsnmp_access_tcpconn_entry_free(entry);
+            continue;
+        }
+
+        buf_len = strlen(remote_addr);
+        offset = 0;
+        tmp_ptr = entry->rmt_addr;
+        rc = netsnmp_hex_to_binary(&tmp_ptr, &buf_len,
+                                   &offset, 0, local_addr, NULL);
+        entry->rmt_addr_len = offset;
+        if (( 16 != entry->rmt_addr_len ) && ( 20 != entry->rmt_addr_len )) {
+            DEBUGMSGT(("access:tcpconn:container",
+                       "error parsing remote addr (%d != 16|20)\n",
+                       entry->rmt_addr_len));
+            DEBUGMSGT(("access:tcpconn:container"," line '%s'\n", line));
+            netsnmp_access_tcpconn_entry_free(entry);
+            continue;
+        }
+
+
+        /*
+         * add entry to container
+         */
+        entry->arbitrary_index = CONTAINER_SIZE(container) + 1;
+        CONTAINER_INSERT(container, entry);
+    }
+
+    fclose(in);
+
+    if(rc<0)
+        return rc;
+
+    return 0;
+}
+#endif /* INET6 */
