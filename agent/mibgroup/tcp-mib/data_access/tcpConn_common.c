@@ -9,7 +9,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/tcpConn.h>
 
-#include "tcp-mib/tcpConnTable/tcpConnTable_constants.h"
+//#include "tcp-mib/tcpConnTable/tcpConnTable_constants.h"
 
 /**---------------------------------------------------------------------*/
 /*
@@ -133,8 +133,8 @@ netsnmp_access_tcpconn_entry_create(void)
 
     DEBUGMSGTL(("verbose:access:tcpconn:entry", "create\n"));
 
-    entry->oid_index.len = 4;
-    entry->oid_index.oids = entry->indexes;
+    entry->oid_index.len = 1;
+    entry->oid_index.oids = entry->arbitrary_index;
 
     /*
      * init arch data
