@@ -5368,7 +5368,7 @@ _sess_read(void *sessp, fd_set * fdset)
          */
         DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));
         transport->f_close(transport);
-        SNMP_FREE(rxbuf);
+        SNMP_FREE(isp->packet);
         isp->packet = NULL;
         if (opaque != NULL) {
             SNMP_FREE(opaque);
@@ -5414,6 +5414,7 @@ _sess_read(void *sessp, fd_set * fdset)
                 if (opaque != NULL) {
                     SNMP_FREE(opaque);
                 }
+                /** XXX-rks: why no SNMP_FREE(isp->packet); ?? */
                 return -1;
             }
 
@@ -5488,6 +5489,7 @@ _sess_read(void *sessp, fd_set * fdset)
                      "too large packet_len = %d, dropping connection %d\n",
                      isp->packet_len, transport->sock);
             transport->f_close(transport);
+            /** XXX-rks: why no SNMP_FREE(isp->packet); ?? */
             return -1;
         } else if (isp->packet_len == 0) {
             /*
