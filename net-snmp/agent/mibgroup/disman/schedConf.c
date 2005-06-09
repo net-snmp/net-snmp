@@ -142,9 +142,9 @@ parse_sched_timed( const char *token, char *line )
 
 /*
     entry->schedWeekDay = dayVal;
-    memcpy(entry->schedMonth,  monVal,  3);
+    memcpy(entry->schedMonth,  monVal,  2);
     memcpy(entry->schedDay,    dateVal, 4+4);
-    memcpy(entry->schedHour,   hourVal, 2);
+    memcpy(entry->schedHour,   hourVal, 3);
     memcpy(entry->schedMinute, minVal,  8);
  */
     
