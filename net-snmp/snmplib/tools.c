@@ -403,7 +403,7 @@ snmp_decimal_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
  *
  * @param buf_len pointer to a size_t containing the initial size of buf.
  *
- * @param out_len On input, a pointer to a size_t indicating an offset into buf.
+ * @param offset On input, a pointer to a size_t indicating an offset into buf.
  *                The  binary data will be stored at this offset.
  *                On output, this pointer will have updated the offset to be
  *                the first byte after the converted data.
@@ -422,13 +422,13 @@ snmp_decimal_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
  * @retval 0  error
  */
 int
-netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
+netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * offset,
                       int allow_realloc, const char *hex, const char *delim)
 {
     int             subid = 0;
     const char     *cp = hex;
 
-    if (buf == NULL || buf_len == NULL || out_len == NULL || hex == NULL) {
+    if (buf == NULL || buf_len == NULL || offset == NULL || hex == NULL) {
         return 0;
     }
 
@@ -451,12 +451,12 @@ netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
          * if we dont' have enough space, realloc.
          * (snmp_realloc will adjust buf_len to new size)
          */
-        if ((*out_len >= *buf_len) &&
+        if ((*offset >= *buf_len) &&
             !(allow_realloc && snmp_realloc(buf, buf_len))) {
             return 0;
         }
-        *(*buf + *out_len) = (u_char) subid;
-        (*out_len)++;
+        *(*buf + *offset) = (u_char) subid;
+        (*offset)++;
         if (*++cp == '\0') {
             /*
              * Odd number of hex digits is an error.  
@@ -481,10 +481,10 @@ netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
  * @retval 0  error
  */
 int
-snmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
+snmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * offset,
                    int allow_realloc, const char *hex)
 {
-    return netsnmp_hex_to_binary(buf, buf_len, out_len, allow_realloc, hex, " ");
+    return netsnmp_hex_to_binary(buf, buf_len, offset, allow_realloc, hex, " ");
 }
 
 /*******************************************************************-o-******
