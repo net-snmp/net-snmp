@@ -47,6 +47,7 @@
 #include "snmpd.h"
 #include "agentx/protocol.h"
 #include "agentx/client.h"
+#include "agentx/agentx_config.h"
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_trap.h>
 #ifdef USING_MIBII_SYSORTABLE_MODULE
@@ -97,6 +98,9 @@ init_subagent(void)
                "the callback transport is not available.\n");
     return;
 #else
+    agentx_register_config_handler("agentxsocket",
+                                  agentx_parse_agentx_socket, NULL,
+                                  "AgentX bind address");
     if (agentx_callback_sess == NULL) {
         agentx_callback_sess = netsnmp_callback_open(callback_master_num,
                                                      handle_subagent_response,
