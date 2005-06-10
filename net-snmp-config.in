@@ -188,41 +188,47 @@ else
       shift
       while test "x$done" = "x" -a "x$1" != "x" ; do
 	case $1 in
-	    -A)
+	    -A|-a)
 		shift
 		if test "x$1" = "x" ; then
-		    echo "You must specify an authentication algorithm"
+		    echo "You must specify an authentication algorithm or pass phrase"
 		    exit 1
 		fi
-		Aalgorithm=$1
-		shift
+	        case $1 in
+                MD5|SHA)
+		    Aalgorithm=$1
+		    shift
+		    ;;
+                md5|sha)
+		    Aalgorithm=`echo $1 | tr a-z A-Z`
+		    shift
+		    ;;
+                *)
+		    apassphrase=$1
+		    shift
+		    ;;
+		esac
 		;;
-	    -X)
+	    -X|-x)
 		shift
 		if test "x$1" = "x" ; then
-		    echo "You must specify an encryption algorithm"
+		    echo "You must specify an encryption algorithm or pass phrase"
 		    exit 1
 		fi
-		Xalgorithm=$1
-		shift
-		;;
-	    -a)
-		shift
-		if test "x$1" = "x" ; then
-		    echo "You must specify an authentication pass phrase"
-		    exit 1
-		fi
-		apassphrase=$1
-		shift
-		;;
-	    -x)
-		shift
-		if test "x$1" = "x" ; then
-		    echo "You must specify an encryption pass phrase"
-		    exit 1
-		fi
-		xpassphrase=$1
-		shift
+	        case $1 in
+                DES|AES|AES128)
+		    Xalgorithm=$1
+		    shift
+		    ;;
+                des|aes|aes128)
+		    Xalgorithm=`echo $1 | tr a-z A-Z`
+		    shift
+		    ;;
+                *)
+		    xpassphrase=$1
+		    shift
+		    ;;
+		esac
 		;;
 	    -ro)
 	        token="rouser"
@@ -485,8 +491,8 @@ if test "x$usage" = "xyes"; then
   echo ""
   echo "  SNMP Setup commands:"
   echo ""
-  echo "    --create-snmpv3-user [-ro] [-a authpass] [-x privpass] [-X DES]"
-  echo "                         [-A MD5|SHA] [username]"
+  echo "    --create-snmpv3-user [-ro] [-A authpass] [-X privpass]"
+  echo "                         [-a MD5|SHA] [-x DES|AES] [username]"
   echo ""
   echo "  These options produce the various compilation flags needed when"
   echo "  building external SNMP applications:"
