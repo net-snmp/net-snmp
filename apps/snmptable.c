@@ -8,6 +8,11 @@
  * Update: 1998-07-17 <jhy@gsu.edu>
  * Added text <special options> to usage().
  */
+
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /**********************************************************************
 	Copyright 1997 Niels Baggesen
 
@@ -25,6 +30,13 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_STDLIB_H
@@ -102,7 +114,7 @@ static int      use_getbulk = 1;
 static int      max_getbulk = 25;
 
 void            usage(void);
-void            get_field_names(char *);
+void            get_field_names(void);
 void            get_table_entries(netsnmp_session * ss);
 void            getbulk_table_entries(netsnmp_session * ss);
 void            print_table(void);
@@ -205,7 +217,6 @@ int
 main(int argc, char *argv[])
 {
     netsnmp_session session, *ss;
-    char           *tblname;
 
     setvbuf(stdout, NULL, _IOLBF, 1024);
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
@@ -233,6 +244,7 @@ main(int argc, char *argv[])
     if (optind + 1 != argc) {
         fprintf(stderr, "Must have exactly one table name\n");
         usage();
+        exit(1);
     }
 
     rootlen = MAX_OID_LEN;
@@ -242,15 +254,8 @@ main(int argc, char *argv[])
     }
     localdebug = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
                                         NETSNMP_DS_LIB_DUMP_PACKET);
-    tblname = strrchr(argv[optind], '.');
-    if (!tblname)
-        tblname = strrchr(argv[optind], ':');
-    if (tblname)
-        ++tblname;
-    else
-        tblname = argv[optind];
 
-    get_field_names(tblname);
+    get_field_names();
     reverse_fields();
 
     /*
@@ -353,14 +358,14 @@ print_table(void)
 }
 
 void
-get_field_names(char *tblname)
+get_field_names(void)
 {
     u_char         *buf = NULL, *name_p = NULL;
     size_t          buf_len = 0, out_len = 0;
     struct tree    *tbl = NULL;
     int             going = 1;
 
-    tbl = find_tree_node(tblname, -1);
+    tbl = get_tree(root, rootlen, get_tree_head());
     if (tbl) {
         tbl = tbl->child_list;
         if (tbl) {
@@ -368,6 +373,7 @@ get_field_names(char *tblname)
             tbl = tbl->child_list;
         } else {
             root[rootlen++] = 1;
+            going = 0;
         }
     }
 
@@ -434,7 +440,7 @@ get_field_names(char *tblname)
         column[fields - 1].subid = root[rootlen];
     }
     if (fields == 0) {
-        fprintf(stderr, "Was that a table? %s\n", buf);
+        fprintf(stderr, "Was that a table? %s\n", table_name);
         exit(1);
     }
     *name_p = 0;

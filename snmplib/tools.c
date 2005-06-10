@@ -513,7 +513,7 @@ dump_chunk(const char *debugtoken, const char *title, const u_char * buf,
  * XXX	Need a switch to decide whether to use DNS name instead of a simple
  *	IP address.
  *
- * FIX	Use something other than sprint_hexstring which doesn't add 
+ * FIX	Use something other than snprint_hexstring which doesn't add 
  *	trailing spaces and (sometimes embedded) newlines...
  */
 #ifdef SNMP_TESTING_CODE
@@ -548,7 +548,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
      * begin by formatting the enterprise ID.
      */
     if (!(*esp & 0x80)) {
-        sprint_hexstring(buf, esp, remaining_len);
+        snprint_hexstring(buf, SNMP_MAXBUF, esp, remaining_len);
         s = strchr(buf, '\0');
         s -= 1;
         goto dump_snmpEngineID_quit;
@@ -631,7 +631,8 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
         break;
      /*NOTREACHED*/ case 5:    /* Octets. */
 
-        sprint_hexstring(s, esp, remaining_len);
+        snprint_hexstring(s, (SNMP_MAXBUF - (s-buf),
+                          esp, remaining_len);
         s = strchr(buf, '\0');
         s -= 1;
         goto dump_snmpEngineID_quit;
@@ -648,7 +649,8 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
         if (!gotviolation) {
             s += sprintf(s, "??? ");
         }
-        sprint_hexstring(s, esp, remaining_len);
+        snprint_hexstring(s, (SNMP_MAXBUF - (s-buf),
+                          esp, remaining_len);
         s = strchr(buf, '\0');
         s -= 1;
 
@@ -665,7 +667,8 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
     if (remaining_len > 0) {
         s += sprintf(s, " (??? ");
 
-        sprint_hexstring(s, esp, remaining_len);
+        snprint_hexstring(s, (SNMP_MAXBUF - (s-buf),
+                          esp, remaining_len);
         s = strchr(buf, '\0');
         s -= 1;
 

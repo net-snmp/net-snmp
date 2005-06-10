@@ -28,7 +28,7 @@
 #include "struct.h"
 #include "util_funcs.h"
 
-#if defined(HAVE_DLFCN_H) && defined(HAVE_DLOPEN)
+#if defined(HAVE_DLFCN_H) && ( defined(HAVE_DLOPEN) || defined(HAVE_LIBDL) )
 
 #include <dlfcn.h>
 #include "dlmod.h"
@@ -140,6 +140,7 @@ dlmod_load_module(struct dlmod *dlm)
     char            sym_init[64];
     char           *p, tmp_path[255];
     int             (*dl_init) (void);
+    char           *st;
 
     DEBUGMSGTL(("dlmod", "dlmod_load_module %s: %s\n", dlm->name,
                 dlm->path));
@@ -161,7 +162,7 @@ dlmod_load_module(struct dlmod *dlm)
             return;
         }
     } else {
-        for (p = strtok(dlmod_path, ":"); p; p = strtok(NULL, ":")) {
+        for (p = strtok_r(dlmod_path, ":", &st); p; p = strtok_r(NULL, ":", &st)) {
             snprintf(tmp_path, sizeof(tmp_path), "%s/%s.so", p, dlm->path);
             DEBUGMSGTL(("dlmod", "p: %s tmp_path: %s\n", p, tmp_path));
 #ifdef RTLD_NOW
@@ -233,6 +234,7 @@ dlmod_parse_config(const char *token, char *cptr)
 {
     char           *dlm_name, *dlm_path;
     struct dlmod   *dlm;
+    char           *st;
 
     if (cptr == NULL) {
         config_perror("Bad dlmod line");
@@ -250,7 +252,7 @@ dlmod_parse_config(const char *token, char *cptr)
     /*
      * dynamic module name 
      */
-    dlm_name = strtok(cptr, "\t ");
+    dlm_name = strtok_r(cptr, "\t ", &st);
     if (dlm_name == NULL) {
         config_perror("Bad dlmod line");
         dlmod_delete_module(dlm);
@@ -261,7 +263,7 @@ dlmod_parse_config(const char *token, char *cptr)
     /*
      * dynamic module path 
      */
-    dlm_path = strtok(NULL, "\t ");
+    dlm_path = strtok_r(NULL, "\t ", &st);
     if (dlm_path)
         strncpy(dlm->path, dlm_path, sizeof(dlm->path));
     else
