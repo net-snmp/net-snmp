@@ -73,7 +73,7 @@ _sched_callback( unsigned int reg, void *magic )
                                          (u_char *)&entry->schedValue,
                                          sizeof(entry->schedValue));
 
-    ret = iquery_set_session( &assign, entry->schedSession );
+    ret = netsnmp_query_set( &assign, entry->schedSession );
     if ( ret != SNMP_ERR_NOERROR ) {
         entry->schedFailures++;
         entry->schedLastFailure = ret;
@@ -227,9 +227,9 @@ schedTable_createEntry(netsnmp_table_data *table_data, char *schedOwner,
     entry->schedVariable_len = 2;   /* .0.0 */
 
     if (pdu)
-        entry->schedSession = iquery_pdu_session( pdu );
+        entry->schedSession = netsnmp_iquery_pdu_session( pdu );
     else
-        entry->schedSession = iquery_user_session( schedOwner );
+        entry->schedSession = netsnmp_iquery_user_session( schedOwner );
 
     netsnmp_table_data_add_row(table_data, row);
     return row;
