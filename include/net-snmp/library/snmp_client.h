@@ -93,6 +93,10 @@ extern          "C" {
      */
     int             snmp_sess_synch_response(void *, netsnmp_pdu *,
                                              netsnmp_pdu **);
+int netsnmp_query_get(     netsnmp_variable_list *, netsnmp_session *);
+int netsnmp_query_getnext( netsnmp_variable_list *, netsnmp_session *);
+int netsnmp_query_walk(    netsnmp_variable_list *, netsnmp_session *);
+int netsnmp_query_set(     netsnmp_variable_list *, netsnmp_session *);
 
 #ifdef __cplusplus
 }
