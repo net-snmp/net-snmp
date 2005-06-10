@@ -1,6 +1,17 @@
 /*
  *  AgentX master agent
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -46,6 +57,26 @@ real_init_master(void)
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT)
         return;
 
+    if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                              NETSNMP_DS_AGENT_X_SOCKET)) {
+       agentx_sockets = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                              NETSNMP_DS_AGENT_X_SOCKET);
+#ifdef AGENTX_DOM_SOCK_ONLY
+       if (agentx_sockets[0] != '/') {
+           /* unix:/path */
+           if (agentx_sockets[5] != '/') {
+               snmp_log(LOG_ERR,
+                    "Error: %s transport is not supported, disabling agentx/master.\n", agentx_sockets);
+               SNMP_FREE(agentx_sockets);
+               return;
+           }
+       }
+#endif
+    } else {
+        agentx_sockets = strdup(AGENTX_SOCKET);
+    }
+
+
     DEBUGMSGTL(("agentx/master", "initializing...\n"));
     snmp_sess_init(&sess);
     sess.version = AGENTX_VERSION_1;
@@ -54,15 +85,6 @@ real_init_master(void)
                                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT);
     sess.retries = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                       NETSNMP_DS_AGENT_AGENTX_RETRIES);
-
-    if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
-			      NETSNMP_DS_AGENT_X_SOCKET)) {
-	agentx_sockets = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
-					       NETSNMP_DS_AGENT_X_SOCKET);
-    } else {
-        agentx_sockets = strdup(AGENTX_SOCKET);
-    }
-
     cp1 = agentx_sockets;
     while (1) {
         /*
@@ -270,7 +292,7 @@ agentx_got_response(int operation,
                 /*
                  * ack, unknown, mark the first one 
                  */
-                netsnmp_set_request_error(cache->reqinfo, request,
+                netsnmp_set_request_error(cache->reqinfo, requests,
                                           SNMP_ERR_GENERR);
             }
             netsnmp_free_delegated_cache(cache);
@@ -361,6 +383,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     netsnmp_session *ax_session = (netsnmp_session *) handler->myvoid;
     netsnmp_request_info *request = requests;
     netsnmp_pdu    *pdu;
+    void           *cb_data;
 
     DEBUGMSGTL(("agentx/master",
                 "agentx master handler starting, mode = 0x%02x\n",
@@ -430,7 +453,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
         oid   *nptr = request->requestvb->name;
         
         DEBUGMSGTL(("agentx/master","request for variable ("));
-        DEBUGMSGOID(("agent/master", nptr, nlen));
+        DEBUGMSGOID(("agentx/master", nptr, nlen));
         DEBUGMSG(("agentx/master", ")\n"));
         
         /*
@@ -442,7 +465,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
             if (snmp_oid_compare(nptr, nlen, request->subtree->start_a,
                                  request->subtree->start_len) < 0) {
                 DEBUGMSGTL(("agentx/master","inexact request preceeding region ("));
-                DEBUGMSGOID(("agent/master", request->subtree->start_a,
+                DEBUGMSGOID(("agentx/master", request->subtree->start_a,
                              request->subtree->start_len));
                 DEBUGMSG(("agentx/master", ")\n"));
                 nptr = request->subtree->start_a;
@@ -497,13 +520,23 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     }
 
     /*
+     * When the master sends a CleanupSet PDU, it will never get a response
+     * back from the subagent. So we shouldn't allocate the
+     * netsnmp_delegated_cache structure in this case.
+     */
+    if (pdu->command != AGENTX_MSG_CLEANUPSET)
+        cb_data = netsnmp_create_delegated_cache(handler, reginfo,
+                                                 reqinfo, requests,
+                                                 (void *) ax_session);
+    else
+        cb_data = NULL;
+
+    /*
      * send the requests out 
      */
     DEBUGMSGTL(("agentx", "sending pdu (req=0x%x,trans=0x%x,sess=0x%x)\n",
                 pdu->reqid,pdu->transid, pdu->sessid));
-    snmp_async_send(ax_session, pdu, agentx_got_response,
-                    netsnmp_create_delegated_cache(handler, reginfo,
-                                                   reqinfo, requests,
-                                                   (void *) ax_session));
+    snmp_async_send(ax_session, pdu, agentx_got_response, cb_data);
+
     return SNMP_ERR_NOERROR;
 }

@@ -1,8 +1,20 @@
 /*
  * agent_registry.c
+ */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/** @defgroup agent_registry Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc
+ *   @ingroup agent
  *
- * Maintain a registry of MIB subtrees, together
- *   with related information regarding mibmodule, sessions, etc
+ * @{
  */
 
 #define IN_SNMP_VARS_C
@@ -62,7 +74,7 @@
 #endif
 
 static void register_mib_detach_node(netsnmp_subtree *s);
-static inline void invalidate_lookup_cache(const char *context);
+static NETSNMP_INLINE void invalidate_lookup_cache(const char *context);
 void netsnmp_set_lookup_cache_size(int newsize);
 int netsnmp_get_lookup_cache_size(void);
 
@@ -790,7 +802,7 @@ register_mib(const char *moduleName,
 }
 
 void
-netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev)
+netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *context)
 {
     netsnmp_subtree *ptr;
 
@@ -821,23 +833,61 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev)
             ptr->next = sub->next;
         for (ptr = sub->next; ptr; ptr = ptr->children)
             ptr->prev = sub->prev;
+
+	if (sub->prev == NULL) {
+	    netsnmp_subtree_replace_first(sub->next, context);
+	}
+
         return;
     } else {
         for (ptr = sub->prev; ptr; ptr = ptr->children)
             ptr->next = sub->children;
         for (ptr = sub->next; ptr; ptr = ptr->children)
             ptr->prev = sub->children;
+
+	if (sub->prev == NULL) {
+	    netsnmp_subtree_replace_first(sub->children, context);
+	}
         return;
     }
 }
 
+/**
+ * Unregisters an OID that has an associated context name value. 
+ * Typically used when a module has multiple contexts defined.  The parameters
+ * priority, range_subid, and range_ubound should be used in conjunction with
+ * agentx, see RFC 2741, otherwise these values should always be 0.
+ *
+ * @param name  the specific OID to unregister if it conatins the associated
+ *              context.
+ *
+ * @param len   the length of the OID, use  OID_LENGTH macro.
+ *
+ * @param priority  a value between 1 and 255, used to achieve a desired
+ *                  configuration when different sessions register identical or
+ *                  overlapping regions.  Subagents with no particular
+ *                  knowledge of priority should register with the default
+ *                  value of 127.
+ *
+ * @param range_subid  permits specifying a range in place of one of a subtree
+ *                     sub-identifiers.  When this value is zero, no range is
+ *                     being specified.
+ *
+ * @param range_ubound  the upper bound of a sub-identifier's range.
+ *                      This field is present only if range_subid is not 0.
+ *
+ * @param context  a context name that has been created
+ *
+ * @return 
+ * 
+ */
 int
 unregister_mib_context(oid * name, size_t len, int priority,
                        int range_subid, oid range_ubound,
                        const char *context)
 {
     netsnmp_subtree *list, *myptr;
-    netsnmp_subtree *prev, *child;       /* loop through children */
+    netsnmp_subtree *prev, *child, *next; /* loop through children */
     struct register_parameters reg_parms;
     int old_lookup_cache_val = netsnmp_get_lookup_cache_size();
     netsnmp_set_lookup_cache_size(0);
@@ -864,7 +914,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
         return MIB_NO_SUCH_REGISTRATION;
     }
 
-    netsnmp_subtree_unload(child, prev);
+    netsnmp_subtree_unload(child, prev, context);
     myptr = child;              /* remember this for later */
 
     /*
@@ -877,13 +927,14 @@ unregister_mib_context(oid * name, size_t len, int priority,
      *  This should also serve to register ranges.
      */
 
-    for (list = myptr->next; list != NULL; list = list->next) {
+    for (list = myptr->next; list != NULL; list = next) {
+        next = list->next; /* list gets freed sometimes; cache next */
         for (child = list, prev = NULL; child != NULL;
              prev = child, child = child->children) {
             if ((netsnmp_oid_equals(child->name_a, child->namelen,
 				  name, len) == 0) &&
 		(child->priority == priority)) {
-                netsnmp_subtree_unload(child, prev);
+                netsnmp_subtree_unload(child, prev, context);
                 netsnmp_subtree_free(child);
                 break;
             }
@@ -943,7 +994,7 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
             continue;
         }
 
-        netsnmp_subtree_unload(child, prev);
+        netsnmp_subtree_unload(child, prev, context);
         myptr = child;          /* remember this for later */
 
         for (list = myptr->next; list != NULL; list = list->next) {
@@ -953,7 +1004,7 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
                 if (netsnmp_oid_equals(child->name_a, child->namelen, 
 				      name, len) == 0 &&
                     (child->priority == priority)) {
-                    netsnmp_subtree_unload(child, prev);
+                    netsnmp_subtree_unload(child, prev, context);
                     netsnmp_subtree_free(child);
                     break;
                 }
@@ -1007,7 +1058,7 @@ unregister_mibs_by_session(netsnmp_session * ss)
     subtree_context_cache *contextptr;
 
     DEBUGMSGTL(("register_mib", "unregister_mibs_by_session(%p) ctxt \"%s\"\n",
-		ss, ss->contextName ? ss->contextName : "[NIL]"));
+		ss, (ss && ss->contextName) ? ss->contextName : "[NIL]"));
 
     for (contextptr = get_top_context_cache(); contextptr != NULL;
          contextptr = contextptr->next) {
@@ -1017,9 +1068,9 @@ unregister_mibs_by_session(netsnmp_session * ss)
             for (child = list, prev = NULL; child != NULL; child = next_child){
                 next_child = child->children;
 
-                if (((ss->flags & SNMP_FLAGS_SUBSESSION) &&
+                if (((!ss || ss->flags & SNMP_FLAGS_SUBSESSION) &&
 		     child->session == ss) ||
-                    (!(ss->flags & SNMP_FLAGS_SUBSESSION) && child->session &&
+                    (!(!ss || ss->flags & SNMP_FLAGS_SUBSESSION) && child->session &&
                      child->session->subsession == ss)) {
 
                     rp.name = child->name_a;
@@ -1040,7 +1091,7 @@ unregister_mibs_by_session(netsnmp_session * ss)
 			child->reginfo = NULL;
                     }
 
-                    netsnmp_subtree_unload(child, prev);
+                    netsnmp_subtree_unload(child, prev, contextptr->context_name);
                     netsnmp_subtree_free(child);
 
                     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
@@ -1214,7 +1265,7 @@ netsnmp_get_lookup_cache_size(void) {
     return lookup_cache_size;
 }
 
-static inline lookup_cache_context *
+static NETSNMP_INLINE lookup_cache_context *
 get_context_lookup_cache(const char *context) {
     lookup_cache_context *ptr;
     if (!context)
@@ -1237,7 +1288,7 @@ get_context_lookup_cache(const char *context) {
     return ptr;
 }
 
-static inline void
+static NETSNMP_INLINE void
 lookup_cache_add(const char *context,
                  netsnmp_subtree *next, netsnmp_subtree *previous) {
     lookup_cache_context *cptr;
@@ -1255,7 +1306,7 @@ lookup_cache_add(const char *context,
         cptr->currentpos = 0;
 }
 
-static inline void
+static NETSNMP_INLINE void
 lookup_cache_replace(lookup_cache *ptr,
                      netsnmp_subtree *next, netsnmp_subtree *previous) {
 
@@ -1263,7 +1314,7 @@ lookup_cache_replace(lookup_cache *ptr,
     ptr->previous = previous;
 }
 
-static inline lookup_cache *
+static NETSNMP_INLINE lookup_cache *
 lookup_cache_find(const char *context, oid *name, size_t name_len,
                   int *retcmp) {
     lookup_cache_context *cptr;
@@ -1289,7 +1340,7 @@ lookup_cache_find(const char *context, oid *name, size_t name_len,
     return ret;
 }
 
-static inline void
+static NETSNMP_INLINE void
 invalidate_lookup_cache(const char *context) {
     lookup_cache_context *cptr;
     if ((cptr = get_context_lookup_cache(context)) != NULL) {
@@ -1698,3 +1749,5 @@ unregister_signal(int sig)
 }
 
 #endif                          /* !WIN32 */
+
+/**  }@ */
