@@ -1753,16 +1753,22 @@ Interface_Scan_Next(short *Index,
         klookup((unsigned long) ifnetaddr, (char *) &ifnet, sizeof ifnet);
         klookup((unsigned long) ifnet.if_name, (char *) saveName,
                 sizeof saveName);
-#else
-        ifnet = *ifnetaddr;
-        strncpy(saveName, ifnet.if_name, sizeof(saveName));
-#endif
+
+       /*
+        * The purpose of this comparison is lost in the mists of time.
+        * It's been around at least cmu-snmp 2.1.2 for SUNv3 systems and
+        * was applied to linux systems during the cmu-snmp-linux project.
+        * No-one now knows what it was intended for, and it breaks IPv6
+        * tunnel interfaces, so it's been moved out of the Linux code block.
+        */
         if (strcmp(saveName, "ip") == 0) {
             ifnetaddr = ifnet.if_next;
             continue;
         }
-
-
+#else
+        ifnet = *ifnetaddr;
+        strncpy(saveName, ifnet.if_name, sizeof(saveName));
+#endif
 
         saveName[sizeof(saveName) - 1] = '\0';
         cp = (char *) strchr(saveName, '\0');
