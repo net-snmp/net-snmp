@@ -1238,6 +1238,11 @@
 ./strlcpy.lo: ../include/net-snmp/system/sysv.h
 ./strlcpy.lo: ../include/net-snmp/system/generic.h
 ./strlcpy.lo: ../include/net-snmp/machine/generic.h 
+./strtok_r.lo: ../include/net-snmp/net-snmp-config.h
+./strtok_r.lo: ../include/net-snmp/system/linux.h
+./strtok_r.lo: ../include/net-snmp/system/sysv.h
+./strtok_r.lo: ../include/net-snmp/system/generic.h
+./strtok_r.lo: ../include/net-snmp/machine/generic.h
 ./strtol.lo: ../include/net-snmp/net-snmp-config.h
 ./strtol.lo: ../include/net-snmp/system/linux.h
 ./strtol.lo: ../include/net-snmp/system/sysv.h
