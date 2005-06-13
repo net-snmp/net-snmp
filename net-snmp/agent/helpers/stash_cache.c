@@ -191,10 +191,10 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
 int
 _netsnmp_stash_cache_load( netsnmp_cache *cache, void *magic )
 {
-    netsnmp_mib_handler          *handler  = cache->handler;
-    netsnmp_handler_registration *reginfo  = cache->reginfo;
-    netsnmp_agent_request_info   *reqinfo  = cache->reqinfo;
-    netsnmp_request_info         *requests = cache->requests;
+    netsnmp_mib_handler          *handler  = cache->cache_hint->handler;
+    netsnmp_handler_registration *reginfo  = cache->cache_hint->reginfo;
+    netsnmp_agent_request_info   *reqinfo  = cache->cache_hint->reqinfo;
+    netsnmp_request_info         *requests = cache->cache_hint->requests;
     netsnmp_stash_cache_info     *cinfo    = (netsnmp_stash_cache_info*) magic;
     int old_mode;
     int ret;
