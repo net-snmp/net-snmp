@@ -765,6 +765,10 @@ inet_addrs_consistence(int pf, void *net, void *mask)
     switch (pf) {
     case PF_INET:
         tmp = (struct sockaddr_in *) malloc(sizeof(struct sockaddr_in));
+        if (!tmp) {
+            config_perror("Resource failure in inet_addr_consistence()");
+            return -1;
+        }
         memset(tmp, 0, sizeof(*tmp));
         tmp->sin_family = PF_INET;
         if (inet_addr_complement
@@ -774,6 +778,11 @@ inet_addrs_consistence(int pf, void *net, void *mask)
             return -1;
         }
         dst = (struct sockaddr_in *) malloc(sizeof(struct sockaddr_in));
+        if (!dst) {
+            config_perror("Resource failure in inet_addr_consistence()");
+            free(tmp);
+            return -1;
+        }
         memset(dst, 0, sizeof(*dst));
         dst->sin_family = PF_INET;
         if (inet_addr_and
@@ -790,6 +799,10 @@ inet_addrs_consistence(int pf, void *net, void *mask)
         break;
     case PF_INET6:
         tmp6 = (struct sockaddr_in6 *) malloc(sizeof(struct sockaddr_in6));
+        if (!tmp6) {
+            config_perror("Resource failure in inet_addr_consistence()");
+            return -1;
+        }
         memset(tmp6, 0, sizeof(*tmp6));
         tmp6->sin6_family = PF_INET6;
         if (inet_addr_complement
@@ -799,6 +812,11 @@ inet_addrs_consistence(int pf, void *net, void *mask)
             return -1;
         }
         dst6 = (struct sockaddr_in6 *) malloc(sizeof(struct sockaddr_in6));
+        if (!dst6) {
+            config_perror("Resource failure in inet_addr_consistence()");
+            free(tmp6);
+            return -1;
+        }
         memset(dst6, 0, sizeof(*dst6));
         dst6->sin6_family = PF_INET6;
         if (inet_addr_and
