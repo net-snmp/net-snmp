@@ -3702,7 +3702,7 @@ read_module_replacements(const char *name)
                          "Loading replacement module %s for %s (%s)\n",
                          mcp->new_module, name, File);
 	    }
-            (void) read_module(mcp->new_module);
+            (void) netsnmp_read_module(mcp->new_module);
             return 1;
         }
     }
@@ -3739,7 +3739,7 @@ read_import_replacements(const char *old_module_name,
                              identifier->label, mcp->new_module,
                              old_module_name, File);
 		}
-                (void) read_module(mcp->new_module);
+                (void) netsnmp_read_module(mcp->new_module);
                 identifier->modid = which_module(mcp->new_module);
                 return 1;         /* finished! */
             }
@@ -3871,8 +3871,16 @@ adopt_orphans(void)
         }
 }
 
+#ifndef NETSNMP_CLEAN_NAMESPACE
 struct tree    *
 read_module(const char *name)
+{
+    return netsnmp_read_module(name);
+}
+#endif
+
+struct tree    *
+netsnmp_read_module(const char *name)
 {
     if (read_module_internal(name) == MODULE_NOT_FOUND)
         if (!read_module_replacements(name))
@@ -3964,8 +3972,16 @@ unload_module_by_ID(int modID, struct tree *tree_top)
     }
 }
 
+#ifndef NETSNMP_CLEAN_NAMESPACE
 int
 unload_module(const char *name)
+{
+    return netsnmp_unload_module(name);
+}
+#endif
+
+int
+netsnmp_unload_module(const char *name)
 {
     struct module  *mp;
     int             modID = -1;
@@ -4769,7 +4785,7 @@ read_mib(const char *filename)
     get_token(fp, token, MAXTOKEN);
     fclose(fp);
     new_module(token, filename);
-    (void) read_module(token);
+    (void) netsnmp_read_module(token);
 
     return tree_head;
 }
@@ -4782,7 +4798,7 @@ read_all_mibs()
 
     for (mp = module_head; mp; mp = mp->next)
         if (mp->no_imports == -1)
-            read_module(mp->name);
+            netsnmp_read_module(mp->name);
     adopt_orphans();
 
     return tree_head;
