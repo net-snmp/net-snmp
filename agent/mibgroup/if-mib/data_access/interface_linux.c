@@ -20,6 +20,16 @@
 #include "if-mib/data_access/interface.h"
 #include "interface_ioctl.h"
 
+#include <sys/types.h>
+
+#ifdef HAVE_LINUX_ETHTOOL_H
+#   ifdef HAVE_PCI_PCI_H
+#      include <pci/pci.h> /* for u32 typedef in linux/ethtool */
+#   endif /* HAVE_PCI_PCI_H */
+#include <linux/ethtool.h>
+#endif /* HAVE_LINUX_ETHTOOL_H */
+#include <linux/sockios.h>
+
 unsigned int
 netsnmp_arch_interface_get_if_speed(int fd, const char *name);
 
@@ -324,20 +334,20 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                 netsnmp_arch_interface_get_if_speed(fd, entry->name);
 #ifdef APPLIED_PATCH_836390   /* xxx-rks ifspeed fixes */
         else if (IANAIFTYPE_PROPVIRTUAL == entry->type)
-            entry->speed = _get_bonded_if_speed(entry)
+            entry->speed = _get_bonded_if_speed(entry);
 #endif
         else
             netsnmp_access_interface_entry_guess_speed(entry);
-
+        
         netsnmp_access_interface_ioctl_flags_get(fd, entry);
 
         netsnmp_access_interface_ioctl_mtu_get(fd, entry);
 
         /*
          * Zero speed means link problem.
-         * -i'm not sure this is always true...
+         * - i'm not sure this is always true...
          */
-        if((entry->speed == 0) && (entry->os_flags & IFF_UP)){
+        if((entry->speed == 0) && (entry->os_flags & IFF_UP)) {
             entry->os_flags &= ~IFF_RUNNING;
         }
 
@@ -370,12 +380,52 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
                                                     IFF_UP, and_complement);
 }
 
-
+#ifdef HAVE_LINUX_ETHTOOL_H
 /**
- * Determines network interface speed.
+ * Determines network interface speed from ETHTOOL_GSET
  */
 unsigned int
 netsnmp_arch_interface_get_if_speed(int fd, const char *name)
+{
+    struct ifreq ifr;
+    struct ethtool_cmd edata;
+
+    memset(&ifr, 0, sizeof(ifr));
+    edata.cmd = ETHTOOL_GSET;
+    
+    strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name)-1);
+    ifr.ifr_data = (char *) &edata;
+    
+    if (ioctl(fd, SIOCETHTOOL, &ifr) == -1) {
+        DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s failed\n",
+                    ifr.ifr_name));
+        return netsnmp_arch_interface_get_if_speed_mii(fd,name);
+    }
+    
+    if (edata.speed != SPEED_10 && edata.speed != SPEED_100 &&
+        edata.speed != SPEED_1000) {
+        DEBUGMSGTL(("mibII/interfaces", "fallback to mii for %s\n",
+                    ifr.ifr_name));
+        /* try MII */
+        return netsnmp_arch_interface_get_if_speed_mii(fd,name);
+    }
+
+    /* return in bps */
+    DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s speed = %d\n",
+                ifr.ifr_name, edata.speed));
+    return edata.speed*1000*1000;
+}
+#endif
+ 
+/**
+ * Determines network interface speed from MII
+ */
+unsigned int
+#ifdef HAVE_LINUX_ETHTOOL_H
+netsnmp_arch_interface_get_if_speed_mii(int fd, const char *name)
+#else
+netsnmp_arch_interface_get_if_speed(int fd, const char *name)
+#endif
 {
     unsigned int retspeed = 10000000;
     struct ifreq ifr;
