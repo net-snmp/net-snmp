@@ -420,6 +420,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
                              netsnmp_request_info * requests)
 {
     netsnmp_cache  *cache = NULL;
+    netsnmp_handler_args cache_hint;
 
     DEBUGMSGTL(("helper:cache_handler", "Got request (%d) for %s: ",
                 reqinfo->mode, reginfo->handlerName));
@@ -442,10 +443,11 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
      * Make the handler-chain parameters available to
      * the cache_load hook routine.
      */
-    cache->handler  = handler;
-    cache->reginfo  = reginfo;
-    cache->reqinfo  = reqinfo;
-    cache->requests = requests;
+    cache_hint.handler = handler;
+    cache_hint.reginfo = reginfo;
+    cache_hint.reqinfo = reqinfo;
+    cache_hint.requests = requests;
+    cache->cache_hint = &cache_hint;
 
     switch (reqinfo->mode) {
 
@@ -453,7 +455,6 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_GETNEXT:
     case MODE_GETBULK:
     case MODE_SET_RESERVE1: {
-        netsnmp_handler_args cache_hint;
 
         /*
          * only touch cache once per pdu request, to prevent a cache
@@ -466,26 +467,12 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
         if (netsnmp_cache_is_valid(reqinfo, reginfo->handlerName))
             return SNMP_ERR_NOERROR;
 
-        if (cache->flags & NETSNMP_CACHE_HINT_HANDLER_ARGS) {
-            netsnmp_assert(NULL == cache->cache_hint);
-            cache_hint.handler = handler;
-            cache_hint.reginfo = reginfo;
-            cache_hint.reqinfo = reqinfo;
-            cache_hint.requests = requests;
-            cache->cache_hint = &cache_hint;
-        }
-
         /*
          * call the load hook, and update the cache timestamp.
          * If it's not already there, add to reqinfo
          */
         netsnmp_cache_check_and_reload(cache);
         netsnmp_cache_reqinfo_insert(cache, reqinfo, reginfo->handlerName);
-        cache->cache_hint = NULL;
-        cache->handler  = NULL;
-        cache->reginfo  = NULL;
-        cache->reqinfo  = NULL;
-        cache->requests = NULL;
         /** next handler called automatically - 'AUTO_NEXT' */
         }
         return SNMP_ERR_NOERROR;
