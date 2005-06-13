@@ -502,7 +502,8 @@ get_uptime(void)
      * min requirement is one PERF_DATA_BLOCK plus one PERF_OBJECT_TYPE 
      */
     perfdata = (PPERF_DATA_BLOCK) malloc(buffersize);
-
+    if (!perfdata)
+        return 0;
 
     memset(perfdata, 0, buffersize);
 
