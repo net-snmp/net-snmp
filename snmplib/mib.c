@@ -2063,19 +2063,31 @@ handle_mibdirs_conf(const char *token, char *line)
     char           *ctmp;
 
     if (confmibdir) {
-        ctmp = (char *) malloc(strlen(confmibdir) + strlen(line) + 2);
+        if (*line == '+') {
+            line++;
+            ctmp = (char *) malloc(strlen(confmibdir) + strlen(line) + 2);
+            if (!ctmp) {
+                DEBUGMSGTL(("read_config:initmib", "mibdir conf malloc failed"));
+                return;
+            }
+            sprintf(ctmp, "%s%c%s", confmibdir, ENV_SEPARATOR_CHAR, line);
+        }
+        else {
+            ctmp = strdup(line);
+            if (!ctmp) {
+                DEBUGMSGTL(("read_config:initmib", "mibdir conf malloc failed"));
+                return;
+            }
+        }
+        SNMP_FREE(confmibdir);
+    } else {
+        ctmp = strdup(line);
         if (!ctmp) {
             DEBUGMSGTL(("read_config:initmib", "mibdir conf malloc failed"));
             return;
         }
-        if (*line == '+')
-            line++;
-        sprintf(ctmp, "%s%c%s", confmibdir, ENV_SEPARATOR_CHAR, line);
-        SNMP_FREE(confmibdir);
-        confmibdir = ctmp;
-    } else {
-        confmibdir = strdup(line);
     }
+    confmibdir = ctmp;
     DEBUGMSGTL(("read_config:initmib", "using mibdirs: %s\n", confmibdir));
 }
 
@@ -2085,19 +2097,31 @@ handle_mibs_conf(const char *token, char *line)
     char           *ctmp;
 
     if (confmibs) {
-        ctmp = (char *) malloc(strlen(confmibs) + strlen(line) + 2);
+        if (*line == '+') {
+            line++;
+            ctmp = (char *) malloc(strlen(confmibs) + strlen(line) + 2);
+            if (!ctmp) {
+                DEBUGMSGTL(("read_config:initmib", "mibs conf malloc failed"));
+                return;
+            }
+            sprintf(ctmp, "%s%c%s", confmibs, ENV_SEPARATOR_CHAR, line);
+        }
+        else {
+            ctmp = strdup(line);
+            if (!ctmp) {
+                DEBUGMSGTL(("read_config:initmib", "mibs conf malloc failed"));
+                return;
+            }
+        }
+        SNMP_FREE(confmibs);
+    } else {
+        ctmp = strdup(line);
         if (!ctmp) {
             DEBUGMSGTL(("read_config:initmib", "mibs conf malloc failed"));
             return;
         }
-        if (*line == '+')
-            line++;
-        sprintf(ctmp, "%s%c%s", confmibs, ENV_SEPARATOR_CHAR, line);
-        SNMP_FREE(confmibs);
-        confmibs = ctmp;
-    } else {
-        confmibs = strdup(line);
     }
+    confmibs = ctmp;
     DEBUGMSGTL(("read_config:initmib", "using mibs: %s\n", confmibs));
 }
 
@@ -2395,7 +2419,7 @@ netsnmp_set_mib_directory(const char *dir)
                 DEBUGMSGTL(("read_config:initmib", "set mibdir malloc failed"));
                 return;
             }
-            sprintf(tmpdir, "%s%c%s", ++dir, ENV_SEPARATOR_CHAR, olddir);
+            sprintf(tmpdir, "%s%c%s", olddir, ENV_SEPARATOR_CHAR, ++dir);
             newdir = tmpdir;
         } else {
             newdir = dir;
