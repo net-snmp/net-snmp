@@ -2075,12 +2075,22 @@ handle_mibdirs_conf(const char *token, char *line)
                 sprintf(ctmp, "%s%c%s", line, ENV_SEPARATOR_CHAR, confmibdir);
         } else {
             ctmp = strdup(line);
+            if (!ctmp) {
+                DEBUGMSGTL(("read_config:initmib",
+                            "mibdir conf malloc failed"));
+                return;
+            }
         }
         SNMP_FREE(confmibdir);
-        confmibdir = ctmp;
     } else {
-        confmibdir = strdup(line);
+        ctmp = strdup(line);
+        if (!ctmp) {
+            DEBUGMSGTL(("read_config:initmib",
+                        "mibdir conf malloc failed"));
+            return;
+        }
     }
+    confmibdir = ctmp;
     DEBUGMSGTL(("read_config:initmib", "using mibdirs: %s\n", confmibdir));
 }
 
@@ -2090,19 +2100,33 @@ handle_mibs_conf(const char *token, char *line)
     char           *ctmp;
 
     if (confmibs) {
-        ctmp = (char *) malloc(strlen(confmibs) + strlen(line) + 2);
+        if ((*line == '+') || (*line == '-')) {
+            ctmp = (char *) malloc(strlen(confmibs) + strlen(line) + 2);
+            if (!ctmp) {
+                DEBUGMSGTL(("read_config:initmib", "mibs conf malloc failed"));
+                return;
+            }
+            if (*line++ == '+')
+                sprintf(ctmp, "%s%c%s", confmibs, ENV_SEPARATOR_CHAR, line);
+            else
+                sprintf(ctmp, "%s%c%s", line, ENV_SEPARATOR_CHAR, confmibs);
+        }
+        else {
+            ctmp = strdup(line);
+            if (!ctmp) {
+                DEBUGMSGTL(("read_config:initmib", "mibs conf malloc failed"));
+                return;
+            }
+        }
+        SNMP_FREE(confmibs);
+    } else {
+        ctmp = strdup(line);
         if (!ctmp) {
             DEBUGMSGTL(("read_config:initmib", "mibs conf malloc failed"));
             return;
         }
-        if (*line == '+')
-            line++;
-        sprintf(ctmp, "%s%c%s", confmibs, ENV_SEPARATOR_CHAR, line);
-        SNMP_FREE(confmibs);
-        confmibs = ctmp;
-    } else {
-        confmibs = strdup(line);
     }
+    confmibs = ctmp;
     DEBUGMSGTL(("read_config:initmib", "using mibs: %s\n", confmibs));
 }
 
@@ -2591,15 +2615,20 @@ init_mib(void)
     } else {
         env_var = strdup(env_var);
     }
-    if (env_var && *env_var == '+') {
+    if (env_var && ((*env_var == '+') || (*env_var == '-'))) {
         entry =
             (char *) malloc(strlen(DEFAULT_MIBS) + strlen(env_var) + 2);
         if (!entry) {
             DEBUGMSGTL(("init_mib", "env mibs malloc failed"));
             return;
-        } else
-            sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR,
-                env_var + 1);
+        } else {
+            if (*env_var++ == '+')
+                sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR,
+                        env_var );
+            else
+                sprintf(entry, "%s%c%s", env_var, ENV_SEPARATOR_CHAR,
+                        DEFAULT_MIBS );
+        }
         SNMP_FREE(env_var);
         env_var = entry;
     }
@@ -2623,16 +2652,21 @@ init_mib(void)
 
     env_var = netsnmp_getenv("MIBFILES");
     if (env_var != NULL) {
-        if (*env_var == '+') {
+        if ((*env_var == '+') || (*env_var == '-')) {
 #ifdef DEFAULT_MIBFILES
             entry =
                 (char *) malloc(strlen(DEFAULT_MIBFILES) +
                                 strlen(env_var) + 2);
             if (!entry) {
                 DEBUGMSGTL(("init_mib", "env mibfiles malloc failed"));
-            } else
-                sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
-                    env_var + 1);
+            } else {
+                if (*env_var++ == '+')
+                    sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
+                            env_var );
+                else
+                    sprintf(entry, "%s%c%s", env_var, ENV_SEPARATOR_CHAR,
+                            DEFAULT_MIBFILES );
+            }
             SNMP_FREE(env_var);
             env_var = entry;
 #else
