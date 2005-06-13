@@ -43,9 +43,10 @@ extern          "C" {
         void             *magic;
 
        /*
-        * hint from the cache helper
+        * hint from the cache helper. contains the standard
+        * handler arguments.
         */
-       void              *cache_hint;
+       netsnmp_handler_args          *cache_hint;
 
         /*
 	 * For SNMP-management of the data caches
@@ -54,13 +55,6 @@ extern          "C" {
         oid *rootoid;
         int  rootoid_len;
 
-        /*
-	 * Allow the load routine to link into the calling handler chain
-	 */
-        netsnmp_mib_handler          *handler;
-        netsnmp_handler_registration *reginfo;
-        netsnmp_agent_request_info   *reqinfo;
-        netsnmp_request_info         *requests;
     };
 
 
