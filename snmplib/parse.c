@@ -2675,6 +2675,10 @@ parse_objectgroup(FILE * fp, char *name, int what, struct objgroup **ol)
                 goto skip;
             }
             o = (struct objgroup *) malloc(sizeof(struct objgroup));
+            if (!o) {
+                print_error("Resource failure", token, type);
+                goto skip;
+            }
             o->line = mibLine;
             o->name = strdup(token);
             o->next = *ol;
@@ -2953,6 +2957,8 @@ compliance_lookup(const char *name, int modid)
     if (modid == -1) {
         struct objgroup *op =
             (struct objgroup *) malloc(sizeof(struct objgroup));
+        if (!op)
+            return 0;
         op->next = objgroups;
         op->name = strdup(name);
         op->line = mibLine;
