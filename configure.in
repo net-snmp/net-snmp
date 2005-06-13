@@ -2452,7 +2452,7 @@ AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_t
 #endif
 ]])
 # Linux
-AC_CHECK_HEADERS(sys/conf.h netinet/tcp_fsm.h sys/protosw.h nlist.h ioctls.h asm/page.h netipx/ipx.h)
+AC_CHECK_HEADERS(sys/conf.h netinet/tcp_fsm.h sys/protosw.h nlist.h ioctls.h asm/page.h netipx/ipx.h pci/pci.h)
 # Solaris
 AC_CHECK_HEADERS(inet/mib2.h)
 # NetBSD required headers
@@ -2462,6 +2462,13 @@ AC_CHECK_HEADERS(vm/swap_pager.h,,,
 [[
 #if HAVE_VM_VM_H
 #include <vm/vm.h>
+#endif
+]])
+# linux ethtool
+AC_CHECK_HEADERS(linux/ethtool.h,,,
+[[
+#if HAVE_PCI_PCI_H
+#include <pci/pci.h>
 #endif
 ]])
 # BSDi3 headers
