@@ -488,8 +488,6 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                     term = *hint++;
                 else
                     term = 0;
-                if (width == 0)
-                    width = 1;
             }
 
             while (repeat && cp < ecp) {
