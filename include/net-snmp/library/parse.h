@@ -208,10 +208,16 @@ SOFTWARE.
 #define	ANON	"anonymous#"
 #define	ANON_LEN  strlen(ANON)
 
+    struct tree    *netsnmp_read_module(const char *);
+#ifndef NETSNMP_CLEAN_NAMESPACE
     struct tree    *read_module(const char *);
+#endif
     struct tree    *read_mib(const char *);
     struct tree    *read_all_mibs(void);
+    int             netsnmp_unload_module(const char *name);
+#ifndef NETSNMP_CLEAN_NAMESPACE
     int             unload_module(const char *name);
+#endif
     void            unload_all_mibs(void);
     void            init_mib_internals(void);
     int             add_mibfile(const char*, const char*, FILE *);

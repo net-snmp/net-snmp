@@ -2616,7 +2616,7 @@ init_mib(void)
         } else if (strstr(entry, "/") != 0) {
             read_mib(entry);
         } else {
-            read_module(entry);
+            netsnmp_read_module(entry);
         }
         entry = strtok_r(NULL, ENV_SEPARATOR, &st);
     }
@@ -4889,7 +4889,7 @@ get_module_node(const char *fname,
     if (!strcmp(module, "ANY"))
         modid = -1;
     else {
-        read_module(module);
+        netsnmp_read_module(module);
         modid = which_module(module);
         if (modid == -1)
             return 0;
