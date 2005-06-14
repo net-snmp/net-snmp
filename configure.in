@@ -1782,7 +1782,14 @@ AC_CHECK_HEADERS(stdarg.h string.h fcntl.h limits.h sys/file.h sys/ioctl.h syslo
 # FreeBSD required headers
 AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_mib.h net/if_types.h net/if_var.h sys/queue.h osreldate.h machine/types.h sys/socketvar.h)
 # Linux
-AC_CHECK_HEADERS(sys/conf.h netinet/in_systm.h netinet/tcp.h netinet/udp.h netinet/in_var.h netinet/if_ether.h netinet/ip_var.h netinet/tcp_timer.h netinet/tcp_var.h netinet/tcp_fsm.h netinet/udp_var.h netinet/icmp_var.h sys/protosw.h nlist.h ioctls.h asm/page.h netipx/ipx.h)
+AC_CHECK_HEADERS(sys/conf.h netinet/in_systm.h netinet/tcp.h netinet/udp.h netinet/in_var.h netinet/if_ether.h netinet/ip_var.h netinet/tcp_timer.h netinet/tcp_var.h netinet/tcp_fsm.h netinet/udp_var.h netinet/icmp_var.h sys/protosw.h nlist.h ioctls.h asm/page.h netipx/ipx.h pci/pci.h)
+# linux ethtool
+AC_CHECK_HEADERS(linux/ethtool.h,,,
+[[
+#if HAVE_PCI_PCI_H
+#include <pci/pci.h>
+#endif
+]])
 # NetBSD required headers
 AC_CHECK_HEADERS(arpa/inet.h kvm.h sys/pool.h uvm/uvm_param.h uvm/uvm_extern.h vm/vm_param.h vm/vm_extern.h)
 # BSDi2 headers

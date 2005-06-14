@@ -149,6 +149,12 @@
 #if HAVE_IOCTLS_H
 #include <ioctls.h>
 #endif
+#if HAVE_LINUX_ETHTOOLS_H
+#   if HAVE_PCI_PCI_H
+#      include <pci/pci.h>
+#   endif
+#include <linux/ethtools.h>
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -1449,13 +1455,9 @@ static char     saveName[16];
 #endif
 static int      saveIndex = 0;
 
-/**
-* Determines network interface speed. It is system specific. Only linux
-* realization is made. 
-*/
-unsigned int getIfSpeed(int fd, struct ifreq ifr){
-	unsigned int retspeed = 10000000;
 #ifdef linux
+static unsigned int _mii_if_speed(int fd, struct ifreq ifr){
+	unsigned int retspeed = 10000000;
 /* the code is based on mii-diag utility by Donald Becker
 * see ftp://ftp.scyld.com/pub/diag/mii-diag.c
 */
@@ -1534,10 +1536,56 @@ unsigned int getIfSpeed(int fd, struct ifreq ifr){
 		retspeed = (lkpar & 0x0080) ? 100000000 : 10000000;
 	}
 	return retspeed;
-#else /*!linux*/			   
-	return retspeed;
-#endif 
 }
+#endif 
+
+#if HAVE_LINUX_ETHTOOLS_H
+static u_int
+_ethtools_if_speed(int fd, struct ifreq ifr)
+{
+    struct ethtool_cmd edata;
+
+    edata.cmd = ETHTOOL_GSET;
+    ifr.ifr_data = (char *) &edata;
+    
+    if (ioctl(fd, SIOCETHTOOL, &ifr) == -1) {
+        DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s failed\n",
+                    ifr.ifr_name));
+        return _mii_if_speed(fd,ifr);
+    }
+    
+    if (edata.speed != SPEED_10 && edata.speed != SPEED_100 &&
+        edata.speed != SPEED_1000) {
+        DEBUGMSGTL(("mibII/interfaces", "fallback to mii for %s\n",
+                    ifr.ifr_name));
+        /* try MII */
+        return _mii_get_if_speed(fd,ifr);
+    }
+
+    /* return in bps */
+    DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s speed = %d\n",
+                ifr.ifr_name, edata.speed));
+    return edata.speed*1000*1000;
+}
+#endif /* HAVE_LINUX_ETHTOOLS_H */
+
+/**
+* Determines network interface speed. It is system specific. Only linux
+* realization is made. 
+*/
+unsigned int getIfSpeed(int fd, struct ifreq ifr){
+	unsigned int retspeed = 10000000;
+#ifdef linux
+#   if HAVE_LINUX_ETHTOOLS_H
+   return _ethtool_if_speed(fd, ifr);
+#   else
+   return _mii_if_speed(fd, ifr);
+#   endif /* HAVE_LINUX_ETHTOOLS_H */
+#else /*!linux*/			   
+   return retspeed;
+#endif
+}
+
 
 void
 Interface_Scan_Init(void)
