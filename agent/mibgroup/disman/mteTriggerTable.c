@@ -168,8 +168,6 @@ init_mteTriggerTable(void)
                                   "[options] monitor_expression [see \"man snmpd.conf\"]");
     snmpd_register_config_handler("defaultMonitors",
                                   parse_default_monitors, NULL, "yes|no");
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmpd", "agentSecName",
-                       NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_INTERNAL_SECNAME);
 
     /*
      * we need to be called back later to store our data 
