@@ -491,6 +491,22 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
             pdu->community_len = sp->community_len;
         }
         break;
+    case SNMP_VERSION_3:
+        if (pdu->securityNameLen == 0) {
+            pdu->securityName = (u_char *) malloc(sp->securityNameLen);
+            if (pdu->securityName == NULL) {
+                sp->s_snmp_errno = SNMPERR_MALLOC;
+                return -1;
+            }
+            memmove(pdu->securityName,
+                     sp->securityName, sp->securityNameLen);
+            pdu->securityNameLen = sp->securityNameLen;
+        }
+        if (pdu->securityModel == -1)
+            pdu->securityModel = sp->securityModel;
+        if (pdu->securityLevel == 0)
+            pdu->securityLevel = sp->securityLevel;
+        /* WHAT ELSE ?? */
     }
     *len = 1;
     DEBUGMSGTL(("transport_callback", "hook_build exit\n"));
