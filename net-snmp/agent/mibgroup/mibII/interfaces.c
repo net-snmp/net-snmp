@@ -1552,19 +1552,19 @@ Interface_Scan_Init(void)
         if (!strcmp(ifname_buf, "lo") && rec_pkt > 0 && !snd_pkt)
             snd_pkt = rec_pkt;
 
-        nnew->if_ipackets = rec_pkt;
+        nnew->if_ipackets = rec_pkt & 0xffffffff;
         nnew->if_ierrors = rec_err;
-        nnew->if_opackets = snd_pkt;
+        nnew->if_opackets = snd_pkt & 0xffffffff;
         nnew->if_oerrors = snd_err;
         nnew->if_collisions = coll;
         if (scan_line_to_use == scan_line_2_2) {
-            nnew->if_ibytes = rec_oct;
-            nnew->if_obytes = snd_oct;
+            nnew->if_ibytes = rec_oct & 0xffffffff;
+            nnew->if_obytes = snd_oct & 0xffffffff;
             nnew->if_iqdrops = rec_drop;
             nnew->if_snd.ifq_drops = snd_drop;
         } else {
-            nnew->if_ibytes = rec_pkt * 308;
-            nnew->if_obytes = snd_pkt * 308;
+            nnew->if_ibytes = (rec_pkt * 308) & 0xffffffff;
+            nnew->if_obytes = (snd_pkt * 308) & 0xffffffff;
         }
 
         /*
