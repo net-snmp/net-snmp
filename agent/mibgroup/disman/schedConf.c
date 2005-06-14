@@ -51,6 +51,8 @@ parse_sched_periodic( const char *token, char *line )
     size_t tmpint;
     oid  variable[MAX_OID_LEN], *var_ptr = variable;
     size_t var_len = MAX_OID_LEN;
+    char  *schedUser = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                             NETSNMP_DS_AGENT_INTERNAL_SECNAME);
     
     schedEntries++;
     sprintf(buf, "_conf%03d", schedEntries);
@@ -81,8 +83,13 @@ parse_sched_periodic( const char *token, char *line )
     /*
      * Create an entry in the schedTable
      */
-    row = schedTable_createEntry(schedTable, "snmpd.conf", strlen("snmpd.conf"),
-                                             buf, strlen(buf), NULL );
+    if ( !schedUser ) {
+        config_perror("no authorization configured for schedEntry");
+        return;
+    }
+    row = schedTable_createEntry(schedTable,
+                                 schedUser, strlen(schedUser),
+                                 buf, strlen(buf), NULL );
     entry = (struct schedTable_entry *)row->data;
 
     entry->schedInterval     = frequency;
@@ -167,6 +174,8 @@ parse_sched_timed( const char *token, char *line )
     netsnmp_table_row *row;
     struct schedTable_entry *entry;
     char buf[24], *cp;
+    char  *schedUser = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                             NETSNMP_DS_AGENT_INTERNAL_SECNAME);
 
     char  minConf[512];  size_t  min_len = sizeof(minConf);  char  minVal[8];
     char hourConf[512];  size_t hour_len = sizeof(hourConf); char hourVal[3];
@@ -236,8 +245,13 @@ parse_sched_timed( const char *token, char *line )
     /*
      * Create an entry in the schedTable
      */
-    row = schedTable_createEntry(schedTable, "snmpd.conf", strlen("snmpd.conf"),
-                                             buf, strlen(buf), NULL );
+    if ( !schedUser ) {
+        config_perror("no authorization configured for schedEntry");
+        return;
+    }
+    row = schedTable_createEntry(schedTable,
+                                 schedUser, strlen(schedUser),
+                                 buf, strlen(buf), NULL );
     entry = (struct schedTable_entry *)row->data;
 
     entry->schedWeekDay = dayVal;
