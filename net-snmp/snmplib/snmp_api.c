@@ -2060,7 +2060,7 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     case SNMP_MSG_RESPONSE:
     case SNMP_MSG_TRAP2:
     case SNMP_MSG_REPORT:
-        pdu->flags &= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
+        netsnmp_assert(0 == (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE));
         /*
          * Fallthrough 
          */
@@ -2095,53 +2095,6 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     }
 
     /* Do we need to set the session security engineid? */
-    if (session->securityEngineIDLen == 0) {
-        if (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) {
-            /* The remote end is authoritative. Send a disovery packet to
-             * determine the remote engine id if necessary
-             */
-            DEBUGMSGTL(("snmpv3_build", "delayed probe for engineID\n"));
-            if (1 != snmpv3_engineID_probe(snmp_sess_pointer(session),
-                                           session)) {
-                session->s_snmp_errno = SNMPERR_USM_UNKNOWNENGINEID;
-                return(-1);
-            }
-        }
-        else {
-            session->securityEngineID =
-                snmpv3_generate_engineID(&session->securityEngineIDLen);
-            if ((NULL == session->securityEngineID) ||
-                (SNMPERR_SUCCESS != create_user_from_session(session))) {
-                session->s_snmp_errno = SNMPERR_USM_UNKNOWNENGINEID;
-                return(-1);
-            }
-        }
-    }
-    
-    /* Do we need to set the session context engineid? */
-    if (session->contextEngineIDLen == 0) {
-        if (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) {
-            /* The remote end is authoritative. Send a disovery packet to
-             * determine the remote engine id if necessary
-             */
-            DEBUGMSGTL(("snmpv3_build", "delayed probe for engineID\n"));
-            if (1 != snmpv3_engineID_probe(snmp_sess_pointer(session),
-                                           session)) {
-                session->s_snmp_errno = SNMPERR_USM_UNKNOWNENGINEID;
-                return(-1);
-            }
-        }
-        else {
-            /* We are the authoritative engine, so use our engineid */
-            session->contextEngineID =
-                snmpv3_generate_engineID(&session->contextEngineIDLen);
-            if (NULL == session->contextEngineID) {
-                session->s_snmp_errno = SNMPERR_USM_UNKNOWNENGINEID;
-                return(-1);
-            }
-        }
-    }
-    
     if (pdu->securityEngineIDLen == 0) {
         if (session->securityEngineIDLen) {
             snmpv3_clone_engineID(&pdu->securityEngineID,
@@ -2150,7 +2103,8 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
                                   session->securityEngineIDLen);
         }
     }
-
+    
+    /* Do we need to set the session context engineid? */
     if (pdu->contextEngineIDLen == 0) {
         if (session->contextEngineIDLen) {
             snmpv3_clone_engineID(&pdu->contextEngineID,
@@ -2787,7 +2741,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
 
     switch (pdu->command) {
     case SNMP_MSG_RESPONSE:
-        pdu->flags &= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
+        netsnmp_assert(0 == (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE));
         /*
          * Fallthrough 
          */
@@ -2808,7 +2762,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         break;
 
     case SNMP_MSG_TRAP2:
-        pdu->flags &= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
+        netsnmp_assert(0 == (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE));
         /*
          * Fallthrough 
          */
@@ -4671,6 +4625,69 @@ _sess_async_send(void *sessp,
         return 0;
     }
 
+    session->s_snmp_errno = 0;
+    session->s_errno = 0;
+
+    /*
+     * Check/setup the version.  
+     */
+    if (pdu->version == SNMP_DEFAULT_VERSION) {
+        if (session->version == SNMP_DEFAULT_VERSION) {
+            session->s_snmp_errno = SNMPERR_BAD_VERSION;
+            return 0;
+        }
+        pdu->version = session->version;
+    } else if (session->version == SNMP_DEFAULT_VERSION) {
+        /*
+         * It's OK  
+         */
+    } else if (pdu->version != session->version) {
+        /*
+         * ENHANCE: we should support multi-lingual sessions  
+         */
+        session->s_snmp_errno = SNMPERR_BAD_VERSION;
+        return 0;
+    }
+
+    /*
+     * do we expect a response?
+     */
+    switch (pdu->command) {
+        case SNMP_MSG_GET:
+        case SNMP_MSG_GETNEXT:
+        case SNMP_MSG_SET:
+        case SNMP_MSG_INFORM:
+        case SNMP_MSG_GETBULK:
+            pdu->flags |= UCD_MSG_FLAG_EXPECT_RESPONSE;
+            break;
+
+        case SNMP_MSG_RESPONSE:
+        case SNMP_MSG_TRAP:
+        case SNMP_MSG_TRAP2:
+        case SNMP_MSG_REPORT:
+            netsnmp_assert(0 == (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE));
+            break;
+            
+        default:
+            snmp_log(LOG_ERR,"unknown pdu command %d\n", pdu->command);
+            break;
+    }
+
+    /*
+     * check to see if we need a v3 engineID probe
+     */
+    if ((pdu->version == SNMP_VERSION_3) &&
+        (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) &&
+        (session->securityEngineIDLen == 0) &&
+        (0 == (session->flags & SNMP_FLAGS_DONT_PROBE))) {
+        int rc;
+        netsnmp_assert(0 == (session->flags & SNMP_FLAGS_DONT_PROBE));
+        DEBUGMSGTL(("snmpv3_build", "delayed probe for engineID\n"));
+        rc = snmpv3_engineID_probe(slp, session);
+        if (rc == 0)
+            return 0; /* s_snmp_errno already set */
+    }
+
     if ((pktbuf = malloc(2048)) == NULL) {
         DEBUGMSGTL(("sess_async_send",
                     "couldn't malloc initial packet buffer\n"));
@@ -4679,9 +4696,6 @@ _sess_async_send(void *sessp,
     } else {
         pktbuf_len = 2048;
     }
-
-    session->s_snmp_errno = 0;
-    session->s_errno = 0;
 
 #if TEMPORARILY_DISABLED
     /*
@@ -4710,31 +4724,6 @@ _sess_async_send(void *sessp,
     }
 #endif
 
-    pdu->flags |= UCD_MSG_FLAG_EXPECT_RESPONSE;
-
-    /*
-     * Check/setup the version.  
-     */
-
-    if (pdu->version == SNMP_DEFAULT_VERSION) {
-        if (session->version == SNMP_DEFAULT_VERSION) {
-            session->s_snmp_errno = SNMPERR_BAD_VERSION;
-            SNMP_FREE(pktbuf);
-            return 0;
-        }
-        pdu->version = session->version;
-    } else if (session->version == SNMP_DEFAULT_VERSION) {
-        /*
-         * It's OK  
-         */
-    } else if (pdu->version != session->version) {
-        /*
-         * ENHANCE: we should support multi-lingual sessions  
-         */
-        session->s_snmp_errno = SNMPERR_BAD_VERSION;
-        SNMP_FREE(pktbuf);
-        return 0;
-    }
 
     /*
      * Build the message to send.  
@@ -4906,6 +4895,9 @@ snmp_sess_async_send(void *sessp,
         snmp_errno = SNMPERR_BAD_SESSION;       /*MTCRITICAL_RESOURCE */
         return (0);
     }
+    /*
+     * send pdu
+     */
     rc = _sess_async_send(sessp, pdu, callback, cb_data);
     if (rc == 0) {
         struct session_list *psl;
