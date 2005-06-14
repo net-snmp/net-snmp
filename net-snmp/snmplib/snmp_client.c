@@ -1127,6 +1127,9 @@ static int _query(netsnmp_variable_list *list,
                 snmp_clone_var( vb1, vb2 );
             }
         }
+    } else {
+        /* Distinguish snmp_send errors from SNMP errStat errors */
+        ret = -ret;
     }
     snmp_free_pdu( response );
     return ret;
