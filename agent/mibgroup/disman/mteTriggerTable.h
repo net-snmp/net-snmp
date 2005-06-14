@@ -14,6 +14,7 @@
 
 
 config_require(header_complex)
+config_require(utilities/iquery)
 
     /*
      * our storage structure(s) 

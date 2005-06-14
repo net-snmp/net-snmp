@@ -7,6 +7,9 @@
 static netsnmp_session *iquery_default_session = NULL;
 
 void init_iquery(void){
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmpd", "agentSecName",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_INTERNAL_SECNAME);
 }
 
     /**************************
