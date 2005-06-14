@@ -98,9 +98,10 @@ init_subagent(void)
                "the callback transport is not available.\n");
     return;
 #else
-    agentx_register_config_handler("agentxsocket",
+    snmpd_register_config_handler("agentxsocket",
                                   agentx_parse_agentx_socket, NULL,
                                   "AgentX bind address");
+
     if (agentx_callback_sess == NULL) {
         agentx_callback_sess = netsnmp_callback_open(callback_master_num,
                                                      handle_subagent_response,
