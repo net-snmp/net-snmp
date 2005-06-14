@@ -771,7 +771,7 @@ free_config(void)
 void
 read_configs_optional(const char *optional_config, int when)
 {
-    char *newp, *cp;
+    char *newp, *cp, *st;
     char *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				       NETSNMP_DS_LIB_APPTYPE);
 
@@ -805,7 +805,6 @@ read_configs(void)
 {
     char *optional_config = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					       NETSNMP_DS_LIB_OPTIONALCONFIG);
-    char *st;
 
     DEBUGMSGTL(("read_config", "reading normal configuration tokens\n"));
 
