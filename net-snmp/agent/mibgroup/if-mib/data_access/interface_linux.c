@@ -32,6 +32,10 @@
 
 unsigned int
 netsnmp_arch_interface_get_if_speed(int fd, const char *name);
+#ifdef HAVE_LINUX_ETHTOOL_H
+unsigned int
+netsnmp_arch_interface_get_if_speed_mii(int fd, const char *name);
+#endif
 
 void
 netsnmp_arch_interface_init(void)
