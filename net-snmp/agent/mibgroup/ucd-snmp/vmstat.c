@@ -247,11 +247,11 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
     b = strstr(buff, "cpu ");
     if (b) {
 	if (!has_cpu_26 ||
-            sscanf(b, "cpu  %llu %llu %llu %llu %llu %llu %llu", cusell,
-                   cicell, csysll, cidell, ciowll, cirqll, csoftll) != 7) {
+            sscanf(b, "cpu  %llu %llu %llu %llu %llu %llu %llu", &cusell,
+                   &cicell, &csysll, &cidell, &ciowll, &cirqll, &csoftll) != 7) {
 	    has_cpu_26 = 0;
-	    sscanf(b, "cpu  %llu %llu %llu %llu", cusell, cicell, csysll,
-                   cidell);
+	    sscanf(b, "cpu  %llu %llu %llu %llu", &cusell, &cicell, &csysll,
+                   &cidell);
 	    *ciow = *cirq = *csoft = 0;
 	} else {
   	    *ciow = (unsigned long)ciowll;
