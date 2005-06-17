@@ -283,7 +283,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      * Finally, handle ".... -Lx value ...." syntax
      *   (*without* surrounding quotes)
      */
-    if (!*optarg) {
+    if ((!*optarg) && (NULL != argv)) {
         /*
          * We've run off the end of the argument
          *  so move on to the next.
@@ -692,7 +692,14 @@ snmp_enable_filelog(const char *logfilename, int dont_zero_log)
 {
     netsnmp_log_handler *logh;
 
-    snmp_disable_filelog();	/* XXX ??? */
+    /*
+     * don't disable ALL filelogs whenever a new one is enabled.
+     * this prevents '-Lf file' from working in snmpd, as the
+     * call to set up /var/log/snmpd.log will disable the previous
+     * log setup. again, this new linked list of log handlers
+     * needs rethinking/cleanup. xxx-rks
+     * snmp_disable_filelog();
+     */
 
     if (logfilename) {
         logh = netsnmp_find_loghandler( logfilename );
