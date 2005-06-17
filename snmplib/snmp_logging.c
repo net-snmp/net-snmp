@@ -548,6 +548,25 @@ snmp_disable_filelog(void)
             snmp_disable_filelog_entry(logh);
 }
 
+/*
+ * returns that status of stderr logging
+ *
+ * @retval 0 : stderr logging disabled
+ * @retval 1 : stderr logging enabled
+ */
+snmp_stderrlog_status(void)
+{
+    netsnmp_log_handler *logh;
+
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->enabled && (logh->type == NETSNMP_LOGHANDLER_STDOUT ||
+                              logh->type == NETSNMP_LOGHANDLER_STDERR)) {
+            return 1;
+       }
+
+    return 0;
+}
+
 void
 snmp_disable_stderrlog(void)
 {
@@ -1084,9 +1103,11 @@ snmp_log_string(int priority, const char *string)
     for ( ; logh; logh = logh->next ) {
         /*
          * ... but skipping any handlers with a "maximum priority"
-	 *     that we have already exceeded.
+         *     that we have already exceeded. And don't forget to
+         *     ensure this logging is turned on (see snmp_disable_stderrlog
+         *     and its cohorts).
          */
-        if (priority >= logh->pri_max)
+        if (logh->enabled && (priority >= logh->pri_max))
             logh->handler( logh, priority, string );
     }
 }
