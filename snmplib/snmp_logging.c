@@ -90,7 +90,7 @@
  * logh_head:  A list of all log handlers, in increasing order of priority
  * logh_priorities:  'Indexes' into this list, by priority
  */
-netsnmp_log_handler *logh_head;
+netsnmp_log_handler *logh_head = NULL;
 netsnmp_log_handler *logh_priorities[LOG_DEBUG+1];
 
 static int      newline = 1;	 /* MTCRITICAL_RESOURCE */
@@ -283,7 +283,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      * Finally, handle ".... -Lx value ...." syntax
      *   (*without* surrounding quotes)
      */
-    if ((!*optarg) && (NULL != argv)) {
+    if (!*optarg) {
         /*
          * We've run off the end of the argument
          *  so move on to the next.
@@ -506,6 +506,25 @@ snmp_disable_filelog(void)
 	    }
             logh->enabled = 0;
 	}
+}
+
+/*
+ * returns that status of stderr logging
+ *
+ * @retval 0 : stderr logging disabled
+ * @retval 1 : stderr logging enabled
+ */
+snmp_stderrlog_status(void)
+{
+    netsnmp_log_handler *logh;
+
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->enabled && (logh->type == NETSNMP_LOGHANDLER_STDOUT ||
+                              logh->type == NETSNMP_LOGHANDLER_STDERR)) {
+            return 1;
+	}
+
+    return 0;
 }
 
 void

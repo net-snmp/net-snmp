@@ -395,13 +395,17 @@ SnmpTrapNodeDown(void)
      */
 }
 
+/*
+ * dummy1 used to be stderr_log, but that was never set. So, ignore the
+ * value here, instead of always disabling stderr logging (which might
+ * have been set up using the new log handler methods).
+ */
 static void
-setup_log(int restart, int dont_zero, int stderr_log, int syslog_log, 
+setup_log(int restart, int dont_zero, int dummy1, int syslog_log, 
 	  char *logfile)
 {
     static char logfile_s[PATH_MAX + 1] = { 0 };
     static int dont_zero_s  = 0;
-    static int stderr_log_s = 0;
     static int syslog_log_s = 0;
 
     if (restart == 0) {
@@ -409,14 +413,7 @@ setup_log(int restart, int dont_zero, int stderr_log, int syslog_log,
 	    strncpy(logfile_s, logfile, PATH_MAX);
 	}
 	dont_zero_s  = dont_zero;
-	stderr_log_s = stderr_log;
 	syslog_log_s = syslog_log;
-    }
-
-    if (stderr_log_s) {
-	snmp_enable_stderrlog();
-    } else {
-	snmp_disable_stderrlog();
     }
 
     if (logfile_s[0]) {
@@ -455,7 +452,7 @@ main(int argc, char *argv[])
     int             arg, i, ret;
     int             dont_fork = 0;
     int             dont_zero_log = 0;
-    int             stderr_log = 0, syslog_log = 0;
+    int             syslog_log = 0;
     int             uid = 0, gid = 0;
     int             agent_mode = -1;
     char            logfile[PATH_MAX + 1] = { 0 };
@@ -614,9 +611,6 @@ main(int argc, char *argv[])
             break;
 
         case 'L':
-	    /*
-            stderr_log = 1;
-	     */
 	    if  (snmp_log_options( optarg, argc, argv ) < 0 ) {
                 usage(argv[0]);
             }
@@ -808,7 +802,7 @@ main(int argc, char *argv[])
 					  NETSNMP_DS_AGENT_PORTS)));
     }
 
-    setup_log(0, dont_zero_log, stderr_log, syslog_log, logfile);
+    setup_log(0, dont_zero_log, 0, syslog_log, logfile);
 
     /*
      * Initialize a argv set to the current for restarting the agent.   
@@ -855,7 +849,7 @@ main(int argc, char *argv[])
     if(!dont_fork) {
         int quit = ! netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                             NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
-        ret = netsnmp_daemonize(quit, stderr_log);
+        ret = netsnmp_daemonize(quit, snmp_stderrlog_status());
         /*
          * xxx-rks: do we care if fork fails? I think we should...
          */

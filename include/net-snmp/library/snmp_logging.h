@@ -49,6 +49,8 @@ extern          "C" {
     void            snmp_enable_stderrlog(void);
     void            snmp_enable_calllog(void);
 
+    int             snmp_stderrlog_status(void);
+
 #if HAVE_STDARG_H
     int             snmp_log(int priority, const char *format, ...);
 #else
