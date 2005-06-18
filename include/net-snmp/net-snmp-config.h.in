@@ -351,6 +351,9 @@
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
 
+/* Define to 1 if you have the <linux/ethtool.h> header file. */
+#undef HAVE_LINUX_ETHTOOL_H
+
 /* Define to 1 if you have the <linux/hdreg.h> header file. */
 #undef HAVE_LINUX_HDREG_H
 
@@ -516,6 +519,9 @@
 /* Define to 1 if you have the <osreldate.h> header file. */
 #undef HAVE_OSRELDATE_H
 
+/* Define to 1 if you have the <pci/pci.h> header file. */
+#undef HAVE_PCI_PCI_H
+
 /* Define to 1 if you have the `perl_eval_pv' function. */
 #undef HAVE_PERL_EVAL_PV
 
@@ -650,6 +656,9 @@
 
 /* Define to 1 if you have the `strncasecmp' function. */
 #undef HAVE_STRNCASECMP
+
+/* Define to 1 if you have the `strtok_r' function. */
+#undef HAVE_STRTOK_R
 
 /* Define to 1 if you have the `strtol' function. */
 #undef HAVE_STRTOL
