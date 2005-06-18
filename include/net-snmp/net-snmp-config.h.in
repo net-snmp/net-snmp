@@ -279,6 +279,12 @@
 /* Define to 1 if you have the <inet/mib2.h> header file. */
 #undef HAVE_INET_MIB2_H
 
+/* Define to 1 if the system has the type `int32_t'. */
+#undef HAVE_INT32_T
+
+/* Define to 1 if the system has the type `int64_t'. */
+#undef HAVE_INT64_T
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -296,6 +302,9 @@
 
 /* Define to 1 if you have the `kvm_getprocs' function. */
 #undef HAVE_KVM_GETPROCS
+
+/* Define to 1 if you have the `kvm_getswapinfo' function. */
+#undef HAVE_KVM_GETSWAPINFO
 
 /* Define to 1 if you have the <kvm.h> header file. */
 #undef HAVE_KVM_H
@@ -480,6 +489,9 @@
 /* Define to 1 if you have the <netipx/ipx.h> header file. */
 #undef HAVE_NETIPX_IPX_H
 
+/* Define to 1 if you have the <net/if_arp.h> header file. */
+#undef HAVE_NET_IF_ARP_H
+
 /* Define to 1 if you have the <net/if_dl.h> header file. */
 #undef HAVE_NET_IF_DL_H
 
@@ -509,6 +521,9 @@
 
 /* Define to 1 if you have the <openssl/des.h> header file. */
 #undef HAVE_OPENSSL_DES_H
+
+/* Define to 1 if you have the <openssl/dh.h> header file. */
+#undef HAVE_OPENSSL_DH_H
 
 /* Define to 1 if you have the <openssl/evp.h> header file. */
 #undef HAVE_OPENSSL_EVP_H
@@ -848,6 +863,12 @@
 /* Define to 1 if you have the <ufs/ufs/quota.h> header file. */
 #undef HAVE_UFS_UFS_QUOTA_H
 
+/* Define to 1 if the system has the type `uint32_t'. */
+#undef HAVE_UINT32_T
+
+/* Define to 1 if the system has the type `uint64_t'. */
+#undef HAVE_UINT64_T
+
 /* Define to 1 if you have the `uname' function. */
 #undef HAVE_UNAME
 
@@ -868,6 +889,12 @@
 
 /* Define to 1 if you have the <uvm/uvm_param.h> header file. */
 #undef HAVE_UVM_UVM_PARAM_H
+
+/* Define to 1 if the system has the type `u_int32_t'. */
+#undef HAVE_U_INT32_T
+
+/* Define to 1 if the system has the type `u_int64_t'. */
+#undef HAVE_U_INT64_T
 
 /* Define to 1 if you have the <vm/swap_pager.h> header file. */
 #undef HAVE_VM_SWAP_PAGER_H
@@ -907,6 +934,18 @@
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
+
+/* The size of a `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
+/* The size of a `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of a `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
+
+/* The size of a `short', as computed by sizeof. */
+#undef SIZEOF_SHORT
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be

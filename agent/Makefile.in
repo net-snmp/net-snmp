@@ -66,7 +66,7 @@ USELIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 HELPERLIB	= helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 LOCAL_LIBS	= 
 LIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @AGENTLIBS@
-OUR_AGENT_LIBS	= $(INSTALLLIBS) $(HELPERLIB) @WRAPLIBS@ $(LIBS) @DLLIBS@
+OUR_AGENT_LIBS	= $(INSTALLLIBS) $(HELPERLIB) @WRAPLIBS@ $(LIBS)
 CPPFLAGS	= -I../include -I$(top_srcdir)/include \
 		  -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
 		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
