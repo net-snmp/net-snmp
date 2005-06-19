@@ -654,7 +654,7 @@ var_ifEntry(struct variable *vp,
     int             interface;
     struct if_msghdr if_msg;
     static char     if_name[100];
-    conf_if_list   *if_ptr = conf_list;;
+    conf_if_list   *if_ptr = conf_list;
     char           *cp;
 
     interface =
