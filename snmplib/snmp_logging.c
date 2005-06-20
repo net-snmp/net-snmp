@@ -585,6 +585,33 @@ snmp_disable_log(void)
     }
 }
 
+/*
+ * close and reopen all file based logs, to allow logfile
+ * rotation.
+ */
+void
+netsnmp_logging_restart(void)
+{
+    netsnmp_log_handler *logh;
+
+    for (logh = logh_head; logh; logh = logh->next) {
+        if (0 == logh->enabled)
+            continue;
+        if (logh->type == NETSNMP_LOGHANDLER_SYSLOG) {
+            snmp_disable_syslog_entry(logh);
+            snmp_enable_syslog_entry(logh);
+        }
+        else if (logh->type == NETSNMP_LOGHANDLER_FILE) {
+            snmp_disable_filelog_entry(logh);
+            /** hmm, don't zero status isn't saved.. i think it's
+             * safer not to overwrite, in case a hup is just to
+             * re-read config files...
+             */
+            snmp_enable_filelog(logh, 1);
+        }
+    }
+}
+
 /* ================================================== */
 
 void
