@@ -97,6 +97,9 @@ static int      newline = 1;	 /* MTCRITICAL_RESOURCE */
 
 static char syslogname[64] = DEFAULT_LOG_ID;
 
+void
+netsnmp_enable_filelog(netsnmp_log_handler *logh, int dont_zero_log);
+
 #ifndef HAVE_VSNPRINTF
                 /*
                  * Need to use the UCD-provided one 
@@ -548,6 +551,26 @@ snmp_disable_filelog(void)
             snmp_disable_filelog_entry(logh);
 }
 
+/*
+ * returns that status of stderr logging
+ *
+ * @retval 0 : stderr logging disabled
+ * @retval 1 : stderr logging enabled
+ */
+int
+snmp_stderrlog_status(void)
+{
+    netsnmp_log_handler *logh;
+
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->enabled && (logh->type == NETSNMP_LOGHANDLER_STDOUT ||
+                              logh->type == NETSNMP_LOGHANDLER_STDERR)) {
+            return 1;
+       }
+
+    return 0;
+}
+
 void
 snmp_disable_stderrlog(void)
 {
@@ -599,7 +622,7 @@ netsnmp_logging_restart(void)
             continue;
         if (logh->type == NETSNMP_LOGHANDLER_SYSLOG) {
             snmp_disable_syslog_entry(logh);
-            snmp_enable_syslog_entry(logh);
+            snmp_enable_syslog_ident(logh->token,(int)logh->magic);
         }
         else if (logh->type == NETSNMP_LOGHANDLER_FILE) {
             snmp_disable_filelog_entry(logh);
@@ -607,7 +630,7 @@ netsnmp_logging_restart(void)
              * safer not to overwrite, in case a hup is just to
              * re-read config files...
              */
-            snmp_enable_filelog(logh, 1);
+            netsnmp_enable_filelog(logh, 1);
         }
     }
 }
@@ -700,12 +723,13 @@ snmp_enable_filelog(const char *logfilename, int dont_zero_log)
 {
     netsnmp_log_handler *logh;
 
-    // don't disable ALL filelogs whenever a new one is enabled.
-    // this prevents '-Lf file' from working in snmpd, as the
-    // call to set up /var/log/snmpd.log will disable the previous
-    // log setup. again, this new linked list of log handlers
-    // needs rethinking/cleanup. xxx-rks
-    //snmp_disable_filelog();	/* XXX ??? */
+    /*
+     * don't disable ALL filelogs whenever a new one is enabled.
+     * this prevents '-Lf file' from working in snmpd, as the
+     * call to set up /var/log/snmpd.log will disable the previous
+     * log setup.
+     * snmp_disable_filelog();
+     */
 
     if (logfilename) {
         logh = netsnmp_find_loghandler( logfilename );

@@ -573,7 +573,7 @@ main(int argc, char *argv[])
                             argv[0], PATH_MAX);
                     exit(1);
                 }
-                snmp_enable_filelog(optarg, dont_zero);
+                snmp_enable_filelog(optarg, dont_zero_log);
                 log_set = 1;
             } else {
                 usage(argv[0]);
@@ -624,7 +624,8 @@ main(int argc, char *argv[])
 
         case 's':
             printf("Warning: -s option is deprecated, use -Lsd instead\n");
-            syslog_log = 1;
+            snmp_enable_syslog();
+            log_set = 1;
             break;
 
         case 'S':
@@ -667,6 +668,8 @@ main(int argc, char *argv[])
                     fprintf(stderr, "invalid syslog facility: -S%c\n",*optarg);
                     usage(argv[0]);
                 }
+                snmp_enable_syslog_ident(snmp_log_syslogname(NULL), Facility);
+                log_set = 1;
             } else {
                 fprintf(stderr, "no syslog facility specified\n");
                 usage(argv[0]);
@@ -775,7 +778,7 @@ main(int argc, char *argv[])
 
 #ifdef LOGFILE
     if (0 == log_set)
-        snmp_enable_filelog(LOGFILE, dont_zero);
+        snmp_enable_filelog(LOGFILE, dont_zero_log);
 #endif
 
     /*
@@ -823,7 +826,7 @@ main(int argc, char *argv[])
     if(!dont_fork) {
         int quit = ! netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                             NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
-        ret = netsnmp_daemonize(quit, stderr_log);
+        ret = netsnmp_daemonize(quit, snmp_stderrlog_status());
         /*
          * xxx-rks: do we care if fork fails? I think we should...
          */
