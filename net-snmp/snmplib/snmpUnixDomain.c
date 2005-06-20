@@ -471,6 +471,10 @@ netsnmp_unix_getSecName(void *opaque, int olength,
     struct sockaddr_un *to = (struct sockaddr_un *) opaque;
     char           *ztcommunity = NULL;
 
+    if (secName != NULL) {
+        *secName = NULL;  /* Haven't found anything yet */
+    }
+
     /*
      * Special case if there are NO entries (as opposed to no MATCHING
      * entries).  
@@ -478,9 +482,6 @@ netsnmp_unix_getSecName(void *opaque, int olength,
 
     if (com2SecUnixList == NULL) {
         DEBUGMSGTL(("netsnmp_unix_getSecName", "no com2sec entries\n"));
-        if (secName != NULL) {
-            *secName = NULL;
-        }
         return 0;
     }
 
@@ -493,9 +494,6 @@ netsnmp_unix_getSecName(void *opaque, int olength,
         to->sun_family != AF_UNIX) {
         DEBUGMSGTL(("netsnmp_unix_getSecName",
 		    "no unix destine address in PDU?\n"));
-        if (secName != NULL) {
-            *secName = NULL;
-        }
         return 1;
     }
 

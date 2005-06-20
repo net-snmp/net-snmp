@@ -20,15 +20,16 @@ netsnmp_container_get_factory(const char *type);
 /*------------------------------------------------------------------
  */
 static void 
-_factory_free(container_type *data, void *context)
+_factory_free(void *dat, void *context)
 {
+    container_type *data = (container_type *)dat;
     if (data == NULL)
 	return;
     
     if (data->name != NULL) {
         DEBUGMSGTL(("container", "  _factory_free_list() called for %s\n",
                     data->name));
-	free(data->name); /* SNMP_FREE wasted on object about to be freed */
+	free((const void*)data->name); /* SNMP_FREE wasted on object about to be freed */
     }
     free(data); /* SNMP_FREE wasted on param */
 }
@@ -129,17 +130,18 @@ netsnmp_container_find_factory(const char *type_list)
 {
     netsnmp_factory   *f = NULL;
     char              *list, *entry;
+    char              *st;
 
     if (NULL==type_list)
         return NULL;
 
     list = strdup(type_list);
-    entry = strtok(list, ":");
+    entry = strtok_r(list, ":", &st);
     while(entry) {
         f = netsnmp_container_get_factory(entry);
         if (NULL != f)
             break;
-        entry = strtok(NULL, ":");
+        entry = strtok_r(NULL, ":", &st);
     }
 
     free(list);
@@ -176,10 +178,18 @@ void
 netsnmp_container_add_index(netsnmp_container *primary,
                             netsnmp_container *new_index)
 {
-    while(primary->next)
-        primary = primary->next;
+    netsnmp_container *curr = primary;
 
-    primary->next = new_index;
+    if((NULL == new_index) || (NULL == primary)) {
+        snmp_log(LOG_ERR, "add index called with null pointer\n");
+        return;
+    }
+
+    while(curr->next)
+        curr = curr->next;
+
+    curr->next = new_index;
+    new_index->prev = curr;
 }
 
 #ifndef NETSNMP_USE_INLINE /* default is to inline */
@@ -189,19 +199,19 @@ netsnmp_container_add_index(netsnmp_container *primary,
  * container.h. If you chance one, change them both.
  */
 int CONTAINER_INSERT(netsnmp_container *x, const void *k)
-{
-    int rc;
-
-    rc = x->insert(x,k);
-    if (NULL != x->next) {
-        netsnmp_container *tmp = x->next;
-        int                rc2;
-        while(tmp) {
-            rc2 = tmp->insert(tmp,k);
-            if (rc2)
-                snmp_log(LOG_ERR,"error on subcontainer insert (%d)\n", rc2);
-            tmp = tmp->next;
+{ 
+    int rc2, rc = 0;
+    
+    /** start at first container */
+    while(x->prev)
+        x = x->prev;
+    while(x) {
+        rc2 = x->insert(x,k);
+        if (rc2) {
+            snmp_log(LOG_ERR,"error on subcontainer insert (%d)\n", rc2);
+            rc = rc2;
         }
+        x = x->next;
     }
     return rc;
 }
@@ -212,19 +222,21 @@ int CONTAINER_INSERT(netsnmp_container *x, const void *k)
  */
 int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
 {
-    if (NULL != x->next) {
-        netsnmp_container *tmp = x->next;
-        int                rc;
-        while(tmp->next)
-            tmp = tmp->next;
-        while(tmp) {
-            rc = tmp->remove(tmp,k);
-            if (rc)
-                snmp_log(LOG_ERR,"error on subcontainer remove (%d)\n", rc);
-            tmp = tmp->prev;
+    int rc2, rc = 0;
+    
+    /** start at last container */
+    while(x->next)
+        x = x->next;
+    while(x) {
+        rc2 = x->remove(x,k);
+        if (rc2) {
+            snmp_log(LOG_ERR,"error on subcontainer remove (%d)\n", rc2);
+            rc = rc2;
         }
+        x = x->prev;
+        
     }
-    return x->remove(x,k);
+    return rc;
 }
 
 /*------------------------------------------------------------------
@@ -233,21 +245,21 @@ int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
  */
 int CONTAINER_FREE(netsnmp_container *x)
 {
-    int                rc;
-
-    if (NULL != x->next) {
-        netsnmp_container *tmp = x->next;
-        while(tmp->next)
-            tmp = tmp->next;
-        while(tmp) {
-            tmp = tmp->prev;
-            rc = tmp->next->cfree(tmp->next);
-            if (rc)
-                snmp_log(LOG_ERR,"error on subcontainer free (%d)\n", rc);
+    int  rc2, rc = 0;
+        
+    /** start at last container */
+    while(x->next)
+        x = x->next;
+    while(x) {
+        netsnmp_container *tmp;
+        tmp = x->prev;
+        rc2 = x->cfree(x);
+        if (rc2) {
+            snmp_log(LOG_ERR,"error on subcontainer cfree (%d)\n", rc2);
+            rc = rc2;
         }
+        x = tmp;
     }
-    rc = x->cfree(x);
-
     return rc;
 }
 #endif
@@ -342,6 +354,13 @@ netsnmp_ncompare_cstring(const void * lhs, const void * rhs)
                    strlen(((const container_type*)rhs)->name));
 }
 
+/*
+ * compare two memory buffers
+ *
+ * since snmp strings aren't NULL terminated, we can't use strcmp. So
+ * compare up to the length of the smaller, and then use length to
+ * break any ties.
+ */
 int
 netsnmp_compare_mem(const char * lhs, size_t lhs_len,
                     const char * rhs, size_t rhs_len)

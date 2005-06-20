@@ -387,6 +387,7 @@ parse_simple_monitor(const char *token, char *line)
     StorageNew->mteTriggerBooleanStartup = MTETRIGGERBOOLEANSTARTUP_TRUE;
     StorageNew->mteTriggerThresholdStartup =
         MTETRIGGERTHRESHOLDSTARTUP_RISINGORFALLING;
+    StorageNew->mteTriggerExistenceTest[0] = 0;
     /*
      * owner = snmpd.conf, why not? 
      */
@@ -406,6 +407,12 @@ parse_simple_monitor(const char *token, char *line)
             * Threshold toggle
             */
            StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_THRESHOLD;
+           break;
+        case 'i':
+           /*
+            * Single instance
+            */
+           StorageNew->mteTriggerValueIDWildcard = MTETRIGGERVALUEIDWILDCARD_FALSE;
            break;
         case 'r':
             if (cp) {
@@ -545,7 +552,7 @@ parse_simple_monitor(const char *token, char *line)
          * if nothing beyond here, it's an existence test 
          */
         if (!cp) {
-            StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_EXISTENCE;
+            StorageNew->mteTriggerTest[0] = (u_char)MTETRIGGERTEST_EXISTENCE;
             if (eventname[0] != '\0') {
                 StorageNew->mteTriggerExistenceEventOwner =
                     strdup("snmpd.conf");
@@ -1391,7 +1398,7 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
                                            &tmpint);
                 cptr =
                     read_config_store_data(ASN_OBJECT_ID, cptr,
-                                           &StorageTmp->pdu_tDomain,
+                                           (void *)(&StorageTmp->pdu_tDomain),
                                            &StorageTmp->pdu_tDomainLen);
                 cptr =
                     read_config_store_data(ASN_OCTET_STR, cptr,
@@ -3503,7 +3510,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
             if (boolresult &&
                 ((item->mteTriggerBooleanStartup ==
                   MTETRIGGERBOOLEANSTARTUP_TRUE
-                  && lastbool == -1) || lastbool != boolresult)) {
+                  && lastbool == (char)-1) || lastbool != boolresult)) {
                 send_mte_trap(item, mteTriggerFired,
                               sizeof(mteTriggerFired) / sizeof(oid),
                               next_oid, next_oid_len,

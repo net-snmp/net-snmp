@@ -27,7 +27,11 @@
 
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/snmp_client.h>
+#if HAVE_GETOPT_H
+#include <getopt.h>
+#else
 #include <net-snmp/library/getopt.h>
+#endif
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>         /* for in_addr_t */

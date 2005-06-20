@@ -3,6 +3,10 @@
  *
  *
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /***********************************************************
 	Copyright 1988, 1989 by Carnegie Mellon University
 	Copyright 1989	TGV, Incorporated
@@ -25,6 +29,13 @@ USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 /*
  * additions, fixes and enhancements for Linux by Erik Schoenfelder
  * (schoenfr@ibr.cs.tu-bs.de) 1994/1995.
@@ -103,6 +114,9 @@ var_ipRouteEntry(struct variable *vp,
     u_char         *cp;
     u_char         *ap;
     oid            *op;
+
+    *write_method = write_rte;
+
 #if 0
   /** 
   ** this optimisation fails, if there is only a single route avail.
@@ -208,7 +222,6 @@ var_ipRouteEntry(struct variable *vp,
     }
 #endif                          /* 0 */
 
-    *write_method = write_rte;
     *var_len = sizeof(long_return);
 
     switch (vp->magic) {
@@ -419,6 +432,9 @@ var_ipRouteEntry(struct variable * vp,
     struct ifnet    rt_ifnet;
     struct in_ifaddr rt_ifnetaddr;
 #endif
+
+    *write_method = write_rte;
+
     /** 
      ** this optimisation fails, if there is only a single route avail.
      ** it is a very special case, but better leave it out ...
@@ -509,7 +525,6 @@ var_ipRouteEntry(struct variable * vp,
         *length = 14;
     }
 
-    *write_method = write_rte;
     *var_len = sizeof(long_return);
 
     switch (vp->magic) {
@@ -705,6 +720,9 @@ var_ipRouteEntry(struct variable * vp,
     mib2_ipRouteEntry_t Lowentry, Nextentry, entry;
     int             Found = 0;
     req_e           req_type;
+    static uint32_t ipaddr_return;
+
+    *write_method = write_rte;
 
     /*
      * fill in object part of name for current (less sizeof instance part) 
@@ -714,8 +732,10 @@ var_ipRouteEntry(struct variable * vp,
     if (*length == IP_ROUTENAME_LENGTH) /* Assume that the input name is the lowest */
         memcpy((char *) lowest, (char *) name,
                IP_ROUTENAME_LENGTH * sizeof(oid));
-    else
+    else {
         name[IP_ROUTEADDR_OFF] = (oid) - 1;     /* Grhhh: to prevent accidental comparison :-( */
+	lowest[0] = 0xff;
+    }
     for (Nextentry.ipRouteDest = (u_long) - 2, req_type = GET_FIRST;;
          Nextentry = entry, req_type = GET_NEXT) {
         if (getMibstat(MIB_IP_ROUTE, &entry, sizeof(mib2_ipRouteEntry_t),
@@ -761,13 +781,13 @@ var_ipRouteEntry(struct variable * vp,
     memcpy((char *) name, (char *) lowest,
            IP_ROUTENAME_LENGTH * sizeof(oid));
     *length = IP_ROUTENAME_LENGTH;
-    *write_method = write_rte;
     *var_len = sizeof(long_return);
 
     switch (vp->magic) {
     case IPROUTEDEST:
-        long_return = Lowentry.ipRouteDest;
-        return (u_char *) & long_return;
+	*var_len = sizeof(uint32_t);
+        ipaddr_return = Lowentry.ipRouteDest;
+        return (u_char *) & ipaddr_return;
     case IPROUTEIFINDEX:
         long_return =
             Interface_Index_By_Name(Lowentry.ipRouteIfIndex.o_bytes,
@@ -786,8 +806,9 @@ var_ipRouteEntry(struct variable * vp,
         long_return = Lowentry.ipRouteMetric4;
         return (u_char *) & long_return;
     case IPROUTENEXTHOP:
-        long_return = Lowentry.ipRouteNextHop;
-        return (u_char *) & long_return;
+	*var_len = sizeof(uint32_t);
+        ipaddr_return = Lowentry.ipRouteNextHop;
+        return (u_char *) & ipaddr_return;
     case IPROUTETYPE:
         long_return = Lowentry.ipRouteType;
         return (u_char *) & long_return;
@@ -800,8 +821,9 @@ var_ipRouteEntry(struct variable * vp,
         long_return = Lowentry.ipRouteAge;
         return (u_char *) & long_return;
     case IPROUTEMASK:
-        long_return = Lowentry.ipRouteMask;
-        return (u_char *) & long_return;
+	*var_len = sizeof(uint32_t);
+        ipaddr_return = Lowentry.ipRouteMask;
+        return (u_char *) & ipaddr_return;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n",
                     vp->magic));
@@ -1213,11 +1235,8 @@ Route_Scan_Reload(void)
     static int      Time_Of_Last_Reload = 0;
     struct timeval  now;
 
-    /*
-     * allow 20 seconds in cache: 
-     */
     gettimeofday(&now, (struct timezone *) 0);
-    if (Time_Of_Last_Reload + 20 > now.tv_sec)
+    if (Time_Of_Last_Reload + CACHE_TIME > now.tv_sec)
         return;
     Time_Of_Last_Reload = now.tv_sec;
 
@@ -1275,11 +1294,6 @@ Route_Scan_Reload(void)
 
         strncpy(name, rt->rt_dev, sizeof(name));
         name[ sizeof(name)-1 ] = 0;
-        /*
-         * linux says ``lo'', but the interface is stored as ``lo0'': 
-         */
-        if (!strcmp(name, "lo"))
-            strcat(name, "0");
 
         rt->rt_flags = flags, rt->rt_refcnt = refcnt;
         rt->rt_use = use, rt->rt_metric = metric;
@@ -1767,6 +1781,8 @@ var_ipRouteEntry(struct variable * vp,
     static int      saveNameLen, saveExact;
     static oid      saveName[14], Current[14];
 
+    *write_method = write_rte;
+
 #if 0
     /*
      *      OPTIMIZATION:
@@ -1836,7 +1852,6 @@ var_ipRouteEntry(struct variable * vp,
         *length = 14;
     }
 
-    *write_method = write_rte;
     *var_len = sizeof long_return;
 
     switch (vp->magic) {

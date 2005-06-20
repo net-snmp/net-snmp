@@ -1,0 +1,144 @@
+#!/usr/bin/perl
+#
+# This program generates an HTML document containing links to man
+# pages already converted to html using man2html3.0.1 
+# (http://search.cpan.org/~ehood/man2html3.0.1/) 
+#
+# Written by:     Alex Burger
+# Date:           March 2nd, 2004
+# 
+################################################################
+# Options
+
+# Location of man pages to parse
+$man_dir = "/tmp/net-snmp/html/";
+$include_header = 1;
+$include_footer = 1;
+
+# Output file
+$toc_file = "/tmp/net-snmp/html/toc.hhc";
+
+#URL up to the name of the man page
+$url = '';
+
+################################################################
+
+if ($man_dir =~ /\/$/) {
+  chop $man_dir;
+}
+
+@files = `find $man_dir`;
+
+@files = sort @files;
+
+open (FILE_OUT, ">$toc_file") || die "Could not open file $toc_file for writing. $!";
+select FILE_OUT;
+
+foreach my $file (@files)
+{
+  chomp $file;
+
+  # Man pages  
+  if ($file =~ /$man_dir\/man(\d+)-(.*)/)
+  {
+    push (@man_pages, "$1-$2");
+  }
+
+  # Perl POD files  
+  elsif ($file =~ /$man_dir\/perl-(.*)/) {
+    push (@perl_files, "$1");
+  }
+
+  # README files
+  elsif ($file =~ /$man_dir\/readme-(.*)/) {
+    push (@readme_files, "$1");
+  }
+}
+
+@man_pages = sort (@man_pages);
+@perl_files = sort (@perl_files);
+@readme_files = sort (@readme_files);
+
+# Divide up man pages  
+foreach my $man_page (@man_pages)
+{
+  $man_page =~ /(\d+)-(.*)/;
+
+  if ($1 == 1) { push (@man1,$2); }
+  elsif ($1 == 2) { push (@man2,$2); }
+  elsif ($1 == 3) { push (@man3,$2); }
+  elsif ($1 == 4) { push (@man4,$2); }
+  elsif ($1 == 5) { push (@man5,$2); }
+  elsif ($1 == 6) { push (@man6,$2); }
+  elsif ($1 == 7) { push (@man7,$2); }
+  elsif ($1 == 8) { push (@man8,$2); }
+  elsif ($1 == 9) { push (@man9,$2); }
+}
+  
+if ($include_header > 0) {
+  print '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">' . "\n";
+  print '<HTML>' . "\n";
+  print '<HEAD>' . "\n";
+  print '<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">' . "\n";
+  print '<!-- Sitemap 1.0 -->' . "\n";
+  print '</HEAD><BODY>' . "\n";
+  print '<OBJECT type="text/site properties">' . "\n";
+  print '	<param name="ImageType" value="Folder">' . "\n";
+  print '</OBJECT>' . "\n";
+  
+  print "<UL>\n";
+}
+print_section("Applications",   "man1-",\@man1);
+print_section("man2",           "man2-",\@man2);
+print_section("API",            "man3-",\@man3);
+print_section("man4",           "man4-",\@man4);
+print_section("Configuration",  "man5-",\@man5);
+print_section("man6",           "man6-",\@man6);
+print_section("man7",           "man7-",\@man7);
+print_section("Servers",        "man8-",\@man8);
+print_section("man9",           "man9-",\@man9);
+
+print_section("Start Here",     "readme-",\@readme_files);
+print_section("Perl Modules",   "perl-",\@perl_files);
+
+sub print_section{
+  # Section title, subfolder/prefix, array
+  my $section_name = shift;
+  my $folder = shift;
+  my $man = shift;
+
+  if (defined(@$man)) {
+      
+    print '	<LI> <OBJECT type="text/sitemap">' . "\n";
+    print "		<param name=\"Name\" value=\"$section_name\">\n";
+    print '		<param name="ImageNumber" value="1">' . "\n";
+    print '		</OBJECT>' . "\n";
+
+    print "	<UL>\n";
+    foreach my $man_page (@$man)
+    {
+      my $man_page_short;
+      if ($man_page =~ /(.*?)\.\d+\.html/i) {
+        $man_page_short = $1;
+      }
+      else {
+        $man_page =~ /(.*?).html/i;
+        $man_page_short = $1;
+      }
+      print '		<LI> <OBJECT type="text/sitemap">' . "\n";
+      print "			<param name=\"Name \"value=\"$man_page_short\">\n";
+      print "			<param name=\"Local\" value=\"$folder$url$man_page\">\n";
+      print '			</OBJECT>' . "\n";
+    }
+    print "	</UL>\n";
+  }
+}
+
+if ($include_footer > 0) {
+  print "</UL>\n";
+  print "</BODY>\n";
+  print "</HTML>\n";
+}
+
+close FILE_OUT;
+

@@ -209,7 +209,7 @@ intpr(int interval)
                      cur_if->ifindex != 0; cur_if++);
                 if (cur_if >= (if_table + cfg_nnets)) {
                     fprintf(stderr,
-                            "Inconsistent reponse from server. Aborting.\n");
+                            "Inconsistent response from server. Aborting.\n");
                     exit(0);
                 }
                 cur_if->ifindex = ifindex;
@@ -300,11 +300,12 @@ intpr(int interval)
             case IFINDEX:
                 ifindex = *var->val.integer;
                 for (cur_if = if_table;
+                     cur_if < (if_table + cfg_nnets) &&
                      cur_if->ifindex != ifindex && cur_if->ifindex != 0;
                      cur_if++);
                 if (cur_if >= (if_table + cfg_nnets)) {
                     fprintf(stderr,
-                            "Inconsistent reponse from server. Aborting\n");
+                            "Inconsistent response from server. Aborting\n");
                     exit(0);
                 }
                 cur_if->ifindex = ifindex;
@@ -492,8 +493,14 @@ intpro(int interval)
             case IPIFINDEX:
                 ifindex = *var->val.integer;
                 for (cur_if = if_table;
+                     cur_if < (if_table + cfg_nnets) &&
                      cur_if->ifindex != ifindex && cur_if->ifindex != 0;
                      cur_if++);
+                if (cur_if >= (if_table + cfg_nnets)) {
+                    fprintf(stderr,
+                            "Inconsistent response from server. Aborting.\n");
+                    exit(0);
+                }
                 cur_if->ifindex = ifindex;
                 break;
             case IPADDR:
@@ -567,8 +574,14 @@ intpro(int interval)
             case IFINDEX:
                 ifindex = *var->val.integer;
                 for (cur_if = if_table;
+                     cur_if < (if_table + cfg_nnets) &&
                      cur_if->ifindex != ifindex && cur_if->ifindex != 0;
                      cur_if++);
+                if (cur_if >= (if_table + cfg_nnets)) {
+                    fprintf(stderr,
+                            "Inconsistent response from server. Aborting.\n");
+                    exit(0);
+                }
                 cur_if->ifindex = ifindex;
                 break;
             case INOCTETS:

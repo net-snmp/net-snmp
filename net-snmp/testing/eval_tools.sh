@@ -30,6 +30,11 @@ if [ "x$EVAL_TOOLS_SH_EVALED" != "xyes" ]; then
 failcount=0
 junkoutputfile="$SNMP_TMPDIR/output-`basename $0`$$"
 seperator="-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+if [ -z "$OK_TO_SAVE_RESULT" ] ; then
+OK_TO_SAVE_RESULT=1
+export OK_TO_SAVE_RESULT
+fi
+
 
 #
 # HEADER: returns a single line when SNMP_HEADERONLY mode and exits.
@@ -101,7 +106,7 @@ GRONIK
 #------------------------------------ -o-
 #
 SKIPIFNOT() {
-	grep "define $1" $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null
+	grep "^#define $1 " $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null
 	if [ $? != 0 ]; then
 	    REMOVETESTDATA
 	    echo "SKIPPED"
@@ -153,7 +158,7 @@ REMOVETESTDATA() {
 
 
 #------------------------------------ -o-
-#
+# Captures output from command, and returns the command's exit code.
 CAPTURE() {	# <command_with_arguments_to_execute>
     echo $* >> $SNMP_TMPDIR/invoked
 
@@ -166,6 +171,7 @@ KNORG
 
 	fi
 	( $* 2>&1 ) > $junkoutputfile 2>&1
+	RC=$?
 
 	if [ $SNMP_VERBOSE -gt 1 ]; then
 		echo "Command Output: "
@@ -174,6 +180,7 @@ KNORG
 		cat $junkoutputfile | sed 's/^/  /'
 		echo "$seperator"
 	fi
+	return $RC
 }
 
 #------------------------------------ -o-
@@ -193,11 +200,13 @@ SAVE_RESULTS() {
 #   Sets return_value to 0 or 1.
 #
 EXPECTRESULT() {
+  if [ $OK_TO_SAVE_RESULT -ne 0 ] ; then
     if [ "$snmp_last_test_result" = "$1" ]; then
 	return_value=0
     else
 	return_value=1
     fi
+  fi
 }
 
 #------------------------------------ -o-
@@ -248,14 +257,20 @@ WAITFORTRAPD() {
 }
 
 WAITFOR() {
+  ## save the previous save state and test result
+    save_state=$OK_TO_SAVE_RESULT
+    save_test=$snmp_last_test_result
+    OK_TO_SAVE_RESULT=0
+
     sleeptime=$SNMP_SLEEP
     oldsleeptime=$SNMP_SLEEP
     if [ "$1" != "" ] ; then
 	CAN_USLEEP
 	if [ $SNMP_CAN_USLEEP = 1 ] ; then
-	  sleeptime=`expr $SNMP_SLEEP '*' 10`
+	  sleeptime=`expr $SNMP_SLEEP '*' 50`
           SNMP_SLEEP=.1
 	else 
+	  sleeptime=`expr $SNMP_SLEEP '*' 5`
 	  SNMP_SLEEP=1
 	fi
         while [ $sleeptime -gt 0 ] ; do
@@ -266,8 +281,7 @@ WAITFOR() {
 	  fi
           if [ "$snmp_last_test_result" != "" ] ; then
               if [ "$snmp_last_test_result" -gt 0 ] ; then
-	         SNMP_SLEEP=$oldsleeptime
-	         return 0;
+	         break;
               fi
 	  fi
           DELAY
@@ -279,6 +293,10 @@ WAITFOR() {
 	    sleep $SNMP_SLEEP
         fi
     fi
+
+  ## restore the previous save state and test result
+    OK_TO_SAVE_RESULT=$save_state
+    snmp_last_test_result=$save_test
 }    
 
 # WAITFORORDIE "grep string" ["file"]
@@ -349,16 +367,13 @@ STARTPROG() {
         COMMAND="$COMMAND $PORT_SPEC"
     fi
     echo $COMMAND >> $SNMP_TMPDIR/invoked
-    $COMMAND > $LOG_FILE.stdout 2>&1
-
-    DELAY
-}
-
-STARTPROGNOSLEEP() {
-    sleepxxx=$SNMP_SLEEP
-    SNMP_SLEEP=0
-    STARTPROG
-    SNMP_SLEEP=$sleepxxx
+    if [ "x$OSTYPE" = "xmsys" ]; then
+      ## $COMMAND > $LOG_FILE.stdout 2>&1 &
+      COMMAND="cmd.exe //c start //min $COMMAND"
+      start $COMMAND > $LOG_FILE.stdout 2>&1
+    else
+      $COMMAND > $LOG_FILE.stdout 2>&1
+    fi
 }
 
 #------------------------------------ -o-
@@ -368,8 +383,10 @@ STARTAGENT() {
     CFG_FILE=$SNMP_CONFIG_FILE
     LOG_FILE=$SNMP_SNMPD_LOG_FILE
     PORT_SPEC="$SNMP_SNMPD_PORT"
-
-    STARTPROGNOSLEEP
+    if [ "x$SNMP_TRANSPORT_SPEC" != "x" ]; then
+        PORT_SPEC="$SNMP_TRANSPORT_SPEC:$PORT_SPEC"
+    fi
+    STARTPROG
     WAITFORAGENT "NET-SNMP version"
 }
 
@@ -380,8 +397,10 @@ STARTTRAPD() {
     CFG_FILE=$SNMPTRAPD_CONFIG_FILE
     LOG_FILE=$SNMP_SNMPTRAPD_LOG_FILE
     PORT_SPEC="$SNMP_SNMPTRAPD_PORT"
-
-    STARTPROGNOSLEEP
+    if [ "x$SNMP_TRANSPORT_SPEC" != "x" ]; then
+        PORT_SPEC="$SNMP_TRANSPORT_SPEC:$PORT_SPEC"
+    fi
+    STARTPROG
     WAITFORTRAPD "NET-SNMP version"
 }
 
@@ -392,27 +411,24 @@ STARTTRAPD() {
 #    master agent and sub agent.
 STOPPROG() {
     if [ -f $1 ]; then
-	COMMAND="kill -TERM `cat $1`"
+        if [ "x$OSTYPE" = "xmsys" ]; then
+          COMMAND="kill.exe `cat $1`"
+        else
+          COMMAND="kill -TERM `cat $1`"
+        fi
 	echo $COMMAND >> $SNMP_TMPDIR/invoked
-
-	DELAY
 	$COMMAND > /dev/null 2>&1
     fi
-}
-
-STOPPROGNOSLEEP() {
-    sleepxxx=$SNMP_SLEEP
-    SNMP_SLEEP=0
-    STOPPROG "$1"
-    SNMP_SLEEP=$sleepxxx
 }
 
 #------------------------------------ -o-
 #
 STOPAGENT() {
     SAVE_RESULTS
-    STOPPROGNOSLEEP $SNMP_SNMPD_PID_FILE
-    WAITFORAGENT "shutting down"
+    STOPPROG $SNMP_SNMPD_PID_FILE
+    if [ "x$OSTYPE" != "xmsys" ]; then
+        WAITFORAGENT "shutting down"
+    fi
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "Agent Output:"
 	echo "$seperator [stdout]"
@@ -427,8 +443,10 @@ STOPAGENT() {
 #
 STOPTRAPD() {
     SAVE_RESULTS
-    STOPPROGNOSLEEP $SNMP_SNMPTRAPD_PID_FILE
-    WAITFORTRAPD "Stopped"
+    STOPPROG $SNMP_SNMPTRAPD_PID_FILE
+    if [ "x$OSTYPE" != "xmsys" ]; then
+        WAITFORTRAPD "Stopped"
+    fi
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "snmptrapd Output:"
 	echo "$seperator [stdout]"
@@ -442,6 +460,10 @@ STOPTRAPD() {
 #------------------------------------ -o-
 #
 FINISHED() {
+
+    ## no more changes to test result.
+    OK_TO_SAVE_RESULT=0
+
     if [ "$SNMPDSTARTED" = "1" ] ; then
       STOPAGENT
     fi
@@ -449,11 +471,23 @@ FINISHED() {
       STOPTRAPD
     fi
     for pfile in $SNMP_TMPDIR/*pid* ; do
+        if [ "x$pfile" = "x$SNMP_TMPDIR/*pid*" ]; then
+            ECHO "(no pid file(s) found) "
+            break
+        fi
+        if [ ! -f $pfile ]; then
+            ECHO "('$pfile' disappeared) "
+            continue
+        fi
 	pid=`cat $pfile`
-	ps -e | egrep "^[ ]*$pid" > /dev/null 2>&1
+	ps -e | egrep "^[	 ]*$pid[	 ]+" > /dev/null 2>&1
 	if [ $? = 0 ] ; then
 	    SNMP_SAVE_TMPDIR=yes
-	    COMMAND="kill -9 $pid"
+            if [ "x$OSTYPE" = "xmsys" ]; then
+              COMMAND="kill.exe $pid"
+            else
+              COMMAND="kill -9 $pid"
+            fi
 	    echo $COMMAND "($pfile)" >> $SNMP_TMPDIR/invoked
 	    $COMMAND > /dev/null 2>&1
 	    return_value=1

@@ -68,8 +68,6 @@ config_add_mib(SNMP-NOTIFICATION-MIB)
      WriteMethod     write_snmpNotifyStorageType;
      WriteMethod     write_snmpNotifyRowStatus;
 
-     WriteMethod     write_snmpNotifyRowStatus;
-
 
 
 #endif                          /* _MIBGROUP_SNMPNOTIFYTABLE_H */

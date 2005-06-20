@@ -4,12 +4,13 @@ use Getopt::Std;
 
 sub usage {
     print "
-$0 [-v VERSION] -R -C -M -h
+$0 [-v VERSION] -R -C -M -D -h
 
   -M           Modify the files with a new version (-v required)
   -v VERSION   Use VERSION as the version string
   -C           Commit changes to the files
   -R           Reverse files (rm and cvs update)
+  -D           Compare files (cvs diff)
   -f FILE      Just do a particular file
   -t TYPE      Just do a particular type of file
 
@@ -41,13 +42,19 @@ my @exprs = (
 	     { type => 'docs',
 	       expr => 'Version: [\.0-9a-zA-Z]+' =>
 	       repl => 'Version: $VERSION', 
-	       files => [qw(README FAQ)]},
+	       files => [qw(README FAQ dist/net-snmp.spec)]},
 
 	     # sed files
 	     { type => 'sed',
 	       expr => '^s\/VERSIONINFO\/[^\/]*' =>
 	       repl => 's\/VERSIONINFO\/$VERSION',
 	       files => [qw(sedscript.in)]},
+
+	     # Makefiles
+	     { type => 'Makefile',
+	       expr => 'VERSION = \'(.*)\'',
+	       repl => 'VERSION = \'$VERSION\'',
+	       files => [qw(dist/Makefile)]},
 
 	     # perl files
 	     { type => 'perl',

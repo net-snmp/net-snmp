@@ -3,6 +3,17 @@
  *
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
@@ -188,6 +199,9 @@ var_ipAddrEntry(struct variable *vp,
     static struct in_ifaddr in_ifaddr, lowin_ifaddr;
 #else
     static struct ifnet lowin_ifnet;
+#if defined(linux)
+    static struct in_ifaddr in_ifaddr;
+#endif
 #endif
     static struct ifnet ifnet;
 #endif                          /* hpux11 */
@@ -199,7 +213,7 @@ var_ipAddrEntry(struct variable *vp,
     memcpy((char *) current, (char *) vp->name,
            (int) vp->namelen * sizeof(oid));
 
-#if !defined(freebsd2) && !defined(hpux11) && !defined(linux)
+#if !defined(freebsd2) && !defined(hpux11)
     Interface_Scan_Init();
 #else
     Address_Scan_Init();
@@ -215,7 +229,7 @@ var_ipAddrEntry(struct variable *vp,
 #endif
 #else                           /* !freebsd2 && !hpux11 */
 #if defined(linux)
-        if (Address_Scan_Next(&interface, &ifnet) == 0)
+        if (Interface_Scan_Next(&interface, NULL, &ifnet, &in_ifaddr) == 0)
             break;
 #else
         if (Address_Scan_Next(&interface, &in_ifaddr) == 0)
@@ -228,6 +242,9 @@ var_ipAddrEntry(struct variable *vp,
 #elif defined(linux) || defined(sunV3)
         cp = (u_char *) & (((struct sockaddr_in *) &(ifnet.if_addr))->
                            sin_addr.s_addr);
+
+        if (*cp == 0)		/* first octet is zero? 0.x.x.x is not a */
+            continue;		/* legal address for an interface */
 #else
         cp = (u_char *) & (((struct sockaddr_in *) &(in_ifaddr.ia_addr))->
                            sin_addr.s_addr);
@@ -271,7 +288,7 @@ var_ipAddrEntry(struct variable *vp,
     }
 
 #if defined(linux)
-    free(ifc.ifc_buf);
+    SNMP_FREE(ifc.ifc_buf);
 #endif
 
     if (!lowinterface)
@@ -354,9 +371,7 @@ Address_Scan_Init(void)
  * NB: Index is the number of the corresponding interface, not of the address 
  */
 static int
-Address_Scan_Next(Index, Retin_ifaddr)
-     short          *Index;
-     struct in_ifaddr *Retin_ifaddr;
+Address_Scan_Next(short *Index, struct in_ifaddr *Retin_ifaddr)
 {
     struct in_ifaddr in_ifaddr;
     struct ifnet    ifnet, *ifnetaddr;  /* NOTA: same name as another one */
@@ -445,9 +460,7 @@ Address_Scan_Init(void)
  * NB: Index is the number of the corresponding interface, not of the address 
  */
 static int
-Address_Scan_Next(Index, Retin_ifaddr)
-     short          *Index;
-     mib_ipAdEnt    *Retin_ifaddr;
+Address_Scan_Next(short *Index, mib_ipAdEnt *Retin_ifaddr)
 {
     if (iptab_current < iptab_size) {
         /*
@@ -484,21 +497,21 @@ Address_Scan_Init(void)
     /* get info about all interfaces */
 
     ifc.ifc_len = 0;
-    ifc.ifc_buf = NULL;
+    SNMP_FREE(ifc.ifc_buf);
     ifr_counter = 0;
 
     do
     {
+	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	{
+	    DEBUGMSGTL(("snmpd", "socket open failure in Address_Scan_Init\n"));
+	    return;
+	}
 	num_interfaces += 16;
 
 	ifc.ifc_len = sizeof(struct ifreq) * num_interfaces;
 	ifc.ifc_buf = (char*) realloc(ifc.ifc_buf, ifc.ifc_len);
 	
-	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-	{
-	    DEBUGMSGTL(("snmpd", "socket open failure in Address_Scan_Init\n"));
-	    return;
-	} else {
 	    if (ioctl(fd, SIOCGIFCONF, &ifc) < 0)
 	    {
 		ifr=NULL;
@@ -506,7 +519,6 @@ Address_Scan_Init(void)
 	   	return;
 	    }
 	    close(fd);
-	}
     }
     while (ifc.ifc_len >= (sizeof(struct ifreq) * num_interfaces));
     
@@ -518,10 +530,7 @@ Address_Scan_Init(void)
  * NB: Index is the number of the corresponding interface, not of the address 
  */
 static int
-Address_Scan_Next(Index, Retifnet)
-    short          *Index;
-    struct ifnet   *Retifnet;
-
+Address_Scan_Next(short *Index, struct ifnet *Retifnet)
 {
     struct ifnet   ifnet_store;
     int fd;
@@ -612,7 +621,8 @@ var_ipAddrEntry(struct variable * vp,
     oid             current[IP_ADDRNAME_LENGTH], *op;
     u_char         *cp;
     IpAddress       NextAddr;
-    mib2_ipAddrEntry_t entry, Lowentry;
+    mib2_ipAddrEntry_t entry;
+    static mib2_ipAddrEntry_t Lowentry;
     int             Found = 0;
     req_e           req_type;
 
@@ -630,6 +640,8 @@ var_ipAddrEntry(struct variable * vp,
     if (*length == IP_ADDRNAME_LENGTH)  /* Assume that the input name is the lowest */
         memcpy((char *) lowest, (char *) name,
                IP_ADDRNAME_LENGTH * sizeof(oid));
+    else
+	lowest[0] = 0xff;
     for (NextAddr = (u_long) - 1, req_type = GET_FIRST;;
          NextAddr = entry.ipAdEntAddr, req_type = GET_NEXT) {
         if (getMibstat
@@ -679,19 +691,22 @@ var_ipAddrEntry(struct variable * vp,
     *var_len = sizeof(long_return);
     switch (vp->magic) {
     case IPADADDR:
-        long_return = Lowentry.ipAdEntAddr;
-        return (u_char *) & long_return;
+	*var_len = sizeof(Lowentry.ipAdEntAddr);
+        return (u_char *) &Lowentry.ipAdEntAddr;
     case IPADIFINDEX:
         long_return =
             Interface_Index_By_Name(Lowentry.ipAdEntIfIndex.o_bytes,
                                     Lowentry.ipAdEntIfIndex.o_length);
         return (u_char *) & long_return;
     case IPADNETMASK:
-        long_return = Lowentry.ipAdEntNetMask;
-        return (u_char *) & long_return;
+	*var_len = sizeof(Lowentry.ipAdEntNetMask);
+        return (u_char *) &Lowentry.ipAdEntNetMask;
     case IPADBCASTADDR:
-        long_return = Lowentry.ipAdEntBcastAddr;
-        return (u_char *) & long_return;
+	*var_len = sizeof(Lowentry.ipAdEntBcastAddr);
+        return (u_char *)&Lowentry.ipAdEntBcastAddr;
+    case IPADREASMMAX:
+	long_return = Lowentry.ipAdEntReasmMaxSize;
+	return (u_char *) & long_return;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipAddrEntry\n",
                     vp->magic));

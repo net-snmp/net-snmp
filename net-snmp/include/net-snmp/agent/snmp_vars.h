@@ -10,6 +10,10 @@
 extern          "C" {
 #endif
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /***********************************************************
 	Copyright 1988, 1989 by Carnegie Mellon University
 	Copyright 1989	TGV, Incorporated
@@ -32,6 +36,12 @@ USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
     struct variable;
 
@@ -64,6 +74,7 @@ PERFORMANCE OF THIS SOFTWARE.
     struct nlist;
 
     extern long     long_return;
+    extern uint32_t ipaddr_return;
     extern u_char   return_buf[];
 
     extern oid      nullOid[];

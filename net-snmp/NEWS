@@ -1,6 +1,100 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.1.3.pre1*
+ Fixes:
+   security:
+     - fix potential race condition in fixproc script
+
+   agent:
+     - bug 1034008: memory leak using SET for table_dataset
+     - patch 1052460: fix agent deadlock on exec
+     - bug 1055781: get-next fails to step into interfaces group correctly
+     - bug 1056760: agent ignores ifspeed, type settings in snmpd.conf
+     - Persistent files in directory defined by snmp.conf persistentDir were 
+       not being loaded at startup
+     - 1062986: pass and pass_persist fail and crash snmpd
+     - patch 1052460: agent deadlock on exec
+     - fix bug 1056760: agent ignores ifspeed, type settings in snmpd.conf
+     - bug 119106, ipAdEntIfIndex is wrong
+     - bug 986238: snmpd loops forever
+     - bug 615744: Spurious DISMAN-EVENT traps
+     - patch 1040718: Agentx error propagation and infinite loop
+
+   library:
+     - process pre-mib config tokens in optional config files at the right time
+     - get rid of strtok (patch 1040330, backported by Thomas Anders, fixes 
+       bug 1040686)
+     - consistent handling of '+' for MIB and MIB directory handling from all
+       sources (config file, environment variables, command line)
+     - handle agentXsocket token in sub-agent configuration files
+     - several AgentX fixes
+
+ Ports:
+   Linux:
+     - use ethtool ioctl to detect gigibit interface speeds
+     - Fix reversed sysIORawSent/Received
+     - 64bit fixes to interface and ssRawCpu statistics
+     - integrate fixes from RedHat and Debian
+
+   Tru64:
+     - build fixes; README.tru64 added
+
+   FreeBSD:
+     - apply patch 1056927: 5.2-p03: freebsd interface bugs
+     - fix bug 1055781: get-next fails to step into interfaces group correctly
+
+   NetBSD:
+     - integragte fixes from NetBSD port
+
+   Win32:
+     - Cygwin compiler fixes
+     - bug 926389: Win32 event log logging
+
+
+*5.1.2*
+ New:
+   - Minor improvements to snmpdelta (error reporting)
+   - Minor improvements to snmpnetstat (IPv6 output)
+
+ Fixes:
+   - Misc 64bit processor fixes.
+   - Misc perl build and install fixes.
+
+ Ports:
+   - Linux 2.6 improvements
+   - Win32 Suport for TCP and UDP over IPv6 via Winsock version 2
+   - Win32 fixes in many places.
+   - Win32 service support for snmptrapd
+   - Win32 support for snmpconf
+
+*5.1.1*
+ New:
+   - test suite supports testing over other transports (tcp, udp6, unix, ...)
+     (see the -P switch to the testing/RUNTESTS script)
+   - Solaris supports the use of it's PKCS#11 library for supporting
+     cryptographic functions (OpenSSL isn't required if PKCS#11 is available)
+     (see configure's --with-pkcs flag)
+
+ Fixes:
+   - Improvements on 64 bit architectures.
+   - A few minor memory leaks fixed.
+   - An extremely large number of minor bug fixes.
+   - Many perl module specific bug fixes.
+   - snmpd will safely handle more signals.
+
+ Ports:
+   - Many many significant Windows improvements.
+     - AgentX support is working again under windows.
+     - SCM support is built into the agent to allow the agent to be
+       started as a windows service.
+     - MSDOS names are supported in path names.
+     - A win32 build script in win32/build.pl
+     - Support for the MinGW compiler
+     - (see the README.win32 file for details on new ports)
+     - Various helpful win32/*.bat files for installation, etc.
+   - Some linux 2.6 support improvements
+
 *5.1*
  New:
 
@@ -970,3 +1064,4 @@ UCD-SNMP NEWS:
 *3.0*
 
 	Initial (public) Release
+yyy

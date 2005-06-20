@@ -1,6 +1,16 @@
 /*
  * SNMPv3 View-based Access Control Model
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -177,12 +187,13 @@ void
 vacm_parse_group(const char *token, char *param)
 {
     char           *group, *model, *security;
+    char           *st;
     int             imodel;
     struct vacm_groupEntry *gp = NULL;
 
-    group = strtok(param, " \t\n");
-    model = strtok(NULL, " \t\n");
-    security = strtok(NULL, " \t\n");
+    group = strtok_r(param, " \t\n", &st);
+    model = strtok_r(NULL, " \t\n", &st);
+    security = strtok_r(NULL, " \t\n", &st);
 
     if (group == NULL || *group == 0) {
         config_perror("missing GROUP parameter");
@@ -242,43 +253,44 @@ vacm_parse_access(const char *token, char *param)
         *writeView, *notify;
     int             imodel, ilevel, iprefix;
     struct vacm_accessEntry *ap;
+    char   *st;
 
-    name = strtok(param, " \t\n");
+    name = strtok_r(param, " \t\n", &st);
     if (!name) {
         config_perror("missing NAME parameter");
         return;
     }
-    context = strtok(NULL, " \t\n");
+    context = strtok_r(NULL, " \t\n", &st);
     if (!context) {
         config_perror("missing CONTEXT parameter");
         return;
     }
-    model = strtok(NULL, " \t\n");
+    model = strtok_r(NULL, " \t\n", &st);
     if (!model) {
         config_perror("missing MODEL parameter");
         return;
     }
-    level = strtok(NULL, " \t\n");
+    level = strtok_r(NULL, " \t\n", &st);
     if (!level) {
         config_perror("missing LEVEL parameter");
         return;
     }
-    prefix = strtok(NULL, " \t\n");
+    prefix = strtok_r(NULL, " \t\n", &st);
     if (!prefix) {
         config_perror("missing PREFIX parameter");
         return;
     }
-    readView = strtok(NULL, " \t\n");
+    readView = strtok_r(NULL, " \t\n", &st);
     if (!readView) {
         config_perror("missing readView parameter");
         return;
     }
-    writeView = strtok(NULL, " \t\n");
+    writeView = strtok_r(NULL, " \t\n", &st);
     if (!writeView) {
         config_perror("missing writeView parameter");
         return;
     }
-    notify = strtok(NULL, " \t\n");
+    notify = strtok_r(NULL, " \t\n", &st);
     if (!notify) {
         config_perror("missing notifyView parameter");
         return;
@@ -372,23 +384,24 @@ vacm_parse_view(const char *token, char *param)
     size_t          suboid_len = 0;
     u_char          viewMask[sizeof(vp->viewMask)];
     int             i;
+    char            *st;
 
-    name = strtok(param, " \t\n");
+    name = strtok_r(param, " \t\n", &st);
     if (!name) {
         config_perror("missing NAME parameter");
         return;
     }
-    type = strtok(NULL, " \n\t");
+    type = strtok_r(NULL, " \n\t", &st);
     if (!type) {
         config_perror("missing TYPE parameter");
         return;
     }
-    subtree = strtok(NULL, " \t\n");
+    subtree = strtok_r(NULL, " \t\n", &st);
     if (!subtree) {
         config_perror("missing SUBTREE parameter");
         return;
     }
-    mask = strtok(NULL, " \t\n");
+    mask = strtok_r(NULL, " \t\n", &st);
 
     if (strcmp(type, "included") == 0)
         inclexcl = SNMP_VIEW_INCLUDED;
@@ -409,7 +422,7 @@ vacm_parse_view(const char *token, char *param)
     if (mask) {
         int             val;
         i = 0;
-        for (mask = strtok(mask, ".:"); mask; mask = strtok(NULL, ".:")) {
+        for (mask = strtok_r(mask, ".:", &st); mask; mask = strtok_r(NULL, ".:", &st)) {
             if (i >= sizeof(viewMask)) {
                 config_perror("MASK too long");
                 return;
@@ -536,14 +549,14 @@ vacm_parse_simple(const char *token, char *confline)
          * com2sec anonymousSecNameNUM    ADDRESS  COMMUNITY 
          */
         sprintf(secname, "anonymousSecName%03d", num);
-        snprintf(line, sizeof(line), "%s %s %s",
+        snprintf(line, sizeof(line), "%s %s '%s'",
                  secname, addressname, community);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "com2sec", line));
         netsnmp_udp_parse_security("com2sec", line);
 
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
-        snprintf(line, sizeof(line), "%s %s %s",
+        snprintf(line, sizeof(line), "%s %s '%s'",
                  secname, addressname, community);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "com2secunix", line));
@@ -575,7 +588,7 @@ vacm_parse_simple(const char *token, char *confline)
          * com2sec6 anonymousSecNameNUM    ADDRESS  COMMUNITY 
          */
         sprintf(secname, "anonymousSecName%03d", num);
-        snprintf(line, sizeof(line), "%s %s %s",
+        snprintf(line, sizeof(line), "%s %s '%s'",
                  secname, addressname, community);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "com2sec6", line));
@@ -742,7 +755,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
          */
 
         if (pdu->tDomain == netsnmpUDPDomain
-#if SNMP_TRANSPORT_TCP_DOMAIN
+#ifdef SNMP_TRANSPORT_TCP_DOMAIN
             || pdu->tDomain == netsnmp_snmpTCPDomain
 #endif
             ) {
@@ -764,21 +777,11 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             if (!netsnmp_udp6_getSecName(pdu->transport_data,
                                          pdu->transport_data_length,
                                          (char *) pdu->community,
-                                         pdu->community_len, &sn)
-                && !vacm_is_configured()) {
+                                         pdu->community_len, &sn)) {
                 /*
                  * There are no com2sec entries.  
                  */
-                DEBUGMSGTL(("mibII/vacm_vars",
-                            "vacm_in_view: accepted with no com2sec entries\n"));
-                switch (pdu->command) {
-                case SNMP_MSG_GET:
-                case SNMP_MSG_GETNEXT:
-                case SNMP_MSG_GETBULK:
-                    return 0;
-                default:
-                    return 1;
-                }
+                sn = NULL;
             }
 #endif
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
@@ -1649,6 +1652,10 @@ write_vacmSecurityToGroupStatus(int action,
                 long_ret = RS_NOTREADY;
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
+            if (long_ret == RS_DESTROY && geptr->storageType == ST_PERMANENT) {
+                free(newName);
+                return SNMP_ERR_WRONGVALUE;
+            }
         } else {
             if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
                 free(newName);
@@ -1927,6 +1934,11 @@ write_vacmAccessStatus(int action,
                 free(newGroupName);
                 free(newContextPrefix);
                 return SNMP_ERR_INCONSISTENTVALUE;
+            }
+            if (long_ret == RS_DESTROY && aptr->storageType == ST_PERMANENT) {
+                free(newGroupName);
+                free(newContextPrefix);
+                return SNMP_ERR_WRONGVALUE;
             }
         } else {
             if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
@@ -2407,13 +2419,22 @@ write_vacmViewStatus(int action,
         vptr =
             vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen,
                               VACM_MODE_IGNORE_MASK);
-
+        if (vptr &&
+            netsnmp_oid_equals(vptr->viewSubtree + 1, vptr->viewSubtreeLen - 1,
+                               newViewSubtree + 1, viewSubtreeLen - 1) != 0) {
+            vptr = NULL;
+        }
         if (vptr != NULL) {
             if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
                 free(newViewName);
                 free(newViewSubtree);
                 long_ret = RS_NOTREADY;
                 return SNMP_ERR_INCONSISTENTVALUE;
+            }
+            if (long_ret == RS_DESTROY && vptr->viewStorageType == ST_PERMANENT) {
+                free(newViewName);
+                free(newViewSubtree);
+                return SNMP_ERR_WRONGVALUE;
             }
         } else {
             if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {

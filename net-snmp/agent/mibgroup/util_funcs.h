@@ -42,13 +42,13 @@ const char     *make_tempfile(void);
 typedef void   *mib_table_t;
 typedef int     (RELOAD) (mib_table_t);
 typedef int     (COMPARE) (const void *, const void *);
-mib_table_t     Initialise_Table(int, int, RELOAD, COMPARE);
+mib_table_t     Initialise_Table(int, int, RELOAD*, COMPARE*);
 int             Search_Table(mib_table_t, void *, int);
 int             Add_Entry(mib_table_t, void *);
 void           *Retrieve_Table_Data(mib_table_t, int *);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* _MIBGROUP_UTIL_FUNCS_H */

@@ -87,7 +87,7 @@ use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 	snmp_oid_compare
         compare
 );
-$VERSION = '5.1';
+$VERSION = '5.1.3.pre1';
 
 sub new {
     my $type = shift;
@@ -176,7 +176,6 @@ bootstrap NetSNMP::OID $VERSION;
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 

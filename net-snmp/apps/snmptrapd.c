@@ -96,11 +96,25 @@ SOFTWARE.
 #include "snmptrapd_log.h"
 #include "notification_log.h"
 
+/*
+ * Include winservice.h to support Windows Service
+ */
+#ifdef WIN32
+#include <windows.h>
+#include <tchar.h>
+#include <net-snmp/library/winservice.h>
+
+#define WIN32SERVICE
+
+#endif
+
 #if USE_LIBWRAP
 #include <tcpd.h>
 
+/* fix 706903 - these are defined in agent/snmp_agent.c *-
 int             allow_severity = LOG_INFO;
 int             deny_severity = LOG_WARNING;
+ */
 #endif
 
 /*
@@ -178,6 +192,18 @@ char           *default_port = ddefault_port;
  */
 int Facility = LOG_DAEMON;
 
+#ifdef WIN32SERVICE
+/*
+ * SNMP Trap Receiver Status 
+ */
+#define SNMPTRAPD_RUNNING 1
+#define SNMPTRAPD_STOPPED 0
+int             trapd_status = SNMPTRAPD_STOPPED;
+LPTSTR          app_name = _T("Net-SNMP Trap Handler");     /* Application Name */
+#else
+const char     *app_name = "snmptrapd";
+#endif
+
 struct timeval  Now;
 
 void            trapd_update_config(void);
@@ -185,6 +211,14 @@ void            trapd_update_config(void);
 static oid      risingAlarm[] = { 1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 1 };
 static oid      fallingAlarm[] = { 1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 2 };
 static oid      unavailableAlarm[] = { 1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 3 };
+
+#ifdef WIN32SERVICE
+void            StopSnmpTrapd(void);
+int             SnmpTrapdMain(int argc, TCHAR * argv[]);
+int __cdecl     _tmain(int argc, TCHAR * argv[]);
+#else
+int             main(int, char **);
+#endif
 
 void
 event_input(netsnmp_variable_list * vp)
@@ -256,7 +290,12 @@ event_input(netsnmp_variable_list * vp)
 void
 usage(void)
 {
+#ifdef WIN32SERVICE
+    fprintf(stderr, "\nUsage:  snmptrapd [-register] [-quiet] [OPTIONS] [LISTENING ADDRESSES]");
+    fprintf(stderr, "\n        snmptrapd [-unregister] [-quiet]");
+#else
     fprintf(stderr, "Usage: snmptrapd [OPTIONS] [LISTENING ADDRESSES]\n");
+#endif
     fprintf(stderr, "\n\tNET-SNMP Version:  %s\n", netsnmp_get_version());
     fprintf(stderr, "\tWeb:      http://www.net-snmp.org/\n");
     fprintf(stderr, "\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
@@ -284,7 +323,17 @@ usage(void)
 #if HAVE_GETPID
     fprintf(stderr, "  -p FILE\t\tstore process id in FILE\n");
 #endif
+#ifdef WIN32SERVICE
+    fprintf(stderr, "  -register\t\tregister as a Windows service\n");
+    fprintf(stderr, "  \t\t\t  (followed by -quiet to prevent message popups)\n");
+    fprintf(stderr, "  \t\t\t  (followed by the startup parameter list)\n");
+    fprintf(stderr, "  \t\t\t  Note that some parameters are not relevant when running as a service\n");
+#endif
     fprintf(stderr, "  -t\t\t\tPrevent traps from being logged to syslog\n");
+#ifdef WIN32SERVICE
+    fprintf(stderr, "  -unregister\t\tunregister as a Windows service\n");
+    fprintf(stderr, "  \t\t\t  (followed -quiet to prevent message popups)\n");
+#endif
     fprintf(stderr, "  -v, --version\t\tdisplay version information\n");
     fprintf(stderr,
             "  -O <OUTOPTS>\t\ttoggle options controlling output display\n");
@@ -312,7 +361,18 @@ version(void)
 RETSIGTYPE
 term_handler(int sig)
 {
+#ifdef WIN32SERVICE
+    extern netsnmp_session *main_session;
+#endif
     running = 0;
+#ifdef WIN32SERVICE
+    /*
+     * In case of windows, select() in receive() function will not return 
+     * on signal. Thats why following function is called, which closes the 
+     * socket descriptors and causes the select() to return
+     */
+    snmp_close(main_session);
+#endif
 }
 
 #ifdef SIGHUP
@@ -343,6 +403,13 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
     }
 
     if (addr_string != NULL) {
+        if( addr_string[0] == '[' ) { /* fix up ipv6 addr */
+            int i;
+            for( i = 1; addr_string[i] != ']'; i++ ) {
+                addr_string[i-1] =  addr_string[i];
+            }
+            addr_string[i-1] = '\0';
+        }
         if (hosts_ctl("snmptrapd", STRING_UNKNOWN, 
 		      addr_string, STRING_UNKNOWN) == 0) {
             free(addr_string);
@@ -355,7 +422,7 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
             return 0;
         }
     }
-#endif/*  USE_LIBWRAP  */
+#endif	/*  USE_LIBWRAP  */
     return 1;
 }
 
@@ -417,8 +484,28 @@ free_trapd_address(void)
     }
 }
 
+/*******************************************************************-o-******
+ * main - Non Windows
+ * SnmpTrapdMain - Windows to support windows service
+ *
+ * Parameters:
+ *	 argc
+ *	*argv[]
+ *      
+ * Returns:
+ *	0	Always succeeds.  (?)
+ *
+ *
+ * Setup and start the trap receiver daemon.
+ *
+ * Also successfully EXITs with zero for some options.
+ */
 int
+#ifdef WIN32SERVICE
+SnmpTrapdMain(int argc, TCHAR * argv[])
+#else
 main(int argc, char *argv[])
+#endif
 {
     char            options[128] = "ac:CdD::efF:hHl:L:m:M:no:PqsS:tvO:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
@@ -466,6 +553,8 @@ main(int argc, char *argv[])
 #if HAVE_GETPID
     strcat(options, "p:u:");
 #endif
+
+    snmp_log_syslogname(app_name);
 
     /*
      * Now process options normally.  
@@ -778,6 +867,7 @@ main(int argc, char *argv[])
      */
     if (agentx_subagent) {
 #ifdef USING_AGENTX_SUBAGENT_MODULE
+	void  init_subagent(void);
         init_subagent();
 #endif
         init_notification_log();
@@ -850,7 +940,7 @@ main(int argc, char *argv[])
 #endif
 
     if (Syslog) {
-        snmp_enable_syslog_ident("snmptrapd", Facility);
+        snmp_enable_syslog_ident(app_name, Facility);
         snmp_log(LOG_INFO, "Starting snmptrapd %s\n", netsnmp_get_version());
 	if (depmsg) {
 	    snmp_log(LOG_WARNING, "-s and -S options are deprecated; use -Ls <facility> instead\n");
@@ -877,14 +967,26 @@ main(int argc, char *argv[])
 
     while (cp != NULL) {
         char *sep = strchr(cp, ',');
+        char  listen_name[128];
+        char *cp2 = strchr(cp, ':');
+
         if (sep != NULL) {
             *sep = 0;
         }
 
-        transport = netsnmp_tdomain_transport(cp, 1, "udp");
+           /*
+            * Make sure this defaults to listening on port 162
+            */
+        if (!cp2) {
+            snprintf(listen_name, sizeof(listen_name), "%s:162", cp);
+            cp2 = listen_name;
+        } else {
+            cp2 = cp;
+        }
+        transport = netsnmp_tdomain_transport(cp2, 1, "udp");
         if (transport == NULL) {
             snmp_log(LOG_ERR, "couldn't open %s -- errno %d (\"%s\")\n",
-                     cp, errno, strerror(errno));
+                     cp2, errno, strerror(errno));
             snmptrapd_close_sessions(sess_list);
             SOCK_CLEANUP;
             exit(1);
@@ -920,12 +1022,22 @@ main(int argc, char *argv[])
         }
     }
 
+#ifdef SIGTERM
     signal(SIGTERM, term_handler);
+#endif
 #ifdef SIGHUP
     signal(SIGHUP, hup_handler);
 #endif
+#ifdef SIGINT
     signal(SIGINT, term_handler);
+#endif
+#ifdef SIGPIPE
+    signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
+#endif
 
+#ifdef WIN32SERVICE
+    trapd_status = SNMPTRAPD_RUNNING;
+#endif
     while (running) {
         if (reconfig) {
             if (Print) {
@@ -986,6 +1098,7 @@ main(int argc, char *argv[])
                 fprintf(stderr, "select returned %d\n", count);
                 running = 0;
             }
+	run_alarms();
     }
 
     if (Print) {
@@ -1004,6 +1117,9 @@ main(int argc, char *argv[])
 
     snmptrapd_close_sessions(sess_list);
     snmp_shutdown("snmptrapd");
+#ifdef WIN32SERVICE
+    trapd_status = SNMPTRAPD_STOPPED;
+#endif
     snmp_disable_log();
     SOCK_CLEANUP;
     return 0;
@@ -1012,7 +1128,7 @@ main(int argc, char *argv[])
 /*
  * Read the configuration files. Implemented as a signal handler so that
  * receipt of SIGHUP will cause configuration to be re-read when the
- * trap deamon is running detatched from the console.
+ * trap daemon is running detatched from the console.
  *
  */
 void
@@ -1033,3 +1149,96 @@ getdtablesize(void)
     return (rl.rlim_cur);
 }
 #endif
+
+/*
+ * Windows Service Related functions 
+ */
+#ifdef WIN32SERVICE
+/************************************************************
+* main function for Windows
+* Parse command line arguments for startup options,
+* to start as service or console mode application in windows.
+* Invokes appropriate startup functions depending on the 
+* parameters passed
+*************************************************************/
+int
+    __cdecl
+_tmain(int argc, TCHAR * argv[])
+{
+    /*
+     * Define Service Name and Description, which appears in windows SCM 
+     */
+    LPCTSTR         lpszServiceName = app_name;      /* Service Registry Name */
+    LPCTSTR         lpszServiceDisplayName = _T("Net-SNMP Trap Handler");       /* Display Name */
+    LPCTSTR         lpszServiceDescription =
+#ifdef IFDESCR
+        _T("SNMPv2c / SNMPv3 trap/inform receiver from Net-SNMP. Supports MIB objects for IP,ICMP,TCP,UDP, and network interface sub-layers.");
+#else
+        _T("SNMPv2c / SNMPv3 trap/inform receiver from Net-SNMP");
+#endif
+    InputParams     InputOptions;
+
+    int             nRunType = RUN_AS_CONSOLE;
+    int             quiet = 0;
+
+    nRunType = ParseCmdLineForServiceOption(argc, argv, &quiet);
+
+    switch (nRunType) {
+    case REGISTER_SERVICE:
+        /*
+         * Register As service 
+         */
+        InputOptions.Argc = argc;
+        InputOptions.Argv = argv;
+        exit (RegisterService(lpszServiceName,
+                        lpszServiceDisplayName,
+                        lpszServiceDescription, &InputOptions, quiet));
+        break;
+    case UN_REGISTER_SERVICE:
+        /*
+         * Unregister service 
+         */
+        exit (UnregisterService(lpszServiceName, quiet));
+        exit(0);
+        break;
+    case RUN_AS_SERVICE:
+        /*
+         * Run as service 
+         */
+        /*
+         * Register Stop Function 
+         */
+        RegisterStopFunction(StopSnmpTrapd);
+        return RunAsService(SnmpTrapdMain);
+        break;
+    default:
+        /*
+         * Run in console mode 
+         */
+        return SnmpTrapdMain(argc, argv);
+        break;
+    }
+}
+
+/*
+ * To stop Snmp Trap Receiver daemon
+ * This portion is still not working
+ */
+void
+StopSnmpTrapd(void)
+{
+    /*
+     * Shut Down Service
+     */
+    term_handler(1);
+
+    /*
+     * Wait till trap receiver is completely stopped 
+     */
+
+    while (trapd_status != SNMPTRAPD_STOPPED) {
+        Sleep(100);
+    }
+}
+
+#endif /*WIN32SERVICE*/

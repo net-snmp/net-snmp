@@ -136,7 +136,7 @@ void
 usage(void)
 {
     fprintf(stderr,
-            "Usage: snmpnetstat [options...] hostname [ community ] [interval]\n");
+            "Usage: snmpnetstat [options...] hostname [interval]\n");
     fprintf(stderr, "NET-SNMP version: %s\n", netsnmp_get_version());
     fprintf(stderr, "  -v [1 | 2c ]   SNMP version\n");
     fprintf(stderr, "  -V             display version number\n");
@@ -273,17 +273,37 @@ main(int argc, char *argv[])
     }
 
     init_snmp("snmpapp");
+    snmp_enable_stderrlog();
     if (version == SNMP_DEFAULT_VERSION) {
-        version = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION);
+        version = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+		                     NETSNMP_DS_LIB_SNMPVERSION);
+        if (!version) {
+            switch (DEFAULT_SNMP_VERSION) {
+            case 1:
+                version = SNMP_VERSION_1;
+                break;
+            case 2:
+                version = SNMP_VERSION_2c;
+                break;
+            case 3:
+                version = SNMP_VERSION_3;
+                break;
+            }
+        } else if (version == NETSNMP_DS_SNMP_VERSION_1) {
+                          /* Bogus value. version1 = 0 */
+            version = SNMP_VERSION_1;
+        }
     }
-    if (hostname == NULL && optind < argc) {
+    if (optind < argc) {
         hostname = argv[optind++];
     }
-    if ((version == SNMP_VERSION_1 || version == SNMP_VERSION_2c)
-        && community == NULL && optind < argc) {
-        community = argv[optind++];
-        fprintf(stderr,
-                "Warning: positional community parameter is deprecated. Use -c\n");
+    else {
+        fprintf(stderr, "Missing host name.\n");
+        exit(1);
+    }
+    if (community == NULL) {
+	community = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+		                          NETSNMP_DS_LIB_COMMUNITY);
     }
     if (optind < argc && isdigit(argv[optind][0])) {
         interval = atoi(argv[optind++]);
@@ -298,24 +318,18 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    if (!hostname) {
-        fprintf(stderr, "Missing host name.\n");
-        exit(1);
-    }
 
     snmp_sess_init(&session);
     session.peername = hostname;
     session.timeout = timeout;
     if (version == SNMP_VERSION_1 || version == SNMP_VERSION_2c) {
-        if (!community
-            && !(community =
-                 netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_COMMUNITY))) {
+        if (!community) {
             fprintf(stderr, "Missing community name.\n");
             exit(1);
         }
         session.version = version;
         session.community = (u_char *) community;
-        session.community_len = strlen((char *) community);
+        session.community_len = strlen(community);
     }
 
     SOCK_STARTUP;
@@ -355,9 +369,7 @@ main(int argc, char *argv[])
             routepr();
     }
 
-    if (iflag || rflag || oflag);
-    else {
-
+    if (!(iflag || rflag || oflag)) {
         while ((p = getprotoent46())) {
             for (tp = protox; tp->pr_name; tp++) {
                 if (strcmp(tp->pr_name, p->p_name) == 0)
@@ -387,7 +399,6 @@ main(int argc, char *argv[])
 const char     *
 plural(int n)
 {
-
     return (n != 1 ? "s" : "");
 }
 

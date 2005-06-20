@@ -165,7 +165,7 @@ netsnmp_binary_array_initialize(void)
     t->max_size = 0;
     t->count = 0;
     t->dirty = 0;
-    t->data_size = 4;
+    t->data_size = sizeof(void*);
     t->data = NULL;
 
     return t;
@@ -287,7 +287,7 @@ netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
      * if entry was last item, just decrement count
      */
     --t->count;
-    if (index != t->count) {
+    if (index != (int)t->count) {
         /*
          * otherwise, shift array down
          */
@@ -434,7 +434,8 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
 
     *len = end - start + 1;
     subset = malloc((*len) * t->data_size);
-    memcpy(subset, &t->data[start], t->data_size * (*len));
+    if (subset)
+        memcpy(subset, &t->data[start], t->data_size * (*len));
 
     return subset;
 }

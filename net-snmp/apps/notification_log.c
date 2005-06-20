@@ -54,7 +54,7 @@ check_log_size(unsigned int clientreg, void *clientarg)
         data = (netsnmp_table_data_set_storage *) row->data;
         data = netsnmp_table_data_set_find_column(data, COLUMN_NLMLOGTIME);
 
-        if (max_age && tmpl > (*(data->data.integer) + max_age * 100 * 60))
+        if (max_age && tmpl > (long)(*(data->data.integer) + max_age * 100 * 60))
             break;
     }
 
