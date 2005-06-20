@@ -499,9 +499,24 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
             /*
              *  If we receive an error from the proxy agent, pass it on up.
              *  The higher-level processing seems to Do The Right Thing.
+             *
+             * 2005/06 rks: actually, it doesn't do the right thing for
+             * a get-next request that returns NOSUCHNAME. If we do nothing,
+             * it passes that error back to the comman initiator. What it should
+             * do is ignore the error and move on to the next tree. To
+             * accomplish that, all we need to do is clear the delegated flag.
+             * Not sure if any other error codes need the same treatment. Left
+             * as an exercise to the reader...
              */
             DEBUGMSGTL(("proxy", "got error response (%d)\n", pdu->errstat));
-            netsnmp_set_request_error(cache->reqinfo, requests, pdu->errstat);
+            if((cache->reqinfo->mode == MODE_GETNEXT) &&
+               (SNMP_ERR_NOSUCHNAME == pdu->errstat)) {
+                DEBUGMSGTL(("proxy", "  ignoring error response\n"));
+                for(request = requests; request; request = request->next)
+                    request->delegated = 0;
+            }
+            else
+                netsnmp_set_request_error(cache->reqinfo, requests, pdu->errstat);
 
         /*
          * update the original request varbinds with the results 
