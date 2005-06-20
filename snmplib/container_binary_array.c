@@ -434,8 +434,7 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
 
     *len = end - start + 1;
     subset = malloc((*len) * t->data_size);
-    if (subset)
-        memcpy(subset, &t->data[start], t->data_size * (*len));
+    memcpy(subset, &t->data[start], t->data_size * (*len));
 
     return subset;
 }
