@@ -731,7 +731,7 @@ really_try_next:
                 long_return = (mbpool.pr_nget - mbpool.pr_nput)
                     * mbpool.pr_size + (mclpool.pr_nget - mclpool.pr_nput)
                     * mclpool.pr_size;
-#elif defined(MBSTAT_SYMBOL)
+#elif defined(MBSTAT_SYMBOL) && defined(STRUCT_MBSTAT_HAS_M_CLUSTERS)
                 long_return = mbstat.m_clusters - mbstat.m_clfree;      /* unlikely, but... */
 #elif defined(NO_DUMMY_VALUES)
                 goto try_next;
