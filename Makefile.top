@@ -69,7 +69,7 @@ CC	        = @CC@
 # 
 LIBCURRENT  = 6
 LIBAGE      = 1
-LIBREVISION = 2
+LIBREVISION = 3
 
 # generally, LIBCURRENT should stay the same unless major changes occur.
 # Increment REVISION every release.  
