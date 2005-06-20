@@ -398,48 +398,6 @@ SnmpTrapNodeDown(void)
      */
 }
 
-static void
-setup_log(int restart, int dont_zero, int stderr_log, int syslog_log, 
-	  char *logfile)
-{
-    static char logfile_s[PATH_MAX + 1] = { 0 };
-    static int dont_zero_s  = 0;
-    static int stderr_log_s = 0;
-    static int syslog_log_s = 0;
-
-    //
-    // this system needs rethinking, as it doesn't work
-    // well with the new linked list of log handlers..
-    // eg, there may be multiple file logs, logs to
-    // stderr and stdout, etc...
-    //
-    if (restart == 0) {
-	if (logfile != NULL) {
-	    strncpy(logfile_s, logfile, PATH_MAX);
-	}
-	dont_zero_s  = dont_zero;
-	stderr_log_s = stderr_log;
-	syslog_log_s = syslog_log;
-    }
-
-    // since stderr_log is never set now, and the log
-    // function now checks enabled, this disables stderr logging...
-    //
-//     if (stderr_log_s) {
-// 	snmp_enable_stderrlog();
-//     } else {
-// 	snmp_disable_stderrlog();
-//     }
-
-    if (logfile_s[0]) {
-	snmp_enable_filelog(logfile_s, dont_zero_s);
-    }
-
-    if (syslog_log_s) {
-	snmp_enable_syslog_ident(app_name, Facility);
-    }
-}
-
 /*******************************************************************-o-******
  * main - Non Windows
  * SnmpDaemonMain - Windows to support windows service
@@ -466,21 +424,15 @@ main(int argc, char *argv[])
     char            options[128] = "aAc:CdD::fhHI:l:L:m:M:p:P:qrsS:UvV-:";
     int             arg, i, ret;
     int             dont_fork = 0;
-    int             dont_zero_log = 0;
-    int             stderr_log = 0, syslog_log = 0;
+    int             dont_zero_log = 0, log_set = 0;
     int             uid = 0, gid = 0;
     int             agent_mode = -1;
-    char            logfile[PATH_MAX + 1] = { 0 };
     char           *cptr, **argvptr;
     char           *pid_file = NULL;
     char            option_compatability[] = "-Le";
 #if HAVE_GETPID
     int fd;
     FILE           *PID;
-#endif
-
-#ifdef LOGFILE
-    strncpy(logfile, LOGFILE, PATH_MAX);
 #endif
 
 #ifdef NO_ROOT_ACCESS
@@ -621,19 +573,18 @@ main(int argc, char *argv[])
                             argv[0], PATH_MAX);
                     exit(1);
                 }
-                strncpy(logfile, optarg, PATH_MAX);
+                snmp_enable_filelog(optarg, dont_zero);
+                log_set = 1;
             } else {
                 usage(argv[0]);
             }
             break;
 
         case 'L':
-	    /*
-            stderr_log = 1;
-	     */
 	    if  (snmp_log_options( optarg, argc, argv ) < 0 ) {
                 usage(argv[0]);
             }
+            log_set = 1;
             break;
 
         case 'm':
@@ -822,7 +773,10 @@ main(int argc, char *argv[])
 					  NETSNMP_DS_AGENT_PORTS)));
     }
 
-    setup_log(0, dont_zero_log, stderr_log, syslog_log, logfile);
+#ifdef LOGFILE
+    if (0 == log_set)
+        snmp_enable_filelog(LOGFILE, dont_zero);
+#endif
 
     /*
      * Initialize a argv set to the current for restarting the agent.   
@@ -1063,8 +1017,7 @@ receive(void)
             snmp_log(LOG_INFO, "Reconfiguring daemon\n");
 	    /*  Stop and restart logging.  This allows logfiles to be
 		rotated etc.  */
-	    snmp_disable_log();
-	    setup_log(1, 0, 0, 0, NULL);
+	    netsnmp_logging_restart();
 	    snmp_log(LOG_INFO, "NET-SNMP version %s restarted\n",
 		     netsnmp_get_version());
             update_config();
