@@ -162,6 +162,24 @@
 
 @BOTTOM@
 
+/* define if you have type int32_t */
+#undef HAVE_INT32_T
+
+/* define if you have type uint32_t */
+#undef HAVE_UINT32_T
+
+/* define if you have type u_int32_t */
+#undef HAVE_U_INT32_T
+
+/* define if you have type int64_t */
+#undef HAVE_INT64_T
+
+/* define if you have type uint64_t */
+#undef HAVE_UINT64_T
+
+/* define if you have type u_int64_t */
+#undef HAVE_U_INT64_T
+
 /* define if you have getdevs() */
 #undef HAVE_GETDEVS
 
@@ -186,6 +204,9 @@
 
 /* Does struct sigaction have a sa_sigaction field? */
 #undef STRUCT_SIGACTION_HAS_SA_SIGACTION
+
+/* Does struct tm have a tm_gmtoff field? */
+#undef STRUCT_TM_HAS_TM_GMTOFFF
 
 /* Does struct sockaddr have a sa_len field? */
 #undef STRUCT_SOCKADDR_HAS_SA_LEN
@@ -275,6 +296,9 @@
 
 /* des_ks_struct.weak_key */
 #undef STRUCT_DES_KS_STRUCT_HAS_WEAK_KEY
+
+/* mbstat.m_clusters */
+#undef STRUCT_MBSTAT_HAS_M_CLUSTERS
 
 /* ifnet needs to have _KERNEL defined */
 #undef IFNET_NEEDS_KERNEL
@@ -420,6 +444,14 @@
 #define UCDAVIS_DOT_MIB		1.3.6.1.4.1.2021
 #define UCDAVIS_DOT_MIB_LENGTH	7
 
+/* this is the location of the net-snmp mib tree.  It shouldn't be
+   changed, as the places it is used are expected to be constant
+   values or are directly tied to the UCD-SNMP-MIB. */
+#define NETSNMP_OID		8072
+#define NETSNMP_MIB		1,3,6,1,4,1,8072
+#define NETSNMP_DOT_MIB		1.3.6.1.4.1.8072
+#define NETSNMP_DOT_MIB_LENGTH	7
+
 /* how long to wait (seconds) for error querys before reseting the error trap.*/
 #define ERRORTIMELENGTH 600 
 
@@ -492,8 +524,13 @@
 
 #ifndef HAVE_INDEX
 #ifdef HAVE_STRCHR
+#ifdef mingw32
+# define index(a,b) strchr(a,b)
+# define rindex(a,b) strrchr(a,b)
+#else
 # define index strchr
 # define rindex strrchr
+#endif
 #endif
 #endif
 
@@ -608,7 +645,7 @@
 /* define this if we're using the new MIT crypto API */
 #undef MIT_NEW_CRYPTO
 
-/* define if you want to build with reentrant/threaded code */
+/* define if you want to build with reentrant/threaded code (incomplete) */
 #undef NS_REENTRANT
 
 /* on aix, if you have perfstat */
@@ -701,5 +738,7 @@
 
 /* define if agentx transport is to use domain sockets only */
 #undef AGENTX_DOM_SOCK_ONLY
+
+#undef HEIMDAL
 
 #endif /* NET_SNMP_CONFIG_H */
