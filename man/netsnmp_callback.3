@@ -1,4 +1,4 @@
-.TH "A generic callback mechanism" 3 "7 Aug 2004" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "20 Jun 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -30,6 +30,9 @@ A generic callback mechanism \-
 .RI "int \fBsnmp_unregister_callback\fP (int major, int minor, SNMPCallback *target, void *arg, int matchargs)"
 .br
 .RI "\fIThis function unregisters a specified callback function given a major and minor type. \fP"
+.ti -1c
+.RI "int \fBnetsnmp_callback_clear_client_arg\fP (void *ptr, int i, int j)"
+.br
 .ti -1c
 .RI "void \fBclear_callback\fP (void)"
 .br

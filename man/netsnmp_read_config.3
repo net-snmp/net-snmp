@@ -1,4 +1,4 @@
-.TH "parsing various configuration files at run time" 3 "7 Aug 2004" "net-snmp" \" -*- nroff -*-
+.TH "parsing various configuration files at run time" 3 "20 Jun 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -42,6 +42,9 @@ parsing various configuration files at run time \- The read_config related funct
 .RI "config_line * \fBread_config_get_handlers\fP (const char *type)"
 .br
 .ti -1c
+.RI "void \fBread_config_with_type_when\fP (const char *filename, const char *type, int when)"
+.br
+.ti -1c
 .RI "void \fBread_config_with_type\fP (const char *filename, const char *type)"
 .br
 .ti -1c
@@ -79,6 +82,9 @@ parsing various configuration files at run time \- The read_config related funct
 .br
 .ti -1c
 .RI "void \fBfree_config\fP (void)"
+.br
+.ti -1c
+.RI "void \fBread_configs_optional\fP (const char *optional_config, int when)"
 .br
 .ti -1c
 .RI "void \fBread_configs\fP (void)"
@@ -241,7 +247,7 @@ ASN_OBJECT_ID
 the next token in the configuration line. NULL if none left or if an unknown type. 
 .RE
 .PP
-Definition at line 1665 of file read_config.c.
+Definition at line 1691 of file read_config.c.
 .PP
 Referenced by netsnmp_read_data_callback().
 .SS "void read_config_store (const char * type, const char * line)"
@@ -260,7 +266,7 @@ read_config_store intended for use by applications to store permenant configurat
 void 
 .RE
 .PP
-Definition at line 1137 of file read_config.c.
+Definition at line 1162 of file read_config.c.
 .PP
 References snmp_log().
 .PP
@@ -299,7 +305,7 @@ ASN_OBJECT_ID
 character pointer to the end of the line. NULL if an unknown type. 
 .RE
 .PP
-Definition at line 1792 of file read_config.c.
+Definition at line 1818 of file read_config.c.
 .SS "struct config_line* register_config_handler (const char * type_param, const char * token, void(* parser)(const char *, char *), void(* releaser)(void), const char * help)"
 .PP
 register_config_handler registers handlers for certain tokens specified in certain types of files. Allows a module writer use/register multiple configuration files based off of the type parameter. A module writer may want to set up multiple configuration files to separate out related tasks/variables or just for management of where to put tokens as the module or modules get more complex in regard to handling token registrations.
@@ -339,6 +345,6 @@ uregister_config_handler un-registers handlers given a specific type_param and t
 void 
 .RE
 .PP
-Definition at line 283 of file read_config.c.
+Definition at line 284 of file read_config.c.
 .PP
 References SNMP_FREE.

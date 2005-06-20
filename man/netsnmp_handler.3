@@ -1,4 +1,4 @@
-.TH "Net-SNMP Agent handler and extensibility API" 3 "7 Aug 2004" "net-snmp" \" -*- nroff -*-
+.TH "Net-SNMP Agent handler and extensibility API" 3 "20 Jun 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -474,7 +474,7 @@ free the resources associated with a handler registration object Definition at l
 .PP
 References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::handler, netsnmp_handler_registration_s::handlerName, netsnmp_handler_free(), netsnmp_handler_registration, netsnmp_handler_registration_s::rootoid, and SNMP_FREE.
 .PP
-Referenced by netsnmp_handler_registration_dup(), netsnmp_register_mib_table_row(), and netsnmp_register_old_api().
+Referenced by netsnmp_handler_registration_dup(), and netsnmp_register_mib_table_row().
 .SS "int netsnmp_inject_handler (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_mib_handler\fP * handler)"
 .PP
 inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. The new handler is injected at the top of the list and hence will be the new handler to be called first. Definition at line 342 of file agent_handler.c.

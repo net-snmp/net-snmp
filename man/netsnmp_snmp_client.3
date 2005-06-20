@@ -1,4 +1,4 @@
-.TH "various PDU processing routines" 3 "7 Aug 2004" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "20 Jun 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -82,7 +82,7 @@ various PDU processing routines \-
 .RI "\fBnetsnmp_variable_list\fP * \fBfind_varbind_of_type\fP (\fBnetsnmp_variable_list\fP *var_ptr, u_char type)"
 .br
 .ti -1c
-.RI "int \fBsnmp_set_var_value\fP (\fBnetsnmp_variable_list\fP *newvar, const u_char *val_str, size_t val_len)"
+.RI "int \fBsnmp_set_var_value\fP (\fBnetsnmp_variable_list\fP *vars, const u_char *value, size_t len)"
 .br
 .ti -1c
 .RI "void \fBsnmp_replace_var_types\fP (\fBnetsnmp_variable_list\fP *vbl, u_char old_type, u_char new_type)"
@@ -138,7 +138,7 @@ returns 0 on success and 1 on a malloc error
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 670 of file snmp_client.c.
+Definition at line 674 of file snmp_client.c.
 .PP
 References variable_list::type.
 .PP
@@ -171,4 +171,4 @@ Referenced by check_getnext_results(), handle_pdu(), netsnmp_check_getnext_reply
 }
 .fi
 .PP
-Definition at line 926 of file snmp_client.c.
+Definition at line 1040 of file snmp_client.c.

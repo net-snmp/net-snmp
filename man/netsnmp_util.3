@@ -1,4 +1,4 @@
-.TH "Memory Utility Routines" 3 "7 Aug 2004" "net-snmp" \" -*- nroff -*-
+.TH "Memory Utility Routines" 3 "20 Jun 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -231,7 +231,7 @@ Definition at line 100 of file tools.h.
 .PP
 Frees a pointer only if it is !NULL and sets its value to NULL. Definition at line 54 of file tools.h.
 .PP
-Referenced by build_oid_segment(), fprint_description(), fprint_objid(), fprint_variable(), init_mib(), netsnmp_fixup_mib_directory(), netsnmp_free_all_list_data(), netsnmp_free_delegated_cache(), netsnmp_free_list_data(), netsnmp_handler_dup(), netsnmp_handler_free(), netsnmp_handler_registration_free(), netsnmp_register_old_api(), netsnmp_set_mib_directory(), netsnmp_set_row_column(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_delete_row(), netsnmp_table_data_set_helper_handler(), netsnmp_table_dataset_delete_data(), netsnmp_table_iterator_helper_handler(), read_objid(), shutdown_mib(), snmp_unregister_callback(), and unregister_config_handler().
+Referenced by _sess_read(), build_oid_segment(), fprint_description(), fprint_objid(), fprint_variable(), init_mib(), netsnmp_fixup_mib_directory(), netsnmp_free_all_list_data(), netsnmp_free_delegated_cache(), netsnmp_free_list_data(), netsnmp_handler_dup(), netsnmp_handler_free(), netsnmp_handler_registration_free(), netsnmp_register_old_api(), netsnmp_set_mib_directory(), netsnmp_set_row_column(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_delete_row(), netsnmp_table_data_set_helper_handler(), netsnmp_table_dataset_delete_data(), netsnmp_table_iterator_helper_handler(), netsnmp_wrap_up_request(), read_objid(), shutdown_mib(), snmp_unregister_callback(), and unregister_config_handler().
 .SS "#define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))"
 .PP
 Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it. Definition at line 61 of file tools.h.

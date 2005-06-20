@@ -1,4 +1,4 @@
-.TH "snmp_session" 3 "7 Aug 2004" "net-snmp" \" -*- nroff -*-
+.TH "snmp_session" 3 "20 Jun 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -190,9 +190,13 @@ Authentication function or NULL if null authentication is used.
 .SS "netsnmp_callback \fBsnmp_session::callback\fP"
 .PP
 Function to interpret incoming data. Definition at line 212 of file snmp_api.h.
+.PP
+Referenced by _sess_read().
 .SS "void* \fBsnmp_session::callback_magic\fP"
 .PP
 Pointer to data that the callback function may consider important. Definition at line 216 of file snmp_api.h.
+.PP
+Referenced by _sess_read().
 .SS "u_char* \fBsnmp_session::community\fP"
 .PP
 community for outgoing requests. Definition at line 228 of file snmp_api.h.
@@ -241,11 +245,13 @@ Number of retries before timeout. Definition at line 194 of file snmp_api.h.
 .SS "int \fBsnmp_session::s_errno\fP"
 .PP
 copy of system errno Definition at line 218 of file snmp_api.h.
+.PP
+Referenced by _sess_read().
 .SS "int \fBsnmp_session::s_snmp_errno\fP"
 .PP
 copy of library errno Definition at line 220 of file snmp_api.h.
 .PP
-Referenced by handle_snmp_packet().
+Referenced by _sess_read(), and handle_snmp_packet().
 .SS "u_char \fBsnmp_session::securityAuthKey\fP[USM_AUTH_KU_LEN]"
 .PP
 Ku for auth protocol XXX. Definition at line 266 of file snmp_api.h.
