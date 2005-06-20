@@ -33,6 +33,9 @@
 #include <netinet/tcp_timer.h>
 #endif
 #if HAVE_NETINET_TCP_VAR_H
+# if HAVE_SYS_TIMEOUT_H
+#  include <sys/timeout.h>
+# endif
 #include <netinet/tcp_var.h>
 #endif
 #if HAVE_NETINET_TCP_FSM_H
