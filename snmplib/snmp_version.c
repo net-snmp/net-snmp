@@ -4,7 +4,7 @@
 #ifndef UCD_COMPATIBLE
 static
 #endif
-const char     *NetSnmpVersionInfo = "5.1.3.dev";
+const char     *NetSnmpVersionInfo = "5.1.3.pre1";
 
 const char     *
 netsnmp_get_version()
