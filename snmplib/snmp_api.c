@@ -140,6 +140,7 @@ SOFTWARE.
 
 static void     _init_snmp(void);
 
+#include "../agent/mibgroup/agentx/protocol.h"
 #include <net-snmp/library/transform_oids.h>
 #ifndef timercmp
 #define	timercmp(tvp, uvp, cmp) \
@@ -4653,23 +4654,18 @@ _sess_async_send(void *sessp,
      * do we expect a response?
      */
     switch (pdu->command) {
-        case SNMP_MSG_GET:
-        case SNMP_MSG_GETNEXT:
-        case SNMP_MSG_SET:
-        case SNMP_MSG_INFORM:
-        case SNMP_MSG_GETBULK:
-            pdu->flags |= UCD_MSG_FLAG_EXPECT_RESPONSE;
-            break;
 
         case SNMP_MSG_RESPONSE:
         case SNMP_MSG_TRAP:
         case SNMP_MSG_TRAP2:
         case SNMP_MSG_REPORT:
-            netsnmp_assert(0 == (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE));
+        case AGENTX_MSG_CLEANUPSET:
+        case AGENTX_MSG_RESPONSE:
+            pdu->flags &= ~UCD_MSG_FLAG_EXPECT_RESPONSE;
             break;
             
         default:
-            snmp_log(LOG_ERR,"unknown pdu command %d\n", pdu->command);
+            pdu->flags |= UCD_MSG_FLAG_EXPECT_RESPONSE;
             break;
     }
 
