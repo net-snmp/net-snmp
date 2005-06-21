@@ -120,6 +120,7 @@ int netsnmp_add_loghandler(    netsnmp_log_handler *logh );
 int netsnmp_remove_loghandler( netsnmp_log_handler *logh );
 int netsnmp_enable_loghandler( const char *token );
 int netsnmp_disable_loghandler( const char *token );
+void netsnmp_logging_restart(void);
 #ifdef __cplusplus
 }
 #endif
