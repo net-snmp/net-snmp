@@ -360,6 +360,14 @@ AC_DEFINE(AGENTX_DOM_SOCK_ONLY))
 AC_ARG_WITH(agentx-dom-sock-only,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-agentx-dom-sock-only/--disable-agentx-dom-sock-only instead ]) )
 
+AC_ARG_ENABLE(snmptrapd-subagent,
+[  --disable-snmptrapd-subagent          Disable agentx subagent code in snmptrapd.])
+if test "x$enable_snmptrapd_subagent" = "xno"; then
+  AC_DEFINE(SNMPTRAPD_DISABLE_AGENTX)
+fi
+AC_ARG_WITH(snmptrapd-subagent,,
+	AC_MSG_ERROR([ Invalid option. Use --enable-snmptrapd-subagent/--disable-snmptrapd-subagent instead ]) )
+
 AC_ARG_WITH(opaque-special-types,
 [  --without-opaque-special-types  Don't use special opaque encodings.
                                   SNMP normally cannot handle
