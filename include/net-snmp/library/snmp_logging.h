@@ -49,6 +49,8 @@ extern          "C" {
     void            snmp_enable_stderrlog(void);
     void            snmp_enable_calllog(void);
 
+    int             snmp_stderrlog_status(void);
+
 #if HAVE_STDARG_H
 # if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
     int             snmp_log(int priority, const char *format, ...);
