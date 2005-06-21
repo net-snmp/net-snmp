@@ -913,7 +913,6 @@ main(int argc, char *argv[])
     } else {
         netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER, print_handler);
     }
-    netsnmp_add_global_traphandler(NETSNMPTRAPD_POST_HANDLER, notification_handler);
 
     if (Event) {
         netsnmp_add_traphandler(event_handler, risingAlarm,
@@ -938,6 +937,7 @@ main(int argc, char *argv[])
          */
         netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
 			       NETSNMP_DS_AGENT_ROLE, 1);
+        netsnmp_add_global_traphandler(NETSNMPTRAPD_POST_HANDLER, notification_handler);
     }
 #endif
 
