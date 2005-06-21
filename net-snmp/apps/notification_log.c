@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -434,7 +436,6 @@ init_notification_log(void)
     /*
      * static variables 
      */
-#ifdef USING_AGENTX_SUBAGENT_MODULE
     netsnmp_register_read_only_counter32_instance_context
         ("nlmStatsGlobalNotificationsLogged",
          my_nlmStatsGlobalNotificationsLogged_oid,
@@ -474,7 +475,6 @@ init_notification_log(void)
      */
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmptrapd", "dontRetainLogs",
 			   NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_APP_DONT_LOG);
-#endif /* USING_AGENTX_SUBAGENT_MODULE */
 }
 
 u_long          default_num = 0;
@@ -728,3 +728,4 @@ int   notification_handler(netsnmp_pdu           *pdu,
     log_notification(host, pdu, transport);
     return NETSNMPTRAPD_HANDLER_OK;
 }
+#endif /* USING_AGENTX_SUBAGENT_MODULE && !SNMPTRAPD_DISABLE_AGENTX */
