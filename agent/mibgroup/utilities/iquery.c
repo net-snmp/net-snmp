@@ -18,7 +18,7 @@ void init_iquery(void){
      *
      **************************/
 
-netsnmp_session *netsnmp_iquery_pdu_session(netsnmp_pdu* pdu){
+netsnmp_session *netsnmp_iquery_pdu_session(netsnmp_pdu* pdu) {
     if (!pdu)
        return NULL;
     if (pdu->version == SNMP_VERSION_3)
@@ -42,12 +42,12 @@ netsnmp_session *netsnmp_iquery_user_session(char* secName){
     size_t elen = snmpv3_get_engineID(eID, sizeof(eID));
 
     return netsnmp_iquery_session( secName, 
-                           SNMP_MP_MODEL_SNMPv3,
+                           SNMP_VERSION_3,
                            SNMP_SEC_MODEL_USM,
                            SNMP_SEC_LEVEL_AUTHNOPRIV, eID, elen);
 }
 
-netsnmp_session *netsnmp_iquery_community_session( char* community, int version ){
+netsnmp_session *netsnmp_iquery_community_session( char* community, int version ) { 
     u_char eID[SNMP_MAXBUF_SMALL];
     size_t elen = snmpv3_get_engineID(eID, sizeof(eID));
 
@@ -55,9 +55,9 @@ netsnmp_session *netsnmp_iquery_community_session( char* community, int version 
                            SNMP_SEC_LEVEL_NOAUTH, eID, elen);
 }
 
-netsnmp_session *netsnmp_iquery_session( char* secName,   int   mpModel,
-                                 int   secModel,  int   secLevel,
-                               u_char* engineID, size_t engIDLen) {
+netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
+                                        int   secModel,  int   secLevel,
+                                       u_char* engineID, size_t engIDLen) {
 
     /*
      * This routine creates a completely new session every time.
@@ -68,12 +68,12 @@ netsnmp_session *netsnmp_iquery_session( char* secName,   int   mpModel,
     netsnmp_session *ss = netsnmp_callback_open( callback_master_num,
                                                  NULL, NULL, NULL);
     if (ss) {
-        ss->version       = mpModel;
+        ss->version       = version;
         ss->securityModel = secModel;
         ss->securityLevel = secLevel;
         memdup( &(ss->securityEngineID), engineID, engIDLen );
         ss->securityEngineIDLen = engIDLen;
-        if ( mpModel == SNMP_MP_MODEL_SNMPv3 ) {
+        if ( version == SNMP_VERSION_3 ) {
             memdup(&(ss->securityName), secName, strlen(secName));
             ss->securityNameLen = strlen(secName);
         } else {
