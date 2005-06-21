@@ -79,9 +79,21 @@ struct schedTable_entry {
 void            init_schedCore(void);
 
 netsnmp_table_row *
-schedTable_createEntry(netsnmp_table_data *table_data, char *schedOwner,
-                       size_t schedOwner_len, char *schedName,
-                       size_t schedName_len, netsnmp_pdu *pdu);
+schedTable_createEntry_auth(netsnmp_table_data *table_data,
+                       char *schedOwner, size_t schedOwner_len,
+                       char *schedName,  size_t schedName_len,
+                       int   version,    char  *secName,
+                       int   secModel,   int    secLevel,
+                       u_char *engineID, size_t engineID_len);
+netsnmp_table_row *
+schedTable_createEntry_pdu(netsnmp_table_data *table_data,
+                       char *schedOwner, size_t schedOwner_len,
+                       char *schedName,  size_t schedName_len,
+                       netsnmp_pdu *pdu);
+netsnmp_table_row *
+schedTable_createEntry(netsnmp_table_data *table_data,
+                       char *schedOwner, size_t schedOwner_len,
+                       char *schedName,  size_t schedName_len);
 void
 schedTable_removeEntry(netsnmp_table_data *table_data, netsnmp_table_row *row);
 void  sched_nextTime( struct schedTable_entry *entry );
