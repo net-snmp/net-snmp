@@ -188,9 +188,12 @@ sched_nextRowTime( netsnmp_table_row *row )
  * create a new row in the table 
  */
 netsnmp_table_row *
-schedTable_createEntry(netsnmp_table_data *table_data, char *schedOwner,
-                       size_t schedOwner_len, char *schedName,
-                       size_t schedName_len, netsnmp_pdu *pdu)
+schedTable_createEntry_auth(netsnmp_table_data *table_data,
+                       char *schedOwner, size_t schedOwner_len,
+                       char *schedName,  size_t schedName_len,
+                       int   version,    char  *secName,
+                       int   secModel,   int    secLevel,
+                       u_char *engineID, size_t engineID_len)
 {
     struct schedTable_entry *entry;
     netsnmp_table_row *row;
@@ -226,13 +229,66 @@ schedTable_createEntry(netsnmp_table_data *table_data, char *schedOwner,
     entry->schedStorageType  = 2;   /* volatile */
     entry->schedVariable_len = 2;   /* .0.0 */
 
-    if (pdu)
-        entry->schedSession = netsnmp_iquery_pdu_session( pdu );
-    else
-        entry->schedSession = netsnmp_iquery_user_session( schedOwner );
+    entry->schedSession = netsnmp_iquery_session(secName,
+                                                 version, secModel, secLevel,
+                                                 engineID, engineID_len);
 
     netsnmp_table_data_add_row(table_data, row);
     return row;
+}
+
+netsnmp_table_row *
+schedTable_createEntry_pdu(netsnmp_table_data *table_data,
+                       char *schedOwner, size_t schedOwner_len,
+                       char *schedName,  size_t schedName_len,
+                       netsnmp_pdu *pdu)
+{
+    char *secName;
+
+    if (!pdu)
+        return NULL;
+    if ( pdu->version == SNMP_VERSION_1 ||
+         pdu->version == SNMP_VERSION_2c )
+        secName = pdu->community;
+    else
+        secName = pdu->securityName;
+
+    return schedTable_createEntry_auth(table_data,
+                       schedOwner, schedOwner_len,
+                       schedName,  schedName_len,
+                       pdu->version,          secName,
+                       pdu->securityModel,    pdu->securityLevel,
+                       pdu->securityEngineID, pdu->securityEngineIDLen);
+}
+
+netsnmp_table_row *
+schedTable_createEntry(netsnmp_table_data *table_data,
+                       char *schedOwner, size_t schedOwner_len,
+                       char *schedName,  size_t schedName_len)
+{
+    char *secName  = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                           NETSNMP_DS_AGENT_INTERNAL_SECNAME);
+    int   version  = netsnmp_ds_get_int(   NETSNMP_DS_APPLICATION_ID,
+                                           NETSNMP_DS_AGENT_INTERNAL_VERSION);
+    int   secLevel = netsnmp_ds_get_int(   NETSNMP_DS_APPLICATION_ID,
+                                           NETSNMP_DS_AGENT_INTERNAL_SECLEVEL);
+    int   secModel;
+    u_char eID[SNMP_MAXBUF_SMALL];
+    size_t elen = snmpv3_get_engineID(eID, sizeof(eID));
+
+    if (version == SNMP_VERSION_3)
+        secModel = SNMP_SEC_MODEL_USM;
+    else {
+        secModel = version+1;
+        secLevel = SNMP_SEC_LEVEL_NOAUTH;
+    }
+    
+    return schedTable_createEntry_auth(table_data,
+                       schedOwner, schedOwner_len,
+                       schedName,  schedName_len,
+                       version,    secName,
+                       secModel,   secLevel,
+                       eID,        elen);
 }
 
 /*
