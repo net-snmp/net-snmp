@@ -4682,7 +4682,6 @@ _sess_async_send(void *sessp,
         (session->securityEngineIDLen == 0) &&
         (0 == (session->flags & SNMP_FLAGS_DONT_PROBE))) {
         int rc;
-        netsnmp_assert(0 == (session->flags & SNMP_FLAGS_DONT_PROBE));
         DEBUGMSGTL(("snmpv3_build", "delayed probe for engineID\n"));
         rc = snmpv3_engineID_probe(slp, session);
         if (rc == 0)
