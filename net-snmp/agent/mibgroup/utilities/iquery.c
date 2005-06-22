@@ -6,10 +6,66 @@
 
 static netsnmp_session *iquery_default_session = NULL;
 
+void
+netsnmp_parse_iquerySecLevel(const char *token, char *line)
+{
+    char buf[1024];
+    int secLevel;
+
+    if ((secLevel = parse_secLevel_conf( token, line )) >= 0 ) {
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_INTERNAL_SECLEVEL, secLevel);
+    } else {
+        snprintf(buf, sizeof(buf), "Unknown security level: %s", line);
+        buf[ sizeof(buf)-1 ] = 0;
+        config_perror(buf);
+    }
+}
+
+void
+netsnmp_parse_iqueryVersion(const char *token, char *line)
+{
+    char buf[1024];
+
+    if (!strcmp( line, "1" ))
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_1);
+    else if (!strcmp( line, "2"  ) ||
+         !strcasecmp( line, "2c" ))
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_2c);
+    else if (!strcmp( line, "3" ))
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_3);
+    else {
+        snprintf(buf, sizeof(buf), "Unknown version: %s", line);
+        buf[ sizeof(buf)-1 ] = 0;
+        config_perror(buf);
+    }
+}
+
 void init_iquery(void){
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmpd", "agentSecName",
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_INTERNAL_SECNAME);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmpd", "iquerySecName",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_INTERNAL_SECNAME);
+
+    snmpd_register_config_handler("iqueryVersion",
+                                   netsnmp_parse_iqueryVersion, NULL,
+                                   "1 | 2c | 3");
+    snmpd_register_config_handler("iquerySecLevel",
+                                   netsnmp_parse_iquerySecLevel, NULL,
+                                   "noAuthNoPriv | authNoPriv | authPriv");
+
+    /*
+     * Set defaults
+     */
+    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_3);
+    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_INTERNAL_SECLEVEL, SNMP_SEC_LEVEL_AUTHNOPRIV);
 }
 
     /**************************
