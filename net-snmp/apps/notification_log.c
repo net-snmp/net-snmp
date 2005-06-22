@@ -1,7 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
 
-#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
-
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -12,6 +10,9 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+
 #include <net-snmp/agent/instance.h>
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_data2.h>
