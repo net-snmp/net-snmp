@@ -185,13 +185,17 @@ netsnmp_unix_close(netsnmp_transport *t)
         t->sock = -1;
         if (sup != NULL) {
             if (sup->local) {
-                DEBUGMSGTL(("netsnmp_unix", "close: server unlink(\"%s\")\n",
-                            sup->server.sun_path));
-                unlink(sup->server.sun_path);
+                if (sup->server.sun_path[0] != 0) {
+                  DEBUGMSGTL(("netsnmp_unix", "close: server unlink(\"%s\")\n",
+                              sup->server.sun_path));
+                  unlink(sup->server.sun_path);
+                }
             } else {
-                DEBUGMSGTL(("netsnmp_unix", "close: client unlink(\"%s\")\n",
-                            sup->client.sun_path));
-                unlink(sup->client.sun_path);
+                if (sup->client.sun_path[0] != 0) {
+                  DEBUGMSGTL(("netsnmp_unix", "close: client unlink(\"%s\")\n",
+                              sup->client.sun_path));
+                  unlink(sup->client.sun_path);
+                }
             }
         }
         return rc;
