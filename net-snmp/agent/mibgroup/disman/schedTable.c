@@ -412,7 +412,7 @@ schedTable_handler(netsnmp_mib_handler *handler,
                 switch (*request->requestvb->val.integer) {
                 case RS_CREATEANDGO:
                 case RS_CREATEANDWAIT:
-                    table_row = schedTable_createEntry(table_data,
+                    table_row = schedTable_createEntry_pdu(table_data,
                                     table_info->indexes->val.string,
                                     table_info->indexes->val_len,
                                     table_info->indexes->next_variable->val.string,
