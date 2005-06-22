@@ -195,23 +195,32 @@ get_default_privtype(size_t * len)
  * Line syntax:
  *	defSecurityLevel "noAuthNoPriv" | "authNoPriv" | "authPriv"
  */
+
+int
+parse_secLevel_conf(const char *word, char *cptr) {
+    if (strcasecmp(cptr, "noAuthNoPriv") == 0 || strcmp(cptr, "1") == 0 ||
+	strcasecmp(cptr, "nanp") == 0) {
+        return SNMP_SEC_LEVEL_NOAUTH;
+    } else if (strcasecmp(cptr, "authNoPriv") == 0 || strcmp(cptr, "2") == 0 ||
+	       strcasecmp(cptr, "anp") == 0) {
+        return SNMP_SEC_LEVEL_AUTHNOPRIV;
+    } else if (strcasecmp(cptr, "authPriv") == 0 || strcmp(cptr, "3") == 0 ||
+	       strcasecmp(cptr, "ap") == 0) {
+        return SNMP_SEC_LEVEL_AUTHPRIV;
+    } else {
+        return -1;
+    }
+}
+
 void
 snmpv3_secLevel_conf(const char *word, char *cptr)
 {
     char            buf[1024];
+    int             secLevel;
 
-    if (strcasecmp(cptr, "noAuthNoPriv") == 0 || strcmp(cptr, "1") == 0 ||
-	strcasecmp(cptr, "nanp") == 0) {
+    if ((secLevel = parse_secLevel_conf( word, cptr )) >= 0 ) {
         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
-			   NETSNMP_DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_NOAUTH);
-    } else if (strcasecmp(cptr, "authNoPriv") == 0 || strcmp(cptr, "2") == 0 ||
-	       strcasecmp(cptr, "anp") == 0) {
-        netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
-			   NETSNMP_DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_AUTHNOPRIV);
-    } else if (strcasecmp(cptr, "authPriv") == 0 || strcmp(cptr, "3") == 0 ||
-	       strcasecmp(cptr, "ap") == 0) {
-        netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
-			   NETSNMP_DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_AUTHPRIV);
+			   NETSNMP_DS_LIB_SECLEVEL, secLevel);
     } else {
         snprintf(buf, sizeof(buf), "Unknown security level: %s", cptr);
         buf[ sizeof(buf)-1 ] = 0;
