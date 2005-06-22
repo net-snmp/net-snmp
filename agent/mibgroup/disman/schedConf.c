@@ -89,7 +89,7 @@ parse_sched_periodic( const char *token, char *line )
     }
     row = schedTable_createEntry(schedTable,
                                  schedUser, strlen(schedUser),
-                                 buf, strlen(buf), NULL );
+                                 buf, strlen(buf) );
     entry = (struct schedTable_entry *)row->data;
 
     entry->schedInterval     = frequency;
@@ -251,7 +251,7 @@ parse_sched_timed( const char *token, char *line )
     }
     row = schedTable_createEntry(schedTable,
                                  schedUser, strlen(schedUser),
-                                 buf, strlen(buf), NULL );
+                                 buf, strlen(buf) );
     entry = (struct schedTable_entry *)row->data;
 
     entry->schedWeekDay = dayVal;
