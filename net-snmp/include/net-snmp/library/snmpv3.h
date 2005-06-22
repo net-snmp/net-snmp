@@ -51,6 +51,7 @@ extern          "C" {
     void            snmpv3_set_engineBootsAndTime(int boots, int ttime);
     int             free_engineID(int majorid, int minorid, void *serverarg,
 				  void *clientarg);
+    int             parse_secLevel_conf(const char* word, char *cptr);
 
 #ifdef __cplusplus
 }
