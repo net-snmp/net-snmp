@@ -276,9 +276,14 @@ schedTable_createEntry(netsnmp_table_data *table_data,
     u_char eID[SNMP_MAXBUF_SMALL];
     size_t elen = snmpv3_get_engineID(eID, sizeof(eID));
 
-    if (version == SNMP_VERSION_3)
+    if (version == DEFAULT_SNMP_VERSION)
+        version =  SNMP_VERSION_3;
+
+    if (version == SNMP_VERSION_3) {
         secModel = SNMP_SEC_MODEL_USM;
-    else {
+        if (!secLevel)
+            secLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+    } else {
         secModel = version+1;
         secLevel = SNMP_SEC_LEVEL_NOAUTH;
     }
