@@ -776,6 +776,30 @@ main(int argc, char *argv[])
 					  NETSNMP_DS_AGENT_PORTS)));
     }
 
+#ifdef SIGTERM
+    DEBUGMSGTL(("signal", "registering SIGTERM signal handler\n"));
+    signal(SIGTERM, SnmpdShutDown);
+#endif
+#ifdef SIGINT
+    DEBUGMSGTL(("signal", "registering SIGINT signal handler\n"));
+    signal(SIGINT, SnmpdShutDown);
+#endif
+#ifdef SIGHUP
+    DEBUGMSGTL(("signal", "registering SIGHUP signal handler\n"));
+    signal(SIGHUP, SnmpdReconfig);
+#endif
+#ifdef SIGUSR1
+    DEBUGMSGTL(("signal", "registering SIGUSR1 signal handler\n"));
+    signal(SIGUSR1, SnmpdDump);
+#endif
+#ifdef SIGPIPE
+    DEBUGMSGTL(("signal", "registering SIGPIPE signal handler\n"));
+    signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
+#endif
+#ifdef SIGXFSZ
+    signal(SIGXFSZ, SnmpdCatchRandomSignal);
+#endif
+
 #ifdef LOGFILE
     if (0 == log_set)
         snmp_enable_filelog(LOGFILE, dont_zero_log);
@@ -849,29 +873,6 @@ main(int argc, char *argv[])
          */
         Exit(1);                /*  Exit logs exit val for us  */
     }
-#ifdef SIGTERM
-    DEBUGMSGTL(("signal", "registering SIGTERM signal handler\n"));
-    signal(SIGTERM, SnmpdShutDown);
-#endif
-#ifdef SIGINT
-    DEBUGMSGTL(("signal", "registering SIGINT signal handler\n"));
-    signal(SIGINT, SnmpdShutDown);
-#endif
-#ifdef SIGHUP
-    DEBUGMSGTL(("signal", "registering SIGHUP signal handler\n"));
-    signal(SIGHUP, SnmpdReconfig);
-#endif
-#ifdef SIGUSR1
-    DEBUGMSGTL(("signal", "registering SIGUSR1 signal handler\n"));
-    signal(SIGUSR1, SnmpdDump);
-#endif
-#ifdef SIGPIPE
-    DEBUGMSGTL(("signal", "registering SIGPIPE signal handler\n"));
-    signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
-#endif
-#ifdef SIGXFSZ
-    signal(SIGXFSZ, SnmpdCatchRandomSignal);
-#endif
 
     /*
      * Store persistent data immediately in case we crash later.  
@@ -1010,6 +1011,11 @@ receive(void)
 #ifdef	USING_SMUX_MODULE
     int             sd;
 #endif                          /* USING_SMUX_MODULE */
+
+    /*
+     * ignore early sighup during startup
+     */
+    reconfig = 0;
 
     /*
      * Loop-forever: execute message handlers for sockets with data
