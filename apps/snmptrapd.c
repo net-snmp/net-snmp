@@ -607,6 +607,19 @@ main(int argc, char *argv[])
     int             agentx_subagent = 1;
 #endif
 
+#ifdef SIGTERM
+    signal(SIGTERM, term_handler);
+#endif
+#ifdef SIGHUP
+    signal(SIGHUP, hup_handler);
+#endif
+#ifdef SIGINT
+    signal(SIGINT, term_handler);
+#endif
+#ifdef SIGPIPE
+    signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
+#endif
+
     /*
      * register our configuration handlers now so -H properly displays them 
      */
@@ -1165,18 +1178,10 @@ main(int argc, char *argv[])
         }
     }
 
-#ifdef SIGTERM
-    signal(SIGTERM, term_handler);
-#endif
-#ifdef SIGHUP
-    signal(SIGHUP, hup_handler);
-#endif
-#ifdef SIGINT
-    signal(SIGINT, term_handler);
-#endif
-#ifdef SIGPIPE
-    signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
-#endif
+    /*
+     * ignore early sighup during startup
+     */
+    reconfig = 0;
 
 #ifdef WIN32SERVICE
     trapd_status = SNMPTRAPD_RUNNING;
