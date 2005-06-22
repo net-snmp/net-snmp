@@ -739,6 +739,9 @@
 /* define if agentx transport is to use domain sockets only */
 #undef AGENTX_DOM_SOCK_ONLY
 
+/* define if you do not want snmptrapd to register as an AgentX subagent */
+#undef SNMPTRAPD_DISABLE_AGENTX
+
 #undef HEIMDAL
 
 #endif /* NET_SNMP_CONFIG_H */
