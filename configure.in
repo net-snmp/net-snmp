@@ -198,6 +198,13 @@ fi
 AC_ARG_WITH(md5,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-md5/--disable-md5 instead ]) )
 
+AC_ARG_ENABLE(snmptrapd-subagent,
+[  --disable-snmptrapd-subagent          Disable agentx subagent code in snmptrapd.])
+if test "x$enable_snmptrapd_subagent" = "xno"; then
+  AC_DEFINE(SNMPTRAPD_DISABLE_AGENTX)
+fi
+AC_ARG_WITH(snmptrapd-subagent,,
+	AC_MSG_ERROR([ Invalid option. Use --enable-snmptrapd-subagent/--disable-snmptrapd-subagent instead ]) )
 
 AC_ARG_ENABLE(ipv6,
 [  --enable-ipv6                   Generate IPv6 ready version.],

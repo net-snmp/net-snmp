@@ -589,15 +589,17 @@ SnmpTrapdMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "ac:CdD::efF:hHl:L:m:M:no:PqsS:tvO:-:";
+    char            options[128] = "ac:CdD::efF:hHI:l:L:m:M:no:PqsS:tvO:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
-    int             arg, i = 0;
+    int             arg, i = 0, depmsg = 0;
     int             count, numfds, block;
     fd_set          fdset;
     struct timeval  timeout, *tvp;
     char           *cp, *listen_ports = NULL;
-    int             agentx_subagent = 1, depmsg = 0;
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+    int             agentx_subagent = 1;
+#endif
 
 #ifdef SIGTERM
     signal(SIGTERM, term_handler);
@@ -727,10 +729,10 @@ main(int argc, char *argv[])
 
         case 'H':
             init_agent("snmptrapd");
-#ifdef USING_AGENTX_SUBAGENT_MODULE
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
             init_subagent();
-#endif
             init_notification_log();
+#endif
 #ifdef NETSNMP_EMBEDDED_PERL
             init_perl();
 #endif
@@ -738,6 +740,14 @@ main(int argc, char *argv[])
             fprintf(stderr, "Configuration directives understood:\n");
             read_config_print_usage("  ");
             exit(0);
+
+        case 'I':
+            if (optarg != NULL) {
+                add_to_init_list(optarg);
+            } else {
+                usage();
+            }
+            break;
 
 	case 'S':
             fprintf(stderr,
@@ -940,7 +950,7 @@ main(int argc, char *argv[])
 	 */
     }
 
-#ifdef USING_AGENTX_SUBAGENT_MODULE
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
     /*
      * we're an agentx subagent? 
      */
@@ -950,7 +960,6 @@ main(int argc, char *argv[])
          */
         netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
 			       NETSNMP_DS_AGENT_ROLE, 1);
-        netsnmp_add_global_traphandler(NETSNMPTRAPD_POST_HANDLER, notification_handler);
     }
 #endif
 
@@ -970,20 +979,24 @@ main(int argc, char *argv[])
      */
     init_agent("snmptrapd");
 
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
     /*
      * initialize local modules 
      */
     if (agentx_subagent) {
         extern void init_register_usmUser_context(const char *);
-#ifdef USING_AGENTX_SUBAGENT_MODULE
         init_subagent();
-#endif
-        /* register the notification log table */
-        init_notification_log();
+        if (should_init("notificationLogMib")) {
+            netsnmp_add_global_traphandler(NETSNMPTRAPD_POST_HANDLER,
+                                           notification_handler);
+            /* register the notification log table */
+            init_notification_log();
+        }
 
         /* register ourselves as having a USM user database */
         init_register_usmUser_context("snmptrapd");
     }
+#endif
 
 #ifdef NETSNMP_EMBEDDED_PERL
     init_perl();
