@@ -118,13 +118,16 @@ sched_nextTime( struct schedTable_entry *entry )
         } else {
              entry->schedNextRun = now + entry->schedInterval;
         }
-        DEBUGMSGTL(("sched", "nextTime: periodic %d\n", entry->schedNextRun));
+        DEBUGMSGTL(("sched", "nextTime: periodic (%d) %s",
+                                  entry->schedNextRun,
+                           ctime(&entry->schedNextRun)));
         break;
 
     case 3:     /* one-shot */
         if ( entry->schedLastRun ) {
-            DEBUGMSGTL(("sched", "nextTime: one-shot expired (%d)\n",
-                                  entry->schedLastRun));
+            DEBUGMSGTL(("sched", "nextTime: one-shot expired: (%d) %s",
+                                  entry->schedLastRun,
+                           ctime(&entry->schedLastRun)));
             return;
         }
         /* Fallthrough */
@@ -166,7 +169,9 @@ sched_nextTime( struct schedTable_entry *entry )
          *
          *  [ CHECK Spring TIMECHANGE ]
          */
-        DEBUGMSGTL(("sched", "nextTime: calendar %d\n", entry->schedNextRun));
+        DEBUGMSGTL(("sched", "nextTime: calendar (%d) %s",
+                                  entry->schedNextRun,
+                           ctime(&entry->schedNextRun)));
         return;
     default:
         DEBUGMSGTL(("sched", "nextTime: unknown type %d\n", entry->schedType));
