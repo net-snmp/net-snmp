@@ -100,7 +100,6 @@ static int ps_numdisks;			/* number of disks in system, may change while running
 static mach_port_t masterPort;		/* to communicate with I/O Kit	*/
 #endif                          /* darwin */
 
-static char     type[20];
 void            diskio_parse_config(const char *, char *);
 
 #if defined (freebsd4) || defined(freebsd5)
@@ -175,12 +174,6 @@ init_diskio(void)
     REGISTER_MIB("diskio", diskio_variables, variable2,
                  diskio_variables_oid);
 
-    /*
-     * Added to parse snmpd.conf - abby
-     */
-    snmpd_register_config_handler("diskio", diskio_parse_config,
-                                  NULL, "diskio [device-type]");
-
 #ifdef solaris2
     kc = kstat_open();
 
@@ -209,12 +202,6 @@ init_diskio(void)
 	snmp_alarm_register(DISKIO_SAMPLE_INTERVAL, SA_REPEAT, devla_getstats, NULL);
 #endif
 
-}
-
-void
-diskio_parse_config(const char *token, char *cptr)
-{
-    copy_nword(cptr, type, sizeof(type));
 }
 
 #ifdef solaris2
