@@ -151,6 +151,9 @@ Monitors file sizes and makes sure they don't grow beyond a certain
 size (in kilobytes).  MAXSIZE defaults to infinite if not specified,
 and only monitors the size without reporting errors about it.
 A maximum of 20 files can be monitored.
+.IP "logmatch NAME PATH CYCLETIME REGEX"
+Configures log file monitoring that can be queried via the
+UCD-SNMP-MIB::logMatchTable.
 .SS "Errors"
 .PP
 Any errors in obtaining the above information are reported via the
@@ -172,6 +175,10 @@ Default is 1 second.
 .IP "AgentXRetries addr"
 Defines the number of retries for an AgentX request.
 Default is 5 retries.
+.IP "agentxperms socket_perms [directory_perms [username|userid [groupname|groupid]]]"
+Defines the permissions of the AgentX socket. socket_perms and directory_perms must be octal digits (see 
+.I chmod(1)
+).
 .P
 You can also put the following in your subagent.conf file (where
 "subagent" is the name you used in your init_snmp("subagent") api call:
@@ -257,6 +264,8 @@ is selected.
 This directive is the IPv6 version of \fIcom2sec\fR.
 A subnet can be specified as IPv6/IPv6MASK or IPv6/BITS.
 It is only valid in specifing \fIUDPIPv6\fR as transport domain.
+.IP "com2secunix [-Cn CONTEXT] NAME SOCKPATH COMMUNITY"
+This directive is the Unix domain sockets version of \fIcom2sec\fR.
 .IP "group NAME MODEL SECURITY"
 This directive defines the mapping from securitymodel/securityname to group.
 MODEL is one of \fIv1\fR, \fIv2c\fR, or \fIusm\fR.
@@ -388,6 +397,9 @@ Sets the system description or object ID for the agent.
 Although these values are not SNMP-writable, it is conceivable
 that a network administrator may wish to configure them to something
 other than the default values.
+.IP "leave_pidfile yes"
+Instructs the agent to not remove its pid file on shutdown. Equivalent to
+specifying "-U" on the command line.
 .IP "agentaddress [<transport-specifier>:]<transport-address>[,...]"
 Makes the agent list on the specified comma-separated list of
 listening addresses instead of the default behaviour, which is to
