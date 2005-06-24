@@ -1,5 +1,45 @@
 -------------------------------------------------------------------------------
 
+Changes: V4.2.7.pre1 -> V4.2.7
+
+2005-05-09 12:53  dts12
+
+   * agent/mibgroup/ucd-snmp/: memory_netbsd1.c, vmstat_netbsd1.c:
+
+   Fix bogus #ifdef syntax
+
+2005-05-06 23:31  driehuis
+
+   * agent/auto_nlist.c:
+
+   Include sys/time.h if we have it. Unbreaks the build on FreeBSD 5.3.
+
+2005-05-06 11:50  dts12
+
+   * FAQ, README, sedscript.in, version.h, perl/SNMP/SNMP.pm:
+
+   - (version.h sedscript.in): version tag ( 4.2.7.pre1 )
+
+2005-05-06 11:50  dts12
+
+   * agent/mibgroup/versiontag:
+
+   Tweak SourceForge CVS hostname.
+
+2005-05-06 11:14  dts12
+
+   * FAQ, sedscript.in, version.h, perl/SNMP/SNMP.pm:
+
+   - (version.h sedscript.in): version tag ( 4.2.7 )
+
+2005-05-06 11:11  dts12
+
+   * ChangeLog, README, NEWS:
+
+   Update preparatory for 4.2.7
+
+-------------------------------------------------------------------------------
+
 Changes: V4.2.6 -> V4.2.7.pre1
 
 2005-05-05 14:34  dts12
