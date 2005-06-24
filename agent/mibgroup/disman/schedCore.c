@@ -9,7 +9,6 @@
 #include "disman/schedCore.h"
 #include "utilities/iquery.h"
 
-
 netsnmp_table_data *schedTable;
 
 /** Initializes the schedCore module */
@@ -83,6 +82,128 @@ _sched_callback( unsigned int reg, void *magic )
     sched_nextTime( entry );
 }
 
+    /*
+     * Internal utility routines to help interpret
+     *  calendar-based schedule bit strings
+     */
+static char _masks[] = { /* 0xff, */ 0x7f, 0x3f, 0x1f,
+                         0x0f, 0x07, 0x03, 0x01, 0x00 };
+static char _bits[]  = { 0x80, 0x40, 0x20, 0x10,
+                         0x08, 0x04, 0x02, 0x01 };
+
+/*
+ * Are any of the bits set?
+ */
+static int
+_bit_allClear( char *pattern, int len ) {
+    int i;
+
+    for (i=0; i<len; i++) {
+        if ( pattern[i] != 0 )
+            return 0;    /* At least one bit set */
+    }
+    return 1;  /* All bits clear */ 
+}
+
+/*
+ * Is a particular bit set?
+ */
+static int
+_bit_set( char *pattern, int bit ) {
+    int major, minor;
+    char buf[ 8 ];
+    memset( buf, 0, 8 );
+    memcpy( buf, pattern, 4 );
+
+    major = bit/8;
+    minor = bit%8;
+    if ( buf[major] & _bits[minor] ) {
+        return 1; /* Specified bit is set */
+    }
+    return 0;     /* Bit not set */
+}
+
+/*
+ * What is the next bit set?
+ *   (after a specified point)
+ */
+static int
+_bit_next( char *pattern, int current, size_t len ) {
+    char buf[ 8 ];
+    int major, minor, i, j;
+
+        /* Make a working copy of the bit pattern */
+    memset( buf, 0, 8 );
+    memcpy( buf, pattern, len );
+
+        /*
+         * If we're looking for the first bit after some point,
+         * then clear all earlier bits from the working copy.
+         */
+    if ( current > -1 ) {
+        major = current/8;
+        minor = current%8;
+        for ( i=0; i<major; i++ )
+            buf[i]=0;
+        buf[major] &= _masks[minor];
+    }
+
+        /*
+         * Look for the first bit that's set
+         */
+    for ( i=0; i<len; i++ ) {
+        if ( buf[i] != 0 ) {
+            major = i*8;
+            for ( j=0; j<8; j++ ) {
+                if ( buf[i] & _bits[j] ) {
+                    return major+j;
+                }
+            }
+        }
+    }
+    return -1;     /* No next bit */
+}
+
+
+static int _daysPerMonth[] = { 31, 28, 31, 30,
+                               31, 30, 31, 31,
+                               30, 31, 30, 31, 29 };
+
+static char _truncate[] = { 0xfe, 0xf0, 0xfe, 0xfc,
+                            0xfe, 0xfc, 0xfe, 0xfe,
+                            0xfc, 0xfe, 0xfc, 0xfe, 0xf8 };
+
+/*
+ * What is the next day with a relevant bit set?
+ *
+ * Merge the forward and reverse day bits into a single
+ *   pattern relevant for this particular month,
+ *   and apply the standard _bit_next() call.
+ * Then check this result against the day of the week bits.
+ */
+static int
+_bit_next_day( char *day_pattern, char weekday_pattern, int day, int month ) {
+    char buf[4];
+    int next_day, i;
+
+        /* Make a working copy of the forward day bits ... */
+    memset( buf,  0, 4 );
+    memcpy( buf,  day_pattern, 4 );
+
+        /* XXX - TODO: Handle reverse-day bits */
+    buf[3] &= _truncate[ month ];
+
+    next_day = day-1;  /* tm_day is 1-based, not 0-based */
+    do {
+        next_day = _bit_next( buf, next_day, 4 );
+        if ( next_day < 0 )
+            return -1;
+
+    } while ( 0 /* XXX - Check this against the weekday mask */ );
+    return next_day+1; /* Convert back to 1-based list */
+}
+
+
 /*
  * determine the time for the next scheduled action of a given entry
  */
@@ -90,6 +211,9 @@ void
 sched_nextTime( struct schedTable_entry *entry )
 {
     time_t now;
+    struct tm now_tm, next_tm;
+    int rev_day, mon;
+
     time( &now );
 
     if ( !entry ) {
@@ -134,45 +258,116 @@ sched_nextTime( struct schedTable_entry *entry )
         DEBUGMSGTL(("sched", "nextTime: one-shot fallthrough\n"));
     case 2:     /* calendar */
         /*
-         *  Check for complete specification
+         *  Check for complete time specification
+         *  If any of the five fields have no bits set,
+         *    the entry can't possibly match any time.
          */
+        if ( _bit_allClear( entry->schedMinute, 8 ) ||
+             _bit_allClear( entry->schedHour,   3 ) ||
+             _bit_allClear( entry->schedDay,  4+4 ) ||
+             _bit_allClear( entry->schedMonth,  2 ) ||
+             _bit_allClear(&entry->schedWeekDay, 1 )) {
+            DEBUGMSGTL(("sched", "nextTime: incomplete calendar spec\n"));
+            return;
+        }
+
         /*
-         *  Calculate next run time:
-         *  If the current Month, Day & Hour is set
+         *  Calculate the next run time:
+         *
+         *  If the current Month, Day & Hour bits are set
          *    calculate the next specified minute
-         *  If this fails (or the current Hour is not set)
+         *  If this fails (or the current Hour bit is not set)
          *    use the first specified minute,
          *    and calculate the next specified hour
-         *  If this fails (or the current Day is not set)
+         *  If this fails (or the current Day bit is not set)
          *    use the first specified minute and hour
          *    and calculate the next specified day (in this month)
-         *  If this fails (or the current Month is not set)
+         *  If this fails (or the current Month bit is not set)
          *    use the first specified minute and hour
          *    calculate the next specified month, and
          *    the first specified day (in that month)
-         *
-         *  IF currentMonth is set
-         *    IF currentDay is set
-         *      IF currentHour is set
-         *        [ CHECK Fall TIMECHANGE ]
-         *        FIND nextMinute
-         *      IF NOT nextMinute
-         *        USE firstMinute
-         *        FIND nextHour
-         *    IF NOT nextHour
-         *      USE firstHour
-         *      FIND nextDay(thisMonth)
-         *
-         *  WHILE NOT nextDay          
-         *    FIND nextMonth
-         *    FIND nextDay(nextMonth)
-         *
-         *  [ CHECK Spring TIMECHANGE ]
          */
+
+        localtime_r( &now, &now_tm );
+        localtime_r( &now, &next_tm );
+
+        next_tm.tm_mon=-1;
+        next_tm.tm_mday=-1;
+        next_tm.tm_hour=-1;
+        next_tm.tm_min=-1;
+        next_tm.tm_sec=0;
+        if ( _bit_set( entry->schedMonth, now_tm.tm_mon )) {
+            next_tm.tm_mon = now_tm.tm_mon;
+            rev_day = _daysPerMonth[ now_tm.tm_mon ] - now_tm.tm_mday;
+                /* XXX - TODO: Check reverse and week day bits */
+            if ( _bit_set( entry->schedDay, now_tm.tm_mday-1 )) {
+                next_tm.tm_mday = now_tm.tm_mday;
+
+                if ( _bit_set( entry->schedHour, now_tm.tm_hour )) {
+                    next_tm.tm_hour = now_tm.tm_hour;
+                    /* XXX - Check Fall timechange */
+                    next_tm.tm_min = _bit_next( entry->schedMinute,
+                                                  now_tm.tm_min, 8 );
+                } else {
+                    next_tm.tm_min = -1;
+                }
+   
+                if ( next_tm.tm_min == -1 ) {
+                    next_tm.tm_min  = _bit_next( entry->schedMinute, -1, 8 );
+                    next_tm.tm_hour = _bit_next( entry->schedHour,
+                                                   now_tm.tm_hour, 3 );
+                }
+            } else {
+                next_tm.tm_hour = -1;
+            }
+
+            if ( next_tm.tm_hour == -1 ) {
+                next_tm.tm_min  = _bit_next( entry->schedMinute, -1, 8 );
+                next_tm.tm_hour = _bit_next( entry->schedHour,   -1, 3 );
+                    /* Handle leap years */
+                mon = now_tm.tm_mon;
+                if ( mon == 1 && (now_tm.tm_year%4 == 0) )
+                    mon = 12;
+                next_tm.tm_mday = _bit_next_day( entry->schedDay,
+                                                 entry->schedWeekDay,
+                                                 now_tm.tm_mday, mon );
+            }
+        } else {
+            next_tm.tm_min  = _bit_next( entry->schedMinute, -1, 2 );
+            next_tm.tm_hour = _bit_next( entry->schedHour,   -1, 3 );
+            next_tm.tm_mday = -1;
+            next_tm.tm_mon  = now_tm.tm_mon;
+        }
+
+        while ( next_tm.tm_mday == -1 ) {
+            next_tm.tm_mon  = _bit_next( entry->schedMonth,
+                                          next_tm.tm_mon, 2 );
+            if ( next_tm.tm_mon == -1 ) {
+                next_tm.tm_year++;
+                next_tm.tm_mon  = _bit_next( entry->schedMonth,
+                                             -1, 2 );
+            }
+                /* Handle leap years */
+            mon = next_tm.tm_mon;
+            if ( mon == 1 && (next_tm.tm_year%4 == 0) )
+                mon = 12;
+            next_tm.tm_mday = _bit_next_day( entry->schedDay,
+                                             entry->schedWeekDay,
+                                             -1, mon );
+            /* XXX - catch infinite loop */
+        }
+
+        /* XXX - Check for Spring timechange */
+
+        /*
+         * 'next_tm' now contains the time for the next scheduled run
+         */
+        entry->schedNextRun = mktime( &next_tm );
         DEBUGMSGTL(("sched", "nextTime: calendar (%d) %s",
                                   entry->schedNextRun,
                            ctime(&entry->schedNextRun)));
         return;
+
     default:
         DEBUGMSGTL(("sched", "nextTime: unknown type %d\n", entry->schedType));
         return;
