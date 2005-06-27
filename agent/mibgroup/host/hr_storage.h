@@ -5,6 +5,8 @@
 #ifndef _MIBGROUP_HRSTORAGE_H
 #define _MIBGROUP_HRSTORAGE_H
 
+config_arch_require(linux, hardware/memory)
+
 extern void     init_hr_storage(void);
 extern FindVarMethod var_hrstore;
 

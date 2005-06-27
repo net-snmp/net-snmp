@@ -148,6 +148,9 @@
 #include <net-snmp/utilities.h>
 #include <net-snmp/output_api.h>
 
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/hardware/memory.h>
+
 #if solaris2
 #include "kernel_sunos5.h"
 #endif
@@ -915,35 +918,34 @@ Get_Next_HR_Store(void)
 int
 linux_mem(int mem_type, int size_or_used)
 {
-    FILE           *fp;
-    char            buf[1024];
-    int             size = -1, free = -1, buffers = -1;
+    netsnmp_memory_info *mem;
 
-    if ((fp = fopen("/proc/meminfo", "r")) == NULL)
+    netsnmp_memory_load();
+    switch (mem_type) {
+    case HRS_TYPE_MEM:
+        mem = netsnmp_memory_get_byIdx( -1, 0 );
+        break;
+    case HRS_TYPE_SWAP:
+        mem = netsnmp_memory_get_byIdx( -2, 0 );
+        break;
+    case HRS_TYPE_MBUF:
+            /*
+             * The previous code reported total memory
+             * as "Memory Buffer" size
+             */
+        if (size_or_used == HRSTORE_SIZE)
+            mem = netsnmp_memory_get_byIdx( -1, 0 );
+        else
+            mem = netsnmp_memory_get_byIdx( -3, 0 );
+        return (mem ? mem->size : -1);
+    default:
         return -1;
-
-    while (fgets(buf, sizeof(buf), fp) != NULL) {
-       if ((!strncmp(buf, "MemTotal:", 9) && (mem_type == HRS_TYPE_MEM || mem_type == HRS_TYPE_MBUF)) ||
-            (!strncmp(buf, "SwapTotal:", 10) && mem_type == HRS_TYPE_SWAP))
-            sscanf(buf, "%*s %d", &size);
-
-       if ((!strncmp(buf, "MemFree:", 8) && mem_type == HRS_TYPE_MEM) ||
-            (!strncmp(buf, "SwapFree:", 9) && mem_type == HRS_TYPE_SWAP))
-            sscanf(buf, "%*s %d", &free);
-
-       if ((!strncmp(buf, "Buffers:", 8) && mem_type == HRS_TYPE_MBUF))
-		sscanf(buf, "%*s %d", &buffers);
     }
 
-    fclose(fp);
-
-    switch (mem_type) {
-        case HRS_TYPE_MBUF:
-            return (size_or_used == HRSTORE_SIZE ? size : buffers);
-        default:
-            return (size_or_used == HRSTORE_SIZE ? size : (size - free));
-    } /* switch */
-
+    if (mem)
+        return (size_or_used == HRSTORE_SIZE ?  mem->size
+                                             : (mem->size - mem->free));
+    return -1;
 }
 #endif
 
