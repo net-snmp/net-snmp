@@ -132,8 +132,6 @@ static int __send_sync_pdu _((netsnmp_session *, netsnmp_pdu *,
                               netsnmp_pdu **, int , SV *, SV *, SV *));
 static int __snmp_xs_cb __P((int, netsnmp_session *, int,
                              netsnmp_pdu *, void *));
-static int __callback_wrapper __P((int, netsnmp_session *, int,
-	                             netsnmp_pdu *, void *));
 static SV* __push_cb_args2 _((SV * sv, SV * esv, SV * tsv));
 #define __push_cb_args(a,b) __push_cb_args2(a,b,NULL)
 static int __call_callback _((SV * sv, int flags));
@@ -1232,20 +1230,6 @@ retry:
 }
 
 static int
-__callback_wrapper (op, ss, reqid, pdu, cb_data)
-int op;
-netsnmp_session *ss;
-int reqid;
-netsnmp_pdu *pdu;
-void *cb_data;
-{
-  /* we should probably just increment the reference counter... */
-  /*  sv_inc(cb_data); */
-  return __snmp_xs_cb(op, ss, reqid, pdu, newSVsv(cb_data));
-}
-
-
-static int
 __snmp_xs_cb (op, ss, reqid, pdu, cb_data)
 int op;
 netsnmp_session *ss;
@@ -1288,7 +1272,8 @@ void *cb_data;
   ENTER;
   SAVETMPS;
 
-  free(cb_data);
+  if (cb_data != ss->callback_magic)
+    free(cb_data);
 
   sv_setpv(*err_str_svp, (char*)snmp_errstring(pdu->errstat));
   sv_setiv(*err_num_svp, pdu->errstat);
@@ -1316,6 +1301,7 @@ void *cb_data;
         warn("Couldn't clone PDU for inform response");
       }
       /* FALLTHRU */
+    case SNMP_MSG_TRAP:
     case SNMP_MSG_TRAP2:
       traplist = newAV();
       traplist_ref = newRV_noinc((SV*)traplist);
@@ -1334,6 +1320,16 @@ void *cb_data;
 	av_push(traplist, newSVpv("", 0));
       }
       av_push(traplist, newSVpv((char*) pdu->community, pdu->community_len));
+    if (pdu->command == SNMP_MSG_TRAP) {
+        /* SNMP v1 only trap fields */
+	snprint_objid(str_buf, sizeof(str_buf), pdu->enterprise, pdu->enterprise_length);
+        av_push(traplist, newSVpv(str_buf,strlen(str_buf)));
+	cp = inet_ntoa(*((struct in_addr *) pdu->agent_addr));
+	av_push(traplist, newSVpv(cp,strlen(cp)));
+	av_push(traplist, newSViv(pdu->trap_type));
+	av_push(traplist, newSViv(pdu->specific_type));
+        av_push(traplist, newSVuv(pdu->time));
+    }
       /* FALLTHRU */
     case SNMP_MSG_RESPONSE:
       {
@@ -1418,7 +1414,8 @@ void *cb_data;
     break;
   default:;
   } /* switch op */
-  sv_2mortal(cb);
+  if (cb_data != ss->callback_magic)
+    sv_2mortal(cb);
   cb = __push_cb_args2(cb,
                  (SvTRUE(varlist_ref) ? sv_2mortal(varlist_ref):varlist_ref),
 	         (SvTRUE(traplist_ref) ? sv_2mortal(traplist_ref):traplist_ref));
@@ -1426,7 +1423,8 @@ void *cb_data;
 
   FREETMPS;
   LEAVE;
-  sv_2mortal(sess_ref);
+  if (cb_data != ss->callback_magic)
+    sv_2mortal(sess_ref);
   return 1;
 }
 
@@ -3154,12 +3152,17 @@ snmp_catch(sess_ref, perl_callback)
               ss->callback_magic = NULL;
 
               if (SvTRUE(perl_callback)) {
-                 perl_callback = newSVsv(perl_callback);
+                 snmp_xs_cb_data *xs_cb_data;
+                 xs_cb_data =
+                      (snmp_xs_cb_data*)malloc(sizeof(snmp_xs_cb_data));
+                 xs_cb_data->perl_cb = newSVsv(perl_callback);
+                 xs_cb_data->sess_ref = newRV_inc(SvRV(sess_ref));
+
                  # it might be more efficient to pass the varbind_ref to
                  # __snmp_xs_cb as part of perl_callback so it is not freed
                  # and reconstructed for each call
-                 ss->callback = __callback_wrapper;
-                 ss->callback_magic = perl_callback;
+                 ss->callback = __snmp_xs_cb;
+                 ss->callback_magic = xs_cb_data;
                  sv_2mortal(newSViv(1));
                  goto done;
               }
