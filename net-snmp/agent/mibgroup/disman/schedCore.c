@@ -111,13 +111,10 @@ _bit_allClear( char *pattern, int len ) {
 static int
 _bit_set( char *pattern, int bit ) {
     int major, minor;
-    char buf[ 8 ];
-    memset( buf, 0, 8 );
-    memcpy( buf, pattern, 4 );
 
     major = bit/8;
     minor = bit%8;
-    if ( buf[major] & _bits[minor] ) {
+    if ( pattern[major] & _bits[minor] ) {
         return 1; /* Specified bit is set */
     }
     return 0;     /* Bit not set */
@@ -184,13 +181,42 @@ static char _truncate[] = { 0xfe, 0xf0, 0xfe, 0xfc,
 static int
 _bit_next_day( char *day_pattern, char weekday_pattern, int day, int month ) {
     char buf[4];
+    union {
+        char buf2[4];
+        int int_val;
+    } rev;
     int next_day, i;
 
         /* Make a working copy of the forward day bits ... */
     memset( buf,  0, 4 );
     memcpy( buf,  day_pattern, 4 );
 
-        /* XXX - TODO: Handle reverse-day bits */
+        /* ... and another (right-aligned) of the reverse day bits */
+    memset( rev.buf2, 0, 4 );
+    memcpy( rev.buf2, day_pattern+4, 4 );
+    rev.int_val >>= 2;
+    if ( buf[3] & 0x01 )
+        rev.buf2[0] |= 0x40;
+    if ( month == 3 || month == 5 ||
+         month == 8 || month == 10 )
+        rev.int_val >>= 1;  /* April, June, September, November */
+    if ( month == 1 )
+        rev.int_val >>= 3;  /* February */
+    if ( month == 12 )
+        rev.int_val >>= 2;  /* February (leap year) */
+
+        /* Combine the two bit patterns, and truncate to the month end */
+    for ( i=0; i<4; i++ ) {
+        if ( rev.buf2[i] & 0x80 ) buf[3-i] |= 0x01;
+        if ( rev.buf2[i] & 0x40 ) buf[3-i] |= 0x02;
+        if ( rev.buf2[i] & 0x20 ) buf[3-i] |= 0x04;
+        if ( rev.buf2[i] & 0x10 ) buf[3-i] |= 0x08;
+        if ( rev.buf2[i] & 0x08 ) buf[3-i] |= 0x10;
+        if ( rev.buf2[i] & 0x04 ) buf[3-i] |= 0x20;
+        if ( rev.buf2[i] & 0x02 ) buf[3-i] |= 0x40;
+        if ( rev.buf2[i] & 0x01 ) buf[3-i] |= 0x80;
+    }
+
     buf[3] &= _truncate[ month ];
 
     next_day = day-1;  /* tm_day is 1-based, not 0-based */
@@ -299,8 +325,9 @@ sched_nextTime( struct schedTable_entry *entry )
         if ( _bit_set( entry->schedMonth, now_tm.tm_mon )) {
             next_tm.tm_mon = now_tm.tm_mon;
             rev_day = _daysPerMonth[ now_tm.tm_mon ] - now_tm.tm_mday;
-                /* XXX - TODO: Check reverse and week day bits */
-            if ( _bit_set( entry->schedDay, now_tm.tm_mday-1 )) {
+                /* XXX - TODO: Check week day bits */
+            if ( _bit_set( entry->schedDay, now_tm.tm_mday-1 ) ||
+                 _bit_set( entry->schedDay, 31+rev_day )) {
                 next_tm.tm_mday = now_tm.tm_mday;
 
                 if ( _bit_set( entry->schedHour, now_tm.tm_hour )) {
