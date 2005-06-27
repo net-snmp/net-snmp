@@ -4,6 +4,8 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -18,6 +20,7 @@
 #include "hr_proc.h"
 #include <net-snmp/agent/auto_nlist.h>
 #include <net-snmp/agent/agent_read_config.h>
+#include <net-snmp/agent/hardware/cpu.h>
 #include "ucd-snmp/loadave.h"
 
 #define HRPROC_MONOTONICALLY_INCREASING
@@ -283,7 +286,9 @@ describe_proc(int idx)
 
     }
 #elif linux
-    return (proc_descriptions[idx & HRDEV_TYPE_MASK]);
+    netsnmp_cpu_info *cpu;
+    cpu = netsnmp_cpu_get_byIdx( idx & HRDEV_TYPE_MASK, 0 );
+    return (cpu ? cpu->descr : NULL );
 #elif solaris2
     int cidx = idx & HRDEV_TYPE_MASK;
     snprintf(proc_description,sizeof(proc_description)-1, 

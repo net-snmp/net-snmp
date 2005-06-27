@@ -104,6 +104,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/agent/hardware/cpu.h>
 
 #include "mibdefs.h"
 #include "struct.h"
@@ -354,41 +355,38 @@ enum vmstat_index { swapin = 0, swapout,
 static unsigned
 vmstat(int iindex)
 {
-    unsigned long   cpu_use, cpu_nic, cpu_sys, cpu_idl;
     double          duse, dsys, didl, ddiv, divo2;
     double          druse, drnic, drsys, dridl;
-    unsigned int    pgpgin, pgpgout, pswpin, pswpout;
-    unsigned int    inter, ticks, ctxt;
-    unsigned long   cpu_wait, cpu_irq, cpu_softirq;
     unsigned int    hertz;
 
-    getstat(&cpu_use, &cpu_nic, &cpu_sys, &cpu_idl,
-            &pgpgin, &pgpgout, &pswpin, &pswpout, &inter, &ticks, &ctxt,
-	    &cpu_wait, &cpu_irq, &cpu_softirq);
-    duse = cpu_use + cpu_nic;
-    dsys = cpu_sys;
-    didl = cpu_idl;
+    netsnmp_cpu_info *cpu;
+    netsnmp_cpu_load();
+    cpu = netsnmp_cpu_get_byIdx( -1, 0 );
+
+    duse = cpu->user_ticks + cpu->nice_ticks;
+    dsys = cpu->sys_ticks;
+    didl = cpu->idle_ticks;
     ddiv = duse + dsys + didl;
     hertz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
     divo2 = ddiv / 2;
-    druse = cpu_use;
-    drnic = cpu_nic;
-    drsys = cpu_sys;
-    dridl = cpu_idl;
+    druse = cpu->user_ticks;
+    drnic = cpu->nice_ticks;
+    drsys = cpu->sys_ticks;
+    dridl = cpu->idle_ticks;
 
     switch (iindex) {
     case swapin:
-        return (pswpin  * 4 * hertz + divo2) / ddiv;
+        return (cpu->swapIn  * 4 * hertz + divo2) / ddiv;
     case swapout:
-        return (pswpout * 4 * hertz + divo2) / ddiv;
+        return (cpu->swapOut * 4 * hertz + divo2) / ddiv;
     case iosent:
-        return (pgpgin      * hertz + divo2) / ddiv;
+        return (cpu->pageIn      * hertz + divo2) / ddiv;
     case ioreceive:
-        return (pgpgout     * hertz + divo2) / ddiv;
+        return (cpu->pageOut     * hertz + divo2) / ddiv;
     case sysinterrupts:
-        return (inter       * hertz + divo2) / ddiv;
+        return (cpu->nInterrupts  * hertz + divo2) / ddiv;
     case syscontext:
-        return (ctxt        * hertz + divo2) / ddiv;
+        return (cpu->nCtxSwitches * hertz + divo2) / ddiv;
     case cpuuser:
         return (100 * duse / ddiv);
     case cpusystem:
@@ -404,23 +402,23 @@ vmstat(int iindex)
     case cpurawidle:
         return dridl;
     case rawinterrupts:
-	return inter;
+        return cpu->nInterrupts;
     case rawcontext:
-	return ctxt;
+        return cpu->nCtxSwitches;
     case cpurawwait:
-	return cpu_wait;
+	return cpu->wait_ticks;
     case cpurawinter:
-	return cpu_irq;
+	return cpu->intrpt_ticks;
     case cpurawsoft:
-	return cpu_softirq;
+	return cpu->sirq_ticks;
     case rawiosent:
-	return pgpgout*2;
+	return cpu->pageOut*2;
     case rawioreceive:
-	return pgpgin*2;
+	return cpu->pageIn*2;
     case rawswapin:
-	return pswpin;
+	return cpu->swapIn;
     case rawswapout:
-	return pswpout;
+	return cpu->swapOut;
     default:
         return -1;
     }
