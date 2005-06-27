@@ -5,6 +5,8 @@
 #ifndef _MIBGROUP_MEMORY_H
 #define _MIBGROUP_MEMORY_H
 
+config_require(hardware/memory)
+
 #include "mibdefs.h"
 
 void            init_memory(void);

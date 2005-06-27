@@ -109,6 +109,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/agent/hardware/memory.h>
 
 #include "mibdefs.h"
 #include "struct.h"
@@ -264,93 +265,38 @@ memory_free_config(void)
 }
 
 #ifdef linux
-#define MEMINFO_FILE "/proc/meminfo"
 
 void
 getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared, 
        unsigned long *buffers, unsigned long *cached, unsigned long *swaptotal, 
        unsigned long *swapfree)
 {
-    int         statfd;
-    static char *buff = NULL;
-    static int  bsize = 0;
-    int len;
+    netsnmp_memory_info *mem;
 
-    if ((statfd = open(MEMINFO_FILE, O_RDONLY, 0)) != -1) {
-        char *b;
-        if (bsize == 0) {
-            bsize = 128;
-            buff = malloc(bsize);
-        }
-        while ((len = read(statfd, buff, bsize)) == bsize) {
-            bsize += 256;
-            buff = realloc(buff, bsize);
-            close(statfd);
-            statfd = open(MEMINFO_FILE, O_RDONLY, 0);
-        }
-        close(statfd);
-	buff[len] = 0;
-        b = strstr(buff, "MemTotal: ");
-        if (b) 
-            sscanf(b, "MemTotal: %lu", memtotal);
-        else {
-            if(log_procerr)
-            snmp_log(LOG_ERR, "No MemTotal line in /proc/meminfo\n");
-            *memtotal = 0;
-        }
-        b = strstr(buff, "MemFree: ");
-        if (b) 
-            sscanf(b, "MemFree: %lu", memfree);
-        else {
-            if(log_procerr)
-            snmp_log(LOG_ERR, "No MemFree line in /proc/meminfo\n");
-            *memfree = 0;
-        }
-        b = strstr(buff, "MemShared: ");
-        if (b)
-            sscanf(b, "MemShared: %lu", memshared);
-        else {
-            if(log_procerr)
-            {
-            if (0 == netsnmp_os_prematch("Linux","2.4"))
-            snmp_log(LOG_ERR, "No MemShared line in /proc/meminfo\n");
-            }
-            *memshared = 0;
-        }
-        b = strstr(buff, "Buffers: ");
-        if (b)
-            sscanf(b, "Buffers: %lu", buffers);
-        else {
-            if(log_procerr)
-            snmp_log(LOG_ERR, "No Buffers line in /proc/meminfo\n");
-            *buffers = 0;
-        }
-        b = strstr(buff, "Cached: ");
-        if (b)
-            sscanf(b, "Cached: %lu", cached);
-        else {
-            if(log_procerr)
-            snmp_log(LOG_ERR, "No Cached line in /proc/meminfo\n");
-            *cached = 0;
-        }
-        b = strstr(buff, "SwapTotal: ");
-        if (b)
-            sscanf(b, "SwapTotal: %lu", swaptotal);
-        else {
-            if(log_procerr)
-            snmp_log(LOG_ERR, "No SwapTotal line in /proc/meminfo\n");
-            *swaptotal = 0;
-        }
-        b = strstr(buff, "SwapFree: ");
-        if (b)
-            sscanf(b, "SwapFree: %lu", swapfree);
-        else {
-            if(log_procerr)
-            snmp_log(LOG_ERR, "No SwapFree line in /proc/meminfo\n");
-            *swapfree = 0;
-        }
+    netsnmp_memory_load();
+    mem = netsnmp_memory_get_byIdx( -1, 0 );  /* Memory information */
+    if ( mem ) {
+        *memtotal = mem->size;
+        *memfree  = mem->free;
+        *memshared = mem->other;
     } else {
-        snmp_log_perror(MEMINFO_FILE);
+        *memtotal = *memfree = *memshared = 0;
+    }
+
+    mem = netsnmp_memory_get_byIdx( -2, 0 );  /* Swap information */
+    if ( mem ) {
+        *swaptotal = mem->size;
+        *swapfree  = mem->free;
+    } else {
+        *swaptotal = *swapfree = 0;
+    }
+
+    mem = netsnmp_memory_get_byIdx( -3, 0 );  /* Buffers/etc */
+    if ( mem ) {
+        *buffers = mem->size;
+        *cached  = mem->other;
+    } else {
+        *swaptotal = *swapfree = 0;
     }
 }
 
