@@ -179,13 +179,15 @@ static char _truncate[] = { 0xfe, 0xf0, 0xfe, 0xfc,
  * Then check this result against the day of the week bits.
  */
 static int
-_bit_next_day( char *day_pattern, char weekday_pattern, int day, int month ) {
+_bit_next_day( char *day_pattern, char weekday_pattern,
+               int day, int month, int year ) {
     char buf[4];
     union {
         char buf2[4];
         int int_val;
     } rev;
     int next_day, i;
+    struct tm tm_val;
 
         /* Make a working copy of the forward day bits ... */
     memset( buf,  0, 4 );
@@ -225,7 +227,16 @@ _bit_next_day( char *day_pattern, char weekday_pattern, int day, int month ) {
         if ( next_day < 0 )
             return -1;
 
-    } while ( 0 /* XXX - Check this against the weekday mask */ );
+            /*
+             * Calculate the day of the week, and
+             * check this against the weekday pattern
+             */
+        memset( &tm_val,  0, sizeof(struct tm));
+        tm_val.tm_mday = next_day+1;
+        tm_val.tm_mon  = month;
+        tm_val.tm_year = year;
+        mktime( &tm_val );
+    } while ( !_bit_set( &weekday_pattern, tm_val.tm_wday ));
     return next_day+1; /* Convert back to 1-based list */
 }
 
@@ -325,9 +336,9 @@ sched_nextTime( struct schedTable_entry *entry )
         if ( _bit_set( entry->schedMonth, now_tm.tm_mon )) {
             next_tm.tm_mon = now_tm.tm_mon;
             rev_day = _daysPerMonth[ now_tm.tm_mon ] - now_tm.tm_mday;
-                /* XXX - TODO: Check week day bits */
-            if ( _bit_set( entry->schedDay, now_tm.tm_mday-1 ) ||
-                 _bit_set( entry->schedDay, 31+rev_day )) {
+            if ( _bit_set( &entry->schedWeekDay, now_tm.tm_wday ) &&
+                (_bit_set( entry->schedDay, now_tm.tm_mday-1 ) ||
+                 _bit_set( entry->schedDay, 31+rev_day ))) {
                 next_tm.tm_mday = now_tm.tm_mday;
 
                 if ( _bit_set( entry->schedHour, now_tm.tm_hour )) {
@@ -357,7 +368,8 @@ sched_nextTime( struct schedTable_entry *entry )
                     mon = 12;
                 next_tm.tm_mday = _bit_next_day( entry->schedDay,
                                                  entry->schedWeekDay,
-                                                 now_tm.tm_mday, mon );
+                                                 now_tm.tm_mday,
+                                                 mon, now_tm.tm_year );
             }
         } else {
             next_tm.tm_min  = _bit_next( entry->schedMinute, -1, 2 );
@@ -380,7 +392,7 @@ sched_nextTime( struct schedTable_entry *entry )
                 mon = 12;
             next_tm.tm_mday = _bit_next_day( entry->schedDay,
                                              entry->schedWeekDay,
-                                             -1, mon );
+                                             -1, mon, next_tm.tm_year );
             /* XXX - catch infinite loop */
         }
 
