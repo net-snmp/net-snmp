@@ -99,7 +99,7 @@ SOFTWARE.
 #include <net-snmp/library/snmp_client.h>
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/mib.h>
-
+#include <net-snmp/net-snmp-includes.h>
 
 #ifndef BSD4_3
 #define BSD4_2
