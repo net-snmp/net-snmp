@@ -1,1 +1,1 @@
-config_require(hardware/memory/memory)
+config_require(hardware/memory/hw_mem)
