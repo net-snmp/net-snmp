@@ -5535,7 +5535,7 @@ _sess_read(void *sessp, fd_set * fdset)
             DEBUGMSGTL(("sess_read", "  loop packet_len %d, PDU length %d\n",
                         isp->packet_len, pdulen));
              
-            if ((pdulen > MAX_PACKET_LENGTH)||(pdulen <= 0)) {
+            if ((pdulen > MAX_PACKET_LENGTH) || (pdulen < 0)) {
                 /*
                  * Illegal length, drop the connection.  
                  */
@@ -5556,7 +5556,7 @@ _sess_read(void *sessp, fd_set * fdset)
                 return -1;
             }
 
-            if (pdulen > isp->packet_len) {
+            if (pdulen > isp->packet_len || pdulen == 0) {
                 /*
                  * We don't have a complete packet yet.  Return, and wait for
                  * more data to arrive.
