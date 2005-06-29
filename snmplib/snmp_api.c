@@ -5534,13 +5534,13 @@ _sess_read(void *sessp, fd_set * fdset)
 
             DEBUGMSGTL(("sess_read", "  loop packet_len %d, PDU length %d\n",
                         isp->packet_len, pdulen));
-
-            if (pdulen > MAX_PACKET_LENGTH) {
+             
+            if ((pdulen > MAX_PACKET_LENGTH)||(pdulen <= 0)) {
                 /*
                  * Illegal length, drop the connection.  
                  */
                 snmp_log(LOG_ERR, 
-			 "Maximum packet size exceeded in a request.\n");
+			 "Received broken packet. Closing session.\n");
 		if (sp->callback != NULL) {
 		  DEBUGMSGTL(("sess_read",
 			      "perform callback with op=DISCONNECT\n"));
