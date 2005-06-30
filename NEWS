@@ -2,6 +2,11 @@ This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 
+*5.2.1.1*
+ Security:
+   - Fixed a denial of service vulnerability when stream sockets have
+     been configured for use (E.G., TCP but not UDP).
+
 *5.2.1*
  Fixes:
    Building:
