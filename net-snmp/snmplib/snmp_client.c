@@ -299,7 +299,8 @@ snmp_reset_var_buffers(netsnmp_variable_list * var)
             var->name_length = 0;
         }
         if (var->val.string != var->buf) {
-            free(var->val.string);
+            if (NULL != var->val.string)
+                free(var->val.string);
             var->val.string = var->buf;
             var->val_len = 0;
         }

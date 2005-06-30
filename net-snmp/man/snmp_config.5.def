@@ -1,7 +1,7 @@
 .TH SNMP.CONF 5 "28 Aug 2001" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-snmp_config - describes how to configure the Net-SNMP applications.
+snmp_config - handling of Net-SNMP configuration files
 .SH DESCRIPTION
 The Net-SNMP package uses various configuration files to configure its 
 applications.  This manual page merely describes the overall nature of 

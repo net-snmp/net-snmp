@@ -1,4 +1,4 @@
-.TH "generic library based alarm timers for various parts of an application" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "generic library based alarm timers for various parts of an application" 3 "29 Jun 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -54,7 +54,9 @@ generic library based alarm timers for various parts of an application \-
 .PP 
 .SS "unsigned int snmp_alarm_register (unsigned int when, unsigned int flags, SNMPAlarmCallback * thecallback, void * clientarg)"
 .PP
-This function registers function callbacks to occur at a speciifc time in the future. \fBParameters:\fP
+This function registers function callbacks to occur at a speciifc time in the future. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIwhen\fP is an unsigned integer specifying when the callback function will be called in seconds.
 .br
@@ -87,12 +89,12 @@ Returns a unique unsigned integer(which is also passed as the first argument of 
 .PP
 Definition at line 403 of file snmp_alarm.c.
 .PP
-References SNMP_MALLOC_STRUCT.
-.PP
 Referenced by netsnmp_cache_timer_start(), and release_cached_resources().
 .SS "unsigned int snmp_alarm_register_hr (struct timeval t, unsigned int flags, SNMPAlarmCallback * cb, void * cd)"
 .PP
-This function offers finer granularity as to when the callback function is called by making use of t->tv_usec value forming the 'when' aspect of \fBsnmp_alarm_register()\fP. \fBParameters:\fP
+This function offers finer granularity as to when the callback function is called by making use of t->tv_usec value forming the 'when' aspect of \fBsnmp_alarm_register()\fP. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIt\fP is a timeval structure used to specify when the callback function(alarm) will be called. Adds the ability to specify microseconds. t.tv_sec and t.tv_usec are assigned to snmp_alarm->tv_sec and snmp_alarm->tv_usec respectively internally. The snmp_alarm_register function only assigns seconds(it's when argument).
 .br
@@ -117,12 +119,14 @@ Returns a unique unsigned integer(which is also passed as the first argument of 
 \fBsnmp_alarm_unregister_all\fP 
 .RE
 .PP
-Definition at line 475 of file snmp_alarm.c.
+
 .PP
-References SNMP_MALLOC_STRUCT.
+Definition at line 475 of file snmp_alarm.c.
 .SS "void snmp_alarm_unregister (unsigned int clientreg)"
 .PP
-This function removes the callback function from a list of registered alarms, unregistering the alarm. \fBParameters:\fP
+This function removes the callback function from a list of registered alarms, unregistering the alarm. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIclientreg\fP is a unique unsigned integer representing a registered alarm which the client wants to unregister.
 .RE
@@ -141,12 +145,16 @@ void
 \fBsnmp_alarm_unregister_all\fP 
 .RE
 .PP
+
+.PP
 Definition at line 150 of file snmp_alarm.c.
 .PP
 Referenced by netsnmp_cache_timer_stop().
 .SS "void snmp_alarm_unregister_all (void)"
 .PP
-This function unregisters all alarms currently stored. \fBReturns:\fP
+This function unregisters all alarms currently stored. 
+.PP
+\fBReturns:\fP
 .RS 4
 void
 .RE
@@ -159,6 +167,8 @@ void
 .PP
 \fBsnmp_alarm_unregister\fP 
 .RE
+.PP
+
 .PP
 Definition at line 183 of file snmp_alarm.c.
 .PP

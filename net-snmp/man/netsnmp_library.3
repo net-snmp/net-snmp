@@ -1,4 +1,4 @@
-.TH "The Net-SNMP library" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "29 Jun 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -7,49 +7,38 @@ The Net-SNMP library \-
 
 .in +1c
 .ti -1c
-.RI "group\fBasn1 parsing and datatype manipulation routines.\fP"
+.RI "\fBasn1 parsing and datatype manipulation routines.\fP"
 .br
 .ti -1c
-.RI "group\fBA generic callback mechanism\fP"
+.RI "\fBA generic callback mechanism\fP"
 .br
 .ti -1c
-.RI "group\fBgeneric linked-list data handling with a string as a key.\fP"
+.RI "\fBgeneric linked-list data handling with a string as a key.\fP"
 .br
 .ti -1c
-.RI "group\fBstorage space for defaults\fP"
-.br
-.RI "\fIThe purpose of the default storage is three-fold:. \fP"
-.PP
-.in +1c
-
-.ti -1c
-.RI "group\fBmib parsing and datatype manipulation routines.\fP"
+.RI "\fBstorage space for defaults\fP"
 .br
 .ti -1c
-.RI "group\fBStore and retrieve data referenced by an OID.\fP"
+.RI "\fBmib parsing and datatype manipulation routines.\fP"
+.br
+.ti -1c
+.RI "\fBStore and retrieve data referenced by an OID.\fP"
 .br
 .RI "\fIThis is essentially a way of storing data associated with a given OID. \fP"
 .PP
 .in +1c
 
 .ti -1c
-.RI "group\fBparsing various configuration files at run time\fP"
-.br
-.RI "\fIThe read_config related functions are a fairly extensible system of parsing various configuration files at the run time. \fP"
-.PP
-.in +1c
-
-.ti -1c
-.RI "group\fBgeneric library based alarm timers for various parts of an application\fP"
+.RI "\fBparsing various configuration files at run time\fP"
 .br
 .ti -1c
-.RI "group\fBvarious PDU processing routines\fP"
+.RI "\fBgeneric library based alarm timers for various parts of an application\fP"
 .br
 .ti -1c
-.RI "group\fBgeneric logging for net-snmp\fP"
+.RI "\fBvarious PDU processing routines\fP"
 .br
 .ti -1c
-.RI "group\fBMemory Utility Routines\fP"
+.RI "\fBgeneric logging for net-snmp\fP"
 .br
 .in -1c
 .SS "Data Structures"
@@ -93,7 +82,7 @@ The Net-SNMP library \-
 .RI "#define \fBBSD4_2\fP"
 .br
 .ti -1c
-.RI "#define \fBNFDBITS\fP   (sizeof(fd_mask) * NBBY)        /* bits per mask */"
+.RI "#define \fBNFDBITS\fP   (sizeof(fd_mask) * NBBY)"
 .br
 .ti -1c
 .RI "#define \fBFD_SET\fP(n, p)   ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))"
@@ -409,24 +398,14 @@ The Net-SNMP library \-
 .ti -1c
 .RI "int \fBsnmp_errno\fP = 0"
 .br
-.ti -1c
-.RI "long \fBlong_return\fP"
-.br
-.ti -1c
-.RI "u_char \fBreturn_buf\fP []"
-.br
-.ti -1c
-.RI "oid \fBnullOid\fP []"
-.br
-.ti -1c
-.RI "int \fBnullOidLen\fP"
-.br
 .in -1c
 .SH "Define Documentation"
 .PP 
 .SS "#define DEBUGPRINTPDUTYPE(token, type)"
 .PP
-\fBValue:\fP.nf
+\fBValue:\fP
+.PP
+.nf
 switch(type) { \
       case SNMP_MSG_GET: \
         DEBUGDUMPSECTION(token, 'PDU-GET'); \
@@ -458,10 +437,12 @@ switch(type) { \
     }
 .fi
 .PP
-Definition at line 375 of file snmp_api.c.
+Definition at line 374 of file snmp_api.c.
 .SS "#define timercmp(tvp, uvp, cmp)"
 .PP
-\fBValue:\fP.nf
+\fBValue:\fP
+.PP
+.nf
 /* CSTYLED */ \
         ((tvp)->tv_sec cmp (uvp)->tv_sec || \
         ((tvp)->tv_sec == (uvp)->tv_sec && \
@@ -474,7 +455,9 @@ Definition at line 145 of file snmp_api.c.
 .PP 
 .SS "int init_agent (const char * app)"
 .PP
-Initialize the agent. Calls into init_agent_read_config to set tha app's configuration file in the appropriate default storage space, NETSNMP_DS_LIB_APPTYPE. Need to call init_agent before calling init_snmp.
+Initialize the agent. 
+.PP
+Calls into init_agent_read_config to set tha app's configuration file in the appropriate default storage space, NETSNMP_DS_LIB_APPTYPE. Need to call init_agent before calling init_snmp.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -491,12 +474,16 @@ Returns non-zero on failure and zero on success.
 \fBinit_snmp\fP 
 .RE
 .PP
+
+.PP
 Definition at line 269 of file snmp_vars.c.
 .PP
 References netsnmp_ds_set_boolean(), netsnmp_init_helpers(), and snmp_log().
 .SS "void init_snmp (const char * type)"
 .PP
-Calls the functions to do config file loading and mib module parsing in the correct order. \fBParameters:\fP
+Calls the functions to do config file loading and mib module parsing in the correct order. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fItype\fP label for the config file 'type'
 .RE
@@ -511,12 +498,16 @@ void
 \fBinit_agent\fP 
 .RE
 .PP
-Definition at line 779 of file snmp_api.c.
+
+.PP
+Definition at line 778 of file snmp_api.c.
 .PP
 References init_mib().
 .SS "int netsnmp_oid_equals (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
-Compares 2 OIDs to determine if they are exactly equal. This should be faster than doing a snmp_oid_compare for different length OIDs, since the length is checked first and if != returns immediately. Might be very slighly faster if lengths are ==. 
+Compares 2 OIDs to determine if they are exactly equal. 
+.PP
+This should be faster than doing a snmp_oid_compare for different length OIDs, since the length is checked first and if != returns immediately. Might be very slighly faster if lengths are ==. 
 .PP
 \fBParameters:\fP
 .RS 4
@@ -534,12 +525,16 @@ Compares 2 OIDs to determine if they are exactly equal. This should be faster th
 0 if they are equal, 1 if they are not. 
 .RE
 .PP
-Definition at line 6213 of file snmp_api.c.
+
+.PP
+Definition at line 6212 of file snmp_api.c.
 .PP
 Referenced by netsnmp_cache_find_by_oid(), netsnmp_old_api_helper(), and unregister_mib_context().
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
-Given two OIDs, determine the common prefix to them both. \fBParameters:\fP
+Given two OIDs, determine the common prefix to them both. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIin_name1\fP A pointer to the first oid. 
 .br
@@ -555,14 +550,16 @@ Given two OIDs, determine the common prefix to them both. \fBParameters:\fP
 length of largest common index of commonality. 1 = first, 0 if none * or -1 on error. 
 .RE
 .PP
-Definition at line 6269 of file snmp_api.c.
+
 .PP
-References SNMP_MIN.
+Definition at line 6268 of file snmp_api.c.
 .PP
 Referenced by netsnmp_add_varbind_to_cache().
 .SS "int netsnmp_oid_is_subtree (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
-Identical to netsnmp_oid_equals, except only the length up to len1 is compared. Functionally, this determines if in_name2 is equal or a subtree of in_name1 
+Identical to netsnmp_oid_equals, except only the length up to len1 is compared. 
+.PP
+Functionally, this determines if in_name2 is equal or a subtree of in_name1 
 .PP
 \fBParameters:\fP
 .RS 4
@@ -580,22 +577,30 @@ Identical to netsnmp_oid_equals, except only the length up to len1 is compared. 
 0 if one is a common prefix of the other. 
 .RE
 .PP
-Definition at line 6249 of file snmp_api.c.
+
+.PP
+Definition at line 6248 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
-lexicographical compare two object identifiers. Caution: this method is called often by command responder applications (ie, agent).
+lexicographical compare two object identifiers. 
+.PP
+Caution: this method is called often by command responder applications (ie, agent).
 .PP
 \fBReturns:\fP
 .RS 4
 -1 if name1 < name2, 0 if name1 = name2, 1 if name1 > name2 
 .RE
 .PP
-Definition at line 6145 of file snmp_api.c.
+
+.PP
+Definition at line 6144 of file snmp_api.c.
 .PP
 Referenced by check_getnext_results(), netsnmp_check_getnext_reply(), netsnmp_insert_iterator_context(), netsnmp_insert_table_row(), netsnmp_row_merge_helper_handler(), netsnmp_table_data_add_row(), netsnmp_table_data_get_from_oid(), netsnmp_table_data_helper_handler(), netsnmp_table_iterator_helper_handler(), snmp_oidtree_compare(), and table_helper_handler().
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
-Compares 2 OIDs to determine if they are equal up until the shortest length. \fBParameters:\fP
+Compares 2 OIDs to determine if they are equal up until the shortest length. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIin_name1\fP A pointer to the first oid. 
 .br
@@ -611,12 +616,16 @@ Compares 2 OIDs to determine if they are equal up until the shortest length. \fB
 0 if they are equal, 1 if in_name1 is > in_name2, or -1 if <. 
 .RE
 .PP
-Definition at line 6194 of file snmp_api.c.
+
+.PP
+Definition at line 6193 of file snmp_api.c.
 .PP
 References snmp_oid_compare().
 .SS "void snmp_shutdown (const char * type)"
 .PP
-Shuts down the application, saving any needed persistent storage, and appropriate clean up. \fBParameters:\fP
+Shuts down the application, saving any needed persistent storage, and appropriate clean up. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fItype\fP Label for the config file 'type' used
 .RE
@@ -626,6 +635,8 @@ Shuts down the application, saving any needed persistent storage, and appropriat
 void 
 .RE
 .PP
-Definition at line 847 of file snmp_api.c.
+
+.PP
+Definition at line 846 of file snmp_api.c.
 .PP
 References shutdown_mib(), snmp_alarm_unregister_all(), and snmp_call_callbacks().

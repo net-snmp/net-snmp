@@ -1235,11 +1235,8 @@ Route_Scan_Reload(void)
     static int      Time_Of_Last_Reload = 0;
     struct timeval  now;
 
-    /*
-     * allow 20 seconds in cache: 
-     */
     gettimeofday(&now, (struct timezone *) 0);
-    if (Time_Of_Last_Reload + 20 > now.tv_sec)
+    if (Time_Of_Last_Reload + CACHE_TIME > now.tv_sec)
         return;
     Time_Of_Last_Reload = now.tv_sec;
 

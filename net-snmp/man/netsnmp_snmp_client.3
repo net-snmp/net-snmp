@@ -1,4 +1,4 @@
-.TH "various PDU processing routines" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "29 Jun 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,7 +10,7 @@ various PDU processing routines \-
 .RI "#define \fBBSD4_2\fP"
 .br
 .ti -1c
-.RI "#define \fBNFDBITS\fP   (sizeof(fd_mask) * NBBY)        /* bits per mask */"
+.RI "#define \fBNFDBITS\fP   (sizeof(fd_mask) * NBBY)"
 .br
 .ti -1c
 .RI "#define \fBFD_SET\fP(n, p)   ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))"
@@ -114,7 +114,9 @@ various PDU processing routines \-
 .PP 
 .SS "int snmp_set_var_typed_value (\fBnetsnmp_variable_list\fP * newvar, u_char type, const u_char * val_str, size_t val_len)"
 .PP
-snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.
+snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. 
+.PP
+Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -147,7 +149,9 @@ Referenced by check_getnext_results(), handle_pdu(), netsnmp_check_getnext_reply
 .PP 
 .SS "const char* error_string[19]"
 .PP
-\fBInitial value:\fP.nf
+\fBInitial value:\fP
+.PP
+.nf
  {
     '(noError) No Error',
     '(tooBig) Response message would have been too large.',

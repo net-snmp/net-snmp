@@ -1,7 +1,7 @@
 .TH SNMP.CONF 5 "11 Dec 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-SYSCONFDIR/snmp/snmp.conf, ~/.snmp/snmp.conf - configuration files for the Net-SNMP applications.
+snmp.conf - configuration files for the Net-SNMP applications
 .SH DESCRIPTION
 .B snmp.conf
 is the configuration file which define how the Net-SNMP applications
@@ -179,6 +179,10 @@ buffer of client sockets (eg. snmpget).
 .IP "clientSendBuf integer"
 Similar to serverRecvBuf, but this directive applies to the send 
 buffer of client sockets. 
+.SH FILES
+SYSCONFDIR/snmp/snmp.conf,
+SYSCONFDIR/snmp/snmp.conf.local - common configuration settings
+~/.snmp/snmp.conf - user-specific configuration settings
 .SH "SEE ALSO"
 snmp_config(5), read_config(3), snmpcmd(1).
 .\" Local Variables:

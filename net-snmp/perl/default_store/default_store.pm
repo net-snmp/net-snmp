@@ -145,7 +145,7 @@ use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 				   NETSNMP_DS_LIB_SECMODEL
 				   NETSNMP_DS_LIB_MIBDIRS
 );
-$VERSION = '5.2.rc4';
+$VERSION = '5.2.1.1';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()

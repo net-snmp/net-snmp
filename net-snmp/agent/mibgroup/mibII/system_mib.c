@@ -93,7 +93,7 @@ WriteMethod     writeSystem;
 int             header_system(struct variable *, oid *, size_t *, int,
                               size_t *, WriteMethod **);
 
-#if HAVE_WINSOCK_H
+#if defined(HAVE_WINSOCK_H) && defined (HAVE_WIN32_PLATFORM_SDK)
 static void     windowsOSVersionString(char [], size_t);
 #endif
 
@@ -369,7 +369,7 @@ init_system_mib(void)
     version_descr[sizeof(version_descr) - 1] = 0;
     version_descr[strlen(version_descr) - 1] = 0;       /* chomp new line */
 #else
-#if HAVE_WINSOCK_H
+#if defined(HAVE_WINSOCK_H) && defined (HAVE_WIN32_PLATFORM_SDK)
     windowsOSVersionString(version_descr, sizeof(version_descr));
 #else
     strcpy(version_descr, "unknown");
@@ -399,7 +399,7 @@ init_system_mib(void)
 #endif                          /* HAVE_UNAME */
 #endif                          /* HAVE_GETHOSTNAME */
 
-#if HAVE_WINSOCK_H
+#if defined(HAVE_WINSOCK_H) && defined (HAVE_WIN32_PLATFORM_SDK)
   {
     HKEY hKey;
     /* Default sysContact is the registered windows user */
@@ -644,7 +644,7 @@ writeSystem(int action,
 	 *
 	 *********************/
 
-#if HAVE_WINSOCK_H
+#if defined(HAVE_WINSOCK_H) && defined (HAVE_WIN32_PLATFORM_SDK)
 static void
 windowsOSVersionString(char stringbuf[], size_t stringbuflen)
 {
@@ -763,5 +763,5 @@ windowsOSVersionString(char stringbuf[], size_t stringbuflen)
              osVersionInfo.dwBuildNumber, osVersionInfo.szCSDVersion,
              windowsVersion, identifier);
 }
-#endif /* HAVE_WINSOCK_H */
+#endif /* HAVE_WINSOCK_H and HAVE_WIN32_PLATFORM_SDK*/
 

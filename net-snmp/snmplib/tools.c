@@ -929,6 +929,7 @@ char *netsnmp_getenv(const char *name)
   unsigned char * key_value = NULL;
   DWORD key_value_size = 0;
   DWORD key_value_type = 0;
+  DWORD getenv_worked = 0;
 
   DEBUGMSGTL(("read_config", "netsnmp_getenv called with name: %s\n",name));
 
@@ -937,8 +938,10 @@ char *netsnmp_getenv(const char *name)
   
   /* Try environment variable first */ 
   temp = getenv(name);
-  if (temp)
+  if (temp) {
+    getenv_worked = 1;
     DEBUGMSGTL(("read_config", "netsnmp_getenv will return from ENV: %s\n",temp));
+  }
   
   /* Next try HKCU */
   if (temp == NULL)
@@ -1025,7 +1028,7 @@ char *netsnmp_getenv(const char *name)
     }
   }
   
-  if (temp) {
+  if (temp && !getenv_worked) {
     setenv(name, temp, 1);
     SNMP_FREE(temp);
   }
