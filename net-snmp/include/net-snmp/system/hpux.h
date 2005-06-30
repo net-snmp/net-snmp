@@ -63,7 +63,3 @@
 #define rt_pad1 rt_refcnt
 
 #define hpux 1
-#ifndef __GNUC__
-#undef inline
-#define inline
-#endif

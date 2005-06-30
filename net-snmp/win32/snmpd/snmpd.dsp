@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\agent\mibgroup" /I "..\..\agent" /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\agent\mibgroup" /I "..\..\agent" /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /FR /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -83,6 +83,9 @@ LINK32=link.exe
 
 # Name "snmpd - Win32 Release"
 # Name "snmpd - Win32 Debug"
+# Begin Group "Source Files"
+
+# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
 SOURCE=..\..\agent\auto_nlist.c
@@ -103,5 +106,30 @@ SOURCE=..\..\snmplib\winservice.c
 
 SOURCE=..\..\snmplib\winservice.rc
 # End Source File
+# End Group
+# Begin Group "Header Files"
+
+# PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\auto_nlist.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\autonlist.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\kernel.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\snmpd.h
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\winservice.h"
+# End Source File
+# End Group
 # End Target
 # End Project

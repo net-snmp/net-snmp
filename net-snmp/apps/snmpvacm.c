@@ -112,13 +112,13 @@ usage(void)
     snmp_parse_args_descriptions(stderr);
     fprintf(stderr, "\nsnmpvacm commands:\n");
     fprintf(stderr,
-            "  createAccess  GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL CONTEXTMATCH READVIEWNAME WRITEVIEWNAME NOTIFYVIEWNAME\n");
+            "                createAccess     GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL CONTEXTMATCH READVIEWNAME WRITEVIEWNAME NOTIFYVIEWNAME\n");
     fprintf(stderr,
-            "  deleteAccess  GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL\n");
-    fprintf(stderr, "  createSec2Group  MODEL SECURITYNAME  GROUPNAME\n");
-    fprintf(stderr, "  deleteSec2Group  MODEL SECURITYNAME\n");
-    fprintf(stderr, "  createView  [-Ce] NAME SUBTREE MASK\n");
-    fprintf(stderr, "  deleteView  NAME SUBTREE\n");
+            "                deleteAccess     GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL\n");
+    fprintf(stderr, "        createSec2Group  MODEL SECURITYNAME  GROUPNAME\n");
+    fprintf(stderr, "        deleteSec2Group  MODEL SECURITYNAME\n");
+    fprintf(stderr, "  [-Ce] createView       NAME SUBTREE MASK\n");
+    fprintf(stderr, "        deleteView       NAME SUBTREE\n");
 }
 
 
@@ -245,6 +245,7 @@ main(int argc, char *argv[])
     int             secModel, secLevel, contextMatch, val, i = 0;
     char           *mask, *groupName, *prefix;
     u_char          viewMask[VACMSTRINGLEN];
+    char           *st;
 
 
     /*
@@ -337,7 +338,7 @@ main(int argc, char *argv[])
          * Mask
          */
         mask = argv[arg + 2];
-        for (mask = strtok(mask, ".:"); mask; mask = strtok(NULL, ".:")) {
+        for (mask = strtok_r(mask, ".:", &st); mask; mask = strtok_r(NULL, ".:", &st)) {
             if (i >= sizeof(viewMask)) {
                 printf("MASK too long\n");
                 exit(1);

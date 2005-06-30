@@ -63,6 +63,7 @@ add_to_init_list(char *module_list)
 {
     struct module_init_list *newitem, **list;
     char           *cp;
+    char           *st;
 
     if (module_list == NULL) {
         return;
@@ -77,13 +78,13 @@ add_to_init_list(char *module_list)
         list = &initlist;
     }
 
-    cp = strtok(cp, ", :");
+    cp = strtok_r(cp, ", :", &st);
     while (cp) {
         newitem = (struct module_init_list *) calloc(1, sizeof(*initlist));
         newitem->module_name = strdup(cp);
         newitem->next = *list;
         *list = newitem;
-        cp = strtok(NULL, ", :");
+        cp = strtok_r(NULL, ", :", &st);
     }
 }
 

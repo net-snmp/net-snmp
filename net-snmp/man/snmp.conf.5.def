@@ -1,15 +1,18 @@
 .TH SNMP.CONF 5 "11 Dec 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-DATADIR/snmp/snmp.conf - configuration file for the Net-SNMP applications.
-.br
-~/.snmp/snmp.conf - personal configuration file.
+SYSCONFDIR/snmp/snmp.conf, ~/.snmp/snmp.conf - configuration files for the Net-SNMP applications.
 .SH DESCRIPTION
 .B snmp.conf
 is the configuration file which define how the Net-SNMP applications
 operate.  Tokens that can be put in them are described in the
 .B DIRECTIVES
 section below.
+.PP
+SYSCONFDIR/snmp/snmp.conf is a common file, shared by all users of the system.
+.br
+~/.snmp/snmp.conf is a personal file, with configuration settings for a
+particular user.
 .SH PLEASE READ FIRST
 Make sure you make these files readable only by the user if you are
 storing sensitive information in them like passphrases!
@@ -46,7 +49,7 @@ The directory where snmpd and snmptrapd stores their persistent data
 files.
 .IP "defaultPort port"
 The default port number that all SNMP applications and daemons should use.
-.IP "defVersion (v1|v2c|v3)"
+.IP "defVersion (1|2c|3)"
 The default SNMP version to use.
 .IP "defCommunity string"
 The default SNMPv1 and SNMPv2c community string to use.
@@ -84,7 +87,7 @@ Whether the commands should log timestamps with their error/message
 logging or not.  Note that output will not look as pretty with
 timestamps if the source code that is doing the logging does
 incremental logging of messages that are not line buffered before
-being passed to the logging routines.
+being passed to the logging routines.  This option is only used when file logging is active. 
 .IP "printNumericEnums (1|yes|true|0|no|false)"
 Equivalent to
 .BR -Oe .

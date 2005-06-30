@@ -186,6 +186,7 @@ getprotoent(void)
     static char    *ali[10];
     struct protoent *px = &spx;
     int             linecnt = 0;
+    char            *st;
 
     for (alp = ali; *alp; free(*alp), *alp = 0, alp++);
     if (px->p_name)
@@ -205,13 +206,13 @@ getprotoent(void)
         if (*cp == '#')
             continue;
 
-        cp = strtok(lbuf, STRTOK_DELIMS);
+        cp = strtok_r(lbuf, STRTOK_DELIMS, &st);
         if (!cp)
             continue;
         if (cp)
             px->p_name = strdup(cp);
 
-        cp = strtok(NULL, STRTOK_DELIMS);
+        cp = strtok_r(NULL, STRTOK_DELIMS, &st);
         if (!cp) {
             free(px->p_name);
             continue;
@@ -219,7 +220,7 @@ getprotoent(void)
         px->p_proto = (short) atoi(cp);
 
         for (alp = px->p_aliases; cp; alp++) {
-            cp = strtok(NULL, STRTOK_DELIMS);
+            cp = strtok_r(NULL, STRTOK_DELIMS, &st);
             if (!cp)
                 break;
             if (*cp == '#')

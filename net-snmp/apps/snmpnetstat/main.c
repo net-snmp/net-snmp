@@ -140,7 +140,6 @@ usage(void)
     fprintf(stderr, "NET-SNMP version: %s\n", netsnmp_get_version());
     fprintf(stderr, "  -v [1 | 2c ]   SNMP version\n");
     fprintf(stderr, "  -V             display version number\n");
-    fprintf(stderr, "  -p port        specify agent port number\n");
     fprintf(stderr, "  -c community   specify community name\n");
     fprintf(stderr, "  -t timeout     SNMP packet timeout (seconds)\n");
     fprintf(stderr,
@@ -202,9 +201,6 @@ main(int argc, char *argv[])
         case 'D':
             debug_register_tokens(optarg);
             snmp_set_do_debugging(1);
-            break;
-        case 'p':
-            dest_port = atoi(optarg);
             break;
 
         case 't':
@@ -278,6 +274,22 @@ main(int argc, char *argv[])
     init_snmp("snmpapp");
     if (version == SNMP_DEFAULT_VERSION) {
         version = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION);
+        if (!version) {
+            switch (DEFAULT_SNMP_VERSION) {
+            case 1:
+                version = SNMP_VERSION_1;
+                break;
+            case 2:
+                version = SNMP_VERSION_2c;
+                break;
+            case 3:
+                version = SNMP_VERSION_3;
+                break;
+            }
+        } else if (version == NETSNMP_DS_SNMP_VERSION_1) {
+                          /* Bogus value. version1 = 0 */
+            version = SNMP_VERSION_1;
+        }
     }
     if (hostname == NULL && optind < argc) {
         hostname = argv[optind++];
