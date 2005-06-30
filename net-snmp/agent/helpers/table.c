@@ -64,6 +64,20 @@ static void     table_data_free_func(void *data);
  *  You can use this table handler by injecting it into a calling
  *  chain.  When the handler gets called, it'll do processing and
  *  store it's information into the request->parent_data structure.
+ *
+ *  The table helper handler pulls out the column number and indexes from 
+ *  the request oid so that you don't have to do the complex work of
+ *  parsing within your own code.
+ *
+ *  @param tabreq is a pointer to a netsnmp_table_registration_info struct.
+ *	The table handler needs to know up front how your table is structured.
+ *	A netsnmp_table_registeration_info structure that is 
+ *	passed to the table handler should contain the asn index types for the 
+ *	table as well as the minimum and maximum column that should be used.
+ *
+ *  @return Returns a pointer to a netsnmp_mib_handler struct which contains
+ *	the handler's name and the access method
+ *
  */
 netsnmp_mib_handler *
 netsnmp_get_table_handler(netsnmp_table_registration_info *tabreq)
@@ -96,10 +110,14 @@ netsnmp_register_table(netsnmp_handler_registration *reginfo,
     return netsnmp_register_handler(reginfo);
 }
 
-/** extracts the processed table information from a given request.
- *  call this from subhandlers on a request to extract the processed
+/** Extracts the processed table information from a given request.
+ *  Call this from subhandlers on a request to extract the processed
  *  netsnmp_request_info information.  The resulting information includes the
  *  index values and the column number.
+ *
+ * @param request populated netsnmp request structure
+ *
+ * @return populated netsnmp_table_request_info structure
  */
 NETSNMP_INLINE netsnmp_table_request_info *
 netsnmp_extract_table_info(netsnmp_request_info *request)
@@ -528,6 +546,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
         if ((reqinfo->mode != MODE_GETNEXT) &&
             ((tbl_req_info->number_indexes != tbl_info->number_indexes) ||
              (tmp_len != -1))) {
+            DEBUGMSGTL(("helper:table",
+                        "invalid index(es) for table - skipping\n"));
             table_helper_cleanup(reqinfo, request, SNMP_NOSUCHINSTANCE);
             continue;
         }
@@ -585,7 +605,7 @@ netsnmp_table_build_result(netsnmp_handler_registration *reginfo,
 /** given a registration info object, a request object and the table
  *  info object it builds the request->requestvb->name oid from the
  *  index values and column information found in the table_info
- *  object.
+ *  object. Index values are extracted from the table_info varbinds.
  */
 int
 netsnmp_table_build_oid(netsnmp_handler_registration *reginfo,
@@ -616,7 +636,10 @@ netsnmp_table_build_oid(netsnmp_handler_registration *reginfo,
     return SNMPERR_SUCCESS;
 }
 
-/** Builds an oid from index information.
+/** given a registration info object, a request object and the table
+ *  info object it builds the request->requestvb->name oid from the
+ *  index values and column information found in the table_info
+ *  object.  Index values are extracted from the table_info index oid.
  */
 int
 netsnmp_table_build_oid_from_index(netsnmp_handler_registration *reginfo,
@@ -652,6 +675,11 @@ netsnmp_update_variable_list_from_index(netsnmp_table_request_info *tri)
 {
     if (!tri)
         return SNMPERR_GENERR;
+
+    /*
+     * free any existing allocated memory, then parse oid into varbinds
+     */
+    snmp_reset_var_buffers( tri->indexes);
 
     return parse_oid_indexes(tri->index_oid, tri->index_oid_len,
                              tri->indexes);
@@ -747,24 +775,36 @@ table_helper_cleanup(netsnmp_agent_request_info *reqinfo,
 }
 
 
+/*
+ * find the closest column to current (which may be current).
+ *
+ * called when a table runs out of rows for column X. This
+ * function is called with current = X + 1, to verify that
+ * X + 1 is a valid column, or find the next closest column if not.
+ *
+ * All list types should be sorted, lowest to highest.
+ */
 unsigned int
 netsnmp_closest_column(unsigned int current,
                        netsnmp_column_info *valid_columns)
 {
     unsigned int    closest = 0;
-    char            done = 0;
     int             idx;
 
     if (valid_columns == NULL)
         return 0;
 
-    for( ; (!done && valid_columns); valid_columns = valid_columns->next) {
+    for( ; valid_columns; valid_columns = valid_columns->next) {
 
         if (valid_columns->isRange) {
-
+            /*
+             * if current < low range, it might be closest.
+             * otherwise, if it's < high range, current is in
+             * the range, and thus is an exact match.
+             */
             if (current < valid_columns->details.range[0]) {
-                if ( (0 == closest) ||
-                     (valid_columns->details.range[0] < closest)) {
+                if ( (valid_columns->details.range[0] < closest) ||
+                     (0 == closest)) {
                     closest = valid_columns->details.range[0];
                 }
             } else if (current <= valid_columns->details.range[1]) {
@@ -774,34 +814,62 @@ netsnmp_closest_column(unsigned int current,
 
         } /* range */
         else {                  /* list */
-
+            /*
+             * if current < first item, no need to iterate over list.
+             * that item is either closest, or not.
+             */
             if (current < valid_columns->details.list[0]) {
-                if (valid_columns->details.list[0] < closest)
+                if ((valid_columns->details.list[0] < closest) ||
+                    (0 == closest))
                     closest = valid_columns->details.list[0];
                 continue;
             }
 
+            /** if current > last item in list, no need to iterate */
             if (current >
-                valid_columns->details.list[(int)valid_columns->list_count])
+                valid_columns->details.list[(int)valid_columns->list_count - 1])
                 continue;       /* not in list range. */
 
-            for (idx = 0; idx < (int)valid_columns->list_count; ++idx) {
-                if (current == valid_columns->details.list[idx]) {
-                    closest = current;
-                    done = 1;   /* can not get any closer! */
-                    break;      /* inner for */
-                } else if (current < valid_columns->details.list[idx]) {
-                    if (valid_columns->details.list[idx] < closest)
-                        closest = valid_columns->details.list[idx];
-                    break;      /* list should be sorted */
-                }
-            }                   /* inner for */
+            /** skip anything less than current*/
+            for (idx = 0; valid_columns->details.list[idx] < current; ++idx)
+                ;
+            
+            /** check for exact match */
+            if (current == valid_columns->details.list[idx]) {
+                closest = current;
+                break;      /* can not get any closer! */
+            }
+            
+            /** list[idx] > current; is it < closest? */
+            if ((valid_columns->details.list[idx] < closest) ||
+                (0 == closest))
+                closest = valid_columns->details.list[idx];
+
         }                       /* list */
-    }                           /* outer for */
+    }                           /* for */
 
     return closest;
 }
 
+/**
+ * This function can be used to setup the table's definition within
+ * your module's initialize function, it takes a variable index parameter list
+ * for example: the table_info structure is followed by two integer index types
+ * netsnmp_table_helper_add_indexes(
+ *                  table_info,   
+ *	            ASN_INTEGER,  
+ *		    ASN_INTEGER,  
+ *		    0);
+ *
+ * @param tinfo is a pointer to a netsnmp_table_registration_info struct.
+ *	The table handler needs to know up front how your table is structured.
+ *	A netsnmp_table_registeration_info structure that is 
+ *	passed to the table handler should contain the asn index types for the 
+ *	table as well as the minimum and maximum column that should be used.
+ *
+ * @return void
+ *
+ */
 void
 #if HAVE_STDARG_H
 netsnmp_table_helper_add_indexes(netsnmp_table_registration_info *tinfo,
@@ -830,6 +898,13 @@ netsnmp_table_helper_add_indexes(va_alist)
     va_end(debugargs);
 }
 
+static void
+_row_stash_data_list_free(void *ptr) {
+    netsnmp_oid_stash_node **tmp = (netsnmp_oid_stash_node **)ptr;
+    netsnmp_oid_stash_free(tmp, NULL);
+    free(ptr);
+}
+
 /** returns a row-wide place to store data in.
     @todo This function will likely change to add free pointer functions. */
 netsnmp_oid_stash_node **
@@ -850,12 +925,9 @@ netsnmp_table_get_or_create_row_stash(netsnmp_agent_request_info *reqinfo,
             return NULL;        /* ack. out of mem */
 
         netsnmp_agent_add_list_data(reqinfo,
-                                    /*
-                                     * XXX: free: wrong 
-                                     */
                                     netsnmp_create_data_list(storage_name,
                                                              stashp,
-                                                             free));
+                                                             _row_stash_data_list_free));
     }
     return stashp;
 }
@@ -874,9 +946,11 @@ netsnmp_table_index_find_next_row(netsnmp_container *c,
     /*
      * no indexes, or below our minimum column? then use first row.
      */
-    if((tblreq->number_indexes == 0) ||
-       (tblreq->colnum < tblreq->reg_info->min_column)) {
+    if(tblreq->colnum < tblreq->reg_info->min_column) {
         tblreq->colnum = tblreq->reg_info->min_column;
+        tblreq->number_indexes = 0;
+    }
+    if(tblreq->number_indexes == 0) {
         row = CONTAINER_FIRST(c);
     } else {
         netsnmp_index index;

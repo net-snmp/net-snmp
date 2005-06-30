@@ -51,12 +51,25 @@ EXEEXT		= @EXEEXT@
 
 # Misc Compiling Stuff
 CC	        = @CC@
-# version number is prefixed by a 0 for a better shared library version number
+
+# ok, use libtool versioning, but not quite the way they recommend.
+# The shared library version number will be:
 #
-# ok, use libtool proper versioning:
+#   (CURRENT-AGE).AGE.REVISION
+#
+# *** THIS MEANS YOU MAY NEED TO DECREMENT CURRENT FOR A NEW RELEASE ***
+#
+# examples:
+#   C.A.R   library name
+#  -------  ---------------
+#   5.0.9   libxxx.so.5.0.9
+#   6.1.2   libxxx.so.5.1.2
+#   7.2.8   libxxx.so.5.2.8
+#   6.0.0   libxxx.so.6.0.0
+# 
 LIBCURRENT  = 6
-LIBREVISION = 0
 LIBAGE      = 1
+LIBREVISION = 3
 
 # generally, LIBCURRENT should stay the same unless major changes occur.
 # Increment REVISION every release.  
@@ -70,6 +83,9 @@ LINK		= $(LIBTOOL) --mode=link $(CC)
 RANLIB		= :
 
 # libtool definitions
-.SUFFIXES: .c .o .lo
+.SUFFIXES: .c .o .lo .rc
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+.rc.lo:
+	$(LIBTOOL) --mode=compile windres -o $@ $<
+

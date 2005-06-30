@@ -262,12 +262,15 @@ main(int argc, char *argv[])
 
     transport = snmp_sess_transport(snmp_sess_pointer(ss));
     if (transport != NULL && transport->f_fmtaddr != NULL) {
-        char           *s = transport->f_fmtaddr(transport,
+        char *addr_string = transport->f_fmtaddr(transport,
                                                  response->transport_data,
                                                  response->
                                                  transport_data_length);
-        printf("[%s]=>[%s] Up: %s\n", s, sysdescr,
-               uptime_string(uptime, buf));
+        if (addr_string != NULL) {
+            printf("[%s]=>[%s] Up: %s\n", addr_string, sysdescr,
+                   uptime_string(uptime, buf));
+            free(addr_string);
+        }
     } else {
         printf("[<UNKNOWN>]=>[%s] Up: %s\n", sysdescr,
                uptime_string(uptime, buf));

@@ -10,7 +10,11 @@
 #include <sys/param.h>
 #include <sys/time.h>
 #include <sys/proc.h>
+#if defined(freebsd5) && __FreeBSD_version >= 500101
+#include <sys/resource.h>
+#else
 #include <sys/dkstat.h>
+#endif
 #ifdef freebsd5
 #include <sys/bio.h>
 #endif

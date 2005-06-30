@@ -3,7 +3,7 @@ tests, simply run "./RUNTESTS".  The important arguments for RUNTESTS
 accepts (from ./RUNTESTS -h):
 
 Usage: RUNTESTS [-a] [-S SLEEPTIME] [-h] [-i] [-v] [-V] [-s]
-       [-T TESTNUMS] [-D bindir] [-S seconds]"
+       [-T TESTNUMS] [-D bindir] [-S seconds] [-P <udp|tcp|udp6|tcp6|unix>]"
 
   -a        run all tests.
   -T NUMS   run particular tests (command separated list of numbers)
@@ -15,3 +15,5 @@ Usage: RUNTESTS [-a] [-S SLEEPTIME] [-h] [-i] [-v] [-V] [-s]
   -A FLAGS  Extra flags to pass to the agent.
   -s        Don't erase the runtime data directory for successful tests
   -x        Turn on SH output debugging for tests.
+  -P TRANS  Specify on which transport domain to run the tests.Default is udp.
+            udp,tcp,udp6,tcp6,unix is available.

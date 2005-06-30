@@ -187,8 +187,6 @@ init_tunnel(void)
                         "RFC 2667 TUNNEL-MIB implementation for "
                         "Linux 2.2.x kernels.");
 
-    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_APPTYPE, "snmpd");
-
     /*
      * register ourselves with the agent to handle our mib tree 
      */

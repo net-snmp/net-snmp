@@ -66,6 +66,7 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
     int gid = -1;
     int s_perm = -1;
     int d_perm = -1;
+    char *st;
 #if HAVE_GETPWNAM && HAVE_PWD_H
     struct passwd *pwd;
 #endif
@@ -74,10 +75,10 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
 #endif
 
     DEBUGMSGTL(("agentx/config", "port permissions: %s\n", cptr));
-    socket_perm = strtok(cptr, " \t");
-    dir_perm    = strtok(NULL, " \t");
-    socket_user = strtok(NULL, " \t");
-    socket_group = strtok(NULL, " \t");
+    socket_perm = strtok_r(cptr, " \t", &st);
+    dir_perm    = strtok_r(NULL, " \t", &st);
+    socket_user = strtok_r(NULL, " \t", &st);
+    socket_group = strtok_r(NULL, " \t", &st);
 
     if (socket_perm) {
         s_perm = strtol(socket_perm, NULL, 8);

@@ -33,5 +33,4 @@ ECHO "$testnum:  "
 # We shouldn't get here...
 # If we do, it means they didn't exit properly.
 # So we will.
-STOPAGENT      # Just in case.
 FINISHED

@@ -52,9 +52,9 @@
 #include <net-snmp/library/snmpusm.h>
 #include <net-snmp/library/lcd_time.h>
 #include <net-snmp/library/scapi.h>
+#include <net-snmp/library/snmpv3.h>
 
 #include <net-snmp/library/transform_oids.h>
-
 
 /*
  * Global static hashlist to contain Enginetime entries.
@@ -130,7 +130,8 @@ get_enginetime(u_char * engineID,
         *engine_time = e->engineTime;
         *engineboot = e->engineBoot;
 
-        timediff = time(NULL) - e->lastReceivedEngineTime;
+       timediff = snmpv3_local_snmpEngineTime() - e->lastReceivedEngineTime;
+
 #ifdef LCD_TIME_SYNC_OPT
     }
 #endif
@@ -225,7 +226,8 @@ get_enginetime_ex(u_char * engineID,
         *last_engine_time = *engine_time = e->engineTime;
         *engineboot = e->engineBoot;
 
-        timediff = time(NULL) - e->lastReceivedEngineTime;
+       timediff = snmpv3_local_snmpEngineTime() - e->lastReceivedEngineTime;
+
 #ifdef LCD_TIME_SYNC_OPT
     }
 #endif
@@ -346,7 +348,7 @@ set_enginetime(u_char * engineID,
 #endif
         e->engineTime = engine_time;
         e->engineBoot = engineboot;
-        e->lastReceivedEngineTime = time(NULL);
+        e->lastReceivedEngineTime = snmpv3_local_snmpEngineTime();
     }
 
     e = NULL;                   /* Indicates a successful update. */
@@ -516,10 +518,9 @@ dump_etimelist_entry(Enginetime e, int count)
     DEBUGMSGTL(("dump_etimelist", "%s\n", tabs));
     DEBUGMSGTL(("dump_etimelist", "%s%s (len=%d) <%d,%d>\n", tabs,
                 s, e->engineID_len, e->engineTime, e->engineBoot));
-    DEBUGMSGTL(("dump_etimelist", "%s%ld (%ld) -- %s", tabs,
+    DEBUGMSGTL(("dump_etimelist", "%s%ld (%ld)", tabs,
                 e->lastReceivedEngineTime,
-                time(NULL) - e->lastReceivedEngineTime,
-                ctime(&e->lastReceivedEngineTime)));
+                snmpv3_local_snmpEngineTime() - e->lastReceivedEngineTime));
 
     SNMP_FREE(s);
 

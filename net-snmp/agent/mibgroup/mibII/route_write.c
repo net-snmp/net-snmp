@@ -93,19 +93,25 @@
 #define SIOCDELRT SIOCDELMULTI
 #endif
 
+#ifdef linux
+#define NETSNMP_ROUTE_WRITE_PROTOCOL PF_ROUTE
+#else
+#define NETSNMP_ROUTE_WRITE_PROTOCOL 0
+#endif
+
 int
 addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
 #ifndef dynix
     struct sockaddr_in dst;
     struct sockaddr_in gateway;
-    int             s;
+    int             s, rc;
     RTENTRY         route;
 
-    s = socket(AF_INET, SOCK_RAW, 0);
+    s = socket(AF_INET, SOCK_RAW, NETSNMP_ROUTE_WRITE_PROTOCOL);
     if (s < 0) {
         snmp_log_perror("socket");
-        return 0;
+        return -1;
     }
 
 
@@ -128,7 +134,11 @@ addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 #ifdef irix6
     return 0;
 #else
-    return (ioctl(s, SIOCADDRT, (caddr_t) & route));
+    rc = ioctl(s, SIOCADDRT, (caddr_t) & route);
+    close(s);
+    if (rc < 0)
+        snmp_log_perror("ioctl");
+    return rc;
 #endif
 
 #else                           /* dynix */
@@ -146,7 +156,7 @@ addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
      * "mibII/route_write.c", line 160: undefined struct/union member: rt_pad1
      * "mibII/route_write.c", line 166: undefined symbol: SIOCDELRT
      */
-    return 0;
+    return -1;
 #endif
 
 }
@@ -160,10 +170,10 @@ delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 
     struct sockaddr_in dst;
     struct sockaddr_in gateway;
-    int             s;
+    int             s, rc;
     RTENTRY         route;
 
-    s = socket(AF_INET, SOCK_RAW, 0);
+    s = socket(AF_INET, SOCK_RAW, NETSNMP_ROUTE_WRITE_PROTOCOL);
     if (s < 0) {
         snmp_log_perror("socket");
         return 0;
@@ -190,7 +200,9 @@ delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 #ifdef irix6
     return 0;
 #else
-    return (ioctl(s, SIOCDELRT, (caddr_t) & route));
+    rc = ioctl(s, SIOCDELRT, (caddr_t) & route);
+    close(s);
+    return rc;
 #endif
 
 #else                           /* dynix */
@@ -343,18 +355,19 @@ write_rte(int action,
             snmp_log(LOG_ERR, "newCacheRTE");
             return SNMP_ERR_RESOURCEUNAVAILABLE;
         }
+        rp->rt_dst = dst;
         rp->rt_type = rp->xx_type = 2;
 
     } else if (action == COMMIT) {
 
 
     } else if (action == FREE) {
-        if (rp->rt_type == 2) { /* was invalid before */
+        if (rp && rp->rt_type == 2) { /* was invalid before */
             delCacheRTE(dst);
         }
     }
 
-
+    netsnmp_assert(NULL != rp); /* should have found or created rp */
 
 
     switch (var) {

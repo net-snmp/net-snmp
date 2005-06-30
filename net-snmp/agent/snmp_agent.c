@@ -3,6 +3,14 @@
  *
  * Simple Network Management Protocol (RFC 1067).
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/* Portions of this file are subject to the following copyrights.  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /***********************************************************
 	Copyright 1988, 1989 by Carnegie Mellon University
 
@@ -24,7 +32,17 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
-
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights 
+ * reserved.  Use is subject to license terms specified in the 
+ * COPYING file distributed with the Net-SNMP package.
+ */
+/** @defgroup snmp_agent net-snmp agent related processing 
+ *  @ingroup agent
+ *
+ * @{
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
@@ -74,9 +92,12 @@ SOFTWARE.
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_assert.h>
 
+#if HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
+
 #ifdef USE_LIBWRAP
 #include <tcpd.h>
-#include <syslog.h>
 int             allow_severity = LOG_INFO;
 int             deny_severity = LOG_WARNING;
 #endif
@@ -85,6 +106,7 @@ int             deny_severity = LOG_WARNING;
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
 #include <net-snmp/agent/mib_module_config.h>
+#include <net-snmp/agent/mib_modules.h>
 
 #ifdef USING_AGENTX_PROTOCOL_MODULE
 #include "agentx/protocol.h"
@@ -99,17 +121,19 @@ int             deny_severity = LOG_WARNING;
 #endif
 
 #define SNMP_ADDRCACHE_SIZE 10
+#define SNMP_ADDRCACHE_MAXAGE 300 /* in seconds */
+
+enum { SNMP_ADDRCACHE_UNUSED = 0,
+       SNMP_ADDRCACHE_USED = 1
+};
 
 struct addrCache {
     char           *addr;
-    enum { SNMP_ADDRCACHE_UNUSED = 0,
-        SNMP_ADDRCACHE_USED = 1,
-        SNMP_ADDRCACHE_OLD = 2
-    } status;
+    int             status;
+    struct timeval lastHit;
 };
 
 static struct addrCache addrCache[SNMP_ADDRCACHE_SIZE];
-int             lastAddrAge = 0;
 int             log_addresses = 0;
 
 
@@ -214,6 +238,7 @@ typedef struct agent_set_cache_s {
 
     int             vbcount;
     netsnmp_request_info *requests;
+    netsnmp_variable_list *saved_vars;
     netsnmp_data_list *agent_data;
 
     /*
@@ -236,6 +261,9 @@ save_set_cache(netsnmp_agent_session *asp)
     if (ptr == NULL)
         return NULL;
 
+    DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p saved in cache (mode %d)\n",
+                asp, asp->reqinfo, asp->pdu->command));
+
     /*
      * Save the important information 
      */
@@ -246,6 +274,7 @@ save_set_cache(netsnmp_agent_session *asp)
     ptr->treecache_num = asp->treecache_num;
     ptr->agent_data = asp->reqinfo->agent_data;
     ptr->requests = asp->requests;
+    ptr->saved_vars = asp->pdu->variables; /* requests contains pointers to variables */
     ptr->vbcount = asp->vbcount;
 
     /*
@@ -283,9 +312,45 @@ get_set_cache(netsnmp_agent_session *asp)
             asp->treecache = ptr->treecache;
             asp->treecache_len = ptr->treecache_len;
             asp->treecache_num = ptr->treecache_num;
-            asp->requests = ptr->requests;
-            asp->vbcount = ptr->vbcount;
 
+            /*
+             * Free previously allocated requests before overwriting by
+             * cached ones, otherwise memory leaks!
+             */
+            if (asp->requests) {
+                /*
+                 * I don't think this case should ever happen. Please email
+                 * the net-snmp-coders@lists.sourceforge.net if you have
+                 * a test case that hits this assert. -- rstory
+                 */
+                int i;
+                netsnmp_assert(NULL == asp->requests); /* see note above */
+                for (i = 0; i < asp->vbcount; i++) {
+                    netsnmp_free_request_data_sets(&asp->requests[i]);
+                }
+                free(asp->requests);
+            }
+
+            /*
+             * If we replace asp->requests with the info from the set cache,
+             * we should replace asp->pdu->variables also with the cached
+             * info, as asp->requests contains pointers to them.  And we
+             * should also free the current asp->pdu->variables list...
+             */
+            if (ptr->saved_vars) {
+                if (asp->pdu->variables)
+                    snmp_free_varbind(asp->pdu->variables);
+                asp->pdu->variables = ptr->saved_vars;
+                asp->vbcount = ptr->vbcount;
+            } else {
+                /*
+                 * when would we not have saved variables? someone
+                 * let me know if they hit this assert. -- rstory
+                 */
+                netsnmp_assert(NULL != ptr->saved_vars);
+            }
+            asp->requests = ptr->requests;
+            
             netsnmp_assert(NULL != asp->reqinfo);
             asp->reqinfo->asp = asp;
             asp->reqinfo->agent_data = ptr->agent_data;
@@ -332,7 +397,10 @@ _reorder_getbulk(netsnmp_agent_session *asp)
     int             j;
     int             all_eoMib;
     netsnmp_variable_list *prev = NULL;
-            
+
+    if (asp->vbcount == 0)  /* Nothing to do! */
+        return;
+
     if (asp->pdu->errstat < asp->vbcount) {
         n = asp->pdu->errstat;
     } else {
@@ -341,6 +409,10 @@ _reorder_getbulk(netsnmp_agent_session *asp)
     if ((r = asp->vbcount - n) < 0) {
         r = 0;
     }
+
+    /* we do nothing if there is nothing repeated */
+    if (r == 0)
+        return;
             
     /*
      * For each of the original repeating varbinds (except the last),
@@ -458,6 +530,18 @@ getNextSessID()
     return ++SessionID;
 }
 
+/**
+ * This function checks for packets arriving on the SNMP port and
+ * processes them(snmp_read) if some are found, using the select(). If block
+ * is non zero, the function call blocks until a packet arrives
+ *
+ * @param block used to control blocking in the select() function, 1 = block
+ *        forever, and 0 = don't block
+ *
+ * @return  Returns a positive integer if packets were processed, and -1 if an
+ * error was found.
+ *
+ */
 int
 agent_check_and_process(int block)
 {
@@ -520,6 +604,8 @@ agent_check_and_process(int block)
      */
     run_alarms();
 
+    netsnmp_check_outstanding_agent_requests();
+
     return count;
 }
 
@@ -540,29 +626,134 @@ netsnmp_addrcache_initialise(void)
 }
 
 
+/*
+ * Adds a new entry to the cache of addresses that
+ * have recently made connections to the agent.
+ * Returns 0 if the entry already exists (but updates
+ * the entry with a new timestamp) and 1 if the
+ * entry did not previously exist.
+ *
+ * Implements a simple LRU cache replacement
+ * policy. Uses a linear search, which should be
+ * okay, as long as SNMP_ADDRCACHE_SIZE remains
+ * relatively small.
+ *
+ * @retval 0 : updated existing entry
+ * @retval 1 : added new entry
+ */
+int
+netsnmp_addrcache_add(const char *addr)
+{
+    int oldest = -1; /* Index of the oldest cache entry */
+    int unused = -1; /* Index of the first free cache entry */
+    int i; /* Looping variable */
+    int rc = -1;
+    struct timeval now; /* What time is it now? */
+    struct timeval aged; /* Oldest allowable cache entry */
+    
+    /*
+     * First get the current and oldest allowable timestamps
+     */
+    gettimeofday(&now, (struct timezone*) NULL);
+    aged.tv_sec = now.tv_sec - SNMP_ADDRCACHE_MAXAGE;
+    aged.tv_usec = now.tv_usec;
+    
+    /*
+     * Now look for a place to put this thing
+     */
+    for(i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
+        if (addrCache[i].status == SNMP_ADDRCACHE_UNUSED) { /* If unused */
+            /*
+             * remember this location, in case addr isn't in the cache
+             */
+            if (unused < 0)
+                unused = i;
+        }
+        else { /* If used */
+            if ((NULL != addr) && (strcmp(addrCache[i].addr, addr) == 0)) {
+                /*
+                 * found a match
+                 */
+                memcpy(&addrCache[i].lastHit, &now, sizeof(struct timeval));
+                if (timercmp(&addrCache[i].lastHit, &aged, <))
+		    rc = 1; /* should have expired, so is new */
+		else
+		    rc = 0; /* not expired, so is existing entry */
+                break;
+            }
+            else {
+                /*
+                 * Used, but not this address. check if it's stale.
+                 */
+                if (timercmp(&addrCache[i].lastHit, &aged, <)) {
+                    /*
+                     * Stale, reuse
+                     */
+                    SNMP_FREE(addrCache[i].addr);
+                    addrCache[i].status = SNMP_ADDRCACHE_UNUSED;
+                    /*
+                     * remember this location, in case addr isn't in the cache
+                     */
+		    if (unused < 0)
+                        unused = i;
+                }
+	        else {
+                    /*
+                     * Still fresh, but a candidate for LRU replacement
+                     */
+                    if (oldest < 0)
+                        oldest = i;
+                    else if (timercmp(&addrCache[i].lastHit,
+                                      &addrCache[oldest].lastHit, <))
+                        oldest = i;
+                } /* fresh */
+            } /* used, no match */
+        } /* used */
+    } /* for loop */
+    
+    if ((-1 == rc) && (NULL != addr)) {
+        /*
+         * We didn't find the entry in the cache
+         */
+        if (unused >= 0) {
+            /*
+             * If we have a slot free anyway, use it
+             */
+            addrCache[unused].addr = strdup(addr);
+            addrCache[unused].status = SNMP_ADDRCACHE_USED;
+            memcpy(&addrCache[unused].lastHit, &now, sizeof(struct timeval));
+        }
+        else { /* Otherwise, replace oldest entry */
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                       NETSNMP_DS_AGENT_VERBOSE))
+                snmp_log(LOG_INFO, "Purging address from address cache: %s",
+                         addrCache[oldest].addr);
+            
+            free(addrCache[oldest].addr);
+            addrCache[oldest].addr = strdup(addr);
+            memcpy(&addrCache[oldest].lastHit, &now, sizeof(struct timeval));
+        }
+        rc = 1;
+    }
+    if ((log_addresses && (1 == rc)) ||
+        netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_VERBOSE)) {
+        snmp_log(LOG_INFO, "Received SNMP packet(s) from %s\n", addr);
+    }
+    
+    return rc;
+}
 
 /*
  * Age the entries in the address cache.  
+ *
+ * backwards compatability; not used anywhere
  */
 
 void
 netsnmp_addrcache_age(void)
 {
-    int             i = 0;
-
-    lastAddrAge = 0;
-    for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
-        if (addrCache[i].status == SNMP_ADDRCACHE_OLD) {
-            addrCache[i].status = SNMP_ADDRCACHE_UNUSED;
-            if (addrCache[i].addr != NULL) {
-                SNMP_FREE(addrCache[i].addr);
-                addrCache[i].addr = NULL;
-            }
-        }
-        if (addrCache[i].status == SNMP_ADDRCACHE_USED) {
-            addrCache[i].status = SNMP_ADDRCACHE_OLD;
-        }
-    }
+    (void)netsnmp_addrcache_add(NULL);
 }
 
 /*******************************************************************-o-******
@@ -587,7 +778,6 @@ netsnmp_agent_check_packet(netsnmp_session * session,
                            void *transport_data, int transport_data_length)
 {
     char           *addr_string = NULL;
-    int             i = 0;
 
     /*
      * Log the message and/or dump the message.
@@ -606,6 +796,14 @@ netsnmp_agent_check_packet(netsnmp_session * session,
     }
 #ifdef  USE_LIBWRAP
     if (addr_string != NULL) {
+      if ( strncmp(addr_string, "callback", 8) != 0 ) {
+          if( addr_string[0] == '[' ) { /* fix up ipv6 addr */
+              int i;
+              for( i = 1; addr_string[i] != ']'; i++ ) {
+                  addr_string[i-1] =  addr_string[i];
+              }
+              addr_string[i-1] = '\0';
+          }
         if (hosts_ctl("snmpd", STRING_UNKNOWN, addr_string, STRING_UNKNOWN)) {
             snmp_log(allow_severity, "Connection from %s\n", addr_string);
         } else {
@@ -614,8 +812,9 @@ netsnmp_agent_check_packet(netsnmp_session * session,
             SNMP_FREE(addr_string);
             return 0;
         }
+      }
     } else {
-        if (hosts_ctl("snmp", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
+        if (hosts_ctl("snmpd", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
             snmp_log(allow_severity, "Connection from <UNKNOWN>\n");
             addr_string = strdup("<UNKNOWN>");
         } else {
@@ -627,55 +826,9 @@ netsnmp_agent_check_packet(netsnmp_session * session,
 
     snmp_increment_statistic(STAT_SNMPINPKTS);
 
-    if (log_addresses || netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-						NETSNMP_DS_AGENT_VERBOSE)) {
-        for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
-            if ((addrCache[i].status != SNMP_ADDRCACHE_UNUSED) &&
-                (strcmp(addrCache[i].addr, addr_string) == 0)) {
-                break;
-            }
-        }
-
-        if (i >= SNMP_ADDRCACHE_SIZE ||
-	    netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-				   NETSNMP_DS_AGENT_VERBOSE)) {
-            /*
-             * Address wasn't in the cache, so log the packet...  
-             */
-            snmp_log(LOG_INFO, "Received SNMP packet(s) from %s\n",
-                     addr_string);
-            /*
-             * ...and try to cache the address.  
-             */
-            for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
-                if (addrCache[i].status == SNMP_ADDRCACHE_UNUSED) {
-                    if (addrCache[i].addr != NULL) {
-                        SNMP_FREE(addrCache[i].addr);
-                    }
-                    addrCache[i].addr = addr_string;
-                    addrCache[i].status = SNMP_ADDRCACHE_USED;
-                    addr_string = NULL; /* Don't free this 'temporary' string
-                                         * since it's now part of the cache */
-                    break;
-                }
-            }
-            if (i >= SNMP_ADDRCACHE_SIZE) {
-                /*
-                 * We didn't find a free slot to cache the address.  Perhaps
-                 * we should be using an LRU replacement policy here or
-                 * something.  Oh well.
-                 */
-                DEBUGMSGTL(("netsnmp_agent_check_packet",
-                            "cache overrun"));
-            }
-        } else {
-            addrCache[i].status = SNMP_ADDRCACHE_USED;
-        }
-    }
-
     if (addr_string != NULL) {
+        netsnmp_addrcache_add(addr_string);
         SNMP_FREE(addr_string);
-        addr_string = NULL;
     }
     return 1;
 }
@@ -953,9 +1106,10 @@ init_master_agent(void)
 {
     netsnmp_transport *transport;
     char           *cptr;
+    char           *st;
     char            buf[SPRINT_MAX_LEN];
 
-    /* default to turning off lookup caching */
+    /* default to a default cache size */
     netsnmp_set_lookup_cache_size(-1);
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
@@ -970,7 +1124,8 @@ init_master_agent(void)
         real_init_master();
 #endif
 #ifdef USING_SMUX_MODULE
-    real_init_smux();
+    if(should_init("smux"))
+        real_init_smux();
 #endif
 
     /*
@@ -994,7 +1149,7 @@ init_master_agent(void)
     }
 
     DEBUGMSGTL(("snmp_agent", "final port spec: %s\n", buf));
-    cptr = strtok(buf, ",");
+    cptr = strtok_r(buf, ",", &st);
     while (cptr) {
         /*
          * Specification format: 
@@ -1043,7 +1198,7 @@ init_master_agent(void)
         /*
          * Next transport please...  
          */
-        cptr = strtok(NULL, ",");
+        cptr = strtok_r(NULL, ",", &st);
     }
 
     return 0;
@@ -1075,7 +1230,7 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
         return NULL;
     }
 
-    DEBUGMSGTL(("snmp_agent","agent_sesion %08p created\n", asp));
+    DEBUGMSGTL(("snmp_agent","agent_session %08p created\n", asp));
     asp->session = session;
     asp->pdu = snmp_clone_pdu(pdu);
     asp->orig_pdu = snmp_clone_pdu(pdu);
@@ -1099,7 +1254,7 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
     if (!asp)
         return;
 
-    DEBUGMSGTL(("snmp_agent","agent_sesion %08p released\n", asp));
+    DEBUGMSGTL(("snmp_agent","agent_session %08p released\n", asp));
 
     netsnmp_remove_from_delegated(asp);
     
@@ -1120,8 +1275,6 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
         for (i = 0; i < asp->vbcount; i++) {
             netsnmp_free_request_data_sets(&asp->requests[i]);
         }
-    }
-    if (asp->requests) {
         SNMP_FREE(asp->requests);
     }
     if (asp->cache_store) {
@@ -1455,6 +1608,24 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         asp->pdu->errstat = asp->status;
         asp->pdu->errindex = asp->index;
         if (!snmp_send(asp->session, asp->pdu)) {
+            netsnmp_variable_list *var_ptr;
+            snmp_perror("send response");
+            for (var_ptr = asp->pdu->variables; var_ptr != NULL;
+                     var_ptr = var_ptr->next_variable) {
+                size_t  c_oidlen = 256, c_outlen = 0;
+                u_char *c_oid = (u_char *) malloc(c_oidlen);
+
+                if (c_oid) {
+                    if (!sprint_realloc_objid (&c_oid, &c_oidlen, &c_outlen, 1,
+ 		                               var_ptr->name,
+                                               var_ptr->name_length)) {
+                        snmp_log(LOG_ERR, "    -- %s [TRUNCATED]\n", c_oid);
+                    } else {
+                        snmp_log(LOG_ERR, "    -- %s\n", c_oid);
+                    }
+                    SNMP_FREE(c_oid);
+                }
+            }
             snmp_free_pdu(asp->pdu);
             asp->pdu = NULL;
         }
@@ -1554,6 +1725,15 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
         return 1;
     }
 
+    /*
+     * send snmpv3 authfail trap.
+     */
+    if (pdu->version  == SNMP_VERSION_3 && 
+        session->s_snmp_errno == SNMPERR_USM_AUTHENTICATIONFAILURE) {
+           send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
+           return 1;
+    } 
+	
     if (magic == NULL) {
         asp = init_agent_snmp_session(session, pdu);
         status = SNMP_ERR_NOERROR;
@@ -1913,7 +2093,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
         } else {
             n = count;
         }
-        if ((r = count - n) < 0) {
+        if ((r = count - n) <= 0) {
             r = 0;
             asp->bulkcache = NULL;
         } else {
@@ -2268,7 +2448,7 @@ netsnmp_check_outstanding_agent_requests(void)
     /*
      * deal with delegated requests
      */
-    for (asp = agent_delegated_list; asp; prev_asp = asp, asp = next_asp) {
+    for (asp = agent_delegated_list; asp; asp = next_asp) {
         next_asp = asp->next;   /* save in case we clean up asp */
         if (!netsnmp_check_for_delegated(asp)) {
 
@@ -2289,6 +2469,20 @@ netsnmp_check_outstanding_agent_requests(void)
              * continue processing or finish up 
              */
             check_delayed_request(asp);
+
+            /*
+             * if head was removed, don't drop it if it
+             * was it re-queued
+             */
+            if ((prev_asp == NULL) && (agent_delegated_list == asp)) {
+                prev_asp = asp;
+            }
+        } else {
+
+            /*
+             * asp is still on the queue
+             */
+            prev_asp = asp;
         }
     }
 
@@ -2784,6 +2978,57 @@ netsnmp_handle_request(netsnmp_agent_session *asp, int status)
     return 1;
 }
 
+/**
+ * This function calls into netsnmp_set_mode_request_error,  sets 
+ * error_value given a reqinfo->mode value.  It's used to send specific
+ * errors back to the agent to process accordingly.
+ * 
+ * If error_value is set to SNMP_NOSUCHOBJECT, SNMP_NOSUCHINSTANCE,
+ * or SNMP_ENDOFMIBVIEW the following is applicable:
+ * Sets the error_value to request->requestvb->type if 
+ * reqinfo->mode value is set to MODE_GET.  If the reqinfo->mode 
+ * value is set to MODE_GETNEXT or MODE_GETBULK the code calls 
+ * snmp_log logging an error message.
+ *
+ * Otherwise, the request->status value is checked, if it's < 0
+ * snmp_log is called with an error message and SNMP_ERR_GENERR is 
+ * assigned to request->status. If the request->status value is >= 0 the
+ * error_value is set to request->status.
+ *
+ * @param reqinfo  is a pointer to the netsnmp_agent_request_info struct.  It
+ *	contains the reqinfo->mode which is required to set error_value or
+ *	log error messages.
+ *
+ * @param request is a pointer to the netsnmp_request_info struct.  The 
+ *	error_value is set to request->requestvb->type
+ *
+ * @param error_value is the exception value you want to set, below are
+ *        possible values.
+ *      - SNMP_NOSUCHOBJECT
+ *      - SNMP_NOSUCHINSTANCE
+ *      - SNMP_ENDOFMIBVIEW
+ *      - SNMP_ERR_NOERROR
+ *      - SNMP_ERR_TOOBIG
+ *      - SNMP_ERR_NOSUCHNAME
+ *      - SNMP_ERR_BADVALUE
+ *      - SNMP_ERR_READONLY
+ *      - SNMP_ERR_GENERR
+ *      - SNMP_ERR_NOACCESS
+ *      - SNMP_ERR_WRONGTYPE
+ *      - SNMP_ERR_WRONGLENGTH
+ *      - SNMP_ERR_WRONGENCODING
+ *      - SNMP_ERR_WRONGVALUE
+ *      - SNMP_ERR_NOCREATION
+ *      - SNMP_ERR_INCONSISTENTVALUE
+ *      - SNMP_ERR_RESOURCEUNAVAILABLE
+ *      - SNMP_ERR_COMMITFAILED
+ *      - SNMP_ERR_UNDOFAILED
+ *      - SNMP_ERR_AUTHORIZATIONERROR
+ *      - SNMP_ERR_NOTWRITABLE
+ *      - SNMP_ERR_INCONSISTENTNAME
+ *
+ * @return Returns error_value under all conditions.
+ */
 int
 handle_pdu(netsnmp_agent_session *asp)
 {
@@ -3221,3 +3466,4 @@ netsnmp_set_all_requests_error(netsnmp_agent_request_info *reqinfo,
     netsnmp_request_set_error_all(requests, error_value);
     return error_value;
 }
+/** @} */

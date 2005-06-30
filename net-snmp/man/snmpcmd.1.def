@@ -27,7 +27,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPCMD 1 "25 Jul 2003" VVERSIONINFO "Net-SNMP"
+.TH SNMPCMD 1 "09 Feb 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpcmd - commands to communicate with a network entity using SNMP Requests.
@@ -456,7 +456,7 @@ That means removing a series of "standard" prefixes, if relevant,
 and breaking down the OID into the displayable pieces.  For example,
 the OID vacmSecruityModel.0.3.119.101.115 is broken down by default
 and the string hidden in the OID is shown.  The result would
-look like: vacmSecurityModel.0."test".  The -Ob option disables this
+look like: vacmSecurityModel.0."wes".  The -Ob option disables this
 feature.
 .br
 system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
@@ -570,10 +570,10 @@ There are also "upper case" versions of each of these options, which
 allow the corresponding logging mechanism to be restricted to certain
 priorities of message.  Using standard error logging as an example:
 .TP
-.B -Le pri
+.B -LE pri
 will log messages of priority 'pri' and above to standard error.
 .TP
-.B -Le p1-p2
+.B -LE p1-p2
 will log messages with priority between 'p1' and 'p2' (inclusive) to
 standard error.
 .PP
@@ -714,7 +714,7 @@ In previous releases of the UCD-SNMP package (and if using the
 .B -Iu
 option), an object identifier such as system.sysDescr.0 will be
 lookup in a single "well known" place, built into the SNMP library (or
-specified by the P@REFIX environment variable).  The standard place
+specified by the PREFIX environment variable).  The standard place
 is: .iso.org.dod.internet.mgmt.mib-2.  The identifier may alternatively be
 a complete object identifier, this is designated by a leading "dot"
 if using UCD-input style, and is the first thing tried otherwise.
@@ -736,7 +736,7 @@ that the specified MIB is loaded, i.e. it need not be mentioned in the
 option (or MIBS environment variable).
 
 .SH "ENVIRONMENT VARIABLES"
-.IP P@REFIX
+.IP PREFIX
 The standard prefix for object identifiers (if using UCD-style output).
 Defaults to .iso.org.dod.internet.mgmt.mib-2
 .IP MIBS

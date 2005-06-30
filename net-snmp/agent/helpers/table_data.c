@@ -51,7 +51,8 @@ int
 netsnmp_table_data_add_row(netsnmp_table_data *table,
                            netsnmp_table_row *row)
 {
-    netsnmp_table_row *nextrow, *prevrow;
+    int rc, dup = 0;
+    netsnmp_table_row *nextrow = NULL, *prevrow;
 
     if (!row || !table)
         return SNMPERR_GENERR;
@@ -70,32 +71,54 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
 
     if (!row->index_oid) {
         snmp_log(LOG_ERR,
-                 "illegal data attempted to be added to table %s\n",
+                 "illegal data attempted to be added to table %s (no index)\n",
                  table->name);
         return SNMPERR_GENERR;
     }
 
     /*
+     * check for simple append
+     */
+    if ((prevrow = table->last_row) != NULL) {
+        rc = snmp_oid_compare(prevrow->index_oid, prevrow->index_oid_len,
+                              row->index_oid, row->index_oid_len);
+        if (0 == rc)
+            dup = 1;
+    }
+    else
+        rc = 1;
+    
+    /*
+     * if no last row, or newrow < last row, search the table and
      * insert it into the table in the proper oid-lexographical order 
      */
-    for (nextrow = table->first_row, prevrow = NULL;
-         nextrow != NULL; prevrow = nextrow, nextrow = nextrow->next) {
-        if (nextrow->index_oid &&
-            snmp_oid_compare(nextrow->index_oid, nextrow->index_oid_len,
-                             row->index_oid, row->index_oid_len) > 0)
-            break;
-        if (nextrow->index_oid &&
-            snmp_oid_compare(nextrow->index_oid, nextrow->index_oid_len,
-                             row->index_oid, row->index_oid_len) == 0) {
-            /*
-             * exact match.  Duplicate entries illegal 
-             */
-            snmp_log(LOG_WARNING,
-                     "duplicate table data attempted to be entered\n");
-            return SNMPERR_GENERR;
+    if (rc > 0) {
+        for (nextrow = table->first_row, prevrow = NULL;
+             nextrow != NULL; prevrow = nextrow, nextrow = nextrow->next) {
+            if (NULL == nextrow->index_oid) {
+                DEBUGMSGT(("table_data_add_data", "row doesn't have index!\n"));
+                /** xxx-rks: remove invalid row? */
+                continue;
+            }
+            rc = snmp_oid_compare(nextrow->index_oid, nextrow->index_oid_len,
+                                  row->index_oid, row->index_oid_len);
+            if(rc > 0)
+                break;
+            if (0 == rc) {
+                dup = 1;
+                break;
+            }
         }
     }
 
+    if (dup) {
+        /*
+         * exact match.  Duplicate entries illegal 
+         */
+        snmp_log(LOG_WARNING,
+                 "duplicate table data attempted to be entered. row exists\n");
+        return SNMPERR_GENERR;
+    }
 
     /*
      * ok, we have the location of where it should go 
@@ -114,6 +137,8 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
 
     if (NULL == row->prev)      /* it's the (new) first row */
         table->first_row = row;
+    if (NULL == row->next)      /* it's the last row */
+        table->last_row = row;
 
     DEBUGMSGTL(("table_data_add_data", "added something...\n"));
 
@@ -140,6 +165,8 @@ netsnmp_table_data_remove_row(netsnmp_table_data *table,
 
     if (row->next)
         row->next->prev = row->prev;
+    else
+        table->last_row = row;
 
     return row;
 }
@@ -507,9 +534,13 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                  *  user-provided handlers to override the dataset handler
                  *  if this proves necessary.
                  */
-                if (requests->requestvb->type == ASN_NULL ||
-                    requests->requestvb->type == SNMP_NOSUCHINSTANCE) {
-                    requests->requestvb->type = ASN_PRIV_RETRY;
+                if (request->requestvb->type == ASN_NULL ||
+                    request->requestvb->type == SNMP_NOSUCHINSTANCE) {
+                    request->requestvb->type = ASN_PRIV_RETRY;
+                }
+                    /* XXX - Move on to the next object */
+                if (request->requestvb->type == SNMP_NOSUCHOBJECT) {
+                    request->requestvb->type = ASN_PRIV_RETRY;
                 }
             }
             reqinfo->mode = oldmode;
@@ -621,6 +652,19 @@ netsnmp_table_data_clone_row(netsnmp_table_row *row)
     }
 
     return newrow;
+}
+
+int
+netsnmp_table_data_num_rows(netsnmp_table_data *table)
+{
+    int i=0;
+    netsnmp_table_row *row;
+    if (!table)
+        return 0;
+    for (row = table->first_row; row; row = row->next) {
+        i++;
+    }
+    return i;
 }
 
 /*

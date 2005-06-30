@@ -7,7 +7,7 @@
 #     modify it under the same terms as Perl itself.
 
 package SNMP;
-$VERSION = '5.1';   # current release version number
+$VERSION = '5.1.3';   # current release version number
 
 require Exporter;
 require DynaLoader;
@@ -195,7 +195,7 @@ sub translateObj {
    SNMP::init_snmp("perl");
    my $obj = shift;
    my $temp = shift;
-   my $include_module_name = shift;
+   my $include_module_name = shift || "0";
    my $long_names = $temp || $SNMP::use_long_names;
 
    return undef if not defined $obj;
@@ -378,6 +378,37 @@ sub _tie {
     tie($_[0],$_[1],$_[2],$_[3]);
 }
 
+sub split_vars {
+    # This sub holds the regex that is used throughout this module  
+    #  to parse the base part of an OID from the IID.
+    #  eg: portName.9.30 -> ['portName','9.30'] 
+    my $vars = shift;
+
+    # The regex was changed to this simple form by patch 722075 for some reason.
+    # Testing shows now (2/05) that it is not needed, and that the long expression 
+    # works fine.  AB
+    # my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
+    
+    # These following two are the same.  Broken down for easier maintenance
+    # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+    my ($tag, $iid) =
+        ($vars =~ /^(               # Capture $1
+                    # 1. either this 5.5.5.5
+                     (?:\.\d+)+     # for grouping, won't increment $1
+                    |
+                    # 2. or asdf-asdf-asdf-asdf
+                     (?:            # grouping again
+                        \w+         # needs some letters followed by
+                        (?:\-*\w+)+ #  zero or more dashes, one or more letters
+                     )
+                    )
+                    \.?             # optionally match a dot
+                    (.*)            # whatever is left in the string is our iid ($2)
+                   $/x
+    );
+    return [$tag,$iid];
+}
+
 package SNMP::Session;
 
 sub new {
@@ -452,13 +483,13 @@ sub new {
        $this->{Context} ||= 
 	   NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		         NetSNMP::default_store::NETSNMP_DS_LIB_CONTEXT()) || '';
-       $this->{AuthProto} ||= 'MD5'; # defaults XXX
+       $this->{AuthProto} ||= 'DEFAULT'; # defaults to the library's default
        $this->{AuthPass} ||=
        NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		     NetSNMP::default_store::NETSNMP_DS_LIB_AUTHPASSPHRASE()) ||
        NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		     NetSNMP::default_store::NETSNMP_DS_LIB_PASSPHRASE()) || '';
-       $this->{PrivProto} ||= 'DES';  # defaults XXX
+       $this->{PrivProto} ||= 'DEFAULT';  # defaults to hte library's default
        $this->{PrivPass} ||=
        NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		     NetSNMP::default_store::NETSNMP_DS_LIB_PRIVPASSPHRASE()) ||
@@ -552,10 +583,11 @@ sub set {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);     
+     #$varbind_list_ref = [[$tag, $iid, $val]];
+     my $split_vars = SNMP::split_vars($vars);
      my $val = shift;
-     $varbind_list_ref = [[$tag, $iid, $val]];
+     push @$split_vars,$val;
+     $varbind_list_ref = [$split_vars];
    }
    my $cb = shift;
 
@@ -575,9 +607,7 @@ sub get {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -648,15 +678,7 @@ sub gettable {
 
 		if($row_oid =~ m/($table_root_oid)/) {
 
-			if(($row_type eq "OCTETSTR") && ($row_value =~ m/^\W/)) {
-
-				# If the value returned is an octet string and
-				# includes non-word or non-digit values, unpack
-				# them to produce cleartext
-
-				$row_value = unpack("H*", $row_value);
-
-			} elsif($row_type eq "OBJECTID") {
+  		        if ($row_type eq "OBJECTID") {
 
 				# If the value returned is an OID, translate this
 				# back in to a textual OID
@@ -695,9 +717,7 @@ sub fget {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -727,9 +747,7 @@ sub getnext {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -752,9 +770,7 @@ sub fgetnext {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -786,9 +802,7 @@ sub getbulk {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -1126,6 +1140,7 @@ my %node_elements =
      defaultValue => 0, # returns default value
      description => 0, # returns DESCRIPTION ($SNMP::save_descriptions must
                     # be set prior to MIB initialization/parsing
+     augments => 0, # textual identifier of augmented object
     );
 
 # sub TIEHASH - implemented in SNMP.xs
@@ -1781,6 +1796,15 @@ methods returned as numeric OID's rather than descriptions.
 UseLongNames will be set so that the entire OID will be
 returned.  Set on a per-session basis (see UseNumeric).
 
+=item $SNMP::best_guess
+
+default '0'.  This setting controls how <tags> are 
+parsed.  Setting to 0 causes a regular lookup.  Setting 
+to 1 causes a regular expression match (defined as -Ib 
+in snmpcmd) and setting to 2 causes a random access 
+lookup (defined as -IR in snmpcmd).  Can also be set 
+on a per session basis (see BestGuess)
+
 =item $SNMP::save_descriptions
 
 default '0',set non-zero to have mib parser save
@@ -1952,18 +1976,22 @@ all known modules to be loaded.
 
 B<*Not Implemented*>
 
-=item &SNMP::translateObj(<var>[,arg])
+=item &SNMP::translateObj(<var>[,arg,[arg]])
 
-will convert a text obj tag to an OID and
-vice-versa. any iid suffix is retained numerically.
-default behaviour when converting a numeric OID
-to text form is to return leaf indentifier only
-(e.g.,'sysDescr') but when $SNMP::use_long_names
-is non-zero or a non-zero second arg is supplied
-will return longer textual identifier. If no Mib
-is loaded when called and $SNMP::auto_init_mib is
-enabled then the Mib will be loaded. Will return
-'undef' upon failure.
+will convert a text obj tag to an OID and vice-versa.
+Any iid suffix is retained numerically.  Default
+behaviour when converting a numeric OID to text
+form is to return leaf identifier only 
+(e.g.,'sysDescr') but when $SNMP::use_long_names 
+is non-zero or a non-zero second arg is supplied it 
+will return a longer textual identifier.  An optional 
+third argument of non-zero will cause the module name 
+to be prepended to the text name (e.g. 
+'SNMPv2-MIB::sysDescr').  When converting a text obj, 
+the $SNMP::best_guess option is used.  If no Mib is 
+loaded when called and $SNMP::auto_init_mib is enabled 
+then the Mib will be loaded. Will return 'undef' upon 
+failure.
 
 =item &SNMP::getType(<var>)
 
@@ -2059,7 +2087,7 @@ net-snmp-users@net-snmp-users@lists.sourceforge.net
 please give sufficient information to analyze the problem (OS type,
 versions for OS/Perl/UCD/compiler, complete error output, etc.)
 
-=head1 Acknowledments
+=head1 Acknowledgements
 
 Many thanks to all those who supplied patches, suggestions and
 feedback.
@@ -2079,7 +2107,13 @@ feedback.
  Wayne Marquette
  Scott Schumate
  Michael Slifcak
+ Srivathsan Srinivasagopalan
+ Bill Fenner
+ Jef Peeraer
+ Daniel Hagerty
+ Karl "Rat" Schilke and Electric Lightwave, Inc.
  Perl5 Porters
+ Alex Burger
 
 Apologies to any/all who's patch/feature/request was not mentioned or
 included - most likely it was lost when paying work intruded on my
@@ -2101,4 +2135,5 @@ bugs, comments, questions to net-snmp-users@lists.sourceforge.net
      Rights Reserved.  This program is free software; you can
      redistribute it and/or modify it under the same terms as Perl
      itself.
+
 =cut

@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
@@ -27,6 +38,11 @@
 #endif
 #if HAVE_NETDB_H
 #include <netdb.h>
+#endif
+
+#if HAVE_WINSOCK_H
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 
 #if HAVE_DMALLOC_H
@@ -223,6 +239,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
      * response.  Linux turns the failed ICMP response into an error message
      * and return value, unlike all other OS's.  
      */
+    if (0 == netsnmp_os_prematch("Linux","2.4"))
     {
         int             one = 1;
         setsockopt(t->sock, SOL_SOCKET, SO_BSDCOMPAT, (void *) &one,
@@ -366,10 +383,10 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
     addr->sin_addr.s_addr = htonl(INADDR_ANY);
     addr->sin_family = AF_INET;
     if (remote_port > 0) {
-        addr->sin_port = htons(remote_port);
+        addr->sin_port = htons((u_short)remote_port);
     } else if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 				  NETSNMP_DS_LIB_DEFAULT_PORT) > 0) {
-        addr->sin_port = htons(netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+        addr->sin_port = htons((u_short)netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 						 NETSNMP_DS_LIB_DEFAULT_PORT));
     } else {
         addr->sin_port = htons(SNMP_PORT);
@@ -396,7 +413,7 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
             if (atoi(cp) != 0) {
                 DEBUGMSGTL(("netsnmp_sockaddr_in",
                             "port number suffix :%d\n", atoi(cp)));
-                addr->sin_port = htons(atoi(cp));
+                addr->sin_port = htons((u_short)atoi(cp));
             }
         }
 
@@ -407,7 +424,7 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
              */
             DEBUGMSGTL(("netsnmp_sockaddr_in", "totally numeric: %d\n",
                         atoi(peername)));
-            addr->sin_port = htons(atoi(peername));
+            addr->sin_port = htons((u_short)atoi(peername));
         } else if (inet_addr(peername) != INADDR_NONE) {
             /*
              * It looks like an IP address.  
@@ -477,26 +494,28 @@ com2SecEntry   *com2SecList = NULL, *com2SecListLast = NULL;
 void
 netsnmp_udp_parse_security(const char *token, char *param)
 {
-    char           *secName = NULL, *community = NULL, *source = NULL;
+    char           secName[VACMSTRINGLEN];
+    char           source[VACMSTRINGLEN];
+    char           community[VACMSTRINGLEN];
     char           *cp = NULL;
     const char     *strmask = NULL;
     com2SecEntry   *e = NULL;
-    unsigned long   network = 0, mask = 0;
+    in_addr_t   network = 0, mask = 0;
 
     /*
      * Get security, source address/netmask and community strings.  
      */
 
-    secName = strtok(param, "\t\n ");
-    if (secName == NULL) {
+    cp = copy_nword(param, secName, sizeof(secName));
+    if (secName[0] == '\0') {
         config_perror("missing NAME parameter");
         return;
     } else if (strlen(secName) > (VACMSTRINGLEN - 1)) {
         config_perror("security name too long");
         return;
     }
-    source = strtok(NULL, "\t\n ");
-    if (source == NULL) {
+    cp = copy_nword(cp, source, sizeof(source));
+    if (source[0] == '\0') {
         config_perror("missing SOURCE parameter");
         return;
     } else if (strncmp(source, EXAMPLE_NETWORK, strlen(EXAMPLE_NETWORK)) ==
@@ -504,8 +523,8 @@ netsnmp_udp_parse_security(const char *token, char *param)
         config_perror("example config NETWORK not properly configured");
         return;
     }
-    community = strtok(NULL, "\t\n ");
-    if (community == NULL) {
+    cp = copy_nword(cp, community, sizeof(community));
+    if (community[0] == '\0') {
         config_perror("missing COMMUNITY parameter\n");
         return;
     } else
@@ -546,7 +565,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
          */
         network = inet_addr(source);
 
-        if (network == (unsigned long) -1) {
+        if (network == (in_addr_t) -1) {
             /*
              * Nope, wasn't a dotted quad.  Must be a hostname.  
              */
@@ -560,7 +579,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
                     config_perror("no IP address for source hostname");
                     return;
                 }
-                network = *((unsigned long *) hp->h_addr);
+                network = *((in_addr_t *) hp->h_addr);
             }
 #else                           /*HAVE_GETHOSTBYNAME */
             /*
@@ -587,7 +606,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
              * Try to interpret mask as a dotted quad.  
              */
             mask = inet_addr(strmask);
-            if (mask == (unsigned long) -1 &&
+            if (mask == (in_addr_t) -1 &&
                 strncmp(strmask, "255.255.255.255", 15) != 0) {
                 config_perror("bad mask");
                 return;
@@ -687,6 +706,10 @@ netsnmp_udp_getSecName(void *opaque, int olength,
     struct sockaddr_in *from = (struct sockaddr_in *) opaque;
     char           *ztcommunity = NULL;
 
+    if (secName != NULL) {
+        *secName = NULL;  /* Haven't found anything yet */
+    }
+
     /*
      * Special case if there are NO entries (as opposed to no MATCHING
      * entries).  
@@ -694,9 +717,6 @@ netsnmp_udp_getSecName(void *opaque, int olength,
 
     if (com2SecList == NULL) {
         DEBUGMSGTL(("netsnmp_udp_getSecName", "no com2sec entries\n"));
-        if (secName != NULL) {
-            *secName = NULL;
-        }
         return 0;
     }
 
@@ -709,9 +729,6 @@ netsnmp_udp_getSecName(void *opaque, int olength,
         from->sin_family != AF_INET) {
         DEBUGMSGTL(("netsnmp_udp_getSecName",
 		    "no IPv4 source address in PDU?\n"));
-        if (secName != NULL) {
-            *secName = NULL;
-        }
         return 1;
     }
 
@@ -768,9 +785,10 @@ netsnmp_udp_create_ostring(const u_char * o, size_t o_len, int local)
     struct sockaddr_in addr;
 
     if (o_len == 6) {
+        unsigned short porttmp = (o[4] << 8) + o[5];
         addr.sin_family = AF_INET;
         memcpy((u_char *) & (addr.sin_addr.s_addr), o, 4);
-        addr.sin_port = ntohs((o[4] << 8) + o[5]);
+        addr.sin_port = htons(porttmp);
         return netsnmp_udp_transport(&addr, local);
     }
     return NULL;

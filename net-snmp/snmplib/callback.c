@@ -1,7 +1,21 @@
 /*
  * callback.c: A generic callback mechanism 
  */
-
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/** @defgroup callback A generic callback mechanism 
+ *  @ingroup library
+ * 
+ *  @{
+ */
 #include <net-snmp/net-snmp-config.h>
 #include <sys/types.h>
 #include <stdio.h>
@@ -54,6 +68,40 @@ init_callbacks(void)
     DEBUGMSGTL(("callback", "initialized\n"));
 }
 
+/**
+ * This function registers a generic callback function.  The major and
+ * minor values are used to set the new_callback function into a global 
+ * static multi-dimensional array of type struct snmp_gen_callback.  
+ * The function makes sure to append this callback function at the end
+ * of the link list, snmp_gen_callback->next.
+ *
+ * @param major is the SNMP callback major type used
+ * 		- SNMP_CALLBACK_LIBRARY
+ *              - SNMP_CALLBACK_APPLICATION
+ *
+ * @param minor is the SNMP callback minor type used
+ *		- SNMP_CALLBACK_POST_READ_CONFIG
+ *		- SNMP_CALLBACK_STORE_DATA	        
+ *		- SNMP_CALLBACK_SHUTDOWN		        
+ *		- SNMP_CALLBACK_POST_PREMIB_READ_CONFIG	
+ *		- SNMP_CALLBACK_LOGGING			
+ *		- SNMP_CALLBACK_SESSION_INIT	       
+ *
+ * @param new_callback is the callback function that is registered.
+ *
+ * @param arg when not NULL is a void pointer used whenever new_callback 
+ *	function is exercised.
+ *
+ * @return 
+ *	Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >=
+ *	MAX_CALLBACK_SUBIDS or a snmp_gen_callback pointer could not be 
+ *	allocated, otherwise SNMPERR_SUCCESS is returned.
+ * 	- #define MAX_CALLBACK_IDS    2
+ *	- #define MAX_CALLBACK_SUBIDS 16
+ *
+ * @see snmp_call_callbacks
+ * @see snmp_unregister_callback
+ */
 int
 snmp_register_callback(int major, int minor, SNMPCallback * new_callback,
                        void *arg)
@@ -97,6 +145,23 @@ netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
     }
 }
 
+/**
+ * This function calls the callback function for each registered callback of
+ * type major and minor.
+ *
+ * @param major is the SNMP callback major type used
+ *
+ * @param minor is the SNMP callback minor type used
+ *
+ * @param caller_arg is a void pointer which is sent in as the callback's 
+ *	serverarg parameter, if needed.
+ *
+ * @return Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or
+ * minor is >= MAX_CALLBACK_SUBIDS, otherwise SNMPERR_SUCCESS is returned.
+ *
+ * @see snmp_register_callback
+ * @see snmp_unregister_callback
+ */
 int
 snmp_call_callbacks(int major, int minor, void *caller_arg)
 {
@@ -164,6 +229,32 @@ snmp_callback_available(int major, int minor)
     return SNMPERR_GENERR;
 }
 
+/**
+ * This function unregisters a specified callback function given a major
+ * and minor type.
+ *
+ * Note: no bound checking on major and minor.
+ *
+ * @param major is the SNMP callback major type used
+ *
+ * @param minor is the SNMP callback minor type used
+ *
+ * @param target is the callback function that will be unregistered.
+ *
+ * @param arg is a void pointer used for comparison against the registered 
+ *	callback's sc_client_arg variable.
+ *
+ * @param matchargs is an integer used to bypass the comparison of arg and the
+ *	callback's sc_client_arg variable only when matchargs is set to 0.
+ *
+ *
+ * @return
+ *        Returns the number of callbacks that were unregistered.
+ *
+ * @see snmp_register_callback
+ * @see snmp_call_callbacks
+ */
+
 int
 snmp_unregister_callback(int major, int minor, SNMPCallback * target,
                          void *arg, int matchargs)
@@ -190,25 +281,75 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
     return count;
 }
 
+/*
+ * find and clear client args that match ptr
+ *
+ * @param ptr  pointer to search for
+ * @param i    callback id to start at
+ * @param j    callback subid to start at
+ */
+int
+netsnmp_callback_clear_client_arg(void *ptr, int i, int j)
+{
+    struct snmp_gen_callback *scp = NULL;
+    int rc = 0;
+
+    for (; i < MAX_CALLBACK_IDS; i++) {
+        for (; j < MAX_CALLBACK_SUBIDS; j++) {
+            scp = thecallbacks[i][j]; 
+            while (scp != NULL) {
+                if ((NULL != scp->sc_callback) &&
+                    (scp->sc_client_arg != NULL) &&
+                    (scp->sc_client_arg == ptr)) {
+                    scp->sc_client_arg = NULL;
+                    ++rc;
+                }
+                scp = scp->next;
+            }
+        }
+    }
+
+    if (0 != rc) {
+        DEBUGMSGTL(("callback", "removed %d client args\n", rc));
+    }
+
+    return rc;
+}
+
 void
 clear_callback(void)
 {
     unsigned int i = 0, j = 0; 
-    struct snmp_gen_callback *scp = NULL, *next = NULL;
+    struct snmp_gen_callback *scp = NULL;
 
     DEBUGMSGTL(("callback", "clear callback\n"));
     for (i = 0; i < MAX_CALLBACK_IDS; i++) {
-	for (j = 0; j < MAX_CALLBACK_SUBIDS; j++) {
-	    scp = thecallbacks[i][j]; 
-	    while (scp != NULL) {
-		next = scp->next;
-		if (scp->sc_client_arg != NULL)
-		    SNMP_FREE(scp->sc_client_arg);
-		SNMP_FREE(scp);
-		scp = next;
-	    }
-	    thecallbacks[i][j] = NULL;
-	}
+        for (j = 0; j < MAX_CALLBACK_SUBIDS; j++) {
+            scp = thecallbacks[i][j]; 
+            while (scp != NULL) {
+                thecallbacks[i][j] = scp->next;
+                /*
+                 * if there is a client arg, check for duplicates
+                 * and then free it.
+                 */
+               if ((NULL != scp->sc_callback) &&
+                    (scp->sc_client_arg != NULL)) {
+                    void *tmp_arg;
+                    /*
+                     * save the client arg, then set it to null so that it
+                     * won't look like a duplicate, then check for duplicates
+                     * starting at the current i,j (earlier dups should have
+                     * already been found) and free the pointer.
+                     */
+                   tmp_arg = scp->sc_client_arg;
+                   scp->sc_client_arg = NULL;
+                   netsnmp_callback_clear_client_arg(tmp_arg, i, j);
+                   free(tmp_arg);
+               }
+               SNMP_FREE(scp);
+               scp = thecallbacks[i][j];
+            }
+        }
     }
 }
 
@@ -217,3 +358,4 @@ snmp_callback_list(int major, int minor)
 {
     return (thecallbacks[major][minor]);
 }
+/**  @} */

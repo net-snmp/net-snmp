@@ -2,6 +2,10 @@
  * snmp_client.c - a toolkit of common functions for an SNMP client.
  *
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /**********************************************************************
 	Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
 
@@ -23,7 +27,18 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
+/** @defgroup snmp_client various PDU processing routines
+ *  @ingroup library
+ * 
+ *  @{
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
@@ -66,6 +81,9 @@ SOFTWARE.
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#if HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -81,7 +99,7 @@ SOFTWARE.
 #include <net-snmp/library/snmp_client.h>
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/mib.h>
-
+#include <net-snmp/net-snmp-includes.h>
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -283,7 +301,8 @@ snmp_reset_var_buffers(netsnmp_variable_list * var)
             var->name_length = 0;
         }
         if (var->val.string != var->buf) {
-            free(var->val.string);
+            if (NULL != var->val.string)
+                free(var->val.string);
             var->val.string = var->buf;
             var->val_len = 0;
         }
@@ -635,6 +654,21 @@ snmp_set_var_objid(netsnmp_variable_list * vp,
     return 0;
 }
 
+/**
+ * snmp_set_var_typed_value is used to set data into the netsnmp_variable_list
+ * structure.  Used to return data to the snmp request via the
+ * netsnmp_request_info structure's requestvb pointer.
+ *
+ * @param newvar   the structure gets populated with the given data, type,
+ *                 val_str, and val_len.
+ * @param type     is the asn data type to be copied
+ * @param val_str  is a buffer containing the value to be copied into the
+ *                 newvar structure. 
+ * @param val_len  the length of val_str
+ * 
+ * @return returns 0 on success and 1 on a malloc error
+ */
+
 int
 snmp_set_var_typed_value(netsnmp_variable_list * newvar, u_char type,
                          const u_char * val_str, size_t val_len)
@@ -682,41 +716,151 @@ find_varbind_of_type(netsnmp_variable_list * var_ptr, u_char type)
  */
 
 int
-snmp_set_var_value(netsnmp_variable_list * newvar,
-                   const u_char * val_str, size_t val_len)
+snmp_set_var_value(netsnmp_variable_list * vars,
+                   const u_char * value, size_t len)
 {
+    int             largeval = 1;
+    const long     *val_long = NULL;
+    const int      *val_int  = NULL;
+    const u_int    *val_uint  = NULL;
+
     /*
      * xxx-rks: why the unconditional free? why not use existing
-     * memory, if val_len < newvar->val_len ?
+     * memory, if len < vars->val_len ?
      */
-    if (newvar->val.string && newvar->val.string != newvar->buf) {
-        free(newvar->val.string);
+    if (vars->val.string && vars->val.string != vars->buf) {
+        free(vars->val.string);
     }
-
-    newvar->val.string = 0;
-    newvar->val_len = 0;
+    vars->val.string = 0;
+    vars->val_len = 0;
 
     /*
-     * need a pointer and a length to copy a string value. 
+     * use built-in storage for smaller values 
      */
-    if (val_str && val_len) {
-        if (val_len <= sizeof(newvar->buf))
-            newvar->val.string = newvar->buf;
-        else {
-            newvar->val.string = (u_char *) malloc(val_len);
-            if (!newvar->val.string)
-                return 1;
-        }
-        memmove(newvar->val.string, val_str, val_len);
-        newvar->val_len = val_len;
-    } else if (val_str) {
-        /*
-         * NULL STRING != NULL ptr 
-         */
-        newvar->val.string = newvar->buf;
-        newvar->val.string[0] = '\0';
-        newvar->val_len = 0;
+    if (len <= (sizeof(vars->buf) - 1)) {
+        vars->val.string = (u_char *) vars->buf;
+        largeval = 0;
     }
+
+    if ((0 == len) || (NULL == value)) {
+        vars->val.string[0] = 0;
+        return 0;
+    }
+
+    vars->val_len = len;
+    switch (vars->type) {
+    case ASN_INTEGER:
+    case ASN_UNSIGNED:
+    case ASN_TIMETICKS:
+    case ASN_IPADDRESS:
+    case ASN_COUNTER:
+        if (value) {
+            if (largeval) {
+                snmp_log(LOG_ERR,"bad size for integer-like type (%d)\n",
+                         vars->val_len);
+                return (1);
+            } else if (vars->val_len == sizeof(int)) {
+                if (ASN_INTEGER == vars->type) {
+                    val_int = (const int *) value;
+                    *(vars->val.integer) = (long) *val_int;
+                } else {
+                    val_uint = (const u_int *) value;
+                    *(vars->val.integer) = (long) *val_uint;
+                }
+            } else {
+                val_long = (const long *) value;
+                *(vars->val.integer) = *val_long;
+            }
+        }
+        vars->val_len = sizeof(long);
+        break;
+
+    case ASN_OBJECT_ID:
+    case ASN_PRIV_IMPLIED_OBJECT_ID:
+    case ASN_PRIV_INCL_RANGE:
+    case ASN_PRIV_EXCL_RANGE:
+        if (largeval) {
+            vars->val.objid = (oid *) malloc(vars->val_len);
+        }
+        if (vars->val.objid == NULL) {
+            snmp_log(LOG_ERR,"no storage for OID\n");
+            return 1;
+        }
+        memmove(vars->val.objid, value, vars->val_len);
+        break;
+
+    case ASN_PRIV_IMPLIED_OCTET_STR:
+    case ASN_OCTET_STR:
+    case ASN_BIT_STR:
+    case ASN_OPAQUE:
+    case ASN_NSAP:
+        if (largeval) {
+            vars->val.string = (u_char *) malloc(vars->val_len + 1);
+        }
+        if (vars->val.string == NULL) {
+            snmp_log(LOG_ERR,"no storage for OID\n");
+            return 1;
+        }
+        memmove(vars->val.string, value, vars->val_len);
+        /*
+         * Make sure the string is zero-terminated; some bits of code make
+         * this assumption.  Easier to do this here than fix all these wrong
+         * assumptions.  
+         */
+        vars->val.string[vars->val_len] = '\0';
+        break;
+
+    case SNMP_NOSUCHOBJECT:
+    case SNMP_NOSUCHINSTANCE:
+    case SNMP_ENDOFMIBVIEW:
+    case ASN_NULL:
+        vars->val_len = 0;
+        vars->val.string = NULL;
+        break;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+    case ASN_OPAQUE_U64:
+    case ASN_OPAQUE_I64:
+#endif                          /* OPAQUE_SPECIAL_TYPES */
+    case ASN_COUNTER64:
+        if (largeval) {
+            snmp_log(LOG_ERR,"bad size for counter 64 (%d)\n",
+                     vars->val_len);
+            return (1);
+        }
+        vars->val_len = sizeof(struct counter64);
+        memmove(vars->val.counter64, value, vars->val_len);
+        break;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+    case ASN_OPAQUE_FLOAT:
+        if (largeval) {
+            snmp_log(LOG_ERR,"bad size for opaque float (%d)\n",
+                     vars->val_len);
+            return (1);
+        }
+        vars->val_len = sizeof(float);
+        memmove(vars->val.floatVal, value, vars->val_len);
+        break;
+
+    case ASN_OPAQUE_DOUBLE:
+        if (largeval) {
+            snmp_log(LOG_ERR,"bad size for opaque double (%d)\n",
+                     vars->val_len);
+            return (1);
+        }
+        vars->val_len = sizeof(double);
+        memmove(vars->val.doubleVal, value, vars->val_len);
+        break;
+
+#endif                          /* OPAQUE_SPECIAL_TYPES */
+
+    default:
+        snmp_log(LOG_ERR,"no storage for OID\n");
+        snmp_set_detail("Internal error in type switching\n");
+        return (1);
+    }
+
     return 0;
 }
 
@@ -788,7 +932,7 @@ snmp_synch_response_cb(netsnmp_session * ss,
                 if (errno == EINTR) {
                     continue;
                 } else {
-                    snmp_errno = SNMPERR_GENERR;
+                    snmp_errno = SNMPERR_GENERR;    /*MTCRITICAL_RESOURCE */
                     /*
                      * CAUTION! if another thread closed the socket(s)
                      * waited on here, the session structure was freed.
@@ -867,7 +1011,7 @@ snmp_sess_synch_response(void *sessp,
                 if (errno == EINTR) {
                     continue;
                 } else {
-                    snmp_errno = SNMPERR_GENERR;
+                    snmp_errno = SNMPERR_GENERR;    /*MTCRITICAL_RESOURCE */
                     /*
                      * CAUTION! if another thread closed the socket(s)
                      * waited on here, the session structure was freed.
@@ -923,3 +1067,4 @@ snmp_errstring(int errstat)
         return "Unknown Error";
     }
 }
+/** @} */
