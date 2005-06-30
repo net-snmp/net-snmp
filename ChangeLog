@@ -1,5 +1,50 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.0.10 -> V5.0.10.1
+
+2005-06-29 17:01  hardaker
+
+   * agent/Makefile.depend,
+     agent/helpers/Makefile.depend,
+     agent/mibgroup/Makefile.depend,
+     apps/snmpnetstat/Makefile.depend,
+     apps/Makefile.depend, snmplib/Makefile.depend
+:
+
+   make depend
+
+2005-06-29 17:00  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_bulk_to_next.3
+, netsnmp_debug.3, netsnmp_handler.3
+, netsnmp_instance.3,
+     netsnmp_library.3, netsnmp_mib_utilities.3
+, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3, netsnmp_old_api.3
+, netsnmp_read_only.3,
+     netsnmp_scalar.3, netsnmp_serialize.3
+, netsnmp_table.3,
+     netsnmp_table_array.3, netsnmp_table_data.3
+, netsnmp_table_dataset.3,
+     netsnmp_table_iterator.3, netsnmp_todo.3
+, netsnmp_watcher.3:
+
+   documentation update
+
+2005-06-29 16:54  hardaker
+
+   * configure.in, configure:
+
+   version update
+
+2005-06-29 16:53  hardaker
+
+   * snmp_api.c
+
+   Applied the security patch fixing DoS problems over socket streams
+
+-------------------------------------------------------------------------------
+
 Changes: V5.0.9 -> V5.0.10
 
 2005-06-10 09:46  hardaker
