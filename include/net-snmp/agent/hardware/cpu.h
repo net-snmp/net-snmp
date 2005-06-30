@@ -1,5 +1,16 @@
 typedef struct netsnmp_cpu_info_s netsnmp_cpu_info;
 
+                 /* For rolling averages */
+struct netsnmp_cpu_history {
+     long user_hist;
+     long sys_hist;
+     long idle_hist;
+     long nice_hist;
+     long total_hist;
+     long ctx_hist;
+     long intr_hist;
+};
+
 struct netsnmp_cpu_info_s {
      int  idx;
                  /* For hrDeviceTable */
@@ -24,6 +35,8 @@ struct netsnmp_cpu_info_s {
      long swapOut;
      long nInterrupts;
      long nCtxSwitches;
+
+     struct netsnmp_cpu_history *history;
 
      netsnmp_cpu_info *next;
 };
