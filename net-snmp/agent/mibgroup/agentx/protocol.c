@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
@@ -227,7 +238,8 @@ agentx_realloc_build_oid(u_char ** buf, size_t * buf_len, size_t * out_len,
      * 'Compact' internet OIDs 
      */
     if (name_len >= 5 && (name[0] == 1 && name[1] == 3 &&
-                          name[2] == 6 && name[3] == 1)) {
+                          name[2] == 6 && name[3] == 1 &&
+                          name[4] > 0 && name[4] < 256)) {
         prefix = name[4];
         name += 5;
         name_len -= 5;
@@ -1088,7 +1100,9 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
     u_int           n_subid;
     u_int           prefix;
     int             i;
+    int             int_offset;
     oid            *oid_ptr = oid_buf;
+    u_int          *int_ptr = (u_int *)oid_buf;
     u_char         *buf_ptr = data;
 
     if (*length < 4) {
@@ -1114,18 +1128,21 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
     prefix = data[1];
     if (inc)
         *inc = data[2];
+    int_offset = sizeof(oid)/4;
 
     buf_ptr += 4;
     *length -= 4;
 
+    DEBUGMSG(("djp", "  parse_oid\n"));
+    DEBUGMSG(("djp", "  sizeof(oid) = %d\n", sizeof(oid)));
     if (n_subid == 0 && prefix == 0) {
         /*
          * Null OID 
          */
-        *oid_ptr = 0;
-        oid_ptr++;
-        *oid_ptr = 0;
-        oid_ptr++;
+        *int_ptr = 0;
+        int_ptr++;
+        *int_ptr = 0;
+        int_ptr++;
         *oid_len = 2;
         DEBUGPRINTINDENT("dumpv_recv");
         DEBUGMSG(("dumpv_recv", "OID: NULL (0.0)\n"));
@@ -1134,27 +1151,45 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
     }
 
 
+#ifdef WORDS_BIGENDIAN
+# define endianoff 1
+#else
+# define endianoff 0
+#endif
     if (*length < 4 * n_subid) {
         DEBUGMSGTL(("agentx", "Incomplete Object ID"));
         return NULL;
     }
 
-    if (prefix) {
-        *oid_ptr = 1;
-        oid_ptr++;
-        *oid_ptr = 3;
-        oid_ptr++;
-        *oid_ptr = 6;
-        oid_ptr++;
-        *oid_ptr = 1;
-        oid_ptr++;
-        *oid_ptr = prefix;
-        oid_ptr++;
+    if (prefix) {	 
+        if (int_offset == 2) {  	/* align OID values in 64 bit agent */  
+	    memset(int_ptr, 0, 10*sizeof(int_ptr[0])); 
+	    int_ptr[0+endianoff] = 1;
+	    int_ptr[2+endianoff] = 3;
+	    int_ptr[4+endianoff] = 6;
+	    int_ptr[6+endianoff] = 1;
+	    int_ptr[8+endianoff] = prefix;
+        } else { /* assume int_offset == 1 */
+	    int_ptr[0] = 1;
+	    int_ptr[1] = 3;
+	    int_ptr[2] = 6;
+	    int_ptr[3] = 1;
+	    int_ptr[4] = prefix;
+        }
+        int_ptr = int_ptr + (int_offset * 5);
     }
 
+    for (i = 0; i < (int) (int_offset * n_subid); i = i + int_offset) {
+	int x;
 
-    for (i = 0; i < (int) n_subid; i++) {
-        oid_ptr[i] = agentx_parse_int(buf_ptr, network_byte_order);
+	x = agentx_parse_int(buf_ptr, network_byte_order);
+	if (int_offset == 2) {
+            int_ptr[i+0] = 0;
+	    int_ptr[i+1] = 0;
+	    int_ptr[i+endianoff]=x;
+        } else {
+	    int_ptr[i] = x;
+        }
         buf_ptr += 4;
         *length -= 4;
     }
@@ -1295,7 +1330,8 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
 {
     u_char         *bufp = data;
     u_int           int_val;
-    struct counter64 *c64 = (struct counter64 *) data_buf;
+    int            int_offset;
+    u_int          *int_ptr = (u_int *) data_buf;
 
     DEBUGDUMPHEADER("recv", "VarBind:");
     DEBUGDUMPHEADER("recv", "Type");
@@ -1340,23 +1376,47 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
         bufp =
             agentx_parse_oid(bufp, length, NULL, (oid *) data_buf,
                              data_len, network_byte_order);
-        *data_len *= 4;
+        *data_len *= sizeof(oid);
         /*
          * 'agentx_parse_oid()' returns the number of sub_ids 
          */
         break;
 
     case ASN_COUNTER64:
-        if (network_byte_order) {
-            c64->high = agentx_parse_int(bufp, network_byte_order);
-            c64->low = agentx_parse_int(bufp + 4, network_byte_order);
-        } else {
-            c64->low = agentx_parse_int(bufp, network_byte_order);
-            c64->high = agentx_parse_int(bufp + 4, network_byte_order);
-        }
-        *data_len = 8;
-        bufp += 8;
-        *length -= 8;
+        /*
+         * Set up offset to be 2 for 64-bit, 1 for 32-bit.
+         * Use this value in formulas to correctly put integer values
+         * extracted from buffer into correct place in byte buffer.
+         */
+        int_offset = sizeof(long) == 8 ? 2 : 1;
+	if (network_byte_order) {
+            /*
+             * For 64-bit, clear integers 2 & 3, then place values in 0 & 1.
+             * For 32-bit, clear integers 0 & 1, then overwrite with values.
+             * Could also put a conditional in here to skip clearing 0 & 1.
+             */
+	    int_ptr[(2 * int_offset) - 2] = 0;
+	    int_ptr[(2 * int_offset) - 1] = 0;
+	    int_ptr[0] = agentx_parse_int(bufp, network_byte_order);
+	    int_ptr[1] = agentx_parse_int(bufp + 4, network_byte_order);
+	} else {
+            /*
+             * For 64-bit, clear integers 0 & 1, then place values in 2 & 3.
+             * For 32-bit, clear integers 0 & 1, then overwrite with values.
+             * Could also put a conditional in here to skip clearing 0 & 1.
+             */
+	    int_ptr[0] = 0;
+	    int_ptr[1] = 0;
+	    int_ptr[(2 * int_offset) - 2] = agentx_parse_int(bufp + 4,
+                                                            network_byte_order);
+	    int_ptr[(2 * int_offset) - 1] = agentx_parse_int(bufp,
+                                                            network_byte_order);
+	}
+
+        /* return data_len 2*8 if 64-bit, 2*4 if 32-bit */
+	*data_len = 2 * sizeof(long);
+	bufp += 2 * sizeof(long);
+	*length -= 8;
         break;
 
     case ASN_NULL:

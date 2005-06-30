@@ -25,7 +25,7 @@
 
 #define N_TYPES      (4)
 #define MAX_NAME     (64)
-#define MAX_SENSORS  (32)
+#define MAX_SENSORS  (128)
 
 /*
  * lmSensors_variables_oid:
@@ -137,9 +137,8 @@ var_lmSensorsTable(struct variable *vp,
 {
     static long     long_ret;
     static unsigned char string[SPRINT_MAX_LEN];
-    int             i;
 
-    int             s_index = name[*length - 1] - 1;
+    int             s_index;
     int             s_type = -1;
     int             n_sensors;
 
@@ -189,6 +188,7 @@ var_lmSensorsTable(struct variable *vp,
     if (s_type < 0)
         return NULL;
 
+    s_index = name[*length - 1] - 1;
     s = sensor_array[s_type].sensor[s_index];
 
     switch (vp->magic) {
@@ -232,7 +232,7 @@ sensor_init(void)
     if (!fp)
         return 1;
 
-    if (res = sensors_init(fp))
+    if ((res = sensors_init(fp)))
         return 2;
 
     _sensor_load(t);
@@ -256,46 +256,60 @@ _sensor_load(clock_t t)
     const sensors_chip_name *chip;
     const sensors_feature_data *data;
     int             chip_nr = 0;
-    int             a = 0;
-    int             b = 0;
 
     int             i;
     for (i = 0; i < N_TYPES; i++)
         sensor_array[i].n = 0;
 
-    while (chip = sensors_get_detected_chips(&chip_nr)) {
-        while (data = sensors_get_all_features(*chip, &a, &b)) {
-            char           *label;
+    while ((chip = sensors_get_detected_chips(&chip_nr))) {
+	int             a = 0;
+	int             b = 0;
+        while ((data = sensors_get_all_features(*chip, &a, &b))) {
+            char           *label = NULL;
             double          val;
 
             if ((data->mode & SENSORS_MODE_R) &&
                 (data->mapping == SENSORS_NO_MAPPING) &&
                 !sensors_get_label(*chip, data->number, &label) &&
                 !sensors_get_feature(*chip, data->number, &val)) {
-                int             type;
+                int             type = -1;
                 float           mul;
                 _sensor_array  *array;
 
-                if (strstr(label, "temp")) {
-                    type = 0;
-                    mul = 1000.0;
-                } else if (strstr(label, "fan")) {
-                    type = 1;
-                    mul = 1.0;
-                } else if (strstr(label, "V")) {
+
+                if (strstr(label, "V")) {
                     type = 2;
                     mul = 1000.0;
-                } else {
+                }
+                if (strstr(label, "fan") || strstr(label, "Fan")) {
+                    type = 1;
+                    mul = 1.0;
+                }
+                if (strstr(label, "temp") || strstr(label, "Temp")) {
+                    type = 0;
+                    mul = 1000.0;
+                }
+                if (type == -1) {
                     type = 3;
                     mul = 1000.0;
                 }
 
                 array = &sensor_array[type];
-
+                if (MAX_SENSORS >= array->n) {
+                    snmp_log(LOG_ERR, "too many sensors. ignoring %s\n", label);
+                    break;
+                }
                 strncpy(array->sensor[array->n].name, label, MAX_NAME);
                 array->sensor[array->n].value = (int) (val * mul);
+                DEBUGMSGTL(("sensors","sensor %d, value %d\n",
+                            array->sensor[array->n].name,
+                            array->sensor[array->n].value));
                 array->n++;
             }
+	    if (label) {
+		free(label);
+		label = NULL;
+	    }
         }
     }
 

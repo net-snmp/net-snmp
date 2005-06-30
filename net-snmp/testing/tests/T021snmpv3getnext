@@ -17,7 +17,7 @@ CONFIGAGENT 'access  testinitialgroup  "" any noauth exact all all all'
 
 STARTAGENT
 
-CAPTURE "snmpgetnext -On $SNMP_FLAGS -v 3 -l nanp -u initial udp:localhost:$SNMP_SNMPD_PORT system.sysUpTime"
+CAPTURE "snmpgetnext -On $SNMP_FLAGS -v 3 -l nanp -u initial $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT system.sysUpTime"
 
 STOPAGENT
 

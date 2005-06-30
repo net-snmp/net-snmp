@@ -23,7 +23,7 @@ use vars qw($agent_port $comm2 $agent_host);
 $SNMP::debugging = 0;
 $SNMP::verbose = 0;
 
-print "1..$num\n";
+#print "1..$num\n";
 
 ######################################################################
 # Fire up a session.

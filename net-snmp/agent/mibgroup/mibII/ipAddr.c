@@ -3,6 +3,17 @@
  *
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
@@ -13,6 +24,9 @@
 #include <sys/param.h>
 #endif
 #if HAVE_UNISTD_H
+#ifdef irix6
+#define _STANDALONE 1
+#endif
 #include <unistd.h>
 #endif
 #if HAVE_SYS_SOCKET_H
@@ -268,7 +282,7 @@ var_ipAddrEntry(struct variable *vp,
     }
 
 #if defined(linux)
-    free(ifc.ifc_buf);
+    SNMP_FREE(ifc.ifc_buf);
 #endif
 
     if (!lowinterface)
@@ -481,28 +495,28 @@ Address_Scan_Init(void)
     /* get info about all interfaces */
 
     ifc.ifc_len = 0;
-    ifc.ifc_buf = NULL;
+    SNMP_FREE(ifc.ifc_buf);
     ifr_counter = 0;
 
     do
     {
-	num_interfaces += 16;
-
-	ifc.ifc_len = sizeof(struct ifreq) * num_interfaces;
-	ifc.ifc_buf = (char*) realloc(ifc.ifc_buf, ifc.ifc_len);
-	
 	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	{
 	    DEBUGMSGTL(("snmpd", "socket open failure in Address_Scan_Init\n"));
 	    return;
 	}
+	num_interfaces += 16;
+
+	ifc.ifc_len = sizeof(struct ifreq) * num_interfaces;
+	ifc.ifc_buf = (char*) realloc(ifc.ifc_buf, ifc.ifc_len);
 	
-	if (ioctl(fd, SIOCGIFCONF, &ifc) < 0)
-	{
-	    ifr=NULL;
+	    if (ioctl(fd, SIOCGIFCONF, &ifc) < 0)
+	    {
+		ifr=NULL;
+		close(fd);
+	   	return;
+	    }
 	    close(fd);
-	    return;
-	}
     }
     while (ifc.ifc_len >= (sizeof(struct ifreq) * num_interfaces));
     
@@ -611,6 +625,7 @@ var_ipAddrEntry(struct variable * vp,
     mib2_ipAddrEntry_t entry, Lowentry;
     int             Found = 0;
     req_e           req_type;
+    unsigned int    ipaddr_return;
 
     /*
      * fill in object part of name for current (less sizeof instance part) 
@@ -626,6 +641,8 @@ var_ipAddrEntry(struct variable * vp,
     if (*length == IP_ADDRNAME_LENGTH)  /* Assume that the input name is the lowest */
         memcpy((char *) lowest, (char *) name,
                IP_ADDRNAME_LENGTH * sizeof(oid));
+    else
+	lowest[0] = 0xff;
     for (NextAddr = (u_long) - 1, req_type = GET_FIRST;;
          NextAddr = entry.ipAdEntAddr, req_type = GET_NEXT) {
         if (getMibstat
@@ -675,19 +692,24 @@ var_ipAddrEntry(struct variable * vp,
     *var_len = sizeof(long_return);
     switch (vp->magic) {
     case IPADADDR:
-        long_return = Lowentry.ipAdEntAddr;
-        return (u_char *) & long_return;
+	*var_len = sizeof(uint32_t);
+        ipaddr_return = Lowentry.ipAdEntAddr;
+        return (u_char *) & ipaddr_return;
     case IPADIFINDEX:
         long_return =
             Interface_Index_By_Name(Lowentry.ipAdEntIfIndex.o_bytes,
                                     Lowentry.ipAdEntIfIndex.o_length);
         return (u_char *) & long_return;
     case IPADNETMASK:
-        long_return = Lowentry.ipAdEntNetMask;
-        return (u_char *) & long_return;
+	*var_len = sizeof(uint32_t);
+        ipaddr_return = Lowentry.ipAdEntNetMask;
+        return (u_char *) & ipaddr_return;
     case IPADBCASTADDR:
         long_return = Lowentry.ipAdEntBcastAddr;
         return (u_char *) & long_return;
+    case IPADREASMMAX:
+	long_return = Lowentry.ipAdEntReasmMaxSize;
+	return (u_char *) & long_return;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipAddrEntry\n",
                     vp->magic));

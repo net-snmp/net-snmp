@@ -54,7 +54,7 @@ netsnmp_oid_stash_create_sized_node(size_t mysize)
     return ret;
 }
 
-inline netsnmp_oid_stash_node *
+NETSNMP_INLINE netsnmp_oid_stash_node *
 netsnmp_oid_stash_create_node(void)
 {
     return netsnmp_oid_stash_create_sized_node(OID_STASH_CHILDREN_SIZE);

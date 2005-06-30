@@ -1,15 +1,84 @@
 /*
  * table_iterator.c 
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 /** @defgroup table_iterator table_iterator: The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.
  *  @ingroup table
- *  Functionally, it is a specialized version of the more
- *  generic table helper but easies the burden of GETNEXT processing by
- *  manually looping through all the data indexes retrieved through
- *  function calls which should be supplied by the module that wishes
- *  help.  The module the table_iterator helps should, afterwards,
- *  never be called for the case of "MODE_GETNEXT" and only for the GET
- *  and SET related modes instead.
+    Functionally, it is a specialized version of the more
+    generic table helper but easies the burden of GETNEXT processing by
+    manually looping through all the data indexes retrieved through
+    function calls which should be supplied by the module that wishes
+    help.  The module the table_iterator helps should, afterwards,
+    never be called for the case of "MODE_GETNEXT" and only for the GET
+    and SET related modes instead.
+ 
+    The fundamental notion between the table iterator is that it
+    allows your code to iterate over each "row" within your data
+    storage mechanism, without requiring that it be sorted in a
+    SNMP-index-compliant manner.  Through the get_first_data_point and
+    get_next_data_point hooks, the table_iterator helper will
+    repeatedly call your hooks to find the "proper" row of data that
+    needs processing.  The following concepts are important:
+
+      - A loop context is a pointer which indicates where in the
+        current processing of a set of rows you currently are.  Allows
+	the get_*_data_point routines to move from one row to the next,
+	once the iterator handler has identified the appropriate row for
+	this request, the job of the loop context is done.  The
+        most simple example would be a pointer to an integer which
+        simply counts rows from 1 to X.  More commonly, it might be a
+        pointer to a linked list node, or someother internal or
+        external reference to a data set (file seek value, array
+        pointer, ...).  If allocated during iteration, either the
+        free_loop_context_at_end (preferably) or the free_loop_context
+        pointers should be set.
+
+      - A data context is something that your handler code can use
+        in order to retrieve the rest of the data for the needed
+        row.  This data can be accessed in your handler via
+	netsnmp_extract_iterator_context api with the netsnmp_request_info
+	structure that's passed in.
+	The important difference between a loop context and a
+        data context is that multiple data contexts can be kept by the
+        table_iterator helper, where as only one loop context will
+        ever be held by the table_iterator helper.  If allocated
+        during iteration the free_data_context pointer should be set
+        to an appropriate function.
+ 
+    The table iterator operates in a series of steps that call your
+    code hooks from your netsnmp_iterator_info registration pointer.
+ 
+      - the get_first_data_point hook is called at the beginning of
+        processing.  It should set the variable list to a list of
+        indexes for the given table.  It should also set the
+        loop_context and maybe a data_context which you will get a
+        pointer back to when it needs to call your code to retrieve
+        actual data later.  The list of indexes should be returned
+        after being update.
+
+      - the get_next_data_point hook is then called repeatedly and is
+        passed the loop context and the data context for it to update.
+        The indexes, loop context and data context should all be
+        updated if more data is available, otherwise they should be
+        left alone and a NULL should be returned.  Ideally, it should
+        update the loop context without the need to reallocate it.  If
+        reallocation is necessary for every iterative step, then the
+        free_loop_context function pointer should be set.  If not,
+        then the free_loop_context_at_end pointer should be set, which
+        is more efficient since a malloc/free will only be performed
+        once for every iteration.
+ *
+ *  @{
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -53,7 +122,23 @@ netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
 }
 
 
-/** registers a table after attaching it to a table_iterator helper */
+/** 
+ * Creates and registers a table iterator helper handler calling 
+ * netsnmp_create_handler with a handler name set to TABLE_ITERATOR_NAME 
+ * and access method, netsnmp_table_iterator_helper_handler.
+ *
+ * If NOT_SERIALIZED is not defined the function injects the serialize
+ * handler into the calling chain prior to calling netsnmp_register_table.
+ *
+ * @param reginfo is a pointer to a netsnmp_handler_registration struct
+ *
+ * @param iinfo is a pointer to a netsnmp_iterator_info struct
+ *
+ * @return MIB_REGISTERED_OK is returned if the registration was a success.
+ *	Failures are MIB_REGISTRATION_FAILED, MIB_DUPLICATE_REGISTRATION.
+ *	If iinfo is NULL, SNMPERR_GENERR is returned.
+ *
+ */
 int
 netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
                                 netsnmp_iterator_info *iinfo)
@@ -69,8 +154,20 @@ netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
     return netsnmp_register_table(reginfo, iinfo->table_reginfo);
 }
 
-/** extracts the table_iterator specific data from a request */
-inline void    *
+/** extracts the table_iterator specific data from a request.
+ * This function extracts the table iterator specific data from a 
+ * netsnmp_request_info object.  Calls netsnmp_request_get_list_data
+ * with request->parent_data set with data from a request that was added 
+ * previously by a module and TABLE_ITERATOR_NAME handler name.
+ *
+ * @param request the netsnmp request info structure
+ *
+ * @return a void pointer(request->parent_data->data), otherwise NULL is
+ *         returned if request is NULL or request->parent_data is NULL or
+ *         request->parent_data object is not found.the net
+ *
+ */
+NETSNMP_INLINE void    *
 netsnmp_extract_iterator_context(netsnmp_request_info *request)
 {
     return netsnmp_request_get_list_data(request, TABLE_ITERATOR_NAME);
@@ -90,7 +187,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     size_t          coloid_len;
     int             ret;
     static oid      myname[MAX_OID_LEN];
-    static int      myname_len;
+    size_t	    myname_len;
     int             oldmode;
     netsnmp_iterator_info *iinfo;
 
@@ -269,7 +366,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                      */
                     table_info->colnum++;
                     coloid[reginfo->rootoid_len + 1] = table_info->colnum;
-		    snmp_free_varbind(free_this_index_search);
+                    if (free_this_index_search != NULL)
+                        snmp_free_varbind(free_this_index_search);
                     index_search = snmp_clone_varbind(table_info->indexes);
 		    free_this_index_search = index_search;
 
@@ -447,13 +545,28 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
             reqinfo->mode = oldmode;
         }
 
-        callback_data_context =
+        callback_data_keep =
             netsnmp_request_get_list_data(requests, TABLE_ITERATOR_NAME);
         callback_loop_context =
             netsnmp_request_get_list_data(requests,
                                           TABLE_ITERATOR_LAST_CONTEXT);
 
-        if (reqinfo->mode == MODE_GET || reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK ||      /* XXX */
+        /* 
+         * This has to be done to prevent a memory leak. Notice that on
+         * SET_RESERVE1 we're assigning something to
+         * 'free_this_index_search' at the beginning of this handler (right
+         * above the line that says 'below our minimum column?'), 
+         * but we're not given a chance to free it below with the other 
+         * SET modes, hence our doing it here. 
+         */
+        if (reqinfo->mode == MODE_SET_RESERVE1) {
+            if (free_this_index_search) {
+                snmp_free_varbind(free_this_index_search);
+                free_this_index_search = NULL;
+            }
+        }
+        if (reqinfo->mode == MODE_GET || reqinfo->mode == MODE_GETNEXT ||
+            reqinfo->mode == MODE_GETBULK ||      /* XXX */
             reqinfo->mode == MODE_SET_FREE ||
             reqinfo->mode == MODE_SET_UNDO ||
             reqinfo->mode == MODE_SET_COMMIT) {
@@ -462,8 +575,10 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 callback_data_keep = NULL;
             }
 
-            if (free_this_index_search)
+            if (free_this_index_search) {
                 snmp_free_varbind(free_this_index_search);
+                free_this_index_search = NULL;
+            }
 #ifndef NOT_SERIALIZED
             if (callback_loop_context && iinfo->free_loop_context_at_end) {
                 (iinfo->free_loop_context_at_end) (callback_loop_context,
@@ -492,3 +607,4 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 #endif
     return SNMP_ERR_NOERROR;
 }
+/** @} */
