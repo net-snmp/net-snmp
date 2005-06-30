@@ -5299,7 +5299,7 @@ _sess_read(void *sessp, fd_set * fdset)
         sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
         sp->s_errno = errno;
         snmp_set_detail(strerror(errno));
-        free(rxbuf);
+        free(isp->packet);
         if (opaque != NULL) {
             free(opaque);
         }
@@ -5324,8 +5324,7 @@ _sess_read(void *sessp, fd_set * fdset)
          */
         DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));
         transport->f_close(transport);
-        free(rxbuf);
-        isp->packet = NULL;
+        SNMP_FREE(isp->packet);
         if (opaque != NULL) {
             free(opaque);
         }
