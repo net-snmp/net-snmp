@@ -1118,9 +1118,9 @@ init_snmpv3(const char *type)
     register_config_handler("snmp", "defPrivType", snmpv3_privtype_conf,
                             NULL,
 #ifdef HAVE_AES
-                            "DES (AES support not available)");
-#else
                             "DES|AES128|AES192|AES256");
+#else
+                            "DES (AES support not available)");
 #endif
     register_config_handler("snmp", "defSecurityLevel",
                             snmpv3_secLevel_conf, NULL,
