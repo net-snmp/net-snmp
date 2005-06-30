@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.2.1 -> V5.2.1.1
+Changes: V5.2.1 -> V5.2.1.2
 
 2005-06-29 17:34  hardaker
 
@@ -69,6 +69,12 @@ Changes: V5.2.1 -> V5.2.1.1
    * snmp_api.c
 
    Applied the security patch fixing DoS problems over socket streams
+
+2005-06-30 08:51  rstory
+
+   * snmplib/snmp_api.c:
+
+   fix free of pkt to use alloc'd ptr, not offset in pkt
 
 -------------------------------------------------------------------------------
 
