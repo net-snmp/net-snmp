@@ -358,6 +358,7 @@ vmstat(int iindex)
     double          duse, dsys, didl, ddiv, divo2;
     double          druse, drnic, drsys, dridl;
     unsigned int    hertz;
+    double          ddiv2;
 
     netsnmp_cpu_info *cpu;
     netsnmp_cpu_load();
@@ -374,6 +375,17 @@ vmstat(int iindex)
     drsys = cpu->sys_ticks;
     dridl = cpu->idle_ticks;
 
+    ddiv2 = ddiv + cpu->wait_ticks
+                 + cpu->intrpt_ticks
+                 + cpu->sirq_ticks;
+    if (cpu->history) {
+        duse  -= (cpu->history[0].user_hist + cpu->history[0].nice_hist);
+        dsys  -=  cpu->history[0].sys_hist;
+        didl  -=  cpu->history[0].idle_hist;
+        ddiv2 -=  cpu->history[0].total_hist;
+    }
+    if (!ddiv) ddiv=1;   /* Protect against division-by-0 */
+ 
     switch (iindex) {
     case swapin:
         return (cpu->swapIn  * 4 * hertz + divo2) / ddiv;
@@ -388,11 +400,11 @@ vmstat(int iindex)
     case syscontext:
         return (cpu->nCtxSwitches * hertz + divo2) / ddiv;
     case cpuuser:
-        return (100 * duse / ddiv);
+        return (ddiv2 ? 100 * duse / ddiv2 : 0);
     case cpusystem:
-        return (100 * dsys / ddiv);
+        return (ddiv2 ? 100 * dsys / ddiv2 : 0);
     case cpuidle:
-        return (100 * didl / ddiv);
+        return (ddiv2 ? 100 * didl / ddiv2 : 0);
     case cpurawuser:
         return druse;
     case cpurawnice:
