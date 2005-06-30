@@ -1,4 +1,4 @@
-.TH "mib parsing and datatype manipulation routines." 3 "24 Jan 2005" "net-snmp" \" -*- nroff -*-
+.TH "mib parsing and datatype manipulation routines." 3 "29 Jun 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -383,7 +383,9 @@ mib parsing and datatype manipulation routines. \-
 .PP 
 .SS "int _sprint_hexstring_line (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const u_char * cp, size_t line_len)"
 .PP
-Prints a hexadecimal string into a buffer. The characters pointed by *cp are encoded as hexadecimal string.
+Prints a hexadecimal string into a buffer. 
+.PP
+The characters pointed by *cp are encoded as hexadecimal string.
 .PP
 If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
 .PP
@@ -407,17 +409,21 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
 .RE
 .PP
-Definition at line 271 of file mib.c.
+
 .PP
-References snmp_realloc().
+Definition at line 271 of file mib.c.
 .SS "int build_oid (oid ** out, size_t * out_len, oid * prefix, size_t prefix_len, \fBnetsnmp_variable_list\fP * indexes)"
+.PP
+xxx-rks: should free previous value? 
 .PP
 Definition at line 3557 of file mib.c.
 .PP
 Referenced by netsnmp_table_build_oid(), and netsnmp_table_data_generate_index_oid().
 .SS "int build_oid_segment (\fBnetsnmp_variable_list\fP * var)"
 .PP
-Takes the value in VAR and turns it into an OID segment in var->name. \fBParameters:\fP
+Takes the value in VAR and turns it into an OID segment in var->name. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIvar\fP The variable.
 .RE
@@ -427,12 +433,16 @@ Takes the value in VAR and turns it into an OID segment in var->name. \fBParamet
 SNMPERR_SUCCESS or SNMPERR_GENERR 
 .RE
 .PP
+
+.PP
 Definition at line 3421 of file mib.c.
 .PP
-References variable_list::name, variable_list::name_length, variable_list::name_loc, SNMP_FREE, variable_list::type, variable_list::val, and variable_list::val_len.
+References variable_list::name, variable_list::name_length, variable_list::name_loc, variable_list::type, variable_list::val, and variable_list::val_len.
 .SS "void fprint_description (FILE * f, oid * objid, size_t objidlen, int width)"
 .PP
-Prints on oid description into a file descriptor. \fBParameters:\fP
+Prints on oid description into a file descriptor. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIf\fP The file descriptor to print to. 
 .br
@@ -443,14 +453,16 @@ Prints on oid description into a file descriptor. \fBParameters:\fP
 \fIwidth\fP Number of subidentifiers. 
 .RE
 .PP
-Definition at line 4401 of file mib.c.
+
 .PP
-References SNMP_FREE.
+Definition at line 4401 of file mib.c.
 .PP
 Referenced by print_description().
 .SS "void fprint_objid (FILE * f, const oid * objid, size_t objidlen)"
 .PP
-Prints an oid to a file descriptor. \fBParameters:\fP
+Prints an oid to a file descriptor. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIf\fP The file descriptor to print to. 
 .br
@@ -459,14 +471,16 @@ Prints an oid to a file descriptor. \fBParameters:\fP
 \fIobjidlen\fP The length of oidid. 
 .RE
 .PP
-Definition at line 3149 of file mib.c.
+
 .PP
-References SNMP_FREE.
+Definition at line 3149 of file mib.c.
 .PP
 Referenced by print_objid().
 .SS "void fprint_variable (FILE * f, const oid * objid, size_t objidlen, const \fBnetsnmp_variable_list\fP * variable)"
 .PP
-Prints a variable to a file descriptor. \fBParameters:\fP
+Prints a variable to a file descriptor. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIf\fP The file descriptor to print to. 
 .br
@@ -477,25 +491,37 @@ Prints a variable to a file descriptor. \fBParameters:\fP
 \fIvariable\fP The variable to print. 
 .RE
 .PP
-Definition at line 3296 of file mib.c.
+
 .PP
-References SNMP_FREE.
+Definition at line 3296 of file mib.c.
 .PP
 Referenced by print_variable().
 .SS "struct tree* get_tree (const oid * objid, size_t objidlen, struct tree * subtree)"
 .PP
-Clone of get_symbol that doesn't take a buffer argument. \fBSee also:\fP
+Clone of get_symbol that doesn't take a buffer argument. 
+.PP
+\fBSee also:\fP
 .RS 4
 get_symbol 
 .RE
 .PP
+
+.PP
 Definition at line 4356 of file mib.c.
+.PP
+References get_tree().
+.PP
+Referenced by get_tree().
 .SS "struct tree* get_tree_head (void)"
 .PP
-Retrieves the tree head. \fBReturns:\fP
+Retrieves the tree head. 
+.PP
+\fBReturns:\fP
 .RS 4
 the tree head. 
 .RE
+.PP
+
 .PP
 Definition at line 2049 of file mib.c.
 .SS "int get_wild_node (const char * name, oid * objid, size_t * objidlen)"
@@ -505,33 +531,47 @@ Definition at line 2049 of file mib.c.
 comments on find_best_tree_node for usage after first time. 
 .RE
 .PP
+
+.PP
 Definition at line 5406 of file mib.c.
 .PP
 Referenced by snmp_parse_oid().
 .SS "void init_mib (void)"
 .PP
-Initialises the mib reader. Reads in all settings from the environment. Definition at line 2537 of file mib.c.
+Initialises the mib reader. 
 .PP
-References netsnmp_fixup_mib_directory(), netsnmp_get_mib_directory(), netsnmp_getenv(), and SNMP_FREE.
+Reads in all settings from the environment. 
+.PP
+Definition at line 2537 of file mib.c.
+.PP
+References netsnmp_fixup_mib_directory(), and netsnmp_get_mib_directory().
 .PP
 Referenced by init_snmp().
 .SS "void netsnmp_fixup_mib_directory (void)"
 .PP
+swap in the new value and repeat 
+.PP
 Definition at line 2490 of file mib.c.
 .PP
-References netsnmp_get_mib_directory(), netsnmp_getenv(), netsnmp_set_mib_directory(), and SNMP_FREE.
+References netsnmp_get_mib_directory(), and netsnmp_set_mib_directory().
 .PP
 Referenced by init_mib().
 .SS "char* netsnmp_get_mib_directory (void)"
 .PP
+Check if the environment variable is set
+.PP
+Not set use hard coded path 
+.PP
 Definition at line 2443 of file mib.c.
 .PP
-References netsnmp_getenv(), and netsnmp_set_mib_directory().
+References netsnmp_set_mib_directory().
 .PP
 Referenced by init_mib(), and netsnmp_fixup_mib_directory().
 .SS "int netsnmp_oid2chars (char * C, int L, const oid * O)"
 .PP
-Converts an OID to its character form. in example 5 . 1 . 2 . 3 . 4 . 5 = 12345
+Converts an OID to its character form. 
+.PP
+in example 5 . 1 . 2 . 3 . 4 . 5 = 12345
 .PP
 \fBParameters:\fP
 .RS 4
@@ -544,15 +584,19 @@ Converts an OID to its character form. in example 5 . 1 . 2 . 3 . 4 . 5 = 12345
 .PP
 \fBReturns:\fP
 .RS 4
-0 on Sucess, 1 on failure. 
+0 on Sucess, 1 on failure.
 .RE
 .PP
-length Definition at line 6149 of file mib.c.
+length 
+.PP
+Definition at line 6149 of file mib.c.
 .PP
 Referenced by netsnmp_oid2str().
 .SS "int netsnmp_oid2str (char * S, int L, oid * O)"
 .PP
-Converts an OID to its string form. in example 5 . 'h' . 'e' . 'l' . 'l' . 'o' = 'hello\\0' (null terminated)
+Converts an OID to its string form. 
+.PP
+in example 5 . 'h' . 'e' . 'l' . 'l' . 'o' = 'hello\\0' (null terminated)
 .PP
 \fBParameters:\fP
 .RS 4
@@ -568,19 +612,27 @@ Converts an OID to its string form. in example 5 . 'h' . 'e' . 'l' . 'l' . 'o' =
 0 on Sucess, 1 on failure. 
 .RE
 .PP
+
+.PP
 Definition at line 6177 of file mib.c.
 .PP
 References netsnmp_oid2chars().
 .SS "void netsnmp_set_mib_directory (const char * dir)"
 .PP
-Definition at line 2388 of file mib.c.
+New dir starts with '+', thus we add it.
 .PP
-References SNMP_FREE.
+If dir starts with '+' skip '+' it.
+.PP
+set_string calls strdup, so if we allocated memory, free it 
+.PP
+Definition at line 2388 of file mib.c.
 .PP
 Referenced by netsnmp_fixup_mib_directory(), and netsnmp_get_mib_directory().
 .SS "int netsnmp_str2oid (const char * S, oid * O, int L)"
 .PP
-Converts a string to its OID form. in example 'hello' = 5 . 'h' . 'e' . 'l' . 'l' . 'o'
+Converts a string to its OID form. 
+.PP
+in example 'hello' = 5 . 'h' . 'e' . 'l' . 'l' . 'o'
 .PP
 \fBParameters:\fP
 .RS 4
@@ -596,40 +648,56 @@ Converts a string to its OID form. in example 'hello' = 5 . 'h' . 'e' . 'l' . 'l
 0 on Sucess, 1 on failure. 
 .RE
 .PP
+
+.PP
 Definition at line 6114 of file mib.c.
 .SS "void print_description (oid * objid, size_t objidlen, int width)"
 .PP
-Prints on oid description on stdout. \fBSee also:\fP
+Prints on oid description on stdout. 
+.PP
+\fBSee also:\fP
 .RS 4
 \fBfprint_description\fP 
 .RE
+.PP
+
 .PP
 Definition at line 4385 of file mib.c.
 .PP
 References fprint_description().
 .SS "void print_mib (FILE * fp)"
 .PP
-Prints the MIBs to the file fp. \fBParameters:\fP
+Prints the MIBs to the file fp. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIfp\fP The file descriptor to print to. 
 .RE
 .PP
+
+.PP
 Definition at line 2730 of file mib.c.
 .SS "void print_objid (const oid * objid, size_t objidlen)"
 .PP
-Prints an oid to stdout. \fBParameters:\fP
+Prints an oid to stdout. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIobjid\fP The oid to print 
 .br
 \fIobjidlen\fP The length of oidid. 
 .RE
 .PP
+
+.PP
 Definition at line 3135 of file mib.c.
 .PP
 References fprint_objid().
 .SS "void print_variable (const oid * objid, size_t objidlen, const \fBnetsnmp_variable_list\fP * variable)"
 .PP
-Prints a variable to stdout. \fBParameters:\fP
+Prints a variable to stdout. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIobjid\fP The object id. 
 .br
@@ -638,12 +706,16 @@ Prints a variable to stdout. \fBParameters:\fP
 \fIvariable\fP The variable to print. 
 .RE
 .PP
+
+.PP
 Definition at line 3280 of file mib.c.
 .PP
 References fprint_variable().
 .SS "int read_objid (const char * input, oid * output, size_t * out_len)"
 .PP
-Reads an object identifier from an input string into internal OID form. When called, out_len must hold the maximum length of the output array.
+Reads an object identifier from an input string into internal OID form. 
+.PP
+When called, out_len must hold the maximum length of the output array.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -659,41 +731,51 @@ Reads an object identifier from an input string into internal OID form. When cal
 1 if successful.
 .RE
 .PP
-If an error occurs, this function returns 0 and MAY set snmp_errno. snmp_errno is NOT set if SET_SNMP_ERROR evaluates to nothing. This can make multi-threaded use a tiny bit more robust. Definition at line 2828 of file mib.c.
+If an error occurs, this function returns 0 and MAY set snmp_errno. snmp_errno is NOT set if SET_SNMP_ERROR evaluates to nothing. This can make multi-threaded use a tiny bit more robust. 
 .PP
-References SNMP_FREE.
+Definition at line 2828 of file mib.c.
 .PP
 Referenced by snmp_parse_oid().
 .SS "void set_function (struct tree * subtree)"
 .PP
-Set's the printing function printomat in a subtree according it's type. \fBParameters:\fP
+Set's the printing function printomat in a subtree according it's type. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIsubtree\fP The subtree to set. 
 .RE
+.PP
+
 .PP
 Definition at line 2751 of file mib.c.
 .PP
 References sprint_realloc_bitstring(), sprint_realloc_by_type(), sprint_realloc_counter(), sprint_realloc_counter64(), sprint_realloc_gauge(), sprint_realloc_integer(), sprint_realloc_ipaddress(), sprint_realloc_networkaddress(), sprint_realloc_null(), sprint_realloc_object_identifier(), sprint_realloc_octet_string(), sprint_realloc_opaque(), sprint_realloc_timeticks(), and sprint_realloc_uinteger().
 .SS "void shutdown_mib (void)"
 .PP
-Unloads all mibs. Definition at line 2707 of file mib.c.
+Unloads all mibs. 
 .PP
-References SNMP_FREE.
+Definition at line 2707 of file mib.c.
 .PP
 Referenced by snmp_shutdown().
 .SS "void snmp_in_toggle_options_usage (const char * lead, FILE * outf)"
 .PP
-Prints out a help usage for the in* toggle options. \fBParameters:\fP
+Prints out a help usage for the in* toggle options. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIlead\fP The lead to print for every line. 
 .br
 \fIoutf\fP The file descriptor to write to. 
 .RE
 .PP
+
+.PP
 Definition at line 2300 of file mib.c.
 .SS "oid* snmp_parse_oid (const char * argv, oid * root, size_t * rootlen)"
 .PP
-Given a string, parses an oid out of it (if possible). It will try to parse it based on predetermined configuration if present or by every method possible otherwise. If a suffix has been registered using NETSNMP_DS_LIB_OIDSUFFIX, it will be appended to the input string before processing.
+Given a string, parses an oid out of it (if possible). 
+.PP
+It will try to parse it based on predetermined configuration if present or by every method possible otherwise. If a suffix has been registered using NETSNMP_DS_LIB_OIDSUFFIX, it will be appended to the input string before processing.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -709,12 +791,16 @@ Given a string, parses an oid out of it (if possible). It will try to parse it b
 The root oid pointer if successful, or NULL otherwise. 
 .RE
 .PP
+
+.PP
 Definition at line 5720 of file mib.c.
 .PP
 References get_wild_node(), and read_objid().
 .SS "int sprint_realloc_asciistring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const u_char * cp, size_t len)"
 .PP
-Prints an ascii string into a buffer. The characters pointed by *cp are encoded as an ascii string.
+Prints an ascii string into a buffer. 
+.PP
+The characters pointed by *cp are encoded as an ascii string.
 .PP
 If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
 .PP
@@ -738,144 +824,14 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
 .RE
 .PP
-Definition at line 363 of file mib.c.
+
 .PP
-References snmp_realloc().
+Definition at line 363 of file mib.c.
 .PP
 Referenced by sprint_realloc_octet_string().
 .SS "int sprint_realloc_badtype (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
-Fallback routine for a bad type, prints 'Variable has bad type' into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
-.PP
-\fBParameters:\fP
-.RS 4
-\fIbuf\fP Address of the buffer to print to. 
-.br
-\fIbuf_len\fP Address to an integer containing the size of buf. 
-.br
-\fIout_len\fP Incremented by the number of characters printed. 
-.br
-\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
-.br
-\fIvar\fP The variable to encode. 
-.br
-\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
-.br
-\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
-.br
-\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
-.RE
-.PP
-\fBReturns:\fP
-.RS 4
-1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
-.RE
-.PP
-Definition at line 1934 of file mib.c.
-.PP
-Referenced by sprint_realloc_by_type().
-.SS "int sprint_realloc_bitstring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
-.PP
-Prints a bit string into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
-.PP
-\fBParameters:\fP
-.RS 4
-\fIbuf\fP Address of the buffer to print to. 
-.br
-\fIbuf_len\fP Address to an integer containing the size of buf. 
-.br
-\fIout_len\fP Incremented by the number of characters printed. 
-.br
-\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
-.br
-\fIvar\fP The variable to encode. 
-.br
-\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
-.br
-\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
-.br
-\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
-.RE
-.PP
-\fBReturns:\fP
-.RS 4
-1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
-.RE
-.PP
-Definition at line 1795 of file mib.c.
-.PP
-References sprint_realloc_by_type(), variable_list::type, variable_list::val, and variable_list::val_len.
-.PP
-Referenced by set_function(), and sprint_realloc_by_type().
-.SS "int sprint_realloc_by_type (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
-.PP
-Universal print routine, prints a variable into a buffer according to the variable type. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
-.PP
-\fBParameters:\fP
-.RS 4
-\fIbuf\fP Address of the buffer to print to. 
-.br
-\fIbuf_len\fP Address to an integer containing the size of buf. 
-.br
-\fIout_len\fP Incremented by the number of characters printed. 
-.br
-\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
-.br
-\fIvar\fP The variable to encode. 
-.br
-\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
-.br
-\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
-.br
-\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
-.RE
-.PP
-\fBReturns:\fP
-.RS 4
-1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
-.RE
-.PP
-Definition at line 1969 of file mib.c.
-.PP
-References sprint_realloc_badtype(), sprint_realloc_bitstring(), sprint_realloc_counter(), sprint_realloc_counter64(), sprint_realloc_gauge(), sprint_realloc_integer(), sprint_realloc_ipaddress(), sprint_realloc_null(), sprint_realloc_object_identifier(), sprint_realloc_octet_string(), sprint_realloc_opaque(), sprint_realloc_timeticks(), sprint_realloc_uinteger(), and variable_list::type.
-.PP
-Referenced by set_function(), sprint_realloc_bitstring(), sprint_realloc_counter(), sprint_realloc_counter64(), sprint_realloc_gauge(), sprint_realloc_integer(), sprint_realloc_ipaddress(), sprint_realloc_networkaddress(), sprint_realloc_null(), sprint_realloc_object_identifier(), sprint_realloc_octet_string(), sprint_realloc_opaque(), sprint_realloc_timeticks(), sprint_realloc_uinteger(), and table_helper_handler().
-.SS "int sprint_realloc_counter (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
-.PP
-Prints a counter value into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
-.PP
-\fBParameters:\fP
-.RS 4
-\fIbuf\fP Address of the buffer to print to. 
-.br
-\fIbuf_len\fP Address to an integer containing the size of buf. 
-.br
-\fIout_len\fP Incremented by the number of characters printed. 
-.br
-\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
-.br
-\fIvar\fP The variable to encode. 
-.br
-\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
-.br
-\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
-.br
-\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
-.RE
-.PP
-\fBReturns:\fP
-.RS 4
-1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
-.RE
-.PP
-Definition at line 1562 of file mib.c.
-.PP
-References sprint_realloc_by_type(), variable_list::type, and variable_list::val.
-.PP
-Referenced by set_function(), and sprint_realloc_by_type().
-.SS "int sprint_realloc_counter64 (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
-.PP
-Prints a counter into a buffer. The variable var is encoded as a counter value.
+Fallback routine for a bad type, prints 'Variable has bad type' into a buffer. 
 .PP
 If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
 .PP
@@ -903,14 +859,16 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
 .RE
 .PP
-Definition at line 867 of file mib.c.
+
 .PP
-References sprint_realloc_by_type(), variable_list::type, and variable_list::val.
+Definition at line 1934 of file mib.c.
 .PP
-Referenced by set_function(), sprint_realloc_by_type(), and sprint_realloc_opaque().
-.SS "int sprint_realloc_gauge (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
+Referenced by sprint_realloc_by_type().
+.SS "int sprint_realloc_bitstring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
-Prints a gauge value into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+Prints a bit string into a buffer. 
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
 .PP
 \fBParameters:\fP
 .RS 4
@@ -936,6 +894,158 @@ Prints a gauge value into a buffer. If allow_realloc is true the buffer will be 
 1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
 .RE
 .PP
+
+.PP
+Definition at line 1795 of file mib.c.
+.PP
+References sprint_realloc_by_type(), variable_list::type, variable_list::val, and variable_list::val_len.
+.PP
+Referenced by set_function(), and sprint_realloc_by_type().
+.SS "int sprint_realloc_by_type (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
+.PP
+Universal print routine, prints a variable into a buffer according to the variable type. 
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbuf\fP Address of the buffer to print to. 
+.br
+\fIbuf_len\fP Address to an integer containing the size of buf. 
+.br
+\fIout_len\fP Incremented by the number of characters printed. 
+.br
+\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
+.br
+\fIvar\fP The variable to encode. 
+.br
+\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
+.br
+\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
+.br
+\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
+.RE
+.PP
+
+.PP
+Definition at line 1969 of file mib.c.
+.PP
+References sprint_realloc_badtype(), sprint_realloc_bitstring(), sprint_realloc_counter(), sprint_realloc_counter64(), sprint_realloc_gauge(), sprint_realloc_integer(), sprint_realloc_ipaddress(), sprint_realloc_null(), sprint_realloc_object_identifier(), sprint_realloc_octet_string(), sprint_realloc_opaque(), sprint_realloc_timeticks(), sprint_realloc_uinteger(), and variable_list::type.
+.PP
+Referenced by set_function(), sprint_realloc_bitstring(), sprint_realloc_counter(), sprint_realloc_counter64(), sprint_realloc_gauge(), sprint_realloc_integer(), sprint_realloc_ipaddress(), sprint_realloc_networkaddress(), sprint_realloc_null(), sprint_realloc_object_identifier(), sprint_realloc_octet_string(), sprint_realloc_opaque(), sprint_realloc_timeticks(), sprint_realloc_uinteger(), and table_helper_handler().
+.SS "int sprint_realloc_counter (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
+.PP
+Prints a counter value into a buffer. 
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbuf\fP Address of the buffer to print to. 
+.br
+\fIbuf_len\fP Address to an integer containing the size of buf. 
+.br
+\fIout_len\fP Incremented by the number of characters printed. 
+.br
+\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
+.br
+\fIvar\fP The variable to encode. 
+.br
+\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
+.br
+\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
+.br
+\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
+.RE
+.PP
+
+.PP
+Definition at line 1562 of file mib.c.
+.PP
+References sprint_realloc_by_type(), variable_list::type, and variable_list::val.
+.PP
+Referenced by set_function(), and sprint_realloc_by_type().
+.SS "int sprint_realloc_counter64 (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
+.PP
+Prints a counter into a buffer. 
+.PP
+The variable var is encoded as a counter value.
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbuf\fP Address of the buffer to print to. 
+.br
+\fIbuf_len\fP Address to an integer containing the size of buf. 
+.br
+\fIout_len\fP Incremented by the number of characters printed. 
+.br
+\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
+.br
+\fIvar\fP The variable to encode. 
+.br
+\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
+.br
+\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
+.br
+\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
+.RE
+.PP
+
+.PP
+Definition at line 867 of file mib.c.
+.PP
+References sprint_realloc_by_type(), variable_list::type, and variable_list::val.
+.PP
+Referenced by set_function(), sprint_realloc_by_type(), and sprint_realloc_opaque().
+.SS "int sprint_realloc_gauge (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
+.PP
+Prints a gauge value into a buffer. 
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbuf\fP Address of the buffer to print to. 
+.br
+\fIbuf_len\fP Address to an integer containing the size of buf. 
+.br
+\fIout_len\fP Incremented by the number of characters printed. 
+.br
+\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
+.br
+\fIvar\fP The variable to encode. 
+.br
+\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
+.br
+\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
+.br
+\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
+.RE
+.PP
+
+.PP
 Definition at line 1489 of file mib.c.
 .PP
 References sprint_realloc_by_type(), sprint_realloc_hinted_integer(), variable_list::type, and variable_list::val.
@@ -943,7 +1053,9 @@ References sprint_realloc_by_type(), sprint_realloc_hinted_integer(), variable_l
 Referenced by set_function(), and sprint_realloc_by_type().
 .SS "int sprint_realloc_hinted_integer (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, long val, const char decimaltype, const char * hint, const char * units)"
 .PP
-Prints an integer according to the hint into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+Prints an integer according to the hint into a buffer. 
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
 .PP
 \fBParameters:\fP
 .RS 4
@@ -969,177 +1081,14 @@ Prints an integer according to the hint into a buffer. If allow_realloc is true 
 1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
 .RE
 .PP
+
+.PP
 Definition at line 1215 of file mib.c.
 .PP
 Referenced by sprint_realloc_gauge(), sprint_realloc_integer(), and sprint_realloc_uinteger().
 .SS "int sprint_realloc_integer (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
-Prints an integer into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
-.PP
-\fBParameters:\fP
-.RS 4
-\fIbuf\fP Address of the buffer to print to. 
-.br
-\fIbuf_len\fP Address to an integer containing the size of buf. 
-.br
-\fIout_len\fP Incremented by the number of characters printed. 
-.br
-\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
-.br
-\fIvar\fP The variable to encode. 
-.br
-\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
-.br
-\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
-.br
-\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
-.RE
-.PP
-\fBReturns:\fP
-.RS 4
-1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
-.RE
-.PP
-Definition at line 1289 of file mib.c.
-.PP
-References sprint_realloc_by_type(), sprint_realloc_hinted_integer(), variable_list::type, and variable_list::val.
-.PP
-Referenced by set_function(), and sprint_realloc_by_type().
-.SS "int sprint_realloc_ipaddress (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
-.PP
-Prints an ip-address into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
-.PP
-\fBParameters:\fP
-.RS 4
-\fIbuf\fP Address of the buffer to print to. 
-.br
-\fIbuf_len\fP Address to an integer containing the size of buf. 
-.br
-\fIout_len\fP Incremented by the number of characters printed. 
-.br
-\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
-.br
-\fIvar\fP The variable to encode. 
-.br
-\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
-.br
-\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
-.br
-\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
-.RE
-.PP
-\fBReturns:\fP
-.RS 4
-1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
-.RE
-.PP
-Definition at line 1691 of file mib.c.
-.PP
-References snmp_realloc(), sprint_realloc_by_type(), variable_list::type, and variable_list::val.
-.PP
-Referenced by set_function(), and sprint_realloc_by_type().
-.SS "int sprint_realloc_networkaddress (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
-.PP
-Prints a network address into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
-.PP
-\fBParameters:\fP
-.RS 4
-\fIbuf\fP Address of the buffer to print to. 
-.br
-\fIbuf_len\fP Address to an integer containing the size of buf. 
-.br
-\fIout_len\fP Incremented by the number of characters printed. 
-.br
-\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
-.br
-\fIvar\fP The variable to encode. 
-.br
-\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
-.br
-\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
-.br
-\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
-.RE
-.PP
-\fBReturns:\fP
-.RS 4
-1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
-.RE
-.PP
-Definition at line 1625 of file mib.c.
-.PP
-References snmp_realloc(), sprint_realloc_by_type(), variable_list::type, variable_list::val, and variable_list::val_len.
-.PP
-Referenced by set_function().
-.SS "int sprint_realloc_null (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
-.PP
-Prints a null value into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
-.PP
-\fBParameters:\fP
-.RS 4
-\fIbuf\fP Address of the buffer to print to. 
-.br
-\fIbuf_len\fP Address to an integer containing the size of buf. 
-.br
-\fIout_len\fP Incremented by the number of characters printed. 
-.br
-\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
-.br
-\fIvar\fP The variable to encode. 
-.br
-\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
-.br
-\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
-.br
-\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
-.RE
-.PP
-\fBReturns:\fP
-.RS 4
-1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
-.RE
-.PP
-Definition at line 1751 of file mib.c.
-.PP
-References sprint_realloc_by_type(), and variable_list::type.
-.PP
-Referenced by set_function(), and sprint_realloc_by_type().
-.SS "int sprint_realloc_object_identifier (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
-.PP
-Prints an object identifier into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
-.PP
-\fBParameters:\fP
-.RS 4
-\fIbuf\fP Address of the buffer to print to. 
-.br
-\fIbuf_len\fP Address to an integer containing the size of buf. 
-.br
-\fIout_len\fP Incremented by the number of characters printed. 
-.br
-\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
-.br
-\fIvar\fP The variable to encode. 
-.br
-\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
-.br
-\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
-.br
-\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
-.RE
-.PP
-\fBReturns:\fP
-.RS 4
-1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
-.RE
-.PP
-Definition at line 1071 of file mib.c.
-.PP
-References sprint_realloc_by_type(), variable_list::type, variable_list::val, and variable_list::val_len.
-.PP
-Referenced by set_function(), and sprint_realloc_by_type().
-.SS "int sprint_realloc_octet_string (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
-.PP
-Prints an octet string into a buffer. The variable var is encoded as octet string.
+Prints an integer into a buffer. 
 .PP
 If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
 .PP
@@ -1167,14 +1116,18 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
 .RE
 .PP
-Definition at line 423 of file mib.c.
+
 .PP
-References snmp_realloc(), sprint_realloc_asciistring(), sprint_realloc_by_type(), variable_list::type, variable_list::val, and variable_list::val_len.
+Definition at line 1289 of file mib.c.
+.PP
+References sprint_realloc_by_type(), sprint_realloc_hinted_integer(), variable_list::type, and variable_list::val.
 .PP
 Referenced by set_function(), and sprint_realloc_by_type().
-.SS "int sprint_realloc_opaque (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
+.SS "int sprint_realloc_ipaddress (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
-Prints an object identifier into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+Prints an ip-address into a buffer. 
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
 .PP
 \fBParameters:\fP
 .RS 4
@@ -1199,6 +1152,195 @@ Prints an object identifier into a buffer. If allow_realloc is true the buffer w
 .RS 4
 1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
 .RE
+.PP
+
+.PP
+Definition at line 1691 of file mib.c.
+.PP
+References sprint_realloc_by_type(), variable_list::type, and variable_list::val.
+.PP
+Referenced by set_function(), and sprint_realloc_by_type().
+.SS "int sprint_realloc_networkaddress (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
+.PP
+Prints a network address into a buffer. 
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbuf\fP Address of the buffer to print to. 
+.br
+\fIbuf_len\fP Address to an integer containing the size of buf. 
+.br
+\fIout_len\fP Incremented by the number of characters printed. 
+.br
+\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
+.br
+\fIvar\fP The variable to encode. 
+.br
+\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
+.br
+\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
+.br
+\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
+.RE
+.PP
+
+.PP
+Definition at line 1625 of file mib.c.
+.PP
+References sprint_realloc_by_type(), variable_list::type, variable_list::val, and variable_list::val_len.
+.PP
+Referenced by set_function().
+.SS "int sprint_realloc_null (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
+.PP
+Prints a null value into a buffer. 
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbuf\fP Address of the buffer to print to. 
+.br
+\fIbuf_len\fP Address to an integer containing the size of buf. 
+.br
+\fIout_len\fP Incremented by the number of characters printed. 
+.br
+\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
+.br
+\fIvar\fP The variable to encode. 
+.br
+\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
+.br
+\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
+.br
+\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
+.RE
+.PP
+
+.PP
+Definition at line 1751 of file mib.c.
+.PP
+References sprint_realloc_by_type(), and variable_list::type.
+.PP
+Referenced by set_function(), and sprint_realloc_by_type().
+.SS "int sprint_realloc_object_identifier (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
+.PP
+Prints an object identifier into a buffer. 
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbuf\fP Address of the buffer to print to. 
+.br
+\fIbuf_len\fP Address to an integer containing the size of buf. 
+.br
+\fIout_len\fP Incremented by the number of characters printed. 
+.br
+\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
+.br
+\fIvar\fP The variable to encode. 
+.br
+\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
+.br
+\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
+.br
+\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
+.RE
+.PP
+
+.PP
+Definition at line 1071 of file mib.c.
+.PP
+References sprint_realloc_by_type(), variable_list::type, variable_list::val, and variable_list::val_len.
+.PP
+Referenced by set_function(), and sprint_realloc_by_type().
+.SS "int sprint_realloc_octet_string (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
+.PP
+Prints an octet string into a buffer. 
+.PP
+The variable var is encoded as octet string.
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbuf\fP Address of the buffer to print to. 
+.br
+\fIbuf_len\fP Address to an integer containing the size of buf. 
+.br
+\fIout_len\fP Incremented by the number of characters printed. 
+.br
+\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
+.br
+\fIvar\fP The variable to encode. 
+.br
+\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
+.br
+\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
+.br
+\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
+.RE
+.PP
+
+.PP
+Definition at line 423 of file mib.c.
+.PP
+References sprint_realloc_asciistring(), sprint_realloc_by_type(), sprint_realloc_octet_string(), variable_list::type, variable_list::val, and variable_list::val_len.
+.PP
+Referenced by set_function(), sprint_realloc_by_type(), and sprint_realloc_octet_string().
+.SS "int sprint_realloc_opaque (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
+.PP
+Prints an object identifier into a buffer. 
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbuf\fP Address of the buffer to print to. 
+.br
+\fIbuf_len\fP Address to an integer containing the size of buf. 
+.br
+\fIout_len\fP Incremented by the number of characters printed. 
+.br
+\fIallow_realloc\fP if not zero reallocate the buffer to fit the needed size. 
+.br
+\fIvar\fP The variable to encode. 
+.br
+\fIenums\fP The enumeration ff this variable is enumerated. may be NULL. 
+.br
+\fIhint\fP Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL. 
+.br
+\fIunits\fP Contents of the UNITS clause of the MIB. may be NULL.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
+.RE
+.PP
+
 .PP
 Definition at line 981 of file mib.c.
 .PP
@@ -1207,7 +1349,9 @@ References sprint_realloc_by_type(), sprint_realloc_counter64(), variable_list::
 Referenced by set_function(), and sprint_realloc_by_type().
 .SS "int sprint_realloc_timeticks (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
-Prints a timetick variable into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+Prints a timetick variable into a buffer. 
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
 .PP
 \fBParameters:\fP
 .RS 4
@@ -1232,6 +1376,8 @@ Prints a timetick variable into a buffer. If allow_realloc is true the buffer wi
 .RS 4
 1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
 .RE
+.PP
+
 .PP
 Definition at line 1141 of file mib.c.
 .PP
@@ -1240,7 +1386,9 @@ References sprint_realloc_by_type(), variable_list::type, and variable_list::val
 Referenced by set_function(), and sprint_realloc_by_type().
 .SS "int sprint_realloc_uinteger (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
-Prints an unsigned integer into a buffer. If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
+Prints an unsigned integer into a buffer. 
+.PP
+If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to this.)
 .PP
 \fBParameters:\fP
 .RS 4
@@ -1266,6 +1414,8 @@ Prints an unsigned integer into a buffer. If allow_realloc is true the buffer wi
 1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.) 
 .RE
 .PP
+
+.PP
 Definition at line 1392 of file mib.c.
 .PP
 References sprint_realloc_by_type(), sprint_realloc_hinted_integer(), variable_list::type, and variable_list::val.
@@ -1273,7 +1423,9 @@ References sprint_realloc_by_type(), sprint_realloc_hinted_integer(), variable_l
 Referenced by set_function(), and sprint_realloc_by_type().
 .SS "char* uptime_string (u_long timeticks, char * buf)"
 .PP
-Converts timeticks to hours, minutes, seconds string. CMU compatible does not show centiseconds.
+Converts timeticks to hours, minutes, seconds string. 
+.PP
+CMU compatible does not show centiseconds.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -1292,12 +1444,16 @@ The buffer
 uptimeString 
 .RE
 .PP
+
+.PP
 Definition at line 5691 of file mib.c.
 .SH "Variable Documentation"
 .PP 
 .SS "PrefixList mib_prefixes[]"
 .PP
-\fBInitial value:\fP.nf
+\fBInitial value:\fP
+.PP
+.nf
  {
     {&Standard_Prefix[0]},      
     {'.iso.org.dod.internet.mgmt.mib-2'},

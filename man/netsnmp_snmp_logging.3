@@ -1,4 +1,4 @@
-.TH "generic logging for net-snmp" 3 "24 Jan 2005" "net-snmp" \" -*- nroff -*-
+.TH "generic logging for net-snmp" 3 "29 Jun 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,10 +10,10 @@ generic logging for net-snmp \-
 .RI "#define \fBLOGLENGTH\fP   1024"
 .br
 .ti -1c
-.RI "#define \fBLOG_CONS\fP   0       /* Don't bother if not defined... */"
+.RI "#define \fBLOG_CONS\fP   0"
 .br
 .ti -1c
-.RI "#define \fBLOG_PID\fP   0       /* Don't bother if not defined... */"
+.RI "#define \fBLOG_PID\fP   0"
 .br
 .ti -1c
 .RI "#define \fBLOG_LOCAL0\fP   0"
@@ -177,7 +177,9 @@ generic logging for net-snmp \-
 .PP 
 .SS "int snmp_get_do_logging (void)"
 .PP
-This snmp logging function allows variable argument list given the specified priority, format and a populated va_list structure. The default logfile this function writes to is /var/log/snmpd.log.
+This snmp logging function allows variable argument list given the specified priority, format and a populated va_list structure. 
+.PP
+The default logfile this function writes to is /var/log/snmpd.log.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -190,16 +192,23 @@ LOG_ALERT action must be taken immediately
 LOG_CRIT critical conditions
 .IP "\(bu" 2
 LOG_ERR error conditions The warning type is:
+.PP
+.RE
+.PP
 .IP "\(bu" 2
 LOG_WARNING warning conditions The information types are:
-.IP "\(bu" 2
+.IP "  \(bu" 4
 LOG_NOTICE normal but significant condition
-.IP "\(bu" 2
+.IP "  \(bu" 4
 LOG_INFO informational
-.IP "\(bu" 2
+.PP
+
+.PP
+.PP
 LOG_DEBUG debug-level messages
 .PP
-.br
+\fBParameters:\fP
+.RS 4
 \fIformat\fP is a pointer to a char representing the variable argument list format used.
 .br
 \fIap\fP is a va_list type used to traverse the list of arguments.
@@ -215,10 +224,14 @@ Returns 0 on success, -1 when the code could not format the log- string, -2 when
 \fBsnmp_log\fP 
 .RE
 .PP
-Definition at line 472 of file snmp_logging.c.
+
+.PP
+Definition at line 470 of file snmp_logging.c.
 .SS "int snmp_log (va_alist)"
 .PP
-This snmp logging function allows variable argument list given the specified format and priority. Calls the snmp_vlog function. The default logfile this function writes to is /var/log/snmpd.log.
+This snmp logging function allows variable argument list given the specified format and priority. 
+.PP
+Calls the snmp_vlog function. The default logfile this function writes to is /var/log/snmpd.log.
 .PP
 \fBSee also:\fP
 .RS 4
@@ -231,6 +244,6 @@ snmp_vlog
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 1146 of file snmp_logging.c.
+Definition at line 1144 of file snmp_logging.c.
 .PP
 Referenced by _request_set_error(), agent_check_and_process(), init_agent(), netsnmp_baby_steps_handler_get(), netsnmp_cache_create(), netsnmp_cache_helper_handler(), netsnmp_cache_timer_start(), netsnmp_cache_timer_stop(), netsnmp_call_handler(), netsnmp_call_next_handler(), netsnmp_call_next_handler_one_request(), netsnmp_container_table_handler_get(), netsnmp_data_list_add_data(), netsnmp_data_list_add_node(), netsnmp_get_multiplexer_handler(), netsnmp_get_table_data_handler(), netsnmp_get_table_data_set_handler(), netsnmp_get_table_handler(), netsnmp_inject_handler_before(), netsnmp_mark_row_column_writable(), netsnmp_multiplexer_helper_handler(), netsnmp_read_data_callback(), netsnmp_register_handler(), netsnmp_register_handler_nocallback(), netsnmp_register_save_list(), netsnmp_request_set_error_all(), netsnmp_save_all_data_callback(), netsnmp_set_row_column(), netsnmp_table_container_register(), netsnmp_table_data_add_row(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), netsnmp_table_set_add_default_row(), read_config_store(), snmp_call_callbacks(), snmp_unregister_callback(), and table_helper_handler().
