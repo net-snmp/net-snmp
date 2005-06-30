@@ -1,4 +1,4 @@
-.TH SNMPD 8 "5 May 2005" VVERSIONINFO "Net-SNMP"
+.TH SNMPD 8 "23 Jun 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
@@ -137,6 +137,14 @@ Change to the user ID
 .I UID
 (which can be given in numerical or textual form) after opening
 listening sockets.
+.TP
+.B -U
+Instructs the agent to not remove its pid file (see the
+.B -p
+option) on shutdown. Overrides the leave_pidfile token in the
+.I snmpd.conf
+file, see
+.I snmpd.conf(5).
 .TP
 .B -v, --version
 Print version information for the agent and then exit.
