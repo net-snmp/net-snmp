@@ -5443,8 +5443,7 @@ _sess_read(void *sessp, fd_set * fdset)
          */
         DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));
         transport->f_close(transport);
-        SNMP_FREE(rxbuf);
-        isp->packet = NULL;
+        SNMP_FREE(isp->packet);
         if (opaque != NULL) {
             SNMP_FREE(opaque);
         }
