@@ -4162,9 +4162,10 @@ _sess_read(void *sessp,
         else
           isp->proper_len = asn_check_packet(isp->packet, isp->packet_len);
 
-        if (isp->proper_len > MAX_PACKET_LENGTH) {
+        if (isp->proper_len < 0 ||
+            isp->proper_len > MAX_PACKET_LENGTH) {
           /* illegal length, drop the connection */
-          snmp_log(LOG_ERR,"Maximum packet size exceeded in a request.\n");
+          snmp_log(LOG_ERR,"illegal packet received in a request.\n");
 #ifdef HAVE_CLOSESOCKET
           closesocket(isp->sd);
 #else
