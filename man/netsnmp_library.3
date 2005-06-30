@@ -1,4 +1,4 @@
-.TH "The Net-SNMP library" 3 "29 Jun 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "30 Jun 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -527,7 +527,7 @@ This should be faster than doing a snmp_oid_compare for different length OIDs, s
 .PP
 
 .PP
-Definition at line 6212 of file snmp_api.c.
+Definition at line 6211 of file snmp_api.c.
 .PP
 Referenced by netsnmp_cache_find_by_oid(), netsnmp_old_api_helper(), and unregister_mib_context().
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -552,7 +552,7 @@ length of largest common index of commonality. 1 = first, 0 if none * or -1 on e
 .PP
 
 .PP
-Definition at line 6268 of file snmp_api.c.
+Definition at line 6267 of file snmp_api.c.
 .PP
 Referenced by netsnmp_add_varbind_to_cache().
 .SS "int netsnmp_oid_is_subtree (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -579,7 +579,7 @@ Functionally, this determines if in_name2 is equal or a subtree of in_name1
 .PP
 
 .PP
-Definition at line 6248 of file snmp_api.c.
+Definition at line 6247 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 lexicographical compare two object identifiers. 
@@ -593,7 +593,7 @@ Caution: this method is called often by command responder applications (ie, agen
 .PP
 
 .PP
-Definition at line 6144 of file snmp_api.c.
+Definition at line 6143 of file snmp_api.c.
 .PP
 Referenced by check_getnext_results(), netsnmp_check_getnext_reply(), netsnmp_insert_iterator_context(), netsnmp_insert_table_row(), netsnmp_row_merge_helper_handler(), netsnmp_table_data_add_row(), netsnmp_table_data_get_from_oid(), netsnmp_table_data_helper_handler(), netsnmp_table_iterator_helper_handler(), snmp_oidtree_compare(), and table_helper_handler().
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -618,7 +618,7 @@ Compares 2 OIDs to determine if they are equal up until the shortest length.
 .PP
 
 .PP
-Definition at line 6193 of file snmp_api.c.
+Definition at line 6192 of file snmp_api.c.
 .PP
 References snmp_oid_compare().
 .SS "void snmp_shutdown (const char * type)"
