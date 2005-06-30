@@ -1,10 +1,11 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
-*5.1.3.pre1*
+*5.1.3*
  Fixes:
    security:
      - fix potential race condition in fixproc script
+     - fix DOS vulnerability on tcp connections
 
    agent:
      - bug 1034008: memory leak using SET for table_dataset
@@ -20,6 +21,11 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
      - bug 986238: snmpd loops forever
      - bug 615744: Spurious DISMAN-EVENT traps
      - patch 1040718: Agentx error propagation and infinite loop
+     - fix error handling for proxy get-next requests
+
+   snmptrapd:
+     - new configure option to exclude AgentX subagent code
+     - new runtime option to exclude table registrations 
 
    library:
      - process pre-mib config tokens in optional config files at the right time
