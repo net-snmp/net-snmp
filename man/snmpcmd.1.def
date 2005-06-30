@@ -27,7 +27,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPCMD 1 "09 Feb 2005" VVERSIONINFO "Net-SNMP"
+.TH SNMPCMD 1 "29 Jun 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpcmd - commands to communicate with a network entity using SNMP Requests.
@@ -49,9 +49,9 @@ parameters are documented in the manual pages for each application.
 .SH OPTIONS
 .TP
 .BI -a " authProtocol"
-Set the authentication protocol (MD5|SHA) used for authenticated SNMPv3
+Set the authentication protocol (MD5 or SHA) used for authenticated SNMPv3
 messages. Overrides the defAuthType token in the
-.I  snmp.conf
+.I snmp.conf
 file.
 .TP
 .BI -A " authPassword"
@@ -130,7 +130,8 @@ addition to MIB modules specified in the environment variable MIBS.
 If a
 .I mibfile
 token is specified in the
-.I snmp.conf file,
+.I snmp.conf
+file,
 the 
 .I -m MIB
 option overrides the 
@@ -209,6 +210,9 @@ Display version information for the application and then exit.
 .TP
 .BI -x " privProtocol"
 Set the privacy protocol (DES) used for encrypted SNMPv3 messages.
+Overrides the defPrivType token in the
+.I snmp.conf
+file. Only valid if OpenSSL is available.
 .TP
 .BI -X " privPassword"
 Set the privacy pass phrase used for encrypted SNMPv3 messages.
@@ -224,6 +228,15 @@ messages.  This will initialize the local notion of the agents
 boots/time with an authenticated value stored in the LCD.
 It is typically not necessary to specify this option, as these values
 will usually be discovered automatically.
+.TP
+.BI -- "name"="value"
+Allows to specify any token ("name") supported in the
+.I snmp.conf
+file and sets its value to "value". Overrides the corresponding token in the
+.I snmp.conf
+file. See
+.I snmp.conf(5)
+for the full list of tokens.
 
 .SH AGENT SPECIFICATION
 .PP
@@ -540,8 +553,8 @@ system.sysUpTime.0 = 14096763
 .PP
 Note that most of these options can be turned on or off by default by
 tuning the
-.I snmp.conf file.
-See the
+.I snmp.conf
+file. See the
 .I snmp.conf(5)
 manual page for details.
 
