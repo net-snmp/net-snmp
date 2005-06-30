@@ -4,6 +4,15 @@
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
+/* Define HAVE_WIN32_PLATFORM_SDK if you have:
+ * Microsoft Visual Studio MSVC 6.0 and the Platform SDK (PSDK)
+ * Microsoft Visual Studio.New 2002
+ * Microsoft Visual Studio.New 2003
+ * Cygwin
+ * MinGW 
+ */
+/* #undef HAVE_WIN32_PLATFORM_SDK */
+
 #define INSTALL_BASE "c:/usr"
 
 /* config.h:  a general config file */
@@ -1256,7 +1265,9 @@
 #define CONFIGURE_OPTIONS ""
 
 /* got socklen_t? */
+#ifdef HAVE_WIN32_PLATFORM_SDK
 #define HAVE_SOCKLEN_T 1
+#endif
 
 /* got in_addr_t? */
 /* #undef HAVE_IN_ADDR_T */

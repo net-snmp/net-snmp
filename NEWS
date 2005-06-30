@@ -56,6 +56,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
    Win32:
      - Cygwin compiler fixes
      - bug 926389: Win32 event log logging
+     - Fix compiling without the Platform SDK (PSDK)
 
 
 *5.1.2*
