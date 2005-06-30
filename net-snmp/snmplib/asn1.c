@@ -1289,8 +1289,10 @@ asn_parse_objid(u_char * data,
         /*
          * ?? note, this test will never be true, since the largest value
          * of subidentifier is the value of MAX_SUBID! 
-	 *
-	 * Yes: PC-LINT says the same thing
+         *
+         * Yes: PC-LINT says the same thing
+         * No!: the agent can be configured to use a char instead of a long
+         *      for OIDs, in which case this test is essential.
          */
         if (subidentifier > (u_long) MAX_SUBID) {
             ERROR_MSG("subidentifier too large");

@@ -109,7 +109,13 @@ initialize_table_ifXTable(void)
      * call interface initialization code
      */
     _ifXTable_initialize_interface(user_context, flags);
-    netsnmp_assert(NULL != _ifXTable_container_get());
+
+    /*
+     * if there is no container, bail. otherwise, register the callbacks
+     * for persistent storage.
+     */
+    if (NULL == _ifXTable_container_get())
+        return; /* msg already logged */
 
     register_config_handler(NULL, "ifXTable", _ifXTable_restore, NULL,
                             NULL);

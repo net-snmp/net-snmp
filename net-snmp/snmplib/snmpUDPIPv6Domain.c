@@ -37,7 +37,6 @@
 #include <sys/socket.h>
 #endif
 
-#define HAVE_IF_NAMETOINDEX
 #if defined(HAVE_WINSOCK_H) || defined(cygwin)
     /*
      *  Windows IPv6 support is part of WinSock2 only

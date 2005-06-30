@@ -90,7 +90,7 @@
  * logh_head:  A list of all log handlers, in increasing order of priority
  * logh_priorities:  'Indexes' into this list, by priority
  */
-netsnmp_log_handler *logh_head;
+netsnmp_log_handler *logh_head = NULL;
 netsnmp_log_handler *logh_priorities[LOG_DEBUG+1];
 
 static int      newline = 1;	 /* MTCRITICAL_RESOURCE */
@@ -389,6 +389,13 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
             optind++;
         /* Fallthrough */
     case 'n':
+        /*
+         * disable all logs to clean them up (close files, etc),
+         * remove all log handlers, then register a null handler.
+         */
+        snmp_disable_log();
+        while(NULL != logh_head)
+            netsnmp_remove_loghandler( logh_head );
         logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_NONE, priority);
         if (logh) {
             logh->pri_max = pri_max;

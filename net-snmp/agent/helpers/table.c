@@ -766,7 +766,7 @@ netsnmp_table_build_result(netsnmp_handler_registration *reginfo,
 /** given a registration info object, a request object and the table
  *  info object it builds the request->requestvb->name oid from the
  *  index values and column information found in the table_info
- *  object.
+ *  object. Index values are extracted from the table_info varbinds.
  */
 int
 netsnmp_table_build_oid(netsnmp_handler_registration *reginfo,
@@ -800,7 +800,10 @@ netsnmp_table_build_oid(netsnmp_handler_registration *reginfo,
     return SNMPERR_SUCCESS;
 }
 
-/** Builds an oid from index information.
+/** given a registration info object, a request object and the table
+ *  info object it builds the request->requestvb->name oid from the
+ *  index values and column information found in the table_info
+ *  object.  Index values are extracted from the table_info index oid.
  */
 int
 netsnmp_table_build_oid_from_index(netsnmp_handler_registration *reginfo,
@@ -836,6 +839,11 @@ netsnmp_update_variable_list_from_index(netsnmp_table_request_info *tri)
 {
     if (!tri)
         return SNMPERR_GENERR;
+
+    /*
+     * free any existing allocated memory, then parse oid into varbinds
+     */
+    snmp_reset_var_buffers( tri->indexes);
 
     return parse_oid_indexes(tri->index_oid, tri->index_oid_len,
                              tri->indexes);
@@ -1054,6 +1062,13 @@ netsnmp_table_helper_add_indexes(va_alist)
     va_end(debugargs);
 }
 
+static void
+_row_stash_data_list_free(void *ptr) {
+    netsnmp_oid_stash_node **tmp = (netsnmp_oid_stash_node **)ptr;
+    netsnmp_oid_stash_free(tmp, NULL);
+    free(ptr);
+}
+
 /** returns a row-wide place to store data in.
     @todo This function will likely change to add free pointer functions. */
 netsnmp_oid_stash_node **
@@ -1074,12 +1089,9 @@ netsnmp_table_get_or_create_row_stash(netsnmp_agent_request_info *reqinfo,
             return NULL;        /* ack. out of mem */
 
         netsnmp_agent_add_list_data(reqinfo,
-                                    /*
-                                     * XXX: free: wrong 
-                                     */
                                     netsnmp_create_data_list(storage_name,
                                                              stashp,
-                                                             free));
+                                                             _row_stash_data_list_free));
     }
     return stashp;
 }

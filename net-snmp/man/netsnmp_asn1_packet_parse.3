@@ -1,4 +1,4 @@
-.TH "asn1 parsing and datatype manipulation routines." 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "asn1 parsing and datatype manipulation routines." 3 "30 Jun 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -98,6 +98,7 @@ Re-allocating reverse ASN.1 encoder functions. Synopsis:
                             type, &data, sizeof(long)) == 0) {
      error;
  }
+.fi
 .PP
 .PP
 NOTE WELL: after calling one of these functions with allow_realloc non-zero, buf might have moved, buf_len might have grown and offset will have increased by the size of the encoded data. You should **NEVER** do something like this:
@@ -119,6 +120,7 @@ NOTE WELL: after calling one of these functions with allow_realloc non-zero, buf
  rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
                               type, &data2, sizeof(long));
  make use of ptr here;
+.fi
 .PP
 .PP
 ptr is **INVALID** at this point. In general, you should store the offset value and compute pointers when you need them:
@@ -141,6 +143,7 @@ ptr is **INVALID** at this point. In general, you should store the offset value 
                               type, &data2, sizeof(long));
  ptr = buf + buf_len - ptr_offset
  make use of ptr here;
+.fi
 .PP
 .PP
 Here, you can see that ptr will be a valid pointer even if the block of memory has been moved, as it may well have been. Plenty of examples of usage all over \fBasn1.c\fP, \fBsnmp_api.c\fP, \fBsnmpusm.c\fP.
@@ -160,6 +163,7 @@ Of course, you can pass allow_realloc as zero, to indicate that you do not wish 
  if (cp == NULL) {
  error;
  }
+.fi
 .PP
 .PP
 IS EQUIVALENT TO:
@@ -177,5 +181,6 @@ IS EQUIVALENT TO:
  if (rc == 0) {
    error;
  }
+.fi
 .PP
-
+ 

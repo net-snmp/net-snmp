@@ -31,7 +31,7 @@ INTRODUCTION
 
   Documentation for using the applications is available in the Windows help file
   (Net-SNMP.chm) located in the docs directory of the installed package.  Help is also
-  available from the web site at http://www.net-snmp.org/#Documentation.
+  available from the web site at http://www.net-snmp.org/docs/.
 
 
 INSTALLATION
@@ -81,6 +81,9 @@ INSTALLATION
     mibdirs c:/usr/share/snmp/mibs
     persistentDir c:/usr/snmp/persist
     tempFilePattern C:/usr/temp/snmpdXXXXXX
+
+  For detailed information on using environment variables and the registry to configure
+  Net-SNMP, see 'Overview' document in the Configuration section of the Net-SNMP help file.
 
   For information on running snmpd.exe and snmptrapd.exe as a Windows service, see 
   'How to Register the Net-SNMP Agent and Trap Daemon as Windows services' in README.win32.
@@ -159,7 +162,7 @@ CONFIGURATION
 
   Documentation for using the snmpconf is available in the Windows help file
   (Net-SNMP.chm) located in the docs directory of the installed package.  Help is also
-  available from the web site at http://www.net-snmp.org/#Documentation.
+  available from the web site at http://www.net-snmp.org/docs/.
 
   To run snmpconf, use the following command line:
 

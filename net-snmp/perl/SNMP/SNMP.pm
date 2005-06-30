@@ -7,7 +7,7 @@
 #     modify it under the same terms as Perl itself.
 
 package SNMP;
-$VERSION = '5.2.rc4';   # current release version number
+$VERSION = '5.2.1.2';   # current release version number
 
 require Exporter;
 require DynaLoader;
@@ -1624,6 +1624,82 @@ use '$numInts + 1' for the max_repeaters value.  This asks the
 agent to include one additional (unrelated) variable that signals
 the end of the sub-tree, allowing bulkwalk() to determine that
 the request is complete.
+
+=item $results = $sess->gettable(E<lt>TABLE OIDE<gt>, E<lt>OPTIONS<gt>)
+
+This will retrieve an entire table of data and return a hash reference
+to that data.  The returned hash reference will have indexes of the
+OID suffixes for the index data as the key.  The value for each entry
+will be another hash containing the data for a given row.  The keys to
+that hash will be the column names, and the values will be the data.
+
+Example:
+
+  #!/usr/bin/perl
+
+  use SNMP;
+  use Data::Dumper;
+
+  my $s = new SNMP::Session(DestHost => 'localhost');
+
+  print Dumper($s->gettable('ifTable'));
+
+On my machine produces:
+
+  $VAR1 = {
+            '6' => {
+                     'ifMtu' => '1500',
+                     'ifPhysAddress' => 'PV',
+                     # ...
+                     'ifInUnknownProtos' => '0'
+                   },
+            '4' => {
+                     'ifMtu' => '1480',
+                     'ifPhysAddress' => '',
+                     # ...
+                     'ifInUnknownProtos' => '0'
+                   },
+            # ...
+           };
+
+By default, it will try to do as optimized retrieval as possible.
+It'll request multiple columns at once, and use GETBULK if possible.
+A few options may be specified by passing in an I<OPTIONS> hash
+containing various parameters:
+
+=over
+
+=item noindexes => 1
+
+Instructs the code not to parse the indexes and place the results in
+the second hash.  If you don't need the index data, this will be
+faster.
+
+=item columns => [ colname1, ... ]
+
+This specifies which columns to collect.  By default, it will try to
+collect all the columns defined in the MIB table.
+
+=item repeat => I<COUNT>
+
+Specifies a GETBULK repeat I<COUNT>.  IE, it will request this many
+varbinds back per column when using the GETBULK operation.  Shortening
+this will mean smaller packets which may help going through some
+systems.  By default, this value is calculated and attepmts to guess
+at what will fit all the results into 1000 bytes.  This calculation is
+fairly safe, hopefully, but you can either raise or lower the number
+using this option if desired.  In lossy networks, you want to make
+sure that the packets don't get fragmented and lowering this value is
+one way to help that.
+
+=item nogetbulk => 1
+
+Force the use of GETNEXT rather than GETBULK.  (always true for
+SNMPv1, as it doesn't have GETBULK anyway).  Some agents are great
+implementers of GETBULK and this allows you to force the use of
+GETNEXT oprations instead.
+
+=back
 
 =back
 

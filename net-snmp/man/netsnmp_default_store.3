@@ -1,10 +1,8 @@
-.TH "storage space for defaults" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "storage space for defaults" 3 "30 Jun 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-storage space for defaults \- The purpose of the default storage is three-fold:.  
-
-.PP
+storage space for defaults \- 
 .SS "Data Structures"
 
 .in +1c
@@ -65,7 +63,9 @@ storage space for defaults \- The purpose of the default storage is three-fold:.
 .in -1c
 .SH "Detailed Description"
 .PP 
-The purpose of the default storage is three-fold:. 1) To create a global storage space without creating a whole bunch of globally accessible variables or a whole bunch of access functions to work with more privately restricted variables.
+The purpose of the default storage is three-fold:
+.PP
+1) To create a global storage space without creating a whole bunch of globally accessible variables or a whole bunch of access functions to work with more privately restricted variables.
 .PP
 2) To provide a single location where the thread lock- ing needs to be implemented. At the time of this writing, however, thread locking is not yet in place.
 .PP
@@ -222,7 +222,9 @@ library strings
 .PP 
 .SS "int netsnmp_ds_set_boolean (int storeid, int which, int value)"
 .PP
-Stores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[store][which] slot. \fBParameters:\fP
+Stores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[store][which] slot. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIstoreid\fP an index to the boolean storage container's first index(store)
 .br
@@ -235,6 +237,8 @@ Stores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[s
 .RS 4
 Returns SNMPPERR_GENERR if the storeid and which parameters do not correspond to a valid slot, or SNMPERR_SUCCESS otherwise. 
 .RE
+.PP
+
 .PP
 Definition at line 197 of file default_store.c.
 .PP

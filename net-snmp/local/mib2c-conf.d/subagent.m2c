@@ -71,6 +71,7 @@ main (int argc, char **argv) {
       netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
 	                     NETSNMP_DS_AGENT_NO_ROOT_ACCESS, 1);
       init_agent("$name");        /* register our .conf handlers */
+      init_$name();  
       init_snmp("$name");
       fprintf(stderr, "Configuration directives understood:\n");
       read_config_print_usage("  ");
@@ -137,11 +138,11 @@ main (int argc, char **argv) {
   /* initialize the agent library */
   init_agent("$name");
 
-  /* read ${name}.conf files. */
-  init_snmp("$name");
-
   /* init $name mib code */
   init_$name();  
+
+  /* read ${name}.conf files. */
+  init_snmp("$name");
 
   /* If we're going to be a snmp master agent, initial the ports */
   if (!agentx_subagent)

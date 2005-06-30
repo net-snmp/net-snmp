@@ -239,7 +239,7 @@ uptimeString(u_long timeticks, char *buf)
 static void
 sprint_char(char *buf, const u_char ch)
 {
-    if (isprint(ch)) {
+    if (isprint(ch) || isspace(ch)) {
         sprintf(buf, "%c", (int) ch);
     } else {
         sprintf(buf, ".");
@@ -367,7 +367,7 @@ sprint_realloc_asciistring(u_char ** buf, size_t * buf_len,
     int             i;
 
     for (i = 0; i < (int) len; i++) {
-        if (isprint(*cp)) {
+        if (isprint(*cp) || isspace(*cp)) {
             if (*cp == '\\' || *cp == '"') {
                 if ((*out_len >= *buf_len) &&
                     !(allow_realloc && snmp_realloc(buf, buf_len))) {
