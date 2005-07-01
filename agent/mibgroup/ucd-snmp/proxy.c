@@ -376,9 +376,12 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
         DEBUGMSGTL(("proxy", "got timed out... requests = %08p\n", requests));
 
         netsnmp_handler_mark_requests_as_delegated(requests,
-						   REQUEST_IS_NOT_DELEGATED);
-        netsnmp_set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index = 0 */
-				  SNMP_ERR_GENERR);
+                                                   REQUEST_IS_NOT_DELEGATED);
+        if(cache->reqinfo->mode != MODE_GETNEXT) {
+            DEBUGMSGTL(("proxy", "  ignoring timeout\n"));
+            netsnmp_set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index = 0 */
+                                      SNMP_ERR_GENERR);
+        }
         netsnmp_free_delegated_cache(cache);
         return 0;
 
@@ -402,8 +405,9 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
             if((cache->reqinfo->mode == MODE_GETNEXT) &&
                (SNMP_ERR_NOSUCHNAME == pdu->errstat)) {
                 DEBUGMSGTL(("proxy", "  ignoring error response\n"));
-                for(request = requests; request; request = request->next)
-                    request->delegated = 0;
+                netsnmp_handler_mark_requests_as_delegated(requests,
+                                                           REQUEST_IS_NOT_DELEGATED);
+                netsnmp_free_delegated_cache(cache);
             }
             else
                 netsnmp_set_request_error(cache->reqinfo, requests, pdu->errstat);
