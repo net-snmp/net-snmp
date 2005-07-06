@@ -145,7 +145,7 @@ agentlib: libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
 
 miblib: libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
-libs: agentlib miblib
+libs: $(INSTALLLIBS)
 
 embedperluninstall:
 	  @rm -f $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl.pl
