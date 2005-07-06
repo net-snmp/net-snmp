@@ -132,6 +132,12 @@ embedperlinstall:
 	  @$(INSTALL) $(srcdir)/snmp_perl.pl $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl.pl
 	  @echo "install:  installed snmp_perl.pl in $(INSTALL_PREFIX)$(snmplibdir)"
 
+agentlib: libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+
+miblib: libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+
+libs: $(INSTALLLIBS)
+
 embedperluninstall:
 	  @rm -f $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl.pl
 	  @echo "removed snmp_perl.pl from $(INSTALL_PREFIX)$(snmplibdir)"
