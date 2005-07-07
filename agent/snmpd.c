@@ -464,6 +464,18 @@ main(int argc, char *argv[])
     FILE           *PID;
 #endif
 
+    /*
+     * close all non-standard file descriptors we may have
+     * inherited from the shell.
+     */
+    for (i = getdtablesize() - 1; i > 2; --i) {
+        (void) close(i);
+    }
+    
+    /*
+     * register signals ASAP to prevent default action (usually core)
+     * for signals during startup...
+     */
 #ifdef SIGTERM
     DEBUGMSGTL(("signal", "registering SIGTERM signal handler\n"));
     signal(SIGTERM, SnmpdShutDown);
@@ -1007,6 +1019,7 @@ main(int argc, char *argv[])
     SNMP_FREE(argvrestartname);
     SNMP_FREE(argvrestart);
     SNMP_FREE(argvrestartp);
+    SOCK_CLEANUP;
     return 0;
 }                               /* End main() -- snmpd */
 
