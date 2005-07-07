@@ -435,6 +435,42 @@ main(int argc, char *argv[])
     FILE           *PID;
 #endif
 
+    /*
+     * close all non-standard file descriptors we may have
+     * inherited from the shell.
+     */
+    for (i = getdtablesize() - 1; i > 2; --i) {
+        (void) close(i);
+    }
+    
+    /*
+     * register signals ASAP to prevent default action (usually core)
+     * for signals during startup...
+     */
+#ifdef SIGTERM
+    DEBUGMSGTL(("signal", "registering SIGTERM signal handler\n"));
+    signal(SIGTERM, SnmpdShutDown);
+#endif
+#ifdef SIGINT
+    DEBUGMSGTL(("signal", "registering SIGINT signal handler\n"));
+    signal(SIGINT, SnmpdShutDown);
+#endif
+#ifdef SIGHUP
+    DEBUGMSGTL(("signal", "registering SIGHUP signal handler\n"));
+    signal(SIGHUP, SnmpdReconfig);
+#endif
+#ifdef SIGUSR1
+    DEBUGMSGTL(("signal", "registering SIGUSR1 signal handler\n"));
+    signal(SIGUSR1, SnmpdDump);
+#endif
+#ifdef SIGPIPE
+    DEBUGMSGTL(("signal", "registering SIGPIPE signal handler\n"));
+    signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
+#endif
+#ifdef SIGXFSZ
+    signal(SIGXFSZ, SnmpdCatchRandomSignal);
+#endif
+
 #ifdef NO_ROOT_ACCESS
     /*
      * Default to no.  
@@ -775,30 +811,6 @@ main(int argc, char *argv[])
                     netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
 					  NETSNMP_DS_AGENT_PORTS)));
     }
-
-#ifdef SIGTERM
-    DEBUGMSGTL(("signal", "registering SIGTERM signal handler\n"));
-    signal(SIGTERM, SnmpdShutDown);
-#endif
-#ifdef SIGINT
-    DEBUGMSGTL(("signal", "registering SIGINT signal handler\n"));
-    signal(SIGINT, SnmpdShutDown);
-#endif
-#ifdef SIGHUP
-    DEBUGMSGTL(("signal", "registering SIGHUP signal handler\n"));
-    signal(SIGHUP, SnmpdReconfig);
-#endif
-#ifdef SIGUSR1
-    DEBUGMSGTL(("signal", "registering SIGUSR1 signal handler\n"));
-    signal(SIGUSR1, SnmpdDump);
-#endif
-#ifdef SIGPIPE
-    DEBUGMSGTL(("signal", "registering SIGPIPE signal handler\n"));
-    signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
-#endif
-#ifdef SIGXFSZ
-    signal(SIGXFSZ, SnmpdCatchRandomSignal);
-#endif
 
 #ifdef LOGFILE
     if (0 == log_set)
