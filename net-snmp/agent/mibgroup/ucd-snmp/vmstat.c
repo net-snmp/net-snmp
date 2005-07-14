@@ -205,7 +205,7 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
     char           *b;
     time_t          now;
     unsigned long long cusell = 0, cicell = 0, csysll = 0, cidell = 0,
-        ciowll = 0, cirqll = 0, csoftll = 0;
+        ciowll = 0, cirqll = 0, csoftll = 0, ctll = 0, itotll = 0, i1ll = 0;
 
     time(&now);
     if (cache_time + CACHE_TIMEOUT < now) {
@@ -322,16 +322,21 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
 	}
     }
     b = strstr(buff, "intr ");
-    if (b)
-	sscanf(b, "intr %u %u", itot, i1);
+    if (b) {
+	sscanf(b, "intr %llu %llu", &itotll, &i1ll);
+        *itot = (unsigned)itotll;
+        *i1 = (unsigned)i1ll;
+    }
     else {
 	if (first)
 	    snmp_log(LOG_ERR, "No intr line in %s\n", STAT_FILE);
 	*itot = 0;
     }
     b = strstr(buff, "ctxt ");
-    if (b)
-	sscanf(b, "ctxt %u", ct);
+    if (b) {
+	sscanf(b, "ctxt %llu", &ctll);
+        *ct = (unsigned long)ctll;
+    }
     else {
 	if (first)
 	    snmp_log(LOG_ERR, "No ctxt line in %s\n", STAT_FILE);
