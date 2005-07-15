@@ -84,7 +84,7 @@
 @eval $m2c_save = "$name"@
 @eval $name = "${m2c_save}_oids"@
 @include generic-header-bottom.m2i@
-@eval $name = $m2c_save@
+@eval $name = "$m2c_save"@
 @end@
 ########################################################################
 @if $m2c_mark_boundary == 1@
