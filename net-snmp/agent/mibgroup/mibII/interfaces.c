@@ -2276,6 +2276,8 @@ init_interfaces_setup(void)
     struct ifa_msghdr *ifam;
     struct sockaddr *sa;
 
+    DEBUGMSGTL(("mibII:freebsd", "init_interfaces_setup\n"));
+
     naddrs = 0;
     if (physaddrs)
         free(physaddrs);
@@ -2285,8 +2287,10 @@ init_interfaces_setup(void)
     physaddrs = 0;
     nphysaddrs = 0;
     len = 0;
-    if (sysctl(mib, 6, 0, &len, 0, 0) < 0)
+    if (sysctl(mib, 6, 0, &len, 0, 0) < 0) {
+        DEBUGMSGTL(("mibII:freebsd", "sysctl 1 < 0\n"));
         return;
+    }
 
     cp = physaddrbuf = malloc(len);
     if (physaddrbuf == 0)
@@ -2294,6 +2298,7 @@ init_interfaces_setup(void)
     if (sysctl(mib, 6, physaddrbuf, &len, 0, 0) < 0) {
         free(physaddrbuf);
         physaddrbuf = 0;
+        DEBUGMSGTL(("mibII:freebsd", "sysctl 2 < 0\n"));
         return;
     }
 
@@ -2303,6 +2308,8 @@ init_interfaces_setup(void)
     while (ilen > 0) {
         rtm = (struct rt_msghdr *) cp;
         if (rtm->rtm_version != RTM_VERSION || rtm->rtm_type != RTM_IFINFO) {
+            DEBUGMSGTL(("mibII:freebsd", "version:%d/%d type:%d/%d\n",
+                        rtm->rtm_version, RTM_VERSION, rtm->rtm_type, RTM_IFINFO));
             free(physaddrs);
             physaddrs = 0;
             free(physaddrbuf);
@@ -2348,6 +2355,7 @@ init_interfaces_setup(void)
             rtm = (struct rt_msghdr *) cp;
         }
     }
+    DEBUGMSGTL(("mibII:freebsd", "found %d addrs\n", naddrs));
     if (physaddrs) {
         nphysaddrs = naddrs;
         return;
@@ -2376,6 +2384,7 @@ get_phys_address(int iindex, char **ap, int *len)
         init_interfaces_setup();
     } while (once--);
 
+    DEBUGMSGTL(("mibII:freebsd", "get_phys_address %d/%d\n", i, nphysaddrs));
     if (i < nphysaddrs) {
         *ap = LLADDR(physaddrs[i]);
         *len = physaddrs[i]->sdl_alen;
@@ -2394,8 +2403,11 @@ Interface_Scan_Get_Count(void)
     int             count;
 
     len = sizeof count;
-    if (sysctl(count_oid, 5, &count, &len, (void *) 0, (size_t) 0) < 0)
+    if (sysctl(count_oid, 5, &count, &len, (void *) 0, (size_t) 0) < 0) {
+        DEBUGMSGTL(("mibII:freebsd", "Interface_Scan_Get_Count err\n"));
         return -1;
+    }
+    DEBUGMSGTL(("mibII:freebsd", "Interface_Scan_Get_Count %d\n", count));
     return count;
 }
 
@@ -2422,8 +2434,10 @@ var_ifEntry(struct variable * vp,
 
     sname[4] = interface;
     len = sizeof ifmd;
-    if (sysctl(sname, 6, &ifmd, &len, 0, 0) < 0)
+    if (sysctl(sname, 6, &ifmd, &len, 0, 0) < 0) {
+        DEBUGMSGTL(("mibII:freebsd", "var_ifEntry sysctl err\n"));
         return NULL;
+    }
     /*
      * hmmm.. where to get the interface name to check overrides?
      *
