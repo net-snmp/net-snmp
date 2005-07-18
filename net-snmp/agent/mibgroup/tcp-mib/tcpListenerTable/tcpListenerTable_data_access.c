@@ -130,6 +130,7 @@ tcpListenerTable_container_init(netsnmp_container ** container_ptr_ptr,
      * cache->enabled to 0.
      */
     cache->timeout = TCPLISTENERTABLE_CACHE_TIMEOUT;    /* seconds */
+    cache->flags |= NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
 }                               /* tcpListenerTable_container_init */
 
 /**
@@ -160,6 +161,42 @@ tcpListenerTable_container_shutdown(netsnmp_container * container_ptr)
     }
 
 }                               /* tcpListenerTable_container_shutdown */
+
+/**
+ * add new entry
+ */
+static void
+_add_connection(netsnmp_tcpconn_entry * entry,
+                netsnmp_container * container)
+{
+    tcpListenerTable_rowreq_ctx *rowreq_ctx;
+
+    DEBUGMSGTL(("tcpListenerTable:access", "creating new entry\n"));
+
+    /*
+     * allocate an row context and set the index(es), then add it to
+     * the container
+     */
+    rowreq_ctx = tcpListenerTable_allocate_rowreq_ctx(entry, NULL);
+    if ((NULL != rowreq_ctx) &&
+        (MFD_SUCCESS == tcpListenerTable_indexes_set(rowreq_ctx,
+                                                       entry->loc_addr_len,
+                                                       entry->loc_addr,
+                                                       entry->loc_addr_len,
+                                                       entry->loc_port))) {
+        CONTAINER_INSERT(container, rowreq_ctx);
+    } else {
+        if (rowreq_ctx) {
+            snmp_log(LOG_ERR, "error setting index while loading "
+                     "tcpListenerTable cache.\n");
+            tcpListenerTable_release_rowreq_ctx(rowreq_ctx);
+        } else {
+            snmp_log(LOG_ERR, "memory allocation failed while loading "
+                     "tcpListenerTable cache.\n");
+            netsnmp_access_tcpconn_entry_free(entry);
+        }
+    }
+}
 
 /**
  * load initial data
@@ -197,91 +234,30 @@ tcpListenerTable_container_shutdown(netsnmp_container * container_ptr)
 int
 tcpListenerTable_container_load(netsnmp_container * container)
 {
-    tcpListenerTable_rowreq_ctx *rowreq_ctx;
-    size_t          count = 0;
-
-    /*
-     * temporary storage for index values
-     */
-    /*
-     * tcpListenerLocalAddressType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h
-     */
-    u_long          tcpListenerLocalAddressType;
-    /*
-     * tcpListenerLocalAddress(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
-     */
-        /** 128 - 1(entry) - 1(col) - 2(other indexes) = 114 */
-    char            tcpListenerLocalAddress[114];
-    size_t          tcpListenerLocalAddress_len;
-    /*
-     * tcpListenerLocalPort(3)/InetPortNumber/ASN_UNSIGNED/u_long(u_long)//l/a/w/e/R/d/H
-     */
-    u_long          tcpListenerLocalPort;
-
+    netsnmp_container             *raw_data =
+        netsnmp_access_tcpconn_container_load(NULL, NETSNMP_ACCESS_TCPCONN_LOAD_ONLYLISTEN);
 
     DEBUGMSGTL(("verbose:tcpListenerTable:tcpListenerTable_container_load",
                 "called\n"));
 
+    if (NULL == raw_data)
+        return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
+
     /*
-     * TODO:351:M: |-> Load/update data in the tcpListenerTable container.
-     * loop over your tcpListenerTable data, allocate a rowreq context,
-     * set the index(es) [and data, optionally] and insert into
-     * the container.
+     * got all the connections. pull out the active ones.
      */
-    while (1) {
-        /*
-         * check for end of data; bail out if there is no more data
-         */
-        if (1)
-            break;
+    CONTAINER_FOR_EACH(raw_data, (netsnmp_container_obj_func *)
+                       _add_connection, container);
 
-        /*
-         * TODO:352:M: |   |-> set indexes in new tcpListenerTable rowreq context.
-         * data context will be set from the first param (unless NULL,
-         *      in which case a new data context will be allocated)
-         * the second param will be passed, with the row context, to
-         *      tcpListenerTablerowreq_ctx_init.
-         */
-        rowreq_ctx = tcpListenerTable_allocate_rowreq_ctx(NULL, NULL);
-        if (NULL == rowreq_ctx) {
-            snmp_log(LOG_ERR, "memory allocation failed\n");
-            return MFD_RESOURCE_UNAVAILABLE;
-        }
-        if (MFD_SUCCESS !=
-            tcpListenerTable_indexes_set(rowreq_ctx,
-                                         tcpListenerLocalAddressType,
-                                         tcpListenerLocalAddress,
-                                         tcpListenerLocalAddress_len,
-                                         tcpListenerLocalPort)) {
-            snmp_log(LOG_ERR,
-                     "error setting index while loading "
-                     "tcpListenerTable data.\n");
-            tcpListenerTable_release_rowreq_ctx(rowreq_ctx);
-            continue;
-        }
+    /*
+     * free the container. we've either claimed each entry, or released it,
+     * so the dal function doesn't need to clear the container.
+     */
+    netsnmp_access_tcpconn_container_free(raw_data,
+                                          NETSNMP_ACCESS_TCPCONN_FREE_DONT_CLEAR);
 
-        /*
-         * TODO:352:r: |   |-> populate tcpListenerTable data context.
-         * Populate data context here. (optionally, delay until row prep)
-         */
-        /*
-         * TRANSIENT or semi-TRANSIENT data:
-         * copy data or save any info needed to do it in row_prep.
-         */
-        /*
-         * setup/save data for tcpListenerProcess
-         * tcpListenerProcess(4)/UNSIGNED32/ASN_UNSIGNED/u_long(u_long)//l/A/w/e/r/d/h
-         */
-
-        /*
-         * insert into table container
-         */
-        CONTAINER_INSERT(container, rowreq_ctx);
-        ++count;
-    }
-
-    DEBUGMSGT(("verbose:tcpListenerTable:tcpListenerTable_container_load",
-               "inserted %d records\n", count));
+    DEBUGMSGT(("verbose:tcpListenerTable:tcpListenerTable_cache_load",
+               "%d records\n", CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }                               /* tcpListenerTable_container_load */

@@ -17,13 +17,14 @@ extern          "C" {
  * @{
  */
 #include <net-snmp/library/asn1.h>
+#include <net-snmp/data_access/tcpConn.h>
 
     /*
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(TCP-MIB/tcpListenerTable/tcpListenerTable_interface);
-config_require(TCP-MIB/tcpListenerTable/tcpListenerTable_data_access);
+config_require(tcp-mib/tcpListenerTable/tcpListenerTable_interface);
+config_require(tcp-mib/tcpListenerTable/tcpListenerTable_data_access);
     /* *INDENT-ON*  */
 
     /*
@@ -64,7 +65,11 @@ config_require(TCP-MIB/tcpListenerTable/tcpListenerTable_data_access);
     /*
      * TODO:101:o: |-> Review tcpListenerTable registration context.
      */
-    typedef struct tListenerT_user_ctx tcpListenerTable_registration;
+    typedef struct tListenerT_user_ctx {
+
+        void * dummy;
+
+    } tcpListenerTable_registration;
 
 /**********************************************************************/
     /*
@@ -89,7 +94,7 @@ config_require(TCP-MIB/tcpListenerTable/tcpListenerTable_data_access);
          * tcpListenerLocalAddress(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
          */
         /** 128 - 2(other indexes) - oid length(10) = 115 */
-        char            tcpListenerLocalAddress[115];
+        char            tcpListenerLocalAddress[20];
         size_t          tcpListenerLocalAddress_len;
 
         /*
@@ -109,7 +114,7 @@ config_require(TCP-MIB/tcpListenerTable/tcpListenerTable_data_access);
      * POSSIBLE LENGHT FOR EVERY VARIABLE LENGTH INDEX!
      * Guessing 128 - col/entry(2)  - oid len(8)
      */
-#define MAX_tcpListenerTable_IDX_LEN     118
+#define MAX_tcpListenerTable_IDX_LEN     22
 
 
     /*
