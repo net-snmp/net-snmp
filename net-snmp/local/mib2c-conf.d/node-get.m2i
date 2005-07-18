@@ -69,9 +69,6 @@ ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref )
 @    if ("$m2c_data_context" eq "generated") && ($m2c_node_skip_get != 1)@
 @        include generic-ctx-get.m2i@
 @    else@
- /*
-  * TODO:235:M: |-> Remove log message/SKIP once you've set $node data
-  */
 @       if ($m2c_node_skip_get != 1)@
  /*
   * TODO:235:M: |-> Remove log message/SKIP once you've set $node data
