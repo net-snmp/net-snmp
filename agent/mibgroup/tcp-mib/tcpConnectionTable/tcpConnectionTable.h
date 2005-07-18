@@ -23,8 +23,8 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(TCP-MIB/tcpConnectionTable/tcpConnectionTable_interface);
-config_require(TCP-MIB/tcpConnectionTable/tcpConnectionTable_data_access);
+config_require(tcp-mib/tcpConnectionTable/tcpConnectionTable_interface);
+config_require(tcp-mib/tcpConnectionTable/tcpConnectionTable_data_access);
     /* *INDENT-ON*  */
 
     /*
@@ -103,7 +103,8 @@ config_require(TCP-MIB/tcpConnectionTable/tcpConnectionTable_data_access);
          * tcpConnectionLocalAddress(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
          */
         /** 128 - 5(other indexes) - oid length(10) = 112 */
-        char            tcpConnectionLocalAddress[112];
+        /** but 20 = size of ipv6z address, longest supported type */
+        char            tcpConnectionLocalAddress[20];
         size_t          tcpConnectionLocalAddress_len;
 
         /*
@@ -120,7 +121,8 @@ config_require(TCP-MIB/tcpConnectionTable/tcpConnectionTable_data_access);
          * tcpConnectionRemAddress(5)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
          */
         /** 128 - 5(other indexes) - oid length(10) = 112 */
-        char            tcpConnectionRemAddress[112];
+        /** but 20 = size of ipv6z address, longest supported type */
+        char            tcpConnectionRemAddress[20];
         size_t          tcpConnectionRemAddress_len;
 
         /*
@@ -140,7 +142,7 @@ config_require(TCP-MIB/tcpConnectionTable/tcpConnectionTable_data_access);
      * POSSIBLE LENGHT FOR EVERY VARIABLE LENGTH INDEX!
      * Guessing 128 - col/entry(2)  - oid len(8)
      */
-#define MAX_tcpConnectionTable_IDX_LEN     118
+#define MAX_tcpConnectionTable_IDX_LEN     44
 
 
     /*
