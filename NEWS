@@ -14,6 +14,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
  Ports:
    Win32:
+     - Linux:
+       - added tcpConnectionTable and tcpListenerTable
      - Cygwin compiler fixes
      - MSVC: agent (snmpd) support for pass and pass_persist
      - MinGW: agent (snmpd) support for pass
