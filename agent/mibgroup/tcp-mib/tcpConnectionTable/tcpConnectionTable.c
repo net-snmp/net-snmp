@@ -311,8 +311,15 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
      * tcpConnectionLocalAddressType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h 
      */
     /** WARNING: this code might not work for netsnmp_tcpconn_entry */
-    tbl_idx->tcpConnectionLocalAddressType =
-        tcpConnectionLocalAddressType_val;
+    /** are cross protocol connections allowed? */
+    netsnmp_assert(tbl_idx->tcpConnectionRemAddressType ==
+                   tbl_idx->tcpConnectionLocalAddressType);
+    if (4 == tcpConnectionLocalAddressType_val)
+        tbl_idx->tcpConnectionLocalAddressType = INETADDRESSTYPE_IPV4;
+    else if (16 == tcpConnectionLocalAddressType_val)
+        tbl_idx->tcpConnectionLocalAddressType = INETADDRESSTYPE_IPV6;
+    else
+        tbl_idx->tcpConnectionLocalAddressType = INETADDRESSTYPE_UNKNOWN;
 
     /*
      * tcpConnectionLocalAddress(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
@@ -346,7 +353,8 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
      * tcpConnectionRemAddressType(4)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h 
      */
     /** WARNING: this code might not work for netsnmp_tcpconn_entry */
-    tbl_idx->tcpConnectionRemAddressType = tcpConnectionRemAddressType_val;
+    tbl_idx->tcpConnectionRemAddressType =
+        tbl_idx->tcpConnectionLocalAddressType;
 
     /*
      * tcpConnectionRemAddress(5)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
@@ -500,12 +508,7 @@ tcpConnectionState_get(tcpConnectionTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the tcpConnectionState data.
      * set (* tcpConnectionState_val_ptr ) from rowreq_ctx->data
      */
-    /*
-     * TODO:235:M: |-> Remove log message/SKIP once you've set tcpConnectionState data
-     */
-    snmp_log(LOG_ERR,
-             "tcpConnectionTable node tcpConnectionState not implemented: skipping\n");
-    return MFD_SKIP;
+    (* tcpConnectionState_val_ptr )= rowreq_ctx->data->tcpConnState;
 
     return MFD_SUCCESS;
 }                               /* tcpConnectionState_get */
@@ -562,12 +565,7 @@ tcpConnectionProcess_get(tcpConnectionTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the tcpConnectionProcess data.
      * set (* tcpConnectionProcess_val_ptr ) from rowreq_ctx->data
      */
-    /*
-     * TODO:235:M: |-> Remove log message/SKIP once you've set tcpConnectionProcess data
-     */
-    snmp_log(LOG_ERR,
-             "tcpConnectionTable node tcpConnectionProcess not implemented: skipping\n");
-    return MFD_SKIP;
+    (* tcpConnectionProcess_val_ptr ) = rowreq_ctx->data->pid;
 
     return MFD_SUCCESS;
 }                               /* tcpConnectionProcess_get */
