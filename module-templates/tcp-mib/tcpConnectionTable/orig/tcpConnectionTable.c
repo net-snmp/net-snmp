@@ -310,7 +310,7 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
     /*
      * tcpConnectionLocalAddressType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h 
      */
-    /** WARNING: this code might not work for struct netsnmp_tcpconn_entry */
+    /** WARNING: this code might not work for netsnmp_tcpconn_entry */
     tbl_idx->tcpConnectionLocalAddressType =
         tcpConnectionLocalAddressType_val;
 
@@ -319,7 +319,7 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
      */
     tbl_idx->tcpConnectionLocalAddress_len =
         sizeof(tbl_idx->tcpConnectionLocalAddress);
-    /** WARNING: this code might not work for struct netsnmp_tcpconn_entry */
+    /** WARNING: this code might not work for netsnmp_tcpconn_entry */
     /*
      * make sure there is enough space for tcpConnectionLocalAddress data
      */
@@ -339,13 +339,13 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
     /*
      * tcpConnectionLocalPort(3)/InetPortNumber/ASN_UNSIGNED/u_long(u_long)//l/a/w/e/R/d/H 
      */
-    /** WARNING: this code might not work for struct netsnmp_tcpconn_entry */
+    /** WARNING: this code might not work for netsnmp_tcpconn_entry */
     tbl_idx->tcpConnectionLocalPort = tcpConnectionLocalPort_val;
 
     /*
      * tcpConnectionRemAddressType(4)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h 
      */
-    /** WARNING: this code might not work for struct netsnmp_tcpconn_entry */
+    /** WARNING: this code might not work for netsnmp_tcpconn_entry */
     tbl_idx->tcpConnectionRemAddressType = tcpConnectionRemAddressType_val;
 
     /*
@@ -353,7 +353,7 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
      */
     tbl_idx->tcpConnectionRemAddress_len =
         sizeof(tbl_idx->tcpConnectionRemAddress);
-    /** WARNING: this code might not work for struct netsnmp_tcpconn_entry */
+    /** WARNING: this code might not work for netsnmp_tcpconn_entry */
     /*
      * make sure there is enough space for tcpConnectionRemAddress data
      */
@@ -373,7 +373,7 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
     /*
      * tcpConnectionRemPort(6)/InetPortNumber/ASN_UNSIGNED/u_long(u_long)//l/a/w/e/R/d/H 
      */
-    /** WARNING: this code might not work for struct netsnmp_tcpconn_entry */
+    /** WARNING: this code might not work for netsnmp_tcpconn_entry */
     tbl_idx->tcpConnectionRemPort = tcpConnectionRemPort_val;
 
 

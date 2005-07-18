@@ -71,7 +71,7 @@ config_require(TCP-MIB/tcpConnectionTable/tcpConnectionTable_data_access);
      * TODO:110:r: |-> Review tcpConnectionTable data context structure.
      * This structure is used to represent the data for tcpConnectionTable.
      */
-    typedef struct netsnmp_tcpconn_entry tcpConnectionTable_data;
+    typedef netsnmp_tcpconn_entry tcpConnectionTable_data;
 
 
     /*
