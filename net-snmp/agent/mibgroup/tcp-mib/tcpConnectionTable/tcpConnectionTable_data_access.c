@@ -129,6 +129,7 @@ tcpConnectionTable_container_init(netsnmp_container ** container_ptr_ptr,
      * cache->enabled to 0.
      */
     cache->timeout = TCPCONNECTIONTABLE_CACHE_TIMEOUT;  /* seconds */
+    cache->flags |= NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
 }                               /* tcpConnectionTable_container_init */
 
 /**
@@ -159,6 +160,46 @@ tcpConnectionTable_container_shutdown(netsnmp_container * container_ptr)
     }
 
 }                               /* tcpConnectionTable_container_shutdown */
+
+/**
+ * add new entry
+ */
+static void
+_add_connection(netsnmp_tcpconn_entry * entry,
+                netsnmp_container * container)
+{
+    tcpConnectionTable_rowreq_ctx *rowreq_ctx;
+
+    DEBUGMSGTL(("tcpConnectionTable:access", "creating new entry\n"));
+
+    /*
+     * allocate an row context and set the index(es), then add it to
+     * the container
+     */
+    rowreq_ctx = tcpConnectionTable_allocate_rowreq_ctx(entry, NULL);
+    if ((NULL != rowreq_ctx) &&
+        (MFD_SUCCESS == tcpConnectionTable_indexes_set(rowreq_ctx,
+                                                       entry->loc_addr_len,
+                                                       entry->loc_addr,
+                                                       entry->loc_addr_len,
+                                                       entry->loc_port,
+                                                       entry->rmt_addr_len,
+                                                       entry->rmt_addr,
+                                                       entry->rmt_addr_len,
+                                                       entry->rmt_port))) {
+        CONTAINER_INSERT(container, rowreq_ctx);
+    } else {
+        if (rowreq_ctx) {
+            snmp_log(LOG_ERR, "error setting index while loading "
+                     "tcpConnectionTable cache.\n");
+            tcpConnectionTable_release_rowreq_ctx(rowreq_ctx);
+        } else {
+            snmp_log(LOG_ERR, "memory allocation failed while loading "
+                     "tcpConnectionTable cache.\n");
+            netsnmp_access_tcpconn_entry_free(entry);
+        }
+    }
+}
 
 /**
  * load initial data
@@ -196,111 +237,29 @@ tcpConnectionTable_container_shutdown(netsnmp_container * container_ptr)
 int
 tcpConnectionTable_container_load(netsnmp_container * container)
 {
-    tcpConnectionTable_rowreq_ctx *rowreq_ctx;
-    size_t          count = 0;
-
-    /*
-     * temporary storage for index values
-     */
-    /*
-     * tcpConnectionLocalAddressType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h
-     */
-    u_long          tcpConnectionLocalAddressType;
-    /*
-     * tcpConnectionLocalAddress(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
-     */
-        /** 128 - 1(entry) - 1(col) - 5(other indexes) = 111 */
-    char            tcpConnectionLocalAddress[111];
-    size_t          tcpConnectionLocalAddress_len;
-    /*
-     * tcpConnectionLocalPort(3)/InetPortNumber/ASN_UNSIGNED/u_long(u_long)//l/a/w/e/R/d/H
-     */
-    u_long          tcpConnectionLocalPort;
-    /*
-     * tcpConnectionRemAddressType(4)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h
-     */
-    u_long          tcpConnectionRemAddressType;
-    /*
-     * tcpConnectionRemAddress(5)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
-     */
-        /** 128 - 1(entry) - 1(col) - 5(other indexes) = 111 */
-    char            tcpConnectionRemAddress[111];
-    size_t          tcpConnectionRemAddress_len;
-    /*
-     * tcpConnectionRemPort(6)/InetPortNumber/ASN_UNSIGNED/u_long(u_long)//l/a/w/e/R/d/H
-     */
-    u_long          tcpConnectionRemPort;
-
+    netsnmp_container             *raw_data =
+        netsnmp_access_tcpconn_container_load(NULL, NETSNMP_ACCESS_TCPCONN_LOAD_NOLISTEN);
 
     DEBUGMSGTL(("verbose:tcpConnectionTable:tcpConnectionTable_container_load", "called\n"));
 
+    if (NULL == raw_data)
+        return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
+
     /*
-     * TODO:351:M: |-> Load/update data in the tcpConnectionTable container.
-     * loop over your tcpConnectionTable data, allocate a rowreq context,
-     * set the index(es) [and data, optionally] and insert into
-     * the container.
+     * got all the connections. pull out the active ones.
      */
-    while (1) {
-        /*
-         * check for end of data; bail out if there is no more data
-         */
-        if (1)
-            break;
+    CONTAINER_FOR_EACH(raw_data, (netsnmp_container_obj_func *)
+                       _add_connection, container);
 
-        /*
-         * TODO:352:M: |   |-> set indexes in new tcpConnectionTable rowreq context.
-         * data context will be set from the first param (unless NULL,
-         *      in which case a new data context will be allocated)
-         * the second param will be passed, with the row context, to
-         *      tcpConnectionTablerowreq_ctx_init.
-         */
-        rowreq_ctx = tcpConnectionTable_allocate_rowreq_ctx(NULL, NULL);
-        if (NULL == rowreq_ctx) {
-            snmp_log(LOG_ERR, "memory allocation failed\n");
-            return MFD_RESOURCE_UNAVAILABLE;
-        }
-        if (MFD_SUCCESS !=
-            tcpConnectionTable_indexes_set(rowreq_ctx,
-                                           tcpConnectionLocalAddressType,
-                                           tcpConnectionLocalAddress,
-                                           tcpConnectionLocalAddress_len,
-                                           tcpConnectionLocalPort,
-                                           tcpConnectionRemAddressType,
-                                           tcpConnectionRemAddress,
-                                           tcpConnectionRemAddress_len,
-                                           tcpConnectionRemPort)) {
-            snmp_log(LOG_ERR,
-                     "error setting index while loading "
-                     "tcpConnectionTable data.\n");
-            tcpConnectionTable_release_rowreq_ctx(rowreq_ctx);
-            continue;
-        }
+    /*
+     * free the container. we've either claimed each entry, or released it,
+     * so the dal function doesn't need to clear the container.
+     */
+    netsnmp_access_tcpconn_container_free(raw_data,
+                                          NETSNMP_ACCESS_TCPCONN_FREE_DONT_CLEAR);
 
-        /*
-         * TODO:352:r: |   |-> populate tcpConnectionTable data context.
-         * Populate data context here. (optionally, delay until row prep)
-         */
-        /*
-         * TRANSIENT or semi-TRANSIENT data:
-         * copy data or save any info needed to do it in row_prep.
-         */
-        /*
-         * setup/save data for tcpConnectionState
-         * tcpConnectionState(7)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
-         */
-        /*
-         * setup/save data for tcpConnectionProcess
-         * tcpConnectionProcess(8)/UNSIGNED32/ASN_UNSIGNED/u_long(u_long)//l/A/w/e/r/d/h
-         */
-
-        /*
-         * insert into table container
-         */
-        CONTAINER_INSERT(container, rowreq_ctx);
-        ++count;
-    }
-
-    DEBUGMSGT(("verbose:tcpConnectionTable:tcpConnectionTable_container_load", "inserted %d records\n", count));
+    DEBUGMSGT(("verbose:tcpConnectionTable:tcpConnectionTable_cache_load",
+               "%d records\n", CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }                               /* tcpConnectionTable_container_load */
