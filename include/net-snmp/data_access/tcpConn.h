@@ -20,17 +20,6 @@ extern          "C" {
 #   define NETSNMP_ACCESS_IPADDRESS_BUF_SIZE 4
 #endif
 
-    /*
-     * tcpconnLocalAddress(2)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h
-     * tcpconnLocalPort(3)/INTEGER/ASN_INTEGER/long(long)//l/A/w/e/R/d/h
-     * tcpconnRemAddress(4)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h
-     * tcpconnRemPort(5)/INTEGER/ASN_INTEGER/long(long)//l/A/w/e/R/d/h
-     */
-#define NETSNMP_TCPCONN_IDX_LOCAL_ADDR       0
-#define NETSNMP_TCPCONN_IDX_LOCAL_PORT       1
-#define NETSNMP_TCPCONN_IDX_REMOTE_ADDR      2
-#define NETSNMP_TCPCONN_IDX_REMOTE_PORT      3
-
 /*
  * netsnmp_tcpconn_entry
  *   - primary tcpconn structure for both ipv4 & ipv6
@@ -59,7 +48,9 @@ extern          "C" {
         /*
          * tcpconnState(1)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
          */
-        u_long          tcpConnState;
+        u_int           tcpConnState; /* 1-12 */
+
+        u_int           pid;
    
         netsnmp_data_list *arch_data;      /* arch specific data */
    
@@ -83,6 +74,8 @@ extern          "C" {
     netsnmp_access_tcpconn_container_load(netsnmp_container* container,
                                           u_int load_flags);
 #define NETSNMP_ACCESS_TCPCONN_LOAD_NOFLAGS               0x0000
+#define NETSNMP_ACCESS_TCPCONN_LOAD_NOLISTEN              0x0001
+#define NETSNMP_ACCESS_TCPCONN_LOAD_ONLYLISTEN            0x0002
 
     void netsnmp_access_tcpconn_container_free(netsnmp_container *container,
                                                u_int free_flags);
