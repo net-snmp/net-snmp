@@ -298,21 +298,21 @@ snmpd. (You can still link it in later.)
 ## save values
 ##      Note: if you add a var here, add it in m2c_table_save_defaults.m2i too
 ##
-@eval $@m2c_context_reg = "$m2c_temp_context_reg"@
-@eval $@m2c_data_allocate = $m2c_temp_data_allocate@
-@eval $@m2c_data_cache = $m2c_temp_data_cache@
-@eval $@m2c_data_context = "$m2c_temp_data_context"@ [generated|NAME]
-@eval $@m2c_data_init = $m2c_temp_data_init@
-@eval $@m2c_data_transient = $m2c_temp_data_transient@
-@eval $@m2c_include_examples = $m2c_temp_include_examples@
-@eval $@m2c_irreversible_commit = $m2c_irreversible_commit@
-@eval $@m2c_table_access = "$m2c_temp_table_access"@
-@eval $@m2c_table_dependencies = $m2c_temp_dependencies@
-@eval $@m2c_table_persistent = $m2c_temp_persistent@
-@eval $@m2c_table_row_creation = $m2c_temp_create@
-@eval $@m2c_table_settable = $m2c_temp_writable@
-@eval $@m2c_table_skip_mapping = $m2c_temp_table_skip_mapping@
-@eval $@m2c_table_sparse = $m2c_temp_table_sparse@
+@eval $m2c_context_reg = "$m2c_temp_context_reg"@
+@eval $m2c_data_allocate = $m2c_temp_data_allocate@
+@eval $m2c_data_cache = $m2c_temp_data_cache@
+@eval $m2c_data_context = "$m2c_temp_data_context"@
+@eval $m2c_data_init = $m2c_temp_data_init@
+@eval $m2c_data_transient = $m2c_temp_data_transient@
+@eval $m2c_include_examples = $m2c_temp_include_examples@
+@eval $m2c_irreversible_commit = $m2c_irreversible_commit@
+@eval $m2c_table_access = "$m2c_temp_table_access"@
+@eval $m2c_table_dependencies = $m2c_temp_dependencies@
+@eval $m2c_table_persistent = $m2c_temp_persistent@
+@eval $m2c_table_row_creation = $m2c_temp_create@
+@eval $m2c_table_settable = $m2c_temp_writable@
+@eval $m2c_table_skip_mapping = $m2c_temp_table_skip_mapping@
+@eval $m2c_table_sparse = $m2c_temp_table_sparse@
 ##
 ## write them back
 ##
