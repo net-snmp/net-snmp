@@ -287,7 +287,12 @@ tcpListenerTable_indexes_set_tbl_idx(tcpListenerTable_mib_index * tbl_idx,
      * tcpListenerLocalAddressType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h 
      */
     /** WARNING: this code might not work for netsnmp_tcpconn_entry */
-    tbl_idx->tcpListenerLocalAddressType = tcpListenerLocalAddressType_val;
+    if (4 == tcpListenerLocalAddressType_val)
+        tbl_idx->tcpListenerLocalAddressType = INETADDRESSTYPE_IPV4;
+    else if (16 == tcpListenerLocalAddressType_val)
+        tbl_idx->tcpListenerLocalAddressType = INETADDRESSTYPE_IPV6;
+    else
+        tbl_idx->tcpListenerLocalAddressType = INETADDRESSTYPE_UNKNOWN;
 
     /*
      * tcpListenerLocalAddress(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
@@ -417,12 +422,7 @@ tcpListenerProcess_get(tcpListenerTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the tcpListenerProcess data.
      * set (* tcpListenerProcess_val_ptr ) from rowreq_ctx->data
      */
-    /*
-     * TODO:235:M: |-> Remove log message/SKIP once you've set tcpListenerProcess data
-     */
-    snmp_log(LOG_ERR,
-             "tcpListenerTable node tcpListenerProcess not implemented: skipping\n");
-    return MFD_SKIP;
+    (* tcpListenerProcess_val_ptr ) = rowreq_ctx->data->pid;
 
     return MFD_SUCCESS;
 }                               /* tcpListenerProcess_get */
