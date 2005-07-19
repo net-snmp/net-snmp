@@ -214,8 +214,8 @@ IP-FORWARD-MIB
 TCP-MIB
  tcp.*.0                      U $2      ~3.2    G mibII/tcp.c
  tcpConnTable (D)             U $2      4.2     I mibII/tcpTable.c
- tcpConnectionTable           U $2      5.3     M tcp-mib/=/*
- tcpListenerTable             U $2      5.3     M tcp-mib/=/*
+ tcpConnectionTable           L         5.3     M tcp-mib/=/*
+ tcpListenerTable             L         5.3     M tcp-mib/=/*
 
 ------------------------------------------------------------------------------
 UDP-MIB
