@@ -191,6 +191,20 @@ netsnmp_table_container_register(netsnmp_handler_registration *reginfo,
     return netsnmp_register_table(reginfo, tabreg);
 }
 
+int
+netsnmp_table_array_register(netsnmp_handler_registration *reginfo,
+                             netsnmp_table_registration_info *tabreg,
+                             netsnmp_table_array_callbacks *cb,
+                             netsnmp_container *container,
+                             int group_rows)
+{
+    netsnmp_inject_handler(reginfo,
+                           netsnmp_create_handler(NULL,
+                               netsnmp_table_array_helper_handler));
+    return netsnmp_table_container_register(reginfo, tabreg, cb,
+                                            container, group_rows);
+}
+
 /** find the handler for the table_array helper. */
 netsnmp_mib_handler *
 netsnmp_find_table_array_handler(netsnmp_handler_registration *reginfo)
