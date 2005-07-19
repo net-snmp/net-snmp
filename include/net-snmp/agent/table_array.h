@@ -136,6 +136,12 @@ extern          "C" {
                                      netsnmp_container *container,
                                      int group_rows);
 
+    int netsnmp_table_array_register(netsnmp_handler_registration *reginfo,
+                                     netsnmp_table_registration_info *tabreq,
+                                     netsnmp_table_array_callbacks *cb,
+                                     netsnmp_container *container,
+                                     int group_rows);
+
     netsnmp_container * netsnmp_extract_array_context(netsnmp_request_info *);
 
     Netsnmp_Node_Handler netsnmp_table_array_helper_handler;
