@@ -95,7 +95,7 @@ TESTING:
       Assuming you are going to build in the source directory :
 
       $ cd SOURCE-DIR
-      $ nsb-config -x -s $PWD
+      $ nsb-config -x
 
   5) Log into as many machines types as you can and run "make test".
      You should get perfect results.  If you don't, try running just
