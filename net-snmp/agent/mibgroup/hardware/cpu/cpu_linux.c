@@ -122,10 +122,10 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
             cpu->intrpt_ticks = (unsigned long)cirqll;
             cpu->sirq_ticks   = (unsigned long)csoftll;
  	}
-        cpu->user_ticks = (unsigned long)cusell;;
-        cpu->nice_ticks = (unsigned long)cicell;;
-        cpu->sys_ticks  = (unsigned long)csysll;;
-        cpu->idle_ticks = (unsigned long)cidell;;
+        cpu->user_ticks = (unsigned long)cusell;
+        cpu->nice_ticks = (unsigned long)cicell;
+        cpu->sys_ticks  = (unsigned long)csysll;
+        cpu->idle_ticks = (unsigned long)cidell;
     } else {
 	if (first)
 	    snmp_log(LOG_ERR, "No cpu line in %s\n", STAT_FILE);
