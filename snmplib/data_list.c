@@ -64,6 +64,8 @@ NETSNMP_INLINE netsnmp_data_list *
 netsnmp_create_data_list(const char *name, void *data,
                          Netsnmp_Free_List_Data * beer)
 {
+    if (!name)
+        return NULL;
     netsnmp_data_list *node = SNMP_MALLOC_TYPEDEF(netsnmp_data_list);
     if (!node)
         return NULL;
@@ -137,6 +139,10 @@ NETSNMP_INLINE netsnmp_data_list *
 netsnmp_data_list_add_data(netsnmp_data_list **head, const char *name,
                            void *data, Netsnmp_Free_List_Data * beer)
 {
+    if (!name) {
+        snmp_log(LOG_ERR,"no name provided.");
+        return NULL;
+    }
     netsnmp_data_list *node = netsnmp_create_data_list(name, data, beer);
     if(NULL == node) {
         snmp_log(LOG_ERR,"could not allocate memory for node.");
@@ -156,6 +162,8 @@ netsnmp_data_list_add_data(netsnmp_data_list **head, const char *name,
 NETSNMP_INLINE void    *
 netsnmp_get_list_data(netsnmp_data_list *head, const char *name)
 {
+    if (!name)
+        return NULL;
     for (; head; head = head->next)
         if (head->name && strcmp(head->name, name) == 0)
             break;
@@ -172,6 +180,8 @@ netsnmp_get_list_data(netsnmp_data_list *head, const char *name)
 NETSNMP_INLINE netsnmp_data_list    *
 netsnmp_get_list_node(netsnmp_data_list *head, const char *name)
 {
+    if (!name)
+        return NULL;
     for (; head; head = head->next)
         if (head->name && strcmp(head->name, name) == 0)
             break;
@@ -189,6 +199,8 @@ int
 netsnmp_remove_list_node(netsnmp_data_list **realhead, const char *name)
 {
     netsnmp_data_list *head, *prev;
+    if (!name)
+        return 1;
     for (head = *realhead, prev = NULL; head;
          prev = head, head = head->next) {
         if (head->name && strcmp(head->name, name) == 0) {
