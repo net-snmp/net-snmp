@@ -720,6 +720,9 @@ struct variable_list {
                                       size_t, size_t);
     int             snmp_oidtree_compare(const oid *, size_t, const oid *,
                                          size_t);
+    int             netsnmp_oid_compare_ll(const oid * in_name1,
+                                           size_t len1, const oid * in_name2,
+                                           size_t len2, size_t *offpt);
     int             netsnmp_oid_equals(const oid *, size_t, const oid *,
                                        size_t);
     int             netsnmp_oid_tree_equals(const oid *, size_t, const oid *,
