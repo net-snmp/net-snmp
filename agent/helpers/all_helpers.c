@@ -2,6 +2,8 @@
  *  @{ */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #ifdef STILL_TO_DO
         /*
@@ -27,6 +29,7 @@ void  netsnmp_init_serialize(void);
 void  netsnmp_init_read_only_helper(void);
 void  netsnmp_init_bulk_to_next_helper(void);
 void  netsnmp_init_table_dataset(void);
+void  netsnmp_init_table_dataset2(void);
 void  netsnmp_init_stash_cache_helper(void);
 #endif
 
