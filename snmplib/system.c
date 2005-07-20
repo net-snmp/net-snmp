@@ -126,6 +126,10 @@ SOFTWARE.
 #include <sys/pstat.h>
 #endif
 
+#if HAVE_SYS_UTSNAME_H
+#include <sys/utsname.h>
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
@@ -1071,7 +1075,6 @@ netsnmp_os_prematch(const char *ospmname,
                     const char *ospmrelprefix)
 {
 #if HAVE_SYS_UTSNAME_H
-#include <sys/utsname.h>
 static int printOSonce = 1;
   struct utsname utsbuf;
   if ( 0 != uname(&utsbuf))
