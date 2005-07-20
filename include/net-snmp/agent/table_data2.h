@@ -84,7 +84,7 @@ extern          "C" {
 
     netsnmp_table_data2row  *netsnmp_extract_table_data2row(netsnmp_request_info *);
     netsnmp_table_data2 *netsnmp_extract_table_data2(    netsnmp_request_info *);
-    void           *netsnmp_extract_table_row_data2(netsnmp_request_info *);
+    void           *netsnmp_extract_table_data2row_data2(netsnmp_request_info *request);
     void netsnmp_insert_table_data2row(netsnmp_request_info *, netsnmp_table_data2row *);
     netsnmp_table_data2 *netsnmp_create_table_data2(const char *name);
     netsnmp_table_data2row *netsnmp_create_table_data2_row(void);
