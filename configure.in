@@ -302,6 +302,10 @@ if test "x$tryopenssl" = "xdefaultyes"; then
 fi
 AC_ARG_ENABLE(openssl,,
 	AC_MSG_ERROR([ Invalid option. Use --with-openssl/--without-openssl instead ]) )
+AC_ARG_WITH(ssl,,
+	AC_MSG_ERROR([ Invalid option. Use --with-openssl/--without-openssl instead ]) )
+AC_ARG_ENABLE(ssl,,
+	AC_MSG_ERROR([ Invalid option. Use --with-openssl/--without-openssl instead ]) )
 
 trykrb5=defaultyes
 askedkrb5=no
