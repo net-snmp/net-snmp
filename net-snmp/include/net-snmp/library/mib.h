@@ -495,6 +495,7 @@ SOFTWARE.
     void            print_oid_report_enable_oid(void);
     void            print_oid_report_enable_suffix(void);
     void            print_oid_report_enable_symbolic(void);
+    void            print_oid_report_enable_mibchildoid(void);
 
     const char     *parse_octet_hint(const char *hint, const char *value,
 	                             unsigned char **new_val, int *new_val_len);
