@@ -199,7 +199,7 @@ netsnmp_table_array_register(netsnmp_handler_registration *reginfo,
                              int group_rows)
 {
     netsnmp_inject_handler(reginfo,
-                           netsnmp_create_handler(NULL,
+                           netsnmp_create_handler(reginfo->handlerName,
                                netsnmp_table_array_helper_handler));
     return netsnmp_table_container_register(reginfo, tabreg, cb,
                                             container, group_rows);
