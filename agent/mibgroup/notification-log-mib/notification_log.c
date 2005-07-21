@@ -22,7 +22,7 @@ u_long          num_received = 0; /* global for snmptrapd */
 static u_long   num_deleted = 0;
 
 static u_long   max_logged = 1000;      /* goes against the mib default of infinite */
-static u_long   max_age = 1440 /* 1440 = 24 hours, which is the mib default */
+static u_long   max_age = 1440; /* 1440 = 24 hours, which is the mib default */
 
 netsnmp_table_data2_set *nlmLogTable;
 netsnmp_table_data2_set *nlmLogVarTable;
