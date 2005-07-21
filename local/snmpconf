@@ -26,59 +26,25 @@ if ($^O eq 'MSWin32') {
 %tokenitems=qw(line 1 info 1 comment 1);
 %arrayitems=qw(question 1 validanswer 1);
 
-if ($^O ne 'MSWin32') {
-  # default folder for snmpconf-data
-  if (defined($ENV{SNMPSHAREPATH})) {
-    $opts{'c'} = "$ENV{SNMPSHAREPATH}/snmpconf-data";
-  }
-  else {
-    $opts{'c'} = "/usr/local/share/snmp/snmpconf-data";
-  }
-  
-  # default config file path
-  if (defined($ENV{SNMPCONFPATH})) {
-    $confpath = "$ENV{SNMPCONFPATH}";
-  }
-  else {
-    $confpath = "/usr/local/share/snmp";
-  }
+# default folder for snmpconf-data
+if (defined(&my_getenv("SNMPSHAREPATH"))) {
+  $opts{'c'} = &my_getenv("SNMPSHAREPATH") . "/snmpconf-data";
 }
-else
-{
-  my $temp;
-
-  # default folder for snmpconf-data
-  $temp = &win32_reg_read("SOFTWARE\\Net-SNMP","SNMPSHAREPATH");
-  if ($temp ne "") {
-    $opts{'c'} = "$temp/snmpconf-data";
-  }
-  else {
-    if (defined($ENV{SNMPSHAREPATH})) {
-      $opts{'c'} = "$ENV{SNMPSHAREPATH}/snmpconf-data";
-    }
-    else {
-      $opts{'c'} = "/usr/local/share/snmp/snmpconf-data";
-    }
-  }
-
-  # default config file path
-  $temp = &win32_reg_read("SOFTWARE\\Net-SNMP","SNMPCONFPATH");
-  if ($temp ne "") {
-    $confpath = "$temp";
-  }
-  else {    
-    if (defined($ENV{SNMPCONFPATH})) {
-      $confpath = "$ENV{SNMPCONFPATH}";
-    }
-    else {
-      $confpath = "/usr/local/share/snmp";
-    }
-  }
+else {
+  $opts{'c'} = "/usr/local/share/snmp/snmpconf-data";
+}
+ 
+# default config file path
+if (defined(&my_getenv("SNMPCONFPATH"))) {
+  $confpath = &my_getenv("SNMPCONFPATH");
+}
+else {
+  $confpath = "/usr/local/share/snmp";
 }
 
 # home environment variable
-if (defined($ENV{HOME})) {
-  $home = "$ENV{HOME}/.snmp";
+if (defined(&my_getenv("HOME"))) {
+  $home = &my_getenv("HOME") . "/.snmp";
 }
 else {
   $home = "(HOME dir - n/a)";
@@ -154,8 +120,8 @@ my $persistentDir = "";
 my $persistentFile = "";
 
 # SNMP_PERSISTENT_FILE environment variable
-if (defined($ENV{SNMP_PERSISTENT_FILE})) {
-  $persistentFile = "$ENV{SNMP_PERSISTENT_FILE}";
+if (defined(&my_getenv("SNMP_PERSISTENT_FILE"))) {
+  $persistentFile = &my_getenv("SNMP_PERSISTENT_FILE");
   debug ("persistent file: SNMP_PERSISTENT_FILE environment variable set\n");
 }
 
@@ -163,7 +129,7 @@ if (defined($ENV{SNMP_PERSISTENT_FILE})) {
 if (!($persistentDir) && !($persistentFile)) {
   foreach my $i (@searchpath) {
     debug ("Searching file $i/snmp.conf for persistentDir\n");
-    my $temp = get_persistentDir($i);
+    my $temp = get_persistentDir("$i/snmp.conf");
     if ($temp) {
       debug("persistent directory: set to $temp in $i/snmp.conf\n");
       $persistentDir = $temp;
@@ -174,8 +140,8 @@ if (!($persistentDir) && !($persistentFile)) {
 
 # SNMP_PERSISTENT_DIR environment variable
 if (!($persistentDir) && !($persistentFile)) {
-  if (defined($ENV{SNMP_PERSISTENT_DIR})) {
-    $persistentDir = "$ENV{SNMP_PERSISTENT_DIR}";
+  if (&my_getenv("SNMP_PERSISTENT_DIR")) {
+    $persistentDir = &my_getenv("SNMP_PERSISTENT_DIR");
     debug ("persistent directory: SNMP_PERSISTENT_DIR environment variable set\n");
   }
 }
@@ -939,4 +905,29 @@ sub win32_reg_read {
   }
   return "";
 }
- 
+
+# Usage:   &my_getenv("key")
+# Example: &my_getenv("SNMPSHAREPATH");
+# Returns: Unix:  Environment variable value (undef if not defined)
+#          Win32: HKCU\Software\Net-SNMP\(key) or
+#          Win32: HKLM\Software\Net-SNMP\(key) or
+#          Win32: Environment variable value (undef if not defined)
+sub my_getenv {
+  my $key = shift;
+  
+  # Unix
+  if ($^O ne 'MSWin32') {
+    return $ENV{$key};
+  }
+  # Windows
+  else {
+    my $temp = &win32_reg_read("SOFTWARE\\Net-SNMP","$key");
+    if ($temp ne "") {
+      return $temp;
+    }
+    else {
+      return $ENV{$key};
+    }
+  }
+}
+
