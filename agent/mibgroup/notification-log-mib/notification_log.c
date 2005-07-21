@@ -11,90 +11,40 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
-
+#include <net-snmp/agent/ds_agent.h>
 #include <net-snmp/agent/instance.h>
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_data2.h>
 #include <net-snmp/agent/table_dataset2.h>
-#include "snmptrapd_handlers.h"
-#include "snmptrapd_log.h"
 #include "notification_log.h"
 
-#define SNMPTRAPD_CONTEXT "snmptrapd"
+u_long          num_received = 0; /* global for snmptrapd */
+static u_long   num_deleted = 0;
 
-extern u_long   num_received;
-u_long          num_deleted = 0;
-
-u_long          max_logged = 1000;      /* goes against the mib default of infinite */
-u_long          max_age = 1440; /* 24 hours, which is the mib default */
+static u_long   max_logged = 1000;      /* goes against the mib default of infinite */
+static u_long   max_age = 1440 /* 1440 = 24 hours, which is the mib default */
 
 netsnmp_table_data2_set *nlmLogTable;
 netsnmp_table_data2_set *nlmLogVarTable;
 
 void
-check_log_size(unsigned int clientreg, void *clientarg)
+netsnmp_notif_log_remove_oldest(int count)
 {
-    netsnmp_table_data2row *row, *deleterow, *tmprow, *deletevarrow;
-    netsnmp_table_data2_set_storage *data;
-    u_long          count = 0;
-    struct timeval  now;
-    long            tmpl;
+    netsnmp_table_data2row *deleterow, *tmprow, *deletevarrow;
+    
+    DEBUGMSGTL(("notification_log", "deleting %d log entry(s)\n", count));
 
-    gettimeofday(&now, NULL);
-    tmpl = netsnmp_timeval_uptime(&now);
-
-    if (!nlmLogTable || !nlmLogTable->table )  {
-        DEBUGMSGTL(("notification_log", "missing log table\n"));
-        return;
-    }
-
-    /* check max allowed count */
-    if (netsnmp_table_dataset2_num_rows(nlmLogTable) < max_logged)
-        return;
-
-    for (row = netsnmp_table_data2_set_get_first_row(nlmLogTable);
-         row;
-         row = netsnmp_table_data2_set_get_next_row(nlmLogTable, row)) {
-        /*
-         * check max allowed count 
-         */
-        count++;
-        if (max_logged && count == max_logged)
-            break;
-
-        /*
-         * check max age 
-         */
-
-        data = (netsnmp_table_data2_set_storage *) row->data;
-        data = netsnmp_table_data2_set_find_column(data, COLUMN_NLMLOGTIME);
-
-        if (max_age && tmpl > (long)(*(data->data.integer) + max_age * 100 * 60))
-            break;
-    }
-
-    if (!row)
-        return;
-
-    /*
-     * we've reached the limit, so keep looping but start deleting
-     * from the beginning 
-     */
-    for (deleterow = netsnmp_table_data2_set_get_first_row(nlmLogTable),
-         row = netsnmp_table_data2_set_get_next_row(nlmLogTable, deleterow);
-         row;
-         row = netsnmp_table_data2_set_get_next_row(nlmLogTable, row)) {
-        DEBUGMSGTL(("notification_log", "deleting a log entry\n"));
-
+    deleterow = netsnmp_table_data2_set_get_first_row(nlmLogTable);
+    for (; count && deleterow; deleterow = tmprow, --count) {
         /*
          * delete contained varbinds 
          */
-        for (deletevarrow = netsnmp_table_data2_set_get_first_row(nlmLogVarTable);
-             deletevarrow; deletevarrow = tmprow) {
+        deletevarrow = netsnmp_table_data2_set_get_first_row(nlmLogVarTable);
+        for (; deletevarrow; deletevarrow = tmprow) {
 
-            tmprow = netsnmp_table_data2_set_get_next_row(nlmLogTable, deletevarrow);
-
+            tmprow = netsnmp_table_data2_set_get_next_row(nlmLogTable,
+                                                          deletevarrow);
+            
             if (deleterow->index_oid_len ==
                 deletevarrow->index_oid_len - 1 &&
                 snmp_oid_compare(deleterow->index_oid,
@@ -102,28 +52,85 @@ check_log_size(unsigned int clientreg, void *clientarg)
                                  deletevarrow->index_oid,
                                  deleterow->index_oid_len) == 0) {
                 netsnmp_table_dataset2_remove_and_delete_row(nlmLogVarTable,
-                                                            deletevarrow);
+                                                             deletevarrow);
             }
         }
-
+        
         /*
          * delete the master row 
          */
         tmprow = netsnmp_table_data2_set_get_next_row(nlmLogTable, deleterow);
         netsnmp_table_dataset2_remove_and_delete_row(nlmLogTable,
-                                                    deleterow);
-        deleterow = tmprow;
+                                                     deleterow);
         num_deleted++;
         /*
          * XXX: delete vars from its table 
          */
+    }
+    /** should have deleted all of them */
+    netsnmp_assert(0 == count);
+}
+
+void
+check_log_size(unsigned int clientreg, void *clientarg)
+{
+    netsnmp_table_data2row *row;
+    netsnmp_table_data2_set_storage *data;
+    u_long          count = 0;
+    struct timeval  now;
+    u_long          uptime;
+
+    gettimeofday(&now, NULL);
+    uptime = netsnmp_timeval_uptime(&now);
+
+    if (!nlmLogTable || !nlmLogTable->table )  {
+        DEBUGMSGTL(("notification_log", "missing log table\n"));
+        return;
+    }
+
+    /*
+     * check max allowed count
+     */
+    count = netsnmp_table_dataset2_num_rows(nlmLogTable);
+    DEBUGMSGTL(("notification_log",
+                "logged notifications %d; max %d\n",
+                    count, max_logged));
+    if (count > max_logged) {
+        count = count - max_logged;
+        DEBUGMSGTL(("notification_log", "removing %d extra notifications\n",
+                    count));
+        netsnmp_notif_log_remove_oldest(count);
+    }
+
+    /*
+     * check max age 
+     */
+    if (0 == max_age)
+        return;
+    count = 0;
+    for (row = netsnmp_table_data2_set_get_first_row(nlmLogTable);
+         row;
+         row = netsnmp_table_data2_set_get_next_row(nlmLogTable, row)) {
+
+        data = (netsnmp_table_data2_set_storage *) row->data;
+        data = netsnmp_table_data2_set_find_column(data, COLUMN_NLMLOGTIME);
+
+        if (uptime < ((long)(*(data->data.integer) + max_age * 100 * 60)))
+            break;
+        ++count;
+    }
+
+    if (count) {
+        DEBUGMSGTL(("notification_log", "removing %d expired notifications\n",
+                    count));
+        netsnmp_notif_log_remove_oldest(count);
     }
 }
 
 
 /** Initialize the nlmLogVariableTable table by defining its contents and how it's structured */
 void
-initialize_table_nlmLogVariableTable(void)
+initialize_table_nlmLogVariableTable(const char * context)
 {
     static oid      nlmLogVariableTable_oid[] =
         { 1, 3, 6, 1, 2, 1, 92, 1, 3, 2 };
@@ -282,13 +289,14 @@ initialize_table_nlmLogVariableTable(void)
                                              nlmLogVariableTable_oid,
                                              nlmLogVariableTable_oid_len,
                                              HANDLER_CAN_RWRITE);
-    reginfo->contextName = strdup(SNMPTRAPD_CONTEXT);
+    if (NULL != context)
+        reginfo->contextName = strdup(context);
     netsnmp_register_table_data2_set(reginfo, table_set, NULL);
 }
 
 /** Initialize the nlmLogTable table by defining its contents and how it's structured */
 void
-initialize_table_nlmLogTable(void)
+initialize_table_nlmLogTable(const char * context)
 {
     static oid      nlmLogTable_oid[] = { 1, 3, 6, 1, 2, 1, 92, 1, 3, 1 };
     size_t          nlmLogTable_oid_len = OID_LENGTH(nlmLogTable_oid);
@@ -396,7 +404,8 @@ initialize_table_nlmLogTable(void)
                                             nlmLogTable_oid,
                                             nlmLogTable_oid_len,
                                             HANDLER_CAN_RWRITE);
-    reginfo->contextName = strdup(SNMPTRAPD_CONTEXT);
+    if (NULL != context)
+        reginfo->contextName = strdup(context);
     netsnmp_register_table_data2_set(reginfo, nlmLogTable, NULL);
 
     /*
@@ -433,6 +442,13 @@ init_notification_log(void)
         { 1, 3, 6, 1, 2, 1, 92, 1, 1, 1, 0 };
     static oid      my_nlmConfigGlobalAgeOut_oid[] =
         { 1, 3, 6, 1, 2, 1, 92, 1, 1, 2, 0 };
+    char * context;
+
+    context = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+                                    NETSNMP_DS_NOTIF_LOG_CTX);
+
+    DEBUGMSGTL(("notification_log", "registering with '%s' context\n",
+                   context));
 
     /*
      * static variables 
@@ -441,13 +457,13 @@ init_notification_log(void)
         ("nlmStatsGlobalNotificationsLogged",
          my_nlmStatsGlobalNotificationsLogged_oid,
          OID_LENGTH(my_nlmStatsGlobalNotificationsLogged_oid),
-         &num_received, NULL, SNMPTRAPD_CONTEXT);
+         &num_received, NULL, context);
 
     netsnmp_register_read_only_counter32_instance_context
         ("nlmStatsGlobalNotificationsBumped",
          my_nlmStatsGlobalNotificationsBumped_oid,
          OID_LENGTH(my_nlmStatsGlobalNotificationsBumped_oid),
-         &num_deleted, NULL, SNMPTRAPD_CONTEXT);
+         &num_deleted, NULL, context);
 
     netsnmp_register_ulong_instance_context("nlmConfigGlobalEntryLimit",
                                             my_nlmConfigGlobalEntryLimit_oid,
@@ -455,7 +471,7 @@ init_notification_log(void)
                                             (my_nlmConfigGlobalEntryLimit_oid),
                                             &max_logged,
                                             notification_log_config_handler,
-                                            SNMPTRAPD_CONTEXT);
+                                            context);
 
     netsnmp_register_ulong_instance_context("nlmConfigGlobalAgeOut",
                                             my_nlmConfigGlobalAgeOut_oid,
@@ -463,30 +479,35 @@ init_notification_log(void)
                                             (my_nlmConfigGlobalAgeOut_oid),
                                             &max_age,
                                             notification_log_config_handler,
-                                            SNMPTRAPD_CONTEXT);
+                                            context);
 
     /*
      * tables 
      */
-    initialize_table_nlmLogVariableTable();
-    initialize_table_nlmLogTable();
+    initialize_table_nlmLogVariableTable(context);
+    initialize_table_nlmLogTable(context);
 
+#if 0
     /*
      * disable flag 
      */
-    netsnmp_ds_register_config(ASN_BOOLEAN, "snmptrapd", "dontRetainLogs",
-			   NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_APP_DONT_LOG);
+    netsnmp_ds_register_config(ASN_INTEGER,
+                               netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                                     NETSNMP_DS_LIB_APPTYPE),
+                               "notificationLogMax",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_NOTIF_LOG_MAX);
+#endif
 }
 
-u_long          default_num = 0;
-
 void
-log_notification(struct hostent *host, netsnmp_pdu *pdu,
-                 netsnmp_transport *transport)
+log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
 {
     long            tmpl;
     struct timeval  now;
     netsnmp_table_data2row *row;
+
+    static u_long   default_num = 0;
 
     static oid      snmptrapoid[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
     size_t          snmptrapoid_len = OID_LENGTH(snmptrapoid);
@@ -499,14 +520,10 @@ log_notification(struct hostent *host, netsnmp_pdu *pdu,
     u_long          tmpul;
     int             col;
 
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-			       NETSNMP_DS_APP_DONT_LOG)) {
-        return;
-    }
-
-    DEBUGMSGTL(("log_notification", "logging something\n"));
+    DEBUGMSGTL(("notification_log", "logging something\n"));
     row = netsnmp_create_table_data2_row();
 
+    ++num_received;
     default_num++;
 
     /*
@@ -533,10 +550,7 @@ log_notification(struct hostent *host, netsnmp_pdu *pdu,
                            pdu->securityEngineIDLen);
     if (transport && transport->domain == netsnmpUDPDomain) {
         /*
-         * lame way to check for the udp domain 
-         */
-        /*
-         * no, it is the correct way to do it -- jbpn 
+         * check for the udp domain 
          */
         struct sockaddr_in *addr =
             (struct sockaddr_in *) pdu->transport_data;
@@ -554,9 +568,11 @@ log_notification(struct hostent *host, netsnmp_pdu *pdu,
                                    sizeof(addr->sin_port));
         }
     }
-    netsnmp_set_data2_row_column(row, COLUMN_NLMLOGENGINETDOMAIN, ASN_OBJECT_ID,
-                           (const u_char *) transport->domain,
-                           sizeof(oid) * transport->domain_length);
+    if (transport)
+        netsnmp_set_data2_row_column(row, COLUMN_NLMLOGENGINETDOMAIN,
+                                     ASN_OBJECT_ID,
+                                     (const u_char *) transport->domain,
+                                     sizeof(oid) * transport->domain_length);
     netsnmp_set_data2_row_column(row, COLUMN_NLMLOGCONTEXTENGINEID,
                            ASN_OCTET_STR, pdu->contextEngineID,
                            pdu->contextEngineIDLen);
@@ -629,7 +645,7 @@ log_notification(struct hostent *host, netsnmp_pdu *pdu,
                 /*
                  * unsupported 
                  */
-                DEBUGMSGTL(("log_notification",
+                DEBUGMSGTL(("notification_log",
                             "skipping type %d\n", vptr->type));
                 continue;
             }
@@ -638,7 +654,7 @@ log_notification(struct hostent *host, netsnmp_pdu *pdu,
                                    sizeof(tmpul));
             netsnmp_set_data2_row_column(myrow, col, vptr->type,
                                    vptr->val.string, vptr->val_len);
-            DEBUGMSGTL(("log_notification",
+            DEBUGMSGTL(("notification_log",
                         "adding a row to the variables table\n"));
             netsnmp_table_dataset2_add_row(nlmLogVarTable, myrow);
         }
@@ -650,7 +666,7 @@ log_notification(struct hostent *host, netsnmp_pdu *pdu,
     netsnmp_table_dataset2_add_row(nlmLogTable, row);
 
     check_log_size(0, NULL);
-    DEBUGMSGTL(("log_notification", "done logging something\n"));
+    DEBUGMSGTL(("notification_log", "done logging something\n"));
 }
 
 /** handles requests for the nlmLogTable table, if anything else needs to be done */
@@ -684,49 +700,3 @@ nlmLogVariableTable_handler(netsnmp_mib_handler *handler,
      */
     return SNMP_ERR_NOERROR;
 }
-
-
-
-/*
- *  "Notification" handler for implementing NOTIFICATION-MIB
- *  		(presumably)
- */
-int   notification_handler(netsnmp_pdu           *pdu,
-                           netsnmp_transport     *transport,
-                           netsnmp_trapd_handler *handler)
-{
-    struct hostent *host = NULL;
-
-    DEBUGMSGTL(( "snmptrapd", "notification_handler\n"));
-
-        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					NETSNMP_DS_APP_NUMERIC_IP)) {
-            /*
-             * Right, apparently a name lookup is wanted.  This is only
-             * reasonable for the UDP and TCP transport domains (we
-             * don't want to try to be too clever here).  
-             */
-            if (transport != NULL
-                && (transport->domain == netsnmpUDPDomain
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
-                    || transport->domain == netsnmp_snmpTCPDomain
-#endif
-		)) {
-                /*
-                 * This is kind of bletcherous -- it breaks the opacity of
-                 * transport_data but never mind -- the alternative is a
-                 * lot of munging strings from f_fmtaddr.
-                 */
-                struct sockaddr_in *addr =
-                    (struct sockaddr_in *) pdu->transport_data;
-                if (addr != NULL && 
-		    pdu->transport_data_length == sizeof(struct sockaddr_in)) {
-                    host = gethostbyaddr((char *) &(addr->sin_addr),
-					     sizeof(struct in_addr), AF_INET);
-                }
-            }
-        }
-    log_notification(host, pdu, transport);
-    return NETSNMPTRAPD_HANDLER_OK;
-}
-#endif /* USING_AGENTX_SUBAGENT_MODULE && !SNMPTRAPD_DISABLE_AGENTX */

@@ -8,13 +8,9 @@
 void            init_notification_log(void);
 Netsnmp_Node_Handler nlmLogTable_handler;
 Netsnmp_Node_Handler nlmLogVariableTable_handler;
-Netsnmp_Trap_Handler notification_handler;
 
 void
-                log_notification(struct hostent *host, netsnmp_pdu *pdu,
-                                 netsnmp_transport *transport);
-
-#define NETSNMP_DS_APP_DONT_LOG    9    /* must match notification_log. */
+                log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport);
 
 /*
  * column number definitions for table nlmLogTable 
