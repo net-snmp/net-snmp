@@ -18,7 +18,8 @@
 #include <net-snmp/agent/table_dataset2.h>
 #include "notification_log.h"
 
-u_long          num_received = 0; /* global for snmptrapd */
+static int      enabled = 0;
+static u_long   num_received = 0;
 static u_long   num_deleted = 0;
 
 static u_long   max_logged = 1000;      /* goes against the mib default of infinite */
@@ -37,23 +38,45 @@ netsnmp_notif_log_remove_oldest(int count)
     deleterow = netsnmp_table_data2_set_get_first_row(nlmLogTable);
     for (; count && deleterow; deleterow = tmprow, --count) {
         /*
-         * delete contained varbinds 
+         * delete contained varbinds
+         * xxx-rks: note that this assumes that only the default
+         * log is used (ie for the first nlmLogTable row, the
+         * first nlmLogVarTable rows will be the right ones).
+         * the right thing to do would be to do a find based on
+         * the nlmLogTable oid.
          */
+        DEBUGMSGTL(("9:notification_log", "  deleting notification\n"));
+        DEBUGIF("9:notification_log") {
+            DEBUGMSGTL(("9:notification_log",
+                        " base oid:"));
+            DEBUGMSGOID(("9:notification_log", deleterow->oid_index.oids,
+                         deleterow->oid_index.len));
+            DEBUGMSG(("9:notification_log", "\n"));
+        }
         deletevarrow = netsnmp_table_data2_set_get_first_row(nlmLogVarTable);
         for (; deletevarrow; deletevarrow = tmprow) {
 
-            tmprow = netsnmp_table_data2_set_get_next_row(nlmLogTable,
+            tmprow = netsnmp_table_data2_set_get_next_row(nlmLogVarTable,
                                                           deletevarrow);
             
-            if (deleterow->index_oid_len ==
-                deletevarrow->index_oid_len - 1 &&
-                snmp_oid_compare(deleterow->index_oid,
-                                 deleterow->index_oid_len,
-                                 deletevarrow->index_oid,
-                                 deleterow->index_oid_len) == 0) {
+            DEBUGIF("9:notification_log") {
+                DEBUGMSGTL(("9:notification_log",
+                            "         :"));
+                DEBUGMSGOID(("9:notification_log", deletevarrow->oid_index.oids,
+                             deletevarrow->oid_index.len));
+                DEBUGMSG(("9:notification_log", "\n"));
+            }
+            if ((deleterow->oid_index.len == deletevarrow->oid_index.len - 1) &&
+                snmp_oid_compare(deleterow->oid_index.oids,
+                                 deleterow->oid_index.len,
+                                 deletevarrow->oid_index.oids,
+                                 deleterow->oid_index.len) == 0) {
+                DEBUGMSGTL(("9:notification_log", "    deleting varbind\n"));
                 netsnmp_table_dataset2_remove_and_delete_row(nlmLogVarTable,
                                                              deletevarrow);
             }
+            else
+                break;
         }
         
         /*
@@ -63,9 +86,6 @@ netsnmp_notif_log_remove_oldest(int count)
         netsnmp_table_dataset2_remove_and_delete_row(nlmLogTable,
                                                      deleterow);
         num_deleted++;
-        /*
-         * XXX: delete vars from its table 
-         */
     }
     /** should have deleted all of them */
     netsnmp_assert(0 == count);
@@ -444,6 +464,7 @@ init_notification_log(void)
         { 1, 3, 6, 1, 2, 1, 92, 1, 1, 2, 0 };
     char * context;
 
+    enabled = 1;
     context = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
                                     NETSNMP_DS_NOTIF_LOG_CTX);
 
@@ -520,6 +541,9 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
     u_long          tmpul;
     int             col;
 
+    if (!enabled)
+        return;
+
     DEBUGMSGTL(("notification_log", "logging something\n"));
     row = netsnmp_create_table_data2_row();
 
@@ -578,6 +602,7 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
                            pdu->contextEngineIDLen);
     netsnmp_set_data2_row_column(row, COLUMN_NLMLOGCONTEXTNAME, ASN_OCTET_STR,
                            pdu->contextName, pdu->contextNameLen);
+
     for (vptr = pdu->variables; vptr; vptr = vptr->next_variable) {
         if (snmp_oid_compare(snmptrapoid, snmptrapoid_len,
                              vptr->name, vptr->name_length) == 0) {
