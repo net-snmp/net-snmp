@@ -111,16 +111,7 @@ SOFTWARE.
 
 #if USE_LIBWRAP
 #include <tcpd.h>
-
-/* fix 706903 - these are defined in agent/snmp_agent.c *-
-int             allow_severity = LOG_INFO;
-int             deny_severity = LOG_WARNING;
- */
 #endif
-
-/*
- * #define NETSNMP_DS_APP_DONT_LOG 9 defined in notification_log.h 
- */
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -146,7 +137,6 @@ int             Event = 0;
 int             dropauth = 0;
 int             running = 1;
 int             reconfig = 0;
-u_long          num_received = 0;
 char            ddefault_port[] = "udp:162";	/* Default default port */
 char           *default_port = ddefault_port;
 #if HAVE_GETPID
@@ -1004,6 +994,9 @@ main(int argc, char *argv[])
         init_subagent();
         /* register the notification log table */
         if (should_init("notificationLogMib")) {
+            netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
+                              NETSNMP_DS_NOTIF_LOG_CTX,
+                              "snmptrapd");
             netsnmp_add_global_traphandler(NETSNMPTRAPD_POST_HANDLER,
                                            notification_handler);
             init_notification_log();
