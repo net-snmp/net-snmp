@@ -67,8 +67,8 @@ CPPFLAGS	= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(HELPER_INCLUDES) \
 
 OSUFFIX		= lo
 TRAPD_OBJECTS   = snmptrapd.$(OSUFFIX) @other_trapd_objects@
-LIBTRAPD_OBJS   = snmptrapd_handlers.o  snmptrapd_log.o  notification_log.o
-LLIBTRAPD_OBJS  = snmptrapd_handlers.lo snmptrapd_log.lo notification_log.lo
+LIBTRAPD_OBJS   = snmptrapd_handlers.o  snmptrapd_log.o
+LLIBTRAPD_OBJS  = snmptrapd_handlers.lo snmptrapd_log.lo
 OBJS  = *.o
 LOBJS = *.lo
 
