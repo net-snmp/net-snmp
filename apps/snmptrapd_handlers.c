@@ -920,6 +920,21 @@ int   forward_handler( netsnmp_pdu           *pdu,
     return NETSNMPTRAPD_HANDLER_OK;
 }
 
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+
+/*
+ *  "Notification" handler for implementing NOTIFICATION-MIB
+ *  		(presumably)
+ */
+int   notification_handler(netsnmp_pdu           *pdu,
+                           netsnmp_transport     *transport,
+                           netsnmp_trapd_handler *handler)
+{
+    DEBUGMSGTL(( "snmptrapd", "notification_handler\n"));
+    log_notification(pdu, transport);
+    return NETSNMPTRAPD_HANDLER_OK;
+}
+#endif /* USING_AGENTX_SUBAGENT_MODULE && !SNMPTRAPD_DISABLE_AGENTX */
 
 /*-----------------------------
  *
