@@ -369,6 +369,8 @@ _data_lookup(netsnmp_handler_registration *reginfo,
                 netsnmp_update_variable_list_from_index(tblreq_info);
             }
             else if (TABLE_CONTAINER_KEY_VARBIND_INDEX == tad->key_type) {
+                /** xxx-rks: shouldn't tblreq_info->indexes be updated
+                    before we call this?? */
                 netsnmp_update_indexes_from_variable_list(tblreq_info);
             }
 
