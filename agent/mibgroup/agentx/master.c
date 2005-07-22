@@ -76,8 +76,8 @@ real_init_master(void)
 
     if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
                               NETSNMP_DS_AGENT_X_SOCKET)) {
-       agentx_sockets = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
-                                              NETSNMP_DS_AGENT_X_SOCKET);
+       agentx_sockets = strdup(netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                                     NETSNMP_DS_AGENT_X_SOCKET));
 #ifdef AGENTX_DOM_SOCK_ONLY
        if (agentx_sockets[0] != '/') {
            /* unix:/path */
