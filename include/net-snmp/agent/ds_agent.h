@@ -16,7 +16,7 @@
 #define NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS 6 /* 1 = !see !connect msgs */
 #define NETSNMP_DS_AGENT_LEAVE_PIDFILE  7       /* 1 = leave PID file on exit */
 #define NETSNMP_DS_AGENT_NO_CACHING     8       /* 1 = disable netsnmp_cache */
-
+#
 /*
  * strings 
  */
@@ -26,6 +26,7 @@
 #define NETSNMP_DS_AGENT_INTERNAL_SECNAME  3    /* used by disman/mteTriggerTable. */
 #define NETSNMP_DS_AGENT_PERL_INIT_FILE    4    /* used by embedded perl */
 #define NETSNMP_DS_SMUX_SOCKET    5     /* ip:port socket addr */
+#define NETSNMP_DS_NOTIF_LOG_CTX  6     /* "" | "snmptrapd" */
 
 /*
  * integers 
