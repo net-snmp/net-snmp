@@ -35,6 +35,7 @@
 #include "target/target.h"
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_trap.h>
+#include <net-snmp/agent/mib_module_config.h>
 
 SNMPCallback    store_snmpNotifyTable;
 
@@ -90,6 +91,7 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg)
     struct snmpNotifyTable_data *nptr;
     netsnmp_session *sess, *sptr;
     netsnmp_pdu    *template_pdu = (netsnmp_pdu *) serverarg;
+    int             count = 0;
 
     DEBUGMSGTL(("send_notifications", "starting: pdu=%x, vars=%x\n",
                 template_pdu, template_pdu->variables));
@@ -112,6 +114,7 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg)
             if (sptr->version == SNMP_VERSION_1 &&
                 minor == SNMPD_CALLBACK_SEND_TRAP1) {
                 send_trap_to_sess(sptr, template_pdu);
+                ++count;
             } else
 #endif
             if ((sptr->version == SNMP_VERSION_3
@@ -125,9 +128,18 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg)
                     template_pdu->command = SNMP_MSG_TRAP2;
                 }
                 send_trap_to_sess(sptr, template_pdu);
+                ++count;
             }
         }
     }
+
+    DEBUGMSGTL(("send_notifications", "sent %d notifications\n", count));
+
+#ifdef USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE
+    if (count)
+        log_notification(template_pdu, NULL);
+#endif
+
     return 0;
 }
 
