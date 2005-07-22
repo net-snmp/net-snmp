@@ -190,6 +190,21 @@ body>#LeftSide {width:150px;}
 /* Again, "be nice to Opera 5". */
 body>#Menu {width:150px;}
 
+#MenuSub table { 
+  border: 0;
+  background: #eee;
+  font-weight:600;
+  font-family:verdana, arial, helvetica, sans-serif;
+  color:#09c;
+}
+
+#MenuSub td {
+  border: 0;
+  line-height:1em;
+  background: #eee;
+  vertical-align:top
+}
+
 #MenuSFLogo {
   padding:10px;
 }
@@ -223,5 +238,3 @@ body>#ListSearch {width:150px;}
 
 .HeaderSmall { font-family: verdana,arial,serif; font-size: 0.50em;}
 
-.Indent { padding-left:1em; }
-.Indent2 { padding-left:2em; }

@@ -1,0 +1,126 @@
+This file contains information about issues in net-snmp releases. It does
+not cover issues that are documented in the various README files, so if
+there is a README for your platform (eg README.win32, README.osX, etc),
+check there first.
+
+-----------------------------------------------------------------------------
+*5.2
+
+  Configure:
+    - Option --disable-snmpv2c actually disables snmpv1
+    - Option --disable-embedded-perl or --enable-embedded-perl=no both
+      actaully turn on perl. As a workaround, do not specify either, as
+      embedded perl support is not enabled by default.
+
+  Agent:
+    - Long output for pass/exec commands hangs agent. PATCH AVAILABLE
+    - Memory leak in table_container (seen when using new MFD code).
+      PATCH AVAILABLE
+    - Memory leak in table_dataset set processing. PATCH AVAILABLE.
+    - snmpd.conf override token has no effect on some platforms. Fixed in CVS.
+    - external destinations in trapsinks don't work. Fixed in CVS
+    - trapsess directives send traps to the wrong port. Explicity add
+      ':162' after the hostname as a temporary workaround.
+
+
+  Ports:
+    64bit:
+      - new MFD ifTable/ifXTable (Linux only)
+        - 64bit counter wrapping not properly detected. PATCH AVAIALBLE
+        - None of the Counter64 counters work.
+
+    Linux:
+      - New MFD ipSystemStats does not includ IPv6 stats. PATCH AVAILABLE
+      - ifXTable fails if init called before ifTable init. PATCH AVAILABLE
+
+
+    FreeBSD:
+      - interface w/out address breaks ifTable. PATCH AVAILABLE
+
+    Windows:
+      - known issues with compiling 5.2 without the SDK installed.
+        - win32\net-snmp\net-snmp-config.h contains:
+
+             #define HAVE_SOCKLEN_T 1
+
+          which should only be defined if the Platform SDK is installed.
+        - in agent\mibgroup\mibII\system_mib.c.  wProductType is 
+          defined in the PSDK WinNT.h file for _OSVERSIONINFOEXA and 
+          _OSVERSIONINFOEXW but not in the standard WINBASE.H file included
+          in MSVC.
+
+
+-----------------------------------------------------------------------------
+*5.1.2
+  Official patches:
+
+  - 5.1.2-p01: AgentX set leak
+    http://sourceforge.net/tracker/index.php?func=detail&aid=1014853&group_id=12694&atid=456380
+
+  - 5.1.2-p02: duplicate registration segfault; memory leaks
+    http://sourceforge.net/tracker/index.php?func=detail&aid=1020597&group_id=12694&atid=456380
+
+  Known Bugs:
+
+    - Iteratator table bug when requesting multiple varbinds
+ 
+      * fixed in cvs
+
+
+  Ports:
+
+    OPENBSD 3.4
+
+      - mbstat support not consistent? If you get an error when compiling:
+
+          vi net-snmp/agent/mibgroups/host/hr_storage.c
+
+          add #undef MBSTAT_SYMBOL near the top (~ line 136)
+
+
+    BSD (all flavors):
+
+      - shell quoting problems in net-snmp-config.h
+
+          vi ./include/net-snmp/net-snmp-config.h
+
+          replace the line
+             #define CONFIGURE_OPTIONS ""'--disable-shared'""
+          with
+             #define CONFIGURE_OPTIONS "\"'--disable-shared'\""
+
+
+
+-----------------------------------------------------------------------------
+*5.0.9*
+ Official Patches:
+
+   - http://sourceforge.net/tracker/index.php?func=detail&aid=733880&group_id=12694&atid=456380
+   - http://sourceforge.net/tracker/index.php?func=detail&aid=817768&group_id=12694&atid=456380
+   - http://sourceforge.net/tracker/index.php?func=detail&aid=823437&group_id=12694&atid=456380
+   - http://sourceforge.net/tracker/index.php?func=detail&aid=899099&group_id=12694&atid=456380
+   - http://sourceforge.net/tracker/index.php?func=detail&aid=905573&group_id=12694&atid=456380
+
+ Bugs:
+
+    - Dynamic modules not detected on some systems. 
+
+      * see official patch 5, above
+
+
+ Ports:
+
+    OPENBSD 3.4
+
+      - mbstat support not consistent? If you get an error when compiling:
+
+          vi net-snmp/agent/mibgroups/host/hr_storage.c
+
+          add #undef MBSTAT_SYMBOL near the top (~ line 136)
+
+
+    HP-UX:
+      - segfault
+
+          see offical patch # 4, above.
+

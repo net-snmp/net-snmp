@@ -23,7 +23,7 @@
    
     <div id="Header">
       <!-- slogan -->
-      <div class="HeaderSmall" align="right"><br /><br /><i>Current release: 5.2.1</i></div>
+      <div class="HeaderSmall" align="right"><br /><br /><i>Current release: 5.2.1.2</i></div>
     </div>
 
     <div id="HeaderMap">
@@ -49,54 +49,90 @@
 
         <a href="/">About</a><br />
         <!--#if expr="$section = about" -->
-        <a href="/about/news.html" class="Indent" title="Latest News">&nbsp;News</a><br />
-        <a href="/about/history.html" class="Indent" title="History of Net-SNMP and UCD-SNMP">&nbsp;History</a><br />
-        <a href="/about/ChangeLog.html" class="Indent" title="Major change log (NEWS file)">&nbsp;Change Log</a><br />
-        <a href="/about/license.html" class="Indent" title="Net-SNMP software license">&nbsp;License</a><br />
+        <div id = "MenuSub">
+          <table>
+            <tr><td>&nbsp;&middot;</td><td><a href="/about/news.html"
+                  title="Latest News">News</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/about/history.html"
+                  title="History of Net-SNMP and UCD-SNMP">History</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/about/ChangeLog.html"
+                  title="Major change log (NEWS file)">Change Log</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/about/license.html"
+                  title="Net-SNMP software license">License</a></td></tr>
+          </table>
+        </div>
         <!--#endif -->
 
         <a href="/download.html" title="Download Net-SNMP binaries and source code">Download</a><br />
 
         <a href="/tutorial/tutorial-5/" >Tutorials</a><br />
         <!--#if expr="$section = tutorial" -->
-        <a href="/tutorial/tutorial-5/" class="Indent" title="Net-SNMP v5 tutorial">&nbsp;Version 5.x</a><br />
-        <a href="/tutorial/tutorial-4/" class="Indent" title="UCD-SNMP v4 tutorial">&nbsp;Version 4.x</a><br />
+        <div id = "MenuSub">
+          <table>
+            <tr><td>&nbsp;&middot;</td><td><a href="/tutorial/tutorial-5/"
+                  title="Net-SNMP v5 tutorial">Version 5.x</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/tutorial/tutorial-4/"
+                  title="UCD-SNMP v4 tutorial">Version 4.x</a></td></tr>
+          </table>
+        </div>
         <!--#endif -->
         
         <a href="/docs/readmefiles.html">Documentation</a><br />
         <!--#if expr="$section = documentation" -->
-        <a href="/docs/readmefiles.html" class="Indent" 
-          title="README files included with the package">&nbsp;README files</a><br />
-        <a href="/docs/FAQ.html" class="Indent" title="Frequently Asked Questions">&nbsp;FAQ</a><br />
-        <a href="/docs/INSTALL.html" class="Indent" title="Intall instructions for *nix systems">&nbsp;INSTALL</a><br />
-        <a href="/docs/man/" class="Indent" title="Man pages for utilities, daemons, api etc">&nbsp;Man pages</a><br />
-        <a href="/docs/mibs/" class="Indent" title="The MIB files distributed with Net-SNMP">&nbsp;MIBS</a><br />
-        <a href="/dev/agent/" class="Indent" title="API documentation">&nbsp;API</a><br />
+        <div id = "MenuSub">
+          <table>
+            <tr><td>&nbsp;&middot;</td><td><a href="/docs/readmefiles.html"
+                  title="README files included with the package">README files</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/docs/FAQ.html" 
+                  title="Frequently Asked Questions">FAQ</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/docs/INSTALL.html" 
+                  title="Intall instructions for *nix systems">INSTALL</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/docs/man/"
+                  title="Man pages for utilities, daemons, api etc">Man pages</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/docs/mibs/"
+                  title="The MIB files distributed with Net-SNMP"></lb>MIBS</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/docs/ERRATA.html"
+                  title="ERRATA">ERRATA</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/dev/agent/"
+                  title="API documentation">API</a></td></tr>
+          </table>
+        </div>
         <!--#endif -->
 
         <a href="/support/contacts.html" >Support</a><br />
         <!--#if expr="$section = support" -->
-        <a href="/support/contacts.html" class="Indent" title="How to contact the authors">&nbsp;Contacts</a><br />
-        <a href="/support/mailinglists.html" class="Indent" 
-          title="Mailing lists for product accouncements and support">&nbsp;Mailing Lists</a><br />
-        <a href="/support/irc/" class="Indent" title="IRC logs from irc.freenode.net #net-snmp channel">&nbsp;IRC</a><br />
-        <a href="/support/bugreports.html" class="Indent" 
-          title="Bug report database for submitting and browsing bugs">&nbsp;Bug Reports</a><br />
-        <a href="/support/patches.html" class="Indent" 
-          title="Patch database for submitting and browsing patches">&nbsp;Patches</a><br />
+        <div id = "MenuSub">
+          <table>
+            <tr><td>&nbsp;&middot;</td><td><a href="/support/contacts.html" 
+                  title="How to contact the authors">Contacts</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/support/mailinglists.html"  
+                  title="Mailing lists for product accouncements and support">Mailing Lists</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/support/irc/"
+                  title="IRC logs from irc.freenode.net #net-snmp channel">IRC</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/support/bugreports.html"
+                  title="Bug report database for submitting and browsing bugs">Bug Reports</a></td></tr><F5>
+            <tr><td>&nbsp;&middot;</td><td><a href="/support/patches.html"
+                  title="Patch database for submitting and browsing patches">Patches</a></td></tr>
+          </table>
+        </div>
         <!--#endif -->
 
         <a href="/dev/projects.html">Development</a><br />
         <!--#if expr="$section = development" -->
-        <a href="/dev/projects.html" class="Indent" 
-          title="Various Net-SNMP projects underway or in need of an author">&nbsp;Projects</a><br />
-        <a href="/dev/schedule.html" class="Indent" 
-          title="The expected release time line">&nbsp;Release Schedule</a><br />
-        <a href="/dev/helpingout.html" class="Indent" 
-          title="How to help out with Net-SNMP">&nbsp;Helping Out</a><br />
-        <a href="/cvs/" class="Indent" 
-          title="Access to the Net-SNMP source code via the Sourceforge CVS repository">&nbsp;CVS</a><br />
-        <a href="/dev/agent/" class="Indent" title="API documentation">&nbsp;API</a><br />
+        <div id = "MenuSub">
+          <table>
+            <tr><td>&nbsp;&middot;</td><td><a href="/dev/projects.html" 
+                  title="Various Net-SNMP projects underway or in need of an author">Projects</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/dev/schedule.html" 
+                  title="The expected release time line">Release Schedule</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/dev/helpingout.html" 
+                  title="How to help out with Net-SNMP">Helping Out</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/dev/cvs.html" 
+                  title="Access to the Net-SNMP source code via the Sourceforge CVS repository">CVS</a></td></tr>
+            <tr><td>&nbsp;&middot;</td><td><a href="/dev/agent/" 
+                  title="API documentation">API</a></td></tr>
+      </table>
+    </div>
         <!--#endif -->
 
         <a href="/related.html" title="Links to Net-SNMP related information and software">Related Info/SW</a><br />
