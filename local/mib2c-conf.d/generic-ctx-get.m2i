@@ -35,7 +35,8 @@
     /*
      * make sure there is enough space for $node data
      */
-    if ((NULL == $m2c_ctx_lh) || ($m2c_ctx_lhs < $m2c_ctx_rhs)) {
+    if ((NULL == $m2c_ctx_lh) ||
+        ($m2c_ctx_lhs < ($m2c_ctx_rhs * sizeof(${m2c_ctx_lh}[0])))) {
 @   if $m2c_node_realloc == 0@
         snmp_log(LOG_ERR,"not enough space for value\n");
         return MFD_ERROR;
@@ -54,9 +55,8 @@
         }
 @   end@
     }
-    $m2c_ctx_lhs = $m2c_ctx_rhs;
-    memcpy( $m2c_ctx_lh, $m2c_ctx_rh,
-            $m2c_ctx_lhs * sizeof(${m2c_ctx_lh}[0]) );
+    $m2c_ctx_lhs = $m2c_ctx_rhs * sizeof(${m2c_ctx_lh}[0]);
+    memcpy( $m2c_ctx_lh, $m2c_ctx_rh, $m2c_ctx_lhs );
 @else@
 @   if $node.decl =~ /U64/i@ #              ASN_COUNTER64
     ${m2c_ctx_lh}.high = ${m2c_ctx_rh}.high;
