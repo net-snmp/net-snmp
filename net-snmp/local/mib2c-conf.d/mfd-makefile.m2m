@@ -116,10 +116,10 @@ $(TABLE_PREFIX)_data_set.deps:                                     $(TABLE_PREFI
 @end@
 
 %.deps : %.c
-	@echo "Generating makefile $@ ..."
-	@set -e; $(CC) -M $(COPTS) $(CFLAGS) $(CPPFLAGS) $< \
-	| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
-	[ -s $@ ] || $(RM) $(RMFLAGS) $@
+	\@echo "Generating makefile $\@ ..."
+	\@set -e; $(CC) -M $(COPTS) $(CFLAGS) $(CPPFLAGS) $< \
+	| sed 's/\($*\)\.o[ :]*/\1.o $\@ : /g' > $\@; \
+	[ -s $\@ ] || $(RM) $(RMFLAGS) $\@
 
 include $(TABLE_PREFIX).deps
 include $(TABLE_PREFIX)_subagent.deps
