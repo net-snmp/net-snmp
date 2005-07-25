@@ -95,7 +95,7 @@ SOFTWARE.
 #include <net-snmp/library/fd_event_manager.h>
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
-#include "notification_log.h"
+#include "notification-log-mib/notification_log.h"
 
 /*
  * Include winservice.h to support Windows Service
@@ -727,7 +727,9 @@ main(int argc, char *argv[])
             init_agent("snmptrapd");
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
             init_subagent();
+#ifdef USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE
             init_notification_log();
+#endif
 #endif
 #ifdef NETSNMP_EMBEDDED_PERL
             init_perl();
@@ -992,6 +994,7 @@ main(int argc, char *argv[])
     if (agentx_subagent) {
         extern void init_register_usmUser_context(const char *);
         init_subagent();
+#ifdef USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE
         /* register the notification log table */
         if (should_init("notificationLogMib")) {
             netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
@@ -1001,7 +1004,7 @@ main(int argc, char *argv[])
                                            notification_handler);
             init_notification_log();
         }
-
+#endif
         /* register ourselves as having a USM user database */
         init_register_usmUser_context("snmptrapd");
     }
