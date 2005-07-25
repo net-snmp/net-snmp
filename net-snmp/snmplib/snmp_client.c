@@ -690,6 +690,16 @@ snmp_set_var_typed_value(netsnmp_variable_list * newvar, u_char type,
 }
 
 int
+snmp_set_var_typed_integer(netsnmp_variable_list * newvar,
+                           u_char type, long val)
+{
+    const long v = val;
+    newvar->type = type;
+    return snmp_set_var_value(newvar, (const u_char *)&v, sizeof(long));
+    return 0;
+}
+
+int
 count_varbinds(netsnmp_variable_list * var_ptr)
 {
     int             count = 0;

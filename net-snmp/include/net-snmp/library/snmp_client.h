@@ -57,6 +57,8 @@ extern          "C" {
                                              newvar, u_char type,
                                              const u_char * val_str,
                                              size_t val_len);
+    int             snmp_set_var_typed_integer(netsnmp_variable_list * newvar,
+                                               u_char type, long val);
     void            snmp_replace_var_types(netsnmp_variable_list * vbl,
                                            u_char old_type,
                                            u_char new_type);
