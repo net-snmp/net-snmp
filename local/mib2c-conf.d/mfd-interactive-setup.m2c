@@ -224,6 +224,7 @@ Which method would you like to use to gather data about available rows?
 @        eval $m2c_temp_data_cache = 1@
 @      else@
 @        eval $m2c_temp_table_access = "container-cached"@
+@        eval $m2c_temp_data_cache = 0@
 @      end@
 
 
