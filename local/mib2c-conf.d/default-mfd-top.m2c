@@ -128,3 +128,14 @@
 @if "x$m2c_data_cache" eq "x"@
 @   eval $m2c_data_cache = 0@
 @end@
+##
+@if "x$user_mfd_default_generate_makefile" eq "x" @
+@  eval $mfd_default_generate_makefile = 0@
+@else@
+@  eval $mfd_default_generate_makefile = $user_mfd_default_generate_makefile@
+@end@
+@if "x$user_mfd_default_generate_subagent" eq "x" @
+@  eval $mfd_default_generate_subagent = 0@
+@else@
+@  eval $mfd_default_generate_subagent = $user_mfd_default_generate_subagent@
+@end@

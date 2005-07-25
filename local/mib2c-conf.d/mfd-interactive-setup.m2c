@@ -22,6 +22,8 @@
 @eval $m2c_temp_include_examples = $mfd_default_include_examples@
 @eval $m2c_temp_table_skip_mapping = $mfd_default_table_skip_mapping@
 @eval $m2c_temp_table_sparse = $mfd_default_data_sparse@
+@eval $m2c_temp_generate_makefile = $mfd_default_generate_makefile@
+@eval $m2c_temp_generate_subagent = $mfd_default_generate_subagent@
 ##
 @if $mfd_interactive_setup != 0@
 @open -@
@@ -279,16 +281,16 @@ Do you want a makefile and AgentX subagent source file generated?
 This will let you test your table without having to link it into
 snmpd. (You can still link it in later.)
 
-  1) generate makefile/AgentX code [DEFAULT]
-  2) do not generate makefile/AgentX code
+  1) do not generate makefile/AgentX code [DEFAULT]
+  2) generate makefile/AgentX code
 
 @      prompt $ans Select your choice : @
 @      if $ans == 2@
-@        eval $mfd_generate_makefile = 1@
-@        eval $mfd_generate_subagent = 1@
+@        eval $m2c_temp_generate_makefile = 1@
+@        eval $m2c_temp_generate_subagent = 1@
 @      else@
-@        eval $mfd_generate_makefile = 0@
-@        eval $mfd_generate_subagent = 0@
+@        eval $m2c_temp_generate_makefile = 0@
+@        eval $m2c_temp_generate_subagent = 0@
 @      end@
 
 @   end@ # do not use hardcoded
@@ -313,6 +315,8 @@ snmpd. (You can still link it in later.)
 @eval $m2c_table_settable = $m2c_temp_writable@
 @eval $m2c_table_skip_mapping = $m2c_temp_table_skip_mapping@
 @eval $m2c_table_sparse = $m2c_temp_table_sparse@
+@eval $mfd_generate_makefile = $m2c_temp_generate_makefile@
+@eval $mfd_generate_subagent = $m2c_temp_generate_subagent@
 ##
 ## write them back
 ##
