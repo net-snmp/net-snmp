@@ -104,7 +104,7 @@ if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
         fi
         while :
         do
-            IN_USE=`$NETSTAT -a 2>/dev/null | grep "[\.:]$SNMP_SNMPD_PORT "`
+            IN_USE=`$NETSTAT -a -n 2>/dev/null | grep "[\.:]$SNMP_SNMPD_PORT "`
             if [ $? -eq 0 ]; then
                 #ECHO "Port $SNMP_SNMPD_PORT in use:"
                 #echo "->$IN_USE"
