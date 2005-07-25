@@ -36,9 +36,12 @@ $example_start
                  snmp_log(LOG_ERR, "couldn't reverse map value %ld for $node\n", $m2c_node_srh );
                  return SNMP_ERR_GENERR;
     }
-$example_end
 @  end@ # integers/bits
+$example_end
+@else@
+@  include generic-ctx-set.m2i@
 @end@ # enums
+
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
