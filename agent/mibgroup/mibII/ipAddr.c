@@ -528,10 +528,7 @@ Address_Scan_Init(void)
  * NB: Index is the number of the corresponding interface, not of the address 
  */
 static int
-Address_Scan_Next(Index, Retifnet)
-    short          *Index;
-    struct ifnet   *Retifnet;
-
+Address_Scan_Next(short *Index, struct ifnet *Retifnet)
 {
     struct ifnet   ifnet_store;
     int fd;
