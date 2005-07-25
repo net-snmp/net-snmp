@@ -233,6 +233,7 @@ auto_nlist_print_tree(int indent, struct autonlist *ptr)
 }
 #endif
 #else                           /* !CAN_USE_NLIST */
+#include <net-snmp/agent/auto_nlist.h>
 int
 auto_nlist_noop(void)
 {

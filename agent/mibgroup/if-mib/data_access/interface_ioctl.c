@@ -22,6 +22,8 @@
 #include <sys/ioctl.h>
 #endif
 
+#include "interface_ioctl.h"
+
 /**
  * ioctl wrapper
  *
