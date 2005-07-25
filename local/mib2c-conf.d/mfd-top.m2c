@@ -33,6 +33,8 @@
 @    eval $m2c_table_settable = table_is_writable($context)@
 @    eval $m2c_table_skip_mapping = -1@ # -1 = no default; based on type
 @    eval $m2c_table_sparse = 0@
+@    eval $mfd_generate_makefile = $mfd_default_generate_makefile@
+@    eval $mfd_generate_subagent = $mfd_default_generate_subagent@
 ##
 ##   allow for user override, or save defaults
 ##

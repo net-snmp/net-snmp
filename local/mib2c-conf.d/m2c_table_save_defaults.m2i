@@ -107,4 +107,11 @@ $m2c_tmp_cc Generate code for sparse tables?
 $m2c_tmp_cc
 $tmp_cc@eval $@m2c_table_sparse = $m2c_table_sparse@
 $m2c_tmp_cc
+$m2c_tmp_cc ########################################################################
+$m2c_tmp_cc
+$m2c_tmp_cc Generate Makefile/AgentX code?
+$m2c_tmp_cc
+$tmp_cc@eval $@mfd_generate_makefile = $mfd_generate_makefile@
+$tmp_cc@eval $@mfd_generate_subagent = $mfd_generate_subagent@
+$m2c_tmp_cc
 @close ${m2c_defaults_dir}table-${context}.m2d@
