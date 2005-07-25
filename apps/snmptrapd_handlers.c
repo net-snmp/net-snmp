@@ -34,6 +34,7 @@
 #include "utilities/execute.h"
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
+#include "notification-log-mib/notification_log.h"
 
 char *syslog_format1 = NULL;
 char *syslog_format2 = NULL;
@@ -920,8 +921,7 @@ int   forward_handler( netsnmp_pdu           *pdu,
     return NETSNMPTRAPD_HANDLER_OK;
 }
 
-#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
-
+#if defined(USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE) && defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
 /*
  *  "Notification" handler for implementing NOTIFICATION-MIB
  *  		(presumably)
@@ -934,7 +934,7 @@ int   notification_handler(netsnmp_pdu           *pdu,
     log_notification(pdu, transport);
     return NETSNMPTRAPD_HANDLER_OK;
 }
-#endif /* USING_AGENTX_SUBAGENT_MODULE && !SNMPTRAPD_DISABLE_AGENTX */
+#endif 
 
 /*-----------------------------
  *
