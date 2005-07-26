@@ -146,7 +146,7 @@ extern          "C" {
                                          long *rs_new, long *rs_old);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* _TABLE_ARRAY_HANDLER_H_ */

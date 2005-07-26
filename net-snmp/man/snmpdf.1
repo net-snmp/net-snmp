@@ -12,9 +12,11 @@
 .SH NAME
 snmpdf - gets a listing of disk space usage on a remote machine via SNMP
 .SH SYNOPSIS
-snmpdf [COMMON OPTIONS] [-Cu] AGENT
+.B snmpdf
+[COMMON OPTIONS] [-Cu] AGENT
 .SH DESCRIPTION
-snmpdf is simply a networked verison of the typical df command.  It
+.B snmpdf
+is simply a networked verison of the typical df command.  It
 checks the disk space on the remote machine by examining the
 HOST-RESOURCES-MIB's hrStorageTable or the UCD-SNMP-MIB's dskTable.
 By default, the hrStorageTable is preferred as it typically contains

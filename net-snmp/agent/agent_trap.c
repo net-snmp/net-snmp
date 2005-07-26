@@ -1,6 +1,20 @@
 /*
- * agent_trap.c: define trap generation routines for mib modules, etc,
- * to use 
+ * agent_trap.c
+ */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/** @defgroup agent_trap Trap generation routines for mib modules to use
+ *  @ingroup agent
+ *
+ * @{
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -53,6 +67,10 @@
 #include <net-snmp/agent/agent_callbacks.h>
 
 #include <net-snmp/agent/mib_module_config.h>
+
+#ifdef USING_AGENTX_PROTOCOL_MODULE
+#include "agentx/protocol.h"
+#endif
 
 struct trap_sink {
     netsnmp_session *sesp;
@@ -266,6 +284,46 @@ create_v2_inform_session(char *sink, u_short sinkport, char *com)
 }
 
 
+/**
+ * This function allows you to make a distinction between generic 
+ * traps from different classes of equipment. For example, you may want 
+ * to handle a SNMP_TRAP_LINKDOWN trap for a particular device in a 
+ * different manner to a generic system SNMP_TRAP_LINKDOWN trap.
+ *   
+ *
+ *  @param trap is the generic trap type.  The trap types are:
+ *		- SNMP_TRAP_COLDSTART:
+ *			cold start
+ *		- SNMP_TRAP_WARMSTART:
+ *			warm start
+ *		- SNMP_TRAP_LINKDOWN:
+ *			link down
+ *		- SNMP_TRAP_LINKUP:
+ *			link up
+ *		- SNMP_TRAP_AUTHFAIL:
+ *			authentication failure
+ *		- SNMP_TRAP_EGPNEIGHBORLOSS:
+ *			egp neighbor loss
+ *		- SNMP_TRAP_ENTERPRISESPECIFIC:
+ *			enterprise specific
+ *			
+ *  @param specific is the specific trap value.
+ *
+ *  @param enterprise is an enterprise oid in which you want to send specifc 
+ *	traps from. 
+ *
+ *  @param enterprise_length is the length of the enterprise oid, use macro,
+ *	OID_LENGTH, to compute length.
+ *
+ *  @param vars is used to supply list of variable bindings to form an SNMPv2 
+ *	trap.
+ *
+ *  @return void
+ *
+ *  @see send_easy_trap
+ *  @see send_v2trap
+
+ */
 void
 snmpd_free_trapsinks(void)
 {
@@ -487,10 +545,10 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
      */
     var = find_varbind_in_list( template_v2pdu->variables,
                                 agentaddr_oid, agentaddr_oid_len);
-    if (!var && template_v1pdu->agent_addr[0]
-             && template_v1pdu->agent_addr[1]
-             && template_v1pdu->agent_addr[2]
-             && template_v1pdu->agent_addr[3]) {
+    if (!var && (template_v1pdu->agent_addr[0]
+              || template_v1pdu->agent_addr[1]
+              || template_v1pdu->agent_addr[2]
+              || template_v1pdu->agent_addr[3])) {
         if (!snmp_varlist_add_variable( &(template_v2pdu->variables),
                  agentaddr_oid, agentaddr_oid_len,
                  ASN_IPADDRESS,
@@ -506,7 +564,7 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
                  community_oid, community_oid_len,
                  ASN_OCTET_STR,
                  template_v1pdu->community, 
-                 strlen(template_v1pdu->community)))
+                 template_v1pdu->community_len))
             snmp_log(LOG_WARNING,
                  "send_trap: failed to append snmpTrapCommunity varbind\n");
     }
@@ -538,6 +596,7 @@ netsnmp_send_traps(int trap, int specific,
     netsnmp_variable_list *vblist = NULL;
     netsnmp_variable_list *trap_vb;
     netsnmp_variable_list *var;
+    in_addr_t             *pdu_in_addr_t;
     u_long                 uptime;
     struct trap_sink *sink;
 
@@ -677,6 +736,11 @@ netsnmp_send_traps(int trap, int specific,
             return -1;
         }
     }
+    /*
+     * Ensure that the v1 trap PDU includes the local IP address
+     */
+     pdu_in_addr_t = (in_addr_t *) template_v1pdu->agent_addr;
+    *pdu_in_addr_t = get_myaddr();
 
 
     /*
@@ -688,6 +752,7 @@ netsnmp_send_traps(int trap, int specific,
         if (sink->version == SNMP_VERSION_1) {
             send_trap_to_sess(sink->sesp, template_v1pdu);
         } else {
+            template_v2pdu->command = sink->pdutype;
             send_trap_to_sess(sink->sesp, template_v2pdu);
         }
     }
@@ -721,6 +786,8 @@ void
 send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
 {
     netsnmp_pdu    *pdu;
+    netsnmp_pdu    *response;
+    int            result;
 
     if (!sess || !template_pdu)
         return;
@@ -729,15 +796,24 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
                 template_pdu->command, sess->version));
 
     if (sess->version == SNMP_VERSION_1 &&
-        (template_pdu->command == SNMP_MSG_TRAP2 ||
-         template_pdu->command == SNMP_MSG_INFORM))
+        (template_pdu->command != SNMP_MSG_TRAP))
         return;                 /* Skip v1 sinks for v2 only traps */
     template_pdu->version = sess->version;
     pdu = snmp_clone_pdu(template_pdu);
     pdu->sessid = sess->sessid; /* AgentX only ? */
-    if (snmp_send(sess, pdu) == 0) {
+
+    if ( template_pdu->command == SNMP_MSG_INFORM
+#ifdef USING_AGENTX_PROTOCOL_MODULE
+         || template_pdu->command == AGENTX_MSG_NOTIFY
+#endif
+       ) {
+        result = snmp_synch_response(sess, pdu, &response);
+        result = !result;	/* XXX - different return code :-( */
+    } else
+        result = snmp_send(sess, pdu);
+    if (result == 0) {
         snmp_sess_perror("snmpd: send_trap", sess);
-        snmp_free_pdu(pdu);
+        /* snmp_free_pdu(pdu); */
     } else {
         snmp_increment_statistic(STAT_SNMPOUTTRAPS);
         snmp_increment_statistic(STAT_SNMPOUTPKTS);
@@ -755,11 +831,57 @@ send_trap_vars(int trap, int specific, netsnmp_variable_list * vars)
                                   OID_LENGTH(trap_version_id), vars);
 }
 
+/**
+ * Sends an SNMPv1 trap (or the SNMPv2 equivalent) to the list of  
+ * configured trap destinations (or "sinks"), using the provided 
+ * values for the generic trap type and specific trap value.
+ *
+ * This function eventually calls send_enterprise_trap_vars.  If the
+ * trap type is not set to SNMP_TRAP_ENTERPRISESPECIFIC the enterprise 
+ * and enterprise_length paramater is set to the pre defined SYSTEM_MIB 
+ * oid and length respectively.  If the trap type is set to 
+ * SNMP_TRAP_ENTERPRISESPECIFIC the enterprise and enterprise_length 
+ * parameters are set to the pre-defined NOTIFICATION_MIB oid and length 
+ * respectively.
+ *
+ * @param trap is the generic trap type.
+ *
+ * @param specific is the specific trap value.
+ *
+ * @return void
+ *
+ * @see send_enterprise_trap_vars
+ * @see send_v2trap
+ */
+       	
 void
 send_easy_trap(int trap, int specific)
 {
     send_trap_vars(trap, specific, NULL);
 }
+
+/**
+ * Uses the supplied list of variable bindings to form an SNMPv2 trap, 
+ * which is sent to SNMPv2-capable sinks  on  the  configured  list.  
+ * An equivalent INFORM is sent to the configured list of inform sinks.  
+ * Sinks that can only handle SNMPv1 traps are skipped.
+ *
+ * This function eventually calls send_enterprise_trap_vars.  If the
+ * trap type is not set to SNMP_TRAP_ENTERPRISESPECIFIC the enterprise 
+ * and enterprise_length paramater is set to the pre defined SYSTEM_MIB 
+ * oid and length respectively.  If the trap type is set to 
+ * SNMP_TRAP_ENTERPRISESPECIFIC the enterprise and enterprise_length 
+ * parameters are set to the pre-defined NOTIFICATION_MIB oid and length 
+ * respectively.
+ *
+ * @param vars is used to supply list of variable bindings to form an SNMPv2 
+ *	trap.
+ *
+ * @return void
+ *
+ * @see send_easy_trap
+ * @see send_enterprise_trap_vars
+ */
 
 void
 send_v2trap(netsnmp_variable_list * vars)
@@ -834,14 +956,15 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
 {
     char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
-    u_short         sinkport;
+    char            *st;
+    int             sinkport;
 
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
-    sp = strtok(cptr, " \t\n");
-    cp = strtok(NULL, " \t\n");
+    sp = strtok_r(cptr, " \t\n", &st);
+    cp = strtok_r(NULL, " \t\n", &st);
     if (cp)
-        pp = strtok(NULL, " \t\n");
+        pp = strtok_r(NULL, " \t\n", &st);
     if (cp && pp) {
         sinkport = atoi(pp);
         if ((sinkport < 1) || (sinkport > 0xffff)) {
@@ -851,7 +974,7 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
     } else {
         sinkport = SNMP_TRAP_PORT;
     }
-    if (create_v1_trap_session(sp, sinkport,
+    if (create_v1_trap_session(sp, (u_short)sinkport,
                                cp ? cp : snmp_trapcommunity) == 0) {
         snprintf(tmpbuf, sizeof(tmpbuf), "cannot create trapsink: %s", cptr);
         tmpbuf[sizeof(tmpbuf)-1] = '\0';
@@ -865,14 +988,15 @@ snmpd_parse_config_trap2sink(const char *word, char *cptr)
 {
     char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
-    u_short         sinkport;
+    char            *st;
+    int             sinkport;
 
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
-    sp = strtok(cptr, " \t\n");
-    cp = strtok(NULL, " \t\n");
+    sp = strtok_r(cptr, " \t\n", &st);
+    cp = strtok_r(NULL, " \t\n", &st);
     if (cp)
-        pp = strtok(NULL, " \t\n");
+        pp = strtok_r(NULL, " \t\n", &st);
     if (cp && pp) {
         sinkport = atoi(pp);
         if ((sinkport < 1) || (sinkport > 0xffff)) {
@@ -882,7 +1006,7 @@ snmpd_parse_config_trap2sink(const char *word, char *cptr)
     } else {
         sinkport = SNMP_TRAP_PORT;
     }
-    if (create_v2_trap_session(sp, sinkport,
+    if (create_v2_trap_session(sp, (u_short)sinkport,
                                cp ? cp : snmp_trapcommunity) == 0) {
         snprintf(tmpbuf, sizeof(tmpbuf), "cannot create trap2sink: %s", cptr);
         tmpbuf[sizeof(tmpbuf)-1] = '\0';
@@ -895,14 +1019,15 @@ snmpd_parse_config_informsink(const char *word, char *cptr)
 {
     char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
-    u_short         sinkport;
+    char            *st;
+    int             sinkport;
 
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
-    sp = strtok(cptr, " \t\n");
-    cp = strtok(NULL, " \t\n");
+    sp = strtok_r(cptr, " \t\n", &st);
+    cp = strtok_r(NULL, " \t\n", &st);
     if (cp)
-        pp = strtok(NULL, " \t\n");
+        pp = strtok_r(NULL, " \t\n", &st);
     if (cp && pp) {
         sinkport = atoi(pp);
         if ((sinkport < 1) || (sinkport > 0xffff)) {
@@ -912,7 +1037,7 @@ snmpd_parse_config_informsink(const char *word, char *cptr)
     } else {
         sinkport = SNMP_TRAP_PORT;
     }
-    if (create_v2_inform_session(sp, sinkport,
+    if (create_v2_inform_session(sp, (u_short)sinkport,
                                  cp ? cp : snmp_trapcommunity) == 0) {
         snprintf(tmpbuf, sizeof(tmpbuf), "cannot create informsink: %s", cptr);
         tmpbuf[sizeof(tmpbuf)-1] = '\0';
@@ -1010,3 +1135,4 @@ snmpd_free_trapcommunity(void)
         snmp_trapcommunity = NULL;
     }
 }
+/** @} */

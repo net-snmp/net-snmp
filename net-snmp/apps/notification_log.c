@@ -10,6 +10,9 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+
 #include <net-snmp/agent/instance.h>
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_data.h>
@@ -54,7 +57,7 @@ check_log_size(unsigned int clientreg, void *clientarg)
         data = (netsnmp_table_data_set_storage *) row->data;
         data = netsnmp_table_data_set_find_column(data, COLUMN_NLMLOGTIME);
 
-        if (max_age && tmpl > (*(data->data.integer) + max_age * 100 * 60))
+        if (max_age && tmpl > (long)(*(data->data.integer) + max_age * 100 * 60))
             break;
     }
 
@@ -703,3 +706,4 @@ int   notification_handler(netsnmp_pdu           *pdu,
     log_notification(host, pdu, transport);
     return NETSNMPTRAPD_HANDLER_OK;
 }
+#endif /* USING_AGENTX_SUBAGENT_MODULE && !SNMPTRAPD_DISABLE_AGENTX */

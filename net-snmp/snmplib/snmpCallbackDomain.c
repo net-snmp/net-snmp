@@ -5,6 +5,9 @@
 #include <ctype.h>
 #include <errno.h>
 
+#ifdef WIN32
+#include <net-snmp/library/winpipe.h>
+#endif
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -185,7 +188,11 @@ netsnmp_callback_recv(netsnmp_transport *t, void *buf, int size,
     DEBUGMSGTL(("transport_callback", "hook_recv enter\n"));
 
     while (rc < 0) {
+#ifdef WIN32
+	rc = recv(mystuff->pipefds[0], newbuf, 1, 0);
+#else
 	rc = read(mystuff->pipefds[0], newbuf, 1);
+#endif
 	if (rc < 0 && errno != EINTR) {
 	    break;
 	}
@@ -261,8 +268,12 @@ netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
             return -1;
 
 	while (rc < 0) {
+#ifdef WIN32
+	    rc = send(((netsnmp_callback_info*) other_side->data)->pipefds[1], " ", 1, 0);
+#else
 	    rc = write(((netsnmp_callback_info *)other_side->data)->pipefds[1],
 		       " ", 1);
+#endif
 	    if (rc < 0 && errno != EINTR) {
 		break;
 	    }
@@ -291,8 +302,12 @@ netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
         if (!other_side)
             return -1;
 	while (rc < 0) {
+#ifdef WIN32
+	    rc = send(((netsnmp_callback_info*) other_side->data)->pipefds[1], " ", 1, 0);
+#else
 	    rc = write(((netsnmp_callback_info *)other_side->data)->pipefds[1],
 		       " ", 1);
+#endif
 	    if (rc < 0 && errno != EINTR) {
 		break;
 	    }
@@ -313,8 +328,13 @@ netsnmp_callback_close(netsnmp_transport *t)
     netsnmp_callback_info *mystuff = (netsnmp_callback_info *) t->data;
     DEBUGMSGTL(("transport_callback", "hook_close enter\n"));
 
+#ifdef WIN32
+    rc  = closesocket(mystuff->pipefds[0]);
+    rc |= closesocket(mystuff->pipefds[1]);
+#else
     rc  = close(mystuff->pipefds[0]);
     rc |= close(mystuff->pipefds[1]);
+#endif
 
     rc |= netsnmp_transport_remove_from_list(&trlist, t);
 
@@ -367,7 +387,7 @@ netsnmp_callback_transport(int to)
     t->data = mydata;
 
 #ifdef WIN32
-    rc = _pipe(mydata->pipefds, 1024, O_BINARY);
+    rc = create_winpipe_transport(mydata->pipefds);
 #else
     rc = pipe(mydata->pipefds);
 #endif

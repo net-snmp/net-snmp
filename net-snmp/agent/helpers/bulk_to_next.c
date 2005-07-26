@@ -45,7 +45,8 @@ netsnmp_bulk_to_next_fix_requests(netsnmp_request_info *requests)
     for (request = requests; request; request = request->next) {
         if (request->repeat > 0 &&
             request->requestvb->type != ASN_NULL &&
-            request->requestvb->type != ASN_PRIV_RETRY) {
+            request->requestvb->type != ASN_PRIV_RETRY &&
+            request->requestvb->next_variable ) {
             request->repeat--;
             snmp_set_var_objid(request->requestvb->next_variable,
                                request->requestvb->name,

@@ -149,6 +149,8 @@ netsnmp_transport_copy(netsnmp_transport *t)
 void
 netsnmp_transport_free(netsnmp_transport *t)
 {
+    if (NULL == t)
+        return;
 
     if (t->local != NULL) {
         SNMP_FREE(t->local);
@@ -219,7 +221,7 @@ netsnmp_clear_tdomain_list(void)
 
     while (list != NULL) {
 	next = list->next;
-	free(list->prefix);
+	SNMP_FREE(list->prefix);
         /* attention!! list itself is not in the heap, so we must not free it! */
 	list = next;
     }
@@ -285,7 +287,7 @@ netsnmp_tdomain_unregister(netsnmp_tdomain *n)
             if (netsnmp_oid_equals(n->name, n->name_length,
                                 d->name, d->name_length) == 0) {
                 *prevNext = n->next;
-		free(n->prefix);
+		SNMP_FREE(n->prefix);
                 return 1;
             }
             prevNext = &(d->next);

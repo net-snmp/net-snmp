@@ -193,7 +193,7 @@ AGUTIL_get_oid_value(u_char * var_val, u_char var_val_type,
     var_val_len /= sizeof(oid);
     data_source_ptr->length = var_val_len;
     oid_var = (oid *) var_val;
-    for (iii = 0; iii < data_source_ptr->length; iii++)
+    for (iii = 0; iii < (int)data_source_ptr->length; iii++)
         data_source_ptr->objid[iii] = oid_var[iii];
 
     return SNMP_ERR_NOERROR;

@@ -229,12 +229,15 @@ main(int argc, char *argv[])
                     }
                     transport = snmp_sess_transport(snmp_sess_pointer(ss));
                     if (transport != NULL && transport->f_fmtaddr != NULL) {
-                        char           *s = transport->f_fmtaddr(transport,
+                        char *addr_string = transport->f_fmtaddr(transport,
                                                                  response->
                                                                  transport_data,
                                                                  response->
                                                                  transport_data_length);
-                        printf("from %s\n", s);
+                        if (addr_string != NULL) {
+                            printf("from %s\n", addr_string);
+                            free(addr_string);
+                        }
                     } else {
                         printf("from <UNKNOWN>\n");
                     }
@@ -282,7 +285,7 @@ int
 input_variable(netsnmp_variable_list * vp)
 {
     char            buf[256];
-    int             val_len;
+    size_t          val_len;
     u_char          value[256], ch;
     oid             name[MAX_OID_LEN];
 

@@ -37,19 +37,19 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "../lib"
+# PROP Output_Dir "../lib/release"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR /YX /FD /c
-# ADD BASE RSC /l 0x406
-# ADD RSC /l 0x406
+# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD BASE RSC /l 0x409
+# ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"../lib/netsnmp.lib"
+# ADD LIB32 /nologo /out:"../lib/release/netsnmp.lib"
 
 !ELSEIF  "$(CFG)" == "libsnmp - Win32 Debug"
 
@@ -60,19 +60,19 @@ LIB32=link.exe -lib
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "../lib"
+# PROP Output_Dir "../lib/debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR /YX /FD /c
-# ADD BASE RSC /l 0x406
-# ADD RSC /l 0xffffffff
+# ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD BASE RSC /l 0x409
+# ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"../lib/netsnmp_d.lib"
+# ADD LIB32 /nologo /out:"../lib/debug/netsnmp.lib"
 
 !ENDIF 
 
@@ -109,6 +109,10 @@ SOURCE=..\..\snmplib\container_binary_array.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\container_iterator.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\container_list_ssll.c
 # End Source File
 # Begin Source File
@@ -126,6 +130,14 @@ SOURCE=..\..\snmplib\default_store.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\getopt.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\inet_ntop.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\inet_pton.c
 # End Source File
 # Begin Source File
 
@@ -229,7 +241,15 @@ SOURCE=..\..\snmplib\snmpTCPDomain.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmpTCPIPv6Domain.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmpUDPDomain.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpUDPIPv6Domain.c
 # End Source File
 # Begin Source File
 
@@ -253,11 +273,19 @@ SOURCE=..\..\snmplib\tools.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\strtok_r.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\ucd_compat.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\snmplib\vacm.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\winpipe.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -341,10 +369,6 @@ SOURCE="..\..\include\net-snmp\library\snmp-tc.h"
 # End Source File
 # Begin Source File
 
-SOURCE="C:\Program Files\Microsoft SDK\include\Snmp.h"
-# End Source File
-# Begin Source File
-
 SOURCE="..\..\include\net-snmp\library\snmp_alarm.h"
 # End Source File
 # Begin Source File
@@ -406,6 +430,10 @@ SOURCE="..\..\include\net-snmp\library\system.h"
 # Begin Source File
 
 SOURCE="..\..\include\net-snmp\library\tools.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\strtok_r.h"
 # End Source File
 # Begin Source File
 

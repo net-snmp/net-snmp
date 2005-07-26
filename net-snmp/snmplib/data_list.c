@@ -293,7 +293,7 @@ netsnmp_save_all_data(netsnmp_data_list *head,
             /* save begining of line */
             snprintf(buf, sizeof(buf), "%s ", token);
             cp = buf + strlen(buf);
-            cp = read_config_save_octet_string(cp, head->name,
+            cp = read_config_save_octet_string(cp, (u_char*)head->name,
                                                strlen(head->name));
             *cp++ = ' ';
 

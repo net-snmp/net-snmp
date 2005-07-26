@@ -185,13 +185,17 @@ netsnmp_unix_close(netsnmp_transport *t)
         t->sock = -1;
         if (sup != NULL) {
             if (sup->local) {
-                DEBUGMSGTL(("netsnmp_unix", "close: server unlink(\"%s\")\n",
-                            sup->server.sun_path));
-                unlink(sup->server.sun_path);
+                if (sup->server.sun_path[0] != 0) {
+                  DEBUGMSGTL(("netsnmp_unix", "close: server unlink(\"%s\")\n",
+                              sup->server.sun_path));
+                  unlink(sup->server.sun_path);
+                }
             } else {
-                DEBUGMSGTL(("netsnmp_unix", "close: client unlink(\"%s\")\n",
-                            sup->client.sun_path));
-                unlink(sup->client.sun_path);
+                if (sup->client.sun_path[0] != 0) {
+                  DEBUGMSGTL(("netsnmp_unix", "close: client unlink(\"%s\")\n",
+                              sup->client.sun_path));
+                  unlink(sup->client.sun_path);
+                }
             }
         }
         return rc;
@@ -471,6 +475,10 @@ netsnmp_unix_getSecName(void *opaque, int olength,
     struct sockaddr_un *to = (struct sockaddr_un *) opaque;
     char           *ztcommunity = NULL;
 
+    if (secName != NULL) {
+        *secName = NULL;  /* Haven't found anything yet */
+    }
+
     /*
      * Special case if there are NO entries (as opposed to no MATCHING
      * entries).  
@@ -478,9 +486,6 @@ netsnmp_unix_getSecName(void *opaque, int olength,
 
     if (com2SecUnixList == NULL) {
         DEBUGMSGTL(("netsnmp_unix_getSecName", "no com2sec entries\n"));
-        if (secName != NULL) {
-            *secName = NULL;
-        }
         return 0;
     }
 
@@ -493,9 +498,6 @@ netsnmp_unix_getSecName(void *opaque, int olength,
         to->sun_family != AF_UNIX) {
         DEBUGMSGTL(("netsnmp_unix_getSecName",
 		    "no unix destine address in PDU?\n"));
-        if (secName != NULL) {
-            *secName = NULL;
-        }
         return 1;
     }
 

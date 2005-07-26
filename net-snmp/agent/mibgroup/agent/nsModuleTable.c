@@ -118,6 +118,12 @@ nsModuleTable_get_first_data_point(void **my_loop_context,
     ctree = SNMP_MALLOC_TYPEDEF(context_tree_ptr);
 
     ctree->context_ptr = get_top_context_cache();
+    /* Skip empty context registrations */
+    while (!ctree->context_ptr->first_subtree) {
+        ctree->context_ptr = ctree->context_ptr->next;
+        if (!ctree->context_ptr)
+            return NULL;
+    }
     ctree->tree = ctree->context_ptr->first_subtree;
 
     *my_loop_context = ctree;

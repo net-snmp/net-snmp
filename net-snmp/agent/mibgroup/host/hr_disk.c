@@ -181,9 +181,9 @@ init_hr_disk(void)
                       "/dev/rdsk/c%dd%xs0", 0, 4);
 #endif
 #elif defined(solaris2)
-    Add_HR_Disk_entry("/dev/rdsk/c%dt%dd0s%d", 0, 1, 0, 15,
+    Add_HR_Disk_entry("/dev/rdsk/c%dt%dd0s%d", 0, 7, 0, 15,
                       "/dev/rdsk/c%dt%dd0s0", 0, 7);
-    Add_HR_Disk_entry("/dev/rdsk/c%dd%ds%d", 0, 1, 0, 15,
+    Add_HR_Disk_entry("/dev/rdsk/c%dd%ds%d", 0, 7, 0, 15,
                       "/dev/rdsk/c%dd%ds0", 0, 7);
 #elif defined(freebsd4) || defined(freebsd5)
     Add_HR_Disk_entry("/dev/ad%ds%d%c", 0, 1, 1, 4, "/dev/ad%ds%d", 'a', 'h');
@@ -245,8 +245,9 @@ parse_disk_config(const char *token, char *cptr)
     details_set    *d_set;
     char           *name, *p, *d_str, c;
     unsigned int    i, neg, c1, c2;
+    char           *st;
 
-    name = strtok(cptr, " \t");
+    name = strtok_r(cptr, " \t", &st);
     if (!name) {
         config_perror("Missing NAME parameter");
         return;
@@ -578,45 +579,52 @@ Add_HR_Disk_entry(const char *devpart_string,
                   const char *devfull_string,
                   int first_partn, int last_partn)
 {
+    int lodev, hidev, nbr_created = 0;
+
     while (first_ctl <= last_ctl) {
+      for (lodev = first_dev;
+           lodev < last_dev && MAX_NUMBER_DISK_TYPES > HR_number_disk_types;
+           lodev += (1+MAX_DISKS_PER_TYPE), HR_number_disk_types++)
+      {
+        nbr_created++;
+        /*
+         * Split long runs of disks into separate "types"
+         */
+        hidev = lodev + MAX_DISKS_PER_TYPE;
+        if (last_dev < hidev)
+            hidev = last_dev;
         disk_devices[HR_number_disk_types].disk_devpart_string =
             devpart_string;
         disk_devices[HR_number_disk_types].disk_controller = first_ctl;
-        disk_devices[HR_number_disk_types].disk_device_first = first_dev;
-        disk_devices[HR_number_disk_types].disk_device_last = last_dev;
+        disk_devices[HR_number_disk_types].disk_device_first = lodev;
+        disk_devices[HR_number_disk_types].disk_device_last = hidev;
         disk_devices[HR_number_disk_types].disk_devfull_string =
             devfull_string;
         disk_devices[HR_number_disk_types].disk_partition_first =
             first_partn;
         disk_devices[HR_number_disk_types].disk_partition_last =
             last_partn;
-
-        /*
-         * Split long runs of disks into separate "types"
-         */
-        while (last_dev - first_dev > MAX_DISKS_PER_TYPE) {
-            first_dev = first_dev + MAX_DISKS_PER_TYPE;
-            disk_devices[HR_number_disk_types].disk_device_last =
-                first_dev - 1;
-            HR_number_disk_types++;
-
-            disk_devices[HR_number_disk_types].disk_devpart_string =
-                devpart_string;
-            disk_devices[HR_number_disk_types].disk_controller = first_ctl;
-            disk_devices[HR_number_disk_types].disk_device_first =
-                first_dev;
-            disk_devices[HR_number_disk_types].disk_device_last = last_dev;
-            disk_devices[HR_number_disk_types].disk_devfull_string =
-                devfull_string;
-            disk_devices[HR_number_disk_types].disk_partition_first =
-                first_partn;
-            disk_devices[HR_number_disk_types].disk_partition_last =
-                last_partn;
-        }
-
-        first_ctl++;
-        HR_number_disk_types++;
+#if DEBUG_TEST
+        DEBUGMSGTL(("host/hr_disk",
+                    "Add_HR %02d '%s' first=%d last=%d\n",
+                    HR_number_disk_types, devpart_string, lodev, hidev));
+#endif
+      }
+      first_ctl++;
     }
+
+    if (nbr_created == 0 || MAX_NUMBER_DISK_TYPES < HR_number_disk_types) {
+        HR_number_disk_types = MAX_NUMBER_DISK_TYPES;
+        DEBUGMSGTL(("host/hr_disk",
+                    "WARNING! Add_HR_Disk_entry '%s' incomplete, %d created\n",
+                    devpart_string, nbr_created));
+    }
+#if DEBUG_TEST
+    else
+        DEBUGMSGTL(("host/hr_disk",
+                    "Add_HR_Disk_entry '%s' completed, %d created\n",
+                    devpart_string, nbr_created));
+#endif
 }
 
 void
@@ -630,7 +638,7 @@ Init_HR_Disk(void)
 int
 Get_Next_HR_Disk(void)
 {
-    char            string[100];
+    char            string[1024];
     int             fd, result;
     int             iindex;
     int             max_disks;
@@ -736,7 +744,7 @@ int
 Get_Next_HR_Disk_Partition(char *string, size_t str_len, int HRP_index)
 {
     DEBUGMSGTL(("host/hr_disk", "Next_Partition type %d/%d:%d\n",
-                HRD_type_index, HRD_type_index, HRP_index));
+                HRD_type_index, HRD_index, HRP_index));
 
     /*
      * no more partition names => return -1 

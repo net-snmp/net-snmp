@@ -25,11 +25,18 @@
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+
+#include <errno.h>
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "util_funcs.h"
+
+#define setPerrorstatus(x) snmp_log_perror(x)
 
 int
 run_shell_command( char *command, char *input,
@@ -45,6 +52,7 @@ run_shell_command( char *command, char *input,
         return -1;
 
     DEBUGMSGTL(("run_shell_command", "running %s\n", command));
+    DEBUGMSGTL(("run:shell", "running '%s'\n", command));
 
     /*
      * Set up the command to run....
@@ -71,11 +79,11 @@ run_shell_command( char *command, char *input,
                     unlink(ifname);
                 return -1;
             }
-            snprintf( shellline, sizeof(shellline), "(%s) < %s > %s",
+            snprintf( shellline, sizeof(shellline), "(%s) < \"%s\" > \"%s\"",
                       command, ifname, ofname );
         } else {
             ofname = NULL;   /* Just to shut the compiler up! */
-            snprintf( shellline, sizeof(shellline), "(%s) < %s",
+            snprintf( shellline, sizeof(shellline), "(%s) < \"%s\"",
                       command, ifname );
         }
     } else {
@@ -84,7 +92,7 @@ run_shell_command( char *command, char *input,
             ofname = make_tempfile();
             if(NULL == ofname)
                 return -1;
-            snprintf( shellline, sizeof(shellline), "(%s) > %s",
+            snprintf( shellline, sizeof(shellline), "(%s) > \"%s\"",
                       command, ofname );
         } else {
             ofname = NULL;   /* Just to shut the compiler up! */
@@ -107,9 +115,11 @@ run_shell_command( char *command, char *input,
         int         len = 0;
         fd = open(ofname, O_RDONLY);
         if(fd >= 0)
-            len  = read( fd, output, *out_len );
+            len  = read( fd, output, *out_len-1 );
 	*out_len = len;
-	close(fd);
+	if (len >= 0) output[len] = 0;
+	else output[0] = 0;
+	if (fd >= 0) close(fd);
         unlink(ofname);
     }
     if ( input ) {
@@ -187,15 +197,16 @@ int
 run_exec_command( char *command, char *input,
                   char *output,  int  *out_len)	/* Or realloc style ? */
 {
+#if HAVE_EXECV
     int ipipe[2];
     int opipe[2];
-    int i, len;
+    int i;
     int pid;
     int result;
     char **argv;
     int argc;
 
-#if HAVE_EXECV
+    DEBUGMSGTL(("run:exec", "running '%s'\n", command));
     pipe(ipipe);
     pipe(opipe);
     if ((pid = fork()) == 0) {
@@ -230,6 +241,13 @@ run_exec_command( char *command, char *input,
         exit(1);	/* End of child */
 
     } else if (pid > 0) {
+        char            cache[MAXCACHESIZE];
+        char           *cache_ptr;
+        ssize_t         count, cache_size, offset = 0;
+        int             waited = 0, numfds;
+        fd_set          readfds;
+        struct timeval  timeout;
+
         /*
          * Parent process
          */
@@ -245,17 +263,148 @@ run_exec_command( char *command, char *input,
 	   write(ipipe[1], input, strlen(input));
 	   close(ipipe[1]);	/* or flush? */
         }
-        if (waitpid(pid, &result, 0) < 0 ) {
+	else close(ipipe[1]);
+
+        /*
+         * child will block if it writes a lot of data and
+         * fills up the pipe before exiting, so we read data
+         * to keep the pipe empty.
+         */
+        if (output && ((NULL == out_len) || (0 == *out_len))) {
+            DEBUGMSGTL(("run:exec",
+                        "invalid params; no output will be returned\n"));
+            output = NULL;
+        }
+        if (output) {
+            cache_ptr = output;
+            cache_size = *out_len - 1;
+        } else {
+            cache_ptr = cache;
+            cache_size = sizeof(cache);
+        }
+
+        /*
+         * xxx: some of this code was lifted from get_exec_output
+         * in util_funcs.c. Probably should be moved to a common
+         * routine for both to use.
+         */
+        DEBUGMSGTL(("verbose:run:exec","  waiting for child %d...\n", pid));
+        numfds = opipe[0] + 1;
+        i = MAXREADCOUNT;
+        for (; i; --i) {
+            /*
+             * set up data for select
+             */
+            FD_ZERO(&readfds);
+            FD_SET(opipe[0],&readfds);
+            timeout.tv_sec = 1;
+            timeout.tv_usec = 0;
+
+            DEBUGMSGTL(("verbose:run:exec", "    calling select\n"));
+            count = select(numfds, &readfds, NULL, NULL, &timeout);
+            if (count == -1) {
+                if (EAGAIN == errno)
+                    continue;
+                else {
+                    DEBUGMSGTL(("verbose:run:exec", "      errno %d\n",
+                                errno));
+                    setPerrorstatus("read");
+                    break;
+                }
+            } else if (0 == count) {
+                DEBUGMSGTL(("verbose:run:exec", "      timeout\n"));
+                continue;
+            }
+
+            if (! FD_ISSET(opipe[0], &readfds)) {
+                DEBUGMSGTL(("verbose:run:exec", "    fd not ready!\n"));
+                continue;
+            }
+
+            /*
+             * read data from the pipe, optionally saving to output buffer
+             */
+            count = read(opipe[0], &cache_ptr[offset], cache_size);
+            DEBUGMSGTL(("verbose:run:exec",
+                        "    read %d bytes\n", count));
+            if (0 == count) {
+                int rc;
+                /*
+                 * we shouldn't get no data, because select should
+                 * wait til the fd is ready. before we go back around,
+                 * check to see if the child exited.
+                 */
+                DEBUGMSGTL(("verbose:run:exec", "    no data!\n"));
+                if ((rc = waitpid(pid, &result, WNOHANG)) <= 0) {
+                    if (rc < 0) {
+                        snmp_log_perror("waitpid");
+                        break;
+                    } else
+                        DEBUGMSGTL(("verbose:run:exec",
+                                    "      child not done!?!\n"));;
+                } else {
+                    DEBUGMSGTL(("verbose:run:exec", "      child done\n"));
+                    waited = 1; /* don't wait again */
+                    break;
+                }
+            }
+            else if (count > 0) {
+                /*
+                 * got some data. fix up offset, if needed.
+                 */
+                if(output) {
+                    offset += count;
+                    cache_size -= count;
+                    if (cache_size <= 0) {
+                        DEBUGMSGTL(("verbose:run:exec",
+                                    "      output full\n"));
+                        break;
+                    }
+                    DEBUGMSGTL(("verbose:run:exec",
+                                "    %d left in buffer\n", cache_size));
+                }
+            }
+            else if ((count == -1) && (EAGAIN != errno)) {
+                /*
+                 * if error, break
+                 */
+                DEBUGMSGTL(("verbose:run:exec", "      errno %d\n",
+                            errno));
+                setPerrorstatus("read");
+                break;
+            }
+        }
+        DEBUGMSGTL(("verbose:run:exec", "  done reading\n"));
+        if (output)
+            DEBUGMSGTL(("run:exec", "  got %d bytes\n", *out_len));
+            
+        /*
+         * close pipe to signal that we aren't listenting any more.
+         */
+        close(opipe[0]);
+
+        /*
+         * if we didn't wait successfully above, wait now.
+         * xxx-rks: seems like this is a waste of the agent's
+         * time. maybe start a time to wait(WNOHANG) once a second,
+         * and late the agent continue?
+         */
+        if ((!waited) && (waitpid(pid, &result, 0) < 0 )) {
             snmp_log_perror("waitpid");
             return -1;
         }
+
+        /*
+         * null terminate any output
+         */
         if (output) {
-            len = read( opipe[0], output, *out_len );
-	    *out_len = len;
+	    output[offset] = 0;
+	    *out_len = offset;
         }
-	close(ipipe[1]);
-	close(opipe[0]);
-	return 0;
+        DEBUGMSGTL(("run:exec","  child %d finished. result=%d\n",
+                    pid,result));
+
+	return WEXITSTATUS(result);
 
     } else {
         /*

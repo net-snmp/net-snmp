@@ -345,7 +345,7 @@ var_smux_write(int action,
     u_char          buf[SMUXMAXPKTSIZE], *ptr, sout[3], type;
     int             reterr;
     size_t          var_len, datalen, name_length, packet_len;
-    int             len;
+    ssize_t         len;
     long            reqid, errsts, erridx;
     u_char          var_type, *dataptr;
 
@@ -440,7 +440,7 @@ var_smux_write(int action,
             packet_len = len;
             ptr = asn_parse_header(buf, &packet_len, &type);
             packet_len += (ptr - buf);
-            if (len > packet_len) {
+            if (len > (ssize_t)packet_len) {
                 /*
                  * set length to receive only the first packet 
                  */
@@ -555,7 +555,8 @@ smux_accept(int sd)
     struct sockaddr_in in_socket;
     struct timeval  tv;
     int             fail, fd, alen;
-    int             length, len;
+    int             length;
+    ssize_t         len;
 
     alen = sizeof(struct sockaddr_in);
     /*
@@ -818,14 +819,14 @@ smux_open_process(int fd, u_char * ptr, size_t * len, int *fail)
     passwd[string_len] = '\0';
     if (!smux_auth_peer(oid_name, oid_name_len, passwd, fd)) {
         snmp_log(LOG_WARNING,
-                 "refused smux peer: oid %s, password %s, descr %s\n",
-                 oid_print, passwd, descr);
+                 "refused smux peer: oid %s, descr %s\n",
+                 oid_print, descr);
         *fail = TRUE;
         return ptr;
     }
     snmp_log(LOG_INFO,
-             "accepted smux peer: oid %s, password %s, descr %s\n",
-             oid_print, passwd, descr);
+             "accepted smux peer: oid %s, descr %s\n",
+             oid_print, descr);
     *fail = FALSE;
     return ptr;
 }
@@ -1729,7 +1730,7 @@ smux_trap_process(u_char * rsp, size_t * len)
 {
     oid             sa_enterpriseoid[MAX_OID_LEN], var_name[MAX_OID_LEN];
     size_t          datalen, var_name_len, var_val_len, maxlen;
-    int             sa_enterpriseoid_len;
+    size_t          sa_enterpriseoid_len;
     u_char          vartype, *ptr, *var_val;
 
     long            trap, specific;
@@ -1744,7 +1745,7 @@ smux_trap_process(u_char * rsp, size_t * len)
     /*
      * parse the sub-agent enterprise oid 
      */
-    datalen = MAX_OID_LEN;
+    sa_enterpriseoid_len = MAX_OID_LEN;
     if ((ptr = asn_parse_objid(ptr, len,
                                &vartype, (oid *) & sa_enterpriseoid,
                                &sa_enterpriseoid_len)) == NULL) {

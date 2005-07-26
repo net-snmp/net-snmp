@@ -1,6 +1,14 @@
-/*
- * table_iterator.c 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
  */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 /** @defgroup table_iterator table_iterator: The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.
  *  @ingroup table
     Functionally, it is a specialized version of the more
@@ -20,7 +28,10 @@
     needs processing.  The following concepts are important:
 
       - A loop context is a pointer which indicates where in the
-        current processing of a set of rows you currently are.  The
+        current processing of a set of rows you currently are.  Allows
+	the get_*_data_point routines to move from one row to the next,
+	once the iterator handler has identified the appropriate row for
+	this request, the job of the loop context is done.  The
         most simple example would be a pointer to an integer which
         simply counts rows from 1 to X.  More commonly, it might be a
         pointer to a linked list node, or someother internal or
@@ -30,8 +41,11 @@
         pointers should be set.
 
       - A data context is something that your handler code can use
-        later in order to retrieve the rest of the data for the needed
-        row.  The important difference between a loop context and a
+        in order to retrieve the rest of the data for the needed
+        row.  This data can be accessed in your handler via
+	netsnmp_extract_iterator_context api with the netsnmp_request_info
+	structure that's passed in.
+	The important difference between a loop context and a
         data context is that multiple data contexts can be kept by the
         table_iterator helper, where as only one loop context will
         ever be held by the table_iterator helper.  If allocated
@@ -62,17 +76,6 @@
         once for every iteration.
  *
  *  @{
- */
-
-/* Portions of this file are subject to the following copyright(s).  See
- * the Net-SNMP's COPYING file for more details and other copyrights
- * that may apply:
- */
-/*
- * Portions of this file are copyrighted by:
- * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
- * Use is subject to license terms specified in the COPYING file
- * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -111,7 +114,23 @@ netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
 }
 
 
-/** registers a table after attaching it to a table_iterator helper */
+/** 
+ * Creates and registers a table iterator helper handler calling 
+ * netsnmp_create_handler with a handler name set to TABLE_ITERATOR_NAME 
+ * and access method, netsnmp_table_iterator_helper_handler.
+ *
+ * If NOT_SERIALIZED is not defined the function injects the serialize
+ * handler into the calling chain prior to calling netsnmp_register_table.
+ *
+ * @param reginfo is a pointer to a netsnmp_handler_registration struct
+ *
+ * @param iinfo is a pointer to a netsnmp_iterator_info struct
+ *
+ * @return MIB_REGISTERED_OK is returned if the registration was a success.
+ *	Failures are MIB_REGISTRATION_FAILED, MIB_DUPLICATE_REGISTRATION.
+ *	If iinfo is NULL, SNMPERR_GENERR is returned.
+ *
+ */
 int
 netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
                                 netsnmp_iterator_info *iinfo)
@@ -124,7 +143,19 @@ netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
     return netsnmp_register_table(reginfo, iinfo->table_reginfo);
 }
 
-/** extracts the table_iterator specific data from a request */
+/** extracts the table_iterator specific data from a request.
+ * This function extracts the table iterator specific data from a 
+ * netsnmp_request_info object.  Calls netsnmp_request_get_list_data
+ * with request->parent_data set with data from a request that was added 
+ * previously by a module and TABLE_ITERATOR_NAME handler name.
+ *
+ * @param request the netsnmp request info structure
+ *
+ * @return a void pointer(request->parent_data->data), otherwise NULL is
+ *         returned if request is NULL or request->parent_data is NULL or
+ *         request->parent_data object is not found.the net
+ *
+ */
 NETSNMP_INLINE void    *
 netsnmp_extract_iterator_context(netsnmp_request_info *request)
 {
@@ -143,7 +174,7 @@ netsnmp_insert_iterator_context(netsnmp_request_info *request, void *data)
     oid      base_oid[] = {0, 0};	/* Make sure index OIDs are legal! */
     oid      this_oid[MAX_OID_LEN];
     oid      that_oid[MAX_OID_LEN];
-    int      this_oid_len, that_oid_len;
+    size_t   this_oid_len, that_oid_len;
 
     if (!request)
         return;
@@ -210,6 +241,7 @@ typedef struct ti_cache_info_s {
 static void
 netsnmp_free_ti_cache(void *it) {
     ti_cache_info *beer = it;
+    if (!it) return;
     if (beer->data_context && beer->free_context) {
             (beer->free_context)(beer->data_context, beer->iinfo);
     }
@@ -268,6 +300,7 @@ netsnmp_iterator_remember(netsnmp_request_info *request,
     return ti_info;
 }    
 
+#define TABLE_ITERATOR_NOTAGAIN 255
 /** implements the table_iterator helper */
 int
 netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
@@ -353,7 +386,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                    and take it, comparing to nothing from the request */
                 table_info->colnum = tbl_info->min_column - 1;
             } else if (table_info->colnum > tbl_info->max_column) {
-                request->processed = 1;
+                request->processed = TABLE_ITERATOR_NOTAGAIN;
             }
 
             ti_info =
@@ -479,7 +512,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 
                         table_info->indexes = index_search;
                         for(i = table_reg_info->min_column;
-                            i <= table_reg_info->max_column; i++) {
+                            i <= (int)table_reg_info->max_column; i++) {
                             myname[reginfo->rootoid_len + 1] = i;
                             table_info->colnum = i;
                             vb = reqtmp->requestvb =
@@ -502,7 +535,6 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 
                     case MODE_GETNEXT:
                         /* looking for "next" matches */
-                        coloid[reginfo->rootoid_len + 1] = table_info->colnum;
                         if (netsnmp_check_getnext_reply
                             (request, coloid, coloid_len, index_search,
                              &ti_info->results)) {
@@ -570,9 +602,16 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 for(request = requests ; request; request = request->next) {
                     if (request->processed)
                         continue;
+                    ti_info =
+                        netsnmp_request_get_list_data(request,
+                                                      TI_REQUEST_CACHE);
                     if (!ti_info->results) {
+                        table_info = netsnmp_extract_table_info(request);
                         if (table_info->colnum == tbl_info->max_column) {
-                            requests->processed = 1;
+                            coloid[reginfo->rootoid_len+1] = table_info->colnum+1;
+                            snmp_set_var_objid(request->requestvb,
+                                               coloid, reginfo->rootoid_len+2);
+                            request->processed = TABLE_ITERATOR_NOTAGAIN;
                             break;
                         } else {
                             table_info->colnum++;
@@ -602,8 +641,15 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
             switch(reqinfo->mode) {
 
             case MODE_GETNEXT:
-                snmp_set_var_objid(request->requestvb, ti_info->best_match,
-                                   ti_info->best_match_len);
+                if (ti_info->best_match_len)
+                    snmp_set_var_objid(request->requestvb, ti_info->best_match,
+                                       ti_info->best_match_len);
+                else {
+                    coloid[reginfo->rootoid_len+1] = table_info->colnum+1;
+                    snmp_set_var_objid(request->requestvb,
+                                       coloid, reginfo->rootoid_len+2);
+                    request->processed = 1;
+                }
                 snmp_free_varbind(table_info->indexes);
                 table_info->indexes = snmp_clone_varbind(ti_info->results);
                 /* FALL THROUGH */
@@ -652,12 +698,16 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     if (oldmode == MODE_GETNEXT) {
         for(request = requests ; request; request = request->next) {
             if (request->requestvb->type == ASN_NULL ||
+                request->requestvb->type == SNMP_NOSUCHOBJECT ||
                 request->requestvb->type == SNMP_NOSUCHINSTANCE) {
                 /*
                  * get next skipped this value for this column, we
                  * need to keep searching forward 
                  */
-                request->requestvb->type = ASN_PRIV_RETRY;
+                if (request->processed != TABLE_ITERATOR_NOTAGAIN)
+                    request->requestvb->type = ASN_PRIV_RETRY;
+                else
+                    request->processed = 1;
             }
         }
         reqinfo->mode = oldmode;

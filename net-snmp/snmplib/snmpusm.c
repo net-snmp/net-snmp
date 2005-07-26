@@ -66,6 +66,7 @@
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/callback.h>
+#include <net-snmp/library/tools.h>
 #include <net-snmp/library/keytools.h>
 #include <net-snmp/library/snmpv3.h>
 #include <net-snmp/library/lcd_time.h>
@@ -81,7 +82,7 @@ oid             usmHMACSHA1AuthProtocol[10] =
     { 1, 3, 6, 1, 6, 3, 10, 1, 1, 3 };
 oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
 oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
-oid             usmAES128PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,128 };
+oid             usmAES128PrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 4 };
 oid             usmAES192PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,192 };
 oid             usmAES256PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,256 };
 
@@ -1929,6 +1930,9 @@ usm_parse_security_parameters(u_char * secParams,
 
     *time_uint = (u_int) time_long;
 
+    if (*boots_uint > ENGINEBOOT_MAX || *time_uint > ENGINETIME_MAX) {
+        return -1;
+    }
 
     /*
      * Retrieve the secName.
@@ -2455,6 +2459,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                 DEBUGMSGTL(("usm", "%s\n",
                             "Failed to increment statistic."));
             }
+	    snmp_log(LOG_WARNING, "Authentication failed for %s\n",
+				user->name);
             return SNMPERR_USM_AUTHENTICATIONFAILURE;
         }
 
@@ -2722,8 +2728,10 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
                                          usmDESPrivProtocol,
                                          USM_LENGTH_OID_TRANSFORM);
 
-    SNMP_FREE(noNameUser->engineID);
-    noNameUser->engineIDLen = 0;
+    if ( noNameUser ) {
+        SNMP_FREE(noNameUser->engineID);
+        noNameUser->engineIDLen = 0;
+    }
 
     return SNMPERR_SUCCESS;
 }                               /* end init_usm_post_config() */

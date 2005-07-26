@@ -3,6 +3,17 @@
  *
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 #include "mibII_common.h"
 
@@ -13,6 +24,9 @@
 #include <netinet/tcp_timer.h>
 #endif
 #if HAVE_NETINET_TCP_VAR_H
+# if HAVE_SYS_TIMEOUT_H
+#  include <sys/timeout.h>
+# endif
 #include <netinet/tcp_var.h>
 #endif
 
@@ -77,6 +91,7 @@ struct netsnmp_inpcb_s {
     int             state;
     netsnmp_inpcb  *inp_next;
 };
+#define INP_NEXT_SYMBOL		inp_next
 #define	TCPTABLE_ENTRY_TYPE	netsnmp_inpcb 
 #define	TCPTABLE_STATE		state 
 #define	TCPTABLE_LOCALADDRESS	pcb.inp_laddr.s_addr 
@@ -218,7 +233,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 #endif
                 break;
             case TCPCONNLOCALPORT:
-                port = ntohs(entry->TCPTABLE_LOCALPORT);
+                port = ntohs((u_short)entry->TCPTABLE_LOCALPORT);
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -234,7 +249,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 #endif
                 break;
             case TCPCONNREMOTEPORT:
-                port = ntohs(entry->TCPTABLE_REMOTEPORT);
+                port = ntohs((u_short)entry->TCPTABLE_REMOTEPORT);
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -314,18 +329,30 @@ tcpTable_next_entry( void **loop_context,
      * Set up the indexing for the specified row...
      */
     idx = index;
+#ifdef WIN32
+    port = ntohl((u_long)tcp_head[i].TCPTABLE_LOCALADDRESS);
+    snmp_set_var_value(idx, (u_char *)&port,
+                                sizeof(tcp_head[i].TCPTABLE_LOCALADDRESS));
+#else
     snmp_set_var_value(idx, (u_char *)&tcp_head[i].TCPTABLE_LOCALADDRESS,
                                 sizeof(tcp_head[i].TCPTABLE_LOCALADDRESS));
+#endif
 
-    port = ntohs(tcp_head[i].TCPTABLE_LOCALPORT);
+    port = ntohs((u_short)tcp_head[i].TCPTABLE_LOCALPORT);
     idx = idx->next_variable;
     snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
 
     idx = idx->next_variable;
+#ifdef WIN32
+    port = ntohl((u_long)tcp_head[i].TCPTABLE_REMOTEADDRESS);
+    snmp_set_var_value(idx, (u_char *)&port,
+                                sizeof(tcp_head[i].TCPTABLE_REMOTEADDRESS));
+#else
     snmp_set_var_value(idx, (u_char *)&tcp_head[i].TCPTABLE_REMOTEADDRESS,
                                 sizeof(tcp_head[i].TCPTABLE_REMOTEADDRESS));
+#endif
 
-    port = ntohs(tcp_head[i].TCPTABLE_REMOTEPORT);
+    port = ntohs((u_short)tcp_head[i].TCPTABLE_REMOTEPORT);
     idx = idx->next_variable;
     snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
 
@@ -342,8 +369,15 @@ tcpTable_next_entry( void **loop_context,
 void
 tcpTable_free(netsnmp_cache *cache, void *magic)
 {
-    if (tcp_head)
+#ifdef WIN32
+    if (tcp_head) {
+		/* the allocated structure is a count followed by table entries */
+		free((char *)(tcp_head) - sizeof(DWORD));
+	}
+#else
+	if (tcp_head)
         free(tcp_head);
+#endif
     tcp_head  = NULL;
     tcp_size  = 0;
     tcp_estab = 0;
@@ -622,7 +656,6 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     PMIB_TCPTABLE pTcpTable = NULL;
     DWORD         dwActualSize = 0;
     DWORD         status = NO_ERROR;
-    int           i;
 
     /*
      * query for the buffer size needed 
@@ -638,28 +671,40 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         }
     }
 
-    /*
-     * Count the number of established connections
-     * Probably not actually necessary for Windows
-     */
-    for (i = 0; i < tcp_size; i++) {
-        if (tcp_head[i].dwState == 5 /* established */ ||
-            tcp_head[i].dwState == 8 /*  closeWait  */ )
-            tcp_estab++;
-    }
-
     if (status == NO_ERROR) {
+        int           i;
+
         DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
-        tcp_size = pTcpTable->dwNumEntries;
+        tcp_size = pTcpTable->dwNumEntries -1;  /* entries are counted starting with 0 */
         tcp_head = pTcpTable->table;
+
+	/*
+	 * Count the number of established connections
+	 * Probably not actually necessary for Windows
+	 */
+	for (i = 0; i < tcp_size; i++) {
+		if (tcp_head[i].dwState == 5 /* established */ ||
+			tcp_head[i].dwState == 8 /*  closeWait  */ )
+			tcp_estab++;
+	}
         return 0;
     }
+
     DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (win32)\n"));
+	if (pTcpTable)
+		free(pTcpTable);
     return -1;
 }
 #else                           /* WIN32 */
 
 #if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST))
+
+#if defined(freebsd4) || defined(darwin)
+    #define NS_ELEM struct xtcpcb
+#else
+    #define NS_ELEM struct xinpcb
+#endif
+
 int
 tcpTable_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -695,11 +740,11 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
         if (!nnew)
             break;
-        nnew->state = StateMap[((struct xinpcb *) xig)->xt_tp.t_state];
+        nnew->state = StateMap[((NS_ELEM *) xig)->xt_tp.t_state];
         if (nnew->state == 5 /* established */ ||
             nnew->state == 8 /*  closeWait  */ )
             tcp_estab++;
-        memcpy(&(nnew->pcb), &(((struct xinpcb *) xig)->xt_inp),
+        memcpy(&(nnew->pcb), &(((NS_ELEM *) xig)->xt_inp),
                            sizeof(struct inpcb));
 
 	nnew->inp_next = tcp_head;
@@ -715,6 +760,8 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (sysctl)\n"));
     return -1;
 }
+#undef NS_ELEM
+
 #else		/* (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)) */
 #ifdef PCB_TABLE
 int
@@ -749,7 +796,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
             nnew->state == 8 /*  closeWait  */ )
             tcp_estab++;
 
-        entry      = nnew->inp_queue.cqe_next;	/* Next kernel entry */
+        entry      = nnew->INP_NEXT_SYMBOL;	/* Next kernel entry */
 	nnew->inp_next = tcp_head;
 	tcp_head   = nnew;
 

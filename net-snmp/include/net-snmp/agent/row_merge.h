@@ -18,6 +18,6 @@ extern          "C" {
     Netsnmp_Node_Handler netsnmp_row_merge_helper_handler;
 
 #ifdef __cplusplus
-};
+}
 #endif
 #endif

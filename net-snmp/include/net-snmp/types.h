@@ -60,6 +60,14 @@ typedef u_int socklen_t;
 typedef u_int in_addr_t;
 #endif
 
+#ifndef HAVE_SSIZE_T
+#if defined(__INT_MAX__) && __INT_MAX__ == 2147483647
+typedef int ssize_t;
+#else
+typedef long ssize_t;
+#endif
+#endif
+
 
     /*
      *  For the initial release, this will just refer to the
@@ -123,7 +131,7 @@ typedef u_int in_addr_t;
     } * netsnmp_ref_size_t;
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* NET_SNMP_TYPES_H */

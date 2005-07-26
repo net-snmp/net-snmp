@@ -30,7 +30,7 @@ netsnmp_mib_handler *netsnmp_get_scalar_group_handler(oid first, oid last);
 Netsnmp_Node_Handler netsnmp_scalar_group_helper_handler;
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /** NETSNMP_SCALAR_GROUP_H */

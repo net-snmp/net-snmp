@@ -1,6 +1,12 @@
 /*
  * util_funcs.c
  */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -116,7 +122,7 @@ make_tempfile(void)
     static char     name[32];
     int             fd = -1;
 
-    strcpy(name, NETSNMP_TEMP_FILE_PATTERN);
+    strcpy(name, get_temp_file_pattern());
 #ifdef HAVE_MKSTEMP
     fd = mkstemp(name);
 #else
@@ -638,7 +644,7 @@ header_simple_table(struct variable *vp, oid * name, size_t * length,
             newname[*length - 1] = name[*length - 1];
         }
     }
-    if ((max >= 0 && (newname[*length - 1] > max)) ||
+    if ((max >= 0 && ((int)newname[*length - 1] > max)) ||
                ( 0 == newname[*length - 1] )) {
         if (var_len)
             *var_len = 0;
@@ -818,7 +824,7 @@ struct internal_mib_table {
 };
 
 mib_table_t
-Initialise_Table(int size, int timeout, RELOAD reload, COMPARE compare)
+Initialise_Table(int size, int timeout, RELOAD *reload, COMPARE *compare)
 {
     struct internal_mib_table *t;
 

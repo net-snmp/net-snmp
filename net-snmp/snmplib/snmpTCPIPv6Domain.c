@@ -1,5 +1,22 @@
 #include <net-snmp/net-snmp-config.h>
 
+#ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
+
+/*
+ * hack-o-matic for Cygwin to use winsock2
+*/
+#if defined(cygwin)
+#undef HAVE_UNISTD_H
+#undef HAVE_NETINET_IN_H
+#undef HAVE_ARPA_INET_H
+#undef HAVE_NET_IF_H
+#undef HAVE_NETDB_H
+#undef HAVE_SYS_PARAM_H
+#undef HAVE_SYS_SELECT_H
+#undef HAVE_SYS_SOCKET_H
+#undef HAVE_IN_ADDR_T
+#endif
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <errno.h>
@@ -18,6 +35,18 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+
+#if defined(HAVE_WINSOCK_H) || defined(cygwin)
+    /*
+     * Windows IPv6 support is part of WinSock2 only
+     */
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+extern const char *inet_ntop(int, const void*, char*, size_t);
+
+#endif
+
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -272,6 +301,16 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
          * be INADDR_ANY, but certainly includes a port number.
          */
 
+#ifdef IPV6_V6ONLY
+        /* Try to restrict PF_INET6 socket to IPv6 communications only. */
+        {
+	  int one=1;
+	  if (setsockopt(t->sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&one, sizeof(one)) != 0) {
+	    DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_V6ONLY to %d bytes: %s\n", one, strerror(errno)));
+	  } 
+	}
+#endif
+
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
         t->local = malloc(18);
         if (t->local == NULL) {
@@ -288,7 +327,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
          * We should set SO_REUSEADDR too.  
          */
 
-        setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+        setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&opt, sizeof(opt));
 
         rc = bind(t->sock, (struct sockaddr *) addr,
 		  sizeof(struct sockaddr_in6));
@@ -424,3 +463,6 @@ netsnmp_tcp6_ctor(void)
 
     netsnmp_tdomain_register(&tcp6Domain);
 }
+
+#endif /* SNMP_TRANSPORT_TCPIPV6_DOMAIN */
+
