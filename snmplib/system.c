@@ -234,12 +234,6 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
                 dup(0);
                 dup(0);
             }
-
-            /*
-             * close all non-standard open file descriptors
-             */
-            for (cnt = getdtablesize() - 1; cnt >= 2; --cnt)
-                (void) close(cnt);
         }
 #endif /* !WIN32 */
     }

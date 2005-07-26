@@ -464,6 +464,14 @@ main(int argc, char *argv[])
     FILE           *PID;
 #endif
 
+    /*
+     * close all non-standard file descriptors we may have
+     * inherited from the shell.
+     */
+    for (i = getdtablesize() - 1; i > 2; --i) {
+        (void) close(i);
+    }
+
 #ifdef SIGTERM
     DEBUGMSGTL(("signal", "registering SIGTERM signal handler\n"));
     signal(SIGTERM, SnmpdShutDown);
