@@ -36,6 +36,8 @@
 
 #include "util_funcs.h"
 
+#define setPerrorstatus(x) snmp_log_perror(x)
+
 int
 run_shell_command( char *command, char *input,
                    char *output,  int *out_len)	/* Or realloc style ? */
