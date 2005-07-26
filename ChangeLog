@@ -1,5 +1,370 @@
-Changes: V5.1.2 -> V5.1.3.pre1
+Changes: V5.1.2 -> V5.1.3.1
 -------------------------------------------------------------------------------
+2005-07-26 18:19  rstory
+
+   * configure:
+
+   run autoconf
+
+2005-07-26 18:18  rstory
+
+   * configure.in, doxygen.conf:
+
+   update for 5.1.3.1
+
+2005-07-26 18:14  rstory
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.1.3.1 )
+
+2005-07-26 18:14  rstory
+
+   * perl/ASN/ASN.pm:
+
+   - (perl/ASN/ASN.pm): version tag ( 5.1.3.1 )
+
+2005-07-26 18:13  rstory
+
+   * perl/OID/OID.pm:
+
+   - (perl/OID/OID.pm): version tag ( 5.1.3.1 )
+
+2005-07-26 18:13  rstory
+
+   * perl/default_store/default_store.pm:
+
+   - (perl/default_store/default_store.pm): version tag ( 5.1.3.1 )
+
+2005-07-26 18:13  rstory
+
+   * perl/agent/default_store/default_store.pm:
+
+   - (perl/agent/default_store/default_store.pm): version tag ( 5.1.3.1 )
+
+2005-07-26 18:13  rstory
+
+   * perl/agent/agent.pm:
+
+   - (perl/agent/agent.pm): version tag ( 5.1.3.1 )
+
+2005-07-26 18:13  rstory
+
+   * perl/SNMP/SNMP.pm:
+
+   - (perl/SNMP/SNMP.pm): version tag ( 5.1.3.1 )
+
+2005-07-26 18:12  rstory
+
+   * dist/Makefile:
+
+   - (dist/Makefile): version tag ( 5.1.3.1 )
+
+2005-07-26 18:12  rstory
+
+   * sedscript.in:
+
+   - (sedscript.in): version tag ( 5.1.3.1 )
+
+2005-07-26 18:12  rstory
+
+   * dist/net-snmp.spec:
+
+   - (dist/net-snmp.spec): version tag ( 5.1.3.1 )
+
+2005-07-26 18:12  rstory
+
+   * FAQ:
+
+   - (FAQ): version tag ( 5.1.3.1 )
+
+2005-07-26 18:11  rstory
+
+   * README:
+
+   - (README): version tag ( 5.1.3.1 )
+
+2005-07-26 18:11  rstory
+
+   * snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c): version tag ( 5.1.3.1 )
+
+2005-07-26 16:23  rstory
+
+   * agent/mibgroup/utilities.h:
+
+   fix snmptrapd for mini-agent; require correct mib module
+
+2005-07-26 16:22  rstory
+
+   * agent/mibgroup/utilities/execute.c:
+
+   fix mini-agent build; define missing macro
+
+2005-07-26 16:14  rstory
+
+   * agent/snmpd.c, snmplib/system.c:
+
+   close inherited file descriptors immediately
+
+2005-07-26 16:12  rstory
+
+	* README.win32 (5.5.2.28.2.1), agent/mibgroup/mibII/system_mib.c
+	  (5.5.4.3.2.1), win32/Configure (1.1.2.6.2.1),
+	  win32/net-snmp/net-snmp-config.h (5.13.2.13.2.1),
+	  win32/net-snmp/net-snmp-config.h.in (1.1.2.4.2.1),
+	  win32/netsnmpmibssdk/Makefile.in (1.1.2.1.2.1),
+	  win32/netsnmpmibssdk/netsnmpmibssdk.dsp (1.3.2.6.2.1):
+
+	apply Alex's Win32 build patches
+
+
+Changes: V5.1.2 -> V5.1.3
+-------------------------------------------------------------------------------
+2005-06-29 19:11  rstory
+
+   * man/: netsnmp_Container_iterator.3, netsnmp_agent.3
+, netsnmp_agent_registry.3,
+     netsnmp_agent_trap.3, netsnmp_asn1_packet_parse.3
+, netsnmp_baby_steps.3, netsnmp_bulk_to_next.3
+, netsnmp_cache_handler.3, netsnmp_callback.3
+, netsnmp_container.3, netsnmp_data_list.3
+, netsnmp_debug.3, netsnmp_default_store.3
+, netsnmp_handler.3, netsnmp_instance.3
+, netsnmp_iterator_info_s.3, netsnmp_leaf.3
+, netsnmp_library.3, netsnmp_mib_utilities.3
+, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3
+, netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3
+, netsnmp_snmp_client.3,
+     netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3,
+     netsnmp_snmp_session.3, netsnmp_stash_cache.3
+, netsnmp_table.3, netsnmp_table_array.3
+, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_iterator.3
+, netsnmp_util.3, netsnmp_utilities.3
+, netsnmp_variable_list.3, netsnmp_watcher.3
+:
+
+   update for 5.1.3
+
+2005-06-29 19:08  rstory
+
+   * man/: default_store.3, mib_api.3,
+     read_config.3, snmp_agent_api.3,
+     snmp_alarm.3, snmp_api.3, snmp_sess_api.3
+, snmp_trap_api.3:
+
+   new files
+
+2005-06-29 19:02  rstory
+
+   * configure:
+
+   run autoconf
+
+2005-06-29 19:00  rstory
+
+   * configure.in, doxygen.conf:
+
+   update for 5.1.3
+
+2005-06-29 17:27  hardaker
+
+   * snmplib/snmp_api.c:
+
+   Do proper checks for zero return and wait rather than closing the connection
+
+2005-06-29 13:40  hardaker
+
+   * snmplib/snmp_api.c:
+
+   Patch from Roman Tsiroulnikov to catch -1 return code from check_packet functions
+
+2005-06-27 18:46  alex_b
+
+   * snmplib/snmp_client.c:
+
+   Add net-snmp-includes include to fix WIN32 compile issue with LOG_ERR not
+   being defined.
+
+2005-06-22 20:18  rstory
+
+   * man/snmpd.conf.5.def:
+
+   - document logmatch, agentxperms, com2secunix and leave_pidfile tokens
+
+2005-06-22 20:05  rstory
+
+   * agent/mibgroup/ucd-snmp/diskio.c:
+
+   remove snmpd diskio token and the unused static variable it sets
+
+2005-06-22 19:48  rstory
+
+   * snmplib/system.c:
+
+   oops. declare variable used in new code.
+
+2005-06-22 19:35  rstory
+
+   * testing/eval_tools.sh:
+
+   apply patch from 1219548: don't use deprecated option
+
+2005-06-22 19:31  rstory
+
+   * snmplib/snmpUnixDomain.c:
+
+   apply patch from 1219548: don't unlink null filename
+
+2005-06-22 19:08  rstory
+
+   * snmplib/system.c:
+
+   close all fds after daemonizing
+
+2005-06-22 18:10  rstory
+
+   * configure, include/net-snmp/net-snmp-config.h.in
+:
+
+   run autoheader and autoconf
+
+2005-06-22 18:08  rstory
+
+   * acconfig.h, configure.in,
+     apps/notification_log.c, apps/snmptrapd.c,
+     include/net-snmp/agent/snmp_vars.h:
+
+   - configure option to disable snmptrapd agentx
+   - snmptrapd command line -I support to exclude modules
+
+2005-06-22 17:03  rstory
+
+   * Makefile.in:
+
+   new check target for full paths in dependency files
+
+2005-06-22 16:46  rstory
+
+   * snmplib/Makefile.depend, agent/helpers/Makefile.depend
+, agent/Makefile.depend,
+     agent/mibgroup/Makefile.depend, apps/Makefile.depend
+, apps/snmpnetstat/Makefile.depend:
+
+   new dependencies that don't have a full path (to my home dir!?!) in them
+
+2005-06-22 16:04  rstory
+
+   * agent/snmpd.c:
+
+   apply slightly modified version of 1225440: register singal handlers earlier
+
+2005-06-22 10:00  rstory
+
+   * apps/snmptrapd.c:
+
+   apply slightly modified version of 1225440: register signal handles earlier
+
+2005-06-21 10:45  dts12
+
+   * EXAMPLE.conf.def:
+
+   Refer to the correct location for config files.
+   (Spotted by Leo Lei)
+
+2005-06-21 10:09  rstory
+
+   * apps/snmptrapd.c:
+
+   - only add notification handler iff we are an agentx subagent
+
+2005-06-20 18:04  rstory
+
+   * agent/mibgroup/ucd-snmp/proxy.c:
+
+   fix proxy handling of NOSUCHNAME on a get-next, noted on users by John Hardin
+
+2005-06-20 15:14  rstory
+
+   * snmplib/container_binary_array.c:
+
+   -missed fix for bug 1210457: missing check after malloc
+
+2005-06-20 11:07  rstory
+
+   * doxygen.conf, man/netsnmp_Container_iterator.3
+, man/netsnmp_agent.3,
+     man/netsnmp_agent_registry.3, man/netsnmp_agent_trap.3
+, man/netsnmp_asn1_packet_parse.3,
+     man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3
+, man/netsnmp_cache_handler.3,
+     man/netsnmp_callback.3, man/netsnmp_container.3
+, man/netsnmp_data_list.3, man/netsnmp_debug.3
+, man/netsnmp_default_store.3,
+     man/netsnmp_handler.3, man/netsnmp_instance.3
+, man/netsnmp_iterator_info_s.3,
+     man/netsnmp_leaf.3, man/netsnmp_library.3,
+     man/netsnmp_mib_utilities.3,
+     man/netsnmp_mode_end_call.3, man/netsnmp_multiplexer.3
+, man/netsnmp_netsnmp_agent_request_info_s.3,
+     man/netsnmp_netsnmp_column_info_t.3,
+     man/netsnmp_netsnmp_data_list_s.3,
+     man/netsnmp_netsnmp_handler_registration_s.3,
+     man/netsnmp_netsnmp_iterator_info_s.3,
+     man/netsnmp_netsnmp_mib_handler_methods.3,
+     man/netsnmp_netsnmp_mib_handler_s.3,
+     man/netsnmp_netsnmp_request_info_s.3,
+     man/netsnmp_netsnmp_table_registration_info_s.3,
+     man/netsnmp_netsnmp_table_request_info_s.3,
+     man/netsnmp_oid_stash.3, man/netsnmp_old_api.3
+, man/netsnmp_read_config.3,
+     man/netsnmp_read_only.3, man/netsnmp_row_merge.3
+, man/netsnmp_scalar.3,
+     man/netsnmp_scalar_group_group.3,
+     man/netsnmp_serialize.3, man/netsnmp_snmp_agent.3
+, man/netsnmp_snmp_alarm.3,
+     man/netsnmp_snmp_client.3, man/netsnmp_snmp_logging.3
+, man/netsnmp_snmp_pdu.3,
+     man/netsnmp_snmp_session.3, man/netsnmp_stash_cache.3
+, man/netsnmp_table.3,
+     man/netsnmp_table_array.3, man/netsnmp_table_data.3
+, man/netsnmp_table_dataset.3,
+     man/netsnmp_table_iterator.3, man/netsnmp_util.3
+, man/netsnmp_utilities.3,
+     man/netsnmp_variable_list.3, man/netsnmp_watcher.3
+:
+
+   update for 5.1.3.pre1
+
+2005-06-20 11:01  rstory
+
+   * ChangeLog:
+
+   update for 5.1.3.pre1
+
+2005-06-20 11:00  rstory
+
+   * NEWS:
+
+   add lots more fixes (too much?)
+
 2005-06-20 09:56  rstory
 
    * snmplib/Makefile.depend, agent/helpers/Makefile.depend
