@@ -415,6 +415,8 @@ sub process_vars {
 #     repeat iterate over values a, b, c, d as assigned generically
 #     (ie, the values are taken straight from the list with no
 #     mib-expansion, etc).
+#   @while expression@
+#     repeat iterate over code until the expression is false
 #   @eval $VAR = expression@
 #     evaluates expression and assigns the results to $VAR.  This is
 #     not a full perl eval, but sort of a "psuedo" eval useful for
@@ -467,6 +469,8 @@ sub process_vars {
 #   @print STUFF@
 #     Prints stuff directly to the users screen (ie, not to where
 #     normal mib2c output goes)
+#   @quit@
+#     Bail out (silently)
 #   @exit@
 #     Bail out!
 #
@@ -653,6 +657,9 @@ sub process {
         elsif (/\@\s*exit\@/) { #                                         EXIT
             close_files;
 	    die "exiting at conf file ($currentfile:$currentline) request\n";
+        } elsif (/\@\s*quit\@/) { #                                       QUIT
+            close_files;
+            exit;
 	} elsif (/\@\s*debug\s+([^\@]+)\@/) { #                          DEBUG
           if ($1 eq "on") {
             $debug = 1;
@@ -961,6 +968,31 @@ sub process {
 		$return = skippart();
 	    }
             m2c_die("foreach did not end with \@end@") if($return ne "end");
+	} elsif (/\@\s*while([a-z]*)\s+([^@]+)\@/) { #                     WHILE
+          my ($type,$arg,$ok) = ($1,$2,0);
+	  my $stash = do_tell();
+          my $loop = 1;
+
+          while ($loop) {
+            # check condition based on type
+            if (! $type) {
+              $ok = eval(process_vars($arg));
+            } elsif ($type eq conf) {
+              my $file = find_conf(process_vars($arg),1); # missingok
+              $ok = (-f $file);
+            } elsif ($type eq dir) {
+              $ok = (-d $arg);
+            } else {
+              m2c_die "unknown while modifier ($type)\n";
+            }
+
+            # act on condition
+            if ($ok) {
+	      $return = do_a_loop($stash, \$vars{$type}, $ok, \$vars{$args});
+            } else {
+	      $loop = 0;
+            }
+          }
 	} elsif (/\@\s*prompt\s+\$(\S+)\s*(.*)\@/) { #                  PROMPT
 	    my ($var, $prompt) = ($1, $2);
 	    if (!$term) {
