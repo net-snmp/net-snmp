@@ -97,7 +97,7 @@ SOURCE=..\..\apps\snmptrapd_log.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\apps\notification_log.c
+SOURCE=..\..\agent\mibgroup\notification-log-mib\notification_log.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -113,7 +113,7 @@ SOURCE="..\..\apps\snmptrapd_log.h"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\apps\notification_log.h"
+SOURCE="..\..\agent\mibgroup\notification-log-mib\notification_log.h"
 # End Source File
 # End Group
 # End Target
