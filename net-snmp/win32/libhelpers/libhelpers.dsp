@@ -169,6 +169,10 @@ SOURCE=..\..\agent\helpers\table_data.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\helpers\table_data2.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\helpers\table_dataset.c
 # End Source File
 # Begin Source File
