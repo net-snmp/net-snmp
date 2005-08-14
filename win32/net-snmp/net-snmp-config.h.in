@@ -6,8 +6,8 @@
 
 /* Define HAVE_WIN32_PLATFORM_SDK if you have:
  * Microsoft Visual Studio MSVC 6.0 and the Platform SDK (PSDK)
- * Microsoft Visual Studio.New 2002
- * Microsoft Visual Studio.New 2003
+ * Microsoft Visual Studio.Net 2002
+ * Microsoft Visual Studio.Net 2003
  * Cygwin
  * MinGW 
  */
