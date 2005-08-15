@@ -160,7 +160,7 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
          * If we didn't get an answer (due to holes in the group)
 	 *   set things up to retry again.
          */
-        if (!request->delegated &&
+        if (!requests->delegated &&
             (requests->requestvb->type == ASN_NULL ||
              requests->requestvb->type == SNMP_NOSUCHOBJECT ||
              requests->requestvb->type == SNMP_NOSUCHINSTANCE)) {
