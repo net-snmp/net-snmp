@@ -586,6 +586,12 @@ netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
                 netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                           requests);
             reqinfo->mode = MODE_GETNEXT;
+            if (!requests->delegated &&
+                (requests->requestvb->type == ASN_NULL ||
+                 requests->requestvb->type == SNMP_NOSUCHINSTANCE ||
+                 requests->requestvb->type == SNMP_NOSUCHOBJECT)) {
+                requests->requestvb->type = ASN_PRIV_RETRY;
+            }
             return ret;
         } else {
             return SNMP_ERR_NOERROR;
