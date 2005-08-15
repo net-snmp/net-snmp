@@ -250,6 +250,15 @@ create_trap_session(char *sink, u_short sinkport,
         session.community = (u_char *) com;
         session.community_len = strlen(com);
     }
+
+    /*
+     * for informs, set retries to default
+     */
+    if (SNMP_MSG_INFORM == pdutype) {
+        session.timeout = SNMP_DEFAULT_TIMEOUT;
+        session.retries = SNMP_DEFAULT_RETRIES;
+    }
+
     /*
      * if the sink is localhost, bind to localhost, to reduce open ports.
      */
