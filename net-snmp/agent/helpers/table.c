@@ -668,7 +668,8 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
 
     if (reqinfo->mode == MODE_GETNEXT) {
         for(request = requests ; request; request = request->next) {
-            if (request->requestvb->type == ASN_NULL && request->processed)
+            if ((request->requestvb->type == ASN_NULL && request->processed) ||
+                request->delegated)
                 continue;
             if (request->requestvb->type == ASN_NULL ||
                 request->requestvb->type == SNMP_NOSUCHINSTANCE) {
