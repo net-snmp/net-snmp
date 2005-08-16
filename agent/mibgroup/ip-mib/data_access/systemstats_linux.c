@@ -233,6 +233,10 @@ _systemstats_v6(netsnmp_container* container, u_int load_flags)
     if(NULL == entry)
         return -3;
     
+    /*
+     * try to open file. If we can't, that's ok - maybe the module hasn't
+     * been loaded yet.
+     */
     if (!(devin = fopen(filename, "r"))) {
         DEBUGMSGTL(("access:systemstats",
                     "Failed to load Systemstats Table (linux1)\n"));
@@ -241,7 +245,7 @@ _systemstats_v6(netsnmp_container* container, u_int load_flags)
             snmp_log(LOG_ERR, "cannot open %s ...\n", filename);
         }
         free(entry);
-        return -2;
+        return 0;
     }
 
     /*
