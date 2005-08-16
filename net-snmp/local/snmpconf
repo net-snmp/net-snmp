@@ -227,7 +227,7 @@ foreach my $i (@didfiles) {
 	if ($opts{'i'} || $opts{'I'}) {
           $opts{'I'} = "$confpath" if (!$opts{'I'});
 
-          if (! (-d "$opts{'I'}") && ! (mkdir ("$opts{'I'}"))) {
+          if (! (-d "$opts{'I'}") && ! (mkdir ("$opts{'I'}", 0755))) {
 	    print "\nCould not create $opts{'I'} directory: $!\n";
 	    print ("File $didfile{$i} left in current directory\n");
 	  }
@@ -242,7 +242,7 @@ foreach my $i (@didfiles) {
             }
           }
 	} elsif ($opts{'p'}) {
-	  if (! (-d "$home") && ! (mkdir ("$home"))) {
+	  if (! (-d "$home") && ! (mkdir ("$home", 0755))) {
 	    print "\nCould not create $home directory: $!\n";
 	    print ("File $didfile{$i} left in current directory\n");
 	  }
