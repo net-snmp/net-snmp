@@ -1041,7 +1041,7 @@ Optional Features:
   --enable-mib-config-checking   Turns on extra checks during configuration
                                   of mib modules. Any conflicts will cause
                                   configure to abort (default is to issue a
-                                  warning and continue.
+                                  warning and continue.)
   --enable-mfd-rewrites          Use new MFD rewrites of mib modules,
                                   where available. (default is to use
                                   original mib module code).
