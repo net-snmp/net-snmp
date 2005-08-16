@@ -399,7 +399,7 @@ AC_ARG_ENABLE(mib-config-checking,
 [  --enable-mib-config-checking   Turns on extra checks during configuration
                                   of mib modules. Any conflicts will cause
                                   configure to abort (default is to issue a
-                                  warning and continue.],
+                                  warning and continue.)],
     with_mib_cfg_checks="yes",with_mib_cfg_checks="no")
 AC_ARG_WITH(mib-config-checking,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-mib-config-checking/--disable-mib-config-checking instead ]) )
