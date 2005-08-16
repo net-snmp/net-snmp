@@ -222,6 +222,7 @@ _systemstats_v6(netsnmp_container* container, u_int load_flags)
     int             len, rc;
     uintmax_t       scan_val;
     const char     *filename = "/proc/net/snmp6";
+    static int      warned_open = 0;
 
     DEBUGMSGTL(("access:systemstats:container:arch", "load v6 (flags %p)\n",
                 load_flags));
@@ -235,7 +236,10 @@ _systemstats_v6(netsnmp_container* container, u_int load_flags)
     if (!(devin = fopen(filename, "r"))) {
         DEBUGMSGTL(("access:systemstats",
                     "Failed to load Systemstats Table (linux1)\n"));
-        snmp_log(LOG_ERR, "cannot open %s ...\n", filename);
+        if(!warned_open) {
+            ++warn_opened;
+            snmp_log(LOG_ERR, "cannot open %s ...\n", filename);
+        }
         free(entry);
         return -2;
     }
