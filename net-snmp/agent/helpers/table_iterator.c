@@ -97,10 +97,6 @@
 #include <net-snmp/agent/table_iterator.h>
 #include <net-snmp/agent/stash_cache.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 /** returns a netsnmp_mib_handler object for the table_iterator helper */
 netsnmp_mib_handler *
 netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)

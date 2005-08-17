@@ -173,10 +173,6 @@
 # endif
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #ifdef cygwin
 #include <windows.h>
 #endif

@@ -136,10 +136,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <inet/mib2.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/mib_modules.h>

@@ -14,10 +14,6 @@
 #include <net-snmp/agent/instance.h>
 #include <net-snmp/agent/scalar.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 /** @defgroup watcher watcher: watch a specified variable and process
  *   it as an instance or scalar object
  *  @ingroup leaf

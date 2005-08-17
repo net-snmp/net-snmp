@@ -29,10 +29,6 @@
 #include <winsock.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #include <signal.h>
 #include <errno.h>
 
