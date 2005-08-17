@@ -21,10 +21,6 @@
 
 #include <net-snmp/agent/debug_handler.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 /** @defgroup debug debug: print out debugging information about the handler chain being called.
  *  This is a useful module for run-time
  *  debugging of requests as the pass this handler in a calling chain.

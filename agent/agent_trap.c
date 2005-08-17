@@ -57,10 +57,6 @@
 #endif
 #include <net-snmp/utilities.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/agent/snmp_agent.h>

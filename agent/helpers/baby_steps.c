@@ -8,10 +8,6 @@
 
 #include <net-snmp/agent/baby_steps.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #define BABY_STEPS_PER_MODE_MAX     4
 #define BSTEP_USE_ORIGINAL          0xffff
 

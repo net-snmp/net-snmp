@@ -11,10 +11,6 @@
 
 #include <net-snmp/agent/bulk_to_next.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 /** @defgroup bulk_to_next bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler.
  *  The only purpose of this handler is to convert a GETBULK request
  *  to a GETNEXT request.  It is inserted into handler chains where

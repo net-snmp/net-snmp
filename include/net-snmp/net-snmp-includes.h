@@ -30,6 +30,9 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

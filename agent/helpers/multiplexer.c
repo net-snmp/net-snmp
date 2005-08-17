@@ -7,10 +7,6 @@
 
 #include <net-snmp/agent/multiplexer.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 /** @defgroup multiplexer multiplexer: splits mode requests into calls to different handlers.
  *  @ingroup utilities
  * The multiplexer helper lets you split the calling chain depending

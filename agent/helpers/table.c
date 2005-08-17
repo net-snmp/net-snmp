@@ -28,10 +28,6 @@
 #include <net-snmp/agent/table.h>
 #include <net-snmp/library/snmp_assert.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 static void     table_helper_cleanup(netsnmp_agent_request_info *reqinfo,
                                      netsnmp_request_info *request,
                                      int status);

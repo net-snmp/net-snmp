@@ -15,10 +15,6 @@
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/read_only.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 /** @defgroup scalar_group_group scalar_group: process groups of scalars.
  *  @ingroup leaf
  *  @{

@@ -19,10 +19,6 @@
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_assert.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 /*
  * snmp.h:#define SNMP_MSG_INTERNAL_SET_BEGIN        -1 
  * snmp.h:#define SNMP_MSG_INTERNAL_SET_RESERVE1     0 

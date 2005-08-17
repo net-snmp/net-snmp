@@ -9,10 +9,6 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 static netsnmp_data_list *auto_tables;
 
 typedef struct data_set_tables_s {
