@@ -11,10 +11,6 @@
 
 #include <net-snmp/agent/cache_handler.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 static netsnmp_cache  *cache_head = NULL;
 static int             cache_outstanding_valid = 0;
 static int             _cache_load( netsnmp_cache *cache );

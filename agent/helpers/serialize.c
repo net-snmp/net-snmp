@@ -11,10 +11,6 @@
 
 #include <net-snmp/agent/serialize.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 /** @defgroup serialize serialize: Calls sub handlers one request at a time.
  *  @ingroup utilities
  *  This functionally passes in one request at a time

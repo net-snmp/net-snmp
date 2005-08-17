@@ -13,10 +13,6 @@
 #include <net-snmp/agent/table_data.h>
 #include <net-snmp/agent/read_only.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 /** @defgroup table_data table_data: Helps you implement a table with datamatted storage.
  *  @ingroup table
  *

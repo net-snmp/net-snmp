@@ -11,10 +11,6 @@
 
 #include <net-snmp/agent/read_only.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 /** @defgroup read_only read_only: make your handler read_only automatically 
  *  The only purpose of this handler is to return an
  *  appropriate error for any requests passed to it in a SET mode.

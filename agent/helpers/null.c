@@ -11,10 +11,6 @@
 
 #include <net-snmp/agent/null.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 int
 netsnmp_register_null(oid * loc, size_t loc_len)
 {

@@ -24,10 +24,6 @@
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/read_only.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 /** @defgroup instance instance: process individual MIB instances easily.
  *  @ingroup leaf
  *  @{

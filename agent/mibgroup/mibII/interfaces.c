@@ -153,10 +153,6 @@
 #include <ioctls.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #ifdef solaris2
 # include <errno.h>
 #include "kernel_sunos5.h"

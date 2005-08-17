@@ -21,10 +21,6 @@
 #include <kvm.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #include <net-snmp/agent/auto_nlist.h>
 #include "autonlist.h"
 #include "kernel.h"

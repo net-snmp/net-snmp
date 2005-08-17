@@ -37,10 +37,6 @@
 #include <arpa/inet.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif

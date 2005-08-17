@@ -12,10 +12,6 @@
 #include <net-snmp/agent/old_api.h>
 #include <net-snmp/agent/agent_callbacks.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #define MIB_CLIENTS_ARE_EVIL 1
 
 /*

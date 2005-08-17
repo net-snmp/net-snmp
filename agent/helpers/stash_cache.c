@@ -12,10 +12,6 @@
 #include <net-snmp/agent/stash_cache.h>
 #include <net-snmp/agent/stash_to_next.h>
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 extern NetsnmpCacheLoad _netsnmp_stash_cache_load;
 extern NetsnmpCacheFree _netsnmp_stash_cache_free;
  
