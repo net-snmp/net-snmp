@@ -56,6 +56,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/system.h>
+#include <net-snmp/library/tools.h>
 
 #ifndef INADDR_NONE
 #define INADDR_NONE	-1
@@ -770,7 +771,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
     char            secName[VACMSTRINGLEN];
     char            contextName[VACMSTRINGLEN];
     char            community[VACMSTRINGLEN];
-    char            source[VACMSTRINGLEN];
+    char            source[SNMP_MAXBUF_SMALL];
     char           *cp = NULL;
     const char     *strmask = NULL;
     com2SecEntry   *e = NULL;
