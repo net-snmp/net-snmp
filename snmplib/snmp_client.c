@@ -797,9 +797,15 @@ snmp_set_var_value(netsnmp_variable_list * vars,
             }
 #endif
 #if SIZEOF_LONG != SIZEOF_LONG_LONG
-            else if (vars->val_len == sizeof(long long)){
+#if defined (WIN32) && !defined (mingw32)
+            else if (vars->val_len == sizeof(__int64)){
+                const unsigned __int64   *val_ullong
+                    = (const unsigned __int64 *) value;
+#else
+                else if (vars->val_len == sizeof(long long)){
                 const unsigned long long   *val_ullong
                     = (const unsigned long long *) value;
+#endif
                 *(vars->val.integer) = (long) *val_ullong;
                 if (*(vars->val.integer) > 0xffffffff) {
                     snmp_log(LOG_ERR,"truncating integer value > 32 bits\n");
