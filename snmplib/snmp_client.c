@@ -742,9 +742,6 @@ snmp_set_var_value(netsnmp_variable_list * vars,
                    const u_char * value, size_t len)
 {
     int             largeval = 1;
-    const long     *val_long = NULL;
-    const int      *val_int  = NULL;
-    const u_int    *val_uint  = NULL;
 
     /*
      * xxx-rks: why the unconditional free? why not use existing
@@ -777,23 +774,68 @@ snmp_set_var_value(netsnmp_variable_list * vars,
     case ASN_IPADDRESS:
     case ASN_COUNTER:
         if (value) {
-            if (largeval) {
+            if (vars->val_len == sizeof(int)) {
+                if (ASN_INTEGER == vars->type) {
+                    const int      *val_int 
+                        = (const int *) value;
+                    *(vars->val.integer) = (long) *val_int;
+                } else {
+                    const u_int    *val_uint
+                        = (const u_int *) value;
+                    *(vars->val.integer) = (unsigned long) *val_uint;
+                }
+            }
+#if SIZEOF_LONG != SIZEOF_INT
+            else if (vars->val_len == sizeof(long)){
+                const u_long   *val_ulong
+                    = (const u_long *) value;
+                *(vars->val.integer) = *val_ulong;
+                if (*(vars->val.integer) > 0xffffffff) {
+                    snmp_log(LOG_ERR,"truncating integer value > 32 bits\n");
+                    *(vars->val.integer) &= 0xffffffff;
+                }
+            }
+#endif
+#if SIZEOF_LONG != SIZEOF_LONG_LONG
+            else if (vars->val_len == sizeof(long long)){
+                const unsigned long long   *val_ullong
+                    = (const unsigned long long *) value;
+                *(vars->val.integer) = (long) *val_ullong;
+                if (*(vars->val.integer) > 0xffffffff) {
+                    snmp_log(LOG_ERR,"truncating integer value > 32 bits\n");
+                    *(vars->val.integer) &= 0xffffffff;
+                }
+            }
+#endif
+#if SIZEOF_SHORT != SIZEOF_INT
+            else if (vars->val_len == sizeof(short)) {
+                if (ASN_INTEGER == vars->type) {
+                    const short      *val_short 
+                        = (const short *) value;
+                    *(vars->val.integer) = (long) *val_short;
+                } else {
+                    const u_short    *val_ushort
+                        = (const u_short *) value;
+                    *(vars->val.integer) = (unsigned long) *val_ushort;
+                }
+            }
+#endif
+            else if (vars->val_len == sizeof(char)) {
+                if (ASN_INTEGER == vars->type) {
+                    const char      *val_char 
+                        = (const char *) value;
+                    *(vars->val.integer) = (long) *val_char;
+                } else {
+                    *(vars->val.integer) = (unsigned long) *value;
+                }
+            }
+            else {
                 snmp_log(LOG_ERR,"bad size for integer-like type (%d)\n",
                          vars->val_len);
                 return (1);
-            } else if (vars->val_len == sizeof(int)) {
-                if (ASN_INTEGER == vars->type) {
-                    val_int = (const int *) value;
-                    *(vars->val.integer) = (long) *val_int;
-                } else {
-                    val_uint = (const u_int *) value;
-                    *(vars->val.integer) = (long) *val_uint;
-                }
-            } else {
-                val_long = (const long *) value;
-                *(vars->val.integer) = *val_long;
             }
-        }
+        } else
+            *(vars->val.integer) = 0;
         vars->val_len = sizeof(long);
         break;
 
