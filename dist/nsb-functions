@@ -174,7 +174,7 @@ nsb-config-all()
    # use libwrap if we can find the header
    #
    if [ -f /usr/include/tcpd.h ]; then
-      NSB_EXTRA_CONFIG="--with-libwrap"
+      NSB_EXTRA_CONFIG="$NSB_EXTRA_CONFIG --with-libwrap"
    fi
 
    #
@@ -299,7 +299,7 @@ nsb-make()
    if [ "x$target" = "xall" ]; then
       $NSB_MAKE NOAUTODEPS=y touchit 2>&1 | tee $nsb_make_OUTPUT
    fi
-   $NSB_MAKE NOAUTODEPS=y start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
+   $NSB_MAKE $NSB_MAKE_EXTRA NOAUTODEPS=y start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
    # checking $? would only get us the rc from tee, which is useless
 
    nsb-info "Checking for errors..."
