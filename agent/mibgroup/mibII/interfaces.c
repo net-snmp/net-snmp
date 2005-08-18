@@ -1999,7 +1999,7 @@ static int      Interface_Count = 0;
 
 #if defined(hpux11)
 
-static int
+int
 Interface_Scan_Get_Count(void)
 {
     if (!Interface_Count) {
