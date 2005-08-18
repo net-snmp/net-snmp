@@ -18,6 +18,7 @@
 ##
 ##   set up defaults
 ##
+@    print Defaults for $table...@
 @    eval $m2c_context_reg = "$mfd_default_context_reg"@
 @    eval $m2c_data_allocate = $mfd_default_data_allocate@
 @    eval $m2c_data_cache = $mfd_default_data_cache@
@@ -50,6 +51,7 @@
 @        if "x$ans" eq "xr"@
 @          eval $mfd_interactive_setup = -1@ # already asked to overwrite
 @          run -again mfd-interactive-setup.m2c@
+@          eval $mfd_interactive_setup = 1@
 @        else@
 ##          ## read in old, write them back (this should add any new vars
 @           include ${m2c_defaults_dir}table-${context}.m2d@
@@ -64,10 +66,11 @@
 @      end@
 @      run mfd-interactive-setup.m2c@
 @    end@ # no conf file
-@    if $m2c_gen_table_defaults == 1@
-@       exit@
-@    end@
 @end@ # foreach table
+@if $m2c_gen_table_defaults == 1@
+@   exit@
+@end@
+@print Starting MFD code generation...@
 ########################################################################
 @eval $m2c_processing_type = 'h'@
 @open ${name}.h@
