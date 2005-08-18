@@ -57,10 +57,6 @@ netsnmp_table_data2_add_row(netsnmp_table_data2 *table,
 
     if (row->indexes)
         netsnmp_table_data2_generate_index_oid(row);
-    else {
-        row->oid_index.oids = row->index_oid;
-        row->oid_index.len  = row->index_oid_len;
-    }
 
     /*
      * we don't store the index info as it
@@ -364,6 +360,28 @@ netsnmp_table_data2_build_result(netsnmp_handler_registration *reginfo,
                                 u_char * result_data2,
                                 size_t result_data2_len)
 {
+    oid             build_space[MAX_OID_LEN];
+    if (!reginfo || !reqinfo || !request)
+        return SNMPERR_GENERR;
+
+    if (reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK) {
+        /*
+         * only need to do this for getnext type cases where oid is changing 
+         */
+        memcpy(build_space, reginfo->rootoid,   /* registered oid */
+               reginfo->rootoid_len * sizeof(oid));
+        build_space[reginfo->rootoid_len] = 1;  /* entry */
+        build_space[reginfo->rootoid_len + 1] = column; /* column */
+        memcpy(build_space + reginfo->rootoid_len + 2,  /* index data */
+               row->oid_index.oids, row->oid_index.len * sizeof(oid));
+        snmp_set_var_objid(request->requestvb, build_space,
+                           reginfo->rootoid_len + 2 + row->oid_index.len);
+    }
+    snmp_set_var_typed_value(request->requestvb, type,
+                             result_data2, result_data2_len);
+    return SNMPERR_SUCCESS;     /* WWWXXX: check for bounds */
+
+    netsnmp_assert("netsnmp_table_data2_build_result" == "implemented");
     return SNMPERR_GENERR;
 }
 
