@@ -758,6 +758,17 @@ netsnmp_send_traps(int trap, int specific,
             return -1;
         }
     }
+
+    /*
+     * Check whether we're ignoring authFail traps
+     */
+    if (template_v1pdu->trap_type == SNMP_TRAP_AUTHFAIL &&
+        snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_DISABLED) {
+        snmp_free_pdu(template_v1pdu);
+        snmp_free_pdu(template_v2pdu);
+        return 0;
+    }
+
     /*
      * Ensure that the v1 trap PDU includes the local IP address
      */
