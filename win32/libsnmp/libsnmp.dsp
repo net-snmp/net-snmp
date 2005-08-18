@@ -129,10 +129,6 @@ SOURCE=..\..\snmplib\default_store.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\fd_event_manager.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\snmplib\getopt.c
 # End Source File
 # Begin Source File
@@ -291,6 +287,10 @@ SOURCE=..\..\snmplib\vacm.c
 
 SOURCE=..\..\snmplib\winpipe.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\fd_event_manager.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -322,10 +322,6 @@ SOURCE="..\..\include\net-snmp\library\data_list.h"
 # Begin Source File
 
 SOURCE="..\..\include\net-snmp\library\default_store.h"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\include\net-snmp\library\fd_event_manager.h"
 # End Source File
 # Begin Source File
 
