@@ -176,7 +176,9 @@ incrByU16(U64 * pu64, unsigned int u16)
      */
     pu64->low = (ulT1 + u16) & 0x0FFFFFFFFL;
     pu64->high++;
-
+#if SIZEOF_LONG != 4
+    pu64->high &= 0xffffffff;
+#endif
 }                               /* incrByV16 */
 
 void
@@ -185,8 +187,15 @@ incrByU32(U64 * pu64, unsigned int u32)
     unsigned int    tmp;
     tmp = pu64->low;
     pu64->low += u32;
-    if (pu64->low < tmp)
+#if SIZEOF_LONG != 4
+    pu64->low &= 0xffffffff;
+#endif
+    if (pu64->low < tmp) {
         pu64->high++;
+#if SIZEOF_LONG != 4
+        pu64->high &= 0xffffffff;
+#endif
+    }
 }
 
 /*
@@ -213,7 +222,6 @@ u64Subtract(U64 * pu64one, U64 * pu64two, U64 * pu64out)
 void
 zeroU64(U64 * pu64)
 {
-
     pu64->low = 0;
     pu64->high = 0;
 }                               /* zeroU64 */
