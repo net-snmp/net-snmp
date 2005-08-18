@@ -1322,6 +1322,11 @@ asn_parse_objid(u_char * data,
         *oidp++ = (oid) subidentifier;
     }
 
+    if (0 != length) {
+        ERROR_MSG("OID length exceeds buffer size");
+        return NULL;
+    }
+
     /*
      * The first two subidentifiers are encoded into the first component
      * with the value (X * 40) + Y, where:
