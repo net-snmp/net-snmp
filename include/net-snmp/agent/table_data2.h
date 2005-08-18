@@ -23,8 +23,6 @@ extern          "C" {
     typedef struct netsnmp_table_data2row_s {
         netsnmp_index   oid_index;      /* table_container index format */
         netsnmp_variable_list *indexes; /* stored permanently if store_indexes = 1 */
-        oid            *index_oid;      /* backwards compatability */
-        size_t          index_oid_len;
         void           *data;   /* the data to store */
 
         struct netsnmp_table_row_s *next, *prev;        /* if used in a list */
