@@ -77,6 +77,8 @@ netsnmp_check_vb_size_range(const netsnmp_variable_list *var,
     if ((var->val_len < low) || (var->val_len > high)) {
         rc = SNMP_ERR_WRONGLENGTH;
     }
+
+    return rc;
 }
 
 NETSNMP_INLINE int
