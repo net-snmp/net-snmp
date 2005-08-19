@@ -464,6 +464,7 @@ main(int argc, char *argv[])
     FILE           *PID;
 #endif
 
+#ifndef WIN32
     /*
      * close all non-standard file descriptors we may have
      * inherited from the shell.
@@ -471,6 +472,7 @@ main(int argc, char *argv[])
     for (i = getdtablesize() - 1; i > 2; --i) {
         (void) close(i);
     }
+#endif /* #WIN32 */
     
     /*
      * register signals ASAP to prevent default action (usually core)
