@@ -275,10 +275,11 @@ usage(char *prog)
     printf("\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
     printf("\n  -a\t\t\tlog addresses\n");
     printf("  -A\t\t\tappend to the logfile rather than truncating it\n");
-    printf("  -c FILE\t\tread FILE as a configuration file\n");
+    printf("  -c FILE[,...]\t\tread FILE(s) as configuration file(s)\n");
     printf("  -C\t\t\tdo not read the default configuration files\n");
     printf("  -d\t\t\tdump sent and received SNMP packets\n");
-    printf("  -D\t\t\tturn on debugging output\n");
+    printf("  -D TOKEN[,...]\tturn on debugging output for the given TOKEN(s)\n"
+	   "\t\t\t  (try ALL for extremely verbose output)\n");
     printf("  -f\t\t\tdo not fork from the shell\n");
 #if HAVE_UNISTD_H
     printf("  -g GID\t\tchange to this numeric gid after opening\n"
