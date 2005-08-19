@@ -543,7 +543,8 @@ version number of v2c or v3 as well).
 .IP "proxy [-Cn CONTEXTNAME] [SNMPCMD ARGS] HOST OID [REMOTEOID]"
 .IP
 This token specifies that any incoming requests under OID should be
-proxied on to another HOST instead.  If a CONTEXTNAME is specified, it
+proxied on to another HOST instead.  Use OID .1.3 (not just .1) to proxy 
+the entire MIB tree. If a CONTEXTNAME is specified, it
 assigns the proxied tree to a particular context name within the local
 agent.  This is the proper way to query multiple agents through a
 single proxy.  Assign each remote agent to a different context name.
