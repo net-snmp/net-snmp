@@ -76,9 +76,8 @@ will be used for both authentication and privacy pass phrases if it is
 specified.
 .IP "defAuthType MD5|SHA"
 The SNMPv3 USM authentication type to use.
-.IP "defPrivType DES"
-The SNMPv3 USM privacy type to use.  Currently, DES is the only
-possible value.
+.IP "defPrivType DES|AES"
+The SNMPv3 USM privacy type to use.
 .IP "defSecurityLevel noAuthNoPriv|authNoPriv|authPriv"
 The SNMPv3 default security level to use.
 .IP "defAuthMasterKey 0xHEXSTRING"

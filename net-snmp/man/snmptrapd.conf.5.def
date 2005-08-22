@@ -74,7 +74,7 @@ the nlmLogTable and nlmLogvariableTable tables.
 See the 
 .I snmptrapd(8) 
 manual page and the NOTIFICATION-LOG-MIB for details.
-.IP "createUser username (MD5|SHA) authpassphrase [DES]"
+.IP "createUser username (MD5|SHA) authpassphrase [DES|AES]"
 See the 
 .I snmpd.conf(5)
 manual page for a description of how to create SNMPv3 users.  It's
