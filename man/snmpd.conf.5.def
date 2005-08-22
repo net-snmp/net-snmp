@@ -341,16 +341,16 @@ respond to SNMPv3 messages.  With this configuration file line, the
 engineID will be configured from STRING.  The default value of the
 engineID is configured with the first IP address found for the
 hostname of the machine.
-.IP "createUser [-e ENGINEID] username (MD5|SHA) authpassphrase [DES] [privpassphrase]"
+.IP "createUser [-e ENGINEID] username (MD5|SHA) authpassphrase [DES|AES] [privpassphrase]"
 .IP
-MD5 and SHA are the authentication types to use.  The
-only privacy protocol currently supported is DES.  If the privacy
+MD5 and SHA are the authentication types to use.  DES and AES are the
+privacy protocols to use.  If the privacy
 passphrase is not specified, it is assumed to be the same as the
 authentication passphrase.  Note that the users created will be
 useless unless they are also added to the VACM access control tables
 described above.
 .IP
-SHA authentication and DES privacy require OpenSSL to be installed and
+SHA authentication and DES/AES privacy require OpenSSL to be installed and
 the agent to be built with OpenSSL support.  MD5 authentication may be
 used without OpenSSL.
 .IP

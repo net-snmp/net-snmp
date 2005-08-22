@@ -148,7 +148,8 @@ snmpv3_privtype_conf(const char *word, char *cptr)
         defaultPrivType = usmDESPrivProtocol;
 #if HAVE_AES
     /* XXX AES: assumes oid length == des oid length */
-    else if (strcasecmp(cptr, "AES128") == 0)
+    else if ((strcasecmp(cptr, "AES128") == 0)
+             || (strcasecmp(cptr, "AES") == 0))
         defaultPrivType = usmAES128PrivProtocol;
     else if (strcasecmp(cptr, "AES192") == 0)
         defaultPrivType = usmAES192PrivProtocol;
