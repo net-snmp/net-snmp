@@ -5,6 +5,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
  Ports:
    - Win32
       - Cygwin compiler fixes
+      - Fix for 'select: No such file or directory' in snmpdelta
 
  Fixes:
    - Persistent files in directory defined by snmp.conf persistentDir were 
