@@ -13,12 +13,14 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - mib2c.mfd.conf now generates code for persistence row storage
 
  Ports:
-   Win32:
-     - Linux:
+   Linux:
        - added tcpConnectionTable and tcpListenerTable
+
+   Win32:
      - Cygwin compiler fixes
      - MSVC: agent (snmpd) support for pass and pass_persist
      - MinGW: agent (snmpd) support for pass
+     - Fix for 'select: No such file or directory' in snmpdelta
 
  Fixes:
    - Persistent files in directory defined by snmp.conf persistentDir were 
