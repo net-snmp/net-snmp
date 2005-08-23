@@ -589,7 +589,7 @@ SnmpTrapdMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "ac:CdD::efF:hHI:l:L:m:M:no:PqsS:tvO:-:";
+    char            options[128] = "ac:CdD::efF:hHI:L:m:M:no:PqsS:tvO:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
     int             arg, i = 0, depmsg = 0;
