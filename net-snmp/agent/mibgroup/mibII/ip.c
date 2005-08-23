@@ -426,10 +426,15 @@ ip_handler(netsnmp_mib_handler          *handler,
     case IPREASMFAILS:
         ret_value = ipstat.ips_fragdropped + ipstat.ips_fragtimeout;
         break;
-    case IPFRAGOKS:            /* XXX */
+    case IPFRAGOKS:
+#if STRUCT_IPSTAT_HAS_IPS_FRAGMENTED
+        ret_value = ipstat.ips_fragments;
+        break;
+#else            /* XXX */
         ret_value = ipstat.ips_fragments
             - (ipstat.ips_fragdropped + ipstat.ips_fragtimeout);
         break;
+#endif
     case IPFRAGFAILS:
 #if STRUCT_IPSTAT_HAS_IPS_CANTFRAG
         ret_value = ipstat.ips_cantfrag;
