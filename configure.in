@@ -3464,6 +3464,16 @@ AC_CHECK_STRUCT_FOR([
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
+], ipstat, ips_fragmented)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
 ], ipstat, ips_localout)
 
 AC_CHECK_STRUCT_FOR([
