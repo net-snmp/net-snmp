@@ -382,7 +382,8 @@ vacm_parse_view(const char *token, char *param)
     struct vacm_viewEntry *vp;
     oid             suboid[MAX_OID_LEN];
     size_t          suboid_len = 0;
-    u_char          viewMask[sizeof(vp->viewMask)];
+    size_t          mask_len = 0;
+    u_char          viewMask[VACMSTRINGLEN];
     int             i;
     char            *st;
 
@@ -434,6 +435,7 @@ vacm_parse_view(const char *token, char *param)
             viewMask[i] = val;
             i++;
         }
+        mask_len = i;
     } else {
         for (i = 0; i < sizeof(viewMask); i++)
             viewMask[i] = 0xff;
@@ -444,6 +446,7 @@ vacm_parse_view(const char *token, char *param)
         return;
     }
     memcpy(vp->viewMask, viewMask, sizeof(viewMask));
+    vp->viewMaskLen = mask_len;
     vp->viewType = inclexcl;
     vp->viewStorageType = SNMP_STORAGE_PERMANENT;
     vp->viewStatus = SNMP_ROW_ACTIVE;
@@ -1398,7 +1401,7 @@ var_vacm_view(struct variable * vp,
         return (u_char *) gp->viewSubtree;
 
     case VIEWMASK:
-        *var_len = (gp->viewSubtreeLen + 7) / 8;
+        *var_len = gp->viewMaskLen;
         return (u_char *) gp->viewMask;
 
     case VIEWTYPE:
