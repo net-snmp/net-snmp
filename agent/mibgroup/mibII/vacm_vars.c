@@ -614,7 +614,7 @@ var_vacm_view(struct variable * vp,
         return (u_char *) gp->viewSubtree;
 
     case VIEWMASK:
-        *var_len = (gp->viewSubtreeLen + 7) / 8;
+        *var_len = gp->viewMaskLen;
         return (u_char *) gp->viewMask;
 
     case VIEWTYPE:
