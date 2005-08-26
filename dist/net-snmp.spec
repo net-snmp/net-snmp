@@ -20,11 +20,11 @@
 #
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
-Version: 5.3.cvs20050331
+Version: 5.3.cvs20050826
 # update release for vendor release. (eg 1.rh9, 1.rh72, 1.ydl3, 1.ydl23)
 Release: 1
 URL: http://net-snmp.sourceforge.net/
-Copyright: BSDish
+License: BSDish
 Group: System Environment/Daemons
 Source: http://prdownloads.sourceforge.net/net-snmp/net-snmp-%{version}.tar.gz
 Prereq: openssl
@@ -32,10 +32,10 @@ Obsoletes: cmu-snmp ucd-snmp ucd-snmp-utils
 BuildRoot: /tmp/%{name}-root
 Packager: The Net-SNMP Coders <http://sourceforge.net/projects/net-snmp/>
 BuildRequires: perl
-# because perl(Tk) is optional we will never dependencies will never succeed:
+# because perl(Tk) is optional, automatic dependencies will never succeed:
 AutoReqProv: no
 Requires: openssl, popt, rpm, zlib, bzip2-libs, beecrypt, elfutils-libelf, glibc
-Provides: net-snmp, libnetsnmp.so.5, libnetsnmpagent.so.5, libnetsnmphelpers.so.5, libnetsnmpmibs.so.5, libnetsnmptrapd.so.5
+Provides: net-snmp, net-snmp-utils, libnetsnmp.so.5, libnetsnmpagent.so.5, libnetsnmphelpers.so.5, libnetsnmpmibs.so.5, libnetsnmptrapd.so.5
 %if %{embedded_perl}
 Requires: perl
 %endif
@@ -117,7 +117,7 @@ install -m 755 dist/snmpd-init.d $RPM_BUILD_ROOT/etc/rc.d/init.d/snmpd
 find $RPM_BUILD_ROOT/usr/lib/perl5/ -name Bundle -type d | xargs rm -rf
 find $RPM_BUILD_ROOT/usr/lib/perl5/ -name perllocal.pod | xargs rm -f
 
-# store a copy of installed perl stuff.  It's too comlpex to predict
+# store a copy of installed perl stuff.  It's too complex to predict
 (xxdir=`pwd` && cd $RPM_BUILD_ROOT && find usr/lib/perl5 -type f | sed 's/^/\//' > $xxdir/net-snmp-perl-files)
 %endif
 
