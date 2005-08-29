@@ -281,7 +281,7 @@ var_extensible_pass_persist(struct variable *vp,
                     return (NULL);
                 }
                 /*
-                 * persistant scripts return "NONE\n" on invalid items 
+                 * persistent scripts return "NONE\n" on invalid items 
                  */
                 if (!strncmp(buf, "NONE", 4)) {
                     if (exact) {
@@ -519,7 +519,7 @@ pass_persist_compare(const void *a, const void *b)
 }
 
 /*
- * Initialize our persistant pipes
+ * Initialize our persistent pipes
  *   - Returns 1 on success, 0 on failure.
  *   - Initializes all FILE pointers to NULL to indicate "closed"
  */
@@ -552,7 +552,7 @@ init_persist_pipes(void)
 }
 
 /*
- * Destruct our persistant pipes
+ * Destruct our persistent pipes
  *
  */
 static void

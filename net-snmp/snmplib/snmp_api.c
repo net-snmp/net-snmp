@@ -744,6 +744,10 @@ register_default_handlers(void)
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CLIENTSENDBUF);
     netsnmp_ds_register_config(ASN_INTEGER, "snmp", "clientRecvBuf",
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CLIENTRECVBUF);
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noPersistentLoad",
+		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD);
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noPersistentSave",
+		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE);
 }
 
 void
