@@ -148,7 +148,7 @@ logmatch_parse_config(const char *token, char *cptr)
         /*
          * ------------------------------------ 
          * be careful this counter needs to be  
-         * resetfrom persistant storage         
+         * reset from persistent storage         
          * ------------------------------------ 
          */
 
