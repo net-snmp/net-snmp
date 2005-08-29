@@ -218,7 +218,7 @@ netsnmp_remove_list_node(netsnmp_data_list **realhead, const char *name)
 /** used to store registered save/parse handlers (specifically, parsing info) */
 static netsnmp_data_list *saveHead;
 
-/** registers to store a data_list set of data at persistant storage time
+/** registers to store a data_list set of data at persistent storage time
  *
  * @param datalist the data to be saved
  * @param type the name of the application to save the data as.  If left NULL the default application name that was registered during the init_snmp call will be used (recommended).

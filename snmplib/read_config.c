@@ -846,10 +846,7 @@ read_configs(void)
         optional_config = NULL; /* clear, so we don't read them twice */
     }
 
-    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-				NETSNMP_DS_LIB_DONT_READ_CONFIGS)) {
-        read_config_files(NORMAL_CONFIG);
-    }
+    read_config_files(NORMAL_CONFIG);
 
     /*
      * do this even when the normal above wasn't done 
@@ -878,10 +875,7 @@ read_premib_configs(void)
         optional_config = NULL; /* clear, so we don't read them twice */
     }
 
-    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-				NETSNMP_DS_LIB_DONT_READ_CONFIGS)) {
-        read_config_files(PREMIB_CONFIG);
-    }
+    read_config_files(PREMIB_CONFIG);
 
     if (NULL != optional_config)
         read_configs_optional(optional_config, PREMIB_CONFIG);
@@ -1064,7 +1058,9 @@ read_config_files(int when)
     struct stat     statbuf;
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_DONT_PERSIST_STATE)) return;
+                               NETSNMP_DS_LIB_DONT_PERSIST_STATE)
+     || netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DISABLE_CONFIG_LOAD)) return;
 
     config_errors = 0;
 
@@ -1223,7 +1219,9 @@ read_config_store(const char *type, const char *line)
 #endif
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_DONT_PERSIST_STATE)) return;
+                               NETSNMP_DS_LIB_DONT_PERSIST_STATE)
+     || netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD)) return;
 
     /*
      * store configuration directives in the following order of preference:
@@ -1297,7 +1295,9 @@ snmp_save_persistent(const char *type)
     int             j;
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_DONT_PERSIST_STATE)) return;
+                               NETSNMP_DS_LIB_DONT_PERSIST_STATE)
+     || netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE)) return;
 
     DEBUGMSGTL(("snmp_save_persistent", "saving %s files...\n", type));
     snprintf(file, sizeof(file),
@@ -1359,7 +1359,9 @@ snmp_clean_persistent(const char *type)
     int             j;
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_DONT_PERSIST_STATE)) return;
+                               NETSNMP_DS_LIB_DONT_PERSIST_STATE)
+     || netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE)) return;
 
     DEBUGMSGTL(("snmp_clean_persistent", "cleaning %s files...\n", type));
     snprintf(file, sizeof(file),
