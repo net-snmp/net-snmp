@@ -36,7 +36,7 @@ extern "C" {
     typedef int (netsnmp_container_rc)(struct netsnmp_container_s *);
 
     /*
-     * function returning an int for an operation on a container
+     * function returning an iterator for a container
      */
     typedef struct netsnmp_iterator_s * (netsnmp_container_it)
         (struct netsnmp_container_s *);
@@ -66,7 +66,7 @@ extern "C" {
     typedef void (netsnmp_container_obj_func)(void *data, void *context);
 
     /*
-     * function with no return which acts on an object
+     * function with no return which calls a function on an object
      */
     typedef void (netsnmp_container_func)(struct netsnmp_container_s *,
                                           netsnmp_container_obj_func *,
@@ -195,6 +195,12 @@ extern "C" {
         * unique name for finding a particular container in a list
         */
        char *container_name;
+
+       /*
+        * sort count, for iterators to track (insert/delete
+        * bumps coutner, invalidates iterator
+        */
+       u_long                          sync;
 
        /*
         * containers can contain other containers (additional indexes)
@@ -431,28 +437,42 @@ extern "C" {
     typedef int (netsnmp_iterator_rc)(struct netsnmp_iterator_s *);
 
     /*
-     * function returning an int for an operation on an iterator and
-     * an object in the container.
-     */
-    typedef int (netsnmp_iterator_rc_op)(struct netsnmp_iterator_s *,
-                                         void *data);
-
-    /*
      * function returning an oject for an operation on an iterator
      */
     typedef void * (netsnmp_iterator_rtn)(struct netsnmp_iterator_s *);
 
+
+    /*
+     * iterator structure
+     */
     typedef struct netsnmp_iterator_s {
 
        netsnmp_container              *container;
 
-       void                           *context;
+        /*
+         * sync from container when iterator created. used to invalidate
+         * the iterator when the container changes.
+         */
+       u_long                          sync;
 
-       netsnmp_iterator_rc           *init;
-       netsnmp_iterator_rc_op        *position;
+        /*
+         * reset iterator position to beginning of container.
+         */
+       netsnmp_iterator_rc           *reset;
+
+        /*
+         * release iterator and memory it uses
+         */
+       netsnmp_iterator_rc           *release;
+
+        /*
+         * first, last and current DO NOT advance the iterator
+         */
        netsnmp_iterator_rtn          *first;
-       netsnmp_iterator_rtn          *next;
+       netsnmp_iterator_rtn          *curr;
        netsnmp_iterator_rtn          *last;
+
+       netsnmp_iterator_rtn          *next;
 
     } netsnmp_iterator;
 
@@ -460,34 +480,6 @@ extern "C" {
 #define ITERATOR_FIRST(x)  x->first(x)
 #define ITERATOR_NEXT(x)   x->next(x)
 #define ITERATOR_LAST(x)   x->last(x)
-
-
-    /*************************************************************************
-     *
-     * Sorted container
-     *
-     *************************************************************************/
-    typedef struct netsnmp_sorted_container_s {
-       
-       netsnmp_container                bc;
-       
-       /*
-        * methods to manipulate container
-        */
-
-       netsnmp_container_rtn            *first;
-       netsnmp_container_rtn            *next;
-       netsnmp_container_set            *subset;
-       
-    } netsnmp_sorted_container;
-    
-
-    void
-    netsnmp_init_sorted_container(netsnmp_sorted_container  *sc,
-                                  netsnmp_container_rtn     *first,
-                                  netsnmp_container_rtn     *next,
-                                  netsnmp_container_set     *subset);
-    
     
     
 #ifdef  __cplusplus
