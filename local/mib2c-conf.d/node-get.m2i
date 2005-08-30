@@ -61,9 +61,9 @@ ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref )
 /*
  * TODO:231:o: |-> Extract the current value of the $node data.
 @if $m2c_node_needlength == 0@
- * set $m2c_node_lh from $m2c_data_item_base
+ * copy $m2c_node_lh from $m2c_data_item_base
 @else@
- * set $m2c_node_lh and $m2c_node_lhs from $m2c_data_item_base
+ * copy $m2c_node_lh data and $m2c_node_lhs from $m2c_data_item_base
 @end@
  */
 @    if ("$m2c_data_context" eq "generated") && ($m2c_node_skip_get != 1)@
