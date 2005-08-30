@@ -83,6 +83,18 @@ netsnmp_bulk_to_next_helper(netsnmp_mib_handler *handler,
      * restore the mode and fix up the requests.
      */
     if(MODE_GETBULK == reqinfo->mode) {
+
+        DEBUGIF("bulk_to_next") {
+            netsnmp_request_info *req = requests;
+            while(req) {
+                DEBUGMSGTL(("bulk_to_next", "Got request: "));
+                DEBUGMSGOID(("bulk_to_next", req->requestvb->name,
+                             req->requestvb->name_length));
+                DEBUGMSG(("bulk_to_next", "\n"));
+                req = req->next;
+            }
+        }
+
         reqinfo->mode = MODE_GETNEXT;
         ret =
             netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
