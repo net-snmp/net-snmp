@@ -170,9 +170,10 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                 netsnmp_transport_free(t);
                                 continue;
                             }
+                            thissess.paramName = strdup(param->paramName);
                             thissess.version = param->mpModel;
                             if (param->mpModel == SNMP_VERSION_3) {
-                                thissess.securityName = param->secName;
+                                thissess.securityName = strdup(param->secName);
                                 thissess.securityNameLen =
                                     strlen(thissess.securityName);
                                 thissess.securityLevel = param->secLevel;
@@ -190,6 +191,10 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                             targaddrs->sessionCreationTime = time(NULL);
                         }
                         if (targaddrs->sess) {
+                            if (NULL == targaddrs->sess->paramName)
+                                targaddrs->sess->paramName =
+                                    strdup(param->paramName);
+
                             if (ret) {
                                 targaddrs->sess->next = ret;
                             }
