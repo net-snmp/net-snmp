@@ -82,6 +82,7 @@ send_example_notification(unsigned int clientreg, void *clientarg)
     oid             notification_oid[] =
         { 1, 3, 6, 1, 4, 1, 8072, 2, 3, 0, 1 };
     size_t          notification_oid_len = OID_LENGTH(notification_oid);
+    static u_long count = 0;
 
     /*
      * In the notification, we have to assign our notification OID to
@@ -160,7 +161,8 @@ send_example_notification(unsigned int clientreg, void *clientarg)
      * receivers (see the "SETTING UP TRAP AND/OR INFORM DESTINATIONS"
      * section of the snmpd.conf manual page. 
      */
-    DEBUGMSGTL(("example_notification", "sending the trap\n"));
+    ++count;
+    DEBUGMSGTL(("example_notification", "sending trap %ld\n",count));
     send_v2trap(notification_vars);
 
     /*
