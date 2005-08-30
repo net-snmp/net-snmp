@@ -513,6 +513,11 @@ ${context}_pre_request(${context}_registration * user_context)
 /**
  * post-request callback
  *
+ * Note:
+ *   New rows have been inserted into the container, and
+ *   deleted rows have been removed from the container and
+ *   released.
+ *
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -526,13 +531,12 @@ ${context}_post_request(${context}_registration * user_context, int rc)
     /*
      * TODO:511:o: Perform $context post-request actions.
      */
+
 @  if $m2c_table_settable@
     /*
      * check to set if any rows were changed.
      */
     if (${context}_dirty_get()) {
-        ${context}_dirty_set(0); /* clear table dirty flag */
-
         /*
          * check if request was successful. If so, this would be
          * a good place to save data to its persistent store.
@@ -546,6 +550,8 @@ ${context}_post_request(${context}_registration * user_context, int rc)
                                              NETSNMP_DS_LIB_APPTYPE));
 @     end@
         }
+        
+        ${context}_dirty_set(0); /* clear table dirty flag */
     }
 
 @   end@
