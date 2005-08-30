@@ -59,6 +59,9 @@ config_require(header_complex)
      WriteMethod     write_snmpNotifyFilterProfileStorType;
      WriteMethod     write_snmpNotifyFilterProfileRowStatus;
 
+     char           *get_FilterProfileName(const char *paramName,
+                                           size_t paramName_len,
+                                           size_t * profileName_len);
 
 
 #endif                          /* _MIBGROUP_SNMPNOTIFYFILTERPROFILETABLE_H */
