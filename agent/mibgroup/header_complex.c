@@ -365,19 +365,30 @@ header_complex_add_data_by_oid(struct header_complex_index **thedata,
                                oid * newoid, size_t newoid_len, void *data)
 {
     struct header_complex_index *hciptrn, *hciptrp, *ourself;
+    int rc;
 
     if (thedata == NULL || newoid == NULL || data == NULL)
         return NULL;
 
     for (hciptrn = *thedata, hciptrp = NULL;
-         hciptrn != NULL; hciptrp = hciptrn, hciptrn = hciptrn->next)
+         hciptrn != NULL; hciptrp = hciptrn, hciptrn = hciptrn->next) {
         /*
          * XXX: check for == and error (overlapping table entries) 
+         * 8/2005 rks Ok, I added duplicate entry check, but only log
+         *            warning and continue, because it seems that nobody
+         *            that calls this fucntion does error checking!.
          */
-        if (snmp_oid_compare
-            (hciptrn->name, hciptrn->namelen, newoid, newoid_len)
-            > 0)
+        rc = snmp_oid_compare(hciptrn->name, hciptrn->namelen,
+                              newoid, newoid_len);
+        if (rc > 0)
             break;
+        else if (0 == rc) {
+            snmp_log(LOG_WARNING, "header_complex_add_data_by_oid with "
+                     "duplicate index.\n");
+            /** uncomment null return when callers do error checking */
+            /** return NULL; */
+        }
+    }
 
     /*
      * nptr should now point to the spot that we need to add ourselves
