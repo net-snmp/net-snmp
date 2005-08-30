@@ -249,7 +249,6 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
      * 3) set the column's flag in column_set_flags if it needs undo
      *    processing in case of a failure.
      */
-##$example_start
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
 @      if $node.settable == 0@
@@ -273,22 +272,18 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
     }
 
 @   end@ # foreach $node
+    /*
+     * if we successfully commited this row, set the dirty flag.
+     */
+    if (MFD_SUCCESS == rc) {
+        rowreq_ctx->rowreq_flags |= MFD_ROW_DIRTY;
+    }
+
     if (save_flags) {
        snmp_log(LOG_ERR, "unhandled columns (0x%x) in commit\n", save_flags);
        return MFD_ERROR;
     }
-##$example_end
 
-@   if $m2c_table_settable@
-    /*
-     * if we successfully commited this row, set the dirty flag.
-     * this is checked in _post_request...
-     */
-    if (MFD_SUCCESS == rc) {
-        ${context}_dirty_set( 1 ); /* set table dirty flag */
-    }
-
-@   end@
     return rc;
 } /* ${context}_commit */
 
@@ -328,8 +323,14 @@ ${context}_undo_commit( ${context}_rowreq_ctx *rowreq_ctx)
      *
      * eg: if (rowreq_ctx->column_set_flags & COLUMN_$node.uc_FLAG) {}
      */
-##$example_start
-##$example_end
+
+    
+    /*
+     * if we successfully un-commited this row, clear the dirty flag.
+     */
+    if (MFD_SUCCESS == rc) {
+        rowreq_ctx->rowreq_flags &= ~MFD_ROW_DIRTY;
+    }
 
     return rc;
 } /* ${context}_undo_commit */
