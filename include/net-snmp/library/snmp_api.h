@@ -291,7 +291,9 @@ struct snmp_session {
     int             securityModel;
     /** noAuthNoPriv, authNoPriv, authPriv */
     int             securityLevel;  
-    
+    /** target param name */
+    char           *paramName;
+
     /**
      * security module specific 
      */
