@@ -363,20 +363,6 @@ snmpd_free_trapsinks(void)
 	 *******************/
 
 
-netsnmp_variable_list*
-find_varbind_in_list( netsnmp_variable_list *vblist,
-                      oid *name, size_t len)
-{
-    netsnmp_variable_list *v;
-
-    for (v=vblist; v; v=v->next_variable)
-        if (!snmp_oid_compare(v->name, v->name_length,
-                              name,    len))
-            return v;
-
-    return NULL;
-}
-
 netsnmp_pdu*
 convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
 {
@@ -623,7 +609,7 @@ netsnmp_send_traps(int trap, int specific,
 
     DEBUGMSGTL(( "trap", "send_trap %d %d ", trap, specific));
     DEBUGMSGOID(("trap", enterprise, enterprise_length));
-    DEBUGMSGTL(( "trap", "\n"));
+    DEBUGMSG(( "trap", "\n"));
 
     if (vars) {
         vblist = snmp_clone_varbind( vars );
