@@ -50,12 +50,45 @@
 #include "mibgroup/agentx/subagent.h"
 #endif
 
+static int need_shutdown = 0;
+
+static int
+_shutdown_mib_modules(int majorID, int minorID, void *serve, void *client)
+{
+    if (! need_shutdown) {
+        netsnmp_assert(need_shutdown == 1);
+    }
+    else {
+#include "mib_module_shutdown.h"
+
+        need_shutdown = 0;
+    }
+
+    return SNMPERR_SUCCESS; /* callback rc ignored */
+}
 
 void
 init_mib_modules(void)
 {
+    static int once = 0;
+
 #ifdef USING_IF_MIB_DATA_ACCESS_INTERFACE_MODULE
     netsnmp_access_interface_init();
 #endif
 #  include "mib_module_inits.h"
+
+    need_shutdown = 1;
+
+    if (once == 0) {
+        int rc;
+        once = 1;
+        rc = snmp_register_callback( SNMP_CALLBACK_LIBRARY,
+                                     SNMP_CALLBACK_SHUTDOWN,
+                                     _shutdown_mib_modules,
+                                     NULL);
+
+        if( rc != SNMP_ERR_NOERROR )
+            snmp_log(LOG_ERR, "error registering for SHUTDOWN callback "
+                     "for mib modules\n");
+    }
 }
