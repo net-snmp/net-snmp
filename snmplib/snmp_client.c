@@ -731,6 +731,17 @@ find_varbind_of_type(netsnmp_variable_list * var_ptr, u_char type)
     return var_ptr;
 }
 
+netsnmp_variable_list*
+find_varbind_in_list( netsnmp_variable_list *vblist,
+                      oid *name, size_t len)
+{
+    for (; vblist != NULL; vblist = vblist->next_variable)
+        if (!snmp_oid_compare(vblist->name, vblist->name_length, name, len))
+            return vblist;
+
+    return NULL;
+}
+
 /*
  * Add some value to SNMP variable.
  * If the value is large, additional memory is allocated.
