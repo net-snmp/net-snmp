@@ -754,7 +754,7 @@ write_snmpNotifyFilterProfileRowStatus(int action,
 
 
 char           *
-get_FilterName(char *targetName, size_t targetName_len,
+get_FilterProfileName(const char *paramName, size_t paramName_len,
                size_t * profileName_len)
 {
     netsnmp_variable_list *vars = NULL;
@@ -764,7 +764,7 @@ get_FilterName(char *targetName, size_t targetName_len,
      * put requested info into var structure 
      */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR,
-                              (u_char *) targetName, targetName_len);
+                              (u_char *) paramName, paramName_len);
 
     /*
      * get the data from the header_complex storage 
