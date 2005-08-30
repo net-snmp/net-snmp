@@ -30,9 +30,11 @@
 
 #include "header_complex.h"
 #include "snmpNotifyTable.h"
+#include "snmpNotifyFilterProfileTable.h"
 #include "target/snmpTargetParamsEntry.h"
 #include "target/snmpTargetAddrEntry.h"
 #include "target/target.h"
+#include "snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable.h"
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/agent/mib_module_config.h>
@@ -84,6 +86,113 @@ struct variable2 snmpNotifyTable_variables[] = {
  */
 static struct header_complex_index *snmpNotifyTableStorage = NULL;
 
+static int
+_checkFilter(const char* paramName, netsnmp_pdu *pdu)
+{
+    /*
+     * find appropriate filterProfileEntry
+     */
+    netsnmp_variable_list *var;
+    char                  *profileName;
+    size_t                 profileNameLen;
+    struct vacm_viewEntry *vp, *head;
+    int                    trap_oid_included = 0, vb_oid_excluded = 0;
+
+    netsnmp_assert(NULL != paramName);
+    netsnmp_assert(NULL != pdu);
+
+    DEBUGMSGTL(("send_notifications", "checking filters...\n"));
+
+    /*
+   A notification originator uses the snmpNotifyFilterTable to filter
+   notifications.  A notification filter profile may be associated with
+   a particular entry in the snmpTargetParamsTable.  The associated
+   filter profile is identified by an entry in the
+   snmpNotifyFilterProfileTable whose index is equal to the index of the
+   entry in the snmpTargetParamsTable.  If no such entry exists in the
+   snmpNotifyFilterProfileTable, no filtering is performed for that
+   management target.
+    */
+    profileName = get_FilterProfileName(paramName, strlen(paramName),
+                                        &profileNameLen);
+    if (NULL == profileName) {
+        DEBUGMSGTL(("send_notifications", "  no matching profile\n"));
+        return 0;
+    }
+
+    /*
+   If such an entry does exist, the value of snmpNotifyFilterProfileName
+   of the entry is compared with the corresponding portion of the index
+   of all active entries in the snmpNotifyFilterTable.  All such entries
+   for which this comparison results in an exact match are used for
+   filtering a notification generated using the associated
+   snmpTargetParamsEntry.  If no such entries exist, no filtering is
+   performed, and a notification may be sent to the management target.
+    */
+    head = snmpNotifyFilterTable_vacm_view_subtree(profileName);
+    if (NULL == head) {
+        DEBUGMSGTL(("send_notifications", "  no matching filters\n"));
+        return 0;
+    }
+
+    /*
+   Otherwise, if matching entries do exist, a notification may be sent
+   if the NOTIFICATION-TYPE OBJECT IDENTIFIER of the notification (this
+   is the value of the element of the variable bindings whose name is
+   snmpTrapOID.0, i.e., the second variable binding) is specifically
+   included, and none of the object instances to be included in the
+   variable-bindings of the notification are specifically excluded by
+   the matching entries.
+     */
+    extern oid             snmptrap_oid[];
+    extern size_t          snmptrap_oid_len;
+    var = find_varbind_in_list( pdu->variables,
+                                snmptrap_oid,
+                                snmptrap_oid_len);
+    if (NULL != var) {
+        /*
+                             For a notification name, if none match,
+   then the notification name is considered excluded, and the
+   notification should not be sent to this management target.
+         */
+        vp = netsnmp_view_get(head, profileName, var->val.objid,
+                              var->val_len / sizeof(oid), VACM_MODE_FIND);
+        if ((NULL == vp) || (SNMP_VIEW_INCLUDED != vp->viewType)) {
+            DEBUGMSGTL(("send_notifications", "  filtered (snmpTrapOID.0 "));
+            DEBUGMSGOID(("send_notifications",var->val.objid,
+                         var->val_len / sizeof(oid)));
+            DEBUGMSG(("send_notifications", " not included)\n"));
+            free(head);
+            return 1;
+        }
+        trap_oid_included = 1;
+    }
+
+    /*
+     * check varbinds
+     */
+    for(var = pdu->variables; var; var = var->next_variable) {
+        /*
+                                                               For an
+   object instance, if none match, the object instance is considered
+   included, and the notification may be sent to this management target.
+         */
+        vp = netsnmp_view_get(head, profileName, var->name,
+                              var->name_length, VACM_MODE_FIND);
+        if ((NULL != vp) && (SNMP_VIEW_EXCLUDED == vp->viewType)) {
+            DEBUGMSGTL(("send_notifications","  filtered (varbind "));
+            DEBUGMSGOID(("send_notifications",var->name, var->name_length));
+            DEBUGMSG(("send_notifications", " excluded)\n"));
+            vb_oid_excluded = 1;
+            break;
+        }
+    }
+
+    free(head);
+
+    return vb_oid_excluded;
+}
+
 int
 send_notifications(int major, int minor, void *serverarg, void *clientarg)
 {
@@ -91,7 +200,7 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg)
     struct snmpNotifyTable_data *nptr;
     netsnmp_session *sess, *sptr;
     netsnmp_pdu    *template_pdu = (netsnmp_pdu *) serverarg;
-    int             count = 0;
+    int             count = 0, send = 0;
 
     DEBUGMSGTL(("send_notifications", "starting: pdu=%x, vars=%x\n",
                 template_pdu, template_pdu->variables));
@@ -106,15 +215,14 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg)
         sess = get_target_sessions(nptr->snmpNotifyTag, NULL, NULL);
 
         /*
-         * XXX: filter appropriately 
+         * filter appropriately, per section 6 of RFC 3413
          */
 
         for (sptr = sess; sptr; sptr = sptr->next) {
 #ifndef DISABLE_SNMPV1
             if (sptr->version == SNMP_VERSION_1 &&
                 minor == SNMPD_CALLBACK_SEND_TRAP1) {
-                send_trap_to_sess(sptr, template_pdu);
-                ++count;
+                send = 1;
             } else
 #endif
             if ((sptr->version == SNMP_VERSION_3
@@ -127,11 +235,19 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg)
                 } else {
                     template_pdu->command = SNMP_MSG_TRAP2;
                 }
+                send = 1;
+            }
+            if (send && sess->paramName) {
+                int filter = _checkFilter(sess->paramName, template_pdu);
+                if (filter)
+                    send = 0;
+            }
+            if (send) {
                 send_trap_to_sess(sptr, template_pdu);
                 ++count;
-            }
-        }
-    }
+            } /* session to send to */
+        } /* for(sptr) */
+    } /* for(hptr) */
 
     DEBUGMSGTL(("send_notifications", "sent %d notifications\n", count));
 
