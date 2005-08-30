@@ -212,8 +212,6 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
         }
 #ifndef WIN32
         else {
-            int cnt;
-
             /* Child. */
             
             DEBUGMSGT(("daemonize","child continuing\n"));
