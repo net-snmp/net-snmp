@@ -69,7 +69,7 @@ safecp()
 check_setup()
 {
     rc=1
-    for d in $UPDATE_ORIG $UPDATE_NEW $UPDATE_MERGED $UPDATE_PATCH $UPDATE_BACKUP $UPDATE_BACKUP/curr $UPDATE_BACKUP/orig
+    for d in $UPDATE_CURR $UPDATE_ORIG $UPDATE_NEW $UPDATE_MERGED $UPDATE_PATCH $UPDATE_BACKUP $UPDATE_BACKUP/curr $UPDATE_BACKUP/orig
     do
         if [ ! -d $d ]; then
             echo "Creating missing directory $d"
