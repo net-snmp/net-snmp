@@ -27,6 +27,10 @@ int ${context}_container_should_save(${context}_rowreq_ctx * rowreq_ctx);
  * the *_should_save routine is called to determine if a row
  * should be stored persistently.
  *
+ * Note that this is not a 'dirty' check (i.e. if a row has changed),
+ * but a check for volatile rows that should not be saved between
+ * restarts.
+ *
  * return 1 if the row should be stored
  * return 0 if the row should not be stored
  */
