@@ -191,6 +191,11 @@ extern          "C" {
     int             store_vacm(int majorID, int minorID, void *serverarg,
                                void *clientarg);
 
+    struct vacm_viewEntry *netsnmp_view_get(struct vacm_viewEntry *head,
+                                            const char *viewName,
+                                            oid * viewSubtree,
+                                            size_t viewSubtreeLen, int mode);
+
 
 #ifdef __cplusplus
 }

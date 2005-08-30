@@ -309,7 +309,7 @@ vacm_parse_config_group(const char *token, char *line)
 }
 
 struct vacm_viewEntry *
-vacm_getViewEntry(const char *viewName,
+netsnmp_view_get(struct vacm_viewEntry *head, const char *viewName,
                   oid * viewSubtree, size_t viewSubtreeLen, int mode)
 {
     struct vacm_viewEntry *vp, *vpret = NULL;
@@ -322,7 +322,7 @@ vacm_getViewEntry(const char *viewName,
         return NULL;
     view[0] = glen;
     strcpy(view + 1, viewName);
-    for (vp = viewList; vp; vp = vp->next) {
+    for (vp = head; vp; vp = vp->next) {
         if (!memcmp(view, vp->viewName, glen + 1)
             && viewSubtreeLen >= (vp->viewSubtreeLen - 1)) {
             int             mask = 0x80, maskpos = 0;
@@ -394,8 +394,8 @@ vacm_getViewEntry(const char *viewName,
  *                         portions.
  */
 int
-vacm_checkSubtree(const char *viewName,
-                  oid * viewSubtree, size_t viewSubtreeLen)
+netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
+                           oid * viewSubtree, size_t viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *vpShorter = NULL, *vpLonger = NULL;
     char            view[VACMSTRINGLEN];
@@ -406,7 +406,7 @@ vacm_checkSubtree(const char *viewName,
         return VACM_NOTINVIEW;
     view[0] = glen;
     strcpy(view + 1, viewName);
-    for (vp = viewList; vp; vp = vp->next) {
+    for (vp = head; vp; vp = vp->next) {
         if (!memcmp(view, vp->viewName, glen + 1)) {
             /*
              * If the subtree defined in the view is shorter than or equal
@@ -547,7 +547,7 @@ vacm_scanViewNext(void)
 }
 
 struct vacm_viewEntry *
-vacm_createViewEntry(const char *viewName,
+netsnmp_view_create(struct vacm_viewEntry **head, const char *viewName,
                      oid * viewSubtree, size_t viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *lp, *op = NULL;
@@ -573,7 +573,7 @@ vacm_createViewEntry(const char *viewName,
     memcpy(vp->viewSubtree + 1, viewSubtree, viewSubtreeLen * sizeof(oid));
     vp->viewSubtreeLen = viewSubtreeLen + 1;
 
-    lp = viewList;
+    lp = *head;
     while (lp) {
         cmp = memcmp(lp->viewName, vp->viewName, glen + 1);
         cmp2 = snmp_oid_compare(lp->viewSubtree, lp->viewSubtreeLen,
@@ -589,24 +589,24 @@ vacm_createViewEntry(const char *viewName,
     if (op)
         op->next = vp;
     else
-        viewList = vp;
+        *head = vp;
     return vp;
 }
 
 void
-vacm_destroyViewEntry(const char *viewName,
+netsnmp_view_destroy(struct vacm_viewEntry **head, const char *viewName,
                       oid * viewSubtree, size_t viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *lastvp = NULL;
 
-    if (viewList && !strcmp(viewList->viewName + 1, viewName)
-        && viewList->viewSubtreeLen == viewSubtreeLen
-        && !memcmp((char *) viewList->viewSubtree, (char *) viewSubtree,
+    if ((*head) && !strcmp((*head)->viewName + 1, viewName)
+        && (*head)->viewSubtreeLen == viewSubtreeLen
+        && !memcmp((char *) (*head)->viewSubtree, (char *) viewSubtree,
                    viewSubtreeLen * sizeof(oid))) {
-        vp = viewList;
-        viewList = viewList->next;
+        vp = (*head);
+        (*head) = (*head)->next;
     } else {
-        for (vp = viewList; vp; vp = vp->next) {
+        for (vp = (*head); vp; vp = vp->next) {
             if (!strcmp(vp->viewName + 1, viewName)
                 && vp->viewSubtreeLen == viewSubtreeLen
                 && !memcmp((char *) vp->viewSubtree, (char *) viewSubtree,
@@ -625,11 +625,11 @@ vacm_destroyViewEntry(const char *viewName,
 }
 
 void
-vacm_destroyAllViewEntries(void)
+netsnmp_view_clear(struct vacm_viewEntry **head)
 {
     struct vacm_viewEntry *vp;
-    while ((vp = viewList)) {
-        viewList = vp->next;
+    while ((vp = (*head))) {
+        (*head) = vp->next;
         if (vp->reserved)
             free(vp->reserved);
         free(vp);
@@ -954,3 +954,45 @@ vacm_is_configured(void)
     }
     return 1;
 }
+
+/*
+ * backwards compatability
+ */
+struct vacm_viewEntry *
+vacm_getViewEntry(const char *viewName,
+                  oid * viewSubtree, size_t viewSubtreeLen, int mode)
+{
+    return netsnmp_view_get( viewList, viewName, viewSubtree, viewSubtreeLen,
+                             mode);
+}
+
+int
+vacm_checkSubtree(const char *viewName,
+                  oid * viewSubtree, size_t viewSubtreeLen)
+{
+    return netsnmp_view_subtree_check( viewList, viewName, viewSubtree,
+                                       viewSubtreeLen);
+}
+
+struct vacm_viewEntry *
+vacm_createViewEntry(const char *viewName,
+                     oid * viewSubtree, size_t viewSubtreeLen)
+{
+    return netsnmp_view_create( &viewList, viewName, viewSubtree,
+                                viewSubtreeLen);
+}
+
+void
+vacm_destroyViewEntry(const char *viewName,
+                      oid * viewSubtree, size_t viewSubtreeLen)
+{
+    return netsnmp_view_destroy( &viewList, viewName, viewSubtree,
+                                 viewSubtreeLen);
+}
+
+void
+vacm_destroyAllViewEntries(void)
+{
+    netsnmp_view_clear( &viewList );
+}
+
