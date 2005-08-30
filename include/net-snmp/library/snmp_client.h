@@ -70,6 +70,8 @@ extern          "C" {
                                            u_char type);
     netsnmp_variable_list *find_varbind_of_type(netsnmp_variable_list *
                                                 var_ptr, u_char type);
+    netsnmp_variable_list *find_varbind_in_list(netsnmp_variable_list *vblist,
+                                                oid *name, size_t len);
 
     netsnmp_variable_list *snmp_add_null_var(netsnmp_pdu *, const oid *, size_t);
     netsnmp_pdu    *snmp_pdu_create(int);
