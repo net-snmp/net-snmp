@@ -57,8 +57,8 @@ netsnmp_container *${context}_container_get( void );
 int ${context}_container_size( void );
 
 @   if $m2c_table_settable@
-int ${context}_dirty_get( void );
-void ${context}_dirty_set( int status );
+u_int ${context}_dirty_get( void );
+void ${context}_dirty_set( u_int status );
 
 @   end@
 @   if $m2c_data_allocate == 1@
@@ -138,7 +138,7 @@ typedef struct ${context}_interface_ctx_s {
    netsnmp_baby_steps_access_methods access_multiplexer;
 
 @  if $m2c_table_settable@
-    int                               table_dirty;
+    u_int                             table_dirty;
 
 @  end@
 } ${context}_interface_ctx;
@@ -178,14 +178,14 @@ ${context}_container_size( void )
 }
 
 @  if $m2c_table_settable@
-int
+u_int
 ${context}_dirty_get( void )
 {
     return ${context}_if_ctx.table_dirty;
 }
 
 void
-${context}_dirty_set( int status )
+${context}_dirty_set( u_int status )
 {
     DEBUGMSGTL(("${context}:${context}_dirty_set",
                 "called. was %d, now %d\n",
@@ -209,9 +209,7 @@ static Netsnmp_Node_Handler _mfd_${context}_undo_cleanup;
 static Netsnmp_Node_Handler _mfd_${context}_undo_values;
 static Netsnmp_Node_Handler _mfd_${context}_commit;
 static Netsnmp_Node_Handler _mfd_${context}_undo_commit;
-@      if $m2c_irreversible_commit == 1@
 static Netsnmp_Node_Handler _mfd_${context}_irreversible_commit;
-@      end@
 @      if $m2c_table_dependencies == 1@
 static Netsnmp_Node_Handler _mfd_${context}_check_dependencies;
 @      end@
@@ -312,9 +310,7 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
      */
     access_multiplexer->commit = _mfd_${context}_commit;
     access_multiplexer->undo_commit = _mfd_${context}_undo_commit;
-@   if $m2c_irreversible_commit == 1@
     access_multiplexer->irreversible_commit = _mfd_${context}_irreversible_commit;
-@   end@
 ##
 @      if $m2c_table_dependencies == 1@
     
@@ -607,12 +603,22 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
                              netsnmp_agent_request_info *agtreq_info,
                              netsnmp_request_info *requests)
 {
-    ${context}_rowreq_ctx *rowreq_ctx;
+    ${context}_rowreq_ctx *rowreq_ctx =
+                  netsnmp_container_table_row_extract(requests);
     int rc, packet_rc;
 
     DEBUGMSGTL(("internal:${context}:_mfd_${context}_post_request",
                 "called\n"));
 
+    /*
+     * release row context, if deleted
+     */
+    if (rowreq_ctx && (rowreq_ctx->rowreq_flags & MFD_ROW_DELETED))
+        ${context}_release_rowreq_ctx(rowreq_ctx);
+
+    /*
+     * wait for last call before calling user
+     */
     if (1 != netsnmp_row_merge_status_last(reginfo, agtreq_info)) {
         DEBUGMSGTL(("internal:${context}",
                     "waiting for last post_request\n"));
@@ -620,6 +626,14 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
     }
     
     packet_rc = netsnmp_check_all_requests_error(agtreq_info->asp, 0);
+    if ((MFD_SUCCESS != packet_rc) && ${context}_dirty_get()) {
+        /*
+         * we shouldn't get here. the undo steps should also clear
+         * the dirty flags.
+         */
+        snmp_log(LOG_WARNING, "${context} dirty flag set in post_request "
+                 "but status != SUCCESS.\n");
+    }
     rc = ${context}_post_request(${context}_if_ctx.user_ctx,packet_rc);
     if (MFD_SUCCESS != rc) {
         /*
@@ -629,43 +643,6 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
                     "${context}_post_request\n", rc));
     }
     
-    /*
-     * if there are no errors, check for and handle row creation/deletion
-     * and update column exist flags...
-     */
-    if ((SNMP_ERR_NOERROR == agtreq_info->asp->status) &&
-        (NULL !=
-         (rowreq_ctx = netsnmp_container_table_row_extract(requests)))) {
-        if (rowreq_ctx->rowreq_flags & MFD_ROW_DELETED) {
-            CONTAINER_REMOVE(${context}_if_ctx.container, rowreq_ctx);
-            ${context}_release_rowreq_ctx(rowreq_ctx);
-        }
-        else {
-@if $m2c_table_settable@
-            if (rowreq_ctx->column_set_flags) {
-@if $m2c_table_sparse == 1@
-                DEBUGMSGTL(("internal:${context}:_mfd_post_request",
-                            "updating exists (%p) w/set (%p) = %p\n",
-                            rowreq_ctx->column_exists_flags,
-                            rowreq_ctx->column_set_flags,
-                            (rowreq_ctx->column_exists_flags |
-                             rowreq_ctx->column_set_flags)));
-                rowreq_ctx->column_exists_flags |=
-                    rowreq_ctx->column_set_flags;
-@end@ # sparse
-                rowreq_ctx->column_set_flags = 0;
-
-            }
-@end@ # settable
-@if ($m2c_table_row_creation == 1)@
-            if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
-                rowreq_ctx->rowreq_flags &= ~MFD_ROW_CREATED;
-                CONTAINER_INSERT(${context}_if_ctx.container, rowreq_ctx);
-            }
-@end@ # creation
-        }
-    }
-
     return SNMP_ERR_NOERROR;
 } /* _mfd_${context}_post_request */
 
@@ -689,6 +666,8 @@ _mfd_${context}_rowreq_from_index(netsnmp_index *oid_idx, int * rc_ptr)
     if (NULL == rc_ptr)
         rc_ptr = &rc;
     *rc_ptr = MFD_SUCCESS;
+
+    memset(&mib_idx, 0x0, sizeof(mib_idx));
     
     /*
      * try to parse oid
@@ -727,6 +706,12 @@ _mfd_${context}_rowreq_from_index(netsnmp_index *oid_idx, int * rc_ptr)
         ${context}_release_rowreq_ctx(rowreq_ctx);
         rowreq_ctx = NULL;
     }
+
+    /*
+     * copy indexes
+     */
+    rowreq_ctx->oid_idx.len = oid_idx->len;
+    memcpy(rowreq_ctx->oid_idx.oids, oid_idx->oids, oid_idx->len * sizeof(oid));
 
     return rowreq_ctx;
 } /* _mfd_${context}_rowreq_from_index */
@@ -1029,7 +1014,7 @@ _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
 
 @if $m2c_table_settable == 0@
 /*
- * NOT APPLICABLE (per MIB or user setting)
+ * SET PROCESSING NOT APPLICABLE (per MIB or user setting)
  */
 @else@
 /*----------------------------------------------------------------------
@@ -1435,6 +1420,15 @@ _mfd_${context}_commit(netsnmp_mib_handler *handler,
         netsnmp_request_set_error_all(requests, SNMP_VALIDATE_ERR(rc));
     }
 
+    if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
+        /*
+         * if we successfully commited this row, set the dirty flag. Use the
+         * current value + 1 (i.e. dirty = # rows changed).
+         * this is checked in post_request...
+         */
+        ${context}_dirty_set( ${context}_dirty_get() + 1 ); /* set table dirty flag */
+    }
+
     return SNMP_ERR_NOERROR;
 }
 
@@ -1452,6 +1446,14 @@ _mfd_${context}_undo_commit(netsnmp_mib_handler *handler,
 
     netsnmp_assert(NULL != rowreq_ctx);
 
+    if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
+        u_int  d = ${context}_dirty_get();
+
+        netsnmp_assert(d != 0);
+        if(d)
+            ${context}_dirty_set( d - 1 );
+    }
+
     rc = ${context}_undo_commit(rowreq_ctx);
     if (MFD_SUCCESS != rc) {
         /*
@@ -1459,6 +1461,11 @@ _mfd_${context}_undo_commit(netsnmp_mib_handler *handler,
          */
         DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
                     "${context}_undo_commit\n", rc));
+    }
+
+    if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
+        snmp_log(LOG_WARNING, "${context} row dirty flag still set after undo_commit\n");
+        rowreq_ctx->rowreq_flags &= ~MFD_ROW_DIRTY;
     }
 
     return SNMP_ERR_NOERROR;
@@ -1543,7 +1550,6 @@ _mfd_${context}_undo_values(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 } /* _mfd_${context}_undo_values */
 
-@   if $m2c_irreversible_commit == 1@
 /*----------------------------------------------------------------------
  *
  * SET: irreversible commit
@@ -1559,7 +1565,9 @@ _mfd_${context}_irreversible_commit(netsnmp_mib_handler *handler,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests)
 {
+@   if $m2c_irreversible_commit == 1@
     int                    rc;
+@   end@
     ${context}_rowreq_ctx *rowreq_ctx =
                   netsnmp_container_table_row_extract(requests);
     
@@ -1567,17 +1575,47 @@ _mfd_${context}_irreversible_commit(netsnmp_mib_handler *handler,
    
     netsnmp_assert(NULL != rowreq_ctx);
     
+@   if $m2c_irreversible_commit == 1@
     rc = ${context}_irreversible_commit(rowreq_ctx);
     if (MFD_SUCCESS != rc) {
         netsnmp_request_set_error_all(requests, SNMP_ERR_COMMITFAILED);
         DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
                     "${context}_irreversible_commit\n", rc));
     }
-    
+
+@   end@
+    /*
+     * check for and handle row creation/deletion
+     * and update column exist flags...
+     */
+    if (rowreq_ctx->rowreq_flags & MFD_ROW_DELETED) {
+        CONTAINER_REMOVE(${context}_if_ctx.container, rowreq_ctx);
+    }
+    else {
+        if (rowreq_ctx->column_set_flags) {
+@if $m2c_table_sparse == 1@
+           DEBUGMSGTL(("internal:${context}:_mfd_irreversible_commit",
+                       "updating exists (%p) w/set (%p) = %p\n",
+                       rowreq_ctx->column_exists_flags,
+                       rowreq_ctx->column_set_flags,
+                       (rowreq_ctx->column_exists_flags |
+                        rowreq_ctx->column_set_flags)));
+           rowreq_ctx->column_exists_flags |=
+           rowreq_ctx->column_set_flags;
+@end@ # sparse
+           rowreq_ctx->column_set_flags = 0;
+        }
+@if ($m2c_table_row_creation == 1)@
+        if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
+            rowreq_ctx->rowreq_flags &= ~MFD_ROW_CREATED;
+            CONTAINER_INSERT(${context}_if_ctx.container, rowreq_ctx);
+        }
+@end@ # creation
+    }
+
     return SNMP_ERR_NOERROR;
 } /* _mfd_${context}_irreversible_commit */
 
-@end@
 @end@ # settable
 /***********************************************************************
  *
