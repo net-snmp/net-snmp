@@ -28,12 +28,14 @@
          */
         if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
             if (ROWSTATUS_CREATEANDGO ==  ${m2c_data_item}$node) {
-                if (rowreq_ctx->column_set_flags != $context.uc_REQUIRED_COLS) {
+                if ((rowreq_ctx->column_set_flags & $context.uc_REQUIRED_COLS)
+                    != $context.uc_REQUIRED_COLS) {
                     DEBUGMSGTL(("${context}",
                                 "required columns missing (0x%0x != 0x%0x)\n",
                                 rowreq_ctx->column_set_flags, $context.uc_REQUIRED_COLS));
                     return MFD_CANNOT_CREATE_NOW;
                 }
+                ${m2c_data_item}$node = ROWSTATUS_ACTIVE;
             }
         } /* row creation */
         else {
@@ -62,6 +64,8 @@
                                 "destroy must be only varbind for row\n"));
                     return MFD_NOT_VALID_NOW;
                 }
+                rowreq_ctx->rowreq_flags |= MFD_ROW_DELETED;
+
             } /* row destroy */
 @if $m2c_table_refcounts == 1@
             else if(ROWSTATUS_NOTINSERVICE == ${m2c_data_item}$node) {
@@ -78,18 +82,25 @@
 @end@
     }
     else {
-        /*
 @if $m2c_table_row_creation == 1@
+        /*
          * must have row status to create a row
-@else@
-         * row creation snot supported
-@end@
          */
         if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
             DEBUGMSGTL(("$context",
                         "must use RowStatus to create rows\n"));
             return MFD_CANNOT_CREATE_NOW;
         }
+@else@
+        /*
+         * row creation not supported
+         */
+        if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
+            DEBUGMSGTL(("$context",
+                        "row creation not supported\n"));
+            return MFD_CANNOT_CREATE_EVER;
+        }
+@end@
     } /* row status not set */
 
 ## }
