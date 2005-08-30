@@ -972,7 +972,6 @@ main(int argc, char *argv[])
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 				NETSNMP_DS_AGENT_QUIT_IMMEDIATELY))
         receive();
-#include "mib_module_shutdown.h"
     DEBUGMSGTL(("snmpd/main", "sending shutdown trap\n"));
     SnmpTrapNodeDown();
     DEBUGMSGTL(("snmpd/main", "Bye...\n"));
