@@ -2478,7 +2478,7 @@ _ifXTable_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
     size = sizeof(row_token) + 1 +      /* 'ifXTable ' */
         13 +                    /* ifIndex value + ' ' */
         13 +                    /* col #, + ':' */
-        rowreq_ctx->data.ifAlias_len + 2 +      /* [0|1] + ' ' */
+        (rowreq_ctx->data.ifAlias_len * 2) + 2 +      /* [0|1] + ' ' */
         4;                      /* '\n\0' & possible quoting */
 
     /*
