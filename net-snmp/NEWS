@@ -25,6 +25,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
  Fixes:
    - Persistent files in directory defined by snmp.conf persistentDir were 
      not being loaded at startup
+   - Perl getnext didn't honor explicit reference to MIB file
+
 
 *5.2*
  New:
