@@ -3418,6 +3418,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            int status;
 	   u_char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
            size_t str_buf_len = sizeof(str_buf);
+           u_char tmp_buf_prefix[STR_BUF_SIZE];
+           u_char str_buf_prefix[STR_BUF_SIZE];
            size_t out_len = 0;
            int buf_over = 0;
            char *label;
@@ -3428,6 +3430,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 	   int old_format;
 	   SV *sv_timestamp = NULL;
            int best_guess;
+           char *tmp_prefix_ptr;
+           char *st;
 	   
            New (0, oid_arr, MAX_OID_LEN, oid);
 
@@ -3459,6 +3463,17 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
                     varbind = (AV*) SvRV(*varbind_ref);
+
+                    /* If the varbind includes the module prefix, capture it for use later */
+                    strncpy(tmp_buf_prefix, __av_elem_pv(varbind, VARBIND_TAG_F, ".0"), STR_BUF_SIZE);
+                    tmp_prefix_ptr = strstr(tmp_buf_prefix,"::");
+                    if (tmp_prefix_ptr) {
+                      tmp_prefix_ptr = strtok_r(tmp_buf_prefix, "::", &st);
+                      strncpy(str_buf_prefix, tmp_prefix_ptr, STR_BUF_SIZE);
+                    }
+                    else {
+                      *str_buf_prefix = '\0';
+                    }
 
                     tp = __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, ".0"),
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
@@ -3554,6 +3569,13 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                                                            vars->name,vars->name_length);
                     str_buf[sizeof(str_buf)-1] = '\0';
 
+                    /* Prepend the module prefix to the next OID if needed */
+                    if (*str_buf_prefix) {
+                      strncat(str_buf_prefix, "::", STR_BUF_SIZE - strlen(str_buf_prefix) - 2);
+                      strncat(str_buf_prefix, str_buf, STR_BUF_SIZE - strlen(str_buf_prefix));
+                      strncpy(str_buf, str_buf_prefix, STR_BUF_SIZE);
+                    }
+                    
                     if (__is_leaf(tp)) {
                        type = tp->type;
                     } else {
