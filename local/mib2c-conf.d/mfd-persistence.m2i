@@ -185,7 +185,7 @@ _${context}_container_row_save(
         ( $table.uc_MAX_COL * 12 ) + /* column num prefix + : */ \
     2 /* LINE_TERM_CHAR + \n */ )
 
-    char buf[MAX_ROW_SIZE], *pos = buf;
+    char buf[MAX_ROW_SIZE], *pos = buf, *max = &buf[MAX_ROW_SIZE-1];
     char *tmp;
     int i;
 
@@ -205,6 +205,11 @@ _${context}_container_row_save(
         return SNMP_ERR_GENERR;
     }
     *pos++ = ' ';
+    if(pos > max) {
+        snmp_log(LOG_ERR,"error saving ${context} row "
+                 "to persistent file (too long)\n");
+        return SNMP_ERR_GENERR;
+    }
 
     /*
      * add each column
@@ -217,6 +222,11 @@ _${context}_container_row_save(
             pos = tmp;
         else
             *pos++ = ' ';        
+        if(pos > max) {
+            snmp_log(LOG_ERR,"error saving ${context} row "
+                     "to persistent file (too long)\n");
+            return SNMP_ERR_GENERR;
+        }
     }
 
     /*
@@ -227,7 +237,12 @@ _${context}_container_row_save(
     /*
      * store the line
      */
-    sprintf(pos, "%c", LINE_TERM_CHAR);
+    pos += sprintf(pos, "%c", LINE_TERM_CHAR);
+    if(pos > max) {
+        snmp_log(LOG_ERR,"error saving ${context} row "
+                 "to persistent file (too long)\n");
+        return SNMP_ERR_GENERR;
+    }
     read_config_store((char*)type, buf);
 
     DEBUGMSGTL(("internal:${context}:_${context}_container_row_save",
