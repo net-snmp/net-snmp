@@ -1,8 +1,9 @@
-This file contains major changes in released revisions.  Please read
+bThis file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.1.4*
  Fixes:
+   - Perl getnext didn't honor explicit reference to MIB file
 
  Ports:
    Win32:
