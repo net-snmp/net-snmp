@@ -60,7 +60,7 @@ export SNMP_PREFER_NEAR_MIBS
 ORIGDIR=`pwd`		## this script may be invoked with relative path
 SNMP_UPDIR=..		## building from the source tree
 interactive=no
-SNMP_VERBOSE=0
+SNMP_VERBOSE=${SNMP_VERBOSE:=0}
 SNMP_SLEEP=${SNMP_SLEEP:=1} 	## default seconds to sleep
 SH_DEBUG=0
 
