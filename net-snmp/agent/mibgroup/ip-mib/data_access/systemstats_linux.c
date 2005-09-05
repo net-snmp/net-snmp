@@ -242,7 +242,7 @@ _systemstats_v6(netsnmp_container* container, u_int load_flags)
         DEBUGMSGTL(("access:systemstats",
                     "Failed to load Systemstats Table (linux1)\n"));
         if(!warned_open) {
-            ++warn_opened;
+            ++warned_open;
             snmp_log(LOG_ERR, "cannot open %s ...\n", filename);
         }
         free(entry);
