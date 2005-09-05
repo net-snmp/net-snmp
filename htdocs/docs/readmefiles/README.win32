@@ -141,8 +141,8 @@ as follows:
        documentation, sample code and 64-bit elements.
 
     -  Once this package has installed, from the Start Menu run
-       "Programs ->Microsoft Platform SDK... -> Visual Studio Registration
-       ->Register PSDK Directories with Visual Studio"
+       "Programs -&gt;Microsoft Platform SDK... -&gt; Visual Studio Registration
+       -&gt;Register PSDK Directories with Visual Studio"
 
 If you are compiling using any of the following systems, the PSDK download
 is not necessary, as the required parts of the PSDK are included with the 
@@ -309,7 +309,7 @@ steps to build using build.bat:
     Select option to set / toggle:
 
 5.  Toggle the options on and off as desired by typing the line number 
-    followed by <enter>.  
+    followed by &lt;enter&gt;.  
 
     To compile with OpenSSL, the OpenSSL library and header files must 
     already be installed.  See the section 'Microsoft Visual C++ - Building 
@@ -323,7 +323,7 @@ steps to build using build.bat:
     If Quiet mode is enabled, all build activity is stored in various *.out 
     files inside of the win32 folder.
 
-    When you are ready to build, type f <enter>
+    When you are ready to build, type f &lt;enter&gt;
 
 6.  Building will begin.  Following is a sample screen shot of a quiet build:
 
@@ -475,32 +475,32 @@ features may be disabled if the Platform SDK is not used.  See the section
    MS VC++ 6.0:
    ------------
    a. Open win32.dsw or win32sdk.dsw.
-   b. Click "Build->Batch Build..."  
+   b. Click "Build-&gt;Batch Build..."  
    c. Set Release and/or Debug in 'Project configurations' to suit.
    d. Click "ReBuild All".
    e. When building is done, View the Output window, clip and
       save to a text file if there is some information to share.
-   f. Click "File->Close Workspace".
+   f. Click "File-&gt;Close Workspace".
 
    MS VC++ 7.0+:
    -------------
    a.  Open win32.dsw or win32sdk.dsw.
    b.  Click "Yes to All" to convert the workspace
-   c.  Click "Build->Configuration Manager" and select either Release or Debug for 
+   c.  Click "Build-&gt;Configuration Manager" and select either Release or Debug for 
        'Active Solution Configuration' and click "Close"
    d.  Right-click the "libagent" project, and select "Rebuild"
    e.  Right-click the "libhelpers" project, and select "Rebuild"
    f.  Right-click the "libnetsnmptrapd" project, and select "Rebuild"
    g.  Right-click the "snmplib" project, and select "Rebuild"
    h.  Right-click the "netsnmpmibs(sdk)" project, and select "Rebuild"
-   i.  Click "Build->Batch Build..." 
+   i.  Click "Build-&gt;Batch Build..." 
    j.  Set Release and/or Debug in 'Project configurations' to suit making
        sure libagent, libhelpers, libnetsnmptrapd, snmplib and netsnmpmibs are 
        NOT selected.
    k.  Click "Rebuild".
    l.  When building is done, View the Output window, clip and
        save to a text file if there is some information to share.
-   m.  Click "File->Close Solution".
+   m.  Click "File-&gt;Close Solution".
   
 5.  If the Perl modules are required, continue with the next section:
     'Microsoft Visual C++ - Building the Perl SNMP modules'.
@@ -553,27 +553,27 @@ not be possible.  For example, the conf module tests will fail.
    MS VC++ 6.0:
    ------------
    a. Open libsdll.dsw.
-   b. Click "Build->Batch Build..."  
+   b. Click "Build-&gt;Batch Build..."  
    c. Set Release and/or Debug in 'Project configurations' to suit.
    d. Click "Clean".  ** Do NOT skip this step. **
-   e. Click "Build->Batch Build..."  
+   e. Click "Build-&gt;Batch Build..."  
    f. Click "ReBuild All".
    g. When building is done, View the Output window, clip and
       save to a text file if there is some information to share.
-   h. Click "File->Close Workspace".
+   h. Click "File-&gt;Close Workspace".
 
    MS VC++ 7.0+:
    -------------
    a. Open libsdll.dsw.
    b. Click "Yes to All" to convert the workspace
-   c. Click "Build->Batch Build..." 
+   c. Click "Build-&gt;Batch Build..." 
    d. Set Release and/or Debug in 'Project configurations' to suit.
    e. Click "Clean".  ** Do NOT skip this step. **
-   f. Click "Build->Batch Build..." 
+   f. Click "Build-&gt;Batch Build..." 
    g. Click "Rebuild".
    h. When building is done, View the Output window, clip and
       save to a text file if there is some information to share.
-   i. Click "File->Close Solution".
+   i. Click "File-&gt;Close Solution".
 
 7.  Install Net-SNMP as described in the 'Microsoft Visual C++ - Installing'
     section to install the applications, the DLL and the .lib files.
@@ -624,7 +624,7 @@ components to an install directory named in the INSTALL_BASE variable.
           not building with OpenSSL, then DLL not found messages
           are normal.
     
-    C:\net-snmp-5.1.1>    win32\install-net-snmp
+    C:\net-snmp-5.1.1&gt;    win32\install-net-snmp
     Remember to run this script from the base of the source directory.
     Creating "c:\usr" sub-directories
     A subdirectory or file c:\usr already exists.
@@ -657,7 +657,7 @@ components to an install directory named in the INSTALL_BASE variable.
     Copying DLL files to "c:\usr"
     The system cannot find the file specified.
     Done copying files to "c:\usr"
-    C:\net-snmp-5.1.1>
+    C:\net-snmp-5.1.1&gt;
     
     ## END sample output from install-net-snmp.bat
 
@@ -762,7 +762,7 @@ Project changes
 
    MS VC++ 6.0:
    ------------
-   a.  Click Project->Settings.  
+   a.  Click Project-&gt;Settings.  
    b.  Highlight the names of all projects except libsnmp, libagent, libhelpers,
        libnetsnmptrapd, netsnmpmibs, netsnmpmibssdk.
    c.  Select the Link section.
@@ -774,7 +774,7 @@ Project changes
    MS VC++ 7.0+:
    -------------
    a.  For each project (except libsnmp, libagent, libhelpers, libnetsnmptrapd,
-       netsnmpmibs, netsnmpmibssdk), click Project->Properties. 
+       netsnmpmibs, netsnmpmibssdk), click Project-&gt;Properties. 
    b.  For Configuration, select 'Release'
    c.  Click Linker and then Input
    d.  Add to the 'Additional Dependencies' section:
@@ -875,12 +875,12 @@ custom MIB "my", the following changes are required to extend the agent
 using VC++:
 
    - Add the my.h and my.c files to your 'netsnmpmibs' project in VC++.
-   - Next edit the '<sourcedir>\win32\mib_module_includes.h' file to
+   - Next edit the '&lt;sourcedir&gt;\win32\mib_module_includes.h' file to
      add an include to your .h file.
 
         #include "mibgroup/my.h"
 
-   - Next edit the '<sourcedir>\win32\mib_module_inits.h' file to add
+   - Next edit the '&lt;sourcedir&gt;\win32\mib_module_inits.h' file to add
      code to call your initialize function.
 
         if (should_init("my")) init_my();
@@ -1250,8 +1250,8 @@ ifAdminStatus is read-write. Status can be set with either 'up' or
 ip group:
 --------
 Scalar objects: 
-ipForwarding:Currently windows supports only ON->OFF (IE,
-enable->disable). For any other value, it returns with failure.
+ipForwarding:Currently windows supports only ON-&gt;OFF (IE,
+enable-&gt;disable). For any other value, it returns with failure.
 
 ipDefaultTTL: Supports value greater than or equal to 0. 
 

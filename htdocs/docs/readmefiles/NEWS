@@ -409,7 +409,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - the memory reporting no longer accidentally reports -1 integers
     - a few memory leaks fixed in the table_iterator API
     - fixes for Sun's "make"
-    - ds_ prefix name-space protection (-> netsnmp_ds_)
+    - ds_ prefix name-space protection (-&gt; netsnmp_ds_)
       (run configure with --enable-ucd-compatibility for old API)
     - v1/v2c access control fixes for ipv6 addresses
     - many many misc fixes
@@ -540,7 +540,7 @@ UCD-SNMP NEWS:
     - a 64 bit architecture socket fix
     - smux authentication fixed for multiple connected sessions.
     - dynamic module support testing in the configure
-    - memory values > 32bits are now reported as a maxed out 32bit number
+    - memory values &gt; 32bits are now reported as a maxed out 32bit number
 
 *4.2.4*
  New:
@@ -870,7 +870,7 @@ UCD-SNMP NEWS:
       exists.  See the snmpd.conf file for how to control access via
       community names now.
     - The header file #defines have changed.  You may have to compile
-      third party applications with -DCMU_COMPATIBLE (like perl-SNMP <= V1.7).
+      third party applications with -DCMU_COMPATIBLE (like perl-SNMP &lt;= V1.7).
     - The parser is more strict about unlinked OIDs and end-of-comment
       conditions.  You may see problems in a few broken mibs that used
       to parse ok with the older parser.
@@ -1006,7 +1006,7 @@ UCD-SNMP NEWS:
     - massive improvements for netbsd, freebsd, hpux.
 
   Fixes:
-    - Massive parser improvements.  (Niels Baggesen <recnba@mediator.uni-c.dk>)
+    - Massive parser improvements.  (Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;)
     - configure script upgraded to autoconf 2.11.
 
 *3.1.1*
@@ -1028,26 +1028,26 @@ UCD-SNMP NEWS:
     - FreeBSD 2.?
 
   Fixes:
-    - snmptrap greatly improved!  (Niels Baggesen <recnba@mediator.uni-c.dk>)
+    - snmptrap greatly improved!  (Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;)
     - other small stuff.
     - default logfile location moved to /var/log if exists, else /usr/adm.
 
   New:
-    - snmptrap man page.  (Niels Baggesen <recnba@mediator.uni-c.dk>)
+    - snmptrap man page.  (Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;)
 
 *3.1*
 
   Features:
     - Pass thru extensibility added!
-    - snmpnetstat greatly improved (Niels Baggesen <recnba@mediator.uni-c.dk>)
-    - improved solaris info caching (Dan A. Dickey <ddickey@transition.com>)
+    - snmpnetstat greatly improved (Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;)
+    - improved solaris info caching (Dan A. Dickey &lt;ddickey@transition.com&gt;)
 
   Bug fixes:
-    - many fixes for solaris (Niels Baggesen <recnba@mediator.uni-c.dk>
-      and "Dan A. Dickey" <ddickey@transition.com>)
+    - many fixes for solaris (Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;
+      and "Dan A. Dickey" &lt;ddickey@transition.com&gt;)
     - greatly reduced memory usage by mib parser (Niels Baggesen)
     - disk checks fixed for solaris and osf.
-    - improved Mib parsing from Mike Perik <mikep@crt.com>
+    - improved Mib parsing from Mike Perik &lt;mikep@crt.com&gt;
       - TRAP-TYPE/NOTIFICATION-TYPE now handled.
       - IMPORTS definition no longer required.
       - SIZE syntax fixed.
@@ -1059,7 +1059,7 @@ UCD-SNMP NEWS:
 
 *3.0.7.2*
 
-  Major solaris patches from Niels Baggesen <recnba@mediator.uni-c.dk>. Thanks!
+  Major solaris patches from Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;. Thanks!
   Other misc patches
 
 *3.0.7.1*
@@ -1125,7 +1125,7 @@ UCD-SNMP NEWS:
     - found a memory leak in the CMU routing table implementation.
     - More configure cleanups, mostly for Solaris.
     - snmp_open calls getservbyname only once now, at the request of Gary
-      Hayward <gah@dirac.bellcore.com>.  Mainly for Perl users.
+      Hayward &lt;gah@dirac.bellcore.com&gt;.  Mainly for Perl users.
 
   New example file:  EXAMPLE.conf file (created at build time).
 

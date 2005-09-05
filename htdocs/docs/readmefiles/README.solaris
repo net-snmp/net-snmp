@@ -147,7 +147,7 @@ it working using gcc at any given time.  Hence, gcc may
 simply be the better choice regardless of whether you have
 another compiler.
 
--- Bruce Shaw <Bruce.Shaw at shaw.ca>
+-- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt;
 
 ------------------------------------------------------------
 2.  Disabling Sun's SNMP daemons
@@ -201,7 +201,7 @@ esac
 exit 0
 ::::::::::::::::::::::::::::::::::::
 
--- Bruce Shaw <Bruce.Shaw at shaw.ca>
+-- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt;
 
 ------------------------------------------------------------
 3.  Compiling net-snmp
@@ -289,7 +289,7 @@ that may be running (see section 2) and type:
 
 When complete, go on to section 5 below.
 
--- Bruce Shaw <Bruce.Shaw at shaw.ca>
+-- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt;
 
 ------------------------------------------------------------
 4.  Obtaining and installing binaries
@@ -358,7 +358,7 @@ Install a startup script (see section 1).
 
 For further information, see README.solaris.binaries.x
 
---Bruce Shaw <Bruce.Shaw at shaw.ca>
+--Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt;
 
 ------------------------------------------------------------
 5.  Creating snmpd.conf and testing
@@ -405,7 +405,7 @@ to get the backtrace.
 
 You can use:
 
-   run -f -L -D <modulename>
+   run -f -L -D &lt;modulename&gt;
 
 to display debug messages.
 
@@ -415,7 +415,7 @@ To display all debug messages type:
 
 but this will be extremely verbose.
 
--- Bruce Shaw <Bruce.Shaw at shaw.ca> with suggestions by Thushara Wickram
+-- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt; with suggestions by Thushara Wickram
 
 ------------------------------------------------------------
 6.  Creating your own binaries
@@ -448,7 +448,7 @@ a startup script (see section 2).
 Note that if you create a binary with Perl support (see below) an
 identically configured Perl needs to be installed as well.
 
--- Bruce Shaw <Bruce.Shaw at shaw.ca>
+-- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt;
 
 ------------------------------------------------------------
 7.  Using Sun's SNMP daemon and net-snmp together
@@ -580,7 +580,7 @@ You may wish to modify the subtrees in net-snmp.reg as you find things
 that do and don't work.  Remember to keep backup copies of working
 configurations.
 
--- Bruce Shaw <Bruce.Shaw at shaw.ca> from notes by Stefan Radman and C Wells
+-- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt; from notes by Stefan Radman and C Wells
 ------------------------------------------------------------
 8.  Monitoring disks, processes and execs (DISMAN-EVENT-MIB)
 
@@ -685,7 +685,7 @@ snmpwalk -v 2c -c public -m ALL localhost prNames
 The same methodology can presumably be used for fileName and laNames.  Your mileage may vary.
 
 
--- Bruce Shaw <Bruce.Shaw at shaw.ca>  with Allan McIntosh and Wes Hardaker
+-- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt;  with Allan McIntosh and Wes Hardaker
 ------------------------------------------------------------
 9.  Monitoring CPU temp, fan and power supply sensors (LM-SENSORS-MIB)
 
@@ -903,7 +903,7 @@ In order to prevent inordinant consumption of machine resources,
 some sensor information is cached.  Currently, information
 retrieved from picld is cached for six seconds.  
 
--- Bruce Shaw <Bruce.Shaw at shaw.ca>
+-- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt;
 ------------------------------------------------------------
 10.  Files descriptors and fopen
 
@@ -912,7 +912,7 @@ available in stdio, so that fopen() fails if more than
 255 file descriptors (sockets) are open. This prevents mibs from 
 being loaded after 250 sockets are open, since parse.c uses stdio.
 
-SEan <burke_sp@pacbell.net> investigated this problem, and had this
+SEan &lt;burke_sp@pacbell.net&gt; investigated this problem, and had this
 report on using the SFIO package to solve this problem.
 
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -957,7 +957,7 @@ a 32-bit off_t, so the code compiled for SFIO doesn't access
 struct dirent's correctly.
 
 There are two solutions to this problem, as well. The first is to
-include <dirent.h> at the start of SFIO's stdio.h. Since SFIO 
+include &lt;dirent.h&gt; at the start of SFIO's stdio.h. Since SFIO 
 defines a macro substitution for off_t, this leaves struct dirent's 
 definition unchanged.
 
@@ -972,7 +972,7 @@ compatible with SFIO's ftell(), fseek().
 Finally, thanks to Phong Vo and AT&T Labs for a fast, robust and
 portable package that solves this headache very neatly.
 
--SEan <burke_sp@pacbell.net>
+-SEan &lt;burke_sp@pacbell.net&gt;
 
 ------------------------------------------------------------
 11.  Perl
@@ -1221,13 +1221,13 @@ NET-SNMP-MIB::netSnmp.999.1.2.1 = STRING: "hello world"
 WARNING!!  If you are planning on created binary versions of net-snmp with Perl capability,
 you will also need to ship the Perl which you created in /usr/local/net-snmp.
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca>
+ -- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt;
 
 ------------------------------------------------------------
 12.  sed and $PATH
 
 (note, if you have followed the recommendations for $PATH 
-above, this is not an issue -- Bruce Shaw <Bruce.Shaw at shaw.ca>)
+above, this is not an issue -- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt;)
 
 The version of sed in /usr/ucb on Solaris 2.5.1 and 2.6 can't
 cope with the size of the subsitution strings used in config.status.
@@ -1311,7 +1311,7 @@ then do:
 crle -c /var/ld/ld.config -l /usr/lib:/usr/local/ssl/lib
 
 Thanks to Dave Shield and Johannes Schmidt-Fischer
--- Bruce Shaw <Bruce.Shaw at shaw.ca>
+-- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt;
 
 ------------------------------------------------------------
 14. Wish list
@@ -1333,7 +1333,7 @@ C.  ORACLE
 
 How to get ORACLE's SNMP functionality to work as a sub-agent.
 
--- Bruce Shaw <Bruce.Shaw at shaw.ca>
+-- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt;
 
 ------------------------------------------------------------
 15.  Known Bugs!!
@@ -1360,7 +1360,7 @@ C.  DISMAN-EVENT-MIB
 Some of the functionality within DISMAN-EVENT-MIB does not
 work as advertised.  See long discussion under section 8 above.
 
--- Bruce Shaw <Bruce.Shaw at shaw.ca>
+-- Bruce Shaw &lt;Bruce.Shaw at shaw.ca&gt;
 
 ------------------------------------------------------------
 16.  Discussion and further information

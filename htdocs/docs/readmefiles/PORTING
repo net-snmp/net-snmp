@@ -51,7 +51,7 @@ In configure.in:
 
 Then in your source code:
   #ifdef HAVE_HEADDIR_HEADER_H
-    #include <headdir/header.h>
+    #include &lt;headdir/header.h&gt;
   #ENDIF
 
 --- LIBRARY ROUTIENS

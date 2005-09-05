@@ -99,7 +99,7 @@ make install
 
    You will need to know your SNMP community.  For this example, we will use "public".
 
-   snmpwalk -v 2c -m ALL -c public -t 100 localhost .1.3 > snmpwalk.txt
+   snmpwalk -v 2c -m ALL -c public -t 100 localhost .1.3 &gt; snmpwalk.txt
    more snmpwalk.txt
 
    This should return a considerable amount of output.

@@ -229,9 +229,9 @@ Example 1 : Traditional API use.
       /* Pass sptr to snmp_error from here forward */
       ...
       /* Change the community name */
-      free(sptr->community);
-      sptr->community = strdup("public");
-      sptr->community_len = strlen("public");
+      free(sptr-&gt;community);
+      sptr-&gt;community = strdup("public");
+      sptr-&gt;community_len = strlen("public");
       ...
       if (0 == snmp_send(sptr, pdu)) {
           snmp_error(sptr, &liberr, &syserr, &errstr);
@@ -248,7 +248,7 @@ Example 2 : Single API use.
       ...
       int liberr, syserr;
       char *errstr;
-      void *sessp;  /* <-- an opaque pointer, not a struct pointer */
+      void *sessp;  /* &lt;-- an opaque pointer, not a struct pointer */
       struct snmp_session Session, *sptr;
       ...
       snmp_sess_init(&Session);
@@ -261,14 +261,14 @@ Example 2 : Single API use.
           free(errstr);
           return 0;
       }
-      sptr = snmp_sess_session(sessp); /* <-- get the snmp_session pointer */
+      sptr = snmp_sess_session(sessp); /* &lt;-- get the snmp_session pointer */
 
       /* Pass sptr to snmp_sess_error from here forward */
       ...
       /* Change the community name */
-      free(sptr->community);
-      sptr->community = strdup("public");
-      sptr->community_len = strlen("public");
+      free(sptr-&gt;community);
+      sptr-&gt;community = strdup("public");
+      sptr-&gt;community_len = strlen("public");
       ...
       if (0 == snmp_sess_send(sessp, pdu)) {
           snmp_sess_error(sessp, &liberr, &syserr, &errstr);
@@ -280,29 +280,29 @@ Example 2 : Single API use.
  
 Example 3. Differences Between Traditional API and Single API Usage
 5a6
->       void *sessp;  /* <-- an opaque pointer, not a struct pointer */
+&gt;       void *sessp;  /* &lt;-- an opaque pointer, not a struct pointer */
 11,13c12,14
-<       sptr = snmp_open(&Session);
-<       if (sptr == NULL) {
+&lt;       sptr = snmp_open(&Session);
+&lt;       if (sptr == NULL) {
 ---
->       sessp = snmp_sess_open(&Session);
->       if (sessp == NULL) {
+&gt;       sessp = snmp_sess_open(&Session);
+&gt;       if (sessp == NULL) {
 19c20,22
-<       /* Pass sptr to snmp_error from here forward */
+&lt;       /* Pass sptr to snmp_error from here forward */
 ---
->       sptr = snmp_sess_session(sessp); /* <-- get the snmp_session pointer */
-> 
->       /* Pass sptr to snmp_sess_error from here forward */
+&gt;       sptr = snmp_sess_session(sessp); /* &lt;-- get the snmp_session pointer */
+&gt; 
+&gt;       /* Pass sptr to snmp_sess_error from here forward */
 26,27c29,30
-<       if (0 == snmp_send(sptr, pdu)) {
-<           snmp_error(sptr, &liberr, &syserr, &errstr);
+&lt;       if (0 == snmp_send(sptr, pdu)) {
+&lt;           snmp_error(sptr, &liberr, &syserr, &errstr);
 ---
->       if (0 == snmp_sess_send(sessp, pdu)) {
->           snmp_sess_error(sessp, &liberr, &syserr, &errstr);
+&gt;       if (0 == snmp_sess_send(sessp, pdu)) {
+&gt;           snmp_sess_error(sessp, &liberr, &syserr, &errstr);
 33c36
-<       snmp_close(sptr);
+&lt;       snmp_close(sptr);
 ---
->       snmp_sess_close(sessp);
+&gt;       snmp_sess_close(sessp);
 
 
 Restrictions on Multi-threaded Use of the SNMP Library
