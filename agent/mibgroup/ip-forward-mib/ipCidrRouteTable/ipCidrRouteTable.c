@@ -222,12 +222,12 @@ ipCidrRouteTable_indexes_set_tbl_idx(ipCidrRouteTable_mib_index * tbl_idx,
     /*
      * ipCidrRouteDest(1)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h 
      */
-    tbl_idx->ipCidrRouteDest = htonl(ipCidrRouteDest_val);
+    tbl_idx->ipCidrRouteDest = ipCidrRouteDest_val;
 
     /*
      * ipCidrRouteMask(2)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h 
      */
-    tbl_idx->ipCidrRouteMask = htonl(ipCidrRouteMask_val);
+    tbl_idx->ipCidrRouteMask = ipCidrRouteMask_val;
 
     /*
      * ipCidrRouteTos(3)/INTEGER32/ASN_INTEGER/long(long)//l/A/w/e/R/d/h 
@@ -237,7 +237,7 @@ ipCidrRouteTable_indexes_set_tbl_idx(ipCidrRouteTable_mib_index * tbl_idx,
     /*
      * ipCidrRouteNextHop(4)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h 
      */
-    tbl_idx->ipCidrRouteNextHop = htonl(ipCidrRouteNextHop_val);
+    tbl_idx->ipCidrRouteNextHop = ipCidrRouteNextHop_val;
 
 
     return MFD_SUCCESS;
@@ -600,6 +600,7 @@ ipCidrRouteInfo_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipCidrRouteInfo data.
      * set (* ipCidrRouteInfo_val_ptr_ptr ) and (* ipCidrRouteInfo_val_ptr_len_ptr ) from rowreq_ctx->data
      */
+    /** nullOidLen is in bytes, so not sizeof(oid) needed */
     if ((*ipCidrRouteInfo_val_ptr_len_ptr) < nullOidLen) {
         (*ipCidrRouteInfo_val_ptr_ptr) = malloc(nullOidLen);
         if (NULL == (*ipCidrRouteInfo_val_ptr_ptr))
