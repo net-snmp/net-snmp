@@ -173,7 +173,7 @@ udpTable_handler(netsnmp_mib_handler          *handler,
     netsnmp_table_request_info *table_info;
     UDPTABLE_ENTRY_TYPE	  *entry;
     oid      subid;
-    long     port;
+    long     port,addr;
 
     DEBUGMSGTL(("mibII/udpTable", "Handler - mode %s\n",
                     se_find_label_in_slist("agent_mode", reqinfo->mode)));
@@ -195,13 +195,15 @@ udpTable_handler(netsnmp_mib_handler          *handler,
             switch (subid) {
             case UDPLOCALADDRESS:
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+                addr = ntohl(*IN6_EXTRACT_V4ADDR(pcb->inp_laddr));
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
-                              (u_char*)IN6_EXTRACT_V4ADDR(pcb->inp_laddr),
-                                sizeof(IN6_EXTRACT_V4ADDR(pcb->inp_laddr)));
+                                         (u_char*)&addr,
+                                         sizeof(addr));
 #else
+                addr = ntohl(entry->UDPTABLE_LOCALADDRESS);
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
-                                 (u_char *)&entry->UDPTABLE_LOCALADDRESS,
-                                     sizeof(entry->UDPTABLE_LOCALADDRESS));
+                                         (u_char *)&addr,
+                                         sizeof(addr));
 #endif
                 break;
             case UDPLOCALPORT:
