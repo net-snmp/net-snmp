@@ -317,13 +317,13 @@ ipCidrRouteTable_index_to_oid(netsnmp_index * oid_idx,
      * set up varbinds
      */
     memset(&var_ipCidrRouteDest, 0x00, sizeof(var_ipCidrRouteDest));
-    var_ipCidrRouteDest.type = ASN_IPADDRESS;
+    var_ipCidrRouteDest.type = ASN_PRIV_IMPLIED_OCTET_STR;
     memset(&var_ipCidrRouteMask, 0x00, sizeof(var_ipCidrRouteMask));
-    var_ipCidrRouteMask.type = ASN_IPADDRESS;
+    var_ipCidrRouteMask.type = ASN_PRIV_IMPLIED_OCTET_STR;
     memset(&var_ipCidrRouteTos, 0x00, sizeof(var_ipCidrRouteTos));
     var_ipCidrRouteTos.type = ASN_INTEGER;
     memset(&var_ipCidrRouteNextHop, 0x00, sizeof(var_ipCidrRouteNextHop));
-    var_ipCidrRouteNextHop.type = ASN_IPADDRESS;
+    var_ipCidrRouteNextHop.type = ASN_PRIV_IMPLIED_OCTET_STR;
 
     /*
      * chain temp index varbinds together
