@@ -411,6 +411,12 @@ EXPORTS
         netsnmp_container_find
         netsnmp_c64_check32_and_update
         netsnmp_oid_compare_ll
+        netsnmp_ncompare_netsnmp_index
+        netsnmp_compare_netsnmp_index
+        find_varbind_in_list
+        netsnmp_dispatch_external_events
+        netsnmp_external_event_info
+        netsnmp_logging_restart
 ;IPv6        netsnmp_udp6_parse_security
 ;IPv6        netsnmp_udp6_getSecName
 ;IPv6        netsnmp_TCPIPv6Domain
