@@ -10,6 +10,7 @@ my $sdk = "disabled";
 my $default_install_base = "c:/usr";
 my $install_base = $default_install_base;
 my $install = "enabled";
+my $install_devel = "disabled";
 my $perl = "disabled";
 my $perl_install = "disabled";
 my $logging = "enabled";
@@ -36,20 +37,22 @@ if (! (-d $ENV{MSVCDir})) {
 while (1) {
   print "\n\nNet-SNMP build and install options\n";
   print "==================================\n\n";
-  print "1. OpenSSL support:      " . $openssl. "\n";
-  print "2. Platform SDK support: " . $sdk . "\n";
+  print "1.  OpenSSL support:            " . $openssl. "\n";
+  print "2.  Platform SDK support:       " . $sdk . "\n";
   print "\n";
-  print "3. Install path:         " . $install_base . "\n";
-  print "4. Install after build:  " . $install . "\n";
+  print "3.  Install path:               " . $install_base . "\n";
+  print "4.  Install after build:        " . $install . "\n";
   print "\n";
-  print "5. Perl modules:         " . $perl . "\n";
-  print "6. Install perl modules: " . $perl_install . "\n";
+  print "5.  Perl modules:               " . $perl . "\n";
+  print "6.  Install perl modules:       " . $perl_install . "\n";
   print "\n";
-  print "7. Quiet build (logged): " . $logging . "\n";
-  print "8. Debug mode:           " . $debug . "\n";
-  print "9. IPv6 transports:      " . $b_ipv6 . "\n";
-  print "\nF. Finished - start build\n";
-  print "Q. Quit - abort build\n\n";
+  print "7.  Quiet build (logged):       " . $logging . "\n";
+  print "8.  Debug mode:                 " . $debug . "\n";
+  print "9.  IPv6 transports:            " . $b_ipv6 . "\n";
+  print "\n";
+  print "10. Install development files   " . $install_devel . "\n";
+  print "\nF.  Finished - start build\n";
+  print "Q.  Quit - abort build\n\n";
   print "Select option to set / toggle: ";
 
   chomp ($option = <>);
@@ -91,6 +94,14 @@ while (1) {
     }
     else {
       $install = "enabled";
+    }
+  }
+  elsif ($option eq "10") {
+    if ($install_devel eq "enabled") {
+      $install_devel = "disabled";
+    }
+    else {
+      $install_devel = "enabled";
     }
   }
   elsif ($option eq "5") {
@@ -218,6 +229,14 @@ if ($logging eq "enabled") {
   else {
     print "Type nmake install to install the package to $install_base\n";
   }
+
+  if ($install_devel eq "enabled") {
+    print "Installing development files...\n";
+    system("nmake /nologo install_devel > install_devel.out 2>&1") == 0 || die "Build error (see install_devel.out)";
+  }
+  else {
+    print "Type nmake install_devel to install the development files to $install_base\n";
+  }
   
   if ($perl_install eq "disabled" && $perl eq "enabled") {
     print "Type nmake perl_install to install the Perl modules\n";
@@ -260,7 +279,15 @@ else {
   else {
     print "Type nmake install to install the package to $install_base\n";
   }
-  
+
+  if ($install_devel eq "enabled") {
+    print "Installing development files...\n";
+    system("nmake /nologo install_devel > install_devel.out 2>&1") == 0 || die "Build error (see install_devel.out)";
+  }
+  else {
+    print "Type nmake install_devel to install the development files to $install_base\n";
+  }
+
   if ($perl_install eq "disabled" && $perl eq "enabled") {
     print "Type nmake perl_install to install the Perl modules\n";
   }
