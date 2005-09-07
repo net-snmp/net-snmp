@@ -97,6 +97,8 @@ _checkFilter(const char* paramName, netsnmp_pdu *pdu)
     size_t                 profileNameLen;
     struct vacm_viewEntry *vp, *head;
     int                    trap_oid_included = 0, vb_oid_excluded = 0;
+    extern oid             snmptrap_oid[];
+    extern size_t          snmptrap_oid_len;
 
     netsnmp_assert(NULL != paramName);
     netsnmp_assert(NULL != pdu);
@@ -144,8 +146,6 @@ _checkFilter(const char* paramName, netsnmp_pdu *pdu)
    variable-bindings of the notification are specifically excluded by
    the matching entries.
      */
-    extern oid             snmptrap_oid[];
-    extern size_t          snmptrap_oid_len;
     var = find_varbind_in_list( pdu->variables,
                                 snmptrap_oid,
                                 snmptrap_oid_len);
