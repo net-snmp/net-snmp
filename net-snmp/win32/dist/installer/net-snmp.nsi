@@ -3,8 +3,8 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Net-SNMP"
 !define PRODUCT_MAJ_VERSION "5"
-!define PRODUCT_MIN_VERSION "2"
-!define PRODUCT_REVISION "1.2"
+!define PRODUCT_MIN_VERSION "3"
+!define PRODUCT_REVISION "dev"
 !define PRODUCT_EXE_VERSION "1"
 !define PRODUCT_WEB_SITE "http://www.net-snmp.org"
 !define PRODUCT_DIR_REGKEY "Software\Net-SNMP"
