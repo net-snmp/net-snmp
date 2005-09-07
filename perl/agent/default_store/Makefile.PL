@@ -16,7 +16,7 @@ sub InitMakeParams {
 		  'XSPROTOARG'          => '-prototypes',
 		  );
 
-    my $snmp_lib, $snmp_llib, $sep;
+    my ($snmp_lib, $snmp_llib, $sep);
     if ($Config{'osname'} eq 'MSWin32') {
       $opts = NetSNMPGetOpts();	
       $snmp_lib = 'libsnmp.lib';
