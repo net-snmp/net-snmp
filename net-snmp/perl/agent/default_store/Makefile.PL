@@ -20,7 +20,7 @@ sub InitMakeParams {
       $Params{'DEFINE'} = "-DMINGW_PERL";
     }
                                    
-    my $snmp_lib, $snmp_llib, $sep;
+    my ($snmp_lib, $snmp_llib, $sep);
     if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} ne 'msys')) {
       $opts = NetSNMPGetOpts();	
       $Params{'DEFINE'} = "-DMSVC_PERL";
