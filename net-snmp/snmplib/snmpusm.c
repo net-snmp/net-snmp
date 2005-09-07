@@ -2994,12 +2994,17 @@ usm_get_user_from_list(u_char * engineID, size_t engineIDLen,
     if (name == NULL)
         name = noName;
     for (ptr = puserList; ptr != NULL; ptr = ptr->next) {
-        if (ptr->name && !strcmp(ptr->name, name) &&
-            ptr->engineIDLen == engineIDLen &&
+        if (ptr->name && !strcmp(ptr->name, name)) {
+          DEBUGMSGTL(("usm", "match on user %s\n", ptr->name));
+          if (ptr->engineIDLen == engineIDLen &&
             ((ptr->engineID == NULL && engineID == NULL) ||
              (ptr->engineID != NULL && engineID != NULL &&
               memcmp(ptr->engineID, engineID, engineIDLen) == 0)))
             return ptr;
+          DEBUGMSGTL(("usm", "no match on engineID ("));
+          DEBUGMSGHEX(("usm", engineID, engineIDLen));
+          DEBUGMSG(("usm", ")\n"));
+        }
     }
 
     /*
