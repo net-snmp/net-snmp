@@ -326,9 +326,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
         }
         /*
          * if it is not in range, then mark it in the request list 
-         * because we can't process it. If the request is not a GETNEXT 
-         * then set the error to NOSUCHOBJECT so nobody else wastes time
-         * trying to process it.  
+         * because we can't process it, and set an error so
+         * nobody else wastes time trying to process it either.  
          */
         if (out_of_range) {
             DEBUGMSGTL(("helper:table", "  Not processed: "));
@@ -338,10 +337,12 @@ table_helper_handler(netsnmp_mib_handler *handler,
             /*
              *  Reject requests of the form 'myTable.N'   (N != 1)
              */
-            if (reqinfo->mode != MODE_GETNEXT) {
+            if (reqinfo->mode == MODE_SET_RESERVE1)
+                table_helper_cleanup(reqinfo, request,
+                                     SNMP_ERR_NOTWRITABLE);
+            else if (reqinfo->mode == MODE_GET)
                 table_helper_cleanup(reqinfo, request,
                                      SNMP_NOSUCHOBJECT);
-            }
             continue;
         }
 
@@ -405,10 +406,12 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 /*
                  *  Reject requests of the form 'myEntry.N'   (invalid N)
                  */
-                if (reqinfo->mode != MODE_GETNEXT) {
+                if (reqinfo->mode == MODE_SET_RESERVE1)
+                    table_helper_cleanup(reqinfo, request,
+                                         SNMP_ERR_NOTWRITABLE);
+                else if (reqinfo->mode == MODE_GET)
                     table_helper_cleanup(reqinfo, request,
                                          SNMP_NOSUCHOBJECT);
-                }
                 continue;
             }
             /*
@@ -454,16 +457,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
                        tbl_req_info->index_oid_len * sizeof(oid));
                 tmp_name = tbl_req_info->index_oid;
             }
-        } else if (reqinfo->mode != MODE_GETNEXT) {
-            /*
-             * oid is NOT long enough to contain index info, and this is
-             * NOT a GETNEXT, so we can't do anything with it.
-             *
-             * Reject requests of the form 'myTable' or 'myEntry'
-             */
-            table_helper_cleanup(reqinfo, request, SNMP_NOSUCHOBJECT);
-            continue;
-        } else {
+        } else if (reqinfo->mode == MODE_GETNEXT ||
+                   reqinfo->mode == MODE_GETBULK) {
             /*
              * oid is NOT long enough to contain column or index info, so start
              * at the minimum column. Set index oid len to 0 because we don't
@@ -472,6 +467,19 @@ table_helper_handler(netsnmp_mib_handler *handler,
             DEBUGMSGTL(("helper:table", "  no column/index in request\n"));
             tbl_req_info->index_oid_len = 0;
             tbl_req_info->colnum = tbl_info->min_column;
+        } else {
+            /*
+             * oid is NOT long enough to contain index info,
+             * so we can't do anything with it.
+             *
+             * Reject requests of the form 'myTable' or 'myEntry'
+             */
+            if (reqinfo->mode == MODE_GET ) {
+                table_helper_cleanup(reqinfo, request, SNMP_NOSUCHOBJECT);
+            } else if (reqinfo->mode == MODE_SET_RESERVE1 ) {
+                table_helper_cleanup(reqinfo, request, SNMP_ERR_NOTWRITABLE);
+            }
+            continue;
         }
 
         /*
