@@ -44,7 +44,6 @@ const char     *row_token = "ifXTable";
 ifXTable_registration ifXTable_user_context;
 
 void            initialize_table_ifXTable(void);
-void            shutdown_table_ifXTable(void);
 
 static int _ifXTable_save(int majorID, int minorID, void *serverarg, void *clientarg);
 static void _ifXTable_restore(const char *token, char *buf);
@@ -68,17 +67,6 @@ init_ifXTable(void)
         initialize_table_ifXTable();
 
 }                               /* init_ifXTable */
-
-/**
- * Shut-down the ifXTable module (agent is exiting)
- */
-void
-shutdown_ifXTable(void)
-{
-    if (should_init("ifXTable"))
-        shutdown_table_ifXTable();
-
-}
 
 /**
  * Initialize the table ifXTable 
@@ -136,20 +124,6 @@ initialize_table_ifXTable(void)
                  "in initialize_table_ifXTable\n");
 
 }                               /* initialize_table_ifXTable */
-
-/**
- * Shutdown the table ifXTable 
- */
-void
-shutdown_table_ifXTable(void)
-{
-    /*
-     * call interface shutdown code
-     * should never get here - ifTable should handle this
-     */
-    netsnmp_assert(0);
-    _ifXTable_shutdown_interface(&ifXTable_user_context);
-}
 
 /**
  * extra context initialization (eg default values)
