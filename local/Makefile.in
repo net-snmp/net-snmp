@@ -28,7 +28,8 @@ DATASRCS=mib2c.conf mib2c.iterate.conf mib2c.iterate_access.conf \
 	mib2c.old-api.conf mib2c.scalar.conf \
 	mib2c.check_values.conf mib2c.check_values_local.conf \
 	mib2c.access_functions.conf mib2c.notify.conf \
-	mib2c.int_watch.conf mib2c.genhtml.conf
+	mib2c.int_watch.conf mib2c.genhtml.conf \
+	mib2c.table_data.conf mib2c.container.conf
 MIB2CINSTALLDIR=$(snmplibdir)/mib2c-data
 MIB2CDATASRC=mib2c-conf.d
 MIB2CFILES=default-mfd-top.m2c details-enums.m2i details-node.m2i \
@@ -45,12 +46,14 @@ MIB2CFILES=default-mfd-top.m2c details-enums.m2i details-node.m2i \
 	generic-value-map-reverse.m2i generic-value-map.m2i \
 	m2c-internal-warning.m2i \
 	m2c_setup_enum.m2i m2c_setup_node.m2i m2c_setup_table.m2i \
+	m2c_table_save_defaults.m2i \
 	mfd-access-container-cached-defines.m2i \
 	mfd-access-unsorted-external-defines.m2i \
 	mfd-data-access.m2c mfd-data-get.m2c mfd-data-set.m2c \
 	mfd-doxygen.m2c mfd-interactive-setup.m2c mfd-interface.m2c \
 	mfd-makefile.m2m mfd-readme.m2c mfd-top.m2c \
-	node-get.m2i node-set.m2i node-storage.m2i node-varbind-validate.m2i \
+	node-get.m2i node-set.m2i node-storage.m2i \
+	node-validate.m2i node-varbind-validate.m2i \
 	parent-dependencies.m2i parent-set.m2i \
 	subagent.m2c \
 	syntax-COUNTER64-get.m2i syntax-DateAndTime-get.m2d \
