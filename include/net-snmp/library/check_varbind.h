@@ -23,6 +23,8 @@ extern          "C" {
     int netsnmp_check_vb_type_and_max_size(const netsnmp_variable_list *var,
                                     int type, size_t size);
 
+    int netsnmp_check_vb_oid(const netsnmp_variable_list *var);
+    int netsnmp_check_vb_int(const netsnmp_variable_list *var);
     int netsnmp_check_vb_int_range(const netsnmp_variable_list *var, int low,
                                    int high);
 
