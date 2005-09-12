@@ -25,6 +25,9 @@ all: $(TARG)
 test:
 	$(srcdir)/RUNTESTS -a -D `pwd`/.. $(TESTOPTS)
 
+test-mibs:
+	cd rfc1213 ; ./run
+
 etest:    etimetest.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ etimetest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
