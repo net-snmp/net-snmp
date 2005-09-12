@@ -1,6 +1,8 @@
 #ifndef IQUERY_H
 #define IQUERY_H
 
+config_belongs_in(agent_module)
+
 void init_iquery(void);
 
 netsnmp_session *netsnmp_iquery_user_session(      char* secName);
