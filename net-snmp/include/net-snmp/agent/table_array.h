@@ -112,7 +112,7 @@ extern          "C" {
 
         UserRowMethod  *create_row;
         UserRowMethod  *duplicate_row;
-        UserRowMethod  *delete_row;
+        UserRowMethod  *delete_row;    /* always returns NULL */
 
         Netsnmp_User_Group_Method *set_reserve1;
         Netsnmp_User_Group_Method *set_reserve2;
