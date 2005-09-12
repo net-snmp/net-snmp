@@ -388,7 +388,7 @@ check_rowstatus_transition(int oldValue, int newValue)
         /*
          * Illegal set value. 
          */
-        return SNMP_ERR_INCONSISTENTVALUE;
+        return SNMP_ERR_WRONGVALUE;
         break;
 
     case RS_CREATEANDGO:
@@ -411,7 +411,7 @@ check_rowstatus_transition(int oldValue, int newValue)
         break;
 
     default:
-        return SNMP_ERR_INCONSISTENTVALUE;
+        return SNMP_ERR_WRONGVALUE;
         break;
     }
 

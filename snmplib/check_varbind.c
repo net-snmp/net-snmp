@@ -183,6 +183,9 @@ netsnmp_check_vb_rowstatus_value(const netsnmp_variable_list *var)
     if ((rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER, sizeof(int))))
         return rc;
     
+    if (*var->val.integer == RS_NOTREADY)
+        return SNMP_ERR_WRONGVALUE;
+
     return netsnmp_check_vb_int_range(var, SNMP_ROW_NONEXISTENT,
                                       SNMP_ROW_DESTROY);
 }
