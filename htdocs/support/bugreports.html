@@ -18,9 +18,56 @@ Bug Reports
   <li>If applicable, the operating system distribution (eg: SuSE Linux 9.1)</li>
   <li>Sample output demonstrating the bug.</li>
   <li>Detailed steps on how to reproduce the problem including exact commands used.</li>
-  <li>If other libraries are involved such as OpenSSL, include the library version.</li>
+  <li>If other libraries are involved such as OpenSSL, include the
+  library version.</li>
+  <li>If possible a stack trace (see below) if it had crashed</li>
 </ul>
 
+<h3> Submitting a stack trace </h3>
+
+<p> When your agent, snmptrapd or application crashes here are
+instructions for submitting a stack trace using GDB which will greatly
+help us debug the problem. </p>
+
+    <ul>
+      <li> First, you either need to be able to reproduce it or have a core
+	file as a result of the crash.  You either need to call gdb
+	appropriately depending on which you have:
+	<ul>
+	  <li> With a core file:
+	    <ol>
+	      <li> % <b>gdb <i>/path/to/ProgramThatCrashed</i> <i>corefile</i></b> </li>
+	    </ol>
+	    After this a bunch of gdb lines will go by, ending in a
+	    <i>"gdb&gt;"</i> prompt.
+	  </li>
+	  <li> Reproducing it the next time inside GDB:
+	    <ol>
+	      <li> % <b>gdb <i>/path/to/ProgramThatCrashed</i></b></li>
+	      <li> <i> [wait for the <i>"gdb&gt;</i> prompt...]</i></li>
+              <li> gdb&gt; <b>run <i>ARGUMENTS-TO-THE-PROGRAM</i></b></li>
+	      <li> <i> [Get program to crash now...]</i></li>
+	    </ol>
+	    <p>Use whatever program arguments you used when getting it
+	    to crash the first time.  For daemons like snmpd and
+	    snmptrapd, be sure to include the -f flag to get it to not
+	    fork into the background though.</p>
+	  </li>
+	</ul>
+      </li>
+      <li> Once you're program is at the stopping point, the most
+      useful thing you can do to us the results of the "where" and
+      "list" commands:
+	<ul>
+	  <li> gdb&gt; <b>where</b></li>
+          <li> <i>[stack trace sent to your screen.  Include it in the
+          bug report]</i></li>
+	  <li> gdb&gt; <b>list</b></li>
+          <li> <i>[source code listing may be shown.  Include it too
+          if possible.]</i></li>
+	</ul>
+      </li>
+    </ul>
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 
