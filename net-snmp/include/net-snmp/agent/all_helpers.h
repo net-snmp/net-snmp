@@ -30,9 +30,7 @@ extern          "C" {
 #include <net-snmp/agent/table_dataset2.h>
 #include <net-snmp/agent/table_iterator.h>
 #include <net-snmp/agent/table_container.h>
-/*
- * #include <net-snmp/agent/table_array.h> 
- */
+#include <net-snmp/agent/table_array.h> 
 
 #include <net-snmp/agent/mfd.h>
 
