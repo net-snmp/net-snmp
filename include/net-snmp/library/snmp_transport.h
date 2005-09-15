@@ -18,6 +18,7 @@ extern          "C" {
 
 #define		NETSNMP_TRANSPORT_FLAG_STREAM	0x01
 #define		NETSNMP_TRANSPORT_FLAG_LISTEN	0x02
+#define		NETSNMP_TRANSPORT_FLAG_TUNNELED	0x04
 
 /*  The standard SNMP domains.  */
 
