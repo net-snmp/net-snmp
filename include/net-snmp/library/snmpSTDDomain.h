@@ -18,13 +18,20 @@ extern          "C" {
 #define TRANSPORT_DOMAIN_STD_IP		1,3,6,1,2,1,100,1,101
 extern oid netsnmp_snmpSTDDomain[];
 
-netsnmp_transport *netsnmp_std_transport(void);
+    typedef struct netsnmp_std_data_s {
+       int outfd;
+       int childpid;
+       char *prog;
+    } netsnmp_std_data;
+    
+    netsnmp_transport *netsnmp_std_transport(const char *instring,
+                                             size_t instring_len);
 
-/*
- * "Constructor" for transport domain object.  
- */
+    /*
+     * "Constructor" for transport domain object.  
+     */
 
-void            netsnmp_std_ctor(void);
+    void            netsnmp_std_ctor(void);
 
 #ifdef __cplusplus
 }
