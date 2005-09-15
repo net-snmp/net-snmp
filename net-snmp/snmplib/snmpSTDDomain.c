@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <signal.h>
 #include <errno.h>
 
 #if HAVE_STRING_H
@@ -25,6 +26,7 @@
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpSTDDomain.h>
+#include <net-snmp/library/tools.h>
 
 oid netsnmp_snmpSTDDomain[] = { TRANSPORT_DOMAIN_STD_IP };
 static netsnmp_tdomain stdDomain;
@@ -37,6 +39,17 @@ static netsnmp_tdomain stdDomain;
 static char *
 netsnmp_std_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
+    char *buf;
+    DEBUGMSGTL(("domain:std","formatting addr.  data=%x\n",t->data));
+    if (t->data) {
+        netsnmp_std_data *data = t->data;
+        buf = malloc(SNMP_MAXBUF_MEDIUM);
+        if (!buf)
+            return strdup("STDInOut");
+        snprintf(buf, SNMP_MAXBUF_MEDIUM, "STD:%s", data->prog);
+        DEBUGMSGTL(("domain:std","  formatted:=%s\n",buf));
+        return buf;
+    }
     return strdup("STDInOut");
 }
 
@@ -54,12 +67,18 @@ netsnmp_std_recv(netsnmp_transport *t, void *buf, int size,
 {
     int rc = -1;
 
+    DEBUGMSGTL(("domain:std","recv on sock %d.  data=%x\n",t->sock, t->data));
     while (rc < 0) {
-        rc = read(0, buf, size);
+        rc = read(t->sock, buf, size);
+        DEBUGMSGTL(("domain:std","  bytes: %d.\n", rc));
         if (rc < 0 && errno != EINTR) {
-            DEBUGMSGTL(("netsnmp_std", " read on stdin failed: %d (\"%s\")\n",
-                        errno, strerror(errno)));
+            DEBUGMSGTL(("netsnmp_std", " read on fd %d failed: %d (\"%s\")\n",
+                        t->sock, errno, strerror(errno)));
             break;
+        }
+        if (rc == 0) {
+            /* 0 input is probably bad since we selected on it */
+            return -1;
         }
         DEBUGMSGTL(("netsnmp_std", "read on stdin got %d bytes\n", rc));
     }
@@ -75,8 +94,15 @@ netsnmp_std_send(netsnmp_transport *t, void *buf, int size,
 {
     int rc = -1;
 
+    DEBUGMSGTL(("domain:std","send on sock.  data=%x\n", t->data));
     while (rc < 0) {
-        rc = write(1, buf, size);
+        if (t->data) {
+            netsnmp_std_data *data = t->data;
+            rc = write(data->outfd, buf, size);
+        } else {
+            /* straight to stdout */
+            rc = write(1, buf, size);
+        }
         if (rc < 0 && errno != EINTR) {
             break;
         }
@@ -87,7 +113,23 @@ netsnmp_std_send(netsnmp_transport *t, void *buf, int size,
 static int
 netsnmp_std_close(netsnmp_transport *t)
 {
-    /* we don't actually close anything here */
+    DEBUGMSGTL(("domain:std","close.  data=%x\n", t->data));
+    if (t->data) {
+        netsnmp_std_data *data = t->data;
+        close(data->outfd);
+        close(t->sock);
+
+        /* kill the child too */
+        DEBUGMSGTL(("domain:std"," killing %d\n", data->childpid));
+        kill(data->childpid, SIGTERM);
+        sleep(1);
+        kill(data->childpid, SIGKILL);
+        /* XXX: set an alarm to kill harder the child */
+    } else {
+        /* close stdout/in */
+        close(1);
+        close(0);
+    }
     return 0;
 }
 
@@ -96,6 +138,7 @@ netsnmp_std_close(netsnmp_transport *t)
 static int
 netsnmp_std_accept(netsnmp_transport *t)
 {
+    DEBUGMSGTL(("domain:std"," accept data=%x\n", t->data));
     /* nothing to do here */
     return 0;
 }
@@ -105,7 +148,7 @@ netsnmp_std_accept(netsnmp_transport *t)
  */
 
 netsnmp_transport *
-netsnmp_std_transport(void)
+netsnmp_std_transport(const char *instring, size_t instring_len)
 {
     netsnmp_transport *t;
 
@@ -120,7 +163,7 @@ netsnmp_std_transport(void)
         sizeof(netsnmp_snmpSTDDomain) / sizeof(netsnmp_snmpSTDDomain[0]);
 
     t->sock = 0;
-    t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
+    t->flags = NETSNMP_TRANSPORT_FLAG_STREAM | NETSNMP_TRANSPORT_FLAG_TUNNELED;
 
     /*
      * Message size is not limited by this transport (hence msgMaxSize
@@ -134,19 +177,88 @@ netsnmp_std_transport(void)
     t->f_accept   = netsnmp_std_accept;
     t->f_fmtaddr  = netsnmp_std_fmtaddr;
 
+    /*
+     * if instring is not null length, it specifies a path to a prog
+     * XXX: plus args
+     */
+    if (instring_len != 0) {
+        int infd[2], outfd[2];  /* sockets to and from the client */
+        int childpid;
+
+        if (pipe(infd) || pipe(outfd)) {
+            snmp_log(LOG_ERR,
+                     "Failed to create needed pipes for a STD transport");
+            netsnmp_transport_free(t);
+            return NULL;
+        }
+
+        childpid = fork();
+        /* parentpid => childpid */
+        /* infd[1]   => infd[0] */
+        /* outfd[0]  <= outfd[1] */
+
+        if (childpid) {
+            netsnmp_std_data *data;
+            
+            /* we're in the parent */
+            close(infd[0]);
+            close(outfd[1]);
+
+            data = SNMP_MALLOC_TYPEDEF(netsnmp_std_data);
+            if (!data) {
+                snmp_log(LOG_ERR, "snmpSTDDomain: memdup failed");
+                netsnmp_transport_free(t);
+                return NULL;
+            }
+            t->data = data;
+            t->data_length = sizeof(netsnmp_transport_free);
+            t->sock = outfd[0];
+            data->prog = strdup(instring);
+            data->outfd = infd[1];
+            data->childpid = childpid;
+            DEBUGMSGTL(("domain:std","parent.  data=%x\n", t->data));
+        } else {
+            /* we're in the child */
+
+            /* close stdin */
+            close(0);
+            /* copy pipe output to stdout */
+            dup(infd[0]);
+
+            /* close stdout */
+            close(1);
+            /* copy pipe output to stdin */
+            dup(outfd[1]);
+            
+            /* close all the pipes themselves */
+            close(infd[0]);
+            close(infd[1]);
+            close(outfd[0]);
+            close(outfd[1]);
+
+            /* call exec */
+            system(instring);
+            // execv(instring, NULL); /* XXX: args */
+            exit(0);
+
+            /* ack...  we should never ever get here */
+            snmp_log(LOG_ERR, "STD transport returned after execv()\n");
+        }
+    }            
+
     return t;
 }
 
 netsnmp_transport *
-netsnmp_std_create_tstring(const char *string, int local)
+netsnmp_std_create_tstring(const char *instring, int local)
 {
-    return netsnmp_std_transport();
+    return netsnmp_std_transport(instring, strlen(instring));
 }
 
 netsnmp_transport *
 netsnmp_std_create_ostring(const u_char * o, size_t o_len, int local)
 {
-    return netsnmp_std_transport();
+    return netsnmp_std_transport(o, o_len);
 }
 
 void
