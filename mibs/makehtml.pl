@@ -93,10 +93,11 @@ foreach my $mibf (@ARGV) {
     $desc =~ s/&/&amp;/g;
     $desc =~ s/</&lt;/g;
     $desc =~ s/>/&gt;/g;
-    
+
     print "  <tr>\n";
     print "    <td><a href=\"$node.html\">$mib</a><br />\n";
     print "        <a href=\"$mib.txt\">[mib file]</a></td>\n";
+    print "        <br><a href=\"$mib-conf.html\">[conformance summary]</a></td>\n";
     print "    <td><a href=\"http://www.ietf.org/rfc/rfc$mibs{$mib}.txt\">rfc$mibs{$mib}</a></td>\n" if ($mibs{$mib});
     print "    <td>&nbsp;</td>\n" if (!$mibs{$mib});
     print "    <td><pre>$desc</pre></td>\n";
