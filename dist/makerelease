@@ -10,7 +10,8 @@ LocalGetOptions(\%opts,
 	   ['r|regexp-ignore-steps=s','Ignore these REGEXP steps'],
 	   ['s|skip-until=s',         'Skip all steps until ARG'],
 	   ['i|interactive',          'Prompt whether to do each step'],
-	   ['n|dry-run',     'Dry run only.  Don\'t actually do anything.']);
+	   ['n|dry-run',     'Dry run only.  Don\'t actually do anything.'],
+	   ['h|help', 'Help']);
 
 
 my $version = shift;
@@ -200,8 +201,8 @@ sub manualstep {
 # getopt long gui portability code
 #
 sub LocalGetOptions {
-    if ($#ARGV == -1 && eval {require Getopt::Long::GUI;}) {
-	import Getopt::Long::GUI;
+    if ($#ARGV == -1 && eval {require Getopt::GUI::Long;}) {
+	import Getopt::GUI::Long;
 	return GetOptions(@_);
     } else {
 	require Getopt::Long;
