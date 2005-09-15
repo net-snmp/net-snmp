@@ -642,11 +642,21 @@
     available.  */
 #undef SNMP_TRANSPORT_TCPIPV6_DOMAIN
 
+/*  This is defined if support for the UDP/IP transport domain is
+    available.   */
+#undef SNMP_TRANSPORT_TLS_DOMAIN
+
+/*  This is defined if support for stdin/out transport domain is available.   */
+#undef SNMP_TRANSPORT_STD_DOMAIN
+
 /* define this if the USM security module is available */
 #undef SNMP_SECMOD_USM
 
 /* define this if the KSM (kerberos based snmp) security module is available */
 #undef SNMP_SECMOD_KSM
+
+/* define this if the local security module is available */
+#undef SNMP_SECMOD_LOCALSM
 
 /* define this if we're using the new MIT crypto API */
 #undef MIT_NEW_CRYPTO
