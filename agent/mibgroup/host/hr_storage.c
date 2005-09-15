@@ -178,7 +178,7 @@ extern int      fscount;
 #define HRFS_mount	f_mntonname
 #define HRFS_HAS_FRSIZE STRUCT_STATVFS_HAS_F_FRSIZE
 
-#elif defined(HAVE_STATVFS)
+#elif defined(HAVE_STATVFS) && defined(STRUCT_STATVFS_HAS_MNT_DIR)
 
 extern struct mntent *HRFS_entry;
 extern int      fscount;
