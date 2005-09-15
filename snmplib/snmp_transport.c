@@ -21,6 +21,9 @@
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPDomain.h>
+#ifdef SNMP_TRANSPORT_TLS_DOMAIN
+#include <net-snmp/library/snmpTLSDomain.h>
+#endif
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
 #include <net-snmp/library/snmpTCPDomain.h>
 #endif
@@ -192,6 +195,9 @@ netsnmp_tdomain_init(void)
 {
     DEBUGMSGTL(("tdomain", "netsnmp_tdomain_init() called\n"));
     netsnmp_udp_ctor();
+#ifdef SNMP_TRANSPORT_STD_DOMAIN
+    netsnmp_std_ctor();
+#endif
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
     netsnmp_tcp_ctor();
 #endif
