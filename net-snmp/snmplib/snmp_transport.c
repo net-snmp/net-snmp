@@ -310,7 +310,7 @@ netsnmp_tdomain_transport(const char *str, int local,
     char           *cp, *mystring;
     int             i;
 
-    if (string == NULL) {
+    if (str == NULL) {
         return NULL;
     }
 
