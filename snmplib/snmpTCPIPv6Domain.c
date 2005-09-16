@@ -188,7 +188,7 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
     struct sockaddr_in6 *farend = NULL;
     int             newsock = -1, sockflags = 0;
     socklen_t       farendlen = sizeof(struct sockaddr_in6);
-    char           *string = NULL;
+    char           *str = NULL;
 
     farend = (struct sockaddr_in6 *) malloc(sizeof(struct sockaddr_in6));
 
@@ -216,9 +216,9 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
 
         t->data = farend;
         t->data_length = farendlen;
-        string = netsnmp_tcp6_fmtaddr(NULL, farend, farendlen);
-        DEBUGMSGTL(("netsnmp_tcp6", "accept succeeded (from %s)\n", string));
-        free(string);
+        str = netsnmp_tcp6_fmtaddr(NULL, farend, farendlen);
+        DEBUGMSGTL(("netsnmp_tcp6", "accept succeeded (from %s)\n", str));
+        free(str);
 
         /*
          * Try to make the new socket blocking.  
@@ -263,7 +263,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
 {
     netsnmp_transport *t = NULL;
     int             rc = 0;
-    char           *string = NULL;
+    char           *str = NULL;
 
     if (addr == NULL || addr->sin6_family != AF_INET6) {
         return NULL;
@@ -275,11 +275,11 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
     }
     memset(t, 0, sizeof(netsnmp_transport));
 
-    string = netsnmp_tcp6_fmtaddr(NULL, (void *)addr,
+    str = netsnmp_tcp6_fmtaddr(NULL, (void *)addr,
 				  sizeof(struct sockaddr_in6));
     DEBUGMSGTL(("netsnmp_tcp6", "open %s %s\n", local ? "local" : "remote",
-                string));
-    free(string);
+                str));
+    free(str);
 
     memset(t, 0, sizeof(netsnmp_transport));
 
@@ -435,11 +435,11 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
 
 
 netsnmp_transport *
-netsnmp_tcp6_create_tstring(const char *string, int local)
+netsnmp_tcp6_create_tstring(const char *str, int local)
 {
     struct sockaddr_in6 addr;
 
-    if (netsnmp_sockaddr_in6(&addr, string, 0)) {
+    if (netsnmp_sockaddr_in6(&addr, str, 0)) {
         return netsnmp_tcp6_transport(&addr, local);
     } else {
         return NULL;
