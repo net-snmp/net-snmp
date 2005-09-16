@@ -146,7 +146,7 @@ netsnmp_check_vb_uint(const netsnmp_variable_list *var)
     if (NULL == var)
         return SNMP_ERR_GENERR;
     
-    return netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED32, sizeof(long));
+    return netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED, sizeof(long));
 }
 
 NETSNMP_INLINE int
