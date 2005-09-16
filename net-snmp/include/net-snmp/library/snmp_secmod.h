@@ -7,6 +7,12 @@ extern          "C" {
 
 #include <net-snmp/library/snmp_transport.h>
 
+/* Locally defined security models.
+ * (Net-SNMP enterprise number = 8072)*256 + local_num
+ */
+#define NETSNMP_KSM_SECURITY_MODEL     2066432
+#define NETSNMP_LOCALSM_SECURITY_MODEL 2066433
+
 struct snmp_secmod_def;
 
 /*
