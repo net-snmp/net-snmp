@@ -264,7 +264,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
     netsnmp_transport *t = NULL;
     sockaddr_un_pair *sup = NULL;
     int             rc = 0;
-    char           *string = NULL;
+    char           *str = NULL;
 
     if (addr == NULL || addr->sun_family != AF_UNIX) {
         return NULL;
@@ -275,11 +275,11 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         return NULL;
     }
 
-    string = netsnmp_unix_fmtaddr(NULL, (void *)addr, 
+    str = netsnmp_unix_fmtaddr(NULL, (void *)addr, 
 				  sizeof(struct sockaddr_un));
     DEBUGMSGTL(("netsnmp_unix", "open %s %s\n", local ? "local" : "remote",
-                string));
-    free(string);
+                str));
+    free(str);
 
     memset(t, 0, sizeof(netsnmp_transport));
 
@@ -399,17 +399,17 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
 }
 
 netsnmp_transport *
-netsnmp_unix_create_tstring(const char *string, int local)
+netsnmp_unix_create_tstring(const char *str, int local)
 {
     struct sockaddr_un addr;
 
-    if ((string != NULL) && (strlen(string) < sizeof(addr.sun_path))) {
+    if ((str != NULL) && (strlen(str) < sizeof(addr.sun_path))) {
         addr.sun_family = AF_UNIX;
         memset(addr.sun_path, 0, sizeof(addr.sun_path));
-        strncpy(addr.sun_path, string, sizeof(addr.sun_path) - 1);
+        strncpy(addr.sun_path, str, sizeof(addr.sun_path) - 1);
         return netsnmp_unix_transport(&addr, local);
     } else {
-        if (string != NULL) {
+        if (str != NULL) {
             snmp_log(LOG_ERR, "Path too long for Unix domain transport\n");
         }
         return NULL;

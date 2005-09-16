@@ -97,10 +97,10 @@ netsnmp_ipx_recv(netsnmp_transport *t, void *buf, int size,
 	}
 
         if (rc >= 0) {
-            char *string = netsnmp_ipx_fmtaddr(NULL, from, fromlen);
+            char *str = netsnmp_ipx_fmtaddr(NULL, from, fromlen);
             DEBUGMSGTL(("netsnmp_ipx","recvfrom fd %d got %d bytes(from %s)\n",
-			t->sock, rc, string));
-            free(string);
+			t->sock, rc, str));
+            free(str);
         } else {
             DEBUGMSGTL(("netsnmp_ipx", "recvfrom fd %d err %d (\"%s\")\n",
                         t->sock, errno, strerror(errno)));
@@ -129,11 +129,11 @@ netsnmp_ipx_send(netsnmp_transport *t, void *buf, int size,
     }
 
     if (to != NULL && t != NULL && t->sock >= 0) {
-        char *string = netsnmp_ipx_fmtaddr(NULL, (void *)to,
+        char *str = netsnmp_ipx_fmtaddr(NULL, (void *)to,
 					sizeof(struct sockaddr_ipx));
         DEBUGMSGTL(("netsnmp_ipx", "send %d bytes from %p to %s on fd %d\n",
-                    size, buf, string, t->sock));
-        free(string);
+                    size, buf, str, t->sock));
+        free(str);
 	while (rc < 0) {
 	    rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
 	    if (rc < 0 && errno != EINTR) {
@@ -174,7 +174,7 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
 {
     netsnmp_transport *t = NULL;
     int             rc = 0;
-    char           *string = NULL;
+    char           *str = NULL;
 
     if (addr == NULL || addr->sipx_family != AF_IPX) {
         return NULL;
@@ -185,11 +185,11 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
         return NULL;
     }
 
-    string = netsnmp_ipx_fmtaddr(NULL, (void *)addr, 
+    str = netsnmp_ipx_fmtaddr(NULL, (void *)addr, 
 				 sizeof(struct sockaddr_ipx));
     DEBUGMSGTL(("netsnmp_ipx", "open %s %s\n", local ? "local" : "remote",
-                string));
-    free(string);
+                str));
+    free(str);
 
     memset(t, 0, sizeof(netsnmp_transport));
 
@@ -382,11 +382,11 @@ netsnmp_sockaddr_ipx(struct sockaddr_ipx *addr, const char *peername)
 
 
 netsnmp_transport *
-netsnmp_ipx_create_tstring(const char *string, int local)
+netsnmp_ipx_create_tstring(const char *str, int local)
 {
     struct sockaddr_ipx addr;
 
-    if (netsnmp_sockaddr_ipx(&addr, string)) {
+    if (netsnmp_sockaddr_ipx(&addr, str)) {
         return netsnmp_ipx_transport(&addr, local);
     } else {
         return NULL;

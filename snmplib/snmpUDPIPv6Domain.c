@@ -141,11 +141,11 @@ netsnmp_udp6_recv(netsnmp_transport *t, void *buf, int size,
 	}
 
         if (rc >= 0) {
-	    char *string = netsnmp_udp6_fmtaddr(NULL, from, fromlen);
+	    char *str = netsnmp_udp6_fmtaddr(NULL, from, fromlen);
             DEBUGMSGTL(("netsnmp_udp6",
 			"recvfrom fd %d got %d bytes (from %s)\n", t->sock,
-                        rc, string));
-            free(string);
+                        rc, str));
+            free(str);
         } else {
             DEBUGMSGTL(("netsnmp_udp6", "recvfrom fd %d err %d (\"%s\")\n",
 			t->sock, errno, strerror(errno)));
@@ -174,11 +174,11 @@ netsnmp_udp6_send(netsnmp_transport *t, void *buf, int size,
     }
 
     if (to != NULL && t != NULL && t->sock >= 0) {
-        char *string = netsnmp_udp6_fmtaddr(NULL, (void *)to,
+        char *str = netsnmp_udp6_fmtaddr(NULL, (void *)to,
 					    sizeof(struct sockaddr_in6));
         DEBUGMSGTL(("netsnmp_udp6", "send %d bytes from %p to %s on fd %d\n",
-                    size, buf, string, t->sock));
-        free(string);
+                    size, buf, str, t->sock));
+        free(str);
 	while (rc < 0) {
 	    rc = sendto(t->sock, buf, size, 0, to,sizeof(struct sockaddr_in6));
 	    if (rc < 0 && errno != EINTR) {
@@ -220,7 +220,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
 {
     netsnmp_transport *t = NULL;
     int             rc = 0, udpbuf = (1 << 17);
-    char           *string = NULL;
+    char           *str = NULL;
 
     if (addr == NULL || addr->sin6_family != AF_INET6) {
         return NULL;
@@ -231,11 +231,11 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
         return NULL;
     }
 
-    string = netsnmp_udp6_fmtaddr(NULL, (void *) addr,
+    str = netsnmp_udp6_fmtaddr(NULL, (void *) addr,
 				  sizeof(struct sockaddr_in6));
     DEBUGMSGTL(("netsnmp_udp6", "open %s %s\n", local ? "local" : "remote",
-                string));
-    free(string);
+                str));
+    free(str);
 
     memset(t, 0, sizeof(netsnmp_transport));
 
@@ -1293,11 +1293,11 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
 }
 
 netsnmp_transport *
-netsnmp_udp6_create_tstring(const char *string, int local)
+netsnmp_udp6_create_tstring(const char *str, int local)
 {
     struct sockaddr_in6 addr;
 
-    if (netsnmp_sockaddr_in6(&addr, string, 0)) {
+    if (netsnmp_sockaddr_in6(&addr, str, 0)) {
         return netsnmp_udp6_transport(&addr, local);
     } else {
         return NULL;
