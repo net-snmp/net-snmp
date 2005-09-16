@@ -945,7 +945,7 @@ netsnmp_remove_loghandler( netsnmp_log_handler *logh )
 /* ==================================================== */
 
 int
-log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *string)
+log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *str)
 {
     char            sbuf[40];
 
@@ -955,12 +955,12 @@ log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *string)
     } else {
         strcpy(sbuf, "");
     }
-    newline = string[strlen(string) - 1] == '\n';	/* XXX - Eh ? */
+    newline = string[strlen(str) - 1] == '\n';	/* XXX - Eh ? */
 
     if (logh->imagic)
-       printf(         "%s%s", sbuf, string);
+       printf(         "%s%s", sbuf, str);
     else
-       fprintf(stderr, "%s%s", sbuf, string);
+       fprintf(stderr, "%s%s", sbuf, str);
 
     return 1;
 }
@@ -968,7 +968,7 @@ log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *string)
 
 #ifdef WIN32
 int
-log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
+log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *str)
 {
     WORD            etype;
     LPCTSTR         event_msg[2];
@@ -1009,7 +1009,7 @@ log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
             etype = EVENTLOG_INFORMATION_TYPE;
             break;
     }
-    event_msg[0] = string;
+    event_msg[0] = str;
     event_msg[1] = NULL;
     /* NOTE: 4th parameter must match winservice.mc:MessageId value */
     if (!ReportEvent(eventlog_h, etype, 0, 100, NULL, 1, 0, event_msg, NULL)) {
@@ -1025,7 +1025,7 @@ log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
 }
 #else
 int
-log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
+log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *str)
 {
 	/*
 	 * XXX
@@ -1045,14 +1045,14 @@ log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
         openlog(ident, LOG_CONS | LOG_PID, facility);
         logh->imagic = 1;
     }
-    syslog( pri, "%s", string );
+    syslog( pri, "%s", str );
     return 1;
 }
 #endif /* !WIN32 */
 
 
 int
-log_handler_file(    netsnmp_log_handler* logh, int pri, const char *string)
+log_handler_file(    netsnmp_log_handler* logh, int pri, const char *str)
 {
     FILE           *fhandle;
     char            sbuf[40];
@@ -1082,14 +1082,14 @@ log_handler_file(    netsnmp_log_handler* logh, int pri, const char *string)
             return 0;
         logh->magic = (void*)fhandle;
     }
-    fprintf(fhandle, "%s%s", sbuf, string);
+    fprintf(fhandle, "%s%s", sbuf, str);
     fflush(fhandle);
-    logh->imagic = string[strlen(string) - 1] == '\n';
+    logh->imagic = str[strlen(str) - 1] == '\n';
     return 1;
 }
 
 int
-log_handler_callback(netsnmp_log_handler* logh, int pri, const char *string)
+log_handler_callback(netsnmp_log_handler* logh, int pri, const char *str)
 {
 	/*
 	 * XXX - perhaps replace 'snmp_call_callbacks' processing
@@ -1099,7 +1099,7 @@ log_handler_callback(netsnmp_log_handler* logh, int pri, const char *string)
     int             dodebug = snmp_get_do_debugging();
 
     slm.priority = pri;
-    slm.msg = string;
+    slm.msg = str;
     if (dodebug)            /* turn off debugging inside the callbacks else will loop */
         snmp_set_do_debugging(0);
     snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_LOGGING, &slm);
@@ -1109,7 +1109,7 @@ log_handler_callback(netsnmp_log_handler* logh, int pri, const char *string)
 }
 
 int
-log_handler_null(    netsnmp_log_handler* logh, int pri, const char *string)
+log_handler_null(    netsnmp_log_handler* logh, int pri, const char *str)
 {
     /*
      * Dummy log handler - just throw away the error completely
@@ -1119,7 +1119,7 @@ log_handler_null(    netsnmp_log_handler* logh, int pri, const char *string)
 }
 
 void
-snmp_log_string(int priority, const char *string)
+snmp_log_string(int priority, const char *str)
 {
     netsnmp_log_handler *logh;
 
@@ -1145,7 +1145,7 @@ snmp_log_string(int priority, const char *string)
          *     and its cohorts).
          */
         if (logh->enabled && (priority >= logh->pri_max))
-            logh->handler( logh, priority, string );
+            logh->handler( logh, priority, str );
     }
 }
 

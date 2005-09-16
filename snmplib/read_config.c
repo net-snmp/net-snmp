@@ -1390,18 +1390,18 @@ snmp_clean_persistent(const char *type)
  * line number of a .conf file and increments the error count. 
  */
 void
-config_perror(const char *string)
+config_perror(const char *str)
 {
     snmp_log(LOG_ERR, "%s: line %d: Error: %s\n", curfilename, linecount,
-             string);
+             str);
     config_errors++;
 }
 
 void
-config_pwarn(const char *string)
+config_pwarn(const char *str)
 {
     snmp_log(LOG_WARNING, "%s: line %d: Warning: %s\n", curfilename,
-             linecount, string);
+             linecount, str);
 }
 
 /*
