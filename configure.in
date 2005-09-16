@@ -906,6 +906,15 @@ case $target_os in
 	AC_MSG_RESULT([yes])
 	enable_shared=no
         ;;
+    darwin8*)
+        AC_MSG_CHECKING([whether darwin ld might need -flat_namespace])
+	if test -z "$MACOSX_DEPLOYMENT_TARGET"; then
+		LDFLAGS="-flat_namespace $LDFLAGS"
+		AC_MSG_RESULT([yes])
+	else
+		AC_MSG_RESULT([no])
+	fi
+	;;
     *)
         ;;
 esac
@@ -2146,14 +2155,25 @@ fi
 # Checks for libraries.
 # AC_CHECK_LIB(des, main)
 AC_CHECK_LIB(m, asin)
-# nlist is needed for uptime on some sytems in the generic library
- AC_ARG_WITH(elf,
-  [  --without-elf           use elf libraries],[
-  if test "x$withval" != "xno"; then
-     AC_CHECK_LIB(elf, nlist)
-  fi
-  ])
 
+AC_ARG_WITH(elf,
+[  --without-elf           use elf libraries])
+AC_ARG_ENABLE(elf,,
+	AC_MSG_ERROR([ Invalid option. Use --with-elf/--with-out-elf instead ]) )
+if test "x$with_elf" != "xno"; then
+# nlist is needed for uptime on some sytems in the generic library
+# add hosts which don't use nlist to the blank first line
+case $target_os in
+	linux*) ;;
+	irix*) # Check for nlist in mld (irix)
+		AC_CHECK_LIB(elf, nlist)
+		AC_CHECK_LIB(mld, nlist)
+		;
+	*) # default
+		AC_CHECK_LIB(elf, nlist)
+		;;
+esac
+fi
  
 
 # On some platforms (Irix) libnsl and libsocket should not be used.
@@ -2172,8 +2192,6 @@ AC_CHECK_FUNC(getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME),
 
 # Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
-# Check for nlist in mld (irix)
-AC_CHECK_LIB(mld, nlist)
 
 # Check for security related functions
 if test "x$tryopenssl" != "xno"; then
