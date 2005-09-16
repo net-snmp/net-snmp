@@ -31,7 +31,7 @@ netsnmp_table_data2_set *nlmLogVarTable;
 void
 netsnmp_notif_log_remove_oldest(int count)
 {
-    netsnmp_table_data2row *deleterow, *tmprow, *deletevarrow;
+    netsnmp_tdata_row *deleterow, *tmprow, *deletevarrow;
     
     DEBUGMSGTL(("notification_log", "deleting %d log entry(s)\n", count));
 
@@ -94,7 +94,7 @@ netsnmp_notif_log_remove_oldest(int count)
 void
 check_log_size(unsigned int clientreg, void *clientarg)
 {
-    netsnmp_table_data2row *row;
+    netsnmp_tdata_row *row;
     netsnmp_table_data2_set_storage *data;
     u_long          count = 0;
     struct timeval  now;
@@ -526,7 +526,7 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
 {
     long            tmpl;
     struct timeval  now;
-    netsnmp_table_data2row *row;
+    netsnmp_tdata_row *row;
 
     static u_long   default_num = 0;
 
@@ -545,7 +545,7 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
         return;
 
     DEBUGMSGTL(("notification_log", "logging something\n"));
-    row = netsnmp_create_table_data2_row();
+    row = netsnmp_tdata_create_row();
 
     ++num_received;
     default_num++;
@@ -611,18 +611,18 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
                                    vptr->val_len);
 
         } else {
-            netsnmp_table_data2row *myrow;
-            myrow = netsnmp_create_table_data2_row();
+            netsnmp_tdata_row *myrow;
+            myrow = netsnmp_tdata_create_row();
 
             /*
              * indexes to the table 
              */
-            netsnmp_table_data2row_add_index(myrow, ASN_OCTET_STR, "default",
+            netsnmp_tdata_row_add_index(myrow, ASN_OCTET_STR, "default",
                                         strlen("default"));
-            netsnmp_table_data2row_add_index(myrow, ASN_UNSIGNED, &default_num,
+            netsnmp_tdata_row_add_index(myrow, ASN_UNSIGNED, &default_num,
                                         sizeof(default_num));
             vbcount++;
-            netsnmp_table_data2row_add_index(myrow, ASN_UNSIGNED, &vbcount,
+            netsnmp_tdata_row_add_index(myrow, ASN_UNSIGNED, &vbcount,
                                         sizeof(vbcount));
 
             /*
