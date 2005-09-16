@@ -25346,7 +25346,7 @@ _ACEOF
 
 fi
 
-		;
+		;;
 	*) # default
 
 echo "$as_me:$LINENO: checking for nlist in -lelf" >&5
