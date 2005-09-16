@@ -97,7 +97,7 @@
 int
 addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
-#ifndef dynix
+#if defined SIOCADDRT && !defined(irix6)
     struct sockaddr_in dst;
     struct sockaddr_in gateway;
     int             s, rc;
@@ -126,34 +126,16 @@ addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 #ifndef RTENTRY_4_4
     route.rt_hash = iff;
 #endif
-#ifdef irix6
-    return 0;
-#else
+
     rc = ioctl(s, SIOCADDRT, (caddr_t) & route);
     close(s);
     if (rc < 0)
         snmp_log_perror("ioctl");
     return rc;
-#endif
 
-#else                           /* dynix */
-    /*
-     *  Throws up the following errors:
-     *
-     * "mibII/route_write.c", line 113: undefined struct/union member: rt_nodes
-     * "mibII/route_write.c", line 113: undefined struct/union member: rn_key
-     * "mibII/route_write.c", line 113: left operand of "->" must be pointer to struct/union
-     * "mibII/route_write.c", line 118: undefined struct/union member: rt_pad1
-     * "mibII/route_write.c", line 123: undefined symbol: SIOCADDRT
-     * "mibII/route_write.c", line 155: undefined struct/union member: rt_nodes
-     * "mibII/route_write.c", line 155: undefined struct/union member: rn_key
-     * "mibII/route_write.c", line 155: left operand of "->" must be pointer to struct/union
-     * "mibII/route_write.c", line 160: undefined struct/union member: rt_pad1
-     * "mibII/route_write.c", line 166: undefined symbol: SIOCDELRT
-     */
+#else                           /* SIOCADDRT */
     return -1;
 #endif
-
 }
 
 
@@ -161,7 +143,7 @@ addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 int
 delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
-#ifndef dynix
+#if defined SIOCDELRT && !defined(irix6)
 
     struct sockaddr_in dst;
     struct sockaddr_in gateway;
@@ -192,18 +174,11 @@ delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
     route.rt_hash = iff;
 #endif
 
-#ifdef irix6
-    return 0;
-#else
     rc = ioctl(s, SIOCDELRT, (caddr_t) & route);
     close(s);
     return rc;
-#endif
 
-#else                           /* dynix */
-    /*
-     * See 'addRoute' for the list of errors.
-     */
+#else                           /* SIOCDELRT */
     return 0;
 #endif
 }
