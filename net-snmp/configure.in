@@ -2150,7 +2150,7 @@ case $target_os in
 	irix*) # Check for nlist in mld (irix)
 		AC_CHECK_LIB(elf, nlist)
 		AC_CHECK_LIB(mld, nlist)
-		;
+		;;
 	*) # default
 		AC_CHECK_LIB(elf, nlist)
 		;;
