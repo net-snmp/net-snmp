@@ -137,7 +137,16 @@ netsnmp_check_vb_int(const netsnmp_variable_list *var)
     if (NULL == var)
         return SNMP_ERR_GENERR;
     
-    return netsnmp_check_vb_type_and_size(var, ASN_INTEGER, sizeof(int));
+    return netsnmp_check_vb_type_and_size(var, ASN_INTEGER, sizeof(long));
+}
+
+NETSNMP_INLINE int
+netsnmp_check_vb_uint(const netsnmp_variable_list *var)
+{
+    if (NULL == var)
+        return SNMP_ERR_GENERR;
+    
+    return netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED32, sizeof(long));
 }
 
 NETSNMP_INLINE int
@@ -148,7 +157,7 @@ netsnmp_check_vb_int_range(const netsnmp_variable_list *var, int low, int high)
     if (NULL == var)
         return SNMP_ERR_GENERR;
     
-    if ((rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER, sizeof(int))))
+    if ((rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER, sizeof(long))))
         return rc;
     
     if ((*var->val.integer < low) || (*var->val.integer > high)) {
