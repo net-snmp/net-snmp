@@ -565,15 +565,15 @@ netsnmp_table_data2_set_helper_handler(netsnmp_mib_handler *handler,
 
         switch (reqinfo->mode) {
         case MODE_GET:
-        case MODE_GETNEXT:
-        case MODE_GETBULK:     /* XXXWWW */
-            if (data && data->data.voidp)
-                netsnmp_table_data2_build_result(reginfo, reqinfo, request,
-                                                row,
-                                                table_info->colnum,
-                                                data->type,
-                                                data->data.voidp,
-                                                data->data_len);
+            /*
+             * GETNEXT/BULK are converted into suitable GET requests by
+             *  the higher level handlers (including updating the OID).
+             *  All that's needed here is to return the appropriate value.
+             */
+            if (data && data->data.voidp) {
+                snmp_set_var_typed_value( request->requestvb, data->type,
+                                          data->data.voidp, data->data_len );
+            }
             break;
 
         case MODE_SET_RESERVE1:
