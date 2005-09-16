@@ -236,7 +236,7 @@ init_ksm(void)
     def->pdu_free = ksm_free_pdu;
     def->pdu_clone = ksm_clone_pdu;
 
-    register_sec_mod(2066432, "ksm", def);
+    register_sec_mod(NETSNMP_KSM_SECURITY_MODEL, "ksm", def);
 }
 
 /*
