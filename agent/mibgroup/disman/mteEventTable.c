@@ -174,7 +174,7 @@ parse_notificationEvent(const char *token, char *line) {
      * add to the mteEventNotificationtable to point to the
      * notification and the objects.
      */
-    row = netsnmp_create_table_data2_row();
+    row = netsnmp_tdata_create_row();
 
     /* indexes */
     netsnmp_table_row_add_index(row, ASN_OCTET_STR, owner, strlen(owner));
@@ -190,13 +190,13 @@ parse_notificationEvent(const char *token, char *line) {
     netsnmp_set_data2_row_column(row, COLUMN_MTEEVENTNOTIFICATIONOBJECTS,
                            ASN_OCTET_STR, name_buf, strlen(name_buf));
 
-    netsnmp_table_data2_add_row(mteEventNotif_table_set2->table, row);
+    netsnmp_tdata_add_row(mteEventNotif_table_set2->table, row);
 
     /*
      * add to the mteEventTable to make it a notification to trigger
      * notification and the objects.
      */
-    row = netsnmp_create_table_data2_row();
+    row = netsnmp_tdata_create_row();
 
     /* indexes */
     netsnmp_table_row_add_index(row, ASN_OCTET_STR, owner, strlen(owner));
@@ -215,7 +215,7 @@ parse_notificationEvent(const char *token, char *line) {
     netsnmp_set_data2_row_column(row, COLUMN_MTEEVENTENTRYSTATUS,
                            ASN_INTEGER, (char *) &tlong, sizeof(tlong));
 
-    netsnmp_table_data2_add_row(table_set2->table, row);
+    netsnmp_tdata_add_row(table_set2->table, row);
     
     /*
      * now all the objects to put into the trap's object row
