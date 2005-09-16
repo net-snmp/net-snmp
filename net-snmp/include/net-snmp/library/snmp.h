@@ -296,6 +296,7 @@ SOFTWARE.
 #define UCD_MSG_FLAG_ALWAYS_IN_VIEW          0x800
 #define UCD_MSG_FLAG_PDU_TIMEOUT            0x1000
 #define UCD_MSG_FLAG_ONE_PASS_ONLY          0x2000
+#define UCD_MSG_FLAG_TUNNELED               0x4000
 
     /*
      * view status 
