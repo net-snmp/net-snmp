@@ -769,7 +769,7 @@ asn_build_unsigned_int(u_char * data,
 u_char         *
 asn_parse_string(u_char * data,
                  size_t * datalength,
-                 u_char * type, u_char * string, size_t * strlength)
+                 u_char * type, u_char * str, size_t * strlength)
 {
     static const char *errpre = "parse string";
     u_char         *bufp = data;
@@ -789,9 +789,9 @@ asn_parse_string(u_char * data,
 
     DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 
-    memmove(string, bufp, asn_length);
+    memmove(str, bufp, asn_length);
     if (*strlength > (int) asn_length)
-        string[asn_length] = 0;
+        str[asn_length] = 0;
     *strlength = (int) asn_length;
     *datalength -= (int) asn_length + (bufp - data);
 
@@ -800,7 +800,7 @@ asn_parse_string(u_char * data,
         size_t          l = (buf != NULL) ? (1 + asn_length) : 0, ol = 0;
 
         if (sprint_realloc_asciistring
-            (&buf, &l, &ol, 1, string, asn_length)) {
+            (&buf, &l, &ol, 1, str, asn_length)) {
             DEBUGMSG(("dumpv_recv", "  String:\t%s\n", buf));
         } else {
             if (buf == NULL) {
@@ -844,7 +844,7 @@ asn_parse_string(u_char * data,
 u_char         *
 asn_build_string(u_char * data,
                  size_t * datalength,
-                 u_char type, const u_char * string, size_t strlength)
+                 u_char type, const u_char * str, size_t strlength)
 {
     /*
      * ASN.1 octet string ::= primstring | cmpdstring
@@ -861,10 +861,10 @@ asn_build_string(u_char * data,
         return NULL;
 
     if (strlength) {
-        if (string == NULL) {
+        if (str == NULL) {
             memset(data, 0, strlength);
         } else {
-            memmove(data, string, strlength);
+            memmove(data, str, strlength);
         }
     }
     *datalength -= strlength;
@@ -874,7 +874,7 @@ asn_build_string(u_char * data,
         size_t          l = (buf != NULL) ? (1 + strlength) : 0, ol = 0;
 
         if (sprint_realloc_asciistring
-            (&buf, &l, &ol, 1, string, strlength)) {
+            (&buf, &l, &ol, 1, str, strlength)) {
             DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
         } else {
             if (buf == NULL) {
@@ -1646,7 +1646,7 @@ asn_build_null(u_char * data, size_t * datalength, u_char type)
 u_char         *
 asn_parse_bitstring(u_char * data,
                     size_t * datalength,
-                    u_char * type, u_char * string, size_t * strlength)
+                    u_char * type, u_char * str, size_t * strlength)
 {
     /*
      * bitstring ::= 0x03 asnlength unused {byte}*
@@ -1673,7 +1673,7 @@ asn_parse_bitstring(u_char * data,
     DEBUGMSGHEX(("dumpv_recv", data, asn_length));
     DEBUGMSG(("dumpv_recv", "\n"));
 
-    memmove(string, bufp, asn_length);
+    memmove(str, bufp, asn_length);
     *strlength = (int) asn_length;
     *datalength -= (int) asn_length + (bufp - data);
     return bufp + asn_length;
@@ -1705,23 +1705,23 @@ asn_parse_bitstring(u_char * data,
 u_char         *
 asn_build_bitstring(u_char * data,
                     size_t * datalength,
-                    u_char type, const u_char * string, size_t strlength)
+                    u_char type, const u_char * str, size_t strlength)
 {
     /*
      * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
      */
     static const char *errpre = "build bitstring";
     if (_asn_bitstring_check
-        (errpre, strlength, (u_char)((string) ? *string :  0)))
+        (errpre, strlength, (u_char)((str) ? *str :  0)))
         return NULL;
 
     data = asn_build_header(data, datalength, type, strlength);
     if (_asn_build_header_check(errpre, data, *datalength, strlength))
         return NULL;
 
-    if (strlength > 0 && string)
-        memmove(data, string, strlength);
-    else if (strlength > 0 && !string) {
+    if (strlength > 0 && str)
+        memmove(data, str, strlength);
+    else if (strlength > 0 && !str) {
         ERROR_MSG("no string passed into asn_build_bitstring\n");
         return NULL;
     }
@@ -2825,7 +2825,7 @@ int
 asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
                           size_t * offset, int r,
                           u_char type,
-                          const u_char * string, size_t strlength)
+                          const u_char * str, size_t strlength)
 {
     static const char *errpre = "build string";
     size_t          start_offset = *offset;
@@ -2837,7 +2837,7 @@ asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
     }
 
     *offset += strlength;
-    memcpy(*pkt + *pkt_len - *offset, string, strlength);
+    memcpy(*pkt + *pkt_len - *offset, str, strlength);
 
     if (asn_realloc_rbuild_header
         (pkt, pkt_len, offset, r, type, strlength)) {
@@ -2856,7 +2856,7 @@ asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
                         (buf != NULL) ? (2 * strlength) : 0, ol = 0;
 
                     if (sprint_realloc_asciistring
-                        (&buf, &l, &ol, 1, string, strlength)) {
+                        (&buf, &l, &ol, 1, str, strlength)) {
                         DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
                     } else {
                         if (buf == NULL) {
@@ -3180,7 +3180,7 @@ int
 asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
                              size_t * offset, int r,
                              u_char type,
-                             const u_char * string, size_t strlength)
+                             const u_char * str, size_t strlength)
 {
     /*
      * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
@@ -3195,7 +3195,7 @@ asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
     }
 
     *offset += strlength;
-    memcpy(*pkt + *pkt_len - *offset, string, strlength);
+    memcpy(*pkt + *pkt_len - *offset, str, strlength);
 
     if (asn_realloc_rbuild_header
         (pkt, pkt_len, offset, r, type, strlength)) {
@@ -3214,7 +3214,7 @@ asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
                         (buf != NULL) ? (2 * strlength) : 0, ol = 0;
 
                     if (sprint_realloc_asciistring
-                        (&buf, &l, &ol, 1, string, strlength)) {
+                        (&buf, &l, &ol, 1, str, strlength)) {
                         DEBUGMSG(("dumpv_send", "  Bitstring:\t%s\n",
                                   buf));
                     } else {
