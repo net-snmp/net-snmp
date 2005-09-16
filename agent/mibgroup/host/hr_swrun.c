@@ -1076,7 +1076,7 @@ var_hrswrun(struct variable * vp,
 #else
         long_return = proc_buf->p_swrss;
 #endif
-#elif HAVE_KVM_GETPROCS
+#elif HAVE_KVM_GETPROCS && !defined(darwin8)
 #if defined(freebsd3) && !defined(darwin)
         long_return =
     #if defined(freebsd5)
