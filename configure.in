@@ -2417,7 +2417,7 @@ if test "x$embed_perl" = "xyes"; then
     AC_MSG_CHECKING([for perl LDFLAGS])
     perlldopts=`$myperl -MExtUtils::Embed -e ldopts`
     AC_MSG_RESULT($perlldopts)
-    LIBS="$LIBS $perlldopts"
+    PERLLDOPTS="$perlldopts"
 
     # newer perl vs older perl call functions
     AC_CHECK_FUNCS(Perl_eval_pv eval_pv perl_eval_pv)
@@ -2436,6 +2436,7 @@ else
 fi
 AC_SUBST(EMBEDPERLINSTALL)
 AC_SUBST(EMBEDPERLUNINSTALL)
+AC_SUBST(PERLLDOPTS)
 
 # reset libs
 AGENTLIBS=$LIBS
