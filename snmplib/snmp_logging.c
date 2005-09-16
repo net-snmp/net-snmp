@@ -955,7 +955,7 @@ log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *str)
     } else {
         strcpy(sbuf, "");
     }
-    newline = string[strlen(str) - 1] == '\n';	/* XXX - Eh ? */
+    newline = str[strlen(str) - 1] == '\n';	/* XXX - Eh ? */
 
     if (logh->imagic)
        printf(         "%s%s", sbuf, str);
