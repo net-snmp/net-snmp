@@ -6000,14 +6000,14 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DUMP_PACKET)) {
         if (transport->f_fmtaddr != NULL) {
-            char           *string = NULL;
-            string =
+            char           *str = NULL;
+            str =
                 transport->f_fmtaddr(transport, rp->pdu->transport_data,
                                      rp->pdu->transport_data_length);
-            if (string != NULL) {
+            if (str != NULL) {
                 snmp_log(LOG_DEBUG, "\nResending %d bytes to %s\n", length,
-                         string);
-                SNMP_FREE(string);
+                         str);
+                SNMP_FREE(str);
             } else {
                 snmp_log(LOG_DEBUG, "\nResending %d bytes to <UNKNOWN>\n",
                          length);
