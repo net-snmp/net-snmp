@@ -64,7 +64,7 @@ extern          "C" {
     } netsnmp_table_data2_set_storage;
 
     typedef struct netsnmp_table_data2_set_s {
-        netsnmp_table_data2 *table;
+        netsnmp_tdata  *table;
         netsnmp_table_data2_set_storage *default_row;
         int             allow_creation; /* set to 1 to allow creation of new rows */
         unsigned int    rowstatus_column;

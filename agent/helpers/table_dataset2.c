@@ -30,7 +30,7 @@ typedef struct data_set_cache_s {
 #define STATE_FREE     4
 
 typedef struct newrow_stash_s {
-    netsnmp_table_data2row *newrow;
+    netsnmp_tdata_row *newrow;
     int             state;
     int             created;
     int             deleted;
@@ -70,7 +70,7 @@ netsnmp_create_table_data2_set(const char *table_name)
         SNMP_MALLOC_TYPEDEF(netsnmp_table_data2_set);
     if (!table_set2)
         return NULL;
-    table_set2->table = netsnmp_create_table_data2(table_name);
+    table_set2->table = netsnmp_tdata_create(table_name);
     return table_set2;
 }
 
@@ -143,7 +143,7 @@ netsnmp_register_table_data2_set(netsnmp_handler_registration *reginfo,
 
     netsnmp_inject_handler(reginfo,
                            netsnmp_get_table_data2_set_handler(data_set));
-    return netsnmp_register_table_data2(reginfo, data_set->table,
+    return netsnmp_register_tdata(reginfo, data_set->table,
                                        table_info);
 }
 
@@ -167,7 +167,7 @@ netsnmp_extract_table_data2_set_column(netsnmp_request_info *request,
                                      unsigned int column)
 {
     netsnmp_table_data2_set_storage *data =
-        netsnmp_extract_table_data2row_data2( request );
+        netsnmp_tdata_extract_entry( request );
     if (data) {
         data = netsnmp_table_data2_set_find_column(data, column);
     }
@@ -184,25 +184,25 @@ netsnmp_extract_table_data2_set(netsnmp_request_info *request)
 }
 
 /** returns the first row in the table */
-netsnmp_table_data2row *
+netsnmp_tdata_row *
 netsnmp_table_data2_set_get_first_row(netsnmp_table_data2_set *table)
 {
-    return netsnmp_table_data2_get_first_row(table->table);
+    return netsnmp_tdata_get_first_row(table->table);
 }
 
 /** returns the next row in the table */
-netsnmp_table_data2row *
+netsnmp_tdata_row *
 netsnmp_table_data2_set_get_next_row(netsnmp_table_data2_set *table,
-                                    netsnmp_table_data2row  *row)
+                                    netsnmp_tdata_row  *row)
 {
-    return netsnmp_table_data2_get_next_row(table->table, row);
+    return netsnmp_tdata_get_next_row(table->table, row);
 }
 
 /**
  * marks a given column in a row as writable or not.
  */
 int
-netsnmp_mark_data2_row_column_writable(netsnmp_table_data2row *row, int column,
+netsnmp_mark_data2_row_column_writable(netsnmp_tdata_row *row, int column,
                                  int writable)
 {
     netsnmp_table_data2_set_storage *data;
@@ -238,7 +238,7 @@ netsnmp_mark_data2_row_column_writable(netsnmp_table_data2row *row, int column,
  * length.  Data is memdup'ed by the function.
  */
 int
-netsnmp_set_data2_row_column(netsnmp_table_data2row *row, unsigned int column,
+netsnmp_set_data2_row_column(netsnmp_tdata_row *row, unsigned int column,
                        int type, const char *value, size_t value_len)
 {
     netsnmp_table_data2_set_storage *data;
@@ -351,16 +351,16 @@ netsnmp_table_set2_add_default_row(netsnmp_table_data2_set *table_set2,
 }
 
 /** clones a dataset2 row, including all data. */
-netsnmp_table_data2row *
-netsnmp_table_data2_set_clone_row(netsnmp_table_data2row *row)
+netsnmp_tdata_row *
+netsnmp_table_data2_set_clone_row(netsnmp_tdata_row *row)
 {
     netsnmp_table_data2_set_storage *data, **newrowdata;
-    netsnmp_table_data2row *newrow;
+    netsnmp_tdata_row *newrow;
 
     if (!row)
         return NULL;
 
-    newrow = netsnmp_table_data2_clone_row(row);
+    newrow = netsnmp_tdata_clone_row(row);
     if (!newrow)
         return NULL;
 
@@ -392,12 +392,12 @@ netsnmp_table_data2_set_clone_row(netsnmp_table_data2row *row)
 }
 
 /** creates a new row from an existing defined default set */
-netsnmp_table_data2row *
+netsnmp_tdata_row *
 netsnmp_table_data2_set_create_row_from_defaults
     (netsnmp_table_data2_set_storage *defrow)
 {
-    netsnmp_table_data2row *row;
-    row = netsnmp_create_table_data2_row();
+    netsnmp_tdata_row *row;
+    row = netsnmp_tdata_create_row();
     if (!row)
         return NULL;
     for (; defrow; defrow = defrow->next) {
@@ -417,7 +417,7 @@ netsnmp_table_data2_set_create_newrowstash
      netsnmp_table_request_info *table_info)
 {
     newrow_stash   *newrowstash = NULL;
-    netsnmp_table_data2row *newrow   = NULL;
+    netsnmp_tdata_row *newrow   = NULL;
 
     newrowstash = SNMP_MALLOC_TYPEDEF(newrow_stash);
     newrowstash->created = 1;
@@ -441,7 +441,7 @@ netsnmp_table_data2_set_helper_handler(netsnmp_mib_handler *handler,
 
     netsnmp_table_data2_set_storage *data = NULL;
     newrow_stash   *newrowstash = NULL;
-    netsnmp_table_data2row *row, *newrow = NULL;
+    netsnmp_tdata_row *row, *newrow = NULL;
     netsnmp_table_request_info *table_info;
     netsnmp_request_info *request;
     oid            *suffix;
@@ -461,7 +461,7 @@ netsnmp_table_data2_set_helper_handler(netsnmp_mib_handler *handler,
         /*
          * extract our stored data and table info 
          */
-        row = netsnmp_extract_table_data2row(request);
+        row = netsnmp_tdata_extract_row(request);
         table_info = netsnmp_extract_table_info(request);
         suffix = requests->requestvb->name + reginfo->rootoid_len + 2;
         suffix_len = requests->requestvb->name_length -
@@ -808,28 +808,28 @@ netsnmp_table_dataset2_add_index(netsnmp_table_data2_set *table, u_char type)
 {
     if (!table)
         return;
-    netsnmp_table_data2_add_index(table->table, type);
+    netsnmp_tdata_add_index(table->table, type);
 }
 
 /** adds a new row to a dataset2 table */
 NETSNMP_INLINE void
 netsnmp_table_dataset2_add_row(netsnmp_table_data2_set *table,
-                              netsnmp_table_data2row *row)
+                              netsnmp_tdata_row *row)
 {
     if (!table)
         return;
-    netsnmp_table_data2_add_row(table->table, row);
+    netsnmp_tdata_add_row(table->table, row);
 }
 
 /** adds a new row to a dataset2 table */
 NETSNMP_INLINE void
 netsnmp_table_dataset2_replace_row(netsnmp_table_data2_set *table,
-                                  netsnmp_table_data2row *origrow,
-                                  netsnmp_table_data2row *newrow)
+                                  netsnmp_tdata_row *origrow,
+                                  netsnmp_tdata_row *newrow)
 {
     if (!table)
         return;
-    netsnmp_table_data2_replace_row(table->table, origrow, newrow);
+    netsnmp_tdata_replace_row(table->table, origrow, newrow);
 }
 
 /** deletes a single dataset2 table data.
@@ -859,32 +859,32 @@ netsnmp_table_dataset2_delete_all_data2(netsnmp_table_data2_set_storage *data)
 
 /** deletes all the data from this node and beyond in the linked list */
 NETSNMP_INLINE void
-netsnmp_table_dataset2_delete_row(netsnmp_table_data2row *row)
+netsnmp_table_dataset2_delete_row(netsnmp_tdata_row *row)
 {
     netsnmp_table_data2_set_storage *data;
 
     if (!row)
         return;
 
-    data = netsnmp_table_data2_delete_row(row);
+    data = netsnmp_tdata_delete_row(row);
     netsnmp_table_dataset2_delete_all_data2(data);
 }
 
 /** removes a row from the table, but doesn't delete/free anything */
 NETSNMP_INLINE void
 netsnmp_table_dataset2_remove_row(netsnmp_table_data2_set *table,
-                                 netsnmp_table_data2row *row)
+                                 netsnmp_tdata_row *row)
 {
     if (!table)
         return;
 
-    netsnmp_table_data2_remove_and_delete_row(table->table, row);
+    netsnmp_tdata_remove_and_delete_row(table->table, row);
 }
 
 /** removes a row from the table and then deletes it (and all it's data) */
 NETSNMP_INLINE void
 netsnmp_table_dataset2_remove_and_delete_row(netsnmp_table_data2_set *table,
-                                            netsnmp_table_data2row *row)
+                                             netsnmp_tdata_row *row)
 {
     netsnmp_table_data2_set_storage *data;
 
@@ -892,7 +892,7 @@ netsnmp_table_dataset2_remove_and_delete_row(netsnmp_table_data2_set *table,
         return;
 
     data = (netsnmp_table_data2_set_storage *)
-        netsnmp_table_data2_remove_and_delete_row(table->table, row);
+        netsnmp_tdata_remove_and_delete_row(table->table, row);
 
     netsnmp_table_dataset2_delete_all_data2(data);
 }
@@ -972,7 +972,7 @@ netsnmp_table_dataset2_num_rows(netsnmp_table_data2_set *table)
 {
     if (!table)
         return 0;
-    return netsnmp_table_data2_num_rows(table->table);
+    return netsnmp_tdata_num_rows(table->table);
 }
 
      /* Confusingly named, and not declared properly */
