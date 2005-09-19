@@ -288,6 +288,9 @@
 /* Define to 1 if you have the `if_nameindex' function. */
 #undef HAVE_IF_NAMEINDEX
 
+/* Define to 1 if you have the `if_nametoindex' function. */
+#undef HAVE_IF_NAMETOINDEX
+
 /* Define to 1 if you have the `index' function. */
 #undef HAVE_INDEX
 
@@ -317,6 +320,9 @@
 
 /* Define to 1 if you have the `kvm_getprocs' function. */
 #undef HAVE_KVM_GETPROCS
+
+/* Define to 1 if you have the `kvm_getswapinfo' function. */
+#undef HAVE_KVM_GETSWAPINFO
 
 /* Define to 1 if you have the <kvm.h> header file. */
 #undef HAVE_KVM_H
@@ -368,6 +374,9 @@
 
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
+
+/* Define to 1 if you have the <linux/ethtool.h> header file. */
+#undef HAVE_LINUX_ETHTOOL_H
 
 /* Define to 1 if you have the <linux/hdreg.h> header file. */
 #undef HAVE_LINUX_HDREG_H
@@ -539,6 +548,9 @@
 
 /* Define to 1 if you have the <osreldate.h> header file. */
 #undef HAVE_OSRELDATE_H
+
+/* Define to 1 if you have the <pci/pci.h> header file. */
+#undef HAVE_PCI_PCI_H
 
 /* Define to 1 if you have the `perl_eval_pv' function. */
 #undef HAVE_PERL_EVAL_PV
@@ -1355,8 +1367,13 @@
 
 #ifndef HAVE_INDEX
 #ifdef HAVE_STRCHR
+#ifdef mingw32
+# define index(a,b) strchr(a,b)
+# define rindex(a,b) strrchr(a,b)
+#else
 # define index strchr
 # define rindex strrchr
+#endif
 #endif
 #endif
 
@@ -1566,6 +1583,9 @@
 
 /* define if agentx transport is to use domain sockets only */
 #undef AGENTX_DOM_SOCK_ONLY
+
+/* define if you do not want snmptrapd to register as an AgentX subagent */
+#undef SNMPTRAPD_DISABLE_AGENTX
 
 #undef HEIMDAL
 

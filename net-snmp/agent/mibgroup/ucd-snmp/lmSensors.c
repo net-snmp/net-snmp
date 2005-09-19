@@ -215,7 +215,6 @@ var_lmSensorsTable(struct variable *vp,
 {
     static long     long_ret;
     static unsigned char string[SPRINT_MAX_LEN];
-    int             i;  /* generates a variable not used error message in Solaris - that's OK */
 
     int             s_index;
     int             s_type = -1;
@@ -303,9 +302,7 @@ var_lmSensorsTable(struct variable *vp,
 static int
 sensor_init(void)
 {
-#ifdef solaris2
-    clock_t         t = time(NULL);
-#else
+#ifndef solaris2
     int             res;
     char            filename[] = CONFIG_FILE_NAME;
     clock_t         t = clock();
@@ -313,7 +310,7 @@ sensor_init(void)
     if (!fp)
         return 1;
 
-    if (res = sensors_init(fp))
+    if ((res = sensors_init(fp)))
         return 2;
 
     _sensor_load(t); /* I'll let the linux people decide whether they want to load right away */
@@ -344,7 +341,7 @@ sensor_load(void)
 /* *******  picld sensor procedures * */
 #ifdef HAVE_PICL_H
 
-static int
+static void
 process_individual_fan(picl_nodehdl_t childh, 
                      char propname[PICL_PROPNAMELEN_MAX])
 {
@@ -357,8 +354,7 @@ process_individual_fan(picl_nodehdl_t childh,
     picl_errno_t    error_code,ec2;
 
     if (sensor_array[typ].n >= MAX_SENSORS){
-        DEBUGMSG(("ucd-snmp/lmSensors",
-            "There are too many sensors of type %d\n",typ));
+        snmp_log(LOG_ERR, "There are too many sensors of type %d\n",typ);
         }
     else{
         error_code = (picl_get_propinfo_by_name(childh,
@@ -383,7 +379,7 @@ process_individual_fan(picl_nodehdl_t childh,
         }
 } /*process individual fan*/
 
-static int
+static void
 process_temperature_sensor(picl_nodehdl_t childh,
                                char propname[PICL_PROPNAMELEN_MAX])
 {
@@ -396,8 +392,7 @@ process_temperature_sensor(picl_nodehdl_t childh,
     picl_errno_t    error_code,ec2;
 
     if (sensor_array[typ].n >= MAX_SENSORS){
-        DEBUGMSG(("ucd-snmp/lmSensors",
-            "There are too many sensors of type %d\n",typ));
+        snmp_log(LOG_ERR, "There are too many sensors of type %d\n",typ);
         }
     else{
         error_code = (picl_get_propinfo_by_name(childh,
@@ -422,7 +417,7 @@ process_temperature_sensor(picl_nodehdl_t childh,
         }
 }  /* process temperature sensor */
 
-static int
+static void
 process_digital_sensor(picl_nodehdl_t childh,
                    char propname[PICL_PROPNAMELEN_MAX])
 {
@@ -435,8 +430,7 @@ process_digital_sensor(picl_nodehdl_t childh,
     picl_errno_t    error_code,ec2;
 
     if (sensor_array[typ].n >= MAX_SENSORS){
-        DEBUGMSG(("ucd-snmp/lmSensors",
-            "There are too many sensors of type %d\n",typ));
+        snmp_log(LOG_ERR, "There are too many sensors of type %d\n",typ);
         }
     else{
         error_code = (picl_get_propinfo_by_name(childh,
@@ -461,7 +455,7 @@ process_digital_sensor(picl_nodehdl_t childh,
         }
 }  /* process digital sensor */
 
-static int
+static void
 process_switch(picl_nodehdl_t childh,
                    char propname[PICL_PROPNAMELEN_MAX])
 {
@@ -470,7 +464,7 @@ process_switch(picl_nodehdl_t childh,
 
     char state[32];
     int st_cnt;
-    char *switch_settings[]={"OFF","ON","NORMAL","LOCKED","UNKNOWN",
+    const char *switch_settings[]={"OFF","ON","NORMAL","LOCKED","UNKNOWN",
                                     "DIAG","SECURE"};
     u_int value;
     u_int found = 0;
@@ -478,8 +472,7 @@ process_switch(picl_nodehdl_t childh,
     int typ = 3; /*other*/
 
     if (sensor_array[typ].n >= MAX_SENSORS){
-        DEBUGMSG(("ucd-snmp/lmSensors",
-            "There are too many sensors of type %d\n",typ));
+        snmp_log(LOG_ERR, "There are too many sensors of type %d\n",typ);
         }
     else{
         picl_errno_t    error_code,ec2;
@@ -516,7 +509,7 @@ process_switch(picl_nodehdl_t childh,
         }
 } /*process switch*/
 
-static int
+static void
 process_led(picl_nodehdl_t childh,
                    char propname[PICL_PROPNAMELEN_MAX])
 {
@@ -525,7 +518,7 @@ process_led(picl_nodehdl_t childh,
 
     char state[32];
     int st_cnt;
-    char *led_settings[]={"OFF","ON","BLINK"};
+    const char *led_settings[]={"OFF","ON","BLINK"};
     u_int value;
     u_int found = 0;
     int max_led_posns = 3;
@@ -534,8 +527,7 @@ process_led(picl_nodehdl_t childh,
     picl_errno_t    error_code,ec2;
 
     if (sensor_array[typ].n >= MAX_SENSORS){
-        DEBUGMSG(("ucd-snmp/lmSensors",
-            "There are too many sensors of type %d\n",typ));
+        snmp_log(LOG_ERR, "There are too many sensors of type %d\n",typ);
         }
     else{
         error_code = (picl_get_propinfo_by_name(childh,
@@ -570,7 +562,7 @@ process_led(picl_nodehdl_t childh,
        }
 } 
 
-static int
+static void
 process_i2c(picl_nodehdl_t childh,
                    char propname[PICL_PROPNAMELEN_MAX])
 {
@@ -579,7 +571,7 @@ process_i2c(picl_nodehdl_t childh,
 
     char state[32];
     int st_cnt;
-    char *i2c_settings[]={"OK"};
+    const char *i2c_settings[]={"OK"};
     u_int value;
     u_int found = 0;
     int max_i2c_posns = 1;
@@ -588,8 +580,7 @@ process_i2c(picl_nodehdl_t childh,
     picl_errno_t    error_code,ec2;
 
     if (sensor_array[typ].n >= MAX_SENSORS){
-        DEBUGMSG(("ucd-snmp/lmSensors",
-            "There are too many sensors of type %d\n",typ));
+        snmp_log(LOG_ERR, "There are too many sensors of type %d\n",typ);
         }
     else{
         error_code = (picl_get_propinfo_by_name(childh,
@@ -761,8 +752,7 @@ _sensor_load(clock_t t)
     int typ;
     int temp;
     int other;
-    int er_code;
-    char *fantypes[]={"CPU","PWR","AFB"};
+    const char *fantypes[]={"CPU","PWR","AFB"};
     kstat_ctl_t *kc;
     kstat_t *kp;
     envctrl_fan_t *fan_info;
@@ -770,6 +760,7 @@ _sensor_load(clock_t t)
     envctrl_encl_t *enc_info;
 
 #ifdef HAVE_PICL_H
+    int er_code;
     picl_errno_t     error_code;
     picl_nodehdl_t  rooth,plath;
     char sname[PICL_PROPNAMELEN_MAX] = "SYSTEM";
@@ -831,7 +822,7 @@ if (kc == 0) {
 else{
     kp = kstat_lookup(kc, ENVCTRL_MODULE_NAME, 0, ENVCTRL_KSTAT_FANSTAT);
     if (kp == 0) {
-        DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup fan kstat"));
+        DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup fan kstat\n"));
         } /* endif lookup fans */
     else{
         if (kstat_read(kc, kp, 0) == -1) {
@@ -856,11 +847,11 @@ else{
 
     kp = kstat_lookup(kc, ENVCTRL_MODULE_NAME, 0, ENVCTRL_KSTAT_PSNAME);
     if (kp == 0) {
-        DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup power supply kstat"));
+        DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup power supply kstat\n"));
         } /* endif lookup power supply */
     else{
         if (kstat_read(kc, kp, 0) == -1) {
-            DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't read power supply kstat"));
+            DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't read power supply kstat\n"));
             } /* endif kstatread fan */
         else{
             typ = 2;
@@ -881,11 +872,11 @@ else{
 
     kp = kstat_lookup(kc, ENVCTRL_MODULE_NAME, 0, ENVCTRL_KSTAT_ENCL);
     if (kp == 0) {
-        DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup enclosure kstat"));
+        DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup enclosure kstat\n"));
         } /* endif lookup enclosure */
     else{
         if (kstat_read(kc, kp, 0) == -1) {
-            DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't read enclosure kstat"));
+            DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't read enclosure kstat\n"));
             } /* endif kstatread enclosure */
         else{
             enc_info = (envctrl_encl_t *) kp->ks_data; 
@@ -962,10 +953,10 @@ else{
     for (i = 0; i < N_TYPES; i++)
         sensor_array[i].n = 0;
 
-    while (chip = sensors_get_detected_chips(&chip_nr)) {
+    while ((chip = sensors_get_detected_chips(&chip_nr))) {
 	int             a = 0;
 	int             b = 0;
-        while (data = sensors_get_all_features(*chip, &a, &b)) {
+        while ((data = sensors_get_all_features(*chip, &a, &b))) {
             char           *label = NULL;
             double          val;
 

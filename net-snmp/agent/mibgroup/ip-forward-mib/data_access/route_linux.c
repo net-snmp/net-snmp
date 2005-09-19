@@ -12,6 +12,7 @@
 #include <net-snmp/data_access/route.h>
 
 #include "ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_constants.h"
+#include "if-mib/data_access/interface_ioctl.h"
 
 static int
 _type_from_flags(unsigned int flags)

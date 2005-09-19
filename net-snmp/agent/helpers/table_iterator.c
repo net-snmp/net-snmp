@@ -610,14 +610,15 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                                                       TI_REQUEST_CACHE);
                     if (!ti_info->results) {
                         table_info = netsnmp_extract_table_info(request);
-                        if (table_info->colnum == tbl_info->max_column) {
+                        table_info->colnum =
+                            netsnmp_table_next_column(table_info);
+                        if (0 == table_info->colnum) {
                             coloid[reginfo->rootoid_len+1] = table_info->colnum+1;
                             snmp_set_var_objid(request->requestvb,
                                                coloid, reginfo->rootoid_len+2);
                             request->processed = TABLE_ITERATOR_NOTAGAIN;
                             break;
                         } else {
-                            table_info->colnum++;
                             notdone = 1;
                         }
                     }
@@ -648,7 +649,13 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     snmp_set_var_objid(request->requestvb, ti_info->best_match,
                                        ti_info->best_match_len);
                 else {
-                    coloid[reginfo->rootoid_len+1] = table_info->colnum+1;
+                    coloid[reginfo->rootoid_len+1] = 
+                        netsnmp_table_next_column(table_info);
+                    if (0 == coloid[reginfo->rootoid_len+1]) {
+                        /* out of range. */
+                        coloid[reginfo->rootoid_len+1] = tbl_info->max_column + 1;
+                        request->processed = TABLE_ITERATOR_NOTAGAIN;
+                    }
                     snmp_set_var_objid(request->requestvb,
                                        coloid, reginfo->rootoid_len+2);
                     request->processed = 1;
