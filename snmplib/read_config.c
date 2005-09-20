@@ -1903,16 +1903,17 @@ read_config_read_memory(int type, char *readfrom,
  * @param dataptr contains the value to be stored, the supported pointers:
  *                (int *, u_int *, char **, oid **)
  *
- * @param len     is the length of the pre-allocated storeto buffer, not
- *                required for the asn integer, unsigned integer, and
- *                timeticks types.
+ * @param len     is the length of the value to be stored
+ *                (not required for the asn integer, unsigned integer,
+ *                 and timeticks types)
  *
  * @return character pointer to the end of the line. NULL if an unknown type.
  */
 char           *
 read_config_store_data(int type, char *storeto, void *dataptr, size_t * len)
 {
-    return read_config_store_data_prefix(' ', type, storeto, dataptr, *len);
+    return read_config_store_data_prefix(' ', type, storeto, dataptr,
+                                                         (len ? *len : 0));
 }
 
 char           *
