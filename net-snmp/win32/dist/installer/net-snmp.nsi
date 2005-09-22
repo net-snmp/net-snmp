@@ -604,6 +604,17 @@ done:
   Exch $R3
 FunctionEnd
 
+Function .onInit
+Push $0
+
+; Disable Development files section by default
+SectionGetFlags ${SEC05} $0
+IntOp $0 $0 & ${SECTION_OFF}
+SectionSetFlags ${SEC05} $0
+
+Pop $0
+FunctionEnd
+
 Function un.onUninstSuccess
   HideWindow
   MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) was successfully removed from your computer."
