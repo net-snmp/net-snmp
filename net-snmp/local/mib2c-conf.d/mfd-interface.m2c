@@ -987,7 +987,7 @@ _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
 
     /* (INDEX) $m2c_node_summary */
 @   eval $m2c_nv_val = "rowreq_ctx->tbl_idx.$node"@
-@   eval $m2c_nv_len = "rowreq_ctx->tbl_idx.$node_len"@
+@   eval $m2c_nv_len = "rowreq_ctx->tbl_idx.${node}_len"@
 @   eval $m2c_nv_str = "rowreq_ctx->tbl_idx.$node"@
 @   include node-validate.m2i@
        if (MFD_SUCCESS != rc)
