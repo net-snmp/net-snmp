@@ -204,7 +204,7 @@ var_hrsys(struct variable * vp,
           size_t * length,
           int exact, size_t * var_len, WriteMethod ** write_method)
 {
-    static char     string[1024];
+    static char     string[129]; /* per MIB, max size is 128 */
 #if defined(solaris2)
     /* max size of nvram property */
     char bootparam[8192];
