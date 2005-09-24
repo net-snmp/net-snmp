@@ -12,6 +12,9 @@
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PRODUCT_STARTMENU_REGVAL "Net-SNMP:StartMenuDir"
 
+; Is OpenSSL required for this build?
+!define OPENSSL_REQUIRED "0"
+
 ; For environment variables
 !define ALL_USERS
 !include "SetEnVar.nsi"
@@ -31,6 +34,10 @@
 ; License page
 !define MUI_LICENSEPAGE_RADIOBUTTONS
 !insertmacro MUI_PAGE_LICENSE "docs\COPYING"
+
+; Make sure SSL is installed.
+Page custom IsSLLInstalled "" ": custom page"
+
 ; Components page
 !insertmacro MUI_PAGE_COMPONENTS
 ; Directory page
@@ -55,6 +62,8 @@ var ICONS_GROUP
 ; Language files
 !insertmacro MUI_LANGUAGE "English"
 
+; For sections
+!define SECTION_OFF   0xFFFFFFFE
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_MAJ_VERSION}.${PRODUCT_MIN_VERSION}.${PRODUCT_REVISION}"
@@ -604,6 +613,15 @@ done:
   Exch $R3
 FunctionEnd
 
+Function un.onUninstSuccess
+  HideWindow
+  MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) was successfully removed from your computer."
+FunctionEnd
+
+Function un.onInit
+
+FunctionEnd
+
 Function .onInit
 Push $0
 
@@ -613,15 +631,6 @@ IntOp $0 $0 & ${SECTION_OFF}
 SectionSetFlags ${SEC05} $0
 
 Pop $0
-FunctionEnd
-
-Function un.onUninstSuccess
-  HideWindow
-  MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) was successfully removed from your computer."
-FunctionEnd
-
-Function un.onInit
- 
 FunctionEnd
 
 Section Uninstall
@@ -1009,4 +1018,13 @@ Section Uninstall
   SetAutoClose true
 SectionEnd
 
+Function IsSLLInstalled
+  StrCmp ${OPENSSL_REQUIRED} "0" continueInstall
+  IfFileExists "$%windir%\system32\libeay32.dll" 0 noSSL
+    Goto continueInstall
+  noSSL:
+    MessageBox MB_YESNO|MB_ICONQUESTION "OpenSSL (libeay32.dll) does not appear to be installed.  OpenSSL is required for this installation of Net-SNMP.  Please install OpenSSL from http://www.slproweb.com/products/Win32OpenSSL.html and try again.  Would you like to continue installing anyways?" IDYES continueInstall
+  Quit
+  continueInstall:
+FunctionEnd
 
