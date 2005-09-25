@@ -4,13 +4,16 @@
 !define PRODUCT_NAME "Net-SNMP"
 !define PRODUCT_MAJ_VERSION "5"
 !define PRODUCT_MIN_VERSION "1"
-!define PRODUCT_REVISION "2"
-!define PRODUCT_EXE_VERSION "pre1"
+!define PRODUCT_REVISION "2.pre1"
+!define PRODUCT_EXE_VERSION "1"
 !define PRODUCT_WEB_SITE "http://www.net-snmp.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\encode_keychange.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PRODUCT_STARTMENU_REGVAL "Net-SNMP:StartMenuDir"
+
+; Is OpenSSL required for this build?
+!define OPENSSL_REQUIRED "0"
 
 ; For environment variables
 !define ALL_USERS
@@ -31,6 +34,10 @@
 ; License page
 !define MUI_LICENSEPAGE_RADIOBUTTONS
 !insertmacro MUI_PAGE_LICENSE "docs\COPYING"
+
+; Make sure SSL is installed.
+Page custom IsSLLInstalled "" ": custom page"
+
 ; Components page
 !insertmacro MUI_PAGE_COMPONENTS
 ; Directory page
@@ -634,3 +641,14 @@ Section Uninstall
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
   SetAutoClose true
 SectionEnd
+
+Function IsSLLInstalled
+  StrCmp ${OPENSSL_REQUIRED} "0" continueInstall
+  IfFileExists "$%windir%\system32\libeay32.dll" 0 noSSL
+    Goto continueInstall
+  noSSL:
+    MessageBox MB_YESNO|MB_ICONQUESTION "OpenSSL (libeay32.dll) does not appear to be installed.  OpenSSL is required for this installation of Net-SNMP.  Please install OpenSSL from http://www.slproweb.com/products/Win32OpenSSL.html and try again.  Would you like to continue installing anyways?" IDYES continueInstall
+  Quit
+  continueInstall:
+FunctionEnd
+

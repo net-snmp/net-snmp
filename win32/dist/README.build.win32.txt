@@ -23,6 +23,8 @@ There are four sections:
 
   Bulding a NullSoft installer package
 
+  Bulding an OpenSSL version
+
 
 Compiling binaries
 ==================
@@ -188,7 +190,7 @@ Note:  A temporary location of /tmp/net-snmp is used.
 
 5.  Build Net-SNMP man pages: 
 
-    ./configure; make sedscript; cd man;make; cd ..
+    ./configure --prefix=c:/usr; make sedscript; cd man;make; cd ..
 
 6.  Install only the man files to /temp/net-snmp:
 
@@ -222,7 +224,7 @@ Note:  A temporary location of /tmp/net-snmp is used.
 10. Verify each converted file to ensure all the links are correct.  The files
     are located in /tmp/net-snmp/html by default.  In some instances, URLs may be 
     split across two lines such as the Variables link at the bottom of 
-    man8-snmptrapd.8.html.
+    /tmp/net-snmp/html/man8-snmptrapd.8.html.
 
 11. If new man pages are added or removed, the Table of Contents (Net-SNMP.hhc) and
     project file (Net-SNMP.hhp) need to be updated by hand.
@@ -384,3 +386,66 @@ Requirements
 11. Compare the directory contents of the compiled folder with the installed
     folder to ensure there are no missing MIB files etc.  Modify net-snmp.nsi
     and rebuild if required.
+
+
+Bulding an OpenSSL version
+==========================
+
+Requirements
+------------
+
+ -OpenSSL binary from http://www.slproweb.com/products/Win32OpenSSL.html
+
+1.  Install the OpenSSL binary, header and library files as explained in 
+    'Using a pre-compiled version' of the 'Microsoft Visual C++ - Building with 
+    OpenSSL' section of README.win32.
+
+2.  Move c:\usr c:\usr.temp
+
+3.  Re-build the binary exactly as above except enable OpenSSL.
+
+4.  Copy contents of c:\usr to c:\usr.temp
+
+5.  Delete c:\usr
+
+6.  Move c:\usr.temp c:\usr
+
+7.  Update the BUILD INFORMATION section of c:\usr\README.txt to include the SSL 
+    info and the filename.
+
+8.  Update the version stamp in c:\usr\net-snmp.nsi to include -ssl.  Example:
+
+    For example, for 5.3.0:
+
+    PRODUCT_MAJ_VERSION "5"
+    PRODUCT_MIN_VERSION "3"
+    PRODUCT_REVISION "0-ssl"
+    PRODUCT_EXE_VERSION "1"
+
+    The generated filename would be: net-snmp-5.3.0-ssl-1.win32.exe
+
+9.  In c:\usr\net-snmp.nsi, change:
+
+    !define OPENSSL_REQUIRED "0"
+
+    to
+
+    !define OPENSSL_REQUIRED "1"
+
+10. Launch the 'Nullsoft Install System (NSIS 2.0)'
+
+11. Select 'MakeNSISW (compiler interface)'
+
+12. Click File - Load Script
+
+13. Select c:\usr\net-snmp.nsi
+
+14. You should now have a c:\usr\Net-SNMP-x.x.x-x.exe binary installer 
+    package
+
+15. Test the package
+
+16. Compare the directory contents of the compiled folder with the installed
+    folder to ensure there are no missing MIB files etc.  Modify net-snmp.nsi
+    and rebuild if required.
+
