@@ -4166,6 +4166,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                          * use the normal_handling.
                          */
                         if (tp->next_peer &&
+                            tp->tc_index != -1 &&
+                            next_peer->tc_index != -1 &&
                             strcmp(get_tc_descriptor(tp->tc_index), "InetAddress") == 0 &&
                             strcmp(get_tc_descriptor(next_peer->tc_index),
                                    "InetAddressType") == 0 ) {
