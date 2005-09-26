@@ -9,10 +9,15 @@ if test "x$DEFAUTHTYPE" = "x"; then
     fi
 fi
 
+# XXX: HAVE_AES depends on cpp logic, so we need to test for lower-level stuff
 if grep '^#define USE_OPENSSL 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
   if test "x$DEFPRIVTYPE" = "x"; then
-    if grep '^#define HAVE_AES 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
-      DEFPRIVTYPE="AES"
+    if grep '^#define HAVE_OPENSSL_AES_H 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
+      if grep '^#define HAVE_AES_CFB128_ENCRYPT 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
+        DEFPRIVTYPE="AES"
+      else
+        DEFPRIVTYPE="DES"
+      fi
     else
       DEFPRIVTYPE="DES"
     fi
