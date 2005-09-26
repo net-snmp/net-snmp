@@ -18765,7 +18765,8 @@ fi
 
 
 
-for ac_header in stdarg.h string.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h sys/dmap.h machine/pte.h xti.h sys/sockio.h sys/socket.h sys/socketvar.h sys/un.h fstab.h sys/fs.h mtab.h ufs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/time.h sys/times.h sys/swap.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/select.h mntent.h sys/mntent.h kstat.h utsname.h sys/utsname.h sys/cdefs.h getopt.h locale.h pthread.h sys/loadavg.h regex.h linux/tasks.h pwd.h grp.h utmpx.h
+
+for ac_header in stdarg.h string.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h sys/dmap.h machine/pte.h xti.h sys/sockio.h sys/socket.h sys/socketvar.h sys/timeout.h sys/un.h fstab.h sys/fs.h mtab.h ufs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/time.h sys/times.h sys/swap.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/select.h mntent.h sys/mntent.h kstat.h utsname.h sys/utsname.h sys/cdefs.h getopt.h locale.h pthread.h sys/loadavg.h regex.h linux/tasks.h pwd.h grp.h utmpx.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -18953,6 +18954,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if HAVE_SYS_TIMEOUT_H
+#include <sys/timeout.h>
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -27997,6 +28001,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef HAVE_SYS_TIMEOUT_H
+#include <sys/timeout.h>
+#endif
 #include <netinet/tcp.h>
 #ifdef HAVE_NETINET_TCP_TIMER_H
 #include <netinet/tcp_timer.h>
