@@ -986,8 +986,7 @@ void
 vacm_destroyViewEntry(const char *viewName,
                       oid * viewSubtree, size_t viewSubtreeLen)
 {
-    return netsnmp_view_destroy( &viewList, viewName, viewSubtree,
-                                 viewSubtreeLen);
+    netsnmp_view_destroy( &viewList, viewName, viewSubtree, viewSubtreeLen);
 }
 
 void
