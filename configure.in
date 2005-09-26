@@ -2651,6 +2651,9 @@ AC_CHECK_STRUCT_FOR([
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef HAVE_SYS_TIMEOUT_H
+#include <sys/timeout.h>
+#endif
 #include <netinet/tcp.h>
 #ifdef HAVE_NETINET_TCP_TIMER_H
 #include <netinet/tcp_timer.h>
