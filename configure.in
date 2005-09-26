@@ -886,26 +886,6 @@ if test "x$embed_perl" = "xyes"; then
     fi
 fi
 
-# AIX has problems with shared libs
-case $target_os in
-    aix*)
-        AC_MSG_CHECKING([whether using AIX and if we should disable shared libraries])
-	AC_MSG_RESULT([yes])
-	enable_shared=no
-        ;;
-    darwin8*)
-        AC_MSG_CHECKING([whether darwin ld might need -flat_namespace])
-	if test -z "$MACOSX_DEPLOYMENT_TARGET"; then
-		LDFLAGS="-flat_namespace $LDFLAGS"
-		AC_MSG_RESULT([yes])
-	else
-		AC_MSG_RESULT([no])
-	fi
-	;;
-    *)
-        ;;
-esac
-
 AC_PROG_CC
 AC_PROG_CPP
 AC_AIX
@@ -1014,6 +994,26 @@ fi
 CFLAGS="$CFLAGS -D$PARTIALTARGETOS"
 changequote([, ])
 AC_MSG_CACHE_ADD(Building for:               $PARTIALTARGETOS)
+
+# AIX has problems with shared libs
+case $target_os in
+    aix*)
+        AC_MSG_CHECKING([whether using AIX and if we should disable shared libraries])
+	AC_MSG_RESULT([yes])
+	enable_shared=no
+        ;;
+    darwin8*)
+        AC_MSG_CHECKING([whether darwin ld might need -flat_namespace])
+	if test -z "$MACOSX_DEPLOYMENT_TARGET"; then
+		LDFLAGS="-flat_namespace $LDFLAGS"
+		AC_MSG_RESULT([yes])
+	else
+		AC_MSG_RESULT([no])
+	fi
+	;;
+    *)
+        ;;
+esac
 
 #
 # check for special includes and pick one
