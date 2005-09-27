@@ -19,6 +19,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
  Ports:
    Linux:
        - added tcpConnectionTable and tcpListenerTable
+       - inetCidrRouteTable supports dynamic ipv4 route creation/deletion
 
    Win32:
      - Cygwin compiler fixes
