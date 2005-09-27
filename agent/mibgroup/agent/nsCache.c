@@ -46,6 +46,9 @@ oid nsCacheEnabled_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 5, 2};
 
 oid nsCacheTable_oid[]      = { 1, 3, 6, 1, 4, 1, 8072, 1, 5, 3};
 
+extern struct snmp_alarm *
+sa_find_specific(unsigned int clientreg);
+
 
 void
 init_nsCache(void)
@@ -381,6 +384,15 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
             switch (table_info->colnum) {
             case NSCACHE_TIMEOUT:
                 cache_entry->timeout = *request->requestvb->val.integer;
+                /*
+                 * check for auto repeat
+                 */
+                if (cache_entry->timer_id) {
+                    struct snmp_alarm * sa =
+                        sa_find_specific(cache_entry->timer_id);
+                    if (NULL != sa)
+                        sa->t.tv_sec = cache_entry->timeout;
+                }
 	        break;
 
             case NSCACHE_STATUS:
