@@ -122,7 +122,6 @@ proxy_parse_config(const char *token, char *line)
         return;
     }
 
-    SOCK_STARTUP;
     /*
      * usm_set_reportErrorOnUnknownID(0); 
      *
