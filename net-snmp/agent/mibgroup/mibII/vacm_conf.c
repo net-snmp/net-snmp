@@ -69,6 +69,8 @@
 #include "sysORTable.h"
 #endif
 
+#include "snmpd.h"
+
 void
 init_vacm_conf(void)
 {
@@ -618,10 +620,12 @@ vacm_warn_if_not_configured(int majorID, int minorID, void *serverarg,
 {
     const char * name = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
                                         NETSNMP_DS_LIB_APPTYPE);
+    const int agent_mode =  netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+                                                   NETSNMP_DS_AGENT_ROLE);
     if (NULL==name)
         name = "snmpd";
     
-    if (!vacm_is_configured() && !strcmp( name, "snmpd" )) {
+    if (!vacm_is_configured() && (MASTER_AGENT == agent_mode)) {
         snmp_log(LOG_WARNING,
                  "Warning: no access control information configured.\n  It's "
                  "unlikely this agent can serve any useful purpose in this "
