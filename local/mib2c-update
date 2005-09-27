@@ -236,7 +236,8 @@ merge_code()
     if [ -f $UPDATE_PATCH/custom.$UPDATE_DATE ]; then
        touch .M2C-UPDATE-MERGE-FAILED
        echo "Patching new generated code in $UPDATE_MERGED ($PWD)"
-       patch -F $FUZZ -N -d $UPDATE_MERGED -i $UPDATE_PATCH/custom.$UPDATE_DATE
+       # --forward = ignore already applied
+       patch --forward -F $FUZZ -N -d $UPDATE_MERGED -i $UPDATE_PATCH/custom.$UPDATE_DATE
        if [ $? -ne 0 ]; then
            error "Could not apply custom code patch to new generated code"
            die   "You must fix the problem in $UPDATE_MERGED, and then re-run mib2c-update."
