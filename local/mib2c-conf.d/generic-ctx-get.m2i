@@ -67,10 +67,6 @@
 @if $m2c_node_needlength == 1@
     /*
      * make sure there is enough space for $node data
-     * $@m2c_ctx_lhu $m2c_ctx_lhu
-     * $@m2c_ctx_lhu $m2c_ctx_rhu
-     * $@m2c_ctx_lm $m2c_ctx_lm
-     * $@m2c_ctx_cm $m2c_ctx_cm
      */
     if ((NULL == $m2c_ctx_lh) ||
         ($m2c_ctx_lhs <
