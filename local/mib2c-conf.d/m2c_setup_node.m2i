@@ -140,8 +140,10 @@
 @  end@
 @  eval $m2c_ctx_lh="$m2c_node_lh"@
 @  eval $m2c_ctx_lhs="$m2c_node_lhs"@
+@  eval $m2c_ctx_lhu="bytes"@
 @  eval $m2c_ctx_rh="${m2c_data_item}${node}"@
 @  eval $m2c_ctx_rhs="${m2c_data_item}${node}_len"@
+@  eval $m2c_ctx_rhu="elements"@
 ########################################################################
 ##
 ########################################################################
