@@ -1378,16 +1378,6 @@ inetCidrRouteTable_commit(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * can't modify an active row
-     */
-#warning "xxx-rks: move this check to dependencies (once code re-generated)"
-    if ((ROWSTATUS_ACTIVE == rowreq_ctx->row_status) &&
-        (ROWSTATUS_ACTIVE == rowreq_ctx->row_status_undo)) {
-        DEBUGMSGTL(("inetCidrRouteTable", "can't change active row\n"));
-        return MFD_ERROR;
-    }
-
-    /*
      * save flags, then clear until we actually do something
      */
     save_flags = rowreq_ctx->column_set_flags;
@@ -1400,9 +1390,9 @@ inetCidrRouteTable_commit(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
      * 3) set the column's flag in column_set_flags if it needs undo
      *    processing in case of a failure.
      */
-            /*
+    /*
      * did anything change?
-             */
+     */
     if (0 == save_flags) {
         DEBUGMSGTL(("ipAddressTable:ipAddressTable_commit",
                     "no change\n"));
@@ -1419,7 +1409,7 @@ inetCidrRouteTable_commit(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
                 rowreq_ctx->rowreq_flags |= MFD_ROW_DELETED;
                 return MFD_SUCCESS;
             }
-            netsnmp_assert(ROWSTATUS_CREATEANDGO ==
+            netsnmp_assert(ROWSTATUS_ACTIVE ==
                            rowreq_ctx->row_status);
             rowreq_ctx->data->flags |= NETSNMP_ACCESS_ROUTE_CREATE;
         } else if (ROWSTATUS_DESTROY == rowreq_ctx->row_status) {
@@ -2526,6 +2516,15 @@ inetCidrRouteTable_check_dependencies(inetCidrRouteTable_rowreq_ctx *
      * TODO:470:o: Check inetCidrRouteTable row dependencies.
      * check that all new value are legal and consistent with each other
      */
+    /*
+     * can't modify an active row
+     */
+    if ((ROWSTATUS_ACTIVE == rowreq_ctx->row_status) &&
+        (ROWSTATUS_ACTIVE == rowreq_ctx->row_status_undo)) {
+        DEBUGMSGTL(("inetCidrRouteTable", "can't change active row (yet)\n"));
+        return MFD_ERROR;
+    }
+
     /*
      * check RowStatus dependencies
      */
