@@ -1,4 +1,4 @@
-.TH "mib parsing and datatype manipulation routines." 3 "19 Sep 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
+.TH "mib parsing and datatype manipulation routines." 3 "27 Sep 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -487,7 +487,7 @@ Prints on oid description into a file descriptor.
 .PP
 
 .PP
-Definition at line 4437 of file mib.c.
+Definition at line 4439 of file mib.c.
 .PP
 References NULL, SNMP_FREE, and sprint_realloc_description().
 .PP
@@ -545,7 +545,7 @@ get_symbol
 .PP
 
 .PP
-Definition at line 4392 of file mib.c.
+Definition at line 4394 of file mib.c.
 .PP
 References tree::child_list, get_tree(), tree::next_peer, NULL, and tree::subid.
 .PP
@@ -573,7 +573,7 @@ comments on find_best_tree_node for usage after first time.
 .PP
 
 .PP
-Definition at line 5442 of file mib.c.
+Definition at line 5444 of file mib.c.
 .PP
 References get_node(), tree::label, and NULL.
 .PP
@@ -631,7 +631,7 @@ in example 5 . 1 . 2 . 3 . 4 . 5 = 12345
 .PP
 length 
 .PP
-Definition at line 6185 of file mib.c.
+Definition at line 6187 of file mib.c.
 .PP
 Referenced by netsnmp_oid2str().
 .SS "int netsnmp_oid2str (char * S, int L, oid * O)"
@@ -656,7 +656,7 @@ in example 5 . 'h' . 'e' . 'l' . 'l' . 'o' = 'hello\\0' (null terminated)
 .PP
 
 .PP
-Definition at line 6213 of file mib.c.
+Definition at line 6215 of file mib.c.
 .PP
 References netsnmp_oid2chars().
 .SS "void netsnmp_set_mib_directory (const char * dir)"
@@ -694,7 +694,7 @@ in example 'hello' = 5 . 'h' . 'e' . 'l' . 'l' . 'o'
 .PP
 
 .PP
-Definition at line 6150 of file mib.c.
+Definition at line 6152 of file mib.c.
 .SS "void print_description (oid * objid, size_t objidlen, int width)"
 .PP
 Prints on oid description on stdout. 
@@ -706,7 +706,7 @@ Prints on oid description on stdout.
 .PP
 
 .PP
-Definition at line 4421 of file mib.c.
+Definition at line 4423 of file mib.c.
 .PP
 References fprint_description().
 .SS "void print_mib (FILE * fp)"
@@ -841,7 +841,7 @@ The root oid pointer if successful, or NULL otherwise.
 .PP
 
 .PP
-Definition at line 5756 of file mib.c.
+Definition at line 5758 of file mib.c.
 .PP
 References clear_tree_flags(), get_node(), get_wild_node(), netsnmp_ds_get_boolean(), netsnmp_ds_get_string(), NULL, and read_objid().
 .PP
@@ -1502,7 +1502,7 @@ uptimeString
 .PP
 
 .PP
-Definition at line 5727 of file mib.c.
+Definition at line 5729 of file mib.c.
 .SH "Variable Documentation"
 .PP 
 .SS "\fBPrefixList\fP \fBmib_prefixes\fP[]"
