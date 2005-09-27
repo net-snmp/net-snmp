@@ -66,7 +66,7 @@ struct netsnmp_udpEntry_s {
 #define INP_NEXT_SYMBOL		inp_next
 #endif
 
-#if defined(freebsd4) || defined(darwin)
+#if defined(freebsd4) || defined(darwin) || defined(osf5)
 typedef struct netsnmp_inpcb_s netsnmp_inpcb;
 struct netsnmp_inpcb_s {
     struct inpcb    pcb;
@@ -195,7 +195,7 @@ udpTable_handler(netsnmp_mib_handler          *handler,
             switch (subid) {
             case UDPLOCALADDRESS:
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
-                addr = ntohl(*IN6_EXTRACT_V4ADDR(pcb->inp_laddr));
+                addr = ntohl(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr));
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
                                          (u_char*)&addr,
                                          sizeof(addr));
@@ -355,8 +355,8 @@ udpTable_next_entry( void **loop_context,
      */
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
                 snmp_set_var_value(index,
-                              (u_char*)&IN6_EXTRACT_V4ADDR(entry->inp_laddr),
-                                 sizeof(IN6_EXTRACT_V4ADDR(entry->inp_laddr)));
+                              (u_char*)&IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr),
+                                 sizeof(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr)));
 #else
     snmp_set_var_value(index, (u_char*)&entry->UDPTABLE_LOCALADDRESS,
                                  sizeof(entry->UDPTABLE_LOCALADDRESS));
