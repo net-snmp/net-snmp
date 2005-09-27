@@ -27,7 +27,10 @@
          * row creation requirements
          */
         if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
-            if (ROWSTATUS_CREATEANDGO ==  ${m2c_data_item}$node) {
+            if (ROWSTATUS_DESTROY ==  ${m2c_data_item}$node) {
+                rowreq_ctx->rowreq_flags |= MFD_ROW_DELETED;
+            }
+            else if (ROWSTATUS_CREATEANDGO ==  ${m2c_data_item}$node) {
                 if ((rowreq_ctx->column_set_flags & $context.uc_REQUIRED_COLS)
                     != $context.uc_REQUIRED_COLS) {
                     DEBUGMSGTL(("${context}",
