@@ -18,8 +18,10 @@
  *    be handled in the *_hpux.h header file.
  */
 config_require(ip-forward-mib/data_access/route_common)
+
 #if defined( linux )
 config_require(ip-forward-mib/data_access/route_linux);
+config_require(ip-forward-mib/data_access/route_ioctl);
 #else
 #error "the route data access library is not available for this platform."
 #endif
