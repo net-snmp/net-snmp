@@ -6,3 +6,4 @@
 *.lo
 Makefile
 *.txt
+*.m2d
