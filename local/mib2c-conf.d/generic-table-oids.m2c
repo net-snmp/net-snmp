@@ -29,11 +29,17 @@
     @eval $minv = 0xffffffff@
     @eval $maxv = 0@
     @eval $gto_flag_req = ""@
+    @eval $gto_flag_set = ""@
     @foreach $node column@
 #define COLUMN_$node.uc         $node.subid
         @if $node.accessible == 1@
            @if ($node.settable == 1) || ($m2c_table_sparse == 1)@
 @             eval $m2c_tmp_gto = ($node.subid - 1)@
+@             if "x$gto_flag_set" eq "x"@
+@               eval $gto_flag_set = "COLUMN_$node.uc_FLAG"@
+@             else@
+@               eval $gto_flag_set = "$gto_flag_set | COLUMN_$node.uc_FLAG"@
+@             end@
 #define COLUMN_$node.uc_FLAG    (0x1 << $m2c_tmp_gto)
            @end@
            @if ($m2c_table_row_creation == 1) && ($node.settable == 1) && ("x$node.defval" eq "x")@
@@ -69,8 +75,16 @@
     @end@
     
 
-@   if $m2c_table_settable && $m2c_table_row_creation@
-      @if "x$gto_flag_req" ne "x"@
+@   if $m2c_table_settable@
+  @if "x$gto_flag_set" ne "x"@
+    /*
+     * TODO:405:r: Review $context.uc_SETTABLE_COLS macro.
+     * OR together all the writable cols.
+     */
+#define $context.uc_SETTABLE_COLS ($gto_flag_set)
+  @end@
+  @if $m2c_table_row_creation@
+    @if "x$gto_flag_req" ne "x"@
     /*
      * TODO:405:r: Review $context.uc_REQUIRED_COLS macro.
      * OR together all the required rows for row creation.
@@ -79,6 +93,7 @@
 #define $context.uc_REQUIRED_COLS ($gto_flag_req)
     
       @end@
+    @end@
 @   end@ # settable
 @if $m2c_create_fewer_files != 1@
 @eval $m2c_save = "$name"@
