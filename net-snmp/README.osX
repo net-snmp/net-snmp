@@ -3,6 +3,12 @@ $Id$
 
 This is what I had to do to get it to work for me. Your mileage may vary.
 
+     - 10.4.x Embedded perl module dyld error
+
+        - If you have enabled embedded perl modules and are getting a
+          dyld error when starting snmpd or snmptrapd, reconfigure and
+          add '--with-ldflags=-flat_namespace' to your configure arguments.
+
      - Some versions of Apple's cpp doesn't like configure. 
 
         - run 'gcc_select' to see what version you are using, and
