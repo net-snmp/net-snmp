@@ -179,7 +179,7 @@ ${context}_row_prep( ${context}_rowreq_ctx *rowreq_ctx)
  *       ${context}_validate_index() function.
  *
  * @retval MFD_SUCCESS   : the incoming value is legal
- * @retval MFD_BAD_VALUE : the incoming value is NOT legal
+ * @retval MFD_ERROR     : the incoming value is NOT legal
  */
 int
 ${context}_${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
@@ -208,7 +208,7 @@ ${context}_${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
  * check validity of ${node} index portion
  *
  * @retval MFD_SUCCESS   : the incoming value is legal
- * @retval MFD_BAD_VALUE : the incoming value is NOT legal
+ * @retval MFD_ERROR     : the incoming value is NOT legal
  *
  * @note this is not the place to do any checks for the sanity
  *       of multiple indexes. Those types of checks should be done in the
