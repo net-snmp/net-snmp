@@ -221,8 +221,8 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
             case TCPCONNLOCALADDRESS:
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
-                              (u_char*)IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr),
-                                sizeof(IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr)));
+                              (u_char*)IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr),
+                                sizeof(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr)));
 #else
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
                                  (u_char *)&entry->TCPTABLE_LOCALADDRESS,
@@ -237,8 +237,8 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
             case TCPCONNREMOTEADDRESS:
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
-                              (u_char*)IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr),
-                                sizeof(IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr)));
+                              (u_char*)IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr),
+                                sizeof(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr)));
 #else
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
                                  (u_char *)&entry->TCPTABLE_REMOTEADDRESS,
@@ -420,7 +420,7 @@ tcpTable_next_entry( void **loop_context,
      */
     idx = index;
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
-    addr = ntohl(IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr));
+    addr = ntohl(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr));
 #else
     addr = ntohl(entry->TCPTABLE_LOCALADDRESS);
 #endif
@@ -432,7 +432,7 @@ tcpTable_next_entry( void **loop_context,
 
     idx = idx->next_variable;
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
-    addr = ntohl(IN6_EXTRACT_V4ADDR(entry->pcb.inp_faddr));
+    addr = ntohl(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_faddr));
 #else
     addr = ntohl(entry->TCPTABLE_REMOTEADDRESS);
 #endif
