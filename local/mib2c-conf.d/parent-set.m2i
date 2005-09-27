@@ -14,6 +14,7 @@
 
 int ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx);
 int ${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx);
+int ${context}_undo( ${context}_rowreq_ctx *rowreq_ctx);
 int ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx);
 int ${context}_undo_commit( ${context}_rowreq_ctx *rowreq_ctx);
 @   if $m2c_irreversible_commit == 1@
@@ -161,6 +162,45 @@ ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
     /*
      * TODO:451:M: |-> Setup $context undo.
      * set up $context undo information, in preparation for a set.
+     * Undo storage is in ${m2c_ctx_lh}*
+     */
+
+    return rc;
+} /* ${context}_undo_setup */
+
+/**
+ * Undo a set request.
+ *
+ * This function will be called before the individual node undo
+ * functions are called. If you need to do any undo that is not
+ * related to a specific column, you can do it here.
+ *
+ * Note that an individual node's undo function will only be called
+ * if that node is being set to a new value.
+ *
+ * If there is anything  specific to a particular column (e.g. releasing
+ * memory for a string), you should do that setup in the node's undo
+ * function, so it won't be done unless it is necessary.
+ *
+ * @param rowreq_ctx
+ *        Pointer to the table context (${context}_rowreq_ctx)
+ *
+ * @retval MFD_SUCCESS : success
+ * @retval MFD_ERROR   : error. set will fail.
+ */
+int
+${context}_undo( ${context}_rowreq_ctx *rowreq_ctx)
+{
+    int rc = MFD_SUCCESS;
+
+    DEBUGMSGTL(("verbose:${context}:${context}_undo","called\n"));
+
+    /** we should have a non-NULL pointer */
+    netsnmp_assert( NULL != rowreq_ctx );
+
+    /*
+     * TODO:451:M: |-> $context undo.
+     * $context undo information, in response to a failed set.
      * Undo storage is in ${m2c_ctx_lh}*
      */
 
