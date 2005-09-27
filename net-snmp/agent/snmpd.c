@@ -418,9 +418,9 @@ SnmpDaemonMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "aAc:CdD::fhHI:l:L:m:M:p:P:qrsS:UvV-:";
+    char            options[128] = "aAc:CdD::fhHI:l:L:m:M:n:p:P:qrsS:UvV-:";
     int             arg, i, ret;
-    int             dont_fork = 0;
+    int             dont_fork = 0, do_help = 0;
     int             dont_zero_log = 0, log_set = 0;
     int             uid = 0, gid = 0;
     int             agent_mode = -1;
@@ -512,6 +512,8 @@ main(int argc, char *argv[])
     }
 
     snmp_log_syslogname(app_name);
+    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                          NETSNMP_DS_LIB_APPTYPE, app_name);
 
     /*
      * Now process options normally.  
@@ -582,14 +584,8 @@ main(int argc, char *argv[])
             break;
 
         case 'H':
-            netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
-				   NETSNMP_DS_AGENT_NO_ROOT_ACCESS, 1);
-            init_agent("snmpd");        /* register our .conf handlers */
-            init_mib_modules();
-            init_snmp("snmpd");
-            fprintf(stderr, "Configuration directives understood:\n");
-            read_config_print_usage("  ");
-            exit(0);
+            do_help = 1;
+            break;
 
         case 'I':
             if (optarg != NULL) {
@@ -633,6 +629,16 @@ main(int argc, char *argv[])
         case 'M':
             if (optarg != NULL) {
                 setenv("MIBDIRS", optarg, 1);
+            } else {
+                usage(argv[0]);
+            }
+            break;
+
+        case 'n':
+            if (optarg != NULL) {
+                app_name = optarg;
+                netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                                      NETSNMP_DS_LIB_APPTYPE, app_name);
             } else {
                 usage(argv[0]);
             }
@@ -783,6 +789,17 @@ main(int argc, char *argv[])
         }
     }
 
+    if (do_help) {
+        netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
+                               NETSNMP_DS_AGENT_NO_ROOT_ACCESS, 1);
+        init_agent(app_name);        /* register our .conf handlers */
+        init_mib_modules();
+        init_snmp(app_name);
+        fprintf(stderr, "Configuration directives understood:\n");
+        read_config_print_usage("  ");
+        exit(0);
+    }
+
     if (optind < argc) {
         /*
          * There are optional transport addresses on the command line.  
@@ -870,13 +887,13 @@ main(int argc, char *argv[])
     }
 
     SOCK_STARTUP;
-    init_agent("snmpd");        /* do what we need to do first. */
+    init_agent(app_name);        /* do what we need to do first. */
     init_mib_modules();
 
     /*
      * start library 
      */
-    init_snmp("snmpd");
+    init_snmp(app_name);
 
     if ((ret = init_master_agent()) != 0) {
         /*
@@ -888,7 +905,7 @@ main(int argc, char *argv[])
     /*
      * Store persistent data immediately in case we crash later.  
      */
-    snmp_store("snmpd");
+    snmp_store(app_name);
 
     /*
      * Send coldstart trap if possible.  
@@ -975,7 +992,7 @@ main(int argc, char *argv[])
     DEBUGMSGTL(("snmpd/main", "sending shutdown trap\n"));
     SnmpTrapNodeDown();
     DEBUGMSGTL(("snmpd/main", "Bye...\n"));
-    snmp_shutdown("snmpd");
+    snmp_shutdown(app_name);
 #ifdef SHUTDOWN_AGENT_CLEANLY /* broken code */
     /* these attempt to free all known memory, but result in double frees */
     shutdown_master_agent();
