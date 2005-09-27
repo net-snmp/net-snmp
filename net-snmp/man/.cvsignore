@@ -18,8 +18,11 @@ snmpcmd.1
 snmpconf.1
 snmpd.8
 snmpd.conf.5
+snmpdelta.1
+snmpdf.1
 snmpget.1
 snmpgetnext.1
+snmpnetstat.1
 snmpset.1
 snmpstatus.1
 snmptable.1
@@ -32,3 +35,4 @@ snmpvacm.1
 snmpusm.1
 snmpwalk.1
 variables.5
+mib2c.conf.5

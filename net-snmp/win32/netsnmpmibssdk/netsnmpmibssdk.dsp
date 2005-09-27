@@ -305,6 +305,10 @@ SOURCE=..\..\agent\mibgroup\mibII\interfaces.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\if-mib\data_access\interface_common.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\mibII\ip.c
 # End Source File
 # Begin Source File

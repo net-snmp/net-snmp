@@ -1,5 +1,5 @@
 /*
- * snmpget.c - send snmp GET requests to a network entity.
+ * snmpdf.c - send snmp GET requests to a network entity.
  *
  */
 
@@ -239,6 +239,11 @@ main(int argc, char *argv[])
         break;
     }
 
+    if (arg != argc) {
+	fprintf(stderr, "snmpdf: extra argument: %s\n", argv[arg]);
+	exit(1);
+    }
+
     SOCK_STARTUP;
 
     /*
@@ -249,7 +254,7 @@ main(int argc, char *argv[])
         /*
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
-        snmp_sess_perror("snmpget", &session);
+        snmp_sess_perror("snmpdf", &session);
         SOCK_CLEANUP;
         exit(1);
     }

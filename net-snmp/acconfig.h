@@ -530,8 +530,13 @@
 
 #ifndef HAVE_INDEX
 #ifdef HAVE_STRCHR
+#ifdef mingw32
+# define index(a,b) strchr(a,b)
+# define rindex(a,b) strrchr(a,b)
+#else
 # define index strchr
 # define rindex strrchr
+#endif
 #endif
 #endif
 
@@ -741,6 +746,9 @@
 
 /* define if agentx transport is to use domain sockets only */
 #undef AGENTX_DOM_SOCK_ONLY
+
+/* define if you do not want snmptrapd to register as an AgentX subagent */
+#undef SNMPTRAPD_DISABLE_AGENTX
 
 #undef HEIMDAL
 
