@@ -585,7 +585,7 @@ var_hrswrun(struct variable * vp,
         string[ sizeof(string)-1 ] = 0;
 #endif
 #elif HAVE_KVM_GETPROCS
-    #if defined(freebsd5)
+    #if defined(freebsd5) && __FreeBSD_version >= 500014
         strcpy(string, proc_table[LowProcIndex].ki_comm);
     #else
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
@@ -698,7 +698,7 @@ var_hrswrun(struct variable * vp,
         *cp1 = 0;
 #endif
 #elif HAVE_KVM_GETPROCS
-    #if defined(freebsd5)
+    #if defined(freebsd5) && __FreeBSD_version >= 500014
         strcpy(string, proc_table[LowProcIndex].ki_comm);
     #else
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
@@ -868,8 +868,25 @@ var_hrswrun(struct variable * vp,
         if (pid < PID_MAXSYS)
             long_return = 2;    /* operatingSystem */
         else
-#endif
             long_return = 4;    /* application */
+#elif HAVE_KVM_GETPROCS
+    #if defined(freebsd5) && __FreeBSD_version >= 500014
+	if (proc_table[LowProcIndex].ki_flag & P_SYSTEM) {
+	    if (proc_table[LowProcIndex].ki_pri.pri_class == PRI_ITHD)
+		long_return = 3;/* deviceDriver */
+	    else
+		long_return = 2;/* operatingSystem */
+	} else
+	    long_return = 4;	/* application */
+    #else
+        if (proc_table[LowProcIndex].kp_proc.p_flag & P_SYSTEM)
+	    long_return = 2;	/* operatingSystem */
+	else
+	    long_return = 4;	/* application */
+    #endif
+#else
+	long_return = 4;	/* application */
+#endif
         return (u_char *) & long_return;
     case HRSWRUN_STATUS:
 #if defined(cygwin)
@@ -901,7 +918,7 @@ var_hrswrun(struct variable * vp,
         }
 #else
 #if HAVE_KVM_GETPROCS
-    #if defined(freebsd5)
+    #if defined(freebsd5) && __FreeBSD_version >= 500014
         switch (proc_table[LowProcIndex].ki_stat) {
     #else
         switch (proc_table[LowProcIndex].kp_proc.p_stat) {
@@ -1000,7 +1017,13 @@ var_hrswrun(struct variable * vp,
         long_return = proc_buf->p_utime * 100 + proc_buf->p_stime * 100;
 #endif
 #elif HAVE_KVM_GETPROCS
-    #if defined(freebsd5)
+    #if defined(freebsd5) && __FreeBSD_version >= 500014
+        /* XXX: Accessing ki_paddr causes sig10 ...
+        long_return = proc_table[LowProcIndex].ki_paddr->p_uticks +
+            proc_table[LowProcIndex].ki_paddr->p_sticks +
+            proc_table[LowProcIndex].ki_paddr->p_iticks; */
+        long_return = 0;
+    #elif defined(freebsd5)
         long_return = proc_table[LowProcIndex].ki_runtime / 100000;
     #else
         long_return = proc_table[LowProcIndex].kp_proc.p_uticks +
@@ -1077,19 +1100,26 @@ var_hrswrun(struct variable * vp,
         long_return = proc_buf->p_swrss;
 #endif
 #elif HAVE_KVM_GETPROCS && !defined(darwin8)
-#if defined(freebsd3) && !defined(darwin)
+  #if defined(freebsd5) && __FreeBSD_version >= 500014
+	    /* XXX
+	    long_return = proc_table[LowProcIndex].ki_vmspace->vm_tsize +
+			  proc_table[LowProcIndex].ki_vmspace->vm_ssize +
+			  proc_table[LowProcIndex].ki_vmspace->vm_dsize;
+	    long_return = long_return * (getpagesize() / 1024); */
+	    long_return = 0;
+  #elif defined(freebsd3) && !defined(darwin)
         long_return =
     #if defined(freebsd5)
             proc_table[LowProcIndex].ki_size / 1024;
     #else
             proc_table[LowProcIndex].kp_eproc.e_vm.vm_map.size / 1024;
     #endif
-#else
+  #else
         long_return = proc_table[LowProcIndex].kp_eproc.e_vm.vm_tsize +
             proc_table[LowProcIndex].kp_eproc.e_vm.vm_ssize +
             proc_table[LowProcIndex].kp_eproc.e_vm.vm_dsize;
         long_return = long_return * (getpagesize() / 1024);
-#endif
+  #endif
 #elif defined(linux)
         sprintf(string, "/proc/%d/stat", pid);
         if ((fp = fopen(string, "r")) == NULL) {
@@ -1365,7 +1395,7 @@ Get_Next_HR_SWRun(void)
 #elif defined(solaris2)
         return proc_table[current_proc_entry++];
 #elif HAVE_KVM_GETPROCS
-    #if defined(freebsd5)
+    #if defined(freebsd5) && __FreeBSD_version >= 500014
         if (proc_table[current_proc_entry].ki_stat != 0)
             return proc_table[current_proc_entry++].ki_pid;
     #else
