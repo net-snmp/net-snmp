@@ -1,6 +1,133 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.2.1 -> V5.2.2.pre1
+Changes: V5.2.1 -> V5.2.2.pre2
+
+2005-09-27 15:33  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3
+, netsnmp_agent_trap.3,
+     netsnmp_asn1_packet_parse.3, netsnmp_baby_steps.3
+, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3,
+     netsnmp_container.3, netsnmp_data_list.3,
+     netsnmp_debug.3, netsnmp_default_store.3,
+     netsnmp_handler.3, netsnmp_instance.3,
+     netsnmp_iterator_info_s.3, netsnmp_leaf.3,
+     netsnmp_library.3, netsnmp_mib_utilities.3,
+     netsnmp_mode_end_call.3, netsnmp_multiplexer.3
+, netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3
+, netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3
+, netsnmp_snmp_client.3,
+     netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3,
+     netsnmp_snmp_session.3, netsnmp_stash_cache.3
+, netsnmp_table.3, netsnmp_table_array.3
+, netsnmp_table_container.3,
+     netsnmp_table_data.3, netsnmp_table_dataset.3
+, netsnmp_table_iterator.3,
+     netsnmp_table_iterator.h.3, netsnmp_util.3,
+     netsnmp_utilities.3, netsnmp_variable_list.3,
+     netsnmp_watcher.3:
+
+   documentation update
+
+2005-09-27 15:29  hardaker
+
+   * configure.in, configure:
+
+   version update
+
+2005-09-27 14:45  tanders
+
+   * README.tru64:
+
+   Tru64 Unix 5.x build fixes (bug #1217509)
+
+2005-09-27 14:24  tanders
+
+   * agent/mibgroup/mibII/: tcpTable.c, udpTable.c
+:
+
+   Tru64 Unix 5.x build fixes (bug #1217509)
+
+2005-09-27 09:45  hardaker
+
+   * agent/mibgroup/smux/smux.c:
+
+   patch #1225360 to fix the smux encoding of the requestid to a signed int
+
+2005-09-26 16:42  hardaker
+
+   * snmplib/mib.c:
+
+   Fix bug 1292896 checking for -1 before searching for TC type
+
+2005-09-26 15:54  rstory
+
+   * configure:
+
+   update for configure.in
+
+2005-09-26 15:40  rstory
+
+   * configure.in:
+
+   don't make decisions based on target_os until after it's set!
+
+2005-09-26 13:21  tanders
+
+   * testing/tests/Sv3config:
+
+   fix SNMPv3 config if AES isn't available
+
+2005-09-26 10:00  tanders
+
+   * testing/RUNTESTS:
+
+   Fix "-x" option
+
+2005-09-26 05:25  tanders
+
+   * configure, configure.in:
+
+   OpenBSD build fix: bring in sys/timeout.h
+
+2005-09-23 07:41  tanders
+
+   * configure:
+
+   Rerun autoconf
+
+2005-09-23 07:20  rstory
+
+   * agent/mibgroup/host/hr_system.c:
+
+   shrink buffer size so MIB size limit not exceeded
+
+2005-09-22 16:02  rstory
+
+   * configure.in:
+
+   move socketvar.h after socket.h
+
+2005-09-21 06:44  alex_b
+
+   * snmplib/snmp_client.c:
+
+   Win32 MSVC:  Use __int64 instead of long long.
 
 2005-09-19 14:38  hardaker
 
