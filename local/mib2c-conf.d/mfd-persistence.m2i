@@ -174,6 +174,7 @@ _${context}_container_row_save(
 @   end@
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
+@    if ($node.settable == 1)@
 @      if "$node.type" eq "ASN_OBJECT_ID"@
         ( ( 12 * sizeof(${m2c_ctx_rh}) ) + 3 ) + /* $node.type */ \
 @      elsif "$node.type" eq "ASN_OCTET_STR"@
@@ -181,6 +182,7 @@ _${context}_container_row_save(
 @      else@
         ( 12 ) + /* $node.type $node */ \
 @      end@
+@    end@
 @   end@
         ( $table.uc_MAX_COL * 12 ) + /* column num prefix + : */ \
     2 /* LINE_TERM_CHAR + \n */ )
@@ -215,6 +217,9 @@ _${context}_container_row_save(
      * add each column
      */
     for(i = $table.uc_MIN_COL; i <= $table.uc_MAX_COL; ++i ) {
+
+        if ((0x1 << (i-1)) & ~$context.uc_SETTABLE_COLS)
+           continue;
 
         tmp = pos;
         pos = _${context}_container_col_save(rowreq_ctx, i, pos);
