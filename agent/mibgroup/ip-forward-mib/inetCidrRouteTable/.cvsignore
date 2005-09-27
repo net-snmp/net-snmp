@@ -7,3 +7,5 @@
 *.deps
 *.conf
 Makefile
+*.txt
+*.m2d
