@@ -34,15 +34,18 @@ typedef struct netsnmp_route_s {
 
    oid       if_index;
 
+    /*
+     * addresses, in network byte order
+     */
    u_char    rt_dest[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
    u_char    rt_nexthop[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
 
 #ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_INETCIDRROUTETABLE_MODULE
    /*
     * define the maximum oid length for a policy, for use by the
-    * inetCidrRouteTable.
+    * inetCidrRouteTable. Must be at least 2, for default nullOid case.
     */
-#define NETSNMP_POLICY_OID_MAX_LEN  1
+#define NETSNMP_POLICY_OID_MAX_LEN  2
    oid      *rt_policy;      /* NULL should be interpreted as { 0, 0 } */
    u_char    rt_policy_len;  /* 0-128 oids */
 #endif
@@ -74,9 +77,6 @@ typedef struct netsnmp_route_s {
    int32_t   rt_metric5;
 
 } netsnmp_route_entry;
-
-
-#define NETSNMP_ROUTE_ENTRY_POLICY_STATIC 0x00000001
 
 
 
@@ -119,6 +119,31 @@ void netsnmp_access_route_entry_free(netsnmp_route_entry * entry);
  * find entry in container
  */
 /** not yet */
+
+/*
+ * create/change/delete
+ */
+int
+netsnmp_access_route_entry_set(netsnmp_route_entry * entry);
+
+/*
+ * route flags
+ *   upper bits for internal use
+ *   lower bits indicate changed fields. see FLAG_INETCIDRROUTE* definitions in
+ *         inetCidrRouteTable_constants.h
+ */
+#define NETSNMP_ACCESS_ROUTE_CREATE                         0x80000000
+#define NETSNMP_ACCESS_ROUTE_DELETE                         0x40000000
+#define NETSNMP_ACCESS_ROUTE_CHANGE                         0x20000000
+#define NETSNMP_ACCESS_ROUTE_POLICY_STATIC                  0x10000000
+#define NETSNMP_ACCESS_ROUTE_POLICY_DEEP_COPY               0x08000000
+
+/* 
+ * mask for change flag bits
+ */
+#define NETSNMP_ACCESS_ROUTE_RESERVED_BITS                  0x000001ff
+
+
 
 /**---------------------------------------------------------------------*/
 
