@@ -83,7 +83,7 @@ u_char          smux_str[SMUXMAXSTRLEN];
 int             smux_listen_sd = -1;
 
 static struct timeval smux_rcv_timeout;
-static u_long   smux_reqid;
+static long   smux_reqid;
 
 void            init_smux(void);
 static u_char  *smux_open_process(int, u_char *, size_t *, int *);
@@ -98,7 +98,7 @@ static void     smux_list_detach(smux_reg **, smux_reg **);
 static void     smux_replace_active(smux_reg *, smux_reg *);
 static void     smux_peer_cleanup(int);
 static int      smux_auth_peer(oid *, size_t, char *, int);
-static int      smux_build(u_char, u_long, oid *,
+static int      smux_build(u_char, long, oid *,
                            size_t *, u_char, u_char *, size_t, u_char *,
                            size_t *);
 static int      smux_list_add(smux_reg **, smux_reg *);
@@ -1545,7 +1545,7 @@ smux_parse_var(u_char * varbind,
  */
 static int
 smux_build(u_char type,
-           u_long reqid,
+           long reqid,
            oid * objid,
            size_t * oidlen,
            u_char val_type,
@@ -1566,7 +1566,7 @@ smux_build(u_char type,
     /*
      * build reqid 
      */
-    ptr = asn_build_unsigned_int(ptr, &len,
+    ptr = asn_build_int(ptr, &len,
                                  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                            ASN_INTEGER), &reqid,
                                  sizeof(reqid));
