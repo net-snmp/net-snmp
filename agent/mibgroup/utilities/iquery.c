@@ -74,6 +74,8 @@ void init_iquery(void){
                        NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_3);
     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                        NETSNMP_DS_AGENT_INTERNAL_SECLEVEL, SNMP_SEC_LEVEL_AUTHNOPRIV);
+    netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
+                          NETSNMP_DS_AGENT_INTERNAL_SECNAME, "netsnmp-internal");
 
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, 
                            SNMP_CALLBACK_POST_READ_CONFIG,
