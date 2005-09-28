@@ -698,7 +698,12 @@ best result is currently calculated as the one that matches the closest
 to the beginning of the node name and the highest in the tree.  A
 current side effect of this option is that you cannot specify indexes
 or multiple nodes, since the '.' is treated as part of the regular
-expression.
+expression.  The result of that match will thus only
+match a single node.  Specifying MIB names, or trailing nodes/numbers
+will not succeed.  Thus, matching on SNMPv2-MIB::sys.*ontact will not
+match sysContact even though sys.*ontact would.  Similarly,
+sys.*ontact.0 will also not match sysContact.0 (though it could match
+sysContactX0 if such a node existed).
 .TP
 .B -Iu
 Use the traditional UCD-style input approach of assuming that OIDs
