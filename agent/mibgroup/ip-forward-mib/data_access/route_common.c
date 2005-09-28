@@ -215,11 +215,11 @@ netsnmp_access_route_entry_copy(netsnmp_route_entry *lhs,
 
 #ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_INETCIDRROUTETABLE_MODULE
     if (NULL != lhs->rt_policy)
-        if (NETSNMP_ACCESS_ROUTE_POLICY_STATIC & lhs->flags) {
+        if (NETSNMP_ACCESS_ROUTE_POLICY_STATIC & lhs->flags)
+            lhs->rt_policy = NULL;
+        else {
             SNMP_FREE(lhs->rt_policy);
         }
-        else
-            lhs->rt_policy = NULL;
     if (NULL != rhs->rt_policy)
         if ((NETSNMP_ACCESS_ROUTE_POLICY_STATIC & rhs->flags) &&
             ! (NETSNMP_ACCESS_ROUTE_POLICY_DEEP_COPY & rhs->flags)) {
