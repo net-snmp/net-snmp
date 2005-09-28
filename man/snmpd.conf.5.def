@@ -88,6 +88,13 @@ output (ie, the first line is output as MIBNUM.ERRORMSG.1, the second
 at MIBNUM.ERRORMSG.2, etc...).
 .RS
 .IP Note:
+The PROG argument must be a full path to a real binary, as it is
+executed under the exec() system call.  IE, you can not specify a path
+to a shell script.  If you want to invoke a shell script, please
+specify a path to the interpreter first as the PROG argument and then
+a path to the shell script.  IE:  "exec myscript /bin/sh
+/path/to/script arg1 ..."
+.IP Note:
 The MIBNUM must be specified in dotted-integer notation and can
 not be specified as ".iso.org.dod.internet..." (should instead
 be .1.3.6.1...).
