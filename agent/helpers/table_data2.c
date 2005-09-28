@@ -358,7 +358,7 @@ netsnmp_insert_tdata_row(netsnmp_request_info *request,
 }
 
 
-/* ==================================   ZZZZZZZZZZZZZZZ
+/* ==================================
  *
  * APIs for working with the contents of a 'tdata' table
  *
@@ -405,20 +405,27 @@ netsnmp_tdata_get_from_oid(netsnmp_tdata *table,
     return CONTAINER_FIND( table->container, &index );
 }
 
+/** finds a row in the 'tdata' table given another row */
+netsnmp_tdata_row *
+netsnmp_tdata_get_from_row(netsnmp_tdata     *table,
+                           netsnmp_tdata_row *row)
+{
+    return CONTAINER_FIND( table->container, row );
+}
+
 /** finds the lexically next row in the 'tdata' table
     given the index OID */
 netsnmp_tdata_row *
 netsnmp_tdata_getnext_from_oid(netsnmp_tdata *table,
                                oid * searchfor, size_t searchfor_len)
 {
-          /* ZZZZZZZZZZ: TODO */
     netsnmp_index index;
     if (!table)
         return NULL;
 
     index.oids = searchfor;
     index.len  = searchfor_len;
-    return CONTAINER_FIND( table->container, &index );
+    return CONTAINER_NEXT( table->container, &index );
 }
 
 /** returns the first row in the table */
@@ -436,12 +443,60 @@ netsnmp_tdata_get_next_row(netsnmp_tdata      *table,
     return (netsnmp_tdata_row *)CONTAINER_NEXT( table->container, row  );
 }
 
+/** compare a row with the given index values */
+int
+netsnmp_tdata_compare(netsnmp_tdata_row     *row,
+                      netsnmp_variable_list *indexes)
+{
+    oid             searchfor[      MAX_OID_LEN];
+    size_t          searchfor_len = MAX_OID_LEN;
+
+    build_oid_noalloc(searchfor, MAX_OID_LEN, &searchfor_len, NULL, 0,
+                      indexes);
+    return netsnmp_tdata_compare_oid(row, searchfor, searchfor_len);
+}
+
+int
+netsnmp_tdata_compare_subtree(netsnmp_tdata_row     *row,
+                              netsnmp_variable_list *indexes)
+{
+    oid             searchfor[      MAX_OID_LEN];
+    size_t          searchfor_len = MAX_OID_LEN;
+
+    build_oid_noalloc(searchfor, MAX_OID_LEN, &searchfor_len, NULL, 0,
+                      indexes);
+    return netsnmp_tdata_compare_subtree_oid(row, searchfor, searchfor_len);
+}
+
+/** compare a row with the given index OID */
+int
+netsnmp_tdata_compare_oid(netsnmp_tdata_row     *row,
+                          oid * compareto, size_t compareto_len)
+{
+    netsnmp_index *index = (netsnmp_index *)row;
+    return snmp_oid_compare( index->oids, index->len,
+                             compareto,   compareto_len);
+}
+
+int
+netsnmp_tdata_compare_subtree_oid(netsnmp_tdata_row     *row,
+                                  oid * compareto, size_t compareto_len)
+{
+    netsnmp_index *index = (netsnmp_index *)row;
+    return snmp_oidtree_compare( index->oids, index->len,
+                                 compareto,   compareto_len);
+}
+
 
 /** returns the (table-specific) entry data for a given row */
 void *
 netsnmp_tdata_row_entry( netsnmp_tdata_row *row )
 {
-    return ( row ? row->data : NULL );
+    if (row)
+        return row->data;
+    else
+        return NULL;
+    //return ( row ? row->data : NULL );
 }
 
 int
