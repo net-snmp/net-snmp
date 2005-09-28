@@ -5415,6 +5415,14 @@ _sess_read(void *sessp, fd_set * fdset)
                 if (nslp != NULL) {
                     nslp->next = Sessions;
                     Sessions = nslp;
+                    /*
+                     * Tell the new session about its existance if possible.
+                     */
+                    DEBUGMSGTL(("sess_read",
+                                "perform callback with op=CONNECT\n"));
+                    (void)nslp->session->callback(NETSNMP_CALLBACK_OP_CONNECT,
+                                                  nslp->session, 0, NULL,
+                                                  sp->callback_magic);
                 } else {
                     new_transport->f_close(new_transport);
                     netsnmp_transport_free(new_transport);
