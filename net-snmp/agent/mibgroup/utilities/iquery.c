@@ -4,8 +4,6 @@
 
 #include "utilities/iquery.h"
 
-static netsnmp_session *iquery_default_session = NULL;
-
 void
 netsnmp_parse_iquerySecLevel(const char *token, char *line)
 {
@@ -44,6 +42,16 @@ netsnmp_parse_iqueryVersion(const char *token, char *line)
     }
 }
 
+int
+_init_default_iquery_session( int majorID, int minorID,
+                              void *serverargs, void *clientarg)
+{
+    char *secName = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                          NETSNMP_DS_AGENT_INTERNAL_SECNAME);
+    netsnmp_query_set_default_session(
+         netsnmp_iquery_user_session(secName));
+}
+
 void init_iquery(void){
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmpd", "agentSecName",
                                NETSNMP_DS_APPLICATION_ID,
@@ -66,6 +74,10 @@ void init_iquery(void){
                        NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_3);
     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                        NETSNMP_DS_AGENT_INTERNAL_SECLEVEL, SNMP_SEC_LEVEL_AUTHNOPRIV);
+
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY, 
+                           SNMP_CALLBACK_POST_READ_CONFIG,
+                           _init_default_iquery_session, NULL);
 }
 
     /**************************
@@ -140,30 +152,3 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
     return ss;
 }
 
-    /**************************
-     *
-     *  APIs to issue an "internal query"
-     *
-     **************************/
-
-
-/*
- * These are simple wrappers round the equivalent library routines
- */
-int netsnmp_iquery_get(netsnmp_variable_list *list){
-    return netsnmp_query_get(list, iquery_default_session);
-}
-
-
-int netsnmp_iquery_getnext(netsnmp_variable_list *list){
-    return netsnmp_query_getnext(list, iquery_default_session);
-}
-
-
-int netsnmp_iquery_set(netsnmp_variable_list *list){
-    return netsnmp_query_set(list, iquery_default_session);
-}
-
-int netsnmp_iquery_walk(netsnmp_variable_list *list){
-    return netsnmp_query_walk(list, iquery_default_session);
-}
