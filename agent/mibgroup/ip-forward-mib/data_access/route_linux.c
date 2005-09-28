@@ -70,15 +70,16 @@ _load_ipv4(netsnmp_container* container, u_long *index )
     while (fgets(line, sizeof(line), in)) {
         char            rtent_name[32];
         int             refcnt, flags, rc;
-        uint32_t        dest, nexthop, mask;
+        uint32_t        dest, nexthop, mask, tmp_mask;
         unsigned        use;
 
         entry = netsnmp_access_route_entry_create();
 
         /*
          * as with 1.99.14:
-         * Iface Dest     GW       Flags RefCnt Use Metric Mask     MTU  Win IRTT
-         * eth0  0A0A0A0A 00000000 05    0      0   0      FFFFFFFF 1500 0   0 
+         *    Iface Dest     GW       Flags RefCnt Use Met Mask     MTU  Win IRTT
+         * BE eth0  00000000 C0A80101 0003  0      0   0   FFFFFFFF 1500 0   0 
+         * LE eth0  00000000 0101A8C0 0003  0      0   0   00FFFFFF    0 0   0  
          */
         rc = sscanf(line, "%s %x %x %x %u %d %d %x %*d %*d %*d\n",
                     rtent_name, &dest, &nexthop,
@@ -86,7 +87,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
                      * XXX: fix type of the args 
                      */
                     &flags, &refcnt, &use, &entry->rt_metric1,
-                    &mask);
+                    &tmp_mask);
         DEBUGMSGTL(("9:access:route:container", "line |%s|\n", line));
         if (8 != rc) {
             snmp_log(LOG_ERR,
@@ -117,6 +118,8 @@ _load_ipv4(netsnmp_container* container, u_long *index )
          */
         entry->ns_rt_index = ++(*index);
 
+        mask = htonl(tmp_mask);
+
 #ifdef USING_IP_FORWARD_MIB_IPCIDRROUTETABLE_IPCIDRROUTETABLE_MODULE
         entry->rt_mask = mask;
         /** entry->rt_tos = XXX; */
@@ -136,9 +139,9 @@ _load_ipv4(netsnmp_container* container, u_long *index )
         /*
          * count bits in mask
          */
-        while (0x1 & mask) {
+        while (0x80000000 & mask) {
             ++entry->rt_pfx_len;
-            mask = mask >> 1;
+            mask = mask << 1;
         }
 
 #ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_INETCIDRROUTETABLE_MODULE
@@ -156,12 +159,17 @@ _load_ipv4(netsnmp_container* container, u_long *index )
         */
         /*
          * on linux, default routes all look alike, and would have the same
-         * indexed based on dest and next hop. So we use our arbitrary index
-         * as the policy, to distinguise between them.
+         * indexed based on dest and next hop. So we use the if index
+         * as the policy, to distinguise between them. Hopefully this is
+         * unique.
+         * xxx-rks: It should really only be for the duplicate case, but that
+         *     would be more complicated thanI want to get into now. Fix later.
          */
-        entry->rt_policy = &entry->ns_rt_index;
-        entry->rt_policy_len = 1;
-        entry->flags |= NETSNMP_ROUTE_ENTRY_POLICY_STATIC;
+        if (0 == nexthop) {
+            entry->rt_policy = &entry->if_index;
+            entry->rt_policy_len = 1;
+            entry->flags |= NETSNMP_ACCESS_ROUTE_POLICY_STATIC;
+        }
 #endif
 
         /*
@@ -312,7 +320,7 @@ _load_ipv6(netsnmp_container* container, u_long *index )
          */
         entry->rt_policy = &entry->ns_rt_index;
         entry->rt_policy_len = 1;
-        entry->flags |= NETSNMP_ROUTE_ENTRY_POLICY_STATIC;
+        entry->flags |= NETSNMP_ACCESS_ROUTE_POLICY_STATIC;
 #endif
 
         /*
@@ -373,3 +381,39 @@ netsnmp_access_route_container_arch_load(netsnmp_container* container,
 
     return rc;
 }
+
+/*
+ * create a new entry
+ */
+int
+netsnmp_arch_route_create(netsnmp_route_entry *entry)
+{
+    if (NULL == entry)
+        return -1;
+
+    if (4 != entry->rt_dest_len) {
+        DEBUGMSGT(("access:route:create", "only ipv4 supported\n"));
+        return -2;
+    }
+
+    return _netsnmp_ioctl_route_set_v4(entry);
+}
+
+/*
+ * create a new entry
+ */
+int
+netsnmp_arch_route_delete(netsnmp_route_entry *entry)
+{
+    if (NULL == entry)
+        return -1;
+
+    if (4 != entry->rt_dest_len) {
+        DEBUGMSGT(("access:route:create", "only ipv4 supported\n"));
+        return -2;
+    }
+
+    return _netsnmp_ioctl_route_delete_v4(entry);
+}
+
+
