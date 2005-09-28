@@ -101,9 +101,11 @@ typedef  struct netsnmp_tdata_s     netsnmp_table_data2;
                                              netsnmp_variable_list *indexes);
     netsnmp_tdata_row *netsnmp_tdata_getnext(netsnmp_tdata         *table,
                                              netsnmp_variable_list *indexes);
-    netsnmp_tdata_row *netsnmp_tdata_get_from_oid(netsnmp_tdata *table,
+    netsnmp_tdata_row *netsnmp_tdata_get_from_oid(netsnmp_tdata    *table,
                                                   oid   *searchfor,
                                                   size_t searchfor_len);
+    netsnmp_tdata_row *netsnmp_tdata_get_from_row(netsnmp_tdata     *table,
+                                                  netsnmp_tdata_row *row);
     netsnmp_tdata_row *netsnmp_tdata_getnext_from_oid(netsnmp_tdata *table,
                                                   oid   *searchfor,
                                                   size_t searchfor_len);
@@ -111,6 +113,15 @@ typedef  struct netsnmp_tdata_s     netsnmp_table_data2;
     netsnmp_tdata_row* netsnmp_tdata_get_first_row(netsnmp_tdata *table);
     netsnmp_tdata_row* netsnmp_tdata_get_next_row( netsnmp_tdata *table,
                                                    netsnmp_tdata_row *row);
+
+    int netsnmp_tdata_compare(            netsnmp_tdata_row     *row,
+                                          netsnmp_variable_list *indexes);
+    int netsnmp_tdata_compare_subtree(    netsnmp_tdata_row     *row,
+                                          netsnmp_variable_list *indexes);
+    int netsnmp_tdata_compare_oid(        netsnmp_tdata_row     *row,
+                                          oid *compareto, size_t compareto_len);
+    int netsnmp_tdata_compare_subtree_oid(netsnmp_tdata_row     *row,
+                                          oid *compareto, size_t compareto_len);
 
     void * netsnmp_tdata_row_entry( netsnmp_tdata_row *row );
 
