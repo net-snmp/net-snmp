@@ -1157,6 +1157,16 @@ snmp_errstring(int errstat)
  *  over the specified SNMP session.
  *
  */
+static netsnmp_session *_def_query_session = NULL;
+void
+netsnmp_query_set_default_session( netsnmp_session *sess) {
+    _def_query_session = sess;
+}
+
+netsnmp_session *
+netsnmp_query_get_default_session( void ) {
+    return _def_query_session;
+}
 
 
 /*
@@ -1164,7 +1174,7 @@ snmp_errstring(int errstat)
  */
 static int _query(netsnmp_variable_list *list,
                   int                    request,
-                  netsnmp_session       *session){
+                  netsnmp_session       *session) {
 
     netsnmp_pdu *pdu      = snmp_pdu_create( request );
     netsnmp_pdu *response = NULL;
@@ -1175,7 +1185,14 @@ static int _query(netsnmp_variable_list *list,
      * Clone the varbind list into the request PDU...
      */
     pdu->variables = snmp_clone_varbind( list );
-    ret = snmp_synch_response( session, pdu, &response );
+    if ( session )
+        ret = snmp_synch_response(            session, pdu, &response );
+    else if (_def_query_session)
+        ret = snmp_synch_response( _def_query_session, pdu, &response );
+    else {
+        /* No session specified */
+        return SNMP_ERR_GENERR;
+    }
 
     /*
      * ....then copy the results back into the
