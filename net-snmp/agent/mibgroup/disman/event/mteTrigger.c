@@ -458,6 +458,9 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                                        vp2->name, vp2->name_length);
                 }
             }
+        } else {
+            for ( vp1 = var; vp1; vp1 = vp1->next_variable )
+               vp1->index = MTE_ARMED_ALL;
         }
 
         /*
@@ -570,27 +573,15 @@ mteTrigger_run( unsigned int reg, void *clientarg)
              *     to remember whether the trigger has already fired)
              */
             if ( cmp ) {
-                if (!entry->old_results &&
-                    (entry->flags & MTE_TRIGGER_FLAG_BSTART)) {
+                if ((!entry->old_results &&
+                     (entry->flags & MTE_TRIGGER_FLAG_BSTART)) ||
+                    (vp1->index & MTE_ARMED_BOOLEAN )) {
                     DEBUGMSGTL(( "disman:event:trigger:fire",
                                  "Firing boolean test: "));
                     DEBUGMSGOID(("disman:event:trigger:fire",
                                  vp1->name, vp1->name_length));
-                    DEBUGMSG((   "disman:event:trigger:fire",
-                                 " (startup)\n"));;
-                    entry->mteTriggerXOwner   = entry->mteTBoolObjOwner;
-                    entry->mteTriggerXObjects = entry->mteTBoolObjects;
-                    entry->mteTriggerFired    = vp1;
-                    n = entry->mteTriggerValueID_len;
-                    mteEvent_fire(entry->mteTBoolEvOwner, entry->mteTBoolEvent, 
-                                  entry, vp1->name+n, vp1->name_length-n);
-                }
-                if ( vp1->index & MTE_ARMED_BOOLEAN ) {
-                    DEBUGMSGTL(( "disman:event:trigger:fire",
-                                 "Firing boolean test: "));
-                    DEBUGMSGOID(("disman:event:trigger:fire",
-                                 vp1->name, vp1->name_length));
-                    DEBUGMSG((   "disman:event:trigger:fire", "\n"));;
+                    DEBUGMSG((   "disman:event:trigger:fire", "%s\n",
+                                  (entry->old_results ? "" : " (startup)")));
                     vp1->index &= ~MTE_ARMED_BOOLEAN;
                     entry->mteTriggerXOwner   = entry->mteTBoolObjOwner;
                     entry->mteTriggerXObjects = entry->mteTBoolObjects;
@@ -606,6 +597,69 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     }
 
     if ( entry->mteTriggerTest & MTE_TRIGGER_THRESHOLD ) {
+        if (entry->flags & MTE_TRIGGER_FLAG_DWILD)
+            vp2 = entry->old_results;
+        for ( vp1 = var; vp1; vp1=vp1->next_variable ) {
+            /*
+             * Determine the value to be monitored...
+             */
+            if (entry->flags & MTE_TRIGGER_FLAG_DWILD) {
+                /* XXX - check the suffix matches      */
+                /* XXX - check the discontinuity value */
+                value = (*vp1->val.integer - *vp2->val.integer);
+                vp2 = vp2->next_variable;
+            } else {
+                value = *vp1->val.integer;
+            }
+
+            /*
+             * ... evaluate the single-value comparisons,
+             *     and decide whether to trigger the event.
+             */
+            cmp = vp1->index;   /* working copy of 'armed' flags */
+            if ( value >= entry->mteTThRiseValue ) {
+                if ((!entry->old_results &&
+                     (entry->mteTThStartup & MTE_THRESH_START_RISE)) || 
+                    (vp1->index & MTE_ARMED_TH_RISE )) {
+                    DEBUGMSGTL(( "disman:event:trigger:fire",
+                                 "Firing rising threshold test: "));
+                    DEBUGMSGOID(("disman:event:trigger:fire",
+                                 vp1->name, vp1->name_length));
+                    DEBUGMSG((   "disman:event:trigger:fire", "%s\n",
+                                 (entry->old_results ? "" : " (startup)")));
+                    cmp &= ~MTE_ARMED_TH_RISE;
+                    cmp |=  MTE_ARMED_TH_FALL;
+                    entry->mteTriggerXOwner   = entry->mteTThObjOwner;
+                    entry->mteTriggerXObjects = entry->mteTThObjects;
+                    entry->mteTriggerFired    = vp1;
+                    n = entry->mteTriggerValueID_len;
+                    mteEvent_fire(entry->mteTThRiseOwner, entry->mteTThRiseEvent, 
+                                  entry, vp1->name+n, vp1->name_length-n);
+                }
+            }
+
+            if ( value <= entry->mteTThFallValue ) {
+                if ((!entry->old_results &&
+                     (entry->mteTThStartup & MTE_THRESH_START_FALL)) || 
+                    (vp1->index & MTE_ARMED_TH_FALL )) {
+                    DEBUGMSGTL(( "disman:event:trigger:fire",
+                                 "Firing falling threshold test: "));
+                    DEBUGMSGOID(("disman:event:trigger:fire",
+                                 vp1->name, vp1->name_length));
+                    DEBUGMSG((   "disman:event:trigger:fire", "%s\n",
+                                 (entry->old_results ? "" : " (startup)")));
+                    cmp &= ~MTE_ARMED_TH_FALL;
+                    cmp |=  MTE_ARMED_TH_RISE;
+                    entry->mteTriggerXOwner   = entry->mteTThObjOwner;
+                    entry->mteTriggerXObjects = entry->mteTThObjects;
+                    entry->mteTriggerFired    = vp1;
+                    n = entry->mteTriggerValueID_len;
+                    mteEvent_fire(entry->mteTThFallOwner, entry->mteTThFallEvent, 
+                                  entry, vp1->name+n, vp1->name_length-n);
+                }
+            }
+            vp1->index = cmp;
+        }
     }
 
     /*
