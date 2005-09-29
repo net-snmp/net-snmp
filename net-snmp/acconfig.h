@@ -476,8 +476,6 @@
 #define CACHEFILE ".snmp-exec-cache"
 #define MAXCACHESIZE (200*80)   /* roughly 200 lines max */
 
-#define MAXDISKS 50                      /* can't scan more than this number */
-
 /* misc defaults */
 
 /* default of 100 meg minimum if the minimum size is not specified in
