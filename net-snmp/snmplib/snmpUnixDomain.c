@@ -32,6 +32,7 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpUnixDomain.h>
 
 
@@ -242,6 +243,8 @@ netsnmp_unix_accept(netsnmp_transport *t)
                     farend, farendlen));
         t->data = farend;
         t->data_length = sizeof(struct sockaddr_un);
+       netsnmp_sock_buffer_set(newsock, SO_SNDBUF, 1, 0);
+       netsnmp_sock_buffer_set(newsock, SO_RCVBUF, 1, 0);
         return newsock;
     } else {
         free(farend);
@@ -381,6 +384,8 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         sup->server.sun_family = AF_UNIX;
         strcpy(sup->server.sun_path, addr->sun_path);
         sup->local = 0;
+       netsnmp_sock_buffer_set(t->sock, SO_SNDBUF, local, 0);
+       netsnmp_sock_buffer_set(t->sock, SO_RCVBUF, local, 0);
     }
 
     /*
