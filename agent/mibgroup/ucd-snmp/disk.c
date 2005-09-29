@@ -165,7 +165,8 @@ struct diskpart {
 
 int             numdisks;
 int             allDisksIncluded = 0;
-struct diskpart disks[MAXDISKS];
+int             maxdisks = 0;
+struct diskpart *disks;
 
 struct variable2 extensible_disk_variables[] = {
   {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_disk, 1, {MIBINDEX}},
@@ -217,7 +218,7 @@ disk_free_config(void)
   int             i;
 
   numdisks = 0;
-  for (i = 0; i < MAXDISKS; i++) {    /* init/erase disk db */
+  for (i = 0; i < maxdisks; i++) {    /* init/erase disk db */
     disks[i].device[0] = 0;
     disks[i].path[0] = 0;
     disks[i].minimumspace = -1;
@@ -234,42 +235,61 @@ disk_parse_config(const char *token, char *cptr)
   int             minpercent;
   int             minspace;
 
-  if (numdisks == MAXDISKS) {
-    config_perror("Too many disks specified.");
-    snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring:  %s", cptr);
-    tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
-    config_perror(tmpbuf);
-  } else {
-    /*
-     * read disk path (eg, /1 or /usr) 
-     */
-    copy_nword(cptr, path, sizeof(path));
-    cptr = skip_not_white(cptr);
-    cptr = skip_white(cptr);
+  if (numdisks == maxdisks) {
+      if (maxdisks == 0) {
+          maxdisks = 50;
+          disks = malloc(maxdisks * sizeof(struct diskpart));
+          if (!disks) {
+              config_perror("malloc failed for new disk allocation.");
+              sprintf(tmpbuf, "\tignoring:  %s", cptr);
+              tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
+              config_perror(tmpbuf);
+              return;
+          }
+          memset(disks, 0, maxdisks * sizeof(struct diskpart));
+      } else {
+          maxdisks *= 2;
+          disks = realloc(disks, maxdisks * sizeof(struct diskpart));
+          if (!disks) {
+              config_perror("malloc failed for new disk allocation.");
+              sprintf(tmpbuf, "\tignoring:  %s", cptr);
+              tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
+              config_perror(tmpbuf);
+              return;
+          }
+          memset(disks + maxdisks/2, 0, maxdisks/2 * sizeof(struct diskpart));
+      }
+  }
+
+  /*
+   * read disk path (eg, /1 or /usr) 
+   */
+  copy_nword(cptr, path, sizeof(path));
+  cptr = skip_not_white(cptr);
+  cptr = skip_white(cptr);
 	
-    /*
-     * read optional minimum disk usage spec 
-     */
-    if(cptr != NULL) {
+  /*
+   * read optional minimum disk usage spec 
+   */
+  if(cptr != NULL) {
       if(strchr(cptr, '%') == 0) {
-	minspace = atoi(cptr);
-	minpercent = -1;
+          minspace = atoi(cptr);
+          minpercent = -1;
       }
       else {
-	minspace = -1;
-	minpercent = atoi(cptr);
+          minspace = -1;
+          minpercent = atoi(cptr);
       }
-    } else {
+  } else {
       minspace = DEFDISKMINIMUMSPACE;
       minpercent = -1;
-    }
-
-    /*
-     * check if the disk already exists, if so then modify its
-     * parameters. if it does not exist then add it
-     */
-    add_device(path, find_device(path), minspace, minpercent, 1);
   }
+
+  /*
+   * check if the disk already exists, if so then modify its
+   * parameters. if it does not exist then add it
+   */
+  add_device(path, find_device(path), minspace, minpercent, 1);
 #endif /* HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS */
 }
 
@@ -280,34 +300,51 @@ disk_parse_config_all(const char *token, char *cptr)
   char            tmpbuf[1024];
   int             minpercent = DISKMINPERCENT;
     
-  if (numdisks == MAXDISKS) {
-    config_perror("Too many disks specified.");
-    sprintf(tmpbuf, "\tignoring:  %s", cptr);
-    config_perror(tmpbuf);
-  } else {
-    /*
-     * read the minimum disk usage percent
-     */
-    if(cptr != NULL) {
-      if(strchr(cptr, '%') != 0) {
-	minpercent = atoi(cptr);
+  if (numdisks == maxdisks) {
+      if (maxdisks == 0) {
+          maxdisks = 50;
+          disks = malloc(maxdisks * sizeof(struct diskpart));
+          if (!disks) {
+              config_perror("malloc failed for new disk allocation.");
+              sprintf(tmpbuf, "\tignoring:  %s", cptr);
+              config_perror(tmpbuf);
+              return;
+          }
+          memset(disks, 0, maxdisks * sizeof(struct diskpart));
+      } else {
+          maxdisks *= 2;
+          disks = realloc(disks, maxdisks * sizeof(struct diskpart));
+          if (!disks) {
+              config_perror("malloc failed for new disk allocation.");
+              sprintf(tmpbuf, "\tignoring:  %s", cptr);
+              config_perror(tmpbuf);
+              return;
+          }
+          memset(disks + maxdisks/2, 0, maxdisks/2 * sizeof(struct diskpart));
       }
-    }
-    /*
-     * if we have already seen the "includeAllDisks" directive
-     * then search for the disk in the "disks" array and modify
-     * the values. if we havent seen the "includeAllDisks"
-     * directive then include this disk
-     */
-    if(allDisksIncluded) {
+  }
+  /*
+   * read the minimum disk usage percent
+   */
+  if(cptr != NULL) {
+      if(strchr(cptr, '%') != 0) {
+          minpercent = atoi(cptr);
+      }
+  }
+  /*
+   * if we have already seen the "includeAllDisks" directive
+   * then search for the disk in the "disks" array and modify
+   * the values. if we havent seen the "includeAllDisks"
+   * directive then include this disk
+   */
+  if(allDisksIncluded) {
       config_perror("includeAllDisks already specified.");
       sprintf(tmpbuf, "\tignoring: includeAllDisks %s", cptr);
       config_perror(tmpbuf);
-    }
-    else {
+  }
+  else {
       allDisksIncluded = 1;
       find_and_add_allDisks(minpercent);
-    }
   }
 #endif /* HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS */
 }
@@ -317,17 +354,36 @@ static void
 add_device(char *path, char *device, int minspace, int minpercent, int override) 
 {
   int index;
-  if (numdisks == MAXDISKS) {
-    char tmpbuf[1024];
-    config_perror("Too many disks specified.");
-    snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring:  %s", device);
-    tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
-    config_perror(tmpbuf);
-    return;
+
+  if (numdisks == maxdisks) {
+      if (maxdisks == 0) {
+          maxdisks = 50;
+          disks = malloc(maxdisks * sizeof(struct diskpart));
+          if (!disks) {
+              char tmpbuf[1024];
+              snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring:  %s", device);
+              tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
+              config_perror(tmpbuf);
+              return;
+          }
+          memset(disks, 0, maxdisks * sizeof(struct diskpart));
+      } else {
+          maxdisks *= 2;
+          disks = realloc(disks, maxdisks * sizeof(struct diskpart));
+          if (!disks) {
+              char tmpbuf[1024];
+              config_perror("malloc failed for new disk allocation.");
+              snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring:  %s", device);
+              tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
+              config_perror(tmpbuf);
+              return;
+          }
+          memset(disks + maxdisks/2, 0, maxdisks/2 * sizeof(struct diskpart));
+      }
   }
 
   index = disk_exists(path);
-  if((index != -1) && (index < MAXDISKS) && (override==1)) {
+  if((index != -1) && (index < maxdisks) && (override==1)) {
     modify_disk_parameters(index, minspace, minpercent);
   }
   else if(index == -1){
@@ -445,7 +501,7 @@ find_and_add_allDisks(int minpercent)
   }
 #endif
   else {
-    if (numdisks == MAXDISKS) {
+    if (numdisks == maxdisks) {
       return;
     }
     snprintf(tmpbuf, sizeof(tmpbuf),
