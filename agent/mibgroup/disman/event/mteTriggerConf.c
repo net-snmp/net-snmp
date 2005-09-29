@@ -525,9 +525,9 @@ parse_mteMonitor(const char *token, char *line)
         }
         break;
     case MTE_TRIGGER_THRESHOLD:
-        entry->mteTThRiseValue  = value;
-        value = strtol(buf, NULL, 0);
         entry->mteTThFallValue  = value;
+        value = strtol(buf, NULL, 0);
+        entry->mteTThRiseValue  = value;
         if (!startup)
             entry->mteTThStartup = 0;
         if ( idx > 0 ) {
