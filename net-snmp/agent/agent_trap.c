@@ -235,12 +235,15 @@ create_trap_session(char *sink, u_short sinkport,
 {
     netsnmp_session session, *sesp;
     char           *peername = NULL;
+    int             len;
 
-    if ((peername = malloc(strlen(sink) + 4 + 32)) == NULL) {
+    len = strlen(sink) + 4 + 32;
+    if ((peername = malloc(len)) == NULL) {
         return 0;
+    } else if (NULL != strchr(sink,':')) {
+        snprintf(peername, len, "%s", sink);
     } else {
-        snprintf(peername, strlen(sink) + 4 + 32, "udp:%s:%hu", sink,
-                 sinkport);
+        snprintf(peername, len, "udp:%s:%hu", sink, sinkport);
     }
 
     memset(&session, 0, sizeof(netsnmp_session));
@@ -624,7 +627,7 @@ netsnmp_send_traps(int trap, int specific,
 
     DEBUGMSGTL(( "trap", "send_trap %d %d ", trap, specific));
     DEBUGMSGOID(("trap", enterprise, enterprise_length));
-    DEBUGMSGTL(( "trap", "\n"));
+    DEBUGMSG(( "trap", "\n"));
 
     if (vars) {
         vblist = snmp_clone_varbind( vars );
