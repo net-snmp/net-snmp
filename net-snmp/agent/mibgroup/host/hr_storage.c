@@ -718,7 +718,7 @@ really_try_next:
                      sizeof(mbstat.m_mtypes) / sizeof(mbstat.m_mtypes[0]);
                      i++)
                     long_return += mbstat.m_mtypes[i];
-#elif defined(MBSTAT_SYMBOL)
+#elif defined(MBSTAT_SYMBOL) && defined(STRUCT_MBSTAT_HAS_M_MBUFS)
                 long_return = mbstat.m_mbufs;
 #elif defined(NO_DUMMY_VALUES)
                 goto try_next;
