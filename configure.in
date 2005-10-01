@@ -2910,6 +2910,13 @@ AC_CHECK_STRUCT_FOR([
 #endif
 ], mbstat, m_clusters, no)
 
+# openbsd seems to have dropped m_mbufs from mbstat too
+AC_CHECK_STRUCT_FOR([
+#if HAVE_SYS_MBUF_H
+#include <sys/mbuf.h>
+#endif
+], mbstat, m_mbufs, no)
+
 
 AC_CHECK_STRUCT_FOR([
 #ifdef HAVE_SYS_PARAM_H
