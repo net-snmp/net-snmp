@@ -21,6 +21,7 @@ usage()
    echo " -x : configure extra features for pre-release testing"
    echo " -C : don't source $HOME/.snmp/nsb-nightly"
    echo ""
+   echo " -e : address to email results to"
    echo " -h : host to upload results to"
    echo " -p : path to upload results to"
    exit 1
@@ -59,11 +60,13 @@ fi
 # -R : remove build dir after
 PARMS="$PARMS -r"
 NIGHTLY_VERBOSE=0
+NSB_RESULTS_TO=""
 
-while getopts b:i:s:xh:p:v opt
+while getopts b:e:i:s:xh:p:v opt
 do
     case "$opt" in
       b)  NSB_BUILD_DIR=$OPTARG;;
+      e)  NSB_RESULTS_TO=$OPTARG;;
       i)  PARMS="-i $OPTARG $PARMS";;
       s)  NSB_SRC_DIR=$OPTARG;;
       h)  NSB_SCP_HOST=$OPTARG
@@ -119,5 +122,9 @@ case $RC in
        fi
         ;;
 esac
+
+if [ ! -z $NSB_RESULTS_TO ]; then
+  cat nsb-make-all-errs.* nsb-make-test-errs.*  | mail -s "$NSB_VERSION on $NSB_PLATFORM" $NSB_RESULTS_TO
+fi
 
 exit $RC
