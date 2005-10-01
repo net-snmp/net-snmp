@@ -33,13 +33,13 @@
 #include <sys/param.h>
 #include "sys/proc.h"
 #endif
-#if HAVE_UTMPX_H
 #ifndef mingw32
+#if HAVE_UTMPX_H
 #include <utmpx.h>
 #else
 #include <utmp.h>
-#endif /* mingw32 */
 #endif
+#endif /* mingw32 */
 #include <signal.h>
 #include <errno.h>
 
