@@ -410,7 +410,7 @@ setPassPersist(int action,
                                      persistpassthru->miboid,
                                      persistpassthru->miblen);
         if (rtest <= 0) {
-            if (action != COMMIT)
+            if (action != ACTION)
                 return SNMP_ERR_NOERROR;
             /*
              * setup args 
