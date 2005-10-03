@@ -36,7 +36,7 @@
 !insertmacro MUI_PAGE_LICENSE "docs\COPYING"
 
 ; Make sure SSL is installed.
-Page custom IsSLLInstalled "" ": custom page"
+Page custom IsSSLInstalled "" ": custom page"
 
 ; Components page
 !insertmacro MUI_PAGE_COMPONENTS
@@ -1019,13 +1019,16 @@ Section Uninstall
   SetAutoClose true
 SectionEnd
 
-Function IsSLLInstalled
+Function IsSSLInstalled
+  Push $R0
   StrCmp ${OPENSSL_REQUIRED} "0" continueInstall
-  IfFileExists "$%windir%\system32\libeay32.dll" 0 noSSL
+  ReadEnvStr $R0 "windir"
+  IfFileExists "$R0\system32\libeay32.dll" 0 noSSL
     Goto continueInstall
   noSSL:
-    MessageBox MB_YESNO|MB_ICONQUESTION "OpenSSL (libeay32.dll) does not appear to be installed.  OpenSSL is required for this installation of Net-SNMP.  Please install OpenSSL from http://www.slproweb.com/products/Win32OpenSSL.html and try again.  Would you like to continue installing anyways?" IDYES continueInstall
+    MessageBox MB_YESNO|MB_ICONQUESTION "OpenSSL ($R0\system32\libeay32.dll) does not appear to be installed.  OpenSSL is required for this installation of Net-SNMP.  Please install OpenSSL from http://www.slproweb.com/products/Win32OpenSSL.html and try again.  Would you like to continue installing anyways?" IDYES continueInstall
   Quit
   continueInstall:
+  Pop $R0
 FunctionEnd
 
