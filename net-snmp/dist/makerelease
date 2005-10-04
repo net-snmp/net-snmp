@@ -8,7 +8,7 @@ my $descr;
 
 LocalGetOptions(\%opts,
 	   ['r|regexp-ignore-steps=s','Ignore these REGEXP steps'],
-	   ['s|skip-until=s',         'Skip all steps until ARG'],
+	   ['s|start-at=s',           'Skip all steps until ARG'],
 	   ['i|interactive',          'Prompt whether to do each step'],
 	   ['n|dry-run',     'Dry run only.  Don\'t actually do anything.'],
 	   ['h|help', 'Help']);
@@ -48,9 +48,7 @@ System("version:commit",
 #
 System("build:configure","./configure --with-defaults '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=UDPIPv6 TCPIPv6 IPX' --enable-embedded-perl --enable-shared");
 System("build:make","make");
-checkresult();
 System("build:test","make test");
-checkresult();
 
 #
 # checks and changes
@@ -138,6 +136,7 @@ sub System {
     if (dostep($name)) {
 	print STDERR "    running: ",$cmd,"\n";
 	system(@_) if (!$opts{'n'});
+	checkresult();
     }
 }
 
