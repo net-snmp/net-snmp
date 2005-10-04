@@ -8,12 +8,9 @@
 #define MTE_TRIGGER_FLAG_VWILD   0x02    /* for mteTriggerValueIDWildcard  */
 #define MTE_TRIGGER_FLAG_CWILD   0x04    /* for mteTriggerContextWildcard  */
 #define MTE_TRIGGER_FLAG_DWILD   0x08    /* for mteTriggerDeltaDIDWildcard */
+#define MTE_TRIGGER_FLAG_SYSUPT  0x10    /* using default mteTriggerDeltaID */
 
-/*#define MTE_TRIGGER_FLAG_ESTART  0x10  / * for mteTriggerExistenceStartup */
 #define MTE_TRIGGER_FLAG_BSTART  0x20    /* for mteTriggerBooleanStartup   */
-/*#define MTE_TRIGGER_FLAG_TSRISE  0x40  / * for mteTriggerThresholdStartup */
-/*#define MTE_TRIGGER_FLAG_TSFALL  0x80  / * for mteTriggerThresholdStartup */
-/*#define MTE_TRIGGER_THRESHOLD_STARTUP_VALUE(x) (((x)->flags & 0xc0) >> 4) */
 
 #define MTE_TRIGGER_FLAG_ENABLED 0x0100  /* for mteTriggerEnabled          */
 #define MTE_TRIGGER_FLAG_ACTIVE  0x0200  /* for mteTriggerEntryStatus      */

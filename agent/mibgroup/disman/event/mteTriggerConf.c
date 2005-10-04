@@ -275,6 +275,8 @@ parse_mteMonitor(const char *token, char *line)
                     mteObjects_removeEntries( "snmpd.conf", tname );
                     return;
                 }
+                /* XXX - check not sysUpTime.0 */
+                flags &= ~MTE_TRIGGER_FLAG_SYSUPT;
                 break;
     
             case 'e':   /*  event */
