@@ -1,6 +1,147 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.2.1 -> V5.2.2.pre2
+Changes: V5.2.1 -> V5.2.2.pre3
+
+2005-10-04 14:33  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3
+, netsnmp_agent_trap.3,
+     netsnmp_asn1_packet_parse.3, netsnmp_baby_steps.3
+, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3,
+     netsnmp_container.3, netsnmp_data_list.3,
+     netsnmp_debug.3, netsnmp_default_store.3,
+     netsnmp_handler.3, netsnmp_instance.3,
+     netsnmp_iterator_info_s.3, netsnmp_leaf.3,
+     netsnmp_library.3, netsnmp_mib_utilities.3,
+     netsnmp_mode_end_call.3, netsnmp_multiplexer.3
+, netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3
+, netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3
+, netsnmp_snmp_client.3,
+     netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3,
+     netsnmp_snmp_session.3, netsnmp_stash_cache.3
+, netsnmp_table.3, netsnmp_table_array.3
+, netsnmp_table_container.3,
+     netsnmp_table_data.3, netsnmp_table_dataset.3
+, netsnmp_table_iterator.3,
+     netsnmp_table_iterator.h.3, netsnmp_util.3,
+     netsnmp_utilities.3, netsnmp_variable_list.3,
+     netsnmp_watcher.3:
+
+   documentation update
+
+2005-10-04 14:29  hardaker
+
+   * configure, configure.in:
+
+   version update
+
+2005-10-03 17:01  alex_b
+
+   * README.win32, win32/Makefile.in,
+     win32/build.pl, win32/dist/README.build.win32.txt
+, win32/dist/installer/net-snmp.nsi,
+     README.win32:
+
+   Win32 installer: Add 'Development files' section to win32 binary, add
+   OpenSSL build steps and SSL check to installer script
+
+2005-10-03 04:51  dts12
+
+   * agent/mibgroup/ucd-snmp/pass_persist.c:
+
+   Run SET assignments during the ACTION pass, so errors can be reported.
+   (Should fix Bug #864281, and be consistent with pass.c behaviour)
+
+2005-10-01 09:25  rstory
+
+   * configure:
+
+   update for configure.in
+
+2005-10-01 09:23  rstory
+
+   * configure.in, agent/mibgroup/host/hr_storage.c
+:
+
+   check for mbstat.m_mbufs before using
+
+2005-10-01 06:54  rstory
+
+   * agent/agent_trap.c:
+
+   - fix debug usage
+   - don't tack on udp/port if trapsink contains ':' (allow other transports)
+
+2005-09-29 15:28  hardaker
+
+   * agent/mibgroup/target/snmpTargetAddrEntry.c:
+
+   Patch from bug#1234834: fixes targetaddrtimeout so its writable
+
+2005-09-28 15:41  alex_b
+
+   * win32/net-snmp/: net-snmp-config.h,
+     net-snmp-config.h.in:
+
+   Win32 MSVC:  Enable AES encryption when SSL is enabled.
+
+2005-09-28 15:28  alex_b
+
+   * win32/net-snmp/: net-snmp-config.h.in,
+     net-snmp-config.h:
+
+   Win32 MSVC:  Enable AES encryption when SSL is enabled.
+
+2005-09-28 09:25  tanders
+
+   * configure.in, configure:
+
+   Fix last remaining "present, but cannot be compiled" warning on Solaris 9
+
+2005-09-28 07:26  hardaker
+
+   * man/snmpd.conf.5.def:
+
+   added documentation describing the exec() path requirement
+
+2005-09-28 07:21  hardaker
+
+   * man/snmpcmd.1.def:
+
+   Updated docs on -Ib to document extra limitations
+
+2005-09-28 02:00  tanders
+
+   * README:
+
+   reveal my continued presence around here
+
+2005-09-27 15:57  tanders
+
+   * include/net-snmp/system/solaris2.10.h:
+
+   add Solaris 10 support
+
+2005-09-27 15:44  rstory
+
+   * README.osX:
+
+   document 10.4.x embedded perl work-around
 
 2005-09-27 15:33  hardaker
 
