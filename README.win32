@@ -442,26 +442,28 @@ steps to build using build.bat:
 
 4.  The following screen will appear:
 
-    Net-SNMP build options
-    ======================
+    Net-SNMP build and install options
+    ==================================
     
-    1. OpenSSL support:      disabled
-    2. Platform SDK support: disabled
-
-    3. Install path:         c:/usr
-    4. Install after build:  enabled
-
-    5. Perl modules:         disabled
-    6. Install perl modules: disabled
-
-    7. Quiet build (logged): enabled
-    8. Debug mode:           disabled
-    9. IPv6 transports:      disabled
+    1.  OpenSSL support:            disabled
+    2.  Platform SDK support:       disabled
     
-    F. Finished - start build
-    Q. Quit - abort build
-
-    Select option to set / toggle:
+    3.  Install path:               c:/usr
+    4.  Install after build:        enabled
+    
+    5.  Perl modules:               disabled
+    6.  Install perl modules:       disabled
+    
+    7.  Quiet build (logged):       enabled
+    8.  Debug mode:                 disabled
+    9.  IPv6 transports:            disabled
+    
+    10. Install development files   disabled
+    
+    F.  Finished - start build
+    Q.  Quit - abort build
+    
+    Select option to set / toggle: 
 
 5.  Toggle the options on and off as desired by typing the line number 
     followed by <enter>.  
