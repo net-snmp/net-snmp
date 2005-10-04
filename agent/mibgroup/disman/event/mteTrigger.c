@@ -161,13 +161,16 @@ void
 mteTrigger_run( unsigned int reg, void *clientarg)
 {
     struct mteTrigger *entry = (struct mteTrigger *)clientarg;
-    netsnmp_variable_list *var, *vp1, *vp2 = NULL;
+    netsnmp_variable_list *var, *vtmp;
+    netsnmp_variable_list *vp1, *vp1_prev;
+    netsnmp_variable_list *vp2, *vp2_prev;
     netsnmp_variable_list *dvar = NULL;
     netsnmp_variable_list sysUT_var;
     oid    sysUT_oid[] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
     size_t sysUT_oid_len = OID_LENGTH( sysUT_oid );
     int  cmp = 0, n;
     long value;
+    char *reason;
 
     if (!entry) {
         snmp_alarm_unregister( reg );
@@ -195,16 +198,120 @@ mteTrigger_run( unsigned int reg, void *clientarg)
          */
 
     /*
-     * ... flatten missing values/exceptions into a single form
-     *     (to simplify later comparisons) ...
+     * ... canonicalise the results (to simplify later comparisons)...
      */
-    for ( vp1 = var; vp1; vp1=vp1->next_variable ) {
-        switch (vp1->type) {
+
+    vp1 = var;                vp1_prev = NULL;
+    vp2 = entry->old_results; vp2_prev = NULL;
+    while (vp1) {
+           /*
+            * Flatten various missing values/exceptions into a single form
+            */ 
+	switch (vp1->type) {
         case SNMP_NOSUCHINSTANCE:
         case SNMP_NOSUCHOBJECT:
         case ASN_PRIV_RETRY:   /* Internal only ? */
-        case ASN_NULL:
             vp1->type = ASN_NULL;
+        }
+           /*
+            * Ensure previous and current result match
+            *  (with corresponding entries in both lists)
+            * and set the flags indicating which triggers are armed
+            */ 
+        if (vp2) {
+            cmp = snmp_oid_compare(vp1->name, vp1->name_length,
+                                   vp2->name, vp2->name_length);
+            if ( cmp < 0 ) {
+                /*
+                 * If a new value has appeared, insert a matching
+                 * dummy entry into the previous result list.
+                 *
+                 * XXX - check how this is best done.
+                 */
+                vtmp = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
+                vtmp->type = ASN_NULL;
+                snmp_set_var_objid( vtmp, vp1->name, vp1->name_length );
+                vtmp->next_variable = vp2;
+                if (vp2_prev) {
+                    vp2_prev->next_variable = vtmp;
+                } else {
+                    entry->old_results      = vtmp;
+                }
+                vp2_prev   = vtmp;
+                vp1->index = MTE_ARMED_ALL;	/* XXX - plus a new flag */
+                vp1_prev   = vp1;
+                vp1        = vp1->next_variable;
+            }
+            else if ( cmp == 0 ) {
+                /*
+                 * If it's a continuing entry, just copy across the armed flags
+                 */
+                vp1->index = vp2->index;
+                vp1_prev   = vp1;
+                vp1        = vp1->next_variable;
+                vp2_prev   = vp2;
+                vp2        = vp2->next_variable;
+            } else {
+                /*
+                 * If a value has just disappeared, insert a
+                 * matching dummy entry into the current result list.
+                 *
+                 * XXX - check how this is best done.
+                 *
+                 */
+                if ( vp2->type != ASN_NULL ) {
+                    vtmp = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
+                    vtmp->type = ASN_NULL;
+                    snmp_set_var_objid( vtmp, vp2->name, vp2->name_length );
+                    vtmp->next_variable = vp1;
+                    if (vp1_prev) {
+                        vp1_prev->next_variable = vtmp;
+                    } else {
+                        entry->old_results      = vtmp;
+                    }
+                    vp1_prev = vtmp;
+                    vp2_prev = vp2;
+                    vp2      = vp2->next_variable;
+                } else {
+                    /*
+                     * But only if this entry has *just* disappeared.  If the
+                     * entry from the last run was a dummy too, then remove it.
+                     *   (leaving vp2_prev unchanged)
+                     */
+                    vtmp = vp2;
+                    if (vp2_prev) {
+                        vp2_prev->next_variable = vp2->next_variable;
+                    } else {
+                        entry->old_results      = vp2->next_variable;
+                    }
+                    vp2  = vp2->next_variable;
+                    vtmp->next_variable = NULL;
+                    snmp_free_varbind( vtmp );
+                }
+            }
+        } else {
+            /*
+             * No more old results to compare.
+             * Either all remaining values have only just been created ...
+             *   (and we need to create dummy 'old' entries for them)
+             */
+            if ( vp2_prev ) {
+                vtmp = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
+                vtmp->type = ASN_NULL;
+                snmp_set_var_objid( vtmp, vp1->name, vp1->name_length );
+                vtmp->next_variable     = vp2_prev->next_variable;
+                vp2_prev->next_variable = vtmp;
+                vp2_prev                = vtmp;
+            }
+            /*
+             * ... or this is the first run through
+             *   (and there were no old results at all)
+             *
+             * In either case, mark the current entry as armed and new.
+             * Note that we no longer need to maintain 'vp1_prev'
+             */
+            vp1->index = MTE_ARMED_ALL;	/* XXX - plus a new flag */
+            vp1        = vp1->next_variable;
         }
     }
 
@@ -213,23 +320,21 @@ mteTrigger_run( unsigned int reg, void *clientarg)
      *     whether or not to trigger the corresponding event.
      *
      *  Note that there's no point in evaluating Existence or
-     *    Boolean tests where there's no corresponding event.
-     *   (Even if the trigger matches, nothing will be done anyway).
+     *    Boolean tests if there's no corresponding event.
+     *   (Even if the trigger matched, nothing would be done anyway).
      */
     if ((entry->mteTriggerTest & MTE_TRIGGER_EXISTENCE) &&
         (entry->mteTExEvent[0] != '\0' )) {
+        /*
+         * If we don't have a record of previous results,
+         * this must be the first time through, so consider
+         * the mteTriggerExistenceStartup tests.
+         */
         if ( !entry->old_results ) {
             /*
-             * If we don't have a record of previous results,
-             * this must be the first time through, so consider
-             * the mteTriggerExistenceStartup tests.
-             *
              * With the 'present(0)' test, the trigger should fire
              *   for each value in the varbind list returned
              *   (whether the monitored value is wildcarded or not).
-             * An initial 'absent(1)' test only makes sense when
-             *   monitoring a non-wildcarded OID (how would we know
-             *   which rows of the table "ought" to exist, but don't?)
              */
             if (entry->mteTExTest & entry->mteTExStartup & MTE_EXIST_PRESENT) {
                 for (vp1 = var; vp1; vp1=vp1->next_variable) {
@@ -247,6 +352,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                                   entry, vp1->name+n, vp1->name_length-n);
                 }
             }
+            /*
+             * An initial 'absent(1)' test only makes sense when
+             *   monitoring a non-wildcarded OID (how would we know
+             *   which rows of the table "ought" to exist, but don't?)
+             */
             if (entry->mteTExTest & entry->mteTExStartup & MTE_EXIST_ABSENT) {
                 if (!(entry->flags & MTE_TRIGGER_FLAG_VWILD) &&
                     vp1->type == ASN_NULL ) {
@@ -256,9 +366,15 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                                  var->name, var->name_length));
                     DEBUGMSG((   "disman:event:trigger:fire",
                                  " (absent)\n"));;
-   /* XXX - what value should the 'mteHotValue' payload varbind take ?? */ 
                     entry->mteTriggerXOwner   = entry->mteTExObjOwner;
                     entry->mteTriggerXObjects = entry->mteTExObjects;
+                    /*
+                     * It's unclear what value the 'mteHotValue' payload
+                     *  should take when a monitored instance does not
+                     *  exist on startup. The only sensible option is
+                     *  to report a NULL value, but this clashes with
+                     * the syntax of the mteHotValue MIB object.
+                     */
                     entry->mteTriggerFired    = vp1;
                     n = entry->mteTriggerValueID_len;
                     mteEvent_fire(entry->mteTExEvOwner, entry->mteTExEvent, 
@@ -266,126 +382,76 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                 }
             }
         } /* !old_results */
-        else {
             /*
              * Otherwise, compare the current set of results with
-             * the previous ones, looking for changes.
+             * the previous ones, looking for changes.  We can
+             * assume that the two lists match (see above).
              */
-            vp1 = var;
-            vp2 = entry->old_results;
-            while (vp1) {
-                cmp = snmp_oid_compare(vp1->name, vp1->name_length,
-                                       vp2->name, vp2->name_length);
-                if ( cmp == 0 ) {
-                    /*
-                     * If the OIDs match, then compare the two values
-                     * before moving on to the next pair of results.
-                     */
-                    if ((entry->mteTExTest & MTE_EXIST_PRESENT) &&
-                        (vp1->type == ASN_NULL) &&
-                        (vp2->type != ASN_NULL)) {
-                        DEBUGMSGTL(( "disman:event:trigger:fire",
-                                     "Firing existence test: "));
-                        DEBUGMSGOID(("disman:event:trigger:fire",
-                                     var->name, var->name_length));
-                        DEBUGMSG((   "disman:event:trigger:fire",
-                                     " (present)\n"));;
-                        entry->mteTriggerXOwner   = entry->mteTExObjOwner;
-                        entry->mteTriggerXObjects = entry->mteTExObjects;
-                        entry->mteTriggerFired    = vp1;
-                        n = entry->mteTriggerValueID_len;
-                        mteEvent_fire(entry->mteTExEvOwner, entry->mteTExEvent, 
-                                      entry, vp1->name+n, vp1->name_length-n);
-                    } else if ((entry->mteTExTest & MTE_EXIST_ABSENT) &&
-                        (vp1->type != ASN_NULL) &&
-                        (vp2->type == ASN_NULL)) {
-                        DEBUGMSGTL(( "disman:event:trigger:fire",
-                                     "Firing existence test: "));
-                        DEBUGMSGOID(("disman:event:trigger:fire",
-                                     var->name, var->name_length));
-                        DEBUGMSG((   "disman:event:trigger:fire",
-                                     " (absent)\n"));;
-                        entry->mteTriggerXOwner   = entry->mteTExObjOwner;
-                        entry->mteTriggerXObjects = entry->mteTExObjects;
-                        entry->mteTriggerFired    = vp1;
-                        n = entry->mteTriggerValueID_len;
-                        mteEvent_fire(entry->mteTExEvOwner, entry->mteTExEvent, 
-                                      entry, vp1->name+n, vp1->name_length-n);
-                    } else if ((entry->mteTExTest & MTE_EXIST_CHANGED) &&
-                        ((vp1->val_len != vp2->val_len) || 
-                         (memcmp( vp1->val.string, vp2->val.string,
-                                  vp1->val_len) != 0 ))) {
-                        /*
-                         * This comparison detects changes in *any* type
-                         *  of value, numeric or string (or even OID).
-                         *
-                         * Unfortunately, the default 'mteTriggerFired'
-                         *  notification payload can't report non-numeric
-                         *  changes properly (see syntax of 'mteHotValue')
-                         */
-                        DEBUGMSGTL(( "disman:event:trigger:fire",
-                                     "Firing existence test: "));
-                        DEBUGMSGOID(("disman:event:trigger:fire",
-                                     var->name, var->name_length));
-                        DEBUGMSG((   "disman:event:trigger:fire",
-                                     " (changed)\n"));;
-                        entry->mteTriggerXOwner   = entry->mteTExObjOwner;
-                        entry->mteTriggerXObjects = entry->mteTExObjects;
-                        entry->mteTriggerFired    = vp1;
-                        n = entry->mteTriggerValueID_len;
-                        mteEvent_fire(entry->mteTExEvOwner, entry->mteTExEvent, 
-                                      entry, vp1->name+n, vp1->name_length-n);
-                    }
+        else {
+            for (vp1 = var, vp2 = entry->old_results;
+                 vp1;
+                 vp1=vp1->next_variable, vp2=vp2->next_variable) {
 
-                    vp1 = vp1->next_variable;
-                    vp2 = vp2->next_variable;
-                } else if ( cmp < 0 ) {
+                /* Use this field to indicate that the trigger should fire */
+                entry->mteTriggerFired = NULL;
+
+                if ((entry->mteTExTest & MTE_EXIST_PRESENT) &&
+                    (vp1->type != ASN_NULL) &&
+                    (vp2->type == ASN_NULL)) {
+                    /* A new instance has appeared */
+                    entry->mteTriggerFired = vp1;
+                    reason = "(present)";
+
+                } else if ((entry->mteTExTest & MTE_EXIST_ABSENT) &&
+                    (vp1->type == ASN_NULL) &&
+                    (vp2->type != ASN_NULL)) {
+
                     /*
-                     * If a new value has appeared, then fire a 'present(0)'
-                     * test, and move on to the next 'current' result.
+                     * A previous instance has disappeared.
+                     *
+                     * It's unclear what value the 'mteHotValue' payload
+                     *  should take when this happens - the previous
+                     *  value (vp2), or a NULL value (vp1) ?
+                     * NULL makes more sense logically, but clashes
+                     *  with the syntax of the mteHotValue MIB object.
                      */
-                    if (entry->mteTExTest & MTE_EXIST_PRESENT) {
-                        DEBUGMSGTL(( "disman:event:trigger:fire",
-                                     "Firing existence test: "));
-                        DEBUGMSGOID(("disman:event:trigger:fire",
-                                     vp1->name, vp1->name_length));
-                        DEBUGMSG((   "disman:event:trigger:fire",
-                                     " (present)\n"));;
-                        entry->mteTriggerXOwner   = entry->mteTExObjOwner;
-                        entry->mteTriggerXObjects = entry->mteTExObjects;
-                        entry->mteTriggerFired    = vp1;
-                        n = entry->mteTriggerValueID_len;
-                        mteEvent_fire(entry->mteTExEvOwner, entry->mteTExEvent, 
-                                      entry, vp1->name+n, vp1->name_length-n);
-                    }
-                    vp1 = vp1->next_variable;
-                } else {
+                    entry->mteTriggerFired = vp2;
+                    reason = "(absent)";
+
+                } else if ((entry->mteTExTest & MTE_EXIST_CHANGED) &&
+                    ((vp1->val_len != vp2->val_len) || 
+                     (memcmp( vp1->val.string, vp2->val.string,
+                              vp1->val_len) != 0 ))) {
                     /*
-                     * While if an entry has disappeared, fire an 'absent(1)'
-                     * test, and move on to the next 'old' result.
+                     * This comparison detects changes in *any* type
+                     *  of value, numeric or string (or even OID).
+                     *
+                     * Unfortunately, the default 'mteTriggerFired'
+                     *  notification payload can't report non-numeric
+                     *  changes properly (see syntax of 'mteHotValue')
                      */
-                    if (entry->mteTExTest & MTE_EXIST_ABSENT) {
-                        DEBUGMSGTL(( "disman:event:trigger:fire",
-                                     "Firing existence test: "));
-                        DEBUGMSGOID(("disman:event:trigger:fire",
-                                     vp2->name, vp2->name_length));
-                        DEBUGMSG((   "disman:event:trigger:fire",
-                                     " (absent)\n"));;
-                        entry->mteTriggerXOwner   = entry->mteTExObjOwner;
-                        entry->mteTriggerXObjects = entry->mteTExObjects;
-                        entry->mteTriggerFired    = vp2;
-                        /*
-                         * XXX - the 'mteHotValue' payload varbind
-                         *       will report the *previous* value.
-                         */ 
-                        n = entry->mteTriggerValueID_len;
-                        mteEvent_fire(entry->mteTExEvOwner, entry->mteTExEvent, 
-                                      entry, vp1->name+n, vp1->name_length-n);
-                    }
-                    vp2 = vp2->next_variable;
+                    entry->mteTriggerFired = vp1;
+                    reason = "(changed)";
+                }
+                if ( entry->mteTriggerFired ) {
+                    /*
+                     * One of the above tests has matched,
+                     *   so fire the trigger.
+                     */
+                    DEBUGMSGTL(( "disman:event:trigger:fire",
+                                 "Firing existence test: "));
+                    DEBUGMSGOID(("disman:event:trigger:fire",
+                                 vp1->name, vp1->name_length));
+                    DEBUGMSG((   "disman:event:trigger:fire",
+                                 " %s\n", reason));;
+                    entry->mteTriggerXOwner   = entry->mteTExObjOwner;
+                    entry->mteTriggerXObjects = entry->mteTExObjects;
+                    n = entry->mteTriggerValueID_len;
+                    mteEvent_fire(entry->mteTExEvOwner, entry->mteTExEvent, 
+                                  entry, vp1->name+n, vp1->name_length-n);
                 }
             }
-        } /* !old_results - else block */
+        } /* !old_results - end of else block */
     } /* MTE_TRIGGER_EXISTENCE */
 
 
@@ -431,37 +497,6 @@ mteTrigger_run( unsigned int reg, void *clientarg)
             return;
         }
 
-        /*
-         * Copy across the flags indicating which triggers are armed
-         */
-        if (entry->old_results) {
-            vp2 = entry->old_results;
-            for ( vp1 = var; vp1; vp1 = vp1->next_variable ) {
-                if (vp2)
-                    cmp = snmp_oid_compare(vp1->name, vp1->name_length,
-                                           vp2->name, vp2->name_length);
-                else
-                    cmp = -1;
-                if ( cmp == 0 ) {
-                    /* Copy across armed flags */
-                    vp1->index = vp2->index;
-                    vp2 = vp2->next_variable;
-                } else if ( cmp < 0 ) {
-                    /* New entry */
-                    vp1->index = MTE_ARMED_ALL;
-                } else {
-                    // XXX - Need to handle multiple deletions!
-                    // while (cmp < 0)
-                    /* Deleted entr(ies) */
-                    vp2 = vp2->next_variable;
-                    cmp = snmp_oid_compare(vp1->name, vp1->name_length,
-                                       vp2->name, vp2->name_length);
-                }
-            }
-        } else {
-            for ( vp1 = var; vp1; vp1 = vp1->next_variable )
-               vp1->index = MTE_ARMED_ALL;
-        }
 
         /*
          * Retrieve the discontinuity markers for delta-valued samples.
