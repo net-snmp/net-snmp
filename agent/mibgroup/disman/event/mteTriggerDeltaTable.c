@@ -218,6 +218,8 @@ mteTriggerDeltaTable_handler(netsnmp_mib_handler *handler,
                        request->requestvb->val_len);
                 entry->mteDeltaDiscontID_len =
                     request->requestvb->val_len/sizeof(oid);
+                /* XXX - check not sysUpTime.0 */
+                entry->flags &= ~MTE_TRIGGER_FLAG_SYSUPT;
                 break;
             case COLUMN_MTETRIGGERDELTADISCONTINUITYIDWILDCARD:
                 if (*request->requestvb->val.integer == TV_TRUE)
