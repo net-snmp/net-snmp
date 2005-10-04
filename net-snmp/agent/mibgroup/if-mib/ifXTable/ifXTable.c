@@ -109,7 +109,13 @@ initialize_table_ifXTable(void)
      * call interface initialization code
      */
     _ifXTable_initialize_interface(user_context, flags);
-    netsnmp_assert(NULL != _ifXTable_container_get());
+
+    /*
+     * if there is no container, bail. otherwise, register the callbacks
+     * for persistent storage.
+     */
+    if (NULL == _ifXTable_container_get())
+        return; /* msg already logged */
 
     register_config_handler(NULL, "ifXTable", _ifXTable_restore, NULL,
                             NULL);
@@ -2472,7 +2478,7 @@ _ifXTable_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
     size = sizeof(row_token) + 1 +      /* 'ifXTable ' */
         13 +                    /* ifIndex value + ' ' */
         13 +                    /* col #, + ':' */
-        rowreq_ctx->data.ifAlias_len + 2 +      /* [0|1] + ' ' */
+        (rowreq_ctx->data.ifAlias_len * 2) + 2 +      /* [0|1] + ' ' */
         4;                      /* '\n\0' & possible quoting */
 
     /*

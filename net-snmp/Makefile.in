@@ -62,6 +62,27 @@ end-flag:
 libtool:	$(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
+
+snmplib:
+	@(cd snmplib; $(MAKE) )
+
+agent:
+	@(cd snmplib; $(MAKE) )
+	@(cd agent; $(MAKE) )
+
+apps:
+	@(cd snmplib; $(MAKE) )
+	@(cd apps; $(MAKE) )
+
+snmpget snmpbulkget snmpwalk snmpbulkwalk snmptranslate snmpstatus snmpdelta snmptable snmptest snmpset snmpusm snmpvacm snmpgetnext encode_keychange snmpdf snmptrap:
+	@(cd snmplib; $(MAKE) )
+	@(cd apps; $(MAKE) $@ )
+
+snmptrapd:
+	@(cd snmplib; $(MAKE) )
+	@(cd agent; $(MAKE) libs)
+	@(cd apps; $(MAKE) $@ )
+
 #
 # local build rules
 #
@@ -293,7 +314,13 @@ tarclean:
 	fi
 
 checks:
-	$(MAKE) -k makefilecheck commentcheck warningcheck
+	$(MAKE) -k makefilecheck commentcheck warningcheck dependcheck
+
+# always exit 1, since I can't figure out how to invert grep rc
+dependcheck:
+	@echo "Checking for full paths in dependency files..."
+	@grep -n -E "^/" `find . -name Makefile.depend`
+	@exit 1
 
 # always exit 1, since I can't figure out how to invert grep rc
 warningcheck:
@@ -320,3 +347,7 @@ FAQ.html:
 
 .PHONY: docs docsdir mancp testdirs test TAGS
 # note: tags and docs are phony to force rebulding
+.PHONY: snmplib agent apps \
+	snmpget snmpbulkget snmpwalk snmpbulkwalk snmptranslate snmpstatus \
+	snmpdelta snmptable snmptest snmpset snmpusm snmpvacm snmpgetnext \
+	encode_keychange snmpdf snmptrap snmptrapd
