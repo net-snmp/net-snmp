@@ -4889,8 +4889,8 @@ snmp_check_timeout()
 
 MODULE = SNMP	PACKAGE = SNMP::MIB::NODE 	PREFIX = snmp_mib_node_
 SV *
-snmp_mib_node_TIEHASH(class,key,tp=0)
-	char *	class
+snmp_mib_node_TIEHASH(cl,key,tp=0)
+	char *	cl
 	char *	key
         IV tp
 	CODE:
@@ -4899,7 +4899,7 @@ snmp_mib_node_TIEHASH(class,key,tp=0)
            if (!tp) tp = (IV)__tag2oid(key, NULL, NULL, NULL, NULL,0);
            if (tp) {
               ST(0) = sv_newmortal();
-              sv_setref_iv(ST(0), class, tp);
+              sv_setref_iv(ST(0), cl, tp);
            } else {
               ST(0) = &sv_undef;
            }
