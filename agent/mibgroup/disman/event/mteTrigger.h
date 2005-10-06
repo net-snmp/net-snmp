@@ -1,6 +1,8 @@
 #ifndef MTETRIGGER_H
 #define MTETRIGGER_H
 
+extern oid    _sysUpTime_instance[];
+extern size_t _sysUpTime_inst_len;
     /*
      * Flags relating to the mteTriggerTable and related tables
      */
