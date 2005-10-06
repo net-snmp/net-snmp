@@ -14,6 +14,8 @@ netsnmp_tdata *trigger_table_data;
 oid    _sysUpTime_instance[] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
 size_t _sysUpTime_inst_len   = OID_LENGTH(_sysUpTime_instance);
 
+int mteTriggerFailures;
+
     /*
      * Initialize the container for the (combined) mteTrigger*Table,
      * regardless of which table initialisation routine is called first.
@@ -25,10 +27,15 @@ init_trigger_table_data(void)
     DEBUGMSGTL(("disman:event:init", "init trigger container\n"));
     if (!trigger_table_data) {
         trigger_table_data = netsnmp_tdata_create("mteTriggerTable");
+        if (!trigger_table_data) {
+            snmp_log(LOG_ERR, "failed to create mteTriggerTable");
+            return;
+        }
         trigger_table_data->store_indexes = 1;
         DEBUGMSGTL(("disman:event:init", "create trigger container (%x)\n",
                                           trigger_table_data));
     }
+    mteTriggerFailures = 0;
 }
 
 
@@ -166,6 +173,17 @@ char *_ops[] = { "",
                 ">",  /* MTE_BOOL_GREATER      */
                 ">="  /* MTE_BOOL_GREATEREQUAL */  };
 
+void
+_mteTrigger_failure( /* int error, */ const char *msg )
+{
+    /*
+     * XXX - Send an mteTriggerFailure trap
+     *           (if configured to do so)
+     */
+    mteTriggerFailures++;
+    snmp_log(LOG_ERR, msg );
+    return;
+}
 
 void
 mteTrigger_run( unsigned int reg, void *clientarg)
@@ -195,16 +213,21 @@ mteTrigger_run( unsigned int reg, void *clientarg)
      */
     DEBUGMSGTL(( "disman:event:trigger:monitor", "Running trigger (%s)\n", entry->mteTName));
     var = (netsnmp_variable_list *)SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
+    if (!var) {
+        _mteTrigger_failure("failed to create mteTrigger query varbind");
+        return;
+    }
     snmp_set_var_objid( var, entry->mteTriggerValueID,
                              entry->mteTriggerValueID_len );
     if ( entry->flags & MTE_TRIGGER_FLAG_VWILD ) {
-        netsnmp_query_walk( var, entry->session );
+        n = netsnmp_query_walk( var, entry->session );
     } else {
-        netsnmp_query_get(  var, entry->session );
+        n = netsnmp_query_get(  var, entry->session );
     }
-        /*
-         * XXX - Deal with failures
-         */
+    if ( n != SNMP_ERR_NOERROR ) {
+        _mteTrigger_failure( "failed to run mteTrigger query" );
+        return;
+    }
 
     /*
      * ... canonicalise the results (to simplify later comparisons)...
@@ -238,6 +261,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                  * XXX - check how this is best done.
                  */
                 vtmp = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
+                if (!vtmp) {
+                    _mteTrigger_failure(
+                          "failed to create mteTrigger temp varbind");
+                    return;
+                }
                 vtmp->type = ASN_NULL;
                 snmp_set_var_objid( vtmp, vp1->name, vp1->name_length );
                 vtmp->next_variable = vp2;
@@ -270,6 +298,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                  */
                 if ( vp2->type != ASN_NULL ) {
                     vtmp = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
+                    if (!vtmp) {
+                        _mteTrigger_failure(
+                                 "failed to create mteTrigger temp varbind");
+                        return;
+                    }
                     vtmp->type = ASN_NULL;
                     snmp_set_var_objid( vtmp, vp2->name, vp2->name_length );
                     vtmp->next_variable = vp1;
@@ -306,6 +339,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
              */
             if ( vp2_prev ) {
                 vtmp = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
+                if (!vtmp) {
+                    _mteTrigger_failure(
+                             "failed to create mteTrigger temp varbind");
+                    return;
+                }
                 vtmp->type = ASN_NULL;
                 snmp_set_var_objid( vtmp, vp1->name, vp1->name_length );
                 vtmp->next_variable     = vp2_prev->next_variable;
@@ -536,6 +574,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
 
                 dvar = (netsnmp_variable_list *)
                                 SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
+                if (!dvar) {
+                    _mteTrigger_failure(
+                            "failed to create mteTrigger delta query varbind");
+                    return;
+                }
                 snmp_set_var_objid( dvar, entry->mteDeltaDiscontID,
                                           entry->mteDeltaDiscontID_len );
                 if ( entry->flags & MTE_TRIGGER_FLAG_DWILD ) {
@@ -543,7 +586,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                 } else {
                     netsnmp_query_get(  dvar, entry->session );
                 }
-                /* XXX - handle errors */
+                if ( n != SNMP_ERR_NOERROR ) {
+                    _mteTrigger_failure( "failed to run mteTrigger delta query" );
+                    snmp_free_varbind( dvar );
+                    return;
+                }
             }
 
             /*
@@ -627,6 +674,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                          */
                         vtmp = (netsnmp_variable_list *)
                                 SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
+                        if (!vtmp) {
+                            _mteTrigger_failure(
+                                  "failed to create mteTrigger discontinuity varbind");
+                            return;
+                        }
                         snmp_set_var_objid(vtmp, entry->mteDeltaDiscontID,
                                                  entry->mteDeltaDiscontID_len);
                             /* XXX - append instance subids */
