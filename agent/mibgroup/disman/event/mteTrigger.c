@@ -911,6 +911,95 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     }
 
     /*
+     * The same processing also works for delta-threshold tests (if configured)
+     */
+    if (( entry->mteTriggerTest & MTE_TRIGGER_THRESHOLD ) &&
+        ((entry->mteTThDRiseEvent[0] != '\0' ) ||
+         (entry->mteTThDFallEvent[0] != '\0' ))) {
+
+        /*
+         * Delta-threshold tests can only be used with
+         *   absolute valued samples.
+         */
+        vp2 = entry->old_results;
+        if (entry->flags & MTE_TRIGGER_FLAG_DELTA) {
+            DEBUGMSGTL(( "disman:event:trigger",
+                         "Delta-threshold on delta-sample\n"));
+        } else if ( vp2 != NULL ) {
+          for ( vp1 = var; vp1; vp1=vp1->next_variable ) {
+            /*
+             * Determine the value to be monitored...
+             *  (similar to previous delta-sample processing,
+             *   but without the discontinuity marker checks)
+             */
+            if (vp2->type == ASN_NULL) {
+                vp2 = vp2->next_variable;
+                continue;
+            }
+            value = (*vp1->val.integer - *vp2->val.integer);
+            vp2 = vp2->next_variable;
+
+            /*
+             * ... evaluate the single-value comparisons,
+             *     and decide whether to trigger the event.
+             */
+            cmp = vp1->index;   /* working copy of 'armed' flags */
+            if ( value >= entry->mteTThDRiseValue ) {
+                if (vp1->index & MTE_ARMED_TH_DRISE ) {
+                    DEBUGMSGTL(( "disman:event:trigger:fire",
+                                 "Firing rising delta threshold test: "));
+                    DEBUGMSGOID(("disman:event:trigger:fire",
+                                 vp1->name, vp1->name_length));
+                    DEBUGMSG((   "disman:event:trigger:fire", "\n"));
+                    cmp &= ~MTE_ARMED_TH_DRISE;
+                    cmp |=  MTE_ARMED_TH_DFALL;
+                    /*
+                     * If no riseEvent is configured, we need still to
+                     *  set the armed flags appropriately, but there's
+                     *  no point in trying to fire the (missing) event.
+                     */
+                    if (entry->mteTThDRiseEvent[0] != '\0' ) {
+                        entry->mteTriggerXOwner   = entry->mteTThObjOwner;
+                        entry->mteTriggerXObjects = entry->mteTThObjects;
+                        entry->mteTriggerFired    = vp1;
+                        n = entry->mteTriggerValueID_len;
+                        mteEvent_fire(entry->mteTThDRiseOwner,
+                                      entry->mteTThDRiseEvent, 
+                                      entry, vp1->name+n, vp1->name_length-n);
+                    }
+                }
+            }
+
+            if ( value <= entry->mteTThDFallValue ) {
+                if (vp1->index & MTE_ARMED_TH_DFALL ) {
+                    DEBUGMSGTL(( "disman:event:trigger:fire",
+                                 "Firing falling delta threshold test: "));
+                    DEBUGMSGOID(("disman:event:trigger:fire",
+                                 vp1->name, vp1->name_length));
+                    DEBUGMSG((   "disman:event:trigger:fire", "\n"));
+                    cmp &= ~MTE_ARMED_TH_DFALL;
+                    cmp |=  MTE_ARMED_TH_DRISE;
+                    /*
+                     * Similarly, if no fallEvent is configured,
+                     *  there's no point in trying to fire it either.
+                     */
+                    if (entry->mteTThDRiseEvent[0] != '\0' ) {
+                        entry->mteTriggerXOwner   = entry->mteTThObjOwner;
+                        entry->mteTriggerXObjects = entry->mteTThObjects;
+                        entry->mteTriggerFired    = vp1;
+                        n = entry->mteTriggerValueID_len;
+                        mteEvent_fire(entry->mteTThDFallOwner,
+                                      entry->mteTThDFallEvent, 
+                                      entry, vp1->name+n, vp1->name_length-n);
+                    }
+                }
+            }
+            vp1->index = cmp;
+          }
+        }
+    }
+
+    /*
      * Finally, rotate the results - ready for the next run.
      */
     snmp_free_varbind( entry->old_results );
