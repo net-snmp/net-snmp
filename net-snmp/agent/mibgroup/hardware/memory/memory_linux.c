@@ -6,6 +6,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+/*
+ * Try to use an initial size that will cover default cases. We aren't talking
+ * about huge files, so why fiddle about with reallocs?
+ * I checked /proc/meminfo sizes on 3 different systems: 598, 644, 654
+ */
+#define MEMINFO_INIT_SIZE   768
+#define MEMINFO_STEP_SIZE   256
 #define MEMINFO_FILE   "/proc/meminfo"
 
     /*
@@ -16,6 +23,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     static char *buff  = NULL;
     static int   bsize = 0;
     static int   first = 1;
+    ssize_t      bytes_read;
     char        *b;
     unsigned long memtotal = 0,  memfree = 0, memshared = 0,
                   buffers = 0,   cached = 0,
@@ -28,17 +36,33 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         return -1;
     }
     if (bsize == 0) {
-        bsize = 128;
+        bsize = MEMINFO_INIT_SIZE;
         buff = malloc(bsize);
+        if (NULL == buff) {
+            snmp_log(LOG_ERR, "malloc failed\n");
+            return -1;
+        }
     }
-    while (read(statfd, buff, bsize) == bsize) {
-        bsize += 256;
-        buff = realloc(buff, bsize);
+    while ((bytes_read = read(statfd, buff, bsize)) == bsize) {
+        b = realloc(buff, bsize + MEMINFO_STEP_SIZE);
+        if (NULL == b) {
+            snmp_log(LOG_ERR, "malloc failed\n");
+            return -1;
+        }
+        buff = b;
+        bsize += MEMINFO_STEP_SIZE;
         DEBUGMSGTL(("mem", "/proc/meminfo buffer increased to %d\n", bsize));
         close(statfd);
         statfd = open(MEMINFO_FILE, O_RDONLY, 0);
+        if (statfd == -1) {
+            snmp_log_perror(MEMINFO_FILE);
+            return -1;
+        }
     }
     close(statfd);
+    if (bytes_read <= 0) {
+        snmp_log_perror(MEMINFO_FILE);
+    }
 
         /*
          * Overall Memory statistics
