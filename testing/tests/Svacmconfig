@@ -9,6 +9,8 @@ if [ "x$snmp_version" = "x" ]; then
   snmp_version="any"
 fi
 
+CONFIGAGENT [snmp] persistentdir $SNMP_TMP_PERSITENTDIR
+
 
 CONFIGAGENT com2sec testcommunitysec1  default testcommunity1
 CONFIGAGENT com2sec testcommunitysec2  default testcommunity2
