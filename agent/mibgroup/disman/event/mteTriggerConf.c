@@ -600,6 +600,11 @@ parse_mteMonitor(const char *token, char *line)
          * Parse and set (optional) Delta thresholds & events
          */
         if ( cp && *cp != '\0' ) {
+            if (entry->flags & MTE_TRIGGER_FLAG_DELTA) {
+                config_perror("Delta-threshold on delta-samples not supported");
+                mteObjects_removeEntries( "snmpd.conf", tname );
+                return;
+            }
             value = strtol(cp, NULL, 0);
             entry->mteTThDFallValue  = value;
             cp = skip_token(cp);
