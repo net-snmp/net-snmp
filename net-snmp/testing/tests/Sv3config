@@ -1,5 +1,7 @@
 #!/bin/sh
 
+CONFIGAGENT [snmp] persistentdir $SNMP_TMP_PERSITENTDIR
+
 # XXX: auto-switch to a supported protocol instead.
 if test "x$DEFAUTHTYPE" = "x"; then
     if grep '^#define USE_OPENSSL 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then

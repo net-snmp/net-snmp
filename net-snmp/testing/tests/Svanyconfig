@@ -7,6 +7,8 @@ if [ "x$snmp_version" = "x" ]; then
   snmp_version="any"
 fi
 
+CONFIGAGENT [snmp] persistentdir $SNMP_TMP_PERSITENTDIR
+
 CONFIGAGENT com2sec testcommunitysec  default testcommunity
 if [ "$SNMP_TRANSPORT_SPEC" = "udp6" -o "$SNMP_TRANSPORT_SPEC" = "tcp6" ];then 
 	CONFIGAGENT com2sec6 testcommunitysec  default testcommunity
