@@ -23,11 +23,11 @@ netsnmp_memory_info *netsnmp_memory_get_first( int type ) {
     return NULL;
 }
 
-netsnmp_memory_info *netsnmp_memory_get_next( netsnmp_memory_info *this, int type ) {
+netsnmp_memory_info *netsnmp_memory_get_next( netsnmp_memory_info *this_ptr, int type ) {
     netsnmp_memory_info *mem;
 
-    if (this)
-        for ( mem=this->next; mem; mem=mem->next )
+    if (this_ptr)
+        for ( mem=this_ptr->next; mem; mem=mem->next )
             if (mem->type == type)    /* Or treat as bits? */
                 return mem;
     return NULL;
