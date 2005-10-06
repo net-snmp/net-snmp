@@ -215,6 +215,8 @@ parse_mteMonitor(const char *token, char *line)
             case '8':
             case '9':
                 /* accept negative values */
+            case '\0':
+                /* and '-' placeholder value */
                 break;
             default:
                 config_perror("unrecognised option");
@@ -430,8 +432,10 @@ parse_mteMonitor(const char *token, char *line)
                      *   the first comparison value...
                      */
                     memcpy(oid_name_buf, buf, SPRINT_MAX_LEN);
-                    cp    = copy_nword(cp, buf, SPRINT_MAX_LEN);
-                    value = strtol(buf, NULL, 0);
+                    memset(         buf,   0, SPRINT_MAX_LEN);
+                    cp  = copy_nword(cp, buf, SPRINT_MAX_LEN);
+                    if ( buf[0] != '-' )
+                        value = strtol(buf, NULL, 0);
     
                     /*
                      * ... then save the rest of the line for later.
@@ -539,47 +543,52 @@ parse_mteMonitor(const char *token, char *line)
         }
         break;
     case MTE_TRIGGER_THRESHOLD:
-        entry->mteTThFallValue  = value;
-        value = strtol(buf, NULL, 0);
-        entry->mteTThRiseValue  = value;
-        if (!startup)
-            entry->mteTThStartup = 0;
-        if ( idx > 0 ) {
-            /*
-             * Refer to the objects for this trigger (if any)...
-             */
-            memset(entry->mteTThObjOwner,   0,     MTE_STR1_LEN+1);
-            memcpy(entry->mteTThObjOwner,   "snmpd.conf",      10);
-            memcpy(entry->mteTThObjects,    tname, MTE_STR1_LEN+1);
-        }
-        if ( ename[0] ) {
-            /*
-             * ... and the specified event...
-             *  (using the same event for all triggers)
-             */
-            memset(entry->mteTThRiseOwner,  0,     MTE_STR1_LEN+1);
-            memcpy(entry->mteTThRiseOwner,  "snmpd.conf",      10);
-            memcpy(entry->mteTThRiseEvent,  ename, MTE_STR1_LEN+1);
-            memset(entry->mteTThFallOwner,  0,     MTE_STR1_LEN+1);
-            memcpy(entry->mteTThFallOwner,  "snmpd.conf",      10);
-            memcpy(entry->mteTThFallEvent,  ename, MTE_STR1_LEN+1);
+        if ( buf[0] != '-' ) {
+            entry->mteTThFallValue  = value;
+            value = strtol(buf, NULL, 0);
+            entry->mteTThRiseValue  = value;
+            if (!startup)
+                entry->mteTThStartup = 0;
+            if ( idx > 0 ) {
+                /*
+                 * Refer to the objects for this trigger (if any)...
+                 */
+                memset(entry->mteTThObjOwner,   0,     MTE_STR1_LEN+1);
+                memcpy(entry->mteTThObjOwner,   "snmpd.conf",      10);
+                memcpy(entry->mteTThObjects,    tname, MTE_STR1_LEN+1);
+            }
+            if ( ename[0] ) {
+                /*
+                 * ... and the specified event...
+                 *  (using the same event for all triggers)
+                 */
+                memset(entry->mteTThRiseOwner,  0,     MTE_STR1_LEN+1);
+                memcpy(entry->mteTThRiseOwner,  "snmpd.conf",      10);
+                memcpy(entry->mteTThRiseEvent,  ename, MTE_STR1_LEN+1);
+                memset(entry->mteTThFallOwner,  0,     MTE_STR1_LEN+1);
+                memcpy(entry->mteTThFallOwner,  "snmpd.conf",      10);
+                memcpy(entry->mteTThFallEvent,  ename, MTE_STR1_LEN+1);
+            } else {
+                /*
+                 * ... or the hardcoded default events.
+                 */
+                memset(entry->mteTThRiseOwner,  0,     MTE_STR1_LEN+1);
+                memset(entry->mteTThFallOwner,  0,     MTE_STR1_LEN+1);
+                memset(entry->mteTThRiseEvent,  0,     MTE_STR1_LEN+1);
+                memset(entry->mteTThFallEvent,  0,     MTE_STR1_LEN+1);
+                memcpy(entry->mteTThRiseOwner,  "_snmpd",           6);
+                memcpy(entry->mteTThFallOwner,  "_snmpd",           6);
+                memcpy(entry->mteTThRiseEvent,  "_mteTriggerRising", 17);
+                memcpy(entry->mteTThFallEvent,  "_mteTriggerFalling", 18);
+            }
+            cp = skip_token(buf);   /* skip riseThreshold value */
         } else {
-            /*
-             * ... or the hardcoded default events.
-             */
-            memset(entry->mteTThRiseOwner,  0,     MTE_STR1_LEN+1);
-            memset(entry->mteTThFallOwner,  0,     MTE_STR1_LEN+1);
-            memset(entry->mteTThRiseEvent,  0,     MTE_STR1_LEN+1);
-            memset(entry->mteTThFallEvent,  0,     MTE_STR1_LEN+1);
-            memcpy(entry->mteTThRiseOwner,  "_snmpd",           6);
-            memcpy(entry->mteTThFallOwner,  "_snmpd",           6);
-            memcpy(entry->mteTThRiseEvent,  "_mteTriggerRising", 17);
-            memcpy(entry->mteTThFallEvent,  "_mteTriggerFalling", 18);
+            /* Skip absolute threshold placeholders */
+            cp = skip_token(buf);
         }
         /*
          * Parse and set (optional) Delta thresholds & events
          */
-        cp = skip_token(buf);
         if ( cp && *cp != '\0' ) {
             value = strtol(cp, NULL, 0);
             entry->mteTThDFallValue  = value;
