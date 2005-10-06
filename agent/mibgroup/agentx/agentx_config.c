@@ -184,15 +184,14 @@ init_agentx_config(void)
      * This means that we can use a config directive to determine
      *   whether or not to run as an AgentX master.
      */
-#ifdef USING_AGENTX_MASTER_MODULE
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) == MASTER_AGENT)
-        snmpd_register_config_handler("master",
-                                      agentx_parse_master, NULL,
-                                      "specify 'agentx' for AgentX support");
-#endif                          /* USING_AGENTX_MASTER_MODULE */
     agentx_register_config_handler("agentxsocket",
                                   agentx_parse_agentx_socket, NULL,
                                   "AgentX bind address");
+#ifdef USING_AGENTX_MASTER_MODULE
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) == MASTER_AGENT) {
+        snmpd_register_config_handler("master",
+                                      agentx_parse_master, NULL,
+                                      "specify 'agentx' for AgentX support");
     agentx_register_config_handler("agentxperms",
                                   agentx_parse_agentx_perms, NULL,
                                   "AgentX socket permissions: socket_perms [directory_perms [username|userid [groupname|groupid]]]");
@@ -202,4 +201,6 @@ init_agentx_config(void)
     agentx_register_config_handler("agentxTimeout",
                                   agentx_parse_agentx_timeout, NULL,
                                   "AgentX Timeout (seconds)");
+    }
+#endif                          /* USING_AGENTX_MASTER_MODULE */
 }
