@@ -41,8 +41,8 @@ void init_cpu( void ) {
 netsnmp_cpu_info *netsnmp_cpu_get_first( void ) {
     return _cpu_head;
 }
-netsnmp_cpu_info *netsnmp_cpu_get_next( netsnmp_cpu_info *this ) {
-    return ( this ? this->next : NULL );
+netsnmp_cpu_info *netsnmp_cpu_get_next( netsnmp_cpu_info *this_ptr ) {
+    return ( this_ptr ? this_ptr->next : NULL );
 }
 
     /*
