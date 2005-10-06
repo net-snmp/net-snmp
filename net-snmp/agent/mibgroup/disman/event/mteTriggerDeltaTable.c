@@ -211,15 +211,19 @@ mteTriggerDeltaTable_handler(netsnmp_mib_handler *handler,
 
             switch (tinfo->colnum) {
             case COLUMN_MTETRIGGERDELTADISCONTINUITYID:
-                memset(entry->mteDeltaDiscontID, 0,
-                       sizeof(entry->mteDeltaDiscontID));
-                memcpy(entry->mteDeltaDiscontID,
-                       request->requestvb->val.string,
-                       request->requestvb->val_len);
-                entry->mteDeltaDiscontID_len =
-                    request->requestvb->val_len/sizeof(oid);
-                /* XXX - check not sysUpTime.0 */
-                entry->flags &= ~MTE_TRIGGER_FLAG_SYSUPT;
+                if ( snmp_oid_compare(
+                       request->requestvb->val.objid,
+                       request->requestvb->val_len/sizeof(oid),
+                       _sysUpTime_instance, _sysUpTime_inst_len) != 0 ) {
+                    memset(entry->mteDeltaDiscontID, 0,
+                           sizeof(entry->mteDeltaDiscontID));
+                    memcpy(entry->mteDeltaDiscontID,
+                           request->requestvb->val.string,
+                           request->requestvb->val_len);
+                    entry->mteDeltaDiscontID_len =
+                        request->requestvb->val_len/sizeof(oid);
+                    entry->flags &= ~MTE_TRIGGER_FLAG_SYSUPT;
+                }
                 break;
             case COLUMN_MTETRIGGERDELTADISCONTINUITYIDWILDCARD:
                 if (*request->requestvb->val.integer == TV_TRUE)
