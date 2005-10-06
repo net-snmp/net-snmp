@@ -107,24 +107,31 @@ else
 fi
 RC=$?
 echo "Finish: `date`"
-echo -n "Result: "
 case $RC in
-    0)  echo "Success!"
+    0)  RESULT="Success"
+        FILES=""
         if [ "x$NSB_BUILD_DIR" = "/" ]; then
             nsb-abort "Not running rm -fR from /"
         else
             /bin/rm -fR $NSB_BUILD_DIR > /dev/null 2>&1
         fi
         ;;
-    *) echo "Error!"
+    *) RESULT="Error"
+       FILES=`ls $NSB_BUILD_DIR/nsb-make-all-errs.* $NSB_BUILD_DIR/nsb-make-test-errs.*`
        if [ ! -z $NSB_SCP_HOST ]; then
           nsb-upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_SUFFIX
        fi
         ;;
 esac
+echo "Result: $RESULT"
 
 if [ ! -z $NSB_RESULTS_TO ]; then
-  cat nsb-make-all-errs.* nsb-make-test-errs.*  | mail -s "$NSB_VERSION on $NSB_PLATFORM" $NSB_RESULTS_TO
+   SUBJECT="$NSB_VERSION $RESULT on $NSB_PLATFORM"
+   if [ ! -z "$FILES" ]; then
+      cat $FILES | mail -s "$SUBJECT" $NSB_RESULTS_TO
+   else
+      echo "Result: $RESULTS" | mail -s "$SUBJECT" $NSB_RESULTS_TO
+   fi
 fi
 
 exit $RC
