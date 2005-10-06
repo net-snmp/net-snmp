@@ -23,24 +23,6 @@
  */
 #define IFNET_NEEDS_KERNEL_LATE  1
 
-/*
- * configure fails to detect these properly because they're broken headers 
- */
-#define HAVE_NETINET_TCP_H 1
-#define HAVE_NETINET_IP_H 1
-
-/*
- * don't use this on irix 
- * it has a prototype of inet_addr() which conflicts
- * with <netinet/in.h>
- */
-#undef HAVE_ARPA_INET_H
-
-/*
- * We need a prototype of inet_ntoa() then.
- */
-extern const char *inet_ntoa();
-
 #define STREAM_NEEDS_KERNEL_ISLANDS
 
 #ifndef __GNUC__
