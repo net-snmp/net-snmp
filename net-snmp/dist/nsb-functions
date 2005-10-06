@@ -310,8 +310,9 @@ nsb-make()
          > nsb-make-$target-errs.$NSB_DATE
    if [ -s nsb-make-$target-errs.$NSB_DATE ]; then
       nsb-prompt "press enter to view errors"
-      grep ':' $nsb_make_OUTPUT > nsb-make-$target-errs2.$NSB_DATE
-      tail -n $NSB_ERR_CTX_LINES nsb-make-$target-errs2.$NSB_DATE >&2
+#      grep ':' $nsb_make_OUTPUT > nsb-make-$target-errs2.$NSB_DATE
+#      tail -n $NSB_ERR_CTX_LINES nsb-make-$target-errs2.$NSB_DATE >&2
+      tail -n $NSB_ERR_CTX_LINES nsb-make-$target-errs.$NSB_DATE >&2
       nsb-abort "Error(s) during make $target"
    fi
 
