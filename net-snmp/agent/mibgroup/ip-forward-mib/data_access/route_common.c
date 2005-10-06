@@ -214,13 +214,14 @@ netsnmp_access_route_entry_copy(netsnmp_route_entry *lhs,
     lhs->rt_nexthop_type = rhs->rt_nexthop_type;
 
 #ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_INETCIDRROUTETABLE_MODULE
-    if (NULL != lhs->rt_policy)
+    if (NULL != lhs->rt_policy) {
         if (NETSNMP_ACCESS_ROUTE_POLICY_STATIC & lhs->flags)
             lhs->rt_policy = NULL;
         else {
             SNMP_FREE(lhs->rt_policy);
         }
-    if (NULL != rhs->rt_policy)
+    }
+    if (NULL != rhs->rt_policy) {
         if ((NETSNMP_ACCESS_ROUTE_POLICY_STATIC & rhs->flags) &&
             ! (NETSNMP_ACCESS_ROUTE_POLICY_DEEP_COPY & rhs->flags)) {
             lhs->rt_policy = rhs->rt_policy;
@@ -229,6 +230,7 @@ netsnmp_access_route_entry_copy(netsnmp_route_entry *lhs,
             snmp_clone_mem((void **) &lhs->rt_policy, rhs->rt_policy,
                            rhs->rt_policy_len * sizeof(oid));
         }
+    }
     lhs->rt_policy_len = rhs->rt_policy_len;
 #endif
 
