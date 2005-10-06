@@ -11,6 +11,9 @@
 
 netsnmp_tdata *trigger_table_data;
 
+oid    _sysUpTime_instance[] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
+size_t _sysUpTime_inst_len   = OID_LENGTH(_sysUpTime_instance);
+
     /*
      * Initialize the container for the (combined) mteTrigger*Table,
      * regardless of which table initialisation routine is called first.
@@ -77,8 +80,6 @@ mteTrigger_createEntry(char *mteOwner, char *mteTName, int fixed)
     netsnmp_tdata_row *row;
     size_t mteOwner_len = (mteOwner) ? strlen(mteOwner) : 0;
     size_t mteTName_len = (mteTName) ? strlen(mteTName) : 0;
-    oid sysUpTime_instance[] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
-    oid sysUpTime_inst_len   = OID_LENGTH(sysUpTime_instance);
 
     DEBUGMSGTL(("disman:event:table", "Create trigger entry (%s, %s)\n",
                                        mteOwner, mteTName));
@@ -113,9 +114,9 @@ mteTrigger_createEntry(char *mteOwner, char *mteTName, int fixed)
   //entry->mteTriggerTest         = MTE_TRIGGER_BOOLEAN;
     entry->mteTriggerValueID_len  = 2;  /* .0.0 */
     entry->mteTriggerFrequency    = 600;
-    memcpy(entry->mteDeltaDiscontID, sysUpTime_instance,
-                              sizeof(sysUpTime_instance));
-    entry->mteDeltaDiscontID_len  = sysUpTime_inst_len;
+    memcpy(entry->mteDeltaDiscontID, _sysUpTime_instance,
+                              sizeof(_sysUpTime_instance));
+    entry->mteDeltaDiscontID_len  =  _sysUpTime_inst_len;
     entry->mteDeltaDiscontIDType  = MTE_DELTAD_TTICKS;
     entry->flags                 |= MTE_TRIGGER_FLAG_SYSUPT;
     entry->mteTExTest             = (MTE_EXIST_PRESENT | MTE_EXIST_ABSENT);
@@ -176,8 +177,6 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     netsnmp_variable_list *dvar = NULL;
     netsnmp_variable_list *dv1  = NULL, *dv2 = NULL;
     netsnmp_variable_list sysUT_var;
-    oid    sysUT_oid[] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
-    size_t sysUT_oid_len = OID_LENGTH( sysUT_oid );
     int  cmp = 0, n, n2;
     long value;
     char *reason;
@@ -519,7 +518,8 @@ mteTrigger_run( unsigned int reg, void *clientarg)
              */
             DEBUGMSGTL(("disman:event:delta", "retrieve sysUpTime.0\n"));
             memset( &sysUT_var, 0, sizeof( netsnmp_variable_list ));
-            snmp_set_var_objid( &sysUT_var, sysUT_oid, sysUT_oid_len );
+            snmp_set_var_objid( &sysUT_var, _sysUpTime_instance,
+                                            _sysUpTime_inst_len );
             netsnmp_query_get(  &sysUT_var, entry->session );
 
             if (!(entry->flags & MTE_TRIGGER_FLAG_SYSUPT)) {

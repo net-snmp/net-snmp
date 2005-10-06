@@ -144,6 +144,7 @@ parse_mteMonitor(const char *token, char *line)
                    MTE_TRIGGER_FLAG_ACTIVE  |
                    MTE_TRIGGER_FLAG_FIXED   |
                    MTE_TRIGGER_FLAG_VWILD   |
+                   MTE_TRIGGER_FLAG_SYSUPT  |
                    MTE_TRIGGER_FLAG_VALID;
     long   idx     = 0;
     long   startup = 1;    /* ??? or 0 */
@@ -289,8 +290,10 @@ parse_mteMonitor(const char *token, char *line)
                     mteObjects_removeEntries( "snmpd.conf", tname );
                     return;
                 }
-                /* XXX - check not sysUpTime.0 */
-                flags &= ~MTE_TRIGGER_FLAG_SYSUPT;
+                if ( snmp_oid_compare( name_buf, name_buf_len,
+                                       _sysUpTime_instance,
+                                       _sysUpTime_inst_len) != 0 )
+                    flags &= ~MTE_TRIGGER_FLAG_SYSUPT;
                 break;
     
             case 'e':   /*  event */
@@ -456,13 +459,6 @@ parse_mteMonitor(const char *token, char *line)
     /*
      *  ... and then create the new trigger entry...
      */
-    name_buf_len = MAX_OID_LEN;
-    if (!snmp_parse_oid(oid_name_buf, name_buf, &name_buf_len)) {
-        snmp_log(LOG_ERR, "trigger OID: %s\n", oid_name_buf);
-        config_perror("unknown monitor OID");
-        mteObjects_removeEntries( "snmpd.conf", tname );
-        return;
-    }
     entry = _find_typed_mteTrigger_entry( "snmpd.conf", tname+2, test );
     if (!entry) {
         mteObjects_removeEntries( "snmpd.conf", tname );
@@ -471,7 +467,21 @@ parse_mteMonitor(const char *token, char *line)
 
     /*
      *  ... populate the type-independent fields...
+     *     (setting the delta discontinuity OID first)
      */
+    if ( (flags & MTE_TRIGGER_FLAG_DELTA) &&
+        !(flags & MTE_TRIGGER_FLAG_SYSUPT)) {
+        memset( entry->mteDeltaDiscontID, 0, sizeof(entry->mteDeltaDiscontID));
+        memcpy( entry->mteDeltaDiscontID, name_buf, name_buf_len*sizeof(oid));
+        entry->mteDeltaDiscontID_len = name_buf_len;
+    }
+    name_buf_len = MAX_OID_LEN;
+    if (!snmp_parse_oid(oid_name_buf, name_buf, &name_buf_len)) {
+        snmp_log(LOG_ERR, "trigger OID: %s\n", oid_name_buf);
+        config_perror("unknown monitor OID");
+        mteObjects_removeEntries( "snmpd.conf", tname );
+        return;
+    }
     entry->session               = sess;
     entry->flags                |= flags;
     entry->mteTriggerTest       |= test;
