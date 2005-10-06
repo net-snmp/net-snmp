@@ -204,6 +204,18 @@ parse_mteMonitor(const char *token, char *line)
                 if (cp && *cp != '-')
                     cp = skip_token( cp );
                 break;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                /* accept negative values */
+                break;
             default:
                 config_perror("unrecognised option");
                 return;
