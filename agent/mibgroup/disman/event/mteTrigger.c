@@ -661,6 +661,10 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     } /* Boolean/Threshold test checks */
 
 
+
+    /*
+     * Only run the Boolean tests if there's an event to be triggered
+     */
     if ((entry->mteTriggerTest & MTE_TRIGGER_BOOLEAN) &&
         (entry->mteTBoolEvent[0] != '\0' )) {
 
@@ -784,7 +788,13 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     }
 
 
-    if ( entry->mteTriggerTest & MTE_TRIGGER_THRESHOLD ) {
+    /*
+     * Only run the basic threshold tests if there's an event to
+     *    be triggered.  (Either rising or falling will do)
+     */
+    if (( entry->mteTriggerTest & MTE_TRIGGER_THRESHOLD ) &&
+        ((entry->mteTThRiseEvent[0] != '\0' ) ||
+         (entry->mteTThFallEvent[0] != '\0' ))) {
 
         /*
          * The same delta-sample validation from Boolean
@@ -852,12 +862,20 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                                  (entry->old_results ? "" : " (startup)")));
                     cmp &= ~MTE_ARMED_TH_RISE;
                     cmp |=  MTE_ARMED_TH_FALL;
-                    entry->mteTriggerXOwner   = entry->mteTThObjOwner;
-                    entry->mteTriggerXObjects = entry->mteTThObjects;
-                    entry->mteTriggerFired    = vp1;
-                    n = entry->mteTriggerValueID_len;
-                    mteEvent_fire(entry->mteTThRiseOwner, entry->mteTThRiseEvent, 
-                                  entry, vp1->name+n, vp1->name_length-n);
+                    /*
+                     * If no riseEvent is configured, we need still to
+                     *  set the armed flags appropriately, but there's
+                     *  no point in trying to fire the (missing) event.
+                     */
+                    if (entry->mteTThRiseEvent[0] != '\0' ) {
+                        entry->mteTriggerXOwner   = entry->mteTThObjOwner;
+                        entry->mteTriggerXObjects = entry->mteTThObjects;
+                        entry->mteTriggerFired    = vp1;
+                        n = entry->mteTriggerValueID_len;
+                        mteEvent_fire(entry->mteTThRiseOwner,
+                                      entry->mteTThRiseEvent, 
+                                      entry, vp1->name+n, vp1->name_length-n);
+                    }
                 }
             }
 
@@ -873,12 +891,19 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                                  (entry->old_results ? "" : " (startup)")));
                     cmp &= ~MTE_ARMED_TH_FALL;
                     cmp |=  MTE_ARMED_TH_RISE;
-                    entry->mteTriggerXOwner   = entry->mteTThObjOwner;
-                    entry->mteTriggerXObjects = entry->mteTThObjects;
-                    entry->mteTriggerFired    = vp1;
-                    n = entry->mteTriggerValueID_len;
-                    mteEvent_fire(entry->mteTThFallOwner, entry->mteTThFallEvent, 
-                                  entry, vp1->name+n, vp1->name_length-n);
+                    /*
+                     * Similarly, if no fallEvent is configured,
+                     *  there's no point in trying to fire it either.
+                     */
+                    if (entry->mteTThRiseEvent[0] != '\0' ) {
+                        entry->mteTriggerXOwner   = entry->mteTThObjOwner;
+                        entry->mteTriggerXObjects = entry->mteTThObjects;
+                        entry->mteTriggerFired    = vp1;
+                        n = entry->mteTriggerValueID_len;
+                        mteEvent_fire(entry->mteTThFallOwner,
+                                      entry->mteTThFallEvent, 
+                                      entry, vp1->name+n, vp1->name_length-n);
+                    }
                 }
             }
             vp1->index = cmp;
