@@ -577,9 +577,37 @@ parse_mteMonitor(const char *token, char *line)
             memcpy(entry->mteTThFallEvent,  "_mteTriggerFalling", 18);
         }
         /*
-         *   XXX
          * Parse and set (optional) Delta thresholds & events
          */
+        cp = skip_token(buf);
+        if ( cp && *cp != '\0' ) {
+            value = strtol(cp, NULL, 0);
+            entry->mteTThDFallValue  = value;
+            cp = skip_token(cp);
+            value = strtol(cp, NULL, 0);
+            entry->mteTThDRiseValue  = value;
+            /*
+             * Set the events in the same way as before
+             */
+            if ( ename[0] ) {
+                memset(entry->mteTThDRiseOwner,  0,     MTE_STR1_LEN+1);
+                memcpy(entry->mteTThDRiseOwner,  "snmpd.conf",      10);
+                memcpy(entry->mteTThDRiseEvent,  ename, MTE_STR1_LEN+1);
+                memset(entry->mteTThDFallOwner,  0,     MTE_STR1_LEN+1);
+                memcpy(entry->mteTThDFallOwner,  "snmpd.conf",      10);
+                memcpy(entry->mteTThDFallEvent,  ename, MTE_STR1_LEN+1);
+            } else {
+                memset(entry->mteTThDRiseOwner,  0,     MTE_STR1_LEN+1);
+                memset(entry->mteTThDFallOwner,  0,     MTE_STR1_LEN+1);
+                memset(entry->mteTThDRiseEvent,  0,     MTE_STR1_LEN+1);
+                memset(entry->mteTThDFallEvent,  0,     MTE_STR1_LEN+1);
+                memcpy(entry->mteTThDRiseOwner,  "_snmpd",           6);
+                memcpy(entry->mteTThDFallOwner,  "_snmpd",           6);
+                memcpy(entry->mteTThDRiseEvent,  "_mteTriggerRising", 17);
+                memcpy(entry->mteTThDFallEvent,  "_mteTriggerFalling", 18);
+            }
+        }
+ 
         break;
     }
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, 
