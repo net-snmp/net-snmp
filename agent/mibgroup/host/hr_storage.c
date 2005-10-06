@@ -31,6 +31,13 @@
 # endif
 #endif
 
+#ifndef mingw32
+#if HAVE_UTMPX_H
+#include <utmpx.h>
+#else
+#include <utmp.h>
+#endif
+#endif /* mingw32 */
 #ifndef dynix
 #if HAVE_SYS_VM_H
 #include <sys/vm.h>
