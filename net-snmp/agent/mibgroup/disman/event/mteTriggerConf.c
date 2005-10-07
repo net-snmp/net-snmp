@@ -109,7 +109,7 @@ _find_typed_mteTrigger_entry( char *owner, char *tname, int type )
     if ( entry &&
         (entry->flags & MTE_TRIGGER_FLAG_VALID) &&
         (entry->mteTriggerTest & type )) {
-        config_perror("error: duplicate trigger name");
+        config_perror("duplicate trigger name");
         return NULL;
     }
     return entry;
@@ -463,7 +463,7 @@ parse_mteMonitor(const char *token, char *line)
      */
     entry = _find_typed_mteTrigger_entry( "snmpd.conf", tname+2, test );
     if (!entry) {
-        mteObjects_removeEntries( "snmpd.conf", tname );
+        //mteObjects_removeEntries( "snmpd.conf", tname );
         return;
     }
 
