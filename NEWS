@@ -35,17 +35,17 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.2*
  New:
-    For the security parnoid (like Wes):
+    For the security paranoid (like Wes):
       - Insecure versions of SNMP may be completely disabled at compile time.
           (configure using one or both of --disable-snmpv1 --disable-snmpv2c)
       - Less secure versions of SNMPv3 authentication and encryption
           algorithms may be completely disabled at compile time.
           (configure using one or both of --disable-des --disable-md5)
           (This requires you have OpenSSL to support SHA1 and AES instead)
-      - Diffie-Helman key negotianion (perfect-forward-secrecy - RFC2786)
+      - Diffie-Helman key negotiation (perfect-forward-secrecy - RFC2786)
           has been implemented in both the agent and "snmpusm".
-      - better support for direct use of localized and master keys
-        (randomly generated keys have more entropy than passwords) See
+      - Better support for direct use of localized and master keys
+        (randomly generated keys have more entropy than passwords). See
         the -3m -3M -3k and -3K options, and the defAuthLocalizedKey,
         defPrivLocalizedKey, defAuthMasterKey, defPrivMasterKey
         snmp.conf tokens)
