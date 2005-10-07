@@ -14,7 +14,7 @@ netsnmp_tdata *trigger_table_data;
 oid    _sysUpTime_instance[] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
 size_t _sysUpTime_inst_len   = OID_LENGTH(_sysUpTime_instance);
 
-int mteTriggerFailures;
+long mteTriggerFailures;
 
     /*
      * Initialize the container for the (combined) mteTrigger*Table,
@@ -235,6 +235,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
 
     vp1 = var;                vp1_prev = NULL;
     vp2 = entry->old_results; vp2_prev = NULL;
+    entry->count=0;
     while (vp1) {
            /*
             * Flatten various missing values/exceptions into a single form
@@ -245,6 +246,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
         case ASN_PRIV_RETRY:   /* Internal only ? */
             vp1->type = ASN_NULL;
         }
+           /*
+            * Keep track of how many entries have been retrieved.
+            */ 
+           entry->count++;
+        
            /*
             * Ensure previous and current result match
             *  (with corresponding entries in both lists)
@@ -1091,4 +1097,32 @@ mteTrigger_disable( struct mteTrigger *entry )
         entry->alarm = 0;
         /* XXX - perhaps release any previous results */
     }
+}
+
+long _mteTrigger_MaxCount = 0;
+long _mteTrigger_countEntries(void)
+{
+    struct mteTrigger *entry;
+    netsnmp_tdata_row *row;
+    long count = 0;
+
+    for (row = netsnmp_tdata_get_first_row(trigger_table_data);
+         row;
+         row = netsnmp_tdata_get_next_row(trigger_table_data, row)) {
+        entry  = (struct mteTrigger *)row->data;
+        count += entry->count;
+    }
+
+    return count;
+}
+
+long mteTrigger_getNumEntries(int max)
+{
+    long count;
+    /* XXX - implement some form of caching ??? */
+    count = _mteTrigger_countEntries();
+    if ( count > _mteTrigger_MaxCount )
+        _mteTrigger_MaxCount = count;
+    
+    return ( max ?  _mteTrigger_MaxCount : count);
 }
