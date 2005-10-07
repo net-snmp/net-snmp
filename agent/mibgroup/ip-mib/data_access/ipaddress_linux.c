@@ -100,7 +100,7 @@ netsnmp_arch_ipaddress_create(netsnmp_ipaddress_entry *entry)
         return -1;
 
     if (4 != entry->ia_address_len) {
-        DEBUGMSGT(("access:ipaddress:create", "on ipv4 supported\n"));
+        DEBUGMSGT(("access:ipaddress:create", "only ipv4 supported\n"));
         return -2;
     }
 
