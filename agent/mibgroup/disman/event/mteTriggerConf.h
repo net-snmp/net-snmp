@@ -6,6 +6,8 @@
  */
 void            init_mteTriggerConf(void);
 void            parse_mteMonitor( const char *, char *);
+void            parse_default_mteMonitors( const char *, char *);
+
 void            parse_mteTTable(  const char *, char *);
 void            parse_mteTDTable( const char *, char *);
 void            parse_mteTExTable(const char *, char *);
