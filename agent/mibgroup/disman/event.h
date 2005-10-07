@@ -1,6 +1,7 @@
 /*
  * wrapper for the disman event mib code files 
  */
+config_require(disman/event/mteScalars)
 config_require(disman/event/mteTrigger)
 config_require(disman/event/mteTriggerTable)
 config_require(disman/event/mteTriggerDeltaTable)
