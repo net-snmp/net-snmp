@@ -87,6 +87,18 @@ else
     --snmpd-module-list|--mod*)
       echo @MODULE_LIST@
       ;;
+    --default-mibs|--mibs|--MIBS)
+      echo @DEFAULT_MIBS@
+      ;;
+    --default-mibdirs|--mibdirs|--MIBDIRS)
+      echo @DEFAULT_MIBDIRS@
+      ;;
+    --snmpconfpath|--SNMPCONFPATH)
+      echo @SNMPCONFPATH@
+      ;;
+    --persistent-directory|--persistent-dir)
+      echo @PERSISTENT_DIRECTORY@
+      ;;
     #################################################### compile
     --base-cflags)
       echo @CFLAGS@ @CPPFLAGS@ -I${NSC_INCLUDEDIR}
@@ -482,6 +494,10 @@ if test "x$usage" = "xyes"; then
   echo "    --indent-options  displays the indent options from the Coding Style"
   echo "    --debug-tokens    displays a example command line to search to source"
   echo "                      code for a list of available debug tokens"
+  echo "    --default-mibs    displays default list of MIBs"
+  echo "    --default-mibdirs displays default list of MIB directories"
+  echo "    --snmpconfpath    displays default SNMPCONFPATH"
+  echo "    --persistent-directory displays default persistent directory"
   echo ""
   echo "  SNMP Setup commands:"
   echo ""
