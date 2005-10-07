@@ -64,6 +64,11 @@ extern          "C" {
 
 
     /*
+     * TODO:405:r: Review IFXTABLE_SETTABLE_COLS macro.
+     * OR together all the writable cols.
+     */
+#define IFXTABLE_SETTABLE_COLS (COLUMN_IFLINKUPDOWNTRAPENABLE_FLAG | COLUMN_IFPROMISCUOUSMODE_FLAG | COLUMN_IFALIAS_FLAG)
+    /*
      * NOTES on enums
      * ==============
      *
