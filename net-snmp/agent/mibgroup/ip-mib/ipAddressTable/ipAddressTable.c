@@ -1105,9 +1105,6 @@ ipAddressTable_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
         rowreq_ctx->ipAddressLastChanged;
 
 
-    rowreq_ctx->ipAddressLastChanged =
-        rowreq_ctx->ipAddressLastChanged_undo;
-
     /*
      * just copy everything
      */
@@ -1148,6 +1145,8 @@ ipAddressTable_undo_cleanup(ipAddressTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:452:M: |-> Cleanup ipAddressTable undo.
      */
+    rowreq_ctx->ipAddressLastChanged =
+        rowreq_ctx->ipAddressLastChanged_undo;
 
     return rc;
 }                               /* ipAddressTable_undo_cleanup */
