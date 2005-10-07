@@ -26,6 +26,8 @@ init_mteTriggerConf(void)
     snmpd_register_config_handler("monitor",
                                    parse_mteMonitor,  NULL,
                                   "triggername [-I] [-i OID | -o OID]* [-e event] expression ");
+    snmpd_register_config_handler("defaultMonitors",
+                                   parse_default_mteMonitors, NULL, "yes|no");
 
     /*
      * ... for persistent storage of various event table entries ...
@@ -326,7 +328,7 @@ parse_mteMonitor(const char *token, char *line)
             case 'o':   /*  object  */
                 idx++;
                 cp     = copy_nword(cp, buf, SPRINT_MAX_LEN);
-                object = mteObjects_addOID( "snmpd.conf", ename, idx, buf, 1 );
+                object = mteObjects_addOID( "snmpd.conf", tname, idx, buf, 1 );
                 idx    = object->mteOIndex;
                 break;
     
@@ -637,6 +639,30 @@ parse_mteMonitor(const char *token, char *line)
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, 
                            SNMP_CALLBACK_POST_READ_CONFIG,
                            _mteTrigger_callback_enable, entry );
+    return;
+}
+
+void
+parse_default_mteMonitors(const char *token, char *line)
+{
+    if (strncmp( line, "yes", 3) == 0) {
+        DEBUGMSGTL(("disman:event:conf", "Registering default monitors\n"));
+
+        parse_mteMonitor("monitor",
+            "-o prNames -o prErrMessage   \"process table\" prErrorFlag  != 0");
+        parse_mteMonitor("monitor",
+            "-o memErrorName -o memSwapErrorMsg \"memory\"  memSwapError != 0");
+        parse_mteMonitor("monitor",
+            "-o extNames -o extOutput     \"extTable\"      extResult    != 0");
+        parse_mteMonitor("monitor",
+            "-o dskPath -o dskErrorMsg    \"dskTable\"      dskErrorFlag != 0");
+        parse_mteMonitor("monitor",
+            "-o laNames -o laErrMessage   \"laTable\"       laErrorFlag  != 0");
+        parse_mteMonitor("monitor",
+            "-o fileName -o fileErrorMsg  \"fileTable\" fileErrorFlag    != 0");
+        parse_mteMonitor("monitor",
+            "-o snmperrErrMessage         \"snmperrs\"  snmperrErrorFlag != 0");
+    }
     return;
 }
 
