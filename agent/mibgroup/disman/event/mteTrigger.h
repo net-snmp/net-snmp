@@ -168,6 +168,11 @@ struct mteTrigger {
     netsnmp_variable_list *old_deltaDs;
 
     /*
+     *  ... stats...
+     */
+    long            count;
+
+    /*
      *  ... and firing.
      */
     char           *mteTriggerXOwner;
@@ -188,5 +193,7 @@ netsnmp_tdata_row *mteTrigger_createEntry(char *mteOwner,
                                           char *mteTriggerName, int fixed);
 void               mteTrigger_enable(    struct mteTrigger *entry );
 void               mteTrigger_disable(   struct mteTrigger *entry );
+
+long mteTrigger_getNumEntries(int max);
 
 #endif                          /* MTETRIGGER_H */
