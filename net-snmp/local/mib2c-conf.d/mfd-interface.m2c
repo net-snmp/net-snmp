@@ -51,7 +51,7 @@ ${context}_registration *
 ${context}_registration_get( void );
 
 ${context}_registration *
-${context}_registration_set( ${context}_registration * new );
+${context}_registration_set( ${context}_registration * newreg );
 
 netsnmp_container *${context}_container_get( void );
 int ${context}_container_size( void );
@@ -164,10 +164,10 @@ ${context}_registration_get( void )
 }
 
 ${context}_registration *
-${context}_registration_set( ${context}_registration * new )
+${context}_registration_set( ${context}_registration * newreg )
 {
     ${context}_registration * old = ${context}_if_ctx.user_ctx;
-    ${context}_if_ctx.user_ctx = new;
+    ${context}_if_ctx.user_ctx = newreg;
     return old;
 }
 
