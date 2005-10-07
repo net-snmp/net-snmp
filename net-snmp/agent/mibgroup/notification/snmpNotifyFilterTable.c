@@ -9,6 +9,8 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
+#ifndef USING_SNMP_NOTIFICATION_MIB_SNMPNOTIFYFILTERTABLE_MODULE
+
 #include <sys/types.h>
 #if HAVE_WINSOCK_H
 #include <winsock.h>
@@ -871,3 +873,5 @@ write_snmpNotifyFilterRowStatus(int action,
     }
     return SNMP_ERR_NOERROR;
 }
+
+#endif /* ndef USING_SNMP_NOTIFICATION_MIB_SNMPNOTIFYFILTERTABLE_MODULE */
