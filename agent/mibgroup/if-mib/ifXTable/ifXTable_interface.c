@@ -1712,7 +1712,7 @@ _ifXTable_container_init(ifXTable_interface_ctx * if_ctx)
     } else {
         snmp_log(LOG_ERR, "error finding ifTable cache\n");
     }
-}
+    }
 
 /*
  * allow direct access to container.
@@ -1889,6 +1889,9 @@ _ifXTable_container_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
      * add each column
      */
     for (i = IFXTABLE_MIN_COL; i <= IFXTABLE_MAX_COL; ++i) {
+
+        if ((0x1 << (i - 1)) & ~IFXTABLE_SETTABLE_COLS)
+            continue;
 
         tmp = pos;
         pos = _ifXTable_container_col_save(rowreq_ctx, i, pos);
