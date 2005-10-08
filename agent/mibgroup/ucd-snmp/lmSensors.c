@@ -21,6 +21,19 @@
  * information.  Later platforms, such as the V880 use the picld
  * daemon to control system resources and report sensor information.
  * Picld is supported only on Solaris 2.8 and later.
+ * 
+ * KSTAT
+ *
+ * The code initializes the kstat variables, then does a specific inquiry
+ * for what we're looking for.
+ *
+ * PICLD
+ *
+ * If picld is available on the platform, it tries to initialize picld.
+ * If that works, it points itself to the top of the picld btree
+ * and walks it way down recursively looking for sensors and child leafs.
+ * If it finds a child, it goes in and works it way down recursively.
+ * If it finds a sensor, it deals with it.
  *
  * Both these methodologies are implemented in a "read only" manner.
  * You cannot use this code to change anything eg. fan speeds.
@@ -78,7 +91,7 @@
     #ifdef HAVE_PICL_H 
         #include <picl.h> /* accesses the picld daemon */
     #endif 
-    #include </usr/platform/sun4u/include/sys/envctrl.h>
+    #include </usr/platform/sun4u/include/sys/envctrl.h> /*should this be more generic? */
 #else
     #include <sensors/sensors.h>
     #define CONFIG_FILE_NAME "/etc/sensors.conf"
@@ -640,12 +653,15 @@ process_sensors(picl_nodehdl_t nodeh)
             return (error_code);
         }
 
+
         if (strcmp(propname,PICL_NODE_PLATFORM)==0){ /*end of the chain*/
                 return (255);
         }
 
+/*        DEBUGMSGTL(("ucd-snmp/lmSensors","dealing with propname %s \n",propname)); */
+
         error_code = picl_get_propval_by_name(childh, PICL_PROP_CLASSNAME,
-                                                propclass, sizeof (propclass));
+                                                propclass, (PICL_CLASSNAMELEN_MAX - 1));
         if (error_code != PICL_SUCCESS) {  /*we found a node with no class.  Impossible.! */
             return (error_code);
         }
@@ -689,56 +705,6 @@ process_sensors(picl_nodehdl_t nodeh)
     return (error_code);
 } /* process sensors */
 
-static int
-get_child(picl_nodehdl_t nodeh, char *cname, picl_nodehdl_t *resulth)
-{
-    picl_nodehdl_t  childh;
-    picl_nodehdl_t  nexth;
-
-    char            pname[PICL_PROPNAMELEN_MAX];
-    picl_errno_t    error_code;
-
-    /* look up first child node */
-    error_code = picl_get_propval_by_name(nodeh, PICL_PROP_CHILD, &childh,
-                                        sizeof (picl_nodehdl_t));
-    if (error_code != PICL_SUCCESS) {
-            return (error_code);
-    }
-
-    /* step through child nodes, get the name first */
-    while (error_code == PICL_SUCCESS) {
-        error_code = picl_get_propval_by_name(childh, PICL_PROP_NAME,
-                                              pname, (PICL_PROPNAMELEN_MAX - 1));
-        if (error_code != PICL_SUCCESS) {  /*we found a node with no name.  Impossible.! */
-            return (error_code);
-        }
-
-        if (strncmp(pname, cname,PICL_PROPNAMELEN_MAX) == 0){
-            *resulth = childh;
-            return (PICL_SUCCESS);
-        }
-
-
-        /* look for children of children (note, this is recursive) */
-
-        if (get_child(childh,cname,resulth) == PICL_SUCCESS) {
-             return (PICL_SUCCESS);
-        }
-
-        /* get next child node at this level*/
-            
-        error_code = picl_get_propval_by_name(childh, PICL_PROP_PEER,
-                                        &nexth, sizeof (picl_nodehdl_t));
-        if (error_code != PICL_SUCCESS) {/* no more children - buh bye*/
-            return (error_code);
-        }
-
-        childh = nexth;
-
-    } /* while */
-    return (error_code);
-} /* get child */
-
 #endif
 /* ******** end of picld sensor procedures * */
 
@@ -762,8 +728,7 @@ _sensor_load(clock_t t)
 #ifdef HAVE_PICL_H
     int er_code;
     picl_errno_t     error_code;
-    picl_nodehdl_t  rooth,plath;
-    char sname[PICL_PROPNAMELEN_MAX] = "SYSTEM";
+    picl_nodehdl_t  rooth;
 #endif 
 
 /* DEBUGMSG(("ucd-snmp/lmSensors", "Reading the sensors\n")); */
@@ -790,19 +755,9 @@ if (er_code == PICL_SUCCESS) {
         DEBUGMSG(("ucd-snmp/lmSensors", "picld couldn't get root error code->%d\n",error_code));
         }
     else{
-        error_code = get_child(rooth,sname,&plath);
-
-        if (error_code == PICL_SUCCESS){
-            error_code = process_sensors(plath);
-
-            if (error_code != 255) 
-                if (error_code != 7)
-                    DEBUGMSG(("ucd-snmp/lmSensors", "picld had an internal problem error code->%d\n",error_code));
-            } /* endif error_code */
-        else{
-            DEBUGMSG(("ucd-snmp/lmSensors", "picld couldn't get system tree error code->%d\n",error_code));
-            } /* end else error_code */
-        } /* end else */
+        DEBUGMSGTL(("ucd-snmp/lmSensors", "found root\n"));
+        error_code = process_sensors(rooth);
+       } /* end else */
 
     picl_shutdown();
 
