@@ -21,6 +21,7 @@ usage()
    echo " -x : configure extra features for pre-release testing"
    echo " -C : don't source $HOME/.snmp/nsb-nightly"
    echo ""
+   echo " -f : from address for email results"
    echo " -e : address to email error results to"
    echo " -o : address to email success results to"
    echo " -h : host to upload results to"
@@ -64,11 +65,12 @@ NIGHTLY_VERBOSE=0
 NSB_ERR_RESULTS_TO=""
 NSB_OK_RESULTS_TO=""
 
-while getopts b:e:i:o:s:xh:p:v opt
+while getopts b:e:f:i:o:s:xh:p:v opt
 do
     case "$opt" in
       b)  NSB_BUILD_DIR=$OPTARG;;
       e)  NSB_ERR_RESULTS_TO=$OPTARG;;
+      e)  NSB_FROM=$OPTARG;;
       o)  NSB_OK_RESULTS_TO=$OPTARG;;
       i)  PARMS="-i $OPTARG $PARMS";;
       s)  NSB_SRC_DIR=$OPTARG;;
@@ -132,7 +134,7 @@ if [ ! -z $NSB_RESULTS_TO ]; then
    esac
    SUBJECT="$NSB_VERSION $RESULT on $NSB_PLATFORM"
    cd $NSB_BUILD_DIR
-   echo "From: $USER@users.sourceforge.net" > mail.results
+   echo "From: $NSB_FROM" > mail.results
    echo "Subject: $SUBJECT" >> mail.results
    echo "" >> mail.results
    echo "Result: $RESULT" >> mail.results
