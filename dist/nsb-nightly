@@ -70,7 +70,7 @@ do
     case "$opt" in
       b)  NSB_BUILD_DIR=$OPTARG;;
       e)  NSB_ERR_RESULTS_TO=$OPTARG;;
-      e)  NSB_FROM=$OPTARG;;
+      f)  NSB_FROM=$OPTARG;;
       o)  NSB_OK_RESULTS_TO=$OPTARG;;
       i)  PARMS="-i $OPTARG $PARMS";;
       s)  NSB_SRC_DIR=$OPTARG;;
