@@ -1178,7 +1178,7 @@ static int _query(netsnmp_variable_list *list,
 
     netsnmp_pdu *pdu      = snmp_pdu_create( request );
     netsnmp_pdu *response = NULL;
-    netsnmp_variable_list *vb1, *vb2;
+    netsnmp_variable_list *vb1, *vb2, *vtmp;
     int ret;
 
     /*
@@ -1211,7 +1211,9 @@ static int _query(netsnmp_variable_list *list,
                     ret = SNMP_ERR_GENERR;
                     break;
                 }
+                vtmp = vb2->next_variable;
                 snmp_clone_var( vb1, vb2 );
+                vb2->next_variable = vtmp;
             }
         }
     } else {
