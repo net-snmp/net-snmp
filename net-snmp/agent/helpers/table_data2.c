@@ -43,7 +43,7 @@
  * generates the index portion of an table oid from a varlist.
  */
 void
-netsnmp_tdata_generate_index_oid(netsnmp_tdata_row *row)
+_netsnmp_tdata_generate_index_oid(netsnmp_tdata_row *row)
 {
     build_oid(&row->oid_index.oids, &row->oid_index.len, NULL, 0, row->indexes);
 }
@@ -62,7 +62,7 @@ netsnmp_tdata_add_row(netsnmp_tdata     *table,
         return SNMPERR_GENERR;
 
     if (row->indexes)
-        netsnmp_tdata_generate_index_oid(row);
+        _netsnmp_tdata_generate_index_oid(row);
 
     if (!row->oid_index.oids) {
         snmp_log(LOG_ERR,
