@@ -27,6 +27,12 @@ init_mteEventConf(void)
                                    parse_setEvent,          NULL,
                                    "eventname [-I] OID = value");
 
+    netsnmp_ds_register_config(ASN_BOOLEAN,
+                   netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                         NETSNMP_DS_LIB_APPTYPE),
+                   "strictDisman", NETSNMP_DS_APPLICATION_ID,
+                                   NETSNMP_DS_AGENT_STRICT_DISMAN);
+
     /*
      * ... and for persistent storage of dynamic event table entries.
      *
