@@ -1014,6 +1014,85 @@ get_temp_file_pattern()
 				  NETSNMP_DS_LIB_TEMP_FILE_PATTERN));
 }
 
+/**
+ * utility routine for read_config_files
+ */
+static void
+read_config_files_in_path(const char *path, struct config_files *ctmp,
+                          int when, const char *perspath, const char *persfile)
+{
+    int             done, j;
+    char            configfile[300];
+    char           *cptr1, *cptr2, *envconfpath;
+    struct stat     statbuf;
+
+    if ((NULL == path) || (NULL == ctmp))
+        return;
+
+    envconfpath = strdup(path);
+
+    DEBUGMSGTL(("read_config", " config path used for %s:%s (persistent path:%s)\n",
+                ctmp->fileHeader, envconfpath, perspath));
+    cptr1 = cptr2 = envconfpath;
+    done = 0;
+    while (*cptr2 != 0) {
+        while (*cptr1 != 0 && *cptr1 != ENV_SEPARATOR_CHAR)
+            cptr1++;
+        if (*cptr1 == 0)
+            done = 1;
+        else
+            *cptr1 = 0;
+        /*
+         * for proper persistent storage retrival, we need to read old backup
+         * copies of the previous storage files.  If the application in
+         * question has died without the proper call to snmp_clean_persistent,
+         * then we read all the configuration files we can, starting with
+         * the oldest first.
+         */
+        if (strncmp(cptr2, perspath, strlen(perspath)) == 0 ||
+            (persfile != NULL &&
+             strncmp(cptr2, persfile, strlen(persfile)) == 0)) {
+            /*
+             * limit this to the known storage directory only 
+             */
+            for (j = 0; j <= MAX_PERSISTENT_BACKUPS; j++) {
+                snprintf(configfile, sizeof(configfile),
+                         "%s/%s.%d.conf", cptr2,
+                         ctmp->fileHeader, j);
+                configfile[ sizeof(configfile)-1 ] = 0;
+                if (stat(configfile, &statbuf) != 0) {
+                    /*
+                     * file not there, continue 
+                     */
+                    break;
+                } else {
+                    /*
+                     * backup exists, read it 
+                     */
+                    DEBUGMSGTL(("read_config_files",
+                                "old config file found: %s, parsing\n",
+                                configfile));
+                    read_config(configfile, ctmp->start, when);
+                }
+            }
+        }
+        snprintf(configfile, sizeof(configfile),
+                 "%s/%s.conf", cptr2, ctmp->fileHeader);
+        configfile[ sizeof(configfile)-1 ] = 0;
+        read_config(configfile, ctmp->start, when);
+        snprintf(configfile, sizeof(configfile),
+                 "%s/%s.local.conf", cptr2, ctmp->fileHeader);
+        configfile[ sizeof(configfile)-1 ] = 0;
+        read_config(configfile, ctmp->start, when);
+
+        if(done)
+            break;
+
+        cptr2 = ++cptr1;
+    }
+    SNMP_FREE(envconfpath);
+}
+
 /*******************************************************************-o-******
  * read_config_files
  *
@@ -1046,16 +1125,8 @@ get_temp_file_pattern()
 void
 read_config_files(int when)
 {
-    int             i, j;
-    char            configfile[300];
-    char           *envconfpath, *persfile;
-    const char     *confpath, *perspath;
-    char           *cptr1, *cptr2;
-    char            defaultPath[SPRINT_MAX_LEN];
-
+    const char     *confpath, *perspath, *persfile, *envconfpath;
     struct config_files *ctmp = config_files;
-    struct config_line *ltmp;
-    struct stat     statbuf;
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_DONT_PERSIST_STATE)
@@ -1067,99 +1138,46 @@ read_config_files(int when)
     if (when == PREMIB_CONFIG)
         free_config();
 
+    /*
+     * these shouldn't change
+     */
     confpath = get_configuration_directory();
+    persfile = netsnmp_getenv("SNMP_PERSISTENT_FILE");
+    envconfpath = netsnmp_getenv("SNMPCONFPATH");
 
     /*
      * read all config file types 
      */
     for (; ctmp != NULL; ctmp = ctmp->next) {
 
-        ltmp = ctmp->start;
-
-        /*
-         * persistent path can change via conf file, so make sure
-         * we have a valid pointer.
-         */
-        perspath = get_persistent_directory();
-
         /*
          * read the config files 
          */
-        if ((envconfpath = netsnmp_getenv("SNMPCONFPATH")) == NULL) {
-            snprintf(defaultPath, sizeof(defaultPath), "%s%s%s",
-                    ((confpath == NULL) ? "" : confpath),
-                    ((perspath == NULL) ? "" : ENV_SEPARATOR),
-                    ((perspath == NULL) ? "" : perspath));
-            defaultPath[ sizeof(defaultPath)-1 ] = 0;
-	    envconfpath = strdup(defaultPath);
-        } else {
-	    envconfpath = strdup(envconfpath);
-        }
-
-        DEBUGMSGTL(("read_config", "config path used:%s\n", envconfpath));
-        cptr1 = cptr2 = envconfpath;
-        i = 1;
-        while (i && *cptr2 != 0) {
-            while (*cptr1 != 0 && *cptr1 != ENV_SEPARATOR_CHAR)
-                cptr1++;
-            if (*cptr1 == 0)
-                i = 0;
-            else
-                *cptr1 = 0;
+        perspath = get_persistent_directory();
+        if (envconfpath == NULL) {
             /*
-             * for proper persistent storage retrival, we need to read old backup
-             * copies of the previous storage files.  If the application in
-             * question has died without the proper call to snmp_clean_persistent,
-             * then we read all the configuration files we can, starting with
-             * the oldest first.
+             * read just the config files (no persistent stuff), since
+             * persistent path can change via conf file. Then get the
+             * current persistent directory, and read files there.
              */
-	    persfile = netsnmp_getenv("SNMP_PERSISTENT_FILE");
-            if (strncmp(cptr2, perspath, strlen(perspath)) == 0 ||
-                (persfile != NULL &&
-                 strncmp(cptr2, persfile, strlen(persfile)) == 0)) {
-                /*
-                 * limit this to the known storage directory only 
-                 */
-                for (j = 0; j <= MAX_PERSISTENT_BACKUPS; j++) {
-                    snprintf(configfile, sizeof(configfile),
-                           "%s/%s.%d.conf", cptr2,
-                            ctmp->fileHeader, j);
-                    configfile[ sizeof(configfile)-1 ] = 0;
-                    if (stat(configfile, &statbuf) != 0) {
-                        /*
-                         * file not there, continue 
-                         */
-                        break;
-                    } else {
-                        /*
-                         * backup exists, read it 
-                         */
-                        DEBUGMSGTL(("read_config_files",
-                                    "old config file found: %s, parsing\n",
-                                    configfile));
-                        read_config(configfile, ltmp, when);
-                    }
-                }
-            }
-            snprintf(configfile, sizeof(configfile),
-                     "%s/%s.conf", cptr2, ctmp->fileHeader);
-            configfile[ sizeof(configfile)-1 ] = 0;
-            read_config(configfile, ltmp, when);
-            snprintf(configfile, sizeof(configfile),
-                     "%s/%s.local.conf", cptr2, ctmp->fileHeader);
-            configfile[ sizeof(configfile)-1 ] = 0;
-            read_config(configfile, ltmp, when);
-            cptr2 = ++cptr1;
+            read_config_files_in_path(confpath, ctmp, when, perspath,
+                                      persfile);
+            perspath = get_persistent_directory();
+            read_config_files_in_path(perspath, ctmp, when, perspath,
+                                      persfile);
         }
-        SNMP_FREE(envconfpath);
+        else {
+            /*
+             * only read path specified by user
+             */
+            read_config_files_in_path(envconfpath, ctmp, when, perspath,
+                                      persfile);
+        }
     }
 
     if (config_errors) {
         snmp_log(LOG_ERR, "net-snmp: %d error(s) in config file(s)\n",
                  config_errors);
-        /*
-         * exit(1); 
-         */
     }
 }
 
