@@ -155,8 +155,10 @@ mteTrigger_removeEntry(netsnmp_tdata_row *row)
         return;                 /* Nothing to remove */
     entry = (struct mteTrigger *)
         netsnmp_tdata_remove_and_delete_row(trigger_table_data, row);
-    if (entry)
+    if (entry) {
+        mteTrigger_disable( entry );
         SNMP_FREE(entry);
+    }
 }
 
     /* ===================================================
@@ -204,7 +206,8 @@ mteTrigger_run( unsigned int reg, void *clientarg)
         return;
     }
     if (!(entry->flags & MTE_TRIGGER_FLAG_ENABLED ) ||
-        !(entry->flags & MTE_TRIGGER_FLAG_ACTIVE )) {
+        !(entry->flags & MTE_TRIGGER_FLAG_ACTIVE  ) ||
+        !(entry->flags & MTE_TRIGGER_FLAG_VALID  )) {
         return;
     }
 
@@ -1075,8 +1078,11 @@ mteTrigger_enable( struct mteTrigger *entry )
     if (!entry)
         return;
 
-    if (entry->alarm)
+    if (entry->alarm) {
+        /* XXX - or explicitly call mteTrigger_disable ?? */
         snmp_alarm_unregister( entry->alarm );
+        entry->alarm = 0;
+    }
 
     if (entry->mteTriggerFrequency) {
         entry->alarm = snmp_alarm_register(
