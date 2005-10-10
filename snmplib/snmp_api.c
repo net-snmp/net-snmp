@@ -6468,8 +6468,8 @@ snmp_add_var(netsnmp_pdu *pdu,
 #ifdef OPAQUE_SPECIAL_TYPES
     double          dtmp;
     float           ftmp;
-    struct counter64 c64tmp;
 #endif                          /* OPAQUE_SPECIAL_TYPES */
+    struct counter64 c64tmp;
 
 #ifndef DISABLE_MIB_LOADING
     tp = get_tree(name, name_length, get_tree_head());
@@ -6497,6 +6497,9 @@ snmp_add_var(netsnmp_pdu *pdu,
             break;
         case TYPE_COUNTER:
             type = 'c';
+            break;
+        case TYPE_COUNTER64:
+            type = 'C';
             break;
         case TYPE_TIMETICKS:
             type = 't';
@@ -6602,6 +6605,21 @@ snmp_add_var(netsnmp_pdu *pdu,
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
                                   (u_char *) & ltmp, sizeof(ltmp));
+        else
+            goto fail;
+        break;
+
+    case 'C':
+#ifndef DISABLE_MIB_LOADING
+        if (check && tp->type != TYPE_COUNTER64) {
+            value = "Counter64";
+            result = SNMPERR_VALUE;
+            goto type_error;
+        }
+#endif /* DISABLE_MIB_LOADING */
+        if (read64(&c64tmp, value))
+            snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER64,
+                                  (u_char *) & c64tmp, sizeof(c64tmp));
         else
             goto fail;
         break;
