@@ -52,7 +52,6 @@ typedef  struct netsnmp_tdata_s     netsnmp_table_data2;
 /*
  * APIs for constructing and manipulating a 'tdata' table
  */
-    void            netsnmp_tdata_generate_index_oid(netsnmp_tdata_row *row);
     int             netsnmp_tdata_add_row(      netsnmp_tdata     *table,
                                                 netsnmp_tdata_row *row);
     netsnmp_tdata_row *netsnmp_tdata_remove_row(netsnmp_tdata     *table,
