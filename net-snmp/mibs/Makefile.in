@@ -75,5 +75,5 @@ htmldir:
 		mkdir html ; \
 	fi
 	rm -f html/index.html ; \
-        perl makehtml.pl -W -M `pwd` -D html $(MIBS) > html/index.html
+        $(PERL) makehtml.pl -W -M `pwd` -D html $(MIBS) > html/index.html
 
