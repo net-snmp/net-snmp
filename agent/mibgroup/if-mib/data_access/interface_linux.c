@@ -31,10 +31,10 @@
 #include <linux/sockios.h>
 
 unsigned int
-netsnmp_arch_interface_get_if_speed(int fd, const char *name);
+netsnmp_linux_interface_get_if_speed(int fd, const char *name);
 #ifdef HAVE_LINUX_ETHTOOL_H
 unsigned int
-netsnmp_arch_interface_get_if_speed_mii(int fd, const char *name);
+netsnmp_linux_interface_get_if_speed_mii(int fd, const char *name);
 #endif
 
 void
@@ -335,7 +335,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 
         if (IANAIFTYPE_ETHERNETCSMACD == entry->type)
             entry->speed =
-                netsnmp_arch_interface_get_if_speed(fd, entry->name);
+                netsnmp_linux_interface_get_if_speed(fd, entry->name);
 #ifdef APPLIED_PATCH_836390   /* xxx-rks ifspeed fixes */
         else if (IANAIFTYPE_PROPVIRTUAL == entry->type)
             entry->speed = _get_bonded_if_speed(entry);
@@ -389,7 +389,7 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
  * Determines network interface speed from ETHTOOL_GSET
  */
 unsigned int
-netsnmp_arch_interface_get_if_speed(int fd, const char *name)
+netsnmp_linux_interface_get_if_speed(int fd, const char *name)
 {
     struct ifreq ifr;
     struct ethtool_cmd edata;
@@ -403,7 +403,7 @@ netsnmp_arch_interface_get_if_speed(int fd, const char *name)
     if (ioctl(fd, SIOCETHTOOL, &ifr) == -1) {
         DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s failed\n",
                     ifr.ifr_name));
-        return netsnmp_arch_interface_get_if_speed_mii(fd,name);
+        return netsnmp_linux_interface_get_if_speed_mii(fd,name);
     }
     
     if (edata.speed != SPEED_10 && edata.speed != SPEED_100 &&
@@ -411,7 +411,7 @@ netsnmp_arch_interface_get_if_speed(int fd, const char *name)
         DEBUGMSGTL(("mibII/interfaces", "fallback to mii for %s\n",
                     ifr.ifr_name));
         /* try MII */
-        return netsnmp_arch_interface_get_if_speed_mii(fd,name);
+        return netsnmp_linux_interface_get_if_speed_mii(fd,name);
     }
 
     /* return in bps */
@@ -426,9 +426,9 @@ netsnmp_arch_interface_get_if_speed(int fd, const char *name)
  */
 unsigned int
 #ifdef HAVE_LINUX_ETHTOOL_H
-netsnmp_arch_interface_get_if_speed_mii(int fd, const char *name)
+netsnmp_linux_interface_get_if_speed_mii(int fd, const char *name)
 #else
-netsnmp_arch_interface_get_if_speed(int fd, const char *name)
+netsnmp_linux_interface_get_if_speed(int fd, const char *name)
 #endif
 {
     unsigned int retspeed = 10000000;
