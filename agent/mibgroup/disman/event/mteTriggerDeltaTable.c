@@ -142,9 +142,6 @@ mteTriggerDeltaTable_handler(netsnmp_mib_handler *handler,
                 }
                 break;
             case COLUMN_MTETRIGGERDELTADISCONTINUITYIDTYPE:
-                /*
-                 * or possibly 'netsnmp_check_vb_int_range' 
-                 */
                 ret = netsnmp_check_vb_int_range(request->requestvb,
                                                  MTE_DELTAD_TTICKS,
                                                  MTE_DELTAD_DATETIME);
