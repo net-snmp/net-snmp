@@ -372,6 +372,7 @@
 #define WIN32ID 13
 #define HPUX11ID 14
 #define AIXID 15
+#define MACOSXID 16
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -418,6 +419,9 @@
 #endif
 #if defined(aix3) || defined(aix4) || defined(aix5)
 #define OSTYPE AIXID
+#endif
+#ifdef darwin8
+#define OSTYPE MACOSXID
 #endif
 /* unknown */
 #ifndef OSTYPE
