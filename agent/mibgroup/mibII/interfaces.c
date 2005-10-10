@@ -1369,9 +1369,9 @@ unsigned int getIfSpeed(int fd, struct ifreq ifr)
 #ifdef linux
     /** temporary expose internal until this module can be re-written */
     extern unsigned int
-        netsnmp_arch_interface_get_if_speed(int fd, const char *name);
+        netsnmp_linux_interface_get_if_speed(int fd, const char *name);
 
-    return netsnmp_arch_interface_get_if_speed(fd, ifr.ifr_name);
+    return netsnmp_linux_interface_get_if_speed(fd, ifr.ifr_name);
 #else /*!linux*/			   
     return 10000000;
 #endif 
