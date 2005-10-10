@@ -371,6 +371,7 @@
 #define OPENBSDID 12
 #define WIN32ID 13
 #define HPUX11ID 14
+#define AIXID 15
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -414,6 +415,9 @@
 #endif
 #ifdef WIN32
 #define OSTYPE WIN32ID
+#endif
+#if defined(aix3) || defined(aix4) || defined(aix5)
+#define OSTYPE AIXID
 #endif
 /* unknown */
 #ifndef OSTYPE
