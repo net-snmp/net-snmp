@@ -345,12 +345,12 @@ depend: dependdirs
 nosysdepend: nosysdependdirs
 	@if test -f Makefile.depend ; then \
 		makedepend `echo $(CPPFLAGS) | sed 's/-f[-a-z]*//g'` -o .lo $(srcdir)/*.c $(srcdir)/*/*.c ; \
-		perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile ; \
+		$(PERL) -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile ; \
 	fi
 
 distdepend: nosysdepend distdependdirs
 	@if test -f Makefile.depend ; then \
-		perl $(top_srcdir)/makefileindepend.pl ; \
+		$(PERL) $(top_srcdir)/makefileindepend.pl ; \
 	fi
 
 dependdirs:
