@@ -299,8 +299,15 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
     netsnmp_variable_list var, *v2;
     oid    snmptrap_oid[]   = { 1,3,6,1,6,3,1,1,4,1,0 };
     size_t snmptrap_oid_len = OID_LENGTH(snmptrap_oid);
-    int eventsFirst = 1;     /* Not according to spec,
-                                but works better this way! */
+         /*
+          * The Event-MIB specification says that objects from the
+          *   mteEventTable should come after those from the trigger,
+          *   but things actually work better if these come first.
+          * Allow the agent to be configured either way.
+          */
+    int strictOrdering = netsnmp_ds_get_boolean(
+                             NETSNMP_DS_APPLICATION_ID,
+                             NETSNMP_DS_AGENT_STRICT_DISMAN);
 
     /*
      * Set the basic notification OID...
@@ -320,7 +327,7 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
      *   are placed first.  So this code handles things either way :-)
      */
 
-    if (eventsFirst) {
+    if (!strictOrdering) {
         DEBUGMSGTL(("disman:event:fire", "Adding event objects (first)\n"));
         if (strcmp(entry->mteNotifyOwner, "_snmpd") != 0)
             mteObjects_vblist( &var, entry->mteNotifyOwner,
@@ -337,7 +344,7 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
                              trigger->mteTriggerXObjects,
                              suffix, sfx_len );
 
-    if (!eventsFirst) {
+    if (strictOrdering) {
         DEBUGMSGTL(("disman:event:fire", "Adding event objects (last)\n"));
         if (strcmp(entry->mteNotifyOwner, "_snmpd") != 0)
             mteObjects_vblist( &var, entry->mteNotifyOwner,
@@ -358,7 +365,7 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
      */
     if (strcmp(entry->mteNotifyOwner, "_snmpd") == 0) {
         DEBUGMSGTL(("disman:event:fire", "Adding event objects (internal)\n"));
-        if ( eventsFirst ) {
+        if ( !strictOrdering ) {
             mteObjects_internal_vblist(&var, entry->mteNotifyObjects, trigger);
         } else {
             for (v2 = &var; v2 && v2->next_variable; v2=v2->next_variable)

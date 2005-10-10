@@ -16,6 +16,7 @@
 #define NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS 6 /* 1 = !see !connect msgs */
 #define NETSNMP_DS_AGENT_LEAVE_PIDFILE  7       /* 1 = leave PID file on exit */
 #define NETSNMP_DS_AGENT_NO_CACHING     8       /* 1 = disable netsnmp_cache */
+#define NETSNMP_DS_AGENT_STRICT_DISMAN  9       /* 1 = "correct" object ordering */
 #
 /*
  * strings 
