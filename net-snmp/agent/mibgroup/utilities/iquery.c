@@ -48,8 +48,9 @@ _init_default_iquery_session( int majorID, int minorID,
 {
     char *secName = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
                                           NETSNMP_DS_AGENT_INTERNAL_SECNAME);
-    netsnmp_query_set_default_session(
-         netsnmp_iquery_user_session(secName));
+    if (secName)
+        netsnmp_query_set_default_session(
+             netsnmp_iquery_user_session(secName));
 }
 
 void init_iquery(void){
@@ -74,8 +75,6 @@ void init_iquery(void){
                        NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_3);
     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                        NETSNMP_DS_AGENT_INTERNAL_SECLEVEL, SNMP_SEC_LEVEL_AUTHNOPRIV);
-    netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
-                          NETSNMP_DS_AGENT_INTERNAL_SECNAME, "netsnmp-internal");
 
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, 
                            SNMP_CALLBACK_POST_READ_CONFIG,
