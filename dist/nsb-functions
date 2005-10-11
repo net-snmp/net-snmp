@@ -50,6 +50,21 @@ NSB_PERL=
 NSB_FLOW=
 NSB_DATE=${NSB_DATE:=`date +%y%m%d_%H%M`}
 
+#
+# System specific additions
+#
+case `uname -s` in
+
+   SunOS)
+      NSB_TAIL_ARGS="-$NSB_ERR_CTX_LINES"
+      ;;
+
+   *)
+      NSB_TAIL_ARGS="-n $NSB_ERR_CTX_LINES"
+      ;;
+esac
+
+
 #----------------------------------------------------------------------
 #
 # Utility functions
@@ -312,7 +327,7 @@ nsb-make()
       nsb-prompt "press enter to view errors"
 #      grep ':' $nsb_make_OUTPUT > nsb-make-$target-errs2.$NSB_DATE
 #      tail -n $NSB_ERR_CTX_LINES nsb-make-$target-errs2.$NSB_DATE >&2
-      tail -n $NSB_ERR_CTX_LINES nsb-make-$target-errs.$NSB_DATE >&2
+      tail $NSB_TAIL_ARGS nsb-make-$target-errs.$NSB_DATE >&2
       nsb-abort "Error(s) during make $target"
    fi
 
