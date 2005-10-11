@@ -1099,7 +1099,6 @@ fi
 
 if test "x$with_res_locks" = "xyes"; then
   AC_DEFINE(NS_REENTRANT)
-EOF
 
     case $target_os in
 
