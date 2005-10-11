@@ -156,7 +156,7 @@ perlmodules: perlmakefiles
            exit 1 ; \
         fi
 
-perlmakefiles:
+perlmakefiles: net-snmp-config-x
 	@if test ! -f perl/Makefile; then \
 	  (dir=`pwd`; \
 	   cd perl ; \
