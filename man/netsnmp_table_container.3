@@ -1,4 +1,4 @@
-.TH "table_container: Helps you implement a table when data can be found via a netsnmp_container." 3 "4 Oct 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
+.TH "table_container: Helps you implement a table when data can be found via a netsnmp_container." 3 "10 Oct 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -32,7 +32,7 @@ TABLE_CONTAINER_KEY_VARBIND_INDEX The container should do comparisons based on a
 .PP
 TABLE_CONTAINER_KEY_VARBIND_RAW (NOTE: unimplemented) While not yet implemented, future plans include passing the request varbind with the full OID to a container.
 .PP
-If a key type is not specified at registration time, the default ket type of TABLE_CONTAINER_KEY_NETSNMP_INDEX will be used. If a container is provided, or the handler name is aliased to a container type, the container must use a netsnmp index.
+If a key type is not specified at registration time, the default key type of TABLE_CONTAINER_KEY_NETSNMP_INDEX will be used. If a container is provided, or the handler name is aliased to a container type, the container must use a netsnmp index.
 .PP
 If no container is provided, a lookup will be made based on the sub-handler's name, or if that isn't found, 'table_container'. The table_container key type will be netsnmp_index.
 .PP
