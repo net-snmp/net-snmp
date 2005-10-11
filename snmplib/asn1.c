@@ -198,6 +198,39 @@ SOFTWARE.
 
 #include <net-snmp/library/snmp_api.h>
 
+#ifndef INT32_MAX
+#   define INT32_MAX 2147483647
+#endif
+
+#ifndef INT32_MIN
+#   define INT32_MIN (0 - INT32_MAX - 1)
+#endif
+
+
+#if SIZEOF_LONG == 4
+#  define CHECK_OVERFLOW_S(x,y) (void)
+#  define CHECK_OVERFLOW_U(x,y) (void)
+#else
+#  define CHECK_OVERFLOW_S(x,y) do { int trunc = 0;                     \
+        if (x > INT32_MAX) {                                            \
+            trunc = 1;                                                  \
+            x &= 0xffffffff;                                            \
+        } else if (x < INT32_MIN) {                                     \
+            trunc = 1;                                                  \
+            x = 0 - (x & 0xffffffff);                                   \
+        }                                                               \
+        if (trunc)                                                      \
+            snmp_log(LOG_ERR,"truncating signed value to 32 bits (%d)\n",y); \
+    } while(0)
+
+#  define CHECK_OVERFLOW_U(x,y) do {                                    \
+        if (x > UINT32_MAX) {                                           \
+            x &= 0xffffffff;                                            \
+            snmp_log(LOG_ERR,"truncating unsigned value to 32 bits (%d)\n",y); \
+        }                                                               \
+    } while(0)
+#endif
+
 /**
  * @internal
  * output an error for a wrong size
@@ -470,12 +503,7 @@ asn_parse_int(u_char * data,
     while (asn_length--)
         value = (value << 8) | *bufp++;
 
-#if SIZEOF_LONG != 4
-    if ((unsigned long)value > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating integer value to 32 bits\n");
-        value &= 0xffffffff;
-    }
-#endif
+    CHECK_OVERFLOW_S(value,1);
 
     DEBUGMSG(("dumpv_recv", "  Integer:\t%ld (0x%.2X)\n", value, value));
 
@@ -542,12 +570,7 @@ asn_parse_unsigned_int(u_char * data,
     while (asn_length--)
         value = (value << 8) | *bufp++;
 
-#if SIZEOF_LONG != 4
-    if (value > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating uinteger value to 32 bits\n");
-        value &= 0xffffffff;
-    }
-#endif
+    CHECK_OVERFLOW_U(value,2);
 
     DEBUGMSG(("dumpv_recv", "  UInteger:\t%ld (0x%.2X)\n", value, value));
 
@@ -598,12 +621,7 @@ asn_build_int(u_char * data,
         return NULL;
     }
     integer = *intp;
-#if SIZEOF_LONG != 4
-    if ((unsigned long)integer > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating integer value to 32 bits\n");
-        integer &= 0xffffffff;
-    }
-#endif
+    CHECK_OVERFLOW_S(integer,3);
     /*
      * Truncate "unnecessary" bytes off of the most significant end of this
      * 2's complement integer.  There should be no sequence of 9
@@ -683,12 +701,8 @@ asn_build_unsigned_int(u_char * data,
         return NULL;
     }
     integer = *intp;
-#if SIZEOF_LONG != 4
-    if (integer > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating uinteger value to 32 bits\n");
-        integer &= 0xffffffff;
-    }
-#endif
+    CHECK_OVERFLOW_U(integer,4);
+
     mask = ((u_long) 0xFF) << (8 * (sizeof(long) - 1));
     /*
      * mask is 0xFF000000 on a big-endian machine 
@@ -1445,6 +1459,8 @@ asn_build_objid(u_char * data,
      * calculate the number of bytes needed to store the encoded value 
      */
     for (i = 1, asnlength = 0;;) {
+
+        CHECK_OVERFLOW_U(objid_val,5);
         if (objid_val < (unsigned) 0x80) {
             objid_size[i] = 1;
             asnlength += 1;
@@ -1465,12 +1481,6 @@ asn_build_objid(u_char * data,
         if (i >= (int) objidlength)
             break;
         objid_val = *op++;	/* XXX - doesn't handle 2.X (X > 40) */
-#if SIZEOF_LONG != 4
-        if (objid_val > 0xffffffff) {
-            snmp_log(LOG_ERR,"truncating objid value to 32 bits\n");
-            objid_val &= 0xffffffff;
-        }
-#endif
     }
 
     /*
@@ -1820,16 +1830,8 @@ asn_parse_unsigned_int64(u_char * data,
         low = (low << 8) | *bufp++;
     }
 
-#if SIZEOF_LONG != 4
-    if (high > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating counter64 high value to 32 bits\n");
-        high &= 0xffffffff;
-    }
-    if (low > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating counter64 low value to 32 bits\n");
-        low &= 0xffffffff;
-    }
-#endif
+    CHECK_OVERFLOW_U(high,6);
+    CHECK_OVERFLOW_U(low,6);
 
     cp->low = low;
     cp->high = high;
@@ -1891,16 +1893,10 @@ asn_build_unsigned_int64(u_char * data,
     intsize = 8;
     low = cp->low;
     high = cp->high;
-#if SIZEOF_LONG != 4
-    if (high > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating counter64 high value to 32 bits\n");
-        high &= 0xffffffff;
-    }
-    if (low > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating counter64 low value to 32 bits\n");
-        low &= 0xffffffff;
-    }
-#endif
+
+    CHECK_OVERFLOW_U(high,7);
+    CHECK_OVERFLOW_U(low,7);
+
     mask = ((u_long) 0xFF) << (8 * (sizeof(long) - 1));
     /*
      * mask is 0xFF000000 on a big-endian machine 
@@ -2099,16 +2095,8 @@ asn_parse_signed_int64(u_char * data,
         low = (low << 8) | *bufp++;
     }
 
-#if SIZEOF_LONG != 4
-    if (high > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating counter64 high value to 32 bits\n");
-        high &= 0xffffffff;
-    }
-    if (low > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating counter64 low value to 32 bits\n");
-        low &= 0xffffffff;
-    }
-#endif
+    CHECK_OVERFLOW_U(high,8);
+    CHECK_OVERFLOW_U(low,8);
 
     cp->low = low;
     cp->high = high;
@@ -2172,16 +2160,9 @@ asn_build_signed_int64(u_char * data,
     memcpy(&c64, cp, sizeof(struct counter64)); /* we're may modify it */
     low = c64.low;
     high = c64.high;
-#if SIZEOF_LONG != 4
-    if (high > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating counter64 high value to 32 bits\n");
-        high &= 0xffffffff;
-    }
-    if (low > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating counter64 low value to 32 bits\n");
-        low &= 0xffffffff;
-    }
-#endif
+
+    CHECK_OVERFLOW_S(high,9);
+    CHECK_OVERFLOW_U(low,9);
 
     /*
      * Truncate "unnecessary" bytes off of the most significant end of this
@@ -2745,19 +2726,16 @@ asn_realloc_rbuild_int(u_char ** pkt, size_t * pkt_len,
 {
     static const char *errpre = "build int";
     register long   integer = *intp;
-    int             testvalue = (*intp < 0) ? -1 : 0;
+    int             testvalue;
     size_t          start_offset = *offset;
 
     if (intsize != sizeof(long)) {
         _asn_size_err(errpre, intsize, sizeof(long));
         return 0;
     }
-#if SIZEOF_LONG != 4
-    if ((unsigned long)integer > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating integer value to 32 bits\n");
-        integer &= 0xffffffff;
-    }
-#endif
+
+    CHECK_OVERFLOW_S(integer,10);
+    testvalue = (*intp < 0) ? -1 : 0;
 
     if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
         return 0;
@@ -2910,12 +2888,7 @@ asn_realloc_rbuild_unsigned_int(u_char ** pkt, size_t * pkt_len,
         return 0;
     }
 
-#if SIZEOF_LONG != 4
-    if (integer > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating uinteger value to 32 bits\n");
-        integer &= 0xffffffff;
-    }
-#endif
+    CHECK_OVERFLOW_U(integer,11);
 
     if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
         return 0;
@@ -3052,12 +3025,7 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
     } else {
         for (i = objidlength; i > 2; i--) {
             tmpint = objid[i - 1];
-#if SIZEOF_LONG != 4
-            if ((unsigned long)tmpint > 0xffffffff) {
-                snmp_log(LOG_ERR,"truncating oid subid to 32 bits\n");
-                tmpint &= 0xffffffff;
-            }
-#endif
+            CHECK_OVERFLOW_U(tmpint,12);
 
             if (((*pkt_len - *offset) < 1)
                 && !(r && asn_realloc(pkt, pkt_len))) {
@@ -3274,16 +3242,9 @@ asn_realloc_rbuild_unsigned_int64(u_char ** pkt, size_t * pkt_len,
                       sizeof(struct counter64));
         return 0;
     }
-#if SIZEOF_LONG != 4
-    if (high > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating counter64 high value to 32 bits\n");
-        high &= 0xffffffff;
-    }
-    if (low > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating counter64 low value to 32 bits\n");
-        low &= 0xffffffff;
-    }
-#endif
+
+    CHECK_OVERFLOW_U(high,13);
+    CHECK_OVERFLOW_U(low,13);
 
     /*
      * Encode the low 4 bytes first.  
@@ -3467,16 +3428,8 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
         return 0;
     }
 
-#if SIZEOF_LONG != 4
-    if (high > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating counter64 high value to 32 bits\n");
-        high &= 0xffffffff;
-    }
-    if (low > 0xffffffff) {
-        snmp_log(LOG_ERR,"truncating counter64 low value to 32 bits\n");
-        low &= 0xffffffff;
-    }
-#endif
+    CHECK_OVERFLOW_S(high,14);
+    CHECK_OVERFLOW_U(low,14);
 
     /*
      * Encode the low 4 bytes first.  
