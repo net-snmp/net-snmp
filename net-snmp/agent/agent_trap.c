@@ -235,12 +235,15 @@ create_trap_session(char *sink, u_short sinkport,
 {
     netsnmp_session session, *sesp;
     char           *peername = NULL;
+    int             len;
 
-    if ((peername = malloc(strlen(sink) + 4 + 32)) == NULL) {
+    len = strlen(sink) + 4 + 32;
+    if ((peername = malloc(len)) == NULL) {
         return 0;
+    } else if (NULL != strchr(sink,':')) {
+        snprintf(peername, len, "%s", sink);
     } else {
-        snprintf(peername, strlen(sink) + 4 + 32, "udp:%s:%hu", sink,
-                 sinkport);
+        snprintf(peername, len, "udp:%s:%hu", sink, sinkport);
     }
 
     memset(&session, 0, sizeof(netsnmp_session));
@@ -250,12 +253,21 @@ create_trap_session(char *sink, u_short sinkport,
         session.community = (u_char *) com;
         session.community_len = strlen(com);
     }
+
     /*
-     * for traps (not informs), there is no response. thus we don't
-     * need to listen to any address for a response, and should
-     * set the clientaddress to localhost, to reduce open ports.
+     * for informs, set retries to default
      */
-    if (pdutype != SNMP_MSG_INFORM)
+    if (SNMP_MSG_INFORM == pdutype) {
+        session.timeout = SNMP_DEFAULT_TIMEOUT;
+        session.retries = SNMP_DEFAULT_RETRIES;
+    }
+
+    /*
+     * if the sink is localhost, bind to localhost, to reduce open ports.
+     */
+    if ((NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_CLIENT_ADDR)) && 
+        ((0 == strcmp("localhost",sink)) || (0 == strcmp("127.0.0.1",sink))))
         session.localname = "localhost";
     sesp = snmp_open(&session);
     free(peername);
@@ -336,7 +348,6 @@ create_v2_inform_session(char *sink, u_short sinkport, char *com)
  *
  *  @see send_easy_trap
  *  @see send_v2trap
-
  */
 void
 snmpd_free_trapsinks(void)
@@ -616,7 +627,7 @@ netsnmp_send_traps(int trap, int specific,
 
     DEBUGMSGTL(( "trap", "send_trap %d %d ", trap, specific));
     DEBUGMSGOID(("trap", enterprise, enterprise_length));
-    DEBUGMSGTL(( "trap", "\n"));
+    DEBUGMSG(( "trap", "\n"));
 
     if (vars) {
         vblist = snmp_clone_varbind( vars );
@@ -750,6 +761,17 @@ netsnmp_send_traps(int trap, int specific,
             return -1;
         }
     }
+
+    /*
+     * Check whether we're ignoring authFail traps
+     */
+    if (template_v1pdu->trap_type == SNMP_TRAP_AUTHFAIL &&
+        snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_DISABLED) {
+        snmp_free_pdu(template_v1pdu);
+        snmp_free_pdu(template_v2pdu);
+        return 0;
+    }
+
     /*
      * Ensure that the v1 trap PDU includes the local IP address
      */

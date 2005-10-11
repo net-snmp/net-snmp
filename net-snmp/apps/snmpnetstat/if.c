@@ -68,6 +68,8 @@ SOFTWARE.
 #endif
 
 #include <stdio.h>
+#define __USE_XOPEN
+#define __USE_XOPEN_EXTENDED
 #include <signal.h>
 
 #if HAVE_WINSOCK_H

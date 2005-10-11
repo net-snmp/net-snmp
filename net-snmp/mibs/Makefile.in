@@ -30,7 +30,8 @@ IANAMIBS = IANAifType-MIB.txt IANA-LANGUAGE-MIB.txt \
 
 RFCMIBS	= IF-MIB.txt IF-INVERTED-STACK-MIB.txt \
 	EtherLike-MIB.txt \
-	IP-MIB.txt IP-FORWARD-MIB.txt TCP-MIB.txt UDP-MIB.txt \
+	IP-MIB.txt IP-FORWARD-MIB.txt IANA-RTPROTO-MIB.txt \
+	TCP-MIB.txt UDP-MIB.txt \
 	INET-ADDRESS-MIB.txt HCNUM-TC.txt \
 	HOST-RESOURCES-MIB.txt HOST-RESOURCES-TYPES.txt \
 	RMON-MIB.txt \
@@ -73,5 +74,6 @@ htmldir:
 	@if test ! -d html ; then \
 		mkdir html ; \
 	fi
-	rm -f html/index.html
-	perl makehtml.pl $(MIBS) > html/index.html
+	rm -f html/index.html ; \
+        perl makehtml.pl -W -M `pwd` -D html $(MIBS) > html/index.html
+
