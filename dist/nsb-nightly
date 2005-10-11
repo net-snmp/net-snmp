@@ -112,6 +112,7 @@ else
 fi
 RC=$?
 echo "Finish: `date`"
+cd $NSB_BUILD_DIR
 case $RC in
     0)  RESULT="Success"
         NSB_RESULTS_TO=$NSB_OK_RESULTS_TO
@@ -119,7 +120,7 @@ case $RC in
         ;;
     *) RESULT="Error"
        NSB_RESULTS_TO=$NSB_ERR_RESULTS_TO
-       FILES=`ls $NSB_BUILD_DIR/nsb-make-all-errs.* $NSB_BUILD_DIR/nsb-make-test-errs.*`
+       FILES=`ls nsb-make-all-errs.* nsb-make-test-errs.* 2>/dev/null`
        if [ ! -z $NSB_SCP_HOST ]; then
           nsb-upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_SUFFIX
        fi
@@ -128,20 +129,26 @@ esac
 echo "Result: $RESULT"
 
 if [ ! -z $NSB_RESULTS_TO ]; then
+   SUBJECT="$NSB_VERSION $RESULT on $NSB_HOST ($NSB_PLATFORM)"
    case `uname -s` in
-      SunOS) NSB_RESULTS_TO="-t $NSB_RESULTS_TO"
+      SunOS)         
+         echo "From: $NSB_FROM" > mail.results
+         echo "Subject: $SUBJECT" >> mail.results
+         echo "" >> mail.results
+         echo "Result: $RESULT" >> mail.results
+         if [ ! -z "$FILES" ]; then
+            cat $FILES >> mail.results
+         fi
+         mail -t $NSB_RESULTS_TO < mail.results
+         ;;
+      *)
+         echo "Result: $RESULT" >> mail.results
+         if [ ! -z "$FILES" ]; then
+            cat $FILES >> mail.results
+         fi
+         mail -s "$SUBJECT" $NSB_RESULTS_TO < mail.results
          ;;
    esac
-   SUBJECT="$NSB_VERSION $RESULT on $NSB_PLATFORM"
-   cd $NSB_BUILD_DIR
-   echo "From: $NSB_FROM" > mail.results
-   echo "Subject: $SUBJECT" >> mail.results
-   echo "" >> mail.results
-   echo "Result: $RESULT" >> mail.results
-   if [ ! -z "$FILES" ]; then
-      cat $FILES >> mail.results
-   fi
-   mail $NSB_RESULTS_TO < mail.results
 fi
 
 if [ $RC -eq 0 ]; then
