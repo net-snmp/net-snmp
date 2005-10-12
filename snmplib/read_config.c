@@ -1087,7 +1087,7 @@ read_config_files(int when)
 	    envconfpath = strdup(envconfpath);
         }
 
-        DEBUGMSGTL(("read_config", "config path used:%s\n", envconfpath));
+        DEBUGMSGTL(("read_config", "config path used: %s\n", envconfpath));
         cptr1 = cptr2 = envconfpath;
         i = 1;
         while (i && *cptr2 != 0) {
