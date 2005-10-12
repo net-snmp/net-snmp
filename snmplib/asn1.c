@@ -208,8 +208,8 @@ SOFTWARE.
 
 
 #if SIZEOF_LONG == 4
-#  define CHECK_OVERFLOW_S(x,y) (void)
-#  define CHECK_OVERFLOW_U(x,y) (void)
+#  define CHECK_OVERFLOW_S(x,y)
+#  define CHECK_OVERFLOW_U(x,y)
 #else
 #  define CHECK_OVERFLOW_S(x,y) do { int trunc = 0;                     \
         if (x > INT32_MAX) {                                            \
