@@ -59,103 +59,103 @@ OTHERCLEANTARGETS=$(TARGETS) default_store.3.h
 
 all: $(TARGETS) standardall
 
-snmpbulkget.1: snmpbulkget.1.def ../sedscript
+snmpbulkget.1: $(srcdir)/snmpbulkget.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpbulkget.1.def > snmpbulkget.1
 
-snmpbulkwalk.1: snmpbulkwalk.1.def ../sedscript
+snmpbulkwalk.1: $(srcdir)/snmpbulkwalk.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpbulkwalk.1.def > snmpbulkwalk.1
 
-snmpcmd.1: snmpcmd.1.def ../sedscript
+snmpcmd.1: $(srcdir)/snmpcmd.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpcmd.1.def > snmpcmd.1
 
-snmpconf.1: snmpconf.1.def ../sedscript
+snmpconf.1: $(srcdir)/snmpconf.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpconf.1.def > snmpconf.1
 
-snmpd.8: snmpd.8.def ../sedscript
+snmpd.8: $(srcdir)/snmpd.8.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpd.8.def > snmpd.8
 
-snmpdelta.1: snmpdelta.1.def ../sedscript
+snmpdelta.1: $(srcdir)/snmpdelta.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpdelta.1.def > snmpdelta.1
 
-snmpdf.1: snmpdf.1.def ../sedscript
+snmpdf.1: $(srcdir)/snmpdf.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpdf.1.def > snmpdf.1
 
-snmpget.1: snmpget.1.def ../sedscript
+snmpget.1: $(srcdir)/snmpget.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpget.1.def > snmpget.1
 
-snmpgetnext.1: snmpgetnext.1.def ../sedscript
+snmpgetnext.1: $(srcdir)/snmpgetnext.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpgetnext.1.def > snmpgetnext.1
 
-snmpnetstat.1: snmpnetstat.1.def ../sedscript
+snmpnetstat.1: $(srcdir)/snmpnetstat.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpnetstat.1.def > snmpnetstat.1
 
-snmpset.1: snmpset.1.def ../sedscript
+snmpset.1: $(srcdir)/snmpset.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpset.1.def > snmpset.1
 
-snmpstatus.1: snmpstatus.1.def ../sedscript
+snmpstatus.1: $(srcdir)/snmpstatus.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpstatus.1.def > snmpstatus.1
 
-snmptable.1: snmptable.1.def ../sedscript
+snmptable.1: $(srcdir)/snmptable.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmptable.1.def > snmptable.1
 
-snmptest.1: snmptest.1.def ../sedscript
+snmptest.1: $(srcdir)/snmptest.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmptest.1.def > snmptest.1
 
-snmptranslate.1: snmptranslate.1.def ../sedscript
+snmptranslate.1: $(srcdir)/snmptranslate.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmptranslate.1.def > snmptranslate.1
 
-snmptrap.1: snmptrap.1.def ../sedscript
+snmptrap.1: $(srcdir)/snmptrap.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmptrap.1.def > snmptrap.1
 
-snmpusm.1: snmpusm.1.def ../sedscript
+snmpusm.1: $(srcdir)/snmpusm.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpusm.1.def > snmpusm.1
 
-snmpvacm.1: snmpvacm.1.def ../sedscript
+snmpvacm.1: $(srcdir)/snmpvacm.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpvacm.1.def > snmpvacm.1
 
-mib2c.1: mib2c.1.def ../sedscript
+mib2c.1: $(srcdir)/mib2c.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/mib2c.1.def > mib2c.1
 
-snmpwalk.1: snmpwalk.1.def ../sedscript
+snmpwalk.1: $(srcdir)/snmpwalk.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpwalk.1.def > snmpwalk.1
 
-mib_api.3: mib_api.3.def ../sedscript
+mib_api.3: $(srcdir)/mib_api.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/mib_api.3.def > mib_api.3
 
-read_config.3: read_config.3.def ../sedscript
+read_config.3: $(srcdir)/read_config.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/read_config.3.def > read_config.3
 
-snmp_agent_api.3: snmp_agent_api.3.def ../sedscript
+snmp_agent_api.3: $(srcdir)/snmp_agent_api.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmp_agent_api.3.def > snmp_agent_api.3
 
-snmp_alarm.3: snmp_alarm.3.def ../sedscript
+snmp_alarm.3: $(srcdir)/snmp_alarm.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmp_alarm.3.def > snmp_alarm.3
 
-snmp_api.3: snmp_api.3.def ../sedscript
+snmp_api.3: $(srcdir)/snmp_api.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmp_api.3.def > snmp_api.3
 
-snmp_sess_api.3: snmp_sess_api.3.def ../sedscript
+snmp_sess_api.3: $(srcdir)/snmp_sess_api.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmp_sess_api.3.def > snmp_sess_api.3
 
-snmp_trap_api.3: snmp_trap_api.3.def ../sedscript
+snmp_trap_api.3: $(srcdir)/snmp_trap_api.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmp_trap_api.3.def > snmp_trap_api.3
 
-snmp.conf.5: snmp.conf.5.def ../sedscript
+snmp.conf.5: $(srcdir)/snmp.conf.5.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmp.conf.5.def > snmp.conf.5
 
-snmp_config.5: snmp_config.5.def ../sedscript
+snmp_config.5: $(srcdir)/snmp_config.5.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmp_config.5.def > snmp_config.5
 
-snmpd.conf.5: snmpd.conf.5.def ../sedscript
+snmpd.conf.5: $(srcdir)/snmpd.conf.5.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpd.conf.5.def > snmpd.conf.5
 
-snmptrapd.conf.5: snmptrapd.conf.5.def ../sedscript
+snmptrapd.conf.5: $(srcdir)/snmptrapd.conf.5.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmptrapd.conf.5.def > snmptrapd.conf.5
 
-variables.5: variables.5.def ../sedscript
+variables.5: $(srcdir)/variables.5.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/variables.5.def > variables.5
 
-snmptrapd.8: snmptrapd.8.def ../sedscript
+snmptrapd.8: $(srcdir)/snmptrapd.8.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmptrapd.8.def > snmptrapd.8
 
 default_store.3.h: $(srcdir)/../include/net-snmp/library/default_store.h
