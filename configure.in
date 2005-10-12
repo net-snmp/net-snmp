@@ -954,6 +954,7 @@ while test "x$tmpset" != "x$SNMPLIBPATH"; do
   eval tmpset="$tmpset"
 done
 AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$SNMPLIBPATH")
+AC_SUBST(SNMPLIBPATH)
 AC_DEFINE_UNQUOTED(SNMPDLMODPATH,"$SNMPLIBPATH/dlmod")
 
 SNMPSHAREPATH=""
@@ -963,6 +964,7 @@ while test "x$tmpset" != "x$SNMPSHAREPATH"; do
   eval tmpset="$tmpset"
 done
 AC_DEFINE_UNQUOTED(SNMPSHAREPATH,"$SNMPSHAREPATH")
+AC_SUBST(SNMPSHAREPATH)
 
 if test "x$DEFAULT_MIBDIRS" = "x"; then
   DEFAULT_MIBDIRS="\$HOME/.snmp/mibs:$SNMPSHAREPATH/mibs"
@@ -1523,13 +1525,6 @@ while test "x$new_module_list" != "x"; do
   new_module_list="$new_list_two"
   new_list_two=""
 done
-if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
-  DEFAULT_MIBS=`echo "$DEFAULT_MIBS" | sed 's/:/;/g'`
-  default_mibs=`echo "$default_mibs" | sed 's/:/;/g'`
-elif test "x$PARTIALTARGETOS" = "xcygwin"; then
-  DEFAULT_MIBS=`echo "$DEFAULT_MIBS" | sed 's/:/;/g'`
-  default_mibs=`echo "$default_mibs" | sed 's/:/;/g'`
-fi
 module_list_o=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.o /g'`
 module_list_lo=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.lo /g'`
 module_list_c=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
@@ -1548,6 +1543,16 @@ AC_SUBST(module_list)
 AC_SUBST(default_mibs_install)
 
 AC_MSG_RESULT(.)
+
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+  # mingw32 and cygwin use ';' as the environment variable separator char
+  ENV_SEPARATOR=";"
+  DEFAULT_MIBS=`echo "$DEFAULT_MIBS" | sed 's/:/;/g'`
+  default_mibs=`echo "$default_mibs" | sed 's/:/;/g'`
+else
+  ENV_SEPARATOR=":"
+fi
+AC_SUBST(ENV_SEPARATOR)
 
 AC_MSG_CHECKING([if directories need to be created])
 for i in $module_directories; do
