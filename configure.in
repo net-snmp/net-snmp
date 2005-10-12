@@ -1158,6 +1158,7 @@ while test "x$tmpset" != "x$SNMPLIBPATH"; do
   eval tmpset="$tmpset"
 done
 AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$SNMPLIBPATH")
+AC_SUBST(SNMPLIBPATH)
 AC_DEFINE_UNQUOTED(SNMPDLMODPATH,"$SNMPLIBPATH/dlmod")
 
 SNMPSHAREPATH=""
@@ -1167,6 +1168,7 @@ while test "x$tmpset" != "x$SNMPSHAREPATH"; do
   eval tmpset="$tmpset"
 done
 AC_DEFINE_UNQUOTED(SNMPSHAREPATH,"$SNMPSHAREPATH")
+AC_SUBST(SNMPSHAREPATH)
 
 if test "x$DEFAULT_MIBDIRS" = "x"; then
   DEFAULT_MIBDIRS="\$HOME/.snmp/mibs:$SNMPSHAREPATH/mibs"
@@ -2055,15 +2057,15 @@ AC_MSG_CHECKING([default mib files to read])
 if test "x$DEFAULT_MIBS" = "x"; then
   DEFAULT_MIBS="$default_mibs"
 fi
-if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
-  # mingw32 uses ';' as the environment variable separator char
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+  # mingw32 and cygwin use ';' as the environment variable separator char
+  ENV_SEPARATOR=";"
   DEFAULT_MIBS=`echo "$DEFAULT_MIBS" | sed 's/:/;/g'`
   default_mibs=`echo "$default_mibs" | sed 's/:/;/g'`
-elif test "x$PARTIALTARGETOS" = "xcygwin"; then
-  # cygwin uses ';' as the environment variable separator char
-  DEFAULT_MIBS=`echo "$DEFAULT_MIBS" | sed 's/:/;/g'`
-  default_mibs=`echo "$default_mibs" | sed 's/:/;/g'`
+else
+  ENV_SEPARATOR=":"
 fi
+AC_SUBST(ENV_SEPARATOR)
 AC_DEFINE_UNQUOTED(DEFAULT_MIBS,"$DEFAULT_MIBS")
 AC_SUBST(DEFAULT_MIBS)
 AC_MSG_RESULT($DEFAULT_MIBS)
