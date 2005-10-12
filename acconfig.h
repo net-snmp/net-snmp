@@ -411,7 +411,7 @@
 #if defined(bsdi2) || defined(bsdi3) || defined(bsdi4)
 #define OSTYPE BSDIID
 #endif
-#ifdef openbsd2
+#if defined(openbsd2) || defined(openbsd3)
 #define OSTYPE OPENBSDID
 #endif
 #ifdef WIN32
