@@ -121,6 +121,10 @@ nsb-config-dist()
    if [ ! -d $ngc_src/agent/mibgroup ]; then
       nsb-abort "agent/mibgroup directory in $ngc_src does not exist!"
    fi
+   ngc_dest=$2
+   if [ ! -d $ngc_dest ]; then
+      nsb-abort "$ngc_dest does not exist!"
+   fi
 
    #
    # some modules might be release specific, so make sure they
@@ -139,10 +143,12 @@ nsb-config-dist()
    # inside of single quotes, so use double quotes
    #
    echo $ngc_src/configure --with-sys-location=Unknown \
+      --prefix=$ngc_dest \
       --disable-developer $NSB_EXTRA_CONFIG \
       --with-sys-contact='System Administrator' \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
    $ngc_src/configure --with-sys-location=Unknown \
+      --prefix=$ngc_dest \
       --disable-developer $NSB_EXTRA_CONFIG \
       --with-sys-contact='System Administrator' \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
@@ -166,6 +172,10 @@ nsb-config-all()
    fi
    if [ ! -d $ngc_src/agent/mibgroup ]; then
       nsb-abort "agent/mibgroup directory in $ngc_src does not exist!"
+   fi
+   ngc_dest=$2
+   if [ ! -d $ngc_dest ]; then
+      nsb-abort "$ngc_dest does not exist!"
    fi
 
    #
@@ -211,11 +221,13 @@ nsb-config-all()
    # inside of single quotes, so use double quotes
    #
    echo $ngc_src/configure  --with-defaults \
+      --prefix=$ngc_dest \
       --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
        $NSB_PERL --enable-shared 
    $ngc_src/configure  --with-defaults \
+      --prefix=$ngc_dest \
       --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
@@ -408,12 +420,19 @@ nsb-build()
       fi
    fi
 
+   if [ ! -d $dest_dir ]; then
+      mkdir -p $dest_dir
+      if [ ! -d $dest_dir ]; then
+         nsb-abort "$dest_dir directory does not exist!"
+      fi
+   fi
+
    if [ $NSB_SKIP_CONFIG -ne 1 ]; then
       nsb-info "Configuring... (log is nsb-config.$NSB_DATE)"
       if [ $nsb_config_all -eq 0 ]; then
-          nsb-config-dist $src_dir
+          nsb-config-dist $src_dir $dest_dir
       else
-          nsb-config-all $src_dir
+          nsb-config-all $src_dir $dest_dir
       fi
       nsb-prompt "press enter to continue"
    fi
@@ -435,7 +454,7 @@ nsb-build()
       nsb-info "Skipping 'make install'"
    else
       nsb-prompt "No errors found, press enter to install"
-      nsb-make install prefix=$dest_dir exec_prefix=$dest_dir
+      nsb-make install
    fi
 
    return 0
