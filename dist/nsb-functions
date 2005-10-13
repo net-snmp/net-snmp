@@ -50,6 +50,21 @@ NSB_PERL=
 NSB_FLOW=
 NSB_DATE=${NSB_DATE:=`date +%y%m%d_%H%M`}
 
+#
+# System specific additions
+#
+case `uname -s` in
+
+   SunOS)
+      NSB_TAIL_ARGS="-$NSB_ERR_CTX_LINES"
+      ;;
+
+   *)
+      NSB_TAIL_ARGS="-n $NSB_ERR_CTX_LINES"
+      ;;
+esac
+
+
 #----------------------------------------------------------------------
 #
 # Utility functions
@@ -106,6 +121,10 @@ nsb-config-dist()
    if [ ! -d $ngc_src/agent/mibgroup ]; then
       nsb-abort "agent/mibgroup directory in $ngc_src does not exist!"
    fi
+   ngc_dest=$2
+   if [ ! -d $ngc_dest ]; then
+      nsb-abort "$ngc_dest does not exist!"
+   fi
 
    #
    # some modules might be release specific, so make sure they
@@ -124,10 +143,12 @@ nsb-config-dist()
    # inside of single quotes, so use double quotes
    #
    echo $ngc_src/configure --with-sys-location=Unknown \
+      --prefix=$ngc_dest \
       --disable-developer $NSB_EXTRA_CONFIG \
       --with-sys-contact='System Administrator' \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
    $ngc_src/configure --with-sys-location=Unknown \
+      --prefix=$ngc_dest \
       --disable-developer $NSB_EXTRA_CONFIG \
       --with-sys-contact='System Administrator' \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
@@ -152,6 +173,10 @@ nsb-config-all()
    if [ ! -d $ngc_src/agent/mibgroup ]; then
       nsb-abort "agent/mibgroup directory in $ngc_src does not exist!"
    fi
+   ngc_dest=$2
+   if [ ! -d $ngc_dest ]; then
+      nsb-abort "$ngc_dest does not exist!"
+   fi
 
    #
    # System specific additions
@@ -174,7 +199,7 @@ nsb-config-all()
    # use libwrap if we can find the header
    #
    if [ -f /usr/include/tcpd.h ]; then
-      NSB_EXTRA_CONFIG="--with-libwrap"
+      NSB_EXTRA_CONFIG="$NSB_EXTRA_CONFIG --with-libwrap"
    fi
 
    #
@@ -196,11 +221,13 @@ nsb-config-all()
    # inside of single quotes, so use double quotes
    #
    echo $ngc_src/configure  --with-defaults \
+      --prefix=$ngc_dest \
       --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
        $NSB_PERL --enable-shared 
    $ngc_src/configure  --with-defaults \
+      --prefix=$ngc_dest \
       --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
@@ -249,12 +276,12 @@ nsb-zip()
 
 nsb-upload()
 {
-   nsb-flow upload
    build_dir=$1
    target=$2
+   nsb-flow upload to $target: config.log configure-summary nsb-make-all.$NSB_DATE nsb-make-test.$NSB_DATE
    dir=$PWD
    cd $build_dir
-   /usr/bin/scp config.log configure-summary nsb-make-all.*$NSB_DATE \
+   /usr/bin/scp config.log configure-summary nsb-make-all.$NSB_DATE nsb-make-test.$NSB_DATE\
                  $target
    cd $dir
 }
@@ -299,19 +326,20 @@ nsb-make()
    if [ "x$target" = "xall" ]; then
       $NSB_MAKE NOAUTODEPS=y touchit 2>&1 | tee $nsb_make_OUTPUT
    fi
-   $NSB_MAKE NOAUTODEPS=y start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
+   $NSB_MAKE $NSB_MAKE_EXTRA NOAUTODEPS=y start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
    # checking $? would only get us the rc from tee, which is useless
 
    nsb-info "Checking for errors..."
    egrep "[Ee]rror|FAIL|[Ww]arn|No |exists|\*\*\*" $nsb_make_OUTPUT \
          > nsb-make-$target-allerrs.$NSB_DATE
    # allow for a few exceptions
-   egrep -v "[Ww]arn|error(mib|\.3)" nsb-make-$target-allerrs.$NSB_DATE \
+   egrep -v "[Ww]arn|error(mib|\.3)|In function" nsb-make-$target-allerrs.$NSB_DATE \
          > nsb-make-$target-errs.$NSB_DATE
    if [ -s nsb-make-$target-errs.$NSB_DATE ]; then
       nsb-prompt "press enter to view errors"
-      grep ':' $nsb_make_OUTPUT > nsb-make-$target-errs2.$NSB_DATE
-      tail -n $NSB_ERR_CTX_LINES nsb-make-$target-errs2.$NSB_DATE >&2
+#      grep ':' $nsb_make_OUTPUT > nsb-make-$target-errs2.$NSB_DATE
+#      tail -n $NSB_ERR_CTX_LINES nsb-make-$target-errs2.$NSB_DATE >&2
+      tail $NSB_TAIL_ARGS nsb-make-$target-errs.$NSB_DATE >&2
       nsb-abort "Error(s) during make $target"
    fi
 
@@ -392,12 +420,19 @@ nsb-build()
       fi
    fi
 
+   if [ ! -d $dest_dir ]; then
+      mkdir -p $dest_dir
+      if [ ! -d $dest_dir ]; then
+         nsb-abort "$dest_dir directory does not exist!"
+      fi
+   fi
+
    if [ $NSB_SKIP_CONFIG -ne 1 ]; then
       nsb-info "Configuring... (log is nsb-config.$NSB_DATE)"
       if [ $nsb_config_all -eq 0 ]; then
-          nsb-config-dist $src_dir
+          nsb-config-dist $src_dir $dest_dir
       else
-          nsb-config-all $src_dir
+          nsb-config-all $src_dir $dest_dir
       fi
       nsb-prompt "press enter to continue"
    fi
@@ -419,7 +454,7 @@ nsb-build()
       nsb-info "Skipping 'make install'"
    else
       nsb-prompt "No errors found, press enter to install"
-      nsb-make install prefix=$dest_dir exec_prefix=$dest_dir
+      nsb-make install
    fi
 
    return 0
