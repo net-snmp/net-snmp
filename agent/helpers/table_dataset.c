@@ -794,19 +794,52 @@ netsnmp_register_auto_data_table(netsnmp_table_data_set *table_set,
 }
 
 #ifndef DISABLE_MIB_LOADING
+static void
+_table_set_add_indexes(netsnmp_table_data_set *table_set, struct tree *tp)
+{
+    oid             name[MAX_OID_LEN];
+    size_t          name_length = MAX_OID_LEN;
+    struct index_list *index;
+    struct tree     *indexnode;
+    u_char          type;
+    
+    /*
+     * loop through indexes and add types 
+     */
+    for (index = tp->indexes; index; index = index->next) {
+        if (!snmp_parse_oid(index->ilabel, name, &name_length) ||
+            (NULL ==
+             (indexnode = get_tree(name, name_length, get_tree_head())))) {
+            config_pwarn("can't instatiate table since "
+                         "I don't know anything about one index");
+            snmp_log(LOG_WARNING, "  index %s not found in tree\n",
+                     index->ilabel);
+            return;             /* xxx mem leak */
+        }
+            
+        type = mib_to_asn_type(indexnode->type);
+        if (type == (u_char) - 1) {
+            config_pwarn("unknown index type");
+            return;             /* xxx mem leak */
+        }
+        if (index->isimplied)   /* if implied, mark it as such */
+            type |= ASN_PRIVATE;
+            
+        DEBUGMSGTL(("table_set_add_table",
+                    "adding default index of type %d\n", type));
+        netsnmp_table_dataset_add_index(table_set, type);
+    }
+}
 /** @internal */
 void
 netsnmp_config_parse_table_set(const char *token, char *line)
 {
-    oid             name[MAX_OID_LEN], table_name[MAX_OID_LEN];
-    size_t          name_length = MAX_OID_LEN, table_name_length =
-        MAX_OID_LEN;
-    struct tree    *tp, *indexnode;
+    oid             table_name[MAX_OID_LEN];
+    size_t          table_name_length = MAX_OID_LEN;
+    struct tree    *tp;
     netsnmp_table_data_set *table_set;
     data_set_tables *tables;
-    struct index_list *index;
     unsigned int    mincol = 0xffffff, maxcol = 0;
-    u_char          type;
     char           *pos;
 
     /*
@@ -849,95 +882,46 @@ netsnmp_config_parse_table_set(const char *token, char *line)
         return;
     }
 
+    table_set = netsnmp_create_table_data_set(line);
+
     /*
      * check for augments indexes
      */
     if (NULL != tp->augments) {
-        if (!snmp_parse_oid(tp->augments, table_name, &table_name_length)) {
+        oid             name[MAX_OID_LEN];
+        size_t          name_length = MAX_OID_LEN;
+        struct tree    *tp2;
+    
+        if (!snmp_parse_oid(tp->augments, name, &name_length)) {
             config_pwarn("I can't parse the augment tabel name");
             snmp_log(LOG_WARNING, "  can't parse %s\n", tp->augments);
             return;
         }
-        if(NULL == (tp = get_tree(table_name, table_name_length,
-                                  get_tree_head()))) {
+        if(NULL == (tp2 = get_tree(name, name_length, get_tree_head()))) {
             config_pwarn("can't instatiate table since "
                          "I can't find mib information about augment table");
             snmp_log(LOG_WARNING, "  table %s not found in tree\n",
                      tp->augments);
             return;
         }
-
-        table_set = netsnmp_create_table_data_set(line);
-    
-        /*
-         * loop through indexes and add types 
-         */
-        for (index = tp->indexes; index; index = index->next) {
-            if (!snmp_parse_oid(index->ilabel, name, &name_length) ||
-                (NULL ==
-                 (indexnode = get_tree(name, name_length, get_tree_head())))) {
-                config_pwarn("can't instatiate table since "
-                             "I don't know anything about one index");
-                snmp_log(LOG_WARNING, "  index %s not found in tree\n",
-                         index->ilabel);
-                return;             /* xxx mem leak */
-            }
-            
-            type = mib_to_asn_type(indexnode->type);
-            if (type == (u_char) - 1) {
-                config_pwarn("unknown index type");
-                return;             /* xxx mem leak */
-            }
-            if (index->isimplied)   /* if implied, mark it as such */
-                type |= ASN_PRIVATE;
-            
-            DEBUGMSGTL(("table_set_add_row",
-                        "adding default index of type %d\n", type));
-            netsnmp_table_dataset_add_index(table_set, type);
-        }
-    }
-    else
-        table_set = netsnmp_create_table_data_set(line);
-    
-    /*
-     * loop through indexes and add types 
-     */
-    for (index = tp->indexes; index; index = index->next) {
-        if (!snmp_parse_oid(index->ilabel, name, &name_length) ||
-            (NULL ==
-             (indexnode = get_tree(name, name_length, get_tree_head())))) {
-            config_pwarn("can't instatiate table since "
-                         "I don't know anything about one index");
-            snmp_log(LOG_WARNING, "  index %s not found in tree\n",
-                     index->ilabel);
-            return;             /* xxx mem leak */
-        }
-
-        type = mib_to_asn_type(indexnode->type);
-        if (type == (u_char) - 1) {
-            config_pwarn("unknown index type");
-            return;             /* xxx mem leak */
-        }
-        if (index->isimplied)   /* if implied, mark it as such */
-            type |= ASN_PRIVATE;
-
-        DEBUGMSGTL(("table_set_add_row",
-                    "adding default index of type %d\n", type));
-        netsnmp_table_dataset_add_index(table_set, type);
+        _table_set_add_indexes(table_set, tp2);
     }
 
+    _table_set_add_indexes(table_set, tp);
+    
     /*
      * loop through children and add each column info 
      */
     for (tp = tp->child_list; tp; tp = tp->next_peer) {
         int             canwrite = 0;
+        u_char          type;
         type = mib_to_asn_type(tp->type);
         if (type == (u_char) - 1) {
             config_pwarn("unknown column type");
             return;             /* xxx mem leak */
         }
 
-        DEBUGMSGTL(("table_set_add_row",
+        DEBUGMSGTL(("table_set_add_table",
                     "adding column %s(%d) of type %d (access %d)\n",
                     tp->label, tp->subid, type, tp->access));
 
@@ -948,7 +932,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
         case MIB_ACCESS_WRITEONLY:
             canwrite = 1;
         case MIB_ACCESS_READONLY:
-            DEBUGMSGTL(("table_set_add_row",
+            DEBUGMSGTL(("table_set_add_table",
                         "adding column %d of type %d\n", tp->subid, type));
             netsnmp_table_set_add_default_row(table_set, tp->subid, type,
                                               canwrite, NULL, 0);
@@ -1043,6 +1027,10 @@ netsnmp_config_parse_add_row(const char *token, char *line)
     rc = netsnmp_table_data_add_row(tables->table_set->table, row);
     if (SNMPERR_SUCCESS != rc) {
         config_pwarn("error adding table row");
+    }
+    if (NULL != line) {
+        config_pwarn("extra data value. Too many columns specified.");
+        snmp_log(LOG_WARNING,"  extra data '%s'\n", line);
     }
 }
 
