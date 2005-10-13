@@ -703,6 +703,9 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
                     
                     request->requestvb->type = ASN_PRIV_RETRY;
                 }
+                else {
+                    request->requestvb->type = ASN_NULL;
+                }
             }
         }
     }
