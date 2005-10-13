@@ -622,7 +622,7 @@ AC_ARG_WITH(out_mib_modules,
     notification           mibs supporting specification of trap destinations.
     target                 Support for the SNMP WGs TARGET-MIB.
     utilities              general agent configuration utilities.
-    disman/event-mib       support for the DISMAN-EVENT-MIB
+    disman/event           support for the DISMAN-EVENT-MIB
                              (supports self monitoring and notification 
                               delivery when error conditions are found)
     host                   host resources mib support.
@@ -636,6 +636,7 @@ AC_ARG_WITH(out_mib_modules,
     ucd-snmp/diskio        Table of io-devices and how much data they have
                            read/written.  (only tested on Solaris, Linux)
     tunnel                 Linux TUNNEL-MIB support (ifTable extension)
+    disman/event-mib       previous implementation of the DISMAN-EVENT-MIB
 
   AgentX support:
     agentx/subagent        allows the agent to run as either a snmp agent
@@ -1680,7 +1681,7 @@ if test "x$mini_agent" = "xyes"; then
    default_mibs=SNMPv2-MIB:RFC1213-MIB
    default_mibs_install=" "
 else
-   new_module_list="mibII ucd_snmp snmpv3mibs notification notification-log-mib target agent_mibs agentx disman/event-mib utilities $new_with_mib_modules"
+   new_module_list="mibII ucd_snmp snmpv3mibs notification notification-log-mib target agent_mibs agentx disman/event utilities $new_with_mib_modules"
    default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:HOST-RESOURCES-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB
 
    case $target_os in
