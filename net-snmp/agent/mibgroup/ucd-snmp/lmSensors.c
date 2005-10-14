@@ -383,11 +383,11 @@ process_individual_fan(picl_nodehdl_t childh,
                  sensor_array[typ].n++;
                  } /*end if ec2*/
              else
-                 DEBUGMSG(("ucd-snmp/lmSensors", 
+                 DEBUGMSGTL(("ucd-snmp/lmSensors", 
                      "sensor value read error code->%d\n",ec2));
             } /* end if */
         else
-            DEBUGMSG(("ucd-snmp/lmSensors", 
+            DEBUGMSGTL(("ucd-snmp/lmSensors", 
                 "sensor lookup failed  error code->%d\n",error_code));
         }
 } /*process individual fan*/
@@ -421,11 +421,11 @@ process_temperature_sensor(picl_nodehdl_t childh,
                  sensor_array[typ].n++;
                  } /*end if ec2*/
              else
-                 DEBUGMSG(("ucd-snmp/lmSensors", 
+                 DEBUGMSGTL(("ucd-snmp/lmSensors", 
                                "sensor value read error code->%d\n",ec2));
             } /* end if */
         else
-            DEBUGMSG(("ucd-snmp/lmSensors", 
+            DEBUGMSGTL(("ucd-snmp/lmSensors", 
                 "sensor lookup failed  error code->%d\n",error_code));
         }
 }  /* process temperature sensor */
@@ -459,11 +459,11 @@ process_digital_sensor(picl_nodehdl_t childh,
                  sensor_array[typ].n++;
                  }
              else
-                 DEBUGMSG(("ucd-snmp/lmSensors", 
+                 DEBUGMSGTL(("ucd-snmp/lmSensors", 
                    "sensor value read error code->%d\n",ec2));
             } /* end if */
         else
-            DEBUGMSG(("ucd-snmp/lmSensors", 
+            DEBUGMSGTL(("ucd-snmp/lmSensors", 
               "sensor lookup failed  error code->%d\n",error_code));
         }
 }  /* process digital sensor */
@@ -513,11 +513,11 @@ process_switch(picl_nodehdl_t childh,
                  sensor_array[typ].n++;
                  } /*end if ec2*/
              else
-                 DEBUGMSG(("ucd-snmp/lmSensors",
+                 DEBUGMSGTL(("ucd-snmp/lmSensors",
                      "sensor value read error code->%d\n",ec2));
             } /* end if */
         else
-            DEBUGMSG(("ucd-snmp/lmSensors",
+            DEBUGMSGTL(("ucd-snmp/lmSensors",
                 "sensor lookup failed  error code->%d\n",error_code));
         }
 } /*process switch*/
@@ -566,11 +566,11 @@ process_led(picl_nodehdl_t childh,
                  sensor_array[typ].n++;
                  }
              else
-                 DEBUGMSG(("ucd-snmp/lmSensors",
+                 DEBUGMSGTL(("ucd-snmp/lmSensors",
                      "sensor value read error code->%d\n",ec2));
             } 
         else
-            DEBUGMSG(("ucd-snmp/lmSensors",
+            DEBUGMSGTL(("ucd-snmp/lmSensors",
                 "sensor lookup failed  error code->%d\n",error_code));
        }
 } 
@@ -599,6 +599,7 @@ process_i2c(picl_nodehdl_t childh,
         error_code = (picl_get_propinfo_by_name(childh,
                          "State",&sensor_info,&sensorh));
         if (error_code == PICL_SUCCESS) {
+             DEBUGMSGTL(("ucd-snmp/lmSensors","Found i2c record size %d\n",sensor_info.size));
              ec2 = picl_get_propval(sensorh,&state,sensor_info.size);
              if (ec2 == PICL_SUCCESS){
                  for (st_cnt=0;st_cnt < max_i2c_posns;st_cnt++){
@@ -619,90 +620,104 @@ process_i2c(picl_nodehdl_t childh,
                  sensor_array[typ].n++;
                  } 
              else
-                 DEBUGMSG(("ucd-snmp/lmSensors",
+                 DEBUGMSGTL(("ucd-snmp/lmSensors",
                      "sensor value read error code->%d\n",ec2));
             }
         else
-            DEBUGMSG(("ucd-snmp/lmSensors",
+            DEBUGMSGTL(("ucd-snmp/lmSensors",
                 "sensor lookup failed  error code->%d\n",error_code));
         }
 }
 
 static int
-process_sensors(picl_nodehdl_t nodeh)
+process_sensors(int level, picl_nodehdl_t nodeh)
 {
     picl_nodehdl_t  childh;
-    picl_nodehdl_t  nexth;
 
-    char            propname[PICL_PROPNAMELEN_MAX];
-    char            propclass[PICL_CLASSNAMELEN_MAX];
-    picl_errno_t    error_code;
+    char		propname[PICL_PROPNAMELEN_MAX];
+    char		propclass[PICL_CLASSNAMELEN_MAX];
+    picl_errno_t	error_code;
+    picl_prophdl_t	prop_handle;
+    picl_propinfo_t	prop_info;
 
-    /* look up first child node */
-    error_code = picl_get_propval_by_name(nodeh, PICL_PROP_CHILD, &childh,
-                                        sizeof (picl_nodehdl_t));
+
+    level++;
+/*
+    DEBUGMSGTL(("ucd-snmp/lmSensors","Processing sensors level %d\n",level));
+*/
+
+    error_code = picl_get_propval_by_name(nodeh, PICL_PROP_CLASSNAME, propclass,
+                                        (PICL_PROPNAMELEN_MAX-1));
     if (error_code != PICL_SUCCESS) {
+        DEBUGMSG(("ucd-snmp/lmSensors","Couldn't get propclass\n"));
                 return (error_code);
     }
 
-    /* step through child nodes, get the name first */
-    while (error_code == PICL_SUCCESS) {
-        error_code = picl_get_propval_by_name(childh, PICL_PROP_NAME,
-                                               propname, (PICL_PROPNAMELEN_MAX - 1));
-        if (error_code != PICL_SUCCESS) {  /*we found a node with no name.  Impossible.! */
-            return (error_code);
-        }
+    error_code = picl_get_prop_by_name(nodeh, PICL_PROP_NAME, &prop_handle);
 
+    if (error_code != PICL_SUCCESS) {
+        DEBUGMSGTL(("ucd-snmp/lmSensors","Couldn't get prop_handle\n"));
+        return (error_code);
 
-        if (strcmp(propname,PICL_NODE_PLATFORM)==0){ /*end of the chain*/
-                return (255);
-        }
+    }
 
-/*        DEBUGMSGTL(("ucd-snmp/lmSensors","dealing with propname %s \n",propname)); */
+    error_code = picl_get_propinfo(prop_handle, &prop_info);
 
-        error_code = picl_get_propval_by_name(childh, PICL_PROP_CLASSNAME,
-                                                propclass, (PICL_CLASSNAMELEN_MAX - 1));
-        if (error_code != PICL_SUCCESS) {  /*we found a node with no class.  Impossible.! */
-            return (error_code);
-        }
+    if (error_code != PICL_SUCCESS) {
+        DEBUGMSGTL(("ucd-snmp/lmSensors","Couldn't get prop information\n"));
+        return (error_code);
 
-/*        DEBUGMSGTL(("ucd-snmp/lmSensors","found %s of class %s\n",propname,propclass)); */
+    }
 
-        if (strstr(propclass,"fan-tachometer"))
-            process_individual_fan(childh,propname);
-        if (strstr(propclass,"temperature-sensor"))
-            process_temperature_sensor(childh,propname);
-        if (strstr(propclass,"digital-sensor"))
-            process_digital_sensor(childh,propname);
-        if (strstr(propclass,"switch"))
-            process_switch(childh,propname);
-        if (strstr(propclass,"led"))
-            process_led(childh,propname);
-        if (strstr(propclass,"i2c"))
-            process_i2c(childh,propname);
+    error_code=picl_get_propval(prop_handle, propname, (PICL_PROPNAMELEN_MAX-1));
+
+    DEBUGMSGTL(("ucd-snmp/lmSensors","found propname %s of class %s\n",propname, propclass));
+
+    if (error_code != PICL_SUCCESS) {
+        DEBUGMSGTL(("ucd-snmp/lmSensors","Couldn't get prop handle by name\n"));
+        return (error_code);
+
+    }
+
+    if (strstr(propclass,"flashprom"))
+       DEBUGMSGTL(("ucd-snmp/lmSensors","found a flashprom\n"));
+    if (strstr(propclass,"fan-tachometer"))
+        process_individual_fan(nodeh,propname);
+    if (strstr(propclass,"temperature-sensor"))
+        process_temperature_sensor(nodeh,propname);
+    if (strstr(propclass,"digital-sensor"))
+        process_digital_sensor(nodeh,propname);
+    if (strstr(propclass,"switch"))
+        process_switch(nodeh,propname);
+    if (strstr(propclass,"led"))
+        process_led(nodeh,propname);
+    if (strstr(propclass,"i2c"))
+        process_i2c(nodeh,propname);
 /*
         if (strstr(propclass,"gpio"))
-            process_gpio(childh,propname); 
+            process_gpio(prop_handle,propname); 
 */
-
-
-           /* look for children of children (note, this is recursive) */
- 
-        if (process_sensors(childh) == PICL_SUCCESS) {
-            return (PICL_SUCCESS);
-        }
-
-          /* get next child node at this level*/
-        error_code = picl_get_propval_by_name(childh, PICL_PROP_PEER,
-                                        &nexth, sizeof (picl_nodehdl_t));
-        if (error_code != PICL_SUCCESS) {/* no more children - buh bye*/
+    for (error_code = picl_get_propval_by_name(nodeh, PICL_PROP_CHILD,
+          &childh, sizeof (picl_nodehdl_t)); 
+          error_code != PICL_PROPNOTFOUND;
+          error_code = picl_get_propval_by_name(childh, PICL_PROP_PEER,
+           &childh, sizeof (picl_nodehdl_t))) {
+       if (error_code != PICL_SUCCESS) {
             return (error_code);
-        }
+          }
 
-        childh = nexth;
+       /* call itself recursively */
 
-    } /* while */
-    return (error_code);
+       error_code = process_sensors(level,childh);
+
+       if (error_code != PICL_SUCCESS)
+           return (error_code);
+
+       } /* end for */
+
+    return (PICL_SUCCESS);
+
+
 } /* process sensors */
 
 #endif
@@ -728,10 +743,11 @@ _sensor_load(clock_t t)
 #ifdef HAVE_PICL_H
     int er_code;
     picl_errno_t     error_code;
+    int level=0;
     picl_nodehdl_t  rooth;
 #endif 
 
-/* DEBUGMSG(("ucd-snmp/lmSensors", "Reading the sensors\n")); */
+ DEBUGMSGTL(("ucd-snmp/lmSensors", "Reading the sensors\n")); 
 
 /* initialize the array */
     for (i = 0; i < N_TYPES; i++){
@@ -742,53 +758,58 @@ _sensor_load(clock_t t)
              }
         } /*end for i*/
 
-/* try picld (if supported), if that doesn't work, try kstat */
+/* try picld (if supported), then try kstat */
 #ifdef HAVE_PICL_H 
+
+DEBUGMSGTL(("ucd-snmp/lmSensors","trying picld first\n"));
 
 er_code = picl_initialize();
 
 if (er_code == PICL_SUCCESS) {
 
+    DEBUGMSGTL(("ucd-snmp/lmSensors","Got into picld\n"));
+
     error_code = picl_get_root(&rooth);
 
     if (error_code != PICL_SUCCESS) {
-        DEBUGMSG(("ucd-snmp/lmSensors", "picld couldn't get root error code->%d\n",error_code));
+        DEBUGMSGTL(("ucd-snmp/lmSensors", "picld couldn't get root error code->%d\n",error_code));
         }
     else{
         DEBUGMSGTL(("ucd-snmp/lmSensors", "found root\n"));
-        error_code = process_sensors(rooth);
+        error_code = process_sensors(level, rooth);
        } /* end else */
 
     picl_shutdown();
 
 }  /* end if err_code for picl_initialize */
+else {
+    DEBUGMSGTL(("ucd-snmp/lmSensors","No picld available\n"));
 
-else{  /* try kstat instead */
-
-    DEBUGMSG(("ucd-snmp/lmSensors", "picld couldn't initialize picld because error code->%d\n",er_code));
+} /*end else picl_initialize */
 
 #endif  /* end of picld section */
 /* initialize kstat */
 
 kc = kstat_open();
 if (kc == 0) {
-    DEBUGMSG(("ucd-snmp/lmSensors", "couldn't open kstat"));
+    DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't open kstat\n"));
     } /* endif kc */
 else{
+    DEBUGMSGTL(("ucd-snmp/lmSensors", "Opened kstat - looking for sensors\n"));
     kp = kstat_lookup(kc, ENVCTRL_MODULE_NAME, 0, ENVCTRL_KSTAT_FANSTAT);
     if (kp == 0) {
         DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup fan kstat\n"));
         } /* endif lookup fans */
     else{
         if (kstat_read(kc, kp, 0) == -1) {
-            DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't read fan kstat"));
+            DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't read fan kstat\n"));
             } /* endif kstatread fan */
         else{
             typ = 1;
             fan_info = (envctrl_fan_t *) kp->ks_data;
             sensor_array[typ].n = kp->ks_ndata;
             for (i=0; i < kp->ks_ndata; i++){
-                DEBUGMSG(("ucd-snmp/lmSensors", "found instance %d fan type %d speed %d OK %d bustedfan %d\n",
+                DEBUGMSGTL(("ucd-snmp/lmSensors", "found instance %d fan type %d speed %d OK %d bustedfan %d\n",
                     fan_info->instance, fan_info->type,fan_info->fanspeed,fan_info->fans_ok,fan_info->fanflt_num));
                 sensor_array[typ].sensor[i].value = fan_info->fanspeed;
                 snprintf(sensor_array[typ].sensor[i].name,(MAX_NAME - 1),
@@ -813,7 +834,7 @@ else{
             power_info = (envctrl_ps_t *) kp->ks_data;
             sensor_array[typ].n = kp->ks_ndata;
             for (i=0; i < kp->ks_ndata; i++){
-                DEBUGMSG(("ucd-snmp/lmSensors", "found instance %d psupply temp %d %dW OK %d share %d limit %d\n",
+                DEBUGMSGTL(("ucd-snmp/lmSensors", "found instance %d psupply temp %d %dW OK %d share %d limit %d\n",
                     power_info->instance, power_info->ps_tempr,power_info->ps_rating,
                     power_info->ps_ok,power_info->curr_share_ok,power_info->limit_ok));
                 sensor_array[typ].sensor[i].value = power_info->ps_tempr;
@@ -840,7 +861,7 @@ else{
             for (i=0; i < kp->ks_ndata; i++){
                switch (enc_info->type){
                case ENVCTRL_ENCL_FSP:
-                   DEBUGMSG(("ucd-snmp/lmSensors", "front panel value %d\n",enc_info->value));
+                   DEBUGMSGTL(("ucd-snmp/lmSensors", "front panel value %d\n",enc_info->value));
                    typ = 3; /* misc */
                    sensor_array[typ].sensor[other].value = enc_info->value;
                    strncpy(sensor_array[typ].sensor[other].name,"FSP",MAX_NAME-1);
@@ -848,7 +869,7 @@ else{
                    other++;
                    break;
                case ENVCTRL_ENCL_AMBTEMPR:
-                   DEBUGMSG(("ucd-snmp/lmSensors", "ambient temp %d\n",enc_info->value));
+                   DEBUGMSGTL(("ucd-snmp/lmSensors", "ambient temp %d\n",enc_info->value));
                    typ = 0; /* temperature sensor */
                    sensor_array[typ].sensor[temp].value = enc_info->value;
                    strncpy(sensor_array[typ].sensor[temp].name,"Ambient",MAX_NAME-1);
@@ -856,7 +877,7 @@ else{
                    temp++;
                    break;
                case ENVCTRL_ENCL_BACKPLANE4:
-                   DEBUGMSG(("ucd-snmp/lmSensors", "There is a backplane4\n"));
+                   DEBUGMSGTL(("ucd-snmp/lmSensors", "There is a backplane4\n"));
                    typ = 3; /* misc */
                    sensor_array[typ].sensor[other].value = enc_info->value;
                    strncpy(sensor_array[typ].sensor[other].name,"Backplane4",MAX_NAME-1);
@@ -864,7 +885,7 @@ else{
                    other++;
                    break;
                case ENVCTRL_ENCL_BACKPLANE8:
-                   DEBUGMSG(("ucd-snmp/lmSensors", "There is a backplane8\n"));
+                   DEBUGMSGTL(("ucd-snmp/lmSensors", "There is a backplane8\n"));
                    typ = 3; /* misc */
                    sensor_array[typ].sensor[other].value = enc_info->value;
                    strncpy(sensor_array[typ].sensor[other].name,"Backplane8",MAX_NAME-1);
@@ -872,7 +893,7 @@ else{
                    other++;
                    break;
                case ENVCTRL_ENCL_CPUTEMPR:
-                   DEBUGMSG(("ucd-snmp/lmSensors", "CPU%d temperature %d\n",enc_info->instance,enc_info->value));
+                   DEBUGMSGTL(("ucd-snmp/lmSensors", "CPU%d temperature %d\n",enc_info->instance,enc_info->value));
                    typ = 0; /* temperature sensor */
                    sensor_array[typ].sensor[temp].value = enc_info->value;
                    snprintf(sensor_array[typ].sensor[temp].name,MAX_NAME,"CPU%d",enc_info->instance);
@@ -880,7 +901,7 @@ else{
                    temp++;
                    break;
                default:
-                   DEBUGMSG(("ucd-snmp/lmSensors", "unknown element instance &d type &d value %d\n",
+                   DEBUGMSGTL(("ucd-snmp/lmSensors", "unknown element instance &d type &d value %d\n",
                        enc_info->instance, enc_info->type, enc_info->value));
                    break;
                } /* end switch */
@@ -893,9 +914,6 @@ else{
 
     kstat_close(kc);
 
-#ifdef HAVE_PICL_H
-    } /* end else kc not needed if no picld*/
-#endif
 
 } /* end else kstat */
 #else /* end solaris2 */
@@ -948,7 +966,7 @@ else{
                 }
                 strncpy(array->sensor[array->n].name, label, MAX_NAME);
                 array->sensor[array->n].value = (int) (val * mul);
-                DEBUGMSGTL(("sensors","sensor %d, value %d\n",
+                DEBUGMSGTL(("ucd-snmp/lmSensors","sensor %d, value %d\n",
                             array->sensor[array->n].name,
                             array->sensor[array->n].value));
                 array->n++;
@@ -962,4 +980,3 @@ else{
 #endif /*else solaris2 */
     timestamp = t;
 }
-
