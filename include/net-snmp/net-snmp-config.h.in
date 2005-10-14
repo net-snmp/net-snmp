@@ -818,6 +818,9 @@
 /* Define to 1 if you have the <sys/tcpipstats.h> header file. */
 #undef HAVE_SYS_TCPIPSTATS_H
 
+/* Define to 1 if you have the <sys/timeout.h> header file. */
+#undef HAVE_SYS_TIMEOUT_H
+
 /* Define to 1 if you have the <sys/times.h> header file. */
 #undef HAVE_SYS_TIMES_H
 
@@ -1208,6 +1211,8 @@
 #define OPENBSDID 12
 #define WIN32ID 13
 #define HPUX11ID 14
+#define AIXID 15
+#define MACOSXID 16
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -1231,7 +1236,7 @@
 #ifdef ultrix4
 #define OSTYPE ULTRIXID
 #endif
-#ifdef netbsd1
+#if defined(netbsd1) || defined(netbsd2)
 #define OSTYPE NETBSD1ID
 #endif
 #if defined(__FreeBSD__)
@@ -1246,11 +1251,17 @@
 #if defined(bsdi2) || defined(bsdi3) || defined(bsdi4)
 #define OSTYPE BSDIID
 #endif
-#ifdef openbsd2
+#if defined(openbsd2) || defined(openbsd3)
 #define OSTYPE OPENBSDID
 #endif
 #ifdef WIN32
 #define OSTYPE WIN32ID
+#endif
+#if defined(aix3) || defined(aix4) || defined(aix5)
+#define OSTYPE AIXID
+#endif
+#ifdef darwin8
+#define OSTYPE MACOSXID
 #endif
 /* unknown */
 #ifndef OSTYPE
