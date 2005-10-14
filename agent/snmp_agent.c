@@ -788,7 +788,10 @@ netsnmp_agent_check_packet(netsnmp_session * session,
 {
     char           *addr_string = NULL;
 #ifdef  USE_LIBWRAP
-    char *tcpudpaddr;
+    char *tcpudpaddr, *name;
+
+    name = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                 NETSNMP_DS_LIB_APPTYPE);
 #endif
 
     /*
@@ -818,7 +821,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
         if (xp)
             *xp = '\0';
  
-        if (hosts_ctl("snmpd", STRING_UNKNOWN, sbuf, STRING_UNKNOWN)) {
+        if (hosts_ctl(name, STRING_UNKNOWN, sbuf, STRING_UNKNOWN)) {
             snmp_log(allow_severity, "Connection from %s\n", addr_string);
         } else {
             snmp_log(deny_severity, "Connection from %s REFUSED\n",
@@ -833,7 +836,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
          */
         if (0 == strncmp(addr_string, "callback", 8))
             ;
-        else if (hosts_ctl("snmpd", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
+        else if (hosts_ctl(name, STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
             snmp_log(allow_severity, "Connection from <UNKNOWN> (%s)\n", addr_string);
             addr_string = strdup("<UNKNOWN>");
         } else {

@@ -721,7 +721,9 @@ char          **argvrestartp, *argvrestartname, *argvrestart;
 RETSIGTYPE
 restart_doit(int a)
 {
-    snmp_shutdown("snmpd");
+    char * name = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                        NETSNMP_DS_LIB_APPTYPE);
+    snmp_shutdown(name);
 
     /*
      * do the exec 
