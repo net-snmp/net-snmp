@@ -54,10 +54,12 @@ _init_default_iquery_session( int majorID, int minorID,
 }
 
 void init_iquery(void){
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmpd", "agentSecName",
+    char *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                       NETSNMP_DS_LIB_APPTYPE);
+    netsnmp_ds_register_config(ASN_OCTET_STR, type, "agentSecName",
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_INTERNAL_SECNAME);
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmpd", "iquerySecName",
+    netsnmp_ds_register_config(ASN_OCTET_STR, type, "iquerySecName",
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_INTERNAL_SECNAME);
 
