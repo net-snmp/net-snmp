@@ -1954,7 +1954,8 @@ _ifXTable_container_row_restore(const char *token, char *buf)
                 "parsing line '%s'\n", buf));
 
     /*
-     * pull out index and create default row
+     * pull out index and find row. (Since we populate the cache
+     * during startup, all rows should exist.)
      */
     index.oids = tmp_oid;
     index.len = OID_LENGTH(tmp_oid);
@@ -1966,7 +1967,7 @@ _ifXTable_container_row_restore(const char *token, char *buf)
     }
     rowreq_ctx = CONTAINER_FIND(container, &index);
     if (NULL == rowreq_ctx) {
-        snmp_log(LOG_ERR, "error creating row index in "
+        snmp_log(LOG_ERR, "error finding row index in "
                  "_ifXTable_container_row_restore\n");
         return;
     }
@@ -2010,25 +2011,16 @@ _ifXTable_container_row_restore(const char *token, char *buf)
     /*
      * if the pointer is NULL and we didn't reach the
      * end of the line, something went wrong. Log message,
-     * delete the row and bail.
+     * and bail.
      */
     if ((buf == NULL) || (*buf != LINE_TERM_CHAR)) {
         snmp_log(LOG_ERR, "error parsing ifXTable row around column %d",
                  col);
-        ifTable_release_rowreq_ctx(rowreq_ctx);
         return;
     }
 
     DEBUGMSGTL(("internal:ifXTable:_ifXTable_container_row_restore",
                 "inserting row\n"));
-
-    /*
-     * copy oid index and insert row
-     */
-    rowreq_ctx->oid_idx.len = index.len;
-    memcpy(rowreq_ctx->oid_idx.oids, index.oids, index.len * sizeof(oid));
-
-    CONTAINER_INSERT(ifXTable_if_ctx.container, rowreq_ctx);
 }
 
 /************************************************************
