@@ -396,7 +396,7 @@
 #ifdef ultrix4
 #define OSTYPE ULTRIXID
 #endif
-#ifdef netbsd1
+#if defined(netbsd1) || defined(netbsd2)
 #define OSTYPE NETBSD1ID
 #endif
 #if defined(__FreeBSD__)
