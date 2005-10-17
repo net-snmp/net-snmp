@@ -146,8 +146,20 @@ _container_table_handler(netsnmp_mib_handler *handler,
  *                                                                    *
  **********************************************************************
  **********************************************************************/
-/** register specified callbacks for the specified table/oid.
-*/
+
+/* ==================================
+ *
+ * Container Table API: Table maintenance
+ *
+ * ================================== */
+
+/* ==================================
+ *
+ * Container Table API: MIB maintenance
+ *
+ * ================================== */
+
+/** returns a netsnmp_mib_handler object for the table_container helper */
 netsnmp_mib_handler *
 netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreg,
                                     netsnmp_container *container, char key_type)
@@ -213,7 +225,101 @@ netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
     return netsnmp_register_table(reginfo, tabreg);
 }
 
-/** @} */
+/** retrieve the container used by the table_container helper */
+netsnmp_container*
+netsnmp_container_table_container_extract(netsnmp_request_info *request)
+{
+    return (netsnmp_container *)
+         netsnmp_request_get_list_data(request, TABLE_CONTAINER_CONTAINER);
+}
+
+#ifndef NETSNMP_USE_INLINE
+/** find the context data used by the table_container helper */
+void *
+netsnmp_container_table_row_extract(netsnmp_request_info *request)
+{
+    /*
+     * NOTE: this function must match in table_container.c and table_container.h.
+     *       if you change one, change them both!
+     */
+    return netsnmp_request_get_list_data(request, TABLE_CONTAINER_ROW);
+}
+/** find the context data used by the table_container helper */
+void *
+netsnmp_container_table_extract_context(netsnmp_request_info *request)
+{
+    /*
+     * NOTE: this function must match in table_container.c and table_container.h.
+     *       if you change one, change them both!
+     */
+    return netsnmp_request_get_list_data(request, TABLE_CONTAINER_ROW);
+}
+#endif /* inline */
+
+/** inserts a newly created table_container entry into a request list */
+void
+netsnmp_container_table_row_insert(netsnmp_request_info *request,
+                                   netsnmp_index        *row)
+{
+    netsnmp_request_info       *req;
+    netsnmp_table_request_info *table_info = NULL;
+    netsnmp_variable_list      *this_index = NULL;
+    netsnmp_variable_list      *that_index = NULL;
+    oid      base_oid[] = {0, 0};	/* Make sure index OIDs are legal! */
+    oid      this_oid[MAX_OID_LEN];
+    oid      that_oid[MAX_OID_LEN];
+    size_t   this_oid_len, that_oid_len;
+
+    if (!request)
+        return;
+
+    /*
+     * We'll add the new row information to any request
+     * structure with the same index values as the request
+     * passed in (which includes that one!).
+     *
+     * So construct an OID based on these index values.
+     */
+
+    table_info = netsnmp_extract_table_info(request);
+    this_index = table_info->indexes;
+    build_oid_noalloc(this_oid, MAX_OID_LEN, &this_oid_len,
+                      base_oid, 2, this_index);
+
+    /*
+     * We need to look through the whole of the request list
+     * (as received by the current handler), as there's no
+     * guarantee that this routine will be called by the first
+     * varbind that refers to this row.
+     *   In particular, a RowStatus controlled row creation
+     * may easily occur later in the variable list.
+     *
+     * So first, we rewind to the head of the list....
+     */
+    for (req=request; req->prev; req=req->prev)
+        ;
+
+    /*
+     * ... and then start looking for matching indexes
+     * (by constructing OIDs from these index values)
+     */
+    for (; req; req=req->next) {
+        table_info = netsnmp_extract_table_info(req);
+        that_index = table_info->indexes;
+        build_oid_noalloc(that_oid, MAX_OID_LEN, &that_oid_len,
+                          base_oid, 2, that_index);
+      
+        /*
+         * This request has the same index values,
+         * so add the newly-created row information.
+         */
+        if (snmp_oid_compare(this_oid, this_oid_len,
+                             that_oid, that_oid_len) == 0) {
+            netsnmp_request_add_list_data(req,
+                netsnmp_create_data_list(TABLE_CONTAINER_ROW, row, NULL));
+        }
+    }
+}
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 /**********************************************************************
@@ -245,75 +351,6 @@ _set_key( container_table_data * tad, netsnmp_request_info *request,
 #endif
     else
         *key = NULL;
-}
-
-static void *
-_find_next_row(netsnmp_container *c,
-               netsnmp_table_request_info *tblreq,
-               void * key)
-{
-    void *row = NULL;
-
-    if (!c || !tblreq || !tblreq->reg_info ) {
-        snmp_log(LOG_ERR,"_find_next_row param error\n");
-        return NULL;
-    }
-
-    /*
-     * table helper should have made sure we aren't below our minimum column
-     */
-    netsnmp_assert(tblreq->colnum >= tblreq->reg_info->min_column);
-
-    /*
-     * if no indexes then use first row.
-     */
-    if(tblreq->number_indexes == 0) {
-        row = CONTAINER_FIRST(c);
-    } else {
-
-        if(NULL == key) {
-            netsnmp_index index;
-            index.oids = tblreq->index_oid;
-            index.len = tblreq->index_oid_len;
-            row = CONTAINER_NEXT(c, &index);
-        }
-        else
-            row = CONTAINER_NEXT(c, key);
-
-        /*
-         * we don't have a row, but we might be at the end of a
-         * column, so try the next column.
-         */
-        if (NULL == row) {
-            /*
-             * don't set tblreq next_col unless we know there is one,
-             * so we don't mess up table handler sparse table processing.
-             */
-            oid next_col = netsnmp_table_next_column(tblreq);
-            if (0 != next_col) {
-                tblreq->colnum = next_col;
-                row = CONTAINER_FIRST(c);
-            }
-        }
-    }
-    
-    return row;
-}
-
-/**
- * deprecated, backwards compatability only
- *
- * expected impact to remove: none
- *  - used between helpers, shouldn't have been used by end users
- *
- * replacement: none
- *  - never should have been a public method in the first place
- */
-netsnmp_index *
-netsnmp_table_index_find_next_row(netsnmp_container *c,
-                                  netsnmp_table_request_info *tblreq)
-{
-    return _find_next_row(c, tblreq, NULL );
 }
 
 
@@ -516,101 +553,88 @@ _container_table_handler(netsnmp_mib_handler *handler,
 
     return rc;
 }
+#endif /** DOXYGEN_SHOULD_SKIP_THIS */
 
-/** retrieve the container used by the table_container helper */
-netsnmp_container*
-netsnmp_container_table_container_extract(netsnmp_request_info *request)
+
+/* ==================================
+ *
+ * Container Table API: Row operations
+ *
+ * ================================== */
+
+static void *
+_find_next_row(netsnmp_container *c,
+               netsnmp_table_request_info *tblreq,
+               void * key)
 {
-    return (netsnmp_container *)
-         netsnmp_request_get_list_data(request, TABLE_CONTAINER_CONTAINER);
-}
+    void *row = NULL;
 
-/** inserts a newly created table_container entry into a request list */
-void
-netsnmp_container_table_row_insert(netsnmp_request_info *request,
-                                   netsnmp_index        *row)
-{
-    netsnmp_request_info       *req;
-    netsnmp_table_request_info *table_info = NULL;
-    netsnmp_variable_list      *this_index = NULL;
-    netsnmp_variable_list      *that_index = NULL;
-    oid      base_oid[] = {0, 0};	/* Make sure index OIDs are legal! */
-    oid      this_oid[MAX_OID_LEN];
-    oid      that_oid[MAX_OID_LEN];
-    size_t   this_oid_len, that_oid_len;
-
-    if (!request)
-        return;
+    if (!c || !tblreq || !tblreq->reg_info ) {
+        snmp_log(LOG_ERR,"_find_next_row param error\n");
+        return NULL;
+    }
 
     /*
-     * We'll add the new row information to any request
-     * structure with the same index values as the request
-     * passed in (which includes that one!).
-     *
-     * So construct an OID based on these index values.
+     * table helper should have made sure we aren't below our minimum column
      */
-
-    table_info = netsnmp_extract_table_info(request);
-    this_index = table_info->indexes;
-    build_oid_noalloc(this_oid, MAX_OID_LEN, &this_oid_len,
-                      base_oid, 2, this_index);
+    netsnmp_assert(tblreq->colnum >= tblreq->reg_info->min_column);
 
     /*
-     * We need to look through the whole of the request list
-     * (as received by the current handler), as there's no
-     * guarantee that this routine will be called by the first
-     * varbind that refers to this row.
-     *   In particular, a RowStatus controlled row creation
-     * may easily occur later in the variable list.
-     *
-     * So first, we rewind to the head of the list....
+     * if no indexes then use first row.
      */
-    for (req=request; req->prev; req=req->prev)
-        ;
+    if(tblreq->number_indexes == 0) {
+        row = CONTAINER_FIRST(c);
+    } else {
 
-    /*
-     * ... and then start looking for matching indexes
-     * (by constructing OIDs from these index values)
-     */
-    for (; req; req=req->next) {
-        table_info = netsnmp_extract_table_info(req);
-        that_index = table_info->indexes;
-        build_oid_noalloc(that_oid, MAX_OID_LEN, &that_oid_len,
-                          base_oid, 2, that_index);
-      
+        if(NULL == key) {
+            netsnmp_index index;
+            index.oids = tblreq->index_oid;
+            index.len = tblreq->index_oid_len;
+            row = CONTAINER_NEXT(c, &index);
+        }
+        else
+            row = CONTAINER_NEXT(c, key);
+
         /*
-         * This request has the same index values,
-         * so add the newly-created row information.
+         * we don't have a row, but we might be at the end of a
+         * column, so try the next column.
          */
-        if (snmp_oid_compare(this_oid, this_oid_len,
-                             that_oid, that_oid_len) == 0) {
-            netsnmp_request_add_list_data(req,
-                netsnmp_create_data_list(TABLE_CONTAINER_ROW, row, NULL));
+        if (NULL == row) {
+            /*
+             * don't set tblreq next_col unless we know there is one,
+             * so we don't mess up table handler sparse table processing.
+             */
+            oid next_col = netsnmp_table_next_column(tblreq);
+            if (0 != next_col) {
+                tblreq->colnum = next_col;
+                row = CONTAINER_FIRST(c);
+            }
         }
     }
+    
+    return row;
 }
 
-#ifndef NETSNMP_USE_INLINE
-/** find the context data used by the table_container helper */
-void *
-netsnmp_container_table_row_extract(netsnmp_request_info *request)
+/**
+ * deprecated, backwards compatability only
+ *
+ * expected impact to remove: none
+ *  - used between helpers, shouldn't have been used by end users
+ *
+ * replacement: none
+ *  - never should have been a public method in the first place
+ */
+netsnmp_index *
+netsnmp_table_index_find_next_row(netsnmp_container *c,
+                                  netsnmp_table_request_info *tblreq)
 {
-    /*
-     * NOTE: this function must match in table_container.c and table_container.h.
-     *       if you change one, change them both!
-     */
-    return netsnmp_request_get_list_data(request, TABLE_CONTAINER_ROW);
+    return _find_next_row(c, tblreq, NULL );
 }
-/** find the context data used by the table_container helper */
-void *
-netsnmp_container_table_extract_context(netsnmp_request_info *request)
-{
-    /*
-     * NOTE: this function must match in table_container.c and table_container.h.
-     *       if you change one, change them both!
-     */
-    return netsnmp_request_get_list_data(request, TABLE_CONTAINER_ROW);
-}
-#endif /* inline */
 
-#endif /** DOXYGEN_SHOULD_SKIP_THIS */
+/* ==================================
+ *
+ * Container Table API: Index operations
+ *
+ * ================================== */
+
+/** @} */

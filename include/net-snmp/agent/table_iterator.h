@@ -22,36 +22,22 @@ extern          "C" {
 
     struct netsnmp_iterator_info_s;
 
-    typedef netsnmp_variable_list *(Netsnmp_First_Data_Point) (void
-                                                               **loop_context,
-                                                               void
-                                                               **data_context,
-                                                               netsnmp_variable_list
-                                                               *,
-                                                               struct
-                                                               netsnmp_iterator_info_s
-                                                               *);
-    typedef netsnmp_variable_list *(Netsnmp_Next_Data_Point) (void
-                                                              **loop_context,
-                                                              void
-                                                              **data_context,
-                                                              netsnmp_variable_list
-                                                              *,
-                                                              struct
-                                                              netsnmp_iterator_info_s
-                                                              *);
-    typedef void   *(Netsnmp_Make_Data_Context) (void *loop_context,
-                                                 struct
-                                                 netsnmp_iterator_info_s
-                                                 *);
-    typedef void    (Netsnmp_Free_Loop_Context) (void *,
-                                                 struct
-                                                 netsnmp_iterator_info_s
-                                                 *);
-    typedef void    (Netsnmp_Free_Data_Context) (void *,
-                                                 struct
-                                                 netsnmp_iterator_info_s
-                                                 *);
+    typedef netsnmp_variable_list *
+               (Netsnmp_First_Data_Point) (void **loop_context,
+                                           void **data_context,
+                                           netsnmp_variable_list *,
+                                           struct netsnmp_iterator_info_s *);
+    typedef netsnmp_variable_list *
+               (Netsnmp_Next_Data_Point)  (void **loop_context,
+                                           void **data_context,
+                                           netsnmp_variable_list *,
+                                           struct netsnmp_iterator_info_s *);
+    typedef void *(Netsnmp_Make_Data_Context) (void *loop_context,
+                                             struct netsnmp_iterator_info_s *);
+    typedef void  (Netsnmp_Free_Loop_Context) (void *,
+                                             struct netsnmp_iterator_info_s *);
+    typedef void  (Netsnmp_Free_Data_Context) (void *,
+                                             struct netsnmp_iterator_info_s *);
 
     /** @typedef struct netsnmp_iterator_info_s netsnmp_iterator_info
      * Typedefs the netsnmp_iterator_info_s struct into netsnmp_iterator_info */
@@ -116,19 +102,34 @@ extern          "C" {
 
 #define TABLE_ITERATOR_NAME "table_iterator"
 
-    netsnmp_mib_handler
-        *netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo);
-    int            
-        netsnmp_register_table_iterator(netsnmp_handler_registration
-                                        *reginfo,
-                                        netsnmp_iterator_info *iinfo);
+/* ============================
+ * Iterator API: Table maintenance
+ * ============================ */
+        /* N/A */
 
-    void           *netsnmp_extract_iterator_context(netsnmp_request_info
-                                                     *);
-    void            netsnmp_insert_iterator_context(netsnmp_request_info
-                                                     *, void *);
+/* ============================
+ * Iterator API: MIB maintenance
+ * ============================ */
+
+    netsnmp_mib_handler
+          *netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo);
+    int    netsnmp_register_table_iterator(   netsnmp_handler_registration
+                                                                    *reginfo,
+                                              netsnmp_iterator_info *iinfo);
+
+    void *netsnmp_extract_iterator_context(netsnmp_request_info *);
+    void   netsnmp_insert_iterator_context(netsnmp_request_info *, void *);
 
     Netsnmp_Node_Handler netsnmp_table_iterator_helper_handler;
+
+
+/* ============================
+ * Iterator API: Row operations
+ * ============================ */
+
+/* ============================
+ * Iterator API: Index operations
+ * ============================ */
 
 #ifdef __cplusplus
 }
