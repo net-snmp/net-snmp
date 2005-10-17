@@ -68,6 +68,12 @@ netsnmp_init_table_dataset(void) {
                                 NULL, "table_name indexes... values...");
 }
 
+/* ==================================
+ *
+ * Data Set API: Table maintenance
+ *
+ * ================================== */
+
 /** Create a netsnmp_table_data_set structure given a table_data definition */
 netsnmp_table_data_set *
 netsnmp_create_table_data_set(const char *table_name)
@@ -80,199 +86,156 @@ netsnmp_create_table_data_set(const char *table_name)
     return table_set;
 }
 
-/** Given a netsnmp_table_data_set definition, create a handler for it */
-netsnmp_mib_handler *
-netsnmp_get_table_data_set_handler(netsnmp_table_data_set *data_set)
+/** clones a dataset row, including all data. */
+netsnmp_table_row *
+netsnmp_table_data_set_clone_row(netsnmp_table_row *row)
 {
-    netsnmp_mib_handler *ret = NULL;
+    netsnmp_table_data_set_storage *data, **newrowdata;
+    netsnmp_table_row *newrow;
 
-    if (!data_set) {
-        snmp_log(LOG_INFO,
-                 "netsnmp_get_table_data_set_handler(NULL) called\n");
+    if (!row)
         return NULL;
-    }
 
-    ret =
-        netsnmp_create_handler(TABLE_DATA_SET_NAME,
-                               netsnmp_table_data_set_helper_handler);
-    if (ret) {
-        ret->flags |= MIB_HANDLER_AUTO_NEXT;
-        ret->myvoid = (void *) data_set;
-    }
-    return ret;
-}
+    newrow = netsnmp_table_data_clone_row(row);
+    if (!newrow)
+        return NULL;
 
+    data = (netsnmp_table_data_set_storage *) row->data;
 
-/** register a given data_set at a given oid (specified in the
-    netsnmp_handler_registration pointer).  The
-    reginfo->handler->access_method *may* be null if the call doesn't
-    ever want to be called for SNMP operations.
-*/
-int
-netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
-                                netsnmp_table_data_set *data_set,
-                                netsnmp_table_registration_info
-                                *table_info)
-{
-    if (NULL == table_info) {
-        /*
-         * allocate the table if one wasn't allocated 
-         */
-        table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
-    }
-
-    if (NULL == table_info->indexes && data_set->table->indexes_template) {
-        /*
-         * copy the indexes in 
-         */
-        table_info->indexes =
-            snmp_clone_varbind(data_set->table->indexes_template);
-    }
-
-    if ((!table_info->min_column || !table_info->max_column) &&
-        (data_set->default_row)) {
-        /*
-         * determine min/max columns 
-         */
-        unsigned int    mincol = 0xffffffff, maxcol = 0;
-        netsnmp_table_data_set_storage *row;
-
-        for (row = data_set->default_row; row; row = row->next) {
-            mincol = SNMP_MIN(mincol, row->column);
-            maxcol = SNMP_MAX(maxcol, row->column);
-        }
-        if (!table_info->min_column)
-            table_info->min_column = mincol;
-        if (!table_info->max_column)
-            table_info->max_column = maxcol;
-    }
-
-    netsnmp_inject_handler(reginfo,
-                           netsnmp_get_table_data_set_handler(data_set));
-    return netsnmp_register_table_data(reginfo, data_set->table,
-                                       table_info);
-}
-
-/** Finds a column within a given storage set, given the pointer to
-   the start of the storage set list.
-*/
-netsnmp_table_data_set_storage *
-netsnmp_table_data_set_find_column(netsnmp_table_data_set_storage *start,
-                                   unsigned int column)
-{
-    while (start && start->column != column)
-        start = start->next;
-    return start;
-}
-
-/**
- * extracts a netsnmp_table_data_set pointer from a given request
- */
-netsnmp_table_data_set_storage *
-netsnmp_extract_table_data_set_column(netsnmp_request_info *request,
-                                     unsigned int column)
-{
-    netsnmp_table_data_set_storage *data =
-        netsnmp_extract_table_row_data( request );
     if (data) {
-        data = netsnmp_table_data_set_find_column(data, column);
-    }
-    return data;
-}
-/**
- * extracts a netsnmp_table_data_set pointer from a given request
- */
-NETSNMP_INLINE netsnmp_table_data_set *
-netsnmp_extract_table_data_set(netsnmp_request_info *request)
-{
-    return (netsnmp_table_data_set *)
-        netsnmp_request_get_list_data(request, TABLE_DATA_SET_NAME);
-}
+        for (newrowdata =
+             (netsnmp_table_data_set_storage **) &(newrow->data); data;
+             newrowdata = &((*newrowdata)->next), data = data->next) {
 
-/**
- * marks a given column in a row as writable or not.
- */
-int
-netsnmp_mark_row_column_writable(netsnmp_table_row *row, int column,
-                                 int writable)
-{
-    netsnmp_table_data_set_storage *data;
-
-    if (!row)
-        return SNMPERR_GENERR;
-
-    data = (netsnmp_table_data_set_storage *) row->data;
-    data = netsnmp_table_data_set_find_column(data, column);
-
-    if (!data) {
-        /*
-         * create it 
-         */
-        data = SNMP_MALLOC_TYPEDEF(netsnmp_table_data_set_storage);
-        if (!data) {
-            snmp_log(LOG_CRIT, "no memory in netsnmp_set_row_column");
-            return SNMPERR_MALLOC;
-        }
-        data->column = column;
-        data->writable = writable;
-        data->next = row->data;
-        row->data = data;
-    } else {
-        data->writable = writable;
-    }
-    return SNMPERR_SUCCESS;
-}
-
-
-/**
- * sets a given column in a row with data given a type, value, and
- * length.  Data is memdup'ed by the function.
- */
-int
-netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
-                       int type, const char *value, size_t value_len)
-{
-    netsnmp_table_data_set_storage *data;
-
-    if (!row)
-        return SNMPERR_GENERR;
-
-    data = (netsnmp_table_data_set_storage *) row->data;
-    data = netsnmp_table_data_set_find_column(data, column);
-
-    if (!data) {
-        /*
-         * create it 
-         */
-        data = SNMP_MALLOC_TYPEDEF(netsnmp_table_data_set_storage);
-        if (!data) {
-            snmp_log(LOG_CRIT, "no memory in netsnmp_set_row_column");
-            return SNMPERR_MALLOC;
-        }
-
-        data->column = column;
-        data->type = type;
-        data->next = row->data;
-        row->data = data;
-    }
-
-    if (value) {
-        if (data->type != type)
-            return SNMPERR_GENERR;
-
-        SNMP_FREE(data->data.voidp);
-        if (value_len) {
-            if (memdup(&data->data.string, value, (value_len)) !=
-                SNMPERR_SUCCESS) {
-                snmp_log(LOG_CRIT, "no memory in netsnmp_set_row_column");
-                return SNMPERR_MALLOC;
+            memdup((u_char **) newrowdata, (u_char *) data,
+                   sizeof(netsnmp_table_data_set_storage));
+            if (!*newrowdata) {
+                netsnmp_table_dataset_delete_row(newrow);
+                return NULL;
             }
-        } else {
-            data->data.string = malloc(1);
+
+            if (data->data.voidp) {
+                memdup((u_char **) & ((*newrowdata)->data.voidp),
+                       (u_char *) data->data.voidp, data->data_len);
+                if (!(*newrowdata)->data.voidp) {
+                    netsnmp_table_dataset_delete_row(newrow);
+                    return NULL;
+                }
+            }
         }
-        data->data_len = value_len;
     }
-    return SNMPERR_SUCCESS;
+    return newrow;
+}
+
+/** deletes a single dataset table data.
+ *  returns the (possibly still good) next pointer of the deleted data object.
+ */
+NETSNMP_INLINE netsnmp_table_data_set_storage *
+netsnmp_table_dataset_delete_data(netsnmp_table_data_set_storage *data)
+{
+    netsnmp_table_data_set_storage *nextPtr = NULL;
+    if (data) {
+        nextPtr = data->next;
+        SNMP_FREE(data->data.voidp);
+    }
+    SNMP_FREE(data);
+    return nextPtr;
+}
+
+/** deletes all the data from this node and beyond in the linked list */
+NETSNMP_INLINE void
+netsnmp_table_dataset_delete_all_data(netsnmp_table_data_set_storage *data)
+{
+
+    while (data) {
+        data = netsnmp_table_dataset_delete_data(data);
+    }
+}
+
+/** deletes all the data from this node and beyond in the linked list */
+NETSNMP_INLINE void
+netsnmp_table_dataset_delete_row(netsnmp_table_row *row)
+{
+    netsnmp_table_data_set_storage *data;
+
+    if (!row)
+        return;
+
+    data = netsnmp_table_data_delete_row(row);
+    netsnmp_table_dataset_delete_all_data(data);
+}
+
+/** adds a new row to a dataset table */
+NETSNMP_INLINE void
+netsnmp_table_dataset_add_row(netsnmp_table_data_set *table,
+                              netsnmp_table_row *row)
+{
+    if (!table)
+        return;
+    netsnmp_table_data_add_row(table->table, row);
+}
+
+/** adds a new row to a dataset table */
+NETSNMP_INLINE void
+netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
+                                  netsnmp_table_row *origrow,
+                                  netsnmp_table_row *newrow)
+{
+    if (!table)
+        return;
+    netsnmp_table_data_replace_row(table->table, origrow, newrow);
+}
+
+/** removes a row from the table, but doesn't delete/free anything */
+NETSNMP_INLINE void
+netsnmp_table_dataset_remove_row(netsnmp_table_data_set *table,
+                                 netsnmp_table_row *row)
+{
+    if (!table)
+        return;
+
+    netsnmp_table_data_remove_and_delete_row(table->table, row);
+}
+
+/** removes a row from the table and then deletes it (and all it's data) */
+NETSNMP_INLINE void
+netsnmp_table_dataset_remove_and_delete_row(netsnmp_table_data_set *table,
+                                            netsnmp_table_row *row)
+{
+    netsnmp_table_data_set_storage *data;
+
+    if (!table)
+        return;
+
+    data = (netsnmp_table_data_set_storage *)
+        netsnmp_table_data_remove_and_delete_row(table->table, row);
+
+    netsnmp_table_dataset_delete_all_data(data);
+}
+
+/* ==================================
+ *
+ * Data Set API: Default row operations
+ *
+ * ================================== */
+
+/** creates a new row from an existing defined default set */
+netsnmp_table_row *
+netsnmp_table_data_set_create_row_from_defaults
+    (netsnmp_table_data_set_storage *defrow)
+{
+    netsnmp_table_row *row;
+    row = netsnmp_create_table_data_row();
+    if (!row)
+        return NULL;
+    for (; defrow; defrow = defrow->next) {
+        netsnmp_set_row_column(row, defrow->column, defrow->type,
+                               defrow->data.voidp, defrow->data_len);
+        if (defrow->writable)
+            netsnmp_mark_row_column_writable(row, defrow->column, 1);
+
+    }
+    return row;
 }
 
 /** adds a new default row to a table_set.
@@ -291,7 +254,6 @@ netsnmp_table_set_add_default_row(netsnmp_table_data_set *table_set,
                                   void *default_value,
                                   size_t default_value_len)
 {
-
     netsnmp_table_data_set_storage *new_col, *ptr, *pptr;
 
     if (!table_set)
@@ -341,66 +303,123 @@ netsnmp_table_set_add_default_row(netsnmp_table_data_set *table_set,
     return SNMPERR_SUCCESS;
 }
 
-/** clones a dataset row, including all data. */
-netsnmp_table_row *
-netsnmp_table_data_set_clone_row(netsnmp_table_row *row)
+/** adds multiple data column definitions to each row.  Functionally,
+ *  this is a wrapper around calling netsnmp_table_set_add_default_row
+ *  repeatedly for you.
+ */
+void
+#if HAVE_STDARG_H
+netsnmp_table_set_multi_add_default_row(netsnmp_table_data_set *tset, ...)
+#else
+netsnmp_table_set_multi_add_default_row(va_dcl
+    )
+     va_dcl
+#endif
 {
-    netsnmp_table_data_set_storage *data, **newrowdata;
-    netsnmp_table_row *newrow;
+    va_list         debugargs;
+    unsigned int    column;
+    int             type, writable;
+    void           *data;
+    size_t          data_len;
 
-    if (!row)
+#if HAVE_STDARG_H
+    va_start(debugargs, tset);
+#else
+    netsnmp_table_data_set *tset;
+
+    va_start(debugargs);
+    tset = va_arg(debugargs, netsnmp_table_data_set *);
+#endif
+
+    while ((column = va_arg(debugargs, unsigned int)) != 0) {
+        type = va_arg(debugargs, int);
+        writable = va_arg(debugargs, int);
+        data = va_arg(debugargs, void *);
+        data_len = va_arg(debugargs, size_t);
+        netsnmp_table_set_add_default_row(tset, column, type, writable,
+                                          data, data_len);
+    }
+
+    va_end(debugargs);
+}
+
+
+/* ==================================
+ *
+ * Data Set API: MIB maintenance
+ *
+ * ================================== */
+
+/** Given a netsnmp_table_data_set definition, create a handler for it */
+netsnmp_mib_handler *
+netsnmp_get_table_data_set_handler(netsnmp_table_data_set *data_set)
+{
+    netsnmp_mib_handler *ret = NULL;
+
+    if (!data_set) {
+        snmp_log(LOG_INFO,
+                 "netsnmp_get_table_data_set_handler(NULL) called\n");
         return NULL;
+    }
 
-    newrow = netsnmp_table_data_clone_row(row);
-    if (!newrow)
-        return NULL;
+    ret =
+        netsnmp_create_handler(TABLE_DATA_SET_NAME,
+                               netsnmp_table_data_set_helper_handler);
+    if (ret) {
+        ret->flags |= MIB_HANDLER_AUTO_NEXT;
+        ret->myvoid = (void *) data_set;
+    }
+    return ret;
+}
 
-    data = (netsnmp_table_data_set_storage *) row->data;
+/** register a given data_set at a given oid (specified in the
+    netsnmp_handler_registration pointer).  The
+    reginfo->handler->access_method *may* be null if the call doesn't
+    ever want to be called for SNMP operations.
+*/
+int
+netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
+                                netsnmp_table_data_set *data_set,
+                                netsnmp_table_registration_info *table_info)
+{
+    if (NULL == table_info) {
+        /*
+         * allocate the table if one wasn't allocated 
+         */
+        table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+    }
 
-    if (data) {
-        for (newrowdata =
-             (netsnmp_table_data_set_storage **) &(newrow->data); data;
-             newrowdata = &((*newrowdata)->next), data = data->next) {
+    if (NULL == table_info->indexes && data_set->table->indexes_template) {
+        /*
+         * copy the indexes in 
+         */
+        table_info->indexes =
+            snmp_clone_varbind(data_set->table->indexes_template);
+    }
 
-            memdup((u_char **) newrowdata, (u_char *) data,
-                   sizeof(netsnmp_table_data_set_storage));
-            if (!*newrowdata) {
-                netsnmp_table_dataset_delete_row(newrow);
-                return NULL;
-            }
+    if ((!table_info->min_column || !table_info->max_column) &&
+        (data_set->default_row)) {
+        /*
+         * determine min/max columns 
+         */
+        unsigned int    mincol = 0xffffffff, maxcol = 0;
+        netsnmp_table_data_set_storage *row;
 
-            if (data->data.voidp) {
-                memdup((u_char **) & ((*newrowdata)->data.voidp),
-                       (u_char *) data->data.voidp, data->data_len);
-                if (!(*newrowdata)->data.voidp) {
-                    netsnmp_table_dataset_delete_row(newrow);
-                    return NULL;
-                }
-            }
+        for (row = data_set->default_row; row; row = row->next) {
+            mincol = SNMP_MIN(mincol, row->column);
+            maxcol = SNMP_MAX(maxcol, row->column);
         }
+        if (!table_info->min_column)
+            table_info->min_column = mincol;
+        if (!table_info->max_column)
+            table_info->max_column = maxcol;
     }
-    return newrow;
+
+    netsnmp_inject_handler(reginfo,
+                           netsnmp_get_table_data_set_handler(data_set));
+    return netsnmp_register_table_data(reginfo, data_set->table,
+                                       table_info);
 }
-
-/** creates a new row from an existing defined default set */
-netsnmp_table_row *
-netsnmp_table_data_set_create_row_from_defaults
-    (netsnmp_table_data_set_storage *defrow)
-{
-    netsnmp_table_row *row;
-    row = netsnmp_create_table_data_row();
-    if (!row)
-        return NULL;
-    for (; defrow; defrow = defrow->next) {
-        netsnmp_set_row_column(row, defrow->column, defrow->type,
-                               defrow->data.voidp, defrow->data_len);
-        if (defrow->writable)
-            netsnmp_mark_row_column_writable(row, defrow->column, 1);
-
-    }
-    return row;
-}
-
 
 newrow_stash   *
 netsnmp_table_data_set_create_newrowstash
@@ -420,7 +439,7 @@ netsnmp_table_data_set_create_newrowstash
     return newrowstash;
 }
 
-/** implements the table data helper.  This is the routine that takes
+/* implements the table data helper.  This is the routine that takes
  *  care of all SNMP requests coming into the table. */
 int
 netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
@@ -429,7 +448,6 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                                       netsnmp_agent_request_info *reqinfo,
                                       netsnmp_request_info *requests)
 {
-
     netsnmp_table_data_set_storage *data = NULL;
     newrow_stash   *newrowstash = NULL;
     netsnmp_table_row *row, *newrow = NULL;
@@ -770,6 +788,38 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
+/**
+ * extracts a netsnmp_table_data_set pointer from a given request
+ */
+NETSNMP_INLINE netsnmp_table_data_set *
+netsnmp_extract_table_data_set(netsnmp_request_info *request)
+{
+    return (netsnmp_table_data_set *)
+        netsnmp_request_get_list_data(request, TABLE_DATA_SET_NAME);
+}
+
+/**
+ * extracts a netsnmp_table_data_set pointer from a given request
+ */
+netsnmp_table_data_set_storage *
+netsnmp_extract_table_data_set_column(netsnmp_request_info *request,
+                                     unsigned int column)
+{
+    netsnmp_table_data_set_storage *data =
+        netsnmp_extract_table_row_data( request );
+    if (data) {
+        data = netsnmp_table_data_set_find_column(data, column);
+    }
+    return data;
+}
+
+
+/* ==================================
+ *
+ * Data Set API: Config-based operation
+ *
+ * ================================== */
+
 /** registers a table_dataset so that the "add_row" snmpd.conf token
   * can be used to add data to this table.  If registration_name is
   * NULL then the name used when the table was created will be used
@@ -1034,6 +1084,130 @@ netsnmp_config_parse_add_row(const char *token, char *line)
     }
 }
 
+
+/* ==================================
+ *
+ * Data Set API: Row operations
+ *
+ * ================================== */
+
+int
+netsnmp_table_set_num_rows(netsnmp_table_data_set *table)
+{
+    if (!table)
+        return 0;
+    return netsnmp_table_data_num_rows(table->table);
+}
+
+/* ==================================
+ *
+ * Data Set API: Column operations
+ *
+ * ================================== */
+
+/** Finds a column within a given storage set, given the pointer to
+   the start of the storage set list.
+*/
+netsnmp_table_data_set_storage *
+netsnmp_table_data_set_find_column(netsnmp_table_data_set_storage *start,
+                                   unsigned int column)
+{
+    while (start && start->column != column)
+        start = start->next;
+    return start;
+}
+
+/**
+ * marks a given column in a row as writable or not.
+ */
+int
+netsnmp_mark_row_column_writable(netsnmp_table_row *row, int column,
+                                 int writable)
+{
+    netsnmp_table_data_set_storage *data;
+
+    if (!row)
+        return SNMPERR_GENERR;
+
+    data = (netsnmp_table_data_set_storage *) row->data;
+    data = netsnmp_table_data_set_find_column(data, column);
+
+    if (!data) {
+        /*
+         * create it 
+         */
+        data = SNMP_MALLOC_TYPEDEF(netsnmp_table_data_set_storage);
+        if (!data) {
+            snmp_log(LOG_CRIT, "no memory in netsnmp_set_row_column");
+            return SNMPERR_MALLOC;
+        }
+        data->column = column;
+        data->writable = writable;
+        data->next = row->data;
+        row->data = data;
+    } else {
+        data->writable = writable;
+    }
+    return SNMPERR_SUCCESS;
+}
+
+/**
+ * sets a given column in a row with data given a type, value, and
+ * length.  Data is memdup'ed by the function.
+ */
+int
+netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
+                       int type, const char *value, size_t value_len)
+{
+    netsnmp_table_data_set_storage *data;
+
+    if (!row)
+        return SNMPERR_GENERR;
+
+    data = (netsnmp_table_data_set_storage *) row->data;
+    data = netsnmp_table_data_set_find_column(data, column);
+
+    if (!data) {
+        /*
+         * create it 
+         */
+        data = SNMP_MALLOC_TYPEDEF(netsnmp_table_data_set_storage);
+        if (!data) {
+            snmp_log(LOG_CRIT, "no memory in netsnmp_set_row_column");
+            return SNMPERR_MALLOC;
+        }
+
+        data->column = column;
+        data->type = type;
+        data->next = row->data;
+        row->data = data;
+    }
+
+    if (value) {
+        if (data->type != type)
+            return SNMPERR_GENERR;
+
+        SNMP_FREE(data->data.voidp);
+        if (value_len) {
+            if (memdup(&data->data.string, value, (value_len)) !=
+                SNMPERR_SUCCESS) {
+                snmp_log(LOG_CRIT, "no memory in netsnmp_set_row_column");
+                return SNMPERR_MALLOC;
+            }
+        } else {
+            data->data.string = malloc(1);
+        }
+        data->data_len = value_len;
+    }
+    return SNMPERR_SUCCESS;
+}
+
+/* ==================================
+ *
+ * Data Set API: Index operations
+ *
+ * ================================== */
+
 /** adds an index to the table.  Call this repeatly for each index. */
 NETSNMP_INLINE void
 netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type)
@@ -1041,132 +1215,6 @@ netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type)
     if (!table)
         return;
     netsnmp_table_data_add_index(table->table, type);
-}
-
-/** adds a new row to a dataset table */
-NETSNMP_INLINE void
-netsnmp_table_dataset_add_row(netsnmp_table_data_set *table,
-                              netsnmp_table_row *row)
-{
-    if (!table)
-        return;
-    netsnmp_table_data_add_row(table->table, row);
-}
-
-/** adds a new row to a dataset table */
-NETSNMP_INLINE void
-netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
-                                  netsnmp_table_row *origrow,
-                                  netsnmp_table_row *newrow)
-{
-    if (!table)
-        return;
-    netsnmp_table_data_replace_row(table->table, origrow, newrow);
-}
-
-/** deletes a single dataset table data.
- *  returns the (possibly still good) next pointer of the deleted data object.
- */
-NETSNMP_INLINE netsnmp_table_data_set_storage *
-netsnmp_table_dataset_delete_data(netsnmp_table_data_set_storage *data)
-{
-    netsnmp_table_data_set_storage *nextPtr = NULL;
-    if (data) {
-        nextPtr = data->next;
-        SNMP_FREE(data->data.voidp);
-    }
-    SNMP_FREE(data);
-    return nextPtr;
-}
-
-/** deletes all the data from this node and beyond in the linked list */
-NETSNMP_INLINE void
-netsnmp_table_dataset_delete_all_data(netsnmp_table_data_set_storage *data)
-{
-
-    while (data) {
-        data = netsnmp_table_dataset_delete_data(data);
-    }
-}
-
-/** deletes all the data from this node and beyond in the linked list */
-NETSNMP_INLINE void
-netsnmp_table_dataset_delete_row(netsnmp_table_row *row)
-{
-    netsnmp_table_data_set_storage *data;
-
-    if (!row)
-        return;
-
-    data = netsnmp_table_data_delete_row(row);
-    netsnmp_table_dataset_delete_all_data(data);
-}
-
-/** removes a row from the table, but doesn't delete/free anything */
-NETSNMP_INLINE void
-netsnmp_table_dataset_remove_row(netsnmp_table_data_set *table,
-                                 netsnmp_table_row *row)
-{
-    if (!table)
-        return;
-
-    netsnmp_table_data_remove_and_delete_row(table->table, row);
-}
-
-/** removes a row from the table and then deletes it (and all it's data) */
-NETSNMP_INLINE void
-netsnmp_table_dataset_remove_and_delete_row(netsnmp_table_data_set *table,
-                                            netsnmp_table_row *row)
-{
-    netsnmp_table_data_set_storage *data;
-
-    if (!table)
-        return;
-
-    data = (netsnmp_table_data_set_storage *)
-        netsnmp_table_data_remove_and_delete_row(table->table, row);
-
-    netsnmp_table_dataset_delete_all_data(data);
-}
-
-/** adds multiple data column definitions to each row.  Functionally,
- *  this is a wrapper around calling netsnmp_table_set_add_default_row
- *  repeatedly for you.
- */
-void
-#if HAVE_STDARG_H
-netsnmp_table_set_multi_add_default_row(netsnmp_table_data_set *tset, ...)
-#else
-netsnmp_table_set_multi_add_default_row(va_dcl
-    )
-     va_dcl
-#endif
-{
-    va_list         debugargs;
-    unsigned int    column;
-    int             type, writable;
-    void           *data;
-    size_t          data_len;
-
-#if HAVE_STDARG_H
-    va_start(debugargs, tset);
-#else
-    netsnmp_table_data_set *tset;
-
-    va_start(debugargs);
-    tset = va_arg(debugargs, netsnmp_table_data_set *);
-#endif
-
-    while ((column = va_arg(debugargs, unsigned int)) != 0) {
-        type = va_arg(debugargs, int);
-        writable = va_arg(debugargs, int);
-        data = va_arg(debugargs, void *);
-        data_len = va_arg(debugargs, size_t);
-        netsnmp_table_set_add_default_row(tset, column, type, writable,
-                                          data, data_len);
-    }
-
-    va_end(debugargs);
 }
 
 /** adds multiple indexes to a table_dataset helper object.
@@ -1199,14 +1247,7 @@ netsnmp_table_set_add_indexes(va_alist)
     va_end(debugargs);
 }
 
-int
-netsnmp_table_set_num_rows(netsnmp_table_data_set *table)
-{
-    if (!table)
-        return 0;
-    return netsnmp_table_data_num_rows(table->table);
-}
-
 /*
  * @} 
  */
+
