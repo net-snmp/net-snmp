@@ -137,6 +137,11 @@ _container_table_handler(netsnmp_mib_handler *handler,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests);
 
+static void *
+_find_next_row(netsnmp_container *c,
+               netsnmp_table_request_info *tblreq,
+               void * key);
+
 /**********************************************************************
  **********************************************************************
  *                                                                    *
@@ -442,7 +447,7 @@ _data_lookup(netsnmp_handler_registration *reginfo,
     /*
      * save the data and table in the request.
      */
-    if (SNMP_ENDOFMIBVIEW != request->status) {
+    if (SNMP_ENDOFMIBVIEW != request->requestvb->type) {
         if (NULL != row)
             netsnmp_request_add_list_data(request,
                                           netsnmp_create_data_list
