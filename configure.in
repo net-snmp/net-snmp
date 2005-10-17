@@ -1930,9 +1930,9 @@ while test "x$new_module_list" != "x"; do
 	fi
 	grep shutdown_$mnm $srcdir/$mibdir/$i.c > /dev/null
         if test $? -eq 0 ; then
-            #if test $module_debug -eq 1; then
+            if test $module_debug -eq 1; then
               echo -e "\nadding shutdown_$mnm() to list"
-            #fi
+            fi
 	    echo "  if (should_init(\"$mnm\")) shutdown_$mnm();" >> $mibdir/${module_type}_shutdown.h
 	fi
       fi # test -f $srcdir/$mibdir/$i.c
