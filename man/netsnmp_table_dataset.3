@@ -1,4 +1,4 @@
-.TH "table_dataset: Helps you implement a table with automatted storage." 3 "10 Oct 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
+.TH "table_dataset: Helps you implement a table with automatted storage." 3 "16 Oct 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -290,11 +290,11 @@ Call this repeatly for each index.
 .in +1c
 \fBdata_set.c\fP.
 .PP
-Definition at line 1052 of file table_dataset.c.
+Definition at line 1040 of file table_dataset.c.
 .PP
 References netsnmp_table_data_set_s::table.
 .PP
-Referenced by netsnmp_config_parse_table_set(), and netsnmp_table_set_add_indexes().
+Referenced by netsnmp_table_set_add_indexes().
 .SS "NETSNMP_INLINE void netsnmp_table_dataset_add_row (\fBnetsnmp_table_data_set\fP * table, \fBnetsnmp_table_row\fP * row)"
 .PP
 adds a new row to a dataset table 
@@ -303,7 +303,7 @@ adds a new row to a dataset table
 .in +1c
 \fBdata_set.c\fP.
 .PP
-Definition at line 1061 of file table_dataset.c.
+Definition at line 1049 of file table_dataset.c.
 .PP
 References netsnmp_table_data_add_row(), and netsnmp_table_data_set_s::table.
 .PP
@@ -312,7 +312,7 @@ Referenced by netsnmp_table_data_set_helper_handler().
 .PP
 deletes all the data from this node and beyond in the linked list 
 .PP
-Definition at line 1097 of file table_dataset.c.
+Definition at line 1085 of file table_dataset.c.
 .PP
 References netsnmp_table_dataset_delete_data().
 .PP
@@ -323,7 +323,7 @@ deletes a single dataset table data.
 .PP
 returns the (possibly still good) next pointer of the deleted data object.
 .PP
-Definition at line 1084 of file table_dataset.c.
+Definition at line 1072 of file table_dataset.c.
 .PP
 References netsnmp_table_data_set_storage_s::data, netsnmp_table_data_set_storage_s::next, NULL, and SNMP_FREE.
 .PP
@@ -332,7 +332,7 @@ Referenced by netsnmp_table_dataset_delete_all_data().
 .PP
 deletes all the data from this node and beyond in the linked list 
 .PP
-Definition at line 1107 of file table_dataset.c.
+Definition at line 1095 of file table_dataset.c.
 .PP
 References netsnmp_table_data_delete_row(), and netsnmp_table_dataset_delete_all_data().
 .PP
@@ -341,7 +341,7 @@ Referenced by netsnmp_table_data_set_clone_row(), and netsnmp_table_data_set_hel
 .PP
 removes a row from the table and then deletes it (and all it's data) 
 .PP
-Definition at line 1131 of file table_dataset.c.
+Definition at line 1119 of file table_dataset.c.
 .PP
 References netsnmp_table_data_remove_and_delete_row(), netsnmp_table_dataset_delete_all_data(), and netsnmp_table_data_set_s::table.
 .PP
@@ -350,14 +350,14 @@ Referenced by netsnmp_table_data_set_helper_handler().
 .PP
 removes a row from the table, but doesn't delete/free anything 
 .PP
-Definition at line 1120 of file table_dataset.c.
+Definition at line 1108 of file table_dataset.c.
 .PP
 References netsnmp_table_data_remove_and_delete_row(), and netsnmp_table_data_set_s::table.
 .SS "NETSNMP_INLINE void netsnmp_table_dataset_replace_row (\fBnetsnmp_table_data_set\fP * table, \fBnetsnmp_table_row\fP * origrow, \fBnetsnmp_table_row\fP * newrow)"
 .PP
 adds a new row to a dataset table 
 .PP
-Definition at line 1071 of file table_dataset.c.
+Definition at line 1059 of file table_dataset.c.
 .PP
 References netsnmp_table_data_replace_row(), and netsnmp_table_data_set_s::table.
 .PP
@@ -381,7 +381,7 @@ adds multiple indexes to a table_dataset helper object.
 .PP
 To end the list, use a 0 after the list of ASN index types. 
 .PP
-Definition at line 1192 of file table_dataset.c.
+Definition at line 1180 of file table_dataset.c.
 .PP
 References netsnmp_table_dataset_add_index().
 .SS "void netsnmp_table_set_multi_add_default_row (va_dcl)"
@@ -394,6 +394,6 @@ Functionally, this is a wrapper around calling netsnmp_table_set_add_default_row
 .in +1c
 \fBdata_set.c\fP.
 .PP
-Definition at line 1153 of file table_dataset.c.
+Definition at line 1141 of file table_dataset.c.
 .PP
 References netsnmp_table_set_add_default_row().

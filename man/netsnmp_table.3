@@ -1,4 +1,4 @@
-.TH "table: Helps you implement a table." 3 "10 Oct 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
+.TH "table: Helps you implement a table." 3 "16 Oct 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -114,7 +114,7 @@ checks the original request against the current data being passed in if its grea
 .PP
 returns 1 if outvar was replaced with the oid from newvar (success). returns 0 if not.
 .PP
-Definition at line 881 of file table.c.
+Definition at line 884 of file table.c.
 .PP
 References build_oid_noalloc(), variable_list::name, variable_list::name_length, netsnmp_request_info_s::requestvb, snmp_clone_varbind(), snmp_oid_compare(), snmp_set_var_objid(), snmp_set_var_typed_value(), netsnmp_vardata::string, variable_list::type, variable_list::val, and variable_list::val_len.
 .PP
@@ -189,14 +189,14 @@ Referenced by netsnmp_container_table_register(), netsnmp_register_table_data(),
 .PP
 create sparse table handler 
 .PP
-Definition at line 719 of file table.c.
+Definition at line 722 of file table.c.
 .PP
 References netsnmp_create_handler(), and SPARSE_TABLE_HANDLER_NAME.
 .SS "int netsnmp_sparse_table_register (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_table_registration_info\fP * tabreq)"
 .PP
 creates a table handler given the netsnmp_table_registration_info object, inserts it into the request chain and then calls \fBnetsnmp_register_handler()\fP to register the table into the agent. 
 .PP
-Definition at line 730 of file table.c.
+Definition at line 733 of file table.c.
 .PP
 References netsnmp_create_handler(), netsnmp_get_table_handler(), netsnmp_inject_handler(), netsnmp_register_handler(), and SPARSE_TABLE_HANDLER_NAME.
 .SS "int netsnmp_table_build_oid (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info)"
@@ -209,7 +209,7 @@ Index values are extracted from the table_info varbinds.
 .PP
 .column 
 .PP
-Definition at line 781 of file table.c.
+Definition at line 784 of file table.c.
 .PP
 References build_oid(), netsnmp_table_request_info_s::colnum, netsnmp_table_request_info_s::indexes, variable_list::name, variable_list::name_length, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len.
 .PP
@@ -220,7 +220,7 @@ given a registration info object, a request object and the table info object it 
 .PP
 Index values are extracted from the table_info index oid.
 .PP
-Definition at line 818 of file table.c.
+Definition at line 821 of file table.c.
 .PP
 References netsnmp_table_request_info_s::colnum, netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, variable_list::name, variable_list::name_length, variable_list::name_loc, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, snmp_clone_mem(), and SNMP_FREE.
 .SS "int netsnmp_table_build_result (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info, u_char type, u_char * result, size_t result_len)"
@@ -229,21 +229,21 @@ Builds the result to be returned to the agent given the table information.
 .PP
 Use this function to return results from lowel level handlers to the agent. It takes care of building the proper resulting oid (containing proper indexing) and inserts the result value into the returning varbind.
 .PP
-Definition at line 748 of file table.c.
+Definition at line 751 of file table.c.
 .PP
 References variable_list::name, variable_list::name_loc, netsnmp_table_build_oid(), NULL, netsnmp_request_info_s::requestvb, and snmp_set_var_typed_value().
 .SS "int netsnmp_update_indexes_from_variable_list (\fBnetsnmp_table_request_info\fP * tri)"
 .PP
 builds an oid given a set of indexes. 
 .PP
-Definition at line 863 of file table.c.
+Definition at line 866 of file table.c.
 .PP
 References build_oid_noalloc(), netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, netsnmp_table_request_info_s::indexes, and NULL.
 .SS "int netsnmp_update_variable_list_from_index (\fBnetsnmp_table_request_info\fP * tri)"
 .PP
 parses an OID into table indexses 
 .PP
-Definition at line 847 of file table.c.
+Definition at line 850 of file table.c.
 .PP
 References netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, netsnmp_table_request_info_s::indexes, parse_oid_indexes(), and snmp_reset_var_buffers().
 .SS "int table_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"

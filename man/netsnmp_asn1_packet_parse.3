@@ -1,4 +1,4 @@
-.TH "asn1 parsing and datatype manipulation routines." 3 "10 Oct 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
+.TH "asn1 parsing and datatype manipulation routines." 3 "16 Oct 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,6 +10,18 @@ asn1 parsing and datatype manipulation routines. \- Note on.
 .in +1c
 .ti -1c
 .RI "#define \fBNULL\fP   0"
+.br
+.ti -1c
+.RI "#define \fBINT32_MAX\fP   2147483647"
+.br
+.ti -1c
+.RI "#define \fBINT32_MIN\fP   (0 - INT32_MAX - 1)"
+.br
+.ti -1c
+.RI "#define \fBCHECK_OVERFLOW_S\fP(x, y)"
+.br
+.ti -1c
+.RI "#define \fBCHECK_OVERFLOW_U\fP(x, y)"
 .br
 .in -1c
 .SS "Functions"
@@ -186,3 +198,42 @@ IS EQUIVALENT TO:
 .fi
 .PP
 
+.SH "Define Documentation"
+.PP 
+.SS "#define CHECK_OVERFLOW_S(x, y)"
+.PP
+\fBValue:\fP
+.PP
+.nf
+do { int trunc = 0;                     \
+        if (x > INT32_MAX) {                                            \
+            trunc = 1;                                                  \
+            x &= 0xffffffff;                                            \
+        } else if (x < INT32_MIN) {                                     \
+            trunc = 1;                                                  \
+            x = 0 - (x & 0xffffffff);                                   \
+        }                                                               \
+        if (trunc)                                                      \
+            snmp_log(LOG_ERR,'truncating signed value to 32 bits (%d)\n',y); \
+    } while(0)
+.fi
+.PP
+Definition at line 214 of file asn1.c.
+.PP
+Referenced by asn_build_int(), and asn_parse_int().
+.SS "#define CHECK_OVERFLOW_U(x, y)"
+.PP
+\fBValue:\fP
+.PP
+.nf
+do {                                    \
+        if (x > UINT32_MAX) {                                           \
+            x &= 0xffffffff;                                            \
+            snmp_log(LOG_ERR,'truncating unsigned value to 32 bits (%d)\n',y); \
+        }                                                               \
+    } while(0)
+.fi
+.PP
+Definition at line 226 of file asn1.c.
+.PP
+Referenced by asn_build_objid(), asn_build_unsigned_int(), asn_build_unsigned_int64(), asn_parse_unsigned_int(), and asn_parse_unsigned_int64().
