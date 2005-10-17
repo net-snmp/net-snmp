@@ -63,7 +63,8 @@ if [ "x$SNMP_TMPDIR" = "x" -a "x$SNMP_HEADERONLY" != "xyes" ]; then
 	echo "$0: ERROR: $SNMP_TMPDIR already existed."
 	exit 1;
     fi
-    export SNMP_TMP_PERSITENTDIR=$SNMP_TMPDIR/persist
+    SNMP_TMP_PERSITENTDIR=$SNMP_TMPDIR/persist
+    export SNMP_TMP_PERSITENTDIR
     mkdir $SNMP_TMPDIR
     mkdir $SNMP_TMP_PERSITENTDIR
 fi
