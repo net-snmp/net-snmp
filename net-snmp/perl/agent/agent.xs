@@ -395,27 +395,25 @@ handler_wrapper(netsnmp_mib_handler          *handler,
         rarg = newSViv(0);
         arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_mib_handler");
         sv_setiv(arg, (int) handler);
-        XPUSHs(rarg);
+        XPUSHs(sv_2mortal(rarg));
         rarg = newSViv(0);
         arg = newSVrv(rarg, "NetSNMP::agent::reginfo");
         sv_setiv(arg, (int) reginfo);
-        XPUSHs(rarg);
+        XPUSHs(sv_2mortal(rarg));
         rarg = newSViv(0);
         arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_agent_request_info");
         sv_setiv(arg, (int) reqinfo);
-        XPUSHs(rarg);
+        XPUSHs(sv_2mortal(rarg));
         rarg = newSViv(0);
         arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_request_infoPtr");
         sv_setiv(arg, (int) requests);
-        XPUSHs(rarg);
+        XPUSHs(sv_2mortal(rarg));
         PUTBACK;
         if (SvTYPE(cb) == SVt_PVCV) {
-            perl_call_sv(cb, G_DISCARD); /* I have no idea what discard does */
-                                         /* XXX: it discards the results,
-                                            which isn't right */
+            perl_call_sv(cb, G_DISCARD);
+                                       
         } else if (SvROK(cb) && SvTYPE(SvRV(cb)) == SVt_PVCV) {
-            /* reference to code */
-            perl_call_sv(SvRV(cb), G_DISCARD);
+            perl_call_sv(SvRV(cb), G_DISCARD); 
         }
         SPAGAIN;
         PUTBACK;
@@ -474,6 +472,21 @@ na_shutdown(me)
     {
         snmp_shutdown("perl");
     }
+
+void
+na_errlog(me,value)
+    SV *me;
+    SV *value;
+   PREINIT:
+        STRLEN stringlen;
+        char * stringptr;
+    CODE:
+    {
+        stringptr = SvPV(value, stringlen);
+        snmp_log(LOG_ERR, stringptr );
+    }
+
+
 
 MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_handler_registration  PREFIX = nsahr_
 
@@ -623,16 +636,39 @@ nari_getOIDptr(me)
     OUTPUT:
         RETVAL
 
+int
+nari_getType(me)
+        SV *me;
+    PREINIT:
+        netsnmp_request_info *request;
+    CODE:
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
+
+        RETVAL =  request->requestvb->type ;
+    OUTPUT:
+        RETVAL 
+
+void
+nari_setType(me, newvalue)
+        SV *me;
+        int newvalue;
+    PREINIT:
+        netsnmp_request_info *request;
+    CODE:
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
+        request->requestvb->type=newvalue;
+
 char *
 nari_getValue(me)
         SV *me;
     PREINIT:
-        u_char *oidbuf = NULL;
-        size_t ob_len = 0, oo_len = 0;
+        u_char buf[1024] ;
+        u_char *oidbuf = buf ;
+        size_t ob_len = 1024, oo_len = 0;
         netsnmp_request_info *request;
     CODE:
         request = (netsnmp_request_info *) SvIV(SvRV(me));
-	sprint_realloc_by_type(&oidbuf, &ob_len, &oo_len, 1,
+	sprint_realloc_by_type(&oidbuf, &ob_len, &oo_len, 0,
                                request->requestvb, 0, 0, 0);
         RETVAL = oidbuf; /* mem leak */
     OUTPUT:
@@ -740,6 +776,18 @@ nari_setValue(me, type, value)
     CODE:
         request = (netsnmp_request_info *) SvIV(SvRV(me));
         switch(type) {
+          case  SNMP_NOSUCHINSTANCE :
+              snmp_set_var_typed_value(request->requestvb,SNMP_NOSUCHINSTANCE,0,0) ;
+              RETVAL = 1;
+              break ;
+          case  SNMP_NOSUCHOBJECT :
+              snmp_set_var_typed_value(request->requestvb,SNMP_NOSUCHOBJECT,0,0) ;
+              RETVAL = 1;
+              break ;
+          case  SNMP_ENDOFMIBVIEW :
+              snmp_set_var_typed_value(request->requestvb,SNMP_ENDOFMIBVIEW,0,0) ;
+              RETVAL = 1;
+              break ;
           case ASN_INTEGER:
 	      /* We want an integer here */
 	      if ((SvTYPE(value) == SVt_IV) || (SvTYPE(value) == SVt_PVMG)) {

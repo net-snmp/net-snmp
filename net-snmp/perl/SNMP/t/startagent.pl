@@ -9,6 +9,11 @@ $comm3 = 'v3_private';
 $sec_name = 'v3_user';
 $oid = '.1.3.6.1.2.1.1.1';
 $name = 'sysDescr';
+$name_module = 'RFC1213-MIB::sysDescr';
+$name_module2 = 'SNMPv2-MIB::sysDescr';
+$name_long = '.iso.org.dod.internet.mgmt.mib-2.system.sysDescr';
+$name_module_long = 'RFC1213-MIB::.iso.org.dod.internet.mgmt.mib-2.system.sysDescr';
+$name_module_long2 = 'SNMPv2-MIB::.iso.org.dod.internet.mgmt.mib-2.system.sysDescr';
 $auth_pass = 'test_pass_auth';
 $priv_pass = 'test_pass_priv';
 
