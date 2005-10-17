@@ -2,6 +2,158 @@
 
 Changes: V5.2.1 -> V5.2.2.pre4
 
+2005-10-16 21:17  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3
+, netsnmp_agent_trap.3,
+     netsnmp_asn1_packet_parse.3, netsnmp_baby_steps.3
+, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3,
+     netsnmp_container.3, netsnmp_data_list.3,
+     netsnmp_debug.3, netsnmp_default_store.3,
+     netsnmp_handler.3, netsnmp_instance.3,
+     netsnmp_iterator_info_s.3, netsnmp_leaf.3,
+     netsnmp_library.3, netsnmp_mib_utilities.3,
+     netsnmp_mode_end_call.3, netsnmp_multiplexer.3
+, netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3
+, netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3
+, netsnmp_snmp_client.3,
+     netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3,
+     netsnmp_snmp_session.3, netsnmp_stash_cache.3
+, netsnmp_table.3, netsnmp_table_array.3
+, netsnmp_table_container.3,
+     netsnmp_table_data.3, netsnmp_table_dataset.3
+, netsnmp_table_iterator.3,
+     netsnmp_table_iterator.h.3, netsnmp_util.3,
+     netsnmp_utilities.3, netsnmp_variable_list.3,
+     netsnmp_watcher.3:
+
+   documentation update
+
+2005-10-16 21:09  hardaker
+
+   * configure, configure.in:
+
+   removed forced debugging output
+
+2005-10-16 21:07  hardaker
+
+   * configure.in, configure, configure
+:
+
+   version update
+
+2005-10-14 16:00  bshaw666
+
+   * agent/mibgroup/ucd-snmp/lmSensors.c:
+
+   Fixes problems including a server running picld would not attempt to use kstat, also had hard-coded start of btree instead of working from root, more debug and various minor fixes
+
+2005-10-14 15:45  tanders
+
+   * acconfig.h, include/net-snmp/net-snmp-config.h.in
+, mibs/NET-SNMP-TC.txt:
+
+   support NetBSD 1.x and 2.x under the (common) "netbsd" sysObjectID.0
+
+2005-10-14 07:01  tanders
+
+   * apps/snmptrapd.c:
+
+   register the snmpEngineID MIB group under the "snmptrapd" context to allow for engineID probes via the master agent, e.g. by snmpusm
+
+2005-10-14 06:59  tanders
+
+   * agent/mibgroup/snmpv3/: snmpEngine.c, snmpEngine.h
+:
+
+   allow subagents (like snmptrapd) to register the snmpEngineID MIB group under a context by introducing register_snmpEngineID_scalars_context()
+
+2005-10-13 14:07  rstory
+
+   * agent/helpers/table.c:
+
+   fix sparse handler case: no more rows, last column
+
+2005-10-13 09:49  rstory
+
+   * agent/helpers/table_dataset.c:
+
+   - fix table token table indexes for augmented table
+   - tweak debug
+   - add warning if too much data specified for add_row
+
+2005-10-13 07:14  rstory
+
+   * dist/: nsb-functions, nsb-nightly:
+
+   sync w/main
+
+2005-10-12 15:59  tanders
+
+   * acconfig.h:
+
+   openbsd sysObjectID.0 for OpenBSD 3.x
+
+2005-10-12 14:39  tanders
+
+   * configure, configure.in,
+     net-snmp-config.in, snmplib/read_config.c:
+
+   enhance recently introduced "net-snmp-config --snmpconfpath" to output full config path
+
+2005-10-12 07:46  rstory
+
+   * man/Makefile.in:
+
+   def files are in srcdir
+
+2005-10-12 03:28  rstory
+
+   * snmplib/asn1.c:
+
+   change no-op macro def to empty isntead of (void)
+
+2005-10-11 16:17  rstory
+
+   * snmplib/asn1.c:
+
+   rework 64 bit overflow checking, accounting for signededness
+
+2005-10-11 11:53  rstory
+
+   * configure.in:
+
+   remove leftover EOF from rev 1.314
+
+2005-10-11 04:49  rstory
+
+   * Makefile.in:
+
+   make sure net-snmp-config is executeable before building perl make files
+
+2005-10-11 02:27  dts12
+
+   * perl/: SNMP/examples/bulkwalk.pl,
+     SNMP/examples/trap-example.pl, SNMP/t/bulkwalk.t
+, manager/manager.pm:
+
+   Be consistent in how various perl scripts are invoked.
+
 2005-10-10 21:35  hardaker
 
    * man/: netsnmp_agent.3, netsnmp_agent_registry.3
