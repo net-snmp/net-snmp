@@ -33,23 +33,30 @@ extern          "C" {
 #define TABLE_CONTAINER_KEY_VARBIND_INDEX         2
 #define TABLE_CONTAINER_KEY_VARBIND_RAW           3
 
+/* ====================================
+ * Container Table API: MIB maintenance
+ * ==================================== */
+
     /*
-     * register a container table
-     */
-    int            
-    netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
-                                     netsnmp_table_registration_info
-                                     *tabreq,
-                                     netsnmp_container *container,
-                                     char key_type);
-    /*
-     * get an injectable containe table handler
+     * get an injectable container table handler
      */
     netsnmp_mib_handler *
     netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreq,
                                         netsnmp_container *container,
                                         char key_type);
+    /*
+     * register a container table
+     */
+    int            
+    netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
+                                     netsnmp_table_registration_info *tabreq,
+                                     netsnmp_container *container,
+                                     char key_type);
     
+    /** retrieve the container used by the table_container helper */
+    netsnmp_container*
+    netsnmp_container_table_container_extract(netsnmp_request_info *request);
+
     /** find the context data used by the table_container helper */
 #ifdef NETSNMP_USE_INLINE
     NETSNMP_STATIC_INLINE void *
@@ -81,9 +88,9 @@ extern          "C" {
     void netsnmp_container_table_row_insert(netsnmp_request_info *request,
                                             netsnmp_index *row);
 
-    /** retrieve the container used by the table_container helper */
-    netsnmp_container*
-    netsnmp_container_table_container_extract(netsnmp_request_info *request);
+/* ===================================
+ * Container Table API: Row operations
+ * =================================== */
 
     void *
     netsnmp_container_table_find_next_row(netsnmp_request_info *request,

@@ -97,6 +97,18 @@
 #include <net-snmp/agent/table_iterator.h>
 #include <net-snmp/agent/stash_cache.h>
 
+/* ==================================
+ *
+ * Iterator API: Table maintenance
+ *
+ * ================================== */
+
+/* ==================================
+ *
+ * Iterator API: MIB maintenance
+ *
+ * ================================== */
+
 /** returns a netsnmp_mib_handler object for the table_iterator helper */
 netsnmp_mib_handler *
 netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
@@ -111,7 +123,6 @@ netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
     me->myvoid = iinfo;
     return me;
 }
-
 
 /** 
  * Creates and registers a table iterator helper handler calling 
@@ -301,14 +312,13 @@ netsnmp_iterator_remember(netsnmp_request_info *request,
 }    
 
 #define TABLE_ITERATOR_NOTAGAIN 255
-/** implements the table_iterator helper */
+/* implements the table_iterator helper */
 int
 netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                                       netsnmp_handler_registration *reginfo,
                                       netsnmp_agent_request_info *reqinfo,
                                       netsnmp_request_info *requests)
 {
-
     netsnmp_table_registration_info *tbl_info;
     netsnmp_table_request_info *table_info = NULL;
     oid             coloid[MAX_OID_LEN];
@@ -716,5 +726,18 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+
+/* ==================================
+ *
+ * Iterator API: Row operations
+ *
+ * ================================== */
+
+/* ==================================
+ *
+ * Iterator API: Index operations
+ *
+ * ================================== */
+
 
 /** @} */

@@ -49,34 +49,32 @@ typedef  struct netsnmp_tdata_row_s netsnmp_table_data2row;
 typedef  struct netsnmp_tdata_s     netsnmp_table_data2;
 
 
-/*
- * APIs for constructing and manipulating a 'tdata' table
- */
+/* ============================
+ * TData API: Table maintenance
+ * ============================ */
+
+    netsnmp_tdata     *netsnmp_tdata_create(    const char       *name);
+    netsnmp_tdata_row *netsnmp_tdata_create_row(void);
+    netsnmp_tdata_row *netsnmp_tdata_clone_row( netsnmp_tdata_row *row);
+    void           *netsnmp_tdata_delete_row(   netsnmp_tdata_row *row);
+
     int             netsnmp_tdata_add_row(      netsnmp_tdata     *table,
                                                 netsnmp_tdata_row *row);
+    NETSNMP_INLINE void
+                    netsnmp_tdata_replace_row(  netsnmp_tdata     *table,
+                                                netsnmp_tdata_row *origrow,
+                                                netsnmp_tdata_row *newrow);
     netsnmp_tdata_row *netsnmp_tdata_remove_row(netsnmp_tdata     *table,
                                                 netsnmp_tdata_row *row);
-    void           *netsnmp_tdata_delete_row(   netsnmp_tdata_row *row);
     void   *netsnmp_tdata_remove_and_delete_row(netsnmp_tdata     *table,
                                                 netsnmp_tdata_row *row);
 
-    NETSNMP_INLINE void
-       netsnmp_tdata_replace_row(netsnmp_tdata *table,
-                                 netsnmp_tdata_row *origrow,
-                                 netsnmp_tdata_row *newrow);
 
-    netsnmp_tdata     *netsnmp_tdata_create(const char *name);
-    netsnmp_tdata_row *netsnmp_tdata_create_row(void);
-    netsnmp_tdata_row *netsnmp_tdata_clone_row(netsnmp_tdata_row *row);
+/* ============================
+ * TData API: MIB maintenance
+ * ============================ */
 
-#define netsnmp_tdata_add_index(thetable, type) snmp_varlist_add_variable(&thetable->indexes_template, NULL, 0, type, NULL, 0)
-#define netsnmp_tdata_row_add_index(row, type, value, value_len) snmp_varlist_add_variable(&row->indexes, NULL, 0, type, (const u_char *) value, value_len)
-
-/*
- * APIs for working with MIBs built using a 'tdata' table
- */
     netsnmp_mib_handler *netsnmp_get_tdata_handler(netsnmp_tdata *table);
-    Netsnmp_Node_Handler netsnmp_tdata_helper_handler;
 
     int netsnmp_register_tdata(netsnmp_handler_registration *reginfo,
                                netsnmp_tdata                *table,
@@ -93,38 +91,46 @@ typedef  struct netsnmp_tdata_s     netsnmp_table_data2;
     void netsnmp_insert_tdata_row(netsnmp_request_info *, netsnmp_tdata_row *);
 
 
-/*
- * APIs for working with the contents of a 'tdata' table
- */
-    netsnmp_tdata_row *netsnmp_tdata_get(    netsnmp_tdata         *table,
-                                             netsnmp_variable_list *indexes);
-    netsnmp_tdata_row *netsnmp_tdata_getnext(netsnmp_tdata         *table,
-                                             netsnmp_variable_list *indexes);
-    netsnmp_tdata_row *netsnmp_tdata_get_from_oid(netsnmp_tdata    *table,
+/* ============================
+ * TData API: Row operations
+ * ============================ */
+
+    void * netsnmp_tdata_row_entry( netsnmp_tdata_row *row );
+    netsnmp_tdata_row *netsnmp_tdata_get_first_row(netsnmp_tdata     *table);
+    netsnmp_tdata_row *netsnmp_tdata_get_from_row( netsnmp_tdata     *table,
+                                                   netsnmp_tdata_row *row);
+    netsnmp_tdata_row *netsnmp_tdata_get_next_row( netsnmp_tdata     *table,
+                                                   netsnmp_tdata_row *row);
+
+    netsnmp_tdata_row *netsnmp_tdata_get(      netsnmp_tdata         *table,
+                                               netsnmp_variable_list *indexes);
+    netsnmp_tdata_row *netsnmp_tdata_get_from_oid(netsnmp_tdata      *table,
                                                   oid   *searchfor,
                                                   size_t searchfor_len);
-    netsnmp_tdata_row *netsnmp_tdata_get_from_row(netsnmp_tdata     *table,
-                                                  netsnmp_tdata_row *row);
-    netsnmp_tdata_row *netsnmp_tdata_getnext_from_oid(netsnmp_tdata *table,
+    netsnmp_tdata_row *netsnmp_tdata_getnext(  netsnmp_tdata         *table,
+                                               netsnmp_variable_list *indexes);
+    netsnmp_tdata_row *netsnmp_tdata_getnext_from_oid(netsnmp_tdata  *table,
                                                   oid   *searchfor,
                                                   size_t searchfor_len);
 
-    netsnmp_tdata_row* netsnmp_tdata_get_first_row(netsnmp_tdata *table);
-    netsnmp_tdata_row* netsnmp_tdata_get_next_row( netsnmp_tdata *table,
-                                                   netsnmp_tdata_row *row);
+    int netsnmp_tdata_num_rows(netsnmp_tdata *table);
+
+
+/* ============================
+ * TData API: Index operations
+ * ============================ */
+
+#define netsnmp_tdata_add_index(thetable, type) snmp_varlist_add_variable(&thetable->indexes_template, NULL, 0, type, NULL, 0)
+#define netsnmp_tdata_row_add_index(row, type, value, value_len) snmp_varlist_add_variable(&row->indexes, NULL, 0, type, (const u_char *) value, value_len)
 
     int netsnmp_tdata_compare(            netsnmp_tdata_row     *row,
                                           netsnmp_variable_list *indexes);
-    int netsnmp_tdata_compare_subtree(    netsnmp_tdata_row     *row,
-                                          netsnmp_variable_list *indexes);
     int netsnmp_tdata_compare_oid(        netsnmp_tdata_row     *row,
                                           oid *compareto, size_t compareto_len);
+    int netsnmp_tdata_compare_subtree(    netsnmp_tdata_row     *row,
+                                          netsnmp_variable_list *indexes);
     int netsnmp_tdata_compare_subtree_oid(netsnmp_tdata_row     *row,
                                           oid *compareto, size_t compareto_len);
-
-    void * netsnmp_tdata_row_entry( netsnmp_tdata_row *row );
-
-    int netsnmp_tdata_num_rows(netsnmp_tdata *table);
 
 
 #ifdef __cplusplus
