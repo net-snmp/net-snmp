@@ -176,6 +176,7 @@ parse_mteMonitor(const char *token, char *line)
      */
     memset( buf,   0, sizeof(buf));
     memset( tname, 0, sizeof(tname));
+    memset( ename, 0, sizeof(ename));
     for (cp = copy_nword(line, buf, SPRINT_MAX_LEN);
          ;
          cp = copy_nword(cp,   buf, SPRINT_MAX_LEN)) {
