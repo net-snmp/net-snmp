@@ -349,13 +349,14 @@ netsnmp_callback_clear_client_arg(void *ptr, int i, int j)
     struct snmp_gen_callback *scp = NULL;
     int rc = 0;
 
-    for (; i < MAX_CALLBACK_IDS; i++) {
+    for (; i < MAX_CALLBACK_IDS; i++,j=0) {
         for (; j < MAX_CALLBACK_SUBIDS; j++) {
             scp = thecallbacks[i][j]; 
             while (scp != NULL) {
                 if ((NULL != scp->sc_callback) &&
                     (scp->sc_client_arg != NULL) &&
                     (scp->sc_client_arg == ptr)) {
+                    DEBUGMSGTL(("9:callback", "  clearing %p at [%d,%d]\n", ptr, i, j));
                     scp->sc_client_arg = NULL;
                     ++rc;
                 }
@@ -403,6 +404,7 @@ clear_callback(void)
                      */
                     tmp_arg = scp->sc_client_arg;
                     scp->sc_client_arg = NULL;
+                    DEBUGMSGTL(("9:callback", "  freeing %p at [%d,%d]\n", tmp_arg, i, j));
                     (void)netsnmp_callback_clear_client_arg(tmp_arg, i, j);
                     free(tmp_arg);
                 }
