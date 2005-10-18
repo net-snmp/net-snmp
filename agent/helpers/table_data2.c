@@ -241,7 +241,7 @@ netsnmp_get_tdata_handler(netsnmp_tdata *table)
         return NULL;
     }
 
-    ret = netsnmp_create_handler(TABLE_DATA2_NAME,
+    ret = netsnmp_create_handler(TABLE_TDATA_NAME,
                                _netsnmp_tdata_helper_handler);
     if (ret) {
         ret->flags |= MIB_HANDLER_AUTO_NEXT;
@@ -284,10 +284,10 @@ _netsnmp_tdata_helper_handler(netsnmp_mib_handler *handler,
 
             netsnmp_request_add_list_data(request,
                                       netsnmp_create_data_list(
-                                          TABLE_DATA2_TABLE, table, NULL));
+                                          TABLE_TDATA_TABLE, table, NULL));
             netsnmp_request_add_list_data(request,
                                       netsnmp_create_data_list(
-                                          TABLE_DATA2_ROW,   row,   NULL));
+                                          TABLE_TDATA_ROW,   row,   NULL));
         }
     }
 
@@ -324,7 +324,7 @@ netsnmp_tdata *
 netsnmp_tdata_extract(netsnmp_request_info *request)
 {
     return (netsnmp_tdata *) netsnmp_request_get_list_data(request,
-                                                           TABLE_DATA2_TABLE);
+                                                           TABLE_TDATA_TABLE);
 }
 
 /** extracts the tdata container from the request structure */
@@ -332,7 +332,7 @@ netsnmp_container *
 netsnmp_tdata_extract_container(netsnmp_request_info *request)
 {
     netsnmp_tdata *tdata = netsnmp_request_get_list_data(request,
-                                                         TABLE_DATA2_TABLE);
+                                                         TABLE_TDATA_TABLE);
     return ( tdata ? tdata->container : NULL );
 }
 
