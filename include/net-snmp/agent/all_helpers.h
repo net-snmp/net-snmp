@@ -26,7 +26,7 @@ extern          "C" {
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_data.h>
 #include <net-snmp/agent/table_dataset.h>
-#include <net-snmp/agent/table_data2.h>
+#include <net-snmp/agent/table_tdata.h>
 #include <net-snmp/agent/table_dataset2.h>
 #include <net-snmp/agent/table_iterator.h>
 #include <net-snmp/agent/table_container.h>

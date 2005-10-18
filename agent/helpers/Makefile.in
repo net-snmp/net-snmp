@@ -32,7 +32,7 @@ INCLUDESUBDIRHEADERS=all_helpers.h \
         set_helper.h \
         table_data.h \
         table_dataset.h \
-        table_data2.h \
+        table_tdata.h \
         table_dataset2.h \
 	table_array.h \
 	table_container.h \
@@ -71,7 +71,7 @@ SRCS =  all_helpers.c \
 	table_iterator.c \
 	table_data.c \
 	table_dataset.c \
-	table_data2.c \
+	table_tdata.c \
 	table_dataset2.c \
 	table.c \
 	mode_end_call.c
@@ -98,7 +98,7 @@ OBJS =  all_helpers.o \
 	table_iterator.o \
 	table_data.o \
 	table_dataset.o \
-	table_data2.o \
+	table_tdata.o \
 	table_dataset2.o \
 	table.o \
 	mode_end_call.o
@@ -125,7 +125,7 @@ LOBJS = all_helpers.lo \
 	table_iterator.lo \
 	table_data.lo \
 	table_dataset.lo \
-	table_data2.lo \
+	table_tdata.lo \
 	table_dataset2.lo \
 	table.lo \
 	mode_end_call.lo
