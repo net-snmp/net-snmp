@@ -20,8 +20,7 @@ init_expr_table_data(void)
 {
     DEBUGMSGTL(("disman:expr:init", "init expression container\n"));
     if (!expr_table_data) {
-         expr_table_data = netsnmp_tdata_create("expExpressionTable");
-         expr_table_data->store_indexes = 1;
+         expr_table_data = netsnmp_tdata_create("expExpressionTable", 0);
          DEBUGMSGTL(("disman:expr:init", "create expression container (%x)\n",
                                           expr_table_data));
     }

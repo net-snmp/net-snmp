@@ -19,7 +19,7 @@ void
 init_objects_table_data(void)
 {
     if (!objects_table_data)
-        objects_table_data = netsnmp_tdata_create("mteObjectsTable");
+        objects_table_data = netsnmp_tdata_create("mteObjectsTable", 0);
 }
 
 

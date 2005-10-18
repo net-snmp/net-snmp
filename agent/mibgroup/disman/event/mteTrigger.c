@@ -26,12 +26,11 @@ init_trigger_table_data(void)
 {
     DEBUGMSGTL(("disman:event:init", "init trigger container\n"));
     if (!trigger_table_data) {
-        trigger_table_data = netsnmp_tdata_create("mteTriggerTable");
+        trigger_table_data = netsnmp_tdata_create("mteTriggerTable", 0);
         if (!trigger_table_data) {
             snmp_log(LOG_ERR, "failed to create mteTriggerTable");
             return;
         }
-        trigger_table_data->store_indexes = 1;
         DEBUGMSGTL(("disman:event:init", "create trigger container (%x)\n",
                                           trigger_table_data));
     }
@@ -548,7 +547,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
             DEBUGMSGOID(("disman:event:trigger:fire",
                          var->name, var->name_length));
             DEBUGMSG((   "disman:event:trigger:fire",
-                         " (boolean/threshold)\n"));;
+                         " (boolean/threshold) %d\n", var->type));;
             snmp_free_varbind( entry->old_results );
             entry->old_results = var;
             return;
