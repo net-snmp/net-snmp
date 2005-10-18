@@ -272,7 +272,7 @@ mteObjects_vblist( netsnmp_variable_list *vblist,
     size_t name_len;
 
     if (!oname || !*oname)
-        return;   /* Empty object name means nothing to add */
+        return 1;   /* Empty object name means nothing to add */
 
     DEBUGMSGTL(("disman:event:objects", "Objects add (%s, %s)\n",
                                          owner, oname ));
@@ -358,7 +358,7 @@ mteObjects_internal_vblist( netsnmp_variable_list *vblist,
     } else {
         DEBUGMSGTL(("disman:event:objects",
                     "Unknown internal objects tag (%s)\n", oname));
-        return;
+        return 1;
     }
 
     /*
@@ -369,4 +369,5 @@ mteObjects_internal_vblist( netsnmp_variable_list *vblist,
         ;
     vp->next_variable     = vblist->next_variable;
     vblist->next_variable = var;
+    return 0;
 }
