@@ -1,3 +1,3 @@
-config_require(disman/schedCore)
-config_require(disman/schedConf)
-config_require(disman/schedTable)
+config_require(disman/schedule/schedCore)
+config_require(disman/schedule/schedConf)
+config_require(disman/schedule/schedTable)
