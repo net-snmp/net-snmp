@@ -872,9 +872,18 @@ _table_set_add_indexes(netsnmp_table_data_set *table_set, struct tree *tp)
             config_pwarn("unknown index type");
             return;             /* xxx mem leak */
         }
-        if (index->isimplied)   /* if implied, mark it as such */
+        /*
+         * if implied, mark it as such. also mark fixed length
+         * octet strings as implied (ie no length prefix) as well.
+         * */
+        if ((index->isimplied) ||
+            ((TYPE_OCTETSTR == indexnode->type) &&  /* octet str */
+             (NULL != indexnode->ranges) &&         /* & has range */
+             (NULL == indexnode->ranges->next) &&   /*   but only one */
+             (indexnode->ranges->high ==            /*   & high==low */
+              indexnode->ranges->low)))
             type |= ASN_PRIVATE;
-            
+        
         DEBUGMSGTL(("table_set_add_table",
                     "adding default index of type %d\n", type));
         netsnmp_table_dataset_add_index(table_set, type);
