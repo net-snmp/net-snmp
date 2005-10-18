@@ -186,6 +186,7 @@ _mteEvent_fire_notify( struct mteEvent    *event,
                        oid *suffix, size_t sfx_len );
 int
 _mteEvent_fire_set(    struct mteEvent    *event,
+                       struct mteTrigger  *trigger,
                        oid *suffix, size_t sfx_len );
 
 int
@@ -224,7 +225,7 @@ mteEvent_fire( char *owner, char *event,      /* Event to invoke    */
     }
     if (entry->mteEventActions & MTE_EVENT_SET) {
         DEBUGMSGTL(("disman:event:fire", "Firing set event\n"));
-        _mteEvent_fire_set( entry, suffix, s_len );
+        _mteEvent_fire_set( entry, trigger, suffix, s_len );
         fired = 1;
     }
 
@@ -357,7 +358,10 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
      *   (skipping the initial snmpTrapOID varbind)
      */
     v2 = var.next_variable;
-    netsnmp_query_get( v2, entry->session );
+    if (entry->session)
+        netsnmp_query_get( v2, entry->session );
+    else
+        netsnmp_query_get( v2, trigger->session );
 
     /*
      * ... add any "internal" objects...
@@ -384,7 +388,8 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
 
 
 int
-_mteEvent_fire_set( struct mteEvent *entry,        /* The event to fire */
+_mteEvent_fire_set( struct mteEvent   *entry,      /* The event to fire */
+                    struct mteTrigger *trigger,    /* Trigger that fired */
                     oid  *suffix, size_t sfx_len ) /* Matching instance */
 {
     netsnmp_variable_list var;
@@ -418,7 +423,10 @@ _mteEvent_fire_set( struct mteEvent *entry,        /* The event to fire */
     memset( &var, 0, sizeof(var));
     snmp_set_var_objid( &var, set_oid, set_len );
     snmp_set_var_typed_integer( &var, ASN_INTEGER, entry->mteSetValue );
-    return netsnmp_query_set( &var, entry->session );
+    if (entry->session)
+        return netsnmp_query_set( &var, entry->session );
+    else
+        return netsnmp_query_set( &var, trigger->session );
 
     /* XXX - Need to check result */
 }
