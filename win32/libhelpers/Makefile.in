@@ -38,7 +38,6 @@ CLEAN :
 	-@erase "$(INTDIR)\table_data.obj"
 	-@erase "$(INTDIR)\table_tdata.obj"
 	-@erase "$(INTDIR)\table_dataset.obj"
-	-@erase "$(INTDIR)\table_dataset2.obj"
 	-@erase "$(INTDIR)\table_iterator.obj"
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\watcher.obj"
@@ -115,7 +114,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\table_data.obj" \
 	"$(INTDIR)\table_tdata.obj" \
 	"$(INTDIR)\table_dataset.obj" \
-	"$(INTDIR)\table_dataset2.obj" \
 	"$(INTDIR)\table_iterator.obj" \
 	"$(INTDIR)\watcher.obj"
 
@@ -153,7 +151,6 @@ CLEAN :
 	-@erase "$(INTDIR)\table_data.obj"
 	-@erase "$(INTDIR)\table_tdata.obj"
 	-@erase "$(INTDIR)\table_dataset.obj"
-	-@erase "$(INTDIR)\table_dataset2.obj"
 	-@erase "$(INTDIR)\table_iterator.obj"
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\vc??.pdb"
@@ -231,7 +228,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\table_data.obj" \
 	"$(INTDIR)\table_tdata.obj" \
 	"$(INTDIR)\table_dataset.obj" \
-	"$(INTDIR)\table_dataset2.obj" \
 	"$(INTDIR)\table_iterator.obj" \
 	"$(INTDIR)\watcher.obj"
 
@@ -388,12 +384,6 @@ SOURCE=..\..\agent\helpers\table_tdata.c
 SOURCE=..\..\agent\helpers\table_dataset.c
 
 "$(INTDIR)\table_dataset.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\agent\helpers\table_dataset2.c
-
-"$(INTDIR)\table_dataset2.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
