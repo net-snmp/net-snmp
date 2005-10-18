@@ -11,7 +11,7 @@
 #include "mteEventNotificationTable.h"
 #include "mteObjectsTable.h"
 
-static netsnmp_table_data2_set *table_set2 = NULL;
+static netsnmp_table_data_set *table_set = NULL;
 
 /** Initialize the mteEventTable table by defining its contents and how it's structured */
 void
@@ -24,28 +24,28 @@ initialize_table_mteEventTable(void)
     /*
      * create the table structure itself 
      */
-    table_set2 = netsnmp_create_table_data2_set("mteEventTable");
+    table_set = netsnmp_create_table_data_set("mteEventTable");
 
     /*
      * comment this out or delete if you don't support creation of new rows 
      */
-    table_set2->allow_creation = 1;
+    table_set->allow_creation = 1;
     /* mark the row status column */
-    table_set2->rowstatus_column = COLUMN_MTEEVENTENTRYSTATUS;
+    table_set->rowstatus_column = COLUMN_MTEEVENTENTRYSTATUS;
 
     /***************************************************
      * Adding indexes
      */
     DEBUGMSGTL(("initialize_table_mteEventTable",
                 "adding indexes to table mteEventTable\n"));
-    netsnmp_table_set2_add_indexes(table_set2,
+    netsnmp_table_set_add_indexes(table_set,
                                   ASN_OCTET_STR,   /* index: mteOwner */
                                   ASN_PRIV_IMPLIED_OCTET_STR, /* index: mteEventName */
                                   0);
 
     DEBUGMSGTL(("initialize_table_mteEventTable",
                 "adding column types to table mteEventTable\n"));
-    netsnmp_table_set2_multi_add_default_row(table_set2,
+    netsnmp_table_set_multi_add_default_row(table_set,
                                             COLUMN_MTEEVENTNAME,
                                             ASN_OCTET_STR, 0, NULL, 0,
                                             COLUMN_MTEEVENTCOMMENT,
@@ -58,7 +58,7 @@ initialize_table_mteEventTable(void)
                                             ASN_INTEGER, 1, NULL, 0, 0);
 
     /* keep index values around for comparisons later */
-    table_set2->table->store_indexes = 1;
+    table_set->table->store_indexes = 1;
     /*
      * registering the table with the master agent 
      */
@@ -66,12 +66,12 @@ initialize_table_mteEventTable(void)
      * note: if you don't need a subhandler to deal with any aspects
      * of the request, change mteEventTable_handler to "NULL" 
      */
-    netsnmp_register_table_data2_set(netsnmp_create_handler_registration
+    netsnmp_register_table_data_set(netsnmp_create_handler_registration
                                     ("mteEventTable",
                                      mteEventTable_handler,
                                      mteEventTable_oid,
                                      mteEventTable_oid_len,
-                                     HANDLER_CAN_RWRITE), table_set2, NULL);
+                                     HANDLER_CAN_RWRITE), table_set, NULL);
 }
 
 /** Initializes the mteEventTable module */
@@ -131,7 +131,7 @@ parse_notificationEvent(const char *token, char *line) {
     oid             oid_buf[MAX_OID_LEN];
     size_t          oid_buf_len = sizeof(oid_buf);
     int             wild = 1;
-    netsnmp_table_data2row *row;
+    netsnmp_table_row *row;
     long tlong;
     char tc;
 
@@ -146,9 +146,7 @@ parse_notificationEvent(const char *token, char *line) {
         return;
     }
 
-    for(row = netsnmp_table_data2_set_get_first_row(table_set2);
-        row;
-        row = netsnmp_table_data2_set_get_next_row(table_set2, row)) {
+    for(row = table_set->table->first_row; row; row = row->next) {
         if (strcmp(row->indexes->val.string, owner) == 0 &&
             strcmp(row->indexes->next_variable->val.string,
                    name_buf) == 0) {
@@ -174,7 +172,7 @@ parse_notificationEvent(const char *token, char *line) {
      * add to the mteEventNotificationtable to point to the
      * notification and the objects.
      */
-    row = netsnmp_tdata_create_row();
+    row = netsnmp_create_table_data_row();
 
     /* indexes */
     netsnmp_table_row_add_index(row, ASN_OCTET_STR, owner, strlen(owner));
@@ -183,20 +181,20 @@ parse_notificationEvent(const char *token, char *line) {
 
 
     /* columns */
-    netsnmp_set_data2_row_column(row, COLUMN_MTEEVENTNOTIFICATION, ASN_OBJECT_ID,
+    netsnmp_set_row_column(row, COLUMN_MTEEVENTNOTIFICATION, ASN_OBJECT_ID,
                            (char *) oid_buf, oid_buf_len * sizeof(oid));
-    netsnmp_set_data2_row_column(row, COLUMN_MTEEVENTNOTIFICATIONOBJECTSOWNER,
+    netsnmp_set_row_column(row, COLUMN_MTEEVENTNOTIFICATIONOBJECTSOWNER,
                            ASN_OCTET_STR, owner, strlen(owner));
-    netsnmp_set_data2_row_column(row, COLUMN_MTEEVENTNOTIFICATIONOBJECTS,
+    netsnmp_set_row_column(row, COLUMN_MTEEVENTNOTIFICATIONOBJECTS,
                            ASN_OCTET_STR, name_buf, strlen(name_buf));
 
-    netsnmp_tdata_add_row(mteEventNotif_table_set2->table, row);
+    netsnmp_table_data_add_row(mteEventNotif_table_set->table, row);
 
     /*
      * add to the mteEventTable to make it a notification to trigger
      * notification and the objects.
      */
-    row = netsnmp_tdata_create_row();
+    row = netsnmp_create_table_data_row();
 
     /* indexes */
     netsnmp_table_row_add_index(row, ASN_OCTET_STR, owner, strlen(owner));
@@ -206,16 +204,16 @@ parse_notificationEvent(const char *token, char *line) {
 
     /* columns */
     tc = (u_char)0x80;
-    netsnmp_set_data2_row_column(row, COLUMN_MTEEVENTACTIONS, ASN_OCTET_STR,
+    netsnmp_set_row_column(row, COLUMN_MTEEVENTACTIONS, ASN_OCTET_STR,
                            &tc, 1);
     tlong = MTETRIGGERENABLED_TRUE;
-    netsnmp_set_data2_row_column(row, COLUMN_MTEEVENTENABLED,
+    netsnmp_set_row_column(row, COLUMN_MTEEVENTENABLED,
                            ASN_INTEGER, (char *) &tlong, sizeof(tlong));
     tlong = RS_ACTIVE;
-    netsnmp_set_data2_row_column(row, COLUMN_MTEEVENTENTRYSTATUS,
+    netsnmp_set_row_column(row, COLUMN_MTEEVENTENTRYSTATUS,
                            ASN_INTEGER, (char *) &tlong, sizeof(tlong));
 
-    netsnmp_tdata_add_row(table_set2->table, row);
+    netsnmp_table_data_add_row(table_set->table, row);
     
     /*
      * now all the objects to put into the trap's object row
@@ -248,33 +246,31 @@ run_mte_events(struct mteTriggerTable_data *item,
 
     netsnmp_variable_list *var_list = NULL;
 
-    netsnmp_table_data2row *row, *notif_row;
-    netsnmp_table_data2_set_storage *col1, *tc, *no, *noo;
+    netsnmp_table_row *row, *notif_row;
+    netsnmp_table_data_set_storage *col1, *tc, *no, *noo;
 
-    for(row = netsnmp_table_data2_set_get_first_row(table_set2);
-        row;
-        row = netsnmp_table_data2_set_get_next_row(table_set2, row)) {
+    for(row = table_set->table->first_row; row; row = row->next) {
         if (strcmp(row->indexes->val.string, eventobjowner) == 0 &&
             strcmp(row->indexes->next_variable->val.string,
                    eventobjname) == 0) {
             /* run this event */
-            col1 = (netsnmp_table_data2_set_storage *) row->data;
+            col1 = (netsnmp_table_data_set_storage *) row->data;
             
-            tc = netsnmp_table_data2_set_find_column(col1,
+            tc = netsnmp_table_data_set_find_column(col1,
                                                     COLUMN_MTEEVENTACTIONS);
             if (!tc->data.bitstring[0] & 0x80) {
                 /* not a notification.  next! (XXX: do sets) */
                 continue;
             }
 
-            tc = netsnmp_table_data2_set_find_column(col1,
+            tc = netsnmp_table_data_set_find_column(col1,
                                                     COLUMN_MTEEVENTENABLED);
             if (*(tc->data.integer) != 1) {
                 /* not enabled.  next! */
                 continue;
             }
 
-            if (!mteEventNotif_table_set2) {
+            if (!mteEventNotif_table_set) {
                 /* no notification info */
                 continue;
             }
@@ -283,20 +279,19 @@ run_mte_events(struct mteTriggerTable_data *item,
             var_list = NULL;
 
             /* XXX: get notif information */
-            for(notif_row = netsnmp_table_data2_set_get_first_row(mteEventNotif_table_set2);
-                notif_row;
-                notif_row = netsnmp_table_data2_set_get_next_row(mteEventNotif_table_set2, notif_row)) {
+            for(notif_row = mteEventNotif_table_set->table->first_row;
+                notif_row; notif_row = notif_row->next) {
                 if (strcmp(notif_row->indexes->val.string,
                            eventobjowner) == 0 &&
                     strcmp(notif_row->indexes->next_variable->val.string,
                            eventobjname) == 0) {
 
                     /* run this event */
-                    col1 = (netsnmp_table_data2_set_storage *) notif_row->data;
+                    col1 = (netsnmp_table_data_set_storage *) notif_row->data;
             
-                    tc = netsnmp_table_data2_set_find_column(col1, COLUMN_MTEEVENTNOTIFICATION);
-                    no = netsnmp_table_data2_set_find_column(col1, COLUMN_MTEEVENTNOTIFICATIONOBJECTS);
-                    noo = netsnmp_table_data2_set_find_column(col1, COLUMN_MTEEVENTNOTIFICATIONOBJECTSOWNER);
+                    tc = netsnmp_table_data_set_find_column(col1, COLUMN_MTEEVENTNOTIFICATION);
+                    no = netsnmp_table_data_set_find_column(col1, COLUMN_MTEEVENTNOTIFICATIONOBJECTS);
+                    noo = netsnmp_table_data_set_find_column(col1, COLUMN_MTEEVENTNOTIFICATIONOBJECTSOWNER);
                     if (!tc)
                         continue; /* no notification to be had. XXX: return? */
                     

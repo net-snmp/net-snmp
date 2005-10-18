@@ -8,7 +8,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "mteEventNotificationTable.h"
 
-netsnmp_table_data2_set *mteEventNotif_table_set2;
+netsnmp_table_data_set *mteEventNotif_table_set;
 
 
 /** Initialize the mteEventNotificationTable table by defining its contents and how it's structured */
@@ -23,19 +23,19 @@ initialize_table_mteEventNotificationTable(void)
     /*
      * create the table structure itself 
      */
-    mteEventNotif_table_set2 = netsnmp_create_table_data2_set("mteEventNotificationTable");
+    mteEventNotif_table_set = netsnmp_create_table_data_set("mteEventNotificationTable");
 
     /*
      * comment this out or delete if you don't support creation of new rows 
      */
-    mteEventNotif_table_set2->allow_creation = 1;
+    mteEventNotif_table_set->allow_creation = 1;
 
     /***************************************************
      * Adding indexes
      */
     DEBUGMSGTL(("initialize_table_mteEventNotificationTable",
                 "adding indexes to table mteEventNotificationTable\n"));
-    netsnmp_table_set2_add_indexes(mteEventNotif_table_set2,
+    netsnmp_table_set_add_indexes(mteEventNotif_table_set,
                                   /* index: mteOwner */
                                   ASN_OCTET_STR,
                                   /* index: mteEventName */
@@ -44,7 +44,7 @@ initialize_table_mteEventNotificationTable(void)
 
     DEBUGMSGTL(("initialize_table_mteEventNotificationTable",
                 "adding column types to table mteEventNotificationTable\n"));
-    netsnmp_table_set2_multi_add_default_row(mteEventNotif_table_set2,
+    netsnmp_table_set_multi_add_default_row(mteEventNotif_table_set,
                                             COLUMN_MTEEVENTNOTIFICATION,
                                             ASN_OBJECT_ID, 1, NULL, 0,
                                             COLUMN_MTEEVENTNOTIFICATIONOBJECTSOWNER,
@@ -53,7 +53,7 @@ initialize_table_mteEventNotificationTable(void)
                                             ASN_OCTET_STR, 1, NULL, 0, 0);
 
     /* keep index values around for comparisons later */
-    mteEventNotif_table_set2->table->store_indexes = 1;
+    mteEventNotif_table_set->table->store_indexes = 1;
     /*
      * registering the table with the master agent 
      */
@@ -61,12 +61,12 @@ initialize_table_mteEventNotificationTable(void)
      * note: if you don't need a subhandler to deal with any aspects
      * of the request, change mteEventNotificationTable_handler to "NULL" 
      */
-    netsnmp_register_table_data2_set(netsnmp_create_handler_registration
+    netsnmp_register_table_data_set(netsnmp_create_handler_registration
                                     ("mteEventNotificationTable",
                                      mteEventNotificationTable_handler,
                                      mteEventNotificationTable_oid,
                                      mteEventNotificationTable_oid_len,
-                                     HANDLER_CAN_RWRITE), mteEventNotif_table_set2, NULL);
+                                     HANDLER_CAN_RWRITE), mteEventNotif_table_set, NULL);
 }
 
 /** Initializes the mteEventNotificationTable module */
