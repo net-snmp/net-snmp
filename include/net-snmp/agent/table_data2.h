@@ -1,5 +1,5 @@
 /*
- * table_iterator.h 
+ * table_data2.h 
  */
 #ifndef _TABLE_DATA2_HANDLER_H_
 #define _TABLE_DATA2_HANDLER_H_
@@ -20,27 +20,32 @@ extern          "C" {
 #define TABLE_DATA2_ROW  "table_data2"
 #define TABLE_DATA2_TABLE "table_data2_table"
 
+#define TDATA_FLAG_NO_STORE_INDEXES   0x01
+
     /*
      * The (table-independent) per-row data structure
      * This is a wrapper round the table-specific per-row data
      *   structure, which is referred to as a "table entry"
+     *
+     * It should be regarded as an opaque, private data structure,
+     *   and shouldn't be accessed directly.
      */
     typedef struct netsnmp_tdata_row_s {
         netsnmp_index   oid_index;      /* table_container index format */
         netsnmp_variable_list *indexes; /* stored permanently if store_indexes = 1 */
         void           *data;   /* the data to store */
-
-        struct netsnmp_tdata_row_s *next, *prev;        /* if used in a list */
     } netsnmp_tdata_row;
 
     /*
      * The data structure to hold a complete table.
+     *
+     * This should be regarded as an opaque, private data structure,
+     *   and shouldn't be accessed directly.
      */
     typedef struct netsnmp_tdata_s {
         netsnmp_variable_list *indexes_template;        /* containing only types */
         char           *name;   /* if !NULL, it's registered globally */
-        int             flags;  /* not currently used */
-        int             store_indexes;
+        int             flags;  /* This field may legitimately be accessed by external code */
         netsnmp_container *container;
     } netsnmp_tdata;
 
@@ -53,7 +58,7 @@ typedef  struct netsnmp_tdata_s     netsnmp_table_data2;
  * TData API: Table maintenance
  * ============================ */
 
-    netsnmp_tdata     *netsnmp_tdata_create(    const char       *name);
+    netsnmp_tdata     *netsnmp_tdata_create(const char *name, long flags);
     netsnmp_tdata_row *netsnmp_tdata_create_row(void);
     netsnmp_tdata_row *netsnmp_tdata_clone_row( netsnmp_tdata_row *row);
     void           *netsnmp_tdata_delete_row(   netsnmp_tdata_row *row);
