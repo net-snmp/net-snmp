@@ -992,8 +992,12 @@ main(int argc, char *argv[])
      * initialize local modules 
      */
     if (agentx_subagent) {
+#ifdef USING_SNMPV3_SNMPENGINE_MODULE
         extern void register_snmpEngine_scalars_context(const char *);
+#endif
+#ifdef USING_SNMPV3_USMUSER_MODULE
         extern void init_register_usmUser_context(const char *);
+#endif
         init_subagent();
 #ifdef USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE
         /* register the notification log table */
@@ -1006,15 +1010,18 @@ main(int argc, char *argv[])
             init_notification_log();
         }
 #endif
+#ifdef USING_SNMPV3_SNMPENGINE_MODULE
         /*
          * register scalars from SNMP-FRAMEWORK-MIB::snmpEngineID group;
          * allows engineID probes via the master agent under the
          * snmptrapd context
          */
         register_snmpEngine_scalars_context("snmptrapd");
-
+#endif
+#ifdef USING_SNMPV3_USMUSER_MODULE
         /* register ourselves as having a USM user database */
         init_register_usmUser_context("snmptrapd");
+#endif
     }
 #endif
 
