@@ -485,7 +485,10 @@ parse_mteMonitor(const char *token, char *line)
         mteObjects_removeEntries( "snmpd.conf", tname );
         return;
     }
-    entry->session               = sess;
+    if (sess)
+        entry->session           = sess;
+    else
+        entry->session           = netsnmp_query_get_default_session();
     entry->flags                |= flags;
     entry->mteTriggerTest       |= test;
     entry->mteTriggerFrequency   = repeat;
