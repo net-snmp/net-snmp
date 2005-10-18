@@ -83,7 +83,6 @@ INCLUDESUBDIRHEADERS=README \
         mt_support.h \
         oid_stash.h \
         snmp_enum.h \
-        snmp_locking.h \
         snmp_secmod.h \
         ucd_compat.h \
         vacm.h \
