@@ -10,7 +10,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/agent/table.h>
-#include <net-snmp/agent/table_data2.h>
+#include <net-snmp/agent/table_tdata.h>
 #include <net-snmp/agent/table_container.h>
 #include <net-snmp/agent/read_only.h>
 
