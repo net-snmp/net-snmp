@@ -51,6 +51,7 @@ _init_default_iquery_session( int majorID, int minorID,
     if (secName)
         netsnmp_query_set_default_session(
              netsnmp_iquery_user_session(secName));
+    return SNMPERR_SUCCESS;
 }
 
 void init_iquery(void){
