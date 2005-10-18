@@ -50,7 +50,7 @@ _netsnmp_tdata_generate_index_oid(netsnmp_tdata_row *row)
 
 /** creates and returns a 'tdata' table data structure */
 netsnmp_tdata *
-netsnmp_tdata_create(const char *name)
+netsnmp_tdata_create(const char *name, long flags)
 {
     netsnmp_tdata *table = SNMP_MALLOC_TYPEDEF(netsnmp_tdata);
     if ( !table )
@@ -150,10 +150,15 @@ netsnmp_tdata_add_row(netsnmp_tdata     *table,
     }
 
     /*
-     * we don't store the index info as it
-     * takes up memory. 
+     * The individual index values probably won't be needed,
+     *    so this memory can be released.
+     * Note that this is purely internal to the helper.
+     * The calling application can set this flag as
+     *    a hint to the helper that these values aren't
+     *    required, but it's up to the helper as to
+     *    whether it takes any notice or not!
      */
-    if (!table->store_indexes) {
+    if (table->flags & TDATA_FLAG_NO_STORE_INDEXES) {
         snmp_free_varbind(row->indexes);
         row->indexes = NULL;
     }

@@ -20,8 +20,7 @@ init_expObject_table_data(void)
 {
     DEBUGMSGTL(("disman:expr:init", "init expObject container\n"));
     if (!expObject_table_data) {
-         expObject_table_data = netsnmp_tdata_create("expObjectTable");
-         expObject_table_data->store_indexes = 1;
+         expObject_table_data = netsnmp_tdata_create("expObjectTable", 0);
          DEBUGMSGTL(("disman:expr:init", "create expObject container (%x)\n",
                                           expObject_table_data));
     }

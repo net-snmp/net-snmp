@@ -22,8 +22,7 @@ init_event_table_data(void)
 {
     DEBUGMSGTL(("disman:event:init", "init event container\n"));
     if (!event_table_data) {
-        event_table_data = netsnmp_tdata_create("mteEventTable");
-        event_table_data->store_indexes = 1;
+        event_table_data = netsnmp_tdata_create("mteEventTable", 0);
         DEBUGMSGTL(("disman:event:init", "create event container (%x)\n",
                                       event_table_data));
     }
