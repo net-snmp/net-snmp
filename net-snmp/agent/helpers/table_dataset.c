@@ -1091,6 +1091,21 @@ netsnmp_config_parse_add_row(const char *token, char *line)
  *
  * ================================== */
 
+/** returns the first row in the table */
+netsnmp_table_row *
+netsnmp_table_data_set_get_first_row(netsnmp_table_data_set *table)
+{
+    return netsnmp_table_data_get_first_row(table->table);
+}
+
+/** returns the next row in the table */
+netsnmp_table_row *
+netsnmp_table_data_set_get_next_row(netsnmp_table_data_set *table,
+                                    netsnmp_table_row      *row)
+{
+    return netsnmp_table_data_get_next_row(table->table, row);
+}
+
 int
 netsnmp_table_set_num_rows(netsnmp_table_data_set *table)
 {

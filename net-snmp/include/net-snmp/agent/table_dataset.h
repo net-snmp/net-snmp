@@ -151,7 +151,10 @@ extern          "C" {
  * DataSet API: Row operations
  * ============================ */
 
-    int netsnmp_table_data_num_rows(netsnmp_table_data *table);
+    netsnmp_table_row *netsnmp_table_data_set_get_first_row(netsnmp_table_data_set *table);
+    netsnmp_table_row *netsnmp_table_data_set_get_next_row( netsnmp_table_data_set *table,
+                                                            netsnmp_table_row      *row);
+    int netsnmp_table_set_num_rows(netsnmp_table_data_set *table);
 
 
 /* ============================
