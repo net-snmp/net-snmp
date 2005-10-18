@@ -70,7 +70,7 @@ netsnmp_create_table_data2_set(const char *table_name)
         SNMP_MALLOC_TYPEDEF(netsnmp_table_data2_set);
     if (!table_set2)
         return NULL;
-    table_set2->table = netsnmp_tdata_create(table_name);
+    table_set2->table = netsnmp_tdata_create(table_name, 0);
     return table_set2;
 }
 
@@ -733,7 +733,7 @@ netsnmp_table_data2_set_helper_handler(netsnmp_mib_handler *handler,
              */
             if (newrowstash->created) {
 		netsnmp_request_add_list_data(request,
-			netsnmp_create_data_list(TABLE_DATA2_NAME,
+			netsnmp_create_data_list(TABLE_TDATA_NAME,
 						 newrow, NULL));
             }
             break;

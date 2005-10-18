@@ -1,8 +1,8 @@
 /*
  * table_data2.h 
  */
-#ifndef _TABLE_DATA2_HANDLER_H_
-#define _TABLE_DATA2_HANDLER_H_
+#ifndef _TABLE_TDATA_HANDLER_H_
+#define _TABLE_TDATA_HANDLER_H_
 
 #ifdef __cplusplus
 extern          "C" {
@@ -16,9 +16,9 @@ extern          "C" {
      * functions found below.
      */
 
-#define TABLE_DATA2_NAME "table_data2"
-#define TABLE_DATA2_ROW  "table_data2"
-#define TABLE_DATA2_TABLE "table_data2_table"
+#define TABLE_TDATA_NAME  "table_tdata"
+#define TABLE_TDATA_ROW   "table_tdata"
+#define TABLE_TDATA_TABLE "table_tdata_table"
 
 #define TDATA_FLAG_NO_STORE_INDEXES   0x01
 
@@ -142,4 +142,4 @@ typedef  struct netsnmp_tdata_s     netsnmp_table_data2;
 }
 #endif
 
-#endif                          /* _TABLE_DATA2_HANDLER_H_ */
+#endif                          /* _TABLE_TDATA_HANDLER_H_ */
