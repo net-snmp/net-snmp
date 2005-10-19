@@ -818,6 +818,45 @@ send_enterprise_trap_vars(int trap,
     return;
 }
 
+/**
+ * Captures responses or the lack there of from INFORMs that were sent
+ * 1) a response is received from an INFORM
+ * 2) one isn't received and the retries/timeouts have failed
+*/
+int
+handle_inform_response(int op, netsnmp_session * session,
+                       int reqid, netsnmp_pdu *pdu,
+                       void *magic)
+{
+    /* XXX: possibly stats update */
+    switch (op) {
+
+    case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+        snmp_increment_statistic(STAT_SNMPINPKTS);
+        DEBUGMSGTL(("trap", "received the inform response for reqid=%d\n",
+                    reqid));
+        break;
+
+    case NETSNMP_CALLBACK_OP_TIMED_OUT:
+        DEBUGMSGTL(("trap",
+                    "received a timeout sending an inform for reqid=%d\n",
+                    reqid));
+        break;
+
+    case NETSNMP_CALLBACK_OP_SEND_FAILED:
+        DEBUGMSGTL(("trap",
+                    "failed to send an inform for reqid=%d\n",
+                    reqid));
+        break;
+
+    default:
+        DEBUGMSGTL(("trap", "received op=%d for reqid=%d when trying to send an inform\n", op, reqid));
+    }
+
+    return 1;
+}
+
+
 /*
  * send_trap_to_sess: sends a trap to a session but assumes that the
  * pdu is constructed correctly for the session type. 
@@ -826,7 +865,6 @@ void
 send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
 {
     netsnmp_pdu    *pdu;
-    netsnmp_pdu    *response;
     int            result;
 
     if (!sess || !template_pdu)
@@ -849,10 +887,13 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
          || template_pdu->command == AGENTX_MSG_NOTIFY
 #endif
        ) {
-        result = snmp_synch_response(sess, pdu, &response);
-        result = !result;	/* XXX - different return code :-( */
-    } else
+        result =
+            snmp_async_send(sess, pdu, &handle_inform_response, NULL);
+        
+    } else {
         result = snmp_send(sess, pdu);
+    }
+
     if (result == 0) {
         snmp_sess_perror("snmpd: send_trap", sess);
         /* snmp_free_pdu(pdu); */
