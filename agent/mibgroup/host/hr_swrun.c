@@ -1283,7 +1283,7 @@ Init_HR_SWRun(void)
     pstat_getproc(proc_table, sizeof(struct pst_status), nproc, 0);
 
 #elif defined(solaris2)
-    if (!getKstatInt("unix", "system_misc", "nproc", &nproc)) {
+    if (getKstatInt("unix", "system_misc", "nproc", &nproc)) {
         current_proc_entry = nproc + 1;
         return;
     }
