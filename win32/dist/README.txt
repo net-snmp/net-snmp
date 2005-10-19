@@ -99,7 +99,10 @@ Please see the section 'Co-existence with Microsoft SNMP services' in README.win
 INSTALLATION - PERL MODULE
 
   Included in the (install folder)\Perl folder is an ActiveState Perl 
-  5.8.x. PPM package.
+  5.8.x. PPM package.  Note:  In previous version of Net-SNMP, the PPM
+  package was called Net-SNMP.ppd.  The package has been renamed to
+  NetSNMP.ppd to prevent conflicts with the Net::SNMP package available
+  from ActiveState.
 
   The Perl modules require the Win32 REGEX (Regular Expression) package which 
   is available from:
@@ -113,12 +116,12 @@ INSTALLATION - PERL MODULE
 
   Remove any existing Net-SNMP Perl modules:
 
-    ppm remove Net-SNMP
+    ppm remove NetSNMP
 
   Install the Perl modules:
 
     cd (install folder)\Perl
-    ppm install Net-SNMP.ppd
+    ppm install NetSNMP.ppd
 
   Perform a basic test using:
 
@@ -152,7 +155,7 @@ BUILD INFORMATION
   Built by:		
   Installer Package by: 
   
-  OS:			Windows 2000 SP3
+  OS:			Windows 2000 SP4
   Compiler:		MSVC++ 6.0 SP5
   Platform SDK:		February 2003
   Perl:			ActivePerl 5.8.2 build 808
