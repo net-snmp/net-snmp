@@ -294,9 +294,9 @@ SectionEnd
 
 Section "Perl SNMP Modules" SEC04
   SetOutPath "$INSTDIR\perl\x86"
-  File "perl\x86\Net-SNMP.tar.gz"
+  File "perl\x86\NetSNMP.tar.gz"
   SetOutPath "$INSTDIR\perl"
-  File "perl\Net-SNMP.ppd"
+  File "perl\NetSNMP.ppd"
   SetOutPath "$INSTDIR\bin"
   File "bin\net-snmp-perl-test.pl"
 SectionEnd
@@ -653,8 +653,8 @@ Section Uninstall
   Delete "$INSTDIR\unregisteragent.bat"
   Delete "$INSTDIR\registertrapd.bat"
   Delete "$INSTDIR\unregistertrapd.bat"
-  Delete "$INSTDIR\perl\Net-SNMP.ppd"
-  Delete "$INSTDIR\perl\x86\Net-SNMP.tar.gz"
+  Delete "$INSTDIR\perl\NetSNMP.ppd"
+  Delete "$INSTDIR\perl\x86\NetSNMP.tar.gz"
   Delete "$INSTDIR\include\net-snmp\net-snmp-config.h"
   Delete "$INSTDIR\include\net-snmp\agent\agent_module_config.h"
   Delete "$INSTDIR\include\net-snmp\agent\mib_module_config.h"
@@ -853,6 +853,8 @@ Section Uninstall
   Delete "$INSTDIR\include\net-snmp\system\dynix.h"
   Delete "$INSTDIR\include\net-snmp\system\bsd.h"
   Delete "$INSTDIR\include\net-snmp\system\solaris.h"
+  Delete "$INSTDIR\include\net-snmp\system\darwin8.h"
+  Delete "$INSTDIR\include\net-snmp\system\solaris2.10.h"
 
   Delete "$INSTDIR\include\net-snmp\library\snmp_transport.h"
   Delete "$INSTDIR\include\net-snmp\library\container_binary_array.h"
@@ -1003,6 +1005,7 @@ Section Uninstall
   RMDir "$INSTDIR\include\net-snmp\agent"
   RMDir "$INSTDIR\include\net-snmp"
   RMDir "$INSTDIR\include"
+  RMDir "$INSTDIR\log"
   RMDir "$INSTDIR"
   ; Delete the environment variables
   ;Push "SNMPCONFPATH"
