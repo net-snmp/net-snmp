@@ -755,7 +755,7 @@ Perl:
 
 AC_ARG_ENABLE(embedded-perl,
 [
-  --enable-embedded-perl          Embed perl in the SNMP agent.
+  --enable-embedded-perl          Embed perl in the SNMP agent and snmptrapd.
                                   [forces --with-perl-modules as well.]],
     embed_perl="$enableval", embed_perl="no")
 
