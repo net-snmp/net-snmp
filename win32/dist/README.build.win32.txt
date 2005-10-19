@@ -62,7 +62,7 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
     to:
 
       #undef USING_EXAMPLES_UCDDEMOPUBLIC_MODULE
-      #undef USING_EXAMPLES_EXAMPLE_MODULE    
+      #undef USING_EXAMPLES_EXAMPLE_MODULE
 
 5.  cd (source dir)\win32
 
@@ -73,20 +73,20 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
     Net-SNMP build and install options
     ==================================
     
-    1. OpenSSL support:      disabled
-    2. Platform SDK support: enabled
+    1. OpenSSL support:      		disabled
+    2. Platform SDK support: 		enabled
     
-    3. Install path:         c:/usr
-    4. Install after build:  enabled
+    3. Install path:         		c:/usr
+    4. Install after build:  		enabled
     
-    5. Perl modules:         enabled
-    6. Install perl modules: disabled
+    5. Perl modules:         		enabled
+    6. Install perl modules: 		disabled
     
-    7. Quiet build (logged): enabled
-    8. Debug mode:           disabled
-    9. IPv6 transports:      disabled
+    7. Quiet build (logged): 		enabled
+    8. Debug mode:           		disabled
+    9. IPv6 transports:      		disabled
 
-    10. Install development files   enabled
+    10. Install development files   	enabled
     
     F.  Finished - start build
     Q.  Quit - abort build
@@ -111,24 +111,24 @@ Creating the Perl package
 4.  cd (source dir)
     cd perl
 
-5.  tar cvf Net-SNMP.tar blib; gzip --best Net-SNMP.tar
+5.  tar cvf NetSNMP.tar blib; gzip --best NetSNMP.tar
 
 6.  Open a Windows command prompt (CMD) and cd (source dir)\perl
 
-7.  ren Bundle-NetSNMP.ppd Net-SNMP.ppd
+7.  ren Bundle-NetSNMP.ppd NetSNMP.ppd
 
-8.  Modify Net-SNMP.ppd to look like the following.  Change the 
+8.  Modify NetSNMP.ppd to look like the following.  Change the 
     VERSION="x,x,x,x" line to the correct values.  Do NOT change 
     * lines in the original file.
 
-<SOFTPKG NAME="Net-SNMP" VERSION="5,2,0,0">
+<SOFTPKG NAME="NetSNMP" VERSION="5,2,0,0">
     <TITLE>Net-SNMP</TITLE>
     <ABSTRACT>Object Oriented Interface to Net-SNMP</ABSTRACT>
     <AUTHOR></AUTHOR>
     <IMPLEMENTATION>
 *        <OS NAME="MSWin32" />
 *        <ARCHITECTURE NAME="MSWin32-x86-multi-thread-5.8" />
-        <CODEBASE HREF="x86/Net-SNMP.tar.gz" />
+        <CODEBASE HREF="x86/NetSNMP.tar.gz" />
     </IMPLEMENTATION>
 </SOFTPKG>
 
@@ -146,8 +146,8 @@ Creating the Perl package
     copy win32\dist\README.txt "c:\usr"
     copy win32\dist\scripts\net-snmp-perl-test.pl "c:\usr\bin"
 
-    copy perl\Net-SNMP.ppd "c:\usr\Perl"
-    copy perl\Net-SNMP.tar.gz "c:\usr\Perl\x86"
+    copy perl\NetSNMP.ppd "c:\usr\Perl"
+    copy perl\NetSNMP.tar.gz "c:\usr\Perl\x86"
 
 11. Update the BUILD INFORMATION section of c:\usr\README.txt
 
