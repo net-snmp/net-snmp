@@ -54,7 +54,7 @@ can be used as a trap handle directive:
 .br
 .RS
 .P
-traphandle /usr/bin/perl BINDIR/traptoemail -s mysmtp.somewhere.com -f admin@somewhere.com me@somewhere.com
+traphandle default /usr/bin/perl BINDIR/traptoemail -s mysmtp.somewhere.com -f admin@somewhere.com me@somewhere.com
 .RE
 .RE
 .IP "snmptrapdaddr [<transport-specifier>:]<transport-address>[,...]"
