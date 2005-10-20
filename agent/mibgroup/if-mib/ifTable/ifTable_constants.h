@@ -11,6 +11,11 @@
 extern          "C" {
 #endif
 
+    /*
+     * scalars
+     */
+#define IFTABLE_LAST_CHANGE  1,3,6,1,2,1,31,1,5
+
 
     /*
      * column number definitions for table ifTable 

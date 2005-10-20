@@ -19,6 +19,12 @@
 
 #include "ifTable_data_access.h"
 
+/*
+ * flag so we know not to set row/table last change times
+ * during startup.
+ */
+static int _first_load = 1;
+
 /** @defgroup data_access data_access: Routines to access data
  *
  * These routines are used to locate the data used to satisfy
@@ -156,6 +162,9 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
         /*
          * if this is the first time we detected that this interface is
          * missing, set admin/oper status down, and set last change.
+         *
+         * yyy-rks: when, if ever, would we consider an entry
+         * deleted (and thus need to update ifTableLastChanged)?
          */
         if (!rowreq_ctx->known_missing) {
             DEBUGMSGTL(("ifTable:access", "updating missing entry\n"));
@@ -223,12 +232,16 @@ _add_new_interface(netsnmp_interface_entry * ifentry,
 
     /*
      * allocate an row context and set the index(es), then add it to
-     * the container
+     * the container and set ifTableLastChanged.
      */
     rowreq_ctx = ifTable_allocate_rowreq_ctx(ifentry);
     if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS == ifTable_indexes_set(rowreq_ctx, ifentry->index))) {
         CONTAINER_INSERT(container, rowreq_ctx);
+        if(0 == _first_load) {
+            rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
+            ifTable_lastChange_set(rowreq_ctx->data.ifLastChange);
+        }
     } else {
         if (rowreq_ctx) {
             snmp_log(LOG_ERR, "error setting index while loading "
@@ -348,7 +361,10 @@ ifTable_container_load(netsnmp_container * container)
   
     DEBUGMSGT(("verbose:ifTable:ifTable_cache_load",
                "%d records\n", CONTAINER_SIZE(container)));
-  
+
+    if(_first_load)
+        _first_load = 0;
+
     return MFD_SUCCESS;
 }                               /* ifTable_container_load */
 
