@@ -87,6 +87,10 @@ extern          "C" {
      */
     void            if_mib_container_init(void);
 
+    /*
+     */
+    void            ifTable_lastChange_set(u_long uptime);
+
 
 #ifdef __cplusplus
 }

@@ -71,6 +71,8 @@ typedef struct ifTable_interface_ctx_s {
 
     u_int           table_dirty;
 
+    u_long          last_changed;
+
 } ifTable_interface_ctx;
 
 static ifTable_interface_ctx ifTable_if_ctx;
@@ -120,6 +122,21 @@ ifTable_dirty_set(u_int status)
                 ifTable_if_ctx.table_dirty, status));
     ifTable_if_ctx.table_dirty = status;
 }
+
+/*
+ * ifTableLastChanged, which is not the last time that a row in
+ * the table was changed, but rather is the last time a row was
+ * added/deleted from the table.
+ */
+void
+ifTable_lastChange_set(u_long table_changed)
+{
+    DEBUGMSGTL(("ifTable:ifTable_lastChanged_set",
+                "called. was %ld, now %ld\n",
+                ifTable_if_ctx.last_changed, table_changed));
+    ifTable_if_ctx.last_changed = table_changed;
+}
+
 
 /*
  * mfd multiplexer modes
@@ -340,6 +357,22 @@ _ifTable_initialize_interface(ifTable_registration * reg_ptr, u_long flags)
      * register table
      */
     netsnmp_register_table(reginfo, tbl_info);
+
+    /*
+     * register ifTableLastChanged
+     */
+    {
+        oid iftlc_oid[] = { IFTABLE_LAST_CHANGE };
+        netsnmp_register_watched_scalar(
+            netsnmp_create_handler_registration(
+                "ifTableLastChanged", NULL,
+                iftlc_oid, OID_LENGTH(iftlc_oid),
+                HANDLER_CAN_RONLY ),
+            netsnmp_create_watcher_info(
+                (void *)&ifTable_if_ctx.last_changed, sizeof( u_long ),
+                ASN_TIMETICKS, WATCHER_FIXED_SIZE ));
+    }
+
 
 
 #endif                          /* NETSNMP_ENABLE_MFD_REWRITES */
