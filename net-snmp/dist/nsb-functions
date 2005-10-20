@@ -333,7 +333,7 @@ nsb-make()
    egrep -i "error|fail|warn|no |exists|\*\*\*" $nsb_make_OUTPUT \
          > nsb-make-$target-allerrs.$NSB_DATE
    # allow for a few exceptions
-   egrep -v -i "testing for failure|warn|error(mib|\.3)|In function" nsb-make-$target-allerrs.$NSB_DATE \
+   egrep -v -i "testing (for|authentication) failure|warn|error(mib|\.3)|In function" nsb-make-$target-allerrs.$NSB_DATE \
          > nsb-make-$target-errs.$NSB_DATE
    if [ -s nsb-make-$target-errs.$NSB_DATE ]; then
       nsb-prompt "press enter to view errors"
