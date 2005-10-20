@@ -134,6 +134,9 @@ copypersistentfiles:
 test: all testdirs
 	( cd testing; $(MAKE) test )
 
+test-mibs: all testdirs
+	( cd testing; $(MAKE) test-mibs )
+
 testdirs:
 	for i in $(TESTDIRS) ; do	\
            ( cd $$i ; $(MAKE) ) ;		\
