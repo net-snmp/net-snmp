@@ -625,6 +625,8 @@ AC_ARG_WITH(out_mib_modules,
     disman/event           support for the DISMAN-EVENT-MIB
                              (supports self monitoring and notification 
                               delivery when error conditions are found)
+    disman/schedule        support for the DISMAN-SCHEDULE-MIB
+                             (trigger SET requests at specified times)
     host                   host resources mib support.
 
   Optional mib modules that can be built into the agent include:
@@ -1681,8 +1683,8 @@ if test "x$mini_agent" = "xyes"; then
    default_mibs=SNMPv2-MIB:RFC1213-MIB
    default_mibs_install=" "
 else
-   new_module_list="mibII ucd_snmp snmpv3mibs notification notification-log-mib target agent_mibs agentx disman/event utilities $new_with_mib_modules"
-   default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:HOST-RESOURCES-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB
+   new_module_list="mibII ucd_snmp snmpv3mibs notification notification-log-mib target agent_mibs agentx disman/event disman/schedule utilities $new_with_mib_modules"
+   default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:HOST-RESOURCES-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB:DISMAN-EVENT-MIB:DISMAN-SCHEDULE-MIB
 
    case $target_os in
       linux* | mingw32* | cygwin* | freebsd* | dynix* | solaris2* | hpux* )
