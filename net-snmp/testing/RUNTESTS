@@ -40,6 +40,7 @@ Usage: `basename $0` [-a] [-S SLEEPTIME] [-h] [-i] [-v] [-V] [-s] [-XM]
   -XM       Don't set MIBDIRS environment unless absolutely necessary
   -x        Turn on SH output debugging for tests.
   -P TRANS  Specify on which transport domain to run the tests.Default is udp.
+  -p prefix Specify test case prefix. Options are [T|V]. Default is T
 
 BLIK
     exit 0
@@ -50,6 +51,8 @@ trap "exit 1;" 1 2 3 9 13 15 17
 SNMP_BASEDIR=`dirname $0`
 SNMP_PREFER_NEAR_MIBS=1	## prefer MIB files found in source hierarchy
 export SNMP_PREFER_NEAR_MIBS
+SNMP_TEST_PREFIX=${SNMP_TEST_PREFIX:=T}
+export SNMP_TEST_PREFIX
 
 ### Check for the configuration script.
 ##if [ ! -s "${SNMP_BASEDIR}/TESTCONF.sh"  ] ; then 
@@ -87,6 +90,10 @@ while [ -n "$1" ]; do
 	-D)
 	    shift
 	    SNMP_UPDIR="$1"
+	    ;;
+	-p)
+	    shift
+	    SNMP_TEST_PREFIX="$1"
 	    ;;
 	-P)
 		shift
@@ -230,7 +237,7 @@ fi
 
 # Hack: the above created a directory, now we have to nuke it and
 # forget about it...  All for the convenience of the test writer.
-rmdir $SNMP_TMPDIR
+rm -fR $SNMP_TMPDIR
 unset SNMP_TMPDIR
 export SNMP_TMPDIR
 
@@ -275,7 +282,7 @@ if [ "x$do_tests" = "x" ]; then
     # List the tests in question
     #
     num=0
-    for testfile in T*; do
+    for testfile in $SNMP_TEST_PREFIX*; do
 	case $testfile in
 	    # Skip backup files, and the like.
 	    *~)     ;;
