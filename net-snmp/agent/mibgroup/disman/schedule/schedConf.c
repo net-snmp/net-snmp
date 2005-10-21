@@ -121,6 +121,7 @@ _sched_convert_bits( char *cron_spec, char *bit_buf,
     char *cp = cron_spec;
     char b[] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
     int val, major, minor;
+    int overshoot;
 
     if (!cron_spec || !bit_buf)
         return;
@@ -135,7 +136,7 @@ _sched_convert_bits( char *cron_spec, char *bit_buf,
          * An "all-bits" specification may not be an exact multiple of 8.
          * Work out how far we've overshot things, and tidy up the excess.
          */
-        int overshoot = 8*bit_buf_len-max_val;
+        overshoot = 8*bit_buf_len-max_val;
         while ( overshoot > 0 ) {
             bit_buf[ bit_buf_len-1 ] ^= b[8-overshoot];
             overshoot--;
