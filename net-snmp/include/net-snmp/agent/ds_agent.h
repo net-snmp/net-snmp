@@ -17,7 +17,11 @@
 #define NETSNMP_DS_AGENT_LEAVE_PIDFILE  7       /* 1 = leave PID file on exit */
 #define NETSNMP_DS_AGENT_NO_CACHING     8       /* 1 = disable netsnmp_cache */
 #define NETSNMP_DS_AGENT_STRICT_DISMAN  9       /* 1 = "correct" object ordering */
-#
+
+/* WARNING: The trap receiver uses DS flags and must not conflict with
+   these!  If you use a value above 15, change the minimimum DS bool
+   value in snmptrapd_log.h */
+
 /*
  * strings 
  */
