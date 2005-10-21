@@ -137,6 +137,7 @@ SOFTWARE.
 #include <net-snmp/library/lcd_time.h>
 #include <net-snmp/library/snmp_alarm.h>
 #include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/vacm.h>
 
 static void     _init_snmp(void);
 
@@ -828,6 +829,7 @@ init_snmp(const char *type)
     init_snmp_alarm();
     init_snmp_enum(type);
     init_snmp_enums();
+    init_vacm();
 
     read_premib_configs();
 #ifndef DISABLE_MIB_LOADING
