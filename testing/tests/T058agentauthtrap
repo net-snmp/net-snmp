@@ -15,6 +15,7 @@ SKIPIF DISABLE_SNMPV2C
 # add in a v1 trap sink
 CONFIGAGENT trapsink localhost public $SNMP_SNMPTRAPD_PORT
 CONFIGAGENT authtrapenable 1
+CONFIGTRAPD ipv4logcommunity public
 
 STARTTRAPD
 

@@ -14,6 +14,8 @@ SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
 . ./Sv3config
 CONFIGAGENT trapsink localhost public $SNMP_SNMPTRAPD_PORT
 
+CONFIGTRAPD ipv4logcommunity public
+
 STARTTRAPD
 
 AGENT_FLAGS="$AGENT_FLAGS -Dexample,header_generic,add_trap"
