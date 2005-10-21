@@ -156,7 +156,7 @@ netsnmp_generic_remove_delete_row( void *table, void *row ) {
   *   code of a particular MIB table implementation.
   */
 netsnmp_mib_handler *
-netsnmp_generic_get_handler(netsnmp_table_data_set *data_set) {
+netsnmp_generic_get_handler(void /* table specific */ ) {
 
 }
 
@@ -229,7 +229,7 @@ netsnmp_generic_row_first( void *table ) {
   *   whether a given row is present in the table.
   */
 void *
-netsnmp_generic_row_get( void *table ) {
+netsnmp_generic_row_get( void *table, void *row ) {
 }
 
 /** Retrieve the following row from the table.
@@ -244,28 +244,28 @@ netsnmp_generic_row_next( void *table, void *row ) {
 /** Retrieve the row with the specified index values.
   */
 void *
-netsnmp_generic_row_get_byidx(     void *table,
-                                   netsnmp_variable_list *indexes ) {
+netsnmp_generic_row_get_byidx(  void *table,
+                                netsnmp_variable_list *indexes ) {
 }
 
 /** Retrieve the next row after the specified index values.
   */
 void *
-netsnmp_generic_row_getnext_byidx( void *table,
-                                   netsnmp_variable_list *indexes ) {
+netsnmp_generic_row_next_byidx( void *table,
+                                netsnmp_variable_list *indexes ) {
 
 }
 
 /** Retrieve the row with the specified instance OIDs.
   */
 void *
-netsnmp_generic_row_get_byoid(     void *table, oid *instance, size_t len ) {
+netsnmp_generic_row_get_byoid(  void *table, oid *instance, size_t len ) {
 }
 
 /** Retrieve the next row after the specified instance OIDs.
   */
 void *
-netsnmp_generic_row_getnext_byoid( void *table, oid *instance, size_t len ) {
+netsnmp_generic_row_next_byoid( void *table, oid *instance, size_t len ) {
 }
 
 /** Report the number of rows in the table.
