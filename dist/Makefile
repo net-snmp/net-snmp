@@ -30,7 +30,7 @@ REL=$(RELEASE)
 WITH_PERL=1
 
 # Define the RPM architecture, i.e., 'noarch', 'i386', 'i686', etc.
-ARCH = i386
+ARCH = `uname -m`
 
 # Directory structure expected by 'rpm' program
 RPM_BASE := $(PWD)/rpm
