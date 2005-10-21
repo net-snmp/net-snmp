@@ -61,15 +61,47 @@ extern          "C" {
 
 #define CONTEXT_MATCH_EXACT  1
 #define CONTEXT_MATCH_PREFIX 2
+
+/* VIEW ENUMS ---------------------------------------- */
+
+/* SNMPD usage: get/set/send-notification views */
+#define VACM_VIEW_READ     0
+#define VACM_VIEW_WRITE    1
+#define VACM_VIEW_NOTIFY   2
+
+/* SNMPTRAPD usage: log execute and net-access (forward) usage */
+#define VACM_VIEW_LOG      3
+#define VACM_VIEW_EXECUTE  4
+#define VACM_VIEW_NET      5
+
+/* VIEW BIT MASK VALUES-------------------------------- */
+
+/* SNMPD usage: get/set/send-notification views */
+#define VACM_VIEW_READ_BIT      (1 << VACM_VIEW_READ)
+#define VACM_VIEW_WRITE_BIT     (1 << VACM_VIEW_WRITE)
+#define VACM_VIEW_NOTIFY_BIT    (1 << VACM_VIEW_NOTIFY)
+
+/* SNMPTRAPD usage: log execute and net-access (forward) usage */
+#define VACM_VIEW_LOG_BIT      (1 << VACM_VIEW_LOG)
+#define VACM_VIEW_EXECUTE_BIT  (1 << VACM_VIEW_EXECUTE)
+#define VACM_VIEW_NET_BIT      (1 << VACM_VIEW_NET)
+    
+#define VACM_VIEW_NO_BITS      0
+
+/* Maximum number of views in the view array */
+#define VACM_MAX_VIEWS     8
+
+#define VACM_VIEW_ENUM_NAME "vacmviews"
+    
+    void init_vacm(void);
+    
     struct vacm_accessEntry {
         char            groupName[VACMSTRINGLEN];
         char            contextPrefix[VACMSTRINGLEN];
         int             securityModel;
         int             securityLevel;
         int             contextMatch;
-        char            readView[VACMSTRINGLEN];
-        char            writeView[VACMSTRINGLEN];
-        char            notifyView[VACMSTRINGLEN];
+        char            views[VACM_MAX_VIEWS][VACMSTRINGLEN];
         int             storageType;
         int             status;
 
