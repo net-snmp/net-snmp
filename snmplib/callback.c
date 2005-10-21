@@ -336,7 +336,7 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
     return count;
 }
 
-/*
+/**
  * find and clear client args that match ptr
  *
  * @param ptr  pointer to search for
@@ -349,6 +349,12 @@ netsnmp_callback_clear_client_arg(void *ptr, int i, int j)
     struct snmp_gen_callback *scp = NULL;
     int rc = 0;
 
+    /*
+     * don't init i and j before loop, since the caller specified
+     * the starting point explicitly. But *after* the i loop has
+     * finished executing once, init j to 0 for the next pass
+     * through the subids.
+     */
     for (; i < MAX_CALLBACK_IDS; i++,j=0) {
         for (; j < MAX_CALLBACK_SUBIDS; j++) {
             scp = thecallbacks[i][j]; 
