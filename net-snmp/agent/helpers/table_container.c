@@ -158,6 +158,90 @@ _find_next_row(netsnmp_container *c,
  *
  * ================================== */
 
+container_table_data *
+netsnmp_tcontainer_create_table( const char *name,
+                                 netsnmp_container *container, long flags )
+{
+    container_table_data *table;
+
+    table = SNMP_MALLOC_TYPEDEF(container_table_data);
+    if (!table)
+        return NULL;
+    if (container)
+        table->table = container;
+    else {
+        table->table = netsnmp_container_find("table_container");
+        if (!table->table) {
+            SNMP_FREE(table);
+            return NULL;
+        }
+    }
+
+    if (flags)
+        table->key_type = flags & 0x03;  /* Use lowest two bits */
+    else
+        table->key_type = TABLE_CONTAINER_KEY_NETSNMP_INDEX;
+
+    if (!table->table->compare)
+         table->table->compare  = netsnmp_compare_netsnmp_index;
+    if (!table->table->ncompare)
+         table->table->ncompare = netsnmp_ncompare_netsnmp_index;
+
+    return table;
+}
+
+void
+netsnmp_tcontainer_delete_table( container_table_data *table )
+{
+    if (!table)
+       return;
+
+    if (table->table)
+       CONTAINER_FREE(table->table);
+    
+    SNMP_FREE(table);
+    return;
+}
+
+    /*
+     * The various standalone row operation routines
+     *    (create/clone/copy/delete)
+     * will be specific to a particular table,
+     *    so can't be implemented here.
+     */
+
+int
+netsnmp_tcontainer_add_row( container_table_data *table, netsnmp_index *row )
+{
+    if (!table || !table->table || !row)
+        return -1;
+    CONTAINER_INSERT( table->table, row );
+    return 0;
+}
+
+netsnmp_index *
+netsnmp_tcontainer_remove_row( container_table_data *table, netsnmp_index *row )
+{
+    if (!table || !table->table || !row)
+        return NULL;
+    CONTAINER_REMOVE( table->table, row );
+    return NULL;
+}
+
+int
+netsnmp_tcontainer_replace_row( container_table_data *table,
+                                netsnmp_index *old_row, netsnmp_index *new_row )
+{
+    if (!table || !table->table || !old_row || !new_row)
+        return -1;
+    netsnmp_tcontainer_remove_row( table, old_row );
+    netsnmp_tcontainer_add_row(    table, new_row );
+    return 0;
+}
+
+    /* netsnmp_tcontainer_remove_delete_row() will be table-specific too */
+
+
 /* ==================================
  *
  * Container Table API: MIB maintenance

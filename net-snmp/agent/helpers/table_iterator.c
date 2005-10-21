@@ -103,6 +103,13 @@
  *
  * ================================== */
 
+    /*
+     * Not Applicable
+     *
+     * An iterator-based table will be maintained
+     *  by the table-specific module.
+     */
+
 /* ==================================
  *
  * Iterator API: MIB maintenance

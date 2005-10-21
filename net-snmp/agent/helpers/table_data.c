@@ -17,7 +17,7 @@
  *  @ingroup table
  *
  *  This helper is obsolete.  If you are writing a new module, please
- *  consider using the table_data2 helper instead.
+ *  consider using the table_tdata helper instead.
  *
  *  This helper helps you implement a table where all the indexes are
  *  expected to be stored within the agent itself and not in some
@@ -277,6 +277,85 @@ netsnmp_table_data_remove_and_delete_row(netsnmp_table_data *table,
      */
     netsnmp_table_data_remove_row(table, row);
     return netsnmp_table_data_delete_row(row);
+}
+
+    /* =====================================
+     * Generic API - mostly renamed wrappers
+     * ===================================== */
+
+netsnmp_table_data *
+netsnmp_table_data_create_table(const char *name, long flags)
+{
+    return netsnmp_create_table_data( name );
+}
+
+void
+netsnmp_table_data_delete_table( netsnmp_table_data *table )
+{
+    netsnmp_table_row *row, *nextrow;
+
+    if (!table)
+        return;
+
+    for (row = table->first_row; row; row=nextrow) {
+        nextrow   = row->next;
+        row->next = NULL;
+        netsnmp_table_data_delete_row(row);
+        /* Can't delete table-specific entry memory */
+    }
+    table->first_row = NULL;
+
+    if (table->name) {
+        SNMP_FREE(table->name);
+        table->name = NULL;
+    }
+    SNMP_FREE(table);
+    return;
+}
+
+netsnmp_table_row *
+netsnmp_table_data_create_row( void* entry )
+{
+    netsnmp_table_row *row = SNMP_MALLOC_TYPEDEF(netsnmp_table_row);
+    if (row)
+        row->data = entry;
+    return row;
+}
+
+    /* netsnmp_table_data_clone_row() defined above */
+
+int
+netsnmp_table_data_copy_row( netsnmp_table_row  *old_row,
+                             netsnmp_table_row  *new_row )
+{
+    if (!old_row || !new_row)
+        return -1;
+
+    memcpy(new_row, old_row, sizeof(netsnmp_table_row));
+
+    if (old_row->indexes)
+        new_row->indexes = snmp_clone_varbind(old_row->indexes);
+    if (old_row->index_oid)
+        memdup((u_char **) & new_row->index_oid,
+               (u_char *)    old_row->index_oid,
+               old_row->index_oid_len * sizeof(oid));
+    /* XXX - Doesn't copy table-specific row structure */
+    return 0;
+}
+
+    /*
+     * netsnmp_table_data_delete_row()
+     * netsnmp_table_data_add_row()
+     * netsnmp_table_data_replace_row()
+     * netsnmp_table_data_remove_row()
+     *     all defined above
+     */
+
+void *
+netsnmp_table_data_remove_delete_row(netsnmp_table_data *table,
+                                     netsnmp_table_row *row)
+{
+    return netsnmp_table_data_remove_and_delete_row(table, row);
 }
 
 
