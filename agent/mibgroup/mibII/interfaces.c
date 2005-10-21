@@ -2654,7 +2654,7 @@ var_ifEntry(struct variable * vp,
 {
     int             ifIndex;
     static MIB_IFROW ifRow;
-    conf_if_list   *if_ptr;
+    conf_if_list   *if_ptr = NULL;
     
     ifIndex =
         header_ifEntry(vp, name, length, exact, var_len, write_method);
