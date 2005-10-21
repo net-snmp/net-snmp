@@ -813,6 +813,27 @@ fi
 AC_MSG_RESULT($DEVFLAGS)
 AC_SUBST(DEVFLAGS)
 
+#
+# hacks for building outside of the source directory
+#
+# 1) make sure build include paths are before source
+# 2) check for GNU make to use vpath instead of VPATH
+#
+NON_GNU_VPATH="VPATH ="
+GNU_vpath="#vpath"
+#
+if test "x$srcdir" != "x."; then
+make -v -f /dev/null 2>/dev/null | grep GNU >/dev/null
+have_gnu_make=$?
+if test $have_gnu_make -eq 0 ; then
+    NON_GNU_VPATH="#VPATH ="
+    GNU_vpath="vpath"
+fi
+fi
+AC_SUBST(GNU_vpath)
+AC_SUBST(NON_GNU_VPATH)
+
+
 # system check
 AC_CANONICAL_TARGET
 changequote(, )

@@ -4,6 +4,8 @@
 
 top_builddir=..
 
+VPATH		= @srcdir@
+
 #
 # Stuff here
 #

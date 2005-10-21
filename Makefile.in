@@ -3,6 +3,7 @@
 #
 
 top_builddir	= .
+VPATH		= @srcdir@
 
 SUBDIRS		= snmplib @MAINSUBS@
 TESTDIRS	= testing
