@@ -33,6 +33,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "utilities/execute.h"
 #include "snmptrapd_handlers.h"
+#include "snmptrapd_auth.h"
 #include "snmptrapd_log.h"
 #include "notification-log-mib/notification_log.h"
 
@@ -102,6 +103,7 @@ snmptrapd_parse_traphandle(const char *token, char *line)
     DEBUGMSG(("read_config:traphandle", "\n"));
 
     if (traph) {
+        traph->authtypes = TRAP_AUTH_EXE;
         traph->token = strdup(cptr);
     }
 }
@@ -138,6 +140,7 @@ parse_forward(const char *token, char *line)
     DEBUGMSG(("read_config:forward", "\n"));
 
     if (traph) {
+        traph->authtypes = TRAP_AUTH_NET;
         traph->token = strdup(cptr);
     }
 }
@@ -276,6 +279,7 @@ netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler handler) {
      *   (or should it go on the end?)
      */
     traph->handler = handler;
+    traph->authtypes = TRAP_AUTH_ALL; /* callers will likely change this */
     switch (list) {
     case NETSNMPTRAPD_AUTH_HANDLER:
         traph->nexth   = netsnmp_auth_global_traphandlers;
@@ -316,6 +320,7 @@ netsnmp_add_default_traphandler( Netsnmp_Trap_Handler handler) {
      * Add this new handler to the front of the default list
      *   (or should it go on the end?)
      */
+    traph->authtypes = TRAP_AUTH_ALL; /* callers will likely change this */
     traph->handler = handler;
     traph->nexth   = netsnmp_default_traphandlers;
     netsnmp_default_traphandlers = traph;
@@ -342,6 +347,7 @@ netsnmp_add_traphandler(Netsnmp_Trap_Handler handler,
      * Populate this new handler with the trap information
      *   (NB: the OID fields were not used in the default/global lists)
      */
+    traph->authtypes   = TRAP_AUTH_ALL; /* callers will likely change this */
     traph->handler     = handler;
     traph->trapoid_len = trapOidLen;
     memdup((u_char **)&(traph->trapoid), (u_char *)trapOid,
@@ -1052,7 +1058,12 @@ t        *     d) any other global handlers
 	 *  a) authentication handlers
 	 */
         traph = netsnmp_auth_global_traphandlers;
+        DEBUGMSGTL(("snmptrapd", "Running auth trap handlers\n"));
 	while (traph) {
+            if (!netsnmp_trapd_check_auth(traph->authtypes, pdu)) {
+                traph = traph->nexth;
+                continue; /* we continue on and skip this one */
+            }
 	    ret = (*(traph->handler))(pdu, transport, traph);
             if (ret == NETSNMPTRAPD_HANDLER_FINISH)
                 return 1;
@@ -1065,7 +1076,12 @@ t        *     d) any other global handlers
 	 *  b) pre-specific global handlers
 	 */
         traph = netsnmp_pre_global_traphandlers;
+        DEBUGMSGTL(("snmptrapd", "Running pre-global trap handlers\n"));
 	while (traph) {
+            if (!netsnmp_trapd_check_auth(traph->authtypes, pdu)) {
+                traph = traph->nexth;
+                continue; /* we continue on and skip this one */
+            }
 	    ret = (*(traph->handler))(pdu, transport, traph);
             if (ret == NETSNMPTRAPD_HANDLER_FINISH)
                 return 1;
@@ -1077,8 +1093,13 @@ t        *     d) any other global handlers
         /*
 	 *  c) trap-specific handlers
 	 */
+        DEBUGMSGTL(("snmptrapd", "Running trap specific handlers\n"));
         traph = netsnmp_get_traphandler(trapOid, trapOidLen);
 	while (traph) {
+            if (!netsnmp_trapd_check_auth(traph->authtypes, pdu)) {
+                traph = traph->nexth;
+                continue; /* we continue on and skip this one */
+            }
 	    ret = (*(traph->handler))(pdu, transport, traph);
             if (ret == NETSNMPTRAPD_HANDLER_FINISH)
                 return 1;
@@ -1090,8 +1111,13 @@ t        *     d) any other global handlers
         /*
 	 *  d) other global handlers
 	 */
+        DEBUGMSGTL(("snmptrapd", "Running global handlers\n"));
         traph = netsnmp_post_global_traphandlers;
 	while (traph) {
+            if (!netsnmp_trapd_check_auth(traph->authtypes, pdu)) {
+                traph = traph->nexth;
+                continue; /* we continue on and skip this one */
+            }
 	    ret = (*(traph->handler))(pdu, transport, traph);
             if (ret == NETSNMPTRAPD_HANDLER_FINISH)
                 return 1;

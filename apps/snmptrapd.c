@@ -95,6 +95,7 @@ SOFTWARE.
 #include <net-snmp/library/fd_event_manager.h>
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
+#include "snmptrapd_auth.h"
 #include "notification-log-mib/notification_log.h"
 
 /*
@@ -596,6 +597,7 @@ main(int argc, char *argv[])
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
     int             agentx_subagent = 1;
 #endif
+    netsnmp_trapd_handler *traph;
 
 #ifdef SIGTERM
     signal(SIGTERM, term_handler);
@@ -940,18 +942,27 @@ main(int argc, char *argv[])
      */
     if (!Log && !Print) {
         Syslog = 1;
-        netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER, syslog_handler);
+        traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER,
+                                               syslog_handler);
+        traph->authtypes = TRAP_AUTH_LOG;
     } else {
-        netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER, print_handler);
+        traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER,
+                                               print_handler);
+        traph->authtypes = TRAP_AUTH_LOG;
     }
 
     if (Event) {
-        netsnmp_add_traphandler(event_handler, risingAlarm,
-                                    OID_LENGTH(risingAlarm));
-        netsnmp_add_traphandler(event_handler, fallingAlarm,
-                                    OID_LENGTH(fallingAlarm));
-        netsnmp_add_traphandler(event_handler, unavailableAlarm,
-                                    OID_LENGTH(unavailableAlarm));
+        traph = netsnmp_add_traphandler(event_handler, risingAlarm,
+                                        OID_LENGTH(risingAlarm));
+        traph->authtypes = TRAP_AUTH_LOG;
+
+        traph = netsnmp_add_traphandler(event_handler, fallingAlarm,
+                                        OID_LENGTH(fallingAlarm));
+        traph->authtypes = TRAP_AUTH_LOG;
+
+        traph = netsnmp_add_traphandler(event_handler, unavailableAlarm,
+                                        OID_LENGTH(unavailableAlarm));
+        traph->authtypes = TRAP_AUTH_LOG;
 	/* XXX - might be worth setting some "magic data"
 	 * in the traphandler structure that 'event_handler'
 	 * can use to avoid checking the trap OID values.
@@ -1005,8 +1016,9 @@ main(int argc, char *argv[])
             netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
                               NETSNMP_DS_NOTIF_LOG_CTX,
                               "snmptrapd");
-            netsnmp_add_global_traphandler(NETSNMPTRAPD_POST_HANDLER,
-                                           notification_handler);
+            traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_POST_HANDLER,
+                                                   notification_handler);
+            traph->authtypes = TRAP_AUTH_LOG;
             init_notification_log();
         }
 #endif
@@ -1018,6 +1030,10 @@ main(int argc, char *argv[])
          */
         register_snmpEngine_scalars_context("snmptrapd");
 #endif
+
+        /* register our authorization handler */
+        init_netsnmp_trapd_auth();
+
 #ifdef USING_SNMPV3_USMUSER_MODULE
         /* register ourselves as having a USM user database */
         init_register_usmUser_context("snmptrapd");
