@@ -434,16 +434,16 @@ var_vacm_access(struct variable * vp,
         return (u_char *) & gp->contextPrefix[1];
 
     case ACCESSREAD:
-        *var_len = strlen(gp->readView);
-        return (u_char *) gp->readView;
+        *var_len = strlen(gp->views[VACM_VIEW_READ]);
+        return (u_char *) gp->views[VACM_VIEW_READ];
 
     case ACCESSWRITE:
-        *var_len = strlen(gp->writeView);
-        return (u_char *) gp->writeView;
+        *var_len = strlen(gp->views[VACM_VIEW_WRITE]);
+        return (u_char *) gp->views[VACM_VIEW_WRITE];
 
     case ACCESSNOTIFY:
-        *var_len = strlen(gp->notifyView);
-        return (u_char *) gp->notifyView;
+        *var_len = strlen(gp->views[VACM_VIEW_NOTIFY]);
+        return (u_char *) gp->views[VACM_VIEW_NOTIFY];
 
     case ACCESSSTORAGE:
         long_return = gp->storageType;
@@ -1365,9 +1365,9 @@ write_vacmAccessReadViewName(int action,
             return SNMP_ERR_INCONSISTENTNAME;
         } else {
             resetOnFail = 1;
-            memcpy(string, aptr->readView, VACMSTRINGLEN);
-            memcpy(aptr->readView, var_val, var_val_len);
-            aptr->readView[var_val_len] = 0;
+            memcpy(string, aptr->views[VACM_VIEW_READ], VACMSTRINGLEN);
+            memcpy(aptr->views[VACM_VIEW_READ], var_val, var_val_len);
+            aptr->views[VACM_VIEW_READ][var_val_len] = 0;
         }
     } else if (action == FREE) {
         /*
@@ -1375,7 +1375,7 @@ write_vacmAccessReadViewName(int action,
          */
         if ((aptr = access_parse_accessEntry(name, name_len)) != NULL &&
             resetOnFail) {
-            memcpy(aptr->readView, string, var_val_len);
+            memcpy(aptr->views[VACM_VIEW_READ], string, var_val_len);
         }
     }
     return SNMP_ERR_NOERROR;
@@ -1409,9 +1409,9 @@ write_vacmAccessWriteViewName(int action,
             return SNMP_ERR_INCONSISTENTNAME;
         } else {
             resetOnFail = 1;
-            memcpy(string, aptr->writeView, VACMSTRINGLEN);
-            memcpy(aptr->writeView, var_val, var_val_len);
-            aptr->writeView[var_val_len] = 0;
+            memcpy(string, aptr->views[VACM_VIEW_WRITE], VACMSTRINGLEN);
+            memcpy(aptr->views[VACM_VIEW_WRITE], var_val, var_val_len);
+            aptr->views[VACM_VIEW_WRITE][var_val_len] = 0;
         }
     } else if (action == FREE) {
         /*
@@ -1419,7 +1419,7 @@ write_vacmAccessWriteViewName(int action,
          */
         if ((aptr = access_parse_accessEntry(name, name_len)) != NULL &&
             resetOnFail) {
-            memcpy(aptr->writeView, string, var_val_len);
+            memcpy(aptr->views[VACM_VIEW_WRITE], string, var_val_len);
         }
     }
     return SNMP_ERR_NOERROR;
@@ -1453,9 +1453,9 @@ write_vacmAccessNotifyViewName(int action,
             return SNMP_ERR_INCONSISTENTNAME;
         } else {
             resetOnFail = 1;
-            memcpy(string, aptr->notifyView, VACMSTRINGLEN);
-            memcpy(aptr->notifyView, var_val, var_val_len);
-            aptr->notifyView[var_val_len] = 0;
+            memcpy(string, aptr->views[VACM_VIEW_NOTIFY], VACMSTRINGLEN);
+            memcpy(aptr->views[VACM_VIEW_NOTIFY], var_val, var_val_len);
+            aptr->views[VACM_VIEW_NOTIFY][var_val_len] = 0;
         }
     } else if (action == FREE) {
         /*
@@ -1463,7 +1463,7 @@ write_vacmAccessNotifyViewName(int action,
          */
         if ((aptr = access_parse_accessEntry(name, name_len)) != NULL &&
             resetOnFail) {
-            memcpy(aptr->notifyView, string, var_val_len);
+            memcpy(aptr->views[VACM_VIEW_NOTIFY], string, var_val_len);
         }
     }
     return SNMP_ERR_NOERROR;

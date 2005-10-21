@@ -68,6 +68,31 @@ static struct vacm_viewEntry *viewList = NULL, *viewScanPtr = NULL;
 static struct vacm_accessEntry *accessList = NULL, *accessScanPtr = NULL;
 static struct vacm_groupEntry *groupList = NULL, *groupScanPtr = NULL;
 
+/**
+ * Initilizes the VACM code.
+ * Specifically:
+ *  - adds a set of enums mapping view numbers to human readable names
+ */
+void
+init_vacm(void)
+{
+    /* views for access via get/set/send-notifications */
+    se_add_pair_to_slist(VACM_VIEW_ENUM_NAME, strdup("read"),
+                         VACM_VIEW_READ);
+    se_add_pair_to_slist(VACM_VIEW_ENUM_NAME, strdup("write"),
+                         VACM_VIEW_WRITE);
+    se_add_pair_to_slist(VACM_VIEW_ENUM_NAME, strdup("notify"),
+                         VACM_VIEW_NOTIFY);
+
+    /* views for permissions when receiving notifications */
+    se_add_pair_to_slist(VACM_VIEW_ENUM_NAME, strdup("log"),
+                         VACM_VIEW_LOG);
+    se_add_pair_to_slist(VACM_VIEW_ENUM_NAME, strdup("execute"),
+                         VACM_VIEW_EXECUTE);
+    se_add_pair_to_slist(VACM_VIEW_ENUM_NAME, strdup("net"),
+                         VACM_VIEW_NET);
+}
+
 void
 vacm_save(const char *token, const char *type)
 {
@@ -187,16 +212,16 @@ vacm_save_access(struct vacm_accessEntry *access_entry, const char *token,
                                       access_entry->contextPrefix[0] + 1);
 
     *cptr++ = ' ';
-    cptr = read_config_save_octet_string(cptr, (u_char *) access_entry->readView,
-                                         strlen(access_entry->readView) + 1);
+    cptr = read_config_save_octet_string(cptr, (u_char *) access_entry->views[VACM_VIEW_READ],
+                                         strlen(access_entry->views[VACM_VIEW_READ]) + 1);
     *cptr++ = ' ';
     cptr =
-        read_config_save_octet_string(cptr, (u_char *) access_entry->writeView,
-                                      strlen(access_entry->writeView) + 1);
+        read_config_save_octet_string(cptr, (u_char *) access_entry->views[VACM_VIEW_WRITE],
+                                      strlen(access_entry->views[VACM_VIEW_WRITE]) + 1);
     *cptr++ = ' ';
     cptr =
-        read_config_save_octet_string(cptr, (u_char *) access_entry->notifyView,
-                                      strlen(access_entry->notifyView) + 1);
+        read_config_save_octet_string(cptr, (u_char *) access_entry->views[VACM_VIEW_NOTIFY],
+                                      strlen(access_entry->views[VACM_VIEW_NOTIFY]) + 1);
 
     read_config_store(type, line);
 }
@@ -238,13 +263,13 @@ vacm_parse_config_access(const char *token, char *line)
     aptr->securityModel = access.securityModel;
     aptr->securityLevel = access.securityLevel;
     aptr->contextMatch = access.contextMatch;
-    readView = (char *) aptr->readView;
+    readView = (char *) aptr->views[VACM_VIEW_READ];
     line =
         read_config_read_octet_string(line, (u_char **) & readView, &len);
-    writeView = (char *) aptr->writeView;
+    writeView = (char *) aptr->views[VACM_VIEW_WRITE];
     line =
         read_config_read_octet_string(line, (u_char **) & writeView, &len);
-    notifyView = (char *) aptr->notifyView;
+    notifyView = (char *) aptr->views[VACM_VIEW_NOTIFY];
     line =
         read_config_read_octet_string(line, (u_char **) & notifyView,
                                       &len);
