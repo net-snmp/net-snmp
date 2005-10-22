@@ -24,6 +24,13 @@
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/read_only.h>
 
+typedef struct netsnmp_num_file_instance_s {
+    char *file_name;
+    FILE *filep;
+    int   type;
+    int   flags;
+} netsnmp_num_file_instance;
+
 /** @defgroup instance instance: process individual MIB instances easily.
  *  @ingroup leaf
  *  @{
@@ -362,6 +369,42 @@ register_read_only_int_instance_context(const char *name,
                                                            contextName);
 }
 
+int
+netsnmp_register_num_file_instance(const char *name,
+                                   oid * reg_oid, size_t reg_oid_len,
+                                   char *file_name, int asn_type, int mode,
+                                   Netsnmp_Node_Handler * subhandler,
+                                   const char *contextName)
+{
+    netsnmp_handler_registration *myreg;
+    netsnmp_num_file_instance *nfi;
+
+    if ((NULL == name) || (NULL == reg_oid) || (NULL == file_name)) {
+        snmp_log(LOG_ERR, "bad parameter to netsnmp_register_num_file_instance\n");
+        return MIB_REGISTRATION_FAILED;
+    }
+
+    nfi = SNMP_MALLOC_TYPEDEF(netsnmp_num_file_instance);
+    if ((NULL == nfi) ||
+        (NULL == (nfi->file_name = strdup(file_name)))) {
+        snmp_log(LOG_ERR, "could not not allocate memory\n");
+        return MIB_REGISTRATION_FAILED;
+    }
+
+    myreg = get_reg(name, "file_num_handler", reg_oid, reg_oid_len, nfi,
+                    mode, netsnmp_instance_num_file_handler,
+                    subhandler, contextName);
+    if (NULL == myreg)
+        return MIB_REGISTRATION_FAILED;
+
+    nfi->type = asn_type;
+
+    if (HANDLER_CAN_RONLY == mode)
+        return netsnmp_register_read_only_instance(myreg);
+
+    return netsnmp_register_instance(myreg);
+}
+
 /**
  * This function registers an int helper handler to a specified OID.
  *
@@ -655,6 +698,135 @@ netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
          */
         break;
     }
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                         requests);
+    return SNMP_ERR_NOERROR;
+}
+
+int
+netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
+                                  netsnmp_handler_registration *reginfo,
+                                  netsnmp_agent_request_info *reqinfo,
+                                  netsnmp_request_info *requests)
+{
+    netsnmp_num_file_instance *nfi;
+    u_long it, *it_save;
+    int rc;
+
+    netsnmp_assert(NULL != handler);
+    nfi = (netsnmp_num_file_instance *)handler->myvoid;
+    netsnmp_assert(NULL != nfi);
+    netsnmp_assert(NULL != nfi->file_name);
+
+    DEBUGMSGTL(("netsnmp_instance_int_handler", "Got request:  %d\n",
+                reqinfo->mode));
+
+    switch (reqinfo->mode) {
+        /*
+         * data requests 
+         */
+    case MODE_GET:
+	/*
+	 * Use a long here, otherwise on 64 bit use of an int would fail
+	 */
+        netsnmp_assert(NULL == nfi->filep);
+        nfi->filep = fopen(nfi->file_name, "r");
+        if (NULL == nfi->filep) {
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_NOSUCHINSTANCE);
+            return SNMP_ERR_NOERROR;
+        }
+        rc = fscanf(nfi->filep, (nfi->type == ASN_INTEGER) ? "%ld" : "%lu",
+                    &it);
+        fclose(nfi->filep);
+        nfi->filep = NULL;
+        if (rc != 1) {
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_NOSUCHINSTANCE);
+            return SNMP_ERR_NOERROR;
+        }
+        snmp_set_var_typed_value(requests->requestvb, nfi->type,
+                                 (u_char *) &it, sizeof(it));
+        break;
+
+        /*
+         * SET requests.  Should only get here if registered RWRITE 
+         */
+    case MODE_SET_RESERVE1:
+        netsnmp_assert(NULL == nfi->filep);
+        if (requests->requestvb->type != nfi->type)
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_ERR_WRONGTYPE);
+        break;
+
+    case MODE_SET_RESERVE2:
+        netsnmp_assert(NULL == nfi->filep);
+        nfi->filep = fopen(nfi->file_name, "w+");
+        if (NULL == nfi->filep) {
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_ERR_NOTWRITABLE);
+            return SNMP_ERR_NOERROR;
+        }
+        /*
+         * store old info for undo later 
+         */
+        if (fscanf(nfi->filep, (nfi->type == ASN_INTEGER) ? "%ld" : "%lu",
+                   &it) != 1) {
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_ERR_RESOURCEUNAVAILABLE);
+            return SNMP_ERR_NOERROR;
+        }
+
+        memdup((u_char **) & it_save, (u_char *)&it, sizeof(u_long));
+        if (it_save == NULL) {
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_ERR_RESOURCEUNAVAILABLE);
+            return SNMP_ERR_NOERROR;
+        }
+        netsnmp_request_add_list_data(requests,
+                                      netsnmp_create_data_list
+                                      (INSTANCE_HANDLER_NAME, it_save,
+                                       free));
+        break;
+
+    case MODE_SET_ACTION:
+        /*
+         * update current 
+         */
+        DEBUGMSGTL(("helper:instance", "updated %s -> %l\n", nfi->file_name,
+                    *(requests->requestvb->val.integer)));
+        it = *(requests->requestvb->val.integer);
+        rewind(nfi->filep); /* rewind to make sure we are at the beginning */
+        rc = fprintf(nfi->filep, (nfi->type == ASN_INTEGER) ? "%ld" : "%lu",
+                     it);
+        if (rc < 0) {
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_ERR_GENERR);
+            return SNMP_ERR_NOERROR;
+        }
+        break;
+
+    case MODE_SET_UNDO:
+        it =
+            *((u_int *) netsnmp_request_get_list_data(requests,
+                                                      INSTANCE_HANDLER_NAME));
+        rc = fprintf(nfi->filep, (nfi->type == ASN_INTEGER) ? "%ld" : "%lu",
+                     it);
+        if (rc < 0)
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_ERR_UNDOFAILED);
+        /** fall through */
+
+    case MODE_SET_COMMIT:
+    case MODE_SET_FREE:
+        if (NULL != nfi->filep) {
+            fclose(nfi->filep);
+            nfi->filep = NULL;
+        }
+        break;
+    }
+
     if (handler->next && handler->next->access_method)
         return netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                          requests);
