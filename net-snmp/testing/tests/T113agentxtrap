@@ -13,7 +13,7 @@ SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
 #
 
 # start the trap demon
-CONFIGTRAPD ipv4logcommunity public
+CONFIGTRAPD authcommunity log public
 STARTTRAPD
 
 # standard V3 configuration for initial user
