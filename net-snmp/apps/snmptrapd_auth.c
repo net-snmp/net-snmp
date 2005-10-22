@@ -10,94 +10,6 @@
 #include "snmptrapd_ds.h"
 #include "mibII/vacm_conf.h"
 
-/* **************************************/
-/* authorization parsing token handlers */
-/* **************************************/
-
-void
-vacm_parse_ipv4logcommunity(const char *token, char *confline)
-{
-    vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_COMIPV4,
-                       VACM_VIEW_LOG_BIT);
-}
-
-void
-vacm_parse_ipv4executecommunity(const char *token, char *confline)
-{
-    vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_COMIPV4,
-                       VACM_VIEW_EXECUTE_BIT);
-}
-
-void
-vacm_parse_ipv4netcommunity(const char *token, char *confline)
-{
-    vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_COMIPV4,
-                       VACM_VIEW_NET_BIT);
-}
-
-void
-vacm_parse_ipv6logcommunity(const char *token, char *confline)
-{
-    vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_COMIPV6,
-                       VACM_VIEW_LOG_BIT);
-}
-
-void
-vacm_parse_ipv6executecommunity(const char *token, char *confline)
-{
-    vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_COMIPV6,
-                       VACM_VIEW_EXECUTE_BIT);
-}
-
-void
-vacm_parse_ipv6netcommunity(const char *token, char *confline)
-{
-    vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_COMIPV6,
-                       VACM_VIEW_NET_BIT);
-}
-
-void
-vacm_parse_loguser(const char *token, char *confline)
-{
-    vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_V3,
-                       VACM_VIEW_LOG_BIT);
-}
-
-void
-vacm_parse_executeuser(const char *token, char *confline)
-{
-    vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_V3,
-                       VACM_VIEW_EXECUTE_BIT);
-}
-
-void
-vacm_parse_netuser(const char *token, char *confline)
-{
-    vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_V3,
-                       VACM_VIEW_NET_BIT);
-}
-
-void
-vacm_parse_authuser(const char *token, char *confline)
-{
-    vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_V3,
-                       VACM_VIEW_NO_BITS);
-}
-
-void
-vacm_parse_ipv4authcommunity(const char *token, char *confline)
-{
-    vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_COMIPV4,
-                       VACM_VIEW_NO_BITS);
-}
-
-void
-vacm_parse_ipv6authcommunity(const char *token, char *confline)
-{
-    vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_COMIPV6,
-                       VACM_VIEW_NO_BITS);
-}
-
 /**
  * initializes the snmptrapd authorization code registering needed
  * handlers and config parsers.
@@ -105,9 +17,6 @@ vacm_parse_ipv6authcommunity(const char *token, char *confline)
 void
 init_netsnmp_trapd_auth(void)
 {
-    const char *commhelp = "[-v viewtype...] community [default|hostname|network/bits [oid]]";
-    const char *userhelp = "[-s secmodel] user [noauth|auth|priv [oid]]";
-    
     /* register our function as a authorization handler */
     netsnmp_trapd_handler *traph;
     traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_AUTH_HANDLER,
@@ -121,48 +30,6 @@ init_netsnmp_trapd_auth(void)
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmptrapd", "disableAuthorization",
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_APP_NO_AUTHORIZATION);
-
-    /* ipv4 community auth handlers */
-    snmpd_register_config_handler("ipv4logcommunity",
-                                  vacm_parse_ipv4logcommunity,
-                                  NULL, commhelp);
-    snmpd_register_config_handler("ipv4executecommunity",
-                                  vacm_parse_ipv4executecommunity,
-                                  NULL, commhelp);
-    snmpd_register_config_handler("ipv4netcommunity",
-                                  vacm_parse_ipv4netcommunity,
-                                  NULL, commhelp);
-    snmpd_register_config_handler("ipv4authcommunity",
-                                  vacm_parse_ipv4authcommunity,
-                                  NULL, commhelp);
-
-    /* ipv6 community auth handlers */
-    snmpd_register_config_handler("ipv6logcommunity",
-                                  vacm_parse_ipv6logcommunity,
-                                  NULL, commhelp);
-    snmpd_register_config_handler("ipv6executecommunity",
-                                  vacm_parse_ipv6executecommunity,
-                                  NULL, commhelp);
-    snmpd_register_config_handler("ipv6netcommunity",
-                                  vacm_parse_ipv6netcommunity,
-                                  NULL, commhelp);
-    snmpd_register_config_handler("ipv6authcommunity",
-                                  vacm_parse_ipv6authcommunity,
-                                  NULL, commhelp);
-
-    /* snmpv3 user auth handlers */
-    snmpd_register_config_handler("loguser",
-                                  vacm_parse_loguser,
-                                  NULL, userhelp);
-    snmpd_register_config_handler("executeuser",
-                                  vacm_parse_executeuser,
-                                  NULL, userhelp);
-    snmpd_register_config_handler("netuser",
-                                  vacm_parse_netuser,
-                                  NULL, userhelp);
-    snmpd_register_config_handler("authuser",
-                                  vacm_parse_authuser,
-                                  NULL, userhelp);
 }
 
 /* XXX: store somewhere in the PDU instead */
