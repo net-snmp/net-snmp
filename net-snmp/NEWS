@@ -13,6 +13,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
    snmptrapd:
      - allow a non-default AgentX socket
 
+   snmplib:
+     - new helper for ascii file based scalar integers (think Linux /proc/)
+
     mib2c:
       - mib2c.mfd.conf now generates code for persistence row storage
 
@@ -20,6 +23,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
    Linux:
        - added tcpConnectionTable and tcpListenerTable
        - inetCidrRouteTable supports dynamic ipv4 route creation/deletion
+       - added ipv6IpForwarding.0 and ipv6IpDefaultHopLimit.0 (read-write)
 
    Win32:
      - Cygwin compiler fixes
