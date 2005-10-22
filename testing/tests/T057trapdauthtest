@@ -9,7 +9,7 @@ HEADER snmptrapd authorization failure of non authorized users
 #
 
 CONFIGTRAPD createUser testuser
-CONFIGTRAPD loguser testuser noAuthNoPriv
+CONFIGTRAPD authuser log testuser noAuthNoPriv
 
 STARTTRAPD
 
