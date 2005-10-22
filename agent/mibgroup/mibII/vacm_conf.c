@@ -93,6 +93,16 @@ init_vacm_config_tokens(void) {
                                   NULL, NULL);
     snmpd_register_config_handler("vacmAccess", vacm_parse_config_access,
                                   NULL, NULL);
+
+    /* easy community auth handler */
+    snmpd_register_config_handler("authcommunity",
+                                  vacm_parse_authcommunity,
+                                  NULL, "authtype1,authtype2 community [default|hostname|network/bits [oid]]");
+
+    /* easy user auth handler */
+    snmpd_register_config_handler("authuser",
+                                  vacm_parse_authuser,
+                                  NULL, "[-s secmodel] user [noauth|auth|priv [oid]]");
 }
 
 /**
@@ -294,6 +304,56 @@ _vacm_parse_access_common(const char *token, char *param, char **st,
     return PARSE_CONT;
 }
 
+/* **************************************/
+/* authorization parsing token handlers */
+/* **************************************/
+
+int
+vacm_parse_authtokens(const char *token, char **confline)
+{
+    char authspec[SNMP_MAXBUF_MEDIUM];
+    char *strtok_state;
+    char *type;
+    int viewtype, viewtypes = 0;
+
+    *confline = copy_nword(*confline, authspec, sizeof(authspec));
+    
+    DEBUGMSGTL(("vacm_parse_authtokens","parsing %s",authspec));
+    if (!*confline) {
+        config_perror("Illegal configuration line: missing fields");
+        return -1;
+    }
+
+    type = strtok_r(authspec, ",|:", &strtok_state);
+    while(type && *type != '\0') {
+        viewtype = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, type);
+        if (viewtype < 0 || viewtype >= VACM_MAX_VIEWS) {
+            config_perror("Illegal view name");
+        } else {
+            viewtypes |= (1 << viewtype);
+        }
+        type = strtok_r(NULL, ",|:", &strtok_state);
+    }
+    DEBUGMSG(("vacm_parse_authtokens","  .. result = 0x%x\n",viewtypes));
+    return viewtypes;
+}
+
+void
+vacm_parse_authuser(const char *token, char *confline)
+{
+    int viewtypes = vacm_parse_authtokens(token, &confline);
+    if (viewtypes != -1)
+        vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_V3, viewtypes);
+}
+
+void
+vacm_parse_authcommunity(const char *token, char *confline)
+{
+    int viewtypes = vacm_parse_authtokens(token, &confline);
+    if (viewtypes != -1)
+        vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_COM, viewtypes);
+}
+
 void
 vacm_parse_setaccess(const char *token, char *param)
 {
@@ -326,7 +386,7 @@ vacm_parse_setaccess(const char *token, char *param)
     }
 
     viewnum = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, viewname);
-    if (viewnum < 0 || viewnum > VACM_MAX_VIEWS) {
+    if (viewnum < 0 || viewnum >= VACM_MAX_VIEWS) {
         config_perror("Illegal view name");
         return;
     }
@@ -619,27 +679,6 @@ vacm_create_simple(const char *token, char *confline,
      */
     cp = copy_nword(confline, community, sizeof(community));
 
-    while(strcmp(community, "-v") == 0) {
-        char viewtype[SPRINT_MAX_LEN];
-        int iviewtype;
-
-        if (cp)
-            cp = copy_nword(cp, viewtype, sizeof(viewtype));
-        if (!cp) {
-            config_perror("illegal line");
-            return;
-        }
-        if (cp)
-            cp = copy_nword(cp, community, sizeof(community));
-
-        iviewtype = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, viewtype);
-        if (iviewtype < 0 || iviewtype > VACM_MAX_VIEWS) {
-            config_perror("illegal view type passed to -v");
-            return;
-        }
-        viewtypes |= 1 << iviewtype;
-    }
-
     if (parsetype == VACM_CREATE_SIMPLE_V3) {
         /*
          * maybe security model type 
@@ -696,36 +735,41 @@ vacm_create_simple(const char *token, char *confline,
     if (viewtypes & VACM_VIEW_WRITE)
         rw = viewname;
 
+    commcount++;
+
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
-    if (parsetype == VACM_CREATE_SIMPLE_COMIPV4) {
-        commcount++;
+    if (parsetype == VACM_CREATE_SIMPLE_COMIPV4 ||
+        parsetype == VACM_CREATE_SIMPLE_COM) {
         vacm_gen_com2sec(commcount, community, addressname,
                          "com2sec", &netsnmp_udp_parse_security,
                          secname, sizeof(secname),
                          viewname, sizeof(viewname));
-
+    }
+    
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+    if (parsetype == VACM_CREATE_SIMPLE_COMUNIX ||
+        parsetype == VACM_CREATE_SIMPLE_COM) {
         snprintf(line, sizeof(line), "%s %s '%s'",
                  secname, addressname, community);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "com2secunix", line));
         netsnmp_unix_parse_security("com2secunix", line);
+    }
 #endif
 
 #ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
-    } else if (parsetype == VACM_CREATE_SIMPLE_COMIPV6) {
-        commcount++;
+    if (parsetype == VACM_CREATE_SIMPLE_COMIPV6 ||
+        parsetype == VACM_CREATE_SIMPLE_COM) {
         vacm_gen_com2sec(commcount, community, addressname,
                          "com2sec6", &netsnmp_udp6_parse_security,
                          secname, sizeof(secname),
                          viewname, sizeof(viewname));
+    }
 #endif
-    } else
 #endif /* support for community based SNMP */
-    {
 
+    if (parsetype == VACM_CREATE_SIMPLE_V3) {
         /* support for SNMPv3 user names */
-        commcount++;
         sprintf(viewname,"viewUSM%d",commcount);
         strncpy(secname, community, sizeof(secname));
         secname[ sizeof(secname)-1 ] = 0;
@@ -1086,7 +1130,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
         return VACM_SUCCESS;
     }
 
-    if (viewtype < 0 || viewtype > VACM_MAX_VIEWS) {
+    if (viewtype < 0 || viewtype >= VACM_MAX_VIEWS) {
         DEBUGMSG(("mibII/vacm_vars", " illegal view type\n"));
         return VACM_NOACCESS;
     }
