@@ -1,4 +1,4 @@
-.TH "Trap generation routines for mib modules to use" 3 "16 Oct 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
+.TH "Trap generation routines for mib modules to use" 3 "21 Oct 2005" "Version 5.2.1.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -66,6 +66,10 @@ Trap generation routines for mib modules to use \-
 .ti -1c
 .RI "void \fBsend_enterprise_trap_vars\fP (int trap, int specific, oid *enterprise, int enterprise_length, \fBnetsnmp_variable_list\fP *vars)"
 .br
+.ti -1c
+.RI "int \fBhandle_inform_response\fP (int op, \fBnetsnmp_session\fP *session, int reqid, \fBnetsnmp_pdu\fP *pdu, void *magic)"
+.br
+.RI "\fICaptures responses or the lack there of from INFORMs that were sent 1) a response is received from an INFORM 2) one isn't received and the retries/timeouts have failed. \fP"
 .ti -1c
 .RI "void \fBsend_trap_to_sess\fP (\fBnetsnmp_session\fP *sess, \fBnetsnmp_pdu\fP *template_pdu)"
 .br
@@ -189,6 +193,15 @@ Trap generation routines for mib modules to use \-
 .in -1c
 .SH "Function Documentation"
 .PP 
+.SS "int handle_inform_response (int op, \fBnetsnmp_session\fP * session, int reqid, \fBnetsnmp_pdu\fP * pdu, void * magic)"
+.PP
+Captures responses or the lack there of from INFORMs that were sent 1) a response is received from an INFORM 2) one isn't received and the retries/timeouts have failed. 
+.PP
+Definition at line 827 of file agent_trap.c.
+.PP
+References snmp_increment_statistic().
+.PP
+Referenced by send_trap_to_sess().
 .SS "void send_easy_trap (int trap, int specific)"
 .PP
 Sends an SNMPv1 trap (or the SNMPv2 equivalent) to the list of configured trap destinations (or 'sinks'), using the provided values for the generic trap type and specific trap value. 
@@ -216,7 +229,7 @@ void
 .PP
 
 .PP
-Definition at line 900 of file agent_trap.c.
+Definition at line 941 of file agent_trap.c.
 .PP
 References NULL, and send_trap_vars().
 .PP
@@ -252,7 +265,7 @@ void
 .in +1c
 \fBnotification.c\fP.
 .PP
-Definition at line 929 of file agent_trap.c.
+Definition at line 970 of file agent_trap.c.
 .PP
 References send_trap_vars().
 .SS "void snmpd_free_trapsinks (void)"
