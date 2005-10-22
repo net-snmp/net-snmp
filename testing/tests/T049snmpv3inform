@@ -9,7 +9,7 @@ HEADER SNMPv3 informs received and sent by tools
 #
 
 CONFIGTRAPD createUser testuser
-CONFIGTRAPD loguser testuser noAuthNoPriv
+CONFIGTRAPD authuser log testuser noAuthNoPriv
 
 STARTTRAPD
 
