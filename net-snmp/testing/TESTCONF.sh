@@ -63,10 +63,10 @@ if [ "x$SNMP_TMPDIR" = "x" -a "x$SNMP_HEADERONLY" != "xyes" ]; then
 	echo "$0: ERROR: $SNMP_TMPDIR already existed."
 	exit 1;
     fi
-    SNMP_TMP_PERSITENTDIR=$SNMP_TMPDIR/persist
-    export SNMP_TMP_PERSITENTDIR
+    SNMP_TMP_PERSISTENTDIR=$SNMP_TMPDIR/persist
+    export SNMP_TMP_PERSISTENTDIR
     mkdir $SNMP_TMPDIR
-    mkdir $SNMP_TMP_PERSITENTDIR
+    mkdir $SNMP_TMP_PERSISTENTDIR
 fi
 
 if [ "x$SNMP_SAVE_TMPDIR" = "x" ]; then
@@ -81,7 +81,7 @@ SNMP_SNMPTRAPD_LOG_FILE="$SNMP_TMPDIR/snmptrapd.log"
 SNMP_SNMPTRAPD_PID_FILE="$SNMP_TMPDIR/snmptrapd.pid"
 SNMP_SNMPD_PID_FILE="$SNMP_TMPDIR/snmpd.pid"
 SNMP_SNMPD_LOG_FILE="$SNMP_TMPDIR/snmpd.log"
-#SNMP_PERSISTENT_FILE="$SNMP_TMP_PERSITENTDIR/persistent-store.conf"
+#SNMP_PERSISTENT_FILE="$SNMP_TMP_PERSISTENTDIR/persistent-store.conf"
 #export SNMP_PERSISTENT_FILE
 
 ## Setup default flags and ports iff not done

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-CONFIGAGENT [snmp] persistentdir $SNMP_TMP_PERSITENTDIR
+CONFIGAGENT [snmp] persistentdir $SNMP_TMP_PERSISTENTDIR
 
 # XXX: auto-switch to a supported protocol instead.
 if test "x$DEFAUTHTYPE" = "x"; then
