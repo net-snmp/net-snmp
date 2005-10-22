@@ -11,7 +11,7 @@
 SKIPIF DISABLE_MD5
 SKIPIF DISABLE_DES
 
-CONFIGAGENT [snmp] persistentdir $SNMP_TMP_PERSITENTDIR
+CONFIGAGENT [snmp] persistentdir $SNMP_TMP_PERSISTENTDIR
 
 CONFIGAGENT createUser initial1 MD5 initial_test_pass_auth DES
 CONFIGAGENT createUser initial2 MD5 initial_test_pass_auth DES
