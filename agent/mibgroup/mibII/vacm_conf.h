@@ -11,8 +11,10 @@ config_require(util_funcs)
 config_belongs_in(agent_module)
 
 #define VACM_CREATE_SIMPLE_V3       1
-#define VACM_CREATE_SIMPLE_COMIPV4  2
-#define VACM_CREATE_SIMPLE_COMIPV6  2
+#define VACM_CREATE_SIMPLE_COM      2
+#define VACM_CREATE_SIMPLE_COMIPV4  3
+#define VACM_CREATE_SIMPLE_COMIPV6  4
+#define VACM_CREATE_SIMPLE_COMUNIX  5
 
      void            init_vacm_conf(void);
      void            init_vacm_config_tokens(void);
@@ -30,6 +32,8 @@ config_belongs_in(agent_module)
      void            vacm_parse_rouser(const char *, char *);
      void            vacm_parse_rwuser(const char *, char *);
      void            vacm_create_simple(const char *, char *, int, int);
+     void            vacm_parse_authcommunity(const char *, char *);
+     void            vacm_parse_authuser(const char *, char *);
 
      SNMPCallback    vacm_in_view_callback;
      SNMPCallback    vacm_warn_if_not_configured;
