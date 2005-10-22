@@ -1,12 +1,12 @@
-.TH SNMPTRAPD.CONF 5 "28 Aug 2001" VVERSIONINFO "Net-SNMP"
+.TH SNMPTRAPD.CONF 5 "29 Jun 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-SYSCONFDIR/snmp/snmptrapd.conf - configuration file for the Net-SNMP trap daemon.
+snmptrapd.conf - configuration file for the Net-SNMP notification receiver
 .SH DESCRIPTION
 .B snmptrapd.conf
-is the configuration file(s) which define how the Net-SNMP SNMP trap
-receiving daemon operates when it receives a trap.  These files may
-contain any of the directives found in the
+is the configuration file(s) which define how the Net-SNMP SNMP notification
+receiver (trap daemon) operates when it receives a notification.  
+These files may contain any of the directives found in the
 .B DIRECTIVES
 section below.  This file is not required for the daemon to operate,
 receive, or report traps.  It is used solely as a method of providing
@@ -54,17 +54,27 @@ can be used as a trap handle directive:
 .br
 .RS
 .P
-traphandle /usr/bin/perl BINDIR/traptoemail -s mysmtp.somewhere.com -f admin@somewhere.com me@somewhere.com
+traphandle default /usr/bin/perl BINDIR/traptoemail -s mysmtp.somewhere.com -f admin@somewhere.com me@somewhere.com
 .RE
 .RE
+.IP "snmptrapdaddr [<transport-specifier>:]<transport-address>[,...]"
+Makes the agent listen on the specified comma-separated list of
+listening addresses instead of the default behaviour, which is to
+listen on UDP port 162 on all IPv4 interfaces.  See the section 
+.B LISTENING ADDRESSES
+in the
+.I snmpd(8)
+manual page for more information about the format of listening
+addresses.
 .IP "dontRetainLogs true"
 Turns off the support for the NOTIFICATION-LOG-MIB and thus doesn't
 retain logged traps.  Normally the snmptrapd program keeps a certain
 number of traps around in memory so they can be retrieved via querying
 the nlmLogTable and nlmLogvariableTable tables.  
-See the snmptrapd manual page and the
-NOTIFICATION-LOG-MIB for details.
-.IP "createUser username (MD5|SHA) authpassphrase [DES]"
+See the 
+.I snmptrapd(8) 
+manual page and the NOTIFICATION-LOG-MIB for details.
+.IP "createUser username (MD5|SHA) authpassphrase [DES|AES]"
 See the 
 .I snmpd.conf(5)
 manual page for a description of how to create SNMPv3 users.  It's
@@ -115,6 +125,8 @@ What file to store the process id in
 The daemon blocks on the executing traphandle commands.  (This should
 be fixed in the future with an appropriate signal catch and wait()
 combination).
+.SH FILES
+SYSCONFDIR/snmp/snmptrapd.conf
 .SH "SEE ALSO"
 snmp_config(5), snmptrapd(8), syslog(8), variables(5), snmpd.conf(5), read_config(3).
 

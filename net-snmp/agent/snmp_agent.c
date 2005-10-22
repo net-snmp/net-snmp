@@ -92,9 +92,12 @@ SOFTWARE.
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_assert.h>
 
+#if HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
+
 #ifdef USE_LIBWRAP
 #include <tcpd.h>
-#include <syslog.h>
 int             allow_severity = LOG_INFO;
 int             deny_severity = LOG_WARNING;
 #endif
@@ -116,6 +119,9 @@ int             deny_severity = LOG_WARNING;
 #ifdef USING_SMUX_MODULE
 #include "smux/smux.h"
 #endif
+
+oid      version_sysoid[] = { SYSTEM_MIB };
+int      version_sysoid_len = OID_LENGTH(version_sysoid);
 
 #define SNMP_ADDRCACHE_SIZE 10
 #define SNMP_ADDRCACHE_MAXAGE 300 /* in seconds */
@@ -825,11 +831,17 @@ netsnmp_agent_check_packet(netsnmp_session * session,
             return 0;
         }
     } else {
-        if (hosts_ctl("snmpd", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
-            snmp_log(allow_severity, "Connection from <UNKNOWN>\n");
+        /*
+         * don't log callback connections.
+         * What about 'Local IPC', 'IPX' and 'AAL5 PVC'?
+         */
+        if (0 == strncmp(addr_string, "callback", 8))
+            ;
+        else if (hosts_ctl("snmpd", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
+            snmp_log(allow_severity, "Connection from <UNKNOWN> (%s)\n", addr_string);
             addr_string = strdup("<UNKNOWN>");
         } else {
-            snmp_log(deny_severity, "Connection from <UNKNOWN> REFUSED\n");
+            snmp_log(deny_severity, "Connection from <UNKNOWN> (%s) REFUSED\n", addr_string);
             return 0;
         }
     }
@@ -872,7 +884,7 @@ netsnmp_agent_check_parse(netsnmp_session * session, netsnmp_pdu *pdu,
                 snmp_log(LOG_DEBUG, "  TRAP message\n");
                 break;
             case SNMP_MSG_GETBULK:
-                snmp_log(LOG_DEBUG, "  GETBULK message, non-rep=%d, max_rep=%d\n",
+                snmp_log(LOG_DEBUG, "  GETBULK message, non-rep=%ld, max_rep=%ld\n",
                          pdu->errstat, pdu->errindex);
                 break;
             case SNMP_MSG_INFORM:
@@ -1625,7 +1637,24 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         asp->pdu->errstat = asp->status;
         asp->pdu->errindex = asp->index;
         if (!snmp_send(asp->session, asp->pdu)) {
+            netsnmp_variable_list *var_ptr;
             snmp_perror("send response");
+            for (var_ptr = asp->pdu->variables; var_ptr != NULL;
+                     var_ptr = var_ptr->next_variable) {
+                size_t  c_oidlen = 256, c_outlen = 0;
+                u_char *c_oid = (u_char *) malloc(c_oidlen);
+
+                if (c_oid) {
+                    if (!sprint_realloc_objid (&c_oid, &c_oidlen, &c_outlen, 1,
+ 		                               var_ptr->name,
+                                               var_ptr->name_length)) {
+                        snmp_log(LOG_ERR, "    -- %s [TRUNCATED]\n", c_oid);
+                    } else {
+                        snmp_log(LOG_ERR, "    -- %s\n", c_oid);
+                    }
+                    SNMP_FREE(c_oid);
+                }
+            }
             snmp_free_pdu(asp->pdu);
             asp->pdu = NULL;
         }
@@ -1745,7 +1774,7 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
     if ((access_ret = check_access(asp->pdu)) != 0) {
         if (access_ret == VACM_NOSUCHCONTEXT) {
             /*
-             * rfc2573 section 3.2, step 5 says that we increment the
+             * rfc3413 section 3.2, step 5 says that we increment the
              * counter but don't return a response of any kind 
              */
 

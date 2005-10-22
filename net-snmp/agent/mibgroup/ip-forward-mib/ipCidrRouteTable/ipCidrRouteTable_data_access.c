@@ -201,8 +201,6 @@ _snarf_route_entry(netsnmp_route_entry * route_entry,
 int
 ipCidrRouteTable_cache_load(netsnmp_container * container)
 {
-    ipCidrRouteTable_rowreq_ctx *rowreq_ctx;
-
     netsnmp_container *route_container;
 
     DEBUGMSGTL(("verbose:ipCidrRouteTable:ipCidrRouteTable_cache_load",

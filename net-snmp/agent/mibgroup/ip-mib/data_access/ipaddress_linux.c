@@ -174,7 +174,8 @@ _load_v6(netsnmp_container *container, int idx_offset)
     FILE           *in;
     char            line[80], addr[33], if_name[IFNAMSIZ];
     u_char          *buf;
-    int             if_index, pfx_len, scope, flags, rc = 0, in_len, out_len;
+    int             if_index, pfx_len, scope, flags, rc = 0;
+    size_t          in_len, out_len;
     netsnmp_ipaddress_entry *entry;
     _ioctl_extras           *extras;
     static int      log_open_err = 1;
