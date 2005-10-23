@@ -751,7 +751,7 @@ usm_parse_create_usmUser(const char *token, char *line)
                       (u_char *) buf, strlen(buf), userKey, &userKeyLen);
     if (ret != SNMPERR_SUCCESS) {
         config_perror("could not generate the authentication key from the "
-                      "suppiled pass phrase.");
+                      "supplied pass phrase.");
         usm_free_user(newuser);
         return;
     }
