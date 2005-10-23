@@ -36,6 +36,7 @@
 typedef struct binary_array_table_s {
     size_t                     max_size;   /* Size of the current data table */
     size_t                     count;      /* Index of the next free entry */
+    u_int                      flags;      /* flags */
     int                        dirty;
     int                        data_size;  /* Size of an individual entry */
     void                     **data;       /* The table itself */
@@ -197,6 +198,16 @@ netsnmp_binary_array_release(netsnmp_container *c)
     SNMP_FREE(c);
 }
 
+int
+netsnmp_binary_array_options_set(netsnmp_container *c, int set, u_int flags)
+{
+    binary_array_table *t = (binary_array_table*)c->container_data;
+    if (set)
+        t->flags = flags;
+    else
+        return ((t->flags & flags) == flags);
+}
+
 NETSNMP_STATIC_INLINE size_t
 netsnmp_binary_array_count(netsnmp_container *c)
 {
@@ -353,7 +364,20 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
     int             new_max;
     void           *new_data;   /* Used for * a) extending the data table
                                  * * b) the next entry to use */
-
+    /*
+     * check for duplicates
+     */
+    if (! (t->flags & CONTAINER_KEY_ALLOW_DUPLICATES)) {
+        new_data = netsnmp_binary_array_get(c, entry, 1);
+        if (NULL != new_data) {
+            DEBUGMSGTL(("container","not inserting duplicate key\n"));
+            return -1;
+        }
+    }
+    
+    /*
+     * check if we need to resize the array
+     */
     if (t->max_size <= t->count) {
         /*
          * Table is full, so extend it to double the size
