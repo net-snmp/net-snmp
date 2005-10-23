@@ -33,6 +33,12 @@ extern "C" {
     /*
      * function returning an int for an operation on a container
      */
+    typedef int (netsnmp_container_option)(struct netsnmp_container_s *,
+                                           int set, u_int flags);
+
+    /*
+     * function returning an int for an operation on a container
+     */
     typedef int (netsnmp_container_rc)(struct netsnmp_container_s *);
 
     /*
@@ -194,7 +200,7 @@ extern "C" {
        /*
         * function to set container options
         */
-       netsnmp_container_rc             *set_options;
+       netsnmp_container_option         *options;
 
        /*
         * unique name for finding a particular container in a list
@@ -262,10 +268,17 @@ extern "C" {
 
 #define CONTAINER_KEY_ALLOW_DUPLICATES             0x00000001
 #define CONTAINER_SET_OPTIONS(x)    do {                                \
-        if (NULL==(x)->set_options)                                     \
+        if (NULL==(x)->options)                                         \
             return -1;                                                  \
         else                                                            \
-            return (x)->set_options(o);                                 \
+            return (x)->options(x,1, o);                                \
+        while(0)
+
+#define CONTAINER_CHECK_OPTION(x)    do {                               \
+        if (NULL==(x)->options)                                         \
+            return -1;                                                  \
+        else                                                            \
+            return (x)->options(x,0, o);                                \
         while(0)
 
 
