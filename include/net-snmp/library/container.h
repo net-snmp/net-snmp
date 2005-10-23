@@ -192,6 +192,11 @@ extern "C" {
        netsnmp_container_compare        *ncompare;
 
        /*
+        * function to set container options
+        */
+       netsnmp_container_rc             *set_options;
+
+       /*
         * unique name for finding a particular container in a list
         */
        char *container_name;
@@ -254,6 +259,15 @@ extern "C" {
 
     /** for_each callback to call free on data item */
     void  netsnmp_container_simple_free(void *data, void *context);
+
+#define CONTAINER_KEY_ALLOW_DUPLICATES             0x00000001
+#define CONTAINER_SET_OPTIONS(x)    do {                                \
+        if (NULL==(x)->set_options)                                     \
+            return -1;                                                  \
+        else                                                            \
+            return (x)->set_options(o);                                 \
+        while(0)
+
 
     /*
      * useful macros (x = container; k = key; c = user context)
