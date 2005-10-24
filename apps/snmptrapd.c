@@ -463,6 +463,14 @@ snmp_input(int op,
     tmpvar.type = ASN_OBJECT_ID;
 
     if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+        /*
+         * Drops packets with reception problems
+         */
+        if (session->s_snmp_errno) {
+            /* drop problem packets */
+            return 1;
+        }
+
         if ((rbuf = (u_char *) calloc(r_len, 1)) == NULL) {
             snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
             return 1;
