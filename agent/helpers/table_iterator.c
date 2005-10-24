@@ -790,6 +790,232 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
  *
  * ================================== */
 
+void *
+netsnmp_iterator_row_first( netsnmp_iterator_info *iinfo ) {
+    netsnmp_variable_list *vp1, *vp2;
+    void *ctx1, *ctx2;
+
+    if (!iinfo)
+        return NULL;
+
+    vp1 = snmp_clone_varbind(iinfo->indexes);
+    vp2 = iinfo->get_first_data_point( &ctx1, &ctx2, vp1, iinfo );
+
+    if (!vp2)
+        ctx2 = NULL;
+
+    /* free loop context ?? */
+    snmp_free_varbind( vp1 );
+    return ctx2;  /* or *ctx2 ?? */
+}
+
+void *
+netsnmp_iterator_row_get( netsnmp_iterator_info *iinfo, void *row )
+{
+    netsnmp_variable_list *vp1, *vp2;
+    void *ctx1, *ctx2;
+
+    if (!iinfo || !row)
+        return NULL;
+
+        /*
+         * This routine relies on being able to
+         *   determine the indexes for a given row.  
+         */
+    if (!iinfo->get_row_indexes)
+        return NULL;
+
+    vp1  = snmp_clone_varbind(iinfo->indexes);
+    ctx1 = row;   /* Probably only need one of these ... */
+    ctx2 = row;
+    vp2  = iinfo->get_row_indexes( &ctx1, &ctx2, vp1, iinfo );
+
+    ctx2 = NULL;
+    if (vp2) {
+        ctx2 = netsnmp_iterator_row_get_byidx( iinfo, vp2 );
+    }
+    snmp_free_varbind( vp1 );
+    return ctx2;
+}
+
+void *
+netsnmp_iterator_row_next( netsnmp_iterator_info *iinfo, void *row )
+{
+    netsnmp_variable_list *vp1, *vp2;
+    void *ctx1, *ctx2;
+
+    if (!iinfo || !row)
+        return NULL;
+
+        /*
+         * This routine relies on being able to
+         *   determine the indexes for a given row.  
+         */
+    if (!iinfo->get_row_indexes)
+        return NULL;
+
+    vp1  = snmp_clone_varbind(iinfo->indexes);
+    ctx1 = row;   /* Probably only need one of these ... */
+    ctx2 = row;
+    vp2  = iinfo->get_row_indexes( &ctx1, &ctx2, vp1, iinfo );
+
+    ctx2 = NULL;
+    if (vp2) {
+        ctx2 = netsnmp_iterator_row_next_byidx( iinfo, vp2 );
+    }
+    snmp_free_varbind( vp1 );
+    return ctx2;
+}
+
+void *
+netsnmp_iterator_row_get_byidx(  netsnmp_iterator_info *iinfo,
+                                 netsnmp_variable_list *indexes )
+{
+    oid    dummy[] = {0,0};   /* Keep 'build_oid' happy */
+    oid    instance[MAX_OID_LEN];
+    size_t len =    MAX_OID_LEN;
+
+    if (!iinfo || !indexes)
+        return NULL;
+
+    build_oid_noalloc(instance, MAX_OID_LEN, &len,
+                      dummy, 2, indexes);
+    return netsnmp_iterator_row_get_byoid( iinfo, instance+2, len-2 );
+}
+
+void *
+netsnmp_iterator_row_next_byidx( netsnmp_iterator_info *iinfo,
+                                 netsnmp_variable_list *indexes )
+{
+    oid    dummy[] = {0,0};
+    oid    instance[MAX_OID_LEN];
+    size_t len =    MAX_OID_LEN;
+
+    if (!iinfo || !indexes)
+        return NULL;
+
+    build_oid_noalloc(instance, MAX_OID_LEN, &len,
+                      dummy, 2, indexes);
+    return netsnmp_iterator_row_next_byoid( iinfo, instance+2, len-2 );
+}
+
+void *
+netsnmp_iterator_row_get_byoid(  netsnmp_iterator_info *iinfo,
+                                 oid *instance, size_t len )
+{
+    oid    dummy[] = {0,0};
+    oid    this_inst[ MAX_OID_LEN];
+    size_t this_len;
+    netsnmp_variable_list *vp1, *vp2;
+    void *ctx1, *ctx2;
+    int   n;
+
+    if (!iinfo || !iinfo->get_first_data_point
+               || !iinfo->get_next_data_point )
+        return NULL;
+
+    if ( !instance || !len )
+        return NULL;
+
+    vp1 = snmp_clone_varbind(iinfo->indexes);
+    vp2 = iinfo->get_first_data_point( &ctx1, &ctx2, vp1, iinfo );
+    DEBUGMSGTL(("table:iterator:get", "first DP: %x %x %x\n",
+                                       ctx1, ctx2, vp2));
+
+    /* XXX - free context ? */
+    
+    while ( vp2 ) {
+        this_len = MAX_OID_LEN;
+        build_oid_noalloc(this_inst, MAX_OID_LEN, &this_len, dummy, 2, vp2);
+        n = snmp_oid_compare( instance, len, this_inst+2, this_len-2 );
+        if ( n == 0 )
+            break;  /* Found matching row */
+
+        if (( n > 0) &&
+            (iinfo->flags & NETSNMP_ITERATOR_FLAG_SORTED)) {
+            vp2 = NULL;  /* Row not present */
+            break;
+        }
+        
+        vp2 = iinfo->get_next_data_point( &ctx1, &ctx2, vp2, iinfo );
+        DEBUGMSGTL(("table:iterator:get", "next DP: %x %x %x\n",
+                                           ctx1, ctx2, vp2));
+        /* XXX - free context ? */
+    }
+           
+    /* XXX - final free context ? */
+    snmp_free_varbind( vp1 );
+
+    return ( vp2 ? ctx2 : NULL );
+}
+
+void *
+netsnmp_iterator_row_next_byoid( netsnmp_iterator_info *iinfo,
+                                 oid *instance, size_t len )
+{
+    oid    dummy[] = {0,0};
+    oid    this_inst[ MAX_OID_LEN];
+    size_t this_len;
+    oid    best_inst[ MAX_OID_LEN];
+    size_t best_len = 0;
+    netsnmp_variable_list *vp1, *vp2;
+    void *ctx1, *ctx2;
+    int   n;
+
+    if (!iinfo || !iinfo->get_first_data_point
+               || !iinfo->get_next_data_point )
+        return NULL;
+
+    vp1 = snmp_clone_varbind(iinfo->indexes);
+    vp2 = iinfo->get_first_data_point( &ctx1, &ctx2, vp1, iinfo );
+    DEBUGMSGTL(("table:iterator:get", "first DP: %x %x %x\n",
+                                       ctx1, ctx2, vp2));
+
+    if ( !instance || !len ) {
+        snmp_free_varbind( vp1 );
+        return ( vp2 ? ctx2 : NULL );   /* First entry */
+    }
+
+    /* XXX - free context ? */
+    
+    while ( vp2 ) {
+        this_len = MAX_OID_LEN;
+        build_oid_noalloc(this_inst, MAX_OID_LEN, &this_len, dummy, 2, vp2);
+        n = snmp_oid_compare( instance, len, this_inst+2, this_len-2 );
+
+        /*
+         * Look for the best-fit candidate for the next row
+         *   (bearing in mind the rows may not be ordered "correctly")
+         */
+        if ( n > 0 ) {
+            if ( best_len == 0 ) {
+                memcpy( best_inst, this_inst, sizeof( this_inst ));
+                best_len = this_len;
+                if (iinfo->flags & NETSNMP_ITERATOR_FLAG_SORTED)
+                    break;
+            } else {
+                n = snmp_oid_compare( best_inst, best_len, this_inst, this_len );
+                if ( n < 0 ) {
+                    memcpy( best_inst, this_inst, sizeof( this_inst ));
+                    best_len = this_len;
+                    if (iinfo->flags & NETSNMP_ITERATOR_FLAG_SORTED)
+                        break;
+                }
+            }
+        }
+        
+        vp2 = iinfo->get_next_data_point( &ctx1, &ctx2, vp2, iinfo );
+        DEBUGMSGTL(("table:iterator:get", "next DP: %x %x %x\n",
+                                           ctx1, ctx2, vp2));
+        /* XXX - free context ? */
+    }
+           
+    /* XXX - final free context ? */
+    snmp_free_varbind( vp1 );
+
+    return ( vp2 ? ctx2 : NULL );
+}
+
 int
 netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
 {
@@ -803,8 +1029,10 @@ netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
 
     vp1 = snmp_clone_varbind(iinfo->indexes);
     vp2 = iinfo->get_first_data_point( &ctx1, &ctx2, vp1, iinfo );
-    if (!vp2)
+    if (!vp2) {
+        snmp_free_varbind( vp1 );
         return 0;
+    }
     
     DEBUGMSGTL(("table:iterator:count", "first DP: %x %x %x\n",
                                          ctx1, ctx2, vp2));

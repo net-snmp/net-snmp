@@ -132,6 +132,18 @@ extern          "C" {
  * Iterator API: Row operations
  * ============================ */
 
+void *netsnmp_iterator_row_first(      netsnmp_iterator_info *);
+void *netsnmp_iterator_row_get(        netsnmp_iterator_info *, void *);
+void *netsnmp_iterator_row_next(       netsnmp_iterator_info *, void *);
+void *netsnmp_iterator_row_get_byidx(  netsnmp_iterator_info *,
+                                       netsnmp_variable_list *);
+void *netsnmp_iterator_row_next_byidx( netsnmp_iterator_info *,
+                                       netsnmp_variable_list *);
+void *netsnmp_iterator_row_get_byoid(  netsnmp_iterator_info *, oid *, size_t);
+void *netsnmp_iterator_row_next_byoid( netsnmp_iterator_info *, oid *, size_t);
+int   netsnmp_iterator_row_count(      netsnmp_iterator_info *);
+
+
 /* ============================
  * Iterator API: Index operations
  * ============================ */
