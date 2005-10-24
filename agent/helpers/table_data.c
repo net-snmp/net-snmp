@@ -775,6 +775,7 @@ netsnmp_table_data_build_result(netsnmp_handler_registration *reginfo,
 /* ==================================
  *
  * Table Data API: Row operations
+ *     (table-independent rows)
  *
  * ================================== */
 
@@ -842,6 +843,156 @@ netsnmp_table_data_num_rows(netsnmp_table_data *table)
     return i;
 }
 
+    /* =====================================
+     * Generic API - mostly renamed wrappers
+     * ===================================== */
+
+netsnmp_table_row *
+netsnmp_table_data_row_first(netsnmp_table_data *table)
+{
+    return netsnmp_table_data_get_first_row(table);
+}
+
+netsnmp_table_row *
+netsnmp_table_data_row_get(  netsnmp_table_data *table,
+                             netsnmp_table_row  *row)
+{
+    if (!table || !row)
+        return NULL;
+    return netsnmp_table_data_get_from_oid(table, row->index_oid,
+                                                  row->index_oid_len);
+}
+
+netsnmp_table_row *
+netsnmp_table_data_row_next( netsnmp_table_data *table,
+                             netsnmp_table_row  *row)
+{
+    return netsnmp_table_data_get_next_row(table, row);
+}
+
+netsnmp_table_row *
+netsnmp_table_data_row_get_byidx( netsnmp_table_data    *table,
+                                  netsnmp_variable_list *indexes)
+{
+    return netsnmp_table_data_get(table, indexes);
+}
+
+netsnmp_table_row *
+netsnmp_table_data_row_next_byidx(netsnmp_table_data    *table,
+                                  netsnmp_variable_list *indexes)
+{
+    oid    instance[MAX_OID_LEN];
+    size_t len    = MAX_OID_LEN;
+
+    if (!table || !indexes)
+        return NULL;
+
+    build_oid_noalloc(instance, MAX_OID_LEN, &len, NULL, 0, indexes);
+    return netsnmp_table_data_row_next_byoid(table, instance, len);
+}
+
+netsnmp_table_row *
+netsnmp_table_data_row_get_byoid( netsnmp_table_data *table,
+                                  oid *instance, size_t len)
+{
+    return netsnmp_table_data_get_from_oid(table, instance, len);
+}
+
+netsnmp_table_row *
+netsnmp_table_data_row_next_byoid(netsnmp_table_data *table,
+                                  oid *instance, size_t len)
+{
+    netsnmp_table_row *row;
+
+    if (!table || !instance)
+        return NULL;
+    
+    for (row = table->first_row; row; row = row->next) {
+        if (snmp_oid_compare(row->index_oid,
+                             row->index_oid_len,
+                             instance, len) > 0)
+            return row;
+    }
+    return NULL;
+}
+
+int
+netsnmp_table_data_row_count(netsnmp_table_data *table)
+{
+    return netsnmp_table_data_num_rows(table);
+}
+
+
+/* ==================================
+ *
+ * Table Data API: Row operations
+ *     (table-specific rows)
+ *
+ * ================================== */
+
+void *
+netsnmp_table_data_entry_first(netsnmp_table_data *table)
+{
+    netsnmp_table_row *row =
+        netsnmp_table_data_get_first_row(table);
+    return (row ? row->data : NULL );
+}
+
+void *
+netsnmp_table_data_entry_get(  netsnmp_table_data *table,
+                               netsnmp_table_row  *row)
+{
+    return (row ? row->data : NULL );
+}
+
+void *
+netsnmp_table_data_entry_next( netsnmp_table_data *table,
+                               netsnmp_table_row  *row)
+{
+    netsnmp_table_row *row =
+         netsnmp_table_data_row_next(table, row);
+    return (row ? row->data : NULL );
+}
+
+void *
+netsnmp_table_data_entry_get_byidx( netsnmp_table_data    *table,
+                                    netsnmp_variable_list *indexes)
+{
+    netsnmp_table_row *row =
+        netsnmp_table_data_row_get_byidx(table, indexes);
+    return (row ? row->data : NULL );
+}
+
+void *
+netsnmp_table_data_entry_next_byidx(netsnmp_table_data    *table,
+                                    netsnmp_variable_list *indexes)
+{
+    netsnmp_table_row *row =
+        netsnmp_table_data_row_next_byidx(table, indexes);
+    return (row ? row->data : NULL );
+}
+
+void *
+netsnmp_table_data_entry_get_byoid( netsnmp_table_data *table,
+                                    oid *instance, size_t len)
+{
+    netsnmp_table_row *row =
+        netsnmp_table_data_row_get_byoid(table, instance, len);
+    return (row ? row->data : NULL );
+}
+
+void *
+netsnmp_table_data_entry_next_byoid(netsnmp_table_data *table,
+                                    oid *instance, size_t len)
+{
+    netsnmp_table_row *row =
+        netsnmp_table_data_row_next_byoid(table, instance, len);
+    return (row ? row->data : NULL );
+}
+
+    /* =====================================
+     * Generic API - mostly renamed wrappers
+     * ===================================== */
 
 /* ==================================
  *
