@@ -336,6 +336,67 @@ netsnmp_access_interface_entry_free(netsnmp_interface_entry * entry)
     free(entry);
 }
 
+/*
+ * Blech - backwards compatible mibII/interfaces style interface
+ * functions, so we don't have to update older modules to use
+ * the new code to get correct ifIndex values.
+ */
+#if defined( USING_IF_MIB_IFTABLE_IFTABLE_DATA_ACCESS_MODULE ) && \
+    ! defined( NETSNMP_NO_BACKWARDS_COMPATABILITY )
+
+static netsnmp_iterator *it = NULL;
+static netsnmp_container *c = NULL;
+static netsnmp_interface_entry *e = NULL;
+
+/**
+ * 
+ */
+void
+Interface_Scan_Init(void)
+{
+    /*
+     * ifTable container shouldn't change, so we shouldn' have to
+     * re-fetch it every time.
+     */
+    if (NULL != c)
+        netsnmp_access_interface_container_free(c, 0);
+
+    c = netsnmp_access_interface_container_load(NULL, 0);
+    
+    if (NULL != c) {
+        if (NULL != it)
+            ITERATOR_RELEASE(it);
+    
+        it = CONTAINER_ITERATOR(c);
+    }
+   
+    if (NULL != it)
+        e = ITERATOR_FIRST(it);
+}
+
+int
+Interface_Scan_Next(short *index, char *name, netsnmp_interface_entry **entry,
+                    void *dc)
+{
+    if (NULL == e)
+        return 0;
+
+    if(index)
+        *index = e->index;
+
+    if(name)
+        strcpy(name, e->name);
+
+    if (entry)
+        *entry = e;
+
+    e = ITERATOR_NEXT(it);
+
+    return 1;
+}
+#endif /* NETSNMP_NO_BACKWARDS_COMPATABILITY */
+
+
 /**
  *
  * @retval 0   : success
