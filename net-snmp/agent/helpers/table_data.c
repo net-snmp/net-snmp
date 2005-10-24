@@ -871,27 +871,6 @@ netsnmp_table_data_row_next( netsnmp_table_data *table,
 }
 
 netsnmp_table_row *
-netsnmp_table_data_row_get_byidx( netsnmp_table_data    *table,
-                                  netsnmp_variable_list *indexes)
-{
-    return netsnmp_table_data_get(table, indexes);
-}
-
-netsnmp_table_row *
-netsnmp_table_data_row_next_byidx(netsnmp_table_data    *table,
-                                  netsnmp_variable_list *indexes)
-{
-    oid    instance[MAX_OID_LEN];
-    size_t len    = MAX_OID_LEN;
-
-    if (!table || !indexes)
-        return NULL;
-
-    build_oid_noalloc(instance, MAX_OID_LEN, &len, NULL, 0, indexes);
-    return netsnmp_table_data_row_next_byoid(table, instance, len);
-}
-
-netsnmp_table_row *
 netsnmp_table_data_row_get_byoid( netsnmp_table_data *table,
                                   oid *instance, size_t len)
 {
@@ -914,6 +893,27 @@ netsnmp_table_data_row_next_byoid(netsnmp_table_data *table,
             return row;
     }
     return NULL;
+}
+
+netsnmp_table_row *
+netsnmp_table_data_row_get_byidx( netsnmp_table_data    *table,
+                                  netsnmp_variable_list *indexes)
+{
+    return netsnmp_table_data_get(table, indexes);
+}
+
+netsnmp_table_row *
+netsnmp_table_data_row_next_byidx(netsnmp_table_data    *table,
+                                  netsnmp_variable_list *indexes)
+{
+    oid    instance[MAX_OID_LEN];
+    size_t len    = MAX_OID_LEN;
+
+    if (!table || !indexes)
+        return NULL;
+
+    build_oid_noalloc(instance, MAX_OID_LEN, &len, NULL, 0, indexes);
+    return netsnmp_table_data_row_next_byoid(table, instance, len);
 }
 
 int
@@ -949,8 +949,8 @@ void *
 netsnmp_table_data_entry_next( netsnmp_table_data *table,
                                netsnmp_table_row  *row)
 {
-    netsnmp_table_row *row =
-         netsnmp_table_data_row_next(table, row);
+    row =
+        netsnmp_table_data_row_next(table, row);
     return (row ? row->data : NULL );
 }
 
