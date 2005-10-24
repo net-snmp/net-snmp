@@ -949,6 +949,14 @@ snmp_input(int op, netsnmp_session *session,
     switch (op) {
     case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
         /*
+         * Drops packets with reception problems
+         */
+        if (session->s_snmp_errno) {
+            /* drop problem packets */
+            return 1;
+        }
+
+        /*
 	 * Determine the OID that identifies the trap being handled
 	 */
         DEBUGMSGTL(("snmptrapd", "input: %x\n", pdu->command));
