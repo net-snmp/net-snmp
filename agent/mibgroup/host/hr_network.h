@@ -8,5 +8,5 @@
 extern void     init_hr_network(void);
 extern FindVarMethod var_hrnet;
 
-config_require(mibII/interfaces)
+config_require(host/hr_device mibII/ifTable)
 #endif                          /* _MIBGROUP_HRNET_H */
