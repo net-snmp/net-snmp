@@ -206,7 +206,7 @@ _ifTable_initialize_interface(ifTable_registration * reg_ptr, u_long flags)
     if (NULL == ifTable_if_ctx.container)
         return; /* msg already logged */
 
-#ifdef NETSNMP_ENABLE_MFD_REWRITES
+#ifndef USING_MIBII_INTERFACES_MODULE
     /*************************************************
      *
      * save interface context for ifTable
@@ -372,10 +372,8 @@ _ifTable_initialize_interface(ifTable_registration * reg_ptr, u_long flags)
                 (void *)&ifTable_if_ctx.last_changed, sizeof( u_long ),
                 ASN_TIMETICKS, WATCHER_FIXED_SIZE ));
     }
+#endif /* USING_MIBII_INTERFACES_MODULE */
 
-
-
-#endif                          /* NETSNMP_ENABLE_MFD_REWRITES */
 }                               /* _ifTable_initialize_interface */
 
 /**
