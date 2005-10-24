@@ -1639,9 +1639,10 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
              * bail if not enough space.
              */
             if (ilen > *len) {
-                snmp_log(LOG_WARNING,"buffer too small\n");
+                snmp_log(LOG_WARNING,"buffer too small to read octet string (%d < %d)\n",
+                         *len, ilen);
                 DEBUGMSGTL(("read_config_read_octet_string",
-                            "buffer too small"));
+                            "buffer too small (%d < %d)", *len, ilen));
                 cptr = skip_not_white(readfrom);
                 return skip_white(cptr);
             }
