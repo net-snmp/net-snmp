@@ -24,8 +24,13 @@ else
   TRAPD_FLAGS="$TRAPD_FLAGS -x tcp:${SNMP_TEST_DEST}7676"
 fi
 
-# standard V3 agent configuration for initial user
-. ./Sv3config
+# standard SNMPv3 USM agent configuration
+DEFSECURITYLEVEL=authPriv
+. ./Sv3usmconfigagent
+
+# save agent access
+AGENT_TESTAUTHARGS=$TESTAUTHARGS
+AGENT_TESTPRIVARGS=$TESTPRIVARGS
 
 # configure agent as AgentX master
 CONFIGAGENT master agentx
@@ -33,16 +38,16 @@ CONFIGAGENT master agentx
 # Start the master agent
 STARTAGENT
 
-# XXX: move to TESTCONF.sh?
-TRAPD_ENGINEID=0x0x80001f88802b3d0e06bbdf4e43
-SNMPUSM_TRAPD_CONTEXT_ARGS="-n snmptrapd -CE $TRAPD_ENGINEID"
+# standard SNMPv3 USM snmptrapd configuration
+. ./Sv3usmconfigtrapd
 
 # configure snmptrapd
-CONFIGTRAPD [snmp] persistentDir $SNMP_TMP_PERSISTENTDIR
-CONFIGTRAPD oldEngineID $TRAPD_ENGINEID
-CONFIGTRAPD createUser trapd_initial $DEFAUTHTYPE trapd_initial_test_pass_auth $DEFPRIVTYPE
-CONFIGTRAPD createUser trapd_template $DEFAUTHTYPE trapd_template_test_pass_auth $DEFPRIVTYPE
-CONFIGTRAPD authuser log newtestuser authNoPriv
+#CONFIGTRAPD_ENGINEID
+NEWUSER=newtestuser
+NEWAUTHPASS=newauthpass
+NEWPRIVPASS=newprivpass
+NEWUSER2=newtestuser_vanilla
+CONFIGTRAPD authuser log $NEWUSER auth
 
 # start snmptrapd
 STARTTRAPD
@@ -52,20 +57,22 @@ DELAY
 
 ## verify snmptrapd usmUserTable management
 
+SNMPUSM_TRAPD_CONTEXT_ARGS="-n snmptrapd -CE $TRAPD_ENGINEID"
+
 # create vanilla user
-CAPTURE "snmpusm $SNMP_FLAGS $AUTHTESTARGS $SNMPUSM_TRAPD_CONTEXT_ARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT create newtestuser_vanilla"
+CAPTURE "snmpusm $SNMP_FLAGS $AGENT_TESTAUTHARGS $SNMPUSM_TRAPD_CONTEXT_ARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT create $NEWUSER2"
 CHECKORDIE "User successfully created"
 
 # clone template user
-CAPTURE "snmpusm $SNMP_FLAGS $AUTHTESTARGS $SNMPUSM_TRAPD_CONTEXT_ARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT create newtestuser trapd_template"
+CAPTURE "snmpusm $SNMP_FLAGS $AGENT_TESTAUTHARGS $SNMPUSM_TRAPD_CONTEXT_ARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT create $NEWUSER $TESTPRIVUSER"
 CHECKORDIE "User successfully created"
 
 # change auth passphrase of new user
-CAPTURE "snmpusm $SNMP_FLAGS $AUTHTESTARGS -Ca $SNMPUSM_TRAPD_CONTEXT_ARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT passwd template_test_pass_auth newtestpass newtestuser"
+CAPTURE "snmpusm $SNMP_FLAGS $AGENT_TESTAUTHARGS $SNMPUSM_TRAPD_CONTEXT_ARGS -Ca $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT passwd $TESTAUTHPASS $NEWAUTHPASS $NEWUSER"
 CHECKORDIE "SNMPv3 Key(s) successfully changed"
 
 # change priv passphrase of new user
-CAPTURE "snmpusm $SNMP_FLAGS $PRIVTESTARGS -Cx $SNMPUSM_TRAPD_CONTEXT_ARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT passwd template_test_pass_auth newtestpass newtestuser"
+CAPTURE "snmpusm $SNMP_FLAGS $AGENT_TESTPRIVARGS $SNMPUSM_TRAPD_CONTEXT_ARGS -Cx $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT passwd $TESTPRIVPASS $NEWPRIVPASS $NEWUSER"
 CHECKORDIE "SNMPv3 Key(s) successfully changed"
 
 # XXX: change key(s) directly?
@@ -73,17 +80,16 @@ CHECKORDIE "SNMPv3 Key(s) successfully changed"
 ## make use of new user (receive INFORMs)
 
 # anp
-#CAPTURE "snmptrap -Ci -d -v 3 -u newtestuser -l anp -a $DEFAUTHTYPE -A newtestpass $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 0 .1.3.6.1.6.3.1.1.5.1 system.sysContact.0 s received_inform_anp"
-#DELAY
-#CHECKTRAPDORDIE "received_inform_anp"
+CAPTURE "snmptrap -Ci -d -v 3 -u $NEWUSER -l anp -a $DEFAUTHTYPE -A $NEWAUTHPASS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 0 .1.3.6.1.6.3.1.1.5.1 system.sysContact.0 s received_inform_anp"
+DELAY
+CHECKTRAPDORDIE "received_inform_anp"
 
 # ap
-#CAPTURE "snmptrap -Ci -d -v 3 -u newtestuser -l ap -a $DEFAUTHTYPE -A newtestpass -x $DEFPRIVTYPE -X newtestpass $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 0 .1.3.6.1.6.3.1.1.5.1 system.sysContact.0 s received_inform_ap"
-#DELAY
-#CHECKTRAPDORDIE "received_inform_ap"
+CAPTURE "snmptrap -Ci -d -v 3 -u $NEWUSER -l ap -a $DEFAUTHTYPE -A $NEWAUTHPASS -x $DEFPRIVTYPE -X $NEWPRIVPASS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 0 .1.3.6.1.6.3.1.1.5.1 system.sysContact.0 s received_inform_ap"
+DELAY
+CHECKTRAPDORDIE "received_inform_ap"
 
 ## stop daemons and finish
-
 STOPTRAPD
 STOPAGENT
 FINISHED
