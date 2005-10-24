@@ -761,7 +761,7 @@ _ba_iterator_get(netsnmp_container *c)
     it->base.curr = (netsnmp_iterator_rtn*)_ba_iterator_curr;
     it->base.last = (netsnmp_iterator_rtn*)_ba_iterator_last;
     it->base.reset = (netsnmp_iterator_rc*)_ba_iterator_reset;
-    it->base.reset = (netsnmp_iterator_rc*)_ba_iterator_release;
+    it->base.release = (netsnmp_iterator_rc*)_ba_iterator_release;
 
     (void)_ba_iterator_reset(it);
 
