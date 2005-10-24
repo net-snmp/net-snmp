@@ -105,21 +105,23 @@ GRONIK
 
 #------------------------------------ -o-
 #
+SKIP() {
+	REMOVETESTDATA
+	echo "SKIPPED"
+	exit 0
+}
+
 SKIPIFNOT() {
 	grep "^#define $1 " $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h $SNMP_UPDIR/include/net-snmp/agent/agent_module_config.h > /dev/null
 	if [ $? != 0 ]; then
-	    REMOVETESTDATA
-	    echo "SKIPPED"
-	    exit 0;
+	    SKIP
 	fi
 }
 
 SKIPIF() {
 	grep "^#define $1 " $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h $SNMP_UPDIR/include/net-snmp/agent/agent_module_config.h > /dev/null
 	if [ $? = 0 ]; then
-	    REMOVETESTDATA
-	    echo "SKIPPED"
-	    exit 0;
+	    SKIP
 	fi
 }
 	
