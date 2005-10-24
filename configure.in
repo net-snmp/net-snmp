@@ -90,6 +90,10 @@ AC_ARG_ENABLE(mini_agent,
     mini_agent="yes",mini_agent="no")
 AC_ARG_WITH(mini_agent,,
          AC_MSG_ERROR([ Invalid option. Use --enable-mini-agent/--disable-mini-agent instead ]) )
+AC_ARG_WITH(miniagent,,
+         AC_MSG_ERROR([ Invalid option. Use --enable-mini-agent/--disable-mini-agent instead ]) )
+AC_ARG_ENABLE(miniagent,,
+         AC_MSG_ERROR([ Invalid option. Use --enable-mini-agent/--disable-mini-agent instead ]) )
 
 AC_ARG_ENABLE(agent,
 [  --disable-agent                 Do not build the agent (snmpd).])
