@@ -5,7 +5,7 @@
 config_require(mibII/system_mib)
 config_require(mibII/sysORTable)
 config_require(mibII/at)
-config_require(mibII/interfaces)
+config_require(mibII/ifTable)
 config_require(mibII/ip)
 config_require(mibII/snmp_mib)
 config_require(mibII/tcp)
@@ -17,8 +17,6 @@ config_require(mibII/setSerialNo)
  * these new module re-rewrites have only been implemented for
  * linux.
  */
-#if defined( linux ) && defined( NETSNMP_ENABLE_MFD_REWRITES )
-config_require(ip-mib)
-config_require(if-mib)
-config_require(ip-forward-mib)
+#if defined( linux )
+config_require(ip-mib if-mib ip-forward-mib)
 #endif
