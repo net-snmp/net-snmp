@@ -743,6 +743,41 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
  *
  * ================================== */
 
+int
+netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
+{
+    netsnmp_variable_list *vp1, *vp2;
+    void *ctx1, *ctx2;
+    int   i=0;
+
+    if (!iinfo || !iinfo->get_first_data_point
+               || !iinfo->get_next_data_point )
+        return 0;
+
+    vp1 = snmp_clone_varbind(iinfo->indexes);
+    vp2 = iinfo->get_first_data_point( &ctx1, &ctx2, vp1, iinfo );
+    if (!vp2)
+        return 0;
+    
+    DEBUGMSGTL(("table:iterator:count", "first DP: %x %x %x\n",
+                                         ctx1, ctx2, vp2));
+
+    /* XXX - free context ? */
+
+    while (vp2) {
+        i++;
+        vp2 = iinfo->get_next_data_point( &ctx1, &ctx2, vp2, iinfo );
+        DEBUGMSGTL(("table:iterator:count", "next DP: %x %x %x (%d)\n",
+                                             ctx1, ctx2, vp2, i));
+        /* XXX - free context ? */
+    }
+           
+    /* XXX - final free context ? */
+    snmp_free_varbind( vp1 );
+    return i;
+}
+
+
 /* ==================================
  *
  * Iterator API: Index operations
