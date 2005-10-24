@@ -157,6 +157,9 @@ netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
                            netsnmp_get_table_iterator_handler(iinfo));
     if (!iinfo)
         return SNMPERR_GENERR;
+    if (!iinfo->indexes && iinfo->table_reginfo &&
+                           iinfo->table_reginfo->indexes )
+        iinfo->indexes = snmp_clone_varbind( iinfo->table_reginfo->indexes );
 
     return netsnmp_register_table(reginfo, iinfo->table_reginfo);
 }
