@@ -55,6 +55,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/data_access/interface.h>
 
 #include "ip.h"
 #include "kernel.h"
@@ -1231,7 +1232,7 @@ Route_Scan_Reload(void)
     FILE           *in;
     char            line[256];
     struct rtentry *rt;
-    char            name[16], temp[16];
+    char            name[16];
     static int      Time_Of_Last_Reload = 0;
     struct timeval  now;
 
@@ -1298,11 +1299,7 @@ Route_Scan_Reload(void)
         rt->rt_flags = flags, rt->rt_refcnt = refcnt;
         rt->rt_use = use, rt->rt_metric = metric;
 
-        Interface_Scan_Init();
-        while (Interface_Scan_Next
-               ((short *) &rt->rt_unit, temp, NULL, NULL) != 0)
-            if (strcmp(name, temp) == 0)
-                break;
+        rt->rt_unit = netsnmp_access_interface_index_find(name);
 
         /*
          *  Allocate a block to hold it and add it to the database
