@@ -25,6 +25,11 @@ extern          "C" {
     /* *INDENT-OFF*  */
 config_require(if-mib/ifTable/ifTable_interface);
 config_require(if-mib/ifTable/ifTable_data_access);
+/*
+ * conflicts with mibII/interfaces
+ */
+config_exclude(mibII/interfaces)
+
     /* *INDENT-ON*  */
 
     /*
