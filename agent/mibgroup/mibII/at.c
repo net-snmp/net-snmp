@@ -103,6 +103,8 @@
 #include "at.h"
 #include "interfaces.h"
 
+#include <net-snmp/data_access/interface.h>
+
 #if defined(HAVE_SYS_SYSCTL_H) && !defined(CAN_USE_SYSCTL)
 # if defined(RTF_LLINFO) && !defined(irix6)
 #  define CAN_USE_SYSCTL 1
@@ -627,6 +629,7 @@ ARP_Scan_Init(void)
         if (tmp_flags == 0) {
             continue;
         }
+        ifname[sizeof(ifname)-1] = 0; /* make sure name is null terminated */
         at[i].at_flags = tmp_flags;
         at[i].at_enaddr[0] = ze;
         at[i].at_enaddr[1] = zf;
@@ -637,7 +640,7 @@ ARP_Scan_Init(void)
         tmp_a = ((u_long) za << 24) |
             ((u_long) zb << 16) | ((u_long) zc << 8) | ((u_long) zd);
         at[i].at_iaddr.s_addr = htonl(tmp_a);
-        at[i].if_index = Interface_Index_By_Name(ifname, strlen(ifname));
+        at[i].if_index = netsnmp_access_interface_index_find(ifname);
         i++;
     }
     arptab_size = i;
