@@ -104,10 +104,57 @@
  * ================================== */
 
     /*
-     * Not Applicable
+     * Iterator-based tables are typically maintained by external
+     *  code, and this helper is really only concerned with
+     *  mapping between a walk through this local representation,
+     *  and the requirements of SNMP table ordering.
+     * However, there's a case to be made for considering the
+     *  iterator info structure as encapsulating the table, so
+     *  it's probably worth defining the table creation/deletion
+     *  routines from the generic API.
      *
-     * An iterator-based table will be maintained
-     *  by the table-specific module.
+     * Time will show whether this is a sensible approach or not.
+     */
+netsnmp_iterator_info *
+netsnmp_iterator_create_table( Netsnmp_First_Data_Point *firstDP,
+                               Netsnmp_Next_Data_Point  *nextDP,
+                               Netsnmp_First_Data_Point *getidx,
+                               netsnmp_variable_list    *indexes)
+{
+    netsnmp_iterator_info *iinfo =
+        SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
+
+    if ( !iinfo )
+        return NULL;
+
+    if ( indexes )
+        iinfo->indexes = snmp_clone_varbind(indexes);
+    iinfo->get_first_data_point = firstDP;
+    iinfo->get_next_data_point  = nextDP;
+    iinfo->get_row_indexes      = getidx;
+
+    return iinfo;
+}
+
+void
+netsnmp_iterator_delete_table( netsnmp_iterator_info *iinfo )
+{
+    if (!iinfo)
+        return;
+
+    if (iinfo->indexes) {
+        snmp_free_varbind( iinfo->indexes );
+        iinfo->indexes = NULL;
+    }
+    SNMP_FREE( iinfo );
+}
+
+    /*
+     * The rest of the table maintenance section of the
+     *   generic table API is Not Applicable to this helper.
+     *
+     * The contents of a iterator-based table will be
+     *  maintained by the table-specific module itself.
      */
 
 /* ==================================
