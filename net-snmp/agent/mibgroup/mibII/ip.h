@@ -7,7 +7,7 @@
 #define _MIBGROUP_IP_H
 
 
-config_require(mibII/interfaces)
+config_require(mibII/ifTable)
 config_require(mibII/ipAddr)
 config_require(mibII/at)
 config_require(mibII/var_route mibII/route_write)
