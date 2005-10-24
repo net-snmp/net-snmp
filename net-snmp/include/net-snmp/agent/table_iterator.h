@@ -98,6 +98,11 @@ extern          "C" {
        /** A pointer to the netsnmp_table_registration_info object
            this iterator is registered along with. */
         netsnmp_table_registration_info *table_reginfo;
+
+        /* Experimental extension - Use At Your Own Risk
+           (these two fields may change/disappear without warning) */
+        Netsnmp_First_Data_Point *get_row_indexes;
+        netsnmp_variable_list *indexes;
     } netsnmp_iterator_info;
 
 #define TABLE_ITERATOR_NAME "table_iterator"
