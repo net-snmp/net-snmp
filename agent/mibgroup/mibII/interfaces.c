@@ -214,7 +214,6 @@ extern struct timeval starttime;
 
 struct variable3 interfaces_variables[] = {
     {IFNUMBER, ASN_INTEGER, RONLY, var_interfaces, 1, {1}},
-#if !defined(NETSNMP_ENABLE_MFD_REWRITES)
     {IFINDEX, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 1}},
     {IFDESCR, ASN_OCTET_STR, RONLY, var_ifEntry, 3, {2, 1, 2}},
     {IFTYPE, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 3}},
@@ -241,7 +240,6 @@ struct variable3 interfaces_variables[] = {
     {IFOUTERRORS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 20}},
     {IFOUTQLEN, ASN_GAUGE, RONLY, var_ifEntry, 3, {2, 1, 21}},
     {IFSPECIFIC, ASN_OBJECT_ID, RONLY, var_ifEntry, 3, {2, 1, 22}}
-#endif /* !def NETSNMP_ENABLE_MFD_REWRITES */
 };
 
 /*
