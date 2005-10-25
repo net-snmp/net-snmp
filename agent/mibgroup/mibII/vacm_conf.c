@@ -148,6 +148,9 @@ init_vacm_conf(void)
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_READ_CONFIG,
                            vacm_warn_if_not_configured, NULL);
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
+                           vacm_standard_views, NULL);
 }
 
 
@@ -833,6 +836,31 @@ vacm_create_simple(const char *token, char *confline,
             }
         }
     }
+}
+
+int
+vacm_standard_views(int majorID, int minorID, void *serverarg,
+                            void *clientarg)
+{
+    char            line[SPRINT_MAX_LEN];
+
+    memset(line, 0, sizeof(line));
+
+    snprintf(line, sizeof(line), "_all_ included .0");
+    vacm_parse_view("view", line);
+    snprintf(line, sizeof(line), "_all_ included .1");
+    vacm_parse_view("view", line);
+    snprintf(line, sizeof(line), "_all_ included .2");
+    vacm_parse_view("view", line);
+
+    snprintf(line, sizeof(line), "_none_ excluded .0");
+    vacm_parse_view("view", line);
+    snprintf(line, sizeof(line), "_none_ excluded .1");
+    vacm_parse_view("view", line);
+    snprintf(line, sizeof(line), "_none_ excluded .2");
+    vacm_parse_view("view", line);
+
+    return SNMP_ERR_NOERROR;
 }
 
 int
