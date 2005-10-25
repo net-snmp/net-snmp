@@ -37,6 +37,7 @@ config_belongs_in(agent_module)
 
      SNMPCallback    vacm_in_view_callback;
      SNMPCallback    vacm_warn_if_not_configured;
+     SNMPCallback    vacm_standard_views;
 
      int             vacm_in_view(netsnmp_pdu *, oid *, size_t, int);
      int             vacm_check_view(netsnmp_pdu *, oid *, size_t, int, int);
