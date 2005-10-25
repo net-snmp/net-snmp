@@ -34,6 +34,7 @@ config_belongs_in(agent_module)
      void            vacm_create_simple(const char *, char *, int, int);
      void            vacm_parse_authcommunity(const char *, char *);
      void            vacm_parse_authuser(const char *, char *);
+     void            vacm_parse_authgroup(const char *, char *);
 
      SNMPCallback    vacm_in_view_callback;
      SNMPCallback    vacm_warn_if_not_configured;
