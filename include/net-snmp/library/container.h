@@ -507,7 +507,7 @@ extern "C" {
 #define ITERATOR_FIRST(x)  x->first(x)
 #define ITERATOR_NEXT(x)   x->next(x)
 #define ITERATOR_LAST(x)   x->last(x)
-    
+#define ITERATOR_RELEASE(x) do { x->release(x); x = NULL; } while(0)
     
 #ifdef  __cplusplus
 }
