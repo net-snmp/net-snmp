@@ -5,10 +5,20 @@
 #ifndef _MIBGROUP_INTERFACES_H
 #define _MIBGROUP_INTERFACES_H
 
+/***********************************************************************
+ * configure macros
+ */
 config_require(util_funcs)
+
+/*
+ * conflicts with the new MFD rewrite
+ */
+config_exclude(if-mib/ifTable/ifTable)
+
 #if !defined(WIN32) && !defined(cygwin)
 config_require(if-mib/data_access/interface)
 #endif
+
 config_arch_require(solaris2, kernel_sunos5)
 /*
  * need get_address in var_route for some platforms (USE_SYSCTL_IFLIST).
@@ -17,6 +27,8 @@ config_arch_require(solaris2, kernel_sunos5)
  */
 config_require(mibII/var_route)
 
+/***********************************************************************
+ */
 #ifdef hpux11
 #include <sys/mib.h>
 #else
