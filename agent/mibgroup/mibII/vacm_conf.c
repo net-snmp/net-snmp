@@ -97,12 +97,12 @@ init_vacm_config_tokens(void) {
     /* easy community auth handler */
     snmpd_register_config_handler("authcommunity",
                                   vacm_parse_authcommunity,
-                                  NULL, "authtype1,authtype2 community [default|hostname|network/bits [oid]]");
+                                  NULL, "authtype1,authtype2 community [default|hostname|network/bits [oid|-V view]]");
 
     /* easy user auth handler */
     snmpd_register_config_handler("authuser",
                                   vacm_parse_authuser,
-                                  NULL, "[-s secmodel] user [noauth|auth|priv [oid]]");
+                                  NULL, "authtype1,authtype2 [-s secmodel] user [noauth|auth|priv [oid|-V view]]");
 }
 
 /**
@@ -584,8 +584,10 @@ vacm_gen_com2sec(int commcount, char *community, char *addressname,
      */
     snprintf(secname, secname_len-1, "comm%d", commcount);
     secname[secname_len-1] = '\0';
-    snprintf(viewname, viewname_len-1, "viewComm%d", commcount);
-    viewname[viewname_len-1] = '\0';
+    if (viewname) {
+        snprintf(viewname, viewname_len-1, "viewComm%d", commcount);
+        viewname[viewname_len-1] = '\0';
+    }
     snprintf(line, sizeof(line), "%s %s '%s'",
              secname, addressname, community);
     line[ sizeof(line)-1 ] = 0;
@@ -662,6 +664,7 @@ vacm_create_simple(const char *token, char *confline,
     char            community[COMMUNITY_MAX_LEN];
     char            theoid[SPRINT_MAX_LEN];
     char            viewname[SPRINT_MAX_LEN];
+    char           *view_ptr = viewname;
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     char            addressname[SPRINT_MAX_LEN];
 #endif
@@ -730,9 +733,17 @@ vacm_create_simple(const char *token, char *confline,
      * oid they can touch 
      */
     if (cp && *cp) {
-        cp = copy_nword(cp, theoid, sizeof(theoid));
+        if (strcmp(cp, "-V") == 0) {
+             cp = skip_token(cp);
+             cp = copy_nword(cp, viewname, sizeof(viewname));
+             view_ptr = NULL;
+        } else {
+             cp = copy_nword(cp, theoid, sizeof(theoid));
+        }
     } else {
         strcpy(theoid, ".1");
+        strcpy(viewname, "_all_");
+        view_ptr = NULL;
     }
 
     if (viewtypes & VACM_VIEW_WRITE)
@@ -746,7 +757,7 @@ vacm_create_simple(const char *token, char *confline,
         vacm_gen_com2sec(commcount, community, addressname,
                          "com2sec", &netsnmp_udp_parse_security,
                          secname, sizeof(secname),
-                         viewname, sizeof(viewname));
+                         view_ptr, sizeof(viewname));
     }
     
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
@@ -766,14 +777,16 @@ vacm_create_simple(const char *token, char *confline,
         vacm_gen_com2sec(commcount, community, addressname,
                          "com2sec6", &netsnmp_udp6_parse_security,
                          secname, sizeof(secname),
-                         viewname, sizeof(viewname));
+                         view_ptr, sizeof(viewname));
     }
 #endif
 #endif /* support for community based SNMP */
 
     if (parsetype == VACM_CREATE_SIMPLE_V3) {
         /* support for SNMPv3 user names */
-        sprintf(viewname,"viewUSM%d",commcount);
+        if (view_ptr) {
+            sprintf(viewname,"viewUSM%d",commcount);
+        }
         strncpy(secname, community, sizeof(secname));
         secname[ sizeof(secname)-1 ] = 0;
 
@@ -796,10 +809,12 @@ vacm_create_simple(const char *token, char *confline,
     /*
      * view    anonymousViewNUM       included OID 
      */
-    snprintf(line, sizeof(line), "%s included %s", viewname, theoid);
-    line[ sizeof(line)-1 ] = 0;
-    DEBUGMSGTL((token, "passing: %s %s\n", "view", line));
-    vacm_parse_view("view", line);
+    if (view_ptr) {
+        snprintf(line, sizeof(line), "%s included %s", viewname, theoid);
+        line[ sizeof(line)-1 ] = 0;
+        DEBUGMSGTL((token, "passing: %s %s\n", "view", line));
+        vacm_parse_view("view", line);
+    }
 
     /*
      * map everything together 
