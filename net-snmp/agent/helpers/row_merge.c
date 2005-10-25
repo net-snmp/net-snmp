@@ -198,7 +198,7 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
     }
 
     /*
-     * we really should only have to do this once, instead of ever pass.
+     * we really should only have to do this once, instead of every pass.
      * as a precaution, we'll do it every time, but put in some asserts
      * to see if we have to. marked with "// SANITY".
      * xxx-rks: remove "// SANITY" checks before release.
@@ -209,22 +209,20 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
     if ((0 != rm_status->count) && (rm_status->count != count)) {
         /*
          * ok, i know next/bulk can cause this condition. Probably
-         * GET, too. need to rething this mode counting. maybe
+         * GET, too. need to rethink this mode counting. maybe
          * add the mode to the rm_status structure? xxx-rks
          */
-        if ((reqinfo->mode != MODE_GETNEXT) &&
+        if ((reqinfo->mode != MODE_GET) &&
+            (reqinfo->mode != MODE_GETNEXT) &&
             (reqinfo->mode != MODE_GETBULK)) {
             netsnmp_assert((NULL != rm_status->saved_requests) &&
                            (NULL != rm_status->saved_status));
         }
         DEBUGMSGTL(("helper:row_merge", "count changed! do over...\n"));
-        /*
-         * if it got bigger, we need to reallocate memory
-         */
-        if (count > rm_status->count) {
-            SNMP_FREE(rm_status->saved_requests);
-            SNMP_FREE(rm_status->saved_status);
-        }
+
+        SNMP_FREE(rm_status->saved_requests);
+        SNMP_FREE(rm_status->saved_status);
+        
         rm_status->count = 0;
         rm_status->rows = 0;
     }
