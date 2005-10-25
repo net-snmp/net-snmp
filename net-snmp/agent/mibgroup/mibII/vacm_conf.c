@@ -767,7 +767,7 @@ vacm_create_simple(const char *token, char *confline,
      * oid they can touch 
      */
     if (cp && *cp) {
-        if (strcmp(cp, "-V") == 0) {
+        if (strncmp(cp, "-V ", 3) == 0) {
              cp = skip_token(cp);
              cp = copy_nword(cp, viewname, sizeof(viewname));
              view_ptr = NULL;
