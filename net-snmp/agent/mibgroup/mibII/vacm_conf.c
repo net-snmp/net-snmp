@@ -103,6 +103,10 @@ init_vacm_config_tokens(void) {
     snmpd_register_config_handler("authuser",
                                   vacm_parse_authuser,
                                   NULL, "authtype1,authtype2 [-s secmodel] user [noauth|auth|priv [oid|-V view]]");
+    /* easy group auth handler */
+    snmpd_register_config_handler("authgroup",
+                                  vacm_parse_authuser,
+                                  NULL, "authtype1,authtype2 [-s secmodel] group [noauth|auth|priv [oid|-V view]]");
 }
 
 /**
@@ -676,6 +680,7 @@ vacm_create_simple(const char *token, char *confline,
     char            model[SPRINT_MAX_LEN];
     char           *cp;
     char            secname[SPRINT_MAX_LEN];
+    char            grpname[SPRINT_MAX_LEN];
     char            authtype[SPRINT_MAX_LEN];
     static int      commcount = 0;
     /* Conveniently, the community-based security
@@ -816,20 +821,28 @@ vacm_create_simple(const char *token, char *confline,
         if (view_ptr) {
             sprintf(viewname,"viewUSM%d",commcount);
         }
-        strncpy(secname, community, sizeof(secname));
-        secname[ sizeof(secname)-1 ] = 0;
+        if ( strcmp( token, "authgroup" ) == 0 ) {
+            strncpy(grpname, community, sizeof(grpname));
+            grpname[ sizeof(grpname)-1 ] = 0;
+        } else {
+            strncpy(secname, community, sizeof(secname));
+            secname[ sizeof(secname)-1 ] = 0;
 
-        /*
-         * sec->group mapping 
-         */
-        /*
-         * group   anonymousGroupNameNUM  any      anonymousSecNameNUM 
-         */
-        snprintf(line, sizeof(line),
-                 "grp%.28s %s %s", secname, model, secname);
-        line[ sizeof(line)-1 ] = 0;
-        DEBUGMSGTL((token, "passing: %s %s\n", "group", line));
-        vacm_parse_group("group", line);
+            /*
+             * sec->group mapping 
+             */
+            /*
+             * group   anonymousGroupNameNUM  any      anonymousSecNameNUM 
+             */
+            snprintf(grpname, sizeof(grpname), "grp%.28s", secname);
+            snprintf(line, sizeof(line),
+                     "%s %s %s", grpname, model, secname);
+            line[ sizeof(line)-1 ] = 0;
+            DEBUGMSGTL((token, "passing: %s %s\n", "group", line));
+            vacm_parse_group("group", line);
+        }
+    } else {
+        snprintf(grpname, sizeof(grpname), "grp%.28s", secname);
     }
 
     /*
@@ -855,8 +868,8 @@ vacm_create_simple(const char *token, char *confline,
          * access  anonymousGroupNameNUM  "" MODEL AUTHTYPE prefix anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] 
          */
         snprintf(line, sizeof(line),
-                 "grp%.28s  \"\" %s %s prefix %s %s %s",
-                 secname, model, authtype, viewname, rw, rw);
+                 "%s  \"\" %s %s prefix %s %s %s",
+                 grpname, model, authtype, viewname, rw, rw);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "access", line));
         vacm_parse_access("access", line);
@@ -870,8 +883,8 @@ vacm_create_simple(const char *token, char *confline,
         for(i = 0; i <= VACM_MAX_VIEWS; i++) {
             if (viewtypes & (1 << i)) {
                 snprintf(line, sizeof(line),
-                         "grp%.28s  \"\" %s %s prefix %s %s",
-                         secname, model, authtype,
+                         "%s  \"\" %s %s prefix %s %s",
+                         grpname, model, authtype,
                          se_find_label_in_slist(VACM_VIEW_ENUM_NAME, i),
                          viewname);
                 line[ sizeof(line)-1 ] = 0;
