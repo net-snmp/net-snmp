@@ -917,8 +917,10 @@ vacm_create_simple(const char *token, char *confline,
         }
     } else {
         strcpy(theoid, ".1");
+#ifdef temporary_hack
         strcpy(viewname, "_all_");
         view_ptr = NULL;
+#endif
     }
 
     if (viewtypes & VACM_VIEW_WRITE)
