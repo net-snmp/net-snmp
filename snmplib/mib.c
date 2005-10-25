@@ -2861,7 +2861,7 @@ int
 read_objid(const char *input, oid * output, size_t * out_len)
 {                               /* number of subid's in "output" */
 #ifndef DISABLE_MIB_LOADING
-    struct tree    *root = tree_top;
+    struct tree    *root = tree_head;
 #endif /* DISABLE_MIB_LOADING */
     char            buf[SPRINT_MAX_LEN];
     int             ret, max_out_len;
