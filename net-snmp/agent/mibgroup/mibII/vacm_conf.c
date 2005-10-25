@@ -107,6 +107,10 @@ init_vacm_config_tokens(void) {
     snmpd_register_config_handler("authgroup",
                                   vacm_parse_authuser,
                                   NULL, "authtype1,authtype2 [-s secmodel] group [noauth|auth|priv [oid|-V view]]");
+
+    snmpd_register_config_handler("authaccess", vacm_parse_authaccess,
+                                  vacm_free_access,
+                                  "name authtype1,authtype2 [-s secmodel] group view [noauth|auth|priv [context|context*]]");
 }
 
 /**
@@ -361,6 +365,143 @@ vacm_parse_authcommunity(const char *token, char *confline)
         vacm_create_simple(token, confline, VACM_CREATE_SIMPLE_COM, viewtypes);
 }
 
+void
+vacm_parse_authaccess(const char *token, char *confline)
+{
+    char *group, *view, *context, *tmp;
+    int  model = SNMP_SEC_MODEL_ANY;
+    int  level, prefix;
+    int  i;
+    char   *st;
+    struct vacm_accessEntry *ap;
+    int  viewtypes = vacm_parse_authtokens(token, &confline);
+
+    if (viewtypes == -1)
+        return;
+
+    group = strtok_r(confline, " \t\n", &st);
+    if (!group) {
+        config_perror("missing GROUP parameter");
+        return;
+    }
+    view = strtok_r(NULL, " \t\n", &st);
+    if (!view) {
+        config_perror("missing VIEW parameter");
+        return;
+    }
+
+    /*
+     * Check for security model option
+     */
+    if ( strcasecmp(view, "-s") == 0 ) {
+        tmp = strtok_r(NULL, " \t\n", &st);
+        if (tmp) {
+            if (strcasecmp(tmp, "any") == 0)
+                model = SNMP_SEC_MODEL_ANY;
+            else if (strcasecmp(tmp, "v1") == 0)
+                model = SNMP_SEC_MODEL_SNMPv1;
+            else if (strcasecmp(tmp, "v2c") == 0)
+                model = SNMP_SEC_MODEL_SNMPv2c;
+            else {
+                model = se_find_value_in_slist("snmp_secmods", tmp);
+                if (model == SE_DNE) {
+                    config_perror
+                        ("bad security model, should be: v1, v2c or usm or a registered security plugin name");
+                    return;
+                }
+            }
+        } else {
+            config_perror("missing SECMODEL parameter");
+            return;
+        }
+        view = strtok_r(NULL, " \t\n", &st);
+        if (!view) {
+            config_perror("missing VIEW parameter");
+            return;
+        }
+    }
+    if (strlen(view) >= VACMSTRINGLEN ) {
+        config_perror("View value too long");
+        return;
+    }
+
+    /*
+     * Now parse optional fields, or provide default values
+     */
+    
+    tmp = strtok_r(NULL, " \t\n", &st);
+    if (tmp) {
+        if (strcasecmp(tmp, "noauth") == 0)
+            level = SNMP_SEC_LEVEL_NOAUTH;
+        else if (strcasecmp(tmp, "noauthnopriv") == 0)
+            level = SNMP_SEC_LEVEL_NOAUTH;
+        else if (strcasecmp(tmp, "auth") == 0)
+            level = SNMP_SEC_LEVEL_AUTHNOPRIV;
+        else if (strcasecmp(tmp, "authnopriv") == 0)
+            level = SNMP_SEC_LEVEL_AUTHNOPRIV;
+        else if (strcasecmp(tmp, "priv") == 0)
+            level = SNMP_SEC_LEVEL_AUTHPRIV;
+        else if (strcasecmp(tmp, "authpriv") == 0)
+            level = SNMP_SEC_LEVEL_AUTHPRIV;
+        else {
+            config_perror
+                ("bad security level (noauthnopriv, authnopriv, authpriv)");
+                return;
+        }
+    } else {
+        /*  What about  SNMP_SEC_MODEL_ANY ?? */
+        if ( model == SNMP_SEC_MODEL_SNMPv1 ||
+             model == SNMP_SEC_MODEL_SNMPv2c )
+            level = SNMP_SEC_LEVEL_NOAUTH;
+        else
+            level = SNMP_SEC_LEVEL_AUTHNOPRIV;
+    }
+    
+
+    context = strtok_r(NULL, " \t\n", &st);
+    if (context) {
+        tmp = (context + strlen(context)-1);
+        if (tmp && *tmp == '*') {
+            *tmp = '\0';
+            prefix = 2;
+        } else {
+            prefix = 1;
+        }
+    } else {
+        context = "";
+        prefix  = 1;   /* Or prefix(2) ?? */
+    }
+
+    /*
+     * Now we can create the access entry
+     */
+    ap = vacm_getAccessEntry(group, context, model, level);
+    if (!ap) {
+        ap = vacm_createAccessEntry(group, context, model, level);
+        DEBUGMSGTL(("vacm:conf:authaccess",
+                    "no existing access found; creating a new one\n"));
+    } else {
+        DEBUGMSGTL(("vacm:conf:authaccess",
+                    "existing access found, using it\n"));
+    }
+    if (!ap) {
+        config_perror("failed to create access entry");
+        return;
+    }
+
+    for (i = 0; i <= VACM_MAX_VIEWS; i++) {
+        if (viewtypes & (1 << i)) {
+            strcpy(ap->views[i], view);
+        }
+    }
+    ap->contextMatch = prefix;
+    ap->storageType  = SNMP_STORAGE_PERMANENT;
+    ap->status       = SNMP_ROW_ACTIVE;
+    if (ap->reserved)
+        free(ap->reserved);
+    ap->reserved = NULL;
+}
+ 
 void
 vacm_parse_setaccess(const char *token, char *param)
 {
