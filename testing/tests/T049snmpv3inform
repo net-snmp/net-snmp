@@ -2,7 +2,7 @@
 
 . ../eval_tools.sh
 
-DEFSECURITYLEVEL=authNoPriv
+DEFSECURITYLEVEL=noAuthNoPriv
 
 HEADER "SNMPv3 informs ($DEFSECURITYLEVEL) received and sent by tools"
 
