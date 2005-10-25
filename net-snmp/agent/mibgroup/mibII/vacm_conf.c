@@ -575,7 +575,7 @@ vacm_gen_com2sec(int commcount, char *community, char *addressname,
                  char *publishtoken,
                  void (*parser)(const char *, char *),
                  char *secname, size_t secname_len,
-                 char *viewname, size_t viewname_len)
+                 char *viewname, size_t viewname_len, int version)
 {
     char            line[SPRINT_MAX_LEN];
 
@@ -600,17 +600,21 @@ vacm_gen_com2sec(int commcount, char *community, char *addressname,
     /*
      * group   anonymousGroupNameNUM  any      anonymousSecNameNUM 
      */
-    snprintf(line, sizeof(line),
+    if ( version & SNMP_SEC_MODEL_SNMPv1 ) {
+        snprintf(line, sizeof(line),
              "grp%.28s v1 %s", secname, secname);
-    line[ sizeof(line)-1 ] = 0;
-    DEBUGMSGTL((publishtoken, "passing: %s %s\n", "group", line));
-    vacm_parse_group("group", line);
+        line[ sizeof(line)-1 ] = 0;
+        DEBUGMSGTL((publishtoken, "passing: %s %s\n", "group", line));
+        vacm_parse_group("group", line);
+    }
 
-    snprintf(line, sizeof(line),
+    if ( version & SNMP_SEC_MODEL_SNMPv2c ) {
+        snprintf(line, sizeof(line),
              "grp%.28s v2c %s", secname, secname);
-    line[ sizeof(line)-1 ] = 0;
-    DEBUGMSGTL((publishtoken, "passing: %s %s\n", "group", line));
-    vacm_parse_group("group", line);
+        line[ sizeof(line)-1 ] = 0;
+        DEBUGMSGTL((publishtoken, "passing: %s %s\n", "group", line));
+        vacm_parse_group("group", line);
+    }
 }
 
 void
@@ -674,6 +678,10 @@ vacm_create_simple(const char *token, char *confline,
     char            secname[SPRINT_MAX_LEN];
     char            authtype[SPRINT_MAX_LEN];
     static int      commcount = 0;
+    /* Conveniently, the community-based security
+       model values can also be used as bit flags */
+    int             commversion = SNMP_SEC_MODEL_SNMPv1 |
+                                  SNMP_SEC_MODEL_SNMPv2c;
 
     /*
      * init 
@@ -714,6 +722,27 @@ vacm_create_simple(const char *token, char *confline,
         DEBUGMSGTL((token, "setting auth type: \"%s\"\n", authtype));
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     } else {
+        if (strcmp(community, "-v") == 0) {
+            /*
+             * -v version ... 
+             */
+            if (cp)
+                cp = copy_nword(cp, model, sizeof(authtype));
+            if (!cp) {
+                config_perror("illegal line");
+                return;
+            }
+            if ( strcasecmp( model,  "1" ) == 0 )
+                strcpy(model, "v1");
+            if ( strcasecmp( model, "v1" ) == 0 )
+                commversion = SNMP_SEC_MODEL_SNMPv1;
+            if ( strcasecmp( model,  "2c" ) == 0 )
+                strcpy(model, "v2c");
+            if ( strcasecmp( model, "v2c" ) == 0 )
+                commversion = SNMP_SEC_MODEL_SNMPv2c;
+            if (cp)
+                cp = copy_nword(cp, community, sizeof(community));
+        }
         /*
          * source address 
          */
@@ -757,7 +786,7 @@ vacm_create_simple(const char *token, char *confline,
         vacm_gen_com2sec(commcount, community, addressname,
                          "com2sec", &netsnmp_udp_parse_security,
                          secname, sizeof(secname),
-                         view_ptr, sizeof(viewname));
+                         view_ptr, sizeof(viewname), commversion);
     }
     
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
@@ -777,7 +806,7 @@ vacm_create_simple(const char *token, char *confline,
         vacm_gen_com2sec(commcount, community, addressname,
                          "com2sec6", &netsnmp_udp6_parse_security,
                          secname, sizeof(secname),
-                         view_ptr, sizeof(viewname));
+                         view_ptr, sizeof(viewname), commversion);
     }
 #endif
 #endif /* support for community based SNMP */
