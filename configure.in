@@ -1135,9 +1135,9 @@ if test "x$prefix" = "xNONE"; then
 fi
 
 fch=`echo $prefix | sed 's/\(.\).*/\1/'`
-if test $fch != "/" ; then
+if test "x$fch" != "x/" ; then
    sch=`echo $prefix | sed 's/.\(.\).*/\1/'`
-   if test $sch != ":" ; then
+   if test "x$sch" != "x:" ; then
       prefix=`pwd`/$prefix
       echo "adjusting prefix to $prefix"
    fi
@@ -1148,9 +1148,9 @@ if test "x$exec_prefix" = "xNONE"; then
 fi
 
 fch=`echo $exec_prefix | sed 's/\(.\).*/\1/'`
-if test $fch != "/" ; then
+if test "x$fch" != "x/" ; then
    sch=`echo $exec_prefix | sed 's/.\(.\).*/\1/'`
-   if test $sch != ":" ; then
+   if test "x$sch" != "x:" ; then
       exec_prefix=`pwd`/$exec_prefix
       echo "adjusting exec_prefix to $exec_prefix"
    fi
