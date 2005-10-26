@@ -98,7 +98,7 @@
     <p>
       Authentication is performed by using a users <b>privKey</b> to
       encrypt the data portion the message being sent.  The
-      <b>privProtocol</b> can only be <i>DES</i> at this time. 
+      <b>privProtocol</b> can be either <i>AES</i> or <i>DES</i>. 
     <p>
       Messages can be be sent unauthenticated, authenticated, or
       authenticated and encrypted by setting the <b>securityLevel</b>
@@ -113,7 +113,7 @@
 	<tr bgcolor="#d0ffd0"><th>Parameter</th><th>Command Line Flag</th><th>snmp.conf token</th></tr>
 	<tr><td>securityName</td><td>-u <i>NAME</i></td><td>defSecurityName NAME</td></tr>
 	<tr><td>authProtocol</td><td>-a <i>(MD5|SHA)</i></td><td>defAuthType (MD5|SHA)</td></tr>
-	<tr><td>privProtocol</td><td>-x <i>DES</i></td><td>defPrivType DES</td></tr>
+	<tr><td>privProtocol</td><td>-x <i>(AES|DES)</i></td><td>defPrivType DES</td></tr>
 	<tr><td>authKey</td><td>-A <i>PASSPHRASE</i></td><td>defAuthPassphrase PASSPHRASE</td></tr>
 	<tr><td>privKey</td><td>-X <i>PASSPHRASE</i></td><td>defPrivPassphrase PASSPHRASE</td></tr>
 	<tr><td>securityLevel</td><td>-l <i>(noAuthNoPriv|authNoPriv|authPriv)</i></td><td>defSecurityLevel (noAuthNoPriv|authNoPriv|authPriv)</td></tr>
@@ -191,7 +191,7 @@ enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoPublicStri
 <br>Page
 <!-- Created: Fri Dec 17 09:00:32 PST 1999 -->
 <!-- hhmts start -->
-Last modified: Tue Oct  7 09:39:36 EDT 2003
+Last modified: Wed Oct 26 07:44:26 PDT 2005
 <!-- hhmts end -->
 </td><td align=right>
 <!--#include virtual="/sfbutton.html" -->
