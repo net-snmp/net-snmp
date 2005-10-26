@@ -161,6 +161,16 @@ format of listening addresses described below.
 .TP
 .B -X
 Run as an AgentX subagent rather than as an SNMP master agent.
+.TP
+.BI -- "name"="value"
+Allows to specify any token ("name") supported in the
+.I snmpd.conf
+file and sets its value to "value". Overrides the corresponding token in the
+.I snmpd.conf
+file. See
+.I snmpd.conf(5)
+for the full list of tokens.
+
 
 .SH LISTENING ADDRESSES
 By default,
