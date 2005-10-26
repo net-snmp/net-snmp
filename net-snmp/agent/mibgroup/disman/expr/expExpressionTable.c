@@ -48,7 +48,7 @@ init_expExpressionTable(void)
     table_info->max_column = COLUMN_EXPEXPRESSIONENTRYSTATUS;
 
     /* Register this using the (common) expr_table_data container */
-    netsnmp_register_tdata(reg, expr_table_data, table_info);
+    netsnmp_tdata_register(reg, expr_table_data, table_info);
     DEBUGMSGTL(("disman:expr:init", "Expression Table container (%x)\n",
                                      expr_table_data));
 }

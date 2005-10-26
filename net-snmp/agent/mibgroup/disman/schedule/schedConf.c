@@ -366,9 +366,9 @@ store_schedTable(int majorID, int minorID, void *serverarg, void *clientarg)
 
     DEBUGMSGTL(( "disman:schedule:conf", "Storing schedTable:\n"));
 
-    for (row = netsnmp_tdata_get_first_row( schedule_table );
+    for (row = netsnmp_tdata_row_first( schedule_table );
          row;
-         row = netsnmp_tdata_get_next_row(  schedule_table, row )) {
+         row = netsnmp_tdata_row_next(  schedule_table, row )) {
 
         if (!row->data)
             continue;

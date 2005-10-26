@@ -19,7 +19,7 @@ void
 init_objects_table_data(void)
 {
     if (!objects_table_data)
-        objects_table_data = netsnmp_tdata_create("mteObjectsTable", 0);
+        objects_table_data = netsnmp_tdata_create_table("mteObjectsTable", 0);
 }
 
 
@@ -141,9 +141,9 @@ mteObjects_createEntry(char *owner, char *oname, int index, int flags)
      * Check whether there's already a row with the same indexes
      *   (XXX - relies on private internal data ???)
      */
-    row2 = netsnmp_tdata_get_from_oid(objects_table_data,
-                                      row->oid_index.oids,
-                                      row->oid_index.len); 
+    row2 = netsnmp_tdata_row_get_byoid(objects_table_data,
+                                       row->oid_index.oids,
+                                       row->oid_index.len); 
     if (row2) {
         if (flags & MTE_OBJECT_FLAG_NEXT) {
             /*
@@ -152,8 +152,8 @@ mteObjects_createEntry(char *owner, char *oname, int index, int flags)
              */
             while (row2) {
                 row->oid_index.oids[row->oid_index.len]++;
-                row2 = netsnmp_tdata_get_from_oid(objects_table_data,
-                                                  row->oid_index.oids,
+                row2 = netsnmp_tdata_row_get_byoid(objects_table_data,
+                                                   row->oid_index.oids,
                                                   row->oid_index.len); 
             }
         } else {
@@ -243,11 +243,11 @@ mteObjects_removeEntries( char *owner, char *oname )
                                oname,     strlen(oname));
     owner_var.next_variable = &oname_var;
 
-    row = netsnmp_tdata_getnext( objects_table_data, &owner_var );
+    row = netsnmp_tdata_row_next_byidx( objects_table_data, &owner_var );
 
-    while (row && !netsnmp_tdata_compare_subtree( row, &owner_var )) {
+    while (row && !netsnmp_tdata_compare_subtree_idx( row, &owner_var )) {
         mteObjects_removeEntry(row);
-        row = netsnmp_tdata_getnext( objects_table_data, &owner_var );
+        row = netsnmp_tdata_row_next_byidx( objects_table_data, &owner_var );
     }
     return;
 }
@@ -289,9 +289,9 @@ mteObjects_vblist( netsnmp_variable_list *vblist,
                                oname,      strlen(oname));
     owner_var.next_variable = &oname_var;
 
-    row = netsnmp_tdata_getnext( objects_table_data, &owner_var );
+    row = netsnmp_tdata_row_next_byidx( objects_table_data, &owner_var );
 
-    while (row && !netsnmp_tdata_compare_subtree( row, &owner_var )) {
+    while (row && !netsnmp_tdata_compare_subtree_idx( row, &owner_var )) {
         entry = (struct mteObject *)netsnmp_tdata_row_entry(row);
 
         memset(name, 0, MAX_OID_LEN);
@@ -312,7 +312,7 @@ mteObjects_vblist( netsnmp_variable_list *vblist,
         }
         snmp_varlist_add_variable( &var, name, name_len, ASN_NULL, NULL, 0);
 
-        row = netsnmp_tdata_get_next_row( objects_table_data, row );
+        row = netsnmp_tdata_row_next( objects_table_data, row );
     }
     return 0;
 }

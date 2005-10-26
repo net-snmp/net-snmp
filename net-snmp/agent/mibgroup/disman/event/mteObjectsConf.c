@@ -116,9 +116,9 @@ store_mteOTable(int majorID, int minorID, void *serverarg, void *clientarg)
 
     DEBUGMSGTL(("disman:event:conf", "Storing mteObjectTable config:\n"));
 
-    for (row = netsnmp_tdata_get_first_row( objects_table_data );
+    for (row = netsnmp_tdata_row_first( objects_table_data );
          row;
-         row = netsnmp_tdata_get_next_row( objects_table_data, row )) {
+         row = netsnmp_tdata_row_next( objects_table_data, row )) {
 
         /*
          * Skip entries that were set up via static config directives

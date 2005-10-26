@@ -26,7 +26,7 @@ init_trigger_table_data(void)
 {
     DEBUGMSGTL(("disman:event:init", "init trigger container\n"));
     if (!trigger_table_data) {
-        trigger_table_data = netsnmp_tdata_create("mteTriggerTable", 0);
+        trigger_table_data = netsnmp_tdata_create_table("mteTriggerTable", 0);
         if (!trigger_table_data) {
             snmp_log(LOG_ERR, "failed to create mteTriggerTable");
             return;
@@ -60,9 +60,9 @@ _mteTrigger_dump(void)
     netsnmp_tdata_row *row;
     int i = 0;
 
-    for (row = netsnmp_tdata_get_first_row(trigger_table_data);
+    for (row = netsnmp_tdata_row_first(trigger_table_data);
          row;
-         row = netsnmp_tdata_get_next_row(trigger_table_data, row)) {
+         row = netsnmp_tdata_row_next(trigger_table_data, row)) {
         entry = (struct mteTrigger *)row->data;
         DEBUGMSGTL(("disman:event:dump", "TriggerTable entry %d: ", i));
         DEBUGMSGOID(("disman:event:dump", row->oid_index.oids, row->oid_index.len));
@@ -227,6 +227,8 @@ mteTrigger_run( unsigned int reg, void *clientarg)
         n = netsnmp_query_get(  var, entry->session );
     }
     if ( n != SNMP_ERR_NOERROR ) {
+        DEBUGMSGTL(( "disman:event:trigger:monitor", "Trigger query (%s) failed: %d\n",
+                           (( entry->flags & MTE_TRIGGER_FLAG_VWILD ) ? "walk" : "get"), n));
         _mteTrigger_failure( "failed to run mteTrigger query" );
         return;
     }
@@ -1111,9 +1113,9 @@ long _mteTrigger_countEntries(void)
     netsnmp_tdata_row *row;
     long count = 0;
 
-    for (row = netsnmp_tdata_get_first_row(trigger_table_data);
+    for (row = netsnmp_tdata_row_first(trigger_table_data);
          row;
-         row = netsnmp_tdata_get_next_row(trigger_table_data, row)) {
+         row = netsnmp_tdata_row_next(trigger_table_data, row)) {
         entry  = (struct mteTrigger *)row->data;
         count += entry->count;
     }

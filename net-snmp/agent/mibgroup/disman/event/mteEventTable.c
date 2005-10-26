@@ -48,7 +48,7 @@ init_mteEventTable(void)
     table_info->max_column = COLUMN_MTEEVENTENTRYSTATUS;
 
     /* Register this using the (common) event_table_data container */
-    netsnmp_register_tdata(reg, event_table_data, table_info);
+    netsnmp_tdata_register(reg, event_table_data, table_info);
     DEBUGMSGTL(("disman:event:init", "Event Table container (%x)\n",
                                       event_table_data));
 }

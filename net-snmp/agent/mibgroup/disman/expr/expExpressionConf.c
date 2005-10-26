@@ -123,9 +123,9 @@ store_expETable(int majorID, int minorID, void *serverarg, void *clientarg)
 
     DEBUGMSGTL(("disman:expr:conf", "Storing expExpressionTable config:\n"));
 
-    for (row = netsnmp_tdata_get_first_row( expr_table_data );
+    for (row = netsnmp_tdata_row_first( expr_table_data );
          row;
-         row = netsnmp_tdata_get_next_row( expr_table_data, row )) {
+         row = netsnmp_tdata_row_next( expr_table_data, row )) {
 
         /*
          * Skip entries that were set up via static config directives

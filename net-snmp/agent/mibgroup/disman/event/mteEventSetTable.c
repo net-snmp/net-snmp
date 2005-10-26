@@ -47,7 +47,7 @@ init_mteEventSetTable(void)
     table_info->max_column = COLUMN_MTEEVENTSETCONTEXTNAMEWILDCARD;
 
     /* Register this using the (common) event_table_data container */
-    netsnmp_register_tdata(reg, event_table_data, table_info);
+    netsnmp_tdata_register(reg, event_table_data, table_info);
     DEBUGMSGTL(("disman:event:init", "Event Set Table container (%x)\n",
                                       event_table_data));
 }
