@@ -192,6 +192,10 @@ netsnmp_cache_timer_start(netsnmp_cache *cache)
     if(NULL == cache)
         return 0;
 
+    DEBUGMSGTL(( "cache_timer:start", "OID: "));
+    DEBUGMSGOID(("cache_timer:start", cache->rootoid, cache->rootoid_len));
+    DEBUGMSG((   "cache_timer:start", "\n"));
+
     if(0 != cache->timer_id) {
         snmp_log(LOG_WARNING, "cache has existing timer id.\n");
         return cache->timer_id;
