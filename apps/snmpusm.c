@@ -144,11 +144,12 @@ usage(void)
     fprintf(stderr,
             "  [-CE ENGINE-ID] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]\n");
     fprintf(stderr,
-            "  [-CE ENGINE-ID] (-Ca|-Cx) -Ck passwd OLD-LOCALIZED-KEY NEW-PASSPHRASE [USER]\n");
+            "  [-CE ENGINE-ID] (-Ca|-Cx) -Ck passwd OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]\n");
     fprintf(stderr, "\t\t-CE ENGINE-ID\tSet usmUserEngineID (e.g. 800000020109840301).\n");
     fprintf(stderr, "\t\t-Cx\t\tChange the privacy key.\n");
     fprintf(stderr, "\t\t-Ca\t\tChange the authentication key.\n");
-    fprintf(stderr, "\t\t-Ck\t\tUse old localized key instead of old passphrase.\n");
+    fprintf(stderr, "\t\t-Ck\t\tAllows to use localized key (must start with 0x)\n");
+    fprintf(stderr, "\t\t\t\tinstead of passphrase.\n");
 }
 
 /*
@@ -490,7 +491,7 @@ main(int argc, char *argv[])
             exit(1);
         }
 
-	if (uselocalizedkey) {
+	if (uselocalizedkey && (strncmp(oldpass, "0x", 2) == 0)) {
 	    /*
 	     * use the localized key from the command line
 	     */
@@ -537,17 +538,35 @@ main(int argc, char *argv[])
 		exit(1);
 	    }
 	}
+	if (uselocalizedkey && (strncmp(newpass, "0x", 2) == 0)) {
+	    /*
+	     * use the localized key from the command line
+	     */
+	    u_char *buf;
+	    size_t buf_len = SNMP_MAXBUF_SMALL;
+	    buf = (u_char *) malloc (buf_len * sizeof(u_char));
 
-        rval = generate_kul(session.securityAuthProto,
-                            session.securityAuthProtoLen,
-                            usmUserEngineID, usmUserEngineIDLen,
-                            newKu, newKu_len, newkul, &newkul_len);
+	    newkul_len = 0; /* initialize the offset */
+	    if (!snmp_hex_to_binary((u_char **) (&buf), &buf_len, &newkul_len, 0, newpass)) {
+	      snmp_perror(argv[0]);
+	      fprintf(stderr, "generating the new Kul from localized key failed\n");
+	      exit(1);
+	    }
+	    
+	    memcpy(newkul, buf, newkul_len);
+	    SNMP_FREE(buf);
+	} else {
+	    rval = generate_kul(session.securityAuthProto,
+				session.securityAuthProtoLen,
+				usmUserEngineID, usmUserEngineIDLen,
+				newKu, newKu_len, newkul, &newkul_len);
 
-        if (rval != SNMPERR_SUCCESS) {
-            snmp_perror(argv[0]);
-            fprintf(stderr, "generating the new Kul failed\n");
-            exit(1);
-        }
+	    if (rval != SNMPERR_SUCCESS) {
+	        snmp_perror(argv[0]);
+		fprintf(stderr, "generating the new Kul failed\n");
+		exit(1);
+	    }
+	}
 
         /*
          * for encryption, we may need to truncate the key to the proper length
