@@ -20,7 +20,7 @@ init_expr_table_data(void)
 {
     DEBUGMSGTL(("disman:expr:init", "init expression container\n"));
     if (!expr_table_data) {
-         expr_table_data = netsnmp_tdata_create("expExpressionTable", 0);
+         expr_table_data = netsnmp_tdata_create_table("expExpressionTable", 0);
          DEBUGMSGTL(("disman:expr:init", "create expression container (%x)\n",
                                           expr_table_data));
     }
@@ -48,9 +48,9 @@ _mteExpr_dump(void)
     netsnmp_tdata_row *row;
     int i = 0;
 
-    for (row = netsnmp_tdata_get_first_row(expr_table_data);
+    for (row = netsnmp_tdata_row_first(expr_table_data);
          row;
-         row = netsnmp_tdata_get_next_row(expr_table_data, row)) {
+         row = netsnmp_tdata_row_next(expr_table_data, row)) {
         entry = (struct mteExpression *)row->data;
         DEBUGMSGTL(("disman:expr:dump", "ExpressionTable entry %d: ", i));
         DEBUGMSGOID(("disman:expr:dump", row->oid_index.oids, row->oid_index.len));
@@ -151,7 +151,7 @@ struct expExpression *
 expExpression_getFirstEntry( void )
 {
     return (struct expExpression *)
-        netsnmp_tdata_row_entry(netsnmp_tdata_get_first_row(expr_table_data));
+        netsnmp_tdata_row_entry(netsnmp_tdata_row_first(expr_table_data));
 }
 
 struct expExpression *
@@ -167,7 +167,7 @@ expExpression_getNextEntry( char *owner, char *name )
 
     return (struct expExpression *)
         netsnmp_tdata_row_entry(
-            netsnmp_tdata_getnext(expr_table_data, &owner_var));
+            netsnmp_tdata_row_next_byidx(expr_table_data, &owner_var));
 }
 
 struct expExpression *
@@ -183,7 +183,7 @@ expExpression_getEntry( char *owner, char *name )
 
     return (struct expExpression *)
         netsnmp_tdata_row_entry(
-            netsnmp_tdata_get(expr_table_data, &owner_var));
+            netsnmp_tdata_row_get_byidx(expr_table_data, &owner_var));
 }
 
 
@@ -327,9 +327,9 @@ long _expExpression_countEntries(void)
     netsnmp_tdata_row *row;
     long count = 0;
 
-    for (row = netsnmp_tdata_get_first_row(expr_table_data);
+    for (row = netsnmp_tdata_row_first(expr_table_data);
          row;
-         row = netsnmp_tdata_get_next_row(expr_table_data, row)) {
+         row = netsnmp_tdata_row_next(expr_table_data, row)) {
         entry  = (struct expExpression *)row->data;
         count += entry->count;
     }

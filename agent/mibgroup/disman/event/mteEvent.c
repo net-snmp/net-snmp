@@ -22,7 +22,7 @@ init_event_table_data(void)
 {
     DEBUGMSGTL(("disman:event:init", "init event container\n"));
     if (!event_table_data) {
-        event_table_data = netsnmp_tdata_create("mteEventTable", 0);
+        event_table_data = netsnmp_tdata_create_table("mteEventTable", 0);
         DEBUGMSGTL(("disman:event:init", "create event container (%x)\n",
                                       event_table_data));
     }
@@ -87,9 +87,9 @@ _mteEvent_dump(void)
     netsnmp_tdata_row *row;
     int i = 0;
 
-    for (row = netsnmp_tdata_get_first_row(event_table_data);
+    for (row = netsnmp_tdata_row_first(event_table_data);
          row;
-         row = netsnmp_tdata_get_next_row(event_table_data, row)) {
+         row = netsnmp_tdata_row_next(event_table_data, row)) {
         entry = (struct mteEvent *)row->data;
         DEBUGMSGTL(("disman:event:dump", "EventTable entry %d: ", i));
         DEBUGMSGOID(("disman:event:dump", row->oid_index.oids, row->oid_index.len));
@@ -211,7 +211,7 @@ mteEvent_fire( char *owner, char *event,      /* Event to invoke    */
     owner_var.next_variable = &event_var;
     entry = (struct mteEvent *)
                 netsnmp_tdata_row_entry(
-                    netsnmp_tdata_get( event_table_data, &owner_var ));
+                    netsnmp_tdata_row_get_byidx( event_table_data, &owner_var ));
     if (!entry) {
         DEBUGMSGTL(("disman:event:fire", "No matching event\n"));
         return -1;

@@ -78,7 +78,7 @@ _find_mteEvent_entry( char *owner, char *ename )
     snmp_set_var_typed_value(&ename_var, ASN_PRIV_IMPLIED_OCTET_STR,
                                                         ename, strlen(ename));
     owner_var.next_variable = &ename_var;
-    row = netsnmp_tdata_get( event_table_data, &owner_var );
+    row = netsnmp_tdata_row_get_byidx( event_table_data, &owner_var );
         /*
          * ... otherwise, create a new one
          */
@@ -464,9 +464,9 @@ store_mteETable(int majorID, int minorID, void *serverarg, void *clientarg)
 
     DEBUGMSGTL(("disman:event:conf", "Storing mteEventTable config:\n"));
 
-    for (row = netsnmp_tdata_get_first_row( event_table_data );
+    for (row = netsnmp_tdata_row_first( event_table_data );
          row;
-         row = netsnmp_tdata_get_next_row( event_table_data, row )) {
+         row = netsnmp_tdata_row_next( event_table_data, row )) {
 
         /*
          * Skip entries that were set up via static config directives

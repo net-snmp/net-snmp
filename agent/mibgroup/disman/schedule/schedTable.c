@@ -45,7 +45,7 @@ init_schedTable(void)
     table_info->min_column = COLUMN_SCHEDDESCR;
     table_info->max_column = COLUMN_SCHEDTRIGGERS;
 
-    netsnmp_register_tdata(reg, schedule_table, table_info);
+    netsnmp_tdata_register(reg, schedule_table, table_info);
 }
 
 

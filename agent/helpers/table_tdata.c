@@ -50,7 +50,7 @@ _netsnmp_tdata_generate_index_oid(netsnmp_tdata_row *row)
 
 /** creates and returns a 'tdata' table data structure */
 netsnmp_tdata *
-netsnmp_tdata_create(const char *name, long flags)
+netsnmp_tdata_create_table(const char *name, long flags)
 {
     netsnmp_tdata *table = SNMP_MALLOC_TYPEDEF(netsnmp_tdata);
     if ( !table )
@@ -60,6 +60,22 @@ netsnmp_tdata_create(const char *name, long flags)
         table->name = strdup(name);
     table->container = netsnmp_container_find( "table_container" );
     return table;
+}
+
+/** creates and returns a 'tdata' table data structure */
+void
+netsnmp_tdata_delete_table(netsnmp_tdata *table)
+{
+    if (!table)
+       return;
+
+    if (table->name)
+       free(table->name);
+    if (table->container)
+       CONTAINER_FREE(table->container);
+    
+    SNMP_FREE(table);
+    return;
 }
 
 /** creates and returns a pointer to new row data structure */
@@ -98,6 +114,33 @@ netsnmp_tdata_clone_row(netsnmp_tdata_row *row)
     }
 
     return newrow;
+}
+
+/** copy the contents of a 'tdata' row.
+    DOES NOT COPY THE TABLE-SPECIFIC ENTRY DATA. */
+int
+netsnmp_tdata_copy_row(netsnmp_tdata_row *dst_row, netsnmp_tdata_row *src_row)
+{
+     if ( !src_row || !dst_row )
+         return -1;
+
+    memcpy((u_char *) dst_row, (u_char *) src_row,
+           sizeof(netsnmp_tdata_row));
+    if (src_row->indexes) {
+        dst_row->indexes = snmp_clone_varbind(src_row->indexes);
+        if (!dst_row->indexes)
+            return -1;
+    }
+
+    if (src_row->oid_index.oids) {
+        memdup((u_char **) &dst_row->oid_index.oids,
+               (u_char  *)  src_row->oid_index.oids,
+               src_row->oid_index.len * sizeof(oid));
+        if (!dst_row->oid_index.oids)
+            return -1;
+    }
+
+    return 0;
 }
 
 /** deletes the memory used by the specified row
@@ -173,7 +216,7 @@ netsnmp_tdata_add_row(netsnmp_tdata     *table,
 }
 
 /** swaps out origrow with newrow.  This does *not* delete/free anything! */
-NETSNMP_INLINE void
+void
 netsnmp_tdata_replace_row(netsnmp_tdata *table,
                                netsnmp_tdata_row *origrow,
                                netsnmp_tdata_row *newrow)
@@ -296,10 +339,9 @@ _netsnmp_tdata_helper_handler(netsnmp_mib_handler *handler,
 }
 
 
-/** registers a handler as a data table.
- *  If table_info != NULL, it registers it as a normal table too. */
+/** registers a tdata-based MIB table */
 int
-netsnmp_register_tdata(netsnmp_handler_registration    *reginfo,
+netsnmp_tdata_register(netsnmp_handler_registration    *reginfo,
                        netsnmp_tdata                   *table,
                        netsnmp_table_registration_info *table_info)
 {
@@ -308,20 +350,9 @@ netsnmp_register_tdata(netsnmp_handler_registration    *reginfo,
                   table->container, TABLE_CONTAINER_KEY_NETSNMP_INDEX);
 }
 
-/** registers a handler as a read-only data table
- *  If table_info != NULL, it registers it as a normal table too. */
-int
-netsnmp_register_read_only_tdata(netsnmp_handler_registration *reginfo,
-                       netsnmp_tdata                   *table,
-                       netsnmp_table_registration_info *table_info)
-{
-    netsnmp_inject_handler(reginfo, netsnmp_get_read_only_handler());
-    return netsnmp_register_tdata(reginfo, table, table_info);
-}
-
 /** extracts the tdata table from the request structure */
 netsnmp_tdata *
-netsnmp_tdata_extract(netsnmp_request_info *request)
+netsnmp_tdata_extract_table(netsnmp_request_info *request)
 {
     return (netsnmp_tdata *) netsnmp_request_get_list_data(request,
                                                            TABLE_TDATA_TABLE);
@@ -384,44 +415,44 @@ netsnmp_tdata_row_entry( netsnmp_tdata_row *row )
 
 /** returns the first row in the table */
 netsnmp_tdata_row *
-netsnmp_tdata_get_first_row(netsnmp_tdata *table)
+netsnmp_tdata_row_first(netsnmp_tdata *table)
 {
     return (netsnmp_tdata_row *)CONTAINER_FIRST( table->container );
 }
 
 /** finds a row in the 'tdata' table given another row */
 netsnmp_tdata_row *
-netsnmp_tdata_get_from_row(netsnmp_tdata     *table,
-                           netsnmp_tdata_row *row)
+netsnmp_tdata_row_get(  netsnmp_tdata     *table,
+                        netsnmp_tdata_row *row)
 {
     return CONTAINER_FIND( table->container, row );
 }
 
 /** returns the next row in the table */
 netsnmp_tdata_row *
-netsnmp_tdata_get_next_row(netsnmp_tdata      *table,
-                           netsnmp_tdata_row  *row)
+netsnmp_tdata_row_next( netsnmp_tdata      *table,
+                        netsnmp_tdata_row  *row)
 {
     return (netsnmp_tdata_row *)CONTAINER_NEXT( table->container, row  );
 }
 
 /** finds a row in the 'tdata' table given the index values */
 netsnmp_tdata_row *
-netsnmp_tdata_get(netsnmp_tdata         *table,
-                  netsnmp_variable_list *indexes)
+netsnmp_tdata_row_get_byidx(netsnmp_tdata         *table,
+                            netsnmp_variable_list *indexes)
 {
     oid             searchfor[      MAX_OID_LEN];
     size_t          searchfor_len = MAX_OID_LEN;
 
     build_oid_noalloc(searchfor, MAX_OID_LEN, &searchfor_len, NULL, 0,
                       indexes);
-    return netsnmp_tdata_get_from_oid(table, searchfor, searchfor_len);
+    return netsnmp_tdata_row_get_byoid(table, searchfor, searchfor_len);
 }
 
 /** finds a row in the 'tdata' table given the index OID */
 netsnmp_tdata_row *
-netsnmp_tdata_get_from_oid(netsnmp_tdata *table,
-                           oid * searchfor, size_t searchfor_len)
+netsnmp_tdata_row_get_byoid(netsnmp_tdata *table,
+                            oid * searchfor, size_t searchfor_len)
 {
     netsnmp_index index;
     if (!table)
@@ -435,22 +466,22 @@ netsnmp_tdata_get_from_oid(netsnmp_tdata *table,
 /** finds the lexically next row in the 'tdata' table
     given the index values */
 netsnmp_tdata_row *
-netsnmp_tdata_getnext(netsnmp_tdata         *table,
-                      netsnmp_variable_list *indexes)
+netsnmp_tdata_row_next_byidx(netsnmp_tdata         *table,
+                             netsnmp_variable_list *indexes)
 {
     oid             searchfor[      MAX_OID_LEN];
     size_t          searchfor_len = MAX_OID_LEN;
 
     build_oid_noalloc(searchfor, MAX_OID_LEN, &searchfor_len, NULL, 0,
                       indexes);
-    return netsnmp_tdata_getnext_from_oid(table, searchfor, searchfor_len);
+    return netsnmp_tdata_row_next_byoid(table, searchfor, searchfor_len);
 }
 
 /** finds the lexically next row in the 'tdata' table
     given the index OID */
 netsnmp_tdata_row *
-netsnmp_tdata_getnext_from_oid(netsnmp_tdata *table,
-                               oid * searchfor, size_t searchfor_len)
+netsnmp_tdata_row_next_byoid(netsnmp_tdata *table,
+                             oid * searchfor, size_t searchfor_len)
 {
     netsnmp_index index;
     if (!table)
@@ -462,7 +493,7 @@ netsnmp_tdata_getnext_from_oid(netsnmp_tdata *table,
 }
 
 int
-netsnmp_tdata_num_rows(netsnmp_tdata *table)
+netsnmp_tdata_row_count(netsnmp_tdata *table)
 {
     if (!table)
         return 0;
@@ -478,8 +509,8 @@ netsnmp_tdata_num_rows(netsnmp_tdata *table)
 
 /** compare a row with the given index values */
 int
-netsnmp_tdata_compare(netsnmp_tdata_row     *row,
-                      netsnmp_variable_list *indexes)
+netsnmp_tdata_compare_idx(netsnmp_tdata_row     *row,
+                          netsnmp_variable_list *indexes)
 {
     oid             searchfor[      MAX_OID_LEN];
     size_t          searchfor_len = MAX_OID_LEN;
@@ -500,8 +531,8 @@ netsnmp_tdata_compare_oid(netsnmp_tdata_row     *row,
 }
 
 int
-netsnmp_tdata_compare_subtree(netsnmp_tdata_row     *row,
-                              netsnmp_variable_list *indexes)
+netsnmp_tdata_compare_subtree_idx(netsnmp_tdata_row     *row,
+                                  netsnmp_variable_list *indexes)
 {
     oid             searchfor[      MAX_OID_LEN];
     size_t          searchfor_len = MAX_OID_LEN;
