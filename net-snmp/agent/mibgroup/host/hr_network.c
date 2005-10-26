@@ -193,7 +193,7 @@ static short    HRN_index;
 static char     HRN_name[16];
 static netsnmp_interface_entry *HRN_ifnet;
 #define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_Next(a, b, c, d)
-#elif def hpux11
+#elif defined(hpux11)
 static char     HRN_name[MAX_PHYSADDR_LEN];
 static nmapi_phystat HRN_ifnet;
 #define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_Next(a, b, c)
