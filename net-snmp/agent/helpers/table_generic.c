@@ -160,6 +160,13 @@ netsnmp_generic_get_handler(void /* table specific */ ) {
 
 }
 
+/** Free a MIB handler structure, releasing any related resources.
+  * Possibly called automatically by 'netsnmp_unregister_handler' ?
+  */
+netsnmp_generic_free_handler( netsnmp_mib_handler *handler ) {
+
+}
+
 /** Register a MIB table with the SNMP agent.
   */
 int
@@ -170,6 +177,8 @@ netsnmp_generic_register(netsnmp_handler_registration    *reginfo,
 
 /** Unregister a MIB table from the SNMP agent.
   * This should also release the internal representation of the table.
+  * ?? Is a table-specific version of this needed, or would
+  *    'netsnmp_unregister_handler' + 'netsnmp_generic_free_handler' do?
   */
 int
 netsnmp_generic_unregister(netsnmp_handler_registration    *reginfo) {
