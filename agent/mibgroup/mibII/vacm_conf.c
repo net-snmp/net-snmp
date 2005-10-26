@@ -72,7 +72,8 @@
 #include "snmpd.h"
 
 /**
- * registers the VACM token handlers for inserting rows into the vacm tables
+ * Registers the VACM token handlers for inserting rows into the vacm tables.
+ * These tokens will be recognised by both 'snmpd' and 'snmptrapd'.
  */
 void
 init_vacm_config_tokens(void) {
@@ -111,10 +112,18 @@ init_vacm_config_tokens(void) {
     snmpd_register_config_handler("authaccess", vacm_parse_authaccess,
                                   vacm_free_access,
                                   "name authtype1,authtype2 [-s secmodel] group view [noauth|auth|priv [context|context*]]");
+
+    /*
+     * Define standard views "_all_" and "_none_"
+     */
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
+                           vacm_standard_views, NULL);
 }
 
 /**
- * registers the easier-to-use VACM token handlers for quick access rules.
+ * Registers the easier-to-use VACM token handlers for quick access rules.
+ * These tokens will only be recognised by 'snmpd'.
  */
 void
 init_vacm_snmpd_easy_tokens(void) {
@@ -142,7 +151,7 @@ init_vacm_conf(void)
     init_vacm_config_tokens();
     init_vacm_snmpd_easy_tokens();
     /*
-     * register ourselves to handle access control 
+     * register ourselves to handle access control  ('snmpd' only)
      */
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_ACM_CHECK, vacm_in_view_callback,
@@ -156,9 +165,6 @@ init_vacm_conf(void)
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_READ_CONFIG,
                            vacm_warn_if_not_configured, NULL);
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                           SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
-                           vacm_standard_views, NULL);
 }
 
 
@@ -917,10 +923,8 @@ vacm_create_simple(const char *token, char *confline,
         }
     } else {
         strcpy(theoid, ".1");
-#ifdef temporary_hack
         strcpy(viewname, "_all_");
         view_ptr = NULL;
-#endif
     }
 
     if (viewtypes & VACM_VIEW_WRITE)
