@@ -95,18 +95,6 @@ initialize_table_ifTable(void)
     user_context = netsnmp_create_data_list("ifTable", NULL, NULL);
 
     /*
- * Shutdown the table ifTable 
- */
-void
-shutdown_table_ifTable(void)
-{
-    /*
-     * call interface shutdown code
-     */
-    _ifTable_shutdown_interface(&ifTable_user_context);
-}
-
-/**
      * No support for any flags yet, but in the future you would
      * set any flags here.
      */
