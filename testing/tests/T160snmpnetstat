@@ -1,0 +1,25 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER "apps: snmpnetstat finds the running agent"
+
+SKIPIF DISABLE_SNMPV2C
+
+# snmpnetstat only works with UDP
+[ "x$SNMP_TRANSPORT_SPEC" = "x" -o "x$SNMP_TRANSPORT_SPEC" = "xudp" ] || SKIP
+
+snmp_version=v2c
+. ./Sv2cconfig
+
+#
+# Begin test
+#
+
+STARTAGENT
+
+CAPTURE "snmpnetstat -n -P $SNMP_TRANSPORT_SPEC -$snmp_version -c testcommunity $SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+CHECKORDIE "$SNMP_SNMPD_PORT"
+
+STOPAGENT
+FINISHED
