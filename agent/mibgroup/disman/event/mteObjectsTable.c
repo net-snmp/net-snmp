@@ -47,7 +47,7 @@ init_mteObjectsTable(void)
     table_info->max_column = COLUMN_MTEOBJECTSENTRYSTATUS;
 
 
-    netsnmp_register_tdata(reg, objects_table_data, table_info);
+    netsnmp_tdata_register(reg, objects_table_data, table_info);
 }
 
 

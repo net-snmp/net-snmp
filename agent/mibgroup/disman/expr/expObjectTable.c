@@ -50,7 +50,7 @@ init_expObjectTable(void)
     table_info->max_column = COLUMN_EXPOBJECTENTRYSTATUS;
 
     /* Register this using the common expObject_table_data container */
-    netsnmp_register_tdata(reg, expObject_table_data, table_info);
+    netsnmp_tdata_register(reg, expObject_table_data, table_info);
     DEBUGMSGTL(("disman:expr:init", "Expression Object Table container (%x)\n",
                                      expObject_table_data));
 }

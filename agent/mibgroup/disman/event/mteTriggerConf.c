@@ -81,7 +81,7 @@ _find_mteTrigger_entry( char *owner, char *tname )
     snmp_set_var_typed_value(&tname_var, ASN_PRIV_IMPLIED_OCTET_STR,
                                                         tname, strlen(tname));
     owner_var.next_variable = &tname_var;
-    row = netsnmp_tdata_get( trigger_table_data, &owner_var );
+    row = netsnmp_tdata_row_get_byidx( trigger_table_data, &owner_var );
         /*
          * ... otherwise, create a new one
          */
@@ -1176,9 +1176,9 @@ store_mteTTable(int majorID, int minorID, void *serverarg, void *clientarg)
 
     DEBUGMSGTL(("disman:event:conf", "Storing mteTriggerTable config:\n"));
 
-    for (row = netsnmp_tdata_get_first_row( trigger_table_data );
+    for (row = netsnmp_tdata_row_first( trigger_table_data );
          row;
-         row = netsnmp_tdata_get_next_row( trigger_table_data, row )) {
+         row = netsnmp_tdata_row_next( trigger_table_data, row )) {
 
         /*
          * Skip entries that were set up via static config directives

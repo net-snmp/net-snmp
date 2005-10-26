@@ -124,9 +124,9 @@ store_expOTable(int majorID, int minorID, void *serverarg, void *clientarg)
 
     DEBUGMSGTL(("disman:expr:conf", "Storing expObjectTable config:\n"));
 
-    for (row = netsnmp_tdata_get_first_row( expObject_table_data );
+    for (row = netsnmp_tdata_row_first( expObject_table_data );
          row;
-         row = netsnmp_tdata_get_next_row( expObject_table_data, row )) {
+         row = netsnmp_tdata_row_next( expObject_table_data, row )) {
 
         /*
          * Skip entries that were set up via static config directives

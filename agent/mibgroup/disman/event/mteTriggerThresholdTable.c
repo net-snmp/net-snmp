@@ -47,7 +47,7 @@ init_mteTriggerThresholdTable(void)
     table_info->max_column = COLUMN_MTETRIGGERTHRESHOLDDELTAFALLINGEVENT;
 
     /* Register this using the (common) trigger_table_data container */
-    netsnmp_register_tdata(reg, trigger_table_data, table_info);
+    netsnmp_tdata_register(reg, trigger_table_data, table_info);
     DEBUGMSGTL(("disman:event:init", "Trigger Threshold Table\n"));
 }
 

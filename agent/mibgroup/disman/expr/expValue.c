@@ -35,7 +35,7 @@ _expValue_evalParam( netsnmp_variable_list *expIdx, int param,
     *expIdx->next_variable->next_variable->val.integer = param;
     obj = (struct expObject *)
                netsnmp_tdata_row_entry(
-                   netsnmp_tdata_get( expObject_table_data, expIdx ));
+                   netsnmp_tdata_row_get_byidx( expObject_table_data, expIdx ));
     if (!obj) {
         /*
          * No such parameter configured for this expression

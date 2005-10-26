@@ -20,7 +20,7 @@ init_expObject_table_data(void)
 {
     DEBUGMSGTL(("disman:expr:init", "init expObject container\n"));
     if (!expObject_table_data) {
-         expObject_table_data = netsnmp_tdata_create("expObjectTable", 0);
+         expObject_table_data = netsnmp_tdata_create_table("expObjectTable", 0);
          DEBUGMSGTL(("disman:expr:init", "create expObject container (%x)\n",
                                           expObject_table_data));
     }
@@ -142,7 +142,7 @@ expObject_getFirst( char *expOwner, char *expName )
     snmp_set_var_typed_value( &name_var,  ASN_OCTET_STR,
                                 expName,  strlen(expName));
     owner_var.next_variable = &name_var;
-    row = netsnmp_tdata_getnext( expObject_table_data, &owner_var );
+    row = netsnmp_tdata_row_next_byidx( expObject_table_data, &owner_var );
 
     /*
      * ... and check that it does!
@@ -173,7 +173,7 @@ expObject_getNext( netsnmp_tdata_row *thisRow )
      * Retrieve the next row, and check whether this
      *   refers to the same expression too.
      */
-    nextRow = netsnmp_tdata_get_next_row( expObject_table_data, thisRow );
+    nextRow = netsnmp_tdata_row_next( expObject_table_data, thisRow );
 
     if (!nextRow || !nextRow->data)
         return NULL;

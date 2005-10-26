@@ -20,7 +20,7 @@ init_schedule_container(void)
 {
     DEBUGMSGTL(("disman:schedule:init", "init schedule container\n"));
     if (!schedule_table) {
-        schedule_table = netsnmp_tdata_create("schedTable", 0);
+        schedule_table = netsnmp_tdata_create_table("schedTable", 0);
         DEBUGMSGTL(("disman:schedule:init",
                         "create schedule container(%x)\n", schedule_table));
     }
