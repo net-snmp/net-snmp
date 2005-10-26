@@ -21,6 +21,9 @@ usage()
    echo " -x : configure extra features for pre-release testing"
    echo " -C : don't source $HOME/.snmp/nsb-nightly"
    echo ""
+   echo " -f : from address for email results"
+   echo " -e : address to email error results to"
+   echo " -o : address to email success results to"
    echo " -h : host to upload results to"
    echo " -p : path to upload results to"
    exit 1
@@ -59,11 +62,16 @@ fi
 # -R : remove build dir after
 PARMS="$PARMS -r"
 NIGHTLY_VERBOSE=0
+NSB_ERR_RESULTS_TO=""
+NSB_OK_RESULTS_TO=""
 
-while getopts b:i:s:xh:p:v opt
+while getopts b:e:f:i:o:s:xh:p:v opt
 do
     case "$opt" in
       b)  NSB_BUILD_DIR=$OPTARG;;
+      e)  NSB_ERR_RESULTS_TO=$OPTARG;;
+      f)  NSB_FROM=$OPTARG;;
+      o)  NSB_OK_RESULTS_TO=$OPTARG;;
       i)  PARMS="-i $OPTARG $PARMS";;
       s)  NSB_SRC_DIR=$OPTARG;;
       h)  NSB_SCP_HOST=$OPTARG
@@ -104,20 +112,51 @@ else
 fi
 RC=$?
 echo "Finish: `date`"
-echo -n "Result: "
+cd $NSB_BUILD_DIR
 case $RC in
-    0)  echo "Success!"
-        if [ "x$NSB_BUILD_DIR" = "/" ]; then
-            nsb-abort "Not running rm -fR from /"
-        else
-            /bin/rm -fR $NSB_BUILD_DIR > /dev/null 2>&1
-        fi
+    0)  RESULT="Success"
+        NSB_RESULTS_TO=$NSB_OK_RESULTS_TO
+        FILES=""
         ;;
-    *) echo "Error!"
+    *) RESULT="Error"
+       NSB_RESULTS_TO=$NSB_ERR_RESULTS_TO
+       FILES=`ls nsb-make-all-errs.* nsb-make-test-errs.* 2>/dev/null`
        if [ ! -z $NSB_SCP_HOST ]; then
           nsb-upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_SUFFIX
        fi
         ;;
 esac
+echo "Result: $RESULT"
+
+if [ ! -z $NSB_RESULTS_TO ]; then
+   SUBJECT="$NSB_VERSION $RESULT on $NSB_HOST ($NSB_PLATFORM)"
+   case `uname -s` in
+      SunOS)         
+         echo "From: $NSB_FROM" > mail.results
+         echo "Subject: $SUBJECT" >> mail.results
+         echo "" >> mail.results
+         echo "Result: $RESULT" >> mail.results
+         if [ ! -z "$FILES" ]; then
+            cat $FILES >> mail.results
+         fi
+         mail -t $NSB_RESULTS_TO < mail.results
+         ;;
+      *)
+         echo "Result: $RESULT" >> mail.results
+         if [ ! -z "$FILES" ]; then
+            cat $FILES >> mail.results
+         fi
+         mail -s "$SUBJECT" $NSB_RESULTS_TO < mail.results
+         ;;
+   esac
+fi
+
+if [ $RC -eq 0 ]; then
+        if [ "x$NSB_BUILD_DIR" = "/" ]; then
+            nsb-abort "Not running rm -fR from /"
+        else
+            /bin/rm -fR $NSB_BUILD_DIR > /dev/null 2>&1
+        fi
+fi
 
 exit $RC

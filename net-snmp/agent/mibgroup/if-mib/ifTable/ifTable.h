@@ -374,9 +374,10 @@ extern          "C" {
     int             ifTable_post_request(ifTable_registration_ptr
                                          user_context);
 
-    int             ifTable_init_rowreq_ctx(ifTable_rowreq_ctx *
-                                            rowreq_ctx);
-    void            ifTable_cleanup_rowreq_ctx(ifTable_rowreq_ctx *
+    int             ifTable_rowreq_ctx_init(ifTable_rowreq_ctx *
+                                            rowreq_ctx,
+                                            void *userreq_ctx);
+    void            ifTable_rowreq_ctx_cleanup(ifTable_rowreq_ctx *
                                                rowreq_ctx);
 
     int             ifTable_check_dependencies(ifTable_rowreq_ctx *

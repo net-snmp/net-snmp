@@ -103,6 +103,5 @@
 #endif
 
 #ifdef cygwin
-#define WIN32
 #include <windows.h>
 #endif

@@ -114,6 +114,9 @@
 @    include m2c_setup_table.m2i@
 @    include details-table.m2i@
 
+/* ---------------------------------------------------------------------
+ * TODO:200:r: Implement $context data context functions.
+ */
 @    if (($m2c_data_allocate == 1) || ($m2c_undo_embed == 0))  && ("$m2c_data_context" ne "generated")@
 @        include generic-data-allocate.m2i@
 @    end@

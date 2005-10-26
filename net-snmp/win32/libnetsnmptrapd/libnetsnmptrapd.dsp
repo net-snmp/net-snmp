@@ -99,6 +99,18 @@ SOURCE=..\..\apps\snmptrapd_log.c
 
 SOURCE=..\..\apps\notification_log.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\winservice.c
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\winservice.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\winservice.rc
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
