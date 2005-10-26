@@ -296,13 +296,13 @@ netsnmp_generic_row_count( void *table ) {
 /** Retrieve the indexing structure of the table.
   */
 netsnmp_variable_list *
-netsnmp_generic_index( void *table ) {
+netsnmp_generic_idx( void *table ) {
 }
 
 /** Report the index values for a row.
   */
 netsnmp_variable_list *
-netsnmp_generic_row_index( void *row ) {
+netsnmp_generic_row_idx( void *row ) {
 }
 
 /** Report the instance OIDs for a row.
@@ -314,7 +314,7 @@ netsnmp_generic_row_oid( void *row, oid *instances ) {
 /** Compare a row against the specified index values.
   */
 int
-netsnmp_generic_compare_index( void *row, netsnmp_variable_list *index ) {
+netsnmp_generic_compare_idx( void *row, netsnmp_variable_list *index ) {
 }
 
 /** Compare a row against the specified instance OIDs.
@@ -326,7 +326,7 @@ netsnmp_generic_compare_oid( void *row, oid *instances, size_t len ) {
 /** Check if a row lies within a subtree of index values.
   */
 int
-netsnmp_generic_compare_subtree_index( void *row, netsnmp_variable_list *index ) {
+netsnmp_generic_compare_subtree_idx( void *row, netsnmp_variable_list *index ) {
 }
 
 /** Check if a row lies within a subtree of instance OIDs.
@@ -336,4 +336,4 @@ netsnmp_generic_compare_subtree_oid( void *row, oid *instances, size_t len ) {
 }
 
 /** @} end of table_indexes */
-/** @} end of table_generic   */
+/** @} end of table_generic */
