@@ -20,12 +20,12 @@
 config_require(ip-forward-mib/data_access/route_common)
 
 #if defined( linux )
-config_require(ip-forward-mib/data_access/route_linux);
-config_require(ip-forward-mib/data_access/route_ioctl);
+config_require(ip-forward-mib/data_access/route_linux)
+config_require(ip-forward-mib/data_access/route_ioctl)
 #else
 #error "the route data access library is not available for this platform."
 #endif
 
 /** need interface for ifIndex */
-config_require(if-mib/data_access/interface);
+config_require(if-mib/data_access/interface)
 

@@ -1,6 +1,7 @@
 /*
  * internal header, not for distribution
  */
+config_noinclude(ip-mib/data_access/ipaddress_ioctl)
 
 int
 _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,

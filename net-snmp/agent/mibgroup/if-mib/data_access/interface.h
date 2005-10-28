@@ -20,21 +20,12 @@
  *    HPUX11 had different reuirements than other HPUX, that should
  *    be handled in the *_hpux.h header file.
  */
-config_require(if-mib/data_access/interface_common)
+config_require(if-mib/data_access/interface)
 #if defined( linux )
-config_require(if-mib/data_access/interface_linux);
-config_require(if-mib/data_access/interface_ioctl);
+config_require(if-mib/data_access/interface_linux)
+config_require(if-mib/data_access/interface_ioctl)
 #else
 #   define NETSNMP_ACCESS_INTERFACE_NOARCH 1
 #endif
-
-/*
- * since the configure script will pick up this header and include it in
- * mib_module_includes.h, but actual interface structure definitions which
- * are used in other headers are defined in net-snmp/data_access/interface.h,
- * we need to ignore the normal convention of not including headers in
- * a header, or we will not be able to compile.
- */
-#include <net-snmp/data_access/interface.h>
 
 #endif /* NETSNMP_ACCESS_INTERFACE_CONFIG_H */
