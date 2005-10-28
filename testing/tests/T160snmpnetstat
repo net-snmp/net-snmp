@@ -9,6 +9,10 @@ SKIPIF DISABLE_SNMPV2C
 # snmpnetstat only works with UDP
 [ "x$SNMP_TRANSPORT_SPEC" = "x" -o "x$SNMP_TRANSPORT_SPEC" = "xudp" ] || SKIP
 
+# make sure snmpnetstat can be executed
+SNMPNETSTAT="${SNMP_UPDIR}/apps/snmpnetstat/snmpnetstat"
+[ -x "$SNMPNETSTAT" ] || SKIP
+
 snmp_version=v2c
 . ./Sv2cconfig
 
@@ -18,7 +22,7 @@ snmp_version=v2c
 
 STARTAGENT
 
-CAPTURE "snmpnetstat -n -P $SNMP_TRANSPORT_SPEC -$snmp_version -c testcommunity $SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+CAPTURE "$SNMPNETSTAT -n -P udp -$snmp_version -c testcommunity $SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 CHECKORDIE "$SNMP_SNMPD_PORT"
 
 STOPAGENT
