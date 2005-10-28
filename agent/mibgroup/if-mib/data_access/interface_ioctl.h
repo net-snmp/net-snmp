@@ -6,6 +6,8 @@
 #ifndef NETSNMP_ACCESS_INTERFACE_IOCTL_H
 #define NETSNMP_ACCESS_INTERFACE_IOCTL_H
 
+config_require(ip-mib/data_access/ipaddress)
+
 #ifdef __cplusplus
 extern          "C" {
 #endif

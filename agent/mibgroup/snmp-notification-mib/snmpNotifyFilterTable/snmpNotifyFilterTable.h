@@ -22,8 +22,8 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface);
-config_require(snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access);
+config_require(snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface)
+config_require(snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access)
     /* *INDENT-ON*  */
 
     /*

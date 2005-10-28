@@ -17,9 +17,9 @@
  *    HPUX11 had different reuirements than other HPUX, that should
  *    be handled in the *_hpux.h header file.
  */
-config_require(tcp-mib/data_access/tcpConn_common);
+config_require(tcp-mib/data_access/tcpConn_common)
 #if defined( linux )
-config_require(tcp-mib/data_access/tcpConn_linux);
+config_require(tcp-mib/data_access/tcpConn_linux)
 #else
 #   define NETSNMP_TCPCONN_COMMON_ONLY
 #endif
