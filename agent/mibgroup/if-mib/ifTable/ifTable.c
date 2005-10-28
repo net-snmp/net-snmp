@@ -26,6 +26,16 @@
 
 #include "ifTable_interface.h"
 
+#ifdef USING_IP_MIB_IPV4INTERFACETABLE_IPV4INTERFACETABLE_MODULE
+#   include "ip-mib/ipv4InterfaceTable/ipv4InterfaceTable.h"
+#endif
+#ifdef USING_IP_MIB_IPV6INTERFACETABLE_IPV6INTERFACETABLE_MODULE
+#   include "ip-mib/ipv4InterfaceTable/ipv4InterfaceTable.h"
+#endif
+#ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
+#   include "if-mib/ifXTable/ifXTable.h"
+#endif
+
 oid             ifTable_oid[] = { IFTABLE_OID };
 int             ifTable_oid_size = OID_LENGTH(ifTable_oid);
 
@@ -42,17 +52,40 @@ void            shutdown_table_ifTable(void);
 void
 init_ifTable(void)
 {
+    static int      ifTable_did_init = 0;
+
     DEBUGMSGTL(("verbose:ifTable:init_ifTable", "called\n"));
 
     /*
      * TODO:300:o: Perform ifTable one-time module initialization.
      */
+    if (++ifTable_did_init != 1) {
+        DEBUGMSGTL(("ifTable:init_ifTable", "ignoring duplicate call\n"));
+        return;
+    }
 
     /*
      * here we initialize all the tables we're planning on supporting
      */
-    if (should_init("ifTable"))
+    if (should_init("ifTable")) {
+
+#ifdef USING_IP_MIB_IPV4INTERFACETABLE_IPV4INTERFACETABLE_MODULE
+        if (should_init("ipv4InterfaceTable"))
+            initialize_table_ipv4InterfaceTable();
+#endif
+
+#ifdef USING_IP_MIB_IPV6INTERFACETABLE_IPV6INTERFACETABLE_MODULE
+        if (should_init("ipv6InterfaceTable"))
+            initialize_table_ipv6InterfaceTable();
+#endif
+
         initialize_table_ifTable();
+
+#ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
+        if (should_init("ifXTable"))
+            initialize_table_ifXTable();
+#endif
+    }
 
 }                               /* init_ifTable */
 
