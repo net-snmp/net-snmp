@@ -20,7 +20,6 @@
 
 #include "ipaddress_ioctl.h"
 
-static int _get_interface_count(int sd, struct ifconf * ifc);
 static void _print_flags(short flags);
 
 #define LIST_TOKEN "ioctl_extras"
@@ -143,7 +142,8 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         return -1;
     }
 
-    interfaces = _get_interface_count(sd, &ifc);
+    interfaces =
+        netsnmp_access_ipaddress_ioctl_get_interface_count(sd, &ifc);
     if(interfaces < 0) {
         close(sd);
         return -2;
@@ -316,7 +316,8 @@ _next_alias(const char *if_name)
         return -1;
     }
 
-    interfaces = _get_interface_count(sd, &ifc);
+    interfaces =
+        netsnmp_access_ipaddress_ioctl_get_interface_count(sd, &ifc);
     if(interfaces < 0) {
         close(sd);
         return -2;
@@ -484,15 +485,23 @@ _netsnmp_ioctl_ipaddress_delete_v4(netsnmp_ipaddress_entry * entry)
 }
 
 /**
+ * get the interface count and populate the ifc_buf
+ *
+ * Note: the caller assumes responsbility for the ifc->ifc_buf
+ *       memory, and should free() it when done.
  *
  * @retval -1 : malloc error
  */
-static int
-_get_interface_count(int sd, struct ifconf * ifc)
+int
+netsnmp_access_ipaddress_ioctl_get_interface_count(int sd, struct ifconf * ifc)
 {
     int lastlen = 0, i;
+    struct ifconf ifc_tmp;
 
-    netsnmp_assert(NULL != ifc);
+    if (NULL == ifc) {
+        memset(&ifc_tmp, 0x0, sizeof(ifc_tmp));
+        ifc = &ifc_tmp;
+    }
 
     /*
      * Cope with lots of interfaces and brokenness of ioctl SIOCGIFCONF
@@ -532,6 +541,9 @@ _get_interface_count(int sd, struct ifconf * ifc)
         }
         free(ifc->ifc_buf); /* no SNMP_FREE, getting ready to reassign */
     }
+
+    if (ifc == &ifc_tmp)
+        free(ifc_tmp.ifc_buf);
 
     return ifc->ifc_len / sizeof(struct ifreq);
 }
