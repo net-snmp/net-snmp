@@ -23,8 +23,9 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(if-mib/ifTable/ifTable_interface);
-config_require(if-mib/ifTable/ifTable_data_access);
+config_require(if-mib/data_access/interface)
+config_require(if-mib/ifTable/ifTable_interface)
+config_require(if-mib/ifTable/ifTable_data_access)
 /*
  * conflicts with mibII/interfaces
  */
@@ -122,7 +123,7 @@ config_exclude(mibII/interfaces)
         /*
          * ifLastChange(9)/TICKS/ASN_TIMETICKS/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifLastChange;
+#define ifLastChange ifentry->lastchange
 
         /*
          * ifInOctets(10)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
