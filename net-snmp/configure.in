@@ -925,6 +925,7 @@ AC_PATH_PROG([PSPROG],ps)
 AC_PATH_PROG([PERLPROG],perl)
 AC_CHECK_PROGS(WHOAMI, whoami logname, whoami)
 AC_CHECK_PROGS(SED,sed gsed)
+AC_CHECK_PROGS(FIND,find)
 AC_PATH_PROG(AUTOCONF, autoconf)
 AC_PATH_PROG(AUTOHEADER, autoheader)
 if test "x$ac_cv_prog_AUTOCONF" = "x"; then
@@ -1762,6 +1763,7 @@ while test "x$new_module_list" != "x"; do
       echo -e "\n================================================================"
       echo "testing $i"
     fi
+    need_header=0
     #---------------------
     # make sure module wasn't explicity excluded, or already added
     #
@@ -1892,7 +1894,7 @@ while test "x$new_module_list" != "x"; do
 	    done
 	fi # new mibs
         #-------------------
-        # add $i to module list, add header to mib_module_includes
+        # add $i to module list
         #
         if test $module_debug -eq 1; then 
            echo "  $i added (based on $i.h)"
@@ -1901,7 +1903,6 @@ while test "x$new_module_list" != "x"; do
         module_list_h="$module_list_h mibgroup/$i.h"
         eval ${module_type}_list="\"\$${module_type}_list $i\""
         eval ${module_type}_list_h="\"\$${module_type}_list_h mibgroup/$i.h\""
-        echo '#include "'"mibgroup/$i.h"'"' >> $mibdir/${module_type}_includes.h
         #-------------------
         # check for unsupported config_load_mib
         #
@@ -1954,6 +1955,7 @@ while test "x$new_module_list" != "x"; do
             if test $module_debug -eq 1; then
               echo -e "adding init_$mnm() to list"
             fi
+            need_header=1
 	    echo "  if (should_init(\"$mnm\")) init_$mnm();" >> $mibdir/${module_type}_inits.h
 	fi
 	grep shutdown_$mnm $srcdir/$mibdir/$i.c > /dev/null
@@ -1961,9 +1963,18 @@ while test "x$new_module_list" != "x"; do
             if test $module_debug -eq 1; then
               echo -e "\nadding shutdown_$mnm() to list"
             fi
+            need_header=1
 	    echo "  if (should_init(\"$mnm\")) shutdown_$mnm();" >> $mibdir/${module_type}_shutdown.h
 	fi
       fi # test -f $srcdir/$mibdir/$i.c
+      #-------------------
+      # if there is a shutdown/init list,
+      #
+      if test $need_header -eq 1 ; then
+           echo '#include "'"mibgroup/$i.h"'"' >> $mibdir/${module_type}_includes.h
+        else
+           echo '/*#include "'"mibgroup/$i.h"'"*/' >> $mibdir/${module_type}_includes.h
+        fi
       #-------------------
       # check for output directory (for building outside of source tree
       #
