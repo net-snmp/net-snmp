@@ -60,8 +60,7 @@ init_ifXTable(void)
     /*
      * here we initialize all the tables we're planning on supporting
      */
-    if (should_init("ifXTable"))
-        initialize_table_ifXTable();
+    init_ifTable();
 
 }                               /* init_ifXTable */
 
