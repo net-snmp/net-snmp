@@ -17,6 +17,7 @@
 #endif
 
 #include <net-snmp/data_access/interface.h>
+#include <net-snmp/data_access/ipaddress.h>
 #include "if-mib/data_access/interface.h"
 #include "interface_ioctl.h"
 
@@ -36,6 +37,7 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name);
 unsigned int
 netsnmp_linux_interface_get_if_speed_mii(int fd, const char *name);
 #endif
+
 
 void
 netsnmp_arch_interface_init(void)
@@ -60,20 +62,12 @@ netsnmp_arch_interface_index_find(const char *name)
     return netsnmp_access_interface_ioctl_ifindex_get(-1, name);
 }
 
-
-/*
- *
- * @retval  0 success
- * @retval -1 no container specified
- * @retval -2 could not open /proc/net/dev
- * @retval -3 could not create entry (probably malloc)
+/**
+ * @internal
  */
-int
-netsnmp_arch_interface_container_load(netsnmp_container* container,
-                                      u_int load_flags)
+static int
+_parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
 {
-    FILE           *devin;
-    char            line[256];
     /*
      * scanline_2_2:
      *  [               IN                        ]
@@ -102,9 +96,114 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         "%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
 #endif
     static const char     *scan_line_to_use = NULL;
-    static char     scan_expected;
-    int             scan_count, fd;
+    int             scan_count;
+
+    if (10 == expected)
+        scan_line_to_use = scan_line_2_2;
+    else {
+        netsnmp_assert(5 == expected);
+        scan_line_to_use = scan_line_2_0;
+    }
+
+    while (*stats == ' ')
+        stats++;
+
+    /*
+     * Now parse the rest of the line (i.e. starting from 'stats')
+     *      to extract the relevant statistics, and populate
+     *      data structure accordingly.
+     * Use the entry flags field to indicate which counters are valid
+     */
+    rec_pkt = rec_oct = rec_err = rec_drop = rec_mcast = 0;
+    snd_pkt = snd_oct = snd_err = snd_drop = coll = 0;
+    if (scan_line_to_use == scan_line_2_2) {
+        scan_count = sscanf(stats, scan_line_to_use,
+                            &rec_oct, &rec_pkt, &rec_err, &rec_drop, &rec_mcast,
+                            &snd_oct, &snd_pkt, &snd_err, &snd_drop,
+                            &coll);
+        if (scan_count == expected) {
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_BYTES;
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_DROPS;
+            /*
+             *  2.4 kernel includes a single multicast (input) counter?
+             */
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED;
+#ifdef SCNuMAX   /* XXX - should be flag for 64-bit variables */
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_BYTES;
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_PACKETS;
+#endif
+        }
+    } else {
+        scan_count = sscanf(stats, scan_line_to_use,
+                            &rec_pkt, &rec_err,
+                            &snd_pkt, &snd_err, &coll);
+        if (scan_count == expected) {
+            entry->ns_flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
+            rec_oct = rec_drop = 0;
+            snd_oct = snd_drop = 0;
+        }
+    }
+    if(scan_count != expected) {
+        snmp_log(LOG_ERR,
+                 "error scanning interface data (expected %d, got %d)\n",
+                 expected, scan_count);
+        netsnmp_access_interface_entry_free(entry);
+        return scan_count;
+    }
+    entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_ACTIVE;
+    
+    /*
+     * linux previous to 1.3.~13 may miss transmitted loopback pkts: 
+     */
+    if (!strcmp(entry->name, "lo") && rec_pkt > 0 && !snd_pkt)
+        snd_pkt = rec_pkt;
+    
+    entry->stats.ibytes.low = rec_oct & 0xffffffff;
+    entry->stats.iucast.low = rec_pkt & 0xffffffff;
+    entry->stats.imcast.low = rec_mcast & 0xffffffff;
+    entry->stats.obytes.low = snd_oct & 0xffffffff;
+    entry->stats.oucast.low = snd_pkt & 0xffffffff;
+#ifdef SCNuMAX   /* XXX - should be flag for 64-bit variables */
+    entry->stats.ibytes.high = rec_oct >> 32;
+    entry->stats.iucast.high = rec_pkt >> 32;
+    entry->stats.imcast.high = rec_mcast >> 32;
+    entry->stats.obytes.high = snd_oct >> 32;
+    entry->stats.oucast.high = snd_pkt >> 32;
+#endif
+    entry->stats.ierrors   = rec_err;
+    entry->stats.idiscards = rec_drop;
+    entry->stats.oerrors   = snd_err;
+    entry->stats.odiscards = snd_drop;
+    entry->stats.collisions = coll;
+    
+    /*
+     * calculated stats.
+         *
+         *  we have imcast, but not ibcast.
+         */
+    entry->stats.inucast = entry->stats.imcast.low +
+        entry->stats.ibcast.low;
+    
+    return 0;
+}
+
+/*
+ *
+ * @retval  0 success
+ * @retval -1 no container specified
+ * @retval -2 could not open /proc/net/dev
+ * @retval -3 could not create entry (probably malloc)
+ */
+int
+netsnmp_arch_interface_container_load(netsnmp_container* container,
+                                      u_int load_flags)
+{
+    FILE           *devin, *retransin;
+    char            line[256];
     netsnmp_interface_entry *entry = NULL;
+    static char     scan_expected = 0;
+    int             fd;
 
     DEBUGMSGTL(("access:interface:container:arch", "load (flags %p)\n",
                 load_flags));
@@ -141,17 +240,13 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
      */
     fgets(line, sizeof(line), devin);
     fgets(line, sizeof(line), devin);
-    /*
-     * XXX - What's the format for the 2.6 kernel ?
-     */
-    if( NULL == scan_line_to_use ) {
+
+    if( 0 == scan_expected ) {
         if (strstr(line, "compressed")) {
-            scan_line_to_use = scan_line_2_2;
             scan_expected = 10;
             DEBUGMSGTL(("access:interface",
                         "using linux 2.2 kernel /proc/net/dev\n"));
         } else {
-            scan_line_to_use = scan_line_2_0;
             scan_expected = 5;
             DEBUGMSGTL(("access:interface",
                         "using linux 2.0 kernel /proc/net/dev\n"));
@@ -165,7 +260,9 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
      */
     while (fgets(line, sizeof(line), devin)) {
         char           *stats, *ifstart = line;
+        int             flags;
 
+        flags = 0;
         if (line[strlen(line) - 1] == '\n')
             line[strlen(line) - 1] = '\0';
 
@@ -177,7 +274,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                      "interface data format error 1, line ==|%s|\n", line);
             continue;
         }
-        if ((scan_line_to_use == scan_line_2_2) && ((stats - line) < 6)) {
+        if ((scan_expected == 10) && ((stats - line) < 6)) {
             snmp_log(LOG_ERR,
                      "interface data format error 2 (%d < 6), line ==|%s|\n",
                      stats - line, line);
@@ -191,6 +288,22 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          * Otherwise find an unused index value and use that.
          */
         *stats++ = 0; /* null terminate name */
+
+        /*
+         * do we only want ipv4?
+         * the only way I know of to check an interface for
+         * ipv4 is to look for an ipv4 ip address. If anyone
+         * knows a better way, add it here!
+         */
+        netsnmp_access_interface_ioctl_get_ipversions(fd, ifstart, 0, &flags);
+        if ((load_flags & NETSNMP_ACCESS_INTERFACE_LOAD_IP4_ONLY) &&
+            ((flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV4) == 0)) {
+            DEBUGMSGTL(("9:access:ifcontainer",
+                        "interface '%s' has no ipv4 addresses\n",
+                        ifstart));
+            continue;
+        }
+
         entry = netsnmp_access_interface_entry_create(ifstart, 0);
         if(NULL == entry) {
             netsnmp_access_interface_container_free(container,
@@ -199,93 +312,12 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
             close(fd);
             return -3;
         }
-
-        /*
-         * OK - we've now got (or created) the data structure for
-         *      this interface, including any "static" information.
-         * Now parse the rest of the line (i.e. starting from 'stats')
-         *      to extract the relevant statistics, and populate
-         *      data structure accordingly.
-         * Use the ifentry flags field to indicate which counters are valid
-         */
-        while (*stats == ' ')
-            stats++;
-
-        rec_pkt = rec_oct = rec_err = rec_drop = rec_mcast = 0;
-        snd_pkt = snd_oct = snd_err = snd_drop = coll = 0;
-        if (scan_line_to_use == scan_line_2_2) {
-            scan_count = sscanf(stats, scan_line_to_use,
-                                &rec_oct, &rec_pkt, &rec_err, &rec_drop, &rec_mcast,
-                                &snd_oct, &snd_pkt, &snd_err, &snd_drop,
-                                &coll);
-            if (scan_count == scan_expected) {
-                entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_BYTES;
-                entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_DROPS;
-                /*
-                 *  2.4 kernel includes a single multicast (input) counter?
-                 */
-                entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
-                entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED;
-#ifdef SCNuMAX   /* XXX - should be flag for 64-bit variables */
-                entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_BYTES;
-                entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_PACKETS;
-#endif
-            }
-        } else {
-            scan_count = sscanf(stats, scan_line_to_use,
-                                &rec_pkt, &rec_err,
-                                &snd_pkt, &snd_err, &coll);
-            if (scan_count == scan_expected) {
-                entry->ns_flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
-                rec_oct = rec_drop = 0;
-                snd_oct = snd_drop = 0;
-            }
-        }
-        if(scan_count != scan_expected) {
-            snmp_log(LOG_ERR,
-                     "error scanning interface data (expected %d, got %d)\n",
-                     scan_expected, scan_count);
-            netsnmp_access_interface_entry_free(entry);
-            continue;
-        }
-        entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_ACTIVE;
-
-        /*
-         * linux previous to 1.3.~13 may miss transmitted loopback pkts: 
-         */
-        if (!strcmp(entry->name, "lo") && rec_pkt > 0 && !snd_pkt)
-            snd_pkt = rec_pkt;
+        entry->ns_flags = flags; /* initial flags; we'll set more later */
 
         /*
          * xxx-rks: get descr by linking mem from /proc/pci and /proc/iomem
          */
 
-
-        entry->stats.ibytes.low = rec_oct & 0xffffffff;
-        entry->stats.iucast.low = rec_pkt & 0xffffffff;
-        entry->stats.imcast.low = rec_mcast & 0xffffffff;
-        entry->stats.obytes.low = snd_oct & 0xffffffff;
-        entry->stats.oucast.low = snd_pkt & 0xffffffff;
-#ifdef SCNuMAX   /* XXX - should be flag for 64-bit variables */
-        entry->stats.ibytes.high = rec_oct >> 32;
-        entry->stats.iucast.high = rec_pkt >> 32;
-        entry->stats.imcast.high = rec_mcast >> 32;
-        entry->stats.obytes.high = snd_oct >> 32;
-        entry->stats.oucast.high = snd_pkt >> 32;
-#endif
-        entry->stats.ierrors   = rec_err;
-        entry->stats.idiscards = rec_drop;
-        entry->stats.oerrors   = snd_err;
-        entry->stats.odiscards = snd_drop;
-        entry->stats.collisions = coll;
-
-        /*
-         * calculated stats.
-         *
-         *  we have imcast, but not ibcast.
-         */
-        entry->stats.inucast = entry->stats.imcast.low +
-            entry->stats.ibcast.low;
 
         /*
          * use ioctls for some stuff
@@ -355,7 +387,32 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
             entry->os_flags &= ~IFF_RUNNING;
         }
 
+        /*
+         * hardcoded max packet size
+         * (see ip_frag_reasm: if(len > 65535) goto out_oversize;)
+         */
+        entry->reasm_max = 65535;
+
         netsnmp_access_interface_entry_overrides(entry);
+
+        if (! (load_flags & NETSNMP_ACCESS_INTERFACE_LOAD_NO_STATS))
+            _parse_stats(entry, stats, scan_expected);
+
+        /*
+         * get the retransmit time
+         */
+        snprintf(line,sizeof(line),"/proc/sys/net/ipv4/neigh/%s/retrans_time",
+                 entry->name);
+        if (!(retransin = fopen(line, "r"))) {
+            DEBUGMSGTL(("access:interface",
+                        "Failed to open %s\n", line));
+        }
+        else {
+            if (fgets(line, sizeof(line), retransin)) {
+                entry->arp_retransmit = atoi(line) * 100;
+                fclose(retransin);
+            }
+        }
 
         /*
          * add to container
