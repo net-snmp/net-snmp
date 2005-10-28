@@ -16,8 +16,11 @@
  */
 #include "ifTable.h"
 
-
 #include "ifTable_data_access.h"
+
+#ifdef USING_IP_MIB_IPV4INTERFACETABLE_IPV4INTERFACETABLE_MODULE
+#   include "mibgroup/ip-mib/ipv4InterfaceTable/ipv4InterfaceTable.h"
+#endif
 
 /*
  * flag so we know not to set row/table last change times
@@ -150,14 +153,27 @@ static void
 _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
                                    netsnmp_container * ifcontainer)
 {
-    char            oper_changed = 0;
-
     /*
      * check for matching entry. We can do this directly, since
      * both containers use the same index.
      */
     netsnmp_interface_entry *ifentry =
         CONTAINER_FIND(ifcontainer, rowreq_ctx);
+
+#ifdef USING_IP_MIB_IPV4INTERFACETABLE_IPV4INTERFACETABLE_MODULE
+    /*
+     * give ipv4If table a crack at the entry
+     */
+    ipv4InterfaceTable_check_entry_for_updates(rowreq_ctx, ifentry);
+#endif
+
+#ifdef USING_IP_MIB_IPV6INTERFACETABLE_IPV6INTERFACETABLE_MODULE
+    /*
+     * give ipv6If table a crack at the entry
+     */
+    ipv6InterfaceTable_check_entry_for_updates(rowreq_ctx, ifentry);
+#endif
+
     if (NULL == ifentry) {
         /*
          * if this is the first time we detected that this interface is
@@ -170,8 +186,6 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
             DEBUGMSGTL(("ifTable:access", "updating missing entry\n"));
             rowreq_ctx->known_missing = 1;
             rowreq_ctx->data.ifAdminStatus = IFADMINSTATUS_DOWN;
-            if (rowreq_ctx->data.ifOperStatus != IFOPERSTATUS_DOWN)
-                oper_changed = 1;
             rowreq_ctx->data.ifOperStatus = IFOPERSTATUS_DOWN;
         }
     } else {
@@ -196,27 +210,17 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
         }
 
         /*
-         * Check for changes, then update
+         * update our ifentry
          */
-        if ((!(ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE))
-            && (rowreq_ctx->data.ifOperStatus != ifentry->oper_status))
-            oper_changed = 1;
         netsnmp_access_interface_entry_copy(rowreq_ctx->data.ifentry,
                                             ifentry);
 
         /*
-         * remove entry from ifcontainer
+         * remove entry from temporary ifcontainer
          */
         CONTAINER_REMOVE(ifcontainer, ifentry);
         netsnmp_access_interface_entry_free(ifentry);
     }
-
-    /*
-     * if ifOperStatus changed, update ifLastChange
-     */
-    if (oper_changed)
-        rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
-
 }
 
 /**
@@ -238,10 +242,27 @@ _add_new_interface(netsnmp_interface_entry * ifentry,
     if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS == ifTable_indexes_set(rowreq_ctx, ifentry->index))) {
         CONTAINER_INSERT(container, rowreq_ctx);
+        /*
+         * fix this when we hit an arch that reports its own last change
+         */
+        netsnmp_assert(0 == (ifentry->ns_flags &
+                             NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE));
         if(0 == _first_load) {
             rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
             ifTable_lastChange_set(rowreq_ctx->data.ifLastChange);
         }
+#ifdef USING_IP_MIB_IPV4INTERFACETABLE_IPV4INTERFACETABLE_MODULE
+        /*
+         * give ipv4If table a crack at the entry
+         */
+        ipv4InterfaceTable_check_entry_for_updates(rowreq_ctx, ifentry);
+#endif
+#ifdef USING_IP_MIB_IPV6INTERFACETABLE_IPV6INTERFACETABLE_MODULE
+        /*
+         * give ipv6If table a crack at the entry
+         */
+        ipv6InterfaceTable_check_entry_for_updates(rowreq_ctx, ifentry);
+#endif
     } else {
         if (rowreq_ctx) {
             snmp_log(LOG_ERR, "error setting index while loading "
