@@ -421,6 +421,13 @@ AC_ARG_ENABLE(mib-config-checking,
 AC_ARG_WITH(mib-config-checking,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-mib-config-checking/--disable-mib-config-checking instead ]) )
 
+AC_ARG_ENABLE(mib-config-debug,
+[  --enable-mib-config-debug      Turns on verbose output during mib module
+                                  configure processing.)],
+    with_mib_cfg_debug="yes",with_mib_cfg_debug="no")
+AC_ARG_WITH(mib-config-checking,,
+	AC_MSG_ERROR([ Invalid option. Use --enable-mib-config-checking/--disable-mib-config-checking instead ]) )
+
 AC_ARG_ENABLE(mfd-rewrites,
 [  --enable-mfd-rewrites          Use new MFD rewrites of mib modules,
                                   where available. (default is to use
@@ -1751,7 +1758,11 @@ changequote(, )
 #---------------------
 # loop over module list
 #
-module_debug=0
+if test "x$with_mib_cfg_debug" = "xyes"; then
+   module_debug=1
+else
+   module_debug=0
+fi
 while test "x$new_module_list" != "x"; do
   if test $module_debug -eq 1; then
       echo -e "\n****************************************************************"
