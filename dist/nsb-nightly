@@ -12,7 +12,7 @@ usage()
    echo ""
    echo " optional params: [-x] [-s SRCD] [-b BUILDD] [-i INSTALLD]"
    echo "                  [-h host] [-p path]"
-   echo " VERSION    : relase number (eg 5.0.3)"
+   echo " VERSION    : release number (eg 5.2.2)"
    echo " -s SRCDIR  : soure directory [$HOME/src/net-snmp-VERSION]"
    echo " -b BUILDD  : build directory [$HOME/build/]"
    echo "              NOTE-platform will be appended to build directory"
