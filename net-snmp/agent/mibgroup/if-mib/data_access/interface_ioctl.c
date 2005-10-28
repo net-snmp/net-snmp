@@ -390,3 +390,91 @@ netsnmp_access_interface_ioctl_ifindex_get(int fd, const char *name)
     return ifrq.ifr_ifindex;
 #endif /* SIOCGIFINDEX */
 }
+
+/**
+ * check an interface for ipv4 addresses
+ *
+ * @parm sd      : open socket descriptor
+ * @parm if_name : optional name. takes precedent over if_index.
+ * @parm if_index: optional if index. only used if no if_name specified
+ *
+ * @retval < 0 : error
+ * @retval   0 : no ip v4 addresses
+ * @retval   1 : 1 or more ip v4 addresses
+ */
+int
+netsnmp_access_interface_ioctl_get_ipversions(int sd, const char *if_name,
+                                              int if_index, u_int *flags)
+{
+    int             i, interfaces = 0;
+    struct ifconf   ifc;
+    struct ifreq   *ifrp;
+
+    /*
+     * one or the other
+     */
+    if ((NULL == flags) ||
+        ((0 == if_index) && (NULL == if_name))) {
+        return -1;
+    }
+
+    interfaces = netsnmp_access_ipaddress_ioctl_get_interface_count(sd, &ifc);
+    if(interfaces < 0) {
+        close(sd);
+        return -2;
+    }
+    netsnmp_assert(NULL != ifc.ifc_buf);
+
+    ifrp = ifc.ifc_req;
+    for(i=0; i < interfaces; ++i, ++ifrp) {
+
+        DEBUGMSGTL(("access:ipaddress:container",
+                    " interface %d, %s\n", i, ifrp->ifr_name));
+
+        /*
+         * search for matching if_name or if_index
+         */
+        if (NULL != if_name) {
+            if  (strncmp(if_name, ifrp->ifr_name, sizeof(ifrp->ifr_name)) != 0)
+                continue;
+        }
+        else {
+            /*
+             * I think that Linux and Solaris both use ':' in the
+             * interface name for aliases.
+             */
+            char *ptr = strchr(ifrp->ifr_name, ':');
+            if (NULL != ptr)
+                *ptr = 0;
+            
+            if (if_index !=
+                netsnmp_access_interface_ioctl_ifindex_get(sd, ifrp->ifr_name))
+                continue;
+        }
+
+        /*
+         * check and set v4 or v6 flag, and break if we've found both
+         */
+        if (AF_INET == ifrp->ifr_addr.sa_family) {
+            if ((*flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV4) == 0) {
+                *flags |= NETSNMP_INTERFACE_FLAGS_HAS_IPV4;
+                if (*flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV6)
+                    break;
+            }
+        }
+        else if (AF_INET6 == ifrp->ifr_addr.sa_family) {
+            if ((*flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV6) == 0) {
+                *flags |= NETSNMP_INTERFACE_FLAGS_HAS_IPV6;
+                if (*flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV4)
+                    break;
+            }
+        }
+    }
+
+    /*
+     * clean up
+     */
+    free(ifc.ifc_buf);
+
+    return 0;
+}
