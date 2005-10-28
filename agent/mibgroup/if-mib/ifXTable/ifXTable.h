@@ -25,8 +25,9 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(if-mib/ifXTable/ifXTable_interface);
-config_require(if-mib/ifXTable/ifXTable_data_access);
+config_require(if-mib/ifTable/ifTable)
+config_require(if-mib/ifXTable/ifXTable_interface)
+config_require(if-mib/ifXTable/ifXTable_data_access)
     /* *INDENT-ON*  */
 
     /*
@@ -58,18 +59,17 @@ config_require(if-mib/ifXTable/ifXTable_data_access);
      *
      * we share data structures (data too, in fact) with ifTable
      */
-#include "if-mib/ifTable/ifTable.h"
-  
+
     typedef ifTable_registration ifXTable_registration;
     typedef ifTable_data ifXTable_data;
     typedef ifTable_undo_data ifXTable_undo_data;
     typedef ifTable_mib_index ifXTable_mib_index;
     typedef ifTable_rowreq_ctx ifXTable_rowreq_ctx;
     typedef ifTable_ref_rowreq_ctx ifXTable_ref_rowreq_ctx;
-    
+
 #define ifXTable_data_list           ifTable_data_list
 #define ifXTable_reg                 ifTable_reg
-    
+
     /*
      *********************************************************************
      * function prototypes
