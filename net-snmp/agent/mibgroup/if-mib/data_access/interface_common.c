@@ -10,7 +10,7 @@
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_enum.h>
-#include "interface.h"
+#include <net-snmp/data_access/interface.h>
 
 /**---------------------------------------------------------------------*/
 /*
@@ -55,7 +55,7 @@ extern int netsnmp_arch_interface_index_find(const char*name);
  * initialization
  */
 void
-init_interface_common(void)
+init_interface(void)
 {
     snmpd_register_config_handler("interface", _parse_interface_config,
                                   _free_interface_config,
@@ -289,11 +289,7 @@ netsnmp_access_interface_entry_create(const char *name, oid if_index)
         entry->index = if_index;
     _access_interface_entry_save_name(name, entry->index);
 
-    /*
-     * until we can get actual description, leave descr NULL.
-     * The end user can decide what to do with it.
-     */
-    /* entry->descr = strdup("unknown"); */
+    entry->descr = strdup(name);
 
     /*
      * make some assumptions
@@ -599,8 +595,12 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
     lhs->type = rhs->type;
     lhs->speed = rhs->speed;
     lhs->speed_high = rhs->speed_high;
+    lhs->arp_retransmit = rhs->arp_retransmit;
     lhs->mtu = rhs->mtu;
+    lhs->lastchange = rhs->lastchange;
     lhs->discontinuity = rhs->discontinuity;
+    lhs->reasm_max = rhs->reasm_max;
+    lhs->admin_status = rhs->admin_status;
     lhs->oper_status = rhs->oper_status;
     lhs->promiscuous = rhs->promiscuous;
     lhs->connector_present = rhs->connector_present;
