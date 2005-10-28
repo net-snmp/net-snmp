@@ -20,7 +20,7 @@ The usage of nsb-package is:
 
  Usage: nsb-package [-c] [-d] [-p] [-s SRCD] [-b BUILDD] [-i INSTALLD] VERSION
   
-    VERSION    : relase number (eg 5.0.3)
+    VERSION    : release number (eg 5.2.2)
     -s SRCDIR  : soure directory [$HOME/src/net-snmp-VERSION]
     -b BUILDD  : build directory [$HOME/build/]
                  NOTE-platform will be appended to build directory
