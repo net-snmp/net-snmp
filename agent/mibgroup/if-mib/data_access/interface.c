@@ -7,11 +7,12 @@
 #include <net-snmp/net-snmp-includes.h>
 #include "mibII/mibII_common.h"
 #include "if-mib/ifTable/ifTable_constants.h"
+#include "if-mib/data_access/interface.h"
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_enum.h>
 #include <net-snmp/data_access/interface.h>
-#include "if-mib/data_access/interface.h"
+
 
 /**---------------------------------------------------------------------*/
 /*
@@ -26,8 +27,10 @@ static int _access_interface_init = 0;
  */
 static int _access_interface_entry_compare_name(const void *lhs,
                                                 const void *rhs);
+#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
 static void _access_interface_entry_release(netsnmp_interface_entry * entry,
                                             void *unused);
+#endif
 static void _access_interface_entry_save_name(const char *name, oid index);
 static void _parse_interface_config(const char *token, char *cptr);
 static void _free_interface_config(void);
