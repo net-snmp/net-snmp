@@ -24,6 +24,9 @@ extern          "C" {
 #define NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE		0x00000100
 #define NETSNMP_INTERFACE_FLAGS_HAS_DISCONTINUITY	0x00000200
 #define NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS      	0x00000400
+#define NETSNMP_INTERFACE_FLAGS_CAN_DOWN_PROTOCOL       0x00000800
+#define NETSNMP_INTERFACE_FLAGS_HAS_IPV4                0x00001000
+#define NETSNMP_INTERFACE_FLAGS_HAS_IPV6                0x00002000
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -60,6 +63,11 @@ extern          "C" {
 /**---------------------------------------------------------------------*/
 /*
  * structure definitions
+ *
+ * NOTE: if you add fields, update code dealing with
+ *       stats in interface_common.c, particularly
+ *       netsnmp_access_interface_entry_update_stats()
+ *
  */
 typedef struct netsnmp_interface_stats_s {
     /*
@@ -90,10 +98,16 @@ typedef struct netsnmp_interface_stats_s {
     unsigned int     onucast;
 } netsnmp_interface_stats;
 
+/*
+ *
+ * NOTE: if you add fields, update code dealing with
+ *       them in interface_common.c, particularly
+ *       netsnmp_access_interface_entry_copy().
+ */
 typedef struct netsnmp_interface_entry_s {
     netsnmp_index oid_index;
 
-    int     ns_flags; /* net-snmp flags */
+    u_int   ns_flags; /* net-snmp flags */
     oid     index;
 
     /*
@@ -103,34 +117,36 @@ typedef struct netsnmp_interface_entry_s {
     char   *name;
     char   *descr;
     int     type;
-    unsigned int     speed;
-    unsigned int     speed_high;
+    u_int   speed;
+    u_int   speed_high;
+    u_int   arp_retransmit; /* milliseconds */
     char   *paddr;
-    int     paddr_len;
-    int     mtu;
+    u_int   paddr_len;
+    u_int   mtu;
 
     u_long  lastchange;
     time_t  discontinuity;
 
-   char  admin_status;
-   char  oper_status;
+    u_int16_t     reasm_max; /* 0..65535 */
+    char  admin_status;
+    char  oper_status;
 
-   /** booleans (not TruthValues!) */
-   char  promiscuous;
-   char  connector_present;
+    /** booleans (not TruthValues!) */
+    char  promiscuous;
+    char  connector_present;
 
-   /*-----------------------------------------------
-    * platform/arch/access specific data
-    */
-   unsigned int os_flags; /* iff NETSNMP_INTERFACE_FLAGS_HAS_FAMILY */
+    /*-----------------------------------------------
+     * platform/arch/access specific data
+     */
+    u_int os_flags; /* iff NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS */
 
-   /*
-    * statistics
-    */
-   netsnmp_interface_stats stats;
+    /*
+     * statistics
+     */
+    netsnmp_interface_stats stats;
 
-   /** old_stats is used in netsnmp_access_interface_entry_update_stats */
-   netsnmp_interface_stats *old_stats;
+    /** old_stats is used in netsnmp_access_interface_entry_update_stats */
+    netsnmp_interface_stats *old_stats;
 
 } netsnmp_interface_entry;
 
@@ -150,7 +166,7 @@ typedef struct _conf_if_list {
 /*
  * ACCESS function prototypes
  */
-void init_interface_common(void);
+void init_interface(void);
 void netsnmp_access_interface_init(void);
 
 /*
@@ -167,6 +183,9 @@ netsnmp_container*
 netsnmp_access_interface_container_load(netsnmp_container* container,
                                         u_int load_flags);
 #define NETSNMP_ACCESS_INTERFACE_LOAD_NOFLAGS               0x0000
+#define NETSNMP_ACCESS_INTERFACE_LOAD_NO_STATS              0x0001
+#define NETSNMP_ACCESS_INTERFACE_LOAD_IP4_ONLY              0x0002
+#define NETSNMP_ACCESS_INTERFACE_LOAD_IP6_ONLY              0x0004
 
 void netsnmp_access_interface_container_free(netsnmp_container *container,
                                              u_int free_flags);
@@ -212,6 +231,9 @@ const char *netsnmp_access_interface_name_find(oid index);
 int netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
                                         netsnmp_interface_entry * rhs);
 
+/*
+ * utility routines
+ */
 void netsnmp_access_interface_entry_guess_speed(netsnmp_interface_entry *);
 void netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *);
 
