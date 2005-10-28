@@ -185,10 +185,6 @@ var_hrnet(struct variable * vp,
 	 *********************/
 
 
-#ifndef solaris2
-static short    HRN_index;
-#endif
-
 #if defined( USING_IF_MIB_IFTABLE_IFTABLE_DATA_ACCESS_MODULE )
 static char     HRN_name[16];
 static netsnmp_interface_entry *HRN_ifnet;
@@ -225,6 +221,7 @@ Init_HR_Network(void)
 int
 Get_Next_HR_Network(void)
 {
+short    HRN_index;
 #if !defined( solaris2) && ! defined( WIN32 )
     if (M_Interface_Scan_Next(&HRN_index, HRN_name, &HRN_ifnet, NULL) == 0)
         HRN_index = -1;
