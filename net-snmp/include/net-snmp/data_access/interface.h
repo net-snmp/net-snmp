@@ -27,6 +27,13 @@ extern          "C" {
 #define NETSNMP_INTERFACE_FLAGS_CAN_DOWN_PROTOCOL       0x00000800
 #define NETSNMP_INTERFACE_FLAGS_HAS_IPV4                0x00001000
 #define NETSNMP_INTERFACE_FLAGS_HAS_IPV6                0x00002000
+#define NETSNMP_INTERFACE_FLAGS_HAS_V4_RETRANSMIT       0x00004000
+#define NETSNMP_INTERFACE_FLAGS_HAS_V4_REASMMAX         0x00008000
+#define NETSNMP_INTERFACE_FLAGS_HAS_V6_RETRANSMIT       0x00010000
+#define NETSNMP_INTERFACE_FLAGS_HAS_V6_REASMMAX         0x00020000
+#define NETSNMP_INTERFACE_FLAGS_HAS_V6_REACHABLE        0x00040000
+#define NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID             0x00080000
+#define NETSNMP_INTERFACE_FLAGS_HAS_V6_FORWARDING       0x00100000
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -119,10 +126,14 @@ typedef struct netsnmp_interface_entry_s {
     int     type;
     u_int   speed;
     u_int   speed_high;
-    u_int   arp_retransmit; /* milliseconds */
     char   *paddr;
     u_int   paddr_len;
     u_int   mtu;
+
+    u_int   retransmit_v4; /* milliseconds */
+    u_int   retransmit_v6; /* milliseconds */
+
+    u_int   reachable_time; /* ipv6 / milliseconds */
 
     u_long  lastchange;
     time_t  discontinuity;
@@ -134,6 +145,10 @@ typedef struct netsnmp_interface_entry_s {
     /** booleans (not TruthValues!) */
     char  promiscuous;
     char  connector_present;
+    char  forwarding_v6;
+
+    char    v6_if_id_len;
+    u_char  v6_if_id[8];
 
     /*-----------------------------------------------
      * platform/arch/access specific data
