@@ -97,7 +97,7 @@ extern          "C" {
 
     /*
      */
-    void            ifTable_lastChange_set(u_long uptime);
+    void            ipv4InterfaceTable_lastChange_set(u_long uptime);
 
 
 #ifdef __cplusplus
