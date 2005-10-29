@@ -378,45 +378,6 @@ ipv4InterfaceTable_allocate_data(void)
     return rtn;
 }                               /* ipv4InterfaceTable_allocate_data */
 
-/*
- * ipv4InterfaceTable_release_data
- *
- * Purpose: release ipv4InterfaceTable data.
- */
-void
-ipv4InterfaceTable_release_data(ipv4InterfaceTable_data * data)
-{
-    DEBUGMSGTL(("verbose:ipv4InterfaceTable:ipv4InterfaceTable_release_data", "called\n"));
-
-    free(data);
-}                               /* ipv4InterfaceTable_release_data */
-
-/*
- * @internal
- * release resources for a ipv4InterfaceTable_rowreq_ctx
- */
-void
-ipv4InterfaceTable_release_rowreq_ctx(ipv4InterfaceTable_rowreq_ctx *
-                                      rowreq_ctx)
-{
-    DEBUGMSGTL(("internal:ipv4InterfaceTable:ipv4InterfaceTable_release_rowreq_ctx", "called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-    ipv4InterfaceTable_rowreq_ctx_cleanup(rowreq_ctx);
-
-    if (rowreq_ctx->undo)
-        ipv4InterfaceTable_release_data(rowreq_ctx->undo);
-
-    /*
-     * free index oid pointer
-     */
-    if (rowreq_ctx->oid_idx.oids != rowreq_ctx->oid_tmp)
-        free(rowreq_ctx->oid_idx.oids);
-
-    SNMP_FREE(rowreq_ctx);
-}                               /* ipv4InterfaceTable_release_rowreq_ctx */
-
 /**
  * @internal
  * wrapper
@@ -468,12 +429,6 @@ _mfd_ipv4InterfaceTable_post_request(netsnmp_mib_handler *handler,
     int             rc, packet_rc;
 
     DEBUGMSGTL(("internal:ipv4InterfaceTable:_mfd_ipv4InterfaceTable_post_request", "called\n"));
-
-    /*
-     * release row context, if deleted
-     */
-    if (rowreq_ctx && (rowreq_ctx->rowreq_flags & MFD_ROW_DELETED))
-        ipv4InterfaceTable_release_rowreq_ctx(rowreq_ctx);
 
     /*
      * wait for last call before calling user
@@ -955,7 +910,7 @@ _mfd_ipv4InterfaceTable_undo_cleanup(netsnmp_mib_handler *handler,
      * release undo context, if needed
      */
     if (rowreq_ctx->undo) {
-        ipv4InterfaceTable_release_data(rowreq_ctx->undo);
+        ifTable_release_data(rowreq_ctx->undo);
         rowreq_ctx->undo = NULL;
     }
 
@@ -1259,19 +1214,6 @@ _mfd_ipv4InterfaceTable_irreversible_commit(netsnmp_mib_handler *handler,
 /**
  * @internal
  */
-static void
-_container_item_free(ipv4InterfaceTable_rowreq_ctx * rowreq_ctx,
-                     void *context)
-{
-    DEBUGMSGTL(("internal:ipv4InterfaceTable:_container_item_free",
-                "called\n"));
-
-    if (NULL == rowreq_ctx)
-        return;
-
-    ipv4InterfaceTable_release_rowreq_ctx(rowreq_ctx);
-}                               /* _container_item_free */
-
 /**
  * @internal
  */
@@ -1291,13 +1233,6 @@ _container_free(netsnmp_container * container)
      * call user code
      */
     ipv4InterfaceTable_container_free(container);
-
-    /*
-     * free all items. inefficient, but easy.
-     */
-    CONTAINER_CLEAR(container,
-                    (netsnmp_container_obj_func *) _container_item_free,
-                    NULL);
 }                               /* _container_free */
 
 /**
