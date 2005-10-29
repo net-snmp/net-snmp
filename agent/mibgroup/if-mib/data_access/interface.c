@@ -599,7 +599,9 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
     lhs->type = rhs->type;
     lhs->speed = rhs->speed;
     lhs->speed_high = rhs->speed_high;
-    lhs->arp_retransmit = rhs->arp_retransmit;
+    lhs->retransmit_v6 = rhs->retransmit_v6;
+    lhs->retransmit_v4 = rhs->retransmit_v4;
+    lhs->reachable_time = rhs->reachable_time;
     lhs->mtu = rhs->mtu;
     lhs->lastchange = rhs->lastchange;
     lhs->discontinuity = rhs->discontinuity;
@@ -608,6 +610,7 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
     lhs->oper_status = rhs->oper_status;
     lhs->promiscuous = rhs->promiscuous;
     lhs->connector_present = rhs->connector_present;
+    lhs->forwarding_v6 = rhs->forwarding_v6;
     lhs->os_flags = rhs->os_flags;
     if(lhs->paddr_len == rhs->paddr_len) {
         if(rhs->paddr_len)

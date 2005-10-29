@@ -62,6 +62,183 @@ netsnmp_arch_interface_index_find(const char *name)
     return netsnmp_access_interface_ioctl_ifindex_get(-1, name);
 }
 
+
+/*
+ * check for ipv6 addresses
+ */
+void
+_arch_interface_has_ipv6(oid if_index, u_int *flags,
+                         netsnmp_container *addr_container)
+{
+#ifdef INET6
+    netsnmp_ipaddress_entry *addr_entry = NULL;
+    netsnmp_iterator        *addr_it = NULL;
+    u_int                    addr_container_flags = 0; /* must init to 0 */
+#endif
+
+    if (NULL == flags)
+        return;
+
+    *flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_IPV6;
+
+#ifdef INET6
+    /*
+     * get ipv6 addresses
+     */
+    if (NULL == addr_container) {
+        /*
+         * we only care about ipv6, if we need to allocate our own
+         * temporary container. set the flags (which we also use later
+         * to determine if we need to free the container).
+         */
+        addr_container_flags = NETSNMP_ACCESS_IPADDRESS_LOAD_IPV6_ONLY;
+        addr_container =
+            netsnmp_access_ipaddress_container_load(NULL,
+                                                    addr_container_flags);
+        if (NULL == addr_container) {
+            DEBUGMSGTL(("access:ifcontainer",
+                        "couldn't get ip addresses container\n"));
+            return;
+        }
+    }
+    else {
+        /*
+         * addr_container flags must be 0, so we don't release the
+         * user's container.
+         */
+        netsnmp_assert(0 == addr_container_flags);
+    }
+
+
+    /*
+     * get an ipaddress container iterator, and look for ipv6 addrs
+     */   
+    addr_it = CONTAINER_ITERATOR(addr_container);
+    if (NULL == addr_it) {
+        DEBUGMSGTL(("access:ifcontainer",
+                    "couldn't get ip addresses iterator\n"));
+        if (0!=addr_container_flags)
+            netsnmp_access_ipaddress_container_free(addr_container, 0);
+        return;
+    }
+
+    addr_entry = ITERATOR_FIRST(addr_it);
+    for( ; addr_entry ; addr_entry = ITERATOR_NEXT(addr_it) ) {
+        /*
+         * skip non matching indexes and ipv4 addresses
+         */
+        if ((if_index != addr_entry->if_index) ||
+            (4 == addr_entry->ia_address_len))
+            continue;
+
+        /*
+         * found one! no need to keep looking, set the flag and bail
+         */
+        *flags |= NETSNMP_INTERFACE_FLAGS_HAS_IPV6;
+        break;
+    }
+
+    /*
+     * make mama proud and clean up after ourselves
+     */
+    ITERATOR_RELEASE(addr_it);
+    if (0!=addr_container_flags)
+        netsnmp_access_ipaddress_container_free(addr_container, 0);    
+#endif
+}
+
+/**
+ * @internal
+ */
+static void
+_arch_interface_flags_v4_get(netsnmp_interface_entry *entry)
+{
+    FILE           *fin;
+    char            line[256];
+
+    /*
+     * get the retransmit time
+     */
+    snprintf(line,sizeof(line),"/proc/sys/net/ipv4/neigh/%s/retrans_time",
+             entry->name);
+    if (!(fin = fopen(line, "r"))) {
+        DEBUGMSGTL(("access:interface",
+                    "Failed to open %s\n", line));
+    }
+    else {
+        if (fgets(line, sizeof(line), fin)) {
+            entry->retransmit_v4 = atoi(line) * 100;
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V4_RETRANSMIT;
+        }
+        fclose(fin);
+    }
+}
+
+
+#ifdef INET6
+/**
+ * @internal
+ */
+static void
+_arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
+{
+    FILE           *fin;
+    char            line[256];
+    u_int           tmp;
+
+    /*
+     * get the retransmit time
+     */
+    snprintf(line,sizeof(line),"/proc/sys/net/ipv6/neigh/%s/retrans_time",
+             entry->name);
+    if (!(fin = fopen(line, "r"))) {
+        DEBUGMSGTL(("access:interface",
+                    "Failed to open %s\n", line));
+    }
+    else {
+        if (fgets(line, sizeof(line), fin)) {
+            entry->retransmit_v6 = atoi(line);
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_RETRANSMIT;
+        }
+        fclose(fin);
+    }
+
+    /*
+     * get the forwarding status
+     */
+    snprintf(line,sizeof(line),"/proc/sys/net/ipv6/conf/%s/forwarding",
+             entry->name);
+    if (!(fin = fopen(line, "r"))) {
+        DEBUGMSGTL(("access:interface",
+                    "Failed to open %s\n", line));
+    }
+    else {
+        if (fgets(line, sizeof(line), fin)) {
+            entry->forwarding_v6 = atoi(line);
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_FORWARDING;
+        }
+        fclose(fin);
+    }
+
+    /*
+     * get the reachable time
+     */
+    snprintf(line,sizeof(line),"/proc/sys/net/ipv6/conf/%s/base_reachable_time",
+             entry->name);
+    if (!(fin = fopen(line, "r"))) {
+        DEBUGMSGTL(("access:interface",
+                    "Failed to open %s\n", line));
+    }
+    else {
+        if (fgets(line, sizeof(line), fin)) {
+            tmp = atoi(line);
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_FORWARDING;
+        }
+        fclose(fin);
+    }
+}
+#endif /* INET6 */
+
 /**
  * @internal
  */
@@ -199,11 +376,14 @@ int
 netsnmp_arch_interface_container_load(netsnmp_container* container,
                                       u_int load_flags)
 {
-    FILE           *devin, *retransin;
+    FILE           *devin;
     char            line[256];
     netsnmp_interface_entry *entry = NULL;
     static char     scan_expected = 0;
     int             fd;
+#ifdef INET6
+    netsnmp_container *addr_container;
+#endif
 
     DEBUGMSGTL(("access:interface:container:arch", "load (flags %p)\n",
                 load_flags));
@@ -228,6 +408,13 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         snmp_log(LOG_ERR, "could not create socket\n");
         return -2;
     }
+
+#ifdef INET6
+    /*
+     * get ipv6 addresses
+     */
+    addr_container = netsnmp_access_ipaddress_container_load(NULL, 0);
+#endif
 
     /*
      * Read the first two lines of the file, containing the header
@@ -261,6 +448,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     while (fgets(line, sizeof(line), devin)) {
         char           *stats, *ifstart = line;
         int             flags;
+        oid             if_index;
 
         flags = 0;
         if (line[strlen(line) - 1] == '\n')
@@ -289,23 +477,37 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          */
         *stats++ = 0; /* null terminate name */
 
+        if_index = netsnmp_arch_interface_index_find(ifstart);
+
         /*
-         * do we only want ipv4?
+         * set address type flags.
          * the only way I know of to check an interface for
-         * ipv4 is to look for an ipv4 ip address. If anyone
-         * knows a better way, add it here!
+         * ip version is to look for ip addresses. If anyone
+         * knows a better way, put it here!
          */
-        netsnmp_access_interface_ioctl_get_ipversions(fd, ifstart, 0, &flags);
-        if ((load_flags & NETSNMP_ACCESS_INTERFACE_LOAD_IP4_ONLY) &&
-            ((flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV4) == 0)) {
+#ifdef INET6
+        _arch_interface_has_ipv6(if_index, &flags, addr_container);
+#endif
+        netsnmp_access_interface_ioctl_has_ipv4(fd, ifstart, 0, &flags);
+
+        /*
+         * do we only want one address type?
+         */
+        if (((load_flags & NETSNMP_ACCESS_INTERFACE_LOAD_IP4_ONLY) &&
+             ((flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV4) == 0)) ||
+            ((load_flags & NETSNMP_ACCESS_INTERFACE_LOAD_IP6_ONLY) &&
+             ((flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV6) == 0))) {
             DEBUGMSGTL(("9:access:ifcontainer",
-                        "interface '%s' has no ipv4 addresses\n",
+                        "interface '%s' excluded by ip version\n",
                         ifstart));
             continue;
         }
 
         entry = netsnmp_access_interface_entry_create(ifstart, 0);
         if(NULL == entry) {
+#ifdef INET6
+            netsnmp_access_ipaddress_container_free(addr_container, 0);
+#endif
             netsnmp_access_interface_container_free(container,
                                                     NETSNMP_ACCESS_INTERFACE_FREE_NOFLAGS);
             fclose(devin);
@@ -395,30 +597,27 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 
         netsnmp_access_interface_entry_overrides(entry);
 
+        entry->speed_high = entry->speed / 1000000;
+
         if (! (load_flags & NETSNMP_ACCESS_INTERFACE_LOAD_NO_STATS))
             _parse_stats(entry, stats, scan_expected);
 
-        /*
-         * get the retransmit time
-         */
-        snprintf(line,sizeof(line),"/proc/sys/net/ipv4/neigh/%s/retrans_time",
-                 entry->name);
-        if (!(retransin = fopen(line, "r"))) {
-            DEBUGMSGTL(("access:interface",
-                        "Failed to open %s\n", line));
-        }
-        else {
-            if (fgets(line, sizeof(line), retransin)) {
-                entry->arp_retransmit = atoi(line) * 100;
-                fclose(retransin);
-            }
-        }
+        if (flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV4)
+            _arch_interface_flags_v4_get(entry);
+
+#ifdef INET6
+        if (flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV6)
+            _arch_interface_flags_v6_get(entry);
+#endif /* INET6 */
 
         /*
          * add to container
          */
         CONTAINER_INSERT(container, entry);
     }
+#ifdef INET6
+    netsnmp_access_ipaddress_container_free(addr_container, 0);
+#endif
     fclose(devin);
     close(fd);
     return 0;
