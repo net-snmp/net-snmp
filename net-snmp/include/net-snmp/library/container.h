@@ -182,6 +182,16 @@ extern "C" {
        netsnmp_container_func         *clear;
 
        /*
+        * OPTIONAL function to filter inserts to the container
+        *  (intended for a secondary container, which only wants
+        *   a sub-set of the objects in the primary/parent container)
+        * Returns:
+        *   1 : filter matched (don't insert)
+        *   0 : no match (insert)
+        */
+       netsnmp_container_op    *insert_filter;
+
+       /*
         * function to compare two object stored in the container.
         *
         * Returns:
@@ -340,13 +350,15 @@ extern "C" {
         /** start at first container */
         while(x->prev)
             x = x->prev;
-        while(x) {
+        for(; x; x = x->next) {
+            if ((NULL != x->insert_filter) &&
+                (x->insert_filter(x,k) == 1))
+                continue;
             rc2 = x->insert(x,k);
             if (rc2) {
                 snmp_log(LOG_ERR,"error on subcontainer insert (%d)\n", rc2);
                 rc = rc2;
             }
-            x = x->next;
         }
         return rc;
     }
@@ -365,7 +377,8 @@ extern "C" {
             x = x->next;
         while(x) {
             rc2 = x->remove(x,k);
-            if (rc2) {
+            /** ignore remove errors if there is a filter in place */
+            if ((rc2) && (NULL == x->insert_filter)) {
                 snmp_log(LOG_ERR,"error on subcontainer remove (%d)\n", rc2);
                 rc = rc2;
             }
