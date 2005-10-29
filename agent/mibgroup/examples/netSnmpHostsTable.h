@@ -10,6 +10,10 @@ config_require(examples/netSnmpHostsTable_access)
 config_require(examples/netSnmpHostsTable_checkfns)
 config_add_mib(NET-SNMP-EXAMPLES-MIB)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
     /*
      * function declarations 
      */
@@ -27,5 +31,10 @@ config_add_mib(NET-SNMP-EXAMPLES-MIB)
  * enum definions 
  */
 #include "netSnmpHostsTable_enums.h"
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /** NETSNMPHOSTSTABLE_H */
