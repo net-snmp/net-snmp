@@ -74,6 +74,8 @@ netsnmp_access_ipaddress_container_load(netsnmp_container* container,
                                     u_int load_flags);
 #define NETSNMP_ACCESS_IPADDRESS_LOAD_NOFLAGS               0x0000
 #define NETSNMP_ACCESS_IPADDRESS_LOAD_IPV4_ONLY             0x0001
+#define NETSNMP_ACCESS_IPADDRESS_LOAD_IPV6_ONLY             0x0002
+#define NETSNMP_ACCESS_IPADDRESS_LOAD_ADDL_IDX_BY_ADDR      0x0004
 
 void netsnmp_access_ipaddress_container_free(netsnmp_container *container,
                                          u_int free_flags);
