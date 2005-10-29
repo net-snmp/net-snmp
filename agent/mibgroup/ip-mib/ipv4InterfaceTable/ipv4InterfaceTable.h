@@ -78,7 +78,7 @@ config_require(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_data_access)
         /*
          * ipv4InterfaceRetransmitTime(4)/UNSIGNED32/ASN_UNSIGNED/u_long(u_long)//l/A/w/e/r/D/h
          */
-#define ipv4InterfaceRetransmitTime ifentry->arp_retransmit
+#define ipv4InterfaceRetransmitTime ifentry->retransmit_v4
 
 
     /*
