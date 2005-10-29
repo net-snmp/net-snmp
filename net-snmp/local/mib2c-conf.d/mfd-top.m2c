@@ -117,6 +117,7 @@ config_require($name.module/${name}/${name}_data_set)
  * function declarations
  */
 void init_$name(void);
+void shutdown_$context(void);
 
 /* *********************************************************************
  * Table declarations
