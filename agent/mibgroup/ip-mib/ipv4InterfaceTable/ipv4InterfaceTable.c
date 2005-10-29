@@ -299,6 +299,9 @@ ipv4InterfaceReasmMaxSize_get(ipv4InterfaceTable_rowreq_ctx * rowreq_ctx,
 
     netsnmp_assert(NULL != rowreq_ctx);
 
+    if (!(rowreq_ctx->data.ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V4_REASMMAX))
+        return MFD_SKIP;
+
     /*
      * TODO:231:o: |-> Extract the current value of the ipv4InterfaceReasmMaxSize data.
      * copy (* ipv4InterfaceReasmMaxSize_val_ptr ) from rowreq_ctx->data
@@ -414,6 +417,9 @@ ipv4InterfaceRetransmitTime_get(ipv4InterfaceTable_rowreq_ctx * rowreq_ctx,
     DEBUGMSGTL(("verbose:ipv4InterfaceTable:ipv4InterfaceRetransmitTime_get", "called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
+
+    if (!(rowreq_ctx->data.ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V4_RETRANSMIT))
+        return MFD_SKIP;
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipv4InterfaceRetransmitTime data.
