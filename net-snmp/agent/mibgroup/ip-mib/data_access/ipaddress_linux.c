@@ -130,29 +130,37 @@ netsnmp_arch_ipaddress_delete(netsnmp_ipaddress_entry *entry)
  * @retval !0 errors
  */
 int
-netsnmp_arch_ipaddress_container_load(netsnmp_container *container)
+netsnmp_arch_ipaddress_container_load(netsnmp_container *container,
+                                      u_int load_flags)
 {
     int rc = 0, idx_offset = 0;
 
-    rc = _netsnmp_ioctl_ipaddress_container_load_v4(container, idx_offset);
-    if(rc < 0) {
-        u_int flags = NETSNMP_ACCESS_IPADDRESS_FREE_KEEP_CONTAINER;
-        netsnmp_access_ipaddress_container_free(container, flags);
-        return rc;
+    if (0 == (load_flags & NETSNMP_ACCESS_IPADDRESS_LOAD_IPV6_ONLY)) {
+        rc = _netsnmp_ioctl_ipaddress_container_load_v4(container, idx_offset);
+        if(rc < 0) {
+            u_int flags = NETSNMP_ACCESS_IPADDRESS_FREE_KEEP_CONTAINER;
+            netsnmp_access_ipaddress_container_free(container, flags);
+        }
     }
 
 #if defined (INET6)
-    idx_offset = rc;
 
-    /*
-     * load ipv6, ignoring errors if file not found
-     */
-    rc = _load_v6(container, idx_offset);
-    if (-2 == rc)
-        rc = 0;
-    else if(rc < 0) {
-        u_int flags = NETSNMP_ACCESS_IPADDRESS_FREE_KEEP_CONTAINER;
-        netsnmp_access_ipaddress_container_free(container, flags);
+    if (0 == (load_flags & NETSNMP_ACCESS_IPADDRESS_LOAD_IPV4_ONLY)) {
+        if (rc < 0)
+            rc = 0;
+
+        idx_offset = rc;
+
+        /*
+         * load ipv6, ignoring errors if file not found
+         */
+        rc = _load_v6(container, idx_offset);
+        if (-2 == rc)
+            rc = 0;
+        else if(rc < 0) {
+            u_int flags = NETSNMP_ACCESS_IPADDRESS_FREE_KEEP_CONTAINER;
+            netsnmp_access_ipaddress_container_free(container, flags);
+        }
     }
 #endif
 
