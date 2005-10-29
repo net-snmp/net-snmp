@@ -403,8 +403,8 @@ netsnmp_access_interface_ioctl_ifindex_get(int fd, const char *name)
  * @retval   1 : 1 or more ip v4 addresses
  */
 int
-netsnmp_access_interface_ioctl_get_ipversions(int sd, const char *if_name,
-                                              int if_index, u_int *flags)
+netsnmp_access_interface_ioctl_has_ipv4(int sd, const char *if_name,
+                                        int if_index, u_int *flags)
 {
     int             i, interfaces = 0;
     struct ifconf   ifc;
@@ -424,6 +424,8 @@ netsnmp_access_interface_ioctl_get_ipversions(int sd, const char *if_name,
         return -2;
     }
     netsnmp_assert(NULL != ifc.ifc_buf);
+
+    *flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_IPV4;
 
     ifrp = ifc.ifc_req;
     for(i=0; i < interfaces; ++i, ++ifrp) {
@@ -456,18 +458,8 @@ netsnmp_access_interface_ioctl_get_ipversions(int sd, const char *if_name,
          * check and set v4 or v6 flag, and break if we've found both
          */
         if (AF_INET == ifrp->ifr_addr.sa_family) {
-            if ((*flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV4) == 0) {
-                *flags |= NETSNMP_INTERFACE_FLAGS_HAS_IPV4;
-                if (*flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV6)
-                    break;
-            }
-        }
-        else if (AF_INET6 == ifrp->ifr_addr.sa_family) {
-            if ((*flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV6) == 0) {
-                *flags |= NETSNMP_INTERFACE_FLAGS_HAS_IPV6;
-                if (*flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV4)
-                    break;
-            }
+            *flags |= NETSNMP_INTERFACE_FLAGS_HAS_IPV4;
+            break;
         }
     }
 
