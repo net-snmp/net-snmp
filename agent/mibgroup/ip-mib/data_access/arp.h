@@ -17,14 +17,14 @@
  *    HPUX11 had different reuirements than other HPUX, that should
  *    be handled in the *_hpux.h header file.
  */
-config_require(ip-mib/data_access/arp_common);
+config_require(ip-mib/data_access/arp_common)
 #if defined( linux )
-config_require(ip-mib/data_access/arp_linux);
+config_require(ip-mib/data_access/arp_linux)
 #else
 /*
  * couldn't determine the correct file!
  * require a bogus file to generate an error.
  */
-configure_require(ip-mib/data_access/arp-unknown-arch);
+config_require(ip-mib/data_access/arp-unknown-arch)
 #endif
 
