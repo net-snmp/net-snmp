@@ -11,6 +11,10 @@
 
 config_require(util_funcs)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
     /*
      * Magic number definitions: 
      */
@@ -21,10 +25,14 @@ config_require(util_funcs)
     /*
      * function definitions 
      */
-     extern void     init_ucdDemoPublic(void);
-     extern FindVarMethod var_ucdDemoPublic;
+     void     init_ucdDemoPublic(void);
+     FindVarMethod var_ucdDemoPublic;
      WriteMethod     write_ucdDemoResetKeys;
      WriteMethod     write_ucdDemoPublicString;
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif                          /* _MIBGROUP_UCDDEMOPUBLIC_H */

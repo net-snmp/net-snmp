@@ -5,6 +5,10 @@
 #ifndef NETSNMPHOSTSTABLE_ACCESS_H
 #define NETSNMPHOSTSTABLE_ACCESS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** User-defined data access functions for data in table netSnmpHostsTable */
 /** row level accessors */
 Netsnmp_First_Data_Point netSnmpHostsTable_get_first_data_point;
@@ -35,5 +39,10 @@ long           *get_netSnmpHostRowStatus(void *data_context,
                                          size_t * ret_len);
 int             set_netSnmpHostRowStatus(void *data_context, long *val,
                                          size_t val_len);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif                          /* NETSNMPHOSTSTABLE_ACCESS_H */
