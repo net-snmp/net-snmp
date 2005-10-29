@@ -15,6 +15,10 @@
  * should NOT be modified.
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int             check_(int type, long *val, size_t val_len, long *old_val,
                        size_t old_val_len);
 int             check_(int type, char *val, size_t val_len, char *old_val,
@@ -23,5 +27,10 @@ int             check_(int type, long *val, size_t val_len, long *old_val,
                        size_t old_val_len);
 int             check_(int type, long *val, size_t val_len, long *old_val,
                        size_t old_val_len);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif                          /* NETSNMPHOSTSTABLE_CHECKFNS_H */
