@@ -77,6 +77,34 @@ extern "C" {
 /** just process line, don't save it */
 #define PMLP_FLAG_NO_CONTAINER                             0x00000010
     
+
+    /*
+     * a few useful pre-defined helpers
+     */
+
+    typedef struct netsnmp_token_value_index_s {
+
+        char               *token;
+        netsnmp_cvalue      value;
+        size_t              index;
+
+    } netsnmp_token_value_index;
+
+    netsnmp_container *netsnmp_text_token_container_from_file(const char *file,
+                                                              u_int flags,
+                                                              netsnmp_container *c,
+                                                              void *context);
+/*
+ * flags
+ */
+#define NSTTC_FLAG_TYPE_CONTEXT_DIRECT                      0x00000001
+
+
+#define PMLP_TYPE_UNSIGNED                                  1
+#define PMLP_TYPE_INTEGER                                   2
+#define PMLP_TYPE_STRING                                    3
+#define PMLP_TYPE_BOOLEAN                                   4
+
         
 #ifdef _cplusplus
 }
