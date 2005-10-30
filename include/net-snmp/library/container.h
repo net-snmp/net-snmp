@@ -240,6 +240,9 @@ extern "C" {
     /*
      * register a new container factory
      */
+    int netsnmp_container_register_with_compare(const char* name,
+                                                netsnmp_factory *f,
+                                                netsnmp_container_compare *c);
     int netsnmp_container_register(const char* name, netsnmp_factory *f);
 
     /*
@@ -276,20 +279,25 @@ extern "C" {
     /** for_each callback to call free on data item */
     void  netsnmp_container_simple_free(void *data, void *context);
 
+/*
+ * container optionflags
+ */
 #define CONTAINER_KEY_ALLOW_DUPLICATES             0x00000001
-#define CONTAINER_SET_OPTIONS(x)    do {                                \
-        if (NULL==(x)->options)                                         \
-            return -1;                                                  \
-        else                                                            \
-            return (x)->options(x,1, o);                                \
-        while(0)
+#define CONTAINER_KEY_UNSORTED                     0x00000002
 
-#define CONTAINER_CHECK_OPTION(x)    do {                               \
+#define CONTAINER_SET_OPTIONS(x,o,rc)  do {                             \
         if (NULL==(x)->options)                                         \
-            return -1;                                                  \
+            rc = -1;                                                    \
         else                                                            \
-            return (x)->options(x,0, o);                                \
-        while(0)
+            rc = (x)->options(x, 1, o);                                 \
+    } while(0)
+
+#define CONTAINER_CHECK_OPTION(x,o,rc)    do {                          \
+        if (NULL==(x)->options)                                         \
+            rc = -1;                                                    \
+        else                                                            \
+            rc = (x)->options(x,0, o);                                  \
+    } while(0)
 
 
     /*
