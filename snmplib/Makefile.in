@@ -56,6 +56,7 @@ INCLUDESUBDIRHEADERS=README \
 	data_list.h \
 	default_store.h \
 	fd_event_manager.h \
+	file_utils.h \
 	int64.h \
 	keytools.h \
 	mib.h \
@@ -75,6 +76,7 @@ INCLUDESUBDIRHEADERS=README \
 	snmp-tc.h \
 	snmpv3.h \
 	system.h \
+	text_utils.h \
 	tools.h \
 	transform_oids.h \
         cmu_compat.h \
@@ -133,8 +135,8 @@ INSTALLUCDLIBS=libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	snmp_auth.c asn1.c md5.c snmp_parse_args.c		\
 	system.c vacm.c int64.c read_config.c pkcs.c		\
-	snmp_debug.c tools.c  snmp_logging.c			\
-	snmpv3.c lcd_time.c keytools.c		                \
+	snmp_debug.c tools.c  snmp_logging.c text_utils.c	\
+	snmpv3.c lcd_time.c keytools.c file_utils.c		\
 	scapi.c callback.c default_store.c snmp_alarm.c		\
 	data_list.c oid_stash.c fd_event_manager.c 		\
 	mt_support.c snmp_enum.c snmp-tc.c 			\
@@ -148,8 +150,8 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	snmp_auth.o asn1.o md5.o snmp_parse_args.o		\
 	system.o vacm.o int64.o read_config.o 			\
-	snmp_debug.o tools.o  snmp_logging.o			\
-	snmpv3.o lcd_time.o keytools.o		                \
+	snmp_debug.o tools.o  snmp_logging.o text_utils.o	\
+	snmpv3.o lcd_time.o keytools.o file_utils.o		\
 	scapi.o callback.o default_store.o snmp_alarm.o		\
 	data_list.o oid_stash.o fd_event_manager.o		\
 	mt_support.o snmp_enum.o snmp-tc.o 			\
@@ -163,8 +165,8 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 		\
 	snmp_auth.lo asn1.lo md5.lo snmp_parse_args.lo		\
 	system.lo vacm.lo int64.lo read_config.lo 			\
-	snmp_debug.lo tools.lo  snmp_logging.lo			\
-	snmpv3.lo lcd_time.lo keytools.lo		                \
+	snmp_debug.lo tools.lo  snmp_logging.lo	 text_utils.lo	\
+	snmpv3.lo lcd_time.lo keytools.lo file_utils.lo		\
 	scapi.lo callback.lo default_store.lo snmp_alarm.lo		\
 	data_list.lo oid_stash.lo fd_event_manager.lo		\
 	mt_support.lo snmp_enum.lo snmp-tc.lo 			\
