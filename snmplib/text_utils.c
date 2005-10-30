@@ -34,6 +34,7 @@
 #endif
 
 #include <net-snmp/types.h>
+#include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/file_utils.h>
 #include <net-snmp/library/text_utils.h>
@@ -44,6 +45,9 @@
  * Prototypes
  *
  */
+/*
+ * parse methods
+ */
 void
 _pm_save_index_string_string(FILE *f, netsnmp_container *cin,
                              int flags);
@@ -53,6 +57,12 @@ void
 _pm_user_function(FILE *f, netsnmp_container *cin,
                   netsnmp_line_process_info *lpi, int flags);
 
+
+/*
+ * line processors
+ */
+int _process_line_tvi(netsnmp_line_info *line_info, void *mem,
+                      struct netsnmp_line_process_info_s* lpi);
 
 
 
@@ -134,6 +144,65 @@ netsnmp_file_text_parse(netsnmp_file *f, netsnmp_container *cin,
     return c;
 }
 
+netsnmp_container *
+netsnmp_text_token_container_from_file(const char *file, u_int flags,
+                                       netsnmp_container *cin, void *context)
+{
+    netsnmp_line_process_info  lpi;
+    netsnmp_container         *c = cin, *c_rc;
+    netsnmp_file              *fp;
+
+    if (NULL == file)
+        return NULL;
+
+    /*
+     * allocate file resources
+     */
+    fp = netsnmp_file_fill(NULL, file, O_RDONLY, 0, 0);
+    if (NULL == fp) /** msg already logged */
+        return NULL;
+
+    memset(&lpi, 0x0, sizeof(lpi));
+    lpi.mem_size = sizeof(netsnmp_token_value_index);
+    lpi.process = _process_line_tvi;
+    lpi.user_context = context;
+
+    if (NULL == c) {
+        c = netsnmp_container_find("string:binary_array");
+        if (NULL == c) {
+            snmp_log(LOG_ERR,"malloc failed\n");
+            netsnmp_file_release(fp);
+            return NULL;
+        }
+    }
+
+    c_rc = netsnmp_file_text_parse(fp, c, PM_USER_FUNCTION, 0, &lpi);
+
+    /*
+     * if we got a bad return and the user didn't pass us a container,
+     * we need to release the container we allocated.
+     */
+    if ((NULL == c_rc) && (NULL == cin)) {
+        CONTAINER_FREE(c);
+        c = NULL;
+    }
+    else
+        c = c_rc;
+
+    /*
+     * release file resources
+     */
+    netsnmp_file_release(fp);
+    
+    return c;
+}
+
+
+/*------------------------------------------------------------------
+ *
+ * Text file process modes helper functions
+ *
+ */
 
 /**
  * @internal
@@ -182,7 +251,7 @@ _pm_save_index_string_string(FILE *f, netsnmp_container *cin,
                              int flags)
 {
     char                        line[STRINGMAX], *ptr;
-    netsnmp_cvalue_triple      *nct;
+    netsnmp_token_value_index  *tvi;
     size_t                      count = 0, len;
 
     netsnmp_assert(NULL != f);
@@ -204,8 +273,8 @@ _pm_save_index_string_string(FILE *f, netsnmp_container *cin,
                 continue;
         }
 
-        nct = SNMP_MALLOC_TYPEDEF(netsnmp_cvalue_triple);
-        if (NULL == nct) {
+        tvi = SNMP_MALLOC_TYPEDEF(netsnmp_token_value_index);
+        if (NULL == tvi) {
             snmp_log(LOG_ERR,"malloc failed\n");
             break;
         }
@@ -214,19 +283,19 @@ _pm_save_index_string_string(FILE *f, netsnmp_container *cin,
          * copy whole line, then set second pointer to
          * after token. One malloc, 2 strings!
          */
-        nct->v1.ul = count;
-        nct->v2.cp = strdup(line);
-        if (NULL == nct->v2.cp) {
+        tvi->index = count;
+        tvi->token = strdup(line);
+        if (NULL == tvi->token) {
             snmp_log(LOG_ERR,"malloc failed\n");
-            free(nct);
+            free(tvi);
             break;
         }
-        nct->v3.cp = skip_white(nct->v2.cp);
-        if (NULL != nct->v3.cp) {
-            *(nct->v3.cp) = 0;
-            ++(nct->v3.cp);
+        tvi->value.cp = skip_not_white(tvi->token);
+        if (NULL != tvi->value.cp) {
+            *(tvi->value.cp) = 0;
+            ++(tvi->value.cp);
         }
-        CONTAINER_INSERT(cin, nct);
+        CONTAINER_INSERT(cin, tvi);
     }
 }
 
@@ -334,8 +403,8 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
         }
         else if (PMLP_RC_MEMORY_UNUSED == rc ) {
             /*
-             * they didn't use the memory. if li.start was a strdup, we have to
-             * release it. leave mem, we can re-use it (its a fixed size).
+             * they didn't use the memory. if li.start was a strdup, we have
+             * to release it. leave mem, we can re-use it (its a fixed size).
              */
             if (lpi->flags & PMLP_FLAG_STRDUP_LINE)
                 free(li.start); /* no point in SNMP_FREE */
@@ -347,3 +416,93 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
         }
     }
 }
+
+/*------------------------------------------------------------------
+ *
+ * Test line process helper functions
+ *
+ */
+/**
+ * @interal
+ * process token value index line
+ */
+int
+_process_line_tvi(netsnmp_line_info *line_info, void *mem,
+                  struct netsnmp_line_process_info_s* lpi)
+{
+    netsnmp_token_value_index *tvi = (netsnmp_token_value_index *)mem;
+    char                      *ptr;
+
+    /*
+     * get token
+     */
+    ptr = skip_not_white(line_info->start);
+    if (NULL == ptr) {
+        DEBUGMSGTL(("text:util:tvi", "no value after token '%s'\n",
+                    line_info->start));
+        return PMLP_RC_MEMORY_UNUSED;
+    }
+
+    /*
+     * null terminate, search for value;
+     */
+    *(ptr++) = 0;
+    ptr = skip_white(ptr);
+    if (NULL == ptr) {
+        DEBUGMSGTL(("text:util:tvi", "no value after token '%s'\n",
+                    line_info->start));
+        return PMLP_RC_MEMORY_UNUSED;
+    }
+
+    /*
+     * get value
+     */
+    switch((int)lpi->user_context) {
+
+        case PMLP_TYPE_UNSIGNED:
+            tvi->value.ul = strtoul(ptr, NULL, 0);
+            if ((errno == ERANGE) &&(ULONG_MAX == tvi->value.sl))
+                snmp_log(LOG_WARNING,"value overflow\n");
+            break;
+
+
+        case PMLP_TYPE_INTEGER:
+            tvi->value.ul = strtol(ptr, NULL, 0);
+            if ((errno == ERANGE) &&
+                ((LONG_MAX == tvi->value.sl) ||
+                 (LONG_MIN == tvi->value.sl)))
+                snmp_log(LOG_WARNING,"value over/under-flow\n");
+            break;
+
+        case PMLP_TYPE_STRING:
+            tvi->value.cp = strdup(ptr);
+            break;
+
+        case PMLP_TYPE_BOOLEAN:
+            if (isdigit(*ptr))
+                tvi->value.ul = strtoul(ptr, NULL, 0);
+            else if (strcasecmp(ptr,"true") == 0)
+                tvi->value.ul = 1;
+            else if (strcasecmp(ptr,"false") == 0)
+                tvi->value.ul = 0;
+            else {
+                snmp_log(LOG_WARNING,"bad value for boolean\n");
+                return PMLP_RC_MEMORY_UNUSED;
+            }
+            break;
+
+        default:
+            snmp_log(LOG_ERR,"unsupported value type %d\n",
+                     (int)lpi->user_context);
+            break;
+    }
+    
+    /*
+     * save token and value
+     */
+    tvi->token = strdup(line_info->start);
+    tvi->index = line_info->index;
+
+    return PMLP_RC_MEMORY_USED;
+}
+
