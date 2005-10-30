@@ -161,6 +161,19 @@ typedef unsigned INT64_T uint64_t;
        void * val;
     } netsnmp_ref_void;
 
+    typedef union {
+        u_long  ul;
+        u_int   ui;
+        u_short us;
+        u_char  uc;
+        long    sl;
+        int     si;
+        short   ss;
+        char    sc;
+        char *  cp;
+        void *  vp;
+    } netsnmp_cvalue;
+
 #if 0
     typedef struct netsnmp_ref_u_char {
        u_char * val;
