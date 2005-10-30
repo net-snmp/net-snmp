@@ -12,6 +12,7 @@ static netsnmp_container *containers = NULL;
 typedef struct container_type_s {
    const char                 *name;
    netsnmp_factory            *factory;
+   netsnmp_container_compare  *compare;
 } container_type;
 
 netsnmp_factory *
@@ -65,6 +66,14 @@ netsnmp_container_init_list(void)
                                netsnmp_container_get_factory("sorted_singly_linked_list"));
     netsnmp_container_register("ssll_container",
                                netsnmp_container_get_factory("sorted_singly_linked_list"));
+
+    netsnmp_container_register_with_compare
+        ("string", netsnmp_container_get_factory("binary_array"),
+         netsnmp_compare_cstring);
+    netsnmp_container_register_with_compare
+        ("string:binary_array", netsnmp_container_get_factory("binary_array"),
+         netsnmp_compare_cstring);
+
 }
 
 void
@@ -87,7 +96,8 @@ netsnmp_container_free_list(void)
 }
 
 int
-netsnmp_container_register(const char* name, netsnmp_factory *f)
+netsnmp_container_register_with_compare(const char* name, netsnmp_factory *f,
+                                        netsnmp_container_compare  *c)
 {
     container_type *ct, tmp;
 
@@ -104,12 +114,19 @@ netsnmp_container_register(const char* name, netsnmp_factory *f)
             return -1;
         ct->name = strdup(name);
         ct->factory = f;
+        ct->compare = c;
         CONTAINER_INSERT(containers, ct);
     }
     DEBUGMSGT(("container_registry", "registered container factory %s (%s)\n",
                ct->name, f->product));
 
     return 0;
+}
+
+int
+netsnmp_container_register(const char* name, netsnmp_factory *f)
+{
+    return netsnmp_container_register_with_compare(name, f, NULL);
 }
 
 /*------------------------------------------------------------------
@@ -150,12 +167,53 @@ netsnmp_container_find_factory(const char *type_list)
 
 /*------------------------------------------------------------------
  */
+static container_type *
+netsnmp_container_get_ct(const char *type)
+{
+    container_type ct;
+    
+    ct.name = type;
+    return CONTAINER_FIND(containers, &ct);
+}
+
+static container_type *
+netsnmp_container_find_ct(const char *type_list)
+{
+    container_type    *ct = NULL;
+    char              *list, *entry;
+    char              *st;
+
+    if (NULL==type_list)
+        return NULL;
+
+    list = strdup(type_list);
+    entry = strtok_r(list, ":", &st);
+    while(entry) {
+        ct = netsnmp_container_get_ct(entry);
+        if (NULL != ct)
+            break;
+        entry = strtok_r(NULL, ":", &st);
+    }
+
+    free(list);
+    return ct;
+}
+
+
+
+/*------------------------------------------------------------------
+ */
 netsnmp_container *
 netsnmp_container_get(const char *type)
 {
-    netsnmp_factory *f = netsnmp_container_get_factory(type);
-    if (f)
-        return f->produce();
+    netsnmp_container *c;
+    container_type *ct = netsnmp_container_get_ct(type);
+    if (ct) {
+        c = ct->factory->produce();
+        if (c && ct->compare)
+            c->compare = ct->compare;
+        return c;
+    }
 
     return NULL;
 }
@@ -165,14 +223,18 @@ netsnmp_container_get(const char *type)
 netsnmp_container *
 netsnmp_container_find(const char *type)
 {
-    netsnmp_factory *f = netsnmp_container_find_factory(type);
-    netsnmp_container *c = f ? f->produce() : NULL;
+    container_type *ct = netsnmp_container_find_ct(type);
+    netsnmp_container *c = ct ? ct->factory->produce() : NULL;
 
     /*
      * provide default compare
      */
-    if (c && (NULL == c->compare))
-        c->compare = netsnmp_compare_netsnmp_index;
+    if (c) {
+        if (ct->compare)
+            c->compare = ct->compare;
+        else if (NULL == c->compare)
+            c->compare = netsnmp_compare_netsnmp_index;
+    }
 
     return c;
 }
