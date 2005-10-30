@@ -98,7 +98,10 @@ Sort_Array(netsnmp_container *c)
     binary_array_table *t = (binary_array_table*)c->container_data;
     netsnmp_assert(t!=NULL);
     netsnmp_assert(c->compare!=NULL);
-    
+
+    if (t->flags & CONTAINER_KEY_UNSORTED)
+        return 0;
+
     if (t->dirty) {
         /*
          * Sort the table 
