@@ -19,6 +19,14 @@ extern          "C" {
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/data_access/ipaddress.h>
 
+    /* *INDENT-OFF*  */
+config_require(if-mib/data_access/interface)
+config_require(ip-mib/data_access/ipaddress)
+config_require(ip-mib/ipAddressTable/ipAddressTable_interface)
+config_require(ip-mib/ipAddressTable/ipAddressTable_data_access)
+    /* *INDENT-ON*  */
+
+
     /*
      * OID, column number and enum definions for  
      */
