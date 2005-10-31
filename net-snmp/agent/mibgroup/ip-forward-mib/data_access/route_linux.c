@@ -139,10 +139,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
         /*
          * count bits in mask
          */
-        while (0x80000000 & mask) {
-            ++entry->rt_pfx_len;
-            mask = mask << 1;
-        }
+        entry->rt_pfx_len = netsnmp_ipaddress_ipv4_prefix_len(mask);
 
 #ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_INETCIDRROUTETABLE_MODULE
         /*
