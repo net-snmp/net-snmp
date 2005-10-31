@@ -299,7 +299,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
             entry->ia_type = IPADDRESSTYPE_UNICAST;
 
 
-        /** entry->ia_prefix_oid ? */
+        entry->ia_prefix_len = pfx_len;
 
         /*
          * can we figure out if an address is from DHCP?
