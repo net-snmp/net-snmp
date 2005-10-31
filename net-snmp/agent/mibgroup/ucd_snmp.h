@@ -50,8 +50,12 @@ config_arch_require(netbsdelf2, ucd-snmp/memory_netbsd1)
 config_arch_require(openbsd2, ucd-snmp/vmstat_netbsd1)
 config_arch_require(openbsd2, ucd-snmp/memory_netbsd1)
 config_arch_require(bsdi4, ucd-snmp/vmstat_bsdi4)
+#ifndef darwin8
 config_arch_require(darwin1, ucd-snmp/vmstat_freebsd2)
 config_arch_require(darwin1, ucd-snmp/memory_freebsd2)
+#endif
+config_arch_require(darwin8, ucd-snmp/memory_darwin7)
+config_arch_require(darwin8, ucd-snmp/vmstat_darwin7)
 config_arch_require(dynix, ucd-snmp/vmstat_dynix)
 config_arch_require(dynix, ucd-snmp/memory_dynix)
 config_add_mib(UCD-SNMP-MIB)
