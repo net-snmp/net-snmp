@@ -625,6 +625,7 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
     }
     
     packet_rc = netsnmp_check_all_requests_error(agtreq_info->asp, 0);
+@  if $m2c_table_settable@
     if ((MFD_SUCCESS != packet_rc) && ${context}_dirty_get()) {
         /*
          * we shouldn't get here. the undo steps should also clear
@@ -633,6 +634,8 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
         snmp_log(LOG_WARNING, "${context} dirty flag set in post_request "
                  "but status != SUCCESS.\n");
     }
+
+@   end@
     rc = ${context}_post_request(${context}_if_ctx.user_ctx,packet_rc);
     if (MFD_SUCCESS != rc) {
         /*
