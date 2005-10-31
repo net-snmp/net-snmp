@@ -183,9 +183,6 @@ netsnmp_access_ipaddress_entry_free(netsnmp_ipaddress_entry * entry)
     if (NULL == entry)
         return;
 
-    if (NULL != entry->ia_prefix_oid)
-        free(entry->ia_prefix_oid);
-
     if (NULL != entry->arch_data)
         netsnmp_arch_ipaddress_entry_cleanup(entry);
 
@@ -263,36 +260,6 @@ netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *lhs,
     int rc, changed = 0;
 
     /*
-     * do any memory allocations first, using temp vars, so a failure can
-     * return w/out chaning lhs entry. length is dealt with right afterwards.
-     */
-    if (lhs->ia_prefix_oid != rhs->ia_prefix_oid) {
-        oid *tmp_oid;
-
-        if (NULL != rhs->ia_prefix_oid) {
-            int tmp_len = rhs->ia_prefix_oid_len * sizeof(oid);
-            tmp_oid = malloc(tmp_len);
-            if (NULL == tmp_oid) {
-                snmp_log(LOG_ERR, "malloc failed\n");
-                return -1;
-            }
-            memcpy(tmp_oid,rhs->ia_prefix_oid, tmp_len);
-        }
-        else
-            tmp_oid = NULL;
-
-        if (NULL != lhs->ia_prefix_oid)
-            SNMP_FREE(lhs->ia_prefix_oid);
-        lhs->ia_prefix_oid = tmp_oid;
-
-        ++changed;
-    }
-    if (lhs->ia_prefix_oid_len != rhs->ia_prefix_oid_len) {
-        ++changed;
-        lhs->ia_prefix_oid_len = rhs->ia_prefix_oid_len;
-    }
-
-    /*
      * copy arch stuff. we don't care if it changed
      */
     rc = netsnmp_arch_ipaddress_entry_copy(lhs,rhs);
@@ -350,12 +317,6 @@ netsnmp_access_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
                                     netsnmp_ipaddress_entry *rhs)
 {
     int rc;
-
-    if (NULL != lhs->ia_prefix_oid)
-        SNMP_FREE(lhs->ia_prefix_oid);
-    snmp_clone_mem((void **) &lhs->ia_prefix_oid, rhs->ia_prefix_oid,
-                   rhs->ia_prefix_oid_len * sizeof(oid));
-    lhs->ia_prefix_oid_len = rhs->ia_prefix_oid_len;
 
     /*
      * copy arch stuff. we don't care if it changed
