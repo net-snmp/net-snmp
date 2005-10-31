@@ -520,7 +520,8 @@ ipAddressPrefix_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
                     oid ** ipAddressPrefix_val_ptr_ptr,
                     size_t *ipAddressPrefix_val_ptr_len_ptr)
 {
-    oid            *src;
+    oid            *dst, tmp_oid[MAX_OID_LEN] = { 1,3,6,1,2,1,4,32,1,5 } ;
+    u_char          tmp_buf[NETSNMP_ACCESS_IPADDRESS_BUF_SIZE];
     int             len;
 
    /** we should have a non-NULL pointer and enough storage */
@@ -537,24 +538,28 @@ ipAddressPrefix_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipAddressPrefix data.
      * set (* ipAddressPrefix_val_ptr_ptr ) and (* ipAddressPrefix_val_ptr_len_ptr ) from rowreq_ctx->data
      */
-    if (NULL == rowreq_ctx->data->ia_prefix_oid) {
-        src = nullOid;
-        len = nullOidLen / sizeof(oid);
-    } else {
-        src = rowreq_ctx->data->ia_prefix_oid;
-        len = rowreq_ctx->data->ia_prefix_oid_len;
-    }
+    dst = &tmp_oid[10];
+    *(dst++) = rowreq_ctx->data->if_index;
+    *(dst++) = rowreq_ctx->tbl_idx.ipAddressAddrType;
+    *(dst++) = rowreq_ctx->data->ia_address_len;
+    netsnmp_ipaddress_prefix_copy(tmp_buf, rowreq_ctx->tbl_idx.ipAddressAddr,
+                                  rowreq_ctx->data->ia_address_len,
+                                  rowreq_ctx->data->ia_prefix_len);
+    for(len = 0; len < rowreq_ctx->data->ia_address_len; ++len)
+        *(dst++) = tmp_buf[len];
+    *(dst++) = rowreq_ctx->data->ia_prefix_len;
+    len = dst - tmp_oid;
+
+    len *= sizeof((*ipAddressPrefix_val_ptr_ptr)[0]);
     if ((*ipAddressPrefix_val_ptr_len_ptr) < len) {
-        (*ipAddressPrefix_val_ptr_ptr) =
-            malloc(len * sizeof((*ipAddressPrefix_val_ptr_ptr)[0]));
+        (*ipAddressPrefix_val_ptr_ptr) = malloc(len);
         if (NULL == (*ipAddressPrefix_val_ptr_ptr)) {
             snmp_log(LOG_ERR, "could not allocate memory\n");
             return MFD_ERROR;
         }
     }
     (*ipAddressPrefix_val_ptr_len_ptr) = len;
-    memcpy((*ipAddressPrefix_val_ptr_ptr), src,
-           len * sizeof((*ipAddressPrefix_val_ptr_ptr)[0]));
+    memcpy((*ipAddressPrefix_val_ptr_ptr), tmp_oid, len);
 
     return MFD_SUCCESS;
 }                               /* ipAddressPrefix_get */
