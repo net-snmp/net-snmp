@@ -14,7 +14,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
    snmptrapd:
      - allow a non-default AgentX socket
-     - now drops an unauthenticated traps by default
+     - now drops unauthenticated notifications by default
+     - registers the snmpEngine MIB group under the "snmptrapd" context
 
    snmplib:
      - new helper for ascii file based scalar integers (think Linux /proc/)
@@ -24,6 +25,12 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     mib2c:
       - mib2c.mfd.conf now generates code for persistence row storage
       - many enhancements and bug fixes
+
+    snmpusm:
+      - allows to use old and/or new localized key instead of passphrase with
+        option -Ck
+      - new option -CE to specify usmUserEngineID (necessary to manage
+        snmptrapd's usmUserTable)
 
  Ports:
    Linux:
