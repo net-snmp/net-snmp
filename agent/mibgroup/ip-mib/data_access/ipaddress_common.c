@@ -100,7 +100,7 @@ netsnmp_access_ipaddress_container_load(netsnmp_container* container,
     DEBUGMSGTL(("access:ipaddress:container", "load\n"));
 
     if (NULL == container) {
-        if (load_flags & NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_ADDR)
+        if (load_flags & NETSNMP_ACCESS_IPADDRESS_LOAD_ADDL_IDX_BY_ADDR)
             container_flags |= NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_ADDR;
         container = netsnmp_access_ipaddress_container_init(container_flags);
     }
@@ -381,6 +381,59 @@ netsnmp_access_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
 /*
  * Utility routines
  */
+
+/**
+ * copy the prefix portion of an ip address
+ */
+int
+netsnmp_ipaddress_prefix_copy(u_char *dst, u_char *src, int addr_len, int pfx_len)
+{
+    int    bytes = pfx_len / 8;
+    int    bits = pfx_len % 8;
+
+    if ((NULL == dst) || (NULL == src) || (0 == pfx_len))
+        return 0;
+
+    memcpy(dst, src, bytes);
+
+    if (bits) {
+        u_char mask = (0xff >> bits);
+        
+        dst[bytes] = (src[bytes] & mask);
+    }
+
+    if (bytes < addr_len)
+        memset(&dst[bytes],0x0, addr_len - bytes);
+
+    return pfx_len;
+}
+
+
+/**
+ * copy the prefix portion of an ip address
+ *
+ * @parm  mask  network byte order make
+ *
+ * @returns number of prefix bits
+ */
+int
+netsnmp_ipaddress_ipv4_prefix_len(in_addr_t mask)
+{
+    int len = 0;
+
+    while((0xff000000 & mask) == 0xff000000) {
+        len += 8;
+        mask = mask << 8;
+    }
+
+    while(0x80000000 & mask) {
+        ++len;
+        mask = mask << 1;
+    }
+
+    return len;
+}
+
 
 /**
  */
