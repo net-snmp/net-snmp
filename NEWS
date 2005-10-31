@@ -12,16 +12,23 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
    snmptrapd:
      - allow a non-default AgentX socket
+     - now drops an unauthenticated traps by default
 
    snmplib:
      - new helper for ascii file based scalar integers (think Linux /proc/)
+     - new utilities for dealing with files
+     - new utilities for parsing text files
 
     mib2c:
       - mib2c.mfd.conf now generates code for persistence row storage
 
  Ports:
    Linux:
-       - added tcpConnectionTable and tcpListenerTable
+       - new experimental tables
+         - tcpConnectionTable, tcpListenerTable
+         - ipAddressPrefixTable
+         - udpEndpointTable
+         - ipv4InterfaceTable, ipv6InterfaceTable
        - inetCidrRouteTable supports dynamic ipv4 route creation/deletion
        - added ipv6IpForwarding.0 and ipv6IpDefaultHopLimit.0 (read-write)
 
@@ -35,6 +42,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
    - Persistent files in directory defined by snmp.conf persistentDir were 
      not being loaded at startup
    - Perl getnext didn't honor explicit reference to MIB file
+   - Lots of bug fixes
 
 
 *5.2*
