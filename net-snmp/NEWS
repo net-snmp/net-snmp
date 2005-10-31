@@ -9,6 +9,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
    snmpd:
      - implement notification logging
      - implement notification filtering
+     - AgentX, host resources and disman/event mibs added to default module list
+     - updated and new disman mib implementations
 
    snmptrapd:
      - allow a non-default AgentX socket
@@ -21,6 +23,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
     mib2c:
       - mib2c.mfd.conf now generates code for persistence row storage
+      - many enhancements and bug fixes
 
  Ports:
    Linux:
