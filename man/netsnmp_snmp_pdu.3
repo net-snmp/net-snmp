@@ -1,4 +1,4 @@
-.TH "snmp_pdu" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "snmp_pdu" 3 "31 Oct 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -188,6 +188,8 @@ Error index (max_repetitions in GetBulk). Definition at line 95 of file snmp_api
 .SS "long \fBsnmp_pdu::errstat\fP"
 .PP
 Error status (non_repeaters in GetBulk). Definition at line 93 of file snmp_api.h.
+.PP
+Referenced by snmpv3_engineID_probe().
 .SS "long \fBsnmp_pdu::msgid\fP"
 .PP
 Message id for V3 messages note: incremented for each retry. Definition at line 87 of file snmp_api.h.
