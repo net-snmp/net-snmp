@@ -203,7 +203,6 @@ ipAddressPrefixTable_container_load(netsnmp_container * container)
     netsnmp_iterator                *addr_it;
     size_t          count = 0;
     u_char                           tmp_pfx[NETSNMP_ACCESS_IPADDRESS_BUF_SIZE];
-    int                              tmp_pfx_len;
 
     DEBUGMSGTL(("verbose:ipAddressPrefixTable:ipAddressPrefixTable_container_load", "called\n"));
 

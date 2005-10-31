@@ -131,7 +131,6 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
                                                   int idx_offset)
 {
     int             i, sd, rc = 0, interfaces = 0;
-    u_int32_t       mask;
     struct ifconf   ifc;
     struct ifreq   *ifrp;
     struct sockaddr save_addr;
