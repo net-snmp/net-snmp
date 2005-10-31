@@ -17,6 +17,9 @@
 
 #include <sys/types.h>
 
+#if HAVE_LIMITS_H
+#   include <limits.h>
+#endif
 #if HAVE_SYS_PARAM_H
 #   include <sys/param.h>
 #endif
