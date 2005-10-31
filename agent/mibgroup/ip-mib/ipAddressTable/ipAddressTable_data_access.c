@@ -299,7 +299,7 @@ ipAddressTable_cache_load(netsnmp_container * container)
      */
     ipaddress_container =
         netsnmp_access_ipaddress_container_load(NULL,
-                                                NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_ADDR);
+                                                NETSNMP_ACCESS_IPADDRESS_LOAD_ADDL_IDX_BY_ADDR);
     /*
      * we just got a fresh copy of interface data. compare it to
      * what we've already got, and make any adjustments, saving
