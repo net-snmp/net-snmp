@@ -41,10 +41,8 @@ typedef struct netsnmp_ipaddress_s {
 
    oid       if_index;
 
-   oid      *ia_prefix_oid; /* NULL == 0.0 */
-
    u_char    ia_address_len;/* address len, 4 | 16 */
-   u_char    ia_prefix_oid_len; /* 1-128 oids */
+   u_char    ia_prefix_len; /* 1-128 bits */
    u_char    ia_type;       /* 1-3 */
    u_char    ia_status;     /* IpAddressStatus (1-7) */
    u_char    ia_origin;     /* IpAddressOrigin (1-6) */
@@ -134,6 +132,17 @@ netsnmp_access_ipaddress_entry_set(netsnmp_ipaddress_entry * entry);
  * mask for change flag bits
  */
 #define NETSNMP_ACCESS_IPADDRESS_RESERVED_BITS 0x0000001f
+
+
+/*
+ * utility routines
+ */
+int netsnmp_ipaddress_prefix_copy(u_char *dst, u_char *src, 
+                                  int addr_len, int pfx_len);
+
+int netsnmp_ipaddress_ipv4_prefix_len(in_addr_t mask);
+
+
 
 /**---------------------------------------------------------------------*/
 
