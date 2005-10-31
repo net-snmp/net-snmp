@@ -72,6 +72,12 @@ static ipAddressTable_interface_ctx ipAddressTable_if_ctx;
 
 static void     _ipAddressTable_container_init(ipAddressTable_interface_ctx
                                                * if_ctx);
+netsnmp_container *
+ipAddressTable_container_get(void)
+{
+    return ipAddressTable_if_ctx.container;
+}
+
 
 
 static Netsnmp_Node_Handler _mfd_ipAddressTable_pre_request;
