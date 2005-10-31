@@ -1,4 +1,4 @@
-.TH "netsnmp_request_info_s" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_request_info_s" 3 "31 Oct 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -88,7 +88,7 @@ Referenced by check_getnext_results(), and netsnmp_add_varbind_to_cache().
 .PP
 can be used to pass information on a per-request basis from a helper to the later handlers Definition at line 65 of file snmp_agent.h.
 .PP
-Referenced by netsnmp_add_varbind_to_cache(), netsnmp_free_request_data_set(), netsnmp_free_request_data_sets(), netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), netsnmp_request_remove_list_data(), and netsnmp_table_iterator_helper_handler().
+Referenced by netsnmp_add_varbind_to_cache(), netsnmp_free_request_data_set(), netsnmp_free_request_data_sets(), netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), and netsnmp_request_remove_list_data().
 .SS "oid* \fBnetsnmp_request_info_s::range_end\fP"
 .PP
 don't free, reference to (struct tree)->end Definition at line 73 of file snmp_agent.h.
@@ -109,7 +109,7 @@ variable bindings
 .PP
 Definition at line 59 of file snmp_agent.h.
 .PP
-Referenced by _request_set_error(), check_getnext_results(), netsnmp_add_varbind_to_cache(), netsnmp_bulk_to_next_fix_requests(), netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_row_merge_helper_handler(), netsnmp_table_build_oid(), netsnmp_table_build_oid_from_index(), netsnmp_table_build_result(), netsnmp_table_data_build_result(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
+Referenced by _data_lookup(), _request_set_error(), check_getnext_results(), netsnmp_add_varbind_to_cache(), netsnmp_bulk_to_next_fix_requests(), netsnmp_check_getnext_reply(), netsnmp_instance_num_file_handler(), netsnmp_old_api_helper(), netsnmp_row_merge_helper_handler(), netsnmp_table_build_oid(), netsnmp_table_build_oid_from_index(), netsnmp_table_build_result(), and table_helper_handler().
 
 .SH "Author"
 .PP 

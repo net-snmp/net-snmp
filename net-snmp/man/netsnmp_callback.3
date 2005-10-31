@@ -1,4 +1,4 @@
-.TH "A generic callback mechanism" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "31 Oct 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -31,6 +31,10 @@ A generic callback mechanism \-
 .br
 .RI "\fIThis function unregisters a specified callback function given a major and minor type. \fP"
 .ti -1c
+.RI "int \fBnetsnmp_callback_clear_client_arg\fP (void *ptr, int i, int j)"
+.br
+.RI "\fIfind and clear client args that match ptr \fP"
+.ti -1c
 .RI "void \fBclear_callback\fP (void)"
 .br
 .ti -1c
@@ -39,6 +43,18 @@ A generic callback mechanism \-
 .in -1c
 .SH "Function Documentation"
 .PP 
+.SS "int netsnmp_callback_clear_client_arg (void * ptr, int i, int j)"
+.PP
+find and clear client args that match ptr \fBParameters:\fP
+.RS 4
+\fIptr\fP pointer to search for 
+.br
+\fIi\fP callback id to start at 
+.br
+\fIj\fP callback subid to start at 
+.RE
+.PP
+Definition at line 347 of file callback.c.
 .SS "int snmp_call_callbacks (int major, int minor, void * caller_arg)"
 .PP
 This function calls the callback function for each registered callback of type major and minor. \fBParameters:\fP
@@ -62,7 +78,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 \fBsnmp_unregister_callback\fP 
 .RE
 .PP
-Definition at line 182 of file callback.c.
+Definition at line 183 of file callback.c.
 .PP
 References snmp_log().
 .PP
@@ -149,6 +165,6 @@ Returns the number of callbacks that were unregistered.
 \fBsnmp_call_callbacks\fP 
 .RE
 .PP
-set cleanup flag? Definition at line 295 of file callback.c.
+set cleanup flag? Definition at line 296 of file callback.c.
 .PP
 References SNMP_FREE, and snmp_log().

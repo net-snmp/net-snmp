@@ -1,4 +1,4 @@
-.TH "watcher: watch a specified variable and process" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "watcher: watch a specified variable and process" 3 "31 Oct 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -27,6 +27,9 @@ watcher: watch a specified variable and process \- it as an instance or scalar o
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_watched_timestamp_handler\fP (void)"
 .br
 .ti -1c
+.RI "int \fBnetsnmp_watched_timestamp_register\fP (\fBnetsnmp_mib_handler\fP *whandler, \fBnetsnmp_handler_registration\fP *reginfo, marker_t timestamp)"
+.br
+.ti -1c
 .RI "int \fBnetsnmp_register_watched_timestamp\fP (\fBnetsnmp_handler_registration\fP *reginfo, marker_t timestamp)"
 .br
 .ti -1c
@@ -40,6 +43,27 @@ watcher: watch a specified variable and process \- it as an instance or scalar o
 .br
 .ti -1c
 .RI "int \fBnetsnmp_watched_spinlock_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_ulong_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_read_only_ulong_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_long_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_read_only_long_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_int_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_read_only_int_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_read_only_counter32_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .in -1c
 .SH "Detailed Description"

@@ -1,4 +1,4 @@
-.TH "snmp_session" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "snmp_session" 3 "31 Oct 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -191,6 +191,10 @@ snmp_session \- The snmp session structure.
 .br
 .RI "\fInoAuthNoPriv, authNoPriv, authPriv \fP"
 .ti -1c
+.RI "char * \fBparamName\fP"
+.br
+.RI "\fItarget param name \fP"
+.ti -1c
 .RI "void * \fBsecurityInfo\fP"
 .br
 .RI "\fIsecurity module specific \fP"
@@ -210,9 +214,13 @@ Authentication function or NULL if null authentication is used.
 .SS "netsnmp_callback \fBsnmp_session::callback\fP"
 .PP
 Function to interpret incoming data. Definition at line 214 of file snmp_api.h.
+.PP
+Referenced by _sess_read().
 .SS "void* \fBsnmp_session::callback_magic\fP"
 .PP
 Pointer to data that the callback function may consider important. Definition at line 218 of file snmp_api.h.
+.PP
+Referenced by _sess_read().
 .SS "u_char* \fBsnmp_session::community\fP"
 .PP
 community for outgoing requests. Definition at line 230 of file snmp_api.h.
@@ -234,9 +242,13 @@ Length of contextName. Definition at line 254 of file snmp_api.h.
 .SS "u_int \fBsnmp_session::engineBoots\fP"
 .PP
 initial engineBoots for remote engine Definition at line 248 of file snmp_api.h.
+.PP
+Referenced by snmpv3_engineID_probe().
 .SS "u_int \fBsnmp_session::engineTime\fP"
 .PP
 initial engineTime for remote engine Definition at line 250 of file snmp_api.h.
+.PP
+Referenced by snmpv3_engineID_probe().
 .SS "u_char \fBsnmp_session::isAuthoritative\fP"
 .PP
 are we the authoritative engine? Definition at line 242 of file snmp_api.h.
@@ -248,7 +260,10 @@ My UDP port number, 0 for default, picked randomly. Definition at line 208 of fi
 My Domain name or dotted IP address, 0 for default. Definition at line 206 of file snmp_api.h.
 .SS "void* \fBsnmp_session::myvoid\fP"
 .PP
-use as you want data Definition at line 303 of file snmp_api.h.
+use as you want data Definition at line 305 of file snmp_api.h.
+.SS "char* \fBsnmp_session::paramName\fP"
+.PP
+target param name Definition at line 295 of file snmp_api.h.
 .SS "char* \fBsnmp_session::peername\fP"
 .PP
 Domain name or dotted IP address of default peer. Definition at line 202 of file snmp_api.h.
@@ -264,11 +279,13 @@ Number of retries before timeout. Definition at line 194 of file snmp_api.h.
 .SS "int \fBsnmp_session::s_errno\fP"
 .PP
 copy of system errno Definition at line 220 of file snmp_api.h.
+.PP
+Referenced by _sess_read().
 .SS "int \fBsnmp_session::s_snmp_errno\fP"
 .PP
 copy of library errno Definition at line 222 of file snmp_api.h.
 .PP
-Referenced by handle_snmp_packet().
+Referenced by _sess_read(), handle_snmp_packet(), and snmpv3_engineID_probe().
 .SS "u_char \fBsnmp_session::securityAuthKey\fP[USM_AUTH_KU_LEN]"
 .PP
 Ku for auth protocol XXX. Definition at line 269 of file snmp_api.h.
@@ -290,12 +307,16 @@ Length of auth protocol oid. Definition at line 267 of file snmp_api.h.
 .SS "u_char* \fBsnmp_session::securityEngineID\fP"
 .PP
 authoritative snmpEngineID Definition at line 256 of file snmp_api.h.
+.PP
+Referenced by snmpv3_engineID_probe().
 .SS "size_t \fBsnmp_session::securityEngineIDLen\fP"
 .PP
 Length of contextEngineID. Definition at line 258 of file snmp_api.h.
+.PP
+Referenced by snmpv3_engineID_probe().
 .SS "void* \fBsnmp_session::securityInfo\fP"
 .PP
-security module specific Definition at line 298 of file snmp_api.h.
+security module specific Definition at line 300 of file snmp_api.h.
 .SS "int \fBsnmp_session::securityLevel\fP"
 .PP
 noAuthNoPriv, authNoPriv, authPriv Definition at line 293 of file snmp_api.h.
@@ -338,6 +359,8 @@ Number of uS until first timeout, then exponential backoff. Definition at line 1
 .SS "long \fBsnmp_session::version\fP"
 .PP
 snmp version Definition at line 192 of file snmp_api.h.
+.PP
+Referenced by snmpv3_engineID_probe().
 
 .SH "Author"
 .PP 

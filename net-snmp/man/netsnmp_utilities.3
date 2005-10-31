@@ -1,4 +1,4 @@
-.TH "utility_handlers: simplify request processing" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "utility_handlers: simplify request processing" 3 "31 Oct 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -61,6 +61,13 @@ utility_handlers: simplify request processing \- A group of handlers intended to
 .RI "group\fBserialize: Calls sub handlers one request at a time.\fP"
 .br
 .RI "\fIThis functionally passes in one request at a time into lower handlers rather than a whole bunch of requests at once. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group\fBstash_to_next: convert GET_STASH requests into GETNEXT requests for the handler.\fP"
+.br
+.RI "\fIThe purpose of this handler is to convert a GET_STASH auto-cache request to a series of GETNEXT requests. \fP"
 .PP
 
 .in -1c

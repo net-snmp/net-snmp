@@ -1,4 +1,4 @@
-.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "31 Oct 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -67,6 +67,12 @@ Maintain a registry of MIB subtrees, together with related information regarding
 .br
 .ti -1c
 .RI "netsnmp_subtree * \fBnetsnmp_subtree_replace_first\fP (netsnmp_subtree *new_tree, const char *context_name)"
+.br
+.ti -1c
+.RI "NETSNMP_INLINE void \fBnetsnmp_subtree_change_next\fP (netsnmp_subtree *ptr, netsnmp_subtree *thenext)"
+.br
+.ti -1c
+.RI "NETSNMP_INLINE void \fBnetsnmp_subtree_change_prev\fP (netsnmp_subtree *ptr, netsnmp_subtree *theprev)"
 .br
 .ti -1c
 .RI "int \fBnetsnmp_subtree_compare\fP (const netsnmp_subtree *ap, const netsnmp_subtree *bp)"
@@ -182,24 +188,6 @@ Maintain a registry of MIB subtrees, together with related information regarding
 .RI "void \fBdump_registry\fP (void)"
 .br
 .ti -1c
-.RI "int \fBregister_readfd\fP (int fd, void(*func)(int, void *), void *data)"
-.br
-.ti -1c
-.RI "int \fBregister_writefd\fP (int fd, void(*func)(int, void *), void *data)"
-.br
-.ti -1c
-.RI "int \fBregister_exceptfd\fP (int fd, void(*func)(int, void *), void *data)"
-.br
-.ti -1c
-.RI "int \fBunregister_readfd\fP (int fd)"
-.br
-.ti -1c
-.RI "int \fBunregister_writefd\fP (int fd)"
-.br
-.ti -1c
-.RI "int \fBunregister_exceptfd\fP (int fd)"
-.br
-.ti -1c
 .RI "RETSIGTYPE \fBagent_SIGCHLD_handler\fP (int sig)"
 .br
 .ti -1c
@@ -219,82 +207,10 @@ Maintain a registry of MIB subtrees, together with related information regarding
 .RI "int \fBlookup_cache_size\fP = 0"
 .br
 .ti -1c
-.RI "int \fBexternal_readfd\fP [NUM_EXTERNAL_FDS]"
-.br
-.ti -1c
-.RI "int \fBexternal_readfdlen\fP = 0"
-.br
-.ti -1c
-.RI "int \fBexternal_writefd\fP [NUM_EXTERNAL_FDS]"
-.br
-.ti -1c
-.RI "int \fBexternal_writefdlen\fP = 0"
-.br
-.ti -1c
-.RI "int \fBexternal_exceptfd\fP [NUM_EXTERNAL_FDS]"
-.br
-.ti -1c
-.RI "int \fBexternal_exceptfdlen\fP = 0"
-.br
-.ti -1c
-.RI "void(* \fBexternal_readfdfunc\fP [NUM_EXTERNAL_FDS])(int, void *)"
-.br
-.ti -1c
-.RI "void(* \fBexternal_writefdfunc\fP [NUM_EXTERNAL_FDS])(int, void *)"
-.br
-.ti -1c
-.RI "void(* \fBexternal_exceptfdfunc\fP [NUM_EXTERNAL_FDS])(int, void *)"
-.br
-.ti -1c
-.RI "void * \fBexternal_readfd_data\fP [NUM_EXTERNAL_FDS]"
-.br
-.ti -1c
-.RI "void * \fBexternal_writefd_data\fP [NUM_EXTERNAL_FDS]"
-.br
-.ti -1c
-.RI "void * \fBexternal_exceptfd_data\fP [NUM_EXTERNAL_FDS]"
-.br
-.ti -1c
 .RI "int \fBexternal_signal_scheduled\fP [NUM_EXTERNAL_SIGS]"
 .br
 .ti -1c
 .RI "void(* \fBexternal_signal_handler\fP [NUM_EXTERNAL_SIGS])(int)"
-.br
-.ti -1c
-.RI "int \fBexternal_readfd\fP [NUM_EXTERNAL_FDS]"
-.br
-.ti -1c
-.RI "int \fBexternal_readfdlen\fP"
-.br
-.ti -1c
-.RI "int \fBexternal_writefd\fP [NUM_EXTERNAL_FDS]"
-.br
-.ti -1c
-.RI "int \fBexternal_writefdlen\fP"
-.br
-.ti -1c
-.RI "int \fBexternal_exceptfd\fP [NUM_EXTERNAL_FDS]"
-.br
-.ti -1c
-.RI "int \fBexternal_exceptfdlen\fP"
-.br
-.ti -1c
-.RI "void(* \fBexternal_readfdfunc\fP [NUM_EXTERNAL_FDS])(int, void *)"
-.br
-.ti -1c
-.RI "void(* \fBexternal_writefdfunc\fP [NUM_EXTERNAL_FDS])(int, void *)"
-.br
-.ti -1c
-.RI "void(* \fBexternal_exceptfdfunc\fP [NUM_EXTERNAL_FDS])(int, void *)"
-.br
-.ti -1c
-.RI "void * \fBexternal_readfd_data\fP [NUM_EXTERNAL_FDS]"
-.br
-.ti -1c
-.RI "void * \fBexternal_writefd_data\fP [NUM_EXTERNAL_FDS]"
-.br
-.ti -1c
-.RI "void * \fBexternal_exceptfd_data\fP [NUM_EXTERNAL_FDS]"
 .br
 .ti -1c
 .RI "int \fBexternal_signal_scheduled\fP [NUM_EXTERNAL_SIGS]"
@@ -314,7 +230,7 @@ checks to see if everything within a given subtree is either: in view, not in vi
 0 if entire subtree is accessible, 5 if not and 7 if portions are both. 1 on error (illegal pdu version). 
 .RE
 .PP
-Definition at line 1236 of file agent_registry.c.
+Definition at line 1286 of file agent_registry.c.
 .PP
 References snmp_pdu::flags, snmp_call_callbacks(), and snmp_pdu::version.
 .PP
@@ -326,7 +242,7 @@ retrieves the current value of the lookup cache size \fBReturns:\fP
 the current lookup cache size 
 .RE
 .PP
-Definition at line 1309 of file agent_registry.c.
+Definition at line 1359 of file agent_registry.c.
 .PP
 Referenced by unregister_mib_context().
 .SS "void netsnmp_set_lookup_cache_size (int newsize)"
@@ -336,7 +252,7 @@ set the lookup cache size for optimized agent registration performance. \fBParam
 \fInewsize\fP set to the maximum size of a cache for a given context. Set to 0 to completely disable caching, or to -1 to set to the default cache size (8), or to a number of your chosing. The rough guide is that it should be equal to the maximum number of simultanious managers you expect to talk to the agent (M) times 80% (or so, he says randomly) the average number (N) of varbinds you expect to receive in a given request for a manager. ie, M times N. Bigger does NOT necessarily mean better. Certainly 16 should be an upper limit. 32 is the hard coded limit. 
 .RE
 .PP
-Definition at line 1296 of file agent_registry.c.
+Definition at line 1346 of file agent_registry.c.
 .PP
 References netsnmp_set_lookup_cache_size().
 .PP
@@ -364,7 +280,7 @@ Unregisters an OID that has an associated context name value. Typically used whe
 .RS 4
 .RE
 .PP
-Definition at line 916 of file agent_registry.c.
+Definition at line 958 of file agent_registry.c.
 .PP
 References netsnmp_get_lookup_cache_size(), netsnmp_oid_equals(), netsnmp_set_lookup_cache_size(), and snmp_call_callbacks().
 .PP
