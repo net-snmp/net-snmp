@@ -131,9 +131,11 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
                                                   int idx_offset)
 {
     int             i, sd, rc = 0, interfaces = 0;
+    u_int32_t       mask;
     struct ifconf   ifc;
     struct ifreq   *ifrp;
     struct sockaddr save_addr;
+    struct sockaddr_in * si;
     netsnmp_ipaddress_entry *entry;
     _ioctl_extras           *extras;
 
@@ -180,32 +182,11 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         /*
          * set indexes
          */
-        switch(ifrp->ifr_addr.sa_family) {
-            case AF_INET: {
-                struct sockaddr_in * si =
-                    (struct sockaddr_in *) &ifrp->ifr_addr;
-                entry->ia_address_len = sizeof(si->sin_addr.s_addr);
-                memcpy(entry->ia_address, &si->sin_addr.s_addr,
-                       entry->ia_address_len);
-            }
-                break;
-                
-            case AF_INET6: {
-                struct sockaddr_in6 * si =
-                    (struct sockaddr_in6 *) &ifrp->ifr_addr;
-
-                entry->ia_address_len = sizeof(si->sin6_addr.s6_addr);
-                memcpy(entry->ia_address, &si->sin6_addr.s6_addr,
-                       entry->ia_address_len);
-            }
-                break;
-
-            default:
-                snmp_log(LOG_ERR,"unknown if family %d\n",
-                         ifrp->ifr_addr.sa_family);
-                netsnmp_access_ipaddress_entry_free(entry);
-                continue;
-        }
+        netsnmp_assert(AF_INET == ifrp->ifr_addr.sa_family);
+        si = (struct sockaddr_in *) &ifrp->ifr_addr;
+        entry->ia_address_len = sizeof(si->sin_addr.s_addr);
+        memcpy(entry->ia_address, &si->sin_addr.s_addr,
+               entry->ia_address_len);
 
         /*
          * get ifindex
@@ -231,6 +212,21 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
             netsnmp_access_ipaddress_entry_free(entry);
             continue;
         }
+
+        /*
+         * get netmask
+         */
+        ifrp->ifr_addr = save_addr;
+        if (ioctl(sd, SIOCGIFNETMASK, ifrp) < 0) {
+            snmp_log(LOG_ERR,
+                     "error getting netmask for interface %d\n", i);
+            netsnmp_access_ipaddress_entry_free(entry);
+            continue;
+        }
+        netsnmp_assert(AF_INET == ifrp->ifr_addr.sa_family);
+        si = (struct sockaddr_in *) &ifrp->ifr_addr;
+        entry->ia_prefix_len =
+            netsnmp_ipaddress_ipv4_prefix_len(si->sin_addr.s_addr);
 
         /*
          * get flags
