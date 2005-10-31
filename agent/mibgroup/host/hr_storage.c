@@ -102,11 +102,15 @@
 #if defined(CTL_HW) && defined(HW_PAGESIZE)
 #define USE_SYSCTL
 #endif
-#if defined(CTL_VM) && (defined(VM_METER) || defined(VM_UVMEXP))
+#if defined(CTL_VM) && (defined(VM_METER) || defined(VM_UVMEXP)) && !defined(darwin8)
 #define USE_SYSCTL_VM
 #endif
 #endif
 #endif                          /* ifndef dynix */
+
+#if defined(darwin8) /* This is to use host_statistics on OS X */
+#include <mach/mach.h>
+#endif
 
 #include "host_res.h"
 #include "hr_storage.h"
@@ -223,6 +227,10 @@ extern struct mntent *HRFS_entry;
 
 #endif
 	
+#if defined(darwin8) /* This is to use host_statistics() on OS X */
+mach_port_t myHost;
+#endif
+
 static int      physmem, pagesize;
 static void parse_storage_config(const char *, char *);
 
@@ -336,6 +344,10 @@ init_hr_storage(void)
 #endif
 #ifdef MBSTAT_SYMBOL
     auto_nlist(MBSTAT_SYMBOL, 0, 0);
+#endif
+
+#if defined(darwin8)
+    myHost = mach_host_self();
 #endif
 
     REGISTER_MIB("host/hr_storage", hrstore_variables, variable4,
@@ -507,6 +519,9 @@ var_hrstore(struct variable *vp,
     int             swap_total, swap_used;
 #elif defined(hpux10) || defined(hpux11)
     struct pst_dynamic pst_buf;
+#elif defined(darwin8)
+    vm_statistics_data_t vm_stat;
+    int count = HOST_VM_INFO_COUNT;
 #elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
 #ifdef VM_UVMEXP
     struct uvmexp   uvmexp_totals;
@@ -564,6 +579,8 @@ really_try_next:
                     sysctl(mib, 2, &uvmexp_totals, &len, NULL, 0);
 #endif
                 }
+#elif defined(darwin8)
+		host_statistics(myHost,HOST_VM_INFO,&vm_stat,&count);
 #elif defined(hpux10) || defined(hpux11)
                 pstat_getdynamic(&pst_buf, sizeof(struct pst_dynamic), 1, 0);
 #elif defined(TOTAL_MEMORY_SYMBOL)
@@ -708,6 +725,18 @@ really_try_next:
             case HRS_TYPE_SWAP:
                 long_return = pst_buf.psd_vm;
                 break;
+#elif defined(darwin8)
+            case HRS_TYPE_MEM:
+                long_return = physmem;
+                break;
+            case HRS_TYPE_SWAP:
+                long_return = -1;
+	        break;
+#if defined(MBSTAT_SYMBOL)
+	    case HRS_TYPE_MBUF:
+                long_return = mbstat.m_mbufs;
+                break; 
+#endif
 #elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
             case HRS_TYPE_MEM:
                 long_return = memory_totals.t_rm;
@@ -785,6 +814,13 @@ really_try_next:
             case HRS_TYPE_SWAP:
                 long_return = pst_buf.psd_avm;
                 break;
+#elif defined(darwin8)
+	    case HRS_TYPE_MEM:
+		long_return = vm_stat.active_count + vm_stat.inactive_count + vm_stat.wire_count;
+		break;
+	    case HRS_TYPE_SWAP:
+		long_return = -1;
+		break;
 #elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
             case HRS_TYPE_MEM:
                 long_return = memory_totals.t_arm;
