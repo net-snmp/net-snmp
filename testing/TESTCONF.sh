@@ -14,6 +14,15 @@ if [ "x$TESTCONF_SH_EVALED" != "xyes" ]; then
     TESTCONF_SH_EVALED=yes
 
 #
+# set cpu and memory limits to prevent major damage
+#
+# defaults: 1h CPU, 500MB VMEM
+#
+[ "x$SNMP_LIMIT_VMEM" = "x" ] && SNMP_LIMIT_VMEM=512000
+[ "x$SNMP_LIMIT_CPU" = "x" ] && SNMP_LIMIT_CPU=3600
+ulimit -S -t $SNMP_LIMIT_CPU -v $SNMP_LIMIT_VMEM
+
+#
 # Set up an NL suppressing echo command
 #
 case "`echo 'x\c'`" in
