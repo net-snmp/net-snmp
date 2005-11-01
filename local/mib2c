@@ -1098,7 +1098,7 @@ sub setup_data {
 	        $notifications{$notifyname} = 1;
                 $notifyvars{$notifyname} = $mib->{varbinds};
 	    } else {
-	        $scalars{$mib->{label}} = 1;
+	        $scalars{$mib->{label}} = 1 if ($mib->{'access'} ne 'Notify');
 	    }
 	} else {
 	    my $i;
