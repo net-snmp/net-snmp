@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void init_watched(void)
+void init_watched(void);
 
 #ifdef __cplusplus
 }
