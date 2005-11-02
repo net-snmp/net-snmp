@@ -14,7 +14,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
    snmptrapd:
      - allow a non-default AgentX socket
-     - now drops unauthenticated notifications by default
+     - a brand new authorization scheme that is based on the VACM
+       authorization scheme from snmpd.
+       - Note: now drops unauthenticated notifications by default
      - registers the snmpEngine MIB group under the "snmptrapd" context
 
    snmplib:
