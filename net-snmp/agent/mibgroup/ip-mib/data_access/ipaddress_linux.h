@@ -17,7 +17,6 @@
  *    HPUX11 had different reuirements than other HPUX, that should
  *    be handled in the *_hpux.h header file.
  */
-config_noinclude(ip-mib/data_access/ipaddress_linux)
 config_require(ip-mib/data_access/ipaddress_linux)
 config_require(ip-mib/data_access/ipaddress_ioctl)
 
