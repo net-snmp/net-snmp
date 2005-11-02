@@ -91,8 +91,8 @@ SOFTWARE.
 #include <netdb.h>
 #endif
 
-#include "main.h"
 #include <net-snmp/net-snmp-includes.h>
+#include "main.h"
 #include "netstat.h"
 
 struct route_entry {
@@ -166,7 +166,7 @@ routepr(void)
                       sizeof(oid_rtproto) / sizeof(oid));
 
     while (request) {
-        status = snmp_synch_response(Session, request, &response);
+        status = snmp_synch_response(ss, request, &response);
         if (status != STAT_SUCCESS
             || response->errstat != SNMP_ERR_NOERROR) {
             fprintf(stderr, "SNMP request failed\n");
@@ -310,7 +310,7 @@ get_ifname(char *name, int ifIndex)
     memmove(varname, oid_ifdescr, sizeof(oid_ifdescr));
     varname[10] = (oid) ifIndex;
     snmp_add_null_var(pdu, varname, sizeof(oid_ifdescr) / sizeof(oid) + 1);
-    status = snmp_synch_response(Session, pdu, &response);
+    status = snmp_synch_response(ss, pdu, &response);
     if (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR) {
         vp = response->variables;
         if (vp->val_len >= sizeof(ip->name))
@@ -470,7 +470,7 @@ rt_stats(void)
 
     printf("routing:\n");
     var =
-        getvarbyname(Session, oid_ipnoroutes,
+        getvarbyname(ss, oid_ipnoroutes,
                      sizeof(oid_ipnoroutes) / sizeof(oid));
     if (var) {
         printf("\t%lu destination%s found unreachable\n",
