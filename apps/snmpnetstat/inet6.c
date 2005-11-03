@@ -50,6 +50,7 @@ SOFTWARE.
 
 #include <net-snmp/net-snmp-config.h>
 
+#undef INET6
 #ifdef INET6
 
 #if HAVE_STDLIB_H

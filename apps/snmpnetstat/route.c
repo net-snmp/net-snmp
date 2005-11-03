@@ -368,6 +368,7 @@ netname(in_addr_t in, in_addr_t mask)
 	return (line);
 }
 
+#undef INET6
 #ifdef INET6
 char *
 netname6(struct sockaddr_in6 *sa6, struct in6_addr *mask)
