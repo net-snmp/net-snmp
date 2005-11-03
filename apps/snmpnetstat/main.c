@@ -246,8 +246,6 @@ main(int argc, char *argv[])
 {
 	netsnmp_session session;
 	struct protoent *p;
-	int ch;
-	char buf[_POSIX2_LINE_MAX];
 
 	af = AF_UNSPEC;
 
