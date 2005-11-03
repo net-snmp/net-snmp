@@ -483,7 +483,7 @@ s_rtflags( struct route_entry *rp )
     memset( flag_buf, 0, sizeof(flag_buf));
     *cp++ = '<';
     *cp++ = 'U';   /* route is in use */
-    if (rp->mask  == 0)
+    if (rp->mask  == 0xffffffff)
         *cp++ = 'H';   /* host */
     if (rp->proto == 4)
         *cp++ = 'D';   /* ICMP redirect */
@@ -501,10 +501,13 @@ p_rtnode( struct route_entry *rp )
 	    WID_DST(AF_INET), WID_DST(AF_INET),
             (rp->destination == INADDR_ANY) ? "default" :
                 (rp->set_bits & SET_MASK) ?
-                    netname(rp->destination, rp->mask) :
+                    (rp->mask == 0xffffffff ?
+                        routename(rp->destination) :
+                        netname(rp->destination, rp->mask)) :
                     netname(rp->destination, 0L));
     printf("%-*.*s %-6.6s  %s\n",
 	    WID_GW(af), WID_GW(af),
-                    netname(rp->gateway, 0L),
+                (rp->gateway ?
+                    routename(rp->gateway) : "*"),
             s_rtflags(rp), rp->ifname);
 }
