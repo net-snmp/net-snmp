@@ -515,9 +515,9 @@ loop:
         cur_if->ift_oe = 0;
         cur_if->ift_co = 0;
         cur_if->ift_dr = 0;
-        cur_if->ifIndex = var->name[ var->name_length-1 ];
+        cur_if->ifIndex = var->name[ ifcol_len-1 ];
         for (vp=var; vp; vp=vp->next_variable) {
-            switch (vp->name[ifcol_len-1]) {
+            switch (vp->name[ifcol_len-2]) {
             case 10:    /* ifInOctets */
                 cur_if->ift_ib = *vp->val.integer;
                 break;
@@ -602,25 +602,17 @@ loop:
             ADD_IFVAR( 19 );        /* ifOutDiscards  */
         }
 #undef ADD_IFVAR
+
+        ifcol_oid[ ifcol_len-2 ] = 11;       /* ifInUcastPkts */
         while ( 1 ) {
             if (netsnmp_query_getnext( var, ss ) != SNMP_ERR_NOERROR)
                 break;
-            ifcol_oid[ ifcol_len-2 ] = 11;	/* ifInUcastPkts */
-            if ( !snmp_oid_compare( ifcol_oid, ifcol_len-1,
-                                    var->name, ifcol_len-1) != 0 )
+            if ( snmp_oid_compare( ifcol_oid, ifcol_len-2,
+                                   var->name, ifcol_len-2) != 0 )
                 break;    /* End of Table */
             
             for ( vp=var; vp; vp=vp->next_variable ) {
-                if ( var->name[ var->name_length-1 ] != cur_if->ifIndex ) {
-                    /*
-                     * Inconsistent index information
-                     * XXX - Try to recover ?
-                     */
-                    SNMP_FREE( cur_if );
-                    cur_if = NULL;
-                    break;    /* not for now, no */
-                }
-                switch ( var->name[ var->name_length-2 ] ) {
+                switch ( vp->name[ ifcol_len-2 ] ) {
                 case 10:    /* ifInOctets */
                     sum->ift_ib += *vp->val.integer;
                     break;
