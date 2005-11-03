@@ -314,8 +314,8 @@ main(int argc, char *argv[])
 		if (sflag)
 			rt_stats();
 		else
-			routepr();
               */
+			routepr();
 		exit(0);
 	}
      /*
