@@ -22,7 +22,7 @@ snmp_version=v2c
 
 STARTAGENT
 
-CAPTURE "$SNMPNETSTAT -n -P udp -$snmp_version -c testcommunity $SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+CAPTURE "$SNMPNETSTAT -Cn -Cp udp -$snmp_version -c testcommunity $SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 CHECKORDIE "$SNMP_SNMPD_PORT"
 
 STOPAGENT
