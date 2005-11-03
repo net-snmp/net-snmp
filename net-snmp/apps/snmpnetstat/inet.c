@@ -58,8 +58,6 @@ static const char *rcsid = "$OpenBSD: inet.c,v 1.92 2005/02/10 14:25:08 itojun E
 #include <arpa/inet.h>
 #endif
 
-#include <rpc/svc.h>
-
 #include "main.h"
 #include "netstat.h"
 
@@ -415,76 +413,8 @@ udp_stats(char *name)
 	 */
 
 /*
-struct rpcnams {
-	struct rpcnams *next;
-	int       port;
-	int	  proto;
-	char	*rpcname;
-};
-
-static char *
-getrpcportnam(int port, int proto)
-{
-	struct sockaddr_in server_addr;
-	struct hostent *hp;
-	static struct pmaplist *head;
-	int socket = RPC_ANYSOCK;
-	struct timeval minutetimeout;
-	CLIENT *client;
-	struct rpcent *rpc;
-	static int first;
-	static struct rpcnams *rpcn;
-	struct rpcnams *n;
-	char num[20];
-
-	if (first == 0) {
-		first = 1;
-		memset((char *)&server_addr, 0, sizeof server_addr);
-		server_addr.sin_family = AF_INET;
-		if ((hp = gethostbyname("localhost")) != NULL)
-			memmove((caddr_t)&server_addr.sin_addr, hp->h_addr,
-			    hp->h_length);
-		else
-			(void) inet_aton("0.0.0.0", &server_addr.sin_addr);
-
-		minutetimeout.tv_sec = 60;
-		minutetimeout.tv_usec = 0;
-		server_addr.sin_port = htons(PMAPPORT);
-		if ((client = clnttcp_create(&server_addr, PMAPPROG,
-		    PMAPVERS, &socket, 50, 500)) == NULL)
-			return (NULL);
-		if (clnt_call(client, PMAPPROC_DUMP, xdr_void, NULL,
-		    xdr_pmaplist, &head, minutetimeout) != RPC_SUCCESS) {
-			clnt_destroy(client);
-			return (NULL);
-		}
-		for (; head != NULL; head = head->pml_next) {
-			n = (struct rpcnams *)malloc(sizeof(struct rpcnams));
-			if (n == NULL)
-				continue;
-			n->next = rpcn;
-			rpcn = n;
-			n->port = head->pml_map.pm_port;
-			n->proto = head->pml_map.pm_prot;
-
-			rpc = getrpcbynumber(head->pml_map.pm_prog);
-			if (rpc)
-				n->rpcname = strdup(rpc->r_name);
-			else {
-				snprintf(num, sizeof num, "%ld",
-				    head->pml_map.pm_prog);
-				n->rpcname = strdup(num);
-			}
-		}
-		clnt_destroy(client);
-	}
-
-	for (n = rpcn; n; n = n->next)
-		if (n->port == port && n->proto == proto)
-			return (n->rpcname);
-	return (NULL);
-}
-*/
+ * Translation of RPC service names - Omitted
+ */
 
 /*
  * Pretty print an Internet address (net address + port).
@@ -506,10 +436,7 @@ inetprint(struct in_addr *in, int port, const char *proto, int local)
 		snprintf(cp, line + sizeof line - cp, "%.8s",
 		    sp ? sp->s_name : "*");
      /*
-	else if (local && !nflag && (nam = getrpcportnam(ntohs(port),
-	    (strcmp(proto, "tcp") == 0 ? IPPROTO_TCP : IPPROTO_UDP))))
-		snprintf(cp, line + sizeof line - cp, "%d[%.8s]",
-		    ntohs(port), nam);
+      * Translation of RPC service names - Omitted
       */
 	else
 		snprintf(cp, line + sizeof line - cp, "%d", ntohs(port));
