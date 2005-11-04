@@ -76,10 +76,20 @@ struct protox {
 	{ 0,	0,	0,		0 }
 };
 
-	/* {ip6,ipx,ns,atalk}protox Omitted */
+struct protox ip6protox[] = {
+	{ 1,	tcp6protopr,	0,	"tcp6" },
+	{ 1,	udp6protopr,	0,	"udp6" },	
+
+	{ 1,	0,	ip6_stats,	"ip6" },	/* ip6protopr Omitted */
+	{ 1,	0,	icmp6_stats,	"icmp6" },	
+	/* pim6/rip6 - Omitted */
+	{ 0,	0,	0,		0 }
+};
+
+	/* {ipx,ns,atalk}protox Omitted */
 
 struct protox *protoprotox[] = {
-	protox, NULL
+	protox, ip6protox, NULL
 };
 
 static void printproto(struct protox *, char *);
@@ -116,9 +126,9 @@ optProc( int argc, char *const *argv[], int opt )
                             optarg = argv[optind++];
 			if (strcmp(optarg, "inet") == 0)
 				af = AF_INET;
-			/*
 			else if (strcmp(optarg, "inet6") == 0)
 				af = AF_INET6;
+			/*
 			else if (strcmp(optarg, "local") == 0)
 				af = AF_LOCAL;
 			else if (strcmp(optarg, "unix") == 0)
@@ -358,12 +368,10 @@ main(int argc, char *argv[])
 		}
 		endprotoent();
 	}
-    /*
-#ifdef INET6
 	if (af == AF_INET6 || af == AF_UNSPEC)
 		for (tp = ip6protox; tp->pr_name; tp++)
 			printproto(tp, tp->pr_name);
-#endif
+    /*
 	if (af == AF_IPX || af == AF_UNSPEC)
 		for (tp = ipxprotox; tp->pr_name; tp++)
 			printproto(tp, tp->pr_name);

@@ -67,13 +67,15 @@ char	*plurales(int);
 
 void	tcpprotopr(char *);
 void	udpprotopr(char *);
-#ifdef INET6
-void	ip6protopr(char *);
-#endif
 void	tcp_stats( char *);
 void	udp_stats( char *);
 void	ip_stats(  char *);
 void	icmp_stats(char *);
+
+void	tcp6protopr(char *);
+void	udp6protopr(char *);
+void	ip6_stats(  char *);
+void	icmp6_stats(char *);
 
 void	pr_rthdr(int);
 void	pr_encaphdr(void);
