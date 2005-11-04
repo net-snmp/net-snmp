@@ -2016,6 +2016,18 @@ while test "x$new_module_list" != "x"; do
 done # while test "x$new_module_list" != "x"; do
 
 #-------------------
+# Check for incompatible MIB modules
+#
+if echo "$module_list_code " | grep disman/mte > /dev/null 2>&1; then
+    if echo "$module_list_code " | grep 'disman/event/' > /dev/null 2>&1; then
+           changequote([, ])
+	   AC_MSG_ERROR([conflicting MIB modules: disman/event vs disman/event-mib.
+Either omit 'disman/event-mib' or explicitly exclude 'disman/event'.])
+           changequote(, )
+    fi
+fi
+
+#-------------------
 # build module lists for Makefiles
 #
 module_list_o=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.o /g'`
