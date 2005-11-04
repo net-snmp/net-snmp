@@ -29,7 +29,9 @@
  * SUCH DAMAGE.
  */
 
+#ifdef HAVE_SYS_CDEFS_H
 #include <sys/cdefs.h>
+#endif
 #ifdef  INHERITED_CODE
 #ifndef lint
 #if 0
