@@ -32,7 +32,9 @@
  *	from: @(#)netstat.h	8.2 (Berkeley) 1/4/94
  */
 
+#ifdef HAVE_SYS_CDEFS_H
 #include <sys/cdefs.h>
+#endif
 
 /* What is the max length of a pointer printed with %p (including 0x)? */
 #define PLEN	(LONG_BIT / 4 + 2)
