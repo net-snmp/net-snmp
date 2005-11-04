@@ -56,6 +56,27 @@ static char *rcsid = "$OpenBSD: main.c,v 1.52 2005/02/10 14:25:08 itojun Exp $";
 #include "main.h"
 #include "netstat.h"
 
+int	Aflag;		/* show addresses of protocol control block */
+int	aflag;		/* show all sockets (including servers) */
+int	bflag;		/* show bytes instead of packets */
+int	dflag;		/* show i/f dropped packets */
+int	gflag;		/* show group (multicast) routing or stats */
+int	iflag;		/* show interfaces */
+int	lflag;		/* show routing table with use and ref */
+int	mflag;		/* show memory stats */
+int	nflag;		/* show addresses numerically */
+int	pflag;		/* show given protocol */
+int	qflag;		/* only display non-zero values for output */
+int	rflag;		/* show routing tables (or routing stats) */
+int	Sflag;		/* show source address in routing table */
+int	sflag;		/* show protocol statistics */
+int	tflag;		/* show i/f watchdog timers */
+int	vflag;		/* be verbose */
+
+int	interval;	/* repeat interval for i/f stats */
+char	*interface;	/* desired i/f for stats, or NULL for all i/fs */
+int	af;		/* address family */
+
     /*
      * struct nlist nl[] - Omitted
      */

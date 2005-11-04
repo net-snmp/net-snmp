@@ -37,28 +37,28 @@
 /* What is the max length of a pointer printed with %p (including 0x)? */
 #define PLEN	(LONG_BIT / 4 + 2)
 
-int	Aflag;		/* show addresses of protocol control block */
-int	aflag;		/* show all sockets (including servers) */
-int	bflag;		/* show bytes instead of packets */
-int	dflag;		/* show i/f dropped packets */
-int	gflag;		/* show group (multicast) routing or stats */
-int	iflag;		/* show interfaces */
-int	lflag;		/* show routing table with use and ref */
-int	mflag;		/* show memory stats */
-int	nflag;		/* show addresses numerically */
-int	pflag;		/* show given protocol */
-int	qflag;		/* only display non-zero values for output */
-int	rflag;		/* show routing tables (or routing stats) */
-int	Sflag;		/* show source address in routing table */
-int	sflag;		/* show protocol statistics */
-int	tflag;		/* show i/f watchdog timers */
-int	vflag;		/* be verbose */
+extern int	Aflag;		/* show addresses of protocol control block */
+extern int	aflag;		/* show all sockets (including servers) */
+extern int	bflag;		/* show bytes instead of packets */
+extern int	dflag;		/* show i/f dropped packets */
+extern int	gflag;		/* show group (multicast) routing or stats */
+extern int	iflag;		/* show interfaces */
+extern int	lflag;		/* show routing table with use and ref */
+extern int	mflag;		/* show memory stats */
+extern int	nflag;		/* show addresses numerically */
+extern int	pflag;		/* show given protocol */
+extern int	qflag;		/* only display non-zero values for output */
+extern int	rflag;		/* show routing tables (or routing stats) */
+extern int	Sflag;		/* show source address in routing table */
+extern int	sflag;		/* show protocol statistics */
+extern int	tflag;		/* show i/f watchdog timers */
+extern int	vflag;		/* be verbose */
 
-int	interval;	/* repeat interval for i/f stats */
+extern int	interval;	/* repeat interval for i/f stats */
 
-char	*interface;	/* desired i/f for stats, or NULL for all i/fs */
+extern char	*interface;	/* desired i/f for stats, or NULL for all i/fs */
 
-int	af;		/* address family */
+extern int	af;		/* address family */
 
 extern	char *__progname; /* program name, from crt0.o */
 
