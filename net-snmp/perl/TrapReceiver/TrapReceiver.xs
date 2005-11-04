@@ -262,6 +262,7 @@ trapd_register(regoid, perlcallback)
                 cb_data = SNMP_MALLOC_TYPEDEF(trapd_cb_data);
                 cb_data->perl_cb = newSVsv(perlcallback);
                 handler->handler_data = cb_data;
+                handler->authtypes = (1 << VACM_VIEW_EXECUTE);
                 RETVAL = 1;
             } else {
                 RETVAL = 0;
