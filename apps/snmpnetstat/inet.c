@@ -61,8 +61,6 @@ static const char *rcsid = "$OpenBSD: inet.c,v 1.92 2005/02/10 14:25:08 itojun E
 #include "main.h"
 #include "netstat.h"
 
-extern netsnmp_session *ss;
-
 struct stat_table {
     int             entry;      /* entry number in table */
     /*
@@ -242,9 +240,11 @@ _dump_stats( char *name, oid *oid_buf, size_t buf_len,
         snmp_varlist_add_variable( &var, oid_buf, buf_len,
                                    ASN_NULL, NULL,  0);
     }
-
-    if (netsnmp_query_get( var, ss ) != SNMP_ERR_NOERROR)
+ 
+    if (netsnmp_query_get( var, ss ) != SNMP_ERR_NOERROR) {
+        snmp_free_var( var );
         return;
+    }
 
     printf("%s:\n", name);
     for (vp=var, sp=stable; vp; vp=vp->next_variable, sp++) {
