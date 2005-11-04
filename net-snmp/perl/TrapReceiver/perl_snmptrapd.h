@@ -15,6 +15,7 @@ struct netsnmp_trapd_handler_s {
      char *token;		/* Or an array of tokens? */
      char *format;		/* Formatting string */
      int   version;		/* ??? */
+     int   authtypes;
      Netsnmp_Trap_Handler *handler;
      void *handler_data;
 
