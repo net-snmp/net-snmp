@@ -2,6 +2,12 @@ This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.2.2*
+
+ Sadness:
+   - Due to a copyright statement that didn't allow modifications, we
+     had to pull the snmpnetstat utility from this release.  A new
+     version will be available in 5.3.
+
  Ports:
    - Win32
       - Cygwin compiler fixes
