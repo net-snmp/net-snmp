@@ -122,7 +122,7 @@ netsnmp_session *ss;
 struct protox *tp = NULL; /* for printing cblocks & stats */
 
 static void
-optProc( int argc, char *const *argv[], int opt )
+optProc( int argc, char *const *argv, int opt )
 {
     switch (opt) {
     case 'C':
