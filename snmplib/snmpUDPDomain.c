@@ -90,7 +90,7 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
     } else {
 	char tmp[64];
 
-        sprintf(tmp, "UDP: [%s]:%hd",
+        sprintf(tmp, "UDP: [%s]:%hu",
                 inet_ntoa(to->sin_addr), ntohs(to->sin_port));
         return strdup(tmp);
     }
