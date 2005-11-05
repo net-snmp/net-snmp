@@ -174,6 +174,8 @@ int             netsnmp_remove_from_delegated(netsnmp_agent_session *asp);
 
 static int      current_globalid = 0;
 
+extern int      running;
+
 int
 netsnmp_allocate_globalcacheid(void)
 {
@@ -2824,7 +2826,7 @@ handle_getnext_loop(netsnmp_agent_session *asp)
     /*
      * loop 
      */
-    while (1) {
+    while (running) {
 
         /*
          * bail for now if anything is delegated. 
