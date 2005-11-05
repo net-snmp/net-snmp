@@ -38,8 +38,6 @@ INSTALLSBINPROGS = snmptrapd$(EXEEXT)
 
 INSTALLLIBS     = libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION)
 
-SUBDIRS		= snmpnetstat
-
 #
 # build variables.
 #
