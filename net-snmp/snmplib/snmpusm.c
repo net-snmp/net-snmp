@@ -2815,8 +2815,10 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
                                          USM_LENGTH_OID_TRANSFORM);
 #endif
 
-    SNMP_FREE(noNameUser->engineID);
-    noNameUser->engineIDLen = 0;
+    if ( noNameUser) {
+        SNMP_FREE(noNameUser->engineID);
+        noNameUser->engineIDLen = 0;
+    }
 
     return SNMPERR_SUCCESS;
 }                               /* end init_usm_post_config() */

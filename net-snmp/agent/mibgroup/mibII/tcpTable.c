@@ -60,7 +60,7 @@ struct netsnmp_tcpConnEntry_s {
 #define	TCPTABLE_IS_LINKED_LIST
 #else
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
 #include <iphlpapi.h>
 #define	TCPTABLE_ENTRY_TYPE	MIB_TCPROW
 #define	TCPTABLE_STATE		dwState 
@@ -88,6 +88,7 @@ struct netsnmp_inpcb_s {
     int             state;
     netsnmp_inpcb  *inp_next;
 };
+#define INP_NEXT_SYMBOL		inp_next
 #define	TCPTABLE_ENTRY_TYPE	netsnmp_inpcb 
 #define	TCPTABLE_STATE		state 
 #define	TCPTABLE_LOCALADDRESS	pcb.inp_laddr.s_addr 
@@ -97,7 +98,7 @@ struct netsnmp_inpcb_s {
 #define	TCPTABLE_IS_LINKED_LIST
 
 #endif                          /* linux */
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */
 #endif                          /* solaris2 */
 #endif                          /* hpux11 */
 
@@ -154,9 +155,9 @@ init_tcpTable(void)
     iinfo->get_first_data_point = tcpTable_first_entry;
     iinfo->get_next_data_point  = tcpTable_next_entry;
     iinfo->table_reginfo        = table_info;
-#if defined(WIN32) || defined(solaris2)
+#if defined (WIN32) || defined (cygwin) || defined (solaris2)
     iinfo->flags               |= NETSNMP_ITERATOR_FLAG_SORTED;
-#endif /* WIN32 || solaris2 */
+#endif /* WIN32 || cygwin || solaris2 */
 
 
     /*
@@ -220,8 +221,8 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
             case TCPCONNLOCALADDRESS:
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
-                              (u_char*)IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr),
-                                sizeof(IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr)));
+                              (u_char*)IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr),
+                                sizeof(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr)));
 #else
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
                                  (u_char *)&entry->TCPTABLE_LOCALADDRESS,
@@ -236,8 +237,8 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
             case TCPCONNREMOTEADDRESS:
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
-                              (u_char*)IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr),
-                                sizeof(IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr)));
+                              (u_char*)IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr),
+                                sizeof(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr)));
 #else
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
                                  (u_char *)&entry->TCPTABLE_REMOTEADDRESS,
@@ -325,7 +326,7 @@ tcpTable_next_entry( void **loop_context,
      * Set up the indexing for the specified row...
      */
     idx = index;
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     port = ntohl((u_long)tcp_head[i].TCPTABLE_LOCALADDRESS);
     snmp_set_var_value(idx, (u_char *)&port,
                                 sizeof(tcp_head[i].TCPTABLE_LOCALADDRESS));
@@ -339,7 +340,7 @@ tcpTable_next_entry( void **loop_context,
     snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
 
     idx = idx->next_variable;
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     port = ntohl((u_long)tcp_head[i].TCPTABLE_REMOTEADDRESS);
     snmp_set_var_value(idx, (u_char *)&port,
                                 sizeof(tcp_head[i].TCPTABLE_REMOTEADDRESS));
@@ -365,7 +366,7 @@ tcpTable_next_entry( void **loop_context,
 void
 tcpTable_free(netsnmp_cache *cache, void *magic)
 {
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     if (tcp_head) {
 		/* the allocated structure is a count followed by table entries */
 		free((char *)(tcp_head) - sizeof(DWORD));
@@ -419,7 +420,7 @@ tcpTable_next_entry( void **loop_context,
      */
     idx = index;
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
-    addr = ntohl(IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr));
+    addr = ntohl(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr));
 #else
     addr = ntohl(entry->TCPTABLE_LOCALADDRESS);
 #endif
@@ -431,7 +432,7 @@ tcpTable_next_entry( void **loop_context,
 
     idx = idx->next_variable;
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
-    addr = ntohl(IN6_EXTRACT_V4ADDR(entry->pcb.inp_faddr));
+    addr = ntohl(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_faddr));
 #else
     addr = ntohl(entry->TCPTABLE_REMOTEADDRESS);
 #endif
@@ -645,7 +646,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 }
 #else                           /* solaris2 */
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
 int
 tcpTable_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -691,7 +692,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 		free(pTcpTable);
     return -1;
 }
-#else                           /* WIN32 */
+#else                           /* WIN32 cygwin */
 
 #if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST))
 
@@ -792,7 +793,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
             nnew->state == 8 /*  closeWait  */ )
             tcp_estab++;
 
-        entry      = nnew->inp_queue.cqe_next;	/* Next kernel entry */
+        entry      = nnew->INP_NEXT_SYMBOL;	/* Next kernel entry */
 	nnew->inp_next = tcp_head;
 	tcp_head   = nnew;
 
@@ -872,7 +873,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 #endif				/* UDB_SYMBOL */
 #endif				/* PCB_TABLE */
 #endif		/* (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)) */
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */
 #endif                          /* linux */
 #endif                          /* solaris2 */
 #endif                          /* hpux11 */

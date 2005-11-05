@@ -119,13 +119,16 @@ RELEASING:
 
   1) [This step is currently only for the 5.x versions]
 
-     a) Check the sources for C++ style comments. 
+     a) Check for illegal constructs in various places
 
-        $ make commentcheck
+        $ make checks
 
         This will basically run a "grep" on all the sources for //.  It
         ignores things with "http:" in it as well as "/win32/".  Make
         sure there are no // comments in the main code body.
+
+        It will also check for some illegal GNU make specific
+        constructs in makefiles.
 
      b) Make the doxygen extracted manual pages.
 
@@ -205,15 +208,18 @@ RELEASING:
           [if you did this before above, do it again if you made any
            changes to the CVS tree since creating the last revision]
 
-          $ cvs2cl -r -b -f ChangeLog.add -F trunk --no-wrap -S
+          $ cvs2cl -r -b -f ChangeLog.add --follow-only trunk --no-wrap -S
 
           Note that if you're on a branch, add the -F option to cvs2cl
           like:
 
           $ cvs2cl -r -f ChangeLog.add -F V4-2-patches --no-ancestors \
-             --no-wrap -S
+             --no-hide-branch-additions --no-wrap -S
 
-          [xxx-rks: I have to remove --no-ancestors to get this to work for me]
+          [if you get errors from --no-hide-branch-additions or
+           --no-ancestors, make you you have a recent version of cvs2cl.
+           Latest as of 1/2005 is 2.58. Available at
+                http://www.red-bean.com/cvs2cl/cvs2cl.pl
 
        b) Fixup the changelog
 

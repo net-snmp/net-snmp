@@ -329,15 +329,19 @@ ifDescr_get(ifTable_rowreq_ctx * rowreq_ctx, char **ifDescr_val_ptr_ptr,
     /*
      * if ifDescr is NULL, use the ifName
      */
+    if (NULL == rowreq_ctx->data.ifDescr) {
 #ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
-    if (NULL == rowreq_ctx->data.ifDescr)
         tmp_descr = rowreq_ctx->data.ifName;
-    else
+#else
+        tmp_descr = NULL;
 #endif
+    } else
         tmp_descr = rowreq_ctx->data.ifDescr;
 
     if (NULL != tmp_descr)
         tmp_len = strlen(tmp_descr);
+    else
+        tmp_len = 0;
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifDescr data.

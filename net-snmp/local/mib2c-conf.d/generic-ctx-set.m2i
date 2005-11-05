@@ -16,9 +16,8 @@
 @   if $m2c_node_needlength == 0@
     ${m2c_data_item}$node = $m2c_node_srh;
 @   else@
-    memcpy( ${m2c_data_item}$node, $m2c_node_srh,
-            $m2c_node_srhs * sizeof(${m2c_node_srh}[0]) );
-    ${m2c_data_item}${node}_len = $m2c_node_srhs;
+    memcpy( ${m2c_data_item}$node, $m2c_node_srh, $m2c_node_srhs );
+    ${m2c_data_item}${node}_len = $m2c_node_srhs / sizeof(${m2c_node_srh}[0]);
 @   end@ # need length
 @end@
 
