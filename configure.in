@@ -1695,7 +1695,7 @@ if test "x$mini_agent" = "xyes"; then
    default_mibs=SNMPv2-MIB:RFC1213-MIB
    default_mibs_install=" "
 else
-   new_module_list="mibII ucd_snmp snmpv3mibs notification notification-log-mib target agent_mibs agentx disman/event disman/schedule utilities $new_with_mib_modules"
+   new_module_list="mibII ucd_snmp snmpv3mibs notification notification-log-mib target agent_mibs agentx disman/event-mib disman/schedule utilities $new_with_mib_modules"
    default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:HOST-RESOURCES-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB:DISMAN-EVENT-MIB:DISMAN-SCHEDULE-MIB
 
    case $target_os in
@@ -2014,18 +2014,6 @@ while test "x$new_module_list" != "x"; do
   new_module_list="$new_list_two"
   new_list_two=""
 done # while test "x$new_module_list" != "x"; do
-
-#-------------------
-# Check for incompatible MIB modules
-#
-if echo "$module_list_code " | grep disman/mte > /dev/null 2>&1; then
-    if echo "$module_list_code " | grep 'disman/event/' > /dev/null 2>&1; then
-           changequote([, ])
-	   AC_MSG_ERROR([conflicting MIB modules: disman/event vs disman/event-mib.
-Either omit 'disman/event-mib' or explicitly exclude 'disman/event'.])
-           changequote(, )
-    fi
-fi
 
 #-------------------
 # build module lists for Makefiles
