@@ -20,8 +20,9 @@ if [ "x$TESTCONF_SH_EVALED" != "xyes" ]; then
 #
 [ "x$SNMP_LIMIT_VMEM" = "x" ] && SNMP_LIMIT_VMEM=512000
 [ "x$SNMP_LIMIT_CPU" = "x" ] && SNMP_LIMIT_CPU=3600
-ulimit -S -t $SNMP_LIMIT_CPU
-ulimit -S -v $SNMP_LIMIT_VMEM
+# ulimit will fail if existing limit is lower -- ignore because it's fine
+ulimit -S -t $SNMP_LIMIT_CPU 2>/dev/null
+ulimit -S -v $SNMP_LIMIT_VMEM 2>/dev/null
 
 #
 # Set up an NL suppressing echo command
