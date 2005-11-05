@@ -41,8 +41,9 @@ NSB_SKIP_INSTALL=${NSB_SKIP_INSTALL:=0}
 NSB_ERR_CTX_LINES=${NSB_ERR_CTX_LINES:=25}
 NSB_DIST_TRANSPORTS="UDP TCP Unix Callback"
 NSB_EXTRA_TRANSPORTS=""
-NSB_DIST_MODULES="host disman/event-mib smux"
-NSB_EXTRA_MODULES="examples examples/example testhandler smux Rmon disman/event-mib"
+NSB_DIST_MODULES=${NSB_DIST_MODULES:="host disman/event-mib smux"}
+NSB_EXTRA_MODULES=${NSB_EXTRA_MODULES:="examples examples/example smux Rmon"}
+#testhandler
 NSB_EXTRA_CONFIG=${NSB_EXTRA_CONFIG:=""}
 NSB_VIEW=cat
 NSB_PERL=
@@ -447,6 +448,8 @@ nsb-build()
       nsb-info "Skipping 'make test'"
    else
       nsb-prompt "No errors found, press enter to run tests"
+      SNMP_TMPDIR_BASE=$build_dir/tests
+      export SNMP_TMPDIR_BASE
       nsb-make test
    fi
 
