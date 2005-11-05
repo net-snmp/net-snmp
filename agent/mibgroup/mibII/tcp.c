@@ -45,6 +45,9 @@
 #if HAVE_NETINET_TCP_FSM_H
 #include <netinet/tcp_fsm.h>
 #endif
+#if HAVE_NETINET_TCP_VAR_H
+#include <netinet/tcp_var.h>
+#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
