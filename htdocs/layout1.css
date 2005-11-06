@@ -224,6 +224,19 @@ body>#ListSearch {width:150px;}
   margin:0px 50px 20px 200px;
 }
 
+#PlainTable table { 
+  border: 0;
+  background: #fff;
+}
+
+#PlainTable td {
+  border: 0;
+  line-height:1em;
+  background: #fff;
+  vertical-align:top
+}
+
+
 .Copyright { font-family: verdana,arial,serif; font-size: 1em;}
 .Email { font-family: verdana,arial,serif; font-size: 0.85em;}
 
