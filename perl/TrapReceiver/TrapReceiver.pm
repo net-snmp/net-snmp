@@ -112,7 +112,7 @@ Put the following lines in your snmptrapd.conf file:
 
 The NetSNMP::TrapReceiver module is used to register perl
 subroutines into the Net-SNMP snmptrapd process.  Net-SNMP MUST have
-been configured using --with-embedded-perl.  Registration of
+been configured using --enable-embedded-perl.  Registration of
 functions is then done through the snmptrapd.conf configuration
 file.  This module can NOT be used in a normal perl script to
 receive traps.  It is intended solely for embedded use within the
@@ -120,7 +120,7 @@ snmptrapd demon.
 
 =head1 DESCRIPTION
 
-Within the snmprapd.conf file, the keyword "perl" may be used to call
+Within the snmptrapd.conf file, the keyword "perl" may be used to call
 any perl expression and using this ability, you can use the
 NetSNMP::TrapReceiver module to register functions which will be
 called every time a given notification (a trap or an inform) is
@@ -136,7 +136,7 @@ associated with it, and the value's numeric type (see NetSNMP::ASN for
 further details on SNMP typing information).
 
 Subroutines are registered using the NetSNMP::TrapReceiver::register
-funcion, which takes two arguments.  The first is a string describing
+function, which takes two arguments.  The first is a string describing
 the notification you want to register for (such as "linkUp" or
 "MyMIB::MyTrap" or ".1.3.6.1.4.1.2021....").  Two special keywords can
 be used in place of an OID: "default" and "all".  The "default"
