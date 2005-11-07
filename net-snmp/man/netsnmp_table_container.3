@@ -1,4 +1,4 @@
-.TH "table_container: Helps you implement a table when data can be found via a netsnmp_container." 3 "31 Oct 2005" "net-snmp" \" -*- nroff -*-
+.TH "table_container: Helps you implement a table when data can be found via a netsnmp_container." 3 "7 Nov 2005" "Version 5.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -59,7 +59,9 @@ table_container: Helps you implement a table when data can be found via a netsnm
 .in -1c
 .SH "Detailed Description"
 .PP 
-The table_container handler is used (automatically) in conjuntion with the \fBtable\fP handler. This handler will use the index information provided by the \fB\fP handler to find the row needed to process the request.
+The table_container handler is used (automatically) in conjuntion with the \fBtable\fP handler. 
+.PP
+This handler will use the index information provided by the \fB\fP handler to find the row needed to process the request.
 .PP
 The container must use one of 3 key types. It is the sub-handler's responsibility to ensure that the container and key type match (unless neither is specified, in which case a default will be used.)
 .PP
@@ -94,41 +96,61 @@ This helper and it's API are still being tested and are subject to change.
 .PP 
 .SS "NETSNMP_STATIC_INLINE void _data_lookup (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * agtreq_info, \fBnetsnmp_request_info\fP * request, container_table_data * tad)"
 .PP
+the table_helper_handler should enforce column boundaries. 
+.PP
+xxx-rks: shouldn't tblreq_info->indexes be updated before we call this?? 
+.PP
+GETNEXT/GETBULK 
+.PP
+GET/SET 
+.PP
 Definition at line 447 of file table_container.c.
 .PP
-References netsnmp_agent_request_info_s::mode, netsnmp_handler_registration_s::modes, variable_list::name, variable_list::name_length, netsnmp_create_data_list(), netsnmp_extract_table_info(), netsnmp_handler_registration, netsnmp_request_add_list_data(), netsnmp_set_request_error(), netsnmp_table_build_oid_from_index(), netsnmp_update_indexes_from_variable_list(), netsnmp_update_variable_list_from_index(), netsnmp_request_info_s::requestvb, and variable_list::type.
+References netsnmp_table_request_info_s::index_oid_len, netsnmp_agent_request_info_s::mode, netsnmp_handler_registration_s::modes, variable_list::name, variable_list::name_length, netsnmp_create_data_list(), netsnmp_extract_table_info(), netsnmp_handler_registration, netsnmp_request_add_list_data(), netsnmp_set_request_error(), netsnmp_table_build_oid_from_index(), netsnmp_update_indexes_from_variable_list(), netsnmp_update_variable_list_from_index(), netsnmp_request_info_s::requestvb, and variable_list::type.
 .SS "netsnmp_container* netsnmp_container_table_container_extract (\fBnetsnmp_request_info\fP * request)"
 .PP
-retrieve the container used by the table_container helper Definition at line 319 of file table_container.c.
+retrieve the container used by the table_container helper 
+.PP
+Definition at line 319 of file table_container.c.
 .PP
 References netsnmp_request_get_list_data().
 .SS "void* netsnmp_container_table_extract_context (\fBnetsnmp_request_info\fP * request)"
 .PP
-find the context data used by the table_container helper Definition at line 338 of file table_container.c.
+find the context data used by the table_container helper 
+.PP
+Definition at line 338 of file table_container.c.
 .PP
 References netsnmp_request_get_list_data().
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_container_table_handler_get (\fBnetsnmp_table_registration_info\fP * tabreg, netsnmp_container * container, char key_type)"
 .PP
-returns a netsnmp_mib_handler object for the table_container helper Definition at line 253 of file table_container.c.
+returns a netsnmp_mib_handler object for the table_container helper 
+.PP
+Definition at line 253 of file table_container.c.
 .PP
 References netsnmp_mib_handler_s::flags, netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_mib_handler, snmp_log(), and SNMP_MALLOC_TYPEDEF.
 .SS "void* netsnmp_container_table_row_extract (\fBnetsnmp_request_info\fP * request)"
 .PP
-find the context data used by the table_container helper Definition at line 328 of file table_container.c.
+find the context data used by the table_container helper 
+.PP
+Definition at line 328 of file table_container.c.
 .PP
 References netsnmp_request_get_list_data().
 .PP
 Referenced by netsnmp_tdata_extract_row().
 .SS "void netsnmp_container_table_row_insert (\fBnetsnmp_request_info\fP * request, netsnmp_index * row)"
 .PP
-inserts a newly created table_container entry into a request list Definition at line 350 of file table_container.c.
+inserts a newly created table_container entry into a request list 
+.PP
+Definition at line 350 of file table_container.c.
 .PP
 References netsnmp_table_request_info_s::indexes, netsnmp_create_data_list(), netsnmp_extract_table_info(), netsnmp_request_add_list_data(), netsnmp_request_info_s::next, netsnmp_request_info_s::prev, and snmp_oid_compare().
 .PP
 Referenced by netsnmp_insert_tdata_row().
 .SS "netsnmp_index* netsnmp_table_index_find_next_row (netsnmp_container * c, \fBnetsnmp_table_request_info\fP * tblreq)"
 .PP
-deprecated, backwards compatability only expected impact to remove: none
+deprecated, backwards compatability only 
+.PP
+expected impact to remove: none
 .IP "\(bu" 2
 used between helpers, shouldn't have been used by end users
 .PP
@@ -136,5 +158,7 @@ used between helpers, shouldn't have been used by end users
 replacement: none
 .IP "\(bu" 2
 never should have been a public method in the first place 
+.PP
+
 .PP
 Definition at line 717 of file table_container.c.
