@@ -1,5 +1,354 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.3.pre1 -> V5.3.pre2
+
+2005-11-07 01:44  rstory
+
+   * agent/Makefile.depend, agent/helpers/Makefile.depend
+, agent/mibgroup/Makefile.depend,
+     apps/Makefile.depend, snmplib/Makefile.depend:
+
+   make depend
+
+2005-11-07 01:43  rstory
+
+   * man/: netsnmp_Container_iterator.3, netsnmp_agent.3
+, netsnmp_agent_registry.3, netsnmp_agent_trap.3
+, netsnmp_asn1_packet_parse.3, netsnmp_baby_steps.3
+, netsnmp_bulk_to_next.3, netsnmp_cache_handler.3
+, netsnmp_callback.3, netsnmp_container.3,
+     netsnmp_data_list.3, netsnmp_debug.3,
+     netsnmp_default_store.3, netsnmp_handler.3,
+     netsnmp_instance.3, netsnmp_iterator_info_s.3,
+     netsnmp_leaf.3, netsnmp_library.3,
+     netsnmp_mib_utilities.3, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3, netsnmp_oid_stash.3
+, netsnmp_old_api.3, netsnmp_read_config.3,
+     netsnmp_read_only.3, netsnmp_row_merge.3,
+     netsnmp_scalar.3, netsnmp_scalar_group_group.3,
+     netsnmp_serialize.3, netsnmp_snmp_agent.3,
+     netsnmp_snmp_alarm.3, netsnmp_snmp_client.3,
+     netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3,
+     netsnmp_snmp_session.3, netsnmp_stash_cache.3,
+     netsnmp_table.3, netsnmp_table_array.3,
+     netsnmp_table_container.3, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_iterator.3,
+     netsnmp_util.3, netsnmp_utilities.3,
+     netsnmp_variable_list.3, netsnmp_watcher.3:
+
+   documentation update
+
+2005-11-07 01:38  rstory
+
+   * configure.in, configure:
+
+   version update
+
+2005-11-07 01:14  rstory
+
+   * snmplib/snmp_client.c:
+
+   don't try to use agent var in base lib (it was late, ok?)
+
+2005-11-07 00:16  rstory
+
+   * snmplib/snmp_client.c:
+
+   break out of waiting loops if ! running
+
+2005-11-06 22:34  alex_b
+
+   * include/net-snmp/types.h, win32/net-snmp/net-snmp-config.h
+, win32/net-snmp/net-snmp-config.h.in:
+
+   Win32:  Move uint16_t definition to static win32 net-snmp-config.h
+
+2005-11-06 21:27  alex_b
+
+   * include/net-snmp/types.h,
+     win32/libnetsnmptrapd/Makefile.in,
+     win32/libnetsnmptrapd/libnetsnmptrapd.dsp,
+     win32/netsnmpmibssdk/Makefile.in,
+     win32/netsnmpmibssdk/netsnmpmibssdk.dsp:
+
+   Win32 MSVC build fixes
+
+2005-11-05 18:19  rstory
+
+   * agent/snmp_agent.c:
+
+   break out of getnext loop if ! running
+
+2005-11-05 17:46  tanders
+
+   * testing/TESTCONF.sh:
+
+   only use "ulimit -v" in bash
+
+2005-11-05 17:43  rstory
+
+   * configure:
+
+   update for configure.in
+
+2005-11-05 17:24  tanders
+
+   * dist/nsb-functions:
+
+   adjust error regex: don't fail on &entry->schedLastFailed, &fail etc.
+
+2005-11-05 17:09  rstory
+
+   * dist/nsb-functions:
+
+   - allow over-ride of NSB_(DIST|EXTRA)_MODULES
+   - remove testhandler from EXTRA modules (hangs snmpwalk)
+   - set SNMP_TMPDIR_BASE (future use)
+
+2005-11-05 17:01  rstory
+
+   * snmplib/snmpUDPDomain.c:
+
+   I'll take my port numbers unsigned, please
+
+2005-11-05 16:40  rstory
+
+   * agent/mibgroup/mibII/tcp.c:
+
+   include netinet/tcp_var.h, if available
+
+2005-11-05 16:38  tanders
+
+   * testing/TESTCONF.sh:
+
+   deliberately ignore ulimit failures
+
+2005-11-05 16:19  rstory
+
+   * agent/mibgroup/mibII/tcp.c:
+
+   remove sys/socketvar.h, since mibII_common.h already has it
+
+2005-11-05 14:43  rstory
+
+   * configure.in:
+
+   - switch disman module list back to event-mib (still uses new code)
+   - remove event mib conflict check (handled by config_excludes)
+
+2005-11-05 14:41  rstory
+
+   * agent/mibgroup/disman/event-mib.h:
+
+   - centralize event mib requires in original event-mib.h
+   - default to re-writes
+   - whichever implementation is selected, config_exclude the other
+
+2005-11-05 14:40  rstory
+
+   * agent/mibgroup/disman/event.h:
+
+   - centralize event mib requires in original event-mib.h
+
+2005-11-05 13:15  tanders
+
+   * apps/snmpnetstat/main.c:
+
+   fix optProc signature
+
+2005-11-04 18:46  tanders
+
+   * apps/snmpnetstat/inet6.c:
+
+   Build fix: protect #include <sys/cdefs.h>
+
+2005-11-04 13:05  rstory
+
+   * apps/snmpnetstat/route.c:
+
+   remove redundant include
+
+2005-11-04 13:05  rstory
+
+   * apps/snmpnetstat/netstat.h:
+
+   check if we have header before including it
+
+2005-11-04 11:59  dts12
+
+   * apps/snmpnetstat/: main.c, netstat.h:
+
+   Move the option flag variable declarations into a code file.
+
+2005-11-04 11:51  dts12
+
+   * apps/snmpnetstat/inet6.c:
+
+   Poertability of 'sin6_len' field is unclear
+   (and it doesn't immediately seem to be needed)
+
+2005-11-04 11:44  rstory
+
+   * apps/snmpnetstat/netstat.h:
+
+   add void to empty prototype param list
+
+2005-11-04 09:45  dts12
+
+   * configure.in, configure:
+
+   Detect (and reject) use of conflicting Event-MIB implementations.
+
+2005-11-04 07:41  dts12
+
+   * apps/snmpnetstat/: inet6.c, main.c, main.h,
+     netstat.h:
+
+   Preliminary implementation of IPv6 support
+
+2005-11-04 07:31  dts12
+
+   * apps/snmpnetstat/inet.c:
+
+   Plug minor memory leak.
+
+2005-11-03 20:02  hardaker
+
+   * perl/TrapReceiver/perl_snmptrapd.h:
+
+   update .h from the trapd.h files
+
+2005-11-03 19:59  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.xs:
+
+   make perl only require the execute bit
+
+2005-11-03 11:52  tanders
+
+   * testing/tests/T160snmpnetstat:
+
+   adjust to new snmpnetstat options
+
+2005-11-03 11:47  dts12
+
+   * apps/snmpnetstat/: inet6.c, main.c, route.c:
+
+   Ensure IPv6 code is omitted (until it can be properly ported/tested)
+
+2005-11-03 11:46  dts12
+
+   * apps/snmpnetstat/main.c:
+
+   Omit redundent declarations.
+
+2005-11-03 11:28  dts12
+
+   * apps/snmpnetstat/inet.c:
+
+   Remove code for determining RPC service names
+   (not relevant/appropriate for SNMP-based queries)
+
+2005-11-03 08:58  dts12
+
+   * apps/snmpnetstat/route.c:
+
+   Better handling of host-specific routes, and displaying gateway/host names.
+
+2005-11-03 07:21  dts12
+
+   * apps/snmpnetstat/: main.c, route.c:
+
+   Re-implement routing table display (based on OpenBSD code)
+
+2005-11-03 07:19  dts12
+
+   * apps/snmpnetstat/if.c:
+
+   Fix problems with repeated interface display.
+
+2005-11-02 16:21  rstory
+
+   * apps/snmpnetstat/route.c:
+
+   move include after net-snmp-includes.h; fix global session name
+
+2005-11-02 12:07  rstory
+
+   * agent/mibgroup/ip-mib/data_access/ipaddress_linux.h:
+
+   remove bogus experimental config macro
+
+2005-11-02 12:06  rstory
+
+   * agent/mibgroup/examples/watched.h:
+
+   add missing semi-colon
+
+2005-11-02 09:25  dts12
+
+   * apps/snmpnetstat/: if.c, inet.c, main.c,
+     main.h, netstat.h:
+
+   Preliminary re-implementation, based on re-distributable OpenBSD code.
+   (Note that if.c draws heavily on the FreeBSD interface display behaviour,
+    which is somewhat different to the Net/OpenBSD approach)
+
+2005-11-02 01:56  hardaker
+
+   * NEWS:
+
+   minor word twiddles
+
+2005-11-02 01:50  hardaker
+
+   * configure, configure.in, agent/snmp_perl.c:
+
+   fix embedded perl and ensure compilation failures if turned on but functions missing
+
+2005-11-01 15:24  hardaker
+
+   * local/mib2c:
+
+   don't add notify objects to the scalar list
+
+2005-11-01 04:02  tanders
+
+   * testing/TESTCONF.sh:
+
+   more portable way of calling ulimit
+
+2005-10-31 07:40  tanders
+
+   * include/net-snmp/system/osf5.h:
+
+   Tru64 Unix 5.1 build fix: make sure UINT32_MAX is defined
+
+2005-10-31 06:11  tanders
+
+   * dist/: nsb-nightly, nsb-package:
+
+   more portable way of calling bash
+
+2005-10-31 05:36  tanders
+
+   * snmplib/text_utils.c:
+
+   Solaris build fix: include limits.h for [U]LONG_MAX and LONG_MIN
+
+-------------------------------------------------------------------------------
+
 Changes: V5.2 -> V5.3.pre1
 
 2005-10-31 04:29  rstory
