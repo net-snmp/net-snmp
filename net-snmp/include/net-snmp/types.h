@@ -126,11 +126,6 @@ typedef unsigned INT64_T uint64_t;
 #endif
 #endif
 
-/* MSVC does not have uint16_t */
-#if defined (WIN32) && !defined (mingw32)
-typedef unsigned short   uint16_t;
-#endif
-
     /*
      *  For the initial release, this will just refer to the
      *  relevant UCD header files.
