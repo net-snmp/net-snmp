@@ -18,6 +18,7 @@ CLEAN :
 	-@erase "$(INTDIR)\snmptrapd.obj"
 	-@erase "$(INTDIR)\snmptrapd_handlers.obj"
 	-@erase "$(INTDIR)\snmptrapd_log.obj"
+	-@erase "$(INTDIR)\snmptrapd_auth.obj"
 	-@erase "$(INTDIR)\notification_log.obj"
 	-@erase "$(INTDIR)\winservice.obj"
 	-@erase "$(INTDIR)\vc??.idb"
@@ -74,6 +75,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmptrapd.obj" \
 	"$(INTDIR)\snmptrapd_handlers.obj" \
 	"$(INTDIR)\snmptrapd_log.obj" \
+	"$(INTDIR)\snmptrapd_auth.obj" \
 	"$(INTDIR)\notification_log.obj" \
 	"$(INTDIR)\winservice.obj"
 
@@ -91,6 +93,7 @@ CLEAN :
 	-@erase "$(INTDIR)\snmptrapd.obj"
 	-@erase "$(INTDIR)\snmptrapd_handlers.obj"
 	-@erase "$(INTDIR)\snmptrapd_log.obj"
+	-@erase "$(INTDIR)\snmptrapd_auth.obj"
 	-@erase "$(INTDIR)\notification_log.obj"
 	-@erase "$(INTDIR)\winservice.obj"
 	-@erase "$(INTDIR)\vc??.idb"
@@ -148,6 +151,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmptrapd.obj" \
 	"$(INTDIR)\snmptrapd_handlers.obj" \
 	"$(INTDIR)\snmptrapd_log.obj" \
+	"$(INTDIR)\snmptrapd_auth.obj" \
 	"$(INTDIR)\notification_log.obj" \
 	"$(INTDIR)\winservice.obj"
 
@@ -184,6 +188,12 @@ SOURCE=..\..\apps\snmptrapd_handlers.c
 SOURCE=..\..\apps\snmptrapd_log.c
 
 "$(INTDIR)\snmptrapd_log.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\apps\snmptrapd_auth.c
+
+"$(INTDIR)\snmptrapd_auth.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
