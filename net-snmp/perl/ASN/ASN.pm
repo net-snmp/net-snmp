@@ -113,7 +113,7 @@ NetSNMP::ASN - Perl extension for SNMP ASN.1 types
 
 =head1 SYNOPSIS
 
-  use NetSNMP::ASN qw(':all');
+  use NetSNMP::ASN qw(:all);
   my $asn_int = ASN_INTEGER;
 
 =head1 DESCRIPTION
