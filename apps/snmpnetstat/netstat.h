@@ -58,7 +58,7 @@ extern int	vflag;		/* be verbose */
 
 extern int	interval;	/* repeat interval for i/f stats */
 
-extern char	*interface;	/* desired i/f for stats, or NULL for all i/fs */
+extern char	*intrface;	/* desired i/f for stats, or NULL for all i/fs */
 
 extern int	af;		/* address family */
 

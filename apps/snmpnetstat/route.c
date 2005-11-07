@@ -74,6 +74,7 @@ struct route_entry {
 };
 
 void p_rtnode( struct route_entry *rp );
+extern int _ffs(int mask);
 
 /*
  * Print routing tables.
@@ -350,7 +351,7 @@ netname(in_addr_t in, in_addr_t mask)
 		if ((np = getnetbyaddr(in, AF_INET)) != NULL)
 			cp = np->n_name;
 	}
-	mbits = mask ? 33 - ffs(mask) : 0;
+	mbits = mask ? 33 - _ffs(mask) : 0;
 	if (cp) {
 		strlcpy(line, cp, sizeof(line));
 	} else if (mbits < 9)
