@@ -1544,6 +1544,7 @@ typedef unsigned __int32 uint32_t;
 typedef long int32_t;
 typedef unsigned __int64 uint64_t;
 typedef __int64 int64_t;
+typedef unsigned short   uint16_t;
 
 /* Define if you have the closesocket function.  */
 #define HAVE_CLOSESOCKET 1
