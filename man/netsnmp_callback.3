@@ -1,4 +1,4 @@
-.TH "A generic callback mechanism" 3 "31 Oct 2005" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "7 Nov 2005" "Version 5.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -45,7 +45,9 @@ A generic callback mechanism \-
 .PP 
 .SS "int netsnmp_callback_clear_client_arg (void * ptr, int i, int j)"
 .PP
-find and clear client args that match ptr \fBParameters:\fP
+find and clear client args that match ptr 
+.PP
+\fBParameters:\fP
 .RS 4
 \fIptr\fP pointer to search for 
 .br
@@ -54,10 +56,14 @@ find and clear client args that match ptr \fBParameters:\fP
 \fIj\fP callback subid to start at 
 .RE
 .PP
+
+.PP
 Definition at line 347 of file callback.c.
 .SS "int snmp_call_callbacks (int major, int minor, void * caller_arg)"
 .PP
-This function calls the callback function for each registered callback of type major and minor. \fBParameters:\fP
+This function calls the callback function for each registered callback of type major and minor. 
+.PP
+\fBParameters:\fP
 .RS 4
 \fImajor\fP is the SNMP callback major type used
 .br
@@ -78,6 +84,8 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 \fBsnmp_unregister_callback\fP 
 .RE
 .PP
+
+.PP
 Definition at line 183 of file callback.c.
 .PP
 References snmp_log().
@@ -85,7 +93,9 @@ References snmp_log().
 Referenced by netsnmp_acm_check_subtree(), netsnmp_register_mib_table_row(), snmp_shutdown(), and unregister_mib_context().
 .SS "int snmp_register_callback (int major, int minor, SNMPCallback * new_callback, void * arg)"
 .PP
-This function registers a generic callback function. The major and minor values are used to set the new_callback function into a global static multi-dimensional array of type struct snmp_gen_callback. The function makes sure to append this callback function at the end of the link list, snmp_gen_callback->next.
+This function registers a generic callback function. 
+.PP
+The major and minor values are used to set the new_callback function into a global static multi-dimensional array of type struct snmp_gen_callback. The function makes sure to append this callback function at the end of the link list, snmp_gen_callback->next.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -133,12 +143,16 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 \fBsnmp_unregister_callback\fP 
 .RE
 .PP
+
+.PP
 Definition at line 115 of file callback.c.
 .PP
 Referenced by netsnmp_register_save_list().
 .SS "int snmp_unregister_callback (int major, int minor, SNMPCallback * target, void * arg, int matchargs)"
 .PP
-This function unregisters a specified callback function given a major and minor type. Note: no bound checking on major and minor.
+This function unregisters a specified callback function given a major and minor type. 
+.PP
+Note: no bound checking on major and minor.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -162,9 +176,12 @@ Returns the number of callbacks that were unregistered.
 .RS 4
 \fBsnmp_register_callback\fP 
 .PP
-\fBsnmp_call_callbacks\fP 
+\fBsnmp_call_callbacks\fP
 .RE
 .PP
-set cleanup flag? Definition at line 296 of file callback.c.
+.PP
+set cleanup flag? 
+.PP
+Definition at line 296 of file callback.c.
 .PP
 References SNMP_FREE, and snmp_log().
