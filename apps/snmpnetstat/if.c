@@ -46,6 +46,8 @@ static char *rcsid = "$OpenBSD: if.c,v 1.42 2005/03/13 16:05:50 mpf Exp $";
 #if HAVE_NET_IF_H
 #include <net/if.h>
 #endif
+#define __USE_XOPEN
+#define __USE_XOPEN_EXTENDED
 #include <signal.h>
 
 #include "main.h"
@@ -55,7 +57,8 @@ static char *rcsid = "$OpenBSD: if.c,v 1.42 2005/03/13 16:05:50 mpf Exp $";
 #define	NO	0
 
 static void sidewaysintpr(u_int);
-static void catchalarm(int);
+static void timerSet(int interval_seconds);
+static void timerPause(void);
 
     struct _if_info {
         char            name[128];
@@ -357,7 +360,7 @@ intpr(int interval)
          *   the varbind list).  But performing this test here
          *   means we can recognise ifXTable names as well)
          */
-        if ( interface && strcmp( cur_if->name, interface ) != 0) {
+        if ( intrface && strcmp( cur_if->name, intrface ) != 0) {
             SNMP_FREE( cur_if );
             cur_if = NULL;
         }
@@ -452,7 +455,7 @@ intpr(int interval)
 
 #define	MAXIF	100
 struct	iftot {
-	char	ift_name[IFNAMSIZ];	/* interface name */
+	char	ift_name[128];		/* interface name */
         int     ifIndex;
 	u_long	ift_ip;			/* input packets */
 	u_long	ift_ib;			/* input bytes */
@@ -499,7 +502,7 @@ sidewaysintpr(unsigned int interval)
     int    i;
 
     var = NULL;
-    if ( interface ) {
+    if ( intrface ) {
         /*
          * Locate the ifIndex of the interface to monitor,
          *   by walking the ifDescr column of the ifTable
@@ -507,10 +510,10 @@ sidewaysintpr(unsigned int interval)
         ifcol_oid[ ifcol_len-2 ] = 2;   /* ifDescr  */
         snmp_varlist_add_variable( &var, ifcol_oid, ifcol_len-1,
                                    ASN_NULL, NULL,  0);
-        i = strlen(interface);
+        i = strlen(intrface);
         netsnmp_query_walk( var, ss );
         for (vp=var; vp; vp=vp->next_variable) {
-            if (strncmp(interface, vp->val.string, i) == 0 &&
+            if (strncmp(intrface, vp->val.string, i) == 0 &&
                 i == vp->val_len)
                 break;  /* found requested interface */
         }
@@ -518,7 +521,7 @@ sidewaysintpr(unsigned int interval)
          * XXX - Might be worth searching ifName/ifAlias as well
          */
         if (!vp) {
-            fprintf(stderr, "%s: unknown interface\n", interface );
+            fprintf(stderr, "%s: unknown interface\n", intrface );
             exit(1);
         }
 
@@ -548,13 +551,11 @@ sidewaysintpr(unsigned int interval)
         }
     }
 
-    (void)signal(SIGALRM, catchalarm);
-    signalled = NO;
-    (void)alarm(interval);
+    timerSet( interval );
     first = 1;
 banner:
     printf( "%17s %14s %16s", "input",
-        interface ? interface : "(Total)", "output");
+        intrface ? intrface : "(Total)", "output");
     putchar('\n');
     printf( "%10s %5s %10s %10s %5s %10s %5s",
         "packets", "errs", "bytes", "packets", "errs", "bytes", "colls");
@@ -564,7 +565,7 @@ banner:
     fflush(stdout);
     line = 0;
 loop:
-    if ( interface ) {
+    if ( intrface ) {
 #define ADD_IFVAR( x ) ifcol_oid[ ifcol_len-2 ] = x; \
     snmp_varlist_add_variable( &var, ifcol_oid, ifcol_len, ASN_NULL, NULL,  0)
     /*  if (bflag) { */
@@ -754,13 +755,8 @@ loop:
 	total->ift_dr = sum->ift_dr;
     }  /* overall summary */
 
-    oldmask = sigblock(sigmask(SIGALRM));
-    if (! signalled) {
-    	sigpause(0);
-    }
-    sigsetmask(oldmask);
-    signalled = NO;
-    (void)alarm(interval);
+    timerPause();
+    timerSet(interval);
     line++;
     first = 0;
     if (line == 21)
@@ -770,12 +766,83 @@ loop:
     /*NOTREACHED*/
 }
 
+
+/*
+ * timerSet sets or resets the timer to fire in "interval" seconds.
+ * timerPause waits only if the timer has not fired.
+ * timing precision is not considered important.
+ */
+
+#if (defined(WIN32) || defined(cygwin))
+static int      sav_int;
+static time_t   timezup;
+static void
+timerSet(int interval_seconds)
+{
+    sav_int = interval_seconds;
+    timezup = time(0) + interval_seconds;
+}
+
+/*
+ * you can do better than this ! 
+ */
+static void
+timerPause(void)
+{
+    time_t          now;
+    while (time(&now) < timezup)
+#ifdef WIN32
+        Sleep(400);
+#else
+    {
+        struct timeval  tx;
+        tx.tv_sec = 0;
+        tx.tv_usec = 400 * 1000;        /* 400 milliseconds */
+        select(0, 0, 0, 0, &tx);
+    }
+#endif
+}
+
+#else
+
 /*
  * Called if an interval expires before sidewaysintpr has completed a loop.
  * Sets a flag to not wait for the alarm.
  */
-static void
-catchalarm(int signo)
+RETSIGTYPE
+catchalarm(int sig)
 {
-	signalled = YES;
+    signalled = YES;
 }
+
+static void
+timerSet(int interval_seconds)
+{
+#ifdef HAVE_SIGSET
+    (void) sigset(SIGALRM, catchalarm);
+#else
+    (void) signal(SIGALRM, catchalarm);
+#endif
+    signalled = NO;
+    (void) alarm(interval_seconds);
+}
+
+static void
+timerPause(void)
+{
+#ifdef HAVE_SIGHOLD
+    sighold(SIGALRM);
+    if (!signalled) {
+        sigpause(SIGALRM);
+    }
+#else
+    int             oldmask;
+    oldmask = sigblock(sigmask(SIGALRM));
+    if (!signalled) {
+        sigpause(0);
+    }
+    sigsetmask(oldmask);
+#endif
+}
+
+#endif                          /* !WIN32 && !cygwin */
