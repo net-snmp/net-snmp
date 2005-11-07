@@ -122,6 +122,8 @@ typedef long    fd_mask;
  */
 static int      snmp_synch_input(int op, netsnmp_session * session,
                                  int reqid, netsnmp_pdu *pdu, void *magic);
+extern int      running;
+
 
 netsnmp_pdu    *
 snmp_pdu_create(int command)
@@ -1030,6 +1032,10 @@ snmp_synch_response_cb(netsnmp_session * ss,
                 state->status = STAT_ERROR;
                 state->waiting = 0;
             }
+        if(!running) {
+            state->status = STAT_ERROR;
+            state->waiting = 0;
+        }
     }
     *response = state->pdu;
     ss->callback = cbsav;
@@ -1109,6 +1115,10 @@ snmp_sess_synch_response(void *sessp,
                 state->status = STAT_ERROR;
                 state->waiting = 0;
             }
+        if(!running) {
+            state->status = STAT_ERROR;
+            state->waiting = 0;
+        }
     }
     *response = state->pdu;
     ss->callback = cbsav;
