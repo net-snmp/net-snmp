@@ -74,8 +74,10 @@ int	tflag;		/* show i/f watchdog timers */
 int	vflag;		/* be verbose */
 
 int	interval;	/* repeat interval for i/f stats */
-char	*interface;	/* desired i/f for stats, or NULL for all i/fs */
+char	*intrface;	/* desired i/f for stats, or NULL for all i/fs */
 int	af;		/* address family */
+
+char    *progname = NULL;
 
     /*
      * struct nlist nl[] - Omitted
@@ -166,7 +168,7 @@ optProc( int argc, char *const *argv, int opt )
 			else {
 				(void)fprintf(stderr,
 				    "%s: %s: unknown address family\n",
-				    __progname, optarg);
+				    progname, optarg);
 				exit(1);
 			}
 			return;
@@ -177,7 +179,7 @@ optProc( int argc, char *const *argv, int opt )
 			iflag = 1;
                         if (!*optarg)
                             optarg = argv[optind++];
-			interface = optarg;
+			intrface = optarg;
 			return;
 		case 'i':
 			iflag = 1;
@@ -211,7 +213,7 @@ optProc( int argc, char *const *argv, int opt )
 			if ((tp = name2protox(optarg)) == NULL) {
 				(void)fprintf(stderr,
 				    "%s: %s: unknown protocol\n",
-				    __progname, optarg);
+				    progname, optarg);
 				exit(1);
 			}
 			pflag = 1;
@@ -277,8 +279,14 @@ main(int argc, char *argv[])
 {
 	netsnmp_session session;
 	struct protoent *p;
+        char *cp;
 
 	af = AF_UNSPEC;
+        cp = strrchr( argv[0], '/' );
+        if (cp)
+            progname = cp+1;
+        else
+            progname = argv[0];
 
 	switch (snmp_parse_args( argc, argv, &session, "C:iRs", optProc)) {
 	case -2:
@@ -492,14 +500,14 @@ usage(void)
 {
 	/* XXX - TODO */
 	(void)fprintf(stderr,
-"usage: %s [-Aan] [-f address_family] [-M core] [-N system]\n", __progname);
+"usage: %s [-Aan] [-f address_family] [-M core] [-N system]\n", progname);
 	(void)fprintf(stderr,
-"       %s [-bdgilmnqrSstu] [-f address_family] [-M core] [-N system]\n", __progname);
+"       %s [-bdgilmnqrSstu] [-f address_family] [-M core] [-N system]\n", progname);
 	(void)fprintf(stderr,
-"       %s [-bdn] [-I interface] [-M core] [-N system] [-w wait]\n", __progname);
+"       %s [-bdn] [-I interface] [-M core] [-N system] [-w wait]\n", progname);
 	(void)fprintf(stderr,
-"       %s [-s] [-M core] [-N system] [-p protocol]\n", __progname);
+"       %s [-s] [-M core] [-N system] [-p protocol]\n", progname);
 	(void)fprintf(stderr,
-"       %s [-a] [-f address_family] [-i | -I interface]\n", __progname);
+"       %s [-a] [-f address_family] [-i | -I interface]\n", progname);
 	exit(1);
 }
