@@ -80,16 +80,87 @@ static void catchalarm(int);
         struct _if_info *next;
     };
 
+
+/*
+ * Retrieve the interface addressing information
+ * XXX - This could also be extended to handle non-IP interfaces
+ */
+void
+_set_address( struct _if_info *cur_if )
+{
+    oid    ipaddr_oid[] = { 1,3,6,1,2,1,4,20,1,0 };
+    size_t ipaddr_len   = OID_LENGTH( ipaddr_oid );
+    static netsnmp_variable_list *addr_if_var  =NULL;
+    static netsnmp_variable_list *addr_mask_var=NULL;
+    netsnmp_variable_list *vp, *vp2;
+    union {
+        in_addr_t addr;
+        char      data[4];
+    } tmpAddr;
+    char *cp;
+    in_addr_t ifAddr, mask;
+
+        /*
+         *  Note that this information only needs to be retrieved 
+         *    once, and can be re-used for subsequent calls.
+         */
+    if ( addr_if_var == NULL ) {
+        ipaddr_oid[ 9 ] = 2;  /* ipAdEntIfIndex */
+        snmp_varlist_add_variable( &addr_if_var, ipaddr_oid, ipaddr_len,
+                                   ASN_NULL, NULL,  0);
+        netsnmp_query_walk( addr_if_var, ss );
+
+        ipaddr_oid[ 9 ] = 3;  /* ipAdEntNetMask */
+        snmp_varlist_add_variable( &addr_mask_var, ipaddr_oid, ipaddr_len,
+                                   ASN_NULL, NULL,  0);
+        netsnmp_query_walk( addr_mask_var, ss );
+    }
+
+    /*
+     * Find the address row relevant to this interface
+     */
+    for (vp=addr_if_var, vp2=addr_mask_var;  vp;
+         vp=vp->next_variable, vp2=vp2->next_variable) {
+        if ( *vp->val.integer == cur_if->ifindex )
+            break;
+    }
+    if (vp2) {
+        /*
+         * Always want a numeric interface IP address
+         */
+        snprintf( cur_if->ip, 128, "%d.%d.%d.%d",
+                  vp2->name[10],
+                  vp2->name[11],
+                  vp2->name[12],
+                  vp2->name[13]);
+
+        /*
+         * But re-use the routing table utilities/code for
+         *   displaying the local network information
+         */
+        cp = tmpAddr.data;
+        cp[0] = vp2->name[ 10 ] & 0xff;
+        cp[1] = vp2->name[ 11 ] & 0xff;
+        cp[2] = vp2->name[ 12 ] & 0xff;
+        cp[3] = vp2->name[ 13 ] & 0xff;
+        ifAddr = tmpAddr.addr;
+        cp = tmpAddr.data;
+        cp[0] = vp2->val.string[ 0 ] & 0xff;
+        cp[1] = vp2->val.string[ 1 ] & 0xff;
+        cp[2] = vp2->val.string[ 2 ] & 0xff;
+        cp[3] = vp2->val.string[ 3 ] & 0xff;
+        mask = tmpAddr.addr;
+        snprintf( cur_if->route, 128, "%s", netname(ifAddr, mask));
+    }
+}
+
+
 /*
  * Print a description of the network interfaces.
  */
 void
 intpr(int interval)
 {
- /*
-    oid    ipaddr_oid[] = { 1,3,6,1,2,1,4,20,1,0 };
-    size_t ipaddr_len   = OID_LENGTH( ipaddr_oid );
-  */
     oid    ifcol_oid[]  = { 1,3,6,1,2,1,2,2,1,0 };
     size_t ifcol_len    = OID_LENGTH( ifcol_oid );
 
@@ -290,6 +361,18 @@ intpr(int interval)
             SNMP_FREE( cur_if );
             cur_if = NULL;
         }
+
+        /*
+         * Insert the IP address and network settings
+         */
+        _set_address( cur_if );
+        i = strlen(cur_if->ip);
+        if (i > max_ip)
+            max_ip = i;
+        i = strlen(cur_if->route);
+        if (i > max_route)
+            max_route = i;
+
         /*
          * Add the new _if_stat structure to the list, and
          *  loop to retrieve the next entry from the table.
@@ -304,12 +387,6 @@ intpr(int interval)
             }
         }
     }   /* while (1) */
-
-        /*
-         * Set the IP address and network information
-         *   XXX - could also be extended to handle non-IP interfaces
-         */
-    /* XXX - TODO */
 
         /*
          * Now display the specified results (in Free-BSD format)
