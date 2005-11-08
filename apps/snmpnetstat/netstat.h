@@ -48,6 +48,7 @@ extern int	iflag;		/* show interfaces */
 extern int	lflag;		/* show routing table with use and ref */
 extern int	mflag;		/* show memory stats */
 extern int	nflag;		/* show addresses numerically */
+extern int	oflag;		/* Open/Net-BSD style octet output */
 extern int	pflag;		/* show given protocol */
 extern int	qflag;		/* only display non-zero values for output */
 extern int	rflag;		/* show routing tables (or routing stats) */
