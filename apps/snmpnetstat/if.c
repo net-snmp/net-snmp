@@ -224,10 +224,11 @@ intpr(int interval)
      *
      * Or we could perhaps support both styles? :-)
      */
-    if (bflag) {
+    if (bflag || oflag) {
         ADD_IFVAR( 10 );            /* ifInOctets   */
         ADD_IFVAR( 16 );            /* ifOutOctets  */
     }
+    if (!oflag) {
         ADD_IFVAR( 11 );            /* ifInUcastPkts  */
         ADD_IFVAR( 12 );            /* ifInNUcastPkts */
         ADD_IFVAR( 14 );            /* ifInErrors     */
@@ -235,6 +236,7 @@ intpr(int interval)
         ADD_IFVAR( 18 );            /* ifOutNUcastPkts */
         ADD_IFVAR( 20 );            /* ifOutErrors    */
         ADD_IFVAR( 21 );            /* ifOutQLen      */
+    }
 /*  if (tflag) {
         ADD_IFVAR( XX );            // ???
     }
@@ -399,17 +401,22 @@ intpr(int interval)
            -max_name,  max_name,  "Name", "Mtu",
            -max_route, max_route, "Network",
            -max_ip,    max_ip,    "Address");
-    printf(    " %*s %*s", max_ipkts,   "Ipkts",
+    if (oflag) {
+        printf(" %*s %*s", max_ibytes,  "Ibytes",
+                           max_obytes,  "Obytes");
+    } else {
+        printf(" %*s %*s", max_ipkts,   "Ipkts",
                            max_ierrs,   "Ierrs");
-    if (bflag) 
-        printf(" %*s",     max_ibytes,  "Ibytes");
+        if (bflag) 
+            printf(" %*s", max_ibytes,  "Ibytes");
 
-    printf(    " %*s %*s", max_opkts,   "Opkts",
+        printf(" %*s %*s", max_opkts,   "Opkts",
                            max_oerrs,   "Oerrs");
-    if (bflag) 
-        printf(" %*s",     max_obytes,  "Obytes");
+        if (bflag) 
+            printf(" %*s", max_obytes,  "Obytes");
 
-    printf(    " %*s",     max_outq,    "Queue");
+        printf(" %*s",     max_outq,    "Queue");
+    }
  /* if (tflag)
         printf(" %s", "Time");
   */
@@ -424,16 +431,21 @@ intpr(int interval)
         printf(" %*.*s",     -max_route, max_route, cur_if->route);
         printf(" %*.*s",     -max_ip,    max_ip,    cur_if->ip);
 
-        printf(    " %*s %*s", max_ipkts,   cur_if->s_ipkts,
+        if (oflag) {
+            printf(" %*s %*s", max_ibytes,  cur_if->s_ibytes,
+                               max_obytes,  cur_if->s_obytes);
+        } else {
+            printf(" %*s %*s", max_ipkts,   cur_if->s_ipkts,
                                max_ierrs,   cur_if->s_ierrs);
-        if (bflag) 
-            printf(" %*s",     max_ibytes,  cur_if->s_ibytes);
+            if (bflag) 
+                printf(" %*s", max_ibytes,  cur_if->s_ibytes);
     
-        printf(    " %*s %*s", max_opkts,   cur_if->s_opkts,
+            printf(" %*s %*s", max_opkts,   cur_if->s_opkts,
                                max_oerrs,   cur_if->s_oerrs);
-        if (bflag) 
-            printf(" %*s",     max_obytes,  cur_if->s_obytes);
-        printf(    " %*s",     max_outq,    cur_if->s_outq);
+            if (bflag) 
+                printf(" %*s", max_obytes,  cur_if->s_obytes);
+            printf(" %*s",     max_outq,    cur_if->s_outq);
+        }
      /* if (tflag)
             printf(" %4d", cur_if->???);
       */
