@@ -16,9 +16,9 @@ INSTALLBINPROGS=snmpnetstat$(EXEEXT)
 #
 # build info
 #
-SRCS=	inet.c inet6.c if.c main.c route.c winstub.c fss.c
-OBJS=	inet.o inet6.o if.o main.o route.o winstub.o fss.o
-LOBJS=	inet.lo inet6.lo if.lo main.lo route.lo winstub.lo fss.lo
+SRCS=	inet.c inet6.c if.c main.c route.c winstub.c ffs.c
+OBJS=	inet.o inet6.o if.o main.o route.o winstub.o ffs.o
+LOBJS=	inet.lo inet6.lo if.lo main.lo route.lo winstub.lo ffs.lo
 TARG= snmpnetstat$(EXEEXT)
 
 CPPFLAGS= $(TOP_INCLUDES)  @CPPFLAGS@
