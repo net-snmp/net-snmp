@@ -91,21 +91,22 @@ tcp6protopr(char *name)
 {
     netsnmp_variable_list *var, *vp;
     oid    ipv6TcpConnState_oid[] = { 1,3,6,1,2,1,6,16,1,6 };
-    size_t ipv6TcpConnState_len   = OID_LENGTH( ipv6TcpConnState_len );
+    size_t ipv6TcpConnState_len   = OID_LENGTH( ipv6TcpConnState_oid );
     int    state, i;
     char   localAddr[16], remoteAddr[16];
     int    localPort,     remotePort,  ifIndex;
-
-    var = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
-    if (!var)
-        return;
 
     /*
      * Walking the v6 tcpConnState column will provide all
      *   the necessary information.
      */
-    snmp_set_var_objid( var, ipv6TcpConnState_oid, ipv6TcpConnState_len );
+    var = NULL;
+    snmp_varlist_add_variable( &var, ipv6TcpConnState_oid,
+                                     ipv6TcpConnState_len,
+                                     ASN_NULL, NULL,  0);
     if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
+        return;
+    if (var->type == ASN_NULL)    /* No entries */
         return;
 
     printf("Active Internet Connections");
@@ -148,19 +149,20 @@ udp6protopr(char *name)
 {
     netsnmp_variable_list *var, *vp;
     oid    ipv6UdpLocalAddress_oid[] = { 1,3,6,1,2,1,7,6,1,1 };
-    size_t ipv6UdpLocalAddress_len   = OID_LENGTH( ipv6UdpLocalAddress_len );
+    size_t ipv6UdpLocalAddress_len   = OID_LENGTH( ipv6UdpLocalAddress_oid );
     int    localPort, ifIndex;
-
-    var = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
-    if (!var)
-        return;
 
     /*
      * Walking a single column of the udpTable will provide
      *   all the necessary information from the index values.
      */
-    snmp_set_var_objid( var, ipv6UdpLocalAddress_oid, ipv6UdpLocalAddress_len );
+    var = NULL;
+    snmp_varlist_add_variable( &var, ipv6UdpLocalAddress_oid,
+                                     ipv6UdpLocalAddress_len,
+                                     ASN_NULL, NULL,  0);
     if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
+        return;
+    if (var->type == ASN_NULL)    /* No entries */
         return;
 
     printf("Active Internet Connections\n");
