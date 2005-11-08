@@ -176,7 +176,7 @@ intpr(int interval)
             */
     int    max_name  = 4, max_ip    = 7, max_route = 7, max_outq  = 5;
     int    max_ipkts = 5, max_ierrs = 5, max_opkts = 5, max_oerrs = 5;
-    int    max_ibytes = 10, max_obytes = 10;
+    int    max_ibytes = 6, max_obytes = 6;
     int    i;
 
 
@@ -399,17 +399,17 @@ intpr(int interval)
            -max_name,  max_name,  "Name", "Mtu",
            -max_route, max_route, "Network",
            -max_ip,    max_ip,    "Address");
-    printf(    " %*.*s %*.*s", -max_ipkts,   max_ipkts,   "Ipkts",
-                               -max_ierrs,   max_ierrs,   "Ierrs");
+    printf(    " %*s %*s", max_ipkts,   "Ipkts",
+                           max_ierrs,   "Ierrs");
     if (bflag) 
-        printf(" %*.*s",       -max_ibytes,  max_ibytes,  "Ibytes");
+        printf(" %*s",     max_ibytes,  "Ibytes");
 
-    printf(    " %*.*s %*.*s", -max_opkts,   max_opkts,   "Opkts",
-                               -max_oerrs,   max_oerrs,   "Oerrs");
+    printf(    " %*s %*s", max_opkts,   "Opkts",
+                           max_oerrs,   "Oerrs");
     if (bflag) 
-        printf(" %*.*s",       -max_obytes,  max_obytes,  "Obytes");
+        printf(" %*s",     max_obytes,  "Obytes");
 
-    printf(    " %*.*s",       -max_outq,    max_outq,    "Queue");
+    printf(    " %*s",     max_outq,    "Queue");
  /* if (tflag)
         printf(" %s", "Time");
   */
@@ -420,9 +420,9 @@ intpr(int interval)
     for (cur_if = if_head; cur_if; cur_if=cur_if->next) {
         if (cur_if->name[0] == 0)
             continue;
-        printf("%*.*s %5d ", -max_name,  max_name,  cur_if->name, cur_if->mtu);
-        printf("%*.*s ",     -max_route, max_route, cur_if->route);
-        printf("%*.*s ",     -max_ip,    max_ip,    cur_if->ip);
+        printf( "%*.*s %5d", -max_name,  max_name,  cur_if->name, cur_if->mtu);
+        printf(" %*.*s",     -max_route, max_route, cur_if->route);
+        printf(" %*.*s",     -max_ip,    max_ip,    cur_if->ip);
 
         printf(    " %*s %*s", max_ipkts,   cur_if->s_ipkts,
                                max_ierrs,   cur_if->s_ierrs);
