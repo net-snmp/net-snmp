@@ -65,6 +65,7 @@ int	iflag;		/* show interfaces */
 int	lflag;		/* show routing table with use and ref */
 int	mflag;		/* show memory stats */
 int	nflag;		/* show addresses numerically */
+int	oflag;		/* Open/Net-BSD style octet output */
 int	pflag;		/* show given protocol */
 int	qflag;		/* only display non-zero values for output */
 int	rflag;		/* show routing tables (or routing stats) */
@@ -204,6 +205,9 @@ optProc( int argc, char *const *argv, int opt )
 	     */
 		case 'n':
 			nflag = 1;
+			break;
+		case 'o':
+			oflag = 1;
 			break;
 	    /*  case 'P':		NetBSD:
 					OpenBSD: dump PCB block */
