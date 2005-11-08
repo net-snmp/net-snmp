@@ -214,6 +214,7 @@ netsnmp_cache_timer_start(netsnmp_cache *cache)
         return 0;
     }
 
+    cache->flags &= ~NETSNMP_CACHE_AUTO_RELOAD;
     DEBUGMSGT(("cache_timer:start",
                "starting timer %d for cache %p\n", cache->timer_id, cache));
     return cache->timer_id;
@@ -235,6 +236,7 @@ netsnmp_cache_timer_stop(netsnmp_cache *cache)
                "stopping timer %d for cache %p\n", cache->timer_id, cache));
 
     snmp_alarm_unregister(cache->timer_id);
+    cache->flags |= NETSNMP_CACHE_AUTO_RELOAD;
 }
 
 
