@@ -81,8 +81,8 @@ System("changelog:changelogfix",
        "perl dist/changelogfix < ChangeLog.add > ChangeLog.reallyadd");
 
 manualstep("changelog:manualedit",
-"You need to manually insert the ChangeLog.reallyadd contents into the 
-ChangeLog file.  I'll run cvs commit for you afterwards");
+"You need to manually insert the *relevent* portions of the ChangeLog.reallyadd
+contents into the ChangeLog file.  I'll run cvs commit for you afterwards");
 
 System("changelog:commit","cvs commit -m \"version update\" ChangeLog");
 
