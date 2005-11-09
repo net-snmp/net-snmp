@@ -10,7 +10,7 @@ extern          "C" {
     void            agentx_parse_master(const char *token, char *cptr);
     void            agentx_parse_agentx_socket(const char *token,
                                                char *cptr);
-    void            init_agentx_config(void);
+    void            agentx_config_init(void);
 
 #ifdef __cplusplus
 }
