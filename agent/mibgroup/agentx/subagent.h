@@ -7,8 +7,7 @@ config_require(agentx/protocol)
 config_require(agentx/client)
 config_require(agentx/agentx_config)
 
-    void             init_subagent(void);
-     int             subagent_pre_init(void);
+     int             subagent_init(void);
      int             handle_agentx_packet(int, netsnmp_session *, int,
                                           netsnmp_pdu *, void *);
      SNMPCallback    agentx_register_callback;
