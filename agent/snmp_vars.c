@@ -306,15 +306,11 @@ init_agent(const char *app)
     init_traps();
     netsnmp_container_init_list();
 
+#if defined(USING_AGENTX_SUBAGENT_MODULE) || defined(USING_AGENTX_MASTER_MODULE)
     /*
-     * initialize agentx subagent if necessary. 
+     * initialize agentx configs
      */
-#ifdef USING_AGENTX_SUBAGENT_MODULE
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-			       NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
-        r = subagent_pre_init();
-        init_subagent();
-    }
+    agentx_config_init();
 #endif
 
     /*
