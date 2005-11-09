@@ -121,7 +121,7 @@ subagent_init(void)
         agentx_callback_sess = netsnmp_callback_open(callback_master_num,
                                                      handle_subagent_response,
                                                      NULL, NULL);
-        DEBUGMSGTL(("agentx/subagent", "init_subagent sess %08x\n",
+        DEBUGMSGTL(("agentx/subagent", "subagent_init sess %08x\n",
                     agentx_callback_sess));
     }
     if (NULL == agentx_callback_sess)
