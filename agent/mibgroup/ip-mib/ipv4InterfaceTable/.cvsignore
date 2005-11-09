@@ -1,0 +1,4 @@
+*.txt
+ipv4InterfaceTable
+ipv4InterfaceTable_Makefile
+ipv4InterfaceTable_subagent.c

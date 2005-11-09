@@ -1,0 +1,4 @@
+*.txt
+ipv6InterfaceTable
+ipv6InterfaceTable_Makefile
+ipv6InterfaceTable_subagent.c
