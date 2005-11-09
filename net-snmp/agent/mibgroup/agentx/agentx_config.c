@@ -26,6 +26,21 @@
 #include "snmpd.h"
 #include "agentx/agentx_config.h"
 
+/* ---------------------------------------------------------------------
+ *
+ * Common master and sub-agent
+ */
+void
+agentx_parse_agentx_socket(const char *token, char *cptr)
+{
+    DEBUGMSGTL(("agentx/config", "port spec: %s\n", cptr));
+    netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET, cptr);
+}
+
+/* ---------------------------------------------------------------------
+ *
+ * Master agent
+ */
 #ifdef USING_AGENTX_MASTER_MODULE
 void
 agentx_parse_master(const char *token, char *cptr)
@@ -48,14 +63,6 @@ agentx_parse_master(const char *token, char *cptr)
         config_perror(buf);
     } else
         netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_AGENTX_MASTER, i);
-}
-#endif                          /* USING_AGENTX_MASTER_MODULE */
-
-void
-agentx_parse_agentx_socket(const char *token, char *cptr)
-{
-    DEBUGMSGTL(("agentx/config", "port spec: %s\n", cptr));
-    netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET, cptr);
 }
 
 void
@@ -155,7 +162,18 @@ agentx_parse_agentx_retries(const char *token, char *cptr)
     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                        NETSNMP_DS_AGENT_AGENTX_RETRIES, x);
 }
+#endif                          /* USING_AGENTX_MASTER_MODULE */
 
+/* ---------------------------------------------------------------------
+ *
+ * Sub-agent
+ */
+
+
+/* ---------------------------------------------------------------------
+ *
+ * Utility support routines
+ */
 void
 agentx_register_config_handler(const char *token,
                               void (*parser) (const char *, char *),
@@ -175,20 +193,22 @@ agentx_unregister_config_handler(const char *token)
 }
 
 void
-init_agentx_config(void)
+agentx_config_init(void)
 {
+    int agent_role = netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                            NETSNMP_DS_AGENT_ROLE);
+
     /*
-     * Don't set this up as part of the per-module initialisation.
-     * Delay this until the 'init_master_agent()' routine is called,
-     *   so that the config settings have been processed.
-     * This means that we can use a config directive to determine
-     *   whether or not to run as an AgentX master.
+     * Common tokens for master/subagent
      */
     agentx_register_config_handler("agentxsocket",
                                   agentx_parse_agentx_socket, NULL,
                                   "AgentX bind address");
 #ifdef USING_AGENTX_MASTER_MODULE
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) == MASTER_AGENT) {
+    /*
+     * tokens for master agent
+     */
+    if (MASTER_AGENT == agent_role) {
         snmpd_register_config_handler("master",
                                       agentx_parse_master, NULL,
                                       "specify 'agentx' for AgentX support");
@@ -203,4 +223,25 @@ init_agentx_config(void)
                                   "AgentX Timeout (seconds)");
     }
 #endif                          /* USING_AGENTX_MASTER_MODULE */
+
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+    /*
+     * tokens for master agent
+     */
+    if (SUB_AGENT == agent_role) {
+        /*
+         * set up callbacks to initiate master agent pings for this session 
+         */
+        netsnmp_ds_register_config(ASN_INTEGER,
+                                   netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                                         NETSNMP_DS_LIB_APPTYPE),
+                                   "agentxPingInterval",
+                                   NETSNMP_DS_APPLICATION_ID,
+                                   NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
+        /* ping and/or reconnect by default every 15 seconds */
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL, 15);
+        
+    }
+#endif /* USING_AGENTX_SUBAGENT_MODULE */
 }
