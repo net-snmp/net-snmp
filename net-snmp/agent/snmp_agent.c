@@ -1140,6 +1140,14 @@ init_master_agent(void)
 			       NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT) {
         DEBUGMSGTL(("snmp_agent",
                     "init_master_agent; not master agent\n"));
+
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+                                   NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
+            return subagent_init();
+        }
+        else
+            netsnmp_assert("agent role !master && !sub_agent");
+
         return 0;               /*  No error if ! MASTER_AGENT  */
     }
 #ifdef USING_AGENTX_MASTER_MODULE
