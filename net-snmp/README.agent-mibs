@@ -129,8 +129,8 @@ IF-MIB
  ifNumber.0                   U $2      ~3.2    O mibII/interfaces.c
  ifTableLastChange.0          ---
  ifTable (old)                U $2      ~3.5    O mibII/interfaces.c
- ifTable (new)                L         5.2+    M if-mib/ifXTable/*
- ifXTable                     L         5.2+    M if-mib/ifXTable/*
+ ifTable (new)                L         5.2     M if-mib/ifXTable/*
+ ifXTable                     L         5.2     M if-mib/ifXTable/*
  ifStackLastChange.0          ---
  ifStackTable                 ---
  ifTestTable                  ---
@@ -147,14 +147,14 @@ IP-MIB
  ip.*.0                       U $2      ~3.2    G mibII/ip.c
  icmp.*.0                     U $2      ~3.2    G mibII/icmp.c
 
- ipSystemStatsTable           L         5.2+    M ip-mib/=/*
+ ipSystemStatsTable           L         5.2     M ip-mib/=/*
  ipIfStatsTableLastChange.0   ---
  ipIfStatsTable               ---
 
  ipAddrTable (D)              U $2      4.2     O mibII/ipAddr.c
  ipAddressSpinLock.0          ---
- ipAddressTable               L         5.2+    M ip-mib/=/*
- ipAddressPrefixTable         ---
+ ipAddressTable               L         5.2     M ip-mib/=/*
+ ipAddressPrefixTable         L         5.3     M ip-mib/=/*
 
  ipRouteTable (D)             U $2      ~3.5    O mibII/*route*.c
  ipNetToMediaTable (D)        U $2      ~3.5    O mibII/at.c
@@ -166,13 +166,13 @@ IP-MIB
  icmpMsgStatsTable            ---
 
  ipv4InterfaceTableLastChange ---
- ipv4InterfaceTable           ---
+ ipv4InterfaceTable           L          5.3    M ip-mib/=/*
 
  ipv6InterfaceTableLastChange ---
- ipv6InterfaceTable           ---
+ ipv6InterfaceTable           L          5.3    M ip-mib/=/*
  ipv6RouterAdvertTable        ---
- ipv6IpForwarding.0           ---
- ipv6IpDefaultHopLimit.0      ---
+ ipv6IpForwarding.0           L          5.3    S ip-mib/ip_scalars.c
+ ipv6IpDefaultHopLimit.0      L          5.3    S ip-mib/ip_scalars.c
  ipv6RouterAdvertSpinLock.0   ---
  ipv6ScopeZoneIndexTable      ---
 
@@ -206,9 +206,9 @@ IPV6-ICMP-MIB
 IP-FORWARD-MIB
  ipForward.*.0                ---
  ipForwardTable (D)           ---
- ipCidrRouteTable (D)(new)    L         5.2+    A mibII/=
- ipCidrRouteTable (D)(newer)  L         5.2+    M ip-forward-mib/=/*
- inetCidrRouteTable           L         5.2+    M ip-forward-mib/=/*
+ ipCidrRouteTable (D)(new)    L         5.2     A mibII/=
+ ipCidrRouteTable (D)(newer)  L         5.2     M ip-forward-mib/=/*
+ inetCidrRouteTable           L         5.2     M ip-forward-mib/=/*
 
 ------------------------------------------------------------------------------
 TCP-MIB
@@ -219,7 +219,7 @@ TCP-MIB
 
 ------------------------------------------------------------------------------
 UDP-MIB
- udpEndpointTable             ---
+ udpEndpointTable             L         5.3     M ucd-mib/=/*
  udp.*.0                      U $2      ~3.2    G mibII/udp.c
  udpTable (D)                 U $2      4.2     I mibII/udpTable.c
 
@@ -342,7 +342,7 @@ UCD-SNMP-MIB
  ucdDemoMIBObjects            A         ~3.5    O examples/ucdDemoPublic.c
  logMatch                     U         ~3.5    O ucd-snmp/logmatch.c
  version.*.0                  A         ~3.2    O ucd-snmp/versioninfo.c
- snmperrs.*.0                 A         ~3.5+   O ucd-snmp/errormib.c
+ snmperrs.*.0                 A         ~3.5    O ucd-snmp/errormib.c
  mrTable (D)                  ---
 
 ------------------------------------------------------------------------------
