@@ -206,7 +206,7 @@ get_ifname(char *name, int ifIndex)
 void
 pr_family(int af)
 {
-	char *afname;
+	const char *afname;
 
 	switch (af) {
 	case AF_INET:
