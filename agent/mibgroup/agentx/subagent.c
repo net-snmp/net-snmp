@@ -92,6 +92,24 @@ netsnmp_session *agentx_callback_sess = NULL;
 extern int      callback_master_num;
 extern netsnmp_session *main_session;   /* from snmp_agent.c */
 
+int
+subagent_startup(int majorID, int minorID,
+                             void *serverarg, void *clientarg)
+{
+    DEBUGMSGTL(("agentx/subagent", "connecting to master...\n"));
+    /*
+     * if a valid ping interval has been defined, call agentx_reopen_session
+     * to try to connect to master or setup a ping alarm if it couldn't
+     * succeed. if no ping interval was set up, just try to connect once.
+     */
+    if (netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL) > 0)
+        agentx_reopen_session(0, NULL);
+    else {
+        subagent_open_master_session();
+    }
+    return 0;
+}
 
 /**
  * init subagent callback (local) session and connect to master agent
@@ -101,9 +119,13 @@ extern netsnmp_session *main_session;   /* from snmp_agent.c */
 int
 subagent_init(void)
 {
+    static int init = 0;
     int rc = 0;
 
     DEBUGMSGTL(("agentx/subagent", "initializing....\n"));
+
+    if (++init != 1)
+        return 0;
 
     netsnmp_assert(netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                           NETSNMP_DS_AGENT_ROLE) == SUB_AGENT);
@@ -127,19 +149,9 @@ subagent_init(void)
     if (NULL == agentx_callback_sess)
         return -1;
 
-    /*
-     * if a valid ping interval has been defined, call agentx_reopen_session
-     * to try to connect to master or setup a ping alarm if it couldn't
-     * succeed. if no ping interval was set up, just try to connect once.
-     */
-    if (netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
-                           NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL) > 0)
-        agentx_reopen_session(0, NULL);
-    else {
-        subagent_open_master_session();
-        if (!main_session)
-            rc = -1;
-    }
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_POST_READ_CONFIG,
+                           subagent_startup, NULL);
 
     DEBUGMSGTL(("agentx/subagent", "initializing....  DONE\n"));
 
@@ -667,9 +679,6 @@ agentx_register_callbacks(netsnmp_session * s)
 {
     DEBUGMSGTL(("agentx/subagent",
                 "registering callbacks for session %p\n", s));
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                           SNMP_CALLBACK_POST_READ_CONFIG,
-                           subagent_register_ping_alarm, s);
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
                            subagent_shutdown, s);
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
@@ -697,9 +706,6 @@ agentx_unregister_callbacks(netsnmp_session * ss)
 {
     DEBUGMSGTL(("agentx/subagent",
                 "unregistering callbacks for session %p\n", ss));
-    snmp_unregister_callback(SNMP_CALLBACK_LIBRARY,
-                             SNMP_CALLBACK_POST_READ_CONFIG,
-                             subagent_register_ping_alarm, ss, 1);
     snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
                              subagent_shutdown, ss, 1);
     snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
