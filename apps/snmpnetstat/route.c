@@ -249,13 +249,13 @@ pr_family(int af)
 
 /* column widths; each followed by one space */
 #ifndef INET6
-#define	WID_DST(af)	18	/* width of destination column */
+#define	WID_DST(af)	26	/* width of destination column */
 #define	WID_GW(af)	18	/* width of gateway column */
 #else
 /* width of destination/gateway column */
 #if 1
 /* strlen("fe80::aaaa:bbbb:cccc:dddd@gif0") == 30, strlen("/128") == 4 */
-#define	WID_DST(af)	((af) == AF_INET6 ? (nflag ? 34 : 18) : 18)
+#define	WID_DST(af)	((af) == AF_INET6 ? (nflag ? 34 : 26) : 26)
 #define	WID_GW(af)	((af) == AF_INET6 ? (nflag ? 30 : 18) : 18)
 #else
 /* strlen("fe80::aaaa:bbbb:cccc:dddd") == 25, strlen("/128") == 4 */
@@ -358,16 +358,16 @@ netname(in_addr_t in, in_addr_t mask)
 	if (cp) {
 		strlcpy(line, cp, sizeof(line));
 	} else if (mbits < 9)
-		snprintf(line, sizeof line, "%u/%d", C(in >> 24), mbits);
+		snprintf(line, sizeof line, "%u", C(in >> 24));
 	else if (mbits < 17)
-		snprintf(line, sizeof line, "%u.%u/%d",
-		    C(in >> 24) , C(in >> 16), mbits);
+		snprintf(line, sizeof line, "%u.%u",
+		    C(in >> 24) , C(in >> 16));
 	else if (mbits < 25)
-		snprintf(line, sizeof line, "%u.%u.%u/%d",
-		    C(in >> 24), C(in >> 16), C(in >> 8), mbits);
+		snprintf(line, sizeof line, "%u.%u.%u",
+		    C(in >> 24), C(in >> 16), C(in >> 8));
 	else
-		snprintf(line, sizeof line, "%u.%u.%u.%u/%d", C(in >> 24),
-		    C(in >> 16), C(in >> 8), C(in), mbits);
+		snprintf(line, sizeof line, "%u.%u.%u.%u", C(in >> 24),
+		    C(in >> 16), C(in >> 8), C(in));
 	return (line);
 }
 
@@ -485,7 +485,6 @@ s_rtflags( struct route_entry *rp )
     char  *cp = flag_buf;
 
     memset( flag_buf, 0, sizeof(flag_buf));
-    *cp++ = '<';
     *cp++ = 'U';   /* route is in use */
     if (rp->mask  == 0xffffffff)
         *cp++ = 'H';   /* host */
@@ -493,7 +492,6 @@ s_rtflags( struct route_entry *rp )
         *cp++ = 'D';   /* ICMP redirect */
     if (rp->type  == 4)
         *cp++ = 'G';   /* remote destination/net */
-    *cp++ = '>';
     return flag_buf;
 }
 
@@ -511,7 +509,6 @@ p_rtnode( struct route_entry *rp )
                     netname(rp->destination, 0L));
     printf("%-*.*s %-6.6s  %s\n",
 	    WID_GW(af), WID_GW(af),
-                (rp->gateway ?
-                    routename(rp->gateway) : "*"),
+                routename(rp->gateway),
             s_rtflags(rp), rp->ifname);
 }
