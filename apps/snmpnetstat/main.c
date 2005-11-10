@@ -442,13 +442,13 @@ printproto(struct protox *tp, char *name)
  * Read kernel memory - Omitted
  */
 
-char *
+const char *
 plural(int n)
 {
 	return (n != 1 ? "s" : "");
 }
 
-char *
+const char *
 plurales(int n)
 {
 	return (n != 1 ? "es" : "");
