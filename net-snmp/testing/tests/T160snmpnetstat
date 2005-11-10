@@ -2,9 +2,10 @@
 
 . ../eval_tools.sh
 
-HEADER "apps: snmpnetstat finds the running agent"
+HEADER "if snmpnetstat finds the running agent in udpTable"
 
 SKIPIF DISABLE_SNMPV2C
+SKIPIFNOT USING_MIBII_UDPTABLE_MODULE
 
 # snmpnetstat only works with UDP
 [ "x$SNMP_TRANSPORT_SPEC" = "x" -o "x$SNMP_TRANSPORT_SPEC" = "xudp" ] || SKIP
