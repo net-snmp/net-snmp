@@ -3,8 +3,8 @@
 #define MAXHOSTNAMELEN	64
 #endif
 
+extern  netsnmp_session *ss;
 
-extern char    *community;
-extern struct sockaddr_in address;
-extern int      reqid;
-extern int      sd;
+#ifndef AF_INET6
+#define AF_INET6	10
+#endif
