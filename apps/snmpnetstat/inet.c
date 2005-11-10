@@ -113,7 +113,7 @@ tcpprotopr(char *name)
     oid    localPort, remotePort;
     struct in_addr localAddr, remoteAddr;
     char  *cp;
-
+    int    first = 1;
 
     /*
      * Walking the tcpConnState column will provide all
@@ -127,18 +127,22 @@ tcpprotopr(char *name)
     if (netsnmp_query_walk( var, ss ) != SNMP_ERR_NOERROR)
         return;
 
-    printf("Active Internet (%s) Connections", name);
-    if (aflag)
-        printf(" (including servers)");
-    putchar('\n');
-    width = Aflag ? 18 : 22;
-    printf("%-5.5s %*.*s %*.*s %s\n",
-           "Proto", -width, width, "Local Address",
-                    -width, width, "Remote Address", "(state)");
     for (vp = var; vp ; vp=vp->next_variable) {
         state = *vp->val.integer;
         if (!aflag && state == MIB_TCPCONNSTATE_LISTEN)
             continue;
+
+        if (first) {
+            printf("Active Internet (%s) Connections", name);
+            if (aflag)
+                printf(" (including servers)");
+            putchar('\n');
+            width = Aflag ? 18 : 22;
+            printf("%-5.5s %*.*s %*.*s %s\n",
+                   "Proto", -width, width, "Local Address",
+                            -width, width, "Remote Address", "(state)");
+            first=0;
+        }
         
         /* Extract the local/remote information from the index values */
         cp = tmpAddr.data;
@@ -346,7 +350,7 @@ icmp_stats(char *name)
     _dump_stats( name, icmpstats_oid, icmpstats_len, icmpstats_tbl );
     _dump_stats( "    Input Histogram",
                        icmpstats_oid, icmpstats_len, icmp_inhistogram );
-    _dump_stats( "    Ouput Histogram",
+    _dump_stats( "    Output Histogram",
                        icmpstats_oid, icmpstats_len, icmp_outhistogram );
 }
 
@@ -424,7 +428,7 @@ void
 inetprint(struct in_addr *in, int port, const char *proto, int local)
 {
 	struct servent *sp = 0;
-	char line[80], *cp, *nam;
+	char line[80], *cp;
 	int width;
 
 	snprintf(line, sizeof line, "%.*s.", (Aflag && !nflag) ? 12 : 16,

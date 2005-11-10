@@ -92,6 +92,7 @@ tcp6protopr(char *name)
     int    state, i;
     char   localAddr[16], remoteAddr[16];
     int    localPort,     remotePort,  ifIndex;
+    int    first = 1;
 
     /*
      * Walking the v6 tcpConnState column will provide all
@@ -106,16 +107,20 @@ tcp6protopr(char *name)
     if (var->type == ASN_NULL)    /* No entries */
         return;
 
-    printf("Active Internet Connections");
-    if (aflag)
-        printf(" (including servers)");
-    putchar('\n');
-    printf("%-5.5s %-28.28s %-28.28s %4s %s\n",
-           "Proto", "Local Address", "Remote Address", "I/F", "(state)");
     for (vp = var; vp ; vp=vp->next_variable) {
         state = *var->val.integer;
         if (!aflag && state == MIB_TCPCONNSTATE_LISTEN)
             continue;
+
+        if (first) {
+            printf("Active Internet Connections");
+            if (aflag)
+                printf(" (including servers)");
+            putchar('\n');
+            printf("%-5.5s %-28.28s %-28.28s %4s %s\n",
+                   "Proto", "Local Address", "Remote Address", "I/F", "(state)");
+            first = 0;
+        }
         
         /* Extract the local/remote information from the index values */
         for (i=0; i<16; i++)
@@ -351,7 +356,7 @@ icmp6_stats(char *name)
     _dump_v6stats( name, icmp6stats_oid, icmp6stats_len, icmp6stats_tbl );
     _dump_v6stats( "    Input Histogram",
                          icmp6stats_oid, icmp6stats_len, icmp6_inhistogram );
-    _dump_v6stats( "    Ouput Histogram",
+    _dump_v6stats( "    Output Histogram",
                          icmp6stats_oid, icmp6stats_len, icmp6_outhistogram );
 }
 
