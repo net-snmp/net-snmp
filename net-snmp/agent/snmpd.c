@@ -187,10 +187,11 @@ int             Facility = LOG_DAEMON;
 #define AGENT_RUNNING 1
 #define AGENT_STOPPED 0
 int             agent_status = AGENT_STOPPED;
-LPTSTR          app_name = _T("Net-SNMP Agent");     /* Application Name */
-#else
-const char     *app_name = "snmpd";
+/* app_name_long used for Event Log (syslog), SCM, registry etc */
+LPTSTR          app_name_long = _T("Net-SNMP Agent");     /* Application Name */
 #endif
+
+const char     *app_name = "snmpd";
 
 extern char   **argvrestartp;
 extern char    *argvrestart;
@@ -511,7 +512,11 @@ main(int argc, char *argv[])
             argv[i] = option_compatability;            
     }
 
+#ifdef WIN32
+    snmp_log_syslogname(app_name_long);
+#else
     snmp_log_syslogname(app_name);
+#endif
     netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                           NETSNMP_DS_LIB_APPTYPE, app_name);
 
@@ -1247,7 +1252,7 @@ _tmain(int argc, TCHAR * argv[])
     /*
      * Define Service Name and Description, which appears in windows SCM 
      */
-    LPCTSTR         lpszServiceName = app_name;      /* Service Registry Name */
+    LPCTSTR         lpszServiceName = app_name_long;      /* Service Registry Name */
     LPCTSTR         lpszServiceDisplayName = _T("Net-SNMP Agent");       /* Display Name */
     LPCTSTR         lpszServiceDescription =
 #ifdef IFDESCR
