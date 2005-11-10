@@ -1758,6 +1758,7 @@ changequote(, )
 #---------------------
 # loop over module list
 #
+all_warnings=""
 if test "x$with_mib_cfg_debug" = "xyes"; then
    module_debug=1
 else
@@ -1927,6 +1928,22 @@ while test "x$new_module_list" != "x"; do
         # check for config_parse_dot_conf
         #
         $MODULECPP $srcdir/$mibdir/$i.h | grep config_parse_dot_conf | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
+        #---------------------
+        # check if $i has any errors, or warnings
+        #
+	error=`$MODULECPP $srcdir/$mibdir/$i.h | grep config_error | sed 's/.*config_error(\(.*\)).*/\1/'`
+	if test "x$error" != "x"; then
+          changequote([, ])
+          echo
+          echo
+          AC_MSG_ERROR([$i: *** $error ***])
+          changequote(, )
+        fi
+	warning=`$MODULECPP $srcdir/$mibdir/$i.h | grep config_warning | sed 's/.*config_warning(\(.*\)).*/\1/'`
+	if test "x$warning" != "x"; then
+          all_warnings="$all_warnings $warning
+"
+        fi
       elif test -f $srcdir/$mibdir/$i.c; then
         if echo " $module_list $new_list_two $new_module_list " | grep " $i      " > /dev/null; then
            if test $module_debug -eq 1; then 
@@ -2769,6 +2786,10 @@ fi
 
 AC_MSG_CACHE_ADD(Authentication support:     $authmodes)
 AC_MSG_CACHE_ADD(Encryption support:         $encrmodes)
+
+if test "x$all_warnings" != "x"; then
+    AC_MSG_CACHE_ADD(WARNING: $all_warnings)
+fi
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
