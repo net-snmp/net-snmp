@@ -131,7 +131,7 @@ _set_address( struct _if_info *cur_if )
         /*
          * Always want a numeric interface IP address
          */
-        snprintf( cur_if->ip, 128, "%d.%d.%d.%d",
+        snprintf( cur_if->ip, 128, "%lu.%lu.%lu.%lu",
                   vp2->name[10],
                   vp2->name[11],
                   vp2->name[12],
@@ -368,21 +368,18 @@ intpr(int interval)
         }
 
         /*
-         * Insert the IP address and network settings
-         */
-        _set_address( cur_if );
-        i = strlen(cur_if->ip);
-        if (i > max_ip)
-            max_ip = i;
-        i = strlen(cur_if->route);
-        if (i > max_route)
-            max_route = i;
-
-        /*
-         * Add the new _if_stat structure to the list, and
-         *  loop to retrieve the next entry from the table.
+         * Insert the IP address and network settings, and
+         *   add the new _if_stat structure to the list.
          */
         if ( cur_if ) {
+            _set_address( cur_if );
+            i = strlen(cur_if->ip);
+            if (i > max_ip)
+                max_ip = i;
+            i = strlen(cur_if->route);
+            if (i > max_route)
+                max_route = i;
+
             if ( if_tail ) {
                 if_tail->next = cur_if;
                 if_tail       = cur_if;
@@ -507,10 +504,10 @@ sidewaysintpr(unsigned int interval)
     oid    ifcol_oid[]  = { 1,3,6,1,2,1,2,2,1,0,0 };
     size_t ifcol_len    = OID_LENGTH( ifcol_oid );
     netsnmp_variable_list *var, *vp;
-    struct iftot *ip,  *cur_if;       /* single I/F display */
-    struct iftot *sum, *total;        /* overall summary    */
+    struct iftot *ip  = NULL, *cur_if = NULL;    /* single I/F display */
+    struct iftot *sum = NULL, *total  = NULL;    /* overall summary    */
     int    line;
-    int    oldmask, first;
+    int    first;
     int    i;
 
     var = NULL;
