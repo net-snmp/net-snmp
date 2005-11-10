@@ -45,16 +45,107 @@
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/snmp_api.h>
 
+
+// temp debug
+#define NETSNMP_PARANOID_LEVEL_HIGH 1 // temp debug
+
+
+static int _callback_need_init = 1;
 static struct snmp_gen_callback
                *thecallbacks[MAX_CALLBACK_IDS][MAX_CALLBACK_SUBIDS];
 
+#define CALLBACK_NAME_LOGGING 1
+#ifdef CALLBACK_NAME_LOGGING
+static const char *types[MAX_CALLBACK_IDS] = { "LIB", "APP" };
+static const char *lib[MAX_CALLBACK_SUBIDS] = {
+    "POST_READ_CONFIG", /* 0 */
+    "STORE_DATA", /* 1 */
+    "SHUTDOWN", /* 2 */
+    "POST_PREMIB_READ_CONFIG", /* 3 */
+    "LOGGING", /* 4 */
+    "SESSION_INIT", /* 5 */
+    NULL, /* 6 */
+    NULL, /* 7 */
+    NULL, /* 8 */
+    NULL, /* 9 */
+    NULL, /* 10 */
+    NULL, /* 11 */
+    NULL, /* 12 */
+    NULL, /* 13 */
+    NULL, /* 14 */
+    NULL /* 15 */
+};
+#endif
+
 /*
- * extermely simplistic locking, just to find problems were the
+ * extremely simplistic locking, just to find problems were the
  * callback list is modified while being traversed. Not intended
  * to do any real protection, or in any way imply that this code
  * has been evaluated for use in a multi-threaded environment.
+ * In 5.2, it was a single lock. For 5.3, it has been updated to
+ * a lock per callback, since a particular callback may trigger
+ * registration/unregistartion of other callbacks (eg AgentX
+ * subagents do this).
  */
-static int _lock = 0;
+#define LOCK_PER_CALLBACK_SUBID 1
+#ifdef LOCK_PER_CALLBACK_SUBID
+static int _locks[MAX_CALLBACK_IDS][MAX_CALLBACK_SUBIDS];
+#define CALLBACK_LOCK(maj,min) ++_locks[major][minor]
+#define CALLBACK_UNLOCK(maj,min) --_locks[major][minor]
+#else
+static int _lock;
+#define CALLBACK_LOCK(maj,min) ++_lock
+#define CALLBACK_UNLOCK(maj,min) --_lock
+#endif
+
+NETSNMP_STATIC_INLINE int
+_callback_lock(int major, int minor, const char* warn, int assert)
+{
+#ifdef NETSNMP_PARANOID_LEVEL_HIGH
+    if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
+        netsnmp_assert("bad callback id");
+        return 1;
+    }
+#endif
+    
+#ifdef CALLBACK_NAME_LOGGING
+    DEBUGMSGTL(("9:callback:lock", "locked (%s,%s)\n",
+                types[major], (SNMP_CALLBACK_LIBRARY == major) ?
+                lib[minor] : NULL));
+#endif
+    if (CALLBACK_LOCK(major,minor) > 1)
+        {
+        if (NULL != warn)
+            snmp_log(LOG_WARNING,
+                     "_callback_lock already locket in %s\n", warn);
+        if (assert)
+            netsnmp_assert(1==_locks[major][minor]);
+        
+        return 1;
+    }
+    else
+        return 0;
+    
+}
+
+NETSNMP_STATIC_INLINE void
+_callback_unlock(int major, int minor)
+{
+#ifdef NETSNMP_PARANOID_LEVEL_HIGH
+    if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
+        netsnmp_assert("bad callback id");
+        return;
+    }
+#endif
+    
+    CALLBACK_UNLOCK(major,minor);
+
+#ifdef CALLBACK_NAME_LOGGING
+    DEBUGMSGTL(("9:callback:lock", "unlocked (%s,%s)\n",
+                types[major], (SNMP_CALLBACK_LIBRARY == major) ?
+                lib[minor] : NULL));
+#endif
+}
 
 
 /*
@@ -64,16 +155,18 @@ void
 init_callbacks(void)
 {
     /*
-     * probably not needed? Should be full of 0's anyway? 
-     */
-    /*
      * (poses a problem if you put init_callbacks() inside of
      * init_snmp() and then want the app to register a callback before
      * init_snmp() is called in the first place.  -- Wes 
      */
-    /*
-     * memset(thecallbacks, 0, sizeof(thecallbacks)); 
-     */
+    if (0 == _callback_need_init)
+        return;
+    
+    _callback_need_init = 0;
+    
+    memset(thecallbacks, 0, sizeof(thecallbacks)); 
+    memset(_locks, 0, sizeof(_locks));
+    
     DEBUGMSGTL(("callback", "initialized\n"));
 }
 
@@ -129,14 +222,14 @@ netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }
-    if(++_lock > 1) {
-        snmp_log(LOG_WARNING,
-                 "netsnmp_register_callback called while callbacks _locked\n");
-        netsnmp_assert(1==_lock);
-    }
 
+    if (_callback_need_init)
+        init_callbacks();
+
+    _callback_lock(major,minor, "netsnmp_register_callback", 1);
+    
     if ((newscp = SNMP_MALLOC_STRUCT(snmp_gen_callback)) == NULL) {
-        --_lock;
+        _callback_unlock(major,minor);
         return SNMPERR_GENERR;
     } else {
         newscp->priority = priority;
@@ -157,7 +250,7 @@ netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
 
         DEBUGMSGTL(("callback", "registered (%d,%d) at %p with priority %d\n",
                     major, minor, newscp, priority));
-        --_lock;
+        _callback_unlock(major,minor);
         return SNMPERR_SUCCESS;
     }
 }
@@ -184,23 +277,24 @@ snmp_call_callbacks(int major, int minor, void *caller_arg)
 {
     struct snmp_gen_callback *scp;
     unsigned int    count = 0;
-
+    
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }
+    
+    if (_callback_need_init)
+        init_callbacks();
 
-    if(++_lock > 1) {
 #ifdef NETSNMP_PARANOID_LEVEL_HIGH
         /*
          * Notes:
          * - this gets hit the first time a trap is sent after a new trap
          *   destination has been added (session init cb during send trap cb)
          */
-        snmp_log(LOG_WARNING,
-                 "snmp_call_callbacks called while callbacks _locked\n");
-        netsnmp_assert(1==_lock);
+    _callback_lock(major,minor,"snmp_call_callbacks", 1);
+#else
+    _callback_lock(major,minor, NULL, 0);
 #endif
-    }
 
     DEBUGMSGTL(("callback", "START calling callbacks for maj=%d min=%d\n",
                 major, minor));
@@ -231,7 +325,7 @@ snmp_call_callbacks(int major, int minor, void *caller_arg)
                 "END calling callbacks for maj=%d min=%d (%d called)\n",
                 major, minor, count));
 
-    --_lock;
+    _callback_unlock(major,minor);
     return SNMPERR_SUCCESS;
 }
 
@@ -244,6 +338,9 @@ snmp_count_callbacks(int major, int minor)
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }
+    
+    if (_callback_need_init)
+        init_callbacks();
 
     for (scp = thecallbacks[major][minor]; scp != NULL; scp = scp->next) {
         count++;
@@ -258,6 +355,9 @@ snmp_callback_available(int major, int minor)
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }
+    
+    if (_callback_need_init)
+        init_callbacks();
 
     if (thecallbacks[major][minor] != NULL) {
         return SNMPERR_SUCCESS;
@@ -300,23 +400,28 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
     struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
     int             count = 0;
 
-    if(++_lock > 1) {
-        snmp_log(LOG_WARNING,
-                 "snmp_unregister_callback called while callbacks _locked\n");
+    if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS)
+        return SNMPERR_GENERR;
+
+    if (_callback_need_init)
+        init_callbacks();
+
 #ifdef NETSNMP_PARANOID_LEVEL_HIGH
         /*
          * Notes;
          * - this gets hit at shutdown, during cleanup. No easy fix.
          */
-        netsnmp_assert(1==_lock);
+    _callback_lock(major,minor,"snmp_unregister_callback", 1);
+#else
+    _callback_lock(major,minor,"snmp_unregister_callback", 0);
 #endif
-    }
+
     while (scp != NULL) {
         if ((scp->sc_callback == target) &&
             (!matchargs || (scp->sc_client_arg == arg))) {
             DEBUGMSGTL(("callback", "unregistering (%d,%d) at %p\n", major,
                         minor, scp));
-            if(_lock == 1) {
+            if(1 == _locks[major][minor]) {
                 *prevNext = scp->next;
                 SNMP_FREE(scp);
                 scp = *prevNext;
@@ -332,7 +437,7 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
         }
     }
 
-    --_lock;
+    _callback_unlock(major,minor);
     return count;
 }
 
@@ -384,14 +489,13 @@ clear_callback(void)
     unsigned int i = 0, j = 0;
     struct snmp_gen_callback *scp = NULL;
 
-    if(++_lock > 1) {
-        snmp_log(LOG_WARNING,
-                 "clear_callback called while callbacks _locked\n");
-        netsnmp_assert(1==_lock);
-    }
+    if (_callback_need_init)
+        init_callbacks();
+
     DEBUGMSGTL(("callback", "clear callback\n"));
     for (i = 0; i < MAX_CALLBACK_IDS; i++) {
         for (j = 0; j < MAX_CALLBACK_SUBIDS; j++) {
+            _callback_lock(i,j, "clear_callback", 1);
             scp = thecallbacks[i][j];
             while (scp != NULL) {
                 thecallbacks[i][j] = scp->next;
@@ -417,14 +521,17 @@ clear_callback(void)
                 SNMP_FREE(scp);
                 scp = thecallbacks[i][j];
             }
+            _callback_unlock(i,j);
         }
     }
-    --_lock;
 }
 
 struct snmp_gen_callback *
 snmp_callback_list(int major, int minor)
 {
+    if (_callback_need_init)
+        init_callbacks();
+
     return (thecallbacks[major][minor]);
 }
 /**  @} */
