@@ -65,8 +65,8 @@ extern int	af;		/* address family */
 
 extern	char *__progname; /* program name, from crt0.o */
 
-char	*plural(int);
-char	*plurales(int);
+const char	*plural(int);
+const char	*plurales(int);
 
 void	tcpprotopr(char *);
 void	udpprotopr(char *);
