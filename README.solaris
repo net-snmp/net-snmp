@@ -1208,7 +1208,7 @@ to /usr/local/net-snmp
 
 and modify your /usr/local/share/snmp/snmpd.conf file to contain the entry:
 
-perl do "/usr/local/net-snmp/perl_module.pl"
+perl do "/usr/local/net-snmp/perl_module.pl";
 
 then do:
 
