@@ -1083,10 +1083,12 @@ receive(void)
         }
 
         /*
-         * default to sleeping for a really long time
+         * default to sleeping for a really long time. INT_MAX
+         * should be sufficient (eg we don't care if time_t is
+         * a long that's bigger than an int).
          */
         tvp = &timeout;
-        tvp->tv_sec = LONG_MAX;
+        tvp->tv_sec = INT_MAX;
         tvp->tv_usec = 0;
 
         numfds = 0;
