@@ -47,6 +47,7 @@ static char *rcsid = "$OpenBSD: main.c,v 1.52 2005/02/10 14:25:08 itojun Exp $";
 #endif
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/utilities.h>
 #include <net-snmp/net-snmp-includes.h>
 
 #if HAVE_NETDB_H
@@ -502,16 +503,15 @@ name2protox(char *name)
 static void
 usage(void)
 {
-	/* XXX - TODO */
 	(void)fprintf(stderr,
-"usage: %s [-Aan] [-f address_family] [-M core] [-N system]\n", progname);
+"usage: %s [snmp_opts] [-Can] [-Cf address_family]\n", progname);
 	(void)fprintf(stderr,
-"       %s [-bdgilmnqrSstu] [-f address_family] [-M core] [-N system]\n", progname);
+"       %s [snmp_opts] [-CbdgimnrSs] [-Cf address_family]\n", progname);
 	(void)fprintf(stderr,
-"       %s [-bdn] [-I interface] [-M core] [-N system] [-w wait]\n", progname);
+"       %s [snmp_opts] [-Cbdn] [-CI interface] [-Cw wait]\n", progname);
 	(void)fprintf(stderr,
-"       %s [-s] [-M core] [-N system] [-p protocol]\n", progname);
+"       %s [snmp_opts] [-Cs] [-Cp protocol]\n", progname);
 	(void)fprintf(stderr,
-"       %s [-a] [-f address_family] [-i | -I interface]\n", progname);
+"       %s [snmp_opts] [-Ca] [-Cf address_family] [-Ci | -CI interface]\n", progname);
 	exit(1);
 }
