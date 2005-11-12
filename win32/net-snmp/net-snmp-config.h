@@ -1646,6 +1646,10 @@ typedef __int64 int64_t;
   #endif
 #endif
 
+#ifndef NI_MAXHOST
+#define NI_MAXHOST	1025
+#endif
+
 /*
  * Module configuration and control starts here.
  *
