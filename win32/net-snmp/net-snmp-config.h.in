@@ -1647,7 +1647,9 @@ typedef unsigned short   uint16_t;
   #endif
 #endif
 
+#ifndef NI_MAXHOST
 #define NI_MAXHOST	1025
+#endif
 
 /*
  * Module configuration and control starts here.
