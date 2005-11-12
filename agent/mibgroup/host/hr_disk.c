@@ -232,7 +232,7 @@ typedef struct _conf_disk_list {
     conf_disk_item *list_item;
     struct _conf_disk_list *list_next;
 } conf_disk_list;
-static conf_disk_list *conf_list;
+static conf_disk_list *conf_list = NULL;
 
 static int      match_disk_config(const char *);
 static int      match_disk_config_item(const char *, conf_disk_item *);
