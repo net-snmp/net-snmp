@@ -41,8 +41,9 @@ NSB_SKIP_INSTALL=${NSB_SKIP_INSTALL:=0}
 NSB_ERR_CTX_LINES=${NSB_ERR_CTX_LINES:=25}
 NSB_DIST_TRANSPORTS="UDP TCP Unix Callback"
 NSB_EXTRA_TRANSPORTS=""
-NSB_DIST_MODULES="host disman/event-mib smux"
-NSB_EXTRA_MODULES="examples examples/example testhandler smux Rmon disman/event-mib"
+NSB_DIST_MODULES=${NSB_DIST_MODULES:="host disman/event-mib smux"}
+NSB_EXTRA_MODULES=${NSB_EXTRA_MODULES:="examples examples/example smux Rmon"}
+#testhandler
 NSB_EXTRA_CONFIG=${NSB_EXTRA_CONFIG:=""}
 NSB_VIEW=cat
 NSB_PERL=
@@ -330,10 +331,10 @@ nsb-make()
    # checking $? would only get us the rc from tee, which is useless
 
    nsb-info "Checking for errors..."
-   egrep "[Ee]rror|FAIL|[Ww]arn|No |exists|\*\*\*" $nsb_make_OUTPUT \
+   egrep -i "error|fail|warn|no such|exists|\*\*\*" $nsb_make_OUTPUT \
          > nsb-make-$target-allerrs.$NSB_DATE
    # allow for a few exceptions
-   egrep -v "[Ww]arn|error(mib|\.3)|In function" nsb-make-$target-allerrs.$NSB_DATE \
+   egrep -v -i "testing .*failure|[a-z&]fail|warn|error(mib|\.3)|In function" nsb-make-$target-allerrs.$NSB_DATE \
          > nsb-make-$target-errs.$NSB_DATE
    if [ -s nsb-make-$target-errs.$NSB_DATE ]; then
       nsb-prompt "press enter to view errors"
@@ -447,6 +448,8 @@ nsb-build()
       nsb-info "Skipping 'make test'"
    else
       nsb-prompt "No errors found, press enter to run tests"
+      SNMP_TMPDIR_BASE=$build_dir/tests
+      export SNMP_TMPDIR_BASE
       nsb-make test
    fi
 
