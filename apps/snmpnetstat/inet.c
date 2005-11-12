@@ -462,6 +462,9 @@ inetname(struct in_addr *inp)
 	struct netent *np;
 	static char domain[MAXHOSTNAMELEN];
 	static int first = 1;
+#if defined (WIN32) || defined (cygwin)
+        char host_temp[] = "localhost";
+#endif
 
 	if (first && !nflag) {
 		first = 0;
@@ -487,7 +490,15 @@ inetname(struct in_addr *inp)
 				if ((cp = strchr(hp->h_name, '.')) &&
 				    !strcmp(cp + 1, domain))
 					*cp = '\0';
-				cp = hp->h_name;
+#if defined (WIN32) || defined (cygwin)
+                                        /* Windows insists on returning the computer name for 127.0.0.1
+                                         * even if the hosts file lists something else such as 'localhost'.
+                                         * If we are trying to look up 127.0.0.1, just return 'localhost'   */
+                                        if (!strcmp(inet_ntoa(*inp),"127.0.0.1"))
+                                             cp = host_temp;
+                                        else
+#endif                                          
+        				     cp = hp->h_name;
 			}
 		}
 	}
