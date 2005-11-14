@@ -235,23 +235,6 @@ ipe./agent_index.lo: mibgroup/target/target_counters.h
 ipe./agent_index.lo: mibgroup/agent/nsTransactionTable.h
 ipe./agent_index.lo: mibgroup/agent/nsModuleTable.h mibgroup/agent/nsDebug.h
 ipe./agent_index.lo: mibgroup/agent/nsCache.h mibgroup/agent/nsLogging.h
-ipe./agent_index.lo: mibgroup/disman/event/mteScalars.h
-ipe./agent_index.lo: mibgroup/disman/event/mteTrigger.h
-ipe./agent_index.lo: mibgroup/disman/event/mteTriggerTable.h
-ipe./agent_index.lo: mibgroup/disman/event/mteTriggerDeltaTable.h
-ipe./agent_index.lo: mibgroup/disman/event/mteTriggerExistenceTable.h
-ipe./agent_index.lo: mibgroup/disman/event/mteTriggerBooleanTable.h
-ipe./agent_index.lo: mibgroup/disman/event/mteTriggerThresholdTable.h
-ipe./agent_index.lo: mibgroup/disman/event/mteTriggerConf.h
-ipe./agent_index.lo: mibgroup/disman/event/mteEvent.h
-ipe./agent_index.lo: ../agent/mibgroup/disman/event/mteTrigger.h
-ipe./agent_index.lo: mibgroup/disman/event/mteEventTable.h
-ipe./agent_index.lo: mibgroup/disman/event/mteEventSetTable.h
-ipe./agent_index.lo: mibgroup/disman/event/mteEventNotificationTable.h
-ipe./agent_index.lo: mibgroup/disman/event/mteEventConf.h
-ipe./agent_index.lo: mibgroup/disman/event/mteObjects.h
-ipe./agent_index.lo: mibgroup/disman/event/mteObjectsTable.h
-ipe./agent_index.lo: mibgroup/disman/event/mteObjectsConf.h
 ipe./agent_index.lo: mibgroup/disman/schedule/schedCore.h
 ipe./agent_index.lo: mibgroup/disman/schedule/schedConf.h
 ipe./agent_index.lo: mibgroup/disman/schedule/schedTable.h
@@ -275,6 +258,23 @@ ipe./agent_index.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNo
 ipe./agent_index.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface.h
 ipe./agent_index.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable.h
 ipe./agent_index.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access.h
+ipe./agent_index.lo: mibgroup/disman/event/mteScalars.h
+ipe./agent_index.lo: mibgroup/disman/event/mteTrigger.h
+ipe./agent_index.lo: mibgroup/disman/event/mteTriggerTable.h
+ipe./agent_index.lo: mibgroup/disman/event/mteTriggerDeltaTable.h
+ipe./agent_index.lo: mibgroup/disman/event/mteTriggerExistenceTable.h
+ipe./agent_index.lo: mibgroup/disman/event/mteTriggerBooleanTable.h
+ipe./agent_index.lo: mibgroup/disman/event/mteTriggerThresholdTable.h
+ipe./agent_index.lo: mibgroup/disman/event/mteTriggerConf.h
+ipe./agent_index.lo: mibgroup/disman/event/mteEvent.h
+ipe./agent_index.lo: ../agent/mibgroup/disman/event/mteTrigger.h
+ipe./agent_index.lo: mibgroup/disman/event/mteEventTable.h
+ipe./agent_index.lo: mibgroup/disman/event/mteEventSetTable.h
+ipe./agent_index.lo: mibgroup/disman/event/mteEventNotificationTable.h
+ipe./agent_index.lo: mibgroup/disman/event/mteEventConf.h
+ipe./agent_index.lo: mibgroup/disman/event/mteObjects.h
+ipe./agent_index.lo: mibgroup/disman/event/mteObjectsTable.h
+ipe./agent_index.lo: mibgroup/disman/event/mteObjectsConf.h
 ipe./agent_index.lo: mibgroup/if-mib/ifTable/ifTable.h
 ipe./agent_index.lo: ../include/net-snmp/data_access/interface.h
 ipe./agent_index.lo: mibgroup/if-mib/ifTable/ifTable_constants.h
@@ -429,10 +429,8 @@ ipe./agent_read_config.lo: mibgroup/struct.h snmpd.h
 ipe./agent_read_config.lo: ../include/net-snmp/agent/agent_callbacks.h
 ipe./agent_read_config.lo: ../agent/mibgroup/agent_module_includes.h
 ipe./agent_read_config.lo: mibgroup/snmpv3/usmConf.h
-ipe./agent_read_config.lo: mibgroup/agentx/subagent.h
 ipe./agent_read_config.lo: mibgroup/utilities/iquery.h mibgroup/smux/smux.h
 ipe./agent_read_config.lo: mibgroup/mibII/vacm_conf.h
-ipe./agent_read_config.lo: mibgroup/agentx/agentx_config.h
 ipe./agent_read_config.lo: ../agent/mibgroup/mib_module_includes.h
 ipe./agent_read_config.lo: mibgroup/examples/example.h mibgroup/testhandler.h
 ipe./agent_read_config.lo: mibgroup/mibII/system_mib.h
@@ -472,23 +470,6 @@ ipe./agent_read_config.lo: mibgroup/agent/nsTransactionTable.h
 ipe./agent_read_config.lo: mibgroup/agent/nsModuleTable.h
 ipe./agent_read_config.lo: mibgroup/agent/nsDebug.h mibgroup/agent/nsCache.h
 ipe./agent_read_config.lo: mibgroup/agent/nsLogging.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteScalars.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteTrigger.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteTriggerTable.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteTriggerDeltaTable.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteTriggerExistenceTable.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteTriggerBooleanTable.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteTriggerThresholdTable.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteTriggerConf.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteEvent.h
-ipe./agent_read_config.lo: ../agent/mibgroup/disman/event/mteTrigger.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteEventTable.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteEventSetTable.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteEventNotificationTable.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteEventConf.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteObjects.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteObjectsTable.h
-ipe./agent_read_config.lo: mibgroup/disman/event/mteObjectsConf.h
 ipe./agent_read_config.lo: mibgroup/disman/schedule/schedCore.h
 ipe./agent_read_config.lo: mibgroup/disman/schedule/schedConf.h
 ipe./agent_read_config.lo: mibgroup/disman/schedule/schedTable.h
@@ -518,6 +499,23 @@ ipe./agent_read_config.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/
 ipe./agent_read_config.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface.h
 ipe./agent_read_config.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable.h
 ipe./agent_read_config.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteScalars.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteTrigger.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteTriggerTable.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteTriggerDeltaTable.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteTriggerExistenceTable.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteTriggerBooleanTable.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteTriggerThresholdTable.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteTriggerConf.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteEvent.h
+ipe./agent_read_config.lo: ../agent/mibgroup/disman/event/mteTrigger.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteEventTable.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteEventSetTable.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteEventNotificationTable.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteEventConf.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteObjects.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteObjectsTable.h
+ipe./agent_read_config.lo: mibgroup/disman/event/mteObjectsConf.h
 ipe./agent_read_config.lo: mibgroup/if-mib/ifTable/ifTable.h
 ipe./agent_read_config.lo: ../include/net-snmp/data_access/interface.h
 ipe./agent_read_config.lo: mibgroup/if-mib/ifTable/ifTable_constants.h
@@ -705,23 +703,6 @@ ipe./agent_registry.lo: mibgroup/agent/nsTransactionTable.h
 ipe./agent_registry.lo: mibgroup/agent/nsModuleTable.h
 ipe./agent_registry.lo: mibgroup/agent/nsDebug.h mibgroup/agent/nsCache.h
 ipe./agent_registry.lo: mibgroup/agent/nsLogging.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteScalars.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteTrigger.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteTriggerTable.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteTriggerDeltaTable.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteTriggerExistenceTable.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteTriggerBooleanTable.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteTriggerThresholdTable.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteTriggerConf.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteEvent.h
-ipe./agent_registry.lo: ../agent/mibgroup/disman/event/mteTrigger.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteEventTable.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteEventSetTable.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteEventNotificationTable.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteEventConf.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteObjects.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteObjectsTable.h
-ipe./agent_registry.lo: mibgroup/disman/event/mteObjectsConf.h
 ipe./agent_registry.lo: mibgroup/disman/schedule/schedCore.h
 ipe./agent_registry.lo: mibgroup/disman/schedule/schedConf.h
 ipe./agent_registry.lo: mibgroup/disman/schedule/schedTable.h
@@ -749,6 +730,23 @@ ipe./agent_registry.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snm
 ipe./agent_registry.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface.h
 ipe./agent_registry.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable.h
 ipe./agent_registry.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteScalars.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteTrigger.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteTriggerTable.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteTriggerDeltaTable.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteTriggerExistenceTable.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteTriggerBooleanTable.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteTriggerThresholdTable.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteTriggerConf.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteEvent.h
+ipe./agent_registry.lo: ../agent/mibgroup/disman/event/mteTrigger.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteEventTable.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteEventSetTable.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteEventNotificationTable.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteEventConf.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteObjects.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteObjectsTable.h
+ipe./agent_registry.lo: mibgroup/disman/event/mteObjectsConf.h
 ipe./agent_registry.lo: mibgroup/if-mib/ifTable/ifTable.h
 ipe./agent_registry.lo: ../include/net-snmp/data_access/interface.h
 ipe./agent_registry.lo: mibgroup/if-mib/ifTable/ifTable_constants.h
@@ -1011,23 +1009,6 @@ ipe./mib_modules.lo: mibgroup/target/target_counters.h
 ipe./mib_modules.lo: mibgroup/agent/nsTransactionTable.h
 ipe./mib_modules.lo: mibgroup/agent/nsModuleTable.h mibgroup/agent/nsDebug.h
 ipe./mib_modules.lo: mibgroup/agent/nsCache.h mibgroup/agent/nsLogging.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteScalars.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteTrigger.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteTriggerTable.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteTriggerDeltaTable.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteTriggerExistenceTable.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteTriggerBooleanTable.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteTriggerThresholdTable.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteTriggerConf.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteEvent.h
-ipe./mib_modules.lo: ../agent/mibgroup/disman/event/mteTrigger.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteEventTable.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteEventSetTable.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteEventNotificationTable.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteEventConf.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteObjects.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteObjectsTable.h
-ipe./mib_modules.lo: mibgroup/disman/event/mteObjectsConf.h
 ipe./mib_modules.lo: mibgroup/disman/schedule/schedCore.h
 ipe./mib_modules.lo: mibgroup/disman/schedule/schedConf.h
 ipe./mib_modules.lo: mibgroup/disman/schedule/schedTable.h
@@ -1051,6 +1032,23 @@ ipe./mib_modules.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNo
 ipe./mib_modules.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface.h
 ipe./mib_modules.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable.h
 ipe./mib_modules.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteScalars.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteTrigger.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteTriggerTable.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteTriggerDeltaTable.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteTriggerExistenceTable.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteTriggerBooleanTable.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteTriggerThresholdTable.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteTriggerConf.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteEvent.h
+ipe./mib_modules.lo: ../agent/mibgroup/disman/event/mteTrigger.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteEventTable.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteEventSetTable.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteEventNotificationTable.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteEventConf.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteObjects.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteObjectsTable.h
+ipe./mib_modules.lo: mibgroup/disman/event/mteObjectsConf.h
 ipe./mib_modules.lo: mibgroup/if-mib/ifTable/ifTable.h
 ipe./mib_modules.lo: ../include/net-snmp/data_access/interface.h
 ipe./mib_modules.lo: mibgroup/if-mib/ifTable/ifTable_constants.h
@@ -1514,9 +1512,8 @@ ipe./snmp_vars.lo: ../include/net-snmp/agent/agent_module_config.h
 ipe./snmp_vars.lo: ../include/net-snmp/agent/mib_modules.h kernel.h
 ipe./snmp_vars.lo: mibgroup/struct.h snmpd.h
 ipe./snmp_vars.lo: ../agent/mibgroup/agent_module_includes.h
-ipe./snmp_vars.lo: mibgroup/snmpv3/usmConf.h mibgroup/agentx/subagent.h
-ipe./snmp_vars.lo: mibgroup/utilities/iquery.h mibgroup/smux/smux.h
-ipe./snmp_vars.lo: mibgroup/mibII/vacm_conf.h mibgroup/agentx/agentx_config.h
+ipe./snmp_vars.lo: mibgroup/snmpv3/usmConf.h mibgroup/utilities/iquery.h
+ipe./snmp_vars.lo: mibgroup/smux/smux.h mibgroup/mibII/vacm_conf.h
 ipe./snmp_vars.lo: ../agent/mibgroup/mib_module_includes.h
 ipe./snmp_vars.lo: mibgroup/examples/example.h mibgroup/testhandler.h
 ipe./snmp_vars.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
@@ -1546,23 +1543,6 @@ ipe./snmp_vars.lo: mibgroup/target/target_counters.h
 ipe./snmp_vars.lo: mibgroup/agent/nsTransactionTable.h
 ipe./snmp_vars.lo: mibgroup/agent/nsModuleTable.h mibgroup/agent/nsDebug.h
 ipe./snmp_vars.lo: mibgroup/agent/nsCache.h mibgroup/agent/nsLogging.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteScalars.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteTrigger.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteTriggerTable.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteTriggerDeltaTable.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteTriggerExistenceTable.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteTriggerBooleanTable.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteTriggerThresholdTable.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteTriggerConf.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteEvent.h
-ipe./snmp_vars.lo: ../agent/mibgroup/disman/event/mteTrigger.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteEventTable.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteEventSetTable.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteEventNotificationTable.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteEventConf.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteObjects.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteObjectsTable.h
-ipe./snmp_vars.lo: mibgroup/disman/event/mteObjectsConf.h
 ipe./snmp_vars.lo: mibgroup/disman/schedule/schedCore.h
 ipe./snmp_vars.lo: mibgroup/disman/schedule/schedConf.h
 ipe./snmp_vars.lo: mibgroup/disman/schedule/schedTable.h
@@ -1585,6 +1565,23 @@ ipe./snmp_vars.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNoti
 ipe./snmp_vars.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface.h
 ipe./snmp_vars.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable.h
 ipe./snmp_vars.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteScalars.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteTrigger.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteTriggerTable.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteTriggerDeltaTable.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteTriggerExistenceTable.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteTriggerBooleanTable.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteTriggerThresholdTable.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteTriggerConf.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteEvent.h
+ipe./snmp_vars.lo: ../agent/mibgroup/disman/event/mteTrigger.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteEventTable.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteEventSetTable.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteEventNotificationTable.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteEventConf.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteObjects.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteObjectsTable.h
+ipe./snmp_vars.lo: mibgroup/disman/event/mteObjectsConf.h
 ipe./snmp_vars.lo: mibgroup/if-mib/ifTable/ifTable.h
 ipe./snmp_vars.lo: ../include/net-snmp/data_access/interface.h
 ipe./snmp_vars.lo: mibgroup/if-mib/ifTable/ifTable_constants.h
@@ -1762,23 +1759,6 @@ ipe./snmpd.lo: mibgroup/target/target_counters.h
 ipe./snmpd.lo: mibgroup/agent/nsTransactionTable.h
 ipe./snmpd.lo: mibgroup/agent/nsModuleTable.h mibgroup/agent/nsDebug.h
 ipe./snmpd.lo: mibgroup/agent/nsCache.h mibgroup/agent/nsLogging.h
-ipe./snmpd.lo: mibgroup/disman/event/mteScalars.h
-ipe./snmpd.lo: mibgroup/disman/event/mteTrigger.h
-ipe./snmpd.lo: mibgroup/disman/event/mteTriggerTable.h
-ipe./snmpd.lo: mibgroup/disman/event/mteTriggerDeltaTable.h
-ipe./snmpd.lo: mibgroup/disman/event/mteTriggerExistenceTable.h
-ipe./snmpd.lo: mibgroup/disman/event/mteTriggerBooleanTable.h
-ipe./snmpd.lo: mibgroup/disman/event/mteTriggerThresholdTable.h
-ipe./snmpd.lo: mibgroup/disman/event/mteTriggerConf.h
-ipe./snmpd.lo: mibgroup/disman/event/mteEvent.h
-ipe./snmpd.lo: ../agent/mibgroup/disman/event/mteTrigger.h
-ipe./snmpd.lo: mibgroup/disman/event/mteEventTable.h
-ipe./snmpd.lo: mibgroup/disman/event/mteEventSetTable.h
-ipe./snmpd.lo: mibgroup/disman/event/mteEventNotificationTable.h
-ipe./snmpd.lo: mibgroup/disman/event/mteEventConf.h
-ipe./snmpd.lo: mibgroup/disman/event/mteObjects.h
-ipe./snmpd.lo: mibgroup/disman/event/mteObjectsTable.h
-ipe./snmpd.lo: mibgroup/disman/event/mteObjectsConf.h
 ipe./snmpd.lo: mibgroup/disman/schedule/schedCore.h
 ipe./snmpd.lo: mibgroup/disman/schedule/schedConf.h
 ipe./snmpd.lo: mibgroup/disman/schedule/schedTable.h
@@ -1801,6 +1781,23 @@ ipe./snmpd.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFi
 ipe./snmpd.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface.h
 ipe./snmpd.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable.h
 ipe./snmpd.lo: mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access.h
+ipe./snmpd.lo: mibgroup/disman/event/mteScalars.h
+ipe./snmpd.lo: mibgroup/disman/event/mteTrigger.h
+ipe./snmpd.lo: mibgroup/disman/event/mteTriggerTable.h
+ipe./snmpd.lo: mibgroup/disman/event/mteTriggerDeltaTable.h
+ipe./snmpd.lo: mibgroup/disman/event/mteTriggerExistenceTable.h
+ipe./snmpd.lo: mibgroup/disman/event/mteTriggerBooleanTable.h
+ipe./snmpd.lo: mibgroup/disman/event/mteTriggerThresholdTable.h
+ipe./snmpd.lo: mibgroup/disman/event/mteTriggerConf.h
+ipe./snmpd.lo: mibgroup/disman/event/mteEvent.h
+ipe./snmpd.lo: ../agent/mibgroup/disman/event/mteTrigger.h
+ipe./snmpd.lo: mibgroup/disman/event/mteEventTable.h
+ipe./snmpd.lo: mibgroup/disman/event/mteEventSetTable.h
+ipe./snmpd.lo: mibgroup/disman/event/mteEventNotificationTable.h
+ipe./snmpd.lo: mibgroup/disman/event/mteEventConf.h
+ipe./snmpd.lo: mibgroup/disman/event/mteObjects.h
+ipe./snmpd.lo: mibgroup/disman/event/mteObjectsTable.h
+ipe./snmpd.lo: mibgroup/disman/event/mteObjectsConf.h
 ipe./snmpd.lo: mibgroup/if-mib/ifTable/ifTable.h
 ipe./snmpd.lo: ../include/net-snmp/data_access/interface.h
 ipe./snmpd.lo: mibgroup/if-mib/ifTable/ifTable_constants.h
