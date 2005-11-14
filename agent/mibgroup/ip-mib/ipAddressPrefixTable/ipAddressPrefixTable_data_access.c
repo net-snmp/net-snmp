@@ -248,8 +248,6 @@ ipAddressPrefixTable_container_load(netsnmp_container * container)
                                       addr_rowreq_ctx->tbl_idx.ipAddressAddr,
                                       addr_rowreq_ctx->data->ia_address_len,
                                       addr_rowreq_ctx->data->ia_prefix_len);
-//         tmp_pfx_len = (addr_rowreq_ctx->data->ia_prefix_len % 8) ? 1 : 0;
-//         tmp_pfx_len += (addr_rowreq_ctx->data->ia_prefix_len / 8);
         if (MFD_SUCCESS !=
             ipAddressPrefixTable_indexes_set(rowreq_ctx,
                                              addr_rowreq_ctx->data->if_index,
