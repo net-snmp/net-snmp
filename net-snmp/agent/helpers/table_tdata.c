@@ -410,7 +410,6 @@ netsnmp_tdata_row_entry( netsnmp_tdata_row *row )
         return row->data;
     else
         return NULL;
-    //return ( row ? row->data : NULL );
 }
 
 /** returns the first row in the table */
