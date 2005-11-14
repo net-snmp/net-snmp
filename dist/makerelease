@@ -112,14 +112,15 @@ my $pkg = "net-snmp-${version}.tar.gz";
 
 my $sig;
 
-if ($me =~ /(rstory|hardaker)/) {
+system("gpg --list-secret-keys net-snmp-admin");
+if($? != 0) {
+    $sig = "net-snmp-${version}.tar.gz.md5";
+    System("release:md5","md5sum $pkg > $sig");
+} else {
     # currently only rstory and hardaker have the gpg keys till Wes
     # sees someone else in person ;-)
     $sig = "net-snmp-${version}.tar.gz.asc";
     System("release:gpg","gpg -u net-snmp-admin -a --detach-sign $pkg");
-} else {
-    $sig = "net-snmp-${version}.tar.gz.md5";
-    System("release:md5","md5sum $pkg > $sig");
 }
 
 #
