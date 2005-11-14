@@ -393,6 +393,9 @@ netsnmp_container_table_row_insert(netsnmp_request_info *request,
      * (by constructing OIDs from these index values)
      */
     for (; req; req=req->next) {
+        if (req->processed) 
+            continue;
+        
         table_info = netsnmp_extract_table_info(req);
         that_index = table_info->indexes;
         build_oid_noalloc(that_oid, MAX_OID_LEN, &that_oid_len,
