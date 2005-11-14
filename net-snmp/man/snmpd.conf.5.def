@@ -900,62 +900,47 @@ In either case, the command should continue running.
 The default registration priority can be changed using the optional
 -p flag, just as for the \fIpass\fR directive.
 .SS "Embedded Perl Support"
-.PP
-Warning: though embedded perl is working, not much functionality has
-been implemented yet and thus writing mib module pieces for the agent
-within perl is not trivial at this point.  It should get better in
-future releases.
-.PP
-The net-snmp package has ability to call perl scripts directly inside
-the agent through embedded perl technology (similar to mod_perl for
-the apache web server).  This must be turned on at compile time by
-passing --enable-embedded-perl to the configure script when the
-package is built.  To see if your package was built with embedded
-perl, run "net-snmp-config --configure-options" and see if that flag
-was used.
-.PP
-If compiled in, it defines the following snmpd.conf configuration
-directives:
-.IP "disablePerl true"
-This will turn off perl support entirely.  If the embedded perl
-support stops working due to a change in perl, etc, this will stop any
-calls to the perl core.
+The previous extension programs can be written in any convenient
+programming language - including perl, which is a common choice for
+pass-through extensions in particular.  However the Net-SNMP agent
+also includes support for embedded perl technology (similar to
+\fImod_perl\fR for the the Apache web server).  This allows the agent
+to interpret perl scripts directly, thus avoiding the overhead of
+initializing the perl system when a request is received.
+This mechanism is not part of the default build environment, and must
+be explicitly included by specifying the '--enable-embedded-perl'
+option to the configure script when the package is first built.
+.IP
+If enabled, the following directives will be recognised:
+.IP "disablePerl [true|false]"
+can turn off embedded perl support entirely (e.g. if there are problems
+with the perl installation).
 
 .IP "perlInitFile FILE"
-Use FILE as the initialization file.  This file is normally
-DATADIR/snmp/snmp_perl.pl but this token can override that default.
-This file performs any in-perl initialization that is needed before
-the rest of the perl directives (below) are called.  It is sourced
-once just before the first perl directive is parsed.  See the default
-file for an example of the initialization it performs.
+loads the specified initialisation file (instead of the default
+DATADIR/snmp/snmp_perl.pl)
+immediately before the first \fIperl\fR directive is parsed.
+The default initialisation script creates a \fC$agent\fR variable
+(a \fCNetSnmp::agent\fR object) which can be used to register
+perl-based MIB handler routines.
 .IP "perl EXPRESSION"
-Calls perl to evaluate an expression.  Normally you'd want to do
-something like register a function to call when an OID is requested,
-but you can really do anything perl related you want.  For example:
-.IP
-perl print "hello world\\n";
-.IP
-is the most basic hello world example.
-.IP
-The init script by default initializes a $agent variable which
-is a pointer to a NetSnmp::agent object through which you can register
-callbacks when a section of the OID tree is hit:
+evaluates the given expression.  This would typically register a
+handler routine to be called when a section of the OID tree was
+requested:
 .nf
 perl use Data::Dumper;
 perl sub myroutine  { print "got called: ",Dumper(@_),"\\n"; }
 perl $agent->register('mylink', '.1.3.6.1.8765', \\&myroutine);
 .fi
 .IP
-Sourcing an external file:
+This expression could also source an external file:
 .RS
 .nf
 perl 'do /path/to/file.pl';
 .fi
 .RE
 .IP
-No better examples exist at the moment, unfortunately.  Look for
-improved support in future releases.  Comments on how this looks as an
-architecture are certainly appreciated now.
+or perform any other perl-based processing that might be required.
 .SS Dynamically Loadable Modules
 If the agent is built with support for the UCD-DLMOD-MIB it is capable
 of loading agent MIB modules dynamically at startup through
