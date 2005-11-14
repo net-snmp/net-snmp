@@ -1,11 +1,36 @@
-.TH "A generic callback mechanism" 3 "7 Nov 2005" "Version 5.2" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "14 Nov 2005" "Version 5.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 A generic callback mechanism \- 
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBNETSNMP_PARANOID_LEVEL_HIGH\fP   1"
+.br
+.ti -1c
+.RI "#define \fBCALLBACK_NAME_LOGGING\fP   1"
+.br
+.ti -1c
+.RI "#define \fBLOCK_PER_CALLBACK_SUBID\fP   1"
+.br
+.ti -1c
+.RI "#define \fBCALLBACK_LOCK\fP(maj, min)   ++_locks[major][minor]"
+.br
+.ti -1c
+.RI "#define \fBCALLBACK_UNLOCK\fP(maj, min)   --_locks[major][minor]"
+.br
+.in -1c
 .SS "Functions"
 
 .in +1c
+.ti -1c
+.RI "NETSNMP_STATIC_INLINE int \fB_callback_lock\fP (int major, int minor, const char *warn, int assert)"
+.br
+.ti -1c
+.RI "NETSNMP_STATIC_INLINE void \fB_callback_unlock\fP (int major, int minor)"
+.br
 .ti -1c
 .RI "void \fBinit_callbacks\fP (void)"
 .br
@@ -58,7 +83,7 @@ find and clear client args that match ptr
 .PP
 
 .PP
-Definition at line 347 of file callback.c.
+Definition at line 452 of file callback.c.
 .SS "int snmp_call_callbacks (int major, int minor, void * caller_arg)"
 .PP
 This function calls the callback function for each registered callback of type major and minor. 
@@ -86,9 +111,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 .PP
 
 .PP
-Definition at line 183 of file callback.c.
-.PP
-References snmp_log().
+Definition at line 276 of file callback.c.
 .PP
 Referenced by netsnmp_acm_check_subtree(), netsnmp_register_mib_table_row(), snmp_shutdown(), and unregister_mib_context().
 .SS "int snmp_register_callback (int major, int minor, SNMPCallback * new_callback, void * arg)"
@@ -145,7 +168,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 .PP
 
 .PP
-Definition at line 115 of file callback.c.
+Definition at line 208 of file callback.c.
 .PP
 Referenced by netsnmp_register_save_list().
 .SS "int snmp_unregister_callback (int major, int minor, SNMPCallback * target, void * arg, int matchargs)"
@@ -182,6 +205,6 @@ Returns the number of callbacks that were unregistered.
 .PP
 set cleanup flag? 
 .PP
-Definition at line 296 of file callback.c.
+Definition at line 396 of file callback.c.
 .PP
-References SNMP_FREE, and snmp_log().
+References SNMP_FREE.

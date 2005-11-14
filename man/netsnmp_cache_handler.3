@@ -1,4 +1,4 @@
-.TH "cache_handler: Maintains a cache of data for use by lower level handlers." 3 "7 Nov 2005" "Version 5.2" "net-snmp" \" -*- nroff -*-
+.TH "cache_handler: Maintains a cache of data for use by lower level handlers." 3 "14 Nov 2005" "Version 5.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -125,7 +125,7 @@ NETSNMP_CACHE_DONT_FREE_EXPIRED NETSNMP_CACHE_DONT_AUTO_RELEASE NETSNMP_CACHE_AU
 .PP
 Reload the cache if required. 
 .PP
-Definition at line 382 of file cache_handler.c.
+Definition at line 384 of file cache_handler.c.
 .PP
 References netsnmp_cache_check_expired().
 .PP
@@ -136,7 +136,7 @@ Check if the cache timeout has passed.
 .PP
 Sets and return the expired flag. 
 .PP
-Definition at line 367 of file cache_handler.c.
+Definition at line 369 of file cache_handler.c.
 .PP
 References atime_ready().
 .PP
@@ -166,7 +166,7 @@ Definition at line 111 of file cache_handler.c.
 .PP
 returns a cache handler that can be injected into a given handler chain. 
 .PP
-Definition at line 244 of file cache_handler.c.
+Definition at line 246 of file cache_handler.c.
 .PP
 References netsnmp_mib_handler_s::flags, netsnmp_mib_handler_s::myvoid, netsnmp_cache_timer_start(), netsnmp_create_handler(), and netsnmp_mib_handler.
 .PP
@@ -175,7 +175,7 @@ Referenced by netsnmp_cache_handler_register(), netsnmp_get_cache_handler(), and
 .PP
 functionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a cache handler at the same time for you. 
 .PP
-Definition at line 292 of file cache_handler.c.
+Definition at line 294 of file cache_handler.c.
 .PP
 References netsnmp_cache_handler_get(), netsnmp_handler_registration, netsnmp_inject_handler(), netsnmp_mib_handler, and netsnmp_register_handler().
 .SS "int netsnmp_cache_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
@@ -188,14 +188,14 @@ next handler called automatically - 'AUTO_NEXT'
 .PP
 next handler called automatically - 'AUTO_NEXT' 
 .PP
-Definition at line 417 of file cache_handler.c.
+Definition at line 419 of file cache_handler.c.
 .PP
 References netsnmp_mib_handler_s::flags, netsnmp_handler_registration_s::handlerName, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, netsnmp_cache_check_and_reload(), netsnmp_cache_is_valid(), netsnmp_cache_reqinfo_insert(), netsnmp_handler_registration, netsnmp_mib_handler, netsnmp_request_set_error_all(), netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and snmp_log().
 .SS "int netsnmp_cache_is_valid (\fBnetsnmp_agent_request_info\fP * reqinfo, const char * name)"
 .PP
 Is the cache valid for a given request? 
 .PP
-Definition at line 399 of file cache_handler.c.
+Definition at line 401 of file cache_handler.c.
 .PP
 References netsnmp_cache_reqinfo_extract().
 .PP
@@ -204,7 +204,7 @@ Referenced by netsnmp_cache_helper_handler(), and netsnmp_is_cache_valid().
 .PP
 Extract the cache information for a given request (PDU). 
 .PP
-Definition at line 347 of file cache_handler.c.
+Definition at line 349 of file cache_handler.c.
 .PP
 References SNMP_FREE.
 .PP
@@ -213,7 +213,7 @@ Referenced by netsnmp_cache_is_valid(), and netsnmp_extract_cache_info().
 .PP
 Insert the cache information for a given request (PDU). 
 .PP
-Definition at line 330 of file cache_handler.c.
+Definition at line 332 of file cache_handler.c.
 .PP
 References netsnmp_create_data_list(), and SNMP_FREE.
 .PP
@@ -231,21 +231,21 @@ Referenced by netsnmp_cache_handler_get().
 .PP
 stops the recurring cache_load callback 
 .PP
-Definition at line 224 of file cache_handler.c.
+Definition at line 225 of file cache_handler.c.
 .PP
 References snmp_alarm_unregister(), and snmp_log().
 .SS "netsnmp_cache* netsnmp_extract_cache_info (\fBnetsnmp_agent_request_info\fP * reqinfo)"
 .PP
 Extract the cache information for a given request (PDU). 
 .PP
-Definition at line 359 of file cache_handler.c.
+Definition at line 361 of file cache_handler.c.
 .PP
 References netsnmp_cache_reqinfo_extract().
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_cache_handler (int timeout, NetsnmpCacheLoad * load_hook, NetsnmpCacheFree * free_hook, oid * rootoid, int rootoid_len)"
 .PP
 returns a cache handler that can be injected into a given handler chain. 
 .PP
-Definition at line 273 of file cache_handler.c.
+Definition at line 275 of file cache_handler.c.
 .PP
 References netsnmp_mib_handler_s::myvoid, netsnmp_cache_create(), netsnmp_cache_handler_get(), and netsnmp_mib_handler.
 .PP
@@ -256,14 +256,14 @@ for backwards compat
 .PP
 \fBnetsnmp_cache_is_valid()\fP is preferred. 
 .PP
-Definition at line 410 of file cache_handler.c.
+Definition at line 412 of file cache_handler.c.
 .PP
 References netsnmp_cache_is_valid().
 .SS "int netsnmp_register_cache_handler (\fBnetsnmp_handler_registration\fP * reginfo, int timeout, NetsnmpCacheLoad * load_hook, NetsnmpCacheFree * free_hook)"
 .PP
 functionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a cache handler at the same time for you. 
 .PP
-Definition at line 305 of file cache_handler.c.
+Definition at line 307 of file cache_handler.c.
 .PP
 References netsnmp_get_cache_handler(), netsnmp_handler_registration, netsnmp_inject_handler(), netsnmp_mib_handler, netsnmp_register_handler(), netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len.
 .SS "void release_cached_resources (unsigned int regNo, void * clientargs)"
@@ -272,7 +272,7 @@ run regularly to automatically release cached resources.
 .PP
 xxx - method to prevent cache from expiring while a request is being processed (e.g. delegated request). proposal: set a flag, which would be cleared when request finished (which could be acomplished by a dummy data list item in agent req info & custom free function). 
 .PP
-Definition at line 574 of file cache_handler.c.
+Definition at line 576 of file cache_handler.c.
 .PP
 References netsnmp_cache_check_expired(), release_cached_resources(), and snmp_alarm_register().
 .PP
