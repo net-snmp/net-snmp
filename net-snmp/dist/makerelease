@@ -46,7 +46,7 @@ System("version:commit",
 #
 # configure and build and test it
 #
-System("build:configure","./configure --with-defaults '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=UDPIPv6 TCPIPv6 IPX' --enable-embedded-perl --enable-shared");
+System("build:configure","./configure --cache=config.cache --with-defaults '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=UDPIPv6 TCPIPv6 IPX' --enable-embedded-perl --enable-shared");
 System("build:make","make");
 System("build:test","make test");
 
@@ -133,22 +133,26 @@ System("release:upload",
 sub System {
     my $name = shift;
     my $cmd = $descr = join(" ", @_);
-    if (dostep($name)) {
+    my $rc;
+    while (dostep($name)) {
 	print STDERR "    running: ",$cmd,"\n";
 	system(@_) if (!$opts{'n'});
-	checkresult();
+	$rc = checkresult();
+        last if ($rc == 0);
     }
 }
 
 sub checkresult {
     if ($?) {
-	print STDERR "The above STEP failed.  Continue anyway (y/n)?  ";
+	print STDERR "The above STEP failed.  Continue anyway (y/n/r)?  ";
 	my $ans = <STDIN>;
+        return 1 if ($ans =~ /^r/);
 	if ($ans =~ /^n/) {
 	    print STDERR "  EXITING\n";
 	    exit;
 	}
     }
+   return 0;
 }
 
 sub dostep {
