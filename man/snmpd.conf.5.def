@@ -904,9 +904,9 @@ The previous extension programs can be written in any convenient
 programming language - including perl, which is a common choice for
 pass-through extensions in particular.  However the Net-SNMP agent
 also includes support for embedded perl technology (similar to
-\fImod_perl\fR for the the Apache web server).  This allows the agent
+\fImod_perl\fR for the Apache web server).  This allows the agent
 to interpret perl scripts directly, thus avoiding the overhead of
-initializing the perl system when a request is received.
+spawning processes and initializing the perl system when a request is received.
 This mechanism is not part of the default build environment, and must
 be explicitly included by specifying the '--enable-embedded-perl'
 option to the configure script when the package is first built.
@@ -921,7 +921,7 @@ loads the specified initialisation file (instead of the default
 DATADIR/snmp/snmp_perl.pl)
 immediately before the first \fIperl\fR directive is parsed.
 The default initialisation script creates a \fC$agent\fR variable
-(a \fCNetSnmp::agent\fR object) which can be used to register
+(a \fCNetSNMP::agent\fR object) which can be used to register
 perl-based MIB handler routines.
 .IP "perl EXPRESSION"
 evaluates the given expression.  This would typically register a
