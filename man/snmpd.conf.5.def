@@ -71,55 +71,6 @@ process NAME.  When EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFIX for a given
 NAMEd program is set to the integer value of 1, this command will be
 called.  It defaults to a compiled value set using the PROCFIXCMD
 definition in the net-snmp-config.h file.
-.IP "exec NAME PROG ARGS"
-.IP "exec MIBNUM NAME PROG ARGS"
-.IP
-If MIBNUM is not specified, the agent executes the named PROG with
-arguments of ARGS and returns the exit status and the first line of
-the STDOUT output of the PROG program to queries of the
-EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFLAG and
-EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORMSG mib columns (respectively).  All
-STDOUT output beyond the first line is silently truncated.
-.IP
-If MIBNUM is specified, it acts as above but returns the exit status
-to MIBNUM.ERRORFLAG.0 and the entire STDOUT output to the table
-MIBNUM.ERRORMSG in a MIB table.  In this case, the MIBNUM.ERRORMSG mib
-contains the entire STDOUT output, one MIB table entry per line of
-output (ie, the first line is output as MIBNUM.ERRORMSG.1, the second
-at MIBNUM.ERRORMSG.2, etc...).
-.RS
-.IP Note:
-The PROG argument must be a full path to a real binary, as it is
-executed under the exec() system call.  IE, you can not specify a path
-to a shell script.  If you want to invoke a shell script, please
-specify a path to the interpreter first as the PROG argument and then
-a path to the shell script.  IE:  "exec myscript /bin/sh
-/path/to/script arg1 ..."
-.IP Note:
-The MIBNUM must be specified in dotted-integer notation and can
-not be specified as ".iso.org.dod.internet..." (should instead
-be .1.3.6.1...).
-.IP Note: 
-The agent caches the exit status and STDOUT of the executed program
-for 30 seconds after the initial query.  This is to increase speed and
-maintain consistency of information for consecutive table queries.
-The cache can be flushed by a snmp-set request of integer(1) to
-EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERCLEARCACHE.
-.RE
-.IP "extend NAME PROG ARGS"
-.IP "extend MIBNUM NAME PROG ARGS"
-.IP
-This is similar to the 'exec' directive, but uses a different MIB output
-structure (for both forms) which covers multi-line output as standard.
-See NET-SNMP-EXTEND-MIB for details.
-Output is cached for each entry separately, controlled by the
-NET-SNMP-AGENT-MIB::nsCacheTable.
-.IP "execfix NAME PROG ARGS"
-This registers a command that knows how to fix errors with the given
-exec or sh NAME.  When EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFIX for a
-given NAMEd entry is set to the integer value of 1, this command will
-be called.  It defaults to a compiled value set using the EXECFIXCMD
-definition in the net-snmp-config.h file.
 .IP "disk PATH"
 .IP "disk PATH [ MINSPACE | MINPERCENT% ]"
 .IP
@@ -175,51 +126,6 @@ UCD-SNMP-MIB::logMatchTable.
 Any errors in obtaining the above information are reported via the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORFLAG flag and the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORMSG text-string description.
-.SH AGENTX SUB-AGENTS
-To enable AgentX support in the SNMP master agent, put the following
-line in your snmpd.conf file:
-.IP "master agentx"
-See README.agentx for further details.
-.IP "AgentXSocket addr"
-This defines the address the master agent listens at.
-The default is /var/agentx/master. By default the Unix Domain socket is
-accessible only to subagents which have the same userid as the agent.
-Another possibility is localhost:705
-.IP "AgentXTimeout addr"
-Defines the timeout period for an AgentX request.
-Default is 1 second.
-.IP "AgentXRetries addr"
-Defines the number of retries for an AgentX request.
-Default is 5 retries.
-.IP "agentxperms socket_perms [directory_perms [username|userid [groupname|groupid]]]"
-Defines the permissions of the AgentX socket. socket_perms and directory_perms must be octal digits (see 
-.I chmod(1)
-).
-.P
-You can also put the following in your subagent.conf file (where
-"subagent" is the name you used in your init_snmp("subagent") api call:
-.IP "agentPingInterval NUM"
-This makes the subagent try and reconnect every NUM seconds to the
-master if it ever becomes (or starts) disconnected.
-.SH SMUX SUB-AGENTS
-To enable and SMUX based sub-agent, such as
-.IR gated ,
-use the
-.I smuxpeer
-configuration entry
-.IP "smuxpeer OID PASS"
-For 
-.I gated
-a sensible entry might be
-.I smuxpeer .1.3.6.1.4.1.4.1.3 secret
-.SH DYNAMICALLY LOADABLE MODULES
-If the agent is built with support for the UCD-DLMOD-MIB it is capable
-of loading agent MIB modules dynamically at startup through
-the \fIdlmod\fR directive and during runtime through use of the UCD-DLMOD-MIB.
-The following directive loads the shared object module file PATH which
-uses the module name prefix NAME.
-.IP "dlmod NAME PATH"
-.IP
 .SH ACCESS CONTROL
 .B snmpd
 supports the View-Based Access Control Model (VACM) as defined in RFC
@@ -641,212 +547,6 @@ In addition to the arguments listed there, the special argument
 \fI-Ci\fR specifies that you want inform notifications to be used
 instead of unacknowledged traps (this requires that you also specify a 
 version number of v2c or v3 as well).
-.SH "PROXY SUPPORT"
-.IP "proxy [-Cn CONTEXTNAME] [SNMPCMD ARGS] HOST OID [REMOTEOID]"
-.IP
-This token specifies that any incoming requests under OID should be
-proxied on to another HOST instead.  Use OID .1.3 (not just .1) to proxy 
-the entire MIB tree. If a CONTEXTNAME is specified, it
-assigns the proxied tree to a particular context name within the local
-agent.  This is the proper way to query multiple agents through a
-single proxy.  Assign each remote agent to a different context name.
-Then you can use "snmpwalk -n contextname1" to walk one remote proxied
-agent and "snmpwalk -n contextname2" to walk another, assuming you are
-using SNMPv3 to talk to the proxy (snmpv1 and snmpv2c context mappings
-aren't currently supported but might be in the future).  Optionally,
-relocate the local OID tree to the new location at the REMOTEOID.  To
-authenticate to HOST you should use the appropriate set of
-.I "SNMPCMD ARGS."
-See the
-.I snmpcmd(1)
-manual page for details.
-.IP
-Examples:
-.RS
-.nf
-# assigns the entire mib tree on remotehost1 to the context of the
-# same name:
-proxy -Cn remotehost1 -v 1 -c public remotehost1 .1.3
-# ditto, but for remotehost 2
-proxy -Cn remotehost2 -v 1 -c public remotehost2 .1.3
-# proxies only the ucdavis enterprises tree to the remote host using snmpv1
-proxy -v 1 -c public remotehost .1.3.6.1.4.1.2021
-# uses v3 to access remotehost and converts the remote .1.3.6.1.2.1.1
-# oid to local .1.3.6.1.3.10 oid (another way to access mulitple hosts
-# without using contexts)
-proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
-.fi
-.RE
-.SH "PASS-THROUGH CONTROL"
-.IP "pass [-p priority] MIBOID EXEC"
-(If you're writing perl scripts, please see the embedded perl support
-information later in this manual page).  Passes entire control of
-MIBOID to the EXEC program.  The default priority is 127, this can be
-changed by supplying the optional -p flag (lower priority is processed
-sooner).  The EXEC program is called in one of the following three
-ways:
-.RS
-.IP "EXEC -g MIBOID"
-.IP "EXEC -n MIBOID"
-.IP
-These call lines match to SNMP get and getnext requests.  It is
-expected that the EXEC program will take the arguments passed to it
-and return the appropriate response through it's stdout.  
-.IP
-The first line of stdout should be the MIB OID of the returning value.
-The second line should be the TYPE of value returned, where TYPE is
-one of the text strings:
-.B string, integer, unsigned, objectid, timeticks, ipaddress, counter, 
-or
-.B gauge.
-The third line of stdout should be the VALUE corresponding with the
-returned TYPE.
-.IP
-For instance, if a script was to return the value integer value "42"
-when a request for .1.3.6.1.4.100 was requested, the script should
-return the following 3 lines:
-.br
-.RS
-  .1.3.6.1.4.100
-.br
-  integer
-.br
-  42
-.RE
-.IP
-To indicate that the script is unable to comply with the request due
-to an end-of-mib condition or an invalid request, simple exit and
-return no output to stdout at all.  An SNMP error will be generated
-corresponding to the SNMP noSuchName response.
-.IP "EXEC -s MIBOID TYPE VALUE"
-.IP 
-For SNMP set requests, the above call method is used.  The TYPE passed
-to the EXEC program is one of the text strings:
-.B integer, counter, gauge, timeticks, ipaddress, objid,
-or 
-.B string,
-indicating the type of value passed in the next argument.
-.IP
-Return nothing to stdout, and the set will assumed to have been
-successful.  Otherwise, return one of the following error strings to
-signal an error:
-.B not-writable, 
-or 
-.B wrong-type
-and the appropriate error response will be generated instead.
-.RS
-.IP Note:
-By default, the only community allowed to write (ie snmpset) to your
-script will be the "private" community,or community #2 if defined
-differently by the "community" token discussed above.  Which
-communities are allowed write access are controlled by the RWRITE
-definition in the snmplib/snmp_impl.h source file.
-.RE
-.RE
-.IP
-Example (in snmpd.conf):
-.IP
-pass .1.3.6.1.4.1.2021.255 /path/to/local/passtest
-.RE
-.IP "pass_persist [-p priority] MIBOID EXEC"
-Passes entire control of MIBOID to the EXEC program.  
-Similar to pass, but the EXEC program continues to run after the initial
-request is answered.  The default priority is 127, this can be
-changed by supplying the optional -p flag (lower priority is processed
-sooner).  Also, pass and pass_persist block till they return.
-.IP
-Upon initialization, EXEC is passed the string "PING\\n" in stdin,
-and it should respond by printing "PONG\\n" to stdout.
-.IP
-For get and getnext requests, EXEC program is passed two lines,
-the command (get or getnext) and the MIB OID.  It should return
-three lines, the MIB OID, the TYPE of value returned,
-the VALUE corresponding with the returned TYPE.
-.IP
-For example, if the value for .1.3.6.1.4.100 was requested, the following
-2 lines would be passed in to stdin:
-.br
-.RS
-  get
-.br
-  .1.3.6.1.4.100  
-.RE
-.IP
-To return the value, say, 42, the script would write to stdout:
-.br
-.RS
-  .1.3.6.1.4.100
-.br
-  integer
-.br
-  42
-.RE
-.IP
-To indicate that the script is unable to comply with the request due
-to an end-of-mib condition or an invalid request, print "NONE\\n" to
-stdout.
-.IP
-Example (in snmpd.conf):
-.IP
-pass_persist .1.3.6.1.4.1.2021.255 /path/to/local/pass_persisttest
-.RE
-.SH "EMBEDDED PERL SUPPORT"
-.PP
-Warning: though embedded perl is working, not much functionality has
-been implemented yet and thus writing mib module pieces for the agent
-within perl is not trivial at this point.  It should get better in
-future releases.
-.PP
-The net-snmp package has ability to call perl scripts directly inside
-the agent through embedded perl technology (similar to mod_perl for
-the apache web server).  This must be turned on at compile time by
-passing --enable-embedded-perl to the configure script when the
-package is built.  To see if your package was built with embedded
-perl, run "net-snmp-config --configure-options" and see if that flag
-was used.
-.PP
-If compiled in, it defines the following snmpd.conf configuration
-directives:
-.IP "disablePerl true"
-This will turn off perl support entirely.  If the embedded perl
-support stops working due to a change in perl, etc, this will stop any
-calls to the perl core.
-
-.IP "perlInitFile FILE"
-Use FILE as the initialization file.  This file is normally
-DATADIR/snmp/snmp_perl.pl but this token can override that default.
-This file performs any in-perl initialization that is needed before
-the rest of the perl directives (below) are called.  It is sourced
-once just before the first perl directive is parsed.  See the default
-file for an example of the initialization it performs.
-.IP "perl EXPRESSION"
-Calls perl to evaluate an expression.  Normally you'd want to do
-something like register a function to call when an OID is requested,
-but you can really do anything perl related you want.  For example:
-.IP
-perl print "hello world\\n";
-.IP
-is the most basic hello world example.
-.IP
-The init script by default initializes a $agent variable which
-is a pointer to a NetSnmp::agent object through which you can register
-callbacks when a section of the OID tree is hit:
-.nf
-perl use Data::Dumper;
-perl sub myroutine  { print "got called: ",Dumper(@_),"\\n"; }
-perl $agent->register('mylink', '.1.3.6.1.8765', \\&myroutine);
-.fi
-.IP
-Sourcing an external file:
-.RS
-.nf
-perl 'do /path/to/file.pl';
-.fi
-.RE
-.IP
-No better examples exist at the moment, unfortunately.  Look for
-improved support in future releases.  Comments on how this looks as an
-architecture are certainly appreciated now.
 .SH "DISMAN-EVENT-MIB SUPPORT (READ: SENDING TRAPS ON ERRORS)"
 .PP
 Warning: this implementation has not been extensively tested and is
@@ -1002,6 +702,308 @@ monitor	-o laNames -o laErrMessage  "laTable" laErrorFlag != 0
 monitor	-o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
 .fi
 .RE
+.SH "EXTENDING AGENT FUNCTIONALITY"
+.SS "Arbitrary Extension Commands"
+.IP "exec NAME PROG ARGS"
+.IP "exec MIBNUM NAME PROG ARGS"
+.IP
+If MIBNUM is not specified, the agent executes the named PROG with
+arguments of ARGS and returns the exit status and the first line of
+the STDOUT output of the PROG program to queries of the
+EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFLAG and
+EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORMSG mib columns (respectively).  All
+STDOUT output beyond the first line is silently truncated.
+.IP
+If MIBNUM is specified, it acts as above but returns the exit status
+to MIBNUM.ERRORFLAG.0 and the entire STDOUT output to the table
+MIBNUM.ERRORMSG in a MIB table.  In this case, the MIBNUM.ERRORMSG mib
+contains the entire STDOUT output, one MIB table entry per line of
+output (ie, the first line is output as MIBNUM.ERRORMSG.1, the second
+at MIBNUM.ERRORMSG.2, etc...).
+.RS
+.IP Note:
+The PROG argument must be a full path to a real binary, as it is
+executed under the exec() system call.  IE, you can not specify a path
+to a shell script.  If you want to invoke a shell script, please
+specify a path to the interpreter first as the PROG argument and then
+a path to the shell script.  IE:  "exec myscript /bin/sh
+/path/to/script arg1 ..."
+.IP Note:
+The MIBNUM must be specified in dotted-integer notation and can
+not be specified as ".iso.org.dod.internet..." (should instead
+be .1.3.6.1...).
+.IP Note: 
+The agent caches the exit status and STDOUT of the executed program
+for 30 seconds after the initial query.  This is to increase speed and
+maintain consistency of information for consecutive table queries.
+The cache can be flushed by a snmp-set request of integer(1) to
+EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERCLEARCACHE.
+.RE
+.IP "extend NAME PROG ARGS"
+.IP "extend MIBNUM NAME PROG ARGS"
+.IP
+This is similar to the 'exec' directive, but uses a different MIB output
+structure (for both forms) which covers multi-line output as standard.
+See NET-SNMP-EXTEND-MIB for details.
+Output is cached for each entry separately, controlled by the
+NET-SNMP-AGENT-MIB::nsCacheTable.
+.IP "execfix NAME PROG ARGS"
+This registers a command that knows how to fix errors with the given
+exec or sh NAME.  When EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFIX for a
+given NAMEd entry is set to the integer value of 1, this command will
+be called.  It defaults to a compiled value set using the EXECFIXCMD
+definition in the net-snmp-config.h file.
+.SS "MIB-Specific Extension Commands"
+.IP "pass [-p priority] MIBOID EXEC"
+(If you're writing perl scripts, please see the embedded perl support
+information later in this manual page).  Passes entire control of
+MIBOID to the EXEC program.  The default priority is 127, this can be
+changed by supplying the optional -p flag (lower priority is processed
+sooner).  The EXEC program is called in one of the following three
+ways:
+.RS
+.IP "EXEC -g MIBOID"
+.IP "EXEC -n MIBOID"
+.IP
+These call lines match to SNMP get and getnext requests.  It is
+expected that the EXEC program will take the arguments passed to it
+and return the appropriate response through it's stdout.  
+.IP
+The first line of stdout should be the MIB OID of the returning value.
+The second line should be the TYPE of value returned, where TYPE is
+one of the text strings:
+.B string, integer, unsigned, objectid, timeticks, ipaddress, counter, 
+or
+.B gauge.
+The third line of stdout should be the VALUE corresponding with the
+returned TYPE.
+.IP
+For instance, if a script was to return the value integer value "42"
+when a request for .1.3.6.1.4.100 was requested, the script should
+return the following 3 lines:
+.br
+.RS
+  .1.3.6.1.4.100
+.br
+  integer
+.br
+  42
+.RE
+.IP
+To indicate that the script is unable to comply with the request due
+to an end-of-mib condition or an invalid request, simple exit and
+return no output to stdout at all.  An SNMP error will be generated
+corresponding to the SNMP noSuchName response.
+.IP "EXEC -s MIBOID TYPE VALUE"
+.IP 
+For SNMP set requests, the above call method is used.  The TYPE passed
+to the EXEC program is one of the text strings:
+.B integer, counter, gauge, timeticks, ipaddress, objid,
+or 
+.B string,
+indicating the type of value passed in the next argument.
+.IP
+Return nothing to stdout, and the set will assumed to have been
+successful.  Otherwise, return one of the following error strings to
+signal an error:
+.B not-writable, 
+or 
+.B wrong-type
+and the appropriate error response will be generated instead.
+.RS
+.IP Note:
+By default, the only community allowed to write (ie snmpset) to your
+script will be the "private" community,or community #2 if defined
+differently by the "community" token discussed above.  Which
+communities are allowed write access are controlled by the RWRITE
+definition in the snmplib/snmp_impl.h source file.
+.RE
+.RE
+.IP
+Example (in snmpd.conf):
+.IP
+pass .1.3.6.1.4.1.2021.255 /path/to/local/passtest
+.RE
+.IP "pass_persist [-p priority] MIBOID EXEC"
+Passes entire control of MIBOID to the EXEC program.  
+Similar to pass, but the EXEC program continues to run after the initial
+request is answered.  The default priority is 127, this can be
+changed by supplying the optional -p flag (lower priority is processed
+sooner).  Also, pass and pass_persist block till they return.
+.IP
+Upon initialization, EXEC is passed the string "PING\\n" in stdin,
+and it should respond by printing "PONG\\n" to stdout.
+.IP
+For get and getnext requests, EXEC program is passed two lines,
+the command (get or getnext) and the MIB OID.  It should return
+three lines, the MIB OID, the TYPE of value returned,
+the VALUE corresponding with the returned TYPE.
+.IP
+For example, if the value for .1.3.6.1.4.100 was requested, the following
+2 lines would be passed in to stdin:
+.br
+.RS
+  get
+.br
+  .1.3.6.1.4.100  
+.RE
+.IP
+To return the value, say, 42, the script would write to stdout:
+.br
+.RS
+  .1.3.6.1.4.100
+.br
+  integer
+.br
+  42
+.RE
+.IP
+To indicate that the script is unable to comply with the request due
+to an end-of-mib condition or an invalid request, print "NONE\\n" to
+stdout.
+.IP
+Example (in snmpd.conf):
+.IP
+pass_persist .1.3.6.1.4.1.2021.255 /path/to/local/pass_persisttest
+.RE
+.SS "Embedded Perl Support"
+.PP
+Warning: though embedded perl is working, not much functionality has
+been implemented yet and thus writing mib module pieces for the agent
+within perl is not trivial at this point.  It should get better in
+future releases.
+.PP
+The net-snmp package has ability to call perl scripts directly inside
+the agent through embedded perl technology (similar to mod_perl for
+the apache web server).  This must be turned on at compile time by
+passing --enable-embedded-perl to the configure script when the
+package is built.  To see if your package was built with embedded
+perl, run "net-snmp-config --configure-options" and see if that flag
+was used.
+.PP
+If compiled in, it defines the following snmpd.conf configuration
+directives:
+.IP "disablePerl true"
+This will turn off perl support entirely.  If the embedded perl
+support stops working due to a change in perl, etc, this will stop any
+calls to the perl core.
+
+.IP "perlInitFile FILE"
+Use FILE as the initialization file.  This file is normally
+DATADIR/snmp/snmp_perl.pl but this token can override that default.
+This file performs any in-perl initialization that is needed before
+the rest of the perl directives (below) are called.  It is sourced
+once just before the first perl directive is parsed.  See the default
+file for an example of the initialization it performs.
+.IP "perl EXPRESSION"
+Calls perl to evaluate an expression.  Normally you'd want to do
+something like register a function to call when an OID is requested,
+but you can really do anything perl related you want.  For example:
+.IP
+perl print "hello world\\n";
+.IP
+is the most basic hello world example.
+.IP
+The init script by default initializes a $agent variable which
+is a pointer to a NetSnmp::agent object through which you can register
+callbacks when a section of the OID tree is hit:
+.nf
+perl use Data::Dumper;
+perl sub myroutine  { print "got called: ",Dumper(@_),"\\n"; }
+perl $agent->register('mylink', '.1.3.6.1.8765', \\&myroutine);
+.fi
+.IP
+Sourcing an external file:
+.RS
+.nf
+perl 'do /path/to/file.pl';
+.fi
+.RE
+.IP
+No better examples exist at the moment, unfortunately.  Look for
+improved support in future releases.  Comments on how this looks as an
+architecture are certainly appreciated now.
+.SS Dynamically Loadable Modules
+If the agent is built with support for the UCD-DLMOD-MIB it is capable
+of loading agent MIB modules dynamically at startup through
+the \fIdlmod\fR directive and during runtime through use of the UCD-DLMOD-MIB.
+The following directive loads the shared object module file PATH which
+uses the module name prefix NAME.
+.IP "dlmod NAME PATH"
+.SS "Proxy Support"
+.IP "proxy [-Cn CONTEXTNAME] [SNMPCMD ARGS] HOST OID [REMOTEOID]"
+.IP
+This token specifies that any incoming requests under OID should be
+proxied on to another HOST instead.  Use OID .1.3 (not just .1) to proxy 
+the entire MIB tree. If a CONTEXTNAME is specified, it
+assigns the proxied tree to a particular context name within the local
+agent.  This is the proper way to query multiple agents through a
+single proxy.  Assign each remote agent to a different context name.
+Then you can use "snmpwalk -n contextname1" to walk one remote proxied
+agent and "snmpwalk -n contextname2" to walk another, assuming you are
+using SNMPv3 to talk to the proxy (snmpv1 and snmpv2c context mappings
+aren't currently supported but might be in the future).  Optionally,
+relocate the local OID tree to the new location at the REMOTEOID.  To
+authenticate to HOST you should use the appropriate set of
+.I "SNMPCMD ARGS."
+See the
+.I snmpcmd(1)
+manual page for details.
+.IP
+Examples:
+.RS
+.nf
+# assigns the entire mib tree on remotehost1 to the context of the
+# same name:
+proxy -Cn remotehost1 -v 1 -c public remotehost1 .1.3
+# ditto, but for remotehost 2
+proxy -Cn remotehost2 -v 1 -c public remotehost2 .1.3
+# proxies only the ucdavis enterprises tree to the remote host using snmpv1
+proxy -v 1 -c public remotehost .1.3.6.1.4.1.2021
+# uses v3 to access remotehost and converts the remote .1.3.6.1.2.1.1
+# oid to local .1.3.6.1.3.10 oid (another way to access mulitple hosts
+# without using contexts)
+proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
+.fi
+.RE
+.SS SMUX Sub-Agents
+To enable a SMUX based sub-agent, such as
+.IR gated ,
+use the
+.I smuxpeer
+configuration entry
+.IP "smuxpeer OID PASS"
+For 
+.I gated
+a sensible entry might be
+.I smuxpeer .1.3.6.1.4.1.4.1.3 secret
+.SS AgentX Sub-Agents
+To enable AgentX support in the SNMP master agent, put the following
+line in your snmpd.conf file:
+.IP "master agentx"
+See README.agentx for further details.
+.IP "AgentXSocket addr"
+This defines the address the master agent listens at.
+The default is /var/agentx/master. By default the Unix Domain socket is
+accessible only to subagents which have the same userid as the agent.
+Another possibility is localhost:705
+.IP "AgentXTimeout addr"
+Defines the timeout period for an AgentX request.
+Default is 1 second.
+.IP "AgentXRetries addr"
+Defines the number of retries for an AgentX request.
+Default is 5 retries.
+.IP "agentxperms socket_perms [directory_perms [username|userid [groupname|groupid]]]"
+Defines the permissions of the AgentX socket. socket_perms and directory_perms must be octal digits (see 
+.I chmod(1)
+).
+.P
+You can also put the following in your subagent.conf file (where
+"subagent" is the name you used in your init_snmp("subagent") api call:
+.IP "agentPingInterval NUM"
+This makes the subagent try and reconnect every NUM seconds to the
+master if it ever becomes (or starts) disconnected.
+.IP
 .SH "DEBUGGING AND OTHER EXTENSIBILITY NOTES"
 If you're trying to figure out aspects of the various mib modules
 (possibly some that you've added yourself), the following may help you
