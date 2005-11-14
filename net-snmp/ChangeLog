@@ -1,6 +1,182 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.2.1 -> V5.2.2.rc4
+Changes: V5.2.1 -> V5.2.2.rc5
+	
+2005-11-14 14:40  hardaker
+
+   * apps/Makefile.depend:
+
+   make depend
+
+2005-11-14 14:34  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3
+, netsnmp_agent_trap.3,
+     netsnmp_asn1_packet_parse.3, netsnmp_baby_steps.3
+, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3
+, netsnmp_container.3, netsnmp_data_list.3
+, netsnmp_debug.3, netsnmp_default_store.3
+, netsnmp_handler.3, netsnmp_instance.3
+, netsnmp_iterator_info_s.3, netsnmp_leaf.3
+, netsnmp_library.3,
+     netsnmp_mib_utilities.3, netsnmp_mode_end_call.3
+, netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3
+, netsnmp_row_merge.3, netsnmp_scalar.3
+, netsnmp_scalar_group_group.3,
+     netsnmp_serialize.3, netsnmp_snmp_agent.3,
+     netsnmp_snmp_alarm.3, netsnmp_snmp_client.3
+, netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3
+, netsnmp_snmp_session.3,
+     netsnmp_stash_cache.3, netsnmp_table.3,
+     netsnmp_table_array.3, netsnmp_table_container.3
+, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_iterator.3
+, netsnmp_table_iterator.h.3, netsnmp_util.3
+, netsnmp_utilities.3,
+     netsnmp_variable_list.3, netsnmp_watcher.3
+:
+
+   documentation update
+
+2005-11-14 14:30  hardaker
+
+   * configure, configure.in:
+
+   version update
+
+2005-11-13 19:10  alex_b
+
+   * win32/: Makefile.in, install-net-snmp.bat,
+     dist/installer/net-snmp.nsi:
+
+   -Win32: Add missing mib2c-data to installer
+   -Win32: Use wildcards in installer for installing files to help prevent
+    missing files.
+
+2005-11-12 06:43  tanders
+
+   * dist/: nsb-functions, nsb-package:
+
+   fixes from MAIN
+
+2005-11-12 06:40  tanders
+
+   * dist/nsb-nightly:
+
+   fixes from MAIN
+
+2005-11-12 06:36  tanders
+
+   * agent/mibgroup/host/hr_disk.c:
+
+   avoid possible crash by initializing properly (fix bug #1052178)
+
+2005-11-11 19:08  alex_b
+
+   * apps/snmpnetstat/inet.c:
+
+   Win32: Work around for bug 1278743:  If trying to reverse lookup
+   127.0.0.1, return 'localhost' to prevent Windows from returning the
+   local computer name because it ignores the hosts file.
+
+2005-11-11 18:59  alex_b
+
+   * win32/: net-snmp/net-snmp-config.h,
+     net-snmp/net-snmp-config.h.in, snmpnetstat/Makefile.in
+, snmpnetstat/snmpnetstat.dsp:
+
+   Win32:  MSVC build fixes.
+
+2005-11-11 13:51  tanders
+
+   * agent/snmpd.c:
+
+   avoid abort due to select() error on systems with sizeof(time_t) < sizeof(long), e.g. Tru64 Unix on Alpha: drop default timeout down to INT_MAX (like in MAIN)
+
+2005-11-11 13:44  tanders
+
+   * apps/snmpnetstat/main.c:
+
+   update usage and includes
+
+2005-11-10 16:48  tanders
+
+   * testing/tests/T0160snmpv2cbulkget:
+
+   fix typo
+
+2005-11-10 02:07  dts12
+
+   * apps/snmpnetstat/: .cvsignore, Makefile.in,
+     snmpnetstat:
+
+   Compatability wrapper for original snmpnetstat behaviour
+
+2005-11-10 02:03  dts12
+
+   * apps/snmpnetstat/route.c:
+
+   Make routing table display closer to previous format.
+
+2005-11-10 02:01  dts12
+
+   * apps/snmpnetstat/: Makefile.in, if.c, inet.c
+, inet6.c, iquery.c, main.h
+, route.c:
+
+   Tweak snmpnetstat rewrite to work with 5.2 library
+
+2005-11-10 01:56  dts12
+
+   * apps/snmpnetstat/: ffs.c, if.c, inet.c
+, inet6.c, main.c, main.h,
+     netstat.h, route.c:
+
+   Copy (redistributable) snmpnetstat rewrite from main development line
+
+2005-11-07 16:55  tanders
+
+   * agent/mibgroup/: if-mib/ifTable/.cvsignore,
+     if-mib/ifXTable/.cvsignore,
+     ip-forward-mib/inetCidrRouteTable/.cvsignore,
+     ip-mib/inetNetToMediaTable/.cvsignore,
+     ip-mib/ipAddressTable/.cvsignore,
+     ip-mib/ipSystemStatsTable/.cvsignore,
+     ip-forward-mib/ipCidrRouteTable/.cvsignore:
+
+   ignore .libs
+
+2005-11-07 06:39  dts12
+
+   * apps/snmpnetstat/ffs.c:
+
+   file ffs.c was added on branch V5-2-patches on 2005-11-10 09:56:51 +0000
+
+2005-11-04 17:48  hardaker
+
+   * NEWS:
+
+   mention snmpnetstat
+
+2005-11-04 17:48  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.2.rc4 )
 
 2005-11-04 17:45  hardaker
 

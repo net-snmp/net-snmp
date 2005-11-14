@@ -3,10 +3,12 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.2.2*
 
- Sadness:
-   - Due to a copyright statement that didn't allow modifications, we
-     had to pull the snmpnetstat utility from this release.  A new
-     version will be available in 5.3.
+ New:
+   - Due to a copyright statement that didn't allow modifications, 
+     snmpnetstat was completely rewritten.  The new binary is named
+     snmpnetstat53, and we've provided a snmpnetstat wrapper script to
+     make the command line options backwards compatible.  As a side
+     effect, however, it now finally supports SNMPv3 at least.
 
  Ports:
    - Win32
