@@ -69,6 +69,9 @@ netsnmp_file_create(void)
      */
     if (NULL != filei)
         filei->fd = -1;
+    else {
+        snmp_log(LOG_WARNING,"failed to malloc netsnmp_file structure\n");
+    }
 
     return filei;
 }
@@ -77,6 +80,10 @@ netsnmp_file_create(void)
  * fill core members in a netsnmp_file structure
  *
  * @param filei      structure to fill; if NULL, a new one will be allocated
+ * @param name       file name
+ * @param fs_flags   filesystem flags passed to open()
+ * @param mode       optional filesystem open modes passed to open()
+ * @param ns_flags   net-snmp flags
  */
 netsnmp_file *
 netsnmp_file_fill(netsnmp_file * filei, const char* name,
@@ -84,7 +91,7 @@ netsnmp_file_fill(netsnmp_file * filei, const char* name,
 {
     if (NULL == filei) {
         filei = netsnmp_file_create();
-        if (NULL == filei)
+        if (NULL == filei) /* failure already logged */
             return NULL;
     }
 
@@ -99,6 +106,8 @@ netsnmp_file_fill(netsnmp_file * filei, const char* name,
 
 /**
  * release a netsnmp_file structure
+ *
+ * @retval  see close() man page
  */
 int
 netsnmp_file_release(netsnmp_file * filei)
@@ -121,19 +130,29 @@ netsnmp_file_release(netsnmp_file * filei)
 }
 
 /**
- * open a file structure
+ * open the file associated with a netsnmp_file structure
+ *
+ * @retval -1  : error opening file
+ * @retval >=0 : file descriptor for opened file
  */
 int
 netsnmp_file_open(netsnmp_file * filei)
 {
+    /*
+     * basic sanity checks
+     */
     if ((NULL == filei) || (NULL == filei->name))
         return -1;
 
-    if (-1 != filei->fd) {
-        // error handling
+    /*
+     * if file is already open, just return the fd.
+     */
+    if (-1 != filei->fd)
         return filei->fd;
-    }
 
+    /*
+     * try to open the file, loging an error if we failed
+     */
     if (0 == filei->mode)
         filei->fd = open(filei->name, filei->fs_flags);
     else
@@ -143,25 +162,40 @@ netsnmp_file_open(netsnmp_file * filei)
         snmp_log(LOG_ERR, "error opening %s (%d)\n", filei->name, errno);
     }
 
+    /*
+     * return results
+     */
     return filei->fd;
 }
 
 
 /**
- * close a file structure
+ * close the file associated with a netsnmp_file structure
+ *
+ * @retval  0 : success
+ * @retval -1 : error
  */
 int
 netsnmp_file_close(netsnmp_file * filei)
 {
     int rc;
 
+    /*
+     * basic sanity checks
+     */
     if ((NULL == filei) || (NULL != filei->name))
         return -1;
 
+    /*
+     * make sure it's not already closed
+     */
     if (-1 == filei->fd) {
         return 0;
     }
 
+    /*
+     * close the file, logging an error if we failed
+     */
     rc = close(filei->fd);
     if (rc < 0) {
         snmp_log(LOG_ERR, "error closing %s (%d)\n", filei->name, errno);
