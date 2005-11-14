@@ -703,56 +703,88 @@ monitor	-o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
 .fi
 .RE
 .SH "EXTENDING AGENT FUNCTIONALITY"
+One of the first distinguishing features of the original UCD suite was
+the ability to extend the functionality of the agent - not just by
+adding new MIB modules, but also by configuring the running agent to
+report additional information. There are a number of techniques to
+support this, including:
+.IP \(bu
+running external commands (\fIexec\fR, \fIextend\fR, \fIpass\fR)
+.IP \(bu
+loading new code dynamically (embedded perl, \fIdlmod\fR)
+.IP \(bu
+communicating with other agents (\fIproxy\fR, SMUX, AgentX)
 .SS "Arbitrary Extension Commands"
-.IP "exec NAME PROG ARGS"
-.IP "exec MIBNUM NAME PROG ARGS"
-.IP
-If MIBNUM is not specified, the agent executes the named PROG with
-arguments of ARGS and returns the exit status and the first line of
-the STDOUT output of the PROG program to queries of the
-EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFLAG and
-EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORMSG mib columns (respectively).  All
-STDOUT output beyond the first line is silently truncated.
-.IP
-If MIBNUM is specified, it acts as above but returns the exit status
-to MIBNUM.ERRORFLAG.0 and the entire STDOUT output to the table
-MIBNUM.ERRORMSG in a MIB table.  In this case, the MIBNUM.ERRORMSG mib
-contains the entire STDOUT output, one MIB table entry per line of
-output (ie, the first line is output as MIBNUM.ERRORMSG.1, the second
-at MIBNUM.ERRORMSG.2, etc...).
+The earliest extension mechanism was the ability to run arbitrary
+commands or shell scripts. Such commands do not need to be aware of
+SNMP operations, or conform to any particular behaviour - the MIB
+structures are designed to accommodate any form of command output.
+.IP "exec [MIBOID] NAME PROG ARGS"
+.IP "sh [MIBOID] NAME PROG ARGS"
+invoke the named PROG with arguments of ARGS.  By default the exit
+status and first line of output from the command will be reported via
+the UCD-SNMP-MIB::extTable, discarding any additional output.
 .RS
 .IP Note:
-The PROG argument must be a full path to a real binary, as it is
-executed under the exec() system call.  IE, you can not specify a path
-to a shell script.  If you want to invoke a shell script, please
-specify a path to the interpreter first as the PROG argument and then
-a path to the shell script.  IE:  "exec myscript /bin/sh
-/path/to/script arg1 ..."
-.IP Note:
-The MIBNUM must be specified in dotted-integer notation and can
-not be specified as ".iso.org.dod.internet..." (should instead
-be .1.3.6.1...).
-.IP Note: 
-The agent caches the exit status and STDOUT of the executed program
-for 30 seconds after the initial query.  This is to increase speed and
-maintain consistency of information for consecutive table queries.
-The cache can be flushed by a snmp-set request of integer(1) to
-EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERCLEARCACHE.
+Entries in this table appear in the order they are read from the
+configuration file.  This means that adding new \fIexec\fR (or \fIsh\fR)
+directives and restarting the agent, may affect the indexing of other
+entries.
 .RE
-.IP "extend NAME PROG ARGS"
-.IP "extend MIBNUM NAME PROG ARGS"
 .IP
-This is similar to the 'exec' directive, but uses a different MIB output
-structure (for both forms) which covers multi-line output as standard.
-See NET-SNMP-EXTEND-MIB for details.
-Output is cached for each entry separately, controlled by the
-NET-SNMP-AGENT-MIB::nsCacheTable.
+The PROG argument for \fIexec\fR directives must be a full path
+to a real binary, as it is executed via the exec() system call.
+To invoke a shell script, use the \fIsh\fR directive instead.
+.IP
+If MIBOID is specified, then the results will be rooted at this point
+in the OID tree, returning the exit statement as MIBOID.ERRORFLAG.0
+and the entire command output in a pseudo-table based at
+MIBNUM.ERRORMSG - with one 'row' for each line of output.
+.RS
+.IP Note:
+The layout of this "relocatable" form of \fIexec\fR (or \fIsh\fR) output
+does not strictly form a valid MIB structure.  This mechanism is being
+deprecated - please see the \fIextend\fR directive (described below) instead.
+.RE
+.IP
+In either case, the exit statement and output will be cached for 30s
+after the initial query.  This cache can be flushed by a SET request of
+\fIinteger(1)\fR to the MIB instance UCD-SNMP-MIB::versionClearCache.0.
 .IP "execfix NAME PROG ARGS"
-This registers a command that knows how to fix errors with the given
-exec or sh NAME.  When EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFIX for a
-given NAMEd entry is set to the integer value of 1, this command will
-be called.  It defaults to a compiled value set using the EXECFIXCMD
-definition in the net-snmp-config.h file.
+registers a command that can be invoked on demand - typically to respond
+to or fix errors with the corresponding \fIexec\fR or \fIsh\fR entry.
+When the \fIextErrFix\fR instance for a given NAMEd entry is set to the
+integer value of 1, this command will be called.
+.RS
+.IP "Note:"
+This directive can only be used in combination with a corresponding
+\fIexec\fR or \fIsh\fR directive, which must be defined first.
+Attempting to define an unaccompanied \fIexecfix\fR directive will fail.
+.RE
+.IP "extend [MIBOID] NAME PROG ARGS"
+works in a similar manner to the \fIexec\fR directive, but with a number
+of amendments and improvements.  The MIB tables (\fInsExtendConfigTable\fR
+etc) are indexed by the NAME token, so are unaffected by the order in
+which entries are read from the configuration files.
+There are \fItwo\fR result tables - one (\fInsExtendOutput1Table\fR)
+containing the exit status, the first line and full output (as a single string)
+for each \fIextend\fR entry, and the other (\fInsExtendOutput2Table\fR)
+containing the full output as a series of separate lines.
+.IP
+If MIBOID is specified, then the configuration and results will be rooted
+at this point in the OID tree, but are otherwise structured in exactly
+the same way as before. This means that several separate \fIextend\fR
+directives can specify the same MIBOID root, without conflicting.
+.IP
+The exit status and output is cached for each entry individually, and
+this can be configured and/or cleared
+via the NET-SNMP-AGENT-MIB::\fInsCacheTable\fR.
+.IP "extendfix NAME PROG ARGS"
+registers a command that can be invoked on demand, by setting the
+appropriate \fInsExtendRunType\fR instance to the value
+\fIrun-command(3)\fR.  Unlike the equivalent \fIexecfix\fR,
+this directive does not need to be paired with a corresponding
+\fIextend\fR entry, and can appear on its own.
 .SS "MIB-Specific Extension Commands"
 .IP "pass [-p priority] MIBOID EXEC"
 (If you're writing perl scripts, please see the embedded perl support
