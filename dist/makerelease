@@ -123,11 +123,14 @@ if($? != 0) {
     System("release:gpg","gpg -u net-snmp-admin -a --detach-sign $pkg");
 }
 
+System("cvsupdate","cvs update");
+
 #
 # XXX: auto upload to SF?
 #
-System("release:upload",
-       "ncftpput upload.sf.net incoming net-snmp-${version}.tar.gz $sig");
+print STDERR "Double check CVS update is right above\n";
+print STDERR "Run this to upload to SF:\n"
+print STDERR "  ncftpput upload.sf.net incoming net-snmp-${version}.tar.gz $sig\n";
 
 
 ######################################################################
