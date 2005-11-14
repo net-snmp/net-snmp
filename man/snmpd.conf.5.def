@@ -995,26 +995,41 @@ For
 .I gated
 a sensible entry might be
 .I smuxpeer .1.3.6.1.4.1.4.1.3 secret
+.IP "smuxsocket [<transport-specifier>:]<transport-address>[,...]"
+This defines the address for communicating with the SMUX peer.
+The default is to listen on TCP port 199 on all IPv4 interfaces, unless the 
+package has been configured with "--enable-local-smux" at build time,
+which causes it to only listen on tcp:127.0.0.1:199 by default.
+See the section
+.B LISTENING ADDRESSES
+in the
+.I snmpd(8)
+manual page for more information about the format of addresses.
 .SS AgentX Sub-Agents
 To enable AgentX support in the SNMP master agent, put the following
 line in your snmpd.conf file:
 .IP "master agentx"
 See README.agentx for further details.
-.IP "AgentXSocket addr"
+.IP "AgentXSocket [<transport-specifier>:]<transport-address>[,...]"
 This defines the address the master agent listens at.
-The default is /var/agentx/master. By default the Unix Domain socket is
-accessible only to subagents which have the same userid as the agent.
-Another possibility is localhost:705
-.IP "AgentXTimeout addr"
-Defines the timeout period for an AgentX request.
+The default is the Unix Domain socket /var/agentx/master.
+Another possibility is tcp:localhost:705.
+See the section
+.B LISTENING ADDRESSES
+in the
+.I snmpd(8)
+manual page for more information about the format of addresses.
+.IP "AgentXTimeout NUM"
+Defines the timeout period (NUM seconds) for an AgentX request.
 Default is 1 second.
-.IP "AgentXRetries addr"
+.IP "AgentXRetries NUM"
 Defines the number of retries for an AgentX request.
 Default is 5 retries.
 .IP "agentxperms socket_perms [directory_perms [username|userid [groupname|groupid]]]"
 Defines the permissions of the AgentX socket. socket_perms and directory_perms must be octal digits (see 
 .I chmod(1)
-).
+). By default the Unix Domain socket is accessible only to subagents which 
+have the same userid as the agent.
 .P
 You can also put the following in your subagent.conf file (where
 "subagent" is the name you used in your init_snmp("subagent") api call:
