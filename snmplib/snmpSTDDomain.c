@@ -238,7 +238,8 @@ netsnmp_std_transport(const char *instring, size_t instring_len)
 
             /* call exec */
             system(instring);
-            // execv(instring, NULL); /* XXX: args */
+            /* XXX: TODO: use exec form instead; needs args */
+            /* execv(instring, NULL); */
             exit(0);
 
             /* ack...  we should never ever get here */
