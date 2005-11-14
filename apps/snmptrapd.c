@@ -136,7 +136,6 @@ int             Syslog = 0;
 int             SyslogTrap = 0;
 int             Event = 0;
 int             dropauth = 0;
-int             running = 1;
 int             reconfig = 0;
 char            ddefault_port[] = "udp:162";	/* Default default port */
 char           *default_port = ddefault_port;
@@ -146,6 +145,8 @@ char           *default_port = ddefault_port;
 #endif
 char           *trap1_fmt_str_remember = NULL;
 int             dofork = 1;
+
+extern int      netsnmp_running;
 
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
@@ -370,7 +371,7 @@ term_handler(int sig)
 #ifdef WIN32SERVICE
     extern netsnmp_session *main_session;
 #endif
-    running = 0;
+    netsnmp_running = 0;
 #ifdef WIN32SERVICE
     /*
      * In case of windows, select() in receive() function will not return 
@@ -1074,13 +1075,13 @@ main(int argc, char *argv[])
          * just starting up to process specific configuration and then
          * shutting down immediately. 
          */
-        running = 0;
+        netsnmp_running = 0;
     }
 #ifndef WIN32
     /*
      * fork the process to the background if we are not printing to stderr 
      */
-    if (dofork && running) {
+    if (dofork && netsnmp_running) {
         int             fd;
 
         switch (fork()) {
@@ -1219,7 +1220,7 @@ main(int argc, char *argv[])
 #ifdef WIN32SERVICE
     trapd_status = SNMPTRAPD_RUNNING;
 #endif
-    while (running) {
+    while (netsnmp_running) {
         if (reconfig) {
             if (Print || Log) {
                 struct tm      *tm;
@@ -1281,11 +1282,11 @@ main(int argc, char *argv[])
                 if (errno == EINTR)
                     continue;
                 snmp_log_perror("select");
-                running = 0;
+                netsnmp_running = 0;
                 break;
             default:
                 fprintf(stderr, "select returned %d\n", count);
-                running = 0;
+                netsnmp_running = 0;
             }
 	run_alarms();
     }
