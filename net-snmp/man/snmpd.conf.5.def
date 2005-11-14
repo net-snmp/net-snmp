@@ -883,24 +883,20 @@ the OLD for the result varbind, the TYPE and the VALUE itself
 If the command cannot return an appropriate varbind,
 it should print print "NONE\\n" to stdout (but continue running).
 .IP
-For SET requests, 
 For SET requests, PROG will be passed three lines on stdin,
-the command (\fIget\fR or \fIgetnext\fR) and the requested OID,
+the command (\fIset\fR) and the requested OID,
 followed by the type and value (both on the same line),
 using the same type token as the \fIpass\fR processing.
-If the request cannot be processed successfully, PROG should
-writing one of the strings
+If the assignment is successful, the command should print
+"DONE\\n" to stdout.
+Errors should be indicated by writing one of the strings
 .B not-writable, 
 or 
 .B wrong-type
 to stdout,
 and the agent will generate the appropriate error response.
-Any other output will be regarded as indicating a successful
-assignmment.
+In either case, the command should continue running.
 .IP
-.\"
-.\" Feels a bit vague!
-.\"
 The default registration priority can be changed using the optional
 -p flag, just as for the \fIpass\fR directive.
 .SS "Embedded Perl Support"
