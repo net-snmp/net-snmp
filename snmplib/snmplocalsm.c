@@ -131,8 +131,6 @@ localsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 {
     u_char         **wholeMsg = parms->wholeMsg;
     size_t	   *offset = parms->wholeMsgOffset;
-//    localsm_sec_state_ref *localsm_state = (localsm_sec_state_ref *)  
-//        parms->secStateRef;
     int rc;
     
     size_t         *wholeMsgLen = parms->wholeMsgLen;
@@ -140,17 +138,6 @@ localsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 
     DEBUGMSGTL(("localsm", "Starting LOCALSM processing\n"));
 
-
-#ifdef MAYBE_SOMEDAY
-    if (!localsm_state) {
-        /*
-         * If we don't have a localsm_state, then we're a outgoing request.
-         */
-    } else {
-        /* We're an incoming request */
-        free(localsm_state);
-    }
-#endif
 
     /*
      * We define here what the security message section will look like:
@@ -174,7 +161,6 @@ localsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     while ((*wholeMsgLen - *offset) < parms->globalDataLen) {
         if (!asn_realloc(wholeMsg, wholeMsgLen)) {
             DEBUGMSGTL(("localsm", "building global data failed.\n"));
-            // localsm_free_localsmStateReference(secStateRef);
             return SNMPERR_TOO_LONG;
         }
     }
@@ -191,11 +177,9 @@ localsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
                                                ASN_CONSTRUCTOR), *offset);
     if (rc == 0) {
         DEBUGMSGTL(("localsm", "building master packet sequence failed.\n"));
-        // localsm_free_localsmStateReference(secStateRef);
         return SNMPERR_TOO_LONG;
     }
 
-    // localsm_free_localsmStateReference(secStateRef);
     DEBUGMSGTL(("localsm", "LOCALSM processing completed.\n"));
     return SNMPERR_SUCCESS;
 }
@@ -259,7 +243,7 @@ localsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     
     *parms->scopedPdu = data_ptr;
     *parms->scopedPduLen = parms->wholeMsgLen - (data_ptr - parms->wholeMsg);
-    *parms->maxSizeResponse = parms->maxMsgSize; // XXX
+    *parms->maxSizeResponse = parms->maxMsgSize; /* XXX */
     parms->secEngineID = strdup("");
     *parms->secEngineIDLen = 0;
     parms->secLevel = SNMP_SEC_LEVEL_NOAUTH;
