@@ -176,6 +176,7 @@ typedef long    fd_mask;
 #define TIMETICK         500000L
 
 int             snmp_dump_packet;
+int             running = 1;
 int             reconfig = 0;
 int             Facility = LOG_DAEMON;
 
@@ -192,7 +193,6 @@ LPTSTR          app_name_long = _T("Net-SNMP Agent");     /* Application Name */
 
 const char     *app_name = "snmpd";
 
-extern int      netsnmp_running;
 extern char   **argvrestartp;
 extern char    *argvrestart;
 extern char    *argvrestartname;
@@ -346,7 +346,7 @@ SnmpdShutDown(int a)
 #ifdef WIN32SERVICE
     extern netsnmp_session *main_session;
 #endif
-    netsnmp_running = 0;
+    running = 0;
 #ifdef WIN32SERVICE
     /*
      * In case of windows, select() in receive() function will not return 
@@ -1052,7 +1052,7 @@ receive(void)
     /*
      * Loop-forever: execute message handlers for sockets with data
      */
-    while (netsnmp_running) {
+    while (running) {
         if (reconfig) {
             reconfig = 0;
             snmp_log(LOG_INFO, "Reconfiguring daemon\n");
@@ -1158,7 +1158,7 @@ receive(void)
                      * likely that we got a signal. Check our special signal
                      * flags before retrying select.
                      */
-		    if (netsnmp_running && !reconfig) {
+		    if (running && !reconfig) {
                         goto reselect;
 		    }
                     continue;

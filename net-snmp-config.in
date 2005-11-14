@@ -403,11 +403,11 @@ EOF
     done
 
       cat >> $tmpfile <<EOF
-extern int netsnmp_running;
+static int keep_running;
 
 RETSIGTYPE
 stop_server(int a) {
-    netsnmp_running = 0;
+    keep_running = 0;
 }
 
 int
@@ -442,8 +442,8 @@ EOF
   /* ustMain will be used to read ustMain.conf files. */
   init_snmp("$outname");
 
-  /* In case we received a request to stop (kill -TERM or kill -INT) */
-  netsnmp_running = 1;
+  /* In case we recevie a request to stop (kill -TERM or kill -INT) */
+  keep_running = 1;
 #ifdef SIGTERM
   signal(SIGTERM, stop_server);
 #endif
@@ -452,7 +452,7 @@ EOF
 #endif
 
   /* main loop here... */
-  while(netsnmp_running) {
+  while(keep_running) {
     agent_check_and_process(1);
   }
 
