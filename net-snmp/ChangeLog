@@ -1,6 +1,464 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.3.pre2 -> V5.3.pre3
+
+2005-11-14 01:26  rstory
+
+   * agent/Makefile.depend, apps/snmpnetstat/Makefile.depend
+:
+
+   make depend
+
+2005-11-14 01:25  rstory
+
+   * man/: netsnmp_Container_iterator.3, netsnmp_agent.3
+, netsnmp_agent_registry.3, netsnmp_agent_trap.3
+, netsnmp_asn1_packet_parse.3, netsnmp_baby_steps.3
+, netsnmp_bulk_to_next.3, netsnmp_cache_handler.3
+, netsnmp_callback.3, netsnmp_container.3,
+     netsnmp_data_list.3, netsnmp_debug.3,
+     netsnmp_default_store.3, netsnmp_handler.3,
+     netsnmp_instance.3, netsnmp_iterator_info_s.3,
+     netsnmp_leaf.3, netsnmp_library.3,
+     netsnmp_mib_utilities.3, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3,
+     netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3,
+     netsnmp_snmp_client.3, netsnmp_snmp_logging.3,
+     netsnmp_snmp_pdu.3, netsnmp_snmp_session.3,
+     netsnmp_stash_cache.3, netsnmp_table.3,
+     netsnmp_table_array.3, netsnmp_table_container.3,
+     netsnmp_table_data.3, netsnmp_table_dataset.3,
+     netsnmp_table_iterator.3, netsnmp_util.3,
+     netsnmp_utilities.3, netsnmp_variable_list.3,
+     netsnmp_watcher.3:
+
+   documentation update
+
+2005-11-14 01:19  rstory
+
+   * configure:
+
+   version update
+
+2005-11-14 01:10  rstory
+
+   * configure, configure.in:
+
+   version update
+
+2005-11-14 00:14  rstory
+
+   * agent/mibgroup/versiontag:
+
+   remove unneeded repository spec
+
+2005-11-13 22:10  alex_b
+
+   * win32/: Makefile.in, install-net-snmp.bat,
+     dist/installer/net-snmp.nsi:
+
+   -Win32: Add missing mib2c-data to installer
+   -Win32: Use wildcards in installer for installing files to help prevent
+    missing files.
+
+2005-11-13 22:00  rstory
+
+   * net-snmp-config.in, agent/snmp_agent.c,
+     agent/snmpd.c, apps/snmptrapd.c:
+
+   - new netsnmp_running global in agent lib
+     - used in place of while(1) in get next processing loop
+     - daemons w/sighandler updated to clear flag on sigterm
+
+2005-11-11 21:55  alex_b
+
+   * win32/net-snmp/: net-snmp-config.h, net-snmp-config.h.in
+:
+
+   Win32:  Fix NI_MAXHOST define.
+
+2005-11-11 21:11  alex_b
+
+   * apps/snmpnetstat/inet.c:
+
+   Win32: Work around for bug 1278743:  If trying to reverse lookup
+   127.0.0.1, return 'localhost' to prevent Windows from returning the
+   local computer name because it ignores the hosts file.
+
+2005-11-10 19:48  tanders
+
+   * testing/tests/T0160snmpv2cbulkget:
+
+   fix typo
+
+2005-11-10 19:18  tanders
+
+   * README.solaris:
+
+   fix syntax typo
+
+2005-11-10 18:55  tanders
+
+   * testing/tests/T160snmpnetstat:
+
+   clarify that this test requires a working udpTable
+
+2005-11-10 18:22  tanders
+
+   * include/net-snmp/system/openbsd.h:
+
+   build fix for OpenBSD/SPARC 3.7
+
+2005-11-10 14:37  rstory
+
+   * agent/mibgroup/agentx/subagent.c:
+
+   - agentx init rework
+     - protect against multiple calls to subagent_init
+     - don't connect to master in subagent_init, instead register POST_CONFIG
+       callback to do so
+
+2005-11-10 14:27  rstory
+
+   * snmplib/callback.c:
+
+   - finer grained locking of callbacks (per subid), allowing a callback to
+     manipulate (reg/unreg) other callbacks
+   - more debugging
+   - add static flag for init
+     - memset and init variables in init_callback if not done yet
+     - call init_callback, if needed, from all functions
+
+2005-11-10 14:15  rstory
+
+   * agent/snmp_agent.c:
+
+   - agentx init rework
+     restore backwards compatibility (no subagent init in init_master_agent())
+
+2005-11-10 14:12  rstory
+
+   * agent/snmp_vars.c:
+
+   - agentx init rework:
+     restore backwards compatibility (call subagent in in init_agent)
+
+2005-11-10 05:13  dts12
+
+   * agent/mibgroup/disman/: event.h, event-mib.h,
+     old-event-mib.h:
+
+   Split original and new Event MIB implementations into distinct
+   "module group" headers, and use the original name to warn of the changes.
+
+2005-11-10 05:10  dts12
+
+   * configure, configure.in:
+
+   Add support for MIB modules to generate configure warnings or errors
+
+2005-11-10 04:46  dts12
+
+   * apps/snmpnetstat/: main.c, netstat.h, route.c:
+
+   Silence a couple of compiler warnings
+
+2005-11-10 04:45  dts12
+
+   * apps/snmpnetstat/if.c:
+
+   Don't choke on missing interfaces (and silence a couple of compiler warnings)
+
+2005-11-10 04:44  dts12
+
+   * apps/snmpnetstat/: inet.c, inet6.c:
+
+   Suppress headers for empty TCP displays (and fix a minor typo)
+
+2005-11-09 21:33  alex_b
+
+   * agent/snmpd.c, apps/snmptrapd.c,
+     snmplib/winservice.c:
+
+   -Win32: Force Event Log, SCM, registry etc to use long
+    name for service (Net-SNMP Agent instead of snmpd).  Needed
+    because of new -n option in snmpd.  Note:  The snmpd -n option
+    does not change the Windows service name etc, only the config
+    file loaded.
+
+2005-11-09 19:34  tanders
+
+   * testing/Makefile.in:
+
+   "make test-mibs" still won't work if build dir != source dir, but it's closer now
+
+2005-11-09 18:41  rstory
+
+   * agent/mibgroup/agentx/: agentx_config.h, subagent.h:
+
+   agentx init rework: update prototypes for renamed functions
+
+2005-11-09 18:24  tanders
+
+   * agent/mibgroup/agentx/subagent.c:
+
+   debug message should match code
+
+2005-11-09 17:38  rstory
+
+   * agent/mibgroup/: ip-mib/ipAddressPrefixTable/.cvsignore,
+     ip-mib/ipv4InterfaceTable/.cvsignore,
+     ip-mib/ipv6InterfaceTable/.cvsignore,
+     udp-mib/udpEndpointTable/.cvsignore:
+
+   ignore executables, makefiles, txt files, subagent files
+
+2005-11-09 17:31  rstory
+
+   * apps/snmpnetstat/inet6.c:
+
+   remove duplicate include
+
+2005-11-09 17:28  rstory
+
+   * dist/nsb-functions:
+
+   more specific error regexp
+
+2005-11-09 17:26  rstory
+
+   * apps/snmptrapd.c:
+
+   agentx init rework: update for function name changes
+
+2005-11-09 17:25  rstory
+
+   * agent/mibgroup/agentx/subagent.c:
+
+   - agentx init rework
+     - ifdef entire module based on using agentx subagent module
+     - rename init fucntion so we can control when it is called
+     - remove subagent_pre_init
+       - config stuff moved into agentx_config.c
+       - connection establishment moved to subagent_init, now that it's called
+         after configs have been read
+
+2005-11-09 17:21  rstory
+
+   * agent/mibgroup/agentx/agentx_config.c:
+
+   - consolidate master and subagent configs in this file
+     - slight code re-org (no changes; move agentx socket parsing to top)
+     - register ping interval config and set default
+     - rename init function so configure won't add it to modules inits, so we
+       can call it when we want it to be called
+
+2005-11-09 17:18  rstory
+
+   * agent/snmp_agent.c:
+
+   - agentx init rework: init subagent in init_master_agent
+   - assert if role isn't master or sub-agent
+
+2005-11-09 17:16  rstory
+
+   * agent/snmp_vars.c:
+
+   - agentx init rework
+     - don't init subagent here (configs haven't been read yet)
+     - only init master/sub configs
+
+2005-11-09 17:12  rstory
+
+   * README.agent-mibs:
+
+   update for new tables
+
+2005-11-08 07:21  dts12
+
+   * apps/snmpnetstat/: if.c, main.c, netstat.h:
+
+   Implement Open/NetBSD-style octet interface display.
+
+2005-11-08 07:17  dts12
+
+   * apps/snmpnetstat/if.c:
+
+   Right-justify headings for counter values.
+   (looks neater when individual values become relatively wide)
+
+2005-11-08 07:04  dts12
+
+   * apps/snmpnetstat/inet6.c:
+
+   Fix problems walking the IPv6 connection tables.
+
+2005-11-08 06:59  dts12
+
+   * agent/helpers/cache_handler.c:
+
+   Only schedule automatic loading once for any given cache.
+
+2005-11-07 22:46  hardaker
+
+   * dist/makerelease:
+
+   ChangeLog note
+
+2005-11-07 21:45  alex_b
+
+   * win32/: net-snmp/net-snmp-config.h,
+     net-snmp/net-snmp-config.h.in, snmpnetstat/Makefile.in
+, snmpnetstat/snmpnetstat.dsp:
+
+   Win32:  MSVC build fixes.
+
+2005-11-07 19:49  tanders
+
+   * testing/tests/T060trapdperl:
+
+   introduce embedded perl test for snmptrapd (too fancy to resist)
+
+2005-11-07 19:42  tanders
+
+   * apps/snmpnetstat/Makefile.in:
+
+   build fix: fss->ffs
+
+2005-11-07 18:54  tanders
+
+   * perl/ASN/ASN.pm:
+
+   fix typo
+
+2005-11-07 18:34  tanders
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   fix typos
+
+2005-11-07 13:41  rstory
+
+   * agent/snmpd.c:
+
+   drop default timeout down to INT_MAX, and document why
+
+2005-11-07 09:39  dts12
+
+   * apps/snmpnetstat/: Makefile.in, ffs.c, if.c,
+     main.c, netstat.h, route.c:
+
+   Tweaks to support building under Windows
+     (including renamed 'ffs()' routine, taken from OpenBSD source tree)
+
+2005-11-07 06:47  dts12
+
+   * apps/snmpnetstat/if.c:
+
+   Display interface addressing information.
+
+-------------------------------------------------------------------------------
+
 Changes: V5.3.pre1 -> V5.3.pre2
+
+2005-11-07 01:57  rstory
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.3.pre2 )
+
+2005-11-07 01:57  rstory
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.3.pre2 )
+
+2005-11-07 01:56  rstory
+
+   * perl/ASN/ASN.pm:
+
+   - (perl/ASN/ASN.pm): version tag ( 5.3.pre2 )
+
+2005-11-07 01:56  rstory
+
+   * perl/OID/OID.pm:
+
+   - (perl/OID/OID.pm): version tag ( 5.3.pre2 )
+
+2005-11-07 01:56  rstory
+
+   * perl/default_store/default_store.pm:
+
+   - (perl/default_store/default_store.pm): version tag ( 5.3.pre2 )
+
+2005-11-07 01:56  rstory
+
+   * perl/agent/default_store/default_store.pm:
+
+   - (perl/agent/default_store/default_store.pm): version tag ( 5.3.pre2 )
+
+2005-11-07 01:56  rstory
+
+   * perl/agent/agent.pm:
+
+   - (perl/agent/agent.pm): version tag ( 5.3.pre2 )
+
+2005-11-07 01:56  rstory
+
+   * perl/SNMP/SNMP.pm:
+
+   - (perl/SNMP/SNMP.pm): version tag ( 5.3.pre2 )
+
+2005-11-07 01:55  rstory
+
+   * sedscript.in:
+
+   - (sedscript.in): version tag ( 5.3.pre2 )
+
+2005-11-07 01:55  rstory
+
+   * dist/net-snmp.spec:
+
+   - (dist/net-snmp.spec): version tag ( 5.3.pre2 )
+
+2005-11-07 01:55  rstory
+
+   * FAQ:
+
+   - (FAQ): version tag ( 5.3.pre2 )
+
+2005-11-07 01:54  rstory
+
+   * README:
+
+   - (README): version tag ( 5.3.pre2 )
+
+2005-11-07 01:54  rstory
+
+   * snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c): version tag ( 5.3.pre2 )
+
+2005-11-07 01:54  rstory
+
+   * ChangeLog:
+
+   version update
 
 2005-11-07 01:44  rstory
 
