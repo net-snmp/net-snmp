@@ -200,8 +200,7 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
     /*
      * we really should only have to do this once, instead of every pass.
      * as a precaution, we'll do it every time, but put in some asserts
-     * to see if we have to. marked with "// SANITY".
-     * xxx-rks: remove "// SANITY" checks before release.
+     * to see if we have to.
      */
     /*
      * if the count changed, re-do everything
@@ -255,7 +254,7 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
         else
             saved_status[i] = ROW_MERGE_WAITING;
         if (0 != rm_status->count)
-            netsnmp_assert(saved_requests[i] == request); // xxx-rks SANITY
+            netsnmp_assert(saved_requests[i] == request);
         saved_requests[i] = request;
     }
     saved_requests[i] = NULL;
@@ -327,13 +326,7 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
         rm_status->current++;
         ret = netsnmp_call_next_handler(handler, reginfo, reqinfo,
 			                saved_requests[i]);
-        /*
-         * hmm... I'm not sure about this break.. it could result
-         * in strange things if one mode doesn't call all requests,
-         * but following modes do..
-         */
         if (ret != SNMP_ERR_NOERROR) {
-            // break;
             snmp_log(LOG_WARNING,
                      "bad rc (%d) from next handler in row_merge\n", ret);
             if (SNMP_ERR_NOERROR == final_rc)
