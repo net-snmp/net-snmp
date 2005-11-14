@@ -223,129 +223,147 @@ uses the module name prefix NAME.
 .SH ACCESS CONTROL
 .B snmpd
 supports the View-Based Access Control Model (VACM) as defined in RFC
-2575.  To this end, it recognizes the following keywords in the
-configuration file: \fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and
-\fIview\fR as well as some easier-to-use wrapper directives:
-\fIrocommunity\fR, \fIrwcommunity\fR, \fIrouser\fR, \fIrwuser\fR.  If
-IPv6 support has been enabled, the \fIrocommunity6\fR and
-\fIrwcommunity6\fR tokens will also be available.  This section
-defines how to configure the snmpd program to accept various types and
-levels of access.
+2575, to control who can retrieve or update information.  To this end,
+it recognizes various directives relating to access control.
+These fall into three basic groups.
+.SS Traditional Access Control
+Most simple access control requirements can be specified using the
+directives \fIrouser\fR/\fIrwuser\fR (for SNMPv3) or
+\fIrocommunity\fR/\fIrwcommunity\fR (for SNMPv1 or SNMPv2c).
 .IP "rouser USER [noauth|auth|priv [OID]]"
 .IP "rwuser USER [noauth|auth|priv [OID]]"
-Creates a SNMPv3 USM user in the VACM access configuration tables.  It
-is more efficient (and powerful) to use the combined \fIgroup\fR,
-\fIaccess\fR, and \fIview\fR directives instead, but these wrapper
-directives are much simpler.
-.IP
-The minimum level of authentication and privacy the user must use is
-specified by the first token (which defaults to "auth").  The OID
-parameter restricts access for that user to everything below the given
-OID.
+specify an SNMPv3 USM user that will be allowed read-only (GET and GETNEXT)
+or read-write (GET, GETNEXT and SET) access respectively.
+By default, this will provide access to the full OID tree for authenticated
+(including encrypted) SNMPv3 requests.
+An alternative minimum security level can be specified using the \fInoauth\fR
+or \fIpriv\fR tokens (to allow unauthenticated requests, or enforce use of
+encryption respectively).  The OID parameter restricts access for that
+user to the subtree rooted at the given OID.
 .IP "rocommunity COMMUNITY [SOURCE [OID]]"
 .IP "rwcommunity COMMUNITY [SOURCE [OID]]"
-These create read-only and read-write communities that can be used to
-access the agent.  They are a quick wrapper around the more complex
-and powerful \fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and \fIview\fR
-directive lines.  They are not as efficient either, as groups aren't
-created so the tables are possibly larger.  In other words: don't use
-these if you have complex situations to set up.  If your setup is
-simple or you don't mind a small performance hit, use these
-directives.
-.IP
-The format of the SOURCE is token is described in the \fIcom2sec\fR
-directive section below.  The OID token restricts access for that
-community to everything below that given OID.
+specify an SNMPv1 or SNMPv2c community that will be allowed read-only
+(GET and GETNEXT) or read-write (GET, GETNEXT and SET) access respectively.
+By default, this will provide access to the full OID tree for such requests,
+regardless of where they were sent from. The SOURCE token can be used to
+restrict access to requests from the specified system(s) - see
+\fIcom2sec\fR for the full details.  The OID parameter restricts access for
+that community to the subtree rooted at the given OID.
 .IP "rocommunity6 COMMUNITY [SOURCE [OID]]"
 .IP "rwcommunity6 COMMUNITY [SOURCE [OID]]"
-They are the alternative directives to the \fIrocommunity\fR,
-\fIrwcommunity\fR for the transport domain UDPIPv6. They are only
-valid in specifing \fIUDPIPv6\fR as transport domain.
+are equivalent directives, relating to requests received using IPv6-based
+transports (if the agent supports such transport domains).
+The interpretation of the SOURCE and OID tokens are exactly the same as for
+the IPv4 equivalents.
+.PP
+In each case, only one directive should be specified for a given SNMPv3 user,
+or community string. More complex access requirements (such as access to two
+or more distinct OID subtrees, or different views for GET and SET requests)
+should use one of the other access control mechanisms.
+.PP
+In particular, it is \fBnot\fR appropriate to specify both \fIrouser\fR
+and \fIrwuser\fR directives referring to the same SNMPv3 user (or equivalent
+community settings). The \fIrwuser\fR directive provides all the access
+of \fIrouser\fR (as well as allowing SET support).
+.PP
+Note that if several distinct communities or SNMPv3 users need to be granted
+the same level of access, it would be more efficient to use the main VACM
+configuration directives.
+.SS VACM Configuration
+The full flexibility of the VACM is available using four configuration
+directives - \fIcom2sec\fR, \fIgroup\fR, \fIview\fR and \fIaccess\fR.
+These provide direct configuration of the underlying VACM tables.
+.IP "com2sec  [-Cn CONTEXT] NAME SOURCE COMMUNITY"
+.IP "com2sec6 [-Cn CONTEXT] NAME SOURCE COMMUNITY"
+map an SNMPv1 or SNMPv2c community string to a security name - either from
+a particular range of source addresses, or globally (\fI"default"\fR).
+A restricted source can either be a specific hostname (or address), or
+a subnet - represented as IP/MASK (e.g. 10.10.10.0/255.255.255.0), or as
+IP/BITS (e.g. 10.10.10.0/24) - or the IPv6 equivalents.
 .IP
-The format of the SOURCE is token is described in the \fIcom2sec6\fR
-directive section below.  The OID token restricts access for that
-community to everything below that given OID.
-.IP "com2sec [-Cn CONTEXT] NAME SOURCE COMMUNITY"
-This directive specifies the mapping from a source/community pair to
-a security name. SOURCE can be a hostname, a subnet, or the word
-\fI"default"\fR.
-A subnet can be specified as IP/MASK or IP/BITS.
-For example, given a directive
-"com2sec myLocal 10.10.10.0/24 public"
-then this would match requests from IP addresses 10.10.10.0 through
-to 10.10.10.255, but not one from 10.10.11.1 or similar.
-The first source/community combination that matches the incoming packet
-is selected.  If a CONTEXT is specified, the community name gets
-mapped to the SNMPv3 CONTEXT of the same name, otherwise the default context
-("") is used.
-.IP "com2sec6  [-Cn CONTEXT] NAME SOURCE COMMUNITY"
-This directive is the IPv6 version of \fIcom2sec\fR.
-A subnet can be specified as IPv6/IPv6MASK or IPv6/BITS.
-It is only valid in specifing \fIUDPIPv6\fR as transport domain.
+The same community string can be specified in several separate directives
+(presumably with different source tokens), and the first source/community
+combination that matches the incoming request will be selected.
+The same security name can also appear in several separate directives.
+.IP
+If a CONTEXT is specified (using \fI-Cn\fR), the community string will be
+mapped to a security name in the named SNMPv3 context. Otherwise the
+default context ("") will be used.
 .IP "com2secunix [-Cn CONTEXT] NAME SOCKPATH COMMUNITY"
-This directive is the Unix domain sockets version of \fIcom2sec\fR.
+is the Unix domain sockets version of \fIcom2sec\fR.
 .IP "group NAME MODEL SECURITY"
-This directive defines the mapping from securitymodel/securityname to group.
+maps one or more security names (in the specified security model) into
+a named group, which allows a single access setting to apply to several
+users and/or community strings.
 MODEL is one of \fIv1\fR, \fIv2c\fR, or \fIusm\fR.
+.IP
+Note that the two community-based models must be specified separately -
+a single \fIcom2sec\fR (or equivalent) directive will typically be
+accompanied by \fBtwo\fR \fIgroup\fR directives.
+.IP "view NAME TYPE SUBTREE [MASK]"
+defines a named "view" - a subset of the overall OID tree. This is most
+commonly a single subtree, but several \fIview\fR directives can be given
+with the same view name, to build up a more complex collection of OIDs.
+TYPE is either \fIincluded\fR or \fIexcluded\fR, which can again define
+a more complex view (e.g by excluding certain sensitive objects
+from an otherwise accessible subtree).
+.IP
+MASK is a list of hex octets (separated by '.' or ':') with the set bits
+indicating which subidentifiers in the view OID to match against.  This
+can be used to define a view covering all columns of selected rows in a
+table.  If not specified, this defaults to matching the OID exactly
+(all bits set), thus defining a simple OID subtree.
 .IP "access NAME CONTEXT MODEL LEVEL PREFX READ WRITE NOTIFY"
-The access directive maps from group/security model/security level to
-a view. 
+maps from a group of users/communities (with a particular security model
+and minimum security level, and in a specific context) to one of three views,
+depending on the request being processed.
+.IP
 MODEL is one of \fIany\fR, \fIv1\fR, \fIv2c\fR, or \fIusm\fR.
 LEVEL is one of \fInoauth\fR, \fIauth\fR, or \fIpriv\fR.
 PREFX specifies how CONTEXT should be matched against the context of
-the incoming pdu, either \fIexact\fR or \fIprefix\fR.
-READ, WRITE and NOTIFY specifies the view to be used for the corresponding 
-access.
-For v1 or v2c access, LEVEL will be noauth, and CONTEXT will be empty.
-.IP "view NAME TYPE SUBTREE [MASK]"
-This defines the named view. TYPE is either \fIincluded\fR or \fIexcluded\fR.
-MASK is a list of hex octets, separated by '.' or ':'.  The MASK
-defaults to "ff" if not specified.
-.IP
-The reason for the mask is, that it allows you to control access to
-one row in a table, in a relatively simple way. As an example, as an ISP
-you might consider giving each customer access to his or her own interface:
-.IP
-.nf
-view cust1 included interfaces.ifTable.ifEntry.ifIndex.1 ff.a0
-view cust2 included interfaces.ifTable.ifEntry.ifIndex.2 ff.a0
-.IP
-(interfaces.ifTable.ifEntry.ifIndex.1 == .1.3.6.1.2.1.2.2.1.1.1,
-ff.a0 == 11111111.10100000. which nicely covers up and including
-the row index, but lets the user vary the field of the row)
+the incoming request, either \fIexact\fR or \fIprefix\fR.
+READ, WRITE and NOTIFY specifies the view to be used for GET*, SET
+and TRAP/INFORM requests (althought the NOTIFY view is not currently used).
+For v1 or v2c access, LEVEL will need to be \fInoauth\fR.
+.SS Typed-View Configuration
+The final group of access control directives extend the VACM approach to a
+more flexible mechanism, which can be applied more widely. Rather than
+the fixed three views of the standard VACM mechanism, this can be used to
+configure various different view types.  As far as the main SNMP agent is
+concerned, the two main view types are \fIread\fR and \fIwrite\fR,
+corresponding to the READ and WRITE views of the main \fIaccess\fR directive.
+See the 'snmptrapd.conf(5)' man page for discussion of other view types.
 .IP "authcommunity TYPES  COMMUNITY   [SOURCE [OID | -v VIEW]]"
 .IP "authuser   TYPES [-s MODEL] USER  [LEVEL [OID | -v VIEW]]"
-These are alternative versions of the "rocommunity"/"rwcommunity"
-and "rouser"/"rwuser" directives.  TYPES will usually be "read"
-or "read,write" (at least when used with the snmp agent - see
-'snmptrapd.conf(5)' for other possibilities).
+are alternative versions of the \fIrocommunity\fR/\fIrwcommunity\fR
+and \fIrouser\fR/\fIrwuser\fR directives respectively.  TYPES will
+usually be \fIread\fR or \fIread,write\fR.
 The view specification can either be an OID subtree (as with
 the earlier directives), or a named view (defined using the
-"view" directive) for greater flexibility.  If this is omitted,
+\fIview\fR directive) for greater flexibility.  If this is omitted,
 then access will be allowed to the full OID tree.
 .IP "authgroup  TYPES [-s MODEL] GROUP [LEVEL [OID | -v VIEW]]"
-This is a companion to the "authuser" directive, specifying access
-for a particular group (defined using the "group" directive).
-Both "authuser" and "authgroup" default to authenticated requests -
-LEVEL can also be specified as "noauth" or "priv" to allow
+is a companion to the \fIauthuser\fR directive, specifying access
+for a particular group (defined using the \fIgroup\fR directive as usual).
+Both \fIauthuser\fR and \fIauthgroup\fR default to authenticated requests -
+LEVEL can also be specified as \fInoauth\fR or \fIpriv\fR to allow
 unauthenticated requests, or require encryption respectively.
-Both "authuser" and "authgroup" directives also default to configuring
-access for SNMPv3/USM requests - use the '-s' flag to specify an
-alternative security model (including 'v1' or 'v2c' for
-community-based requests, or 'any' for any recognised security model).
+Both \fIauthuser\fR and \fIauthgroup\fR directives also default to configuring
+access for SNMPv3/USM requests - use the '-s' flag to specify an alternative
+security model (using the same values as for \fIaccess\fR above).
 .IP "authaccess TYPES [-s MODEL] GROUP VIEW [LEVEL [CONTEXT]]"
-This directive also configures the access for a particular group,
-specifying the view and type to apply. The MODEL and LEVEL fields
-are interpreted in the same way as before.
+also configures the access for a particular group,
+specifying the name and type of view to apply. The MODEL and LEVEL fields
+are interpreted in the same way as for \fIauthgroup\fI.
 If CONTEXT is specified, access is configured within this SNMPv3 context
 (or contexts with this prefix if the CONTEXT field ends with '*'),
 otherwise the default context ("") is used.
 .IP "setaccess CONTEXT MODEL LEVEL PREFIX VIEW TYPES"
-This is a direct equivalent to the original "access" directive,
-listing the appropriate "read" or "read,write" view types
+is a direct equivalent to the original \fIaccess\fR directive, typically
+listing the view types as \fIread\fR or \fIread,write\fR as appropriate.
 (or see 'snmptrapd.conf(5)' for other possibilities).
-All other fields have the same interpretation as with "access".
-.IP "VACM Examples:"
+All other fields have the same interpretation as with \fIaccess\fR.
+.SS "VACM Examples:"
 .nf
 #        sec.name  source          community
 com2sec  local     localhost       private
