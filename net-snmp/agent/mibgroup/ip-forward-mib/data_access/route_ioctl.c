@@ -65,9 +65,6 @@
 #include "ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable.h"
 #include "route_ioctl.h"
 
-//#include "ip.h"
-//#include "route_write.h"
-
 #ifdef cygwin
 #include <windows.h>
 #endif
