@@ -45,10 +45,14 @@
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/snmp_api.h>
 
-
-// temp debug
-#define NETSNMP_PARANOID_LEVEL_HIGH 1 // temp debug
-
+/*
+ * the inline callback methods use major/minor to index into arrays.
+ * all users in this function do range checking before calling these
+ * functions, so it is redundant for them to check again. But if you
+ * want to be paranoid, define this var, and additional range checks
+ * will be performed.
+ * #define NETSNMP_PARANOID_LEVEL_HIGH 1 
+ */
 
 static int _callback_need_init = 1;
 static struct snmp_gen_callback
@@ -285,14 +289,14 @@ snmp_call_callbacks(int major, int minor, void *caller_arg)
     if (_callback_need_init)
         init_callbacks();
 
-#ifdef NETSNMP_PARANOID_LEVEL_HIGH
-        /*
-         * Notes:
-         * - this gets hit the first time a trap is sent after a new trap
-         *   destination has been added (session init cb during send trap cb)
-         */
+#ifdef LOCK_PER_CALLBACK_SUBID
     _callback_lock(major,minor,"snmp_call_callbacks", 1);
 #else
+    /*
+     * Notes:
+     * - this gets hit the first time a trap is sent after a new trap
+     *   destination has been added (session init cb during send trap cb)
+     */
     _callback_lock(major,minor, NULL, 0);
 #endif
 
@@ -406,13 +410,13 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
     if (_callback_need_init)
         init_callbacks();
 
-#ifdef NETSNMP_PARANOID_LEVEL_HIGH
-        /*
-         * Notes;
-         * - this gets hit at shutdown, during cleanup. No easy fix.
-         */
+#ifdef LOCK_PER_CALLBACK_SUBID
     _callback_lock(major,minor,"snmp_unregister_callback", 1);
 #else
+    /*
+     * Notes;
+     * - this gets hit at shutdown, during cleanup. No easy fix.
+     */
     _callback_lock(major,minor,"snmp_unregister_callback", 0);
 #endif
 
