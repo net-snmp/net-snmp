@@ -105,7 +105,7 @@ send_example_notification(unsigned int clientreg, void *clientarg)
      * here is where we store the variables to be sent in the trap 
      */
     netsnmp_variable_list *notification_vars = NULL;
-    char *heartbeat_name = "A girl named Maria";
+    const char *heartbeat_name = "A girl named Maria";
 #ifdef  RANDOM_HEARTBEAT
     int  heartbeat_rate = rand() % 60;
 #else

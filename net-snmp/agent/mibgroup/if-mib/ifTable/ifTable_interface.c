@@ -94,6 +94,28 @@ NETSNMP_STATIC_INLINE int _ifTable_undo_column(ifTable_rowreq_ctx *
 ifTable_data   *ifTable_allocate_data(void);
 
 /**
+ * common init of container for ifTable and ifXTable
+ */
+void
+if_mib_container_init(void)
+{
+    static int done = 0;
+
+    if (done)
+        return;
+
+    DEBUGMSGTL(("internal:ifTable:ifTable_container_init", "called\n"));
+
+    done = 1;
+
+    /*
+     * set up the container. This is outside the rewrite ifdef, because
+     * the container is used by the ifXTable too..
+     */
+    _ifTable_container_init(&ifTable_if_ctx);
+}
+
+/**
  * @internal
  * Initialize the table ifTable 
  *    (Define its contents and how it's structured)
@@ -112,16 +134,10 @@ _ifTable_initialize_interface(ifTable_registration_ptr reg_ptr,
     DEBUGMSGTL(("internal:ifTable:_ifTable_initialize_interface",
                 "called\n"));
 
+    (void) if_mib_container_init();
+    if (NULL == ifTable_if_ctx.container)
+        return; /* msg already logged */
 
-    /*
-     * set up the container. This is outside the rewrite ifdef, because
-     * the container is used by the ifXTable too..
-     */
-    _ifTable_container_init(&ifTable_if_ctx);
-    if (NULL == ifTable_if_ctx.container) {
-        snmp_log(LOG_ERR, "could not initialize container for ifTable\n");
-        return;
-    }
 #ifdef NETSNMP_ENABLE_MFD_REWRITES
     /*************************************************
      *
@@ -321,7 +337,7 @@ ifTable_index_to_oid(netsnmp_index * oid_idx, ifTable_mib_index * mib_idx)
     err = build_oid_noalloc(oid_idx->oids, oid_idx->len, &oid_idx->len,
                             NULL, 0, &var_ifIndex);
     if (err)
-        snmp_log(LOG_ERR, "error %d converting index to oid\n");
+        snmp_log(LOG_ERR, "error %d converting index to oid\n", err);
 
     /*
      * parsing may have allocated memory. free it.

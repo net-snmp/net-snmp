@@ -25,7 +25,7 @@ $example_start
 
 @    end@ # foreach
              default:
-                 snmp_log(LOG_ERR, "couldn't reverse map value %d for $node\n", $m2c_node_srh );
+                 snmp_log(LOG_ERR, "couldn't reverse map value %ld for $node\n", $m2c_node_srh );
                  return SNMP_ERR_GENERR;
     }
 $example_end

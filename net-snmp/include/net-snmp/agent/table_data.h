@@ -63,6 +63,9 @@ extern          "C" {
                                                        oid * searchfor,
                                                        size_t
                                                        searchfor_len);
+    netsnmp_table_row *netsnmp_table_data_get_first_row(netsnmp_table_data *table);
+    netsnmp_table_row *netsnmp_table_data_get_next_row(netsnmp_table_data *table,
+                                                       netsnmp_table_row  *row);
 
     int            
         netsnmp_register_table_data(netsnmp_handler_registration *reginfo,

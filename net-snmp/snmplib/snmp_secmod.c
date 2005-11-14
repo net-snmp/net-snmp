@@ -85,7 +85,7 @@ register_sec_mod(int secmod, const char *modname,
             if (strcmp(othername, modname) != 0) {
                 snmp_log(LOG_ERR,
                          "snmp_secmod: two security modules %s and %s registered with the same security number\n",
-                         secmod, othername);
+                         modname, othername);
             }
             break;
 

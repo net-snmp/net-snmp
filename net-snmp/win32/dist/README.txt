@@ -31,7 +31,7 @@ INTRODUCTION
 
   Documentation for using the applications is available in the Windows help file
   (Net-SNMP.chm) located in the docs directory of the installed package.  Help is also
-  available from the web site at http://www.net-snmp.org/#Documentation.
+  available from the web site at http://www.net-snmp.org/docs/.
 
 
 INSTALLATION
@@ -42,7 +42,8 @@ INSTALLATION
     package into the installation folder (defaults to c:\usr). 
   - Adds (install folder)\bin to the system PATH. 
   - Adds the following registry keys:
-    - HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPCONFPATH=(install folder)/etc/snmp
+    - HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPCONFPATH=(install folder)/etc/snmp;
+      (install folder)/snmp/persist
     - HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPSHAREPATH=(install folder)/share/snmp
   - Creates an snmp.conf file in SNMPCONFPATH which defines: 
     - mibdirs (install folder)/share/snmp/mibs 
@@ -74,54 +75,34 @@ INSTALLATION
 
   If you get Module not found errors such as 'IP-MIB: Module not found', the application
   was not able to locate the mibs folder.  Verify that SNMPCONFPATH is set to the location
-  of the conf folder (c:/usr/etc/snmp for example).  Also verify that there is a snmp.conf
-  file in that folder that contains configuration values for mibdirs, persistentDir and
+  of the configuration folder and the persistent storage folder 
+  (c:/usr/etc/snmp;c:/usr/snmp/persist for example).  Also verify that there is an 
+  snmp.conf file that contains configuration values for mibdirs, persistentDir and 
   tempFilePattern.  For example:
 
     mibdirs c:/usr/share/snmp/mibs
     persistentDir c:/usr/snmp/persist
     tempFilePattern C:/usr/temp/snmpdXXXXXX
 
+  For detailed information on using environment variables and the registry to configure
+  Net-SNMP, see 'Overview' document in the Configuration section of the Net-SNMP help file.
+
   For information on running snmpd.exe and snmptrapd.exe as a Windows service, see 
   'How to Register the Net-SNMP Agent and Trap Daemon as Windows services' in README.win32.
 
+
 CO-EXISTENCE WITH MICROSOFT SNMP SERVICES
 
-If the Microsoft SNMP agent service (SNMP Service) is running, the Net-SNMP agent (snmpd) 
-will fail to start as it will not be able to bind to the default TCP/IP port of 161.
-
-If the Microsoft SNMP Trap Receiver service is running, the Net-SNMP trap receiver (snmptrapd) 
-will fail to start as it will not be able to bind to the default TCP/IP port of 162.
-
-For most users, it is recommended that either the Microsoft or Net-SNMP version of the 
-application be used, not both.
-
-To allow both the Microsoft and Net-SNMP agent / trap receiver to run at the same time, the
-default TCP/IP port must be changed on either the Microsoft or Net-SNMP version of the 
-application.
-
-The Microsoft services use the 'snmp' and 'snmptrap' entries in the SERVICES file 
-(%SystemRoot%\SYSTEM32\DRIVERS\ETC\SERVICES) to determine the port to bind the service to 
-when the service starts.  Simply modify the entries and restart the affected services.
-
-The Net-SNMP ports for snmpd and snmptrapd can be modified via snmpd.conf and snmptrapd.conf 
-or by using a command line option with each program.  See the Net-SNMP Help file for 
-instructions on changing the port number.
-
-Note:  Changing the default port the service listens on will prevent it from accepting
-       requests or receiving traps from standard SNMP devices and management stations 
-       unless they have also been reconfigured to use the new port numbers.
-
-Some users have reported success in configuring the Net-SNMP snmpd agent service to 'proxy' 
-requests for Microsoft objects which are not available in the Net-SNMP agent.  This is done 
-by changing the default Microsoft 'SNMP Service' port and configuring a PROXY value in snmpd 
-to connect to 'localhost:newportnumber' for the 'HOST' value.
+Please see the section 'Co-existence with Microsoft SNMP services' in README.win32
 
 
 INSTALLATION - PERL MODULE
 
   Included in the (install folder)\Perl folder is an ActiveState Perl 
-  5.8.x. PPM package.
+  5.8.x. PPM package.  Note:  In previous version of Net-SNMP, the PPM
+  package was called Net-SNMP.ppd.  The package has been renamed to
+  NetSNMP.ppd to prevent conflicts with the Net::SNMP package available
+  from ActiveState.
 
   The Perl modules require the Win32 REGEX (Regular Expression) package which 
   is available from:
@@ -135,12 +116,12 @@ INSTALLATION - PERL MODULE
 
   Remove any existing Net-SNMP Perl modules:
 
-    ppm remove Net-SNMP
+    ppm remove NetSNMP
 
   Install the Perl modules:
 
     cd (install folder)\Perl
-    ppm install Net-SNMP.ppd
+    ppm install NetSNMP.ppd
 
   Perform a basic test using:
 
@@ -159,7 +140,7 @@ CONFIGURATION
 
   Documentation for using the snmpconf is available in the Windows help file
   (Net-SNMP.chm) located in the docs directory of the installed package.  Help is also
-  available from the web site at http://www.net-snmp.org/#Documentation.
+  available from the web site at http://www.net-snmp.org/docs/.
 
   To run snmpconf, use the following command line:
 
@@ -174,7 +155,7 @@ BUILD INFORMATION
   Built by:		
   Installer Package by: 
   
-  OS:			Windows 2000 SP3
+  OS:			Windows 2000 SP4
   Compiler:		MSVC++ 6.0 SP5
   Platform SDK:		February 2003
   Perl:			ActivePerl 5.8.2 build 808
@@ -190,13 +171,14 @@ BUILD INFORMATION
   The following are the default paths are used by the applications:
 
   ----------------------------------------------------------------------------
-  net-snmp-config.h define   | value                    | environment variable
+  net-snmp-config.h define   | value                    | optional environment
+                             |                          | variable
   ----------------------------------------------------------------------------
-  DEFAULT_MIBDIRS:           | c:/usr/share/snmp/mibs   | MIBDIRS
-  SNMPDLMODPATH:             | c:/usr/lib/dlmod         | SNMPDLMODPATH
-  SNMPLIBPATH:               | c:/usr/lib               | SNMPLIBPATH
-  SNMPSHAREPATH:             | c:/usr/share/snmp        | SNMPSHAREPATH
-  SNMPCONFPATH:              | c:/usr/etc/snmp          | SNMPCONFPATH
-  PERSISTENT_DIRECTORY:      | c:/usr/snmp/persist      | SNMP_PERSISTENT_FILE
-  NETSNMP_TEMP_FILE_PATTERN: | c:/usr/temp/snmpdXXXXXX  | 
+  DEFAULT_MIBDIRS            | c:/usr/share/snmp/mibs   | MIBDIRS
+  SNMPDLMODPATH              | c:/usr/lib/dlmod         | SNMPDLMODPATH
+  SNMPLIBPATH                | c:/usr/lib               | SNMPLIBPATH
+  SNMPSHAREPATH              | c:/usr/share/snmp        | SNMPSHAREPATH
+  SNMPCONFPATH               | c:/usr/etc/snmp          | SNMPCONFPATH
+  PERSISTENT_DIRECTORY       | c:/usr/snmp/persist      | 
+  NETSNMP_TEMP_FILE_PATTERN  | c:/usr/temp/snmpdXXXXXX  | 
 

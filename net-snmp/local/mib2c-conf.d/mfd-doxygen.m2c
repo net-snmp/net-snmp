@@ -1,5 +1,8 @@
 ########################################################################
 @foreach $table table@
+@  ifconf ${context}_doxygen.conf
+@    print "${context}_doxygen.conf exists, skipping.@
+@  else@
 @    include m2c_setup_table.m2i@
 @    open ${context}_doxygen.conf@
 #---------------------------------------------------------------------------
@@ -53,4 +56,5 @@ RECURSIVE              = NO
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
 EXCLUDE                = 
+@  end@ # conf file exists
 @end@ # foreach table

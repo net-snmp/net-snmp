@@ -338,8 +338,9 @@ main(int argc, char *argv[])
      * open an SNMP session 
      */
     /*
-     * Note:  this wil obtain the engineID needed below 
+     * Note:  this needs to obtain the engineID used below 
      */
+    session.flags &= ~SNMP_FLAGS_DONT_PROBE;
     ss = snmp_open(&session);
     if (ss == NULL) {
         /*
