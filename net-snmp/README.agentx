@@ -1,4 +1,4 @@
-  This is a reasonably full implementation of the AgentX agent
+  net-snmp contains a reasonably full implementation of the AgentX agent
 extensibility protocol (RFC 2741) in as much as it supports all
 the protocol operations described in this document.  The core
 functionality has received a reasonable amount of exposure, and
@@ -22,10 +22,9 @@ for the dead connection (and hence unregistered it).
 
   Some of the less frequently used features (index allocation,
 range registration, etc), have received less thorough testing,
-and may well not be fully functional.   Many of the omissions
-of the earlier release (Contexts, use of GetBulk, the AgentX MIB)
+and may well not be fully functional.   Some of the omissions
+of the earlier release (use of GetBulk, the AgentX MIB)
 are still missing from this version.
-
 
   AgentX support is now included in the agent by default, but needs
 to be explicitly enabled before use.  Activate it using by putting a line
@@ -38,7 +37,7 @@ or when the agent is invoked as an AgentX subagent (i.e. via the name
 'agentxd' or with the '-X' flag).
 
   See the main project web page for an examples of a simple stand-alone
-subagent.  (http://www.net-snmp.org/tutorial-5/toolkit/)
+subagent.  (http://www.net-snmp.org/tutorial/tutorial-5/toolkit/)
 
 
   Please report any problems experienced to the net-snmp-coders list.
