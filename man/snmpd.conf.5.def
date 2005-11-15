@@ -719,6 +719,9 @@ The earliest extension mechanism was the ability to run arbitrary
 commands or shell scripts. Such commands do not need to be aware of
 SNMP operations, or conform to any particular behaviour - the MIB
 structures are designed to accommodate any form of command output.
+This requires that the agent was built with support for the
+\fIucd-snmp/extensible\fR and/or \fIagent/extend\fR modules (which
+are both included as part of the default build configuration).
 .IP "exec [MIBOID] NAME PROG ARGS"
 .IP "sh [MIBOID] NAME PROG ARGS"
 invoke the named PROG with arguments of ARGS.  By default the exit
@@ -750,6 +753,9 @@ deprecated - please see the \fIextend\fR directive (described below) instead.
 In either case, the exit statement and output will be cached for 30s
 after the initial query.  This cache can be flushed by a SET request of
 \fIinteger(1)\fR to the MIB instance UCD-SNMP-MIB::versionClearCache.0.
+.\"
+.\" XXX - Is this still true ??
+.\"
 .IP "execfix NAME PROG ARGS"
 registers a command that can be invoked on demand - typically to respond
 to or fix errors with the corresponding \fIexec\fR or \fIsh\fR entry.
@@ -763,7 +769,7 @@ Attempting to define an unaccompanied \fIexecfix\fR directive will fail.
 .RE
 .IP "extend [MIBOID] NAME PROG ARGS"
 works in a similar manner to the \fIexec\fR directive, but with a number
-of amendments and improvements.  The MIB tables (\fInsExtendConfigTable\fR
+of improvements.  The MIB tables (\fInsExtendConfigTable\fR
 etc) are indexed by the NAME token, so are unaffected by the order in
 which entries are read from the configuration files.
 There are \fItwo\fR result tables - one (\fInsExtendOutput1Table\fR)
@@ -771,14 +777,14 @@ containing the exit status, the first line and full output (as a single string)
 for each \fIextend\fR entry, and the other (\fInsExtendOutput2Table\fR)
 containing the full output as a series of separate lines.
 .IP
-If MIBOID is specified, then the configuration and results will be rooted
+If MIBOID is specified, then the configuration and result tables will be rooted
 at this point in the OID tree, but are otherwise structured in exactly
-the same way as before. This means that several separate \fIextend\fR
+the same way. This means that several separate \fIextend\fR
 directives can specify the same MIBOID root, without conflicting.
 .IP
 The exit status and output is cached for each entry individually, and
 this can be configured and/or cleared
-via the NET-SNMP-AGENT-MIB::\fInsCacheTable\fR.
+via the NET-SNMP-AGENT-MIB::nsCacheTable.
 .IP "extendfix NAME PROG ARGS"
 registers a command that can be invoked on demand, by setting the
 appropriate \fInsExtendRunType\fR instance to the value
@@ -794,6 +800,9 @@ is of no use when implementing specific MIB objects, where the extension
 must conformto the structure of the MIB (rather than vice versa).
 The rest of the extension mechanisms are all concerned with such
 MIB-specific situations - starting with "pass-through" scripts.
+This requires that the agent was built with support for the
+\fIucd-snmp/pass\fR and \fIucd-snmp/pass_persist\fR modules (which
+are both included as part of the default build configuration).
 .IP "pass [-p priority] MIBOID PROG"
 will pass control of the subtree rooted at MIBOID to the specified
 PROG command.  GET and GETNEXT requests for OIDs within this tree will
@@ -833,7 +842,7 @@ A SET request will result in an invocation of the command as:
 PROG -s OID TYPE VALUE
 .RE
 .IP
-where TYPE is one of the types listed above, indicating the type of the
+where TYPE is one of the tokens listed above, indicating the type of the
 value passed as the third parameter.
 .\".RS
 .\".RS
@@ -878,15 +887,14 @@ and should respond by printing "PONG\\n" to stdout.
 For GET and GETNEXT requests, PROG will be passed two lines on stdin,
 the command (\fIget\fR or \fIgetnext\fR) and the requested OID.
 It should respond by printing three lines to stdout - 
-the OLD for the result varbind, the TYPE and the VALUE itself
-(exactly as for the \fIpass\fR directive above).
+the OID for the result varbind, the TYPE and the VALUE itself -
+exactly as for the \fIpass\fR directive above.
 If the command cannot return an appropriate varbind,
 it should print print "NONE\\n" to stdout (but continue running).
 .IP
 For SET requests, PROG will be passed three lines on stdin,
 the command (\fIset\fR) and the requested OID,
-followed by the type and value (both on the same line),
-using the same type token as the \fIpass\fR processing.
+followed by the type and value (both on the same line).
 If the assignment is successful, the command should print
 "DONE\\n" to stdout.
 Errors should be indicated by writing one of the strings
@@ -907,15 +915,15 @@ also includes support for embedded perl technology (similar to
 \fImod_perl\fR for the Apache web server).  This allows the agent
 to interpret perl scripts directly, thus avoiding the overhead of
 spawning processes and initializing the perl system when a request is received.
-This mechanism is not part of the default build environment, and must
-be explicitly included by specifying the '--enable-embedded-perl'
+This requires that the agent was built with support for the embedded
+perl mechanism, which is not part of the default build environment, and
+must be explicitly included by specifying the '--enable-embedded-perl'
 option to the configure script when the package is first built.
-.IP
+.PP
 If enabled, the following directives will be recognised:
 .IP "disablePerl [true|false]"
 can turn off embedded perl support entirely (e.g. if there are problems
 with the perl installation).
-
 .IP "perlInitFile FILE"
 loads the specified initialisation file (instead of the default
 DATADIR/snmp/snmp_perl.pl)
@@ -927,48 +935,86 @@ perl-based MIB handler routines.
 evaluates the given expression.  This would typically register a
 handler routine to be called when a section of the OID tree was
 requested:
+.RS
+.RS
 .nf
 perl use Data::Dumper;
 perl sub myroutine  { print "got called: ",Dumper(@_),"\\n"; }
 perl $agent->register('mylink', '.1.3.6.1.8765', \\&myroutine);
 .fi
+.RE
+.RE
 .IP
 This expression could also source an external file:
+.RS
 .RS
 .nf
 perl 'do /path/to/file.pl';
 .fi
 .RE
+.RE
 .IP
 or perform any other perl-based processing that might be required.
 .SS Dynamically Loadable Modules
-If the agent is built with support for the UCD-DLMOD-MIB it is capable
-of loading agent MIB modules dynamically at startup through
-the \fIdlmod\fR directive and during runtime through use of the UCD-DLMOD-MIB.
-The following directive loads the shared object module file PATH which
-uses the module name prefix NAME.
+Most of the MIBs supported by the Net-SNMP agent are implemented as
+C code modules, which are compiled and linked into the agent libraries
+when the suite was first built.  Such implementation modules can also be
+compiled independently and loaded into the running agent once it has
+started.  This requires that the agent was built with support for the
+\fIucd-snmp/dlmod\fR module (which is included as part of the default
+build configuration).
 .IP "dlmod NAME PATH"
+will load the shared object module from the file PATH (an absolute
+filename), and call the initialisation routine \fIinit_NAME\fR.
+.RS
+.IP "Note:"
+If the specified PATH is not a fully qualified filename, it will
+be interpreted relative to LIBDIR/snmp/dlmod, and \fC.so\fR
+will be appended to the filename.
+.RE
+.PP
+This functionality is also available via SNMP SET requests
+to the UCD-DLMOD-MIB.
 .SS "Proxy Support"
+Another mechanism for extending the functionality of the agent
+is to pass selected requests (or selected varbinds) to another
+SNMP agent, which can be running on the same host (presumably
+listening on a different port), or on a remote system.
+This can be viewed as the main agent delegating requests to
+the remote one, or acting as a proxy for it.
+This requires that the agent was built with support for the
+\fIucd-snmp/proxy\fR module (which is included as part of the
+default build configuration).
 .IP "proxy [-Cn CONTEXTNAME] [SNMPCMD ARGS] HOST OID [REMOTEOID]"
+will pass any incoming requests under OID to the agent listening
+on the port specified by the transport address HOST.
+.RS
+.IP "Note:"
+To proxy the entire MIB tree, use the OID .1.3
+(\fBnot\fR the top-level .1)
+.RE
 .IP
-This token specifies that any incoming requests under OID should be
-proxied on to another HOST instead.  Use OID .1.3 (not just .1) to proxy 
-the entire MIB tree. If a CONTEXTNAME is specified, it
-assigns the proxied tree to a particular context name within the local
-agent.  This is the proper way to query multiple agents through a
-single proxy.  Assign each remote agent to a different context name.
-Then you can use "snmpwalk -n contextname1" to walk one remote proxied
-agent and "snmpwalk -n contextname2" to walk another, assuming you are
-using SNMPv3 to talk to the proxy (snmpv1 and snmpv2c context mappings
-aren't currently supported but might be in the future).  Optionally,
-relocate the local OID tree to the new location at the REMOTEOID.  To
-authenticate to HOST you should use the appropriate set of
-.I "SNMPCMD ARGS."
-See the
-.I snmpcmd(1)
-manual page for details.
+The \fISNMPCMD ARGS\fR should provide sufficient version and
+administrative information to generate a valid SNMP request
+(see \fIsnmpcmd(1)\fR).
+.RS
+.IP "Note:"
+The proxied request will \fInot\fR use the same administrative
+settings from the original request.
+.RE
 .IP
-Examples:
+If a CONTEXTNAME is specified, this will register the proxy
+delegation within the named context in the local agent.
+Defining multiple \fIproxy\fR directives for the same OID but
+different contexts can be used to query several remote agents
+through a single proxy, by specifying the appropriate SNMPv3
+context in the incoming request (or using suitable configured
+community strings - see the \fIcom2sec\fR directive).
+.IP
+Specifying the REMOID parameter will map the local MIB tree
+rooted at OID to an equivalent subtree rooted at REMOID
+on the remote agent.
+.IP "Examples:"
 .RS
 .nf
 # assigns the entire mib tree on remotehost1 to the context of the
@@ -985,18 +1031,36 @@ proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
 .fi
 .RE
 .SS SMUX Sub-Agents
-To enable a SMUX based sub-agent, such as
-.IR gated ,
-use the
-.I smuxpeer
-configuration entry
+The Net-SNMP agent supports the SMUX protocol (RFC 1227) to communicate
+with SMUX-based subagents (such as \fIgated\fR, \fIzebra\fR or \quagga\fR).
+This requires that the agent was built with support for the
+\fIsmux\fR module, which is not part of the default build environment, and
+must be explicitly included by specifying the '--with-mib-modules=smux'
+option to the configure script when the package is first built.
+.RS
+.IP "Note:"
+This extension protocol has been officially deprecated in
+favour of AgentX (see below).
+.RE
 .IP "smuxpeer OID PASS"
-For 
-.I gated
-a sensible entry might be
-.I smuxpeer .1.3.6.1.4.1.4.1.3 secret
+will register a subtree for SMUX-based processing, to be
+authenticated using the password PASS.  If the subagent
+(or "peer") connects to the agent and registers this subtree
+.\"
+.\" Or a subtree of this subtree ??
+.\"
+then requests for OIDs within it will be passed to that
+SMUX subagent for processing.
+.IP
+A suitable entry for an OSPF routing daemon (such as \fIgated\fR,
+\fIzebra\fR or \fIquagga\fR) might be something like
+.RS
+.RS
+.I smuxpeer .1.3.6.1.2.1.14 ospf_pass
+.RE
+.RE
 .IP "smuxsocket [<transport-specifier>:]<transport-address>[,...]"
-This defines the address for communicating with the SMUX peer.
+defines the address for SMUX peers to communicate with the Net-SNMP agent.
 The default is to listen on TCP port 199 on all IPv4 interfaces, unless the 
 package has been configured with "--enable-local-smux" at build time,
 which causes it to only listen on tcp:127.0.0.1:199 by default.
@@ -1005,6 +1069,9 @@ See the section
 in the
 .I snmpd(8)
 manual page for more information about the format of addresses.
+.PP
+Note the Net-SNMP agent will only operate as a SMUX \fImaster\fR
+agent. It does not support acting in a SMUX subagent role.
 .SS AgentX Sub-Agents
 To enable AgentX support in the SNMP master agent, put the following
 line in your snmpd.conf file:
