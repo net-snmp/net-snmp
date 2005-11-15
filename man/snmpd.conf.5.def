@@ -1073,12 +1073,38 @@ manual page for more information about the format of addresses.
 Note the Net-SNMP agent will only operate as a SMUX \fImaster\fR
 agent. It does not support acting in a SMUX subagent role.
 .SS AgentX Sub-Agents
-To enable AgentX support in the SNMP master agent, put the following
-line in your snmpd.conf file:
+The Net-SNMP agent supports the AgentX protocol (RFC 2741) in
+both master and subagent roles.
+This requires that the agent was built with support for the
+\fIagentx\fR module (which is included as part of the
+default build configuration), and also that this support is
+explicitly enabled (e.g. via the \fIsnmpd.conf\fR file).
+.PP
+There are two directives specifically relevant to running as
+an AgentX master agent:
 .IP "master agentx"
-See README.agentx for further details.
-.IP "AgentXSocket [<transport-specifier>:]<transport-address>[,...]"
-This defines the address the master agent listens at.
+will enable the AgentX functionality and cause the agent to
+start listening for incoming AgentX registrations.
+This can also be activated by specifying the '-x' command-line
+option (to specify an alternative listening socket).
+.IP "agentXPerms socket_perms [directory_perms [username|userid [groupname|groupid]]]"
+Defines the permissions and ownership of the AgentX Unix Domain socket.
+socket_perms and directory_perms must be octal digits (see 
+.I chmod(1)
+). By default this socket is accessible only to subagents which 
+have the same userid as the agent.
+.PP
+There is one directive specifically relevant to running as
+an AgentX sub-agent:
+.IP "agentPingInterval NUM"
+will make the subagent try and reconnect every NUM seconds to the
+master if it ever becomes (or starts) disconnected.
+.PP
+The remaining directives are relevant to both AgentX master
+and sub-agents:
+.IP "agentXSocket [<transport-specifier>:]<transport-address>[,...]"
+defines the address the master agent listens at, or the subagent
+should connect to.
 The default is the Unix Domain socket /var/agentx/master.
 Another possibility is tcp:localhost:705.
 See the section
@@ -1086,24 +1112,17 @@ See the section
 in the
 .I snmpd(8)
 manual page for more information about the format of addresses.
-.IP "AgentXTimeout NUM"
-Defines the timeout period (NUM seconds) for an AgentX request.
+.RS
+.IP "Note:"
+Specifying an AgentX socket does \fBnot\fR automatically enable
+AgentX functionality (unlike the '-x' command-line option).
+.RE
+.IP "agentXTimeout NUM"
+defines the timeout period (NUM seconds) for an AgentX request.
 Default is 1 second.
-.IP "AgentXRetries NUM"
-Defines the number of retries for an AgentX request.
+.IP "agentXRetries NUM"
+defines the number of retries for an AgentX request.
 Default is 5 retries.
-.IP "agentxperms socket_perms [directory_perms [username|userid [groupname|groupid]]]"
-Defines the permissions of the AgentX socket. socket_perms and directory_perms must be octal digits (see 
-.I chmod(1)
-). By default the Unix Domain socket is accessible only to subagents which 
-have the same userid as the agent.
-.P
-You can also put the following in your subagent.conf file (where
-"subagent" is the name you used in your init_snmp("subagent") api call:
-.IP "agentPingInterval NUM"
-This makes the subagent try and reconnect every NUM seconds to the
-master if it ever becomes (or starts) disconnected.
-.IP
 .SH "DEBUGGING AND OTHER EXTENSIBILITY NOTES"
 If you're trying to figure out aspects of the various mib modules
 (possibly some that you've added yourself), the following may help you
