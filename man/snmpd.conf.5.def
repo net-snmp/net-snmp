@@ -797,7 +797,7 @@ and rely on the MIB structure (and management applications) having
 the flexibility to accommodate and interpret the output.  This is a
 convenient way to make information available quickly and simply, but
 is of no use when implementing specific MIB objects, where the extension
-must conformto the structure of the MIB (rather than vice versa).
+must conform to the structure of the MIB (rather than vice versa).
 The rest of the extension mechanisms are all concerned with such
 MIB-specific situations - starting with "pass-through" scripts.
 This requires that the agent was built with support for the
@@ -1123,6 +1123,9 @@ Default is 1 second.
 .IP "agentXRetries NUM"
 defines the number of retries for an AgentX request.
 Default is 5 retries.
+.PP
+net-snmp ships with both C and Perl APIs to develop your own AgentX
+subagent.
 .SH "DEBUGGING AND OTHER EXTENSIBILITY NOTES"
 If you're trying to figure out aspects of the various mib modules
 (possibly some that you've added yourself), the following may help you
