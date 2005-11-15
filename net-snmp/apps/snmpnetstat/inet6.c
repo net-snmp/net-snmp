@@ -41,6 +41,26 @@ static char sccsid[] = "@(#)inet.c	8.4 (Berkeley) 4/20/94";
 #endif
 
 #include <net-snmp/net-snmp-config.h>
+
+/*
+ * hack-o-matic for Cygwin to use winsock2
+*/
+#if defined(cygwin)
+#undef HAVE_UNISTD_H
+#undef HAVE_NETINET_IN_H
+#undef HAVE_ARPA_INET_H
+#undef HAVE_SYS_PARAM_H
+#undef HAVE_SYS_SELECT_H
+#undef HAVE_SYS_SOCKET_H
+#undef HAVE_IN_ADDR_T
+#endif
+
+#if defined(HAVE_WINSOCK_H) || defined(cygwin)
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include "winstub.h"
+#endif
+
 #include <net-snmp/net-snmp-includes.h>
 
 #if HAVE_NETDB_H
