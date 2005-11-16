@@ -474,6 +474,7 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
      * Copy missing values from session defaults
      */
     switch (pdu->version) {
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
         if (pdu->community_len == 0) {
@@ -491,6 +492,7 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
             pdu->community_len = sp->community_len;
         }
         break;
+#endif
     case SNMP_VERSION_3:
         if (pdu->securityNameLen == 0) {
             pdu->securityName = (u_char *) malloc(sp->securityNameLen);
