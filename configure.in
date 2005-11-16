@@ -1437,6 +1437,12 @@ for i in $new_transport_list; do
         AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
       fi
     fi
+    if test ! "x$enable_ipv6" = "xyes"; then
+        if test "x$i" = "xUDPIPv6" -o "x$i" = "xTCPIPv6"; then
+            echo
+            AC_MSG_ERROR(IPv6 transports not available if IPv6 support is not enabled)
+        fi
+    fi
     transport_src="snmp"$i"Domain.c"
     transport_hdr="snmp"$i"Domain.h"
     rel_transport_src="snmplib/"$transport_src
