@@ -928,7 +928,7 @@ _mfd_inetCidrRouteTable_object_lookup(netsnmp_mib_handler *handler, netsnmp_hand
              * add rowreq_ctx to request data lists
              */
             netsnmp_container_table_row_insert(requests,
-                                               (void *) rowreq_ctx);
+                                               (netsnmp_index *) rowreq_ctx);
         }
     }
 
