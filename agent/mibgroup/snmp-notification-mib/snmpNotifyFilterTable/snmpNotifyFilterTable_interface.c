@@ -1881,9 +1881,9 @@ _snmpNotifyFilterTable_container_shutdown
 {
     DEBUGMSGTL(("internal:snmpNotifyFilterTable:_snmpNotifyFilterTable_container_shutdown", "called\n"));
 
-//    snmpNotifyFilterTable_container_shutdown(if_ctx->container);
+    snmpNotifyFilterTable_container_shutdown(if_ctx->container);
 
-//    _container_free(if_ctx->container);
+    _container_free(if_ctx->container);
 
 }                               /* _snmpNotifyFilterTable_container_shutdown */
 
