@@ -525,7 +525,7 @@ sidewaysintpr(unsigned int interval)
         i = strlen(intrface);
         netsnmp_query_walk( var, ss );
         for (vp=var; vp; vp=vp->next_variable) {
-            if (strncmp(intrface, vp->val.string, i) == 0 &&
+            if (strncmp(intrface, (char *)vp->val.string, i) == 0 &&
                 i == vp->val_len)
                 break;  /* found requested interface */
         }

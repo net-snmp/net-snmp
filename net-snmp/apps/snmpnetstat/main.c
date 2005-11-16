@@ -88,8 +88,8 @@ char    *progname = NULL;
 struct protox {
         /* pr_index/pr_sindex - Omitted */ 
 	int	pr_wanted;			/* 1 if wanted, 0 otherwise */
-	void	(*pr_cblocks)(char *);	/* control blocks printing routine */
-	void	(*pr_stats)(char *);	/* statistics printing routine */
+	void	(*pr_cblocks)(const char *);	/* control blocks printing routine */
+	void	(*pr_stats)(const char *);	/* statistics printing routine */
   const char	*pr_name;			/* well-known name */
 } protox[] = {
 	{ 1,	tcpprotopr,	tcp_stats,	"tcp" },	
@@ -117,10 +117,10 @@ struct protox *protoprotox[] = {
 	protox, ip6protox, NULL
 };
 
-static void printproto(struct protox *, char *);
+static void printproto(struct protox *, const char *);
 static void usage(void);
-static struct protox *name2protox(char *);
-static struct protox *knownname(char *);
+static struct protox *name2protox(const char *);
+static struct protox *knownname(const char *);
 
 netsnmp_session *ss;
 struct protox *tp = NULL; /* for printing cblocks & stats */
@@ -426,9 +426,9 @@ main(int argc, char *argv[])
  * Namelist checks - Omitted
  */
 static void
-printproto(struct protox *tp, char *name)
+printproto(struct protox *tp, const char *name)
 {
-	void (*pr)(char *);
+	void (*pr)(const char *);
 
 	if (sflag) {
 		pr = tp->pr_stats;
@@ -459,7 +459,7 @@ plurales(int n)
  * Find the protox for the given "well-known" name.
  */
 static struct protox *
-knownname(char *name)
+knownname(const char *name)
 {
 	struct protox **tpp, *tp;
 
@@ -474,7 +474,7 @@ knownname(char *name)
  * Find the protox corresponding to name.
  */
 static struct protox *
-name2protox(char *name)
+name2protox(const char *name)
 {
 	struct protox *tp;
 	char **alias;			/* alias from p->aliases */
