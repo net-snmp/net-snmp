@@ -47,8 +47,8 @@ static char *rcsid = "$OpenBSD: main.c,v 1.52 2005/02/10 14:25:08 itojun Exp $";
 #endif
 
 #include <net-snmp/net-snmp-config.h>
-#include <net-snmp/utilities.h>
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/utilities.h>
 
 #if HAVE_NETDB_H
 #include <netdb.h>
