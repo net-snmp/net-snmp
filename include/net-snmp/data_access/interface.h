@@ -256,6 +256,16 @@ void netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *);
 netsnmp_conf_if_list *
 netsnmp_access_interface_entry_overrides_get(const char * name);
 
+/**---------------------------------------------------------------------*/
+
+#if defined( USING_IF_MIB_IFTABLE_IFTABLE_DATA_ACCESS_MODULE ) && \
+    ! defined( NETSNMP_NO_BACKWARDS_COMPATABILITY )
+void
+Interface_Scan_Init(void);
+int
+Interface_Scan_Next(short *index, char *name, netsnmp_interface_entry **entry,
+                    void *dc);
+#endif
 
 /**---------------------------------------------------------------------*/
 
