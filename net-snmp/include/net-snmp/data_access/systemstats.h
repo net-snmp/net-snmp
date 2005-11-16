@@ -77,7 +77,7 @@ void netsnmp_access_systemstats_entry_free(netsnmp_systemstats_entry * entry);
  */
 int
 netsnmp_access_systemstats_entry_update(netsnmp_systemstats_entry *old, 
-                                        netsnmp_systemstats_entry *new);
+                                        netsnmp_systemstats_entry *new_val);
 
 
 /**---------------------------------------------------------------------*/

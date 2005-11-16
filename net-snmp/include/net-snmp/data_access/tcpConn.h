@@ -97,7 +97,7 @@ extern          "C" {
  */
     int
     netsnmp_access_tcpconn_entry_update(netsnmp_tcpconn_entry *old, 
-                                        netsnmp_tcpconn_entry *new);
+                                        netsnmp_tcpconn_entry *new_val);
 
 /*
  * find entry in container

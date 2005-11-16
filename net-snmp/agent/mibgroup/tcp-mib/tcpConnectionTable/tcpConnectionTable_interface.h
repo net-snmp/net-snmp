@@ -64,7 +64,7 @@ extern          "C" {
 
     tcpConnectionTable_registration
         *tcpConnectionTable_registration_set
-        (tcpConnectionTable_registration * new);
+        (tcpConnectionTable_registration * new_val);
 
     netsnmp_container *tcpConnectionTable_container_get(void);
     int             tcpConnectionTable_container_size(void);
