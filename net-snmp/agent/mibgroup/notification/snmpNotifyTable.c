@@ -39,6 +39,10 @@
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/agent/mib_module_config.h>
 
+#ifdef USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE
+#   include "notification-log-mib/notification_log.h"
+#endif
+
 SNMPCallback    store_snmpNotifyTable;
 
 /*
