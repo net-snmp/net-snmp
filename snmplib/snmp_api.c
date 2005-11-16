@@ -2960,11 +2960,15 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             /*
              * Build the final sequence.  
              */
+#ifndef DISABLE_SNMPV1
             if (pdu->version == SNMP_VERSION_1) {
                 DEBUGDUMPSECTION("send", "SNMPv1 Message");
             } else {
+#endif
                 DEBUGDUMPSECTION("send", "SNMPv2c Message");
+#ifndef DISABLE_SNMPV1
             }
+#endif
             rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset, 1,
                                              (u_char) (ASN_SEQUENCE |
                                                        ASN_CONSTRUCTOR),
@@ -2991,11 +2995,15 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             }
             h0e = cp;
 
+#ifndef DISABLE_SNMPV1
             if (pdu->version == SNMP_VERSION_1) {
                 DEBUGDUMPSECTION("send", "SNMPv1 Message");
             } else {
+#endif
                 DEBUGDUMPSECTION("send", "SNMPv2c Message");
+#ifndef DISABLE_SNMPV1
             }
+#endif
 
             /*
              * store the version field 
@@ -4070,11 +4078,15 @@ _snmp_parse(void *sessp,
         /*
          * authenticates message and returns length if valid 
          */
+#ifndef DISABLE_SNMPV1
         if (pdu->version == SNMP_VERSION_1) {
             DEBUGDUMPSECTION("recv", "SNMPv1 message\n");
         } else {
+#endif
             DEBUGDUMPSECTION("recv", "SNMPv2c message\n");
+#ifndef DISABLE_SNMPV1
         }
+#endif
         data = snmp_comstr_parse(data, &length,
                                  community, &community_length,
                                  &pdu->version);
@@ -4091,8 +4103,11 @@ _snmp_parse(void *sessp,
          * maybe get the community string. 
          */
         pdu->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
-        pdu->securityModel = (pdu->version == SNMP_VERSION_1) ?
-            SNMP_SEC_MODEL_SNMPv1 : SNMP_SEC_MODEL_SNMPv2c;
+        pdu->securityModel = 
+#ifndef DISABLE_SNMPV1
+            (pdu->version == SNMP_VERSION_1) ? SNMP_SEC_MODEL_SNMPv1 : 
+#endif
+                                               SNMP_SEC_MODEL_SNMPv2c;
         SNMP_FREE(pdu->community);
         pdu->community_len = 0;
         pdu->community = (u_char *) 0;

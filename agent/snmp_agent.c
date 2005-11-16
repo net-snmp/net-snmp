@@ -1799,8 +1799,16 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
              */
             send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if defined(DISABLE_SNMPV1)
+            if (asp->pdu->version != SNMP_VERSION_2c) {
+#else
+#if defined(DISABLE_SNMPV2C)
+            if (asp->pdu->version != SNMP_VERSION_1) {
+#else
             if (asp->pdu->version != SNMP_VERSION_1
                 && asp->pdu->version != SNMP_VERSION_2c) {
+#endif
+#endif
                 asp->pdu->errstat = SNMP_ERR_AUTHORIZATIONERROR;
                 asp->pdu->command = SNMP_MSG_RESPONSE;
                 snmp_increment_statistic(STAT_SNMPOUTPKTS);

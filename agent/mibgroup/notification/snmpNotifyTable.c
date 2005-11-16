@@ -335,8 +335,11 @@ notifyTable_register_notifications(int major, int minor,
     }
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
        else {
-        pptr->secModel = ss->version == SNMP_VERSION_1 ?
-            SNMP_SEC_MODEL_SNMPv1 : SNMP_SEC_MODEL_SNMPv2c;
+        pptr->secModel = 
+#ifndef DISABLE_SNMPV1
+            ss->version == SNMP_VERSION_1 ?  SNMP_SEC_MODEL_SNMPv1 : 
+#endif
+                                             SNMP_SEC_MODEL_SNMPv2c;
         pptr->secLevel = SNMP_SEC_LEVEL_NOAUTH;
         pptr->secName = NULL;
         if (ss->community && (ss->community_len > 0)) {

@@ -736,8 +736,16 @@ snmp_parse_args(int argc,
      * If neither, it will be taken from the incoming request PDU.
      */
 
+#if defined(DISABLE_SNMPV1)
+    if (session->version == SNMP_VERSION_2c) {
+#else 
+#if defined(DISABLE_SNMPV2C)
+    if (session->version == SNMP_VERSION_1) {
+#else
     if (session->version == SNMP_VERSION_1 ||
 	session->version == SNMP_VERSION_2c) {
+#endif
+#endif
         if (Cpsz == NULL) {
             Cpsz = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					 NETSNMP_DS_LIB_COMMUNITY);

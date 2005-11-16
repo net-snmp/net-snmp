@@ -474,9 +474,13 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
      * Copy missing values from session defaults
      */
     switch (pdu->version) {
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#ifndef DISABLE_SNMPV1
     case SNMP_VERSION_1:
+#endif
+#ifndef DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
+#endif
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
         if (pdu->community_len == 0) {
             if (sp->community_len == 0) {
                 sp->s_snmp_errno = SNMPERR_BAD_COMMUNITY;
