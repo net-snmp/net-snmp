@@ -352,13 +352,15 @@ var_ipAddrEntry(struct variable *vp,
 }
 
 #ifdef freebsd2
-static struct in_ifaddr *in_ifaddraddr;
+static struct in_ifaddr *in_ifaddraddr = NULL;
 
 static void
 Address_Scan_Init(void)
 {
-    auto_nlist(IFADDR_SYMBOL, (char *) &in_ifaddraddr,
+    int rc = auto_nlist(IFADDR_SYMBOL, (char *) &in_ifaddraddr,
                sizeof(in_ifaddraddr));
+    if (0 == rc)
+        in_ifaddraddr = NULL;
 }
 
 /*
