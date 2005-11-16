@@ -94,10 +94,10 @@ ifXTable_registration_get(void)
 }
 
 ifXTable_registration *
-ifXTable_registration_set(ifXTable_registration * new)
+ifXTable_registration_set(ifXTable_registration * new_val)
 {
     ifXTable_registration *old = ifXTable_if_ctx.user_ctx;
-    ifXTable_if_ctx.user_ctx = new;
+    ifXTable_if_ctx.user_ctx = new_val;
     return old;
 }
 

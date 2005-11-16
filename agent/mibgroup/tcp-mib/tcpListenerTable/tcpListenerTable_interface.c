@@ -93,10 +93,10 @@ tcpListenerTable_registration_get(void)
 }
 
 tcpListenerTable_registration *
-tcpListenerTable_registration_set(tcpListenerTable_registration * new)
+tcpListenerTable_registration_set(tcpListenerTable_registration * new_val)
 {
     tcpListenerTable_registration *old = tcpListenerTable_if_ctx.user_ctx;
-    tcpListenerTable_if_ctx.user_ctx = new;
+    tcpListenerTable_if_ctx.user_ctx = new_val;
     return old;
 }
 
