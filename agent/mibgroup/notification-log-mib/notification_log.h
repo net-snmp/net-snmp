@@ -2,6 +2,9 @@
 #define NOTIFICATION_LOG_H
 #include <net-snmp/agent/agent_handler.h>
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
 /*
  * function declarations 
  */
@@ -40,5 +43,9 @@ void
 #define COLUMN_NLMLOGVARIABLEOIDVAL		10
 #define COLUMN_NLMLOGVARIABLECOUNTER64VAL		11
 #define COLUMN_NLMLOGVARIABLEOPAQUEVAL		12
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif                          /* NOTIFICATION_LOG_H */
