@@ -96,11 +96,11 @@ inetCidrRouteTable_registration_get(void)
 }
 
 inetCidrRouteTable_registration *
-inetCidrRouteTable_registration_set(inetCidrRouteTable_registration * new)
+inetCidrRouteTable_registration_set(inetCidrRouteTable_registration * new_val)
 {
     inetCidrRouteTable_registration *old =
         inetCidrRouteTable_if_ctx.user_ctx;
-    inetCidrRouteTable_if_ctx.user_ctx = new;
+    inetCidrRouteTable_if_ctx.user_ctx = new_val;
     return old;
 }
 

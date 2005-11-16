@@ -96,11 +96,11 @@ snmpNotifyFilterTable_registration_get(void)
 
 snmpNotifyFilterTable_registration *
 snmpNotifyFilterTable_registration_set(snmpNotifyFilterTable_registration *
-                                       new)
+                                       new_val)
 {
     snmpNotifyFilterTable_registration *old =
         snmpNotifyFilterTable_if_ctx.user_ctx;
-    snmpNotifyFilterTable_if_ctx.user_ctx = new;
+    snmpNotifyFilterTable_if_ctx.user_ctx = new_val;
     return old;
 }
 

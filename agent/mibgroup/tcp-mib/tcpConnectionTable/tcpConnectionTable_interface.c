@@ -96,11 +96,11 @@ tcpConnectionTable_registration_get(void)
 }
 
 tcpConnectionTable_registration *
-tcpConnectionTable_registration_set(tcpConnectionTable_registration * new)
+tcpConnectionTable_registration_set(tcpConnectionTable_registration * new_val)
 {
     tcpConnectionTable_registration *old =
         tcpConnectionTable_if_ctx.user_ctx;
-    tcpConnectionTable_if_ctx.user_ctx = new;
+    tcpConnectionTable_if_ctx.user_ctx = new_val;
     return old;
 }
 
