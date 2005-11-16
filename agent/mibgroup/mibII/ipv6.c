@@ -139,16 +139,16 @@
 #include "interfaces.h"
 
 static int header_ipv6
-__P((register struct variable *, oid *, size_t *, int, size_t *,
-     WriteMethod **));
+(register struct variable *, oid *, size_t *, int, size_t *,
+     WriteMethod **);
 static int header_ipv6_scan
-__P((register struct variable *, oid *, size_t *, int, size_t *,
-     WriteMethod **, int, int));
-static int if_initialize __P((void));
-static int if_maxifindex __P((void));
-static char    *if_getname __P((int));
+(register struct variable *, oid *, size_t *, int, size_t *,
+     WriteMethod **, int, int);
+static int if_initialize (void);
+static int if_maxifindex (void);
+static char    *if_getname (int);
 #ifdef notused
-static int if_getindex __P((const char *));
+static int if_getindex (const char *);
 #endif
 
 struct variable3 ipv6_variables[] = {
@@ -2076,7 +2076,7 @@ linux_if_nameindex(void)
     FILE           *f;
     unsigned long   if_index;
     char            if_name[256];
-    struct if_nameindex *ifndx = NULL, *iflist = NULL, *new;
+    struct if_nameindex *ifndx = NULL, *iflist = NULL, *tmp;
     int             i, j;
     int             maxidx, if_count = 0;
 
@@ -2093,17 +2093,17 @@ linux_if_nameindex(void)
             if_name[sizeof(if_name) - 1] = '\0';
             if (maxidx < 0 || maxidx < if_index) {
 
-                new =
+                tmp =
                     realloc(iflist,
                             (sizeof(struct if_nameindex)) * (if_index +
                                                              2));
-                if (!new) {
+                if (!tmp) {
                     linux_freeinternalnameindex(iflist, if_index);
                     if_count = 0;
                     iflist = NULL;
                     break;
                 }
-                iflist = new;
+                iflist = tmp;
                 for (i = maxidx + 1; i <= if_index; i++)
                     memset(&iflist[i], 0, sizeof(struct if_nameindex));
                 memset(&iflist[if_index + 1], 0,
