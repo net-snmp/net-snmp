@@ -28,110 +28,117 @@ ahead.  Right now.  Run:
 to get you started. See the
 .I snmpconf(1)
 manual page for more information.
-.SH EXTENSIBLE-MIB
-.PP
-The Net-SNMP SNMP agent reports much of its information through
-queries to the EXTENSIBLEDOTMIB section of the MIB tree.  Every MIB in
-this section has the following table entries in it.
-.IP ".MIBINDEX -- index"
-This is the table's index numbers for each of the DIRECTIVES listed below.
-.IP ".ERRORNAME -- name"
-The name of the given table entry.  This should be unique, but is not
-required to be.
-.IP ".ERRORFLAG -- errorFlag"
-This is a flag returning either the integer value 1 or 0 if an error
-is detected for this table entry.
-.IP ".ERRORMSG -- errorMsg"
-This is a DISPLAY-STRING describing any error triggering the errorFlag above.
-.IP ".ERRORFIX -- errorFix"
-If this entry is set to the integer value of 1 AND the errorFlag
-defined above is indeed a 1, a program or script will get executed
-with the table entry name from above as the argument.  The program to
-be executed is configured in the net-snmp-config.h file at compile time.
-.SS Directives
-.IP "proc NAME"
-.IP "proc NAME MAX"
-.IP "proc NAME MAX MIN"
-.IP
-Checks to see if processes called NAME are running on the agent
-machine.  An error flag (1) and a description message are then passed
-to the EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFLAG and
-EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORMSG MIB columns (respectively) if
-the NAME'd program is not found in the process table as reported by
-PSCMD.
-.IP
-If MAX and MIN are not specified, MAX is assumed to be 
-.B infinity
-and MIN is assumed to be 1.
-.IP
-If MAX is specified but MIN is not specified, MIN is assumed to be 0.
-.IP "procfix NAME PROG ARGS"
-This registers a command that knows how to fix errors with the given
-process NAME.  When EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFIX for a given
-NAMEd program is set to the integer value of 1, this command will be
-called.  It defaults to a compiled value set using the PROCFIXCMD
-definition in the net-snmp-config.h file.
-.IP "disk PATH"
-.IP "disk PATH [ MINSPACE | MINPERCENT% ]"
-.IP
-Checks the named disks mounted at PATH for available disk space.  If
-the disk space is less than MINSPACE (kB) if specified or less than
-MINPERCENT (%) if a % sign is specified, or DEFDISKMINIMUMSPACE (kB)
-if not specified, the associated entry in the
-EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORFLAG MIB table will be set to (1) and
-a descriptive error message will be returned to queries of
-EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORMSG.
-.IP "includeAllDisks MINPERCENT%"
-.IP
-Adds  all  the  disks  that can be found on the system using the
-setmntent(3) and getmntent(3), or fopen(3) and getmntent(3),  or
-setfsent(3)  and  getfsent(3) system calls. If none of the above
-system calls are available then it adds the root partition  "/",
-(which  is  assumed to exist on any UNIX based system) using the
-statfs(2) system call.
-.IP
-There can only be one 'includeAllDisks' directive in the config-
-uration  file.  It  can  be  used in conjunction with the 'disk'
-directive. They may be used in any order. The  'disk'  directive
-overrides  the  disk  usage  specified  by the 'includeAllDisks'
-directive, no matter in which order they are  specified  in  the
-configuration file.
-.IP
-The 'includeAllDisks' directive only includes the disks that are
-mounted when the snmpd daemon  is  started.  It  cannot  include
-disks  that are dynamically loadable, such as with automount. So
-the preferred way is to mount all the disks that will ever  need
-to be monitored before starting the snmpd daemon.
-.IP "load MAX1"
-.IP "load MAX1 MAX5"
-.IP "load MAX1 MAX5 MAX15"
-.IP
-Checks the load average of the machine and returns an error flag (1),
-and an text-string error message
-to queries of EXTENSIBLEDOTMIB.LOADAVEMIBNUM.1.ERRORFLAG and
-EXTENSIBLEDOTMIB.LOADAVEMIBNUM.1.ERRORMSG (respectively) when the
-1-minute, 5-minute, or 15-minute averages exceed the associated
-maximum values.  If any of the MAX1, MAX5, or MAX15 values are
-unspecified, they default to a value of DEFMAXLOADAVE.
-.IP "file FILE [MAXSIZE]"
-Monitors file sizes and makes sure they don't grow beyond a certain
-size (in kilobytes).  MAXSIZE defaults to infinite if not specified,
-and only monitors the size without reporting errors about it.
-A maximum of 20 files can be monitored.
-.IP "logmatch NAME PATH CYCLETIME REGEX"
-Configures log file monitoring that can be queried via the
-UCD-SNMP-MIB::logMatchTable.
-.SS "Errors"
-.PP
-Any errors in obtaining the above information are reported via the
-EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORFLAG flag and the
-EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORMSG text-string description.
+.SH AGENT BEHAVIOUR
+.IP "leave_pidfile yes"
+Instructs the agent to not remove its pid file on shutdown. Equivalent to
+specifying "-U" on the command line.
+.IP "agentaddress [<transport-specifier>:]<transport-address>[,...]"
+Makes the agent list on the specified comma-separated list of
+listening addresses instead of the default behaviour, which is to
+listen on UDP port 161 on all IPv4 interfaces.  See the section 
+.B LISTENING ADDRESSES
+in the
+.I snmpd(8)
+manual page for more information about the format of listening
+addresses.  For example, specifying
+.I "agentaddress 161,tcp:161,localhost:9161"
+will make the agent listen on UDP port 161 on all IPv4 interfaces, TCP
+port 161 on all IPv4 interfaces and UDP port 9161 only on the interface
+associated with the localhost address.
+.IP "agentgroup groupid"
+Change to this gid after opening port. The groupid may refer to a group
+by name or a number if the group number starts with '#'. For example,
+specifying
+.I agentgroup snmp
+will cause the agent to run as the snmp group or
+.I agentgroup #10
+will cause the agent to run as the group with groupid 10.
+.IP "agentuser uid"
+Change to this uid after opening port. The userid may refer to a user
+by name or a number if the user number starts with '#'. For example,
+specifying
+.I agentuser snmp
+will cause the agent to run as the snmp user or
+.I agentuser #10
+will cause the agent to run as the user with userid 10.
+.SS SNMPv3 Configuration
+.IP "engineID STRING"
+The snmpd agent needs to be configured with a unique engineID to be able to
+respond to SNMPv3 messages.  With this configuration file line, the
+engineID will be configured from STRING. 
+.IP "engineIDType 1|2|3"
+Defines that the engineID should be built from the IPv4 address (1), IPv6 address (2) or MAC address (3). Beware that you might run into trouble on IP 
+address changes!
+.IP "engineIDNic interface"
+Defines the interface (e.g. "eth1") that should be used to determine the MAC address in case of "engineIDType 3". Default is eth0.
+.P
+If neither an engineID, engineIDType or engineIDNic directive is present, 
+the value of the engineID is built from 2 fairly random elements:
+a random number and the current time in seconds. This is the recommended
+approach.
 .SH ACCESS CONTROL
 .B snmpd
 supports the View-Based Access Control Model (VACM) as defined in RFC
 2575, to control who can retrieve or update information.  To this end,
 it recognizes various directives relating to access control.
-These fall into three basic groups.
+These fall into four basic groups.
+.SS SNMPv3 Users
+.IP "createUser [-e ENGINEID] username (MD5|SHA) authpassphrase [DES|AES] [privpassphrase]"
+.IP
+MD5 and SHA are the authentication types to use.  DES and AES are the
+privacy protocols to use.  If the privacy
+passphrase is not specified, it is assumed to be the same as the
+authentication passphrase.  Note that the users created will be
+useless unless they are also added to the VACM access control tables
+described above.
+.IP
+SHA authentication and DES/AES privacy require OpenSSL to be installed and
+the agent to be built with OpenSSL support.  MD5 authentication may be
+used without OpenSSL.
+.IP
+Warning: the minimum pass phrase length is 8 characters.
+.IP
+SNMPv3 users can be created at runtime using the
+.I snmpusm(1)
+command.
+.IP
+Instead of figuring out how to use this directive and where to put it
+(see below), just run "net-snmp-config --create-snmpv3-user" instead,
+which will add one of these lines to the right place.
+.IP
+This directive should be placed into the
+PERSISTENT_DIRECTORY/snmpd.conf file instead of the other normal
+locations.  The reason is that the information is read from the file
+and then the line is removed (eliminating the storage of the master
+password for that user) and replaced with the key that is derived from
+it.  This key is a localized key, so that if it is stolen it can not
+be used to access other agents.  If the password is stolen, however,
+it can be.
+.IP
+If you need to localize the user to a particular EngineID (this is
+useful mostly in the similar snmptrapd.conf file), you can use the -e
+argument to specify an EngineID as a hex value (EG, "0x01020304").
+.IP
+If you want to generate either your master or localized keys directly,
+replace the given password with a hexstring (preceeded by a "0x") and
+precede the hex string by a -m or -l token (respectively).  EGs:
+.IP
+.RS
+.nf
+[these keys are *not* secure but are easy to visually parse for
+counting purposes.  Please generate random keys instead of using
+these examples]
+
+createUser myuser SHA -l 0x0001020304050607080900010203040506070809 AES -l 0x00010203040506070809000102030405
+createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x0001020304050607080900010203040506070809
+.fi
+.RE
+.IP
+Due to the way localization happens, localized privacy keys are
+expected to be the length needed by the algorithm (128 bits for all
+supported algorithms).  Master encryption keys, though, need to be the
+length required by the authentication algorithm not the length
+required by the encrypting algorithm (MD5: 16 bytes, SHA: 20 bytes).
 .SS Traditional Access Control
 Most simple access control requirements can be specified using the
 directives \fIrouser\fR/\fIrwuser\fR (for SNMPv3) or
@@ -309,80 +316,8 @@ view 	all	included	.1
 access	public	""	any	noauth	exact	all	none	none
 .fi
 .RE
-.SH SNMPv3 CONFIGURATION
-.PP
-.IP "engineID STRING"
-The snmpd agent needs to be configured with a unique engineID to be able to
-respond to SNMPv3 messages.  With this configuration file line, the
-engineID will be configured from STRING. 
-.IP "engineIDType 1|2|3"
-Defines that the engineID should be built from the IPv4 address (1), IPv6 address (2) or MAC address (3). Beware that you might run into trouble on IP 
-address changes!
-.IP "engineIDNic interface"
-Defines the interface (e.g. "eth1") that should be used to determine the MAC address in case of "engineIDType 3". Default is eth0.
-.P
-If neither an engineID, engineIDType or engineIDNic directive is present, 
-the value of the engineID is built from 2 fairly random elements:
-a random number and the current time in seconds. This is the recommended
-approach.
-.IP "createUser [-e ENGINEID] username (MD5|SHA) authpassphrase [DES|AES] [privpassphrase]"
-.IP
-MD5 and SHA are the authentication types to use.  DES and AES are the
-privacy protocols to use.  If the privacy
-passphrase is not specified, it is assumed to be the same as the
-authentication passphrase.  Note that the users created will be
-useless unless they are also added to the VACM access control tables
-described above.
-.IP
-SHA authentication and DES/AES privacy require OpenSSL to be installed and
-the agent to be built with OpenSSL support.  MD5 authentication may be
-used without OpenSSL.
-.IP
-Warning: the minimum pass phrase length is 8 characters.
-.IP
-SNMPv3 users can be created at runtime using the
-.I snmpusm(1)
-command.
-.IP
-Instead of figuring out how to use this directive and where to put it
-(see below), just run "net-snmp-config --create-snmpv3-user" instead,
-which will add one of these lines to the right place.
-.IP
-This directive should be placed into the
-PERSISTENT_DIRECTORY/snmpd.conf file instead of the other normal
-locations.  The reason is that the information is read from the file
-and then the line is removed (eliminating the storage of the master
-password for that user) and replaced with the key that is derived from
-it.  This key is a localized key, so that if it is stolen it can not
-be used to access other agents.  If the password is stolen, however,
-it can be.
-.IP
-If you need to localize the user to a particular EngineID (this is
-useful mostly in the similar snmptrapd.conf file), you can use the -e
-argument to specify an EngineID as a hex value (EG, "0x01020304").
-.IP
-If you want to generate either your master or localized keys directly,
-replace the given password with a hexstring (preceeded by a "0x") and
-precede the hex string by a -m or -l token (respectively).  EGs:
-.IP
-.RS
-.nf
-[these keys are *not* secure but are easy to visually parse for
-counting purposes.  Please generate random keys instead of using
-these examples]
-
-createUser myuser SHA -l 0x0001020304050607080900010203040506070809 AES -l 0x00010203040506070809000102030405
-createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x0001020304050607080900010203040506070809
-.fi
-.RE
-.IP
-Due to the way localization happens, localized privacy keys are
-expected to be the length needed by the algorithm (128 bits for all
-supported algorithms).  Master encryption keys, though, need to be the
-length required by the authentication algorithm not the length
-required by the encrypting algorithm (MD5: 16 bytes, SHA: 20 bytes).
-.IP
-.SH SETTING SYSTEM INFORMATION
+.SH SYSTEM INFORMATION
+.SS System Group
 .IP "syslocation STRING"
 .IP "syscontact STRING"
 .IP "sysname STRING"
@@ -402,42 +337,12 @@ Sets the system description or object ID for the agent.
 Although these values are not SNMP-writable, it is conceivable
 that a network administrator may wish to configure them to something
 other than the default values.
-.IP "leave_pidfile yes"
-Instructs the agent to not remove its pid file on shutdown. Equivalent to
-specifying "-U" on the command line.
-.IP "agentaddress [<transport-specifier>:]<transport-address>[,...]"
-Makes the agent list on the specified comma-separated list of
-listening addresses instead of the default behaviour, which is to
-listen on UDP port 161 on all IPv4 interfaces.  See the section 
-.B LISTENING ADDRESSES
-in the
-.I snmpd(8)
-manual page for more information about the format of listening
-addresses.  For example, specifying
-.I "agentaddress 161,tcp:161,localhost:9161"
-will make the agent listen on UDP port 161 on all IPv4 interfaces, TCP
-port 161 on all IPv4 interfaces and UDP port 9161 only on the interface
-associated with the localhost address.
-.IP "agentgroup groupid"
-Change to this gid after opening port. The groupid may refer to a group
-by name or a number if the group number starts with '#'. For example,
-specifying
-.I agentgroup snmp
-will cause the agent to run as the snmp group or
-.I agentgroup #10
-will cause the agent to run as the group with groupid 10.
-.IP "agentuser uid"
-Change to this uid after opening port. The userid may refer to a user
-by name or a number if the user number starts with '#'. For example,
-specifying
-.I agentuser snmp
-will cause the agent to run as the snmp user or
-.I agentuser #10
-will cause the agent to run as the user with userid 10.
+.SS Interfaces Group
 .IP "interface NAME TYPE SPEED"
 For interfaces where the agent fails to guess correctly on the type and
 speed, this directive can supply additional information.
 TYPE is a type value as given in the IANAifType-MIB.
+.SS Host Resources Group
 .IP "ignoredisk STRING"
 When scanning for available disk devices the agent might block in trying
 to open all possible disk devices. This might lead to a timeout when
@@ -485,41 +390,114 @@ marked as 'Network Disks' in the hrStorageTable. This is according to RFC 2790.
 Not setting storageUseNFS or setting it to 2 causes NFS and NFS-like file
 systems to be marked as 'Fixed Disks' as it has been in previous versions of
 the ucd-snmp SNMP agent.
+.SS EXTENSIBLE-MIB
+.PP
+The Net-SNMP SNMP agent reports much of its information through
+queries to the EXTENSIBLEDOTMIB section of the MIB tree.  Every MIB in
+this section has the following table entries in it.
+.IP ".MIBINDEX -- index"
+This is the table's index numbers for each of the DIRECTIVES listed below.
+.IP ".ERRORNAME -- name"
+The name of the given table entry.  This should be unique, but is not
+required to be.
+.IP ".ERRORFLAG -- errorFlag"
+This is a flag returning either the integer value 1 or 0 if an error
+is detected for this table entry.
+.IP ".ERRORMSG -- errorMsg"
+This is a DISPLAY-STRING describing any error triggering the errorFlag above.
+.IP ".ERRORFIX -- errorFix"
+If this entry is set to the integer value of 1 AND the errorFlag
+defined above is indeed a 1, a program or script will get executed
+with the table entry name from above as the argument.  The program to
+be executed is configured in the net-snmp-config.h file at compile time.
+.SS Process Monitoring 
+.IP "proc NAME"
+.IP "proc NAME MAX"
+.IP "proc NAME MAX MIN"
+.IP
+Checks to see if processes called NAME are running on the agent
+machine.  An error flag (1) and a description message are then passed
+to the EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFLAG and
+EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORMSG MIB columns (respectively) if
+the NAME'd program is not found in the process table as reported by
+PSCMD.
+.IP
+If MAX and MIN are not specified, MAX is assumed to be 
+.B infinity
+and MIN is assumed to be 1.
+.IP
+If MAX is specified but MIN is not specified, MIN is assumed to be 0.
+.IP "procfix NAME PROG ARGS"
+This registers a command that knows how to fix errors with the given
+process NAME.  When EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFIX for a given
+NAMEd program is set to the integer value of 1, this command will be
+called.  It defaults to a compiled value set using the PROCFIXCMD
+definition in the net-snmp-config.h file.
+.SS Disk Usage Monitoring
+.IP "disk PATH"
+.IP "disk PATH [ MINSPACE | MINPERCENT% ]"
+.IP
+Checks the named disks mounted at PATH for available disk space.  If
+the disk space is less than MINSPACE (kB) if specified or less than
+MINPERCENT (%) if a % sign is specified, or DEFDISKMINIMUMSPACE (kB)
+if not specified, the associated entry in the
+EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORFLAG MIB table will be set to (1) and
+a descriptive error message will be returned to queries of
+EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORMSG.
+.IP "includeAllDisks MINPERCENT%"
+.IP
+Adds  all  the  disks  that can be found on the system using the
+setmntent(3) and getmntent(3), or fopen(3) and getmntent(3),  or
+setfsent(3)  and  getfsent(3) system calls. If none of the above
+system calls are available then it adds the root partition  "/",
+(which  is  assumed to exist on any UNIX based system) using the
+statfs(2) system call.
+.IP
+There can only be one 'includeAllDisks' directive in the config-
+uration  file.  It  can  be  used in conjunction with the 'disk'
+directive. They may be used in any order. The  'disk'  directive
+overrides  the  disk  usage  specified  by the 'includeAllDisks'
+directive, no matter in which order they are  specified  in  the
+configuration file.
+.IP
+The 'includeAllDisks' directive only includes the disks that are
+mounted when the snmpd daemon  is  started.  It  cannot  include
+disks  that are dynamically loadable, such as with automount. So
+the preferred way is to mount all the disks that will ever  need
+to be monitored before starting the snmpd daemon.
+.SS System Load Monitoring
+.IP "load MAX1"
+.IP "load MAX1 MAX5"
+.IP "load MAX1 MAX5 MAX15"
+.IP
+Checks the load average of the machine and returns an error flag (1),
+and an text-string error message
+to queries of EXTENSIBLEDOTMIB.LOADAVEMIBNUM.1.ERRORFLAG and
+EXTENSIBLEDOTMIB.LOADAVEMIBNUM.1.ERRORMSG (respectively) when the
+1-minute, 5-minute, or 15-minute averages exceed the associated
+maximum values.  If any of the MAX1, MAX5, or MAX15 values are
+unspecified, they default to a value of DEFMAXLOADAVE.
+.SS Log File Monitoring
+.IP "file FILE [MAXSIZE]"
+Monitors file sizes and makes sure they don't grow beyond a certain
+size (in kilobytes).  MAXSIZE defaults to infinite if not specified,
+and only monitors the size without reporting errors about it.
+A maximum of 20 files can be monitored.
+.IP "logmatch NAME PATH CYCLETIME REGEX"
+Configures log file monitoring that can be queried via the
+UCD-SNMP-MIB::logMatchTable.
+.SS "Errors"
+.PP
+Any errors in obtaining the above information are reported via the
+EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORFLAG flag and the
+EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORMSG text-string description.
+.SH "SETTING UP TRAP AND/OR INFORM DESTINATIONS"
 .IP "authtrapenable NUMBER"
 Setting authtrapenable to 1 enables generation of authentication failure
 traps.  The default value is disabled(2).  Ordinarily the corresponding
 object (snmpEnableAuthenTraps.0) is read-write, but setting its value
 via this token makes the object read-only, and attempts to set the
 value of the object will result in a notWritable error response.
-.IP "override [-rw] OID TYPE VALUE"
-This directive allows you to override a particular OID with a
-different value (and possibly a different type of value).  The -rw
-flag will allow snmp SETs to modify it's value as well. (note that if
-you're overriding original functionality, that functionality will be
-entirely lost.  Thus SETS will do nothing more than modify the
-internal overridden value and will not perform any of the original
-functionality intended to be provided by the MIB object.  It's an
-emulation only.)  An example:
-.IP
-override sysDescr.0 octet_str "my own sysDescr"
-.IP
-That line will set the sysDescr.0 value to "my own sysDescr" as well
-as make it modifiable with SNMP SETs as well (which is actually
-illegal according to the MIB specifications).
-.IP
-Note that care must be taken when using this.  For example, if you try
-to override a property of the 3rd interface in the ifTable with a new
-value and later the numbering within the ifTable changes it's index
-ordering you'll end up with problems and your modified value won't
-appear in the right place in the table.
-.IP
-Valid TYPEs are: integer, uinteger, octet_str, object_id, counter,
-null (for gauge's, use "uinteger"; for bit strings, use "octet_str").
-Note that setting an object to "null" effectively delete's it as being
-accessible.  No VALUE needs to be given if the object type is null.
-.IP
-More types should be available in the future.
-.SH "SETTING UP TRAP AND/OR INFORM DESTINATIONS"
 .IP "trapcommunity STRING"
 This defines the default community string to be used when sending traps.
 Note that this command must be used prior to any of the following three
@@ -1126,7 +1104,35 @@ Default is 5 retries.
 .PP
 net-snmp ships with both C and Perl APIs to develop your own AgentX
 subagent.
-.SH "DEBUGGING AND OTHER EXTENSIBILITY NOTES"
+.SH "OTHER CONFIGURATION"
+.IP "override [-rw] OID TYPE VALUE"
+This directive allows you to override a particular OID with a
+different value (and possibly a different type of value).  The -rw
+flag will allow snmp SETs to modify it's value as well. (note that if
+you're overriding original functionality, that functionality will be
+entirely lost.  Thus SETS will do nothing more than modify the
+internal overridden value and will not perform any of the original
+functionality intended to be provided by the MIB object.  It's an
+emulation only.)  An example:
+.IP
+override sysDescr.0 octet_str "my own sysDescr"
+.IP
+That line will set the sysDescr.0 value to "my own sysDescr" as well
+as make it modifiable with SNMP SETs as well (which is actually
+illegal according to the MIB specifications).
+.IP
+Note that care must be taken when using this.  For example, if you try
+to override a property of the 3rd interface in the ifTable with a new
+value and later the numbering within the ifTable changes it's index
+ordering you'll end up with problems and your modified value won't
+appear in the right place in the table.
+.IP
+Valid TYPEs are: integer, uinteger, octet_str, object_id, counter,
+null (for gauge's, use "uinteger"; for bit strings, use "octet_str").
+Note that setting an object to "null" effectively delete's it as being
+accessible.  No VALUE needs to be given if the object type is null.
+.IP
+More types should be available in the future.
 If you're trying to figure out aspects of the various mib modules
 (possibly some that you've added yourself), the following may help you
 spit out some useful debugging information.  First off, please read
