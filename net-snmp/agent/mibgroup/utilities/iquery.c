@@ -25,14 +25,19 @@ netsnmp_parse_iqueryVersion(const char *token, char *line)
 {
     char buf[1024];
 
+#ifndef DISABLE_SNMPV1
     if (!strcmp( line, "1" ))
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_1);
-    else if (!strcmp( line, "2"  ) ||
-         !strcasecmp( line, "2c" ))
+    else 
+#endif
+#ifndef DISABLE_SNMPV2C
+         if (!strcmp( line, "2"  ) || !strcasecmp( line, "2c" ))
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_2c);
-    else if (!strcmp( line, "3" ))
+    else 
+#endif
+         if (!strcmp( line, "3" ))
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_3);
     else {
