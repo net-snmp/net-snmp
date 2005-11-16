@@ -40,6 +40,7 @@ config_require(if-mib/ifXTable/ifXTable_data_access)
      * function declarations
      */
     void            init_ifXTable(void);
+    void            initialize_table_ifXTable(void);
 
     /*
      *********************************************************************

@@ -43,8 +43,6 @@ const char     *row_token = "ifXTable";
 
 ifXTable_registration ifXTable_user_context;
 
-void            initialize_table_ifXTable(void);
-
 /**
  * Initializes the ifXTable module
  */
