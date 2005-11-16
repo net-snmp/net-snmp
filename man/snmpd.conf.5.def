@@ -317,30 +317,37 @@ access	public	""	any	noauth	exact	all	none	none
 .fi
 .RE
 .SH SYSTEM INFORMATION
+Most of the information reported by the Net-SNMP agent is retrieved
+from the underlying systems, or dyncamically configured (and retained
+from one run of the agent to the next).
+However, certain MIB objects can be configured or controlled via
+the \fIsnmpd.conf(5)\fR file.
 .SS System Group
+Most of the scalar objects in the 'system' group can be configured
+in this way:
 .IP "syslocation STRING"
 .IP "syscontact STRING"
 .IP "sysname STRING"
-Sets the system location, system contact or system name for the agent.
-This information is reported in the 'system' group the mibII tree.
-Ordinarily these objects (sysLocation.0, sysContact.0 and sysName.0)
-are read-write.  However, specifying the value for one of these
-objects by giving the appropriate token makes the corresponding object
-read-only, and attempts to set the value of the object will result in
-a notWritable error response.
+set the system location, system contact or system name
+(sysLocation.0, sysContact.0 and sysName.0) for the agent respectively.
+Ordinarily these objects are writeable via suitably authorized SNMP SET
+requests.  However, specifying one of these directives makes the
+corresponding object read-only, and attempts to SET it will result in
+a \fInotWritable\fR error response.
 .IP "sysservices NUMBER"
-Sets the value of the system.sysServices.0 object.
-For a host, a good value is 72.
+sets the value of the sysServices.0 object.
+For a host, a good value is 72 (application + end-to-end layers).
+If this directive is not specified, then no value will be reported
+for the sysServices.0 object.
 .IP "sysdescr STRING"
 .IP "sysobjectid OID"
-Sets the system description or object ID for the agent.
-Although these values are not SNMP-writable, it is conceivable
-that a network administrator may wish to configure them to something
-other than the default values.
+sets the system description or object ID for the agent.
+Although these values are not SNMP-writable, these directives can be
+used by a network administrator to configure suitable values for them.
 .SS Interfaces Group
 .IP "interface NAME TYPE SPEED"
-For interfaces where the agent fails to guess correctly on the type and
-speed, this directive can supply additional information.
+can be used to provide appropriate type and speed settings for
+interfaces where the agent fails to determine this information correctly.
 TYPE is a type value as given in the IANAifType-MIB.
 .SS Host Resources Group
 .IP "ignoredisk STRING"
