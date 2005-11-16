@@ -39,6 +39,7 @@ LN_S		= @LN_S@
 AUTOCONF	= @AUTOCONF@
 AUTOHEADER	= @AUTOHEADER@
 PERL            = @PERLPROG@
+FIND            = @FIND@
 
 #
 # Compiler arguments
