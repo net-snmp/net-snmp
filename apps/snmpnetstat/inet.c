@@ -103,7 +103,7 @@ const char     *tcpstates[] = {
 #define TCP_NSTATES 11
 
 void
-tcpprotopr(char *name)
+tcpprotopr(const char *name)
 {
     netsnmp_variable_list *var, *vp;
     oid    tcpConnState_oid[] = { 1,3,6,1,2,1,6,13,1,1 };
@@ -179,7 +179,7 @@ tcpprotopr(char *name)
  *    XXX - what about "listening" services ??
  */
 void
-udpprotopr(char *name)
+udpprotopr(const char *name)
 {
     netsnmp_variable_list *var, *vp;
     oid    udpLocalAddress_oid[] = { 1,3,6,1,2,1,7,5,1,1 };
@@ -234,7 +234,7 @@ udpprotopr(char *name)
 	 *********************/
 
 void
-_dump_stats( char *name, oid *oid_buf, size_t buf_len,
+_dump_stats( const char *name, oid *oid_buf, size_t buf_len,
              struct stat_table *stable )
 {
     netsnmp_variable_list *var, *vp;
@@ -277,7 +277,7 @@ _dump_stats( char *name, oid *oid_buf, size_t buf_len,
  * Dump IP statistics.
  */
 void
-ip_stats(char *name)
+ip_stats(const char *name)
 {
     oid               ipstats_oid[] = { 1, 3, 6, 1, 2, 1, 4, 0, 0 };
     size_t            ipstats_len   = OID_LENGTH( ipstats_oid );
@@ -310,7 +310,7 @@ ip_stats(char *name)
  * Dump ICMP statistics.
  */
 void
-icmp_stats(char *name)
+icmp_stats(const char *name)
 {
     oid               icmpstats_oid[] = { 1, 3, 6, 1, 2, 1, 5, 0, 0 };
     size_t            icmpstats_len   = OID_LENGTH( icmpstats_oid );
@@ -362,7 +362,7 @@ icmp_stats(char *name)
  * Dump TCP statistics.
  */
 void
-tcp_stats(char *name)
+tcp_stats(const char *name)
 {
     oid               tcpstats_oid[] = { 1, 3, 6, 1, 2, 1, 6, 0, 0 };
     size_t            tcpstats_len   = OID_LENGTH( tcpstats_oid );
@@ -387,7 +387,7 @@ tcp_stats(char *name)
  * Dump UDP statistics.
  */
 void
-udp_stats(char *name)
+udp_stats(const char *name)
 {
     oid               udpstats_oid[] = { 1, 3, 6, 1, 2, 1, 7, 0, 0 };
     size_t            udpstats_len   = OID_LENGTH( udpstats_oid );
