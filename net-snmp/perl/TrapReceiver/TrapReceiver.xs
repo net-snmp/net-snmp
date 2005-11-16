@@ -198,7 +198,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
     sv_dump(varbinds);
 #endif
     
-    // svREFCNT_dec((SV *) pduinfo);
+    /* svREFCNT_dec((SV *) pduinfo); */
 #ifdef NOT_THIS
     {
         SV *vba;
@@ -210,9 +210,9 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
 #endif    
     free(tmparray);
 
-    // Not needed because of the G_DISCARD flag (I think)
-    // SPAGAIN;
-    // PUTBACK;
+    /* Not needed because of the G_DISCARD flag (I think) */
+    /* SPAGAIN; */
+    /* PUTBACK; */
     FREETMPS;
     LEAVE;
     return NETSNMPTRAPD_HANDLER_OK;
