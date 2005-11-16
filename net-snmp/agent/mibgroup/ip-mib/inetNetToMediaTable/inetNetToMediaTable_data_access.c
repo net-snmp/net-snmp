@@ -172,6 +172,7 @@ _snarf_arp_entry(netsnmp_arp_entry * arp_entry,
          (rowreq_ctx, rowreq_ctx->data->if_index, inetAddressType,
           rowreq_ctx->data->arp_ipaddress,
           rowreq_ctx->data->arp_ipaddress_len))) {
+        rowreq_ctx->inetNetToMediaRowStatus = ROWSTATUS_ACTIVE;
         CONTAINER_INSERT(container, rowreq_ctx);
     } else {
         if (rowreq_ctx) {
