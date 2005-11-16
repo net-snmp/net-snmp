@@ -1399,10 +1399,9 @@ inetCidrRouteTable_commit(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
         return MFD_SUCCESS;
     }
 
-#warning inetCidrRouteTable commit
-            /*
+    /*
      * pass everything to data access
-             */
+     */
     if (save_flags & COLUMN_INETCIDRROUTESTATUS_FLAG) {
         if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
             if(ROWSTATUS_DESTROY == rowreq_ctx->row_status) {
@@ -1478,7 +1477,6 @@ inetCidrRouteTable_undo_commit(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
      *
      * eg: if (rowreq_ctx->column_set_flags & COLUMN__FLAG) {}
      */
-#warning "xxx-rks: inetCidrRouteTable undo commit"
     if (rowreq_ctx->column_set_flags & COLUMN_INETCIDRROUTESTATUS_FLAG) {
         /*
          * if we created an addr, delete it. if we deleted it,
