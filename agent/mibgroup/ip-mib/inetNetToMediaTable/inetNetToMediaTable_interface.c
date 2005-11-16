@@ -665,7 +665,8 @@ _mfd_inetNetToMediaTable_object_lookup(netsnmp_mib_handler *handler, netsnmp_han
                 inetNetToMediaTable_release_rowreq_ctx(rowreq_ctx);
             } else {
                 rowreq_ctx->rowreq_flags |= MFD_ROW_CREATED;
-                netsnmp_container_table_row_insert(requests, rowreq_ctx);
+                netsnmp_container_table_row_insert(requests,
+                                                   (netsnmp_index*)rowreq_ctx);
             }
         }
     } else {
