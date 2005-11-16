@@ -98,14 +98,6 @@ _load_v4(netsnmp_container *container, int idx_offset)
                     za,zb,zc,zd, tmp_flags, ze,zf,zg,zh,zi,zj, ifname ));
 
         /*
-         * Invalidated entries have their flag set to 0.
-         * * We want to ignore them 
-         */
-        if (tmp_flags == 0) {
-            continue;
-        }
-
-        /*
          */
         entry = netsnmp_access_arp_entry_create();
         if(NULL == entry) {
@@ -175,8 +167,13 @@ _load_v4(netsnmp_container *container, int idx_offset)
 
         /*
          * process status
+         * if flags are 0, we can't tell the difference between
+         * stale or incomplete.
          */
-        /** entry->arp_status = ?; */
+        if(tmp_flags & ATF_COM)
+            entry->arp_state = INETNETTOMEDIASTATE_REACHABLE;
+        else
+            entry->arp_state = INETNETTOMEDIASTATE_UNKNOWN;
 
         /*
          * add entry to container
