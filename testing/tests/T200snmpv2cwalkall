@@ -6,7 +6,7 @@ HEADER "full snmpwalk (SNMPv2c) against agent (may take time)"
 
 SKIPIF DISABLE_SNMPV2C
 
-# make sure snmpnetstat can be executed
+# make sure snmpwalk can be executed
 SNMPWALK="${SNMP_UPDIR}/apps/snmpwalk"
 [ -x "$SNMPWALK" ] || SKIP
 
