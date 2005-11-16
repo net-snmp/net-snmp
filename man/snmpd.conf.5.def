@@ -401,52 +401,46 @@ You might use more than one such wildcard expression in any such directive.
 .IP "storageUseNFS [1|2]"
 controls whether NFS and NFS-like file systems should be reported
 as 'Network Disks' (1) or 'Fixed Disks' (2) in the hrStorageTable.
-The default is to report them as 'Fixed Disks' (following the behaviour
-of previous versions of the UCD agent), but RFC 2790 specifies that
-'Network Disks' would be more appropriate.
-.SS EXTENSIBLE-MIB
-.PP
-The Net-SNMP SNMP agent reports much of its information through
-queries to the EXTENSIBLEDOTMIB section of the MIB tree.  Every MIB in
-this section has the following table entries in it.
-.IP ".MIBINDEX -- index"
-This is the table's index numbers for each of the DIRECTIVES listed below.
-.IP ".ERRORNAME -- name"
-The name of the given table entry.  This should be unique, but is not
-required to be.
-.IP ".ERRORFLAG -- errorFlag"
-This is a flag returning either the integer value 1 or 0 if an error
-is detected for this table entry.
-.IP ".ERRORMSG -- errorMsg"
-This is a DISPLAY-STRING describing any error triggering the errorFlag above.
-.IP ".ERRORFIX -- errorFix"
-If this entry is set to the integer value of 1 AND the errorFlag
-defined above is indeed a 1, a program or script will get executed
-with the table entry name from above as the argument.  The program to
-be executed is configured in the net-snmp-config.h file at compile time.
 .SS Process Monitoring 
-.IP "proc NAME"
-.IP "proc NAME MAX"
-.IP "proc NAME MAX MIN"
+The \fChrSWRun\fR group of the Host Resources MIB provides
+information about individual processes running on the local system.
+The \fCprTable\fR of the UCD-SNMP-MIB complements this by reporting
+on selected services (which may involve multiple processes).
+This requires that the agent was built with support for the
+\fIucd-snmp/proc\fR module (which is included as part of the
+default build configuration).
+.IP "proc NAME [MAX [MIN]]"
+monitors the number of processes called NAME (as reported by PSCMD)
+running on the local system.
 .IP
-Checks to see if processes called NAME are running on the agent
-machine.  An error flag (1) and a description message are then passed
-to the EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFLAG and
-EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORMSG MIB columns (respectively) if
-the NAME'd program is not found in the process table as reported by
-PSCMD.
+If the number of NAMEd processes is less than MIN or greater than MAX,
+then the corresponding UCD-SNMP-MIB::prErrorFlag instance will be
+set to 1, and a suitable description message reported via the
+UCD-SNMP-MIB::prErrMessage instance.
+.RE
+.IP "Note:"
+This situation will \fBnot\fR automatically trigger a trap to report
+the error - see the DISMAN-EVENT-MIB section later.
+.RE
 .IP
-If MAX and MIN are not specified, MAX is assumed to be 
-.B infinity
-and MIN is assumed to be 1.
-.IP
-If MAX is specified but MIN is not specified, MIN is assumed to be 0.
+If neither MAX nor MIN are specified, they default to \fBinfinity\fR
+and 1 respectively ("at least one").  If only MAX is specified, MIN
+will default to 0 ("no more than MAX").
 .IP "procfix NAME PROG ARGS"
-This registers a command that knows how to fix errors with the given
-process NAME.  When EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFIX for a given
-NAMEd program is set to the integer value of 1, this command will be
-called.  It defaults to a compiled value set using the PROCFIXCMD
-definition in the net-snmp-config.h file.
+registers a command that can be run to fix errors with the given
+process NAME.  This will be invoked when the corresponding
+UCD-SNMP-MIB::prErrFix instance is set to 1.
+.RE
+.IP "Note:"
+This command will \fBnot\fR be invoked automatically.
+.\" XXX - but see the DISMAN-EVENT-MIB section later ???
+.RE
+.IP
+The \fIprocfix\fR directive must be specified \fBafter\fR the matching
+\fIproc\fR directive, and cannot be used on its own.
+.PP
+If no \fIproc\fR directives are defined, then walking the
+UCD-SNMP-MIB::prTable will fail (\fInoSuchObject\fI).
 .SS Disk Usage Monitoring
 .IP "disk PATH"
 .IP "disk PATH [ MINSPACE | MINPERCENT% ]"
