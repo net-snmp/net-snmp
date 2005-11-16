@@ -831,7 +831,7 @@ _mfd_snmpNotifyFilterTable_object_lookup(netsnmp_mib_handler *handler,
              * add rowreq_ctx to request data lists
              */
             netsnmp_container_table_row_insert(requests,
-                                               (void *) rowreq_ctx);
+                                               (netsnmp_index*) rowreq_ctx);
         }
     } else {
         snmpNotifyFilterTable_row_prep(rowreq_ctx);
