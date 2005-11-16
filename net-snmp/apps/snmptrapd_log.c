@@ -1065,9 +1065,13 @@ realloc_handle_wrap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     switch (pdu->version) {
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#ifndef DISABLE_SNMPV1
     case SNMP_VERSION_1:
+#endif
+#ifndef DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
+#endif
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
              (const u_char *) ", community ")) {

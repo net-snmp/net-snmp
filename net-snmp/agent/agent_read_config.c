@@ -216,18 +216,20 @@ init_agent_read_config(const char *app)
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_AGENT_ROLE) == MASTER_AGENT) {
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#ifndef DISABLE_SNMPV1
         register_app_config_handler("trapsink",
                                     snmpd_parse_config_trapsink,
                                     snmpd_free_trapsinks,
                                     "host [community] [port]");
+#endif
+#ifndef DISABLE_SNMPV2C
         register_app_config_handler("trap2sink",
                                     snmpd_parse_config_trap2sink, NULL,
                                     "host [community] [port]");
         register_app_config_handler("informsink",
                                     snmpd_parse_config_informsink, NULL,
                                     "host [community] [port]");
-#endif /* support for community based SNMP */
+#endif
         register_app_config_handler("trapsess",
                                     snmpd_parse_config_trapsess, NULL,
                                     "[snmpcmdargs] host");
