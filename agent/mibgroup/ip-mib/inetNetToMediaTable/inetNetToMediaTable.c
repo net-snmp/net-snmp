@@ -586,7 +586,7 @@ inetNetToMediaState_get(inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the inetNetToMediaState data.
      * set (* inetNetToMediaState_val_ptr ) from rowreq_ctx->data
      */
-    (*inetNetToMediaState_val_ptr) = INETNETTOMEDIASTATE_UNKNOWN;
+    (*inetNetToMediaState_val_ptr) = rowreq_ctx->data->arp_state;
 
     return MFD_SUCCESS;
 }                               /* inetNetToMediaState_get */
