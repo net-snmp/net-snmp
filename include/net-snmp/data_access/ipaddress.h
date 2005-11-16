@@ -95,14 +95,14 @@ void netsnmp_access_ipaddress_entry_free(netsnmp_ipaddress_entry * entry);
  */
 int
 netsnmp_access_ipaddress_entry_copy(netsnmp_ipaddress_entry *old, 
-                                    netsnmp_ipaddress_entry *new);
+                                    netsnmp_ipaddress_entry *new_val);
 
 /*
  * update/compare
  */
 int
 netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *old, 
-                                      netsnmp_ipaddress_entry *new);
+                                      netsnmp_ipaddress_entry *new_val);
 
 /*
  * find entry in container

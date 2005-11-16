@@ -63,7 +63,7 @@ extern          "C" {
 
     tcpListenerTable_registration
         *tcpListenerTable_registration_set(tcpListenerTable_registration *
-                                           new);
+                                           new_val);
 
     netsnmp_container *tcpListenerTable_container_get(void);
     int             tcpListenerTable_container_size(void);

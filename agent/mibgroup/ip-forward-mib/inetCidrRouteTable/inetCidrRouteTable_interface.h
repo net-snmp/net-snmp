@@ -64,7 +64,7 @@ extern          "C" {
 
     inetCidrRouteTable_registration
         *inetCidrRouteTable_registration_set
-        (inetCidrRouteTable_registration * new);
+        (inetCidrRouteTable_registration * new_val);
 
     netsnmp_container *inetCidrRouteTable_container_get(void);
     int             inetCidrRouteTable_container_size(void);

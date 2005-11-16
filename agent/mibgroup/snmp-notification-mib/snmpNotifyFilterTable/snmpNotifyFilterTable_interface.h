@@ -64,7 +64,7 @@ extern          "C" {
 
     snmpNotifyFilterTable_registration
         *snmpNotifyFilterTable_registration_set
-        (snmpNotifyFilterTable_registration * new);
+        (snmpNotifyFilterTable_registration * new_val);
 
     netsnmp_container *snmpNotifyFilterTable_container_get(void);
     int             snmpNotifyFilterTable_container_size(void);
