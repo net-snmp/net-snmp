@@ -318,7 +318,7 @@ access	public	""	any	noauth	exact	all	none	none
 .RE
 .SH SYSTEM INFORMATION
 Most of the information reported by the Net-SNMP agent is retrieved
-from the underlying systems, or dyncamically configured (and retained
+from the underlying system, or dynamically configured (and retained
 from one run of the agent to the next).
 However, certain MIB objects can be configured or controlled via
 the \fIsnmpd.conf(5)\fR file.
@@ -342,7 +342,7 @@ for the sysServices.0 object.
 .IP "sysdescr STRING"
 .IP "sysobjectid OID"
 sets the system description or object ID for the agent.
-Although these values are not SNMP-writable, these directives can be
+Although these MIB objects are not SNMP-writable, these directives can be
 used by a network administrator to configure suitable values for them.
 .SS Interfaces Group
 .IP "interface NAME TYPE SPEED"
@@ -417,7 +417,7 @@ If the number of NAMEd processes is less than MIN or greater than MAX,
 then the corresponding UCD-SNMP-MIB::prErrorFlag instance will be
 set to 1, and a suitable description message reported via the
 UCD-SNMP-MIB::prErrMessage instance.
-.RE
+.RS
 .IP "Note:"
 This situation will \fBnot\fR automatically trigger a trap to report
 the problem - see the DISMAN-EVENT-MIB section later.
@@ -430,7 +430,7 @@ will default to 0 ("no more than MAX").
 registers a command that can be run to fix errors with the given
 process NAME.  This will be invoked when the corresponding
 UCD-SNMP-MIB::prErrFix instance is set to 1.
-.RE
+.RS
 .IP "Note:"
 This command will \fBnot\fR be invoked automatically.
 .\" XXX - but see the DISMAN-EVENT-MIB section later ???
@@ -455,7 +455,7 @@ If the free disk space falls below this threshold,
 then the corresponding UCD-SNMP-MIB::dskErrorFlag instance will be
 set to 1, and a suitable description message reported via the
 UCD-SNMP-MIB::dskErrorMsg instance.
-.RE
+.RS
 .IP "Note:"
 This situation will \fBnot\fR automatically trigger a trap to report
 the problem - see the DISMAN-EVENT-MIB section later.
@@ -466,11 +466,12 @@ the agent was started, using the specified (percentage) threshold.
 The threshold for individual disks can be adjusted using suitable
 \fIdisk\fR directives (which can come either before or after the
 \fIincludeAllDisks\fR directive).
-.RE
+.RS
 .IP "Note:"
 Whether \fIdisk\fR directives appears before or after \fIincludeAllDisks\fR 
 may affect the indexing of the dskTable.
 .RE
+.IP
 Only one \fIincludeAllDisks\fR directive can be specified - any
 subsequent copies will be ignored.
 .IP
@@ -487,31 +488,63 @@ Disks mounted after the agent has started will not be monitored.
 If neither any \fIdisk\fR directives or \fIincludeAllDisks\fR are defined,
 then walking the UCD-SNMP-MIB::dskTable will fail (\fInoSuchObject\fI).
 .SS System Load Monitoring
-.IP "load MAX1"
-.IP "load MAX1 MAX5"
-.IP "load MAX1 MAX5 MAX15"
+This requires that the agent was built with support for the
+\fIucd-snmp/loadave\fR module (which is included as part of the
+default build configuration).
+.IP "load MAX1 [MAX5 [MAX15]]"
+monitors the load average of the local system, specifying
+thresholds for the 1-minute, 5-minute and 15-minute averages.
+If any of these loads exceed the associated maximum value, 
+then the corresponding UCD-SNMP-MIB::laErrorFlag instance will be
+set to 1, and a suitable description message reported via the
+UCD-SNMP-MIB::laErrMessage instance.
+.RS
+.IP "Note:"
+This situation will \fBnot\fR automatically trigger a trap to report
+the problem - see the DISMAN-EVENT-MIB section later.
+.RE
 .IP
-Checks the load average of the machine and returns an error flag (1),
-and an text-string error message
-to queries of EXTENSIBLEDOTMIB.LOADAVEMIBNUM.1.ERRORFLAG and
-EXTENSIBLEDOTMIB.LOADAVEMIBNUM.1.ERRORMSG (respectively) when the
-1-minute, 5-minute, or 15-minute averages exceed the associated
-maximum values.  If any of the MAX1, MAX5, or MAX15 values are
-unspecified, they default to a value of DEFMAXLOADAVE.
-.SS Log File Monitoring
-.IP "file FILE [MAXSIZE]"
-Monitors file sizes and makes sure they don't grow beyond a certain
-size (in kilobytes).  MAXSIZE defaults to infinite if not specified,
-and only monitors the size without reporting errors about it.
-A maximum of 20 files can be monitored.
-.IP "logmatch NAME PATH CYCLETIME REGEX"
-Configures log file monitoring that can be queried via the
-UCD-SNMP-MIB::logMatchTable.
-.SS "Errors"
+If the MAX15 threshold is omitted, it will default to the MAX5 value.
+If both MAX5 and MAX15 are omitted, they will default to the MAX1 value.
+If this directive is not specified, all three thresholds will
+default to a value of DEFMAXLOADAVE.
 .PP
-Any errors in obtaining the above information are reported via the
-EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORFLAG flag and the
-EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORMSG text-string description.
+Unlike the \fIproc\fR and \fIdisk\fR directives, walking the
+walking the UCD-SNMP-MIB::laTable will succeed (assuming the
+\fIucd-snmp/loadave\fR module was configured into the agent),
+even if the \fIload\fR directive is not present.
+.SS Log File Monitoring
+These require that the agent was built with support for the
+\fIucd-snmp/file\fR and \fIucd-snmp/logmatch\fR modules
+(both of which are included as part of the
+default build configuration).
+.IP "file FILE [MAXSIZE]"
+monitors the size of the specified file (in Kb).
+If MAXSIZE is specified, and the size of the file exceeds
+this threshold, then the corresponding UCD-SNMP-MIB::fileErrorFlag
+instance will be set to 1, and a suitable description message reported
+via the UCD-SNMP-MIB::fileErrorMsg instance.
+.RS
+.IP "Note:"
+This situation will \fBnot\fR automatically trigger a trap to report
+the problem - see the DISMAN-EVENT-MIB section later.
+.RE
+.IP
+A maximum of 20 files can be monitored.
+.PP
+If no \fIfile\fR directives are defined, then walking the
+UCD-SNMP-MIB::fileTable will fail (\fInoSuchObject\fI).
+.IP "logmatch NAME PATH CYCLETIME REGEX"
+monitors the specified file for occurances of the specified
+pattern REGEX.
+.\"
+.\"  XXX - Need more details here!
+.\"
+.IP
+A maximum of 50 files can be monitored.
+.PP
+If no \fIlogmatch\fR directives are defined, then walking the
+UCD-SNMP-MIB::logMatchTable will fail (\fInoSuchObject\fI).
 .SH "SETTING UP TRAP AND/OR INFORM DESTINATIONS"
 .IP "authtrapenable NUMBER"
 Setting authtrapenable to 1 enables generation of authentication failure
