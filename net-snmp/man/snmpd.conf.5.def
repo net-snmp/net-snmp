@@ -420,7 +420,7 @@ UCD-SNMP-MIB::prErrMessage instance.
 .RE
 .IP "Note:"
 This situation will \fBnot\fR automatically trigger a trap to report
-the error - see the DISMAN-EVENT-MIB section later.
+the problem - see the DISMAN-EVENT-MIB section later.
 .RE
 .IP
 If neither MAX nor MIN are specified, they default to \fBinfinity\fR
@@ -442,37 +442,50 @@ The \fIprocfix\fR directive must be specified \fBafter\fR the matching
 If no \fIproc\fR directives are defined, then walking the
 UCD-SNMP-MIB::prTable will fail (\fInoSuchObject\fI).
 .SS Disk Usage Monitoring
-.IP "disk PATH"
+This requires that the agent was built with support for the
+\fIucd-snmp/disk\fR module (which is included as part of the
+default build configuration).
 .IP "disk PATH [ MINSPACE | MINPERCENT% ]"
+monitors the disk mounted at PATH for available disk space.
 .IP
-Checks the named disks mounted at PATH for available disk space.  If
-the disk space is less than MINSPACE (kB) if specified or less than
-MINPERCENT (%) if a % sign is specified, or DEFDISKMINIMUMSPACE (kB)
-if not specified, the associated entry in the
-EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORFLAG MIB table will be set to (1) and
-a descriptive error message will be returned to queries of
-EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORMSG.
+The minimum threshold can either be specified in Kb (MINSPACE) or
+as a percentage of the total disk (MINPERCENT% with a '%' character),
+defaulting to 100Kb if neither are specified.
+If the free disk space falls below this threshold, 
+then the corresponding UCD-SNMP-MIB::dskErrorFlag instance will be
+set to 1, and a suitable description message reported via the
+UCD-SNMP-MIB::dskErrorMsg instance.
+.RE
+.IP "Note:"
+This situation will \fBnot\fR automatically trigger a trap to report
+the problem - see the DISMAN-EVENT-MIB section later.
+.RE
 .IP "includeAllDisks MINPERCENT%"
+configures monitoring of all disks mounted on the system when
+the agent was started, using the specified (percentage) threshold.
+The threshold for individual disks can be adjusted using suitable
+\fIdisk\fR directives (which can come either before or after the
+\fIincludeAllDisks\fR directive).
+.RE
+.IP "Note:"
+Whether \fIdisk\fR directives appears before or after \fIincludeAllDisks\fR 
+may affect the indexing of the dskTable.
+.RE
+Only one \fIincludeAllDisks\fR directive can be specified - any
+subsequent copies will be ignored.
 .IP
-Adds  all  the  disks  that can be found on the system using the
+The list of mounted disks will be determined using the
 setmntent(3) and getmntent(3), or fopen(3) and getmntent(3),  or
 setfsent(3)  and  getfsent(3) system calls. If none of the above
-system calls are available then it adds the root partition  "/",
-(which  is  assumed to exist on any UNIX based system) using the
-statfs(2) system call.
-.IP
-There can only be one 'includeAllDisks' directive in the config-
-uration  file.  It  can  be  used in conjunction with the 'disk'
-directive. They may be used in any order. The  'disk'  directive
-overrides  the  disk  usage  specified  by the 'includeAllDisks'
-directive, no matter in which order they are  specified  in  the
-configuration file.
-.IP
-The 'includeAllDisks' directive only includes the disks that are
-mounted when the snmpd daemon  is  started.  It  cannot  include
-disks  that are dynamically loadable, such as with automount. So
-the preferred way is to mount all the disks that will ever  need
-to be monitored before starting the snmpd daemon.
+system calls are available then the root partition  "/"
+(which  is  assumed to exist on any UNIX based system) will be monitored.
+Disks mounted after the agent has started will not be monitored.
+.\"
+.\" XXX - unless the config is re-read ??
+.\"
+.PP
+If neither any \fIdisk\fR directives or \fIincludeAllDisks\fR are defined,
+then walking the UCD-SNMP-MIB::dskTable will fail (\fInoSuchObject\fI).
 .SS System Load Monitoring
 .IP "load MAX1"
 .IP "load MAX1 MAX5"
