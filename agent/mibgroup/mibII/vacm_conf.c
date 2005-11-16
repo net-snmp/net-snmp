@@ -1200,7 +1200,15 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     char            contextNameIndex[CONTEXTNAMEINDEXLEN + 1];
 
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if defined(DISABLE_SNMPV1)
+    if (pdu->version == SNMP_VERSION_2c) {
+#else
+#if defined(DISABLE_SNMPV2C)
+    if (pdu->version == SNMP_VERSION_1) {
+#else
     if (pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c) {
+#endif
+#endif
         if (snmp_get_do_debugging()) {
             char           *buf;
             if (pdu->community) {
@@ -1384,8 +1392,15 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
 
     if (vp->viewType == SNMP_VIEW_EXCLUDED) {
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
-        if (pdu->version == SNMP_VERSION_1
-            || pdu->version == SNMP_VERSION_2c) {
+#if defined(DISABLE_SNMPV1)
+        if (pdu->version == SNMP_VERSION_2c) {
+#else
+#if defined(DISABLE_SNMPV2C)
+        if (pdu->version == SNMP_VERSION_1) {
+#else
+        if (pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c) {
+#endif
+#endif
             snmp_increment_statistic(STAT_SNMPINBADCOMMUNITYUSES);
         }
 #endif

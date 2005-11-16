@@ -259,8 +259,16 @@ proxy_fill_in_session(netsnmp_mib_handler *handler,
     }
 
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if defined(DISABLE_SNMPV1)
+    if (session->version == SNMP_VERSION_2c) {
+#else
+#if defined(DISABLE_SNMPV2C)
+    if (session->version == SNMP_VERSION_1) {
+#else
     if (session->version == SNMP_VERSION_1 ||
         session->version == SNMP_VERSION_2c) {
+#endif
+#endif
 
         /*
          * Check if session has community string defined for it.
