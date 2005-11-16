@@ -108,12 +108,16 @@ void netsnmp_access_route_container_free(netsnmp_container *container,
 
 
 /*
- * create/free a route+entry
+ * create/copy/free a route entry
  */
 netsnmp_route_entry *
 netsnmp_access_route_entry_create(void);
 
 void netsnmp_access_route_entry_free(netsnmp_route_entry * entry);
+
+int
+netsnmp_access_route_entry_copy(netsnmp_route_entry *lhs,
+                                netsnmp_route_entry *rhs);
 
 /*
  * find entry in container
