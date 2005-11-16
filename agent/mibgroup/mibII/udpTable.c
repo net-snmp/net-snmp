@@ -137,9 +137,9 @@ init_udpTable(void)
     iinfo->get_first_data_point = udpTable_first_entry;
     iinfo->get_next_data_point  = udpTable_next_entry;
     iinfo->table_reginfo        = table_info;
-#if defined (WIN32) || defined (cygwin) || defined (solaris2)
+#if defined (WIN32) || defined (cygwin)
     iinfo->flags               |= NETSNMP_ITERATOR_FLAG_SORTED;
-#endif /* WIN32 || cygwin || solaris2 */
+#endif /* WIN32 || cygwin */
 
 
     /*
@@ -525,12 +525,13 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         /*
          * Not interested in 'idle' entries, apparently....
          */
-        if (entry.udpEntryInfo.ue_state != MIB2_UDP_idle) {
+        if (entry.udpEntryInfo.ue_state == MIB2_UDP_idle) {
             /*
              * Build up a linked list copy of the getMibstat results
              * Note that since getMibstat returns rows in sorted order,
 	     *    we need to retain this order while building the list
 	     *    so new entries are added onto the end of the list.
+             * xxx-rks: WARNING: this is NOT TRUE on the sf cf solaris boxes.
              */
             nnew = SNMP_MALLOC_TYPEDEF(netsnmp_udpEntry);
             if (nnew == NULL)
