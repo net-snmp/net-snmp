@@ -350,24 +350,30 @@ can be used to provide appropriate type and speed settings for
 interfaces where the agent fails to determine this information correctly.
 TYPE is a type value as given in the IANAifType-MIB.
 .SS Host Resources Group
+This requires that the agent was built with support for the
+\fIhost\fR module (which is now included as part of the
+default build configuration for the most recent distribution).
+.\"
+.\" XXX - .IP "scandisk STRING"
+.\"
 .IP "ignoredisk STRING"
-When scanning for available disk devices the agent might block in trying
-to open all possible disk devices. This might lead to a timeout when
-walking the device tree. Sometimes the next walk will run without timeout,
-sometimes it will timeout every time you try it.
-.IP
-If you experience such behaviour you might add this directive and give all
-device names not to be checked (i.e. opened). You might have more than one
-such directive in your configuration file stating all devices not to be
-opened. You might also specify those devices using wildcards similar to
-the syntax you can use in a bourne shell (see examples below).
-.IP
-.B Note:
-For a list of devices scanned for every system please consult the sources
-(host/hr_disk.c) and check for the Add_HR_Disk_entry() calls relevant for
-your type of OS.
-.IP
-Examples:
+controls which disk devices are scanned as part of populating the
+hrDiskStorageTable (and hrDeviceTable).
+The HostRes implementation code includes a list of disk device patterns
+appropriate for the current operating system, some of which may cause
+the agent to block when trying to open the corresponding disk devices.
+This might lead to a timeout when walking these tables, possibly
+resulting in inconsistent behaviour.  This directive can be used
+to specify particular devices (either individually or wildcarded)
+that should not be checked.
+.RS
+.IP "Note:"
+Please consult the sources (host/hr_disk.c) and check for the
+\fIAdd_HR_Disk_entry\fR calls relevant for a particular O/S
+to determine the list of devices that will be scanned.
+.RE
+.RS
+.IP "Examples:"
 .IP
 ignoredisk /dev/rdsk/c0t2d0
 .IP
@@ -391,12 +397,13 @@ This directive prevents all devices /dev/rdsk/cXt0d0 ('X' might be any char)
 from being scanned.
 .IP
 You might use more than one such wildcard expression in any such directive.
-.IP "storageUseNFS NUMBER"
-Setting storageUseNFS to 1 causes all NFS and NFS-like file systems to be
-marked as 'Network Disks' in the hrStorageTable. This is according to RFC 2790.
-Not setting storageUseNFS or setting it to 2 causes NFS and NFS-like file
-systems to be marked as 'Fixed Disks' as it has been in previous versions of
-the ucd-snmp SNMP agent.
+.RE
+.IP "storageUseNFS [1|2]"
+controls whether NFS and NFS-like file systems should be reported
+as 'Network Disks' (1) or 'Fixed Disks' (2) in the hrStorageTable.
+The default is to report them as 'Fixed Disks' (following the behaviour
+of previous versions of the UCD agent), but RFC 2790 specifies that
+'Network Disks' would be more appropriate.
 .SS EXTENSIBLE-MIB
 .PP
 The Net-SNMP SNMP agent reports much of its information through
