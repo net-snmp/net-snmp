@@ -60,7 +60,7 @@ extern          "C" {
     ifTable_registration *ifTable_registration_get(void);
 
     ifTable_registration *ifTable_registration_set(ifTable_registration *
-                                                   new);
+                                                   new_val);
 
     netsnmp_container *ifTable_container_get(void);
     int             ifTable_container_size(void);
