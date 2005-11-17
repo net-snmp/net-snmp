@@ -10,6 +10,7 @@
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
+#include <net-snmp/data_access/ipaddress.h>
 #include "if-mib/data_access/interface.h"
 
 #ifdef HAVE_NET_IF_H
@@ -23,6 +24,7 @@
 #endif
 
 #include "interface_ioctl.h"
+#include "ip-mib/data_access/ipaddress_ioctl.h"
 
 /**
  * ioctl wrapper
