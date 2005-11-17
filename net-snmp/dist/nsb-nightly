@@ -130,12 +130,15 @@ echo "Result: $RESULT"
 
 if [ ! -z $NSB_RESULTS_TO ]; then
    SUBJECT="$NSB_VERSION $RESULT on $NSB_HOST ($NSB_PLATFORM)"
+   echo "Sending mail to $NSB_RESULTS_TO: $SUBJECT"
    case `uname -s` in
-      OpenBSD) # mail doesn't allow setting From
+      OpenBSD|FreeBSD) # mail doesn't allow setting From
          # seems to be in /usr/sbin, which isn't in all paths
 	 PATH=/usr/sbin/:$PATH
          echo "From: $NSB_FROM" > mail.results
          echo "To: $NSB_RESULTS_TO" >> mail.results
+         # mail-related errors to OK address (usully buildmaster)
+         echo "Errors-To: $NSB_OK_RESULTS_TO" >> mail.results
          echo "Subject: $SUBJECT" >> mail.results
          echo "" >> mail.results
          echo "Result: $RESULT" >> mail.results
@@ -146,6 +149,8 @@ if [ ! -z $NSB_RESULTS_TO ]; then
          ;;
       SunOS) # no sendmail, no mail -s, need -t for To 
          echo "From: $NSB_FROM" > mail.results
+         # mail-related errors to OK address (usully buildmaster)
+         echo "Errors-To: $NSB_OK_RESULTS_TO" >> mail.results
          echo "Subject: $SUBJECT" >> mail.results
          echo "" >> mail.results
          echo "Result: $RESULT" >> mail.results
