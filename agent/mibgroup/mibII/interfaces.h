@@ -29,6 +29,7 @@ config_require(mibII/var_route)
 
 /***********************************************************************
  */
+#ifndef USING_IF_MIB_IFTABLE_MODULE
 #ifdef hpux11
 #include <sys/mib.h>
 #else
@@ -54,6 +55,8 @@ config_require(mibII/var_route)
      void            init_interfaces(void);
      extern FindVarMethod var_interfaces;
      extern FindVarMethod var_ifEntry;
+
+#endif /* USING_IF_MIB_IFTABLE_MODULE */
 
 #define IFNUMBER        0
 #define IFINDEX         1
@@ -117,5 +120,5 @@ config_require(mibII/var_route)
           */
          struct ifnet   *if_next;
      };
-#endif
+#endif   /* linux */
 #endif                          /* _MIBGROUP_INTERFACES_H */
