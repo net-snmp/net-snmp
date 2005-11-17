@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 int
 _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
                                                   int idx_offset);
@@ -5,6 +9,9 @@ int
 _netsnmp_ioctl_ipaddress_set_v4(netsnmp_ipaddress_entry * entry);
 int
 _netsnmp_ioctl_ipaddress_remove_v4(netsnmp_ipaddress_entry * entry);
+
+int
+netsnmp_access_ipaddress_ioctl_get_interface_count(int sd, struct ifconf * ifc);
 
 
 /*
@@ -30,3 +37,8 @@ netsnmp_ioctl_ipaddress_extras_get(netsnmp_ipaddress_entry *entry);
 
 int
 _netsnmp_ioctl_ipaddress_delete_v4(netsnmp_ipaddress_entry * entry);
+
+#ifdef __cplusplus
+}
+#endif
+
