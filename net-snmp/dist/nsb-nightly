@@ -141,6 +141,7 @@ if [ ! -z $NSB_RESULTS_TO ]; then
          echo "Errors-To: $NSB_OK_RESULTS_TO" >> mail.results
          echo "Subject: $SUBJECT" >> mail.results
          echo "" >> mail.results
+         grep CONFIGURE_OPTIONS include/net-snmp/net-snmp-config.h|sed 's:/home/[^ ]*/build:$HOME:g' >> mail.results
          echo "Result: $RESULT" >> mail.results
          if [ ! -z "$FILES" ]; then
             cat $FILES >> mail.results
@@ -153,6 +154,7 @@ if [ ! -z $NSB_RESULTS_TO ]; then
          echo "Errors-To: $NSB_OK_RESULTS_TO" >> mail.results
          echo "Subject: $SUBJECT" >> mail.results
          echo "" >> mail.results
+         grep CONFIGURE_OPTIONS include/net-snmp/net-snmp-config.h|sed 's:/home/[^ ]*/build:$HOME:g' >> mail.results
          echo "Result: $RESULT" >> mail.results
          if [ ! -z "$FILES" ]; then
             cat $FILES >> mail.results
