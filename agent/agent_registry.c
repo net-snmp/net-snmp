@@ -1470,10 +1470,20 @@ netsnmp_subtree_find_prev(oid *name, size_t len, netsnmp_subtree *subtree,
         }
     }
 
+    /*
+     * this optimization causes a segfault on sf cf alpha-linux1.
+     * ifdef out until someone figures out why and fixes it. xxx-rks 20051117
+     */
+#ifndef __alpha
+#define WTEST_OPTIMIZATION 1
+#endif
+#ifdef WTEST_OPTIMIZATION
     DEBUGMSGTL(("wtest","oid in: "));
     DEBUGMSGOID(("wtest", name, len));
     DEBUGMSG(("wtest","\n"));
+#endif
     for (; myptr != NULL; previous = myptr, myptr = myptr->next) {
+#ifdef WTEST_OPTIMIZATION
         /* Compare the incoming oid with the linked list.  If we have
            results of previous compares, its faster to make sure the
            length we differed in the last check is greater than the
@@ -1489,6 +1499,9 @@ netsnmp_subtree_find_prev(oid *name, size_t len, netsnmp_subtree *subtree,
             netsnmp_oid_compare_ll(name, len,
                                    myptr->start_a, myptr->start_len,
                                    &ll_off) < 0) {
+#else
+        if (snmp_oid_compare(name, len, myptr->start_a, myptr->start_len) < 0) {
+#endif
             if (lookup_cache_size && previous && cmp) {
                 if (lookup_cache) {
                     lookup_cache_replace(lookup_cache, myptr, previous);
