@@ -547,40 +547,67 @@ A maximum of 50 files can be monitored.
 .PP
 If no \fIlogmatch\fR directives are defined, then walking the
 \fClogMatchTable\fR will fail (\fInoSuchObject\fI).
-.SH "SETTING UP TRAP AND/OR INFORM DESTINATIONS"
-.IP "authtrapenable NUMBER"
-Setting authtrapenable to 1 enables generation of authentication failure
-traps.  The default value is disabled(2).  Ordinarily the corresponding
-object (snmpEnableAuthenTraps.0) is read-write, but setting its value
-via this token makes the object read-only, and attempts to set the
-value of the object will result in a notWritable error response.
+.SH "ACTIVE MONITORING"
+The usual behaviour of an SNMP agent is to wait for incoming SNMP requests
+and respond to them - if no requests are received, an agent will typically
+not initiate any actins. This section describes various directives that
+can configure \fIsnmpd\fR to take a more active role.
+.SS "Notification Handling"
 .IP "trapcommunity STRING"
-This defines the default community string to be used when sending traps.
-Note that this command must be used prior to any of the following three
-commands that are intended use this community string.
+defines the default community string to be used when sending traps.
+Note that this directive must be used prior to any community-based
+trap destination directives that need to use it.
 .IP "trapsink HOST [COMMUNITY [PORT]]"
 .IP "trap2sink HOST [COMMUNITY [PORT]]"
 .IP "informsink HOST [COMMUNITY [PORT]]"
-These commands define
-the hosts to receive traps (and/or inform notifications). The
-daemon sends a Cold Start trap when it starts up. If enabled, it also sends
-traps on authentication failures.  Multiple \fItrapsink\fR, \fItrap2sink\fR
-and \fIinformsink\fR lines may be specified to specify multiple destinations.
-Use \fItrap2sink\fR to send SNMPv2 traps and \fIinformsink\fR to send
-inform notifications.
-If COMMUNITY is not specified, the string from a preceding \fItrapcommunity\fR
-directive will be used. If PORT is not specified, the well known SNMP trap
+define the address of a notification receiver that should be sent
+SNMPv1 TRAPs, SNMPv2c TRAP2s, or SNMPv2 INFORM notifications respectively.
+See the section 
+.B LISTENING ADDRESSES
+in the
+.I snmpd(8)
+manual page for more information about the format of listening
+addresses.
+If COMMUNITY is not specified, the most recent \fItrapcommunity\fR
+string will be used.
+.IP
+If the transport address does not include an explicit
+port specification, then PORT will be used.
+If this is not specified, the well known SNMP trap
 port (162) will be used.
+.RS
+.IP Note:
+This mechanism is being deprecated, and the listening port
+should be specified via the transport specification instead.
+.RE
+.IP
+If several \fI*sink\fR directives are specified, multiple
+copies of each notification 9in the appropriate formats)
+will be generated.
+.RS
+.IP Note:
+It is \fBnot\fR normally appropriate to list the same
+destination in two (or all threee) sink directives. 
+.RE
 .IP "trapsess [SNMPCMD_ARGS] HOST"
-This is a more generic trap configuration token that allows any type
-of trap destination to be specified with any version of SNMP.  See the 
-.I snmpcmd(1)
-manual page for further details on the arguments that can be passed as
-.I "SNMPCMD ARGS".
-In addition to the arguments listed there, the special argument
-\fI-Ci\fR specifies that you want inform notifications to be used
-instead of unacknowledged traps (this requires that you also specify a 
-version number of v2c or v3 as well).
+provides a more generic mechanism for defining notification destinations.
+.I "SNMPCMD ARGS"
+should be the command-line options required for an equivalent
+\fIsnmptrap\fR (or \fIsnmpinform\fR) command to send the desired notification.
+The option \fI-Ci\fR can be used (with \fI-v2c\fR or \fI-v3\fR) to generate
+an INFORM notification rather than an unacknowledged TRAP.
+.IP
+This is the appropriate directive for defining SNMPv3 trap receivers.
+See
+http://www.net-snmp.org/tutorial/tutorial-5/commands/snmptrap-v3.html
+for more information about SNMPv3 notification behaviour.
+.IP "authtrapenable {1|2}"
+determines whether to generate authentication failure traps
+(\fIenabled(1)\fR) or not (\fIdisabled(2)\fR - the default).
+Ordinarily the corresponding MIB
+object (\fCsnmpEnableAuthenTraps.0\fR) is read-write, but specifying
+this directive makes this object read-only, and attempts to set the
+value of the object will result in a \fInotWritable\fR error response.
 .SH "DISMAN-EVENT-MIB SUPPORT (READ: SENDING TRAPS ON ERRORS)"
 .PP
 Warning: this implementation has not been extensively tested and is
