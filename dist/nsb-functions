@@ -185,14 +185,15 @@ nsb-config-all()
    case `uname -s` in
 
    Linux)
-      NSB_EXTRA_TRANSPORTS="UDPIPv6 TCPIPv6 IPX"
+      NSB_EXTRA_CONFIG="$NSB_EXTRA_CONFIG --enable-ipv6"
+      NSB_EXTRA_TRANSPORTS="IPX"
       ;;
 
-   Darwin)
-      ;;
+   #Darwin)
+   #   ;;
 
    *)
-      NSB_EXTRA_TRANSPORTS="UDPIPv6 TCPIPv6"
+      NSB_EXTRA_CONFIG="$NSB_EXTRA_CONFIG --enable-ipv6"
       ;;
    esac
 
