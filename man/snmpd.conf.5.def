@@ -608,75 +608,112 @@ Ordinarily the corresponding MIB
 object (\fCsnmpEnableAuthenTraps.0\fR) is read-write, but specifying
 this directive makes this object read-only, and attempts to set the
 value of the object will result in a \fInotWritable\fR error response.
-.SH "DISMAN-EVENT-MIB SUPPORT (READ: SENDING TRAPS ON ERRORS)"
+.SS "DisMan Event MIB"
+.\"
+.\" XXX - General waffle about the Event MIB
+.\"
 .PP
-Warning: this implementation has not been extensively tested and is
-additionally not known to be entirely complete.  The concepts defined
-here should function appropriately, however, but no promises are made
-at this time.
-.PP
-If your agent was compiled with support for the DISMAN-EVENT-MIB (you
-can enable this by running the net-snmp configure script with the
---with-mib-modules=disman/event-mib argument) you have support for
-having the agent check its own data at regular intervals and to send
-out traps when certain conditions occur.  Traps are sent when
-expressions are first noticed, not once per evaluation.  Once a test
-expression fires a trap, the test will have to fail again before a new
-trap is sent.  See the DISMAN-EVENT-MIB documentation for more
-details. This can be configured either using the MIB tables themselves
-or by using these special key words:
+This requires that the agent was built with support for the
+\fIdisman/event\fR module (which is now included as part of the
+default build configuration for the most recent distribution).
+.\"
+.\" XXX - Mention previous implementation
+.\"
+.IP "iquerySecName NAME"
 .IP "agentSecName NAME"
-The DISMAN-EVENT-MIB support requires a valid user name for which to
-scan your agent with.  This can either be specified using the
-agentSecName token or by explicitly list one on the "monitor" lines
-described below using the -u switch.  Either way, a "rouser" line (or
-equivalent access control settings) must also be specified with the
-same security name name.  If you need an example, just do something
-like this:
-.RS
+specifies the default SNMPv3 username, to be use when making internal
+queries to retrieve any necessary information (either for evaluating
+the monitored expression, or building a notification payload).
 .IP
-.nf
-agentSecName internal
-rouser internal
-.fi
-.RE
-.IP
-And everything below should work just fine.
+Note that this user must also be explicitly created (\fIcreateUser\fR)
+and given appropriate access rights (e.g. \fIrouser\fR).  This
+directive is purely concerned with defining \fIwhich\fR user should
+be used - not with actually setting this user up.
+.\"
+.\" XXX - Should it create the user as well?
+.\"
 .IP "monitor [OPTIONS] NAME EXPRESSION"
-This token tells the agent to monitor itself for problems based on
-EXPRESSION.  Expression is a simple expression based on an oid, a
-comparison operator (!=, ==, <, <=, >, >=) and an integer value (see
-the examples below).  NAME is merely an arbitrary name of your
-choosing for administrative purposes only.  OPTIONS include the
-following possibilities:
+defines a MIB object to monitor.
+If the EXPRESSION condition holds (see below), then this will trigger
+the corresponding event, and either send a notification or apply
+a SET assignment (or both).
+Note that the event will only be triggered once, when the expression
+first matches.  This monitor entry will not fire again until the
+monitored condition first becomes false, and then matches again.
+NAME is an administrative name for this expression, and is used for
+indexing the \fCmteTriggerTable\fR (and related tables).
+.IP "\fIEXPRESSION\fR"
+There are three types of monitor expression supported by the Event MIB -
+existence, boolean and threshold tests.
 .RS
-.IP "-t"
-Use a threshold monitor instead of a boolean monitor.  This means that
-expression should be a low and high value.  If the given OID passes
-beyond the high value, a rising alarm will triggered.  A falling alarm
-will then be triggered after it falls below the low value.
-.IP "-r FREQUENCY"
-Monitors the given expression every FREQUENCY seconds.  The default is
-600 (10 minutes). 
-.IP "-u SECNAME"
-Use the SECNAME security name for scanning the local host.
-Specifically, this SECNAME must then be given access control rights
-via something like the "rouser" snmpd.conf token for this expression
-to be valid at all.  If not specified, it uses the default security
-name specified by the agentsecname snmpd.conf token.  Either the -u
-flag or a valid agentsecname token must be specified (and that name
-must be given proper access control rights via a "rouser" token).
-.IP "-o OID"
-Specifies additional object values to be delivered with in the
-resulting trap in addition to the normal trap objects.  This is useful
-for obtaining other columns in the table for the row that triggered
-the expression.  See the examples below for more details.
-.IP "-e EVENTNAME"
-Specifies an event name that describes what to do when the trigger is
-fired.  Currently, this must be the name of a notificationEvent event
-as described below.
-.RE
+.IP "OID | !OID | !=OID"
+defines an \fIexistence(0)\fR monitor test.
+A bare OID specifies a \fIpresent(0)\fR test, which will fire when
+(an instance of) the monitored OID is created.
+An expression of the form \fI!OID\fR specifies an \fIabsent(1)\fR test,
+which will fire when the monitored OID is delected.
+An expression of the form \fI!=OID\fR specifies a \fIchanged(2)\fR test,
+which will fire whenever the monitored value(s) change.
+.IP "OID OP VALUE"
+defines a \fIboolean(1)\fR monitor test.
+OP should be one of the defined
+comparison operators (!=, ==, <, <=, >, >=) and VALUE should be an
+integer value to compare against.
+.IP "OID MIN MAX [DMIN DMAX]"
+defines a \fIthreshold(1)\fR monitor test, and requires the \fI-t\fR
+option to be specified.
+.\"
+.\" XXX - Why ??
+.\"
+MIN and MAX are integer values, specifying lower and upper thresholds.
+If the value of the monitored OID falls below the lower threshold (MIN)
+or rises above the upper threshold (MAX), then the monitor entry will
+trigger the corresponding event.
 .IP
+Note that the rising threshold event will only be re-armed when
+the monitored value falls below the \fBlower\fR threshold (MIN),
+and similarly for the falling threshold event and MAX.
+.IP
+The optional parameters DMIN and DMAX configure a pair of
+similar threshold tests, but working with the \fIdelta\fR
+differences between successive sample values.
+.RE
+.IP "\fIOPTIONS\fR"
+There are various options to control the behaviour of the monitored
+expression.  These include:
+.RS
+.IP "-e EVENT"
+specifies the event to be invoked when this monitor entry is triggered.
+If this option is not given, the monitor entry will generate one
+of the standard notifications defined in the DISMAN-EVENT-MIB.
+.IP "-I"
+indicates that the monitored expression should be applied to the
+specified OID as a single instance.  By default, the OID will
+be treated as a wildcarded object, and the monitor expanded
+to cover all matching instances.
+.IP "-i OID"
+.IP "-o OID"
+define additional varbinds to be added to the notification payload
+when this monitor trigger fires.
+For a wildcarded expression, the suffix of the matched instance
+will be added to any OIDs specified using \fI-o\fR, while OIDs
+specified using \fI-i\fR will be treated as exact instances.
+If the \fI-I\fR flag is specified, then there is no difference
+between these two options.
+.IP
+See \fIstrictDisman\fR for details of the ordering of notification payloads.
+.IP "-r FREQUENCY"
+monitors the given expression every FREQUENCY seconds, rather
+than the default of 600s (10 minutes). 
+.IP "-t"
+specifies a threshold instead of a boolean monitor - see above.
+.IP "-u SECNAME"
+specifies a security name to use for scanning the local host,
+instead of the default \fIiquerySecName\fR.
+Once again, this user must be explicitly created and given
+suitable access rights.
+.RE
+.IP "\fIExamples\fR"
 The following example configuration checks the hrSWRunPerfTable table
 (listing running processes) for any process which is consuming > 10Mb
 of memory.  It performs this check every 600 seconds (the default).
@@ -715,25 +752,72 @@ Threshold example:
 monitor -t -r 15 -o prNames -o prErrMessage "process table" prErrorFlag 0 1
 .fi
 .RE
-.IP "notificationEvent NAME NOTIFICATION [[-w] OID_OBJECT ...]"
-This will create a notification event, which can be fired by attaching
-it to a monitor using a monitor's -e switch and an identical NAME
-field.  The NOTIFICATION to be sent should be the OID of a
-notification.  Additional objects can be included, and by default the
-suffix of the row/object being monitored will be appended to the
-object identifier unless it's told not to be a wild-card object by
-prefixing it with the -w switch.  EG, if you're monitoring the ifTable
-and you want your trap to include the ifDescr object for the row that
-was discovered, don't add the -w switch and the .INDEX field will be
-appended.  If the OID is fully qualified (EG, "sysContact.0") and no
-instance suffix should be appended to it then add a -w switch before
-it.  See the linkUpDownNotifications token below for example usage of
-this token to send the linkUp and linkDown traps.
+.IP "notificationEvent ENAME NOTIFICATION [-n] [-i OID | -o OID ]*"
+defines a notification event named ENAME.
+This can be triggered from a given \fImonitor\fR entry by specifying
+the option \fI-e ENAME\fR (see above).
+NOTIFICATION should be the OID of the NOTIFICATION-TYPE definition
+for the notification to be generated.
+.IP
+If the \fI-n\fR option is given, the notification payload will
+include the standard varbinds as specified in the OBJECTS clause
+of the notification definition.  Otherwise, these varbinds must
+be listed explicitly (either here or in the corresponding
+\fImonitor\fR directive).
+This option must come \fBafter\fR the NOTIFICATION OID
+(and the relevant MIB file must be available and loaded by the agent).
+.IP
+The \fI-i OID\fR and \fI-o OID\fR options specify additional
+varbinds to be appended to the notification payload, after the
+standard list.
+If the monitor entry that triggered this event involved a
+wildcarded expression, the suffix of the matched instance
+will be added to any OIDs specified using \fI-o\fR, while OIDs
+specified using \fI-i\fR will be treated as exact instances.
+If the \fI-I\fR flag was specified to the \fImonitor\fR directive,
+then there is no difference between these two options.
+.IP "setEvent ENAME [-I] OID = VALUE "
+defines a set event named ENAME, assigning the (integer) VALUE
+to the specified OID.
+This can be triggered from a given \fImonitor\fR entry by specifying
+the option \fI-e ENAME\fR (see above).
+.IP
+If the monitor entry that triggered this event involved a
+wildcarded expression, the suffix of the matched instance
+will normally be added to the OID.
+If the \fI-I\fR flag was specified to either of the
+\fImonitor\fR or \fIsetEvent\fR directives, the
+specified OID will be regarded as an exact single instance.
+.IP "strictDisman [yes|no]"
+The definition of SNMP notifications states that the
+varbinds defined in the OBJECT clause should come first
+(in the order specified), followed by any "extra" varbinds
+that the notification generator feels might be useful.
+The most natural approach would be to associate these
+mandatory varbinds with the \fInotificationEvent\fR entry,
+and append any varbinds associated with the monitor entry
+that triggered the notification to the end of this list.
+This is the default behaviour of the Net-SNMP Event MIB implementation.
+.IP
+Unfortunately, the DisMan Event MIB specifications actually
+state that the trigger-related varbinds should come \fBfirst\fR,
+followed by the event-related ones.  Specifying this directive
+restores this strictly-correct (but inappropriate) behaviour.
+.RS
+.IP "Note:"
+This may result in generating invalid notifications if
+the \fInotificationEvent -n\fR flag is used together
+with \fImonitor -o\fR (or \fI-i\fR) varbind options.
+.RE
+.IP
+If no \fImonitor\fR entries specify payload varbinds,
+then the setting of this directive is irrelevant.
 .IP "linkUpDownNotifications yes"
-This will make the DISMAN-EVENT-MIB support watch the ifTable to
-determine when a network interface is taken up or down.  When this
-happens, a linkUp or linkDown notification will be triggered.  This is
-exactly equivalent to doing:
+will configure the Event MIB tables to monitor the \fCifTable\fR
+for network interfaces being taken up or down, and triggering
+a \fIlinkUp\fR or \fIlinkDown\fR notification as appropriate.
+.IP
+This is exactly equivalent to the configuration:
 .RS
 .IP
 .nf
@@ -745,13 +829,11 @@ monitor  -r 60 -e linkDownTrap "Generate linkDown" ifOperStatus == 2
 .fi
 .RE
 .IP "defaultMonitors yes"
-By default, the agent and the DISMAN-EVENT-MIB support do nothing
-until configured.  Typically people wish to watch a bunch of tables
-within the UCD-SNMP-MIB which are designed specifically for reporting
-problems.  If the "defaultMonitors yes" line is put into the
-snmpd.conf file (which must be accompanied by an appropriate
-agentSecName line and a rouser line), the following monitoring
-conditions will be installed:
+will configure the Event MIB tables to monitor the various
+\fCUCD-SNMP-MIB\fR tables for problems (as indicated by
+the appropriate \fCxxErrFlag\fR column objects).
+.IP
+This is exactly equivalent to the configuration:
 .RS
 .IP
 .nf
@@ -763,6 +845,10 @@ monitor	-o laNames -o laErrMessage  "laTable" laErrorFlag != 0
 monitor	-o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
 .fi
 .RE
+.PP
+In both these latter cases, the snmpd.conf must also contain a
+\fIiquerySecName\fR directive, together with a corresponding
+\fIcreateUser\fR entry and suitable access control configuration.
 .SH "EXTENDING AGENT FUNCTIONALITY"
 One of the first distinguishing features of the original UCD suite was
 the ability to extend the functionality of the agent - not just by
