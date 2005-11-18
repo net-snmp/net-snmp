@@ -1860,6 +1860,7 @@ read_config_read_memory(int type, char *readfrom,
         *len = sizeof(int);
         return readfrom;
 
+    case ASN_COUNTER:
     case ASN_TIMETICKS:
     case ASN_UNSIGNED:
         if (*len < sizeof(unsigned int))
