@@ -537,11 +537,13 @@ sub new {
 
    SNMP::initMib($SNMP::auto_init_mib); # ensures that *some* mib is loaded
 
-   $this->{UseLongNames} ||= $SNMP::use_long_names;
-   $this->{UseSprintValue} ||= $SNMP::use_sprint_value;
-   $this->{BestGuess} ||= $SNMP::best_guess;
-   $this->{UseEnums} ||= $SNMP::use_enums;
-   $this->{UseNumeric} ||= $SNMP::use_numeric;
+   $this->{UseLongNames} = $SNMP::use_long_names 
+       unless exists $this->{UseLongNames};
+   $this->{UseSprintValue} = $SNMP::use_sprint_value 
+       unless exists $this->{UseSprintValue};
+   $this->{BestGuess} = $SNMP::best_guess unless exists $this->{BestGuess};
+   $this->{UseEnums} = $SNMP::use_enums unless exists $this->{UseEnums};
+   $this->{UseNumeric} = $SNMP::use_numeric unless exists $this->{UseNumeric};
 
    # Force UseLongNames if UseNumeric is in use.
    $this->{UseLongNames}++  if $this->{UseNumeric};
@@ -563,11 +565,13 @@ sub update {
 
    @$this{keys %new_fields} = values %new_fields;
 
-   $this->{UseLongNames} ||= $SNMP::use_long_names;
-   $this->{UseSprintValue} ||= $SNMP::use_sprint_value;
-   $this->{BestGuess} ||= $SNMP::best_guess;
-   $this->{UseEnums} ||= $SNMP::use_enums;
-   $this->{UseNumeric} ||= $SNMP::use_numeric;
+   $this->{UseLongNames} = $SNMP::use_long_names 
+       unless exists $this->{UseLongNames};
+   $this->{UseSprintValue} = $SNMP::use_sprint_value 
+       unless exists $this->{UseSprintValue};
+   $this->{BestGuess} = $SNMP::best_guess unless exists $this->{BestGuess};
+   $this->{UseEnums} = $SNMP::use_enums unless exists $this->{UseEnums};
+   $this->{UseNumeric} = $SNMP::use_numeric unless exists $this->{UseNumeric};
 
    # Force UseLongNames if UseNumeric is in use.
    $this->{UseLongNames}++  if $this->{UseNumeric};
