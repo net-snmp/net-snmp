@@ -222,6 +222,7 @@ var_hrdevice(struct variable *vp,
 {
     int             dev_idx, type;
     oid            *oid_p;
+    char           *tmp_str;
     static char     string[1024];
 
     dev_idx =
@@ -240,9 +241,9 @@ var_hrdevice(struct variable *vp,
         *var_len = sizeof(device_type_id);
         return (u_char *) device_type_id;
     case HRDEV_DESCR:
-        if (device_descr[type] != NULL) {
-            strncpy(string, ((*device_descr[type]) (dev_idx)),
-                    sizeof(string)-1);
+        if ((device_descr[type] != NULL) &&
+            (NULL!=(tmp_str=((*device_descr[type])(dev_idx))))) {
+            strncpy(string, tmp_str, sizeof(string)-1);
             string[ sizeof(string)-1] = 0;
         } else
 #if NO_DUMMY_VALUES
