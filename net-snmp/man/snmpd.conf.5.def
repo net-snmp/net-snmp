@@ -3,34 +3,49 @@
 .SH NAME
 snmpd.conf - configuration file for the Net-SNMP SNMP agent
 .SH DESCRIPTION
-.B snmpd.conf
-is the configuration file which defines how the Net-SNMP SNMP agent
-operates.  These files may contain any of the directives found in the
-.B DIRECTIVES
-section below.  If this file is not found (or does not contain any
-access control directives), the agent will run but will not respond
-to any requests.
-.SH PLEASE READ FIRST
-First, make sure you have read the
+The Net-SNMP agent uses one or more configuration files
+to control its operation and the management information
+provided.
+These files (\fBsnmpd.conf\fR and \fBsnmpd.local.conf\fR)
+can be located in one of several locations, as described in the
 .I snmp_config(5) 
-manual page that describes how the Net-SNMP configuration files
-operate, where they are located and how they all work together.
+manual page.
 .PP
-Also, you might consider looking into the
+The (perl) application
 .B snmpconf
-application (perl script) which can help you build an snmpd.conf file
-by prompting you for information.  You should try it.  Really.  Go
-ahead.  Right now.  Run:
+can be used to generate configuration files for the
+most common agent requirements.  See the
+.I snmpconf(1)
+manual page for more information, or try running the
+command:
 .RS
 .IP "snmpconf -g basic_setup"
 .RE
 .PP
-to get you started. See the
-.I snmpconf(1)
-manual page for more information.
+There are a large number of directives that can be specified,
+but these mostly fall into four distinct categories:
+.IP \(bu
+those controlling who can access the agent
+.IP \(bu
+those configuring the information that is supplied by the agent
+.IP \(bu
+those controlling active monitoring of the local system
+.IP \(bu
+those concerned with extending the functionality of the agent.
+.PP
+Some directives don't fall naturally into any of these four
+categories, but this covers the majority of the contents of
+a typical
+.B snmpd.conf
+file.
+A full list of recognised directives can be obtained by running
+the command:
+.RS
+.IP "snmpd -H"
+.RE
 .SH AGENT BEHAVIOUR
-Most configuration directives are concerned with the MIB information
-supplied by the agent, but there are a handful of directives that
+Although most configuration directives are concerned with the MIB
+information supplied by the agent, there are a handful of directives that
 control the behaviour of \fIsnmpd\fR considered simply as a daemon
 providing a network service.
 .IP "agentaddress [<transport-specifier>:]<transport-address>[,...]"
