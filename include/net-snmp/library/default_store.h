@@ -80,6 +80,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_IGNORE_NO_COMMUNITY 34	/* don't complain if no community is specified in the command arguments */
 #define NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD  35 /* don't load persistent file */
 #define NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE  36 /* don't save persistent file */
+#define NETSNMP_DS_LIB_APPEND_LOGFILES     37 /* append, don't overwrite, log files */
 
     /*
      * library integers 
