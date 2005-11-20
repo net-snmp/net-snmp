@@ -203,6 +203,8 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
     static int      bsize = 0, vmbsize = 0;
     char           *b;
     time_t          now;
+    unsigned long long cusell = 0, cicell = 0, csysll = 0, cidell = 0,
+        ciowll = 0, cirqll = 0, csoftll = 0, ctll = 0, itotll = 0, i1ll = 0;
 
     time(&now);
     if (cache_time + CACHE_TIMEOUT < now) {
@@ -241,16 +243,25 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
     }
 
     *itot = 0;
-    *i1 = 1;                /* ensure assert below will fail if the sscanf bombs */
+    *i1 = 1;
     b = strstr(buff, "cpu ");
     if (b) {
 	if (!has_cpu_26 ||
-		sscanf(b, "cpu  %lu %lu %lu %lu %lu %lu %lu", cuse, cice, csys,
-		                        cide, ciow, cirq, csoft) != 7) {
+            sscanf(b, "cpu  %llu %llu %llu %llu %llu %llu %llu", &cusell,
+                   &cicell, &csysll, &cidell, &ciowll, &cirqll, &csoftll) != 7) {
 	    has_cpu_26 = 0;
-	    sscanf(b, "cpu  %lu %lu %lu %lu", cuse, cice, csys, cide);
+	    sscanf(b, "cpu  %llu %llu %llu %llu", &cusell, &cicell, &csysll,
+                   &cidell);
 	    *ciow = *cirq = *csoft = 0;
-	}
+	} else {
+  	    *ciow = (unsigned long)ciowll;
+  	    *cirq = (unsigned long)cirqll;
+  	    *csoft = (unsigned long)csoftll;
+ 	}
+	*cuse = (unsigned long)cusell;
+	*cice = (unsigned long)cicell;
+	*csys = (unsigned long)csysll;
+	*cide = (unsigned long)cidell;
     }
     else {
 	if (first)
@@ -310,16 +321,21 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
 	}
     }
     b = strstr(buff, "intr ");
-    if (b)
-	sscanf(b, "intr %u %u", itot, i1);
+    if (b) {
+	sscanf(b, "intr %llu %llu", &itotll, &i1ll);
+        *itot = (unsigned)itotll;
+        *i1 = (unsigned)i1ll;
+    }
     else {
 	if (first)
 	    snmp_log(LOG_ERR, "No intr line in %s\n", STAT_FILE);
 	*itot = 0;
     }
     b = strstr(buff, "ctxt ");
-    if (b)
-	sscanf(b, "ctxt %u", ct);
+    if (b) {
+	sscanf(b, "ctxt %llu", &ctll);
+        *ct = (unsigned long)ctll;
+    }
     else {
 	if (first)
 	    snmp_log(LOG_ERR, "No ctxt line in %s\n", STAT_FILE);
@@ -403,9 +419,9 @@ vmstat(int iindex)
     case cpurawsoft:
 	return cpu_softirq;
     case rawiosent:
-	return pgpgin*2;
-    case rawioreceive:
 	return pgpgout*2;
+    case rawioreceive:
+	return pgpgin*2;
     case rawswapin:
 	return pswpin;
     case rawswapout:

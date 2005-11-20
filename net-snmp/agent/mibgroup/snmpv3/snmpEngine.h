@@ -27,6 +27,7 @@ config_add_mib(SNMP-FRAMEWORK-MIB)
      * function definitions 
      */
      extern void     init_snmpEngine(void);
+     extern void register_snmpEngine_scalars_context(const char *contextName);
      extern FindVarMethod var_snmpEngine;
 
 #endif                          /* _MIBGROUP_SNMPENGINE_H */

@@ -137,11 +137,30 @@ _snarf_arp_entry(netsnmp_arp_entry * arp_entry,
                  netsnmp_container * container)
 {
     inetNetToMediaTable_rowreq_ctx *rowreq_ctx;
+    int inetAddressType;
 
     DEBUGTRACE;
 
     netsnmp_assert(NULL != arp_entry);
     netsnmp_assert(NULL != container);
+
+    /*
+     * convert the addr len to an inetAddressType
+     */
+    switch(arp_entry->arp_ipaddress_len) {
+        case 4:
+            inetAddressType = INETADDRESSTYPE_IPV4;
+            break;
+            
+        case 6:
+            inetAddressType = INETADDRESSTYPE_IPV6;
+            break;
+
+        default:
+            netsnmp_access_arp_entry_free(arp_entry);
+            snmp_log(LOG_ERR, "unsupported address type\n");
+            return;
+    }
 
     /*
      * allocate an row context and set the index(es), then add it to
@@ -150,8 +169,7 @@ _snarf_arp_entry(netsnmp_arp_entry * arp_entry,
     rowreq_ctx = inetNetToMediaTable_allocate_rowreq_ctx(arp_entry);
     if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS == inetNetToMediaTable_indexes_set
-         (rowreq_ctx, rowreq_ctx->data->if_index,
-          rowreq_ctx->data->arp_ipaddress_len,
+         (rowreq_ctx, rowreq_ctx->data->if_index, inetAddressType,
           rowreq_ctx->data->arp_ipaddress,
           rowreq_ctx->data->arp_ipaddress_len))) {
         CONTAINER_INSERT(container, rowreq_ctx);
@@ -198,7 +216,6 @@ _snarf_arp_entry(netsnmp_arp_entry * arp_entry,
 int
 inetNetToMediaTable_cache_load(netsnmp_container * container)
 {
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx;
     netsnmp_container *arp_container;
 
     DEBUGMSGTL(("verbose:inetNetToMediaTable:inetNetToMediaTable_cache_load", "called\n"));

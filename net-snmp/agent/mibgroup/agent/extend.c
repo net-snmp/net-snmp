@@ -24,7 +24,7 @@ typedef struct extend_registration_block_s {
     netsnmp_table_data *dinfo;
     oid                *root_oid;
     size_t              oid_len;
-    int                 num_entries;
+    long                num_entries;
     netsnmp_extend     *ehead;
     struct extend_registration_block_s *next;
 } extend_registration_block;
@@ -835,8 +835,17 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
 
             case COLUMN_EXTCFG_RUNTYPE:
                 i = *request->requestvb->val.integer;
-                if ( i == 3 )
+                switch (i) {
+                case 1:
+                    extension->flags &= ~NS_EXTEND_FLAGS_WRITEABLE;
+                    break;
+                case 2:
+                    extension->flags |=  NS_EXTEND_FLAGS_WRITEABLE;
+                    break;
+                case 3:
                     (void)netsnmp_cache_check_and_reload( extension->cache );
+                    break;
+                }
                 break;
 
             case COLUMN_EXTCFG_EXECTYPE:

@@ -202,48 +202,48 @@ date_n_time(time_t * when, size_t * length)
 
 
 time_t
-ctime_to_timet(char *string)
+ctime_to_timet(char *str)
 {
     struct tm       tm;
 
-    if (strlen(string) < 24)
+    if (strlen(str) < 24)
         return 0;
 
     /*
      * Month 
      */
-    if (!strncmp(string + 4, "Jan", 3))
+    if (!strncmp(str + 4, "Jan", 3))
         tm.tm_mon = 0;
-    else if (!strncmp(string + 4, "Feb", 3))
+    else if (!strncmp(str + 4, "Feb", 3))
         tm.tm_mon = 1;
-    else if (!strncmp(string + 4, "Mar", 3))
+    else if (!strncmp(str + 4, "Mar", 3))
         tm.tm_mon = 2;
-    else if (!strncmp(string + 4, "Apr", 3))
+    else if (!strncmp(str + 4, "Apr", 3))
         tm.tm_mon = 3;
-    else if (!strncmp(string + 4, "May", 3))
+    else if (!strncmp(str + 4, "May", 3))
         tm.tm_mon = 4;
-    else if (!strncmp(string + 4, "Jun", 3))
+    else if (!strncmp(str + 4, "Jun", 3))
         tm.tm_mon = 5;
-    else if (!strncmp(string + 4, "Jul", 3))
+    else if (!strncmp(str + 4, "Jul", 3))
         tm.tm_mon = 6;
-    else if (!strncmp(string + 4, "Aug", 3))
+    else if (!strncmp(str + 4, "Aug", 3))
         tm.tm_mon = 7;
-    else if (!strncmp(string + 4, "Sep", 3))
+    else if (!strncmp(str + 4, "Sep", 3))
         tm.tm_mon = 8;
-    else if (!strncmp(string + 4, "Oct", 3))
+    else if (!strncmp(str + 4, "Oct", 3))
         tm.tm_mon = 9;
-    else if (!strncmp(string + 4, "Nov", 3))
+    else if (!strncmp(str + 4, "Nov", 3))
         tm.tm_mon = 10;
-    else if (!strncmp(string + 4, "Dec", 3))
+    else if (!strncmp(str + 4, "Dec", 3))
         tm.tm_mon = 11;
     else
         return 0;
 
-    tm.tm_mday = atoi(string + 8);
-    tm.tm_hour = atoi(string + 11);
-    tm.tm_min = atoi(string + 14);
-    tm.tm_sec = atoi(string + 17);
-    tm.tm_year = atoi(string + 20) - 1900;
+    tm.tm_mday = atoi(str + 8);
+    tm.tm_hour = atoi(str + 11);
+    tm.tm_min = atoi(str + 14);
+    tm.tm_sec = atoi(str + 17);
+    tm.tm_year = atoi(str + 20) - 1900;
 
     /*
      *  Cope with timezone and DST

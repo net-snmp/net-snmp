@@ -592,8 +592,11 @@ var_hrswrun(struct variable * vp,
     #endif
 #elif defined(linux)
         sprintf(string, "/proc/%d/status", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            strcpy(string, "<exited>");
+            *var_len = strlen(string);
+            return (u_char *) string;
+        }
         fgets(buf, sizeof(buf), fp);    /* Name: process name */
         cp = buf;
         while (*cp != ':')
@@ -604,7 +607,8 @@ var_hrswrun(struct variable * vp,
         strcpy(string, cp);
         fclose(fp);
 #elif defined(cygwin)
-        if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED))
+        /* if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED)) */
+        if (lowproc.process_state & PID_EXITED || (lowproc.exitcode & ~0xffff))
             strcpy(string, "<defunct>");
         else if (lowproc.ppid) {
             cygwin_conv_to_posix_path(lowproc.progname, string);
@@ -701,8 +705,11 @@ var_hrswrun(struct variable * vp,
     #endif
 #elif defined(linux)
         sprintf(string, "/proc/%d/cmdline", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            strcpy(string, "<exited>");
+            *var_len = strlen(string);
+            return (u_char *) string;
+        }
         if (fgets(buf, sizeof(buf) - 1, fp))    /* argv[0] '\0' argv[1] '\0' .... */
             strcpy(string, buf);
         else {
@@ -725,7 +732,8 @@ var_hrswrun(struct variable * vp,
         }
         fclose(fp);
 #elif defined(cygwin)
-        if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED))
+        /* if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED)) */
+        if (lowproc.process_state & PID_EXITED || (lowproc.exitcode & ~0xffff))
             strcpy(string, "<defunct>");
         else if (lowproc.ppid)
             cygwin_conv_to_posix_path(lowproc.progname, string);
@@ -801,8 +809,11 @@ var_hrswrun(struct variable * vp,
         }
 #elif defined(linux)
         sprintf(string, "/proc/%d/cmdline", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            strcpy(string, "");
+            *var_len = 0;
+            return (u_char *) string;
+        }
         memset(buf, 0, sizeof(buf));
 
         /*
@@ -864,7 +875,8 @@ var_hrswrun(struct variable * vp,
 #if defined(cygwin)
         if (lowproc.process_state & PID_STOPPED)
             long_return = 3;    /* notRunnable */
-        else if (lowproc.process_state & PID_ZOMBIE)
+        /* else if (lowproc.process_state & PID_ZOMBIE) */
+        else if (lowproc.exitcode & ~0xffff)
             long_return = 4;    /* invalid */
         else
             long_return = 1;    /* running */
@@ -997,8 +1009,10 @@ var_hrswrun(struct variable * vp,
     #endif
 #elif defined(linux)
         sprintf(string, "/proc/%d/stat", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            long_return = 0;
+            return (u_char *) & long_return;
+        }
         fgets(buf, sizeof(buf), fp);
         cp = buf;
         for (i = 0; i < 13; ++i) {      /* skip 13 fields */
@@ -1062,7 +1076,7 @@ var_hrswrun(struct variable * vp,
 #else
         long_return = proc_buf->p_swrss;
 #endif
-#elif HAVE_KVM_GETPROCS
+#elif HAVE_KVM_GETPROCS && !defined(darwin8)
 #if defined(freebsd3) && !defined(darwin)
         long_return =
     #if defined(freebsd5)
@@ -1078,8 +1092,10 @@ var_hrswrun(struct variable * vp,
 #endif
 #elif defined(linux)
         sprintf(string, "/proc/%d/stat", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            long_return = 0;
+            return (u_char *) & long_return;
+        }
         fgets(buf, sizeof(buf), fp);
         cp = buf;
         for (i = 0; i < 23; ++i) {      /* skip 23 fields */
@@ -1267,7 +1283,7 @@ Init_HR_SWRun(void)
     pstat_getproc(proc_table, sizeof(struct pst_status), nproc, 0);
 
 #elif defined(solaris2)
-    if (!getKstatInt("unix", "system_misc", "nproc", &nproc)) {
+    if (getKstatInt("unix", "system_misc", "nproc", &nproc)) {
         current_proc_entry = nproc + 1;
         return;
     }

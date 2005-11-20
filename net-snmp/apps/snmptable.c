@@ -192,7 +192,7 @@ optProc(int argc, char *const *argv, int opt)
 			max_getbulk = atoi(argv[optind]);
 			if (max_getbulk == 0) {
 			    usage();
-			    fprintf(stderr, "Bad -Cc option: %s\n", 
+			    fprintf(stderr, "Bad -Cr option: %s\n", 
 				    argv[optind]);
 			    exit(1);
 			}
