@@ -41,14 +41,16 @@ static const char *rcsid = "$OpenBSD: inet.c,v 1.92 2005/02/10 14:25:08 itojun E
 #endif
 
 #include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #if HAVE_WINSOCK_H
-#include <winsock.h>
-#else
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include "winstub.h"
+#endif
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #if HAVE_NETDB_H
@@ -60,6 +62,8 @@ static const char *rcsid = "$OpenBSD: inet.c,v 1.92 2005/02/10 14:25:08 itojun E
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+
+#include <net-snmp/net-snmp-includes.h>
 
 #include "main.h"
 #include "netstat.h"
