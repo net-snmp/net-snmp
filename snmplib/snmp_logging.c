@@ -353,6 +353,9 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         if (logh) {
             logh->pri_max = pri_max;
             logh->token   = strdup(optarg);
+            netsnmp_enable_filelog(logh,
+                                   netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                                          NETSNMP_DS_LIB_APPEND_LOGFILES));
 	}
         break;
 
