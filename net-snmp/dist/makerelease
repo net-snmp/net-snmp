@@ -46,7 +46,7 @@ System("version:commit",
 #
 # configure and build and test it
 #
-System("build:configure","./configure --cache=config.cache --with-defaults '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=UDPIPv6 TCPIPv6 IPX' --enable-embedded-perl --enable-shared");
+System("build:configure","./configure --cache=config.cache --with-defaults '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=IPX' --enable-ipv6 --enable-embedded-perl --enable-shared");
 System("build:make","make");
 System("build:test","make test");
 
