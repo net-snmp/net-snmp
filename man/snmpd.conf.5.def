@@ -367,8 +367,8 @@ interfaces where the agent fails to determine this information correctly.
 TYPE is a type value as given in the IANAifType-MIB.
 .SS Host Resources Group
 This requires that the agent was built with support for the
-\fIhost\fR module (which is now included as part of the
-default build configuration for the most recent distribution).
+\fIhost\fR module (which is now included as part of the default build 
+configuration on the major supported platforms).
 .\"
 .\" XXX - .IP "scandisk STRING"
 .\"
