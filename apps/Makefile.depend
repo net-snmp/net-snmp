@@ -1643,14 +1643,15 @@ ipe./snmpnetstat/main.lo: ../include/net-snmp/system/linux.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/system/sysv.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/system/generic.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/machine/generic.h
-ipe./snmpnetstat/main.lo: ../include/net-snmp/utilities.h
-ipe./snmpnetstat/main.lo: ../include/net-snmp/types.h 
+ipe./snmpnetstat/main.lo: ../include/net-snmp/net-snmp-includes.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/definitions.h
+ipe./snmpnetstat/main.lo: ../include/net-snmp/types.h 
 ipe./snmpnetstat/main.lo: ../include/net-snmp/library/snmp_api.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/library/asn1.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/library/snmp_impl.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/library/snmp.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/library/snmp-tc.h
+ipe./snmpnetstat/main.lo: ../include/net-snmp/utilities.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/library/snmp_client.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/library/system.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/library/tools.h
@@ -1670,7 +1671,6 @@ ipe./snmpnetstat/main.lo: ../include/net-snmp/library/container_iterator.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/library/container.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/library/snmp_assert.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/version.h
-ipe./snmpnetstat/main.lo: ../include/net-snmp/net-snmp-includes.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/session_api.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/library/snmp_transport.h
 ipe./snmpnetstat/main.lo: ../include/net-snmp/library/snmpCallbackDomain.h
