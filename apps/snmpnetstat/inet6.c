@@ -79,7 +79,7 @@ extern int WSAAPI getnameinfo(const struct sockaddr*,socklen_t,char*,DWORD, char
 #endif
 
 #include "main.h"
-#include "netstat.h""
+#include "netstat.h"
 
 struct stat_table {
     int             entry;      /* entry number in table */
