@@ -59,19 +59,27 @@ static char sccsid[] = "@(#)inet.c	8.4 (Berkeley) 4/20/94";
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include "winstub.h"
+
+extern const char *inet_ntop(int, const void*, char*, size_t);
+
+#ifdef cygwin
+extern int WSAAPI getnameinfo(const struct sockaddr*,socklen_t,char*,DWORD, char*,DWORD,int);
 #endif
+
+#else                  /* WIN32 */
+#if HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#endif                  /* WIN32 */
 
 #include <net-snmp/net-snmp-includes.h>
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_NETDB_H
-#include <netdb.h>
-#endif
 
 #include "main.h"
-#include "netstat.h"
+#include "netstat.h""
 
 struct stat_table {
     int             entry;      /* entry number in table */
