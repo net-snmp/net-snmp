@@ -323,10 +323,19 @@ WAITFORORDIE() {
     ECHO "."
 }
 
-# CHECKFILE "grep string" ["file"]
+# CHECKORDIE "grep string" ["file"] .. FAIL if "grep string" is *not* found
 CHECKORDIE() {
     CHECKFILE "$2" "$1"
     if [ "$snmp_last_test_result" = 0 ] ; then
+        FINISHED
+    fi
+    ECHO "."
+}
+
+# CHECKANDDIE "grep string" ["file"] .. FAIL if "grep string" *is* found
+CHECKANDDIE() {
+    CHECKFILE "$2" "$1"
+    if [ "$snmp_last_test_result" != 0 ] ; then
         FINISHED
     fi
     ECHO "."
