@@ -335,6 +335,7 @@ CHECKORDIE() {
 # CHECKANDDIE "grep string" ["file"] .. FAIL if "grep string" *is* found
 CHECKANDDIE() {
     CHECKFILE "$2" "$1"
+    EXPECTRESULT 0 # make sure return_value gets set correctly
     if [ "$snmp_last_test_result" != 0 ] ; then
         FINISHED
     fi
