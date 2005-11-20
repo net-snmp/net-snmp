@@ -79,8 +79,7 @@ non-predictable values - a (pseudo-)random number and the current
 uptime in seconds. This is the recommended approach. However the
 capacity exists to define the engineID in other ways:
 .IP "engineID STRING"
-configures the agent to use the specified engine ID
-(as a list of hexadecimal octet values).
+specifies that the engineID should be built from the given text STRING.
 .IP "engineIDType 1|2|3"
 specifies that the engineID should be built from the IPv4 address (1),
 IPv6 address (2) or MAC address (3).  Note that changing the IP address
