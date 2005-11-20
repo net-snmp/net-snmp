@@ -422,7 +422,7 @@ main(int argc, char *argv[])
     char            options[128] = "aAc:CdD::fhHI:l:L:m:M:n:p:P:qrsS:UvV-:";
     int             arg, i, ret;
     int             dont_fork = 0, do_help = 0;
-    int             dont_zero_log = 0, log_set = 0;
+    int             log_set = 0;
     int             uid = 0, gid = 0;
     int             agent_mode = -1;
     char           *cptr, **argvptr;
@@ -541,7 +541,8 @@ main(int argc, char *argv[])
             break;
 
         case 'A':
-            dont_zero_log = 1;
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_LIB_APPEND_LOGFILES, 1);
             break;
 
         case 'c':
@@ -609,7 +610,9 @@ main(int argc, char *argv[])
                             argv[0], PATH_MAX);
                     exit(1);
                 }
-                snmp_enable_filelog(optarg, dont_zero_log);
+                snmp_enable_filelog(optarg,
+                                    netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                                           NETSNMP_DS_LIB_APPEND_LOGFILES));
                 log_set = 1;
             } else {
                 usage(argv[0]);
@@ -835,7 +838,9 @@ main(int argc, char *argv[])
 
 #ifdef LOGFILE
     if (0 == log_set)
-        snmp_enable_filelog(LOGFILE, dont_zero_log);
+        snmp_enable_filelog(LOGFILE,
+                            netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                                   NETSNMP_DS_LIB_APPEND_LOGFILES));
 #endif
 
     /*
