@@ -47,6 +47,12 @@ environment variable.
 .IP "persistentDir directory"
 The directory where snmpd and snmptrapd stores their persistent data
 files.
+.IP "noPersistentLoad (1|yes|true|0|no|false)"
+Turns off loading the persistent configuration file. Breaks persistency
+(e.g. SNMPv3), so use with care. Default is false.
+.IP "noPersistentSave (1|yes|true|0|no|false)"
+Turns off saving the persistent configuration file. Breaks persistency
+(e.g. SNMPv3), so use with care. Default is false.
 .IP "tempFilePattern pattern"
 The file pattern used by snmptrapd to create temporary files.  Example:
 /tmp/snmpdXXXXXX.  Used by mkstemp() and mktemp() functions.

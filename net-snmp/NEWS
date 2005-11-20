@@ -23,6 +23,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
      - new helper for ascii file based scalar integers (think Linux /proc/)
      - new utilities for dealing with files
      - new utilities for parsing text files
+     - granular config/persistent file disablement (noPersistentLoad and
+       noPersistentSave snmp.conf tokens)
 
     mib2c:
       - mib2c.mfd.conf now generates code for persistence row storage
