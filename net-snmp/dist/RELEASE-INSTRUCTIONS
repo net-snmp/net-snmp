@@ -41,24 +41,37 @@ TESTING:
 
   2) [This step is currently only for the 5.x versions]
 
-     Change the libtool version information in Makefile.top.
+     Change the libtool version information in Makefile.top.  This may
+     could be automated in the future, but libtool doesn't like you to
+     match your project version with the library version so they have
+     cases where the version numbers can't match.  Libtool uses 3
+     identifiers: LIBCURRENT, LIBAGE and LIBREVISION. These WILL NOT
+     exactly match up with the Net-SNMP release numbers, and they ARE NOT
+     directly used to generate the shared library version numbers.
 
-      - If any interfaces/structures have been removed or changed since the
-        last update, increment current, and set age and revision to 0. Stop!
+     The shared library version number will be:
 
-      - If any interfaces have been added since the last public release, then
-        increment current and age, and set revision to 0. Stop!
+        libxxx.so.(CURRENT-AGE).AGE.REVISION
 
-      - If the source code has changed at all since the last update,
-        then increment revision (c:r:a becomes c:r+1:a).
+     *** THIS MEANS YOU MAY NEED TO *DECREMENT* CURRENT FOR A NEW RELEASE ***
 
-      Note: maintenance releases (eg 5.2.x) should never have changes
-            that would require current to be incremented.
+         examples:
+
+            release    C.A.R   library name
+            -------   -------  ---------------
+             5.0.9     5.0.9   libxxx.so.5.0.9
+             5.1.2     6.1.2   libxxx.so.5.1.2
+             5.2.8     7.2.8   libxxx.so.5.2.8
+             6.0.0     6.0.0   libxxx.so.6.0.0 (Note: C is decremented!)
 
      Update these variables now, so that when you run
      make in a second to test things you can spot libtool yelling
      about improper numbering before you make the release and not
      after you've uploaded the tar ball :-/
+
+     When you've done this, run 'make clean; ./config.status; cd
+     snmplib; make' a minimum to check the version number in
+     snmplib/.libs/ to see if it matches the release number.
 
   3) Change the configure script version number.  This isn't
       autochanged either.  The line to change looks like this:
@@ -74,7 +87,7 @@ TESTING:
 
       $ ./configure  '--with-mib-modules=host examples examples/example    \
                               testhandler smux Rmon disman/event-mib'    \
-                   '--with-transports=IPX' --enable-ipv6              \
+                   '--with-transports=UDPIPv6 TCPIPv6 IPX'               \
                    --enable-embedded-perl --enable-shared
 
       Alternatively, try using the new scripts in the dist directory, which
