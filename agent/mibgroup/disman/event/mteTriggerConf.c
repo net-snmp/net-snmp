@@ -139,7 +139,7 @@ parse_mteMonitor(const char *token, char *line)
     char   buf[  SPRINT_MAX_LEN];
     char   tname[MTE_STR1_LEN+1];
     char  *cp;
-    long   test = MTE_TRIGGER_BOOLEAN;
+    long   test = 0;
 
     char   ename[MTE_STR1_LEN+1];
     long   flags = MTE_TRIGGER_FLAG_ENABLED |
@@ -184,7 +184,7 @@ parse_mteMonitor(const char *token, char *line)
         if ( buf[0] == '-' ) {
             switch (buf[1]) {
             case 't':
-                test = MTE_TRIGGER_THRESHOLD;
+                /* No longer necessary */
                 break;
             case 'd':
             case 'e':
@@ -239,18 +239,58 @@ parse_mteMonitor(const char *token, char *line)
                 tname[0] = '_';
                 tname[1] = '_';   /* Placeholder */
                 memcpy( tname+2, buf, MTE_STR1_LEN-2 );
+            } else {
+                /*
+                 * This marks the beginning of the monitor expression,
+                 *   so we don't need to scan any further
+                 */
+                break;
             }
         }
         if (!cp)
             break;
     }
+
     /*
-     * Both boolean and threshold tests end with the comparison value(s).
-     * Existence tests end with the monitored OID. If the final token
-     * isn't numeric, then this is (probably!) an existence test.
+     * Now let's examine the expression to determine the type of
+     *   monitor being configured.  There are four possible forms:
+     *     != OID  (or ! OID)     (existence test)
+     *        OID                 (existence test)
+     *        OID  op  VALUE      (boolean   test)
+     *        OID  MIN MAX        (threshold test)
      */
-    if ( !isdigit(buf[0]))
-        test = MTE_TRIGGER_EXISTENCE;
+    if ( *buf == '!' ) {
+       /*
+        * If the expression starts with '!=' or '!', then
+        *  it must be the first style of existence test.
+        */
+       test = MTE_TRIGGER_EXISTENCE;
+    } else {
+       /*
+        * Otherwise the first token is the OID to be monitored.
+        *   Skip it and look at the next token (if any).
+        */
+        cp = copy_nword(cp,   buf, SPRINT_MAX_LEN);
+        if (cp) {
+            /*
+             * If this is a numeric value, then it'll be the MIN
+             *   field of a threshold test (the fourth form)
+             * Otherwise it'll be the operation field of a
+             *   boolean test (the third form)
+             */
+            if ( isdigit(buf[0]) || buf[0] == '-' )
+                test = MTE_TRIGGER_THRESHOLD;
+            else
+                test = MTE_TRIGGER_BOOLEAN;
+        } else {
+            /*
+             * If there isn't a "next token", then this
+             *   must be the second style of existence test.
+             */
+            test = MTE_TRIGGER_EXISTENCE;
+        }
+    }
+
     /*
      * Use the type of trigger test to update the trigger name buffer
      */
