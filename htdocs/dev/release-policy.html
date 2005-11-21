@@ -1,0 +1,226 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+
+    <h1>Net-SNMP Release Policy</h1>
+
+    <h2>Important Note</h2>
+
+    <p>This policy becomes fully active January 1st, 2006.  It has
+    been in use prior to this time.  This is merely a written
+    representation of what has been roughly done for a while now.
+    Issues with this policy statement should be discussed on -coders.</p>
+
+    <h2>Net-SNMP Release Policy</h2>
+    <p>Net-SNMP strives to be a highly stable package for its
+      end-users.  To achieve that we strive to meet a number of goals.
+      Namely:</p>
+    <ol>
+      <li> Backwards-compatibility unless impossible.</li>
+      <li> Bug fixes released for multiple branches of our source tree
+	(we maintain the last few branches in our source repository and
+	frequently release versions which appear "older" than the most
+	recent major version number).
+      <li> Stable packages that have been well tested and were
+	properly frozen during the release cycle..</li>
+    </ol>
+
+    <p> This document describes how Net-SNMP development happens in
+    CVS branches that are nearing release time.  This is written as
+    policy, however it is impossible to encode solid lines between
+    many of the issues discussed below.  People are the final judge
+    and the only hard-definition/rule in this document is the +N
+    voting, discussed below.  Don't argue over whether something meets
+    the criteria of the show-stopper definition.  Instead, just get +N
+    votes to accept the patch as it will save time and reduce the
+    arguing to the technical issue (you know, the important one)
+    instead of the philosophical one.</p>
+
+    <hr />
+    <h2>Definitions:</h2>
+    The following terms are used in this document.
+
+    <h3>Release Manager</h3>
+
+    <p>The person responsible for producing the current release being
+      discussed.  Release managers are appointed and are listed in the
+      <a href="schedule.html">schedule document</a>.</p>
+
+    <h3>+N:</h3>
+
+    <p>+N means that at least +N people agreed to something
+      over those that disagreed.  +N = "yes votes" minus "no votes".
+    </p>
+      <ul>
+      <li>Example: a +3 requirement to include a
+	patch in a RC release cycle means developers indicating support
+	for applying the patch would need at least 3 votes greater than
+	those who object (EG, tallies of 3-0, 4-1, 5-2, ...).</li>
+
+      <li> A vote discussion will last at least 24 hours in
+	length.  Saturdays and Sundays are excluding from the counting
+	period.</li>
+
+      <li>Any regular participant on the -coders list (subscribed for
+	at least the last 3 months and reading the discussions there)
+	can vote in such a discussion, but must be able to demonstrate
+	understanding of the issue and code.</li>
+
+      <li>Everyone gets 1 vote on
+	a subject, except for the person who is currently actively
+	maintaining/writing a given section of code.  They get 1.001
+	votes.</li>
+
+      <li>Voting on serious issues can delay a scheduled release for a
+	period of time in order for the vote to take place.  A release
+	manager may need to make a judgment call here, however, and
+	release earlier than the technical end of the voting period.</li>
+
+
+    </ul>
+
+    <h3>Supported System:</h3>
+
+    <p>A OS for which there is a current active developer working on
+      ensure that the package works properly on said system.  (We
+      can't force developers to work on a platform without interest.)</p>
+
+    <h3>Show stopper:</h3>
+    <ul>
+      <li>Any error that when discussed on the coders list is agreed
+      upon by at least +3 developers during the RC phase of release.</li>
+
+      <li>a condition such that a default
+	<i>"configure; make; make install"</i>
+	fails to complete successfully on a supported system.
+      </li>
+
+      <li>a condition such that
+	<i>"make test"</i> fails to complete successfully on a
+	supported system, (excluding problems within the test suite
+	itself)
+      </li>
+
+      <li>A condition that is security related (introduction of a new
+      attack, especially for ones related to processing before
+      authentication is done.)</li>
+    </ul>
+
+    <hr />
+    <h2>Release Cycle:</h2>
+
+    <p> The Net-SNMP package follows the following steps in release
+    software from a CVS branch:
+
+    <pre>
+      Open Development => Pre-Releases => Release-Candidates => Final Release
+    </pre>
+
+    <h3>Open Development</h3>
+
+    <p> Anyone with write access to the repository can submit changes
+      at will, including for new features.</p>
+
+    <h3>Pre-Releases</h3>
+
+    <p> Pre-Releases are released using version numbers such as
+      5.1.3.pre1, and during the period between when the first
+      pre-release is made available to the point where the first
+      release-candidate is made available:
+    </p>
+
+      <ul>
+      <li> Only bug fixes should
+	be checked in by developers with write access (no new
+	features).</li>
+
+      <li> Serious issues should be discussed on the -coders list first, but
+	generally patches can be committed to fix bugs as needed.</li>
+
+      <li> Developers that disagree that a patch should have been
+	committed should bring up the issue on the -coders list.  A vote
+	of +1 is needed to keep the patch in place.</li>
+
+      <li>No new features are allowed.</li>
+
+      <li>Generally the Pre-Release phase lasts for
+	3-4 weeks, at one pre-release per week or two.</li>
+    </ul>
+
+    <h3>Release-Candidates</h3>
+
+    <p> Release-Candidates are released using version numbers such as
+    5.1.3.rc1.  Ideally, the final release should exactly match the
+    last release candidate except for version numbering changes.
+    During the period between when the first release-candidate is made
+    available to the point where the final release is made available:
+    </p>
+      <ul>
+
+      <li> Any changes to the CVS tree require a +3 vote on the
+      -coders list.  This vote <b>MUST</b> take place prior to
+      committing them to the CVS tree.</li>
+      
+      <li>Only show-stopper bugs should be fixed at this point.</li> 
+
+      <li>No new features are allowed.</li>
+
+      <li>Generally the Pre-Release phase lasts for
+	3-4 weeks, at one pre-release per week or two.</li>
+      
+      <li>Changes to documentation (but not documentation building
+      systems) are allowed.</li>
+
+      <li>Changes to comments (doxygen documentation included) are
+      allowed except after what is expected to be the last RC
+      version.</li>
+
+    </ul>
+
+    <h3>Final Release</h3>
+
+    <p>There's nothing left to do right?  Hopefully.  But in the odd
+    case that something does slip through:</p>
+
+    <ul>
+      <li> A patch branch should be created for major releases (X.Y)
+      if it doesn't exist yet.  These are labeled (tagged)
+      V<i>X</i>-<i>Y</i>-patches in the CVS tree.</li>
+
+      <li> The CVS tree right after a release continues in freeze mode
+      (same as the release-candidate phase) for at least 1 week beyond
+      the time the final release is published.</li>
+
+      <li> If a major bug is found in the final release, a vote of +3
+      on -coders will result in a new immediate release with a minor
+      minor version number increment (the Z in W.X.Y.Z).</li>
+    </ul>
+
+    <hr />
+    <h2>Resolving Disputes</h2>
+
+    <p>Under the above guidelines this shouldn't happen.  The voting
+    system is provided to alleviate these types of major issues.</p>
+
+    <p>However...  Disputes will be resolved based on the following
+    order of precedence:</p>
+
+    <ul>
+      <li>+N vote as discussed above.  For issues which didn't have a +N
+	vote specified (I.E., missed in the above documentation)
+	consider it +3</li>
+
+      <li>The release manager</li>
+
+      <li>Active project core-developers by seniority</li>
+    </ul>
+
+    <h2>Acknowledgments</h2>
+    <p>Much of this was codified by Dave Shield originally.</p>
+
+    <h2>Warnings</h2>
+    <p>We're all friends generally, but just to be clear: attempts to
+    misuse this policy will be severely frowned upon.  Don't test me.</p>
+
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
