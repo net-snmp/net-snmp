@@ -623,16 +623,21 @@ object (\fCsnmpEnableAuthenTraps.0\fR) is read-write, but specifying
 this directive makes this object read-only, and attempts to set the
 value of the object will result in a \fInotWritable\fR error response.
 .SS "DisMan Event MIB"
-.\"
-.\" XXX - General waffle about the Event MIB
-.\"
+The previous directives can be used to configure where traps should
+be sent, but are not concerned with \fIwhen\fR to send such traps
+(or what traps should be generated).  This is the domain of the
+Event MIB - developed by the Distributed Management (DisMan)
+working group of the IETF.
 .PP
 This requires that the agent was built with support for the
 \fIdisman/event\fR module (which is now included as part of the
 default build configuration for the most recent distribution).
-.\"
-.\" XXX - Mention previous implementation
-.\"
+.RS
+.IP "Note"
+The behaviour of the latest implementation differs in some minor
+respects from the previous code - nothing too significant, but
+existing scripts may possibly need some minor adjustments.
+.RE
 .IP "iquerySecName NAME"
 .IP "agentSecName NAME"
 specifies the default SNMPv3 username, to be use when making internal
@@ -674,11 +679,7 @@ OP should be one of the defined
 comparison operators (!=, ==, <, <=, >, >=) and VALUE should be an
 integer value to compare against.
 .IP "OID MIN MAX [DMIN DMAX]"
-defines a \fIthreshold(1)\fR monitor test, and requires the \fI-t\fR
-option to be specified.
-.\"
-.\" XXX - Why ??
-.\"
+defines a \fIthreshold(1)\fR monitor test.
 MIN and MAX are integer values, specifying lower and upper thresholds.
 If the value of the monitored OID falls below the lower threshold (MIN)
 or rises above the upper threshold (MAX), then the monitor entry will
@@ -696,6 +697,12 @@ differences between successive sample values.
 There are various options to control the behaviour of the monitored
 expression.  These include:
 .RS
+.IP "-D"
+indicates that the expression should be evaluated using delta differences
+between sample values (rather than the values themselves).
+.IP "-d OID | -di OID"
+specifies a discontinuity marker for validating delta differences.
+This option also implies \fI-D\fR.
 .IP "-e EVENT"
 specifies the event to be invoked when this monitor entry is triggered.
 If this option is not given, the monitor entry will generate one
@@ -719,8 +726,13 @@ See \fIstrictDisman\fR for details of the ordering of notification payloads.
 .IP "-r FREQUENCY"
 monitors the given expression every FREQUENCY seconds, rather
 than the default of 600s (10 minutes). 
-.IP "-t"
-specifies a threshold instead of a boolean monitor - see above.
+.IP "-S"
+indicates that the monitor expression should not be evaluated when the
+agent first starts up - rather this should wait until the first repeat
+interval expires.
+.IP "-s"
+indicates that the monitor expression \fIshould\fR be evaluated when the
+agent first starts up.  This is the default behaviour.
 .IP "-u SECNAME"
 specifies a security name to use for scanning the local host,
 instead of the default \fIiquerySecName\fR.
