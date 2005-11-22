@@ -292,6 +292,10 @@ SOURCE=..\..\agent\mibgroup\utilities\execute.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\utilities\iquery.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\utilities\override.c
 # End Source File
 # End Group
