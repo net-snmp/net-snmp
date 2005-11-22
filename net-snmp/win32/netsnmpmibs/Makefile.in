@@ -21,6 +21,7 @@ CLEAN :
 	-@erase "$(INTDIR)\errormib.obj"
 	-@erase "$(INTDIR)\example.obj"
 	-@erase "$(INTDIR)\execute.obj"
+	-@erase "$(INTDIR)\iquery.obj"
 	-@erase "$(INTDIR)\extensible.obj"
 	-@erase "$(INTDIR)\file.obj"
 	-@erase "$(INTDIR)\header_complex.obj"
@@ -179,6 +180,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\nsModuleTable.obj" \
 	"$(INTDIR)\nsTransactionTable.obj" \
 	"$(INTDIR)\execute.obj" \
+	"$(INTDIR)\iquery.obj" \
 	"$(INTDIR)\header_complex.obj" \
 	"$(INTDIR)\mib_modules.obj" \
 	"$(INTDIR)\override.obj" \
@@ -202,6 +204,7 @@ CLEAN :
 	-@erase "$(INTDIR)\errormib.obj"
 	-@erase "$(INTDIR)\example.obj"
 	-@erase "$(INTDIR)\execute.obj"
+	-@erase "$(INTDIR)\iquery.obj"
 	-@erase "$(INTDIR)\extensible.obj"
 	-@erase "$(INTDIR)\file.obj"
 	-@erase "$(INTDIR)\header_complex.obj"
@@ -361,6 +364,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\nsModuleTable.obj" \
 	"$(INTDIR)\nsTransactionTable.obj" \
 	"$(INTDIR)\execute.obj" \
+	"$(INTDIR)\iquery.obj" \
 	"$(INTDIR)\header_complex.obj" \
 	"$(INTDIR)\mib_modules.obj" \
 	"$(INTDIR)\override.obj" \
@@ -708,6 +712,11 @@ SOURCE=..\..\agent\mibgroup\utilities\execute.c
 "$(INTDIR)\execute.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+
+SOURCE=..\..\agent\mibgroup\utilities\iquery.c
+
+"$(INTDIR)\iquery.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 SOURCE=..\..\agent\mibgroup\header_complex.c
 

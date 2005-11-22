@@ -1470,6 +1470,7 @@
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
+#define config_warning(x)
 #define config_exclude(x)
 #define config_arch_require(x,y)
 #define config_parse_dot_conf(w,x,y,z)
