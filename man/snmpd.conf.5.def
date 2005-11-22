@@ -875,6 +875,34 @@ monitor	-o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
 In both these latter cases, the snmpd.conf must also contain a
 \fIiquerySecName\fR directive, together with a corresponding
 \fIcreateUser\fR entry and suitable access control configuration.
+.SS "DisMan Schedule MIB"
+The DisMan working group also produced a mechanism for scheduling
+particular actions (a specified SET assignment) at given times.
+This requires that the agent was built with support for the
+\fIdisman/schedule\fR module (which is included as part of the
+default build configuration for the most recent distribution).
+.PP
+There are three ways of specifying the scheduled action:
+.IP "repeat FREQUENCY OID = VALUE"
+configures a SET assignment of the (integer) VALUE to the MIB instance
+OID, to be run every FREQUENCY seconds.
+.IP "cron MINUTE HOUR DAY MONTH WEEKDAY  OID = VALUE"
+configures a SET assignment of the (integer) VALUE to the MIB instance
+OID, to be run at the times specified by the fields MINUTE to WEEKDAY.
+These follow the same pattern as the equivalent \fIcrontab(5)\fR fields.
+.RS
+.IP "Note:"
+These fields should be specified as a (comma-separated) list of numeric
+values.  Named values for the MONTH and WEEKDAY fields are not supported,
+and neither are value ranges. A wildcard match can be specified as '*'.
+.RE
+.IP
+The DAY field can also accept negative values, to indicate days counting
+backwards from the end of the month.
+.IP "at MINUTE HOUR DAY MONTH WEEKDAY  OID = VALUE"
+configures a one-shot SET assignment, to be run at the first matching
+time as specified by the fields MINUTE to WEEKDAY.  The interpretation
+of these fields is exactly the same as for the \fIcron\fR directive.
 .SH "EXTENDING AGENT FUNCTIONALITY"
 One of the first distinguishing features of the original UCD suite was
 the ability to extend the functionality of the agent - not just by
