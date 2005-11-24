@@ -57,6 +57,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
      not being loaded at startup
    - Perl getnext didn't honor explicit reference to MIB file
    - AgentX sub-agent connection delayed til after config files read
+   - Build fixes for --disable-agent, --disable-snmpv1 and --disable-snmpv2c
    - Lots of bug fixes
 
 
