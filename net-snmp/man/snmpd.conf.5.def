@@ -564,7 +564,7 @@ If no \fIlogmatch\fR directives are defined, then walking the
 .SH "ACTIVE MONITORING"
 The usual behaviour of an SNMP agent is to wait for incoming SNMP requests
 and respond to them - if no requests are received, an agent will typically
-not initiate any actins. This section describes various directives that
+not initiate any actions. This section describes various directives that
 can configure \fIsnmpd\fR to take a more active role.
 .SS "Notification Handling"
 .IP "trapcommunity STRING"
@@ -1381,6 +1381,7 @@ Note that setting an object to "null" effectively delete's it as being
 accessible.  No VALUE needs to be given if the object type is null.
 .IP
 More types should be available in the future.
+.PP
 If you're trying to figure out aspects of the various mib modules
 (possibly some that you've added yourself), the following may help you
 spit out some useful debugging information.  First off, please read
