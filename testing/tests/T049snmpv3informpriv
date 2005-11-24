@@ -6,6 +6,9 @@ DEFSECURITYLEVEL=authPriv
 
 HEADER "SNMPv3 informs ($DEFSECURITYLEVEL) received and sent by tools"
 
+SKIPIFNOT USE_OPENSSL
+SKIPIFNOT SCAPI_AUTHPRIV
+
 #
 # Begin test
 #
