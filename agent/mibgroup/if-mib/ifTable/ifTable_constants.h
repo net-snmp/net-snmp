@@ -21,28 +21,51 @@ extern          "C" {
      * column number definitions for table ifTable 
      */
 #define IFTABLE_OID              1,3,6,1,2,1,2,2
+
 #define COLUMN_IFINDEX         1
+
 #define COLUMN_IFDESCR         2
+
 #define COLUMN_IFTYPE         3
+
+#define COLUMN_IFADMINSTATUS_FLAG    (0x1 << 6)
 #define COLUMN_IFMTU         4
+
 #define COLUMN_IFSPEED         5
+
 #define COLUMN_IFPHYSADDRESS         6
+
 #define COLUMN_IFADMINSTATUS         7
 #define COLUMN_IFADMINSTATUS_FLAG    (0x1 << 6)
+
 #define COLUMN_IFOPERSTATUS         8
+
 #define COLUMN_IFLASTCHANGE         9
+
 #define COLUMN_IFINOCTETS         10
+
 #define COLUMN_IFINUCASTPKTS         11
+
 #define COLUMN_IFINNUCASTPKTS         12
+
 #define COLUMN_IFINDISCARDS         13
+
 #define COLUMN_IFINERRORS         14
+
 #define COLUMN_IFINUNKNOWNPROTOS         15
+
 #define COLUMN_IFOUTOCTETS         16
+
 #define COLUMN_IFOUTUCASTPKTS         17
+
 #define COLUMN_IFOUTNUCASTPKTS         18
+
 #define COLUMN_IFOUTDISCARDS         19
+
 #define COLUMN_IFOUTERRORS         20
+
 #define COLUMN_IFOUTQLEN         21
+
 #define COLUMN_IFSPECIFIC         22
 
 
@@ -50,6 +73,11 @@ extern          "C" {
 #define IFTABLE_MAX_COL   COLUMN_IFSPECIFIC
 
 
+    /*
+     * TODO:405:r: Review IFTABLE_SETTABLE_COLS macro.
+     * OR together all the writable cols.
+     */
+#define IFTABLE_SETTABLE_COLS (COLUMN_IFADMINSTATUS_FLAG)
     /*
      * NOTES on enums
      * ==============
@@ -304,9 +332,8 @@ extern          "C" {
 #define IANAIFTYPE_CISCOISLVLAN  222
 #define IANAIFTYPE_ACTELISMETALOOP  223
 #define IANAIFTYPE_FCIPLINK  224
+
 #endif                          /* IANAIFTYPE_ENUMS */
-
-
 /*************************************************************
  * constants for enums for the MIB node
  * ifAdminStatus (INTEGER / ASN_INTEGER)
@@ -323,6 +350,7 @@ extern          "C" {
 
 #endif                          /* IFADMINSTATUS_ENUMS */
 
+
 /*************************************************************
  * constants for enums for the MIB node
  * ifOperStatus (INTEGER / ASN_INTEGER)
@@ -332,6 +360,7 @@ extern          "C" {
  */
 #ifndef IFOPERSTATUS_ENUMS
 #define IFOPERSTATUS_ENUMS
+
 #define IFOPERSTATUS_UP  1
 #define IFOPERSTATUS_DOWN  2
 #define IFOPERSTATUS_TESTING  3
