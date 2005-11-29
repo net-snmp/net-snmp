@@ -69,9 +69,9 @@ ipe./inet6.lo: ../../include/net-snmp/net-snmp-config.h
 ipe./inet6.lo: ../../include/net-snmp/system/linux.h
 ipe./inet6.lo: ../../include/net-snmp/system/sysv.h
 ipe./inet6.lo: ../../include/net-snmp/system/generic.h
-ipe./inet6.lo: ../../include/net-snmp/machine/generic.h
+ipe./inet6.lo: ../../include/net-snmp/machine/generic.h 
 ipe./inet6.lo: ../../include/net-snmp/net-snmp-includes.h
-ipe./inet6.lo:  ../../include/net-snmp/definitions.h
+ipe./inet6.lo: ../../include/net-snmp/definitions.h
 ipe./inet6.lo: ../../include/net-snmp/types.h 
 ipe./inet6.lo: ../../include/net-snmp/library/snmp_api.h
 ipe./inet6.lo: ../../include/net-snmp/library/asn1.h
@@ -135,9 +135,9 @@ ipe./inet.lo: ../../include/net-snmp/net-snmp-config.h
 ipe./inet.lo: ../../include/net-snmp/system/linux.h
 ipe./inet.lo: ../../include/net-snmp/system/sysv.h
 ipe./inet.lo: ../../include/net-snmp/system/generic.h
-ipe./inet.lo: ../../include/net-snmp/machine/generic.h
+ipe./inet.lo: ../../include/net-snmp/machine/generic.h 
 ipe./inet.lo: ../../include/net-snmp/net-snmp-includes.h 
-ipe./inet.lo:  ../../include/net-snmp/definitions.h
+ipe./inet.lo: ../../include/net-snmp/definitions.h
 ipe./inet.lo: ../../include/net-snmp/types.h 
 ipe./inet.lo: ../../include/net-snmp/library/snmp_api.h
 ipe./inet.lo: ../../include/net-snmp/library/asn1.h
@@ -146,7 +146,7 @@ ipe./inet.lo: ../../include/net-snmp/library/snmp.h
 ipe./inet.lo: ../../include/net-snmp/library/snmp-tc.h
 ipe./inet.lo: ../../include/net-snmp/utilities.h
 ipe./inet.lo: ../../include/net-snmp/library/snmp_client.h
-ipe./inet.lo:  ../../include/net-snmp/library/system.h
+ipe./inet.lo: ../../include/net-snmp/library/system.h
 ipe./inet.lo: ../../include/net-snmp/library/tools.h
 ipe./inet.lo: ../../include/net-snmp/library/int64.h
 ipe./inet.lo: ../../include/net-snmp/library/mt_support.h
@@ -195,9 +195,7 @@ ipe./inet.lo: ../../include/net-snmp/library/scapi.h
 ipe./inet.lo: ../../include/net-snmp/library/lcd_time.h
 ipe./inet.lo: ../../include/net-snmp/library/snmp_secmod.h
 ipe./inet.lo: ../../include/net-snmp/library/snmpv3-security-includes.h
-ipe./inet.lo: ../../include/net-snmp/library/snmpusm.h 
-ipe./inet.lo:   main.h
-ipe./inet.lo: netstat.h
+ipe./inet.lo: ../../include/net-snmp/library/snmpusm.h main.h netstat.h
 ipe./iquery.lo: ../../include/net-snmp/net-snmp-config.h
 ipe./iquery.lo: ../../include/net-snmp/system/linux.h
 ipe./iquery.lo: ../../include/net-snmp/system/sysv.h
