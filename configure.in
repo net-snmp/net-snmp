@@ -653,7 +653,7 @@ AC_ARG_WITH(out_mib_modules,
     mibII/mta_sendmail     Sendmail statistics monitoring (MTA-MIB)
     misc/ipfwacc           accounting rules IP firewall information (linux).
     ipfwchains/ipfwchains  firewall chains under ipfw for linux.
-                           (Download separately from the ucd-snmp ftp site.)
+                           (See agent/mibgroup/ipfwchains/README)
     ucd-snmp/diskio        Table of io-devices and how much data they have
                            read/written.  (only tested on Solaris, Linux)
     tunnel                 Linux TUNNEL-MIB support (ifTable extension)
