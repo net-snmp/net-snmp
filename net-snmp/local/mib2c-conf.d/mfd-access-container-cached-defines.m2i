@@ -105,7 +105,7 @@ ${context}_container_init(netsnmp_container **container_ptr_ptr,
 
 @if $m2c_data_cache == 1@
     if (NULL == cache) {
-        snmp_log(LOG_ERR,"bad cacge param to ${context}_container_init\n");
+        snmp_log(LOG_ERR,"bad cache param to ${context}_container_init\n");
         return;
     }
 
