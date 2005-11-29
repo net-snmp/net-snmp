@@ -1,7 +1,172 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.2.1 -> V5.2.2.rc6
+Changes: V5.2.1 -> V5.2.2
 	
+2005-11-28 21:34  hardaker
+
+   * dist/Makefile:
+
+   version update
+
+2005-11-28 21:34  hardaker
+
+   * apps/snmpnetstat/Makefile.depend:
+
+   make depend
+
+2005-11-28 21:20  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3
+, netsnmp_agent_trap.3,
+     netsnmp_asn1_packet_parse.3, netsnmp_baby_steps.3
+, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3
+, netsnmp_container.3, netsnmp_data_list.3
+, netsnmp_debug.3, netsnmp_default_store.3
+, netsnmp_handler.3, netsnmp_instance.3
+, netsnmp_iterator_info_s.3, netsnmp_leaf.3
+, netsnmp_library.3,
+     netsnmp_mib_utilities.3, netsnmp_mode_end_call.3
+, netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3
+, netsnmp_row_merge.3, netsnmp_scalar.3
+, netsnmp_scalar_group_group.3,
+     netsnmp_serialize.3, netsnmp_snmp_agent.3,
+     netsnmp_snmp_alarm.3, netsnmp_snmp_client.3
+, netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3
+, netsnmp_snmp_session.3,
+     netsnmp_stash_cache.3, netsnmp_table.3,
+     netsnmp_table_array.3, netsnmp_table_container.3
+, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_iterator.3
+, netsnmp_table_iterator.h.3,
+     netsnmp_util.3, netsnmp_utilities.3,
+     netsnmp_variable_list.3, netsnmp_watcher.3
+:
+
+   documentation update
+
+2005-11-28 21:16  hardaker
+
+   * configure, configure.in:
+
+   version update
+
+2005-11-20 15:00  tanders
+
+   * mibs/NET-SNMP-TC.txt:
+
+   update LAST-UPDATED field to reflect recent changes
+
+2005-11-20 09:28  alex_b
+
+   * apps/snmpnetstat/inet6.c:
+
+   WIN32:  Snmpnetstat compile fixes for Cygwin
+
+2005-11-20 09:25  alex_b
+
+   * README.win32, apps/snmpnetstat/inet.c,
+     apps/snmpnetstat/inet6.c:
+
+   WIN32:  Snmpnetstat compile fixes for Cygwin
+
+2005-11-19 21:19  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:19  hardaker
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:19  hardaker
+
+   * perl/ASN/ASN.pm:
+
+   - (perl/ASN/ASN.pm): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:19  hardaker
+
+   * perl/OID/OID.pm:
+
+   - (perl/OID/OID.pm): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:19  hardaker
+
+   * perl/default_store/default_store.pm:
+
+   - (perl/default_store/default_store.pm): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:19  hardaker
+
+   * perl/agent/default_store/default_store.pm:
+
+   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:19  hardaker
+
+   * perl/agent/agent.pm:
+
+   - (perl/agent/agent.pm): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:19  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   - (perl/SNMP/SNMP.pm): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:18  hardaker
+
+   * sedscript.in:
+
+   - (sedscript.in): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:18  hardaker
+
+   * dist/net-snmp.spec:
+
+   - (dist/net-snmp.spec): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:18  hardaker
+
+   * FAQ:
+
+   - (FAQ): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:18  hardaker
+
+   * README:
+
+   - (README): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:18  hardaker
+
+   * snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c): version tag ( 5.2.2.rc6 )
+
+2005-11-19 21:15  hardaker
+
+   * ChangeLog:
+
+   version update
+
 2005-11-19 21:12  hardaker
 
    * apps/: Makefile.depend, snmpnetstat/Makefile.depend
@@ -102,6 +267,90 @@ Changes: V5.2.1 -> V5.2.2.rc6
    * perl/TrapReceiver/TrapReceiver.pm:
 
    - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:48  hardaker
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:48  hardaker
+
+   * perl/ASN/ASN.pm:
+
+   - (perl/ASN/ASN.pm): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:48  hardaker
+
+   * perl/OID/OID.pm:
+
+   - (perl/OID/OID.pm): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:48  hardaker
+
+   * perl/default_store/default_store.pm:
+
+   - (perl/default_store/default_store.pm): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:48  hardaker
+
+   * perl/agent/default_store/default_store.pm:
+
+   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:48  hardaker
+
+   * perl/agent/agent.pm:
+
+   - (perl/agent/agent.pm): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:48  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   - (perl/SNMP/SNMP.pm): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:47  hardaker
+
+   * sedscript.in:
+
+   - (sedscript.in): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:47  hardaker
+
+   * dist/net-snmp.spec:
+
+   - (dist/net-snmp.spec): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:47  hardaker
+
+   * FAQ:
+
+   - (FAQ): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:47  hardaker
+
+   * README:
+
+   - (README): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:47  hardaker
+
+   * snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c): version tag ( 5.2.2.rc5 )
+
+2005-11-14 14:47  hardaker
+
+   * NEWS, README:
+
+   version update
+
+2005-11-14 14:44  hardaker
+
+   * ChangeLog:
+
+   version update
 
 2005-11-14 14:40  hardaker
 
@@ -279,6 +528,60 @@ Changes: V5.2.1 -> V5.2.2.rc6
 
    - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.2.rc4 )
 
+2005-11-04 17:47  hardaker
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.2.rc4 )
+
+2005-11-04 17:47  hardaker
+
+   * perl/ASN/ASN.pm:
+
+   - (perl/ASN/ASN.pm): version tag ( 5.2.2.rc4 )
+
+2005-11-04 17:47  hardaker
+
+   * perl/OID/OID.pm:
+
+   - (perl/OID/OID.pm): version tag ( 5.2.2.rc4 )
+
+2005-11-04 17:47  hardaker
+
+   * perl/default_store/default_store.pm:
+
+   - (perl/default_store/default_store.pm): version tag ( 5.2.2.rc4 )
+
+2005-11-04 17:47  hardaker
+
+   * perl/agent/default_store/default_store.pm:
+
+   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.2.rc4 )
+
+2005-11-04 17:47  hardaker
+
+   * perl/agent/agent.pm:
+
+   - (perl/agent/agent.pm): version tag ( 5.2.2.rc4 )
+
+2005-11-04 17:47  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   - (perl/SNMP/SNMP.pm): version tag ( 5.2.2.rc4 )
+
+2005-11-04 17:47  hardaker
+
+   * FAQ:
+
+   - (FAQ): version tag ( 5.2.2.rc4 )
+
+2005-11-04 17:47  hardaker
+
+   * ChangeLog:
+
+   version update
+
 2005-11-04 17:45  hardaker
 
    * apps/Makefile.depend:
@@ -384,6 +687,84 @@ Changes: V5.2.1 -> V5.2.2.rc6
 
    - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.2.rc3 )
 
+2005-10-25 20:56  hardaker
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.2.rc3 )
+
+2005-10-25 20:56  hardaker
+
+   * perl/ASN/ASN.pm:
+
+   - (perl/ASN/ASN.pm): version tag ( 5.2.2.rc3 )
+
+2005-10-25 20:56  hardaker
+
+   * perl/OID/OID.pm:
+
+   - (perl/OID/OID.pm): version tag ( 5.2.2.rc3 )
+
+2005-10-25 20:56  hardaker
+
+   * perl/default_store/default_store.pm:
+
+   - (perl/default_store/default_store.pm): version tag ( 5.2.2.rc3 )
+
+2005-10-25 20:56  hardaker
+
+   * perl/agent/default_store/default_store.pm:
+
+   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.2.rc3 )
+
+2005-10-25 20:56  hardaker
+
+   * perl/agent/agent.pm:
+
+   - (perl/agent/agent.pm): version tag ( 5.2.2.rc3 )
+
+2005-10-25 20:56  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   - (perl/SNMP/SNMP.pm): version tag ( 5.2.2.rc3 )
+
+2005-10-25 20:56  hardaker
+
+   * sedscript.in:
+
+   - (sedscript.in): version tag ( 5.2.2.rc3 )
+
+2005-10-25 20:55  hardaker
+
+   * dist/net-snmp.spec:
+
+   - (dist/net-snmp.spec): version tag ( 5.2.2.rc3 )
+
+2005-10-25 20:55  hardaker
+
+   * FAQ:
+
+   - (FAQ): version tag ( 5.2.2.rc3 )
+
+2005-10-25 20:55  hardaker
+
+   * README:
+
+   - (README): version tag ( 5.2.2.rc3 )
+
+2005-10-25 20:55  hardaker
+
+   * snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c): version tag ( 5.2.2.rc3 )
+
+2005-10-25 20:55  hardaker
+
+   * ChangeLog:
+
+   version update
+
 2005-10-25 20:47  hardaker
 
    * man/: netsnmp_agent.3, netsnmp_agent_registry.3
@@ -437,6 +818,90 @@ Changes: V5.2.1 -> V5.2.2.rc6
    * apps/snmptrapd_handlers.c:
 
    drop packets with session errnos attached to them
+
+2005-10-21 23:28  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:28  hardaker
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:28  hardaker
+
+   * perl/ASN/ASN.pm:
+
+   - (perl/ASN/ASN.pm): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:28  hardaker
+
+   * perl/OID/OID.pm:
+
+   - (perl/OID/OID.pm): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:28  hardaker
+
+   * perl/default_store/default_store.pm:
+
+   - (perl/default_store/default_store.pm): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:28  hardaker
+
+   * perl/agent/default_store/default_store.pm:
+
+   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:28  hardaker
+
+   * perl/agent/agent.pm:
+
+   - (perl/agent/agent.pm): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:28  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   - (perl/SNMP/SNMP.pm): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:28  hardaker
+
+   * sedscript.in:
+
+   - (sedscript.in): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:28  hardaker
+
+   * dist/net-snmp.spec:
+
+   - (dist/net-snmp.spec): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:27  hardaker
+
+   * FAQ:
+
+   - (FAQ): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:27  hardaker
+
+   * README:
+
+   - (README): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:27  hardaker
+
+   * snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c): version tag ( 5.2.2.rc2 )
+
+2005-10-21 23:27  hardaker
+
+   * ChangeLog:
+
+   version update
 
 2005-10-21 23:16  hardaker
 
@@ -554,6 +1019,90 @@ Changes: V5.2.1 -> V5.2.2.rc6
    * agent/mibgroup/kernel_sunos5.c:
 
    Fix a flipping lo interface by fixing getKstatInt to do as documented
+
+2005-10-16 21:27  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:27  hardaker
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:26  hardaker
+
+   * perl/ASN/ASN.pm:
+
+   - (perl/ASN/ASN.pm): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:26  hardaker
+
+   * perl/OID/OID.pm:
+
+   - (perl/OID/OID.pm): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:26  hardaker
+
+   * perl/default_store/default_store.pm:
+
+   - (perl/default_store/default_store.pm): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:26  hardaker
+
+   * perl/agent/default_store/default_store.pm:
+
+   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:26  hardaker
+
+   * perl/agent/agent.pm:
+
+   - (perl/agent/agent.pm): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:26  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   - (perl/SNMP/SNMP.pm): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:26  hardaker
+
+   * sedscript.in:
+
+   - (sedscript.in): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:26  hardaker
+
+   * dist/net-snmp.spec:
+
+   - (dist/net-snmp.spec): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:26  hardaker
+
+   * FAQ:
+
+   - (FAQ): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:26  hardaker
+
+   * README:
+
+   - (README): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:26  hardaker
+
+   * snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c): version tag ( 5.2.2.rc1 )
+
+2005-10-16 21:25  hardaker
+
+   * ChangeLog:
+
+   version update
 
 2005-10-16 21:17  hardaker
 
@@ -706,6 +1255,96 @@ Changes: V5.2.1 -> V5.2.2.rc6
 , manager/manager.pm:
 
    Be consistent in how various perl scripts are invoked.
+
+2005-10-10 21:46  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:46  hardaker
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:45  hardaker
+
+   * perl/ASN/ASN.pm:
+
+   - (perl/ASN/ASN.pm): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:45  hardaker
+
+   * perl/OID/OID.pm:
+
+   - (perl/OID/OID.pm): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:45  hardaker
+
+   * perl/default_store/default_store.pm:
+
+   - (perl/default_store/default_store.pm): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:45  hardaker
+
+   * perl/agent/default_store/default_store.pm:
+
+   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:45  hardaker
+
+   * perl/agent/agent.pm:
+
+   - (perl/agent/agent.pm): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:45  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   - (perl/SNMP/SNMP.pm): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:45  hardaker
+
+   * dist/Makefile:
+
+   - (dist/Makefile): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:45  hardaker
+
+   * sedscript.in:
+
+   - (sedscript.in): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:45  hardaker
+
+   * dist/net-snmp.spec:
+
+   - (dist/net-snmp.spec): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:45  hardaker
+
+   * FAQ:
+
+   - (FAQ): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:45  hardaker
+
+   * README:
+
+   - (README): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:44  hardaker
+
+   * snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c): version tag ( 5.2.2.pre4 )
+
+2005-10-10 21:43  hardaker
+
+   * ChangeLog:
+
+   version update
 
 2005-10-10 21:35  hardaker
 
@@ -877,6 +1516,90 @@ Changes: V5.2.1 -> V5.2.2.rc6
 
    Remove bogus trailing comma (reported by Albert Chin)
 
+2005-10-04 14:51  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:51  hardaker
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:51  hardaker
+
+   * perl/ASN/ASN.pm:
+
+   - (perl/ASN/ASN.pm): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:51  hardaker
+
+   * perl/OID/OID.pm:
+
+   - (perl/OID/OID.pm): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:51  hardaker
+
+   * perl/default_store/default_store.pm:
+
+   - (perl/default_store/default_store.pm): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:51  hardaker
+
+   * perl/agent/default_store/default_store.pm:
+
+   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:51  hardaker
+
+   * perl/agent/agent.pm:
+
+   - (perl/agent/agent.pm): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:50  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   - (perl/SNMP/SNMP.pm): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:50  hardaker
+
+   * sedscript.in:
+
+   - (sedscript.in): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:50  hardaker
+
+   * dist/net-snmp.spec:
+
+   - (dist/net-snmp.spec): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:50  hardaker
+
+   * FAQ:
+
+   - (FAQ): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:50  hardaker
+
+   * README:
+
+   - (README): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:50  hardaker
+
+   * snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c): version tag ( 5.2.2.pre3 )
+
+2005-10-04 14:49  hardaker
+
+   * ChangeLog:
+
+   version update
+
 2005-10-04 14:33  hardaker
 
    * man/: netsnmp_agent.3, netsnmp_agent_registry.3
@@ -1018,6 +1741,90 @@ Changes: V5.2.1 -> V5.2.2.rc6
 
    document 10.4.x embedded perl work-around
 
+2005-09-27 15:39  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:39  hardaker
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:38  hardaker
+
+   * perl/ASN/ASN.pm:
+
+   - (perl/ASN/ASN.pm): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:38  hardaker
+
+   * perl/OID/OID.pm:
+
+   - (perl/OID/OID.pm): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:38  hardaker
+
+   * perl/default_store/default_store.pm:
+
+   - (perl/default_store/default_store.pm): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:38  hardaker
+
+   * perl/agent/default_store/default_store.pm:
+
+   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:38  hardaker
+
+   * perl/agent/agent.pm:
+
+   - (perl/agent/agent.pm): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:38  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   - (perl/SNMP/SNMP.pm): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:37  hardaker
+
+   * sedscript.in:
+
+   - (sedscript.in): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:37  hardaker
+
+   * dist/net-snmp.spec:
+
+   - (dist/net-snmp.spec): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:37  hardaker
+
+   * FAQ:
+
+   - (FAQ): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:37  hardaker
+
+   * README:
+
+   - (README): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:37  hardaker
+
+   * snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c): version tag ( 5.2.2.pre2 )
+
+2005-09-27 15:36  hardaker
+
+   * ChangeLog:
+
+   version update
+
 2005-09-27 15:33  hardaker
 
    * man/: netsnmp_agent.3, netsnmp_agent_registry.3
@@ -1144,6 +1951,96 @@ Changes: V5.2.1 -> V5.2.2.rc6
    * snmplib/snmp_client.c:
 
    Win32 MSVC:  Use __int64 instead of long long.
+
+2005-09-19 15:01  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.2.pre1 )
+
+2005-09-19 15:00  hardaker
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.2.pre1 )
+
+2005-09-19 15:00  hardaker
+
+   * perl/ASN/ASN.pm:
+
+   - (perl/ASN/ASN.pm): version tag ( 5.2.2.pre1 )
+
+2005-09-19 15:00  hardaker
+
+   * perl/OID/OID.pm:
+
+   - (perl/OID/OID.pm): version tag ( 5.2.2.pre1 )
+
+2005-09-19 15:00  hardaker
+
+   * perl/default_store/default_store.pm:
+
+   - (perl/default_store/default_store.pm): version tag ( 5.2.2.pre1 )
+
+2005-09-19 14:59  hardaker
+
+   * perl/agent/default_store/default_store.pm:
+
+   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.2.pre1 )
+
+2005-09-19 14:59  hardaker
+
+   * perl/agent/agent.pm:
+
+   - (perl/agent/agent.pm): version tag ( 5.2.2.pre1 )
+
+2005-09-19 14:59  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   - (perl/SNMP/SNMP.pm): version tag ( 5.2.2.pre1 )
+
+2005-09-19 14:59  hardaker
+
+   * dist/Makefile:
+
+   - (dist/Makefile): version tag ( 5.2.2.pre1 )
+
+2005-09-19 14:59  hardaker
+
+   * sedscript.in:
+
+   - (sedscript.in): version tag ( 5.2.2.pre1 )
+
+2005-09-19 14:59  hardaker
+
+   * dist/net-snmp.spec:
+
+   - (dist/net-snmp.spec): version tag ( 5.2.2.pre1 )
+
+2005-09-19 14:59  hardaker
+
+   * FAQ:
+
+   - (FAQ): version tag ( 5.2.2.pre1 )
+
+2005-09-19 14:58  hardaker
+
+   * README:
+
+   - (README): version tag ( 5.2.2.pre1 )
+
+2005-09-19 14:58  hardaker
+
+   * snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c): version tag ( 5.2.2.pre1 )
+
+2005-09-19 14:53  hardaker
+
+   * ChangeLog:
+
+   version update
 
 2005-09-19 14:38  hardaker
 
@@ -3528,1105 +4425,6 @@ Changes: V5.2.1 -> V5.2.2.rc6
      netsnmp_variable_list.3, netsnmp_watcher.3:
 
    update for 5.2.1
-
-2005-01-24 11:42  rstory
-
-   * man/.cvsignore:
-
-   ignore more files that are generated from .def files
-
-2005-01-24 11:29  rstory
-
-   * apps/snmpnetstat/Makefile.depend, apps/Makefile.depend
-, agent/mibgroup/Makefile.depend,
-     agent/helpers/Makefile.depend, agent/Makefile.depend
-, snmplib/Makefile.depend:
-
-   make depend
-
-2005-01-24 11:15  rstory
-
-   * configure:
-
-   update for new configure.in
-
-2005-01-24 11:13  rstory
-
-   * configure.in:
-
-   update for 5.2.1
-
-2005-01-22 12:38  alex_b
-
-   * README.win32, win32/dist/README.txt,
-     win32/dist/htmlhelp/Configuration_Overview.html:
-
-   Win32 registry documentation improvements
-
-2005-01-13 08:29  hardaker
-
-   * agent/mibgroup/mibII/ipCidrRouteTable.h:
-
-   Newer IP-FORWARD-MIB from an ID set to become an RFC
-
-2005-01-13 08:24  hardaker
-
-   * mibs/: IANA-RTPROTO-MIB.txt, IP-FORWARD-MIB.txt
-, Makefile.in:
-
-   Newer IP-FORWARD-MIB from an ID set to become an RFC
-
-2005-01-13 05:17  rstory
-
-   * perl/TrapReceiver/TrapReceiver.pm:
-
-   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:17  rstory
-
-   * perl/AnyData_SNMP/Storage.pm:
-
-   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:17  rstory
-
-   * perl/ASN/ASN.pm:
-
-   - (perl/ASN/ASN.pm): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:16  rstory
-
-   * perl/OID/OID.pm:
-
-   - (perl/OID/OID.pm): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:16  rstory
-
-   * perl/default_store/default_store.pm:
-
-   - (perl/default_store/default_store.pm): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:16  rstory
-
-   * perl/agent/default_store/default_store.pm:
-
-   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:15  rstory
-
-   * perl/agent/agent.pm:
-
-   - (perl/agent/agent.pm): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:15  rstory
-
-   * perl/SNMP/SNMP.pm:
-
-   - (perl/SNMP/SNMP.pm): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:15  rstory
-
-   * dist/Makefile:
-
-   - (dist/Makefile): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:14  rstory
-
-   * sedscript.in:
-
-   - (sedscript.in): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:14  rstory
-
-   * dist/net-snmp.spec:
-
-   - (dist/net-snmp.spec): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:14  rstory
-
-   * FAQ:
-
-   - (FAQ): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:14  rstory
-
-   * README:
-
-   - (README): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:13  rstory
-
-   * snmplib/snmp_version.c:
-
-   - (snmplib/snmp_version.c): version tag ( 5.2.1.rc3 )
-
-2005-01-13 05:11  rstory
-
-   * doxygen.conf:
-
-   update for 5.2.1.rc3
-
-2005-01-13 04:51  rstory
-
-   * configure:
-
-   update for new configure.in
-
-2005-01-13 04:50  rstory
-
-   * configure.in:
-
-   update for 5.2.1.rc3
-
-2005-01-13 04:44  rstory
-
-   * NEWS:
-
-   update for 5.2.1.rc3
-
-2005-01-12 08:26  rstory
-
-   * agent/mibgroup/utilities/execute.c:
-
-   define setPerrorstatus until proper fix implemented
-
-2005-01-12 06:43  alex_b
-
-   * snmplib/tools.c:
-
-   Apply patch from Philip W Gillis and Daniel Kerns for win32 getenv crash.
-
-2005-01-09 08:31  rstory
-
-   * man/snmpd.conf.5.def:
-
-   config.h -> net-snmp-config.h
-
-2005-01-06 09:26  rstory
-
-   * local/mib2c-conf.d/parent-set.m2i:
-
-   remove condition on prototype gen now that function is always generated
-
-2005-01-06 06:53  rstory
-
-   * local/mib2c-conf.d/generic-value-map-func.m2i:
-
-   remove conditional for var decl, since use isn't conditional
-
-2005-01-06 06:51  rstory
-
-   * local/mib2c-conf.d/mfd-access-container-cached-defines.m2i
-:
-
-   add comment on how to disable caching
-
-2005-01-06 06:49  rstory
-
-   * local/mib2c-conf.d/syntax-InetAddress-get.m2i:
-
-   - add missing % spec in log msg
-   - gen code to copy value once addrType is known
-
-2005-01-05 14:28  rstory
-
-   * local/mib2c-conf.d/subagent.m2c:
-
-   init mibs before snmp so conf file registrations work
-
-2005-01-05 11:13  rstory
-
-   * local/mib2c-conf.d/parent-set.m2i:
-
-   always generate row undo_setup/undo_cleanup
-
-2005-01-05 07:12  rstory
-
-   * net-snmp-config.in:
-
-   add case label to match lablel given in usage msg
-
-2005-01-03 08:02  rstory
-
-   * perl/TrapReceiver/TrapReceiver.pm:
-
-   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.1.rc2 )
-
-2005-01-03 08:01  rstory
-
-   * perl/AnyData_SNMP/Storage.pm:
-
-   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.1.rc2 )
-
-2005-01-03 08:01  rstory
-
-   * perl/ASN/ASN.pm:
-
-   - (perl/ASN/ASN.pm): version tag ( 5.2.1.rc2 )
-
-2005-01-03 08:01  rstory
-
-   * perl/OID/OID.pm:
-
-   - (perl/OID/OID.pm): version tag ( 5.2.1.rc2 )
-
-2005-01-03 08:01  rstory
-
-   * perl/default_store/default_store.pm:
-
-   - (perl/default_store/default_store.pm): version tag ( 5.2.1.rc2 )
-
-2005-01-03 08:00  rstory
-
-   * perl/agent/default_store/default_store.pm:
-
-   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.1.rc2 )
-
-2005-01-03 08:00  rstory
-
-   * perl/agent/agent.pm:
-
-   - (perl/agent/agent.pm): version tag ( 5.2.1.rc2 )
-
-2005-01-03 08:00  rstory
-
-   * perl/SNMP/SNMP.pm:
-
-   - (perl/SNMP/SNMP.pm): version tag ( 5.2.1.rc2 )
-
-2005-01-03 07:59  rstory
-
-   * doxygen.conf:
-
-   - (doxygen.conf): version tag ( 5.2.1.rc2 )
-
-2005-01-03 07:59  rstory
-
-   * sedscript.in:
-
-   - (sedscript.in): version tag ( 5.2.1.rc2 )
-
-2005-01-03 07:59  rstory
-
-   * dist/net-snmp.spec:
-
-   - (dist/net-snmp.spec): version tag ( 5.2.1.rc2 )
-
-2005-01-03 07:59  rstory
-
-   * FAQ:
-
-   - (FAQ): version tag ( 5.2.1.rc2 )
-
-2005-01-03 07:58  rstory
-
-   * README:
-
-   - (README): version tag ( 5.2.1.rc2 )
-
-2005-01-03 07:58  rstory
-
-   * snmplib/snmp_version.c:
-
-   - (snmplib/snmp_version.c): version tag ( 5.2.1.rc2 )
-
-2005-01-03 07:57  rstory
-
-   * configure:
-
-   update for new configure.in
-
-2005-01-03 07:56  rstory
-
-   * configure.in:
-
-   update for 5.2.1.rc2
-
-2005-01-03 07:51  rstory
-
-   * agent/mibgroup/mibII/interfaces.c:
-
-   comment out override checks where we don't have the interface name
-
-2005-01-02 17:33  rstory
-
-   * doxygen.conf:
-
-   update for 5.2.1
-
-2005-01-02 17:32  rstory
-
-   * perl/TrapReceiver/TrapReceiver.pm:
-
-   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:32  rstory
-
-   * perl/AnyData_SNMP/Storage.pm:
-
-   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:31  rstory
-
-   * perl/ASN/ASN.pm:
-
-   - (perl/ASN/ASN.pm): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:31  rstory
-
-   * perl/OID/OID.pm:
-
-   - (perl/OID/OID.pm): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:31  rstory
-
-   * perl/default_store/default_store.pm:
-
-   - (perl/default_store/default_store.pm): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:31  rstory
-
-   * perl/agent/default_store/default_store.pm:
-
-   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:31  rstory
-
-   * perl/agent/agent.pm:
-
-   - (perl/agent/agent.pm): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:30  rstory
-
-   * perl/SNMP/SNMP.pm:
-
-   - (perl/SNMP/SNMP.pm): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:30  rstory
-
-   * dist/Makefile:
-
-   - (dist/Makefile): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:30  rstory
-
-   * sedscript.in:
-
-   - (sedscript.in): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:30  rstory
-
-   * dist/net-snmp.spec:
-
-   - (dist/net-snmp.spec): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:30  rstory
-
-   * FAQ:
-
-   - (FAQ): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:29  rstory
-
-   * README:
-
-   - (README): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:29  rstory
-
-   * snmplib/snmp_version.c:
-
-   - (snmplib/snmp_version.c): version tag ( 5.2.1.rc1 )
-
-2005-01-02 17:26  rstory
-
-   * NEWS:
-
-   update for 5.2.1.rc1
-
-2005-01-02 17:06  rstory
-
-   * configure:
-
-   update for new configure.in
-
-2005-01-02 17:05  rstory
-
-   * configure.in:
-
-   update for 5.2.1.rc1
-
-2005-01-02 16:50  rstory
-
-   * local/mib2c-conf.d/: generic-data-allocate.m2i,
-     mfd-data-get.m2c, mfd-interface.m2c:
-
-   don't generate TODO item for code in interfaces file
-
-2005-01-02 15:24  rstory
-
-   * agent/agent_trap.c:
-
-   - don't bind local trapsinks to localhost if clientAddr is set
-
-2004-12-31 06:28  rstory
-
-   * local/mib2c-conf.d/mfd-top.m2c:
-
-   comment clarification
-
-2004-12-29 12:23  dts12
-
-   * agent/mibgroup/mibII/vacm_conf.c:
-
-   Only issue "access control not configured" warning for the agent
-   (not snmptrapd)
-
-2004-12-29 12:21  dts12
-
-   * snmplib/mib.c:
-
-   Recognise whitespace characters as printable.
-
-2004-12-28 15:49  rstory
-
-   * local/mib2c.mfd.conf:
-
-   fix logic for mfd table test
-
-2004-12-28 13:02  rstory
-
-   * agent/helpers/instance.c:
-
-   - don't register ronly handlers as RWRITE
-   - add missing netsnmp_register_int_instance_context
-
-2004-12-28 12:16  rstory
-
-   * agent/: agent_registry.c, helpers/old_api.c:
-
-   - always specify context, if available) for register callbacks
-     (so disconnected agentx subagents reconnect w/proper context)
-   - memset struct on stack to 0
-
-2004-12-28 09:02  rstory
-
-   * net-snmp-config.in:
-
-   fix bug 1049607: net-snmp-config --compile-subagent broken
-
-2004-12-27 07:55  rstory
-
-   * local/mib2c-conf.d/mfd-readme.m2c:
-
-   add pointer to tutorial and commandline to generate pseudo-todo list
-
-2004-12-24 22:41  rstory
-
-   * dist/net-snmp.spec:
-
-   fix automated checkin of empty file after interrupting a script
-
-2004-12-24 22:40  rstory
-
-   * perl/TrapReceiver/TrapReceiver.pm:
-
-   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:39  rstory
-
-   * perl/AnyData_SNMP/Storage.pm:
-
-   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:39  rstory
-
-   * perl/ASN/ASN.pm:
-
-   - (perl/ASN/ASN.pm): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:39  rstory
-
-   * perl/OID/OID.pm:
-
-   - (perl/OID/OID.pm): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:39  rstory
-
-   * perl/default_store/default_store.pm:
-
-   - (perl/default_store/default_store.pm): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:39  rstory
-
-   * perl/agent/default_store/default_store.pm:
-
-   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:38  rstory
-
-   * perl/agent/agent.pm:
-
-   - (perl/agent/agent.pm): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:38  rstory
-
-   * perl/SNMP/SNMP.pm:
-
-   - (perl/SNMP/SNMP.pm): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:38  rstory
-
-   * doxygen.conf:
-
-   - (doxygen.conf): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:38  rstory
-
-   * dist/Makefile:
-
-   - (dist/Makefile): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:37  rstory
-
-   * sedscript.in:
-
-   - (sedscript.in): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:37  rstory
-
-   * dist/net-snmp.spec:
-
-   - (dist/net-snmp.spec): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:37  rstory
-
-   * FAQ:
-
-   - (FAQ): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:37  rstory
-
-   * README:
-
-   - (README): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:36  rstory
-
-   * snmplib/snmp_version.c:
-
-   - (snmplib/snmp_version.c): version tag ( 5.2.1.pre1 )
-
-2004-12-24 22:36  rstory
-
-   * NEWS:
-
-   oops- update for 5.2.1.pre1
-
-2004-12-24 22:33  rstory
-
-   * configure:
-
-   update for new configure.in
-
-2004-12-24 22:32  rstory
-
-   * configure.in:
-
-   oops- update version for 5.2.1.pre1
-
-2004-12-24 22:31  rstory
-
-   * snmplib/snmp_version.c:
-
-   - (snmplib/snmp_version.c): version tag ( 5.2.1 )
-
-2004-12-24 22:31  rstory
-
-   * agent/mibgroup/Makefile.depend, apps/Makefile.depend
-, apps/snmpnetstat/Makefile.depend,
-     agent/helpers/Makefile.depend, agent/Makefile.depend
-, snmplib/Makefile.depend:
-
-   make depend
-
-2004-12-24 22:29  rstory
-
-   * doxygen.conf, man/netsnmp_Container_iterator.3
-, man/netsnmp_agent.3,
-     man/netsnmp_agent_registry.3, man/netsnmp_agent_trap.3
-, man/netsnmp_asn1_packet_parse.3,
-     man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3
-, man/netsnmp_cache_handler.3,
-     man/netsnmp_callback.3, man/netsnmp_container.3
-, man/netsnmp_data_list.3,
-     man/netsnmp_debug.3, man/netsnmp_default_store.3
-, man/netsnmp_handler.3,
-     man/netsnmp_instance.3, man/netsnmp_iterator_info_s.3
-, man/netsnmp_leaf.3, man/netsnmp_library.3
-, man/netsnmp_mib_utilities.3,
-     man/netsnmp_mode_end_call.3, man/netsnmp_multiplexer.3
-, man/netsnmp_netsnmp_agent_request_info_s.3,
-     man/netsnmp_netsnmp_column_info_t.3,
-     man/netsnmp_netsnmp_data_list_s.3,
-     man/netsnmp_netsnmp_handler_registration_s.3,
-     man/netsnmp_netsnmp_iterator_info_s.3,
-     man/netsnmp_netsnmp_mib_handler_access_methods.3,
-     man/netsnmp_netsnmp_mib_handler_methods.3,
-     man/netsnmp_netsnmp_mib_handler_s.3,
-     man/netsnmp_netsnmp_request_info_s.3,
-     man/netsnmp_netsnmp_table_registration_info_s.3,
-     man/netsnmp_netsnmp_table_request_info_s.3,
-     man/netsnmp_oid_stash.3, man/netsnmp_old_api.3
-, man/netsnmp_read_config.3,
-     man/netsnmp_read_only.3, man/netsnmp_row_merge.3
-, man/netsnmp_scalar.3,
-     man/netsnmp_scalar_group_group.3,
-     man/netsnmp_serialize.3, man/netsnmp_snmp_agent.3
-, man/netsnmp_snmp_alarm.3,
-     man/netsnmp_snmp_client.3, man/netsnmp_snmp_logging.3
-, man/netsnmp_snmp_pdu.3,
-     man/netsnmp_snmp_session.3, man/netsnmp_stash_cache.3
-, man/netsnmp_table.3,
-     man/netsnmp_table_array.3,
-     man/netsnmp_table_container.3, man/netsnmp_table_data.3
-, man/netsnmp_table_dataset.3,
-     man/netsnmp_table_iterator.3, man/netsnmp_util.3
-, man/netsnmp_utilities.3,
-     man/netsnmp_variable_list.3, man/netsnmp_watcher.3
-:
-
-   update for 5.2.1
-
-2004-12-24 22:20  rstory
-
-   * configure:
-
-   update for new configure.in
-
-2004-12-24 22:15  rstory
-
-   * configure.in:
-
-   update version for 5.2.1
-
-2004-12-24 22:07  rstory
-
-   * Makefile.top:
-
-   update libtool version for 5.2.1
-
-2004-12-24 22:00  rstory
-
-   * NEWS:
-
-   update for recent checkins
-
-2004-12-24 21:34  rstory
-
-   * local/mib2c.mfd.conf:
-
-   bail on non-table OID until multiple tables per file are supported
-
-2004-12-24 21:21  rstory
-
-   * agent/mibgroup/ucd-snmp/pass_persist.c:
-
-   fix bug 1062986: pass and pass_persist fail and crash snmpd
-
-2004-12-24 20:51  rstory
-
-   * snmplib/system.c:
-
-   fix bug 1072406: invalid operator precedence in opendir()
-
-2004-12-24 07:52  rstory
-
-   * snmplib/snmp_logging.c:
-
-   fix bug 1084413: Can't disable file logging
-
-2004-12-24 07:32  rstory
-
-   * apps/snmptrapd_handlers.c:
-
-   fix bug 1040711: snmptrapd: SIGHUP duplicates traphandlers (repeatedly)
-
-2004-12-24 06:50  rstory
-
-   * local/mib2c-update:
-
-   add -p to mkdir parm
-
-2004-12-24 06:42  rstory
-
-   * snmplib/snmpUDPIPv6Domain.c:
-
-   remove hardcoded HAVE_IFNAMETOINDEX now that configure checks for it
-
-2004-12-24 06:05  rstory
-
-   * local/mib2c-conf.d/mfd-interactive-setup.m2c:
-
-   - don't open stdout til we need it
-   - explicit close for opened file
-   - change default to asking questions instead of using defaults
-
-2004-12-24 06:01  rstory
-
-   * local/mib2c.mfd.conf:
-
-   - change default for interactive setup to on
-   - don't override report progress var if already set
-
-2004-12-23 14:55  alex_b
-
-   * README.win32, agent/mibgroup/mibII/system_mib.c
-, win32/Configure,
-     win32/net-snmp/net-snmp-config.h,
-     win32/net-snmp/net-snmp-config.h.in:
-
-   Fix compiling without PSDK.
-
-2004-12-23 10:01  alex_b
-
-   * agent/mibgroup/mibII/interfaces.c,
-     win32/libsnmp_dll/libsnmp.def,
-     win32/libsnmp_dll/libsnmp.def.in,
-     win32/net-snmp/net-snmp-config.h,
-     win32/net-snmp/net-snmp-config.h.in,
-     win32/netsnmpmibssdk/Makefile.in,
-     win32/netsnmpmibssdk/netsnmpmibssdk.dsp:
-
-   Win32 MSVC compile fixes
-
-2004-12-22 15:09  rstory
-
-   * agent/agent_trap.c:
-
-   fix bug 1088765: Agent fails to send traps to remote target
-
-2004-12-22 13:28  rstory
-
-   * configure:
-
-   update for new configure.in
-
-2004-12-22 13:12  rstory
-
-   * configure.in, include/net-snmp/net-snmp-config.h.in
-:
-
-   - test for if_nametoindex
-
-2004-12-17 12:25  rstory
-
-   * configure:
-
-   update for configure.in
-
-2004-12-16 18:08  rstory
-
-   * snmplib/read_config.c:
-
-   log warning on bad hex length (higher routines don't get error indication)
-
-2004-12-16 17:55  rstory
-
-   * agent/mibgroup/ucd-snmp/proxy.c:
-
-   ifdef out v1/v2 code when both disabled
-
-2004-12-16 15:14  rstory
-
-   * agent/helpers/table_dataset.c:
-
-   -check for duplicate table defs in snmpd.conf
-   -more informative error messages
-   -support run-time tables which are augmentations
-   -log error if run-time row add fails
-
-2004-12-16 14:03  rstory
-
-   * agent/helpers/table_data.c:
-
-   more informative error messages
-
-2004-12-16 11:59  rstory
-
-   * snmplib/snmp_transport.c:
-
-   check for null var before deref
-
-2004-12-16 11:55  rstory
-
-   * agent/agent_registry.c:
-
-   cache next ptr b4 object could be freed
-
-2004-12-16 11:42  rstory
-
-   * ltmain.sh:
-
-   more helpful error message on missing library
-
-2004-12-16 11:40  rstory
-
-   * Makefile.rules:
-
-   add INSTALL_PREFIX to progress messages
-
-2004-12-14 05:16  rstory
-
-   * agent/mibgroup/utilities/execute.c:
-
-   delete extra ';'
-
-2004-12-14 03:42  rstory
-
-   * configure.in:
-
-   fix quoting on eval lines
-
-2004-12-13 11:13  rstory
-
-   * configure:
-
-   update for new configure.in
-
-2004-12-13 09:42  rstory
-
-   * perl/TrapReceiver/TrapReceiver.pm:
-
-   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.2.1.dev )
-
-2004-12-13 09:42  rstory
-
-   * perl/AnyData_SNMP/Storage.pm:
-
-   - (perl/AnyData_SNMP/Storage.pm): version tag ( 5.2.1.dev )
-
-2004-12-13 09:41  rstory
-
-   * perl/ASN/ASN.pm:
-
-   - (perl/ASN/ASN.pm): version tag ( 5.2.1.dev )
-
-2004-12-13 09:41  rstory
-
-   * perl/OID/OID.pm:
-
-   - (perl/OID/OID.pm): version tag ( 5.2.1.dev )
-
-2004-12-13 09:41  rstory
-
-   * perl/default_store/default_store.pm:
-
-   - (perl/default_store/default_store.pm): version tag ( 5.2.1.dev )
-
-2004-12-13 09:41  rstory
-
-   * perl/agent/default_store/default_store.pm:
-
-   - (perl/agent/default_store/default_store.pm): version tag ( 5.2.1.dev )
-
-2004-12-13 09:40  rstory
-
-   * perl/agent/agent.pm:
-
-   - (perl/agent/agent.pm): version tag ( 5.2.1.dev )
-
-2004-12-13 09:40  rstory
-
-   * perl/SNMP/SNMP.pm:
-
-   - (perl/SNMP/SNMP.pm): version tag ( 5.2.1.dev )
-
-2004-12-13 09:40  rstory
-
-   * dist/Makefile:
-
-   - (dist/Makefile): version tag ( 5.2.1.dev )
-
-2004-12-13 09:39  rstory
-
-   * sedscript.in:
-
-   - (sedscript.in): version tag ( 5.2.1.dev )
-
-2004-12-13 09:39  rstory
-
-   * dist/net-snmp.spec:
-
-   - (dist/net-snmp.spec): version tag ( 5.2.1.dev )
-
-2004-12-13 09:39  rstory
-
-   * FAQ:
-
-   - (FAQ): version tag ( 5.2.1.dev )
-
-2004-12-13 09:39  rstory
-
-   * README:
-
-   - (README): version tag ( 5.2.1.dev )
-
-2004-12-13 09:38  rstory
-
-   * snmplib/snmp_version.c:
-
-   - (snmplib/snmp_version.c): version tag ( 5.2.1.dev )
-
-2004-12-13 05:24  rstory
-
-   * configure.in:
-
-   fix missing end quote
-
-2004-12-10 12:15  rstory
-
-   * NEWS:
-
-   update for recent checkins
-
-2004-12-10 12:00  rstory
-
-   * agent/helpers/table.c:
-
-   -comment tweaks
-   -free varbind indexes before parsing new ones
-   -add/use proper data_list free function for row stashes
-
-2004-12-10 11:44  rstory
-
-   * agent/mibgroup/if-mib/ifTable/ifTable.c:
-
-   fix for using ifName for ifDescr when ifDescr not available
-
-2004-12-10 11:41  rstory
-
-   * agent/helpers/table_dataset.c:
-
-   -fix bug 1034008: memory leak using SET for table_dataset
-   -remove unsupportd % spec in config_pwarn
-
-2004-12-10 10:14  rstory
-
-   * agent/mibgroup/utilities/execute.c:
-
-   apply patch 1052460: agent deadlock on exec
-
-2004-12-10 10:01  rstory
-
-   * agent/mibgroup/if-mib/: ifXTable/ifXTable.c,
-     ifXTable/ifXTable_interface.c,
-     ifTable/ifTable_interface.c,
-     ifTable/ifTable_interface.h:
-
-   apply patch 1055036: if-mib init order fix
-
-2004-12-10 09:56  rstory
-
-   * agent/mibgroup/ip-mib/data_access/systemstats_linux.c:
-
-   apply patch 1057057: ipSystemStatsTable index fix, add ipv6
-
-2004-12-10 08:01  rstory
-
-   * configure:
-
-   update for new configure.in
-
-2004-12-10 08:00  rstory
-
-   * configure.in:
-
-   -fix disable snmpv2c
-   -add partial target os to module cflags
-   -restore missing var init (fix configure slowdown)
-   -more debugging
-
-2004-12-10 07:15  rstory
-
-   * testing/rfc1213/snmpfun.sh:
-
-   fix table checks by adding missing null parameter
-
-2004-12-10 07:07  rstory
-
-   * snmplib/asn1.c:
-
-   comment change only- document why test may not always be false
-
-2004-12-10 06:57  rstory
-
-   * local/mib2c-conf.d/mfd-readme.m2c:
-
-   consistent table naming in example flow, noted on coders by Dave
-
-2004-12-10 06:51  rstory
-
-   * local/mib2c-conf.d/generic-value-map.m2i:
-
-   fix case of missing get code
-
-2004-12-10 06:48  rstory
-
-   * include/net-snmp/agent/mfd.h,
-     local/mib2c-conf.d/mfd-interface.m2c:
-
-   -add flag for row deleted
-   -if no errors, insert/delete new/deleted row into container
-
-2004-12-10 06:41  rstory
-
-   * agent/mibgroup/mibII/var_route.c:
-
-   use same cache timeout on all platforms
-
-2004-12-10 06:33  rstory
-
-   * agent/mibgroup/mibII/interfaces.c:
-
-   - apply patch 1056927: 5.2-p03: freebsd interface bugs
-     - fix bug 1055781: get-next fails to step into interfaces group correctly
-     - fix bug 1056760: agent ignores ifspeed, type settings in snmpd.conf
-   - also fix bug 1056760 fo HP-UX, solaris, Win32 and others
-
-2004-12-10 05:49  rstory
-
-   * agent/mibgroup/if-mib/data_access/interface_common.c:
-
-   apply patch 1073897: fix if-mib data access 64bit counter wrap detection
-
-2004-12-09 19:39  rstory
-
-   * agent/helpers/table_array.c:
-
-   - delete removed row after user commit function called
-   - remove row insert/delete in undo - handled in commit
-
-2004-12-09 19:30  rstory
-
-   * agent/helpers/baby_steps.c:
-
-   check requests for errors on get modes too
-
-2004-12-09 18:21  rstory
-
-   * snmplib/snmp_client.c:
-
-   don't free null pointer
-
-2004-12-09 08:57  dts12
-
-   * man/: snmp.conf.5.def, snmp_config.5.def,
-     snmpd.conf.5.def, snmptrapd.conf.5.def:
-
-   Slightly cleaner summaries of config file handling.
-
-	
 	
 -------------------------------------------------------------------------------
 
