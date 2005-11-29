@@ -618,7 +618,7 @@ var_vacm_view(struct variable * vp,
         return (u_char *) gp->viewSubtree;
 
     case VIEWMASK:
-        *var_len = (gp->viewSubtreeLen + 7) / 8;
+        *var_len = gp->viewMaskLen;
         return (u_char *) gp->viewMask;
 
     case VIEWTYPE:
@@ -1639,7 +1639,11 @@ write_vacmViewStatus(int action,
         vptr =
             vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen,
                               VACM_MODE_IGNORE_MASK);
-
+        if (vptr &&
+            netsnmp_oid_equals(vptr->viewSubtree + 1, vptr->viewSubtreeLen - 1,
+                               newViewSubtree + 1, viewSubtreeLen - 1) != 0) {
+            vptr = NULL;
+        }
         if (vptr != NULL) {
             if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
                 free(newViewName);

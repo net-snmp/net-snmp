@@ -83,7 +83,7 @@ typedef struct container_table_data_s {
  *        While not yet implemented, future plans include passing the request
  *        varbind with the full OID to a container.
  *
- *  If a key type is not specified at registration time, the default ket type
+ *  If a key type is not specified at registration time, the default key type
  *  of TABLE_CONTAINER_KEY_NETSNMP_INDEX will be used. If a container is
  *  provided, or the handler name is aliased to a container type, the container
  *  must use a netsnmp index.

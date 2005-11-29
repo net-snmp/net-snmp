@@ -216,6 +216,7 @@ netsnmp_register_mib_table_row(const char *moduleName,
         reg_parms.range_subid = var_subid;
         reg_parms.range_ubound = ubound;
         reg_parms.timeout = timeout;
+        reg_parms.contextName = context;
         rc = snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                                  SNMPD_CALLBACK_REGISTER_OID, &reg_parms);
     }

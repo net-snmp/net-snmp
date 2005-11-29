@@ -217,7 +217,7 @@ netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
                                netsnmp_request_info *requests)
 {
     marker_t timestamp = (marker_t) handler->myvoid;
-    int      uptime;
+    long     uptime;
     int      cmp;
 
     DEBUGMSGTL(("helper:watcher:timestamp",

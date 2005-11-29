@@ -291,11 +291,12 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
         }
 
         /*
-         * check for errors in any of the requests for reserve1,
+         * check for errors in any of the requests for GET-like, reserve1,
          * reserve2 and action. (there is no recovery from errors
          * in commit, free or undo.)
          */
-        if (save_mode < SNMP_MSG_INTERNAL_SET_COMMIT) {
+        if (MODE_IS_GET(save_mode)
+            || (save_mode < SNMP_MSG_INTERNAL_SET_COMMIT)) {
             rc = netsnmp_check_requests_error(requests);
             if(rc) {
                 DEBUGMSGTL(("baby_steps", "   ERROR:request error\n"));

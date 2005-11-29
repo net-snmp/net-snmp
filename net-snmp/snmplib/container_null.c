@@ -29,7 +29,7 @@
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/container.h>
-#include <net-snmp/library/container_binary_array.h>
+#include <net-snmp/library/container_null.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_assert.h>
 

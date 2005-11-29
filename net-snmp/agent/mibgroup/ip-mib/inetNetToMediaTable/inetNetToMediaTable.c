@@ -374,11 +374,16 @@ inetNetToMediaPhysAddress_get(inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the inetNetToMediaPhysAddress data.
      * set (* inetNetToMediaPhysAddress_val_ptr_ptr ) and (* inetNetToMediaPhysAddress_val_ptr_len_ptr ) from rowreq_ctx->data
      */
-    (*inetNetToMediaPhysAddress_val_ptr_ptr) =
-        rowreq_ctx->data->arp_physaddress;
+    if ((*inetNetToMediaPhysAddress_val_ptr_len_ptr) <
+        rowreq_ctx->data->arp_physaddress_len)
+        return MFD_SKIP;
+
+    memcpy((*inetNetToMediaPhysAddress_val_ptr_ptr),
+           rowreq_ctx->data->arp_physaddress,
+           rowreq_ctx->data->arp_physaddress_len);
     (*inetNetToMediaPhysAddress_val_ptr_len_ptr) =
         rowreq_ctx->data->arp_physaddress_len;
-
+    
     return MFD_SUCCESS;
 }                               /* inetNetToMediaPhysAddress_get */
 

@@ -207,7 +207,7 @@ int Facility = LOG_DAEMON;
 int             trapd_status = SNMPTRAPD_STOPPED;
 LPTSTR          app_name = _T("Net-SNMP Trap Handler");     /* Application Name */
 #else
-char           *app_name = "snmptrapd";
+const char     *app_name = "snmptrapd";
 #endif
 
 struct timeval  Now;
@@ -224,6 +224,10 @@ int             SnmpTrapdMain(int argc, TCHAR * argv[]);
 int __cdecl     _tmain(int argc, TCHAR * argv[]);
 #else
 int             main(int, char **);
+#endif
+
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+void            init_subagent(void);
 #endif
 
 void
@@ -585,15 +589,30 @@ SnmpTrapdMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "ac:CdD::efF:hHl:L:m:M:no:PqsS:tvO:-:";
+    char            options[128] = "ac:CdD::efF:hHI:L:m:M:no:PqsS:tvO:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
-    int             arg, i = 0;
+    int             arg, i = 0, depmsg = 0;
     int             count, numfds, block;
     fd_set          fdset;
     struct timeval  timeout, *tvp;
     char           *cp, *listen_ports = NULL;
-    int             agentx_subagent = 1, depmsg = 0;
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+    int             agentx_subagent = 1;
+#endif
+
+#ifdef SIGTERM
+    signal(SIGTERM, term_handler);
+#endif
+#ifdef SIGHUP
+    signal(SIGHUP, hup_handler);
+#endif
+#ifdef SIGINT
+    signal(SIGINT, term_handler);
+#endif
+#ifdef SIGPIPE
+    signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
+#endif
 
     /*
      * register our configuration handlers now so -H properly displays them 
@@ -709,11 +728,26 @@ main(int argc, char *argv[])
             exit(0);
 
         case 'H':
+            init_agent("snmptrapd");
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+            init_subagent();
             init_notification_log();
+#endif
+#ifdef NETSNMP_EMBEDDED_PERL
+            init_perl();
+#endif
             init_snmp("snmptrapd");
             fprintf(stderr, "Configuration directives understood:\n");
             read_config_print_usage("  ");
             exit(0);
+
+        case 'I':
+            if (optarg != NULL) {
+                add_to_init_list(optarg);
+            } else {
+                usage();
+            }
+            break;
 
 	case 'S':
             fprintf(stderr,
@@ -902,7 +936,6 @@ main(int argc, char *argv[])
     } else {
         netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER, print_handler);
     }
-    netsnmp_add_global_traphandler(NETSNMPTRAPD_POST_HANDLER, notification_handler);
 
     if (Event) {
         netsnmp_add_traphandler(event_handler, risingAlarm,
@@ -917,7 +950,7 @@ main(int argc, char *argv[])
 	 */
     }
 
-#ifdef USING_AGENTX_SUBAGENT_MODULE
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
     /*
      * we're an agentx subagent? 
      */
@@ -946,21 +979,32 @@ main(int argc, char *argv[])
      */
     init_agent("snmptrapd");
 
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
     /*
      * initialize local modules 
      */
     if (agentx_subagent) {
+        extern void register_snmpEngine_scalars_context(const char *);
         extern void init_register_usmUser_context(const char *);
-#ifdef USING_AGENTX_SUBAGENT_MODULE
-	void  init_subagent(void);
         init_subagent();
-#endif
-        /* register the notification log table */
-        init_notification_log();
+        if (should_init("notificationLogMib")) {
+            netsnmp_add_global_traphandler(NETSNMPTRAPD_POST_HANDLER,
+                                           notification_handler);
+            /* register the notification log table */
+            init_notification_log();
+        }
+
+        /*
+         * register scalars from SNMP-FRAMEWORK-MIB::snmpEngineID group;
+         * allows engineID probes via the master agent under the
+         * snmptrapd context
+         */
+        register_snmpEngine_scalars_context("snmptrapd");
 
         /* register ourselves as having a USM user database */
         init_register_usmUser_context("snmptrapd");
     }
+#endif
 
 #ifdef NETSNMP_EMBEDDED_PERL
     init_perl();
@@ -1126,11 +1170,10 @@ main(int argc, char *argv[])
         }
     }
 
-    signal(SIGTERM, term_handler);
-#ifdef SIGHUP
-    signal(SIGHUP, hup_handler);
-#endif
-    signal(SIGINT, term_handler);
+    /*
+     * ignore early sighup during startup
+     */
+    reconfig = 0;
 
 #ifdef WIN32SERVICE
     trapd_status = SNMPTRAPD_RUNNING;

@@ -137,7 +137,7 @@ sub NetSNMPGetOpts {
 
       # Grab command line options first.  Only used if environment variables are not set
       GetOptions("NET-SNMP-IN-SOURCE=s" => \$ret{'insource'},
-        "NET-SNMP-PATH=s"      => \$ret{'prefix'},
+        "NET-SNMP-PATH=s"      => \$ret{'prefix'},          
         "NET-SNMP-DEBUG=s"     => \$ret{'debug'});
 
       if ($ENV{'NET-SNMP-IN-SOURCE'})
@@ -159,17 +159,20 @@ sub NetSNMPGetOpts {
       $ENV{'NET-SNMP-IN-SOURCE'}    = $ret{'insource'};
       $ENV{'NET-SNMP-PATH'}         = $ret{'prefix'};
       $ENV{'NET-SNMP-DEBUG'}        = $ret{'debug'};
-
+     
       $basedir = `%COMSPEC% /c cd`;
       chomp $basedir;
       $basedir =~ /(.*?)\\perl.*/;
       $basedir = $1;
       print "Net-SNMP base directory: $basedir\n";
-
+      if ($basedir =~ / /) {
+        die "\nA space has been detected in the base directory.  This is not " .
+            "supported\nPlease rename the folder and try again.\n\n";
+      }
     }
     else
     {
-      if ($ENV{'NET-SNMP-CONFIG'} &&
+      if ($ENV{'NET-SNMP-CONFIG'} && 
         $ENV{'NET-SNMP-IN-SOURCE'}) {
 	# have env vars, pull from there
 	$ret{'nsconfig'} = $ENV{'NET-SNMP-CONFIG'};
@@ -189,7 +192,7 @@ sub NetSNMPGetOpts {
 	$ENV{'NET-SNMP-IN-SOURCE'} = $ret{'insource'};
       }
     }	
-
+    
     $ret{'nsconfig'} =~ s/ROOTPATH/$rootpath/;
 
     $ret{'rootpath'} = $rootpath;
@@ -210,3 +213,4 @@ sub find_files {
 	}
     }
 }
+

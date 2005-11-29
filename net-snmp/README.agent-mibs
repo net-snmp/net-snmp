@@ -404,5 +404,6 @@ Other feature info
 ------------------
  AgentX                           4.0
  proxy support                    4.2
- override toekn                   5.0
+ override token                   5.0
  smux                             3.2
+ proper context support           5.2

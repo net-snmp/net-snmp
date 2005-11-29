@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # $Id$
 # Author: Robert Story <rstory@freesnmp.com>
@@ -13,7 +13,7 @@ usage()
    echo "  params: [-c] [-d] [-P] [-s NSB_SRC_DIR] [-b BUILDD] [-i NSB_INSTALL_DIR]"
    echo "          [-h host] [-p path]"
    echo ""
-   echo " VERSION    : relase number (eg 5.0.3)"
+   echo " VERSION    : release number (eg 5.2.2)"
    echo " -s NSB_SRC_DIRIR  : soure directory [$HOME/src/net-snmp-VERSION]"
    echo " -b BUILDD  : build directory [$HOME/build/]"
    echo "              NOTE-platform will be appended to build directory"

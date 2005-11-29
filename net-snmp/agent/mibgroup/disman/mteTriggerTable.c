@@ -3503,7 +3503,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
 
             default:
                 snmp_log(LOG_WARNING,
-                         "illegal value in mteTriggerBooleanComparison object: %d",
+                         "illegal value in mteTriggerBooleanComparison object: %ld",
                          item->mteTriggerBooleanComparison);
                 boolresult = item->lastboolresult;      /* to fail next test */
             }

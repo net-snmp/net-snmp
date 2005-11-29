@@ -66,7 +66,7 @@ extern          "C" {
     netsnmp_container_table_extract_context(netsnmp_request_info *request);
 #endif /* inline */
 
-    void netsnmp_container_table_insert_row(netsnmp_request_info *request,
+    void netsnmp_container_table_row_insert(netsnmp_request_info *request,
                                             netsnmp_index *row);
 
     /** retrieve the container used by the table_container helper */

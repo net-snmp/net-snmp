@@ -47,6 +47,7 @@
 
 #include <net-snmp/agent/agent_index.h>
 #include <net-snmp/agent/agent_trap.h>
+#include <net-snmp/agent/agent_callbacks.h>
 #include "mibII/sysORTable.h"
 #include "master.h"
 
@@ -134,7 +135,9 @@ close_agentx_session(netsnmp_session * session, int sessid)
     if (session != NULL && sessid == -1) {
         unregister_mibs_by_session(session);
         unregister_index_by_session(session);
-        unregister_sysORTable_by_session(session);
+        snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                            SNMPD_CALLBACK_REQ_UNREG_SYSOR_SESS,
+                            (void*)session);
 	if (session->myvoid != NULL) {
 	  free(session->myvoid);
 	}
@@ -162,7 +165,9 @@ close_agentx_session(netsnmp_session * session, int sessid)
         if (sp->sessid == sessid) {
             unregister_mibs_by_session(sp);
             unregister_index_by_session(sp);
-            unregister_sysORTable_by_session(sp);
+            snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                                SNMPD_CALLBACK_REQ_UNREG_SYSOR_SESS,
+                                (void*)sp);
 
             *prevNext = sp->next;
 
@@ -229,6 +234,9 @@ register_agentx_list(netsnmp_session * session, netsnmp_pdu *pdu)
 
     reg->handler->myvoid = session;
     reg->global_cacheid = cacheid;
+    if (NULL != pdu->community)
+        reg->contextName = strdup(pdu->community);
+
     /*
      * register mib. Note that for failure cases, the registration info
      * (reg) will be freed, and thus is no longer a valid pointer.
@@ -374,14 +382,18 @@ int
 add_agent_caps_list(netsnmp_session * session, netsnmp_pdu *pdu)
 {
     netsnmp_session *sp;
+    struct sysORTable parms;
 
     sp = find_agentx_session(session, pdu->sessid);
     if (sp == NULL)
         return AGENTX_ERR_NOT_OPEN;
 
-    register_sysORTable_sess(pdu->variables->name,
-                             pdu->variables->name_length,
-                             (char *) pdu->variables->val.string, sp);
+    parms.OR_oid = pdu->variables->name;
+    parms.OR_oidlen = pdu->variables->name_length;
+    parms.OR_descr = (char *) pdu->variables->val.string;
+    parms.OR_sess = sp;
+    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                        SNMPD_CALLBACK_REQ_REG_SYSOR, (void*)&parms);
     return AGENTX_ERR_NOERROR;
 }
 
@@ -389,16 +401,23 @@ int
 remove_agent_caps_list(netsnmp_session * session, netsnmp_pdu *pdu)
 {
     netsnmp_session *sp;
+    struct sysORTable parms;
 
     sp = find_agentx_session(session, pdu->sessid);
     if (sp == NULL)
         return AGENTX_ERR_NOT_OPEN;
 
-    if (unregister_sysORTable_sess(pdu->variables->name,
-                                   pdu->variables->name_length, sp) < 0)
-        return AGENTX_ERR_UNKNOWN_AGENTCAPS;
-    else
-        return AGENTX_ERR_NOERROR;
+    parms.OR_oid = pdu->variables->name;
+    parms.OR_oidlen = pdu->variables->name_length;
+    parms.OR_sess = sp;
+    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                        SNMPD_CALLBACK_REQ_UNREG_SYSOR, (void*)&parms);
+    /*
+     * no easy way to get an error code...
+     * if (rc < 0)
+     *   return AGENTX_ERR_UNKNOWN_AGENTCAPS;
+     */
+    return AGENTX_ERR_NOERROR;
 }
 
 int

@@ -163,6 +163,8 @@ handle_long_opt(const char *myoptarg)
      * else it's a long option, so process it like name=value 
      */
     cp = malloc(strlen(myoptarg) + 3);
+    if (!cp)
+        return;
     strcpy(cp, myoptarg);
     cp2 = strchr(cp, '=');
     if (!cp2 && !strchr(cp, ' ')) {

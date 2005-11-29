@@ -702,6 +702,11 @@ process_set_group(netsnmp_index *o, void *c)
                 netsnmp_monitor_notify(EVENT_ROW_ADD);
         }
 #endif
+
+        if ((ag->row_created == 0) && (ag->row_deleted == 1)) {
+            context->tad->cb->delete_row(ag->existing_row);
+            ag->existing_row = NULL;
+        }
         break;
 
     case MODE_SET_FREE:/** FINAL CHANCE ON FAILURE */
@@ -722,31 +727,6 @@ process_set_group(netsnmp_index *o, void *c)
         break;
 
     case MODE_SET_UNDO:/** FINAL CHANCE ON FAILURE */
-        if (ag->row_created == 0) {
-            /*
-             * this row existed before.
-             */
-            if (ag->row_deleted == 1) {
-                /*
-                 * re-insert undo_info
-                 */
-                DEBUGMSGT((TABLE_ARRAY_NAME, "undo: re-inserting row\n"));
-                if (CONTAINER_INSERT(ag->table, ag->existing_row) != 0) {
-                    rc = SNMP_ERR_UNDOFAILED;
-                    break;
-                }
-            }
-        } else if (ag->row_deleted == 0) {
-            /*
-             * new row that wasn't deleted should be removed
-             */
-            DEBUGMSGT((TABLE_ARRAY_NAME, "undo: removing new row\n"));
-            if (CONTAINER_REMOVE(ag->table, ag->existing_row) != 0) {
-                rc = SNMP_ERR_UNDOFAILED;
-                break;
-            }
-        }
-
         /*
          * status already set - don't change it now
          */

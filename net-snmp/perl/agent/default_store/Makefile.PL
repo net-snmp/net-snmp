@@ -20,7 +20,7 @@ sub InitMakeParams {
       $Params{'DEFINE'} = "-DMINGW_PERL";
     }
                                    
-    my $snmp_lib, $snmp_llib, $sep;
+    my ($snmp_lib, $snmp_llib, $sep);
     if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} ne 'msys')) {
       $opts = NetSNMPGetOpts();	
       $Params{'DEFINE'} = "-DMSVC_PERL";
@@ -124,7 +124,10 @@ sub NetSNMPGetOpts {
       $basedir =~ /(.*?)\\perl.*/;
       $basedir = $1;
       print "Net-SNMP base directory: $basedir\n";
-
+      if ($basedir =~ / /) {
+        die "\nA space has been detected in the base directory.  This is not " .
+            "supported\nPlease rename the folder and try again.\n\n";
+      }
     }
     else
     {

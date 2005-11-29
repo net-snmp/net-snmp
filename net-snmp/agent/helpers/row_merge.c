@@ -68,13 +68,10 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
      * xxx-rks - for sets, should store this info in agent request info, so it
      *           doesn't need to be done for every mode.
      *
-     * XXX - Need some mechanism for specifying the length of the table OID
-     *  i.e. where to start looking for shared indexes
-     *  N.B: The first subidentifier after the table OID will typically vary,
-     *    being the column subidentifier, so skip this as well.
+     * Use the prefix length as supplied during registration, rather
+     *  than trying to second-guess what the MIB implementer wanted.
      */
-    /* int SKIP_OID = reginfo->rootoid_len + 2; */
-    int SKIP_OID = (int)handler->myvoid + 1;
+    int SKIP_OID = (int)handler->myvoid;
 
     DEBUGMSGTL(("helper:row_merge", "Got request (%d)\n", SKIP_OID));
     DEBUGMSGOID(("helper:row_merge", reginfo->rootoid, reginfo->rootoid_len));

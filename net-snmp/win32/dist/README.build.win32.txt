@@ -23,6 +23,8 @@ There are four sections:
 
   Bulding a NullSoft installer package
 
+  Bulding an OpenSSL version
+
 
 Compiling binaries
 ==================
@@ -60,7 +62,7 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
     to:
 
       #undef USING_EXAMPLES_UCDDEMOPUBLIC_MODULE
-      #undef USING_EXAMPLES_EXAMPLE_MODULE    
+      #undef USING_EXAMPLES_EXAMPLE_MODULE
 
 5.  cd (source dir)\win32
 
@@ -71,18 +73,25 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
     Net-SNMP build and install options
     ==================================
     
-    1. OpenSSL support:      disabled
-    2. Platform SDK support: enabled
+    1. OpenSSL support:      		disabled
+    2. Platform SDK support: 		enabled
     
-    3. Install path:         c:/usr
-    4. Install after build:  enabled
+    3. Install path:         		c:/usr
+    4. Install after build:  		enabled
     
-    5. Perl modules:         enabled
-    6. Install perl modules: disabled
+    5. Perl modules:         		enabled
+    6. Install perl modules: 		disabled
     
-    7. Quiet build (logged): enabled
-    8. Debug mode:           disabled
-    9. IPv6 transports:      disabled
+    7. Quiet build (logged): 		enabled
+    8. Debug mode:           		disabled
+    9. IPv6 transports:      		disabled
+
+    10. Install development files   	enabled
+    
+    F.  Finished - start build
+    Q.  Quit - abort build
+    
+    Select option to set / toggle:
 
 8.  F to start the build and verify everything was built ok
 
@@ -102,24 +111,24 @@ Creating the Perl package
 4.  cd (source dir)
     cd perl
 
-5.  tar cvf Net-SNMP.tar blib; gzip --best Net-SNMP.tar
+5.  tar cvf NetSNMP.tar blib; gzip --best NetSNMP.tar
 
 6.  Open a Windows command prompt (CMD) and cd (source dir)\perl
 
-7.  ren Bundle-NetSNMP.ppd Net-SNMP.ppd
+7.  ren Bundle-NetSNMP.ppd NetSNMP.ppd
 
-8.  Modify Net-SNMP.ppd to look like the following.  Change the 
+8.  Modify NetSNMP.ppd to look like the following.  Change the 
     VERSION="x,x,x,x" line to the correct values.  Do NOT change 
     * lines in the original file.
 
-<SOFTPKG NAME="Net-SNMP" VERSION="5,2,0,0">
+<SOFTPKG NAME="NetSNMP" VERSION="5,2,0,0">
     <TITLE>Net-SNMP</TITLE>
     <ABSTRACT>Object Oriented Interface to Net-SNMP</ABSTRACT>
     <AUTHOR></AUTHOR>
     <IMPLEMENTATION>
 *        <OS NAME="MSWin32" />
 *        <ARCHITECTURE NAME="MSWin32-x86-multi-thread-5.8" />
-        <CODEBASE HREF="x86/Net-SNMP.tar.gz" />
+        <CODEBASE HREF="x86/NetSNMP.tar.gz" />
     </IMPLEMENTATION>
 </SOFTPKG>
 
@@ -137,8 +146,8 @@ Creating the Perl package
     copy win32\dist\README.txt "c:\usr"
     copy win32\dist\scripts\net-snmp-perl-test.pl "c:\usr\bin"
 
-    copy perl\Net-SNMP.ppd "c:\usr\Perl"
-    copy perl\Net-SNMP.tar.gz "c:\usr\Perl\x86"
+    copy perl\NetSNMP.ppd "c:\usr\Perl"
+    copy perl\NetSNMP.tar.gz "c:\usr\Perl\x86"
 
 11. Update the BUILD INFORMATION section of c:\usr\README.txt
 
@@ -188,7 +197,7 @@ Note:  A temporary location of /tmp/net-snmp is used.
 
 5.  Build Net-SNMP man pages: 
 
-    ./configure; make sedscript; cd man;make; cd ..
+    ./configure --prefix=c:/usr; make sedscript; cd man;make; cd ..
 
 6.  Install only the man files to /temp/net-snmp:
 
@@ -222,7 +231,7 @@ Note:  A temporary location of /tmp/net-snmp is used.
 10. Verify each converted file to ensure all the links are correct.  The files
     are located in /tmp/net-snmp/html by default.  In some instances, URLs may be 
     split across two lines such as the Variables link at the bottom of 
-    man8-snmptrapd.8.html.
+    /tmp/net-snmp/html/man8-snmptrapd.8.html.
 
 11. If new man pages are added or removed, the Table of Contents (Net-SNMP.hhc) and
     project file (Net-SNMP.hhp) need to be updated by hand.
@@ -384,3 +393,66 @@ Requirements
 11. Compare the directory contents of the compiled folder with the installed
     folder to ensure there are no missing MIB files etc.  Modify net-snmp.nsi
     and rebuild if required.
+
+
+Bulding an OpenSSL version
+==========================
+
+Requirements
+------------
+
+ -OpenSSL binary from http://www.slproweb.com/products/Win32OpenSSL.html
+
+1.  Install the OpenSSL binary, header and library files as explained in 
+    'Using a pre-compiled version' of the 'Microsoft Visual C++ - Building with 
+    OpenSSL' section of README.win32.
+
+2.  Move c:\usr c:\usr.temp
+
+3.  Re-build the binary exactly as above except enable OpenSSL.
+
+4.  Copy contents of c:\usr to c:\usr.temp
+
+5.  Delete c:\usr
+
+6.  Move c:\usr.temp c:\usr
+
+7.  Update the BUILD INFORMATION section of c:\usr\README.txt to include the SSL 
+    info and the filename.
+
+8.  Update the version stamp in c:\usr\net-snmp.nsi to include -ssl.  Example:
+
+    For example, for 5.3.0:
+
+    PRODUCT_MAJ_VERSION "5"
+    PRODUCT_MIN_VERSION "3"
+    PRODUCT_REVISION "0-ssl"
+    PRODUCT_EXE_VERSION "1"
+
+    The generated filename would be: net-snmp-5.3.0-ssl-1.win32.exe
+
+9.  In c:\usr\net-snmp.nsi, change:
+
+    !define OPENSSL_REQUIRED "0"
+
+    to
+
+    !define OPENSSL_REQUIRED "1"
+
+10. Launch the 'Nullsoft Install System (NSIS 2.0)'
+
+11. Select 'MakeNSISW (compiler interface)'
+
+12. Click File - Load Script
+
+13. Select c:\usr\net-snmp.nsi
+
+14. You should now have a c:\usr\Net-SNMP-x.x.x-x.exe binary installer 
+    package
+
+15. Test the package
+
+16. Compare the directory contents of the compiled folder with the installed
+    folder to ensure there are no missing MIB files etc.  Modify net-snmp.nsi
+    and rebuild if required.
+

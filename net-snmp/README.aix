@@ -1,6 +1,9 @@
 Some notes for the AIX port
 ===========================
 
+1. Compiling
+------------
+
 It's been reported that the applications segfault on AIX. The cause seems to
 be that AIX has a libsnmp and a libcrypto which may get in the way when you
 try to use shared libraries. So, the fix is to disable shared libraries:
@@ -16,3 +19,17 @@ change
 to
 
   #define CONFIGURE_OPTIONS "'--disable-shared'"
+
+Please note that the "host" module doesn't compile on AIX, so you *can't*
+configure with "--with-mib-modules=host".
+
+
+2. Feedback
+-----------
+
+Please also see README and PORTING.
+
+If you have questions, additional insights or (even better) patches regarding
+net-snmp on AIX, please refer to the net-snmp mailing lists (see
+http://www.net-snmp.org/lists).
+

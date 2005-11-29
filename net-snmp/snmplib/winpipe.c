@@ -114,7 +114,7 @@ static void CloseUDPSocketPair(SOCKET *socketpair)
 	{
 		closesocket(socketpair[0]);
 	}
-	if(socketpair[1] =! INVALID_SOCKET)
+	if(socketpair[1] != INVALID_SOCKET)
 	{
 		closesocket(socketpair[1]);
 	}

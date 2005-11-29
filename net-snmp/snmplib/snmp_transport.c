@@ -149,6 +149,8 @@ netsnmp_transport_copy(netsnmp_transport *t)
 void
 netsnmp_transport_free(netsnmp_transport *t)
 {
+    if (NULL == t)
+        return;
 
     if (t->local != NULL) {
         SNMP_FREE(t->local);
@@ -299,7 +301,7 @@ netsnmp_tdomain_unregister(netsnmp_tdomain *n)
 
 
 netsnmp_transport *
-netsnmp_tdomain_transport(const char *string, int local,
+netsnmp_tdomain_transport(const char *str, int local,
                           const char *default_domain)
 {
     netsnmp_tdomain *d;
@@ -308,12 +310,12 @@ netsnmp_tdomain_transport(const char *string, int local,
     char           *cp, *mystring;
     int             i;
 
-    if (string == NULL) {
+    if (str == NULL) {
         return NULL;
     }
 
-    if ((mystring = strdup(string)) == NULL) {
-        DEBUGMSGTL(("tdomain", "can't strdup(\"%s\")\n", string));
+    if ((mystring = strdup(str)) == NULL) {
+        DEBUGMSGTL(("tdomain", "can't strdup(\"%s\")\n", str));
         return NULL;
     }
 

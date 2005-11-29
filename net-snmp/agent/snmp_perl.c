@@ -84,8 +84,10 @@ do_something_perlish(char *something)
 #ifdef HAVE_PERL_EVAL_PV
     /* older perl */
     perl_eval_pv(something, TRUE);
-#endif /* HAVE_PERL_EVAL_PV */
-#endif /* HAVE_EVAL_PV */
+#else /* !HAVE_PERL_EVAL_PV */
+#error embedded perl broken 
+#endif /* !HAVE_PERL_EVAL_PV */
+#endif /* !HAVE_EVAL_PV */
     DEBUGMSGTL(("perl", "finished calling perl\n"));
 }
 
