@@ -35,7 +35,7 @@ extern          "C" {
      */
 
 
-    int            
+    int
         inetCidrRouteTable_init_data(inetCidrRouteTable_registration *
                                      inetCidrRouteTable_reg);
 
@@ -46,28 +46,28 @@ extern          "C" {
      */
 #define INETCIDRROUTETABLE_CACHE_TIMEOUT   60
 
-    void            inetCidrRouteTable_container_init(netsnmp_container **
-                                                      container_ptr_ptr,
+    void            inetCidrRouteTable_container_init(netsnmp_container
+                                                      **container_ptr_ptr,
                                                       netsnmp_cache *
                                                       cache);
     void            inetCidrRouteTable_container_shutdown(netsnmp_container
-                                                          * container_ptr);
+                                                          *container_ptr);
 
-    int             inetCidrRouteTable_container_load(netsnmp_container *
-                                                      container);
-    void            inetCidrRouteTable_container_free(netsnmp_container *
-                                                      container);
+    int             inetCidrRouteTable_container_load(netsnmp_container
+                                                      *container);
+    void            inetCidrRouteTable_container_free(netsnmp_container
+                                                      *container);
 
-    int             inetCidrRouteTable_cache_load(netsnmp_container *
-                                                  container);
-    void            inetCidrRouteTable_cache_free(netsnmp_container *
-                                                  container);
+    int             inetCidrRouteTable_cache_load(netsnmp_container
+                                                  *container);
+    void            inetCidrRouteTable_cache_free(netsnmp_container
+                                                  *container);
 
-    int            
+    int
         inetCidrRouteTable_row_prep(inetCidrRouteTable_rowreq_ctx *
                                     rowreq_ctx);
 
-    int            
+    int
         inetCidrRouteTable_validate_index(inetCidrRouteTable_registration *
                                           inetCidrRouteTable_reg,
                                           inetCidrRouteTable_rowreq_ctx *
