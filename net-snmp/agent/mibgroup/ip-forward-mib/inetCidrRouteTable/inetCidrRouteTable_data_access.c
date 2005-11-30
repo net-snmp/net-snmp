@@ -97,7 +97,7 @@ inetCidrRouteTable_init_data(inetCidrRouteTable_registration *
  *  process that will supply the data, opening a database, etc.
  */
 void
-inetCidrRouteTable_container_init(netsnmp_container ** container_ptr_ptr,
+inetCidrRouteTable_container_init(netsnmp_container **container_ptr_ptr,
                                   netsnmp_cache * cache)
 {
     DEBUGMSGTL(("verbose:inetCidrRouteTable:inetCidrRouteTable_container_init", "called\n"));
@@ -116,7 +116,7 @@ inetCidrRouteTable_container_init(netsnmp_container ** container_ptr_ptr,
 
     if (NULL == cache) {
         snmp_log(LOG_ERR,
-                 "bad cacge param to inetCidrRouteTable_container_init\n");
+                 "bad cache param to inetCidrRouteTable_container_init\n");
         return;
     }
 
@@ -135,8 +135,8 @@ inetCidrRouteTable_container_init(netsnmp_container ** container_ptr_ptr,
  * check entry for update
  */
 static void
-_snarf_route_entry(netsnmp_route_entry * route_entry,
-                   netsnmp_container * container)
+_snarf_route_entry(netsnmp_route_entry *route_entry,
+                   netsnmp_container *container)
 {
     inetCidrRouteTable_rowreq_ctx *rowreq_ctx;
 
@@ -198,7 +198,7 @@ _snarf_route_entry(netsnmp_route_entry * route_entry,
  *  process that supplied the data, closing a database, etc.
  */
 void
-inetCidrRouteTable_container_shutdown(netsnmp_container * container_ptr)
+inetCidrRouteTable_container_shutdown(netsnmp_container *container_ptr)
 {
     DEBUGMSGTL(("verbose:inetCidrRouteTable:inetCidrRouteTable_container_shutdown", "called\n"));
 
@@ -244,7 +244,7 @@ inetCidrRouteTable_container_shutdown(netsnmp_container * container_ptr)
  *
  */
 int
-inetCidrRouteTable_container_load(netsnmp_container * container)
+inetCidrRouteTable_container_load(netsnmp_container *container)
 {
     netsnmp_container *route_container;
 
@@ -267,17 +267,17 @@ inetCidrRouteTable_container_load(netsnmp_container * container)
     if (NULL == route_container)
         return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
 
-        /*
+    /*
      * we just got a fresh copy of route data. snarf data
-         */
+     */
     CONTAINER_FOR_EACH(route_container,
                        (netsnmp_container_obj_func *) _snarf_route_entry,
                        container);
 
-        /*
+    /*
      * free the container. we've either claimed each ifentry, or released it,
      * so the dal function doesn't need to clear the container.
-         */
+     */
     netsnmp_access_route_container_free(route_container,
                                         NETSNMP_ACCESS_ROUTE_FREE_DONT_CLEAR);
 
@@ -301,7 +301,7 @@ inetCidrRouteTable_container_load(netsnmp_container * container)
  *
  */
 void
-inetCidrRouteTable_container_free(netsnmp_container * container)
+inetCidrRouteTable_container_free(netsnmp_container *container)
 {
     DEBUGMSGTL(("verbose:inetCidrRouteTable:inetCidrRouteTable_container_free", "called\n"));
 
@@ -364,8 +364,7 @@ inetCidrRouteTable_row_prep(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
          * policy pointing to rowreq array, set flag so
          * it won't be freed
          */
-        rowreq_ctx->data->flags |=
-            NETSNMP_ACCESS_ROUTE_POLICY_STATIC;
+        rowreq_ctx->data->flags |= NETSNMP_ACCESS_ROUTE_POLICY_STATIC;
     }
 
 
@@ -444,18 +443,20 @@ inetCidrRouteDestType_check_index(inetCidrRouteTable_rowreq_ctx *
      */
     switch (rowreq_ctx->tbl_idx.inetCidrRouteDestType) {
 
-        case INETADDRESSTYPE_IPV4:
-        case INETADDRESSTYPE_IPV6:
-            break;
+    case INETADDRESSTYPE_IPV4:
+    case INETADDRESSTYPE_IPV6:
+        break;
 
-        case INETADDRESSTYPE_UNKNOWN:
-        case INETADDRESSTYPE_IPV4Z:
-        case INETADDRESSTYPE_IPV6Z:
-        case INETADDRESSTYPE_DNS:
-            /* fall through */
+    case INETADDRESSTYPE_UNKNOWN:
+    case INETADDRESSTYPE_IPV4Z:
+    case INETADDRESSTYPE_IPV6Z:
+    case INETADDRESSTYPE_DNS:
+        /*
+         * fall through 
+         */
 
-        default:
-            return MFD_ERROR    ;
+    default:
+        return MFD_ERROR;
     }
 
     return MFD_SUCCESS;         /* inetCidrRouteDestType index ok */
@@ -754,18 +755,20 @@ inetCidrRouteNextHopType_check_index(inetCidrRouteTable_rowreq_ctx *
      */
     switch (rowreq_ctx->tbl_idx.inetCidrRouteDestType) {
 
-        case INETADDRESSTYPE_IPV4:
-        case INETADDRESSTYPE_IPV6:
-            break;
+    case INETADDRESSTYPE_IPV4:
+    case INETADDRESSTYPE_IPV6:
+        break;
 
-        case INETADDRESSTYPE_UNKNOWN:
-        case INETADDRESSTYPE_IPV4Z:
-        case INETADDRESSTYPE_IPV6Z:
-        case INETADDRESSTYPE_DNS:
-            /* fall through */
+    case INETADDRESSTYPE_UNKNOWN:
+    case INETADDRESSTYPE_IPV4Z:
+    case INETADDRESSTYPE_IPV6Z:
+    case INETADDRESSTYPE_DNS:
+        /*
+         * fall through 
+         */
 
-        default:
-            return MFD_ERROR    ;
+    default:
+        return MFD_ERROR;
     }
 
     return MFD_SUCCESS;         /* inetCidrRouteNextHopType index ok */
@@ -890,30 +893,36 @@ inetCidrRouteTable_validate_index(inetCidrRouteTable_registration *
         rowreq_ctx->tbl_idx.inetCidrRouteNextHopType) {
         DEBUGMSGTL(("inetCidrRouteTable:validate_index",
                     "ipv4/v6 cross routing not supported\n"));
-            return MFD_CANNOT_CREATE_EVER;
+        return MFD_CANNOT_CREATE_EVER;
     }
 
     /*
      * InetAddress
-         */
-    if (((INETADDRESSTYPE_IPV4 == rowreq_ctx->tbl_idx.inetCidrRouteDestType) &&
-         (4 != rowreq_ctx->tbl_idx.inetCidrRouteDest_len)) ||
-        ((INETADDRESSTYPE_IPV6 == rowreq_ctx->tbl_idx.inetCidrRouteDestType) &&
-         (16 != rowreq_ctx->tbl_idx.inetCidrRouteDest_len))) {
+     */
+    if (((INETADDRESSTYPE_IPV4 ==
+          rowreq_ctx->tbl_idx.inetCidrRouteDestType)
+         && (4 != rowreq_ctx->tbl_idx.inetCidrRouteDest_len))
+        ||
+        ((INETADDRESSTYPE_IPV6 ==
+          rowreq_ctx->tbl_idx.inetCidrRouteDestType)
+         && (16 != rowreq_ctx->tbl_idx.inetCidrRouteDest_len))) {
         DEBUGMSGTL(("inetCidrRouteTable:validate_index",
                     "dest addr type/size mismatch\n"));
-            return MFD_CANNOT_CREATE_EVER;
-        }
+        return MFD_CANNOT_CREATE_EVER;
+    }
     /*
      * InetAddress
      */
-    if (((INETADDRESSTYPE_IPV4 == rowreq_ctx->tbl_idx.inetCidrRouteNextHopType) &&
-         (4 != rowreq_ctx->tbl_idx.inetCidrRouteNextHop_len)) ||
-        ((INETADDRESSTYPE_IPV6 == rowreq_ctx->tbl_idx.inetCidrRouteNextHopType) &&
-         (16 != rowreq_ctx->tbl_idx.inetCidrRouteNextHop_len))) {
+    if (((INETADDRESSTYPE_IPV4 ==
+          rowreq_ctx->tbl_idx.inetCidrRouteNextHopType)
+         && (4 != rowreq_ctx->tbl_idx.inetCidrRouteNextHop_len))
+        ||
+        ((INETADDRESSTYPE_IPV6 ==
+          rowreq_ctx->tbl_idx.inetCidrRouteNextHopType)
+         && (16 != rowreq_ctx->tbl_idx.inetCidrRouteNextHop_len))) {
         DEBUGMSGTL(("inetCidrRouteTable:validate_index",
                     "next hop addr type/size mismatch\n"));
-            return MFD_CANNOT_CREATE_EVER;
+        return MFD_CANNOT_CREATE_EVER;
     }
 
     return rc;
