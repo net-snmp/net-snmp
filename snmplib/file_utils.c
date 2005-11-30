@@ -112,7 +112,7 @@ netsnmp_file_fill(netsnmp_file * filei, const char* name,
 int
 netsnmp_file_release(netsnmp_file * filei)
 {
-    int rc;
+    int rc = 0;
 
     if (NULL == filei)
         return -1;
