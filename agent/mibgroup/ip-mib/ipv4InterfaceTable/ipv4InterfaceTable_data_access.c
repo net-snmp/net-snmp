@@ -90,7 +90,7 @@ ipv4InterfaceTable_init_data(ipv4InterfaceTable_registration *
  *  process that will supply the data, opening a database, etc.
  */
 void
-ipv4InterfaceTable_container_init(netsnmp_container ** container_ptr_ptr)
+ipv4InterfaceTable_container_init(netsnmp_container **container_ptr_ptr)
 {
     DEBUGMSGTL(("verbose:ipv4InterfaceTable:ipv4InterfaceTable_container_init", "called\n"));
 
@@ -112,12 +112,13 @@ ipv4InterfaceTable_container_init(netsnmp_container ** container_ptr_ptr)
  * determine if we want a ifTable row in our container
  */
 void
-ipv4InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *ift_rrc,
+ipv4InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *
+                                           ift_rrc,
                                            netsnmp_interface_entry *entry)
 {
-    netsnmp_container  *c = ipv4InterfaceTable_container_get();
+    netsnmp_container *c = ipv4InterfaceTable_container_get();
     ifTable_rowreq_ctx *ip4if_rrc;
-    int                 changed = 0;
+    int             changed = 0;
 
     DEBUGMSGTL(("verbose:ipv4InterfaceTable:check_entry_for_updates",
                 "called\n"));
@@ -140,8 +141,7 @@ ipv4InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *ift_rrc,
             CONTAINER_INSERT(c, ift_rrc);
             changed = 1;
         }
-    }
-    else {
+    } else {
         /*
          * found corresponding row. is it still applicable?
          */
@@ -155,8 +155,7 @@ ipv4InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *ift_rrc,
                         ift_rrc->data.ifentry->index));
             CONTAINER_REMOVE(c, ift_rrc);
             changed = 1;
-        }
-        else {
+        } else {
             /*
              * still applicable. anything changed?
              */
@@ -196,7 +195,7 @@ ipv4InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *ift_rrc,
  *  process that supplied the data, closing a database, etc.
  */
 void
-ipv4InterfaceTable_container_shutdown(netsnmp_container * container_ptr)
+ipv4InterfaceTable_container_shutdown(netsnmp_container *container_ptr)
 {
     DEBUGMSGTL(("verbose:ipv4InterfaceTable:ipv4InterfaceTable_container_shutdown", "called\n"));
 
@@ -239,10 +238,9 @@ ipv4InterfaceTable_container_shutdown(netsnmp_container * container_ptr)
  *
  */
 int
-ipv4InterfaceTable_container_load(netsnmp_container * container)
+ipv4InterfaceTable_container_load(netsnmp_container *container)
 {
-    DEBUGMSGT(("verbose:ipv4InterfaceTable:ipv4InterfaceTable_container_load",
-               "illegal call!\n"));
+    DEBUGMSGT(("verbose:ipv4InterfaceTable:ipv4InterfaceTable_container_load", "illegal call!\n"));
 
     return MFD_ERROR;
 }                               /* ipv4InterfaceTable_container_load */
@@ -261,7 +259,7 @@ ipv4InterfaceTable_container_load(netsnmp_container * container)
  *
  */
 void
-ipv4InterfaceTable_container_free(netsnmp_container * container)
+ipv4InterfaceTable_container_free(netsnmp_container *container)
 {
     DEBUGMSGTL(("verbose:ipv4InterfaceTable:ipv4InterfaceTable_container_free", "called\n"));
 
