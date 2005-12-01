@@ -446,11 +446,10 @@ ipAddressPrefixOnLinkFlag_get(ipAddressPrefixTable_rowreq_ctx * rowreq_ctx,
      * copy (* ipAddressPrefixOnLinkFlag_val_ptr ) from rowreq_ctx->data
      */
     if (INETADDRESSTYPE_IPV4 == rowreq_ctx->tbl_idx.ipAddressPrefixType) {
-        (*ipAddressPrefixOnLinkFlag_val_ptr) = 1; /* per MIB */        
-    }
-    else
-    (*ipAddressPrefixOnLinkFlag_val_ptr) =
-        rowreq_ctx->data.ipAddressPrefixOnLinkFlag;
+        (*ipAddressPrefixOnLinkFlag_val_ptr) = 1;       /* per MIB */
+    } else
+        (*ipAddressPrefixOnLinkFlag_val_ptr) =
+            rowreq_ctx->data.ipAddressPrefixOnLinkFlag;
 
     return MFD_SUCCESS;
 }                               /* ipAddressPrefixOnLinkFlag_get */
@@ -513,10 +512,10 @@ ipAddressPrefixAutonomousFlag_get(ipAddressPrefixTable_rowreq_ctx *
      * copy (* ipAddressPrefixAutonomousFlag_val_ptr ) from rowreq_ctx->data
      */
     if (INETADDRESSTYPE_IPV4 == rowreq_ctx->tbl_idx.ipAddressPrefixType)
-        (*ipAddressPrefixAutonomousFlag_val_ptr) = 2; /* per MIB */
+        (*ipAddressPrefixAutonomousFlag_val_ptr) = 2;   /* per MIB */
     else
-    (*ipAddressPrefixAutonomousFlag_val_ptr) =
-        rowreq_ctx->data.ipAddressPrefixAutonomousFlag;
+        (*ipAddressPrefixAutonomousFlag_val_ptr) =
+            rowreq_ctx->data.ipAddressPrefixAutonomousFlag;
 
     return MFD_SUCCESS;
 }                               /* ipAddressPrefixAutonomousFlag_get */
@@ -586,11 +585,10 @@ ipAddressPrefixAdvPreferredLifetime_get(ipAddressPrefixTable_rowreq_ctx *
      * copy (* ipAddressPrefixAdvPreferredLifetime_val_ptr ) from rowreq_ctx->data
      */
     if (INETADDRESSTYPE_IPV4 == rowreq_ctx->tbl_idx.ipAddressPrefixType)
-        (*ipAddressPrefixAdvPreferredLifetime_val_ptr) =
-            4294967295; /* per MIB */
+        (*ipAddressPrefixAdvPreferredLifetime_val_ptr) = 4294967295;    /* per MIB */
     else
-    (*ipAddressPrefixAdvPreferredLifetime_val_ptr) =
-        rowreq_ctx->data.ipAddressPrefixAdvPreferredLifetime;
+        (*ipAddressPrefixAdvPreferredLifetime_val_ptr) =
+            rowreq_ctx->data.ipAddressPrefixAdvPreferredLifetime;
 
     return MFD_SUCCESS;
 }                               /* ipAddressPrefixAdvPreferredLifetime_get */
@@ -654,10 +652,10 @@ ipAddressPrefixAdvValidLifetime_get(ipAddressPrefixTable_rowreq_ctx *
      * copy (* ipAddressPrefixAdvValidLifetime_val_ptr ) from rowreq_ctx->data
      */
     if (INETADDRESSTYPE_IPV4 == rowreq_ctx->tbl_idx.ipAddressPrefixType)
-        (*ipAddressPrefixAdvValidLifetime_val_ptr) = 4294967295; /* per MIB */
+        (*ipAddressPrefixAdvValidLifetime_val_ptr) = 4294967295;        /* per MIB */
     else
-    (*ipAddressPrefixAdvValidLifetime_val_ptr) =
-        rowreq_ctx->data.ipAddressPrefixAdvValidLifetime;
+        (*ipAddressPrefixAdvValidLifetime_val_ptr) =
+            rowreq_ctx->data.ipAddressPrefixAdvValidLifetime;
 
     return MFD_SUCCESS;
 }                               /* ipAddressPrefixAdvValidLifetime_get */

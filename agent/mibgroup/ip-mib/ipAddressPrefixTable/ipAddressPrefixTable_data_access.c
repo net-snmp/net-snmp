@@ -98,7 +98,7 @@ ipAddressPrefixTable_init_data(ipAddressPrefixTable_registration *
  *  process that will supply the data, opening a database, etc.
  */
 void
-ipAddressPrefixTable_container_init(netsnmp_container ** container_ptr_ptr,
+ipAddressPrefixTable_container_init(netsnmp_container **container_ptr_ptr,
                                     netsnmp_cache * cache)
 {
     DEBUGMSGTL(("verbose:ipAddressPrefixTable:ipAddressPrefixTable_container_init", "called\n"));
@@ -117,7 +117,7 @@ ipAddressPrefixTable_container_init(netsnmp_container ** container_ptr_ptr,
 
     if (NULL == cache) {
         snmp_log(LOG_ERR,
-                 "bad cacge param to ipAddressPrefixTable_container_init\n");
+                 "bad cache param to ipAddressPrefixTable_container_init\n");
         return;
     }
 
@@ -149,7 +149,7 @@ ipAddressPrefixTable_container_init(netsnmp_container ** container_ptr_ptr,
  *  process that supplied the data, closing a database, etc.
  */
 void
-ipAddressPrefixTable_container_shutdown(netsnmp_container * container_ptr)
+ipAddressPrefixTable_container_shutdown(netsnmp_container *container_ptr)
 {
     DEBUGMSGTL(("verbose:ipAddressPrefixTable:ipAddressPrefixTable_container_shutdown", "called\n"));
 
@@ -195,14 +195,14 @@ ipAddressPrefixTable_container_shutdown(netsnmp_container * container_ptr)
  *
  */
 int
-ipAddressPrefixTable_container_load(netsnmp_container * container)
+ipAddressPrefixTable_container_load(netsnmp_container *container)
 {
     ipAddressPrefixTable_rowreq_ctx *rowreq_ctx = NULL, *tmp_rowreq_ctx;
-    ipAddressTable_rowreq_ctx       *addr_rowreq_ctx;
-    netsnmp_container               *addr_container;
-    netsnmp_iterator                *addr_it;
+    ipAddressTable_rowreq_ctx *addr_rowreq_ctx;
+    netsnmp_container *addr_container;
+    netsnmp_iterator *addr_it;
     size_t          count = 0;
-    u_char                           tmp_pfx[NETSNMP_ACCESS_IPADDRESS_BUF_SIZE];
+    u_char          tmp_pfx[NETSNMP_ACCESS_IPADDRESS_BUF_SIZE];
 
     DEBUGMSGTL(("verbose:ipAddressPrefixTable:ipAddressPrefixTable_container_load", "called\n"));
 
@@ -226,9 +226,8 @@ ipAddressPrefixTable_container_load(netsnmp_container * container)
      * set the index(es) [and data, optionally] and insert into
      * the container.
      */
-    for ( addr_rowreq_ctx = ITERATOR_FIRST(addr_it);
-          addr_rowreq_ctx;
-          addr_rowreq_ctx = ITERATOR_NEXT(addr_it)) {
+    for (addr_rowreq_ctx = ITERATOR_FIRST(addr_it);
+         addr_rowreq_ctx; addr_rowreq_ctx = ITERATOR_NEXT(addr_it)) {
 
 
 
@@ -245,15 +244,22 @@ ipAddressPrefixTable_container_load(netsnmp_container * container)
             }
         }
         netsnmp_ipaddress_prefix_copy(tmp_pfx,
-                                      addr_rowreq_ctx->tbl_idx.ipAddressAddr,
-                                      addr_rowreq_ctx->data->ia_address_len,
-                                      addr_rowreq_ctx->data->ia_prefix_len);
+                                      addr_rowreq_ctx->tbl_idx.
+                                      ipAddressAddr,
+                                      addr_rowreq_ctx->data->
+                                      ia_address_len,
+                                      addr_rowreq_ctx->data->
+                                      ia_prefix_len);
         if (MFD_SUCCESS !=
             ipAddressPrefixTable_indexes_set(rowreq_ctx,
-                                             addr_rowreq_ctx->data->if_index,
-                                             addr_rowreq_ctx->tbl_idx.ipAddressAddrType,
-                                             tmp_pfx,addr_rowreq_ctx->data->ia_address_len,
-                                             addr_rowreq_ctx->data->ia_prefix_len)) {
+                                             addr_rowreq_ctx->data->
+                                             if_index,
+                                             addr_rowreq_ctx->tbl_idx.
+                                             ipAddressAddrType, tmp_pfx,
+                                             addr_rowreq_ctx->data->
+                                             ia_address_len,
+                                             addr_rowreq_ctx->data->
+                                             ia_prefix_len)) {
             snmp_log(LOG_ERR,
                      "error setting index while loading "
                      "ipAddressPrefixTable data.\n");
@@ -302,7 +308,7 @@ ipAddressPrefixTable_container_load(netsnmp_container * container)
  *
  */
 void
-ipAddressPrefixTable_container_free(netsnmp_container * container)
+ipAddressPrefixTable_container_free(netsnmp_container *container)
 {
     DEBUGMSGTL(("verbose:ipAddressPrefixTable:ipAddressPrefixTable_container_free", "called\n"));
 
@@ -337,7 +343,7 @@ ipAddressPrefixTable_row_prep(ipAddressPrefixTable_rowreq_ctx * rowreq_ctx)
      * fill in the row for this request.
      */
     if (INETADDRESSTYPE_IPV6 == rowreq_ctx->tbl_idx.ipAddressPrefixType) {
-        
+
     }
 
     return MFD_SUCCESS;

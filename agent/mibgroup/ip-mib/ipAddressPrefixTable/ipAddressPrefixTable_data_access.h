@@ -35,7 +35,7 @@ extern          "C" {
      */
 
 
-    int            
+    int
         ipAddressPrefixTable_init_data(ipAddressPrefixTable_registration *
                                        ipAddressPrefixTable_reg);
 
@@ -47,25 +47,24 @@ extern          "C" {
 #define IPADDRESSPREFIXTABLE_CACHE_TIMEOUT   60
 
     void            ipAddressPrefixTable_container_init(netsnmp_container
-                                                        **
-                                                        container_ptr_ptr,
+                                                        **container_ptr_ptr,
                                                         netsnmp_cache *
                                                         cache);
-    void           
-        ipAddressPrefixTable_container_shutdown(netsnmp_container *
-                                                container_ptr);
+    void
+        ipAddressPrefixTable_container_shutdown(netsnmp_container
+                                                *container_ptr);
 
-    int             ipAddressPrefixTable_container_load(netsnmp_container *
-                                                        container);
-    void            ipAddressPrefixTable_container_free(netsnmp_container *
-                                                        container);
+    int             ipAddressPrefixTable_container_load(netsnmp_container
+                                                        *container);
+    void            ipAddressPrefixTable_container_free(netsnmp_container
+                                                        *container);
 
-    int             ipAddressPrefixTable_cache_load(netsnmp_container *
-                                                    container);
-    void            ipAddressPrefixTable_cache_free(netsnmp_container *
-                                                    container);
+    int             ipAddressPrefixTable_cache_load(netsnmp_container
+                                                    *container);
+    void            ipAddressPrefixTable_cache_free(netsnmp_container
+                                                    *container);
 
-    int            
+    int
         ipAddressPrefixTable_row_prep(ipAddressPrefixTable_rowreq_ctx *
                                       rowreq_ctx);
 
