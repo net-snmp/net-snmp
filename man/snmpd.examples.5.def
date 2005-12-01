@@ -1,0 +1,508 @@
+.TH SNMPD.EXAMPLES 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.UC 4
+.SH NAME
+snmpd.examples - example configuration for the Net-SNMP agent
+.SH DESCRIPTION
+The
+.I snmpd.conf(5)
+man page defines the syntax and behaviour of the various
+configuration directives that can be used to control the
+operation of the Net-SNMP agent, and the management information
+it provides.
+.PP
+This companion man page illustrates these directives, showing
+some practical examples of how they might be used.
+.SH AGENT BEHAVIOUR
+.SS "Listening addresses"
+The default agent behaviour (listing on the standard SNMP UDP port on
+all interfaces) is equivalent to the directive:
+.RS
+agentaddress udp:161
+.RE
+or simply
+.RS
+agentaddress 161
+.RE
+The agent can be configured to \fIonly\fR accept requests sent to the
+local loopback interface (again listening on the SNMP UDP port), using:
+.RS
+agentaddress localhost:161
+.RE
+or
+.RS
+agentaddress 127.0.0.1
+.RE
+It can be configured to accept both UDP and TCP requests (over both IPv4
+and IPv6), using:
+.RS
+agentaddress udp:161,tcp:161,udp6:161,tcp6:161
+.RE
+.\"
+.\" Can the agent handle the same port for both IPv4 & IPv6
+.\"
+.SS "Run-time privileges"
+The agent can be configured to relinquish any privileged access once it
+has opened the initial listening ports.  Given a suitable "snmp" group
+(defined in \fI/etc/group\fR), this could be done using the directives:
+.RS
+.nf
+agentuser  nobody
+agentgroup snmp
+.fi
+.RE
+A similar effect could be achieved using numeric UID and/or GID values:
+.RS
+.nf
+agentuser  #10
+agentgroup #10
+.fi
+.RE
+.\"
+.\" What effect will/may this have on the information returned.
+.\"   ??? Mention this in the main man page.
+.\"
+.SS SNMPv3 Configuration
+The engine ID for the agent can be calculated based on the MAC address
+of the second network interface (\fIeth1\fR), using the directives:
+.RS
+engineIDType 3
+engineIDNic  eth1
+.RE
+It can be calculated from the (first) IP address, using:
+.RS
+engineIDType 1
+.RE
+It can be specified explicitly, using:
+.RS
+engineID "XXX - WHAT FORMAT"
+.RE
+.\"
+.\" Does engineID override the other directives, or what?
+.\"
+.SH ACCESS CONTROL
+.SS SNMPv3 Users
+The following directives will create three users, all using exactly
+the same authentication and encryption settings:
+.RS
+.nf
+createUser me     MD5 "single pass phrase"
+createUser myself MD5 "single pass phrase" DES
+createUser andI   MD5 "single pass phrase" DES "single pass phrase"
+.fi
+.RE
+Note that this defines three \fIdistinct\fR users, who could be granted
+different levels of access.  Changing the passphrase for any one of
+these would not affect the other two.
+.PP
+Separate pass phrases can be specified for authentication and
+encryption:
+.RS
+createUser onering SHA "to rule them all" AES "to bind them"
+.RE
+Remember that these \fIcreateUser\fR directives should be defined in the
+PERSISTENT_DIRECTORY/snmpd.conf file, rather than the usual location.
+.RE
+.\"
+.\"  ??? Illustrate "-e", "-l" and "-m" forms ??
+.\"
+.SS Traditional Access Control
+The SNMPv3 users defined above can be granted access to the full
+MIB tree using the directives:
+.RS
+.nf
+rouser me
+rwuser onering
+.fi
+.RE
+Or selective access to individual subtrees using:
+.RS
+.nf
+rouser myself   .1.3.6.1.2
+rwuser andI     system
+.fi
+.RE
+.PP
+Note that a combination such as:
+.RS
+.nf
+rouser onering
+rwuser onering
+.fi
+.RE
+should \fBnot\fR be used. This would configure the user \fIonering\fR
+with read-only access (and ignore the \fIrwuser\fR entry altogether).
+.PP
+The directives
+.RS
+.nf
+rocommunity public
+rwcommunity private
+.fi
+.RE
+would configure the commonly-expected read and write community strings
+for SNMPv1 and SNMPv2c requests.  This behaviour is \fBnot\fR set up
+by default, and would need to be configured explicitly.
+.RS
+.IP Note:
+It would also be a very good idea to change \fIprivate\fR to something
+a little less predictable!
+.RE
+.PP
+A slightly less vulnerable configuration might restrict what information
+could be retrieved, or the management systems that settings could be
+manipulated from:
+.RS
+.nf
+rocommunity public   default system
+rwcommunity private  10.10.10.0/24
+.fi
+.RE
+.SS VACM Configuration
+This last pair of settings are equivalent to the full VACM definitions:
+.RS
+.nf
+#         sec.name  source        community
+com2sec   public    default       public
+com2sec   mynet     10.10.10.0/24 private
+com2sec6  mynet     fec0::/64     private
+
+#                  sec.model  sec.name
+group  worldGroup  v1         public
+group  worldGroup  v2c        public
+group  myGroup     v1         mynet
+group  myGroup     v2c        mynet
+
+#              incl/excl   subtree     [mask]
+view   all     included    .1
+view   sysView included    system
+
+#              context model level   prefix  read    write  notify (unused)
+access  worldGroup  ""  any  noauth  exact   system  none   none
+access  myGroup     ""  any  noauth  exact   all     all    none
+.fi
+.RE
+.\"
+.\" Discuss this in detail ??
+.\"
+.\" Illustrate other, more flexible configurations
+.\"   including SNMPv3 access.
+.\"
+.SS Typed-View Configuration
+A similar configuration (slightly extended) could also be configured as follows:
+.RS
+.nf
+view   sys2View included    system
+view   sys2View included    .1.3.6.1.2.1.25.1
+
+authcommunity read       public  default      -v sys2View
+authcommunity read,write private 10.10.10.0/8
+.fi
+.RE
+.\"
+.\" Expand this example
+.\"
+.SH SYSTEM INFORMATION
+.SS System Group
+The contents of the 'system' group (with the exception of \fCsysUpTime\fR)
+can be configured using:
+.RS
+.nf
+# Override 'uname -a' and hardcoded system OID values (read-only)
+sysDescr     Universal Turing Machine mk I
+sysObjectID  .1.3.6.1.4.1.8072.3.2.1066
+
+# Override default values from 'configure' - makes these objects read-only
+sysContact   Alan.Turing@cs.man.ac.uk
+sysName      tortoise.turing.com
+sysLocation  An idea in the mind of AT
+
+# Standard end-host behaviour
+sysServices  72
+.fi
+.RE
+.SS Host Resources Group
+The list of devices probed for potential inclusion in the
+\fChrDiskStorageTable\fR (and \fChrDeviceTable\fR) can be amended using
+any of the following directives:
+.RS
+ignoredisk /dev/rdsk/c0t2d0
+.RE
+which prevents the device \fI/dev/rdsk/c0t2d0\fR from being scanned
+.RS
+.nf
+ignoredisk /dev/rdsk/c0t[!6]d0
+ignoredisk /dev/rdsk/c0t[0-57-9a-f]d0
+.fi
+.RE
+either of which prevents all devices \fI/dev/rdsk/c0t\fRX\fId0\fR
+(except .../\fIc0t6d0\fR) from being scanned
+.RS
+ignoredisk /dev/rdsk/c1*
+.RE
+which prevents all devices whose device names start with \fI/dev/rdsk/c1\fR
+from being scanned, or
+.RS
+ignoredisk /dev/rdsk/c?t0d0
+.RE
+which prevents all devices \fI/dev/rdsk/c\fRX\fIt0d0\fR
+(where 'X' is any single character) from being scanned.
+.SS Process Monitoring 
+The list of services running on a system can be monitored
+(and provision made for correcting any problems), using:
+.RS
+.nf
+# At least one web server process must be running at all times
+proc    httpd
+procfix httpd  /etc/rc.d/init.d/httpd restart
+
+# There should never be more than 10 mail processes running
+#    (more implies a probable mail storm, so shut down)
+proc    sendmail   10
+procfix sendmail  /etc/rc.d/init.d/sendmail stop
+
+# There should be a single network management agent running
+#   ("There can be only one")
+proc    snmpd    1  1
+.fi
+.RE
+Also see the "DisMan Event MIB" section later on.
+.SS Disk Usage Monitoring
+The state of disk storage can be monitored using:
+.RS
+.nf
+includeAllDisks 10%
+disk /var 20%
+disk /usr  3%
+#  Keep 100 Mb free for crash dumps
+disk /mnt/crash  100000
+.fi
+.RE
+===============================================================
+.SS System Load Monitoring
+A simple check for an overloaded system might be:
+.RS
+load 10
+.RE
+A more refined check, to allow brief periods of heavy use,
+but recognised sustained medium-heavy load, might be:
+.RS
+load 30 10 5
+.RE
+.SS Log File Monitoring
+.I TODO
+.RS
+file FILE [MAXSIZE]
+.RE
+.RS
+logmatch NAME PATH CYCLETIME REGEX
+.RE
+.SH "ACTIVE MONITORING"
+.SS "Notification Handling"
+.I TODO
+.RS
+authtrapenable 1
+trapcommunity public
+trapsink      localhost
+.RE
+.I TODO
+.RS
+trap2sink      localhost  public
+.RE
+.I TODO
+.RS
+trapsess  \fIsnmpv3 options\fR  localhost:162
+.RE
+
+.SS "DisMan Event MIB"
+.I "TODO - Simple"
+.RS
+createUser    _internal
+iquerySecName _internal
+rouser        _internal
+defaultMonitors         yes
+linkUpDownNotifications yes
+.RE
+.I "TODO - Extended (notifications)"
+.RS
+.RE
+.I "TODO - Set events (autofix)"
+.RS
+setEvent ....
+.RE
+.IP "\fIExamples\fR"
+The following example configuration checks the hrSWRunPerfTable table
+(listing running processes) for any process which is consuming > 10Mb
+of memory.  It performs this check every 600 seconds (the default).
+For every process it finds exceeding the limit, it will end out
+exactly one notification.  In addition to the normal hrSWRunPerfMem
+oid and value sent in the trap, the hrSWRunName object will also be
+sent.  Note that the hrSWRunName object actually occurs in a different
+table, but since the indexes to the two tables are the same this works
+out alright.
+.RS
+.IP
+.nf
+rouser me
+monitor -u me -o sysUpTime.0 -o hrSWRunName "high process memory" hrSWRunPerfMem > 10000
+.fi
+.fi
+.RE
+.IP
+The above line would produce a trap which, when formated by snmptrapd, would
+look like:
+.RS
+.IP
+.nf
+2002-04-05 13:33:53 localhost.localdomain [udp:127.0.0.1:32931]:
+        sysUpTimeInstance = Timeticks: (1629) 0:00:16.29        snmpTrapOID.0 = OID: mteTriggerFired    mteHotTrigger = high process memory     mteHotTargetName =      mteHotContextName =     mteHotOID = OID: hrSWRunPerfMem.1968    mteHotValue = 28564     hrSWRunName.1968 = "xemacs"
+.fi
+.RE
+.IP
+This shows my xemacs process using 28Mb of resident memory.  Which,
+considering it's xemacs, is not that surprising.
+.IP
+Threshold example:
+.RS
+.nf
+.IP
+monitor -t -r 15 -o prNames -o prErrMessage "process table" prErrorFlag 0 1
+.fi
+.RE
+.IP "linkUpDownNotifications yes"
+.RS
+.IP
+.nf
+notificationEvent  linkUpTrap    linkUp   ifIndex ifAdminStatus ifOperStatus
+notificationEvent  linkDownTrap  linkDown ifIndex ifAdminStatus ifOperStatus
+
+monitor  -r 60 -e linkUpTrap   "Generate linkUp" ifOperStatus != 2
+monitor  -r 60 -e linkDownTrap "Generate linkDown" ifOperStatus == 2
+.fi
+.RE
+.IP "defaultMonitors yes"
+.RS
+.IP
+.nf
+monitor	-o prNames -o prErrMessage "process table" prErrorFlag != 0
+monitor	-o memErrorName -o memSwapErrorMsg "memory" memSwapError != 0
+monitor	-o extNames -o extOutput "extTable" extResult != 0
+monitor	-o dskPath -o dskErrorMsg "dskTable" dskErrorFlag != 0
+monitor	-o laNames -o laErrMessage  "laTable" laErrorFlag != 0
+monitor	-o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
+.fi
+.RE
+.SS "DisMan Schedule MIB"
+.I TODO
+.RS
+repeat FREQUENCY OID = VALUE
+cron MINUTE HOUR DAY MONTH WEEKDAY  OID = VALUE
+at   MINUTE HOUR DAY MONTH WEEKDAY  OID = VALUE
+.RE
+.SH "EXTENDING AGENT FUNCTIONALITY"
+.SS "Arbitrary Extension Commands"
+.I "Old Style"
+.RS 
+exec [MIBOID] NAME PROG ARGS"
+sh   [MIBOID] NAME PROG ARGS"
+execfix NAME PROG ARGS"
+.RE
+.I "New Style"
+.RS
+extend [MIBOID] NAME PROG ARGS"
+extendfix [MIBOID] NAME PROG ARGS"
+.RE
+.SS "MIB-Specific Extension Commands"
+.I One-Shot
+.RS
+"pass [-p priority] MIBOID PROG"
+.RE
+.IP
+.I Persistent
+.RS
+"pass_persist [-p priority] MIBOID PROG"
+.RE
+.SS "Embedded Perl Support"
+.I ToDo
+.RS
+disablePerl [true|false]"
+perlInitFile FILE"
+perl EXPRESSION"
+.RE
+.I Examples
+.RS
+.RS
+.nf
+perl use Data::Dumper;
+perl sub myroutine  { print "got called: ",Dumper(@_),"\\n"; }
+perl $agent->register('mylink', '.1.3.6.1.8765', \\&myroutine);
+.fi
+.RE
+.RS
+.nf
+perl 'do /path/to/file.pl';
+.fi
+.RE
+.RE
+.SS Dynamically Loadable Modules
+.I TODO
+.RS
+dlmod NAME PATH"
+.RE
+.SS "Proxy Support"
+.I TODO
+.RS
+proxy [-Cn CONTEXTNAME] [SNMPCMD ARGS] HOST OID [REMOTEOID]"
+.RE
+Examples
+.RS
+.nf
+# assigns the entire mib tree on remotehost1 to the context of the
+# same name:
+proxy -Cn remotehost1 -v 1 -c public remotehost1 .1.3
+# ditto, but for remotehost 2
+proxy -Cn remotehost2 -v 1 -c public remotehost2 .1.3
+# proxies only the ucdavis enterprises tree to the remote host using snmpv1
+proxy -v 1 -c public remotehost .1.3.6.1.4.1.2021
+# uses v3 to access remotehost and converts the remote .1.3.6.1.2.1.1
+# oid to local .1.3.6.1.3.10 oid (another way to access mulitple hosts
+# without using contexts)
+proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
+.fi
+.RE
+.SS SMUX Sub-Agents
+.RS
+.nf
+smuxsocket [<transport-specifier>:]<transport-address>[,...]"
+smuxpeer .1.3.6.1.2.1.14 ospf_pass
+.fi
+.RE
+.SS AgentX Sub-Agents
+.I "Master agent"
+.RS
+.nf
+master agentx
+agentXSocket [<transport-specifier>:]<transport-address>[,...]"
+agentXPerms socket_perms [directory_perms [username|userid [groupname|groupid]]]"
+.fi
+.RE
+.I "Sub-agent"
+.RS
+.nf
+agentPingInterval NUM"
+agentXSocket [<transport-specifier>:]<transport-address>[,...]"
+.fi
+.RE
+.SH "OTHER CONFIGURATION"
+.RS
+override sysDescr.0 octet_str "my own sysDescr"
+.RE
+.RS
+injectHandler stash_cache NAME table_iterator
+.RE
+.SH "FILES"
+SYSCONFDIR/snmp/snmpd.conf
+.SH "SEE ALSO"
+snmpconf(1), snmpd.conf(5), snmp.conf(5), snmp_config(5), snmpd(8), EXAMPLE.conf, read_config(3).
+.\" Local Variables:
+.\"  mode: nroff
+.\" End:

@@ -292,46 +292,6 @@ is a direct equivalent to the original \fIaccess\fR directive, typically
 listing the view types as \fIread\fR or \fIread,write\fR as appropriate.
 (or see 'snmptrapd.conf(5)' for other possibilities).
 All other fields have the same interpretation as with \fIaccess\fR.
-.SS "VACM Examples:"
-.nf
-#        sec.name  source          community
-com2sec  local     localhost       private
-com2sec  mynet     10.10.10.0/24   public
-com2sec  public    default         public
-com2sec6 mynet     fec0::/64       public
-
-#             sec.model  sec.name
-group mygroup v1         mynet
-group mygroup v2c        mynet
-group mygroup usm        mynet
-group local   v1         local
-group local   v2c        local
-group local   usm        local
-group public  v1         public
-group public  v2c        public
-group public  usm        public
-
-#           incl/excl subtree                          mask
-view all    included  .1                               80
-view system included  system                           fe
-view mib2   included  .iso.org.dod.internet.mgmt.mib-2 fc
-
-#              context sec.model sec.level prefix read   write notify
-access mygroup ""      any       noauth    exact  mib2   none  none
-access public  ""      any       noauth    exact  system none  none
-access local   ""      any       noauth    exact  all    all   all
-.IP "Default VACM model"
-The default configuration of the agent, as shipped, is functionally
-equivalent to the following entries:
-.nf
-com2sec	public	default	public
-group	public	v1	public
-group	public	v2c	public
-group	public	usm	public
-view 	all	included	.1
-access	public	""	any	noauth	exact	all	none	none
-.fi
-.RE
 .SH SYSTEM INFORMATION
 Most of the information reported by the Net-SNMP agent is retrieved
 from the underlying system, or dynamically configured via SNMP SET requests
@@ -388,32 +348,9 @@ Please consult the source (\fIhost/hr_disk.c\fR) and check for the
 \fIAdd_HR_Disk_entry\fR calls relevant for a particular O/S
 to determine the list of devices that will be scanned.
 .RE
-.RS
-.IP "Examples:"
 .IP
-ignoredisk /dev/rdsk/c0t2d0
-.IP
-This directive prevents the device /dev/rdsk/c0t2d0 from being scanned.
-.IP
-ignoredisk /dev/rdsk/c0t[!6]d0
-.IP
-This directive prevents all devices /dev/rdsk/c0tXd0 except .../c0t6d0
-from being scanned. For most systems similar is the following directive:
-.IP
-ignoredisk /dev/rdsk/c0t[0-57-9a-f]d0
-.IP
-ignoredisk /dev/rdsk/c1*
-.IP
-This directive prevents all devices whose device names start with /dev/rdsk/c1
-from being scanned.
-.IP
-ignoredisk /dev/rdsk/c?t0d0
-.IP
-This directive prevents all devices /dev/rdsk/cXt0d0 ('X' might be any char)
-from being scanned.
-.IP
-You might use more than one such wildcard expression in any such directive.
-.RE
+The pattern can include one or more wildcard expressions.
+See \fIsnmpd.examples(5)\fR for illustration of the wildcard syntax.
 .IP "storageUseNFS [1|2]"
 controls whether NFS and NFS-like file systems should be reported
 as 'Network Disks' (1) or 'Fixed Disks' (2) in the hrStorageTable.
