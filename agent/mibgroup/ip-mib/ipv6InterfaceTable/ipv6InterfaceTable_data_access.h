@@ -35,22 +35,52 @@ extern          "C" {
      */
 
 
-    int            
+    int
+     
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         ipv6InterfaceTable_init_data(ipv6InterfaceTable_registration *
                                      ipv6InterfaceTable_reg);
 
 
-    void            ipv6InterfaceTable_container_init(netsnmp_container **
-                                                      container_ptr_ptr);
+    void            ipv6InterfaceTable_container_init(netsnmp_container
+                                                      **container_ptr_ptr);
     void            ipv6InterfaceTable_container_shutdown(netsnmp_container
-                                                          * container_ptr);
+                                                          *container_ptr);
 
-    int             ipv6InterfaceTable_container_load(netsnmp_container *
-                                                      container);
-    void            ipv6InterfaceTable_container_free(netsnmp_container *
-                                                      container);
+    int             ipv6InterfaceTable_container_load(netsnmp_container
+                                                      *container);
+    void            ipv6InterfaceTable_container_free(netsnmp_container
+                                                      *container);
 
-    int            
+    int
+     
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         ipv6InterfaceTable_row_prep(ipv6InterfaceTable_rowreq_ctx *
                                     rowreq_ctx);
 
