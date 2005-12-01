@@ -7,22 +7,22 @@
 #ifndef IPV4INTERFACETABLE_DATA_ACCESS_H
 #define IPV4INTERFACETABLE_DATA_ACCESS_H
 
-config_noinclude(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_data_access)
-
+config_noinclude(ip -
+                 mib / ipv4InterfaceTable / ipv4InterfaceTable_data_access)
 #ifdef __cplusplus
-extern          "C" {
+     extern          "C" {
 #endif
 
 
-    /*
-     *********************************************************************
-     * function declarations
-     */
+         /*
+          *********************************************************************
+          * function declarations
+          */
 
-    /*
-     *********************************************************************
-     * Table declarations
-     */
+         /*
+          *********************************************************************
+          * Table declarations
+          */
 /**********************************************************************
  **********************************************************************
  ***
@@ -30,39 +30,44 @@ extern          "C" {
  ***
  **********************************************************************
  **********************************************************************/
-    /*
-     * IP-MIB::ipv4InterfaceTable is subid 28 of ip.
-     * Its status is Current.
-     * OID: .1.3.6.1.2.1.4.28, length: 8
-     */
+         /*
+          * IP-MIB::ipv4InterfaceTable is subid 28 of ip.
+          * Its status is Current.
+          * OID: .1.3.6.1.2.1.4.28, length: 8
+          */
 
 
-    int            
-        ipv4InterfaceTable_init_data(ipv4InterfaceTable_registration *
-                                     ipv4InterfaceTable_reg);
+         int
+             ipv4InterfaceTable_init_data(ipv4InterfaceTable_registration *
+                                          ipv4InterfaceTable_reg);
 
 
-    void            ipv4InterfaceTable_container_init(netsnmp_container **
-                                                      container_ptr_ptr);
-    void            ipv4InterfaceTable_container_shutdown(netsnmp_container
-                                                          * container_ptr);
+         void           
+             ipv4InterfaceTable_container_init(netsnmp_container
+                                               **container_ptr_ptr);
+         void            ipv4InterfaceTable_container_shutdown(netsnmp_container
+                                                               *container_ptr);
 
-    int             ipv4InterfaceTable_container_load(netsnmp_container *
-                                                      container);
-    void            ipv4InterfaceTable_container_free(netsnmp_container *
-                                                      container);
+         int            
+             ipv4InterfaceTable_container_load(netsnmp_container
+                                               *container);
+         void           
+             ipv4InterfaceTable_container_free(netsnmp_container
+                                               *container);
 
-    int            
-        ipv4InterfaceTable_row_prep(ipv4InterfaceTable_rowreq_ctx *
-                                    rowreq_ctx);
+         int
+             ipv4InterfaceTable_row_prep(ipv4InterfaceTable_rowreq_ctx *
+                                         rowreq_ctx);
 
-    void
-    ipv4InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *
-                                               ift_rrc,
-                                               netsnmp_interface_entry *entry);
+         void
+             ipv4InterfaceTable_check_entry_for_updates(const
+                                                        ifTable_rowreq_ctx
+                                                        * ift_rrc,
+                                                        netsnmp_interface_entry
+                                                        *entry);
 
 
 #ifdef __cplusplus
-}
+     }
 #endif
 #endif                          /* IPV4INTERFACETABLE_DATA_ACCESS_H */

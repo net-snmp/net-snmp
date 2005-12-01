@@ -89,7 +89,7 @@ ipv6InterfaceTable_init_data(ipv6InterfaceTable_registration *
  *  process that will supply the data, opening a database, etc.
  */
 void
-ipv6InterfaceTable_container_init(netsnmp_container ** container_ptr_ptr)
+ipv6InterfaceTable_container_init(netsnmp_container **container_ptr_ptr)
 {
     DEBUGMSGTL(("verbose:ipv6InterfaceTable:ipv6InterfaceTable_container_init", "called\n"));
 
@@ -112,12 +112,13 @@ ipv6InterfaceTable_container_init(netsnmp_container ** container_ptr_ptr)
  * determine if we want a ifTable row in our container
  */
 void
-ipv6InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *ift_rrc,
+ipv6InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *
+                                           ift_rrc,
                                            netsnmp_interface_entry *entry)
 {
-    netsnmp_container  *c = ipv6InterfaceTable_container_get();
+    netsnmp_container *c = ipv6InterfaceTable_container_get();
     ifTable_rowreq_ctx *ip6if_rrc;
-    int                 changed = 0;
+    int             changed = 0;
 
     DEBUGMSGTL(("verbose:ipv6InterfaceTable:check_entry_for_updates",
                 "called\n"));
@@ -140,8 +141,7 @@ ipv6InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *ift_rrc,
             CONTAINER_INSERT(c, ift_rrc);
             changed = 1;
         }
-    }
-    else {
+    } else {
         /*
          * found corresponding row. is it still applicable?
          */
@@ -155,29 +155,39 @@ ipv6InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *ift_rrc,
                         ift_rrc->data.ifentry->index));
             CONTAINER_REMOVE(c, ift_rrc);
             changed = 1;
-        }
-        else {
+        } else {
             /*
              * still applicable. anything changed?
              */
             if (/** retransmit */
-                ((entry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_RETRANSMIT) &&
-                 (entry->retransmit_v6 !=
-                  ift_rrc->data.ifentry->retransmit_v6)) ||
+                   ((entry->
+                     ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_RETRANSMIT)
+                    && (entry->retransmit_v6 !=
+                        ift_rrc->data.ifentry->retransmit_v6)) ||
                 /** reasm */
-                ((entry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_REASMMAX) &&
-                 (entry->reasm_max != ift_rrc->data.ifentry->reasm_max)) ||
+                   ((entry->
+                     ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_REASMMAX)
+                    && (entry->reasm_max !=
+                        ift_rrc->data.ifentry->reasm_max)) ||
                 /** reachable time */
-                ((entry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_REACHABLE) &&
-                 (entry->reachable_time != ift_rrc->data.ifentry->reachable_time)) ||
+                   ((entry->
+                     ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_REACHABLE)
+                    && (entry->reachable_time !=
+                        ift_rrc->data.ifentry->reachable_time)) ||
                 /** if id */
-                ((entry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID) &&
-                 ((entry->v6_if_id_len != ift_rrc->data.ifentry->v6_if_id_len) ||
-                  (0 != memcmp(entry->v6_if_id,ift_rrc->data.ifentry->v6_if_id,
-                               entry->v6_if_id_len)))) ||
+                   ((entry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID)
+                    &&
+                    ((entry->v6_if_id_len !=
+                      ift_rrc->data.ifentry->v6_if_id_len)
+                     || (0 !=
+                         memcmp(entry->v6_if_id,
+                                ift_rrc->data.ifentry->v6_if_id,
+                                entry->v6_if_id_len)))) ||
                 /** forwarding */
-                ((entry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_FORWARDING) &&
-                 (entry->forwarding_v6 != ift_rrc->data.ifentry->forwarding_v6))) {
+                   ((entry->
+                     ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_FORWARDING)
+                    && (entry->forwarding_v6 !=
+                        ift_rrc->data.ifentry->forwarding_v6))) {
                 DEBUGMSGTL(("ipv6InterfaceTable:check_entry_for_updates",
                             "row changed for index %d\n",
                             ift_rrc->data.ifentry->index));
@@ -211,7 +221,7 @@ ipv6InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *ift_rrc,
  *  process that supplied the data, closing a database, etc.
  */
 void
-ipv6InterfaceTable_container_shutdown(netsnmp_container * container_ptr)
+ipv6InterfaceTable_container_shutdown(netsnmp_container *container_ptr)
 {
     DEBUGMSGTL(("verbose:ipv6InterfaceTable:ipv6InterfaceTable_container_shutdown", "called\n"));
 
@@ -254,7 +264,7 @@ ipv6InterfaceTable_container_shutdown(netsnmp_container * container_ptr)
  *
  */
 int
-ipv6InterfaceTable_container_load(netsnmp_container * container)
+ipv6InterfaceTable_container_load(netsnmp_container *container)
 {
     ipv6InterfaceTable_rowreq_ctx *rowreq_ctx;
     size_t          count = 0;
@@ -337,7 +347,7 @@ ipv6InterfaceTable_container_load(netsnmp_container * container)
  *
  */
 void
-ipv6InterfaceTable_container_free(netsnmp_container * container)
+ipv6InterfaceTable_container_free(netsnmp_container *container)
 {
     DEBUGMSGTL(("verbose:ipv6InterfaceTable:ipv6InterfaceTable_container_free", "called\n"));
 
