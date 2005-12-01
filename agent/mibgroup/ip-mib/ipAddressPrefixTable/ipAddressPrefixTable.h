@@ -191,24 +191,24 @@ config_require(ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access)
      *********************************************************************
      * function prototypes
      */
-    int            
+    int
         ipAddressPrefixTable_pre_request(ipAddressPrefixTable_registration
                                          * user_context);
-    int            
+    int
         ipAddressPrefixTable_post_request(ipAddressPrefixTable_registration
                                           * user_context, int rc);
 
-    int            
+    int
         ipAddressPrefixTable_rowreq_ctx_init
         (ipAddressPrefixTable_rowreq_ctx * rowreq_ctx,
          void *user_init_ctx);
-    void           
+    void
         ipAddressPrefixTable_rowreq_ctx_cleanup
         (ipAddressPrefixTable_rowreq_ctx * rowreq_ctx);
 
 
     ipAddressPrefixTable_rowreq_ctx
-        *ipAddressPrefixTable_row_find_by_mib_index
+        * ipAddressPrefixTable_row_find_by_mib_index
         (ipAddressPrefixTable_mib_index * mib_idx);
 
     extern oid      ipAddressPrefixTable_oid[];
@@ -242,39 +242,39 @@ config_require(ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access)
      * indexes
      */
 
-    int            
+    int
         ipAddressPrefixOrigin_get(ipAddressPrefixTable_rowreq_ctx *
                                   rowreq_ctx,
                                   u_long * ipAddressPrefixOrigin_val_ptr);
-    int            
+    int
         ipAddressPrefixOnLinkFlag_get(ipAddressPrefixTable_rowreq_ctx *
                                       rowreq_ctx,
                                       u_long *
                                       ipAddressPrefixOnLinkFlag_val_ptr);
-    int            
+    int
         ipAddressPrefixAutonomousFlag_get(ipAddressPrefixTable_rowreq_ctx *
                                           rowreq_ctx,
                                           u_long *
                                           ipAddressPrefixAutonomousFlag_val_ptr);
-    int            
+    int
         ipAddressPrefixAdvPreferredLifetime_get
         (ipAddressPrefixTable_rowreq_ctx * rowreq_ctx,
          u_long * ipAddressPrefixAdvPreferredLifetime_val_ptr);
-    int            
+    int
         ipAddressPrefixAdvValidLifetime_get(ipAddressPrefixTable_rowreq_ctx
                                             * rowreq_ctx,
                                             u_long *
                                             ipAddressPrefixAdvValidLifetime_val_ptr);
 
 
-    int            
+    int
         ipAddressPrefixTable_indexes_set_tbl_idx
         (ipAddressPrefixTable_mib_index * tbl_idx,
          long ipAddressPrefixIfIndex_val, u_long ipAddressPrefixType_val,
          char *ipAddressPrefixPrefix_val_ptr,
          size_t ipAddressPrefixPrefix_val_ptr_len,
          u_long ipAddressPrefixLength_val);
-    int            
+    int
         ipAddressPrefixTable_indexes_set(ipAddressPrefixTable_rowreq_ctx *
                                          rowreq_ctx,
                                          long ipAddressPrefixIfIndex_val,
