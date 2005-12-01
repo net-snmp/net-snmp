@@ -40,6 +40,11 @@ extern          "C" {
 
 
     /*
+     * TODO:405:r: Review TCPCONNECTIONTABLE_SETTABLE_COLS macro.
+     * OR together all the writable cols.
+     */
+#define TCPCONNECTIONTABLE_SETTABLE_COLS (COLUMN_TCPCONNECTIONSTATE_FLAG)
+    /*
      * NOTES on enums
      * ==============
      *
