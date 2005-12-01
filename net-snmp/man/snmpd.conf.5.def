@@ -58,7 +58,7 @@ in the
 manual page for more information about the format of listening
 addresses.
 .IP
-The default behaviour, is to
+The default behaviour is to
 listen on UDP port 161 on all IPv4 interfaces.
 .IP "agentgroup {GROUP|#GID}"
 changes to the specified group after opening the listening port(s).
@@ -168,7 +168,7 @@ By default, this will provide access to the full OID tree for authenticated
 (including encrypted) SNMPv3 requests.
 An alternative minimum security level can be specified using \fInoauth\fR
 (to allow unauthenticated requests), or \fIpriv\fR (to enforce use of
-encryption).  The OID parameter restricts access for that
+encryption).  The OID field restricts access for that
 user to the subtree rooted at the given OID.
 .IP "rocommunity COMMUNITY [SOURCE [OID]]"
 .IP "rwcommunity COMMUNITY [SOURCE [OID]]"
@@ -177,7 +177,7 @@ specify an SNMPv1 or SNMPv2c community that will be allowed read-only
 By default, this will provide access to the full OID tree for such requests,
 regardless of where they were sent from. The SOURCE token can be used to
 restrict access to requests from the specified system(s) - see
-\fIcom2sec\fR for the full details.  The OID parameter restricts access for
+\fIcom2sec\fR for the full details.  The OID field restricts access for
 that community to the subtree rooted at the given OID.
 .IP "rocommunity6 COMMUNITY [SOURCE [OID]]"
 .IP "rwcommunity6 COMMUNITY [SOURCE [OID]]"
@@ -188,10 +188,11 @@ the IPv4 versions.
 .PP
 In each case, only one directive should be specified for a given SNMPv3 user,
 or community string.
-In particular, it is \fBnot\fR appropriate to specify both \fIrouser\fR
+It is \fBnot\fR appropriate to specify both \fIrouser\fR
 and \fIrwuser\fR directives referring to the same SNMPv3 user (or equivalent
 community settings). The \fIrwuser\fR directive provides all the access
 of \fIrouser\fR (as well as allowing SET support).
+The same holds true for the community-based directives.
 .PP
 More complex access requirements (such as access to two
 or more distinct OID subtrees, or different views for GET and SET requests)
@@ -263,14 +264,16 @@ concerned, the two main view types are \fIread\fR and \fIwrite\fR,
 corresponding to the READ and WRITE views of the main \fIaccess\fR directive.
 See the 'snmptrapd.conf(5)' man page for discussion of other view types.
 .IP "authcommunity TYPES  COMMUNITY   [SOURCE [OID | -v VIEW]]"
-.IP "authuser   TYPES [-s MODEL] USER  [LEVEL [OID | -v VIEW]]"
-correspond to the \fIrocommunity\fR/\fIrwcommunity\fR
-and \fIrouser\fR/\fIrwuser\fR directives respectively.  TYPES will
-usually be \fIread\fR or \fIread,write\fR.
-The view specification can either be an OID subtree (as with
-the earlier directives), or a named view (defined using the
+is an alternative to the \fIrocommunity\fR/\fIrwcommunity\fR directives.
+TYPES will usually be \fIread\fR or \fIread,write\fR respectively.
+The view specification can either be an OID subtree (as before),
+or a named view (defined using the
 \fIview\fR directive) for greater flexibility.  If this is omitted,
 then access will be allowed to the full OID tree.
+.IP "authuser   TYPES [-s MODEL] USER  [LEVEL [OID | -v VIEW]]"
+is an alternative to the \fIrouser\fR/\fIrwuser\fR directives.
+The fields TYPES, OID and VIEW have the same meaning as for
+\fIauthcommunity\fR.
 .IP "authgroup  TYPES [-s MODEL] GROUP [LEVEL [OID | -v VIEW]]"
 is a companion to the \fIauthuser\fR directive, specifying access
 for a particular group (defined using the \fIgroup\fR directive as usual).
@@ -285,8 +288,8 @@ also configures the access for a particular group,
 specifying the name and type of view to apply. The MODEL and LEVEL fields
 are interpreted in the same way as for \fIauthgroup\fR.
 If CONTEXT is specified, access is configured within this SNMPv3 context
-(or contexts with this prefix if the CONTEXT field ends with '*'),
-otherwise the default context ("") is used.
+(or contexts with this prefix if the CONTEXT field ends with '*').
+Otherwise the default context ("") is used.
 .IP "setaccess CONTEXT MODEL LEVEL PREFIX VIEW TYPES"
 is a direct equivalent to the original \fIaccess\fR directive, typically
 listing the view types as \fIread\fR or \fIread,write\fR as appropriate.
@@ -312,7 +315,7 @@ corresponding object read-only, and attempts to SET it will result in
 a \fInotWritable\fR error response.
 .IP "sysServices NUMBER"
 sets the value of the \fCsysServices.0\fR object.
-For a host, a good value is 72 (application + end-to-end layers).
+For a host system, a good value is 72 (application + end-to-end layers).
 If this directive is not specified, then no value will be reported
 for the \fCsysServices.0\fR object.
 .IP "sysDescr STRING"
@@ -324,7 +327,8 @@ used by a network administrator to configure suitable values for them.
 .IP "interface NAME TYPE SPEED"
 can be used to provide appropriate type and speed settings for
 interfaces where the agent fails to determine this information correctly.
-TYPE is a type value as given in the IANAifType-MIB.
+TYPE is a type value as given in the IANAifType-MIB,
+and can be specified numerically or by name (assuming this MIB is loaded).
 .SS Host Resources Group
 This requires that the agent was built with support for the
 \fIhost\fR module (which is now included as part of the default build 
@@ -352,8 +356,13 @@ to determine the list of devices that will be scanned.
 The pattern can include one or more wildcard expressions.
 See \fIsnmpd.examples(5)\fR for illustration of the wildcard syntax.
 .IP "storageUseNFS [1|2]"
-controls whether NFS and NFS-like file systems should be reported
-as 'Network Disks' (1) or 'Fixed Disks' (2) in the hrStorageTable.
+controls how NFS and NFS-like file systems should be reported
+in the hrStorageTable.
+as 'Network Disks' (1) or 'Fixed Disks' (2)
+Historically, the Net-SNMP agent has reported such file systems
+as 'Fixed Disks', and this is still the default behaviour.
+Setting this directive to '1' reports such file systems as
+'Network Disks', as required by the Host Resources MIB.
 .SS Process Monitoring 
 The \fChrSWRun\fR group of the Host Resources MIB provides
 information about individual processes running on the local system.
@@ -373,7 +382,7 @@ set to 1, and a suitable description message reported via the
 .RS
 .IP "Note:"
 This situation will \fBnot\fR automatically trigger a trap to report
-the problem - see the DISMAN-EVENT-MIB section later.
+the problem - see the DisMan Event MIB section later.
 .RE
 .IP
 If neither MAX nor MIN are specified, they default to \fBinfinity\fR
@@ -386,7 +395,7 @@ process NAME.  This will be invoked when the corresponding
 .RS
 .IP "Note:"
 This command will \fBnot\fR be invoked automatically.
-.\" XXX - but see the DISMAN-EVENT-MIB section later ???
+.\" XXX - but see the DisMan Event MIB section later ???
 .RE
 .IP
 The \fIprocfix\fR directive must be specified \fBafter\fR the matching
@@ -411,7 +420,7 @@ set to 1, and a suitable description message reported via the
 .RS
 .IP "Note:"
 This situation will \fBnot\fR automatically trigger a trap to report
-the problem - see the DISMAN-EVENT-MIB section later.
+the problem - see the DisMan Event MIB section later.
 .RE
 .IP "includeAllDisks MINPERCENT%"
 configures monitoring of all disks found on the system,
@@ -454,7 +463,7 @@ set to 1, and a suitable description message reported via the
 .RS
 .IP "Note:"
 This situation will \fBnot\fR automatically trigger a trap to report
-the problem - see the DISMAN-EVENT-MIB section later.
+the problem - see the DisMan Event MIB section later.
 .RE
 .IP
 If the MAX15 threshold is omitted, it will default to the MAX5 value.
@@ -467,8 +476,8 @@ walking the \fClaTable\fR will succeed (assuming the
 \fIucd-snmp/loadave\fR module was configured into the agent),
 even if the \fIload\fR directive is not present.
 .SS Log File Monitoring
-These require that the agent was built with support for the
-\fIucd-snmp/file\fR and \fIucd-snmp/logmatch\fR modules respectively
+This requires that the agent was built with support for either the
+\fIucd-snmp/file\fR or \fIucd-snmp/logmatch\fR modules respectively
 (both of which are included as part of the
 default build configuration).
 .IP "file FILE [MAXSIZE]"
@@ -480,7 +489,7 @@ via the \fCfileErrorMsg\fR instance.
 .RS
 .IP "Note:"
 This situation will \fBnot\fR automatically trigger a trap to report
-the problem - see the DISMAN-EVENT-MIB section later.
+the problem - see the DisMan Event MIB section later.
 .RE
 .IP
 A maximum of 20 files can be monitored.
@@ -529,16 +538,16 @@ port (162) will be used.
 .RS
 .IP Note:
 This mechanism is being deprecated, and the listening port
-should be specified via the transport specification instead.
+should be specified via the transport specification HOST instead.
 .RE
 .IP
-If several \fI*sink\fR directives are specified, multiple
-copies of each notification 9in the appropriate formats)
+If several sink directives are specified, multiple
+copies of each notification (in the appropriate formats)
 will be generated.
 .RS
 .IP Note:
-It is \fBnot\fR normally appropriate to list the same
-destination in two (or all threee) sink directives. 
+It is \fBnot\fR normally appropriate to list two (or all three)
+sink directives with the same destination.
 .RE
 .IP "trapsess [SNMPCMD_ARGS] HOST"
 provides a more generic mechanism for defining notification destinations.
@@ -558,7 +567,7 @@ determines whether to generate authentication failure traps
 Ordinarily the corresponding MIB
 object (\fCsnmpEnableAuthenTraps.0\fR) is read-write, but specifying
 this directive makes this object read-only, and attempts to set the
-value of the object will result in a \fInotWritable\fR error response.
+value via SET requests will result in a \fInotWritable\fR error response.
 .SS "DisMan Event MIB"
 The previous directives can be used to configure where traps should
 be sent, but are not concerned with \fIwhen\fR to send such traps
@@ -577,7 +586,7 @@ existing scripts may possibly need some minor adjustments.
 .RE
 .IP "iquerySecName NAME"
 .IP "agentSecName NAME"
-specifies the default SNMPv3 username, to be use when making internal
+specifies the default SNMPv3 username, to be used when making internal
 queries to retrieve any necessary information (either for evaluating
 the monitored expression, or building a notification payload).
 .IP
@@ -623,8 +632,9 @@ or rises above the upper threshold (MAX), then the monitor entry will
 trigger the corresponding event.
 .IP
 Note that the rising threshold event will only be re-armed when
-the monitored value falls below the \fBlower\fR threshold (MIN),
-and similarly for the falling threshold event and MAX.
+the monitored value falls below the \fBlower\fR threshold (MIN).
+Similarly, the falling threshold event will be re-armed by
+the upper threshold (MAX).
 .IP
 The optional parameters DMIN and DMAX configure a pair of
 similar threshold tests, but working with the \fIdelta\fR
@@ -724,11 +734,12 @@ for the notification to be generated.
 .IP
 If the \fI-n\fR option is given, the notification payload will
 include the standard varbinds as specified in the OBJECTS clause
-of the notification definition.  Otherwise, these varbinds must
-be listed explicitly (either here or in the corresponding
-\fImonitor\fR directive).
+of the notification MIB definition.
 This option must come \fBafter\fR the NOTIFICATION OID
 (and the relevant MIB file must be available and loaded by the agent).
+Otherwise, these varbinds must
+be listed explicitly (either here or in the corresponding
+\fImonitor\fR directive).
 .IP
 The \fI-i OID\fR and \fI-o OID\fR options specify additional
 varbinds to be appended to the notification payload, after the
@@ -764,12 +775,12 @@ This is the default behaviour of the Net-SNMP Event MIB implementation.
 .IP
 Unfortunately, the DisMan Event MIB specifications actually
 state that the trigger-related varbinds should come \fBfirst\fR,
-followed by the event-related ones.  Specifying this directive
-restores this strictly-correct (but inappropriate) behaviour.
+followed by the event-related ones.  This directive can be used to
+restore this strictly-correct (but inappropriate) behaviour.
 .RS
 .IP "Note:"
-This may result in generating invalid notifications if
-the \fInotificationEvent -n\fR flag is used together
+Strict DisMan ordering may result in generating invalid notifications
+payload lists if the \fInotificationEvent -n\fR flag is used together
 with \fImonitor -o\fR (or \fI-i\fR) varbind options.
 .RE
 .IP
