@@ -9,6 +9,14 @@
 UPDATE_CURR=$NETSNMP_SRC_DIR/agent/mibgroup/ip-mib/inetNetToMediaTable
 
 #
+# sigh.. hack city - code generated and checked in for draft version
+# of mib, and they changed the name of the table! So we need a local
+# copy here
+#
+MIBS=$PWD/IP-MIB.txt
+export MIBS
+
+#
 # required params
 #
 UPDATE_OID=inetNetToMediaTable
