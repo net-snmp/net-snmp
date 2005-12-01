@@ -37,6 +37,11 @@ extern          "C" {
 
 
     /*
+     * TODO:405:r: Review SNMPNOTIFYFILTERTABLE_SETTABLE_COLS macro.
+     * OR together all the writable cols.
+     */
+#define SNMPNOTIFYFILTERTABLE_SETTABLE_COLS (COLUMN_SNMPNOTIFYFILTERMASK_FLAG | COLUMN_SNMPNOTIFYFILTERTYPE_FLAG | COLUMN_SNMPNOTIFYFILTERSTORAGETYPE_FLAG | COLUMN_SNMPNOTIFYFILTERROWSTATUS_FLAG)
+    /*
      * TODO:405:r: Review SNMPNOTIFYFILTERTABLE_REQUIRED_COLS macro.
      * OR together all the required rows for row creation.
      * default is writable cols w/out defaults.
