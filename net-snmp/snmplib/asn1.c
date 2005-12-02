@@ -1821,13 +1821,13 @@ asn_parse_unsigned_int64(u_char * data,
     }
     *datalength -= (int) asn_length + (bufp - data);
     if (*bufp & 0x80) {
-        low = ~low;             /* integer is negative */
-        high = ~high;
+        low = 0xFFFFFF;     /* first byte bit 1 means start the data with 1s */
+        high = 0xFFFFFF;
     }
 
     while (asn_length--) {
-        high = (high << 8) | ((low & 0xFF000000) >> 24);
-        low = (low << 8) | *bufp++;
+        high = ((0x00FFFFFF & high) << 8) | ((low & 0xFF000000) >> 24);
+        low = ((low & 0x00FFFFFF) << 8) | *bufp++;
     }
 
     CHECK_OVERFLOW_U(high,6);
@@ -2086,13 +2086,13 @@ asn_parse_signed_int64(u_char * data,
     }
     *datalength -= (int) asn_length + (bufp - data);
     if (*bufp & 0x80) {
-        low = ~low;             /* integer is negative */
-        high = ~high;
+        low = 0xFFFFFF;     /* first byte bit 1 means start the data with 1s */
+        high = 0xFFFFFF;
     }
 
     while (asn_length--) {
-        high = (high << 8) | ((low & 0xFF000000) >> 24);
-        low = (low << 8) | *bufp++;
+        high = ((0x00FFFFFF & high) << 8) | ((low & 0xFF000000) >> 24);
+        low = ((low & 0x00FFFFFF) << 8) | *bufp++;
     }
 
     CHECK_OVERFLOW_U(high,8);
