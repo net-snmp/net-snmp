@@ -48,6 +48,7 @@ static char *rcsid = "$OpenBSD: main.c,v 1.52 2005/02/10 14:25:08 itojun Exp $";
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/utilities.h>
 
 #if HAVE_NETDB_H
 #include <netdb.h>
@@ -87,8 +88,8 @@ char    *progname = NULL;
 struct protox {
         /* pr_index/pr_sindex - Omitted */ 
 	int	pr_wanted;			/* 1 if wanted, 0 otherwise */
-	void	(*pr_cblocks)(char *);	/* control blocks printing routine */
-	void	(*pr_stats)(char *);	/* statistics printing routine */
+	void	(*pr_cblocks)(const char *);	/* control blocks printing routine */
+	void	(*pr_stats)(const char *);	/* statistics printing routine */
   const char	*pr_name;			/* well-known name */
 } protox[] = {
 	{ 1,	tcpprotopr,	tcp_stats,	"tcp" },	
@@ -116,10 +117,10 @@ struct protox *protoprotox[] = {
 	protox, ip6protox, NULL
 };
 
-static void printproto(struct protox *, char *);
+static void printproto(struct protox *, const char *);
 static void usage(void);
-static struct protox *name2protox(char *);
-static struct protox *knownname(char *);
+static struct protox *name2protox(const char *);
+static struct protox *knownname(const char *);
 
 netsnmp_session *ss;
 struct protox *tp = NULL; /* for printing cblocks & stats */
@@ -425,9 +426,9 @@ main(int argc, char *argv[])
  * Namelist checks - Omitted
  */
 static void
-printproto(struct protox *tp, char *name)
+printproto(struct protox *tp, const char *name)
 {
-	void (*pr)(char *);
+	void (*pr)(const char *);
 
 	if (sflag) {
 		pr = tp->pr_stats;
@@ -458,7 +459,7 @@ plurales(int n)
  * Find the protox for the given "well-known" name.
  */
 static struct protox *
-knownname(char *name)
+knownname(const char *name)
 {
 	struct protox **tpp, *tp;
 
@@ -473,7 +474,7 @@ knownname(char *name)
  * Find the protox corresponding to name.
  */
 static struct protox *
-name2protox(char *name)
+name2protox(const char *name)
 {
 	struct protox *tp;
 	char **alias;			/* alias from p->aliases */
@@ -502,16 +503,15 @@ name2protox(char *name)
 static void
 usage(void)
 {
-	/* XXX - TODO */
 	(void)fprintf(stderr,
-"usage: %s [-Aan] [-f address_family] [-M core] [-N system]\n", progname);
+"usage: %s [snmp_opts] [-Can] [-Cf address_family]\n", progname);
 	(void)fprintf(stderr,
-"       %s [-bdgilmnqrSstu] [-f address_family] [-M core] [-N system]\n", progname);
+"       %s [snmp_opts] [-CbdgimnrSs] [-Cf address_family]\n", progname);
 	(void)fprintf(stderr,
-"       %s [-bdn] [-I interface] [-M core] [-N system] [-w wait]\n", progname);
+"       %s [snmp_opts] [-Cbdn] [-CI interface] [-Cw wait]\n", progname);
 	(void)fprintf(stderr,
-"       %s [-s] [-M core] [-N system] [-p protocol]\n", progname);
+"       %s [snmp_opts] [-Cs] [-Cp protocol]\n", progname);
 	(void)fprintf(stderr,
-"       %s [-a] [-f address_family] [-i | -I interface]\n", progname);
+"       %s [snmp_opts] [-Ca] [-Cf address_family] [-Ci | -CI interface]\n", progname);
 	exit(1);
 }
