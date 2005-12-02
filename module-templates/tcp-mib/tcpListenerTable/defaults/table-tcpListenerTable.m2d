@@ -94,3 +94,10 @@
 ##
 @eval $m2c_table_sparse = 0@
 ##
+## ########################################################################
+##
+## Generate Makefile/AgentX code?
+##
+@eval $mfd_generate_makefile = 0@
+@eval $mfd_generate_subagent = 0@
+##
