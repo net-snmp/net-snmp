@@ -5628,12 +5628,18 @@ _sess_read(void *sessp, fd_set * fdset)
 
             if (pdulen > isp->packet_len || pdulen == 0) {
                 /*
-                 * We don't have a complete packet yet.  Return, and wait for
-                 * more data to arrive.
+                 * We don't have a complete packet yet.  If we've already
+                 * processed a packet, break out so we'll shift this packet
+                 * to the start of the buffer. If we're already at the
+                 * start, simply return and wait for more data to arrive.
                  */
                 DEBUGMSGTL(("sess_read",
                             "pkt not complete (need %d got %d so far)\n",
                             pdulen, isp->packet_len));
+
+                if (pptr != isp->packet)
+                    break; /* opaque freed for us outside of loop. */
+
                 if (opaque != NULL) {
                     SNMP_FREE(opaque);
                 }
