@@ -138,8 +138,35 @@ run_shell_command( char *command, char *input,
  * Split the given command up into separate tokens,
  * ready to be passed to 'execv'
  */
-static char **
+char **
 tokenize_exec_command( char *command, int *argc )
+{
+    char ctmp[STRMAX];
+    char *cp;
+    char **argv;
+    int  i;
+
+    argv = (char **) calloc(100, sizeof(char *));
+    cp = command;
+
+    for ( i=0; cp; i++ ) {
+        memset( ctmp, 0, STRMAX );
+        cp = copy_nword( cp, ctmp, STRMAX );
+        argv[i] = strdup( ctmp );
+        if (i == 99)
+            break;
+    }
+    if (cp) {
+        argv[i++] = strdup( cp );
+    }
+    argv[i] = 0;
+    *argc = i;
+
+    return argv;
+}
+
+char **
+xx_tokenize_exec_command( char *command, int *argc )
 {
     char ctmp[STRMAX];
     char *cptr1, *cptr2;
