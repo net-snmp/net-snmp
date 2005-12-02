@@ -68,17 +68,17 @@ extern	char *__progname; /* program name, from crt0.o */
 const char	*plural(int);
 const char	*plurales(int);
 
-void	tcpprotopr(char *);
-void	udpprotopr(char *);
-void	tcp_stats( char *);
-void	udp_stats( char *);
-void	ip_stats(  char *);
-void	icmp_stats(char *);
+void	tcpprotopr(const char *);
+void	udpprotopr(const char *);
+void	tcp_stats( const char *);
+void	udp_stats( const char *);
+void	ip_stats(  const char *);
+void	icmp_stats(const char *);
 
-void	tcp6protopr(char *);
-void	udp6protopr(char *);
-void	ip6_stats(  char *);
-void	icmp6_stats(char *);
+void	tcp6protopr(const char *);
+void	udp6protopr(const char *);
+void	ip6_stats(  const char *);
+void	icmp6_stats(const char *);
 
 void	pr_rthdr(int);
 void	pr_encaphdr(void);
