@@ -99,7 +99,7 @@ udpEndpointTable_init_data(udpEndpointTable_registration *
  *  process that will supply the data, opening a database, etc.
  */
 void
-udpEndpointTable_container_init(netsnmp_container ** container_ptr_ptr,
+udpEndpointTable_container_init(netsnmp_container **container_ptr_ptr,
                                 netsnmp_cache * cache)
 {
     DEBUGMSGTL(("verbose:udpEndpointTable:udpEndpointTable_container_init",
@@ -119,7 +119,7 @@ udpEndpointTable_container_init(netsnmp_container ** container_ptr_ptr,
 
     if (NULL == cache) {
         snmp_log(LOG_ERR,
-                 "bad cacge param to udpEndpointTable_container_init\n");
+                 "bad cache param to udpEndpointTable_container_init\n");
         return;
     }
 
@@ -151,7 +151,7 @@ udpEndpointTable_container_init(netsnmp_container ** container_ptr_ptr,
  *  process that supplied the data, closing a database, etc.
  */
 void
-udpEndpointTable_container_shutdown(netsnmp_container * container_ptr)
+udpEndpointTable_container_shutdown(netsnmp_container *container_ptr)
 {
     DEBUGMSGTL(("verbose:udpEndpointTable:udpEndpointTable_container_shutdown", "called\n"));
 
@@ -197,12 +197,12 @@ udpEndpointTable_container_shutdown(netsnmp_container * container_ptr)
  *
  */
 int
-udpEndpointTable_container_load(netsnmp_container * container)
+udpEndpointTable_container_load(netsnmp_container *container)
 {
     udpEndpointTable_rowreq_ctx *rowreq_ctx;
-    netsnmp_container           *ep_c;
-    netsnmp_iterator            *ep_it;
-    netsnmp_udp_endpoint_entry  *ep;
+    netsnmp_container *ep_c;
+    netsnmp_iterator *ep_it;
+    netsnmp_udp_endpoint_entry *ep;
 
     /*
      * temporary storage for index values
@@ -248,8 +248,7 @@ udpEndpointTable_container_load(netsnmp_container * container)
                                          udpEndpointLocalAddressType,
                                          ep->rmt_addr,
                                          ep->rmt_addr_len,
-                                         ep->rmt_port,
-                                         0)) {
+                                         ep->rmt_port, 0)) {
             snmp_log(LOG_ERR,
                      "error setting index while loading "
                      "udpEndpointTable data.\n");
@@ -273,7 +272,8 @@ udpEndpointTable_container_load(netsnmp_container * container)
 
     ITERATOR_RELEASE(ep_it);
 
-    netsnmp_access_udp_endpoint_container_free(ep_c, NETSNMP_ACCESS_UDP_ENDPOINT_FREE_DONT_CLEAR);
+    netsnmp_access_udp_endpoint_container_free(ep_c,
+                                               NETSNMP_ACCESS_UDP_ENDPOINT_FREE_DONT_CLEAR);
 
 
     DEBUGMSGT(("verbose:udpEndpointTable:udpEndpointTable_container_load",
@@ -296,7 +296,7 @@ udpEndpointTable_container_load(netsnmp_container * container)
  *
  */
 void
-udpEndpointTable_container_free(netsnmp_container * container)
+udpEndpointTable_container_free(netsnmp_container *container)
 {
     DEBUGMSGTL(("verbose:udpEndpointTable:udpEndpointTable_container_free",
                 "called\n"));

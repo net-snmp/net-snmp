@@ -188,17 +188,17 @@ config_require(udp-mib/udpEndpointTable/udpEndpointTable_data_access)
      *********************************************************************
      * function prototypes
      */
-    int            
+    int
         udpEndpointTable_pre_request(udpEndpointTable_registration *
                                      user_context);
-    int            
+    int
         udpEndpointTable_post_request(udpEndpointTable_registration *
                                       user_context, int rc);
 
 
-    udpEndpointTable_rowreq_ctx
-        *udpEndpointTable_row_find_by_mib_index(udpEndpointTable_mib_index
-                                                * mib_idx);
+        udpEndpointTable_rowreq_ctx
+        * udpEndpointTable_row_find_by_mib_index(udpEndpointTable_mib_index
+                                                 * mib_idx);
 
     extern oid      udpEndpointTable_oid[];
     extern int      udpEndpointTable_oid_size;
@@ -237,7 +237,7 @@ config_require(udp-mib/udpEndpointTable/udpEndpointTable_data_access)
                                            udpEndpointProcess_val_ptr);
 
 
-    int            
+    int
         udpEndpointTable_indexes_set_tbl_idx(udpEndpointTable_mib_index *
                                              tbl_idx,
                                              u_long
@@ -258,7 +258,7 @@ config_require(udp-mib/udpEndpointTable/udpEndpointTable_data_access)
                                              udpEndpointRemotePort_val,
                                              u_long
                                              udpEndpointInstance_val);
-    int            
+    int
         udpEndpointTable_indexes_set(udpEndpointTable_rowreq_ctx *
                                      rowreq_ctx,
                                      u_long
@@ -268,8 +268,7 @@ config_require(udp-mib/udpEndpointTable/udpEndpointTable_data_access)
                                      udpEndpointLocalAddress_val_ptr_len,
                                      u_long udpEndpointLocalPort_val,
                                      u_long
-                                     udpEndpointRemoteAddressType_val,
-                                     char
+                                     udpEndpointRemoteAddressType_val, char
                                      *udpEndpointRemoteAddress_val_ptr,
                                      size_t
                                      udpEndpointRemoteAddress_val_ptr_len,
