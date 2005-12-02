@@ -152,6 +152,9 @@ snmpd.conf.5: $(srcdir)/snmpd.conf.5.def ../sedscript
 snmpd.examples.5: $(srcdir)/snmpd.examples.5.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpd.examples.5.def > snmpd.examples.5
 
+snmpd.internal.5: $(srcdir)/snmpd.internal.5.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/snmpd.internal.5.def > snmpd.internal.5
+
 snmptrapd.conf.5: $(srcdir)/snmptrapd.conf.5.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmptrapd.conf.5.def > snmptrapd.conf.5
 
