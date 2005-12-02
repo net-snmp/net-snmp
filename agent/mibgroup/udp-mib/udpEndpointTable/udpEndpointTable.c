@@ -209,8 +209,7 @@ udpEndpointTable_indexes_set_tbl_idx(udpEndpointTable_mib_index * tbl_idx,
                                      udpEndpointLocalAddress_val_ptr_len,
                                      u_long udpEndpointLocalPort_val,
                                      u_long
-                                     udpEndpointRemoteAddressType_val,
-                                     char
+                                     udpEndpointRemoteAddressType_val, char
                                      *udpEndpointRemoteAddress_val_ptr,
                                      size_t
                                      udpEndpointRemoteAddress_val_ptr_len,
