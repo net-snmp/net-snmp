@@ -81,7 +81,11 @@ $node.description
  * Its syntax is $node.syntax (based on perltype $node.perltype)
  * The net-snmp type is $node.type. The C type decl is $node.decl ($m2c_decl)
 @if $node.needlength == 1@
+@   if $node.ranges == 1@
  * This data type requires a length.  (Max $m2c_range_max)
+@   else@
+ * This data type requires a length.
+@   end@
 @end@
 @if $node.noaccess@
  *
