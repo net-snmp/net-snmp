@@ -51,6 +51,7 @@ MIB2CFILES=default-mfd-top.m2c details-enums.m2i details-node.m2i \
 	mfd-data-access.m2c mfd-data-get.m2c mfd-data-set.m2c \
 	mfd-doxygen.m2c mfd-interactive-setup.m2c mfd-interface.m2c \
 	mfd-makefile.m2m mfd-readme.m2c mfd-top.m2c \
+	mfd-persistence.m2i \
 	node-get.m2i node-set.m2i node-storage.m2i \
 	node-validate.m2i node-varbind-validate.m2i \
 	parent-dependencies.m2i parent-set.m2i \
