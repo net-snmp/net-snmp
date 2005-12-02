@@ -90,8 +90,8 @@ struct stat_table {
     char            description[80];
 };
 
-char	*inet6name(char *);
-void	inet6print(char *, int, char *, int);
+char	*inet6name(const unsigned char *);
+void	inet6print(unsigned char *, int, const char *, int);
 
 /*
  * Print a summary of TCPv6 connections
@@ -115,13 +115,13 @@ const char     *tcp6states[] = {
 #define TCP_NSTATES 11
 
 void
-tcp6protopr(char *name)
+tcp6protopr(const char *name)
 {
     netsnmp_variable_list *var, *vp;
     oid    ipv6TcpConnState_oid[] = { 1,3,6,1,2,1,6,16,1,6 };
     size_t ipv6TcpConnState_len   = OID_LENGTH( ipv6TcpConnState_oid );
     int    state, i;
-    char   localAddr[16], remoteAddr[16];
+    unsigned char   localAddr[16], remoteAddr[16];
     int    localPort,     remotePort,  ifIndex;
     int    first = 1;
 
@@ -178,7 +178,7 @@ tcp6protopr(char *name)
  *    XXX - what about "listening" services ??
  */
 void
-udp6protopr(char *name)
+udp6protopr(const char *name)
 {
     netsnmp_variable_list *var, *vp;
     oid    ipv6UdpLocalAddress_oid[] = { 1,3,6,1,2,1,7,6,1,1 };
@@ -229,7 +229,7 @@ udp6protopr(char *name)
  *    than simply retrieving individual scalar values)
  */
 void
-_dump_v6stats( char *name, oid *oid_buf, size_t buf_len,
+_dump_v6stats( const char *name, oid *oid_buf, size_t buf_len,
                struct stat_table *stable )
 {
     netsnmp_variable_list *var, *vp;
@@ -296,7 +296,7 @@ _dump_v6stats( char *name, oid *oid_buf, size_t buf_len,
  * Dump IP6 statistics.
  */
 void
-ip6_stats(char *name)
+ip6_stats(const char *name)
 {
     oid               ip6stats_oid[] = { 1, 3, 6, 1, 2, 1, 55, 1, 6, 1, 0 };
     size_t            ip6stats_len   = OID_LENGTH( ip6stats_oid );
@@ -336,7 +336,7 @@ ip6_stats(char *name)
  * Dump ICMP6 statistics.
  */
 void
-icmp6_stats(char *name)
+icmp6_stats(const char *name)
 {
     oid               icmp6stats_oid[] = { 1, 3, 6, 1, 2, 1, 56, 1, 1, 1, 0 };
     size_t            icmp6stats_len   = OID_LENGTH( icmp6stats_oid );
@@ -410,7 +410,7 @@ icmp6_stats(char *name)
  */
 
 void
-inet6print(char *in6, int port, char *proto, int local)
+inet6print(unsigned char *in6, int port, const char *proto, int local)
 {
 
 #define GETSERVBYPORT6(port, proto, ret) do { \
@@ -456,7 +456,7 @@ bail:
  */
 
 char *
-inet6name(char *in6)
+inet6name(const unsigned char *in6)
 {
 	char *cp;
 	static char line[NI_MAXHOST];
@@ -467,7 +467,7 @@ inet6name(char *in6)
 	char hbuf[NI_MAXHOST];
 	const int niflag = NI_NUMERICHOST;
 	struct sockaddr_in6 sin6;
-	struct in6_addr *in6p = (struct in6_addr *)in6;
+	const struct in6_addr *in6p = (const struct in6_addr *)in6;
 #endif
 
 	if (first && !nflag) {
@@ -481,7 +481,7 @@ inet6name(char *in6)
 #ifdef INET6
 	cp = 0;
 	if (!nflag && !IN6_IS_ADDR_UNSPECIFIED(in6p)) {
-		hp = gethostbyaddr((char *)in6p, sizeof(*in6p), AF_INET6);
+		hp = gethostbyaddr((const char *)in6p, sizeof(*in6p), AF_INET6);
 		if (hp) {
 			if ((cp = strchr(hp->h_name, '.')) &&
 			    !strcmp(cp + 1, domain))

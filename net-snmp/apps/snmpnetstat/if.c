@@ -43,6 +43,9 @@ static char *rcsid = "$OpenBSD: if.c,v 1.42 2005/03/13 16:05:50 mpf Exp $";
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #if HAVE_NET_IF_H
 #include <net/if.h>
 #endif
@@ -522,7 +525,7 @@ sidewaysintpr(unsigned int interval)
         i = strlen(intrface);
         netsnmp_query_walk( var, ss );
         for (vp=var; vp; vp=vp->next_variable) {
-            if (strncmp(intrface, vp->val.string, i) == 0 &&
+            if (strncmp(intrface, (char *)vp->val.string, i) == 0 &&
                 i == vp->val_len)
                 break;  /* found requested interface */
         }

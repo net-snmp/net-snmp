@@ -43,6 +43,9 @@ static char *rcsid = "$OpenBSD: route.c,v 1.66 2004/11/17 01:47:20 itojun Exp $"
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -246,13 +249,13 @@ pr_family(int af)
 
 /* column widths; each followed by one space */
 #ifndef INET6
-#define	WID_DST(af)	18	/* width of destination column */
+#define	WID_DST(af)	26	/* width of destination column */
 #define	WID_GW(af)	18	/* width of gateway column */
 #else
 /* width of destination/gateway column */
 #if 1
 /* strlen("fe80::aaaa:bbbb:cccc:dddd@gif0") == 30, strlen("/128") == 4 */
-#define	WID_DST(af)	((af) == AF_INET6 ? (nflag ? 34 : 18) : 18)
+#define	WID_DST(af)	((af) == AF_INET6 ? (nflag ? 34 : 26) : 26)
 #define	WID_GW(af)	((af) == AF_INET6 ? (nflag ? 30 : 18) : 18)
 #else
 /* strlen("fe80::aaaa:bbbb:cccc:dddd") == 25, strlen("/128") == 4 */
@@ -508,7 +511,6 @@ p_rtnode( struct route_entry *rp )
                     netname(rp->destination, 0L));
     printf("%-*.*s %-6.6s  %s\n",
 	    WID_GW(af), WID_GW(af),
-                (rp->gateway ?
-                    routename(rp->gateway) : "*"),
+	    rp->gateway ? routename(rp->gateway) : "*",
             s_rtflags(rp), rp->ifname);
 }
