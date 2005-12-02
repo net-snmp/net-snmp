@@ -18,6 +18,8 @@ snmpcmd.1
 snmpconf.1
 snmpd.8
 snmpd.conf.5
+snmpd.examples.5
+snmpd.internal.5
 snmpdelta.1
 snmpdf.1
 snmpget.1
