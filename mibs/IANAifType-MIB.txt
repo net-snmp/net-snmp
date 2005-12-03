@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "200505270000Z"  -- May 27, 2005
+       LAST-UPDATED "200510100000Z"  -- October 10, 2005
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -15,9 +15,16 @@
 
                      Tel:    +1 310 823 9358
                      E-Mail: iana@iana.org"
+
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "200510100000Z"  -- October 10, 2005
+       DESCRIPTION  "Registration of new IANA ifType 230."
+
+       REVISION     "200509090000Z"  -- September 09, 2005
+       DESCRIPTION  "Registration of new IANA ifType 229."
 
        REVISION     "200505270000Z"  -- May 27, 2005
        DESCRIPTION  "Registration of new IANA ifType 228."
@@ -25,7 +32,7 @@
        REVISION     "200503030000Z"  -- March 3, 2005
        DESCRIPTION  "Added the IANAtunnelType TC and deprecated
 	                 IANAifType sixToFour (215) per 
-	                 RFC-ietf-ipv6-inet-tunnel-mib-03.txt."
+	                 RFC4087."
 
        REVISION     "200411220000Z"  -- November 22, 2004
        DESCRIPTION  "Registration of new IANA ifType 227."
@@ -427,7 +434,9 @@
                    rpr (225), -- Resilient Packet Ring Interface Type
                    qam (226), -- RF Qam Interface
                    lmp (227), -- Link Management Protocol
-                   cblVectaStar (228) -- Cambridge Broadband Limited VectaStar
+                   cblVectaStar, (228) -- Cambridge Broadband Limited VectaStar
+                   docsCableMCmtsDownstream, (229) -- CATV Modular CMTS Downstream Interface
+                   adsl2 (230) -- Asymmetric Digital Subscriber Loop Version 2
     			   }
 
 IANAtunnelType ::= TEXTUAL-CONVENTION
