@@ -2,6 +2,32 @@ This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.3*
+
+ *** Important Notes ***
+
+    Several very significant changes have been made in Net-SNMP for this
+    release that warrant special attention.
+
+    - shared library version number no longer matches the release number. We
+      now follow the versioning scheme recommended by libtool. For the 5.3
+      release this means that the libraries now have a SONAME ending with
+      ".so.10", e.g. libnetsnmp.so.10.
+
+    - snmpd has not been truncating log files at startup, as documented in
+      the man pages, for a while now. This default behaviour has been restored.
+      Please use the '-A' flag if you want to continue appending to your log
+      files at startup.
+
+    - snmptrapd will no longer accept all traps by default. It must be
+      configured with authorized SNMPv1/v2c community strings and/or SNMPv3
+      users. Non-authorized traps/informs will be dropped.
+
+    - Due to a copyright statement that didn't allow modifications, 
+      snmpnetstat was completely rewritten.  The new binary is named
+      snmpnetstat53, and we've provided a snmpnetstat wrapper script to
+      make the command line options backwards compatible.  As a side
+      effect, however, it now finally supports SNMPv3 at least.
+    
  New:
     Building:
       - new option to disable set support in the agent (--disable-set-support)
