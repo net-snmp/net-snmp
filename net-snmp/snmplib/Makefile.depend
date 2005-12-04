@@ -1474,6 +1474,7 @@
 ./snmp_client.lo: ../include/net-snmp/library/snmp_transport.h
 ./snmp_client.lo: ../include/net-snmp/library/mib.h
 ./snmp_client.lo: ../include/net-snmp/library/snmp_logging.h
+./snmp_client.lo: ../include/net-snmp/library/snmp_assert.h
 ./snmp_debug.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_debug.lo: ../include/net-snmp/system/linux.h
 ./snmp_debug.lo: ../include/net-snmp/system/sysv.h
