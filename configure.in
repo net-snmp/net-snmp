@@ -2644,9 +2644,9 @@ AC_CHECK_HEADERS(pkginfo.h,
     AC_CHECK_LIB(adm, pkginfo, AC_DEFINE(HAVE_PKGINFO)
     LIBS="${LIBS} -ladm"
     AGENTLIBS="${AGENTLIBS} -ladm"))
-# AIX perfstat library, needed for CPU/memory statistics
+
 case $target_os in
-    aix*)
+    aix*) # AIX perfstat library, needed for CPU/memory statistics
         AC_CHECK_HEADERS(libperfstat.h,
             AC_CHECK_LIB(perfstat, perfstat_cpu_total, AC_DEFINE(HAVE_PERFSTAT)
             AGENTLIBS="${AGENTLIBS} -lperfstat"), AC_MSG_ERROR([
@@ -2654,6 +2654,10 @@ case $target_os in
 *** To monitor CPU/memory values in AIX you need to install
 *** libperfstat which can be found in bos.perf
 ]))
+        ;;
+    hpux*) # HP-UX agent needs open_mib
+        AC_CHECK_LIB(nm, open_mib, AC_DEFINE(HAVE_LIBNM)
+            AGENTLIBS="${AGENTLIBS} -lnm")
         ;;
     *)
         ;;
