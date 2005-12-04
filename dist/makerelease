@@ -24,7 +24,7 @@ $vtag = "Ext-" . $vtag;
 chdir("..") if (-f 'makerelease');
 
 # cvs update
-System("cvsupdate","cvs update");
+System("cvsupdate","cvs -q update");
 
 # modify Makefile.top and configure.in
 manualstep('human:version',
