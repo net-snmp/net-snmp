@@ -130,9 +130,6 @@ typedef long    fd_mask;
 #endif
 
 char           *logfile = 0;
-int             Log = 0;
-int             Print = 0;
-int             Syslog = 0;
 int             SyslogTrap = 0;
 int             Event = 0;
 int             dropauth = 0;
@@ -526,9 +523,7 @@ parse_config_logOption(const char *token, char *cptr)
   int my_argc = 0 ;
   char **my_argv = NULL;
 
-  if  (snmp_log_options( cptr, my_argc, my_argv ) >= 0 ) {
-    Log++;
-  }
+  snmp_log_options( cptr, my_argc, my_argv );
 }
 
 void
@@ -686,6 +681,11 @@ main(int argc, char *argv[])
             dropauth = 1;
             break;
 
+        case 'A':
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_LIB_APPEND_LOGFILES, 1);
+            break;
+
         case 'c':
             if (optarg != NULL) {
                 netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
@@ -828,10 +828,11 @@ main(int argc, char *argv[])
         case 'o':
             fprintf(stderr,
                     "Warning: -o option is deprecated; use -Lf <file> instead\n");
-            Print++;
             if (optarg != NULL) {
                 logfile = optarg;
-                snmp_enable_filelog(optarg, 0);
+                snmp_enable_filelog(optarg, 
+                                    netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                                           NETSNMP_DS_LIB_APPEND_LOGFILES));
             } else {
                 usage();
                 exit(1);
@@ -853,7 +854,6 @@ main(int argc, char *argv[])
                 usage();
                 exit(1);
             }
-            Log++;
             break;
 
         case 'P':
@@ -861,14 +861,17 @@ main(int argc, char *argv[])
                     "Warning: -P option is deprecated; use -f -Le instead\n");
             dofork = 0;
             snmp_enable_stderrlog();
-            Print++;
             break;
 
         case 's':
             fprintf(stderr,
                     "Warning: -s option is deprecated; use -Lsd instead\n");
             depmsg = 1;
-            Syslog++;
+#ifdef WIN32
+            snmp_enable_syslog_ident(app_name_long, Facility);
+#else
+            snmp_enable_syslog_ident(app_name, Facility);
+#endif
             break;
 
         case 't':
@@ -943,8 +946,7 @@ main(int argc, char *argv[])
      * return value from these registration calls.
      * Don't try this at home, children!
      */
-    if (!Log && !Print) {
-        Syslog = 1;
+    if (0 == snmp_get_do_logging()) {
         traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER,
                                                syslog_handler);
         traph->authtypes = TRAP_AUTH_LOG;
@@ -1077,6 +1079,18 @@ main(int argc, char *argv[])
          */
         netsnmp_running = 0;
     }
+
+    /*
+     * if no logging options on command line or in conf files, use syslog
+     */
+    if (0 == snmp_get_do_logging()) {
+#ifdef WIN32
+        snmp_enable_syslog_ident(app_name_long, Facility);
+#else
+        snmp_enable_syslog_ident(app_name, Facility);
+#endif        
+    }
+
 #ifndef WIN32
     /*
      * fork the process to the background if we are not printing to stderr 
@@ -1125,29 +1139,11 @@ main(int argc, char *argv[])
     }
 #endif
 
-    if (Syslog) {
-#ifdef WIN32
-        snmp_enable_syslog_ident(app_name_long, Facility);
-#else
-        snmp_enable_syslog_ident(app_name, Facility);
-#endif
-        snmp_log(LOG_INFO, "Starting snmptrapd %s\n", netsnmp_get_version());
-	if (depmsg) {
-	    snmp_log(LOG_WARNING, "-s and -S options are deprecated; use -Ls <facility> instead\n");
-	}
+    snmp_log(LOG_INFO, "NET-SNMP version %s\n", netsnmp_get_version());
+    if (depmsg) {
+        snmp_log(LOG_WARNING, "-s and -S options are deprecated; use -Ls <facility> instead\n");
     }
-    if (Print || Log) {
-        struct tm      *tm;
-        time_t          timer;
-        time(&timer);
-        tm = localtime(&timer);
-        snmp_log(LOG_INFO,
-                "%.4d-%.2d-%.2d %.2d:%.2d:%.2d NET-SNMP version %s Started.\n",
-                 tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-                 tm->tm_hour, tm->tm_min, tm->tm_sec,
-                 netsnmp_get_version());
-    }
-
+    
     SOCK_STARTUP;
 
     if (listen_ports)
@@ -1189,9 +1185,7 @@ main(int argc, char *argv[])
                  */
                 snmptrapd_close_sessions(sess_list);
                 netsnmp_transport_free(transport);
-                if (Syslog) {
-                    snmp_log(LOG_ERR, "couldn't open snmp - %m");
-                }
+                snmp_log(LOG_ERR, "couldn't open snmp - %m");
                 SOCK_CLEANUP;
                 exit(1);
             } else {
@@ -1222,12 +1216,6 @@ main(int argc, char *argv[])
 #endif
     while (netsnmp_running) {
         if (reconfig) {
-            if (Print || Log) {
-                struct tm      *tm;
-                time_t          timer;
-                time(&timer);
-                tm = localtime(&timer);
-
                 /*
                  * If we are logging to a file, receipt of SIGHUP also
                  * indicates the the log file should be closed and
@@ -1235,15 +1223,8 @@ main(int argc, char *argv[])
                  * rotate logs in a more predictable manner.
                  */
                 netsnmp_logging_restart();
-
-                snmp_log(LOG_INFO,
-                         "%.4d-%.2d-%.2d %.2d:%.2d:%.2d NET-SNMP version %s Reconfigured.\n",
-                         tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-                         tm->tm_hour, tm->tm_min, tm->tm_sec,
+                snmp_log(LOG_INFO, "NET-SNMP version %s restarted\n",
                          netsnmp_get_version());
-            }
-            if (Syslog)
-                snmp_log(LOG_INFO, "Snmptrapd reconfiguring");
             trapd_update_config();
             if (trap1_fmt_str_remember) {
                 free_trap1_fmt();
@@ -1291,7 +1272,7 @@ main(int argc, char *argv[])
 	run_alarms();
     }
 
-    if (Print || Log) {
+    if (snmp_get_do_logging()) {
         struct tm      *tm;
         time_t          timer;
         time(&timer);
@@ -1301,10 +1282,8 @@ main(int argc, char *argv[])
                  tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour,
                  tm->tm_min, tm->tm_sec, netsnmp_get_version());
     }
-    if (Syslog) {
-        snmp_log(LOG_INFO, "Stopping snmptrapd");
-    }
-
+    snmp_log(LOG_INFO, "Stopping snmptrapd");
+    
     snmptrapd_close_sessions(sess_list);
     snmp_shutdown("snmptrapd");
 #ifdef WIN32SERVICE
