@@ -364,7 +364,8 @@ extern "C" {
                 continue;
             rc2 = x->insert(x,k);
             if (rc2) {
-                snmp_log(LOG_ERR,"error on subcontainer insert (%d)\n", rc2);
+                snmp_log(LOG_ERR,"error on subcontainer '%s' insert (%d)\n",
+                         x->container_name ? x->container_name : "", rc2);
                 rc = rc2;
             }
         }
