@@ -30,7 +30,7 @@ System("cvsupdate","cvs -q update");
 manualstep('human:version',
 	   "You need to edit Makefile.top and configure.in to update the version number.
 
-     Makefile.top:
+     Makefile.top (usually just for initial pre-release):
         See comments above LIBCURRENT, LIBAGE and LIBREVISION
 
      Configure.in:
