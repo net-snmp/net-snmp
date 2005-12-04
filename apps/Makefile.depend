@@ -1464,8 +1464,7 @@
 ./snmpnetstat/inet.lo: ../include/net-snmp/library/snmp_secmod.h
 ./snmpnetstat/inet.lo: ../include/net-snmp/library/snmpv3-security-includes.h
 ./snmpnetstat/inet.lo: ../include/net-snmp/library/snmpusm.h
-./snmpnetstat/inet.lo:  ./snmpnetstat/main.h
-./snmpnetstat/inet.lo: ./snmpnetstat/netstat.h
+./snmpnetstat/inet.lo: ./snmpnetstat/main.h ./snmpnetstat/netstat.h
 ./snmpnetstat/inet6.lo: ../include/net-snmp/net-snmp-config.h
 ./snmpnetstat/inet6.lo: ../include/net-snmp/system/linux.h
 ./snmpnetstat/inet6.lo: ../include/net-snmp/system/sysv.h
