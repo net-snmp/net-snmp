@@ -434,8 +434,8 @@
                    rpr (225), -- Resilient Packet Ring Interface Type
                    qam (226), -- RF Qam Interface
                    lmp (227), -- Link Management Protocol
-                   cblVectaStar, (228) -- Cambridge Broadband Limited VectaStar
-                   docsCableMCmtsDownstream, (229) -- CATV Modular CMTS Downstream Interface
+                   cblVectaStar (228), -- Cambridge Broadband Limited VectaStar
+                   docsCableMCmtsDownstream (229), -- CATV Modular CMTS Downstream Interface
                    adsl2 (230) -- Asymmetric Digital Subscriber Loop Version 2
     			   }
 
