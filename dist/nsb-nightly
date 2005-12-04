@@ -118,7 +118,7 @@ case $RC in
         NSB_RESULTS_TO=$NSB_OK_RESULTS_TO
         FILES=""
         ;;
-    *) RESULT="Error"
+    *) RESULT="Error (rc $RC)"
        NSB_RESULTS_TO=$NSB_ERR_RESULTS_TO
        FILES=`ls nsb-make-all-errs.* nsb-make-test-errs.* 2>/dev/null`
        if [ ! -z $NSB_SCP_HOST ]; then
