@@ -163,9 +163,9 @@ process) and you have pointers to the data, you probably want allocated.
 
 @      end@ # ! default (generated)
 ## ---------------------------------------------------
-Do you need to initialize elements in the '$m2c_temp_data_context' when
-a new instance is created (eg default values, or other structures you are
-going to add that might need initialization to the row request context?
+Do you need to initialize elements in the '$m2c_temp_data_context' DATA
+context when a new instance is created (eg default values, or other structures
+you are going to add that might need initialization to the row request context?
 (The most common reasons you might need to do this is are if you want to keep
 some non-MIB data for every row, or some columns have default values.)
 
@@ -207,13 +207,13 @@ Which method would you like to use to gather data about available rows?
   2) container-cached : This access method uses a netsnmp_container
      to keep track of the indexes (and data, usually) for each 
      row. This method is best for:
-         - External data (maintained by another process)
+         - External data (maintained by another process/the kernel)
          - Access speed is important
          - Sufficient memory exists to contain all indexes
      
   3) unsorted-external : This access method iterates over all of your data
      to find the row with the appropriate index. This method is good for
-         - External data (maintained by another process)
+         - External data (maintained by another process/the kernel)
          - Using less memory is much more important than access speed
      
 @      prompt $ans Select your choice : @
@@ -253,7 +253,8 @@ When accessing your data, is your data TRANSIENT?
 
 
 ## ---------------------------------------------------
-Do you want example code to be generated?
+Do you want example code to be generated? This will generate example code
+for reading data from a text file.
 
   1) generate example code [DEFAULT]
   2) do not generate example code
@@ -266,8 +267,10 @@ Do you want example code to be generated?
 @      end@
 
 ## ---------------------------------------------------
-Is your table sparse? (A sparse table is a table where some
-columns might not exist for all rows.)
+Is your table sparse? A sparse table is a table where some
+columns might not exist for all rows. Note that if your table
+contains a RowStaus column and it supports createAndWait, you
+will need sparse table support.
 
   1) No, all columns always exist for every row [DEFAULT]
   2) Yes, my table is sparse
