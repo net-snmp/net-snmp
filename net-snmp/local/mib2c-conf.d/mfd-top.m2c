@@ -94,6 +94,7 @@
 
 /* other required module components */
     /* *INDENT-OFF*  */
+config_add_mib($name.module)
 config_require($name.module/${name}/${name}_interface)
 config_require($name.module/${name}/${name}_data_access)
 @if $m2c_create_fewer_files != 1@
