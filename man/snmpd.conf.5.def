@@ -450,8 +450,9 @@ Disks mounted after the agent has started will not be monitored.
 If neither any \fIdisk\fR directives or \fIincludeAllDisks\fR are defined,
 then walking the \fCdskTable\fR will fail (\fInoSuchObject\fI).
 .SS System Load Monitoring
-This requires that the agent was built with support for the
-\fIucd-snmp/loadave\fR module (which is included as part of the
+This requires that the agent was built with support for either the
+\fIucd-snmp/loadave\fR module or the \fIucd-snmp/memory\fR module
+respectively (both of which are included as part of the
 default build configuration).
 .IP "load MAX1 [MAX5 [MAX15]]"
 monitors the load average of the local system, specifying
@@ -475,6 +476,17 @@ Unlike the \fIproc\fR and \fIdisk\fR directives, walking the
 walking the \fClaTable\fR will succeed (assuming the
 \fIucd-snmp/loadave\fR module was configured into the agent),
 even if the \fIload\fR directive is not present.
+.IP "swap MIN "
+monitors the amount of swap space available on the local system.
+If this falls below the specified threshold (MIB Kb),
+then the \fImemErrorSwap\fR object will be set to 1,
+and a suitable description message reported via \fImemSwapErrorMsg\fR.
+.RS
+.IP "Note:"
+This situation will \fBnot\fR automatically trigger a trap to report
+the problem - see the DisMan Event MIB section later.
+.RE
+If this directive is not specified, the default threshold is 16 Mb.
 .SS Log File Monitoring
 This requires that the agent was built with support for either the
 \fIucd-snmp/file\fR or \fIucd-snmp/logmatch\fR modules respectively
@@ -596,6 +608,9 @@ directive is purely concerned with defining \fIwhich\fR user should
 be used - not with actually setting this user up.
 .\"
 .\" XXX - Should it create the user as well?
+.\"
+.\" .IP "iqueryVersion "
+.\" .IP "iquerySecLevel "
 .\"
 .IP "monitor [OPTIONS] NAME EXPRESSION"
 defines a MIB object to monitor.
@@ -1381,6 +1396,11 @@ getnext requests before the final module receives it.
 To figure out which modules you can inject things into, snmpwalk the
 nsModuleTable which will give you a list of all named modules
 registered within the agent.
+.SS Internal Data tables
+.IP "table NAME"
+.\" XXX: To Document
+.IP "add_row NAME INDEX(ES) VALUE(S)"
+.\" XXX: To Document
 .SH "EXAMPLE CONFIGURATION FILE"
 See the EXAMPLE.CONF file in the top level source directory for a more
 detailed example of how the above information is used in real
