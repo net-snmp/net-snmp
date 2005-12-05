@@ -321,22 +321,36 @@ logmatch NAME PATH CYCLETIME REGEX
 .RE
 .SH "ACTIVE MONITORING"
 .SS "Notification Handling"
-.I TODO
+Configuring the agent to report invalid access attempts might be done by:
 .RS
 .nf
 authtrapenable 1
-trapcommunity public
-trapsink      localhost
+trapcommunity  public
+trap2sink      localhost
 .fi
 .RE
-.I TODO
+Alternatively, the second and third directives could be combined
+(and an acknowledgement requested) using:
 .RS
-trap2sink      localhost  public
+informsink     localhost  public
 .RE
-.I TODO
+A configuration such as:
+.RS
+.nf
+trapsink       localhost
+trap2sink      localhost
+informsink     localhost
+.fi
+.RE
+should \fBNOT\fR be used, as this will generate multiple copies
+of each trap.
+.PP
+.I "TODO - discuss SNMPv3 traps"
 .RS
 trapsess  \fIsnmpv3 options\fR  localhost:162
 .RE
+.PP
+.I "TODO - mention trapd access configuration"
 
 .SS "DisMan Event MIB"
 .I "TODO - Simple"
@@ -455,16 +469,17 @@ extendfix [MIBOID] NAME PROG ARGS"
 "pass_persist [-p priority] MIBOID PROG"
 .RE
 .SS "Embedded Perl Support"
-.I ToDo
+If embedded perl support is enabled in the agent, the default
+initialisation is equivalent to the directives:
 .RS
 .nf
-disablePerl [true|false]"
-perlInitFile FILE"
-perl EXPRESSION"
+disablePerl  false
+perlInitFile DATADIR/snmp/snmp_perl.pl
 .fi
 .RE
-.I Examples
-.RS
+The main mechanism for defining embedded perl scripts is the
+\fIperl\fR directive.  A very simple (if somewhat pointless)
+MIB handler could be registered using:
 .RS
 .nf
 perl use Data::Dumper;
@@ -472,12 +487,24 @@ perl sub myroutine  { print "got called: ",Dumper(@_),"\\n"; }
 perl $agent->register('mylink', '.1.3.6.1.8765', \\&myroutine);
 .fi
 .RE
+.PP
+This relies on the \fI$agent\fR object, defined in the example
+\fCsnmp_perl.pl\fR file.
+.PP
+A more realistic MIB handler might be:
 .RS
 .nf
-perl 'do /path/to/file.pl';
+\fIXXX - WHAT ???\fR
 .fi
 .RE
+Alternatively, this code could be stored in an external file,
+and loaded using:
+.RS
+perl 'do DATADIR/snmp/perl_example.pl';
 .RE
+.\"
+.\" XXX - does this last entry need the quotes ??
+.\"
 .SS Dynamically Loadable Modules
 .I TODO
 .RS
