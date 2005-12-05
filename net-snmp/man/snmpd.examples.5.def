@@ -1,4 +1,4 @@
-.TH SNMPD.EXAMPLES 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPD.EXAMPLES 5 "05 Dec 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpd.examples - example configuration for the Net-SNMP agent
@@ -26,11 +26,11 @@ agentaddress 161
 The agent can be configured to \fIonly\fR accept requests sent to the
 local loopback interface (again listening on the SNMP UDP port), using:
 .RS
-agentaddress localhost:161
+agentaddress localhost:161     \fI# (udp implicit)\fR
 .RE
 or
 .RS
-agentaddress 127.0.0.1
+agentaddress 127.0.0.1     \fI# (udp and standard port implicit)\fR
 .RE
 It can be configured to accept both UDP and TCP requests (over both IPv4
 and IPv6), using:
@@ -40,6 +40,7 @@ agentaddress udp:161,tcp:161,udp6:161,tcp6:161
 .\"
 .\" Can the agent handle the same port for both IPv4 & IPv6
 .\"
+Other combinations are also valid.
 .SS "Run-time privileges"
 The agent can be configured to relinquish any privileged access once it
 has opened the initial listening ports.  Given a suitable "snmp" group
@@ -62,17 +63,18 @@ agentgroup #10
 .\"   ??? Mention this in the main man page.
 .\"
 .SS SNMPv3 Configuration
-The engine ID for the agent can be calculated based on the MAC address
+Rather than being generated pseudo-randomly,
+the engine ID for the agent could be calculated based on the MAC address
 of the second network interface (\fIeth1\fR), using the directives:
 .RS
 engineIDType 3
 engineIDNic  eth1
 .RE
-It can be calculated from the (first) IP address, using:
+or it could be calculated from the (first) IP address, using:
 .RS
 engineIDType 1
 .RE
-It can be specified explicitly, using:
+or it could be specified explicitly, using:
 .RS
 engineID "XXX - WHAT FORMAT"
 .RE
@@ -132,16 +134,16 @@ rwuser onering
 should \fBnot\fR be used. This would configure the user \fIonering\fR
 with read-only access (and ignore the \fIrwuser\fR entry altogether).
 .PP
-The directives
+The directives:
 .RS
 .nf
 rocommunity public
 rwcommunity private
 .fi
 .RE
-would configure the commonly-expected read and write community strings
-for SNMPv1 and SNMPv2c requests.  This behaviour is \fBnot\fR set up
-by default, and would need to be configured explicitly.
+would define the commonly-expected read and write community strings
+for SNMPv1 and SNMPv2c requests.  This behaviour is \fBnot\fR
+configured by default, and would need to be set up explicitly.
 .RS
 .IP Note:
 It would also be a very good idea to change \fIprivate\fR to something
@@ -149,46 +151,62 @@ a little less predictable!
 .RE
 .PP
 A slightly less vulnerable configuration might restrict what information
-could be retrieved, or the management systems that settings could be
-manipulated from:
+could be retrieved:
 .RS
-.nf
 rocommunity public   default system
-rwcommunity private  10.10.10.0/24
-.fi
 .RE
+or the management systems that settings could be manipulated from:
+.RS
+rwcommunity private  10.10.10.0/24
+.RE
+(or both!)
 .SS VACM Configuration
 This last pair of settings are equivalent to the full VACM definitions:
 .RS
 .nf
-#         sec.name  source        community
+\fI#         sec.name  source        community\fR
 com2sec   public    default       public
 com2sec   mynet     10.10.10.0/24 private
 com2sec6  mynet     fec0::/64     private
 
-#                  sec.model  sec.name
+\fI#                  sec.model  sec.name\fR
 group  worldGroup  v1         public
 group  worldGroup  v2c        public
 group  myGroup     v1         mynet
 group  myGroup     v2c        mynet
 
-#              incl/excl   subtree     [mask]
+\fI#              incl/excl   subtree     [mask]\fR
 view   all     included    .1
 view   sysView included    system
 
-#              context model level   prefix  read    write  notify (unused)
+\fI#              context model level   prefix  read    write  notify (unused)\fR
 access  worldGroup  ""  any  noauth  exact   system  none   none
 access  myGroup     ""  any  noauth  exact   all     all    none
 .fi
 .RE
+.PP
+There are several points to note in this example:
+.PP
+The \fIgroup\fR directives have to be repeated for 
+both SNMPv1 and SNMPv2c requests.
+The \fIcom2sec\fR security name is distinct from the community
+string that is mapped to it. They can be the same ("public")
+or different ("mynet"/"private") - but what appears in the
+\fIgroup\fR directive is the security name, regardless of
+the community strings.
+.PP
+Both of the \fIview\fR directives are defining simple OID
+subtrees, so neither of these require an explicit mask field.
+In fact, this field is only necessary when defining row slices
+across a table (or similar views), and can usually be omitted.
 .\"
-.\" Discuss this in detail ??
+.\" Mention/use hardwired views	'_all_' and '_none_'
 .\"
 .\" Illustrate other, more flexible configurations
 .\"   including SNMPv3 access.
 .\"
 .SS Typed-View Configuration
-A similar configuration (slightly extended) could also be configured as follows:
+A similar configuration could also be configured as follows:
 .RS
 .nf
 view   sys2View included    system
@@ -198,25 +216,31 @@ authcommunity read       public  default      -v sys2View
 authcommunity read,write private 10.10.10.0/8
 .fi
 .RE
+.PP
+This mechanism allows multi-subtree (or other non-simple) views to
+be used with the one-line \fIrocommunity\fR style of configuration.
+.PP
+It would also support configurin "write-only" access, should this
+be required.
 .\"
 .\" Expand this example
 .\"
 .SH SYSTEM INFORMATION
 .SS System Group
-The contents of the 'system' group (with the exception of \fCsysUpTime\fR)
-can be configured using:
+The full contents of the 'system' group (with the exception of \fCsysUpTime\fR)
+can be explicitly configured using:
 .RS
 .nf
-# Override 'uname -a' and hardcoded system OID values (read-only)
+\fI# Override 'uname -a' and hardcoded system OID - inherently read-only values\fR
 sysDescr     Universal Turing Machine mk I
 sysObjectID  .1.3.6.1.4.1.8072.3.2.1066
 
-# Override default values from 'configure' - makes these objects read-only
-sysContact   Alan.Turing@cs.man.ac.uk
+\fI# Override default values from 'configure' - makes these objects read-only\fR
+sysContact   Alan.Turing@pre-cs.man.ac.uk
 sysName      tortoise.turing.com
 sysLocation  An idea in the mind of AT
 
-# Standard end-host behaviour
+\fI# Standard end-host behaviour\fR
 sysServices  72
 .fi
 .RE
@@ -227,7 +251,7 @@ any of the following directives:
 .RS
 ignoredisk /dev/rdsk/c0t2d0
 .RE
-which prevents the device \fI/dev/rdsk/c0t2d0\fR from being scanned
+which prevents the device \fI/dev/rdsk/c0t2d0\fR from being scanned,
 .RS
 .nf
 ignoredisk /dev/rdsk/c0t[!6]d0
@@ -235,7 +259,7 @@ ignoredisk /dev/rdsk/c0t[0-57-9a-f]d0
 .fi
 .RE
 either of which prevents all devices \fI/dev/rdsk/c0t\fRX\fId0\fR
-(except .../\fIc0t6d0\fR) from being scanned
+(except .../\fIc0t6d0\fR) from being scanned,
 .RS
 ignoredisk /dev/rdsk/c1*
 .RE
@@ -251,17 +275,17 @@ The list of services running on a system can be monitored
 (and provision made for correcting any problems), using:
 .RS
 .nf
-# At least one web server process must be running at all times
+\fI# At least one web server process must be running at all times\fR
 proc    httpd
 procfix httpd  /etc/rc.d/init.d/httpd restart
 
-# There should never be more than 10 mail processes running
-#    (more implies a probable mail storm, so shut down)
+\fI# There should never be more than 10 mail processes running
+#    (more implies a probable mail storm, so shut down the mail system)\fR
 proc    sendmail   10
 procfix sendmail  /etc/rc.d/init.d/sendmail stop
 
-# There should be a single network management agent running
-#   ("There can be only one")
+\fI# There should be a single network management agent running
+#   ("There can be only one")\fR
 proc    snmpd    1  1
 .fi
 .RE
@@ -273,18 +297,17 @@ The state of disk storage can be monitored using:
 includeAllDisks 10%
 disk /var 20%
 disk /usr  3%
-#  Keep 100 Mb free for crash dumps
+\fI#  Keep 100 Mb free for crash dumps\fR
 disk /mnt/crash  100000
 .fi
 .RE
-===============================================================
 .SS System Load Monitoring
 A simple check for an overloaded system might be:
 .RS
 load 10
 .RE
-A more refined check, to allow brief periods of heavy use,
-but recognised sustained medium-heavy load, might be:
+A more refined check (to allow brief periods of heavy use,
+but recognise sustained medium-heavy load) might be:
 .RS
 load 30 10 5
 .RE
@@ -300,9 +323,11 @@ logmatch NAME PATH CYCLETIME REGEX
 .SS "Notification Handling"
 .I TODO
 .RS
+.nf
 authtrapenable 1
 trapcommunity public
 trapsink      localhost
+.fi
 .RE
 .I TODO
 .RS
@@ -316,11 +341,13 @@ trapsess  \fIsnmpv3 options\fR  localhost:162
 .SS "DisMan Event MIB"
 .I "TODO - Simple"
 .RS
+.nf
 createUser    _internal
 iquerySecName _internal
 rouser        _internal
 defaultMonitors         yes
 linkUpDownNotifications yes
+.fi
 .RE
 .I "TODO - Extended (notifications)"
 .RS
@@ -394,22 +421,28 @@ monitor	-o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
 .SS "DisMan Schedule MIB"
 .I TODO
 .RS
+.nf
 repeat FREQUENCY OID = VALUE
 cron MINUTE HOUR DAY MONTH WEEKDAY  OID = VALUE
 at   MINUTE HOUR DAY MONTH WEEKDAY  OID = VALUE
+.fi
 .RE
 .SH "EXTENDING AGENT FUNCTIONALITY"
 .SS "Arbitrary Extension Commands"
 .I "Old Style"
 .RS 
+.nf
 exec [MIBOID] NAME PROG ARGS"
 sh   [MIBOID] NAME PROG ARGS"
 execfix NAME PROG ARGS"
+.fi
 .RE
 .I "New Style"
 .RS
+.nf
 extend [MIBOID] NAME PROG ARGS"
 extendfix [MIBOID] NAME PROG ARGS"
+.fi
 .RE
 .SS "MIB-Specific Extension Commands"
 .I One-Shot
@@ -424,9 +457,11 @@ extendfix [MIBOID] NAME PROG ARGS"
 .SS "Embedded Perl Support"
 .I ToDo
 .RS
+.nf
 disablePerl [true|false]"
 perlInitFile FILE"
 perl EXPRESSION"
+.fi
 .RE
 .I Examples
 .RS
