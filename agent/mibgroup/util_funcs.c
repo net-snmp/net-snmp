@@ -92,6 +92,7 @@
 
 #include "struct.h"
 #include "util_funcs.h"
+#include "utilities/execute.h"
 
 #if HAVE_LIMITS_H
 #include "limits.h"
@@ -234,159 +235,49 @@ int
 get_exec_output(struct extensible *ex)
 {
 #if HAVE_EXECV
-    int             fd[2], i, cnt;
-    char            ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv,
-        **aptr;
-#ifdef EXCACHETIME
     char            cachefile[STRMAX];
     char            cache[MAXCACHESIZE];
     ssize_t         cachebytes;
+    int             cfd;
+#ifdef EXCACHETIME
     long            curtime;
     static char     lastcmd[STRMAX];
-    int             cfd;
     static int      lastresult;
-    int             readcount;
 #endif
 
     DEBUGMSGTL(("exec:get_exec_output","calling %s\n", ex->command));
 
-#ifdef EXCACHETIME
     sprintf(cachefile, "%s/%s", get_persistent_directory(), CACHEFILE);
+#ifdef EXCACHETIME
     curtime = time(NULL);
     if (curtime > (cachetime + EXCACHETIME) ||
         strcmp(ex->command, lastcmd) != 0) {
         strcpy(lastcmd, ex->command);
         cachetime = curtime;
 #endif
-        if (pipe(fd)) {
-            setPerrorstatus("pipe");
-#ifdef EXCACHETIME
-            cachetime = 0;
-#endif
-            return -1;
-        }
-        if ((ex->pid = fork()) == 0) {
-            close(1);
-            if (dup(fd[1]) != 1) {
-                setPerrorstatus("dup");
-                return -1;
-            }
 
-            /*
-             * write standard output and standard error to pipe. 
-             */
-            /*
-             * close all other file descriptors. 
-             */
-            for (cnt = getdtablesize() - 1; cnt >= 2; --cnt)
-                (void) close(cnt);
-            (void) dup(1);      /* stderr */
+        cachebytes = MAXCACHESIZE;
+        ex->result = run_exec_command( ex->command, NULL, cache, &cachebytes );
 
-            /*
-             * set standard input to /dev/null 
-             */
-            close(0);
-            (void) open("/dev/null", O_RDWR);
-
-            for (cnt = 1, cptr1 = ex->command, cptr2 = argvs;
-                 cptr1 && *cptr1 != 0; cptr2++, cptr1++) {
-                *cptr2 = *cptr1;
-                if (*cptr1 == ' ') {
-                    *(cptr2++) = 0;
-                    if ((cptr1 = skip_white(cptr1)) == NULL)
-                        break;
-                    if (cptr1) {
-                        *cptr2 = *cptr1;
-                        if (*cptr1 != 0)
-                            cnt++;
-                    }
-                }
-            }
-            *cptr2 = 0;
-            *(cptr2 + 1) = 0;
-            argv = (char **) malloc((cnt + 2) * sizeof(char *));
-            if (argv == NULL)
-                return 0;       /* memory alloc error */
-            aptr = argv;
-            *(aptr++) = argvs;
-            for (cptr2 = argvs, i = 1; i != cnt; cptr2++)
-                if (*cptr2 == 0) {
-                    *(aptr++) = cptr2 + 1;
-                    i++;
-                }
-            while (*cptr2 != 0)
-                cptr2++;
-            *(aptr++) = NULL;
-            copy_nword(ex->command, ctmp, sizeof(ctmp));
-            execv(ctmp, argv);
-            perror(ctmp);
-            exit(1);
-        } else {
-            close(fd[1]);
-            if (ex->pid < 0) {
-                close(fd[0]);
-                setPerrorstatus("fork");
-#ifdef EXCACHETIME
-                cachetime = 0;
-#endif
-                return -1;
-            }
-#ifdef EXCACHETIME
-            unlink(cachefile);
+        unlink(cachefile);
             /*
              * XXX  Use SNMP_FILEMODE_CLOSED instead of 644? 
              */
-            if ((cfd =
-                 open(cachefile, O_WRONLY | O_TRUNC | O_CREAT,
-                      0644)) < 0) {
+        if ((cfd = open(cachefile, O_WRONLY | O_TRUNC | O_CREAT, 0644)) < 0) {
                 snmp_log(LOG_ERR,"can not create cache file\n");
                 setPerrorstatus(cachefile);
                 cachetime = 0;
                 return -1;
-            }
-            fcntl(fd[0], F_SETFL, O_NONBLOCK);  /* don't block on reads */
-#ifdef HAVE_USLEEP
-            for (readcount = 0; readcount <= MAXREADCOUNT * 100 &&
-                 (cachebytes = read(fd[0], (void *) cache, MAXCACHESIZE));
-                 readcount++) {
-#else
-            for (readcount = 0; readcount <= MAXREADCOUNT &&
-                 (cachebytes = read(fd[0], (void *) cache, MAXCACHESIZE));
-                 readcount++) {
-#endif
-                if (cachebytes > 0)
-                    write(cfd, (void *) cache, cachebytes);
-                else if (cachebytes == -1 && errno != EAGAIN) {
-                    setPerrorstatus("read");
-                    break;
-                } else
-#ifdef HAVE_USLEEP
-                    usleep(10000);      /* sleeps for 0.01 sec */
-#else
-                    sleep(1);
-#endif
-            }
-            close(cfd);
-            close(fd[0]);
-            /*
-             * wait for the child to finish 
-             */
-            if (ex->pid > 0 && waitpid(ex->pid, &ex->result, 0) < 0) {
-                setPerrorstatus("waitpid()");
-                cachetime = 0;
-                return -1;
-            }
-            ex->pid = 0;
-            ex->result = WEXITSTATUS(ex->result);
-            lastresult = ex->result;
-#else                           /* !EXCACHETIME */
-            return (fd[0]);
-#endif
         }
+        if (cachebytes > 0)
+            write(cfd, (void *) cache, cachebytes);
+        close(cfd);
 #ifdef EXCACHETIME
+        lastresult = ex->result;
     } else {
         ex->result = lastresult;
     }
+#endif
     DEBUGMSGTL(("exec:get_exec_output","using cached value\n"));
     if ((cfd = open(cachefile, O_RDONLY)) < 0) {
         snmp_log(LOG_ERR,"can not open cache file\n");
@@ -394,8 +285,6 @@ get_exec_output(struct extensible *ex)
         return -1;
     }
     return (cfd);
-#endif
-
 #else                           /* !HAVE_EXECV */
 #if defined(WIN32) && !defined(HAVE_EXECV)
 /* MSVC and MinGW.  Cygwin already works as it has execv and fork */
