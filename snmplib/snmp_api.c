@@ -6315,6 +6315,7 @@ snmp_add_var(netsnmp_pdu *pdu,
     u_char         *buf = NULL;
     const u_char   *buf_ptr = NULL;
     size_t          buf_len = 0, value_len = 0, tint;
+    in_addr_t       atmp;
     long            ltmp;
     int             itmp;
     struct enum_list *ep;
@@ -6501,10 +6502,10 @@ snmp_add_var(netsnmp_pdu *pdu,
             goto type_error;
         }
 #endif /* DISABLE_MIB_LOADING */
-        ltmp = inet_addr(value);
-        if (ltmp != (long) -1 || !strcmp(value, "255.255.255.255"))
+        atmp = inet_addr(value);
+        if (atmp != (long) -1 || !strcmp(value, "255.255.255.255"))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS,
-                                  (u_char *) & ltmp, sizeof(long));
+                                  (u_char *) & atmp, sizeof(atmp));
         else
             goto fail;
         break;
