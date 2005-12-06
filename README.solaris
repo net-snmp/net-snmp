@@ -526,11 +526,11 @@ agents =
 resource =
 {
         {
-   registration_file = "/etc/snmp/conf/net-snmp.reg"
-   policy = "spawn"
-   type = "legacy"
-   command = "/usr/local/sbin/snmpd -p $PORT"  
-      }
+                registration_file = "/etc/snmp/conf/net-snmp.reg"
+                policy = "spawn"
+                type = "legacy"
+                command = "/usr/local/sbin/snmpd $PORT"  
+        }
  
 }
 
