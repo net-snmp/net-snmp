@@ -445,13 +445,12 @@ void devla_getstats(unsigned int regno, void *dummy) {
 	if (lastat == NULL) {
 	    lastat = (struct statinfo *) malloc(sizeof(struct statinfo));
 	    if (lastat != NULL)
-		lastat->dinfo = (struct devinfo *) malloc(sizeof(struct devinfo));
+		lastat->dinfo = (struct devinfo *) calloc(sizeof(struct devinfo), 1);
 	    if (lastat == NULL || lastat->dinfo == NULL) {
 		    SNMP_FREE(lastat);
 		    ERROR_MSG("Memory alloc failure - devla_getstats()\n");
 		    return;
 	    }
-	    memset(lastat->dinfo, 0, sizeof(struct devinfo));
 	}
 
         if ((GETDEVS(lastat)) == -1) {
@@ -522,14 +521,13 @@ getstats(void)
     if (stat == NULL) {
         stat = (struct statinfo *) malloc(sizeof(struct statinfo));
         if (stat != NULL)
-            stat->dinfo = (struct devinfo *) malloc(sizeof(struct devinfo));
+            stat->dinfo = (struct devinfo *) calloc(sizeof(struct devinfo), 1);
         if (stat == NULL || stat->dinfo == NULL) {
 		SNMP_FREE(stat);
         	ERROR_MSG("Memory alloc failure - getstats\n");
 		return 1;
 	}
     }
-    memset(stat->dinfo, 0, sizeof(struct devinfo));
 
     if (GETDEVS(stat) == -1) {
         fprintf(stderr, "Can't get devices:%s\n", devstat_errbuf);
