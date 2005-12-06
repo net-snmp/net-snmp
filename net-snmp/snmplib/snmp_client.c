@@ -733,9 +733,6 @@ snmp_set_var_value(netsnmp_variable_list * vars,
                    const u_char * value, size_t len)
 {
     int             largeval = 1;
-    const long     *val_long = NULL;
-    const int      *val_int  = NULL;
-    const u_int    *val_uint  = NULL;
 
     /*
      * xxx-rks: why the unconditional free? why not use existing
