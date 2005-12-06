@@ -43,7 +43,11 @@ extern          "C" {
      * TODO:180:o: Review ifTable cache timeout.
      * The number of seconds before the cache times out
      */
-#define IFTABLE_CACHE_TIMEOUT   60
+    /*
+     * A 10 Mbps stream can wrap if*Octets in ~57 minutes.
+     * At 100 Mbps it is ~5 minutes, and at 1 Gbps, ~34 seconds.
+     */
+#define IFTABLE_CACHE_TIMEOUT   30
 
     void            ifTable_container_init(netsnmp_container **
                                            container_ptr_ptr,
