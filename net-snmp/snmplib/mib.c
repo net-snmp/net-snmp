@@ -4749,8 +4749,8 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 return 0;
         if (tp->units)
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             "  UNITS\t\"") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, tp->hint) ||
+                             "  UNITS\t\t\"") ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, tp->units) ||
                 !snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"\n"))
                 return 0;
         switch (tp->access) {
