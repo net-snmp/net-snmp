@@ -134,6 +134,11 @@ ifTable_container_init(netsnmp_container **container_ptr_ptr,
      * by the MFD helper. To completely disable caching, set
      * cache->enabled to 0.
      */
+    /*
+     * since we set AUTO_RELOAD below, this timer controls how
+     * often the cache is reloaded. A 10 Mbps stream can wrap if*Octets in ~57 minutes.
+     * At 100 Mbps it is ~5 minutes, and at 1 Gbps, ~34 seconds.
+     */
     cache->timeout = IFTABLE_CACHE_TIMEOUT;     /* seconds */
 
     /*
