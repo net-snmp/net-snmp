@@ -29,11 +29,19 @@ be fiddling with these directives!
 .\" .SS Traditional Access Control
 .SS VACM Configuration
 .IP "vacmView / vacmGroup / vacmAccess  "
+These directives are used to retain dynamically configured
+access control settings.
 .\" .SS Typed-View Configuration
 .SH SYSTEM INFORMATION
 .SS System Group
 .IP "setSerialNo "
+This directive is used to implement the advisory lock object
+\fCsnmpSetSerialNo\fR.
 .IP "psyslocation / psyscontact / psysname "
+These directives are used to retain dynamically configured
+system settings.
+They will be overridden by the corresponding
+\fIsysLocation\fR, \fIsysContact\fR and \fIsysName\fR directives.
 .\" .SS Host Resources Group
 .\" .SS Process Monitoring 
 .\" .SS Disk Usage Monitoring
@@ -41,19 +49,34 @@ be fiddling with these directives!
 .\" .SS Log File Monitoring
 .SH "ACTIVE MONITORING"
 .SS "Notification Handling"
-.IP "pauthtrapenable {1|2}"
+.IP "pauthtrapenable"
+This directive is used to retain the dynamically configured
+setting of whether the agent should generate authenticationFailure
+traps.
+It will be overridden by the corresponding
+\fIauthtrapenable\fR directive.
 .IP "snmpNotify*Table "
 .IP "targetAddr / targetParams "
+These directives are used to retain dynamically configured
+notification destination settings.
 .SS "DisMan Event MIB"
-.IP "_mteE*Table "
-.IP "_mteOTable / mteObjectsTable "
-.IP "_mteT*Table / mteTriggerTable "
+.IP "_mteE*Table, _mteOTable, _mteT*Table "
+These directives are used to retain dynamically configured
+event, object and monitor trigger settings.
+.IP "mteObjectsTable / mteTriggerTable "
+These directives are for compatibility with the previous
+\fIdisman/event-mib\fR implementation.
 .SS "DisMan Schedule MIB"
 .IP "_schedTable "
+This directive is used to retain dynamically configured
+scheduled events.
 .SH "EXTENDING AGENT FUNCTIONALITY"
 .SS "Arbitrary Extension Commands"
 .IP "extend-sh "
 .IP "exec2 / sh2 / execFix2 "
+These directives were defined by analogy with equivalent directives
+in the previous \fIucd-snmp/extensible\fR implementation.
+They are deprecated, and should not be used.
 .\" .SS "MIB-Specific Extension Commands"
 .\" .SS "Embedded Perl Support"
 .\" .SS Dynamically Loadable Modules
