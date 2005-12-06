@@ -100,6 +100,7 @@ SOFTWARE.
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/snmp_logging.h>
+#include <net-snmp/library/snmp_assert.h>
 
 
 #ifndef BSD4_3
@@ -764,7 +765,6 @@ snmp_set_var_value(netsnmp_variable_list * vars,
     case ASN_INTEGER:
     case ASN_UNSIGNED:
     case ASN_TIMETICKS:
-    case ASN_IPADDRESS:
     case ASN_COUNTER:
         if (value) {
             if (vars->val_len == sizeof(int)) {
@@ -852,6 +852,11 @@ snmp_set_var_value(netsnmp_variable_list * vars,
         memmove(vars->val.objid, value, vars->val_len);
         break;
 
+    case ASN_IPADDRESS: /* snmp_build_var_op treats IPADDR like a string */
+        if (4 != vars->val_len) {
+            netsnmp_assert("ipaddress length == 4");
+        }
+        /** FALL THROUGH */
     case ASN_PRIV_IMPLIED_OCTET_STR:
     case ASN_OCTET_STR:
     case ASN_BIT_STR:
