@@ -140,7 +140,7 @@ struct addrCache {
 static struct addrCache addrCache[SNMP_ADDRCACHE_SIZE];
 int             log_addresses = 0;
 
-
+int             netsnmp_running = 1;
 
 typedef struct _agent_nsap {
     int             handle;
@@ -2794,7 +2794,7 @@ handle_getnext_loop(netsnmp_agent_session *asp)
     /*
      * loop 
      */
-    while (1) {
+    while (netsnmp_running) {
 
         /*
          * bail for now if anything is delegated. 
