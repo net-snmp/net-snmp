@@ -192,15 +192,18 @@ retry:
             sysdescr[vars->val_len] = '\0';
           }
           if (vars->name_length == length_sysUpTime &&
-              !memcmp(objid_sysUpTime, vars->name, sizeof(objid_sysUpTime))){
+              !memcmp(objid_sysUpTime, vars->name, sizeof(objid_sysUpTime))
+              && vars->val.integer){
             uptime = *vars->val.integer;
           }
           if (vars->name_length == length_ipInReceives &&
-              !memcmp(objid_ipInReceives, vars->name, sizeof(objid_ipInReceives))){
+              !memcmp(objid_ipInReceives, vars->name, sizeof(objid_ipInReceives))
+              && vars->val.integer){
             ipin = *vars->val.integer;
           }
           if (vars->name_length == length_ipOutRequests &&
-              !memcmp(objid_ipOutRequests, vars->name, sizeof(objid_ipOutRequests))){
+              !memcmp(objid_ipOutRequests, vars->name, sizeof(objid_ipOutRequests))
+              && vars->val.integer){
             ipout = *vars->val.integer;
           }
         }
