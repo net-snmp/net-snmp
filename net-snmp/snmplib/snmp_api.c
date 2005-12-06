@@ -5562,12 +5562,18 @@ _sess_read(void *sessp, fd_set * fdset)
 
             if (pdulen > isp->packet_len || pdulen == 0) {
                 /*
-                 * We don't have a complete packet yet.  Return, and wait for
-                 * more data to arrive.
+                 * We don't have a complete packet yet.  If we've already
+                 * processed a packet, break out so we'll shift this packet
+                 * to the start of the buffer. If we're already at the
+                 * start, simply return and wait for more data to arrive.
                  */
                 DEBUGMSGTL(("sess_read",
                             "pkt not complete (need %d got %d so far)\n",
                             pdulen, isp->packet_len));
+
+                if (pptr != isp->packet)
+                    break; /* opaque freed for us outside of loop. */
+
                 if (opaque != NULL) {
                     SNMP_FREE(opaque);
                 }
@@ -6462,6 +6468,7 @@ snmp_add_var(netsnmp_pdu *pdu,
     u_char         *buf = NULL;
     const u_char   *buf_ptr = NULL;
     size_t          buf_len = 0, value_len = 0, tint;
+    in_addr_t       atmp;
     long            ltmp;
     int             itmp;
     struct enum_list *ep;
@@ -6648,10 +6655,10 @@ snmp_add_var(netsnmp_pdu *pdu,
             goto type_error;
         }
 #endif /* DISABLE_MIB_LOADING */
-        ltmp = inet_addr(value);
-        if (ltmp != (long) -1 || !strcmp(value, "255.255.255.255"))
+        atmp = inet_addr(value);
+        if (atmp != (long) -1 || !strcmp(value, "255.255.255.255"))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS,
-                                  (u_char *) & ltmp, sizeof(long));
+                                  (u_char *) & atmp, sizeof(atmp));
         else
             goto fail;
         break;
