@@ -554,6 +554,7 @@ snmp_disable_filelog(void)
  * @retval 0 : stderr logging disabled
  * @retval 1 : stderr logging enabled
  */
+int
 snmp_stderrlog_status(void)
 {
     netsnmp_log_handler *logh;
