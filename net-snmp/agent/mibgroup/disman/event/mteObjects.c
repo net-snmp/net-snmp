@@ -43,15 +43,18 @@ init_mteObjects(void)
 
 
 void
-_init_default_mteObject( const char *oname, const char *object, int index)
+_init_default_mteObject( const char *oname, const char *object, int index, int wcard)
 {
     struct mteObject *entry;
 
     entry = mteObjects_addOID( "_snmpd", oname, index, object, 0 );
-    if (entry)
+    if (entry) {
         entry->flags |= MTE_OBJECT_FLAG_ACTIVE|
                         MTE_OBJECT_FLAG_FIXED |
                         MTE_OBJECT_FLAG_VALID;
+        if (wcard)
+            entry->flags |= MTE_OBJECT_FLAG_WILD;
+    }
 }
 
 int
@@ -59,27 +62,34 @@ _init_default_mteObject_lists( int majorID, int minorID,
                                void *serverargs, void *clientarg)
 {
                                                    /* mteHotTrigger     */
-    _init_default_mteObject( "_triggerFire", ".1.3.6.1.2.1.88.2.1.1", 1 );
+    _init_default_mteObject( "_triggerFire", ".1.3.6.1.2.1.88.2.1.1", 1, 0);
                                                    /* mteHotTargetName  */
-    _init_default_mteObject( "_triggerFire", ".1.3.6.1.2.1.88.2.1.2", 2 );
+    _init_default_mteObject( "_triggerFire", ".1.3.6.1.2.1.88.2.1.2", 2, 0);
                                                    /* mteHotContextName */
-    _init_default_mteObject( "_triggerFire", ".1.3.6.1.2.1.88.2.1.3", 3 );
+    _init_default_mteObject( "_triggerFire", ".1.3.6.1.2.1.88.2.1.3", 3, 0);
                                                    /* mteHotOID         */
-    _init_default_mteObject( "_triggerFire", ".1.3.6.1.2.1.88.2.1.4", 4 );
-                                                   /* mteHotValue     */
-    _init_default_mteObject( "_triggerFire", ".1.3.6.1.2.1.88.2.1.5", 5 );
+    _init_default_mteObject( "_triggerFire", ".1.3.6.1.2.1.88.2.1.4", 4, 0);
+                                                   /* mteHotValue       */
+    _init_default_mteObject( "_triggerFire", ".1.3.6.1.2.1.88.2.1.5", 5, 0);
 
 
                                                    /* mteHotTrigger     */
-    _init_default_mteObject( "_triggerFail", ".1.3.6.1.2.1.88.2.1.1", 1 );
+    _init_default_mteObject( "_triggerFail", ".1.3.6.1.2.1.88.2.1.1", 1, 0);
                                                    /* mteHotTargetName  */
-    _init_default_mteObject( "_triggerFail", ".1.3.6.1.2.1.88.2.1.2", 2 );
+    _init_default_mteObject( "_triggerFail", ".1.3.6.1.2.1.88.2.1.2", 2, 0);
                                                    /* mteHotContextName */
-    _init_default_mteObject( "_triggerFail", ".1.3.6.1.2.1.88.2.1.3", 3 );
+    _init_default_mteObject( "_triggerFail", ".1.3.6.1.2.1.88.2.1.3", 3, 0);
                                                    /* mteHotOID         */
-    _init_default_mteObject( "_triggerFail", ".1.3.6.1.2.1.88.2.1.4", 4 );
-                                                   /* mteFailedReason */
-    _init_default_mteObject( "_triggerFail", ".1.3.6.1.2.1.88.2.1.6", 5 );
+    _init_default_mteObject( "_triggerFail", ".1.3.6.1.2.1.88.2.1.4", 4, 0);
+                                                   /* mteFailedReason   */
+    _init_default_mteObject( "_triggerFail", ".1.3.6.1.2.1.88.2.1.6", 5, 0);
+
+                                                   /* ifIndex       */
+    _init_default_mteObject( "_linkUpDown", ".1.3.6.1.2.1.2.2.1.1", 1, 1);
+                                                   /* ifAdminStatus */
+    _init_default_mteObject( "_linkUpDown", ".1.3.6.1.2.1.2.2.1.7", 2, 1);
+                                                   /* ifOperStatus  */
+    _init_default_mteObject( "_linkUpDown", ".1.3.6.1.2.1.2.2.1.8", 3, 1);
 
     return 0;
 }

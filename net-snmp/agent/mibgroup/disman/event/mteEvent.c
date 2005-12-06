@@ -29,6 +29,10 @@ init_event_table_data(void)
 }
 
 void _init_default_mteEvent( char *event, char *oname, int specific );
+void _init_link_mteEvent(    char *event, char *oname, int specific );
+void _init_builtin_mteEvent( char *event, char *oname,
+                            oid *trapOID, size_t trapOID_len );
+
 
 /** Initializes the mteEvent module */
 void
@@ -43,21 +47,21 @@ init_mteEvent(void)
     _init_default_mteEvent( "mteTriggerRising",   "_triggerFire", 2 );
     _init_default_mteEvent( "mteTriggerFalling",  "_triggerFire", 3 );
     _init_default_mteEvent( "mteTriggerFailure",  "_triggerFail", 4 );
+
+    _init_link_mteEvent( "linkDown", "_linkUpDown", 3 );
+    _init_link_mteEvent( "linkUp",   "_linkUpDown", 4 );
 }
 
 void
-_init_default_mteEvent( char *event, char *oname, int specific )
+_init_builtin_mteEvent( char *event, char *oname, oid *trapOID, size_t trapOID_len )
 {
     char ename[ MTE_STR1_LEN+1 ];
     netsnmp_tdata_row *row;
     struct mteEvent   *entry;
-    oid    mteTrapOID[]   = {1, 3, 6, 1, 2, 1, 88, 2, 0, 99 /* placeholder */};
-    size_t mteTrapOID_len = OID_LENGTH(mteTrapOID);
 
     memset(ename, 0, sizeof(ename));
     ename[0] = '_';
     memcpy(ename+1, event, strlen(event));
-    mteTrapOID[ mteTrapOID_len-1 ] = specific;
 
     row = mteEvent_createEntry( "_snmpd", ename, 1 );
     if (!row || !row->data)
@@ -65,13 +69,36 @@ _init_default_mteEvent( char *event, char *oname, int specific )
     entry = (struct mteEvent *)row->data;
 
     entry->mteEventActions     = MTE_EVENT_NOTIFICATION;
-    entry->mteNotification_len = mteTrapOID_len;
-    memcpy( entry->mteNotification, mteTrapOID, mteTrapOID_len*sizeof(oid));
+    entry->mteNotification_len = trapOID_len;
+    memcpy( entry->mteNotification, trapOID, trapOID_len*sizeof(oid));
     memcpy( entry->mteNotifyOwner, "_snmpd", 6 );
     memcpy( entry->mteNotifyObjects,  oname, strlen(oname));
-    entry->flags |= MTE_EVENT_FLAG_ACTIVE|
+    entry->flags |= MTE_EVENT_FLAG_ENABLED|
+                    MTE_EVENT_FLAG_ACTIVE|
                     MTE_EVENT_FLAG_VALID;
 }
+
+void
+_init_default_mteEvent( char *event, char *oname, int specific )
+{
+    oid    mteTrapOID[]   = {1, 3, 6, 1, 2, 1, 88, 2, 0, 99 /* placeholder */};
+    size_t mteTrapOID_len = OID_LENGTH(mteTrapOID);
+
+    mteTrapOID[ mteTrapOID_len-1 ] = specific;
+   _init_builtin_mteEvent( event, oname, mteTrapOID, mteTrapOID_len );
+}
+
+
+void
+_init_link_mteEvent( char *event, char *oname, int specific )
+{
+    oid    mteTrapOID[]   = {1, 3, 6, 1, 6, 3, 1, 1, 5, 99 /* placeholder */};
+    size_t mteTrapOID_len = OID_LENGTH(mteTrapOID);
+
+    mteTrapOID[ mteTrapOID_len-1 ] = specific;
+   _init_builtin_mteEvent( event, oname, mteTrapOID, mteTrapOID_len );
+}
+
 
     /* ===================================================
      *
