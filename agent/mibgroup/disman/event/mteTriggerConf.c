@@ -28,6 +28,8 @@ init_mteTriggerConf(void)
                                   "triggername [-I] [-i OID | -o OID]* [-e event] expression ");
     snmpd_register_config_handler("defaultMonitors",
                                    parse_default_mteMonitors, NULL, "yes|no");
+    snmpd_register_config_handler("linkUpDownNotifications",
+                                   parse_linkUpDown_traps,    NULL, "yes|no");
 
     /*
      * ... for persistent storage of various event table entries ...
@@ -685,6 +687,24 @@ parse_mteMonitor(const char *token, char *line)
                            _mteTrigger_callback_enable, entry );
     return;
 }
+
+void
+parse_linkUpDown_traps(const char *token, char *line)
+{
+    /*
+     * XXX - This isn't strictly correct according to the
+     *       definitions in IF-MIB, but will do for now.
+     */
+    if (strncmp( line, "yes", 3) == 0) {
+        DEBUGMSGTL(("disman:event:conf", "Registering linkUpDown traps\n"));
+
+        parse_mteMonitor("monitor",
+            "-r 60 -S -e _linkUp   \"linkUp\"   ifOperStatus != 2");
+        parse_mteMonitor("monitor",
+            "-r 60 -S -e _linkDown \"linkDown\" ifOperStatus == 2");
+    }
+}
+
 
 void
 parse_default_mteMonitors(const char *token, char *line)
