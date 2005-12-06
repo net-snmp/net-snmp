@@ -20,9 +20,9 @@
 #
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
-Version: 5.2.2
+Version: 5.2.3.dev
 # update release for vendor release. (eg 1.rh9, 1.rh72, 1.ydl3, 1.ydl23)
-Release: 1
+Release: 1.ydl4
 URL: http://net-snmp.sourceforge.net/
 License: BSDish
 Group: System Environment/Daemons
