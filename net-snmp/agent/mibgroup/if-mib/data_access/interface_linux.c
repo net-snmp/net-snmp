@@ -23,6 +23,9 @@
 #include <sys/types.h>
 
 #ifdef HAVE_LINUX_ETHTOOL_H
+#   ifdef HAVE_ASM_TYPES_H
+#      include <asm/types.h>
+#   endif /* HAVE_ASM_TYPES_H */
 #   ifdef HAVE_PCI_PCI_H
 #      include <pci/pci.h> /* for u32 typedef in linux/ethtool */
 #   endif /* HAVE_PCI_PCI_H */
