@@ -967,14 +967,14 @@ store_vacm(int majorID, int minorID, void *serverarg, void *clientarg)
 }
 
 /*
- * returns 1 if vacm has *any* configuration entries in it (regardless
- * of weather or not there is enough to make a decision based on it),
+ * returns 1 if vacm has *any* (non-built-in) configuration entries,
+ * regardless of whether or not there is enough to make a decision,
  * else return 0 
  */
 int
 vacm_is_configured(void)
 {
-    if (viewList == NULL && accessList == NULL && groupList == NULL) {
+    if (accessList == NULL && groupList == NULL) {
         return 0;
     }
     return 1;
