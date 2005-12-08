@@ -2614,7 +2614,7 @@ AC_CHECK_HEADERS(malloc.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h sys/q
 #endif
 ]])
 # Linux
-AC_CHECK_HEADERS(sys/conf.h netinet/tcp_fsm.h sys/protosw.h nlist.h ioctls.h asm/page.h netipx/ipx.h pci/pci.h)
+AC_CHECK_HEADERS(sys/conf.h netinet/tcp_fsm.h sys/protosw.h nlist.h ioctls.h asm/page.h asm/types.h netipx/ipx.h pci/pci.h)
 # Solaris
 AC_CHECK_HEADERS(inet/mib2.h)
 # NetBSD required headers
