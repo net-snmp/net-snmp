@@ -30,6 +30,10 @@ init_netsnmp_trapd_auth(void)
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmptrapd", "disableAuthorization",
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_APP_NO_AUTHORIZATION);
+    /* an alternative name, perhaps more immediately meaningful */
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmptrapd", "acceptAllTraps",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_APP_NO_AUTHORIZATION);
 }
 
 /* XXX: store somewhere in the PDU instead */
@@ -70,6 +74,11 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
 
     if (!newpdu) {
         snmp_log(LOG_ERR, "Failed to duplicate incoming PDU.  Refusing to authorize.\n");
+        return NETSNMPTRAPD_HANDLER_FINISH;
+    }
+
+    if (!vacm_is_configured()) {
+        snmp_log(LOG_WARNING, "No access configuration - dropping trap.\n");
         return NETSNMPTRAPD_HANDLER_FINISH;
     }
 

@@ -119,6 +119,9 @@ init_vacm_config_tokens(void) {
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
                            vacm_standard_views, NULL);
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_POST_READ_CONFIG,
+                           vacm_warn_if_not_configured, NULL);
 }
 
 /**
@@ -162,9 +165,6 @@ init_vacm_conf(void)
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_ACM_CHECK_SUBTREE,
                            vacm_in_view_callback, NULL);
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                           SNMP_CALLBACK_POST_READ_CONFIG,
-                           vacm_warn_if_not_configured, NULL);
 }
 
 
@@ -1078,12 +1078,30 @@ vacm_warn_if_not_configured(int majorID, int minorID, void *serverarg,
     if (NULL==name)
         name = "snmpd";
     
-    if (!vacm_is_configured() && (MASTER_AGENT == agent_mode)) {
-        snmp_log(LOG_WARNING,
+    if (!vacm_is_configured()) {
+        if (MASTER_AGENT == agent_mode) {
+            snmp_log(LOG_WARNING,
                  "Warning: no access control information configured.\n  It's "
                  "unlikely this agent can serve any useful purpose in this "
                  "state.\n  Run \"snmpconf -g basic_setup\" to help you "
                  "configure the %s.conf file for this agent.\n", name );
+        }
+
+/*
+ * XXX - HACK ALERT!!
+ *
+ * This duplicates a definition from "apps/snmptrapd_ds.h"
+ */
+#ifndef NETSNMP_DS_APP_NO_AUTHORIZATION
+#define NETSNMP_DS_APP_NO_AUTHORIZATION 17
+#endif
+        if (!strcmp(name, "snmptrapd") &&
+            !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+                                    NETSNMP_DS_APP_NO_AUTHORIZATION)) {
+            snmp_log(LOG_WARNING,
+                 "Warning: no access control information configured.\n"
+                 "This receiver will *NOT* accept any incoming traps.\n");
+        }
     }
     return SNMP_ERR_NOERROR;
 }
