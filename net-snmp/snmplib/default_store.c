@@ -340,6 +340,30 @@ netsnmp_ds_get_void(int storeid, int which)
     return netsnmp_ds_voids[storeid][which];
 }
 
+int
+netsnmp_ds_parse_boolean(char *line)
+{
+    char           *value, *endptr;
+    int             itmp;
+    char           *st;
+
+    value = strtok_r(line, " \t\n", &st);
+    if (strcasecmp(value, "yes") == 0 || 
+	strcasecmp(value, "true") == 0) {
+        return 1;
+    } else if (strcasecmp(value, "no") == 0 ||
+	       strcasecmp(value, "false") == 0) {
+        return 0;
+    } else {
+        itmp = strtol(value, &endptr, 10);
+        if (*endptr != 0 || itmp < 0 || itmp > 1) {
+            config_perror("Should be yes|no|true|false|0|1");
+            return -1;
+	}
+        return itmp;
+    }
+}
+
 void
 netsnmp_ds_handle_config(const char *token, char *line)
 {
@@ -363,20 +387,9 @@ netsnmp_ds_handle_config(const char *token, char *line)
 
         switch (drsp->type) {
         case ASN_BOOLEAN:
-            value = strtok_r(line, " \t\n", &st);
-            if (strcasecmp(value, "yes") == 0 || 
-		strcasecmp(value, "true") == 0) {
-                itmp = 1;
-            } else if (strcasecmp(value, "no") == 0 ||
-		       strcasecmp(value, "false") == 0) {
-                itmp = 0;
-            } else {
-                itmp = strtol(value, &endptr, 10);
-                if (*endptr != 0 || itmp < 0 || itmp > 1) {
-                    config_perror("Should be yes|no|true|false|0|1");
-		}
-            }
-            netsnmp_ds_set_boolean(drsp->storeid, drsp->which, itmp);
+            itmp = netsnmp_ds_parse_boolean(line);
+            if ( itmp != -1 )
+                netsnmp_ds_set_boolean(drsp->storeid, drsp->which, itmp);
             DEBUGMSGTL(("netsnmp_ds_handle_config", "bool: %d\n", itmp));
             break;
 

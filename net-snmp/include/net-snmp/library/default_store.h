@@ -157,6 +157,7 @@ extern          "C" {
     int             netsnmp_ds_register_premib(u_char type, const char *ftype,
                                        const char *token, int storeid,
                                        int which);
+    int             netsnmp_ds_parse_boolean(char *line);
     void            netsnmp_ds_shutdown(void);
 
 #ifdef __cplusplus
