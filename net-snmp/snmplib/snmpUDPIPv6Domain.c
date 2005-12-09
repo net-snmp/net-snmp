@@ -945,13 +945,17 @@ memmove_com2Sec6Entry(com2Sec6Entry * c,
 }
 
 
+#ifndef IPV6_STRING_LEN
+#define IPV6_STRING_LEN 55
+#endif
+
 void
 netsnmp_udp6_parse_security(const char *token, char *param)
 {
     char            secName[VACMSTRINGLEN];
     char            contextName[VACMSTRINGLEN];
     char            community[VACMSTRINGLEN];
-    char            source[VACMSTRINGLEN];
+    char            source[IPV6_STRING_LEN];
     char           *cp = NULL, *strnetwork = NULL, *strmask = NULL;
     com2Sec6Entry  *e = NULL;
     struct sockaddr_in6 net, mask;
