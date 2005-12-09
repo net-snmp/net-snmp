@@ -18,7 +18,6 @@
 #include <net-snmp/agent/table_dataset.h>
 #include "notification_log.h"
 
-static int      enabled = 0;
 static u_long   num_received = 0;
 static u_long   num_deleted = 0;
 
@@ -463,8 +462,8 @@ init_notification_log(void)
     static oid      my_nlmConfigGlobalAgeOut_oid[] =
         { 1, 3, 6, 1, 2, 1, 92, 1, 1, 2, 0 };
     char * context;
+    char * apptype;
 
-    enabled = 1;
     context = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
                                     NETSNMP_DS_NOTIF_LOG_CTX);
 
@@ -508,10 +507,17 @@ init_notification_log(void)
     initialize_table_nlmLogVariableTable(context);
     initialize_table_nlmLogTable(context);
 
-#if 0
     /*
      * disable flag 
      */
+    apptype = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                    NETSNMP_DS_LIB_APPTYPE);
+    netsnmp_ds_register_config(ASN_BOOLEAN, apptype, "dontRetainLogs",
+			   NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_APP_DONT_LOG);
+    netsnmp_ds_register_config(ASN_BOOLEAN, apptype, "doNotRetainTrapLogs",
+			   NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_APP_DONT_LOG);
+#if 0
+    /* xxx-rks: config for max size; should be peristent too, & tied to mib */
     netsnmp_ds_register_config(ASN_INTEGER,
                                netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
                                                      NETSNMP_DS_LIB_APPTYPE),
@@ -541,8 +547,10 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
     u_long          tmpul;
     int             col;
 
-    if (!enabled)
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_APP_DONT_LOG)) {
         return;
+    }
 
     DEBUGMSGTL(("notification_log", "logging something\n"));
     row = netsnmp_create_table_data_row();
