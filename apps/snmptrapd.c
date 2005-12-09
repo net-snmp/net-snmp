@@ -529,21 +529,21 @@ parse_config_logOption(const char *token, char *cptr)
 void
 parse_config_doNotFork(const char *token, char *cptr)
 {
-  if (atoi(cptr) == 1)
+  if (netsnmp_ds_parse_boolean(cptr) == 1)
     dofork = 0;
 }
 
 void
 parse_config_printEventNumbers(const char *token, char *cptr)
 {
-  if (atoi(cptr) == 1)
+  if (netsnmp_ds_parse_boolean(cptr) == 1)
     Event++;
 }
 
 void
 parse_config_ignoreAuthFailure(const char *token, char *cptr)
 {
-  if (atoi(cptr) == 1)
+  if (netsnmp_ds_parse_boolean(cptr) == 1)
     dropauth = 1;
 }
 
@@ -614,7 +614,7 @@ main(int argc, char *argv[])
      */
     snmptrapd_register_configs( );
     init_usm_conf( "snmptrapd" );
-    register_config_handler("snmptrapd", "snmptrapdaddr",
+    register_config_handler("snmptrapd", "snmpTrapdAddr",
                             parse_trapd_address, free_trapd_address, "string");
 
     register_config_handler("snmptrapd", "doNotLogTraps",
