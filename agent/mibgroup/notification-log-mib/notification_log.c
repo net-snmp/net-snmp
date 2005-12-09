@@ -514,7 +514,7 @@ init_notification_log(void)
                                     NETSNMP_DS_LIB_APPTYPE);
     netsnmp_ds_register_config(ASN_BOOLEAN, apptype, "dontRetainLogs",
 			   NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_APP_DONT_LOG);
-    netsnmp_ds_register_config(ASN_BOOLEAN, apptype, "doNotRetainTrapLogs",
+    netsnmp_ds_register_config(ASN_BOOLEAN, apptype, "doNotRetainNotificationLogs",
 			   NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_APP_DONT_LOG);
 #if 0
     /* xxx-rks: config for max size; should be peristent too, & tied to mib */
