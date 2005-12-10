@@ -7,8 +7,6 @@
 #ifndef IPV4INTERFACETABLE_DATA_ACCESS_H
 #define IPV4INTERFACETABLE_DATA_ACCESS_H
 
-config_noinclude(ip -
-                 mib / ipv4InterfaceTable / ipv4InterfaceTable_data_access)
 #ifdef __cplusplus
      extern          "C" {
 #endif
