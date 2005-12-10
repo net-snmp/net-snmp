@@ -164,7 +164,7 @@ netsnmp_access_route_entry_set(netsnmp_route_entry * entry)
         rc = netsnmp_arch_route_create(entry);
     }
     else if (entry->flags & NETSNMP_ACCESS_ROUTE_CHANGE) {
-        #warning "route change not implemented"
+        /** xxx-rks:9 route change not implemented */
         snmp_log(LOG_ERR,"netsnmp_access_route_entry_set change not supported yet\n");
         rc = -1;
     }
