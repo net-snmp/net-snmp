@@ -1,6 +1,8 @@
 #ifndef MTETRIGGERCONF_H
 #define MTETRIGGERCONF_H
 
+config_require(utilities/iquery)
+
 /*
  * function declarations 
  */
