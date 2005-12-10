@@ -68,7 +68,7 @@ netsnmp_arch_udp_endpoint_delete(netsnmp_udp_endpoint_entry *entry)
 {
     if (NULL == entry)
         return -1;
-#warning "udp_endpoint delete not implemented"
+    /** xxx-rks:9 udp_endpoint delete not implemented */
     return -1;
 }
 
@@ -226,7 +226,6 @@ _load4(netsnmp_container *container, u_int load_flags)
 }
 
 #if defined (INET6)
-#warning "using ipv6"
 /**
  *
  * @retval  0 no errors
