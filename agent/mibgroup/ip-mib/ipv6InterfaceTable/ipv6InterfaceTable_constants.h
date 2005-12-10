@@ -15,6 +15,7 @@ extern          "C" {
     /*
      * column number definitions for table ipv6InterfaceTable 
      */
+#define IPV6INTERFACETABLELASTCHANGE_OID    1,3,6,1,2,1,4,29
 #define IPV6INTERFACETABLE_OID              1,3,6,1,2,1,4,30
 
 #define COLUMN_IPV6INTERFACEIFINDEX         1

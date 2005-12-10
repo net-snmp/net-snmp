@@ -336,6 +336,24 @@ _ipv4InterfaceTable_initialize_interface(ipv4InterfaceTable_registration *
      */
     netsnmp_register_table(reginfo, tbl_info);
 
+    /*
+     * register LastChanged
+     */
+    {
+        oid             lc_oid[] = { IPV4INTERFACETABLELASTCHANGE_OID };
+        netsnmp_register_watched_scalar(netsnmp_create_handler_registration
+                                        ("ipv4TableLastChanged", NULL,
+                                         lc_oid, OID_LENGTH(lc_oid),
+                                         HANDLER_CAN_RONLY),
+                                        netsnmp_create_watcher_info((void
+                                                                     *)
+                                                                    &ipv4InterfaceTable_if_ctx.
+                                                                    last_changed,
+                                                                    sizeof
+                                                                    (u_long),
+                                                                    ASN_TIMETICKS,
+                                                                    WATCHER_FIXED_SIZE));
+    }
 }                               /* _ipv4InterfaceTable_initialize_interface */
 
 /**
