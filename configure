@@ -1023,7 +1023,9 @@ Optional Features:
   --disable-snmpv2c               Do not include code that implements SNMPv2c.
   --disable-set-support           Do not allow SNMP set requests.
   --disable-des                   Do not support DES encryption.
+  --disable-privacy               Don't compile in support for privacy (encryption).
   --disable-md5                   Do not support MD5 authentication.
+  --enable-internal-md5           Use the internal MD5 support.
   --enable-ipv6                   Generate IPv6 ready version.
   --enable-local-smux             Restrict SMUX connections to localhost (by default).
   --enable-debugging              Outputs extra debugging information at all
@@ -1034,8 +1036,6 @@ Optional Features:
                                   This might provide some speed benefits.
   --enable-developer              Turns on super-duper-extra-compile-warnings
                                   when using gcc.
-  --disable-privacy               Don't compile in support for privacy.
-  --enable-internal-md5           Use the internal MD5 support.
   --enable-agentx-dom-sock-only         Disable UDP/TCP transports for agentx.
   --disable-snmptrapd-subagent          Disable agentx subagent code in snmptrapd.
   --enable-mib-config-checking   Turns on extra checks during configuration
@@ -2099,6 +2099,26 @@ echo "$as_me: error:  Invalid option. Use --enable-des/--disable-des instead " >
    { (exit 1); exit 1; }; }
 fi;
 
+# Check whether --enable-privacy or --disable-privacy was given.
+if test "${enable_privacy+set}" = set; then
+  enableval="$enable_privacy"
+
+fi;
+if test "x$enable_privacy" != "xno"; then
+  cat >>confdefs.h <<\_ACEOF
+#define SCAPI_AUTHPRIV 1
+_ACEOF
+
+fi
+
+# Check whether --with-privacy or --without-privacy was given.
+if test "${with_privacy+set}" = set; then
+  withval="$with_privacy"
+  { { echo "$as_me:$LINENO: error:  Invalid option. Use --enable-privacy/--disable-privacy instead " >&5
+echo "$as_me: error:  Invalid option. Use --enable-privacy/--disable-privacy instead " >&2;}
+   { (exit 1); exit 1; }; }
+fi;
+
 # Check whether --enable-md5 or --disable-md5 was given.
 if test "${enable_md5+set}" = set; then
   enableval="$enable_md5"
@@ -2120,6 +2140,31 @@ echo "$as_me: error:  Invalid option. Use --enable-md5/--disable-md5 instead " >
    { (exit 1); exit 1; }; }
 fi;
 
+# Check whether --enable-internal-md5 or --disable-internal-md5 was given.
+if test "${enable_internal_md5+set}" = set; then
+  enableval="$enable_internal_md5"
+
+fi;
+if test "x$enable_internal_md5" = "xyes"; then
+  if test "x$enable_md5" = "xno"; then
+    { { echo "$as_me:$LINENO: error: You can not specify both --enable-internal-md5 and --disable-md5" >&5
+echo "$as_me: error: You can not specify both --enable-internal-md5 and --disable-md5" >&2;}
+   { (exit 1); exit 1; }; }
+  else
+    cat >>confdefs.h <<\_ACEOF
+#define USE_INTERNAL_MD5 1
+_ACEOF
+
+  fi
+fi
+
+# Check whether --with-internal-md5 or --without-internal-md5 was given.
+if test "${with_internal_md5+set}" = set; then
+  withval="$with_internal_md5"
+  { { echo "$as_me:$LINENO: error:  Invalid option. Use --enable-internal-md5/--disable-internal-md5 instead " >&5
+echo "$as_me: error:  Invalid option. Use --enable-internal-md5/--disable-internal-md5 instead " >&2;}
+   { (exit 1); exit 1; }; }
+fi;
 
 # Check whether --enable-ipv6 or --disable-ipv6 was given.
 if test "${enable_ipv6+set}" = set; then
@@ -2384,52 +2429,6 @@ if test "${enable_rpm+set}" = set; then
   enableval="$enable_rpm"
   { { echo "$as_me:$LINENO: error:  Invalid option. Use --with-rpm/--without-rpm instead " >&5
 echo "$as_me: error:  Invalid option. Use --with-rpm/--without-rpm instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi;
-
-# Check whether --enable-privacy or --disable-privacy was given.
-if test "${enable_privacy+set}" = set; then
-  enableval="$enable_privacy"
-
-fi;
-if test "x$enable_privacy" != "xno"; then
-  cat >>confdefs.h <<\_ACEOF
-#define SCAPI_AUTHPRIV 1
-_ACEOF
-
-fi
-
-# Check whether --with-privacy or --without-privacy was given.
-if test "${with_privacy+set}" = set; then
-  withval="$with_privacy"
-  { { echo "$as_me:$LINENO: error:  Invalid option. Use --enable-privacy/--disable-privacy instead " >&5
-echo "$as_me: error:  Invalid option. Use --enable-privacy/--disable-privacy instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi;
-
-# Check whether --enable-internal-md5 or --disable-internal-md5 was given.
-if test "${enable_internal_md5+set}" = set; then
-  enableval="$enable_internal_md5"
-
-fi;
-if test "x$enable_internal_md5" = "xyes"; then
-  if test "x$enable_md5" = "xno"; then
-    { { echo "$as_me:$LINENO: error: You can not specify both --enable-internal-md5 and --disable-md5" >&5
-echo "$as_me: error: You can not specify both --enable-internal-md5 and --disable-md5" >&2;}
-   { (exit 1); exit 1; }; }
-  else
-    cat >>confdefs.h <<\_ACEOF
-#define USE_INTERNAL_MD5 1
-_ACEOF
-
-  fi
-fi
-
-# Check whether --with-internal-md5 or --without-internal-md5 was given.
-if test "${with_internal_md5+set}" = set; then
-  withval="$with_internal_md5"
-  { { echo "$as_me:$LINENO: error:  Invalid option. Use --enable-internal-md5/--disable-internal-md5 instead " >&5
-echo "$as_me: error:  Invalid option. Use --enable-internal-md5/--disable-internal-md5 instead " >&2;}
    { (exit 1); exit 1; }; }
 fi;
 
@@ -6034,7 +6033,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6037 "configure"' > conftest.$ac_ext
+  echo '#line 6036 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6606,7 +6605,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:6609: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:6608: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -8570,7 +8569,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8573 "configure"
+#line 8572 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -8668,7 +8667,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8671 "configure"
+#line 8670 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
