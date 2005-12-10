@@ -2414,7 +2414,6 @@ netsnmp_check_requests_status(netsnmp_agent_session *asp,
             DEBUGMSGTL(("verbose:asp",
                         "**reqinfo %p doesn't match cached reqinfo %p\n",
                         asp->reqinfo, requests->agent_req_info));
-//            netsnmp_assert(requests->agent_req_info == asp->reqinfo);/* DEBUG */
         }
         if (requests->status != SNMP_ERR_NOERROR &&
             (!look_for_specific || requests->status == look_for_specific)
