@@ -638,7 +638,7 @@ AC_ARG_WITH(out_mib_modules,
     snmpv3mibs             support for the snmpv3 mib modules.
     ucd_snmp               UCD-SNMP-MIB specific extensions.
     agent_mibs             NET-SNMP-AGENT-MIB extensions
-    agentx                 (see below)
+    agentx                 AgentX support (see below)
     notification           mibs supporting specification of trap destinations.
     target                 Support for the SNMP WGs TARGET-MIB.
     utilities              general agent configuration utilities.
@@ -648,30 +648,31 @@ AC_ARG_WITH(out_mib_modules,
     disman/schedule        support for the DISMAN-SCHEDULE-MIB
                              (trigger SET requests at specified times)
     host                   host resources mib support.
+                             (only on major supported platforms)
 
   Optional mib modules that can be built into the agent include:
     smux                   smux support to allow subagents to attach to snmpd.
     mibII/mta_sendmail     Sendmail statistics monitoring (MTA-MIB)
-    misc/ipfwacc           accounting rules IP firewall information (linux).
-    ipfwchains/ipfwchains  firewall chains under ipfw for linux.
-                           (See agent/mibgroup/ipfwchains/README)
     ucd-snmp/diskio        Table of io-devices and how much data they have
                            read/written.  (only tested on Solaris, Linux)
-    tunnel                 Linux TUNNEL-MIB support (ifTable extension)
     disman/event-mib       previous implementation of the DISMAN-EVENT-MIB
 
   Optional modules for specific platforms
     Linux
-      ucd-snmp/lmSensors   hardware monitoring
+      ucd-snmp/lmSensors   hardware monitoring (LM-SENSORS-MIB)
+      tunnel               Linux TUNNEL-MIB support (ifTable extension)
       mibII/interfaces     (old ifTable implementation)
       tcp-mib              (experimental) tcpConnectionTable and
                            tcpListenerTable
       udp-mib              (experimental) udpEndpointTable
       ip-mib/ipv4InterfaceTable  (experimental)
       ip-mib/ipv6InterfaceTable  (experimental)
+      misc/ipfwacc         accounting rules IP firewall information
+      ipfwchains/ipfwchains  firewall chains under ipfw
+                             (See agent/mibgroup/ipfwchains/README)
 
     Solaris
-      ucd-snmp/lmSensors   hardware monitoring
+      ucd-snmp/lmSensors   hardware monitoring (LM-SENSORS-MIB)
 
   AgentX support:
     agentx/subagent        allows the agent to run as either a snmp agent
