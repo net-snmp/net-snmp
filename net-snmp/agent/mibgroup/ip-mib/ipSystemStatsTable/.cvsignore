@@ -7,3 +7,5 @@
 .new
 .patch
 .orig
+*.m2d
+*.txt
