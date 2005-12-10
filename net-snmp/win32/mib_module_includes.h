@@ -86,7 +86,7 @@
 #include "mibgroup/snmpv3/usmStats.h"
 #include "mibgroup/snmpv3/usmUser.h"
 #include "mibgroup/notification/snmpNotifyTable.h"
-#include "mibgroup/notification/snmpNotifyFilterTable.h"
+#include "mibgroup/snmp-notification-mib/snmpNotifyFilterTable.h"
 #include "mibgroup/notification/snmpNotifyFilterProfileTable.h"
 #include "mibgroup/target/snmpTargetAddrEntry.h"
 #include "mibgroup/target/snmpTargetParamsEntry.h"
