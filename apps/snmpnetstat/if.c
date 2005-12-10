@@ -241,7 +241,7 @@ intpr(int interval)
         ADD_IFVAR( 21 );            /* ifOutQLen      */
     }
 /*  if (tflag) {
-        ADD_IFVAR( XX );            /* ??? */
+        ADD_IFVAR( XX );          */  /* ??? */ /*
     }
  */
     if (dflag) {
