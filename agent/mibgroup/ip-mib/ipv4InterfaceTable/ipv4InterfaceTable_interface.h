@@ -36,8 +36,6 @@
 #ifndef IPV4INTERFACETABLE_INTERFACE_H
 #define IPV4INTERFACETABLE_INTERFACE_H
 
-config_noinclude(ip -
-                 mib / ipv4InterfaceTable / ipv4InterfaceTable_interface)
 #ifdef __cplusplus
      extern          "C" {
 #endif
