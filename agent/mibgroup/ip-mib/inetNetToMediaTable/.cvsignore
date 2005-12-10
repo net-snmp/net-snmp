@@ -5,3 +5,5 @@
 .orig
 *.lo
 Makefile
+*.m2d
+*.txt
