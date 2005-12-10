@@ -64,7 +64,7 @@ netsnmp_arch_tcpconn_delete(netsnmp_tcpconn_entry *entry)
 {
     if (NULL == entry)
         return -1;
-#warning "tcpConn delete not implemented"
+    /** xxx-rks:9 tcpConn delete not implemented */
     return -1;
 }
 
@@ -219,7 +219,6 @@ _load4(netsnmp_container *container, u_int load_flags)
 }
 
 #if defined (INET6)
-#warning "using ipv6"
 /**
  *
  * @retval  0 no errors
