@@ -663,6 +663,19 @@ AC_ARG_WITH(out_mib_modules,
     tunnel                 Linux TUNNEL-MIB support (ifTable extension)
     disman/event-mib       previous implementation of the DISMAN-EVENT-MIB
 
+  Optional modules for specific platforms
+    Linux
+      ucd-snmp/lmSensors   hardware monitoring
+      mibII/interfaces     (old ifTable implementation)
+      tcp-mib              (experimental) tcpConnectionTable and
+                           tcpListenerTable
+      udp-mib              (experimental) udpEndpointTable
+      ip-mib/ipv4InterfaceTable  (experimental)
+      ip-mib/ipv6InterfaceTable  (experimental)
+
+    Solaris
+      ucd-snmp/lmSensors   hardware monitoring
+
   AgentX support:
     agentx/subagent        allows the agent to run as either a snmp agent
                            or as an agentX sub-agent.
