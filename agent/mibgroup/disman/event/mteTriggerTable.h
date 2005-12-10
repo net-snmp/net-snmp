@@ -5,6 +5,8 @@
 #ifndef MTETRIGGERTABLE_H
 #define MTETRIGGERTABLE_H
 
+config_require(utilities/iquery)
+
 /*
  * function declarations 
  */
