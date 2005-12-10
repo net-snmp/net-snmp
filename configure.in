@@ -213,6 +213,14 @@ fi
 AC_ARG_WITH(des,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-des/--disable-des instead ]) )
 
+AC_ARG_ENABLE(privacy,
+[  --disable-privacy               Don't compile in support for privacy (encryption).])
+if test "x$enable_privacy" != "xno"; then
+  AC_DEFINE(SCAPI_AUTHPRIV)
+fi
+AC_ARG_WITH(privacy,,
+	AC_MSG_ERROR([ Invalid option. Use --enable-privacy/--disable-privacy instead ]) )
+
 AC_ARG_ENABLE(md5,
 [  --disable-md5                   Do not support MD5 authentication.])
 if test "x$enable_md5" = "xno"; then
@@ -222,6 +230,17 @@ fi
 AC_ARG_WITH(md5,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-md5/--disable-md5 instead ]) )
 
+AC_ARG_ENABLE(internal-md5,
+[  --enable-internal-md5           Use the internal MD5 support.])
+if test "x$enable_internal_md5" = "xyes"; then
+  if test "x$enable_md5" = "xno"; then
+    AC_MSG_ERROR(You can not specify both --enable-internal-md5 and --disable-md5)
+  else
+    AC_DEFINE(USE_INTERNAL_MD5)
+  fi
+fi
+AC_ARG_WITH(internal-md5,,
+	AC_MSG_ERROR([ Invalid option. Use --enable-internal-md5/--disable-internal-md5 instead ]) )
 
 AC_ARG_ENABLE(ipv6,
 [  --enable-ipv6                   Generate IPv6 ready version.],
@@ -353,26 +372,6 @@ AC_ARG_WITH(rpm,
                                  module.])
 AC_ARG_ENABLE(rpm,,
 	AC_MSG_ERROR([ Invalid option. Use --with-rpm/--without-rpm instead ]) )
-
-AC_ARG_ENABLE(privacy,
-[  --disable-privacy               Don't compile in support for privacy.])
-if test "x$enable_privacy" != "xno"; then
-  AC_DEFINE(SCAPI_AUTHPRIV)
-fi
-AC_ARG_WITH(privacy,,
-	AC_MSG_ERROR([ Invalid option. Use --enable-privacy/--disable-privacy instead ]) )
-
-AC_ARG_ENABLE(internal-md5,
-[  --enable-internal-md5           Use the internal MD5 support.])
-if test "x$enable_internal_md5" = "xyes"; then
-  if test "x$enable_md5" = "xno"; then
-    AC_MSG_ERROR(You can not specify both --enable-internal-md5 and --disable-md5)
-  else
-    AC_DEFINE(USE_INTERNAL_MD5)
-  fi
-fi
-AC_ARG_WITH(internal-md5,,
-	AC_MSG_ERROR([ Invalid option. Use --enable-internal-md5/--disable-internal-md5 instead ]) )
 
 AC_ARG_ENABLE(agentx-dom-sock-only,
 [  --enable-agentx-dom-sock-only         Disable UDP/TCP transports for agentx.],
