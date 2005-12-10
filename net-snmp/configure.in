@@ -345,7 +345,7 @@ AC_ARG_ENABLE(ssl,,
 trykrb5=defaultyes
 askedkrb5=no
 AC_ARG_WITH(krb5,
-[  --with-krb5=PATH             Look for krb5 in PATH/lib.],
+[  --with-krb5=PATH                Look for krb5 in PATH/lib.],
     if test "x$withval" = "xyes"; then
       trykrb5=yes
       askedkrb5=yes
@@ -367,20 +367,20 @@ AC_ARG_ENABLE(krb5,,
 	AC_MSG_ERROR([ Invalid option. Use --with-krb5/--without-krb5 instead ]) )
 
 AC_ARG_WITH(rpm,
-[  --without-rpm                  Don't include support for the RPM package
-                                 management system when building the host MIB
-                                 module.])
+[  --without-rpm                   Don't include support for the RPM package
+                                  management system when building the host MIB
+                                  module.])
 AC_ARG_ENABLE(rpm,,
 	AC_MSG_ERROR([ Invalid option. Use --with-rpm/--without-rpm instead ]) )
 
 AC_ARG_ENABLE(agentx-dom-sock-only,
-[  --enable-agentx-dom-sock-only         Disable UDP/TCP transports for agentx.],
+[  --enable-agentx-dom-sock-only   Disable UDP/TCP transports for agentx.],
 AC_DEFINE(AGENTX_DOM_SOCK_ONLY))
 AC_ARG_WITH(agentx-dom-sock-only,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-agentx-dom-sock-only/--disable-agentx-dom-sock-only instead ]) )
 
 AC_ARG_ENABLE(snmptrapd-subagent,
-[  --disable-snmptrapd-subagent          Disable agentx subagent code in snmptrapd.])
+[  --disable-snmptrapd-subagent    Disable agentx subagent code in snmptrapd.])
 if test "x$enable_snmptrapd_subagent" = "xno"; then
   AC_DEFINE(SNMPTRAPD_DISABLE_AGENTX)
 fi
@@ -399,32 +399,32 @@ AC_ARG_ENABLE(opaque-special-types,,
 	AC_MSG_ERROR([ Invalid option. Use --with-opaque-special-types/--without-opaque-special-types instead ]) )
 
 AC_ARG_WITH(mibdirs,
-[  --with-mibdirs=\"dir1:dir2:\"     Default directories to look for mibs.
-                                    (Default: \$HOME/.snmp/mibs:DATADIR/snmp/mibs)],
+[  --with-mibdirs=\"dir1:dir2:\"   Default directories to look for mibs.
+                                  (Default: \$HOME/.snmp/mibs:DATADIR/snmp/mibs)],
     [DEFAULT_MIBDIRS="$with_mibdirs"
     AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$with_mibdirs")])
 AC_ARG_ENABLE(mibdirs,,
 	AC_MSG_ERROR([ Invalid option. Use --with-mibdirs/--without-mibdirs instead ]) )
 
 AC_ARG_WITH(mibs,
-[  --with-mibs=\"item1:item2:\"      Default mib IDs to read.
-                                    (The default list is \"IP-MIB:IF-MIB:
-                                    TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB\"
-                                    with the addition of any mibs used
-                                    by the mib modules the agent is
-                                    configured with)],
+[  --with-mibs=\"item1:item2:\"    Default mib IDs to read.
+                                  (The default list is \"IP-MIB:IF-MIB:
+                                  TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB\"
+                                  with the addition of any mibs used
+                                  by the mib modules the agent is
+                                  configured with)],
     DEFAULT_MIBS="$with_mibs")
 # enable-mibs is valid too, but means something else
 
 AC_ARG_WITH(mibfiles,
-[  --with-mibfiles=\"file1:file2\"   Default mib files to load.
-                                    (Default:  none.  uses IDs above instead.)],
+[  --with-mibfiles=\"file1:file2\" Default mib files to load.
+                                  (Default:  none.  uses IDs above instead.)],
     AC_DEFINE_UNQUOTED(DEFAULT_MIBFILES,"$with_mibfiles"))
 AC_ARG_ENABLE(mibfiles,,
 	AC_MSG_ERROR([ Invalid option. Use --with-mibfiles/--without-mibfiles instead ]) )
 
 AC_ARG_ENABLE(mib-config-checking,
-[  --enable-mib-config-checking   Turns on extra checks during configuration
+[  --enable-mib-config-checking    Turns on extra checks during configuration
                                   of mib modules. Any conflicts will cause
                                   configure to abort (default is to issue a
                                   warning and continue.)],
@@ -433,14 +433,14 @@ AC_ARG_WITH(mib-config-checking,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-mib-config-checking/--disable-mib-config-checking instead ]) )
 
 AC_ARG_ENABLE(mib-config-debug,
-[  --enable-mib-config-debug      Turns on verbose output during mib module
+[  --enable-mib-config-debug       Turns on verbose output during mib module
                                   configure processing.)],
     with_mib_cfg_debug="yes",with_mib_cfg_debug="no")
 AC_ARG_WITH(mib-config-checking,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-mib-config-checking/--disable-mib-config-checking instead ]) )
 
 AC_ARG_ENABLE(mfd-rewrites,
-[  --enable-mfd-rewrites          Use new MFD rewrites of mib modules,
+[  --enable-mfd-rewrites           Use new MFD rewrites of mib modules,
                                   where available. (default is to use
                                   original mib module code).])
 if test "x$enable_mfd_rewrites" = "xyes"; then
@@ -451,7 +451,7 @@ AC_ARG_WITH(mfd-rewrites,,
 
 askedpkcs=no
 AC_ARG_WITH(pkcs,
-[  --with-pkcs=PATH             Look for pkcs11 in PATH/lib.],
+[  --with-pkcs=PATH                Look for pkcs11 in PATH/lib.],
     if test "x$withval" = "xyes"; then
       askedpkcs=yes
     elif test "x$withval" = "xno"; then
@@ -493,9 +493,7 @@ AC_ARG_ENABLE(root-access,,
 	AC_MSG_ERROR([ Invalid option. Use --with-root-access/--without-root-access instead ]) )
 
 AC_ARG_WITH(kmem-usage,
-[
-Configuring the agent:
-  --without-kmem-usage            Do not include any code related to the use
+[  --without-kmem-usage            Do not include any code related to the use
                                   of kmem. This option can only be used with
                                   the option --enable-mini-agent.])
 AC_ARG_ENABLE(kmem-usage,,
@@ -526,8 +524,8 @@ AC_ARG_ENABLE(copy_persistent_files,,
 
 AC_ARG_WITH(default-snmp-version,
 [  --with-default-snmp-version=\"3\" Default version of SNMP to use.
-                                  (Default: 3)
-                                  Legal values: 1, 2 (for SNMPv2c) or 3.],
+                                    (Default: 3)
+                                    Legal values: 1, 2 (for SNMPv2c) or 3.],
     ac_cv_user_prompt_DEFAULT_SNMP_VERSION="$with_default_snmp_version")
 AC_ARG_ENABLE(default-snmp-version,,
 	AC_MSG_ERROR([ Invalid option. Use --with-default-snmp-version/--without-default-snmp-version instead ]) )
@@ -791,8 +789,7 @@ Perl:
 ])
 
 AC_ARG_ENABLE(embedded-perl,
-[
-  --enable-embedded-perl          Embed perl in the SNMP agent and snmptrapd.
+[  --enable-embedded-perl          Embed perl in the SNMP agent and snmptrapd.
                                   [forces --with-perl-modules as well.]],
     embed_perl="$enableval", embed_perl="no")
 
@@ -856,13 +853,14 @@ AC_ARG_ENABLE(client-recv-buf,,
 AC_ARG_WITH(defaults,
 [
 Miscellaneous:
-  --with-defaults          Use defaults for prompted values.],
+  --with-defaults         Use defaults for prompted values.],
     defaults="yes",defaults="no")
 AC_ARG_ENABLE(defaults,,
 	AC_MSG_ERROR([ Invalid option. Use --with-defaults/--without-defaults instead ]) )
 
 AC_ARG_ENABLE(ucd-snmp-compatibility,
-[--enable-ucd-snmp-compatibility  Install ucd-snmp look-alike headers and libs.], ucd_compat=yes, ucd_compat=no)
+[  --enable-ucd-snmp-compatibility Install ucd-snmp look-alike headers and libs.
+], ucd_compat=yes, ucd_compat=no)
 AC_ARG_WITH(ucd-snmp-compatibility,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-ucd-snmp-compatibility/--disable-ucd-snmp-compatibility instead ]) )
 
@@ -2306,7 +2304,7 @@ _cppflags="${CPPFLAGS}"
 _ldflags="${LDFLAGS}"
 
 AC_ARG_WITH(libwrap,
-[  --with-libwrap[=LIBPATH] Compile in libwrap (tcp_wrappers) support.],[
+[  --with-libwrap[=LIBPATH]  Compile in libwrap (tcp_wrappers) support.],[
   if test "$with_libwrap" != "no"; then
     if test "$with_libwrap" != "yes"; then
       CPPFLAGS="${CPPFLAGS} -I$with_libwrap/include"
@@ -2369,7 +2367,7 @@ if test "x$with_rpm" != "xno" && \
   _ldflags="${LDFLAGS}"
 
   AC_ARG_WITH(zlib,
-  [  --with-zlib[=DIR]        use libz in DIR],[
+  [  --with-zlib[=DIR]         use libz in DIR],[
     if test -d "$withval"; then
       CPPFLAGS="${CPPFLAGS} -I$withval/include"
       LDFLAGS="${LDFLAGS} -L$withval/lib"
