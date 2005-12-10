@@ -26,8 +26,8 @@ extern          "C" {
      */
     /* *INDENT-OFF*  */
 config_require(if-mib/ifTable/ifTable)
-config_require(IP-MIB/ipv4InterfaceTable/ipv4InterfaceTable_interface)
-config_require(IP-MIB/ipv4InterfaceTable/ipv4InterfaceTable_data_access)
+config_require(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_interface)
+config_require(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_data_access)
     /* *INDENT-ON*  */
 
     /*
