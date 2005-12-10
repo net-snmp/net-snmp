@@ -159,8 +159,8 @@ ipv4InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *
             /*
              * still applicable. anything changed?
              */
-            if ((entry->arp_retransmit !=
-                 ift_rrc->data.ifentry->arp_retransmit) ||
+            if ((entry->retransmit_v4 !=
+                 ift_rrc->data.ifentry->retransmit_v4) ||
                 (entry->reasm_max != ift_rrc->data.ifentry->reasm_max)) {
                 DEBUGMSGTL(("ipv4InterfaceTable:check_entry_for_updates",
                             "row changed for %d\n",
