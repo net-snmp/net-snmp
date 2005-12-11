@@ -138,7 +138,8 @@ netsnmp_access_ipaddress_container_free(netsnmp_container *container, u_int free
                         NULL);
     }
 
-    CONTAINER_FREE(container);
+    if(! (free_flags & NETSNMP_ACCESS_IPADDRESS_FREE_KEEP_CONTAINER))
+        CONTAINER_FREE(container);
 }
 
 /**---------------------------------------------------------------------*/

@@ -109,7 +109,8 @@ netsnmp_access_udp_endpoint_container_free(netsnmp_container *container,
                         NULL);
     }
 
-    CONTAINER_FREE(container);
+    if(! (free_flags & NETSNMP_ACCESS_UDP_ENDPOINT_FREE_KEEP_CONTAINER))
+        CONTAINER_FREE(container);
 }
 
 /**---------------------------------------------------------------------*/
