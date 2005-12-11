@@ -209,6 +209,7 @@ netsnmp_binary_array_options_set(netsnmp_container *c, int set, u_int flags)
         t->flags = flags;
     else
         return ((t->flags & flags) == flags);
+    return flags;
 }
 
 NETSNMP_STATIC_INLINE size_t

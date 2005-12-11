@@ -4,11 +4,19 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
+#include <netinet/in.h>
+#include <netdb.h>
+#endif
+
 #include <net-snmp/net-snmp-includes.h>
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_auth.h"
 #include "snmptrapd_ds.h"
 #include "mibII/vacm_conf.h"
+#include <net-snmp/agent/agent_trap.h>
 
 /**
  * initializes the snmptrapd authorization code registering needed

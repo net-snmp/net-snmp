@@ -143,6 +143,8 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include "mibgroup/struct.h"
 #include "snmpd.h"
+#include "agentx/agentx_config.h"
+#include "agentx/subagent.h"
 #include "net-snmp/agent/all_helpers.h"
 #include "agent_module_includes.h"
 #include "mib_module_includes.h"

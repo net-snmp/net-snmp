@@ -77,7 +77,7 @@ void             init_schedule_container(void);
 void             init_schedCore(void);
 
 netsnmp_tdata_row *
-      schedTable_createEntry(char *schedOwner, char *schedName);
+      schedTable_createEntry(const char *schedOwner, const char *schedName);
 void  schedTable_removeEntry(netsnmp_tdata_row *row);
 void  sched_nextTime(        struct schedTable_entry *entry );
 void  sched_nextRowTime(     netsnmp_tdata_row *row );
