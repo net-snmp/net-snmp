@@ -78,8 +78,8 @@ extern void      init_event_table_data(void);
 
 void          init_mteEvent(void);
 void               mteEvent_removeEntry(netsnmp_tdata_row *row);
-netsnmp_tdata_row *mteEvent_createEntry(char *mteOwner,
-                                        char *mteEventName, int fixed);
+netsnmp_tdata_row *mteEvent_createEntry(const char *mteOwner,
+                                        const char *mteEventName, int fixed);
 int mteEvent_fire( char *owner, char *event,
                    struct mteTrigger *trigger,
                    oid  *suffix, size_t s_len );
