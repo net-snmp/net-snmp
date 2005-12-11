@@ -240,10 +240,11 @@ intpr(int interval)
         ADD_IFVAR( 20 );            /* ifOutErrors    */
         ADD_IFVAR( 21 );            /* ifOutQLen      */
     }
-/*  if (tflag) {
-        ADD_IFVAR( XX );          */  /* ??? */ /*
+#if 0
+    if (tflag) {
+        ADD_IFVAR( XX );            /* ??? */
     }
- */
+#endif
     if (dflag) {
         ADD_IFVAR( 19 );            /* ifOutDiscards  */
     }
