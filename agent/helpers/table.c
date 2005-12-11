@@ -675,8 +675,7 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
             if ((request->requestvb->type == ASN_NULL && request->processed) ||
                 request->delegated)
                 continue;
-            if (request->requestvb->type == ASN_NULL ||
-                request->requestvb->type == SNMP_NOSUCHINSTANCE) {
+            if (request->requestvb->type == SNMP_NOSUCHINSTANCE) {
                 /*
                  * get next skipped this value for this column, we
                  * need to keep searching forward 
@@ -704,6 +703,10 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
                     request->requestvb->type = ASN_PRIV_RETRY;
                 }
                 else {
+                    /*
+                     * If we don't have column info, reset to null so
+                     * the agent will move on to the next table.
+                     */
                     request->requestvb->type = ASN_NULL;
                 }
             }
