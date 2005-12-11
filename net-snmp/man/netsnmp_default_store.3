@@ -1,4 +1,4 @@
-.TH "storage space for defaults" 3 "4 Dec 2005" "Version 5.2" "net-snmp" \" -*- nroff -*-
+.TH "storage space for defaults" 3 "11 Dec 2005" "Version 5.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -52,6 +52,9 @@ storage space for defaults \- The purpose of the default storage is three-fold:.
 .br
 .ti -1c
 .RI "void * \fBnetsnmp_ds_get_void\fP (int storeid, int which)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_ds_parse_boolean\fP (char *line)"
 .br
 .ti -1c
 .RI "int \fBnetsnmp_ds_register_config\fP (u_char type, const char *ftype, const char *token, int storeid, int which)"
