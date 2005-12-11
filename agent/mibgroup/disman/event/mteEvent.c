@@ -28,9 +28,9 @@ init_event_table_data(void)
     }
 }
 
-void _init_default_mteEvent( char *event, char *oname, int specific );
-void _init_link_mteEvent(    char *event, char *oname, int specific );
-void _init_builtin_mteEvent( char *event, char *oname,
+void _init_default_mteEvent( const char *event, const char *oname, int specific );
+void _init_link_mteEvent(    const char *event, const char *oname, int specific );
+void _init_builtin_mteEvent( const char *event, const char *oname,
                             oid *trapOID, size_t trapOID_len );
 
 
@@ -53,7 +53,7 @@ init_mteEvent(void)
 }
 
 void
-_init_builtin_mteEvent( char *event, char *oname, oid *trapOID, size_t trapOID_len )
+_init_builtin_mteEvent( const char *event, const char *oname, oid *trapOID, size_t trapOID_len )
 {
     char ename[ MTE_STR1_LEN+1 ];
     netsnmp_tdata_row *row;
@@ -79,7 +79,7 @@ _init_builtin_mteEvent( char *event, char *oname, oid *trapOID, size_t trapOID_l
 }
 
 void
-_init_default_mteEvent( char *event, char *oname, int specific )
+_init_default_mteEvent( const char *event, const char *oname, int specific )
 {
     oid    mteTrapOID[]   = {1, 3, 6, 1, 2, 1, 88, 2, 0, 99 /* placeholder */};
     size_t mteTrapOID_len = OID_LENGTH(mteTrapOID);
@@ -90,7 +90,7 @@ _init_default_mteEvent( char *event, char *oname, int specific )
 
 
 void
-_init_link_mteEvent( char *event, char *oname, int specific )
+_init_link_mteEvent( const char *event, const char *oname, int specific )
 {
     oid    mteTrapOID[]   = {1, 3, 6, 1, 6, 3, 1, 1, 5, 99 /* placeholder */};
     size_t mteTrapOID_len = OID_LENGTH(mteTrapOID);
@@ -134,7 +134,7 @@ _mteEvent_dump(void)
  * Create a new row in the event table 
  */
 netsnmp_tdata_row *
-mteEvent_createEntry(char *mteOwner, char *mteEName, int fixed)
+mteEvent_createEntry(const char *mteOwner, const char *mteEName, int fixed)
 {
     struct mteEvent *entry;
     netsnmp_tdata_row *row;

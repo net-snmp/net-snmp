@@ -426,7 +426,7 @@ sched_nextRowTime( netsnmp_tdata_row *row )
  * create a new row in the table 
  */
 netsnmp_tdata_row *
-schedTable_createEntry(char *schedOwner, char *schedName)
+schedTable_createEntry(const char *schedOwner, const char *schedName)
 {
     struct schedTable_entry *entry;
     netsnmp_tdata_row *row;

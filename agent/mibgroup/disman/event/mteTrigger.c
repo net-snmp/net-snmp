@@ -166,7 +166,7 @@ mteTrigger_removeEntry(netsnmp_tdata_row *row)
      *   and firing the appropriate event
      *
      * =================================================== */
-char *_ops[] = { "",
+const char *_ops[] = { "",
                 "!=", /* MTE_BOOL_UNEQUAL      */
                 "==", /* MTE_BOOL_EQUAL        */
                 "<",  /* MTE_BOOL_LESS         */
@@ -198,7 +198,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     netsnmp_variable_list sysUT_var;
     int  cmp = 0, n, n2;
     long value;
-    char *reason;
+    const char *reason;
 
     if (!entry) {
         snmp_alarm_unregister( reg );
