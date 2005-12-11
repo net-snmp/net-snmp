@@ -114,7 +114,8 @@ netsnmp_access_tcpconn_container_free(netsnmp_container *container, u_int free_f
                         NULL);
     }
 
-    CONTAINER_FREE(container);
+    if(! (free_flags & NETSNMP_ACCESS_TCPCONN_FREE_KEEP_CONTAINER))
+        CONTAINER_FREE(container);
 }
 
 /**---------------------------------------------------------------------*/
