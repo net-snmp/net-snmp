@@ -1,35 +1,19 @@
-The attached "build" script does a "one-shot" build 
- and packaging of an untarred net-snmp distribution 
- on Solaris without requiring root access. 
+The "buildpackage-solaris" script does a "one-shot" build 
+and packaging of an untarred net-snmp distribution 
+on Solaris without requiring root access. 
  
- The resulting native Solaris package can then be 
- (automatically) installed/removed using the Solaris 
- pkgadd(1)/pkgrm(1) commands. 
+The resulting native Solaris package can then be 
+(automatically) installed/removed using the Solaris 
+pkgadd(1)/pkgrm(1) commands. 
  
- The script requires customization of your 
- development environment - see attached file 
- DEVENV - before it can be used. 
+The script requires customization of your 
+development environment - see attached file 
+DEVENV - before it can be used. 
  
- Basic usage: ./net-snmp-x.y-build distclean 
+ Basic usage: ./buildpackage-solaris distclean 
  
- The attached script "elfdepend" is required to 
- determine the dependencies of all built ELF binaries 
- and libraries to create a "package dependency file" - 
- see depend(4). 
+The script "elfdepend.sh" is required to 
+determine the dependencies of all built ELF binaries 
+and libraries to create a "package dependency file" - 
+see depend(4). 
  
- Has been tested on Solaris 2.7 and 2.9 with net- 
- snmp-5.0.6. 
- Earlier versions of net-snmp (4.x to 5.0.x) were 
- packaged with earlier versions of this script and will 
- most probably also work. 
- 
- The patches included with the build script will 
- mostly be obsolete in 5.0.7 (see included bug 
- tracker reference) 
- 
- The initial request for contribution can be found at 
- https://sourceforge.net/tracker/? 
- func=detail&atid=112694&aid=596250&group_id= 
- 12694 
- 
-
