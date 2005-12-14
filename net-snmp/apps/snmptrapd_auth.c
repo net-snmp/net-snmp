@@ -38,10 +38,6 @@ init_netsnmp_trapd_auth(void)
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmptrapd", "disableAuthorization",
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_APP_NO_AUTHORIZATION);
-    /* an alternative name, perhaps more immediately meaningful */
-    netsnmp_ds_register_config(ASN_BOOLEAN, "snmptrapd", "acceptAllTraps",
-                               NETSNMP_DS_APPLICATION_ID,
-                               NETSNMP_DS_APP_NO_AUTHORIZATION);
 }
 
 /* XXX: store somewhere in the PDU instead */
