@@ -38,7 +38,7 @@ addresses.
 .IP
 The default behaviour is to
 listen on UDP port 162 on all IPv4 interfaces.
-.IP "doNotRetainTrapLogs yes"
+.IP "doNotRetainNotificationLogs yes"
 disables support for the NOTIFICATION-LOG-MIB.
 Normally the snmptrapd program keeps a record of the traps
 received, which can be retrieved by querying
