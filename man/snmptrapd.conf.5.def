@@ -69,7 +69,8 @@ There are currently three types of processing that can be specified:
 log the details of the notification - either in a specified file,
 to standard output (or stderr), or via \fIsyslog\fR (or similar).
 .IP "execute"
-pass the details of the trap to a specified handler program.
+pass the details of the trap to a specified handler program, including
+embedded perl.
 .IP "net"
 forward the trap to another notification receiver.
 .RE
