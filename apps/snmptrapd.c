@@ -347,7 +347,7 @@ usage(void)
     snmp_log_options_usage("\t\t\t", stderr);
     fprintf(stderr, "\n  Deprecated options:\n");
     fprintf(stderr, "  -o FILE\t\tuse -Lf <FILE> instead\n");
-    fprintf(stderr, "  -P\t\t\tuse -Le  instead\n");
+    fprintf(stderr, "  -P\t\t\tuse -f -Le  instead\n");
     fprintf(stderr, "  -s\t\t\tuse -Lsd instead\n");
     fprintf(stderr, "  -S d|i|0-7\t\tuse -Ls <facility> instead\n");
     fprintf(stderr, "  -u FILE\t\tuse -p <FILE> instead\n");
