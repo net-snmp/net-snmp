@@ -18,7 +18,8 @@ would accept all incoming notifications, and log them automatically
 Starting with release 5.3, access control checks will be applied to
 incoming notifications. If
 .B snmptrapd
-is run without a configuration file, then such traps \fBWILL NOT\fR
+is run without a suitable configuration file (or equivalent access
+control settings), then such traps \fBWILL NOT\fR
 be processed.
 See the section \fBACCESS CONTROL\fR for more details.
 .PP

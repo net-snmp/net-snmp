@@ -3,118 +3,262 @@
 .SH NAME
 snmp.conf - configuration files for the Net-SNMP applications
 .SH DESCRIPTION
-.B snmp.conf
-is the configuration file which define how the Net-SNMP applications
-operate.  Tokens that can be put in them are described in the
-.B DIRECTIVES
-section below.
+Applications built using the Net-SNMP libraries typically use one or
+more configuration files to control various aspects of their operation.
+These files (\fBsnmp.conf\fR and \fBsnmp.local.conf\fR) can be located
+in one of several locations, as described in the \fIsnmp_config(5)\fR
+manual page.
 .PP
-SYSCONFDIR/snmp/snmp.conf is a common file, shared by all users of the system.
-.br
-~/.snmp/snmp.conf is a personal file, with configuration settings for a
-particular user.
-.SH PLEASE READ FIRST
-Make sure you make these files readable only by the user if you are
-storing sensitive information in them like passphrases!
+In particular, \fCSYSCONFDIR/snmp/snmp.conf\fR is a common file,
+containing the settings shared by all users of the system.
+\fC~/.snmp/snmp.conf\fR is a personal file, with the settings
+specific to a particular user.
+.SH IMPORTANT NOTE
+Several of these directives may contain sensitive information
+(such as pass phrases).  Configuration files that include such
+settings should only be readable by the user concerned.
 .PP
-First, make sure you have read the
-.I snmp_config(5)
-manual page that describes how the Net-SNMP configuration files
-operate, where they are located and how they all work together.
-.SH DIRECTIVES
-.IP "mibdirs (mib-dirs|+mib-dirs)"
-Look for textual MIBs to parse in the list of ':' separated
-directories.  If the directive value starts with a '+' it prepends
-this list to the front of the default directory list compiled into the
-application.  Note that this value can be overridden by the
-.B MIBDIRS
-environment variable.
-.IP "mibs (mib-tokens|+mib-tokens)"
-Specifies a ':' separated list of MIB tokens that represent textual
-MIB files that should be found and parsed.  If the directive value
-starts with a '+' it prepends this list to the front of the default
-MIB token list compiled into the application.  The special keyword of
-"ALL" forces all MIBs files found to be read. Note that the value
-specified here can be overridden by the
-.B MIBS
-environment variable.
-.IP "mibfile file"
-Specifies a textual MIB file to read and parse, in addition to the
-list read from the MIBs token.  Note that the value specified here can
-be overridden by the
-.B MIBFILES
-environment variable.
-.IP "persistentDir directory"
-The directory where snmpd and snmptrapd stores their persistent data
-files.
-.IP "noPersistentLoad (1|yes|true|0|no|false)"
-Turns off loading the persistent configuration file. Breaks persistency
-(e.g. SNMPv3), so use with care. Default is false.
-.IP "noPersistentSave (1|yes|true|0|no|false)"
-Turns off saving the persistent configuration file. Breaks persistency
-(e.g. SNMPv3), so use with care. Default is false.
-.IP "tempFilePattern pattern"
-The file pattern used by snmptrapd to create temporary files.  Example:
-/tmp/snmpdXXXXXX.  Used by mkstemp() and mktemp() functions.
-.IP "clientaddr [<transport-specifier>:]<transport-address>"
-Specify source address used by command-line tools, see
-.I snmpcmd(1)
-, and by snmpd when sending notifications.
-.IP "defaultPort port"
-The default port number that all SNMP applications and daemons should use.
+As well as application-specific configuration tokens, there are
+several directives that relate to standard library behaviour,
+relevant to most Net-SNMP applications.  Many of these correspond
+to standard command-line options, which are described in the
+\fIsnmpcmd(1)\fR manual page.
+.PP
+These directives can be divided into several distinct groups.
+.SH CLIENT BEHAVIOUR
+.IP "defaultPort PORT"
+defines the default UDP port that client SNMP applications will
+attempt to connect to.  This can be overridden by explicitly
+including a port number in the \fIAGENT\fR specification.
+See the \fIsnmpcmd(1)\fR manual page for more details.
+.IP
+If not specified, the default default port is 161.
 .IP "defVersion (1|2c|3)"
-The default SNMP version to use.
-.IP "defCommunity string"
-The default SNMPv1 and SNMPv2c community string to use.
-.IP "defSecurityModel string"
-The SNMP security model to use. Defaults to "usm" which is the only widely 
-used security model for SNMPv3.
-.IP "defSecurityName string"
-The default SNMPv3 USM security name you want to use for SNMPv3 requests.
-.IP "defContext string"
-The default SNMPv3 context name you want to use.
-.IP "defPassphrase string"
-.IP "defAuthPassphrase string"
-.IP "defPrivPassphrase string"
-The default SNMPv3 USM passphrase(s) to use.  
-.B defPassphrase
-will be used for both authentication and privacy pass phrases if it is 
-specified.
-.IP "defAuthType MD5|SHA"
-The SNMPv3 USM authentication type to use.
-.IP "defPrivType DES|AES"
-The SNMPv3 USM privacy type to use.
+defines the default version of SNMP to use.
+This can be overridden using the \fB-v\fR option.
+.IP "defCommunity STRING"
+defines the default community to use for SNMPv1 and SNMPv2c requests.
+This can be overridden using the \fB-c\fR option.
+.\".IP "dumpPacket (1|yes|true|0|no|false)"
+.IP "dumpPacket yes"
+defines whether to display a hexadecimal dump of the raw SNMP requests
+sent and received by the application.
+This is equivalent to the \fB-d\fR option.
+.IP "doDebugging (1|0)"
+turns on debugging for all applications run if set to 1.
+.\"
+.\" XXX - why not full boolean values?
+.\"       what is the purpose of this directive ??
+.\"
+.IP "debugTokens TOKEN[,TOKEN...]"
+defines the debugging tokens that should be turned on when
+\fIdoDebugging\fR is set.
+This is equivalent to the \fB-D\fR option.
+.\".IP "16bitIDs (1|yes|true|0|no|false)"
+.IP "16bitIDs yes"
+restricts requestIDs, etc to 16-bit values.
+.IP
+The SNMP specifications define these ID fields as 32-bit quantities,
+and the Net-SNMP library typically initialises them to random values
+for security.
+However certain (broken) agents cannot handle ID values greater than
+2^16 - this option allows interoperability with such agents.
+.IP "clientaddr [<transport-specifier>:]<transport-address>"
+specifies the source address to be used by command-line applications
+when sending SNMP requests. See \fIsnmpcmd(1)\fR for more information
+about the format of addresses.
+.IP
+This value is also used by \fBsnmpd\fR when generating notifications.
+.\"
+.\"  But not responses to an incoming request?
+.\"  What about snmptrapd?
+.\"
+.IP "clientRecvBuf INTEGER"
+specifies the desired size of the buffer to be used when receiving
+responses to SNMP requests.
+If the OS hard limit is lower than the \fIclientRecvBuf\fR value,
+then this will be used instead.
+Some platforms may decide to increase the size of the buffer
+actually used for internal housekeeping.
+.IP
+This directive will be ignored if the platforms does not support
+\fIsetsockopt()\fR.
+.IP "clientSendBuf INTEGER"
+is similar to \fIclientRecvBuf\fR, but applies to the size
+of the buffer used when sending SNMP requests.
+.IP "noRangeCheck yes"
+disables the validation of varbind values against the MIB definition
+for the relevant OID.
+This is equivalent to the \fB-Ir\fR option.
+.IP
+This directive is primarily relevant to the \fBsnmpset\fR command,
+but will also apply to any application that calls \fIsnmp_add_var()\fR
+.\" what else ??
+with a non-NULL value.
+.\"
+.\" XXX - including snmpd ??
+.\"
+.IP "noTokenWarnings"
+disables warnings about unknown config file tokens.
+.IP "reverseEncodeBER (1|yes|true|0|no|false)"
+controls how the encoding of SNMP requests is handled.
+.IP
+The default behaviour is to encode packets starting from the end of
+the PDU and working backwards.
+This directive can be used to disable this behaviour, and build
+the encoded request in the (more obvious) forward direction.
+.IP
+It should not normally be necessary to change this setting, as
+the encoding is basically the same in either case - but working
+backwards typically produces a slightly more efficient encoding,
+and hence a smaller network datagram.
+.\"
+.\" XXX - It is probably about time to remove this choice!
+.\"
+.SH SNMPv3 SETTINGS
+.IP "defSecurityName STRING"
+defines the default security name to use for SNMPv3 requests.
+This can be overridden using the \fB-u\fR option.
 .IP "defSecurityLevel noAuthNoPriv|authNoPriv|authPriv"
-The SNMPv3 default security level to use.
+defines the default security level to use for SNMPv3 requests.
+This can be overridden using the \fB-l\fR option.
+.IP
+If not specified, the default default security level is \fInoAuthNoPriv\fR.
+.\"
+.\" XXX - Is this correct ?
+.\"
+.RS
+.IP "Note:
+\fIauthPriv\fR is only available if the software has been compiled
+to use the OpenSSL libraries.
+.RE
+.IP "defPassphrase STRING"
+.IP "defAuthPassphrase STRING"
+.IP "defPrivPassphrase STRING"
+define the default authentication and privacy pass phrases to use
+for SNMPv3 requests.
+These can be overridden using the \fB-A\fR and \fB-X\fR options respectively.
+.IP
+The 
+.B defPassphrase
+value will be used for the authentication and/or privacy pass phrases
+if either of the other directives are not specified.
+.IP "defAuthType MD5|SHA"
+.IP "defPrivType DES|AES"
+define the default authentication and privacy protocols to use for
+SNMPv3 requests.
+These can be overridden using the \fB-a\fR and \fB-x\fR options respectively.
+.IP
+If not specified, SNMPv3 requests will default to MD5 authentication
+and DES encryption.
+.RS
+.IP "Note:
+If the software has not been compiled to use the OpenSSL libraries,
+then only MD5 authentication is supported.
+Neither SHA authentication nor any form of encryption will be available.
+.RE
+.IP "defContext STRING"
+defines the default context to use for SNMPv3 requests.
+This can be overridden using the \fB-n\fR option.
+.IP
+If not specified, the default default context is the default context
+(i.e. the empty string "").
+.IP "defSecurityModel STRING"
+defines the security model to use for SNMPv3 requests.
+The default value is "usm" which is the only widely 
+used security model for SNMPv3.
 .IP "defAuthMasterKey 0xHEXSTRING"
 .IP "defPrivMasterKey 0xHEXSTRING"
 .IP "defAuthLocalizedKey 0xHEXSTRING"
 .IP "defPrivLocalizedKey 0xHEXSTRING"
-Defines the SNMPv3 keys to be used for SNMPv3 secure communications.
+define the (hexadecimal) keys to be used for SNMPv3 secure communications.
 SNMPv3 keys are frequently derived from a passphrase, as discussed in
-the defPassphrase section above, however for improved security a
+the \fIdefPassphrase\fR section above. However for improved security a
 truely random key can be generated and used instead (which would
-normally has better entropy than a password unless your password is
-amazingly long).  But to do this, you need to specify the hexadecimal
-keys directly to be used for authentication and encryption.  These
-tokens let you do just that.  They are equivalent to the short-form
-command line arguments -3m, -3M, -3k, and -3K.  Localized keys are
+normally has better entropy than a password unless it is
+amazingly long).
+The directives are equivalent to the short-form
+command line options \fB-3m\fR, \fB-3M\fR, \fB-3k\fR, and \fB-3K\fR.
+.IP
+Localized keys are
 master keys which have been converted to a unique key which is only
 suitable for on particular SNMP engine (agent).  The length of the key
 needs to be appropriate for the authentication or encryption type
-being used (auth keys: MD5=16 bytes, SHA1=20 bytes, DES=16 bytes (8
+being used (auth keys: MD5=16 bytes, SHA1=20 bytes;
+priv keys: DES=16 bytes (8
 bytes of which is used as an IV and not a key), and AES=16 bytes).
+.\"
+.\" XXX - are these lengths still correct ?
+.\"
+.SH SERVER BEHAVIOUR
+.IP "persistentDir DIRECTORY"
+defines the directory where \fBsnmpd\fR and \fBsnmptrapd\fR store
+persistent configuration settings.
+.IP
+If not specified, the persistent directory defaults to
+PERSISTENT_DIRECTORY
+.IP "noPersistentLoad yes"
+.IP "noPersistentSave yes"
+disable the loading and saving of persistent configuration information.
+.RS
+.IP "Note:"
+This will break SNMPv3 operations (and other behaviour that relies
+on changes persisting across application restart).  Use With Care.
+.RE
+.IP "tempFilePattern PATTERN"
+defines a filename template for creating temporary files,
+for handling input to and output from external shell commands.
+Used by the \fImkstemp()\fR and \fImktemp()\fR functions.
+.IP
+If not specified, the default pattern is \fC/tmp/snmpdXXXXXX\fR.
+.IP "serverRecvBuf INTEGER"
+specifies the desired size of the buffer to be used when receiving
+incoming SNMP requests.
+If the OS hard limit is lower than the \fIserverRecvBuf\fR value,
+then this will be used instead.
+Some platforms may decide to increase the size of the buffer
+actually used for internal housekeeping.
+.IP
+This directive will be ignored if the platforms does not support
+\fIsetsockopt()\fR.
+.IP "serverSendBuf INTEGER"
+is similar to \fIserverRecvBuf\fR, but applies to the size
+of the buffer used when sending SNMP responses.
+.SH MIB HANDLING
+.IP "mibdirs DIRLIST"
+specifies a list of directories to search for MIB files.
+This operates in the same way as the \fB-M\fR option -
+see \fIsnmpcmd(1)\fR for details.
+Note that this value can be overridden by the
+.B MIBDIRS
+environment variable, and the \fB-M\fR option.
+.IP "mibs MIBLIST"
+specifies a list of MIB modules (not files) that should be loaded.
+This operates in the same way as the \fB-m\fR option -
+see \fIsnmpcmd(1)\fR for details.
+Note that this list can be overridden by the
+.B MIBS
+environment variable, and the \fB-m\fR option.
+.IP "mibfile FILE"
+specifies a (single) MIB file to load, in addition to the
+list read from the \fImibs\fR token (or equivalent configuration).
+Note that this value can be overridden by the
+.B MIBFILES
+environment variable.
 .IP "showMibErrors (1|yes|true|0|no|false)"
-Whether or not to display textual MIB parsing errors when commands are
-run.
+whether to display MIB parsing errors.
 .IP "strictCommentTerm (1|yes|true|0|no|false)"
-Whether or not MIBs that are parsed should be strict about comment
-termination.  "--" terminates a comment if this is true.  Many
-MIBs have broken comments in them, hence this option.
+whether MIB parsing should be strict about comment termination.
+Many MIB writers assume that ASN.1 comments extend to the end of
+the text line, rather than being terminated by the next "--" token.
+This token can be used to accept such (strictly incorrect) MIBs.
 .IP "mibAllowUnderline (1|yes|true|0|no|false)"
-Allow underline characters in MIBs (illegal).
-.IP "mibWarningLevel integerValue"
-The minimum warning level of the warnings printed by the MIB parser.
+whether to allow underline characters in MIB object names and
+enumeration values.
+This token can be used to accept such (strictly incorrect) MIBs.
+.IP "mibWarningLevel INTEGER"
+the minimum warning level of the warnings printed by the MIB parser.
+.SH OUTPUT CONFIGURATION
 .IP "logTimestamp (1|yes|true|0|no|false)"
 Whether the commands should log timestamps with their error/message
 logging or not.  Note that output will not look as pretty with
@@ -152,9 +296,9 @@ Equivalent to
 Specifies where to break up the output of hexadecimal strings.  
 Set to 0 to disable line breaks.  Defaults to 16.
 .IP "suffixPrinting (0|1|2)"
-If the value is 1, its equivalent to
+The value 1 is equivalent to
 .B -Os
-and if the value is 2 it's equivalent to
+and the value 2 is equivalent to
 .BR -OS .
 .IP "oidOutputFormat (1|2|3|4|5|6)"
 Maps -O options as follow: -Os=1, -OS=2, -Of=3, -On=4, -Ou=5.
@@ -162,54 +306,14 @@ The value 6 has no matching -O option. It suppresses output.
 .IP "extendedIndex (1|yes|true|0|no|false)"
 Equivalent to
 .BR -OX .
-.IP "noRangeCheck (1|yes|true|0|no|false)"
-Disables the validation of values that is done by
-.B snmpset
-before issuing the request to the agent.
-Equivalent to
-.BR -Ir .
 .IP "noDisplayHint (1|yes|true|0|no|false)"
 Disables the use of DISPLAY-HINT information when parsing indices and
 values to set. Equivalent to
 .BR -Ih .
-.IP "dumpPacket (1|yes|true|0|no|false)"
-Whether the commands should dump packets by default.
-.IP "doDebugging (1|0)"
-Turns on debugging for all applications run if set to 1.
-.IP "debugTokens TOKEN[,TOKEN...]"
-The debugging tokens that should be printed.  See the
-.I snmpcmd(1)
-manual page for debugging usage details.
-.IP "serverRecvBuf integer"
-.B serverRecvBuf
-is used to specify the receive buffer size (in bytes)
-for the initialization of server sockets (eg. snmpd, snmptrapd).
-If the OS hard limit is smaller than
-.B serverRecvBuf
-the resulting buffer will be lowered so it is close to the hard limit.  
-Some platforms may decide to increment the actual buffersize themselves 
-for internal housekeeping.
-This directive will be ignored on platforms that don't support
-..I setsockopt()
-.IP "serverSendBuf integer"
-Similar to serverRecvBuf, but this directive applies to the send 
-buffer of server sockets. 
-.IP "clientRecvBuf integer"
-Similar to serverRecvBuf, but this directive applies to the receive 
-buffer of client sockets (eg. snmpget). 
-.IP "clientSendBuf integer"
-Similar to serverRecvBuf, but this directive applies to the send 
-buffer of client sockets. 
-.IP "reverseEncodeBER (1|yes|true|0|no|false)"
-Encode packets from back to front. Defaults to true. You'll rarely want to
-change that.
-.IP "16bitIDs (1|yes|true|0|no|false)"
-Restrict requestIDs, etc to 16-bit values.
-.IP "noTokenWarnings"
-Do not warn about unknown config file tokens.
 .SH FILES
 SYSCONFDIR/snmp/snmp.conf,
-SYSCONFDIR/snmp/snmp.conf.local - common configuration settings
+SYSCONFDIR/snmp/snmp.local.conf - common configuration settings
+.br
 ~/.snmp/snmp.conf - user-specific configuration settings
 .SH "SEE ALSO"
 snmp_config(5), read_config(3), snmpcmd(1).

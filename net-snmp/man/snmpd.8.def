@@ -68,51 +68,40 @@ Display a list of configuration file directives understood by the
 agent and then exit.
 .TP
 .B -I \fI[-]INITLIST
-This option specifies which modules you do (or do not) want to be
-initialized when the agent starts up.  If the comma-separated
+Specifies which modules should (or should not) be initialized
+when the agent starts up.  If the comma-separated
 .I INITLIST
 is preceded
-with a '-', it is the list of modules that you do
-.I not
-want to be started.  Otherwise,
-.I INITLIST
-is the list of modules to be started.
+with a '-', it is the list of modules that should \fInot\fR be started.
+Otherwise this is the list of the \fIonly\fR modules that should be started.
 
 To get a list of compiled modules, run the agent with the arguments
 .I "-Dmib_init -H"
-(assumes you have debugging support compiled in).
-.TP
-.BR -l "" " " "[\fIFILE" "" "]"
-Log all output from the agent (including stdout and stderr) to 
-.IR FILE .
-If no filename is given, log to a default file set at compile time
-(normally /var/log/snmpd.log).
-.br
-This option is being deprecated, and '-Lf FILE' should be used instead.
+(assuming debugging support has been compiled in).
 .TP
 .B -L[efos]
 Specify where logging output should be directed (standard error or output,
 to a file or via syslog).  See LOGGING OPTIONS in snmpcmd(5) for details.
-.br
-This option deprecates the
-.B -l
-.B -s
-and
-.B -S
-options.
+.TP
+.BR -m " \fIMIBLIST"
+Specifies a colon separated list of MIB modules to load for this
+application.  This overrides the environment variable MIBS.
+See \fIsnmpcmd(1)\fR for details.
+.TP
+.BR -M " \fIDIRLIST"
+Specifies a colon separated list of directories to search for MIBs.
+This overrides the environment variable MIBDIRS.
+See \fIsnmpcmd(1)\fR for details.
+.TP
+.B -n \fINAME
+Set an alternative application name (which will affect the
+configuration files loaded).
+By default this will be \fIsnmpd\fR, regardless of the name
+of the actual binary.
 .TP
 .B -p \fIFILE
 Save the process ID of the daemon in
 .IR FILE "."
-.br
-This option deprecates the
-.B -P
-option.
-.TP
-.B -P \fIFILE
-Save the process ID of the daemon in
-.IR FILE "."
-This option is being deprecated, and '-p FILE' should be used instead.
 .TP 
 .B -q
 Print simpler output for easier automated parsing.
@@ -121,16 +110,6 @@ Print simpler output for easier automated parsing.
 Do not require root access to run the daemon.  Specifically, do not exit
 if files only accessible to root (such as /dev/kmem etc.) cannot be
 opened.
-.TP
-.B -s
-Use syslog for logging.
-.br
-This option is being deprecated, and '-Ls FACILITY' should be used instead.
-.TP
-.BR -S " d|0-7"
-Specifies the syslog facility to use when logging to syslog.
-.br
-This option is being deprecated, and '-Ls FACILITY' should be used instead.
 .TP
 .B -u \fIUID
 Change to the user ID
@@ -170,15 +149,12 @@ file and sets its value to "value". Overrides the corresponding token in the
 file. See
 .I snmpd.conf(5)
 for the full list of tokens.
-
-
 .SH LISTENING ADDRESSES
 By default,
 .B snmpd
-listens for incoming SNMP requests only on UDP port 161.  However, it
-is possible to modify this behaviour by specifying one or more
-listening addresses as arguments to
-.BR snmpd .
+listens for incoming SNMP requests on UDP port 161 on all IPv4 interfaces.
+However, it is possible to modify this behaviour by specifying one or more
+listening addresses as arguments to \fBsnmpd\fR.
 A listening address takes the form:
 .IP
 [<transport-specifier>:]<transport-address>
@@ -193,7 +169,7 @@ the following table:
 .TP 28
 .BR "<transport-specifier>"
 .BR "<transport-address> format"
-.IP "udp" 28
+.IP "udp \fI(default)\fR" 28
 hostname[:port]
 .I or
 IPv4-address[:port]
@@ -228,8 +204,8 @@ along with their interpretation:
 listen on UDP port 161, but only on the loopback interface.  This
 prevents
 .B snmpd
-being queried remotely (which is a bit pointless).  The ":161" is
-redundant here since that is the default SNMP port in any case.
+being queried remotely.  The  port specification ":161" is
+not strictly necessary since that is the default SNMP port.
 .TP 24
 .IR "TCP:1161"
 listen on TCP port 1161 on all IPv4 interfaces.
@@ -238,13 +214,11 @@ listen on TCP port 1161 on all IPv4 interfaces.
 listen on IPX port 40000 on all IPX interfaces.
 .TP 24
 .IR "unix:/tmp/local-agent"
-listen on the Unix domain socket 
-.IR /tmp/local-agent .
+listen on the Unix domain socket \fI/tmp/local-agent\fR.
 .TP 24
 .IR "/tmp/local-agent"
-identical to the previous specification, since the Unix domain is the
-default transport iff the first character of the <transport-address>
-is a '/'.
+is identical to the previous specification, since the Unix domain is
+assumed if the first character of the <transport-address> is '/'.
 .TP 24
 .IR "PVC:161"
 listen on the AAL5 permanent virtual circuit with VPI=0 and VCI=161
@@ -259,8 +233,6 @@ to use udp6 transport addresses, and attempts to do so will result in
 the error "Error opening specified endpoint".  Likewise, since AAL5
 PVC support is only currently available on Linux, it will fail with
 the same error on other platforms.
-
-.RE
 .SH CONFIGURATION FILES
 .PP
 .B snmpd
