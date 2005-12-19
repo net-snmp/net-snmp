@@ -563,7 +563,7 @@ sink directives with the same destination.
 .RE
 .IP "trapsess [SNMPCMD_ARGS] HOST"
 provides a more generic mechanism for defining notification destinations.
-.I "SNMPCMD ARGS"
+.I "SNMPCMD_ARGS"
 should be the command-line options required for an equivalent
 \fIsnmptrap\fR (or \fIsnmpinform\fR) command to send the desired notification.
 The option \fI-Ci\fR can be used (with \fI-v2c\fR or \fI-v3\fR) to generate
@@ -591,7 +591,7 @@ This requires that the agent was built with support for the
 \fIdisman/event\fR module (which is now included as part of the
 default build configuration for the most recent distribution).
 .RS
-.IP "Note"
+.IP "Note:"
 The behaviour of the latest implementation differs in some minor
 respects from the previous code - nothing too significant, but
 existing scripts may possibly need some minor adjustments.
@@ -652,7 +652,7 @@ Similarly, the falling threshold event will be re-armed by
 the upper threshold (MAX).
 .IP
 The optional parameters DMIN and DMAX configure a pair of
-similar threshold tests, but working with the \fIdelta\fR
+similar threshold tests, but working with the delta
 differences between successive sample values.
 .RE
 .IP "\fIOPTIONS\fR"
@@ -662,8 +662,15 @@ expression.  These include:
 .IP "-D"
 indicates that the expression should be evaluated using delta differences
 between sample values (rather than the values themselves).
-.IP "-d OID | -di OID"
+.IP "-d OID"
+.IP "-di OID"
 specifies a discontinuity marker for validating delta differences.
+A \fI-di\fR object instance will be used exactly as given.
+A \fI-d\fR object will have the instance subidentifiers from the
+corresponding (wildcarded) expression object appended.
+If the \fI-I\fR flag is specified, then there is no difference
+between these two options.
+.IP
 This option also implies \fI-D\fR.
 .IP "-e EVENT"
 specifies the event to be invoked when this monitor entry is triggered.
@@ -686,59 +693,25 @@ between these two options.
 .IP
 See \fIstrictDisman\fR for details of the ordering of notification payloads.
 .IP "-r FREQUENCY"
-monitors the given expression every FREQUENCY seconds, rather
-than the default of 600s (10 minutes). 
+monitors the given expression every FREQUENCY seconds.
+By default, the expression will be evaluated every 600s (10 minutes). 
 .IP "-S"
-indicates that the monitor expression should not be evaluated when the
-agent first starts up - rather this should wait until the first repeat
-interval expires.
+indicates that the monitor expression should \fInot\fR be evaluated
+when the agent first starts up.  The first evaluation will be done
+once the first repeat interval has expired.
 .IP "-s"
 indicates that the monitor expression \fIshould\fR be evaluated when the
 agent first starts up.  This is the default behaviour.
+.RS
+.IP "Note:"
+Notifications triggered by this initial evaluation will be sent
+\fIbefore\fR the \fCcoldStart\fR trap.
+.RE
 .IP "-u SECNAME"
 specifies a security name to use for scanning the local host,
 instead of the default \fIiquerySecName\fR.
 Once again, this user must be explicitly created and given
 suitable access rights.
-.RE
-.IP "\fIExamples\fR"
-The following example configuration checks the hrSWRunPerfTable table
-(listing running processes) for any process which is consuming > 10Mb
-of memory.  It performs this check every 600 seconds (the default).
-For every process it finds exceeding the limit, it will end out
-exactly one notification.  In addition to the normal hrSWRunPerfMem
-oid and value sent in the trap, the hrSWRunName object will also be
-sent.  Note that the hrSWRunName object actually occurs in a different
-table, but since the indexes to the two tables are the same this works
-out alright.
-.RS
-.IP
-.nf
-rouser me
-monitor -u me -o sysUpTime.0 -o hrSWRunName "high process memory" hrSWRunPerfMem > 10000
-.fi
-.fi
-.RE
-.IP
-The above line would produce a trap which, when formated by snmptrapd, would
-look like:
-.RS
-.IP
-.nf
-2002-04-05 13:33:53 localhost.localdomain [udp:127.0.0.1:32931]:
-        sysUpTimeInstance = Timeticks: (1629) 0:00:16.29        snmpTrapOID.0 = OID: mteTriggerFired    mteHotTrigger = high process memory     mteHotTargetName =      mteHotContextName =     mteHotOID = OID: hrSWRunPerfMem.1968    mteHotValue = 28564     hrSWRunName.1968 = "xemacs"
-.fi
-.RE
-.IP
-This shows my xemacs process using 28Mb of resident memory.  Which,
-considering it's xemacs, is not that surprising.
-.IP
-Threshold example:
-.RS
-.nf
-.IP
-monitor -t -r 15 -o prNames -o prErrMessage "process table" prErrorFlag 0 1
-.fi
 .RE
 .IP "notificationEvent ENAME NOTIFICATION [-n] [-i OID | -o OID ]*"
 defines a notification event named ENAME.
@@ -777,7 +750,7 @@ will normally be added to the OID.
 If the \fI-I\fR flag was specified to either of the
 \fImonitor\fR or \fIsetEvent\fR directives, the
 specified OID will be regarded as an exact single instance.
-.IP "strictDisman [yes|no]"
+.IP "strictDisman yes"
 The definition of SNMP notifications states that the
 varbinds defined in the OBJECT clause should come first
 (in the order specified), followed by any "extra" varbinds
@@ -1002,7 +975,7 @@ error, or a \fInoSuchInstance\fR exception.
 .RS
 .IP "Note:"
 The SMIv2 type \fBcounter64\fR
-and SNMPv2 \fInoSuchObject\fR exception are not supported
+and SNMPv2 \fInoSuchObject\fR exception are not supported.
 .RE
 .RE
 .IP
@@ -1098,19 +1071,18 @@ must be explicitly included by specifying the '--enable-embedded-perl'
 option to the configure script when the package is first built.
 .PP
 If enabled, the following directives will be recognised:
-.IP "disablePerl [true|false]"
-can turn off embedded perl support entirely (e.g. if there are problems
+.IP "disablePerl true"
+will turn off embedded perl support entirely (e.g. if there are problems
 with the perl installation).
 .IP "perlInitFile FILE"
-loads the specified initialisation file (instead of the default
-DATADIR/snmp/snmp_perl.pl)
+loads the specified initialisation file (if present)
 immediately before the first \fIperl\fR directive is parsed.
-The default initialisation script creates a \fC$agent\fR variable
-(a \fCNetSNMP::agent\fR object) which can be used to register
-perl-based MIB handler routines.
-.\"
-.\"  XXX - What if this file doesn't exist?
-.\"
+If not explicitly specified, the agent will look for the default
+initialisation file DATADIR/snmp/snmp_perl.pl.
+.IP
+The example initialisation file (which is not installed automatically)
+creates an instance of a \fCNetSNMP::agent\fR object - a variable
+\fC$agent\fR which can be used to register perl-based MIB handler routines.
 .IP "perl EXPRESSION"
 evaluates the given expression.  This would typically register a
 handler routine to be called when a section of the OID tree was
@@ -1118,9 +1090,9 @@ requested:
 .RS
 .RS
 .nf
-perl use Data::Dumper;
+\fCperl use Data::Dumper;
 perl sub myroutine  { print "got called: ",Dumper(@_),"\\n"; }
-perl $agent->register('mylink', '.1.3.6.1.8765', \\&myroutine);
+perl $agent->register('mylink', '.1.3.6.1.8765', \\&myroutine);\fR
 .fi
 .RE
 .RE
@@ -1128,9 +1100,7 @@ perl $agent->register('mylink', '.1.3.6.1.8765', \\&myroutine);
 This expression could also source an external file:
 .RS
 .RS
-.nf
-perl 'do /path/to/file.pl';
-.fi
+\fCperl 'do /path/to/file.pl';\fR
 .RE
 .RE
 .IP
@@ -1168,7 +1138,7 @@ the remote one, or acting as a proxy for it.
 Use of this mechanism requires that the agent was built with support for the
 \fIucd-snmp/proxy\fR module (which is included as part of the
 default build configuration).
-.IP "proxy [-Cn CONTEXTNAME] [SNMPCMD ARGS] HOST OID [REMOTEOID]"
+.IP "proxy [-Cn CONTEXTNAME] [SNMPCMD_ARGS] HOST OID [REMOTEOID]"
 will pass any incoming requests under OID to the agent listening
 on the port specified by the transport address HOST.
 See the section 
@@ -1182,16 +1152,15 @@ addresses.
 To proxy the entire MIB tree, use the OID .1.3
 (\fBnot\fR the top-level .1)
 .RE
-.IP
-The \fISNMPCMD ARGS\fR should provide sufficient version and
+.PP
+The \fISNMPCMD_ARGS\fR should provide sufficient version and
 administrative information to generate a valid SNMP request
 (see \fIsnmpcmd(1)\fR).
-.RS
 .IP "Note:"
 The proxied request will \fInot\fR use the administrative
 settings from the original request.
 .RE
-.IP
+.PP
 If a CONTEXTNAME is specified, this will register the proxy
 delegation within the named context in the local agent.
 Defining multiple \fIproxy\fR directives for the same OID but
@@ -1199,26 +1168,10 @@ different contexts can be used to query several remote agents
 through a single proxy, by specifying the appropriate SNMPv3
 context in the incoming request (or using suitable configured
 community strings - see the \fIcom2sec\fR directive).
-.IP
+.PP
 Specifying the REMOID parameter will map the local MIB tree
 rooted at OID to an equivalent subtree rooted at REMOID
 on the remote agent.
-.IP "Examples:"
-.RS
-.nf
-# assigns the entire mib tree on remotehost1 to the context of the
-# same name:
-proxy -Cn remotehost1 -v 1 -c public remotehost1 .1.3
-# ditto, but for remotehost 2
-proxy -Cn remotehost2 -v 1 -c public remotehost2 .1.3
-# proxies only the ucdavis enterprises tree to the remote host using snmpv1
-proxy -v 1 -c public remotehost .1.3.6.1.4.1.2021
-# uses v3 to access remotehost and converts the remote .1.3.6.1.2.1.1
-# oid to local .1.3.6.1.3.10 oid (another way to access mulitple hosts
-# without using contexts)
-proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
-.fi
-.RE
 .SS SMUX Sub-Agents
 The Net-SNMP agent supports the SMUX protocol (RFC 1227) to communicate
 with SMUX-based subagents (such as \fIgated\fR, \fIzebra\fR or \fIquagga\fR).
@@ -1276,11 +1229,12 @@ will enable the AgentX functionality and cause the agent to
 start listening for incoming AgentX registrations.
 This can also be activated by specifying the '-x' command-line
 option (to specify an alternative listening socket).
-.IP "agentXPerms socket_perms [directory_perms [username|userid [groupname|groupid]]]"
-Defines the permissions and ownership of the AgentX Unix Domain socket.
-socket_perms and directory_perms must be octal digits (see 
+.IP "agentXPerms SOCKPERMS [DIRPERMS [USER|UID [GROUP|GID]]]"
+Defines the permissions and ownership of the AgentX Unix Domain socket,
+and the parent directories of this socket.
+SOCKPERMS and DIRPERMS must be octal digits (see 
 .I chmod(1)
-). By default this socket is accessible only to subagents which 
+). By default this socket will only be accessible to subagents which 
 have the same userid as the agent.
 .PP
 There is one directive specifically relevant to running as
@@ -1294,8 +1248,8 @@ and sub-agents:
 .IP "agentXSocket [<transport-specifier>:]<transport-address>[,...]"
 defines the address the master agent listens at, or the subagent
 should connect to.
-The default is the Unix Domain socket /var/agentx/master.
-Another possibility is tcp:localhost:705.
+The default is the Unix Domain socket \fC/var/agentx/master\fR.
+Another common alternative is \fCtcp:localhost:705\fR.
 See the section
 .B LISTENING ADDRESSES
 in the
@@ -1325,8 +1279,10 @@ entirely lost.  Thus SETS will do nothing more than modify the
 internal overridden value and will not perform any of the original
 functionality intended to be provided by the MIB object.  It's an
 emulation only.)  An example:
+.RS
 .IP
-override sysDescr.0 octet_str "my own sysDescr"
+\fCoverride sysDescr.0 octet_str "my own sysDescr"\fR
+.RE
 .IP
 That line will set the sysDescr.0 value to "my own sysDescr" as well
 as make it modifiable with SNMP SETs as well (which is actually
@@ -1339,7 +1295,7 @@ ordering you'll end up with problems and your modified value won't
 appear in the right place in the table.
 .IP
 Valid TYPEs are: integer, uinteger, octet_str, object_id, counter,
-null (for gauge's, use "uinteger"; for bit strings, use "octet_str").
+null (for gauges, use "uinteger"; for bit strings, use "octet_str").
 Note that setting an object to "null" effectively delete's it as being
 accessible.  No VALUE needs to be given if the object type is null.
 .IP
@@ -1368,10 +1324,10 @@ support, which is only a few mib tables.  To use it,
 you need to make sure to install it before the
 table_iterator point in the chain, so to do this:
 
-                  injectHandler stash_cache NAME table_iterator
+                  \fCinjectHandler stash_cache NAME table_iterator\fR
 
 If you want a table to play with, try walking the
-nsModuleTable with and without this injected.
+\fCnsModuleTable\fR with and without this injected.
 
 .IP debug
 Prints out lots of debugging information when
@@ -1393,26 +1349,31 @@ this module will convert all getbulk requests to
 getnext requests before the final module receives it.
 .RE
 .IP "Figuring out module names"
-To figure out which modules you can inject things into, snmpwalk the
-nsModuleTable which will give you a list of all named modules
-registered within the agent.
+To figure out which modules you can inject things into,
+run \fBsnmpwalk\fR on the \fCnsModuleTable\fR which will give
+a list of all named modules registered within the agent.
 .SS Internal Data tables
 .IP "table NAME"
 .\" XXX: To Document
 .IP "add_row NAME INDEX(ES) VALUE(S)"
 .\" XXX: To Document
+.SH NOTES
+.IP o
+The Net-SNMP agent can be instructed to re-read the various configuration files,
+either via an \fBsnmpset\fR assignment of integer(1) to
+\fCUCD-SNMP-MIB::versionUpdateConfig.0\fR (.1.3.6.1.4.1.2021.100.11.0),
+or by sending a \fBkill -HUP\fR signal to the agent process.
+.IP o
+All directives listed with a value of "yes" actually accept a range
+of boolean values.  These will accept any of \fI1\fR, \fIyes\fR or
+\fItrue\fR to enable the corresponding behaviour, 
+or any of \fI0\fR, \fIno\fR or \fIfalse\fR to disable it.
+The default in each case is for the feature to be turned off, so these
+directives are typically only used to enable the appropriate behaviour.
 .SH "EXAMPLE CONFIGURATION FILE"
 See the EXAMPLE.CONF file in the top level source directory for a more
 detailed example of how the above information is used in real
 examples.
-.SH "RE-READING snmpd.conf AND snmpd.local.conf"
-The Net-SNMP agent can be forced to re-read its configuration files.
-It can be told to do so by one of two ways:
-.IP 1.
-An snmpset of integer(1) to \fCversionUpdateConfig.0\fR
-(.1.3.6.1.4.1.2021.100.11.0)
-.IP 2.
-A "kill -HUP" signal sent to the snmpd agent process.
 .SH "FILES"
 SYSCONFDIR/snmp/snmpd.conf
 .SH "SEE ALSO"
