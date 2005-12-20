@@ -1100,7 +1100,7 @@ vacm_warn_if_not_configured(int majorID, int minorID, void *serverarg,
                                     NETSNMP_DS_APP_NO_AUTHORIZATION)) {
             snmp_log(LOG_WARNING,
                  "Warning: no access control information configured.\n"
-                 "This receiver will *NOT* accept any incoming traps.\n");
+                 "This receiver will *NOT* accept any incoming notifications.\n");
         }
     }
     return SNMP_ERR_NOERROR;
