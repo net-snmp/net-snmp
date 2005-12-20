@@ -32,7 +32,7 @@ attempt to connect to.  This can be overridden by explicitly
 including a port number in the \fIAGENT\fR specification.
 See the \fIsnmpcmd(1)\fR manual page for more details.
 .IP
-If not specified, the default default port is 161.
+If not specified, the default value for this token is 161.
 .IP "defVersion (1|2c|3)"
 defines the default version of SNMP to use.
 This can be overridden using the \fB-v\fR option.
@@ -123,7 +123,7 @@ This can be overridden using the \fB-u\fR option.
 defines the default security level to use for SNMPv3 requests.
 This can be overridden using the \fB-l\fR option.
 .IP
-If not specified, the default default security level is \fInoAuthNoPriv\fR.
+If not specified, the default value for this token is \fInoAuthNoPriv\fR.
 .\"
 .\" XXX - Is this correct ?
 .\"
@@ -161,7 +161,7 @@ Neither SHA authentication nor any form of encryption will be available.
 defines the default context to use for SNMPv3 requests.
 This can be overridden using the \fB-n\fR option.
 .IP
-If not specified, the default default context is the default context
+If not specified, the default value for this token is the default context
 (i.e. the empty string "").
 .IP "defSecurityModel STRING"
 defines the security model to use for SNMPv3 requests.
