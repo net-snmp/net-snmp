@@ -1080,7 +1080,7 @@ immediately before the first \fIperl\fR directive is parsed.
 If not explicitly specified, the agent will look for the default
 initialisation file DATADIR/snmp/snmp_perl.pl.
 .IP
-The example initialisation file (which is not installed automatically)
+The default initialisation file
 creates an instance of a \fCNetSNMP::agent\fR object - a variable
 \fC$agent\fR which can be used to register perl-based MIB handler routines.
 .IP "perl EXPRESSION"
