@@ -33,7 +33,7 @@ messages.
 Note: the default is to listen on UDP port 162 on all IPv4 interfaces.
 Since 162 is a privileged port,
 .B snmptrapd
-must be typically be run as root.
+must typically be run as root.
 .SH OPTIONS
 .TP 8
 .B -a
