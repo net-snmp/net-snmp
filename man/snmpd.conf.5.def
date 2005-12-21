@@ -385,9 +385,9 @@ This situation will \fBnot\fR automatically trigger a trap to report
 the problem - see the DisMan Event MIB section later.
 .RE
 .IP
-If neither MAX nor MIN are specified, they default to \fBinfinity\fR
-and 1 respectively ("at least one").  If only MAX is specified, MIN
-will default to 0 ("no more than MAX").
+If neither MAX nor MIN are specified (or are both 0), they will
+default to \fBinfinity\fR and 1 respectively ("at least one").
+If only MAX is specified, MIN will default to 0 ("no more than MAX").
 .IP "procfix NAME PROG ARGS"
 registers a command that can be run to fix errors with the given
 process NAME.  This will be invoked when the corresponding
@@ -478,7 +478,7 @@ walking the \fClaTable\fR will succeed (assuming the
 even if the \fIload\fR directive is not present.
 .IP "swap MIN "
 monitors the amount of swap space available on the local system.
-If this falls below the specified threshold (MIB Kb),
+If this falls below the specified threshold (MIN Kb),
 then the \fImemErrorSwap\fR object will be set to 1,
 and a suitable description message reported via \fImemSwapErrorMsg\fR.
 .RS
