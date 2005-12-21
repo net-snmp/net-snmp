@@ -23,11 +23,11 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       users. Non-authorized traps/informs will be dropped.
 
     - Due to a copyright statement that didn't allow modifications, 
-      snmpnetstat was completely rewritten.  The new binary is named
-      snmpnetstat53, and we've provided a snmpnetstat wrapper script to
-      make the command line options backwards compatible.  As a side
-      effect, however, it now finally supports SNMPv3 at least.
-    
+      snmpnetstat has been completely rewritten.  The new version now
+      accepts the same command-line options as the other tools, which
+      has introduced a number of incompatible changes.  However, it
+      does now finally support SNMPv3.
+
  New:
     Building:
       - new option to disable set support in the agent (--disable-set-support)
