@@ -283,8 +283,8 @@ DISMAN-EVENT-MIB
 
 ------------------------------------------------------------------------------
 DISMAN-SCHEDULE-MIB
- schedLocalTime.0            ---
- schedTable                  ---
+ schedLocalTime.0             A         5.3     D disman/schedule/=
+ schedTable                   A         5.3     D disman/schedule/=
 
 ------------------------------------------------------------------------------
 DISMAN-EXPRESSION-MIB (expired ID)
@@ -324,6 +324,13 @@ AGENTX-MIB
  *                            ---
 
 ------------------------------------------------------------------------------
+LM-SENSORS-MIB
+ lmTempSensorsTable           LS        5.0     O ucd-snmp/lmSensors.c
+ lmFanSensorsTable            LS        5.0     O ucd-snmp/lmSensors.c
+ lmVoltSensorsTable           LS        5.0     O ucd-snmp/lmSensors.c
+ lmMiscSensorsTable           LS        5.0     O ucd-snmp/lmSensors.c
+
+------------------------------------------------------------------------------
 UCD-SNMP-MIB
  prTable                      U $       ~3.2    O ucd-snmp/proc.c
  memory.*.0                   U         ~3.2    O ucd-snmp/memory*.c
@@ -335,10 +342,6 @@ UCD-SNMP-MIB
  ipFwAccTable                 U         3.5     O misc/ipfwacc.c
  dlModTable                   U         4.2     O ucd-snmp/dlmod.c
  diskIOTable                  U         4.1     O ucd-snmp/diskio.c
- lmSensorsTable               LS        5.0     O ucd-snmp/lmSensors.c
- lmFanSensorsTable            LS        5.0     O ucd-snmp/lmSensors.c
- lmVoltSensorsTable           LS        5.0     O ucd-snmp/lmSensors.c
- lmMiscSensorsTable           LS        5.0     O ucd-snmp/lmSensors.c
  ucdDemoMIBObjects            A         ~3.5    O examples/ucdDemoPublic.c
  logMatch                     U         ~3.5    O ucd-snmp/logmatch.c
  version.*.0                  A         ~3.2    O ucd-snmp/versioninfo.c
@@ -362,7 +365,7 @@ NET-SNMP-AGENT-MIB
  nsTransactionTable           A         5.0     I agent/nsTransactionTable.c
  netSnmpExampleScalars        A         5.0     O 
  netSnmpIETFWGTable           A         5.0     D examples/data_set.c
- netSnmpHostsTable            A         5.0     A exampes/=*
+ netSnmpHostsTable            A         5.0     A examples/=*
  nstAgentModules              A         5.0     O 
 
 ------------------------------------------------------------------------------
@@ -402,8 +405,10 @@ Misc notes
 
 Other feature info
 ------------------
- AgentX                           4.0
- proxy support                    4.2
- override token                   5.0
- smux                             3.2
- proper context support           5.2
+ smux                                     3.2
+ AgentX                                   4.0
+ proxy support                            4.2
+ override token                           5.0
+ proper context support                   5.2
+ DISMAN-EVENT-MIB implementation rewrite  5.3
+ AgentX, host, disman/event by default    5.3
