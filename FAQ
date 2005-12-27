@@ -204,8 +204,6 @@ Where can I get it?
     - http://www.net-snmp.org/project/
   Mirrors (note that sourceforge download servers are mirrored themselves):
     - US:          ftp://ftp.freesnmp.com/mirrors/net-snmp/
-    - Bulgaria:    http://rtfm.uni-svishtov.bg/net-snmp/    (appears to be out of date)
-    - Germany:     ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/  (unknown host)
     - Greece:      ftp://ftp.ntua.gr/pub/net/snmp/net-snmp/
 
 
@@ -281,20 +279,20 @@ What operating systems does it run on?
   Both the applications and the agent have been reported as running
   (at least in part) on the following operating systems:
 
-	* HP-UX (10.20 to 9.01 and 11.11 to 11.0 -- see README.hpux11)
-	* Ultrix (4.5 to 4.2)
+	* Linux (kernels 2.6 to 1.3)
 	* Solaris/SPARC (11 to 2.3), Solaris/Intel (10, 9) -- see 
 	  README.solaris
-	* SunOS (4.1.4 to 4.1.2)
-	* OSF (4.0, 3.2 and Tru64 Unix 5.1B -- see README.tru64)
+	* HP-UX (10.20 to 9.01 and 11.11 to 11.0 -- see README.hpux11)
+	* Mac OS X (10.4 to 10.1) -- see README.osX
 	* NetBSD (2.0 to 1.0)
 	* FreeBSD (5.3 to 2.2)
-	* BSDi (4.0.1 to 2.1)
-	* Linux (kernels 2.6 to 1.3)
-	* AIX (5.2, 5.1, 4.1.5, 3.2.5) -- see README.aix
 	* OpenBSD (3.7, 2.8, 2.6)
+	* BSDi (4.0.1 to 2.1)
+	* AIX (5.2, 5.1, 4.1.5, 3.2.5) -- see README.aix
 	* IRIX (6.5 to 5.1)
-	* OS X (10.4 to 10.1) -- see README.osX
+	* OSF (4.0, 3.2 and Tru64 Unix 5.1B -- see README.tru64)
+	* SunOS 4 (4.1.4 to 4.1.2)
+	* Ultrix (4.5 to 4.2)
 	* Dynix/PTX 4.4
 	* QNX 6.2.1A
 
@@ -1073,11 +1071,11 @@ How do I handle traps and notifications?
     Handling received traps is done using the tool 'snmptrapd'.
   This can log these traps via the syslog mechanism:
 
-	snmptrapd -s -l7	(log to 'LOCAL7')
+	snmptrapd -Ls 7		(log to 'LOCAL7')
 
   printed to standard output
 
-	snmptrapd -f -P
+	snmptrapd -f -Lo
 
   or pass them to an external command.  This last approach uses
   a 'traphandle' directive in the configuration file 'snmptrapd.conf'.
@@ -1095,6 +1093,11 @@ How do I handle traps and notifications?
   Note that the first entry uses the OID corresponding to the SNMPv1
   'coldStart' trap.  See the co-existence RFC (RFC 2576) for details
   of mapping SNMPv1 traps to SNMPv2 OIDs.
+
+  Starting with net-snmp 5.3, snmptrapd will no longer accept all traps 
+  by default. It must be configured with authorized SNMPv1/v2c community 
+  strings and/or SNMPv3 users. Non-authorized traps/informs will be dropped.
+  Please refer to the snmptrapd.conf(5) manual page for details.
 
   There's a tutorial with more details on the web site at
 	http://www.net-snmp.org/tutorial-5/commands/snmptrap.html
@@ -1768,16 +1771,22 @@ What MIBs are supported?
 	- SNMPv3 MIBS (RFCs 2571-5, 3411-3418)
 		(including USM, VACM, Target
 		 and Notification MIBs)
-	- DisMan EVENT-MIB
+	- DisMan Event MIB
+	- DisMan Schedule MIB
 	- MTA-MIB (sendmail)
 	- private agent extensions
 		(monitor specified processes and disks,
 		 memory, CPU, load average, plus extend
 		 the agent using shell commands)
 
-  The Host Resources MIB, the Event MIB and the MTA MIB are not
+  See README.agent-mibs for details.
+
+  The Host Resources MIB, the DisMan MIBs and the MTA MIB are not
   included by default, and need to be explicitly requested when
-  the suite is first configured and built.
+  the suite is first configured and built. Starting with net-snmp 5.3,
+  the DisMan Event MIB is included by default on all platforms, and
+  the Host Resources MIB is included by default on the major supported
+  platforms.
 
   There are a few other MIB implementations distributed as part of the
   source tarball, but these are basically unsupported and most of the
