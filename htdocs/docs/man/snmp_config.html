@@ -2,12 +2,12 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>SNMP.CONF</h1>Section: Net-SNMP (5)<br />
-    Updated: 28 Aug 2001<br />
+    Updated: 5 May 2005<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
     <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>snmp_config - describes how to configure the Net-SNMP applications. <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmp_config - handling of Net-SNMP configuration files <a name="lbAC" id="lbAC"> </a>
 
     <h2>DESCRIPTION</h2>The Net-SNMP package uses various configuration files to configure its applications. This manual page
     merely describes the overall nature of them, so that the other manual pages don't have to. <a name="lbAD" id="lbAD"> </a>
@@ -19,10 +19,41 @@
     places a configuration file can exist for any given configuration file type.
 
     <p>Additionally, the above default search path can be overridden by setting the environment variable SNMPCONFPATH to a
-    colon-separated list of directories to search for.</p>
+    colon-separated list of directories to search for. The path for the persistent data should be included when running
+    applications that use persistent storage, such as snmpd.</p>
 
-    <p>Finally, applications that store persistent data will also look in the /var/net-snmp directory for configuration files
-    there. <a name="lbAE" id="lbAE"> </a></p>
+    <p>Applications will read persistent configuration files in the following order of preference:</p>
+
+    <dl compact="compact">
+      <dd>
+        <p>file in <b>SNMP_PERSISTENT_FILE</b> environment variable</p>
+
+        <p>directories in <b>SNMPCONFPATH</b> environment variable</p>
+
+        <p>directory defined by <b>persistentDir</b> snmp.conf variable</p>
+
+        <p>directory in <b>SNMP_PERSISTENT_DIR</b> environment variable</p>
+
+        <p>default <b>/var/net-snmp</b> directory</p>
+      </dd>
+    </dl>
+
+    <p>Finally, applications will write persistent configuration files in the following order of preference:</p>
+
+    <dl compact="compact">
+      <dd>
+        <p>file in <b>SNMP_PERSISTENT_FILE</b> environment variable</p>
+
+        <p>directory defined by <b>persistentDir</b> snmp.conf variable</p>
+
+        <p>directory in <b>SNMP_PERSISTENT_DIR</b> environment variable</p>
+
+        <p>default <b>/var/net-snmp</b> directory</p>
+      </dd>
+    </dl>
+
+    <p>Note: When using SNMP_PERSISTENT_FILE, the filename should match the application name. For example,
+    /var/net-snmp/snmpd.conf. <a name="lbAE" id="lbAE"> </a></p>
 
     <h2>CONFIGURATION FILE TYPES</h2>Each application may use multiple configuration files, which will configure various
     different aspects of the application. For instance, the SNMP agent (<b>snmpd</b>) knows how to understand configuration
@@ -107,7 +138,7 @@ rocommunity mypublic
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 22:24:02 GMT, November 25, 2004
+    Time: 17:34:34 GMT, December 30, 2005
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

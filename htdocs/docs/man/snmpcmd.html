@@ -2,7 +2,7 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>SNMPCMD</h1>Section: Net-SNMP (1)<br />
-    Updated: 09 Jan 2004<br />
+    Updated: 29 Jun 2005<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
     <a name="lbAB" id="lbAB"> </a>
@@ -28,30 +28,31 @@
       <dd>Sets the keys to be used for SNMPv3 transactions. These options allow you to set the master authentication and
       encryption keys (-3m and -3M respectively) or set the localized authentication and encryption keys (-3k and -3K
       respectively). SNMPv3 keys can be either passed in by hand using these flags, or by the use of keys generated from
-      passwords using the -A and -X flags discussed below. For further details on SNMPv3 and it's usage of keying information,
-      see the Net-SNMP tutorial web site ( <a href=
-      "http://www.Net-SNMP.org/tutorial-5/commands/">http://www.Net-SNMP.org/tutorial-5/commands/</a> ). See the snmp.conf manual
-      page on the defAuthMasterKey and related tokens for more information as well.</dd>
+      passwords using the -A and -X flags discussed below. For further details on SNMPv3 and its usage of keying information, see
+      the Net-SNMP tutorial web site ( <a href=
+      "http://www.Net-SNMP.org/tutorial-5/commands/">http://www.Net-SNMP.org/tutorial-5/commands/</a> ). Overrides the
+      defAuthMasterKey (-3m), defPrivMasterKey (-3M), defAuthLocalizedKey (-3k) or defPrivLocalizedKey (-3K) tokens,
+      respectively, in the <i>snmp.conf</i> file, see <i><a href="snmp.conf.html">snmp.conf</a>(5).</i></dd>
 
       <dt><b>-a</b> <i>authProtocol</i></dt>
 
-      <dd>Set the authentication protocol (MD5|SHA) used for authenticated SNMPv3 messages. Overrides the defAuthType token in
-      the <i>snmp.conf</i> file.</dd>
+      <dd>Set the authentication protocol (MD5 or SHA) used for authenticated SNMPv3 messages. Overrides the <i>defAuthType</i>
+      token in the <i>snmp.conf</i> file.</dd>
 
       <dt><b>-A</b> <i>authPassword</i></dt>
 
-      <dd>Set the authentication pass phrase used for authenticated SNMPv3 messages. Overrides the defAuthPassphrase token in the
-      <i>snmp.conf</i> file. It is insecure to specify pass phrases on the command line, see <i><a href=
+      <dd>Set the authentication pass phrase used for authenticated SNMPv3 messages. Overrides the <i>defAuthPassphrase</i> token
+      in the <i>snmp.conf</i> file. It is insecure to specify pass phrases on the command line, see <i><a href=
       "snmp.conf.html">snmp.conf</a>(5).</i></dd>
 
       <dt><b>-c</b> <i>community</i></dt>
 
-      <dd>Set the community string for SNMPv1/v2c transactions. Overrides the defcommunity token in the <i>snmp.conf</i>
+      <dd>Set the community string for SNMPv1/v2c transactions. Overrides the <i>defCommunity</i> token in the <i>snmp.conf</i>
       file.</dd>
 
       <dt><b>-d</b></dt>
 
-      <dd>Dump (in hexadecimal) the sent and received SNMP packets.</dd>
+      <dd>Dump (in hexadecimal) the raw SNMP packets sent and received.</dd>
 
       <dt><b>-D</b> <i>TOKEN[,...]</i></dt>
 
@@ -82,7 +83,7 @@
       <dt><b>-l</b> <i>secLevel</i></dt>
 
       <dd>Set the securityLevel used for SNMPv3 messages (noAuthNoPriv|authNoPriv|authPriv). Appropriate pass phrase(s) must
-      provided when using any level higher than noAuthNoPriv. Overrides the defSecurityLevel token in the <i>snmp.conf</i>
+      provided when using any level higher than noAuthNoPriv. Overrides the <i>defSecurityLevel</i> token in the <i>snmp.conf</i>
       file.</dd>
 
       <dt><b>-L</b> <i>[eEfFoOsS]</i></dt>
@@ -91,41 +92,40 @@
 
       <dt><b>-m</b> <i>MIBLIST</i></dt>
 
-      <dd>Specifies a colon separated list of MIB modules (not files) to load for this application. This overrides the
-      environment variable MIBS.</dd>
+      <dd>Specifies a colon separated list of MIB modules (not files) to load for this application. This overrides (or augments)
+      the environment variable MIBS, the <i>snmp.conf</i> directive <i>mibs</i>, and the list of MIBs hardcoded into the Net-SNMP
+      library.</dd>
 
-      <dd>The special keyword <i>ALL</i> is used to specify all modules in all directories when searching for MIB files. Every
-      file whose name does not begin with "." will be parsed as if it were a MIB file.</dd>
+      <dd>If <i>MIBLIST</i> has a leading '-' or '+' character, then the MIB modules listed are loaded in addition to the default
+      list, coming before or after this list respectively. Otherwise, the specified MIBs are loaded <i>instead</i> of this
+      default list.</dd>
 
-      <dd>If the <i>MIBLIST</i> has a leading '+', then the listed MIB modules are loaded in addition to MIB modules specified in
-      the environment variable MIBS.</dd>
-
-      <dd>If a <i>mibfile</i> token is specified in the <i>snmp.conf file,</i> the <i>-m MIB</i> option overrides the
-      <i>mibfile</i> token.</dd>
+      <dd>The special keyword <i>ALL</i> is used to load all MIB modules in the MIB directory search list. Every file whose name
+      does not begin with "." will be parsed as if it were a MIB file.</dd>
 
       <dt><b>-M</b> <i>DIRLIST</i></dt>
 
-      <dd>Specifies a colon separated list of directories to search for MIBs. This overrides the environment variable
-      MIBDIRS.</dd>
+      <dd>Specifies a colon separated list of directories to search for MIBs. This overrides (or augments) the environment
+      variable MIBDIRS, the <i>snmp.conf</i> directive <i>mibdirs</i>, and the default directory hardcoded into the Net-SNMP
+      library (/usr/local/share/snmp/mibs).</dd>
 
-      <dd>If <i>DIRLIST</i> has a leading '+', then the given directories are added to the list of MIB directories. Without the
-      leading '+', the given directory list overrides the list specified with the environment variable MIBDIRS. Note that the
-      directories listed at the end of the list have precedence over directories at the beginning of the list.</dd>
+      <dd>
+        If <i>DIRLIST</i> has a leading '-' or '+' character, then the given directories are added to the default list, being
+        searched before or after the directories on this list respectively. Otherwise, the specified directories are searched
+        <i>instead</i> of this default list.
 
-      <dd>If no value is specified for the environment variable MIBDIRS, then the command will still search a default mib
-      directory, after it searches the MIB directories specified on the -M option. The default directory is
-      /usr/local/share/snmp/mibs. To avoid having a default mib directory searched, set the MIBDIRS environment variable to "".
-      Even if the default MIB directory is searched, the directories specified in the -M option have precedence in the search
-      order over the default directory.</dd>
+        <p>Note that the directories appearing later in the list have have precedence over earlier ones. To avoid searching any
+        MIB directories, set the MIBDIRS environment variable to the empty string ("").</p>
 
-      <dd>If the -M option is specified and either a mibfile or mibdirs token is also specified in the <i>snmp.conf</i> file, the
-      directories in the -M option have precedence in the MIB search order, over the directories set with both the mibdirs token
-      and the mibfile token.</dd>
+        <p>Note that MIBs specified using the -m option or the <i>mibs</i> configuration directive will be loaded from one of the
+        directories listed by the -M option (or equivalents). The <i>mibfile</i> directive takes a full path to the specified MIB
+        file, so this does not need to be in the MIB directory search list.</p>
+      </dd>
 
       <dt><b>-n</b> <i>contextName</i></dt>
 
-      <dd>Set the destination contextName used for SNMPv3 messages. The default contextName is the empty string "". Overrides the
-      defContext token in the <i>snmp.conf</i> file.</dd>
+      <dd>Set the contextName used for SNMPv3 messages. The default contextName is the empty string "". Overrides the
+      <i>defContext</i> token in the <i>snmp.conf</i> file.</dd>
 
       <dt><b>-O</b> <i>[abeEfnqQsStTuUvxX]</i></dt>
 
@@ -145,13 +145,13 @@
 
       <dt><b>-u</b> <i>secName</i></dt>
 
-      <dd>Set the securityName used for authenticated SNMPv3 messages. Overrides the defSecurityName token in the
+      <dd>Set the securityName used for authenticated SNMPv3 messages. Overrides the <i>defSecurityName</i> token in the
       <i>snmp.conf</i> file.</dd>
 
       <dt><b>-v</b> <i>1</i> | <i>2c</i> | <i>3</i></dt>
 
       <dd>Specifies the protocol version to use: 1 (RFCs 1155-1157), 2c (RFCs 1901-1908), or 3 (RFCs 2571-2574). The default is
-      typically version 3. This option overrides the defVersion token in the <i>snmp.conf</i> file.</dd>
+      typically version 3. Overrides the <i>defVersion</i> token in the <i>snmp.conf</i> file.</dd>
 
       <dt><b>-V, --version</b></dt>
 
@@ -159,11 +159,12 @@
 
       <dt><b>-x</b> <i>privProtocol</i></dt>
 
-      <dd>Set the privacy protocol (DES) used for encrypted SNMPv3 messages.</dd>
+      <dd>Set the privacy protocol (DES or AES) used for encrypted SNMPv3 messages. Overrides the <i>defPrivType</i> token in the
+      <i>snmp.conf</i> file. This option is only valid if the Net-SNMP software was build to use OpenSSL.</dd>
 
       <dt><b>-X</b> <i>privPassword</i></dt>
 
-      <dd>Set the privacy pass phrase used for encrypted SNMPv3 messages. Overrides the defPrivPassphrase token in the
+      <dd>Set the privacy pass phrase used for encrypted SNMPv3 messages. Overrides the <i>defPrivPassphrase</i> token in the
       <i>snmp.conf</i> file. It is insecure to specify pass phrases on the command line, see <i><a href=
       "snmp.conf.html">snmp.conf</a>(5).</i></dd>
 
@@ -172,6 +173,12 @@
       <dd>Set the engineBoots and engineTime used for authenticated SNMPv3 messages. This will initialize the local notion of the
       agents boots/time with an authenticated value stored in the LCD. It is typically not necessary to specify this option, as
       these values will usually be discovered automatically.</dd>
+
+      <dt><b>--</b><i>name=value</i></dt>
+
+      <dd>Allows to specify any token ("name") supported in the <i>snmp.conf</i> file and sets its value to "value". Overrides
+      the corresponding token in the <i>snmp.conf</i> file. See <i><a href="snmp.conf.html">snmp.conf</a>(5)</i> for the full
+      list of tokens.</dd>
     </dl><a name="lbAF" id="lbAF"> </a>
 
     <h2>AGENT SPECIFICATION</h2>
@@ -299,165 +306,236 @@
     additional options provide more flexibility in reading MIB files.
 
     <dl compact="compact">
-      <dt><b>-Pw</b></dt>
-
-      <dd>Show some warning messages in resolving the MIB files. Can be also set with the configuration token
-      "mibWarningLevel".</dd>
-
-      <dt><b>-PW</b></dt>
-
-      <dd>Show additional warning messages. Can be also set with the configuration token "mibWarningLevel".</dd>
-
-      <dt><b>-Pe</b></dt>
-
-      <dd>Show MIB errors. Can be also set with the configuration token "showMibErrors". An example of an error that would be
-      shown is if an imported module is not found during MIB parsing.</dd>
-
       <dt><b>-Pc</b></dt>
 
-      <dd>Allow ASN.1 comment to extend to the end of the MIB source line (i.e. disallow the use of "--" to terminate comments).
-      This overcomes some problems with manually maintained MIB files. Can be also set with the configuration token
-      "strictCommentTerm".</dd>
+      <dd>Allow ASN.1 comments to extend to the end of the MIB source line. Strictly speaking, a second appearance of "--" should
+      terminate the comment, but this breaks some MIB files. This behaviour can also be set with the configuration token
+      <i>strictCommentTerm</i>.</dd>
 
       <dt><b>-Pd</b></dt>
 
+      <dd>Disables saving the DESCRIPTION of MIB objects when parsing MIB files, reducing the amount of memory used by the
+      running application.</dd>
+
+      <dt><b>-Pe</b></dt>
+
+      <dd>Show errors encountered when parsing MIB files. These include references to IMPORTed modules and MIB objects that
+      cannot be located in the MIB directory search list. This can also be set with the configuration token
+      <i>showMibErrors</i>.</dd>
+
+      <dt><b>-PR</b></dt>
+
       <dd>
-        Toggles the default of whether or not to save the DESCRIPTIONs of the MIB objects when parsing. Since the default is to
-        save the DESCRIPTIONS, specifying -Pd will cause the DESCRIPTIONs not to be saved during MIB parsing. For example:
+        If the same MIB object (parent name and sub-identifier) appears multiple times in the list of MIB definitions loaded, use
+        the last version to be read in. By default, the first version will be used, and any duplicates discarded. This behaviour
+        can also be set with the configuration token <i>mibReplaceWithLatest</i>.
 
-        <p>snmptranslate -Td -OS -IR system.sysDescr.0</p>
-
-        <p>will show a description, while</p>
-
-        <p>snmptranslate -Td -OS -IR -Pd system.sysDescr.0</p>
-
-        <p>will not show a description. Collecting the DESCRIPTION information into the parsed hierarchy increases the memory
-        used by the size of each DESCRIPTION clause.</p>
+        <p>Such ordering is normally only relevant if there are two MIB files with conflicting object definitions for the same
+        OID (or different revisions of the same basic MIB object).</p>
       </dd>
 
       <dt><b>-Pu</b></dt>
 
-      <dd>Allow underline characters in symbols. Can be also set with the configuration token "mibAllowUnderline".</dd>
+      <dd>Allow the underline character in MIB object names and other symbols. Strictly speaking, this is not valid SMI syntax,
+      but some vendor MIB files define such names. This can also be set with the configuration token
+      <i>mibAllowUnderline</i>.</dd>
 
-      <dt><b>-PR</b></dt>
+      <dt><b>-Pw</b></dt>
 
-      <dd>Replace MIB objects using the last read MIB file. The parser will replace MIB objects in its hierarchy whenever it sees
-      a sub-identifier and name match. <b>WARNING:</b> Setting this option may result in an incorrect hierarchy. Can be also set
-      with the configuration token "mibReplaceWithLatest".</dd>
+      <dd>Show various warning messages in parsing MIB files and building the overall OID tree. This can also be set with the
+      configuration directive <i>mibWarningLevel 1</i></dd>
+
+      <dt><b>-PW</b></dt>
+
+      <dd>Show some additional warning messages, mostly relating to parsing individual MIB objects. This can also be set with the
+      configuration directive <i>mibWarningLevel 2</i></dd>
     </dl><a name="lbAH" id="lbAH"> </a>
 
-    <h2>OUTPUT OPTIONS</h2>Output display can be controlled by passing various parameters to the <b>-O</b> flag. The following
-    examples should demonstrate this.
-
-    <p>The default output looks as follows:<br />
-    snmpget -c public -v 1 localhost system.sysUpTime.0<br />
-    SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63</p>
+    <h2>OUTPUT OPTIONS</h2>The format of the output from SNMP commands can be controlled using various parameters of the
+    <b>-O</b> flag. The effects of these sub-options can be seen by comparison with the following default output (unless
+    otherwise specified):
 
     <dl compact="compact">
-      <dt><b>-Oq</b></dt>
+      <dd>
+        <pre>
+$ snmpget -c public -v 1 localhost sysUpTime.0
+SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
+</pre>
+      </dd>
+    </dl>
 
-      <dd>Removes the equal sign and type information:<br />
-      system.sysUpTime.0 1:15:09:27.63</dd>
+    <dl compact="compact">
+      <dt><b>-Oa</b></dt>
 
-      <dt><b>-OQ</b></dt>
+      <dd>
+        Display string values as ASCII strings (unless there is a DISPLAY-HINT defined for the corresponding MIB object). By
+        default, the library attempts to determine whether the value is a printable or binary string, and displays it
+        accordingly.
 
-      <dd>Removes the type information:<br />
-      system.sysUpTime.0 = 1:15:09:27.63</dd>
+        <p>This option does not affect objects that <i>do</i> have a Display Hint.</p>
+      </dd>
+
+      <dt><b>-Ob</b></dt>
+
+      <dd>
+        Display table indexes numerically, rather than trying to interpret the instance subidentifiers as string or OID values:
+
+        <dl compact="compact">
+          <dd>
+            <pre>
+    $ snmpgetnext -c public -v 1 localhost vacmSecurityModel
+    SNMP-VIEW-BASED-ACM-MIB::vacmSecurityModel.0."wes" = xxx
+    $ snmpgetnext -c public -v 1 <b>-Ob</b> localhost vacmSecurityModel
+    SNMP-VIEW-BASED-ACM-MIB::vacmSecurityModel.0.3.119.101.115 = xxx
+</pre>
+          </dd>
+        </dl>
+      </dd>
+
+      <dt><b>-Oe</b></dt>
+
+      <dd>
+        Removes the symbolic labels from enumeration values:
+
+        <dl compact="compact">
+          <dd>
+            <pre>
+    $ snmpget -c public -v 1 localhost ipForwarding.0
+    IP-MIB::ipForwarding.0 = INTEGER: <a href="forwarding.html">forwarding</a>(1)
+    $ snmpget -c public -v 1 <b>-Oe</b> localhost ipForwarding.0
+    IP-MIB::ipForwarding.0 = INTEGER: 1
+</pre>
+          </dd>
+        </dl>
+      </dd>
+
+      <dt><b>-OE</b></dt>
+
+      <dd>
+        Modifies index strings to escape the quote characters:
+
+        <dl compact="compact">
+          <dd>
+            <pre>
+    $ snmpgetnext -c public -v 1 localhost vacmSecurityModel
+    SNMP-VIEW-BASED-ACM-MIB::vacmSecurityModel.0."wes" = xxx
+    $ snmpgetnext -c public -v 1 <b>-OE</b> localhost vacmSecurityModel
+    SNMP-VIEW-BASED-ACM-MIB::vacmSecurityModel.0.\"wes\" = xxx
+</pre>
+          </dd>
+        </dl>
+      </dd>
+
+      <dd>This allows the output to be reused in shell commands.</dd>
 
       <dt><b>-Of</b></dt>
 
-      <dd>Gives you the complete OID:<br />
-      <br />
-       .iso.org.dod.internet.mgmt.mib-2.system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63</dd>
+      <dd>
+        Include the full list of MIB objects when displaying an OID:
+
+        <dl compact="compact">
+          <dd>
+            .iso.org.dod.internet.mgmt.mib-2.system.sysUpTime.0 =
+
+            <dl compact="compact">
+              <dd>Timeticks: (14096763) 1 day, 15:09:27.63</dd>
+            </dl>
+          </dd>
+        </dl>
+      </dd>
+
+      <dt><b>-On</b></dt>
+
+      <dd>Displays the OID numerically:<br />
+      .1.3.6.1.2.1.1.3.0 = Timeticks: (14096763) 1 day, 15:09:27.63</dd>
+
+      <dt><b>-Oq</b></dt>
+
+      <dd>Removes the equal sign and type information when displaying varbind values:<br />
+      SNMPv2-MIB::sysUpTime.0 1:15:09:27.63</dd>
+
+      <dt><b>-OQ</b></dt>
+
+      <dd>Removes the type information when displaying varbind values:<br />
+      SNMPv2-MIB::sysUpTime.0 = 1:15:09:27.63</dd>
 
       <dt><b>-Os</b></dt>
 
-      <dd>Deletes all but the last symbolic part of the OID:<br />
+      <dd>Display the MIB object name (plus any instance or other subidentifiers):<br />
       sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63</dd>
 
       <dt><b>-OS</b></dt>
 
-      <dd>A variation on <b>-Os</b> that adds the name of the MIB that defined the object:<br />
-      SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63<br />
-      (from release 5.0, this is now the default output format)</dd>
+      <dd>Display the name of the MIB, as well as the object name:<br />
+      SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63</dd>
 
-      <dt><b>-Ou</b></dt>
+      <dd>This is the default OID output format.</dd>
 
-      <dd>Prints the OID in the UCD-style (inherited from the original CMU code), That means removing a series of "standard"
-      prefixes, if relevant, and breaking down the OID into the displayable pieces. For example, the OID
-      vacmSecruityModel.0.3.119.101.115 is broken down by default and the string hidden in the OID is shown. The result would
-      look like: vacmSecurityModel.0."test". The -Ob option disables this feature.<br />
-      system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63</dd>
+      <dt><b>-Ot</b></dt>
 
-      <dt><b>-On</b></dt>
-
-      <dd>Prints the OID numerically:<br />
-      <br />
-       .1.3.6.1.2.1.1.3.0 = Timeticks: (14096763) 1 day, 15:09:27.63</dd>
-
-      <dt><b>-Oe</b></dt>
-
-      <dd>Removes the symbolic labels from enumerations:<br />
-      snmpget -c public -v 1 localhost ip.ipForwarding.0<br />
-      ip.ipForwarding.0 = INTEGER: <a href="forwarding.html">forwarding</a>(1)<br />
-      snmpget -c public -v 1 -Oe localhost ip.ipForwarding.0<br />
-      ip.ipForwarding.0 = INTEGER: 1</dd>
-
-      <dt><b>-Ob</b></dt>
-
-      <dd>When OIDs contain a index to a table, they are broken into the displayable pieces and shown to you. For example the OID
-      vacmSecurityModel.0.3.119.101.115 is nicely broken down by default and the string hidden in the OID is shown to you as
-      vacmSecurityModel.0."wes". The <b>-Ob</b> option disables this feature and displays it as vacmSecurityModel.0.3.119.101.115
-      again.</dd>
-
-      <dt><b>-OE</b></dt>
-
-      <dd>This modifies the index strings to include a \ to escape the quotes, to allow them to be reused in shell commands, such
-      as vacmSecurityModel.0.\"wes\"</dd>
-
-      <dt><b>-OX</b></dt>
-
-      <dd>This modifies the output of index OIDs, to look more "program like". Square brackets are placed around each index, and
-      the DISPLAY-HINT information and string conversions are used to format each index. If you take an entry from the
-      IPV6-MIB::ipv6RouteTable, it is indexed with an IPv6 address and two integers, and if you are used to IPv6 addresses you
-      will know that decimal OIDs are not the preferred notation. Compare:<br />
-      snmpgetnext -OS host IPV6-MIB:ipv6RouteTable<br />
-      IPV6-MIB::ipv6RouteIfIndex.63.254.1.0.255.0.0.0.0.0.0.0.0.0.0.0.64.1 = INTEGER: 2<br />
-      snmpgetnext -OSX host IPV6-MIB:ipv6RouteTable<br />
-      IPV6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = INTEGER: 2</dd>
-
-      <dt><b>-Oa</b></dt>
-
-      <dd>If a string-valued object definition does not include a Display Hint, then the library attempts to determine whether it
-      is an ascii or binary string, and displays the value accordingly. This flag bypasses this check, and displays all strings
-      as ASCII. Note that this does not affect objects that do have a Display Hint.</dd>
-
-      <dt><b>-Ox</b></dt>
-
-      <dd>This works similarly to '-Oa', but displays strings as Hex.</dd>
+      <dd>Display TimeTicks values as raw numbers:<br />
+      SNMPv2-MIB::sysUpTime.0 = 14096763</dd>
 
       <dt><b>-OT</b></dt>
 
-      <dd>If hexadecimal code is printed, this will also print any printable characters after the hexadecimal codes.</dd>
+      <dd>If values are printed as Hex strings, display a printable version as well.</dd>
 
-      <dt><b>-Ov</b></dt>
+      <dt><b>-Ou</b></dt>
 
-      <dd>Output only the variable value, not the OID:<br />
-      snmpget -c public -v 1 -Ov localhost ip.ipForwarding.0<br />
-      INTEGER: <a href="forwarding.html">forwarding</a>(1)</dd>
+      <dd>Display the OID in the traditional UCD-style (inherited from the original CMU code). That means removing a series of
+      "standard" prefixes from the OID, and displaying the remaining list of MIB object names (plus any other
+      subidentifiers):<br />
+      system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63</dd>
 
       <dt><b>-OU</b></dt>
 
       <dd>Do not print the UNITS suffix at the end of the value.</dd>
 
-      <dt><b>-Ot</b></dt>
+      <dt><b>-Ov</b></dt>
 
-      <dd>Output timeticks values as raw numbers:<br />
-      system.sysUpTime.0 = 14096763</dd>
+      <dd>
+        Display the varbind value only, not the OID:
+
+        <dl compact="compact">
+          <dd>
+            <pre>
+    $ snmpget -c public -v 1 <b>-Oe</b> localhost ipForwarding.0
+    INTEGER: <a href="forwarding.html">forwarding</a>(1)
+</pre>
+          </dd>
+        </dl>
+      </dd>
+
+      <dt><b>-Ox</b></dt>
+
+      <dd>
+        Display string values as Hex strings (unless there is a DISPLAY-HINT defined for the corresponding MIB object). By
+        default, the library attempts to determine whether the value is a printable or binary string, and displays it
+        accordingly.
+
+        <p>This option does not affect objects that <i>do</i> have a Display Hint.</p>
+      </dd>
+
+      <dt><b>-OX</b></dt>
+
+      <dd>
+        Display table indexes in a more "program like" output, imitating a traditional array-style index format:
+
+        <dl compact="compact">
+          <dd>
+            <pre>
+    $ snmpgetnext -c public -v 1 localhost ipv6RouteTable
+    IPv6-MIB::ipv6RouteIfIndex.63.254.1.0.255.0.0.0.0.0.0.0.0.0.0.0.64.1 = INTEGER: 2
+    $ snmpgetnext -c public -v 1 <b>-OE</b> localhost ipv6RouteTable
+    IPv6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = INTEGER: 2
+</pre>
+          </dd>
+        </dl>
+      </dd>
     </dl>
 
-    <p>Note that most of these options can be turned on or off by default by tuning the <i>snmp.conf file.</i> See the
-    <i><a href="snmp.conf.html">snmp.conf</a>(5)</i> manual page for details.</p>
+    <p>Most of these options can also be configured via configuration tokens. See the <i><a href=
+    "snmp.conf.html">snmp.conf</a>(5)</i> manual page for details.</p>
 
     <p><a name="lbAI" id="lbAI"> </a></p>
 
@@ -514,82 +592,100 @@
 
     <p><a name="lbAJ" id="lbAJ"> </a></p>
 
-    <h2>INPUT OPTIONS</h2>The <b>-I</b> flag specifies various options that control how your input to the program is parsed. By
-    default, all input parsing methods are used: First the OID is parsed regularly, then <b>-IR</b> is used, then <b>-Ib</b> is
-    used, unless one of the following flags is specified which will force it to only use one method.
+    <h2>INPUT OPTIONS</h2>The interpretation of input object names and the values to be assigned can be controlled using various
+    parameters of the <b>-I</b> flag. The default behaviour will be described at the end of this section.
 
     <dl compact="compact">
-      <dt><b>-IR</b></dt>
-
-      <dd>The <b>-IR</b> flag specifies random access lookup, so that if the entire OID path is not specified, it will search for
-      a node in the MIB tree with the given name. Normally, you would have to specify the vacmSecurityModel OID above as
-      .iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmSecurityToGroupTable.vacmSecurityToGroupEntry.vacmSecurityModel.0."wes",
-      but the use of the <b>-IR</b> flag allows you to shorten that to just vacmSecurityModel.0."wes". (Though this OID really
-      needs to be quoted - 'vacmSecurityModel.0."wes"' - to prevent the shell from swallowing the double quotes).</dd>
-
-      <dd>Additionally, see the <b>RANDOM ACCESS MIBS</b> section below.</dd>
-
       <dt><b>-Ib</b></dt>
 
-      <dd>The <b>-Ib</b> flag indicates that the expression you gave it is actually a regular expression that should be used to
-      search for the best match possible in the MIB tree. This would allow you to specify the node vacmSecurityModel MIB node as
-      something as generic as vacmsecuritymodel (since case insensitive searches are done) or vacm.*model. Note that multiple
-      matches are obviously possible (.* matches everything), and the best result is currently calculated as the one that matches
-      the closest to the beginning of the node name and the highest in the tree. A current side effect of this option is that you
-      cannot specify indexes or multiple nodes, since the '.' is treated as part of the regular expression.</dd>
+      <dd>
+        specifies that the given name should be regarded as a regular expression, to match (case-insensitively) against object
+        names in the MIB tree. The "best" match will be used - calculated as the one that matches the closest to the beginning of
+        the node name and the highest in the tree. For example, the MIB object vacmSecurityModel could be matched by the
+        expression vacmsecuritymodel (full name, but different case), or vacm.*model (regexp pattern).
 
-      <dt><b>-Iu</b></dt>
-
-      <dd>Use the traditional UCD-style input approach of assuming that OIDs are rooted at the 'mib-2' point in the tree (unless
-      they start with an explicit '.') If random access lookup is in effect (which is the default for most commands), then this
-      will only affect OIDs specified with a leading numberic subidentifier (and no initial '.') Thus an input of "snmpcmd ... 1"
-      would refer to 'iso' (from v5.0 onwards) while "snmpcmd -Iu ... 1" would refer to 'system'.</dd>
-
-      <dt><b>-Ir</b></dt>
-
-      <dd>By default, indices into tables and values to be assigned to objects are checked against range and type specified in
-      the MIB. The <b>-Ir</b> flag disables this check. This flag is mostly useful when you are testing an agent. For normal
-      operation it is useful to get your requests checked before they are sent to the remote agent (the diagnostic that the
-      library can provide is also much more precise).</dd>
+        <p>Note that '.' is a special character in regular expression patterns, so the expression cannot specify instance
+        subidentifiers or more than one object name. A "best match" expression will only be applied against single MIB object
+        names. For example, the expression <i>sys*ontact.0</i> would not match the instance sysContact.0 (although
+        <i>sys*ontact</i> would match sysContact). Similarly, specifying a MIB module name will not succeed (so
+        <i>SNMPv2-MIB::sys.*ontact</i> would not match either).</p>
+      </dd>
 
       <dt><b>-Ih</b></dt>
 
-      <dd>By default, the library will use DISPLAY-HINT information when assigning values. This flag disables this behaviour. The
-      result is that instead of<br />
-      snmpset localhost HOST-RESOURCES-MIB::hrSystemDate.0 = 2002-12-10,2:4:6.8<br />
-      you will have to write<br />
-      snmpset localhost HOST-RESOURCES-MIB::hrSystemData.0 x "07 D2 0C 0A 02 04 06 08"</dd>
+      <dd>disables the use of DISPLAY-HINT information when assigning values. This would then require providing the raw
+      value:<br />
+      snmpset ... HOST-RESOURCES-MIB::hrSystemData.0<br />
+      <br />
+                          x "07 D2 0C 0A 02 04 06 08"<br />
+      instead of a formatted version:<br />
+      snmpset ... HOST-RESOURCES-MIB::hrSystemDate.0<br />
+      <br />
+                          = 2002-12-10,2:4:6.8</dd>
+
+      <dt><b>-Ir</b></dt>
+
+      <dd>disables checking table indexes and the value to be assigned against the relevant MIB definitions. This will
+      (hopefully) result in the remote agent reporting an invalid request, rather than checking (and rejecting) this before it is
+      sent to the remote agent.<br />
+        Local checks are more efficient (and the diagnostics provided also tend to be more precise), but disabling this behaviour
+      is particularly useful when testing the remote agent.</dd>
+
+      <dt><b>-IR</b></dt>
+
+      <dd>
+        enables "random access" lookup of MIB names. Rather than providing a full OID path to the desired MIB object (or
+        qualifying this object with an explicit MIB module name), the MIB tree will be searched for the matching object name.
+        Thus .iso.org.dod.internet.mib-2.system.sysDescr.0 (or SNMPv2-MIB::sysDescr.0) can be specified simply as sysDescr.0.
+
+        <dl compact="compact">
+          <dd>
+            <dl compact="compact">
+              <dt>Warning:</dt>
+
+              <dd>Since MIB object names are not globally unique, this approach may return a different MIB object depending on
+              which MIB files have been loaded.</dd>
+            </dl>
+          </dd>
+        </dl>
+      </dd>
+
+      <dd>The <i>MIB-MODULE::objectName</i> syntax has the advantage of uniquely identifying a particular MIB object, as well as
+      being slightly more efficient (and automatically loading the necessary MIB file if necessary).</dd>
 
       <dt><b>-Is SUFFIX</b></dt>
 
-      <dd>Add the specified suffix to each textual OID given on the command line. It is useful to specify a common index value
-      when you want to retrieve multiple objects from the same row of a table.</dd>
+      <dd>adds the specified suffix to each textual OID given on the command line. This can be used to retrieve multiple objects
+      from the same row of a table, by specifying a common index value.</dd>
 
       <dt><b>-IS PREFIX</b></dt>
 
-      <dd>Add the specified prefix to each textual OID given on the command line. Useful to specify an explicit MIB module name
-      for all objects being retrieved (or for incurably lazy typists)</dd>
-    </dl><a name="lbAK" id="lbAK"> </a>
+      <dd>adds the specified prefix to each textual OID given on the command line. This can be used to specify an explicit MIB
+      module name for all objects being retrieved (or for incurably lazy typists).</dd>
 
-    <h2>RANDOM ACCESS MIBS</h2>In previous releases of the UCD-SNMP package (and if using the <b>-Iu</b> option), an object
-    identifier such as system.sysDescr.0 will be lookup in a single "well known" place, built into the SNMP library (or specified
-    by the PREFIX environment variable). The standard place is: .iso.org.dod.internet.mgmt.mib-2. The identifier may
-    alternatively be a complete object identifier, this is designated by a leading "dot" if using UCD-input style, and is the
-    first thing tried otherwise. To simplify the specification of object identifiers the library supports random access to the
-    identifiers in the MIBs. This is requested by the <b>-IR</b> option to the SNMP applications. Additionally, <b>-Os</b> prints
-    OIDs in this manner. Using this, system.sysDescr.0 may also be entered as sysDescr.0. To search only a single MIB for the
-    identifier (if it appears in more than one), specify it as SNMPv2-MIB::sysDescr.0. (use <b>-OS</b> to print output OIDs in
-    this manner, though this is the default as from v5.0). This notation will also ensure that the specified MIB is loaded, i.e.
-    it need not be mentioned in the <b>-m</b> option (or MIBS environment variable).
+      <dt><b>-Iu</b></dt>
 
-    <p><a name="lbAL" id="lbAL"> </a></p>
+      <dd>enables the traditional UCD-style approach to interpreting input OIDs. This assumes that OIDs are rooted at the 'mib-2'
+      point in the tree (unless they start with an explicit '.' or include a MIB module name). So the sysDescr instance above
+      would be referenced as system.sysDescr.0.</dd>
+    </dl>
+
+    <p>Object names specified with a leading '.' are always interpreted as "fully qualified" OIDs, listing the sequence of MIB
+    objects from the root of the MIB tree. Such objects and those qualified by an explicit MIB module name are unaffected by the
+    <b>-Ib</b>, <b>-IR</b> and <b>-Iu</b> flags.</p>
+
+    <p>Otherwise, if none of the above input options are specified, the default behaviour for a "relative" OID is to try and
+    interpret it as an (implicitly) fully qualified OID, then apply "random access" lookup (<b>-IR</b>), followed by "best match"
+    pattern matching (<b>-Ib</b>).</p>
+
+    <p><a name="lbAK" id="lbAK"> </a></p>
 
     <h2>ENVIRONMENT VARIABLES</h2>
 
     <dl compact="compact">
       <dt>PREFIX</dt>
 
-      <dd>The standard prefix for object identifiers (if using UCD-style output). Defaults to
+      <dd>The standard prefix for object identifiers (when using UCD-style output). Defaults to
       .iso.org.dod.internet.mgmt.mib-2</dd>
 
       <dt>MIBS</dt>
@@ -601,7 +697,7 @@
 
       <dd>The list of directories to search for MIBs. Defaults to /usr/local/share/snmp/mibs. Overridden by the <b>-M</b>
       option.</dd>
-    </dl><a name="lbAM" id="lbAM"> </a>
+    </dl><a name="lbAL" id="lbAL"> </a>
 
     <h2>FILES</h2>
 
@@ -615,7 +711,7 @@
       <dt>~/.snmp/snmp.conf</dt>
 
       <dd>Application configuration files. See <i><a href="snmp.conf.html">snmp.conf</a>(5)</i>.</dd>
-    </dl><a name="lbAN" id="lbAN"> </a>
+    </dl><a name="lbAM" id="lbAM"> </a>
 
     <h2>SEE ALSO</h2><a href="snmpget.html">snmpget</a>(1), <a href="snmpgetnext.html">snmpgetnext</a>(1), <a href=
     "snmpset.html">snmpset</a>(1), <a href="snmpbulkget.html">snmpbulkget</a>(1), <a href=
@@ -647,17 +743,15 @@
 
       <dt><a href="#lbAJ">INPUT OPTIONS</a></dt>
 
-      <dt><a href="#lbAK">RANDOM ACCESS MIBS</a></dt>
+      <dt><a href="#lbAK">ENVIRONMENT VARIABLES</a></dt>
 
-      <dt><a href="#lbAL">ENVIRONMENT VARIABLES</a></dt>
+      <dt><a href="#lbAL">FILES</a></dt>
 
-      <dt><a href="#lbAM">FILES</a></dt>
-
-      <dt><a href="#lbAN">SEE ALSO</a></dt>
+      <dt><a href="#lbAM">SEE ALSO</a></dt>
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 22:24:00 GMT, November 25, 2004
+    Time: 17:34:31 GMT, December 30, 2005
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

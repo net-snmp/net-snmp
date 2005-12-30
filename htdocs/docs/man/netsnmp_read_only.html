@@ -1,8 +1,8 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>read_only: make your handler read_only automatically</h1>Section: C Library Functions (3)<br />
-    Updated: 24 Nov 2004<br />
+    <h1>read_only: make your handler read_only automatically</h1>Section: net-snmp (3)<br />
+    Updated: 28 Dec 2005<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
     <a name="lbAB" id="lbAB"> </a>
@@ -26,9 +26,10 @@
 
     <h2>Detailed Description</h2>
 
-    <p>The only purpose of this handler is to return an appropriate error for any requests passed to it in a SET mode. Inserting
-    it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error conditions.
-    <a name="lbAE" id="lbAE"> </a></p>
+    <p>The only purpose of this handler is to return an appropriate error for any requests passed to it in a SET mode.</p>
+
+    <p>Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error
+    conditions. <a name="lbAE" id="lbAE"> </a></p>
 
     <h2>Function Documentation</h2>
 
@@ -36,8 +37,9 @@
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_read_only_handler (void)</h3>
 
-    <p>returns a read_only handler that can be injected into a given handler chain. Definition at line 32 of file
-    read_only.c.</p>
+    <p>returns a read_only handler that can be injected into a given handler chain.</p>
+
+    <p>Definition at line 28 of file read_only.c.</p>
 
     <p>References netsnmp_mib_handler_s::flags, netsnmp_create_handler(), and netsnmp_mib_handler.</p>
 
@@ -47,7 +49,9 @@
     <h3>void netsnmp_init_read_only_helper (void)</h3>
 
     <p>initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for
-    configuration file use. Definition at line 86 of file read_only.c.</p>
+    configuration file use.</p>
+
+    <p>Definition at line 80 of file read_only.c.</p>
 
     <p>References netsnmp_get_read_only_handler(), and netsnmp_register_handler_by_name().</p>
     <hr />
@@ -78,7 +82,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 22:24:01 GMT, November 25, 2004
+    Time: 17:34:33 GMT, December 30, 2005
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

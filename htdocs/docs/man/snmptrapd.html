@@ -14,7 +14,7 @@
     <h2>DESCRIPTION</h2><b>snmptrapd</b> is an SNMP application that receives and logs SNMP TRAP and INFORM messages.
 
     <p>Note: the default is to listen on UDP port 162 on all IPv4 interfaces. Since 162 is a privileged port, <b>snmptrapd</b>
-    must be typically be run as root. <a name="lbAE" id="lbAE"> </a></p>
+    must typically be run as root. <a name="lbAE" id="lbAE"> </a></p>
 
     <h2>OPTIONS</h2>
 
@@ -22,6 +22,10 @@
       <dt><b>-a</b></dt>
 
       <dd>Ignore authenticationFailure traps.</dd>
+
+      <dt><b>-A</b></dt>
+
+      <dd>Append to the log file rather than truncating it.</dd>
 
       <dt><b>-c</b> <i>FILE</i></dt>
 
@@ -41,7 +45,8 @@
 
       <dt><b>-e</b></dt>
 
-      <dd>Print event numbers (rising/falling alarm etc.).</dd>
+      <dd>Print event numbers (rising/falling alarm etc.) from the (obsolete) M2M-MIB.<br />
+      This functionality is being deprecated and will be removed in due course.</dd>
 
       <dt><b>-f</b></dt>
 
@@ -60,78 +65,65 @@
 
       <dd>Display a list of configuration file directives understood by the trap daemon and then exit.</dd>
 
-      <dt><b>-l</b> d|0-7</dt>
+      <dt><b>-I</b> <i>[-]INITLIST</i></dt>
 
-      <dd>Specifies the syslog facility to use when logging to syslog. 'd' means <b>LOG_DAEMON</b> and 0 through 7 mean
-      <b>LOG_LOCAL0</b> through <b>LOG_LOCAL7</b>. <b>LOG_LOCAL0</b> is the default.<br />
-      This option is being deprecated, and '-Ls FACILITY' should be used instead.</dd>
+      <dd>
+        Specifies which modules should (or should not) be initialized when the agent starts up. If the comma-separated
+        <i>INITLIST</i> is preceded with a '-', it is the list of modules that should <i>not</i> be started. <i>not</i> want to
+        be started. Otherwise, <i>INITLIST</i> Otherwise this is the list of the <i>only</i> modules that should be started.
+
+        <p>To get a list of compiled modules, run the agent with the arguments <i>-Dmib_init -H</i> (assuming debugging support
+        has been compiled in).</p>
+      </dd>
 
       <dt><b>-L[efos]</b></dt>
 
       <dd>Specify where logging output should be directed (standard error or output, to a file or via syslog). See LOGGING
-      OPTIONS in <a href="snmpcmd.html">snmpcmd</a>(1) for details.<br />
-      This option deprecates the <b>-l</b> <b>-o</b> <b>-P</b> and <b>-s</b> options.</dd>
+      OPTIONS in <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> for details.</dd>
 
       <dt><b>-m</b> <i>MIBLIST</i></dt>
 
       <dd>Specifies a colon separated list of MIB modules to load for this application. This overrides the environment variable
-      MIBS.</dd>
+      MIBS. See <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> for details.</dd>
 
       <dt><b>-M</b> <i>DIRLIST</i></dt>
 
-      <dd>Specifies a colon separated list of directories to search for MIBs. This overrides the environment variable
-      MIBDIRS.</dd>
+      <dd>Specifies a colon separated list of directories to search for MIBs. This overrides the environment variable MIBDIRS.
+      See <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> for details.</dd>
 
       <dt><b>-n</b></dt>
 
       <dd>Do not attempt to translate source addresses of incoming packets into hostnames.</dd>
 
-      <dt><b>-o</b> <i>FILE</i></dt>
-
-      <dd>Log formatted incoming traps to <i>FILE</i>. Upon receipt of a SIGHUP, the daemon will close and re-open the log file.
-      This feature is useful when rotating the log file with other utilities such as logrotate.<br />
-      This option is being deprecated, and '-Lf FILE' should be used instead.</dd>
-
       <dt><b>-p</b> <i>FILE</i></dt>
 
-      <dd>Save the process ID of the trap daemon in <i>FILE</i>.<br />
-      This option deprecates the <b>-u</b> option.</dd>
+      <dd>Save the process ID of the trap daemon in <i>FILE</i>.</dd>
 
-      <dt><b>-P</b></dt>
+      <dt><b>-O</b> <i>[abeEfnqQsStTuUvxX]</i></dt>
 
-      <dd>Print formatted incoming traps to stderr.<br />
-      This option is being deprecated, and '-Le' should be used instead.</dd>
-
-      <dt><b>-s</b></dt>
-
-      <dd>Log formatted incoming traps to syslog. These syslog messages are sent with a level of <b>LOG_WARNING</b> and facility
-      as determined by the <b>-l</b> flag (<b>LOG_LOCAL0</b> by default). This is the default unless the <b>-o</b>, <b>-P</b> or
-      <b>-L</b> flag is used.<br />
-      This option is being deprecated, and '-Ls FACILITY' should be used instead.</dd>
-
-      <dt><b>-S</b> d|0-7</dt>
-
-      <dd>Specifies the syslog facility to use when logging to syslog. See <b>-l</b> for details.<br />
-      This option is being deprecated, and '-Ls FACILITY' should be used instead.</dd>
+      <dd>Specifies how MIB objects and other output should be displayed. See the section <b>OUTPUT OPTIONS</b> in the
+      <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual page for details.</dd>
 
       <dt><b>-t</b></dt>
 
       <dd>Do not log traps to syslog. This disables logging to syslog. This is useful if you want the snmptrapd application to
       <b>only</b> run traphandle hooks and not to log any traps to any location.</dd>
 
-      <dt><b>-u</b> <i>FILE</i></dt>
-
-      <dd>Save the process ID of the trap daemon in <i>FILE</i>.<br />
-      This option is being deprecated, and '-p FILE' should be used instead.</dd>
-
       <dt><b>-v, --version</b></dt>
 
       <dd>Print version information for the trap daemon and then exit.</dd>
-    </dl>
 
-    <p>In addition, <b>snmptrapd</b> takes the same output formatting (<b>-O</b>) options as the other Net-SNMP commands. See the
-    section <b>OUTPUT OPTIONS</b> in the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual page. <a name="lbAF" id="lbAF">
-    </a></p>
+      <dt><b>-x</b> <i>ADDRESS</i></dt>
+
+      <dd>Connect to the AgentX master agent on the specified address, rather than the default '/var/agentx/master'. See
+      <i><a href="snmpd.html">snmpd</a>(8)</i> for details of the format of such addresses.</dd>
+
+      <dt><b>--</b><i>name=value</i></dt>
+
+      <dd>Allows to specify any token ("name") supported in the <i>snmptrapd.conf</i> file and sets its value to "value".
+      Overrides the corresponding token in the <i>snmptrapd.conf</i> file. See <i><a href=
+      "snmptrapd.conf.html">snmptrapd.conf</a>(5)</i> for the full list of tokens.</dd>
+    </dl><a name="lbAF" id="lbAF"> </a>
 
     <h2>FORMAT SPECIFICATIONS</h2>
 
@@ -144,63 +136,6 @@
           <dt><b>%%</b></dt>
 
           <dd>a literal %</dd>
-
-          <dt><b>%t</b></dt>
-
-          <dd>decimal number of seconds since the operating system's epoch (as returned by <i><a href=
-          "time.html">time</a>(2)</i>)</dd>
-
-          <dt><b>%y</b></dt>
-
-          <dd>current year on the local system</dd>
-
-          <dt><b>%m</b></dt>
-
-          <dd>current (numeric) month on the local system</dd>
-
-          <dt><b>%l</b></dt>
-
-          <dd>current day of month on the local system</dd>
-
-          <dt><b>%h</b></dt>
-
-          <dd>current hour on the local system</dd>
-
-          <dt><b>%j</b></dt>
-
-          <dd>current minute on the local system</dd>
-
-          <dt><b>%k</b></dt>
-
-          <dd>current second on the local system</dd>
-
-          <dt><b>%T</b></dt>
-
-          <dd>the value of the sysUpTime.0 varbind in seconds</dd>
-
-          <dt><b>%Y</b></dt>
-
-          <dd>the year field from the sysUpTime.0 varbind</dd>
-
-          <dt><b>%M</b></dt>
-
-          <dd>the numeric month field from the sysUpTime.0 varbind</dd>
-
-          <dt><b>%L</b></dt>
-
-          <dd>the day of month field from the sysUpTime.0 varbind</dd>
-
-          <dt><b>%H</b></dt>
-
-          <dd>the hour field from the sysUpTime.0 varbind</dd>
-
-          <dt><b>%J</b></dt>
-
-          <dd>the minute field from the sysUpTime.0 varbind</dd>
-
-          <dt><b>%K</b></dt>
-
-          <dd>the seconds field from the sysUpTime.0 varbind</dd>
 
           <dt><b>%a</b></dt>
 
@@ -219,17 +154,49 @@
 
           <dd>PDU source hostname if available, otherwise PDU source address (see note above)</dd>
 
+          <dt><b>%h</b></dt>
+
+          <dd>current hour on the local system</dd>
+
+          <dt><b>%H</b></dt>
+
+          <dd>the hour field from the sysUpTime.0 varbind</dd>
+
+          <dt><b>%j</b></dt>
+
+          <dd>current minute on the local system</dd>
+
+          <dt><b>%J</b></dt>
+
+          <dd>the minute field from the sysUpTime.0 varbind</dd>
+
+          <dt><b>%k</b></dt>
+
+          <dd>current second on the local system</dd>
+
+          <dt><b>%K</b></dt>
+
+          <dd>the seconds field from the sysUpTime.0 varbind</dd>
+
+          <dt><b>%l</b></dt>
+
+          <dd>current day of month on the local system</dd>
+
+          <dt><b>%L</b></dt>
+
+          <dd>the day of month field from the sysUpTime.0 varbind</dd>
+
+          <dt><b>%m</b></dt>
+
+          <dd>current (numeric) month on the local system</dd>
+
+          <dt><b>%M</b></dt>
+
+          <dd>the numeric month field from the sysUpTime.0 varbind</dd>
+
           <dt><b>%N</b></dt>
 
           <dd>enterprise string</dd>
-
-          <dt><b>%w</b></dt>
-
-          <dd>trap type (numeric, in decimal)</dd>
-
-          <dt><b>%W</b></dt>
-
-          <dd>trap description</dd>
 
           <dt><b>%q</b></dt>
 
@@ -239,21 +206,46 @@
 
           <dd>security information from the PDU (community name for v1/v2c, user and context for v3)</dd>
 
+          <dt><b>%t</b></dt>
+
+          <dd>decimal number of seconds since the operating system epoch (as returned by <i><a href=
+          "time.html">time</a>(2)</i>)</dd>
+
+          <dt><b>%T</b></dt>
+
+          <dd>the value of the sysUpTime.0 varbind in seconds</dd>
+
           <dt><b>%v</b></dt>
 
-          <dd>list of trap's variable-bindings. These will be separated by a tab, or by a comma and a blank if the alternate form
-          is requested See also %V</dd>
+          <dd>list of variable-bindings from the notification payload. These will be separated by a tab, or by a comma and a
+          blank if the alternate form is requested See also %V</dd>
 
           <dt><b>%V</b></dt>
 
           <dd>specifies the variable-bindings separator. This takes a sequence of characters, up to the next % (to embed a % in
           the string, use \%)</dd>
+
+          <dt><b>%w</b></dt>
+
+          <dd>trap type (numeric, in decimal)</dd>
+
+          <dt><b>%W</b></dt>
+
+          <dd>trap description</dd>
+
+          <dt><b>%y</b></dt>
+
+          <dd>current year on the local system</dd>
+
+          <dt><b>%Y</b></dt>
+
+          <dd>the year field from the sysUpTime.0 varbind</dd>
         </dl>
       </dd>
     </dl>
 
-    <p>In addition to these values, you may also specify an optional field width and precision, just as in <i><a href=
-    "printf.html">printf</a>(3)</i>, and a flag value. The following flags are legal:</p>
+    <p>In addition to these values, an optional field width and precision may also be specified , just as in <i><a href=
+    "printf.html">printf</a>(3)</i>, and a flag value. The following flags are supported:</p>
 
     <dl compact="compact">
       <dd>
@@ -273,10 +265,15 @@
       </dd>
     </dl>
 
-    <p>The "use alternate form" flag changes the behavior of some format flags. Normally, the fields that display time
-    information base it on the local timezone, but this flag tells them to use GMT instead. Also, the variable-binding list is
-    normally a tab-separated list, but this flag changes it to a comma-separated one. The alternate form for the uptime is
-    similar to "3 days, 0:14:34.65" <a name="lbAG" id="lbAG"> </a></p>
+    <p>The "use alternate form" flag changes the behavior of various format string sequences:</p>
+
+    <dl compact="compact">
+      <dd>Time information will be displayed based on GMT (rather than the local timezone)</dd>
+
+      <dd>The variable-bindings will be a comma-separated list (rather than a tab-separated one)</dd>
+
+      <dd>The system uptime will be broken down into a human-meaningful format (rather than being a simple integer)</dd>
+    </dl><a name="lbAG" id="lbAG"> </a>
 
     <h3>Examples:</h3>
 
@@ -349,7 +346,7 @@ snmptrapd -P -F "%#02.2h:%#02.2j TRAP%w.%q from %A\n"
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 22:24:02 GMT, November 25, 2004
+    Time: 17:34:34 GMT, December 30, 2005
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

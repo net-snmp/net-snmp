@@ -2,7 +2,7 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>SNMPD</h1>Section: Net-SNMP (8)<br />
-    Updated: 7 Feb 2002<br />
+    Updated: 23 Jun 2005<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
     <a name="lbAB" id="lbAB"> </a>
@@ -28,7 +28,9 @@
 
       <dt><b>-c</b> <i>FILE</i></dt>
 
-      <dd>Read <i>FILE</i> as a configuration file (or a comma-separated list of configuration files).</dd>
+      <dd>Read <i>FILE</i> as a configuration file (or a comma-separated list of configuration files). Note that the loaded file
+      will only understand snmpd.conf tokens, unless the configuration type is specified in the file as described in the
+      snmp_config man page under SWITCHING CONFIGURATION TYPES IN MID-FILE.</dd>
 
       <dt><b>-C</b></dt>
 
@@ -66,35 +68,37 @@
       <dt><b>-I</b> <i>[-]INITLIST</i></dt>
 
       <dd>
-        This option specifies which modules you do (or do not) want to be initialized when the agent starts up. If the
-        comma-separated <i>INITLIST</i> is preceded with a '-', it is the list of modules that you do <i>not</i> want to be
-        started. Otherwise, <i>INITLIST</i> is the list of modules to be started.
+        Specifies which modules should (or should not) be initialized when the agent starts up. If the comma-separated
+        <i>INITLIST</i> is preceded with a '-', it is the list of modules that should <i>not</i> be started. Otherwise this is
+        the list of the <i>only</i> modules that should be started.
 
-        <p>To get a list of compiled modules, run the agent with the arguments <i>-Dmib_init -H</i> (assumes you have debugging
-        support compiled in).</p>
+        <p>To get a list of compiled modules, run the agent with the arguments <i>-Dmib_init -H</i> (assuming debugging support
+        has been compiled in).</p>
       </dd>
-
-      <dt><b>-l</b> [<i>FILE</i>]</dt>
-
-      <dd>Log all output from the agent (including stdout and stderr) to <i>FILE</i>. If no filename is given, log to a default
-      file set at compile time (normally /var/log/snmpd.log).<br />
-      This option is being deprecated, and '-Lf FILE' should be used instead.</dd>
 
       <dt><b>-L[efos]</b></dt>
 
       <dd>Specify where logging output should be directed (standard error or output, to a file or via syslog). See LOGGING
-      OPTIONS in <a href="snmpcmd.html">snmpcmd</a>(5) for details.<br />
-      This option deprecates the <b>-l</b> <b>-s</b> and <b>-S</b> options.</dd>
+      OPTIONS in <a href="snmpcmd.html">snmpcmd</a>(5) for details.</dd>
+
+      <dt><b>-m</b> <i>MIBLIST</i></dt>
+
+      <dd>Specifies a colon separated list of MIB modules to load for this application. This overrides the environment variable
+      MIBS. See <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> for details.</dd>
+
+      <dt><b>-M</b> <i>DIRLIST</i></dt>
+
+      <dd>Specifies a colon separated list of directories to search for MIBs. This overrides the environment variable MIBDIRS.
+      See <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> for details.</dd>
+
+      <dt><b>-n</b> <i>NAME</i></dt>
+
+      <dd>Set an alternative application name (which will affect the configuration files loaded). By default this will be
+      <i>snmpd</i>, regardless of the name of the actual binary.</dd>
 
       <dt><b>-p</b> <i>FILE</i></dt>
 
-      <dd>Save the process ID of the daemon in <i>FILE</i>.<br />
-      This option deprecates the <b>-P</b> option.</dd>
-
-      <dt><b>-P</b> <i>FILE</i></dt>
-
-      <dd>Save the process ID of the daemon in <i>FILE</i>. This option is being deprecated, and '-p FILE' should be used
-      instead.</dd>
+      <dd>Save the process ID of the daemon in <i>FILE</i>.</dd>
 
       <dt><b>-q</b></dt>
 
@@ -105,20 +109,15 @@
       <dd>Do not require root access to run the daemon. Specifically, do not exit if files only accessible to root (such as
       /dev/kmem etc.) cannot be opened.</dd>
 
-      <dt><b>-s</b></dt>
-
-      <dd>Use syslog for logging.<br />
-      This option is being deprecated, and '-Ls FACILITY' should be used instead.</dd>
-
-      <dt><b>-S</b> d|0-7</dt>
-
-      <dd>Specifies the syslog facility to use when logging to syslog.<br />
-      This option is being deprecated, and '-Ls FACILITY' should be used instead.</dd>
-
       <dt><b>-u</b> <i>UID</i></dt>
 
       <dd>Change to the user ID <i>UID</i> (which can be given in numerical or textual form) after opening listening
       sockets.</dd>
+
+      <dt><b>-U</b></dt>
+
+      <dd>Instructs the agent to not remove its pid file (see the <b>-p</b> option) on shutdown. Overrides the leave_pidfile
+      token in the <i>snmpd.conf</i> file, see <i><a href="snmpd.conf.html">snmpd.conf</a>(5).</i></dd>
 
       <dt><b>-v, --version</b></dt>
 
@@ -137,11 +136,17 @@
       <dt><b>-X</b></dt>
 
       <dd>Run as an AgentX subagent rather than as an SNMP master agent.</dd>
+
+      <dt><b>--</b><i>name=value</i></dt>
+
+      <dd>Allows to specify any token ("name") supported in the <i>snmpd.conf</i> file and sets its value to "value". Overrides
+      the corresponding token in the <i>snmpd.conf</i> file. See <i><a href="snmpd.conf.html">snmpd.conf</a>(5)</i> for the full
+      list of tokens.</dd>
     </dl><a name="lbAF" id="lbAF"> </a>
 
-    <h2>LISTENING ADDRESSES</h2>By default, <b>snmpd</b> listens for incoming SNMP requests only on UDP port 161. However, it is
-    possible to modify this behaviour by specifying one or more listening addresses as arguments to <b>snmpd</b>. A listening
-    address takes the form:
+    <h2>LISTENING ADDRESSES</h2>By default, <b>snmpd</b> listens for incoming SNMP requests on UDP port 161 on all IPv4
+    interfaces. However, it is possible to modify this behaviour by specifying one or more listening addresses as arguments to
+    <b>snmpd</b>. A listening address takes the form:
 
     <dl compact="compact">
       <dd>[&lt;transport-specifier&gt;:]&lt;transport-address&gt;</dd>
@@ -158,7 +163,7 @@
 
           <dd><b>&lt;transport-address&gt; format</b></dd>
 
-          <dt>udp</dt>
+          <dt>udp <i>(default)</i></dt>
 
           <dd>hostname[:port] <i>or</i> IPv4-address[:port]</dd>
 
@@ -195,8 +200,8 @@
     <dl compact="compact">
       <dt><i>127.0.0.1:161</i></dt>
 
-      <dd>listen on UDP port 161, but only on the loopback interface. This prevents <b>snmpd</b> being queried remotely (which is
-      a bit pointless). The ":161" is redundant here since that is the default SNMP port in any case.</dd>
+      <dd>listen on UDP port 161, but only on the loopback interface. This prevents <b>snmpd</b> being queried remotely. The port
+      specification ":161" is not strictly necessary since that is the default SNMP port.</dd>
 
       <dt><i>TCP:1161</i></dt>
 
@@ -212,8 +217,8 @@
 
       <dt><i>/tmp/local-agent</i></dt>
 
-      <dd>identical to the previous specification, since the Unix domain is the default transport iff the first character of the
-      &lt;transport-address&gt; is a '/'.</dd>
+      <dd>is identical to the previous specification, since the Unix domain is assumed if the first character of the
+      &lt;transport-address&gt; is '/'.</dd>
 
       <dt><i>PVC:161</i></dt>
 
@@ -228,9 +233,7 @@
     <p>Note that not all the transport domains listed above will always be available; for instance, hosts with no IPv6 support
     will not be able to use udp6 transport addresses, and attempts to do so will result in the error "Error opening specified
     endpoint". Likewise, since AAL5 PVC support is only currently available on Linux, it will fail with the same error on other
-    platforms.</p>
-
-    <p><a name="lbAG" id="lbAG"> </a></p>
+    platforms. <a name="lbAG" id="lbAG"> </a></p>
 
     <h2>CONFIGURATION FILES</h2>
 
@@ -261,7 +264,8 @@
 
     <h2>SEE ALSO</h2>(in recommended reading order)
 
-    <p><a href="snmp.conf.html">snmp.conf</a>(5), <a href="snmpd.conf.html">snmpd.conf</a>(5)</p>
+    <p><a href="snmp_config.html">snmp_config</a>(5), <a href="snmp.conf.html">snmp.conf</a>(5), <a href=
+    "snmpd.conf.html">snmpd.conf</a>(5)</p>
     <hr />
     <a name="index" id="index"> </a>
 
@@ -284,7 +288,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 22:24:02 GMT, November 25, 2004
+    Time: 17:34:34 GMT, December 30, 2005
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

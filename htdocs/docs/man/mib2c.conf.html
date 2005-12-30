@@ -107,6 +107,10 @@
       <dd>repeat iterate over values a, b, c, d as assigned generically (ie, the values are taken straight from the list with no
       mib-expansion, etc).</dd>
 
+      <dt>@while expression@</dt>
+
+      <dd>repeat iterate over code until the expression is false</dd>
+
       <dt>@eval $VAR = expression@</dt>
 
       <dd>evaluates expression and assigns the results to $VAR. This is not a full perl eval, but sort of a "psuedo" eval useful
@@ -114,8 +118,8 @@
 
       <dt>@perleval STUFF@</dt>
 
-      <dd>evaluates STUFF directly in perl. Note that all mib2c variables interpereted within .conf files are in
-      $vars{NAME}.</dd>
+      <dd>evaluates STUFF directly in perl. Note that all mib2c variables interpereted within .conf files are in $vars{NAME} and
+      that a warning will be printed if STUFF does not return 0. (adding a</dd>
 
       <dt>@startperl@</dt>
 
@@ -130,8 +134,19 @@
 
       <dt>@if expression@</dt>
 
-      <dd>evaluates expression, and if expression is true processes contained part until appropriate @end@ is reached. If an
-      @else@ clause is found, it will be evaluated instead if expression isn't true.</dd>
+      <dd>evaluates expression, and if expression is true processes contained part until appropriate @end@ is reached. If the
+      expression is false, the next @elsif expression@ expression (if it exists) will be evaluated, until an expression is true.
+      If no such expression exists and an @else@ clause is found, it will be evaluated.</dd>
+
+      <dt>@ifconf file@</dt>
+
+      <dd>If the specified file can be found in the conf file search path, and if found processes contained part until an
+      appropriate @end@ is found. As with a regular @if expression@, @elsif expression@ and @else@ can be used.</dd>
+
+      <dt>@ifdir dir@</dt>
+
+      <dd>If the specified directory exists, process contained part until an appropriate @end@ is found. As with a regular @if
+      expression@, @elsif expression@ and @else@ can be used.</dd>
 
       <dt>@define NAME@</dt>
 
@@ -162,6 +177,10 @@
       <dt>@print STUFF@</dt>
 
       <dd>Prints stuff directly to the users screen (ie, not to where normal mib2c output goes)</dd>
+
+      <dt>@quit@</dt>
+
+      <dd>Bail out (silently)</dd>
 
       <dt>@exit@</dt>
 
@@ -329,7 +348,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 22:24:02 GMT, November 25, 2004
+    Time: 17:34:34 GMT, December 30, 2005
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

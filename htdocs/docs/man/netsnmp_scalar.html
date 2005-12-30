@@ -1,8 +1,8 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>scalar: process scalars easily.</h1>Section: C Library Functions (3)<br />
-    Updated: 24 Nov 2004<br />
+    <h1>scalar: process scalars easily.</h1>Section: net-snmp (3)<br />
+    Updated: 28 Dec 2005<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
     <a name="lbAB" id="lbAB"> </a>
@@ -30,7 +30,9 @@
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_scalar_handler (void)</h3>
 
     <p>Creates a scalar handler calling netsnmp_create_handler with a handler name defaulted to 'scalar' and access method,
-    netsnmp_scalar_helper_handler. <b>Parameters:</b></p>
+    netsnmp_scalar_helper_handler.</p>
+
+    <p><b>Parameters:</b></p>
 
     <dl compact="compact">
       <dd>
@@ -52,7 +54,7 @@
           </dd>
         </dl>
 
-        <p>Definition at line 51 of file scalar.c.</p>
+        <p>Definition at line 47 of file scalar.c.</p>
 
         <p>References netsnmp_create_handler().</p>
 
@@ -62,9 +64,10 @@
 
     <h3>int netsnmp_register_read_only_scalar (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
-    <p>This function registers a read only scalar helper handler. This function is very similar to netsnmp_register_scalar the
-    only addition is that the 'read_only' handler is injected into the handler chain prior to injecting the serialize handler and
-    registering reginfo.</p>
+    <p>This function registers a read only scalar helper handler.</p>
+
+    <p>This function is very similar to netsnmp_register_scalar the only addition is that the 'read_only' handler is injected
+    into the handler chain prior to injecting the serialize handler and registering reginfo.</p>
 
     <p><b>Parameters:</b></p>
 
@@ -90,7 +93,7 @@
       </dd>
     </dl>
 
-    <p>Definition at line 114 of file scalar.c.</p>
+    <p>Definition at line 110 of file scalar.c.</p>
 
     <p>References netsnmp_get_instance_handler(), netsnmp_get_read_only_handler(), netsnmp_get_scalar_handler(),
     netsnmp_handler_registration, netsnmp_inject_handler(), netsnmp_register_serialize(),
@@ -98,9 +101,11 @@
 
     <h3>int netsnmp_register_scalar (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
-    <p>This function registers a scalar helper handler. The registered OID, reginfo-&gt;rootoid, space is extended for the
-    instance subid using realloc() but the reginfo-&gt;rootoid_len length is not extended just yet. .This function subsequently
-    injects the instance, scalar, and serialize helper handlers before actually registering reginfo.</p>
+    <p>This function registers a scalar helper handler.</p>
+
+    <p>The registered OID, reginfo-&gt;rootoid, space is extended for the instance subid using realloc() but the
+    reginfo-&gt;rootoid_len length is not extended just yet. .This function subsequently injects the instance, scalar, and
+    serialize helper handlers before actually registering reginfo.</p>
 
     <p>Each handler is injected/pushed to the top of the handler chain list and will be processed last in first out, LIFO.</p>
 
@@ -128,7 +133,7 @@
       </dd>
     </dl>
 
-    <p>Definition at line 79 of file scalar.c.</p>
+    <p>Definition at line 75 of file scalar.c.</p>
 
     <p>References netsnmp_get_instance_handler(), netsnmp_get_scalar_handler(), netsnmp_handler_registration,
     netsnmp_inject_handler(), netsnmp_register_serialize(), netsnmp_handler_registration_s::rootoid, and
@@ -161,7 +166,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 22:24:01 GMT, November 25, 2004
+    Time: 17:34:33 GMT, December 30, 2005
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 
