@@ -11,8 +11,8 @@ There is also a quoting problem on AIX, so  you will need to fix the quotes
 in include/net-snmp/net-snmp-config.h after running configure. For example,
 change
 
-  #define CONFIGURE_OPTIONS ""'--disable-shared'""
+  #define CONFIGURE_OPTIONS &quot;&quot;'--disable-shared'&quot;&quot;
 
 to
 
-  #define CONFIGURE_OPTIONS "'--disable-shared'"
+  #define CONFIGURE_OPTIONS &quot;'--disable-shared'&quot;

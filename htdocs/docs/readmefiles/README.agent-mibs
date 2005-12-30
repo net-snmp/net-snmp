@@ -129,8 +129,8 @@ IF-MIB
  ifNumber.0                   U $2      ~3.2    O mibII/interfaces.c
  ifTableLastChange.0          ---
  ifTable (old)                U $2      ~3.5    O mibII/interfaces.c
- ifTable (new)                L         5.2+    M if-mib/ifXTable/*
- ifXTable                     L         5.2+    M if-mib/ifXTable/*
+ ifTable (new)                L         5.2     M if-mib/ifXTable/*
+ ifXTable                     L         5.2     M if-mib/ifXTable/*
  ifStackLastChange.0          ---
  ifStackTable                 ---
  ifTestTable                  ---
@@ -147,14 +147,14 @@ IP-MIB
  ip.*.0                       U $2      ~3.2    G mibII/ip.c
  icmp.*.0                     U $2      ~3.2    G mibII/icmp.c
 
- ipSystemStatsTable           L         5.2+    M ip-mib/=/*
+ ipSystemStatsTable           L         5.2     M ip-mib/=/*
  ipIfStatsTableLastChange.0   ---
  ipIfStatsTable               ---
 
  ipAddrTable (D)              U $2      4.2     O mibII/ipAddr.c
  ipAddressSpinLock.0          ---
- ipAddressTable               L         5.2+    M ip-mib/=/*
- ipAddressPrefixTable         ---
+ ipAddressTable               L         5.2     M ip-mib/=/*
+ ipAddressPrefixTable         L         5.3     M ip-mib/=/*
 
  ipRouteTable (D)             U $2      ~3.5    O mibII/*route*.c
  ipNetToMediaTable (D)        U $2      ~3.5    O mibII/at.c
@@ -166,13 +166,13 @@ IP-MIB
  icmpMsgStatsTable            ---
 
  ipv4InterfaceTableLastChange ---
- ipv4InterfaceTable           ---
+ ipv4InterfaceTable           L          5.3    M ip-mib/=/*
 
  ipv6InterfaceTableLastChange ---
- ipv6InterfaceTable           ---
+ ipv6InterfaceTable           L          5.3    M ip-mib/=/*
  ipv6RouterAdvertTable        ---
- ipv6IpForwarding.0           ---
- ipv6IpDefaultHopLimit.0      ---
+ ipv6IpForwarding.0           L          5.3    S ip-mib/ip_scalars.c
+ ipv6IpDefaultHopLimit.0      L          5.3    S ip-mib/ip_scalars.c
  ipv6RouterAdvertSpinLock.0   ---
  ipv6ScopeZoneIndexTable      ---
 
@@ -206,20 +206,20 @@ IPV6-ICMP-MIB
 IP-FORWARD-MIB
  ipForward.*.0                ---
  ipForwardTable (D)           ---
- ipCidrRouteTable (D)(new)    L         5.2+    A mibII/=
- ipCidrRouteTable (D)(newer)  L         5.2+    M ip-forward-mib/=/*
- inetCidrRouteTable           L         5.2+    M ip-forward-mib/=/*
+ ipCidrRouteTable (D)(new)    L         5.2     A mibII/=
+ ipCidrRouteTable (D)(newer)  L         5.2     M ip-forward-mib/=/*
+ inetCidrRouteTable           L         5.2     M ip-forward-mib/=/*
 
 ------------------------------------------------------------------------------
 TCP-MIB
  tcp.*.0                      U $2      ~3.2    G mibII/tcp.c
  tcpConnTable (D)             U $2      4.2     I mibII/tcpTable.c
- tcpConnectionTable           ---
- tcpListenerTable             ---
+ tcpConnectionTable           L         5.3     M tcp-mib/=/*
+ tcpListenerTable             L         5.3     M tcp-mib/=/*
 
 ------------------------------------------------------------------------------
 UDP-MIB
- udpEndpointTable             ---
+ udpEndpointTable             L         5.3     M udp-mib/=/*
  udp.*.0                      U $2      ~3.2    G mibII/udp.c
  udpTable (D)                 U $2      4.2     I mibII/udpTable.c
 
@@ -283,8 +283,8 @@ DISMAN-EVENT-MIB
 
 ------------------------------------------------------------------------------
 DISMAN-SCHEDULE-MIB
- schedLocalTime.0            ---
- schedTable                  ---
+ schedLocalTime.0             A         5.3     D disman/schedule/=
+ schedTable                   A         5.3     D disman/schedule/=
 
 ------------------------------------------------------------------------------
 DISMAN-EXPRESSION-MIB (expired ID)
@@ -324,6 +324,13 @@ AGENTX-MIB
  *                            ---
 
 ------------------------------------------------------------------------------
+LM-SENSORS-MIB
+ lmTempSensorsTable           LS        5.0     O ucd-snmp/lmSensors.c
+ lmFanSensorsTable            LS        5.0     O ucd-snmp/lmSensors.c
+ lmVoltSensorsTable           LS        5.0     O ucd-snmp/lmSensors.c
+ lmMiscSensorsTable           LS        5.0     O ucd-snmp/lmSensors.c
+
+------------------------------------------------------------------------------
 UCD-SNMP-MIB
  prTable                      U $       ~3.2    O ucd-snmp/proc.c
  memory.*.0                   U         ~3.2    O ucd-snmp/memory*.c
@@ -335,14 +342,10 @@ UCD-SNMP-MIB
  ipFwAccTable                 U         3.5     O misc/ipfwacc.c
  dlModTable                   U         4.2     O ucd-snmp/dlmod.c
  diskIOTable                  U         4.1     O ucd-snmp/diskio.c
- lmSensorsTable               LS        5.0     O ucd-snmp/lmSensors.c
- lmFanSensorsTable            LS        5.0     O ucd-snmp/lmSensors.c
- lmVoltSensorsTable           LS        5.0     O ucd-snmp/lmSensors.c
- lmMiscSensorsTable           LS        5.0     O ucd-snmp/lmSensors.c
  ucdDemoMIBObjects            A         ~3.5    O examples/ucdDemoPublic.c
  logMatch                     U         ~3.5    O ucd-snmp/logmatch.c
  version.*.0                  A         ~3.2    O ucd-snmp/versioninfo.c
- snmperrs.*.0                 A         ~3.5+   O ucd-snmp/errormib.c
+ snmperrs.*.0                 A         ~3.5    O ucd-snmp/errormib.c
  mrTable (D)                  ---
 
 ------------------------------------------------------------------------------
@@ -362,7 +365,7 @@ NET-SNMP-AGENT-MIB
  nsTransactionTable           A         5.0     I agent/nsTransactionTable.c
  netSnmpExampleScalars        A         5.0     O 
  netSnmpIETFWGTable           A         5.0     D examples/data_set.c
- netSnmpHostsTable            A         5.0     A exampes/=*
+ netSnmpHostsTable            A         5.0     A examples/=*
  nstAgentModules              A         5.0     O 
 
 ------------------------------------------------------------------------------
@@ -402,7 +405,10 @@ Misc notes
 
 Other feature info
 ------------------
- AgentX                           4.0
- proxy support                    4.2
- override toekn                   5.0
- smux                             3.2
+ smux                                     3.2
+ AgentX                                   4.0
+ proxy support                            4.2
+ override token                           5.0
+ proper context support                   5.2
+ DISMAN-EVENT-MIB implementation rewrite  5.3
+ AgentX, host, disman/event by default    5.3

@@ -43,7 +43,7 @@ this is the work of several authors, credit is given.
 Discussion, however, should take place on the net-snmp-users
 or net-snmp-coders mailing lists so everybody can
 benefit.  See http://sourceforge.net/mail/?group_id=12694 .
-Use "net-snmp-users" for general usage questions and "net-snmp-coders" for
+Use &quot;net-snmp-users&quot; for general usage questions and &quot;net-snmp-coders&quot; for
 discussion of net-snmp source code.  
 
 No warranty is implied by this document.
@@ -99,7 +99,7 @@ binaries (see sections 4 and 5).
 
 If some other SNMP daemon is running, you will need to determine
 where it came from and what it's being used for.  You get clues by
-typing "snmpd -v" or "snmpd --help".  In some cases it may be
+typing &quot;snmpd -v&quot; or &quot;snmpd --help&quot;.  In some cases it may be
 a subagent or agent from another application, such as ORACLE.  If
 you disable its agent, you will need to re-create this functionality
 under net-snmp (eg. by running it as a sub-agent).  ORACLE's SNMP
@@ -121,7 +121,7 @@ D.  A compilation environment
    (note, the cc in /usr/ucb is NOT a full-blown compiler)
 -OpenSSL (sunfreeware.com or source www.openssl.org)
 -zlib (sunfreeware.com or source www.gzip.org/zlib/)
--an SNMP community string ("public" is deprecated)
+-an SNMP community string (&quot;public&quot; is deprecated)
 
 If you are installing on a development machine, it may be best
 to compile openssl and zlib from source, otherwise
@@ -184,7 +184,7 @@ Here's an example:
 #
 X=`which pkill`
 
-case "$1" in
+case &quot;$1&quot; in
 'start')
         /usr/local/sbin/snmpd 
         ;;
@@ -194,7 +194,7 @@ case "$1" in
         ;;
 
 *)
-        echo "Usage: $0 { start | stop }"
+        echo &quot;Usage: $0 { start | stop }&quot;
         exit 1
         ;;
 esac
@@ -234,14 +234,14 @@ Uncompress it and untar it in a working directory eg. /usr/local/src/net-snmp
 Note:  Sun's tar (/usr/bin/tar) may have problem with long directory
 paths.  You may need to install gnu tar available from www.sunfreeware.com.
 
-In order to save a lot of typing, you should create a "configure" 
+In order to save a lot of typing, you should create a &quot;configure&quot; 
 script eg. bcc.sh in the directory below eg. /usr/local/src.
 
-   ./configure --with-mib-modules="host disman/event-mib ucd-snmp/diskio \
-      smux agentx mibII/mta_sendmail" --with-cc=gcc
+   ./configure --with-mib-modules=&quot;host disman/event-mib ucd-snmp/diskio \
+      smux agentx mibII/mta_sendmail&quot; --with-cc=gcc
 
 (note, see the long discussion about Perl below)
-(note, subtitute "cc" for "gcc" as appropriate)
+(note, subtitute &quot;cc&quot; for &quot;gcc&quot; as appropriate)
 (note, if you wish to use the new LM-SENSORS-MIB component, see
 discussion below)
 
@@ -327,16 +327,16 @@ SunOS foo 5.8 Generic_108528-14 sun4u sparc SUNW,Ultra-4
 5.8 means Solaris 8
 5.7 means Solaris 7  etc.
 
-"sun4u" is the Ultra hardware platform
-"sun4m" is SuperSPARC  eg. Sparc 5 or Sparc 10
-"sun4d" is older SPARC boxes.  
+&quot;sun4u&quot; is the Ultra hardware platform
+&quot;sun4m&quot; is SuperSPARC  eg. Sparc 5 or Sparc 10
+&quot;sun4d&quot; is older SPARC boxes.  
 
 You can then decode the binary version by its name eg.:
 
 net-snmp_5.0.9-SunOS_5.8_sun4u.tar.gz
 
-means "net-snmp version 5.0.9 for Solaris version 5.8 running on Ultra
-hardware".
+means &quot;net-snmp version 5.0.9 for Solaris version 5.8 running on Ultra
+hardware&quot;.
 
 Once you have found the appropriate version, download it to a
 distribution directory (making one if necessary) eg. /usr/local/dist
@@ -372,8 +372,8 @@ the defaults, place the resulting snmpd.conf file in:
 
 /usr/local/share/snmp/snmpd.conf
 
-A security note - use of the "public" community is deprecated.
-This example uses "whatever" as a community.
+A security note - use of the &quot;public&quot; community is deprecated.
+This example uses &quot;whatever&quot; as a community.
 
 When you have the daemon running either with the script above or running:
 
@@ -422,8 +422,8 @@ but this will be extremely verbose.
 
 Pick an appropriate name for a tarfile 
 eg. net-snmp-5.2.custom-SunOS_5.8_sun4u.tar (see above)
-(this particular one means "a customized version of
-net-snmp 5.2 that works under Solaris 8 running on Ultra hardware")
+(this particular one means &quot;a customized version of
+net-snmp 5.2 that works under Solaris 8 running on Ultra hardware&quot;)
 
 Create an empty directory such as /usr/local/dist, then do the following
 from the source directory (using the example above):
@@ -477,7 +477,7 @@ modify snmpd.conf with the correct:
    syscontact
    sysLocation
    system-group-read-community
-   read-community (in my example below I will use community "whatever")
+   read-community (in my example below I will use community &quot;whatever&quot;)
    trap 
    trap-community
    managers (leave blank for all)
@@ -493,7 +493,7 @@ Make sure that in snmpdx.reg the port is 161.
 
 You will now need to add two files - net-snmp.reg and net-snmp.rscs
 
-In this example, "subtrees" is set for HOST-RESOURCES-MIB, and UCD-SNMP-MIB.
+In this example, &quot;subtrees&quot; is set for HOST-RESOURCES-MIB, and UCD-SNMP-MIB.
 Do not use net-snmp's MIB-2 information as this is already provided by 
 Sun's mib and may cause a conflict.
 
@@ -510,7 +510,7 @@ Sun's mib and may cause a conflict.
 agents =
 {
         {
-                 name = "net-snmp"
+                 name = &quot;net-snmp&quot;
                  subtrees = { 1.3.6.1.2.1.25,1.3.6.1.4.1.2021 } # hostmib, ucd
                  timeout = 2000000
                  watch-dog-time = 86400
@@ -526,10 +526,10 @@ agents =
 resource =
 {
         {
-   registration_file = "/etc/snmp/conf/net-snmp.reg"
-   policy = "spawn"
-   type = "legacy"
-   command = "/usr/local/sbin/snmpd -p $PORT"  
+                registration_file = &quot;/etc/snmp/conf/net-snmp.reg&quot;
+                policy = &quot;spawn&quot;
+                type = &quot;legacy&quot;
+                command = &quot;/usr/local/sbin/snmpd $PORT&quot;  
       }
  
 }
@@ -590,7 +590,7 @@ http://www.net-snmp.org/man/snmpd.conf.html
 
 To use this compoenent, net-snmp must be compiled with the option..
 
---with-mib-modules="disman/event-mib"
+--with-mib-modules=&quot;disman/event-mib&quot;
 
 This discussion concerns the use of DISMAN-EVENT-MIB with Solaris.
 
@@ -607,7 +607,7 @@ has not been tested.  Your mileage may vary.  Same with includeAllDisks.
 
 The documentation suggests using...
 
-monitor -o prNames -o prErrMessage "process table" prErrorFlag != 0
+monitor -o prNames -o prErrMessage &quot;process table&quot; prErrorFlag != 0
 
 to monitor all processes.  This will fail with ambiguous results.
 
@@ -618,8 +618,8 @@ For example:
 proc smail
 proc mdlogd
 
-monitor -r 30 -i -o prNames.1 -o prErrMessage.1 "Process smail" prErrorFlag.1 !=0
-monitor -r 30 -i -o prNames.2 -o prErrMessage.2 "Process Solstice Disksuite SNMP trap" prErrorFlag.2 !=0
+monitor -r 30 -i -o prNames.1 -o prErrMessage.1 &quot;Process smail&quot; prErrorFlag.1 !=0
+monitor -r 30 -i -o prNames.2 -o prErrMessage.2 &quot;Process Solstice Disksuite SNMP trap&quot; prErrorFlag.2 !=0
 
 To monitor disks, do the same.  An example:
 
@@ -630,8 +630,8 @@ han 90%
 disk / 10%
 disk /usr6 90%
 
-monitor -i -r 30 -o dskPath.1 -o dskErrorMsg.1 "root file system" dskErrorFlag.1 !=0
-monitor -i -r 30 -o dskPath.2 -o dskErrorMsg.2 "ORACLE file system" dskErrorFlag.2 != 0
+monitor -i -r 30 -o dskPath.1 -o dskErrorMsg.1 &quot;root file system&quot; dskErrorFlag.1 !=0
+monitor -i -r 30 -o dskPath.2 -o dskErrorMsg.2 &quot;ORACLE file system&quot; dskErrorFlag.2 != 0
 #########
 
 To implement an external program then monitor its results you need to set up your script.
@@ -663,11 +663,11 @@ exec tester3 /usr/local/src/tester3
 exec tester4 /usr/local/src/tester4
 exec tester5 /usr/local/src/tester5
 
-monitor -i -r 60 -o extNames.1 -o extOutput.1 "status table 1" extResult.1 != 0
-monitor -i -r 60 -o extNames.2 -o extOutput.2 "status table 2" extResult.2 != 0
-monitor -i -r 60 -o extNames.3 -o extOutput.3 "status table 3" extResult.3 != 0
-monitor -i -r 60 -o extNames.4 -o extOutput.4 "status table 4" extResult.4 != 0
-monitor -i -r 60 -o extNames.5 -o extOutput.5 "status table 5" extResult.5 != 0
+monitor -i -r 60 -o extNames.1 -o extOutput.1 &quot;status table 1&quot; extResult.1 != 0
+monitor -i -r 60 -o extNames.2 -o extOutput.2 &quot;status table 2&quot; extResult.2 != 0
+monitor -i -r 60 -o extNames.3 -o extOutput.3 &quot;status table 3&quot; extResult.3 != 0
+monitor -i -r 60 -o extNames.4 -o extOutput.4 &quot;status table 4&quot; extResult.4 != 0
+monitor -i -r 60 -o extNames.5 -o extOutput.5 &quot;status table 5&quot; extResult.5 != 0
 ##############
 
 While snmpd is running, go to /usr/local/src and modify one of the tester programs eg. tester1
@@ -691,9 +691,9 @@ The same methodology can presumably be used for fileName and laNames.  Your mile
 
 *********************************************************************************
 
-NOTE!!  This is a new and experimental module.  It should be considered "alpha"
+NOTE!!  This is a new and experimental module.  It should be considered &quot;alpha&quot;
 for this first release.  Use with caution as its impact on machine performance
-(ie. CPU usage) has yet to be determined.  The module works in "read only"
+(ie. CPU usage) has yet to be determined.  The module works in &quot;read only&quot;
 mode to examine sensors.  It cannot change switch or fan settings.
 
 It has been tested on the following platforms:
@@ -703,7 +703,7 @@ V880
 280R
 
 If you have information about other platforms this is desperately needed.  For 
-example, the only "state" that I'm aware of for an i2c is "OK".  The more
+example, the only &quot;state&quot; that I'm aware of for an i2c is &quot;OK&quot;.  The more
 information we have, the richer the components.
 
 Please report any performance statistics, bugs or omissions to the users list.
@@ -719,7 +719,7 @@ At present this is only supported on the Ultra (sun4u) platform.
 
 To display this information, net-snmp must be compiled with the option:
 
---with-mib-modules="ucd-snmp/lmSensors"
+--with-mib-modules=&quot;ucd-snmp/lmSensors&quot;
 
 Early Ultra servers such as the Ultra 1 or Ultra 2 did not report
 any sensor information at all.  Later servers, such as the Enterprise 450
@@ -969,7 +969,7 @@ compatible with SFIO's ftell(), fseek().
  [[ We have received reports that this approach does not in fact work 
 (see Perl discussion below)]]
 
-Finally, thanks to Phong Vo and AT&T Labs for a fast, robust and
+Finally, thanks to Phong Vo and AT&amp;T Labs for a fast, robust and
 portable package that solves this headache very neatly.
 
 -SEan &lt;burke_sp@pacbell.net&gt;
@@ -991,8 +991,8 @@ Solaris 8 and 9 ship with a version of Perl compiled using sun's cc.
 This causes a problem when attempting to compile net-snmp 
 with Perl functionality ie.:
 
-   ./configure --with-mib-modules="host disman/event-mib ucd-snmp/diskio \
-      smux agents mibII/mta_sendmail" --enable-shared --enable-embedded-perl
+   ./configure --with-mib-modules=&quot;host disman/event-mib ucd-snmp/diskio \
+      smux agents mibII/mta_sendmail&quot; --enable-shared --enable-embedded-perl
 
 because during the Perl section of the compile, it attempts to do so 
 using the methodology used to compile the original Perl, not
@@ -1126,7 +1126,7 @@ What suffix should be used for the main Perl5 man pages? [1]
 Where do the perl5 library man pages (source) go? (~name ok)
 [/usr/local/net-snmp/man/man3] 
 What suffix should be used for the perl5 library man pages? [3]
-Your host name appears to be "foo". Right? [y] 
+Your host name appears to be &quot;foo&quot;. Right? [y] 
 What is your domain name? [.bar.com]
 What is your e-mail address? [something.else@foo.bar.com] 
 Perl administrator e-mail address [something.else@foo.bar.com] 
@@ -1145,7 +1145,7 @@ Pathname where the site-specific library manual pages should be installed? (~nam
 [/usr/local/net-snmp/man/man3] 
 Pathname where add-on public executable scripts should be installed? (~name ok)
 [/usr/local/net-snmp/bin] 
-Use the "fast stdio" if available? [y]
+Use the &quot;fast stdio&quot; if available? [y]
 Try to understand large files, if available? [n]
 What is the extension of dynamically loaded modules [so] 
 Shall I ignore gethostname() from now on? [n] 
@@ -1166,7 +1166,7 @@ When it is finished, do:
 
    grep cppsymbols config.sh
 
-and make sure "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64" does NOT appear.
+and make sure &quot;-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64&quot; does NOT appear.
 
 Then do:
 
@@ -1194,8 +1194,8 @@ to make sure you get the correct version.
 Your configure invocation should be...
 
 ./configure --with-gnu-ld --enable-shared --enable-embedded-perl --disable-developer \
---with-mib-modules="host disman/event-mib ucd-snmp/diskio examples/example smux  \
-agentx mibII/mta_sendmail" --with-cc=gcc
+--with-mib-modules=&quot;host disman/event-mib ucd-snmp/diskio examples/example smux  \
+agentx mibII/mta_sendmail&quot; --with-cc=gcc
 
 Once you have compiled and installed net-snmp you should test its Perl 
 capabilities by doing the following:
@@ -1208,7 +1208,7 @@ to /usr/local/net-snmp
 
 and modify your /usr/local/share/snmp/snmpd.conf file to contain the entry:
 
-perl do "/usr/local/net-snmp/perl_module.pl"
+perl do &quot;/usr/local/net-snmp/perl_module.pl&quot;;
 
 then do:
 
@@ -1216,7 +1216,7 @@ then do:
 
 It should return the following:
 
-NET-SNMP-MIB::netSnmp.999.1.2.1 = STRING: "hello world"
+NET-SNMP-MIB::netSnmp.999.1.2.1 = STRING: &quot;hello world&quot;
 
 WARNING!!  If you are planning on created binary versions of net-snmp with Perl capability,
 you will also need to ship the Perl which you created in /usr/local/net-snmp.
@@ -1268,7 +1268,7 @@ Default configuration file (/var/ld/ld.config) not found
 
 Find the location of the libcrypto libraries by typing:
 
-find /usr -name "libcrypto*" -print
+find /usr -name &quot;libcrypto*&quot; -print
 
 which will probably display:
 

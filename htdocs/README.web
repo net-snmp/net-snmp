@@ -28,17 +28,21 @@ Updating Documentation / README Files
   text README file from /docs/readmefiles/
 
   To update existing README files, just copy the updated files to /docs/readmefiles/
+  and run html-textfile-fix.pl.
 
   To add a new README file:
 
   -copy file to /docs/readmefiles/
   -create a .html file in /docs/ which includes the README file
+  -add an entry to html-textfile-fix.pl
+  -run html-textfile-fix.pl
 
 
 Updating Documentation / FAQ
 ----------------------------
 
  -cd (source dir)
+ -./configure
  -make FAQ.html
  -local/html-add-header-footer.pl --section=documentation FAQ.html
  -copy FAQ.html to \docs\
@@ -47,7 +51,7 @@ Updating Documentation / FAQ
 Updating Documentation / INSTALL
 --------------------------------
 
-  Replace /docs/readmefiles/INSTALL with new text file from the source code.
+  Replace /docs/readmefiles/INSTALL with new text file from the source code and run html-textfile-fix.pl.
 
 
 Updating Documentation / Man pages

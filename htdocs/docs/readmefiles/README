@@ -1,10 +1,10 @@
-	       README file for net-snmp Version: 5.2.1
+	       README file for net-snmp Version: 5.3
 
 DISCLAIMER
 
   The Authors assume no responsibility for damage or loss of system
   performance as a direct or indirect result of the use of this
-  software.  This software is provided "as is" without express or
+  software.  This software is provided &quot;as is&quot; without express or
   implied warranty.
 
 TABLE OF CONTENTS
@@ -342,6 +342,7 @@ THANKS
     Marcus Meissner &lt;marcusmeissner@users.sourceforge.net&gt;
     Andrew Rucker Jones &lt;arjones@users.sourceforge.net&gt;
     Dai.H. &lt;dg-f@users.sourceforge.net&gt;
+    Thomas Anders &lt;tanders@users.sourceforge.net&gt;
 
   We've probably forgotten people on this list.  Let us know if you've
   contributed code and we've left you out.

@@ -31,7 +31,7 @@ Extensibility:
   AgentX	(reasonably stable now)
   SMUX		(?obsolete?)
   embedded Perl	(done? in hand?)
-     "   Python
+     &quot;   Python
   DisMan script MIB
   Extend scripts  (new, so will need to bed down)
   Pass scripts	(support SNMPv2 exceptions/errors)
@@ -40,7 +40,7 @@ Extensibility:
 Library:
   Threading
   Debugging	(heirarchical)
-  Config	(split syntax & processing, persist/read-only/etc)
+  Config	(split syntax &amp; processing, persist/read-only/etc)
   SecModels:
     Kerberos	(?done)
     SBSM	(?in hand)

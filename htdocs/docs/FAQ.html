@@ -142,11 +142,12 @@ Email: <a href="mailto:net-snmp-coders@lists.sourceforge.net">net-snmp-coders@li
 <li> <a href="#How_does_the_agent_fetch_the_value_of_a_MIB_variable_from_the_system_">How does the agent fetch the value of a MIB variable from the system?</a></li>
 <li> <a href="#Mib_c_complains_about_a_missing__mib_reference____what_does_this_mean_">Mib2c complains about a missing "mib reference" - what does this mean?</a></li>
 <li> <a href="#Mib_c_complains_about_not_having_a__valid_OID____what_does_this_mean_">Mib2c complains about not having a "valid OID" - what does this mean?</a></li>
-<li> <a href="#Why_doesn_t_Mib_c_like_the_MIB_file_I_m_giving_it_">Why doesn't Mib2c like the MIB file I'm giving it?</a></li>
+<li> <a href="#Why_doesn_t_mib_c_like_the_MIB_file_I_m_giving_it_">Why doesn't mib2c like the MIB file I'm giving it?</a></li>
 <li> <a href="#Mib_c_ignores_my_MIB_and_generates_a_pair_of__mib____code_files___Why_">Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?</a></li>
 <li> <a href="#Mib_c_complains_about__configuration_files___What_s_this_for_">Mib2c complains about "configuration files". What's this for?</a></li>
+<li> <a href="#What_s_the_difference_between_the_various_mib_c_configuration_files_">What's the difference between the various mib2c configuration files?</a></li>
 <li> <a href="#Which_mib_c_configuration_file_should_I_use_">Which mib2c configuration file should I use?</a></li>
-<li> <a href="#How_can_I_have_Mib_c_generate_code_for_both_scalars_and_tables_">How can I have Mib2c generate code for both scalars and tables?</a></li>
+<li> <a href="#How_can_I_have_mib_c_generate_code_for_both_scalars_and_tables_">How can I have mib2c generate code for both scalars and tables?</a></li>
 <li> <a href="#Are_there_any_examples__or_documentation_">Are there any examples, or documentation?</a></li>
 <li> <a href="#Where_should_I_put_the_files_produced_by__mib_c__">Where should I put the files produced by 'mib2c'?</a></li>
 <li> <a href="#I_ve_created_a_new_module_with__mib_c__but_it_doesn_t_work___Why_not_">I've created a new module with 'mib2c' but it doesn't work.  Why not?</a></li>
@@ -205,8 +206,6 @@ Where can I get it?
     - http://www.net-snmp.org/project/
   Mirrors (note that sourceforge download servers are mirrored themselves):
     - US:          ftp://ftp.freesnmp.com/mirrors/net-snmp/
-    - Bulgaria:    http://rtfm.uni-svishtov.bg/net-snmp/    (appears to be out of date)
-    - Germany:     ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/  (unknown host)
     - Greece:      ftp://ftp.ntua.gr/pub/net/snmp/net-snmp/
 
 
@@ -286,18 +285,20 @@ What operating systems does it run on?
   Both the applications and the agent have been reported as running
   (at least in part) on the following operating systems:
 
-	* HP-UX (10.20 to 9.01 and 11.0 -- see README.hpux11)
-	* Ultrix (4.5 to 4.2)
-	* Solaris SPARC/ULTRA (2.8 to 2.3), Intel (2.9) and SunOS (4.1.4 to 4.1.2)
-	* OSF (4.0, 3.2)
-	* NetBSD (1.5alpha to 1.0)
-	* FreeBSD (4.1 to 2.2)
+	* Linux (kernels 2.6 to 1.3)
+	* Solaris/SPARC (11 to 2.3), Solaris/Intel (10, 9) -- see 
+	  README.solaris
+	* HP-UX (10.20 to 9.01 and 11.11 to 11.0 -- see README.hpux11)
+	* Mac OS X (10.4 to 10.1) -- see README.osX
+	* NetBSD (2.0 to 1.0)
+	* FreeBSD (5.3 to 2.2)
+	* OpenBSD (3.7, 2.8, 2.6)
 	* BSDi (4.0.1 to 2.1)
-	* Linux (kernels 2.4 to 1.3)
-	* AIX (4.1.5, 3.2.5)
-	* OpenBSD (2.8, 2.6)
-	* Irix (6.5 to 5.1)
-	* OS X (10.1.1 and 10.1.2)
+	* AIX (5.2, 5.1, 4.1.5, 3.2.5) -- see README.aix
+	* IRIX (6.5 to 5.1)
+	* OSF (4.0, 3.2 and Tru64 Unix 5.1B -- see README.tru64)
+	* SunOS 4 (4.1.4 to 4.1.2)
+	* Ultrix (4.5 to 4.2)
 	* Dynix/PTX 4.4
 	* QNX 6.2.1A
 
@@ -1105,11 +1106,11 @@ How do I handle traps and notifications?
     Handling received traps is done using the tool 'snmptrapd'.
   This can log these traps via the syslog mechanism:
 
-	snmptrapd -s -l7	(log to 'LOCAL7')
+	snmptrapd -Ls 7		(log to 'LOCAL7')
 
   printed to standard output
 
-	snmptrapd -f -P
+	snmptrapd -f -Lo
 
   or pass them to an external command.  This last approach uses
   a 'traphandle' directive in the configuration file 'snmptrapd.conf'.
@@ -1127,6 +1128,11 @@ How do I handle traps and notifications?
   Note that the first entry uses the OID corresponding to the SNMPv1
   'coldStart' trap.  See the co-existence RFC (RFC 2576) for details
   of mapping SNMPv1 traps to SNMPv2 OIDs.
+
+  Starting with net-snmp 5.3, snmptrapd will no longer accept all traps 
+  by default. It must be configured with authorized SNMPv1/v2c community 
+  strings and/or SNMPv3 users. Non-authorized traps/informs will be dropped.
+  Please refer to the snmptrapd.conf(5) manual page for details.
 
   There's a tutorial with more details on the web site at
 	http://www.net-snmp.org/tutorial-5/commands/snmptrap.html
@@ -1833,16 +1839,22 @@ What MIBs are supported?
 	- SNMPv3 MIBS (RFCs 2571-5, 3411-3418)
 		(including USM, VACM, Target
 		 and Notification MIBs)
-	- DisMan EVENT-MIB
+	- DisMan Event MIB
+	- DisMan Schedule MIB
 	- MTA-MIB (sendmail)
 	- private agent extensions
 		(monitor specified processes and disks,
 		 memory, CPU, load average, plus extend
 		 the agent using shell commands)
 
-  The Host Resources MIB, the Event MIB and the MTA MIB are not
+  See README.agent-mibs for details.
+
+  The Host Resources MIB, the DisMan MIBs and the MTA MIB are not
   included by default, and need to be explicitly requested when
-  the suite is first configured and built.
+  the suite is first configured and built. Starting with net-snmp 5.3,
+  the DisMan Event MIB is included by default on all platforms, and
+  the Host Resources MIB is included by default on the major supported
+  platforms.
 
   There are a few other MIB implementations distributed as part of the
   source tarball, but these are basically unsupported and most of the
@@ -3454,8 +3466,8 @@ Mib2c complains about not having a "valid OID" - what does this mean?
 
 
 
-<a name="Why_doesn_t_Mib_c_like_the_MIB_file_I_m_giving_it_"></a>
-Why doesn't Mib2c like the MIB file I'm giving it?
+<a name="Why_doesn_t_mib_c_like_the_MIB_file_I_m_giving_it_"></a>
+Why doesn't mib2c like the MIB file I'm giving it?
 -------------------------------------------------
 
     This is most likely the same problem as above.  Mib2c takes the
@@ -3498,77 +3510,113 @@ Mib2c complains about "configuration files". What's this for?
 
 
 
-<a name="Which_mib_c_configuration_file_should_I_use_"></a>
-Which mib2c configuration file should I use?
--------------------------------------------
+<a name="What_s_the_difference_between_the_various_mib_c_configuration_files_"></a>
+What's the difference between the various mib2c configuration files?
+-------------------------------------------------------------------
 
-    If the MIB contains scalar objects, then use the config file
-  'mib2c.scalar.conf'.   This will generate template handlers for
-  these scalar objects (ignoring internal structural definitions,
-  table objects and notifications).
+    There are various alternative configuration templates for mib2c,
+  mostly concerned with implementing MIB tables.  These basically
+  fall into four distinct categories.
 
-    If the MIB contains tables, then there are number of possible
-  choices.  There are at least four configuration files that will
-  generate template handlers for table objects (ignoring internal
-  internal structural definitions, scalar objects and notifications).
-  Which to use depends on the characteristics of the table being
-  modelled (in particular where the data is held), and preferences
-  as to the style of code structure.
+    'mib2c.raw-table.conf' is the lightest of the templates, and
+  just provides a fairly basic table framework.  Most of the work
+  of implementing the table - detecting which row is required for a
+  given request, retrieving or updating the relevant column values,
+  and interacting with the underlying subsystem - are all left to
+  the MIB programmer.
 
-    The config file 'mib2c.create-dataset.conf' assumes that the
-  data is held internally within the agent, and generates a single
-  handler routine for each table.  Most of the processing is handled
-  internally within the agent, so this handler routine is really
-  only needed if particular column objects require special processing.
-  
-    The config file 'mib2c.iterate.conf' is aimed at tables which
-  model data held external to the agent (not necessarily ordered
-  according to the MIB indexing requirements).  It generates a pair
-  of "iteration" routines, which can be used to step through the
-  table, to select the appropriate row for any given request.
-  This row is then passed to the (single) table handler routine,
-  which handles the rest of the processing for all of the column
-  objects (for both GET and SET requests).
+    The second group of templates - 'table_data', 'container' and
+  'tdata' - all share the same basic model (although the internal
+  details are rather different).  The MIB implementer should define a
+  data structure to represent a row of the table, and the helper then
+  takes care of holding the table internally, as a collection of such
+  per-row data structures.  This includes identifying which row is
+  required for a given request.  Retrieving or updating the appropriate
+  column value is left to the MIB programmer, although the generated
+  framework includes most of the necessary code.
+    Allied to this is a fourth "internal data" mib2c configuration 
+  file ('create-dataset') which handles the individual columns as
+  well.  This is the closest to a Plug-and-Play configuration, and
+  the MIB implementer only needs to be concerned with any special
+  processing, such as linking the table with the underlying subsystem.
 
-    There is also a similar 'mib2c.iterate_access.conf' which
-  builds on this, but generates a series of individual routines
-  for handling GET or SET requests for each column object.
+    The third style of mib2c config assumes that the table data is
+  held externally to the helper - either within the MIB module code
+  itself, or in the external subsystem.  The generated code framework
+  includes routines to "iterate" through the rows of the table, with
+  the iterator helper simply deciding which row is required for a
+  particular request.  Once again, the MIB programmer must handle
+  retrieving or updating the appropriate column value, although the
+  generated framework includes most of the necessary code.
+    There is a variant of this config ('iterate_access') which works
+  in basically the same way. However this tries to separate out the
+  standard processing, from the code that needs to be amended by the
+  programmer for retrieving and updating the individual column values.
 
-    The config file 'mib2c.array-user.conf' is again primarily
-  aimed at data held within the agent (although it can also be used
-  with external data).  In contrast to the single handler routine of
-  the first two approaches, this generates a series of separate
-  template routines to handle different aspects of processing the
-  request.  As with the 'mib2c.create-dataset.conf' approach, much
-  of the processing is handled internally.  Many of the generated
-  routines can be deleted if the relevant objects need no special
-  processing.
- 
-    The most recent 'mfd' (or 'MIBs For Dummies') configuration takes
-  this idea of small (often optional) 'stub' routines even further.
-  This generates a collection of separate *files*, each of which
-  implements a particular aspect of the table processing.  The idea
-  here is to have lots of "baby steps", rather than have all the
-  processing dealt with in one place.
+    This is also the idea behind the final table-oriented mib2c config
+  template - 'mib2c.mfd.conf' (or "MIBs for Dummies").  This is a much
+  more flexible framework, which can be used with either internally
+  held data, or iterating through an external representation.  The
+  distinguishing feature of this framework is that it separates out
+  standard and table-specific processing, at a much finer level of
+  detail than the others.
 
-    There are also some other 'mib2c' configuration files, for more
-  specialised requirements (e.g. generating notifications, "watched"
-  scalar objects, or code that is compatible with the v4 UCD agent
-  API), but these are the main choices for most requirements.
+    The other mib2c config templates are concerned with implementing
+  scalar objects ('scalar', 'int_watch'), code to generating traps
+  ('notify'), and various specialised requirements.  There is also a
+  template ('old-api') to generate code suitable for the previous v4
+  UCD agent - though this is not particularly complete or reliable.
+  It's probably better to use a pure v4 mib2c environment (or switch
+  wholeheartedly to the v5 style).
 
 
 
-<a name="How_can_I_have_Mib_c_generate_code_for_both_scalars_and_tables_"></a>
-How can I have Mib2c generate code for both scalars and tables?
+Which one should I use?
+----------------------
+
+    The answer to that heavily depends on the characteristics of the
+  MIB objects being implemented.  Of the handler-based table frameworks,
+  'tdata' is more appropriate for tables that can be stored (or a copy
+  cached) within the agent itself, while 'iterate' is more relevant to
+  reporting data from outside the agent.
+    The raw interface is only suitable in very specific circumstances,
+  so it's probably sensible to start with one of the other frameworks
+  first, and only look at this if none of the alternatives seem to work.
+
+    The decision between the handler-based configs and MfD is more a
+  matter of the style of programming to use.  Most of the frameworks
+  define a single handler routine to process an incoming request, so
+  all of the code is listed together, with the MIB programmer inserting
+  table-specific processing into this single block of code.
+    The MfD provides a series of individual object-specific routines,
+  each concerned with one very specific task, and hides as much as
+  possible from the programmer.
+
+    If you like to understand the broad thrust of what's happening,
+  then one of the handler-based approaches would be the best choice.
+  If you prefer to concentrate on the nitty-gritty of a given table,
+  and are happy to trust that the rest of the processing will work
+  correctly, then the MfD framework would be more appropriate.
+
+    For implementing a group of scalar objects, then the choice is
+  simple - use 'mib2c.scalar.conf'.  Similarly, for generating traps
+  or informs, use 'mib2c.notify.conf'.
+
+
+
+<a name="How_can_I_have_mib_c_generate_code_for_both_scalars_and_tables_"></a>
+How can I have mib2c generate code for both scalars and tables?
 --------------------------------------------------------------
+
+    This uses a very powerful tool called a "text editor" :-)
 
     The v5 Net-SNMP mib2c tool uses separate configuration files to
   generate code for scalar objects, and for tables.  This means that
   it's not possible to automatically generate a single code file
   that supports both scalars and tables.
 
-    Instead, it's necessary to generate the two code files separately,
-  and then combine the two files manually.  The handler routines from
+    Instead, the two code files need to be generated separately, and
+  then combined manually.  The handler and supporting routines from
   one file can simply be included in the other with no changes needed.
   The corresponding registration of these handlers can then be copied
   from the first initialisation routine into the second.

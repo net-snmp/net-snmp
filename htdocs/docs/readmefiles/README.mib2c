@@ -14,9 +14,9 @@ OVERVIEW
 
 	mib2c is a Perl script that takes a MIB (such as those files found
 in ./mibs/ ) and converts it into C code.  That C code can then be used as a
-"template" to implement your MIB.  Then, when you are done editing the C
+&quot;template&quot; to implement your MIB.  Then, when you are done editing the C
 code and recompiling, the UCD-SNMP agent (snmpd) will support your MIB.
-mib2c takes the place of "MIB Compilers" that come with commercial SNMP
+mib2c takes the place of &quot;MIB Compilers&quot; that come with commercial SNMP
 agents.
 
 
@@ -35,13 +35,13 @@ from CPAN (www.cpan.org).  Follow the installation instructions for the
 module.
 
 	NOTE: If you are running Redhat Linux 5.2 (and perhaps other
-versions), you might get the following errors during the "make test" phase
+versions), you might get the following errors during the &quot;make test&quot; phase
 of the installation of the SNMP.pm module:
 
 [root@olly SNMP-1.8b5]# make test             # This is the command...
 PERL_DL_NONLAZY=1 /usr/bin/perl -I./blib/arch -I./blib/lib
 -I/usr/lib/perl5/i386-linux/5.00404 -I/usr/lib/perl5 -e 'use Test::Harness
-qw(&runtests $verbose); $verbose=0; runtests @ARGV;' t/*.t
+qw(&amp;runtests $verbose); $verbose=0; runtests @ARGV;' t/*.t
 t/mib...............ok
 t/session...........FAILED tests 7-8
         Failed 2/14 tests, 85.71% okay
@@ -53,7 +53,7 @@ Failed 1/3 test scripts, 66.67% okay. 2/24 subtests failed, 91.67% okay.
 make: *** [test_dynamic] Error 9
 
 
-	If the "make" went okay, then you can ignore these test failures.
+	If the &quot;make&quot; went okay, then you can ignore these test failures.
 These indicate you don't have write access to the portions of the mib
 tree that the test script is trying to use.  Please don't email the
 UCD-SNMP list with other errors regarding the SNMP.pm module.
@@ -118,7 +118,7 @@ this:
 setenv MIBS MY-ITEM-MIB          # assumes csh
 mib2c itemNode
 
-Where, "itemNode" should be a node in the mib tree that you want to
+Where, &quot;itemNode&quot; should be a node in the mib tree that you want to
 generate C code for.  Note, pick small pieces not large ones.  Yes, it 
 will generate code for the entire mibII tree if you ask it to, in one
 very large mib file.
@@ -201,7 +201,7 @@ version of the script.
 Couldn't find mib reference: myEnterpriseOID
 
 	...when you know that it should be finding your MIB file(s), then
-you forgot to put the word "END" at the very end of your MIB.  (Uh...I'm
+you forgot to put the word &quot;END&quot; at the very end of your MIB.  (Uh...I'm
 not speaking from experience here.  Really.)
 
 ACKNOWLEGMENTS

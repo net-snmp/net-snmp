@@ -18,8 +18,8 @@ Introduction:
 
 ******************************NOTE NOTE NOTE**************************
   This module now relies on many other modules.  Do not try to build
-  it independently, as it won't work.  Instead of running "perl
-  Makefile.PL" in this directory, run it in the net-snmp/perl
+  it independently, as it won't work.  Instead of running &quot;perl
+  Makefile.PL&quot; in this directory, run it in the net-snmp/perl
   directory instead which has a global makefile used to build all the
   sub-modules in their proper order.
 ******************************NOTE NOTE NOTE**************************
@@ -108,7 +108,7 @@ net-snmp/perl directory rather than the one in this directory.
 Unix:
 
 cd net-snmp/perl
-perl Makefile.PL [-NET-SNMP-CONFIG="sh ../../net-snmp-config"] [-NET-SNMP-IN-SOURCE=true]
+perl Makefile.PL [-NET-SNMP-CONFIG=&quot;sh ../../net-snmp-config&quot;] [-NET-SNMP-IN-SOURCE=true]
 make
 make test
 make install
@@ -116,7 +116,7 @@ make install
 FreeBSD:
 
 cd net-snmp/perl
-perl Makefile.PL -NET-SNMP-CONFIG="sh ../../net-snmp-config" -NET-SNMP-IN-SOURCE=true
+perl Makefile.PL -NET-SNMP-CONFIG=&quot;sh ../../net-snmp-config&quot; -NET-SNMP-IN-SOURCE=true
 make
 make test
 make install
@@ -136,7 +136,11 @@ Note: With ActiveState Perl (currently at 5.8.2 build 808) and possibly other
       failure of test #3 in the SNMP conf test (perl/SNMP/t/conf.t).  The 
       change to the SNMPCONFPATH env variable is not seen by the calls to the 
       C SNMP module.
-      
+
+Note: The source code should *not* be in a folder that contains a space.  For
+      example, compiling in your 'My Documents' or your Desktop (usually
+      c:\Documents and Settings\xxxx\Desktop) is not supported.
+     
 Automatic building / testing with nmakeperl.bat:
 
 1.  Ensure a static version of Net-SNMP has been compiled and installed.  Also
@@ -150,33 +154,33 @@ Automatic building / testing with nmakeperl.bat:
 
     a.  Copy regex.h to the include folder of MSVC++
 
-        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
-                  Vc7\include\regex.h"
+        Example: &quot;C:\Program Files\Microsoft Visual Studio .NET 2003\
+                  Vc7\include\regex.h&quot;
 
     b.  Copy gnu_regex.lib to the lib folder of MSVC++
 
-        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
-                  Vc7\lib\gnu_regex.lib"
+        Example: &quot;C:\Program Files\Microsoft Visual Studio .NET 2003\
+                  Vc7\lib\gnu_regex.lib&quot;
 
     c.  Copy gnu_regex.dll to your %windir%\system32 folder
 
-        Example: "C:\winnt\system32\gnu_regex.dll"
+        Example: &quot;C:\winnt\system32\gnu_regex.dll&quot;
 
-3.  Set the environment PATH to locate "nmake", "cl", and "link".
+3.  Set the environment PATH to locate &quot;nmake&quot;, &quot;cl&quot;, and &quot;link&quot;.
     Visual Studio installs a VCVARS32.BAT batch file for this purpose.
 
 4.  Using a command prompt window, cd to the source base directory.
 
 5.  Invoke win32\nmakeperl.bat to build the Perl SNMP modules.  If you see 
-    errors, review the "nmake.out" file first.  If no errors there,
+    errors, review the &quot;nmake.out&quot; file first.  If no errors there,
     then the modules built correctly, but the tests did not rigourously
-    prove the mettle of the modules.  Review "nmaketest.out".  If the
+    prove the mettle of the modules.  Review &quot;nmaketest.out&quot;.  If the
     first three sections mostly pass, the modules are well formed.
 
     NOTE: If the tests fail, there may be a perl application left hanging.
           Use the Task Manager to remove any stale perl or snmp*.exe process.
 
-6.  The final step is to invoke "nmake install".  If no errors occurred,
+6.  The final step is to invoke &quot;nmake install&quot;.  If no errors occurred,
     then the SNMP modules are available for use by your Perl programs.
 
 
@@ -193,22 +197,22 @@ Manual building / testing:
 
     a.  Copy regex.h to the include folder of MSVC++
 
-        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
-                  Vc7\include\regex.h"
+        Example: &quot;C:\Program Files\Microsoft Visual Studio .NET 2003\
+                  Vc7\include\regex.h&quot;
 
     b.  Copy gnu_regex.lib to the lib folder of MSVC++
 
-        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
-                  Vc7\lib\gnu_regex.lib"
+        Example: &quot;C:\Program Files\Microsoft Visual Studio .NET 2003\
+                  Vc7\lib\gnu_regex.lib&quot;
 
     c.  Copy gnu_regex.dll to your %windir%\system32 folder
 
-        Example: "C:\winnt\system32\gnu_regex.dll"
+        Example: &quot;C:\winnt\system32\gnu_regex.dll&quot;
 
-4.  Set the environment PATH to locate "nmake", "cl", and "link".
+3.  Set the environment PATH to locate &quot;nmake&quot;, &quot;cl&quot;, and &quot;link&quot;.
     Visual Studio installs a VCVARS32.BAT for this purpose.
 
-3.  Using a command prompt window, cd to the perl directory.
+4.  Using a command prompt window, cd to the perl directory.
 
 5.  Type: 
 
@@ -228,7 +232,7 @@ Manual building / testing:
             library files from the installed Net-SNMP directory.  To specify the
             installed Net-SNMP directory, use:
 
-            perl Makefile.PL CAPI=TRUE -NET-SNMP-PATH="c:\usr"
+            perl Makefile.PL CAPI=TRUE -NET-SNMP-PATH=&quot;c:\usr&quot;
 
             Note: -NET-SNMP-DEBUG has no effect while compiling against an 
                   installed copy of Net-SNMP.
@@ -254,6 +258,10 @@ If you get an error saying your system can't compile, you are probably missing
 the regex library.  Install regex from 
 http://mirrors.sunsite.dk/cygwin/release/regex/regex-4.4-2-src.tar.bz2
 
+Note: The source code should *not* be in a folder that contains a space.  For
+      example, compiling in your 'My Documents' or your Desktop (usually
+      c:\Documents and Settings\xxxx\Desktop) is not supported.
+
 
 Win32 (MinGW):
 
@@ -264,6 +272,10 @@ Note:  As of February 25th, 2004, the MinGW build of Net-SNMP does not
        modules may not work.  For example, sharing configurations between
        modules which is why the SNMP conf test fails.
 
+Note: The source code should *not* be in a folder that contains a space.  For
+      example, compiling in your 'My Documents' or your Desktop (usually
+      c:\Documents and Settings\xxxx\Desktop) is not supported.
+       
 These directions are for MinGW 3.1.0 with MSYS 1.0.9 and ActiveState Perl.
 Compiling the Perl modules using a MinGW built Perl environment has not
 been tested.
@@ -400,7 +412,7 @@ public:
                reference of output value formatters, (e.g., {&lt;type&gt; =&gt;
                &lt;sub-ref&gt;, ... }, the supplied sub is called to translate
                the value to a new format, unless a VarFormat mathces first
-               (e.g., $session-&gt;{TypeFormats}{INTEGER} = \&mapEnum();
+               (e.g., $session-&gt;{TypeFormats}{INTEGER} = \&amp;mapEnum();
                 although this can be done more efficiently by enabling
                 $SNMP::use_enums or session creation param 'UseEnums')
  UseLongNames - defaults to the value of SNMP::use_long_names at time
@@ -480,7 +492,7 @@ methods:
                    the m lexico instances are retrieved each of the remaining
                    Varbinds, where m is &lt;max-repeaters&gt;.
  bulkwalk(&lt;non-repeaters&gt;, &lt;max-repeaters&gt;, &lt;vars&gt; [, &lt;callback&gt;])
-                 - do an "SNMP bulkwalk" on the given variables.  Bulkwalk is
+                 - do an &quot;SNMP bulkwalk&quot; on the given variables.  Bulkwalk is
                    implemented by sending an SNMP GETBULK request to fetch the
                    variables.  Objects are copied to the return list until the
                    sub-tree is exited.  If the request is not completed at the
@@ -507,13 +519,13 @@ methods:
                 generic =&gt; specific,  # can be omitted if 'specific' supplied
                 specific =&gt; 5,        # can be omitted if 'generic' supplied
                 uptime =&gt; 1234,       # dflt to localhost uptime (0 on win32)
-                [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
+                [[ifIndex, 1, 1],[sysLocation, 0, &quot;here&quot;]]); # optional vars
                                                              # always last
  or v2 format
  trap(oid, uptime, &lt;vars&gt;)
     $sess-&gt;trap(oid =&gt; 'snmpRisingAlarm',
                 uptime =&gt; 1234,
-                [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
+                [[ifIndex, 1, 1],[sysLocation, 0, &quot;here&quot;]]); # optional vars
                                                              # always last
 
 
@@ -578,12 +590,12 @@ Acceptable callback formats:
 &lt;callback&gt; may be one of the following forms:
 
  without arguments:
-    \&subname
+    \&amp;subname
     sub { ... }
  or with arguments:
-    [ \&subname, $arg1, ... ]
+    [ \&amp;subname, $arg1, ... ]
     [ sub { ... }, $arg1, ... ]
-    [ "method", $obj, $arg1, ... ]
+    [ &quot;method&quot;, $obj, $arg1, ... ]
 
 callback will be called when response is received or timeout
 occurs. the last argument passed to callback will be a
@@ -680,7 +692,7 @@ SNMP package variables and functions:
                         be set prior to MIB initialization/parsing)
 
 
- &SNMP::setMib(&lt;file&gt;) - allows dynamic parsing of the mib and explicit
+ &amp;SNMP::setMib(&lt;file&gt;) - allows dynamic parsing of the mib and explicit
                          specification of mib file independent of environment
                          variables. called with no args acts like initMib,
                          loading MIBs indicated by environment variables (see
@@ -689,32 +701,32 @@ SNMP package variables and functions:
                          (Note: second arg not working since freeing previous
                           Mib is more involved than before).
 
- &SNMP::initMib()     - calls library init_mib function if Mib not already
+ &amp;SNMP::initMib()     - calls library init_mib function if Mib not already
                         loaded - does nothing if Mib already loaded. will
                         parse directories and load modules according to
                         environment variables described in Net-SNMP
                         documentations.
                         (see man mib_api, MIBDIRS, MIBS, MIBFILE(S), etc.)
 
- &SNMP::addMibDirs(&lt;dir&gt;,...) - calls library add_mibdir for each directory
+ &amp;SNMP::addMibDirs(&lt;dir&gt;,...) - calls library add_mibdir for each directory
                         supplied. will cause directory(s) to be added to
                         internal list and made available for searching in
                         subsequent loadModules calls
 
- &SNMP::addMibFiles(&lt;file&gt;,...) - calls library read_mib function. The file(s)
+ &amp;SNMP::addMibFiles(&lt;file&gt;,...) - calls library read_mib function. The file(s)
                        supplied will be read and all Mib module definitions
                        contained therein will be added to internal mib tree
                        structure
 
- &SNMP::loadModules(&lt;mod&gt;,...) - calls library read_module function. The
+ &amp;SNMP::loadModules(&lt;mod&gt;,...) - calls library read_module function. The
                        module(s) supplied will be searched for in the
                        current mibdirs and and added to internal mib tree
                        structure. Passing special &lt;mod&gt;, 'ALL', will cause
                        all known modules to be loaded.
 
- &SNMP::unloadModules(&lt;mod&gt;,...) - *Not Implemented*
+ &amp;SNMP::unloadModules(&lt;mod&gt;,...) - *Not Implemented*
 
- &SNMP::translateObj(&lt;var&gt;[,arg,[arg]]) - will convert a text obj tag to an 
+ &amp;SNMP::translateObj(&lt;var&gt;[,arg,[arg]]) - will convert a text obj tag to an 
                        OID and vice-versa. Any iid suffix is retained 
                        numerically.  Default behaviour when converting a 
                        numeric OID to text form is to return leaf identifier 
@@ -729,11 +741,11 @@ SNMP package variables and functions:
                        then the Mib will be loaded. Will return 'undef' upon 
                        failure.
 
- &SNMP::getType(&lt;var&gt;) - return SNMP data type for given textual identifier
+ &amp;SNMP::getType(&lt;var&gt;) - return SNMP data type for given textual identifier
                         OBJECTID, OCTETSTR, INTEGER, NETADDR, IPADDR, COUNTER
                         GAUGE, TIMETICKS, OPAQUE, or undef
 
- &SNMP::mapEnum(&lt;var&gt;) - converts integer value to enumeration tag defined
+ &amp;SNMP::mapEnum(&lt;var&gt;) - converts integer value to enumeration tag defined
                          in Mib or converts tag to integer depending on
                          input. the function will return the corresponding
                          integer value *or* tag for a given MIB attribute
@@ -746,7 +758,7 @@ SNMP package variables and functions:
                          $val = SNMP::mapEnum('ipForwarding', 'forwarding');
                          $val = SNMP::mapEnum('ipForwarding', 1);
 
- &SNMP::MainLoop([&lt;timeout&gt;, [&lt;callback&gt;]])
+ &amp;SNMP::MainLoop([&lt;timeout&gt;, [&lt;callback&gt;]])
                    - to be used with async SNMP::Session
                      calls. MainLoop must be called after initial async calls
                      so return packets from the agent will not be processed.
@@ -754,7 +766,7 @@ SNMP package variables and functions:
                      so program must be exited in a callback or externally
                      interrupted. If &lt;timeout
 
- &SNMP::finish()
+ &amp;SNMP::finish()
 		   - This function, when called from an SNMP::MainLoop()
 		     callback function, will cause the current SNMP::MainLoop
 		     to return after the callback is completed. finish() can
@@ -763,16 +775,16 @@ SNMP package variables and functions:
 		     further requests.
 
 Exported SNMP utility functions
-&snmp_get() - takes args of SNMP::Session::new followed by those of
+&amp;snmp_get() - takes args of SNMP::Session::new followed by those of
               SNMP::Session::get
 
-&snmp_getnext() - takes args of SNMP::Session::new followed by those of
+&amp;snmp_getnext() - takes args of SNMP::Session::new followed by those of
                   SNMP::Session::getnext
 
-&snmp_set() - takes args of SNMP::Session::new followed by those of
+&amp;snmp_set() - takes args of SNMP::Session::new followed by those of
               SNMP::Session::set
 
-&snmp_trap() - takes args of SNMP::TrapSession::new followed by those of
+&amp;snmp_trap() - takes args of SNMP::TrapSession::new followed by those of
                SNMP::TrapSession::trap
 
 Note: utility functions do not support async operation yet.
@@ -835,7 +847,7 @@ Srivathsan Srinivasagopalan
 Bill Fenner
 Jef Peeraer
 Daniel Hagerty
-Karl "Rat" Schilke and Electric Lightwave, Inc.
+Karl &quot;Rat&quot; Schilke and Electric Lightwave, Inc.
 Perl5 Porters
 Alex Burger
 
@@ -936,7 +948,7 @@ Bugs fixed and changes in 1.8
 
 16) fixed bug with __translate_appl_type in case of NULL or empty string
 
-17) eliminated the use of strtoul for portability - use sscanf(,"%lu",)
+17) eliminated the use of strtoul for portability - use sscanf(,&quot;%lu&quot;,)
 
 18) getType() supports all tag formats now
 

@@ -18,7 +18,7 @@ the LIBS macro (it should stand at the end of this macro).
 
 When starting the net-snmp daemon via rc script you have to trap some signals
 because otherwise the daemon will die the moment the rc script ends. I trap
-the signals 1, 2 and 3 via "trap '' 1 2 3" immediately before starting the
+the signals 1, 2 and 3 via &quot;trap '' 1 2 3&quot; immediately before starting the
 daemon. I didn't check whether all these signals need to be trapped, probably
 SIGHUP will suffice. BTW this applies to the HP-UX 10.x version as well. It
 would be a good idea to ignore or handle these signals in the daemon...

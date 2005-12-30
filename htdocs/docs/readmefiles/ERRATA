@@ -55,10 +55,10 @@ check there first.
   Official patches:
 
   - 5.1.2-p01: AgentX set leak
-    http://sourceforge.net/tracker/index.php?func=detail&aid=1014853&group_id=12694&atid=456380
+    http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1014853&amp;group_id=12694&amp;atid=456380
 
   - 5.1.2-p02: duplicate registration segfault; memory leaks
-    http://sourceforge.net/tracker/index.php?func=detail&aid=1020597&group_id=12694&atid=456380
+    http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1020597&amp;group_id=12694&amp;atid=456380
 
   Known Bugs:
 
@@ -85,9 +85,9 @@ check there first.
           vi ./include/net-snmp/net-snmp-config.h
 
           replace the line
-             #define CONFIGURE_OPTIONS ""'--disable-shared'""
+             #define CONFIGURE_OPTIONS &quot;&quot;'--disable-shared'&quot;&quot;
           with
-             #define CONFIGURE_OPTIONS "\"'--disable-shared'\""
+             #define CONFIGURE_OPTIONS &quot;\&quot;'--disable-shared'\&quot;&quot;
 
 
 
@@ -95,11 +95,11 @@ check there first.
 *5.0.9*
  Official Patches:
 
-   - http://sourceforge.net/tracker/index.php?func=detail&aid=733880&group_id=12694&atid=456380
-   - http://sourceforge.net/tracker/index.php?func=detail&aid=817768&group_id=12694&atid=456380
-   - http://sourceforge.net/tracker/index.php?func=detail&aid=823437&group_id=12694&atid=456380
-   - http://sourceforge.net/tracker/index.php?func=detail&aid=899099&group_id=12694&atid=456380
-   - http://sourceforge.net/tracker/index.php?func=detail&aid=905573&group_id=12694&atid=456380
+   - http://sourceforge.net/tracker/index.php?func=detail&amp;aid=733880&amp;group_id=12694&amp;atid=456380
+   - http://sourceforge.net/tracker/index.php?func=detail&amp;aid=817768&amp;group_id=12694&amp;atid=456380
+   - http://sourceforge.net/tracker/index.php?func=detail&amp;aid=823437&amp;group_id=12694&amp;atid=456380
+   - http://sourceforge.net/tracker/index.php?func=detail&amp;aid=899099&amp;group_id=12694&amp;atid=456380
+   - http://sourceforge.net/tracker/index.php?func=detail&amp;aid=905573&amp;group_id=12694&amp;atid=456380
 
  Bugs:
 

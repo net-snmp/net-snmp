@@ -1,68 +1,105 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.3*
 
-*5.2.1*
- Fixes:
-   Building:
-     - configure --disable-snmpv2c now works
-     - fix make test tests for rfc1213
-     - bug 1049607: net-snmp-config --compile-subagent broken
+ *** Important Notes ***
 
-   library:
-     - bug 1084413: Can't disable file logging
-     - bug 1072406: invalid operator precedence in opendir()
+    Several very significant changes have been made in Net-SNMP for this
+    release that warrant special attention.
 
-   agent library:
-     - disconnected AgentX subagents now reconnect with correct context
-     - fix table_array row insert/delete during set processing
+    - shared library version number no longer matches the release number. We
+      now follow the versioning scheme recommended by libtool. For the 5.3
+      release this means that the libraries now have a SONAME ending with
+      &quot;.so.10&quot;, e.g. libnetsnmp.so.10.
 
-   agent:
-     - don't override clientAddr setting for local trapsinks
-     - bug 1088765: Agent fails to send traps to remote target
-     - bug 1034008: memory leak using SET for table_dataset
-     - patch 1052460: fix agent deadlock on exec
-     - bug 1055781: get-next fails to step into interfaces group correctly
-     - bug 1056760: agent ignores ifspeed, type settings in snmpd.conf
-     - bug 1062986: pass and pass_persist fail and crash snmpd
-     - fix snmpd.conf table token to handle augments tables
+    - snmpd has not been truncating log files at startup, as documented in
+      the man pages, for a while now. This default behaviour has been restored.
+      Please use the '-A' flag if you want to continue appending to your log
+      files at startup.
+
+    - snmptrapd will no longer accept all traps by default. It must be
+      configured with authorized SNMPv1/v2c community strings and/or SNMPv3
+      users. Non-authorized traps/informs will be dropped.
+
+    - Due to a copyright statement that didn't allow modifications, 
+      snmpnetstat has been completely rewritten.  The new version now
+      accepts the same command-line options as the other tools, which
+      has introduced a number of incompatible changes.  However, it
+      does now finally support SNMPv3.
+
+ New:
+    Building:
+      - new option to disable set support in the agent (--disable-set-support)
+
+   snmpd:
+     - implement notification logging
+     - implement notification filtering
+     - AgentX, host resources and disman/event mibs added to default module list
+     - updated and new disman mib implementations
 
    snmptrapd:
-     - bug 1085981: snmptrapd complains about logging and access control
-     - bug 1040711: snmptrapd: SIGHUP duplicates traphandlers (repeatedly)
+     - allow a non-default AgentX socket
+     - a brand new authorization scheme that is based on the VACM
+       authorization scheme from snmpd.
+       - Note: now drops unauthenticated notifications by default
+     - registers the snmpEngine MIB group under the &quot;snmptrapd&quot; context
 
-   MFD:
-     - Misc updates to MFD templates
-     - add auto-handling of cache update for row insert/delete
+   snmplib:
+     - new helper for ascii file based scalar integers (think Linux /proc/)
+     - new utilities for dealing with files
+     - new utilities for parsing text files
+     - granular config/persistent file disablement (noPersistentLoad and
+       noPersistentSave snmp.conf tokens)
+
+    mib2c:
+      - mib2c.mfd.conf now generates code for persistence row storage
+      - many enhancements and bug fixes
+
+    snmpusm:
+      - allows to use old and/or new localized key instead of passphrase with
+        option -Ck
+      - new option -CE to specify usmUserEngineID (necessary to manage
+        snmptrapd's usmUserTable)
 
  Ports:
-   - Win32
-      - fixes for compiling without the Microsoft PSDK installed
-      - fix Win32 getenv crash
-   - Mac OS X compile error fix
-   - HP-UX configure now detects and won't use unavailable function
-   - Linux
-      - patch 1055036: if-mib init order fix
-      - patch 1057057: ipSystemStatsTable index fix, add ipv6
-      - patch 1073897: fix if-mib data access 64bit counter wrap detection
+   Linux:
+       - new experimental tables
+         - tcpConnectionTable, tcpListenerTable
+         - ipAddressPrefixTable
+         - udpEndpointTable
+         - ipv4InterfaceTable, ipv6InterfaceTable
+       - inetCidrRouteTable supports dynamic ipv4 route creation/deletion
+       - added ipv6IpForwarding.0 and ipv6IpDefaultHopLimit.0 (read-write)
 
- MIBs:
-   - update IP-FORWARD-MIB from an ID set to become an RFC
+   Win32:
+     - Cygwin compiler fixes
+     - MSVC: agent (snmpd) support for pass and pass_persist
+     - MinGW: agent (snmpd) support for pass
+     - Fix for 'select: No such file or directory' in snmpdelta
+
+ Fixes:
+   - Persistent files in directory defined by snmp.conf persistentDir were 
+     not being loaded at startup
+   - Perl getnext didn't honor explicit reference to MIB file
+   - AgentX sub-agent connection delayed til after config files read
+   - Build fixes for --disable-agent, --disable-snmpv1 and --disable-snmpv2c
+   - Lots of bug fixes
 
 
 *5.2*
  New:
-    For the security parnoid (like Wes):
+    For the security paranoid (like Wes):
       - Insecure versions of SNMP may be completely disabled at compile time.
           (configure using one or both of --disable-snmpv1 --disable-snmpv2c)
       - Less secure versions of SNMPv3 authentication and encryption
           algorithms may be completely disabled at compile time.
           (configure using one or both of --disable-des --disable-md5)
           (This requires you have OpenSSL to support SHA1 and AES instead)
-      - Diffie-Helman key negotianion (perfect-forward-secrecy - RFC2786)
-          has been implemented in both the agent and "snmpusm".
-      - better support for direct use of localized and master keys
-        (randomly generated keys have more entropy than passwords) See
+      - Diffie-Helman key negotiation (perfect-forward-secrecy - RFC2786)
+          has been implemented in both the agent and &quot;snmpusm&quot;.
+      - Better support for direct use of localized and master keys
+        (randomly generated keys have more entropy than passwords). See
         the -3m -3M -3k and -3K options, and the defAuthLocalizedKey,
         defPrivLocalizedKey, defAuthMasterKey, defPrivMasterKey
         snmp.conf tokens)
@@ -70,19 +107,19 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     library:
       - send and receive buffer sizes for UDP/TCP are configurable
       - .conf file token registration can now search multiple files
-        (separate file names to search by a :.  IE, "snmpd:agentx")
+        (separate file names to search by a :.  IE, &quot;snmpd:agentx&quot;)
 
     snmptrapd:
       - Embedded perl support for trap handlers (much faster than traphandles).
           (configure --with-embedded-perl ; see 'perldoc NetSNMP::TrapReceiver')
-      - the snmptrapd usmUser table can be controlled through SNMP & AgentX
-	  (the snmptrapd registers MIBs under the "snmptrapd" SNMPv3 context)
+      - the snmptrapd usmUser table can be controlled through SNMP &amp; AgentX
+	  (the snmptrapd registers MIBs under the &quot;snmptrapd&quot; SNMPv3 context)
 
     agent:
       - community strings can be mapped to individual SNMPv3 contexts
-          (see the snmpd.conf manual on "com2sec").
+          (see the snmpd.conf manual on &quot;com2sec&quot;).
       - AgentX should work properly with SNMPv3 contexts now.
-      - improved version of "exec" extension directive - "extend":
+      - improved version of &quot;exec&quot; extension directive - &quot;extend&quot;:
           supports multi-line output, configurable command input, SET
           handling, a valid relocatable MIB output structure, etc
       - more flexibility added to netsnmp_cache helper, including periodic
@@ -110,11 +147,11 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
         - mib2c.iterate.conf: the iterator-based table config
             now produces fuller template code than before.
         - mib2c.table_data.conf and mib2c.container.conf:
-            two new "internal-row" style configs
-        - mib2c.mfd.conf: "MIBs for Dummies" (or MFD) - intended to
+            two new &quot;internal-row&quot; style configs
+        - mib2c.mfd.conf: &quot;MIBs for Dummies&quot; (or MFD) - intended to
             reduce the SNMP knowledge needed to develop MIB modules
-            and add flexibility at the same time.  Run "mib2c -S
-            mfd_interactive_setup=1 -c mib2c.mfd.conf OID" and follow
+            and add flexibility at the same time.  Run &quot;mib2c -S
+            mfd_interactive_setup=1 -c mib2c.mfd.conf OID&quot; and follow
             its guided instructions to help you tailor its results to
             meet your needs.
         - mib2c.genhtml.conf: Generates an easier-to-read HTML view of
@@ -134,7 +171,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     perl:
       - An improved SNMP::gettable() method.  Uses GETBULK if possible and
         better GETNEXT requests if not, decodes indexes from OIDs,
-        requests multiple variables at once, ...  ("perldoc SNMP" for details)
+        requests multiple variables at once, ...  (&quot;perldoc SNMP&quot; for details)
       - A NetSNMP::OID::get_indexes() function to extract index values
         from an OID.
 
@@ -217,8 +254,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
     Building:
       - configure is now generated using autoconf 2.57.
-      - The make system now supports "make uninstall"
-      - configure & make supports a --with-install-prefix option
+      - The make system now supports &quot;make uninstall&quot;
+      - configure &amp; make supports a --with-install-prefix option
       - new configure options to disable building of the agent, apps, ...
         ./configure --help for a list of package sections that can be excluded.
       - new configure option to remove specific code pieces (mib reading, ...)
@@ -228,7 +265,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - linkUp and linkDown notifications can be enabled
         (see the linkUpDownNotifications snmpd.conf token documentation)
       - notifications (traps) can be generated for disman/monitor events.
-        (see the snmpd.conf documentation on "monitor" and "notificatonEvent")
+        (see the snmpd.conf documentation on &quot;monitor&quot; and &quot;notificatonEvent&quot;)
       - new snmpd.conf tokens:  includeAllDisks
       - the UCD-DISKIO-MIB will now work on linux.
       - com2sec mappings for SNMP over unix sockets.
@@ -236,7 +273,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
         speed of the agent's processing time.
       - for mib code using the table iterator, an auto-caching mechanism
         which can greatly speed up access at the cost of caching.
-        (see "stash_cache" in the injectHandler token docs in snmpd.conf(5))
+        (see &quot;stash_cache&quot; in the injectHandler token docs in snmpd.conf(5))
       - Some of the agent modules were completely rewritten (and
         should be faster and cleaner).
       - A number of new APIs and helper modules are available, but
@@ -253,7 +290,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - snmptable sports 3 new options: fixed width, max-repeaters,
         left-justify.  (see snmptable -h for details)
       - mib2c walks you through instructions to help you generate code
-        "just for you".  Including some new forms of output code, like
+        &quot;just for you&quot;.  Including some new forms of output code, like
         notification code generation.  Run mib2c SOMETHING for details.
       - mib2c has about a billion other improvements, including the
         ability to generate trap generation code templates.
@@ -384,7 +421,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 *5.0.3*
 
  New:
-    - the "dist" directory contains the beginnings of some init
+    - the &quot;dist&quot; directory contains the beginnings of some init
       scripts and packaging utilities.
 
  Ports:
@@ -408,7 +445,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - NFS file systems are better supported in the hrStorageTable
     - the memory reporting no longer accidentally reports -1 integers
     - a few memory leaks fixed in the table_iterator API
-    - fixes for Sun's "make"
+    - fixes for Sun's &quot;make&quot;
     - ds_ prefix name-space protection (-&gt; netsnmp_ds_)
       (run configure with --enable-ucd-compatibility for old API)
     - v1/v2c access control fixes for ipv6 addresses
@@ -475,12 +512,12 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       now, including UDP/TCP (ipv4 and ipv6), AAL5pvc, and IPX.  See
       ./configure --help for details on enabling them.
       Note: the -p and -T flags to all the applications have been
-      removed.  Use hostname strings like "tcp:localhost:9999"
+      removed.  Use hostname strings like &quot;tcp:localhost:9999&quot;
       instead.  See the snmpcmd manual page for details.
     - snmptrapd now acts as an agentx subagent and implements portions
       of the NOTIFICATION-LOG-MIB to allow captured traps and informs
       to be queried.
-    - A "net-snmp-config" script will get installed which can report
+    - A &quot;net-snmp-config&quot; script will get installed which can report
       how the various tools were built (which libraries they were
       linked against, etc).  It will also help you do other things as
       well, like setting up snmpv3.  Run net-snmp-config --help for details.
@@ -490,13 +527,13 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       features and fixes.
     - mib2c was completely rewritten and has a much improved
       configuration file specification.
-    - Much of the code is getting documented with "doxygen" style
-      documentation.  Run "make docs" if you have doxygen installed.
+    - Much of the code is getting documented with &quot;doxygen&quot; style
+      documentation.  Run &quot;make docs&quot; if you have doxygen installed.
     - some RMON support is available.
       (See agent/mibgroup/Rmon/README for details.)
     - The source tree has been reorganized and all the exported header
       files are now in the include subdirectory.  You can now point to
-      the includes easily without having to run "make install" first.
+      the includes easily without having to run &quot;make install&quot; first.
     - the agent now requires a configuration file to access any information.
     - The entire code base has had indent run on it to effect a
       consistent coding style.  See the CodingStyle file for details.
@@ -506,14 +543,14 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - The SNMP perl module now calls init_snmp() like real net-snmp
       applications, which means it will read snmp.conf configuration
       files, etc.
-    - new perl specific configure options --with-perl-modules &
+    - new perl specific configure options --with-perl-modules &amp;
       --enable-embedded-perl.  See ./configure --help for details.
     - The beginnings of some new Perl modules (alpha level quality)
       are in the perl directory, including:
       - NetSNMP::agent which allows perl scripts to become net-snmp
         master or subagents
       - AnyData::SNMP is available that implements a perl DBI
-        interface to map SQL commands to SNMP.  Included is a "netsh"
+        interface to map SQL commands to SNMP.  Included is a &quot;netsh&quot;
         shell where SQL commands can be typed, aliases created, etc.
         See the perl/AnyData_SNMP/INSTALL file for details.
     - Beginning (alpha level quality) support for embedding perl
@@ -564,7 +601,7 @@ UCD-SNMP NEWS:
  New:
     - sysLocation, sysContact, sysName and snmpEnableAuthenTraps are
       persistent after being set remotely.
-    - New "ignoredisk" directive to ignore disks in the host resources mib.
+    - New &quot;ignoredisk&quot; directive to ignore disks in the host resources mib.
 
  Bug Fixes:
     - The ifTable on Linux no longer reports duplicate interfaces.
@@ -618,7 +655,7 @@ UCD-SNMP NEWS:
  New:
     - The snmpconf configuration file editor can create snmptrapd.conf files.
     - AgentX support is compiled in by default, but must be configured now.
-      (Add "master on" to your snmpd.conf file to enable agentx support)
+      (Add &quot;master on&quot; to your snmpd.conf file to enable agentx support)
 
 *4.2*
 
@@ -652,7 +689,7 @@ UCD-SNMP NEWS:
     - the agent can run as a particular user.
     - snmptable takes a -Ci argument to show table indices.
     - snmptable uses GETBULK requests when it can (unless -CB is specified).
-    - The "make test" suite contains a lot of new tests.
+    - The &quot;make test&quot; suite contains a lot of new tests.
     - cross-compiling support.
     - snmpset checks types and range values for legality.
     - Significant improvements to the AgentX support.
@@ -696,7 +733,7 @@ UCD-SNMP NEWS:
 *4.1.1*
  Fixes:
     - Better agent handling of unauthorized requests.
-    - Better "make test" support.
+    - Better &quot;make test&quot; support.
     - Misc bug fixes.
 
 *4.1*
@@ -751,14 +788,14 @@ UCD-SNMP NEWS:
     - historic v2party support removed.
     - complete re-write of the agent.
     - The extensible AgentX protocol is in alpha-test mode.
-      (to use, compile with the mib-module "agentx" or
-      "agentx/master" or "agentx/client").
+      (to use, compile with the mib-module &quot;agentx&quot; or
+      &quot;agentx/master&quot; or &quot;agentx/client&quot;).
     - syslog support for the agent (and everything else for that matter).
     - Per-process/per-exec-script based fix scripts implemented.
       (see snmpd.conf(5) for details)
     - many more config file options supported.
       (run any command with -H and see appropriate .conf manual pages)
-    - The start of a "make test" suite.
+    - The start of a &quot;make test&quot; suite.
     - many other things we've forgotten.
     - code is ANSI C now, and requires a ANSI C compiler.
 
@@ -800,10 +837,10 @@ UCD-SNMP NEWS:
       various applications.
     - The mib parser supports a variety of options dictating how
       strictly it parses mib files.
-      (see snmpcmd.1 on "-P")
+      (see snmpcmd.1 on &quot;-P&quot;)
     - Debugging output with the -D flag now accepts a list of
       debugging information types to print.
-      (see snmpcmd.1 on "-D")
+      (see snmpcmd.1 on &quot;-D&quot;)
     - Minimal multi-thread support using a modified version of the
       session API.
       (see snmp_sess_api(3))
@@ -866,7 +903,7 @@ UCD-SNMP NEWS:
     - the UCD-SNMP specific mib structure changed.
       - many of the table oids have changed location and have been renamed.
     - the View Based Access Control module was implemented in the agent.
-      Therefore, the "community" snmpd.conf parameter no longer
+      Therefore, the &quot;community&quot; snmpd.conf parameter no longer
       exists.  See the snmpd.conf file for how to control access via
       community names now.
     - The header file #defines have changed.  You may have to compile
@@ -900,7 +937,7 @@ UCD-SNMP NEWS:
 *3.3.1*
 
  New:
-    - "make install" installs the library and header files.
+    - &quot;make install&quot; installs the library and header files.
 
  Fixes:
     - compilation on many architectures (sunos for example).
@@ -1044,7 +1081,7 @@ UCD-SNMP NEWS:
 
   Bug fixes:
     - many fixes for solaris (Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;
-      and "Dan A. Dickey" &lt;ddickey@transition.com&gt;)
+      and &quot;Dan A. Dickey&quot; &lt;ddickey@transition.com&gt;)
     - greatly reduced memory usage by mib parser (Niels Baggesen)
     - disk checks fixed for solaris and osf.
     - improved Mib parsing from Mike Perik &lt;mikep@crt.com&gt;
@@ -1092,7 +1129,7 @@ UCD-SNMP NEWS:
     - new app:  apps/snmptrap, as requested by many, many people.
     - New man page (rough still):  snmpd.conf.5.
     - Returns new values for system.sysObjectID for each supported OS.
-    - Better OpenView support for changing the icons & etc.  See ov/README.
+    - Better OpenView support for changing the icons &amp; etc.  See ov/README.
 
   Bug fixes.
     - -p PORT -l LOGFILE now work as advertised.
