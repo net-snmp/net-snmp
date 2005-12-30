@@ -14,11 +14,13 @@ document as <b>.1.3.6.1.2.1.6</b>.
 <h3><a href="#objects_Current">Current Objects</a></h3>
 <ul>
 <li><a href="#scalar_current">Scalars</a></li>
-  <li><a href="#tcpConnTable">tcpConnTable</a></li>
+  <li><a href="#tcpConnectionTable">tcpConnectionTable</a></li>
+  <li><a href="#tcpListenerTable">tcpListenerTable</a></li>
 </ul>
 <h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
 <ul>
 <li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+  <li><a href="#tcpConnTable">tcpConnTable</a></li>
 </ul>
 <h3><a href="#notifications">Notifications</a></h3>
 <h3><a href="#textconventions">Textual Conventions</a></h3>
@@ -28,8 +30,8 @@ document as <b>.1.3.6.1.2.1.6</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="tcpRtoAlgorithm" />
@@ -38,13 +40,13 @@ document as <b>.1.3.6.1.2.1.6</b>.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>other</td></tr>
         <tr><td>2</td><td>constant</td></tr>
         <tr><td>3</td><td>rsre</td></tr>
         <tr><td>4</td><td>vanj</td></tr>
+        <tr><td>5</td><td>rfc2988</td></tr>
       </table>
 
   </td><td>ReadOnly</td>
@@ -64,19 +66,19 @@ retransmitting unacknowledged octets.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.2</td>
 <td>
 <pre>
-The minimum value permitted by a TCP implementation for the
-retransmission timeout, measured in milliseconds.  More
-refined semantics for objects of this type depend upon the
-algorithm used to determine the retransmission timeout.  In
-particular, when the timeout algorithm is rsre(3), an object
-of this type has the semantics of the LBOUND quantity
-described in RFC 793.
+The minimum value permitted by a TCP implementation for
+the retransmission timeout, measured in milliseconds.
+More refined semantics for objects of this type depend
+on the algorithm used to determine the retransmission
+timeout; in particular, the IETF standard algorithm
+rfc2988(5) provides a minimum value.
 </pre>
 </td>
   </tr>
@@ -88,19 +90,20 @@ described in RFC 793.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.3</td>
 <td>
 <pre>
-The maximum value permitted by a TCP implementation for the
-retransmission timeout, measured in milliseconds.  More
-            refined semantics for objects of this type depend upon the
-            algorithm used to determine the retransmission timeout.  In
-            particular, when the timeout algorithm is rsre(3), an object
-            of this type has the semantics of the UBOUND quantity
-            described in RFC 793.
+The maximum value permitted by a TCP implementation for
+the retransmission timeout, measured in milliseconds.
+More refined semantics for objects of this type depend
+on the algorithm used to determine the retransmission
+timeout; in particular, the IETF standard algorithm
+rfc2988(5) provides an upper bound (as part of an
+adaptive backoff algorithm).
 </pre>
 </td>
   </tr>
@@ -112,7 +115,10 @@ retransmission timeout, measured in milliseconds.  More
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        -1
+        ,
+        0 .. 2147483647
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.4</td>
@@ -120,8 +126,8 @@ retransmission timeout, measured in milliseconds.  More
 <pre>
 The limit on the total number of TCP connections the entity
 can support.  In entities where the maximum number of
-connections is dynamic, this object should contain the value
--1.
+connections is dynamic, this object should contain the
+value -1.
 </pre>
 </td>
   </tr>
@@ -134,13 +140,15 @@ connections is dynamic, this object should contain the value
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.5</td>
 <td>
 <pre>
-The number of times TCP connections have made a direct
+The number of times that TCP connections have made a direct
 transition to the SYN-SENT state from the CLOSED state.
+
+Discontinuities in the value of this counter are
+indicated via discontinuities in the value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -153,13 +161,15 @@ transition to the SYN-SENT state from the CLOSED state.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.6</td>
 <td>
 <pre>
 The number of times TCP connections have made a direct
 transition to the SYN-RCVD state from the LISTEN state.
+
+Discontinuities in the value of this counter are
+indicated via discontinuities in the value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -172,16 +182,18 @@ transition to the SYN-RCVD state from the LISTEN state.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.7</td>
 <td>
 <pre>
-The number of times TCP connections have made a direct
+The number of times that TCP connections have made a direct
 transition to the CLOSED state from either the SYN-SENT
-state or the SYN-RCVD state, plus the number of times TCP
-connections have made a direct transition to the LISTEN
-state from the SYN-RCVD state.
+state or the SYN-RCVD state, plus the number of times that
+TCP connections have made a direct transition to the
+LISTEN state from the SYN-RCVD state.
+
+Discontinuities in the value of this counter are
+indicated via discontinuities in the value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -194,14 +206,16 @@ state from the SYN-RCVD state.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.8</td>
 <td>
 <pre>
-The number of times TCP connections have made a direct
+The number of times that TCP connections have made a direct
 transition to the CLOSED state from either the ESTABLISHED
 state or the CLOSE-WAIT state.
+
+Discontinuities in the value of this counter are
+indicated via discontinuities in the value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -214,13 +228,12 @@ state or the CLOSE-WAIT state.
 </td><td>
   GAUGE
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.9</td>
 <td>
 <pre>
 The number of TCP connections for which the current state
-is either ESTABLISHED or CLOSE- WAIT.
+is either ESTABLISHED or CLOSE-WAIT.
 </pre>
 </td>
   </tr>
@@ -233,14 +246,16 @@ is either ESTABLISHED or CLOSE- WAIT.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.10</td>
 <td>
 <pre>
 The total number of segments received, including those
-received in error.  This count includes segments received on
-currently established connections.
+received in error.  This count includes segments received
+on currently established connections.
+
+Discontinuities in the value of this counter are
+indicated via discontinuities in the value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -253,7 +268,6 @@ currently established connections.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.11</td>
 <td>
@@ -261,6 +275,9 @@ currently established connections.
 The total number of segments sent, including those on
 current connections but excluding those containing only
 retransmitted octets.
+
+Discontinuities in the value of this counter are
+indicated via discontinuities in the value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -273,14 +290,16 @@ retransmitted octets.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.12</td>
 <td>
 <pre>
-The total number of segments retransmitted - that is, the
+The total number of segments retransmitted; that is, the
 number of TCP segments transmitted containing one or more
 previously transmitted octets.
+
+Discontinuities in the value of this counter are
+indicated via discontinuities in the value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -293,13 +312,15 @@ previously transmitted octets.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.14</td>
 <td>
 <pre>
 The total number of segments received in error (e.g., bad
 TCP checksums).
+
+Discontinuities in the value of this counter are
+indicated via discontinuities in the value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -312,12 +333,60 @@ TCP checksums).
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.6.15</td>
 <td>
 <pre>
 The number of TCP segments sent containing the RST flag.
+Discontinuities in the value of this counter are
+            indicated via discontinuities in the value of sysUpTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="tcpHCInSegs" />
+17
+<br /><b>tcpHCInSegs</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.6.17</td>
+<td>
+<pre>
+The total number of segments received, including those
+received in error.  This count includes segments received
+
+on currently established connections.  This object is
+the 64-bit equivalent of tcpInSegs.
+
+Discontinuities in the value of this counter are
+indicated via discontinuities in the value of sysUpTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="tcpHCOutSegs" />
+18
+<br /><b>tcpHCOutSegs</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.6.18</td>
+<td>
+<pre>
+The total number of segments sent, including those on
+current connections but excluding those containing only
+retransmitted octets.  This object is the 64-bit
+equivalent of tcpOutSegs.
+
+Discontinuities in the value of this counter are
+indicated via discontinuities in the value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -325,68 +394,109 @@ The number of TCP segments sent containing the RST flag.
 </ul>
 
 <h2>TABLE OBJECTS</h2>
-<a name="tcpConnTable" /><h3>Table tcpConnTable</h3>
+<a name="tcpConnectionTable" /><h3>Table tcpConnectionTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>tcpConnTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>TCP-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.6.13</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>tcpConnectionTable</td></tr>
+  <tr><td class="label">In MIB</td><td>TCP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.6.19</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
-A table containing TCP connection-specific information.
+A table containing information about existing TCP
+connections.  Note that unlike earlier TCP MIBs, there
+is a separate table for connections in the LISTEN state.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="tcpConnEntry" />Row Description</td>
+<tr><td class="label"><a name="tcpConnectionEntry" />Row Description</td>
 <td>
 <pre>
-A conceptual row of the tcpConnTable containing information
-about a particular current TCP connection.  Each row of this
-table is transient, in that it ceases to exist when (or soon
-after) the connection makes the transition to the CLOSED
-state.
+A conceptual row of the tcpConnectionTable containing
+information about a particular current TCP connection.
+Each row of this table is transient in that it ceases to
+exist when (or soon after) the connection makes the
+transition to the CLOSED state.
 </pre>
 </td>
 </tr>
   </table>
 
-  <h4>tcpConnTable Indexes:</h4>
+  <h4>tcpConnectionTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
-<a name="tcpConnLocalAddress" />
-2
-<br /><b>tcpConnLocalAddress</b>
+<a name="tcpConnectionLocalAddressType" />
+1
+<br /><b>tcpConnectionLocalAddressType</b>
 
 </td><td>
-  IPADDR
+  INTEGER
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
 
-
-  </td><td>ReadOnly</td>
+  </td><td>NoAccess</td>
 <td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
 <pre>
-The local IP address for this TCP connection.  In the case
-of a connection in the listen state which is willing to
-accept connections for any IP interface associated with the
-node, the value 0.0.0.0 is used.
+The address type of tcpConnectionLocalAddress.
 </pre>
 </td>
   </tr>
   <tr>
   <td>
-<a name="tcpConnLocalPort" />
-3
-<br /><b>tcpConnLocalPort</b>
+<a name="tcpConnectionLocalAddress" />
+2
+<br /><b>tcpConnectionLocalAddress</b>
 
 </td><td>
-  INTEGER
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+ <br>
+ <a href="#InetAddress">InetAddress</a>
 
-
-  </td><td>ReadOnly</td>
+  </td><td>NoAccess</td>
 <td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The local IP address for this TCP connection.  The type
+of this address is determined by the value of
+tcpConnectionLocalAddressType.
+
+As this object is used in the index for the
+tcpConnectionTable, implementors should be
+careful not to create entries that would result in OIDs
+with more than 128 subidentifiers; otherwise the information
+cannot be accessed by using SNMPv1, SNMPv2c, or SNMPv3.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="tcpConnectionLocalPort" />
+3
+<br /><b>tcpConnectionLocalPort</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        0 .. 65535
+ <br>
+ <a href="#InetPortNumber">InetPortNumber</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetPortNumber"> InetPortNumber TEXTUAL-CONVENTION</a>.
+</p>
 <pre>
 The local port number for this TCP connection.
 </pre>
@@ -394,33 +504,75 @@ The local port number for this TCP connection.
   </tr>
   <tr>
   <td>
-<a name="tcpConnRemAddress" />
+<a name="tcpConnectionRemAddressType" />
 4
-<br /><b>tcpConnRemAddress</b>
+<br /><b>tcpConnectionRemAddressType</b>
 
 </td><td>
-  IPADDR
+  INTEGER
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
 
-
-  </td><td>ReadOnly</td>
+  </td><td>NoAccess</td>
 <td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
 <pre>
-The remote IP address for this TCP connection.
+The address type of tcpConnectionRemAddress.
 </pre>
 </td>
   </tr>
   <tr>
   <td>
-<a name="tcpConnRemPort" />
+<a name="tcpConnectionRemAddress" />
 5
-<br /><b>tcpConnRemPort</b>
+<br /><b>tcpConnectionRemAddress</b>
 
 </td><td>
-  INTEGER
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+ <br>
+ <a href="#InetAddress">InetAddress</a>
 
-
-  </td><td>ReadOnly</td>
+  </td><td>NoAccess</td>
 <td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The remote IP address for this TCP connection.  The type
+of this address is determined by the value of
+tcpConnectionRemAddressType.
+
+As this object is used in the index for the
+tcpConnectionTable, implementors should be
+careful not to create entries that would result in OIDs
+with more than 128 subidentifiers; otherwise the information
+cannot be accessed by using SNMPv1, SNMPv2c, or SNMPv3.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="tcpConnectionRemPort" />
+6
+<br /><b>tcpConnectionRemPort</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        0 .. 65535
+ <br>
+ <a href="#InetPortNumber">InetPortNumber</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetPortNumber"> InetPortNumber TEXTUAL-CONVENTION</a>.
+</p>
 <pre>
 The remote port number for this TCP connection.
 </pre>
@@ -428,19 +580,18 @@ The remote port number for this TCP connection.
   </tr>
 </table>
 
-  <h4>Other tcpConnTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <h4>Other tcpConnectionTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
-<a name="tcpConnState" />
-1
-<br /><b>tcpConnState</b>
+<a name="tcpConnectionState" />
+7
+<br /><b>tcpConnectionState</b>
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>closed</td></tr>
         <tr><td>2</td><td>listen</td></tr>
@@ -460,18 +611,216 @@ The remote port number for this TCP connection.
 <td>
 <pre>
 The state of this TCP connection.
-The only value which may be set by a management station is
+The value listen(2) is included only for parallelism to the
+            old tcpConnTable and should not be used.  A connection in
+            LISTEN state should be present in the tcpListenerTable.
+The only value that may be set by a management station is
             deleteTCB(12).  Accordingly, it is appropriate for an agent
             to return a `badValue' response if a management station
             attempts to set this object to any other value.
 If a management station sets this object to the value
-            deleteTCB(12), then this has the effect of deleting the TCB
-            (as defined in RFC 793) of the corresponding connection on
-            the managed node, resulting in immediate termination of the
+            deleteTCB(12), then the TCB (as defined in [RFC793]) of
+            the corresponding connection on the managed node is
+            deleted, resulting in immediate termination of the
             connection.
 As an implementation-specific option, a RST segment may be
-            sent from the managed node to the other TCP endpoint (note
-            however that RST segments are not sent reliably).
+            sent from the managed node to the other TCP endpoint (note,
+            however, that RST segments are not sent reliably).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="tcpConnectionProcess" />
+8
+<br /><b>tcpConnectionProcess</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The system's process ID for the process associated with
+this connection, or zero if there is no such process.  This
+value is expected to be the same as HOST-RESOURCES-MIB::
+hrSWRunIndex or SYSAPPL-MIB::sysApplElmtRunIndex for some
+row in the appropriate tables.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="tcpListenerTable" /><h3>Table tcpListenerTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>tcpListenerTable</td></tr>
+  <tr><td class="label">In MIB</td><td>TCP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.6.20</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+A table containing information about TCP listeners.  A
+listening application can be represented in three
+possible ways:
+
+1. An application that is willing to accept both IPv4 and
+   IPv6 datagrams is represented by
+
+   a tcpListenerLocalAddressType of unknown (0) and
+   a tcpListenerLocalAddress of ''h (a zero-length
+   octet-string).
+
+2. An application that is willing to accept only IPv4 or
+   IPv6 datagrams is represented by a
+   tcpListenerLocalAddressType of the appropriate address
+   type and a tcpListenerLocalAddress of '0.0.0.0' or '::'
+   respectively.
+
+3. An application that is listening for data destined
+   only to a specific IP address, but from any remote
+   system, is represented by a tcpListenerLocalAddressType
+   of an appropriate address type, with
+   tcpListenerLocalAddress as the specific local address.
+
+NOTE: The address type in this table represents the
+address type used for the communication, irrespective
+of the higher-layer abstraction.  For example, an
+application using IPv6 'sockets' to communicate via
+IPv4 between ::ffff:10.0.0.1 and ::ffff:10.0.0.2 would
+use InetAddressType ipv4(1)).
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="tcpListenerEntry" />Row Description</td>
+<td>
+<pre>
+A conceptual row of the tcpListenerTable containing
+information about a particular TCP listener.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>tcpListenerTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="tcpListenerLocalAddressType" />
+1
+<br /><b>tcpListenerLocalAddressType</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The address type of tcpListenerLocalAddress.  The value
+should be unknown (0) if connection initiations to all
+local IP addresses are accepted.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="tcpListenerLocalAddress" />
+2
+<br /><b>tcpListenerLocalAddress</b>
+
+</td><td>
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The local IP address for this TCP connection.
+The value of this object can be represented in three
+            possible ways, depending on the characteristics of the
+            listening application:
+1. For an application willing to accept both IPv4 and
+               IPv6 datagrams, the value of this object must be
+               ''h (a zero-length octet-string), with the value
+               of the corresponding tcpListenerLocalAddressType
+               object being unknown (0).
+2. For an application willing to accept only IPv4 or
+               IPv6 datagrams, the value of this object must be
+               '0.0.0.0' or '::' respectively, with
+               tcpListenerLocalAddressType representing the
+               appropriate address type.
+3. For an application which is listening for data
+               destined only to a specific IP address, the value
+               of this object is the specific local address, with
+               tcpListenerLocalAddressType representing the
+               appropriate address type.
+As this object is used in the index for the
+            tcpListenerTable, implementors should be
+            careful not to create entries that would result in OIDs
+            with more than 128 subidentifiers; otherwise the information
+            cannot be accessed, using SNMPv1, SNMPv2c, or SNMPv3.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="tcpListenerLocalPort" />
+3
+<br /><b>tcpListenerLocalPort</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        0 .. 65535
+ <br>
+ <a href="#InetPortNumber">InetPortNumber</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetPortNumber"> InetPortNumber TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The local port number for this TCP connection.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other tcpListenerTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="tcpListenerProcess" />
+4
+<br /><b>tcpListenerProcess</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The system's process ID for the process associated with
+this listener, or zero if there is no such process.  This
+value is expected to be the same as HOST-RESOURCES-MIB::
+hrSWRunIndex or SYSAPPL-MIB::sysApplElmtRunIndex for some
+row in the appropriate tables.
 </pre>
 </td>
   </tr>
@@ -480,18 +829,175 @@ As an implementation-specific option, a RST segment may be
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
+<a name="tcpConnTable" /><h3>Table tcpConnTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>tcpConnTable</td></tr>
+  <tr><td class="label">In MIB</td><td>TCP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.6.13</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+A table containing information about existing IPv4-specific
+TCP connections or listeners.  This table has been
+deprecated in favor of the version neutral
+tcpConnectionTable.
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="tcpConnEntry" />Row Description</td>
+<td>
+<pre>
+A conceptual row of the tcpConnTable containing information
+about a particular current IPv4 TCP connection.  Each row
+of this table is transient in that it ceases to exist when
+(or soon after) the connection makes the transition to the
+CLOSED state.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>tcpConnTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="tcpConnLocalAddress" />
+2
+<br /><b>tcpConnLocalAddress</b>
+
+</td><td>
+  IPADDR
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The local IP address for this TCP connection.  In the case
+of a connection in the listen state willing to
+accept connections for any IP interface associated with the
+node, the value 0.0.0.0 is used.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="tcpConnLocalPort" />
+3
+<br /><b>tcpConnLocalPort</b>
+
+</td><td>
+  INTEGER32
+      <br />Legal values:
+        0 .. 65535
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The local port number for this TCP connection.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="tcpConnRemAddress" />
+4
+<br /><b>tcpConnRemAddress</b>
+
+</td><td>
+  IPADDR
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The remote IP address for this TCP connection.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="tcpConnRemPort" />
+5
+<br /><b>tcpConnRemPort</b>
+
+</td><td>
+  INTEGER32
+      <br />Legal values:
+        0 .. 65535
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The remote port number for this TCP connection.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other tcpConnTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="tcpConnState" />
+1
+<br /><b>tcpConnState</b>
+
+</td><td>
+  INTEGER
+      <table class="enum">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>closed</td></tr>
+        <tr><td>2</td><td>listen</td></tr>
+        <tr><td>3</td><td>synSent</td></tr>
+        <tr><td>4</td><td>synReceived</td></tr>
+        <tr><td>5</td><td>established</td></tr>
+        <tr><td>6</td><td>finWait1</td></tr>
+        <tr><td>7</td><td>finWait2</td></tr>
+        <tr><td>8</td><td>closeWait</td></tr>
+        <tr><td>9</td><td>lastAck</td></tr>
+        <tr><td>10</td><td>closing</td></tr>
+        <tr><td>11</td><td>timeWait</td></tr>
+        <tr><td>12</td><td>deleteTCB</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The state of this TCP connection.
+The only value that may be set by a management station is
+            deleteTCB(12).  Accordingly, it is appropriate for an agent
+            to return a `badValue' response if a management station
+            attempts to set this object to any other value.
+If a management station sets this object to the value
+            deleteTCB(12), then the TCB (as defined in [RFC793]) of
+            the corresponding connection on the managed node is
+            deleted, resulting in immediate termination of the
+            connection.
+As an implementation-specific option, a RST segment may be
+            sent from the managed node to the other TCP endpoint (note,
+            however, that RST segments are not sent reliably).
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -500,6 +1006,7 @@ As an implementation-specific option, a RST segment may be
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -510,7 +1017,10 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="InetPortNumber">InetPortNumber</td><td>UNSIGNED32</td><td><pre></pre></td></tr>
+<tr><td><a name="InetAddress">InetAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />
@@ -520,10 +1030,13 @@ clause as well as the DESCRIPTION clause of the object itself.
 +--<a href="#tcp">tcp</a>(6)
    |
    +-- -R-- EnumVal   <a href="#tcpRtoAlgorithm">tcpRtoAlgorithm</a>(1)
-   |        Values: other(1), constant(2), rsre(3), vanj(4)
+   |        Values: other(1), constant(2), rsre(3), vanj(4), rfc2988(5)
    +-- -R-- Integer32 <a href="#tcpRtoMin">tcpRtoMin</a>(2)
+   |        Range: 0..2147483647
    +-- -R-- Integer32 <a href="#tcpRtoMax">tcpRtoMax</a>(3)
+   |        Range: 0..2147483647
    +-- -R-- Integer32 <a href="#tcpMaxConn">tcpMaxConn</a>(4)
+   |        Range: -1 | 0..2147483647
    +-- -R-- Counter   <a href="#tcpActiveOpens">tcpActiveOpens</a>(5)
    +-- -R-- Counter   <a href="#tcpPassiveOpens">tcpPassiveOpens</a>(6)
    +-- -R-- Counter   <a href="#tcpAttemptFails">tcpAttemptFails</a>(7)
@@ -541,14 +1054,59 @@ clause as well as the DESCRIPTION clause of the object itself.
    |     +-- -RW- EnumVal   <a href="#tcpConnState">tcpConnState</a>(1)
    |     |        Values: closed(1), listen(2), synSent(3), synReceived(4), established(5), finWait1(6), finWait2(7), closeWait(8), lastAck(9), closing(10), timeWait(11), deleteTCB(12)
    |     +-- -R-- IpAddr    <a href="#tcpConnLocalAddress">tcpConnLocalAddress</a>(2)
-   |     +-- -R-- INTEGER   <a href="#tcpConnLocalPort">tcpConnLocalPort</a>(3)
+   |     +-- -R-- Integer32 <a href="#tcpConnLocalPort">tcpConnLocalPort</a>(3)
    |     |        Range: 0..65535
    |     +-- -R-- IpAddr    <a href="#tcpConnRemAddress">tcpConnRemAddress</a>(4)
-   |     +-- -R-- INTEGER   <a href="#tcpConnRemPort">tcpConnRemPort</a>(5)
+   |     +-- -R-- Integer32 <a href="#tcpConnRemPort">tcpConnRemPort</a>(5)
    |              Range: 0..65535
    |
    +-- -R-- Counter   <a href="#tcpInErrs">tcpInErrs</a>(14)
    +-- -R-- Counter   <a href="#tcpOutRsts">tcpOutRsts</a>(15)
+   +-- -R-- Counter64 <a href="#tcpHCInSegs">tcpHCInSegs</a>(17)
+   +-- -R-- Counter64 <a href="#tcpHCOutSegs">tcpHCOutSegs</a>(18)
+   |
+   +--<a href="#tcpConnectionTable">tcpConnectionTable</a>(19)
+   |  |
+   |  +--<a href="#tcpConnectionEntry">tcpConnectionEntry</a>(1)
+   |     |  Index: tcpConnectionLocalAddressType, tcpConnectionLocalAddress, tcpConnectionLocalPort, tcpConnectionRemAddressType, tcpConnectionRemAddress, tcpConnectionRemPort
+   |     |
+   |     +-- ---- EnumVal   <a href="#tcpConnectionLocalAddressType">tcpConnectionLocalAddressType</a>(1)
+   |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |     +-- ---- String    <a href="#tcpConnectionLocalAddress">tcpConnectionLocalAddress</a>(2)
+   |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |     |        Size: 0..255
+   |     +-- ---- Unsigned  <a href="#tcpConnectionLocalPort">tcpConnectionLocalPort</a>(3)
+   |     |        Textual Convention: <a href="#InetPortNumber">InetPortNumber</a>
+   |     |        Range: 0..65535
+   |     +-- ---- EnumVal   <a href="#tcpConnectionRemAddressType">tcpConnectionRemAddressType</a>(4)
+   |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |     +-- ---- String    <a href="#tcpConnectionRemAddress">tcpConnectionRemAddress</a>(5)
+   |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |     |        Size: 0..255
+   |     +-- ---- Unsigned  <a href="#tcpConnectionRemPort">tcpConnectionRemPort</a>(6)
+   |     |        Textual Convention: <a href="#InetPortNumber">InetPortNumber</a>
+   |     |        Range: 0..65535
+   |     +-- -RW- EnumVal   <a href="#tcpConnectionState">tcpConnectionState</a>(7)
+   |     |        Values: closed(1), listen(2), synSent(3), synReceived(4), established(5), finWait1(6), finWait2(7), closeWait(8), lastAck(9), closing(10), timeWait(11), deleteTCB(12)
+   |     +-- -R-- Unsigned  <a href="#tcpConnectionProcess">tcpConnectionProcess</a>(8)
+   |
+   +--<a href="#tcpListenerTable">tcpListenerTable</a>(20)
+      |
+      +--<a href="#tcpListenerEntry">tcpListenerEntry</a>(1)
+         |  Index: tcpListenerLocalAddressType, tcpListenerLocalAddress, tcpListenerLocalPort
+         |
+         +-- ---- EnumVal   <a href="#tcpListenerLocalAddressType">tcpListenerLocalAddressType</a>(1)
+         |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+         |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+         +-- ---- String    <a href="#tcpListenerLocalAddress">tcpListenerLocalAddress</a>(2)
+         |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+         |        Size: 0..255
+         +-- ---- Unsigned  <a href="#tcpListenerLocalPort">tcpListenerLocalPort</a>(3)
+         |        Textual Convention: <a href="#InetPortNumber">InetPortNumber</a>
+         |        Range: 0..65535
+         +-- -R-- Unsigned  <a href="#tcpListenerProcess">tcpListenerProcess</a>(4)
 </pre>
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->

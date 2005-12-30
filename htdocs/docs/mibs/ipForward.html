@@ -14,12 +14,13 @@ document as <b>.1.3.6.1.2.1.4.24</b>.
 <h3><a href="#objects_Current">Current Objects</a></h3>
 <ul>
 <li><a href="#scalar_current">Scalars</a></li>
-  <li><a href="#ipCidrRouteTable">ipCidrRouteTable</a></li>
+  <li><a href="#inetCidrRouteTable">inetCidrRouteTable</a></li>
 </ul>
 <h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
 <ul>
 <li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
   <li><a href="#ipForwardTable">ipForwardTable</a></li>
+  <li><a href="#ipCidrRouteTable">ipCidrRouteTable</a></li>
 </ul>
 <h3><a href="#notifications">Notifications</a></h3>
 <h3><a href="#textconventions">Textual Conventions</a></h3>
@@ -29,8 +30,557 @@ document as <b>.1.3.6.1.2.1.4.24</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteNumber" />
+6
+<br /><b>inetCidrRouteNumber</b>
+
+</td><td>
+  GAUGE
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.24.6</td>
+<td>
+<pre>
+The number of current inetCidrRouteTable entries that 
+are not invalid.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteDiscards" />
+8
+<br /><b>inetCidrRouteDiscards</b>
+
+</td><td>
+  COUNTER
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.24.8</td>
+<td>
+<pre>
+The number of valid route entries discarded from 
+inetCidrRouteTable.  Discarded route entries do not 
+appear in inetCidrRouteTable.  One possible reason for 
+discarding an entry would be to free-up buffer space 
+for other route table entries.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="inetCidrRouteTable" /><h3>Table inetCidrRouteTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>inetCidrRouteTable</td></tr>
+  <tr><td class="label">In MIB</td><td>IP-FORWARD-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.4.24.7</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+This entity's IP Routing table.
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="inetCidrRouteEntry" />Row Description</td>
+<td>
+<pre>
+A particular route to a particular destination, under a 
+particular policy (as reflected in the 
+inetCidrRoutePolicy object). 
+
+Dynamically created rows will survive an agent reboot. 
+
+Implementers need to be aware that if the total number 
+of elements (octets or sub-identifiers) in 
+inetCidrRouteDest, inetCidrRoutePolicy, and 
+inetCidrRouteNextHop exceeds 111 then OIDs of column 
+instances in this table will have more than 128 sub- 
+identifiers and cannot be accessed using SNMPv1, 
+SNMPv2c, or SNMPv3.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>inetCidrRouteTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteDestType" />
+1
+<br /><b>inetCidrRouteDestType</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The type of the inetCidrRouteDest address, as defined  
+in the InetAddress MIB. 
+
+Only those address types that may appear in an actual 
+routing table are allowed as values of this object.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteDest" />
+2
+<br /><b>inetCidrRouteDest</b>
+
+</td><td>
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The destination IP address of this route. 
+The type of this address is determined by the value of 
+                the inetCidrRouteDestType object. 
+The values for the index objects inetCidrRouteDest and 
+                inetCidrRoutePfxLen must be consistent.  When the value 
+                of inetCidrRouteDest (excluding the zone index, if one 
+                is present) is x, then the bitwise logical-AND 
+                of x with the value of the mask formed from the 
+                corresponding index object inetCidrRoutePfxLen MUST be 
+                equal to x.  If not, then the index pair is not 
+                consistent and an inconsistentName error must be 
+                returned on SET or CREATE requests.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRoutePfxLen" />
+3
+<br /><b>inetCidrRoutePfxLen</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        0 .. 2040
+ <br>
+ <a href="#InetAddressPrefixLength">InetAddressPrefixLength</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressPrefixLength"> InetAddressPrefixLength TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Indicates the number of leading one bits which form the  
+mask to be logical-ANDed with the destination address  
+before being compared to the value in the 
+inetCidrRouteDest field. 
+
+The values for the index objects inetCidrRouteDest and 
+inetCidrRoutePfxLen must be consistent.  When the value 
+of inetCidrRouteDest (excluding the zone index, if one 
+is present) is x, then the bitwise logical-AND 
+of x with the value of the mask formed from the 
+corresponding index object inetCidrRoutePfxLen MUST be 
+equal to x.  If not, then the index pair is not 
+consistent and an inconsistentName error must be 
+returned on SET or CREATE requests.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRoutePolicy" />
+4
+<br /><b>inetCidrRoutePolicy</b>
+
+</td><td>
+  OBJECTID
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+This object is an opaque object without any defined 
+semantics.  Its purpose is to serve as an additional 
+index which may delineate between multiple entries to 
+the same destination.  The value { 0 0 } shall be used 
+as the default value for this object.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteNextHopType" />
+5
+<br /><b>inetCidrRouteNextHopType</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The type of the inetCidrRouteNextHop address, as  
+defined in the InetAddress MIB. 
+
+Value should be set to unknown(0) for non-remote  
+routes. 
+
+Only those address types that may appear in an actual 
+routing table are allowed as values of this object.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteNextHop" />
+6
+<br /><b>inetCidrRouteNextHop</b>
+
+</td><td>
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+On remote routes, the address of the next system en              
+route.  For non-remote routes, a zero length string. 
+
+The type of this address is determined by the value of 
+the inetCidrRouteNextHopType object.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other inetCidrRouteTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteIfIndex" />
+7
+<br /><b>inetCidrRouteIfIndex</b>
+
+</td><td>
+  INTEGER32
+      <br />Legal values:
+        0 .. 2147483647
+ <br>
+ <a href="#InterfaceIndexOrZero">InterfaceIndexOrZero</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InterfaceIndexOrZero"> InterfaceIndexOrZero TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The ifIndex value which identifies the local interface 
+through which the next hop of this route should be  
+reached.  A value of 0 is valid and represents the 
+scenario where no interface is specified.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteType" />
+8
+<br /><b>inetCidrRouteType</b>
+
+</td><td>
+  INTEGER
+      <table class="enum">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>other</td></tr>
+        <tr><td>2</td><td>reject</td></tr>
+        <tr><td>3</td><td>local</td></tr>
+        <tr><td>4</td><td>remote</td></tr>
+        <tr><td>5</td><td>blackhole</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The type of route.  Note that local(3) refers to a  
+route for which the next hop is the final destination;  
+remote(4)refers to a route for which the next hop is  
+not the final destination. 
+
+Routes which do not result in traffic forwarding or 
+rejection should not be displayed even if the  
+implementation keeps them stored internally. 
+
+reject(2) refers to a route which, if matched, discards  
+the message as unreachable and returns a notification  
+(e.g. ICMP error) to the message sender.  This is used  
+in some protocols as a means of correctly aggregating  
+routes. 
+
+blackhole(5) refers to a route which, if matched,  
+discards the message silently.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteProto" />
+9
+<br /><b>inetCidrRouteProto</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#IANAipRouteProtocol">IANAipRouteProtocol</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#IANAipRouteProtocol"> IANAipRouteProtocol TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The routing mechanism via which this route was learned. 
+Inclusion of values for gateway routing protocols is  
+not intended to imply that hosts should support those 
+protocols.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteAge" />
+10
+<br /><b>inetCidrRouteAge</b>
+
+</td><td>
+  GAUGE
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of seconds since this route was last updated  
+or otherwise determined to be correct.  Note that no  
+semantics of 'too old' can be implied except through  
+knowledge of the routing protocol by which the route  
+was learned.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteNextHopAS" />
+11
+<br /><b>inetCidrRouteNextHopAS</b>
+
+</td><td>
+  UNSIGNED32
+ <br>
+ <a href="#InetAutonomousSystemNumber">InetAutonomousSystemNumber</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAutonomousSystemNumber"> InetAutonomousSystemNumber TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The Autonomous System Number of the Next Hop.  The  
+semantics of this object are determined by the routing- 
+protocol specified in the route's inetCidrRouteProto  
+value. When this object is unknown or not relevant its  
+value should be set to zero.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteMetric1" />
+12
+<br /><b>inetCidrRouteMetric1</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>Create</td>
+<td>
+<pre>
+The primary routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's inetCidrRouteProto  
+value.  If this metric is not used, its value should be  
+set to -1.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteMetric2" />
+13
+<br /><b>inetCidrRouteMetric2</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>Create</td>
+<td>
+<pre>
+An alternate routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's inetCidrRouteProto  
+value.  If this metric is not used, its value should be  
+set to -1.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteMetric3" />
+14
+<br /><b>inetCidrRouteMetric3</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>Create</td>
+<td>
+<pre>
+An alternate routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's inetCidrRouteProto  
+value.  If this metric is not used, its value should be  
+set to -1.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteMetric4" />
+15
+<br /><b>inetCidrRouteMetric4</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>Create</td>
+<td>
+<pre>
+An alternate routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's inetCidrRouteProto  
+value.  If this metric is not used, its value should be  
+set to -1.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteMetric5" />
+16
+<br /><b>inetCidrRouteMetric5</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>Create</td>
+<td>
+<pre>
+An alternate routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's inetCidrRouteProto  
+value.  If this metric is not used, its value should be  
+set to -1.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="inetCidrRouteStatus" />
+17
+<br /><b>inetCidrRouteStatus</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The row status variable, used according to row  
+installation and removal conventions. 
+
+A row entry cannot be modified when the status is 
+marked as active(1).
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <br>
+  <table class="deprecated"><tr><td>
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipForwardNumber" />
+1
+<br /><b>ipForwardNumber</b>
+
+</td><td>
+  GAUGE
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of current ipForwardTable entries that are  
+not invalid.
+</pre>
+</td>
+  </tr>
   <tr>
   <td>
 <a name="ipCidrRouteNumber" />
@@ -40,13 +590,12 @@ document as <b>.1.3.6.1.2.1.4.24</b>.
 </td><td>
   GAUGE
 
-
   </td><td>ReadOnly</td>
-    <td>.1.3.6.1.2.1.4.24.3</td>
 <td>
 <pre>
-The number of current ipCidrRouteTable entries
-that are not invalid.
+The number of current ipCidrRouteTable entries that are              
+not invalid.  This object is deprecated in favor of 
+inetCidrRouteNumber and the inetCidrRouteTable.
 </pre>
 </td>
   </tr>
@@ -54,24 +603,438 @@ that are not invalid.
 </ul>
 
 <h2>TABLE OBJECTS</h2>
-<a name="ipCidrRouteTable" /><h3>Table ipCidrRouteTable</h3>
+<a name="ipForwardTable" /><h3>Table ipForwardTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipCidrRouteTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IP-FORWARD-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.4.24.4</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>ipForwardTable</td></tr>
+  <tr><td class="label">In MIB</td><td>IP-FORWARD-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.4.24.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 This entity's IP Routing table.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="ipCidrRouteEntry" />Row Description</td>
+<tr><td class="label"><a name="ipForwardEntry" />Row Description</td>
 <td>
 <pre>
-A particular route to  a  particular  destina-
-tion, under a particular policy.
+A particular route to a particular destination, under a 
+particular policy.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>ipForwardTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipForwardDest" />
+1
+<br /><b>ipForwardDest</b>
+
+</td><td>
+  IPADDR
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The destination IP address of this route.  An entry  
+with a value of 0.0.0.0 is considered a default route. 
+
+This object may not take a Multicast (Class D) address 
+value. 
+
+Any assignment (implicit or otherwise) of an instance  
+of this object to a value x must be rejected if the  
+bitwise logical-AND of x with the value of the  
+corresponding instance of the ipForwardMask object is  
+not equal to x.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardProto" />
+7
+<br /><b>ipForwardProto</b>
+
+</td><td>
+  INTEGER
+      <table class="enum">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>other</td></tr>
+        <tr><td>2</td><td>local</td></tr>
+        <tr><td>3</td><td>netmgmt</td></tr>
+        <tr><td>4</td><td>icmp</td></tr>
+        <tr><td>5</td><td>egp</td></tr>
+        <tr><td>6</td><td>ggp</td></tr>
+        <tr><td>7</td><td>hello</td></tr>
+        <tr><td>8</td><td>rip</td></tr>
+        <tr><td>9</td><td>is_is</td></tr>
+        <tr><td>10</td><td>es_is</td></tr>
+        <tr><td>11</td><td>ciscoIgrp</td></tr>
+        <tr><td>12</td><td>bbnSpfIgp</td></tr>
+        <tr><td>13</td><td>ospf</td></tr>
+        <tr><td>14</td><td>bgp</td></tr>
+        <tr><td>15</td><td>idpr</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The routing mechanism via which this route was learned. 
+Inclusion of values for gateway routing protocols is  
+not intended to imply that hosts should support those 
+protocols.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardPolicy" />
+3
+<br /><b>ipForwardPolicy</b>
+
+</td><td>
+  INTEGER32
+      <br />Legal values:
+        0 .. 2147483647
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The general set of conditions that would cause 
+the selection of one multipath route (set of 
+next hops for a given destination) is referred 
+to as 'policy'. 
+
+Unless the mechanism indicated by ipForwardProto 
+specifies otherwise, the policy specifier is 
+the IP TOS Field.  The encoding of IP TOS is as 
+specified by the following convention.  Zero 
+indicates the default path if no more specific 
+policy applies. 
+
++-----+-----+-----+-----+-----+-----+-----+-----+ 
+|                 |                       |     | 
+|   PRECEDENCE    |    TYPE OF SERVICE    |  0  | 
+|                 |                       |     | 
++-----+-----+-----+-----+-----+-----+-----+-----+ 
+
+             IP TOS                IP TOS 
+   Field     Policy      Field     Policy 
+   Contents    Code      Contents    Code 
+   0 0 0 0  ==>   0      0 0 0 1  ==>   2 
+   0 0 1 0  ==>   4      0 0 1 1  ==>   6 
+   0 1 0 0  ==>   8      0 1 0 1  ==>  10 
+   0 1 1 0  ==>  12      0 1 1 1  ==>  14 
+   1 0 0 0  ==>  16      1 0 0 1  ==>  18 
+   1 0 1 0  ==>  20      1 0 1 1  ==>  22 
+   1 1 0 0  ==>  24      1 1 0 1  ==>  26 
+   1 1 1 0  ==>  28      1 1 1 1  ==>  30 
+
+Protocols defining 'policy' otherwise must either 
+define a set of values which are valid for 
+this object or must implement an integer-instanced 
+policy table for which this object's 
+value acts as an index.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardNextHop" />
+4
+<br /><b>ipForwardNextHop</b>
+
+</td><td>
+  IPADDR
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+On remote routes, the address of the next system en  
+route; Otherwise, 0.0.0.0.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other ipForwardTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipForwardMask" />
+2
+<br /><b>ipForwardMask</b>
+
+</td><td>
+  IPADDR
+
+  </td><td>Create</td>
+<td>
+<pre>
+Indicate the mask to be logical-ANDed with the  
+destination address before being compared to the value  
+in the ipForwardDest field.  For those systems that do  
+not support arbitrary subnet masks, an agent constructs  
+the value of the ipForwardMask by reference to the IP  
+Address Class. 
+
+Any assignment (implicit or otherwise) of an instance  
+of this object to a value x must be rejected if the  
+bitwise logical-AND of x with the value of the  
+corresponding instance of the ipForwardDest object is  
+not equal to ipForwardDest.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardIfIndex" />
+5
+<br /><b>ipForwardIfIndex</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>Create</td>
+<td>
+<pre>
+The ifIndex value which identifies the local interface 
+through which the next hop of this route should be  
+reached.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardType" />
+6
+<br /><b>ipForwardType</b>
+
+</td><td>
+  INTEGER
+      <table class="enum">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>other</td></tr>
+        <tr><td>2</td><td>invalid</td></tr>
+        <tr><td>3</td><td>local</td></tr>
+        <tr><td>4</td><td>remote</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The type of route.  Note that local(3) refers to a  
+route for which the next hop is the final destination;  
+remote(4) refers to a route for which the next hop is  
+not the final destination. 
+
+Setting this object to the value invalid(2) has the  
+effect of invalidating the corresponding entry in the 
+ipForwardTable object.  That is, it effectively 
+disassociates the destination identified with said  
+entry from the route identified with said entry.  It is  
+an implementation-specific matter as to whether the  
+agent removes an invalidated entry from the table.   
+Accordingly, management stations must be prepared to  
+receive tabular information from agents that  
+corresponds to entries not currently in use.  Proper  
+interpretation of such entries requires examination of  
+the relevant ipForwardType object.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardAge" />
+8
+<br /><b>ipForwardAge</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of seconds since this route was last updated  
+or otherwise determined to be correct.  Note that no  
+semantics of `too old' can be implied except through  
+knowledge of the routing protocol by which the route  
+was learned.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardInfo" />
+9
+<br /><b>ipForwardInfo</b>
+
+</td><td>
+  OBJECTID
+
+  </td><td>Create</td>
+<td>
+<pre>
+A reference to MIB definitions specific to the  
+particular routing protocol which is responsible for  
+this route, as determined by the value specified in the  
+route's ipForwardProto value.  If this information is  
+not present, its value should be set to the OBJECT  
+IDENTIFIER { 0 0 }, which is a syntactically valid  
+object identifier, and any implementation conforming to  
+ASN.1 and the Basic Encoding Rules must be able to  
+generate and recognize this value.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardNextHopAS" />
+10
+<br /><b>ipForwardNextHopAS</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>Create</td>
+<td>
+<pre>
+The Autonomous System Number of the Next Hop.  When  
+this is unknown or not relevant to the protocol  
+indicated by ipForwardProto, zero.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardMetric1" />
+11
+<br /><b>ipForwardMetric1</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>Create</td>
+<td>
+<pre>
+The primary routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's ipForwardProto value.   
+If this metric is not used, its value should be set to  
+-1.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardMetric2" />
+12
+<br /><b>ipForwardMetric2</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>Create</td>
+<td>
+<pre>
+An alternate routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's ipForwardProto value.   
+If this metric is not used, its value should be set to  
+-1.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardMetric3" />
+13
+<br /><b>ipForwardMetric3</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>Create</td>
+<td>
+<pre>
+An alternate routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's ipForwardProto value.   
+If this metric is not used, its value should be set to  
+-1.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardMetric4" />
+14
+<br /><b>ipForwardMetric4</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>Create</td>
+<td>
+<pre>
+An alternate routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's ipForwardProto value.   
+If this metric is not used, its value should be set to  
+-1.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwardMetric5" />
+15
+<br /><b>ipForwardMetric5</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>Create</td>
+<td>
+<pre>
+An alternate routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's ipForwardProto value.   
+If this metric is not used, its value should be set to  
+-1.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="ipCidrRouteTable" /><h3>Table ipCidrRouteTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>ipCidrRouteTable</td></tr>
+  <tr><td class="label">In MIB</td><td>IP-FORWARD-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.4.24.4</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+This entity's IP Routing table.  This table has been 
+deprecated in favor of the IP version neutral 
+inetCidrRouteTable.
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="ipCidrRouteEntry" />Row Description</td>
+<td>
+<pre>
+A particular route to a particular destination, under a 
+particular policy.
 </pre>
 </td>
 </tr>
@@ -79,8 +1042,8 @@ tion, under a particular policy.
 
   <h4>ipCidrRouteTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipCidrRouteDest" />
@@ -90,18 +1053,17 @@ tion, under a particular policy.
 </td><td>
   IPADDR
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The destination IP address of this route.
-This object may not take a Multicast (Class  D)
-       address value.
-Any assignment (implicit or  otherwise)  of  an
-       instance  of  this  object to a value x must be
-       rejected if the bitwise logical-AND of  x  with
-       the  value of the corresponding instance of the
-       ipCidrRouteMask object is not equal to x.
+The destination IP address of this route. 
+This object may not take a Multicast (Class D) address 
+                value. 
+Any assignment (implicit or otherwise) of an instance  
+                of this object to a value x must be rejected if the  
+                bitwise logical-AND of x with the value of the  
+                corresponding instance of the ipCidrRouteMask object is  
+                not equal to x.
 </pre>
 </td>
   </tr>
@@ -114,25 +1076,23 @@ Any assignment (implicit or  otherwise)  of  an
 </td><td>
   IPADDR
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
-Indicate the mask to be logical-ANDed with the
-destination  address  before  being compared to
-the value  in  the  ipCidrRouteDest  field.   For
-those  systems  that  do  not support arbitrary
-subnet masks, an agent constructs the value  of
-the  ipCidrRouteMask  by  reference to the IP Ad-
-dress Class.
+Indicate the mask to be logical-ANDed with the  
+destination address before being compared to the value  
+in the ipCidrRouteDest field.  For those systems that  
+do not support arbitrary subnet masks, an agent  
+constructs the value of the ipCidrRouteMask by  
+reference to the IP Address Class. 
 
-Any assignment (implicit or  otherwise)  of  an
-instance  of  this  object to a value x must be
-rejected if the bitwise logical-AND of  x  with
+Any assignment (implicit or otherwise) of an instance  
+of this object to a value x must be rejected if the  
+bitwise logical-AND of x with the value of the  
+corresponding instance of the ipCidrRouteDest object is  
 
-the  value of the corresponding instance of the
-ipCidrRouteDest object is not equal to ipCidrRoute-
-Dest.
+
+not equal to ipCidrRouteDest.
 </pre>
 </td>
   </tr>
@@ -144,33 +1104,34 @@ Dest.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The policy specifier is the IP TOS Field.  The encoding
-of IP TOS is as specified  by  the  following convention.
-Zero indicates the default path if no more  specific
-policy applies.
+The policy specifier is the IP TOS Field.  The encoding 
+of IP TOS is as specified by the following convention. 
+Zero indicates the default path if no more specific 
+policy applies. 
 
-+-----+-----+-----+-----+-----+-----+-----+-----+
-|                 |                       |     |
-|   PRECEDENCE    |    TYPE OF SERVICE    |  0  |
-|                 |                       |     |
-+-----+-----+-----+-----+-----+-----+-----+-----+
++-----+-----+-----+-----+-----+-----+-----+-----+ 
+|                 |                       |     | 
+|   PRECEDENCE    |    TYPE OF SERVICE    |  0  | 
+|                 |                       |     | 
++-----+-----+-----+-----+-----+-----+-----+-----+ 
 
-         IP TOS                IP TOS
-    Field     Policy      Field     Policy
-    Contents    Code      Contents    Code
-    0 0 0 0  ==>   0      0 0 0 1  ==>   2
-    0 0 1 0  ==>   4      0 0 1 1  ==>   6
-    0 1 0 0  ==>   8      0 1 0 1  ==>  10
-    0 1 1 0  ==>  12      0 1 1 1  ==>  14
-    1 0 0 0  ==>  16      1 0 0 1  ==>  18
-    1 0 1 0  ==>  20      1 0 1 1  ==>  22
-    1 1 0 0  ==>  24      1 1 0 1  ==>  26
-    1 1 1 0  ==>  28      1 1 1 1  ==>  30
+             IP TOS                IP TOS 
+   Field     Policy      Field     Policy 
+   Contents    Code      Contents    Code 
+   0 0 0 0  ==>   0      0 0 0 1  ==>   2 
+   0 0 1 0  ==>   4      0 0 1 1  ==>   6 
+   0 1 0 0  ==>   8      0 1 0 1  ==>  10 
+   0 1 1 0  ==>  12      0 1 1 1  ==>  14 
+   1 0 0 0  ==>  16      1 0 0 1  ==>  18 
+   1 0 1 0  ==>  20      1 0 1 1  ==>  22 
+   1 1 0 0  ==>  24      1 1 0 1  ==>  26 
+   1 1 1 0  ==>  28      1 1 1 1  ==>  30
 </pre>
 </td>
   </tr>
@@ -183,20 +1144,19 @@ policy applies.
 </td><td>
   IPADDR
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
-On remote routes, the address of the next sys-
-tem en route; Otherwise, 0.0.0.0.
+On remote routes, the address of the next system en  
+route; Otherwise, 0.0.0.0.
 </pre>
 </td>
   </tr>
 </table>
 
   <h4>Other ipCidrRouteTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipCidrRouteIfIndex" />
@@ -206,13 +1166,12 @@ tem en route; Otherwise, 0.0.0.0.
 </td><td>
   INTEGER32
 
-
   </td><td>Create</td>
 <td>
 <pre>
-The ifIndex value which identifies  the  local
-interface  through  which  the next hop of this
-route should be reached.
+The ifIndex value which identifies  the local interface 
+through which the next hop of this route should be  
+                reached.
 </pre>
 </td>
   </tr>
@@ -224,8 +1183,7 @@ route should be reached.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>other</td></tr>
         <tr><td>2</td><td>reject</td></tr>
@@ -236,19 +1194,19 @@ route should be reached.
   </td><td>Create</td>
 <td>
 <pre>
-The type of route.  Note that local(3)  refers
-to  a route for which the next hop is the final
-destination; remote(4) refers to  a  route  for
-which  the  next  hop is not the final destina-
-tion.
+The type of route.  Note that local(3) refers to a  
+route for which the next hop is the final destination;   
+remote(4) refers to a route for which the next hop is  
+not the final destination. 
 
-Routes which do not result in traffic forwarding or
-rejection should not be displayed even if the
-implementation keeps them stored internally.
+Routes which do not result in traffic forwarding or 
+rejection should not be displayed even if the  
+implementation keeps them stored internally. 
 
-reject (2) refers to a route which, if matched, discards
-the message as unreachable. This is used in some
-protocols as a means of correctly aggregating routes.
+reject (2) refers to a route which, if matched,  
+discards the message as unreachable. This is used in  
+some protocols as a means of correctly aggregating  
+routes.
 </pre>
 </td>
   </tr>
@@ -260,8 +1218,7 @@ protocols as a means of correctly aggregating routes.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>other</td></tr>
         <tr><td>2</td><td>local</td></tr>
@@ -284,10 +1241,10 @@ protocols as a means of correctly aggregating routes.
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The routing mechanism via which this route was
-learned.  Inclusion of values for gateway rout-
-ing protocols is not  intended  to  imply  that
-hosts should support those protocols.
+The routing mechanism via which this route was learned. 
+Inclusion of values for gateway routing protocols is  
+not intended to imply that hosts should support those 
+protocols.
 </pre>
 </td>
   </tr>
@@ -300,16 +1257,14 @@ hosts should support those protocols.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The number of seconds  since  this  route  was
-last  updated  or  otherwise  determined  to be
-correct.  Note that no semantics of  `too  old'
-can  be implied except through knowledge of the
-routing  protocol  by  which  the   route   was
-learned.
+The number of seconds since this route was last updated  
+or otherwise determined to be correct.  Note that no  
+semantics of `too old' can be implied except through  
+knowledge of the routing protocol by which the route  
+was learned.
 </pre>
 </td>
   </tr>
@@ -322,20 +1277,17 @@ learned.
 </td><td>
   OBJECTID
 
-
   </td><td>Create</td>
 <td>
 <pre>
-A reference to MIB definitions specific to the
-particular  routing protocol which is responsi-
-ble for this route, as determined by the  value
-specified  in the route's ipCidrRouteProto value.
-If this information is not present,  its  value
-should be set to the OBJECT IDENTIFIER { 0 0 },
-which is a syntactically valid object  identif-
-
-ier, and any implementation conforming to ASN.1
-and the Basic Encoding Rules must  be  able  to
+A reference to MIB definitions specific to the  
+particular routing protocol which is responsible for  
+this route, as determined by the value specified in the  
+route's ipCidrRouteProto value.  If this information is  
+not present, its value should be set to the OBJECT  
+IDENTIFIER { 0 0 }, which is a syntactically valid  
+object identifier, and any implementation conforming to  
+ASN.1 and the Basic Encoding Rules must be able to  
 generate and recognize this value.
 </pre>
 </td>
@@ -349,16 +1301,14 @@ generate and recognize this value.
 </td><td>
   INTEGER32
 
-
   </td><td>Create</td>
 <td>
 <pre>
-The Autonomous System Number of the Next  Hop.
-The  semantics of this object are determined by
-the routing-protocol specified in  the  route's
-ipCidrRouteProto  value. When  this object is
-unknown or not relevant its value should be set
-to zero.
+The Autonomous System Number of the Next Hop.  The  
+semantics of this object are determined by the routing- 
+protocol specified in the route's ipCidrRouteProto  
+value. When this object is unknown or not relevant its  
+value should be set to zero.
 </pre>
 </td>
   </tr>
@@ -371,15 +1321,14 @@ to zero.
 </td><td>
   INTEGER32
 
-
   </td><td>Create</td>
 <td>
 <pre>
-The primary routing  metric  for  this  route.
-The  semantics of this metric are determined by
-the routing-protocol specified in  the  route's
-ipCidrRouteProto  value.   If  this metric is not
-used, its value should be set to -1.
+The primary routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's ipCidrRouteProto  
+value.  If this metric is not used, its value should be  
+set to -1.
 </pre>
 </td>
   </tr>
@@ -392,15 +1341,14 @@ used, its value should be set to -1.
 </td><td>
   INTEGER32
 
-
   </td><td>Create</td>
 <td>
 <pre>
-An alternate routing metric  for  this  route.
-The  semantics of this metric are determined by
-the routing-protocol specified in  the  route's
-ipCidrRouteProto  value.   If  this metric is not
-used, its value should be set to -1.
+An alternate routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's ipCidrRouteProto  
+value.  If this metric is not used, its value should be  
+set to -1.
 </pre>
 </td>
   </tr>
@@ -413,15 +1361,14 @@ used, its value should be set to -1.
 </td><td>
   INTEGER32
 
-
   </td><td>Create</td>
 <td>
 <pre>
-An alternate routing metric  for  this  route.
-The  semantics of this metric are determined by
-the routing-protocol specified in  the  route's
-ipCidrRouteProto  value.   If  this metric is not
-used, its value should be set to -1.
+An alternate routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's ipCidrRouteProto  
+value.  If this metric is not used, its value should be  
+set to -1.
 </pre>
 </td>
   </tr>
@@ -434,15 +1381,14 @@ used, its value should be set to -1.
 </td><td>
   INTEGER32
 
-
   </td><td>Create</td>
 <td>
 <pre>
-An alternate routing metric  for  this  route.
-The  semantics of this metric are determined by
-the routing-protocol specified in  the  route's
-ipCidrRouteProto  value.   If  this metric is not
-used, its value should be set to -1.
+An alternate routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+protocol specified in the route's ipCidrRouteProto  
+value.  If this metric is not used, its value should be  
+set to -1.
 </pre>
 </td>
   </tr>
@@ -455,15 +1401,16 @@ used, its value should be set to -1.
 </td><td>
   INTEGER32
 
-
   </td><td>Create</td>
 <td>
 <pre>
-An alternate routing metric  for  this  route.
-The  semantics of this metric are determined by
-the routing-protocol specified in  the  route's
-ipCidrRouteProto  value.   If  this metric is not
-used, its value should be set to -1.
+An alternate routing metric for this route.  The  
+semantics of this metric are determined by the routing- 
+
+
+protocol specified in the route's ipCidrRouteProto  
+value.  If this metric is not used, its value should be  
+set to -1.
 </pre>
 </td>
   </tr>
@@ -475,7 +1422,6 @@ used, its value should be set to -1.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -486,475 +1432,8 @@ used, its value should be set to -1.
 Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-The row status variable, used according to
-row installation and removal conventions.
-</pre>
-</td>
-  </tr>
-</table>
-</ul>
-<a name="objects_Deprecated" />
-  <hr />
-  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
-<a name="scalar_notcurrent" />
-<h2>SCALAR OBJECTS</h2>
-<ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
-  <tr>
-  <td>
-<a name="ipForwardNumber" />
-1
-<br /><b>ipForwardNumber</b>
-
-</td><td>
-  GAUGE
-
-
-  </td><td>ReadOnly</td>
-<td>
-<pre>
-The number of current  ipForwardTable  entries
-that are not invalid.
-</pre>
-</td>
-  </tr>
-</table>
-</ul>
-
-<h2>TABLE OBJECTS</h2>
-<a name="ipForwardTable" /><h3>Table ipForwardTable</h3>
-<ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipForwardTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IP-FORWARD-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.4.24.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
-<td>
-<pre>
-This entity's IP Routing table.
-</pre>
-</td>
-</tr>
-<tr><td bgcolor="#bbbbbb"><a name="ipForwardEntry" />Row Description</td>
-<td>
-<pre>
-A particular route to  a  particular  destina-
-tion, under a particular policy.
-</pre>
-</td>
-</tr>
-  </table>
-
-  <h4>ipForwardTable Indexes:</h4>
-
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
-  <tr>
-  <td>
-<a name="ipForwardDest" />
-1
-<br /><b>ipForwardDest</b>
-
-</td><td>
-  IPADDR
-
-
-  </td><td>ReadOnly</td>
-<td>
-<pre>
-The destination IP address of this route.   An
-entry  with  a value of 0.0.0.0 is considered a
-default route.
-
-This object may not take a Multicast (Class  D)
-address value.
-
-Any assignment (implicit or  otherwise)  of  an
-instance  of  this  object to a value x must be
-rejected if the bitwise logical-AND of  x  with
-the  value of the corresponding instance of the
-ipForwardMask object is not equal to x.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardProto" />
-7
-<br /><b>ipForwardProto</b>
-
-</td><td>
-  INTEGER
-
-      <table border=2 bgcolor="#cccccc">
-      <tr><th>Value</th><th>Label/Meaning</th></tr>
-        <tr><td>1</td><td>other</td></tr>
-        <tr><td>2</td><td>local</td></tr>
-        <tr><td>3</td><td>netmgmt</td></tr>
-        <tr><td>4</td><td>icmp</td></tr>
-        <tr><td>5</td><td>egp</td></tr>
-        <tr><td>6</td><td>ggp</td></tr>
-        <tr><td>7</td><td>hello</td></tr>
-        <tr><td>8</td><td>rip</td></tr>
-        <tr><td>9</td><td>is_is</td></tr>
-        <tr><td>10</td><td>es_is</td></tr>
-        <tr><td>11</td><td>ciscoIgrp</td></tr>
-        <tr><td>12</td><td>bbnSpfIgp</td></tr>
-        <tr><td>13</td><td>ospf</td></tr>
-        <tr><td>14</td><td>bgp</td></tr>
-        <tr><td>15</td><td>idpr</td></tr>
-      </table>
-
-  </td><td>ReadOnly</td>
-<td>
-<pre>
-The routing mechanism via which this route was
-learned.  Inclusion of values for gateway rout-
-ing protocols is not  intended  to  imply  that
-hosts should support those protocols.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardPolicy" />
-3
-<br /><b>ipForwardPolicy</b>
-
-</td><td>
-  INTEGER32
-
-
-  </td><td>ReadOnly</td>
-<td>
-<pre>
-The general set of conditions that would cause
-the  selection  of  one multipath route (set of
-next hops for a given destination) is  referred
-to as 'policy'.
-
-Unless the mechanism indicated by ipForwardPro-
-to specifies otherwise, the policy specifier is
-the IP TOS Field.  The encoding of IP TOS is as
- specified  by  the  following convention.  Zero
-indicates the default path if no more  specific
-policy applies.
-
-+-----+-----+-----+-----+-----+-----+-----+-----+
-|                 |                       |     |
-|   PRECEDENCE    |    TYPE OF SERVICE    |  0  |
-|                 |                       |     |
-+-----+-----+-----+-----+-----+-----+-----+-----+
-
-         IP TOS                IP TOS
-    Field     Policy      Field     Policy
-    Contents    Code      Contents    Code
-    0 0 0 0  ==>   0      0 0 0 1  ==>   2
-    0 0 1 0  ==>   4      0 0 1 1  ==>   6
-    0 1 0 0  ==>   8      0 1 0 1  ==>  10
-    0 1 1 0  ==>  12      0 1 1 1  ==>  14
-    1 0 0 0  ==>  16      1 0 0 1  ==>  18
-    1 0 1 0  ==>  20      1 0 1 1  ==>  22
-    1 1 0 0  ==>  24      1 1 0 1  ==>  26
-    1 1 1 0  ==>  28      1 1 1 1  ==>  30
-
-Protocols defining 'policy' otherwise must  ei-
-ther define a set of values which are valid for
-this  object  or  must  implement  an  integer-
-instanced  policy table for which this object's
-value acts as an index.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardNextHop" />
-4
-<br /><b>ipForwardNextHop</b>
-
-</td><td>
-  IPADDR
-
-
-  </td><td>ReadOnly</td>
-<td>
-<pre>
-On remote routes, the address of the next sys-
-tem en route; Otherwise, 0.0.0.0.
-</pre>
-</td>
-  </tr>
-</table>
-
-  <h4>Other ipForwardTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
-  <tr>
-  <td>
-<a name="ipForwardMask" />
-2
-<br /><b>ipForwardMask</b>
-
-</td><td>
-  IPADDR
-
-
-  </td><td>Create</td>
-<td>
-<pre>
-Indicate the mask to be logical-ANDed with the
-destination  address  before  being compared to
-the value  in  the  ipForwardDest  field.   For
-those  systems  that  do  not support arbitrary
-subnet masks, an agent constructs the value  of
-the  ipForwardMask  by  reference to the IP Ad-
-dress Class.
-
-Any assignment (implicit or  otherwise)  of  an
-instance  of  this  object to a value x must be
-rejected if the bitwise logical-AND of  x  with
-
-the  value of the corresponding instance of the
-ipForwardDest object is not equal to ipForward-
-Dest.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardIfIndex" />
-5
-<br /><b>ipForwardIfIndex</b>
-
-</td><td>
-  INTEGER32
-
-
-  </td><td>Create</td>
-<td>
-<pre>
-The ifIndex value which identifies  the  local
-interface  through  which  the next hop of this
-route should be reached.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardType" />
-6
-<br /><b>ipForwardType</b>
-
-</td><td>
-  INTEGER
-
-      <table border=2 bgcolor="#cccccc">
-      <tr><th>Value</th><th>Label/Meaning</th></tr>
-        <tr><td>1</td><td>other</td></tr>
-        <tr><td>2</td><td>invalid</td></tr>
-        <tr><td>3</td><td>local</td></tr>
-        <tr><td>4</td><td>remote</td></tr>
-      </table>
-
-  </td><td>Create</td>
-<td>
-<pre>
-The type of route.  Note that local(3)  refers
-to  a route for which the next hop is the final
-destination; remote(4) refers to  a  route  for
-which  the  next  hop is not the final destina-
-tion.
-
-Setting this object to the value invalid(2) has
-the  effect  of  invalidating the corresponding
-entry in the ipForwardTable object.   That  is,
-it  effectively  disassociates  the destination
-identified with said entry from the route iden-
-
-tified    with    said   entry.    It   is   an
-implementation-specific matter  as  to  whether
-the agent removes an invalidated entry from the
-table.  Accordingly, management  stations  must
-be prepared to receive tabular information from
-agents that corresponds to entries not current-
-ly  in  use.  Proper interpretation of such en-
-tries requires examination of the relevant  ip-
-ForwardType object.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardAge" />
-8
-<br /><b>ipForwardAge</b>
-
-</td><td>
-  INTEGER32
-
-
-  </td><td>ReadOnly</td>
-<td>
-<pre>
-The number of seconds  since  this  route  was
-last  updated  or  otherwise  determined  to be
-       correct.  Note that no semantics of  `too  old'
-       can  be implied except through knowledge of the
-       routing  protocol  by  which  the   route   was
-       learned.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardInfo" />
-9
-<br /><b>ipForwardInfo</b>
-
-</td><td>
-  OBJECTID
-
-
-  </td><td>Create</td>
-<td>
-<pre>
-A reference to MIB definitions specific to the
-particular  routing protocol which is responsi-
-ble for this route, as determined by the  value
-specified  in the route's ipForwardProto value.
-If this information is not present,  its  value
-should be set to the OBJECT IDENTIFIER { 0 0 },
-which is a syntactically valid object  identif-
-ier, and any implementation conforming to ASN.1
-and the Basic Encoding Rules must  be  able  to
-generate and recognize this value.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardNextHopAS" />
-10
-<br /><b>ipForwardNextHopAS</b>
-
-</td><td>
-  INTEGER32
-
-
-  </td><td>Create</td>
-<td>
-<pre>
-The Autonomous System Number of the Next  Hop.
-When  this  is  unknown  or not relevant to the
-protocol indicated by ipForwardProto, zero.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardMetric1" />
-11
-<br /><b>ipForwardMetric1</b>
-
-</td><td>
-  INTEGER32
-
-
-  </td><td>Create</td>
-<td>
-<pre>
-The primary routing  metric  for  this  route.
-The  semantics of this metric are determined by
-the routing-protocol specified in  the  route's
-ipForwardProto  value.   If  this metric is not
-used, its value should be set to -1.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardMetric2" />
-12
-<br /><b>ipForwardMetric2</b>
-
-</td><td>
-  INTEGER32
-
-
-  </td><td>Create</td>
-<td>
-<pre>
-An alternate routing metric  for  this  route.
-The  semantics of this metric are determined by
-the routing-protocol specified in  the  route's
-ipForwardProto  value.   If  this metric is not
-used, its value should be set to -1.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardMetric3" />
-13
-<br /><b>ipForwardMetric3</b>
-
-</td><td>
-  INTEGER32
-
-
-  </td><td>Create</td>
-<td>
-<pre>
-An alternate routing metric  for  this  route.
-The  semantics of this metric are determined by
-the routing-protocol specified in  the  route's
-ipForwardProto  value.   If  this metric is not
-used, its value should be set to -1.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardMetric4" />
-14
-<br /><b>ipForwardMetric4</b>
-
-</td><td>
-  INTEGER32
-
-
-  </td><td>Create</td>
-<td>
-<pre>
-An alternate routing metric  for  this  route.
-The  semantics of this metric are determined by
-the routing-protocol specified in  the  route's
-ipForwardProto  value.   If  this metric is not
-used, its value should be set to -1.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="ipForwardMetric5" />
-15
-<br /><b>ipForwardMetric5</b>
-
-</td><td>
-  INTEGER32
-
-
-  </td><td>Create</td>
-<td>
-<pre>
-An alternate routing metric  for  this  route.
-The  semantics of this metric are determined by
-the routing-protocol specified in  the  route's
-
-ipForwardProto  value.   If  this metric is not
-used, its value should be set to -1.
+The row status variable, used according to row  
+installation and removal conventions.
 </pre>
 </td>
   </tr>
@@ -962,6 +1441,8 @@ used, its value should be set to -1.
 </ul>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -970,6 +1451,7 @@ used, its value should be set to -1.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -980,8 +1462,14 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="IANAipRouteProtocol">IANAipRouteProtocol</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>local</td></tr><tr><td>3</td><td>netmgmt</td></tr><tr><td>4</td><td>icmp</td></tr><tr><td>5</td><td>egp</td></tr><tr><td>6</td><td>ggp</td></tr><tr><td>7</td><td>hello</td></tr><tr><td>8</td><td>rip</td></tr><tr><td>9</td><td>isIs</td></tr><tr><td>10</td><td>esIs</td></tr><tr><td>11</td><td>ciscoIgrp</td></tr><tr><td>12</td><td>bbnSpfIgp</td></tr><tr><td>13</td><td>ospf</td></tr><tr><td>14</td><td>bgp</td></tr><tr><td>15</td><td>idpr</td></tr><tr><td>16</td><td>ciscoEigrp</td></tr><tr><td>17</td><td>dvmrp</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="InterfaceIndexOrZero">InterfaceIndexOrZero</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<tr><td><a name="InetAutonomousSystemNumber">InetAutonomousSystemNumber</td><td>UNSIGNED32</td><td><pre></pre></td></tr>
+<tr><td><a name="InetAddressPrefixLength">InetAddressPrefixLength</td><td>UNSIGNED32</td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="InetAddress">InetAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />
@@ -999,6 +1487,7 @@ clause as well as the DESCRIPTION clause of the object itself.
    |     +-- -R-- IpAddr    <a href="#ipForwardDest">ipForwardDest</a>(1)
    |     +-- CR-- IpAddr    <a href="#ipForwardMask">ipForwardMask</a>(2)
    |     +-- -R-- Integer32 <a href="#ipForwardPolicy">ipForwardPolicy</a>(3)
+   |     |        Range: 0..2147483647
    |     +-- -R-- IpAddr    <a href="#ipForwardNextHop">ipForwardNextHop</a>(4)
    |     +-- CR-- Integer32 <a href="#ipForwardIfIndex">ipForwardIfIndex</a>(5)
    |     +-- CR-- EnumVal   <a href="#ipForwardType">ipForwardType</a>(6)
@@ -1024,6 +1513,7 @@ clause as well as the DESCRIPTION clause of the object itself.
    |     +-- -R-- IpAddr    <a href="#ipCidrRouteDest">ipCidrRouteDest</a>(1)
    |     +-- -R-- IpAddr    <a href="#ipCidrRouteMask">ipCidrRouteMask</a>(2)
    |     +-- -R-- Integer32 <a href="#ipCidrRouteTos">ipCidrRouteTos</a>(3)
+   |     |        Range: 0..2147483647
    |     +-- -R-- IpAddr    <a href="#ipCidrRouteNextHop">ipCidrRouteNextHop</a>(4)
    |     +-- CR-- Integer32 <a href="#ipCidrRouteIfIndex">ipCidrRouteIfIndex</a>(5)
    |     +-- CR-- EnumVal   <a href="#ipCidrRouteType">ipCidrRouteType</a>(6)
@@ -1043,16 +1533,64 @@ clause as well as the DESCRIPTION clause of the object itself.
    |              Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
    |
    +--<a href="#ipForwardConformance">ipForwardConformance</a>(5)
-      |
-      +--<a href="#ipForwardGroups">ipForwardGroups</a>(1)
-      |  |
-      |  +--<a href="#ipForwardMultiPathGroup">ipForwardMultiPathGroup</a>(2)
-      |  +--<a href="#ipForwardCidrRouteGroup">ipForwardCidrRouteGroup</a>(3)
-      |
-      +--<a href="#ipForwardCompliances">ipForwardCompliances</a>(2)
-         |
-         +--<a href="#ipForwardCompliance">ipForwardCompliance</a>(1)
-         +--<a href="#ipForwardOldCompliance">ipForwardOldCompliance</a>(2)
+   |  |
+   |  +--<a href="#ipForwardGroups">ipForwardGroups</a>(1)
+   |  |  |
+   |  |  +--<a href="#ipForwardMultiPathGroup">ipForwardMultiPathGroup</a>(2)
+   |  |  +--<a href="#ipForwardCidrRouteGroup">ipForwardCidrRouteGroup</a>(3)
+   |  |  +--<a href="#inetForwardCidrRouteGroup">inetForwardCidrRouteGroup</a>(4)
+   |  |
+   |  +--<a href="#ipForwardCompliances">ipForwardCompliances</a>(2)
+   |     |
+   |     +--<a href="#ipForwardCompliance">ipForwardCompliance</a>(1)
+   |     +--<a href="#ipForwardOldCompliance">ipForwardOldCompliance</a>(2)
+   |     +--<a href="#ipForwardFullCompliance">ipForwardFullCompliance</a>(3)
+   |     +--<a href="#ipForwardReadOnlyCompliance">ipForwardReadOnlyCompliance</a>(4)
+   |
+   +-- -R-- Gauge     <a href="#inetCidrRouteNumber">inetCidrRouteNumber</a>(6)
+   |
+   +--<a href="#inetCidrRouteTable">inetCidrRouteTable</a>(7)
+   |  |
+   |  +--<a href="#inetCidrRouteEntry">inetCidrRouteEntry</a>(1)
+   |     |  Index: inetCidrRouteDestType, inetCidrRouteDest, inetCidrRoutePfxLen, inetCidrRoutePolicy, inetCidrRouteNextHopType, inetCidrRouteNextHop
+   |     |
+   |     +-- ---- EnumVal   <a href="#inetCidrRouteDestType">inetCidrRouteDestType</a>(1)
+   |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |     +-- ---- String    <a href="#inetCidrRouteDest">inetCidrRouteDest</a>(2)
+   |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |     |        Size: 0..255
+   |     +-- ---- Unsigned  <a href="#inetCidrRoutePfxLen">inetCidrRoutePfxLen</a>(3)
+   |     |        Textual Convention: <a href="#InetAddressPrefixLength">InetAddressPrefixLength</a>
+   |     |        Range: 0..2040
+   |     +-- ---- ObjID     <a href="#inetCidrRoutePolicy">inetCidrRoutePolicy</a>(4)
+   |     +-- ---- EnumVal   <a href="#inetCidrRouteNextHopType">inetCidrRouteNextHopType</a>(5)
+   |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |     +-- ---- String    <a href="#inetCidrRouteNextHop">inetCidrRouteNextHop</a>(6)
+   |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |     |        Size: 0..255
+   |     +-- CR-- Integer32 <a href="#inetCidrRouteIfIndex">inetCidrRouteIfIndex</a>(7)
+   |     |        Textual Convention: <a href="#InterfaceIndexOrZero">InterfaceIndexOrZero</a>
+   |     |        Range: 0..2147483647
+   |     +-- CR-- EnumVal   <a href="#inetCidrRouteType">inetCidrRouteType</a>(8)
+   |     |        Values: other(1), reject(2), local(3), remote(4), blackhole(5)
+   |     +-- -R-- EnumVal   <a href="#inetCidrRouteProto">inetCidrRouteProto</a>(9)
+   |     |        Textual Convention: <a href="#IANAipRouteProtocol">IANAipRouteProtocol</a>
+   |     |        Values: other(1), local(2), netmgmt(3), icmp(4), egp(5), ggp(6), hello(7), rip(8), isIs(9), esIs(10), ciscoIgrp(11), bbnSpfIgp(12), ospf(13), bgp(14), idpr(15), ciscoEigrp(16), dvmrp(17)
+   |     +-- -R-- Gauge     <a href="#inetCidrRouteAge">inetCidrRouteAge</a>(10)
+   |     +-- CR-- Unsigned  <a href="#inetCidrRouteNextHopAS">inetCidrRouteNextHopAS</a>(11)
+   |     |        Textual Convention: <a href="#InetAutonomousSystemNumber">InetAutonomousSystemNumber</a>
+   |     +-- CR-- Integer32 <a href="#inetCidrRouteMetric1">inetCidrRouteMetric1</a>(12)
+   |     +-- CR-- Integer32 <a href="#inetCidrRouteMetric2">inetCidrRouteMetric2</a>(13)
+   |     +-- CR-- Integer32 <a href="#inetCidrRouteMetric3">inetCidrRouteMetric3</a>(14)
+   |     +-- CR-- Integer32 <a href="#inetCidrRouteMetric4">inetCidrRouteMetric4</a>(15)
+   |     +-- CR-- Integer32 <a href="#inetCidrRouteMetric5">inetCidrRouteMetric5</a>(16)
+   |     +-- CR-- EnumVal   <a href="#inetCidrRouteStatus">inetCidrRouteStatus</a>(17)
+   |              Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |              Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |
+   +-- -R-- Counter   <a href="#inetCidrRouteDiscards">inetCidrRouteDiscards</a>(8)
 </pre>
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->

@@ -28,8 +28,8 @@ document as <b>.1.3.6.1.4.1.2021.13.14</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dlmodNextIndex" />
@@ -38,7 +38,6 @@ document as <b>.1.3.6.1.4.1.2021.13.14</b>.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.13.14.1</td>
@@ -55,18 +54,18 @@ in the dlmodTable.
 <h2>TABLE OBJECTS</h2>
 <a name="dlmodTable" /><h3>Table dlmodTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dlmodTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-DLMOD-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.13.14.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>dlmodTable</td></tr>
+  <tr><td class="label">In MIB</td><td>UCD-DLMOD-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.2021.13.14.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of dlmodEntry.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="dlmodEntry" />Row Description</td>
+<tr><td class="label"><a name="dlmodEntry" />Row Description</td>
 <td>
 <pre>
 The parameters of dynamically loaded MIB module.
@@ -77,8 +76,8 @@ The parameters of dynamically loaded MIB module.
 
   <h4>dlmodTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dlmodIndex" />
@@ -87,7 +86,8 @@ The parameters of dynamically loaded MIB module.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 65535
 
   </td><td>NoAccess</td>
 <td>
@@ -99,8 +99,8 @@ An index that uniqely identifies an entry in the dlmodTable.
 </table>
 
   <h4>Other dlmodTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dlmodName" />
@@ -109,7 +109,8 @@ An index that uniqely identifies an entry in the dlmodTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -131,7 +132,8 @@ The module name.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -153,7 +155,8 @@ The path of the module executable file.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -175,8 +178,7 @@ The last error from dlmod_load_module.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>loaded</td></tr>
         <tr><td>2</td><td>unloaded</td></tr>
@@ -199,18 +201,21 @@ The current status of the loaded module.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -219,6 +224,7 @@ The current status of the loaded module.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -229,7 +235,7 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
 <tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
 </table></ul>
 

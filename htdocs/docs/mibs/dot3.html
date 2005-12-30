@@ -32,19 +32,19 @@ document as <b>.1.3.6.1.2.1.10.7</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 <a name="dot3StatsTable" /><h3>Table dot3StatsTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dot3StatsTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>EtherLike-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.10.7.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>dot3StatsTable</td></tr>
+  <tr><td class="label">In MIB</td><td>EtherLike-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.10.7.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 Statistics for a collection of ethernet-like
@@ -54,7 +54,7 @@ ethernet-like interface in the system.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="dot3StatsEntry" />Row Description</td>
+<tr><td class="label"><a name="dot3StatsEntry" />Row Description</td>
 <td>
 <pre>
 Statistics for a particular interface to an
@@ -66,8 +66,8 @@ ethernet-like medium.
 
   <h4>dot3StatsTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dot3StatsIndex" />
@@ -76,7 +76,8 @@ ethernet-like medium.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
  <br>
  <a href="#InterfaceIndex">InterfaceIndex</a>
 
@@ -97,8 +98,8 @@ by the same value of ifIndex.
 </table>
 
   <h4>Other dot3StatsTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dot3StatsAlignmentErrors" />
@@ -107,7 +108,6 @@ by the same value of ifIndex.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -154,7 +154,6 @@ value of ifCounterDiscontinuityTime.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -205,7 +204,6 @@ value of ifCounterDiscontinuityTime.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -240,7 +238,6 @@ value of ifCounterDiscontinuityTime.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -271,7 +268,6 @@ Discontinuities in the value of this counter can
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -304,7 +300,6 @@ value of ifCounterDiscontinuityTime.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -334,7 +329,6 @@ value of ifCounterDiscontinuityTime.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -368,7 +362,6 @@ value of ifCounterDiscontinuityTime.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -394,7 +387,6 @@ value of ifCounterDiscontinuityTime.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -442,7 +434,6 @@ value of ifCounterDiscontinuityTime.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -475,7 +466,6 @@ value of ifCounterDiscontinuityTime.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -518,7 +508,6 @@ value of ifCounterDiscontinuityTime.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -566,7 +555,6 @@ value of ifCounterDiscontinuityTime.
 </td><td>
   OBJECTID
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -607,7 +595,6 @@ This object has been deprecated.  Implementation
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -676,8 +663,7 @@ value of ifCounterDiscontinuityTime.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>unknown</td></tr>
         <tr><td>2</td><td>halfDuplex</td></tr>
@@ -721,7 +707,6 @@ valuable to justify the redundancy.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -748,8 +733,7 @@ otherwise.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>rateControlOff</td></tr>
         <tr><td>2</td><td>rateControlOn</td></tr>
@@ -768,11 +752,11 @@ the MAC sublayer of this interface.
 </ul>
 <a name="dot3CollTable" /><h3>Table dot3CollTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dot3CollTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>EtherLike-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.10.7.5</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>dot3CollTable</td></tr>
+  <tr><td class="label">In MIB</td><td>EtherLike-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.10.7.5</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A collection of collision histograms for a
@@ -780,7 +764,7 @@ particular set of interfaces.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="dot3CollEntry" />Row Description</td>
+<tr><td class="label"><a name="dot3CollEntry" />Row Description</td>
 <td>
 <pre>
 A cell in the histogram of per-frame
@@ -798,8 +782,8 @@ particular number of media collisions.
 
   <h4>dot3CollTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ifIndex" />
@@ -808,7 +792,8 @@ particular number of media collisions.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
  <br>
  <a href="#InterfaceIndex">InterfaceIndex</a>
 
@@ -835,7 +820,8 @@ initialization.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 16
 
   </td><td>NoAccess</td>
 <td>
@@ -850,8 +836,8 @@ interface.
 </table>
 
   <h4>Other dot3CollTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dot3CollFrequencies" />
@@ -860,7 +846,6 @@ interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -894,11 +879,11 @@ value of ifCounterDiscontinuityTime.
 </ul>
 <a name="dot3ControlTable" /><h3>Table dot3ControlTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dot3ControlTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>EtherLike-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.10.7.9</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>dot3ControlTable</td></tr>
+  <tr><td class="label">In MIB</td><td>EtherLike-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.10.7.9</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of descriptive and status information
@@ -914,7 +899,7 @@ rows in this table than in the dot3StatsTable.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="dot3ControlEntry" />Row Description</td>
+<tr><td class="label"><a name="dot3ControlEntry" />Row Description</td>
 <td>
 <pre>
 An entry in the table, containing information
@@ -927,8 +912,8 @@ ethernet-like interface.
 
   <h4>dot3ControlTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dot3StatsIndex" />
@@ -937,7 +922,8 @@ ethernet-like interface.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
  <br>
  <a href="#InterfaceIndex">InterfaceIndex</a>
 
@@ -958,8 +944,8 @@ by the same value of ifIndex.
 </table>
 
   <h4>Other dot3ControlTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dot3ControlFunctionsSupported" />
@@ -968,8 +954,7 @@ by the same value of ifIndex.
 
 </td><td>
   BITS
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>0</td><td>pause</td></tr>
       </table>
@@ -990,7 +975,6 @@ implemented for this interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1025,7 +1009,6 @@ value of ifCounterDiscontinuityTime.
 </td><td>
   COUNTER64
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1048,11 +1031,11 @@ value of ifCounterDiscontinuityTime.
 </ul>
 <a name="dot3PauseTable" /><h3>Table dot3PauseTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dot3PauseTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>EtherLike-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.10.7.10</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>dot3PauseTable</td></tr>
+  <tr><td class="label">In MIB</td><td>EtherLike-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.10.7.10</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of descriptive and status information
@@ -1072,7 +1055,7 @@ in this table than in the dot3StatsTable.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="dot3PauseEntry" />Row Description</td>
+<tr><td class="label"><a name="dot3PauseEntry" />Row Description</td>
 <td>
 <pre>
 An entry in the table, containing information
@@ -1085,8 +1068,8 @@ ethernet-like interface.
 
   <h4>dot3PauseTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dot3StatsIndex" />
@@ -1095,7 +1078,8 @@ ethernet-like interface.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
  <br>
  <a href="#InterfaceIndex">InterfaceIndex</a>
 
@@ -1116,8 +1100,8 @@ by the same value of ifIndex.
 </table>
 
   <h4>Other dot3PauseTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dot3PauseAdminMode" />
@@ -1126,8 +1110,7 @@ by the same value of ifIndex.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>disabled</td></tr>
         <tr><td>2</td><td>enabledXmit</td></tr>
@@ -1183,8 +1166,7 @@ at greater than 100 Mb/s.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>disabled</td></tr>
         <tr><td>2</td><td>enabledXmit</td></tr>
@@ -1220,7 +1202,6 @@ in use on this interface, as determined by
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1258,7 +1239,6 @@ value of ifCounterDiscontinuityTime.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1295,7 +1275,6 @@ value of ifCounterDiscontinuityTime.
 </td><td>
   COUNTER64
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1326,7 +1305,6 @@ value of ifCounterDiscontinuityTime.
 </td><td>
   COUNTER64
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1352,11 +1330,11 @@ value of ifCounterDiscontinuityTime.
 </ul>
 <a name="dot3HCStatsTable" /><h3>Table dot3HCStatsTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dot3HCStatsTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>EtherLike-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.10.7.11</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>dot3HCStatsTable</td></tr>
+  <tr><td class="label">In MIB</td><td>EtherLike-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.10.7.11</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table containing 64-bit versions of error
@@ -1385,7 +1363,7 @@ all ethernet-like interfaces.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="dot3HCStatsEntry" />Row Description</td>
+<tr><td class="label"><a name="dot3HCStatsEntry" />Row Description</td>
 <td>
 <pre>
 An entry containing 64-bit statistics for a
@@ -1397,8 +1375,8 @@ single ethernet-like interface.
 
   <h4>dot3HCStatsTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dot3StatsIndex" />
@@ -1407,7 +1385,8 @@ single ethernet-like interface.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
  <br>
  <a href="#InterfaceIndex">InterfaceIndex</a>
 
@@ -1428,8 +1407,8 @@ by the same value of ifIndex.
 </table>
 
   <h4>Other dot3HCStatsTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dot3HCStatsAlignmentErrors" />
@@ -1438,7 +1417,6 @@ by the same value of ifIndex.
 
 </td><td>
   COUNTER64
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1479,7 +1457,6 @@ value of ifCounterDiscontinuityTime.
 
 </td><td>
   COUNTER64
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1523,7 +1500,6 @@ value of ifCounterDiscontinuityTime.
 </td><td>
   COUNTER64
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1565,7 +1541,6 @@ value of ifCounterDiscontinuityTime.
 </td><td>
   COUNTER64
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1602,7 +1577,6 @@ value of ifCounterDiscontinuityTime.
 
 </td><td>
   COUNTER64
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1643,7 +1617,6 @@ value of ifCounterDiscontinuityTime.
 
 </td><td>
   COUNTER64
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1699,18 +1672,21 @@ value of ifCounterDiscontinuityTime.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -1719,6 +1695,7 @@ value of ifCounterDiscontinuityTime.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -1729,9 +1706,9 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
 <tr><td><a name="InterfaceIndex">InterfaceIndex</td><td>INTEGER32</td><td><pre></pre></td></tr>
-<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />

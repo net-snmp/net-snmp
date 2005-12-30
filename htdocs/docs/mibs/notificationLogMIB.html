@@ -31,8 +31,8 @@ document as <b>.1.3.6.1.2.1.92</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="nlmConfigGlobalEntryLimit" />
@@ -41,7 +41,6 @@ document as <b>.1.3.6.1.2.1.92</b>.
 
 </td><td>
   UNSIGNED32
-
 
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.2.1.92.1.1.1</td>
@@ -78,7 +77,6 @@ reliability and completeness of data seen by each manager.
 </td><td>
   UNSIGNED32
 
-
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.2.1.92.1.1.2</td>
 <td>
@@ -107,7 +105,6 @@ reliability and completeness of data seen by each manager.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.92.1.2.1</td>
 <td>
@@ -127,7 +124,6 @@ counts a Notification once for each log entry, so a Notification
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.92.1.2.2</td>
 <td>
@@ -145,18 +141,18 @@ due to the value of nlmConfigGlobalAgeOut.
 <h2>TABLE OBJECTS</h2>
 <a name="nlmConfigLogTable" /><h3>Table nlmConfigLogTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>nlmConfigLogTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>NOTIFICATION-LOG-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.92.1.1.3</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>nlmConfigLogTable</td></tr>
+  <tr><td class="label">In MIB</td><td>NOTIFICATION-LOG-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.92.1.1.3</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of logging control entries.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="nlmConfigLogEntry" />Row Description</td>
+<tr><td class="label"><a name="nlmConfigLogEntry" />Row Description</td>
 <td>
 <pre>
 A logging control entry.  Depending on the entry's storage type
@@ -169,8 +165,8 @@ applications using nlmConfigLogEntryStatus.
 
   <h4>nlmConfigLogTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="nlmLogName" />
@@ -179,7 +175,8 @@ applications using nlmConfigLogEntryStatus.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -201,8 +198,8 @@ An implementation may allow multiple named logs, up to some
 </table>
 
   <h4>Other nlmConfigLogTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="nlmConfigLogFilterName" />
@@ -211,7 +208,8 @@ An implementation may allow multiple named logs, up to some
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -240,7 +238,6 @@ Notifications are to be logged in this log.
 
 </td><td>
   UNSIGNED32
-
 
   </td><td>Create</td>
 <td>
@@ -271,8 +268,7 @@ reliability and completeness of data seen by each manager.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>enabled</td></tr>
         <tr><td>2</td><td>disabled</td></tr>
@@ -298,8 +294,7 @@ reliability and completeness of data seen by each manager.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>disabled</td></tr>
         <tr><td>2</td><td>operational</td></tr>
@@ -327,7 +322,6 @@ noFilter  administratively enabled but either
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#StorageType">StorageType</a>
      <br>(ENUM list below)
@@ -350,7 +344,6 @@ The storage type of this conceptual row.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -376,18 +369,18 @@ may be logged.
 </ul>
 <a name="nlmStatsLogTable" /><h3>Table nlmStatsLogTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>nlmStatsLogTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>NOTIFICATION-LOG-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.92.1.2.3</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>nlmStatsLogTable</td></tr>
+  <tr><td class="label">In MIB</td><td>NOTIFICATION-LOG-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.92.1.2.3</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of Notification log statistics entries.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="nlmStatsLogEntry" />Row Description</td>
+<tr><td class="label"><a name="nlmStatsLogEntry" />Row Description</td>
 <td>
 <pre>
 A Notification log statistics entry.
@@ -398,8 +391,8 @@ A Notification log statistics entry.
 
   <h4>nlmStatsLogTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="nlmLogName" />
@@ -408,7 +401,8 @@ A Notification log statistics entry.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -430,8 +424,8 @@ An implementation may allow multiple named logs, up to some
 </table>
 
   <h4>Other nlmStatsLogTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="nlmStatsLogNotificationsLogged" />
@@ -440,7 +434,6 @@ An implementation may allow multiple named logs, up to some
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -458,7 +451,6 @@ The number of Notifications put in this named log.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -474,11 +466,11 @@ nlmConfigGlobalAgeOut.
 </ul>
 <a name="nlmLogTable" /><h3>Table nlmLogTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>nlmLogTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>NOTIFICATION-LOG-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.92.1.3.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>nlmLogTable</td></tr>
+  <tr><td class="label">In MIB</td><td>NOTIFICATION-LOG-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.92.1.3.1</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of Notification log entries.
@@ -494,7 +486,7 @@ Note that keeping entries across initializations of the
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="nlmLogEntry" />Row Description</td>
+<tr><td class="label"><a name="nlmLogEntry" />Row Description</td>
 <td>
 <pre>
 A Notification log entry.
@@ -519,8 +511,8 @@ Before the managed system puts a locally-generated Notification
 
   <h4>nlmLogTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="nlmLogName" />
@@ -529,7 +521,8 @@ Before the managed system puts a locally-generated Notification
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -556,7 +549,8 @@ An implementation may allow multiple named logs, up to some
 
 </td><td>
   UNSIGNED32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -571,8 +565,8 @@ value back to 1.
 </table>
 
   <h4>Other nlmLogTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="nlmLogTime" />
@@ -581,7 +575,6 @@ value back to 1.
 
 </td><td>
   TICKS
-
  <br>
  <a href="#TimeStamp">TimeStamp</a>
 
@@ -605,7 +598,10 @@ initialization this object value MUST be set to zero.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        8
+        ,
+        11
  <br>
  <a href="#DateAndTime">DateAndTime</a>
 
@@ -628,7 +624,8 @@ only by systems that have date and time capability.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        5 .. 32
  <br>
  <a href="#SnmpEngineID">SnmpEngineID</a>
 
@@ -655,7 +652,8 @@ originated.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 255
  <br>
  <a href="#TAddress">TAddress</a>
 
@@ -691,7 +689,6 @@ SNMP engine.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#TDomain">TDomain</a>
 
@@ -719,7 +716,8 @@ Transport Mappings for SNMPv2 document (RFC 1906 [8]).
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        5 .. 32
  <br>
  <a href="#SnmpEngineID">SnmpEngineID</a>
 
@@ -743,7 +741,8 @@ Otherwise its value is a zero-length string.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -767,7 +766,6 @@ For SNMPv1 Traps this is the community string from the Trap.
 </td><td>
   OBJECTID
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -780,18 +778,18 @@ occurred.
 </ul>
 <a name="nlmLogVariableTable" /><h3>Table nlmLogVariableTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>nlmLogVariableTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>NOTIFICATION-LOG-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.92.1.3.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>nlmLogVariableTable</td></tr>
+  <tr><td class="label">In MIB</td><td>NOTIFICATION-LOG-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.92.1.3.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of variables to go with Notification log entries.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="nlmLogVariableEntry" />Row Description</td>
+<tr><td class="label"><a name="nlmLogVariableEntry" />Row Description</td>
 <td>
 <pre>
 A Notification log entry variable.
@@ -804,8 +802,8 @@ Entries appear in this table when there are variables in
 
   <h4>nlmLogVariableTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="nlmLogName" />
@@ -814,7 +812,8 @@ Entries appear in this table when there are variables in
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -841,7 +840,8 @@ An implementation may allow multiple named logs, up to some
 
 </td><td>
   UNSIGNED32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -861,7 +861,8 @@ value back to 1.
 
 </td><td>
   UNSIGNED32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -875,8 +876,8 @@ Notification.
 </table>
 
   <h4>Other nlmLogVariableTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="nlmLogVariableID" />
@@ -885,7 +886,6 @@ Notification.
 
 </td><td>
   OBJECTID
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -902,8 +902,7 @@ The variable's object identifier.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>counter32</td></tr>
         <tr><td>2</td><td>unsigned32</td></tr>
@@ -933,7 +932,6 @@ objects that follow must be instantiated, based on this type.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -949,7 +947,6 @@ The value when nlmLogVariableType is 'counter32'.
 
 </td><td>
   UNSIGNED32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -967,7 +964,6 @@ The value when nlmLogVariableType is 'unsigned32'.
 </td><td>
   TICKS
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -983,7 +979,6 @@ The value when nlmLogVariableType is 'timeTicks'.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1001,7 +996,6 @@ The value when nlmLogVariableType is 'integer32'.
 </td><td>
   OCTETSTR
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1017,7 +1011,6 @@ The value when nlmLogVariableType is 'octetString'.
 
 </td><td>
   IPADDR
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1046,7 +1039,6 @@ the nlmLogVariableOctetStringVal column.
 </td><td>
   OBJECTID
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1062,7 +1054,6 @@ The value when nlmLogVariableType is 'objectId'.
 
 </td><td>
   COUNTER64
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1080,7 +1071,6 @@ The value when nlmLogVariableType is 'counter64'.
 </td><td>
   OPAQUE
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1093,18 +1083,21 @@ The value when nlmLogVariableType is 'opaque'.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -1113,6 +1106,7 @@ The value when nlmLogVariableType is 'opaque'.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -1123,15 +1117,15 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="TDomain">TDomain</td><td>OBJECTID</td><td><pre></pre></td></tr>
-<tr><td><a name="TAddress">TAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre></pre></td></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
 <tr><td><a name="SnmpEngineID">SnmpEngineID</td><td>OCTETSTR</td><td><pre></pre></td></tr>
 <tr><td><a name="DateAndTime">DateAndTime</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="TAddress">TAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="TDomain">TDomain</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />

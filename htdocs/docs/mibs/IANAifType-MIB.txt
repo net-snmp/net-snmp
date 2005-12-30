@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "200406170000Z"  -- June 17, 2004
+       LAST-UPDATED "200510100000Z"  -- October 10, 2005
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -15,9 +15,27 @@
 
                      Tel:    +1 310 823 9358
                      E-Mail: iana@iana.org"
+
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "200510100000Z"  -- October 10, 2005
+       DESCRIPTION  "Registration of new IANA ifType 230."
+
+       REVISION     "200509090000Z"  -- September 09, 2005
+       DESCRIPTION  "Registration of new IANA ifType 229."
+
+       REVISION     "200505270000Z"  -- May 27, 2005
+       DESCRIPTION  "Registration of new IANA ifType 228."
+
+       REVISION     "200503030000Z"  -- March 3, 2005
+       DESCRIPTION  "Added the IANAtunnelType TC and deprecated
+	                 IANAifType sixToFour (215) per 
+	                 RFC4087."
+
+       REVISION     "200411220000Z"  -- November 22, 2004
+       DESCRIPTION  "Registration of new IANA ifType 227."
 
        REVISION     "200406170000Z"  -- June 17, 2004
        DESCRIPTION  "Registration of new IANA ifType 226."
@@ -403,7 +421,7 @@
                    voiceFGDEANA (212), -- voice FGD Exchange Access North American
                    voiceDID (213), -- voice Direct Inward Dialing
                    mpegTransport (214), -- MPEG transport interface
-                   sixToFour (215), -- 6to4 interface
+                   sixToFour (215), -- 6to4 interface (DEPRECATED)
                    gtp (216), -- GTP (GPRS Tunneling Protocol)
                    pdnEtherLoop1 (217), -- Paradyne EtherLoop 1
                    pdnEtherLoop2 (218), -- Paradyne EtherLoop 2
@@ -414,7 +432,56 @@
                    actelisMetaLOOP (223), -- Acteleis proprietary MetaLOOP High Speed Link 
                    fcipLink (224), -- FCIP Link 
                    rpr (225), -- Resilient Packet Ring Interface Type
-                   qam (226) -- RF Qam Interface
+                   qam (226), -- RF Qam Interface
+                   lmp (227), -- Link Management Protocol
+                   cblVectaStar (228), -- Cambridge Broadband Limited VectaStar
+                   docsCableMCmtsDownstream (229), -- CATV Modular CMTS Downstream Interface
+                   adsl2 (230) -- Asymmetric Digital Subscriber Loop Version 2
     			   }
+
+IANAtunnelType ::= TEXTUAL-CONVENTION
+    STATUS     current
+    DESCRIPTION
+            "The encapsulation method used by a tunnel. The value
+            direct indicates that a packet is encapsulated
+            directly within a normal IP header, with no
+            intermediate header, and unicast to the remote tunnel
+            endpoint (e.g., an RFC 2003 IP-in-IP tunnel, or an RFC
+            1933 IPv6-in-IPv4 tunnel). The value minimal indicates
+            that a Minimal Forwarding Header (RFC 2004) is
+            inserted between the outer header and the payload
+            packet. The value UDP indicates that the payload
+            packet is encapsulated within a normal UDP packet
+            (e.g., RFC 1234).
+
+            The values sixToFour, sixOverFour, and isatap
+            indicates that an IPv6 packet is encapsulated directly
+            within an IPv4 header, with no intermediate header,
+            and unicast to the destination determined by the 6to4,
+            6over4, or ISATAP protocol.
+
+            The remaining protocol-specific values indicate that a
+            header of the protocol of that name is inserted
+            between the outer header and the payload header.
+
+            The assignment policy for IANAtunnelType values is
+            identical to the policy for assigning IANAifType
+            values."
+    SYNTAX     INTEGER {
+                   other(1),        -- none of the following
+                   direct(2),       -- no intermediate header
+                   gre(3),          -- GRE encapsulation
+                   minimal(4),      -- Minimal encapsulation
+                   l2tp(5),         -- L2TP encapsulation
+                   pptp(6),         -- PPTP encapsulation
+                   l2f(7),          -- L2F encapsulation
+                   udp(8),          -- UDP encapsulation
+                   atmp(9),         -- ATMP encapsulation
+                   msdp(10),        -- MSDP encapsulation
+                   sixToFour(11),   -- 6to4 encapsulation
+                   sixOverFour(12), -- 6over4 encapsulation
+                   isatap(13),      -- ISATAP encapsulation
+                   teredo(14)       -- Teredo encapsulation
+               }
 
    END

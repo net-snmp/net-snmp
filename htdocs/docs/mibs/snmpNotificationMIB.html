@@ -30,19 +30,19 @@ document as <b>.1.3.6.1.6.3.13</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 <a name="snmpNotifyTable" /><h3>Table snmpNotifyTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>snmpNotifyTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>SNMP-NOTIFICATION-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.6.3.13.1.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>snmpNotifyTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SNMP-NOTIFICATION-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.6.3.13.1.1</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 This table is used to select management targets which should
@@ -51,7 +51,7 @@ which should be sent to each selected management target.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="snmpNotifyEntry" />Row Description</td>
+<tr><td class="label"><a name="snmpNotifyEntry" />Row Description</td>
 <td>
 <pre>
 An entry in this table selects a set of management targets
@@ -69,8 +69,8 @@ deleted using the snmpNotifyRowStatus object.
 
   <h4>snmpNotifyTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="snmpNotifyName" />
@@ -79,7 +79,8 @@ deleted using the snmpNotifyRowStatus object.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -97,8 +98,8 @@ with this snmpNotifyEntry.
 </table>
 
   <h4>Other snmpNotifyTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="snmpNotifyTag" />
@@ -107,7 +108,8 @@ with this snmpNotifyEntry.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#SnmpTagValue">SnmpTagValue</a>
 
@@ -134,8 +136,7 @@ of zero length, no entries are selected.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>trap</td></tr>
         <tr><td>2</td><td>inform</td></tr>
@@ -171,7 +172,6 @@ Note that if an SNMP entity only supports
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#StorageType">StorageType</a>
      <br>(ENUM list below)
@@ -196,7 +196,6 @@ allow write-access to any columnar objects in the row.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -218,11 +217,11 @@ To create a row in this table, a manager must
 </ul>
 <a name="snmpNotifyFilterProfileTable" /><h3>Table snmpNotifyFilterProfileTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>snmpNotifyFilterProfileTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>SNMP-NOTIFICATION-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.6.3.13.1.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>snmpNotifyFilterProfileTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SNMP-NOTIFICATION-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.6.3.13.1.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 This table is used to associate a notification filter
@@ -230,7 +229,7 @@ profile with a particular set of target parameters.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="snmpNotifyFilterProfileEntry" />Row Description</td>
+<tr><td class="label"><a name="snmpNotifyFilterProfileEntry" />Row Description</td>
 <td>
 <pre>
 An entry in this table indicates the name of the filter
@@ -247,8 +246,8 @@ object.
 
   <h4>snmpNotifyFilterProfileTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="snmpTargetParamsName" />
@@ -257,7 +256,8 @@ object.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -275,8 +275,8 @@ with this snmpTargetParamsEntry.
 </table>
 
   <h4>Other snmpNotifyFilterProfileTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="snmpNotifyFilterProfileName" />
@@ -285,7 +285,8 @@ with this snmpTargetParamsEntry.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -309,7 +310,6 @@ snmpTargetAddrTable.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#StorageType">StorageType</a>
      <br>(ENUM list below)
@@ -334,7 +334,6 @@ allow write-access to any columnar objects in the row.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -363,11 +362,11 @@ In particular, a newly created row cannot be made
 </ul>
 <a name="snmpNotifyFilterTable" /><h3>Table snmpNotifyFilterTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>snmpNotifyFilterTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>SNMP-NOTIFICATION-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.6.3.13.1.3</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>snmpNotifyFilterTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SNMP-NOTIFICATION-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.6.3.13.1.3</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The table of filter profiles.  Filter profiles are used
@@ -385,7 +384,7 @@ can be found in section 6. of [SNMP-APPL].
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="snmpNotifyFilterEntry" />Row Description</td>
+<tr><td class="label"><a name="snmpNotifyFilterEntry" />Row Description</td>
 <td>
 <pre>
 An element of a filter profile.
@@ -398,8 +397,8 @@ Entries in the snmpNotifyFilterTable are created and
 
   <h4>snmpNotifyFilterTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="snmpNotifyFilterProfileName" />
@@ -408,7 +407,8 @@ Entries in the snmpNotifyFilterTable are created and
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -433,7 +433,6 @@ snmpTargetAddrTable.
 </td><td>
   OBJECTID
 
-
   </td><td>NoAccess</td>
 <td>
 <pre>
@@ -447,8 +446,8 @@ filter profile.
 </table>
 
   <h4>Other snmpNotifyFilterTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="snmpNotifyFilterMask" />
@@ -457,7 +456,8 @@ filter profile.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 16
 
   </td><td>Create</td>
 <td>
@@ -517,8 +517,7 @@ instance of snmpNotifyFilterSubtree.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>included</td></tr>
         <tr><td>2</td><td>excluded</td></tr>
@@ -542,7 +541,6 @@ object can be found in section 6. of [SNMP-APPL].
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#StorageType">StorageType</a>
      <br>(ENUM list below)
@@ -568,7 +566,6 @@ allow write-access to any columnar objects in the row.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -591,18 +588,21 @@ To create a row in this table, a manager must
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -611,6 +611,7 @@ To create a row in this table, a manager must
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -621,11 +622,11 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="SnmpTagValue">SnmpTagValue</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
 <tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpTagValue">SnmpTagValue</td><td>OCTETSTR</td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />

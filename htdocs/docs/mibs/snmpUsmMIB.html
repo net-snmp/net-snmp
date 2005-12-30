@@ -28,8 +28,8 @@ document as <b>.1.3.6.1.6.3.15</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="usmStatsUnsupportedSecLevels" />
@@ -38,7 +38,6 @@ document as <b>.1.3.6.1.6.3.15</b>.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.6.3.15.1.1.1</td>
@@ -61,7 +60,6 @@ or otherwise unavailable.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.6.3.15.1.1.2</td>
 <td>
@@ -81,7 +79,6 @@ outside of the authoritative SNMP engine's window.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.6.3.15.1.1.3</td>
@@ -103,7 +100,6 @@ user that was not known to the SNMP engine.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.6.3.15.1.1.4</td>
 <td>
@@ -123,7 +119,6 @@ snmpEngineID that was not known to the SNMP engine.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.6.3.15.1.1.5</td>
@@ -145,7 +140,6 @@ contain the expected digest value.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.6.3.15.1.1.6</td>
 <td>
@@ -165,7 +159,8 @@ decrypted.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        0 .. 2147483647
  <br>
  <a href="#TestAndIncr">TestAndIncr</a>
 
@@ -190,11 +185,11 @@ usmUserTable.
 <h2>TABLE OBJECTS</h2>
 <a name="usmUserTable" /><h3>Table usmUserTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>usmUserTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>SNMP-USER-BASED-SM-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.6.3.15.1.2.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>usmUserTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SNMP-USER-BASED-SM-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.6.3.15.1.2.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The table of users configured in the SNMP engine's
@@ -262,7 +257,7 @@ also be acting on the usmUserTable.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="usmUserEntry" />Row Description</td>
+<tr><td class="label"><a name="usmUserEntry" />Row Description</td>
 <td>
 <pre>
 A user configured in the SNMP engine's Local
@@ -276,8 +271,8 @@ Security Model.
 
   <h4>usmUserTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="usmUserEngineID" />
@@ -286,7 +281,8 @@ Security Model.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        5 .. 32
  <br>
  <a href="#SnmpEngineID">SnmpEngineID</a>
 
@@ -314,7 +310,8 @@ The value can also take the value of the snmpEngineID
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -336,8 +333,8 @@ security ID.
 </table>
 
   <h4>Other usmUserTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="usmUserSecurityName" />
@@ -346,7 +343,8 @@ security ID.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -375,7 +373,6 @@ securityName is the same as the userName.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#RowPointer">RowPointer</a>
 
@@ -430,7 +427,6 @@ is returned.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#AutonomousType">AutonomousType</a>
 
@@ -489,7 +485,6 @@ the usmUserAuthProtocol value to usmNoAuthProtocol.
 
 </td><td>
   OCTETSTR
-
  <br>
  <a href="#KeyChange">KeyChange</a>
 
@@ -564,7 +559,6 @@ can start over with the procedure above.
 
 </td><td>
   OCTETSTR
-
  <br>
  <a href="#KeyChange">KeyChange</a>
 
@@ -607,7 +601,6 @@ is not USM, then a 'noAccess' error must be returned.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#AutonomousType">AutonomousType</a>
 
@@ -665,7 +658,6 @@ usmNoAuthProtocol. If it does, then an
 
 </td><td>
   OCTETSTR
-
  <br>
  <a href="#KeyChange">KeyChange</a>
 
@@ -713,7 +705,6 @@ a recommended procedure to do a key change.
 
 </td><td>
   OCTETSTR
-
  <br>
  <a href="#KeyChange">KeyChange</a>
 
@@ -756,7 +747,8 @@ is not USM, then a 'noAccess' error must be returned.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
 
   </td><td>Create</td>
 <td>
@@ -778,7 +770,6 @@ effected.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#StorageType">StorageType</a>
      <br>(ENUM list below)
@@ -824,7 +815,6 @@ It is an implementation issue to decide if a SET for
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -864,18 +854,21 @@ value of usmUserStatus MUST be active.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -884,6 +877,7 @@ value of usmUserStatus MUST be active.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -894,15 +888,15 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
 <tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="RowPointer">RowPointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
-<tr><td><a name="TestAndIncr">TestAndIncr</td><td>INTEGER</td><td><pre></pre></td></tr>
-<tr><td><a name="SnmpEngineID">SnmpEngineID</td><td>OCTETSTR</td><td><pre></pre></td></tr>
 <tr><td><a name="KeyChange">KeyChange</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpEngineID">SnmpEngineID</td><td>OCTETSTR</td><td><pre></pre></td></tr>
 <tr><td><a name="AutonomousType">AutonomousType</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<tr><td><a name="TestAndIncr">TestAndIncr</td><td>INTEGER</td><td><pre></pre></td></tr>
+<tr><td><a name="RowPointer">RowPointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />

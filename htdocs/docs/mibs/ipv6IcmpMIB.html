@@ -28,19 +28,19 @@ document as <b>.1.3.6.1.2.1.56</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 <a name="ipv6IfIcmpTable" /><h3>Table ipv6IfIcmpTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6IfIcmpTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-ICMP-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.56.1.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>ipv6IfIcmpTable</td></tr>
+  <tr><td class="label">In MIB</td><td>IPV6-ICMP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.56.1.1</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 IPv6 ICMP statistics. This table contains statistics
@@ -49,7 +49,7 @@ the entity.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="ipv6IfIcmpEntry" />Row Description</td>
+<tr><td class="label"><a name="ipv6IfIcmpEntry" />Row Description</td>
 <td>
 <pre>
 An ICMPv6 statistics entry containing
@@ -71,8 +71,8 @@ necessarily the output interface for the message.
 
   <h4>ipv6IfIcmpTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6IfIndex" />
@@ -81,7 +81,8 @@ necessarily the output interface for the message.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
  <br>
  <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
 
@@ -99,8 +100,8 @@ the particular IPv6 interface.
 </table>
 
   <h4>Other ipv6IfIcmpTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6IfIcmpInMsgs" />
@@ -109,7 +110,6 @@ the particular IPv6 interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -132,7 +132,6 @@ necessarily the input interface for the messages.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -151,7 +150,6 @@ errors (bad ICMP checksums, bad length, etc.).
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -168,7 +166,6 @@ messages received by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -188,7 +185,6 @@ prohibited messages received by the interface.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -205,7 +201,6 @@ received by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -224,7 +219,6 @@ received by the interface.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -241,7 +235,6 @@ received by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -260,7 +253,6 @@ received by the interface.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -277,7 +269,6 @@ by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -296,7 +287,6 @@ received by the interface.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -313,7 +303,6 @@ received by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -332,7 +321,6 @@ received by the interface.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -349,7 +337,6 @@ messages received by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -368,7 +355,6 @@ by the interface.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -385,7 +371,6 @@ messages received by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -404,7 +389,6 @@ received by the interface.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -421,7 +405,6 @@ received by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -440,7 +423,6 @@ includes all those counted by icmpOutErrors.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -465,7 +447,6 @@ value.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -482,7 +463,6 @@ messages sent by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -501,7 +481,6 @@ administratively prohibited messages sent.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -518,7 +497,6 @@ by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -537,7 +515,6 @@ sent by the interface.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -554,7 +531,6 @@ by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -573,7 +549,6 @@ by the interface.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -590,7 +565,6 @@ by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -609,7 +583,6 @@ sent by the interface.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -626,7 +599,6 @@ sent by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -645,7 +617,6 @@ messages sent by the interface.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -662,7 +633,6 @@ messages sent by the interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -682,7 +652,6 @@ since hosts do not send redirects.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -699,7 +668,6 @@ messages sent.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -718,7 +686,6 @@ messages sent.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -732,18 +699,21 @@ messages sent.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -752,6 +722,7 @@ messages sent.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -762,7 +733,7 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
 <tr><td><a name="Ipv6IfIndex">Ipv6IfIndex</td><td>INTEGER32</td><td><pre></pre></td></tr>
 </table></ul>
 

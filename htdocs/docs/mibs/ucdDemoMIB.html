@@ -27,8 +27,8 @@ document as <b>.1.3.6.1.4.1.2021.14</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ucdDemoResetKeys" />
@@ -37,7 +37,8 @@ document as <b>.1.3.6.1.4.1.2021.14</b>.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.4.1.2021.14.1.1.1</td>
@@ -60,7 +61,8 @@ Values other than 1 are ignored.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 1024
 
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.4.1.2021.14.1.1.2</td>
@@ -81,7 +83,6 @@ testing purposes.
 </td><td>
   OCTETSTR
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.14.1.1.3</td>
 <td>
@@ -99,7 +100,6 @@ The list of users affected by the ucdDemoResetKeys object.
 </td><td>
   OCTETSTR
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.14.1.1.4</td>
 <td>
@@ -116,18 +116,21 @@ users localized key to based on the P->Ku->Kul transformation.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -136,6 +139,7 @@ users localized key to based on the P->Ku->Kul transformation.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -146,7 +150,7 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
 </table></ul>
 
 <a name="treeview" />

@@ -5,7 +5,7 @@
 Net-SNMP Distributed MIBs
 </p>
 
-<p>The following are the MIB files distributed with Net-SNMP.  Note that because they are distributed with Net-SNMP does not mean the agent implements them all.  Other good places for finding other MIB definitions are <a href="http://www.oidview.com/mibs/detail.html">oidview.com</a> or <a href="http://www.mibdepot.com/">the MIB depot</a>.</p>
+<p>The following are the MIB files distributed with Net-SNMP.  Note that because they are distributed with Net-SNMP does not mean the agent implements them all.  Another good place for finding other MIB definitions can be found <a href="http://www.mibdepot.com/">at the MIB depot</a>.</p>
 
 <table border="2" bgcolor="#dddddd">
   <tr><th>MIB</th><th>RFC</th><th>Description</th></tr>
@@ -184,38 +184,73 @@ see the RFC itself for full legal notices.</pre></td>
     <td><a href="ip.html">IP-MIB</a><br />
         <a href="IP-MIB.txt">[mib file]</a></td>
     <td><a href="http://www.ietf.org/rfc/rfc2011.txt">rfc2011</a></td>
-    <td><pre>The MIB module for managing IP and ICMP implementations,
-but excluding their management of IP routes.</pre></td>
+    <td><pre>The MIB module for managing IP and ICMP implementations, but
+excluding their management of IP routes.
+
+Copyright (C) The Internet Society (2004).  This version of
+this MIB module is part of RFC xxxx; see the RFC itself for
+full legal notices.</pre></td>
   </tr>
   <tr>
     <td><a href="ipForward.html">IP-FORWARD-MIB</a><br />
         <a href="IP-FORWARD-MIB.txt">[mib file]</a></td>
     <td><a href="http://www.ietf.org/rfc/rfc2096.txt">rfc2096</a></td>
-    <td><pre>The MIB module for the display of CIDR multipath IP Routes.</pre></td>
+    <td><pre>The MIB module for the management of CIDR multipath IP 
+Routes. 
+
+Copyright (C) The Internet Society (2004). This version 
+of this MIB module is a part of RFC xxxx; see the RFC 
+itself for full legal notices.</pre></td>
+  </tr>
+  <tr>
+    <td><a href="ianaRtProtoMIB.html">IANA-RTPROTO-MIB</a><br />
+        <a href="IANA-RTPROTO-MIB.txt">[mib file]</a></td>
+    <td>&nbsp;</td>
+    <td><pre>This MIB module defines the IANAipRouteProtocol and
+IANAipMRouteProtocol textual conventions for use in MIBs
+which need to identify unicast or multicast routing
+mechanisms.
+
+Any additions or changes to the contents of this MIB module
+require either publication of an RFC, or Designated Expert
+Review as defined in RFC 2434, Guidelines for Writing an
+IANA Considerations Section in RFCs.  The Designated Expert 
+will be selected by the IESG Area Director(s) of the Routing
+Area.</pre></td>
   </tr>
   <tr>
     <td><a href="tcp.html">TCP-MIB</a><br />
         <a href="TCP-MIB.txt">[mib file]</a></td>
-    <td><a href="http://www.ietf.org/rfc/rfc2012.txt">rfc2012</a></td>
-    <td><pre>The MIB module for managing TCP implementations.</pre></td>
+    <td><a href="http://www.ietf.org/rfc/rfc4022.txt">rfc4022</a></td>
+    <td><pre>The MIB module for managing TCP implementations.
+Copyright (C) The Internet Society (2005). This version
+            of this MIB module is a part of RFC 4022; see the RFC
+            itself for full legal notices.</pre></td>
   </tr>
   <tr>
     <td><a href="udp.html">UDP-MIB</a><br />
         <a href="UDP-MIB.txt">[mib file]</a></td>
-    <td><a href="http://www.ietf.org/rfc/rfc2013.txt">rfc2013</a></td>
-    <td><pre>The MIB module for managing UDP implementations.</pre></td>
+    <td><a href="http://www.ietf.org/rfc/rfc4113.txt">rfc4113</a></td>
+    <td><pre>The MIB module for managing UDP implementations.
+Copyright (C) The Internet Society (2005).  This
+version of this MIB module is part of RFC 4113;
+see the RFC itself for full legal notices.</pre></td>
   </tr>
   <tr>
     <td><a href="inetAddressMIB.html">INET-ADDRESS-MIB</a><br />
         <a href="INET-ADDRESS-MIB.txt">[mib file]</a></td>
-    <td><a href="http://www.ietf.org/rfc/rfc3291.txt">rfc3291</a></td>
+    <td><a href="http://www.ietf.org/rfc/rfc4001.txt">rfc4001</a></td>
     <td><pre>This MIB module defines textual conventions for
-representing Internet addresses. An Internet
-address can be an IPv4 address, an IPv6 address
-or a DNS domain name. This module also defines
+representing Internet addresses.  An Internet
+address can be an IPv4 address, an IPv6 address,
+or a DNS domain name.  This module also defines
 textual conventions for Internet port numbers,
-autonomous system numbers and the length of an
-Internet address prefix.</pre></td>
+autonomous system numbers, and the length of an
+Internet address prefix.
+
+Copyright (C) The Internet Society (2005).  This version
+of this MIB module is part of RFC 4001, see the RFC
+itself for full legal notices.</pre></td>
   </tr>
   <tr>
     <td><a href="hcnumTC.html">HCNUM-TC</a><br />
@@ -287,6 +322,13 @@ the ICMPv6.</pre></td>
         <a href="IPV6-UDP-MIB.txt">[mib file]</a></td>
     <td><a href="http://www.ietf.org/rfc/rfc2454.txt">rfc2454</a></td>
     <td><pre>The MIB module for entities implementing UDP over IPv6.</pre></td>
+  </tr>
+  <tr>
+    <td><a href="dismanEventMIB.html">DISMAN-EVENT-MIB</a><br />
+        <a href="DISMAN-EVENT-MIB.txt">[mib file]</a></td>
+    <td><a href="http://www.ietf.org/rfc/rfc2981.txt">rfc2981</a></td>
+    <td><pre>The MIB module for defining event triggers and actions
+for network management purposes.</pre></td>
   </tr>
   <tr>
     <td><a href="scriptMIB.html">DISMAN-SCRIPT-MIB</a><br />

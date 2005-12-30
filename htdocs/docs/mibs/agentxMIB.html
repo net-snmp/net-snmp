@@ -30,8 +30,8 @@ document as <b>.1.3.6.1.2.1.74</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="agentxDefaultTimeout" />
@@ -40,7 +40,8 @@ document as <b>.1.3.6.1.2.1.74</b>.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        0 .. 255
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.74.1.1.1</td>
@@ -72,7 +73,8 @@ given subagent.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        1 .. 255
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.74.1.1.2</td>
@@ -93,7 +95,6 @@ must also allow interaction with earlier version subagents.
 
 </td><td>
   TICKS
-
  <br>
  <a href="#TimeStamp">TimeStamp</a>
 
@@ -118,7 +119,6 @@ occurred in the agentxConnectionTable.
 
 </td><td>
   TICKS
-
  <br>
  <a href="#TimeStamp">TimeStamp</a>
 
@@ -143,7 +143,6 @@ occurred in the agentxSessionTable.
 
 </td><td>
   TICKS
-
  <br>
  <a href="#TimeStamp">TimeStamp</a>
 
@@ -166,11 +165,11 @@ occurred in the agentxRegistrationTable.
 <h2>TABLE OBJECTS</h2>
 <a name="agentxConnectionTable" /><h3>Table agentxConnectionTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>agentxConnectionTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>AGENTX-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.74.1.2.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>agentxConnectionTable</td></tr>
+  <tr><td class="label">In MIB</td><td>AGENTX-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.74.1.2.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The agentxConnectionTable tracks all current AgentX transport
@@ -180,7 +179,7 @@ carried on a given AgentX connection.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="agentxConnectionEntry" />Row Description</td>
+<tr><td class="label"><a name="agentxConnectionEntry" />Row Description</td>
 <td>
 <pre>
 An agentxConnectionEntry contains information describing a
@@ -197,8 +196,8 @@ and is destroyed when the transport connection is terminated.
 
   <h4>agentxConnectionTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="agentxConnIndex" />
@@ -207,7 +206,8 @@ and is destroyed when the transport connection is terminated.
 
 </td><td>
   UNSIGNED32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -224,8 +224,8 @@ connection is constant for the lifetime of that connection.
 </table>
 
   <h4>Other agentxConnectionTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="agentxConnOpenTime" />
@@ -234,7 +234,6 @@ connection is constant for the lifetime of that connection.
 
 </td><td>
   TICKS
-
  <br>
  <a href="#TimeStamp">TimeStamp</a>
 
@@ -258,7 +257,6 @@ and, therefore, its value when this entry was added to the table.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#TDomain">TDomain</a>
 
@@ -282,7 +280,8 @@ subagent.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#AgentxTAddress">AgentxTAddress</a>
 
@@ -305,11 +304,11 @@ local socket.
 </ul>
 <a name="agentxSessionTable" /><h3>Table agentxSessionTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>agentxSessionTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>AGENTX-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.74.1.3.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>agentxSessionTable</td></tr>
+  <tr><td class="label">In MIB</td><td>AGENTX-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.74.1.3.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of AgentX subagent sessions currently in effect.
@@ -317,7 +316,7 @@ A table of AgentX subagent sessions currently in effect.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="agentxSessionEntry" />Row Description</td>
+<tr><td class="label"><a name="agentxSessionEntry" />Row Description</td>
 <td>
 <pre>
 Information about a single open session between the AgentX
@@ -333,8 +332,8 @@ has terminated or when the subagent session is closed.
 
   <h4>agentxSessionTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="agentxConnIndex" />
@@ -343,7 +342,8 @@ has terminated or when the subagent session is closed.
 
 </td><td>
   UNSIGNED32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -365,7 +365,8 @@ connection is constant for the lifetime of that connection.
 
 </td><td>
   UNSIGNED32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -383,8 +384,8 @@ to be compatible with the definition of h.sessionId.
 </table>
 
   <h4>Other agentxSessionTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="agentxSessionObjectID" />
@@ -393,7 +394,6 @@ to be compatible with the definition of h.sessionId.
 
 </td><td>
   OBJECTID
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -414,7 +414,8 @@ identifier.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -441,8 +442,7 @@ subagents not supporting the notion of a session description.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>up</td></tr>
         <tr><td>2</td><td>down</td></tr>
@@ -466,7 +466,6 @@ set to 'reasonByManager').
 
 </td><td>
   TICKS
-
  <br>
  <a href="#TimeStamp">TimeStamp</a>
 
@@ -490,7 +489,8 @@ therefore, its value when this entry was added to the table.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        1 .. 255
 
   </td><td>ReadOnly</td>
 <td>
@@ -510,7 +510,8 @@ agentxMasterAgentXVer.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        0 .. 255
 
   </td><td>ReadOnly</td>
 <td>
@@ -533,11 +534,11 @@ the master agent's default timeout value should be used
 </ul>
 <a name="agentxRegistrationTable" /><h3>Table agentxRegistrationTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>agentxRegistrationTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>AGENTX-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.74.1.4.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>agentxRegistrationTable</td></tr>
+  <tr><td class="label">In MIB</td><td>AGENTX-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.74.1.4.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of registered regions.
@@ -545,7 +546,7 @@ A table of registered regions.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="agentxRegistrationEntry" />Row Description</td>
+<tr><td class="label"><a name="agentxRegistrationEntry" />Row Description</td>
 <td>
 <pre>
 Contains information for a single registered region.  An
@@ -561,8 +562,8 @@ or the subagent connection is closed.
 
   <h4>agentxRegistrationTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="agentxConnIndex" />
@@ -571,7 +572,8 @@ or the subagent connection is closed.
 
 </td><td>
   UNSIGNED32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -593,7 +595,8 @@ connection is constant for the lifetime of that connection.
 
 </td><td>
   UNSIGNED32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -616,7 +619,8 @@ to be compatible with the definition of h.sessionId.
 
 </td><td>
   UNSIGNED32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -630,8 +634,8 @@ This value is constant for the lifetime of an entry.
 </table>
 
   <h4>Other agentxRegistrationTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="agentxRegContext" />
@@ -640,7 +644,6 @@ This value is constant for the lifetime of an entry.
 
 </td><td>
   OCTETSTR
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -659,7 +662,6 @@ region.  A zero-length context indicates the default context.
 
 </td><td>
   OBJECTID
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -681,7 +683,6 @@ instance.
 
 </td><td>
   UNSIGNED32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -705,7 +706,6 @@ OID for purposes of defining the region's upper bound.
 </td><td>
   UNSIGNED32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -727,7 +727,6 @@ bound for this registration.
 </td><td>
   UNSIGNED32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -747,7 +746,8 @@ default value is desired.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        0 .. 255
 
   </td><td>ReadOnly</td>
 <td>
@@ -770,7 +770,6 @@ the agentx-Register-PDU.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -793,18 +792,21 @@ was set, and is `false' for all other registrations.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -813,6 +815,7 @@ was set, and is `false' for all other registrations.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -823,12 +826,12 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre></pre></td></tr>
-<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="AgentxTAddress">AgentxTAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="TDomain">TDomain</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
 <tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="TDomain">TDomain</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<tr><td><a name="AgentxTAddress">AgentxTAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />

@@ -28,26 +28,26 @@ document as <b>.1.3.6.1.4.1.2021.13.1</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 <a name="ipFwAccTable" /><h3>Table ipFwAccTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipFwAccTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-IPFWACC-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.13.1.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>ipFwAccTable</td></tr>
+  <tr><td class="label">In MIB</td><td>UCD-IPFWACC-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.2021.13.1.1</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table with the accounting rules of the IP firewall
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="ipFwAccEntry" />Row Description</td>
+<tr><td class="label"><a name="ipFwAccEntry" />Row Description</td>
 <td>
 <pre>
 An accounting rule of the IP firewall
@@ -58,8 +58,8 @@ An accounting rule of the IP firewall
 
   <h4>ipFwAccTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipFwAccIndex" />
@@ -68,7 +68,8 @@ An accounting rule of the IP firewall
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -80,8 +81,8 @@ Reference index for each firewall rule.
 </table>
 
   <h4>Other ipFwAccTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipFwAccSrcAddr" />
@@ -90,7 +91,6 @@ Reference index for each firewall rule.
 
 </td><td>
   IPADDR
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -108,7 +108,6 @@ The source address in the firewall rule.
 </td><td>
   IPADDR
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -124,7 +123,6 @@ The netmask of the source address in the firewall rule.
 
 </td><td>
   IPADDR
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -142,7 +140,6 @@ The destination address in the firewall rule.
 </td><td>
   IPADDR
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -158,7 +155,8 @@ The netmask of the destination address in the firewall rule.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 64
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -183,7 +181,6 @@ contain a dash (-).
 </td><td>
   IPADDR
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -202,8 +199,7 @@ for the current rule this should be set to 0.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>other</td></tr>
         <tr><td>2</td><td>all</td></tr>
@@ -227,8 +223,7 @@ The protocol(s) to which the rule applies.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>unidirectional</td></tr>
         <tr><td>2</td><td>bidirectional</td></tr>
@@ -250,8 +245,7 @@ source and destination parts swapped) or not.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>both</td></tr>
         <tr><td>2</td><td>in</td></tr>
@@ -275,7 +269,6 @@ kernel.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -292,7 +285,6 @@ reset of the counters.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -311,7 +303,6 @@ reset of the counters.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -328,7 +319,6 @@ The number of ports that refer to the source address.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -344,8 +334,7 @@ The number of ports that refer to the destination address.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>srchasrange</td></tr>
         <tr><td>2</td><td>srchasnorange</td></tr>
@@ -367,8 +356,7 @@ the upper and lower limit of an interval or not.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>dsthasrange</td></tr>
         <tr><td>2</td><td>dsthasnorange</td></tr>
@@ -391,7 +379,6 @@ the upper and lower limit of an interval or not.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -407,7 +394,6 @@ Port number 1.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -425,7 +411,6 @@ Port number 2.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -441,7 +426,6 @@ Port number 3.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -459,7 +443,6 @@ Port number 4.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -475,7 +458,6 @@ Port number 5.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -493,7 +475,6 @@ Port number 6.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -509,7 +490,6 @@ Port number 7.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -527,7 +507,6 @@ Port number 8.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -544,7 +523,6 @@ Port number 9.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -557,18 +535,21 @@ Port number 10.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -577,6 +558,7 @@ Port number 10.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -587,7 +569,7 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
 <tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
 </table></ul>
 

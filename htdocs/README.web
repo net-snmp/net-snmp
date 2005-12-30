@@ -68,6 +68,7 @@ Updating Documentation / Man pages
 Updating Documentation / MIBS
 -----------------------------
 
+ -install this version of Net-SNMP
  -cd (source dir)/mibs
  -make htmldir
  -find html/. -name '*.html' | ../local/html-add-header-footer.pl --section=documentation --body

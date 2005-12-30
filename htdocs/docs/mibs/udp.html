@@ -14,11 +14,12 @@ document as <b>.1.3.6.1.2.1.7</b>.
 <h3><a href="#objects_Current">Current Objects</a></h3>
 <ul>
 <li><a href="#scalar_current">Scalars</a></li>
-  <li><a href="#udpTable">udpTable</a></li>
+  <li><a href="#udpEndpointTable">udpEndpointTable</a></li>
 </ul>
 <h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
 <ul>
 <li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+  <li><a href="#udpTable">udpTable</a></li>
 </ul>
 <h3><a href="#notifications">Notifications</a></h3>
 <h3><a href="#textconventions">Textual Conventions</a></h3>
@@ -28,8 +29,8 @@ document as <b>.1.3.6.1.2.1.7</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="udpInDatagrams" />
@@ -39,12 +40,17 @@ document as <b>.1.3.6.1.2.1.7</b>.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.7.1</td>
 <td>
 <pre>
-The total number of UDP datagrams delivered to UDP users.
+The total number of UDP datagrams delivered to UDP
+users.
+
+Discontinuities in the value of this counter can occur
+at re-initialization of the management system, and at
+other times as indicated by discontinuities in the
+value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -57,13 +63,17 @@ The total number of UDP datagrams delivered to UDP users.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.7.2</td>
 <td>
 <pre>
-The total number of received UDP datagrams for which there
-was no application at the destination port.
+The total number of received UDP datagrams for which
+there was no application at the destination port.
+
+Discontinuities in the value of this counter can occur
+at re-initialization of the management system, and at
+other times as indicated by discontinuities in the
+value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -76,14 +86,18 @@ was no application at the destination port.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.7.3</td>
 <td>
 <pre>
 The number of received UDP datagrams that could not be
-delivered for reasons other than the lack of an application
-at the destination port.
+delivered for reasons other than the lack of an
+application at the destination port.
+
+Discontinuities in the value of this counter can occur
+at re-initialization of the management system, and at
+other times as indicated by discontinuities in the
+value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -96,12 +110,65 @@ at the destination port.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.7.4</td>
 <td>
 <pre>
-The total number of UDP datagrams sent from this entity.
+The total number of UDP datagrams sent from this
+entity.
+
+Discontinuities in the value of this counter can occur
+at re-initialization of the management system, and at
+other times as indicated by discontinuities in the
+value of sysUpTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="udpHCInDatagrams" />
+8
+<br /><b>udpHCInDatagrams</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.7.8</td>
+<td>
+<pre>
+The total number of UDP datagrams delivered to UDP
+users, for devices that can receive more than 1
+million UDP datagrams per second.
+
+Discontinuities in the value of this counter can occur
+at re-initialization of the management system, and at
+other times as indicated by discontinuities in the
+value of sysUpTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="udpHCOutDatagrams" />
+9
+<br /><b>udpHCOutDatagrams</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.7.9</td>
+<td>
+<pre>
+The total number of UDP datagrams sent from this
+entity, for devices that can transmit more than 1
+million UDP datagrams per second.
+
+Discontinuities in the value of this counter can occur
+at re-initialization of the management system, and at
+other times as indicated by discontinuities in the
+value of sysUpTime.
 </pre>
 </td>
   </tr>
@@ -109,20 +176,355 @@ The total number of UDP datagrams sent from this entity.
 </ul>
 
 <h2>TABLE OBJECTS</h2>
-<a name="udpTable" /><h3>Table udpTable</h3>
+<a name="udpEndpointTable" /><h3>Table udpEndpointTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>udpTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UDP-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.7.5</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>udpEndpointTable</td></tr>
+  <tr><td class="label">In MIB</td><td>UDP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.7.7</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
-A table containing UDP listener information.
+A table containing information about this entity's UDP
+endpoints on which a local application is currently
+accepting or sending datagrams.
+
+The address type in this table represents the address
+type used for the communication, irrespective of the
+higher-layer abstraction.  For example, an application
+using IPv6 'sockets' to communicate via IPv4 between
+::ffff:10.0.0.1 and ::ffff:10.0.0.2 would use
+InetAddressType ipv4(1).
+
+Unlike the udpTable in RFC 2013, this table also allows
+the representation of an application that completely
+specifies both local and remote addresses and ports.  A
+listening application is represented in three possible
+ways:
+
+1) An application that is willing to accept both IPv4
+   and IPv6 datagrams is represented by a
+   udpEndpointLocalAddressType of unknown(0) and a
+   udpEndpointLocalAddress of ''h (a zero-length
+   octet-string).
+
+2) An application that is willing to accept only IPv4
+   or only IPv6 datagrams is represented by a
+   udpEndpointLocalAddressType of the appropriate
+   address type and a udpEndpointLocalAddress of
+   '0.0.0.0' or '::' respectively.
+
+3) An application that is listening for datagrams only
+   for a specific IP address but from any remote
+   system is represented by a
+   udpEndpointLocalAddressType of the appropriate
+   address type, with udpEndpointLocalAddress
+   specifying the local address.
+
+In all cases where the remote is a wildcard, the
+udpEndpointRemoteAddressType is unknown(0), the
+udpEndpointRemoteAddress is ''h (a zero-length
+octet-string), and the udpEndpointRemotePort is 0.
+
+If the operating system is demultiplexing UDP packets
+by remote address and port, or if the application has
+'connected' the socket specifying a default remote
+address and port, the udpEndpointRemote* values should
+be used to reflect this.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="udpEntry" />Row Description</td>
+<tr><td class="label"><a name="udpEndpointEntry" />Row Description</td>
+<td>
+<pre>
+Information about a particular current UDP endpoint.
+Implementers need to be aware that if the total number
+            of elements (octets or sub-identifiers) in
+            udpEndpointLocalAddress and udpEndpointRemoteAddress
+            exceeds 111, then OIDs of column instances in this table
+            will have more than 128 sub-identifiers and cannot be
+            accessed using SNMPv1, SNMPv2c, or SNMPv3.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>udpEndpointTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="udpEndpointLocalAddressType" />
+1
+<br /><b>udpEndpointLocalAddressType</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The address type of udpEndpointLocalAddress.  Only
+IPv4, IPv4z, IPv6, and IPv6z addresses are expected, or
+unknown(0) if datagrams for all local IP addresses are
+accepted.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="udpEndpointLocalAddress" />
+2
+<br /><b>udpEndpointLocalAddress</b>
+
+</td><td>
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The local IP address for this UDP endpoint.
+The value of this object can be represented in three
+possible ways, depending on the characteristics of the
+            listening application:
+1. For an application that is willing to accept both
+               IPv4 and IPv6 datagrams, the value of this object
+               must be ''h (a zero-length octet-string), with
+               the value of the corresponding instance of the
+               udpEndpointLocalAddressType object being unknown(0).
+2. For an application that is willing to accept only IPv4
+               or only IPv6 datagrams, the value of this object
+               must be '0.0.0.0' or '::', respectively, while the
+               corresponding instance of the
+               udpEndpointLocalAddressType object represents the
+               appropriate address type.
+3. For an application that is listening for data
+               destined only to a specific IP address, the value
+               of this object is the specific IP address for which
+               this node is receiving packets, with the
+               corresponding instance of the
+               udpEndpointLocalAddressType object representing the
+               appropriate address type.
+As this object is used in the index for the
+            udpEndpointTable, implementors of this table should be
+            careful not to create entries that would result in OIDs
+            with more than 128 subidentifiers; else the information
+            cannot be accessed using SNMPv1, SNMPv2c, or SNMPv3.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="udpEndpointLocalPort" />
+3
+<br /><b>udpEndpointLocalPort</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        0 .. 65535
+ <br>
+ <a href="#InetPortNumber">InetPortNumber</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetPortNumber"> InetPortNumber TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The local port number for this UDP endpoint.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="udpEndpointRemoteAddressType" />
+4
+<br /><b>udpEndpointRemoteAddressType</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The address type of udpEndpointRemoteAddress.  Only
+IPv4, IPv4z, IPv6, and IPv6z addresses are expected, or
+unknown(0) if datagrams for all remote IP addresses are
+accepted.  Also, note that some combinations of
+
+udpEndpointLocalAdressType and
+udpEndpointRemoteAddressType are not supported.  In
+particular, if the value of this object is not
+unknown(0), it is expected to always refer to the
+same IP version as udpEndpointLocalAddressType.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="udpEndpointRemoteAddress" />
+5
+<br /><b>udpEndpointRemoteAddress</b>
+
+</td><td>
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The remote IP address for this UDP endpoint.  If
+datagrams from any remote system are to be accepted,
+this value is ''h (a zero-length octet-string).
+Otherwise, it has the type described by
+udpEndpointRemoteAddressType and is the address of the
+remote system from which datagrams are to be accepted
+(or to which all datagrams will be sent).
+
+As this object is used in the index for the
+udpEndpointTable, implementors of this table should be
+careful not to create entries that would result in OIDs
+with more than 128 subidentifiers; else the information
+cannot be accessed using SNMPv1, SNMPv2c, or SNMPv3.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="udpEndpointRemotePort" />
+6
+<br /><b>udpEndpointRemotePort</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        0 .. 65535
+ <br>
+ <a href="#InetPortNumber">InetPortNumber</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetPortNumber"> InetPortNumber TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The remote port number for this UDP endpoint.  If
+datagrams from any remote system are to be accepted,
+this value is zero.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="udpEndpointInstance" />
+7
+<br /><b>udpEndpointInstance</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. -1
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The instance of this tuple.  This object is used to
+distinguish among multiple processes 'connected' to
+the same UDP endpoint.  For example, on a system
+implementing the BSD sockets interface, this would be
+used to support the SO_REUSEADDR and SO_REUSEPORT
+socket options.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other udpEndpointTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="udpEndpointProcess" />
+8
+<br /><b>udpEndpointProcess</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The system's process ID for the process associated with
+this endpoint, or zero if there is no such process.
+This value is expected to be the same as
+HOST-RESOURCES-MIB::hrSWRunIndex or SYSAPPL-MIB::
+sysApplElmtRunIndex for some row in the appropriate
+tables.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <br>
+  <table class="deprecated"><tr><td>
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="udpTable" /><h3>Table udpTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>udpTable</td></tr>
+  <tr><td class="label">In MIB</td><td>UDP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.7.5</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+A table containing IPv4-specific UDP listener
+information.  It contains information about all local
+IPv4 UDP end-points on which an application is
+currently accepting datagrams.  This table has been
+deprecated in favor of the version neutral
+udpEndpointTable.
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="udpEntry" />Row Description</td>
 <td>
 <pre>
 Information about a particular current UDP listener.
@@ -133,8 +535,8 @@ Information about a particular current UDP listener.
 
   <h4>udpTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="udpLocalAddress" />
@@ -144,14 +546,13 @@ Information about a particular current UDP listener.
 </td><td>
   IPADDR
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The local IP address for this UDP listener.  In the case of
-a UDP listener which is willing to accept datagrams for any
-IP interface associated with the node, the value 0.0.0.0 is
-used.
+The local IP address for this UDP listener.  In the
+case of a UDP listener that is willing to accept
+datagrams for any IP interface associated with the
+node, the value 0.0.0.0 is used.
 </pre>
 </td>
   </tr>
@@ -162,8 +563,9 @@ used.
 <br /><b>udpLocalPort</b>
 
 </td><td>
-  INTEGER
-
+  INTEGER32
+      <br />Legal values:
+        0 .. 65535
 
   </td><td>ReadOnly</td>
 <td>
@@ -175,25 +577,14 @@ The local port number for this UDP listener.
 </table>
 
   <h4>Other udpTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
 </table>
 </ul>
-<a name="objects_Deprecated" />
-  <hr />
-  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
-<a name="scalar_notcurrent" />
-<h2>SCALAR OBJECTS</h2>
-<ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
-</table>
-</ul>
-
-<h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -202,6 +593,7 @@ The local port number for this UDP listener.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -212,7 +604,10 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="InetPortNumber">InetPortNumber</td><td>UNSIGNED32</td><td><pre></pre></td></tr>
+<tr><td><a name="InetAddress">InetAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />
@@ -227,13 +622,43 @@ clause as well as the DESCRIPTION clause of the object itself.
    +-- -R-- Counter   <a href="#udpOutDatagrams">udpOutDatagrams</a>(4)
    |
    +--<a href="#udpTable">udpTable</a>(5)
-      |
-      +--<a href="#udpEntry">udpEntry</a>(1)
-         |  Index: udpLocalAddress, udpLocalPort
-         |
-         +-- -R-- IpAddr    <a href="#udpLocalAddress">udpLocalAddress</a>(1)
-         +-- -R-- INTEGER   <a href="#udpLocalPort">udpLocalPort</a>(2)
-                  Range: 0..65535
+   |  |
+   |  +--<a href="#udpEntry">udpEntry</a>(1)
+   |     |  Index: udpLocalAddress, udpLocalPort
+   |     |
+   |     +-- -R-- IpAddr    <a href="#udpLocalAddress">udpLocalAddress</a>(1)
+   |     +-- -R-- Integer32 <a href="#udpLocalPort">udpLocalPort</a>(2)
+   |              Range: 0..65535
+   |
+   +--<a href="#udpEndpointTable">udpEndpointTable</a>(7)
+   |  |
+   |  +--<a href="#udpEndpointEntry">udpEndpointEntry</a>(1)
+   |     |  Index: udpEndpointLocalAddressType, udpEndpointLocalAddress, udpEndpointLocalPort, udpEndpointRemoteAddressType, udpEndpointRemoteAddress, udpEndpointRemotePort, udpEndpointInstance
+   |     |
+   |     +-- ---- EnumVal   <a href="#udpEndpointLocalAddressType">udpEndpointLocalAddressType</a>(1)
+   |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |     +-- ---- String    <a href="#udpEndpointLocalAddress">udpEndpointLocalAddress</a>(2)
+   |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |     |        Size: 0..255
+   |     +-- ---- Unsigned  <a href="#udpEndpointLocalPort">udpEndpointLocalPort</a>(3)
+   |     |        Textual Convention: <a href="#InetPortNumber">InetPortNumber</a>
+   |     |        Range: 0..65535
+   |     +-- ---- EnumVal   <a href="#udpEndpointRemoteAddressType">udpEndpointRemoteAddressType</a>(4)
+   |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |     +-- ---- String    <a href="#udpEndpointRemoteAddress">udpEndpointRemoteAddress</a>(5)
+   |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |     |        Size: 0..255
+   |     +-- ---- Unsigned  <a href="#udpEndpointRemotePort">udpEndpointRemotePort</a>(6)
+   |     |        Textual Convention: <a href="#InetPortNumber">InetPortNumber</a>
+   |     |        Range: 0..65535
+   |     +-- ---- Unsigned  <a href="#udpEndpointInstance">udpEndpointInstance</a>(7)
+   |     |        Range: 1..-1
+   |     +-- -R-- Unsigned  <a href="#udpEndpointProcess">udpEndpointProcess</a>(8)
+   |
+   +-- -R-- Counter64 <a href="#udpHCInDatagrams">udpHCInDatagrams</a>(8)
+   +-- -R-- Counter64 <a href="#udpHCOutDatagrams">udpHCOutDatagrams</a>(9)
 </pre>
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->

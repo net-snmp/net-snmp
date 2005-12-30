@@ -31,8 +31,8 @@ document as <b>.1.3.6.1.6.3.16</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="vacmViewSpinLock" />
@@ -41,7 +41,8 @@ document as <b>.1.3.6.1.6.3.16</b>.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        0 .. 2147483647
  <br>
  <a href="#TestAndIncr">TestAndIncr</a>
 
@@ -84,11 +85,11 @@ is not enforced.
 <h2>TABLE OBJECTS</h2>
 <a name="vacmContextTable" /><h3>Table vacmContextTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>vacmContextTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>SNMP-VIEW-BASED-ACM-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.6.3.16.1.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>vacmContextTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SNMP-VIEW-BASED-ACM-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.6.3.16.1.1</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The table of locally available contexts.
@@ -119,7 +120,7 @@ This table is read-only.  It cannot be configured via
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="vacmContextEntry" />Row Description</td>
+<tr><td class="label"><a name="vacmContextEntry" />Row Description</td>
 <td>
 <pre>
 Information about a particular context.
@@ -130,8 +131,8 @@ Information about a particular context.
 
   <h4>vacmContextTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="vacmContextName" />
@@ -140,7 +141,8 @@ Information about a particular context.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -162,17 +164,17 @@ default context.
 </table>
 
   <h4>Other vacmContextTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
 </table>
 </ul>
 <a name="vacmSecurityToGroupTable" /><h3>Table vacmSecurityToGroupTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>vacmSecurityToGroupTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>SNMP-VIEW-BASED-ACM-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.6.3.16.1.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>vacmSecurityToGroupTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SNMP-VIEW-BASED-ACM-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.6.3.16.1.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 This table maps a combination of securityModel and
@@ -182,7 +184,7 @@ an access control policy for a group of principals.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="vacmSecurityToGroupEntry" />Row Description</td>
+<tr><td class="label"><a name="vacmSecurityToGroupEntry" />Row Description</td>
 <td>
 <pre>
 An entry in this table maps the combination of a
@@ -195,8 +197,8 @@ securityModel and securityName into a groupName.
 
   <h4>vacmSecurityToGroupTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="vacmSecurityModel" />
@@ -205,7 +207,8 @@ securityModel and securityName into a groupName.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        1 .. 2147483647
  <br>
  <a href="#SnmpSecurityModel">SnmpSecurityModel</a>
 
@@ -231,7 +234,8 @@ Note, this object may not take the 'any' (0) value.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -251,8 +255,8 @@ this entry to a groupName.
 </table>
 
   <h4>Other vacmSecurityToGroupTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="vacmGroupName" />
@@ -261,7 +265,8 @@ this entry to a groupName.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -291,7 +296,6 @@ instance with the value exists in table vacmAccesTable.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#StorageType">StorageType</a>
      <br>(ENUM list below)
@@ -317,7 +321,6 @@ allow write-access to any columnar objects in the row.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -348,11 +351,11 @@ The value of this object has no effect on whether
 </ul>
 <a name="vacmAccessTable" /><h3>Table vacmAccessTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>vacmAccessTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>SNMP-VIEW-BASED-ACM-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.6.3.16.1.4</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>vacmAccessTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SNMP-VIEW-BASED-ACM-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.6.3.16.1.4</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The table of access rights for groups.
@@ -399,7 +402,7 @@ Please note that for securityLevel noAuthNoPriv, all
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="vacmAccessEntry" />Row Description</td>
+<tr><td class="label"><a name="vacmAccessEntry" />Row Description</td>
 <td>
 <pre>
 An access right configured in the Local Configuration
@@ -417,8 +420,8 @@ value for object vacmGroupName.
 
   <h4>vacmAccessTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="vacmGroupName" />
@@ -427,7 +430,8 @@ value for object vacmGroupName.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -457,7 +461,8 @@ instance with the value exists in table vacmAccesTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -485,7 +490,8 @@ object.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        0 .. 2147483647
  <br>
  <a href="#SnmpSecurityModel">SnmpSecurityModel</a>
 
@@ -509,7 +515,6 @@ conceptual row, this securityModel must be in use.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#SnmpSecurityLevel">SnmpSecurityLevel</a>
      <br>(ENUM list below)
@@ -536,8 +541,8 @@ vacmAccessSecurityLevel is selected.
 </table>
 
   <h4>Other vacmAccessTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="vacmAccessContextMatch" />
@@ -546,8 +551,7 @@ vacmAccessSecurityLevel is selected.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>exact</td></tr>
         <tr><td>2</td><td>prefix</td></tr>
@@ -576,7 +580,8 @@ This allows for a simple form of wildcarding.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -608,7 +613,8 @@ is granted.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -640,7 +646,8 @@ is granted.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -672,7 +679,6 @@ is granted.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#StorageType">StorageType</a>
      <br>(ENUM list below)
@@ -698,7 +704,6 @@ Conceptual rows having the value 'permanent' need not
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -723,11 +728,11 @@ The value of this object has no effect on whether
 </ul>
 <a name="vacmViewTreeFamilyTable" /><h3>Table vacmViewTreeFamilyTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>vacmViewTreeFamilyTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>SNMP-VIEW-BASED-ACM-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.6.3.16.1.5.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>vacmViewTreeFamilyTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SNMP-VIEW-BASED-ACM-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.6.3.16.1.5.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 Locally held information about families of subtrees
@@ -797,7 +802,7 @@ inconsistentName error must be returned.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="vacmViewTreeFamilyEntry" />Row Description</td>
+<tr><td class="label"><a name="vacmViewTreeFamilyEntry" />Row Description</td>
 <td>
 <pre>
 Information on a particular family of view subtrees
@@ -821,8 +826,8 @@ consisting of the empty set of view subtrees.
 
   <h4>vacmViewTreeFamilyTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="vacmViewTreeFamilyViewName" />
@@ -831,7 +836,8 @@ consisting of the empty set of view subtrees.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -855,7 +861,6 @@ The human readable name for a family of view subtrees.
 </td><td>
   OBJECTID
 
-
   </td><td>NoAccess</td>
 <td>
 <pre>
@@ -869,8 +874,8 @@ defines a family of view subtrees.
 </table>
 
   <h4>Other vacmViewTreeFamilyTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="vacmViewTreeFamilyMask" />
@@ -879,7 +884,8 @@ defines a family of view subtrees.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 16
 
   </td><td>Create</td>
 <td>
@@ -944,8 +950,7 @@ object is made read-only.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>included</td></tr>
         <tr><td>2</td><td>excluded</td></tr>
@@ -970,7 +975,6 @@ or excluded from the MIB view.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#StorageType">StorageType</a>
      <br>(ENUM list below)
@@ -996,7 +1000,6 @@ Conceptual rows having the value 'permanent' need not
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -1022,18 +1025,21 @@ The value of this object has no effect on whether
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -1042,6 +1048,7 @@ The value of this object has no effect on whether
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -1052,13 +1059,13 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
 <tr><td><a name="SnmpSecurityModel">SnmpSecurityModel</td><td>INTEGER</td><td><pre></pre></td></tr>
-<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="SnmpSecurityLevel">SnmpSecurityLevel</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>noAuthNoPriv</td></tr><tr><td>2</td><td>authNoPriv</td></tr><tr><td>3</td><td>authPriv</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
 <tr><td><a name="TestAndIncr">TestAndIncr</td><td>INTEGER</td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpSecurityLevel">SnmpSecurityLevel</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>noAuthNoPriv</td></tr><tr><td>2</td><td>authNoPriv</td></tr><tr><td>3</td><td>authPriv</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />

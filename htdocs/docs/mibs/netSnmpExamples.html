@@ -29,8 +29,8 @@ document as <b>.1.3.6.1.4.1.8072.2</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="netSnmpExampleInteger" />
@@ -39,7 +39,6 @@ document as <b>.1.3.6.1.4.1.8072.2</b>.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.4.1.8072.2.1.1</td>
@@ -63,7 +62,6 @@ agent/mibgroup/examples/scalar_int.c file.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.4.1.8072.2.1.2</td>
@@ -89,51 +87,24 @@ agent/mibgroup/examples/delayed_instance.c file.
   </tr>
   <tr>
   <td>
-<a name="netSnmpExampleHeartbeatRate" />
-1
-<br /><b>netSnmpExampleHeartbeatRate</b>
+<a name="netSnmpExampleString" />
+3
+<br /><b>netSnmpExampleString</b>
 
 </td><td>
   INTEGER32
 
-
-  </td><td>Notify</td>
-    <td>.1.3.6.1.4.1.8072.2.3.2.1</td>
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.4.1.8072.2.1.3</td>
 <td>
 <pre>
-A simple integer object, to act as a payload for the
-netSnmpExampleHeartbeatNotification.  The value has
-no real meaning, but is nominally the interval (in
-seconds) between successive heartbeat notifications.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="netSnmpExampleHeartbeatName" />
-2
-<br /><b>netSnmpExampleHeartbeatName</b>
+This is a simple object which merely houses a writable
+string.  It's only purposes is to hold the value of a single
+string.  Writing to it will simply change the value for
+subsequent GET/GETNEXT/GETBULK retrievals.
 
-</td><td>
-  OCTETSTR
-
- <br>
- <a href="#SnmpAdminString">SnmpAdminString</a>
-
-  </td><td>Notify</td>
-    <td>.1.3.6.1.4.1.8072.2.3.2.2</td>
-<td>
-<p>
-Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
-</p>
-<pre>
-A simple string object, to act as an optional payload
-for the netSnmpExampleHeartbeatNotification.  This varbind
-is not part of the notification definition, so is optional
-and need not be included in the notification payload. 
-The value has no real meaning, but the romantically inclined
-may take it to be the object of the sender's affection,
-and hence the cause of the heart beating faster.
+This example object is implemented in the
+agent/mibgroup/examples/watched.c file.
 </pre>
 </td>
   </tr>
@@ -143,11 +114,11 @@ and hence the cause of the heart beating faster.
 <h2>TABLE OBJECTS</h2>
 <a name="netSnmpIETFWGTable" /><h3>Table netSnmpIETFWGTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>netSnmpIETFWGTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>NET-SNMP-EXAMPLES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.8072.2.2.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>netSnmpIETFWGTable</td></tr>
+  <tr><td class="label">In MIB</td><td>NET-SNMP-EXAMPLES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.8072.2.2.1</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 This table merely contains a set of data which is otherwise
@@ -160,7 +131,7 @@ agent/mibgroup/examples/data_set.c file.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="netSnmpIETFWGEntry" />Row Description</td>
+<tr><td class="label"><a name="netSnmpIETFWGEntry" />Row Description</td>
 <td>
 <pre>
 A row describing a given working group
@@ -171,8 +142,8 @@ A row describing a given working group
 
   <h4>netSnmpIETFWGTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="nsIETFWGName" />
@@ -181,7 +152,8 @@ A row describing a given working group
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
 
   </td><td>NoAccess</td>
 <td>
@@ -193,8 +165,8 @@ The name of the IETF Working Group this table describes.
 </table>
 
   <h4>Other netSnmpIETFWGTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="nsIETFWGChair1" />
@@ -203,7 +175,6 @@ The name of the IETF Working Group this table describes.
 
 </td><td>
   OCTETSTR
-
 
   </td><td>Create</td>
 <td>
@@ -221,7 +192,6 @@ One of the names of the chairs for the IETF working group.
 </td><td>
   OCTETSTR
 
-
   </td><td>Create</td>
 <td>
 <pre>
@@ -234,11 +204,11 @@ working group.
 </ul>
 <a name="netSnmpHostsTable" /><h3>Table netSnmpHostsTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>netSnmpHostsTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>NET-SNMP-EXAMPLES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.8072.2.2.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>netSnmpHostsTable</td></tr>
+  <tr><td class="label">In MIB</td><td>NET-SNMP-EXAMPLES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.8072.2.2.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 An example table that implements a wrapper around the
@@ -246,7 +216,7 @@ An example table that implements a wrapper around the
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="netSnmpHostsEntry" />Row Description</td>
+<tr><td class="label"><a name="netSnmpHostsEntry" />Row Description</td>
 <td>
 <pre>
 A host name mapped to an ip address
@@ -257,8 +227,8 @@ A host name mapped to an ip address
 
   <h4>netSnmpHostsTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="netSnmpHostName" />
@@ -267,7 +237,8 @@ A host name mapped to an ip address
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 64
 
   </td><td>NoAccess</td>
 <td>
@@ -279,8 +250,8 @@ A host name that exists in the /etc/hosts (unix) file.
 </table>
 
   <h4>Other netSnmpHostsTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="netSnmpHostAddressType" />
@@ -289,7 +260,6 @@ A host name that exists in the /etc/hosts (unix) file.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#InetAddressType">InetAddressType</a>
      <br>(ENUM list below)
@@ -312,7 +282,8 @@ The address type of then given host.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#InetAddress">InetAddress</a>
 
@@ -334,7 +305,6 @@ The address of then given host.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#StorageType">StorageType</a>
      <br>(ENUM list below)
@@ -357,7 +327,6 @@ The storage type for this conceptual row.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -377,52 +346,32 @@ The status of this conceptual row.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
-  <tr>
-  <td>
-<a name="netSnmpExampleNotification" />
-1
-<br /><b>netSnmpExampleNotification</b>
-
-</td><td>
-  OCTETSTR
-
- <br>
- <a href="#SnmpAdminString">SnmpAdminString</a>
-
-  </td><td>Notify</td>
-<td>
-<p>
-Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
-</p>
-<pre>
-This object was improperly defined for its original purpose,
-and should no longer be used.
-</pre>
-</td>
-  </tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
 <p>
 <a name="netSnmpExampleHeartbeatNotification" /><h3>Notification: netSnmpExampleHeartbeatNotification</h3>
 
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>netSnmpExampleHeartbeatNotification</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>NET-SNMP-EXAMPLES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.8072.2.3.0.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+  <table>
+  <tr><td class="label">Notification Name</td><td>netSnmpExampleHeartbeatNotification</td></tr>
+  <tr><td class="label">In MIB</td><td>NET-SNMP-EXAMPLES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.8072.2.3.0.1</td></tr>
+  <tr><td class="label">Notification Description</td>
 <td>
 <pre>
 An example notification, used to illustrate the
@@ -435,8 +384,8 @@ This notification will typically be sent every
 </pre>
 </td>
   </tr>
-  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
-  <table border=2>
+  <tr> <td class="label">Mandatory<br />Objects</td><td>
+  <table>
       <tr><td><a href="#netSnmpExampleHeartbeatRate">netSnmpExampleHeartbeatRate</a></td></tr>
   </table></td></tr>
   </table>
@@ -444,6 +393,7 @@ This notification will typically be sent every
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -454,12 +404,11 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre></pre></td></tr>
 <tr><td><a name="InetAddress">InetAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />
@@ -472,6 +421,7 @@ clause as well as the DESCRIPTION clause of the object itself.
    |  |
    |  +-- -RW- Integer32 <a href="#netSnmpExampleInteger">netSnmpExampleInteger</a>(1)
    |  +-- -RW- Integer32 <a href="#netSnmpExampleSleeper">netSnmpExampleSleeper</a>(2)
+   |  +-- -RW- Integer32 <a href="#netSnmpExampleString">netSnmpExampleString</a>(3)
    |
    +--<a href="#netSnmpExampleTables">netSnmpExampleTables</a>(2)
    |  |

@@ -28,26 +28,26 @@ document as <b>.1.3.6.1.4.1.2021.13.15</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 <a name="diskIOTable" /><h3>Table diskIOTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>diskIOTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-DISKIO-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.13.15.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>diskIOTable</td></tr>
+  <tr><td class="label">In MIB</td><td>UCD-DISKIO-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.2021.13.15.1</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 Table of IO devices and how much data they have read/written.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="diskIOEntry" />Row Description</td>
+<tr><td class="label"><a name="diskIOEntry" />Row Description</td>
 <td>
 <pre>
 An entry containing a device and its statistics.
@@ -58,8 +58,8 @@ An entry containing a device and its statistics.
 
   <h4>diskIOTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="diskIOIndex" />
@@ -68,7 +68,8 @@ An entry containing a device and its statistics.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 65535
 
   </td><td>ReadOnly</td>
 <td>
@@ -80,8 +81,8 @@ Reference index for each observed device.
 </table>
 
   <h4>Other diskIOTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="diskIODevice" />
@@ -90,7 +91,8 @@ Reference index for each observed device.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -113,7 +115,6 @@ The name of the device we are counting/checking.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -129,7 +130,6 @@ The number of bytes read from this device since boot.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -147,7 +147,6 @@ The number of bytes written to this device since boot.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -164,7 +163,6 @@ The number of read accesses from this device since boot.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -180,7 +178,8 @@ The number of write accesses to this device since boot.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 100
 
   </td><td>ReadOnly</td>
 <td>
@@ -197,7 +196,8 @@ The 1 minute average load of disk (%)
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 100
 
   </td><td>ReadOnly</td>
 <td>
@@ -214,7 +214,8 @@ The 5 minute average load of disk (%)
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 100
 
   </td><td>ReadOnly</td>
 <td>
@@ -223,23 +224,58 @@ The 15 minute average load of disk (%)
 </pre>
 </td>
   </tr>
+  <tr>
+  <td>
+<a name="diskIONReadX" />
+12
+<br /><b>diskIONReadX</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of bytes read from this device since boot.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="diskIONWrittenX" />
+13
+<br /><b>diskIONWrittenX</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of bytes written to this device since boot.
+</pre>
+</td>
+  </tr>
 </table>
 </ul>
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -248,6 +284,7 @@ The 15 minute average load of disk (%)
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -258,7 +295,7 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
 <tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
 </table></ul>
 
@@ -287,7 +324,9 @@ clause as well as the DESCRIPTION clause of the object itself.
          +-- -R-- Integer32 <a href="#diskIOLA5">diskIOLA5</a>(10)
          |        Range: 0..100
          +-- -R-- Integer32 <a href="#diskIOLA15">diskIOLA15</a>(11)
-                  Range: 0..100
+         |        Range: 0..100
+         +-- -R-- Counter64 <a href="#diskIONReadX">diskIONReadX</a>(12)
+         +-- -R-- Counter64 <a href="#diskIONWrittenX">diskIONWrittenX</a>(13)
 </pre>
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->

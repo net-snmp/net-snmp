@@ -28,8 +28,8 @@ document as <b>.1.3.6.1.2.1.63</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="schedLocalTime" />
@@ -38,7 +38,8 @@ document as <b>.1.3.6.1.2.1.63</b>.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        11
  <br>
  <a href="#DateAndTime">DateAndTime</a>
 
@@ -63,11 +64,11 @@ may retrieve the offset from GMT time.
 <h2>TABLE OBJECTS</h2>
 <a name="schedTable" /><h3>Table schedTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>schedTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCHEDULE-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.63.1.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>schedTable</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-SCHEDULE-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.63.1.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 This table defines scheduled actions triggered by
@@ -75,7 +76,7 @@ SNMP set operations.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="schedEntry" />Row Description</td>
+<tr><td class="label"><a name="schedEntry" />Row Description</td>
 <td>
 <pre>
 An entry describing a particular scheduled action.
@@ -93,8 +94,8 @@ Unless noted otherwise, writable objects of this row
 
   <h4>schedTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="schedOwner" />
@@ -103,7 +104,8 @@ Unless noted otherwise, writable objects of this row
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -128,7 +130,8 @@ the security administrator.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -147,8 +150,8 @@ multiple entries in the schedTable.
 </table>
 
   <h4>Other schedTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="schedDescr" />
@@ -157,7 +160,8 @@ multiple entries in the schedTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -180,7 +184,6 @@ scheduling entry.
 
 </td><td>
   UNSIGNED32
-
 
   </td><td>Create</td>
 <td>
@@ -214,8 +217,7 @@ changed.
 
 </td><td>
   BITS
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>0</td><td>sunday</td></tr>
         <tr><td>1</td><td>monday</td></tr>
@@ -249,8 +251,7 @@ changed.
 
 </td><td>
   BITS
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>0</td><td>january</td></tr>
         <tr><td>1</td><td>february</td></tr>
@@ -290,8 +291,7 @@ changed.
 
 </td><td>
   BITS
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>0</td><td>d1</td></tr>
         <tr><td>1</td><td>d2</td></tr>
@@ -398,8 +398,7 @@ changed.
 
 </td><td>
   BITS
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>0</td><td>h0</td></tr>
         <tr><td>1</td><td>h1</td></tr>
@@ -447,8 +446,7 @@ changed.
 
 </td><td>
   BITS
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>0</td><td>m0</td></tr>
         <tr><td>1</td><td>m1</td></tr>
@@ -532,7 +530,8 @@ changed.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -555,7 +554,6 @@ to by schedVariable.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#VariablePointer">VariablePointer</a>
 
@@ -578,7 +576,6 @@ which resolves to an ASN.1 primitive type of INTEGER.
 
 </td><td>
   INTEGER32
-
 
   </td><td>Create</td>
 <td>
@@ -604,8 +601,7 @@ decision to the normal message processing procedure.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>periodic</td></tr>
         <tr><td>2</td><td>calendar</td></tr>
@@ -649,8 +645,7 @@ changed.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>enabled</td></tr>
         <tr><td>2</td><td>disabled</td></tr>
@@ -671,8 +666,7 @@ The desired state of the schedule.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>enabled</td></tr>
         <tr><td>2</td><td>disabled</td></tr>
@@ -706,7 +700,6 @@ when the schedRowStatus is not active.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -724,7 +717,6 @@ for a triggered action.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#SnmpPduErrorStatus">SnmpPduErrorStatus</a>
      <br>(ENUM list below)
@@ -749,7 +741,10 @@ if no errors have occurred yet.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        8
+        ,
+        11
  <br>
  <a href="#DateAndTime">DateAndTime</a>
 
@@ -773,7 +768,6 @@ The value '0000000000000000'H is returned if no failure
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#StorageType">StorageType</a>
      <br>(ENUM list below)
@@ -806,7 +800,6 @@ schedHour, schedMinute.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -842,7 +835,6 @@ objects in this conceptual row can be modified.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -856,29 +848,32 @@ successful or failed) to invoke the scheduled action.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
 <p>
 <a name="schedActionFailure" /><h3>Notification: schedActionFailure</h3>
 
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>schedActionFailure</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCHEDULE-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.63.2.0.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+  <table>
+  <tr><td class="label">Notification Name</td><td>schedActionFailure</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-SCHEDULE-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.63.2.0.1</td></tr>
+  <tr><td class="label">Notification Description</td>
 <td>
 <pre>
 This notification is generated whenever the invocation of a
@@ -886,8 +881,8 @@ scheduled action fails.
 </pre>
 </td>
   </tr>
-  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
-  <table border=2>
+  <tr> <td class="label">Mandatory<br />Objects</td><td>
+  <table>
       <tr><td><a href="#schedLastFailure">schedLastFailure</a></td></tr>
       <tr><td><a href="#schedLastFailed">schedLastFailed</a></td></tr>
   </table></td></tr>
@@ -896,6 +891,7 @@ scheduled action fails.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -906,12 +902,12 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
 <tr><td><a name="VariablePointer">VariablePointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
-<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
 <tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="SnmpPduErrorStatus">SnmpPduErrorStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>-1</td><td>noResponse</td></tr><tr><td>0</td><td>noError</td></tr><tr><td>1</td><td>tooBig</td></tr><tr><td>2</td><td>noSuchName</td></tr><tr><td>3</td><td>badValue</td></tr><tr><td>4</td><td>readOnly</td></tr><tr><td>5</td><td>genErr</td></tr><tr><td>6</td><td>noAccess</td></tr><tr><td>7</td><td>wrongType</td></tr><tr><td>8</td><td>wrongLength</td></tr><tr><td>9</td><td>wrongEncoding</td></tr><tr><td>10</td><td>wrongValue</td></tr><tr><td>11</td><td>noCreation</td></tr><tr><td>12</td><td>inconsistentValue</td></tr><tr><td>13</td><td>resourceUnavailable</td></tr><tr><td>14</td><td>commitFailed</td></tr><tr><td>15</td><td>undoFailed</td></tr><tr><td>16</td><td>authorizationError</td></tr><tr><td>17</td><td>notWritable</td></tr><tr><td>18</td><td>inconsistentName</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpPduErrorStatus">SnmpPduErrorStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>-1</td><td>noResponse</td></tr><tr><td>0</td><td>noError</td></tr><tr><td>1</td><td>tooBig</td></tr><tr><td>2</td><td>noSuchName</td></tr><tr><td>3</td><td>badValue</td></tr><tr><td>4</td><td>readOnly</td></tr><tr><td>5</td><td>genErr</td></tr><tr><td>6</td><td>noAccess</td></tr><tr><td>7</td><td>wrongType</td></tr><tr><td>8</td><td>wrongLength</td></tr><tr><td>9</td><td>wrongEncoding</td></tr><tr><td>10</td><td>wrongValue</td></tr><tr><td>11</td><td>noCreation</td></tr><tr><td>12</td><td>inconsistentValue</td></tr><tr><td>13</td><td>resourceUnavailable</td></tr><tr><td>14</td><td>commitFailed</td></tr><tr><td>15</td><td>undoFailed</td></tr><tr><td>16</td><td>authorizationError</td></tr><tr><td>17</td><td>notWritable</td></tr><tr><td>18</td><td>inconsistentName</td></tr></table></td><td><pre></pre></td></tr>
 <tr><td><a name="DateAndTime">DateAndTime</td><td>OCTETSTR</td><td><pre></pre></td></tr>
 </table></ul>
 

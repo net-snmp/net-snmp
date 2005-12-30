@@ -38,8 +38,8 @@ document as <b>.1.3.6.1.2.1.25</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrSystemUptime" />
@@ -48,7 +48,6 @@ document as <b>.1.3.6.1.2.1.25</b>.
 
 </td><td>
   TICKS
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.25.1.1</td>
@@ -70,7 +69,10 @@ portion of the system.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        8
+        ,
+        11
  <br>
  <a href="#DateAndTime">DateAndTime</a>
 
@@ -93,7 +95,8 @@ The host's notion of the local date and time of day.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.2.1.25.1.3</td>
@@ -119,7 +122,8 @@ the reload to occur.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 128
  <br>
  <a href="#InternationalDisplayString">InternationalDisplayString</a>
 
@@ -151,7 +155,6 @@ from that device.
 </td><td>
   GAUGE
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.25.1.5</td>
 <td>
@@ -173,7 +176,6 @@ control.
 </td><td>
   GAUGE
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.25.1.6</td>
 <td>
@@ -191,7 +193,8 @@ running on this system.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.25.1.7</td>
@@ -213,7 +216,8 @@ this maximum is reached.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
  <br>
  <a href="#KBytes">KBytes</a>
 
@@ -237,7 +241,8 @@ typically RAM, contained by the host.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.25.4.1</td>
@@ -258,7 +263,6 @@ uniquely identifying that primary operating system.
 
 </td><td>
   TICKS
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.25.6.1</td>
@@ -282,7 +286,6 @@ might be useful.
 </td><td>
   TICKS
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.25.6.2</td>
 <td>
@@ -302,11 +305,11 @@ older than the indicated time.
 <h2>TABLE OBJECTS</h2>
 <a name="hrStorageTable" /><h3>Table hrStorageTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrStorageTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.2.3</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>hrStorageTable</td></tr>
+  <tr><td class="label">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.25.2.3</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The (conceptual) table of logical storage areas on
@@ -340,7 +343,7 @@ usage.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="hrStorageEntry" />Row Description</td>
+<tr><td class="label"><a name="hrStorageEntry" />Row Description</td>
 <td>
 <pre>
 A (conceptual) entry for one logical storage area on
@@ -353,8 +356,8 @@ hrStorageType object might be named hrStorageType.3
 
   <h4>hrStorageTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrStorageIndex" />
@@ -363,7 +366,8 @@ hrStorageType object might be named hrStorageType.3
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -376,8 +380,8 @@ contained by the host.
 </table>
 
   <h4>Other hrStorageTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrStorageType" />
@@ -386,7 +390,6 @@ contained by the host.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#AutonomousType">AutonomousType</a>
 
@@ -408,7 +411,8 @@ The type of storage represented by this entry.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -431,7 +435,8 @@ described by this entry.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -452,7 +457,8 @@ number will typically be one.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>ReadWrite</td>
 <td>
@@ -477,7 +483,8 @@ might be modified.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -497,7 +504,6 @@ hrStorageAllocationUnits.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -515,11 +521,11 @@ stations must not depend on such an initialization.
 </ul>
 <a name="hrDeviceTable" /><h3>Table hrDeviceTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrDeviceTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>hrDeviceTable</td></tr>
+  <tr><td class="label">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.25.3.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The (conceptual) table of devices contained by the
@@ -527,7 +533,7 @@ host.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="hrDeviceEntry" />Row Description</td>
+<tr><td class="label"><a name="hrDeviceEntry" />Row Description</td>
 <td>
 <pre>
 A (conceptual) entry for one device contained by the
@@ -540,8 +546,8 @@ object might be named hrDeviceType.3
 
   <h4>hrDeviceTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrDeviceIndex" />
@@ -550,7 +556,8 @@ object might be named hrDeviceType.3
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -565,8 +572,8 @@ next re-initialization.
 </table>
 
   <h4>Other hrDeviceTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrDeviceType" />
@@ -575,7 +582,6 @@ next re-initialization.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#AutonomousType">AutonomousType</a>
 
@@ -613,7 +619,8 @@ If this value is
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 64
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -637,7 +644,6 @@ its serial number.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#ProductID">ProductID</a>
 
@@ -659,8 +665,7 @@ The product ID for this device.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>unknown</td></tr>
         <tr><td>2</td><td>running</td></tr>
@@ -699,7 +704,6 @@ use.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -716,11 +720,11 @@ must not depend on such an initialization.
 </ul>
 <a name="hrProcessorTable" /><h3>Table hrProcessorTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrProcessorTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.3</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>hrProcessorTable</td></tr>
+  <tr><td class="label">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.25.3.3</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The (conceptual) table of processors contained by the
@@ -733,7 +737,7 @@ value of the hrDeviceType object is
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="hrProcessorEntry" />Row Description</td>
+<tr><td class="label"><a name="hrProcessorEntry" />Row Description</td>
 <td>
 <pre>
 A (conceptual) entry for one processor contained by
@@ -751,8 +755,8 @@ named hrProcessorFrwID.3
 
   <h4>hrProcessorTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrDeviceIndex" />
@@ -761,7 +765,8 @@ named hrProcessorFrwID.3
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -776,8 +781,8 @@ next re-initialization.
 </table>
 
   <h4>Other hrProcessorTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrProcessorFrwID" />
@@ -786,7 +791,6 @@ next re-initialization.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#ProductID">ProductID</a>
 
@@ -809,7 +813,8 @@ processor.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 100
 
   </td><td>ReadOnly</td>
 <td>
@@ -825,11 +830,11 @@ smoothing period if necessary.
 </ul>
 <a name="hrNetworkTable" /><h3>Table hrNetworkTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrNetworkTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.4</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>hrNetworkTable</td></tr>
+  <tr><td class="label">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.25.3.4</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The (conceptual) table of network devices contained
@@ -842,7 +847,7 @@ value of the hrDeviceType object is
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="hrNetworkEntry" />Row Description</td>
+<tr><td class="label"><a name="hrNetworkEntry" />Row Description</td>
 <td>
 <pre>
 A (conceptual) entry for one network device contained
@@ -860,8 +865,8 @@ named hrNetworkIfIndex.3
 
   <h4>hrNetworkTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrDeviceIndex" />
@@ -870,7 +875,8 @@ named hrNetworkIfIndex.3
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -885,8 +891,8 @@ next re-initialization.
 </table>
 
   <h4>Other hrNetworkTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrNetworkIfIndex" />
@@ -895,7 +901,8 @@ next re-initialization.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
  <br>
  <a href="#InterfaceIndexOrZero">InterfaceIndexOrZero</a>
 
@@ -915,11 +922,11 @@ the ifTable, then this value shall be zero.
 </ul>
 <a name="hrPrinterTable" /><h3>Table hrPrinterTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrPrinterTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.5</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>hrPrinterTable</td></tr>
+  <tr><td class="label">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.25.3.5</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The (conceptual) table of printers local to the host.
@@ -930,7 +937,7 @@ Note that this table is potentially sparse: a
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="hrPrinterEntry" />Row Description</td>
+<tr><td class="label"><a name="hrPrinterEntry" />Row Description</td>
 <td>
 <pre>
 A (conceptual) entry for one printer local to the
@@ -948,8 +955,8 @@ named hrPrinterStatus.3
 
   <h4>hrPrinterTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrDeviceIndex" />
@@ -958,7 +965,8 @@ named hrPrinterStatus.3
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -973,8 +981,8 @@ next re-initialization.
 </table>
 
   <h4>Other hrPrinterTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrPrinterStatus" />
@@ -983,8 +991,7 @@ next re-initialization.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>other</td></tr>
         <tr><td>2</td><td>unknown</td></tr>
@@ -1008,7 +1015,6 @@ The current status of this printer device.
 
 </td><td>
   OCTETSTR
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1055,11 +1061,11 @@ especially those requiring human intervention.
 </ul>
 <a name="hrDiskStorageTable" /><h3>Table hrDiskStorageTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrDiskStorageTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.6</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>hrDiskStorageTable</td></tr>
+  <tr><td class="label">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.25.3.6</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The (conceptual) table of long-term storage devices
@@ -1074,7 +1080,7 @@ value of the hrDeviceType object is
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="hrDiskStorageEntry" />Row Description</td>
+<tr><td class="label"><a name="hrDiskStorageEntry" />Row Description</td>
 <td>
 <pre>
 A (conceptual) entry for one long-term storage device
@@ -1090,8 +1096,8 @@ be named hrDiskStorageCapacity.3
 
   <h4>hrDiskStorageTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrDeviceIndex" />
@@ -1100,7 +1106,8 @@ be named hrDiskStorageCapacity.3
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -1115,8 +1122,8 @@ next re-initialization.
 </table>
 
   <h4>Other hrDiskStorageTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrDiskStorageAccess" />
@@ -1125,8 +1132,7 @@ next re-initialization.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>readWrite</td></tr>
         <tr><td>2</td><td>readOnly</td></tr>
@@ -1151,8 +1157,7 @@ device.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>other</td></tr>
         <tr><td>2</td><td>unknown</td></tr>
@@ -1180,7 +1185,6 @@ term storage device.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -1204,7 +1208,8 @@ from the drive.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
  <br>
  <a href="#KBytes">KBytes</a>
 
@@ -1224,11 +1229,11 @@ value should be zero.
 </ul>
 <a name="hrPartitionTable" /><h3>Table hrPartitionTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrPartitionTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.7</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>hrPartitionTable</td></tr>
+  <tr><td class="label">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.25.3.7</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The (conceptual) table of partitions for long-term
@@ -1238,7 +1243,7 @@ included here.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="hrPartitionEntry" />Row Description</td>
+<tr><td class="label"><a name="hrPartitionEntry" />Row Description</td>
 <td>
 <pre>
 A (conceptual) entry for one partition.  The
@@ -1256,8 +1261,8 @@ named hrPartitionSize.3.1
 
   <h4>hrPartitionTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrDeviceIndex" />
@@ -1266,7 +1271,8 @@ named hrPartitionSize.3.1
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -1286,7 +1292,8 @@ next re-initialization.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -1302,8 +1309,8 @@ initialization.
 </table>
 
   <h4>Other hrPartitionTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrPartitionLabel" />
@@ -1312,7 +1319,8 @@ initialization.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 128
  <br>
  <a href="#InternationalDisplayString">InternationalDisplayString</a>
 
@@ -1335,7 +1343,6 @@ A textual description of this partition.
 </td><td>
   OCTETSTR
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1353,7 +1360,8 @@ this might take on a binary representation.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
  <br>
  <a href="#KBytes">KBytes</a>
 
@@ -1375,7 +1383,8 @@ The size of this partition.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -1394,11 +1403,11 @@ one partition.
 </ul>
 <a name="hrFSTable" /><h3>Table hrFSTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrFSTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.8</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>hrFSTable</td></tr>
+  <tr><td class="label">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.25.3.8</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The (conceptual) table of file systems local to this
@@ -1408,7 +1417,7 @@ multi-user system will not be included in this table.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="hrFSEntry" />Row Description</td>
+<tr><td class="label"><a name="hrFSEntry" />Row Description</td>
 <td>
 <pre>
 A (conceptual) entry for one file system local to
@@ -1427,8 +1436,8 @@ named hrFSMountPoint.3
 
   <h4>hrFSTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrFSIndex" />
@@ -1437,7 +1446,8 @@ named hrFSMountPoint.3
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -1452,8 +1462,8 @@ agent to the next re-initialization.
 </table>
 
   <h4>Other hrFSTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrFSMountPoint" />
@@ -1462,7 +1472,8 @@ agent to the next re-initialization.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 128
  <br>
  <a href="#InternationalDisplayString">InternationalDisplayString</a>
 
@@ -1484,7 +1495,8 @@ The path name of the root of this file system.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 128
  <br>
  <a href="#InternationalDisplayString">InternationalDisplayString</a>
 
@@ -1510,7 +1522,6 @@ system, this string should have a length of zero.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#AutonomousType">AutonomousType</a>
 
@@ -1533,8 +1544,7 @@ file system.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>readWrite</td></tr>
         <tr><td>2</td><td>readOnly</td></tr>
@@ -1559,7 +1569,6 @@ applied to the file system as a whole.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -1583,7 +1592,8 @@ bootable.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -1606,7 +1616,10 @@ space.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        8
+        ,
+        11
  <br>
  <a href="#DateAndTime">DateAndTime</a>
 
@@ -1635,7 +1648,10 @@ If this information is not known, then this variable
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        8
+        ,
+        11
  <br>
  <a href="#DateAndTime">DateAndTime</a>
 
@@ -1661,11 +1677,11 @@ shall have the value corresponding to January 1, year
 </ul>
 <a name="hrSWRunTable" /><h3>Table hrSWRunTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrSWRunTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.4.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>hrSWRunTable</td></tr>
+  <tr><td class="label">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.25.4.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The (conceptual) table of software running on the
@@ -1673,7 +1689,7 @@ host.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="hrSWRunEntry" />Row Description</td>
+<tr><td class="label"><a name="hrSWRunEntry" />Row Description</td>
 <td>
 <pre>
 A (conceptual) entry for one piece of software
@@ -1695,8 +1711,8 @@ hrSWRunName.1287
 
   <h4>hrSWRunTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrSWRunIndex" />
@@ -1705,7 +1721,8 @@ hrSWRunName.1287
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -1719,8 +1736,8 @@ system's native, unique identification number.
 </table>
 
   <h4>Other hrSWRunTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrSWRunName" />
@@ -1729,7 +1746,8 @@ system's native, unique identification number.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 64
  <br>
  <a href="#InternationalDisplayString">InternationalDisplayString</a>
 
@@ -1756,7 +1774,6 @@ hrSWInstalledName.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#ProductID">ProductID</a>
 
@@ -1778,7 +1795,8 @@ The product ID of this running piece of software.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 128
  <br>
  <a href="#InternationalDisplayString">InternationalDisplayString</a>
 
@@ -1802,7 +1820,8 @@ loaded.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 128
  <br>
  <a href="#InternationalDisplayString">InternationalDisplayString</a>
 
@@ -1825,8 +1844,7 @@ software when it was initially loaded.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>unknown</td></tr>
         <tr><td>2</td><td>operatingSystem</td></tr>
@@ -1849,8 +1867,7 @@ The type of this software.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>running</td></tr>
         <tr><td>2</td><td>runnable</td></tr>
@@ -1872,11 +1889,11 @@ other values are not valid.
 </ul>
 <a name="hrSWRunPerfTable" /><h3>Table hrSWRunPerfTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrSWRunPerfTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.5.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>hrSWRunPerfTable</td></tr>
+  <tr><td class="label">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.25.5.1</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The (conceptual) table of running software
@@ -1884,7 +1901,7 @@ performance metrics.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="hrSWRunPerfEntry" />Row Description</td>
+<tr><td class="label"><a name="hrSWRunPerfEntry" />Row Description</td>
 <td>
 <pre>
 A (conceptual) entry containing software performance
@@ -1898,8 +1915,8 @@ hrSWRunPerfCPU.1287
 
   <h4>hrSWRunPerfTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrSWRunIndex" />
@@ -1908,7 +1925,8 @@ hrSWRunPerfCPU.1287
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -1922,8 +1940,8 @@ system's native, unique identification number.
 </table>
 
   <h4>Other hrSWRunPerfTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrSWRunPerfCPU" />
@@ -1932,7 +1950,8 @@ system's native, unique identification number.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -1953,7 +1972,8 @@ more than one centi-second in one centi-second of real
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
  <br>
  <a href="#KBytes">KBytes</a>
 
@@ -1972,11 +1992,11 @@ this process.
 </ul>
 <a name="hrSWInstalledTable" /><h3>Table hrSWInstalledTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrSWInstalledTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.6.3</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>hrSWInstalledTable</td></tr>
+  <tr><td class="label">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.25.6.3</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The (conceptual) table of software installed on this
@@ -1984,7 +2004,7 @@ host.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="hrSWInstalledEntry" />Row Description</td>
+<tr><td class="label"><a name="hrSWInstalledEntry" />Row Description</td>
 <td>
 <pre>
 A (conceptual) entry for a piece of software
@@ -2000,8 +2020,8 @@ named hrSWInstalledName.96
 
   <h4>hrSWInstalledTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrSWInstalledIndex" />
@@ -2010,7 +2030,8 @@ named hrSWInstalledName.96
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -2025,8 +2046,8 @@ host.
 </table>
 
   <h4>Other hrSWInstalledTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="hrSWInstalledName" />
@@ -2035,7 +2056,8 @@ host.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 64
  <br>
  <a href="#InternationalDisplayString">InternationalDisplayString</a>
 
@@ -2060,7 +2082,6 @@ its serial number.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#ProductID">ProductID</a>
 
@@ -2082,8 +2103,7 @@ The product ID of this installed piece of software.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>unknown</td></tr>
         <tr><td>2</td><td>operatingSystem</td></tr>
@@ -2106,7 +2126,10 @@ The type of this software.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        8
+        ,
+        11
  <br>
  <a href="#DateAndTime">DateAndTime</a>
 
@@ -2131,18 +2154,21 @@ shall have the value corresponding to January 1, year
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
@@ -2151,6 +2177,7 @@ shall have the value corresponding to January 1, year
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -2161,15 +2188,15 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="AutonomousType">AutonomousType</td><td>OBJECTID</td><td><pre></pre></td></tr>
-<tr><td><a name="KBytes">KBytes</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
 <tr><td><a name="ProductID">ProductID</td><td>OBJECTID</td><td><pre></pre></td></tr>
 <tr><td><a name="DateAndTime">DateAndTime</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="InterfaceIndexOrZero">InterfaceIndexOrZero</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
 <tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
 <tr><td><a name="InternationalDisplayString">InternationalDisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="InterfaceIndexOrZero">InterfaceIndexOrZero</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<tr><td><a name="AutonomousType">AutonomousType</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<tr><td><a name="KBytes">KBytes</td><td>INTEGER32</td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />

@@ -33,8 +33,8 @@ document as <b>.1.3.6.1.2.1.55</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6Forwarding" />
@@ -43,8 +43,7 @@ document as <b>.1.3.6.1.2.1.55</b>.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>forwarding</td></tr>
         <tr><td>2</td><td>notForwarding</td></tr>
@@ -78,7 +77,8 @@ inappropriate value.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        0 .. 255
 
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.2.1.55.1.2</td>
@@ -100,7 +100,6 @@ supplied by the transport layer protocol.
 </td><td>
   UNSIGNED32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.55.1.3</td>
 <td>
@@ -118,7 +117,6 @@ their current state) present on this system.
 
 </td><td>
   TICKS
-
  <br>
  <a href="#TimeStamp">TimeStamp</a>
 
@@ -147,7 +145,6 @@ object contains a zero value.
 </td><td>
   GAUGE
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.55.1.9</td>
 <td>
@@ -167,7 +164,6 @@ the table in order to determine this number.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.55.1.10</td>
 <td>
@@ -186,11 +182,11 @@ entries.
 <h2>TABLE OBJECTS</h2>
 <a name="ipv6IfTable" /><h3>Table ipv6IfTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6IfTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.1.5</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>ipv6IfTable</td></tr>
+  <tr><td class="label">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.55.1.5</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The IPv6 Interfaces table contains information
@@ -203,7 +199,7 @@ tunnels over IPv4 or IPv6 itself.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="ipv6IfEntry" />Row Description</td>
+<tr><td class="label"><a name="ipv6IfEntry" />Row Description</td>
 <td>
 <pre>
 An interface entry containing objects
@@ -215,8 +211,8 @@ about a particular IPv6 interface.
 
   <h4>ipv6IfTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6IfIndex" />
@@ -225,7 +221,8 @@ about a particular IPv6 interface.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
  <br>
  <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
 
@@ -243,8 +240,8 @@ the particular IPv6 interface.
 </table>
 
   <h4>Other ipv6IfTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6IfDescr" />
@@ -253,7 +250,8 @@ the particular IPv6 interface.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -277,7 +275,6 @@ management system.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#VariablePointer">VariablePointer</a>
 
@@ -313,7 +310,6 @@ should be set to the OBJECT ID { 0 0 }.
 </td><td>
   UNSIGNED32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -331,7 +327,8 @@ octets.
 
 </td><td>
   UNSIGNED32
-
+      <br />Legal values:
+        0 .. 65535
 
   </td><td>ReadOnly</td>
 <td>
@@ -350,7 +347,8 @@ datagrams received on this interface.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 8
  <br>
  <a href="#Ipv6AddressIfIdentifier">Ipv6AddressIfIdentifier</a>
 
@@ -378,7 +376,8 @@ By default, the Interface Identifier is autoconfigured
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        0 .. 64
 
   </td><td>ReadWrite</td>
 <td>
@@ -395,7 +394,6 @@ The length of the Interface Identifier in bits.
 
 </td><td>
   OCTETSTR
-
  <br>
  <a href="#PhysAddress">PhysAddress</a>
 
@@ -426,8 +424,7 @@ contain an octet string of zero length.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>up</td></tr>
         <tr><td>2</td><td>down</td></tr>
@@ -455,8 +452,7 @@ the up(1) state (or remains in the down(2) state).
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>up</td></tr>
         <tr><td>2</td><td>down</td></tr>
@@ -494,7 +490,6 @@ components.
 
 </td><td>
   TICKS
-
  <br>
  <a href="#TimeStamp">TimeStamp</a>
 
@@ -518,18 +513,18 @@ value.
 </ul>
 <a name="ipv6IfStatsTable" /><h3>Table ipv6IfStatsTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6IfStatsTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.1.6</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>ipv6IfStatsTable</td></tr>
+  <tr><td class="label">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.55.1.6</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 IPv6 interface traffic statistics.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="ipv6IfStatsEntry" />Row Description</td>
+<tr><td class="label"><a name="ipv6IfStatsEntry" />Row Description</td>
 <td>
 <pre>
 An interface statistics entry containing objects
@@ -541,8 +536,8 @@ at a particular IPv6 interface.
 
   <h4>ipv6IfStatsTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6IfIndex" />
@@ -551,7 +546,8 @@ at a particular IPv6 interface.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
  <br>
  <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
 
@@ -569,8 +565,8 @@ the particular IPv6 interface.
 </table>
 
   <h4>Other ipv6IfStatsTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6IfStatsInReceives" />
@@ -579,7 +575,6 @@ the particular IPv6 interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -597,7 +592,6 @@ the interface, including those received in error.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -619,7 +613,6 @@ IPv6 options, etc.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -638,7 +631,6 @@ of outgoing interface.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -656,7 +648,6 @@ destination.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -683,7 +674,6 @@ was not a local address.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -706,7 +696,6 @@ the datagrams.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -723,7 +712,6 @@ datagram frame didn't carry enough data.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -746,7 +734,6 @@ while awaiting re-assembly.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -767,7 +754,6 @@ the datagrams.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -793,7 +779,6 @@ of the outgoing interface is incremented.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -813,7 +798,6 @@ ipv6IfStatsOutForwDatagrams.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -837,7 +821,6 @@ met this (discretionary) discard criterion.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -854,7 +837,6 @@ successfully fragmented at this output interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -874,7 +856,6 @@ at this output interface but could not be.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -892,7 +873,6 @@ this output interface.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -915,7 +895,6 @@ the fragments.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -935,7 +914,6 @@ interface for some of the fragments.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -963,7 +941,6 @@ fragments.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -981,7 +958,6 @@ by the interface
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -994,11 +970,11 @@ by the interface
 </ul>
 <a name="ipv6AddrPrefixTable" /><h3>Table ipv6AddrPrefixTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6AddrPrefixTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.1.7</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>ipv6AddrPrefixTable</td></tr>
+  <tr><td class="label">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.55.1.7</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The list of IPv6 address prefixes of
@@ -1006,7 +982,7 @@ IPv6 interfaces.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="ipv6AddrPrefixEntry" />Row Description</td>
+<tr><td class="label"><a name="ipv6AddrPrefixEntry" />Row Description</td>
 <td>
 <pre>
 An interface entry containing objects of
@@ -1018,8 +994,8 @@ a particular IPv6 address prefix.
 
   <h4>ipv6AddrPrefixTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6IfIndex" />
@@ -1028,7 +1004,8 @@ a particular IPv6 address prefix.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
  <br>
  <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
 
@@ -1051,7 +1028,8 @@ the particular IPv6 interface.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 16
  <br>
  <a href="#Ipv6AddressPrefix">Ipv6AddressPrefix</a>
 
@@ -1073,7 +1051,8 @@ The prefix associated with the this interface.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        0 .. 128
 
   </td><td>NoAccess</td>
 <td>
@@ -1085,8 +1064,8 @@ The length of the prefix (in bits).
 </table>
 
   <h4>Other ipv6AddrPrefixTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6AddrPrefixOnLinkFlag" />
@@ -1095,7 +1074,6 @@ The length of the prefix (in bits).
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -1120,7 +1098,6 @@ and the value 'false(2)' otherwise.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -1149,7 +1126,6 @@ a local interface address.
 </td><td>
   UNSIGNED32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1174,7 +1150,6 @@ an interface are processed as expected.
 </td><td>
   UNSIGNED32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1193,11 +1168,11 @@ address of a packet.
 </ul>
 <a name="ipv6AddrTable" /><h3>Table ipv6AddrTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6AddrTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.1.8</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>ipv6AddrTable</td></tr>
+  <tr><td class="label">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.55.1.8</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The table of addressing information relevant to
@@ -1205,7 +1180,7 @@ this node's interface addresses.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="ipv6AddrEntry" />Row Description</td>
+<tr><td class="label"><a name="ipv6AddrEntry" />Row Description</td>
 <td>
 <pre>
 The addressing information for one of this
@@ -1217,8 +1192,8 @@ node's interface addresses.
 
   <h4>ipv6AddrTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6IfIndex" />
@@ -1227,7 +1202,8 @@ node's interface addresses.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
  <br>
  <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
 
@@ -1250,7 +1226,8 @@ the particular IPv6 interface.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        16
  <br>
  <a href="#Ipv6Address">Ipv6Address</a>
 
@@ -1268,8 +1245,8 @@ information pertains.
 </table>
 
   <h4>Other ipv6AddrTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6AddrPfxLength" />
@@ -1278,7 +1255,8 @@ information pertains.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        0 .. 128
 
   </td><td>ReadOnly</td>
 <td>
@@ -1296,8 +1274,7 @@ the IPv6 address of this entry.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>stateless</td></tr>
         <tr><td>2</td><td>stateful</td></tr>
@@ -1323,7 +1300,6 @@ which was acquired by via a stateful protocol
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -1348,8 +1324,7 @@ address is an anycast address and the value
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>preferred</td></tr>
         <tr><td>3</td><td>invalid</td></tr>
@@ -1381,11 +1356,11 @@ to which this address is assigned is not operational.
 </ul>
 <a name="ipv6RouteTable" /><h3>Table ipv6RouteTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6RouteTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.1.11</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>ipv6RouteTable</td></tr>
+  <tr><td class="label">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.55.1.11</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 IPv6 Routing table. This table contains
@@ -1395,7 +1370,7 @@ determination.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="ipv6RouteEntry" />Row Description</td>
+<tr><td class="label"><a name="ipv6RouteEntry" />Row Description</td>
 <td>
 <pre>
 A routing entry.
@@ -1406,8 +1381,8 @@ A routing entry.
 
   <h4>ipv6RouteTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6RouteDest" />
@@ -1416,7 +1391,8 @@ A routing entry.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        16
  <br>
  <a href="#Ipv6Address">Ipv6Address</a>
 
@@ -1440,7 +1416,8 @@ value.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        0 .. 128
 
   </td><td>NoAccess</td>
 <td>
@@ -1459,7 +1436,6 @@ address.
 </td><td>
   UNSIGNED32
 
-
   </td><td>NoAccess</td>
 <td>
 <pre>
@@ -1475,8 +1451,8 @@ constant for the life of the route.
 </table>
 
   <h4>Other ipv6RouteTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6RouteIfIndex" />
@@ -1485,7 +1461,8 @@ constant for the life of the route.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
  <br>
  <a href="#Ipv6IfIndexOrZero">Ipv6IfIndexOrZero</a>
 
@@ -1513,7 +1490,8 @@ value can be zero.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        16
  <br>
  <a href="#Ipv6Address">Ipv6Address</a>
 
@@ -1538,8 +1516,7 @@ string representation).
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>other</td></tr>
         <tr><td>2</td><td>discard</td></tr>
@@ -1569,8 +1546,7 @@ black-hole route).
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>other</td></tr>
         <tr><td>2</td><td>local</td></tr>
@@ -1600,7 +1576,6 @@ learned.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1629,7 +1604,6 @@ value acts as an index.
 </td><td>
   UNSIGNED32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1649,7 +1623,6 @@ by which the route was learned.
 
 </td><td>
   UNSIGNED32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1671,7 +1644,6 @@ to zero.
 
 </td><td>
   UNSIGNED32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1695,7 +1667,6 @@ set to its maximum value (4,294,967,295).
 </td><td>
   UNSIGNED32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1716,7 +1687,6 @@ the route.
 
 </td><td>
   OBJECTID
-
  <br>
  <a href="#RowPointer">RowPointer</a>
 
@@ -1747,7 +1717,6 @@ generate and recognize this value.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -1780,11 +1749,11 @@ object.
 </ul>
 <a name="ipv6NetToMediaTable" /><h3>Table ipv6NetToMediaTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6NetToMediaTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.1.12</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>ipv6NetToMediaTable</td></tr>
+  <tr><td class="label">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.55.1.12</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 The IPv6 Address Translation table used for
@@ -1800,7 +1769,7 @@ entries.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="ipv6NetToMediaEntry" />Row Description</td>
+<tr><td class="label"><a name="ipv6NetToMediaEntry" />Row Description</td>
 <td>
 <pre>
 Each entry contains one IPv6 address to `physical'
@@ -1812,8 +1781,8 @@ address equivalence.
 
   <h4>ipv6NetToMediaTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6IfIndex" />
@@ -1822,7 +1791,8 @@ address equivalence.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
  <br>
  <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
 
@@ -1845,7 +1815,8 @@ the particular IPv6 interface.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        16
  <br>
  <a href="#Ipv6Address">Ipv6Address</a>
 
@@ -1863,8 +1834,8 @@ the media-dependent `physical' address.
 </table>
 
   <h4>Other ipv6NetToMediaTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ipv6NetToMediaPhysAddress" />
@@ -1873,7 +1844,6 @@ the media-dependent `physical' address.
 
 </td><td>
   OCTETSTR
-
  <br>
  <a href="#PhysAddress">PhysAddress</a>
 
@@ -1895,8 +1865,7 @@ The media-dependent `physical' address.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>other</td></tr>
         <tr><td>2</td><td>dynamic</td></tr>
@@ -1926,8 +1895,7 @@ provided for an entity's own interface address.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>reachable</td></tr>
         <tr><td>2</td><td>stale</td></tr>
@@ -1954,7 +1922,6 @@ this entry is used.
 
 </td><td>
   TICKS
-
  <br>
  <a href="#TimeStamp">TimeStamp</a>
 
@@ -1980,7 +1947,6 @@ a zero value.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -2013,29 +1979,32 @@ ipv6NetToMediaValid object.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
 <p>
 <a name="ipv6IfStateChange" /><h3>Notification: ipv6IfStateChange</h3>
 
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>ipv6IfStateChange</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.2.0.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+  <table>
+  <tr><td class="label">Notification Name</td><td>ipv6IfStateChange</td></tr>
+  <tr><td class="label">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.55.2.0.1</td></tr>
+  <tr><td class="label">Notification Description</td>
 <td>
 <pre>
 An ipv6IfStateChange notification signifies
@@ -2046,8 +2015,8 @@ status transitions to or from the up(1) state.
 </pre>
 </td>
   </tr>
-  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
-  <table border=2>
+  <tr> <td class="label">Mandatory<br />Objects</td><td>
+  <table>
       <tr><td><a href="#ipv6IfDescr">ipv6IfDescr</a></td></tr>
       <tr><td><a href="#ipv6IfOperStatus">ipv6IfOperStatus</a></td></tr>
   </table></td></tr>
@@ -2056,6 +2025,7 @@ status transitions to or from the up(1) state.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -2066,18 +2036,18 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="Ipv6IfIndexOrZero">Ipv6IfIndexOrZero</td><td>INTEGER32</td><td><pre></pre></td></tr>
-<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
 <tr><td><a name="Ipv6IfIndex">Ipv6IfIndex</td><td>INTEGER32</td><td><pre></pre></td></tr>
-<tr><td><a name="RowPointer">RowPointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
-<tr><td><a name="Ipv6AddressIfIdentifier">Ipv6AddressIfIdentifier</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre></pre></td></tr>
-<tr><td><a name="VariablePointer">VariablePointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
-<tr><td><a name="Ipv6AddressPrefix">Ipv6AddressPrefix</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="Ipv6Address">Ipv6Address</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="Ipv6IfIndexOrZero">Ipv6IfIndexOrZero</td><td>INTEGER32</td><td><pre></pre></td></tr>
 <tr><td><a name="PhysAddress">PhysAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre></pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="Ipv6AddressPrefix">Ipv6AddressPrefix</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="Ipv6Address">Ipv6Address</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="Ipv6AddressIfIdentifier">Ipv6AddressIfIdentifier</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="VariablePointer">VariablePointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<tr><td><a name="RowPointer">RowPointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />

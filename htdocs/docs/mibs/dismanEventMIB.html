@@ -1,13 +1,6 @@
-<head>
-  <title>MIB information for dismanEventMIB</title>
-<style type="text/css">
-<!--
-h2{background:#bbeebb}
-h3{background:#ccccee}
--->
-</style>
-</head>
-<body bgcolor="#ffffff">
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
 <h2>INTRODUCTION</h2>
 <ul>
 <p>
@@ -43,8 +36,8 @@ document as <b>.1.3.6.1.2.1.88</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteResourceSampleMinimum" />
@@ -53,7 +46,8 @@ document as <b>.1.3.6.1.2.1.88</b>.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.2.1.88.1.1.1</td>
@@ -84,7 +78,6 @@ of mteTriggerFrequency.
 
 </td><td>
   UNSIGNED32
-
 
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.2.1.88.1.1.2</td>
@@ -119,7 +112,6 @@ information.
 </td><td>
   GAUGE
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.88.1.1.3</td>
 <td>
@@ -137,7 +129,6 @@ defined for mteResourceSampleInstanceMaximum.
 
 </td><td>
   GAUGE
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.88.1.1.4</td>
@@ -157,7 +148,6 @@ occurred since initialization of the management system.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.88.1.1.5</td>
 <td>
@@ -176,7 +166,6 @@ mteResourceSampleInstanceMaximum.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.88.1.2.1</td>
@@ -200,7 +189,6 @@ wildcarded object.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.2.1.88.1.4.1</td>
 <td>
@@ -212,166 +200,24 @@ wildcarded trigger object.
 </pre>
 </td>
   </tr>
-  <tr>
-  <td>
-<a name="mteHotTrigger" />
-1
-<br /><b>mteHotTrigger</b>
-
-</td><td>
-  OCTETSTR
-
- <br>
- <a href="#SnmpAdminString">SnmpAdminString</a>
-
-  </td><td>Notify</td>
-    <td>.1.3.6.1.2.1.88.2.1.1</td>
-<td>
-<p>
-Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
-</p>
-<pre>
-The name of the trigger causing the notification.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="mteHotTargetName" />
-2
-<br /><b>mteHotTargetName</b>
-
-</td><td>
-  OCTETSTR
-
- <br>
- <a href="#SnmpAdminString">SnmpAdminString</a>
-
-  </td><td>Notify</td>
-    <td>.1.3.6.1.2.1.88.2.1.2</td>
-<td>
-<p>
-Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
-</p>
-<pre>
-The SNMP Target MIB's snmpTargetAddrName related to the
-notification.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="mteHotContextName" />
-3
-<br /><b>mteHotContextName</b>
-
-</td><td>
-  OCTETSTR
-
- <br>
- <a href="#SnmpAdminString">SnmpAdminString</a>
-
-  </td><td>Notify</td>
-    <td>.1.3.6.1.2.1.88.2.1.3</td>
-<td>
-<p>
-Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
-</p>
-<pre>
-The context name related to the notification.  This MUST be as
-fully-qualified as possible, including filling in wildcard
-information determined in processing.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="mteHotOID" />
-4
-<br /><b>mteHotOID</b>
-
-</td><td>
-  OBJECTID
-
-
-  </td><td>Notify</td>
-    <td>.1.3.6.1.2.1.88.2.1.4</td>
-<td>
-<pre>
-The object identifier of the destination object related to the
-notification.  This MUST be as fully-qualified as possible,
-including filling in wildcard information determined in
-processing.
-
-For a trigger-related notification this is from
-mteTriggerValueID.
-
-For a set failure this is from mteEventSetObject.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="mteHotValue" />
-5
-<br /><b>mteHotValue</b>
-
-</td><td>
-  INTEGER32
-
-
-  </td><td>Notify</td>
-    <td>.1.3.6.1.2.1.88.2.1.5</td>
-<td>
-<pre>
-The value of the object at mteTriggerValueID when a
-trigger fired.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="mteFailedReason" />
-6
-<br /><b>mteFailedReason</b>
-
-</td><td>
-  INTEGER
-
- <br>
- <a href="#FailureReason">FailureReason</a>
-     <br>(ENUM list below)
-
-  </td><td>Notify</td>
-    <td>.1.3.6.1.2.1.88.2.1.6</td>
-<td>
-<p>
-Note: this object is based on the <a href="#FailureReason"> FailureReason TEXTUAL-CONVENTION</a>.
-</p>
-<pre>
-The reason for the failure of an attempt to check for a
-trigger condition or set an object in response to an event.
-</pre>
-</td>
-  </tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 <a name="mteTriggerTable" /><h3>Table mteTriggerTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteTriggerTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>mteTriggerTable</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of management event trigger information.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="mteTriggerEntry" />Row Description</td>
+<tr><td class="label"><a name="mteTriggerEntry" />Row Description</td>
 <td>
 <pre>
 Information about a single trigger.  Applications create and
@@ -383,8 +229,8 @@ delete entries using mteTriggerEntryStatus.
 
   <h4>mteTriggerTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteOwner" />
@@ -393,7 +239,8 @@ delete entries using mteTriggerEntryStatus.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -417,7 +264,8 @@ security administrator.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -435,8 +283,8 @@ trigger within the scope of mteOwner.
 </table>
 
   <h4>Other mteTriggerTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteTriggerComment" />
@@ -445,7 +293,8 @@ trigger within the scope of mteOwner.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -467,8 +316,7 @@ A description of the trigger's function and use.
 
 </td><td>
   BITS
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>0</td><td>existence</td></tr>
         <tr><td>1</td><td>boolean</td></tr>
@@ -516,8 +364,7 @@ same object may be somewhat redundant.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>absoluteValue</td></tr>
         <tr><td>2</td><td>deltaValue</td></tr>
@@ -553,7 +400,6 @@ If only 'existence' is set in mteTriggerTest this object has
 
 </td><td>
   OBJECTID
-
 
   </td><td>Create</td>
 <td>
@@ -596,7 +442,6 @@ all possible instances ahead of time.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -620,7 +465,8 @@ fully-specified or wildcarded, with 'true' indicating wildcard.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#SnmpTagValue">SnmpTagValue</a>
 
@@ -655,7 +501,8 @@ parameters resulting from the tag.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -694,7 +541,6 @@ Operation of this feature assumes that the local system has a
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -718,7 +564,6 @@ fully-specified or wildcarded, with 'true' indicating wildcard.
 
 </td><td>
   UNSIGNED32
-
 
   </td><td>Create</td>
 <td>
@@ -756,7 +601,8 @@ object to 0 should be disallowed.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -779,7 +625,8 @@ objects from mteObjectsTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -810,7 +657,6 @@ A length of 0 indicates no additional objects.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -834,7 +680,6 @@ When the value is 'false' the trigger is not sampled.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -855,11 +700,11 @@ delete it.
 </ul>
 <a name="mteTriggerDeltaTable" /><h3>Table mteTriggerDeltaTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteTriggerDeltaTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.3</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>mteTriggerDeltaTable</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.3</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of management event trigger information for delta
@@ -867,7 +712,7 @@ sampling.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="mteTriggerDeltaEntry" />Row Description</td>
+<tr><td class="label"><a name="mteTriggerDeltaEntry" />Row Description</td>
 <td>
 <pre>
 Information about a single trigger's delta sampling.  Entries
@@ -880,8 +725,8 @@ that has mteTriggerSampleType set to 'deltaValue'.
 
   <h4>mteTriggerDeltaTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteOwner" />
@@ -890,7 +735,8 @@ that has mteTriggerSampleType set to 'deltaValue'.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -914,7 +760,8 @@ security administrator.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -932,8 +779,8 @@ trigger within the scope of mteOwner.
 </table>
 
   <h4>Other mteTriggerDeltaTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteTriggerDeltaDiscontinuityID" />
@@ -942,7 +789,6 @@ trigger within the scope of mteOwner.
 
 </td><td>
   OBJECTID
-
 
   </td><td>ReadWrite</td>
 <td>
@@ -980,7 +826,6 @@ with a 'badType' error code.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -1010,8 +855,7 @@ mteTriggerSampleType is 'deltaValue'.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>timeTicks</td></tr>
         <tr><td>2</td><td>timeStamp</td></tr>
@@ -1032,11 +876,11 @@ The value 'dateAndTime' indicates syntax DateAndTime.
 </ul>
 <a name="mteTriggerExistenceTable" /><h3>Table mteTriggerExistenceTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteTriggerExistenceTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.4</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>mteTriggerExistenceTable</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.4</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of management event trigger information for existence
@@ -1044,7 +888,7 @@ triggers.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="mteTriggerExistenceEntry" />Row Description</td>
+<tr><td class="label"><a name="mteTriggerExistenceEntry" />Row Description</td>
 <td>
 <pre>
 Information about a single existence trigger.  Entries
@@ -1057,8 +901,8 @@ that has 'existence' set in mteTriggerTest.
 
   <h4>mteTriggerExistenceTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteOwner" />
@@ -1067,7 +911,8 @@ that has 'existence' set in mteTriggerTest.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1091,7 +936,8 @@ security administrator.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1109,8 +955,8 @@ trigger within the scope of mteOwner.
 </table>
 
   <h4>Other mteTriggerExistenceTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteTriggerExistenceTest" />
@@ -1119,8 +965,7 @@ trigger within the scope of mteOwner.
 
 </td><td>
   BITS
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>0</td><td>present</td></tr>
         <tr><td>1</td><td>absent</td></tr>
@@ -1157,8 +1002,7 @@ to the other state.
 
 </td><td>
   BITS
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>0</td><td>present</td></tr>
         <tr><td>1</td><td>absent</td></tr>
@@ -1182,7 +1026,8 @@ that trigger to fire when its test is true.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1205,7 +1050,8 @@ group of objects from mteObjectsTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1235,7 +1081,8 @@ A length of 0 indicates no additional objects.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1258,7 +1105,8 @@ entry from the mteEventTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1278,11 +1126,11 @@ event.
 </ul>
 <a name="mteTriggerBooleanTable" /><h3>Table mteTriggerBooleanTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteTriggerBooleanTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.5</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>mteTriggerBooleanTable</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.5</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of management event trigger information for boolean
@@ -1290,7 +1138,7 @@ triggers.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="mteTriggerBooleanEntry" />Row Description</td>
+<tr><td class="label"><a name="mteTriggerBooleanEntry" />Row Description</td>
 <td>
 <pre>
 Information about a single boolean trigger.  Entries
@@ -1303,8 +1151,8 @@ that has 'boolean' set in mteTriggerTest.
 
   <h4>mteTriggerBooleanTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteOwner" />
@@ -1313,7 +1161,8 @@ that has 'boolean' set in mteTriggerTest.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1337,7 +1186,8 @@ security administrator.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1355,8 +1205,8 @@ trigger within the scope of mteOwner.
 </table>
 
   <h4>Other mteTriggerBooleanTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteTriggerBooleanComparison" />
@@ -1365,8 +1215,7 @@ trigger within the scope of mteOwner.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>unequal</td></tr>
         <tr><td>2</td><td>equal</td></tr>
@@ -1397,7 +1246,6 @@ The value at mteTriggerValueID is compared to
 </td><td>
   INTEGER32
 
-
   </td><td>ReadWrite</td>
 <td>
 <pre>
@@ -1414,7 +1262,6 @@ mteTriggerBooleanTest.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -1441,7 +1288,8 @@ triggered if mteTriggerBooleanStartup is 'true'.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1464,7 +1312,8 @@ of objects from mteObjectsTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1494,7 +1343,8 @@ A length of 0 indicates no additional objects.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1517,7 +1367,8 @@ entry from mteEventTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1537,11 +1388,11 @@ event.
 </ul>
 <a name="mteTriggerThresholdTable" /><h3>Table mteTriggerThresholdTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteTriggerThresholdTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.6</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>mteTriggerThresholdTable</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.6</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of management event trigger information for threshold
@@ -1549,7 +1400,7 @@ triggers.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="mteTriggerThresholdEntry" />Row Description</td>
+<tr><td class="label"><a name="mteTriggerThresholdEntry" />Row Description</td>
 <td>
 <pre>
 Information about a single threshold trigger.  Entries
@@ -1562,8 +1413,8 @@ that has 'threshold' set in mteTriggerTest.
 
   <h4>mteTriggerThresholdTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteOwner" />
@@ -1572,7 +1423,8 @@ that has 'threshold' set in mteTriggerTest.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1596,7 +1448,8 @@ security administrator.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1614,8 +1467,8 @@ trigger within the scope of mteOwner.
 </table>
 
   <h4>Other mteTriggerThresholdTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteTriggerThresholdStartup" />
@@ -1624,8 +1477,7 @@ trigger within the scope of mteOwner.
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>rising</td></tr>
         <tr><td>2</td><td>falling</td></tr>
@@ -1659,7 +1511,6 @@ triggered for that instance.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadWrite</td>
 <td>
 <pre>
@@ -1690,7 +1541,6 @@ and reaches mteTriggerThresholdFalling.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadWrite</td>
 <td>
 <pre>
@@ -1720,7 +1570,6 @@ and reaches mteTriggerThresholdRising.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadWrite</td>
 <td>
@@ -1754,7 +1603,6 @@ reaches mteTriggerThresholdDeltaFalling.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadWrite</td>
 <td>
 <pre>
@@ -1786,7 +1634,8 @@ reaches mteTriggerThresholdDeltaRising.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1809,7 +1658,8 @@ of objects from mteObjectsTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1841,7 +1691,8 @@ A length of 0 indicates no additional objects.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1864,7 +1715,8 @@ event entry from mteEventTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1888,7 +1740,8 @@ mteTriggerThresholdRising.  A length of 0 indicates no event.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1911,7 +1764,8 @@ event entry from mteEventTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1935,7 +1789,8 @@ mteTriggerThresholdFalling.  A length of 0 indicates no event.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1958,7 +1813,8 @@ of an event entry from mteEventTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -1983,7 +1839,8 @@ no event.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2006,7 +1863,8 @@ of an event entry from mteEventTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2027,11 +1885,11 @@ no event.
 </ul>
 <a name="mteObjectsTable" /><h3>Table mteObjectsTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteObjectsTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.3.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>mteObjectsTable</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.1.3.1</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of objects that can be added to notifications based
@@ -2040,7 +1898,7 @@ entries in those tables.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="mteObjectsEntry" />Row Description</td>
+<tr><td class="label"><a name="mteObjectsEntry" />Row Description</td>
 <td>
 <pre>
 A group of objects.  Applications create and delete entries
@@ -2056,8 +1914,8 @@ with a trigger come first, then trigger test, then event.
 
   <h4>mteObjectsTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteOwner" />
@@ -2066,7 +1924,8 @@ with a trigger come first, then trigger test, then event.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2090,7 +1949,8 @@ security administrator.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2113,7 +1973,8 @@ of objects.
 
 </td><td>
   UNSIGNED32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -2142,8 +2003,8 @@ from the notification.
 </table>
 
   <h4>Other mteObjectsTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteObjectsID" />
@@ -2152,7 +2013,6 @@ from the notification.
 
 </td><td>
   OBJECTID
-
 
   </td><td>Create</td>
 <td>
@@ -2183,7 +2043,6 @@ all possible instances ahead of time.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -2207,7 +2066,6 @@ fully-specified or wildcarded, with 'true' indicating wildcard.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -2228,18 +2086,18 @@ delete it.
 </ul>
 <a name="mteEventTable" /><h3>Table mteEventTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteEventTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.4.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>mteEventTable</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.1.4.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of management event action information.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="mteEventEntry" />Row Description</td>
+<tr><td class="label"><a name="mteEventEntry" />Row Description</td>
 <td>
 <pre>
 Information about a single event.  Applications create and
@@ -2251,8 +2109,8 @@ delete entries using mteEventEntryStatus.
 
   <h4>mteEventTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteOwner" />
@@ -2261,7 +2119,8 @@ delete entries using mteEventEntryStatus.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2285,7 +2144,8 @@ security administrator.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2303,8 +2163,8 @@ event.
 </table>
 
   <h4>Other mteEventTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteEventComment" />
@@ -2313,7 +2173,8 @@ event.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2335,8 +2196,7 @@ A description of the event's function and use.
 
 </td><td>
   BITS
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>0</td><td>notification</td></tr>
         <tr><td>1</td><td>set</td></tr>
@@ -2361,7 +2221,6 @@ For 'set', an SNMP Set operation is performed according to
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -2388,7 +2247,6 @@ triggered.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -2409,11 +2267,11 @@ delete it.
 </ul>
 <a name="mteEventNotificationTable" /><h3>Table mteEventNotificationTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteEventNotificationTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.4.3</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>mteEventNotificationTable</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.1.4.3</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of information about notifications to be sent as a
@@ -2421,7 +2279,7 @@ consequence of management events.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="mteEventNotificationEntry" />Row Description</td>
+<tr><td class="label"><a name="mteEventNotificationEntry" />Row Description</td>
 <td>
 <pre>
 Information about a single event's notification.  Entries
@@ -2434,8 +2292,8 @@ that has 'notification' set in mteEventActions.
 
   <h4>mteEventNotificationTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteOwner" />
@@ -2444,7 +2302,8 @@ that has 'notification' set in mteEventActions.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2468,7 +2327,8 @@ security administrator.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2486,8 +2346,8 @@ event.
 </table>
 
   <h4>Other mteEventNotificationTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteEventNotification" />
@@ -2496,7 +2356,6 @@ event.
 
 </td><td>
   OBJECTID
-
 
   </td><td>ReadWrite</td>
 <td>
@@ -2514,7 +2373,8 @@ notification to use if metEventActions has 'notification' set.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2537,7 +2397,8 @@ group of objects from mteObjectsTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2563,18 +2424,18 @@ A length of 0 indicates no additional objects.
 </ul>
 <a name="mteEventSetTable" /><h3>Table mteEventSetTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteEventSetTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.4.4</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>mteEventSetTable</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.1.4.4</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of management event action information.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="mteEventSetEntry" />Row Description</td>
+<tr><td class="label"><a name="mteEventSetEntry" />Row Description</td>
 <td>
 <pre>
 Information about a single event's set option.  Entries
@@ -2587,8 +2448,8 @@ that has 'set' set in mteEventActions.
 
   <h4>mteEventSetTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteOwner" />
@@ -2597,7 +2458,8 @@ that has 'set' set in mteEventActions.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2621,7 +2483,8 @@ security administrator.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2639,8 +2502,8 @@ event.
 </table>
 
   <h4>Other mteEventSetTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mteEventSetObject" />
@@ -2649,7 +2512,6 @@ event.
 
 </td><td>
   OBJECTID
-
 
   </td><td>ReadWrite</td>
 <td>
@@ -2689,7 +2551,6 @@ error code.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -2715,7 +2576,6 @@ if mteEventActions has 'set' set.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadWrite</td>
 <td>
 <pre>
@@ -2732,7 +2592,8 @@ if mteEventActions has 'set' set.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#SnmpTagValue">SnmpTagValue</a>
 
@@ -2769,7 +2630,8 @@ parameters resulting from the tag.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -2799,7 +2661,6 @@ the wildcarding of mteTriggerContextName will be appended.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -2821,29 +2682,32 @@ if mteEventActions has 'set' set.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
 <p>
 <a name="mteTriggerFired" /><h3>Notification: mteTriggerFired</h3>
 
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>mteTriggerFired</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+  <table>
+  <tr><td class="label">Notification Name</td><td>mteTriggerFired</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.1</td></tr>
+  <tr><td class="label">Notification Description</td>
 <td>
 <pre>
 Notification that the trigger indicated by the object
@@ -2852,8 +2716,8 @@ instances has fired, for triggers with mteTriggerType
 </pre>
 </td>
   </tr>
-  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
-  <table border=2>
+  <tr> <td class="label">Mandatory<br />Objects</td><td>
+  <table>
       <tr><td><a href="#mteHotTrigger">mteHotTrigger</a></td></tr>
       <tr><td><a href="#mteHotTargetName">mteHotTargetName</a></td></tr>
       <tr><td><a href="#mteHotContextName">mteHotContextName</a></td></tr>
@@ -2863,11 +2727,11 @@ instances has fired, for triggers with mteTriggerType
   </table>
 <a name="mteTriggerRising" /><h3>Notification: mteTriggerRising</h3>
 
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>mteTriggerRising</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+  <table>
+  <tr><td class="label">Notification Name</td><td>mteTriggerRising</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.2</td></tr>
+  <tr><td class="label">Notification Description</td>
 <td>
 <pre>
 Notification that the rising threshold was met for triggers
@@ -2875,8 +2739,8 @@ with mteTriggerType 'threshold'.
 </pre>
 </td>
   </tr>
-  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
-  <table border=2>
+  <tr> <td class="label">Mandatory<br />Objects</td><td>
+  <table>
       <tr><td><a href="#mteHotTrigger">mteHotTrigger</a></td></tr>
       <tr><td><a href="#mteHotTargetName">mteHotTargetName</a></td></tr>
       <tr><td><a href="#mteHotContextName">mteHotContextName</a></td></tr>
@@ -2886,11 +2750,11 @@ with mteTriggerType 'threshold'.
   </table>
 <a name="mteTriggerFalling" /><h3>Notification: mteTriggerFalling</h3>
 
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>mteTriggerFalling</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.3</td></tr>
-  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+  <table>
+  <tr><td class="label">Notification Name</td><td>mteTriggerFalling</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.3</td></tr>
+  <tr><td class="label">Notification Description</td>
 <td>
 <pre>
 Notification that the falling threshold was met for triggers
@@ -2898,8 +2762,8 @@ with mteTriggerType 'threshold'.
 </pre>
 </td>
   </tr>
-  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
-  <table border=2>
+  <tr> <td class="label">Mandatory<br />Objects</td><td>
+  <table>
       <tr><td><a href="#mteHotTrigger">mteHotTrigger</a></td></tr>
       <tr><td><a href="#mteHotTargetName">mteHotTargetName</a></td></tr>
       <tr><td><a href="#mteHotContextName">mteHotContextName</a></td></tr>
@@ -2909,11 +2773,11 @@ with mteTriggerType 'threshold'.
   </table>
 <a name="mteTriggerFailure" /><h3>Notification: mteTriggerFailure</h3>
 
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>mteTriggerFailure</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.4</td></tr>
-  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+  <table>
+  <tr><td class="label">Notification Name</td><td>mteTriggerFailure</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.4</td></tr>
+  <tr><td class="label">Notification Description</td>
 <td>
 <pre>
 Notification that an attempt to check a trigger has failed.
@@ -2925,8 +2789,8 @@ The network manager must enable this notification only with
 </pre>
 </td>
   </tr>
-  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
-  <table border=2>
+  <tr> <td class="label">Mandatory<br />Objects</td><td>
+  <table>
       <tr><td><a href="#mteHotTrigger">mteHotTrigger</a></td></tr>
       <tr><td><a href="#mteHotTargetName">mteHotTargetName</a></td></tr>
       <tr><td><a href="#mteHotContextName">mteHotContextName</a></td></tr>
@@ -2936,11 +2800,11 @@ The network manager must enable this notification only with
   </table>
 <a name="mteEventSetFailure" /><h3>Notification: mteEventSetFailure</h3>
 
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>mteEventSetFailure</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.5</td></tr>
-  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+  <table>
+  <tr><td class="label">Notification Name</td><td>mteEventSetFailure</td></tr>
+  <tr><td class="label">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.5</td></tr>
+  <tr><td class="label">Notification Description</td>
 <td>
 <pre>
 Notification that an attempt to do a set in response to an
@@ -2954,8 +2818,8 @@ be found otherwise.
 </pre>
 </td>
   </tr>
-  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
-  <table border=2>
+  <tr> <td class="label">Mandatory<br />Objects</td><td>
+  <table>
       <tr><td><a href="#mteHotTrigger">mteHotTrigger</a></td></tr>
       <tr><td><a href="#mteHotTargetName">mteHotTargetName</a></td></tr>
       <tr><td><a href="#mteHotContextName">mteHotContextName</a></td></tr>
@@ -2967,6 +2831,7 @@ be found otherwise.
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -2977,12 +2842,11 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
 <tr><td><a name="SnmpTagValue">SnmpTagValue</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
 <tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="FailureReason">FailureReason</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>-6</td><td>sampleOverrun</td></tr><tr><td>-5</td><td>badType</td></tr><tr><td>-4</td><td>noResponse</td></tr><tr><td>-3</td><td>destinationUnreachable</td></tr><tr><td>-2</td><td>badDestination</td></tr><tr><td>-1</td><td>localResourceLack</td></tr><tr><td>0</td><td>noError</td></tr><tr><td>1</td><td>tooBig</td></tr><tr><td>2</td><td>noSuchName</td></tr><tr><td>3</td><td>badValue</td></tr><tr><td>4</td><td>readOnly</td></tr><tr><td>5</td><td>genErr</td></tr><tr><td>6</td><td>noAccess</td></tr><tr><td>7</td><td>wrongType</td></tr><tr><td>8</td><td>wrongLength</td></tr><tr><td>9</td><td>wrongEncoding</td></tr><tr><td>10</td><td>wrongValue</td></tr><tr><td>11</td><td>noCreation</td></tr><tr><td>12</td><td>inconsistentValue</td></tr><tr><td>13</td><td>resourceUnavailable</td></tr><tr><td>14</td><td>commitFailed</td></tr><tr><td>15</td><td>undoFailed</td></tr><tr><td>16</td><td>authorizationError</td></tr><tr><td>17</td><td>notWritable</td></tr><tr><td>18</td><td>inconsistentName</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />
@@ -3271,3 +3135,6 @@ clause as well as the DESCRIPTION clause of the object itself.
          |
          +--<a href="#dismanEventNotificationGroup">dismanEventNotificationGroup</a>(6)
 </pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

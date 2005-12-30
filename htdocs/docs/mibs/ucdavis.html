@@ -34,8 +34,8 @@ document as <b>.1.3.6.1.4.1.2021</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="memIndex" />
@@ -44,7 +44,6 @@ document as <b>.1.3.6.1.4.1.2021</b>.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.1</td>
@@ -62,7 +61,8 @@ Bogus Index.  This should always return the integer 0.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -86,7 +86,6 @@ Bogus Name. This should always return the string 'swap'.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.3</td>
 <td>
@@ -103,7 +102,6 @@ Total Swap Size configured for the host.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.4</td>
@@ -122,7 +120,6 @@ Available Swap Space on the host.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.5</td>
 <td>
@@ -139,7 +136,6 @@ Total Real/Physical Memory Size on the host.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.6</td>
@@ -158,7 +154,6 @@ Available Real/Physical Memory Space on the host.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.7</td>
 <td>
@@ -175,7 +170,6 @@ Total virtual memory used by text.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.8</td>
@@ -194,7 +188,6 @@ Active virtual memory used by text.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.9</td>
 <td>
@@ -211,7 +204,6 @@ Total Real/Physical Memory Size used by text.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.10</td>
@@ -230,7 +222,6 @@ Active Real/Physical Memory Space used by text.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.11</td>
 <td>
@@ -247,7 +238,6 @@ Total Available Memory on the host
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.12</td>
@@ -268,7 +258,6 @@ returned memSwapErrorMsg.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.13</td>
 <td>
@@ -285,7 +274,6 @@ Total Shared Memory
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.14</td>
@@ -304,7 +292,6 @@ Total Buffered Memory
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.15</td>
 <td>
@@ -322,7 +309,6 @@ Total Cached Memory
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.100</td>
 <td>
@@ -339,7 +325,8 @@ Error flag.  1 indicates very little swap space left
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -363,7 +350,6 @@ Error message describing the Error Flag condition
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.1</td>
 <td>
@@ -380,7 +366,8 @@ Reference Index for each observed systemStat (1).
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -404,7 +391,6 @@ The list of systemStats names (vmstat) we're Counting.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.3</td>
 <td>
@@ -421,7 +407,6 @@ Amount of memory swapped in from disk (kB/s).
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.4</td>
@@ -440,7 +425,6 @@ Amount of memory swapped to disk (kB/s).
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.50</td>
 <td>
@@ -457,7 +441,6 @@ user CPU time.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.51</td>
@@ -476,7 +459,6 @@ nice CPU time.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.52</td>
 <td>
@@ -493,7 +475,6 @@ system CPU time.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.53</td>
@@ -512,7 +493,6 @@ idle CPU time.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.54</td>
 <td>
@@ -529,7 +509,6 @@ iowait CPU time. This is primarily a SysV thingie
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.55</td>
@@ -548,7 +527,6 @@ kernel CPU time.
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.56</td>
 <td>
@@ -565,7 +543,6 @@ interruptlevel CPU time. This is primarily a BSD thingie
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.57</td>
@@ -584,7 +561,6 @@ Number of blocks sent to a block device
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.58</td>
 <td>
@@ -601,7 +577,6 @@ Number of blocks received from a block device
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.59</td>
@@ -620,7 +595,6 @@ Number of interrupts processed
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.60</td>
 <td>
@@ -637,7 +611,6 @@ Number of context switches
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.61</td>
@@ -656,7 +629,6 @@ Soft IRQ CPU time. This is for Linux 2.6
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.62</td>
 <td>
@@ -674,7 +646,6 @@ Number of blocks swapped in
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.11.63</td>
 <td>
@@ -691,7 +662,6 @@ Number of blocks swapped out
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.16.1</td>
@@ -711,7 +681,6 @@ this snmpd daemon can support.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.100.1</td>
 <td>
@@ -728,7 +697,8 @@ Index to mib (always 0)
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -751,7 +721,8 @@ CVS tag keyword
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -774,7 +745,8 @@ Date string from RCS keyword
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -797,7 +769,8 @@ Date string from ctime()
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -820,7 +793,8 @@ Id string from RCS keyword
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -844,7 +818,6 @@ Options passed to the configure script when this agent was built.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.4.1.2021.100.10</td>
 <td>
@@ -861,7 +834,6 @@ Set to 1 to clear the exec cache, if enabled
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.4.1.2021.100.11</td>
@@ -880,7 +852,6 @@ Set to 1 to read-read the config file(s).
 </td><td>
   INTEGER32
 
-
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.4.1.2021.100.12</td>
 <td>
@@ -898,7 +869,6 @@ Set to 1 to restart the agent.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.4.1.2021.100.13</td>
 <td>
@@ -915,7 +885,6 @@ Set to 1 to force the agent to save it's persistent data immediately.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadWrite</td>
     <td>.1.3.6.1.4.1.2021.100.20</td>
@@ -935,7 +904,6 @@ to turn it off.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.101.1</td>
 <td>
@@ -952,7 +920,8 @@ Bogus Index for snmperrs (always 0).
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -976,7 +945,6 @@ snmp
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.101.100</td>
 <td>
@@ -994,7 +962,8 @@ goes to 1 if there is an error, 0 if no error.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1015,11 +984,11 @@ An error message describing the problem (if one exists).
 <h2>TABLE OBJECTS</h2>
 <a name="prTable" /><h3>Table prTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>prTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>prTable</td></tr>
+  <tr><td class="label">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.2021.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table containing information on running
@@ -1031,7 +1000,7 @@ textual errors.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="prEntry" />Row Description</td>
+<tr><td class="label"><a name="prEntry" />Row Description</td>
 <td>
 <pre>
 An entry containing a process and its statistics.
@@ -1042,8 +1011,8 @@ An entry containing a process and its statistics.
 
   <h4>prTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="prIndex" />
@@ -1052,7 +1021,8 @@ An entry containing a process and its statistics.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 65535
 
   </td><td>ReadOnly</td>
 <td>
@@ -1064,8 +1034,8 @@ Reference Index for each observed process.
 </table>
 
   <h4>Other prTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="prNames" />
@@ -1074,7 +1044,8 @@ Reference Index for each observed process.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1097,7 +1068,6 @@ The process name we're counting/checking on.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1115,7 +1085,6 @@ running processes is < the minimum.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1135,7 +1104,6 @@ running processes is > the maximum.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1153,7 +1121,6 @@ in question.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1170,7 +1137,8 @@ goes to 1 if there is an error, 0 if no error.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1193,7 +1161,6 @@ An error message describing the problem (if one exists).
 </td><td>
   INTEGER32
 
-
   </td><td>ReadWrite</td>
 <td>
 <pre>
@@ -1212,7 +1179,8 @@ snmp operations.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1231,11 +1199,11 @@ set to 1.
 </ul>
 <a name="extTable" /><h3>Table extTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>extTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.8</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>extTable</td></tr>
+  <tr><td class="label">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.2021.8</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table of extensible commands returning output and
@@ -1244,7 +1212,7 @@ agent's snmpd.conf file.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="extEntry" />Row Description</td>
+<tr><td class="label"><a name="extEntry" />Row Description</td>
 <td>
 <pre>
 An entry containing an extensible script/program and its output.
@@ -1255,8 +1223,8 @@ An entry containing an extensible script/program and its output.
 
   <h4>extTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="extIndex" />
@@ -1265,7 +1233,8 @@ An entry containing an extensible script/program and its output.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 65535
 
   </td><td>ReadOnly</td>
 <td>
@@ -1278,8 +1247,8 @@ integer row number.
 </table>
 
   <h4>Other extTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="extNames" />
@@ -1288,7 +1257,8 @@ integer row number.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1310,7 +1280,8 @@ A Short, one name description of the extensible command.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1333,7 +1304,6 @@ The command line to be executed.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1349,7 +1319,8 @@ The result code (exit status) from the executed command.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1372,7 +1343,6 @@ The first line of output of the executed command.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadWrite</td>
 <td>
 <pre>
@@ -1391,7 +1361,8 @@ snmp operations.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1410,11 +1381,11 @@ set to 1.
 </ul>
 <a name="dskTable" /><h3>Table dskTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dskTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.9</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>dskTable</td></tr>
+  <tr><td class="label">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.2021.9</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 Disk watching information.  Partions to be watched
@@ -1422,7 +1393,7 @@ are configured by the snmpd.conf file of the agent.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="dskEntry" />Row Description</td>
+<tr><td class="label"><a name="dskEntry" />Row Description</td>
 <td>
 <pre>
 An entry containing a disk and its statistics.
@@ -1433,8 +1404,8 @@ An entry containing a disk and its statistics.
 
   <h4>dskTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dskIndex" />
@@ -1443,7 +1414,8 @@ An entry containing a disk and its statistics.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 65535
 
   </td><td>ReadOnly</td>
 <td>
@@ -1455,8 +1427,8 @@ Integer reference number (row number) for the disk mib.
 </table>
 
   <h4>Other dskTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="dskPath" />
@@ -1465,7 +1437,8 @@ Integer reference number (row number) for the disk mib.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1487,7 +1460,8 @@ Path where the disk is mounted.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1510,7 +1484,6 @@ Path of the device for the partition
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1528,7 +1501,6 @@ configured via the agent's snmpd.conf file.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1548,7 +1520,6 @@ configured via the agent's snmpd.conf file.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1564,7 +1535,6 @@ Total size of the disk/partion (kBytes)
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1582,7 +1552,6 @@ Available space on the disk
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1598,7 +1567,6 @@ Used space on the disk
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1616,7 +1584,6 @@ Percentage of space used on disk
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1632,7 +1599,6 @@ Percentage of inodes used on disk
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -1650,7 +1616,8 @@ the minimum required space configured for it.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1669,18 +1636,18 @@ on the disk.
 </ul>
 <a name="laTable" /><h3>Table laTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>laTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.10</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>laTable</td></tr>
+  <tr><td class="label">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.2021.10</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 Load average information.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="laEntry" />Row Description</td>
+<tr><td class="label"><a name="laEntry" />Row Description</td>
 <td>
 <pre>
 An entry containing a load average and its values.
@@ -1691,8 +1658,8 @@ An entry containing a load average and its values.
 
   <h4>laTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="laIndex" />
@@ -1701,7 +1668,8 @@ An entry containing a load average and its values.
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 3
 
   </td><td>ReadOnly</td>
 <td>
@@ -1713,8 +1681,8 @@ reference index/row number for each observed loadave.
 </table>
 
   <h4>Other laTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="laNames" />
@@ -1723,7 +1691,8 @@ reference index/row number for each observed loadave.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1745,7 +1714,8 @@ The list of loadave names we're watching.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1767,7 +1737,8 @@ The 1,5 and 10 minute load averages (one per row).
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1792,7 +1763,6 @@ the laErrorFlag below is set.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1811,7 +1781,8 @@ converting the value to an integer.
 
 </td><td>
   OPAQUE
-
+      <br />Legal values:
+        7
  <br>
  <a href="#Float">Float</a>
 
@@ -1835,7 +1806,6 @@ wrapped floating point number.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1853,7 +1823,8 @@ It is set to 1 if the threshold is crossed, 0 otherwise.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1872,18 +1843,18 @@ surpased watch-point value.
 </ul>
 <a name="fileTable" /><h3>Table fileTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>fileTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.15</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>fileTable</td></tr>
+  <tr><td class="label">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.2021.15</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 Table of monitored files.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="fileEntry" />Row Description</td>
+<tr><td class="label"><a name="fileEntry" />Row Description</td>
 <td>
 <pre>
 Entry of file
@@ -1894,8 +1865,8 @@ Entry of file
 
   <h4>fileTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="fileIndex" />
@@ -1904,7 +1875,8 @@ Entry of file
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        0 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -1916,8 +1888,8 @@ Index of file
 </table>
 
   <h4>Other fileTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="fileName" />
@@ -1926,7 +1898,8 @@ Index of file
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -1949,7 +1922,6 @@ Filename
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1966,7 +1938,6 @@ Size of file (kB)
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -1982,7 +1953,6 @@ Limit of filesize (kB)
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -2005,7 +1975,8 @@ Limit exceeded flag
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -2023,18 +1994,18 @@ Filesize error message
 </ul>
 <a name="logMatchTable" /><h3>Table logMatchTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>logMatchTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.16.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>logMatchTable</td></tr>
+  <tr><td class="label">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.2021.16.2</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 Table of monitored files.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="logMatchEntry" />Row Description</td>
+<tr><td class="label"><a name="logMatchEntry" />Row Description</td>
 <td>
 <pre>
 Entry of file
@@ -2045,8 +2016,8 @@ Entry of file
 
   <h4>logMatchTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="logMatchIndex" />
@@ -2055,7 +2026,8 @@ Entry of file
 
 </td><td>
   INTEGER32
-
+      <br />Legal values:
+        1 .. 2147483647
 
   </td><td>ReadOnly</td>
 <td>
@@ -2067,8 +2039,8 @@ Index of logmatch
 </table>
 
   <h4>Other logMatchTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="logMatchName" />
@@ -2077,7 +2049,8 @@ Index of logmatch
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -2099,7 +2072,8 @@ logmatch instance name
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -2121,7 +2095,8 @@ filename to be logmatched
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -2144,7 +2119,6 @@ regular expression
 </td><td>
   COUNTER
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -2161,7 +2135,6 @@ global count of matches
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -2177,7 +2150,6 @@ Description.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -2196,7 +2168,6 @@ be reset with each logfile rotation.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -2212,7 +2183,6 @@ Description.
 
 </td><td>
   COUNTER
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -2231,7 +2201,6 @@ be reset with each read
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -2248,7 +2217,6 @@ Description.
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -2264,7 +2232,6 @@ time between updates (if not queried) in seconds
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#TruthValue">TruthValue</a>
      <br>(ENUM list below)
@@ -2287,7 +2254,8 @@ errorflag: is this line configured correctly?
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -2305,11 +2273,11 @@ message of regex precompilation
 </ul>
 <a name="mrTable" /><h3>Table mrTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mrTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.102</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>mrTable</td></tr>
+  <tr><td class="label">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.2021.102</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 A table displaying all the oid's registered by mib modules in
@@ -2318,7 +2286,7 @@ each module's OID it is responsible for and the name of the module
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="mrEntry" />Row Description</td>
+<tr><td class="label"><a name="mrEntry" />Row Description</td>
 <td>
 <pre>
 An entry containing a registered mib oid.
@@ -2329,8 +2297,8 @@ An entry containing a registered mib oid.
 
   <h4>mrTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mrIndex" />
@@ -2339,7 +2307,6 @@ An entry containing a registered mib oid.
 
 </td><td>
   OBJECTID
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -2351,8 +2318,8 @@ The registry slot of a mibmodule.
 </table>
 
   <h4>Other mrTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="mrModuleName" />
@@ -2361,7 +2328,8 @@ The registry slot of a mibmodule.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 255
  <br>
  <a href="#DisplayString">DisplayString</a>
 
@@ -2380,12 +2348,13 @@ The module name that registered this OID.
 <a name="objects_Deprecated" />
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
-  <hr />
+  <br>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="ssIOSent" />
@@ -2394,7 +2363,6 @@ The module name that registered this OID.
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -2413,7 +2381,6 @@ the ssIORawSent object
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -2430,7 +2397,6 @@ the ssIORawReceived object
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -2449,7 +2415,6 @@ Deprecated, replaced by ssRawInterrupts
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -2466,7 +2431,6 @@ Deprecated, replaced by ssRawContext
 
 </td><td>
   INTEGER32
-
 
   </td><td>ReadOnly</td>
 <td>
@@ -2485,7 +2449,6 @@ object
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -2503,7 +2466,6 @@ ssCpuRawSystem object
 </td><td>
   INTEGER32
 
-
   </td><td>ReadOnly</td>
 <td>
 <pre>
@@ -2518,48 +2480,51 @@ ssCpuRawIdle object
 <h2>TABLE OBJECTS</h2>
 
 <br>
+  </table>
+<hr />
 <a name="notifications" />
 <h2>NOTIFICATIONS</h2>
 <ul>
 <p>
 <a name="ucdStart" /><h3>Notification: ucdStart</h3>
 
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>ucdStart</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.251.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+  <table>
+  <tr><td class="label">Notification Name</td><td>ucdStart</td></tr>
+  <tr><td class="label">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.2021.251.1</td></tr>
+  <tr><td class="label">Notification Description</td>
 <td>
 <pre>
 
 </pre>
 </td>
   </tr>
-  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
-  <table border=2>
+  <tr> <td class="label">Mandatory<br />Objects</td><td>
+  <table>
   </table></td></tr>
   </table>
 <a name="ucdShutdown" /><h3>Notification: ucdShutdown</h3>
 
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>ucdShutdown</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.251.2</td></tr>
-  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+  <table>
+  <tr><td class="label">Notification Name</td><td>ucdShutdown</td></tr>
+  <tr><td class="label">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.2021.251.2</td></tr>
+  <tr><td class="label">Notification Description</td>
 <td>
 <pre>
 This trap is sent when the agent terminates
 </pre>
 </td>
   </tr>
-  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
-  <table border=2>
+  <tr> <td class="label">Mandatory<br />Objects</td><td>
+  <table>
   </table></td></tr>
   </table>
 </ul>
 
 
 <br>
+<hr />
 <a name="textconventions" />
 <h2>TEXTUAL CONVENTIONS</h2>
 <ul>
@@ -2570,10 +2535,10 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
 <tr><td><a name="Float">Float</td><td>OPAQUE</td><td><pre></pre></td></tr>
 <tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
 </table></ul>
 
 <a name="treeview" />
