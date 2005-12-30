@@ -171,336 +171,350 @@
 00179 <span class="comment">     */</span>
 00180     pu64-&gt;low = (ulT1 + u16) &amp; 0x0FFFFFFFFL;
 00181     pu64-&gt;high++;
-00182 
-00183 }                               <span class="comment">/* incrByV16 */</span>
-00184 
-00185 <span class="keywordtype">void</span>
-00186 incrByU32(U64 * pu64, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> u32)
-00187 {
-00188     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    tmp;
-00189     tmp = pu64-&gt;low;
-00190     pu64-&gt;low += u32;
-00191     <span class="keywordflow">if</span> (pu64-&gt;low &lt; tmp)
-00192         pu64-&gt;high++;
-00193 }
-00194 
-00198 <span class="keywordtype">void</span>
-00199 u64Subtract(<span class="keyword">const</span> U64 * pu64one, <span class=
+00182 <span class="preprocessor">#if SIZEOF_LONG != 4</span>
+00183     pu64-&gt;high &amp;= 0xffffffff;
+00184 <span class="preprocessor">#endif</span>
+00185 }                               <span class="comment">/* incrByV16 */</span>
+00186 
+00187 <span class="keywordtype">void</span>
+00188 incrByU32(U64 * pu64, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> u32)
+00189 {
+00190     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    tmp;
+00191     tmp = pu64-&gt;low;
+00192     pu64-&gt;low += u32;
+00193 <span class="preprocessor">#if SIZEOF_LONG != 4</span>
+00194     pu64-&gt;low &amp;= 0xffffffff;
+00195 <span class="preprocessor">#endif</span>
+00196     <span class="keywordflow">if</span> (pu64-&gt;low &lt; tmp) {
+00197         pu64-&gt;high++;
+00198 <span class="preprocessor">#if SIZEOF_LONG != 4</span>
+00199         pu64-&gt;high &amp;= 0xffffffff;
+00200 <span class="preprocessor">#endif</span>
+00201     }
+00202 }
+00203 
+00207 <span class="keywordtype">void</span>
+00208 u64Subtract(<span class="keyword">const</span> U64 * pu64one, <span class=
 "keyword">const</span> U64 * pu64two, U64 * pu64out)
-00200 {
-00201     <span class="keywordflow">if</span> (pu64one-&gt;low &lt; pu64two-&gt;low) {
-00202         pu64out-&gt;low = 0xffffffff - pu64two-&gt;low + pu64one-&gt;low + 1;
-00203         pu64out-&gt;high = pu64one-&gt;high - pu64two-&gt;high - 1;
-00204     } <span class="keywordflow">else</span> {
-00205         pu64out-&gt;low = pu64one-&gt;low - pu64two-&gt;low;
-00206         pu64out-&gt;high = pu64one-&gt;high - pu64two-&gt;high;
-00207     }
-00208 }
-00209 
-00213 <span class="keywordtype">void</span>
-00214 u64Incr(U64 * pu64out, <span class="keyword">const</span> U64 * pu64one)
-00215 {
-00216     pu64out-&gt;high += pu64one-&gt;high;
-00217     incrByU32(pu64out, pu64one-&gt;low);
-00218 }
-00219 
-00223 <span class="keywordtype">void</span>
-00224 u64UpdateCounter(U64 * pu64out, <span class="keyword">const</span> U64 * pu64one, <span class=
+00209 {
+00210     <span class="keywordflow">if</span> (pu64one-&gt;low &lt; pu64two-&gt;low) {
+00211         pu64out-&gt;low = 0xffffffff - pu64two-&gt;low + pu64one-&gt;low + 1;
+00212         pu64out-&gt;high = pu64one-&gt;high - pu64two-&gt;high - 1;
+00213     } <span class="keywordflow">else</span> {
+00214         pu64out-&gt;low = pu64one-&gt;low - pu64two-&gt;low;
+00215         pu64out-&gt;high = pu64one-&gt;high - pu64two-&gt;high;
+00216     }
+00217 }
+00218 
+00222 <span class="keywordtype">void</span>
+00223 u64Incr(U64 * pu64out, <span class="keyword">const</span> U64 * pu64one)
+00224 {
+00225     pu64out-&gt;high += pu64one-&gt;high;
+00226 <span class="preprocessor">#if SIZEOF_LONG != 4</span>
+00227     pu64out-&gt;high &amp;= 0xffffffff;
+00228 <span class="preprocessor">#endif</span>
+00229     incrByU32(pu64out, pu64one-&gt;low);
+00230 }
+00231 
+00235 <span class="keywordtype">void</span>
+00236 u64UpdateCounter(U64 * pu64out, <span class="keyword">const</span> U64 * pu64one, <span class=
 "keyword">const</span> U64 * pu64two)
-00225 {
-00226     U64 tmp;
-00227     u64Subtract(pu64one, pu64two, &amp;tmp);
-00228     u64Incr(pu64out, &amp;tmp);
-00229 }
-00230 
-00234 <span class="keywordtype">void</span>
-00235 u64Copy(U64 * pu64one, <span class="keyword">const</span> U64 * pu64two)
-00236 {
-00237     pu64one-&gt;high = pu64two-&gt;high;
-00238     pu64one-&gt;low =  pu64two-&gt;low;
-00239 }
-00240 
-00247 <span class="keywordtype">void</span>
-00248 zeroU64(U64 * pu64)
-00249 {
-00250 
-00251     pu64-&gt;low = 0;
-00252     pu64-&gt;high = 0;
-00253 }                               <span class="comment">/* zeroU64 */</span>
-00254 
-00255 
-00262 <span class="keywordtype">int</span>
-00263 isZeroU64(<span class="keyword">const</span> U64 * pu64)
-00264 {
+00237 {
+00238     U64 tmp;
+00239     u64Subtract(pu64one, pu64two, &amp;tmp);
+00240     u64Incr(pu64out, &amp;tmp);
+00241 }
+00242 
+00246 <span class="keywordtype">void</span>
+00247 u64Copy(U64 * pu64one, <span class="keyword">const</span> U64 * pu64two)
+00248 {
+00249     pu64one-&gt;high = pu64two-&gt;high;
+00250     pu64one-&gt;low =  pu64two-&gt;low;
+00251 }
+00252 
+00259 <span class="keywordtype">void</span>
+00260 zeroU64(U64 * pu64)
+00261 {
+00262     pu64-&gt;low = 0;
+00263     pu64-&gt;high = 0;
+00264 }                               <span class="comment">/* zeroU64 */</span>
 00265 
-00266     <span class="keywordflow">if</span> ((pu64-&gt;low == 0) &amp;&amp; (pu64-&gt;high == 0))
-00267         <span class="keywordflow">return</span> (TRUE);
-00268     <span class="keywordflow">else</span>
-00269         <span class="keywordflow">return</span> (FALSE);
-00270 
-00271 }                               <span class="comment">/* isZeroU64 */</span>
-00272 
-00293 <span class="keywordtype">int</span>
-00294 netsnmp_c64_check_for_32bit_wrap(<span class="keyword">struct</span> counter64 *old_val,
-00295                                  <span class="keyword">struct</span> counter64 *new_val,
-00296                                  <span class="keywordtype">int</span> adjust)
-00297 {
-00298     <span class="keywordflow">if</span>( (NULL == old_val) || (NULL == new_val) )
-00299         <span class="keywordflow">return</span> -1;
-00300 
-00301     DEBUGMSGTL((<span class="stringliteral">"9:c64:check_wrap"</span>, <span class=
+00266 
+00273 <span class="keywordtype">int</span>
+00274 isZeroU64(<span class="keyword">const</span> U64 * pu64)
+00275 {
+00276 
+00277     <span class="keywordflow">if</span> ((pu64-&gt;low == 0) &amp;&amp; (pu64-&gt;high == 0))
+00278         <span class="keywordflow">return</span> (TRUE);
+00279     <span class="keywordflow">else</span>
+00280         <span class="keywordflow">return</span> (FALSE);
+00281 
+00282 }                               <span class="comment">/* isZeroU64 */</span>
+00283 
+00304 <span class="keywordtype">int</span>
+00305 netsnmp_c64_check_for_32bit_wrap(<span class="keyword">struct</span> counter64 *old_val,
+00306                                  <span class="keyword">struct</span> counter64 *new_val,
+00307                                  <span class="keywordtype">int</span> adjust)
+00308 {
+00309     <span class="keywordflow">if</span>( (NULL == old_val) || (NULL == new_val) )
+00310         <span class="keywordflow">return</span> -1;
+00311 
+00312     DEBUGMSGTL((<span class="stringliteral">"9:c64:check_wrap"</span>, <span class=
 "stringliteral">"check wrap 0x%0x.0x%0x 0x%0x.0x%0x\n"</span>,
-00302                 old_val-&gt;high, old_val-&gt;low, new_val-&gt;high, new_val-&gt;low));
-00303     
-00304     <span class="comment">/*</span>
-00305 <span class="comment">     * check for wraps</span>
-00306 <span class="comment">     */</span>
-00307     <span class="keywordflow">if</span> ((new_val-&gt;low &gt;= old_val-&gt;low) &amp;&amp;
-00308         (new_val-&gt;high == old_val-&gt;high)) {
-00309         DEBUGMSGTL((<span class="stringliteral">"9:c64:check_wrap"</span>, <span class=
+00313                 old_val-&gt;high, old_val-&gt;low, new_val-&gt;high, new_val-&gt;low));
+00314     
+00315     <span class="comment">/*</span>
+00316 <span class="comment">     * check for wraps</span>
+00317 <span class="comment">     */</span>
+00318     <span class="keywordflow">if</span> ((new_val-&gt;low &gt;= old_val-&gt;low) &amp;&amp;
+00319         (new_val-&gt;high == old_val-&gt;high)) {
+00320         DEBUGMSGTL((<span class="stringliteral">"9:c64:check_wrap"</span>, <span class=
 "stringliteral">"no wrap\n"</span>));
-00310         <span class="keywordflow">return</span> 0;
-00311     }
-00312 
-00313     <span class="comment">/*</span>
-00314 <span class="comment">     * low wrapped. did high change?</span>
-00315 <span class="comment">     */</span>
-00316     <span class="keywordflow">if</span> (new_val-&gt;high == old_val-&gt;high) {
-00317         DEBUGMSGTL((<span class="stringliteral">"c64:check_wrap"</span>, <span class=
+00321         <span class="keywordflow">return</span> 0;
+00322     }
+00323 
+00324     <span class="comment">/*</span>
+00325 <span class="comment">     * low wrapped. did high change?</span>
+00326 <span class="comment">     */</span>
+00327     <span class="keywordflow">if</span> (new_val-&gt;high == old_val-&gt;high) {
+00328         DEBUGMSGTL((<span class="stringliteral">"c64:check_wrap"</span>, <span class=
 "stringliteral">"32 bit wrap\n"</span>));
-00318         <span class="keywordflow">if</span> (adjust)
-00319             ++new_val-&gt;high;
-00320         <span class="keywordflow">return</span> 32;
-00321     }
-00322     <span class="keywordflow">else</span> <span class=
+00329         <span class="keywordflow">if</span> (adjust) {
+00330             ++new_val-&gt;high;
+00331 <span class="preprocessor">#if SIZEOF_LONG != 4</span>
+00332             new_val-&gt;high &amp;= 0xffffffff;
+00333 <span class="preprocessor">#endif</span>
+00334         }
+00335         <span class="keywordflow">return</span> 32;
+00336     }
+00337     <span class="keywordflow">else</span> <span class=
 "keywordflow">if</span> ((new_val-&gt;high == (old_val-&gt;high + 1)) ||
-00323              ((0 == new_val-&gt;high) &amp;&amp; (0xffffffff == old_val-&gt;high))) {
-00324         DEBUGMSGTL((<span class="stringliteral">"c64:check_wrap"</span>, <span class=
+00338              ((0 == new_val-&gt;high) &amp;&amp; (0xffffffff == old_val-&gt;high))) {
+00339         DEBUGMSGTL((<span class="stringliteral">"c64:check_wrap"</span>, <span class=
 "stringliteral">"64 bit wrap\n"</span>));
-00325         <span class="keywordflow">return</span> 64;
-00326     }
-00327 
-00328     <span class="keywordflow">return</span> -2;
-00329 }
-00330 
-00366 <span class="keywordtype">int</span>
-00367 netsnmp_c64_check32_and_update(<span class="keyword">struct</span> counter64 *prev_val, <span class=
+00340         <span class="keywordflow">return</span> 64;
+00341     }
+00342 
+00343     <span class="keywordflow">return</span> -2;
+00344 }
+00345 
+00381 <span class="keywordtype">int</span>
+00382 netsnmp_c64_check32_and_update(<span class="keyword">struct</span> counter64 *prev_val, <span class=
 "keyword">struct</span> counter64 *new_val,
-00368                                <span class="keyword">struct</span> counter64 *old_prev_val, <span class=
+00383                                <span class="keyword">struct</span> counter64 *old_prev_val, <span class=
 "keywordtype">int</span> *need_wrap_check)
-00369 {
-00370     <span class="keywordtype">int</span> rc;
-00371 
-00372     <span class="comment">/*</span>
-00373 <span class="comment">     * counters are 32bit or unknown (which we'll treat as 32bit).</span>
-00374 <span class="comment">     * update the prev values with the difference between the</span>
-00375 <span class="comment">     * new stats and the prev old_stats:</span>
-00376 <span class="comment">     *    prev-&gt;stats += (new-&gt;stats - prev-&gt;old_stats)</span>
-00377 <span class="comment">     */</span>
-00378     <span class="keywordflow">if</span> ((NULL == need_wrap_check) || (0 != *need_wrap_check)) {
-00379         rc = netsnmp_c64_check_for_32bit_wrap(old_prev_val,new_val, 1);
-00380         <span class="keywordflow">if</span> (rc &lt; 0) {
-00381             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,<span class=
+00384 {
+00385     <span class="keywordtype">int</span> rc;
+00386 
+00387     <span class="comment">/*</span>
+00388 <span class="comment">     * counters are 32bit or unknown (which we'll treat as 32bit).</span>
+00389 <span class="comment">     * update the prev values with the difference between the</span>
+00390 <span class="comment">     * new stats and the prev old_stats:</span>
+00391 <span class="comment">     *    prev-&gt;stats += (new-&gt;stats - prev-&gt;old_stats)</span>
+00392 <span class="comment">     */</span>
+00393     <span class="keywordflow">if</span> ((NULL == need_wrap_check) || (0 != *need_wrap_check)) {
+00394         rc = netsnmp_c64_check_for_32bit_wrap(old_prev_val,new_val, 1);
+00395         <span class="keywordflow">if</span> (rc &lt; 0) {
+00396             <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,<span class=
 "stringliteral">"c64 32 bit check failed\n"</span>);
-00382             <span class="keywordflow">return</span> -1;
-00383         }
-00384     }
-00385     <span class="keywordflow">else</span>
-00386         rc = 0;
-00387     
-00388     <span class="comment">/*</span>
-00389 <span class="comment">     * update previous values</span>
-00390 <span class="comment">     */</span>
-00391     (void) u64UpdateCounter(prev_val, new_val, old_prev_val);
-00392 
-00393     <span class="comment">/*</span>
-00394 <span class="comment">     * if wrap check was 32 bit, undo adjust, now that prev is updated</span>
-00395 <span class="comment">     */</span>
-00396     <span class="keywordflow">if</span> (32 == rc) {
-00397         <span class="comment">/*</span>
-00398 <span class="comment">         * check wrap incremented high, so reset it. (Because having</span>
-00399 <span class="comment">         * high set for a 32 bit counter will confuse us in the next update).</span>
-00400 <span class="comment">         */</span>
-00401         netsnmp_assert(1 == new_val-&gt;high);
-00402         new_val-&gt;high = 0;
-00403     }
-00404     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (64 == rc) {
-00405         <span class="comment">/*</span>
-00406 <span class="comment">         * if we really have 64 bit counters, the summing we've been</span>
-00407 <span class="comment">         * doing for prev values should be equal to the new values.</span>
-00408 <span class="comment">         */</span>
-00409         <span class="keywordflow">if</span> ((prev_val-&gt;low != new_val-&gt;low) ||
-00410             (prev_val-&gt;high != new_val-&gt;high)) {
-00411             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00397             <span class="keywordflow">return</span> -1;
+00398         }
+00399     }
+00400     <span class="keywordflow">else</span>
+00401         rc = 0;
+00402     
+00403     <span class="comment">/*</span>
+00404 <span class="comment">     * update previous values</span>
+00405 <span class="comment">     */</span>
+00406     (void) u64UpdateCounter(prev_val, new_val, old_prev_val);
+00407 
+00408     <span class="comment">/*</span>
+00409 <span class="comment">     * if wrap check was 32 bit, undo adjust, now that prev is updated</span>
+00410 <span class="comment">     */</span>
+00411     <span class="keywordflow">if</span> (32 == rc) {
+00412         <span class="comment">/*</span>
+00413 <span class="comment">         * check wrap incremented high, so reset it. (Because having</span>
+00414 <span class="comment">         * high set for a 32 bit counter will confuse us in the next update).</span>
+00415 <span class="comment">         */</span>
+00416         netsnmp_assert(1 == new_val-&gt;high);
+00417         new_val-&gt;high = 0;
+00418     }
+00419     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (64 == rc) {
+00420         <span class="comment">/*</span>
+00421 <span class="comment">         * if we really have 64 bit counters, the summing we've been</span>
+00422 <span class="comment">         * doing for prev values should be equal to the new values.</span>
+00423 <span class="comment">         */</span>
+00424         <span class="keywordflow">if</span> ((prev_val-&gt;low != new_val-&gt;low) ||
+00425             (prev_val-&gt;high != new_val-&gt;high)) {
+00426             <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"looks like a 64bit wrap, but prev!=new\n"</span>);
-00412             <span class="keywordflow">return</span> -2;
-00413         }
-00414         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (NULL != need_wrap_check)
-00415             *need_wrap_check = 0;
-00416     }
-00417     
-00418     <span class="keywordflow">return</span> 0;
-00419 }
-00420 
-00421 <span class="keywordtype">void</span>
-00422 printU64(<span class="keywordtype">char</span> *buf,     <span class="comment">/* char [I64CHARSZ+1]; */</span>
-00423                          <span class="keyword">const</span> U64 * pu64) {
-00424     U64             u64a;
-00425     U64             u64b;
-00426 
-00427     <span class="keywordtype">char</span>            aRes[I64CHARSZ + 1];
-00428     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    u;
-00429     <span class="keywordtype">int</span>             j;
-00430 
-00431     u64a.high = pu64-&gt;high;
-00432     u64a.low = pu64-&gt;low;
-00433     aRes[I64CHARSZ] = 0;
-00434     <span class="keywordflow">for</span> (j = 0; j &lt; I64CHARSZ; j++) {
-00435         divBy10(u64a, &amp;u64b, &amp;u);
-00436         aRes[(I64CHARSZ - 1) - j] = (char) (<span class="charliteral">'0'</span> + u);
-00437         u64a.high = u64b.high;
-00438         u64a.low = u64b.low;
-00439         <span class="keywordflow">if</span> (isZeroU64(&amp;u64a))
-00440             <span class="keywordflow">break</span>;
-00441     }
-00442     strcpy(buf, &amp;aRes[(I64CHARSZ - 1) - j]);
-00443 }
-00444 
-00445 <span class="keywordtype">void</span>
-00446 printI64(<span class="keywordtype">char</span> *buf,     <span class="comment">/* char [I64CHARSZ+1]; */</span>
-00447                          <span class="keyword">const</span> U64 * pu64) {
-00448     U64             u64a;
-00449     U64             u64b;
-00450 
-00451     <span class="keywordtype">char</span>            aRes[I64CHARSZ + 1];
-00452     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    u;
-00453     <span class="keywordtype">int</span>             j, sign = 0;
-00454 
-00455     <span class="keywordflow">if</span> (pu64-&gt;high &amp; 0x80000000) {
-00456         u64a.high = ~pu64-&gt;high;
-00457         u64a.low = ~pu64-&gt;low;
-00458         sign = 1;
-00459         incrByU32(&amp;u64a, 1);    <span class="comment">/* bit invert and incr by 1 to print 2s complement */</span>
-00460     } <span class="keywordflow">else</span> {
-00461         u64a.high = pu64-&gt;high;
-00462         u64a.low = pu64-&gt;low;
-00463     }
-00464 
-00465     aRes[I64CHARSZ] = 0;
-00466     <span class="keywordflow">for</span> (j = 0; j &lt; I64CHARSZ; j++) {
-00467         divBy10(u64a, &amp;u64b, &amp;u);
-00468         aRes[(I64CHARSZ - 1) - j] = (char) (<span class="charliteral">'0'</span> + u);
-00469         u64a.high = u64b.high;
-00470         u64a.low = u64b.low;
-00471         <span class="keywordflow">if</span> (isZeroU64(&amp;u64a))
-00472             <span class="keywordflow">break</span>;
-00473     }
-00474     <span class="keywordflow">if</span> (sign == 1) {
-00475         aRes[(I64CHARSZ - 1) - j - 1] = <span class="charliteral">'-'</span>;
-00476         strcpy(buf, &amp;aRes[(I64CHARSZ - 1) - j - 1]);
-00477         <span class="keywordflow">return</span>;
+00427             <span class="keywordflow">return</span> -2;
+00428         }
+00429         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (NULL != need_wrap_check)
+00430             *need_wrap_check = 0;
+00431     }
+00432     
+00433     <span class="keywordflow">return</span> 0;
+00434 }
+00435 
+00436 <span class="keywordtype">void</span>
+00437 printU64(<span class="keywordtype">char</span> *buf,     <span class="comment">/* char [I64CHARSZ+1]; */</span>
+00438                          <span class="keyword">const</span> U64 * pu64) {
+00439     U64             u64a;
+00440     U64             u64b;
+00441 
+00442     <span class="keywordtype">char</span>            aRes[I64CHARSZ + 1];
+00443     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    u;
+00444     <span class="keywordtype">int</span>             j;
+00445 
+00446     u64a.high = pu64-&gt;high;
+00447     u64a.low = pu64-&gt;low;
+00448     aRes[I64CHARSZ] = 0;
+00449     <span class="keywordflow">for</span> (j = 0; j &lt; I64CHARSZ; j++) {
+00450         divBy10(u64a, &amp;u64b, &amp;u);
+00451         aRes[(I64CHARSZ - 1) - j] = (char) (<span class="charliteral">'0'</span> + u);
+00452         u64a.high = u64b.high;
+00453         u64a.low = u64b.low;
+00454         <span class="keywordflow">if</span> (isZeroU64(&amp;u64a))
+00455             <span class="keywordflow">break</span>;
+00456     }
+00457     strcpy(buf, &amp;aRes[(I64CHARSZ - 1) - j]);
+00458 }
+00459 
+00460 <span class="keywordtype">void</span>
+00461 printI64(<span class="keywordtype">char</span> *buf,     <span class="comment">/* char [I64CHARSZ+1]; */</span>
+00462                          <span class="keyword">const</span> U64 * pu64) {
+00463     U64             u64a;
+00464     U64             u64b;
+00465 
+00466     <span class="keywordtype">char</span>            aRes[I64CHARSZ + 1];
+00467     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    u;
+00468     <span class="keywordtype">int</span>             j, sign = 0;
+00469 
+00470     <span class="keywordflow">if</span> (pu64-&gt;high &amp; 0x80000000) {
+00471         u64a.high = ~pu64-&gt;high;
+00472         u64a.low = ~pu64-&gt;low;
+00473         sign = 1;
+00474         incrByU32(&amp;u64a, 1);    <span class="comment">/* bit invert and incr by 1 to print 2s complement */</span>
+00475     } <span class="keywordflow">else</span> {
+00476         u64a.high = pu64-&gt;high;
+00477         u64a.low = pu64-&gt;low;
 00478     }
-00479     strcpy(buf, &amp;aRes[(I64CHARSZ - 1) - j]);
-00480 }
-00481 
-00482 <span class="keywordtype">int</span>
-00483 read64(U64 * i64, <span class="keyword">const</span> <span class="keywordtype">char</span> *string)
-00484 {
-00485     U64             i64p;
-00486     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    u;
-00487     <span class="keywordtype">int</span>             sign = 0;
-00488     <span class="keywordtype">int</span>             ok = 0;
-00489 
-00490     zeroU64(i64);
-00491     <span class="keywordflow">if</span> (*string == <span class="charliteral">'-'</span>) {
-00492         sign = 1;
-00493         string++;
-00494     }
-00495 
-00496     <span class="keywordflow">while</span> (*string &amp;&amp; isdigit(*string)) {
-00497         ok = 1;
-00498         u = *string - <span class="charliteral">'0'</span>;
-00499         multBy10(*i64, &amp;i64p);
-00500         memcpy(i64, &amp;i64p, <span class="keyword">sizeof</span>(i64p));
-00501         incrByU16(i64, u);
-00502         string++;
-00503     }
-00504     <span class="keywordflow">if</span> (sign) {
-00505         i64-&gt;high = ~i64-&gt;high;
-00506         i64-&gt;low = ~i64-&gt;low;
-00507         incrByU16(i64, 1);
-00508     }
-00509     <span class="keywordflow">return</span> ok;
-00510 }
-00511 
-00512 
-00513 
-00514 
-00515 <span class="preprocessor">#ifdef TESTING</span>
-00516 <span class="keywordtype">void</span>
-00517 main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[])
-00518 {
-00519     <span class="keywordtype">int</span>             i;
-00520     <span class="keywordtype">int</span>             j;
-00521     <span class="keywordtype">int</span>             l;
-00522     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    u;
-00523     U64             u64a;
-00524     U64             u64b;
-00525 <span class="preprocessor">#define MXSZ 20</span>
-00526     <span class="keywordtype">char</span>            aRes[MXSZ + 1];
+00479 
+00480     aRes[I64CHARSZ] = 0;
+00481     <span class="keywordflow">for</span> (j = 0; j &lt; I64CHARSZ; j++) {
+00482         divBy10(u64a, &amp;u64b, &amp;u);
+00483         aRes[(I64CHARSZ - 1) - j] = (char) (<span class="charliteral">'0'</span> + u);
+00484         u64a.high = u64b.high;
+00485         u64a.low = u64b.low;
+00486         <span class="keywordflow">if</span> (isZeroU64(&amp;u64a))
+00487             <span class="keywordflow">break</span>;
+00488     }
+00489     <span class="keywordflow">if</span> (sign == 1) {
+00490         aRes[(I64CHARSZ - 1) - j - 1] = <span class="charliteral">'-'</span>;
+00491         strcpy(buf, &amp;aRes[(I64CHARSZ - 1) - j - 1]);
+00492         <span class="keywordflow">return</span>;
+00493     }
+00494     strcpy(buf, &amp;aRes[(I64CHARSZ - 1) - j]);
+00495 }
+00496 
+00497 <span class="keywordtype">int</span>
+00498 read64(U64 * i64, <span class="keyword">const</span> <span class="keywordtype">char</span> *str)
+00499 {
+00500     U64             i64p;
+00501     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    u;
+00502     <span class="keywordtype">int</span>             sign = 0;
+00503     <span class="keywordtype">int</span>             ok = 0;
+00504 
+00505     zeroU64(i64);
+00506     <span class="keywordflow">if</span> (*str == <span class="charliteral">'-'</span>) {
+00507         sign = 1;
+00508         str++;
+00509     }
+00510 
+00511     <span class="keywordflow">while</span> (*str &amp;&amp; isdigit(*str)) {
+00512         ok = 1;
+00513         u = *str - <span class="charliteral">'0'</span>;
+00514         multBy10(*i64, &amp;i64p);
+00515         memcpy(i64, &amp;i64p, <span class="keyword">sizeof</span>(i64p));
+00516         incrByU16(i64, u);
+00517         str++;
+00518     }
+00519     <span class="keywordflow">if</span> (sign) {
+00520         i64-&gt;high = ~i64-&gt;high;
+00521         i64-&gt;low = ~i64-&gt;low;
+00522         incrByU16(i64, 1);
+00523     }
+00524     <span class="keywordflow">return</span> ok;
+00525 }
+00526 
 00527 
 00528 
-00529     <span class="keywordflow">if</span> (argc &lt; 2) {
-00530         printf(<span class="stringliteral">"This program takes numbers from the command line\n"</span>
-00531                <span class="stringliteral">"and prints them out.\n"</span> <span class=
+00529 
+00530 <span class="preprocessor">#ifdef TESTING</span>
+00531 <span class="keywordtype">void</span>
+00532 main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[])
+00533 {
+00534     <span class="keywordtype">int</span>             i;
+00535     <span class="keywordtype">int</span>             j;
+00536     <span class="keywordtype">int</span>             l;
+00537     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    u;
+00538     U64             u64a;
+00539     U64             u64b;
+00540 <span class="preprocessor">#define MXSZ 20</span>
+00541     <span class="keywordtype">char</span>            aRes[MXSZ + 1];
+00542 
+00543 
+00544     <span class="keywordflow">if</span> (argc &lt; 2) {
+00545         printf(<span class="stringliteral">"This program takes numbers from the command line\n"</span>
+00546                <span class="stringliteral">"and prints them out.\n"</span> <span class=
 "stringliteral">"Usage: test &lt;unsignedInt&gt;...\n"</span>);
-00532         exit(1);
-00533     }
-00534 
-00535     aRes[MXSZ] = 0;
-00536 
-00537     <span class="keywordflow">for</span> (i = 1; i &lt; argc; i++) {
-00538         l = strlen(argv[i]);
-00539         zeroU64(&amp;u64a);
-00540         <span class="keywordflow">for</span> (j = 0; j &lt; l; j++) {
-00541             <span class="keywordflow">if</span> (!isdigit(argv[i][j])) {
-00542                 printf(<span class="stringliteral">"Argument is not a number \"%s\"\n"</span>, argv[i]);
-00543                 exit(1);
-00544             }
-00545             u = argv[i][j] - <span class="charliteral">'0'</span>;
-00546             multBy10(u64a, &amp;u64b);
-00547             u64a = u64b;
-00548             incrByU16(&amp;u64a, u);
-00549         }
-00550 
-00551         printf(<span class="stringliteral">"number \"%s\" in hex is '%08x%08x'h\n"</span>,
-00552                argv[i], u64a.high, u64a.low);
-00553 
-00554         printf(<span class="stringliteral">"number is \"%s\"\n"</span>, printU64(&amp;u64a));
-00555         <span class="keywordflow">for</span> (j = 0; j &lt; MXSZ; j++) {
-00556             divBy10(u64a, &amp;u64b, &amp;u);
-00557             aRes[(MXSZ - 1) - j] = (char) (<span class="charliteral">'0'</span> + u);
-00558             u64a = u64b;
-00559             <span class="keywordflow">if</span> (isZeroU64(&amp;u64a))
-00560                 <span class="keywordflow">break</span>;
-00561         }
-00562 
-00563         printf(<span class="stringliteral">"number is \"%s\"\n"</span>, &amp;aRes[(MXSZ - 1) - j]);
-00564     }
-00565     exit(0);
-00566 }                               <span class="comment">/* main */</span>
-00567 <span class="preprocessor">#endif                          </span><span class="comment">/* TESTING */</span>
+00547         exit(1);
+00548     }
+00549 
+00550     aRes[MXSZ] = 0;
+00551 
+00552     <span class="keywordflow">for</span> (i = 1; i &lt; argc; i++) {
+00553         l = strlen(argv[i]);
+00554         zeroU64(&amp;u64a);
+00555         <span class="keywordflow">for</span> (j = 0; j &lt; l; j++) {
+00556             <span class="keywordflow">if</span> (!isdigit(argv[i][j])) {
+00557                 printf(<span class="stringliteral">"Argument is not a number \"%s\"\n"</span>, argv[i]);
+00558                 exit(1);
+00559             }
+00560             u = argv[i][j] - <span class="charliteral">'0'</span>;
+00561             multBy10(u64a, &amp;u64b);
+00562             u64a = u64b;
+00563             incrByU16(&amp;u64a, u);
+00564         }
+00565 
+00566         printf(<span class="stringliteral">"number \"%s\" in hex is '%08x%08x'h\n"</span>,
+00567                argv[i], u64a.high, u64a.low);
 00568 
-00569 <span class="comment">/*</span>
-00570 <span class="comment"> * file: test.c </span>
-00571 <span class="comment"> */</span>
+00569         printf(<span class="stringliteral">"number is \"%s\"\n"</span>, printU64(&amp;u64a));
+00570         <span class="keywordflow">for</span> (j = 0; j &lt; MXSZ; j++) {
+00571             divBy10(u64a, &amp;u64b, &amp;u);
+00572             aRes[(MXSZ - 1) - j] = (char) (<span class="charliteral">'0'</span> + u);
+00573             u64a = u64b;
+00574             <span class="keywordflow">if</span> (isZeroU64(&amp;u64a))
+00575                 <span class="keywordflow">break</span>;
+00576         }
+00577 
+00578         printf(<span class="stringliteral">"number is \"%s\"\n"</span>, &amp;aRes[(MXSZ - 1) - j]);
+00579     }
+00580     exit(0);
+00581 }                               <span class="comment">/* main */</span>
+00582 <span class="preprocessor">#endif                          </span><span class="comment">/* TESTING */</span>
+00583 
+00584 <span class="comment">/*</span>
+00585 <span class="comment"> * file: test.c </span>
+00586 <span class="comment"> */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:37 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:45 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

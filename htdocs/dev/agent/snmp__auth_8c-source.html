@@ -53,221 +53,223 @@
 00033 <span class="preprocessor">#endif</span>
 00034 
 00035 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
-00036 <span class="preprocessor">#if HAVE_STRING_H</span>
-00037 <span class="preprocessor">#include &lt;string.h&gt;</span>
-00038 <span class="preprocessor">#else</span>
-00039 <span class="preprocessor">#include &lt;strings.h&gt;</span>
-00040 <span class="preprocessor">#endif</span>
-00041 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
-00042 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
-00043 <span class="preprocessor"># ifdef WIN32</span>
-00044 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
-00045 <span class="preprocessor"># else</span>
-00046 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
-00047 <span class="preprocessor"># endif</span>
-00048 <span class="preprocessor"># include &lt;time.h&gt;</span>
-00049 <span class="preprocessor">#else</span>
-00050 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
-00051 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
-00052 <span class="preprocessor"># else</span>
-00053 <span class="preprocessor">#  include &lt;time.h&gt;</span>
-00054 <span class="preprocessor"># endif</span>
-00055 <span class="preprocessor">#endif</span>
-00056 <span class="preprocessor">#if HAVE_SYS_SELECT_H</span>
-00057 <span class="preprocessor">#include &lt;sys/select.h&gt;</span>
+00036 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00037 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00038 <span class="preprocessor">#endif</span>
+00039 <span class="preprocessor">#if HAVE_STRING_H</span>
+00040 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00041 <span class="preprocessor">#else</span>
+00042 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00043 <span class="preprocessor">#endif</span>
+00044 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00045 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00046 <span class="preprocessor"># ifdef WIN32</span>
+00047 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00048 <span class="preprocessor"># else</span>
+00049 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00050 <span class="preprocessor"># endif</span>
+00051 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00052 <span class="preprocessor">#else</span>
+00053 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00054 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00055 <span class="preprocessor"># else</span>
+00056 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00057 <span class="preprocessor"># endif</span>
 00058 <span class="preprocessor">#endif</span>
-00059 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
-00060 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00059 <span class="preprocessor">#if HAVE_SYS_SELECT_H</span>
+00060 <span class="preprocessor">#include &lt;sys/select.h&gt;</span>
 00061 <span class="preprocessor">#endif</span>
-00062 <span class="preprocessor">#if HAVE_ARPA_INET_H</span>
-00063 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+00062 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00063 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
 00064 <span class="preprocessor">#endif</span>
-00065 
-00066 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
-00067 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
-00068 <span class="preprocessor">#endif</span>
-00069 
-00070 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
-00071 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
-00072 <span class="preprocessor">#endif</span>
-00073 
-00074 <span class="preprocessor">#ifdef vms</span>
-00075 <span class="preprocessor">#include &lt;in.h&gt;</span>
-00076 <span class="preprocessor">#endif</span>
-00077 
-00078 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
-00079 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
-00080 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
-00081 
-00082 <span class="preprocessor">#include &lt;net-snmp/library/asn1.h&gt;</span>
-00083 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
-00084 <span class="preprocessor">#include &lt;net-snmp/library/mib.h&gt;</span>
-00085 <span class="preprocessor">#include &lt;net-snmp/library/md5.h&gt;</span>
-00086 <span class="preprocessor">#include &lt;net-snmp/library/scapi.h&gt;</span>
-00087 
-00088 <span class="comment">/*</span>
-00089 <span class="comment"> * Globals.</span>
-00090 <span class="comment"> */</span>
-00091 
-00092 <span class="preprocessor">#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)</span>
-00093 <span class="comment">/*******************************************************************-o-******</span>
-00094 <span class="comment"> * snmp_comstr_parse</span>
-00095 <span class="comment"> *</span>
-00096 <span class="comment"> * Parameters:</span>
-00097 <span class="comment"> *      *data           (I)   Message.</span>
-00098 <span class="comment"> *      *length         (I/O) Bytes left in message.</span>
-00099 <span class="comment"> *      *psid           (O)   Community string.</span>
-00100 <span class="comment"> *      *slen           (O)   Length of community string.</span>
-00101 <span class="comment"> *      *version        (O)   Message version.</span>
-00102 <span class="comment"> *      </span>
-00103 <span class="comment"> * Returns:</span>
-00104 <span class="comment"> *      Pointer to the remainder of data.</span>
-00105 <span class="comment"> *</span>
-00106 <span class="comment"> *</span>
-00107 <span class="comment"> * Parse the header of a community string-based message such as that found</span>
-00108 <span class="comment"> * in SNMPv1 and SNMPv2c.</span>
-00109 <span class="comment"> */</span>
-00110 u_char         *
-00111 snmp_comstr_parse(u_char * data,
-00112                   size_t * length,
-00113                   u_char * psid, size_t * slen, <span class="keywordtype">long</span> *version)
-00114 {
-00115     u_char          type;
-00116     <span class="keywordtype">long</span>            ver;
-00117     size_t          origlen = *slen;
-00118 
-00119     <span class="comment">/*</span>
-00120 <span class="comment">     * Message is an ASN.1 SEQUENCE.</span>
-00121 <span class="comment">     */</span>
-00122     data = asn_parse_sequence(data, length, &amp;type,
-00123                               (ASN_SEQUENCE | ASN_CONSTRUCTOR),
-00124                               <span class="stringliteral">"auth message"</span>);
-00125     <span class="keywordflow">if</span> (data == NULL) {
-00126         <span class="keywordflow">return</span> NULL;
-00127     }
-00128 
-00129     <span class="comment">/*</span>
-00130 <span class="comment">     * First field is the version.</span>
-00131 <span class="comment">     */</span>
-00132     DEBUGDUMPHEADER(<span class="stringliteral">"recv"</span>, <span class="stringliteral">"SNMP version"</span>);
-00133     data = asn_parse_int(data, length, &amp;type, &amp;ver, <span class="keyword">sizeof</span>(ver));
-00134     DEBUGINDENTLESS();
-00135     *version = ver;
-00136     <span class="keywordflow">if</span> (data == NULL) {
-00137         ERROR_MSG(<span class="stringliteral">"bad parse of version"</span>);
-00138         <span class="keywordflow">return</span> NULL;
-00139     }
-00140 
-00141     <span class="comment">/*</span>
-00142 <span class="comment">     * second field is the community string for SNMPv1 &amp; SNMPv2c </span>
-00143 <span class="comment">     */</span>
-00144     DEBUGDUMPHEADER(<span class="stringliteral">"recv"</span>, <span class="stringliteral">"community string"</span>);
-00145     data = asn_parse_string(data, length, &amp;type, psid, slen);
-00146     DEBUGINDENTLESS();
-00147     <span class="keywordflow">if</span> (data == NULL) {
-00148         ERROR_MSG(<span class="stringliteral">"bad parse of community"</span>);
-00149         <span class="keywordflow">return</span> NULL;
-00150     }
-00151     psid[<a class="code" href="group__util.html#ga46">SNMP_MIN</a>(*slen, origlen - 1)] = <span class=
+00065 <span class="preprocessor">#if HAVE_ARPA_INET_H</span>
+00066 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+00067 <span class="preprocessor">#endif</span>
+00068 
+00069 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00070 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00071 <span class="preprocessor">#endif</span>
+00072 
+00073 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00074 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00075 <span class="preprocessor">#endif</span>
+00076 
+00077 <span class="preprocessor">#ifdef vms</span>
+00078 <span class="preprocessor">#include &lt;in.h&gt;</span>
+00079 <span class="preprocessor">#endif</span>
+00080 
+00081 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00082 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00083 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00084 
+00085 <span class="preprocessor">#include &lt;net-snmp/library/asn1.h&gt;</span>
+00086 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00087 <span class="preprocessor">#include &lt;net-snmp/library/mib.h&gt;</span>
+00088 <span class="preprocessor">#include &lt;net-snmp/library/md5.h&gt;</span>
+00089 <span class="preprocessor">#include &lt;net-snmp/library/scapi.h&gt;</span>
+00090 
+00091 <span class="comment">/*</span>
+00092 <span class="comment"> * Globals.</span>
+00093 <span class="comment"> */</span>
+00094 
+00095 <span class="preprocessor">#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)</span>
+00096 <span class="comment">/*******************************************************************-o-******</span>
+00097 <span class="comment"> * snmp_comstr_parse</span>
+00098 <span class="comment"> *</span>
+00099 <span class="comment"> * Parameters:</span>
+00100 <span class="comment"> *      *data           (I)   Message.</span>
+00101 <span class="comment"> *      *length         (I/O) Bytes left in message.</span>
+00102 <span class="comment"> *      *psid           (O)   Community string.</span>
+00103 <span class="comment"> *      *slen           (O)   Length of community string.</span>
+00104 <span class="comment"> *      *version        (O)   Message version.</span>
+00105 <span class="comment"> *      </span>
+00106 <span class="comment"> * Returns:</span>
+00107 <span class="comment"> *      Pointer to the remainder of data.</span>
+00108 <span class="comment"> *</span>
+00109 <span class="comment"> *</span>
+00110 <span class="comment"> * Parse the header of a community string-based message such as that found</span>
+00111 <span class="comment"> * in SNMPv1 and SNMPv2c.</span>
+00112 <span class="comment"> */</span>
+00113 u_char         *
+00114 snmp_comstr_parse(u_char * data,
+00115                   size_t * length,
+00116                   u_char * psid, size_t * slen, <span class="keywordtype">long</span> *version)
+00117 {
+00118     u_char          type;
+00119     <span class="keywordtype">long</span>            ver;
+00120     size_t          origlen = *slen;
+00121 
+00122     <span class="comment">/*</span>
+00123 <span class="comment">     * Message is an ASN.1 SEQUENCE.</span>
+00124 <span class="comment">     */</span>
+00125     data = asn_parse_sequence(data, length, &amp;type,
+00126                               (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+00127                               <span class="stringliteral">"auth message"</span>);
+00128     <span class="keywordflow">if</span> (data == NULL) {
+00129         <span class="keywordflow">return</span> NULL;
+00130     }
+00131 
+00132     <span class="comment">/*</span>
+00133 <span class="comment">     * First field is the version.</span>
+00134 <span class="comment">     */</span>
+00135     DEBUGDUMPHEADER(<span class="stringliteral">"recv"</span>, <span class="stringliteral">"SNMP version"</span>);
+00136     data = asn_parse_int(data, length, &amp;type, &amp;ver, <span class="keyword">sizeof</span>(ver));
+00137     DEBUGINDENTLESS();
+00138     *version = ver;
+00139     <span class="keywordflow">if</span> (data == NULL) {
+00140         ERROR_MSG(<span class="stringliteral">"bad parse of version"</span>);
+00141         <span class="keywordflow">return</span> NULL;
+00142     }
+00143 
+00144     <span class="comment">/*</span>
+00145 <span class="comment">     * second field is the community string for SNMPv1 &amp; SNMPv2c </span>
+00146 <span class="comment">     */</span>
+00147     DEBUGDUMPHEADER(<span class="stringliteral">"recv"</span>, <span class="stringliteral">"community string"</span>);
+00148     data = asn_parse_string(data, length, &amp;type, psid, slen);
+00149     DEBUGINDENTLESS();
+00150     <span class="keywordflow">if</span> (data == NULL) {
+00151         ERROR_MSG(<span class="stringliteral">"bad parse of community"</span>);
+00152         <span class="keywordflow">return</span> NULL;
+00153     }
+00154     psid[<a class="code" href="group__util.html#ga46">SNMP_MIN</a>(*slen, origlen - 1)] = <span class=
 "charliteral">'\0'</span>;
-00152     <span class="keywordflow">return</span> (u_char *) data;
-00153 
-00154 }                               <span class="comment">/* end snmp_comstr_parse() */</span>
-00155 
+00155     <span class="keywordflow">return</span> (u_char *) data;
 00156 
-00157 
+00157 }                               <span class="comment">/* end snmp_comstr_parse() */</span>
 00158 
-00159 <span class="comment">/*******************************************************************-o-******</span>
-00160 <span class="comment"> * snmp_comstr_build</span>
-00161 <span class="comment"> *</span>
-00162 <span class="comment"> * Parameters:</span>
-00163 <span class="comment"> *      *data</span>
-00164 <span class="comment"> *      *length</span>
-00165 <span class="comment"> *      *psid</span>
-00166 <span class="comment"> *      *slen</span>
-00167 <span class="comment"> *      *version</span>
-00168 <span class="comment"> *       messagelen</span>
-00169 <span class="comment"> *      </span>
-00170 <span class="comment"> * Returns:</span>
-00171 <span class="comment"> *      Pointer into 'data' after built section.</span>
-00172 <span class="comment"> *</span>
-00173 <span class="comment"> *</span>
-00174 <span class="comment"> * Build the header of a community string-based message such as that found</span>
-00175 <span class="comment"> * in SNMPv1 and SNMPv2c.</span>
+00159 
+00160 
+00161 
+00162 <span class="comment">/*******************************************************************-o-******</span>
+00163 <span class="comment"> * snmp_comstr_build</span>
+00164 <span class="comment"> *</span>
+00165 <span class="comment"> * Parameters:</span>
+00166 <span class="comment"> *      *data</span>
+00167 <span class="comment"> *      *length</span>
+00168 <span class="comment"> *      *psid</span>
+00169 <span class="comment"> *      *slen</span>
+00170 <span class="comment"> *      *version</span>
+00171 <span class="comment"> *       messagelen</span>
+00172 <span class="comment"> *      </span>
+00173 <span class="comment"> * Returns:</span>
+00174 <span class="comment"> *      Pointer into 'data' after built section.</span>
+00175 <span class="comment"> *</span>
 00176 <span class="comment"> *</span>
-00177 <span class="comment"> * NOTE:        The length of the message will have to be inserted later,</span>
-00178 <span class="comment"> *              if not known.</span>
+00177 <span class="comment"> * Build the header of a community string-based message such as that found</span>
+00178 <span class="comment"> * in SNMPv1 and SNMPv2c.</span>
 00179 <span class="comment"> *</span>
-00180 <span class="comment"> * NOTE:        Version is an 'int'.  (CMU had it as a long, but was passing</span>
-00181 <span class="comment"> *              in a *int.  Grrr.)  Assign version to verfix and pass in</span>
-00182 <span class="comment"> *              that to asn_build_int instead which expects a long.  -- WH</span>
-00183 <span class="comment"> */</span>
-00184 u_char         *
-00185 snmp_comstr_build(u_char * data,
-00186                   size_t * length,
-00187                   u_char * psid,
-00188                   size_t * slen, <span class="keywordtype">long</span> *version, size_t messagelen)
-00189 {
-00190     <span class="keywordtype">long</span>            verfix = *version;
-00191     u_char         *h1 = data;
-00192     u_char         *h1e;
-00193     size_t          hlength = *length;
-00194 
-00195 
-00196     <span class="comment">/*</span>
-00197 <span class="comment">     * Build the the message wrapper (note length will be inserted later).</span>
-00198 <span class="comment">     */</span>
-00199     data =
-00200         asn_build_sequence(data, length,
-00201                            (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR), 0);
-00202     <span class="keywordflow">if</span> (data == NULL) {
-00203         <span class="keywordflow">return</span> NULL;
-00204     }
-00205     h1e = data;
-00206 
-00207 
-00208     <span class="comment">/*</span>
-00209 <span class="comment">     * Store the version field.</span>
-00210 <span class="comment">     */</span>
-00211     data = asn_build_int(data, length,
-00212                          (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
-00213                                    ASN_INTEGER), &amp;verfix, <span class="keyword">sizeof</span>(verfix));
-00214     <span class="keywordflow">if</span> (data == NULL) {
-00215         <span class="keywordflow">return</span> NULL;
-00216     }
-00217 
-00218 
-00219     <span class="comment">/*</span>
-00220 <span class="comment">     * Store the community string.</span>
-00221 <span class="comment">     */</span>
-00222     data = asn_build_string(data, length,
-00223                             (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
-00224                                       ASN_OCTET_STR), psid,
-00225                             *(u_char *) slen);
-00226     <span class="keywordflow">if</span> (data == NULL) {
-00227         <span class="keywordflow">return</span> NULL;
-00228     }
-00229 
-00230 
-00231     <span class="comment">/*</span>
-00232 <span class="comment">     * Insert length.</span>
-00233 <span class="comment">     */</span>
-00234     asn_build_sequence(h1, &amp;hlength,
-00235                        (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
-00236                        data - h1e + messagelen);
-00237 
-00238 
-00239     <span class="keywordflow">return</span> data;
+00180 <span class="comment"> * NOTE:        The length of the message will have to be inserted later,</span>
+00181 <span class="comment"> *              if not known.</span>
+00182 <span class="comment"> *</span>
+00183 <span class="comment"> * NOTE:        Version is an 'int'.  (CMU had it as a long, but was passing</span>
+00184 <span class="comment"> *              in a *int.  Grrr.)  Assign version to verfix and pass in</span>
+00185 <span class="comment"> *              that to asn_build_int instead which expects a long.  -- WH</span>
+00186 <span class="comment"> */</span>
+00187 u_char         *
+00188 snmp_comstr_build(u_char * data,
+00189                   size_t * length,
+00190                   u_char * psid,
+00191                   size_t * slen, <span class="keywordtype">long</span> *version, size_t messagelen)
+00192 {
+00193     <span class="keywordtype">long</span>            verfix = *version;
+00194     u_char         *h1 = data;
+00195     u_char         *h1e;
+00196     size_t          hlength = *length;
+00197 
+00198 
+00199     <span class="comment">/*</span>
+00200 <span class="comment">     * Build the the message wrapper (note length will be inserted later).</span>
+00201 <span class="comment">     */</span>
+00202     data =
+00203         asn_build_sequence(data, length,
+00204                            (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR), 0);
+00205     <span class="keywordflow">if</span> (data == NULL) {
+00206         <span class="keywordflow">return</span> NULL;
+00207     }
+00208     h1e = data;
+00209 
+00210 
+00211     <span class="comment">/*</span>
+00212 <span class="comment">     * Store the version field.</span>
+00213 <span class="comment">     */</span>
+00214     data = asn_build_int(data, length,
+00215                          (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+00216                                    ASN_INTEGER), &amp;verfix, <span class="keyword">sizeof</span>(verfix));
+00217     <span class="keywordflow">if</span> (data == NULL) {
+00218         <span class="keywordflow">return</span> NULL;
+00219     }
+00220 
+00221 
+00222     <span class="comment">/*</span>
+00223 <span class="comment">     * Store the community string.</span>
+00224 <span class="comment">     */</span>
+00225     data = asn_build_string(data, length,
+00226                             (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+00227                                       ASN_OCTET_STR), psid,
+00228                             *(u_char *) slen);
+00229     <span class="keywordflow">if</span> (data == NULL) {
+00230         <span class="keywordflow">return</span> NULL;
+00231     }
+00232 
+00233 
+00234     <span class="comment">/*</span>
+00235 <span class="comment">     * Insert length.</span>
+00236 <span class="comment">     */</span>
+00237     asn_build_sequence(h1, &amp;hlength,
+00238                        (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+00239                        data - h1e + messagelen);
 00240 
-00241 }                               <span class="comment">/* end snmp_comstr_build() */</span>
-00242 <span class="preprocessor">#endif </span><span class="comment">/* support for community based SNMP */</span>
+00241 
+00242     <span class="keywordflow">return</span> data;
+00243 
+00244 }                               <span class="comment">/* end snmp_comstr_build() */</span>
+00245 <span class="preprocessor">#endif </span><span class="comment">/* support for community based SNMP */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:48 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

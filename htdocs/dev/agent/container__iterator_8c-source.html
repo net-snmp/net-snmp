@@ -107,7 +107,7 @@
 "structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;tmp);
 00095     <span class="keywordflow">if</span>(SNMP_ERR_NOERROR != rc) {
 00096         <span class="keywordflow">if</span>(SNMP_ENDOFMIBVIEW != rc)
-00097             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00097             <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"bad rc %d from get_next\n"</span>, rc);
 00098     }
 00099     <span class="keywordflow">else</span> {
@@ -214,7 +214,7 @@ href="structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;tmp);
 00195 <span class="comment">                 * (see note on context reuse in comments above function.</span>
 00196 <span class="comment">                 */</span>
 00197                 <span class="keywordflow">if</span>(best_val.val == tmp.val) {
-00198                     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,<span class=
+00198                     <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,<span class=
 "stringliteral">"illegal reuse of data context in "</span>
 00199                              <span class="stringliteral">"container_iterator\n"</span>);
 00200                     rc = SNMP_ERR_GENERR;
@@ -284,14 +284,14 @@ href="structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;best_c
 00254             rc = ii-&gt;<a class="code" href="structiterator__info__s.html#o3">get_data</a>(ii-&gt;<a class="code" href=
 "structiterator__info__s.html#o13">user_ctx</a>, &amp;best_ctx, &amp;best_val);
 00255             <span class="keywordflow">if</span>(SNMP_ERR_NOERROR != rc) {
-00256                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00256                 <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"bad rc %d from get_data\n"</span>, rc);
 00257                 best_val.val = NULL;
 00258             }
 00259         }
 00260     }
 00261     <span class="keywordflow">else</span> <span class="keywordflow">if</span>(SNMP_ENDOFMIBVIEW != rc) {
-00262         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00262         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"bad rc %d from get_next\n"</span>, rc);
 00263         best_val.val = NULL;
 00264     }
@@ -497,7 +497,7 @@ href="structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;best_c
 00425 _iterator_clear(netsnmp_container *container, netsnmp_container_obj_func *f,
 00426                  <span class="keywordtype">void</span> *context)
 00427 {
-00428     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING,<span class=
+00428     <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_WARNING,<span class=
 "stringliteral">"clear is meaningless for iterator container.\n"</span>);
 00429 }
 00430 
@@ -522,7 +522,7 @@ href="structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;best_c
 00449 <span class="comment">     * sanity checks</span>
 00450 <span class="comment">     */</span>
 00451     <span class="keywordflow">if</span>(get_data &amp;&amp; ! save_pos) {
-00452         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00452         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"save_pos required with get_data\n"</span>);
 00453         <span class="keywordflow">return</span> NULL;
 00454     }
@@ -533,7 +533,7 @@ href="structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;best_c
 00459     ii = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(<a class="code" href=
 "structiterator__info__s.html">iterator_info</a>);
 00460     <span class="keywordflow">if</span> (NULL==ii) {
-00461         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00461         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"couldn't allocate memory\n"</span>);
 00462         <span class="keywordflow">return</span> NULL;
 00463     }
@@ -595,8 +595,7 @@ href="structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;best_c
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:37 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:44 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

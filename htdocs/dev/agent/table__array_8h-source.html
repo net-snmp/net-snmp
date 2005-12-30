@@ -138,7 +138,7 @@
 00112 
 00113         UserRowMethod  *create_row;
 00114         UserRowMethod  *duplicate_row;
-00115         UserRowMethod  *delete_row;
+00115         UserRowMethod  *delete_row;    <span class="comment">/* always returns NULL */</span>
 00116 
 00117         Netsnmp_User_Group_Method *set_reserve1;
 00118         Netsnmp_User_Group_Method *set_reserve2;
@@ -163,31 +163,38 @@
 00136                                      netsnmp_container *container,
 00137                                      <span class="keywordtype">int</span> group_rows);
 00138 
-00139     netsnmp_container * <a class="code" href="group__table__array.html#ga2">netsnmp_extract_array_context</a>(<a class=
+00139     <span class="keywordtype">int</span> netsnmp_table_array_register(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00140                                      <a class="code" href=
+"structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *tabreq,
+00141                                      netsnmp_table_array_callbacks *cb,
+00142                                      netsnmp_container *container,
+00143                                      <span class="keywordtype">int</span> group_rows);
+00144 
+00145     netsnmp_container * <a class="code" href="group__table__array.html#ga3">netsnmp_extract_array_context</a>(<a class=
 "code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *);
-00140 
-00141     Netsnmp_Node_Handler netsnmp_table_array_helper_handler;
-00142 
-00143     <span class="keywordtype">int</span>
-00144     <a class="code" href=
-"group__table__array.html#ga3">netsnmp_table_array_check_row_status</a>(netsnmp_table_array_callbacks *cb,
-00145                                          netsnmp_request_group *ag,
-00146                                          <span class="keywordtype">long</span> *rs_new, <span class=
+00146 
+00147     Netsnmp_Node_Handler netsnmp_table_array_helper_handler;
+00148 
+00149     <span class="keywordtype">int</span>
+00150     <a class="code" href=
+"group__table__array.html#ga4">netsnmp_table_array_check_row_status</a>(netsnmp_table_array_callbacks *cb,
+00151                                          netsnmp_request_group *ag,
+00152                                          <span class="keywordtype">long</span> *rs_new, <span class=
 "keywordtype">long</span> *rs_old);
-00147 
-00148 <span class="preprocessor">#ifdef __cplusplus</span>
-00149 }
-00150 <span class="preprocessor">#endif</span>
-00151 
-00152 <span class="preprocessor">#endif                          </span><span class=
+00153 
+00154 <span class="preprocessor">#ifdef __cplusplus</span>
+00155 }
+00156 <span class="preprocessor">#endif</span>
+00157 
+00158 <span class="preprocessor">#endif                          </span><span class=
 "comment">/* _TABLE_ARRAY_HANDLER_H_ */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:42 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:50 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

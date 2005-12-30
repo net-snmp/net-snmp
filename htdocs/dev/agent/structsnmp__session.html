@@ -556,27 +556,39 @@
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">char *&nbsp;</td>
 
-      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o45">securityInfo</a></td>
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o45">paramName</a></td>
     </tr>
 
     <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">security module specific <a href="#o45"></a><br /></td>
+      <td class="mdescRight">target param name <a href="#o45"></a><br /></td>
     </tr>
 
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void *&nbsp;</td>
 
-      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o46">myvoid</a></td>
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o46">securityInfo</a></td>
     </tr>
 
     <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">use as you want data <a href="#o46"></a><br /></td>
+      <td class="mdescRight">security module specific <a href="#o46"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o47">myvoid</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">use as you want data <a href="#o47"></a><br /></td>
     </tr>
   </table>
   <hr />
@@ -635,6 +647,9 @@
 
         <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00214">214</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l05398">_sess_read()</a>, and <a class="el" href=
+        "snmp__client_8c-source.html#l00753">snmp_set_var_value()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o12" doxytag="snmp_session::callback_magic" id="o12"></a>
@@ -661,6 +676,9 @@
 
         <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00218">218</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l05398">_sess_read()</a>, and <a class="el" href=
+        "snmp__client_8c-source.html#l00753">snmp_set_var_value()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o16" doxytag="snmp_session::community" id="o16"></a>
@@ -843,6 +861,8 @@
 
         <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00248">248</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l01278">snmpv3_engineID_probe()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o24" doxytag="snmp_session::engineTime" id="o24"></a>
@@ -869,6 +889,8 @@
 
         <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00250">250</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l01278">snmpv3_engineID_probe()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o20" doxytag="snmp_session::isAuthoritative" id="o20"></a>
@@ -949,7 +971,7 @@
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="o46" doxytag="snmp_session::myvoid" id="o46"></a>
+  </table><a class="anchor" name="o47" doxytag="snmp_session::myvoid" id="o47"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -957,7 +979,7 @@
         <table cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td class="md" nowrap="nowrap" valign="top">void* <a class="el" href=
-            "structsnmp__session.html#o46">snmp_session::myvoid</a></td>
+            "structsnmp__session.html#o47">snmp_session::myvoid</a></td>
           </tr>
         </table>
       </td>
@@ -971,7 +993,33 @@
       <td>
         <p>use as you want data</p>
 
-        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00303">303</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00305">305</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o45" doxytag="snmp_session::paramName" id="o45"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">char* <a class="el" href=
+            "structsnmp__session.html#o45">snmp_session::paramName</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>target param name</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00295">295</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
       </td>
     </tr>
@@ -1103,6 +1151,8 @@
 
         <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00220">220</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l05398">_sess_read()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o14" doxytag="snmp_session::s_snmp_errno" id="o14"></a>
@@ -1130,7 +1180,9 @@
         <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00222">222</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l01702">handle_snmp_packet()</a>.</p>
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l05398">_sess_read()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l01735">handle_snmp_packet()</a>, and <a class="el" href=
+        "snmp__api_8c-source.html#l01278">snmpv3_engineID_probe()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o33" doxytag="snmp_session::securityAuthKey" id="o33"></a>
@@ -1313,6 +1365,8 @@
 
         <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00256">256</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l01278">snmpv3_engineID_probe()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o28" doxytag="snmp_session::securityEngineIDLen" id="o28"></a>
@@ -1339,9 +1393,11 @@
 
         <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00258">258</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l01278">snmpv3_engineID_probe()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="o45" doxytag="snmp_session::securityInfo" id="o45"></a>
+  </table><a class="anchor" name="o46" doxytag="snmp_session::securityInfo" id="o46"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1349,7 +1405,7 @@
         <table cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td class="md" nowrap="nowrap" valign="top">void* <a class="el" href=
-            "structsnmp__session.html#o45">snmp_session::securityInfo</a></td>
+            "structsnmp__session.html#o46">snmp_session::securityInfo</a></td>
           </tr>
         </table>
       </td>
@@ -1363,7 +1419,7 @@
       <td>
         <p>security module specific</p>
 
-        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00298">298</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00300">300</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
       </td>
     </tr>
@@ -1729,6 +1785,8 @@
 
         <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00192">192</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l01278">snmpv3_engineID_probe()</a>.</p>
       </td>
     </tr>
   </table>
@@ -1741,8 +1799,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:43 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:52 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

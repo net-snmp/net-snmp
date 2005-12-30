@@ -263,77 +263,84 @@
 00208 <span class="preprocessor">#define ANON    "anonymous#"</span>
 00209 <span class="preprocessor">#define ANON_LEN  strlen(ANON)</span>
 00210 
-00211     <span class="keyword">struct </span>tree    *read_module(<span class="keyword">const</span> <span class=
+00211     <span class="keyword">struct </span>tree    *netsnmp_read_module(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *);
-00212     <span class="keyword">struct </span>tree    *read_mib(<span class="keyword">const</span> <span class=
+00212 <span class="preprocessor">#ifndef NETSNMP_CLEAN_NAMESPACE</span>
+00213     <span class="keyword">struct </span>tree    *read_module(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *);
-00213     <span class="keyword">struct </span>tree    *read_all_mibs(<span class="keywordtype">void</span>);
-00214     <span class="keywordtype">int</span>             unload_module(<span class="keyword">const</span> <span class=
+00214 <span class="preprocessor">#endif</span>
+00215     <span class="keyword">struct </span>tree    *read_mib(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00216     <span class="keyword">struct </span>tree    *read_all_mibs(<span class="keywordtype">void</span>);
+00217     <span class="keywordtype">int</span>             netsnmp_unload_module(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *name);
-00215     <span class="keywordtype">void</span>            unload_all_mibs(<span class="keywordtype">void</span>);
-00216     <span class="keywordtype">void</span>            init_mib_internals(<span class="keywordtype">void</span>);
-00217     <span class="keywordtype">int</span>             add_mibfile(<span class="keyword">const</span> <span class=
+00218 <span class="preprocessor">#ifndef NETSNMP_CLEAN_NAMESPACE</span>
+00219     <span class="keywordtype">int</span>             unload_module(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *name);
+00220 <span class="preprocessor">#endif</span>
+00221     <span class="keywordtype">void</span>            unload_all_mibs(<span class="keywordtype">void</span>);
+00222     <span class="keywordtype">void</span>            init_mib_internals(<span class="keywordtype">void</span>);
+00223     <span class="keywordtype">int</span>             add_mibfile(<span class="keyword">const</span> <span class=
 "keywordtype">char</span>*, <span class="keyword">const</span> <span class="keywordtype">char</span>*, FILE *);
-00218     <span class="keywordtype">int</span>             add_mibdir(<span class="keyword">const</span> <span class=
+00224     <span class="keywordtype">int</span>             add_mibdir(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *);
-00219     <span class="keywordtype">void</span>            add_module_replacement(<span class="keyword">const</span> <span class=
+00225     <span class="keywordtype">void</span>            add_module_replacement(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
-00220                                            <span class="keyword">const</span> <span class=
+00226                                            <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *, <span class="keywordtype">int</span>);
-00221     <span class="keywordtype">int</span>             which_module(<span class="keyword">const</span> <span class=
+00227     <span class="keywordtype">int</span>             which_module(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *);
-00222     <span class="keywordtype">char</span>           *module_name(<span class="keywordtype">int</span>, <span class=
+00228     <span class="keywordtype">char</span>           *module_name(<span class="keywordtype">int</span>, <span class=
 "keywordtype">char</span> *);
-00223     <span class="keywordtype">void</span>            print_subtree(FILE *, <span class=
+00229     <span class="keywordtype">void</span>            print_subtree(FILE *, <span class=
 "keyword">struct</span> tree *, <span class="keywordtype">int</span>);
-00224     <span class="keywordtype">void</span>            print_ascii_dump_tree(FILE *, <span class=
+00230     <span class="keywordtype">void</span>            print_ascii_dump_tree(FILE *, <span class=
 "keyword">struct</span> tree *, <span class="keywordtype">int</span>);
-00225     <span class="keyword">struct </span>tree    *find_tree_node(<span class="keyword">const</span> <span class=
+00231     <span class="keyword">struct </span>tree    *find_tree_node(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *, <span class="keywordtype">int</span>);
-00226     <span class="keyword">const</span> <span class="keywordtype">char</span>     *get_tc_descriptor(<span class=
+00232     <span class="keyword">const</span> <span class="keywordtype">char</span>     *get_tc_descriptor(<span class=
 "keywordtype">int</span>);
-00227     <span class="keyword">const</span> <span class="keywordtype">char</span>     *get_tc_description(<span class=
+00233     <span class="keyword">const</span> <span class="keywordtype">char</span>     *get_tc_description(<span class=
 "keywordtype">int</span>);
-00228     <span class="keyword">struct </span>tree    *find_best_tree_node(<span class="keyword">const</span> <span class=
+00234     <span class="keyword">struct </span>tree    *find_best_tree_node(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *, <span class="keyword">struct</span> tree *,
-00229                                         u_int *);
-00230     <span class="comment">/*</span>
-00231 <span class="comment">     * backwards compatability </span>
-00232 <span class="comment">     */</span>
-00233     <span class="keyword">struct </span>tree    *find_node(<span class="keyword">const</span> <span class=
+00235                                         u_int *);
+00236     <span class="comment">/*</span>
+00237 <span class="comment">     * backwards compatability </span>
+00238 <span class="comment">     */</span>
+00239     <span class="keyword">struct </span>tree    *find_node(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *, <span class="keyword">struct</span> tree *);
-00234     <span class="keyword">struct </span>tree    *find_node2(<span class="keyword">const</span> <span class=
+00240     <span class="keyword">struct </span>tree    *find_node2(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *); 
-00235     <span class="keyword">struct </span>module  *find_module(<span class="keywordtype">int</span>);
-00236     <span class="keywordtype">void</span>            adopt_orphans(<span class="keywordtype">void</span>);
-00237     <span class="keywordtype">char</span>           *snmp_mib_toggle_options(<span class=
+00241     <span class="keyword">struct </span>module  *find_module(<span class="keywordtype">int</span>);
+00242     <span class="keywordtype">void</span>            adopt_orphans(<span class="keywordtype">void</span>);
+00243     <span class="keywordtype">char</span>           *snmp_mib_toggle_options(<span class=
 "keywordtype">char</span> *options);
-00238     <span class="keywordtype">void</span>            snmp_mib_toggle_options_usage(<span class=
+00244     <span class="keywordtype">void</span>            snmp_mib_toggle_options_usage(<span class=
 "keyword">const</span> <span class="keywordtype">char</span> *lead,
-00239                                                   FILE * outf);
-00240     <span class="keywordtype">void</span>            <a class="code" href=
-"group__mib__utilities.html#ga58">print_mib</a>(FILE *);
-00241     <span class="keywordtype">void</span>            print_mib_tree(FILE *, <span class=
+00245                                                   FILE * outf);
+00246     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga59">print_mib</a>(FILE *);
+00247     <span class="keywordtype">void</span>            print_mib_tree(FILE *, <span class=
 "keyword">struct</span> tree *, <span class="keywordtype">int</span>);
-00242     <span class="keywordtype">int</span>             get_mib_parse_error_count(<span class="keywordtype">void</span>);
-00243     <span class="keywordtype">int</span>             snmp_get_token(FILE * fp, <span class=
+00248     <span class="keywordtype">int</span>             get_mib_parse_error_count(<span class="keywordtype">void</span>);
+00249     <span class="keywordtype">int</span>             snmp_get_token(FILE * fp, <span class=
 "keywordtype">char</span> *token, <span class="keywordtype">int</span> maxtlen);
-00244     <span class="keyword">struct </span>tree    *find_best_tree_node(<span class="keyword">const</span> <span class=
+00250     <span class="keyword">struct </span>tree    *find_best_tree_node(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *name,
-00245                                         <span class="keyword">struct</span> tree *tree_top,
-00246                                         u_int * match);
-00247 
-00248 <span class="preprocessor">#ifdef __cplusplus</span>
-00249 }
-00250 <span class="preprocessor">#endif</span>
-00251 <span class="preprocessor">#endif                          </span><span class="comment">/* PARSE_H */</span>
+00251                                         <span class="keyword">struct</span> tree *tree_top,
+00252                                         u_int * match);
+00253 
+00254 <span class="preprocessor">#ifdef __cplusplus</span>
+00255 }
+00256 <span class="preprocessor">#endif</span>
+00257 <span class="preprocessor">#endif                          </span><span class="comment">/* PARSE_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:39 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:46 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

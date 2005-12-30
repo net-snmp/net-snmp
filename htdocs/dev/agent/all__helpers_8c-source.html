@@ -20,57 +20,58 @@
     <pre class="fragment">
 00001 
 00004 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
-00005 
-00006 <span class="preprocessor">#ifdef STILL_TO_DO</span>
-00007         <span class="comment">/*</span>
-00008 <span class="comment">         * It ought to be possible to just #include these files,</span>
-00009 <span class="comment">         *   but they rely on various other types being defined first.</span>
-00010 <span class="comment">         *</span>
-00011 <span class="comment">         * I really can't face tracking down the dependency chain</span>
-00012 <span class="comment">         *   just at the moment.</span>
-00013 <span class="comment">         * So we'll just have to live with the warnings....</span>
-00014 <span class="comment">         */</span>
-00015 <span class="preprocessor">#include &lt;net-snmp/agent/debug_handler.h&gt;</span>
-00016 <span class="preprocessor">#include &lt;net-snmp/agent/serialize.h&gt;</span>
-00017 <span class="preprocessor">#include &lt;net-snmp/agent/read_only.h&gt;</span>
-00018 <span class="preprocessor">#include &lt;net-snmp/agent/bulk_to_next.h&gt;</span>
-00019 <span class="preprocessor">#include &lt;net-snmp/agent/table_dataset.h&gt;</span>
-00020 <span class="preprocessor">#include &lt;net-snmp/agent/stash_cache.h&gt;</span>
-00021 
-00022 <span class="preprocessor">#else</span>
+00005 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00006 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00007 
+00008 <span class="preprocessor">#ifdef STILL_TO_DO</span>
+00009         <span class="comment">/*</span>
+00010 <span class="comment">         * It ought to be possible to just #include these files,</span>
+00011 <span class="comment">         *   but they rely on various other types being defined first.</span>
+00012 <span class="comment">         *</span>
+00013 <span class="comment">         * I really can't face tracking down the dependency chain</span>
+00014 <span class="comment">         *   just at the moment.</span>
+00015 <span class="comment">         * So we'll just have to live with the warnings....</span>
+00016 <span class="comment">         */</span>
+00017 <span class="preprocessor">#include &lt;net-snmp/agent/debug_handler.h&gt;</span>
+00018 <span class="preprocessor">#include &lt;net-snmp/agent/serialize.h&gt;</span>
+00019 <span class="preprocessor">#include &lt;net-snmp/agent/read_only.h&gt;</span>
+00020 <span class="preprocessor">#include &lt;net-snmp/agent/bulk_to_next.h&gt;</span>
+00021 <span class="preprocessor">#include &lt;net-snmp/agent/table_dataset.h&gt;</span>
+00022 <span class="preprocessor">#include &lt;net-snmp/agent/stash_cache.h&gt;</span>
 00023 
-00024 <span class="keywordtype">void</span>  <a class="code" href=
-"group__debug.html#ga3">netsnmp_init_debug_helper</a>(<span class="keywordtype">void</span>);
-00025 <span class="keywordtype">void</span>  <a class="code" href="group__debug.html#ga4">netsnmp_init_serialize</a>(<span class=
-"keywordtype">void</span>);
+00024 <span class="preprocessor">#else</span>
+00025 
 00026 <span class="keywordtype">void</span>  <a class="code" href=
+"group__debug.html#ga3">netsnmp_init_debug_helper</a>(<span class="keywordtype">void</span>);
+00027 <span class="keywordtype">void</span>  <a class="code" href="group__debug.html#ga4">netsnmp_init_serialize</a>(<span class=
+"keywordtype">void</span>);
+00028 <span class="keywordtype">void</span>  <a class="code" href=
 "group__debug.html#ga5">netsnmp_init_read_only_helper</a>(<span class="keywordtype">void</span>);
-00027 <span class="keywordtype">void</span>  <a class="code" href=
-"group__debug.html#ga6">netsnmp_init_bulk_to_next_helper</a>(<span class="keywordtype">void</span>);
-00028 <span class="keywordtype">void</span>  netsnmp_init_table_dataset(<span class="keywordtype">void</span>);
 00029 <span class="keywordtype">void</span>  <a class="code" href=
+"group__debug.html#ga6">netsnmp_init_bulk_to_next_helper</a>(<span class="keywordtype">void</span>);
+00030 <span class="keywordtype">void</span>  netsnmp_init_table_dataset(<span class="keywordtype">void</span>);
+00031 <span class="keywordtype">void</span>  <a class="code" href=
 "group__debug.html#ga8">netsnmp_init_stash_cache_helper</a>(<span class="keywordtype">void</span>);
-00030 <span class="preprocessor">#endif</span>
-00031 
-00033 <span class="keywordtype">void</span>
-<a name="l00034" id="l00034"></a><a class="code" href="group__debug.html#ga9">00034</a> <a class="code" href=
+00032 <span class="preprocessor">#endif</span>
+00033 
+00035 <span class="keywordtype">void</span>
+<a name="l00036" id="l00036"></a><a class="code" href="group__debug.html#ga9">00036</a> <a class="code" href=
 "group__debug.html#ga9">netsnmp_init_helpers</a>(<span class="keywordtype">void</span>)
-00035 {
-00036     <a class="code" href="group__debug.html#ga3">netsnmp_init_debug_helper</a>();
-00037     <a class="code" href="group__debug.html#ga4">netsnmp_init_serialize</a>();
-00038     <a class="code" href="group__debug.html#ga5">netsnmp_init_read_only_helper</a>();
-00039     <a class="code" href="group__debug.html#ga6">netsnmp_init_bulk_to_next_helper</a>();
-00040     netsnmp_init_table_dataset();
-00041     <a class="code" href="group__debug.html#ga8">netsnmp_init_stash_cache_helper</a>();
-00042 }
-00043 
+00037 {
+00038     <a class="code" href="group__debug.html#ga3">netsnmp_init_debug_helper</a>();
+00039     <a class="code" href="group__debug.html#ga4">netsnmp_init_serialize</a>();
+00040     <a class="code" href="group__debug.html#ga5">netsnmp_init_read_only_helper</a>();
+00041     <a class="code" href="group__debug.html#ga6">netsnmp_init_bulk_to_next_helper</a>();
+00042     netsnmp_init_table_dataset();
+00043     <a class="code" href="group__debug.html#ga8">netsnmp_init_stash_cache_helper</a>();
+00044 }
+00045 
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:36 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:44 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

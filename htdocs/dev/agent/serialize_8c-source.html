@@ -31,93 +31,88 @@
 00011 
 00012 <span class="preprocessor">#include &lt;net-snmp/agent/serialize.h&gt;</span>
 00013 
-00014 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
-00015 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
-00016 <span class="preprocessor">#endif</span>
-00017 
-00033 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
-<a name="l00034" id="l00034"></a><a class="code" href="group__serialize.html#ga0">00034</a> <a class="code" href=
+00029 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+<a name="l00030" id="l00030"></a><a class="code" href="group__serialize.html#ga0">00030</a> <a class="code" href=
 "group__serialize.html#ga0">netsnmp_get_serialize_handler</a>(<span class="keywordtype">void</span>)
-00035 {
-00036     <span class="keywordflow">return</span> <a class="code" href=
+00031 {
+00032     <span class="keywordflow">return</span> <a class="code" href=
 "group__handler.html#ga7">netsnmp_create_handler</a>(<span class="stringliteral">"serialize"</span>,
-00037                                   netsnmp_serialize_helper_handler);
-00038 }
-00039 
-00042 <span class="keywordtype">int</span>
-<a name="l00043" id="l00043"></a><a class="code" href="group__serialize.html#ga1">00043</a> <a class="code" href=
+00033                                   netsnmp_serialize_helper_handler);
+00034 }
+00035 
+00038 <span class="keywordtype">int</span>
+<a name="l00039" id="l00039"></a><a class="code" href="group__serialize.html#ga1">00039</a> <a class="code" href=
 "group__serialize.html#ga1">netsnmp_register_serialize</a>(<a class="code" href=
 "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo)
-00044 {
-00045     <a class="code" href="group__handler.html#ga14">netsnmp_inject_handler</a>(reginfo, <a class="code" href=
+00040 {
+00041     <a class="code" href="group__handler.html#ga14">netsnmp_inject_handler</a>(reginfo, <a class="code" href=
 "group__serialize.html#ga0">netsnmp_get_serialize_handler</a>());
-00046     <span class="keywordflow">return</span> <a class="code" href=
+00042     <span class="keywordflow">return</span> <a class="code" href=
 "group__handler.html#ga10">netsnmp_register_handler</a>(reginfo);
-00047 }
-00048 
-00050 <span class="keywordtype">int</span>
-<a name="l00051" id="l00051"></a><a class="code" href="group__serialize.html#ga2">00051</a> <a class="code" href=
+00043 }
+00044 
+00046 <span class="keywordtype">int</span>
+<a name="l00047" id="l00047"></a><a class="code" href="group__serialize.html#ga2">00047</a> <a class="code" href=
 "group__serialize.html#ga2">netsnmp_serialize_helper_handler</a>(<a class="code" href=
 "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
-00052                                  <a class="code" href=
+00048                                  <a class="code" href=
 "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
-00053                                  <a class="code" href=
+00049                                  <a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
-00054                                  <a class="code" href=
+00050                                  <a class="code" href=
 "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
-00055 {
-00056 
-00057     <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, *requesttmp;
-00058 
-00059     DEBUGMSGTL((<span class="stringliteral">"helper:serialize"</span>, <span class=
+00051 {
+00052 
+00053     <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, *requesttmp;
+00054 
+00055     DEBUGMSGTL((<span class="stringliteral">"helper:serialize"</span>, <span class=
 "stringliteral">"Got request\n"</span>));
-00060     <span class="comment">/*</span>
-00061 <span class="comment">     * loop through requests </span>
-00062 <span class="comment">     */</span>
-00063     <span class="keywordflow">for</span> (request = requests; request; request = request-&gt;<a class="code" href=
+00056     <span class="comment">/*</span>
+00057 <span class="comment">     * loop through requests </span>
+00058 <span class="comment">     */</span>
+00059     <span class="keywordflow">for</span> (request = requests; request; request = request-&gt;<a class="code" href=
 "structnetsnmp__request__info__s.html#o13">next</a>) {
-00064         <span class="keywordtype">int</span>             ret;
-00065 
-00066         <span class="comment">/*</span>
-00067 <span class="comment">         * store next pointer and delete it </span>
-00068 <span class="comment">         */</span>
-00069         requesttmp = request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o13">next</a>;
-00070         request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o13">next</a> = NULL;
-00071 
-00072         <span class="comment">/*</span>
-00073 <span class="comment">         * call the next handler </span>
-00074 <span class="comment">         */</span>
-00075         ret =
-00076             <a class="code" href=
+00060         <span class="keywordtype">int</span>             ret;
+00061 
+00062         <span class="comment">/*</span>
+00063 <span class="comment">         * store next pointer and delete it </span>
+00064 <span class="comment">         */</span>
+00065         requesttmp = request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o13">next</a>;
+00066         request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o13">next</a> = NULL;
+00067 
+00068         <span class="comment">/*</span>
+00069 <span class="comment">         * call the next handler </span>
+00070 <span class="comment">         */</span>
+00071         ret =
+00072             <a class="code" href=
 "group__handler.html#ga17">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo, request);
-00077 
-00078         <span class="comment">/*</span>
-00079 <span class="comment">         * restore original next pointer </span>
-00080 <span class="comment">         */</span>
-00081         request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o13">next</a> = requesttmp;
+00073 
+00074         <span class="comment">/*</span>
+00075 <span class="comment">         * restore original next pointer </span>
+00076 <span class="comment">         */</span>
+00077         request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o13">next</a> = requesttmp;
+00078 
+00079         <span class="keywordflow">if</span> (ret != SNMP_ERR_NOERROR)
+00080             <span class="keywordflow">return</span> ret;
+00081     }
 00082 
-00083         <span class="keywordflow">if</span> (ret != SNMP_ERR_NOERROR)
-00084             <span class="keywordflow">return</span> ret;
-00085     }
-00086 
-00087     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00088 }
-00089 
-00095 <span class="keywordtype">void</span>
-<a name="l00096" id="l00096"></a><a class="code" href="group__serialize.html#ga3">00096</a> <a class="code" href=
+00083     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00084 }
+00085 
+00091 <span class="keywordtype">void</span>
+<a name="l00092" id="l00092"></a><a class="code" href="group__serialize.html#ga3">00092</a> <a class="code" href=
 "group__debug.html#ga4">netsnmp_init_serialize</a>(<span class="keywordtype">void</span>)
-00097 {
-00098     <a class="code" href="group__handler.html#ga36">netsnmp_register_handler_by_name</a>(<span class=
+00093 {
+00094     <a class="code" href="group__handler.html#ga36">netsnmp_register_handler_by_name</a>(<span class=
 "stringliteral">"serialize"</span>,
-00099                                      <a class="code" href="group__serialize.html#ga0">netsnmp_get_serialize_handler</a>());
-00100 }
+00095                                      <a class="code" href="group__serialize.html#ga0">netsnmp_get_serialize_handler</a>());
+00096 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:39 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:47 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

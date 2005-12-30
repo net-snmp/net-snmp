@@ -29,24 +29,31 @@
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga4" doxytag=
-      "row_merge::ROW_MERGE_WAITING" id="ga4"></a> #define&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga8" doxytag=
+      "row_merge::ROW_MERGE_WAITING" id="ga8"></a> #define&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>ROW_MERGE_WAITING</b>&nbsp;&nbsp;&nbsp;0</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga5" doxytag=
-      "row_merge::ROW_MERGE_ACTIVE" id="ga5"></a> #define&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga9" doxytag=
+      "row_merge::ROW_MERGE_ACTIVE" id="ga9"></a> #define&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>ROW_MERGE_ACTIVE</b>&nbsp;&nbsp;&nbsp;1</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga6" doxytag=
-      "row_merge::ROW_MERGE_DONE" id="ga6"></a> #define&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga10" doxytag=
+      "row_merge::ROW_MERGE_DONE" id="ga10"></a> #define&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>ROW_MERGE_DONE</b>&nbsp;&nbsp;&nbsp;2</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga11" doxytag=
+      "row_merge::ROW_MERGE_HEAD" id="ga11"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>ROW_MERGE_HEAD</b>&nbsp;&nbsp;&nbsp;3</td>
     </tr>
 
     <tr>
@@ -88,10 +95,52 @@
     </tr>
 
     <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_row_merge_status *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__row__merge.html#ga3">netsnmp_row_merge_status_get</a>
+      (<a class="el" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el"
+      href="structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, int create_missing)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">retrieve row_merge_status <a href="#ga3"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__row__merge.html#ga4">netsnmp_row_merge_status_first</a>
+      (<a class="el" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el"
+      href="structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Determine if this is the first row. <a href="#ga4"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__row__merge.html#ga5">netsnmp_row_merge_status_last</a>
+      (<a class="el" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el"
+      href="structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Determine if this is the last row. <a href="#ga5"></a><br /></td>
+    </tr>
+
+    <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__row__merge.html#ga2">netsnmp_row_merge_helper_handler</a> (<a class="el" href=
+      "group__row__merge.html#ga6">netsnmp_row_merge_helper_handler</a> (<a class="el" href=
       "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler, <a class="el" href=
       "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
       "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
@@ -101,13 +150,13 @@
     <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">Implements the row_merge handler. <a href="#ga2"></a><br /></td>
+      <td class="mdescRight">Implements the row_merge handler. <a href="#ga6"></a><br /></td>
     </tr>
 
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
 
-      <td class="memItemRight" valign="bottom"><a class="el" href="group__row__merge.html#ga3">netsnmp_init_row_merge</a>
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__row__merge.html#ga7">netsnmp_init_row_merge</a>
       (void)</td>
     </tr>
 
@@ -115,7 +164,7 @@
       <td class="mdescLeft">&nbsp;</td>
 
       <td class="mdescRight">initializes the row_merge helper which then registers a row_merge handler as a run-time injectable
-      handler for configuration file use. <a href="#ga3"></a><br /></td>
+      handler for configuration file use. <a href="#ga7"></a><br /></td>
     </tr>
   </table>
   <hr />
@@ -160,18 +209,18 @@
       <td>
         <p>returns a row_merge handler that can be injected into a given handler chain.</p>
 
-        <p>Definition at line <a class="el" href="row__merge_8c-source.html#l00031">31</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="row__merge_8c-source.html#l00027">27</a> of file <a class="el" href=
         "row__merge_8c-source.html">row_merge.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el"
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00050">netsnmp_mib_handler_s::myvoid</a>, <a class="el"
         href="agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, and <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>.</p>
 
-        <p>Referenced by <a class="el" href="row__merge_8c-source.html#l00200">netsnmp_init_row_merge()</a>, and <a class="el"
-        href="row__merge_8c-source.html#l00045">netsnmp_register_row_merge()</a>.</p>
+        <p>Referenced by <a class="el" href="row__merge_8c-source.html#l00352">netsnmp_init_row_merge()</a>, and <a class="el"
+        href="row__merge_8c-source.html#l00041">netsnmp_register_row_merge()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga3" doxytag="row_merge.c::netsnmp_init_row_merge" id="ga3"></a>
+  </table><a class="anchor" name="ga7" doxytag="row_merge.c::netsnmp_init_row_merge" id="ga7"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -203,11 +252,11 @@
         <p>initializes the row_merge helper which then registers a row_merge handler as a run-time injectable handler for
         configuration file use.</p>
 
-        <p>Definition at line <a class="el" href="row__merge_8c-source.html#l00200">200</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="row__merge_8c-source.html#l00352">352</a> of file <a class="el" href=
         "row__merge_8c-source.html">row_merge.c</a>.</p>
 
-        <p>References <a class="el" href="row__merge_8c-source.html#l00031">netsnmp_get_row_merge_handler()</a>, and <a class=
-        "el" href="agent__handler_8c-source.html#l00880">netsnmp_register_handler_by_name()</a>.</p>
+        <p>References <a class="el" href="row__merge_8c-source.html#l00027">netsnmp_get_row_merge_handler()</a>, and <a class=
+        "el" href="agent__handler_8c-source.html#l00885">netsnmp_register_handler_by_name()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga1" doxytag="row_merge.c::netsnmp_register_row_merge" id="ga1"></a>
@@ -243,17 +292,17 @@
         <p>functionally the same as calling <a class="el" href="group__handler.html#ga10">netsnmp_register_handler()</a> but also
         injects a row_merge handler at the same time for you.</p>
 
-        <p>Definition at line <a class="el" href="row__merge_8c-source.html#l00045">45</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="row__merge_8c-source.html#l00041">41</a> of file <a class="el" href=
         "row__merge_8c-source.html">row_merge.c</a>.</p>
 
-        <p>References <a class="el" href="row__merge_8c-source.html#l00031">netsnmp_get_row_merge_handler()</a>, <a class="el"
+        <p>References <a class="el" href="row__merge_8c-source.html#l00027">netsnmp_get_row_merge_handler()</a>, <a class="el"
         href="group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00379">netsnmp_inject_handler()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, and <a class="el" href=
-        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>.</p>
+        "agent__handler_8h-source.html#l00104">netsnmp_handler_registration_s::rootoid_len</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga2" doxytag="row_merge.c::netsnmp_row_merge_helper_handler" id="ga2"></a>
+  </table><a class="anchor" name="ga6" doxytag="row_merge.c::netsnmp_row_merge_helper_handler" id="ga6"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -322,29 +371,213 @@
       <td>
         <p>Implements the row_merge handler.</p>
 
-        <p>Definition at line <a class="el" href="row__merge_8c-source.html#l00058">58</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="row__merge_8c-source.html#l00153">153</a> of file <a class="el" href=
         "row__merge_8c-source.html">row_merge.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el"
-        href="snmp__api_8h-source.html#l00517">variable_list::name</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00519">variable_list::name_length</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00512">netsnmp_call_next_handler()</a>, <a class="el" href=
+        <p>References <a class="el" href="snmp__agent_8h-source.html#l00159">netsnmp_agent_request_info_s::mode</a>, <a class=
+        "el" href="agent__handler_8h-source.html#l00050">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00521">variable_list::name</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00523">variable_list::name_length</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00517">netsnmp_call_next_handler()</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00066">netsnmp_row_merge_status_get()</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00092">netsnmp_request_info_s::next</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00079">netsnmp_request_info_s::processed</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00058">netsnmp_request_info_s::requestvb</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
-        "snmp__api_8c-source.html#l06144">snmp_oid_compare()</a>.</p>
+        "agent__handler_8h-source.html#l00103">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00104">netsnmp_handler_registration_s::rootoid_len</a>, <a class="el" href=
+        "tools_8h-source.html#l00053">SNMP_FREE</a>, <a class="el" href="snmp__logging_8c-source.html#l01205">snmp_log()</a>, and
+        <a class="el" href="snmp__api_8c-source.html#l06284">snmp_oid_compare()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga4" doxytag="row_merge.c::netsnmp_row_merge_status_first" id="ga4"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_row_merge_status_first</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Determine if this is the first row.</p>
+
+        <p>returns 1 if this is the first row for this pass of the handler.</p>
+
+        <p>Definition at line <a class="el" href="row__merge_8c-source.html#l00109">109</a> of file <a class="el" href=
+        "row__merge_8c-source.html">row_merge.c</a>.</p>
+
+        <p>References <a class="el" href="group__handler.html#ga3">netsnmp_handler_registration</a>, and <a class="el" href=
+        "row__merge_8c-source.html#l00066">netsnmp_row_merge_status_get()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga3" doxytag="row_merge.c::netsnmp_row_merge_status_get" id="ga3"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_row_merge_status* netsnmp_row_merge_status_get</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>create_missing</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>retrieve row_merge_status</p>
+
+        <p>Definition at line <a class="el" href="row__merge_8c-source.html#l00066">66</a> of file <a class="el" href=
+        "row__merge_8c-source.html">row_merge.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00060">netsnmp_create_data_list()</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>, and <a class="el" href=
+        "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
+
+        <p>Referenced by <a class="el" href="row__merge_8c-source.html#l00153">netsnmp_row_merge_helper_handler()</a>, <a class=
+        "el" href="row__merge_8c-source.html#l00109">netsnmp_row_merge_status_first()</a>, and <a class="el" href=
+        "row__merge_8c-source.html#l00129">netsnmp_row_merge_status_last()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga5" doxytag="row_merge.c::netsnmp_row_merge_status_last" id="ga5"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_row_merge_status_last</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Determine if this is the last row.</p>
+
+        <p>returns 1 if this is the last row for this pass of the handler.</p>
+
+        <p>Definition at line <a class="el" href="row__merge_8c-source.html#l00129">129</a> of file <a class="el" href=
+        "row__merge_8c-source.html">row_merge.c</a>.</p>
+
+        <p>References <a class="el" href="group__handler.html#ga3">netsnmp_handler_registration</a>, and <a class="el" href=
+        "row__merge_8c-source.html#l00066">netsnmp_row_merge_status_get()</a>.</p>
       </td>
     </tr>
   </table>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:44 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:48:00 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

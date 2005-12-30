@@ -83,39 +83,46 @@
 00062 <span class="preprocessor">#define MFD_ROW_FLAG_USER_1            0x00000001 </span><span class=
 "comment">/* user flag 1 */</span>
 00063 <span class="preprocessor">#define MFD_ROW_FLAG_USER_2            0x00000002 </span><span class=
-"comment">/* user flag 1 */</span>
+"comment">/* user flag 2 */</span>
 00064 <span class="preprocessor">#define MFD_ROW_FLAG_USER_3            0x00000004 </span><span class=
-"comment">/* user flag 1 */</span>
+"comment">/* user flag 3 */</span>
 00065 <span class="preprocessor">#define MFD_ROW_FLAG_USER_4            0x00000008 </span><span class=
-"comment">/* user flag 1 */</span>
+"comment">/* user flag 4 */</span>
 00066 <span class="preprocessor">#define MFD_ROW_FLAG_USER_5            0x00000010 </span><span class=
-"comment">/* user flag 1 */</span>
+"comment">/* user flag 5 */</span>
 00067 <span class="preprocessor">#define MFD_ROW_FLAG_USER_6            0x00000020 </span><span class=
-"comment">/* user flag 1 */</span>
+"comment">/* user flag 6 */</span>
 00068 <span class="preprocessor">#define MFD_ROW_FLAG_USER_7            0x00000040 </span><span class=
-"comment">/* user flag 1 */</span>
+"comment">/* user flag 7 */</span>
 00069 <span class="preprocessor">#define MFD_ROW_FLAG_USER_8            0x00000080 </span><span class=
-"comment">/* user flag 1 */</span>
-00070 
-00071 <span class="comment">/*----------------------------------------------------------------------</span>
-00072 <span class="comment"> * MFD flags</span>
-00073 <span class="comment"> *</span>
-00074 <span class="comment"> * grow left to right, in case we want to add more user flags later</span>
-00075 <span class="comment"> */</span>
-00076 <span class="preprocessor">#define MFD_ROW_CREATED                0x80000000 </span><span class=
+"comment">/* user flag 8 */</span>
+00070 <span class="preprocessor">#define MFD_ROW_FLAG_USER_MASK         0x000000ff </span><span class=
+"comment">/* user flag mask */</span>
+00071 
+00072 <span class="comment">/*----------------------------------------------------------------------</span>
+00073 <span class="comment"> * MFD flags</span>
+00074 <span class="comment"> *</span>
+00075 <span class="comment"> * grow left to right, in case we want to add more user flags later</span>
+00076 <span class="comment"> */</span>
+00077 <span class="preprocessor">#define MFD_ROW_MASK                   0xffffff00 </span><span class=
+"comment">/* mask to clear user flags */</span>
+00078 <span class="preprocessor">#define MFD_ROW_CREATED                0x80000000 </span><span class=
 "comment">/* newly created row */</span>
-00077 <span class="preprocessor">#define MFD_ROW_DATA_FROM_USER         0x40000000 </span><span class=
+00079 <span class="preprocessor">#define MFD_ROW_DATA_FROM_USER         0x40000000 </span><span class=
 "comment">/* we didn't allocate data */</span>
-00078 
-00079 
-00080 <span class="preprocessor">#endif                          </span><span class="comment">/* NETSNMP_MFD_H */</span>
+00080 <span class="preprocessor">#define MFD_ROW_DELETED                0x20000000 </span><span class=
+"comment">/* deleted row */</span>
+00081 <span class="preprocessor">#define MFD_ROW_DIRTY                  0x10000000 </span><span class=
+"comment">/* changed row */</span>
+00082 
+00083 
+00084 <span class="preprocessor">#endif                          </span><span class="comment">/* NETSNMP_MFD_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:37 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:45 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

@@ -36,28 +36,36 @@
 00015 <span class="comment"> * should NOT be modified.</span>
 00016 <span class="comment"> */</span>
 00017 
-00018 <span class="keywordtype">int</span>             check_(<span class="keywordtype">int</span> type, <span class=
-"keywordtype">long</span> *val, size_t val_len, <span class="keywordtype">long</span> *old_val,
-00019                        size_t old_val_len);
-00020 <span class="keywordtype">int</span>             check_(<span class="keywordtype">int</span> type, <span class=
-"keywordtype">char</span> *val, size_t val_len, <span class="keywordtype">char</span> *old_val,
-00021                        size_t old_val_len);
+00018 <span class="preprocessor">#ifdef __cplusplus</span>
+00019 <span class="keyword">extern</span> <span class="stringliteral">"C"</span> {
+00020 <span class="preprocessor">#endif</span>
+00021 
 00022 <span class="keywordtype">int</span>             check_(<span class="keywordtype">int</span> type, <span class=
 "keywordtype">long</span> *val, size_t val_len, <span class="keywordtype">long</span> *old_val,
 00023                        size_t old_val_len);
 00024 <span class="keywordtype">int</span>             check_(<span class="keywordtype">int</span> type, <span class=
-"keywordtype">long</span> *val, size_t val_len, <span class="keywordtype">long</span> *old_val,
+"keywordtype">char</span> *val, size_t val_len, <span class="keywordtype">char</span> *old_val,
 00025                        size_t old_val_len);
-00026 
-00027 <span class="preprocessor">#endif                          </span><span class=
+00026 <span class="keywordtype">int</span>             check_(<span class="keywordtype">int</span> type, <span class=
+"keywordtype">long</span> *val, size_t val_len, <span class="keywordtype">long</span> *old_val,
+00027                        size_t old_val_len);
+00028 <span class="keywordtype">int</span>             check_(<span class="keywordtype">int</span> type, <span class=
+"keywordtype">long</span> *val, size_t val_len, <span class="keywordtype">long</span> *old_val,
+00029                        size_t old_val_len);
+00030 
+00031 
+00032 <span class="preprocessor">#ifdef __cplusplus</span>
+00033 }
+00034 <span class="preprocessor">#endif</span>
+00035 
+00036 <span class="preprocessor">#endif                          </span><span class=
 "comment">/* NETSNMPHOSTSTABLE_CHECKFNS_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:38 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:45 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

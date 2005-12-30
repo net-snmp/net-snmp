@@ -34,41 +34,48 @@
 00013 
 00015 config_require(examples/netSnmpHostsTable_checkfns_local)
 00016 
-00017     <span class="comment">/*</span>
-00018 <span class="comment">     * these functions are designed to check incoming values for </span>
-00019 <span class="comment">     * columns in the netSnmpHostsTable table for legality with respect to </span>
-00020 <span class="comment">     * datatype and value.</span>
-00021 <span class="comment">     */</span>
-00022      <span class="keywordtype">int</span>             check_netSnmpHostAddressType(<span class=
+00017 #ifdef __cplusplus
+00018 <span class="keyword">extern</span> <span class="stringliteral">"C"</span> {
+00019 <span class="preprocessor">#endif</span>
+00020 
+00021     <span class="comment">/*</span>
+00022 <span class="comment">     * these functions are designed to check incoming values for </span>
+00023 <span class="comment">     * columns in the netSnmpHostsTable table for legality with respect to </span>
+00024 <span class="comment">     * datatype and value.</span>
+00025 <span class="comment">     */</span>
+00026      <span class="keywordtype">int</span>             check_netSnmpHostAddressType(<span class=
 "keywordtype">int</span> type, <span class="keywordtype">long</span> *val,
-00023                                                   size_t val_len,
-00024                                                   <span class="keywordtype">long</span> *old_val,
-00025                                                   size_t old_val_len);
-00026      <span class="keywordtype">int</span>             check_netSnmpHostAddress(<span class=
+00027                                                   size_t val_len,
+00028                                                   <span class="keywordtype">long</span> *old_val,
+00029                                                   size_t old_val_len);
+00030      <span class="keywordtype">int</span>             check_netSnmpHostAddress(<span class=
 "keywordtype">int</span> type, <span class="keywordtype">char</span> *val,
-00027                                               size_t val_len,
-00028                                               <span class="keywordtype">char</span> *old_val,
-00029                                               size_t old_val_len);
-00030      <span class="keywordtype">int</span>             check_netSnmpHostStorage(<span class=
-"keywordtype">int</span> type, <span class="keywordtype">long</span> *val,
 00031                                               size_t val_len,
-00032                                               <span class="keywordtype">long</span> *old_val,
+00032                                               <span class="keywordtype">char</span> *old_val,
 00033                                               size_t old_val_len);
-00034      <span class="keywordtype">int</span>             check_netSnmpHostRowStatus(<span class=
+00034      <span class="keywordtype">int</span>             check_netSnmpHostStorage(<span class=
 "keywordtype">int</span> type, <span class="keywordtype">long</span> *val,
-00035                                                 size_t val_len,
-00036                                                 <span class="keywordtype">long</span> *old_val,
-00037                                                 size_t old_val_len);
-00038 
-00039 <span class="preprocessor">#endif                          </span><span class=
+00035                                               size_t val_len,
+00036                                               <span class="keywordtype">long</span> *old_val,
+00037                                               size_t old_val_len);
+00038      <span class="keywordtype">int</span>             check_netSnmpHostRowStatus(<span class=
+"keywordtype">int</span> type, <span class="keywordtype">long</span> *val,
+00039                                                 size_t val_len,
+00040                                                 <span class="keywordtype">long</span> *old_val,
+00041                                                 size_t old_val_len);
+00042 
+00043 <span class="preprocessor">#ifdef __cplusplus</span>
+00044 }
+00045 <span class="preprocessor">#endif</span>
+00046 
+00047 <span class="preprocessor">#endif                          </span><span class=
 "comment">/* NETSNMPHOSTSTABLE_CHECKFNS_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:38 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:45 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

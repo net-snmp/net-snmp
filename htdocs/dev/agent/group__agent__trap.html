@@ -137,32 +137,23 @@
 
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga36" doxytag=
-      "agent_trap::find_varbind_in_list" id="ga36"></a> <a class="el" href="structvariable__list.html">netsnmp_variable_list</a>
-      *&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><b>find_varbind_in_list</b> (<a class="el" href=
-      "structvariable__list.html">netsnmp_variable_list</a> *vblist, oid *name, size_t len)</td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga37" doxytag=
-      "agent_trap::convert_v2pdu_to_v1" id="ga37"></a> <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
+      "agent_trap::convert_v2pdu_to_v1" id="ga36"></a> <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>convert_v2pdu_to_v1</b> (<a class="el" href=
       "structsnmp__pdu.html">netsnmp_pdu</a> *template_v2pdu)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga38" doxytag=
-      "agent_trap::convert_v1pdu_to_v2" id="ga38"></a> <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga37" doxytag=
+      "agent_trap::convert_v1pdu_to_v2" id="ga37"></a> <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>convert_v1pdu_to_v2</b> (<a class="el" href=
       "structsnmp__pdu.html">netsnmp_pdu</a> *template_v1pdu)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga39" doxytag=
-      "agent_trap::netsnmp_send_traps" id="ga39"></a> int&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga38" doxytag=
+      "agent_trap::netsnmp_send_traps" id="ga38"></a> int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_send_traps</b> (int trap, int specific, oid *enterprise, int
       enterprise_length, <a class="el" href="structvariable__list.html">netsnmp_variable_list</a> *vars, char *context, int
@@ -170,11 +161,26 @@
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga40" doxytag=
-      "agent_trap::send_enterprise_trap_vars" id="ga40"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga39" doxytag=
+      "agent_trap::send_enterprise_trap_vars" id="ga39"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>send_enterprise_trap_vars</b> (int trap, int specific, oid *enterprise, int
       enterprise_length, <a class="el" href="structvariable__list.html">netsnmp_variable_list</a> *vars)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__agent__trap.html#ga40">handle_inform_response</a> (int
+      op, <a class="el" href="structsnmp__session.html">netsnmp_session</a> *session, int reqid, <a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *pdu, void *magic)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Captures responses or the lack there of from INFORMs that were sent 1) a response is received from
+      an INFORM 2) one isn't received and the retries/timeouts have failed. <a href="#ga40"></a><br /></td>
     </tr>
 
     <tr>
@@ -470,7 +476,87 @@
   </table>
   <hr />
 
-  <h2>Function Documentation</h2><a class="anchor" name="ga43" doxytag="agent_trap.c::send_easy_trap" id="ga43"></a>
+  <h2>Function Documentation</h2><a class="anchor" name="ga40" doxytag="agent_trap.c::handle_inform_response" id="ga40"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int handle_inform_response</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>op</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structsnmp__session.html">netsnmp_session</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>session</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqid</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>pdu</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">void *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>magic</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Captures responses or the lack there of from INFORMs that were sent 1) a response is received from an INFORM 2) one
+        isn't received and the retries/timeouts have failed.</p>
+
+        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00809">809</a> of file <a class="el" href=
+        "agent__trap_8c-source.html">agent_trap.c</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga43" doxytag="agent_trap.c::send_easy_trap" id="ga43"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -561,10 +647,10 @@
           </dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00878">878</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00923">923</a> of file <a class="el" href=
         "agent__trap_8c-source.html">agent_trap.c</a>.</p>
 
-        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l01702">handle_snmp_packet()</a>.</p>
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l01735">handle_snmp_packet()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga44" doxytag="agent_trap.c::send_v2trap" id="ga44"></a>
@@ -646,7 +732,7 @@
           <dd><a class="el" href="notification_8c-example.html#a30">notification.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00907">907</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00952">952</a> of file <a class="el" href=
         "agent__trap_8c-source.html">agent_trap.c</a>.</p>
       </td>
     </tr>
@@ -766,7 +852,7 @@
           </dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00342">342</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00349">349</a> of file <a class="el" href=
         "agent__trap_8c-source.html">agent_trap.c</a>.</p>
 
         <p>References <a class="el" href="snmp__api_8h-source.html#l00199">snmp_session::next</a>.</p>
@@ -802,7 +888,7 @@
 </pre>
         </div>
 
-        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00102">102</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00098">98</a> of file <a class="el" href=
         "agent__trap_8c-source.html">agent_trap.c</a>.</p>
       </td>
     </tr>
@@ -810,8 +896,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:43 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:54 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

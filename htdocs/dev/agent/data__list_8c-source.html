@@ -26,57 +26,57 @@
 00006 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
 00007 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
 00008 
-00009 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
-00010 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
-00011 <span class="preprocessor">#endif</span>
-00012 
-00013 <span class="comment">/*</span>
-00014 <span class="comment"> * prototypes</span>
-00015 <span class="comment"> */</span>
-00016 NETSNMP_INLINE <span class="keywordtype">void</span>
-00017 <a class="code" href="group__data__list.html#ga5">netsnmp_data_list_add_node</a>(<a class="code" href=
+00009 <span class="comment">/*</span>
+00010 <span class="comment"> * prototypes</span>
+00011 <span class="comment"> */</span>
+00012 NETSNMP_INLINE <span class="keywordtype">void</span>
+00013 <a class="code" href="group__data__list.html#ga5">netsnmp_data_list_add_node</a>(<a class="code" href=
 "structnetsnmp__data__list__s.html">netsnmp_data_list</a> **head, <a class="code" href=
 "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node);
-00018 
-00019 
-00029 NETSNMP_INLINE <span class="keywordtype">void</span>
-<a name="l00030" id="l00030"></a><a class="code" href="group__data__list.html#ga1">00030</a> <a class="code" href=
+00014 
+00015 
+00025 NETSNMP_INLINE <span class="keywordtype">void</span>
+<a name="l00026" id="l00026"></a><a class="code" href="group__data__list.html#ga1">00026</a> <a class="code" href=
 "group__data__list.html#ga1">netsnmp_free_list_data</a>(<a class="code" href=
 "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node)
-00031 {
-00032     Netsnmp_Free_List_Data *beer;
-00033     <span class="keywordflow">if</span> (!node)
-00034         <span class="keywordflow">return</span>;
-00035 
-00036     beer = node-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o3">free_func</a>;
-00037     <span class="keywordflow">if</span> (beer)
-00038         (beer) (node-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o2">data</a>);
-00039     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(node-&gt;<a class="code" href=
+00027 {
+00028     Netsnmp_Free_List_Data *beer;
+00029     <span class="keywordflow">if</span> (!node)
+00030         <span class="keywordflow">return</span>;
+00031 
+00032     beer = node-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o3">free_func</a>;
+00033     <span class="keywordflow">if</span> (beer)
+00034         (beer) (node-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o2">data</a>);
+00035     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(node-&gt;<a class="code" href=
 "structnetsnmp__data__list__s.html#o1">name</a>);
-00040 }
-00041 
-00045 NETSNMP_INLINE <span class="keywordtype">void</span>
-<a name="l00046" id="l00046"></a><a class="code" href="group__data__list.html#ga2">00046</a> <a class="code" href=
+00036 }
+00037 
+00041 NETSNMP_INLINE <span class="keywordtype">void</span>
+<a name="l00042" id="l00042"></a><a class="code" href="group__data__list.html#ga2">00042</a> <a class="code" href=
 "group__data__list.html#ga2">netsnmp_free_all_list_data</a>(<a class="code" href=
 "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head)
-00047 {
-00048     <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *tmpptr;
-00049     <span class="keywordflow">for</span> (; head;) {
-00050         <a class="code" href="group__data__list.html#ga1">netsnmp_free_list_data</a>(head);
-00051         tmpptr = head;
-00052         head = head-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o0">next</a>;
-00053         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(tmpptr);
-00054     }
-00055 }
-00056 
-00063 NETSNMP_INLINE <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *
-<a name="l00064" id="l00064"></a><a class="code" href="group__data__list.html#ga3">00064</a> <a class="code" href=
+00043 {
+00044     <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *tmpptr;
+00045     <span class="keywordflow">for</span> (; head;) {
+00046         <a class="code" href="group__data__list.html#ga1">netsnmp_free_list_data</a>(head);
+00047         tmpptr = head;
+00048         head = head-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o0">next</a>;
+00049         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(tmpptr);
+00050     }
+00051 }
+00052 
+00059 NETSNMP_INLINE <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *
+<a name="l00060" id="l00060"></a><a class="code" href="group__data__list.html#ga3">00060</a> <a class="code" href=
 "group__data__list.html#ga3">netsnmp_create_data_list</a>(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *name, <span class="keywordtype">void</span> *data,
-00065                          Netsnmp_Free_List_Data * beer)
-00066 {
-00067     <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node = <a class="code" href=
-"group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(<a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a>);
+00061                          Netsnmp_Free_List_Data * beer)
+00062 {
+00063     <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node;
+00064     
+00065     <span class="keywordflow">if</span> (!name)
+00066         <span class="keywordflow">return</span> NULL;
+00067     node = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(<a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a>);
 00068     <span class="keywordflow">if</span> (!node)
 00069         <span class="keywordflow">return</span> NULL;
 00070     node-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o1">name</a> = strdup(name);
@@ -116,7 +116,7 @@
 00107     <span class="keywordflow">if</span> (0 == strcmp(node-&gt;name, (*head)-&gt;name)) {
 00108         netsnmp_assert(<span class="stringliteral">"list key"</span> == <span class=
 "stringliteral">"is unique"</span>); <span class="comment">/* always fail */</span>
-00109         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING,
+00109         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_WARNING,
 00110                  <span class="stringliteral">"WARNING: adding duplicate key '%s' to data list\n"</span>,
 00111                  node-&gt;name);
 00112     }
@@ -129,7 +129,7 @@
 "structnetsnmp__data__list__s.html#o1">name</a>)) {
 00117             netsnmp_assert(<span class="stringliteral">"list key"</span> == <span class=
 "stringliteral">"is unique"</span>); <span class="comment">/* always fail */</span>
-00118             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING,
+00118             <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_WARNING,
 00119                      <span class="stringliteral">"WARNING: adding duplicate key '%s' to data list\n"</span>,
 00120                      node-&gt;name);
 00121         }
@@ -147,230 +147,240 @@
 "keywordtype">char</span> *name,
 00138                            <span class="keywordtype">void</span> *data, Netsnmp_Free_List_Data * beer)
 00139 {
-00140     <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node = <a class="code" href=
-"group__data__list.html#ga3">netsnmp_create_data_list</a>(name, data, beer);
-00141     <span class="keywordflow">if</span>(NULL == node) {
-00142         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,<span class=
-"stringliteral">"could not allocate memory for node."</span>);
+00140     <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node;
+00141     <span class="keywordflow">if</span> (!name) {
+00142         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,<span class=
+"stringliteral">"no name provided."</span>);
 00143         <span class="keywordflow">return</span> NULL;
 00144     }
-00145     
-00146     <a class="code" href="group__data__list.html#ga4">netsnmp_add_list_data</a>(head, node);
-00147 
-00148     <span class="keywordflow">return</span> node;
-00149 }
-00150 
-00156 NETSNMP_INLINE <span class="keywordtype">void</span>    *
-<a name="l00157" id="l00157"></a><a class="code" href="group__data__list.html#ga7">00157</a> <a class="code" href=
+00145     node = <a class="code" href="group__data__list.html#ga3">netsnmp_create_data_list</a>(name, data, beer);
+00146     <span class="keywordflow">if</span>(NULL == node) {
+00147         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,<span class=
+"stringliteral">"could not allocate memory for node."</span>);
+00148         <span class="keywordflow">return</span> NULL;
+00149     }
+00150     
+00151     <a class="code" href="group__data__list.html#ga4">netsnmp_add_list_data</a>(head, node);
+00152 
+00153     <span class="keywordflow">return</span> node;
+00154 }
+00155 
+00161 NETSNMP_INLINE <span class="keywordtype">void</span>    *
+<a name="l00162" id="l00162"></a><a class="code" href="group__data__list.html#ga7">00162</a> <a class="code" href=
 "group__data__list.html#ga7">netsnmp_get_list_data</a>(<a class="code" href=
 "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head, <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *name)
-00158 {
-00159     <span class="keywordflow">for</span> (; head; head = head-&gt;<a class="code" href=
+00163 {
+00164     <span class="keywordflow">if</span> (!name)
+00165         <span class="keywordflow">return</span> NULL;
+00166     <span class="keywordflow">for</span> (; head; head = head-&gt;<a class="code" href=
 "structnetsnmp__data__list__s.html#o0">next</a>)
-00160         <span class="keywordflow">if</span> (head-&gt;<a class="code" href=
+00167         <span class="keywordflow">if</span> (head-&gt;<a class="code" href=
 "structnetsnmp__data__list__s.html#o1">name</a> &amp;&amp; strcmp(head-&gt;<a class="code" href=
 "structnetsnmp__data__list__s.html#o1">name</a>, name) == 0)
-00161             <span class="keywordflow">break</span>;
-00162     <span class="keywordflow">if</span> (head)
-00163         <span class="keywordflow">return</span> head-&gt;<a class="code" href=
+00168             <span class="keywordflow">break</span>;
+00169     <span class="keywordflow">if</span> (head)
+00170         <span class="keywordflow">return</span> head-&gt;<a class="code" href=
 "structnetsnmp__data__list__s.html#o2">data</a>;
-00164     <span class="keywordflow">return</span> NULL;
-00165 }
-00166 
-00172 NETSNMP_INLINE <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a>    *
-<a name="l00173" id="l00173"></a><a class="code" href="group__data__list.html#ga8">00173</a> <a class="code" href=
+00171     <span class="keywordflow">return</span> NULL;
+00172 }
+00173 
+00179 NETSNMP_INLINE <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a>    *
+<a name="l00180" id="l00180"></a><a class="code" href="group__data__list.html#ga8">00180</a> <a class="code" href=
 "group__data__list.html#ga8">netsnmp_get_list_node</a>(<a class="code" href=
 "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head, <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *name)
-00174 {
-00175     <span class="keywordflow">for</span> (; head; head = head-&gt;<a class="code" href=
+00181 {
+00182     <span class="keywordflow">if</span> (!name)
+00183         <span class="keywordflow">return</span> NULL;
+00184     <span class="keywordflow">for</span> (; head; head = head-&gt;<a class="code" href=
 "structnetsnmp__data__list__s.html#o0">next</a>)
-00176         <span class="keywordflow">if</span> (head-&gt;<a class="code" href=
+00185         <span class="keywordflow">if</span> (head-&gt;<a class="code" href=
 "structnetsnmp__data__list__s.html#o1">name</a> &amp;&amp; strcmp(head-&gt;<a class="code" href=
 "structnetsnmp__data__list__s.html#o1">name</a>, name) == 0)
-00177             <span class="keywordflow">break</span>;
-00178     <span class="keywordflow">if</span> (head)
-00179         <span class="keywordflow">return</span> head;
-00180     <span class="keywordflow">return</span> NULL;
-00181 }
-00182 
-00188 <span class="keywordtype">int</span>
-<a name="l00189" id="l00189"></a><a class="code" href="group__data__list.html#ga9">00189</a> <a class="code" href=
+00186             <span class="keywordflow">break</span>;
+00187     <span class="keywordflow">if</span> (head)
+00188         <span class="keywordflow">return</span> head;
+00189     <span class="keywordflow">return</span> NULL;
+00190 }
+00191 
+00197 <span class="keywordtype">int</span>
+<a name="l00198" id="l00198"></a><a class="code" href="group__data__list.html#ga9">00198</a> <a class="code" href=
 "group__data__list.html#ga9">netsnmp_remove_list_node</a>(<a class="code" href=
 "structnetsnmp__data__list__s.html">netsnmp_data_list</a> **realhead, <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *name)
-00190 {
-00191     <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head, *prev;
-00192     <span class="keywordflow">for</span> (head = *realhead, prev = NULL; head;
-00193          prev = head, head = head-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o0">next</a>) {
-00194         <span class="keywordflow">if</span> (head-&gt;name &amp;&amp; strcmp(head-&gt;name, name) == 0) {
-00195             <span class="keywordflow">if</span> (prev)
-00196                 prev-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o0">next</a> = head-&gt;<a class="code"
+00199 {
+00200     <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head, *prev;
+00201     <span class="keywordflow">if</span> (!name)
+00202         <span class="keywordflow">return</span> 1;
+00203     <span class="keywordflow">for</span> (head = *realhead, prev = NULL; head;
+00204          prev = head, head = head-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o0">next</a>) {
+00205         <span class="keywordflow">if</span> (head-&gt;name &amp;&amp; strcmp(head-&gt;name, name) == 0) {
+00206             <span class="keywordflow">if</span> (prev)
+00207                 prev-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o0">next</a> = head-&gt;<a class="code"
 href="structnetsnmp__data__list__s.html#o0">next</a>;
-00197             <span class="keywordflow">else</span>
-00198                 *realhead = head-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o0">next</a>;
-00199             <a class="code" href="group__data__list.html#ga1">netsnmp_free_list_data</a>(head);
-00200             free(head);
-00201             <span class="keywordflow">return</span> 0;
-00202         }
-00203     }
-00204     <span class="keywordflow">return</span> 1;
-00205 }
-00206 
-00208 <span class="keyword">static</span> <a class="code" href=
+00208             <span class="keywordflow">else</span>
+00209                 *realhead = head-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o0">next</a>;
+00210             <a class="code" href="group__data__list.html#ga1">netsnmp_free_list_data</a>(head);
+00211             free(head);
+00212             <span class="keywordflow">return</span> 0;
+00213         }
+00214     }
+00215     <span class="keywordflow">return</span> 1;
+00216 }
+00217 
+00219 <span class="keyword">static</span> <a class="code" href=
 "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *saveHead;
-00209 
-00219 <span class="keywordtype">void</span>
-<a name="l00220" id="l00220"></a><a class="code" href="group__data__list.html#ga10">00220</a> <a class="code" href=
+00220 
+00230 <span class="keywordtype">void</span>
+<a name="l00231" id="l00231"></a><a class="code" href="group__data__list.html#ga10">00231</a> <a class="code" href=
 "group__data__list.html#ga10">netsnmp_register_save_list</a>(<a class="code" href=
 "structnetsnmp__data__list__s.html">netsnmp_data_list</a> **datalist,
-00221                            <span class="keyword">const</span> <span class="keywordtype">char</span> *type, <span class=
+00232                            <span class="keyword">const</span> <span class="keywordtype">char</span> *type, <span class=
 "keyword">const</span> <span class="keywordtype">char</span> *token,
-00222                            Netsnmp_Save_List_Data *data_list_save_ptr,
-00223                            Netsnmp_Read_List_Data *data_list_read_ptr,
-00224                            Netsnmp_Free_List_Data *data_list_free_ptr) {
-00225     netsnmp_data_list_saveinfo *info =
-00226         <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_data_list_saveinfo);
-00227 
-00228     <span class="keywordflow">if</span> (!info) {
-00229         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00233                            Netsnmp_Save_List_Data *data_list_save_ptr,
+00234                            Netsnmp_Read_List_Data *data_list_read_ptr,
+00235                            Netsnmp_Free_List_Data *data_list_free_ptr) {
+00236     netsnmp_data_list_saveinfo *info =
+00237         <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_data_list_saveinfo);
+00238 
+00239     <span class="keywordflow">if</span> (!info) {
+00240         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"couldn't malloc a netsnmp_data_list_saveinfo typedef"</span>);
-00230         <span class="keywordflow">return</span>;
-00231     }
-00232 
-00233     info-&gt;datalist = datalist;
-00234     info-&gt;token = token;
-00235     info-&gt;type = type;
-00236     <span class="keywordflow">if</span> (!info-&gt;type) {
-00237         info-&gt;type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-00238                                            NETSNMP_DS_LIB_APPTYPE);
-00239     }
-00240 
-00241     <span class="comment">/* function which will save the data */</span>
-00242     info-&gt;data_list_save_ptr = data_list_save_ptr;
-00243     <span class="keywordflow">if</span> (data_list_save_ptr)
-00244         <a class="code" href=
-"group__callback.html#ga3">snmp_register_callback</a>(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-00245                                netsnmp_save_all_data_callback, info);
-00246 
-00247     <span class="comment">/* function which will read the data back in */</span>
-00248     info-&gt;data_list_read_ptr = data_list_read_ptr;
-00249     <span class="keywordflow">if</span> (data_list_read_ptr) {
-00251         <a class="code" href="group__data__list.html#ga4">netsnmp_add_list_data</a>(&amp;saveHead,
-00252                               <a class="code" href=
+00241         <span class="keywordflow">return</span>;
+00242     }
+00243 
+00244     info-&gt;datalist = datalist;
+00245     info-&gt;token = token;
+00246     info-&gt;type = type;
+00247     <span class="keywordflow">if</span> (!info-&gt;type) {
+00248         info-&gt;type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+00249                                            NETSNMP_DS_LIB_APPTYPE);
+00250     }
+00251 
+00252     <span class="comment">/* function which will save the data */</span>
+00253     info-&gt;data_list_save_ptr = data_list_save_ptr;
+00254     <span class="keywordflow">if</span> (data_list_save_ptr)
+00255         <a class="code" href=
+"group__callback.html#ga8">snmp_register_callback</a>(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+00256                                netsnmp_save_all_data_callback, info);
+00257 
+00258     <span class="comment">/* function which will read the data back in */</span>
+00259     info-&gt;data_list_read_ptr = data_list_read_ptr;
+00260     <span class="keywordflow">if</span> (data_list_read_ptr) {
+00262         <a class="code" href="group__data__list.html#ga4">netsnmp_add_list_data</a>(&amp;saveHead,
+00263                               <a class="code" href=
 "group__data__list.html#ga3">netsnmp_create_data_list</a>(token, info, NULL));
-00253         <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(type, token, <a class="code" href=
+00264         <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(type, token, <a class="code" href=
 "group__data__list.html#ga13">netsnmp_read_data_callback</a>,
-00254                                 NULL <span class="comment">/* XXX */</span>, NULL);
-00255     }
-00256 
-00257     info-&gt;data_list_free_ptr = data_list_free_ptr;
-00258 }
-00259 
-00260 
-00268 <span class="keywordtype">int</span>
-<a name="l00269" id="l00269"></a><a class="code" href="group__data__list.html#ga11">00269</a> <a class="code" href=
+00265                                 NULL <span class="comment">/* XXX */</span>, NULL);
+00266     }
+00267 
+00268     info-&gt;data_list_free_ptr = data_list_free_ptr;
+00269 }
+00270 
+00271 
+00279 <span class="keywordtype">int</span>
+<a name="l00280" id="l00280"></a><a class="code" href="group__data__list.html#ga11">00280</a> <a class="code" href=
 "group__data__list.html#ga11">netsnmp_save_all_data_callback</a>(<span class="keywordtype">int</span> major, <span class=
 "keywordtype">int</span> minor,
-00270                                <span class="keywordtype">void</span> *serverarg, <span class=
+00281                                <span class="keywordtype">void</span> *serverarg, <span class=
 "keywordtype">void</span> *clientarg) {
-00271     netsnmp_data_list_saveinfo *info = clientarg;
-00272 
-00273     <span class="keywordflow">if</span> (!clientarg) {
-00274         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING, <span class=
+00282     netsnmp_data_list_saveinfo *info = clientarg;
+00283 
+00284     <span class="keywordflow">if</span> (!clientarg) {
+00285         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_WARNING, <span class=
 "stringliteral">"netsnmp_save_all_data_callback called with no passed data"</span>);
-00275         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00276     }
-00277 
-00278     <a class="code" href=
+00286         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00287     }
+00288 
+00289     <a class="code" href=
 "group__data__list.html#ga12">netsnmp_save_all_data</a>(*(info-&gt;datalist), info-&gt;type, info-&gt;token,
-00279                           info-&gt;data_list_save_ptr);
-00280     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00281 }    
-00282 
-00285 <span class="keywordtype">int</span>
-<a name="l00286" id="l00286"></a><a class="code" href="group__data__list.html#ga12">00286</a> <a class="code" href=
+00290                           info-&gt;data_list_save_ptr);
+00291     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00292 }    
+00293 
+00296 <span class="keywordtype">int</span>
+<a name="l00297" id="l00297"></a><a class="code" href="group__data__list.html#ga12">00297</a> <a class="code" href=
 "group__data__list.html#ga12">netsnmp_save_all_data</a>(<a class="code" href=
 "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head,
-00287                       <span class="keyword">const</span> <span class="keywordtype">char</span> *type, <span class=
+00298                       <span class="keyword">const</span> <span class="keywordtype">char</span> *type, <span class=
 "keyword">const</span> <span class="keywordtype">char</span> *token,
-00288                       Netsnmp_Save_List_Data * data_list_save_ptr)
-00289 {
-00290     <span class="keywordtype">char</span> buf[SNMP_MAXBUF], *cp;
-00291 
-00292     <span class="keywordflow">for</span> (; head; head = head-&gt;<a class="code" href=
+00299                       Netsnmp_Save_List_Data * data_list_save_ptr)
+00300 {
+00301     <span class="keywordtype">char</span> buf[SNMP_MAXBUF], *cp;
+00302 
+00303     <span class="keywordflow">for</span> (; head; head = head-&gt;<a class="code" href=
 "structnetsnmp__data__list__s.html#o0">next</a>) {
-00293         <span class="keywordflow">if</span> (head-&gt;<a class="code" href=
+00304         <span class="keywordflow">if</span> (head-&gt;<a class="code" href=
 "structnetsnmp__data__list__s.html#o1">name</a>) {
-00294             <span class="comment">/* save begining of line */</span>
-00295             snprintf(buf, <span class="keyword">sizeof</span>(buf), <span class="stringliteral">"%s "</span>, token);
-00296             cp = buf + strlen(buf);
-00297             cp = read_config_save_octet_string(cp, (u_char*)head-&gt;<a class="code" href=
+00305             <span class="comment">/* save begining of line */</span>
+00306             snprintf(buf, <span class="keyword">sizeof</span>(buf), <span class="stringliteral">"%s "</span>, token);
+00307             cp = buf + strlen(buf);
+00308             cp = read_config_save_octet_string(cp, (u_char*)head-&gt;<a class="code" href=
 "structnetsnmp__data__list__s.html#o1">name</a>,
-00298                                                strlen(head-&gt;<a class="code" href=
+00309                                                strlen(head-&gt;<a class="code" href=
 "structnetsnmp__data__list__s.html#o1">name</a>));
-00299             *cp++ = <span class="charliteral">' '</span>;
-00300 
-00301             <span class="comment">/* call registered function to save the rest */</span>
-00302             <span class="keywordflow">if</span> (!(data_list_save_ptr)(cp,
-00303                                       <span class="keyword">sizeof</span>(buf) - strlen(buf),
-00304                                       head-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o2">data</a>)) {
-00305                 <a class="code" href="group__read__config.html#ga37">read_config_store</a>(type, buf);
-00306             }
-00307         }
-00308     }
-00309     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00310 }
+00310             *cp++ = <span class="charliteral">' '</span>;
 00311 
-00320 <span class="keywordtype">void</span>
-<a name="l00321" id="l00321"></a><a class="code" href="group__data__list.html#ga13">00321</a> <a class="code" href=
+00312             <span class="comment">/* call registered function to save the rest */</span>
+00313             <span class="keywordflow">if</span> (!(data_list_save_ptr)(cp,
+00314                                       <span class="keyword">sizeof</span>(buf) - strlen(buf),
+00315                                       head-&gt;<a class="code" href="structnetsnmp__data__list__s.html#o2">data</a>)) {
+00316                 <a class="code" href="group__read__config.html#ga40">read_config_store</a>(type, buf);
+00317             }
+00318         }
+00319     }
+00320     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00321 }
+00322 
+00331 <span class="keywordtype">void</span>
+<a name="l00332" id="l00332"></a><a class="code" href="group__data__list.html#ga13">00332</a> <a class="code" href=
 "group__data__list.html#ga13">netsnmp_read_data_callback</a>(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *token, <span class="keywordtype">char</span> *line) {
-00322     netsnmp_data_list_saveinfo *info;
-00323     <span class="keywordtype">char</span> *dataname = NULL;
-00324     size_t dataname_len;
-00325     <span class="keywordtype">void</span> *data = NULL;
-00326 
-00327     <span class="comment">/* find the stashed information about what we're parsing */</span>
-00328     info = <a class="code" href="group__data__list.html#ga7">netsnmp_get_list_data</a>(saveHead, token);
-00329     <span class="keywordflow">if</span> (!info) {
-00330         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING, <span class=
+00333     netsnmp_data_list_saveinfo *info;
+00334     <span class="keywordtype">char</span> *dataname = NULL;
+00335     size_t dataname_len;
+00336     <span class="keywordtype">void</span> *data = NULL;
+00337 
+00338     <span class="comment">/* find the stashed information about what we're parsing */</span>
+00339     info = <a class="code" href="group__data__list.html#ga7">netsnmp_get_list_data</a>(saveHead, token);
+00340     <span class="keywordflow">if</span> (!info) {
+00341         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_WARNING, <span class=
 "stringliteral">"netsnmp_read_data_callback called without previously registered subparser"</span>);
-00331         <span class="keywordflow">return</span>;
-00332     }
-00333 
-00334     <span class="comment">/* read in the token */</span>
-00335     line =
-00336         <a class="code" href="group__read__config.html#ga52">read_config_read_data</a>(ASN_OCTET_STR, line,
-00337                               &amp;dataname, &amp;dataname_len);
-00338 
-00339     <span class="keywordflow">if</span> (!line || !dataname)
-00340         <span class="keywordflow">return</span>;
-00341 
-00342     <span class="comment">/* call the sub-parser to read the rest */</span>
-00343     data = (info-&gt;data_list_read_ptr)(line, strlen(line));
+00342         <span class="keywordflow">return</span>;
+00343     }
 00344 
-00345     <span class="keywordflow">if</span> (!data) {
-00346         free(dataname);
-00347         <span class="keywordflow">return</span>;
-00348     }
+00345     <span class="comment">/* read in the token */</span>
+00346     line =
+00347         <a class="code" href="group__read__config.html#ga55">read_config_read_data</a>(ASN_OCTET_STR, line,
+00348                               &amp;dataname, &amp;dataname_len);
 00349 
-00350     <span class="comment">/* add to the datalist */</span>
-00351     <a class="code" href="group__data__list.html#ga4">netsnmp_add_list_data</a>(info-&gt;datalist,
-00352                           <a class="code" href="group__data__list.html#ga3">netsnmp_create_data_list</a>(dataname, data,
-00353                                                    info-&gt;data_list_free_ptr));
-00354 
-00355     <span class="keywordflow">return</span>;
-00356 }
-00357 
+00350     <span class="keywordflow">if</span> (!line || !dataname)
+00351         <span class="keywordflow">return</span>;
+00352 
+00353     <span class="comment">/* call the sub-parser to read the rest */</span>
+00354     data = (info-&gt;data_list_read_ptr)(line, strlen(line));
+00355 
+00356     <span class="keywordflow">if</span> (!data) {
+00357         free(dataname);
+00358         <span class="keywordflow">return</span>;
+00359     }
+00360 
+00361     <span class="comment">/* add to the datalist */</span>
+00362     <a class="code" href="group__data__list.html#ga4">netsnmp_add_list_data</a>(info-&gt;datalist,
+00363                           <a class="code" href="group__data__list.html#ga3">netsnmp_create_data_list</a>(dataname, data,
+00364                                                    info-&gt;data_list_free_ptr));
+00365 
+00366     <span class="keywordflow">return</span>;
+00367 }
+00368 
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:37 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:44 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

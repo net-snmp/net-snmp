@@ -28,176 +28,181 @@
 00007 
 00008 <span class="preprocessor">#include &lt;net-snmp/library/snmp_transport.h&gt;</span>
 00009 
-00010 <span class="keyword">struct </span>snmp_secmod_def;
-00011 
-00012 <span class="comment">/*</span>
-00013 <span class="comment"> * parameter information passed to security model routines</span>
-00014 <span class="comment"> */</span>
-00015 <span class="keyword">struct </span>snmp_secmod_outgoing_params {
-00016     <span class="keywordtype">int</span>             msgProcModel;
-00017     u_char         *globalData;
-00018     size_t          globalDataLen;
-00019     <span class="keywordtype">int</span>             maxMsgSize;
-00020     <span class="keywordtype">int</span>             secModel;
-00021     u_char         *secEngineID;
-00022     size_t          secEngineIDLen;
-00023     <span class="keywordtype">char</span>           *secName;
-00024     size_t          secNameLen;
-00025     <span class="keywordtype">int</span>             secLevel;
-00026     u_char         *scopedPdu;
-00027     size_t          scopedPduLen;
-00028     <span class="keywordtype">void</span>           *secStateRef;
-00029     u_char         *secParams;
-00030     size_t         *secParamsLen;
-00031     u_char        **wholeMsg;
-00032     size_t         *wholeMsgLen;
-00033     size_t         *wholeMsgOffset;
-00034     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;        <span class=
+00010 <span class="comment">/* Locally defined security models.</span>
+00011 <span class="comment"> * (Net-SNMP enterprise number = 8072)*256 + local_num</span>
+00012 <span class="comment"> */</span>
+00013 <span class="preprocessor">#define NETSNMP_KSM_SECURITY_MODEL     2066432</span>
+00014 <span class="preprocessor">#define NETSNMP_LOCALSM_SECURITY_MODEL 2066433</span>
+00015 
+00016 <span class="keyword">struct </span>snmp_secmod_def;
+00017 
+00018 <span class="comment">/*</span>
+00019 <span class="comment"> * parameter information passed to security model routines</span>
+00020 <span class="comment"> */</span>
+00021 <span class="keyword">struct </span>snmp_secmod_outgoing_params {
+00022     <span class="keywordtype">int</span>             msgProcModel;
+00023     u_char         *globalData;
+00024     size_t          globalDataLen;
+00025     <span class="keywordtype">int</span>             maxMsgSize;
+00026     <span class="keywordtype">int</span>             secModel;
+00027     u_char         *secEngineID;
+00028     size_t          secEngineIDLen;
+00029     <span class="keywordtype">char</span>           *secName;
+00030     size_t          secNameLen;
+00031     <span class="keywordtype">int</span>             secLevel;
+00032     u_char         *scopedPdu;
+00033     size_t          scopedPduLen;
+00034     <span class="keywordtype">void</span>           *secStateRef;
+00035     u_char         *secParams;
+00036     size_t         *secParamsLen;
+00037     u_char        **wholeMsg;
+00038     size_t         *wholeMsgLen;
+00039     size_t         *wholeMsgOffset;
+00040     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;        <span class=
 "comment">/* IN - the pdu getting encoded            */</span>
-00035     <a class="code" href="structsnmp__session.html">netsnmp_session</a> *session;   <span class=
+00041     <a class="code" href="structsnmp__session.html">netsnmp_session</a> *session;   <span class=
 "comment">/* IN - session sending the message        */</span>
-00036 };
-00037 
-00038 <span class="keyword">struct </span>snmp_secmod_incoming_params {
-00039     <span class="keywordtype">int</span>             msgProcModel;       <span class="comment">/* IN */</span>
-00040     size_t          maxMsgSize; <span class="comment">/* IN     - Used to calc maxSizeResponse.  */</span>
-00041 
-00042     u_char         *secParams;  <span class="comment">/* IN     - BER encoded securityParameters. */</span>
-00043     <span class="keywordtype">int</span>             secModel;   <span class="comment">/* IN */</span>
-00044     <span class="keywordtype">int</span>             secLevel;   <span class=
+00042 };
+00043 
+00044 <span class="keyword">struct </span>snmp_secmod_incoming_params {
+00045     <span class="keywordtype">int</span>             msgProcModel;       <span class="comment">/* IN */</span>
+00046     size_t          maxMsgSize; <span class="comment">/* IN     - Used to calc maxSizeResponse.  */</span>
+00047 
+00048     u_char         *secParams;  <span class="comment">/* IN     - BER encoded securityParameters. */</span>
+00049     <span class="keywordtype">int</span>             secModel;   <span class="comment">/* IN */</span>
+00050     <span class="keywordtype">int</span>             secLevel;   <span class=
 "comment">/* IN     - AuthNoPriv; authPriv etc.      */</span>
-00045 
-00046     u_char         *wholeMsg;   <span class="comment">/* IN     - Original v3 message.           */</span>
-00047     size_t          wholeMsgLen;        <span class="comment">/* IN     - Msg length.                    */</span>
-00048 
-00049     u_char         *secEngineID;        <span class="comment">/* OUT    - Pointer snmpEngineID.          */</span>
-00050     size_t         *secEngineIDLen;     <span class="comment">/* IN/OUT - Len available; len returned.   */</span>
-00051     <span class="comment">/*</span>
-00052 <span class="comment">     * NOTE: Memory provided by caller.      </span>
-00053 <span class="comment">     */</span>
+00051 
+00052     u_char         *wholeMsg;   <span class="comment">/* IN     - Original v3 message.           */</span>
+00053     size_t          wholeMsgLen;        <span class="comment">/* IN     - Msg length.                    */</span>
 00054 
-00055     <span class="keywordtype">char</span>           *secName;    <span class=
-"comment">/* OUT    - Pointer to securityName.       */</span>
-00056     size_t         *secNameLen; <span class="comment">/* IN/OUT - Len available; len returned.   */</span>
-00057 
-00058     u_char        **scopedPdu;  <span class="comment">/* OUT    - Pointer to plaintext scopedPdu. */</span>
-00059     size_t         *scopedPduLen;       <span class="comment">/* IN/OUT - Len available; len returned.   */</span>
+00055     u_char         *secEngineID;        <span class="comment">/* OUT    - Pointer snmpEngineID.          */</span>
+00056     size_t         *secEngineIDLen;     <span class="comment">/* IN/OUT - Len available; len returned.   */</span>
+00057     <span class="comment">/*</span>
+00058 <span class="comment">     * NOTE: Memory provided by caller.      </span>
+00059 <span class="comment">     */</span>
 00060 
-00061     size_t         *maxSizeResponse;    <span class="comment">/* OUT    - Max size of Response PDU.      */</span>
-00062     <span class="keywordtype">void</span>          **secStateRef;        <span class=
+00061     <span class="keywordtype">char</span>           *secName;    <span class=
+"comment">/* OUT    - Pointer to securityName.       */</span>
+00062     size_t         *secNameLen; <span class="comment">/* IN/OUT - Len available; len returned.   */</span>
+00063 
+00064     u_char        **scopedPdu;  <span class="comment">/* OUT    - Pointer to plaintext scopedPdu. */</span>
+00065     size_t         *scopedPduLen;       <span class="comment">/* IN/OUT - Len available; len returned.   */</span>
+00066 
+00067     size_t         *maxSizeResponse;    <span class="comment">/* OUT    - Max size of Response PDU.      */</span>
+00068     <span class="keywordtype">void</span>          **secStateRef;        <span class=
 "comment">/* OUT    - Ref to security state.         */</span>
-00063     <a class="code" href="structsnmp__session.html">netsnmp_session</a> *sess;      <span class=
+00069     <a class="code" href="structsnmp__session.html">netsnmp_session</a> *sess;      <span class=
 "comment">/* IN     - session which got the message  */</span>
-00064     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;        <span class=
+00070     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;        <span class=
 "comment">/* IN     - the pdu getting parsed         */</span>
-00065     u_char          msg_flags;  <span class="comment">/* IN     - v3 Message flags.              */</span>
-00066 };
-00067 
-00068 
-00069 <span class="comment">/*</span>
-00070 <span class="comment"> * function pointers:</span>
-00071 <span class="comment"> */</span>
-00072 
-00073 <span class="comment">/*</span>
-00074 <span class="comment"> * free's a given security module's data; called at unregistration time </span>
-00075 <span class="comment"> */</span>
-00076 <span class="keyword">typedef</span> int     (SecmodSessionCallback) (<a class="code" href=
+00071     u_char          msg_flags;  <span class="comment">/* IN     - v3 Message flags.              */</span>
+00072 };
+00073 
+00074 
+00075 <span class="comment">/*</span>
+00076 <span class="comment"> * function pointers:</span>
+00077 <span class="comment"> */</span>
+00078 
+00079 <span class="comment">/*</span>
+00080 <span class="comment"> * free's a given security module's data; called at unregistration time </span>
+00081 <span class="comment"> */</span>
+00082 <span class="keyword">typedef</span> int     (SecmodSessionCallback) (<a class="code" href=
 "structsnmp__session.html">netsnmp_session</a> *);
-00077 <span class="keyword">typedef</span> int     (SecmodPduCallback) (<a class="code" href=
+00083 <span class="keyword">typedef</span> int     (SecmodPduCallback) (<a class="code" href=
 "structsnmp__pdu.html">netsnmp_pdu</a> *);
-00078 <span class="keyword">typedef</span> int     (Secmod2PduCallback) (<a class="code" href=
+00084 <span class="keyword">typedef</span> int     (Secmod2PduCallback) (<a class="code" href=
 "structsnmp__pdu.html">netsnmp_pdu</a> *, <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *);
-00079 <span class="keyword">typedef</span> int     (SecmodOutMsg) (<span class=
+00085 <span class="keyword">typedef</span> int     (SecmodOutMsg) (<span class=
 "keyword">struct </span>snmp_secmod_outgoing_params *);
-00080 <span class="keyword">typedef</span> int     (SecmodInMsg) (<span class=
+00086 <span class="keyword">typedef</span> int     (SecmodInMsg) (<span class=
 "keyword">struct </span>snmp_secmod_incoming_params *);
-00081 <span class="keyword">typedef</span> void    (SecmodFreeState) (<span class="keywordtype">void</span> *);
-00082 <span class="keyword">typedef</span> void    (SecmodHandleReport) (<span class="keywordtype">void</span> *sessp,
-00083                                       netsnmp_transport *transport,
-00084                                       <a class="code" href="structsnmp__session.html">netsnmp_session</a> *,
-00085                                       <span class="keywordtype">int</span> result,
-00086                                       <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *origpdu);
-00087 
-00088 <span class="comment">/*</span>
-00089 <span class="comment"> * definition of a security module</span>
-00090 <span class="comment"> */</span>
-00091 
-00092 <span class="comment">/*</span>
-00093 <span class="comment"> * all of these callback functions except the encoding and decoding</span>
-00094 <span class="comment"> * routines are optional.  The rest of them are available if need.  </span>
-00095 <span class="comment"> */</span>
-00096 <span class="keyword">struct </span>snmp_secmod_def {
-00097     <span class="comment">/*</span>
-00098 <span class="comment">     * session maniplation functions </span>
-00099 <span class="comment">     */</span>
-00100     SecmodSessionCallback *session_open;        <span class="comment">/* called in snmp_sess_open()  */</span>
-00101     SecmodSessionCallback *session_close;       <span class="comment">/* called in snmp_sess_close() */</span>
-00102 
+00087 <span class="keyword">typedef</span> void    (SecmodFreeState) (<span class="keywordtype">void</span> *);
+00088 <span class="keyword">typedef</span> void    (SecmodHandleReport) (<span class="keywordtype">void</span> *sessp,
+00089                                       netsnmp_transport *transport,
+00090                                       <a class="code" href="structsnmp__session.html">netsnmp_session</a> *,
+00091                                       <span class="keywordtype">int</span> result,
+00092                                       <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *origpdu);
+00093 
+00094 <span class="comment">/*</span>
+00095 <span class="comment"> * definition of a security module</span>
+00096 <span class="comment"> */</span>
+00097 
+00098 <span class="comment">/*</span>
+00099 <span class="comment"> * all of these callback functions except the encoding and decoding</span>
+00100 <span class="comment"> * routines are optional.  The rest of them are available if need.  </span>
+00101 <span class="comment"> */</span>
+00102 <span class="keyword">struct </span>snmp_secmod_def {
 00103     <span class="comment">/*</span>
-00104 <span class="comment">     * pdu manipulation routines </span>
+00104 <span class="comment">     * session maniplation functions </span>
 00105 <span class="comment">     */</span>
-00106     SecmodPduCallback *pdu_free;        <span class="comment">/* called in free_pdu() */</span>
-00107     Secmod2PduCallback *pdu_clone;      <span class="comment">/* called in snmp_clone_pdu() */</span>
-00108     SecmodPduCallback *pdu_timeout;     <span class="comment">/* called when request timesout */</span>
-00109     SecmodFreeState *pdu_free_state_ref;        <span class="comment">/* frees pdu-&gt;securityStateRef */</span>
-00110 
-00111     <span class="comment">/*</span>
-00112 <span class="comment">     * de/encoding routines: mandatory </span>
-00113 <span class="comment">     */</span>
-00114     SecmodOutMsg   *encode_reverse;     <span class="comment">/* encode packet back to front */</span>
-00115     SecmodOutMsg   *encode_forward;     <span class="comment">/* encode packet forward */</span>
-00116     SecmodInMsg    *decode;     <span class="comment">/* decode &amp; validate incoming */</span>
-00117 
-00118    <span class="comment">/*</span>
-00119 <span class="comment">    * error and report handling</span>
-00120 <span class="comment">    */</span>
-00121    SecmodHandleReport *handle_report;
-00122 };
+00106     SecmodSessionCallback *session_open;        <span class="comment">/* called in snmp_sess_open()  */</span>
+00107     SecmodSessionCallback *session_close;       <span class="comment">/* called in snmp_sess_close() */</span>
+00108 
+00109     <span class="comment">/*</span>
+00110 <span class="comment">     * pdu manipulation routines </span>
+00111 <span class="comment">     */</span>
+00112     SecmodPduCallback *pdu_free;        <span class="comment">/* called in free_pdu() */</span>
+00113     Secmod2PduCallback *pdu_clone;      <span class="comment">/* called in snmp_clone_pdu() */</span>
+00114     SecmodPduCallback *pdu_timeout;     <span class="comment">/* called when request timesout */</span>
+00115     SecmodFreeState *pdu_free_state_ref;        <span class="comment">/* frees pdu-&gt;securityStateRef */</span>
+00116 
+00117     <span class="comment">/*</span>
+00118 <span class="comment">     * de/encoding routines: mandatory </span>
+00119 <span class="comment">     */</span>
+00120     SecmodOutMsg   *encode_reverse;     <span class="comment">/* encode packet back to front */</span>
+00121     SecmodOutMsg   *encode_forward;     <span class="comment">/* encode packet forward */</span>
+00122     SecmodInMsg    *decode;     <span class="comment">/* decode &amp; validate incoming */</span>
 00123 
-00124 
-00125 <span class="comment">/*</span>
-00126 <span class="comment"> * internal list</span>
-00127 <span class="comment"> */</span>
-00128 <span class="keyword">struct </span>snmp_secmod_list {
-00129     <span class="keywordtype">int</span>             securityModel;
-00130     <span class="keyword">struct </span>snmp_secmod_def *secDef;
-00131     <span class="keyword">struct </span>snmp_secmod_list *next;
-00132 };
-00133 
-00134 
-00135 <span class="comment">/*</span>
-00136 <span class="comment"> * register a security service </span>
-00137 <span class="comment"> */</span>
-00138 <span class="keywordtype">int</span>             register_sec_mod(<span class="keywordtype">int</span>, <span class=
+00124    <span class="comment">/*</span>
+00125 <span class="comment">    * error and report handling</span>
+00126 <span class="comment">    */</span>
+00127    SecmodHandleReport *handle_report;
+00128 };
+00129 
+00130 
+00131 <span class="comment">/*</span>
+00132 <span class="comment"> * internal list</span>
+00133 <span class="comment"> */</span>
+00134 <span class="keyword">struct </span>snmp_secmod_list {
+00135     <span class="keywordtype">int</span>             securityModel;
+00136     <span class="keyword">struct </span>snmp_secmod_def *secDef;
+00137     <span class="keyword">struct </span>snmp_secmod_list *next;
+00138 };
+00139 
+00140 
+00141 <span class="comment">/*</span>
+00142 <span class="comment"> * register a security service </span>
+00143 <span class="comment"> */</span>
+00144 <span class="keywordtype">int</span>             register_sec_mod(<span class="keywordtype">int</span>, <span class=
 "keyword">const</span> <span class="keywordtype">char</span> *,
-00139                                  <span class="keyword">struct</span> snmp_secmod_def *);
-00140 <span class="comment">/*</span>
-00141 <span class="comment"> * find a security service definition </span>
-00142 <span class="comment"> */</span>
-00143 <span class="keyword">struct </span>snmp_secmod_def *find_sec_mod(<span class="keywordtype">int</span>);
-00144 <span class="comment">/*</span>
-00145 <span class="comment"> * register a security service </span>
-00146 <span class="comment"> */</span>
-00147 <span class="keywordtype">int</span>             unregister_sec_mod(<span class=
-"keywordtype">int</span>);        <span class="comment">/* register a security service */</span>
-00148 <span class="keywordtype">void</span>            init_secmod(<span class="keywordtype">void</span>);
-00149 
+00145                                  <span class="keyword">struct</span> snmp_secmod_def *);
+00146 <span class="comment">/*</span>
+00147 <span class="comment"> * find a security service definition </span>
+00148 <span class="comment"> */</span>
+00149 <span class="keyword">struct </span>snmp_secmod_def *find_sec_mod(<span class="keywordtype">int</span>);
 00150 <span class="comment">/*</span>
-00151 <span class="comment"> * clears the sec_mod list</span>
+00151 <span class="comment"> * register a security service </span>
 00152 <span class="comment"> */</span>
-00153 <span class="keywordtype">void</span>            clear_sec_mod(<span class="keywordtype">void</span>);
-00154 
-00155 <span class="preprocessor">#ifdef __cplusplus</span>
-00156 }
-00157 <span class="preprocessor">#endif</span>
-00158 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMPSECMOD_H */</span>
+00153 <span class="keywordtype">int</span>             unregister_sec_mod(<span class=
+"keywordtype">int</span>);        <span class="comment">/* register a security service */</span>
+00154 <span class="keywordtype">void</span>            init_secmod(<span class="keywordtype">void</span>);
+00155 
+00156 <span class="comment">/*</span>
+00157 <span class="comment"> * clears the sec_mod list</span>
+00158 <span class="comment"> */</span>
+00159 <span class="keywordtype">void</span>            clear_sec_mod(<span class="keywordtype">void</span>);
+00160 
+00161 <span class="preprocessor">#ifdef __cplusplus</span>
+00162 }
+00163 <span class="preprocessor">#endif</span>
+00164 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMPSECMOD_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:49 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

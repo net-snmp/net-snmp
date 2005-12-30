@@ -46,46 +46,56 @@
     </tr>
 
     <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga1" doxytag=
+      "table_array::netsnmp_table_array_register" id="ga1"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_table_array_register</b> (<a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
+      "structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *tabreg,
+      netsnmp_table_array_callbacks *cb, netsnmp_container *container, int group_rows)</td>
+    </tr>
+
+    <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
       "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__array.html#ga1">netsnmp_find_table_array_handler</a> (<a class="el" href=
+      "group__table__array.html#ga2">netsnmp_find_table_array_handler</a> (<a class="el" href=
       "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo)</td>
     </tr>
 
     <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">find the handler for the table_array helper. <a href="#ga1"></a><br /></td>
+      <td class="mdescRight">find the handler for the table_array helper. <a href="#ga2"></a><br /></td>
     </tr>
 
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_container *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__array.html#ga2">netsnmp_extract_array_context</a> (<a class="el" href=
+      "group__table__array.html#ga3">netsnmp_extract_array_context</a> (<a class="el" href=
       "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request)</td>
     </tr>
 
     <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">find the context data used by the table_array helper <a href="#ga2"></a><br /></td>
+      <td class="mdescRight">find the context data used by the table_array helper <a href="#ga3"></a><br /></td>
     </tr>
 
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__array.html#ga3">netsnmp_table_array_check_row_status</a> (netsnmp_table_array_callbacks *cb,
+      "group__table__array.html#ga4">netsnmp_table_array_check_row_status</a> (netsnmp_table_array_callbacks *cb,
       netsnmp_request_group *ag, long *rs_new, long *rs_old)</td>
     </tr>
 
     <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">this function is called to validate RowStatus transitions. <a href="#ga3"></a><br /></td>
+      <td class="mdescRight">this function is called to validate RowStatus transitions. <a href="#ga4"></a><br /></td>
     </tr>
   </table>
   <hr />
@@ -135,8 +145,8 @@
   activation and deactivation requirements, etc.</p>
   <hr />
 
-  <h2>Function Documentation</h2><a class="anchor" name="ga2" doxytag="table_array.c::netsnmp_extract_array_context" id=
-  "ga2"></a>
+  <h2>Function Documentation</h2><a class="anchor" name="ga3" doxytag="table_array.c::netsnmp_extract_array_context" id=
+  "ga3"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -168,13 +178,13 @@
       <td>
         <p>find the context data used by the table_array helper</p>
 
-        <p>Definition at line <a class="el" href="table__array_8c-source.html#l00213">213</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__array_8c-source.html#l00223">223</a> of file <a class="el" href=
         "table__array_8c-source.html">table_array.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8c-source.html#l00797">netsnmp_request_get_list_data()</a>.</p>
+        <p>References <a class="el" href="agent__handler_8c-source.html#l00802">netsnmp_request_get_list_data()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga1" doxytag="table_array.c::netsnmp_find_table_array_handler" id="ga1"></a>
+  </table><a class="anchor" name="ga2" doxytag="table_array.c::netsnmp_find_table_array_handler" id="ga2"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -207,17 +217,17 @@
       <td>
         <p>find the handler for the table_array helper.</p>
 
-        <p>Definition at line <a class="el" href="table__array_8c-source.html#l00196">196</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__array_8c-source.html#l00206">206</a> of file <a class="el" href=
         "table__array_8c-source.html">table_array.c</a>.</p>
 
         <p>References <a class="el" href="structnetsnmp__mib__handler__s.html#o3">netsnmp_mib_handler_s::access_method</a>,
-        <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>, <a class="el"
+        <a class="el" href="agent__handler_8h-source.html#l00109">netsnmp_handler_registration_s::handler</a>, <a class="el"
         href="group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, and <a class="el" href=
-        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>.</p>
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::next</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga3" doxytag="table_array.c::netsnmp_table_array_check_row_status" id="ga3"></a>
+  </table><a class="anchor" name="ga4" doxytag="table_array.c::netsnmp_table_array_check_row_status" id="ga4"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -282,7 +292,7 @@
       <td>
         <p>this function is called to validate RowStatus transitions.</p>
 
-        <p>Definition at line <a class="el" href="table__array_8c-source.html#l00220">220</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__array_8c-source.html#l00230">230</a> of file <a class="el" href=
         "table__array_8c-source.html">table_array.c</a>.</p>
       </td>
     </tr>
@@ -366,14 +376,14 @@
         <p>If the group_rows parameter is set, the row related callbacks will be called once for each unique row index.
         Otherwise, each callback will be called only once, for all objects.</p>
 
-        <p>Definition at line <a class="el" href="table__array_8c-source.html#l00152">152</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__array_8c-source.html#l00148">148</a> of file <a class="el" href=
         "table__array_8c-source.html">table_array.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>,
-        <a class="el" href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00109">netsnmp_handler_registration_s::handler</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00050">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
-        "table_8c-source.html#l00111">netsnmp_register_table()</a>, <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>, and <a class="el" href=
+        "table_8c-source.html#l00107">netsnmp_register_table()</a>, <a class="el" href=
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>, and <a class="el" href=
         "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
       </td>
     </tr>
@@ -381,8 +391,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:44 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:48:00 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

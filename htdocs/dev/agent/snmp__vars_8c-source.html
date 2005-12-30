@@ -152,176 +152,176 @@
 00136 <span class="preprocessor">#include &lt;inet/mib2.h&gt;</span>
 00137 <span class="preprocessor">#endif</span>
 00138 
-00139 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
-00140 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
-00141 <span class="preprocessor">#endif</span>
-00142 
-00143 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
-00144 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
-00145 <span class="preprocessor">#include &lt;net-snmp/agent/mib_modules.h&gt;</span>
-00146 <span class="preprocessor">#include "kernel.h"</span>
-00147 
-00148 <span class="preprocessor">#include "mibgroup/struct.h"</span>
-00149 <span class="preprocessor">#include "snmpd.h"</span>
-00150 <span class="preprocessor">#include "net-snmp/agent/all_helpers.h"</span>
-00151 <span class="preprocessor">#include "agent_module_includes.h"</span>
-00152 <span class="preprocessor">#include "mib_module_includes.h"</span>
-00153 <span class="preprocessor">#include "net-snmp/library/container.h"</span>
-00154 
-00155 <span class="preprocessor">#ifndef  MIN</span>
-00156 <span class="preprocessor">#define  MIN(a,b)                     (((a) &lt; (b)) ? (a) : (b))</span>
-00157 <span class="preprocessor">#endif</span>
+00139 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00140 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00141 <span class="preprocessor">#include &lt;net-snmp/agent/mib_modules.h&gt;</span>
+00142 <span class="preprocessor">#include "kernel.h"</span>
+00143 
+00144 <span class="preprocessor">#include "mibgroup/struct.h"</span>
+00145 <span class="preprocessor">#include "snmpd.h"</span>
+00146 <span class="preprocessor">#include "agentx/agentx_config.h"</span>
+00147 <span class="preprocessor">#include "agentx/subagent.h"</span>
+00148 <span class="preprocessor">#include "net-snmp/agent/all_helpers.h"</span>
+00149 <span class="preprocessor">#include "agent_module_includes.h"</span>
+00150 <span class="preprocessor">#include "mib_module_includes.h"</span>
+00151 <span class="preprocessor">#include "net-snmp/library/container.h"</span>
+00152 
+00153 <span class="preprocessor">#ifndef  MIN</span>
+00154 <span class="preprocessor">#define  MIN(a,b)                     (((a) &lt; (b)) ? (a) : (b))</span>
+00155 <span class="preprocessor">#endif</span>
+00156 
+00157 <span class="keyword">static</span> <span class="keywordtype">char</span>     done_init_agent = 0;
 00158 
-00159 <span class="keyword">static</span> <span class="keywordtype">char</span>     done_init_agent = 0;
-00160 
-00161 <span class="comment">/*</span>
-00162 <span class="comment"> * mib clients are passed a pointer to a oid buffer.  Some mib clients</span>
-00163 <span class="comment"> * * (namely, those first noticed in mibII/vacm.c) modify this oid buffer</span>
-00164 <span class="comment"> * * before they determine if they really need to send results back out</span>
-00165 <span class="comment"> * * using it.  If the master agent determined that the client was not the</span>
-00166 <span class="comment"> * * right one to talk with, it will use the same oid buffer to pass to the</span>
-00167 <span class="comment"> * * rest of the clients, which may not longer be valid.  This should be</span>
-00168 <span class="comment"> * * fixed in all clients rather than the master.  However, its not a</span>
-00169 <span class="comment"> * * particularily easy bug to track down so this saves debugging time at</span>
-00170 <span class="comment"> * * the expense of a few memcpy's.</span>
-00171 <span class="comment"> */</span>
-00172 <span class="preprocessor">#define MIB_CLIENTS_ARE_EVIL 1</span>
-00173 
-00174 <span class="keyword">extern</span> netsnmp_subtree *subtrees;
-00175 
-00176 <span class="comment">/*</span>
-00177 <span class="comment"> *      Each variable name is placed in the variable table, without the</span>
-00178 <span class="comment"> * terminating substring that determines the instance of the variable.  When</span>
-00179 <span class="comment"> * a string is found that is lexicographicly preceded by the input string,</span>
-00180 <span class="comment"> * the function for that entry is called to find the method of access of the</span>
-00181 <span class="comment"> * instance of the named variable.  If that variable is not found, NULL is</span>
-00182 <span class="comment"> * returned, and the search through the table continues (it will probably</span>
-00183 <span class="comment"> * stop at the next entry).  If it is found, the function returns a character</span>
-00184 <span class="comment"> * pointer and a length or a function pointer.  The former is the address</span>
-00185 <span class="comment"> * of the operand, the latter is a write routine for the variable.</span>
-00186 <span class="comment"> *</span>
-00187 <span class="comment"> * u_char *</span>
-00188 <span class="comment"> * findVar(name, length, exact, var_len, write_method)</span>
-00189 <span class="comment"> * oid      *name;          IN/OUT - input name requested, output name found</span>
-00190 <span class="comment"> * int      length;         IN/OUT - number of sub-ids in the in and out oid's</span>
-00191 <span class="comment"> * int      exact;          IN - TRUE if an exact match was requested.</span>
-00192 <span class="comment"> * int      len;            OUT - length of variable or 0 if function returned.</span>
-00193 <span class="comment"> * int      write_method;   OUT - pointer to function to set variable,</span>
-00194 <span class="comment"> *                                otherwise 0</span>
-00195 <span class="comment"> *</span>
-00196 <span class="comment"> *     The writeVar function is returned to handle row addition or complex</span>
-00197 <span class="comment"> * writes that require boundary checking or executing an action.</span>
-00198 <span class="comment"> * This routine will be called three times for each varbind in the packet.</span>
-00199 <span class="comment"> * The first time for each varbind, action is set to RESERVE1.  The type</span>
-00200 <span class="comment"> * and value should be checked during this pass.  If any other variables</span>
-00201 <span class="comment"> * in the MIB depend on this variable, this variable will be stored away</span>
-00202 <span class="comment"> * (but *not* committed!) in a place where it can be found by a call to</span>
-00203 <span class="comment"> * writeVar for a dependent variable, even in the same PDU.  During</span>
-00204 <span class="comment"> * the second pass, action is set to RESERVE2.  If this variable is dependent</span>
-00205 <span class="comment"> * on any other variables, it will check them now.  It must check to see</span>
-00206 <span class="comment"> * if any non-committed values have been stored for variables in the same</span>
-00207 <span class="comment"> * PDU that it depends on.  Sometimes resources will need to be reserved</span>
-00208 <span class="comment"> * in the first two passes to guarantee that the operation can proceed</span>
-00209 <span class="comment"> * during the third pass.  During the third pass, if there were no errors</span>
-00210 <span class="comment"> * in the first two passes, writeVar is called for every varbind with action</span>
-00211 <span class="comment"> * set to COMMIT.  It is now that the values should be written.  If there</span>
-00212 <span class="comment"> * were errors during the first two passes, writeVar is called in the third</span>
-00213 <span class="comment"> * pass once for each varbind, with the action set to FREE.  An opportunity</span>
-00214 <span class="comment"> * is thus provided to free those resources reserved in the first two passes.</span>
-00215 <span class="comment"> * </span>
-00216 <span class="comment"> * writeVar(action, var_val, var_val_type, var_val_len, statP, name, name_len)</span>
-00217 <span class="comment"> * int      action;         IN - RESERVE1, RESERVE2, COMMIT, or FREE</span>
-00218 <span class="comment"> * u_char   *var_val;       IN - input or output buffer space</span>
-00219 <span class="comment"> * u_char   var_val_type;   IN - type of input buffer</span>
-00220 <span class="comment"> * int      var_val_len;    IN - input and output buffer len</span>
-00221 <span class="comment"> * u_char   *statP;         IN - pointer to local statistic</span>
-00222 <span class="comment"> * oid      *name           IN - pointer to name requested</span>
-00223 <span class="comment"> * int      name_len        IN - number of sub-ids in the name</span>
-00224 <span class="comment"> */</span>
-00225 
-00226 <span class="keywordtype">long</span>            long_return;
-00227 <span class="preprocessor">#ifndef ibm032</span>
-00228 u_char          return_buf[258];
-00229 <span class="preprocessor">#else</span>
-00230 u_char          return_buf[256];        <span class="comment">/* nee 64 */</span>
-00231 <span class="preprocessor">#endif</span>
-00232 
-00233 <span class="keyword">struct </span>timeval  starttime;
-00234 
-00235 <span class="keywordtype">int</span>             callback_master_num = -1;
-00236 
-00237 <span class="preprocessor">#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN</span>
-00238 <a class="code" href="structsnmp__session.html">netsnmp_session</a> *callback_master_sess = NULL;
-00239 
-00240 <span class="keyword">static</span> <span class="keywordtype">void</span>
-00241 _init_agent_callback_transport(<span class="keywordtype">void</span>)
-00242 {
-00243     <span class="comment">/*</span>
-00244 <span class="comment">     * always register a callback transport for internal use </span>
-00245 <span class="comment">     */</span>
-00246     callback_master_sess = netsnmp_callback_open(0, handle_snmp_packet,
-00247                                                  netsnmp_agent_check_packet,
-00248                                                  netsnmp_agent_check_parse);
-00249     <span class="keywordflow">if</span> (callback_master_sess)
-00250         callback_master_num = callback_master_sess-&gt;<a class="code" href="structsnmp__session.html#o9">local_port</a>;
-00251 }
-00252 <span class="preprocessor">#else</span>
-00253 <span class="preprocessor">#define _init_agent_callback_transport()</span>
-00254 <span class="preprocessor">#endif</span>
-00255 
-00268 <span class="keywordtype">int</span>
-<a name="l00269" id="l00269"></a><a class="code" href="group__library.html#ga21">00269</a> <a class="code" href=
-"group__library.html#ga21">init_agent</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *app)
-00270 {
-00271     <span class="keywordtype">int</span>             r = 0;
-00272 
-00273     <span class="keywordflow">if</span>(++done_init_agent &gt; 1) {
-00274         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING, <span class=
+00159 <span class="keyword">struct </span>module_init_list *initlist = NULL;
+00160 <span class="keyword">struct </span>module_init_list *noinitlist = NULL;
+00161 
+00162 <span class="comment">/*</span>
+00163 <span class="comment"> * mib clients are passed a pointer to a oid buffer.  Some mib clients</span>
+00164 <span class="comment"> * * (namely, those first noticed in mibII/vacm.c) modify this oid buffer</span>
+00165 <span class="comment"> * * before they determine if they really need to send results back out</span>
+00166 <span class="comment"> * * using it.  If the master agent determined that the client was not the</span>
+00167 <span class="comment"> * * right one to talk with, it will use the same oid buffer to pass to the</span>
+00168 <span class="comment"> * * rest of the clients, which may not longer be valid.  This should be</span>
+00169 <span class="comment"> * * fixed in all clients rather than the master.  However, its not a</span>
+00170 <span class="comment"> * * particularily easy bug to track down so this saves debugging time at</span>
+00171 <span class="comment"> * * the expense of a few memcpy's.</span>
+00172 <span class="comment"> */</span>
+00173 <span class="preprocessor">#define MIB_CLIENTS_ARE_EVIL 1</span>
+00174 
+00175 <span class="keyword">extern</span> netsnmp_subtree *subtrees;
+00176 
+00177 <span class="comment">/*</span>
+00178 <span class="comment"> *      Each variable name is placed in the variable table, without the</span>
+00179 <span class="comment"> * terminating substring that determines the instance of the variable.  When</span>
+00180 <span class="comment"> * a string is found that is lexicographicly preceded by the input string,</span>
+00181 <span class="comment"> * the function for that entry is called to find the method of access of the</span>
+00182 <span class="comment"> * instance of the named variable.  If that variable is not found, NULL is</span>
+00183 <span class="comment"> * returned, and the search through the table continues (it will probably</span>
+00184 <span class="comment"> * stop at the next entry).  If it is found, the function returns a character</span>
+00185 <span class="comment"> * pointer and a length or a function pointer.  The former is the address</span>
+00186 <span class="comment"> * of the operand, the latter is a write routine for the variable.</span>
+00187 <span class="comment"> *</span>
+00188 <span class="comment"> * u_char *</span>
+00189 <span class="comment"> * findVar(name, length, exact, var_len, write_method)</span>
+00190 <span class="comment"> * oid      *name;          IN/OUT - input name requested, output name found</span>
+00191 <span class="comment"> * int      length;         IN/OUT - number of sub-ids in the in and out oid's</span>
+00192 <span class="comment"> * int      exact;          IN - TRUE if an exact match was requested.</span>
+00193 <span class="comment"> * int      len;            OUT - length of variable or 0 if function returned.</span>
+00194 <span class="comment"> * int      write_method;   OUT - pointer to function to set variable,</span>
+00195 <span class="comment"> *                                otherwise 0</span>
+00196 <span class="comment"> *</span>
+00197 <span class="comment"> *     The writeVar function is returned to handle row addition or complex</span>
+00198 <span class="comment"> * writes that require boundary checking or executing an action.</span>
+00199 <span class="comment"> * This routine will be called three times for each varbind in the packet.</span>
+00200 <span class="comment"> * The first time for each varbind, action is set to RESERVE1.  The type</span>
+00201 <span class="comment"> * and value should be checked during this pass.  If any other variables</span>
+00202 <span class="comment"> * in the MIB depend on this variable, this variable will be stored away</span>
+00203 <span class="comment"> * (but *not* committed!) in a place where it can be found by a call to</span>
+00204 <span class="comment"> * writeVar for a dependent variable, even in the same PDU.  During</span>
+00205 <span class="comment"> * the second pass, action is set to RESERVE2.  If this variable is dependent</span>
+00206 <span class="comment"> * on any other variables, it will check them now.  It must check to see</span>
+00207 <span class="comment"> * if any non-committed values have been stored for variables in the same</span>
+00208 <span class="comment"> * PDU that it depends on.  Sometimes resources will need to be reserved</span>
+00209 <span class="comment"> * in the first two passes to guarantee that the operation can proceed</span>
+00210 <span class="comment"> * during the third pass.  During the third pass, if there were no errors</span>
+00211 <span class="comment"> * in the first two passes, writeVar is called for every varbind with action</span>
+00212 <span class="comment"> * set to COMMIT.  It is now that the values should be written.  If there</span>
+00213 <span class="comment"> * were errors during the first two passes, writeVar is called in the third</span>
+00214 <span class="comment"> * pass once for each varbind, with the action set to FREE.  An opportunity</span>
+00215 <span class="comment"> * is thus provided to free those resources reserved in the first two passes.</span>
+00216 <span class="comment"> * </span>
+00217 <span class="comment"> * writeVar(action, var_val, var_val_type, var_val_len, statP, name, name_len)</span>
+00218 <span class="comment"> * int      action;         IN - RESERVE1, RESERVE2, COMMIT, or FREE</span>
+00219 <span class="comment"> * u_char   *var_val;       IN - input or output buffer space</span>
+00220 <span class="comment"> * u_char   var_val_type;   IN - type of input buffer</span>
+00221 <span class="comment"> * int      var_val_len;    IN - input and output buffer len</span>
+00222 <span class="comment"> * u_char   *statP;         IN - pointer to local statistic</span>
+00223 <span class="comment"> * oid      *name           IN - pointer to name requested</span>
+00224 <span class="comment"> * int      name_len        IN - number of sub-ids in the name</span>
+00225 <span class="comment"> */</span>
+00226 
+00227 <span class="keywordtype">long</span>            long_return;
+00228 <span class="preprocessor">#ifndef ibm032</span>
+00229 u_char          return_buf[258];
+00230 <span class="preprocessor">#else</span>
+00231 u_char          return_buf[256];        <span class="comment">/* nee 64 */</span>
+00232 <span class="preprocessor">#endif</span>
+00233 
+00234 <span class="keyword">struct </span>timeval  starttime;
+00235 
+00236 <span class="keywordtype">int</span>             callback_master_num = -1;
+00237 
+00238 <span class="preprocessor">#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN</span>
+00239 <a class="code" href="structsnmp__session.html">netsnmp_session</a> *callback_master_sess = NULL;
+00240 
+00241 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00242 _init_agent_callback_transport(<span class="keywordtype">void</span>)
+00243 {
+00244     <span class="comment">/*</span>
+00245 <span class="comment">     * always register a callback transport for internal use </span>
+00246 <span class="comment">     */</span>
+00247     callback_master_sess = netsnmp_callback_open(0, handle_snmp_packet,
+00248                                                  netsnmp_agent_check_packet,
+00249                                                  netsnmp_agent_check_parse);
+00250     <span class="keywordflow">if</span> (callback_master_sess)
+00251         callback_master_num = callback_master_sess-&gt;<a class="code" href="structsnmp__session.html#o9">local_port</a>;
+00252 }
+00253 <span class="preprocessor">#else</span>
+00254 <span class="preprocessor">#define _init_agent_callback_transport()</span>
+00255 <span class="preprocessor">#endif</span>
+00256 
+00269 <span class="keywordtype">int</span>
+<a name="l00270" id="l00270"></a><a class="code" href="group__library.html#ga23">00270</a> <a class="code" href=
+"group__library.html#ga23">init_agent</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *app)
+00271 {
+00272     <span class="keywordtype">int</span>             r = 0;
+00273 
+00274     <span class="keywordflow">if</span>(++done_init_agent &gt; 1) {
+00275         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_WARNING, <span class=
 "stringliteral">"ignoring extra call to init_agent (%d)\n"</span>, 
-00275                  done_init_agent);
-00276         <span class="keywordflow">return</span> r;
-00277     }
-00278 
-00279     <span class="comment">/*</span>
-00280 <span class="comment">     * get current time (ie, the time the agent started) </span>
-00281 <span class="comment">     */</span>
-00282     gettimeofday(&amp;starttime, NULL);
-00283     starttime.tv_sec--;
-00284     starttime.tv_usec += 1000000L;
-00285 
-00286     <span class="comment">/*</span>
-00287 <span class="comment">     * we handle alarm signals ourselves in the select loop </span>
-00288 <span class="comment">     */</span>
-00289     <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_LIBRARY_ID, 
-00290                            NETSNMP_DS_LIB_ALARM_DONT_USE_SIG, 1);
-00291 
-00292 <span class="preprocessor">#ifdef CAN_USE_NLIST</span>
-00293     init_kmem(<span class="stringliteral">"/dev/kmem"</span>);
-00294 <span class="preprocessor">#endif</span>
-00295 
-00296     setup_tree();
-00297 
-00298     init_agent_read_config(app);
-00299 
-00300 <span class="preprocessor">#ifdef TESTING</span>
-00301     auto_nlist_print_tree(-2, 0);
-00302 <span class="preprocessor">#endif</span>
-00303 
-00304     _init_agent_callback_transport();
-00305     
-00306     <a class="code" href="group__debug.html#ga9">netsnmp_init_helpers</a>();
-00307     init_traps();
-00308     netsnmp_container_init_list();
-00309 
-00310     <span class="comment">/*</span>
-00311 <span class="comment">     * initialize agentx subagent if necessary. </span>
-00312 <span class="comment">     */</span>
-00313 <span class="preprocessor">#ifdef USING_AGENTX_SUBAGENT_MODULE</span>
-00314     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-00315                                NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
-00316         r = subagent_pre_init();
-00317         init_subagent();
-00318     }
+00276                  done_init_agent);
+00277         <span class="keywordflow">return</span> r;
+00278     }
+00279 
+00280     <span class="comment">/*</span>
+00281 <span class="comment">     * get current time (ie, the time the agent started) </span>
+00282 <span class="comment">     */</span>
+00283     gettimeofday(&amp;starttime, NULL);
+00284     starttime.tv_sec--;
+00285     starttime.tv_usec += 1000000L;
+00286 
+00287     <span class="comment">/*</span>
+00288 <span class="comment">     * we handle alarm signals ourselves in the select loop </span>
+00289 <span class="comment">     */</span>
+00290     <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_LIBRARY_ID, 
+00291                            NETSNMP_DS_LIB_ALARM_DONT_USE_SIG, 1);
+00292 
+00293 <span class="preprocessor">#ifdef CAN_USE_NLIST</span>
+00294     init_kmem(<span class="stringliteral">"/dev/kmem"</span>);
+00295 <span class="preprocessor">#endif</span>
+00296 
+00297     setup_tree();
+00298 
+00299     init_agent_read_config(app);
+00300 
+00301 <span class="preprocessor">#ifdef TESTING</span>
+00302     auto_nlist_print_tree(-2, 0);
+00303 <span class="preprocessor">#endif</span>
+00304 
+00305     _init_agent_callback_transport();
+00306     
+00307     <a class="code" href="group__debug.html#ga9">netsnmp_init_helpers</a>();
+00308     init_traps();
+00309     netsnmp_container_init_list();
+00310 
+00311 <span class="preprocessor">#if defined(USING_AGENTX_SUBAGENT_MODULE) || defined(USING_AGENTX_MASTER_MODULE)</span>
+00312     <span class="comment">/*</span>
+00313 <span class="comment">     * initialize agentx configs</span>
+00314 <span class="comment">     */</span>
+00315     agentx_config_init();
+00316     <span class="keywordflow">if</span>(netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+00317                               NETSNMP_DS_AGENT_ROLE) == SUB_AGENT)
+00318         subagent_init();
 00319 <span class="preprocessor">#endif</span>
 00320 
 00321     <span class="comment">/*</span>
@@ -341,39 +341,127 @@
 00335     init_perl();
 00336 <span class="preprocessor">#endif</span>
 00337 
-00338 <span class="preprocessor">#  include "agent_module_inits.h"</span>
-00339 
-00340     <span class="keywordflow">return</span> r;
-00341 }                               <span class="comment">/* end init_agent() */</span>
-00342 
-00343 oid             nullOid[] = { 0, 0 };
-00344 <span class="keywordtype">int</span>             nullOidLen = <span class="keyword">sizeof</span>(nullOid);
-00345 
-00346 <span class="keywordtype">void</span>
-00347 shutdown_agent(<span class="keywordtype">void</span>) {
+00338 <span class="preprocessor">#ifdef USING_AGENTX_SUBAGENT_MODULE</span>
+00339     <span class="comment">/*</span>
+00340 <span class="comment">     * don't init agent modules for a sub-agent</span>
+00341 <span class="comment">     */</span>
+00342     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00343                                NETSNMP_DS_AGENT_ROLE) == SUB_AGENT)
+00344         <span class="keywordflow">return</span> r;
+00345 <span class="preprocessor">#endif</span>
+00346 
+00347 <span class="preprocessor">#  include "agent_module_inits.h"</span>
 00348 
-00349     <span class="comment">/* probably some of this can be called as shutdown callback */</span>
-00350     shutdown_tree();
-00351     clear_context();
-00352     netsnmp_clear_callback_list();
-00353     netsnmp_clear_tdomain_list();
-00354     <a class="code" href="group__handler.html#ga37">netsnmp_clear_handler_list</a>();
-00355     netsnmp_container_free_list();
-00356     clear_sec_mod();
-00357     clear_snmp_enum();
-00358     clear_callback();
-00359     clear_user_list();
-00360 
-00361     done_init_agent = 0;
-00362 }
-00363 
+00349     <span class="keywordflow">return</span> r;
+00350 }                               <span class="comment">/* end init_agent() */</span>
+00351 
+00352 oid             nullOid[] = { 0, 0 };
+00353 <span class="keywordtype">int</span>             nullOidLen = <span class="keyword">sizeof</span>(nullOid);
+00354 
+00355 <span class="keywordtype">void</span>
+00356 shutdown_agent(<span class="keywordtype">void</span>) {
+00357 
+00358     <span class="comment">/* probably some of this can be called as shutdown callback */</span>
+00359     shutdown_tree();
+00360     clear_context();
+00361     netsnmp_clear_callback_list();
+00362     netsnmp_clear_tdomain_list();
+00363     <a class="code" href="group__handler.html#ga37">netsnmp_clear_handler_list</a>();
+00364     netsnmp_container_free_list();
+00365     clear_sec_mod();
+00366     clear_snmp_enum();
+00367     clear_callback();
+00368     clear_user_list();
+00369 
+00370     done_init_agent = 0;
+00371 }
+00372 
+00373 
+00374 <span class="keywordtype">void</span>
+00375 add_to_init_list(<span class="keywordtype">char</span> *module_list)
+00376 {
+00377     <span class="keyword">struct </span>module_init_list *newitem, **list;
+00378     <span class="keywordtype">char</span>           *cp;
+00379     <span class="keywordtype">char</span>           *st;
+00380 
+00381     <span class="keywordflow">if</span> (module_list == NULL) {
+00382         <span class="keywordflow">return</span>;
+00383     } <span class="keywordflow">else</span> {
+00384         cp = (<span class="keywordtype">char</span> *) module_list;
+00385     }
+00386 
+00387     <span class="keywordflow">if</span> (*cp == <span class="charliteral">'-'</span> || *cp == <span class=
+"charliteral">'!'</span>) {
+00388         cp++;
+00389         list = &amp;noinitlist;
+00390     } <span class="keywordflow">else</span> {
+00391         list = &amp;initlist;
+00392     }
+00393 
+00394     cp = strtok_r(cp, <span class="stringliteral">", :"</span>, &amp;st);
+00395     <span class="keywordflow">while</span> (cp) {
+00396         newitem = (<span class="keyword">struct </span>module_init_list *) calloc(1, <span class=
+"keyword">sizeof</span>(*initlist));
+00397         newitem-&gt;module_name = strdup(cp);
+00398         newitem-&gt;<a class="code" href="structsnmp__session.html#o5">next</a> = *list;
+00399         *list = newitem;
+00400         cp = strtok_r(NULL, <span class="stringliteral">", :"</span>, &amp;st);
+00401     }
+00402 }
+00403 
+00404 <span class="keywordtype">int</span>
+00405 should_init(<span class="keyword">const</span> <span class="keywordtype">char</span> *module_name)
+00406 {
+00407     <span class="keyword">struct </span>module_init_list *listp;
+00408 
+00409     <span class="comment">/*</span>
+00410 <span class="comment">     * a definitive list takes priority </span>
+00411 <span class="comment">     */</span>
+00412     <span class="keywordflow">if</span> (initlist) {
+00413         listp = initlist;
+00414         <span class="keywordflow">while</span> (listp) {
+00415             <span class="keywordflow">if</span> (strcmp(listp-&gt;module_name, module_name) == 0) {
+00416                 DEBUGMSGTL((<span class="stringliteral">"mib_init"</span>, <span class=
+"stringliteral">"initializing: %s\n"</span>,
+00417                             module_name));
+00418                 <span class="keywordflow">return</span> DO_INITIALIZE;
+00419             }
+00420             listp = listp-&gt;<a class="code" href="structsnmp__session.html#o5">next</a>;
+00421         }
+00422         DEBUGMSGTL((<span class="stringliteral">"mib_init"</span>, <span class=
+"stringliteral">"skipping:     %s\n"</span>, module_name));
+00423         <span class="keywordflow">return</span> DONT_INITIALIZE;
+00424     }
+00425 
+00426     <span class="comment">/*</span>
+00427 <span class="comment">     * initialize it only if not on the bad list (bad module, no bone) </span>
+00428 <span class="comment">     */</span>
+00429     <span class="keywordflow">if</span> (noinitlist) {
+00430         listp = noinitlist;
+00431         <span class="keywordflow">while</span> (listp) {
+00432             <span class="keywordflow">if</span> (strcmp(listp-&gt;module_name, module_name) == 0) {
+00433                 DEBUGMSGTL((<span class="stringliteral">"mib_init"</span>, <span class=
+"stringliteral">"skipping:     %s\n"</span>,
+00434                             module_name));
+00435                 <span class="keywordflow">return</span> DONT_INITIALIZE;
+00436             }
+00437             listp = listp-&gt;<a class="code" href="structsnmp__session.html#o5">next</a>;
+00438         }
+00439     }
+00440     DEBUGMSGTL((<span class="stringliteral">"mib_init"</span>, <span class=
+"stringliteral">"initializing: %s\n"</span>, module_name));
+00441 
+00442     <span class="comment">/*</span>
+00443 <span class="comment">     * initialize it </span>
+00444 <span class="comment">     */</span>
+00445     <span class="keywordflow">return</span> DO_INITIALIZE;
+00446 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:49 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

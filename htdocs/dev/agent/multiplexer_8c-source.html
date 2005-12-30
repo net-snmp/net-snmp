@@ -27,118 +27,113 @@
 00007 
 00008 <span class="preprocessor">#include &lt;net-snmp/agent/multiplexer.h&gt;</span>
 00009 
-00010 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
-00011 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
-00012 <span class="preprocessor">#endif</span>
-00013 
-00035 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
-<a name="l00036" id="l00036"></a><a class="code" href="group__multiplexer.html#ga0">00036</a> <a class="code" href=
+00031 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+<a name="l00032" id="l00032"></a><a class="code" href="group__multiplexer.html#ga0">00032</a> <a class="code" href=
 "group__multiplexer.html#ga0">netsnmp_get_multiplexer_handler</a>(<a class="code" href=
 "structnetsnmp__mib__handler__methods.html">netsnmp_mib_handler_methods</a> *req)
-00037 {
-00038     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *ret = NULL;
-00039 
-00040     <span class="keywordflow">if</span> (!req) {
-00041         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_INFO,
-00042                  <span class="stringliteral">"netsnmp_get_multiplexer_handler(NULL) called\n"</span>);
-00043         <span class="keywordflow">return</span> NULL;
-00044     }
-00045 
-00046     ret =
-00047         <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
+00033 {
+00034     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *ret = NULL;
+00035 
+00036     <span class="keywordflow">if</span> (!req) {
+00037         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_INFO,
+00038                  <span class="stringliteral">"netsnmp_get_multiplexer_handler(NULL) called\n"</span>);
+00039         <span class="keywordflow">return</span> NULL;
+00040     }
+00041 
+00042     ret =
+00043         <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
 "stringliteral">"multiplexer"</span>,
-00048                                netsnmp_multiplexer_helper_handler);
-00049     <span class="keywordflow">if</span> (ret) {
-00050         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = (<span class=
+00044                                netsnmp_multiplexer_helper_handler);
+00045     <span class="keywordflow">if</span> (ret) {
+00046         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = (<span class=
 "keywordtype">void</span> *) req;
-00051     }
-00052     <span class="keywordflow">return</span> ret;
-00053 }
-00054 
-00056 <span class="keywordtype">int</span>
-<a name="l00057" id="l00057"></a><a class="code" href="group__multiplexer.html#ga1">00057</a> <a class="code" href=
+00047     }
+00048     <span class="keywordflow">return</span> ret;
+00049 }
+00050 
+00052 <span class="keywordtype">int</span>
+<a name="l00053" id="l00053"></a><a class="code" href="group__multiplexer.html#ga1">00053</a> <a class="code" href=
 "group__multiplexer.html#ga1">netsnmp_multiplexer_helper_handler</a>(<a class="code" href=
 "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
-00058                                    <a class="code" href=
+00054                                    <a class="code" href=
 "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
-00059                                    <a class="code" href=
+00055                                    <a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
-00060                                    <a class="code" href=
+00056                                    <a class="code" href=
 "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
-00061 {
-00062 
-00063     <a class="code" href="structnetsnmp__mib__handler__methods.html">netsnmp_mib_handler_methods</a> *methods;
-00064 
-00065     <span class="keywordflow">if</span> (!handler-&gt;<a class="code" href=
+00057 {
+00058 
+00059     <a class="code" href="structnetsnmp__mib__handler__methods.html">netsnmp_mib_handler_methods</a> *methods;
+00060 
+00061     <span class="keywordflow">if</span> (!handler-&gt;<a class="code" href=
 "structnetsnmp__mib__handler__s.html#o1">myvoid</a>) {
-00066         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_INFO, <span class=
+00062         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_INFO, <span class=
 "stringliteral">"improperly registered multiplexer found\n"</span>);
-00067         <span class="keywordflow">return</span> SNMP_ERR_GENERR;
-00068     }
-00069 
-00070     methods = (<a class="code" href=
+00063         <span class="keywordflow">return</span> SNMP_ERR_GENERR;
+00064     }
+00065 
+00066     methods = (<a class="code" href=
 "structnetsnmp__mib__handler__methods.html">netsnmp_mib_handler_methods</a> *) handler-&gt;<a class="code" href=
 "structnetsnmp__mib__handler__s.html#o1">myvoid</a>;
-00071 
-00072     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
+00067 
+00068     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
 "structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
-00073     <span class="keywordflow">case</span> MODE_GETBULK:
-00074         handler = methods-&gt;getbulk_handler;
-00075         <span class="keywordflow">if</span> (handler)
-00076             <span class="keywordflow">break</span>;
-00077         <span class="comment">/* Deliberate fallthrough to use GetNext handler */</span>
-00078     <span class="keywordflow">case</span> MODE_GETNEXT:
-00079         handler = methods-&gt;getnext_handler;
-00080         <span class="keywordflow">if</span> (handler)
-00081             <span class="keywordflow">break</span>;
-00082         <span class="comment">/* Deliberate fallthrough to use Get handler */</span>
-00083     <span class="keywordflow">case</span> MODE_GET:
-00084         handler = methods-&gt;get_handler;
-00085         <span class="keywordflow">if</span> (!handler) {
-00086             <a class="code" href="group__snmp__agent.html#ga81">netsnmp_set_all_requests_error</a>(reqinfo, requests,
-00087                                            SNMP_NOSUCHOBJECT);
-00088         }
-00089         <span class="keywordflow">break</span>;
-00090 
-00091     <span class="keywordflow">case</span> MODE_SET_RESERVE1:
-00092     <span class="keywordflow">case</span> MODE_SET_RESERVE2:
-00093     <span class="keywordflow">case</span> MODE_SET_ACTION:
-00094     <span class="keywordflow">case</span> MODE_SET_COMMIT:
-00095     <span class="keywordflow">case</span> MODE_SET_FREE:
-00096     <span class="keywordflow">case</span> MODE_SET_UNDO:
-00097         handler = methods-&gt;set_handler;
-00098         <span class="keywordflow">if</span> (!handler) {
-00099             <a class="code" href="group__snmp__agent.html#ga81">netsnmp_set_all_requests_error</a>(reqinfo, requests,
-00100                                            SNMP_ERR_NOTWRITABLE);
-00101             <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00102         }
-00103         <span class="keywordflow">break</span>;
-00104 
-00105         <span class="comment">/*</span>
-00106 <span class="comment">         * XXX: process SETs specially, and possibly others </span>
-00107 <span class="comment">         */</span>
-00108     <span class="keywordflow">default</span>:
-00109         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00069     <span class="keywordflow">case</span> MODE_GETBULK:
+00070         handler = methods-&gt;getbulk_handler;
+00071         <span class="keywordflow">if</span> (handler)
+00072             <span class="keywordflow">break</span>;
+00073         <span class="comment">/* Deliberate fallthrough to use GetNext handler */</span>
+00074     <span class="keywordflow">case</span> MODE_GETNEXT:
+00075         handler = methods-&gt;getnext_handler;
+00076         <span class="keywordflow">if</span> (handler)
+00077             <span class="keywordflow">break</span>;
+00078         <span class="comment">/* Deliberate fallthrough to use Get handler */</span>
+00079     <span class="keywordflow">case</span> MODE_GET:
+00080         handler = methods-&gt;get_handler;
+00081         <span class="keywordflow">if</span> (!handler) {
+00082             <a class="code" href=
+"group__snmp__agent.html#ga73">netsnmp_request_set_error_all</a>(requests, SNMP_NOSUCHOBJECT);
+00083         }
+00084         <span class="keywordflow">break</span>;
+00085 
+00086     <span class="keywordflow">case</span> MODE_SET_RESERVE1:
+00087     <span class="keywordflow">case</span> MODE_SET_RESERVE2:
+00088     <span class="keywordflow">case</span> MODE_SET_ACTION:
+00089     <span class="keywordflow">case</span> MODE_SET_COMMIT:
+00090     <span class="keywordflow">case</span> MODE_SET_FREE:
+00091     <span class="keywordflow">case</span> MODE_SET_UNDO:
+00092         handler = methods-&gt;set_handler;
+00093         <span class="keywordflow">if</span> (!handler) {
+00094             <a class="code" href=
+"group__snmp__agent.html#ga73">netsnmp_request_set_error_all</a>(requests, SNMP_ERR_NOTWRITABLE);
+00095             <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00096         }
+00097         <span class="keywordflow">break</span>;
+00098 
+00099         <span class="comment">/*</span>
+00100 <span class="comment">         * XXX: process SETs specially, and possibly others </span>
+00101 <span class="comment">         */</span>
+00102     <span class="keywordflow">default</span>:
+00103         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"unsupported mode for multiplexer: %d\n"</span>,
+00104                  reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a>);
+00105         <span class="keywordflow">return</span> SNMP_ERR_GENERR;
+00106     }
+00107     <span class="keywordflow">if</span> (!handler) {
+00108         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,
+00109                  <span class="stringliteral">"No handler enabled for mode %d in multiplexer\n"</span>,
 00110                  reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a>);
 00111         <span class="keywordflow">return</span> SNMP_ERR_GENERR;
 00112     }
-00113     <span class="keywordflow">if</span> (!handler) {
-00114         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,
-00115                  <span class="stringliteral">"No handler enabled for mode %d in multiplexer\n"</span>,
-00116                  reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a>);
-00117         <span class="keywordflow">return</span> SNMP_ERR_GENERR;
-00118     }
-00119     <span class="keywordflow">return</span> <a class="code" href=
+00113     <span class="keywordflow">return</span> <a class="code" href=
 "group__handler.html#ga15">netsnmp_call_handler</a>(handler, reginfo, reqinfo, requests);
-00120 }
+00114 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:38 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:45 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

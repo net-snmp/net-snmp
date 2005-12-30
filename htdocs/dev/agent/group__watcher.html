@@ -82,15 +82,24 @@
 
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga6" doxytag=
-      "watcher::netsnmp_register_watched_timestamp" id="ga6"></a> int&nbsp;</td>
+      "watcher::netsnmp_watched_timestamp_register" id="ga6"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_watched_timestamp_register</b> (<a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *whandler, <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, marker_t timestamp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga7" doxytag=
+      "watcher::netsnmp_register_watched_timestamp" id="ga7"></a> int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_register_watched_timestamp</b> (<a class="el" href=
       "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, marker_t timestamp)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga7" doxytag=
-      "watcher::netsnmp_watched_timestamp_handler" id="ga7"></a> int&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga8" doxytag=
+      "watcher::netsnmp_watched_timestamp_handler" id="ga8"></a> int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_watched_timestamp_handler</b> (<a class="el" href=
       "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler, <a class="el" href=
@@ -100,30 +109,86 @@
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga8" doxytag=
-      "watcher::netsnmp_get_watched_spinlock_handler" id="ga8"></a> <a class="el" href=
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga9" doxytag=
+      "watcher::netsnmp_get_watched_spinlock_handler" id="ga9"></a> <a class="el" href=
       "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_get_watched_spinlock_handler</b> (void)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga9" doxytag=
-      "watcher::netsnmp_register_watched_spinlock" id="ga9"></a> int&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga10" doxytag=
+      "watcher::netsnmp_register_watched_spinlock" id="ga10"></a> int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_register_watched_spinlock</b> (<a class="el" href=
       "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, int *spinlock)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga10" doxytag=
-      "watcher::netsnmp_watched_spinlock_handler" id="ga10"></a> int&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga11" doxytag=
+      "watcher::netsnmp_watched_spinlock_handler" id="ga11"></a> int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_watched_spinlock_handler</b> (<a class="el" href=
       "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler, <a class="el" href=
       "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
       "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
       "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga12" doxytag=
+      "watcher::netsnmp_register_ulong_scalar" id="ga12"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_register_ulong_scalar</b> (const char *name, oid *reg_oid, size_t
+      reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga13" doxytag=
+      "watcher::netsnmp_register_read_only_ulong_scalar" id="ga13"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_register_read_only_ulong_scalar</b> (const char *name, oid *reg_oid,
+      size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga14" doxytag=
+      "watcher::netsnmp_register_long_scalar" id="ga14"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_register_long_scalar</b> (const char *name, oid *reg_oid, size_t
+      reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga15" doxytag=
+      "watcher::netsnmp_register_read_only_long_scalar" id="ga15"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_register_read_only_long_scalar</b> (const char *name, oid *reg_oid,
+      size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga16" doxytag=
+      "watcher::netsnmp_register_int_scalar" id="ga16"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_register_int_scalar</b> (const char *name, oid *reg_oid, size_t
+      reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga17" doxytag=
+      "watcher::netsnmp_register_read_only_int_scalar" id="ga17"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_register_read_only_int_scalar</b> (const char *name, oid *reg_oid,
+      size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga18" doxytag=
+      "watcher::netsnmp_register_read_only_counter32_scalar" id="ga18"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_register_read_only_counter32_scalar</b> (const char *name, oid
+      *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)</td>
     </tr>
   </table>
   <hr />
@@ -133,8 +198,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:45 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:48:02 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

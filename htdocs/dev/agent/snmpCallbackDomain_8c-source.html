@@ -486,127 +486,206 @@ href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu)
 00445     ch-&gt;orig_transport_data = pdu-&gt;<a class="code" href="structsnmp__pdu.html#o13">transport_data</a>;
 00446     pdu-&gt;<a class="code" href="structsnmp__pdu.html#o13">transport_data</a> = ch;
 00447     <span class="keywordflow">switch</span> (pdu-&gt;<a class="code" href="structsnmp__pdu.html#o1">command</a>) {
-00448     <span class="keywordflow">case</span> SNMP_MSG_RESPONSE:
-00449     <span class="keywordflow">case</span> SNMP_MSG_TRAP:
-00450     <span class="keywordflow">case</span> SNMP_MSG_TRAP2:
-00451         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o9">flags</a> &amp;= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
-00452         <span class="keywordflow">break</span>;
-00453     }
-00454     *len = 1;
-00455     DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
+00448     <span class="keywordflow">case</span> SNMP_MSG_GETBULK:
+00449         <span class="keywordflow">if</span> (pdu-&gt;max_repetitions &lt; 0) {
+00450             sp-&gt;<a class="code" href="structsnmp__session.html#o14">s_snmp_errno</a> = SNMPERR_BAD_REPETITIONS;
+00451             <span class="keywordflow">return</span> -1;
+00452         }
+00453         <span class="keywordflow">if</span> (pdu-&gt;non_repeaters &lt; 0) {
+00454             sp-&gt;<a class="code" href="structsnmp__session.html#o14">s_snmp_errno</a> = SNMPERR_BAD_REPEATERS;
+00455             <span class="keywordflow">return</span> -1;
+00456         }
+00457         <span class="keywordflow">break</span>;
+00458     <span class="keywordflow">case</span> SNMP_MSG_RESPONSE:
+00459     <span class="keywordflow">case</span> SNMP_MSG_TRAP:
+00460     <span class="keywordflow">case</span> SNMP_MSG_TRAP2:
+00461         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o9">flags</a> &amp;= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
+00462         <span class="comment">/*</span>
+00463 <span class="comment">         * Fallthrough</span>
+00464 <span class="comment">         */</span>
+00465     <span class="keywordflow">default</span>:
+00466         <span class="keywordflow">if</span> (pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o6">errstat</a> == SNMP_DEFAULT_ERRSTAT)
+00467             pdu-&gt;<a class="code" href="structsnmp__pdu.html#o6">errstat</a> = 0;
+00468         <span class="keywordflow">if</span> (pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o7">errindex</a> == SNMP_DEFAULT_ERRINDEX)
+00469             pdu-&gt;<a class="code" href="structsnmp__pdu.html#o7">errindex</a> = 0;
+00470         <span class="keywordflow">break</span>;
+00471     }
+00472 
+00473     <span class="comment">/*</span>
+00474 <span class="comment">     * Copy missing values from session defaults</span>
+00475 <span class="comment">     */</span>
+00476     <span class="keywordflow">switch</span> (pdu-&gt;<a class="code" href="structsnmp__pdu.html#o0">version</a>) {
+00477 <span class="preprocessor">#ifndef DISABLE_SNMPV1</span>
+00478     <span class="keywordflow">case</span> SNMP_VERSION_1:
+00479 <span class="preprocessor">#endif</span>
+00480 <span class="preprocessor">#ifndef DISABLE_SNMPV2C</span>
+00481     <span class="keywordflow">case</span> SNMP_VERSION_2c:
+00482 <span class="preprocessor">#endif</span>
+00483 <span class="preprocessor">#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)</span>
+00484         <span class="keywordflow">if</span> (pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o19">community_len</a> == 0) {
+00485             <span class="keywordflow">if</span> (sp-&gt;<a class="code" href=
+"structsnmp__session.html#o17">community_len</a> == 0) {
+00486                 sp-&gt;<a class="code" href="structsnmp__session.html#o14">s_snmp_errno</a> = SNMPERR_BAD_COMMUNITY;
+00487                 <span class="keywordflow">return</span> -1;
+00488             }
+00489             pdu-&gt;<a class="code" href="structsnmp__pdu.html#o18">community</a> = (u_char *) malloc(sp-&gt;<a class=
+"code" href="structsnmp__session.html#o17">community_len</a>);
+00490             <span class="keywordflow">if</span> (pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o18">community</a> == NULL) {
+00491                 sp-&gt;<a class="code" href="structsnmp__session.html#o14">s_snmp_errno</a> = SNMPERR_MALLOC;
+00492                 <span class="keywordflow">return</span> -1;
+00493             }
+00494             memmove(pdu-&gt;<a class="code" href="structsnmp__pdu.html#o18">community</a>,
+00495                     sp-&gt;<a class="code" href="structsnmp__session.html#o16">community</a>, sp-&gt;<a class="code" href=
+"structsnmp__session.html#o17">community_len</a>);
+00496             pdu-&gt;<a class="code" href="structsnmp__pdu.html#o19">community_len</a> = sp-&gt;<a class="code" href=
+"structsnmp__session.html#o17">community_len</a>;
+00497         }
+00498         <span class="keywordflow">break</span>;
+00499 <span class="preprocessor">#endif</span>
+00500     <span class="keywordflow">case</span> SNMP_VERSION_3:
+00501         <span class="keywordflow">if</span> (pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o32">securityNameLen</a> == 0) {
+00502             pdu-&gt;<a class="code" href="structsnmp__pdu.html#o31">securityName</a> = (u_char *) malloc(sp-&gt;<a class=
+"code" href="structsnmp__session.html#o30">securityNameLen</a>);
+00503             <span class="keywordflow">if</span> (pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o31">securityName</a> == NULL) {
+00504                 sp-&gt;<a class="code" href="structsnmp__session.html#o14">s_snmp_errno</a> = SNMPERR_MALLOC;
+00505                 <span class="keywordflow">return</span> -1;
+00506             }
+00507             memmove(pdu-&gt;<a class="code" href="structsnmp__pdu.html#o31">securityName</a>,
+00508                      sp-&gt;<a class="code" href="structsnmp__session.html#o29">securityName</a>, sp-&gt;<a class="code"
+href="structsnmp__session.html#o30">securityNameLen</a>);
+00509             pdu-&gt;<a class="code" href="structsnmp__pdu.html#o32">securityNameLen</a> = sp-&gt;<a class="code" href=
+"structsnmp__session.html#o30">securityNameLen</a>;
+00510         }
+00511         <span class="keywordflow">if</span> (pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o10">securityModel</a> == -1)
+00512             pdu-&gt;<a class="code" href="structsnmp__pdu.html#o10">securityModel</a> = sp-&gt;<a class="code" href=
+"structsnmp__session.html#o43">securityModel</a>;
+00513         <span class="keywordflow">if</span> (pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o11">securityLevel</a> == 0)
+00514             pdu-&gt;<a class="code" href="structsnmp__pdu.html#o11">securityLevel</a> = sp-&gt;<a class="code" href=
+"structsnmp__session.html#o44">securityLevel</a>;
+00515         <span class="comment">/* WHAT ELSE ?? */</span>
+00516     }
+00517     *len = 1;
+00518     DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
 "stringliteral">"hook_build exit\n"</span>));
-00456     <span class="keywordflow">return</span> 1;
-00457 }
-00458 
-00459 <span class="keywordtype">int</span>
-00460 netsnmp_callback_check_packet(u_char * pkt, size_t len)
-00461 {
-00462     <span class="keywordflow">return</span> 1;
-00463 }
-00464 
-00465 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *
-00466 netsnmp_callback_create_pdu(netsnmp_transport *transport,
-00467                             <span class="keywordtype">void</span> *opaque, size_t olength)
-00468 {
-00469     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;
-00470     netsnmp_callback_pass *cp =
-00471         callback_pop_queue(((netsnmp_callback_info *) transport-&gt;data)-&gt;
-00472                            callback_num);
-00473     <span class="keywordflow">if</span> (!cp)
-00474         <span class="keywordflow">return</span> NULL;
-00475     pdu = cp-&gt;pdu;
-00476     pdu-&gt;<a class="code" href="structsnmp__pdu.html#o13">transport_data</a> = opaque;
-00477     pdu-&gt;<a class="code" href="structsnmp__pdu.html#o14">transport_data_length</a> = olength;
-00478     <span class="keywordflow">if</span> (opaque)                 <span class=
+00519     <span class="keywordflow">return</span> 1;
+00520 }
+00521 
+00522 <span class="keywordtype">int</span>
+00523 netsnmp_callback_check_packet(u_char * pkt, size_t len)
+00524 {
+00525     <span class="keywordflow">return</span> 1;
+00526 }
+00527 
+00528 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *
+00529 netsnmp_callback_create_pdu(netsnmp_transport *transport,
+00530                             <span class="keywordtype">void</span> *opaque, size_t olength)
+00531 {
+00532     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;
+00533     netsnmp_callback_pass *cp =
+00534         callback_pop_queue(((netsnmp_callback_info *) transport-&gt;data)-&gt;
+00535                            callback_num);
+00536     <span class="keywordflow">if</span> (!cp)
+00537         <span class="keywordflow">return</span> NULL;
+00538     pdu = cp-&gt;pdu;
+00539     pdu-&gt;<a class="code" href="structsnmp__pdu.html#o13">transport_data</a> = opaque;
+00540     pdu-&gt;<a class="code" href="structsnmp__pdu.html#o14">transport_data_length</a> = olength;
+00541     <span class="keywordflow">if</span> (opaque)                 <span class=
 "comment">/* if created, we're the server */</span>
-00479         *((<span class="keywordtype">int</span> *) opaque) = cp-&gt;return_transport_num;
-00480     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(cp);
-00481     <span class="keywordflow">return</span> pdu;
-00482 }
-00483 
-00484 <a class="code" href="structsnmp__session.html">netsnmp_session</a> *
-00485 netsnmp_callback_open(<span class="keywordtype">int</span> attach_to,
-00486                       <span class="keywordtype">int</span> (*return_func) (<span class="keywordtype">int</span> op,
-00487                                           <a class="code" href="structsnmp__session.html">netsnmp_session</a> * session,
-00488                                           <span class="keywordtype">int</span> reqid, <a class="code" href=
+00542         *((<span class="keywordtype">int</span> *) opaque) = cp-&gt;return_transport_num;
+00543     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(cp);
+00544     <span class="keywordflow">return</span> pdu;
+00545 }
+00546 
+00547 <a class="code" href="structsnmp__session.html">netsnmp_session</a> *
+00548 netsnmp_callback_open(<span class="keywordtype">int</span> attach_to,
+00549                       <span class="keywordtype">int</span> (*return_func) (<span class="keywordtype">int</span> op,
+00550                                           <a class="code" href="structsnmp__session.html">netsnmp_session</a> * session,
+00551                                           <span class="keywordtype">int</span> reqid, <a class="code" href=
 "structsnmp__pdu.html">netsnmp_pdu</a> *pdu,
-00489                                           <span class="keywordtype">void</span> *magic),
-00490                       <span class="keywordtype">int</span> (*fpre_parse) (<a class="code" href=
+00552                                           <span class="keywordtype">void</span> *magic),
+00553                       <span class="keywordtype">int</span> (*fpre_parse) (<a class="code" href=
 "structsnmp__session.html">netsnmp_session</a> *,
-00491                                          <span class="keyword">struct</span> netsnmp_transport_s *,
-00492                                          <span class="keywordtype">void</span> *, <span class="keywordtype">int</span>),
-00493                       <span class="keywordtype">int</span> (*fpost_parse) (netsnmp_session *, <a class="code" href=
+00554                                          <span class="keyword">struct</span> netsnmp_transport_s *,
+00555                                          <span class="keywordtype">void</span> *, <span class="keywordtype">int</span>),
+00556                       <span class="keywordtype">int</span> (*fpost_parse) (netsnmp_session *, <a class="code" href=
 "structsnmp__pdu.html">netsnmp_pdu</a> *,
-00494                                           <span class="keywordtype">int</span>))
-00495 {
-00496     netsnmp_session callback_sess, *callback_ss;
-00497     netsnmp_transport *callback_tr;
-00498 
-00499     callback_tr = netsnmp_callback_transport(attach_to);
-00500     snmp_sess_init(&amp;callback_sess);
-00501     callback_sess.<a class="code" href="structsnmp__session.html#o11">callback</a> = return_func;
-00502     <span class="keywordflow">if</span> (attach_to) {
-00503         <span class="comment">/*</span>
-00504 <span class="comment">         * client </span>
-00505 <span class="comment">         */</span>
-00506         <span class="comment">/*</span>
-00507 <span class="comment">         * trysess.community = (u_char *) callback_ss; </span>
-00508 <span class="comment">         */</span>
-00509     } <span class="keywordflow">else</span> {
-00510         callback_sess.<a class="code" href="structsnmp__session.html#o20">isAuthoritative</a> = SNMP_SESS_AUTHORITATIVE;
-00511     }
-00512     callback_sess.<a class="code" href="structsnmp__session.html#o7">remote_port</a> = 0;
-00513     callback_sess.<a class="code" href="structsnmp__session.html#o1">retries</a> = 0;
-00514     callback_sess.<a class="code" href="structsnmp__session.html#o2">timeout</a> = 30000000;
-00515     callback_sess.<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_DEFAULT_VERSION;       <span class=
+00557                                           <span class="keywordtype">int</span>))
+00558 {
+00559     netsnmp_session callback_sess, *callback_ss;
+00560     netsnmp_transport *callback_tr;
+00561 
+00562     callback_tr = netsnmp_callback_transport(attach_to);
+00563     snmp_sess_init(&amp;callback_sess);
+00564     callback_sess.<a class="code" href="structsnmp__session.html#o11">callback</a> = return_func;
+00565     <span class="keywordflow">if</span> (attach_to) {
+00566         <span class="comment">/*</span>
+00567 <span class="comment">         * client </span>
+00568 <span class="comment">         */</span>
+00569         <span class="comment">/*</span>
+00570 <span class="comment">         * trysess.community = (u_char *) callback_ss; </span>
+00571 <span class="comment">         */</span>
+00572     } <span class="keywordflow">else</span> {
+00573         callback_sess.<a class="code" href="structsnmp__session.html#o20">isAuthoritative</a> = SNMP_SESS_AUTHORITATIVE;
+00574     }
+00575     callback_sess.<a class="code" href="structsnmp__session.html#o7">remote_port</a> = 0;
+00576     callback_sess.<a class="code" href="structsnmp__session.html#o1">retries</a> = 0;
+00577     callback_sess.<a class="code" href="structsnmp__session.html#o2">timeout</a> = 30000000;
+00578     callback_sess.<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_DEFAULT_VERSION;       <span class=
 "comment">/* (mostly) bogus */</span>
-00516     callback_ss = snmp_add_full(&amp;callback_sess, callback_tr,
-00517                                 fpre_parse,
-00518                                 netsnmp_callback_hook_parse, fpost_parse,
-00519                                 netsnmp_callback_hook_build,
-00520                                 NULL,
-00521                                 netsnmp_callback_check_packet,
-00522                                 netsnmp_callback_create_pdu);
-00523     <span class="keywordflow">if</span> (callback_ss)
-00524         callback_ss-&gt;<a class="code" href="structsnmp__session.html#o9">local_port</a> =
-00525             ((netsnmp_callback_info *) callback_tr-&gt;data)-&gt;callback_num;
-00526     <span class="keywordflow">return</span> callback_ss;
-00527 }
-00528 
-00529 
-00530 
-00531 <span class="keywordtype">void</span>
-00532 netsnmp_clear_callback_list(<span class="keywordtype">void</span>)
-00533 {
-00534 
-00535     netsnmp_transport_list *list = trlist, *next = NULL;
-00536     netsnmp_transport *tr = NULL;
-00537 
-00538     DEBUGMSGTL((<span class="stringliteral">"callback_clear"</span>, <span class=
+00579     callback_ss = snmp_add_full(&amp;callback_sess, callback_tr,
+00580                                 fpre_parse,
+00581                                 netsnmp_callback_hook_parse, fpost_parse,
+00582                                 netsnmp_callback_hook_build,
+00583                                 NULL,
+00584                                 netsnmp_callback_check_packet,
+00585                                 netsnmp_callback_create_pdu);
+00586     <span class="keywordflow">if</span> (callback_ss)
+00587         callback_ss-&gt;<a class="code" href="structsnmp__session.html#o9">local_port</a> =
+00588             ((netsnmp_callback_info *) callback_tr-&gt;data)-&gt;callback_num;
+00589     <span class="keywordflow">return</span> callback_ss;
+00590 }
+00591 
+00592 
+00593 
+00594 <span class="keywordtype">void</span>
+00595 netsnmp_clear_callback_list(<span class="keywordtype">void</span>)
+00596 {
+00597 
+00598     netsnmp_transport_list *list = trlist, *next = NULL;
+00599     netsnmp_transport *tr = NULL;
+00600 
+00601     DEBUGMSGTL((<span class="stringliteral">"callback_clear"</span>, <span class=
 "stringliteral">"called netsnmp_callback_clear_list()\n"</span>));
-00539     <span class="keywordflow">while</span> (list != NULL) {
-00540         next = list-&gt;<a class="code" href="structsnmp__session.html#o5">next</a>;
-00541         tr = list-&gt;transport;
-00542 
-00543         <span class="keywordflow">if</span> (tr != NULL) {
-00544             tr-&gt;f_close(tr);
-00545             netsnmp_transport_remove_from_list(&amp;trlist, list-&gt;transport);
-00546             netsnmp_transport_free(list-&gt;transport);
-00547         }
-00548         list = next;
-00549     }
-00550     trlist = NULL;
-00551 
-00552 }
-00553 
-00554 <span class="preprocessor">#endif </span><span class="comment">/* SNMP_TRANSPORT_CALLBACK_DOMAIN */</span>
+00602     <span class="keywordflow">while</span> (list != NULL) {
+00603         next = list-&gt;<a class="code" href="structsnmp__session.html#o5">next</a>;
+00604         tr = list-&gt;transport;
+00605 
+00606         <span class="keywordflow">if</span> (tr != NULL) {
+00607             tr-&gt;f_close(tr);
+00608             netsnmp_transport_remove_from_list(&amp;trlist, list-&gt;transport);
+00609             netsnmp_transport_free(list-&gt;transport);
+00610         }
+00611         list = next;
+00612     }
+00613     trlist = NULL;
+00614 
+00615 }
+00616 
+00617 <span class="preprocessor">#endif </span><span class="comment">/* SNMP_TRANSPORT_CALLBACK_DOMAIN */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:49 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

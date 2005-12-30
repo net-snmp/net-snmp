@@ -34,6 +34,32 @@
     </tr>
 
     <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga29" doxytag=
+      "asn1_packet_parse::INT32_MAX" id="ga29"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>INT32_MAX</b>&nbsp;&nbsp;&nbsp;2147483647</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga30" doxytag=
+      "asn1_packet_parse::INT32_MIN" id="ga30"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>INT32_MIN</b>&nbsp;&nbsp;&nbsp;(0 - INT32_MAX - 1)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>CHECK_OVERFLOW_S</b>(x, y)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>CHECK_OVERFLOW_U</b>(x, y)</td>
+    </tr>
+
+    <tr>
       <td colspan="2">
         <br />
 
@@ -85,7 +111,7 @@
       "asn1_packet_parse::asn_parse_string" id="ga11"></a> u_char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>asn_parse_string</b> (u_char *data, size_t *datalength, u_char *type, u_char
-      *string, size_t *strlength)</td>
+      *str, size_t *strlength)</td>
     </tr>
 
     <tr>
@@ -93,7 +119,7 @@
       "asn1_packet_parse::asn_build_string" id="ga12"></a> u_char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>asn_build_string</b> (u_char *data, size_t *datalength, u_char type, const
-      u_char *string, size_t strlength)</td>
+      u_char *str, size_t strlength)</td>
     </tr>
 
     <tr>
@@ -176,7 +202,7 @@
       "asn1_packet_parse::asn_parse_bitstring" id="ga23"></a> u_char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>asn_parse_bitstring</b> (u_char *data, size_t *datalength, u_char *type, u_char
-      *string, size_t *strlength)</td>
+      *str, size_t *strlength)</td>
     </tr>
 
     <tr>
@@ -184,7 +210,7 @@
       "asn1_packet_parse::asn_build_bitstring" id="ga24"></a> u_char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>asn_build_bitstring</b> (u_char *data, size_t *datalength, u_char type, const
-      u_char *string, size_t strlength)</td>
+      u_char *str, size_t strlength)</td>
     </tr>
 
     <tr>
@@ -322,11 +348,129 @@
  }
 </pre>
   </div>
+  <hr />
+
+  <h2>Define Documentation</h2><a class="anchor" name="ga31" doxytag="asn1.c::CHECK_OVERFLOW_S" id="ga31"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define CHECK_OVERFLOW_S</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">x,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">y&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p><b>Value:</b></p>
+
+        <div class="fragment">
+          <pre class="fragment">
+<span class="keywordflow">do</span> { <span class="keywordtype">int</span> trunc = 0;                     \
+        <span class="keywordflow">if</span> (x &gt; INT32_MAX) {                                            \
+            trunc = 1;                                                  \
+            x &amp;= 0xffffffff;                                            \
+        } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (x &lt; INT32_MIN) {                                     \
+            trunc = 1;                                                  \
+            x = 0 - (x &amp; 0xffffffff);                                   \
+        }                                                               \
+        <span class="keywordflow">if</span> (trunc)                                                      \
+            <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,<span class=
+"stringliteral">"truncating signed value to 32 bits (%d)\n"</span>,y); \
+    } <span class="keywordflow">while</span>(0)
+</pre>
+        </div>
+
+        <p>Definition at line <a class="el" href="asn1_8c-source.html#l00214">214</a> of file <a class="el" href=
+        "asn1_8c-source.html">asn1.c</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga32" doxytag="asn1.c::CHECK_OVERFLOW_U" id="ga32"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define CHECK_OVERFLOW_U</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">x,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">y&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p><b>Value:</b></p>
+
+        <div class="fragment">
+          <pre class="fragment">
+<span class="keywordflow">do</span> {                                    \
+        <span class="keywordflow">if</span> (x &gt; UINT32_MAX) {                                           \
+            x &amp;= 0xffffffff;                                            \
+            <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,<span class=
+"stringliteral">"truncating unsigned value to 32 bits (%d)\n"</span>,y); \
+        }                                                               \
+    } <span class="keywordflow">while</span>(0)
+</pre>
+        </div>
+
+        <p>Definition at line <a class="el" href="asn1_8c-source.html#l00226">226</a> of file <a class="el" href=
+        "asn1_8c-source.html">asn1.c</a>.</p>
+      </td>
+    </tr>
+  </table>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:44 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:55 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

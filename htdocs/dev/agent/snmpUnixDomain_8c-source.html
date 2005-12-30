@@ -52,653 +52,661 @@
 00032 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
 00033 
 00034 <span class="preprocessor">#include &lt;net-snmp/library/snmp_transport.h&gt;</span>
-00035 <span class="preprocessor">#include &lt;net-snmp/library/snmpUnixDomain.h&gt;</span>
-00036 
+00035 <span class="preprocessor">#include &lt;net-snmp/library/snmpUDPDomain.h&gt;</span>
+00036 <span class="preprocessor">#include &lt;net-snmp/library/snmpUnixDomain.h&gt;</span>
 00037 
-00038 <span class="preprocessor">#ifndef NETSNMP_STREAM_QUEUE_LEN</span>
-00039 <span class="preprocessor">#define NETSNMP_STREAM_QUEUE_LEN  5</span>
-00040 <span class="preprocessor">#endif</span>
-00041 
-00042 <span class="preprocessor">#ifndef SUN_LEN</span>
-00043 <span class="comment">/*</span>
-00044 <span class="comment"> * Evaluate to actual length of the `sockaddr_un' structure.</span>
-00045 <span class="comment"> */</span>
-00046 <span class="preprocessor">#define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)-&gt;sun_path)         \</span>
-00047 <span class="preprocessor">                      + strlen ((ptr)-&gt;sun_path))</span>
-00048 <span class="preprocessor">#endif</span>
-00049 
-00050 oid netsnmp_UnixDomain[] = { TRANSPORT_DOMAIN_LOCAL };
-00051 <span class="keyword">static</span> netsnmp_tdomain unixDomain;
-00052 
+00038 
+00039 <span class="preprocessor">#ifndef NETSNMP_STREAM_QUEUE_LEN</span>
+00040 <span class="preprocessor">#define NETSNMP_STREAM_QUEUE_LEN  5</span>
+00041 <span class="preprocessor">#endif</span>
+00042 
+00043 <span class="preprocessor">#ifndef SUN_LEN</span>
+00044 <span class="comment">/*</span>
+00045 <span class="comment"> * Evaluate to actual length of the `sockaddr_un' structure.</span>
+00046 <span class="comment"> */</span>
+00047 <span class="preprocessor">#define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)-&gt;sun_path)         \</span>
+00048 <span class="preprocessor">                      + strlen ((ptr)-&gt;sun_path))</span>
+00049 <span class="preprocessor">#endif</span>
+00050 
+00051 oid netsnmp_UnixDomain[] = { TRANSPORT_DOMAIN_LOCAL };
+00052 <span class="keyword">static</span> netsnmp_tdomain unixDomain;
 00053 
-00054 <span class="comment">/*</span>
-00055 <span class="comment"> * This is the structure we use to hold transport-specific data.</span>
-00056 <span class="comment"> */</span>
-00057 
-00058 <span class="keyword">typedef</span> <span class="keyword">struct </span>_sockaddr_un_pair {
-00059     <span class="keywordtype">int</span>             local;
-00060     <span class="keyword">struct </span>sockaddr_un server;
-00061     <span class="keyword">struct </span>sockaddr_un client;
-00062 } sockaddr_un_pair;
-00063 
+00054 
+00055 <span class="comment">/*</span>
+00056 <span class="comment"> * This is the structure we use to hold transport-specific data.</span>
+00057 <span class="comment"> */</span>
+00058 
+00059 <span class="keyword">typedef</span> <span class="keyword">struct </span>_sockaddr_un_pair {
+00060     <span class="keywordtype">int</span>             local;
+00061     <span class="keyword">struct </span>sockaddr_un server;
+00062     <span class="keyword">struct </span>sockaddr_un client;
+00063 } sockaddr_un_pair;
 00064 
-00065 <span class="comment">/*</span>
-00066 <span class="comment"> * Return a string representing the address in data, or else the "far end"</span>
-00067 <span class="comment"> * address if data is NULL.</span>
-00068 <span class="comment"> */</span>
-00069 
-00070 <span class="keyword">static</span> <span class="keywordtype">char</span> *
-00071 netsnmp_unix_fmtaddr(netsnmp_transport *t, <span class="keywordtype">void</span> *data, <span class=
+00065 
+00066 <span class="comment">/*</span>
+00067 <span class="comment"> * Return a string representing the address in data, or else the "far end"</span>
+00068 <span class="comment"> * address if data is NULL.</span>
+00069 <span class="comment"> */</span>
+00070 
+00071 <span class="keyword">static</span> <span class="keywordtype">char</span> *
+00072 netsnmp_unix_fmtaddr(netsnmp_transport *t, <span class="keywordtype">void</span> *data, <span class=
 "keywordtype">int</span> len)
-00072 {
-00073     <span class="keyword">struct </span>sockaddr_un *to = NULL;
-00074 
-00075     <span class="keywordflow">if</span> (data != NULL) {
-00076         to = (<span class="keyword">struct </span>sockaddr_un *) data;
-00077     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;data != NULL) {
-00078         to = &amp;(((sockaddr_un_pair *) t-&gt;data)-&gt;server);
-00079         len = SUN_LEN(to);
-00080     }
-00081     <span class="keywordflow">if</span> (to == NULL) {
-00082         <span class="comment">/*</span>
-00083 <span class="comment">         * "Local IPC" is the Posix.1g term for Unix domain protocols,</span>
-00084 <span class="comment">         * according to W. R. Stevens, ``Unix Network Programming Volume I</span>
-00085 <span class="comment">         * Second Edition'', p. 374.</span>
-00086 <span class="comment">         */</span>
-00087         <span class="keywordflow">return</span> strdup(<span class="stringliteral">"Local IPC: unknown"</span>);
-00088     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (to-&gt;sun_path[0] == 0) {
-00089         <span class="comment">/*</span>
-00090 <span class="comment">         * This is an abstract name.  We could render it as hex or something</span>
-00091 <span class="comment">         * but let's not worry about that for now.</span>
-00092 <span class="comment">         */</span>
-00093         <span class="keywordflow">return</span> strdup(<span class="stringliteral">"Local IPC: abstract"</span>);
-00094     } <span class="keywordflow">else</span> {
-00095         <span class="keywordtype">char</span>           *tmp = (<span class="keywordtype">char</span> *) malloc(16 + len);
-00096         <span class="keywordflow">if</span> (tmp != NULL) {
-00097             sprintf(tmp, <span class="stringliteral">"Local IPC: %s"</span>, to-&gt;sun_path);
-00098         }
-00099         <span class="keywordflow">return</span> tmp;
-00100     }
-00101 }
-00102 
+00073 {
+00074     <span class="keyword">struct </span>sockaddr_un *to = NULL;
+00075 
+00076     <span class="keywordflow">if</span> (data != NULL) {
+00077         to = (<span class="keyword">struct </span>sockaddr_un *) data;
+00078     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;data != NULL) {
+00079         to = &amp;(((sockaddr_un_pair *) t-&gt;data)-&gt;server);
+00080         len = SUN_LEN(to);
+00081     }
+00082     <span class="keywordflow">if</span> (to == NULL) {
+00083         <span class="comment">/*</span>
+00084 <span class="comment">         * "Local IPC" is the Posix.1g term for Unix domain protocols,</span>
+00085 <span class="comment">         * according to W. R. Stevens, ``Unix Network Programming Volume I</span>
+00086 <span class="comment">         * Second Edition'', p. 374.</span>
+00087 <span class="comment">         */</span>
+00088         <span class="keywordflow">return</span> strdup(<span class="stringliteral">"Local IPC: unknown"</span>);
+00089     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (to-&gt;sun_path[0] == 0) {
+00090         <span class="comment">/*</span>
+00091 <span class="comment">         * This is an abstract name.  We could render it as hex or something</span>
+00092 <span class="comment">         * but let's not worry about that for now.</span>
+00093 <span class="comment">         */</span>
+00094         <span class="keywordflow">return</span> strdup(<span class="stringliteral">"Local IPC: abstract"</span>);
+00095     } <span class="keywordflow">else</span> {
+00096         <span class="keywordtype">char</span>           *tmp = (<span class="keywordtype">char</span> *) malloc(16 + len);
+00097         <span class="keywordflow">if</span> (tmp != NULL) {
+00098             sprintf(tmp, <span class="stringliteral">"Local IPC: %s"</span>, to-&gt;sun_path);
+00099         }
+00100         <span class="keywordflow">return</span> tmp;
+00101     }
+00102 }
 00103 
 00104 
-00105 <span class="comment">/*</span>
-00106 <span class="comment"> * You can write something into opaque that will subsequently get passed back</span>
-00107 <span class="comment"> * to your send function if you like.  For instance, you might want to</span>
-00108 <span class="comment"> * remember where a PDU came from, so that you can send a reply there...</span>
-00109 <span class="comment"> */</span>
-00110 
-00111 <span class="keyword">static</span> <span class="keywordtype">int</span>
-00112 netsnmp_unix_recv(netsnmp_transport *t, <span class="keywordtype">void</span> *buf, <span class=
+00105 
+00106 <span class="comment">/*</span>
+00107 <span class="comment"> * You can write something into opaque that will subsequently get passed back</span>
+00108 <span class="comment"> * to your send function if you like.  For instance, you might want to</span>
+00109 <span class="comment"> * remember where a PDU came from, so that you can send a reply there...</span>
+00110 <span class="comment"> */</span>
+00111 
+00112 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00113 netsnmp_unix_recv(netsnmp_transport *t, <span class="keywordtype">void</span> *buf, <span class=
 "keywordtype">int</span> size,
-00113                   <span class="keywordtype">void</span> **opaque, <span class="keywordtype">int</span> *olength)
-00114 {
-00115     <span class="keywordtype">int</span> rc = -1;
-00116     socklen_t       tolen = <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_un);
-00117     <span class="keyword">struct </span>sockaddr *to;
-00118 
+00114                   <span class="keywordtype">void</span> **opaque, <span class="keywordtype">int</span> *olength)
+00115 {
+00116     <span class="keywordtype">int</span> rc = -1;
+00117     socklen_t       tolen = <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_un);
+00118     <span class="keyword">struct </span>sockaddr *to;
 00119 
-00120     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
-00121         to = (<span class="keyword">struct </span>sockaddr *) malloc(<span class="keyword">sizeof</span>(<span class=
+00120 
+00121     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+00122         to = (<span class="keyword">struct </span>sockaddr *) malloc(<span class="keyword">sizeof</span>(<span class=
 "keyword">struct</span> sockaddr_un));
-00122         <span class="keywordflow">if</span> (to == NULL) {
-00123             *opaque = NULL;
-00124             *olength = 0;
-00125             <span class="keywordflow">return</span> -1;
-00126         } <span class="keywordflow">else</span> {
-00127             memset(to, 0, tolen);
-00128         }
-00129         <span class="keywordflow">if</span>(getsockname(t-&gt;sock, to, &amp;tolen) != 0){
-00130             free(to);
-00131             *opaque = NULL;
-00132             *olength = 0;
-00133             <span class="keywordflow">return</span> -1;
-00134         };
-00135         <span class="keywordflow">while</span> (rc &lt; 0) {
-00136             rc = recv(t-&gt;sock, buf, size, 0);
-00137             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
-00138                 DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
+00123         <span class="keywordflow">if</span> (to == NULL) {
+00124             *opaque = NULL;
+00125             *olength = 0;
+00126             <span class="keywordflow">return</span> -1;
+00127         } <span class="keywordflow">else</span> {
+00128             memset(to, 0, tolen);
+00129         }
+00130         <span class="keywordflow">if</span>(getsockname(t-&gt;sock, to, &amp;tolen) != 0){
+00131             free(to);
+00132             *opaque = NULL;
+00133             *olength = 0;
+00134             <span class="keywordflow">return</span> -1;
+00135         };
+00136         <span class="keywordflow">while</span> (rc &lt; 0) {
+00137             rc = recv(t-&gt;sock, buf, size, 0);
+00138             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+00139                 DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
 "stringliteral">"recv fd %d err %d (\"%s\")\n"</span>,
-00139                             t-&gt;sock, errno, strerror(errno)));
-00140                 <span class="keywordflow">return</span> rc;
-00141             }
-00142             *opaque = (<span class="keywordtype">void</span>*)to;
-00143             *olength = <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_un);
-00144         }
-00145         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
+00140                             t-&gt;sock, errno, strerror(errno)));
+00141                 <span class="keywordflow">return</span> rc;
+00142             }
+00143             *opaque = (<span class="keywordtype">void</span>*)to;
+00144             *olength = <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_un);
+00145         }
+00146         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
 "stringliteral">"recv fd %d got %d bytes\n"</span>, t-&gt;sock, rc));
-00146     }
-00147     <span class="keywordflow">return</span> rc;
-00148 }
-00149 
+00147     }
+00148     <span class="keywordflow">return</span> rc;
+00149 }
 00150 
 00151 
-00152 <span class="keyword">static</span> <span class="keywordtype">int</span>
-00153 netsnmp_unix_send(netsnmp_transport *t, <span class="keywordtype">void</span> *buf, <span class=
+00152 
+00153 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00154 netsnmp_unix_send(netsnmp_transport *t, <span class="keywordtype">void</span> *buf, <span class=
 "keywordtype">int</span> size,
-00154                   <span class="keywordtype">void</span> **opaque, <span class="keywordtype">int</span> *olength)
-00155 {
-00156     <span class="keywordtype">int</span> rc = -1;
-00157 
-00158     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
-00159         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
+00155                   <span class="keywordtype">void</span> **opaque, <span class="keywordtype">int</span> *olength)
+00156 {
+00157     <span class="keywordtype">int</span> rc = -1;
+00158 
+00159     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+00160         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
 "stringliteral">"send %d bytes to %p on fd %d\n"</span>,
-00160                     size, buf, t-&gt;sock));
-00161         <span class="keywordflow">while</span> (rc &lt; 0) {
-00162             rc = send(t-&gt;sock, buf, size, 0);
-00163             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
-00164                 <span class="keywordflow">break</span>;
-00165             }
-00166         }
-00167     }
-00168     <span class="keywordflow">return</span> rc;
-00169 }
-00170 
+00161                     size, buf, t-&gt;sock));
+00162         <span class="keywordflow">while</span> (rc &lt; 0) {
+00163             rc = send(t-&gt;sock, buf, size, 0);
+00164             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+00165                 <span class="keywordflow">break</span>;
+00166             }
+00167         }
+00168     }
+00169     <span class="keywordflow">return</span> rc;
+00170 }
 00171 
 00172 
-00173 <span class="keyword">static</span> <span class="keywordtype">int</span>
-00174 netsnmp_unix_close(netsnmp_transport *t)
-00175 {
-00176     <span class="keywordtype">int</span> rc = 0;
-00177     sockaddr_un_pair *sup = (sockaddr_un_pair *) t-&gt;data;
-00178 
-00179     <span class="keywordflow">if</span> (t-&gt;sock &gt;= 0) {
-00180 <span class="preprocessor">#ifndef HAVE_CLOSESOCKET</span>
-00181         rc = close(t-&gt;sock);
-00182 <span class="preprocessor">#else</span>
-00183         rc = closesocket(t-&gt;sock);
-00184 <span class="preprocessor">#endif</span>
-00185         t-&gt;sock = -1;
-00186         <span class="keywordflow">if</span> (sup != NULL) {
-00187             <span class="keywordflow">if</span> (sup-&gt;local) {
-00188                 DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
+00173 
+00174 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00175 netsnmp_unix_close(netsnmp_transport *t)
+00176 {
+00177     <span class="keywordtype">int</span> rc = 0;
+00178     sockaddr_un_pair *sup = (sockaddr_un_pair *) t-&gt;data;
+00179 
+00180     <span class="keywordflow">if</span> (t-&gt;sock &gt;= 0) {
+00181 <span class="preprocessor">#ifndef HAVE_CLOSESOCKET</span>
+00182         rc = close(t-&gt;sock);
+00183 <span class="preprocessor">#else</span>
+00184         rc = closesocket(t-&gt;sock);
+00185 <span class="preprocessor">#endif</span>
+00186         t-&gt;sock = -1;
+00187         <span class="keywordflow">if</span> (sup != NULL) {
+00188             <span class="keywordflow">if</span> (sup-&gt;local) {
+00189                 <span class="keywordflow">if</span> (sup-&gt;server.sun_path[0] != 0) {
+00190                   DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
 "stringliteral">"close: server unlink(\"%s\")\n"</span>,
-00189                             sup-&gt;server.sun_path));
-00190                 unlink(sup-&gt;server.sun_path);
-00191             } <span class="keywordflow">else</span> {
-00192                 DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
+00191                               sup-&gt;server.sun_path));
+00192                   unlink(sup-&gt;server.sun_path);
+00193                 }
+00194             } <span class="keywordflow">else</span> {
+00195                 <span class="keywordflow">if</span> (sup-&gt;client.sun_path[0] != 0) {
+00196                   DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
 "stringliteral">"close: client unlink(\"%s\")\n"</span>,
-00193                             sup-&gt;client.sun_path));
-00194                 unlink(sup-&gt;client.sun_path);
-00195             }
-00196         }
-00197         <span class="keywordflow">return</span> rc;
-00198     } <span class="keywordflow">else</span> {
-00199         <span class="keywordflow">return</span> -1;
-00200     }
-00201 }
-00202 
-00203 
-00204 
-00205 <span class="keyword">static</span> <span class="keywordtype">int</span>
-00206 netsnmp_unix_accept(netsnmp_transport *t)
-00207 {
-00208     <span class="keyword">struct </span>sockaddr *farend = NULL;
-00209     <span class="keywordtype">int</span>             newsock = -1;
-00210     socklen_t       farendlen = <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_un);
-00211 
-00212     farend = (<span class="keyword">struct </span>sockaddr *) malloc(farendlen);
-00213 
-00214     <span class="keywordflow">if</span> (farend == NULL) {
-00215         <span class="comment">/*</span>
-00216 <span class="comment">         * Indicate that the acceptance of this socket failed.</span>
-00217 <span class="comment">         */</span>
-00218         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
+00197                               sup-&gt;client.sun_path));
+00198                   unlink(sup-&gt;client.sun_path);
+00199                 }
+00200             }
+00201         }
+00202         <span class="keywordflow">return</span> rc;
+00203     } <span class="keywordflow">else</span> {
+00204         <span class="keywordflow">return</span> -1;
+00205     }
+00206 }
+00207 
+00208 
+00209 
+00210 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00211 netsnmp_unix_accept(netsnmp_transport *t)
+00212 {
+00213     <span class="keyword">struct </span>sockaddr *farend = NULL;
+00214     <span class="keywordtype">int</span>             newsock = -1;
+00215     socklen_t       farendlen = <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_un);
+00216 
+00217     farend = (<span class="keyword">struct </span>sockaddr *) malloc(farendlen);
+00218 
+00219     <span class="keywordflow">if</span> (farend == NULL) {
+00220         <span class="comment">/*</span>
+00221 <span class="comment">         * Indicate that the acceptance of this socket failed.</span>
+00222 <span class="comment">         */</span>
+00223         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
 "stringliteral">"accept: malloc failed\n"</span>));
-00219         <span class="keywordflow">return</span> -1;
-00220     }
-00221     memset(farend, 0, farendlen);
-00222 
-00223     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
-00224         newsock = accept(t-&gt;sock, farend, &amp;farendlen);
-00225 
-00226         <span class="keywordflow">if</span> (newsock &lt; 0) {
-00227             DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>,<span class=
+00224         <span class="keywordflow">return</span> -1;
+00225     }
+00226     memset(farend, 0, farendlen);
+00227 
+00228     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+00229         newsock = accept(t-&gt;sock, farend, &amp;farendlen);
+00230 
+00231         <span class="keywordflow">if</span> (newsock &lt; 0) {
+00232             DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>,<span class=
 "stringliteral">"accept failed rc %d errno %d \"%s\"\n"</span>,
-00228                         newsock, errno, strerror(errno)));
-00229             free(farend);
-00230             <span class="keywordflow">return</span> newsock;
-00231         }
-00232 
-00233         <span class="keywordflow">if</span> (t-&gt;data != NULL) {
-00234             free(t-&gt;data);
-00235         }
-00236 
-00237         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
+00233                         newsock, errno, strerror(errno)));
+00234             free(farend);
+00235             <span class="keywordflow">return</span> newsock;
+00236         }
+00237 
+00238         <span class="keywordflow">if</span> (t-&gt;data != NULL) {
+00239             free(t-&gt;data);
+00240         }
+00241 
+00242         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
 "stringliteral">"accept succeeded (farend %p len %d)\n"</span>,
-00238                     farend, farendlen));
-00239         t-&gt;data = farend;
-00240         t-&gt;data_length = <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_un);
-00241         <span class="keywordflow">return</span> newsock;
-00242     } <span class="keywordflow">else</span> {
-00243         free(farend);
-00244         <span class="keywordflow">return</span> -1;
-00245     }
-00246 }
-00247 
-00248 
-00249 
-00250 <span class="comment">/*</span>
-00251 <span class="comment"> * Open a Unix-domain transport for SNMP.  Local is TRUE if addr is the local</span>
-00252 <span class="comment"> * address to bind to (i.e. this is a server-type session); otherwise addr is</span>
-00253 <span class="comment"> * the remote address to send things to (and we make up a temporary name for</span>
-00254 <span class="comment"> * the local end of the connection).</span>
-00255 <span class="comment"> */</span>
+00243                     farend, farendlen));
+00244         t-&gt;data = farend;
+00245         t-&gt;data_length = <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_un);
+00246        netsnmp_sock_buffer_set(newsock, SO_SNDBUF, 1, 0);
+00247        netsnmp_sock_buffer_set(newsock, SO_RCVBUF, 1, 0);
+00248         <span class="keywordflow">return</span> newsock;
+00249     } <span class="keywordflow">else</span> {
+00250         free(farend);
+00251         <span class="keywordflow">return</span> -1;
+00252     }
+00253 }
+00254 
+00255 
 00256 
-00257 netsnmp_transport *
-00258 netsnmp_unix_transport(<span class="keyword">struct</span> sockaddr_un *addr, <span class="keywordtype">int</span> local)
-00259 {
-00260     netsnmp_transport *t = NULL;
-00261     sockaddr_un_pair *sup = NULL;
-00262     <span class="keywordtype">int</span>             rc = 0;
-00263     <span class="keywordtype">char</span>           *string = NULL;
-00264 
-00265     <span class="keywordflow">if</span> (addr == NULL || addr-&gt;sun_family != AF_UNIX) {
-00266         <span class="keywordflow">return</span> NULL;
-00267     }
-00268 
-00269     t = (netsnmp_transport *) malloc(<span class="keyword">sizeof</span>(netsnmp_transport));
-00270     <span class="keywordflow">if</span> (t == NULL) {
-00271         <span class="keywordflow">return</span> NULL;
-00272     }
-00273 
-00274     string = netsnmp_unix_fmtaddr(NULL, (<span class="keywordtype">void</span> *)addr,
-00275                                   <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_un));
-00276     DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
+00257 <span class="comment">/*</span>
+00258 <span class="comment"> * Open a Unix-domain transport for SNMP.  Local is TRUE if addr is the local</span>
+00259 <span class="comment"> * address to bind to (i.e. this is a server-type session); otherwise addr is</span>
+00260 <span class="comment"> * the remote address to send things to (and we make up a temporary name for</span>
+00261 <span class="comment"> * the local end of the connection).</span>
+00262 <span class="comment"> */</span>
+00263 
+00264 netsnmp_transport *
+00265 netsnmp_unix_transport(<span class="keyword">struct</span> sockaddr_un *addr, <span class="keywordtype">int</span> local)
+00266 {
+00267     netsnmp_transport *t = NULL;
+00268     sockaddr_un_pair *sup = NULL;
+00269     <span class="keywordtype">int</span>             rc = 0;
+00270     <span class="keywordtype">char</span>           *string = NULL;
+00271 
+00272     <span class="keywordflow">if</span> (addr == NULL || addr-&gt;sun_family != AF_UNIX) {
+00273         <span class="keywordflow">return</span> NULL;
+00274     }
+00275 
+00276     t = (netsnmp_transport *) malloc(<span class="keyword">sizeof</span>(netsnmp_transport));
+00277     <span class="keywordflow">if</span> (t == NULL) {
+00278         <span class="keywordflow">return</span> NULL;
+00279     }
+00280 
+00281     string = netsnmp_unix_fmtaddr(NULL, (<span class="keywordtype">void</span> *)addr,
+00282                                   <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_un));
+00283     DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix"</span>, <span class=
 "stringliteral">"open %s %s\n"</span>, local ? <span class="stringliteral">"local"</span> : <span class=
 "stringliteral">"remote"</span>,
-00277                 string));
-00278     free(string);
-00279 
-00280     memset(t, 0, <span class="keyword">sizeof</span>(netsnmp_transport));
-00281 
-00282     t-&gt;domain = netsnmp_UnixDomain;
-00283     t-&gt;domain_length =
-00284         <span class="keyword">sizeof</span>(netsnmp_UnixDomain) / <span class=
+00284                 string));
+00285     free(string);
+00286 
+00287     memset(t, 0, <span class="keyword">sizeof</span>(netsnmp_transport));
+00288 
+00289     t-&gt;domain = netsnmp_UnixDomain;
+00290     t-&gt;domain_length =
+00291         <span class="keyword">sizeof</span>(netsnmp_UnixDomain) / <span class=
 "keyword">sizeof</span>(netsnmp_UnixDomain[0]);
-00285 
-00286     t-&gt;data = malloc(<span class="keyword">sizeof</span>(sockaddr_un_pair));
-00287     <span class="keywordflow">if</span> (t-&gt;data == NULL) {
-00288         netsnmp_transport_free(t);
-00289         <span class="keywordflow">return</span> NULL;
-00290     }
-00291     memset(t-&gt;data, 0, <span class="keyword">sizeof</span>(sockaddr_un_pair));
-00292     t-&gt;data_length = <span class="keyword">sizeof</span>(sockaddr_un_pair);
-00293     sup = (sockaddr_un_pair *) t-&gt;data;
-00294 
-00295     t-&gt;sock = socket(PF_UNIX, SOCK_STREAM, 0);
-00296     <span class="keywordflow">if</span> (t-&gt;sock &lt; 0) {
-00297         netsnmp_transport_free(t);
-00298         <span class="keywordflow">return</span> NULL;
-00299     }
-00300 
-00301     t-&gt;flags = NETSNMP_TRANSPORT_FLAG_STREAM;
-00302 
-00303     <span class="keywordflow">if</span> (local) {
-00304         t-&gt;local = malloc(strlen(addr-&gt;sun_path));
-00305         <span class="keywordflow">if</span> (t-&gt;local == NULL) {
-00306             netsnmp_transport_free(t);
-00307             <span class="keywordflow">return</span> NULL;
-00308         }
-00309         memcpy(t-&gt;local, addr-&gt;sun_path, strlen(addr-&gt;sun_path));
-00310         t-&gt;local_length = strlen(addr-&gt;sun_path);
-00311 
-00312         <span class="comment">/*</span>
-00313 <span class="comment">         * This session is inteneded as a server, so we must bind to the given</span>
-00314 <span class="comment">         * path (unlinking it first, to avoid errors).</span>
-00315 <span class="comment">         */</span>
-00316 
-00317         t-&gt;flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
+00292 
+00293     t-&gt;data = malloc(<span class="keyword">sizeof</span>(sockaddr_un_pair));
+00294     <span class="keywordflow">if</span> (t-&gt;data == NULL) {
+00295         netsnmp_transport_free(t);
+00296         <span class="keywordflow">return</span> NULL;
+00297     }
+00298     memset(t-&gt;data, 0, <span class="keyword">sizeof</span>(sockaddr_un_pair));
+00299     t-&gt;data_length = <span class="keyword">sizeof</span>(sockaddr_un_pair);
+00300     sup = (sockaddr_un_pair *) t-&gt;data;
+00301 
+00302     t-&gt;sock = socket(PF_UNIX, SOCK_STREAM, 0);
+00303     <span class="keywordflow">if</span> (t-&gt;sock &lt; 0) {
+00304         netsnmp_transport_free(t);
+00305         <span class="keywordflow">return</span> NULL;
+00306     }
+00307 
+00308     t-&gt;flags = NETSNMP_TRANSPORT_FLAG_STREAM;
+00309 
+00310     <span class="keywordflow">if</span> (local) {
+00311         t-&gt;local = malloc(strlen(addr-&gt;sun_path));
+00312         <span class="keywordflow">if</span> (t-&gt;local == NULL) {
+00313             netsnmp_transport_free(t);
+00314             <span class="keywordflow">return</span> NULL;
+00315         }
+00316         memcpy(t-&gt;local, addr-&gt;sun_path, strlen(addr-&gt;sun_path));
+00317         t-&gt;local_length = strlen(addr-&gt;sun_path);
 00318 
-00319         unlink(addr-&gt;sun_path);
-00320         rc = bind(t-&gt;sock, (<span class="keyword">struct</span> sockaddr *) addr, SUN_LEN(addr));
-00321         <span class="keywordflow">if</span> (rc != 0) {
-00322             DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_transport"</span>,
-00323                         <span class="stringliteral">"couldn't bind \"%s\", errno %d (%s)\n"</span>,
-00324                         addr-&gt;sun_path, errno, strerror(errno)));
-00325             netsnmp_unix_close(t);
-00326             netsnmp_transport_free(t);
-00327             <span class="keywordflow">return</span> NULL;
-00328         }
-00329 
-00330         <span class="comment">/*</span>
-00331 <span class="comment">         * Save the address in the transport-specific data pointer for later</span>
-00332 <span class="comment">         * use by netsnmp_unix_close.</span>
-00333 <span class="comment">         */</span>
-00334 
-00335         sup-&gt;server.sun_family = AF_UNIX;
-00336         strcpy(sup-&gt;server.sun_path, addr-&gt;sun_path);
-00337         sup-&gt;local = 1;
-00338 
-00339         <span class="comment">/*</span>
-00340 <span class="comment">         * Now sit here and listen for connections to arrive.</span>
-00341 <span class="comment">         */</span>
-00342 
-00343         rc = listen(t-&gt;sock, NETSNMP_STREAM_QUEUE_LEN);
-00344         <span class="keywordflow">if</span> (rc != 0) {
-00345             DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_transport"</span>,
-00346                         <span class="stringliteral">"couldn't listen to \"%s\", errno %d (%s)\n"</span>,
-00347                         addr-&gt;sun_path, errno, strerror(errno)));
-00348             netsnmp_unix_close(t);
-00349             netsnmp_transport_free(t);
-00350         }
-00351 
-00352     } <span class="keywordflow">else</span> {
-00353         t-&gt;remote = malloc(strlen(addr-&gt;sun_path));
-00354         <span class="keywordflow">if</span> (t-&gt;remote == NULL) {
-00355             netsnmp_transport_free(t);
-00356             <span class="keywordflow">return</span> NULL;
+00319         <span class="comment">/*</span>
+00320 <span class="comment">         * This session is inteneded as a server, so we must bind to the given</span>
+00321 <span class="comment">         * path (unlinking it first, to avoid errors).</span>
+00322 <span class="comment">         */</span>
+00323 
+00324         t-&gt;flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
+00325 
+00326         unlink(addr-&gt;sun_path);
+00327         rc = bind(t-&gt;sock, (<span class="keyword">struct</span> sockaddr *) addr, SUN_LEN(addr));
+00328         <span class="keywordflow">if</span> (rc != 0) {
+00329             DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_transport"</span>,
+00330                         <span class="stringliteral">"couldn't bind \"%s\", errno %d (%s)\n"</span>,
+00331                         addr-&gt;sun_path, errno, strerror(errno)));
+00332             netsnmp_unix_close(t);
+00333             netsnmp_transport_free(t);
+00334             <span class="keywordflow">return</span> NULL;
+00335         }
+00336 
+00337         <span class="comment">/*</span>
+00338 <span class="comment">         * Save the address in the transport-specific data pointer for later</span>
+00339 <span class="comment">         * use by netsnmp_unix_close.</span>
+00340 <span class="comment">         */</span>
+00341 
+00342         sup-&gt;server.sun_family = AF_UNIX;
+00343         strcpy(sup-&gt;server.sun_path, addr-&gt;sun_path);
+00344         sup-&gt;local = 1;
+00345 
+00346         <span class="comment">/*</span>
+00347 <span class="comment">         * Now sit here and listen for connections to arrive.</span>
+00348 <span class="comment">         */</span>
+00349 
+00350         rc = listen(t-&gt;sock, NETSNMP_STREAM_QUEUE_LEN);
+00351         <span class="keywordflow">if</span> (rc != 0) {
+00352             DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_transport"</span>,
+00353                         <span class="stringliteral">"couldn't listen to \"%s\", errno %d (%s)\n"</span>,
+00354                         addr-&gt;sun_path, errno, strerror(errno)));
+00355             netsnmp_unix_close(t);
+00356             netsnmp_transport_free(t);
 00357         }
-00358         memcpy(t-&gt;remote, addr-&gt;sun_path, strlen(addr-&gt;sun_path));
-00359         t-&gt;remote_length = strlen(addr-&gt;sun_path);
-00360 
-00361         rc = connect(t-&gt;sock, (<span class="keyword">struct</span> sockaddr *) addr,
-00362                      <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_un));
-00363         <span class="keywordflow">if</span> (rc != 0) {
-00364             DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_transport"</span>,
-00365                         <span class="stringliteral">"couldn't connect to \"%s\", errno %d (%s)\n"</span>,
-00366                         addr-&gt;sun_path, errno, strerror(errno)));
-00367             netsnmp_unix_close(t);
-00368             netsnmp_transport_free(t);
-00369             <span class="keywordflow">return</span> NULL;
-00370         }
-00371 
-00372         <span class="comment">/*</span>
-00373 <span class="comment">         * Save the remote address in the transport-specific data pointer for</span>
-00374 <span class="comment">         * later use by netsnmp_unix_send.</span>
-00375 <span class="comment">         */</span>
-00376 
-00377         sup-&gt;server.sun_family = AF_UNIX;
-00378         strcpy(sup-&gt;server.sun_path, addr-&gt;sun_path);
-00379         sup-&gt;local = 0;
-00380     }
-00381 
-00382     <span class="comment">/*</span>
-00383 <span class="comment">     * Message size is not limited by this transport (hence msgMaxSize</span>
-00384 <span class="comment">     * is equal to the maximum legal size of an SNMP message).</span>
-00385 <span class="comment">     */</span>
-00386 
-00387     t-&gt;msgMaxSize = 0x7fffffff;
-00388     t-&gt;f_recv     = netsnmp_unix_recv;
-00389     t-&gt;f_send     = netsnmp_unix_send;
-00390     t-&gt;f_close    = netsnmp_unix_close;
-00391     t-&gt;f_accept   = netsnmp_unix_accept;
-00392     t-&gt;f_fmtaddr  = netsnmp_unix_fmtaddr;
-00393 
-00394     <span class="keywordflow">return</span> t;
-00395 }
-00396 
-00397 netsnmp_transport *
-00398 netsnmp_unix_create_tstring(<span class="keyword">const</span> <span class="keywordtype">char</span> *string, <span class=
+00358 
+00359     } <span class="keywordflow">else</span> {
+00360         t-&gt;remote = malloc(strlen(addr-&gt;sun_path));
+00361         <span class="keywordflow">if</span> (t-&gt;remote == NULL) {
+00362             netsnmp_transport_free(t);
+00363             <span class="keywordflow">return</span> NULL;
+00364         }
+00365         memcpy(t-&gt;remote, addr-&gt;sun_path, strlen(addr-&gt;sun_path));
+00366         t-&gt;remote_length = strlen(addr-&gt;sun_path);
+00367 
+00368         rc = connect(t-&gt;sock, (<span class="keyword">struct</span> sockaddr *) addr,
+00369                      <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_un));
+00370         <span class="keywordflow">if</span> (rc != 0) {
+00371             DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_transport"</span>,
+00372                         <span class="stringliteral">"couldn't connect to \"%s\", errno %d (%s)\n"</span>,
+00373                         addr-&gt;sun_path, errno, strerror(errno)));
+00374             netsnmp_unix_close(t);
+00375             netsnmp_transport_free(t);
+00376             <span class="keywordflow">return</span> NULL;
+00377         }
+00378 
+00379         <span class="comment">/*</span>
+00380 <span class="comment">         * Save the remote address in the transport-specific data pointer for</span>
+00381 <span class="comment">         * later use by netsnmp_unix_send.</span>
+00382 <span class="comment">         */</span>
+00383 
+00384         sup-&gt;server.sun_family = AF_UNIX;
+00385         strcpy(sup-&gt;server.sun_path, addr-&gt;sun_path);
+00386         sup-&gt;local = 0;
+00387        netsnmp_sock_buffer_set(t-&gt;sock, SO_SNDBUF, local, 0);
+00388        netsnmp_sock_buffer_set(t-&gt;sock, SO_RCVBUF, local, 0);
+00389     }
+00390 
+00391     <span class="comment">/*</span>
+00392 <span class="comment">     * Message size is not limited by this transport (hence msgMaxSize</span>
+00393 <span class="comment">     * is equal to the maximum legal size of an SNMP message).</span>
+00394 <span class="comment">     */</span>
+00395 
+00396     t-&gt;msgMaxSize = 0x7fffffff;
+00397     t-&gt;f_recv     = netsnmp_unix_recv;
+00398     t-&gt;f_send     = netsnmp_unix_send;
+00399     t-&gt;f_close    = netsnmp_unix_close;
+00400     t-&gt;f_accept   = netsnmp_unix_accept;
+00401     t-&gt;f_fmtaddr  = netsnmp_unix_fmtaddr;
+00402 
+00403     <span class="keywordflow">return</span> t;
+00404 }
+00405 
+00406 netsnmp_transport *
+00407 netsnmp_unix_create_tstring(<span class="keyword">const</span> <span class="keywordtype">char</span> *string, <span class=
 "keywordtype">int</span> local)
-00399 {
-00400     <span class="keyword">struct </span>sockaddr_un addr;
-00401 
-00402     <span class="keywordflow">if</span> ((string != NULL) &amp;&amp; (strlen(string) &lt; <span class=
+00408 {
+00409     <span class="keyword">struct </span>sockaddr_un addr;
+00410 
+00411     <span class="keywordflow">if</span> ((string != NULL) &amp;&amp; (strlen(string) &lt; <span class=
 "keyword">sizeof</span>(addr.sun_path))) {
-00403         addr.sun_family = AF_UNIX;
-00404         memset(addr.sun_path, 0, <span class="keyword">sizeof</span>(addr.sun_path));
-00405         strncpy(addr.sun_path, string, <span class="keyword">sizeof</span>(addr.sun_path) - 1);
-00406         <span class="keywordflow">return</span> netsnmp_unix_transport(&amp;addr, local);
-00407     } <span class="keywordflow">else</span> {
-00408         <span class="keywordflow">if</span> (string != NULL) {
-00409             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00412         addr.sun_family = AF_UNIX;
+00413         memset(addr.sun_path, 0, <span class="keyword">sizeof</span>(addr.sun_path));
+00414         strncpy(addr.sun_path, string, <span class="keyword">sizeof</span>(addr.sun_path) - 1);
+00415         <span class="keywordflow">return</span> netsnmp_unix_transport(&amp;addr, local);
+00416     } <span class="keywordflow">else</span> {
+00417         <span class="keywordflow">if</span> (string != NULL) {
+00418             <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"Path too long for Unix domain transport\n"</span>);
-00410         }
-00411         <span class="keywordflow">return</span> NULL;
-00412     }
-00413 }
-00414 
-00415 
-00416 
-00417 netsnmp_transport *
-00418 netsnmp_unix_create_ostring(<span class="keyword">const</span> u_char * o, size_t o_len, <span class=
+00419         }
+00420         <span class="keywordflow">return</span> NULL;
+00421     }
+00422 }
+00423 
+00424 
+00425 
+00426 netsnmp_transport *
+00427 netsnmp_unix_create_ostring(<span class="keyword">const</span> u_char * o, size_t o_len, <span class=
 "keywordtype">int</span> local)
-00419 {
-00420     <span class="keyword">struct </span>sockaddr_un addr;
-00421 
-00422     <span class="keywordflow">if</span> (o_len &gt; 0 &amp;&amp; o_len &lt; (<span class=
+00428 {
+00429     <span class="keyword">struct </span>sockaddr_un addr;
+00430 
+00431     <span class="keywordflow">if</span> (o_len &gt; 0 &amp;&amp; o_len &lt; (<span class=
 "keyword">sizeof</span>(addr.sun_path) - 1)) {
-00423         addr.sun_family = AF_UNIX;
-00424         memset(addr.sun_path, 0, <span class="keyword">sizeof</span>(addr.sun_path));
-00425         strncpy(addr.sun_path, o, o_len);
-00426         <span class="keywordflow">return</span> netsnmp_unix_transport(&amp;addr, local);
-00427     } <span class="keywordflow">else</span> {
-00428         <span class="keywordflow">if</span> (o_len &gt; 0) {
-00429             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00432         addr.sun_family = AF_UNIX;
+00433         memset(addr.sun_path, 0, <span class="keyword">sizeof</span>(addr.sun_path));
+00434         strncpy(addr.sun_path, o, o_len);
+00435         <span class="keywordflow">return</span> netsnmp_unix_transport(&amp;addr, local);
+00436     } <span class="keywordflow">else</span> {
+00437         <span class="keywordflow">if</span> (o_len &gt; 0) {
+00438             <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"Path too long for Unix domain transport\n"</span>);
-00430         }
-00431     }
-00432     <span class="keywordflow">return</span> NULL;
-00433 }
-00434 
-00435 
-00436 
-00437 <span class="keywordtype">void</span>
-00438 netsnmp_unix_ctor(<span class="keywordtype">void</span>)
-00439 {
-00440     unixDomain.name = netsnmp_UnixDomain;
-00441     unixDomain.name_length = <span class="keyword">sizeof</span>(netsnmp_UnixDomain) / <span class=
-"keyword">sizeof</span>(oid);
-00442     unixDomain.prefix = calloc(2, <span class="keyword">sizeof</span>(<span class="keywordtype">char</span> *));
-00443     unixDomain.prefix[0] = <span class="stringliteral">"unix"</span>;
+00439         }
+00440     }
+00441     <span class="keywordflow">return</span> NULL;
+00442 }
+00443 
 00444 
-00445     unixDomain.f_create_from_tstring = netsnmp_unix_create_tstring;
-00446     unixDomain.f_create_from_ostring = netsnmp_unix_create_ostring;
-00447 
-00448     netsnmp_tdomain_register(&amp;unixDomain);
-00449 }
-00450 
-00451 <span class="preprocessor">#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)</span>
-00452 <span class="comment">/* support for SNMPv1 and SNMPv2c on unix domain*/</span>
+00445 
+00446 <span class="keywordtype">void</span>
+00447 netsnmp_unix_ctor(<span class="keywordtype">void</span>)
+00448 {
+00449     unixDomain.name = netsnmp_UnixDomain;
+00450     unixDomain.name_length = <span class="keyword">sizeof</span>(netsnmp_UnixDomain) / <span class=
+"keyword">sizeof</span>(oid);
+00451     unixDomain.prefix = calloc(2, <span class="keyword">sizeof</span>(<span class="keywordtype">char</span> *));
+00452     unixDomain.prefix[0] = <span class="stringliteral">"unix"</span>;
 00453 
-00454 <span class="preprocessor">#define EXAMPLE_COMMUNITY "COMMUNITY"</span>
-00455 <span class="keyword">typedef</span> <span class="keyword">struct </span>_com2SecUnixEntry {
-00456     <span class="keywordtype">char</span>            community[VACMSTRINGLEN];
-00457     <span class="keywordtype">char</span>            sockpath[<span class="keyword">sizeof</span>(<span class=
+00454     unixDomain.f_create_from_tstring = netsnmp_unix_create_tstring;
+00455     unixDomain.f_create_from_ostring = netsnmp_unix_create_ostring;
+00456 
+00457     netsnmp_tdomain_register(&amp;unixDomain);
+00458 }
+00459 
+00460 <span class="preprocessor">#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)</span>
+00461 <span class="comment">/* support for SNMPv1 and SNMPv2c on unix domain*/</span>
+00462 
+00463 <span class="preprocessor">#define EXAMPLE_COMMUNITY "COMMUNITY"</span>
+00464 <span class="keyword">typedef</span> <span class="keyword">struct </span>_com2SecUnixEntry {
+00465     <span class="keywordtype">char</span>            community[VACMSTRINGLEN];
+00466     <span class="keywordtype">char</span>            sockpath[<span class="keyword">sizeof</span>(<span class=
 "keyword">struct </span>sockaddr_un)];
-00458     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   pathlen;
-00459     <span class="keywordtype">char</span>            secName[VACMSTRINGLEN];
-00460     <span class="keywordtype">char</span>            contextName[VACMSTRINGLEN];
-00461     <span class="keyword">struct </span>_com2SecUnixEntry *next;
-00462 } com2SecUnixEntry;
-00463 
-00464 com2SecUnixEntry   *com2SecUnixList = NULL, *com2SecUnixListLast = NULL;
-00465 
-00466 
-00467 <span class="keywordtype">int</span>
-00468 netsnmp_unix_getSecName(<span class="keywordtype">void</span> *opaque, <span class="keywordtype">int</span> olength,
-00469                         <span class="keyword">const</span> <span class="keywordtype">char</span> *community,
-00470                         size_t community_len,
-00471                         <span class="keywordtype">char</span> **secName, <span class=
+00467     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   pathlen;
+00468     <span class="keywordtype">char</span>            secName[VACMSTRINGLEN];
+00469     <span class="keywordtype">char</span>            contextName[VACMSTRINGLEN];
+00470     <span class="keyword">struct </span>_com2SecUnixEntry *next;
+00471 } com2SecUnixEntry;
+00472 
+00473 com2SecUnixEntry   *com2SecUnixList = NULL, *com2SecUnixListLast = NULL;
+00474 
+00475 
+00476 <span class="keywordtype">int</span>
+00477 netsnmp_unix_getSecName(<span class="keywordtype">void</span> *opaque, <span class="keywordtype">int</span> olength,
+00478                         <span class="keyword">const</span> <span class="keywordtype">char</span> *community,
+00479                         size_t community_len,
+00480                         <span class="keywordtype">char</span> **secName, <span class=
 "keywordtype">char</span> **contextName)
-00472 {
-00473     com2SecUnixEntry   *c;
-00474     <span class="keyword">struct </span>sockaddr_un *to = (<span class="keyword">struct </span>sockaddr_un *) opaque;
-00475     <span class="keywordtype">char</span>           *ztcommunity = NULL;
-00476 
-00477     <span class="keywordflow">if</span> (secName != NULL) {
-00478         *secName = NULL;  <span class="comment">/* Haven't found anything yet */</span>
-00479     }
-00480 
-00481     <span class="comment">/*</span>
-00482 <span class="comment">     * Special case if there are NO entries (as opposed to no MATCHING</span>
-00483 <span class="comment">     * entries).</span>
-00484 <span class="comment">     */</span>
+00481 {
+00482     com2SecUnixEntry   *c;
+00483     <span class="keyword">struct </span>sockaddr_un *to = (<span class="keyword">struct </span>sockaddr_un *) opaque;
+00484     <span class="keywordtype">char</span>           *ztcommunity = NULL;
 00485 
-00486     <span class="keywordflow">if</span> (com2SecUnixList == NULL) {
-00487         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_getSecName"</span>, <span class=
+00486     <span class="keywordflow">if</span> (secName != NULL) {
+00487         *secName = NULL;  <span class="comment">/* Haven't found anything yet */</span>
+00488     }
+00489 
+00490     <span class="comment">/*</span>
+00491 <span class="comment">     * Special case if there are NO entries (as opposed to no MATCHING</span>
+00492 <span class="comment">     * entries).</span>
+00493 <span class="comment">     */</span>
+00494 
+00495     <span class="keywordflow">if</span> (com2SecUnixList == NULL) {
+00496         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_getSecName"</span>, <span class=
 "stringliteral">"no com2sec entries\n"</span>));
-00488         <span class="keywordflow">return</span> 0;
-00489     }
-00490 
-00491     <span class="comment">/*</span>
-00492 <span class="comment">     * If there is no unix socket path, then there can be no valid security</span>
-00493 <span class="comment">     * name.</span>
-00494 <span class="comment">     */</span>
-00495 
-00496     <span class="keywordflow">if</span> (opaque == NULL || olength != <span class="keyword">sizeof</span>(<span class=
+00497         <span class="keywordflow">return</span> 0;
+00498     }
+00499 
+00500     <span class="comment">/*</span>
+00501 <span class="comment">     * If there is no unix socket path, then there can be no valid security</span>
+00502 <span class="comment">     * name.</span>
+00503 <span class="comment">     */</span>
+00504 
+00505     <span class="keywordflow">if</span> (opaque == NULL || olength != <span class="keyword">sizeof</span>(<span class=
 "keyword">struct </span>sockaddr_un) ||
-00497         to-&gt;sun_family != AF_UNIX) {
-00498         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_getSecName"</span>,
-00499                     <span class="stringliteral">"no unix destine address in PDU?\n"</span>));
-00500         <span class="keywordflow">return</span> 1;
-00501     }
-00502 
-00503     DEBUGIF(<span class="stringliteral">"netsnmp_unix_getSecName"</span>) {
-00504         ztcommunity = (<span class="keywordtype">char</span> *)malloc(community_len + 1);
-00505         <span class="keywordflow">if</span> (ztcommunity != NULL) {
-00506             memcpy(ztcommunity, community, community_len);
-00507             ztcommunity[community_len] = <span class="charliteral">'\0'</span>;
-00508         }
-00509 
-00510         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_getSecName"</span>, <span class=
+00506         to-&gt;sun_family != AF_UNIX) {
+00507         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_getSecName"</span>,
+00508                     <span class="stringliteral">"no unix destine address in PDU?\n"</span>));
+00509         <span class="keywordflow">return</span> 1;
+00510     }
+00511 
+00512     DEBUGIF(<span class="stringliteral">"netsnmp_unix_getSecName"</span>) {
+00513         ztcommunity = (<span class="keywordtype">char</span> *)malloc(community_len + 1);
+00514         <span class="keywordflow">if</span> (ztcommunity != NULL) {
+00515             memcpy(ztcommunity, community, community_len);
+00516             ztcommunity[community_len] = <span class="charliteral">'\0'</span>;
+00517         }
+00518 
+00519         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_getSecName"</span>, <span class=
 "stringliteral">"resolve &lt;\"%s\"&gt;\n"</span>,
-00511                     ztcommunity ? ztcommunity : <span class="stringliteral">"&lt;malloc error&gt;"</span>));
-00512     }
-00513 
-00514     <span class="keywordflow">for</span> (c = com2SecUnixList; c != NULL; c = c-&gt;next) {
-00515         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_getSecName"</span>,<span class=
+00520                     ztcommunity ? ztcommunity : <span class="stringliteral">"&lt;malloc error&gt;"</span>));
+00521     }
+00522 
+00523     <span class="keywordflow">for</span> (c = com2SecUnixList; c != NULL; c = c-&gt;next) {
+00524         DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_getSecName"</span>,<span class=
 "stringliteral">"compare &lt;\"%s\",to socket %s&gt;"</span>,
-00516                     c-&gt;community, c-&gt;sockpath ));
-00517         <span class="keywordflow">if</span> ((community_len == strlen(c-&gt;community)) &amp;&amp;
-00518             (memcmp(community, c-&gt;community, community_len) == 0) &amp;&amp;
-00519             <span class="comment">/* compare sockpath, if pathlen == 0, always match */</span>
-00520             (strlen(to-&gt;sun_path) == c-&gt;pathlen || c-&gt;pathlen == 0) &amp;&amp;
-00521             (memcmp(to-&gt;sun_path, c-&gt;sockpath, c-&gt;pathlen) == 0)
-00522             ) {
-00523             DEBUGMSG((<span class="stringliteral">"netsnmp_unix_getSecName"</span>, <span class=
+00525                     c-&gt;community, c-&gt;sockpath ));
+00526         <span class="keywordflow">if</span> ((community_len == strlen(c-&gt;community)) &amp;&amp;
+00527             (memcmp(community, c-&gt;community, community_len) == 0) &amp;&amp;
+00528             <span class="comment">/* compare sockpath, if pathlen == 0, always match */</span>
+00529             (strlen(to-&gt;sun_path) == c-&gt;pathlen || c-&gt;pathlen == 0) &amp;&amp;
+00530             (memcmp(to-&gt;sun_path, c-&gt;sockpath, c-&gt;pathlen) == 0)
+00531             ) {
+00532             DEBUGMSG((<span class="stringliteral">"netsnmp_unix_getSecName"</span>, <span class=
 "stringliteral">"... SUCCESS\n"</span>));
-00524             <span class="keywordflow">if</span> (secName != NULL) {
-00525                 *secName = c-&gt;secName;
-00526                 *contextName = c-&gt;contextName;
-00527             }
-00528             <span class="keywordflow">break</span>;
-00529         }
-00530         DEBUGMSG((<span class="stringliteral">"netsnmp_unix_getSecName"</span>, <span class=
+00533             <span class="keywordflow">if</span> (secName != NULL) {
+00534                 *secName = c-&gt;secName;
+00535                 *contextName = c-&gt;contextName;
+00536             }
+00537             <span class="keywordflow">break</span>;
+00538         }
+00539         DEBUGMSG((<span class="stringliteral">"netsnmp_unix_getSecName"</span>, <span class=
 "stringliteral">"... nope\n"</span>));
-00531     }
-00532     <span class="keywordflow">if</span> (ztcommunity != NULL) {
-00533         free(ztcommunity);
-00534     }
-00535     <span class="keywordflow">return</span> 1;
-00536 }
-00537 
-00538 <span class="keywordtype">void</span>
-00539 netsnmp_unix_parse_security(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
-"keywordtype">char</span> *param)
-00540 {
-00541     <span class="keywordtype">char</span>              secName[VACMSTRINGLEN + 1], community[VACMSTRINGLEN + 1];
-00542     <span class="keywordtype">char</span>              contextName[VACMSTRINGLEN + 1];
-00543     <span class="keywordtype">char</span>              sockpath[<span class="keyword">sizeof</span>(<span class=
-"keyword">struct </span>sockaddr_un) + 1];
-00544     com2SecUnixEntry *e = NULL;
-00545 
+00540     }
+00541     <span class="keywordflow">if</span> (ztcommunity != NULL) {
+00542         free(ztcommunity);
+00543     }
+00544     <span class="keywordflow">return</span> 1;
+00545 }
 00546 
-00547     param = copy_nword(param, secName, VACMSTRINGLEN);
-00548     <span class="keywordflow">if</span> (strcmp(secName, <span class="stringliteral">"-Cn"</span>) == 0) {
-00549         <span class="keywordflow">if</span> (!secName) {
-00550             config_perror(<span class="stringliteral">"missing CONTEXT_NAME parameter"</span>);
-00551             <span class="keywordflow">return</span>;
-00552         }
-00553         param = copy_nword( param, contextName, <span class="keyword">sizeof</span>(contextName));
-00554         param = copy_nword( param, secName, <span class="keyword">sizeof</span>(secName));
-00555     } <span class="keywordflow">else</span> {
-00556         contextName[0] = <span class="charliteral">'\0'</span>;
-00557     }
-00558     <span class="keywordflow">if</span> (secName[0] == <span class="charliteral">'\0'</span>) {
-00559         config_perror(<span class="stringliteral">"missing NAME parameter"</span>);
-00560         <span class="keywordflow">return</span>;
-00561     } <span class="keywordflow">else</span> <span class=
-"keywordflow">if</span> (strlen(secName) &gt; (VACMSTRINGLEN - 1)) {
-00562         config_perror(<span class="stringliteral">"security name too long"</span>);
-00563         <span class="keywordflow">return</span>;
-00564     }
-00565 
-00566         param = copy_nword(param, sockpath, <span class="keyword">sizeof</span>(<span class=
-"keyword">struct</span> sockaddr_un) - 1);
-00567     <span class="keywordflow">if</span> (sockpath[0] == <span class="charliteral">'\0'</span>) {
-00568         config_perror(<span class="stringliteral">"missing SOCKPATH parameter"</span>);
+00547 <span class="keywordtype">void</span>
+00548 netsnmp_unix_parse_security(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keywordtype">char</span> *param)
+00549 {
+00550     <span class="keywordtype">char</span>              secName[VACMSTRINGLEN + 1], community[VACMSTRINGLEN + 1];
+00551     <span class="keywordtype">char</span>              contextName[VACMSTRINGLEN + 1];
+00552     <span class="keywordtype">char</span>              sockpath[<span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr_un) + 1];
+00553     com2SecUnixEntry *e = NULL;
+00554 
+00555 
+00556     param = copy_nword(param, secName, VACMSTRINGLEN);
+00557     <span class="keywordflow">if</span> (strcmp(secName, <span class="stringliteral">"-Cn"</span>) == 0) {
+00558         <span class="keywordflow">if</span> (!secName) {
+00559             config_perror(<span class="stringliteral">"missing CONTEXT_NAME parameter"</span>);
+00560             <span class="keywordflow">return</span>;
+00561         }
+00562         param = copy_nword( param, contextName, <span class="keyword">sizeof</span>(contextName));
+00563         param = copy_nword( param, secName, <span class="keyword">sizeof</span>(secName));
+00564     } <span class="keywordflow">else</span> {
+00565         contextName[0] = <span class="charliteral">'\0'</span>;
+00566     }
+00567     <span class="keywordflow">if</span> (secName[0] == <span class="charliteral">'\0'</span>) {
+00568         config_perror(<span class="stringliteral">"missing NAME parameter"</span>);
 00569         <span class="keywordflow">return</span>;
-00570     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (strlen(sockpath) &gt; (<span class=
-"keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_un) - 1)) {
-00571         config_perror(<span class="stringliteral">"sockpath too long"</span>);
+00570     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (strlen(secName) &gt; (VACMSTRINGLEN - 1)) {
+00571         config_perror(<span class="stringliteral">"security name too long"</span>);
 00572         <span class="keywordflow">return</span>;
 00573     }
-00574     <span class="comment">/* if sockpath == "default", set pathlen=0*/</span>
-00575     <span class="keywordflow">if</span>(strcmp(sockpath, <span class="stringliteral">"default"</span>) == 0){
-00576         sockpath[0] = 0;
-00577     }
-00578 
-00579     param = copy_nword(param, community, VACMSTRINGLEN);
-00580     <span class="keywordflow">if</span> (community[0] == <span class="charliteral">'\0'</span>) {
-00581         config_perror(<span class="stringliteral">"missing COMMUNITY parameter\n"</span>);
-00582         <span class="keywordflow">return</span>;
-00583     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (strncmp
-00584                (community, EXAMPLE_COMMUNITY, strlen(EXAMPLE_COMMUNITY))
-00585                == 0) {
-00586         config_perror(<span class="stringliteral">"example config COMMUNITY not properly configured"</span>);
-00587         <span class="keywordflow">return</span>;
-00588     } <span class="keywordflow">else</span> <span class=
-"keywordflow">if</span> (strlen(community) &gt; (VACMSTRINGLEN - 1)) {
-00589         config_perror(<span class="stringliteral">"community name too long"</span>);
-00590         <span class="keywordflow">return</span>;
-00591     }
-00592 
-00593     e = (com2SecUnixEntry *) malloc(<span class="keyword">sizeof</span>(com2SecUnixEntry));
-00594     <span class="keywordflow">if</span> (e == NULL) {
-00595         config_perror(<span class="stringliteral">"memory error"</span>);
+00574 
+00575         param = copy_nword(param, sockpath, <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_un) - 1);
+00576     <span class="keywordflow">if</span> (sockpath[0] == <span class="charliteral">'\0'</span>) {
+00577         config_perror(<span class="stringliteral">"missing SOCKPATH parameter"</span>);
+00578         <span class="keywordflow">return</span>;
+00579     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (strlen(sockpath) &gt; (<span class=
+"keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_un) - 1)) {
+00580         config_perror(<span class="stringliteral">"sockpath too long"</span>);
+00581         <span class="keywordflow">return</span>;
+00582     }
+00583     <span class="comment">/* if sockpath == "default", set pathlen=0*/</span>
+00584     <span class="keywordflow">if</span>(strcmp(sockpath, <span class="stringliteral">"default"</span>) == 0){
+00585         sockpath[0] = 0;
+00586     }
+00587 
+00588     param = copy_nword(param, community, VACMSTRINGLEN);
+00589     <span class="keywordflow">if</span> (community[0] == <span class="charliteral">'\0'</span>) {
+00590         config_perror(<span class="stringliteral">"missing COMMUNITY parameter\n"</span>);
+00591         <span class="keywordflow">return</span>;
+00592     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (strncmp
+00593                (community, EXAMPLE_COMMUNITY, strlen(EXAMPLE_COMMUNITY))
+00594                == 0) {
+00595         config_perror(<span class="stringliteral">"example config COMMUNITY not properly configured"</span>);
 00596         <span class="keywordflow">return</span>;
-00597     }
-00598 
-00599     DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_parse_security"</span>,
-00600                 <span class="stringliteral">"&lt;\"%s\"&gt; =&gt; \"%s\"\n"</span>, community, secName));
+00597     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (strlen(community) &gt; (VACMSTRINGLEN - 1)) {
+00598         config_perror(<span class="stringliteral">"community name too long"</span>);
+00599         <span class="keywordflow">return</span>;
+00600     }
 00601 
-00602     strcpy(e-&gt;secName, secName);
-00603     strcpy(e-&gt;contextName, contextName);
-00604     strcpy(e-&gt;community, community);
-00605     strcpy(e-&gt;sockpath, sockpath);
-00606     e-&gt;pathlen = strlen(sockpath);
-00607     e-&gt;next = NULL;
-00608 
-00609     <span class="keywordflow">if</span> (com2SecUnixListLast != NULL) {
-00610         com2SecUnixListLast-&gt;next = e;
-00611         com2SecUnixListLast = e;
-00612     } <span class="keywordflow">else</span> {
-00613         com2SecUnixListLast = com2SecUnixList = e;
-00614     }
-00615 }
-00616 
-00617 <span class="keywordtype">void</span>
-00618 netsnmp_unix_com2SecList_free(<span class="keywordtype">void</span>)
-00619 {
-00620     com2SecUnixEntry   *e = com2SecUnixList;
-00621     <span class="keywordflow">while</span> (e != NULL) {
-00622         com2SecUnixEntry   *tmp = e;
-00623         e = e-&gt;next;
-00624         free(tmp);
-00625     }
-00626     com2SecUnixList = com2SecUnixListLast = NULL;
-00627 }
-00628 <span class="preprocessor">#endif </span><span class="comment">/* support for community based SNMP */</span>
-00629 
-00630 <span class="keywordtype">void</span>
-00631 netsnmp_unix_agent_config_tokens_register(<span class="keywordtype">void</span>)
-00632 {
-00633 <span class="preprocessor">#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)</span>
-00634     register_app_config_handler(<span class="stringliteral">"com2secunix"</span>, netsnmp_unix_parse_security,
-00635                                 netsnmp_unix_com2SecList_free,
-00636                                 <span class="stringliteral">"[-Cn CONTEXT] secName sockpath community"</span>);
+00602     e = (com2SecUnixEntry *) malloc(<span class="keyword">sizeof</span>(com2SecUnixEntry));
+00603     <span class="keywordflow">if</span> (e == NULL) {
+00604         config_perror(<span class="stringliteral">"memory error"</span>);
+00605         <span class="keywordflow">return</span>;
+00606     }
+00607 
+00608     DEBUGMSGTL((<span class="stringliteral">"netsnmp_unix_parse_security"</span>,
+00609                 <span class="stringliteral">"&lt;\"%s\"&gt; =&gt; \"%s\"\n"</span>, community, secName));
+00610 
+00611     strcpy(e-&gt;secName, secName);
+00612     strcpy(e-&gt;contextName, contextName);
+00613     strcpy(e-&gt;community, community);
+00614     strcpy(e-&gt;sockpath, sockpath);
+00615     e-&gt;pathlen = strlen(sockpath);
+00616     e-&gt;next = NULL;
+00617 
+00618     <span class="keywordflow">if</span> (com2SecUnixListLast != NULL) {
+00619         com2SecUnixListLast-&gt;next = e;
+00620         com2SecUnixListLast = e;
+00621     } <span class="keywordflow">else</span> {
+00622         com2SecUnixListLast = com2SecUnixList = e;
+00623     }
+00624 }
+00625 
+00626 <span class="keywordtype">void</span>
+00627 netsnmp_unix_com2SecList_free(<span class="keywordtype">void</span>)
+00628 {
+00629     com2SecUnixEntry   *e = com2SecUnixList;
+00630     <span class="keywordflow">while</span> (e != NULL) {
+00631         com2SecUnixEntry   *tmp = e;
+00632         e = e-&gt;next;
+00633         free(tmp);
+00634     }
+00635     com2SecUnixList = com2SecUnixListLast = NULL;
+00636 }
 00637 <span class="preprocessor">#endif </span><span class="comment">/* support for community based SNMP */</span>
-00638 }
+00638 
+00639 <span class="keywordtype">void</span>
+00640 netsnmp_unix_agent_config_tokens_register(<span class="keywordtype">void</span>)
+00641 {
+00642 <span class="preprocessor">#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)</span>
+00643     register_app_config_handler(<span class="stringliteral">"com2secunix"</span>, netsnmp_unix_parse_security,
+00644                                 netsnmp_unix_com2SecList_free,
+00645                                 <span class="stringliteral">"[-Cn CONTEXT] secName sockpath community"</span>);
+00646 <span class="preprocessor">#endif </span><span class="comment">/* support for community based SNMP */</span>
+00647 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:42 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:50 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

@@ -31,79 +31,73 @@
 00011 
 00012 <span class="preprocessor">#include &lt;net-snmp/agent/null.h&gt;</span>
 00013 
-00014 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
-00015 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
-00016 <span class="preprocessor">#endif</span>
-00017 
-00018 <span class="keywordtype">int</span>
-00019 netsnmp_register_null(oid * loc, size_t loc_len)
-00020 {
-00021     <span class="keywordflow">return</span> netsnmp_register_null_context(loc, loc_len, NULL);
-00022 }
-00023 
-00024 <span class="keywordtype">int</span>
-00025 netsnmp_register_null_context(oid * loc, size_t loc_len,
-00026                               <span class="keyword">const</span> <span class="keywordtype">char</span> *contextName)
-00027 {
-00028     <a class="code" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo;
-00029     reginfo = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(<a class="code" href=
+00014 <span class="keywordtype">int</span>
+00015 netsnmp_register_null(oid * loc, size_t loc_len)
+00016 {
+00017     <span class="keywordflow">return</span> netsnmp_register_null_context(loc, loc_len, NULL);
+00018 }
+00019 
+00020 <span class="keywordtype">int</span>
+00021 netsnmp_register_null_context(oid * loc, size_t loc_len,
+00022                               <span class="keyword">const</span> <span class="keywordtype">char</span> *contextName)
+00023 {
+00024     <a class="code" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo;
+00025     reginfo = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(<a class="code" href=
 "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>);
-00030     reginfo-&gt;<a class="code" href=
+00026     reginfo-&gt;<a class="code" href=
 "structnetsnmp__handler__registration__s.html#o0">handlerName</a> = strdup(<span class="stringliteral">""</span>);
-00031     reginfo-&gt;<a class="code" href="structnetsnmp__handler__registration__s.html#o2">rootoid</a> = loc;
-00032     reginfo-&gt;<a class="code" href="structnetsnmp__handler__registration__s.html#o3">rootoid_len</a> = loc_len;
-00033     reginfo-&gt;<a class="code" href="structnetsnmp__handler__registration__s.html#o4">handler</a> =
-00034         <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
+00027     reginfo-&gt;<a class="code" href="structnetsnmp__handler__registration__s.html#o2">rootoid</a> = loc;
+00028     reginfo-&gt;<a class="code" href="structnetsnmp__handler__registration__s.html#o3">rootoid_len</a> = loc_len;
+00029     reginfo-&gt;<a class="code" href="structnetsnmp__handler__registration__s.html#o4">handler</a> =
+00030         <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
 "stringliteral">"null"</span>, netsnmp_null_handler);
-00035     <span class="keywordflow">if</span> (contextName)
-00036         reginfo-&gt;<a class="code" href=
+00031     <span class="keywordflow">if</span> (contextName)
+00032         reginfo-&gt;<a class="code" href=
 "structnetsnmp__handler__registration__s.html#o1">contextName</a> = strdup(contextName);
-00037     reginfo-&gt;<a class="code" href="structnetsnmp__handler__registration__s.html#o5">modes</a> = HANDLER_CAN_DEFAULT;
-00038     <span class="keywordflow">return</span> <a class="code" href=
+00033     reginfo-&gt;<a class="code" href="structnetsnmp__handler__registration__s.html#o5">modes</a> = HANDLER_CAN_DEFAULT;
+00034     <span class="keywordflow">return</span> <a class="code" href=
 "group__handler.html#ga10">netsnmp_register_handler</a>(reginfo);
-00039 }
-00040 
-00041 <span class="keywordtype">int</span>
-00042 netsnmp_null_handler(<a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
-00043                      <a class="code" href=
+00035 }
+00036 
+00037 <span class="keywordtype">int</span>
+00038 netsnmp_null_handler(<a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00039                      <a class="code" href=
 "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
-00044                      <a class="code" href=
+00040                      <a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
-00045                      <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
-00046 {
-00047     DEBUGMSGTL((<span class="stringliteral">"helper:null"</span>, <span class="stringliteral">"Got request\n"</span>));
-00048 
-00049     DEBUGMSGTL((<span class="stringliteral">"helper:null"</span>, <span class="stringliteral">"  oid:"</span>));
-00050     DEBUGMSGOID((<span class="stringliteral">"helper:null"</span>, requests-&gt;<a class="code" href=
+00041                      <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
+00042 {
+00043     DEBUGMSGTL((<span class="stringliteral">"helper:null"</span>, <span class="stringliteral">"Got request\n"</span>));
+00044 
+00045     DEBUGMSGTL((<span class="stringliteral">"helper:null"</span>, <span class="stringliteral">"  oid:"</span>));
+00046     DEBUGMSGOID((<span class="stringliteral">"helper:null"</span>, requests-&gt;<a class="code" href=
 "structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
-00051                  requests-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class=
+00047                  requests-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class=
 "code" href="structvariable__list.html#o2">name_length</a>));
-00052     DEBUGMSG((<span class="stringliteral">"helper:null"</span>, <span class="stringliteral">"\n"</span>));
-00053 
-00054     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
+00048     DEBUGMSG((<span class="stringliteral">"helper:null"</span>, <span class="stringliteral">"\n"</span>));
+00049 
+00050     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
 "structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
-00055     <span class="keywordflow">case</span> MODE_GETNEXT:
-00056     <span class="keywordflow">case</span> MODE_GETBULK:
+00051     <span class="keywordflow">case</span> MODE_GETNEXT:
+00052     <span class="keywordflow">case</span> MODE_GETBULK:
+00053         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00054 
+00055     <span class="keywordflow">case</span> MODE_GET:
+00056         <a class="code" href="group__snmp__agent.html#ga73">netsnmp_request_set_error_all</a>(requests, SNMP_NOSUCHOBJECT);
 00057         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
 00058 
-00059     <span class="keywordflow">case</span> MODE_GET:
-00060         <a class="code" href="group__snmp__agent.html#ga81">netsnmp_set_all_requests_error</a>(reqinfo, requests,
-00061                                        SNMP_NOSUCHOBJECT);
-00062         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00063 
-00064     <span class="keywordflow">default</span>:
-00065         <a class="code" href="group__snmp__agent.html#ga81">netsnmp_set_all_requests_error</a>(reqinfo, requests,
-00066                                        SNMP_ERR_NOSUCHNAME);
-00067         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00068     }
-00069 }
+00059     <span class="keywordflow">default</span>:
+00060         <a class="code" href=
+"group__snmp__agent.html#ga73">netsnmp_request_set_error_all</a>(requests, SNMP_ERR_NOSUCHNAME);
+00061         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00062     }
+00063 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:38 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:45 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

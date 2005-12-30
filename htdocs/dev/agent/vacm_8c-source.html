@@ -91,933 +91,997 @@
 00069 <span class="keyword">static</span> <span class=
 "keyword">struct </span>vacm_groupEntry *groupList = NULL, *groupScanPtr = NULL;
 00070 
-00071 <span class="keywordtype">void</span>
-00072 vacm_save(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+00076 <span class="keywordtype">void</span>
+00077 init_vacm(<span class="keywordtype">void</span>)
+00078 {
+00079     <span class="comment">/* views for access via get/set/send-notifications */</span>
+00080     se_add_pair_to_slist(VACM_VIEW_ENUM_NAME, strdup(<span class="stringliteral">"read"</span>),
+00081                          VACM_VIEW_READ);
+00082     se_add_pair_to_slist(VACM_VIEW_ENUM_NAME, strdup(<span class="stringliteral">"write"</span>),
+00083                          VACM_VIEW_WRITE);
+00084     se_add_pair_to_slist(VACM_VIEW_ENUM_NAME, strdup(<span class="stringliteral">"notify"</span>),
+00085                          VACM_VIEW_NOTIFY);
+00086 
+00087     <span class="comment">/* views for permissions when receiving notifications */</span>
+00088     se_add_pair_to_slist(VACM_VIEW_ENUM_NAME, strdup(<span class="stringliteral">"log"</span>),
+00089                          VACM_VIEW_LOG);
+00090     se_add_pair_to_slist(VACM_VIEW_ENUM_NAME, strdup(<span class="stringliteral">"execute"</span>),
+00091                          VACM_VIEW_EXECUTE);
+00092     se_add_pair_to_slist(VACM_VIEW_ENUM_NAME, strdup(<span class="stringliteral">"net"</span>),
+00093                          VACM_VIEW_NET);
+00094 }
+00095 
+00096 <span class="keywordtype">void</span>
+00097 vacm_save(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
 "keyword">const</span> <span class="keywordtype">char</span> *type)
-00073 {
-00074     <span class="keyword">struct </span>vacm_viewEntry *vptr;
-00075     <span class="keyword">struct </span>vacm_accessEntry *aptr;
-00076     <span class="keyword">struct </span>vacm_groupEntry *gptr;
-00077 
-00078     <span class="keywordflow">for</span> (vptr = viewList; vptr != NULL; vptr = vptr-&gt;next) {
-00079         <span class="keywordflow">if</span> (vptr-&gt;viewStorageType == ST_NONVOLATILE)
-00080             vacm_save_view(vptr, token, type);
-00081     }
-00082 
-00083     <span class="keywordflow">for</span> (aptr = accessList; aptr != NULL; aptr = aptr-&gt;next) {
-00084         <span class="keywordflow">if</span> (aptr-&gt;storageType == ST_NONVOLATILE)
-00085             vacm_save_access(aptr, token, type);
-00086     }
-00087 
-00088     <span class="keywordflow">for</span> (gptr = groupList; gptr != NULL; gptr = gptr-&gt;next) {
-00089         <span class="keywordflow">if</span> (gptr-&gt;storageType == ST_NONVOLATILE)
-00090             vacm_save_group(gptr, token, type);
-00091     }
-00092 }
-00093 
-00094 <span class="comment">/*</span>
-00095 <span class="comment"> * vacm_save_view(): saves a view entry to the persistent cache </span>
-00096 <span class="comment"> */</span>
-00097 <span class="keywordtype">void</span>
-00098 vacm_save_view(<span class="keyword">struct</span> vacm_viewEntry *view, <span class="keyword">const</span> <span class=
+00098 {
+00099     <span class="keyword">struct </span>vacm_viewEntry *vptr;
+00100     <span class="keyword">struct </span>vacm_accessEntry *aptr;
+00101     <span class="keyword">struct </span>vacm_groupEntry *gptr;
+00102 
+00103     <span class="keywordflow">for</span> (vptr = viewList; vptr != NULL; vptr = vptr-&gt;next) {
+00104         <span class="keywordflow">if</span> (vptr-&gt;viewStorageType == ST_NONVOLATILE)
+00105             vacm_save_view(vptr, token, type);
+00106     }
+00107 
+00108     <span class="keywordflow">for</span> (aptr = accessList; aptr != NULL; aptr = aptr-&gt;next) {
+00109         <span class="keywordflow">if</span> (aptr-&gt;storageType == ST_NONVOLATILE)
+00110             vacm_save_access(aptr, token, type);
+00111     }
+00112 
+00113     <span class="keywordflow">for</span> (gptr = groupList; gptr != NULL; gptr = gptr-&gt;next) {
+00114         <span class="keywordflow">if</span> (gptr-&gt;storageType == ST_NONVOLATILE)
+00115             vacm_save_group(gptr, token, type);
+00116     }
+00117 }
+00118 
+00119 <span class="comment">/*</span>
+00120 <span class="comment"> * vacm_save_view(): saves a view entry to the persistent cache </span>
+00121 <span class="comment"> */</span>
+00122 <span class="keywordtype">void</span>
+00123 vacm_save_view(<span class="keyword">struct</span> vacm_viewEntry *view, <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *token,
-00099                <span class="keyword">const</span> <span class="keywordtype">char</span> *type)
-00100 {
-00101     <span class="keywordtype">char</span>            line[4096];
-00102     <span class="keywordtype">char</span>           *cptr;
-00103 
-00104     memset(line, 0, <span class="keyword">sizeof</span>(line));
-00105     snprintf(line, <span class="keyword">sizeof</span>(line), <span class=
+00124                <span class="keyword">const</span> <span class="keywordtype">char</span> *type)
+00125 {
+00126     <span class="keywordtype">char</span>            line[4096];
+00127     <span class="keywordtype">char</span>           *cptr;
+00128 
+00129     memset(line, 0, <span class="keyword">sizeof</span>(line));
+00130     snprintf(line, <span class="keyword">sizeof</span>(line), <span class=
 "stringliteral">"%s%s %d %d %d "</span>, token, <span class="stringliteral">"View"</span>,
-00106             view-&gt;viewStatus, view-&gt;viewStorageType, view-&gt;viewType);
-00107     line[ <span class="keyword">sizeof</span>(line)-1 ] = 0;
-00108     cptr = &amp;line[strlen(line)]; <span class="comment">/* the NULL */</span>
-00109 
-00110     cptr =
-00111         read_config_save_octet_string(cptr, (u_char *) view-&gt;viewName + 1,
-00112                                       view-&gt;viewName[0] + 1);
-00113     *cptr++ = <span class="charliteral">' '</span>;
-00114     cptr =
-00115         read_config_save_objid(cptr, view-&gt;viewSubtree+1,
-00116                                      view-&gt;viewSubtreeLen-1);
-00117     *cptr++ = <span class="charliteral">' '</span>;
-00118     cptr = read_config_save_octet_string(cptr, (u_char *) view-&gt;viewMask,
-00119                                          view-&gt;viewMaskLen);
-00120 
-00121     <a class="code" href="group__read__config.html#ga37">read_config_store</a>(type, line);
-00122 }
-00123 
-00124 <span class="keywordtype">void</span>
-00125 vacm_parse_config_view(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+00131             view-&gt;viewStatus, view-&gt;viewStorageType, view-&gt;viewType);
+00132     line[ <span class="keyword">sizeof</span>(line)-1 ] = 0;
+00133     cptr = &amp;line[strlen(line)]; <span class="comment">/* the NULL */</span>
+00134 
+00135     cptr =
+00136         read_config_save_octet_string(cptr, (u_char *) view-&gt;viewName + 1,
+00137                                       view-&gt;viewName[0] + 1);
+00138     *cptr++ = <span class="charliteral">' '</span>;
+00139     cptr =
+00140         read_config_save_objid(cptr, view-&gt;viewSubtree+1,
+00141                                      view-&gt;viewSubtreeLen-1);
+00142     *cptr++ = <span class="charliteral">' '</span>;
+00143     cptr = read_config_save_octet_string(cptr, (u_char *) view-&gt;viewMask,
+00144                                          view-&gt;viewMaskLen);
+00145 
+00146     <a class="code" href="group__read__config.html#ga40">read_config_store</a>(type, line);
+00147 }
+00148 
+00149 <span class="keywordtype">void</span>
+00150 vacm_parse_config_view(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
 "keywordtype">char</span> *line)
-00126 {
-00127     <span class="keyword">struct </span>vacm_viewEntry view;
-00128     <span class="keyword">struct </span>vacm_viewEntry *vptr;
-00129     <span class="keywordtype">char</span>           *viewName = (<span class=
+00151 {
+00152     <span class="keyword">struct </span>vacm_viewEntry view;
+00153     <span class="keyword">struct </span>vacm_viewEntry *vptr;
+00154     <span class="keywordtype">char</span>           *viewName = (<span class=
 "keywordtype">char</span> *) &amp;view.viewName;
-00130     oid            *viewSubtree = (oid *) &amp; view.viewSubtree;
-00131     u_char         *viewMask;
-00132     size_t          len;
-00133 
-00134     view.viewStatus = atoi(line);
-00135     line = skip_token(line);
-00136     view.viewStorageType = atoi(line);
-00137     line = skip_token(line);
-00138     view.viewType = atoi(line);
-00139     line = skip_token(line);
-00140     line =
-00141         read_config_read_octet_string(line, (u_char **) &amp; viewName, &amp;len);
-00142     view.viewSubtreeLen = MAX_OID_LEN;
-00143     line =
-00144         read_config_read_objid(line, (oid **) &amp; viewSubtree,
-00145                                &amp;view.viewSubtreeLen);
-00146 
-00147     vptr =
-00148         vacm_createViewEntry(view.viewName, view.viewSubtree,
-00149                              view.viewSubtreeLen);
-00150     <span class="keywordflow">if</span> (!vptr)
-00151         <span class="keywordflow">return</span>;
-00152 
-00153     vptr-&gt;viewStatus = view.viewStatus;
-00154     vptr-&gt;viewStorageType = view.viewStorageType;
-00155     vptr-&gt;viewType = view.viewType;
-00156     viewMask = (u_char *) vptr-&gt;viewMask;
-00157     line =
-00158         read_config_read_octet_string(line, (u_char **) &amp; viewMask,
-00159                                       &amp;vptr-&gt;viewMaskLen);
-00160 }
-00161 
-00162 <span class="comment">/*</span>
-00163 <span class="comment"> * vacm_save_access(): saves an access entry to the persistent cache </span>
-00164 <span class="comment"> */</span>
-00165 <span class="keywordtype">void</span>
-00166 vacm_save_access(<span class="keyword">struct</span> vacm_accessEntry *access_entry, <span class=
-"keyword">const</span> <span class="keywordtype">char</span> *token,
-00167                  <span class="keyword">const</span> <span class="keywordtype">char</span> *type)
-00168 {
-00169     <span class="keywordtype">char</span>            line[4096];
-00170     <span class="keywordtype">char</span>           *cptr;
+00155     oid            *viewSubtree = (oid *) &amp; view.viewSubtree;
+00156     u_char         *viewMask;
+00157     size_t          len;
+00158 
+00159     view.viewStatus = atoi(line);
+00160     line = skip_token(line);
+00161     view.viewStorageType = atoi(line);
+00162     line = skip_token(line);
+00163     view.viewType = atoi(line);
+00164     line = skip_token(line);
+00165     line =
+00166         read_config_read_octet_string(line, (u_char **) &amp; viewName, &amp;len);
+00167     view.viewSubtreeLen = MAX_OID_LEN;
+00168     line =
+00169         read_config_read_objid(line, (oid **) &amp; viewSubtree,
+00170                                &amp;view.viewSubtreeLen);
 00171 
-00172     memset(line, 0, <span class="keyword">sizeof</span>(line));
-00173     snprintf(line, <span class="keyword">sizeof</span>(line), <span class="stringliteral">"%s%s %d %d %d %d %d "</span>,
-00174             token, <span class="stringliteral">"Access"</span>, access_entry-&gt;status,
-00175             access_entry-&gt;storageType, access_entry-&gt;securityModel,
-00176             access_entry-&gt;securityLevel, access_entry-&gt;contextMatch);
-00177     line[ <span class="keyword">sizeof</span>(line)-1 ] = 0;
-00178     cptr = &amp;line[strlen(line)]; <span class="comment">/* the NULL */</span>
-00179     cptr =
-00180         read_config_save_octet_string(cptr,
-00181                                       (u_char *) access_entry-&gt;groupName + 1,
-00182                                       access_entry-&gt;groupName[0] + 1);
-00183     *cptr++ = <span class="charliteral">' '</span>;
-00184     cptr =
-00185         read_config_save_octet_string(cptr,
-00186                                       (u_char *) access_entry-&gt;contextPrefix + 1,
-00187                                       access_entry-&gt;contextPrefix[0] + 1);
-00188 
-00189     *cptr++ = <span class="charliteral">' '</span>;
-00190     cptr = read_config_save_octet_string(cptr, (u_char *) access_entry-&gt;readView,
-00191                                          strlen(access_entry-&gt;readView) + 1);
-00192     *cptr++ = <span class="charliteral">' '</span>;
-00193     cptr =
-00194         read_config_save_octet_string(cptr, (u_char *) access_entry-&gt;writeView,
-00195                                       strlen(access_entry-&gt;writeView) + 1);
-00196     *cptr++ = <span class="charliteral">' '</span>;
-00197     cptr =
-00198         read_config_save_octet_string(cptr, (u_char *) access_entry-&gt;notifyView,
-00199                                       strlen(access_entry-&gt;notifyView) + 1);
-00200 
-00201     <a class="code" href="group__read__config.html#ga37">read_config_store</a>(type, line);
-00202 }
-00203 
-00204 <span class="keywordtype">void</span>
-00205 vacm_parse_config_access(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
-"keywordtype">char</span> *line)
-00206 {
-00207     <span class="keyword">struct </span>vacm_accessEntry access;
-00208     <span class="keyword">struct </span>vacm_accessEntry *aptr;
-00209     <span class="keywordtype">char</span>           *contextPrefix = (<span class=
-"keywordtype">char</span> *) &amp;access.contextPrefix;
-00210     <span class="keywordtype">char</span>           *groupName = (<span class=
-"keywordtype">char</span> *) &amp;access.groupName;
-00211     <span class="keywordtype">char</span>           *readView, *writeView, *notifyView;
-00212     size_t          len;
-00213 
-00214     access.status = atoi(line);
-00215     line = skip_token(line);
-00216     access.storageType = atoi(line);
-00217     line = skip_token(line);
-00218     access.securityModel = atoi(line);
-00219     line = skip_token(line);
-00220     access.securityLevel = atoi(line);
-00221     line = skip_token(line);
-00222     access.contextMatch = atoi(line);
-00223     line = skip_token(line);
-00224     line =
-00225         read_config_read_octet_string(line, (u_char **) &amp; groupName, &amp;len);
-00226     line =
-00227         read_config_read_octet_string(line, (u_char **) &amp; contextPrefix,
-00228                                       &amp;len);
-00229 
-00230     aptr = vacm_createAccessEntry(access.groupName, access.contextPrefix,
-00231                                   access.securityModel,
-00232                                   access.securityLevel);
-00233     <span class="keywordflow">if</span> (!aptr)
-00234         <span class="keywordflow">return</span>;
-00235 
-00236     aptr-&gt;status = access.status;
-00237     aptr-&gt;storageType = access.storageType;
-00238     aptr-&gt;securityModel = access.securityModel;
-00239     aptr-&gt;securityLevel = access.securityLevel;
-00240     aptr-&gt;contextMatch = access.contextMatch;
-00241     readView = (<span class="keywordtype">char</span> *) aptr-&gt;readView;
-00242     line =
-00243         read_config_read_octet_string(line, (u_char **) &amp; readView, &amp;len);
-00244     writeView = (<span class="keywordtype">char</span> *) aptr-&gt;writeView;
-00245     line =
-00246         read_config_read_octet_string(line, (u_char **) &amp; writeView, &amp;len);
-00247     notifyView = (<span class="keywordtype">char</span> *) aptr-&gt;notifyView;
-00248     line =
-00249         read_config_read_octet_string(line, (u_char **) &amp; notifyView,
-00250                                       &amp;len);
-00251 }
-00252 
-00253 <span class="comment">/*</span>
-00254 <span class="comment"> * vacm_save_group(): saves a group entry to the persistent cache </span>
-00255 <span class="comment"> */</span>
-00256 <span class="keywordtype">void</span>
-00257 vacm_save_group(<span class="keyword">struct</span> vacm_groupEntry *group_entry, <span class=
+00172     vptr =
+00173         vacm_createViewEntry(view.viewName, view.viewSubtree,
+00174                              view.viewSubtreeLen);
+00175     <span class="keywordflow">if</span> (!vptr)
+00176         <span class="keywordflow">return</span>;
+00177 
+00178     vptr-&gt;viewStatus = view.viewStatus;
+00179     vptr-&gt;viewStorageType = view.viewStorageType;
+00180     vptr-&gt;viewType = view.viewType;
+00181     viewMask = (u_char *) vptr-&gt;viewMask;
+00182     line =
+00183         read_config_read_octet_string(line, (u_char **) &amp; viewMask,
+00184                                       &amp;vptr-&gt;viewMaskLen);
+00185 }
+00186 
+00187 <span class="comment">/*</span>
+00188 <span class="comment"> * vacm_save_access(): saves an access entry to the persistent cache </span>
+00189 <span class="comment"> */</span>
+00190 <span class="keywordtype">void</span>
+00191 vacm_save_access(<span class="keyword">struct</span> vacm_accessEntry *access_entry, <span class=
 "keyword">const</span> <span class="keywordtype">char</span> *token,
-00258                 <span class="keyword">const</span> <span class="keywordtype">char</span> *type)
-00259 {
-00260     <span class="keywordtype">char</span>            line[4096];
-00261     <span class="keywordtype">char</span>           *cptr;
-00262 
-00263     memset(line, 0, <span class="keyword">sizeof</span>(line));
-00264     snprintf(line, <span class="keyword">sizeof</span>(line), <span class="stringliteral">"%s%s %d %d %d "</span>,
-00265             token, <span class="stringliteral">"Group"</span>, group_entry-&gt;status,
-00266             group_entry-&gt;storageType, group_entry-&gt;securityModel);
-00267     line[ <span class="keyword">sizeof</span>(line)-1 ] = 0;
-00268     cptr = &amp;line[strlen(line)]; <span class="comment">/* the NULL */</span>
-00269 
-00270     cptr =
-00271         read_config_save_octet_string(cptr,
-00272                                       (u_char *) group_entry-&gt;securityName + 1,
-00273                                       group_entry-&gt;securityName[0] + 1);
-00274     *cptr++ = <span class="charliteral">' '</span>;
-00275     cptr = read_config_save_octet_string(cptr, (u_char *) group_entry-&gt;groupName,
-00276                                          strlen(group_entry-&gt;groupName) + 1);
-00277 
-00278     <a class="code" href="group__read__config.html#ga37">read_config_store</a>(type, line);
-00279 }
-00280 
-00281 <span class="keywordtype">void</span>
-00282 vacm_parse_config_group(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+00192                  <span class="keyword">const</span> <span class="keywordtype">char</span> *type)
+00193 {
+00194     <span class="keywordtype">char</span>            line[4096];
+00195     <span class="keywordtype">char</span>           *cptr;
+00196 
+00197     memset(line, 0, <span class="keyword">sizeof</span>(line));
+00198     snprintf(line, <span class="keyword">sizeof</span>(line), <span class="stringliteral">"%s%s %d %d %d %d %d "</span>,
+00199             token, <span class="stringliteral">"Access"</span>, access_entry-&gt;status,
+00200             access_entry-&gt;storageType, access_entry-&gt;securityModel,
+00201             access_entry-&gt;securityLevel, access_entry-&gt;contextMatch);
+00202     line[ <span class="keyword">sizeof</span>(line)-1 ] = 0;
+00203     cptr = &amp;line[strlen(line)]; <span class="comment">/* the NULL */</span>
+00204     cptr =
+00205         read_config_save_octet_string(cptr,
+00206                                       (u_char *) access_entry-&gt;groupName + 1,
+00207                                       access_entry-&gt;groupName[0] + 1);
+00208     *cptr++ = <span class="charliteral">' '</span>;
+00209     cptr =
+00210         read_config_save_octet_string(cptr,
+00211                                       (u_char *) access_entry-&gt;contextPrefix + 1,
+00212                                       access_entry-&gt;contextPrefix[0] + 1);
+00213 
+00214     *cptr++ = <span class="charliteral">' '</span>;
+00215     cptr = read_config_save_octet_string(cptr, (u_char *) access_entry-&gt;views[VACM_VIEW_READ],
+00216                                          strlen(access_entry-&gt;views[VACM_VIEW_READ]) + 1);
+00217     *cptr++ = <span class="charliteral">' '</span>;
+00218     cptr =
+00219         read_config_save_octet_string(cptr, (u_char *) access_entry-&gt;views[VACM_VIEW_WRITE],
+00220                                       strlen(access_entry-&gt;views[VACM_VIEW_WRITE]) + 1);
+00221     *cptr++ = <span class="charliteral">' '</span>;
+00222     cptr =
+00223         read_config_save_octet_string(cptr, (u_char *) access_entry-&gt;views[VACM_VIEW_NOTIFY],
+00224                                       strlen(access_entry-&gt;views[VACM_VIEW_NOTIFY]) + 1);
+00225 
+00226     <a class="code" href="group__read__config.html#ga40">read_config_store</a>(type, line);
+00227 }
+00228 
+00229 <span class="keywordtype">void</span>
+00230 vacm_parse_config_access(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
 "keywordtype">char</span> *line)
-00283 {
-00284     <span class="keyword">struct </span>vacm_groupEntry group;
-00285     <span class="keyword">struct </span>vacm_groupEntry *gptr;
-00286     <span class="keywordtype">char</span>           *securityName = (<span class=
+00231 {
+00232     <span class="keyword">struct </span>vacm_accessEntry access;
+00233     <span class="keyword">struct </span>vacm_accessEntry *aptr;
+00234     <span class="keywordtype">char</span>           *contextPrefix = (<span class=
+"keywordtype">char</span> *) &amp;access.contextPrefix;
+00235     <span class="keywordtype">char</span>           *groupName = (<span class=
+"keywordtype">char</span> *) &amp;access.groupName;
+00236     <span class="keywordtype">char</span>           *readView, *writeView, *notifyView;
+00237     size_t          len;
+00238 
+00239     access.status = atoi(line);
+00240     line = skip_token(line);
+00241     access.storageType = atoi(line);
+00242     line = skip_token(line);
+00243     access.securityModel = atoi(line);
+00244     line = skip_token(line);
+00245     access.securityLevel = atoi(line);
+00246     line = skip_token(line);
+00247     access.contextMatch = atoi(line);
+00248     line = skip_token(line);
+00249     line =
+00250         read_config_read_octet_string(line, (u_char **) &amp; groupName, &amp;len);
+00251     line =
+00252         read_config_read_octet_string(line, (u_char **) &amp; contextPrefix,
+00253                                       &amp;len);
+00254 
+00255     aptr = vacm_createAccessEntry(access.groupName, access.contextPrefix,
+00256                                   access.securityModel,
+00257                                   access.securityLevel);
+00258     <span class="keywordflow">if</span> (!aptr)
+00259         <span class="keywordflow">return</span>;
+00260 
+00261     aptr-&gt;status = access.status;
+00262     aptr-&gt;storageType = access.storageType;
+00263     aptr-&gt;securityModel = access.securityModel;
+00264     aptr-&gt;securityLevel = access.securityLevel;
+00265     aptr-&gt;contextMatch = access.contextMatch;
+00266     readView = (<span class="keywordtype">char</span> *) aptr-&gt;views[VACM_VIEW_READ];
+00267     line =
+00268         read_config_read_octet_string(line, (u_char **) &amp; readView, &amp;len);
+00269     writeView = (<span class="keywordtype">char</span> *) aptr-&gt;views[VACM_VIEW_WRITE];
+00270     line =
+00271         read_config_read_octet_string(line, (u_char **) &amp; writeView, &amp;len);
+00272     notifyView = (<span class="keywordtype">char</span> *) aptr-&gt;views[VACM_VIEW_NOTIFY];
+00273     line =
+00274         read_config_read_octet_string(line, (u_char **) &amp; notifyView,
+00275                                       &amp;len);
+00276 }
+00277 
+00278 <span class="comment">/*</span>
+00279 <span class="comment"> * vacm_save_group(): saves a group entry to the persistent cache </span>
+00280 <span class="comment"> */</span>
+00281 <span class="keywordtype">void</span>
+00282 vacm_save_group(<span class="keyword">struct</span> vacm_groupEntry *group_entry, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *token,
+00283                 <span class="keyword">const</span> <span class="keywordtype">char</span> *type)
+00284 {
+00285     <span class="keywordtype">char</span>            line[4096];
+00286     <span class="keywordtype">char</span>           *cptr;
+00287 
+00288     memset(line, 0, <span class="keyword">sizeof</span>(line));
+00289     snprintf(line, <span class="keyword">sizeof</span>(line), <span class="stringliteral">"%s%s %d %d %d "</span>,
+00290             token, <span class="stringliteral">"Group"</span>, group_entry-&gt;status,
+00291             group_entry-&gt;storageType, group_entry-&gt;securityModel);
+00292     line[ <span class="keyword">sizeof</span>(line)-1 ] = 0;
+00293     cptr = &amp;line[strlen(line)]; <span class="comment">/* the NULL */</span>
+00294 
+00295     cptr =
+00296         read_config_save_octet_string(cptr,
+00297                                       (u_char *) group_entry-&gt;securityName + 1,
+00298                                       group_entry-&gt;securityName[0] + 1);
+00299     *cptr++ = <span class="charliteral">' '</span>;
+00300     cptr = read_config_save_octet_string(cptr, (u_char *) group_entry-&gt;groupName,
+00301                                          strlen(group_entry-&gt;groupName) + 1);
+00302 
+00303     <a class="code" href="group__read__config.html#ga40">read_config_store</a>(type, line);
+00304 }
+00305 
+00306 <span class="keywordtype">void</span>
+00307 vacm_parse_config_group(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keywordtype">char</span> *line)
+00308 {
+00309     <span class="keyword">struct </span>vacm_groupEntry group;
+00310     <span class="keyword">struct </span>vacm_groupEntry *gptr;
+00311     <span class="keywordtype">char</span>           *securityName = (<span class=
 "keywordtype">char</span> *) &amp;group.securityName;
-00287     <span class="keywordtype">char</span>           *groupName;
-00288     size_t          len;
-00289 
-00290     group.status = atoi(line);
-00291     line = skip_token(line);
-00292     group.storageType = atoi(line);
-00293     line = skip_token(line);
-00294     group.securityModel = atoi(line);
-00295     line = skip_token(line);
-00296     line =
-00297         read_config_read_octet_string(line, (u_char **) &amp; securityName,
-00298                                       &amp;len);
-00299 
-00300     gptr = vacm_createGroupEntry(group.securityModel, group.securityName);
-00301     <span class="keywordflow">if</span> (!gptr)
-00302         <span class="keywordflow">return</span>;
-00303 
-00304     gptr-&gt;status = group.status;
-00305     gptr-&gt;storageType = group.storageType;
-00306     groupName = (<span class="keywordtype">char</span> *) gptr-&gt;groupName;
-00307     line =
-00308         read_config_read_octet_string(line, (u_char **) &amp; groupName, &amp;len);
-00309 }
-00310 
-00311 <span class="keyword">struct </span>vacm_viewEntry *
-00312 vacm_getViewEntry(<span class="keyword">const</span> <span class="keywordtype">char</span> *viewName,
-00313                   oid * viewSubtree, size_t viewSubtreeLen, <span class="keywordtype">int</span> mode)
-00314 {
-00315     <span class="keyword">struct </span>vacm_viewEntry *vp, *vpret = NULL;
-00316     <span class="keywordtype">char</span>            view[VACMSTRINGLEN];
-00317     <span class="keywordtype">int</span>             found, glen;
-00318     <span class="keywordtype">int</span> count=0;
-00319 
-00320     glen = (int) strlen(viewName);
-00321     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
-00322         <span class="keywordflow">return</span> NULL;
-00323     view[0] = glen;
-00324     strcpy(view + 1, viewName);
-00325     <span class="keywordflow">for</span> (vp = viewList; vp; vp = vp-&gt;next) {
-00326         <span class="keywordflow">if</span> (!memcmp(view, vp-&gt;viewName, glen + 1)
-00327             &amp;&amp; viewSubtreeLen &gt;= (vp-&gt;viewSubtreeLen - 1)) {
-00328             <span class="keywordtype">int</span>             mask = 0x80, maskpos = 0;
-00329             <span class="keywordtype">int</span>             oidpos;
-00330             found = 1;
-00331 
-00332             <span class="keywordflow">if</span> (mode != VACM_MODE_IGNORE_MASK) {  <span class=
+00312     <span class="keywordtype">char</span>           *groupName;
+00313     size_t          len;
+00314 
+00315     group.status = atoi(line);
+00316     line = skip_token(line);
+00317     group.storageType = atoi(line);
+00318     line = skip_token(line);
+00319     group.securityModel = atoi(line);
+00320     line = skip_token(line);
+00321     line =
+00322         read_config_read_octet_string(line, (u_char **) &amp; securityName,
+00323                                       &amp;len);
+00324 
+00325     gptr = vacm_createGroupEntry(group.securityModel, group.securityName);
+00326     <span class="keywordflow">if</span> (!gptr)
+00327         <span class="keywordflow">return</span>;
+00328 
+00329     gptr-&gt;status = group.status;
+00330     gptr-&gt;storageType = group.storageType;
+00331     groupName = (<span class="keywordtype">char</span> *) gptr-&gt;groupName;
+00332     line =
+00333         read_config_read_octet_string(line, (u_char **) &amp; groupName, &amp;len);
+00334 }
+00335 
+00336 <span class="keyword">struct </span>vacm_viewEntry *
+00337 netsnmp_view_get(<span class="keyword">struct</span> vacm_viewEntry *head, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *viewName,
+00338                   oid * viewSubtree, size_t viewSubtreeLen, <span class="keywordtype">int</span> mode)
+00339 {
+00340     <span class="keyword">struct </span>vacm_viewEntry *vp, *vpret = NULL;
+00341     <span class="keywordtype">char</span>            view[VACMSTRINGLEN];
+00342     <span class="keywordtype">int</span>             found, glen;
+00343     <span class="keywordtype">int</span> count=0;
+00344 
+00345     glen = (int) strlen(viewName);
+00346     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
+00347         <span class="keywordflow">return</span> NULL;
+00348     view[0] = glen;
+00349     strcpy(view + 1, viewName);
+00350     <span class="keywordflow">for</span> (vp = head; vp; vp = vp-&gt;next) {
+00351         <span class="keywordflow">if</span> (!memcmp(view, vp-&gt;viewName, glen + 1)
+00352             &amp;&amp; viewSubtreeLen &gt;= (vp-&gt;viewSubtreeLen - 1)) {
+00353             <span class="keywordtype">int</span>             mask = 0x80, maskpos = 0;
+00354             <span class="keywordtype">int</span>             oidpos;
+00355             found = 1;
+00356 
+00357             <span class="keywordflow">if</span> (mode != VACM_MODE_IGNORE_MASK) {  <span class=
 "comment">/* check the mask */</span>
-00333                 <span class="keywordflow">for</span> (oidpos = 0;
-00334                      found &amp;&amp; oidpos &lt; (int) vp-&gt;viewSubtreeLen - 1;
-00335                      oidpos++) {
-00336                     <span class="keywordflow">if</span> ((vp-&gt;viewMask[maskpos] &amp; mask) != 0) {
-00337                         <span class="keywordflow">if</span> (viewSubtree[oidpos] !=
-00338                             vp-&gt;viewSubtree[oidpos + 1])
-00339                             found = 0;
-00340                     }
-00341                     <span class="keywordflow">if</span> (mask == 1) {
-00342                         mask = 0x80;
-00343                         maskpos++;
-00344                     } <span class="keywordflow">else</span>
-00345                         mask &gt;&gt;= 1;
-00346                 }
-00347             }
-00348             <span class="keywordflow">if</span> (found) {
-00349                 <span class="comment">/*</span>
-00350 <span class="comment">                 * match successful, keep this node if its longer than</span>
-00351 <span class="comment">                 * the previous or (equal and lexicographically greater</span>
-00352 <span class="comment">                 * than the previous). </span>
-00353 <span class="comment">                 */</span>
-00354                 count++;
-00355                 <span class="keywordflow">if</span> (mode == VACM_MODE_CHECK_SUBTREE) {
-00356                     vpret = vp;
-00357                 } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (vpret == NULL
-00358                            || vp-&gt;viewSubtreeLen &gt; vpret-&gt;viewSubtreeLen
-00359                            || (vp-&gt;viewSubtreeLen == vpret-&gt;viewSubtreeLen
-00360                                &amp;&amp; <a class="code" href=
-"group__library.html#ga98">snmp_oid_compare</a>(vp-&gt;viewSubtree + 1,
-00361                                                    vp-&gt;viewSubtreeLen - 1,
-00362                                                    vpret-&gt;viewSubtree + 1,
-00363                                                    vpret-&gt;viewSubtreeLen - 1) &gt;
-00364                                0)) {
-00365                     vpret = vp;
-00366                 }
-00367             }
-00368         }
-00369     }
-00370     DEBUGMSGTL((<span class="stringliteral">"vacm:getView"</span>, <span class=
+00358                 <span class="keywordflow">for</span> (oidpos = 0;
+00359                      found &amp;&amp; oidpos &lt; (int) vp-&gt;viewSubtreeLen - 1;
+00360                      oidpos++) {
+00361                     <span class="keywordflow">if</span> ((vp-&gt;viewMask[maskpos] &amp; mask) != 0) {
+00362                         <span class="keywordflow">if</span> (viewSubtree[oidpos] !=
+00363                             vp-&gt;viewSubtree[oidpos + 1])
+00364                             found = 0;
+00365                     }
+00366                     <span class="keywordflow">if</span> (mask == 1) {
+00367                         mask = 0x80;
+00368                         maskpos++;
+00369                     } <span class="keywordflow">else</span>
+00370                         mask &gt;&gt;= 1;
+00371                 }
+00372             }
+00373             <span class="keywordflow">if</span> (found) {
+00374                 <span class="comment">/*</span>
+00375 <span class="comment">                 * match successful, keep this node if its longer than</span>
+00376 <span class="comment">                 * the previous or (equal and lexicographically greater</span>
+00377 <span class="comment">                 * than the previous). </span>
+00378 <span class="comment">                 */</span>
+00379                 count++;
+00380                 <span class="keywordflow">if</span> (mode == VACM_MODE_CHECK_SUBTREE) {
+00381                     vpret = vp;
+00382                 } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (vpret == NULL
+00383                            || vp-&gt;viewSubtreeLen &gt; vpret-&gt;viewSubtreeLen
+00384                            || (vp-&gt;viewSubtreeLen == vpret-&gt;viewSubtreeLen
+00385                                &amp;&amp; <a class="code" href=
+"group__library.html#ga103">snmp_oid_compare</a>(vp-&gt;viewSubtree + 1,
+00386                                                    vp-&gt;viewSubtreeLen - 1,
+00387                                                    vpret-&gt;viewSubtree + 1,
+00388                                                    vpret-&gt;viewSubtreeLen - 1) &gt;
+00389                                0)) {
+00390                     vpret = vp;
+00391                 }
+00392             }
+00393         }
+00394     }
+00395     DEBUGMSGTL((<span class="stringliteral">"vacm:getView"</span>, <span class=
 "stringliteral">", %s\n"</span>, (vpret) ? <span class="stringliteral">"found"</span> : <span class=
 "stringliteral">"none"</span>));
-00371     <span class="keywordflow">if</span> (mode == VACM_MODE_CHECK_SUBTREE &amp;&amp; count &gt; 1) {
-00372         <span class="keywordflow">return</span> NULL;
-00373     }
-00374     <span class="keywordflow">return</span> vpret;
-00375 }
-00376 
-00377 <span class="comment">/*******************************************************************o-o******</span>
-00378 <span class="comment"> * vacm_checkSubtree</span>
-00379 <span class="comment"> *</span>
-00380 <span class="comment"> * Check to see if everything within a subtree is in view, not in view,</span>
-00381 <span class="comment"> * or possibly both.</span>
-00382 <span class="comment"> *</span>
-00383 <span class="comment"> * Parameters:</span>
-00384 <span class="comment"> *   *viewName           - Name of view to check</span>
-00385 <span class="comment"> *   *viewSubtree        - OID of subtree</span>
-00386 <span class="comment"> *    viewSubtreeLen     - length of subtree OID</span>
-00387 <span class="comment"> *      </span>
-00388 <span class="comment"> * Returns:</span>
-00389 <span class="comment"> *   VACM_SUCCESS          The OID is included in the view.</span>
-00390 <span class="comment"> *   VACM_NOTINVIEW        If no entry in the view list includes the</span>
-00391 <span class="comment"> *                         provided OID, or the OID is explicitly excluded</span>
-00392 <span class="comment"> *                         from the view. </span>
-00393 <span class="comment"> *   VACM_SUBTREE_UNKNOWN  The entire subtree has both allowed and disallowed</span>
-00394 <span class="comment"> *                         portions.</span>
-00395 <span class="comment"> */</span>
-00396 <span class="keywordtype">int</span>
-00397 vacm_checkSubtree(<span class="keyword">const</span> <span class="keywordtype">char</span> *viewName,
-00398                   oid * viewSubtree, size_t viewSubtreeLen)
-00399 {
-00400     <span class="keyword">struct </span>vacm_viewEntry *vp, *vpShorter = NULL, *vpLonger = NULL;
-00401     <span class="keywordtype">char</span>            view[VACMSTRINGLEN];
-00402     <span class="keywordtype">int</span>             found, glen;
-00403 
-00404     glen = (int) strlen(viewName);
-00405     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
-00406         <span class="keywordflow">return</span> VACM_NOTINVIEW;
-00407     view[0] = glen;
-00408     strcpy(view + 1, viewName);
-00409     <span class="keywordflow">for</span> (vp = viewList; vp; vp = vp-&gt;next) {
-00410         <span class="keywordflow">if</span> (!memcmp(view, vp-&gt;viewName, glen + 1)) {
-00411             <span class="comment">/*</span>
-00412 <span class="comment">             * If the subtree defined in the view is shorter than or equal</span>
-00413 <span class="comment">             * to the subtree we are comparing, then it might envelop the</span>
-00414 <span class="comment">             * subtree we are comparing against.</span>
-00415 <span class="comment">             */</span>
-00416             <span class="keywordflow">if</span> (viewSubtreeLen &gt;= (vp-&gt;viewSubtreeLen - 1)) {
-00417                 <span class="keywordtype">int</span>             mask = 0x80, maskpos = 0;
-00418                 <span class="keywordtype">int</span>             oidpos;
-00419                 found = 1;
-00420 
-00421                 <span class="comment">/*</span>
-00422 <span class="comment">                 * check the mask</span>
-00423 <span class="comment">                 */</span>
-00424                 <span class="keywordflow">for</span> (oidpos = 0;
-00425                      found &amp;&amp; oidpos &lt; (int) vp-&gt;viewSubtreeLen - 1;
-00426                      oidpos++) {
-00427                     <span class="keywordflow">if</span> ((vp-&gt;viewMask[maskpos] &amp; mask) != 0) {
-00428                         <span class="keywordflow">if</span> (viewSubtree[oidpos] !=
-00429                             vp-&gt;viewSubtree[oidpos + 1])
-00430                             found = 0;
-00431                     }
-00432                     <span class="keywordflow">if</span> (mask == 1) {
-00433                         mask = 0x80;
-00434                         maskpos++;
-00435                     } <span class="keywordflow">else</span>
-00436                         mask &gt;&gt;= 1;
-00437                 }
-00438 
-00439                 <span class="keywordflow">if</span> (found) {
-00440                     <span class="comment">/*</span>
-00441 <span class="comment">                     * match successful, keep this node if it's longer than</span>
-00442 <span class="comment">                     * the previous or (equal and lexicographically greater</span>
-00443 <span class="comment">                     * than the previous). </span>
-00444 <span class="comment">                     */</span>
-00445     
-00446                     <span class="keywordflow">if</span> (vpShorter == NULL
-00447                         || vp-&gt;viewSubtreeLen &gt; vpShorter-&gt;viewSubtreeLen
-00448                         || (vp-&gt;viewSubtreeLen == vpShorter-&gt;viewSubtreeLen
-00449                            &amp;&amp; <a class="code" href=
-"group__library.html#ga98">snmp_oid_compare</a>(vp-&gt;viewSubtree + 1,
-00450                                                vp-&gt;viewSubtreeLen - 1,
-00451                                                vpShorter-&gt;viewSubtree + 1,
-00452                                                vpShorter-&gt;viewSubtreeLen - 1) &gt;
-00453                                    0)) {
-00454                         vpShorter = vp;
-00455                     }
-00456                 }
-00457             }
-00458             <span class="comment">/*</span>
-00459 <span class="comment">             * If the subtree defined in the view is longer than the</span>
-00460 <span class="comment">             * subtree we are comparing, then it might ambiguate our</span>
-00461 <span class="comment">             * response.</span>
-00462 <span class="comment">             */</span>
-00463             <span class="keywordflow">else</span> {
-00464                 <span class="keywordtype">int</span>             mask = 0x80, maskpos = 0;
-00465                 <span class="keywordtype">int</span>             oidpos;
-00466                 found = 1;
-00467 
-00468                 <span class="comment">/*</span>
-00469 <span class="comment">                 * check the mask up to the length of the provided subtree</span>
-00470 <span class="comment">                 */</span>
-00471                 <span class="keywordflow">for</span> (oidpos = 0;
-00472                      found &amp;&amp; oidpos &lt; (int) viewSubtreeLen;
-00473                      oidpos++) {
-00474                     <span class="keywordflow">if</span> ((vp-&gt;viewMask[maskpos] &amp; mask) != 0) {
-00475                         <span class="keywordflow">if</span> (viewSubtree[oidpos] !=
-00476                             vp-&gt;viewSubtree[oidpos + 1])
-00477                             found = 0;
-00478                     }
-00479                     <span class="keywordflow">if</span> (mask == 1) {
-00480                         mask = 0x80;
-00481                         maskpos++;
-00482                     } <span class="keywordflow">else</span>
-00483                         mask &gt;&gt;= 1;
-00484                 }
-00485 
-00486                 <span class="keywordflow">if</span> (found) {
-00487                     <span class="comment">/*</span>
-00488 <span class="comment">                     * match successful.  If we already found a match</span>
-00489 <span class="comment">                     * with a different view type, then parts of the subtree </span>
-00490 <span class="comment">                     * are included and others are excluded, so return UNKNOWN.</span>
-00491 <span class="comment">                     */</span>
-00492                     <span class="keywordflow">if</span> (vpLonger != NULL
-00493                         &amp;&amp; (vpLonger-&gt;viewType != vp-&gt;viewType)) {
-00494                         DEBUGMSGTL((<span class="stringliteral">"vacm:checkSubtree"</span>, <span class=
+00396     <span class="keywordflow">if</span> (mode == VACM_MODE_CHECK_SUBTREE &amp;&amp; count &gt; 1) {
+00397         <span class="keywordflow">return</span> NULL;
+00398     }
+00399     <span class="keywordflow">return</span> vpret;
+00400 }
+00401 
+00402 <span class="comment">/*******************************************************************o-o******</span>
+00403 <span class="comment"> * vacm_checkSubtree</span>
+00404 <span class="comment"> *</span>
+00405 <span class="comment"> * Check to see if everything within a subtree is in view, not in view,</span>
+00406 <span class="comment"> * or possibly both.</span>
+00407 <span class="comment"> *</span>
+00408 <span class="comment"> * Parameters:</span>
+00409 <span class="comment"> *   *viewName           - Name of view to check</span>
+00410 <span class="comment"> *   *viewSubtree        - OID of subtree</span>
+00411 <span class="comment"> *    viewSubtreeLen     - length of subtree OID</span>
+00412 <span class="comment"> *      </span>
+00413 <span class="comment"> * Returns:</span>
+00414 <span class="comment"> *   VACM_SUCCESS          The OID is included in the view.</span>
+00415 <span class="comment"> *   VACM_NOTINVIEW        If no entry in the view list includes the</span>
+00416 <span class="comment"> *                         provided OID, or the OID is explicitly excluded</span>
+00417 <span class="comment"> *                         from the view. </span>
+00418 <span class="comment"> *   VACM_SUBTREE_UNKNOWN  The entire subtree has both allowed and disallowed</span>
+00419 <span class="comment"> *                         portions.</span>
+00420 <span class="comment"> */</span>
+00421 <span class="keywordtype">int</span>
+00422 netsnmp_view_subtree_check(<span class="keyword">struct</span> vacm_viewEntry *head, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *viewName,
+00423                            oid * viewSubtree, size_t viewSubtreeLen)
+00424 {
+00425     <span class="keyword">struct </span>vacm_viewEntry *vp, *vpShorter = NULL, *vpLonger = NULL;
+00426     <span class="keywordtype">char</span>            view[VACMSTRINGLEN];
+00427     <span class="keywordtype">int</span>             found, glen;
+00428 
+00429     glen = (int) strlen(viewName);
+00430     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
+00431         <span class="keywordflow">return</span> VACM_NOTINVIEW;
+00432     view[0] = glen;
+00433     strcpy(view + 1, viewName);
+00434     <span class="keywordflow">for</span> (vp = head; vp; vp = vp-&gt;next) {
+00435         <span class="keywordflow">if</span> (!memcmp(view, vp-&gt;viewName, glen + 1)) {
+00436             <span class="comment">/*</span>
+00437 <span class="comment">             * If the subtree defined in the view is shorter than or equal</span>
+00438 <span class="comment">             * to the subtree we are comparing, then it might envelop the</span>
+00439 <span class="comment">             * subtree we are comparing against.</span>
+00440 <span class="comment">             */</span>
+00441             <span class="keywordflow">if</span> (viewSubtreeLen &gt;= (vp-&gt;viewSubtreeLen - 1)) {
+00442                 <span class="keywordtype">int</span>             mask = 0x80, maskpos = 0;
+00443                 <span class="keywordtype">int</span>             oidpos;
+00444                 found = 1;
+00445 
+00446                 <span class="comment">/*</span>
+00447 <span class="comment">                 * check the mask</span>
+00448 <span class="comment">                 */</span>
+00449                 <span class="keywordflow">for</span> (oidpos = 0;
+00450                      found &amp;&amp; oidpos &lt; (int) vp-&gt;viewSubtreeLen - 1;
+00451                      oidpos++) {
+00452                     <span class="keywordflow">if</span> ((vp-&gt;viewMask[maskpos] &amp; mask) != 0) {
+00453                         <span class="keywordflow">if</span> (viewSubtree[oidpos] !=
+00454                             vp-&gt;viewSubtree[oidpos + 1])
+00455                             found = 0;
+00456                     }
+00457                     <span class="keywordflow">if</span> (mask == 1) {
+00458                         mask = 0x80;
+00459                         maskpos++;
+00460                     } <span class="keywordflow">else</span>
+00461                         mask &gt;&gt;= 1;
+00462                 }
+00463 
+00464                 <span class="keywordflow">if</span> (found) {
+00465                     <span class="comment">/*</span>
+00466 <span class="comment">                     * match successful, keep this node if it's longer than</span>
+00467 <span class="comment">                     * the previous or (equal and lexicographically greater</span>
+00468 <span class="comment">                     * than the previous). </span>
+00469 <span class="comment">                     */</span>
+00470     
+00471                     <span class="keywordflow">if</span> (vpShorter == NULL
+00472                         || vp-&gt;viewSubtreeLen &gt; vpShorter-&gt;viewSubtreeLen
+00473                         || (vp-&gt;viewSubtreeLen == vpShorter-&gt;viewSubtreeLen
+00474                            &amp;&amp; <a class="code" href=
+"group__library.html#ga103">snmp_oid_compare</a>(vp-&gt;viewSubtree + 1,
+00475                                                vp-&gt;viewSubtreeLen - 1,
+00476                                                vpShorter-&gt;viewSubtree + 1,
+00477                                                vpShorter-&gt;viewSubtreeLen - 1) &gt;
+00478                                    0)) {
+00479                         vpShorter = vp;
+00480                     }
+00481                 }
+00482             }
+00483             <span class="comment">/*</span>
+00484 <span class="comment">             * If the subtree defined in the view is longer than the</span>
+00485 <span class="comment">             * subtree we are comparing, then it might ambiguate our</span>
+00486 <span class="comment">             * response.</span>
+00487 <span class="comment">             */</span>
+00488             <span class="keywordflow">else</span> {
+00489                 <span class="keywordtype">int</span>             mask = 0x80, maskpos = 0;
+00490                 <span class="keywordtype">int</span>             oidpos;
+00491                 found = 1;
+00492 
+00493                 <span class="comment">/*</span>
+00494 <span class="comment">                 * check the mask up to the length of the provided subtree</span>
+00495 <span class="comment">                 */</span>
+00496                 <span class="keywordflow">for</span> (oidpos = 0;
+00497                      found &amp;&amp; oidpos &lt; (int) viewSubtreeLen;
+00498                      oidpos++) {
+00499                     <span class="keywordflow">if</span> ((vp-&gt;viewMask[maskpos] &amp; mask) != 0) {
+00500                         <span class="keywordflow">if</span> (viewSubtree[oidpos] !=
+00501                             vp-&gt;viewSubtree[oidpos + 1])
+00502                             found = 0;
+00503                     }
+00504                     <span class="keywordflow">if</span> (mask == 1) {
+00505                         mask = 0x80;
+00506                         maskpos++;
+00507                     } <span class="keywordflow">else</span>
+00508                         mask &gt;&gt;= 1;
+00509                 }
+00510 
+00511                 <span class="keywordflow">if</span> (found) {
+00512                     <span class="comment">/*</span>
+00513 <span class="comment">                     * match successful.  If we already found a match</span>
+00514 <span class="comment">                     * with a different view type, then parts of the subtree </span>
+00515 <span class="comment">                     * are included and others are excluded, so return UNKNOWN.</span>
+00516 <span class="comment">                     */</span>
+00517                     <span class="keywordflow">if</span> (vpLonger != NULL
+00518                         &amp;&amp; (vpLonger-&gt;viewType != vp-&gt;viewType)) {
+00519                         DEBUGMSGTL((<span class="stringliteral">"vacm:checkSubtree"</span>, <span class=
 "stringliteral">", %s\n"</span>, <span class="stringliteral">"unknown"</span>));
-00495                         <span class="keywordflow">return</span> VACM_SUBTREE_UNKNOWN;
-00496                     }
-00497                     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (vpLonger == NULL) {
-00498                         vpLonger = vp;
-00499                     }
-00500                 }
-00501             }
-00502         }
-00503     }
-00504 
-00505     <span class="comment">/*</span>
-00506 <span class="comment">     * If we found a matching view subtree with a longer OID than the provided</span>
-00507 <span class="comment">     * OID, check to see if its type is consistent with any matching view</span>
-00508 <span class="comment">     * subtree we may have found with a shorter OID than the provided OID.</span>
-00509 <span class="comment">     *</span>
-00510 <span class="comment">     * The view type of the longer OID is inconsistent with the shorter OID in</span>
-00511 <span class="comment">     * either of these two cases:</span>
-00512 <span class="comment">     *  1) No matching shorter OID was found and the view type of the longer</span>
-00513 <span class="comment">     *     OID is INCLUDE.</span>
-00514 <span class="comment">     *  2) A matching shorter ID was found and its view type doesn't match</span>
-00515 <span class="comment">     *     the view type of the longer OID.</span>
-00516 <span class="comment">     */</span>
-00517     <span class="keywordflow">if</span> (vpLonger != NULL) {
-00518         <span class="keywordflow">if</span> ((!vpShorter &amp;&amp; vpLonger-&gt;viewType != SNMP_VIEW_EXCLUDED)
-00519             || (vpShorter &amp;&amp; vpLonger-&gt;viewType != vpShorter-&gt;viewType)) {
-00520             DEBUGMSGTL((<span class="stringliteral">"vacm:checkSubtree"</span>, <span class=
-"stringliteral">", %s\n"</span>, <span class="stringliteral">"unknown"</span>));
-00521             <span class="keywordflow">return</span> VACM_SUBTREE_UNKNOWN;
-00522         }
-00523     }
-00524 
-00525     <span class="keywordflow">if</span> (vpShorter &amp;&amp; vpShorter-&gt;viewType != SNMP_VIEW_EXCLUDED) {
-00526         DEBUGMSGTL((<span class="stringliteral">"vacm:checkSubtree"</span>, <span class=
-"stringliteral">", %s\n"</span>, <span class="stringliteral">"included"</span>));
-00527         <span class="keywordflow">return</span> VACM_SUCCESS;
+00520                         <span class="keywordflow">return</span> VACM_SUBTREE_UNKNOWN;
+00521                     }
+00522                     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (vpLonger == NULL) {
+00523                         vpLonger = vp;
+00524                     }
+00525                 }
+00526             }
+00527         }
 00528     }
 00529 
-00530     DEBUGMSGTL((<span class="stringliteral">"vacm:checkSubtree"</span>, <span class=
+00530     <span class="comment">/*</span>
+00531 <span class="comment">     * If we found a matching view subtree with a longer OID than the provided</span>
+00532 <span class="comment">     * OID, check to see if its type is consistent with any matching view</span>
+00533 <span class="comment">     * subtree we may have found with a shorter OID than the provided OID.</span>
+00534 <span class="comment">     *</span>
+00535 <span class="comment">     * The view type of the longer OID is inconsistent with the shorter OID in</span>
+00536 <span class="comment">     * either of these two cases:</span>
+00537 <span class="comment">     *  1) No matching shorter OID was found and the view type of the longer</span>
+00538 <span class="comment">     *     OID is INCLUDE.</span>
+00539 <span class="comment">     *  2) A matching shorter ID was found and its view type doesn't match</span>
+00540 <span class="comment">     *     the view type of the longer OID.</span>
+00541 <span class="comment">     */</span>
+00542     <span class="keywordflow">if</span> (vpLonger != NULL) {
+00543         <span class="keywordflow">if</span> ((!vpShorter &amp;&amp; vpLonger-&gt;viewType != SNMP_VIEW_EXCLUDED)
+00544             || (vpShorter &amp;&amp; vpLonger-&gt;viewType != vpShorter-&gt;viewType)) {
+00545             DEBUGMSGTL((<span class="stringliteral">"vacm:checkSubtree"</span>, <span class=
+"stringliteral">", %s\n"</span>, <span class="stringliteral">"unknown"</span>));
+00546             <span class="keywordflow">return</span> VACM_SUBTREE_UNKNOWN;
+00547         }
+00548     }
+00549 
+00550     <span class="keywordflow">if</span> (vpShorter &amp;&amp; vpShorter-&gt;viewType != SNMP_VIEW_EXCLUDED) {
+00551         DEBUGMSGTL((<span class="stringliteral">"vacm:checkSubtree"</span>, <span class=
+"stringliteral">", %s\n"</span>, <span class="stringliteral">"included"</span>));
+00552         <span class="keywordflow">return</span> VACM_SUCCESS;
+00553     }
+00554 
+00555     DEBUGMSGTL((<span class="stringliteral">"vacm:checkSubtree"</span>, <span class=
 "stringliteral">", %s\n"</span>, <span class="stringliteral">"excluded"</span>));
-00531     <span class="keywordflow">return</span> VACM_NOTINVIEW;
-00532 }
-00533 
-00534 <span class="keywordtype">void</span>
-00535 vacm_scanViewInit(<span class="keywordtype">void</span>)
-00536 {
-00537     viewScanPtr = viewList;
-00538 }
-00539 
-00540 <span class="keyword">struct </span>vacm_viewEntry *
-00541 vacm_scanViewNext(<span class="keywordtype">void</span>)
-00542 {
-00543     <span class="keyword">struct </span>vacm_viewEntry *returnval = viewScanPtr;
-00544     <span class="keywordflow">if</span> (viewScanPtr)
-00545         viewScanPtr = viewScanPtr-&gt;next;
-00546     <span class="keywordflow">return</span> returnval;
-00547 }
-00548 
-00549 <span class="keyword">struct </span>vacm_viewEntry *
-00550 vacm_createViewEntry(<span class="keyword">const</span> <span class="keywordtype">char</span> *viewName,
-00551                      oid * viewSubtree, size_t viewSubtreeLen)
-00552 {
-00553     <span class="keyword">struct </span>vacm_viewEntry *vp, *lp, *op = NULL;
-00554     <span class="keywordtype">int</span>             cmp, cmp2, glen;
-00555 
-00556     glen = (int) strlen(viewName);
-00557     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
-00558         <span class="keywordflow">return</span> NULL;
-00559     vp = (<span class="keyword">struct </span>vacm_viewEntry *) calloc(1,
-00560                                           <span class="keyword">sizeof</span>(<span class=
+00556     <span class="keywordflow">return</span> VACM_NOTINVIEW;
+00557 }
+00558 
+00559 <span class="keywordtype">void</span>
+00560 vacm_scanViewInit(<span class="keywordtype">void</span>)
+00561 {
+00562     viewScanPtr = viewList;
+00563 }
+00564 
+00565 <span class="keyword">struct </span>vacm_viewEntry *
+00566 vacm_scanViewNext(<span class="keywordtype">void</span>)
+00567 {
+00568     <span class="keyword">struct </span>vacm_viewEntry *returnval = viewScanPtr;
+00569     <span class="keywordflow">if</span> (viewScanPtr)
+00570         viewScanPtr = viewScanPtr-&gt;next;
+00571     <span class="keywordflow">return</span> returnval;
+00572 }
+00573 
+00574 <span class="keyword">struct </span>vacm_viewEntry *
+00575 netsnmp_view_create(<span class="keyword">struct</span> vacm_viewEntry **head, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *viewName,
+00576                      oid * viewSubtree, size_t viewSubtreeLen)
+00577 {
+00578     <span class="keyword">struct </span>vacm_viewEntry *vp, *lp, *op = NULL;
+00579     <span class="keywordtype">int</span>             cmp, cmp2, glen;
+00580 
+00581     glen = (int) strlen(viewName);
+00582     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
+00583         <span class="keywordflow">return</span> NULL;
+00584     vp = (<span class="keyword">struct </span>vacm_viewEntry *) calloc(1,
+00585                                           <span class="keyword">sizeof</span>(<span class=
 "keyword">struct</span> vacm_viewEntry));
-00561     <span class="keywordflow">if</span> (vp == NULL)
-00562         <span class="keywordflow">return</span> NULL;
-00563     vp-&gt;reserved =
-00564         (<span class="keyword">struct </span>vacm_viewEntry *) calloc(1, <span class="keyword">sizeof</span>(<span class=
+00586     <span class="keywordflow">if</span> (vp == NULL)
+00587         <span class="keywordflow">return</span> NULL;
+00588     vp-&gt;reserved =
+00589         (<span class="keyword">struct </span>vacm_viewEntry *) calloc(1, <span class="keyword">sizeof</span>(<span class=
 "keyword">struct</span> vacm_viewEntry));
-00565     <span class="keywordflow">if</span> (vp-&gt;reserved == NULL) {
-00566         free(vp);
-00567         <span class="keywordflow">return</span> NULL;
-00568     }
-00569 
-00570     vp-&gt;viewName[0] = glen;
-00571     strcpy(vp-&gt;viewName + 1, viewName);
-00572     vp-&gt;viewSubtree[0] = viewSubtreeLen;
-00573     memcpy(vp-&gt;viewSubtree + 1, viewSubtree, viewSubtreeLen * <span class="keyword">sizeof</span>(oid));
-00574     vp-&gt;viewSubtreeLen = viewSubtreeLen + 1;
-00575 
-00576     lp = viewList;
-00577     <span class="keywordflow">while</span> (lp) {
-00578         cmp = memcmp(lp-&gt;viewName, vp-&gt;viewName, glen + 1);
-00579         cmp2 = <a class="code" href=
-"group__library.html#ga98">snmp_oid_compare</a>(lp-&gt;viewSubtree, lp-&gt;viewSubtreeLen,
-00580                                 vp-&gt;viewSubtree, vp-&gt;viewSubtreeLen);
-00581         <span class="keywordflow">if</span> (cmp == 0 &amp;&amp; cmp2 &gt; 0)
-00582             <span class="keywordflow">break</span>;
-00583         <span class="keywordflow">if</span> (cmp &gt; 0)
-00584             <span class="keywordflow">break</span>;
-00585         op = lp;
-00586         lp = lp-&gt;next;
-00587     }
-00588     vp-&gt;next = lp;
-00589     <span class="keywordflow">if</span> (op)
-00590         op-&gt;next = vp;
-00591     <span class="keywordflow">else</span>
-00592         viewList = vp;
-00593     <span class="keywordflow">return</span> vp;
-00594 }
-00595 
-00596 <span class="keywordtype">void</span>
-00597 vacm_destroyViewEntry(<span class="keyword">const</span> <span class="keywordtype">char</span> *viewName,
-00598                       oid * viewSubtree, size_t viewSubtreeLen)
-00599 {
-00600     <span class="keyword">struct </span>vacm_viewEntry *vp, *lastvp = NULL;
-00601 
-00602     <span class="keywordflow">if</span> (viewList &amp;&amp; !strcmp(viewList-&gt;viewName + 1, viewName)
-00603         &amp;&amp; viewList-&gt;viewSubtreeLen == viewSubtreeLen
-00604         &amp;&amp; !memcmp((<span class="keywordtype">char</span> *) viewList-&gt;viewSubtree, (<span class=
-"keywordtype">char</span> *) viewSubtree,
-00605                    viewSubtreeLen * <span class="keyword">sizeof</span>(oid))) {
-00606         vp = viewList;
-00607         viewList = viewList-&gt;next;
-00608     } <span class="keywordflow">else</span> {
-00609         <span class="keywordflow">for</span> (vp = viewList; vp; vp = vp-&gt;next) {
-00610             <span class="keywordflow">if</span> (!strcmp(vp-&gt;viewName + 1, viewName)
-00611                 &amp;&amp; vp-&gt;viewSubtreeLen == viewSubtreeLen
-00612                 &amp;&amp; !memcmp((<span class="keywordtype">char</span> *) vp-&gt;viewSubtree, (<span class=
-"keywordtype">char</span> *) viewSubtree,
-00613                            viewSubtreeLen * <span class="keyword">sizeof</span>(oid)))
-00614                 <span class="keywordflow">break</span>;
-00615             lastvp = vp;
-00616         }
-00617         <span class="keywordflow">if</span> (!vp)
-00618             <span class="keywordflow">return</span>;
-00619         lastvp-&gt;next = vp-&gt;next;
-00620     }
-00621     <span class="keywordflow">if</span> (vp-&gt;reserved)
-00622         free(vp-&gt;reserved);
-00623     free(vp);
-00624     <span class="keywordflow">return</span>;
-00625 }
+00590     <span class="keywordflow">if</span> (vp-&gt;reserved == NULL) {
+00591         free(vp);
+00592         <span class="keywordflow">return</span> NULL;
+00593     }
+00594 
+00595     vp-&gt;viewName[0] = glen;
+00596     strcpy(vp-&gt;viewName + 1, viewName);
+00597     vp-&gt;viewSubtree[0] = viewSubtreeLen;
+00598     memcpy(vp-&gt;viewSubtree + 1, viewSubtree, viewSubtreeLen * <span class="keyword">sizeof</span>(oid));
+00599     vp-&gt;viewSubtreeLen = viewSubtreeLen + 1;
+00600 
+00601     lp = *head;
+00602     <span class="keywordflow">while</span> (lp) {
+00603         cmp = memcmp(lp-&gt;viewName, vp-&gt;viewName, glen + 1);
+00604         cmp2 = <a class="code" href=
+"group__library.html#ga103">snmp_oid_compare</a>(lp-&gt;viewSubtree, lp-&gt;viewSubtreeLen,
+00605                                 vp-&gt;viewSubtree, vp-&gt;viewSubtreeLen);
+00606         <span class="keywordflow">if</span> (cmp == 0 &amp;&amp; cmp2 &gt; 0)
+00607             <span class="keywordflow">break</span>;
+00608         <span class="keywordflow">if</span> (cmp &gt; 0)
+00609             <span class="keywordflow">break</span>;
+00610         op = lp;
+00611         lp = lp-&gt;next;
+00612     }
+00613     vp-&gt;next = lp;
+00614     <span class="keywordflow">if</span> (op)
+00615         op-&gt;next = vp;
+00616     <span class="keywordflow">else</span>
+00617         *head = vp;
+00618     <span class="keywordflow">return</span> vp;
+00619 }
+00620 
+00621 <span class="keywordtype">void</span>
+00622 netsnmp_view_destroy(<span class="keyword">struct</span> vacm_viewEntry **head, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *viewName,
+00623                       oid * viewSubtree, size_t viewSubtreeLen)
+00624 {
+00625     <span class="keyword">struct </span>vacm_viewEntry *vp, *lastvp = NULL;
 00626 
-00627 <span class="keywordtype">void</span>
-00628 vacm_destroyAllViewEntries(<span class="keywordtype">void</span>)
-00629 {
-00630     <span class="keyword">struct </span>vacm_viewEntry *vp;
-00631     <span class="keywordflow">while</span> ((vp = viewList)) {
-00632         viewList = vp-&gt;next;
-00633         <span class="keywordflow">if</span> (vp-&gt;reserved)
-00634             free(vp-&gt;reserved);
-00635         free(vp);
-00636     }
-00637 }
-00638 
-00639 <span class="keyword">struct </span>vacm_groupEntry *
-00640 vacm_getGroupEntry(<span class="keywordtype">int</span> securityModel, <span class="keyword">const</span> <span class=
-"keywordtype">char</span> *securityName)
-00641 {
-00642     <span class="keyword">struct </span>vacm_groupEntry *vp;
-00643     <span class="keywordtype">char</span>            secname[VACMSTRINGLEN];
-00644     <span class="keywordtype">int</span>             glen;
-00645 
-00646     glen = (int) strlen(securityName);
-00647     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
-00648         <span class="keywordflow">return</span> NULL;
-00649     secname[0] = glen;
-00650     strcpy(secname + 1, securityName);
+00627     <span class="keywordflow">if</span> ((*head) &amp;&amp; !strcmp((*head)-&gt;viewName + 1, viewName)
+00628         &amp;&amp; (*head)-&gt;viewSubtreeLen == viewSubtreeLen
+00629         &amp;&amp; !memcmp((<span class="keywordtype">char</span> *) (*head)-&gt;viewSubtree, (<span class=
+"keywordtype">char</span> *) viewSubtree,
+00630                    viewSubtreeLen * <span class="keyword">sizeof</span>(oid))) {
+00631         vp = (*head);
+00632         (*head) = (*head)-&gt;next;
+00633     } <span class="keywordflow">else</span> {
+00634         <span class="keywordflow">for</span> (vp = (*head); vp; vp = vp-&gt;next) {
+00635             <span class="keywordflow">if</span> (!strcmp(vp-&gt;viewName + 1, viewName)
+00636                 &amp;&amp; vp-&gt;viewSubtreeLen == viewSubtreeLen
+00637                 &amp;&amp; !memcmp((<span class="keywordtype">char</span> *) vp-&gt;viewSubtree, (<span class=
+"keywordtype">char</span> *) viewSubtree,
+00638                            viewSubtreeLen * <span class="keyword">sizeof</span>(oid)))
+00639                 <span class="keywordflow">break</span>;
+00640             lastvp = vp;
+00641         }
+00642         <span class="keywordflow">if</span> (!vp)
+00643             <span class="keywordflow">return</span>;
+00644         lastvp-&gt;next = vp-&gt;next;
+00645     }
+00646     <span class="keywordflow">if</span> (vp-&gt;reserved)
+00647         free(vp-&gt;reserved);
+00648     free(vp);
+00649     <span class="keywordflow">return</span>;
+00650 }
 00651 
-00652     <span class="keywordflow">for</span> (vp = groupList; vp; vp = vp-&gt;next) {
-00653         <span class="keywordflow">if</span> ((securityModel == vp-&gt;securityModel
-00654              || vp-&gt;securityModel == SNMP_SEC_MODEL_ANY)
-00655             &amp;&amp; !memcmp(vp-&gt;securityName, secname, glen + 1))
-00656             <span class="keywordflow">return</span> vp;
-00657     }
-00658     <span class="keywordflow">return</span> NULL;
-00659 }
-00660 
-00661 <span class="keywordtype">void</span>
-00662 vacm_scanGroupInit(<span class="keywordtype">void</span>)
-00663 {
-00664     groupScanPtr = groupList;
-00665 }
-00666 
-00667 <span class="keyword">struct </span>vacm_groupEntry *
-00668 vacm_scanGroupNext(<span class="keywordtype">void</span>)
-00669 {
-00670     <span class="keyword">struct </span>vacm_groupEntry *returnval = groupScanPtr;
-00671     <span class="keywordflow">if</span> (groupScanPtr)
-00672         groupScanPtr = groupScanPtr-&gt;next;
-00673     <span class="keywordflow">return</span> returnval;
-00674 }
-00675 
-00676 <span class="keyword">struct </span>vacm_groupEntry *
-00677 vacm_createGroupEntry(<span class="keywordtype">int</span> securityModel, <span class="keyword">const</span> <span class=
+00652 <span class="keywordtype">void</span>
+00653 netsnmp_view_clear(<span class="keyword">struct</span> vacm_viewEntry **head)
+00654 {
+00655     <span class="keyword">struct </span>vacm_viewEntry *vp;
+00656     <span class="keywordflow">while</span> ((vp = (*head))) {
+00657         (*head) = vp-&gt;next;
+00658         <span class="keywordflow">if</span> (vp-&gt;reserved)
+00659             free(vp-&gt;reserved);
+00660         free(vp);
+00661     }
+00662 }
+00663 
+00664 <span class="keyword">struct </span>vacm_groupEntry *
+00665 vacm_getGroupEntry(<span class="keywordtype">int</span> securityModel, <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *securityName)
-00678 {
-00679     <span class="keyword">struct </span>vacm_groupEntry *gp, *lg, *og;
-00680     <span class="keywordtype">int</span>             cmp, glen;
-00681 
-00682     glen = (int) strlen(securityName);
-00683     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
-00684         <span class="keywordflow">return</span> NULL;
-00685     gp = (<span class="keyword">struct </span>vacm_groupEntry *) calloc(1,
-00686                                            <span class="keyword">sizeof</span>(<span class=
-"keyword">struct</span> vacm_groupEntry));
-00687     <span class="keywordflow">if</span> (gp == NULL)
-00688         <span class="keywordflow">return</span> NULL;
-00689     gp-&gt;reserved =
-00690         (<span class="keyword">struct </span>vacm_groupEntry *) calloc(1,
-00691                                           <span class="keyword">sizeof</span>(<span class=
-"keyword">struct</span> vacm_groupEntry));
-00692     <span class="keywordflow">if</span> (gp-&gt;reserved == NULL) {
-00693         free(gp);
-00694         <span class="keywordflow">return</span> NULL;
-00695     }
-00696 
-00697     gp-&gt;securityModel = securityModel;
-00698     gp-&gt;securityName[0] = glen;
-00699     strcpy(gp-&gt;securityName + 1, securityName);
+00666 {
+00667     <span class="keyword">struct </span>vacm_groupEntry *vp;
+00668     <span class="keywordtype">char</span>            secname[VACMSTRINGLEN];
+00669     <span class="keywordtype">int</span>             glen;
+00670 
+00671     glen = (int) strlen(securityName);
+00672     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
+00673         <span class="keywordflow">return</span> NULL;
+00674     secname[0] = glen;
+00675     strcpy(secname + 1, securityName);
+00676 
+00677     <span class="keywordflow">for</span> (vp = groupList; vp; vp = vp-&gt;next) {
+00678         <span class="keywordflow">if</span> ((securityModel == vp-&gt;securityModel
+00679              || vp-&gt;securityModel == SNMP_SEC_MODEL_ANY)
+00680             &amp;&amp; !memcmp(vp-&gt;securityName, secname, glen + 1))
+00681             <span class="keywordflow">return</span> vp;
+00682     }
+00683     <span class="keywordflow">return</span> NULL;
+00684 }
+00685 
+00686 <span class="keywordtype">void</span>
+00687 vacm_scanGroupInit(<span class="keywordtype">void</span>)
+00688 {
+00689     groupScanPtr = groupList;
+00690 }
+00691 
+00692 <span class="keyword">struct </span>vacm_groupEntry *
+00693 vacm_scanGroupNext(<span class="keywordtype">void</span>)
+00694 {
+00695     <span class="keyword">struct </span>vacm_groupEntry *returnval = groupScanPtr;
+00696     <span class="keywordflow">if</span> (groupScanPtr)
+00697         groupScanPtr = groupScanPtr-&gt;next;
+00698     <span class="keywordflow">return</span> returnval;
+00699 }
 00700 
-00701     lg = groupList;
-00702     og = NULL;
-00703     <span class="keywordflow">while</span> (lg) {
-00704         <span class="keywordflow">if</span> (lg-&gt;securityModel &gt; securityModel)
-00705             <span class="keywordflow">break</span>;
-00706         <span class="keywordflow">if</span> (lg-&gt;securityModel == securityModel &amp;&amp;
-00707             (cmp =
-00708              memcmp(lg-&gt;securityName, gp-&gt;securityName, glen + 1)) &gt; 0)
-00709             <span class="keywordflow">break</span>;
-00710         <span class="comment">/*</span>
-00711 <span class="comment">         * if (lg-&gt;securityModel == securityModel &amp;&amp; cmp == 0) abort(); </span>
-00712 <span class="comment">         */</span>
-00713         og = lg;
-00714         lg = lg-&gt;next;
-00715     }
-00716     gp-&gt;next = lg;
-00717     <span class="keywordflow">if</span> (og == NULL)
-00718         groupList = gp;
-00719     <span class="keywordflow">else</span>
-00720         og-&gt;next = gp;
-00721     <span class="keywordflow">return</span> gp;
-00722 }
-00723 
-00724 <span class="keywordtype">void</span>
-00725 vacm_destroyGroupEntry(<span class="keywordtype">int</span> securityModel, <span class="keyword">const</span> <span class=
+00701 <span class="keyword">struct </span>vacm_groupEntry *
+00702 vacm_createGroupEntry(<span class="keywordtype">int</span> securityModel, <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *securityName)
-00726 {
-00727     <span class="keyword">struct </span>vacm_groupEntry *vp, *lastvp = NULL;
-00728 
-00729     <span class="keywordflow">if</span> (groupList &amp;&amp; groupList-&gt;securityModel == securityModel
-00730         &amp;&amp; !strcmp(groupList-&gt;securityName + 1, securityName)) {
-00731         vp = groupList;
-00732         groupList = groupList-&gt;next;
-00733     } <span class="keywordflow">else</span> {
-00734         <span class="keywordflow">for</span> (vp = groupList; vp; vp = vp-&gt;next) {
-00735             <span class="keywordflow">if</span> (vp-&gt;securityModel == securityModel
-00736                 &amp;&amp; !strcmp(vp-&gt;securityName + 1, securityName))
-00737                 <span class="keywordflow">break</span>;
-00738             lastvp = vp;
-00739         }
-00740         <span class="keywordflow">if</span> (!vp)
-00741             <span class="keywordflow">return</span>;
-00742         lastvp-&gt;next = vp-&gt;next;
-00743     }
-00744     <span class="keywordflow">if</span> (vp-&gt;reserved)
-00745         free(vp-&gt;reserved);
-00746     free(vp);
-00747     <span class="keywordflow">return</span>;
-00748 }
-00749 
-00750 <span class="keywordtype">void</span>
-00751 vacm_destroyAllGroupEntries(<span class="keywordtype">void</span>)
-00752 {
-00753     <span class="keyword">struct </span>vacm_groupEntry *gp;
-00754     <span class="keywordflow">while</span> ((gp = groupList)) {
-00755         groupList = gp-&gt;next;
-00756         <span class="keywordflow">if</span> (gp-&gt;reserved)
-00757             free(gp-&gt;reserved);
-00758         free(gp);
-00759     }
-00760 }
-00761 
-00762 <span class="keyword">struct </span>vacm_accessEntry *
-00763 vacm_getAccessEntry(<span class="keyword">const</span> <span class="keywordtype">char</span> *groupName,
-00764                     <span class="keyword">const</span> <span class="keywordtype">char</span> *contextPrefix,
-00765                     <span class="keywordtype">int</span> securityModel, <span class="keywordtype">int</span> securityLevel)
-00766 {
-00767     <span class="keyword">struct </span>vacm_accessEntry *vp;
-00768     <span class="keywordtype">char</span>            group[VACMSTRINGLEN];
-00769     <span class="keywordtype">char</span>            context[VACMSTRINGLEN];
-00770     <span class="keywordtype">int</span>             glen, clen;
-00771 
-00772     glen = (int) strlen(groupName);
-00773     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
-00774         <span class="keywordflow">return</span> NULL;
-00775     clen = (int) strlen(contextPrefix);
-00776     <span class="keywordflow">if</span> (clen &lt; 0 || clen &gt;= VACM_MAX_STRING)
-00777         <span class="keywordflow">return</span> NULL;
-00778 
-00779     group[0] = glen;
-00780     strcpy(group + 1, groupName);
-00781     context[0] = clen;
-00782     strcpy(context + 1, contextPrefix);
-00783     <span class="keywordflow">for</span> (vp = accessList; vp; vp = vp-&gt;next) {
-00784         <span class="keywordflow">if</span> ((securityModel == vp-&gt;securityModel
-00785              || vp-&gt;securityModel == SNMP_SEC_MODEL_ANY)
-00786             &amp;&amp; securityLevel &gt;= vp-&gt;securityLevel
-00787             &amp;&amp; !memcmp(vp-&gt;groupName, group, glen + 1)
-00788             &amp;&amp;
-00789             ((vp-&gt;contextMatch == CONTEXT_MATCH_EXACT
-00790               &amp;&amp; clen == vp-&gt;contextPrefix[0]
-00791               &amp;&amp; (memcmp(vp-&gt;contextPrefix, context, clen + 1) == 0))
-00792              || (vp-&gt;contextMatch == CONTEXT_MATCH_PREFIX
-00793                  &amp;&amp; clen &gt;= vp-&gt;contextPrefix[0]
-00794                  &amp;&amp; (memcmp(vp-&gt;contextPrefix + 1, context + 1,
-00795                             vp-&gt;contextPrefix[0]) == 0))))
-00796             <span class="keywordflow">return</span> vp;
-00797     }
-00798     <span class="keywordflow">return</span> NULL;
-00799 }
-00800 
-00801 <span class="keywordtype">void</span>
-00802 vacm_scanAccessInit(<span class="keywordtype">void</span>)
-00803 {
-00804     accessScanPtr = accessList;
-00805 }
-00806 
-00807 <span class="keyword">struct </span>vacm_accessEntry *
-00808 vacm_scanAccessNext(<span class="keywordtype">void</span>)
-00809 {
-00810     <span class="keyword">struct </span>vacm_accessEntry *returnval = accessScanPtr;
-00811     <span class="keywordflow">if</span> (accessScanPtr)
-00812         accessScanPtr = accessScanPtr-&gt;next;
-00813     <span class="keywordflow">return</span> returnval;
-00814 }
-00815 
-00816 <span class="keyword">struct </span>vacm_accessEntry *
-00817 vacm_createAccessEntry(<span class="keyword">const</span> <span class="keywordtype">char</span> *groupName,
-00818                        <span class="keyword">const</span> <span class="keywordtype">char</span> *contextPrefix,
-00819                        <span class="keywordtype">int</span> securityModel, <span class=
+00703 {
+00704     <span class="keyword">struct </span>vacm_groupEntry *gp, *lg, *og;
+00705     <span class="keywordtype">int</span>             cmp, glen;
+00706 
+00707     glen = (int) strlen(securityName);
+00708     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
+00709         <span class="keywordflow">return</span> NULL;
+00710     gp = (<span class="keyword">struct </span>vacm_groupEntry *) calloc(1,
+00711                                            <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> vacm_groupEntry));
+00712     <span class="keywordflow">if</span> (gp == NULL)
+00713         <span class="keywordflow">return</span> NULL;
+00714     gp-&gt;reserved =
+00715         (<span class="keyword">struct </span>vacm_groupEntry *) calloc(1,
+00716                                           <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> vacm_groupEntry));
+00717     <span class="keywordflow">if</span> (gp-&gt;reserved == NULL) {
+00718         free(gp);
+00719         <span class="keywordflow">return</span> NULL;
+00720     }
+00721 
+00722     gp-&gt;securityModel = securityModel;
+00723     gp-&gt;securityName[0] = glen;
+00724     strcpy(gp-&gt;securityName + 1, securityName);
+00725 
+00726     lg = groupList;
+00727     og = NULL;
+00728     <span class="keywordflow">while</span> (lg) {
+00729         <span class="keywordflow">if</span> (lg-&gt;securityModel &gt; securityModel)
+00730             <span class="keywordflow">break</span>;
+00731         <span class="keywordflow">if</span> (lg-&gt;securityModel == securityModel &amp;&amp;
+00732             (cmp =
+00733              memcmp(lg-&gt;securityName, gp-&gt;securityName, glen + 1)) &gt; 0)
+00734             <span class="keywordflow">break</span>;
+00735         <span class="comment">/*</span>
+00736 <span class="comment">         * if (lg-&gt;securityModel == securityModel &amp;&amp; cmp == 0) abort(); </span>
+00737 <span class="comment">         */</span>
+00738         og = lg;
+00739         lg = lg-&gt;next;
+00740     }
+00741     gp-&gt;next = lg;
+00742     <span class="keywordflow">if</span> (og == NULL)
+00743         groupList = gp;
+00744     <span class="keywordflow">else</span>
+00745         og-&gt;next = gp;
+00746     <span class="keywordflow">return</span> gp;
+00747 }
+00748 
+00749 <span class="keywordtype">void</span>
+00750 vacm_destroyGroupEntry(<span class="keywordtype">int</span> securityModel, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *securityName)
+00751 {
+00752     <span class="keyword">struct </span>vacm_groupEntry *vp, *lastvp = NULL;
+00753 
+00754     <span class="keywordflow">if</span> (groupList &amp;&amp; groupList-&gt;securityModel == securityModel
+00755         &amp;&amp; !strcmp(groupList-&gt;securityName + 1, securityName)) {
+00756         vp = groupList;
+00757         groupList = groupList-&gt;next;
+00758     } <span class="keywordflow">else</span> {
+00759         <span class="keywordflow">for</span> (vp = groupList; vp; vp = vp-&gt;next) {
+00760             <span class="keywordflow">if</span> (vp-&gt;securityModel == securityModel
+00761                 &amp;&amp; !strcmp(vp-&gt;securityName + 1, securityName))
+00762                 <span class="keywordflow">break</span>;
+00763             lastvp = vp;
+00764         }
+00765         <span class="keywordflow">if</span> (!vp)
+00766             <span class="keywordflow">return</span>;
+00767         lastvp-&gt;next = vp-&gt;next;
+00768     }
+00769     <span class="keywordflow">if</span> (vp-&gt;reserved)
+00770         free(vp-&gt;reserved);
+00771     free(vp);
+00772     <span class="keywordflow">return</span>;
+00773 }
+00774 
+00775 <span class="keywordtype">void</span>
+00776 vacm_destroyAllGroupEntries(<span class="keywordtype">void</span>)
+00777 {
+00778     <span class="keyword">struct </span>vacm_groupEntry *gp;
+00779     <span class="keywordflow">while</span> ((gp = groupList)) {
+00780         groupList = gp-&gt;next;
+00781         <span class="keywordflow">if</span> (gp-&gt;reserved)
+00782             free(gp-&gt;reserved);
+00783         free(gp);
+00784     }
+00785 }
+00786 
+00787 <span class="keyword">struct </span>vacm_accessEntry *
+00788 vacm_getAccessEntry(<span class="keyword">const</span> <span class="keywordtype">char</span> *groupName,
+00789                     <span class="keyword">const</span> <span class="keywordtype">char</span> *contextPrefix,
+00790                     <span class="keywordtype">int</span> securityModel, <span class="keywordtype">int</span> securityLevel)
+00791 {
+00792     <span class="keyword">struct </span>vacm_accessEntry *vp;
+00793     <span class="keywordtype">char</span>            group[VACMSTRINGLEN];
+00794     <span class="keywordtype">char</span>            context[VACMSTRINGLEN];
+00795     <span class="keywordtype">int</span>             glen, clen;
+00796 
+00797     glen = (int) strlen(groupName);
+00798     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
+00799         <span class="keywordflow">return</span> NULL;
+00800     clen = (int) strlen(contextPrefix);
+00801     <span class="keywordflow">if</span> (clen &lt; 0 || clen &gt;= VACM_MAX_STRING)
+00802         <span class="keywordflow">return</span> NULL;
+00803 
+00804     group[0] = glen;
+00805     strcpy(group + 1, groupName);
+00806     context[0] = clen;
+00807     strcpy(context + 1, contextPrefix);
+00808     <span class="keywordflow">for</span> (vp = accessList; vp; vp = vp-&gt;next) {
+00809         <span class="keywordflow">if</span> ((securityModel == vp-&gt;securityModel
+00810              || vp-&gt;securityModel == SNMP_SEC_MODEL_ANY)
+00811             &amp;&amp; securityLevel &gt;= vp-&gt;securityLevel
+00812             &amp;&amp; !memcmp(vp-&gt;groupName, group, glen + 1)
+00813             &amp;&amp;
+00814             ((vp-&gt;contextMatch == CONTEXT_MATCH_EXACT
+00815               &amp;&amp; clen == vp-&gt;contextPrefix[0]
+00816               &amp;&amp; (memcmp(vp-&gt;contextPrefix, context, clen + 1) == 0))
+00817              || (vp-&gt;contextMatch == CONTEXT_MATCH_PREFIX
+00818                  &amp;&amp; clen &gt;= vp-&gt;contextPrefix[0]
+00819                  &amp;&amp; (memcmp(vp-&gt;contextPrefix + 1, context + 1,
+00820                             vp-&gt;contextPrefix[0]) == 0))))
+00821             <span class="keywordflow">return</span> vp;
+00822     }
+00823     <span class="keywordflow">return</span> NULL;
+00824 }
+00825 
+00826 <span class="keywordtype">void</span>
+00827 vacm_scanAccessInit(<span class="keywordtype">void</span>)
+00828 {
+00829     accessScanPtr = accessList;
+00830 }
+00831 
+00832 <span class="keyword">struct </span>vacm_accessEntry *
+00833 vacm_scanAccessNext(<span class="keywordtype">void</span>)
+00834 {
+00835     <span class="keyword">struct </span>vacm_accessEntry *returnval = accessScanPtr;
+00836     <span class="keywordflow">if</span> (accessScanPtr)
+00837         accessScanPtr = accessScanPtr-&gt;next;
+00838     <span class="keywordflow">return</span> returnval;
+00839 }
+00840 
+00841 <span class="keyword">struct </span>vacm_accessEntry *
+00842 vacm_createAccessEntry(<span class="keyword">const</span> <span class="keywordtype">char</span> *groupName,
+00843                        <span class="keyword">const</span> <span class="keywordtype">char</span> *contextPrefix,
+00844                        <span class="keywordtype">int</span> securityModel, <span class=
 "keywordtype">int</span> securityLevel)
-00820 {
-00821     <span class="keyword">struct </span>vacm_accessEntry *vp, *lp, *op = NULL;
-00822     <span class="keywordtype">int</span>             cmp, glen, clen;
-00823 
-00824     glen = (int) strlen(groupName);
-00825     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
-00826         <span class="keywordflow">return</span> NULL;
-00827     clen = (int) strlen(contextPrefix);
-00828     <span class="keywordflow">if</span> (clen &lt; 0 || clen &gt;= VACM_MAX_STRING)
-00829         <span class="keywordflow">return</span> NULL;
-00830     vp = (<span class="keyword">struct </span>vacm_accessEntry *) calloc(1,
-00831                                             <span class="keyword">sizeof</span>(<span class="keyword">struct</span>
-00832                                                    vacm_accessEntry));
-00833     <span class="keywordflow">if</span> (vp == NULL)
-00834         <span class="keywordflow">return</span> NULL;
-00835     vp-&gt;reserved =
-00836         (<span class="keyword">struct </span>vacm_accessEntry *) calloc(1,
-00837                                            <span class="keyword">sizeof</span>(<span class="keyword">struct</span>
-00838                                                   vacm_accessEntry));
-00839     <span class="keywordflow">if</span> (vp-&gt;reserved == NULL) {
-00840         free(vp);
-00841         <span class="keywordflow">return</span> NULL;
-00842     }
-00843 
-00844     vp-&gt;securityModel = securityModel;
-00845     vp-&gt;securityLevel = securityLevel;
-00846     vp-&gt;groupName[0] = glen;
-00847     strcpy(vp-&gt;groupName + 1, groupName);
-00848     vp-&gt;contextPrefix[0] = clen;
-00849     strcpy(vp-&gt;contextPrefix + 1, contextPrefix);
-00850 
-00851     lp = accessList;
-00852     <span class="keywordflow">while</span> (lp) {
-00853         cmp = memcmp(lp-&gt;groupName, vp-&gt;groupName, glen + 1);
-00854         <span class="keywordflow">if</span> (cmp &gt; 0)
-00855             <span class="keywordflow">break</span>;
-00856         <span class="keywordflow">if</span> (cmp &lt; 0)
-00857             <span class="keywordflow">goto</span> next;
-00858         cmp = memcmp(lp-&gt;contextPrefix, vp-&gt;contextPrefix, clen + 1);
-00859         <span class="keywordflow">if</span> (cmp &gt; 0)
-00860             <span class="keywordflow">break</span>;
-00861         <span class="keywordflow">if</span> (cmp &lt; 0)
-00862             <span class="keywordflow">goto</span> next;
-00863         <span class="keywordflow">if</span> (lp-&gt;securityModel &lt; securityModel)
-00864             <span class="keywordflow">break</span>;
-00865         <span class="keywordflow">if</span> (lp-&gt;securityModel &gt; securityModel)
-00866             <span class="keywordflow">goto</span> next;
-00867         <span class="keywordflow">if</span> (lp-&gt;securityLevel &lt; securityLevel)
-00868             <span class="keywordflow">break</span>;
-00869       next:
-00870         op = lp;
-00871         lp = lp-&gt;next;
-00872     }
-00873     vp-&gt;next = lp;
-00874     <span class="keywordflow">if</span> (op == NULL)
-00875         accessList = vp;
-00876     <span class="keywordflow">else</span>
-00877         op-&gt;next = vp;
-00878     <span class="keywordflow">return</span> vp;
-00879 }
-00880 
-00881 <span class="keywordtype">void</span>
-00882 vacm_destroyAccessEntry(<span class="keyword">const</span> <span class="keywordtype">char</span> *groupName,
-00883                         <span class="keyword">const</span> <span class="keywordtype">char</span> *contextPrefix,
-00884                         <span class="keywordtype">int</span> securityModel, <span class=
+00845 {
+00846     <span class="keyword">struct </span>vacm_accessEntry *vp, *lp, *op = NULL;
+00847     <span class="keywordtype">int</span>             cmp, glen, clen;
+00848 
+00849     glen = (int) strlen(groupName);
+00850     <span class="keywordflow">if</span> (glen &lt; 0 || glen &gt;= VACM_MAX_STRING)
+00851         <span class="keywordflow">return</span> NULL;
+00852     clen = (int) strlen(contextPrefix);
+00853     <span class="keywordflow">if</span> (clen &lt; 0 || clen &gt;= VACM_MAX_STRING)
+00854         <span class="keywordflow">return</span> NULL;
+00855     vp = (<span class="keyword">struct </span>vacm_accessEntry *) calloc(1,
+00856                                             <span class="keyword">sizeof</span>(<span class="keyword">struct</span>
+00857                                                    vacm_accessEntry));
+00858     <span class="keywordflow">if</span> (vp == NULL)
+00859         <span class="keywordflow">return</span> NULL;
+00860     vp-&gt;reserved =
+00861         (<span class="keyword">struct </span>vacm_accessEntry *) calloc(1,
+00862                                            <span class="keyword">sizeof</span>(<span class="keyword">struct</span>
+00863                                                   vacm_accessEntry));
+00864     <span class="keywordflow">if</span> (vp-&gt;reserved == NULL) {
+00865         free(vp);
+00866         <span class="keywordflow">return</span> NULL;
+00867     }
+00868 
+00869     vp-&gt;securityModel = securityModel;
+00870     vp-&gt;securityLevel = securityLevel;
+00871     vp-&gt;groupName[0] = glen;
+00872     strcpy(vp-&gt;groupName + 1, groupName);
+00873     vp-&gt;contextPrefix[0] = clen;
+00874     strcpy(vp-&gt;contextPrefix + 1, contextPrefix);
+00875 
+00876     lp = accessList;
+00877     <span class="keywordflow">while</span> (lp) {
+00878         cmp = memcmp(lp-&gt;groupName, vp-&gt;groupName, glen + 1);
+00879         <span class="keywordflow">if</span> (cmp &gt; 0)
+00880             <span class="keywordflow">break</span>;
+00881         <span class="keywordflow">if</span> (cmp &lt; 0)
+00882             <span class="keywordflow">goto</span> next;
+00883         cmp = memcmp(lp-&gt;contextPrefix, vp-&gt;contextPrefix, clen + 1);
+00884         <span class="keywordflow">if</span> (cmp &gt; 0)
+00885             <span class="keywordflow">break</span>;
+00886         <span class="keywordflow">if</span> (cmp &lt; 0)
+00887             <span class="keywordflow">goto</span> next;
+00888         <span class="keywordflow">if</span> (lp-&gt;securityModel &lt; securityModel)
+00889             <span class="keywordflow">break</span>;
+00890         <span class="keywordflow">if</span> (lp-&gt;securityModel &gt; securityModel)
+00891             <span class="keywordflow">goto</span> next;
+00892         <span class="keywordflow">if</span> (lp-&gt;securityLevel &lt; securityLevel)
+00893             <span class="keywordflow">break</span>;
+00894       next:
+00895         op = lp;
+00896         lp = lp-&gt;next;
+00897     }
+00898     vp-&gt;next = lp;
+00899     <span class="keywordflow">if</span> (op == NULL)
+00900         accessList = vp;
+00901     <span class="keywordflow">else</span>
+00902         op-&gt;next = vp;
+00903     <span class="keywordflow">return</span> vp;
+00904 }
+00905 
+00906 <span class="keywordtype">void</span>
+00907 vacm_destroyAccessEntry(<span class="keyword">const</span> <span class="keywordtype">char</span> *groupName,
+00908                         <span class="keyword">const</span> <span class="keywordtype">char</span> *contextPrefix,
+00909                         <span class="keywordtype">int</span> securityModel, <span class=
 "keywordtype">int</span> securityLevel)
-00885 {
-00886     <span class="keyword">struct </span>vacm_accessEntry *vp, *lastvp = NULL;
-00887 
-00888     <span class="keywordflow">if</span> (accessList &amp;&amp; accessList-&gt;securityModel == securityModel
-00889         &amp;&amp; accessList-&gt;securityLevel == securityLevel
-00890         &amp;&amp; !strcmp(accessList-&gt;groupName + 1, groupName)
-00891         &amp;&amp; !strcmp(accessList-&gt;contextPrefix + 1, contextPrefix)) {
-00892         vp = accessList;
-00893         accessList = accessList-&gt;next;
-00894     } <span class="keywordflow">else</span> {
-00895         <span class="keywordflow">for</span> (vp = accessList; vp; vp = vp-&gt;next) {
-00896             <span class="keywordflow">if</span> (vp-&gt;securityModel == securityModel
-00897                 &amp;&amp; vp-&gt;securityLevel == securityLevel
-00898                 &amp;&amp; !strcmp(vp-&gt;groupName + 1, groupName)
-00899                 &amp;&amp; !strcmp(vp-&gt;contextPrefix + 1, contextPrefix))
-00900                 <span class="keywordflow">break</span>;
-00901             lastvp = vp;
-00902         }
-00903         <span class="keywordflow">if</span> (!vp)
-00904             <span class="keywordflow">return</span>;
-00905         lastvp-&gt;next = vp-&gt;next;
-00906     }
-00907     <span class="keywordflow">if</span> (vp-&gt;reserved)
-00908         free(vp-&gt;reserved);
-00909     free(vp);
-00910     <span class="keywordflow">return</span>;
-00911 }
+00910 {
+00911     <span class="keyword">struct </span>vacm_accessEntry *vp, *lastvp = NULL;
 00912 
-00913 <span class="keywordtype">void</span>
-00914 vacm_destroyAllAccessEntries(<span class="keywordtype">void</span>)
-00915 {
-00916     <span class="keyword">struct </span>vacm_accessEntry *ap;
-00917     <span class="keywordflow">while</span> ((ap = accessList)) {
-00918         accessList = ap-&gt;next;
-00919         <span class="keywordflow">if</span> (ap-&gt;reserved)
-00920             free(ap-&gt;reserved);
-00921         free(ap);
-00922     }
-00923 }
-00924 
-00925 <span class="keywordtype">int</span>
-00926 store_vacm(<span class="keywordtype">int</span> majorID, <span class="keywordtype">int</span> minorID, <span class=
+00913     <span class="keywordflow">if</span> (accessList &amp;&amp; accessList-&gt;securityModel == securityModel
+00914         &amp;&amp; accessList-&gt;securityLevel == securityLevel
+00915         &amp;&amp; !strcmp(accessList-&gt;groupName + 1, groupName)
+00916         &amp;&amp; !strcmp(accessList-&gt;contextPrefix + 1, contextPrefix)) {
+00917         vp = accessList;
+00918         accessList = accessList-&gt;next;
+00919     } <span class="keywordflow">else</span> {
+00920         <span class="keywordflow">for</span> (vp = accessList; vp; vp = vp-&gt;next) {
+00921             <span class="keywordflow">if</span> (vp-&gt;securityModel == securityModel
+00922                 &amp;&amp; vp-&gt;securityLevel == securityLevel
+00923                 &amp;&amp; !strcmp(vp-&gt;groupName + 1, groupName)
+00924                 &amp;&amp; !strcmp(vp-&gt;contextPrefix + 1, contextPrefix))
+00925                 <span class="keywordflow">break</span>;
+00926             lastvp = vp;
+00927         }
+00928         <span class="keywordflow">if</span> (!vp)
+00929             <span class="keywordflow">return</span>;
+00930         lastvp-&gt;next = vp-&gt;next;
+00931     }
+00932     <span class="keywordflow">if</span> (vp-&gt;reserved)
+00933         free(vp-&gt;reserved);
+00934     free(vp);
+00935     <span class="keywordflow">return</span>;
+00936 }
+00937 
+00938 <span class="keywordtype">void</span>
+00939 vacm_destroyAllAccessEntries(<span class="keywordtype">void</span>)
+00940 {
+00941     <span class="keyword">struct </span>vacm_accessEntry *ap;
+00942     <span class="keywordflow">while</span> ((ap = accessList)) {
+00943         accessList = ap-&gt;next;
+00944         <span class="keywordflow">if</span> (ap-&gt;reserved)
+00945             free(ap-&gt;reserved);
+00946         free(ap);
+00947     }
+00948 }
+00949 
+00950 <span class="keywordtype">int</span>
+00951 store_vacm(<span class="keywordtype">int</span> majorID, <span class="keywordtype">int</span> minorID, <span class=
 "keywordtype">void</span> *serverarg, <span class="keywordtype">void</span> *clientarg)
-00927 {
-00928     <span class="comment">/*</span>
-00929 <span class="comment">     * figure out our application name </span>
-00930 <span class="comment">     */</span>
-00931     <span class="keywordtype">char</span>           *appname = (<span class="keywordtype">char</span> *) clientarg;
-00932     <span class="keywordflow">if</span> (appname == NULL) {
-00933         appname = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-00934                                         NETSNMP_DS_LIB_APPTYPE);
-00935     }
-00936 
-00937     <span class="comment">/*</span>
-00938 <span class="comment">     * save the VACM MIB </span>
-00939 <span class="comment">     */</span>
-00940     vacm_save(<span class="stringliteral">"vacm"</span>, appname);
-00941     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
-00942 }
-00943 
-00944 <span class="comment">/*</span>
-00945 <span class="comment"> * returns 1 if vacm has *any* configuration entries in it (regardless</span>
-00946 <span class="comment"> * of weather or not there is enough to make a decision based on it),</span>
-00947 <span class="comment"> * else return 0 </span>
-00948 <span class="comment"> */</span>
-00949 <span class="keywordtype">int</span>
-00950 vacm_is_configured(<span class="keywordtype">void</span>)
-00951 {
-00952     <span class="keywordflow">if</span> (viewList == NULL &amp;&amp; accessList == NULL &amp;&amp; groupList == NULL) {
-00953         <span class="keywordflow">return</span> 0;
-00954     }
-00955     <span class="keywordflow">return</span> 1;
-00956 }
+00952 {
+00953     <span class="comment">/*</span>
+00954 <span class="comment">     * figure out our application name </span>
+00955 <span class="comment">     */</span>
+00956     <span class="keywordtype">char</span>           *appname = (<span class="keywordtype">char</span> *) clientarg;
+00957     <span class="keywordflow">if</span> (appname == NULL) {
+00958         appname = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00959                                         NETSNMP_DS_LIB_APPTYPE);
+00960     }
+00961 
+00962     <span class="comment">/*</span>
+00963 <span class="comment">     * save the VACM MIB </span>
+00964 <span class="comment">     */</span>
+00965     vacm_save(<span class="stringliteral">"vacm"</span>, appname);
+00966     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00967 }
+00968 
+00969 <span class="comment">/*</span>
+00970 <span class="comment"> * returns 1 if vacm has *any* (non-built-in) configuration entries,</span>
+00971 <span class="comment"> * regardless of whether or not there is enough to make a decision,</span>
+00972 <span class="comment"> * else return 0 </span>
+00973 <span class="comment"> */</span>
+00974 <span class="keywordtype">int</span>
+00975 vacm_is_configured(<span class="keywordtype">void</span>)
+00976 {
+00977     <span class="keywordflow">if</span> (accessList == NULL &amp;&amp; groupList == NULL) {
+00978         <span class="keywordflow">return</span> 0;
+00979     }
+00980     <span class="keywordflow">return</span> 1;
+00981 }
+00982 
+00983 <span class="comment">/*</span>
+00984 <span class="comment"> * backwards compatability</span>
+00985 <span class="comment"> */</span>
+00986 <span class="keyword">struct </span>vacm_viewEntry *
+00987 vacm_getViewEntry(<span class="keyword">const</span> <span class="keywordtype">char</span> *viewName,
+00988                   oid * viewSubtree, size_t viewSubtreeLen, <span class="keywordtype">int</span> mode)
+00989 {
+00990     <span class="keywordflow">return</span> netsnmp_view_get( viewList, viewName, viewSubtree, viewSubtreeLen,
+00991                              mode);
+00992 }
+00993 
+00994 <span class="keywordtype">int</span>
+00995 vacm_checkSubtree(<span class="keyword">const</span> <span class="keywordtype">char</span> *viewName,
+00996                   oid * viewSubtree, size_t viewSubtreeLen)
+00997 {
+00998     <span class="keywordflow">return</span> netsnmp_view_subtree_check( viewList, viewName, viewSubtree,
+00999                                        viewSubtreeLen);
+01000 }
+01001 
+01002 <span class="keyword">struct </span>vacm_viewEntry *
+01003 vacm_createViewEntry(<span class="keyword">const</span> <span class="keywordtype">char</span> *viewName,
+01004                      oid * viewSubtree, size_t viewSubtreeLen)
+01005 {
+01006     <span class="keywordflow">return</span> netsnmp_view_create( &amp;viewList, viewName, viewSubtree,
+01007                                 viewSubtreeLen);
+01008 }
+01009 
+01010 <span class="keywordtype">void</span>
+01011 vacm_destroyViewEntry(<span class="keyword">const</span> <span class="keywordtype">char</span> *viewName,
+01012                       oid * viewSubtree, size_t viewSubtreeLen)
+01013 {
+01014     netsnmp_view_destroy( &amp;viewList, viewName, viewSubtree, viewSubtreeLen);
+01015 }
+01016 
+01017 <span class="keywordtype">void</span>
+01018 vacm_destroyAllViewEntries(<span class="keywordtype">void</span>)
+01019 {
+01020     netsnmp_view_clear( &amp;viewList );
+01021 }
+01022 
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:43 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:51 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

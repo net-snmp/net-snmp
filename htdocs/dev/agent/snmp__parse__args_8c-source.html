@@ -168,7 +168,7 @@
 00146     snmp_out_toggle_options_usage(<span class="stringliteral">"\t\t\t  "</span>, outf);
 00147     fprintf(outf,
 00148             <span class="stringliteral">"  -I INOPTS\t\tToggle various defaults controlling input parsing:\n"</span>);
-00149     <a class="code" href="group__mib__utilities.html#ga51">snmp_in_toggle_options_usage</a>(<span class=
+00149     <a class="code" href="group__mib__utilities.html#ga52">snmp_in_toggle_options_usage</a>(<span class=
 "stringliteral">"\t\t\t  "</span>, outf);
 00150     fprintf(outf,
 00151             <span class="stringliteral">"  -L LOGOPTS\t\tToggle various defaults controlling logging:\n"</span>);
@@ -186,664 +186,676 @@
 00163 <span class="comment">     * else it's a long option, so process it like name=value </span>
 00164 <span class="comment">     */</span>
 00165     cp = malloc(strlen(myoptarg) + 3);
-00166     strcpy(cp, myoptarg);
-00167     cp2 = strchr(cp, <span class="charliteral">'='</span>);
-00168     <span class="keywordflow">if</span> (!cp2 &amp;&amp; !strchr(cp, <span class="charliteral">' '</span>)) {
-00169         <span class="comment">/*</span>
-00170 <span class="comment">         * well, they didn't specify an argument as far as we</span>
-00171 <span class="comment">         * can tell.  Give them a '1' as the argument (which</span>
-00172 <span class="comment">         * works for boolean tokens and a few others) and let</span>
-00173 <span class="comment">         * them suffer from there if it's not what they</span>
-00174 <span class="comment">         * wanted </span>
-00175 <span class="comment">         */</span>
-00176         strcat(cp, <span class="stringliteral">" 1"</span>);
-00177     } <span class="keywordflow">else</span> {
-00178         <span class="comment">/*</span>
-00179 <span class="comment">         * replace the '=' with a ' ' </span>
-00180 <span class="comment">         */</span>
-00181         <span class="keywordflow">if</span> (cp2)
-00182             *cp2 = <span class="charliteral">' '</span>;
-00183     }
-00184     netsnmp_config(cp);
-00185     free(cp);
-00186 }
-00187 
-00188 <span class="keyword">extern</span> <span class="keywordtype">int</span>      snmpv3_options(<span class=
+00166     <span class="keywordflow">if</span> (!cp)
+00167         <span class="keywordflow">return</span>;
+00168     strcpy(cp, myoptarg);
+00169     cp2 = strchr(cp, <span class="charliteral">'='</span>);
+00170     <span class="keywordflow">if</span> (!cp2 &amp;&amp; !strchr(cp, <span class="charliteral">' '</span>)) {
+00171         <span class="comment">/*</span>
+00172 <span class="comment">         * well, they didn't specify an argument as far as we</span>
+00173 <span class="comment">         * can tell.  Give them a '1' as the argument (which</span>
+00174 <span class="comment">         * works for boolean tokens and a few others) and let</span>
+00175 <span class="comment">         * them suffer from there if it's not what they</span>
+00176 <span class="comment">         * wanted </span>
+00177 <span class="comment">         */</span>
+00178         strcat(cp, <span class="stringliteral">" 1"</span>);
+00179     } <span class="keywordflow">else</span> {
+00180         <span class="comment">/*</span>
+00181 <span class="comment">         * replace the '=' with a ' ' </span>
+00182 <span class="comment">         */</span>
+00183         <span class="keywordflow">if</span> (cp2)
+00184             *cp2 = <span class="charliteral">' '</span>;
+00185     }
+00186     netsnmp_config(cp);
+00187     free(cp);
+00188 }
+00189 
+00190 <span class="keyword">extern</span> <span class="keywordtype">int</span>      snmpv3_options(<span class=
 "keywordtype">char</span> *optarg, <a class="code" href="structsnmp__session.html">netsnmp_session</a> * session,
-00189                                <span class="keywordtype">char</span> **Apsz, <span class=
+00191                                <span class="keywordtype">char</span> **Apsz, <span class=
 "keywordtype">char</span> **Xpsz, <span class="keywordtype">int</span> argc,
-00190                                <span class="keywordtype">char</span> *<span class="keyword">const</span> *argv);
-00191 
-00192 <span class="comment">/*</span>
-00193 <span class="comment"> * This method does the real work for snmp_parse_args.  It takes an</span>
-00194 <span class="comment"> * extra argument, proxy, and uses this to decide how to handle the lack of</span>
-00195 <span class="comment"> * of a community string.</span>
-00196 <span class="comment"> */</span>
-00197 <span class="keywordtype">int</span>
-00198 snmp_parse_args(<span class="keywordtype">int</span> argc,
-00199                 <span class="keywordtype">char</span> **argv,
-00200                 <a class="code" href="structsnmp__session.html">netsnmp_session</a> * session, <span class=
+00192                                <span class="keywordtype">char</span> *<span class="keyword">const</span> *argv);
+00193 
+00194 <span class="comment">/*</span>
+00195 <span class="comment"> * This method does the real work for snmp_parse_args.  It takes an</span>
+00196 <span class="comment"> * extra argument, proxy, and uses this to decide how to handle the lack of</span>
+00197 <span class="comment"> * of a community string.</span>
+00198 <span class="comment"> */</span>
+00199 <span class="keywordtype">int</span>
+00200 snmp_parse_args(<span class="keywordtype">int</span> argc,
+00201                 <span class="keywordtype">char</span> **argv,
+00202                 <a class="code" href="structsnmp__session.html">netsnmp_session</a> * session, <span class=
 "keyword">const</span> <span class="keywordtype">char</span> *localOpts,
-00201                 <span class="keywordtype">void</span> (*proc) (<span class="keywordtype">int</span>, <span class=
+00203                 <span class="keywordtype">void</span> (*proc) (<span class="keywordtype">int</span>, <span class=
 "keywordtype">char</span> *<span class="keyword">const</span> *, <span class="keywordtype">int</span>))
-00202 {
-00203     <span class="keyword">static</span> <span class=
+00204 {
+00205     <span class="keyword">static</span> <span class=
 "keywordtype">char</span>    *sensitive[4] = { NULL, NULL, NULL, NULL };
-00204     <span class="keywordtype">int</span>             arg, sp = 0, zero_sensitive = 1, testcase = 0;
-00205     <span class="keywordtype">char</span>           *cp;
-00206     <span class="keywordtype">char</span>           *Apsz = NULL;
-00207     <span class="keywordtype">char</span>           *Xpsz = NULL;
-00208     <span class="keywordtype">char</span>           *Cpsz = NULL;
-00209     <span class="keywordtype">char</span>            Opts[BUF_SIZE];
-00210     <span class="keywordtype">int</span>             logopt = 0;
-00211 
-00212     <span class="comment">/*</span>
-00213 <span class="comment">     * initialize session to default values </span>
-00214 <span class="comment">     */</span>
-00215     snmp_sess_init(session);
-00216     strcpy(Opts, <span class="stringliteral">"Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:p:T:-:3:s:S:L:"</span>);
-00217     <span class="keywordflow">if</span> (localOpts)
-00218         strcat(Opts, localOpts);
-00219 
-00220     <span class="keywordflow">if</span> (strcmp(argv[0], <span class="stringliteral">"snmpd-trapsess"</span>) == 0 ||
-00221         strcmp(argv[0], <span class="stringliteral">"snmpd-proxy"</span>)    == 0) {
-00222         <span class="comment">/*  Don't worry about zeroing sensitive parameters as they are not</span>
-00223 <span class="comment">            on the command line anyway (called from internal config-line</span>
-00224 <span class="comment">            handler).  */</span>
-00225         zero_sensitive = 0;
-00226     }
-00227 
-00228     <span class="comment">/*</span>
-00229 <span class="comment">     * get the options </span>
-00230 <span class="comment">     */</span>
-00231     DEBUGMSGTL((<span class="stringliteral">"snmp_parse_args"</span>, <span class=
+00206     <span class="keywordtype">int</span>             arg, sp = 0, zero_sensitive = 1, testcase = 0;
+00207     <span class="keywordtype">char</span>           *cp;
+00208     <span class="keywordtype">char</span>           *Apsz = NULL;
+00209     <span class="keywordtype">char</span>           *Xpsz = NULL;
+00210     <span class="keywordtype">char</span>           *Cpsz = NULL;
+00211     <span class="keywordtype">char</span>            Opts[BUF_SIZE];
+00212     <span class="keywordtype">int</span>             logopt = 0;
+00213 
+00214     <span class="comment">/*</span>
+00215 <span class="comment">     * initialize session to default values </span>
+00216 <span class="comment">     */</span>
+00217     snmp_sess_init(session);
+00218     strcpy(Opts, <span class="stringliteral">"Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:p:T:-:3:s:S:L:"</span>);
+00219     <span class="keywordflow">if</span> (localOpts)
+00220         strcat(Opts, localOpts);
+00221 
+00222     <span class="keywordflow">if</span> (strcmp(argv[0], <span class="stringliteral">"snmpd-trapsess"</span>) == 0 ||
+00223         strcmp(argv[0], <span class="stringliteral">"snmpd-proxy"</span>)    == 0) {
+00224         <span class="comment">/*  Don't worry about zeroing sensitive parameters as they are not</span>
+00225 <span class="comment">            on the command line anyway (called from internal config-line</span>
+00226 <span class="comment">            handler).  */</span>
+00227         zero_sensitive = 0;
+00228     }
+00229 
+00230     <span class="comment">/*</span>
+00231 <span class="comment">     * get the options </span>
+00232 <span class="comment">     */</span>
+00233     DEBUGMSGTL((<span class="stringliteral">"snmp_parse_args"</span>, <span class=
 "stringliteral">"starting: %d/%d\n"</span>, optind, argc));
-00232     <span class="keywordflow">for</span> (arg = 0; arg &lt; argc; arg++) {
-00233         DEBUGMSGTL((<span class="stringliteral">"snmp_parse_args"</span>, <span class=
+00234     <span class="keywordflow">for</span> (arg = 0; arg &lt; argc; arg++) {
+00235         DEBUGMSGTL((<span class="stringliteral">"snmp_parse_args"</span>, <span class=
 "stringliteral">" arg %d = %s\n"</span>, arg, argv[arg]));
-00234     }
-00235 
-00236     optind = 1;
-00237     <span class="keywordflow">while</span> ((arg = getopt(argc, argv, Opts)) != EOF) {
-00238         DEBUGMSGTL((<span class="stringliteral">"snmp_parse_args"</span>, <span class=
+00236     }
+00237 
+00238     optind = 1;
+00239     <span class="keywordflow">while</span> ((arg = getopt(argc, argv, Opts)) != EOF) {
+00240         DEBUGMSGTL((<span class="stringliteral">"snmp_parse_args"</span>, <span class=
 "stringliteral">"handling (#%d): %c\n"</span>, optind, arg));
-00239         <span class="keywordflow">switch</span> (arg) {
-00240         <span class="keywordflow">case</span> <span class="charliteral">'-'</span>:
-00241             <span class="keywordflow">if</span> (strcasecmp(optarg, <span class="stringliteral">"help"</span>) == 0) {
-00242                 <span class="keywordflow">return</span> (-1);
-00243             }
-00244             <span class="keywordflow">if</span> (strcasecmp(optarg, <span class="stringliteral">"version"</span>) == 0) {
-00245                 fprintf(stderr,<span class="stringliteral">"NET-SNMP version: %s\n"</span>,netsnmp_get_version());
-00246                 <span class="keywordflow">return</span> (-2);
-00247             }
-00248 
-00249             handle_long_opt(optarg);
-00250             <span class="keywordflow">break</span>;
-00251 
-00252         <span class="keywordflow">case</span> <span class="charliteral">'V'</span>:
-00253             fprintf(stderr, <span class="stringliteral">"NET-SNMP version: %s\n"</span>, netsnmp_get_version());
-00254             <span class="keywordflow">return</span> (-2);
-00255 
-00256         <span class="keywordflow">case</span> <span class="charliteral">'h'</span>:
-00257             <span class="keywordflow">return</span> (-1);
-00258             <span class="keywordflow">break</span>;
-00259 
-00260         <span class="keywordflow">case</span> <span class="charliteral">'H'</span>:
-00261             <a class="code" href="group__library.html#ga51">init_snmp</a>(<span class="stringliteral">"snmpapp"</span>);
-00262             fprintf(stderr, <span class="stringliteral">"Configuration directives understood:\n"</span>);
-00263             read_config_print_usage(<span class="stringliteral">"  "</span>);
-00264             <span class="keywordflow">return</span> (-2);
-00265 
-00266         <span class="keywordflow">case</span> <span class="charliteral">'Y'</span>:
-00267             netsnmp_config_remember(optarg);
-00268             <span class="keywordflow">break</span>;
-00269 
-00270 <span class="preprocessor">#ifndef DISABLE_MIB_LOADING</span>
-00271         <span class="keywordflow">case</span> <span class="charliteral">'m'</span>:
-00272             setenv(<span class="stringliteral">"MIBS"</span>, optarg, 1);
-00273             <span class="keywordflow">break</span>;
-00274 
-00275         <span class="keywordflow">case</span> <span class="charliteral">'M'</span>:
-00276             <a class="code" href="group__mib__utilities.html#ga53">netsnmp_set_mib_directory</a>(optarg);
-00277             <span class="keywordflow">break</span>;
-00278 <span class="preprocessor">#endif </span><span class="comment">/* DISABLE_MIB_LOADING */</span>
-00279 
-00280         <span class="keywordflow">case</span> <span class="charliteral">'O'</span>:
-00281             cp = snmp_out_toggle_options(optarg);
-00282             <span class="keywordflow">if</span> (cp != NULL) {
-00283                 fprintf(stderr, <span class="stringliteral">"Unknown output option passed to -O: %c.\n"</span>, 
-00284                         *cp);
-00285                 <span class="keywordflow">return</span> (-1);
-00286             }
-00287             <span class="keywordflow">break</span>;
-00288 
-00289         <span class="keywordflow">case</span> <span class="charliteral">'I'</span>:
-00290             cp = snmp_in_options(optarg, argc, argv);
-00291             <span class="keywordflow">if</span> (cp != NULL) {
-00292                 fprintf(stderr, <span class="stringliteral">"Unknown input option passed to -I: %c.\n"</span>,
-00293                         *cp);
-00294                 <span class="keywordflow">return</span> (-1);
-00295             }
-00296             <span class="keywordflow">break</span>;
-00297 
-00298 <span class="preprocessor">#ifndef DISABLE_MIB_LOADING</span>
-00299         <span class="keywordflow">case</span> <span class="charliteral">'P'</span>:
-00300             cp = snmp_mib_toggle_options(optarg);
-00301             <span class="keywordflow">if</span> (cp != NULL) {
-00302                 fprintf(stderr,
-00303                         <span class="stringliteral">"Unknown parsing option passed to -P: %c.\n"</span>, *cp);
-00304                 <span class="keywordflow">return</span> (-1);
-00305             }
-00306             <span class="keywordflow">break</span>;
-00307 <span class="preprocessor">#endif </span><span class="comment">/* DISABLE_MIB_LOADING */</span>
-00308 
-00309         <span class="keywordflow">case</span> <span class="charliteral">'D'</span>:
-00310             debug_register_tokens(optarg);
-00311             snmp_set_do_debugging(1);
-00312             <span class="keywordflow">break</span>;
-00313 
-00314         <span class="keywordflow">case</span> <span class="charliteral">'d'</span>:
-00315             <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_LIBRARY_ID, 
-00316                                    NETSNMP_DS_LIB_DUMP_PACKET, 1);
-00317             <span class="keywordflow">break</span>;
-00318 
-00319         <span class="keywordflow">case</span> <span class="charliteral">'v'</span>:
-00320             session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = -1;
-00321 <span class="preprocessor">#ifndef DISABLE_SNMPV1</span>
-00322             <span class="keywordflow">if</span> (!strcmp(optarg, <span class="stringliteral">"1"</span>)) {
-00323                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_1;
-00324             }
-00325 <span class="preprocessor">#endif</span>
-00326 <span class="preprocessor">#ifndef DISABLE_SNMPV2C</span>
-00327             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"2c"</span>)) {
-00328                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_2c;
-00329             }
-00330 <span class="preprocessor">#endif</span>
-00331             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"3"</span>)) {
-00332                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_3;
-00333             }
-00334             <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+00241         <span class="keywordflow">switch</span> (arg) {
+00242         <span class="keywordflow">case</span> <span class="charliteral">'-'</span>:
+00243             <span class="keywordflow">if</span> (strcasecmp(optarg, <span class="stringliteral">"help"</span>) == 0) {
+00244                 <span class="keywordflow">return</span> (-1);
+00245             }
+00246             <span class="keywordflow">if</span> (strcasecmp(optarg, <span class="stringliteral">"version"</span>) == 0) {
+00247                 fprintf(stderr,<span class="stringliteral">"NET-SNMP version: %s\n"</span>,netsnmp_get_version());
+00248                 <span class="keywordflow">return</span> (-2);
+00249             }
+00250 
+00251             handle_long_opt(optarg);
+00252             <span class="keywordflow">break</span>;
+00253 
+00254         <span class="keywordflow">case</span> <span class="charliteral">'V'</span>:
+00255             fprintf(stderr, <span class="stringliteral">"NET-SNMP version: %s\n"</span>, netsnmp_get_version());
+00256             <span class="keywordflow">return</span> (-2);
+00257 
+00258         <span class="keywordflow">case</span> <span class="charliteral">'h'</span>:
+00259             <span class="keywordflow">return</span> (-1);
+00260             <span class="keywordflow">break</span>;
+00261 
+00262         <span class="keywordflow">case</span> <span class="charliteral">'H'</span>:
+00263             <a class="code" href="group__library.html#ga56">init_snmp</a>(<span class="stringliteral">"snmpapp"</span>);
+00264             fprintf(stderr, <span class="stringliteral">"Configuration directives understood:\n"</span>);
+00265             read_config_print_usage(<span class="stringliteral">"  "</span>);
+00266             <span class="keywordflow">return</span> (-2);
+00267 
+00268         <span class="keywordflow">case</span> <span class="charliteral">'Y'</span>:
+00269             netsnmp_config_remember(optarg);
+00270             <span class="keywordflow">break</span>;
+00271 
+00272 <span class="preprocessor">#ifndef DISABLE_MIB_LOADING</span>
+00273         <span class="keywordflow">case</span> <span class="charliteral">'m'</span>:
+00274             setenv(<span class="stringliteral">"MIBS"</span>, optarg, 1);
+00275             <span class="keywordflow">break</span>;
+00276 
+00277         <span class="keywordflow">case</span> <span class="charliteral">'M'</span>:
+00278             <a class="code" href="group__mib__utilities.html#ga54">netsnmp_set_mib_directory</a>(optarg);
+00279             <span class="keywordflow">break</span>;
+00280 <span class="preprocessor">#endif </span><span class="comment">/* DISABLE_MIB_LOADING */</span>
+00281 
+00282         <span class="keywordflow">case</span> <span class="charliteral">'O'</span>:
+00283             cp = snmp_out_toggle_options(optarg);
+00284             <span class="keywordflow">if</span> (cp != NULL) {
+00285                 fprintf(stderr, <span class="stringliteral">"Unknown output option passed to -O: %c.\n"</span>, 
+00286                         *cp);
+00287                 <span class="keywordflow">return</span> (-1);
+00288             }
+00289             <span class="keywordflow">break</span>;
+00290 
+00291         <span class="keywordflow">case</span> <span class="charliteral">'I'</span>:
+00292             cp = snmp_in_options(optarg, argc, argv);
+00293             <span class="keywordflow">if</span> (cp != NULL) {
+00294                 fprintf(stderr, <span class="stringliteral">"Unknown input option passed to -I: %c.\n"</span>,
+00295                         *cp);
+00296                 <span class="keywordflow">return</span> (-1);
+00297             }
+00298             <span class="keywordflow">break</span>;
+00299 
+00300 <span class="preprocessor">#ifndef DISABLE_MIB_LOADING</span>
+00301         <span class="keywordflow">case</span> <span class="charliteral">'P'</span>:
+00302             cp = snmp_mib_toggle_options(optarg);
+00303             <span class="keywordflow">if</span> (cp != NULL) {
+00304                 fprintf(stderr,
+00305                         <span class="stringliteral">"Unknown parsing option passed to -P: %c.\n"</span>, *cp);
+00306                 <span class="keywordflow">return</span> (-1);
+00307             }
+00308             <span class="keywordflow">break</span>;
+00309 <span class="preprocessor">#endif </span><span class="comment">/* DISABLE_MIB_LOADING */</span>
+00310 
+00311         <span class="keywordflow">case</span> <span class="charliteral">'D'</span>:
+00312             debug_register_tokens(optarg);
+00313             snmp_set_do_debugging(1);
+00314             <span class="keywordflow">break</span>;
+00315 
+00316         <span class="keywordflow">case</span> <span class="charliteral">'d'</span>:
+00317             <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_LIBRARY_ID, 
+00318                                    NETSNMP_DS_LIB_DUMP_PACKET, 1);
+00319             <span class="keywordflow">break</span>;
+00320 
+00321         <span class="keywordflow">case</span> <span class="charliteral">'v'</span>:
+00322             session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = -1;
+00323 <span class="preprocessor">#ifndef DISABLE_SNMPV1</span>
+00324             <span class="keywordflow">if</span> (!strcmp(optarg, <span class="stringliteral">"1"</span>)) {
+00325                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_1;
+00326             }
+00327 <span class="preprocessor">#endif</span>
+00328 <span class="preprocessor">#ifndef DISABLE_SNMPV2C</span>
+00329             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"2c"</span>)) {
+00330                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_2c;
+00331             }
+00332 <span class="preprocessor">#endif</span>
+00333             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"3"</span>)) {
+00334                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_3;
+00335             }
+00336             <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
 "structsnmp__session.html#o0">version</a> == -1) {
-00335                 fprintf(stderr,
-00336                         <span class="stringliteral">"Invalid version specified after -v flag: %s\n"</span>,
-00337                         optarg);
-00338                 <span class="keywordflow">return</span> (-1);
-00339             }
-00340             <span class="keywordflow">break</span>;
-00341 
-00342         <span class="keywordflow">case</span> <span class="charliteral">'p'</span>:
-00343             fprintf(stderr, <span class="stringliteral">"Warning: -p option is no longer used - "</span>);
-00344             fprintf(stderr, <span class="stringliteral">"specify the remote host as HOST:PORT\n"</span>);
-00345             <span class="keywordflow">return</span> (-1);
-00346             <span class="keywordflow">break</span>;
-00347 
-00348         <span class="keywordflow">case</span> <span class="charliteral">'T'</span>:
-00349             fprintf(stderr, <span class="stringliteral">"Warning: -T option is no longer used - "</span>);
-00350             fprintf(stderr, <span class="stringliteral">"specify the remote host as TRANSPORT:HOST\n"</span>);
-00351             <span class="keywordflow">return</span> (-1);
-00352             <span class="keywordflow">break</span>;
-00353 
-00354         <span class="keywordflow">case</span> <span class="charliteral">'t'</span>:
-00355             session-&gt;<a class="code" href="structsnmp__session.html#o2">timeout</a> = atoi(optarg) * 1000000L;
-00356             <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+00337                 fprintf(stderr,
+00338                         <span class="stringliteral">"Invalid version specified after -v flag: %s\n"</span>,
+00339                         optarg);
+00340                 <span class="keywordflow">return</span> (-1);
+00341             }
+00342             <span class="keywordflow">break</span>;
+00343 
+00344         <span class="keywordflow">case</span> <span class="charliteral">'p'</span>:
+00345             fprintf(stderr, <span class="stringliteral">"Warning: -p option is no longer used - "</span>);
+00346             fprintf(stderr, <span class="stringliteral">"specify the remote host as HOST:PORT\n"</span>);
+00347             <span class="keywordflow">return</span> (-1);
+00348             <span class="keywordflow">break</span>;
+00349 
+00350         <span class="keywordflow">case</span> <span class="charliteral">'T'</span>:
+00351             fprintf(stderr, <span class="stringliteral">"Warning: -T option is no longer used - "</span>);
+00352             fprintf(stderr, <span class="stringliteral">"specify the remote host as TRANSPORT:HOST\n"</span>);
+00353             <span class="keywordflow">return</span> (-1);
+00354             <span class="keywordflow">break</span>;
+00355 
+00356         <span class="keywordflow">case</span> <span class="charliteral">'t'</span>:
+00357             session-&gt;<a class="code" href="structsnmp__session.html#o2">timeout</a> = atoi(optarg) * 1000000L;
+00358             <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
 "structsnmp__session.html#o2">timeout</a> &lt; 0 || !isdigit(optarg[0])) {
-00357                 fprintf(stderr, <span class="stringliteral">"Invalid timeout in seconds after -t flag.\n"</span>);
-00358                 <span class="keywordflow">return</span> (-1);
-00359             }
-00360             <span class="keywordflow">break</span>;
-00361 
-00362         <span class="keywordflow">case</span> <span class="charliteral">'r'</span>:
-00363             session-&gt;<a class="code" href="structsnmp__session.html#o1">retries</a> = atoi(optarg);
-00364             <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+00359                 fprintf(stderr, <span class="stringliteral">"Invalid timeout in seconds after -t flag.\n"</span>);
+00360                 <span class="keywordflow">return</span> (-1);
+00361             }
+00362             <span class="keywordflow">break</span>;
+00363 
+00364         <span class="keywordflow">case</span> <span class="charliteral">'r'</span>:
+00365             session-&gt;<a class="code" href="structsnmp__session.html#o1">retries</a> = atoi(optarg);
+00366             <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
 "structsnmp__session.html#o1">retries</a> &lt; 0 || !isdigit(optarg[0])) {
-00365                 fprintf(stderr, <span class="stringliteral">"Invalid number of retries after -r flag.\n"</span>);
-00366                 <span class="keywordflow">return</span> (-1);
-00367             }
-00368             <span class="keywordflow">break</span>;
-00369 
-00370         <span class="keywordflow">case</span> <span class="charliteral">'c'</span>:
-00371             <span class="keywordflow">if</span> (zero_sensitive) {
-00372                 <span class="keywordflow">if</span> ((sensitive[sp] = strdup(optarg)) != NULL) {
-00373                     Cpsz = sensitive[sp];
-00374                     memset(optarg, <span class="charliteral">'\0'</span>, strlen(optarg));
-00375                     sp++;
-00376                 } <span class="keywordflow">else</span> {
-00377                     fprintf(stderr, <span class="stringliteral">"malloc failure processing -c flag.\n"</span>);
-00378                     <span class="keywordflow">return</span> -1;
-00379                 }
-00380             } <span class="keywordflow">else</span> {
-00381                 Cpsz = optarg;
-00382             }
-00383             <span class="keywordflow">break</span>;
-00384 
-00385         <span class="keywordflow">case</span> <span class="charliteral">'3'</span>:
-00386             <span class="comment">/*  TODO: This needs to zero things too.  */</span>
-00387             <span class="keywordflow">if</span> (snmpv3_options(optarg, session, &amp;Apsz, &amp;Xpsz, argc, argv) &lt; 0){
-00388                 <span class="keywordflow">return</span> (-1);
-00389             }
-00390             <span class="keywordflow">break</span>;
-00391 
-00392         <span class="keywordflow">case</span> <span class="charliteral">'L'</span>:
-00393             <span class="keywordflow">if</span> (snmp_log_options(optarg, argc, argv) &lt; 0) {
-00394                 <span class="keywordflow">return</span> (-1);
-00395             }
-00396             logopt = 1;
-00397             <span class="keywordflow">break</span>;
-00398 
-00399 <span class="preprocessor">#define SNMPV3_CMD_OPTIONS</span>
-00400 <span class="preprocessor">#ifdef  SNMPV3_CMD_OPTIONS</span>
-00401         <span class="keywordflow">case</span> <span class="charliteral">'Z'</span>:
-00402             session-&gt;<a class="code" href="structsnmp__session.html#o23">engineBoots</a> = strtoul(optarg, NULL, 10);
-00403             <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+00367                 fprintf(stderr, <span class="stringliteral">"Invalid number of retries after -r flag.\n"</span>);
+00368                 <span class="keywordflow">return</span> (-1);
+00369             }
+00370             <span class="keywordflow">break</span>;
+00371 
+00372         <span class="keywordflow">case</span> <span class="charliteral">'c'</span>:
+00373             <span class="keywordflow">if</span> (zero_sensitive) {
+00374                 <span class="keywordflow">if</span> ((sensitive[sp] = strdup(optarg)) != NULL) {
+00375                     Cpsz = sensitive[sp];
+00376                     memset(optarg, <span class="charliteral">'\0'</span>, strlen(optarg));
+00377                     sp++;
+00378                 } <span class="keywordflow">else</span> {
+00379                     fprintf(stderr, <span class="stringliteral">"malloc failure processing -c flag.\n"</span>);
+00380                     <span class="keywordflow">return</span> -1;
+00381                 }
+00382             } <span class="keywordflow">else</span> {
+00383                 Cpsz = optarg;
+00384             }
+00385             <span class="keywordflow">break</span>;
+00386 
+00387         <span class="keywordflow">case</span> <span class="charliteral">'3'</span>:
+00388             <span class="comment">/*  TODO: This needs to zero things too.  */</span>
+00389             <span class="keywordflow">if</span> (snmpv3_options(optarg, session, &amp;Apsz, &amp;Xpsz, argc, argv) &lt; 0){
+00390                 <span class="keywordflow">return</span> (-1);
+00391             }
+00392             <span class="keywordflow">break</span>;
+00393 
+00394         <span class="keywordflow">case</span> <span class="charliteral">'L'</span>:
+00395             <span class="keywordflow">if</span> (snmp_log_options(optarg, argc, argv) &lt; 0) {
+00396                 <span class="keywordflow">return</span> (-1);
+00397             }
+00398             logopt = 1;
+00399             <span class="keywordflow">break</span>;
+00400 
+00401 <span class="preprocessor">#define SNMPV3_CMD_OPTIONS</span>
+00402 <span class="preprocessor">#ifdef  SNMPV3_CMD_OPTIONS</span>
+00403         <span class="keywordflow">case</span> <span class="charliteral">'Z'</span>:
+00404             session-&gt;<a class="code" href="structsnmp__session.html#o23">engineBoots</a> = strtoul(optarg, NULL, 10);
+00405             <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
 "structsnmp__session.html#o23">engineBoots</a> == 0 || !isdigit(optarg[0])) {
-00404                 fprintf(stderr, <span class="stringliteral">"Need engine boots value after -Z flag.\n"</span>);
-00405                 <span class="keywordflow">return</span> (-1);
-00406             }
-00407             cp = strchr(optarg, <span class="charliteral">','</span>);
-00408             <span class="keywordflow">if</span> (cp &amp;&amp; *(++cp) &amp;&amp; isdigit(*cp))
-00409                 session-&gt;<a class="code" href="structsnmp__session.html#o24">engineTime</a> = strtoul(cp, NULL, 10);
-00410             <span class="comment">/*</span>
-00411 <span class="comment">             * Handle previous '-Z boot time' syntax </span>
-00412 <span class="comment">             */</span>
-00413             <span class="keywordflow">else</span> <span class=
+00406                 fprintf(stderr, <span class="stringliteral">"Need engine boots value after -Z flag.\n"</span>);
+00407                 <span class="keywordflow">return</span> (-1);
+00408             }
+00409             cp = strchr(optarg, <span class="charliteral">','</span>);
+00410             <span class="keywordflow">if</span> (cp &amp;&amp; *(++cp) &amp;&amp; isdigit(*cp))
+00411                 session-&gt;<a class="code" href="structsnmp__session.html#o24">engineTime</a> = strtoul(cp, NULL, 10);
+00412             <span class="comment">/*</span>
+00413 <span class="comment">             * Handle previous '-Z boot time' syntax </span>
+00414 <span class="comment">             */</span>
+00415             <span class="keywordflow">else</span> <span class=
 "keywordflow">if</span> ((optind &lt; argc) &amp;&amp; isdigit(argv[optind][0]))
-00414                 session-&gt;<a class="code" href=
+00416                 session-&gt;<a class="code" href=
 "structsnmp__session.html#o24">engineTime</a> = strtoul(argv[optind], NULL, 10);
-00415             <span class="keywordflow">else</span> {
-00416                 fprintf(stderr, <span class="stringliteral">"Need engine time value after -Z flag.\n"</span>);
-00417                 <span class="keywordflow">return</span> (-1);
-00418             }
-00419             <span class="keywordflow">break</span>;
-00420 
-00421         <span class="keywordflow">case</span> <span class="charliteral">'e'</span>:{
-00422                 size_t ebuf_len = 32, eout_len = 0;
-00423                 u_char *ebuf = (u_char *)malloc(ebuf_len);
-00424 
-00425                 <span class="keywordflow">if</span> (ebuf == NULL) {
-00426                     fprintf(stderr, <span class="stringliteral">"malloc failure processing -e flag.\n"</span>);
-00427                     <span class="keywordflow">return</span> (-1);
-00428                 }
-00429                 <span class="keywordflow">if</span> (!<a class="code" href="group__util.html#ga8">snmp_hex_to_binary</a>
-00430                     (&amp;ebuf, &amp;ebuf_len, &amp;eout_len, 1, optarg)) {
-00431                     fprintf(stderr, <span class="stringliteral">"Bad engine ID value after -e flag.\n"</span>);
-00432                     free(ebuf);
-00433                     <span class="keywordflow">return</span> (-1);
-00434                 }
-00435                 session-&gt;<a class="code" href="structsnmp__session.html#o27">securityEngineID</a> = ebuf;
-00436                 session-&gt;<a class="code" href="structsnmp__session.html#o28">securityEngineIDLen</a> = eout_len;
-00437                 <span class="keywordflow">break</span>;
-00438             }
-00439 
-00440         <span class="keywordflow">case</span> <span class="charliteral">'E'</span>:{
-00441                 size_t ebuf_len = 32, eout_len = 0;
-00442                 u_char *ebuf = (u_char *)malloc(ebuf_len);
-00443 
-00444                 <span class="keywordflow">if</span> (ebuf == NULL) {
-00445                     fprintf(stderr, <span class="stringliteral">"malloc failure processing -E flag.\n"</span>);
-00446                     <span class="keywordflow">return</span> (-1);
-00447                 }
-00448                 <span class="keywordflow">if</span> (!<a class="code" href=
+00417             <span class="keywordflow">else</span> {
+00418                 fprintf(stderr, <span class="stringliteral">"Need engine time value after -Z flag.\n"</span>);
+00419                 <span class="keywordflow">return</span> (-1);
+00420             }
+00421             <span class="keywordflow">break</span>;
+00422 
+00423         <span class="keywordflow">case</span> <span class="charliteral">'e'</span>:{
+00424                 size_t ebuf_len = 32, eout_len = 0;
+00425                 u_char *ebuf = (u_char *)malloc(ebuf_len);
+00426 
+00427                 <span class="keywordflow">if</span> (ebuf == NULL) {
+00428                     fprintf(stderr, <span class="stringliteral">"malloc failure processing -e flag.\n"</span>);
+00429                     <span class="keywordflow">return</span> (-1);
+00430                 }
+00431                 <span class="keywordflow">if</span> (!<a class="code" href="group__util.html#ga8">snmp_hex_to_binary</a>
+00432                     (&amp;ebuf, &amp;ebuf_len, &amp;eout_len, 1, optarg)) {
+00433                     fprintf(stderr, <span class="stringliteral">"Bad engine ID value after -e flag.\n"</span>);
+00434                     free(ebuf);
+00435                     <span class="keywordflow">return</span> (-1);
+00436                 }
+00437                 session-&gt;<a class="code" href="structsnmp__session.html#o27">securityEngineID</a> = ebuf;
+00438                 session-&gt;<a class="code" href="structsnmp__session.html#o28">securityEngineIDLen</a> = eout_len;
+00439                 <span class="keywordflow">break</span>;
+00440             }
+00441 
+00442         <span class="keywordflow">case</span> <span class="charliteral">'E'</span>:{
+00443                 size_t ebuf_len = 32, eout_len = 0;
+00444                 u_char *ebuf = (u_char *)malloc(ebuf_len);
+00445 
+00446                 <span class="keywordflow">if</span> (ebuf == NULL) {
+00447                     fprintf(stderr, <span class="stringliteral">"malloc failure processing -E flag.\n"</span>);
+00448                     <span class="keywordflow">return</span> (-1);
+00449                 }
+00450                 <span class="keywordflow">if</span> (!<a class="code" href=
 "group__util.html#ga8">snmp_hex_to_binary</a>(&amp;ebuf, &amp;ebuf_len,
-00449                                         &amp;eout_len, 1, optarg)) {
-00450                     fprintf(stderr, <span class="stringliteral">"Bad engine ID value after -E flag.\n"</span>);
-00451                     free(ebuf);
-00452                     <span class="keywordflow">return</span> (-1);
-00453                 }
-00454                 session-&gt;<a class="code" href="structsnmp__session.html#o21">contextEngineID</a> = ebuf;
-00455                 session-&gt;<a class="code" href="structsnmp__session.html#o22">contextEngineIDLen</a> = eout_len;
-00456                 <span class="keywordflow">break</span>;
-00457             }
-00458 
-00459         <span class="keywordflow">case</span> <span class="charliteral">'n'</span>:
-00460             session-&gt;<a class="code" href="structsnmp__session.html#o25">contextName</a> = optarg;
-00461             session-&gt;<a class="code" href="structsnmp__session.html#o26">contextNameLen</a> = strlen(optarg);
-00462             <span class="keywordflow">break</span>;
-00463 
-00464         <span class="keywordflow">case</span> <span class="charliteral">'u'</span>:
-00465             <span class="keywordflow">if</span> (zero_sensitive) {
-00466                 <span class="keywordflow">if</span> ((sensitive[sp] = strdup(optarg)) != NULL) {
-00467                     session-&gt;<a class="code" href="structsnmp__session.html#o29">securityName</a> = sensitive[sp];
-00468                     session-&gt;<a class="code" href=
+00451                                         &amp;eout_len, 1, optarg)) {
+00452                     fprintf(stderr, <span class="stringliteral">"Bad engine ID value after -E flag.\n"</span>);
+00453                     free(ebuf);
+00454                     <span class="keywordflow">return</span> (-1);
+00455                 }
+00456                 session-&gt;<a class="code" href="structsnmp__session.html#o21">contextEngineID</a> = ebuf;
+00457                 session-&gt;<a class="code" href="structsnmp__session.html#o22">contextEngineIDLen</a> = eout_len;
+00458                 <span class="keywordflow">break</span>;
+00459             }
+00460 
+00461         <span class="keywordflow">case</span> <span class="charliteral">'n'</span>:
+00462             session-&gt;<a class="code" href="structsnmp__session.html#o25">contextName</a> = optarg;
+00463             session-&gt;<a class="code" href="structsnmp__session.html#o26">contextNameLen</a> = strlen(optarg);
+00464             <span class="keywordflow">break</span>;
+00465 
+00466         <span class="keywordflow">case</span> <span class="charliteral">'u'</span>:
+00467             <span class="keywordflow">if</span> (zero_sensitive) {
+00468                 <span class="keywordflow">if</span> ((sensitive[sp] = strdup(optarg)) != NULL) {
+00469                     session-&gt;<a class="code" href="structsnmp__session.html#o29">securityName</a> = sensitive[sp];
+00470                     session-&gt;<a class="code" href=
 "structsnmp__session.html#o30">securityNameLen</a> = strlen(sensitive[sp]);
-00469                     memset(optarg, <span class="charliteral">'\0'</span>, strlen(optarg));
-00470                     sp++;
-00471                 } <span class="keywordflow">else</span> {
-00472                     fprintf(stderr, <span class="stringliteral">"malloc failure processing -u flag.\n"</span>);
-00473                     <span class="keywordflow">return</span> -1;
-00474                 }
-00475             } <span class="keywordflow">else</span> {
-00476                 session-&gt;<a class="code" href="structsnmp__session.html#o29">securityName</a> = optarg;
-00477                 session-&gt;<a class="code" href="structsnmp__session.html#o30">securityNameLen</a> = strlen(optarg);
-00478             }
-00479             <span class="keywordflow">break</span>;
-00480 
-00481         <span class="keywordflow">case</span> <span class="charliteral">'l'</span>:
-00482             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class=
+00471                     memset(optarg, <span class="charliteral">'\0'</span>, strlen(optarg));
+00472                     sp++;
+00473                 } <span class="keywordflow">else</span> {
+00474                     fprintf(stderr, <span class="stringliteral">"malloc failure processing -u flag.\n"</span>);
+00475                     <span class="keywordflow">return</span> -1;
+00476                 }
+00477             } <span class="keywordflow">else</span> {
+00478                 session-&gt;<a class="code" href="structsnmp__session.html#o29">securityName</a> = optarg;
+00479                 session-&gt;<a class="code" href="structsnmp__session.html#o30">securityNameLen</a> = strlen(optarg);
+00480             }
+00481             <span class="keywordflow">break</span>;
+00482 
+00483         <span class="keywordflow">case</span> <span class="charliteral">'l'</span>:
+00484             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class=
 "stringliteral">"noAuthNoPriv"</span>) || !strcmp(optarg, <span class="stringliteral">"1"</span>)
-00483                 || !strcasecmp(optarg, <span class="stringliteral">"noauth"</span>)
-00484                 || !strcasecmp(optarg, <span class="stringliteral">"nanp"</span>)) {
-00485                 session-&gt;<a class="code" href="structsnmp__session.html#o44">securityLevel</a> = SNMP_SEC_LEVEL_NOAUTH;
-00486             } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class=
+00485                 || !strcasecmp(optarg, <span class="stringliteral">"noauth"</span>)
+00486                 || !strcasecmp(optarg, <span class="stringliteral">"nanp"</span>)) {
+00487                 session-&gt;<a class="code" href="structsnmp__session.html#o44">securityLevel</a> = SNMP_SEC_LEVEL_NOAUTH;
+00488             } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class=
 "stringliteral">"authNoPriv"</span>)
-00487                        || !strcmp(optarg, <span class="stringliteral">"2"</span>)
-00488                        || !strcasecmp(optarg, <span class="stringliteral">"auth"</span>)
-00489                        || !strcasecmp(optarg, <span class="stringliteral">"anp"</span>)) {
-00490                 session-&gt;<a class="code" href=
+00489                        || !strcmp(optarg, <span class="stringliteral">"2"</span>)
+00490                        || !strcasecmp(optarg, <span class="stringliteral">"auth"</span>)
+00491                        || !strcasecmp(optarg, <span class="stringliteral">"anp"</span>)) {
+00492                 session-&gt;<a class="code" href=
 "structsnmp__session.html#o44">securityLevel</a> = SNMP_SEC_LEVEL_AUTHNOPRIV;
-00491             } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class=
+00493             } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class=
 "stringliteral">"authPriv"</span>)
-00492                        || !strcmp(optarg, <span class="stringliteral">"3"</span>)
-00493                        || !strcasecmp(optarg, <span class="stringliteral">"priv"</span>)
-00494                        || !strcasecmp(optarg, <span class="stringliteral">"ap"</span>)) {
-00495                 session-&gt;<a class="code" href=
+00494                        || !strcmp(optarg, <span class="stringliteral">"3"</span>)
+00495                        || !strcasecmp(optarg, <span class="stringliteral">"priv"</span>)
+00496                        || !strcasecmp(optarg, <span class="stringliteral">"ap"</span>)) {
+00497                 session-&gt;<a class="code" href=
 "structsnmp__session.html#o44">securityLevel</a> = SNMP_SEC_LEVEL_AUTHPRIV;
-00496             } <span class="keywordflow">else</span> {
-00497                 fprintf(stderr,
-00498                         <span class="stringliteral">"Invalid security level specified after -l flag: %s\n"</span>,
-00499                         optarg);
-00500                 <span class="keywordflow">return</span> (-1);
-00501             }
-00502 
-00503             <span class="keywordflow">break</span>;
+00498             } <span class="keywordflow">else</span> {
+00499                 fprintf(stderr,
+00500                         <span class="stringliteral">"Invalid security level specified after -l flag: %s\n"</span>,
+00501                         optarg);
+00502                 <span class="keywordflow">return</span> (-1);
+00503             }
 00504 
-00505         <span class="keywordflow">case</span> <span class="charliteral">'a'</span>:
-00506 <span class="preprocessor">#ifndef DISABLE_MD5</span>
-00507             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"MD5"</span>)) {
-00508                 session-&gt;<a class="code" href=
+00505             <span class="keywordflow">break</span>;
+00506 
+00507         <span class="keywordflow">case</span> <span class="charliteral">'a'</span>:
+00508 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00509             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"MD5"</span>)) {
+00510                 session-&gt;<a class="code" href=
 "structsnmp__session.html#o31">securityAuthProto</a> = usmHMACMD5AuthProtocol;
-00509                 session-&gt;<a class="code" href=
+00511                 session-&gt;<a class="code" href=
 "structsnmp__session.html#o32">securityAuthProtoLen</a> = USM_AUTH_PROTO_MD5_LEN;
-00510             } <span class="keywordflow">else</span>
-00511 <span class="preprocessor">#endif</span>
-00512                 <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"SHA"</span>)) {
-00513                 session-&gt;<a class="code" href=
+00512             } <span class="keywordflow">else</span>
+00513 <span class="preprocessor">#endif</span>
+00514                 <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"SHA"</span>)) {
+00515                 session-&gt;<a class="code" href=
 "structsnmp__session.html#o31">securityAuthProto</a> = usmHMACSHA1AuthProtocol;
-00514                 session-&gt;<a class="code" href=
+00516                 session-&gt;<a class="code" href=
 "structsnmp__session.html#o32">securityAuthProtoLen</a> = USM_AUTH_PROTO_SHA_LEN;
-00515             } <span class="keywordflow">else</span> {
-00516                 fprintf(stderr,
-00517                         <span class="stringliteral">"Invalid authentication protocol specified after -a flag: %s\n"</span>,
-00518                         optarg);
-00519                 <span class="keywordflow">return</span> (-1);
-00520             }
-00521             <span class="keywordflow">break</span>;
-00522 
-00523         <span class="keywordflow">case</span> <span class="charliteral">'x'</span>:
-00524             testcase = 0;
-00525 <span class="preprocessor">#ifndef DISABLE_DES</span>
-00526             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"DES"</span>)) {
-00527                 testcase = 1;
-00528                 session-&gt;<a class="code" href="structsnmp__session.html#o37">securityPrivProto</a> = usmDESPrivProtocol;
-00529                 session-&gt;<a class="code" href=
+00517             } <span class="keywordflow">else</span> {
+00518                 fprintf(stderr,
+00519                         <span class="stringliteral">"Invalid authentication protocol specified after -a flag: %s\n"</span>,
+00520                         optarg);
+00521                 <span class="keywordflow">return</span> (-1);
+00522             }
+00523             <span class="keywordflow">break</span>;
+00524 
+00525         <span class="keywordflow">case</span> <span class="charliteral">'x'</span>:
+00526             testcase = 0;
+00527 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00528             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"DES"</span>)) {
+00529                 testcase = 1;
+00530                 session-&gt;<a class="code" href="structsnmp__session.html#o37">securityPrivProto</a> = usmDESPrivProtocol;
+00531                 session-&gt;<a class="code" href=
 "structsnmp__session.html#o38">securityPrivProtoLen</a> = USM_PRIV_PROTO_DES_LEN;
-00530             }
-00531 <span class="preprocessor">#endif</span>
-00532 <span class="preprocessor">#ifdef HAVE_AES</span>
-00533             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"AES128"</span>) ||
-00534                 !strcasecmp(optarg, <span class="stringliteral">"AES"</span>)) {
-00535                 testcase = 1;
-00536                 session-&gt;<a class="code" href="structsnmp__session.html#o37">securityPrivProto</a> = usmAESPrivProtocol;
-00537                 session-&gt;<a class="code" href=
+00532             }
+00533 <span class="preprocessor">#endif</span>
+00534 <span class="preprocessor">#ifdef HAVE_AES</span>
+00535             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"AES128"</span>) ||
+00536                 !strcasecmp(optarg, <span class="stringliteral">"AES"</span>)) {
+00537                 testcase = 1;
+00538                 session-&gt;<a class="code" href="structsnmp__session.html#o37">securityPrivProto</a> = usmAESPrivProtocol;
+00539                 session-&gt;<a class="code" href=
 "structsnmp__session.html#o38">securityPrivProtoLen</a> = USM_PRIV_PROTO_AES_LEN;
-00538             }
-00539 <span class="preprocessor">#endif</span>
-00540             <span class="keywordflow">if</span> (testcase == 0) {
-00541                 fprintf(stderr,
-00542                       <span class="stringliteral">"Invalid privacy protocol specified after -x flag: %s\n"</span>,
-00543                         optarg);
-00544                 <span class="keywordflow">return</span> (-1);
-00545             }
-00546             <span class="keywordflow">break</span>;
-00547 
-00548         <span class="keywordflow">case</span> <span class="charliteral">'A'</span>:
-00549             <span class="keywordflow">if</span> (zero_sensitive) {
-00550                 <span class="keywordflow">if</span> ((sensitive[sp] = strdup(optarg)) != NULL) {
-00551                     Apsz = sensitive[sp];
-00552                     memset(optarg, <span class="charliteral">'\0'</span>, strlen(optarg));
-00553                     sp++;
-00554                 } <span class="keywordflow">else</span> {
-00555                     fprintf(stderr, <span class="stringliteral">"malloc failure processing -A flag.\n"</span>);
-00556                     <span class="keywordflow">return</span> -1;
-00557                 }
-00558             } <span class="keywordflow">else</span> {
-00559                 Apsz = optarg;
-00560             }
-00561             <span class="keywordflow">break</span>;
-00562 
-00563         <span class="keywordflow">case</span> <span class="charliteral">'X'</span>:
-00564             <span class="keywordflow">if</span> (zero_sensitive) {
-00565                 <span class="keywordflow">if</span> ((sensitive[sp] = strdup(optarg)) != NULL) {
-00566                     Xpsz = sensitive[sp];
-00567                     memset(optarg, <span class="charliteral">'\0'</span>, strlen(optarg));
-00568                     sp++;
-00569                 } <span class="keywordflow">else</span> {
-00570                     fprintf(stderr, <span class="stringliteral">"malloc failure processing -X flag.\n"</span>);
-00571                     <span class="keywordflow">return</span> -1;
-00572                 }
-00573             } <span class="keywordflow">else</span> {
-00574                 Xpsz = optarg;
-00575             }
-00576             <span class="keywordflow">break</span>;
-00577 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMPV3_CMD_OPTIONS */</span>
-00578 
-00579         <span class="keywordflow">case</span> <span class="charliteral">'?'</span>:
-00580             <span class="keywordflow">return</span> (-1);
-00581             <span class="keywordflow">break</span>;
-00582 
-00583         <span class="keywordflow">default</span>:
-00584             proc(argc, argv, arg);
-00585             <span class="keywordflow">break</span>;
-00586         }
-00587     }
-00588     DEBUGMSGTL((<span class="stringliteral">"snmp_parse_args"</span>, <span class=
+00540             }
+00541 <span class="preprocessor">#endif</span>
+00542             <span class="keywordflow">if</span> (testcase == 0) {
+00543                 fprintf(stderr,
+00544                       <span class="stringliteral">"Invalid privacy protocol specified after -x flag: %s\n"</span>,
+00545                         optarg);
+00546                 <span class="keywordflow">return</span> (-1);
+00547             }
+00548             <span class="keywordflow">break</span>;
+00549 
+00550         <span class="keywordflow">case</span> <span class="charliteral">'A'</span>:
+00551             <span class="keywordflow">if</span> (zero_sensitive) {
+00552                 <span class="keywordflow">if</span> ((sensitive[sp] = strdup(optarg)) != NULL) {
+00553                     Apsz = sensitive[sp];
+00554                     memset(optarg, <span class="charliteral">'\0'</span>, strlen(optarg));
+00555                     sp++;
+00556                 } <span class="keywordflow">else</span> {
+00557                     fprintf(stderr, <span class="stringliteral">"malloc failure processing -A flag.\n"</span>);
+00558                     <span class="keywordflow">return</span> -1;
+00559                 }
+00560             } <span class="keywordflow">else</span> {
+00561                 Apsz = optarg;
+00562             }
+00563             <span class="keywordflow">break</span>;
+00564 
+00565         <span class="keywordflow">case</span> <span class="charliteral">'X'</span>:
+00566             <span class="keywordflow">if</span> (zero_sensitive) {
+00567                 <span class="keywordflow">if</span> ((sensitive[sp] = strdup(optarg)) != NULL) {
+00568                     Xpsz = sensitive[sp];
+00569                     memset(optarg, <span class="charliteral">'\0'</span>, strlen(optarg));
+00570                     sp++;
+00571                 } <span class="keywordflow">else</span> {
+00572                     fprintf(stderr, <span class="stringliteral">"malloc failure processing -X flag.\n"</span>);
+00573                     <span class="keywordflow">return</span> -1;
+00574                 }
+00575             } <span class="keywordflow">else</span> {
+00576                 Xpsz = optarg;
+00577             }
+00578             <span class="keywordflow">break</span>;
+00579 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMPV3_CMD_OPTIONS */</span>
+00580 
+00581         <span class="keywordflow">case</span> <span class="charliteral">'?'</span>:
+00582             <span class="keywordflow">return</span> (-1);
+00583             <span class="keywordflow">break</span>;
+00584 
+00585         <span class="keywordflow">default</span>:
+00586             proc(argc, argv, arg);
+00587             <span class="keywordflow">break</span>;
+00588         }
+00589     }
+00590     DEBUGMSGTL((<span class="stringliteral">"snmp_parse_args"</span>, <span class=
 "stringliteral">"finished: %d/%d\n"</span>, optind, argc));
-00589     
-00590     <span class="keywordflow">if</span> (!logopt)
-00591         snmp_enable_stderrlog();
-00592 
-00593     <span class="comment">/*</span>
-00594 <span class="comment">     * read in MIB database and initialize the snmp library</span>
-00595 <span class="comment">     */</span>
-00596     <a class="code" href="group__library.html#ga51">init_snmp</a>(<span class="stringliteral">"snmpapp"</span>);
-00597 
-00598     <span class="comment">/*</span>
-00599 <span class="comment">     * session default version </span>
-00600 <span class="comment">     */</span>
-00601     <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+00591     
+00592     <span class="keywordflow">if</span> (!logopt)
+00593         snmp_enable_stderrlog();
+00594 
+00595     <span class="comment">/*</span>
+00596 <span class="comment">     * read in MIB database and initialize the snmp library</span>
+00597 <span class="comment">     */</span>
+00598     <a class="code" href="group__library.html#ga56">init_snmp</a>(<span class="stringliteral">"snmpapp"</span>);
+00599 
+00600     <span class="comment">/*</span>
+00601 <span class="comment">     * session default version </span>
+00602 <span class="comment">     */</span>
+00603     <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
 "structsnmp__session.html#o0">version</a> == SNMP_DEFAULT_VERSION) {
-00602         <span class="comment">/*</span>
-00603 <span class="comment">         * run time default version </span>
-00604 <span class="comment">         */</span>
-00605         session-&gt;<a class="code" href=
+00604         <span class="comment">/*</span>
+00605 <span class="comment">         * run time default version </span>
+00606 <span class="comment">         */</span>
+00607         session-&gt;<a class="code" href=
 "structsnmp__session.html#o0">version</a> = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
-00606                                               NETSNMP_DS_LIB_SNMPVERSION);
-00607 
-00608         <span class="comment">/*</span>
-00609 <span class="comment">         * compile time default version </span>
-00610 <span class="comment">         */</span>
-00611         <span class="keywordflow">if</span> (!session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a>) {
-00612             <span class="keywordflow">switch</span> (DEFAULT_SNMP_VERSION) {
-00613 <span class="preprocessor">#ifndef DISABLE_SNMPV1</span>
-00614             <span class="keywordflow">case</span> 1:
-00615                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_1;
-00616                 <span class="keywordflow">break</span>;
-00617 <span class="preprocessor">#endif</span>
-00618 
-00619 <span class="preprocessor">#ifndef DISABLE_SNMPV2C</span>
-00620             <span class="keywordflow">case</span> 2:
-00621                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_2c;
-00622                 <span class="keywordflow">break</span>;
-00623 <span class="preprocessor">#endif</span>
-00624 
-00625             <span class="keywordflow">case</span> 3:
-00626                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_3;
-00627                 <span class="keywordflow">break</span>;
-00628 
-00629             <span class="keywordflow">default</span>:
-00630                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00608                                               NETSNMP_DS_LIB_SNMPVERSION);
+00609 
+00610         <span class="comment">/*</span>
+00611 <span class="comment">         * compile time default version </span>
+00612 <span class="comment">         */</span>
+00613         <span class="keywordflow">if</span> (!session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a>) {
+00614             <span class="keywordflow">switch</span> (DEFAULT_SNMP_VERSION) {
+00615 <span class="preprocessor">#ifndef DISABLE_SNMPV1</span>
+00616             <span class="keywordflow">case</span> 1:
+00617                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_1;
+00618                 <span class="keywordflow">break</span>;
+00619 <span class="preprocessor">#endif</span>
+00620 
+00621 <span class="preprocessor">#ifndef DISABLE_SNMPV2C</span>
+00622             <span class="keywordflow">case</span> 2:
+00623                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_2c;
+00624                 <span class="keywordflow">break</span>;
+00625 <span class="preprocessor">#endif</span>
+00626 
+00627             <span class="keywordflow">case</span> 3:
+00628                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_3;
+00629                 <span class="keywordflow">break</span>;
+00630 
+00631             <span class="keywordflow">default</span>:
+00632                 <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"Can't determine a valid SNMP version for the session\n"</span>);
-00631                 <span class="keywordflow">return</span>(-2);
-00632             }
-00633         } <span class="keywordflow">else</span> {
-00634 <span class="preprocessor">#ifndef DISABLE_SNMPV1</span>
-00635             <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+00633                 <span class="keywordflow">return</span>(-2);
+00634             }
+00635         } <span class="keywordflow">else</span> {
+00636 <span class="preprocessor">#ifndef DISABLE_SNMPV1</span>
+00637             <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
 "structsnmp__session.html#o0">version</a> == NETSNMP_DS_SNMP_VERSION_1)  <span class=
 "comment">/* bogus value.  version 1 actually = 0 */</span>
-00636                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_1;
-00637 <span class="preprocessor">#endif</span>
-00638         }
-00639     }
-00640 
-00641     <span class="comment">/*</span>
-00642 <span class="comment">     * make master key from pass phrases </span>
-00643 <span class="comment">     */</span>
-00644     <span class="keywordflow">if</span> (Apsz) {
-00645         session-&gt;<a class="code" href="structsnmp__session.html#o34">securityAuthKeyLen</a> = USM_AUTH_KU_LEN;
-00646         <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+00638                 session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_VERSION_1;
+00639 <span class="preprocessor">#endif</span>
+00640         }
+00641     }
+00642 
+00643     <span class="comment">/*</span>
+00644 <span class="comment">     * make master key from pass phrases </span>
+00645 <span class="comment">     */</span>
+00646     <span class="keywordflow">if</span> (Apsz) {
+00647         session-&gt;<a class="code" href="structsnmp__session.html#o34">securityAuthKeyLen</a> = USM_AUTH_KU_LEN;
+00648         <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
 "structsnmp__session.html#o31">securityAuthProto</a> == NULL) {
-00647             <span class="comment">/*</span>
-00648 <span class="comment">             * get .conf set default </span>
-00649 <span class="comment">             */</span>
-00650             <span class="keyword">const</span> oid      *def =
-00651                 get_default_authtype(&amp;session-&gt;<a class="code" href=
+00649             <span class="comment">/*</span>
+00650 <span class="comment">             * get .conf set default </span>
+00651 <span class="comment">             */</span>
+00652             <span class="keyword">const</span> oid      *def =
+00653                 get_default_authtype(&amp;session-&gt;<a class="code" href=
 "structsnmp__session.html#o32">securityAuthProtoLen</a>);
-00652             session-&gt;<a class="code" href="structsnmp__session.html#o31">securityAuthProto</a> =
-00653                 snmp_duplicate_objid(def, session-&gt;<a class="code" href=
+00654             session-&gt;<a class="code" href="structsnmp__session.html#o31">securityAuthProto</a> =
+00655                 snmp_duplicate_objid(def, session-&gt;<a class="code" href=
 "structsnmp__session.html#o32">securityAuthProtoLen</a>);
-00654         }
-00655         <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+00656         }
+00657         <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
 "structsnmp__session.html#o31">securityAuthProto</a> == NULL) {
-00656 <span class="preprocessor">#ifndef DISABLE_MD5</span>
-00657             <span class="comment">/*</span>
-00658 <span class="comment">             * assume MD5</span>
-00659 <span class="comment">             */</span>
-00660             session-&gt;<a class="code" href="structsnmp__session.html#o31">securityAuthProto</a> =
-00661                 snmp_duplicate_objid(usmHMACMD5AuthProtocol,
-00662                                      USM_AUTH_PROTO_MD5_LEN);
-00663             session-&gt;<a class="code" href=
+00658 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00659             <span class="comment">/*</span>
+00660 <span class="comment">             * assume MD5</span>
+00661 <span class="comment">             */</span>
+00662             session-&gt;<a class="code" href="structsnmp__session.html#o31">securityAuthProto</a> =
+00663                 snmp_duplicate_objid(usmHMACMD5AuthProtocol,
+00664                                      USM_AUTH_PROTO_MD5_LEN);
+00665             session-&gt;<a class="code" href=
 "structsnmp__session.html#o32">securityAuthProtoLen</a> = USM_AUTH_PROTO_MD5_LEN;
-00664 <span class="preprocessor">#else</span>
-00665             session-&gt;<a class="code" href="structsnmp__session.html#o31">securityAuthProto</a> =
-00666                 snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
-00667                                      USM_AUTH_PROTO_SHA_LEN);
-00668             session-&gt;<a class="code" href=
+00666 <span class="preprocessor">#else</span>
+00667             session-&gt;<a class="code" href="structsnmp__session.html#o31">securityAuthProto</a> =
+00668                 snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
+00669                                      USM_AUTH_PROTO_SHA_LEN);
+00670             session-&gt;<a class="code" href=
 "structsnmp__session.html#o32">securityAuthProtoLen</a> = USM_AUTH_PROTO_SHA_LEN;
-00669 <span class="preprocessor">#endif</span>
-00670         }
-00671         <span class="keywordflow">if</span> (generate_Ku(session-&gt;<a class="code" href=
+00671 <span class="preprocessor">#endif</span>
+00672         }
+00673         <span class="keywordflow">if</span> (generate_Ku(session-&gt;<a class="code" href=
 "structsnmp__session.html#o31">securityAuthProto</a>,
-00672                         session-&gt;<a class="code" href="structsnmp__session.html#o32">securityAuthProtoLen</a>,
-00673                         (u_char *) Apsz, strlen(Apsz),
-00674                         session-&gt;<a class="code" href="structsnmp__session.html#o33">securityAuthKey</a>,
-00675                         &amp;session-&gt;<a class="code" href=
+00674                         session-&gt;<a class="code" href="structsnmp__session.html#o32">securityAuthProtoLen</a>,
+00675                         (u_char *) Apsz, strlen(Apsz),
+00676                         session-&gt;<a class="code" href="structsnmp__session.html#o33">securityAuthKey</a>,
+00677                         &amp;session-&gt;<a class="code" href=
 "structsnmp__session.html#o34">securityAuthKeyLen</a>) != SNMPERR_SUCCESS) {
-00676             snmp_perror(argv[0]);
-00677             fprintf(stderr,
-00678                     <span class=
+00678             snmp_perror(argv[0]);
+00679             fprintf(stderr,
+00680                     <span class=
 "stringliteral">"Error generating a key (Ku) from the supplied authentication pass phrase. \n"</span>);
-00679             <span class="keywordflow">return</span> (-2);
-00680         }
-00681     }
-00682     <span class="keywordflow">if</span> (Xpsz) {
-00683         session-&gt;<a class="code" href="structsnmp__session.html#o40">securityPrivKeyLen</a> = USM_PRIV_KU_LEN;
-00684         <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+00681             <span class="keywordflow">return</span> (-2);
+00682         }
+00683     }
+00684     <span class="keywordflow">if</span> (Xpsz) {
+00685         session-&gt;<a class="code" href="structsnmp__session.html#o40">securityPrivKeyLen</a> = USM_PRIV_KU_LEN;
+00686         <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
 "structsnmp__session.html#o37">securityPrivProto</a> == NULL) {
-00685             <span class="comment">/*</span>
-00686 <span class="comment">             * get .conf set default </span>
-00687 <span class="comment">             */</span>
-00688             <span class="keyword">const</span> oid      *def =
-00689                 get_default_privtype(&amp;session-&gt;<a class="code" href=
+00687             <span class="comment">/*</span>
+00688 <span class="comment">             * get .conf set default </span>
+00689 <span class="comment">             */</span>
+00690             <span class="keyword">const</span> oid      *def =
+00691                 get_default_privtype(&amp;session-&gt;<a class="code" href=
 "structsnmp__session.html#o38">securityPrivProtoLen</a>);
-00690             session-&gt;<a class="code" href="structsnmp__session.html#o37">securityPrivProto</a> =
-00691                 snmp_duplicate_objid(def, session-&gt;<a class="code" href=
+00692             session-&gt;<a class="code" href="structsnmp__session.html#o37">securityPrivProto</a> =
+00693                 snmp_duplicate_objid(def, session-&gt;<a class="code" href=
 "structsnmp__session.html#o38">securityPrivProtoLen</a>);
-00692         }
-00693         <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+00694         }
+00695         <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
 "structsnmp__session.html#o37">securityPrivProto</a> == NULL) {
-00694             <span class="comment">/*</span>
-00695 <span class="comment">             * assume DES </span>
-00696 <span class="comment">             */</span>
-00697 <span class="preprocessor">#ifndef DISABLE_DES</span>
-00698             session-&gt;<a class="code" href="structsnmp__session.html#o37">securityPrivProto</a> =
-00699                 snmp_duplicate_objid(usmDESPrivProtocol,
-00700                                      USM_PRIV_PROTO_DES_LEN);
-00701             session-&gt;<a class="code" href=
+00696             <span class="comment">/*</span>
+00697 <span class="comment">             * assume DES </span>
+00698 <span class="comment">             */</span>
+00699 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00700             session-&gt;<a class="code" href="structsnmp__session.html#o37">securityPrivProto</a> =
+00701                 snmp_duplicate_objid(usmDESPrivProtocol,
+00702                                      USM_PRIV_PROTO_DES_LEN);
+00703             session-&gt;<a class="code" href=
 "structsnmp__session.html#o38">securityPrivProtoLen</a> = USM_PRIV_PROTO_DES_LEN;
-00702 <span class="preprocessor">#else</span>
-00703             session-&gt;<a class="code" href="structsnmp__session.html#o37">securityPrivProto</a> =
-00704                 snmp_duplicate_objid(usmAESPrivProtocol,
-00705                                      USM_PRIV_PROTO_AES_LEN);
-00706             session-&gt;<a class="code" href=
+00704 <span class="preprocessor">#else</span>
+00705             session-&gt;<a class="code" href="structsnmp__session.html#o37">securityPrivProto</a> =
+00706                 snmp_duplicate_objid(usmAESPrivProtocol,
+00707                                      USM_PRIV_PROTO_AES_LEN);
+00708             session-&gt;<a class="code" href=
 "structsnmp__session.html#o38">securityPrivProtoLen</a> = USM_PRIV_PROTO_AES_LEN;
-00707 <span class="preprocessor">#endif</span>
-00708 
-00709         }
-00710         <span class="keywordflow">if</span> (generate_Ku(session-&gt;<a class="code" href=
+00709 <span class="preprocessor">#endif</span>
+00710 
+00711         }
+00712         <span class="keywordflow">if</span> (generate_Ku(session-&gt;<a class="code" href=
 "structsnmp__session.html#o31">securityAuthProto</a>,
-00711                         session-&gt;<a class="code" href="structsnmp__session.html#o32">securityAuthProtoLen</a>,
-00712                         (u_char *) Xpsz, strlen(Xpsz),
-00713                         session-&gt;<a class="code" href="structsnmp__session.html#o39">securityPrivKey</a>,
-00714                         &amp;session-&gt;<a class="code" href=
+00713                         session-&gt;<a class="code" href="structsnmp__session.html#o32">securityAuthProtoLen</a>,
+00714                         (u_char *) Xpsz, strlen(Xpsz),
+00715                         session-&gt;<a class="code" href="structsnmp__session.html#o39">securityPrivKey</a>,
+00716                         &amp;session-&gt;<a class="code" href=
 "structsnmp__session.html#o40">securityPrivKeyLen</a>) != SNMPERR_SUCCESS) {
-00715             snmp_perror(argv[0]);
-00716             fprintf(stderr,
-00717                     <span class=
+00717             snmp_perror(argv[0]);
+00718             fprintf(stderr,
+00719                     <span class=
 "stringliteral">"Error generating a key (Ku) from the supplied privacy pass phrase. \n"</span>);
-00718             <span class="keywordflow">return</span> (-2);
-00719         }
-00720     }
-00721     <span class="comment">/*</span>
-00722 <span class="comment">     * get the hostname </span>
-00723 <span class="comment">     */</span>
-00724     <span class="keywordflow">if</span> (optind == argc) {
-00725         fprintf(stderr, <span class="stringliteral">"No hostname specified.\n"</span>);
-00726         <span class="keywordflow">return</span> (-1);
-00727     }
-00728     session-&gt;<a class="code" href="structsnmp__session.html#o6">peername</a> = argv[optind++]; <span class=
+00720             <span class="keywordflow">return</span> (-2);
+00721         }
+00722     }
+00723     <span class="comment">/*</span>
+00724 <span class="comment">     * get the hostname </span>
+00725 <span class="comment">     */</span>
+00726     <span class="keywordflow">if</span> (optind == argc) {
+00727         fprintf(stderr, <span class="stringliteral">"No hostname specified.\n"</span>);
+00728         <span class="keywordflow">return</span> (-1);
+00729     }
+00730     session-&gt;<a class="code" href="structsnmp__session.html#o6">peername</a> = argv[optind++]; <span class=
 "comment">/* hostname */</span>
-00729 
-00730 <span class="preprocessor">#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)</span>
-00731     <span class="comment">/*</span>
-00732 <span class="comment">     * If v1 or v2c, check community has been set, either by a -c option above,</span>
-00733 <span class="comment">     * or via a default token somewhere.  </span>
-00734 <span class="comment">     * If neither, it will be taken from the incoming request PDU.</span>
-00735 <span class="comment">     */</span>
-00736 
-00737     <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+00731 
+00732 <span class="preprocessor">#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)</span>
+00733     <span class="comment">/*</span>
+00734 <span class="comment">     * If v1 or v2c, check community has been set, either by a -c option above,</span>
+00735 <span class="comment">     * or via a default token somewhere.  </span>
+00736 <span class="comment">     * If neither, it will be taken from the incoming request PDU.</span>
+00737 <span class="comment">     */</span>
+00738 
+00739 <span class="preprocessor">#if defined(DISABLE_SNMPV1)</span>
+00740     <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+"structsnmp__session.html#o0">version</a> == SNMP_VERSION_2c)
+00741 <span class="preprocessor">#else </span>
+00742 <span class="preprocessor">#if defined(DISABLE_SNMPV2C)</span>
+00743     <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+"structsnmp__session.html#o0">version</a> == SNMP_VERSION_1)
+00744 <span class="preprocessor">#else</span>
+00745     <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
 "structsnmp__session.html#o0">version</a> == SNMP_VERSION_1 ||
-00738         session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> == SNMP_VERSION_2c) {
-00739         <span class="keywordflow">if</span> (Cpsz == NULL) {
-00740             Cpsz = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-00741                                          NETSNMP_DS_LIB_COMMUNITY);
-00742             <span class="keywordflow">if</span> (Cpsz == NULL) {
-00743                 <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-00744                                            NETSNMP_DS_LIB_IGNORE_NO_COMMUNITY)){
-00745                     DEBUGMSGTL((<span class="stringliteral">"snmp_parse_args"</span>,
-00746                                 <span class="stringliteral">"ignoring that the community string is not present\n"</span>));
-00747                     session-&gt;<a class="code" href="structsnmp__session.html#o16">community</a> = NULL;
-00748                     session-&gt;<a class="code" href="structsnmp__session.html#o17">community_len</a> = 0;
-00749                 } <span class="keywordflow">else</span> {
-00750                     fprintf(stderr, <span class="stringliteral">"No community name specified.\n"</span>);
-00751                     <span class="keywordflow">return</span> (-1);
-00752                 }
-00753             }
-00754         } <span class="keywordflow">else</span> {
-00755             session-&gt;<a class="code" href="structsnmp__session.html#o16">community</a> = (<span class=
+00746         session-&gt;<a class="code" href="structsnmp__session.html#o0">version</a> == SNMP_VERSION_2c)
+00747 <span class="preprocessor">#endif</span>
+00748 <span class="preprocessor">#endif</span>
+00749     {
+00750         <span class="keywordflow">if</span> (Cpsz == NULL) {
+00751             Cpsz = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00752                                          NETSNMP_DS_LIB_COMMUNITY);
+00753             <span class="keywordflow">if</span> (Cpsz == NULL) {
+00754                 <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+00755                                            NETSNMP_DS_LIB_IGNORE_NO_COMMUNITY)){
+00756                     DEBUGMSGTL((<span class="stringliteral">"snmp_parse_args"</span>,
+00757                                 <span class="stringliteral">"ignoring that the community string is not present\n"</span>));
+00758                     session-&gt;<a class="code" href="structsnmp__session.html#o16">community</a> = NULL;
+00759                     session-&gt;<a class="code" href="structsnmp__session.html#o17">community_len</a> = 0;
+00760                 } <span class="keywordflow">else</span> {
+00761                     fprintf(stderr, <span class="stringliteral">"No community name specified.\n"</span>);
+00762                     <span class="keywordflow">return</span> (-1);
+00763                 }
+00764             }
+00765         } <span class="keywordflow">else</span> {
+00766             session-&gt;<a class="code" href="structsnmp__session.html#o16">community</a> = (<span class=
 "keywordtype">unsigned</span> <span class="keywordtype">char</span> *)Cpsz;
-00756             session-&gt;<a class="code" href="structsnmp__session.html#o17">community_len</a> = strlen(Cpsz);
-00757         }
-00758     }
-00759 <span class="preprocessor">#endif </span><span class="comment">/* support for community based SNMP */</span>
-00760 
-00761     <span class="keywordflow">return</span> optind;
-00762 }
+00767             session-&gt;<a class="code" href="structsnmp__session.html#o17">community_len</a> = strlen(Cpsz);
+00768         }
+00769     }
+00770 <span class="preprocessor">#endif </span><span class="comment">/* support for community based SNMP */</span>
+00771 
+00772     <span class="keywordflow">return</span> optind;
+00773 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:49 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

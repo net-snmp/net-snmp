@@ -84,7 +84,7 @@
 00058     <span class="keywordflow">return</span>;
 00059 
 00060   bail_out:
-00061     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00061     <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"embedded perl support failed to initalize\n"</span>);
 00062     <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_APPLICATION_ID, 
 00063                            NETSNMP_DS_AGENT_DISABLE_PERL, 1);
@@ -111,72 +111,73 @@
 00084 <span class="preprocessor">#ifdef HAVE_PERL_EVAL_PV</span>
 00085     <span class="comment">/* older perl */</span>
 00086     perl_eval_pv(something, TRUE);
-00087 <span class="preprocessor">#endif </span><span class="comment">/* HAVE_PERL_EVAL_PV */</span>
-00088 <span class="preprocessor">#endif </span><span class="comment">/* HAVE_EVAL_PV */</span>
-00089     DEBUGMSGTL((<span class="stringliteral">"perl"</span>, <span class="stringliteral">"finished calling perl\n"</span>));
-00090 }
-00091 
-00092 <span class="keywordtype">void</span>
-00093 perl_config_handler(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+00087 <span class="preprocessor">#else </span><span class="comment">/* !HAVE_PERL_EVAL_PV */</span>
+00088 <span class="preprocessor">#error embedded perl broken </span>
+00089 <span class="preprocessor">#endif </span><span class="comment">/* !HAVE_PERL_EVAL_PV */</span>
+00090 <span class="preprocessor">#endif </span><span class="comment">/* !HAVE_EVAL_PV */</span>
+00091     DEBUGMSGTL((<span class="stringliteral">"perl"</span>, <span class="stringliteral">"finished calling perl\n"</span>));
+00092 }
+00093 
+00094 <span class="keywordtype">void</span>
+00095 perl_config_handler(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
 "keywordtype">char</span> *line)
-00094 {
-00095     do_something_perlish(line);
-00096 }
-00097 
-00098 <span class="keywordtype">void</span>
-00099 init_perl(<span class="keywordtype">void</span>)
-00100 {
-00101     <span class="keyword">const</span> <span class=
+00096 {
+00097     do_something_perlish(line);
+00098 }
+00099 
+00100 <span class="keywordtype">void</span>
+00101 init_perl(<span class="keywordtype">void</span>)
+00102 {
+00103     <span class="keyword">const</span> <span class=
 "keywordtype">char</span>     *appid = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-00102                                                   NETSNMP_DS_LIB_APPTYPE);
-00103     <span class="keyword">const</span> <span class="keywordtype">char</span>     *defaultid = <span class=
+00104                                                   NETSNMP_DS_LIB_APPTYPE);
+00105     <span class="keyword">const</span> <span class="keywordtype">char</span>     *defaultid = <span class=
 "stringliteral">"snmpd"</span>;
-00104 
-00105     <span class="keywordflow">if</span> (!appid) {
-00106         appid = defaultid;
-00107     }
-00108 
-00109     <span class="comment">/*</span>
-00110 <span class="comment">     * register config handlers </span>
-00111 <span class="comment">     */</span>
-00112     snmpd_register_config_handler(<span class="stringliteral">"perl"</span>, perl_config_handler, NULL,
-00113                                   <span class="stringliteral">"PERLCODE"</span>);
-00114 
-00115     <span class="comment">/*</span>
-00116 <span class="comment">     * define the perlInitFile token to point to an init file </span>
-00117 <span class="comment">     */</span>
-00118     netsnmp_ds_register_premib(ASN_OCTET_STR, appid, <span class="stringliteral">"perlInitFile"</span>,
-00119                                NETSNMP_DS_APPLICATION_ID, 
-00120                                NETSNMP_DS_AGENT_PERL_INIT_FILE);
-00121 
-00122     <span class="comment">/*</span>
-00123 <span class="comment">     * define the perlInitFile token to point to an init file </span>
-00124 <span class="comment">     */</span>
-00125     netsnmp_ds_register_premib(ASN_BOOLEAN, appid, <span class="stringliteral">"disablePerl"</span>,
-00126                                NETSNMP_DS_APPLICATION_ID,
-00127                                NETSNMP_DS_AGENT_DISABLE_PERL);
-00128 }
-00129 
-00130 <span class="keywordtype">void</span>
-00131 shutdown_perl(<span class="keywordtype">void</span>)
-00132 {
-00133     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-00134                                NETSNMP_DS_AGENT_DISABLE_PERL)) {
-00135         <span class="keywordflow">return</span>;
-00136     }
-00137     DEBUGMSGTL((<span class="stringliteral">"perl"</span>, <span class="stringliteral">"shutting down perl\n"</span>));
-00138     perl_destruct(my_perl);
-00139     perl_free(my_perl);
-00140     DEBUGMSGTL((<span class="stringliteral">"perl"</span>, <span class=
+00106 
+00107     <span class="keywordflow">if</span> (!appid) {
+00108         appid = defaultid;
+00109     }
+00110 
+00111     <span class="comment">/*</span>
+00112 <span class="comment">     * register config handlers </span>
+00113 <span class="comment">     */</span>
+00114     snmpd_register_config_handler(<span class="stringliteral">"perl"</span>, perl_config_handler, NULL,
+00115                                   <span class="stringliteral">"PERLCODE"</span>);
+00116 
+00117     <span class="comment">/*</span>
+00118 <span class="comment">     * define the perlInitFile token to point to an init file </span>
+00119 <span class="comment">     */</span>
+00120     netsnmp_ds_register_premib(ASN_OCTET_STR, appid, <span class="stringliteral">"perlInitFile"</span>,
+00121                                NETSNMP_DS_APPLICATION_ID, 
+00122                                NETSNMP_DS_AGENT_PERL_INIT_FILE);
+00123 
+00124     <span class="comment">/*</span>
+00125 <span class="comment">     * define the perlInitFile token to point to an init file </span>
+00126 <span class="comment">     */</span>
+00127     netsnmp_ds_register_premib(ASN_BOOLEAN, appid, <span class="stringliteral">"disablePerl"</span>,
+00128                                NETSNMP_DS_APPLICATION_ID,
+00129                                NETSNMP_DS_AGENT_DISABLE_PERL);
+00130 }
+00131 
+00132 <span class="keywordtype">void</span>
+00133 shutdown_perl(<span class="keywordtype">void</span>)
+00134 {
+00135     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00136                                NETSNMP_DS_AGENT_DISABLE_PERL)) {
+00137         <span class="keywordflow">return</span>;
+00138     }
+00139     DEBUGMSGTL((<span class="stringliteral">"perl"</span>, <span class="stringliteral">"shutting down perl\n"</span>));
+00140     perl_destruct(my_perl);
+00141     perl_free(my_perl);
+00142     DEBUGMSGTL((<span class="stringliteral">"perl"</span>, <span class=
 "stringliteral">"finished shutting down perl\n"</span>));
-00141 }
+00143 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:49 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

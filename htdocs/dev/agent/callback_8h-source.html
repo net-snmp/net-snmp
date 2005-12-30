@@ -49,64 +49,75 @@
 00028 <span class="preprocessor">#define SNMP_CALLBACK_LOGGING                   4</span>
 00029 <span class="preprocessor">#define SNMP_CALLBACK_SESSION_INIT              5</span>
 00030 
-00031     <span class="keyword">typedef</span> int     (SNMPCallback) (<span class="keywordtype">int</span> majorID, <span class=
+00031 
+00032     <span class="comment">/*</span>
+00033 <span class="comment">     * Callback priority (lower priority numbers called first(</span>
+00034 <span class="comment">     */</span>
+00035 <span class="preprocessor">#define NETSNMP_CALLBACK_HIGHEST_PRIORITY      -1024 </span>
+00036 <span class="preprocessor">#define NETSNMP_CALLBACK_DEFAULT_PRIORITY       0</span>
+00037 <span class="preprocessor">#define NETSNMP_CALLBACK_LOWEST_PRIORITY        1024</span>
+00038 
+00039     <span class="keyword">typedef</span> int     (SNMPCallback) (<span class="keywordtype">int</span> majorID, <span class=
 "keywordtype">int</span> minorID,
-00032                                     <span class="keywordtype">void</span> *serverarg, <span class=
+00040                                     <span class="keywordtype">void</span> *serverarg, <span class=
 "keywordtype">void</span> *clientarg);
-00033 
-00034     <span class="keyword">struct </span>snmp_gen_callback {
-00035         SNMPCallback   *sc_callback;
-00036         <span class="keywordtype">void</span>           *sc_client_arg;
-00037         <span class="keywordtype">int</span>             priority;
-00038         <span class="keyword">struct </span>snmp_gen_callback *next;
-00039     };
-00040 
-00041     <span class="comment">/*</span>
-00042 <span class="comment">     * function prototypes </span>
-00043 <span class="comment">     */</span>
-00044     <span class="keywordtype">void</span>            init_callbacks(<span class="keywordtype">void</span>);
-00045 
-00046     <span class="keywordtype">int</span>             netsnmp_register_callback(<span class=
+00041 
+00042     <span class="keyword">struct </span>snmp_gen_callback {
+00043         SNMPCallback   *sc_callback;
+00044         <span class="keywordtype">void</span>           *sc_client_arg;
+00045         <span class="keywordtype">int</span>             priority;
+00046         <span class="keyword">struct </span>snmp_gen_callback *next;
+00047     };
+00048 
+00049     <span class="comment">/*</span>
+00050 <span class="comment">     * function prototypes </span>
+00051 <span class="comment">     */</span>
+00052     <span class="keywordtype">void</span>            init_callbacks(<span class="keywordtype">void</span>);
+00053 
+00054     <span class="keywordtype">int</span>             netsnmp_register_callback(<span class=
 "keywordtype">int</span> major, <span class="keywordtype">int</span> minor,
-00047                                               SNMPCallback * new_callback,
-00048                                               <span class="keywordtype">void</span> *arg, <span class=
+00055                                               SNMPCallback * new_callback,
+00056                                               <span class="keywordtype">void</span> *arg, <span class=
 "keywordtype">int</span> priority);
-00049     <span class="keywordtype">int</span>             <a class="code" href=
-"group__callback.html#ga3">snmp_register_callback</a>(<span class="keywordtype">int</span> major, <span class=
+00057     <span class="keywordtype">int</span>             <a class="code" href=
+"group__callback.html#ga8">snmp_register_callback</a>(<span class="keywordtype">int</span> major, <span class=
 "keywordtype">int</span> minor,
-00050                                            SNMPCallback * new_callback,
-00051                                            <span class="keywordtype">void</span> *arg);
-00052     <span class="keywordtype">int</span>             <a class="code" href=
-"group__callback.html#ga5">snmp_call_callbacks</a>(<span class="keywordtype">int</span> major, <span class=
+00058                                            SNMPCallback * new_callback,
+00059                                            <span class="keywordtype">void</span> *arg);
+00060     <span class="keywordtype">int</span>             <a class="code" href=
+"group__callback.html#ga10">snmp_call_callbacks</a>(<span class="keywordtype">int</span> major, <span class=
 "keywordtype">int</span> minor,
-00053                                         <span class="keywordtype">void</span> *caller_arg);
-00054     <span class="keywordtype">int</span>             snmp_callback_available(<span class=
+00061                                         <span class="keywordtype">void</span> *caller_arg);
+00062     <span class="keywordtype">int</span>             snmp_callback_available(<span class=
 "keywordtype">int</span> major, <span class="keywordtype">int</span> minor);      <span class=
 "comment">/* is &gt;1 available */</span>
-00055     <span class="keywordtype">int</span>             snmp_count_callbacks(<span class=
+00063     <span class="keywordtype">int</span>             snmp_count_callbacks(<span class=
 "keywordtype">int</span> major, <span class="keywordtype">int</span> minor); <span class=
 "comment">/* ret the number registered */</span>
-00056     <span class="keywordtype">int</span>             <a class="code" href=
-"group__callback.html#ga8">snmp_unregister_callback</a>(<span class="keywordtype">int</span> major, <span class=
+00064     <span class="keywordtype">int</span>             <a class="code" href=
+"group__callback.html#ga13">snmp_unregister_callback</a>(<span class="keywordtype">int</span> major, <span class=
 "keywordtype">int</span> minor,
-00057                                              SNMPCallback * new_callback,
-00058                                              <span class="keywordtype">void</span> *arg, <span class=
+00065                                              SNMPCallback * new_callback,
+00066                                              <span class="keywordtype">void</span> *arg, <span class=
 "keywordtype">int</span> matchargs);
-00059     <span class="keywordtype">void</span>            clear_callback (<span class="keywordtype">void</span>);
-00060     <span class="keyword">struct </span>snmp_gen_callback *snmp_callback_list(<span class=
+00067     <span class="keywordtype">void</span>            clear_callback (<span class="keywordtype">void</span>);
+00068     <span class="keywordtype">int</span>             <a class="code" href=
+"group__callback.html#ga14">netsnmp_callback_clear_client_arg</a>(<span class="keywordtype">void</span> *, <span class=
+"keywordtype">int</span> i, <span class="keywordtype">int</span> j);
+00069 
+00070     <span class="keyword">struct </span>snmp_gen_callback *snmp_callback_list(<span class=
 "keywordtype">int</span> major, <span class="keywordtype">int</span> minor);
-00061 
-00062 <span class="preprocessor">#ifdef __cplusplus</span>
-00063 }
-00064 <span class="preprocessor">#endif</span>
-00065 <span class="preprocessor">#endif                          </span><span class="comment">/* CALLBACK_H */</span>
+00071 
+00072 <span class="preprocessor">#ifdef __cplusplus</span>
+00073 }
+00074 <span class="preprocessor">#endif</span>
+00075 <span class="preprocessor">#endif                          </span><span class="comment">/* CALLBACK_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:37 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:44 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

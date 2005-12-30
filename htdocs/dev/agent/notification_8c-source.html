@@ -60,103 +60,105 @@
 00082     oid             notification_oid[] =
 00083         { 1, 3, 6, 1, 4, 1, 8072, 2, 3, 0, 1 };
 00084     size_t          notification_oid_len = OID_LENGTH(notification_oid);
-00085 
-00086     <span class="comment">/*</span>
-00087 <span class="comment">     * In the notification, we have to assign our notification OID to</span>
-00088 <span class="comment">     * the snmpTrapOID.0 object. Here is it's definition. </span>
-00089 <span class="comment">     */</span>
-00090     oid             objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
-00091     size_t          objid_snmptrap_len = OID_LENGTH(objid_snmptrap);
-00092 
-00093     <span class="comment">/*</span>
-00094 <span class="comment">     * define the OIDs for the varbinds we're going to include</span>
-00095 <span class="comment">     *  with the notification -</span>
-00096 <span class="comment">     * NET-SNMP-EXAMPLES-MIB::netSnmpExampleHeartbeatRate  and</span>
-00097 <span class="comment">     * NET-SNMP-EXAMPLES-MIB::netSnmpExampleHeartbeatName </span>
-00098 <span class="comment">     */</span>
-00099     oid      hbeat_rate_oid[]   = { 1, 3, 6, 1, 4, 1, 8072, 2, 3, 2, 1, 0 };
-00100     size_t   hbeat_rate_oid_len = OID_LENGTH(hbeat_rate_oid);
-00101     oid      hbeat_name_oid[]   = { 1, 3, 6, 1, 4, 1, 8072, 2, 3, 2, 2, 0 };
-00102     size_t   hbeat_name_oid_len = OID_LENGTH(hbeat_name_oid);
-00103 
-00104     <span class="comment">/*</span>
-00105 <span class="comment">     * here is where we store the variables to be sent in the trap </span>
-00106 <span class="comment">     */</span>
-00107     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *notification_vars = NULL;
-00108     <span class="keywordtype">char</span> *heartbeat_name = <span class="stringliteral">"A girl named Maria"</span>;
-00109 <span class="preprocessor">#ifdef  RANDOM_HEARTBEAT</span>
-00110     <span class="keywordtype">int</span>  heartbeat_rate = rand() % 60;
-00111 <span class="preprocessor">#else</span>
-00112     <span class="keywordtype">int</span>  heartbeat_rate = 30;
-00113 <span class="preprocessor">#endif</span>
-00114 
-00115     DEBUGMSGTL((<span class="stringliteral">"example_notification"</span>, <span class=
+00085     <span class="keyword">static</span> u_long count = 0;
+00086 
+00087     <span class="comment">/*</span>
+00088 <span class="comment">     * In the notification, we have to assign our notification OID to</span>
+00089 <span class="comment">     * the snmpTrapOID.0 object. Here is it's definition. </span>
+00090 <span class="comment">     */</span>
+00091     oid             objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
+00092     size_t          objid_snmptrap_len = OID_LENGTH(objid_snmptrap);
+00093 
+00094     <span class="comment">/*</span>
+00095 <span class="comment">     * define the OIDs for the varbinds we're going to include</span>
+00096 <span class="comment">     *  with the notification -</span>
+00097 <span class="comment">     * NET-SNMP-EXAMPLES-MIB::netSnmpExampleHeartbeatRate  and</span>
+00098 <span class="comment">     * NET-SNMP-EXAMPLES-MIB::netSnmpExampleHeartbeatName </span>
+00099 <span class="comment">     */</span>
+00100     oid      hbeat_rate_oid[]   = { 1, 3, 6, 1, 4, 1, 8072, 2, 3, 2, 1, 0 };
+00101     size_t   hbeat_rate_oid_len = OID_LENGTH(hbeat_rate_oid);
+00102     oid      hbeat_name_oid[]   = { 1, 3, 6, 1, 4, 1, 8072, 2, 3, 2, 2, 0 };
+00103     size_t   hbeat_name_oid_len = OID_LENGTH(hbeat_name_oid);
+00104 
+00105     <span class="comment">/*</span>
+00106 <span class="comment">     * here is where we store the variables to be sent in the trap </span>
+00107 <span class="comment">     */</span>
+00108     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *notification_vars = NULL;
+00109     <span class="keyword">const</span> <span class="keywordtype">char</span> *heartbeat_name = <span class=
+"stringliteral">"A girl named Maria"</span>;
+00110 <span class="preprocessor">#ifdef  RANDOM_HEARTBEAT</span>
+00111     <span class="keywordtype">int</span>  heartbeat_rate = rand() % 60;
+00112 <span class="preprocessor">#else</span>
+00113     <span class="keywordtype">int</span>  heartbeat_rate = 30;
+00114 <span class="preprocessor">#endif</span>
+00115 
+00116     DEBUGMSGTL((<span class="stringliteral">"example_notification"</span>, <span class=
 "stringliteral">"defining the trap\n"</span>));
-00116 
-00117     <span class="comment">/*</span>
-00118 <span class="comment">     * add in the trap definition object </span>
-00119 <span class="comment">     */</span>
-00120     snmp_varlist_add_variable(&amp;notification_vars,
-00121                               <span class="comment">/*</span>
-00122 <span class="comment">                               * the snmpTrapOID.0 variable </span>
-00123 <span class="comment">                               */</span>
-00124                               objid_snmptrap, objid_snmptrap_len,
-00125                               <span class="comment">/*</span>
-00126 <span class="comment">                               * value type is an OID </span>
-00127 <span class="comment">                               */</span>
-00128                               ASN_OBJECT_ID,
-00129                               <span class="comment">/*</span>
-00130 <span class="comment">                               * value contents is our notification OID </span>
-00131 <span class="comment">                               */</span>
-00132                               (u_char *) notification_oid,
-00133                               <span class="comment">/*</span>
-00134 <span class="comment">                               * size in bytes = oid length * sizeof(oid) </span>
-00135 <span class="comment">                               */</span>
-00136                               notification_oid_len * <span class="keyword">sizeof</span>(oid));
-00137 
-00138     <span class="comment">/*</span>
-00139 <span class="comment">     * add in the additional objects defined as part of the trap</span>
-00140 <span class="comment">     */</span>
-00141 
-00142     snmp_varlist_add_variable(&amp;notification_vars,
-00143                                hbeat_rate_oid, hbeat_rate_oid_len,
-00144                                ASN_INTEGER,
-00145                               (u_char *)&amp;heartbeat_rate,
-00146                                   <span class="keyword">sizeof</span>(heartbeat_rate));
-00147 
-00148     <span class="comment">/*</span>
-00149 <span class="comment">     * if we want to insert additional objects, we do it here </span>
-00150 <span class="comment">     */</span>
-00151     <span class="keywordflow">if</span> (heartbeat_rate &lt; 30 ) {
-00152         snmp_varlist_add_variable(&amp;notification_vars,
-00153                                hbeat_name_oid, hbeat_name_oid_len,
-00154                                ASN_OCTET_STR,
-00155                                heartbeat_name, strlen(heartbeat_name));
-00156     }
-00157 
-00158     <span class="comment">/*</span>
-00159 <span class="comment">     * send the trap out.  This will send it to all registered</span>
-00160 <span class="comment">     * receivers (see the "SETTING UP TRAP AND/OR INFORM DESTINATIONS"</span>
-00161 <span class="comment">     * section of the snmpd.conf manual page. </span>
-00162 <span class="comment">     */</span>
-00163     DEBUGMSGTL((<span class="stringliteral">"example_notification"</span>, <span class=
-"stringliteral">"sending the trap\n"</span>));
-00164     <a class="code" href="group__agent__trap.html#ga44">send_v2trap</a>(notification_vars);
-00165 
-00166     <span class="comment">/*</span>
-00167 <span class="comment">     * free the created notification variable list </span>
-00168 <span class="comment">     */</span>
-00169     DEBUGMSGTL((<span class="stringliteral">"example_notification"</span>, <span class=
+00117 
+00118     <span class="comment">/*</span>
+00119 <span class="comment">     * add in the trap definition object </span>
+00120 <span class="comment">     */</span>
+00121     snmp_varlist_add_variable(&amp;notification_vars,
+00122                               <span class="comment">/*</span>
+00123 <span class="comment">                               * the snmpTrapOID.0 variable </span>
+00124 <span class="comment">                               */</span>
+00125                               objid_snmptrap, objid_snmptrap_len,
+00126                               <span class="comment">/*</span>
+00127 <span class="comment">                               * value type is an OID </span>
+00128 <span class="comment">                               */</span>
+00129                               ASN_OBJECT_ID,
+00130                               <span class="comment">/*</span>
+00131 <span class="comment">                               * value contents is our notification OID </span>
+00132 <span class="comment">                               */</span>
+00133                               (u_char *) notification_oid,
+00134                               <span class="comment">/*</span>
+00135 <span class="comment">                               * size in bytes = oid length * sizeof(oid) </span>
+00136 <span class="comment">                               */</span>
+00137                               notification_oid_len * <span class="keyword">sizeof</span>(oid));
+00138 
+00139     <span class="comment">/*</span>
+00140 <span class="comment">     * add in the additional objects defined as part of the trap</span>
+00141 <span class="comment">     */</span>
+00142 
+00143     snmp_varlist_add_variable(&amp;notification_vars,
+00144                                hbeat_rate_oid, hbeat_rate_oid_len,
+00145                                ASN_INTEGER,
+00146                               (u_char *)&amp;heartbeat_rate,
+00147                                   <span class="keyword">sizeof</span>(heartbeat_rate));
+00148 
+00149     <span class="comment">/*</span>
+00150 <span class="comment">     * if we want to insert additional objects, we do it here </span>
+00151 <span class="comment">     */</span>
+00152     <span class="keywordflow">if</span> (heartbeat_rate &lt; 30 ) {
+00153         snmp_varlist_add_variable(&amp;notification_vars,
+00154                                hbeat_name_oid, hbeat_name_oid_len,
+00155                                ASN_OCTET_STR,
+00156                                heartbeat_name, strlen(heartbeat_name));
+00157     }
+00158 
+00159     <span class="comment">/*</span>
+00160 <span class="comment">     * send the trap out.  This will send it to all registered</span>
+00161 <span class="comment">     * receivers (see the "SETTING UP TRAP AND/OR INFORM DESTINATIONS"</span>
+00162 <span class="comment">     * section of the snmpd.conf manual page. </span>
+00163 <span class="comment">     */</span>
+00164     ++count;
+00165     DEBUGMSGTL((<span class="stringliteral">"example_notification"</span>, <span class=
+"stringliteral">"sending trap %ld\n"</span>,count));
+00166     <a class="code" href="group__agent__trap.html#ga44">send_v2trap</a>(notification_vars);
+00167 
+00168     <span class="comment">/*</span>
+00169 <span class="comment">     * free the created notification variable list </span>
+00170 <span class="comment">     */</span>
+00171     DEBUGMSGTL((<span class="stringliteral">"example_notification"</span>, <span class=
 "stringliteral">"cleaning up\n"</span>));
-00170     snmp_free_varbind(notification_vars);
-00171 }
+00172     snmp_free_varbind(notification_vars);
+00173 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:38 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:45 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

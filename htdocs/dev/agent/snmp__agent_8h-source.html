@@ -226,7 +226,7 @@ href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *parent_data;
 00211 <span class="comment">     * config file parsing routines </span>
 00212 <span class="comment">     */</span>
 00213     <span class="keywordtype">int</span>             <a class="code" href=
-"group__snmp__agent.html#ga52">handle_snmp_packet</a>(<span class="keywordtype">int</span>, <a class="code" href=
+"group__snmp__agent.html#ga55">handle_snmp_packet</a>(<span class="keywordtype">int</span>, <a class="code" href=
 "structsnmp__session.html">netsnmp_session</a> *, <span class="keywordtype">int</span>,
 00214                                        <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *, <span class=
 "keywordtype">void</span> *);
@@ -251,111 +251,112 @@ href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *parent_data;
 00231     <span class="keywordtype">int</span>             init_master_agent(<span class="keywordtype">void</span>);
 00232     <span class="keywordtype">void</span>            shutdown_master_agent(<span class="keywordtype">void</span>);
 00233     <span class="keywordtype">int</span>             <a class="code" href=
-"group__snmp__agent.html#ga33">agent_check_and_process</a>(<span class="keywordtype">int</span> block);
+"group__snmp__agent.html#ga36">agent_check_and_process</a>(<span class="keywordtype">int</span> block);
 00234     <span class="keywordtype">void</span>            netsnmp_check_outstanding_agent_requests(<span class=
 "keywordtype">void</span>);
 00235 
 00236     <span class="keywordtype">int</span>             <a class="code" href=
-"group__snmp__agent.html#ga68">netsnmp_request_set_error</a>(<a class="code" href=
+"group__snmp__agent.html#ga72">netsnmp_request_set_error</a>(<a class="code" href=
 "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request,
 00237                                               <span class="keywordtype">int</span> error_value);
 00238     <span class="keywordtype">int</span>             netsnmp_check_requests_error(<a class="code" href=
 "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *reqs);
-00239     <span class="keywordtype">int</span>
-00240         <a class="code" href="group__snmp__agent.html#ga81">netsnmp_set_all_requests_error</a>(<a class="code" href=
+00239     <span class="keywordtype">int</span>             netsnmp_check_all_requests_error(netsnmp_agent_session *asp,
+00240                                                      <span class="keywordtype">int</span> look_for_specific);
+00241     <span class="keywordtype">int</span>
+00242         <a class="code" href="group__snmp__agent.html#ga85">netsnmp_set_all_requests_error</a>(<a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
-00241                                        <a class="code" href=
+00243                                        <a class="code" href=
 "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests,
-00242                                        <span class="keywordtype">int</span> error_value);
-00243     <span class="keywordtype">int</span>
-00244         <a class="code" href="group__snmp__agent.html#ga69">netsnmp_request_set_error_all</a>(<a class="code" href=
+00244                                        <span class="keywordtype">int</span> error_value);
+00245     <span class="keywordtype">int</span>
+00246         <a class="code" href="group__snmp__agent.html#ga73">netsnmp_request_set_error_all</a>(<a class="code" href=
 "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests,
-00245                                        <span class="keywordtype">int</span> error_value);
-00246     
-00248     <span class="keywordtype">int</span>             <a class="code" href=
-"group__snmp__agent.html#ga79">netsnmp_set_request_error</a>(<a class="code" href=
+00247                                        <span class="keywordtype">int</span> error_value);
+00248     
+00250     <span class="keywordtype">int</span>             <a class="code" href=
+"group__snmp__agent.html#ga83">netsnmp_set_request_error</a>(<a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a>
-00249                                               *reqinfo,
-00250                                               <a class="code" href=
+00251                                               *reqinfo,
+00252                                               <a class="code" href=
 "structnetsnmp__request__info__s.html">netsnmp_request_info</a>
-00251                                               *request, <span class="keywordtype">int</span> error_value);
-00253     <span class="keywordtype">int</span>             <a class="code" href=
-"group__snmp__agent.html#ga80">netsnmp_set_mode_request_error</a>(<span class="keywordtype">int</span> mode,
-00254                                                    <a class="code" href=
+00253                                               *request, <span class="keywordtype">int</span> error_value);
+00255     <span class="keywordtype">int</span>             <a class="code" href=
+"group__snmp__agent.html#ga84">netsnmp_set_mode_request_error</a>(<span class="keywordtype">int</span> mode,
+00256                                                    <a class="code" href=
 "structnetsnmp__request__info__s.html">netsnmp_request_info</a>
-00255                                                    *request,
-00256                                                    <span class="keywordtype">int</span> error_value);
-00257 
-00258     u_long          netsnmp_marker_uptime(marker_t pm);
-00259     u_long          netsnmp_timeval_uptime(<span class="keyword">struct</span> timeval *tv);
-00260     u_long          netsnmp_get_agent_uptime(<span class="keywordtype">void</span>);
-00261     <span class="keywordtype">int</span>             <a class="code" href=
-"group__snmp__agent.html#ga64">netsnmp_check_transaction_id</a>(<span class="keywordtype">int</span> transaction_id);
-00262     <span class="keywordtype">int</span>             netsnmp_agent_check_packet(<a class="code" href=
+00257                                                    *request,
+00258                                                    <span class="keywordtype">int</span> error_value);
+00259 
+00260     u_long          netsnmp_marker_uptime(marker_t pm);
+00261     u_long          netsnmp_timeval_uptime(<span class="keyword">struct</span> timeval *tv);
+00262     u_long          netsnmp_get_agent_uptime(<span class="keywordtype">void</span>);
+00263     <span class="keywordtype">int</span>             <a class="code" href=
+"group__snmp__agent.html#ga68">netsnmp_check_transaction_id</a>(<span class="keywordtype">int</span> transaction_id);
+00264     <span class="keywordtype">int</span>             netsnmp_agent_check_packet(<a class="code" href=
 "structsnmp__session.html">netsnmp_session</a> *,
-00263                                                <span class="keyword">struct</span> netsnmp_transport_s
-00264                                                *, <span class="keywordtype">void</span> *, <span class=
+00265                                                <span class="keyword">struct</span> netsnmp_transport_s
+00266                                                *, <span class="keywordtype">void</span> *, <span class=
 "keywordtype">int</span>);
-00265     <span class="keywordtype">int</span>             netsnmp_agent_check_parse(<a class="code" href=
+00267     <span class="keywordtype">int</span>             netsnmp_agent_check_parse(<a class="code" href=
 "structsnmp__session.html">netsnmp_session</a> *,
-00266                                               <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *, <span class=
+00268                                               <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *, <span class=
 "keywordtype">int</span>);
-00267     <span class="keywordtype">int</span>             netsnmp_allocate_globalcacheid(<span class="keywordtype">void</span>);
-00268 
-00269     <span class="keywordtype">int</span> netsnmp_remove_delegated_requests_for_session(<a class="code" href=
-"structsnmp__session.html">netsnmp_session</a> *sess);
+00269     <span class="keywordtype">int</span>             netsnmp_allocate_globalcacheid(<span class="keywordtype">void</span>);
 00270 
-00271     <span class="comment">/*</span>
-00272 <span class="comment">     * Register and de-register agent NSAPs.  </span>
-00273 <span class="comment">     */</span>
-00274 
-00275     <span class="keyword">struct </span>netsnmp_transport_s;
+00271     <span class="keywordtype">int</span> netsnmp_remove_delegated_requests_for_session(<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> *sess);
+00272 
+00273     <span class="comment">/*</span>
+00274 <span class="comment">     * Register and de-register agent NSAPs.  </span>
+00275 <span class="comment">     */</span>
 00276 
-00277     <span class="keywordtype">int</span>             netsnmp_register_agent_nsap(<span class=
+00277     <span class="keyword">struct </span>netsnmp_transport_s;
+00278 
+00279     <span class="keywordtype">int</span>             netsnmp_register_agent_nsap(<span class=
 "keyword">struct</span> netsnmp_transport_s
-00278                                                 *t);
-00279     <span class="keywordtype">void</span>            netsnmp_deregister_agent_nsap(<span class=
+00280                                                 *t);
+00281     <span class="keywordtype">void</span>            netsnmp_deregister_agent_nsap(<span class=
 "keywordtype">int</span> handle);
-00280 
-00281     NETSNMP_INLINE <span class="keywordtype">void</span>
-00282         netsnmp_agent_add_list_data(<a class="code" href=
+00282 
+00283     NETSNMP_INLINE <span class="keywordtype">void</span>
+00284         netsnmp_agent_add_list_data(<a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *agent,
-00283                                     <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node);
-00284 
-00285     NETSNMP_INLINE <span class="keywordtype">int</span>
-00286         netsnmp_agent_remove_list_data(<a class="code" href=
+00285                                     <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node);
+00286 
+00287     NETSNMP_INLINE <span class="keywordtype">int</span>
+00288         netsnmp_agent_remove_list_data(<a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *ari,
-00287                                        <span class="keyword">const</span> <span class="keywordtype">char</span> * name);
-00288 
-00289     NETSNMP_INLINE <span class="keywordtype">void</span> *
-00290             netsnmp_agent_get_list_data(<a class="code" href=
+00289                                        <span class="keyword">const</span> <span class="keywordtype">char</span> * name);
+00290 
+00291     NETSNMP_INLINE <span class="keywordtype">void</span> *
+00292             netsnmp_agent_get_list_data(<a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a>
-00291                                         *agent, <span class="keyword">const</span> <span class=
+00293                                         *agent, <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *name);
-00292 
-00293     NETSNMP_INLINE <span class="keywordtype">void</span>
-00294             netsnmp_free_agent_data_set(<a class="code" href=
+00294 
+00295     NETSNMP_INLINE <span class="keywordtype">void</span>
+00296             netsnmp_free_agent_data_set(<a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *agent);
-00295 
-00296     NETSNMP_INLINE <span class="keywordtype">void</span>
-00297            netsnmp_free_agent_data_sets(<a class="code" href=
+00297 
+00298     NETSNMP_INLINE <span class="keywordtype">void</span>
+00299            netsnmp_free_agent_data_sets(<a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *agent);
-00298     NETSNMP_INLINE <span class="keywordtype">void</span>    
-00299         netsnmp_free_agent_request_info(<a class="code" href=
+00300     NETSNMP_INLINE <span class="keywordtype">void</span>    
+00301         netsnmp_free_agent_request_info(<a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *ari);
-00300 
-00301 <span class="preprocessor">#ifdef __cplusplus</span>
-00302 }
-00303 <span class="preprocessor">#endif</span>
-00304 <span class="preprocessor">#endif</span>
-00305 
+00302 
+00303 <span class="preprocessor">#ifdef __cplusplus</span>
+00304 }
+00305 <span class="preprocessor">#endif</span>
+00306 <span class="preprocessor">#endif</span>
+00307 
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:39 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:47 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

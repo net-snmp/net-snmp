@@ -32,32 +32,38 @@
 00011 
 00012 config_require(util_funcs)
 00013 
-00014     <span class="comment">/*</span>
-00015 <span class="comment">     * Magic number definitions: </span>
-00016 <span class="comment">     */</span>
-00017 #define   UCDDEMORESETKEYS      1
-00018 <span class="preprocessor">#define   UCDDEMOPUBLICSTRING   2</span>
-00019 <span class="preprocessor">#define   UCDDEMOUSERLIST       3</span>
-00020 <span class="preprocessor">#define   UCDDEMOPASSPHRASE     4</span>
-00021     <span class="comment">/*</span>
-00022 <span class="comment">     * function definitions </span>
-00023 <span class="comment">     */</span>
-00024      <span class="keyword">extern</span> <span class="keywordtype">void</span>     init_ucdDemoPublic(<span class=
-"keywordtype">void</span>);
-00025      <span class="keyword">extern</span> FindVarMethod var_ucdDemoPublic;
-00026      WriteMethod     write_ucdDemoResetKeys;
-00027      WriteMethod     write_ucdDemoPublicString;
-00028 
-00029 
-00030 <span class="preprocessor">#endif                          </span><span class=
+00014 #ifdef __cplusplus
+00015 <span class="keyword">extern</span> <span class="stringliteral">"C"</span> {
+00016 <span class="preprocessor">#endif</span>
+00017 
+00018     <span class="comment">/*</span>
+00019 <span class="comment">     * Magic number definitions: </span>
+00020 <span class="comment">     */</span>
+00021 <span class="preprocessor">#define   UCDDEMORESETKEYS      1</span>
+00022 <span class="preprocessor">#define   UCDDEMOPUBLICSTRING   2</span>
+00023 <span class="preprocessor">#define   UCDDEMOUSERLIST       3</span>
+00024 <span class="preprocessor">#define   UCDDEMOPASSPHRASE     4</span>
+00025     <span class="comment">/*</span>
+00026 <span class="comment">     * function definitions </span>
+00027 <span class="comment">     */</span>
+00028      <span class="keywordtype">void</span>     init_ucdDemoPublic(<span class="keywordtype">void</span>);
+00029      FindVarMethod var_ucdDemoPublic;
+00030      WriteMethod     write_ucdDemoResetKeys;
+00031      WriteMethod     write_ucdDemoPublicString;
+00032 
+00033 
+00034 <span class="preprocessor">#ifdef __cplusplus</span>
+00035 }
+00036 <span class="preprocessor">#endif</span>
+00037 
+00038 <span class="preprocessor">#endif                          </span><span class=
 "comment">/* _MIBGROUP_UCDDEMOPUBLIC_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:43 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:51 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

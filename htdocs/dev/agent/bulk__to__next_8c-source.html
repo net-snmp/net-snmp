@@ -31,126 +31,137 @@
 00011 
 00012 <span class="preprocessor">#include &lt;net-snmp/agent/bulk_to_next.h&gt;</span>
 00013 
-00014 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
-00015 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
-00016 <span class="preprocessor">#endif</span>
-00017 
-00029 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
-<a name="l00030" id="l00030"></a><a class="code" href="group__bulk__to__next.html#ga0">00030</a> <a class="code" href=
+00025 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+<a name="l00026" id="l00026"></a><a class="code" href="group__bulk__to__next.html#ga0">00026</a> <a class="code" href=
 "group__bulk__to__next.html#ga0">netsnmp_get_bulk_to_next_handler</a>(<span class="keywordtype">void</span>)
-00031 {
-00032     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler =
-00033         <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
+00027 {
+00028     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler =
+00029         <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
 "stringliteral">"bulk_to_next"</span>,
-00034                                netsnmp_bulk_to_next_helper);
-00035 
-00036     <span class="keywordflow">if</span> (NULL != handler)
-00037         handler-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o2">flags</a> |= MIB_HANDLER_AUTO_NEXT;
-00038 
-00039     <span class="keywordflow">return</span> handler;
-00040 }
-00041 
-00044 <span class="keywordtype">void</span>
-<a name="l00045" id="l00045"></a><a class="code" href="group__bulk__to__next.html#ga1">00045</a> <a class="code" href=
+00030                                netsnmp_bulk_to_next_helper);
+00031 
+00032     <span class="keywordflow">if</span> (NULL != handler)
+00033         handler-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o2">flags</a> |= MIB_HANDLER_AUTO_NEXT;
+00034 
+00035     <span class="keywordflow">return</span> handler;
+00036 }
+00037 
+00040 <span class="keywordtype">void</span>
+<a name="l00041" id="l00041"></a><a class="code" href="group__bulk__to__next.html#ga1">00041</a> <a class="code" href=
 "group__bulk__to__next.html#ga1">netsnmp_bulk_to_next_fix_requests</a>(<a class="code" href=
 "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
-00046 {
-00047     <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request;
-00048     <span class="comment">/*</span>
-00049 <span class="comment">     * update the varbinds for the next request series </span>
-00050 <span class="comment">     */</span>
-00051     <span class="keywordflow">for</span> (request = requests; request; request = request-&gt;<a class="code" href=
+00042 {
+00043     <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request;
+00044     <span class="comment">/*</span>
+00045 <span class="comment">     * update the varbinds for the next request series </span>
+00046 <span class="comment">     */</span>
+00047     <span class="keywordflow">for</span> (request = requests; request; request = request-&gt;<a class="code" href=
 "structnetsnmp__request__info__s.html#o13">next</a>) {
-00052         <span class="keywordflow">if</span> (request-&gt;<a class="code" href=
+00048         <span class="keywordflow">if</span> (request-&gt;<a class="code" href=
 "structnetsnmp__request__info__s.html#o10">repeat</a> &gt; 0 &amp;&amp;
-00053             request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code"
+00049             request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code"
 href="structvariable__list.html#o3">type</a> != ASN_NULL &amp;&amp;
-00054             request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code"
+00050             request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code"
 href="structvariable__list.html#o3">type</a> != ASN_PRIV_RETRY &amp;&amp;
-00055             request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code"
+00051             request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code"
 href="structvariable__list.html#o0">next_variable</a> ) {
-00056             request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o10">repeat</a>--;
-00057             snmp_set_var_objid(request-&gt;<a class="code" href=
+00052             request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o10">repeat</a>--;
+00053             snmp_set_var_objid(request-&gt;<a class="code" href=
 "structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
 "structvariable__list.html#o0">next_variable</a>,
-00058                                request-&gt;<a class="code" href=
+00054                                request-&gt;<a class="code" href=
 "structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
-00059                                request-&gt;<a class="code" href=
+00055                                request-&gt;<a class="code" href=
 "structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>);
-00060             request-&gt;<a class="code" href=
+00056             request-&gt;<a class="code" href=
 "structnetsnmp__request__info__s.html#o0">requestvb</a> = request-&gt;<a class="code" href=
 "structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
 "structvariable__list.html#o0">next_variable</a>;
-00061             request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code"
+00057             request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code"
 href="structvariable__list.html#o3">type</a> = ASN_PRIV_RETRY;
-00062         }
-00063     }
-00064 }
-00065 
-00067 <span class="keywordtype">int</span>
-00068 netsnmp_bulk_to_next_helper(<a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
-00069                             <a class="code" href=
+00058         }
+00059     }
+00060 }
+00061 
+00063 <span class="keywordtype">int</span>
+00064 netsnmp_bulk_to_next_helper(<a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00065                             <a class="code" href=
 "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
-00070                             <a class="code" href=
+00066                             <a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
-00071                             <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
-00072 {
-00073 
-00074     <span class="keywordtype">int</span>             ret = SNMP_ERR_NOERROR;
-00075 
-00076     <span class="comment">/*</span>
-00077 <span class="comment">     * this code depends on AUTO_NEXT being set</span>
-00078 <span class="comment">     */</span>
-00079     netsnmp_assert(handler-&gt;<a class="code" href=
+00067                             <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
+00068 {
+00069 
+00070     <span class="keywordtype">int</span>             ret = SNMP_ERR_NOERROR;
+00071 
+00072     <span class="comment">/*</span>
+00073 <span class="comment">     * this code depends on AUTO_NEXT being set</span>
+00074 <span class="comment">     */</span>
+00075     netsnmp_assert(handler-&gt;<a class="code" href=
 "structnetsnmp__mib__handler__s.html#o2">flags</a> &amp; MIB_HANDLER_AUTO_NEXT);
-00080 
-00081     <span class="comment">/*</span>
-00082 <span class="comment">     * don't do anything for any modes besides GETBULK. Just return, and</span>
-00083 <span class="comment">     * the agent will call the next handler (AUTO_NEXT).</span>
-00084 <span class="comment">     *</span>
-00085 <span class="comment">     * for GETBULK, we munge the mode, call the next handler ourselves</span>
-00086 <span class="comment">     * (setting AUTO_NEXT_OVERRRIDE so the agent knows what we did),</span>
-00087 <span class="comment">     * restore the mode and fix up the requests.</span>
-00088 <span class="comment">     */</span>
-00089     <span class="keywordflow">if</span>(MODE_GETBULK == reqinfo-&gt;<a class="code" href=
+00076 
+00077     <span class="comment">/*</span>
+00078 <span class="comment">     * don't do anything for any modes besides GETBULK. Just return, and</span>
+00079 <span class="comment">     * the agent will call the next handler (AUTO_NEXT).</span>
+00080 <span class="comment">     *</span>
+00081 <span class="comment">     * for GETBULK, we munge the mode, call the next handler ourselves</span>
+00082 <span class="comment">     * (setting AUTO_NEXT_OVERRRIDE so the agent knows what we did),</span>
+00083 <span class="comment">     * restore the mode and fix up the requests.</span>
+00084 <span class="comment">     */</span>
+00085     <span class="keywordflow">if</span>(MODE_GETBULK == reqinfo-&gt;<a class="code" href=
 "structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
-00090         reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> = MODE_GETNEXT;
-00091         ret =
-00092             <a class="code" href=
+00086 
+00087         DEBUGIF(<span class="stringliteral">"bulk_to_next"</span>) {
+00088             <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *req = requests;
+00089             <span class="keywordflow">while</span>(req) {
+00090                 DEBUGMSGTL((<span class="stringliteral">"bulk_to_next"</span>, <span class=
+"stringliteral">"Got request: "</span>));
+00091                 DEBUGMSGOID((<span class="stringliteral">"bulk_to_next"</span>, req-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00092                              req-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o2">name_length</a>));
+00093                 DEBUGMSG((<span class="stringliteral">"bulk_to_next"</span>, <span class="stringliteral">"\n"</span>));
+00094                 req = req-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o13">next</a>;
+00095             }
+00096         }
+00097 
+00098         reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> = MODE_GETNEXT;
+00099         ret =
+00100             <a class="code" href=
 "group__handler.html#ga17">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo, requests);
-00093         reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> = MODE_GETBULK;
-00094 
-00095         <span class="comment">/*</span>
-00096 <span class="comment">         * update the varbinds for the next request series </span>
-00097 <span class="comment">         */</span>
-00098         <a class="code" href="group__bulk__to__next.html#ga1">netsnmp_bulk_to_next_fix_requests</a>(requests);
-00099 
-00100         <span class="comment">/*</span>
-00101 <span class="comment">         * let agent handler know that we've already called next handler</span>
-00102 <span class="comment">         */</span>
-00103         handler-&gt;<a class="code" href=
+00101         reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> = MODE_GETBULK;
+00102 
+00103         <span class="comment">/*</span>
+00104 <span class="comment">         * update the varbinds for the next request series </span>
+00105 <span class="comment">         */</span>
+00106         <a class="code" href="group__bulk__to__next.html#ga1">netsnmp_bulk_to_next_fix_requests</a>(requests);
+00107 
+00108         <span class="comment">/*</span>
+00109 <span class="comment">         * let agent handler know that we've already called next handler</span>
+00110 <span class="comment">         */</span>
+00111         handler-&gt;<a class="code" href=
 "structnetsnmp__mib__handler__s.html#o2">flags</a> |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
-00104     }
-00105 
-00106     <span class="keywordflow">return</span> ret;
-00107 }
-00108 
-00113 <span class="keywordtype">void</span>
-<a name="l00114" id="l00114"></a><a class="code" href="group__bulk__to__next.html#ga3">00114</a> <a class="code" href=
+00112     }
+00113 
+00114     <span class="keywordflow">return</span> ret;
+00115 }
+00116 
+00121 <span class="keywordtype">void</span>
+<a name="l00122" id="l00122"></a><a class="code" href="group__bulk__to__next.html#ga3">00122</a> <a class="code" href=
 "group__debug.html#ga6">netsnmp_init_bulk_to_next_helper</a>(<span class="keywordtype">void</span>)
-00115 {
-00116     <a class="code" href="group__handler.html#ga36">netsnmp_register_handler_by_name</a>(<span class=
+00123 {
+00124     <a class="code" href="group__handler.html#ga36">netsnmp_register_handler_by_name</a>(<span class=
 "stringliteral">"bulk_to_next"</span>,
-00117                                      <a class="code" href=
+00125                                      <a class="code" href=
 "group__bulk__to__next.html#ga0">netsnmp_get_bulk_to_next_handler</a>());
-00118 }
+00126 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:36 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:44 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

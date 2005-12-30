@@ -12,8 +12,7 @@
 
   <h1>table_dataset: Helps you implement a table with automatted storage.<br />
   <small>[<a class="el" href="group__table__data.html">table_data: Helps you implement a table with datamatted
-  storage.</a>]</small></h1>This handler helps you implement a table where all the data is expected to be stored within the agent
-  itself and not in some external storage location. <a href="#_details">More...</a>
+  storage.</a>]</small></h1>This helper is obsolete. <a href="#_details">More...</a>
 
   <table border="0" cellpadding="0" cellspacing="0">
     <tr>
@@ -50,24 +49,174 @@
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
-      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_table_row *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga2">netsnmp_get_table_data_set_handler</a> (netsnmp_table_data_set *data_set)</td>
+      "group__table__dataset.html#ga2">netsnmp_table_data_set_clone_row</a> (netsnmp_table_row *row)</td>
     </tr>
 
     <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">Given a netsnmp_table_data_set definition, create a handler for it. <a href="#ga2"></a><br /></td>
+      <td class="mdescRight">clones a dataset row, including all data. <a href="#ga2"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE netsnmp_table_data_set_storage
+      *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga3">netsnmp_table_dataset_delete_data</a> (netsnmp_table_data_set_storage *data)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">deletes a single dataset table data. <a href="#ga3"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga4">netsnmp_table_dataset_delete_all_data</a> (netsnmp_table_data_set_storage *data)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">deletes all the data from this node and beyond in the linked list <a href="#ga4"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga5">netsnmp_table_dataset_delete_row</a> (netsnmp_table_row *row)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">deletes all the data from this node and beyond in the linked list <a href="#ga5"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga6">netsnmp_table_dataset_add_row</a> (netsnmp_table_data_set *table, netsnmp_table_row
+      *row)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">adds a new row to a dataset table <a href="#ga6"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga7">netsnmp_table_dataset_replace_row</a> (netsnmp_table_data_set *table, netsnmp_table_row
+      *origrow, netsnmp_table_row *newrow)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">adds a new row to a dataset table <a href="#ga7"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga8">netsnmp_table_dataset_remove_row</a> (netsnmp_table_data_set *table, netsnmp_table_row
+      *row)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">removes a row from the table, but doesn't delete/free anything <a href="#ga8"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga9">netsnmp_table_dataset_remove_and_delete_row</a> (netsnmp_table_data_set *table,
+      netsnmp_table_row *row)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">removes a row from the table and then deletes it (and all it's data) <a href="#ga9"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_table_row *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga10">netsnmp_table_data_set_create_row_from_defaults</a> (netsnmp_table_data_set_storage
+      *defrow)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">creates a new row from an existing defined default set <a href="#ga10"></a><br /></td>
     </tr>
 
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga3">netsnmp_register_table_data_set</a> (<a class="el" href=
+      "group__table__dataset.html#ga11">netsnmp_table_set_add_default_row</a> (netsnmp_table_data_set *table_set, unsigned int
+      column, int type, int writable, void *default_value, size_t default_value_len)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">adds a new default row to a table_set. <a href="#ga11"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga12">netsnmp_table_set_multi_add_default_row</a> (va_dcl)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">adds multiple data column definitions to each row. <a href="#ga12"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga13">netsnmp_get_table_data_set_handler</a> (netsnmp_table_data_set *data_set)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Given a netsnmp_table_data_set definition, create a handler for it. <a href="#ga13"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga14">netsnmp_register_table_data_set</a> (<a class="el" href=
       "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, netsnmp_table_data_set *data_set,
       <a class="el" href="structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *table_info)</td>
     </tr>
@@ -76,124 +225,12 @@
       <td class="mdescLeft">&nbsp;</td>
 
       <td class="mdescRight">register a given data_set at a given oid (specified in the netsnmp_handler_registration pointer).
-      <a href="#ga3"></a><br /></td>
+      <a href="#ga14"></a><br /></td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_table_data_set_storage *&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga4">netsnmp_table_data_set_find_column</a> (netsnmp_table_data_set_storage *start, unsigned
-      int column)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">Finds a column within a given storage set, given the pointer to the start of the storage set list.
-      <a href="#ga4"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_table_data_set_storage *&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga5">netsnmp_extract_table_data_set_column</a> (<a class="el" href=
-      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, unsigned int column)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">extracts a netsnmp_table_data_set pointer from a given request <a href="#ga5"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE netsnmp_table_data_set *&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga6">netsnmp_extract_table_data_set</a> (<a class="el" href=
-      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">extracts a netsnmp_table_data_set pointer from a given request <a href="#ga6"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga7">netsnmp_mark_row_column_writable</a> (netsnmp_table_row *row, int column, int
-      writable)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">marks a given column in a row as writable or not. <a href="#ga7"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href="group__table__dataset.html#ga8">netsnmp_set_row_column</a>
-      (netsnmp_table_row *row, unsigned int column, int type, const char *value, size_t value_len)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">sets a given column in a row with data given a type, value, and length. <a href=
-      "#ga8"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga9">netsnmp_table_set_add_default_row</a> (netsnmp_table_data_set *table_set, unsigned int
-      column, int type, int writable, void *default_value, size_t default_value_len)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">adds a new default row to a table_set. <a href="#ga9"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_table_row *&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga10">netsnmp_table_data_set_clone_row</a> (netsnmp_table_row *row)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">clones a dataset row, including all data. <a href="#ga10"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_table_row *&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga11">netsnmp_table_data_set_create_row_from_defaults</a> (netsnmp_table_data_set_storage
-      *defrow)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">creates a new row from an existing defined default set <a href="#ga11"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga12" doxytag=
-      "table_dataset::netsnmp_table_data_set_create_newrowstash" id="ga12"></a> newrow_stash *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga15" doxytag=
+      "table_dataset::netsnmp_table_data_set_create_newrowstash" id="ga15"></a> newrow_stash *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_table_data_set_create_newrowstash</b> (netsnmp_table_data_set
       *datatable, <a class="el" href="structnetsnmp__table__request__info__s.html">netsnmp_table_request_info</a>
@@ -201,10 +238,10 @@
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga16" doxytag=
+      "table_dataset::netsnmp_table_data_set_helper_handler" id="ga16"></a> int&nbsp;</td>
 
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga13">netsnmp_table_data_set_helper_handler</a> (<a class="el" href=
+      <td class="memItemRight" valign="bottom"><b>netsnmp_table_data_set_helper_handler</b> (<a class="el" href=
       "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler, <a class="el" href=
       "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
       "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
@@ -212,16 +249,38 @@
     </tr>
 
     <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE netsnmp_table_data_set *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga17">netsnmp_extract_table_data_set</a> (<a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request)</td>
+    </tr>
+
+    <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">implements the table data helper. <a href="#ga13"></a><br /></td>
+      <td class="mdescRight">extracts a netsnmp_table_data_set pointer from a given request <a href="#ga17"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_table_data_set_storage *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga18">netsnmp_extract_table_data_set_column</a> (<a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, unsigned int column)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">extracts a netsnmp_table_data_set pointer from a given request <a href="#ga18"></a><br /></td>
     </tr>
 
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga14">netsnmp_register_auto_data_table</a> (netsnmp_table_data_set *table_set, char
+      "group__table__dataset.html#ga19">netsnmp_register_auto_data_table</a> (netsnmp_table_data_set *table_set, char
       *registration_name)</td>
     </tr>
 
@@ -229,176 +288,139 @@
       <td class="mdescLeft">&nbsp;</td>
 
       <td class="mdescRight">registers a table_dataset so that the "add_row" snmpd.conf token can be used to add data to this
-      table. <a href="#ga14"></a><br /></td>
+      table. <a href="#ga19"></a><br /></td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga15" doxytag=
-      "table_dataset::netsnmp_config_parse_table_set" id="ga15"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga21" doxytag=
+      "table_dataset::netsnmp_config_parse_table_set" id="ga21"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_config_parse_table_set</b> (const char *token, char *line)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga16" doxytag=
-      "table_dataset::netsnmp_config_parse_add_row" id="ga16"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga22" doxytag=
+      "table_dataset::netsnmp_config_parse_add_row" id="ga22"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_config_parse_add_row</b> (const char *token, char *line)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_table_row *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga17">netsnmp_table_dataset_add_index</a> (netsnmp_table_data_set *table, u_char type)</td>
+      "group__table__dataset.html#ga23">netsnmp_table_data_set_get_first_row</a> (netsnmp_table_data_set *table)</td>
     </tr>
 
     <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">adds an index to the table. <a href="#ga17"></a><br /></td>
+      <td class="mdescRight">returns the first row in the table <a href="#ga23"></a><br /></td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_table_row *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga18">netsnmp_table_dataset_add_row</a> (netsnmp_table_data_set *table, netsnmp_table_row
+      "group__table__dataset.html#ga24">netsnmp_table_data_set_get_next_row</a> (netsnmp_table_data_set *table, netsnmp_table_row
       *row)</td>
     </tr>
 
     <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">adds a new row to a dataset table <a href="#ga18"></a><br /></td>
+      <td class="mdescRight">returns the next row in the table <a href="#ga24"></a><br /></td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga19">netsnmp_table_dataset_replace_row</a> (netsnmp_table_data_set *table, netsnmp_table_row
-      *origrow, netsnmp_table_row *newrow)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">adds a new row to a dataset table <a href="#ga19"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE netsnmp_table_data_set_storage
-      *&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga20">netsnmp_table_dataset_delete_data</a> (netsnmp_table_data_set_storage *data)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">deletes a single dataset table data. <a href="#ga20"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga21">netsnmp_table_dataset_delete_all_data</a> (netsnmp_table_data_set_storage *data)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">deletes all the data from this node and beyond in the linked list <a href="#ga21"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga22">netsnmp_table_dataset_delete_row</a> (netsnmp_table_row *row)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">deletes all the data from this node and beyond in the linked list <a href="#ga22"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga23">netsnmp_table_dataset_remove_row</a> (netsnmp_table_data_set *table, netsnmp_table_row
-      *row)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">removes a row from the table, but doesn't delete/free anything <a href="#ga23"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga24">netsnmp_table_dataset_remove_and_delete_row</a> (netsnmp_table_data_set *table,
-      netsnmp_table_row *row)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">removes a row from the table and then deletes it (and all it's data) <a href="#ga24"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga25">netsnmp_table_set_multi_add_default_row</a> (va_dcl)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">adds multiple data column definitions to each row. <a href="#ga25"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
-
-      <td class="memItemRight" valign="bottom"><a class="el" href=
-      "group__table__dataset.html#ga26">netsnmp_table_set_add_indexes</a> (va_alist)</td>
-    </tr>
-
-    <tr>
-      <td class="mdescLeft">&nbsp;</td>
-
-      <td class="mdescRight">adds multiple indexes to a table_dataset helper object. <a href="#ga26"></a><br /></td>
-    </tr>
-
-    <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga27" doxytag=
-      "table_dataset::netsnmp_table_set_num_rows" id="ga27"></a> int&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga25" doxytag=
+      "table_dataset::netsnmp_table_set_num_rows" id="ga25"></a> int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_table_set_num_rows</b> (netsnmp_table_data_set *table)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_table_data_set_storage *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga26">netsnmp_table_data_set_find_column</a> (netsnmp_table_data_set_storage *start, unsigned
+      int column)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Finds a column within a given storage set, given the pointer to the start of the storage set list.
+      <a href="#ga26"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga27">netsnmp_mark_row_column_writable</a> (netsnmp_table_row *row, int column, int
+      writable)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">marks a given column in a row as writable or not. <a href="#ga27"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__table__dataset.html#ga28">netsnmp_set_row_column</a>
+      (netsnmp_table_row *row, unsigned int column, int type, const char *value, size_t value_len)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">sets a given column in a row with data given a type, value, and length. <a href=
+      "#ga28"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga29">netsnmp_table_dataset_add_index</a> (netsnmp_table_data_set *table, u_char type)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">adds an index to the table. <a href="#ga29"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__dataset.html#ga30">netsnmp_table_set_add_indexes</a> (va_alist)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">adds multiple indexes to a table_dataset helper object. <a href="#ga30"></a><br /></td>
     </tr>
   </table>
   <hr />
   <a name="_details" id="_details"></a>
 
-  <h2>Detailed Description</h2>This handler helps you implement a table where all the data is expected to be stored within the
-  agent itself and not in some external storage location.
+  <h2>Detailed Description</h2>This helper is obsolete.
 
-  <p>It handles all MIB requests including GETs, GETNEXTs and SETs. It's possible to simply create a table without actually ever
-  defining a handler to be called when SNMP requests come in. To use the data, you can either attach a sub-handler that merely
-  uses/manipulates the data further when requests come in, or you can loop through it externally when it's actually needed. This
-  handler is most useful in cases where a table is holding configuration data for something which gets triggered via another
-  event.</p>
+  <p>If you are writing a new module, please consider using the table_dataset2 helper instead.</p>
+
+  <p>This handler helps you implement a table where all the data is expected to be stored within the agent itself and not in some
+  external storage location. It handles all MIB requests including GETs, GETNEXTs and SETs. It's possible to simply create a
+  table without actually ever defining a handler to be called when SNMP requests come in. To use the data, you can either attach
+  a sub-handler that merely uses/manipulates the data further when requests come in, or you can loop through it externally when
+  it's actually needed. This handler is most useful in cases where a table is holding configuration data for something which gets
+  triggered via another event.</p>
 
   <p>NOTE NOTE NOTE: This helper isn't complete and is likely to change somewhat over time. Specifically, the way it stores data
   internally may change drastically.</p>
@@ -442,14 +464,14 @@
           <dd><a class="el" href="data__set_8c-example.html#a0">data_set.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00074">74</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00079">79</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table__data_8c-source.html#l00544">netsnmp_create_table_data()</a>, and <a class="el"
+        <p>References <a class="el" href="table__data_8c-source.html#l00051">netsnmp_create_table_data()</a>, and <a class="el"
         href="tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga6" doxytag="table_dataset.c::netsnmp_extract_table_data_set" id="ga6"></a>
+  </table><a class="anchor" name="ga17" doxytag="table_dataset.c::netsnmp_extract_table_data_set" id="ga17"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -482,13 +504,13 @@
       <td>
         <p>extracts a netsnmp_table_data_set pointer from a given request</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00187">187</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00795">795</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8c-source.html#l00797">netsnmp_request_get_list_data()</a>.</p>
+        <p>References <a class="el" href="agent__handler_8c-source.html#l00802">netsnmp_request_get_list_data()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga5" doxytag="table_dataset.c::netsnmp_extract_table_data_set_column" id="ga5"></a>
+  </table><a class="anchor" name="ga18" doxytag="table_dataset.c::netsnmp_extract_table_data_set_column" id="ga18"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -535,14 +557,14 @@
       <td>
         <p>extracts a netsnmp_table_data_set pointer from a given request</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00173">173</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00805">805</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table__data_8c-source.html#l00644">netsnmp_extract_table_row_data()</a>, and <a class=
-        "el" href="table__dataset_8c-source.html#l00161">netsnmp_table_data_set_find_column()</a>.</p>
+        <p>References <a class="el" href="table__data_8c-source.html#l00665">netsnmp_extract_table_row_data()</a>, and <a class=
+        "el" href="table__dataset_8c-source.html#l01136">netsnmp_table_data_set_find_column()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga2" doxytag="table_dataset.c::netsnmp_get_table_data_set_handler" id="ga2"></a>
+  </table><a class="anchor" name="ga13" doxytag="table_dataset.c::netsnmp_get_table_data_set_handler" id="ga13"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -574,19 +596,19 @@
       <td>
         <p>Given a netsnmp_table_data_set definition, create a handler for it.</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00086">86</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00355">355</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00051">netsnmp_mib_handler_s::flags</a>, <a class="el"
-        href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00052">netsnmp_mib_handler_s::flags</a>, <a class="el"
+        href="agent__handler_8h-source.html#l00050">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, and <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>.</p>
 
-        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l00113">netsnmp_register_table_data_set()</a>.</p>
+        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l00381">netsnmp_register_table_data_set()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga7" doxytag="table_dataset.c::netsnmp_mark_row_column_writable" id="ga7"></a>
+  </table><a class="anchor" name="ga27" doxytag="table_dataset.c::netsnmp_mark_row_column_writable" id="ga27"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -647,18 +669,19 @@
           <dd><a class="el" href="data__set_8c-example.html#a5">data_set.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00197">197</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01148">1148</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table__dataset_8c-source.html#l00161">netsnmp_table_data_set_find_column()</a>,
-        <a class="el" href="snmp__logging_8c-source.html#l01137">snmp_log()</a>, and <a class="el" href=
+        <p>References <a class="el" href="snmp__api_8h-source.html#l00535">variable_list::data</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l01136">netsnmp_table_data_set_find_column()</a>, <a class="el" href=
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>, and <a class="el" href=
         "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
 
         <p>Referenced by <a class="el" href=
-        "table__dataset_8c-source.html#l00381">netsnmp_table_data_set_create_row_from_defaults()</a>.</p>
+        "table__dataset_8c-source.html#l00225">netsnmp_table_data_set_create_row_from_defaults()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga14" doxytag="table_dataset.c::netsnmp_register_auto_data_table" id="ga14"></a>
+  </table><a class="anchor" name="ga19" doxytag="table_dataset.c::netsnmp_register_auto_data_table" id="ga19"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -717,16 +740,16 @@
           <dd><a class="el" href="data__set_8c-example.html#a7">data_set.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00775">775</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00832">832</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="snmp__api_8h-source.html#l00517">variable_list::name</a>, <a class="el" href=
+        <p>References <a class="el" href="snmp__api_8h-source.html#l00521">variable_list::name</a>, <a class="el" href=
         "data__list_8c-source.html#l00083">netsnmp_add_list_data()</a>, <a class="el" href=
-        "data__list_8c-source.html#l00064">netsnmp_create_data_list()</a>, and <a class="el" href=
+        "data__list_8c-source.html#l00060">netsnmp_create_data_list()</a>, and <a class="el" href=
         "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga3" doxytag="table_dataset.c::netsnmp_register_table_data_set" id="ga3"></a>
+  </table><a class="anchor" name="ga14" doxytag="table_dataset.c::netsnmp_register_table_data_set" id="ga14"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -792,21 +815,21 @@
           <dd><a class="el" href="data__set_8c-example.html#a2">data_set.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00113">113</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00381">381</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
         <p>References <a class="el" href="table_8h-source.html#l00076">netsnmp_table_registration_info_s::indexes</a>, <a class=
         "el" href="table_8h-source.html#l00087">netsnmp_table_registration_info_s::max_column</a>, <a class="el" href=
         "table_8h-source.html#l00085">netsnmp_table_registration_info_s::min_column</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00086">netsnmp_get_table_data_set_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00355">netsnmp_get_table_data_set_handler()</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00286">netsnmp_register_table_data()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00379">netsnmp_inject_handler()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00393">netsnmp_register_table_data()</a>, <a class="el" href=
         "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>, <a class="el" href="tools_8h-source.html#l00085">SNMP_MAX</a>, and
         <a class="el" href="tools_8h-source.html#l00089">SNMP_MIN</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga8" doxytag="table_dataset.c::netsnmp_set_row_column" id="ga8"></a>
+  </table><a class="anchor" name="ga28" doxytag="table_dataset.c::netsnmp_set_row_column" id="ga28"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -889,19 +912,21 @@
           <dd><a class="el" href="data__set_8c-example.html#a4">data_set.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00233">233</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01183">1183</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="tools_8c-source.html#l00233">memdup()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00161">netsnmp_table_data_set_find_column()</a>, <a class="el" href=
-        "tools_8h-source.html#l00053">SNMP_FREE</a>, <a class="el" href="snmp__logging_8c-source.html#l01137">snmp_log()</a>, and
-        <a class="el" href="tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
+        <p>References <a class="el" href="snmp__api_8h-source.html#l00535">variable_list::data</a>, <a class="el" href=
+        "tools_8c-source.html#l00236">memdup()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l01136">netsnmp_table_data_set_find_column()</a>, <a class="el" href=
+        "tools_8h-source.html#l00053">SNMP_FREE</a>, <a class="el" href="snmp__logging_8c-source.html#l01205">snmp_log()</a>,
+        <a class="el" href="tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>, and <a class="el" href=
+        "snmp__api_8h-source.html#l00525">variable_list::type</a>.</p>
 
         <p>Referenced by <a class="el" href=
-        "table__dataset_8c-source.html#l00381">netsnmp_table_data_set_create_row_from_defaults()</a>.</p>
+        "table__dataset_8c-source.html#l00225">netsnmp_table_data_set_create_row_from_defaults()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga10" doxytag="table_dataset.c::netsnmp_table_data_set_clone_row" id="ga10"></a>
+  </table><a class="anchor" name="ga2" doxytag="table_dataset.c::netsnmp_table_data_set_clone_row" id="ga2"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -932,17 +957,15 @@
       <td>
         <p>clones a dataset row, including all data.</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00347">347</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00091">91</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="tools_8c-source.html#l00233">memdup()</a>, and <a class="el" href=
-        "table__data_8c-source.html#l00690">netsnmp_table_data_clone_row()</a>.</p>
-
-        <p>Referenced by <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>.</p>
+        <p>References <a class="el" href="tools_8c-source.html#l00236">memdup()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00069">netsnmp_table_data_clone_row()</a>, and <a class="el" href=
+        "table__dataset_8c-source.html#l00157">netsnmp_table_dataset_delete_row()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga11" doxytag="table_dataset.c::netsnmp_table_data_set_create_row_from_defaults" id="ga11"></a>
+  </table><a class="anchor" name="ga10" doxytag="table_dataset.c::netsnmp_table_data_set_create_row_from_defaults" id="ga10"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -973,15 +996,15 @@
       <td>
         <p>creates a new row from an existing defined default set</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00381">381</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00225">225</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table__data_8c-source.html#l00554">netsnmp_create_table_data_row()</a>, <a class="el"
-        href="table__dataset_8c-source.html#l00197">netsnmp_mark_row_column_writable()</a>, and <a class="el" href=
-        "table__dataset_8c-source.html#l00233">netsnmp_set_row_column()</a>.</p>
+        <p>References <a class="el" href="table__data_8c-source.html#l00061">netsnmp_create_table_data_row()</a>, <a class="el"
+        href="table__dataset_8c-source.html#l01148">netsnmp_mark_row_column_writable()</a>, and <a class="el" href=
+        "table__dataset_8c-source.html#l01183">netsnmp_set_row_column()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga4" doxytag="table_dataset.c::netsnmp_table_data_set_find_column" id="ga4"></a>
+  </table><a class="anchor" name="ga26" doxytag="table_dataset.c::netsnmp_table_data_set_find_column" id="ga26"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1026,31 +1049,66 @@
       <td>
         <p>Finds a column within a given storage set, given the pointer to the start of the storage set list.</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00161">161</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01136">1136</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l00173">netsnmp_extract_table_data_set_column()</a>,
-        <a class="el" href="table__dataset_8c-source.html#l00197">netsnmp_mark_row_column_writable()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00233">netsnmp_set_row_column()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, and <a class="el" href=
-        "table__dataset_8c-source.html#l00289">netsnmp_table_set_add_default_row()</a>.</p>
+        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l00805">netsnmp_extract_table_data_set_column()</a>,
+        <a class="el" href="table__dataset_8c-source.html#l01148">netsnmp_mark_row_column_writable()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l01183">netsnmp_set_row_column()</a>, and <a class="el" href=
+        "table__dataset_8c-source.html#l00251">netsnmp_table_set_add_default_row()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga13" doxytag="table_dataset.c::netsnmp_table_data_set_helper_handler" id="ga13"></a>
+  </table><a class="anchor" name="ga23" doxytag="table_dataset.c::netsnmp_table_data_set_get_first_row" id="ga23"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
       <td class="mdRow">
         <table cellpadding="0" cellspacing="0" border="0">
           <tr>
-            <td class="md" nowrap="nowrap" valign="top">int netsnmp_table_data_set_helper_handler</td>
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_table_row* netsnmp_table_data_set_get_first_row</td>
 
             <td class="md" valign="top">(&nbsp;</td>
 
-            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
-            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_table_data_set *&nbsp;</td>
 
-            <td class="mdname" nowrap="nowrap"><em>handler</em>,</td>
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>table</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>returns the first row in the table</p>
+
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01105">1105</a> of file <a class="el" href=
+        "table__dataset_8c-source.html">table_dataset.c</a>.</p>
+
+        <p>References <a class="el" href="table__data_8c-source.html#l00784">netsnmp_table_data_get_first_row()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga24" doxytag="table_dataset.c::netsnmp_table_data_set_get_next_row" id="ga24"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_table_row* netsnmp_table_data_set_get_next_row</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_table_data_set *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>table</em>,</td>
           </tr>
 
           <tr>
@@ -1058,32 +1116,9 @@
 
             <td class="md"></td>
 
-            <td class="md" nowrap="nowrap"><a class="el" href=
-            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+            <td class="md" nowrap="nowrap">netsnmp_table_row *&nbsp;</td>
 
-            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
-          </tr>
-
-          <tr>
-            <td class="md" nowrap="nowrap" align="right"></td>
-
-            <td class="md"></td>
-
-            <td class="md" nowrap="nowrap"><a class="el" href=
-            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
-
-            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
-          </tr>
-
-          <tr>
-            <td class="md" nowrap="nowrap" align="right"></td>
-
-            <td class="md"></td>
-
-            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>
-            *&nbsp;</td>
-
-            <td class="mdname" nowrap="nowrap"><em>requests</em></td>
+            <td class="mdname" nowrap="nowrap"><em>row</em></td>
           </tr>
 
           <tr>
@@ -1103,50 +1138,15 @@
       <td>&nbsp;</td>
 
       <td>
-        <p>implements the table data helper.</p>
+        <p>returns the next row in the table</p>
 
-        <p>This is the routine that takes care of all SNMP requests coming into the table.</p>
-
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00419">419</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01112">1112</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table_8h-source.html#l00104">netsnmp_table_request_info_s::colnum</a>, <a class="el"
-        href="snmp__api_8h-source.html#l00531">variable_list::data</a>, <a class="el" href=
-        "table_8h-source.html#l00110">netsnmp_table_request_info_s::index_oid</a>, <a class="el" href=
-        "table_8h-source.html#l00111">netsnmp_table_request_info_s::index_oid_len</a>, <a class="el" href=
-        "snmp__agent_8h-source.html#l00159">netsnmp_agent_request_info_s::mode</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00517">variable_list::name</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00519">variable_list::name_length</a>, <a class="el" href=
-        "data__list_8c-source.html#l00064">netsnmp_create_data_list()</a>, <a class="el" href=
-        "table_8c-source.html#l00128">netsnmp_extract_table_info()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00627">netsnmp_extract_table_row()</a>, <a class="el" href=
-        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
-        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
-        "oid__stash_8c-source.html#l00087">netsnmp_oid_stash_add_data()</a>, <a class="el" href=
-        "oid__stash_8c-source.html#l00283">netsnmp_oid_stash_get_data()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00755">netsnmp_request_add_list_data()</a>, <a class="el" href=
-        "snmp__agent_8c-source.html#l03461">netsnmp_set_request_error()</a>, <a class="el" href=
-        "tools_8c-source.html#l00252">netsnmp_strdup_and_null()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00656">netsnmp_table_data_build_result()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00347">netsnmp_table_data_set_clone_row()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00161">netsnmp_table_data_set_find_column()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00970">netsnmp_table_dataset_add_row()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l01016">netsnmp_table_dataset_delete_row()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l01040">netsnmp_table_dataset_remove_and_delete_row()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00980">netsnmp_table_dataset_replace_row()</a>, <a class="el" href=
-        "snmp__agent_8h-source.html#l00092">netsnmp_request_info_s::next</a>, <a class="el" href=
-        "snmp__agent_8h-source.html#l00079">netsnmp_request_info_s::processed</a>, <a class="el" href=
-        "snmp__agent_8h-source.html#l00058">netsnmp_request_info_s::requestvb</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, <a class="el" href=
-        "tools_8h-source.html#l00053">SNMP_FREE</a>, <a class="el" href="snmp__logging_8c-source.html#l01137">snmp_log()</a>,
-        <a class="el" href="tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00521">variable_list::type</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00523">variable_list::val</a>, and <a class="el" href=
-        "snmp__api_8h-source.html#l00525">variable_list::val_len</a>.</p>
+        <p>References <a class="el" href="table__data_8c-source.html#l00793">netsnmp_table_data_get_next_row()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga17" doxytag="table_dataset.c::netsnmp_table_dataset_add_index" id="ga17"></a>
+  </table><a class="anchor" name="ga29" doxytag="table_dataset.c::netsnmp_table_dataset_add_index" id="ga29"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1199,13 +1199,13 @@
           <dd><a class="el" href="data__set_8c-example.html#a1">data_set.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00961">961</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01237">1237</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l01101">netsnmp_table_set_add_indexes()</a>.</p>
+        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l01251">netsnmp_table_set_add_indexes()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga18" doxytag="table_dataset.c::netsnmp_table_dataset_add_row" id="ga18"></a>
+  </table><a class="anchor" name="ga6" doxytag="table_dataset.c::netsnmp_table_dataset_add_row" id="ga6"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1256,16 +1256,13 @@
           <dd><a class="el" href="data__set_8c-example.html#a6">data_set.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00970">970</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00170">170</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table__data_8c-source.html#l00051">netsnmp_table_data_add_row()</a>.</p>
-
-        <p>Referenced by <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>.</p>
+        <p>References <a class="el" href="table__data_8c-source.html#l00129">netsnmp_table_data_add_row()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga21" doxytag="table_dataset.c::netsnmp_table_dataset_delete_all_data" id="ga21"></a>
+  </table><a class="anchor" name="ga4" doxytag="table_dataset.c::netsnmp_table_dataset_delete_all_data" id="ga4"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1296,16 +1293,16 @@
       <td>
         <p>deletes all the data from this node and beyond in the linked list</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01006">1006</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00147">147</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table__dataset_8c-source.html#l00993">netsnmp_table_dataset_delete_data()</a>.</p>
+        <p>References <a class="el" href="table__dataset_8c-source.html#l00134">netsnmp_table_dataset_delete_data()</a>.</p>
 
-        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l01016">netsnmp_table_dataset_delete_row()</a>, and
-        <a class="el" href="table__dataset_8c-source.html#l01040">netsnmp_table_dataset_remove_and_delete_row()</a>.</p>
+        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l00157">netsnmp_table_dataset_delete_row()</a>, and
+        <a class="el" href="table__dataset_8c-source.html#l00202">netsnmp_table_dataset_remove_and_delete_row()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga20" doxytag="table_dataset.c::netsnmp_table_dataset_delete_data" id="ga20"></a>
+  </table><a class="anchor" name="ga3" doxytag="table_dataset.c::netsnmp_table_dataset_delete_data" id="ga3"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1339,16 +1336,16 @@
 
         <p>returns the (possibly still good) next pointer of the deleted data object.</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00993">993</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00134">134</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
         <p>References <a class="el" href="tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
 
         <p>Referenced by <a class="el" href=
-        "table__dataset_8c-source.html#l01006">netsnmp_table_dataset_delete_all_data()</a>.</p>
+        "table__dataset_8c-source.html#l00147">netsnmp_table_dataset_delete_all_data()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga22" doxytag="table_dataset.c::netsnmp_table_dataset_delete_row" id="ga22"></a>
+  </table><a class="anchor" name="ga5" doxytag="table_dataset.c::netsnmp_table_dataset_delete_row" id="ga5"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1379,17 +1376,16 @@
       <td>
         <p>deletes all the data from this node and beyond in the linked list</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01016">1016</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00157">157</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table__data_8c-source.html#l00177">netsnmp_table_data_delete_row()</a>, and <a class=
-        "el" href="table__dataset_8c-source.html#l01006">netsnmp_table_dataset_delete_all_data()</a>.</p>
+        <p>References <a class="el" href="table__data_8c-source.html#l00100">netsnmp_table_data_delete_row()</a>, and <a class=
+        "el" href="table__dataset_8c-source.html#l00147">netsnmp_table_dataset_delete_all_data()</a>.</p>
 
-        <p>Referenced by <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l00091">netsnmp_table_data_set_clone_row()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga24" doxytag="table_dataset.c::netsnmp_table_dataset_remove_and_delete_row" id="ga24"></a>
+  </table><a class="anchor" name="ga9" doxytag="table_dataset.c::netsnmp_table_dataset_remove_and_delete_row" id="ga9"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1434,17 +1430,14 @@
       <td>
         <p>removes a row from the table and then deletes it (and all it's data)</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01040">1040</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00202">202</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table__data_8c-source.html#l00206">netsnmp_table_data_remove_and_delete_row()</a>, and
-        <a class="el" href="table__dataset_8c-source.html#l01006">netsnmp_table_dataset_delete_all_data()</a>.</p>
-
-        <p>Referenced by <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>.</p>
+        <p>References <a class="el" href="table__data_8c-source.html#l00269">netsnmp_table_data_remove_and_delete_row()</a>, and
+        <a class="el" href="table__dataset_8c-source.html#l00147">netsnmp_table_dataset_delete_all_data()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga23" doxytag="table_dataset.c::netsnmp_table_dataset_remove_row" id="ga23"></a>
+  </table><a class="anchor" name="ga8" doxytag="table_dataset.c::netsnmp_table_dataset_remove_row" id="ga8"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1489,13 +1482,13 @@
       <td>
         <p>removes a row from the table, but doesn't delete/free anything</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01029">1029</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00191">191</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table__data_8c-source.html#l00206">netsnmp_table_data_remove_and_delete_row()</a>.</p>
+        <p>References <a class="el" href="table__data_8c-source.html#l00269">netsnmp_table_data_remove_and_delete_row()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga19" doxytag="table_dataset.c::netsnmp_table_dataset_replace_row" id="ga19"></a>
+  </table><a class="anchor" name="ga7" doxytag="table_dataset.c::netsnmp_table_dataset_replace_row" id="ga7"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1550,16 +1543,13 @@
       <td>
         <p>adds a new row to a dataset table</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00980">980</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00180">180</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table__data_8c-source.html#l00221">netsnmp_table_data_replace_row()</a>.</p>
-
-        <p>Referenced by <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>.</p>
+        <p>References <a class="el" href="table__data_8c-source.html#l00228">netsnmp_table_data_replace_row()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga9" doxytag="table_dataset.c::netsnmp_table_set_add_default_row" id="ga9"></a>
+  </table><a class="anchor" name="ga11" doxytag="table_dataset.c::netsnmp_table_set_add_default_row" id="ga11"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1650,19 +1640,19 @@
 
         <p>returns SNMPERR_SUCCESS or SNMPERR_FAILURE</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00289">289</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00251">251</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="tools_8c-source.html#l00233">memdup()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00161">netsnmp_table_data_set_find_column()</a>, <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>, and <a class="el" href=
+        <p>References <a class="el" href="tools_8c-source.html#l00236">memdup()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l01136">netsnmp_table_data_set_find_column()</a>, <a class="el" href=
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>, and <a class="el" href=
         "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
 
         <p>Referenced by <a class="el" href=
-        "table__dataset_8c-source.html#l01062">netsnmp_table_set_multi_add_default_row()</a>.</p>
+        "table__dataset_8c-source.html#l00314">netsnmp_table_set_multi_add_default_row()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga26" doxytag="table_dataset.c::netsnmp_table_set_add_indexes" id="ga26"></a>
+  </table><a class="anchor" name="ga30" doxytag="table_dataset.c::netsnmp_table_set_add_indexes" id="ga30"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1695,13 +1685,13 @@
 
         <p>To end the list, use a 0 after the list of ASN index types.</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01101">1101</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01251">1251</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table__dataset_8c-source.html#l00961">netsnmp_table_dataset_add_index()</a>.</p>
+        <p>References <a class="el" href="table__dataset_8c-source.html#l01237">netsnmp_table_dataset_add_index()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga25" doxytag="table_dataset.c::netsnmp_table_set_multi_add_default_row" id="ga25"></a>
+  </table><a class="anchor" name="ga12" doxytag="table_dataset.c::netsnmp_table_set_multi_add_default_row" id="ga12"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -1734,22 +1724,21 @@
 
         <p>Functionally, this is a wrapper around calling netsnmp_table_set_add_default_row repeatedly for you.</p>
 
-        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l01062">1062</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__dataset_8c-source.html#l00314">314</a> of file <a class="el" href=
         "table__dataset_8c-source.html">table_dataset.c</a>.</p>
 
-        <p>References <a class="el" href="table__dataset_8c-source.html#l00289">netsnmp_table_set_add_default_row()</a>, and
-        <a class="el" href="table__dataset_8c-source.html#l01062">netsnmp_table_set_multi_add_default_row()</a>.</p>
+        <p>References <a class="el" href="table__dataset_8c-source.html#l00251">netsnmp_table_set_add_default_row()</a>, and
+        <a class="el" href="table__dataset_8c-source.html#l00314">netsnmp_table_set_multi_add_default_row()</a>.</p>
 
         <p>Referenced by <a class="el" href=
-        "table__dataset_8c-source.html#l01062">netsnmp_table_set_multi_add_default_row()</a>.</p>
+        "table__dataset_8c-source.html#l00314">netsnmp_table_set_multi_add_default_row()</a>.</p>
       </td>
     </tr>
   </table>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:45 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:48:01 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

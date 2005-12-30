@@ -93,123 +93,143 @@
 00075 <span class="comment">     * Try to ensure we have 32-bit (and hopefully 64-bit)</span>
 00076 <span class="comment">     *    integer types available.</span>
 00077 <span class="comment">     */</span>
-00078 <span class="preprocessor">#ifndef HAVE_INT32_T</span>
-00079 <span class="preprocessor">#if   SIZEOF_INT == 4</span>
-00080 <span class="keyword">typedef</span> <span class="keywordtype">int</span> int32_t
-00081 <span class="preprocessor">#elif SIZEOF_LONG == 4</span>
-00082 <span class="keyword">typedef</span> <span class="keywordtype">long</span> int32_t
-00083 <span class="preprocessor">#elif SIZEOF_SHORT == 4</span>
-00084 <span class="keyword">typedef</span> <span class="keywordtype">short</span> int32_t
-00085 <span class="preprocessor">#else</span>
-00086 <span class="keyword">typedef</span> <span class="keywordtype">int</span> int32_t
+00078 
+00079 <span class="preprocessor">#ifndef HAVE_INT32_T</span>
+00080 <span class="preprocessor">#if   SIZEOF_INT == 4</span>
+00081 <span class="preprocessor">#define INT32_T int </span>
+00082 <span class="preprocessor">#elif SIZEOF_LONG == 4</span>
+00083 <span class="preprocessor">#define INT32_T long </span>
+00084 <span class="preprocessor">#elif SIZEOF_SHORT == 4</span>
+00085 <span class="preprocessor">#define INT32_T short </span>
+00086 <span class="preprocessor">#else</span>
 00087 <span class="preprocessor">#define _INT32_IS_NOT_32BIT</span>
-00088 <span class="preprocessor">#endif</span>
+00088 <span class="preprocessor">#define INT32_T int </span>
 00089 <span class="preprocessor">#endif</span>
-00090 
-00091 <span class="preprocessor">#ifndef HAVE_UINT32_T</span>
-00092 <span class="preprocessor">#ifdef HAVE_U_INT32_T</span>
-00093 <span class="keyword">typedef</span> u_int32_t        uint32_t
-00094 <span class="preprocessor">#else</span>
-00095 <span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> int32_t uint32_t
-00096 <span class="preprocessor">#endif</span>
-00097 <span class="preprocessor">#endif</span>
-00098 
-00099 <span class="preprocessor">#ifndef HAVE_INT64_T</span>
-00100 <span class="preprocessor">#if SIZEOF_LONG == 8</span>
-00101 <span class="keyword">typedef</span> <span class="keywordtype">long</span> int64_t
-00102 <span class="preprocessor">#elif SIZEOF_LONG_LONG == 8</span>
-00103 <span class="keyword">typedef</span> <span class="keywordtype">long</span> <span class="keywordtype">long</span> int64_t
-00104 <span class="preprocessor">#elif   SIZEOF_INT == 8</span>
-00105 <span class="keyword">typedef</span> <span class="keywordtype">int</span> int64_t
-00106 <span class="preprocessor">#elif SIZEOF_LONG &gt;= 8</span>
-00107 <span class="keyword">typedef</span> <span class="keywordtype">long</span> int64_t
-00108 <span class="preprocessor">#define _INT64_IS_NOT_64BIT</span>
-00109 <span class="preprocessor">#else</span>
-00110 <span class="preprocessor">#define _NO_64BIT_TYPE 1</span>
-00111 <span class="preprocessor">#endif</span>
-00112 <span class="preprocessor">#endif</span>
-00113 
-00114 <span class="preprocessor">#ifndef HAVE_UINT64_T</span>
-00115 <span class="preprocessor">#ifdef HAVE_U_INT64_T</span>
-00116 <span class="keyword">typedef</span> u_int64_t        uint64_t
-00117 <span class="preprocessor">#elif !defined(_NO_64BIT_TYPE)</span>
-00118 <span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> int64_t uint64_t
-00119 <span class="preprocessor">#endif</span>
-00120 <span class="preprocessor">#endif</span>
-00121 
-00122     <span class="comment">/*</span>
-00123 <span class="comment">     *  For the initial release, this will just refer to the</span>
-00124 <span class="comment">     *  relevant UCD header files.</span>
-00125 <span class="comment">     *    In due course, the types and structures relevant to the</span>
-00126 <span class="comment">     *  Net-SNMP API will be identified, and defined here directly.</span>
-00127 <span class="comment">     *</span>
-00128 <span class="comment">     *  But for the time being, this header file is primarily a placeholder,</span>
-00129 <span class="comment">     *  to allow application writers to adopt the new header file names.</span>
-00130 <span class="comment">     */</span>
-00131 
-00132 
-00133 <span class="preprocessor">#include &lt;net-snmp/definitions.h&gt;</span>
-00134 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
-00135 <span class="comment">/*</span>
-00136 <span class="comment"> * #include &lt;net-snmp/library/libsnmp.h&gt; </span>
-00137 <span class="comment"> */</span>
+00090 <span class="keyword">typedef</span> INT32_T int32_t;
+00091 <span class="preprocessor">#endif </span><span class="comment">/* !HAVE_INT32_T */</span>
+00092 
+00093 <span class="preprocessor">#ifndef HAVE_UINT32_T</span>
+00094 <span class="preprocessor">#ifdef HAVE_U_INT32_T</span>
+00095 <span class="keyword">typedef</span> u_int32_t        uint32_t;
+00096 <span class="preprocessor">#else</span>
+00097 <span class="preprocessor">#ifdef INT32_T</span>
+00098 <span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> INT32_T uint32_t;
+00099 <span class="preprocessor">#else</span>
+00100 <span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span>     uint32_t;
+00101 <span class="preprocessor">#endif</span>
+00102 <span class="preprocessor">#endif</span>
+00103 <span class="preprocessor">#endif </span><span class="comment">/* !HAVE_UINT32_T */</span>
+00104 
+00105 <span class="preprocessor">#ifndef HAVE_INT64_T</span>
+00106 <span class="preprocessor">#if SIZEOF_LONG == 8</span>
+00107 <span class="preprocessor">#define INT64_T long </span>
+00108 <span class="preprocessor">#elif SIZEOF_LONG_LONG == 8</span>
+00109 <span class="preprocessor">#define INT64_T long long</span>
+00110 <span class="preprocessor">#elif   SIZEOF_INT == 8</span>
+00111 <span class="preprocessor">#define INT64_T int </span>
+00112 <span class="preprocessor">#elif SIZEOF_LONG &gt;= 8</span>
+00113 <span class="preprocessor">#define INT64_T long </span>
+00114 <span class="preprocessor">#define _INT64_IS_NOT_64BIT</span>
+00115 <span class="preprocessor">#endif</span>
+00116 <span class="preprocessor">#ifdef INT64_T</span>
+00117 <span class="keyword">typedef</span> INT64_T int64_t;
+00118 <span class="preprocessor">#endif</span>
+00119 <span class="preprocessor">#endif </span><span class="comment">/* !HAVE_INT64_T */</span>
+00120 
+00121 <span class="preprocessor">#ifndef HAVE_UINT64_T</span>
+00122 <span class="preprocessor">#ifdef HAVE_U_INT64_T</span>
+00123 <span class="keyword">typedef</span> u_int64_t        uint64_t;
+00124 <span class="preprocessor">#elif defined(INT64_T)</span>
+00125 <span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> INT64_T uint64_t;
+00126 <span class="preprocessor">#endif</span>
+00127 <span class="preprocessor">#endif</span>
+00128 
+00129     <span class="comment">/*</span>
+00130 <span class="comment">     *  For the initial release, this will just refer to the</span>
+00131 <span class="comment">     *  relevant UCD header files.</span>
+00132 <span class="comment">     *    In due course, the types and structures relevant to the</span>
+00133 <span class="comment">     *  Net-SNMP API will be identified, and defined here directly.</span>
+00134 <span class="comment">     *</span>
+00135 <span class="comment">     *  But for the time being, this header file is primarily a placeholder,</span>
+00136 <span class="comment">     *  to allow application writers to adopt the new header file names.</span>
+00137 <span class="comment">     */</span>
 00138 
-00139     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_index_s {
-00140        <span class="keywordtype">int</span>          len;
-00141        oid         *oids;
-00142     } netsnmp_index;
-00143 
-00144 
-00145     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_void_array_s {
-00146        size_t  size;
-00147        <span class="keywordtype">void</span> * *array;
-00148     } netsnmp_void_array;
-00149 
-00150     <span class="comment">/*</span>
-00151 <span class="comment">     * references to various types</span>
-00152 <span class="comment">     */</span>
-00153     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_void {
-00154        <span class="keywordtype">void</span> * val;
-00155     } netsnmp_ref_void;
+00139 
+00140 <span class="preprocessor">#include &lt;net-snmp/definitions.h&gt;</span>
+00141 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00142 <span class="comment">/*</span>
+00143 <span class="comment"> * #include &lt;net-snmp/library/libsnmp.h&gt; </span>
+00144 <span class="comment"> */</span>
+00145 
+00146     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_index_s {
+00147        <span class="keywordtype">int</span>          len;
+00148        oid         *oids;
+00149     } netsnmp_index;
+00150 
+00151 
+00152     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_void_array_s {
+00153        size_t  size;
+00154        <span class="keywordtype">void</span> * *array;
+00155     } netsnmp_void_array;
 00156 
-00157 <span class="preprocessor">#if 0</span>
-00158     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_u_char {
-00159        u_char * val;
-00160     } netsnmp_ref_U_char;
-00161 
-00162     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_char {
-00163        <span class="keywordtype">char</span> * val;
-00164     } netsnmp_ref_void;
-00165 
-00166     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_int_s {
-00167        <span class="keywordtype">int</span> val;
-00168     } netsnmp_ref_int;
-00169 
-00170     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_u_int_s {
-00171        u_int val;
-00172     } netsnmp_ref_int;
-00173 
-00174     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_u_long_s {
-00175        u_long val;
-00176     } netsnmp_ref_u_long;
-00177 <span class="preprocessor">#endif</span>
-00178 
-00179     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_size_t_s {
-00180        size_t val;
-00181     } * netsnmp_ref_size_t;
-00182 
-00183 <span class="preprocessor">#ifdef __cplusplus</span>
-00184 }
-00185 <span class="preprocessor">#endif</span>
-00186 
-00187 <span class="preprocessor">#endif                          </span><span class="comment">/* NET_SNMP_TYPES_H */</span>
+00157     <span class="comment">/*</span>
+00158 <span class="comment">     * references to various types</span>
+00159 <span class="comment">     */</span>
+00160     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_void {
+00161        <span class="keywordtype">void</span> * val;
+00162     } netsnmp_ref_void;
+00163 
+00164     <span class="keyword">typedef</span> <span class="keyword">union </span>{
+00165         u_long  ul;
+00166         u_int   ui;
+00167         u_short us;
+00168         u_char  uc;
+00169         <span class="keywordtype">long</span>    sl;
+00170         <span class="keywordtype">int</span>     si;
+00171         <span class="keywordtype">short</span>   ss;
+00172         <span class="keywordtype">char</span>    sc;
+00173         <span class="keywordtype">char</span> *  cp;
+00174         <span class="keywordtype">void</span> *  vp;
+00175     } netsnmp_cvalue;
+00176 
+00177 <span class="preprocessor">#if 0</span>
+00178     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_u_char {
+00179        u_char * val;
+00180     } netsnmp_ref_U_char;
+00181 
+00182     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_char {
+00183        <span class="keywordtype">char</span> * val;
+00184     } netsnmp_ref_void;
+00185 
+00186     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_int_s {
+00187        <span class="keywordtype">int</span> val;
+00188     } netsnmp_ref_int;
+00189 
+00190     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_u_int_s {
+00191        u_int val;
+00192     } netsnmp_ref_int;
+00193 
+00194     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_u_long_s {
+00195        u_long val;
+00196     } netsnmp_ref_u_long;
+00197 <span class="preprocessor">#endif</span>
+00198 
+00199     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_size_t_s {
+00200        size_t val;
+00201     } * netsnmp_ref_size_t;
+00202 
+00203 <span class="preprocessor">#ifdef __cplusplus</span>
+00204 }
+00205 <span class="preprocessor">#endif</span>
+00206 
+00207 <span class="preprocessor">#endif                          </span><span class="comment">/* NET_SNMP_TYPES_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:43 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:51 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

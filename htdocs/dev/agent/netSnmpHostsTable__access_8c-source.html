@@ -134,7 +134,8 @@
 00142             copy_nword(loopctx-&gt;current_ptr, loopctx-&gt;hostname, <span class=
 "keyword">sizeof</span>(loopctx-&gt;hostname));
 00143         
-00144         snmp_set_var_value(put_index_data, (u_char *) loopctx-&gt;hostname,
+00144         <a class="code" href=
+"group__snmp__client.html#ga25">snmp_set_var_value</a>(put_index_data, (u_char *) loopctx-&gt;hostname,
 00145                            strlen(loopctx-&gt;hostname));
 00146         <span class="keywordflow">return</span> put_index_data;
 00147     }
@@ -353,8 +354,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:38 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:45 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

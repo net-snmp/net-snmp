@@ -329,7 +329,7 @@
 00393 
 00394     cbh = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_monitor_callback_cooperative);
 00395     <span class="keywordflow">if</span> (NULL == cbh) {
-00396         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00396         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"could not allocate memory for "</span>
 00397                  <span class="stringliteral">"cooperative callback"</span>);
 00398         <span class="keywordflow">return</span>;
@@ -560,7 +560,7 @@
 00649 <span class="comment">             */</span>
 00650             new_cbr = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(callback_placeholder);
 00651             <span class="keywordflow">if</span> (NULL == new_cbr) {
-00652                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00652                 <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"malloc failed, callback dropped."</span>);
 00653                 <span class="keywordflow">continue</span>;
 00654             }
@@ -598,7 +598,7 @@
 00687     netsnmp_monitor_callback_header *cbh = wl-&gt;head;
 00688 
 00689     printf(<span class="stringliteral">"Watcher List for OID "</span>);
-00690     <a class="code" href="group__mib__utilities.html#ga66">print_objid</a>(wl-&gt;hdr-&gt;oids, wl-&gt;hdr-&gt;len);
+00690     <a class="code" href="group__mib__utilities.html#ga67">print_objid</a>(wl-&gt;hdr-&gt;oids, wl-&gt;hdr-&gt;len);
 00691     printf(<span class="stringliteral">"\n"</span>);
 00692 
 00693     <span class="keywordflow">while</span> (cbh) {
@@ -668,8 +668,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:38 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:46 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

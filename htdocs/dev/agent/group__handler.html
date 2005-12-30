@@ -267,45 +267,52 @@
 
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga54" doxytag=
-      "handler::HANDLER_CAN_RONLY" id="ga54"></a> #define&nbsp;</td>
+      "handler::HANDLER_CAN_STASH" id="ga54"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_STASH</b>&nbsp;&nbsp;&nbsp;0x20</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga55" doxytag=
+      "handler::HANDLER_CAN_RONLY" id="ga55"></a> #define&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_RONLY</b>&nbsp;&nbsp;&nbsp;(HANDLER_CAN_GETANDGETNEXT)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga55" doxytag=
-      "handler::HANDLER_CAN_RWRITE" id="ga55"></a> #define&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga56" doxytag=
+      "handler::HANDLER_CAN_RWRITE" id="ga56"></a> #define&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_RWRITE</b>&nbsp;&nbsp;&nbsp;(HANDLER_CAN_GETANDGETNEXT |
       HANDLER_CAN_SET)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga56" doxytag=
-      "handler::HANDLER_CAN_SET_ONLY" id="ga56"></a> #define&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga57" doxytag=
+      "handler::HANDLER_CAN_SET_ONLY" id="ga57"></a> #define&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_SET_ONLY</b>&nbsp;&nbsp;&nbsp;(HANDLER_CAN_SET |
       HANDLER_CAN_NOT_CREATE)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga57" doxytag=
-      "handler::HANDLER_CAN_DEFAULT" id="ga57"></a> #define&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga58" doxytag=
+      "handler::HANDLER_CAN_DEFAULT" id="ga58"></a> #define&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_DEFAULT</b>&nbsp;&nbsp;&nbsp;(HANDLER_CAN_RONLY |
       HANDLER_CAN_NOT_CREATE)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga58" doxytag=
-      "handler::REQUEST_IS_DELEGATED" id="ga58"></a> #define&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga59" doxytag=
+      "handler::REQUEST_IS_DELEGATED" id="ga59"></a> #define&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>REQUEST_IS_DELEGATED</b>&nbsp;&nbsp;&nbsp;1</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga59" doxytag=
-      "handler::REQUEST_IS_NOT_DELEGATED" id="ga59"></a> #define&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga60" doxytag=
+      "handler::REQUEST_IS_NOT_DELEGATED" id="ga60"></a> #define&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>REQUEST_IS_NOT_DELEGATED</b>&nbsp;&nbsp;&nbsp;0</td>
     </tr>
@@ -893,54 +900,58 @@
         <p>Typedefs the <a class="el" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration_s</a>
         struct into netsnmp_handler_registration.</p>
 
-        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00292">netsnmp_cache_handler_register()</a>,
-        <a class="el" href="cache__handler_8c-source.html#l00417">netsnmp_cache_helper_handler()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00382">netsnmp_call_handler()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00512">netsnmp_call_next_handler()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00534">netsnmp_call_next_handler_one_request()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00683">netsnmp_create_delegated_cache()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00825">netsnmp_find_handler_by_name()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00842">netsnmp_find_handler_data_by_name()</a>, <a class="el" href=
-        "table__array_8c-source.html#l00196">netsnmp_find_table_array_handler()</a>, <a class="el" href=
-        "table_8c-source.html#l00137">netsnmp_find_table_registration_info()</a>, <a class="el" href=
+        <p>Referenced by <a class="el" href="table__container_8c-source.html#l00450">_data_lookup()</a>, <a class="el" href=
+        "stash__cache_8c-source.html#l00188">_netsnmp_stash_cache_load()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00294">netsnmp_cache_handler_register()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00419">netsnmp_cache_helper_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00387">netsnmp_call_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00517">netsnmp_call_next_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00539">netsnmp_call_next_handler_one_request()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00688">netsnmp_create_delegated_cache()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00830">netsnmp_find_handler_by_name()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00847">netsnmp_find_handler_data_by_name()</a>, <a class="el" href=
+        "table__array_8c-source.html#l00206">netsnmp_find_table_array_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00133">netsnmp_find_table_registration_info()</a>, <a class="el" href=
+        "table__generic_8c-source.html#l00173">netsnmp_generic_register()</a>, <a class="el" href=
+        "table__generic_8c-source.html#l00184">netsnmp_generic_unregister()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00163">netsnmp_handler_registration_create()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00608">netsnmp_handler_registration_free()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00626">netsnmp_handler_registration_dup()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00613">netsnmp_handler_registration_free()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00379">netsnmp_inject_handler()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00322">netsnmp_inject_handler_before()</a>, <a class="el" href=
-        "multiplexer_8c-source.html#l00057">netsnmp_multiplexer_helper_handler()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
-        "cache__handler_8c-source.html#l00305">netsnmp_register_cache_handler()</a>, <a class="el" href=
+        "instance_8c-source.html#l00708">netsnmp_instance_num_file_handler()</a>, <a class="el" href=
+        "multiplexer_8c-source.html#l00053">netsnmp_multiplexer_helper_handler()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00225">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00307">netsnmp_register_cache_handler()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00270">netsnmp_register_handler_nocallback()</a>, <a class="el" href=
-        "instance_8c-source.html#l00071">netsnmp_register_instance()</a>, <a class="el" href=
-        "instance_8c-source.html#l00372">netsnmp_register_int_instance()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
-        "instance_8c-source.html#l00096">netsnmp_register_read_only_instance()</a>, <a class="el" href=
-        "scalar_8c-source.html#l00114">netsnmp_register_read_only_scalar()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00297">netsnmp_register_read_only_table_data()</a>, <a class="el" href=
-        "row__merge_8c-source.html#l00045">netsnmp_register_row_merge()</a>, <a class="el" href=
-        "scalar_8c-source.html#l00079">netsnmp_register_scalar()</a>, <a class="el" href=
-        "serialize_8c-source.html#l00043">netsnmp_register_serialize()</a>, <a class="el" href=
-        "table_8c-source.html#l00111">netsnmp_register_table()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00286">netsnmp_register_table_data()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00113">netsnmp_register_table_data_set()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00138">netsnmp_register_table_iterator()</a>, <a class="el" href=
-        "row__merge_8c-source.html#l00058">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
-        "serialize_8c-source.html#l00051">netsnmp_serialize_helper_handler()</a>, <a class="el" href=
-        "table_8c-source.html#l00721">netsnmp_sparse_table_register()</a>, <a class="el" href=
-        "stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>, <a class="el" href=
-        "table_8c-source.html#l00772">netsnmp_table_build_oid()</a>, <a class="el" href=
-        "table_8c-source.html#l00806">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
-        "table_8c-source.html#l00739">netsnmp_table_build_result()</a>, <a class="el" href=
-        "table__array_8c-source.html#l00152">netsnmp_table_container_register()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00656">netsnmp_table_data_build_result()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, <a class="el" href=
+        "instance_8c-source.html#l00074">netsnmp_register_instance()</a>, <a class="el" href=
+        "instance_8c-source.html#l00427">netsnmp_register_int_instance()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00106">netsnmp_register_mib_table_row()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00047">netsnmp_register_old_api()</a>, <a class="el" href=
+        "instance_8c-source.html#l00099">netsnmp_register_read_only_instance()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00110">netsnmp_register_read_only_scalar()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00404">netsnmp_register_read_only_table_data()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00041">netsnmp_register_row_merge()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00075">netsnmp_register_scalar()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00039">netsnmp_register_serialize()</a>, <a class="el" href=
+        "table_8c-source.html#l00107">netsnmp_register_table()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00393">netsnmp_register_table_data()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00381">netsnmp_register_table_data_set()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00199">netsnmp_register_table_iterator()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00153">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00109">netsnmp_row_merge_status_first()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00066">netsnmp_row_merge_status_get()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00129">netsnmp_row_merge_status_last()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00047">netsnmp_serialize_helper_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00732">netsnmp_sparse_table_register()</a>, <a class="el" href=
+        "table_8c-source.html#l00783">netsnmp_table_build_oid()</a>, <a class="el" href=
+        "table_8c-source.html#l00820">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
+        "table_8c-source.html#l00750">netsnmp_table_build_result()</a>, <a class="el" href=
+        "table__array_8c-source.html#l00148">netsnmp_table_container_register()</a>, <a class="el" href=
+        "table__tdata_8c-source.html#l00344">netsnmp_tdata_register()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00260">netsnmp_unregister_handler()</a>, and <a class="el" href=
-        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+        "table_8c-source.html#l00141">table_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga2" doxytag="agent_handler.h::netsnmp_mib_handler" id="ga2"></a>
@@ -967,50 +978,53 @@
         <p>Typedefs the <a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler_s</a> struct into
         netsnmp_mib_handler.</p>
 
-        <p>Referenced by <a class="el" href="baby__steps_8c-source.html#l00338">netsnmp_baby_steps_access_multiplexer_get()</a>,
-        <a class="el" href="baby__steps_8c-source.html#l00061">netsnmp_baby_steps_handler_get()</a>, <a class="el" href=
-        "cache__handler_8c-source.html#l00244">netsnmp_cache_handler_get()</a>, <a class="el" href=
-        "cache__handler_8c-source.html#l00292">netsnmp_cache_handler_register()</a>, <a class="el" href=
-        "cache__handler_8c-source.html#l00417">netsnmp_cache_helper_handler()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00382">netsnmp_call_handler()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00512">netsnmp_call_next_handler()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00534">netsnmp_call_next_handler_one_request()</a>, <a class="el" href=
-        "table__container_8c-source.html#l00156">netsnmp_container_table_handler_get()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00683">netsnmp_create_delegated_cache()</a>, <a class="el" href=
+        <p>Referenced by <a class="el" href="stash__cache_8c-source.html#l00188">_netsnmp_stash_cache_load()</a>, <a class="el"
+        href="baby__steps_8c-source.html#l00335">netsnmp_baby_steps_access_multiplexer_get()</a>, <a class="el" href=
+        "baby__steps_8c-source.html#l00057">netsnmp_baby_steps_handler_get()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00246">netsnmp_cache_handler_get()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00294">netsnmp_cache_handler_register()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00419">netsnmp_cache_helper_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00387">netsnmp_call_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00517">netsnmp_call_next_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00539">netsnmp_call_next_handler_one_request()</a>, <a class="el" href=
+        "table__container_8c-source.html#l00253">netsnmp_container_table_handler_get()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00688">netsnmp_create_delegated_cache()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00825">netsnmp_find_handler_by_name()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00842">netsnmp_find_handler_data_by_name()</a>, <a class="el" href=
-        "table__array_8c-source.html#l00196">netsnmp_find_table_array_handler()</a>, <a class="el" href=
-        "bulk__to__next_8c-source.html#l00030">netsnmp_get_bulk_to_next_handler()</a>, <a class="el" href=
-        "cache__handler_8c-source.html#l00273">netsnmp_get_cache_handler()</a>, <a class="el" href=
-        "mode__end__call_8c-source.html#l00048">netsnmp_get_mode_end_call_handler()</a>, <a class="el" href=
-        "multiplexer_8c-source.html#l00036">netsnmp_get_multiplexer_handler()</a>, <a class="el" href=
-        "read__only_8c-source.html#l00032">netsnmp_get_read_only_handler()</a>, <a class="el" href=
-        "row__merge_8c-source.html#l00031">netsnmp_get_row_merge_handler()</a>, <a class="el" href=
-        "stash__cache_8c-source.html#l00042">netsnmp_get_stash_cache_handler()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00263">netsnmp_get_table_data_handler()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00086">netsnmp_get_table_data_set_handler()</a>, <a class="el" href=
-        "table_8c-source.html#l00088">netsnmp_get_table_handler()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00106">netsnmp_get_table_iterator_handler()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00579">netsnmp_handler_dup()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00557">netsnmp_handler_free()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00830">netsnmp_find_handler_by_name()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00847">netsnmp_find_handler_data_by_name()</a>, <a class="el" href=
+        "table__array_8c-source.html#l00206">netsnmp_find_table_array_handler()</a>, <a class="el" href=
+        "table__generic_8c-source.html#l00166">netsnmp_generic_free_handler()</a>, <a class="el" href=
+        "bulk__to__next_8c-source.html#l00026">netsnmp_get_bulk_to_next_handler()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00275">netsnmp_get_cache_handler()</a>, <a class="el" href=
+        "mode__end__call_8c-source.html#l00044">netsnmp_get_mode_end_call_handler()</a>, <a class="el" href=
+        "multiplexer_8c-source.html#l00032">netsnmp_get_multiplexer_handler()</a>, <a class="el" href=
+        "read__only_8c-source.html#l00028">netsnmp_get_read_only_handler()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00027">netsnmp_get_row_merge_handler()</a>, <a class="el" href=
+        "stash__cache_8c-source.html#l00085">netsnmp_get_stash_cache_handler()</a>, <a class="el" href=
+        "stash__to__next_8c-source.html#l00027">netsnmp_get_stash_to_next_handler()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00370">netsnmp_get_table_data_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00355">netsnmp_get_table_data_set_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00084">netsnmp_get_table_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00168">netsnmp_get_table_iterator_handler()</a>, <a class="el" href=
+        "table__tdata_8c-source.html#l00277">netsnmp_get_tdata_handler()</a>, <a class="el" href=
+        "stash__cache_8c-source.html#l00043">netsnmp_get_timed_bare_stash_cache_handler()</a>, <a class="el" href=
+        "stash__cache_8c-source.html#l00098">netsnmp_get_timed_stash_cache_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00584">netsnmp_handler_dup()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00562">netsnmp_handler_free()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00163">netsnmp_handler_registration_create()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00379">netsnmp_inject_handler()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00322">netsnmp_inject_handler_before()</a>, <a class="el" href=
-        "mode__end__call_8c-source.html#l00068">netsnmp_mode_end_call_add_mode_callback()</a>, <a class="el" href=
-        "multiplexer_8c-source.html#l00057">netsnmp_multiplexer_helper_handler()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
-        "cache__handler_8c-source.html#l00305">netsnmp_register_cache_handler()</a>, <a class="el" href=
+        "instance_8c-source.html#l00708">netsnmp_instance_num_file_handler()</a>, <a class="el" href=
+        "mode__end__call_8c-source.html#l00064">netsnmp_mode_end_call_add_mode_callback()</a>, <a class="el" href=
+        "multiplexer_8c-source.html#l00053">netsnmp_multiplexer_helper_handler()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00225">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00307">netsnmp_register_cache_handler()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00880">netsnmp_register_handler_by_name()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00885">netsnmp_register_handler_by_name()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00270">netsnmp_register_handler_nocallback()</a>, <a class="el" href=
-        "row__merge_8c-source.html#l00058">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
-        "serialize_8c-source.html#l00051">netsnmp_serialize_helper_handler()</a>, <a class="el" href=
-        "stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, and <a class="el" href=
-        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+        "row__merge_8c-source.html#l00153">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00047">netsnmp_serialize_helper_handler()</a>, and <a class="el" href=
+        "table_8c-source.html#l00141">table_helper_handler()</a>.</p>
       </td>
     </tr>
   </table>
@@ -1085,21 +1099,21 @@
       <td>
         <p>calls a handler with with appropriate NULL checking of arguments, etc.</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00382">382</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00387">387</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
         <p>References <a class="el" href="structnetsnmp__mib__handler__s.html#o3">netsnmp_mib_handler_s::access_method</a>,
-        <a class="el" href="agent__handler_8h-source.html#l00051">netsnmp_mib_handler_s::flags</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        <a class="el" href="agent__handler_8h-source.html#l00052">netsnmp_mib_handler_s::flags</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00048">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00159">netsnmp_agent_request_info_s::mode</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>.</p>
 
-        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00512">netsnmp_call_next_handler()</a>, <a class="el"
-        href="agent__handler_8c-source.html#l00534">netsnmp_call_next_handler_one_request()</a>, and <a class="el" href=
-        "multiplexer_8c-source.html#l00057">netsnmp_multiplexer_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00517">netsnmp_call_next_handler()</a>, <a class="el"
+        href="agent__handler_8c-source.html#l00539">netsnmp_call_next_handler_one_request()</a>, and <a class="el" href=
+        "multiplexer_8c-source.html#l00053">netsnmp_multiplexer_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga17" doxytag="agent_handler.c::netsnmp_call_next_handler" id="ga17"></a>
@@ -1171,21 +1185,20 @@
       <td>
         <p>calls the next handler in the chain after the current one with with appropriate NULL checking, etc.</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00512">512</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00517">517</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8c-source.html#l00382">netsnmp_call_handler()</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8c-source.html#l00387">netsnmp_call_handler()</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>.</p>
 
-        <p>Referenced by <a class="el" href="row__merge_8c-source.html#l00058">netsnmp_row_merge_helper_handler()</a>, <a class=
-        "el" href="serialize_8c-source.html#l00051">netsnmp_serialize_helper_handler()</a>, <a class="el" href=
-        "stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, and <a class="el" href=
-        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="stash__cache_8c-source.html#l00188">_netsnmp_stash_cache_load()</a>, <a class="el"
+        href="instance_8c-source.html#l00708">netsnmp_instance_num_file_handler()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00153">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00047">netsnmp_serialize_helper_handler()</a>, and <a class="el" href=
+        "table_8c-source.html#l00141">table_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga18" doxytag="agent_handler.c::netsnmp_call_next_handler_one_request" id="ga18"></a>
@@ -1257,15 +1270,15 @@
       <td>
         <p>calls the next handler in the chain after the current one with with appropriate NULL checking, etc.</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00534">534</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00539">539</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8c-source.html#l00382">netsnmp_call_handler()</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8c-source.html#l00387">netsnmp_call_handler()</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::next</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00092">netsnmp_request_info_s::next</a>, and <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga37" doxytag="agent_handler.c::netsnmp_clear_handler_list" id="ga37"></a>
@@ -1299,10 +1312,10 @@
       <td>
         <p>clears the entire handler-registration list</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00892">892</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00897">897</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="data__list_8c-source.html#l00046">netsnmp_free_all_list_data()</a>.</p>
+        <p>References <a class="el" href="data__list_8c-source.html#l00042">netsnmp_free_all_list_data()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga23" doxytag="agent_handler.c::netsnmp_create_delegated_cache" id="ga23"></a>
@@ -1394,7 +1407,7 @@
           <dd><a class="el" href="delayed__instance_8c-example.html#a16">delayed_instance.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00683">683</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00688">688</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
         <p>References <a class="el" href="snmp__agent_8h-source.html#l00162">netsnmp_agent_request_info_s::asp</a>, <a class="el"
@@ -1496,31 +1509,33 @@
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
         <p>References <a class="el" href="structnetsnmp__mib__handler__s.html#o3">netsnmp_mib_handler_s::access_method</a>,
-        <a class="el" href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        <a class="el" href="agent__handler_8h-source.html#l00048">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href="tools_8h-source.html#l00053">SNMP_FREE</a>, and
         <a class="el" href="tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
 
-        <p>Referenced by <a class="el" href="old__api_8c-source.html#l00040">get_old_api_handler()</a>, <a class="el" href=
-        "baby__steps_8c-source.html#l00338">netsnmp_baby_steps_access_multiplexer_get()</a>, <a class="el" href=
-        "baby__steps_8c-source.html#l00061">netsnmp_baby_steps_handler_get()</a>, <a class="el" href=
-        "cache__handler_8c-source.html#l00244">netsnmp_cache_handler_get()</a>, <a class="el" href=
-        "table__container_8c-source.html#l00156">netsnmp_container_table_handler_get()</a>, <a class="el" href=
-        "bulk__to__next_8c-source.html#l00030">netsnmp_get_bulk_to_next_handler()</a>, <a class="el" href=
-        "debug__handler_8c-source.html#l00054">netsnmp_get_debug_handler()</a>, <a class="el" href=
-        "instance_8c-source.html#l00046">netsnmp_get_instance_handler()</a>, <a class="el" href=
-        "mode__end__call_8c-source.html#l00048">netsnmp_get_mode_end_call_handler()</a>, <a class="el" href=
-        "multiplexer_8c-source.html#l00036">netsnmp_get_multiplexer_handler()</a>, <a class="el" href=
-        "read__only_8c-source.html#l00032">netsnmp_get_read_only_handler()</a>, <a class="el" href=
-        "row__merge_8c-source.html#l00031">netsnmp_get_row_merge_handler()</a>, <a class="el" href=
-        "scalar_8c-source.html#l00051">netsnmp_get_scalar_handler()</a>, <a class="el" href=
-        "serialize_8c-source.html#l00034">netsnmp_get_serialize_handler()</a>, <a class="el" href=
-        "stash__cache_8c-source.html#l00042">netsnmp_get_stash_cache_handler()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00263">netsnmp_get_table_data_handler()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00086">netsnmp_get_table_data_set_handler()</a>, <a class="el" href=
-        "table_8c-source.html#l00088">netsnmp_get_table_handler()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00106">netsnmp_get_table_iterator_handler()</a>, <a class="el" href=
-        "table_8c-source.html#l00710">netsnmp_sparse_table_handler_get()</a>, and <a class="el" href=
-        "table_8c-source.html#l00721">netsnmp_sparse_table_register()</a>.</p>
+        <p>Referenced by <a class="el" href="old__api_8c-source.html#l00036">get_old_api_handler()</a>, <a class="el" href=
+        "baby__steps_8c-source.html#l00335">netsnmp_baby_steps_access_multiplexer_get()</a>, <a class="el" href=
+        "baby__steps_8c-source.html#l00057">netsnmp_baby_steps_handler_get()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00246">netsnmp_cache_handler_get()</a>, <a class="el" href=
+        "table__container_8c-source.html#l00253">netsnmp_container_table_handler_get()</a>, <a class="el" href=
+        "bulk__to__next_8c-source.html#l00026">netsnmp_get_bulk_to_next_handler()</a>, <a class="el" href=
+        "debug__handler_8c-source.html#l00050">netsnmp_get_debug_handler()</a>, <a class="el" href=
+        "instance_8c-source.html#l00049">netsnmp_get_instance_handler()</a>, <a class="el" href=
+        "mode__end__call_8c-source.html#l00044">netsnmp_get_mode_end_call_handler()</a>, <a class="el" href=
+        "multiplexer_8c-source.html#l00032">netsnmp_get_multiplexer_handler()</a>, <a class="el" href=
+        "read__only_8c-source.html#l00028">netsnmp_get_read_only_handler()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00027">netsnmp_get_row_merge_handler()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00047">netsnmp_get_scalar_handler()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00030">netsnmp_get_serialize_handler()</a>, <a class="el" href=
+        "stash__to__next_8c-source.html#l00027">netsnmp_get_stash_to_next_handler()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00370">netsnmp_get_table_data_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00355">netsnmp_get_table_data_set_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00084">netsnmp_get_table_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00168">netsnmp_get_table_iterator_handler()</a>, <a class="el" href=
+        "table__tdata_8c-source.html#l00277">netsnmp_get_tdata_handler()</a>, <a class="el" href=
+        "stash__cache_8c-source.html#l00043">netsnmp_get_timed_bare_stash_cache_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00721">netsnmp_sparse_table_handler_get()</a>, and <a class="el" href=
+        "table_8c-source.html#l00732">netsnmp_sparse_table_register()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga32" doxytag="agent_handler.c::netsnmp_find_handler_by_name" id="ga32"></a>
@@ -1570,16 +1585,16 @@
       <td>
         <p>Returns a handler from a chain based on the name.</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00825">825</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00830">830</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>,
-        <a class="el" href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00109">netsnmp_handler_registration_s::handler</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00048">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, and <a class="el" href=
-        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>.</p>
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::next</a>.</p>
 
-        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00842">netsnmp_find_handler_data_by_name()</a>.</p>
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00847">netsnmp_find_handler_data_by_name()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga33" doxytag="agent_handler.c::netsnmp_find_handler_data_by_name" id="ga33"></a>
@@ -1631,15 +1646,15 @@
         <p>This probably shouldn't be used by the general public as the void * data may change as a handler evolves. Handlers
         should really advertise some function for you to use instead.</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00842">842</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00847">847</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el"
-        href="agent__handler_8c-source.html#l00825">netsnmp_find_handler_by_name()</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00050">netsnmp_mib_handler_s::myvoid</a>, <a class="el"
+        href="agent__handler_8c-source.html#l00830">netsnmp_find_handler_by_name()</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, and <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>.</p>
 
-        <p>Referenced by <a class="el" href="table_8c-source.html#l00137">netsnmp_find_table_registration_info()</a>.</p>
+        <p>Referenced by <a class="el" href="table_8c-source.html#l00133">netsnmp_find_table_registration_info()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga25" doxytag="agent_handler.c::netsnmp_free_delegated_cache" id="ga25"></a>
@@ -1679,7 +1694,7 @@
           <dd><a class="el" href="delayed__instance_8c-example.html#a23">delayed_instance.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00721">721</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00726">726</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
         <p>References <a class="el" href="tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
@@ -1717,10 +1732,10 @@
       <td>
         <p>Free the extra data stored in a request.</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00807">807</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00812">812</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="data__list_8c-source.html#l00030">netsnmp_free_list_data()</a>, and <a class="el" href=
+        <p>References <a class="el" href="data__list_8c-source.html#l00026">netsnmp_free_list_data()</a>, and <a class="el" href=
         "snmp__agent_8h-source.html#l00064">netsnmp_request_info_s::parent_data</a>.</p>
       </td>
     </tr>
@@ -1756,14 +1771,13 @@
       <td>
         <p>Free the extra data stored in a bunch of requests (all data in the chain).</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00815">815</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00820">820</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="data__list_8c-source.html#l00046">netsnmp_free_all_list_data()</a>, and <a class="el"
+        <p>References <a class="el" href="data__list_8c-source.html#l00042">netsnmp_free_all_list_data()</a>, and <a class="el"
         href="snmp__agent_8h-source.html#l00064">netsnmp_request_info_s::parent_data</a>.</p>
 
-        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l01803">netsnmp_add_varbind_to_cache()</a>, and <a class=
-        "el" href="table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l01844">netsnmp_add_varbind_to_cache()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga24" doxytag="agent_handler.c::netsnmp_handler_check_cache" id="ga24"></a>
@@ -1806,10 +1820,10 @@
           <dd><a class="el" href="delayed__instance_8c-example.html#a17">delayed_instance.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00707">707</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00712">712</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="snmp__agent_8c-source.html#l02565">netsnmp_check_transaction_id()</a>.</p>
+        <p>References <a class="el" href="snmp__agent_8c-source.html#l02636">netsnmp_check_transaction_id()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga20" doxytag="agent_handler.c::netsnmp_handler_dup" id="ga20"></a>
@@ -1845,16 +1859,16 @@
       <td>
         <p>dulpicates a handler and all subsequent handlers see also _clone_handler</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00579">579</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00584">584</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el"
-        href="agent__handler_8c-source.html#l00557">netsnmp_handler_free()</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00050">netsnmp_mib_handler_s::myvoid</a>, <a class="el"
+        href="agent__handler_8c-source.html#l00562">netsnmp_handler_free()</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
-        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::prev</a>.</p>
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00065">netsnmp_mib_handler_s::prev</a>.</p>
 
-        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>.</p>
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00626">netsnmp_handler_registration_dup()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga19" doxytag="agent_handler.c::netsnmp_handler_free" id="ga19"></a>
@@ -1894,17 +1908,17 @@
         <p>XXX : segv here at shutdown if SHUTDOWN_AGENT_CLEANLY defined. About 30 functions down the stack, starting in
         clear_context() -&gt; clear_subtree()</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00557">557</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00562">562</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>,
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00048">netsnmp_mib_handler_s::handler_name</a>,
         <a class="el" href="group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
         "tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
 
-        <p>Referenced by <a class="el" href="baby__steps_8c-source.html#l00061">netsnmp_baby_steps_handler_get()</a>, <a class=
-        "el" href="agent__handler_8c-source.html#l00579">netsnmp_handler_dup()</a>, and <a class="el" href=
-        "agent__handler_8c-source.html#l00608">netsnmp_handler_registration_free()</a>.</p>
+        <p>Referenced by <a class="el" href="baby__steps_8c-source.html#l00057">netsnmp_baby_steps_handler_get()</a>, <a class=
+        "el" href="agent__handler_8c-source.html#l00584">netsnmp_handler_dup()</a>, and <a class="el" href=
+        "agent__handler_8c-source.html#l00613">netsnmp_handler_registration_free()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga26" doxytag="agent_handler.c::netsnmp_handler_mark_requests_as_delegated" id="ga26"></a>
@@ -1953,7 +1967,7 @@
       <td>
         <p>marks a list of requests as delegated (or not if isdelegaded = 0)</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00735">735</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00740">740</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
         <p>References <a class="el" href="snmp__agent_8h-source.html#l00078">netsnmp_request_info_s::delegated</a>, and <a class=
@@ -2136,15 +2150,15 @@
         <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00163">163</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>,
-        <a class="el" href="agent__handler_8h-source.html#l00094">netsnmp_handler_registration_s::handlerName</a>, <a class="el"
-        href="tools_8c-source.html#l00233">memdup()</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00108">netsnmp_handler_registration_s::modes</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00109">netsnmp_handler_registration_s::handler</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::handlerName</a>, <a class="el"
+        href="tools_8c-source.html#l00236">memdup()</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00110">netsnmp_handler_registration_s::modes</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00113">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00103">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00104">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
         "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
       </td>
     </tr>
@@ -2182,23 +2196,23 @@
       <td>
         <p>duplicates the handler registration object</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00621">621</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00626">626</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::contextName</a>,
-        <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>, <a class="el"
-        href="agent__handler_8h-source.html#l00094">netsnmp_handler_registration_s::handlerName</a>, <a class="el" href=
-        "tools_8c-source.html#l00233">memdup()</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00108">netsnmp_handler_registration_s::modes</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00579">netsnmp_handler_dup()</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00098">netsnmp_handler_registration_s::contextName</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00109">netsnmp_handler_registration_s::handler</a>, <a class="el"
+        href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::handlerName</a>, <a class="el" href=
+        "tools_8c-source.html#l00236">memdup()</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00110">netsnmp_handler_registration_s::modes</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00584">netsnmp_handler_dup()</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00608">netsnmp_handler_registration_free()</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00113">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00114">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::range_ubound</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
-        "agent__handler_8h-source.html#l00116">netsnmp_handler_registration_s::timeout</a>.</p>
+        "agent__handler_8c-source.html#l00613">netsnmp_handler_registration_free()</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00116">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00117">netsnmp_handler_registration_s::range_ubound</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00103">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00104">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00118">netsnmp_handler_registration_s::timeout</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga21" doxytag="agent_handler.c::netsnmp_handler_registration_free" id="ga21"></a>
@@ -2233,19 +2247,19 @@
       <td>
         <p>free the resources associated with a handler registration object</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00608">608</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00613">613</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::contextName</a>,
-        <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>, <a class="el"
-        href="agent__handler_8h-source.html#l00094">netsnmp_handler_registration_s::handlerName</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00557">netsnmp_handler_free()</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00098">netsnmp_handler_registration_s::contextName</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00109">netsnmp_handler_registration_s::handler</a>, <a class="el"
+        href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::handlerName</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00562">netsnmp_handler_free()</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00103">netsnmp_handler_registration_s::rootoid</a>, and <a class="el" href=
         "tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
 
-        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>, and
-        <a class="el" href="old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>.</p>
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00626">netsnmp_handler_registration_dup()</a>, and
+        <a class="el" href="old__api_8c-source.html#l00106">netsnmp_register_mib_table_row()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga14" doxytag="agent_handler.c::netsnmp_inject_handler" id="ga14"></a>
@@ -2297,28 +2311,29 @@
 
         <p>The new handler is injected at the top of the list and hence will be the new handler to be called first.</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00374">374</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00379">379</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
         <p>References <a class="el" href="group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00322">netsnmp_inject_handler_before()</a>, and <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>.</p>
 
-        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00292">netsnmp_cache_handler_register()</a>,
-        <a class="el" href="cache__handler_8c-source.html#l00305">netsnmp_register_cache_handler()</a>, <a class="el" href=
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00294">netsnmp_cache_handler_register()</a>,
+        <a class="el" href="cache__handler_8c-source.html#l00307">netsnmp_register_cache_handler()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, <a class="el" href=
-        "instance_8c-source.html#l00071">netsnmp_register_instance()</a>, <a class="el" href=
-        "instance_8c-source.html#l00096">netsnmp_register_read_only_instance()</a>, <a class="el" href=
-        "scalar_8c-source.html#l00114">netsnmp_register_read_only_scalar()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00297">netsnmp_register_read_only_table_data()</a>, <a class="el" href=
-        "row__merge_8c-source.html#l00045">netsnmp_register_row_merge()</a>, <a class="el" href=
-        "scalar_8c-source.html#l00079">netsnmp_register_scalar()</a>, <a class="el" href=
-        "serialize_8c-source.html#l00043">netsnmp_register_serialize()</a>, <a class="el" href=
-        "table_8c-source.html#l00111">netsnmp_register_table()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00286">netsnmp_register_table_data()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00113">netsnmp_register_table_data_set()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00138">netsnmp_register_table_iterator()</a>, and <a class="el" href=
-        "table_8c-source.html#l00721">netsnmp_sparse_table_register()</a>.</p>
+        "instance_8c-source.html#l00074">netsnmp_register_instance()</a>, <a class="el" href=
+        "instance_8c-source.html#l00099">netsnmp_register_read_only_instance()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00110">netsnmp_register_read_only_scalar()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00404">netsnmp_register_read_only_table_data()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00041">netsnmp_register_row_merge()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00075">netsnmp_register_scalar()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00039">netsnmp_register_serialize()</a>, <a class="el" href=
+        "table_8c-source.html#l00107">netsnmp_register_table()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00393">netsnmp_register_table_data()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00381">netsnmp_register_table_data_set()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00199">netsnmp_register_table_iterator()</a>, <a class="el" href=
+        "table_8c-source.html#l00732">netsnmp_sparse_table_register()</a>, and <a class="el" href=
+        "table__tdata_8c-source.html#l00344">netsnmp_tdata_register()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga13" doxytag="agent_handler.c::netsnmp_inject_handler_before" id="ga13"></a>
@@ -2384,15 +2399,15 @@
         <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00322">322</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>,
-        <a class="el" href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00109">netsnmp_handler_registration_s::handler</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00048">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::prev</a>, and <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::next</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00065">netsnmp_mib_handler_s::prev</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>.</p>
 
-        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00379">netsnmp_inject_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga10" doxytag="agent_handler.c::netsnmp_register_handler" id="ga10"></a>
@@ -2430,31 +2445,31 @@
         <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00202">202</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::contextName</a>,
-        <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>, <a class="el"
-        href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00094">netsnmp_handler_registration_s::handlerName</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00108">netsnmp_handler_registration_s::modes</a>, <a class="el" href=
-        "bulk__to__next_8c-source.html#l00030">netsnmp_get_bulk_to_next_handler()</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00098">netsnmp_handler_registration_s::contextName</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00109">netsnmp_handler_registration_s::handler</a>, <a class="el"
+        href="agent__handler_8h-source.html#l00048">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::handlerName</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00110">netsnmp_handler_registration_s::modes</a>, <a class="el" href=
+        "bulk__to__next_8c-source.html#l00026">netsnmp_get_bulk_to_next_handler()</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00379">netsnmp_inject_handler()</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00113">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00114">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::range_ubound</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>, and <a class="el" href=
-        "agent__handler_8h-source.html#l00116">netsnmp_handler_registration_s::timeout</a>.</p>
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::next</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00116">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00117">netsnmp_handler_registration_s::range_ubound</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00103">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00104">netsnmp_handler_registration_s::rootoid_len</a>, <a class="el" href=
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00118">netsnmp_handler_registration_s::timeout</a>.</p>
 
-        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00292">netsnmp_cache_handler_register()</a>,
-        <a class="el" href="cache__handler_8c-source.html#l00305">netsnmp_register_cache_handler()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
-        "row__merge_8c-source.html#l00045">netsnmp_register_row_merge()</a>, <a class="el" href=
-        "serialize_8c-source.html#l00043">netsnmp_register_serialize()</a>, <a class="el" href=
-        "table_8c-source.html#l00111">netsnmp_register_table()</a>, and <a class="el" href=
-        "table_8c-source.html#l00721">netsnmp_sparse_table_register()</a>.</p>
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00294">netsnmp_cache_handler_register()</a>,
+        <a class="el" href="cache__handler_8c-source.html#l00307">netsnmp_register_cache_handler()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00047">netsnmp_register_old_api()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00041">netsnmp_register_row_merge()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00039">netsnmp_register_serialize()</a>, <a class="el" href=
+        "table_8c-source.html#l00107">netsnmp_register_table()</a>, and <a class="el" href=
+        "table_8c-source.html#l00732">netsnmp_sparse_table_register()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga36" doxytag="agent_handler.c::netsnmp_register_handler_by_name" id="ga36"></a>
@@ -2503,20 +2518,20 @@
       <td>
         <p>registers a given handler by name so that it can be found easily later.</p>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00880">880</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00885">885</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
         <p>References <a class="el" href="data__list_8c-source.html#l00083">netsnmp_add_list_data()</a>, <a class="el" href=
-        "data__list_8c-source.html#l00064">netsnmp_create_data_list()</a>, and <a class="el" href=
+        "data__list_8c-source.html#l00060">netsnmp_create_data_list()</a>, and <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>.</p>
 
-        <p>Referenced by <a class="el" href="baby__steps_8c-source.html#l00321">netsnmp_baby_steps_handler_init()</a>, <a class=
-        "el" href="bulk__to__next_8c-source.html#l00114">netsnmp_init_bulk_to_next_helper()</a>, <a class="el" href=
-        "debug__handler_8c-source.html#l00158">netsnmp_init_debug_helper()</a>, <a class="el" href=
-        "read__only_8c-source.html#l00086">netsnmp_init_read_only_helper()</a>, <a class="el" href=
-        "row__merge_8c-source.html#l00200">netsnmp_init_row_merge()</a>, <a class="el" href=
-        "serialize_8c-source.html#l00096">netsnmp_init_serialize()</a>, and <a class="el" href=
-        "stash__cache_8c-source.html#l00188">netsnmp_init_stash_cache_helper()</a>.</p>
+        <p>Referenced by <a class="el" href="baby__steps_8c-source.html#l00318">netsnmp_baby_steps_handler_init()</a>, <a class=
+        "el" href="bulk__to__next_8c-source.html#l00122">netsnmp_init_bulk_to_next_helper()</a>, <a class="el" href=
+        "debug__handler_8c-source.html#l00154">netsnmp_init_debug_helper()</a>, <a class="el" href=
+        "read__only_8c-source.html#l00080">netsnmp_init_read_only_helper()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00352">netsnmp_init_row_merge()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00092">netsnmp_init_serialize()</a>, and <a class="el" href=
+        "stash__cache_8c-source.html#l00231">netsnmp_init_stash_cache_helper()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga12" doxytag="agent_handler.c::netsnmp_register_handler_nocallback" id="ga12"></a>
@@ -2554,22 +2569,22 @@
         <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00270">270</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::contextName</a>,
-        <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>, <a class="el"
-        href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00108">netsnmp_handler_registration_s::modes</a>, <a class="el" href=
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00098">netsnmp_handler_registration_s::contextName</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00109">netsnmp_handler_registration_s::handler</a>, <a class="el"
+        href="agent__handler_8h-source.html#l00048">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00110">netsnmp_handler_registration_s::modes</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00113">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00114">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::range_ubound</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>, and <a class="el" href=
-        "agent__handler_8h-source.html#l00116">netsnmp_handler_registration_s::timeout</a>.</p>
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::next</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00116">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00117">netsnmp_handler_registration_s::range_ubound</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00103">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00104">netsnmp_handler_registration_s::rootoid_len</a>, <a class="el" href=
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00118">netsnmp_handler_registration_s::timeout</a>.</p>
 
-        <p>Referenced by <a class="el" href="old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>.</p>
+        <p>Referenced by <a class="el" href="old__api_8c-source.html#l00106">netsnmp_register_mib_table_row()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga27" doxytag="agent_handler.c::netsnmp_request_add_list_data" id="ga27"></a>
@@ -2655,19 +2670,19 @@
           <dd><a class="el" href="delayed__instance_8c-example.html#a25">delayed_instance.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00755">755</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00760">760</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
         <p>References <a class="el" href="data__list_8c-source.html#l00083">netsnmp_add_list_data()</a>, and <a class="el" href=
         "snmp__agent_8h-source.html#l00064">netsnmp_request_info_s::parent_data</a>.</p>
 
-        <p>Referenced by <a class="el" href="table__iterator_8c-source.html#l00171">netsnmp_insert_iterator_context()</a>,
-        <a class="el" href="table__data_8c-source.html#l00562">netsnmp_insert_table_row()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, and <a class="el" href=
-        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="table__container_8c-source.html#l00450">_data_lookup()</a>, <a class="el" href=
+        "table__container_8c-source.html#l00350">netsnmp_container_table_row_insert()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00236">netsnmp_insert_iterator_context()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00677">netsnmp_insert_table_row()</a>, <a class="el" href=
+        "instance_8c-source.html#l00708">netsnmp_instance_num_file_handler()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00225">netsnmp_old_api_helper()</a>, and <a class="el" href=
+        "table_8c-source.html#l00141">table_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga29" doxytag="agent_handler.c::netsnmp_request_get_list_data" id="ga29"></a>
@@ -2754,20 +2769,26 @@
           <dd><a class="el" href="delayed__instance_8c-example.html#a27">delayed_instance.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00797">797</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00802">802</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="data__list_8c-source.html#l00157">netsnmp_get_list_data()</a>, and <a class="el" href=
+        <p>References <a class="el" href="data__list_8c-source.html#l00162">netsnmp_get_list_data()</a>, and <a class="el" href=
         "snmp__agent_8h-source.html#l00064">netsnmp_request_info_s::parent_data</a>.</p>
 
-        <p>Referenced by <a class="el" href="table__array_8c-source.html#l00213">netsnmp_extract_array_context()</a>, <a class=
-        "el" href="table__iterator_8c-source.html#l00163">netsnmp_extract_iterator_context()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00635">netsnmp_extract_table()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00187">netsnmp_extract_table_data_set()</a>, <a class="el" href=
-        "table_8c-source.html#l00128">netsnmp_extract_table_info()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00627">netsnmp_extract_table_row()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, and <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href=
+        "table__container_8c-source.html#l00319">netsnmp_container_table_container_extract()</a>, <a class="el" href=
+        "table__container_8c-source.html#l00338">netsnmp_container_table_extract_context()</a>, <a class="el" href=
+        "table__container_8c-source.html#l00328">netsnmp_container_table_row_extract()</a>, <a class="el" href=
+        "table__array_8c-source.html#l00223">netsnmp_extract_array_context()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00228">netsnmp_extract_iterator_context()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00648">netsnmp_extract_table()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00795">netsnmp_extract_table_data_set()</a>, <a class="el" href=
+        "table_8c-source.html#l00124">netsnmp_extract_table_info()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00656">netsnmp_extract_table_row()</a>, <a class="el" href=
+        "instance_8c-source.html#l00708">netsnmp_instance_num_file_handler()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00225">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "table__tdata_8c-source.html#l00363">netsnmp_tdata_extract_container()</a>, and <a class="el" href=
+        "table__tdata_8c-source.html#l00355">netsnmp_tdata_extract_table()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga28" doxytag="agent_handler.c::netsnmp_request_remove_list_data" id="ga28"></a>
@@ -2846,10 +2867,10 @@
           <dd>0 on successful find-and-delete, 1 otherwise.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00776">776</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00781">781</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="data__list_8c-source.html#l00189">netsnmp_remove_list_node()</a>, and <a class="el"
+        <p>References <a class="el" href="data__list_8c-source.html#l00198">netsnmp_remove_list_node()</a>, and <a class="el"
         href="snmp__agent_8h-source.html#l00064">netsnmp_request_info_s::parent_data</a>.</p>
       </td>
     </tr>
@@ -2888,22 +2909,21 @@
         <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00260">260</a> of file <a class="el" href=
         "agent__handler_8c-source.html">agent_handler.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::contextName</a>,
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00098">netsnmp_handler_registration_s::contextName</a>,
         <a class="el" href="group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00113">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00114">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::range_ubound</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
-        "agent__registry_8c-source.html#l00916">unregister_mib_context()</a>.</p>
+        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00116">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00117">netsnmp_handler_registration_s::range_ubound</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00103">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00104">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
+        "agent__registry_8c-source.html#l00958">unregister_mib_context()</a>.</p>
       </td>
     </tr>
   </table>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:43 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:53 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

@@ -380,7 +380,7 @@
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga7">netsnmp_hex_to_binary</a> (u_char **buf,
-      size_t *buf_len, size_t *out_len, int allow_realloc, const char *hex, const char *delim)</td>
+      size_t *buf_len, size_t *offset, int allow_realloc, const char *hex, const char *delim)</td>
     </tr>
 
     <tr>
@@ -393,7 +393,7 @@
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga8">snmp_hex_to_binary</a> (u_char **buf,
-      size_t *buf_len, size_t *out_len, int allow_realloc, const char *hex)</td>
+      size_t *buf_len, size_t *offset, int allow_realloc, const char *hex)</td>
     </tr>
 
     <tr>
@@ -694,7 +694,7 @@
 
         <div class="fragment">
           <pre class="fragment">
-!<a class="code" href="group__library.html#ga98">snmp_oid_compare</a>(ttype, USM_LENGTH_OID_TRANSFORM,              \
+!<a class="code" href="group__library.html#ga103">snmp_oid_compare</a>(ttype, USM_LENGTH_OID_TRANSFORM,              \
                 usm ## toid ## Protocol, USM_LENGTH_OID_TRANSFORM)
 </pre>
         </div>
@@ -789,30 +789,33 @@
         <p>Definition at line <a class="el" href="tools_8h-source.html#l00053">53</a> of file <a class="el" href=
         "tools_8h-source.html">tools.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="mib_8c-source.html#l03421">build_oid_segment()</a>, <a class="el" href=
-        "mib_8c-source.html#l04401">fprint_description()</a>, <a class="el" href="mib_8c-source.html#l03149">fprint_objid()</a>,
-        <a class="el" href="mib_8c-source.html#l03296">fprint_variable()</a>, <a class="el" href=
-        "mib_8c-source.html#l02537">init_mib()</a>, <a class="el" href=
-        "cache__handler_8c-source.html#l00347">netsnmp_cache_reqinfo_extract()</a>, <a class="el" href=
-        "cache__handler_8c-source.html#l00330">netsnmp_cache_reqinfo_insert()</a>, <a class="el" href=
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l05398">_sess_read()</a>, <a class="el" href=
+        "mib_8c-source.html#l03454">build_oid_segment()</a>, <a class="el" href=
+        "mib_8c-source.html#l04436">fprint_description()</a>, <a class="el" href="mib_8c-source.html#l03182">fprint_objid()</a>,
+        <a class="el" href="mib_8c-source.html#l03329">fprint_variable()</a>, <a class="el" href=
+        "mib_8c-source.html#l02560">init_mib()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00349">netsnmp_cache_reqinfo_extract()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00332">netsnmp_cache_reqinfo_insert()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, <a class="el" href=
-        "mib_8c-source.html#l02490">netsnmp_fixup_mib_directory()</a>, <a class="el" href=
-        "data__list_8c-source.html#l00046">netsnmp_free_all_list_data()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00721">netsnmp_free_delegated_cache()</a>, <a class="el" href=
-        "data__list_8c-source.html#l00030">netsnmp_free_list_data()</a>, <a class="el" href=
-        "tools_8c-source.html#l00922">netsnmp_getenv()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00557">netsnmp_handler_free()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00608">netsnmp_handler_registration_free()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
-        "mib_8c-source.html#l02388">netsnmp_set_mib_directory()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00233">netsnmp_set_row_column()</a>, <a class="el" href=
-        "table_8c-source.html#l00806">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00177">netsnmp_table_data_delete_row()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00993">netsnmp_table_dataset_delete_data()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, <a class="el" href=
-        "mib_8c-source.html#l02828">read_objid()</a>, <a class="el" href="mib_8c-source.html#l02707">shutdown_mib()</a>,
-        <a class="el" href="callback_8c-source.html#l00295">snmp_unregister_callback()</a>, and <a class="el" href=
+        "mib_8c-source.html#l02513">netsnmp_fixup_mib_directory()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00042">netsnmp_free_all_list_data()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00726">netsnmp_free_delegated_cache()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00026">netsnmp_free_list_data()</a>, <a class="el" href=
+        "tools_8c-source.html#l00925">netsnmp_getenv()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00562">netsnmp_handler_free()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00613">netsnmp_handler_registration_free()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00047">netsnmp_register_old_api()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00153">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
+        "mib_8c-source.html#l02411">netsnmp_set_mib_directory()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l01183">netsnmp_set_row_column()</a>, <a class="el" href=
+        "table_8c-source.html#l00820">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00100">netsnmp_table_data_delete_row()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00134">netsnmp_table_dataset_delete_data()</a>, <a class="el" href=
+        "table__tdata_8c-source.html#l00150">netsnmp_tdata_delete_row()</a>, <a class="el" href=
+        "table__tdata_8c-source.html#l00067">netsnmp_tdata_delete_table()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l01486">netsnmp_wrap_up_request()</a>, <a class="el" href=
+        "mib_8c-source.html#l02861">read_objid()</a>, <a class="el" href="mib_8c-source.html#l02740">shutdown_mib()</a>,
+        <a class="el" href="callback_8c-source.html#l00400">snmp_unregister_callback()</a>, and <a class="el" href=
         "read__config_8c-source.html#l00301">unregister_config_handler()</a>.</p>
       </td>
     </tr>
@@ -888,31 +891,32 @@
         <p>Definition at line <a class="el" href="tools_8h-source.html#l00068">68</a> of file <a class="el" href=
         "tools_8h-source.html">tools.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="baby__steps_8c-source.html#l00061">netsnmp_baby_steps_handler_get()</a>, <a class=
-        "el" href="cache__handler_8c-source.html#l00139">netsnmp_cache_create()</a>, <a class="el" href=
-        "table__container_8c-source.html#l00156">netsnmp_container_table_handler_get()</a>, <a class="el" href=
-        "data__list_8c-source.html#l00064">netsnmp_create_data_list()</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00683">netsnmp_create_delegated_cache()</a>, <a class="el" href=
+        <p>Referenced by <a class="el" href="baby__steps_8c-source.html#l00057">netsnmp_baby_steps_handler_get()</a>, <a class=
+        "el" href="cache__handler_8c-source.html#l00135">netsnmp_cache_create()</a>, <a class="el" href=
+        "table__container_8c-source.html#l00253">netsnmp_container_table_handler_get()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00060">netsnmp_create_data_list()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00688">netsnmp_create_delegated_cache()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00544">netsnmp_create_table_data()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00554">netsnmp_create_table_data_row()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00074">netsnmp_create_table_data_set()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00051">netsnmp_create_table_data()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00061">netsnmp_create_table_data_row()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00079">netsnmp_create_table_data_set()</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00163">netsnmp_handler_registration_create()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00197">netsnmp_mark_row_column_writable()</a>, <a class="el" href=
-        "mode__end__call_8c-source.html#l00068">netsnmp_mode_end_call_add_mode_callback()</a>, <a class="el" href=
-        "oid__stash_8c-source.html#l00050">netsnmp_oid_stash_create_sized_node()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00775">netsnmp_register_auto_data_table()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
-        "data__list_8c-source.html#l00220">netsnmp_register_save_list()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00113">netsnmp_register_table_data_set()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00233">netsnmp_set_row_column()</a>, <a class="el" href=
-        "table__array_8c-source.html#l00152">netsnmp_table_container_register()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00289">netsnmp_table_set_add_default_row()</a>, and <a class="el" href=
-        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+        "table__dataset_8c-source.html#l01148">netsnmp_mark_row_column_writable()</a>, <a class="el" href=
+        "mode__end__call_8c-source.html#l00064">netsnmp_mode_end_call_add_mode_callback()</a>, <a class="el" href=
+        "oid__stash_8c-source.html#l00046">netsnmp_oid_stash_create_sized_node()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00225">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00832">netsnmp_register_auto_data_table()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00106">netsnmp_register_mib_table_row()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00047">netsnmp_register_old_api()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00231">netsnmp_register_save_list()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00381">netsnmp_register_table_data_set()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00066">netsnmp_row_merge_status_get()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l01183">netsnmp_set_row_column()</a>, <a class="el" href=
+        "table__array_8c-source.html#l00148">netsnmp_table_container_register()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00251">netsnmp_table_set_add_default_row()</a>, <a class="el" href=
+        "table__tdata_8c-source.html#l00083">netsnmp_tdata_create_row()</a>, <a class="el" href=
+        "table__tdata_8c-source.html#l00053">netsnmp_tdata_create_table()</a>, and <a class="el" href=
+        "table_8c-source.html#l00141">table_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga45" doxytag="tools.h::SNMP_MAX" id="ga45"></a>
@@ -957,7 +961,7 @@
         <p>Definition at line <a class="el" href="tools_8h-source.html#l00085">85</a> of file <a class="el" href=
         "tools_8h-source.html">tools.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l00113">netsnmp_register_table_data_set()</a>.</p>
+        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l00381">netsnmp_register_table_data_set()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga46" doxytag="tools.h::SNMP_MIN" id="ga46"></a>
@@ -1002,9 +1006,8 @@
         <p>Definition at line <a class="el" href="tools_8h-source.html#l00089">89</a> of file <a class="el" href=
         "tools_8h-source.html">tools.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l06268">netsnmp_oid_find_prefix()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00113">netsnmp_register_table_data_set()</a>, and <a class="el" href=
-        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l06461">netsnmp_oid_find_prefix()</a>, and <a class="el"
+        href="table__dataset_8c-source.html#l00381">netsnmp_register_table_data_set()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga37" doxytag="tools.h::SNMP_SWIPE_MEM" id="ga37"></a>
@@ -1141,11 +1144,11 @@
       <td>
         <p>Returns the difference (in msec) between the two markers.</p>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00791">791</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00794">794</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
-        <p>Referenced by <a class="el" href="tools_8c-source.html#l00846">atime_ready()</a>, and <a class="el" href=
-        "tools_8c-source.html#l00894">marker_tticks()</a>.</p>
+        <p>Referenced by <a class="el" href="tools_8c-source.html#l00849">atime_ready()</a>, and <a class="el" href=
+        "tools_8c-source.html#l00897">marker_tticks()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga15" doxytag="tools.h::atime_newMarker" id="ga15"></a>
@@ -1181,13 +1184,12 @@
 
         <p>NOTE: Caller must free time marker when no longer needed.</p>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00767">767</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00770">770</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
-        <p>Referenced by <a class="el" href="tools_8c-source.html#l00846">atime_ready()</a>, <a class="el" href=
-        "tools_8c-source.html#l00894">marker_tticks()</a>, <a class="el" href=
-        "stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>, and <a class="el" href=
-        "tools_8c-source.html#l00868">uatime_ready()</a>.</p>
+        <p>Referenced by <a class="el" href="tools_8c-source.html#l00849">atime_ready()</a>, <a class="el" href=
+        "tools_8c-source.html#l00897">marker_tticks()</a>, and <a class="el" href=
+        "tools_8c-source.html#l00871">uatime_ready()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga20" doxytag="tools.h::atime_ready" id="ga20"></a>
@@ -1236,14 +1238,13 @@
         <p>Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no
         marker).</p>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00846">846</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00849">849</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
-        <p>References <a class="el" href="tools_8c-source.html#l00791">atime_diff()</a>, and <a class="el" href=
-        "tools_8c-source.html#l00767">atime_newMarker()</a>.</p>
+        <p>References <a class="el" href="tools_8c-source.html#l00794">atime_diff()</a>, and <a class="el" href=
+        "tools_8c-source.html#l00770">atime_newMarker()</a>.</p>
 
-        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00367">netsnmp_cache_check_expired()</a>, and
-        <a class="el" href="stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>.</p>
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00369">netsnmp_cache_check_expired()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga16" doxytag="tools.h::atime_setMarker" id="ga16"></a>
@@ -1277,10 +1278,8 @@
       <td>
         <p>set a time marker.</p>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00778">778</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00781">781</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
-
-        <p>Referenced by <a class="el" href="stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga6" doxytag="tools.h::binary_to_hex" id="ga6"></a>
@@ -1377,7 +1376,7 @@
         </dl>FIX Is there already one of these in the UCD SNMP codebase? The old one should be used, or this one should be moved
         to snmplib/snmp_api.c.
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00284">284</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00287">287</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
       </td>
     </tr>
@@ -1450,11 +1449,11 @@
           </dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00182">182</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00185">185</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
-        <p>Referenced by <a class="el" href="tools_8c-source.html#l00321">hex_to_binary2()</a>, and <a class="el" href=
-        "tools_8c-source.html#l00202">malloc_random()</a>.</p>
+        <p>Referenced by <a class="el" href="tools_8c-source.html#l00324">hex_to_binary2()</a>, and <a class="el" href=
+        "tools_8c-source.html#l00205">malloc_random()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga9" doxytag="tools.h::hex_to_binary2" id="ga9"></a>
@@ -1553,10 +1552,10 @@
         <p>FIX Another version of "hex-to-binary" which takes odd length input strings. It also allocates the memory to hold the
         binary data. Should be integrated with the official hex_to_binary() function.</p>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00321">321</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00324">324</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
-        <p>References <a class="el" href="tools_8c-source.html#l00182">free_zero()</a>.</p>
+        <p>References <a class="el" href="tools_8c-source.html#l00185">free_zero()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga3" doxytag="tools.h::malloc_random" id="ga3"></a>
@@ -1614,10 +1613,10 @@
           <dd>a malloced buffer</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00202">202</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00205">205</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
-        <p>References <a class="el" href="tools_8c-source.html#l00182">free_zero()</a>.</p>
+        <p>References <a class="el" href="tools_8c-source.html#l00185">free_zero()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga22" doxytag="tools.h::marker_tticks" id="ga22"></a>
@@ -1651,11 +1650,11 @@
       <td>
         <p>Return the number of timeTicks since the given marker.</p>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00894">894</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00897">897</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
-        <p>References <a class="el" href="tools_8c-source.html#l00791">atime_diff()</a>, and <a class="el" href=
-        "tools_8c-source.html#l00767">atime_newMarker()</a>.</p>
+        <p>References <a class="el" href="tools_8c-source.html#l00794">atime_diff()</a>, and <a class="el" href=
+        "tools_8c-source.html#l00770">atime_newMarker()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga5" doxytag="tools.h::memdup" id="ga5"></a>
@@ -1753,16 +1752,19 @@
           <dd>SNMPERR_SUCCESS on success, SNMPERR_GENERR on failure.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00233">233</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00236">236</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
         <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00163">netsnmp_handler_registration_create()</a>,
-        <a class="el" href="agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00233">netsnmp_set_row_column()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00690">netsnmp_table_data_clone_row()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00347">netsnmp_table_data_set_clone_row()</a>, and <a class="el" href=
-        "table__dataset_8c-source.html#l00289">netsnmp_table_set_add_default_row()</a>.</p>
+        <a class="el" href="agent__handler_8c-source.html#l00626">netsnmp_handler_registration_dup()</a>, <a class="el" href=
+        "instance_8c-source.html#l00708">netsnmp_instance_num_file_handler()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00047">netsnmp_register_old_api()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l01183">netsnmp_set_row_column()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00069">netsnmp_table_data_clone_row()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00091">netsnmp_table_data_set_clone_row()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00251">netsnmp_table_set_add_default_row()</a>, <a class="el" href=
+        "table__tdata_8c-source.html#l00091">netsnmp_tdata_clone_row()</a>, and <a class="el" href=
+        "table__tdata_8c-source.html#l00122">netsnmp_tdata_copy_row()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga24" doxytag="tools.h::netsnmp_getenv" id="ga24"></a>
@@ -1801,15 +1803,15 @@
         in the registry in HKCU-SNMP or HKLM-SNMP (whichever it finds first) and stores the result in the environment variable.
         It then returns a pointer to environment variable.</p>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00922">922</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00925">925</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
         <p>References <a class="el" href="tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
 
-        <p>Referenced by <a class="el" href="mib_8c-source.html#l02537">init_mib()</a>, <a class="el" href=
-        "mib_8c-source.html#l02490">netsnmp_fixup_mib_directory()</a>, <a class="el" href=
-        "mib_8c-source.html#l02443">netsnmp_get_mib_directory()</a>, and <a class="el" href=
-        "read__config_8c-source.html#l01181">read_config_store()</a>.</p>
+        <p>Referenced by <a class="el" href="mib_8c-source.html#l02560">init_mib()</a>, <a class="el" href=
+        "mib_8c-source.html#l02513">netsnmp_fixup_mib_directory()</a>, <a class="el" href=
+        "mib_8c-source.html#l02466">netsnmp_get_mib_directory()</a>, and <a class="el" href=
+        "read__config_8c-source.html#l01230">read_config_store()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga7" doxytag="tools.h::netsnmp_hex_to_binary" id="ga7"></a>
@@ -1845,7 +1847,7 @@
 
             <td class="md" nowrap="nowrap">size_t *&nbsp;</td>
 
-            <td class="mdname" nowrap="nowrap"><em>out_len</em>,</td>
+            <td class="mdname" nowrap="nowrap"><em>offset</em>,</td>
           </tr>
 
           <tr>
@@ -1922,7 +1924,7 @@
               <tr>
                 <td valign="top"></td>
 
-                <td valign="top"><em>out_len</em>&nbsp;</td>
+                <td valign="top"><em>offset</em>&nbsp;</td>
 
                 <td>On input, a pointer to a size_t indicating an offset into buf. The binary data will be stored at this offset.
                 On output, this pointer will have updated the offset to be the first byte after the converted data.</td>
@@ -1981,12 +1983,12 @@
           </dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00422">422</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00425">425</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
-        <p>References <a class="el" href="tools_8c-source.html#l00118">snmp_realloc()</a>.</p>
+        <p>References <a class="el" href="tools_8c-source.html#l00121">snmp_realloc()</a>.</p>
 
-        <p>Referenced by <a class="el" href="tools_8c-source.html#l00481">snmp_hex_to_binary()</a>.</p>
+        <p>Referenced by <a class="el" href="tools_8c-source.html#l00484">snmp_hex_to_binary()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga12" doxytag="tools.h::netsnmp_strdup_and_null" id="ga12"></a>
@@ -2035,11 +2037,8 @@
         <p>copies a (possible) unterminated string of a given length into a new buffer and null terminates it as well (new buffer
         MAY be one byte longer to account for this</p>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00252">252</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00255">255</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
-
-        <p>Referenced by <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga8" doxytag="tools.h::snmp_hex_to_binary" id="ga8"></a>
@@ -2075,7 +2074,7 @@
 
             <td class="md" nowrap="nowrap">size_t *&nbsp;</td>
 
-            <td class="mdname" nowrap="nowrap"><em>out_len</em>,</td>
+            <td class="mdname" nowrap="nowrap"><em>offset</em>,</td>
           </tr>
 
           <tr>
@@ -2147,10 +2146,10 @@
           </dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00481">481</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00484">484</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
-        <p>References <a class="el" href="tools_8c-source.html#l00422">netsnmp_hex_to_binary()</a>.</p>
+        <p>References <a class="el" href="tools_8c-source.html#l00425">netsnmp_hex_to_binary()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga1" doxytag="tools.h::snmp_realloc" id="ga1"></a>
@@ -2232,15 +2231,15 @@
           current buffer size, up to a maximum increase of 8192 bytes.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00118">118</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00121">121</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
         <p>Referenced by <a class="el" href="mib_8c-source.html#l00271">_sprint_hexstring_line()</a>, <a class="el" href=
-        "tools_8c-source.html#l00422">netsnmp_hex_to_binary()</a>, <a class="el" href=
-        "mib_8c-source.html#l00363">sprint_realloc_asciistring()</a>, <a class="el" href=
-        "mib_8c-source.html#l01691">sprint_realloc_ipaddress()</a>, <a class="el" href=
-        "mib_8c-source.html#l01625">sprint_realloc_networkaddress()</a>, and <a class="el" href=
-        "mib_8c-source.html#l00423">sprint_realloc_octet_string()</a>.</p>
+        "tools_8c-source.html#l00425">netsnmp_hex_to_binary()</a>, <a class="el" href=
+        "mib_8c-source.html#l00367">sprint_realloc_asciistring()</a>, <a class="el" href=
+        "mib_8c-source.html#l01693">sprint_realloc_ipaddress()</a>, <a class="el" href=
+        "mib_8c-source.html#l01627">sprint_realloc_networkaddress()</a>, and <a class="el" href=
+        "mib_8c-source.html#l00427">sprint_realloc_octet_string()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga18" doxytag="tools.h::uatime_diff" id="ga18"></a>
@@ -2288,10 +2287,10 @@
       <td>
         <p>Returns the difference (in u_long msec) between the two markers.</p>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00808">808</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00811">811</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
-        <p>Referenced by <a class="el" href="tools_8c-source.html#l00868">uatime_ready()</a>.</p>
+        <p>Referenced by <a class="el" href="tools_8c-source.html#l00871">uatime_ready()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga19" doxytag="tools.h::uatime_hdiff" id="ga19"></a>
@@ -2340,7 +2339,7 @@
         <p>Returns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime
         needs).</p>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00826">826</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00829">829</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
       </td>
     </tr>
@@ -2390,19 +2389,18 @@
         <p>Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no
         marker).</p>
 
-        <p>Definition at line <a class="el" href="tools_8c-source.html#l00868">868</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00871">871</a> of file <a class="el" href=
         "tools_8c-source.html">tools.c</a>.</p>
 
-        <p>References <a class="el" href="tools_8c-source.html#l00767">atime_newMarker()</a>, and <a class="el" href=
-        "tools_8c-source.html#l00808">uatime_diff()</a>.</p>
+        <p>References <a class="el" href="tools_8c-source.html#l00770">atime_newMarker()</a>, and <a class="el" href=
+        "tools_8c-source.html#l00811">uatime_diff()</a>.</p>
       </td>
     </tr>
   </table>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:45 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:48:02 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

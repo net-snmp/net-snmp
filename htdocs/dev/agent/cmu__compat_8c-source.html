@@ -30,7 +30,7 @@
 00010 mib_TxtToOid(<span class="keywordtype">char</span> *Buf, oid ** OidP, size_t * LenP)
 00011 {
 00012     <span class="keywordflow">return</span> <a class="code" href=
-"group__mib__utilities.html#ga61">read_objid</a>(Buf, *OidP, LenP);
+"group__mib__utilities.html#ga62">read_objid</a>(Buf, *OidP, LenP);
 00013 }
 00014 
 00015 <span class="keywordtype">int</span>
@@ -41,126 +41,86 @@
 00020 }
 00021 
 00022 
-00023 
-00024 <span class="keywordtype">char</span>           *
-00025 snmp_pdu_type(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *PDU)
-00026 {
-00027     <span class="keywordflow">switch</span> (PDU-&gt;<a class="code" href="structsnmp__pdu.html#o1">command</a>) {
-00028     <span class="keywordflow">case</span> SNMP_MSG_GET:
-00029         <span class="keywordflow">return</span> (<span class="stringliteral">"GET"</span>);
-00030         <span class="keywordflow">break</span>;
-00031     <span class="keywordflow">case</span> SNMP_MSG_GETNEXT:
-00032         <span class="keywordflow">return</span> (<span class="stringliteral">"GETNEXT"</span>);
-00033         <span class="keywordflow">break</span>;
-00034     <span class="keywordflow">case</span> SNMP_MSG_RESPONSE:
-00035         <span class="keywordflow">return</span> (<span class="stringliteral">"RESPONSE"</span>);
-00036         <span class="keywordflow">break</span>;
-00037     <span class="keywordflow">case</span> SNMP_MSG_SET:
-00038         <span class="keywordflow">return</span> (<span class="stringliteral">"SET"</span>);
-00039         <span class="keywordflow">break</span>;
-00040     <span class="keywordflow">case</span> SNMP_MSG_GETBULK:
-00041         <span class="keywordflow">return</span> (<span class="stringliteral">"GETBULK"</span>);
-00042         <span class="keywordflow">break</span>;
-00043     <span class="keywordflow">case</span> SNMP_MSG_INFORM:
-00044         <span class="keywordflow">return</span> (<span class="stringliteral">"INFORM"</span>);
-00045         <span class="keywordflow">break</span>;
-00046     <span class="keywordflow">case</span> SNMP_MSG_TRAP2:
-00047         <span class="keywordflow">return</span> (<span class="stringliteral">"V2TRAP"</span>);
+00023 <span class="comment">/*</span>
+00024 <span class="comment"> * cmu_snmp_parse - emulate CMU library's snmp_parse.</span>
+00025 <span class="comment"> *</span>
+00026 <span class="comment"> * Parse packet, storing results into PDU.</span>
+00027 <span class="comment"> * Returns community string if success, NULL if fail.</span>
+00028 <span class="comment"> * WARNING: may return a zero length community string.</span>
+00029 <span class="comment"> *</span>
+00030 <span class="comment"> * Note:</span>
+00031 <span class="comment"> * Some CMU-aware apps call init_mib(), but do not</span>
+00032 <span class="comment"> * initialize a session.</span>
+00033 <span class="comment"> * Check Reqid to make sure that this module is initialized.</span>
+00034 <span class="comment"> */</span>
+00035 
+00036 u_char         *
+00037 cmu_snmp_parse(<a class="code" href="structsnmp__session.html">netsnmp_session</a> * session,
+00038                <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu, u_char * data, size_t length)
+00039 {
+00040     u_char         *bufp = NULL;
+00041 
+00042     snmp_sess_init(session);    <span class="comment">/* gimme a break! */</span>
+00043 
+00044     <span class="keywordflow">switch</span> (pdu-&gt;<a class="code" href="structsnmp__pdu.html#o0">version</a>) {
+00045     <span class="keywordflow">case</span> SNMP_VERSION_1:
+00046     <span class="keywordflow">case</span> SNMP_VERSION_2c:
+00047     <span class="keywordflow">case</span> SNMP_DEFAULT_VERSION:
 00048         <span class="keywordflow">break</span>;
-00049     <span class="keywordflow">case</span> SNMP_MSG_REPORT:
-00050         <span class="keywordflow">return</span> (<span class="stringliteral">"REPORT"</span>);
-00051         <span class="keywordflow">break</span>;
-00052 
-00053     <span class="keywordflow">case</span> SNMP_MSG_TRAP:
-00054         <span class="keywordflow">return</span> (<span class="stringliteral">"V1TRAP"</span>);
-00055         <span class="keywordflow">break</span>;
-00056     <span class="keywordflow">default</span>:
-00057         <span class="keywordflow">return</span> (<span class="stringliteral">"Unknown"</span>);
-00058         <span class="keywordflow">break</span>;
-00059     }
-00060 }
-00061 
-00062 <span class="comment">/*</span>
-00063 <span class="comment"> * cmu_snmp_parse - emulate CMU library's snmp_parse.</span>
-00064 <span class="comment"> *</span>
-00065 <span class="comment"> * Parse packet, storing results into PDU.</span>
-00066 <span class="comment"> * Returns community string if success, NULL if fail.</span>
-00067 <span class="comment"> * WARNING: may return a zero length community string.</span>
-00068 <span class="comment"> *</span>
-00069 <span class="comment"> * Note:</span>
-00070 <span class="comment"> * Some CMU-aware apps call init_mib(), but do not</span>
-00071 <span class="comment"> * initialize a session.</span>
-00072 <span class="comment"> * Check Reqid to make sure that this module is initialized.</span>
-00073 <span class="comment"> */</span>
-00074 
-00075 u_char         *
-00076 cmu_snmp_parse(<a class="code" href="structsnmp__session.html">netsnmp_session</a> * session,
-00077                <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu, u_char * data, size_t length)
-00078 {
-00079     u_char         *bufp = NULL;
-00080 
-00081     snmp_sess_init(session);    <span class="comment">/* gimme a break! */</span>
-00082 
-00083     <span class="keywordflow">switch</span> (pdu-&gt;<a class="code" href="structsnmp__pdu.html#o0">version</a>) {
-00084     <span class="keywordflow">case</span> SNMP_VERSION_1:
-00085     <span class="keywordflow">case</span> SNMP_VERSION_2c:
-00086     <span class="keywordflow">case</span> SNMP_DEFAULT_VERSION:
-00087         <span class="keywordflow">break</span>;
-00088     <span class="keywordflow">default</span>:
-00089         <span class="keywordflow">return</span> NULL;
-00090     }
-00091 <span class="preprocessor">#ifndef NO_INTERNAL_VARLIST</span>
-00092     <span class="keywordflow">if</span> (snmp_parse(0, session, pdu, data, length) != SNMP_ERR_NOERROR) {
-00093         <span class="keywordflow">return</span> NULL;
-00094     }
-00095 <span class="preprocessor">#else</span>
-00096     <span class="comment">/*</span>
-00097 <span class="comment">     * while there are two versions of variable_list:</span>
-00098 <span class="comment">     * use an internal variable list for snmp_parse;</span>
-00099 <span class="comment">     * clone the result.</span>
-00100 <span class="comment">     */</span>
-00101     <span class="keywordflow">if</span> (1) {
-00102         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_clone_pdu(<a class="code" href=
+00049     <span class="keywordflow">default</span>:
+00050         <span class="keywordflow">return</span> NULL;
+00051     }
+00052 <span class="preprocessor">#ifndef NO_INTERNAL_VARLIST</span>
+00053     <span class="keywordflow">if</span> (snmp_parse(0, session, pdu, data, length) != SNMP_ERR_NOERROR) {
+00054         <span class="keywordflow">return</span> NULL;
+00055     }
+00056 <span class="preprocessor">#else</span>
+00057     <span class="comment">/*</span>
+00058 <span class="comment">     * while there are two versions of variable_list:</span>
+00059 <span class="comment">     * use an internal variable list for snmp_parse;</span>
+00060 <span class="comment">     * clone the result.</span>
+00061 <span class="comment">     */</span>
+00062     <span class="keywordflow">if</span> (1) {
+00063         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_clone_pdu(<a class="code" href=
 "structsnmp__pdu.html">netsnmp_pdu</a> *);
-00103         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_2clone_pdu(<a class="code" href=
+00064         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_2clone_pdu(<a class="code" href=
 "structsnmp__pdu.html">netsnmp_pdu</a> *from_pdu,
-00104                                         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *to_pdu);
-00105 
-00106         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *ipdu;
-00107         ipdu = snmp_clone_pdu(pdu);
-00108         <span class="keywordflow">if</span> (snmp_parse(0, session, ipdu, data, length) != SNMP_ERR_NOERROR) {
-00109             snmp_free_internal_pdu(ipdu);
-00110             <span class="keywordflow">return</span> NULL;
-00111         }
-00112         pdu = snmp_2clone_pdu(ipdu, pdu);
-00113         snmp_free_internal_pdu(ipdu);
-00114     }
-00115 <span class="preprocessor">#endif                          </span><span class="comment">/* NO_INTERNAL_VAR_LIST */</span>
-00116 
-00117     <span class="comment">/*</span>
-00118 <span class="comment">     * Add a null to meet the caller's expectations. </span>
-00119 <span class="comment">     */</span>
-00120 
-00121     bufp = (u_char *) malloc(1 + pdu-&gt;<a class="code" href="structsnmp__pdu.html#o19">community_len</a>);
-00122     <span class="keywordflow">if</span> (bufp &amp;&amp; pdu-&gt;<a class="code" href=
+00065                                         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *to_pdu);
+00066 
+00067         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *ipdu;
+00068         ipdu = snmp_clone_pdu(pdu);
+00069         <span class="keywordflow">if</span> (snmp_parse(0, session, ipdu, data, length) != SNMP_ERR_NOERROR) {
+00070             snmp_free_internal_pdu(ipdu);
+00071             <span class="keywordflow">return</span> NULL;
+00072         }
+00073         pdu = snmp_2clone_pdu(ipdu, pdu);
+00074         snmp_free_internal_pdu(ipdu);
+00075     }
+00076 <span class="preprocessor">#endif                          </span><span class="comment">/* NO_INTERNAL_VAR_LIST */</span>
+00077 
+00078     <span class="comment">/*</span>
+00079 <span class="comment">     * Add a null to meet the caller's expectations. </span>
+00080 <span class="comment">     */</span>
+00081 
+00082     bufp = (u_char *) malloc(1 + pdu-&gt;<a class="code" href="structsnmp__pdu.html#o19">community_len</a>);
+00083     <span class="keywordflow">if</span> (bufp &amp;&amp; pdu-&gt;<a class="code" href=
 "structsnmp__pdu.html#o19">community_len</a>) {
-00123         memcpy(bufp, pdu-&gt;<a class="code" href="structsnmp__pdu.html#o18">community</a>, pdu-&gt;<a class="code" href=
+00084         memcpy(bufp, pdu-&gt;<a class="code" href="structsnmp__pdu.html#o18">community</a>, pdu-&gt;<a class="code" href=
 "structsnmp__pdu.html#o19">community_len</a>);
-00124         bufp[pdu-&gt;<a class="code" href="structsnmp__pdu.html#o19">community_len</a>] = <span class=
+00085         bufp[pdu-&gt;<a class="code" href="structsnmp__pdu.html#o19">community_len</a>] = <span class=
 "charliteral">'\0'</span>;
-00125     }
-00126     <span class="keywordflow">return</span> (bufp);
-00127 }
-00128 
-00129 
-00130 <span class="preprocessor">#endif                          </span><span class="comment">/* CMU_COMPATIBLE */</span>
+00086     }
+00087     <span class="keywordflow">return</span> (bufp);
+00088 }
+00089 
+00090 
+00091 <span class="preprocessor">#endif                          </span><span class="comment">/* CMU_COMPATIBLE */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:37 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:44 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

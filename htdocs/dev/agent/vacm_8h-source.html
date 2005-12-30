@@ -82,175 +82,213 @@
 00061 
 00062 <span class="preprocessor">#define CONTEXT_MATCH_EXACT  1</span>
 00063 <span class="preprocessor">#define CONTEXT_MATCH_PREFIX 2</span>
-00064     <span class="keyword">struct </span>vacm_accessEntry {
-00065         <span class="keywordtype">char</span>            groupName[VACMSTRINGLEN];
-00066         <span class="keywordtype">char</span>            contextPrefix[VACMSTRINGLEN];
-00067         <span class="keywordtype">int</span>             securityModel;
-00068         <span class="keywordtype">int</span>             securityLevel;
-00069         <span class="keywordtype">int</span>             contextMatch;
-00070         <span class="keywordtype">char</span>            readView[VACMSTRINGLEN];
-00071         <span class="keywordtype">char</span>            writeView[VACMSTRINGLEN];
-00072         <span class="keywordtype">char</span>            notifyView[VACMSTRINGLEN];
-00073         <span class="keywordtype">int</span>             storageType;
-00074         <span class="keywordtype">int</span>             status;
-00075 
-00076         u_long          bitMask;
-00077         <span class="keyword">struct </span>vacm_accessEntry *reserved;
-00078         <span class="keyword">struct </span>vacm_accessEntry *next;
-00079     };
-00080 
-00081     <span class="keyword">struct </span>vacm_viewEntry {
-00082         <span class="keywordtype">char</span>            viewName[VACMSTRINGLEN];
-00083         oid             viewSubtree[MAX_OID_LEN];
-00084         size_t          viewSubtreeLen;
-00085         u_char          viewMask[VACMSTRINGLEN];
-00086         size_t          viewMaskLen;
-00087         <span class="keywordtype">int</span>             viewType;
-00088         <span class="keywordtype">int</span>             viewStorageType;
-00089         <span class="keywordtype">int</span>             viewStatus;
+00064 
+00065 <span class="comment">/* VIEW ENUMS ---------------------------------------- */</span>
+00066 
+00067 <span class="comment">/* SNMPD usage: get/set/send-notification views */</span>
+00068 <span class="preprocessor">#define VACM_VIEW_READ     0</span>
+00069 <span class="preprocessor">#define VACM_VIEW_WRITE    1</span>
+00070 <span class="preprocessor">#define VACM_VIEW_NOTIFY   2</span>
+00071 
+00072 <span class="comment">/* SNMPTRAPD usage: log execute and net-access (forward) usage */</span>
+00073 <span class="preprocessor">#define VACM_VIEW_LOG      3</span>
+00074 <span class="preprocessor">#define VACM_VIEW_EXECUTE  4</span>
+00075 <span class="preprocessor">#define VACM_VIEW_NET      5</span>
+00076 
+00077 <span class="comment">/* VIEW BIT MASK VALUES-------------------------------- */</span>
+00078 
+00079 <span class="comment">/* SNMPD usage: get/set/send-notification views */</span>
+00080 <span class="preprocessor">#define VACM_VIEW_READ_BIT      (1 &lt;&lt; VACM_VIEW_READ)</span>
+00081 <span class="preprocessor">#define VACM_VIEW_WRITE_BIT     (1 &lt;&lt; VACM_VIEW_WRITE)</span>
+00082 <span class="preprocessor">#define VACM_VIEW_NOTIFY_BIT    (1 &lt;&lt; VACM_VIEW_NOTIFY)</span>
+00083 
+00084 <span class="comment">/* SNMPTRAPD usage: log execute and net-access (forward) usage */</span>
+00085 <span class="preprocessor">#define VACM_VIEW_LOG_BIT      (1 &lt;&lt; VACM_VIEW_LOG)</span>
+00086 <span class="preprocessor">#define VACM_VIEW_EXECUTE_BIT  (1 &lt;&lt; VACM_VIEW_EXECUTE)</span>
+00087 <span class="preprocessor">#define VACM_VIEW_NET_BIT      (1 &lt;&lt; VACM_VIEW_NET)</span>
+00088     
+00089 <span class="preprocessor">#define VACM_VIEW_NO_BITS      0</span>
 00090 
-00091         u_long          bitMask;
-00092 
-00093         <span class="keyword">struct </span>vacm_viewEntry *reserved;
-00094         <span class="keyword">struct </span>vacm_viewEntry *next;
-00095     };
-00096 
-00097     <span class="keywordtype">void</span>            vacm_destroyViewEntry(<span class="keyword">const</span> <span class=
-"keywordtype">char</span> *, oid *, size_t);
-00098     <span class="keywordtype">void</span>            vacm_destroyAllViewEntries(<span class="keywordtype">void</span>);
-00099 
-00100 <span class="preprocessor">#define VACM_MODE_FIND                0</span>
-00101 <span class="preprocessor">#define VACM_MODE_IGNORE_MASK         1</span>
-00102 <span class="preprocessor">#define VACM_MODE_CHECK_SUBTREE       2</span>
-00103     <span class="keyword">struct </span>vacm_viewEntry *vacm_getViewEntry(<span class="keyword">const</span> <span class=
-"keywordtype">char</span> *, oid *, size_t,
-00104                                              <span class="keywordtype">int</span>);
-00105     <span class="comment">/*</span>
-00106 <span class="comment">     * Returns a pointer to the viewEntry with the</span>
-00107 <span class="comment">     * same viewName and viewSubtree</span>
-00108 <span class="comment">     * Returns NULL if that entry does not exist.</span>
-00109 <span class="comment">     */</span>
-00110 
-00111     <span class="keywordtype">int</span> vacm_checkSubtree(<span class="keyword">const</span> <span class=
-"keywordtype">char</span> *, oid *, size_t);
+00091 <span class="comment">/* Maximum number of views in the view array */</span>
+00092 <span class="preprocessor">#define VACM_MAX_VIEWS     8</span>
+00093 
+00094 <span class="preprocessor">#define VACM_VIEW_ENUM_NAME "vacmviews"</span>
+00095     
+00096     <span class="keywordtype">void</span> init_vacm(<span class="keywordtype">void</span>);
+00097     
+00098     <span class="keyword">struct </span>vacm_accessEntry {
+00099         <span class="keywordtype">char</span>            groupName[VACMSTRINGLEN];
+00100         <span class="keywordtype">char</span>            contextPrefix[VACMSTRINGLEN];
+00101         <span class="keywordtype">int</span>             securityModel;
+00102         <span class="keywordtype">int</span>             securityLevel;
+00103         <span class="keywordtype">int</span>             contextMatch;
+00104         <span class="keywordtype">char</span>            views[VACM_MAX_VIEWS][VACMSTRINGLEN];
+00105         <span class="keywordtype">int</span>             storageType;
+00106         <span class="keywordtype">int</span>             status;
+00107 
+00108         u_long          bitMask;
+00109         <span class="keyword">struct </span>vacm_accessEntry *reserved;
+00110         <span class="keyword">struct </span>vacm_accessEntry *next;
+00111     };
 00112 
-00113     <span class="comment">/*</span>
-00114 <span class="comment">     * Check to see if everything within a subtree is in view, not in view,</span>
-00115 <span class="comment">     * or possibly both.</span>
-00116 <span class="comment">     *</span>
-00117 <span class="comment">     * Returns:</span>
-00118 <span class="comment">     *   VACM_SUCCESS          The OID is included in the view.</span>
-00119 <span class="comment">     *   VACM_NOTINVIEW        If no entry in the view list includes the</span>
-00120 <span class="comment">     *                         provided OID, or the OID is explicitly excluded</span>
-00121 <span class="comment">     *                         from the view. </span>
-00122 <span class="comment">     *   VACM_SUBTREE_UNKNOWN  The entire subtree has both allowed and</span>
-00123 <span class="comment">     *                         disallowed portions.</span>
-00124 <span class="comment">     */</span>
-00125 
-00126     <span class="keywordtype">void</span>
-00127                     vacm_scanViewInit(<span class="keywordtype">void</span>);
-00128     <span class="comment">/*</span>
-00129 <span class="comment">     * Initialized the scan routines so that they will begin at the</span>
-00130 <span class="comment">     * beginning of the list of viewEntries.</span>
-00131 <span class="comment">     *</span>
-00132 <span class="comment">     */</span>
-00133 
-00134 
-00135     <span class="keyword">struct </span>vacm_viewEntry *vacm_scanViewNext(<span class="keywordtype">void</span>);
-00136     <span class="comment">/*</span>
-00137 <span class="comment">     * Returns a pointer to the next viewEntry.</span>
-00138 <span class="comment">     * These entries are returned in no particular order,</span>
-00139 <span class="comment">     * but if N entries exist, N calls to view_scanNext() will</span>
-00140 <span class="comment">     * return all N entries once.</span>
-00141 <span class="comment">     * Returns NULL if all entries have been returned.</span>
-00142 <span class="comment">     * view_scanInit() starts the scan over.</span>
-00143 <span class="comment">     */</span>
+00113     <span class="keyword">struct </span>vacm_viewEntry {
+00114         <span class="keywordtype">char</span>            viewName[VACMSTRINGLEN];
+00115         oid             viewSubtree[MAX_OID_LEN];
+00116         size_t          viewSubtreeLen;
+00117         u_char          viewMask[VACMSTRINGLEN];
+00118         size_t          viewMaskLen;
+00119         <span class="keywordtype">int</span>             viewType;
+00120         <span class="keywordtype">int</span>             viewStorageType;
+00121         <span class="keywordtype">int</span>             viewStatus;
+00122 
+00123         u_long          bitMask;
+00124 
+00125         <span class="keyword">struct </span>vacm_viewEntry *reserved;
+00126         <span class="keyword">struct </span>vacm_viewEntry *next;
+00127     };
+00128 
+00129     <span class="keywordtype">void</span>            vacm_destroyViewEntry(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, oid *, size_t);
+00130     <span class="keywordtype">void</span>            vacm_destroyAllViewEntries(<span class="keywordtype">void</span>);
+00131 
+00132 <span class="preprocessor">#define VACM_MODE_FIND                0</span>
+00133 <span class="preprocessor">#define VACM_MODE_IGNORE_MASK         1</span>
+00134 <span class="preprocessor">#define VACM_MODE_CHECK_SUBTREE       2</span>
+00135     <span class="keyword">struct </span>vacm_viewEntry *vacm_getViewEntry(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, oid *, size_t,
+00136                                              <span class="keywordtype">int</span>);
+00137     <span class="comment">/*</span>
+00138 <span class="comment">     * Returns a pointer to the viewEntry with the</span>
+00139 <span class="comment">     * same viewName and viewSubtree</span>
+00140 <span class="comment">     * Returns NULL if that entry does not exist.</span>
+00141 <span class="comment">     */</span>
+00142 
+00143     <span class="keywordtype">int</span> vacm_checkSubtree(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, oid *, size_t);
 00144 
-00145     <span class="keyword">struct </span>vacm_viewEntry *vacm_createViewEntry(<span class=
+00145     <span class="comment">/*</span>
+00146 <span class="comment">     * Check to see if everything within a subtree is in view, not in view,</span>
+00147 <span class="comment">     * or possibly both.</span>
+00148 <span class="comment">     *</span>
+00149 <span class="comment">     * Returns:</span>
+00150 <span class="comment">     *   VACM_SUCCESS          The OID is included in the view.</span>
+00151 <span class="comment">     *   VACM_NOTINVIEW        If no entry in the view list includes the</span>
+00152 <span class="comment">     *                         provided OID, or the OID is explicitly excluded</span>
+00153 <span class="comment">     *                         from the view. </span>
+00154 <span class="comment">     *   VACM_SUBTREE_UNKNOWN  The entire subtree has both allowed and</span>
+00155 <span class="comment">     *                         disallowed portions.</span>
+00156 <span class="comment">     */</span>
+00157 
+00158     <span class="keywordtype">void</span>
+00159                     vacm_scanViewInit(<span class="keywordtype">void</span>);
+00160     <span class="comment">/*</span>
+00161 <span class="comment">     * Initialized the scan routines so that they will begin at the</span>
+00162 <span class="comment">     * beginning of the list of viewEntries.</span>
+00163 <span class="comment">     *</span>
+00164 <span class="comment">     */</span>
+00165 
+00166 
+00167     <span class="keyword">struct </span>vacm_viewEntry *vacm_scanViewNext(<span class="keywordtype">void</span>);
+00168     <span class="comment">/*</span>
+00169 <span class="comment">     * Returns a pointer to the next viewEntry.</span>
+00170 <span class="comment">     * These entries are returned in no particular order,</span>
+00171 <span class="comment">     * but if N entries exist, N calls to view_scanNext() will</span>
+00172 <span class="comment">     * return all N entries once.</span>
+00173 <span class="comment">     * Returns NULL if all entries have been returned.</span>
+00174 <span class="comment">     * view_scanInit() starts the scan over.</span>
+00175 <span class="comment">     */</span>
+00176 
+00177     <span class="keyword">struct </span>vacm_viewEntry *vacm_createViewEntry(<span class=
 "keyword">const</span> <span class="keywordtype">char</span> *, oid *,
-00146                                                 size_t);
-00147     <span class="comment">/*</span>
-00148 <span class="comment">     * Creates a viewEntry with the given index</span>
-00149 <span class="comment">     * and returns a pointer to it.</span>
-00150 <span class="comment">     * The status of this entry is created as invalid.</span>
-00151 <span class="comment">     */</span>
-00152 
-00153     <span class="keywordtype">void</span>            vacm_destroyGroupEntry(<span class=
+00178                                                 size_t);
+00179     <span class="comment">/*</span>
+00180 <span class="comment">     * Creates a viewEntry with the given index</span>
+00181 <span class="comment">     * and returns a pointer to it.</span>
+00182 <span class="comment">     * The status of this entry is created as invalid.</span>
+00183 <span class="comment">     */</span>
+00184 
+00185     <span class="keywordtype">void</span>            vacm_destroyGroupEntry(<span class=
 "keywordtype">int</span>, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
-00154     <span class="keywordtype">void</span>            vacm_destroyAllGroupEntries(<span class="keywordtype">void</span>);
-00155     <span class="keyword">struct </span>vacm_groupEntry *vacm_createGroupEntry(<span class=
+00186     <span class="keywordtype">void</span>            vacm_destroyAllGroupEntries(<span class="keywordtype">void</span>);
+00187     <span class="keyword">struct </span>vacm_groupEntry *vacm_createGroupEntry(<span class=
 "keywordtype">int</span>, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
-00156     <span class="keyword">struct </span>vacm_groupEntry *vacm_getGroupEntry(<span class=
+00188     <span class="keyword">struct </span>vacm_groupEntry *vacm_getGroupEntry(<span class=
 "keywordtype">int</span>, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
-00157     <span class="keywordtype">void</span>            vacm_scanGroupInit(<span class="keywordtype">void</span>);
-00158     <span class="keyword">struct </span>vacm_groupEntry *vacm_scanGroupNext(<span class="keywordtype">void</span>);
-00159 
-00160     <span class="keywordtype">void</span>            vacm_destroyAccessEntry(<span class=
+00189     <span class="keywordtype">void</span>            vacm_scanGroupInit(<span class="keywordtype">void</span>);
+00190     <span class="keyword">struct </span>vacm_groupEntry *vacm_scanGroupNext(<span class="keywordtype">void</span>);
+00191 
+00192     <span class="keywordtype">void</span>            vacm_destroyAccessEntry(<span class=
 "keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *,
-00161                                             <span class="keywordtype">int</span>, <span class="keywordtype">int</span>);
-00162     <span class="keywordtype">void</span>            vacm_destroyAllAccessEntries(<span class="keywordtype">void</span>);
-00163     <span class="keyword">struct </span>vacm_accessEntry *vacm_createAccessEntry(<span class=
+00193                                             <span class="keywordtype">int</span>, <span class="keywordtype">int</span>);
+00194     <span class="keywordtype">void</span>            vacm_destroyAllAccessEntries(<span class="keywordtype">void</span>);
+00195     <span class="keyword">struct </span>vacm_accessEntry *vacm_createAccessEntry(<span class=
 "keyword">const</span> <span class="keywordtype">char</span> *,
-00164                                                     <span class="keyword">const</span> <span class=
+00196                                                     <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *, <span class="keywordtype">int</span>,
-00165                                                     <span class="keywordtype">int</span>);
-00166     <span class="keyword">struct </span>vacm_accessEntry *vacm_getAccessEntry(<span class=
+00197                                                     <span class="keywordtype">int</span>);
+00198     <span class="keyword">struct </span>vacm_accessEntry *vacm_getAccessEntry(<span class=
 "keyword">const</span> <span class="keywordtype">char</span> *,
-00167                                                  <span class="keyword">const</span> <span class=
+00199                                                  <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *, <span class="keywordtype">int</span>, <span class="keywordtype">int</span>);
-00168     <span class="keywordtype">void</span>            vacm_scanAccessInit(<span class="keywordtype">void</span>);
-00169     <span class="keyword">struct </span>vacm_accessEntry *vacm_scanAccessNext(<span class="keywordtype">void</span>);
-00170 
-00171     <span class="keywordtype">void</span>            vacm_destroySecurityEntry(<span class=
+00200     <span class="keywordtype">void</span>            vacm_scanAccessInit(<span class="keywordtype">void</span>);
+00201     <span class="keyword">struct </span>vacm_accessEntry *vacm_scanAccessNext(<span class="keywordtype">void</span>);
+00202 
+00203     <span class="keywordtype">void</span>            vacm_destroySecurityEntry(<span class=
 "keyword">const</span> <span class="keywordtype">char</span> *);
-00172     <span class="keyword">struct </span>vacm_securityEntry *vacm_createSecurityEntry(<span class=
+00204     <span class="keyword">struct </span>vacm_securityEntry *vacm_createSecurityEntry(<span class=
 "keyword">const</span> <span class="keywordtype">char</span> *);
-00173     <span class="keyword">struct </span>vacm_securityEntry *vacm_getSecurityEntry(<span class=
+00205     <span class="keyword">struct </span>vacm_securityEntry *vacm_getSecurityEntry(<span class=
 "keyword">const</span> <span class="keywordtype">char</span> *);
-00174     <span class="keywordtype">void</span>            vacm_scanSecurityInit(<span class="keywordtype">void</span>);
-00175     <span class="keyword">struct </span>vacm_securityEntry *vacm_scanSecurityEntry(<span class="keywordtype">void</span>);
-00176     <span class="keywordtype">int</span>             vacm_is_configured(<span class="keywordtype">void</span>);
-00177 
-00178     <span class="keywordtype">void</span>            vacm_save(<span class="keyword">const</span> <span class=
+00206     <span class="keywordtype">void</span>            vacm_scanSecurityInit(<span class="keywordtype">void</span>);
+00207     <span class="keyword">struct </span>vacm_securityEntry *vacm_scanSecurityEntry(<span class="keywordtype">void</span>);
+00208     <span class="keywordtype">int</span>             vacm_is_configured(<span class="keywordtype">void</span>);
+00209 
+00210     <span class="keywordtype">void</span>            vacm_save(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *token, <span class="keyword">const</span> <span class="keywordtype">char</span> *type);
-00179     <span class="keywordtype">void</span>            vacm_save_view(<span class=
+00211     <span class="keywordtype">void</span>            vacm_save_view(<span class=
 "keyword">struct</span> vacm_viewEntry *view,
-00180                                    <span class="keyword">const</span> <span class=
+00212                                    <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *token, <span class="keyword">const</span> <span class="keywordtype">char</span> *type);
-00181     <span class="keywordtype">void</span>            vacm_save_access(<span class=
+00213     <span class="keywordtype">void</span>            vacm_save_access(<span class=
 "keyword">struct</span> vacm_accessEntry *access_entry,
-00182                                      <span class="keyword">const</span> <span class=
+00214                                      <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *token, <span class="keyword">const</span> <span class="keywordtype">char</span> *type);
-00183     <span class="keywordtype">void</span>            vacm_save_group(<span class=
+00215     <span class="keywordtype">void</span>            vacm_save_group(<span class=
 "keyword">struct</span> vacm_groupEntry *group_entry,
-00184                                     <span class="keyword">const</span> <span class=
+00216                                     <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *token, <span class="keyword">const</span> <span class="keywordtype">char</span> *type);
-00185 
-00186     <span class="keywordtype">void</span>            vacm_parse_config_view(<span class="keyword">const</span> <span class=
+00217 
+00218     <span class="keywordtype">void</span>            vacm_parse_config_view(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *token, <span class="keywordtype">char</span> *line);
-00187     <span class="keywordtype">void</span>            vacm_parse_config_group(<span class=
+00219     <span class="keywordtype">void</span>            vacm_parse_config_group(<span class=
 "keyword">const</span> <span class="keywordtype">char</span> *token, <span class="keywordtype">char</span> *line);
-00188     <span class="keywordtype">void</span>            vacm_parse_config_access(<span class=
+00220     <span class="keywordtype">void</span>            vacm_parse_config_access(<span class=
 "keyword">const</span> <span class="keywordtype">char</span> *token,
-00189                                              <span class="keywordtype">char</span> *line);
-00190 
-00191     <span class="keywordtype">int</span>             store_vacm(<span class="keywordtype">int</span> majorID, <span class=
+00221                                              <span class="keywordtype">char</span> *line);
+00222 
+00223     <span class="keywordtype">int</span>             store_vacm(<span class="keywordtype">int</span> majorID, <span class=
 "keywordtype">int</span> minorID, <span class="keywordtype">void</span> *serverarg,
-00192                                <span class="keywordtype">void</span> *clientarg);
-00193 
-00194 
-00195 <span class="preprocessor">#ifdef __cplusplus</span>
-00196 }
-00197 <span class="preprocessor">#endif</span>
-00198 <span class="preprocessor">#endif                          </span><span class="comment">/* VACM_H */</span>
+00224                                <span class="keywordtype">void</span> *clientarg);
+00225 
+00226     <span class="keyword">struct </span>vacm_viewEntry *netsnmp_view_get(<span class=
+"keyword">struct</span> vacm_viewEntry *head,
+00227                                             <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *viewName,
+00228                                             oid * viewSubtree,
+00229                                             size_t viewSubtreeLen, <span class="keywordtype">int</span> mode);
+00230 
+00231 
+00232 <span class="preprocessor">#ifdef __cplusplus</span>
+00233 }
+00234 <span class="preprocessor">#endif</span>
+00235 <span class="preprocessor">#endif                          </span><span class="comment">/* VACM_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:43 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:51 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

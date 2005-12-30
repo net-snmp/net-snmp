@@ -31,118 +31,118 @@
 00011 
 00012 <span class="preprocessor">#include &lt;net-snmp/agent/cache_handler.h&gt;</span>
 00013 
-00014 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
-00015 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
-00016 <span class="preprocessor">#endif</span>
+00014 <span class="keyword">static</span> netsnmp_cache  *cache_head = NULL;
+00015 <span class="keyword">static</span> <span class="keywordtype">int</span>             cache_outstanding_valid = 0;
+00016 <span class="keyword">static</span> <span class="keywordtype">int</span>             _cache_load( netsnmp_cache *cache );
 00017 
-00018 <span class="keyword">static</span> netsnmp_cache  *cache_head = NULL;
-00019 <span class="keyword">static</span> <span class="keywordtype">int</span>             cache_outstanding_valid = 0;
-00020 <span class="keyword">static</span> <span class="keywordtype">int</span>             _cache_load( netsnmp_cache *cache );
-00021 
-00022 <span class="preprocessor">#define CACHE_RELEASE_FREQUENCY 60      </span><span class=
+00018 <span class="preprocessor">#define CACHE_RELEASE_FREQUENCY 60      </span><span class=
 "comment">/* Check for expired caches every 60s */</span>
-00023 
-00024 <span class="keywordtype">void</span>            <a class="code" href=
+00019 
+00020 <span class="keywordtype">void</span>            <a class="code" href=
 "group__cache__handler.html#ga21">release_cached_resources</a>(<span class="keywordtype">unsigned</span> <span class=
 "keywordtype">int</span> regNo,
-00025                                          <span class="keywordtype">void</span> *clientargs);
-00026 
-00114 netsnmp_cache *
-<a name="l00115" id="l00115"></a><a class="code" href="group__cache__handler.html#ga0">00115</a> <a class="code" href=
+00021                                          <span class="keywordtype">void</span> *clientargs);
+00022 
+00110 netsnmp_cache *
+<a name="l00111" id="l00111"></a><a class="code" href="group__cache__handler.html#ga0">00111</a> <a class="code" href=
 "group__cache__handler.html#ga0">netsnmp_cache_get_head</a>(<span class="keywordtype">void</span>)
-00116 {
-00117     <span class="keywordflow">return</span> cache_head;
-00118 }
-00119 
-00122 netsnmp_cache *
-<a name="l00123" id="l00123"></a><a class="code" href="group__cache__handler.html#ga1">00123</a> <a class="code" href=
+00112 {
+00113     <span class="keywordflow">return</span> cache_head;
+00114 }
+00115 
+00118 netsnmp_cache *
+<a name="l00119" id="l00119"></a><a class="code" href="group__cache__handler.html#ga1">00119</a> <a class="code" href=
 "group__cache__handler.html#ga1">netsnmp_cache_find_by_oid</a>(oid * rootoid, <span class="keywordtype">int</span> rootoid_len)
-00124 {
-00125     netsnmp_cache  *cache;
-00126 
-00127     <span class="keywordflow">for</span> (cache = cache_head; cache; cache = cache-&gt;next) {
-00128         <span class="keywordflow">if</span> (0 == <a class="code" href=
-"group__library.html#ga100">netsnmp_oid_equals</a>(cache-&gt;rootoid, cache-&gt;rootoid_len,
-00129                                     rootoid, rootoid_len))
-00130             <span class="keywordflow">return</span> cache;
-00131     }
-00132     
-00133     <span class="keywordflow">return</span> NULL;
-00134 }
-00135 
-00138 netsnmp_cache *
-<a name="l00139" id="l00139"></a><a class="code" href="group__cache__handler.html#ga2">00139</a> <a class="code" href=
+00120 {
+00121     netsnmp_cache  *cache;
+00122 
+00123     <span class="keywordflow">for</span> (cache = cache_head; cache; cache = cache-&gt;next) {
+00124         <span class="keywordflow">if</span> (0 == <a class="code" href=
+"group__library.html#ga106">netsnmp_oid_equals</a>(cache-&gt;rootoid, cache-&gt;rootoid_len,
+00125                                     rootoid, rootoid_len))
+00126             <span class="keywordflow">return</span> cache;
+00127     }
+00128     
+00129     <span class="keywordflow">return</span> NULL;
+00130 }
+00131 
+00134 netsnmp_cache *
+<a name="l00135" id="l00135"></a><a class="code" href="group__cache__handler.html#ga2">00135</a> <a class="code" href=
 "group__cache__handler.html#ga2">netsnmp_cache_create</a>(<span class=
 "keywordtype">int</span> timeout, NetsnmpCacheLoad * load_hook,
-00140                      NetsnmpCacheFree * free_hook,
-00141                      oid * rootoid, <span class="keywordtype">int</span> rootoid_len)
-00142 {
-00143     netsnmp_cache  *cache = NULL;
-00144 
-00145     cache = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_cache);
-00146     <span class="keywordflow">if</span> (NULL == cache) {
-00147         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,<span class=
+00136                      NetsnmpCacheFree * free_hook,
+00137                      oid * rootoid, <span class="keywordtype">int</span> rootoid_len)
+00138 {
+00139     netsnmp_cache  *cache = NULL;
+00140 
+00141     cache = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_cache);
+00142     <span class="keywordflow">if</span> (NULL == cache) {
+00143         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,<span class=
 "stringliteral">"malloc error in netsnmp_cache_create\n"</span>);
-00148         <span class="keywordflow">return</span> NULL;
-00149     }
-00150     cache-&gt;timeout = timeout;
-00151     cache-&gt;load_cache = load_hook;
-00152     cache-&gt;free_cache = free_hook;
-00153     cache-&gt;enabled = 1;
+00144         <span class="keywordflow">return</span> NULL;
+00145     }
+00146     cache-&gt;timeout = timeout;
+00147     cache-&gt;load_cache = load_hook;
+00148     cache-&gt;free_cache = free_hook;
+00149     cache-&gt;enabled = 1;
+00150 
+00151     <span class="keywordflow">if</span>(0 == cache-&gt;timeout)
+00152         cache-&gt;timeout = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+00153                                             NETSNMP_DS_AGENT_CACHE_TIMEOUT);
 00154 
-00155     <span class="keywordflow">if</span>(0 == cache-&gt;timeout)
-00156         cache-&gt;timeout = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
-00157                                             NETSNMP_DS_AGENT_CACHE_TIMEOUT);
-00158 
-00159     
-00160     <span class="comment">/*</span>
-00161 <span class="comment">     * Add the registered OID information, and tack</span>
-00162 <span class="comment">     * this onto the list for cache SNMP management</span>
-00163 <span class="comment">     *</span>
-00164 <span class="comment">     * Note that this list is not ordered.</span>
-00165 <span class="comment">     *    table_iterator rules again!</span>
-00166 <span class="comment">     */</span>
-00167     <span class="keywordflow">if</span> (rootoid) {
-00168         cache-&gt;rootoid = snmp_duplicate_objid(rootoid, rootoid_len);
-00169         cache-&gt;rootoid_len = rootoid_len;
-00170         cache-&gt;next = cache_head;
-00171         <span class="keywordflow">if</span> (cache_head)
-00172             cache_head-&gt;prev = cache;
-00173         cache_head = cache;
-00174     }
-00175 
-00176     <span class="keywordflow">return</span> cache;
-00177 }
-00178 
-00180 <span class="keyword">static</span> <span class="keywordtype">void</span>
-00181 _timer_reload(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> regNo, <span class=
+00155     
+00156     <span class="comment">/*</span>
+00157 <span class="comment">     * Add the registered OID information, and tack</span>
+00158 <span class="comment">     * this onto the list for cache SNMP management</span>
+00159 <span class="comment">     *</span>
+00160 <span class="comment">     * Note that this list is not ordered.</span>
+00161 <span class="comment">     *    table_iterator rules again!</span>
+00162 <span class="comment">     */</span>
+00163     <span class="keywordflow">if</span> (rootoid) {
+00164         cache-&gt;rootoid = snmp_duplicate_objid(rootoid, rootoid_len);
+00165         cache-&gt;rootoid_len = rootoid_len;
+00166         cache-&gt;next = cache_head;
+00167         <span class="keywordflow">if</span> (cache_head)
+00168             cache_head-&gt;prev = cache;
+00169         cache_head = cache;
+00170     }
+00171 
+00172     <span class="keywordflow">return</span> cache;
+00173 }
+00174 
+00176 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00177 _timer_reload(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> regNo, <span class=
 "keywordtype">void</span> *clientargs)
-00182 {
-00183     netsnmp_cache *cache = (netsnmp_cache *)clientargs;
-00184 
-00185     DEBUGMSGT((<span class="stringliteral">"cache_timer:start"</span>, <span class=
+00178 {
+00179     netsnmp_cache *cache = (netsnmp_cache *)clientargs;
+00180 
+00181     DEBUGMSGT((<span class="stringliteral">"cache_timer:start"</span>, <span class=
 "stringliteral">"loading cache %p\n"</span>, cache));
-00186 
-00187     cache-&gt;expired = 1;
-00188 
-00189     _cache_load(cache);
-00190 }
-00191 
-00193 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>
-<a name="l00194" id="l00194"></a><a class="code" href="group__cache__handler.html#ga4">00194</a> <a class="code" href=
+00182 
+00183     cache-&gt;expired = 1;
+00184 
+00185     _cache_load(cache);
+00186 }
+00187 
+00189 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>
+<a name="l00190" id="l00190"></a><a class="code" href="group__cache__handler.html#ga4">00190</a> <a class="code" href=
 "group__cache__handler.html#ga4">netsnmp_cache_timer_start</a>(netsnmp_cache *cache)
-00195 {
-00196     <span class="keywordflow">if</span>(NULL == cache)
-00197         <span class="keywordflow">return</span> 0;
+00191 {
+00192     <span class="keywordflow">if</span>(NULL == cache)
+00193         <span class="keywordflow">return</span> 0;
+00194 
+00195     DEBUGMSGTL(( <span class="stringliteral">"cache_timer:start"</span>, <span class="stringliteral">"OID: "</span>));
+00196     DEBUGMSGOID((<span class="stringliteral">"cache_timer:start"</span>, cache-&gt;rootoid, cache-&gt;rootoid_len));
+00197     DEBUGMSG((   <span class="stringliteral">"cache_timer:start"</span>, <span class="stringliteral">"\n"</span>));
 00198 
 00199     <span class="keywordflow">if</span>(0 != cache-&gt;timer_id) {
-00200         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING, <span class=
+00200         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_WARNING, <span class=
 "stringliteral">"cache has existing timer id.\n"</span>);
 00201         <span class="keywordflow">return</span> cache-&gt;timer_id;
 00202     }
 00203     
 00204     <span class="keywordflow">if</span>(! (cache-&gt;flags &amp; NETSNMP_CACHE_AUTO_RELOAD)) {
-00205         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,
+00205         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,
 00206                  <span class="stringliteral">"cache_timer_start called but auto_reload not set.\n"</span>);
 00207         <span class="keywordflow">return</span> 0;
 00208     }
@@ -151,449 +151,449 @@
 "group__snmp__alarm.html#ga14">snmp_alarm_register</a>(cache-&gt;timeout, SA_REPEAT,
 00211                                           _timer_reload, cache);
 00212     <span class="keywordflow">if</span>(0 == cache-&gt;timer_id) {
-00213         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,<span class=
+00213         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,<span class=
 "stringliteral">"could not register alarm\n"</span>);
 00214         <span class="keywordflow">return</span> 0;
 00215     }
 00216 
-00217     DEBUGMSGT((<span class="stringliteral">"cache_timer:start"</span>,
-00218                <span class="stringliteral">"starting timer %d for cache %p\n"</span>, cache-&gt;timer_id, cache));
-00219     <span class="keywordflow">return</span> cache-&gt;timer_id;
-00220 }
-00221 
-00223 <span class="keywordtype">void</span>
-<a name="l00224" id="l00224"></a><a class="code" href="group__cache__handler.html#ga5">00224</a> <a class="code" href=
+00217     cache-&gt;flags &amp;= ~NETSNMP_CACHE_AUTO_RELOAD;
+00218     DEBUGMSGT((<span class="stringliteral">"cache_timer:start"</span>,
+00219                <span class="stringliteral">"starting timer %d for cache %p\n"</span>, cache-&gt;timer_id, cache));
+00220     <span class="keywordflow">return</span> cache-&gt;timer_id;
+00221 }
+00222 
+00224 <span class="keywordtype">void</span>
+<a name="l00225" id="l00225"></a><a class="code" href="group__cache__handler.html#ga5">00225</a> <a class="code" href=
 "group__cache__handler.html#ga5">netsnmp_cache_timer_stop</a>(netsnmp_cache *cache)
-00225 {
-00226     <span class="keywordflow">if</span>(NULL == cache)
-00227         <span class="keywordflow">return</span>;
-00228 
-00229     <span class="keywordflow">if</span>(0 == cache-&gt;timer_id) {
-00230         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING, <span class=
+00226 {
+00227     <span class="keywordflow">if</span>(NULL == cache)
+00228         <span class="keywordflow">return</span>;
+00229 
+00230     <span class="keywordflow">if</span>(0 == cache-&gt;timer_id) {
+00231         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_WARNING, <span class=
 "stringliteral">"cache has no timer id.\n"</span>);
-00231         <span class="keywordflow">return</span>;
-00232     }
-00233 
-00234     DEBUGMSGT((<span class="stringliteral">"cache_timer:stop"</span>,
-00235                <span class="stringliteral">"stopping timer %d for cache %p\n"</span>, cache-&gt;timer_id, cache));
-00236 
-00237     <a class="code" href="group__snmp__alarm.html#ga6">snmp_alarm_unregister</a>(cache-&gt;timer_id);
-00238 }
-00239 
-00240 
-00243 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
-<a name="l00244" id="l00244"></a><a class="code" href="group__cache__handler.html#ga6">00244</a> <a class="code" href=
+00232         <span class="keywordflow">return</span>;
+00233     }
+00234 
+00235     DEBUGMSGT((<span class="stringliteral">"cache_timer:stop"</span>,
+00236                <span class="stringliteral">"stopping timer %d for cache %p\n"</span>, cache-&gt;timer_id, cache));
+00237 
+00238     <a class="code" href="group__snmp__alarm.html#ga6">snmp_alarm_unregister</a>(cache-&gt;timer_id);
+00239     cache-&gt;flags |= NETSNMP_CACHE_AUTO_RELOAD;
+00240 }
+00241 
+00242 
+00245 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+<a name="l00246" id="l00246"></a><a class="code" href="group__cache__handler.html#ga6">00246</a> <a class="code" href=
 "group__cache__handler.html#ga6">netsnmp_cache_handler_get</a>(netsnmp_cache* cache)
-00245 {
-00246     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *ret = NULL;
-00247     
-00248     ret = <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
+00247 {
+00248     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *ret = NULL;
+00249     
+00250     ret = <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
 "stringliteral">"cache_handler"</span>,
-00249                                  netsnmp_cache_helper_handler);
-00250     <span class="keywordflow">if</span> (ret) {
-00251         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o2">flags</a> |= MIB_HANDLER_AUTO_NEXT;
-00252         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = (<span class=
+00251                                  netsnmp_cache_helper_handler);
+00252     <span class="keywordflow">if</span> (ret) {
+00253         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o2">flags</a> |= MIB_HANDLER_AUTO_NEXT;
+00254         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = (<span class=
 "keywordtype">void</span> *) cache;
-00253         
-00254         <span class="keywordflow">if</span>(NULL != cache) {
-00255             <span class=
+00255         
+00256         <span class="keywordflow">if</span>(NULL != cache) {
+00257             <span class=
 "keywordflow">if</span> ((cache-&gt;flags &amp; NETSNMP_CACHE_PRELOAD) &amp;&amp; ! cache-&gt;valid) {
-00256                 <span class="comment">/*</span>
-00257 <span class="comment">                 * load cache, ignore rc</span>
-00258 <span class="comment">                 * (failed load doesn't affect registration)</span>
-00259 <span class="comment">                 */</span>
-00260                 (void)_cache_load(cache);
-00261             }
-00262             <span class="keywordflow">if</span> (cache-&gt;flags &amp; NETSNMP_CACHE_AUTO_RELOAD)
-00263                 <a class="code" href="group__cache__handler.html#ga4">netsnmp_cache_timer_start</a>(cache);
-00264             
-00265         }
-00266     }
-00267     <span class="keywordflow">return</span> ret;
-00268 }
-00269 
-00272 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
-<a name="l00273" id="l00273"></a><a class="code" href="group__cache__handler.html#ga7">00273</a> <a class="code" href=
+00258                 <span class="comment">/*</span>
+00259 <span class="comment">                 * load cache, ignore rc</span>
+00260 <span class="comment">                 * (failed load doesn't affect registration)</span>
+00261 <span class="comment">                 */</span>
+00262                 (void)_cache_load(cache);
+00263             }
+00264             <span class="keywordflow">if</span> (cache-&gt;flags &amp; NETSNMP_CACHE_AUTO_RELOAD)
+00265                 <a class="code" href="group__cache__handler.html#ga4">netsnmp_cache_timer_start</a>(cache);
+00266             
+00267         }
+00268     }
+00269     <span class="keywordflow">return</span> ret;
+00270 }
+00271 
+00274 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+<a name="l00275" id="l00275"></a><a class="code" href="group__cache__handler.html#ga7">00275</a> <a class="code" href=
 "group__cache__handler.html#ga7">netsnmp_get_cache_handler</a>(<span class=
 "keywordtype">int</span> timeout, NetsnmpCacheLoad * load_hook,
-00274                           NetsnmpCacheFree * free_hook,
-00275                           oid * rootoid, <span class="keywordtype">int</span> rootoid_len)
-00276 {
-00277     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *ret = NULL;
-00278     netsnmp_cache  *cache = NULL;
-00279 
-00280     ret = <a class="code" href="group__cache__handler.html#ga6">netsnmp_cache_handler_get</a>(NULL);
-00281     <span class="keywordflow">if</span> (ret) {
-00282         cache = <a class="code" href=
+00276                           NetsnmpCacheFree * free_hook,
+00277                           oid * rootoid, <span class="keywordtype">int</span> rootoid_len)
+00278 {
+00279     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *ret = NULL;
+00280     netsnmp_cache  *cache = NULL;
+00281 
+00282     ret = <a class="code" href="group__cache__handler.html#ga6">netsnmp_cache_handler_get</a>(NULL);
+00283     <span class="keywordflow">if</span> (ret) {
+00284         cache = <a class="code" href=
 "group__cache__handler.html#ga2">netsnmp_cache_create</a>(timeout, load_hook, free_hook,
-00283                                      rootoid, rootoid_len);
-00284         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = (<span class=
+00285                                      rootoid, rootoid_len);
+00286         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = (<span class=
 "keywordtype">void</span> *) cache;
-00285     }
-00286     <span class="keywordflow">return</span> ret;
-00287 }
-00288 
-00291 <span class="keywordtype">int</span>
-<a name="l00292" id="l00292"></a><a class="code" href="group__cache__handler.html#ga8">00292</a> <a class="code" href=
+00287     }
+00288     <span class="keywordflow">return</span> ret;
+00289 }
+00290 
+00293 <span class="keywordtype">int</span>
+<a name="l00294" id="l00294"></a><a class="code" href="group__cache__handler.html#ga8">00294</a> <a class="code" href=
 "group__cache__handler.html#ga8">netsnmp_cache_handler_register</a>(<a class="code" href=
 "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> * reginfo,
-00293                                netsnmp_cache* cache)
-00294 {
-00295     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler = NULL;
-00296     handler = <a class="code" href="group__cache__handler.html#ga6">netsnmp_cache_handler_get</a>(cache);
-00297 
-00298     <a class="code" href="group__handler.html#ga14">netsnmp_inject_handler</a>(reginfo, handler);
-00299     <span class="keywordflow">return</span> <a class="code" href=
+00295                                netsnmp_cache* cache)
+00296 {
+00297     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler = NULL;
+00298     handler = <a class="code" href="group__cache__handler.html#ga6">netsnmp_cache_handler_get</a>(cache);
+00299 
+00300     <a class="code" href="group__handler.html#ga14">netsnmp_inject_handler</a>(reginfo, handler);
+00301     <span class="keywordflow">return</span> <a class="code" href=
 "group__handler.html#ga10">netsnmp_register_handler</a>(reginfo);
-00300 }
-00301 
-00304 <span class="keywordtype">int</span>
-<a name="l00305" id="l00305"></a><a class="code" href="group__cache__handler.html#ga9">00305</a> <a class="code" href=
+00302 }
+00303 
+00306 <span class="keywordtype">int</span>
+<a name="l00307" id="l00307"></a><a class="code" href="group__cache__handler.html#ga9">00307</a> <a class="code" href=
 "group__cache__handler.html#ga9">netsnmp_register_cache_handler</a>(<a class="code" href=
 "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> * reginfo,
-00306                                <span class="keywordtype">int</span> timeout, NetsnmpCacheLoad * load_hook,
-00307                                NetsnmpCacheFree * free_hook)
-00308 {
-00309     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler = NULL;
-00310     handler = <a class="code" href=
+00308                                <span class="keywordtype">int</span> timeout, NetsnmpCacheLoad * load_hook,
+00309                                NetsnmpCacheFree * free_hook)
+00310 {
+00311     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler = NULL;
+00312     handler = <a class="code" href=
 "group__cache__handler.html#ga7">netsnmp_get_cache_handler</a>(timeout, load_hook, free_hook,
-00311                                         reginfo-&gt;<a class="code" href=
+00313                                         reginfo-&gt;<a class="code" href=
 "structnetsnmp__handler__registration__s.html#o2">rootoid</a>,
-00312                                         reginfo-&gt;<a class="code" href=
+00314                                         reginfo-&gt;<a class="code" href=
 "structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>);
-00313 
-00314     <a class="code" href="group__handler.html#ga14">netsnmp_inject_handler</a>(reginfo, handler);
-00315     <span class="keywordflow">return</span> <a class="code" href=
+00315 
+00316     <a class="code" href="group__handler.html#ga14">netsnmp_inject_handler</a>(reginfo, handler);
+00317     <span class="keywordflow">return</span> <a class="code" href=
 "group__handler.html#ga10">netsnmp_register_handler</a>(reginfo);
-00316 }
-00317 
-00318 NETSNMP_STATIC_INLINE <span class="keywordtype">char</span> *
-00319 _build_cache_name(<span class="keyword">const</span> <span class="keywordtype">char</span> *name)
-00320 {
-00321     <span class="keywordtype">char</span> *dup = malloc(strlen(name) + strlen(CACHE_NAME) + 2);
-00322     <span class="keywordflow">if</span> (NULL == dup)
-00323         <span class="keywordflow">return</span> NULL;
-00324     sprintf(dup, <span class="stringliteral">"%s:%s"</span>, CACHE_NAME, name);
-00325     <span class="keywordflow">return</span> dup;
-00326 }
-00327 
-00329 <span class="keywordtype">void</span>
-<a name="l00330" id="l00330"></a><a class="code" href="group__cache__handler.html#ga11">00330</a> <a class="code" href=
+00318 }
+00319 
+00320 NETSNMP_STATIC_INLINE <span class="keywordtype">char</span> *
+00321 _build_cache_name(<span class="keyword">const</span> <span class="keywordtype">char</span> *name)
+00322 {
+00323     <span class="keywordtype">char</span> *dup = malloc(strlen(name) + strlen(CACHE_NAME) + 2);
+00324     <span class="keywordflow">if</span> (NULL == dup)
+00325         <span class="keywordflow">return</span> NULL;
+00326     sprintf(dup, <span class="stringliteral">"%s:%s"</span>, CACHE_NAME, name);
+00327     <span class="keywordflow">return</span> dup;
+00328 }
+00329 
+00331 <span class="keywordtype">void</span>
+<a name="l00332" id="l00332"></a><a class="code" href="group__cache__handler.html#ga11">00332</a> <a class="code" href=
 "group__cache__handler.html#ga11">netsnmp_cache_reqinfo_insert</a>(netsnmp_cache* cache,
-00331                              <a class="code" href=
+00333                              <a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> * reqinfo,
-00332                              <span class="keyword">const</span> <span class="keywordtype">char</span> *name)
-00333 {
-00334     <span class="keywordtype">char</span> *cache_name = _build_cache_name(name);
-00335     <span class="keywordflow">if</span> (NULL == netsnmp_agent_get_list_data(reqinfo, cache_name)) {
-00336         DEBUGMSGTL((<span class="stringliteral">"verbose:helper:cache_handler"</span>, <span class=
+00334                              <span class="keyword">const</span> <span class="keywordtype">char</span> *name)
+00335 {
+00336     <span class="keywordtype">char</span> *cache_name = _build_cache_name(name);
+00337     <span class="keywordflow">if</span> (NULL == netsnmp_agent_get_list_data(reqinfo, cache_name)) {
+00338         DEBUGMSGTL((<span class="stringliteral">"verbose:helper:cache_handler"</span>, <span class=
 "stringliteral">" adding '%s' to %p\n"</span>,
-00337                     cache_name, reqinfo));
-00338         netsnmp_agent_add_list_data(reqinfo,
-00339                                     <a class="code" href=
+00339                     cache_name, reqinfo));
+00340         netsnmp_agent_add_list_data(reqinfo,
+00341                                     <a class="code" href=
 "group__data__list.html#ga3">netsnmp_create_data_list</a>(cache_name,
-00340                                                              cache, NULL));
-00341     }
-00342     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(cache_name);
-00343 }
-00344 
-00346 netsnmp_cache  *
-<a name="l00347" id="l00347"></a><a class="code" href="group__cache__handler.html#ga12">00347</a> <a class="code" href=
+00342                                                              cache, NULL));
+00343     }
+00344     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(cache_name);
+00345 }
+00346 
+00348 netsnmp_cache  *
+<a name="l00349" id="l00349"></a><a class="code" href="group__cache__handler.html#ga12">00349</a> <a class="code" href=
 "group__cache__handler.html#ga12">netsnmp_cache_reqinfo_extract</a>(<a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> * reqinfo,
-00348                               <span class="keyword">const</span> <span class="keywordtype">char</span> *name)
-00349 {
-00350     netsnmp_cache  *result;
-00351     <span class="keywordtype">char</span> *cache_name = _build_cache_name(name);
-00352     result = netsnmp_agent_get_list_data(reqinfo, cache_name);
-00353     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(cache_name);
-00354     <span class="keywordflow">return</span> result;
-00355 }
-00356 
-00358 netsnmp_cache  *
-<a name="l00359" id="l00359"></a><a class="code" href="group__cache__handler.html#ga13">00359</a> <a class="code" href=
+00350                               <span class="keyword">const</span> <span class="keywordtype">char</span> *name)
+00351 {
+00352     netsnmp_cache  *result;
+00353     <span class="keywordtype">char</span> *cache_name = _build_cache_name(name);
+00354     result = netsnmp_agent_get_list_data(reqinfo, cache_name);
+00355     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(cache_name);
+00356     <span class="keywordflow">return</span> result;
+00357 }
+00358 
+00360 netsnmp_cache  *
+<a name="l00361" id="l00361"></a><a class="code" href="group__cache__handler.html#ga13">00361</a> <a class="code" href=
 "group__cache__handler.html#ga13">netsnmp_extract_cache_info</a>(<a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> * reqinfo)
-00360 {
-00361     <span class="keywordflow">return</span> <a class="code" href=
+00362 {
+00363     <span class="keywordflow">return</span> <a class="code" href=
 "group__cache__handler.html#ga12">netsnmp_cache_reqinfo_extract</a>(reqinfo, CACHE_NAME);
-00362 }
-00363 
-00364 
-00366 <span class="keywordtype">int</span>
-<a name="l00367" id="l00367"></a><a class="code" href="group__cache__handler.html#ga14">00367</a> <a class="code" href=
+00364 }
+00365 
+00366 
+00368 <span class="keywordtype">int</span>
+<a name="l00369" id="l00369"></a><a class="code" href="group__cache__handler.html#ga14">00369</a> <a class="code" href=
 "group__cache__handler.html#ga14">netsnmp_cache_check_expired</a>(netsnmp_cache *cache)
-00368 {
-00369     <span class="keywordflow">if</span>(NULL == cache)
-00370         <span class="keywordflow">return</span> 0;
-00371     
-00372     <span class="keywordflow">if</span>(!cache-&gt;valid || (NULL == cache-&gt;timestamp) || (-1 == cache-&gt;timeout))
-00373         cache-&gt;expired = 1;
-00374     <span class="keywordflow">else</span>
-00375         cache-&gt;expired = <a class="code" href=
+00370 {
+00371     <span class="keywordflow">if</span>(NULL == cache)
+00372         <span class="keywordflow">return</span> 0;
+00373     
+00374     <span class="keywordflow">if</span>(!cache-&gt;valid || (NULL == cache-&gt;timestamp) || (-1 == cache-&gt;timeout))
+00375         cache-&gt;expired = 1;
+00376     <span class="keywordflow">else</span>
+00377         cache-&gt;expired = <a class="code" href=
 "group__util.html#ga20">atime_ready</a>(cache-&gt;timestamp, 1000 * cache-&gt;timeout);
-00376     
-00377     <span class="keywordflow">return</span> cache-&gt;expired;
-00378 }
-00379 
-00381 <span class="keywordtype">int</span>
-<a name="l00382" id="l00382"></a><a class="code" href="group__cache__handler.html#ga15">00382</a> <a class="code" href=
+00378     
+00379     <span class="keywordflow">return</span> cache-&gt;expired;
+00380 }
+00381 
+00383 <span class="keywordtype">int</span>
+<a name="l00384" id="l00384"></a><a class="code" href="group__cache__handler.html#ga15">00384</a> <a class="code" href=
 "group__cache__handler.html#ga15">netsnmp_cache_check_and_reload</a>(netsnmp_cache * cache)
-00383 {
-00384     <span class="keywordflow">if</span> (!cache) {
-00385         DEBUGMSG((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
+00385 {
+00386     <span class="keywordflow">if</span> (!cache) {
+00387         DEBUGMSG((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
 "stringliteral">" no cache\n"</span>));
-00386         <span class="keywordflow">return</span> 0;       <span class="comment">/* ?? or -1 */</span>
-00387     }
-00388     <span class="keywordflow">if</span> (!cache-&gt;valid || <a class="code" href=
+00388         <span class="keywordflow">return</span> 0;       <span class="comment">/* ?? or -1 */</span>
+00389     }
+00390     <span class="keywordflow">if</span> (!cache-&gt;valid || <a class="code" href=
 "group__cache__handler.html#ga14">netsnmp_cache_check_expired</a>(cache))
-00389         <span class="keywordflow">return</span> _cache_load( cache );
-00390     <span class="keywordflow">else</span> {
-00391         DEBUGMSG((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
+00391         <span class="keywordflow">return</span> _cache_load( cache );
+00392     <span class="keywordflow">else</span> {
+00393         DEBUGMSG((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
 "stringliteral">" cached (%d)\n"</span>,
-00392                   cache-&gt;timeout));
-00393         <span class="keywordflow">return</span> 0;
-00394     }
-00395 }
-00396 
-00398 <span class="keywordtype">int</span>
-<a name="l00399" id="l00399"></a><a class="code" href="group__cache__handler.html#ga16">00399</a> <a class="code" href=
+00394                   cache-&gt;timeout));
+00395         <span class="keywordflow">return</span> 0;
+00396     }
+00397 }
+00398 
+00400 <span class="keywordtype">int</span>
+<a name="l00401" id="l00401"></a><a class="code" href="group__cache__handler.html#ga16">00401</a> <a class="code" href=
 "group__cache__handler.html#ga16">netsnmp_cache_is_valid</a>(<a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> * reqinfo, 
-00400                        <span class="keyword">const</span> <span class="keywordtype">char</span>* name)
-00401 {
-00402     netsnmp_cache  *cache = <a class="code" href=
+00402                        <span class="keyword">const</span> <span class="keywordtype">char</span>* name)
+00403 {
+00404     netsnmp_cache  *cache = <a class="code" href=
 "group__cache__handler.html#ga12">netsnmp_cache_reqinfo_extract</a>(reqinfo, name);
-00403     <span class="keywordflow">return</span> (cache &amp;&amp; cache-&gt;valid);
-00404 }
-00405 
-00409 <span class="keywordtype">int</span>
-<a name="l00410" id="l00410"></a><a class="code" href="group__cache__handler.html#ga17">00410</a> <a class="code" href=
+00405     <span class="keywordflow">return</span> (cache &amp;&amp; cache-&gt;valid);
+00406 }
+00407 
+00411 <span class="keywordtype">int</span>
+<a name="l00412" id="l00412"></a><a class="code" href="group__cache__handler.html#ga17">00412</a> <a class="code" href=
 "group__cache__handler.html#ga17">netsnmp_is_cache_valid</a>(<a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> * reqinfo)
-00411 {
-00412     <span class="keywordflow">return</span> <a class="code" href=
+00413 {
+00414     <span class="keywordflow">return</span> <a class="code" href=
 "group__cache__handler.html#ga16">netsnmp_cache_is_valid</a>(reqinfo, CACHE_NAME);
-00413 }
-00414 
-00416 <span class="keywordtype">int</span>
-<a name="l00417" id="l00417"></a><a class="code" href="group__cache__handler.html#ga18">00417</a> <a class="code" href=
+00415 }
+00416 
+00418 <span class="keywordtype">int</span>
+<a name="l00419" id="l00419"></a><a class="code" href="group__cache__handler.html#ga18">00419</a> <a class="code" href=
 "group__cache__handler.html#ga18">netsnmp_cache_helper_handler</a>(<a class="code" href=
 "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> * handler,
-00418                              <a class="code" href=
-"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> * reginfo,
-00419                              <a class="code" href=
-"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> * reqinfo,
 00420                              <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> * reginfo,
+00421                              <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> * reqinfo,
+00422                              <a class="code" href=
 "structnetsnmp__request__info__s.html">netsnmp_request_info</a> * requests)
-00421 {
-00422     netsnmp_cache  *cache = NULL;
-00423 
-00424     DEBUGMSGTL((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
+00423 {
+00424     netsnmp_cache  *cache = NULL;
+00425     netsnmp_handler_args cache_hint;
+00426 
+00427     DEBUGMSGTL((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
 "stringliteral">"Got request (%d) for %s: "</span>,
-00425                 reqinfo-&gt;<a class="code" href=
+00428                 reqinfo-&gt;<a class="code" href=
 "structnetsnmp__agent__request__info__s.html#o0">mode</a>, reginfo-&gt;<a class="code" href=
 "structnetsnmp__handler__registration__s.html#o0">handlerName</a>));
-00426     DEBUGMSGOID((<span class="stringliteral">"helper:cache_handler"</span>, reginfo-&gt;<a class="code" href=
+00429     DEBUGMSGOID((<span class="stringliteral">"helper:cache_handler"</span>, reginfo-&gt;<a class="code" href=
 "structnetsnmp__handler__registration__s.html#o2">rootoid</a>,
-00427                  reginfo-&gt;<a class="code" href="structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>));
-00428 
-00429     netsnmp_assert(handler-&gt;<a class="code" href=
+00430                  reginfo-&gt;<a class="code" href="structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>));
+00431     DEBUGMSG((<span class="stringliteral">"helper:cache_handler"</span>, <span class="stringliteral">"\n"</span>));
+00432 
+00433     netsnmp_assert(handler-&gt;<a class="code" href=
 "structnetsnmp__mib__handler__s.html#o2">flags</a> &amp; MIB_HANDLER_AUTO_NEXT);
-00430 
-00431     cache = (netsnmp_cache *) handler-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a>;
-00432     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-00433                                NETSNMP_DS_AGENT_NO_CACHING) ||
-00434         !cache || !cache-&gt;enabled || !cache-&gt;load_cache) {
-00435         DEBUGMSG((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
+00434 
+00435     cache = (netsnmp_cache *) handler-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a>;
+00436     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+00437                                NETSNMP_DS_AGENT_NO_CACHING) ||
+00438         !cache || !cache-&gt;enabled || !cache-&gt;load_cache) {
+00439         DEBUGMSG((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
 "stringliteral">" caching disabled or "</span>
-00436                   <span class="stringliteral">"cache not found, disabled or had no load method\n"</span>));
-00437         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00438     }
-00439 
-00440     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
+00440                   <span class="stringliteral">"cache not found, disabled or had no load method\n"</span>));
+00441         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00442     }
+00443 
+00444     <span class="comment">/*</span>
+00445 <span class="comment">     * Make the handler-chain parameters available to</span>
+00446 <span class="comment">     * the cache_load hook routine.</span>
+00447 <span class="comment">     */</span>
+00448     cache_hint.handler = handler;
+00449     cache_hint.reginfo = reginfo;
+00450     cache_hint.reqinfo = reqinfo;
+00451     cache_hint.requests = requests;
+00452     cache-&gt;cache_hint = &amp;cache_hint;
+00453 
+00454     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
 "structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
-00441 
-00442     <span class="keywordflow">case</span> MODE_GET:
-00443     <span class="keywordflow">case</span> MODE_GETNEXT:
-00444     <span class="keywordflow">case</span> MODE_GETBULK:
-00445     <span class="keywordflow">case</span> MODE_SET_RESERVE1: {
-00446         netsnmp_handler_args cache_hint;
-00447 
-00448         <span class="comment">/*</span>
-00449 <span class="comment">         * only touch cache once per pdu request, to prevent a cache</span>
-00450 <span class="comment">         * reload while a module is using cached data.</span>
-00451 <span class="comment">         *</span>
-00452 <span class="comment">         * XXX: this won't catch a request reloading the cache while</span>
-00453 <span class="comment">         * a previous (delegated) request is still using the cache.</span>
-00454 <span class="comment">         * maybe use a reference counter?</span>
-00455 <span class="comment">         */</span>
-00456         <span class="keywordflow">if</span> (<a class="code" href=
+00455 
+00456     <span class="keywordflow">case</span> MODE_GET:
+00457     <span class="keywordflow">case</span> MODE_GETNEXT:
+00458     <span class="keywordflow">case</span> MODE_GETBULK:
+00459     <span class="keywordflow">case</span> MODE_SET_RESERVE1: {
+00460 
+00461         <span class="comment">/*</span>
+00462 <span class="comment">         * only touch cache once per pdu request, to prevent a cache</span>
+00463 <span class="comment">         * reload while a module is using cached data.</span>
+00464 <span class="comment">         *</span>
+00465 <span class="comment">         * XXX: this won't catch a request reloading the cache while</span>
+00466 <span class="comment">         * a previous (delegated) request is still using the cache.</span>
+00467 <span class="comment">         * maybe use a reference counter?</span>
+00468 <span class="comment">         */</span>
+00469         <span class="keywordflow">if</span> (<a class="code" href=
 "group__cache__handler.html#ga16">netsnmp_cache_is_valid</a>(reqinfo, reginfo-&gt;<a class="code" href=
 "structnetsnmp__handler__registration__s.html#o0">handlerName</a>))
-00457             <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00458 
-00459         <span class="keywordflow">if</span> (cache-&gt;flags &amp; NETSNMP_CACHE_HINT_HANDLER_ARGS) {
-00460             netsnmp_assert(NULL == cache-&gt;cache_hint);
-00461             cache_hint.handler = handler;
-00462             cache_hint.reginfo = reginfo;
-00463             cache_hint.reqinfo = reqinfo;
-00464             cache_hint.requests = requests;
-00465             cache-&gt;cache_hint = &amp;cache_hint;
-00466         }
-00467 
-00468         <span class="comment">/*</span>
-00469 <span class="comment">         * call the load hook, and update the cache timestamp.</span>
-00470 <span class="comment">         * If it's not already there, add to reqinfo</span>
-00471 <span class="comment">         */</span>
-00472         <a class="code" href="group__cache__handler.html#ga15">netsnmp_cache_check_and_reload</a>(cache);
-00473         <a class="code" href=
+00470             <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00471 
+00472         <span class="comment">/*</span>
+00473 <span class="comment">         * call the load hook, and update the cache timestamp.</span>
+00474 <span class="comment">         * If it's not already there, add to reqinfo</span>
+00475 <span class="comment">         */</span>
+00476         <a class="code" href="group__cache__handler.html#ga15">netsnmp_cache_check_and_reload</a>(cache);
+00477         <a class="code" href=
 "group__cache__handler.html#ga11">netsnmp_cache_reqinfo_insert</a>(cache, reqinfo, reginfo-&gt;<a class="code" href=
 "structnetsnmp__handler__registration__s.html#o0">handlerName</a>);
-00474         cache-&gt;cache_hint = NULL;
-00476         }
-00477         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00478 
-00479     <span class="keywordflow">case</span> MODE_SET_RESERVE2:
-00480     <span class="keywordflow">case</span> MODE_SET_FREE:
-00481     <span class="keywordflow">case</span> MODE_SET_ACTION:
-00482     <span class="keywordflow">case</span> MODE_SET_UNDO:
-00483         netsnmp_assert(<a class="code" href=
+00479         }
+00480         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00481 
+00482     <span class="keywordflow">case</span> MODE_SET_RESERVE2:
+00483     <span class="keywordflow">case</span> MODE_SET_FREE:
+00484     <span class="keywordflow">case</span> MODE_SET_ACTION:
+00485     <span class="keywordflow">case</span> MODE_SET_UNDO:
+00486         netsnmp_assert(<a class="code" href=
 "group__cache__handler.html#ga16">netsnmp_cache_is_valid</a>(reqinfo, reginfo-&gt;<a class="code" href=
 "structnetsnmp__handler__registration__s.html#o0">handlerName</a>));
-00485         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00486 
-00487         <span class="comment">/*</span>
-00488 <span class="comment">         * A (successful) SET request wouldn't typically trigger a reload of</span>
-00489 <span class="comment">         *  the cache, but might well invalidate the current contents.</span>
-00490 <span class="comment">         * Only do this on the last pass through.</span>
-00491 <span class="comment">         */</span>
-00492     <span class="keywordflow">case</span> MODE_SET_COMMIT:
-00493         <span class="keywordflow">if</span> (cache-&gt;valid &amp;&amp; 
-00494             ! (cache-&gt;flags &amp; NETSNMP_CACHE_DONT_INVALIDATE_ON_SET) ) {
-00495             cache-&gt;free_cache(cache, cache-&gt;magic);
-00496             cache-&gt;valid = 0;
-00497         }
-00499         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00500 
-00501     <span class="keywordflow">default</span>:
-00502         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING, <span class=
+00488         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00489 
+00490         <span class="comment">/*</span>
+00491 <span class="comment">         * A (successful) SET request wouldn't typically trigger a reload of</span>
+00492 <span class="comment">         *  the cache, but might well invalidate the current contents.</span>
+00493 <span class="comment">         * Only do this on the last pass through.</span>
+00494 <span class="comment">         */</span>
+00495     <span class="keywordflow">case</span> MODE_SET_COMMIT:
+00496         <span class="keywordflow">if</span> (cache-&gt;valid &amp;&amp; 
+00497             ! (cache-&gt;flags &amp; NETSNMP_CACHE_DONT_INVALIDATE_ON_SET) ) {
+00498             cache-&gt;free_cache(cache, cache-&gt;magic);
+00499             cache-&gt;valid = 0;
+00500         }
+00502         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00503 
+00504     <span class="keywordflow">default</span>:
+00505         <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_WARNING, <span class=
 "stringliteral">"cache_handler: Unrecognised mode (%d)\n"</span>,
-00503                  reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a>);
-00504         <a class="code" href="group__snmp__agent.html#ga81">netsnmp_set_all_requests_error</a>(reqinfo, requests,
-00505                                        SNMP_ERR_GENERR);
-00506         <span class="keywordflow">return</span> SNMP_ERR_GENERR;
-00507     }
-00508     <a class="code" href=
-"group__snmp__agent.html#ga81">netsnmp_set_all_requests_error</a>(reqinfo, requests, SNMP_ERR_GENERR);
-00509     <span class="keywordflow">return</span> SNMP_ERR_GENERR;     <span class="comment">/* should never get here */</span>
-00510 }
-00511 
-00512 <span class="keyword">static</span> <span class="keywordtype">void</span>
-00513 _cache_free( netsnmp_cache *cache )
-00514 {
-00515     <span class="keywordflow">if</span> (NULL != cache-&gt;free_cache) {
-00516         cache-&gt;free_cache(cache, cache-&gt;magic);
-00517         cache-&gt;valid = 0;
-00518     }
-00519 }
-00520 
-00521 <span class="keyword">static</span> <span class="keywordtype">int</span>
-00522 _cache_load( netsnmp_cache *cache )
-00523 {
-00524     <span class="keywordtype">int</span> ret = -1;
-00525 
-00526     <span class="comment">/*</span>
-00527 <span class="comment">     * If we've got a valid cache, then release it before reloading</span>
-00528 <span class="comment">     */</span>
-00529     <span class="keywordflow">if</span> (cache-&gt;valid &amp;&amp;
-00530         (! (cache-&gt;flags &amp; NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD)))
-00531         _cache_free(cache);
-00532 
-00533     <span class="keywordflow">if</span> ( cache-&gt;load_cache)
-00534         ret = cache-&gt;load_cache(cache, cache-&gt;magic);
-00535     <span class="keywordflow">if</span> (ret &lt; 0) {
-00536         DEBUGMSG((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
+00506                  reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a>);
+00507         <a class="code" href="group__snmp__agent.html#ga73">netsnmp_request_set_error_all</a>(requests, SNMP_ERR_GENERR);
+00508         <span class="keywordflow">return</span> SNMP_ERR_GENERR;
+00509     }
+00510     <a class="code" href="group__snmp__agent.html#ga73">netsnmp_request_set_error_all</a>(requests, SNMP_ERR_GENERR);
+00511     <span class="keywordflow">return</span> SNMP_ERR_GENERR;     <span class="comment">/* should never get here */</span>
+00512 }
+00513 
+00514 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00515 _cache_free( netsnmp_cache *cache )
+00516 {
+00517     <span class="keywordflow">if</span> (NULL != cache-&gt;free_cache) {
+00518         cache-&gt;free_cache(cache, cache-&gt;magic);
+00519         cache-&gt;valid = 0;
+00520     }
+00521 }
+00522 
+00523 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00524 _cache_load( netsnmp_cache *cache )
+00525 {
+00526     <span class="keywordtype">int</span> ret = -1;
+00527 
+00528     <span class="comment">/*</span>
+00529 <span class="comment">     * If we've got a valid cache, then release it before reloading</span>
+00530 <span class="comment">     */</span>
+00531     <span class="keywordflow">if</span> (cache-&gt;valid &amp;&amp;
+00532         (! (cache-&gt;flags &amp; NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD)))
+00533         _cache_free(cache);
+00534 
+00535     <span class="keywordflow">if</span> ( cache-&gt;load_cache)
+00536         ret = cache-&gt;load_cache(cache, cache-&gt;magic);
+00537     <span class="keywordflow">if</span> (ret &lt; 0) {
+00538         DEBUGMSG((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
 "stringliteral">" load failed (%d)\n"</span>,
-00537                   ret));
-00538         cache-&gt;valid = 0;
-00539         <span class="keywordflow">return</span> ret;
-00540     }
-00541     cache-&gt;valid = 1;
-00542     cache-&gt;expired = 0;
-00543 
-00544     <span class="comment">/*</span>
-00545 <span class="comment">     * If we didn't previously have any valid caches outstanding,</span>
-00546 <span class="comment">     *   then schedule a pass of the auto-release routine.</span>
-00547 <span class="comment">     */</span>
-00548     <span class="keywordflow">if</span> ((!cache_outstanding_valid) &amp;&amp;
-00549         (! (cache-&gt;flags &amp; NETSNMP_CACHE_DONT_FREE_EXPIRED))) {
-00550         <a class="code" href="group__snmp__alarm.html#ga14">snmp_alarm_register</a>(CACHE_RELEASE_FREQUENCY,
-00551                             0, release_cached_resources, NULL);
-00552         cache_outstanding_valid = 1;
-00553     }
-00554     <span class="keywordflow">if</span> (cache-&gt;timestamp)
-00555         <a class="code" href="group__util.html#ga16">atime_setMarker</a>(cache-&gt;timestamp);
-00556     <span class="keywordflow">else</span>
-00557         cache-&gt;timestamp = <a class="code" href="group__util.html#ga15">atime_newMarker</a>();
-00558     DEBUGMSG((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
+00539                   ret));
+00540         cache-&gt;valid = 0;
+00541         <span class="keywordflow">return</span> ret;
+00542     }
+00543     cache-&gt;valid = 1;
+00544     cache-&gt;expired = 0;
+00545 
+00546     <span class="comment">/*</span>
+00547 <span class="comment">     * If we didn't previously have any valid caches outstanding,</span>
+00548 <span class="comment">     *   then schedule a pass of the auto-release routine.</span>
+00549 <span class="comment">     */</span>
+00550     <span class="keywordflow">if</span> ((!cache_outstanding_valid) &amp;&amp;
+00551         (! (cache-&gt;flags &amp; NETSNMP_CACHE_DONT_FREE_EXPIRED))) {
+00552         <a class="code" href="group__snmp__alarm.html#ga14">snmp_alarm_register</a>(CACHE_RELEASE_FREQUENCY,
+00553                             0, release_cached_resources, NULL);
+00554         cache_outstanding_valid = 1;
+00555     }
+00556     <span class="keywordflow">if</span> (cache-&gt;timestamp)
+00557         <a class="code" href="group__util.html#ga16">atime_setMarker</a>(cache-&gt;timestamp);
+00558     <span class="keywordflow">else</span>
+00559         cache-&gt;timestamp = <a class="code" href="group__util.html#ga15">atime_newMarker</a>();
+00560     DEBUGMSG((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
 "stringliteral">" loaded (%d)\n"</span>,
-00559               cache-&gt;timeout));
-00560 
-00561     <span class="keywordflow">return</span> ret;
-00562 }
-00563 
-00564 
+00561               cache-&gt;timeout));
+00562 
+00563     <span class="keywordflow">return</span> ret;
+00564 }
 00565 
-00573 <span class="keywordtype">void</span>
-<a name="l00574" id="l00574"></a><a class="code" href="group__cache__handler.html#ga21">00574</a> <a class="code" href=
+00566 
+00567 
+00575 <span class="keywordtype">void</span>
+<a name="l00576" id="l00576"></a><a class="code" href="group__cache__handler.html#ga21">00576</a> <a class="code" href=
 "group__cache__handler.html#ga21">release_cached_resources</a>(<span class="keywordtype">unsigned</span> <span class=
 "keywordtype">int</span> regNo, <span class="keywordtype">void</span> *clientargs)
-00575 {
-00576     netsnmp_cache  *cache = NULL;
-00577 
-00578     cache_outstanding_valid = 0;
-00579     DEBUGMSGTL((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
+00577 {
+00578     netsnmp_cache  *cache = NULL;
+00579 
+00580     cache_outstanding_valid = 0;
+00581     DEBUGMSGTL((<span class="stringliteral">"helper:cache_handler"</span>, <span class=
 "stringliteral">"running auto-release\n"</span>));
-00580     <span class="keywordflow">for</span> (cache = cache_head; cache; cache = cache-&gt;next) {
-00581         DEBUGMSGTL((<span class="stringliteral">"helper:cache_handler"</span>,<span class=
+00582     <span class="keywordflow">for</span> (cache = cache_head; cache; cache = cache-&gt;next) {
+00583         DEBUGMSGTL((<span class="stringliteral">"helper:cache_handler"</span>,<span class=
 "stringliteral">" checking %p (flags 0x%x)\n"</span>,
-00582                      cache, cache-&gt;flags));
-00583         <span class="keywordflow">if</span> (cache-&gt;valid &amp;&amp;
-00584             ! (cache-&gt;flags &amp; NETSNMP_CACHE_DONT_AUTO_RELEASE)) {
-00585             DEBUGMSGTL((<span class="stringliteral">"helper:cache_handler"</span>,<span class=
+00584                      cache, cache-&gt;flags));
+00585         <span class="keywordflow">if</span> (cache-&gt;valid &amp;&amp;
+00586             ! (cache-&gt;flags &amp; NETSNMP_CACHE_DONT_AUTO_RELEASE)) {
+00587             DEBUGMSGTL((<span class="stringliteral">"helper:cache_handler"</span>,<span class=
 "stringliteral">"  releasing %p\n"</span>, cache));
-00586             <span class="comment">/*</span>
-00587 <span class="comment">             * Check to see if this cache has timed out.</span>
-00588 <span class="comment">             * If so, release the cached resources.</span>
-00589 <span class="comment">             * Otherwise, note that we still have at</span>
-00590 <span class="comment">             *   least one active cache.</span>
-00591 <span class="comment">             */</span>
-00592             <span class="keywordflow">if</span> (<a class="code" href=
+00588             <span class="comment">/*</span>
+00589 <span class="comment">             * Check to see if this cache has timed out.</span>
+00590 <span class="comment">             * If so, release the cached resources.</span>
+00591 <span class="comment">             * Otherwise, note that we still have at</span>
+00592 <span class="comment">             *   least one active cache.</span>
+00593 <span class="comment">             */</span>
+00594             <span class="keywordflow">if</span> (<a class="code" href=
 "group__cache__handler.html#ga14">netsnmp_cache_check_expired</a>(cache)) {
-00593                 <span class="keywordflow">if</span>(! (cache-&gt;flags &amp; NETSNMP_CACHE_DONT_FREE_EXPIRED))
-00594                     _cache_free(cache);
-00595             } <span class="keywordflow">else</span> {
-00596                 cache_outstanding_valid = 1;
-00597             }
-00598         }
-00599     }
-00600     <span class="comment">/*</span>
-00601 <span class="comment">     * If there are any caches still valid &amp; active,</span>
-00602 <span class="comment">     *   then schedule another pass.</span>
-00603 <span class="comment">     */</span>
-00604     <span class="keywordflow">if</span> (cache_outstanding_valid) {
-00605         <a class="code" href="group__snmp__alarm.html#ga14">snmp_alarm_register</a>(CACHE_RELEASE_FREQUENCY,
-00606                             0, <a class="code" href="group__cache__handler.html#ga21">release_cached_resources</a>, NULL);
-00607     }
-00608 }
+00595                 <span class="keywordflow">if</span>(! (cache-&gt;flags &amp; NETSNMP_CACHE_DONT_FREE_EXPIRED))
+00596                     _cache_free(cache);
+00597             } <span class="keywordflow">else</span> {
+00598                 cache_outstanding_valid = 1;
+00599             }
+00600         }
+00601     }
+00602     <span class="comment">/*</span>
+00603 <span class="comment">     * If there are any caches still valid &amp; active,</span>
+00604 <span class="comment">     *   then schedule another pass.</span>
+00605 <span class="comment">     */</span>
+00606     <span class="keywordflow">if</span> (cache_outstanding_valid) {
+00607         <a class="code" href="group__snmp__alarm.html#ga14">snmp_alarm_register</a>(CACHE_RELEASE_FREQUENCY,
+00608                             0, <a class="code" href="group__cache__handler.html#ga21">release_cached_resources</a>, NULL);
+00609     }
+00610 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:37 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:44 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

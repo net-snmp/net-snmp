@@ -238,7 +238,7 @@
 "stringliteral">"defKSMServiceName"</span>,
 00204                                NETSNMP_DS_LIBRARY_ID,
 00205                                NETSNMP_DS_LIB_KSM_SERVICE_NAME);
-00206     <a class="code" href="group__callback.html#ga3">snmp_register_callback</a>(SNMP_CALLBACK_LIBRARY,
+00206     <a class="code" href="group__callback.html#ga8">snmp_register_callback</a>(SNMP_CALLBACK_LIBRARY,
 00207                            SNMP_CALLBACK_POST_READ_CONFIG,
 00208                            init_snmpksm_post_config, NULL);
 00209 
@@ -273,7 +273,7 @@
 00236     def-&gt;pdu_free = ksm_free_pdu;
 00237     def-&gt;pdu_clone = ksm_clone_pdu;
 00238 
-00239     register_sec_mod(2066432, <span class="stringliteral">"ksm"</span>, def);
+00239     register_sec_mod(NETSNMP_KSM_SECURITY_MODEL, <span class="stringliteral">"ksm"</span>, def);
 00240 }
 00241 
 00242 <span class="comment">/*</span>
@@ -2015,8 +2015,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:49 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

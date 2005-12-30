@@ -32,27 +32,53 @@
 00011 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
 00012 <span class="preprocessor">#endif</span>
 00013 
-00014     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *<a class="code" href=
+00014     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_row_merge_status_x {
+00015        <span class="keywordtype">char</span>                  count;    <span class=
+"comment">/* number of requests */</span>
+00016        <span class="keywordtype">char</span>                  rows;     <span class=
+"comment">/* number of rows (unique indexes) */</span>
+00017        <span class="keywordtype">char</span>                  current;  <span class=
+"comment">/* current row number */</span>
+00018        <span class="keywordtype">char</span>                  reserved; <span class=
+"comment">/* reserver for future use */</span>
+00019 
+00020        <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>  **saved_requests; <span class=
+"comment">/* internal use */</span>
+00021        <span class="keywordtype">char</span>                  *saved_status;    <span class=
+"comment">/* internal use */</span>
+00022     } netsnmp_row_merge_status;
+00023 
+00024     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *<a class="code" href=
 "group__row__merge.html#ga0">netsnmp_get_row_merge_handler</a>(<span class="keywordtype">int</span>);
-00015     <span class="keywordtype">int</span>   <a class="code" href=
+00025     <span class="keywordtype">int</span>   <a class="code" href=
 "group__row__merge.html#ga1">netsnmp_register_row_merge</a>(<a class="code" href=
 "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo);
-00016     <span class="keywordtype">void</span>  <a class="code" href=
-"group__row__merge.html#ga3">netsnmp_init_row_merge</a>(<span class="keywordtype">void</span>);
-00017 
-00018     Netsnmp_Node_Handler netsnmp_row_merge_helper_handler;
-00019 
-00020 <span class="preprocessor">#ifdef __cplusplus</span>
-00021 }
-00022 <span class="preprocessor">#endif</span>
-00023 <span class="preprocessor">#endif</span>
+00026     <span class="keywordtype">void</span>  <a class="code" href=
+"group__row__merge.html#ga7">netsnmp_init_row_merge</a>(<span class="keywordtype">void</span>);
+00027 
+00028     <span class="keywordtype">int</span> <a class="code" href=
+"group__row__merge.html#ga4">netsnmp_row_merge_status_first</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00029                                        <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo);
+00030     <span class="keywordtype">int</span> <a class="code" href=
+"group__row__merge.html#ga5">netsnmp_row_merge_status_last</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00031                                       <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo);
+00032 
+00033     Netsnmp_Node_Handler netsnmp_row_merge_helper_handler;
+00034 
+00035 <span class="preprocessor">#ifdef __cplusplus</span>
+00036 }
+00037 <span class="preprocessor">#endif</span>
+00038 <span class="preprocessor">#endif</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:39 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:46 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

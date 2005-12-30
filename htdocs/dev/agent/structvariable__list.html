@@ -169,7 +169,7 @@
     </dd>
   </dl>
 
-  <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00513">513</a> of file <a class="el" href=
+  <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00517">517</a> of file <a class="el" href=
   "snmp__api_8h-source.html">snmp_api.h</a>.</p>
   <hr />
 
@@ -195,8 +195,10 @@
       <td>
         <p>90 percentile &lt; 40.</p>
 
-        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00529">529</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00533">533</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__client_8c-source.html#l00753">snmp_set_var_value()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o8" doxytag="variable_list::data" id="o8"></a>
@@ -221,12 +223,14 @@
       <td>
         <p>(Opaque) hook for additional data</p>
 
-        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00531">531</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00535">535</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="table__data_8c-source.html#l00644">netsnmp_extract_table_row_data()</a>, <a class=
-        "el" href="old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, and <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l01148">netsnmp_mark_row_column_writable()</a>,
+        <a class="el" href="old__api_8c-source.html#l00225">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l01183">netsnmp_set_row_column()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00100">netsnmp_table_data_delete_row()</a>, and <a class="el" href=
+        "table__tdata_8c-source.html#l00150">netsnmp_tdata_delete_row()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o9" doxytag="variable_list::dataFreeHook" id="o9"></a>
@@ -274,24 +278,24 @@
       <td>
         <p>Object identifier of variable.</p>
 
-        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00517">517</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00521">521</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="mib_8c-source.html#l03421">build_oid_segment()</a>, <a class="el" href=
-        "snmp__agent_8c-source.html#l02655">check_getnext_results()</a>, <a class="el" href=
-        "snmp__agent_8c-source.html#l01803">netsnmp_add_varbind_to_cache()</a>, <a class="el" href=
-        "bulk__to__next_8c-source.html#l00045">netsnmp_bulk_to_next_fix_requests()</a>, <a class="el" href=
-        "table_8c-source.html#l00864">netsnmp_check_getnext_reply()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00775">netsnmp_register_auto_data_table()</a>, <a class="el" href=
-        "row__merge_8c-source.html#l00058">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
-        "table_8c-source.html#l00772">netsnmp_table_build_oid()</a>, <a class="el" href=
-        "table_8c-source.html#l00806">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
-        "table_8c-source.html#l00739">netsnmp_table_build_result()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, and <a class="el" href=
-        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="table__container_8c-source.html#l00450">_data_lookup()</a>, <a class="el" href=
+        "mib_8c-source.html#l03454">build_oid_segment()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l02726">check_getnext_results()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l01844">netsnmp_add_varbind_to_cache()</a>, <a class="el" href=
+        "bulk__to__next_8c-source.html#l00041">netsnmp_bulk_to_next_fix_requests()</a>, <a class="el" href=
+        "table_8c-source.html#l00883">netsnmp_check_getnext_reply()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00225">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00832">netsnmp_register_auto_data_table()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00153">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00783">netsnmp_table_build_oid()</a>, <a class="el" href=
+        "table_8c-source.html#l00820">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
+        "table_8c-source.html#l00750">netsnmp_table_build_result()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l01486">netsnmp_wrap_up_request()</a>, <a class="el" href=
+        "snmp__client_8c-source.html#l00753">snmp_set_var_value()</a>, and <a class="el" href=
+        "table_8c-source.html#l00141">table_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o2" doxytag="variable_list::name_length" id="o2"></a>
@@ -316,22 +320,22 @@
       <td>
         <p>number of subid's in name</p>
 
-        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00519">519</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00523">523</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="mib_8c-source.html#l03421">build_oid_segment()</a>, <a class="el" href=
-        "snmp__agent_8c-source.html#l02655">check_getnext_results()</a>, <a class="el" href=
-        "snmp__agent_8c-source.html#l01803">netsnmp_add_varbind_to_cache()</a>, <a class="el" href=
-        "bulk__to__next_8c-source.html#l00045">netsnmp_bulk_to_next_fix_requests()</a>, <a class="el" href=
-        "table_8c-source.html#l00864">netsnmp_check_getnext_reply()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
-        "row__merge_8c-source.html#l00058">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
-        "table_8c-source.html#l00772">netsnmp_table_build_oid()</a>, <a class="el" href=
-        "table_8c-source.html#l00806">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, and <a class="el" href=
-        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="table__container_8c-source.html#l00450">_data_lookup()</a>, <a class="el" href=
+        "mib_8c-source.html#l03454">build_oid_segment()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l02726">check_getnext_results()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l01844">netsnmp_add_varbind_to_cache()</a>, <a class="el" href=
+        "bulk__to__next_8c-source.html#l00041">netsnmp_bulk_to_next_fix_requests()</a>, <a class="el" href=
+        "table_8c-source.html#l00883">netsnmp_check_getnext_reply()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00225">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00153">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00783">netsnmp_table_build_oid()</a>, <a class="el" href=
+        "table_8c-source.html#l00820">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l01486">netsnmp_wrap_up_request()</a>, <a class="el" href=
+        "snmp__client_8c-source.html#l00753">snmp_set_var_value()</a>, and <a class="el" href=
+        "table_8c-source.html#l00141">table_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o6" doxytag="variable_list::name_loc" id="o6"></a>
@@ -356,13 +360,13 @@
       <td>
         <p>90 percentile &lt; 24.</p>
 
-        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00527">527</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00531">531</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="mib_8c-source.html#l03421">build_oid_segment()</a>, <a class="el" href=
-        "table_8c-source.html#l00806">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
-        "table_8c-source.html#l00739">netsnmp_table_build_result()</a>, and <a class="el" href=
-        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="mib_8c-source.html#l03454">build_oid_segment()</a>, <a class="el" href=
+        "table_8c-source.html#l00820">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
+        "table_8c-source.html#l00750">netsnmp_table_build_result()</a>, and <a class="el" href=
+        "table_8c-source.html#l00141">table_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o0" doxytag="variable_list::next_variable" id="o0"></a>
@@ -387,14 +391,15 @@
       <td>
         <p>NULL for last variable.</p>
 
-        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00515">515</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00519">519</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l02760">handle_getnext_loop()</a>, <a class="el" href=
-        "snmp__agent_8c-source.html#l03054">handle_pdu()</a>, <a class="el" href=
-        "bulk__to__next_8c-source.html#l00045">netsnmp_bulk_to_next_fix_requests()</a>, <a class="el" href=
-        "snmp__agent_8c-source.html#l01470">netsnmp_wrap_up_request()</a>, and <a class="el" href=
-        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l02831">handle_getnext_loop()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l03125">handle_pdu()</a>, <a class="el" href=
+        "bulk__to__next_8c-source.html#l00041">netsnmp_bulk_to_next_fix_requests()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l01486">netsnmp_wrap_up_request()</a>, <a class="el" href=
+        "snmp__client_8c-source.html#l00753">snmp_set_var_value()</a>, and <a class="el" href=
+        "table_8c-source.html#l00141">table_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o3" doxytag="variable_list::type" id="o3"></a>
@@ -425,37 +430,38 @@
           <dd><a class="el" href="delayed__instance_8c-example.html#a21">delayed_instance.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00521">521</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00525">525</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l03239">_request_set_error()</a>, <a class="el" href=
-        "mib_8c-source.html#l03421">build_oid_segment()</a>, <a class="el" href=
-        "snmp__agent_8c-source.html#l02655">check_getnext_results()</a>, <a class="el" href=
-        "snmp__agent_8c-source.html#l03054">handle_pdu()</a>, <a class="el" href=
-        "snmp__agent_8c-source.html#l01803">netsnmp_add_varbind_to_cache()</a>, <a class="el" href=
-        "bulk__to__next_8c-source.html#l00045">netsnmp_bulk_to_next_fix_requests()</a>, <a class="el" href=
-        "table_8c-source.html#l00864">netsnmp_check_getnext_reply()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, <a class="el" href=
-        "snmp__agent_8c-source.html#l01470">netsnmp_wrap_up_request()</a>, <a class="el" href=
-        "snmp__client_8c-source.html#l00670">snmp_set_var_typed_value()</a>, <a class="el" href=
-        "mib_8c-source.html#l01795">sprint_realloc_bitstring()</a>, <a class="el" href=
-        "mib_8c-source.html#l01969">sprint_realloc_by_type()</a>, <a class="el" href=
-        "mib_8c-source.html#l01562">sprint_realloc_counter()</a>, <a class="el" href=
-        "mib_8c-source.html#l00867">sprint_realloc_counter64()</a>, <a class="el" href=
-        "mib_8c-source.html#l01489">sprint_realloc_gauge()</a>, <a class="el" href=
-        "mib_8c-source.html#l01289">sprint_realloc_integer()</a>, <a class="el" href=
-        "mib_8c-source.html#l01691">sprint_realloc_ipaddress()</a>, <a class="el" href=
-        "mib_8c-source.html#l01625">sprint_realloc_networkaddress()</a>, <a class="el" href=
-        "mib_8c-source.html#l01751">sprint_realloc_null()</a>, <a class="el" href=
-        "mib_8c-source.html#l01071">sprint_realloc_object_identifier()</a>, <a class="el" href=
-        "mib_8c-source.html#l00423">sprint_realloc_octet_string()</a>, <a class="el" href=
-        "mib_8c-source.html#l00981">sprint_realloc_opaque()</a>, <a class="el" href=
-        "mib_8c-source.html#l01141">sprint_realloc_timeticks()</a>, <a class="el" href=
-        "mib_8c-source.html#l01392">sprint_realloc_uinteger()</a>, and <a class="el" href=
-        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="table__container_8c-source.html#l00450">_data_lookup()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l03313">_request_set_error()</a>, <a class="el" href=
+        "mib_8c-source.html#l03454">build_oid_segment()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l02726">check_getnext_results()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l03125">handle_pdu()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l01844">netsnmp_add_varbind_to_cache()</a>, <a class="el" href=
+        "bulk__to__next_8c-source.html#l00041">netsnmp_bulk_to_next_fix_requests()</a>, <a class="el" href=
+        "table_8c-source.html#l00883">netsnmp_check_getnext_reply()</a>, <a class="el" href=
+        "instance_8c-source.html#l00708">netsnmp_instance_num_file_handler()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00225">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l01183">netsnmp_set_row_column()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l01486">netsnmp_wrap_up_request()</a>, <a class="el" href=
+        "snmp__client_8c-source.html#l00686">snmp_set_var_typed_value()</a>, <a class="el" href=
+        "snmp__client_8c-source.html#l00753">snmp_set_var_value()</a>, <a class="el" href=
+        "mib_8c-source.html#l01797">sprint_realloc_bitstring()</a>, <a class="el" href=
+        "mib_8c-source.html#l01971">sprint_realloc_by_type()</a>, <a class="el" href=
+        "mib_8c-source.html#l01564">sprint_realloc_counter()</a>, <a class="el" href=
+        "mib_8c-source.html#l00869">sprint_realloc_counter64()</a>, <a class="el" href=
+        "mib_8c-source.html#l01491">sprint_realloc_gauge()</a>, <a class="el" href=
+        "mib_8c-source.html#l01291">sprint_realloc_integer()</a>, <a class="el" href=
+        "mib_8c-source.html#l01693">sprint_realloc_ipaddress()</a>, <a class="el" href=
+        "mib_8c-source.html#l01627">sprint_realloc_networkaddress()</a>, <a class="el" href=
+        "mib_8c-source.html#l01753">sprint_realloc_null()</a>, <a class="el" href=
+        "mib_8c-source.html#l01073">sprint_realloc_object_identifier()</a>, <a class="el" href=
+        "mib_8c-source.html#l00427">sprint_realloc_octet_string()</a>, <a class="el" href=
+        "mib_8c-source.html#l00983">sprint_realloc_opaque()</a>, <a class="el" href=
+        "mib_8c-source.html#l01143">sprint_realloc_timeticks()</a>, <a class="el" href=
+        "mib_8c-source.html#l01394">sprint_realloc_uinteger()</a>, and <a class="el" href=
+        "table_8c-source.html#l00141">table_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o4" doxytag="variable_list::val" id="o4"></a>
@@ -486,25 +492,26 @@
           <dd><a class="el" href="delayed__instance_8c-example.html#a26">delayed_instance.c</a>.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00523">523</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00527">527</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="mib_8c-source.html#l03421">build_oid_segment()</a>, <a class="el" href=
-        "table_8c-source.html#l00864">netsnmp_check_getnext_reply()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
-        "mib_8c-source.html#l01795">sprint_realloc_bitstring()</a>, <a class="el" href=
-        "mib_8c-source.html#l01562">sprint_realloc_counter()</a>, <a class="el" href=
-        "mib_8c-source.html#l00867">sprint_realloc_counter64()</a>, <a class="el" href=
-        "mib_8c-source.html#l01489">sprint_realloc_gauge()</a>, <a class="el" href=
-        "mib_8c-source.html#l01289">sprint_realloc_integer()</a>, <a class="el" href=
-        "mib_8c-source.html#l01691">sprint_realloc_ipaddress()</a>, <a class="el" href=
-        "mib_8c-source.html#l01625">sprint_realloc_networkaddress()</a>, <a class="el" href=
-        "mib_8c-source.html#l01071">sprint_realloc_object_identifier()</a>, <a class="el" href=
-        "mib_8c-source.html#l00423">sprint_realloc_octet_string()</a>, <a class="el" href=
-        "mib_8c-source.html#l00981">sprint_realloc_opaque()</a>, <a class="el" href=
-        "mib_8c-source.html#l01141">sprint_realloc_timeticks()</a>, and <a class="el" href=
-        "mib_8c-source.html#l01392">sprint_realloc_uinteger()</a>.</p>
+        <p>Referenced by <a class="el" href="mib_8c-source.html#l03454">build_oid_segment()</a>, <a class="el" href=
+        "table_8c-source.html#l00883">netsnmp_check_getnext_reply()</a>, <a class="el" href=
+        "instance_8c-source.html#l00708">netsnmp_instance_num_file_handler()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00225">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "snmp__client_8c-source.html#l00753">snmp_set_var_value()</a>, <a class="el" href=
+        "mib_8c-source.html#l01797">sprint_realloc_bitstring()</a>, <a class="el" href=
+        "mib_8c-source.html#l01564">sprint_realloc_counter()</a>, <a class="el" href=
+        "mib_8c-source.html#l00869">sprint_realloc_counter64()</a>, <a class="el" href=
+        "mib_8c-source.html#l01491">sprint_realloc_gauge()</a>, <a class="el" href=
+        "mib_8c-source.html#l01291">sprint_realloc_integer()</a>, <a class="el" href=
+        "mib_8c-source.html#l01693">sprint_realloc_ipaddress()</a>, <a class="el" href=
+        "mib_8c-source.html#l01627">sprint_realloc_networkaddress()</a>, <a class="el" href=
+        "mib_8c-source.html#l01073">sprint_realloc_object_identifier()</a>, <a class="el" href=
+        "mib_8c-source.html#l00427">sprint_realloc_octet_string()</a>, <a class="el" href=
+        "mib_8c-source.html#l00983">sprint_realloc_opaque()</a>, <a class="el" href=
+        "mib_8c-source.html#l01143">sprint_realloc_timeticks()</a>, and <a class="el" href=
+        "mib_8c-source.html#l01394">sprint_realloc_uinteger()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o5" doxytag="variable_list::val_len" id="o5"></a>
@@ -529,18 +536,18 @@
       <td>
         <p>the length of the value to be copied into buf</p>
 
-        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00525">525</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00529">529</a> of file <a class="el" href=
         "snmp__api_8h-source.html">snmp_api.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="mib_8c-source.html#l03421">build_oid_segment()</a>, <a class="el" href=
-        "table_8c-source.html#l00864">netsnmp_check_getnext_reply()</a>, <a class="el" href=
-        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
-        "mib_8c-source.html#l01795">sprint_realloc_bitstring()</a>, <a class="el" href=
-        "mib_8c-source.html#l01625">sprint_realloc_networkaddress()</a>, <a class="el" href=
-        "mib_8c-source.html#l01071">sprint_realloc_object_identifier()</a>, <a class="el" href=
-        "mib_8c-source.html#l00423">sprint_realloc_octet_string()</a>, and <a class="el" href=
-        "mib_8c-source.html#l00981">sprint_realloc_opaque()</a>.</p>
+        <p>Referenced by <a class="el" href="mib_8c-source.html#l03454">build_oid_segment()</a>, <a class="el" href=
+        "table_8c-source.html#l00883">netsnmp_check_getnext_reply()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00225">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "snmp__client_8c-source.html#l00753">snmp_set_var_value()</a>, <a class="el" href=
+        "mib_8c-source.html#l01797">sprint_realloc_bitstring()</a>, <a class="el" href=
+        "mib_8c-source.html#l01627">sprint_realloc_networkaddress()</a>, <a class="el" href=
+        "mib_8c-source.html#l01073">sprint_realloc_object_identifier()</a>, <a class="el" href=
+        "mib_8c-source.html#l00427">sprint_realloc_octet_string()</a>, and <a class="el" href=
+        "mib_8c-source.html#l00983">sprint_realloc_opaque()</a>.</p>
       </td>
     </tr>
   </table>
@@ -553,8 +560,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:43 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:52 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

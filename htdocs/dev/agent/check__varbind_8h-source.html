@@ -35,41 +35,54 @@
 "structvariable__list.html">netsnmp_variable_list</a> *var, <span class="keywordtype">int</span> type);
 00014     <span class="keywordtype">int</span> netsnmp_check_vb_size(<span class="keyword">const</span> <a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a> *var, size_t size );
-00015     <span class="keywordtype">int</span> netsnmp_check_vb_size_range(<span class="keyword">const</span> <a class="code"
+00015     <span class="keywordtype">int</span> netsnmp_check_vb_max_size(<span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *var, size_t size );
+00016     <span class="keywordtype">int</span> netsnmp_check_vb_range(<span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *var,
+00017                                size_t low, size_t high );
+00018     <span class="keywordtype">int</span> netsnmp_check_vb_size_range(<span class="keyword">const</span> <a class="code"
 href="structvariable__list.html">netsnmp_variable_list</a> *var,
-00016                                     size_t low, size_t high );
-00017 
-00018     <span class="keywordtype">int</span> netsnmp_check_vb_type_and_size(<span class="keyword">const</span> <a class="code"
-href="structvariable__list.html">netsnmp_variable_list</a> *var,
-00019                                     <span class="keywordtype">int</span> type, size_t size);
+00019                                     size_t low, size_t high );
 00020 
-00021     <span class="keywordtype">int</span> netsnmp_check_vb_int_range(<span class="keyword">const</span> <a class="code"
-href="structvariable__list.html">netsnmp_variable_list</a> *var, <span class="keywordtype">int</span> low,
-00022                                    <span class="keywordtype">int</span> high);
-00023 
-00024     <span class="keywordtype">int</span> netsnmp_check_vb_truthvalue(<span class="keyword">const</span> <a class="code"
-href="structvariable__list.html">netsnmp_variable_list</a> *var);
+00021     <span class="keywordtype">int</span> netsnmp_check_vb_type_and_size(<span class="keyword">const</span> <a class="code"
+href="structvariable__list.html">netsnmp_variable_list</a> *var,
+00022                                     <span class="keywordtype">int</span> type, size_t size);
+00023     <span class="keywordtype">int</span> netsnmp_check_vb_type_and_max_size(<span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html">netsnmp_variable_list</a> *var,
+00024                                     <span class="keywordtype">int</span> type, size_t size);
 00025 
-00026     <span class="keywordtype">int</span> netsnmp_check_vb_rowstatus_value(<span class="keyword">const</span> <a class=
-"code" href="structvariable__list.html">netsnmp_variable_list</a> *var);
-00027     <span class="keywordtype">int</span> netsnmp_check_vb_rowstatus(<span class="keyword">const</span> <a class="code"
-href="structvariable__list.html">netsnmp_variable_list</a> *var, <span class="keywordtype">int</span> old_val);
-00028 
-00029     <span class="keywordtype">int</span> netsnmp_check_vb_storagetype(<span class="keyword">const</span> <a class="code"
-href="structvariable__list.html">netsnmp_variable_list</a> *var, <span class="keywordtype">int</span> old_val);
-00030 
+00026     <span class="keywordtype">int</span> netsnmp_check_vb_oid(<span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *var);
+00027     <span class="keywordtype">int</span> netsnmp_check_vb_int(<span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *var);
+00028     <span class="keywordtype">int</span> netsnmp_check_vb_uint(<span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *var);
+00029     <span class="keywordtype">int</span> netsnmp_check_vb_int_range(<span class="keyword">const</span> <a class="code"
+href="structvariable__list.html">netsnmp_variable_list</a> *var, <span class="keywordtype">int</span> low,
+00030                                    <span class="keywordtype">int</span> high);
 00031 
-00032 <span class="preprocessor">#ifdef __cplusplus</span>
-00033 }
-00034 <span class="preprocessor">#endif</span>
-00035 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_CHECK_VARBIND_H */</span>
+00032     <span class="keywordtype">int</span> netsnmp_check_vb_truthvalue(<span class="keyword">const</span> <a class="code"
+href="structvariable__list.html">netsnmp_variable_list</a> *var);
+00033 
+00034     <span class="keywordtype">int</span> netsnmp_check_vb_rowstatus_value(<span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html">netsnmp_variable_list</a> *var);
+00035     <span class="keywordtype">int</span> netsnmp_check_vb_rowstatus(<span class="keyword">const</span> <a class="code"
+href="structvariable__list.html">netsnmp_variable_list</a> *var, <span class="keywordtype">int</span> old_val);
+00036 
+00037     <span class="keywordtype">int</span> netsnmp_check_vb_storagetype(<span class="keyword">const</span> <a class="code"
+href="structvariable__list.html">netsnmp_variable_list</a> *var, <span class="keywordtype">int</span> old_val);
+00038 
+00039 
+00040 <span class="preprocessor">#ifdef __cplusplus</span>
+00041 }
+00042 <span class="preprocessor">#endif</span>
+00043 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_CHECK_VARBIND_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:37 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:44 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

@@ -35,92 +35,87 @@
 00015 
 00016 <span class="preprocessor">#include &lt;net-snmp/agent/mode_end_call.h&gt;</span>
 00017 
-00018 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
-00019 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
-00020 <span class="preprocessor">#endif</span>
-00021 
-00047 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
-<a name="l00048" id="l00048"></a><a class="code" href="group__mode__end__call.html#ga0">00048</a> <a class="code" href=
+00043 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+<a name="l00044" id="l00044"></a><a class="code" href="group__mode__end__call.html#ga0">00044</a> <a class="code" href=
 "group__mode__end__call.html#ga0">netsnmp_get_mode_end_call_handler</a>(netsnmp_mode_handler_list *endlist)
-00049 {
-00050     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *me =
-00051         <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
+00045 {
+00046     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *me =
+00047         <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
 "stringliteral">"mode_end_call"</span>,
-00052                                netsnmp_mode_end_call_helper);
-00053 
-00054     <span class="keywordflow">if</span> (!me)
-00055         <span class="keywordflow">return</span> NULL;
+00048                                netsnmp_mode_end_call_helper);
+00049 
+00050     <span class="keywordflow">if</span> (!me)
+00051         <span class="keywordflow">return</span> NULL;
+00052 
+00053     me-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = endlist;
+00054     <span class="keywordflow">return</span> me;
+00055 }
 00056 
-00057     me-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = endlist;
-00058     <span class="keywordflow">return</span> me;
-00059 }
-00060 
-00067 netsnmp_mode_handler_list *
-<a name="l00068" id="l00068"></a><a class="code" href="group__mode__end__call.html#ga1">00068</a> <a class="code" href=
+00063 netsnmp_mode_handler_list *
+<a name="l00064" id="l00064"></a><a class="code" href="group__mode__end__call.html#ga1">00064</a> <a class="code" href=
 "group__mode__end__call.html#ga1">netsnmp_mode_end_call_add_mode_callback</a>(netsnmp_mode_handler_list *endlist,
-00069                                         <span class="keywordtype">int</span> mode,
-00070                                         <a class="code" href=
+00065                                         <span class="keywordtype">int</span> mode,
+00066                                         <a class="code" href=
 "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *callbackh) {
-00071     netsnmp_mode_handler_list *ptr, *ptr2;
-00072     ptr = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_mode_handler_list);
-00073     <span class="keywordflow">if</span> (!ptr)
-00074         <span class="keywordflow">return</span> NULL;
-00075     
-00076     ptr-&gt;mode = mode;
-00077     ptr-&gt;callback_handler = callbackh;
-00078     ptr-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o4">next</a> = NULL;
-00079 
-00080     <span class="keywordflow">if</span> (!endlist)
-00081         <span class="keywordflow">return</span> ptr;
-00082 
-00083     <span class="comment">/* get to end */</span>
-00084     <span class="keywordflow">for</span>(ptr2 = endlist; ptr2-&gt;next != NULL; ptr2 = ptr2-&gt;next);
-00085 
-00086     ptr2-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o4">next</a> = ptr;
-00087     <span class="keywordflow">return</span> endlist;
-00088 }
-00089     
-00091 <span class="keywordtype">int</span>
-00092 netsnmp_mode_end_call_helper(<a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
-00093                             <a class="code" href=
+00067     netsnmp_mode_handler_list *ptr, *ptr2;
+00068     ptr = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_mode_handler_list);
+00069     <span class="keywordflow">if</span> (!ptr)
+00070         <span class="keywordflow">return</span> NULL;
+00071     
+00072     ptr-&gt;mode = mode;
+00073     ptr-&gt;callback_handler = callbackh;
+00074     ptr-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o4">next</a> = NULL;
+00075 
+00076     <span class="keywordflow">if</span> (!endlist)
+00077         <span class="keywordflow">return</span> ptr;
+00078 
+00079     <span class="comment">/* get to end */</span>
+00080     <span class="keywordflow">for</span>(ptr2 = endlist; ptr2-&gt;next != NULL; ptr2 = ptr2-&gt;next);
+00081 
+00082     ptr2-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o4">next</a> = ptr;
+00083     <span class="keywordflow">return</span> endlist;
+00084 }
+00085     
+00087 <span class="keywordtype">int</span>
+00088 netsnmp_mode_end_call_helper(<a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00089                             <a class="code" href=
 "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
-00094                             <a class="code" href=
+00090                             <a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
-00095                             <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
-00096 {
+00091                             <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
+00092 {
+00093 
+00094     <span class="keywordtype">int</span>             ret;
+00095     <span class="keywordtype">int</span>             ret2 = SNMP_ERR_NOERROR;
+00096     netsnmp_mode_handler_list *ptr;
 00097 
-00098     <span class="keywordtype">int</span>             ret;
-00099     <span class="keywordtype">int</span>             ret2 = SNMP_ERR_NOERROR;
-00100     netsnmp_mode_handler_list *ptr;
+00098     <span class="comment">/* always call the real handlers first */</span>
+00099     ret = <a class="code" href="group__handler.html#ga17">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo,
+00100                                     requests);
 00101 
-00102     <span class="comment">/* always call the real handlers first */</span>
-00103     ret = <a class="code" href="group__handler.html#ga17">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo,
-00104                                     requests);
-00105 
-00106     <span class="comment">/* then call the callback handlers */</span>
-00107     <span class="keywordflow">for</span>(ptr = handler-&gt;<a class="code" href=
+00102     <span class="comment">/* then call the callback handlers */</span>
+00103     <span class="keywordflow">for</span>(ptr = handler-&gt;<a class="code" href=
 "structnetsnmp__mib__handler__s.html#o1">myvoid</a>; ptr; ptr = ptr-&gt;<a class="code" href=
 "structnetsnmp__mib__handler__s.html#o4">next</a>) {
-00108         <span class="keywordflow">if</span> (ptr-&gt;mode == NETSNMP_MODE_END_ALL_MODES ||
-00109             reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> == ptr-&gt;<a class=
+00104         <span class="keywordflow">if</span> (ptr-&gt;mode == NETSNMP_MODE_END_ALL_MODES ||
+00105             reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> == ptr-&gt;<a class=
 "code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
-00110             ret2 = <a class="code" href=
+00106             ret2 = <a class="code" href=
 "group__handler.html#ga15">netsnmp_call_handler</a>(ptr-&gt;callback_handler, reginfo,
-00111                                              reqinfo, requests);
-00112             <span class="keywordflow">if</span> (ret != SNMP_ERR_NOERROR)
-00113                 ret = ret2;
-00114         }
-00115     }
-00116     
-00117     <span class="keywordflow">return</span> ret2;
-00118 }
+00107                                              reqinfo, requests);
+00108             <span class="keywordflow">if</span> (ret != SNMP_ERR_NOERROR)
+00109                 ret = ret2;
+00110         }
+00111     }
+00112     
+00113     <span class="keywordflow">return</span> ret2;
+00114 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:38 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:45 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

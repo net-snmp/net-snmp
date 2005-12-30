@@ -146,982 +146,985 @@
 00126 <span class="preprocessor">#include &lt;sys/pstat.h&gt;</span>
 00127 <span class="preprocessor">#endif</span>
 00128 
-00129 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
-00130 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
-00131 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
-00132 <span class="preprocessor">#include &lt;net-snmp/library/system.h&gt;</span>    <span class=
+00129 <span class="preprocessor">#if HAVE_SYS_UTSNAME_H</span>
+00130 <span class="preprocessor">#include &lt;sys/utsname.h&gt;</span>
+00131 <span class="preprocessor">#endif</span>
+00132 
+00133 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00134 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00135 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00136 <span class="preprocessor">#include &lt;net-snmp/library/system.h&gt;</span>    <span class=
 "comment">/* for "internal" definitions */</span>
-00133 
-00134 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
-00135 
-00136 <span class="preprocessor">#ifndef IFF_LOOPBACK</span>
-00137 <span class="preprocessor">#       define IFF_LOOPBACK 0</span>
-00138 <span class="preprocessor">#endif</span>
+00137 
+00138 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
 00139 
-00140 <span class="preprocessor">#ifdef  INADDR_LOOPBACK</span>
-00141 <span class="preprocessor"># define LOOPBACK    INADDR_LOOPBACK</span>
-00142 <span class="preprocessor">#else</span>
-00143 <span class="preprocessor"># define LOOPBACK    0x7f000001</span>
-00144 <span class="preprocessor">#endif</span>
-00145 
-00168 <span class="keywordtype">int</span>
-00169 netsnmp_daemonize(<span class="keywordtype">int</span> quit_immediately, <span class="keywordtype">int</span> stderr_log)
-00170 {
-00171     <span class="keywordtype">int</span> i = 0;
-00172     DEBUGMSGT((<span class="stringliteral">"daemonize"</span>,<span class="stringliteral">"deamonizing...\n"</span>));
-00173 <span class="preprocessor">#if HAVE_FORK</span>
-00174     <span class="comment">/*</span>
-00175 <span class="comment">     * Fork to return control to the invoking process and to</span>
-00176 <span class="comment">     * guarantee that we aren't a process group leader.</span>
-00177 <span class="comment">     */</span>
-00178     i = fork();
-00179     <span class="keywordflow">if</span> (i != 0) {
-00180         <span class="comment">/* Parent. */</span>
-00181         DEBUGMSGT((<span class="stringliteral">"daemonize"</span>,<span class=
+00140 <span class="preprocessor">#ifndef IFF_LOOPBACK</span>
+00141 <span class="preprocessor">#       define IFF_LOOPBACK 0</span>
+00142 <span class="preprocessor">#endif</span>
+00143 
+00144 <span class="preprocessor">#ifdef  INADDR_LOOPBACK</span>
+00145 <span class="preprocessor"># define LOOPBACK    INADDR_LOOPBACK</span>
+00146 <span class="preprocessor">#else</span>
+00147 <span class="preprocessor"># define LOOPBACK    0x7f000001</span>
+00148 <span class="preprocessor">#endif</span>
+00149 
+00172 <span class="keywordtype">int</span>
+00173 netsnmp_daemonize(<span class="keywordtype">int</span> quit_immediately, <span class="keywordtype">int</span> stderr_log)
+00174 {
+00175     <span class="keywordtype">int</span> i = 0;
+00176     DEBUGMSGT((<span class="stringliteral">"daemonize"</span>,<span class="stringliteral">"deamonizing...\n"</span>));
+00177 <span class="preprocessor">#if HAVE_FORK</span>
+00178     <span class="comment">/*</span>
+00179 <span class="comment">     * Fork to return control to the invoking process and to</span>
+00180 <span class="comment">     * guarantee that we aren't a process group leader.</span>
+00181 <span class="comment">     */</span>
+00182     i = fork();
+00183     <span class="keywordflow">if</span> (i != 0) {
+00184         <span class="comment">/* Parent. */</span>
+00185         DEBUGMSGT((<span class="stringliteral">"daemonize"</span>,<span class=
 "stringliteral">"first fork returned %d.\n"</span>, i));
-00182         <span class="keywordflow">if</span>(i == -1) {
-00183             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,<span class=
+00186         <span class="keywordflow">if</span>(i == -1) {
+00187             <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,<span class=
 "stringliteral">"first fork failed (errno %d) in "</span>
-00184                      <span class="stringliteral">"netsnmp_daemonize()\n"</span>, errno);
-00185             <span class="keywordflow">return</span> -1;
-00186         }
-00187         <span class="keywordflow">if</span> (quit_immediately) {
-00188             DEBUGMSGT((<span class="stringliteral">"daemonize"</span>,<span class=
-"stringliteral">"parent exiting\n"</span>));
-00189             exit(0);
+00188                      <span class="stringliteral">"netsnmp_daemonize()\n"</span>, errno);
+00189             <span class="keywordflow">return</span> -1;
 00190         }
-00191     } <span class="keywordflow">else</span> {
-00192         <span class="comment">/* Child. */</span>
-00193 <span class="preprocessor">#ifdef HAVE_SETSID</span>
-00194         <span class="comment">/* Become a process/session group leader. */</span>
-00195         setsid();
-00196 <span class="preprocessor">#endif</span>
-00197         <span class="comment">/*</span>
-00198 <span class="comment">         * Fork to let the process/session group leader exit.</span>
-00199 <span class="comment">         */</span>
-00200         <span class="keywordflow">if</span> ((i = fork()) != 0) {
-00201             DEBUGMSGT((<span class="stringliteral">"daemonize"</span>,<span class=
+00191         <span class="keywordflow">if</span> (quit_immediately) {
+00192             DEBUGMSGT((<span class="stringliteral">"daemonize"</span>,<span class=
+"stringliteral">"parent exiting\n"</span>));
+00193             exit(0);
+00194         }
+00195     } <span class="keywordflow">else</span> {
+00196         <span class="comment">/* Child. */</span>
+00197 <span class="preprocessor">#ifdef HAVE_SETSID</span>
+00198         <span class="comment">/* Become a process/session group leader. */</span>
+00199         setsid();
+00200 <span class="preprocessor">#endif</span>
+00201         <span class="comment">/*</span>
+00202 <span class="comment">         * Fork to let the process/session group leader exit.</span>
+00203 <span class="comment">         */</span>
+00204         <span class="keywordflow">if</span> ((i = fork()) != 0) {
+00205             DEBUGMSGT((<span class="stringliteral">"daemonize"</span>,<span class=
 "stringliteral">"second fork returned %d.\n"</span>, i));
-00202             <span class="keywordflow">if</span>(i == -1) {
-00203                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,<span class=
+00206             <span class="keywordflow">if</span>(i == -1) {
+00207                 <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,<span class=
 "stringliteral">"second fork failed (errno %d) in "</span>
-00204                          <span class="stringliteral">"netsnmp_daemonize()\n"</span>, errno);
-00205             }
-00206             <span class="comment">/* Parent. */</span>
-00207             exit(0);
-00208         }
-00209 <span class="preprocessor">#ifndef WIN32</span>
-00210         <span class="keywordflow">else</span> {
-00211             <span class="comment">/* Child. */</span>
-00212             
-00213             DEBUGMSGT((<span class="stringliteral">"daemonize"</span>,<span class=
+00208                          <span class="stringliteral">"netsnmp_daemonize()\n"</span>, errno);
+00209             }
+00210             <span class="comment">/* Parent. */</span>
+00211             exit(0);
+00212         }
+00213 <span class="preprocessor">#ifndef WIN32</span>
+00214         <span class="keywordflow">else</span> {
+00215             <span class="comment">/* Child. */</span>
+00216             
+00217             DEBUGMSGT((<span class="stringliteral">"daemonize"</span>,<span class=
 "stringliteral">"child continuing\n"</span>));
-00214 
-00215             <span class="comment">/* Avoid keeping any directory in use. */</span>
-00216             chdir(<span class="stringliteral">"/"</span>);
-00217             
-00218             <span class="keywordflow">if</span> (!stderr_log) {
-00219                 <span class="comment">/*</span>
-00220 <span class="comment">                 * Close inherited file descriptors to avoid</span>
-00221 <span class="comment">                 * keeping unnecessary references.</span>
-00222 <span class="comment">                 */</span>
-00223                 close(0);
-00224                 close(1);
-00225                 close(2);
-00226                 
-00227                 <span class="comment">/*</span>
-00228 <span class="comment">                 * Redirect std{in,out,err} to /dev/null, just in</span>
-00229 <span class="comment">                 * case.</span>
-00230 <span class="comment">                 */</span>
-00231                 open(<span class="stringliteral">"/dev/null"</span>, O_RDWR);
-00232                 dup(0);
-00233                 dup(0);
-00234             }
-00235         }
-00236 <span class="preprocessor">#endif </span><span class="comment">/* !WIN32 */</span>
-00237     }
-00238 <span class="preprocessor">#endif </span><span class="comment">/* HAVE_FORK */</span>
-00239     <span class="keywordflow">return</span> i;
-00240 }
-00241 
-00242 <span class="comment">/*</span>
-00243 <span class="comment"> * ********************************************* </span>
-00244 <span class="comment"> */</span>
-00245 <span class="preprocessor">#ifdef                                                  WIN32</span>
-00246 <span class="preprocessor">#       define WIN32_LEAN_AND_MEAN</span>
-00247 <span class="preprocessor">#       define WIN32IO_IS_STDIO</span>
-00248 <span class="preprocessor">#       define PATHLEN  1024</span>
-00249 
-00250 <span class="preprocessor">#       include &lt;tchar.h&gt;</span>
-00251 <span class="preprocessor">#       include &lt;windows.h&gt;</span>
-00252 
-00253 <span class="comment">/*</span>
-00254 <span class="comment"> * MinGW defines WIN32, but has working dirent stuff.</span>
-00255 <span class="comment"> */</span>
-00256 <span class="preprocessor">#ifndef HAVE_DIRENT_H </span>
-00257 
-00258 <span class="comment">/*</span>
-00259 <span class="comment"> * The idea here is to read all the directory names into a string table</span>
-00260 <span class="comment"> * * (separated by nulls) and when one of the other dir functions is called</span>
-00261 <span class="comment"> * * return the pointer to the current file name.</span>
-00262 <span class="comment"> */</span>
-00263 DIR            *
-00264 opendir(<span class="keyword">const</span> <span class="keywordtype">char</span> *filename)
-00265 {
-00266     DIR            *p;
-00267     <span class="keywordtype">long</span>            len;
-00268     <span class="keywordtype">long</span>            idx;
-00269     <span class="keywordtype">char</span>            scannamespc[PATHLEN];
-00270     <span class="keywordtype">char</span>           *scanname = scannamespc;
-00271     <span class="keyword">struct </span>stat     sbuf;
-00272     WIN32_FIND_DATA FindData;
-00273     HANDLE          fh;
-00274 
-00275     <span class="comment">/*</span>
-00276 <span class="comment">     * check to see if filename is a directory </span>
-00277 <span class="comment">     */</span>
-00278     <span class="keywordflow">if</span> (stat(filename, &amp;sbuf) &lt; 0 || sbuf.st_mode &amp; S_IFDIR == 0) {
-00279         <span class="keywordflow">return</span> NULL;
-00280     }
-00281 
-00282     <span class="comment">/*</span>
-00283 <span class="comment">     * get the file system characteristics </span>
-00284 <span class="comment">     */</span>
-00285     <span class="comment">/*</span>
-00286 <span class="comment">     * if(GetFullPathName(filename, SNMP_MAXPATH, root, &amp;dummy)) {</span>
-00287 <span class="comment">     * *    if(dummy = strchr(root, '\\'))</span>
-00288 <span class="comment">     * *        *++dummy = '\0';</span>
-00289 <span class="comment">     * *    if(GetVolumeInformation(root, volname, SNMP_MAXPATH, &amp;serial,</span>
-00290 <span class="comment">     * *                            &amp;maxname, &amp;flags, 0, 0)) {</span>
-00291 <span class="comment">     * *        downcase = !(flags &amp; FS_CASE_IS_PRESERVED);</span>
-00292 <span class="comment">     * *    }</span>
-00293 <span class="comment">     * *  }</span>
-00294 <span class="comment">     * *  else {</span>
-00295 <span class="comment">     * *    downcase = TRUE;</span>
-00296 <span class="comment">     * *  }</span>
-00297 <span class="comment">     */</span>
-00298 
-00299     <span class="comment">/*</span>
-00300 <span class="comment">     * Create the search pattern </span>
+00218 
+00219             <span class="comment">/* Avoid keeping any directory in use. */</span>
+00220             chdir(<span class="stringliteral">"/"</span>);
+00221             
+00222             <span class="keywordflow">if</span> (!stderr_log) {
+00223                 <span class="comment">/*</span>
+00224 <span class="comment">                 * Close inherited file descriptors to avoid</span>
+00225 <span class="comment">                 * keeping unnecessary references.</span>
+00226 <span class="comment">                 */</span>
+00227                 close(0);
+00228                 close(1);
+00229                 close(2);
+00230                 
+00231                 <span class="comment">/*</span>
+00232 <span class="comment">                 * Redirect std{in,out,err} to /dev/null, just in</span>
+00233 <span class="comment">                 * case.</span>
+00234 <span class="comment">                 */</span>
+00235                 open(<span class="stringliteral">"/dev/null"</span>, O_RDWR);
+00236                 dup(0);
+00237                 dup(0);
+00238             }
+00239         }
+00240 <span class="preprocessor">#endif </span><span class="comment">/* !WIN32 */</span>
+00241     }
+00242 <span class="preprocessor">#endif </span><span class="comment">/* HAVE_FORK */</span>
+00243     <span class="keywordflow">return</span> i;
+00244 }
+00245 
+00246 <span class="comment">/*</span>
+00247 <span class="comment"> * ********************************************* </span>
+00248 <span class="comment"> */</span>
+00249 <span class="preprocessor">#ifdef                                                  WIN32</span>
+00250 <span class="preprocessor">#       define WIN32_LEAN_AND_MEAN</span>
+00251 <span class="preprocessor">#       define WIN32IO_IS_STDIO</span>
+00252 <span class="preprocessor">#       define PATHLEN  1024</span>
+00253 
+00254 <span class="preprocessor">#       include &lt;tchar.h&gt;</span>
+00255 <span class="preprocessor">#       include &lt;windows.h&gt;</span>
+00256 
+00257 <span class="comment">/*</span>
+00258 <span class="comment"> * MinGW defines WIN32, but has working dirent stuff.</span>
+00259 <span class="comment"> */</span>
+00260 <span class="preprocessor">#ifndef HAVE_DIRENT_H </span>
+00261 
+00262 <span class="comment">/*</span>
+00263 <span class="comment"> * The idea here is to read all the directory names into a string table</span>
+00264 <span class="comment"> * * (separated by nulls) and when one of the other dir functions is called</span>
+00265 <span class="comment"> * * return the pointer to the current file name.</span>
+00266 <span class="comment"> */</span>
+00267 DIR            *
+00268 opendir(<span class="keyword">const</span> <span class="keywordtype">char</span> *filename)
+00269 {
+00270     DIR            *p;
+00271     <span class="keywordtype">long</span>            len;
+00272     <span class="keywordtype">long</span>            idx;
+00273     <span class="keywordtype">char</span>            scannamespc[PATHLEN];
+00274     <span class="keywordtype">char</span>           *scanname = scannamespc;
+00275     <span class="keyword">struct </span>stat     sbuf;
+00276     WIN32_FIND_DATA FindData;
+00277     HANDLE          fh;
+00278 
+00279     <span class="comment">/*</span>
+00280 <span class="comment">     * check to see if filename is a directory </span>
+00281 <span class="comment">     */</span>
+00282     <span class="keywordflow">if</span> ((stat(filename, &amp;sbuf) &lt; 0) || ((sbuf.st_mode &amp; S_IFDIR) == 0)) {
+00283         <span class="keywordflow">return</span> NULL;
+00284     }
+00285 
+00286     <span class="comment">/*</span>
+00287 <span class="comment">     * get the file system characteristics </span>
+00288 <span class="comment">     */</span>
+00289     <span class="comment">/*</span>
+00290 <span class="comment">     * if(GetFullPathName(filename, SNMP_MAXPATH, root, &amp;dummy)) {</span>
+00291 <span class="comment">     * *    if(dummy = strchr(root, '\\'))</span>
+00292 <span class="comment">     * *        *++dummy = '\0';</span>
+00293 <span class="comment">     * *    if(GetVolumeInformation(root, volname, SNMP_MAXPATH, &amp;serial,</span>
+00294 <span class="comment">     * *                            &amp;maxname, &amp;flags, 0, 0)) {</span>
+00295 <span class="comment">     * *        downcase = !(flags &amp; FS_CASE_IS_PRESERVED);</span>
+00296 <span class="comment">     * *    }</span>
+00297 <span class="comment">     * *  }</span>
+00298 <span class="comment">     * *  else {</span>
+00299 <span class="comment">     * *    downcase = TRUE;</span>
+00300 <span class="comment">     * *  }</span>
 00301 <span class="comment">     */</span>
-00302     strcpy(scanname, filename);
-00303 
-00304     <span class="keywordflow">if</span> (strchr(<span class=
+00302 
+00303     <span class="comment">/*</span>
+00304 <span class="comment">     * Create the search pattern </span>
+00305 <span class="comment">     */</span>
+00306     strcpy(scanname, filename);
+00307 
+00308     <span class="keywordflow">if</span> (strchr(<span class=
 "stringliteral">"/\\"</span>, *(scanname + strlen(scanname) - 1)) == NULL)
-00305         strcat(scanname, <span class="stringliteral">"/*"</span>);
-00306     <span class="keywordflow">else</span>
-00307         strcat(scanname, <span class="stringliteral">"*"</span>);
-00308 
-00309     <span class="comment">/*</span>
-00310 <span class="comment">     * do the FindFirstFile call </span>
-00311 <span class="comment">     */</span>
-00312     fh = FindFirstFile(scanname, &amp;FindData);
-00313     <span class="keywordflow">if</span> (fh == INVALID_HANDLE_VALUE) {
-00314         <span class="keywordflow">return</span> NULL;
-00315     }
-00316 
-00317     <span class="comment">/*</span>
-00318 <span class="comment">     * Get us a DIR structure </span>
-00319 <span class="comment">     */</span>
-00320     p = (DIR *) malloc(<span class="keyword">sizeof</span>(DIR));
+00309         strcat(scanname, <span class="stringliteral">"/*"</span>);
+00310     <span class="keywordflow">else</span>
+00311         strcat(scanname, <span class="stringliteral">"*"</span>);
+00312 
+00313     <span class="comment">/*</span>
+00314 <span class="comment">     * do the FindFirstFile call </span>
+00315 <span class="comment">     */</span>
+00316     fh = FindFirstFile(scanname, &amp;FindData);
+00317     <span class="keywordflow">if</span> (fh == INVALID_HANDLE_VALUE) {
+00318         <span class="keywordflow">return</span> NULL;
+00319     }
+00320 
 00321     <span class="comment">/*</span>
-00322 <span class="comment">     * Newz(1303, p, 1, DIR); </span>
+00322 <span class="comment">     * Get us a DIR structure </span>
 00323 <span class="comment">     */</span>
-00324     <span class="keywordflow">if</span> (p == NULL)
-00325         <span class="keywordflow">return</span> NULL;
-00326 
-00327     <span class="comment">/*</span>
-00328 <span class="comment">     * now allocate the first part of the string table for</span>
-00329 <span class="comment">     * * the filenames that we find.</span>
-00330 <span class="comment">     */</span>
-00331     idx = strlen(FindData.cFileName) + 1;
-00332     p-&gt;start = (<span class="keywordtype">char</span> *) malloc(idx);
-00333     <span class="comment">/*</span>
-00334 <span class="comment">     * New(1304, p-&gt;start, idx, char);</span>
-00335 <span class="comment">     */</span>
-00336     <span class="keywordflow">if</span> (p-&gt;start == NULL) {
-00337         free(p);
-00338         <span class="keywordflow">return</span> NULL;
-00339     }
-00340     strcpy(p-&gt;start, FindData.cFileName);
-00341     <span class="comment">/*</span>
-00342 <span class="comment">     * if(downcase)</span>
-00343 <span class="comment">     * *    strlwr(p-&gt;start);</span>
-00344 <span class="comment">     */</span>
-00345     p-&gt;nfiles = 0;
-00346 
-00347     <span class="comment">/*</span>
-00348 <span class="comment">     * loop finding all the files that match the wildcard</span>
-00349 <span class="comment">     * * (which should be all of them in this directory!).</span>
-00350 <span class="comment">     * * the variable idx should point one past the null terminator</span>
-00351 <span class="comment">     * * of the previous string found.</span>
-00352 <span class="comment">     */</span>
-00353     <span class="keywordflow">while</span> (FindNextFile(fh, &amp;FindData)) {
-00354         len = strlen(FindData.cFileName);
-00355         <span class="comment">/*</span>
-00356 <span class="comment">         * bump the string table size by enough for the</span>
-00357 <span class="comment">         * * new name and it's null terminator</span>
-00358 <span class="comment">         */</span>
-00359         p-&gt;start = (<span class="keywordtype">char</span> *) realloc((<span class=
-"keywordtype">void</span> *) p-&gt;start, idx + len + 1);
-00360         <span class="comment">/*</span>
-00361 <span class="comment">         * Renew(p-&gt;start, idx+len+1, char);</span>
+00324     p = (DIR *) malloc(<span class="keyword">sizeof</span>(DIR));
+00325     <span class="comment">/*</span>
+00326 <span class="comment">     * Newz(1303, p, 1, DIR); </span>
+00327 <span class="comment">     */</span>
+00328     <span class="keywordflow">if</span> (p == NULL)
+00329         <span class="keywordflow">return</span> NULL;
+00330 
+00331     <span class="comment">/*</span>
+00332 <span class="comment">     * now allocate the first part of the string table for</span>
+00333 <span class="comment">     * * the filenames that we find.</span>
+00334 <span class="comment">     */</span>
+00335     idx = strlen(FindData.cFileName) + 1;
+00336     p-&gt;start = (<span class="keywordtype">char</span> *) malloc(idx);
+00337     <span class="comment">/*</span>
+00338 <span class="comment">     * New(1304, p-&gt;start, idx, char);</span>
+00339 <span class="comment">     */</span>
+00340     <span class="keywordflow">if</span> (p-&gt;start == NULL) {
+00341         free(p);
+00342         <span class="keywordflow">return</span> NULL;
+00343     }
+00344     strcpy(p-&gt;start, FindData.cFileName);
+00345     <span class="comment">/*</span>
+00346 <span class="comment">     * if(downcase)</span>
+00347 <span class="comment">     * *    strlwr(p-&gt;start);</span>
+00348 <span class="comment">     */</span>
+00349     p-&gt;nfiles = 0;
+00350 
+00351     <span class="comment">/*</span>
+00352 <span class="comment">     * loop finding all the files that match the wildcard</span>
+00353 <span class="comment">     * * (which should be all of them in this directory!).</span>
+00354 <span class="comment">     * * the variable idx should point one past the null terminator</span>
+00355 <span class="comment">     * * of the previous string found.</span>
+00356 <span class="comment">     */</span>
+00357     <span class="keywordflow">while</span> (FindNextFile(fh, &amp;FindData)) {
+00358         len = strlen(FindData.cFileName);
+00359         <span class="comment">/*</span>
+00360 <span class="comment">         * bump the string table size by enough for the</span>
+00361 <span class="comment">         * * new name and it's null terminator</span>
 00362 <span class="comment">         */</span>
-00363         <span class="keywordflow">if</span> (p-&gt;start == NULL) {
-00364             free(p);
-00365             <span class="keywordflow">return</span> NULL;
-00366         }
-00367         strcpy(&amp;p-&gt;start[idx], FindData.cFileName);
-00368         <span class="comment">/*</span>
-00369 <span class="comment">         * if (downcase) </span>
-00370 <span class="comment">         * *        strlwr(&amp;p-&gt;start[idx]);</span>
-00371 <span class="comment">         */</span>
-00372         p-&gt;nfiles++;
-00373         idx += len + 1;
-00374     }
-00375     FindClose(fh);
-00376     p-&gt;size = idx;
-00377     p-&gt;curr = p-&gt;start;
-00378     <span class="keywordflow">return</span> p;
-00379 }
-00380 
-00381 
-00382 <span class="comment">/*</span>
-00383 <span class="comment"> * Readdir just returns the current string pointer and bumps the</span>
-00384 <span class="comment"> * * string pointer to the nDllExport entry.</span>
-00385 <span class="comment"> */</span>
-00386 <span class="keyword">struct </span>direct  *
-00387 readdir(DIR * dirp)
-00388 {
-00389     <span class="keywordtype">int</span>             len;
-00390     <span class="keyword">static</span> <span class="keywordtype">int</span>      dummy = 0;
-00391 
-00392     <span class="keywordflow">if</span> (dirp-&gt;curr) {
-00393         <span class="comment">/*</span>
-00394 <span class="comment">         * first set up the structure to return </span>
-00395 <span class="comment">         */</span>
-00396         len = strlen(dirp-&gt;curr);
-00397         strcpy(dirp-&gt;dirstr.d_name, dirp-&gt;curr);
-00398         dirp-&gt;dirstr.d_namlen = len;
-00399 
-00400         <span class="comment">/*</span>
-00401 <span class="comment">         * Fake an inode </span>
-00402 <span class="comment">         */</span>
-00403         dirp-&gt;dirstr.d_ino = dummy++;
-00404 
-00405         <span class="comment">/*</span>
-00406 <span class="comment">         * Now set up for the nDllExport call to readdir </span>
-00407 <span class="comment">         */</span>
-00408         dirp-&gt;curr += len + 1;
-00409         <span class="keywordflow">if</span> (dirp-&gt;curr &gt;= (dirp-&gt;start + dirp-&gt;size)) {
-00410             dirp-&gt;curr = NULL;
-00411         }
-00412 
-00413         <span class="keywordflow">return</span> &amp;(dirp-&gt;dirstr);
-00414     } <span class="keywordflow">else</span>
-00415         <span class="keywordflow">return</span> NULL;
-00416 }
-00417 
-00418 <span class="comment">/*</span>
-00419 <span class="comment"> * free the memory allocated by opendir </span>
-00420 <span class="comment"> */</span>
-00421 <span class="keywordtype">int</span>
-00422 closedir(DIR * dirp)
-00423 {
-00424     free(dirp-&gt;start);
-00425     free(dirp);
-00426     <span class="keywordflow">return</span> 1;
-00427 }
-00428 <span class="preprocessor">#endif </span><span class="comment">/* HAVE_DIRENT_H */</span>
-00429 
-00430 <span class="preprocessor">#ifndef HAVE_GETTIMEOFDAY</span>
-00431 
-00432 <span class="keywordtype">int</span>
-00433 gettimeofday(<span class="keyword">struct</span> timeval *tv, <span class="keyword">struct</span> timezone *tz)
-00434 {
-00435     <span class="keyword">struct </span>_timeb   timebuffer;
-00436 
-00437     _ftime(&amp;timebuffer);
-00438     tv-&gt;tv_usec = timebuffer.millitm * 1000;
-00439     tv-&gt;tv_sec = timebuffer.time;
-00440     <span class="keywordflow">return</span> (0);
-00441 }
-00442 <span class="preprocessor">#endif                          </span><span class="comment">/* !HAVE_GETTIMEOFDAY */</span>
-00443 
-00444 in_addr_t
-00445 get_myaddr(<span class="keywordtype">void</span>)
-00446 {
-00447     <span class="keywordtype">char</span>            local_host[130];
-00448     <span class="keywordtype">int</span>             result;
-00449     LPHOSTENT       lpstHostent;
-00450     SOCKADDR_IN     in_addr, remote_in_addr;
-00451     SOCKET          hSock;
-00452     <span class="keywordtype">int</span>             nAddrSize = <span class="keyword">sizeof</span>(SOCKADDR);
-00453 
-00454     in_addr.sin_addr.s_addr = INADDR_ANY;
-00455 
-00456     result = gethostname(local_host, <span class="keyword">sizeof</span>(local_host));
-00457     <span class="keywordflow">if</span> (result == 0) {
-00458         lpstHostent = gethostbyname((LPSTR) local_host);
-00459         <span class="keywordflow">if</span> (lpstHostent) {
-00460             in_addr.sin_addr.s_addr =
-00461                 *((u_long FAR *) (lpstHostent-&gt;h_addr));
-00462             <span class="keywordflow">return</span> ((in_addr_t) in_addr.sin_addr.s_addr);
-00463         }
-00464     }
-00465 
-00466     <span class="comment">/*</span>
-00467 <span class="comment">     * if we are here, than we don't have host addr </span>
-00468 <span class="comment">     */</span>
-00469     hSock = socket(AF_INET, SOCK_DGRAM, 0);
-00470     <span class="keywordflow">if</span> (hSock != INVALID_SOCKET) {
-00471         <span class="comment">/*</span>
-00472 <span class="comment">         * connect to any port and address </span>
-00473 <span class="comment">         */</span>
-00474         remote_in_addr.sin_family = AF_INET;
-00475         remote_in_addr.sin_port = htons(IPPORT_ECHO);
-00476         remote_in_addr.sin_addr.s_addr = inet_addr(<span class="stringliteral">"0.0.0.0"</span>);
-00477         result =
-00478             connect(hSock, (LPSOCKADDR) &amp; remote_in_addr,
-00479                     <span class="keyword">sizeof</span>(SOCKADDR));
-00480         <span class="keywordflow">if</span> (result != SOCKET_ERROR) {
-00481             <span class="comment">/*</span>
-00482 <span class="comment">             * get local ip address </span>
-00483 <span class="comment">             */</span>
-00484             getsockname(hSock, (LPSOCKADDR) &amp; in_addr,
-00485                         (<span class="keywordtype">int</span> FAR *) &amp;nAddrSize);
-00486         }
-00487         closesocket(hSock);
-00488     }
-00489     <span class="keywordflow">return</span> ((in_addr_t) in_addr.sin_addr.s_addr);
-00490 }
-00491 
-00492 <span class="keywordtype">long</span>
-00493 get_uptime(<span class="keywordtype">void</span>)
-00494 {
-00495     <span class="keywordtype">long</span>            return_value = 0;
-00496     DWORD           buffersize = (<span class="keyword">sizeof</span>(PERF_DATA_BLOCK) +
-00497                                   <span class="keyword">sizeof</span>(PERF_OBJECT_TYPE)),
-00498         type = REG_EXPAND_SZ;
-00499     PPERF_DATA_BLOCK perfdata = NULL;
-00500 
-00501     <span class="comment">/*</span>
-00502 <span class="comment">     * min requirement is one PERF_DATA_BLOCK plus one PERF_OBJECT_TYPE </span>
-00503 <span class="comment">     */</span>
-00504     perfdata = (PPERF_DATA_BLOCK) malloc(buffersize);
-00505 
-00506 
-00507     memset(perfdata, 0, buffersize);
-00508 
-00509     RegQueryValueEx(HKEY_PERFORMANCE_DATA,
-00510                     <span class="stringliteral">"Global"</span>, NULL, &amp;type, (LPBYTE) perfdata, &amp;buffersize);
+00363         p-&gt;start = (<span class="keywordtype">char</span> *) realloc((<span class=
+"keywordtype">void</span> *) p-&gt;start, idx + len + 1);
+00364         <span class="comment">/*</span>
+00365 <span class="comment">         * Renew(p-&gt;start, idx+len+1, char);</span>
+00366 <span class="comment">         */</span>
+00367         <span class="keywordflow">if</span> (p-&gt;start == NULL) {
+00368             free(p);
+00369             <span class="keywordflow">return</span> NULL;
+00370         }
+00371         strcpy(&amp;p-&gt;start[idx], FindData.cFileName);
+00372         <span class="comment">/*</span>
+00373 <span class="comment">         * if (downcase) </span>
+00374 <span class="comment">         * *        strlwr(&amp;p-&gt;start[idx]);</span>
+00375 <span class="comment">         */</span>
+00376         p-&gt;nfiles++;
+00377         idx += len + 1;
+00378     }
+00379     FindClose(fh);
+00380     p-&gt;size = idx;
+00381     p-&gt;curr = p-&gt;start;
+00382     <span class="keywordflow">return</span> p;
+00383 }
+00384 
+00385 
+00386 <span class="comment">/*</span>
+00387 <span class="comment"> * Readdir just returns the current string pointer and bumps the</span>
+00388 <span class="comment"> * * string pointer to the nDllExport entry.</span>
+00389 <span class="comment"> */</span>
+00390 <span class="keyword">struct </span>direct  *
+00391 readdir(DIR * dirp)
+00392 {
+00393     <span class="keywordtype">int</span>             len;
+00394     <span class="keyword">static</span> <span class="keywordtype">int</span>      dummy = 0;
+00395 
+00396     <span class="keywordflow">if</span> (dirp-&gt;curr) {
+00397         <span class="comment">/*</span>
+00398 <span class="comment">         * first set up the structure to return </span>
+00399 <span class="comment">         */</span>
+00400         len = strlen(dirp-&gt;curr);
+00401         strcpy(dirp-&gt;dirstr.d_name, dirp-&gt;curr);
+00402         dirp-&gt;dirstr.d_namlen = len;
+00403 
+00404         <span class="comment">/*</span>
+00405 <span class="comment">         * Fake an inode </span>
+00406 <span class="comment">         */</span>
+00407         dirp-&gt;dirstr.d_ino = dummy++;
+00408 
+00409         <span class="comment">/*</span>
+00410 <span class="comment">         * Now set up for the nDllExport call to readdir </span>
+00411 <span class="comment">         */</span>
+00412         dirp-&gt;curr += len + 1;
+00413         <span class="keywordflow">if</span> (dirp-&gt;curr &gt;= (dirp-&gt;start + dirp-&gt;size)) {
+00414             dirp-&gt;curr = NULL;
+00415         }
+00416 
+00417         <span class="keywordflow">return</span> &amp;(dirp-&gt;dirstr);
+00418     } <span class="keywordflow">else</span>
+00419         <span class="keywordflow">return</span> NULL;
+00420 }
+00421 
+00422 <span class="comment">/*</span>
+00423 <span class="comment"> * free the memory allocated by opendir </span>
+00424 <span class="comment"> */</span>
+00425 <span class="keywordtype">int</span>
+00426 closedir(DIR * dirp)
+00427 {
+00428     free(dirp-&gt;start);
+00429     free(dirp);
+00430     <span class="keywordflow">return</span> 1;
+00431 }
+00432 <span class="preprocessor">#endif </span><span class="comment">/* HAVE_DIRENT_H */</span>
+00433 
+00434 <span class="preprocessor">#ifndef HAVE_GETTIMEOFDAY</span>
+00435 
+00436 <span class="keywordtype">int</span>
+00437 gettimeofday(<span class="keyword">struct</span> timeval *tv, <span class="keyword">struct</span> timezone *tz)
+00438 {
+00439     <span class="keyword">struct </span>_timeb   timebuffer;
+00440 
+00441     _ftime(&amp;timebuffer);
+00442     tv-&gt;tv_usec = timebuffer.millitm * 1000;
+00443     tv-&gt;tv_sec = timebuffer.time;
+00444     <span class="keywordflow">return</span> (0);
+00445 }
+00446 <span class="preprocessor">#endif                          </span><span class="comment">/* !HAVE_GETTIMEOFDAY */</span>
+00447 
+00448 in_addr_t
+00449 get_myaddr(<span class="keywordtype">void</span>)
+00450 {
+00451     <span class="keywordtype">char</span>            local_host[130];
+00452     <span class="keywordtype">int</span>             result;
+00453     LPHOSTENT       lpstHostent;
+00454     SOCKADDR_IN     in_addr, remote_in_addr;
+00455     SOCKET          hSock;
+00456     <span class="keywordtype">int</span>             nAddrSize = <span class="keyword">sizeof</span>(SOCKADDR);
+00457 
+00458     in_addr.sin_addr.s_addr = INADDR_ANY;
+00459 
+00460     result = gethostname(local_host, <span class="keyword">sizeof</span>(local_host));
+00461     <span class="keywordflow">if</span> (result == 0) {
+00462         lpstHostent = gethostbyname((LPSTR) local_host);
+00463         <span class="keywordflow">if</span> (lpstHostent) {
+00464             in_addr.sin_addr.s_addr =
+00465                 *((u_long FAR *) (lpstHostent-&gt;h_addr));
+00466             <span class="keywordflow">return</span> ((in_addr_t) in_addr.sin_addr.s_addr);
+00467         }
+00468     }
+00469 
+00470     <span class="comment">/*</span>
+00471 <span class="comment">     * if we are here, than we don't have host addr </span>
+00472 <span class="comment">     */</span>
+00473     hSock = socket(AF_INET, SOCK_DGRAM, 0);
+00474     <span class="keywordflow">if</span> (hSock != INVALID_SOCKET) {
+00475         <span class="comment">/*</span>
+00476 <span class="comment">         * connect to any port and address </span>
+00477 <span class="comment">         */</span>
+00478         remote_in_addr.sin_family = AF_INET;
+00479         remote_in_addr.sin_port = htons(IPPORT_ECHO);
+00480         remote_in_addr.sin_addr.s_addr = inet_addr(<span class="stringliteral">"0.0.0.0"</span>);
+00481         result =
+00482             connect(hSock, (LPSOCKADDR) &amp; remote_in_addr,
+00483                     <span class="keyword">sizeof</span>(SOCKADDR));
+00484         <span class="keywordflow">if</span> (result != SOCKET_ERROR) {
+00485             <span class="comment">/*</span>
+00486 <span class="comment">             * get local ip address </span>
+00487 <span class="comment">             */</span>
+00488             getsockname(hSock, (LPSOCKADDR) &amp; in_addr,
+00489                         (<span class="keywordtype">int</span> FAR *) &amp;nAddrSize);
+00490         }
+00491         closesocket(hSock);
+00492     }
+00493     <span class="keywordflow">return</span> ((in_addr_t) in_addr.sin_addr.s_addr);
+00494 }
+00495 
+00496 <span class="keywordtype">long</span>
+00497 get_uptime(<span class="keywordtype">void</span>)
+00498 {
+00499     <span class="keywordtype">long</span>            return_value = 0;
+00500     DWORD           buffersize = (<span class="keyword">sizeof</span>(PERF_DATA_BLOCK) +
+00501                                   <span class="keyword">sizeof</span>(PERF_OBJECT_TYPE)),
+00502         type = REG_EXPAND_SZ;
+00503     PPERF_DATA_BLOCK perfdata = NULL;
+00504 
+00505     <span class="comment">/*</span>
+00506 <span class="comment">     * min requirement is one PERF_DATA_BLOCK plus one PERF_OBJECT_TYPE </span>
+00507 <span class="comment">     */</span>
+00508     perfdata = (PPERF_DATA_BLOCK) malloc(buffersize);
+00509     <span class="keywordflow">if</span> (!perfdata)
+00510         <span class="keywordflow">return</span> 0;
 00511 
-00512     <span class="comment">/*</span>
-00513 <span class="comment">     * we can not rely on the return value since there is always more so</span>
-00514 <span class="comment">     * we check the signature </span>
-00515 <span class="comment">     */</span>
+00512     memset(perfdata, 0, buffersize);
+00513 
+00514     RegQueryValueEx(HKEY_PERFORMANCE_DATA,
+00515                     <span class="stringliteral">"Global"</span>, NULL, &amp;type, (LPBYTE) perfdata, &amp;buffersize);
 00516 
-00517     <span class="keywordflow">if</span> (wcsncmp(perfdata-&gt;Signature, L<span class=
+00517     <span class="comment">/*</span>
+00518 <span class="comment">     * we can not rely on the return value since there is always more so</span>
+00519 <span class="comment">     * we check the signature </span>
+00520 <span class="comment">     */</span>
+00521 
+00522     <span class="keywordflow">if</span> (wcsncmp(perfdata-&gt;Signature, L<span class=
 "stringliteral">"PERF"</span>, 4) == 0) {
-00518         <span class="comment">/*</span>
-00519 <span class="comment">         * signature ok, and all we need is in the in the PERF_DATA_BLOCK </span>
-00520 <span class="comment">         */</span>
-00521         return_value = (long) ((perfdata-&gt;PerfTime100nSec.QuadPart /
-00522                                 (LONGLONG) 100000));
-00523     } <span class="keywordflow">else</span>
-00524         return_value = GetTickCount() / 10;
-00525 
-00526     RegCloseKey(HKEY_PERFORMANCE_DATA);
-00527     free(perfdata);
-00528 
-00529     <span class="keywordflow">return</span> return_value;
-00530 }
-00531 
-00532 <span class="keywordtype">char</span>           *
-00533 winsock_startup(<span class="keywordtype">void</span>)
-00534 {
-00535     WORD            VersionRequested;
-00536     WSADATA         stWSAData;
-00537     <span class="keywordtype">int</span>             i;
-00538     <span class="keyword">static</span> <span class="keywordtype">char</span>     errmsg[100];
-00539 
-00540         <span class="comment">/* winsock 1: use MAKEWORD(1,1) */</span>
-00541         <span class="comment">/* winsock 2: use MAKEWORD(2,2) */</span>
-00542 
-00543     VersionRequested = MAKEWORD(2,2);
-00544     i = WSAStartup(VersionRequested, &amp;stWSAData);
-00545     <span class="keywordflow">if</span> (i != 0) {
-00546         <span class="keywordflow">if</span> (i == WSAVERNOTSUPPORTED)
-00547             sprintf(errmsg,
-00548                     <span class="stringliteral">"Unable to init. socket lib, does not support 1.1"</span>);
-00549         <span class="keywordflow">else</span> {
-00550             sprintf(errmsg, <span class="stringliteral">"Socket Startup error %d"</span>, i);
-00551         }
-00552         <span class="keywordflow">return</span> (errmsg);
-00553     }
-00554     <span class="keywordflow">return</span> (NULL);
-00555 }
-00556 
-00557 <span class="keywordtype">void</span>
-00558 winsock_cleanup(<span class="keywordtype">void</span>)
-00559 {
-00560     WSACleanup();
-00561 }
-00562 
-00563 <span class="preprocessor">#else                           </span><span class="comment">/* ! WIN32 */</span>
-00564 <span class="comment">/*******************************************************************/</span>
-00565 
-00566 <span class="comment">/*</span>
-00567 <span class="comment"> * XXX  What if we have multiple addresses?  Or no addresses for that matter?</span>
-00568 <span class="comment"> * XXX  Could it be computed once then cached?  Probably not worth it (not</span>
-00569 <span class="comment"> *                                                           used very often).</span>
-00570 <span class="comment"> */</span>
-00571 in_addr_t
-00572 get_myaddr(<span class="keywordtype">void</span>)
-00573 {
-00574     <span class="keywordtype">int</span>             sd, i, lastlen = 0;
-00575     <span class="keyword">struct </span>ifconf   ifc;
-00576     <span class="keyword">struct </span>ifreq   *ifrp = NULL;
-00577     in_addr_t       addr;
-00578     <span class="keywordtype">char</span>           *buf = NULL;
-00579 
-00580     <span class="keywordflow">if</span> ((sd = socket(AF_INET, SOCK_DGRAM, 0)) &lt; 0) {
-00581         <span class="keywordflow">return</span> 0;
-00582     }
-00583 
-00584     <span class="comment">/*</span>
-00585 <span class="comment">     * Cope with lots of interfaces and brokenness of ioctl SIOCGIFCONF on</span>
-00586 <span class="comment">     * some platforms; see W. R. Stevens, ``Unix Network Programming Volume</span>
-00587 <span class="comment">     * I'', p.435.  </span>
-00588 <span class="comment">     */</span>
-00589 
-00590     <span class="keywordflow">for</span> (i = 8;; i += 8) {
-00591         buf = (<span class="keywordtype">char</span> *) calloc(i, <span class="keyword">sizeof</span>(<span class=
+00523         <span class="comment">/*</span>
+00524 <span class="comment">         * signature ok, and all we need is in the in the PERF_DATA_BLOCK </span>
+00525 <span class="comment">         */</span>
+00526         return_value = (long) ((perfdata-&gt;PerfTime100nSec.QuadPart /
+00527                                 (LONGLONG) 100000));
+00528     } <span class="keywordflow">else</span>
+00529         return_value = GetTickCount() / 10;
+00530 
+00531     RegCloseKey(HKEY_PERFORMANCE_DATA);
+00532     free(perfdata);
+00533 
+00534     <span class="keywordflow">return</span> return_value;
+00535 }
+00536 
+00537 <span class="keywordtype">char</span>           *
+00538 winsock_startup(<span class="keywordtype">void</span>)
+00539 {
+00540     WORD            VersionRequested;
+00541     WSADATA         stWSAData;
+00542     <span class="keywordtype">int</span>             i;
+00543     <span class="keyword">static</span> <span class="keywordtype">char</span>     errmsg[100];
+00544 
+00545         <span class="comment">/* winsock 1: use MAKEWORD(1,1) */</span>
+00546         <span class="comment">/* winsock 2: use MAKEWORD(2,2) */</span>
+00547 
+00548     VersionRequested = MAKEWORD(2,2);
+00549     i = WSAStartup(VersionRequested, &amp;stWSAData);
+00550     <span class="keywordflow">if</span> (i != 0) {
+00551         <span class="keywordflow">if</span> (i == WSAVERNOTSUPPORTED)
+00552             sprintf(errmsg,
+00553                     <span class="stringliteral">"Unable to init. socket lib, does not support 1.1"</span>);
+00554         <span class="keywordflow">else</span> {
+00555             sprintf(errmsg, <span class="stringliteral">"Socket Startup error %d"</span>, i);
+00556         }
+00557         <span class="keywordflow">return</span> (errmsg);
+00558     }
+00559     <span class="keywordflow">return</span> (NULL);
+00560 }
+00561 
+00562 <span class="keywordtype">void</span>
+00563 winsock_cleanup(<span class="keywordtype">void</span>)
+00564 {
+00565     WSACleanup();
+00566 }
+00567 
+00568 <span class="preprocessor">#else                           </span><span class="comment">/* ! WIN32 */</span>
+00569 <span class="comment">/*******************************************************************/</span>
+00570 
+00571 <span class="comment">/*</span>
+00572 <span class="comment"> * XXX  What if we have multiple addresses?  Or no addresses for that matter?</span>
+00573 <span class="comment"> * XXX  Could it be computed once then cached?  Probably not worth it (not</span>
+00574 <span class="comment"> *                                                           used very often).</span>
+00575 <span class="comment"> */</span>
+00576 in_addr_t
+00577 get_myaddr(<span class="keywordtype">void</span>)
+00578 {
+00579     <span class="keywordtype">int</span>             sd, i, lastlen = 0;
+00580     <span class="keyword">struct </span>ifconf   ifc;
+00581     <span class="keyword">struct </span>ifreq   *ifrp = NULL;
+00582     in_addr_t       addr;
+00583     <span class="keywordtype">char</span>           *buf = NULL;
+00584 
+00585     <span class="keywordflow">if</span> ((sd = socket(AF_INET, SOCK_DGRAM, 0)) &lt; 0) {
+00586         <span class="keywordflow">return</span> 0;
+00587     }
+00588 
+00589     <span class="comment">/*</span>
+00590 <span class="comment">     * Cope with lots of interfaces and brokenness of ioctl SIOCGIFCONF on</span>
+00591 <span class="comment">     * some platforms; see W. R. Stevens, ``Unix Network Programming Volume</span>
+00592 <span class="comment">     * I'', p.435.  </span>
+00593 <span class="comment">     */</span>
+00594 
+00595     <span class="keywordflow">for</span> (i = 8;; i += 8) {
+00596         buf = (<span class="keywordtype">char</span> *) calloc(i, <span class="keyword">sizeof</span>(<span class=
 "keyword">struct</span> ifreq));
-00592         <span class="keywordflow">if</span> (buf == NULL) {
-00593             close(sd);
-00594             <span class="keywordflow">return</span> 0;
-00595         }
-00596         ifc.ifc_len = i * <span class="keyword">sizeof</span>(<span class="keyword">struct </span>ifreq);
-00597         ifc.ifc_buf = (caddr_t) buf;
-00598 
-00599         <span class="keywordflow">if</span> (ioctl(sd, SIOCGIFCONF, (<span class=
+00597         <span class="keywordflow">if</span> (buf == NULL) {
+00598             close(sd);
+00599             <span class="keywordflow">return</span> 0;
+00600         }
+00601         ifc.ifc_len = i * <span class="keyword">sizeof</span>(<span class="keyword">struct </span>ifreq);
+00602         ifc.ifc_buf = (caddr_t) buf;
+00603 
+00604         <span class="keywordflow">if</span> (ioctl(sd, SIOCGIFCONF, (<span class=
 "keywordtype">char</span> *) &amp;ifc) &lt; 0) {
-00600             <span class="keywordflow">if</span> (errno != EINVAL || lastlen != 0) {
-00601                 <span class="comment">/*</span>
-00602 <span class="comment">                 * Something has gone genuinely wrong.  </span>
-00603 <span class="comment">                 */</span>
-00604                 free(buf);
-00605                 close(sd);
-00606                 <span class="keywordflow">return</span> 0;
-00607             }
-00608             <span class="comment">/*</span>
-00609 <span class="comment">             * Otherwise, it could just be that the buffer is too small.  </span>
-00610 <span class="comment">             */</span>
-00611         } <span class="keywordflow">else</span> {
-00612             <span class="keywordflow">if</span> (ifc.ifc_len == lastlen) {
-00613                 <span class="comment">/*</span>
-00614 <span class="comment">                 * The length is the same as the last time; we're done.  </span>
-00615 <span class="comment">                 */</span>
-00616                 <span class="keywordflow">break</span>;
-00617             }
-00618             lastlen = ifc.ifc_len;
-00619         }
-00620         free(buf);
-00621     }
-00622 
-00623     <span class="keywordflow">for</span> (ifrp = ifc.ifc_req;
-00624         (<span class="keywordtype">char</span> *)ifrp &lt; (<span class=
+00605             <span class="keywordflow">if</span> (errno != EINVAL || lastlen != 0) {
+00606                 <span class="comment">/*</span>
+00607 <span class="comment">                 * Something has gone genuinely wrong.  </span>
+00608 <span class="comment">                 */</span>
+00609                 free(buf);
+00610                 close(sd);
+00611                 <span class="keywordflow">return</span> 0;
+00612             }
+00613             <span class="comment">/*</span>
+00614 <span class="comment">             * Otherwise, it could just be that the buffer is too small.  </span>
+00615 <span class="comment">             */</span>
+00616         } <span class="keywordflow">else</span> {
+00617             <span class="keywordflow">if</span> (ifc.ifc_len == lastlen) {
+00618                 <span class="comment">/*</span>
+00619 <span class="comment">                 * The length is the same as the last time; we're done.  </span>
+00620 <span class="comment">                 */</span>
+00621                 <span class="keywordflow">break</span>;
+00622             }
+00623             lastlen = ifc.ifc_len;
+00624         }
+00625         free(buf);
+00626     }
+00627 
+00628     <span class="keywordflow">for</span> (ifrp = ifc.ifc_req;
+00629         (<span class="keywordtype">char</span> *)ifrp &lt; (<span class=
 "keywordtype">char</span> *)ifc.ifc_req + ifc.ifc_len;
-00625 <span class="preprocessor">#ifdef STRUCT_SOCKADDR_HAS_SA_LEN</span>
-00626         ifrp = (<span class="keyword">struct </span>ifreq *)(((<span class="keywordtype">char</span> *) ifrp) +
-00627                                 <span class="keyword">sizeof</span>(ifrp-&gt;ifr_name) +
-00628                                 ifrp-&gt;ifr_addr.sa_len)
-00629 <span class="preprocessor">#else</span>
-00630         ifrp++
-00631 <span class="preprocessor">#endif</span>
-00632         ) {
-00633         <span class="keywordflow">if</span> (ifrp-&gt;ifr_addr.sa_family != AF_INET) {
-00634             <span class="keywordflow">continue</span>;
-00635         }
-00636         addr = ((<span class="keyword">struct </span>sockaddr_in *) &amp;(ifrp-&gt;ifr_addr))-&gt;sin_addr.s_addr;
-00637 
-00638         <span class="keywordflow">if</span> (ioctl(sd, SIOCGIFFLAGS, (<span class=
-"keywordtype">char</span> *) ifrp) &lt; 0) {
+00630 <span class="preprocessor">#ifdef STRUCT_SOCKADDR_HAS_SA_LEN</span>
+00631         ifrp = (<span class="keyword">struct </span>ifreq *)(((<span class="keywordtype">char</span> *) ifrp) +
+00632                                 <span class="keyword">sizeof</span>(ifrp-&gt;ifr_name) +
+00633                                 ifrp-&gt;ifr_addr.sa_len)
+00634 <span class="preprocessor">#else</span>
+00635         ifrp++
+00636 <span class="preprocessor">#endif</span>
+00637         ) {
+00638         <span class="keywordflow">if</span> (ifrp-&gt;ifr_addr.sa_family != AF_INET) {
 00639             <span class="keywordflow">continue</span>;
 00640         }
-00641         <span class="keywordflow">if</span> ((ifrp-&gt;ifr_flags &amp; IFF_UP)
-00642 <span class="preprocessor">#ifdef IFF_RUNNING</span>
-00643             &amp;&amp; (ifrp-&gt;ifr_flags &amp; IFF_RUNNING)
-00644 <span class="preprocessor">#endif                          </span><span class="comment">/* IFF_RUNNING */</span>
-00645             &amp;&amp; !(ifrp-&gt;ifr_flags &amp; IFF_LOOPBACK)
-00646             &amp;&amp; addr != LOOPBACK) {
-00647             <span class="comment">/*</span>
-00648 <span class="comment">             * I *really* don't understand why this is necessary.  Perhaps for</span>
-00649 <span class="comment">             * some broken platform?  Leave it for now.  JBPN  </span>
-00650 <span class="comment">             */</span>
-00651 <span class="preprocessor">#ifdef SYS_IOCTL_H_HAS_SIOCGIFADDR</span>
-00652             <span class="keywordflow">if</span> (ioctl(sd, SIOCGIFADDR, (<span class=
+00641         addr = ((<span class="keyword">struct </span>sockaddr_in *) &amp;(ifrp-&gt;ifr_addr))-&gt;sin_addr.s_addr;
+00642 
+00643         <span class="keywordflow">if</span> (ioctl(sd, SIOCGIFFLAGS, (<span class=
 "keywordtype">char</span> *) ifrp) &lt; 0) {
-00653                 <span class="keywordflow">continue</span>;
-00654             }
-00655             addr =
-00656                 ((<span class="keyword">struct </span>sockaddr_in *) &amp;(ifrp-&gt;ifr_addr))-&gt;sin_addr.
-00657                 s_addr;
-00658 <span class="preprocessor">#endif</span>
-00659             free(buf);
-00660             close(sd);
-00661             <span class="keywordflow">return</span> addr;
-00662         }
-00663     }
-00664     free(buf);
-00665     close(sd);
-00666     <span class="keywordflow">return</span> 0;
-00667 }
-00668 
-00669 
-00670 <span class="preprocessor">#if !defined(solaris2) &amp;&amp; !defined(linux) &amp;&amp; !defined(cygwin)</span>
-00671 <span class="comment">/*</span>
-00672 <span class="comment"> * Returns boottime in centiseconds(!).</span>
-00673 <span class="comment"> *      Caches this for future use.</span>
-00674 <span class="comment"> */</span>
-00675 <span class="keywordtype">long</span>
-00676 get_boottime(<span class="keywordtype">void</span>)
-00677 {
-00678     <span class="keyword">static</span> <span class="keywordtype">long</span>     boottime_csecs = 0;
-00679 <span class="preprocessor">#if defined(hpux10) || defined(hpux11)</span>
-00680     <span class="keyword">struct </span>pst_static pst_buf;
-00681 <span class="preprocessor">#else</span>
-00682     <span class="keyword">struct </span>timeval  boottime;
-00683 <span class="preprocessor">#ifdef  CAN_USE_SYSCTL</span>
-00684     <span class="keywordtype">int</span>             mib[2];
-00685     size_t          len;
+00644             <span class="keywordflow">continue</span>;
+00645         }
+00646         <span class="keywordflow">if</span> ((ifrp-&gt;ifr_flags &amp; IFF_UP)
+00647 <span class="preprocessor">#ifdef IFF_RUNNING</span>
+00648             &amp;&amp; (ifrp-&gt;ifr_flags &amp; IFF_RUNNING)
+00649 <span class="preprocessor">#endif                          </span><span class="comment">/* IFF_RUNNING */</span>
+00650             &amp;&amp; !(ifrp-&gt;ifr_flags &amp; IFF_LOOPBACK)
+00651             &amp;&amp; addr != LOOPBACK) {
+00652             <span class="comment">/*</span>
+00653 <span class="comment">             * I *really* don't understand why this is necessary.  Perhaps for</span>
+00654 <span class="comment">             * some broken platform?  Leave it for now.  JBPN  </span>
+00655 <span class="comment">             */</span>
+00656 <span class="preprocessor">#ifdef SYS_IOCTL_H_HAS_SIOCGIFADDR</span>
+00657             <span class="keywordflow">if</span> (ioctl(sd, SIOCGIFADDR, (<span class=
+"keywordtype">char</span> *) ifrp) &lt; 0) {
+00658                 <span class="keywordflow">continue</span>;
+00659             }
+00660             addr =
+00661                 ((<span class="keyword">struct </span>sockaddr_in *) &amp;(ifrp-&gt;ifr_addr))-&gt;sin_addr.
+00662                 s_addr;
+00663 <span class="preprocessor">#endif</span>
+00664             free(buf);
+00665             close(sd);
+00666             <span class="keywordflow">return</span> addr;
+00667         }
+00668     }
+00669     free(buf);
+00670     close(sd);
+00671     <span class="keywordflow">return</span> 0;
+00672 }
+00673 
+00674 
+00675 <span class="preprocessor">#if !defined(solaris2) &amp;&amp; !defined(linux) &amp;&amp; !defined(cygwin)</span>
+00676 <span class="comment">/*</span>
+00677 <span class="comment"> * Returns boottime in centiseconds(!).</span>
+00678 <span class="comment"> *      Caches this for future use.</span>
+00679 <span class="comment"> */</span>
+00680 <span class="keywordtype">long</span>
+00681 get_boottime(<span class="keywordtype">void</span>)
+00682 {
+00683     <span class="keyword">static</span> <span class="keywordtype">long</span>     boottime_csecs = 0;
+00684 <span class="preprocessor">#if defined(hpux10) || defined(hpux11)</span>
+00685     <span class="keyword">struct </span>pst_static pst_buf;
 00686 <span class="preprocessor">#else</span>
-00687     <span class="keywordtype">int</span>             kmem;
-00688     <span class="keyword">static</span> <span class="keyword">struct </span>nlist nl[] = {
-00689 <span class="preprocessor">#if !defined(hpux)</span>
-00690         {(<span class="keywordtype">char</span> *) <span class="stringliteral">"_boottime"</span>},
+00687     <span class="keyword">struct </span>timeval  boottime;
+00688 <span class="preprocessor">#ifdef  CAN_USE_SYSCTL</span>
+00689     <span class="keywordtype">int</span>             mib[2];
+00690     size_t          len;
 00691 <span class="preprocessor">#else</span>
-00692         {(<span class="keywordtype">char</span> *) <span class="stringliteral">"boottime"</span>},
-00693 <span class="preprocessor">#endif</span>
-00694         {(<span class="keywordtype">char</span> *) <span class="stringliteral">""</span>}
-00695     };
-00696 <span class="preprocessor">#endif                          </span><span class="comment">/* CAN_USE_SYSCTL */</span>
-00697 <span class="preprocessor">#endif                          </span><span class="comment">/* hpux10 || hpux 11 */</span>
-00698 
-00699 
-00700     <span class="keywordflow">if</span> (boottime_csecs != 0)
-00701         <span class="keywordflow">return</span> (boottime_csecs);
-00702 
-00703 <span class="preprocessor">#if defined(hpux10) || defined(hpux11)</span>
-00704     pstat_getstatic(&amp;pst_buf, <span class="keyword">sizeof</span>(<span class=
+00692     <span class="keywordtype">int</span>             kmem;
+00693     <span class="keyword">static</span> <span class="keyword">struct </span>nlist nl[] = {
+00694 <span class="preprocessor">#if !defined(hpux)</span>
+00695         {(<span class="keywordtype">char</span> *) <span class="stringliteral">"_boottime"</span>},
+00696 <span class="preprocessor">#else</span>
+00697         {(<span class="keywordtype">char</span> *) <span class="stringliteral">"boottime"</span>},
+00698 <span class="preprocessor">#endif</span>
+00699         {(<span class="keywordtype">char</span> *) <span class="stringliteral">""</span>}
+00700     };
+00701 <span class="preprocessor">#endif                          </span><span class="comment">/* CAN_USE_SYSCTL */</span>
+00702 <span class="preprocessor">#endif                          </span><span class="comment">/* hpux10 || hpux 11 */</span>
+00703 
+00704 
+00705     <span class="keywordflow">if</span> (boottime_csecs != 0)
+00706         <span class="keywordflow">return</span> (boottime_csecs);
+00707 
+00708 <span class="preprocessor">#if defined(hpux10) || defined(hpux11)</span>
+00709     pstat_getstatic(&amp;pst_buf, <span class="keyword">sizeof</span>(<span class=
 "keyword">struct</span> pst_static), 1, 0);
-00705     boottime_csecs = pst_buf.boot_time * 100;
-00706 <span class="preprocessor">#else</span>
-00707 <span class="preprocessor">#ifdef CAN_USE_SYSCTL</span>
-00708     mib[0] = CTL_KERN;
-00709     mib[1] = KERN_BOOTTIME;
-00710 
-00711     len = <span class="keyword">sizeof</span>(boottime);
-00712 
-00713     sysctl(mib, 2, &amp;boottime, &amp;len, NULL, NULL);
-00714     boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
-00715 <span class="preprocessor">#else                           </span><span class="comment">/* CAN_USE_SYSCTL */</span>
-00716     <span class="keywordflow">if</span> ((kmem = open(<span class="stringliteral">"/dev/kmem"</span>, 0)) &lt; 0)
-00717         <span class="keywordflow">return</span> 0;
-00718     nlist(KERNEL_LOC, nl);
-00719     <span class="keywordflow">if</span> (nl[0].n_type == 0) {
-00720         close(kmem);
-00721         <span class="keywordflow">return</span> 0;
-00722     }
-00723 
-00724     lseek(kmem, (<span class="keywordtype">long</span>) nl[0].n_value, L_SET);
-00725     read(kmem, &amp;boottime, <span class="keyword">sizeof</span>(boottime));
-00726     close(kmem);
-00727     boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
-00728 <span class="preprocessor">#endif                          </span><span class="comment">/* CAN_USE_SYSCTL */</span>
-00729 <span class="preprocessor">#endif                          </span><span class="comment">/* hpux10 || hpux 11 */</span>
-00730 
-00731     <span class="keywordflow">return</span> (boottime_csecs);
-00732 }
-00733 <span class="preprocessor">#endif</span>
-00734 
-00735 <span class="comment">/*</span>
-00736 <span class="comment"> * Returns uptime in centiseconds(!).</span>
-00737 <span class="comment"> */</span>
-00738 <span class="keywordtype">long</span>
-00739 get_uptime(<span class="keywordtype">void</span>)
-00740 {
-00741 <span class="preprocessor">#if !defined(solaris2) &amp;&amp; !defined(linux) &amp;&amp; !defined(cygwin)</span>
-00742     <span class="keyword">struct </span>timeval  now;
-00743     <span class="keywordtype">long</span>            boottime_csecs, nowtime_csecs;
-00744 
-00745     boottime_csecs = get_boottime();
-00746     <span class="keywordflow">if</span> (boottime_csecs == 0)
-00747         <span class="keywordflow">return</span> 0;
-00748     gettimeofday(&amp;now, (<span class="keyword">struct</span> timezone *) 0);
-00749     nowtime_csecs = (now.tv_sec * 100) + (now.tv_usec / 10000);
-00750 
-00751     <span class="keywordflow">return</span> (nowtime_csecs - boottime_csecs);
-00752 <span class="preprocessor">#endif</span>
-00753 
-00754 <span class="preprocessor">#ifdef solaris2</span>
-00755     kstat_ctl_t    *ksc = kstat_open();
-00756     kstat_t        *ks;
-00757     kid_t           kid;
-00758     kstat_named_t  *named;
-00759     u_long          lbolt = 0;
-00760 
-00761     <span class="keywordflow">if</span> (ksc) {
-00762         ks = kstat_lookup(ksc, <span class="stringliteral">"unix"</span>, -1, <span class=
+00710     boottime_csecs = pst_buf.boot_time * 100;
+00711 <span class="preprocessor">#else</span>
+00712 <span class="preprocessor">#ifdef CAN_USE_SYSCTL</span>
+00713     mib[0] = CTL_KERN;
+00714     mib[1] = KERN_BOOTTIME;
+00715 
+00716     len = <span class="keyword">sizeof</span>(boottime);
+00717 
+00718     sysctl(mib, 2, &amp;boottime, &amp;len, NULL, 0);
+00719     boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
+00720 <span class="preprocessor">#else                           </span><span class="comment">/* CAN_USE_SYSCTL */</span>
+00721     <span class="keywordflow">if</span> ((kmem = open(<span class="stringliteral">"/dev/kmem"</span>, 0)) &lt; 0)
+00722         <span class="keywordflow">return</span> 0;
+00723     nlist(KERNEL_LOC, nl);
+00724     <span class="keywordflow">if</span> (nl[0].n_type == 0) {
+00725         close(kmem);
+00726         <span class="keywordflow">return</span> 0;
+00727     }
+00728 
+00729     lseek(kmem, (<span class="keywordtype">long</span>) nl[0].n_value, L_SET);
+00730     read(kmem, &amp;boottime, <span class="keyword">sizeof</span>(boottime));
+00731     close(kmem);
+00732     boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
+00733 <span class="preprocessor">#endif                          </span><span class="comment">/* CAN_USE_SYSCTL */</span>
+00734 <span class="preprocessor">#endif                          </span><span class="comment">/* hpux10 || hpux 11 */</span>
+00735 
+00736     <span class="keywordflow">return</span> (boottime_csecs);
+00737 }
+00738 <span class="preprocessor">#endif</span>
+00739 
+00740 <span class="comment">/*</span>
+00741 <span class="comment"> * Returns uptime in centiseconds(!).</span>
+00742 <span class="comment"> */</span>
+00743 <span class="keywordtype">long</span>
+00744 get_uptime(<span class="keywordtype">void</span>)
+00745 {
+00746 <span class="preprocessor">#if !defined(solaris2) &amp;&amp; !defined(linux) &amp;&amp; !defined(cygwin)</span>
+00747     <span class="keyword">struct </span>timeval  now;
+00748     <span class="keywordtype">long</span>            boottime_csecs, nowtime_csecs;
+00749 
+00750     boottime_csecs = get_boottime();
+00751     <span class="keywordflow">if</span> (boottime_csecs == 0)
+00752         <span class="keywordflow">return</span> 0;
+00753     gettimeofday(&amp;now, (<span class="keyword">struct</span> timezone *) 0);
+00754     nowtime_csecs = (now.tv_sec * 100) + (now.tv_usec / 10000);
+00755 
+00756     <span class="keywordflow">return</span> (nowtime_csecs - boottime_csecs);
+00757 <span class="preprocessor">#endif</span>
+00758 
+00759 <span class="preprocessor">#ifdef solaris2</span>
+00760     kstat_ctl_t    *ksc = kstat_open();
+00761     kstat_t        *ks;
+00762     kid_t           kid;
+00763     kstat_named_t  *named;
+00764     u_long          lbolt = 0;
+00765 
+00766     <span class="keywordflow">if</span> (ksc) {
+00767         ks = kstat_lookup(ksc, <span class="stringliteral">"unix"</span>, -1, <span class=
 "stringliteral">"system_misc"</span>);
-00763         <span class="keywordflow">if</span> (ks) {
-00764             kid = kstat_read(ksc, ks, NULL);
-00765             <span class="keywordflow">if</span> (kid != -1) {
-00766                 named = kstat_data_lookup(ks, <span class="stringliteral">"lbolt"</span>);
-00767                 <span class="keywordflow">if</span> (named) {
-00768 <span class="preprocessor">#ifdef KSTAT_DATA_UINT32</span>
-00769                     lbolt = named-&gt;value.ui32;
-00770 <span class="preprocessor">#else</span>
-00771                     lbolt = named-&gt;value.ul;
-00772 <span class="preprocessor">#endif</span>
-00773                 }
-00774             }
-00775         }
-00776         kstat_close(ksc);
-00777     }
-00778     <span class="keywordflow">return</span> lbolt;
-00779 <span class="preprocessor">#endif                          </span><span class="comment">/* solaris2 */</span>
-00780 
-00781 <span class="preprocessor">#ifdef linux</span>
-00782     FILE           *in = fopen(<span class="stringliteral">"/proc/uptime"</span>, <span class="stringliteral">"r"</span>);
-00783     <span class="keywordtype">long</span>            uptim = 0, a, b;
-00784     <span class="keywordflow">if</span> (in) {
-00785         <span class="keywordflow">if</span> (2 == fscanf(in, <span class="stringliteral">"%ld.%ld"</span>, &amp;a, &amp;b))
-00786             uptim = a * 100 + b;
-00787         fclose(in);
-00788     }
-00789     <span class="keywordflow">return</span> uptim;
-00790 <span class="preprocessor">#endif                          </span><span class="comment">/* linux */</span>
-00791 
-00792 <span class="preprocessor">#ifdef cygwin</span>
-00793     <span class="keywordflow">return</span> (0);                 <span class="comment">/* not implemented */</span>
-00794 <span class="preprocessor">#endif</span>
-00795 }
+00768         <span class="keywordflow">if</span> (ks) {
+00769             kid = kstat_read(ksc, ks, NULL);
+00770             <span class="keywordflow">if</span> (kid != -1) {
+00771                 named = kstat_data_lookup(ks, <span class="stringliteral">"lbolt"</span>);
+00772                 <span class="keywordflow">if</span> (named) {
+00773 <span class="preprocessor">#ifdef KSTAT_DATA_UINT32</span>
+00774                     lbolt = named-&gt;value.ui32;
+00775 <span class="preprocessor">#else</span>
+00776                     lbolt = named-&gt;value.ul;
+00777 <span class="preprocessor">#endif</span>
+00778                 }
+00779             }
+00780         }
+00781         kstat_close(ksc);
+00782     }
+00783     <span class="keywordflow">return</span> lbolt;
+00784 <span class="preprocessor">#endif                          </span><span class="comment">/* solaris2 */</span>
+00785 
+00786 <span class="preprocessor">#ifdef linux</span>
+00787     FILE           *in = fopen(<span class="stringliteral">"/proc/uptime"</span>, <span class="stringliteral">"r"</span>);
+00788     <span class="keywordtype">long</span>            uptim = 0, a, b;
+00789     <span class="keywordflow">if</span> (in) {
+00790         <span class="keywordflow">if</span> (2 == fscanf(in, <span class="stringliteral">"%ld.%ld"</span>, &amp;a, &amp;b))
+00791             uptim = a * 100 + b;
+00792         fclose(in);
+00793     }
+00794     <span class="keywordflow">return</span> uptim;
+00795 <span class="preprocessor">#endif                          </span><span class="comment">/* linux */</span>
 00796 
-00797 <span class="preprocessor">#endif                          </span><span class="comment">/* ! WIN32 */</span>
-00798 <span class="comment">/*******************************************************************/</span>
-00799 
-00800 <span class="preprocessor">#ifndef HAVE_STRNCASECMP</span>
+00797 <span class="preprocessor">#ifdef cygwin</span>
+00798     <span class="keywordflow">return</span> (0);                 <span class="comment">/* not implemented */</span>
+00799 <span class="preprocessor">#endif</span>
+00800 }
 00801 
-00802 <span class="comment">/*</span>
-00803 <span class="comment"> * test for NULL pointers before and NULL characters after</span>
-00804 <span class="comment"> * * comparing possibly non-NULL strings.</span>
-00805 <span class="comment"> * * WARNING: This function does NOT check for array overflow.</span>
-00806 <span class="comment"> */</span>
-00807 <span class="keywordtype">int</span>
-00808 strncasecmp(<span class="keyword">const</span> <span class="keywordtype">char</span> *s1, <span class=
+00802 <span class="preprocessor">#endif                          </span><span class="comment">/* ! WIN32 */</span>
+00803 <span class="comment">/*******************************************************************/</span>
+00804 
+00805 <span class="preprocessor">#ifndef HAVE_STRNCASECMP</span>
+00806 
+00807 <span class="comment">/*</span>
+00808 <span class="comment"> * test for NULL pointers before and NULL characters after</span>
+00809 <span class="comment"> * * comparing possibly non-NULL strings.</span>
+00810 <span class="comment"> * * WARNING: This function does NOT check for array overflow.</span>
+00811 <span class="comment"> */</span>
+00812 <span class="keywordtype">int</span>
+00813 strncasecmp(<span class="keyword">const</span> <span class="keywordtype">char</span> *s1, <span class=
 "keyword">const</span> <span class="keywordtype">char</span> *s2, size_t nch)
-00809 {
-00810     size_t          ii;
-00811     <span class="keywordtype">int</span>             res = -1;
-00812 
-00813     <span class="keywordflow">if</span> (!s1) {
-00814         <span class="keywordflow">if</span> (!s2)
-00815             <span class="keywordflow">return</span> 0;
-00816         <span class="keywordflow">return</span> (-1);
-00817     }
-00818     <span class="keywordflow">if</span> (!s2)
-00819         <span class="keywordflow">return</span> (1);
-00820 
-00821     <span class="keywordflow">for</span> (ii = 0; (ii &lt; nch) &amp;&amp; *s1 &amp;&amp; *s2; ii++, s1++, s2++) {
-00822         res = (int) (tolower(*s1) - tolower(*s2));
-00823         <span class="keywordflow">if</span> (res != 0)
-00824             <span class="keywordflow">break</span>;
-00825     }
-00826 
-00827     <span class="keywordflow">if</span> (ii == nch) {
-00828         s1--;
-00829         s2--;
+00814 {
+00815     size_t          ii;
+00816     <span class="keywordtype">int</span>             res = -1;
+00817 
+00818     <span class="keywordflow">if</span> (!s1) {
+00819         <span class="keywordflow">if</span> (!s2)
+00820             <span class="keywordflow">return</span> 0;
+00821         <span class="keywordflow">return</span> (-1);
+00822     }
+00823     <span class="keywordflow">if</span> (!s2)
+00824         <span class="keywordflow">return</span> (1);
+00825 
+00826     <span class="keywordflow">for</span> (ii = 0; (ii &lt; nch) &amp;&amp; *s1 &amp;&amp; *s2; ii++, s1++, s2++) {
+00827         res = (int) (tolower(*s1) - tolower(*s2));
+00828         <span class="keywordflow">if</span> (res != 0)
+00829             <span class="keywordflow">break</span>;
 00830     }
 00831 
-00832     <span class="keywordflow">if</span> (!*s1) {
-00833         <span class="keywordflow">if</span> (!*s2)
-00834             <span class="keywordflow">return</span> 0;
-00835         <span class="keywordflow">return</span> (-1);
-00836     }
-00837     <span class="keywordflow">if</span> (!*s2)
-00838         <span class="keywordflow">return</span> (1);
-00839 
-00840     <span class="keywordflow">return</span> (res);
-00841 }
-00842 
-00843 <span class="keywordtype">int</span>
-00844 strcasecmp(<span class="keyword">const</span> <span class="keywordtype">char</span> *s1, <span class=
+00832     <span class="keywordflow">if</span> (ii == nch) {
+00833         s1--;
+00834         s2--;
+00835     }
+00836 
+00837     <span class="keywordflow">if</span> (!*s1) {
+00838         <span class="keywordflow">if</span> (!*s2)
+00839             <span class="keywordflow">return</span> 0;
+00840         <span class="keywordflow">return</span> (-1);
+00841     }
+00842     <span class="keywordflow">if</span> (!*s2)
+00843         <span class="keywordflow">return</span> (1);
+00844 
+00845     <span class="keywordflow">return</span> (res);
+00846 }
+00847 
+00848 <span class="keywordtype">int</span>
+00849 strcasecmp(<span class="keyword">const</span> <span class="keywordtype">char</span> *s1, <span class=
 "keyword">const</span> <span class="keywordtype">char</span> *s2)
-00845 {
-00846     <span class="keywordflow">return</span> strncasecmp(s1, s2, 1000000);
-00847 }
-00848 
-00849 <span class="preprocessor">#endif                          </span><span class="comment">/* HAVE_STRNCASECMP */</span>
-00850 
-00851 
-00852 <span class="preprocessor">#ifndef HAVE_STRDUP</span>
-00853 <span class="keywordtype">char</span>           *
-00854 strdup(<span class="keyword">const</span> <span class="keywordtype">char</span> *src)
-00855 {
-00856     <span class="keywordtype">int</span>             len;
-00857     <span class="keywordtype">char</span>           *dst;
-00858 
-00859     len = strlen(src) + 1;
-00860     <span class="keywordflow">if</span> ((dst = (<span class="keywordtype">char</span> *) malloc(len)) == NULL)
-00861         <span class="keywordflow">return</span> (NULL);
-00862     strcpy(dst, src);
-00863     <span class="keywordflow">return</span> (dst);
-00864 }
-00865 <span class="preprocessor">#endif                          </span><span class="comment">/* HAVE_STRDUP */</span>
-00866 
-00867 <span class="preprocessor">#ifndef HAVE_SETENV</span>
-00868 <span class="keywordtype">int</span>
-00869 setenv(<span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class=
+00850 {
+00851     <span class="keywordflow">return</span> strncasecmp(s1, s2, 1000000);
+00852 }
+00853 
+00854 <span class="preprocessor">#endif                          </span><span class="comment">/* HAVE_STRNCASECMP */</span>
+00855 
+00856 
+00857 <span class="preprocessor">#ifndef HAVE_STRDUP</span>
+00858 <span class="keywordtype">char</span>           *
+00859 strdup(<span class="keyword">const</span> <span class="keywordtype">char</span> *src)
+00860 {
+00861     <span class="keywordtype">int</span>             len;
+00862     <span class="keywordtype">char</span>           *dst;
+00863 
+00864     len = strlen(src) + 1;
+00865     <span class="keywordflow">if</span> ((dst = (<span class="keywordtype">char</span> *) malloc(len)) == NULL)
+00866         <span class="keywordflow">return</span> (NULL);
+00867     strcpy(dst, src);
+00868     <span class="keywordflow">return</span> (dst);
+00869 }
+00870 <span class="preprocessor">#endif                          </span><span class="comment">/* HAVE_STRDUP */</span>
+00871 
+00872 <span class="preprocessor">#ifndef HAVE_SETENV</span>
+00873 <span class="keywordtype">int</span>
+00874 setenv(<span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class=
 "keyword">const</span> <span class="keywordtype">char</span> *value, <span class="keywordtype">int</span> overwrite)
-00870 {
-00871     <span class="keywordtype">char</span>           *cp;
-00872     <span class="keywordtype">int</span>             ret;
-00873 
-00874     <span class="keywordflow">if</span> (overwrite == 0) {
-00875         <span class="keywordflow">if</span> (getenv(name))
-00876             <span class="keywordflow">return</span> 0;
-00877     }
-00878     cp = (<span class="keywordtype">char</span> *) malloc(strlen(name) + strlen(value) + 2);
-00879     <span class="keywordflow">if</span> (cp == NULL)
-00880         <span class="keywordflow">return</span> -1;
-00881     sprintf(cp, <span class="stringliteral">"%s=%s"</span>, name, value);
-00882     ret = putenv(cp);
-00883 <span class="preprocessor">#ifdef WIN32</span>
-00884     free(cp);
-00885 <span class="preprocessor">#endif</span>
-00886     <span class="keywordflow">return</span> ret;
-00887 }
-00888 <span class="preprocessor">#endif                          </span><span class="comment">/* HAVE_SETENV */</span>
-00889 
-00890 <span class="comment">/* returns centiseconds */</span>
-00891 <span class="keywordtype">int</span>
-00892 calculate_time_diff(<span class="keyword">struct</span> timeval *now, <span class="keyword">struct</span> timeval *then)
-00893 {
-00894     <span class="keyword">struct </span>timeval  tmp, diff;
-00895     memcpy(&amp;tmp, now, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> timeval));
-00896     tmp.tv_sec--;
-00897     tmp.tv_usec += 1000000L;
-00898     diff.tv_sec = tmp.tv_sec - then-&gt;tv_sec;
-00899     diff.tv_usec = tmp.tv_usec - then-&gt;tv_usec;
-00900     <span class="keywordflow">if</span> (diff.tv_usec &gt; 1000000L) {
-00901         diff.tv_usec -= 1000000L;
-00902         diff.tv_sec++;
-00903     }
-00904     <span class="keywordflow">return</span> ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
-00905 }
-00906 
-00907 <span class="comment">/* returns diff in rounded seconds */</span>
-00908 u_int
-00909 calculate_sectime_diff(<span class="keyword">struct</span> timeval *now, <span class="keyword">struct</span> timeval *then)
-00910 {
-00911     <span class="keyword">struct </span>timeval  tmp, diff;
-00912     memcpy(&amp;tmp, now, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> timeval));
-00913     tmp.tv_sec--;
-00914     tmp.tv_usec += 1000000L;
-00915     diff.tv_sec = tmp.tv_sec - then-&gt;tv_sec;
-00916     diff.tv_usec = tmp.tv_usec - then-&gt;tv_usec;
-00917     <span class="keywordflow">if</span> (diff.tv_usec &gt; 1000000L) {
-00918         diff.tv_usec -= 1000000L;
-00919         diff.tv_sec++;
-00920     }
-00921     <span class="keywordflow">if</span> (diff.tv_usec &gt;= 500000L)
-00922         <span class="keywordflow">return</span> diff.tv_sec + 1;
-00923     <span class="keywordflow">return</span>  diff.tv_sec;
-00924 }
-00925 
-00926 <span class="preprocessor">#ifndef HAVE_STRCASESTR</span>
-00927 <span class="comment">/*</span>
-00928 <span class="comment"> * only glibc2 has this.</span>
-00929 <span class="comment"> */</span>
-00930 <span class="keywordtype">char</span>           *
-00931 strcasestr(<span class="keyword">const</span> <span class="keywordtype">char</span> *haystack, <span class=
+00875 {
+00876     <span class="keywordtype">char</span>           *cp;
+00877     <span class="keywordtype">int</span>             ret;
+00878 
+00879     <span class="keywordflow">if</span> (overwrite == 0) {
+00880         <span class="keywordflow">if</span> (getenv(name))
+00881             <span class="keywordflow">return</span> 0;
+00882     }
+00883     cp = (<span class="keywordtype">char</span> *) malloc(strlen(name) + strlen(value) + 2);
+00884     <span class="keywordflow">if</span> (cp == NULL)
+00885         <span class="keywordflow">return</span> -1;
+00886     sprintf(cp, <span class="stringliteral">"%s=%s"</span>, name, value);
+00887     ret = putenv(cp);
+00888 <span class="preprocessor">#ifdef WIN32</span>
+00889     free(cp);
+00890 <span class="preprocessor">#endif</span>
+00891     <span class="keywordflow">return</span> ret;
+00892 }
+00893 <span class="preprocessor">#endif                          </span><span class="comment">/* HAVE_SETENV */</span>
+00894 
+00895 <span class="comment">/* returns centiseconds */</span>
+00896 <span class="keywordtype">int</span>
+00897 calculate_time_diff(<span class="keyword">struct</span> timeval *now, <span class="keyword">struct</span> timeval *then)
+00898 {
+00899     <span class="keyword">struct </span>timeval  tmp, diff;
+00900     memcpy(&amp;tmp, now, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> timeval));
+00901     tmp.tv_sec--;
+00902     tmp.tv_usec += 1000000L;
+00903     diff.tv_sec = tmp.tv_sec - then-&gt;tv_sec;
+00904     diff.tv_usec = tmp.tv_usec - then-&gt;tv_usec;
+00905     <span class="keywordflow">if</span> (diff.tv_usec &gt; 1000000L) {
+00906         diff.tv_usec -= 1000000L;
+00907         diff.tv_sec++;
+00908     }
+00909     <span class="keywordflow">return</span> ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+00910 }
+00911 
+00912 <span class="comment">/* returns diff in rounded seconds */</span>
+00913 u_int
+00914 calculate_sectime_diff(<span class="keyword">struct</span> timeval *now, <span class="keyword">struct</span> timeval *then)
+00915 {
+00916     <span class="keyword">struct </span>timeval  tmp, diff;
+00917     memcpy(&amp;tmp, now, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> timeval));
+00918     tmp.tv_sec--;
+00919     tmp.tv_usec += 1000000L;
+00920     diff.tv_sec = tmp.tv_sec - then-&gt;tv_sec;
+00921     diff.tv_usec = tmp.tv_usec - then-&gt;tv_usec;
+00922     <span class="keywordflow">if</span> (diff.tv_usec &gt; 1000000L) {
+00923         diff.tv_usec -= 1000000L;
+00924         diff.tv_sec++;
+00925     }
+00926     <span class="keywordflow">if</span> (diff.tv_usec &gt;= 500000L)
+00927         <span class="keywordflow">return</span> diff.tv_sec + 1;
+00928     <span class="keywordflow">return</span>  diff.tv_sec;
+00929 }
+00930 
+00931 <span class="preprocessor">#ifndef HAVE_STRCASESTR</span>
+00932 <span class="comment">/*</span>
+00933 <span class="comment"> * only glibc2 has this.</span>
+00934 <span class="comment"> */</span>
+00935 <span class="keywordtype">char</span>           *
+00936 strcasestr(<span class="keyword">const</span> <span class="keywordtype">char</span> *haystack, <span class=
 "keyword">const</span> <span class="keywordtype">char</span> *needle)
-00932 {
-00933     <span class="keyword">const</span> <span class="keywordtype">char</span>     *cp1 = haystack, *cp2 = needle;
-00934     <span class="keyword">const</span> <span class="keywordtype">char</span>     *cx;
-00935     <span class="keywordtype">int</span>             tstch1, tstch2;
-00936 
-00937     <span class="comment">/*</span>
-00938 <span class="comment">     * printf("looking for '%s' in '%s'\n", needle, haystack); </span>
-00939 <span class="comment">     */</span>
-00940     <span class="keywordflow">if</span> (cp1 &amp;&amp; cp2 &amp;&amp; *cp1 &amp;&amp; *cp2)
-00941         <span class="keywordflow">for</span> (cp1 = haystack, cp2 = needle; *cp1;) {
-00942             cx = cp1;
-00943             cp2 = needle;
-00944             <span class="keywordflow">do</span> {
-00945                 <span class="comment">/*</span>
-00946 <span class="comment">                 * printf("T'%c' ", *cp1); </span>
-00947 <span class="comment">                 */</span>
-00948                 <span class="keywordflow">if</span> (!*cp2) {    <span class="comment">/* found the needle */</span>
-00949                     <span class="comment">/*</span>
-00950 <span class="comment">                     * printf("\nfound '%s' in '%s'\n", needle, cx); </span>
-00951 <span class="comment">                     */</span>
-00952                     <span class="keywordflow">return</span> (<span class="keywordtype">char</span> *) cx;
-00953                 }
-00954                 <span class="keywordflow">if</span> (!*cp1)
-00955                     <span class="keywordflow">break</span>;
-00956 
-00957                 tstch1 = toupper(*cp1);
-00958                 tstch2 = toupper(*cp2);
-00959                 <span class="keywordflow">if</span> (tstch1 != tstch2)
+00937 {
+00938     <span class="keyword">const</span> <span class="keywordtype">char</span>     *cp1 = haystack, *cp2 = needle;
+00939     <span class="keyword">const</span> <span class="keywordtype">char</span>     *cx;
+00940     <span class="keywordtype">int</span>             tstch1, tstch2;
+00941 
+00942     <span class="comment">/*</span>
+00943 <span class="comment">     * printf("looking for '%s' in '%s'\n", needle, haystack); </span>
+00944 <span class="comment">     */</span>
+00945     <span class="keywordflow">if</span> (cp1 &amp;&amp; cp2 &amp;&amp; *cp1 &amp;&amp; *cp2)
+00946         <span class="keywordflow">for</span> (cp1 = haystack, cp2 = needle; *cp1;) {
+00947             cx = cp1;
+00948             cp2 = needle;
+00949             <span class="keywordflow">do</span> {
+00950                 <span class="comment">/*</span>
+00951 <span class="comment">                 * printf("T'%c' ", *cp1); </span>
+00952 <span class="comment">                 */</span>
+00953                 <span class="keywordflow">if</span> (!*cp2) {    <span class="comment">/* found the needle */</span>
+00954                     <span class="comment">/*</span>
+00955 <span class="comment">                     * printf("\nfound '%s' in '%s'\n", needle, cx); </span>
+00956 <span class="comment">                     */</span>
+00957                     <span class="keywordflow">return</span> (<span class="keywordtype">char</span> *) cx;
+00958                 }
+00959                 <span class="keywordflow">if</span> (!*cp1)
 00960                     <span class="keywordflow">break</span>;
-00961                 <span class="comment">/*</span>
-00962 <span class="comment">                 * printf("M'%c' ", *cp1); </span>
-00963 <span class="comment">                 */</span>
-00964                 cp1++;
-00965                 cp2++;
-00966             }
-00967             <span class="keywordflow">while</span> (1);
-00968             <span class="keywordflow">if</span> (*cp1)
+00961 
+00962                 tstch1 = toupper(*cp1);
+00963                 tstch2 = toupper(*cp2);
+00964                 <span class="keywordflow">if</span> (tstch1 != tstch2)
+00965                     <span class="keywordflow">break</span>;
+00966                 <span class="comment">/*</span>
+00967 <span class="comment">                 * printf("M'%c' ", *cp1); </span>
+00968 <span class="comment">                 */</span>
 00969                 cp1++;
-00970         }
-00971     <span class="comment">/*</span>
-00972 <span class="comment">     * printf("\n"); </span>
-00973 <span class="comment">     */</span>
-00974     <span class="keywordflow">if</span> (cp1 &amp;&amp; *cp1)
-00975         <span class="keywordflow">return</span> (<span class="keywordtype">char</span> *) cp1;
-00976 
-00977     <span class="keywordflow">return</span> NULL;
-00978 }
-00979 <span class="preprocessor">#endif</span>
-00980 
-00981 <span class="keywordtype">int</span>
-00982 mkdirhier(<span class="keyword">const</span> <span class="keywordtype">char</span> *pathname, mode_t mode, <span class=
+00970                 cp2++;
+00971             }
+00972             <span class="keywordflow">while</span> (1);
+00973             <span class="keywordflow">if</span> (*cp1)
+00974                 cp1++;
+00975         }
+00976     <span class="comment">/*</span>
+00977 <span class="comment">     * printf("\n"); </span>
+00978 <span class="comment">     */</span>
+00979     <span class="keywordflow">if</span> (cp1 &amp;&amp; *cp1)
+00980         <span class="keywordflow">return</span> (<span class="keywordtype">char</span> *) cp1;
+00981 
+00982     <span class="keywordflow">return</span> NULL;
+00983 }
+00984 <span class="preprocessor">#endif</span>
+00985 
+00986 <span class="keywordtype">int</span>
+00987 mkdirhier(<span class="keyword">const</span> <span class="keywordtype">char</span> *pathname, mode_t mode, <span class=
 "keywordtype">int</span> skiplast)
-00983 {
-00984     <span class="keyword">struct </span>stat     sbuf;
-00985     <span class="keywordtype">char</span>           *ourcopy = strdup(pathname);
-00986     <span class="keywordtype">char</span>           *entry;
-00987     <span class="keywordtype">char</span>            buf[SNMP_MAXPATH];
-00988     <span class="keywordtype">char</span>           *st;
-00989 
-00990 <span class="preprocessor">#if defined (WIN32) || defined (cygwin)</span>
-00991     <span class="comment">/* convert backslash to forward slash */</span>
-00992     <span class="keywordflow">for</span> (entry = ourcopy; *entry; entry++)
-00993         <span class="keywordflow">if</span> (*entry == <span class="charliteral">'\\'</span>)
-00994             *entry = <span class="charliteral">'/'</span>;
-00995 <span class="preprocessor">#endif</span>
-00996 
-00997     entry = strtok_r(ourcopy, <span class="stringliteral">"/"</span>, &amp;st);
-00998 
-00999     buf[0] = <span class="charliteral">'\0'</span>;
-01000 
-01001 <span class="preprocessor">#if defined (WIN32) || defined (cygwin)</span>
-01002     <span class="comment">/*</span>
-01003 <span class="comment">     * Check if first entry contains a drive-letter</span>
-01004 <span class="comment">     *   e.g  "c:/path"</span>
-01005 <span class="comment">     */</span>
-01006     <span class="keywordflow">if</span> ((entry) &amp;&amp; (<span class="charliteral">':'</span> == entry[1]) &amp;&amp;
-01007         ((<span class="charliteral">'\0'</span> == entry[2]) || (<span class="charliteral">'/'</span> == entry[2]))) {
-01008         strcat(buf, entry);
-01009         entry = strtok_r(NULL, <span class="stringliteral">"/"</span>, &amp;st);
-01010     }
-01011 <span class="preprocessor">#endif</span>
-01012 
-01013     <span class="comment">/*</span>
-01014 <span class="comment">     * check to see if filename is a directory </span>
-01015 <span class="comment">     */</span>
-01016     <span class="keywordflow">while</span> (entry) {
-01017         strcat(buf, <span class="stringliteral">"/"</span>);
-01018         strcat(buf, entry);
-01019         entry = strtok_r(NULL, <span class="stringliteral">"/"</span>, &amp;st);
-01020         <span class="keywordflow">if</span> (entry == NULL &amp;&amp; skiplast)
-01021             <span class="keywordflow">break</span>;
-01022         <span class="keywordflow">if</span> (stat(buf, &amp;sbuf) &lt; 0) {
-01023             <span class="comment">/*</span>
-01024 <span class="comment">             * DNE, make it </span>
-01025 <span class="comment">             */</span>
-01026             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_INFO, <span class=
+00988 {
+00989     <span class="keyword">struct </span>stat     sbuf;
+00990     <span class="keywordtype">char</span>           *ourcopy = strdup(pathname);
+00991     <span class="keywordtype">char</span>           *entry;
+00992     <span class="keywordtype">char</span>            buf[SNMP_MAXPATH];
+00993     <span class="keywordtype">char</span>           *st;
+00994 
+00995 <span class="preprocessor">#if defined (WIN32) || defined (cygwin)</span>
+00996     <span class="comment">/* convert backslash to forward slash */</span>
+00997     <span class="keywordflow">for</span> (entry = ourcopy; *entry; entry++)
+00998         <span class="keywordflow">if</span> (*entry == <span class="charliteral">'\\'</span>)
+00999             *entry = <span class="charliteral">'/'</span>;
+01000 <span class="preprocessor">#endif</span>
+01001 
+01002     entry = strtok_r(ourcopy, <span class="stringliteral">"/"</span>, &amp;st);
+01003 
+01004     buf[0] = <span class="charliteral">'\0'</span>;
+01005 
+01006 <span class="preprocessor">#if defined (WIN32) || defined (cygwin)</span>
+01007     <span class="comment">/*</span>
+01008 <span class="comment">     * Check if first entry contains a drive-letter</span>
+01009 <span class="comment">     *   e.g  "c:/path"</span>
+01010 <span class="comment">     */</span>
+01011     <span class="keywordflow">if</span> ((entry) &amp;&amp; (<span class="charliteral">':'</span> == entry[1]) &amp;&amp;
+01012         ((<span class="charliteral">'\0'</span> == entry[2]) || (<span class="charliteral">'/'</span> == entry[2]))) {
+01013         strcat(buf, entry);
+01014         entry = strtok_r(NULL, <span class="stringliteral">"/"</span>, &amp;st);
+01015     }
+01016 <span class="preprocessor">#endif</span>
+01017 
+01018     <span class="comment">/*</span>
+01019 <span class="comment">     * check to see if filename is a directory </span>
+01020 <span class="comment">     */</span>
+01021     <span class="keywordflow">while</span> (entry) {
+01022         strcat(buf, <span class="stringliteral">"/"</span>);
+01023         strcat(buf, entry);
+01024         entry = strtok_r(NULL, <span class="stringliteral">"/"</span>, &amp;st);
+01025         <span class="keywordflow">if</span> (entry == NULL &amp;&amp; skiplast)
+01026             <span class="keywordflow">break</span>;
+01027         <span class="keywordflow">if</span> (stat(buf, &amp;sbuf) &lt; 0) {
+01028             <span class="comment">/*</span>
+01029 <span class="comment">             * DNE, make it </span>
+01030 <span class="comment">             */</span>
+01031             <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_INFO, <span class=
 "stringliteral">"Creating directory: %s\n"</span>, buf);
-01027 <span class="preprocessor">#ifdef WIN32</span>
-01028             <span class="keywordflow">if</span> (CreateDirectory(buf, NULL) == 0)
-01029 <span class="preprocessor">#else</span>
-01030             <span class="keywordflow">if</span> (mkdir(buf, mode) == -1)
-01031 <span class="preprocessor">#endif</span>
-01032             {
-01033                 free(ourcopy);
-01034                 <span class="keywordflow">return</span> SNMPERR_GENERR;
-01035             }
-01036         } <span class="keywordflow">else</span> {
-01037             <span class="comment">/*</span>
-01038 <span class="comment">             * exists, is it a file? </span>
-01039 <span class="comment">             */</span>
-01040             <span class="keywordflow">if</span> ((sbuf.st_mode &amp; S_IFDIR) == 0) {
-01041                 <span class="comment">/*</span>
-01042 <span class="comment">                 * ack! can't make a directory on top of a file </span>
-01043 <span class="comment">                 */</span>
-01044                 free(ourcopy);
-01045                 <span class="keywordflow">return</span> SNMPERR_GENERR;
-01046             }
-01047         }
-01048     }
-01049     free(ourcopy);
-01050     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
-01051 }
-01052 
-01053 <span class="comment">/*</span>
-01054 <span class="comment"> * This function was created to differentiate actions</span>
-01055 <span class="comment"> * that are appropriate for Linux 2.4 kernels, but not later kernels.</span>
-01056 <span class="comment"> *</span>
-01057 <span class="comment"> * This function can be used to test kernels on any platform that supports uname().</span>
-01058 <span class="comment"> *</span>
-01059 <span class="comment"> * If not running a platform that supports uname(), return -1.</span>
-01060 <span class="comment"> *</span>
-01061 <span class="comment"> * If ospname matches, and the release matches up through the prefix,</span>
-01062 <span class="comment"> *  return 0.</span>
-01063 <span class="comment"> * If the release is ordered higher, return 1.</span>
-01064 <span class="comment"> * Be aware that "ordered higher" is not a guarantee of correctness.</span>
-01065 <span class="comment"> */</span>
-01066 <span class="keywordtype">int</span>
-01067 netsnmp_os_prematch(<span class="keyword">const</span> <span class="keywordtype">char</span> *ospmname,
-01068                     <span class="keyword">const</span> <span class="keywordtype">char</span> *ospmrelprefix)
-01069 {
-01070 <span class="preprocessor">#if HAVE_SYS_UTSNAME_H</span>
-01071 <span class="preprocessor">#include &lt;sys/utsname.h&gt;</span>
-01072 <span class="keyword">static</span> <span class="keywordtype">int</span> printOSonce = 1;
-01073   <span class="keyword">struct </span>utsname utsbuf;
-01074   <span class="keywordflow">if</span> ( 0 != uname(&amp;utsbuf))
-01075     <span class="keywordflow">return</span> -1;
-01076 
-01077   <span class="keywordflow">if</span> (printOSonce) {
-01078     printOSonce = 0;
-01079     <span class="comment">/* show the four elements that the kernel can be sure of */</span>
-01080   DEBUGMSGT((<span class="stringliteral">"daemonize"</span>,<span class=
+01032 <span class="preprocessor">#ifdef WIN32</span>
+01033             <span class="keywordflow">if</span> (CreateDirectory(buf, NULL) == 0)
+01034 <span class="preprocessor">#else</span>
+01035             <span class="keywordflow">if</span> (mkdir(buf, mode) == -1)
+01036 <span class="preprocessor">#endif</span>
+01037             {
+01038                 free(ourcopy);
+01039                 <span class="keywordflow">return</span> SNMPERR_GENERR;
+01040             }
+01041         } <span class="keywordflow">else</span> {
+01042             <span class="comment">/*</span>
+01043 <span class="comment">             * exists, is it a file? </span>
+01044 <span class="comment">             */</span>
+01045             <span class="keywordflow">if</span> ((sbuf.st_mode &amp; S_IFDIR) == 0) {
+01046                 <span class="comment">/*</span>
+01047 <span class="comment">                 * ack! can't make a directory on top of a file </span>
+01048 <span class="comment">                 */</span>
+01049                 free(ourcopy);
+01050                 <span class="keywordflow">return</span> SNMPERR_GENERR;
+01051             }
+01052         }
+01053     }
+01054     free(ourcopy);
+01055     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+01056 }
+01057 
+01058 <span class="comment">/*</span>
+01059 <span class="comment"> * This function was created to differentiate actions</span>
+01060 <span class="comment"> * that are appropriate for Linux 2.4 kernels, but not later kernels.</span>
+01061 <span class="comment"> *</span>
+01062 <span class="comment"> * This function can be used to test kernels on any platform that supports uname().</span>
+01063 <span class="comment"> *</span>
+01064 <span class="comment"> * If not running a platform that supports uname(), return -1.</span>
+01065 <span class="comment"> *</span>
+01066 <span class="comment"> * If ospname matches, and the release matches up through the prefix,</span>
+01067 <span class="comment"> *  return 0.</span>
+01068 <span class="comment"> * If the release is ordered higher, return 1.</span>
+01069 <span class="comment"> * Be aware that "ordered higher" is not a guarantee of correctness.</span>
+01070 <span class="comment"> */</span>
+01071 <span class="keywordtype">int</span>
+01072 netsnmp_os_prematch(<span class="keyword">const</span> <span class="keywordtype">char</span> *ospmname,
+01073                     <span class="keyword">const</span> <span class="keywordtype">char</span> *ospmrelprefix)
+01074 {
+01075 <span class="preprocessor">#if HAVE_SYS_UTSNAME_H</span>
+01076 <span class="keyword">static</span> <span class="keywordtype">int</span> printOSonce = 1;
+01077   <span class="keyword">struct </span>utsname utsbuf;
+01078   <span class="keywordflow">if</span> ( 0 != uname(&amp;utsbuf))
+01079     <span class="keywordflow">return</span> -1;
+01080 
+01081   <span class="keywordflow">if</span> (printOSonce) {
+01082     printOSonce = 0;
+01083     <span class="comment">/* show the four elements that the kernel can be sure of */</span>
+01084   DEBUGMSGT((<span class="stringliteral">"daemonize"</span>,<span class=
 "stringliteral">"sysname '%s',\nrelease '%s',\nversion '%s',\nmachine '%s'\n"</span>,
-01081       utsbuf.sysname, utsbuf.release, utsbuf.version, utsbuf.machine));
-01082   }
-01083   <span class="keywordflow">if</span> (0 != strcasecmp(utsbuf.sysname, ospmname)) <span class=
+01085       utsbuf.sysname, utsbuf.release, utsbuf.version, utsbuf.machine));
+01086   }
+01087   <span class="keywordflow">if</span> (0 != strcasecmp(utsbuf.sysname, ospmname)) <span class=
 "keywordflow">return</span> -1;
-01084 
-01085   <span class="comment">/* Required to match only the leading characters */</span>
-01086   <span class="keywordflow">return</span> strncasecmp(utsbuf.release, ospmrelprefix, strlen(ospmrelprefix));
-01087 
-01088 <span class="preprocessor">#else</span>
-01089 
-01090   <span class="keywordflow">return</span> -1;
+01088 
+01089   <span class="comment">/* Required to match only the leading characters */</span>
+01090   <span class="keywordflow">return</span> strncasecmp(utsbuf.release, ospmrelprefix, strlen(ospmrelprefix));
 01091 
-01092 <span class="preprocessor">#endif </span><span class="comment">/* HAVE_SYS_UTSNAME_H */</span>
-01093 }
-01094 
+01092 <span class="preprocessor">#else</span>
+01093 
+01094   <span class="keywordflow">return</span> -1;
+01095 
+01096 <span class="preprocessor">#endif </span><span class="comment">/* HAVE_SYS_UTSNAME_H */</span>
+01097 }
+01098 
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:42 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:50 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

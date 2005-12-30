@@ -150,6 +150,21 @@
       <td class="mdescRight">A pointer to the netsnmp_table_registration_info object this iterator is registered along with.
       <a href="#o8"></a><br /></td>
     </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o9" doxytag=
+      "netsnmp_iterator_info_s::get_row_indexes" id="o9"></a> Netsnmp_First_Data_Point *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>get_row_indexes</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o10" doxytag=
+      "netsnmp_iterator_info_s::indexes" id="o10"></a> <a class="el" href="structvariable__list.html">netsnmp_variable_list</a>
+      *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>indexes</b></td>
+    </tr>
   </table>
   <hr />
   <a name="_details" id="_details"></a>
@@ -159,7 +174,7 @@
 
   <p>The netsnmp_iterator_info typedef can be used instead of directly calling this struct if you would prefer.</p>
 
-  <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00067">67</a> of file <a class="el" href=
+  <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00053">53</a> of file <a class="el" href=
   "table__iterator_8h-source.html">table_iterator.h</a>.</p>
   <hr />
 
@@ -188,11 +203,8 @@
         <p>This will be called at any time a data context needs to be freed. This may be at the same time as a correspondng loop
         context is freed, or much much later. Multiple data contexts may be kept in existence at any time.</p>
 
-        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00096">96</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00082">82</a> of file <a class="el" href=
         "table__iterator_8h-source.html">table_iterator.h</a>.</p>
-
-        <p>Referenced by <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o3" doxytag="netsnmp_iterator_info_s::free_loop_context" id="o3"></a>
@@ -220,11 +232,8 @@
         <p>This function is called at *each* iteration step, which is not-optimal for speed purposes. The use of
         free_loop_context_at_end instead is strongly encouraged. This can be set to NULL to avoid its usage.</p>
 
-        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00089">89</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00075">75</a> of file <a class="el" href=
         "table__iterator_8h-source.html">table_iterator.h</a>.</p>
-
-        <p>Referenced by <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o5" doxytag="netsnmp_iterator_info_s::free_loop_context_at_end" id="o5"></a>
@@ -253,11 +262,8 @@
         updated by each call to the get_next_data_point function). It is not called until the get_next_data_point function
         returns a NULL</p>
 
-        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00104">104</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00090">90</a> of file <a class="el" href=
         "table__iterator_8h-source.html">table_iterator.h</a>.</p>
-
-        <p>Referenced by <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o0" doxytag="netsnmp_iterator_info_s::get_first_data_point" id="o0"></a>
@@ -283,11 +289,8 @@
         <p>Responsible for: returning the first set of "index" data, a loop-context pointer, and optionally a data context
         pointer.</p>
 
-        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00071">71</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00057">57</a> of file <a class="el" href=
         "table__iterator_8h-source.html">table_iterator.h</a>.</p>
-
-        <p>Referenced by <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o1" doxytag="netsnmp_iterator_info_s::get_next_data_point" id="o1"></a>
@@ -313,11 +316,8 @@
         <p>Given the previous loop context, this should return the next loop context, assiocated index set and optionally a data
         context.</p>
 
-        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00076">76</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00062">62</a> of file <a class="el" href=
         "table__iterator_8h-source.html">table_iterator.h</a>.</p>
-
-        <p>Referenced by <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="o2" doxytag="netsnmp_iterator_info_s::make_data_context" id="o2"></a>
@@ -343,7 +343,7 @@
         <p>If a data context wasn't supplied by the get_first_data_point or get_next_data_point functions and the
         make_data_context pointer is defined, it will be called to convert a loop context into a data context.</p>
 
-        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00082">82</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00068">68</a> of file <a class="el" href=
         "table__iterator_8h-source.html">table_iterator.h</a>.</p>
       </td>
     </tr>
@@ -369,7 +369,7 @@
       <td>
         <p>This can be used by client handlers to store any information they need.</p>
 
-        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00108">108</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00094">94</a> of file <a class="el" href=
         "table__iterator_8h-source.html">table_iterator.h</a>.</p>
       </td>
     </tr>
@@ -396,11 +396,10 @@
       <td>
         <p>A pointer to the netsnmp_table_registration_info object this iterator is registered along with.</p>
 
-        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00114">114</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00100">100</a> of file <a class="el" href=
         "table__iterator_8h-source.html">table_iterator.h</a>.</p>
 
-        <p>Referenced by <a class="el" href="table__iterator_8c-source.html#l00138">netsnmp_register_table_iterator()</a>, and
-        <a class="el" href="table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="table__iterator_8c-source.html#l00199">netsnmp_register_table_iterator()</a>.</p>
       </td>
     </tr>
   </table>
@@ -413,8 +412,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:43 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:51 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

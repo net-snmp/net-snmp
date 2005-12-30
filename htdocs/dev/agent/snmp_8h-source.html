@@ -339,61 +339,63 @@
 00296 <span class="preprocessor">#define UCD_MSG_FLAG_ALWAYS_IN_VIEW          0x800</span>
 00297 <span class="preprocessor">#define UCD_MSG_FLAG_PDU_TIMEOUT            0x1000</span>
 00298 <span class="preprocessor">#define UCD_MSG_FLAG_ONE_PASS_ONLY          0x2000</span>
-00299 
-00300     <span class="comment">/*</span>
-00301 <span class="comment">     * view status </span>
-00302 <span class="comment">     */</span>
-00303 <span class="preprocessor">#define SNMP_VIEW_INCLUDED              1</span>
-00304 <span class="preprocessor">#define SNMP_VIEW_EXCLUDED              2</span>
-00305 
-00306     <span class="comment">/*</span>
-00307 <span class="comment">     * basic oid values </span>
-00308 <span class="comment">     */</span>
-00309 <span class="preprocessor">#define SNMP_OID_INTERNET               1, 3, 6, 1</span>
-00310 <span class="preprocessor">#define SNMP_OID_ENTERPRISES            SNMP_OID_INTERNET, 4, 1</span>
-00311 <span class="preprocessor">#define SNMP_OID_MIB2                   SNMP_OID_INTERNET, 2, 1</span>
-00312 <span class="preprocessor">#define SNMP_OID_SNMPV2                 SNMP_OID_INTERNET, 6</span>
-00313 <span class="preprocessor">#define SNMP_OID_SNMPMODULES            SNMP_OID_SNMPV2, 3</span>
-00314 
-00315     <span class="comment">/*</span>
-00316 <span class="comment">     * lengths as defined by TCs </span>
-00317 <span class="comment">     */</span>
-00318 <span class="preprocessor">#define SNMPADMINLENGTH 255</span>
-00319 
+00299 <span class="preprocessor">#define UCD_MSG_FLAG_TUNNELED               0x4000</span>
+00300 
+00301     <span class="comment">/*</span>
+00302 <span class="comment">     * view status </span>
+00303 <span class="comment">     */</span>
+00304 <span class="preprocessor">#define SNMP_VIEW_INCLUDED              1</span>
+00305 <span class="preprocessor">#define SNMP_VIEW_EXCLUDED              2</span>
+00306 
+00307     <span class="comment">/*</span>
+00308 <span class="comment">     * basic oid values </span>
+00309 <span class="comment">     */</span>
+00310 <span class="preprocessor">#define SNMP_OID_INTERNET               1, 3, 6, 1</span>
+00311 <span class="preprocessor">#define SNMP_OID_ENTERPRISES            SNMP_OID_INTERNET, 4, 1</span>
+00312 <span class="preprocessor">#define SNMP_OID_MIB2                   SNMP_OID_INTERNET, 2, 1</span>
+00313 <span class="preprocessor">#define SNMP_OID_SNMPV2                 SNMP_OID_INTERNET, 6</span>
+00314 <span class="preprocessor">#define SNMP_OID_SNMPMODULES            SNMP_OID_SNMPV2, 3</span>
+00315 
+00316     <span class="comment">/*</span>
+00317 <span class="comment">     * lengths as defined by TCs </span>
+00318 <span class="comment">     */</span>
+00319 <span class="preprocessor">#define SNMPADMINLENGTH 255</span>
 00320 
-00321     <span class="keywordtype">char</span>           *<a class="code" href=
-"group__mib__utilities.html#ga102">uptime_string</a>(u_long, <span class="keywordtype">char</span> *);
-00322     <span class="keywordtype">void</span>            xdump(<span class=
+00321 
+00322     <span class="keywordtype">char</span>           *<a class="code" href=
+"group__mib__utilities.html#ga105">uptime_string</a>(u_long, <span class="keywordtype">char</span> *);
+00323     <span class="keywordtype">char</span>           *uptime_string_n(u_long, <span class=
+"keywordtype">char</span> *, size_t);
+00324     <span class="keywordtype">void</span>            xdump(<span class=
 "keyword">const</span> u_char *, size_t, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
-00323     u_char         *snmp_parse_var_op(u_char *, oid *, size_t *, u_char *,
-00324                                       size_t *, u_char **, size_t *);
-00325     u_char         *snmp_build_var_op(u_char *, oid *, size_t *, u_char,
-00326                                       size_t, u_char *, size_t *);
-00327 
-00328 
-00329 <span class="preprocessor">#ifdef USE_REVERSE_ASNENCODING</span>
-00330     <span class="keywordtype">int</span>             snmp_realloc_rbuild_var_op(u_char ** pkt,
-00331                                                size_t * pkt_len,
-00332                                                size_t * offset,
-00333                                                <span class="keywordtype">int</span> allow_realloc,
-00334                                                <span class="keyword">const</span> oid * name,
-00335                                                size_t * name_len,
-00336                                                u_char value_type,
-00337                                                u_char * value,
-00338                                                size_t value_length);
-00339 <span class="preprocessor">#endif</span>
-00340 
-00341 <span class="preprocessor">#ifdef __cplusplus</span>
-00342 }
-00343 <span class="preprocessor">#endif</span>
-00344 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_H */</span>
+00325     u_char         *snmp_parse_var_op(u_char *, oid *, size_t *, u_char *,
+00326                                       size_t *, u_char **, size_t *);
+00327     u_char         *snmp_build_var_op(u_char *, oid *, size_t *, u_char,
+00328                                       size_t, u_char *, size_t *);
+00329 
+00330 
+00331 <span class="preprocessor">#ifdef USE_REVERSE_ASNENCODING</span>
+00332     <span class="keywordtype">int</span>             snmp_realloc_rbuild_var_op(u_char ** pkt,
+00333                                                size_t * pkt_len,
+00334                                                size_t * offset,
+00335                                                <span class="keywordtype">int</span> allow_realloc,
+00336                                                <span class="keyword">const</span> oid * name,
+00337                                                size_t * name_len,
+00338                                                u_char value_type,
+00339                                                u_char * value,
+00340                                                size_t value_length);
+00341 <span class="preprocessor">#endif</span>
+00342 
+00343 <span class="preprocessor">#ifdef __cplusplus</span>
+00344 }
+00345 <span class="preprocessor">#endif</span>
+00346 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:39 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:47 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

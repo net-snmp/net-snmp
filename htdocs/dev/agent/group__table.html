@@ -65,8 +65,19 @@
     <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">This helper helps you implement a table where all the indexes are expected to be stored within the
-      agent itself and not in some external storage location.<br /></td>
+      <td class="mdescRight">This helper is obsolete.<br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__table__generic.html">generic_table_API</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">General requirements for a table helper.<br /></td>
     </tr>
 
     <tr>
@@ -83,6 +94,20 @@
       <td class="mdescRight">Functionally, it is a specialized version of the more generic table helper but easies the burden of
       GETNEXT processing by manually looping through all the data indexes retrieved through function calls which should be
       supplied by the module that wishes help.<br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__tdata.html">tdata: Implement a table with datamatted
+      storage.</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This helper helps you implement a table where all the rows are expected to be stored within the
+      agent itself and not in some external storage location.<br /></td>
     </tr>
 
     <tr>
@@ -261,7 +286,9 @@
     <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">Builds an oid from index information. <a href="#ga10"></a><br /></td>
+      <td class="mdescRight">given a registration info object, a request object and the table info object it builds the
+      request-&gt;requestvb-&gt;name oid from the index values and column information found in the table_info object. <a href=
+      "#ga10"></a><br /></td>
     </tr>
 
     <tr>
@@ -402,20 +429,17 @@
 
         <p>returns 1 if outvar was replaced with the oid from newvar (success). returns 0 if not.</p>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00864">864</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00883">883</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
-        <p>References <a class="el" href="snmp__api_8h-source.html#l00517">variable_list::name</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00519">variable_list::name_length</a>, <a class="el" href=
+        <p>References <a class="el" href="snmp__api_8h-source.html#l00521">variable_list::name</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00523">variable_list::name_length</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00058">netsnmp_request_info_s::requestvb</a>, <a class="el" href=
-        "snmp__api_8c-source.html#l06144">snmp_oid_compare()</a>, <a class="el" href=
-        "snmp__client_8c-source.html#l00670">snmp_set_var_typed_value()</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00521">variable_list::type</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00523">variable_list::val</a>, and <a class="el" href=
-        "snmp__api_8h-source.html#l00525">variable_list::val_len</a>.</p>
-
-        <p>Referenced by <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+        "snmp__api_8c-source.html#l06284">snmp_oid_compare()</a>, <a class="el" href=
+        "snmp__client_8c-source.html#l00686">snmp_set_var_typed_value()</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00525">variable_list::type</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00527">variable_list::val</a>, and <a class="el" href=
+        "snmp__api_8h-source.html#l00529">variable_list::val_len</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga2" doxytag="table.c::netsnmp_extract_table_info" id="ga2"></a>
@@ -476,17 +500,16 @@
           <dd>populated netsnmp_table_request_info structure</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00128">128</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00124">124</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8c-source.html#l00797">netsnmp_request_get_list_data()</a>.</p>
+        <p>References <a class="el" href="agent__handler_8c-source.html#l00802">netsnmp_request_get_list_data()</a>.</p>
 
-        <p>Referenced by <a class="el" href="table__iterator_8c-source.html#l00171">netsnmp_insert_iterator_context()</a>,
-        <a class="el" href="table__data_8c-source.html#l00562">netsnmp_insert_table_row()</a>, <a class="el" href=
-        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
-        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
-        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, and <a class="el" href=
-        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+        <p>Referenced by <a class="el" href="table__container_8c-source.html#l00450">_data_lookup()</a>, <a class="el" href=
+        "table__container_8c-source.html#l00350">netsnmp_container_table_row_insert()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00236">netsnmp_insert_iterator_context()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00677">netsnmp_insert_table_row()</a>, and <a class="el" href=
+        "table_8c-source.html#l00141">table_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga3" doxytag="table.c::netsnmp_find_table_registration_info" id="ga3"></a>
@@ -523,14 +546,11 @@
       <td>
         <p>extracts the registered netsnmp_table_registration_info object from a netsnmp_handler_registration object</p>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00137">137</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00133">133</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8c-source.html#l00842">netsnmp_find_handler_data_by_name()</a>, and
+        <p>References <a class="el" href="agent__handler_8c-source.html#l00847">netsnmp_find_handler_data_by_name()</a>, and
         <a class="el" href="group__handler.html#ga3">netsnmp_handler_registration</a>.</p>
-
-        <p>Referenced by <a class="el" href="table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, and
-        <a class="el" href="table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga0" doxytag="table.c::netsnmp_get_table_handler" id="ga0"></a>
@@ -596,18 +616,18 @@
           <dd>Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00088">88</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00084">84</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
         <p>References <a class="el" href="table_8h-source.html#l00076">netsnmp_table_registration_info_s::indexes</a>, <a class=
-        "el" href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
+        "el" href="agent__handler_8h-source.html#l00050">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
         "agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
         "table_8h-source.html#l00078">netsnmp_table_registration_info_s::number_indexes</a>, and <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>.</p>
 
-        <p>Referenced by <a class="el" href="table_8c-source.html#l00111">netsnmp_register_table()</a>, and <a class="el" href=
-        "table_8c-source.html#l00721">netsnmp_sparse_table_register()</a>.</p>
+        <p>Referenced by <a class="el" href="table_8c-source.html#l00107">netsnmp_register_table()</a>, and <a class="el" href=
+        "table_8c-source.html#l00732">netsnmp_sparse_table_register()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga1" doxytag="table.c::netsnmp_register_table" id="ga1"></a>
@@ -659,17 +679,17 @@
         calls <a class="el" href="group__handler.html#ga10">netsnmp_register_handler()</a> to register the table into the
         agent.</p>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00111">111</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00107">107</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
-        <p>References <a class="el" href="table_8c-source.html#l00088">netsnmp_get_table_handler()</a>, <a class="el" href=
+        <p>References <a class="el" href="table_8c-source.html#l00084">netsnmp_get_table_handler()</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, and <a class="el" href=
+        "agent__handler_8c-source.html#l00379">netsnmp_inject_handler()</a>, and <a class="el" href=
         "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>.</p>
 
-        <p>Referenced by <a class="el" href="table__data_8c-source.html#l00286">netsnmp_register_table_data()</a>, <a class="el"
-        href="table__iterator_8c-source.html#l00138">netsnmp_register_table_iterator()</a>, and <a class="el" href=
-        "table__array_8c-source.html#l00152">netsnmp_table_container_register()</a>.</p>
+        <p>Referenced by <a class="el" href="table__data_8c-source.html#l00393">netsnmp_register_table_data()</a>, <a class="el"
+        href="table__iterator_8c-source.html#l00199">netsnmp_register_table_iterator()</a>, and <a class="el" href=
+        "table__array_8c-source.html#l00148">netsnmp_table_container_register()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga6" doxytag="table.c::netsnmp_sparse_table_handler_get" id="ga6"></a>
@@ -704,7 +724,7 @@
       <td>
         <p>create sparse table handler</p>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00710">710</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00721">721</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
         <p>References <a class="el" href="agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>.</p>
@@ -759,13 +779,13 @@
         calls <a class="el" href="group__handler.html#ga10">netsnmp_register_handler()</a> to register the table into the
         agent.</p>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00721">721</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00732">732</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
         <p>References <a class="el" href="agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, <a class="el" href=
-        "table_8c-source.html#l00088">netsnmp_get_table_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00084">netsnmp_get_table_handler()</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, and <a class="el" href=
+        "agent__handler_8c-source.html#l00379">netsnmp_inject_handler()</a>, and <a class="el" href=
         "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>.</p>
       </td>
     </tr>
@@ -828,24 +848,26 @@
         <p>given a registration info object, a request object and the table info object it builds the
         request-&gt;requestvb-&gt;name oid from the index values and column information found in the table_info object.</p>
 
+        <p>Index values are extracted from the table_info varbinds.</p>
+
         <p>.Entry</p>
 
         <p>.column</p>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00772">772</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00783">783</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
-        <p>References <a class="el" href="mib_8c-source.html#l03557">build_oid()</a>, <a class="el" href=
+        <p>References <a class="el" href="mib_8c-source.html#l03590">build_oid()</a>, <a class="el" href=
         "table_8h-source.html#l00104">netsnmp_table_request_info_s::colnum</a>, <a class="el" href=
         "table_8h-source.html#l00108">netsnmp_table_request_info_s::indexes</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00517">variable_list::name</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00519">variable_list::name_length</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00521">variable_list::name</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00523">variable_list::name_length</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00058">netsnmp_request_info_s::requestvb</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, and <a class="el" href=
-        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>.</p>
+        "agent__handler_8h-source.html#l00103">netsnmp_handler_registration_s::rootoid</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00104">netsnmp_handler_registration_s::rootoid_len</a>.</p>
 
-        <p>Referenced by <a class="el" href="table_8c-source.html#l00739">netsnmp_table_build_result()</a>.</p>
+        <p>Referenced by <a class="el" href="table_8c-source.html#l00750">netsnmp_table_build_result()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga10" doxytag="table.c::netsnmp_table_build_oid_from_index" id="ga10"></a>
@@ -904,22 +926,27 @@
       <td>&nbsp;</td>
 
       <td>
-        <p>Builds an oid from index information.</p>
+        <p>given a registration info object, a request object and the table info object it builds the
+        request-&gt;requestvb-&gt;name oid from the index values and column information found in the table_info object.</p>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00806">806</a> of file <a class="el" href=
+        <p>Index values are extracted from the table_info index oid.</p>
+
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00820">820</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
         <p>References <a class="el" href="table_8h-source.html#l00104">netsnmp_table_request_info_s::colnum</a>, <a class="el"
         href="table_8h-source.html#l00110">netsnmp_table_request_info_s::index_oid</a>, <a class="el" href=
         "table_8h-source.html#l00111">netsnmp_table_request_info_s::index_oid_len</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00517">variable_list::name</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00519">variable_list::name_length</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00527">variable_list::name_loc</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00521">variable_list::name</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00523">variable_list::name_length</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00531">variable_list::name_loc</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00058">netsnmp_request_info_s::requestvb</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00103">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00104">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
         "tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
+
+        <p>Referenced by <a class="el" href="table__container_8c-source.html#l00450">_data_lookup()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga8" doxytag="table.c::netsnmp_table_build_result" id="ga8"></a>
@@ -1013,15 +1040,15 @@
         <p>Use this function to return results from lowel level handlers to the agent. It takes care of building the proper
         resulting oid (containing proper indexing) and inserts the result value into the returning varbind.</p>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00739">739</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00750">750</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
-        <p>References <a class="el" href="snmp__api_8h-source.html#l00517">variable_list::name</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00527">variable_list::name_loc</a>, <a class="el" href=
+        <p>References <a class="el" href="snmp__api_8h-source.html#l00521">variable_list::name</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00531">variable_list::name_loc</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
-        "table_8c-source.html#l00772">netsnmp_table_build_oid()</a>, <a class="el" href=
+        "table_8c-source.html#l00783">netsnmp_table_build_oid()</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00058">netsnmp_request_info_s::requestvb</a>, and <a class="el" href=
-        "snmp__client_8c-source.html#l00670">snmp_set_var_typed_value()</a>.</p>
+        "snmp__client_8c-source.html#l00686">snmp_set_var_typed_value()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga12" doxytag="table.c::netsnmp_update_indexes_from_variable_list" id="ga12"></a>
@@ -1056,12 +1083,14 @@
       <td>
         <p>builds an oid given a set of indexes.</p>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00846">846</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00865">865</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
         <p>References <a class="el" href="table_8h-source.html#l00110">netsnmp_table_request_info_s::index_oid</a>, <a class="el"
         href="table_8h-source.html#l00111">netsnmp_table_request_info_s::index_oid_len</a>, and <a class="el" href=
         "table_8h-source.html#l00108">netsnmp_table_request_info_s::indexes</a>.</p>
+
+        <p>Referenced by <a class="el" href="table__container_8c-source.html#l00450">_data_lookup()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga11" doxytag="table.c::netsnmp_update_variable_list_from_index" id="ga11"></a>
@@ -1096,12 +1125,14 @@
       <td>
         <p>parses an OID into table indexses</p>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00835">835</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00849">849</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
         <p>References <a class="el" href="table_8h-source.html#l00110">netsnmp_table_request_info_s::index_oid</a>, <a class="el"
         href="table_8h-source.html#l00111">netsnmp_table_request_info_s::index_oid_len</a>, and <a class="el" href=
         "table_8h-source.html#l00108">netsnmp_table_request_info_s::indexes</a>.</p>
+
+        <p>Referenced by <a class="el" href="table__container_8c-source.html#l00450">_data_lookup()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga4" doxytag="table.c::table_helper_handler" id="ga4"></a>
@@ -1181,11 +1212,11 @@
 
         <p>for loop</p>
 
-        <p>Definition at line <a class="el" href="table_8c-source.html#l00145">145</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="table_8c-source.html#l00141">141</a> of file <a class="el" href=
         "table_8c-source.html">table.c</a>.</p>
 
         <p>References <a class="el" href="table_8h-source.html#l00104">netsnmp_table_request_info_s::colnum</a>, <a class="el"
-        href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        href="agent__handler_8h-source.html#l00048">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
         "table_8h-source.html#l00110">netsnmp_table_request_info_s::index_oid</a>, <a class="el" href=
         "table_8h-source.html#l00111">netsnmp_table_request_info_s::index_oid_len</a>, <a class="el" href=
         "table_8h-source.html#l00108">netsnmp_table_request_info_s::indexes</a>, <a class="el" href=
@@ -1193,33 +1224,33 @@
         "table_8h-source.html#l00087">netsnmp_table_registration_info_s::max_column</a>, <a class="el" href=
         "table_8h-source.html#l00085">netsnmp_table_registration_info_s::min_column</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00159">netsnmp_agent_request_info_s::mode</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00517">variable_list::name</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00519">variable_list::name_length</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00527">variable_list::name_loc</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00512">netsnmp_call_next_handler()</a>, <a class="el" href=
-        "data__list_8c-source.html#l00064">netsnmp_create_data_list()</a>, <a class="el" href=
-        "table_8c-source.html#l00128">netsnmp_extract_table_info()</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00050">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00521">variable_list::name</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00523">variable_list::name_length</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00531">variable_list::name_loc</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00517">netsnmp_call_next_handler()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00060">netsnmp_create_data_list()</a>, <a class="el" href=
+        "table_8c-source.html#l00124">netsnmp_extract_table_info()</a>, <a class="el" href=
         "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00755">netsnmp_request_add_list_data()</a>, <a class="el" href=
-        "snmp__agent_8c-source.html#l03461">netsnmp_set_request_error()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00760">netsnmp_request_add_list_data()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l03535">netsnmp_set_request_error()</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00092">netsnmp_request_info_s::next</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00515">variable_list::next_variable</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::next</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00519">variable_list::next_variable</a>, <a class="el" href=
         "table_8h-source.html#l00078">netsnmp_table_registration_info_s::number_indexes</a>, <a class="el" href=
         "table_8h-source.html#l00106">netsnmp_table_request_info_s::number_indexes</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00079">netsnmp_request_info_s::processed</a>, <a class="el" href=
         "table_8h-source.html#l00112">netsnmp_table_request_info_s::reg_info</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00058">netsnmp_request_info_s::requestvb</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
-        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00103">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00104">netsnmp_handler_registration_s::rootoid_len</a>, <a class="el" href=
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>, <a class="el" href=
         "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>, <a class="el" href=
-        "snmp__api_8c-source.html#l06144">snmp_oid_compare()</a>, <a class="el" href=
-        "mib_8c-source.html#l01969">sprint_realloc_by_type()</a>, <a class="el" href=
+        "snmp__api_8c-source.html#l06284">snmp_oid_compare()</a>, <a class="el" href=
+        "mib_8c-source.html#l01971">sprint_realloc_by_type()</a>, <a class="el" href=
         "snmp__agent_8h-source.html#l00082">netsnmp_request_info_s::status</a>, <a class="el" href=
-        "snmp__api_8h-source.html#l00521">variable_list::type</a>, and <a class="el" href=
+        "snmp__api_8h-source.html#l00525">variable_list::type</a>, and <a class="el" href=
         "table_8h-source.html#l00090">netsnmp_table_registration_info_s::valid_columns</a>.</p>
       </td>
     </tr>
@@ -1227,8 +1258,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:44 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:48:00 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

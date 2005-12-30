@@ -59,7 +59,7 @@
 00039 <span class="keywordtype">void</span>
 00040 init_secmod(<span class="keywordtype">void</span>)
 00041 {
-00042     <a class="code" href="group__callback.html#ga3">snmp_register_callback</a>(SNMP_CALLBACK_LIBRARY,
+00042     <a class="code" href="group__callback.html#ga8">snmp_register_callback</a>(SNMP_CALLBACK_LIBRARY,
 00043                            SNMP_CALLBACK_SESSION_INIT, set_default_secmod,
 00044                            NULL);
 00045 
@@ -99,22 +99,22 @@
 00077         != SE_OK) {
 00078         <span class="keywordflow">switch</span> (result) {
 00079         <span class="keywordflow">case</span> SE_NOMEM:
-00080             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_CRIT, <span class=
+00080             <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_CRIT, <span class=
 "stringliteral">"snmp_secmod: no memory\n"</span>);
 00081             <span class="keywordflow">break</span>;
 00082 
 00083         <span class="keywordflow">case</span> SE_ALREADY_THERE:
 00084             othername = se_find_label_in_slist(<span class="stringliteral">"snmp_secmods"</span>, secmod);
 00085             <span class="keywordflow">if</span> (strcmp(othername, modname) != 0) {
-00086                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,
+00086                 <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,
 00087                          <span class=
 "stringliteral">"snmp_secmod: two security modules %s and %s registered with the same security number\n"</span>,
-00088                          secmod, othername);
+00088                          modname, othername);
 00089             }
 00090             <span class="keywordflow">break</span>;
 00091 
 00092         <span class="keywordflow">default</span>:
-00093             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,
+00093             <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,
 00094                      <span class=
 "stringliteral">"snmp_secmod: unknown error trying to register a new security module\n"</span>);
 00095             <span class="keywordflow">break</span>;
@@ -195,7 +195,7 @@
 00166                 != SE_DNE) {
 00167                 sess-&gt;<a class="code" href="structsnmp__session.html#o43">securityModel</a> = model;
 00168             } <span class="keywordflow">else</span> {
-00169                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,
+00169                 <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR,
 00170                          <span class="stringliteral">"unknown security model name: %s.  Forcing USM instead.\n"</span>,
 00171                          cptr);
 00172                 sess-&gt;<a class="code" href="structsnmp__session.html#o43">securityModel</a> = USM_SEC_MODEL_NUMBER;
@@ -212,8 +212,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:49 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

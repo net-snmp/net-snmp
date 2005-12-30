@@ -69,7 +69,8 @@
 00048         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;
 00049     };
 00050 
-00051     <span class="keywordtype">int</span>             snmp_set_var_value(<a class="code" href=
+00051     <span class="keywordtype">int</span>             <a class="code" href=
+"group__snmp__client.html#ga25">snmp_set_var_value</a>(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a> *,
 00052                                        <span class="keyword">const</span> u_char *, size_t);
 00053     <span class="keywordtype">int</span>             snmp_set_var_objid(<a class="code" href=
@@ -77,78 +78,96 @@
 00054                                        <span class="keyword">const</span> oid * objid,
 00055                                        size_t name_length);
 00056     <span class="keywordtype">int</span>             <a class="code" href=
-"group__snmp__client.html#ga18">snmp_set_var_typed_value</a>(<a class="code" href=
+"group__snmp__client.html#ga19">snmp_set_var_typed_value</a>(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a> *
 00057                                              newvar, u_char type,
 00058                                              <span class="keyword">const</span> u_char * val_str,
 00059                                              size_t val_len);
-00060     <span class="keywordtype">void</span>            snmp_replace_var_types(<a class="code" href=
+00060     <span class="keywordtype">int</span>             snmp_set_var_typed_integer(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * newvar,
+00061                                                u_char type, <span class="keywordtype">long</span> val);
+00062     <span class="keywordtype">void</span>            snmp_replace_var_types(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a> * vbl,
-00061                                            u_char old_type,
-00062                                            u_char new_type);
-00063     <span class="keywordtype">void</span>            snmp_reset_var_buffers(<a class="code" href=
+00063                                            u_char old_type,
+00064                                            u_char new_type);
+00065     <span class="keywordtype">void</span>            snmp_reset_var_buffers(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a> * var);
-00064     <span class="keywordtype">void</span>            snmp_reset_var_types(<a class="code" href=
+00066     <span class="keywordtype">void</span>            snmp_reset_var_types(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a> * vbl,
-00065                                          u_char new_type);
-00066     <span class="keywordtype">int</span>             count_varbinds(<a class="code" href=
+00067                                          u_char new_type);
+00068     <span class="keywordtype">int</span>             count_varbinds(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a> * var_ptr);
-00067     <span class="keywordtype">int</span>             count_varbinds_of_type(<a class="code" href=
+00069     <span class="keywordtype">int</span>             count_varbinds_of_type(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a> * var_ptr,
-00068                                            u_char type);
-00069     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *find_varbind_of_type(<a class="code" href=
+00070                                            u_char type);
+00071     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *find_varbind_of_type(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a> *
-00070                                                 var_ptr, u_char type);
-00071 
-00072     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *snmp_add_null_var(<a class="code" href=
+00072                                                 var_ptr, u_char type);
+00073     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *find_varbind_in_list(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *vblist,
+00074                                                 oid *name, size_t len);
+00075 
+00076     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *snmp_add_null_var(<a class="code" href=
 "structsnmp__pdu.html">netsnmp_pdu</a> *, <span class="keyword">const</span> oid *, size_t);
-00073     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_pdu_create(<span class="keywordtype">int</span>);
-00074     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_fix_pdu(<a class="code" href=
+00077     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_pdu_create(<span class="keywordtype">int</span>);
+00078     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_fix_pdu(<a class="code" href=
 "structsnmp__pdu.html">netsnmp_pdu</a> *, <span class="keywordtype">int</span>);
-00075     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_clone_pdu(<a class="code" href=
+00079     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_clone_pdu(<a class="code" href=
 "structsnmp__pdu.html">netsnmp_pdu</a> *);
-00076     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_split_pdu(<a class="code" href=
+00080     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_split_pdu(<a class="code" href=
 "structsnmp__pdu.html">netsnmp_pdu</a> *, <span class="keywordtype">int</span> skipCount,
-00077                                    <span class="keywordtype">int</span> copyCount);
-00078 
-00079     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   snmp_varbind_len(<a class="code"
+00081                                    <span class="keywordtype">int</span> copyCount);
+00082 
+00083     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   snmp_varbind_len(<a class="code"
 href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu);
-00080     <span class="keywordtype">int</span>             snmp_clone_var(<a class="code" href=
+00084     <span class="keywordtype">int</span>             snmp_clone_var(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a> *,
-00081                                    <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *);
-00082     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *snmp_clone_varbind(<a class="code" href=
+00085                                    <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *);
+00086     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *snmp_clone_varbind(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a> *);
-00083     <span class="keyword">const</span> <span class="keywordtype">char</span>     *snmp_errstring(<span class=
+00087     <span class="keyword">const</span> <span class="keywordtype">char</span>     *snmp_errstring(<span class=
 "keywordtype">int</span>);
-00084     <span class="keywordtype">int</span>             snmp_synch_response(<a class="code" href=
+00088     <span class="keywordtype">int</span>             snmp_synch_response(<a class="code" href=
 "structsnmp__session.html">netsnmp_session</a> *, <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *,
-00085                                         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> **);
-00086     <span class="keywordtype">int</span>             snmp_synch_response_cb(<a class="code" href=
+00089                                         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> **);
+00090     <span class="keywordtype">int</span>             snmp_synch_response_cb(<a class="code" href=
 "structsnmp__session.html">netsnmp_session</a> *,
-00087                                            <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *, <a class="code"
+00091                                            <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *, <a class="code"
 href="structsnmp__pdu.html">netsnmp_pdu</a> **,
-00088                                            snmp_callback);
-00089     <span class="keywordtype">int</span>             snmp_clone_mem(<span class="keywordtype">void</span> **, <span class=
+00092                                            snmp_callback);
+00093     <span class="keywordtype">int</span>             snmp_clone_mem(<span class="keywordtype">void</span> **, <span class=
 "keywordtype">void</span> *, <span class="keywordtype">unsigned</span>);
-00090 
-00091     <span class="comment">/*</span>
-00092 <span class="comment">     * single session API - see snmp_api.h for full details </span>
-00093 <span class="comment">     */</span>
-00094     <span class="keywordtype">int</span>             snmp_sess_synch_response(<span class=
+00094 
+00095     <span class="comment">/*</span>
+00096 <span class="comment">     * single session API - see snmp_api.h for full details </span>
+00097 <span class="comment">     */</span>
+00098     <span class="keywordtype">int</span>             snmp_sess_synch_response(<span class=
 "keywordtype">void</span> *, <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *,
-00095                                              <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> **);
-00096 
-00097 <span class="preprocessor">#ifdef __cplusplus</span>
-00098 }
-00099 <span class="preprocessor">#endif</span>
-00100 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_CLIENT_H */</span>
+00099                                              <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> **);
+00100 
+00101 <span class="keywordtype">void</span>              netsnmp_query_set_default_session(<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> *);
+00102 <a class="code" href="structsnmp__session.html">netsnmp_session</a> * netsnmp_query_get_default_session( <span class=
+"keywordtype">void</span> );
+00103 <span class="keywordtype">int</span> netsnmp_query_get(     <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *, <a class="code" href="structsnmp__session.html">netsnmp_session</a> *);
+00104 <span class="keywordtype">int</span> netsnmp_query_getnext( <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *, <a class="code" href="structsnmp__session.html">netsnmp_session</a> *);
+00105 <span class="keywordtype">int</span> netsnmp_query_walk(    <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *, <a class="code" href="structsnmp__session.html">netsnmp_session</a> *);
+00106 <span class="keywordtype">int</span> netsnmp_query_set(     <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *, <a class="code" href="structsnmp__session.html">netsnmp_session</a> *);
+00107 
+00108 <span class="preprocessor">#ifdef __cplusplus</span>
+00109 }
+00110 <span class="preprocessor">#endif</span>
+00111 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_CLIENT_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:48 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

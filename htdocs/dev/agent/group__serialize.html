@@ -132,13 +132,13 @@
       <td>
         <p>returns a serialize handler that can be injected into a given handler chain.</p>
 
-        <p>Definition at line <a class="el" href="serialize_8c-source.html#l00034">34</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="serialize_8c-source.html#l00030">30</a> of file <a class="el" href=
         "serialize_8c-source.html">serialize.c</a>.</p>
 
         <p>References <a class="el" href="agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>.</p>
 
-        <p>Referenced by <a class="el" href="serialize_8c-source.html#l00096">netsnmp_init_serialize()</a>, and <a class="el"
-        href="serialize_8c-source.html#l00043">netsnmp_register_serialize()</a>.</p>
+        <p>Referenced by <a class="el" href="serialize_8c-source.html#l00092">netsnmp_init_serialize()</a>, and <a class="el"
+        href="serialize_8c-source.html#l00039">netsnmp_register_serialize()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga3" doxytag="serialize.c::netsnmp_init_serialize" id="ga3"></a>
@@ -173,11 +173,11 @@
         <p>initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for
         configuration file use.</p>
 
-        <p>Definition at line <a class="el" href="serialize_8c-source.html#l00096">96</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="serialize_8c-source.html#l00092">92</a> of file <a class="el" href=
         "serialize_8c-source.html">serialize.c</a>.</p>
 
-        <p>References <a class="el" href="serialize_8c-source.html#l00034">netsnmp_get_serialize_handler()</a>, and <a class="el"
-        href="agent__handler_8c-source.html#l00880">netsnmp_register_handler_by_name()</a>.</p>
+        <p>References <a class="el" href="serialize_8c-source.html#l00030">netsnmp_get_serialize_handler()</a>, and <a class="el"
+        href="agent__handler_8c-source.html#l00885">netsnmp_register_handler_by_name()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga1" doxytag="serialize.c::netsnmp_register_serialize" id="ga1"></a>
@@ -213,18 +213,18 @@
         <p>functionally the same as calling <a class="el" href="group__handler.html#ga10">netsnmp_register_handler()</a> but also
         injects a serialize handler at the same time for you.</p>
 
-        <p>Definition at line <a class="el" href="serialize_8c-source.html#l00043">43</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="serialize_8c-source.html#l00039">39</a> of file <a class="el" href=
         "serialize_8c-source.html">serialize.c</a>.</p>
 
-        <p>References <a class="el" href="serialize_8c-source.html#l00034">netsnmp_get_serialize_handler()</a>, <a class="el"
+        <p>References <a class="el" href="serialize_8c-source.html#l00030">netsnmp_get_serialize_handler()</a>, <a class="el"
         href="group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
-        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, and <a class="el" href=
+        "agent__handler_8c-source.html#l00379">netsnmp_inject_handler()</a>, and <a class="el" href=
         "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>.</p>
 
-        <p>Referenced by <a class="el" href="instance_8c-source.html#l00071">netsnmp_register_instance()</a>, <a class="el" href=
-        "instance_8c-source.html#l00096">netsnmp_register_read_only_instance()</a>, <a class="el" href=
-        "scalar_8c-source.html#l00114">netsnmp_register_read_only_scalar()</a>, and <a class="el" href=
-        "scalar_8c-source.html#l00079">netsnmp_register_scalar()</a>.</p>
+        <p>Referenced by <a class="el" href="instance_8c-source.html#l00074">netsnmp_register_instance()</a>, <a class="el" href=
+        "instance_8c-source.html#l00099">netsnmp_register_read_only_instance()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00110">netsnmp_register_read_only_scalar()</a>, and <a class="el" href=
+        "scalar_8c-source.html#l00075">netsnmp_register_scalar()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga2" doxytag="serialize.c::netsnmp_serialize_helper_handler" id="ga2"></a>
@@ -296,10 +296,10 @@
       <td>
         <p>Implements the serial handler.</p>
 
-        <p>Definition at line <a class="el" href="serialize_8c-source.html#l00051">51</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="serialize_8c-source.html#l00047">47</a> of file <a class="el" href=
         "serialize_8c-source.html">serialize.c</a>.</p>
 
-        <p>References <a class="el" href="agent__handler_8c-source.html#l00512">netsnmp_call_next_handler()</a>, <a class="el"
+        <p>References <a class="el" href="agent__handler_8c-source.html#l00517">netsnmp_call_next_handler()</a>, <a class="el"
         href="group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
         "group__handler.html#ga2">netsnmp_mib_handler</a>, and <a class="el" href=
         "snmp__agent_8h-source.html#l00092">netsnmp_request_info_s::next</a>.</p>
@@ -309,8 +309,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:44 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:48:00 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

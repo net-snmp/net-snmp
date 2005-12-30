@@ -28,8 +28,8 @@
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga56" doxytag=
-      "read_config::SNMP_CONFIG_DELIMETERS" id="ga56"></a> #define&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga59" doxytag=
+      "read_config::SNMP_CONFIG_DELIMETERS" id="ga59"></a> #define&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>SNMP_CONFIG_DELIMETERS</b>&nbsp;&nbsp;&nbsp;" \t="</td>
     </tr>
@@ -118,166 +118,181 @@
 
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga14" doxytag=
-      "read_config::read_config_with_type" id="ga14"></a> void&nbsp;</td>
+      "read_config::read_config_with_type_when" id="ga14"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>read_config_with_type_when</b> (const char *filename, const char *type, int
+      when)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga15" doxytag=
+      "read_config::read_config_with_type" id="ga15"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_config_with_type</b> (const char *filename, const char *type)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga15" doxytag=
-      "read_config::read_config_find_handler" id="ga15"></a> config_line *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga16" doxytag=
+      "read_config::read_config_find_handler" id="ga16"></a> config_line *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_config_find_handler</b> (struct config_line *line_handlers, const char
       *token)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga16" doxytag=
-      "read_config::run_config_handler" id="ga16"></a> int&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga17" doxytag=
+      "read_config::run_config_handler" id="ga17"></a> int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>run_config_handler</b> (struct config_line *lptr, const char *token, char
       *cptr, int when)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga17" doxytag=
-      "read_config::snmp_config_when" id="ga17"></a> int&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga18" doxytag=
+      "read_config::snmp_config_when" id="ga18"></a> int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>snmp_config_when</b> (char *line, int when)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga18" doxytag=
-      "read_config::netsnmp_config" id="ga18"></a> int&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga19" doxytag=
+      "read_config::netsnmp_config" id="ga19"></a> int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_config</b> (char *line)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga19" doxytag=
-      "read_config::netsnmp_config_remember_in_list" id="ga19"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga20" doxytag=
+      "read_config::netsnmp_config_remember_in_list" id="ga20"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_config_remember_in_list</b> (char *line, struct read_config_memory
       **mem)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga20" doxytag=
-      "read_config::netsnmp_config_remember_free_list" id="ga20"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga21" doxytag=
+      "read_config::netsnmp_config_remember_free_list" id="ga21"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_config_remember_free_list</b> (struct read_config_memory **mem)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga21" doxytag=
-      "read_config::netsnmp_config_process_memory_list" id="ga21"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga22" doxytag=
+      "read_config::netsnmp_config_process_memory_list" id="ga22"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_config_process_memory_list</b> (struct read_config_memory **memp, int
       when, int clear)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga22" doxytag=
-      "read_config::netsnmp_config_remember" id="ga22"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga23" doxytag=
+      "read_config::netsnmp_config_remember" id="ga23"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_config_remember</b> (char *line)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga23" doxytag=
-      "read_config::netsnmp_config_process_memories" id="ga23"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga24" doxytag=
+      "read_config::netsnmp_config_process_memories" id="ga24"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_config_process_memories</b> (void)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga24" doxytag=
-      "read_config::netsnmp_config_process_memories_when" id="ga24"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga25" doxytag=
+      "read_config::netsnmp_config_process_memories_when" id="ga25"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_config_process_memories_when</b> (int when, int clear)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga25" doxytag=
-      "read_config::read_config" id="ga25"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga26" doxytag=
+      "read_config::read_config" id="ga26"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_config</b> (const char *filename, struct config_line *line_handler, int
       when)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga26" doxytag=
-      "read_config::free_config" id="ga26"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga27" doxytag=
+      "read_config::free_config" id="ga27"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>free_config</b> (void)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga27" doxytag=
-      "read_config::read_configs" id="ga27"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga28" doxytag=
+      "read_config::read_configs_optional" id="ga28"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>read_configs_optional</b> (const char *optional_config, int when)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga29" doxytag=
+      "read_config::read_configs" id="ga29"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_configs</b> (void)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga28" doxytag=
-      "read_config::read_premib_configs" id="ga28"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga30" doxytag=
+      "read_config::read_premib_configs" id="ga30"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_premib_configs</b> (void)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga29" doxytag=
-      "read_config::set_configuration_directory" id="ga29"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga31" doxytag=
+      "read_config::set_configuration_directory" id="ga31"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>set_configuration_directory</b> (const char *dir)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga30" doxytag=
-      "read_config::get_configuration_directory" id="ga30"></a> const char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga32" doxytag=
+      "read_config::get_configuration_directory" id="ga32"></a> const char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>get_configuration_directory</b> ()</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga31" doxytag=
-      "read_config::set_persistent_directory" id="ga31"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga33" doxytag=
+      "read_config::set_persistent_directory" id="ga33"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>set_persistent_directory</b> (const char *dir)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga32" doxytag=
-      "read_config::get_persistent_directory" id="ga32"></a> const char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga34" doxytag=
+      "read_config::get_persistent_directory" id="ga34"></a> const char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>get_persistent_directory</b> ()</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga33" doxytag=
-      "read_config::set_temp_file_pattern" id="ga33"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga35" doxytag=
+      "read_config::set_temp_file_pattern" id="ga35"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>set_temp_file_pattern</b> (const char *pattern)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga34" doxytag=
-      "read_config::get_temp_file_pattern" id="ga34"></a> const char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga36" doxytag=
+      "read_config::get_temp_file_pattern" id="ga36"></a> const char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>get_temp_file_pattern</b> ()</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga35" doxytag=
-      "read_config::read_config_files" id="ga35"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga38" doxytag=
+      "read_config::read_config_files" id="ga38"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_config_files</b> (int when)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga36" doxytag=
-      "read_config::read_config_print_usage" id="ga36"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga39" doxytag=
+      "read_config::read_config_print_usage" id="ga39"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_config_print_usage</b> (const char *lead)</td>
     </tr>
@@ -285,7 +300,7 @@
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
 
-      <td class="memItemRight" valign="bottom"><a class="el" href="group__read__config.html#ga37">read_config_store</a> (const
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__read__config.html#ga40">read_config_store</a> (const
       char *type, const char *line)</td>
     </tr>
 
@@ -293,104 +308,104 @@
       <td class="mdescLeft">&nbsp;</td>
 
       <td class="mdescRight">read_config_store intended for use by applications to store permenant configuration information
-      generated by sets or persistent counters. <a href="#ga37"></a><br /></td>
+      generated by sets or persistent counters. <a href="#ga40"></a><br /></td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga38" doxytag=
-      "read_config::read_app_config_store" id="ga38"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga41" doxytag=
+      "read_config::read_app_config_store" id="ga41"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_app_config_store</b> (const char *line)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga39" doxytag=
-      "read_config::snmp_save_persistent" id="ga39"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga42" doxytag=
+      "read_config::snmp_save_persistent" id="ga42"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>snmp_save_persistent</b> (const char *type)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga40" doxytag=
-      "read_config::snmp_clean_persistent" id="ga40"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga43" doxytag=
+      "read_config::snmp_clean_persistent" id="ga43"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>snmp_clean_persistent</b> (const char *type)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga41" doxytag=
-      "read_config::config_perror" id="ga41"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga44" doxytag=
+      "read_config::config_perror" id="ga44"></a> void&nbsp;</td>
 
-      <td class="memItemRight" valign="bottom"><b>config_perror</b> (const char *string)</td>
+      <td class="memItemRight" valign="bottom"><b>config_perror</b> (const char *str)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga42" doxytag=
-      "read_config::config_pwarn" id="ga42"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga45" doxytag=
+      "read_config::config_pwarn" id="ga45"></a> void&nbsp;</td>
 
-      <td class="memItemRight" valign="bottom"><b>config_pwarn</b> (const char *string)</td>
+      <td class="memItemRight" valign="bottom"><b>config_pwarn</b> (const char *str)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga43" doxytag=
-      "read_config::skip_white" id="ga43"></a> char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga46" doxytag=
+      "read_config::skip_white" id="ga46"></a> char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>skip_white</b> (char *ptr)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga44" doxytag=
-      "read_config::skip_not_white" id="ga44"></a> char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga47" doxytag=
+      "read_config::skip_not_white" id="ga47"></a> char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>skip_not_white</b> (char *ptr)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga45" doxytag=
-      "read_config::skip_token" id="ga45"></a> char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga48" doxytag=
+      "read_config::skip_token" id="ga48"></a> char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>skip_token</b> (char *ptr)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga46" doxytag=
-      "read_config::copy_nword" id="ga46"></a> char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga49" doxytag=
+      "read_config::copy_nword" id="ga49"></a> char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>copy_nword</b> (char *from, char *to, int len)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga47" doxytag=
-      "read_config::copy_word" id="ga47"></a> char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga50" doxytag=
+      "read_config::copy_word" id="ga50"></a> char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>copy_word</b> (char *from, char *to)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga48" doxytag=
-      "read_config::read_config_save_octet_string" id="ga48"></a> char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga51" doxytag=
+      "read_config::read_config_save_octet_string" id="ga51"></a> char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_config_save_octet_string</b> (char *saveto, u_char *str, size_t len)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga49" doxytag=
-      "read_config::read_config_read_octet_string" id="ga49"></a> char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga52" doxytag=
+      "read_config::read_config_read_octet_string" id="ga52"></a> char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_config_read_octet_string</b> (char *readfrom, u_char **str, size_t
       *len)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga50" doxytag=
-      "read_config::read_config_save_objid" id="ga50"></a> char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga53" doxytag=
+      "read_config::read_config_save_objid" id="ga53"></a> char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_config_save_objid</b> (char *saveto, oid *objid, size_t len)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga51" doxytag=
-      "read_config::read_config_read_objid" id="ga51"></a> char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga54" doxytag=
+      "read_config::read_config_read_objid" id="ga54"></a> char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_config_read_objid</b> (char *readfrom, oid **objid, size_t *len)</td>
     </tr>
@@ -398,7 +413,7 @@
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">char *&nbsp;</td>
 
-      <td class="memItemRight" valign="bottom"><a class="el" href="group__read__config.html#ga52">read_config_read_data</a> (int
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__read__config.html#ga55">read_config_read_data</a> (int
       type, char *readfrom, void *dataptr, size_t *len)</td>
     </tr>
 
@@ -406,12 +421,12 @@
       <td class="mdescLeft">&nbsp;</td>
 
       <td class="mdescRight">read_config_read_data reads data of a given type from a token(s) on a configuration line. <a href=
-      "#ga52"></a><br /></td>
+      "#ga55"></a><br /></td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga53" doxytag=
-      "read_config::read_config_read_memory" id="ga53"></a> char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga56" doxytag=
+      "read_config::read_config_read_memory" id="ga56"></a> char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_config_read_memory</b> (int type, char *readfrom, char *dataptr, size_t
       *len)</td>
@@ -420,7 +435,7 @@
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">char *&nbsp;</td>
 
-      <td class="memItemRight" valign="bottom"><a class="el" href="group__read__config.html#ga54">read_config_store_data</a> (int
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__read__config.html#ga57">read_config_store_data</a> (int
       type, char *storeto, void *dataptr, size_t *len)</td>
     </tr>
 
@@ -428,12 +443,12 @@
       <td class="mdescLeft">&nbsp;</td>
 
       <td class="mdescRight">read_config_store_data stores data of a given type to a configuration line into the storeto buffer.
-      <a href="#ga54"></a><br /></td>
+      <a href="#ga57"></a><br /></td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga55" doxytag=
-      "read_config::read_config_store_data_prefix" id="ga55"></a> char *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga58" doxytag=
+      "read_config::read_config_store_data_prefix" id="ga58"></a> char *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>read_config_store_data_prefix</b> (char prefix, int type, char *storeto, void
       *dataptr, size_t len)</td>
@@ -503,7 +518,7 @@
   function. Your handler will be invoked and you can parse in the data using the read_config_read APIs.</p>
   <hr />
 
-  <h2>Function Documentation</h2><a class="anchor" name="ga52" doxytag="read_config.c::read_config_read_data" id="ga52"></a>
+  <h2>Function Documentation</h2><a class="anchor" name="ga55" doxytag="read_config.c::read_config_read_data" id="ga55"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -631,13 +646,13 @@
           <dd>the next token in the configuration line. NULL if none left or if an unknown type.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="read__config_8c-source.html#l01722">1722</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="read__config_8c-source.html#l01794">1794</a> of file <a class="el" href=
         "read__config_8c-source.html">read_config.c</a>.</p>
 
-        <p>Referenced by <a class="el" href="data__list_8c-source.html#l00321">netsnmp_read_data_callback()</a>.</p>
+        <p>Referenced by <a class="el" href="data__list_8c-source.html#l00332">netsnmp_read_data_callback()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga37" doxytag="read_config.c::read_config_store" id="ga37"></a>
+  </table><a class="anchor" name="ga40" doxytag="read_config.c::read_config_store" id="ga40"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -716,17 +731,17 @@
           <dd>void</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="read__config_8c-source.html#l01181">1181</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="read__config_8c-source.html#l01230">1230</a> of file <a class="el" href=
         "read__config_8c-source.html">read_config.c</a>.</p>
 
-        <p>References <a class="el" href="tools_8c-source.html#l00922">netsnmp_getenv()</a>, and <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+        <p>References <a class="el" href="tools_8c-source.html#l00925">netsnmp_getenv()</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01205">snmp_log()</a>.</p>
 
-        <p>Referenced by <a class="el" href="oid__stash_8c-source.html#l00332">netsnmp_oid_stash_store()</a>, and <a class="el"
-        href="data__list_8c-source.html#l00286">netsnmp_save_all_data()</a>.</p>
+        <p>Referenced by <a class="el" href="oid__stash_8c-source.html#l00331">netsnmp_oid_stash_store()</a>, and <a class="el"
+        href="data__list_8c-source.html#l00297">netsnmp_save_all_data()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga54" doxytag="read_config.c::read_config_store_data" id="ga54"></a>
+  </table><a class="anchor" name="ga57" doxytag="read_config.c::read_config_store_data" id="ga57"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -841,8 +856,8 @@
 
                 <td valign="top"><em>len</em>&nbsp;</td>
 
-                <td>is the length of the pre-allocated storeto buffer, not required for the asn integer, unsigned integer, and
-                timeticks types.</td>
+                <td>is the length of the value to be stored (not required for the asn integer, unsigned integer, and timeticks
+                types)</td>
               </tr>
             </table>
           </dd>
@@ -854,7 +869,7 @@
           <dd>character pointer to the end of the line. NULL if an unknown type.</dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="read__config_8c-source.html#l01850">1850</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="read__config_8c-source.html#l01933">1933</a> of file <a class="el" href=
         "read__config_8c-source.html">read_config.c</a>.</p>
       </td>
     </tr>
@@ -997,7 +1012,7 @@
         <p>Definition at line <a class="el" href="read__config_8c-source.html#l00196">196</a> of file <a class="el" href=
         "read__config_8c-source.html">read_config.c</a>.</p>
 
-        <p>Referenced by <a class="el" href="data__list_8c-source.html#l00220">netsnmp_register_save_list()</a>.</p>
+        <p>Referenced by <a class="el" href="data__list_8c-source.html#l00231">netsnmp_register_save_list()</a>.</p>
       </td>
     </tr>
   </table><a class="anchor" name="ga10" doxytag="read_config.c::unregister_config_handler" id="ga10"></a>
@@ -1085,8 +1100,7 @@
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:44 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:57 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

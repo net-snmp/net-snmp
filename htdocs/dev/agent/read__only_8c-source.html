@@ -31,82 +31,75 @@
 00011 
 00012 <span class="preprocessor">#include &lt;net-snmp/agent/read_only.h&gt;</span>
 00013 
-00014 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
-00015 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
-00016 <span class="preprocessor">#endif</span>
-00017 
-00031 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
-<a name="l00032" id="l00032"></a><a class="code" href="group__read__only.html#ga0">00032</a> <a class="code" href=
+00027 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+<a name="l00028" id="l00028"></a><a class="code" href="group__read__only.html#ga0">00028</a> <a class="code" href=
 "group__read__only.html#ga0">netsnmp_get_read_only_handler</a>(<span class="keywordtype">void</span>)
-00033 {
-00034     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *ret = NULL;
-00035     
-00036     ret = <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
+00029 {
+00030     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *ret = NULL;
+00031     
+00032     ret = <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
 "stringliteral">"read_only"</span>,
-00037                                  netsnmp_read_only_helper);
-00038     <span class="keywordflow">if</span> (ret) {
-00039         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o2">flags</a> |= MIB_HANDLER_AUTO_NEXT;
-00040     }
-00041     <span class="keywordflow">return</span> ret;
-00042 }
-00043 
-00045 <span class="keywordtype">int</span>
-00046 netsnmp_read_only_helper(<a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
-00047                          <a class="code" href=
+00033                                  netsnmp_read_only_helper);
+00034     <span class="keywordflow">if</span> (ret) {
+00035         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o2">flags</a> |= MIB_HANDLER_AUTO_NEXT;
+00036     }
+00037     <span class="keywordflow">return</span> ret;
+00038 }
+00039 
+00041 <span class="keywordtype">int</span>
+00042 netsnmp_read_only_helper(<a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00043                          <a class="code" href=
 "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
-00048                          <a class="code" href=
+00044                          <a class="code" href=
 "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
-00049                          <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
-00050 {
-00051 
-00052     DEBUGMSGTL((<span class="stringliteral">"helper:read_only"</span>, <span class=
+00045                          <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
+00046 {
+00047 
+00048     DEBUGMSGTL((<span class="stringliteral">"helper:read_only"</span>, <span class=
 "stringliteral">"Got request\n"</span>));
-00053 
-00054     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
+00049 
+00050     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
 "structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
-00055 
-00056     <span class="keywordflow">case</span> MODE_SET_RESERVE1:
-00057     <span class="keywordflow">case</span> MODE_SET_RESERVE2:
-00058     <span class="keywordflow">case</span> MODE_SET_ACTION:
-00059     <span class="keywordflow">case</span> MODE_SET_COMMIT:
-00060     <span class="keywordflow">case</span> MODE_SET_FREE:
-00061     <span class="keywordflow">case</span> MODE_SET_UNDO:
-00062         <a class="code" href="group__snmp__agent.html#ga81">netsnmp_set_all_requests_error</a>(reqinfo, requests,
-00063                                        SNMP_ERR_NOTWRITABLE);
-00064         <span class="keywordflow">return</span> SNMP_ERR_NOTWRITABLE;
-00065 
-00066     <span class="keywordflow">case</span> MODE_GET:
-00067     <span class="keywordflow">case</span> MODE_GETNEXT:
-00068     <span class="keywordflow">case</span> MODE_GETBULK:
-00069         <span class="comment">/* next handler called automatically - 'AUTO_NEXT' */</span>
-00070         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00071 
-00072     <span class="keywordflow">default</span>:
-00073         <a class="code" href="group__snmp__agent.html#ga81">netsnmp_set_all_requests_error</a>(reqinfo, requests,
-00074                                        SNMP_ERR_GENERR);
-00075         <span class="keywordflow">return</span> SNMP_ERR_GENERR;
-00076     }
-00077     <a class="code" href=
-"group__snmp__agent.html#ga81">netsnmp_set_all_requests_error</a>(reqinfo, requests, SNMP_ERR_GENERR);
-00078     <span class="keywordflow">return</span> SNMP_ERR_GENERR;     <span class="comment">/* should never get here */</span>
-00079 }
-00080 
-00085 <span class="keywordtype">void</span>
-<a name="l00086" id="l00086"></a><a class="code" href="group__read__only.html#ga2">00086</a> <a class="code" href=
+00051 
+00052     <span class="keywordflow">case</span> MODE_SET_RESERVE1:
+00053     <span class="keywordflow">case</span> MODE_SET_RESERVE2:
+00054     <span class="keywordflow">case</span> MODE_SET_ACTION:
+00055     <span class="keywordflow">case</span> MODE_SET_COMMIT:
+00056     <span class="keywordflow">case</span> MODE_SET_FREE:
+00057     <span class="keywordflow">case</span> MODE_SET_UNDO:
+00058         <a class="code" href=
+"group__snmp__agent.html#ga73">netsnmp_request_set_error_all</a>(requests, SNMP_ERR_NOTWRITABLE);
+00059         <span class="keywordflow">return</span> SNMP_ERR_NOTWRITABLE;
+00060 
+00061     <span class="keywordflow">case</span> MODE_GET:
+00062     <span class="keywordflow">case</span> MODE_GETNEXT:
+00063     <span class="keywordflow">case</span> MODE_GETBULK:
+00064         <span class="comment">/* next handler called automatically - 'AUTO_NEXT' */</span>
+00065         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00066 
+00067     <span class="keywordflow">default</span>:
+00068         <a class="code" href="group__snmp__agent.html#ga73">netsnmp_request_set_error_all</a>(requests, SNMP_ERR_GENERR);
+00069         <span class="keywordflow">return</span> SNMP_ERR_GENERR;
+00070     }
+00071     <a class="code" href="group__snmp__agent.html#ga73">netsnmp_request_set_error_all</a>(requests, SNMP_ERR_GENERR);
+00072     <span class="keywordflow">return</span> SNMP_ERR_GENERR;     <span class="comment">/* should never get here */</span>
+00073 }
+00074 
+00079 <span class="keywordtype">void</span>
+<a name="l00080" id="l00080"></a><a class="code" href="group__read__only.html#ga2">00080</a> <a class="code" href=
 "group__debug.html#ga5">netsnmp_init_read_only_helper</a>(<span class="keywordtype">void</span>)
-00087 {
-00088     <a class="code" href="group__handler.html#ga36">netsnmp_register_handler_by_name</a>(<span class=
+00081 {
+00082     <a class="code" href="group__handler.html#ga36">netsnmp_register_handler_by_name</a>(<span class=
 "stringliteral">"read_only"</span>,
-00089                                      <a class="code" href=
+00083                                      <a class="code" href=
 "group__read__only.html#ga0">netsnmp_get_read_only_handler</a>());
-00090 }
+00084 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:39 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:46 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

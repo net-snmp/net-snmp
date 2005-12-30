@@ -46,51 +46,67 @@
 "comment">/* 1 = leave PID file on exit */</span>
 00018 <span class="preprocessor">#define NETSNMP_DS_AGENT_NO_CACHING     8       </span><span class=
 "comment">/* 1 = disable netsnmp_cache */</span>
-00019 
-00020 <span class="comment">/*</span>
-00021 <span class="comment"> * strings </span>
-00022 <span class="comment"> */</span>
-00023 <span class="preprocessor">#define NETSNMP_DS_AGENT_PROGNAME 0     </span><span class="comment">/* argv[0] */</span>
-00024 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_SOCKET 1     </span><span class=
+00019 <span class="preprocessor">#define NETSNMP_DS_AGENT_STRICT_DISMAN  9       </span><span class=
+"comment">/* 1 = "correct" object ordering */</span>
+00020 <span class="preprocessor">#define NETSNMP_DS_AGENT_DONT_RETAIN_NOTIFICATIONS 10   </span><span class=
+"comment">/* 1 = disable trap logging */</span>
+00021 <span class=
+"preprocessor">#define NETSNMP_DS_APP_DONT_LOG         NETSNMP_DS_AGENT_DONT_RETAIN_NOTIFICATIONS </span><span class=
+"comment">/* compat */</span>
+00022 
+00023 <span class="comment">/* WARNING: The trap receiver uses DS flags and must not conflict with</span>
+00024 <span class="comment">   these!  If you use a value above 15, change the minimimum DS bool</span>
+00025 <span class="comment">   value in snmptrapd_log.h */</span>
+00026 
+00027 <span class="comment">/*</span>
+00028 <span class="comment"> * strings </span>
+00029 <span class="comment"> */</span>
+00030 <span class="preprocessor">#define NETSNMP_DS_AGENT_PROGNAME 0     </span><span class="comment">/* argv[0] */</span>
+00031 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_SOCKET 1     </span><span class=
 "comment">/* AF_UNIX or ip:port socket addr */</span>
-00025 <span class="preprocessor">#define NETSNMP_DS_AGENT_PORTS    2     </span><span class=
+00032 <span class="preprocessor">#define NETSNMP_DS_AGENT_PORTS    2     </span><span class=
 "comment">/* localhost:9161,tcp:localhost:9161... */</span>
-00026 <span class="preprocessor">#define NETSNMP_DS_AGENT_INTERNAL_SECNAME  3    </span><span class=
+00033 <span class="preprocessor">#define NETSNMP_DS_AGENT_INTERNAL_SECNAME  3    </span><span class=
 "comment">/* used by disman/mteTriggerTable. */</span>
-00027 <span class="preprocessor">#define NETSNMP_DS_AGENT_PERL_INIT_FILE    4    </span><span class=
+00034 <span class="preprocessor">#define NETSNMP_DS_AGENT_PERL_INIT_FILE    4    </span><span class=
 "comment">/* used by embedded perl */</span>
-00028 <span class="preprocessor">#define NETSNMP_DS_SMUX_SOCKET    5     </span><span class=
+00035 <span class="preprocessor">#define NETSNMP_DS_SMUX_SOCKET    5     </span><span class=
 "comment">/* ip:port socket addr */</span>
-00029 
-00030 <span class="comment">/*</span>
-00031 <span class="comment"> * integers </span>
-00032 <span class="comment"> */</span>
-00033 <span class="preprocessor">#define NETSNMP_DS_AGENT_FLAGS    0     </span><span class="comment">/* session.flags */</span>
-00034 <span class="preprocessor">#define NETSNMP_DS_AGENT_USERID   1</span>
-00035 <span class="preprocessor">#define NETSNMP_DS_AGENT_GROUPID  2</span>
-00036 <span class="preprocessor">#define NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL 3 </span><span class=
+00036 <span class="preprocessor">#define NETSNMP_DS_NOTIF_LOG_CTX  6     </span><span class=
+"comment">/* "" | "snmptrapd" */</span>
+00037 
+00038 <span class="comment">/*</span>
+00039 <span class="comment"> * integers </span>
+00040 <span class="comment"> */</span>
+00041 <span class="preprocessor">#define NETSNMP_DS_AGENT_FLAGS    0     </span><span class="comment">/* session.flags */</span>
+00042 <span class="preprocessor">#define NETSNMP_DS_AGENT_USERID   1</span>
+00043 <span class="preprocessor">#define NETSNMP_DS_AGENT_GROUPID  2</span>
+00044 <span class="preprocessor">#define NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL 3 </span><span class=
 "comment">/* ping master every SECONDS */</span>
-00037 <span class="preprocessor">#define NETSNMP_DS_AGENT_AGENTX_TIMEOUT  4</span>
-00038 <span class="preprocessor">#define NETSNMP_DS_AGENT_AGENTX_RETRIES  5</span>
-00039 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_SOCK_PERM     6      </span><span class=
+00045 <span class="preprocessor">#define NETSNMP_DS_AGENT_AGENTX_TIMEOUT  4</span>
+00046 <span class="preprocessor">#define NETSNMP_DS_AGENT_AGENTX_RETRIES  5</span>
+00047 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_SOCK_PERM     6      </span><span class=
 "comment">/* permissions for the */</span>
-00040 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_DIR_PERM      7      </span><span class=
+00048 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_DIR_PERM      7      </span><span class=
 "comment">/*     AgentX socket   */</span>
-00041 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_SOCK_USER     8      </span><span class=
+00049 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_SOCK_USER     8      </span><span class=
 "comment">/* ownership for the   */</span>
-00042 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_SOCK_GROUP    9      </span><span class=
+00050 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_SOCK_GROUP    9      </span><span class=
 "comment">/*     AgentX socket   */</span>
-00043 <span class="preprocessor">#define NETSNMP_DS_AGENT_CACHE_TIMEOUT  10      </span><span class=
+00051 <span class="preprocessor">#define NETSNMP_DS_AGENT_CACHE_TIMEOUT  10      </span><span class=
 "comment">/* default cache timeout */</span>
-00044 
-00045 <span class="preprocessor">#endif</span>
+00052 <span class="preprocessor">#define NETSNMP_DS_AGENT_INTERNAL_VERSION  11   </span><span class=
+"comment">/* used by internal queries */</span>
+00053 <span class="preprocessor">#define NETSNMP_DS_AGENT_INTERNAL_SECLEVEL 12   </span><span class=
+"comment">/* used by internal queries */</span>
+00054 
+00055 <span class="preprocessor">#endif</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:37 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:44 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

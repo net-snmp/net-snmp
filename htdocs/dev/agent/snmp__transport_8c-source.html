@@ -41,470 +41,477 @@
 00021 
 00022 <span class="preprocessor">#include &lt;net-snmp/library/snmp_transport.h&gt;</span>
 00023 <span class="preprocessor">#include &lt;net-snmp/library/snmpUDPDomain.h&gt;</span>
-00024 <span class="preprocessor">#ifdef SNMP_TRANSPORT_TCP_DOMAIN</span>
-00025 <span class="preprocessor">#include &lt;net-snmp/library/snmpTCPDomain.h&gt;</span>
+00024 <span class="preprocessor">#ifdef SNMP_TRANSPORT_TLS_DOMAIN</span>
+00025 <span class="preprocessor">#include &lt;net-snmp/library/snmpTLSDomain.h&gt;</span>
 00026 <span class="preprocessor">#endif</span>
-00027 <span class="preprocessor">#ifdef SNMP_TRANSPORT_IPX_DOMAIN</span>
-00028 <span class="preprocessor">#include &lt;net-snmp/library/snmpIPXDomain.h&gt;</span>
+00027 <span class="preprocessor">#ifdef SNMP_TRANSPORT_TCP_DOMAIN</span>
+00028 <span class="preprocessor">#include &lt;net-snmp/library/snmpTCPDomain.h&gt;</span>
 00029 <span class="preprocessor">#endif</span>
-00030 <span class="preprocessor">#ifdef SNMP_TRANSPORT_UNIX_DOMAIN</span>
-00031 <span class="preprocessor">#include &lt;net-snmp/library/snmpUnixDomain.h&gt;</span>
+00030 <span class="preprocessor">#ifdef SNMP_TRANSPORT_IPX_DOMAIN</span>
+00031 <span class="preprocessor">#include &lt;net-snmp/library/snmpIPXDomain.h&gt;</span>
 00032 <span class="preprocessor">#endif</span>
-00033 <span class="preprocessor">#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN</span>
-00034 <span class="preprocessor">#include &lt;net-snmp/library/snmpAAL5PVCDomain.h&gt;</span>
+00033 <span class="preprocessor">#ifdef SNMP_TRANSPORT_UNIX_DOMAIN</span>
+00034 <span class="preprocessor">#include &lt;net-snmp/library/snmpUnixDomain.h&gt;</span>
 00035 <span class="preprocessor">#endif</span>
-00036 <span class="preprocessor">#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN</span>
-00037 <span class="preprocessor">#include &lt;net-snmp/library/snmpUDPIPv6Domain.h&gt;</span>
+00036 <span class="preprocessor">#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN</span>
+00037 <span class="preprocessor">#include &lt;net-snmp/library/snmpAAL5PVCDomain.h&gt;</span>
 00038 <span class="preprocessor">#endif</span>
-00039 <span class="preprocessor">#ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN</span>
-00040 <span class="preprocessor">#include &lt;net-snmp/library/snmpTCPIPv6Domain.h&gt;</span>
+00039 <span class="preprocessor">#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN</span>
+00040 <span class="preprocessor">#include &lt;net-snmp/library/snmpUDPIPv6Domain.h&gt;</span>
 00041 <span class="preprocessor">#endif</span>
-00042 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
-00043 
-00044 
-00045 <span class="comment">/*</span>
-00046 <span class="comment"> * Our list of supported transport domains.  </span>
-00047 <span class="comment"> */</span>
-00048 
-00049 <span class="keyword">static</span> netsnmp_tdomain *domain_list = NULL;
-00050 
+00042 <span class="preprocessor">#ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN</span>
+00043 <span class="preprocessor">#include &lt;net-snmp/library/snmpTCPIPv6Domain.h&gt;</span>
+00044 <span class="preprocessor">#endif</span>
+00045 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00046 
+00047 
+00048 <span class="comment">/*</span>
+00049 <span class="comment"> * Our list of supported transport domains.  </span>
+00050 <span class="comment"> */</span>
 00051 
-00052 
-00053 <span class="comment">/*</span>
-00054 <span class="comment"> * The standard SNMP domains.  </span>
-00055 <span class="comment"> */</span>
-00056 
-00057 oid             netsnmpUDPDomain[] = { 1, 3, 6, 1, 6, 1, 1 };
-00058 size_t          netsnmpUDPDomain_len = OID_LENGTH(netsnmpUDPDomain);
-00059 oid             netsnmpCLNSDomain[] = { 1, 3, 6, 1, 6, 1, 2 };
-00060 size_t          netsnmpCLNSDomain_len = OID_LENGTH(netsnmpCLNSDomain);
-00061 oid             netsnmpCONSDomain[] = { 1, 3, 6, 1, 6, 1, 3 };
-00062 size_t          netsnmpCONSDomain_len = OID_LENGTH(netsnmpCONSDomain);
-00063 oid             netsnmpDDPDomain[] = { 1, 3, 6, 1, 6, 1, 4 };
-00064 size_t          netsnmpDDPDomain_len = OID_LENGTH(netsnmpDDPDomain);
-00065 oid             netsnmpIPXDomain[] = { 1, 3, 6, 1, 6, 1, 5 };
-00066 size_t          netsnmpIPXDomain_len = OID_LENGTH(netsnmpIPXDomain);
-00067 
-00068 
-00069 
-00070 <span class="keyword">static</span> <span class="keywordtype">void</span>     netsnmp_tdomain_dump(<span class=
-"keywordtype">void</span>);
+00052 <span class="keyword">static</span> netsnmp_tdomain *domain_list = NULL;
+00053 
+00054 
+00055 
+00056 <span class="comment">/*</span>
+00057 <span class="comment"> * The standard SNMP domains.  </span>
+00058 <span class="comment"> */</span>
+00059 
+00060 oid             netsnmpUDPDomain[] = { 1, 3, 6, 1, 6, 1, 1 };
+00061 size_t          netsnmpUDPDomain_len = OID_LENGTH(netsnmpUDPDomain);
+00062 oid             netsnmpCLNSDomain[] = { 1, 3, 6, 1, 6, 1, 2 };
+00063 size_t          netsnmpCLNSDomain_len = OID_LENGTH(netsnmpCLNSDomain);
+00064 oid             netsnmpCONSDomain[] = { 1, 3, 6, 1, 6, 1, 3 };
+00065 size_t          netsnmpCONSDomain_len = OID_LENGTH(netsnmpCONSDomain);
+00066 oid             netsnmpDDPDomain[] = { 1, 3, 6, 1, 6, 1, 4 };
+00067 size_t          netsnmpDDPDomain_len = OID_LENGTH(netsnmpDDPDomain);
+00068 oid             netsnmpIPXDomain[] = { 1, 3, 6, 1, 6, 1, 5 };
+00069 size_t          netsnmpIPXDomain_len = OID_LENGTH(netsnmpIPXDomain);
+00070 
 00071 
 00072 
-00073 <span class="comment">/*</span>
-00074 <span class="comment"> * Make a deep copy of an netsnmp_transport.  </span>
-00075 <span class="comment"> */</span>
-00076 
-00077 netsnmp_transport *
-00078 netsnmp_transport_copy(netsnmp_transport *t)
-00079 {
-00080     netsnmp_transport *n = NULL;
-00081 
-00082     n = (netsnmp_transport *) malloc(<span class="keyword">sizeof</span>(netsnmp_transport));
-00083     <span class="keywordflow">if</span> (n == NULL) {
-00084         <span class="keywordflow">return</span> NULL;
-00085     }
-00086     memset(n, 0, <span class="keyword">sizeof</span>(netsnmp_transport));
-00087 
-00088     <span class="keywordflow">if</span> (t-&gt;domain != NULL) {
-00089         n-&gt;domain = t-&gt;domain;
-00090         n-&gt;domain_length = t-&gt;domain_length;
-00091     } <span class="keywordflow">else</span> {
-00092         n-&gt;domain = NULL;
-00093         n-&gt;domain_length = 0;
-00094     }
-00095 
-00096     <span class="keywordflow">if</span> (t-&gt;local != NULL) {
-00097         n-&gt;local = (u_char *) malloc(t-&gt;local_length);
-00098         <span class="keywordflow">if</span> (n-&gt;local == NULL) {
-00099             netsnmp_transport_free(n);
-00100             <span class="keywordflow">return</span> NULL;
-00101         }
-00102         n-&gt;local_length = t-&gt;local_length;
-00103         memcpy(n-&gt;local, t-&gt;local, t-&gt;local_length);
-00104     } <span class="keywordflow">else</span> {
-00105         n-&gt;local = NULL;
-00106         n-&gt;local_length = 0;
-00107     }
-00108 
-00109     <span class="keywordflow">if</span> (t-&gt;remote != NULL) {
-00110         n-&gt;remote = (u_char *) malloc(t-&gt;remote_length);
-00111         <span class="keywordflow">if</span> (n-&gt;remote == NULL) {
-00112             netsnmp_transport_free(n);
-00113             <span class="keywordflow">return</span> NULL;
-00114         }
-00115         n-&gt;remote_length = t-&gt;remote_length;
-00116         memcpy(n-&gt;remote, t-&gt;remote, t-&gt;remote_length);
-00117     } <span class="keywordflow">else</span> {
-00118         n-&gt;remote = NULL;
-00119         n-&gt;remote_length = 0;
-00120     }
-00121 
-00122     <span class="keywordflow">if</span> (t-&gt;data != NULL &amp;&amp; t-&gt;data_length &gt; 0) {
-00123         n-&gt;data = malloc(t-&gt;data_length);
-00124         <span class="keywordflow">if</span> (n-&gt;data == NULL) {
-00125             netsnmp_transport_free(n);
-00126             <span class="keywordflow">return</span> NULL;
-00127         }
-00128         n-&gt;data_length = t-&gt;data_length;
-00129         memcpy(n-&gt;data, t-&gt;data, t-&gt;data_length);
-00130     } <span class="keywordflow">else</span> {
-00131         n-&gt;data = NULL;
-00132         n-&gt;data_length = 0;
-00133     }
-00134 
-00135     n-&gt;msgMaxSize = t-&gt;msgMaxSize;
-00136     n-&gt;f_accept = t-&gt;f_accept;
-00137     n-&gt;f_recv = t-&gt;f_recv;
-00138     n-&gt;f_send = t-&gt;f_send;
-00139     n-&gt;f_close = t-&gt;f_close;
-00140     n-&gt;f_fmtaddr = t-&gt;f_fmtaddr;
-00141     n-&gt;sock = t-&gt;sock;
-00142     n-&gt;flags = t-&gt;flags;
-00143 
-00144     <span class="keywordflow">return</span> n;
-00145 }
+00073 <span class="keyword">static</span> <span class="keywordtype">void</span>     netsnmp_tdomain_dump(<span class=
+"keywordtype">void</span>);
+00074 
+00075 
+00076 <span class="comment">/*</span>
+00077 <span class="comment"> * Make a deep copy of an netsnmp_transport.  </span>
+00078 <span class="comment"> */</span>
+00079 
+00080 netsnmp_transport *
+00081 netsnmp_transport_copy(netsnmp_transport *t)
+00082 {
+00083     netsnmp_transport *n = NULL;
+00084 
+00085     n = (netsnmp_transport *) malloc(<span class="keyword">sizeof</span>(netsnmp_transport));
+00086     <span class="keywordflow">if</span> (n == NULL) {
+00087         <span class="keywordflow">return</span> NULL;
+00088     }
+00089     memset(n, 0, <span class="keyword">sizeof</span>(netsnmp_transport));
+00090 
+00091     <span class="keywordflow">if</span> (t-&gt;domain != NULL) {
+00092         n-&gt;domain = t-&gt;domain;
+00093         n-&gt;domain_length = t-&gt;domain_length;
+00094     } <span class="keywordflow">else</span> {
+00095         n-&gt;domain = NULL;
+00096         n-&gt;domain_length = 0;
+00097     }
+00098 
+00099     <span class="keywordflow">if</span> (t-&gt;local != NULL) {
+00100         n-&gt;local = (u_char *) malloc(t-&gt;local_length);
+00101         <span class="keywordflow">if</span> (n-&gt;local == NULL) {
+00102             netsnmp_transport_free(n);
+00103             <span class="keywordflow">return</span> NULL;
+00104         }
+00105         n-&gt;local_length = t-&gt;local_length;
+00106         memcpy(n-&gt;local, t-&gt;local, t-&gt;local_length);
+00107     } <span class="keywordflow">else</span> {
+00108         n-&gt;local = NULL;
+00109         n-&gt;local_length = 0;
+00110     }
+00111 
+00112     <span class="keywordflow">if</span> (t-&gt;remote != NULL) {
+00113         n-&gt;remote = (u_char *) malloc(t-&gt;remote_length);
+00114         <span class="keywordflow">if</span> (n-&gt;remote == NULL) {
+00115             netsnmp_transport_free(n);
+00116             <span class="keywordflow">return</span> NULL;
+00117         }
+00118         n-&gt;remote_length = t-&gt;remote_length;
+00119         memcpy(n-&gt;remote, t-&gt;remote, t-&gt;remote_length);
+00120     } <span class="keywordflow">else</span> {
+00121         n-&gt;remote = NULL;
+00122         n-&gt;remote_length = 0;
+00123     }
+00124 
+00125     <span class="keywordflow">if</span> (t-&gt;data != NULL &amp;&amp; t-&gt;data_length &gt; 0) {
+00126         n-&gt;data = malloc(t-&gt;data_length);
+00127         <span class="keywordflow">if</span> (n-&gt;data == NULL) {
+00128             netsnmp_transport_free(n);
+00129             <span class="keywordflow">return</span> NULL;
+00130         }
+00131         n-&gt;data_length = t-&gt;data_length;
+00132         memcpy(n-&gt;data, t-&gt;data, t-&gt;data_length);
+00133     } <span class="keywordflow">else</span> {
+00134         n-&gt;data = NULL;
+00135         n-&gt;data_length = 0;
+00136     }
+00137 
+00138     n-&gt;msgMaxSize = t-&gt;msgMaxSize;
+00139     n-&gt;f_accept = t-&gt;f_accept;
+00140     n-&gt;f_recv = t-&gt;f_recv;
+00141     n-&gt;f_send = t-&gt;f_send;
+00142     n-&gt;f_close = t-&gt;f_close;
+00143     n-&gt;f_fmtaddr = t-&gt;f_fmtaddr;
+00144     n-&gt;sock = t-&gt;sock;
+00145     n-&gt;flags = t-&gt;flags;
 00146 
-00147 
-00148 
-00149 <span class="keywordtype">void</span>
-00150 netsnmp_transport_free(netsnmp_transport *t)
-00151 {
-00152 
-00153     <span class="keywordflow">if</span> (t-&gt;local != NULL) {
-00154         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(t-&gt;local);
-00155     }
-00156     <span class="keywordflow">if</span> (t-&gt;remote != NULL) {
-00157         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(t-&gt;remote);
-00158     }
-00159     <span class="keywordflow">if</span> (t-&gt;data != NULL) {
-00160         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(t-&gt;data);
-00161     }
-00162     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(t);
-00163 }
-00164 
-00165 
-00166 
-00167 <span class="keywordtype">int</span>
-00168 netsnmp_tdomain_support(<span class="keyword">const</span> oid * in_oid,
-00169                         size_t in_len,
-00170                         <span class="keyword">const</span> oid ** out_oid, size_t * out_len)
-00171 {
-00172     netsnmp_tdomain *d = NULL;
-00173 
-00174     <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
-00175         <span class="keywordflow">if</span> (<a class="code" href=
-"group__library.html#ga100">netsnmp_oid_equals</a>(in_oid, in_len, d-&gt;name, d-&gt;name_length) == 0) {
-00176             <span class="keywordflow">if</span> (out_oid != NULL &amp;&amp; out_len != NULL) {
-00177                 *out_oid = d-&gt;name;
-00178                 *out_len = d-&gt;name_length;
-00179             }
-00180             <span class="keywordflow">return</span> 1;
-00181         }
-00182     }
-00183     <span class="keywordflow">return</span> 0;
-00184 }
-00185 
-00186 
-00187 
-00188 <span class="keywordtype">void</span>
-00189 netsnmp_tdomain_init(<span class="keywordtype">void</span>)
-00190 {
-00191     DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
+00147     <span class="keywordflow">return</span> n;
+00148 }
+00149 
+00150 
+00151 
+00152 <span class="keywordtype">void</span>
+00153 netsnmp_transport_free(netsnmp_transport *t)
+00154 {
+00155     <span class="keywordflow">if</span> (NULL == t)
+00156         <span class="keywordflow">return</span>;
+00157 
+00158     <span class="keywordflow">if</span> (t-&gt;local != NULL) {
+00159         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(t-&gt;local);
+00160     }
+00161     <span class="keywordflow">if</span> (t-&gt;remote != NULL) {
+00162         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(t-&gt;remote);
+00163     }
+00164     <span class="keywordflow">if</span> (t-&gt;data != NULL) {
+00165         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(t-&gt;data);
+00166     }
+00167     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(t);
+00168 }
+00169 
+00170 
+00171 
+00172 <span class="keywordtype">int</span>
+00173 netsnmp_tdomain_support(<span class="keyword">const</span> oid * in_oid,
+00174                         size_t in_len,
+00175                         <span class="keyword">const</span> oid ** out_oid, size_t * out_len)
+00176 {
+00177     netsnmp_tdomain *d = NULL;
+00178 
+00179     <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
+00180         <span class="keywordflow">if</span> (<a class="code" href=
+"group__library.html#ga106">netsnmp_oid_equals</a>(in_oid, in_len, d-&gt;name, d-&gt;name_length) == 0) {
+00181             <span class="keywordflow">if</span> (out_oid != NULL &amp;&amp; out_len != NULL) {
+00182                 *out_oid = d-&gt;name;
+00183                 *out_len = d-&gt;name_length;
+00184             }
+00185             <span class="keywordflow">return</span> 1;
+00186         }
+00187     }
+00188     <span class="keywordflow">return</span> 0;
+00189 }
+00190 
+00191 
+00192 
+00193 <span class="keywordtype">void</span>
+00194 netsnmp_tdomain_init(<span class="keywordtype">void</span>)
+00195 {
+00196     DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
 "stringliteral">"netsnmp_tdomain_init() called\n"</span>));
-00192     netsnmp_udp_ctor();
-00193 <span class="preprocessor">#ifdef SNMP_TRANSPORT_TCP_DOMAIN</span>
-00194     netsnmp_tcp_ctor();
-00195 <span class="preprocessor">#endif</span>
-00196 <span class="preprocessor">#ifdef SNMP_TRANSPORT_IPX_DOMAIN</span>
-00197     netsnmp_ipx_ctor();
-00198 <span class="preprocessor">#endif</span>
-00199 <span class="preprocessor">#ifdef SNMP_TRANSPORT_UNIX_DOMAIN</span>
-00200     netsnmp_unix_ctor();
-00201 <span class="preprocessor">#endif</span>
-00202 <span class="preprocessor">#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN</span>
-00203     netsnmp_aal5pvc_ctor();
-00204 <span class="preprocessor">#endif</span>
-00205 <span class="preprocessor">#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN</span>
-00206     netsnmp_udp6_ctor();
-00207 <span class="preprocessor">#endif</span>
-00208 <span class="preprocessor">#ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN</span>
-00209     netsnmp_tcp6_ctor();
-00210 <span class="preprocessor">#endif</span>
-00211     netsnmp_tdomain_dump();
-00212 }
-00213 
-00214 <span class="keywordtype">void</span>
-00215 netsnmp_clear_tdomain_list(<span class="keywordtype">void</span>)
-00216 {
-00217     netsnmp_tdomain *list = domain_list, *next = NULL;
-00218     DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
+00197     netsnmp_udp_ctor();
+00198 <span class="preprocessor">#ifdef SNMP_TRANSPORT_STD_DOMAIN</span>
+00199     netsnmp_std_ctor();
+00200 <span class="preprocessor">#endif</span>
+00201 <span class="preprocessor">#ifdef SNMP_TRANSPORT_TCP_DOMAIN</span>
+00202     netsnmp_tcp_ctor();
+00203 <span class="preprocessor">#endif</span>
+00204 <span class="preprocessor">#ifdef SNMP_TRANSPORT_IPX_DOMAIN</span>
+00205     netsnmp_ipx_ctor();
+00206 <span class="preprocessor">#endif</span>
+00207 <span class="preprocessor">#ifdef SNMP_TRANSPORT_UNIX_DOMAIN</span>
+00208     netsnmp_unix_ctor();
+00209 <span class="preprocessor">#endif</span>
+00210 <span class="preprocessor">#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN</span>
+00211     netsnmp_aal5pvc_ctor();
+00212 <span class="preprocessor">#endif</span>
+00213 <span class="preprocessor">#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN</span>
+00214     netsnmp_udp6_ctor();
+00215 <span class="preprocessor">#endif</span>
+00216 <span class="preprocessor">#ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN</span>
+00217     netsnmp_tcp6_ctor();
+00218 <span class="preprocessor">#endif</span>
+00219     netsnmp_tdomain_dump();
+00220 }
+00221 
+00222 <span class="keywordtype">void</span>
+00223 netsnmp_clear_tdomain_list(<span class="keywordtype">void</span>)
+00224 {
+00225     netsnmp_tdomain *list = domain_list, *next = NULL;
+00226     DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
 "stringliteral">"clear_tdomain_list() called\n"</span>));
-00219 
-00220     <span class="keywordflow">while</span> (list != NULL) {
-00221         next = list-&gt;next;
-00222         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(list-&gt;prefix);
-00223         <span class="comment">/* attention!! list itself is not in the heap, so we must not free it! */</span>
-00224         list = next;
-00225     }
-00226     domain_list = NULL;
-00227 }
-00228 
-00229 
-00230 <span class="keyword">static</span> <span class="keywordtype">void</span>
-00231 netsnmp_tdomain_dump(<span class="keywordtype">void</span>)
-00232 {
-00233     netsnmp_tdomain *d;
-00234     <span class="keywordtype">int</span> i = 0;
-00235 
-00236     DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">"domain_list -&gt; "</span>));
-00237     <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
-00238         DEBUGMSG((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">"{ "</span>));
-00239         DEBUGMSGOID((<span class="stringliteral">"tdomain"</span>, d-&gt;name, d-&gt;name_length));
-00240         DEBUGMSG((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">", \""</span>));
-00241         <span class="keywordflow">for</span> (i = 0; d-&gt;prefix[i] != NULL; i++) {
-00242             DEBUGMSG((<span class="stringliteral">"tdomain"</span>, <span class=
+00227 
+00228     <span class="keywordflow">while</span> (list != NULL) {
+00229         next = list-&gt;next;
+00230         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(list-&gt;prefix);
+00231         <span class="comment">/* attention!! list itself is not in the heap, so we must not free it! */</span>
+00232         list = next;
+00233     }
+00234     domain_list = NULL;
+00235 }
+00236 
+00237 
+00238 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00239 netsnmp_tdomain_dump(<span class="keywordtype">void</span>)
+00240 {
+00241     netsnmp_tdomain *d;
+00242     <span class="keywordtype">int</span> i = 0;
+00243 
+00244     DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">"domain_list -&gt; "</span>));
+00245     <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
+00246         DEBUGMSG((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">"{ "</span>));
+00247         DEBUGMSGOID((<span class="stringliteral">"tdomain"</span>, d-&gt;name, d-&gt;name_length));
+00248         DEBUGMSG((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">", \""</span>));
+00249         <span class="keywordflow">for</span> (i = 0; d-&gt;prefix[i] != NULL; i++) {
+00250             DEBUGMSG((<span class="stringliteral">"tdomain"</span>, <span class=
 "stringliteral">"%s%s"</span>, d-&gt;prefix[i],
-00243                       (d-&gt;prefix[i + 1]) ? <span class="stringliteral">"/"</span> : <span class=
+00251                       (d-&gt;prefix[i + 1]) ? <span class="stringliteral">"/"</span> : <span class=
 "stringliteral">""</span>));
-00244         }
-00245         DEBUGMSG((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">"\" } -&gt; "</span>));
-00246     }
-00247     DEBUGMSG((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">"[NIL]\n"</span>));
-00248 }
-00249 
-00250 
-00251 
-00252 <span class="keywordtype">int</span>
-00253 netsnmp_tdomain_register(netsnmp_tdomain *n)
-00254 {
-00255     netsnmp_tdomain **prevNext = &amp;domain_list, *d;
-00256 
-00257     <span class="keywordflow">if</span> (n != NULL) {
-00258         <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
-00259             <span class="keywordflow">if</span> (<a class="code" href=
-"group__library.html#ga100">netsnmp_oid_equals</a>(n-&gt;name, n-&gt;name_length,
-00260                                 d-&gt;name, d-&gt;name_length) == 0) {
-00261                 <span class="comment">/*</span>
-00262 <span class="comment">                 * Already registered.  </span>
-00263 <span class="comment">                 */</span>
-00264                 <span class="keywordflow">return</span> 0;
-00265             }
-00266             prevNext = &amp;(d-&gt;next);
-00267         }
-00268         n-&gt;next = NULL;
-00269         *prevNext = n;
-00270         <span class="keywordflow">return</span> 1;
-00271     } <span class="keywordflow">else</span> {
-00272         <span class="keywordflow">return</span> 0;
-00273     }
-00274 }
-00275 
-00276 
-00277 
-00278 <span class="keywordtype">int</span>
-00279 netsnmp_tdomain_unregister(netsnmp_tdomain *n)
-00280 {
-00281     netsnmp_tdomain **prevNext = &amp;domain_list, *d;
-00282 
-00283     <span class="keywordflow">if</span> (n != NULL) {
-00284         <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
-00285             <span class="keywordflow">if</span> (<a class="code" href=
-"group__library.html#ga100">netsnmp_oid_equals</a>(n-&gt;name, n-&gt;name_length,
-00286                                 d-&gt;name, d-&gt;name_length) == 0) {
-00287                 *prevNext = n-&gt;next;
-00288                 <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(n-&gt;prefix);
-00289                 <span class="keywordflow">return</span> 1;
-00290             }
-00291             prevNext = &amp;(d-&gt;next);
-00292         }
-00293         <span class="keywordflow">return</span> 0;
-00294     } <span class="keywordflow">else</span> {
-00295         <span class="keywordflow">return</span> 0;
-00296     }
-00297 }
-00298 
-00299 
-00300 
-00301 netsnmp_transport *
-00302 netsnmp_tdomain_transport(<span class="keyword">const</span> <span class="keywordtype">char</span> *string, <span class=
+00252         }
+00253         DEBUGMSG((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">"\" } -&gt; "</span>));
+00254     }
+00255     DEBUGMSG((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">"[NIL]\n"</span>));
+00256 }
+00257 
+00258 
+00259 
+00260 <span class="keywordtype">int</span>
+00261 netsnmp_tdomain_register(netsnmp_tdomain *n)
+00262 {
+00263     netsnmp_tdomain **prevNext = &amp;domain_list, *d;
+00264 
+00265     <span class="keywordflow">if</span> (n != NULL) {
+00266         <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
+00267             <span class="keywordflow">if</span> (<a class="code" href=
+"group__library.html#ga106">netsnmp_oid_equals</a>(n-&gt;name, n-&gt;name_length,
+00268                                 d-&gt;name, d-&gt;name_length) == 0) {
+00269                 <span class="comment">/*</span>
+00270 <span class="comment">                 * Already registered.  </span>
+00271 <span class="comment">                 */</span>
+00272                 <span class="keywordflow">return</span> 0;
+00273             }
+00274             prevNext = &amp;(d-&gt;next);
+00275         }
+00276         n-&gt;next = NULL;
+00277         *prevNext = n;
+00278         <span class="keywordflow">return</span> 1;
+00279     } <span class="keywordflow">else</span> {
+00280         <span class="keywordflow">return</span> 0;
+00281     }
+00282 }
+00283 
+00284 
+00285 
+00286 <span class="keywordtype">int</span>
+00287 netsnmp_tdomain_unregister(netsnmp_tdomain *n)
+00288 {
+00289     netsnmp_tdomain **prevNext = &amp;domain_list, *d;
+00290 
+00291     <span class="keywordflow">if</span> (n != NULL) {
+00292         <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
+00293             <span class="keywordflow">if</span> (<a class="code" href=
+"group__library.html#ga106">netsnmp_oid_equals</a>(n-&gt;name, n-&gt;name_length,
+00294                                 d-&gt;name, d-&gt;name_length) == 0) {
+00295                 *prevNext = n-&gt;next;
+00296                 <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(n-&gt;prefix);
+00297                 <span class="keywordflow">return</span> 1;
+00298             }
+00299             prevNext = &amp;(d-&gt;next);
+00300         }
+00301         <span class="keywordflow">return</span> 0;
+00302     } <span class="keywordflow">else</span> {
+00303         <span class="keywordflow">return</span> 0;
+00304     }
+00305 }
+00306 
+00307 
+00308 
+00309 netsnmp_transport *
+00310 netsnmp_tdomain_transport(<span class="keyword">const</span> <span class="keywordtype">char</span> *str, <span class=
 "keywordtype">int</span> local,
-00303                           <span class="keyword">const</span> <span class="keywordtype">char</span> *default_domain)
-00304 {
-00305     netsnmp_tdomain *d;
-00306     netsnmp_transport *t = NULL;
-00307     <span class="keyword">const</span> <span class="keywordtype">char</span>     *spec, *addr;
-00308     <span class="keywordtype">char</span>           *cp, *mystring;
-00309     <span class="keywordtype">int</span>             i;
-00310 
-00311     <span class="keywordflow">if</span> (string == NULL) {
-00312         <span class="keywordflow">return</span> NULL;
-00313     }
-00314 
-00315     <span class="keywordflow">if</span> ((mystring = strdup(string)) == NULL) {
-00316         DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
-"stringliteral">"can't strdup(\"%s\")\n"</span>, string));
-00317         <span class="keywordflow">return</span> NULL;
-00318     }
-00319 
-00320     <span class="keywordflow">if</span> ((cp = strchr(mystring, <span class="charliteral">':'</span>)) == NULL) {
-00321         <span class="comment">/*</span>
-00322 <span class="comment">         * There doesn't appear to be a transport specifier.  </span>
-00323 <span class="comment">         */</span>
+00311                           <span class="keyword">const</span> <span class="keywordtype">char</span> *default_domain)
+00312 {
+00313     netsnmp_tdomain *d;
+00314     netsnmp_transport *t = NULL;
+00315     <span class="keyword">const</span> <span class="keywordtype">char</span>     *spec, *addr;
+00316     <span class="keywordtype">char</span>           *cp, *mystring;
+00317     <span class="keywordtype">int</span>             i;
+00318 
+00319     <span class="keywordflow">if</span> (str == NULL) {
+00320         <span class="keywordflow">return</span> NULL;
+00321     }
+00322 
+00323     <span class="keywordflow">if</span> ((mystring = strdup(str)) == NULL) {
 00324         DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
+"stringliteral">"can't strdup(\"%s\")\n"</span>, str));
+00325         <span class="keywordflow">return</span> NULL;
+00326     }
+00327 
+00328     <span class="keywordflow">if</span> ((cp = strchr(mystring, <span class="charliteral">':'</span>)) == NULL) {
+00329         <span class="comment">/*</span>
+00330 <span class="comment">         * There doesn't appear to be a transport specifier.  </span>
+00331 <span class="comment">         */</span>
+00332         DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
 "stringliteral">"no specifier in \"%s\"\n"</span>, mystring));
-00325         <span class="keywordflow">if</span> (*mystring == <span class="charliteral">'/'</span>) {
-00326             spec = <span class="stringliteral">"unix"</span>;
-00327             addr = mystring;
-00328         } <span class="keywordflow">else</span> {
-00329             <span class="keywordflow">if</span> (default_domain) {
-00330                 spec = default_domain;
-00331             } <span class="keywordflow">else</span> {
-00332                 spec = <span class="stringliteral">"udp"</span>;
-00333             }
-00334             addr = mystring;
-00335         }
-00336     } <span class="keywordflow">else</span> {
-00337         *cp = <span class="charliteral">'\0'</span>;
-00338         spec = mystring;
-00339         addr = cp + 1;
-00340     }
-00341     DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
+00333         <span class="keywordflow">if</span> (*mystring == <span class="charliteral">'/'</span>) {
+00334             spec = <span class="stringliteral">"unix"</span>;
+00335             addr = mystring;
+00336         } <span class="keywordflow">else</span> {
+00337             <span class="keywordflow">if</span> (default_domain) {
+00338                 spec = default_domain;
+00339             } <span class="keywordflow">else</span> {
+00340                 spec = <span class="stringliteral">"udp"</span>;
+00341             }
+00342             addr = mystring;
+00343         }
+00344     } <span class="keywordflow">else</span> {
+00345         *cp = <span class="charliteral">'\0'</span>;
+00346         spec = mystring;
+00347         addr = cp + 1;
+00348     }
+00349     DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
 "stringliteral">"specifier \"%s\" address \"%s\"\n"</span>, spec,
-00342                 addr));
-00343 
-00344     <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
-00345         <span class="keywordflow">for</span> (i = 0; d-&gt;prefix[i] != NULL; i++) {
-00346             <span class="keywordflow">if</span> (strcasecmp(d-&gt;prefix[i], spec) == 0) {
-00347                 DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
+00350                 addr));
+00351 
+00352     <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
+00353         <span class="keywordflow">for</span> (i = 0; d-&gt;prefix[i] != NULL; i++) {
+00354             <span class="keywordflow">if</span> (strcasecmp(d-&gt;prefix[i], spec) == 0) {
+00355                 DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
 "stringliteral">"specifier \"%s\" matched\n"</span>,
-00348                             spec));
-00349                 t = d-&gt;f_create_from_tstring(addr, local);
-00350                 <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(mystring);
-00351                 <span class="keywordflow">return</span> t;
-00352             }
-00353         }
-00354     }
-00355 
-00356     <span class="comment">/*</span>
-00357 <span class="comment">     * Okay no match so far.  Consider the possibility that we have something</span>
-00358 <span class="comment">     * like hostname.domain.com:port which will have confused the parser above.</span>
-00359 <span class="comment">     * Try and match again with the appropriate default domain.  </span>
-00360 <span class="comment">     */</span>
-00361 
-00362     <span class="keywordflow">if</span> (default_domain) {
-00363         spec = default_domain;
-00364     } <span class="keywordflow">else</span> {
-00365         spec = <span class="stringliteral">"udp"</span>;
-00366     }
-00367     <span class="keywordflow">if</span> (cp) {
-00368         *cp = <span class="charliteral">':'</span>;
-00369     }
-00370 
-00371     addr = mystring;
-00372     DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>,
-00373                 <span class="stringliteral">"try again with specifier \"%s\" address \"%s\"\n"</span>, spec,
-00374                 addr));
-00375 
-00376     <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
-00377         <span class="keywordflow">for</span> (i = 0; d-&gt;prefix[i] != NULL; i++) {
-00378             <span class="keywordflow">if</span> (strcmp(d-&gt;prefix[i], spec) == 0) {
-00379                 DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
+00356                             spec));
+00357                 t = d-&gt;f_create_from_tstring(addr, local);
+00358                 <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(mystring);
+00359                 <span class="keywordflow">return</span> t;
+00360             }
+00361         }
+00362     }
+00363 
+00364     <span class="comment">/*</span>
+00365 <span class="comment">     * Okay no match so far.  Consider the possibility that we have something</span>
+00366 <span class="comment">     * like hostname.domain.com:port which will have confused the parser above.</span>
+00367 <span class="comment">     * Try and match again with the appropriate default domain.  </span>
+00368 <span class="comment">     */</span>
+00369 
+00370     <span class="keywordflow">if</span> (default_domain) {
+00371         spec = default_domain;
+00372     } <span class="keywordflow">else</span> {
+00373         spec = <span class="stringliteral">"udp"</span>;
+00374     }
+00375     <span class="keywordflow">if</span> (cp) {
+00376         *cp = <span class="charliteral">':'</span>;
+00377     }
+00378 
+00379     addr = mystring;
+00380     DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>,
+00381                 <span class="stringliteral">"try again with specifier \"%s\" address \"%s\"\n"</span>, spec,
+00382                 addr));
+00383 
+00384     <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
+00385         <span class="keywordflow">for</span> (i = 0; d-&gt;prefix[i] != NULL; i++) {
+00386             <span class="keywordflow">if</span> (strcmp(d-&gt;prefix[i], spec) == 0) {
+00387                 DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class=
 "stringliteral">"specifier \"%s\" matched\n"</span>,
-00380                             spec));
-00381                 t = d-&gt;f_create_from_tstring(addr, local);
-00382                 <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(mystring);
-00383                 <span class="keywordflow">return</span> t;
-00384             }
-00385         }
-00386     }
-00387 
-00388     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00388                             spec));
+00389                 t = d-&gt;f_create_from_tstring(addr, local);
+00390                 <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(mystring);
+00391                 <span class="keywordflow">return</span> t;
+00392             }
+00393         }
+00394     }
+00395 
+00396     <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"No support for requested transport domain \"%s\"\n"</span>,
-00389              spec);
-00390     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(mystring);
-00391     <span class="keywordflow">return</span> NULL;
-00392 }
-00393 
-00394 
-00395 netsnmp_transport *
-00396 netsnmp_tdomain_transport_oid(<span class="keyword">const</span> oid * dom,
-00397                               size_t dom_len,
-00398                               <span class="keyword">const</span> u_char * o, size_t o_len, <span class=
-"keywordtype">int</span> local)
-00399 {
-00400     netsnmp_tdomain *d;
-00401     <span class="keywordtype">int</span>             i;
+00397              spec);
+00398     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(mystring);
+00399     <span class="keywordflow">return</span> NULL;
+00400 }
+00401 
 00402 
-00403     DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">"domain \""</span>));
-00404     DEBUGMSGOID((<span class="stringliteral">"tdomain"</span>, dom, dom_len));
-00405     DEBUGMSG((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">"\"\n"</span>));
-00406 
-00407     <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
-00408         <span class="keywordflow">for</span> (i = 0; d-&gt;prefix[i] != NULL; i++) {
-00409             <span class="keywordflow">if</span> (<a class="code" href=
-"group__library.html#ga100">netsnmp_oid_equals</a>(dom, dom_len, d-&gt;name, d-&gt;name_length) ==
-00410                 0) {
-00411                 <span class="keywordflow">return</span> d-&gt;f_create_from_ostring(o, o_len, local);
-00412             }
-00413         }
-00414     }
-00415 
-00416     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+00403 netsnmp_transport *
+00404 netsnmp_tdomain_transport_oid(<span class="keyword">const</span> oid * dom,
+00405                               size_t dom_len,
+00406                               <span class="keyword">const</span> u_char * o, size_t o_len, <span class=
+"keywordtype">int</span> local)
+00407 {
+00408     netsnmp_tdomain *d;
+00409     <span class="keywordtype">int</span>             i;
+00410 
+00411     DEBUGMSGTL((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">"domain \""</span>));
+00412     DEBUGMSGOID((<span class="stringliteral">"tdomain"</span>, dom, dom_len));
+00413     DEBUGMSG((<span class="stringliteral">"tdomain"</span>, <span class="stringliteral">"\"\n"</span>));
+00414 
+00415     <span class="keywordflow">for</span> (d = domain_list; d != NULL; d = d-&gt;next) {
+00416         <span class="keywordflow">for</span> (i = 0; d-&gt;prefix[i] != NULL; i++) {
+00417             <span class="keywordflow">if</span> (<a class="code" href=
+"group__library.html#ga106">netsnmp_oid_equals</a>(dom, dom_len, d-&gt;name, d-&gt;name_length) ==
+00418                 0) {
+00419                 <span class="keywordflow">return</span> d-&gt;f_create_from_ostring(o, o_len, local);
+00420             }
+00421         }
+00422     }
+00423 
+00424     <a class="code" href="group__snmp__logging.html#ga41">snmp_log</a>(LOG_ERR, <span class=
 "stringliteral">"No support for requested transport domain\n"</span>);
-00417     <span class="keywordflow">return</span> NULL;
-00418 }
-00419 
-00420 
-00423 <span class="keywordtype">int</span>
-00424 netsnmp_transport_add_to_list(netsnmp_transport_list **transport_list,
-00425                               netsnmp_transport *transport)
-00426 {
-00427     netsnmp_transport_list *newptr =
-00428         <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_transport_list);
-00429 
-00430     <span class="keywordflow">if</span> (!newptr)
-00431         <span class="keywordflow">return</span> 1;
-00432 
-00433     newptr-&gt;next = *transport_list;
-00434     newptr-&gt;transport = transport;
-00435 
-00436     *transport_list = newptr;
+00425     <span class="keywordflow">return</span> NULL;
+00426 }
+00427 
+00428 
+00431 <span class="keywordtype">int</span>
+00432 netsnmp_transport_add_to_list(netsnmp_transport_list **transport_list,
+00433                               netsnmp_transport *transport)
+00434 {
+00435     netsnmp_transport_list *newptr =
+00436         <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_transport_list);
 00437 
-00438     <span class="keywordflow">return</span> 0;
-00439 }
+00438     <span class="keywordflow">if</span> (!newptr)
+00439         <span class="keywordflow">return</span> 1;
 00440 
-00441 
-00444 <span class="keywordtype">int</span>
-00445 netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
-00446                                    netsnmp_transport *transport)
-00447 {
-00448     netsnmp_transport_list *ptr = *transport_list, *lastptr = NULL;
+00441     newptr-&gt;next = *transport_list;
+00442     newptr-&gt;transport = transport;
+00443 
+00444     *transport_list = newptr;
+00445 
+00446     <span class="keywordflow">return</span> 0;
+00447 }
+00448 
 00449 
-00450     <span class="keywordflow">while</span> (ptr &amp;&amp; ptr-&gt;transport != transport) {
-00451         lastptr = ptr;
-00452         ptr = ptr-&gt;next;
-00453     }
-00454 
-00455     <span class="keywordflow">if</span> (!ptr)
-00456         <span class="keywordflow">return</span> 1;
+00452 <span class="keywordtype">int</span>
+00453 netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
+00454                                    netsnmp_transport *transport)
+00455 {
+00456     netsnmp_transport_list *ptr = *transport_list, *lastptr = NULL;
 00457 
-00458     <span class="keywordflow">if</span> (lastptr)
-00459         lastptr-&gt;next = ptr-&gt;next;
-00460     <span class="keywordflow">else</span>
-00461         *transport_list = ptr-&gt;next;
+00458     <span class="keywordflow">while</span> (ptr &amp;&amp; ptr-&gt;transport != transport) {
+00459         lastptr = ptr;
+00460         ptr = ptr-&gt;next;
+00461     }
 00462 
-00463     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(ptr);
-00464 
-00465     <span class="keywordflow">return</span> 0;
-00466 }
+00463     <span class="keywordflow">if</span> (!ptr)
+00464         <span class="keywordflow">return</span> 1;
+00465 
+00466     <span class="keywordflow">if</span> (lastptr)
+00467         lastptr-&gt;next = ptr-&gt;next;
+00468     <span class="keywordflow">else</span>
+00469         *transport_list = ptr-&gt;next;
+00470 
+00471     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(ptr);
+00472 
+00473     <span class="keywordflow">return</span> 0;
+00474 }
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:49 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

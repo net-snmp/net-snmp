@@ -59,7 +59,7 @@
 00036 
 00037     <span class="keywordtype">void</span>            init_snmp_logging(<span class="keywordtype">void</span>);
 00038     <span class="keywordtype">int</span>             <a class="code" href=
-"group__snmp__logging.html#ga11">snmp_get_do_logging</a>(<span class="keywordtype">void</span>);
+"group__snmp__logging.html#ga12">snmp_get_do_logging</a>(<span class="keywordtype">void</span>);
 00039     <span class="keywordtype">void</span>            snmp_disable_syslog(<span class="keywordtype">void</span>);
 00040     <span class="keywordtype">void</span>            snmp_disable_filelog(<span class="keywordtype">void</span>);
 00041     <span class="keywordtype">void</span>            snmp_disable_stderrlog(<span class="keywordtype">void</span>);
@@ -76,95 +76,104 @@
 00049     <span class="keywordtype">void</span>            snmp_enable_stderrlog(<span class="keywordtype">void</span>);
 00050     <span class="keywordtype">void</span>            snmp_enable_calllog(<span class="keywordtype">void</span>);
 00051 
-00052 <span class="preprocessor">#if HAVE_STDARG_H</span>
-00053     <span class="keywordtype">int</span>             <a class="code" href=
-"group__snmp__logging.html#ga39">snmp_log</a>(<span class="keywordtype">int</span> priority, <span class=
+00052     <span class="keywordtype">int</span>             snmp_stderrlog_status(<span class="keywordtype">void</span>);
+00053 
+00054 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00055 <span class=
+"preprocessor"># if !defined(__GNUC__) || __GNUC__ &lt; 2 || (__GNUC__ == 2 &amp;&amp; __GNUC_MINOR__ &lt; 8)</span>
+00056     <span class="keywordtype">int</span>             <a class="code" href=
+"group__snmp__logging.html#ga41">snmp_log</a>(<span class="keywordtype">int</span> priority, <span class=
 "keyword">const</span> <span class="keywordtype">char</span> *format, ...);
-00054 <span class="preprocessor">#else</span>
-00055     <span class="keywordtype">int</span>             <a class="code" href=
-"group__snmp__logging.html#ga39">snmp_log</a>(va_alist);
-00056 <span class="preprocessor">#endif</span>
-00057     <span class="keywordtype">int</span>             snmp_vlog(<span class="keywordtype">int</span> priority, <span class=
-"keyword">const</span> <span class="keywordtype">char</span> *format,
-00058                               va_list ap);
-00059     <span class="comment">/*</span>
-00060 <span class="comment">     * 0 - successful message formatting </span>
-00061 <span class="comment">     */</span>
-00062     <span class="comment">/*</span>
-00063 <span class="comment">     * -1 - Could not format log-string </span>
-00064 <span class="comment">     */</span>
-00065     <span class="comment">/*</span>
-00066 <span class="comment">     * -2 - Could not allocate memory for log-message </span>
-00067 <span class="comment">     */</span>
-00068     <span class="comment">/*</span>
-00069 <span class="comment">     * -3 - Log-message too long! </span>
-00070 <span class="comment">     */</span>
-00071 
-00072     <span class="keywordtype">void</span>            snmp_log_perror(<span class="keyword">const</span> <span class=
-"keywordtype">char</span> *s);
-00073 
-00074 
-00075 <span class="preprocessor">#define NETSNMP_LOGHANDLER_STDOUT       1</span>
-00076 <span class="preprocessor">#define NETSNMP_LOGHANDLER_STDERR       2</span>
-00077 <span class="preprocessor">#define NETSNMP_LOGHANDLER_FILE         3</span>
-00078 <span class="preprocessor">#define NETSNMP_LOGHANDLER_SYSLOG       4</span>
-00079 <span class="preprocessor">#define NETSNMP_LOGHANDLER_CALLBACK     5</span>
-00080 <span class="preprocessor">#define NETSNMP_LOGHANDLER_NONE         6</span>
+00057 <span class="preprocessor"># else</span>
+00058     <span class="keywordtype">int</span>             <a class="code" href=
+"group__snmp__logging.html#ga41">snmp_log</a>(<span class="keywordtype">int</span> priority, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *format, ...)
+00059                         __attribute__ ((__format__ (__printf__, 2, 3)));
+00060 # endif
+00061 #else
+00062     <span class="keywordtype">int</span>             snmp_log(va_alist);
+00063 #endif
+00064     <span class="keywordtype">int</span>             snmp_vlog(<span class=
+"keywordtype">int</span> priority, const <span class="keywordtype">char</span> *format,
+00065                               va_list ap);
+00066     <span class="comment">/*</span>
+00067 <span class="comment">     * 0 - successful message formatting </span>
+00068 <span class="comment">     */</span>
+00069     <span class="comment">/*</span>
+00070 <span class="comment">     * -1 - Could not format log-string </span>
+00071 <span class="comment">     */</span>
+00072     <span class="comment">/*</span>
+00073 <span class="comment">     * -2 - Could not allocate memory for log-message </span>
+00074 <span class="comment">     */</span>
+00075     <span class="comment">/*</span>
+00076 <span class="comment">     * -3 - Log-message too long! </span>
+00077 <span class="comment">     */</span>
+00078 
+00079     <span class="keywordtype">void</span>            snmp_log_perror(const <span class="keywordtype">char</span> *s);
+00080 
 00081 
-00082     <span class="keywordtype">int</span> snmp_log_options(<span class="keywordtype">char</span> *optarg, <span class=
-"keywordtype">int</span> argc, <span class="keywordtype">char</span> *<span class="keyword">const</span> *argv);
-00083     <span class="keywordtype">void</span> snmp_log_options_usage(<span class="keyword">const</span> <span class=
+00082 #define NETSNMP_LOGHANDLER_STDOUT       1
+00083 #define NETSNMP_LOGHANDLER_STDERR       2
+00084 #define NETSNMP_LOGHANDLER_FILE         3
+00085 #define NETSNMP_LOGHANDLER_SYSLOG       4
+00086 #define NETSNMP_LOGHANDLER_CALLBACK     5
+00087 #define NETSNMP_LOGHANDLER_NONE         6
+00088 
+00089     <span class="keywordtype">int</span> snmp_log_options(<span class="keywordtype">char</span> *optarg, <span class=
+"keywordtype">int</span> argc, <span class="keywordtype">char</span> *const *argv);
+00090     <span class="keywordtype">void</span> snmp_log_options_usage(const <span class=
 "keywordtype">char</span> *lead, FILE *outf);
-00084     <span class="keywordtype">char</span> *snmp_log_syslogname(<span class="keywordtype">char</span> *syslogname);
-00085     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_log_handler_s netsnmp_log_handler; 
-00086     <span class="keyword">typedef</span> int (NetsnmpLogHandler)(netsnmp_log_handler*, int, <span class=
-"keyword">const</span> <span class="keywordtype">char</span> *);
-00087 
-00088     NetsnmpLogHandler log_handler_stdouterr;
-00089     NetsnmpLogHandler log_handler_file;
-00090     NetsnmpLogHandler log_handler_syslog;
-00091     NetsnmpLogHandler log_handler_callback;
-00092     NetsnmpLogHandler log_handler_null;
-00093 
-00094     <span class="keyword">struct </span>netsnmp_log_handler_s {
-00095         <span class="keywordtype">int</span>     enabled;
-00096         <span class="keywordtype">int</span>     priority;
-00097         <span class="keywordtype">int</span>     pri_max;
-00098         <span class="keywordtype">int</span>     type;
-00099         <span class="keyword">const</span> <span class="keywordtype">char</span> *token;              <span class=
-"comment">/* Also used for filename */</span>
+00091     <span class="keywordtype">char</span> *snmp_log_syslogname(const <span class="keywordtype">char</span> *syslogname);
+00092     typedef struct netsnmp_log_handler_s netsnmp_log_handler; 
+00093     typedef <span class="keywordtype">int</span> (NetsnmpLogHandler)(netsnmp_log_handler*, <span class=
+"keywordtype">int</span>, const <span class="keywordtype">char</span> *);
+00094 
+00095     NetsnmpLogHandler log_handler_stdouterr;
+00096     NetsnmpLogHandler log_handler_file;
+00097     NetsnmpLogHandler log_handler_syslog;
+00098     NetsnmpLogHandler log_handler_callback;
+00099     NetsnmpLogHandler log_handler_null;
 00100 
-00101         NetsnmpLogHandler       *handler;
-00102 
-00103         <span class="keywordtype">int</span>     imagic;         <span class=
+00101     struct netsnmp_log_handler_s {
+00102         <span class="keywordtype">int</span>     enabled;
+00103         <span class="keywordtype">int</span>     priority;
+00104         <span class="keywordtype">int</span>     pri_max;
+00105         <span class="keywordtype">int</span>     type;
+00106         <span class="keyword">const</span> <span class="keywordtype">char</span> *token;              <span class=
+"comment">/* Also used for filename */</span>
+00107 
+00108         NetsnmpLogHandler       *handler;
+00109 
+00110         <span class="keywordtype">int</span>     imagic;         <span class=
 "comment">/* E.g. file descriptor, syslog facility */</span>
-00104         <span class="keywordtype">void</span>   *magic;          <span class="comment">/* E.g. Callback function */</span>
-00105 
-00106         netsnmp_log_handler     *next, *prev;
-00107     };
-00108 
-00109 netsnmp_log_handler *get_logh_head( <span class="keywordtype">void</span> );
-00110 netsnmp_log_handler *netsnmp_register_loghandler( <span class="keywordtype">int</span> type, <span class=
+00111         <span class="keywordtype">void</span>   *magic;          <span class="comment">/* E.g. Callback function */</span>
+00112 
+00113         netsnmp_log_handler     *next, *prev;
+00114     };
+00115 
+00116 netsnmp_log_handler *get_logh_head( <span class="keywordtype">void</span> );
+00117 netsnmp_log_handler *netsnmp_register_loghandler( <span class="keywordtype">int</span> type, <span class=
 "keywordtype">int</span> pri );
-00111 netsnmp_log_handler *netsnmp_find_loghandler( <span class="keyword">const</span> <span class=
+00118 netsnmp_log_handler *netsnmp_find_loghandler( <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *token );
-00112 <span class="keywordtype">int</span> netsnmp_add_loghandler(    netsnmp_log_handler *logh );
-00113 <span class="keywordtype">int</span> netsnmp_remove_loghandler( netsnmp_log_handler *logh );
-00114 <span class="keywordtype">int</span> netsnmp_enable_loghandler( <span class="keyword">const</span> <span class=
+00119 <span class="keywordtype">int</span> netsnmp_add_loghandler(    netsnmp_log_handler *logh );
+00120 <span class="keywordtype">int</span> netsnmp_remove_loghandler( netsnmp_log_handler *logh );
+00121 <span class="keywordtype">int</span> netsnmp_enable_loghandler( <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *token );
-00115 <span class="keywordtype">int</span> netsnmp_disable_loghandler( <span class="keyword">const</span> <span class=
+00122 <span class="keywordtype">int</span> netsnmp_disable_loghandler( <span class="keyword">const</span> <span class=
 "keywordtype">char</span> *token );
-00116 <span class="preprocessor">#ifdef __cplusplus</span>
-00117 }
-00118 <span class="preprocessor">#endif</span>
-00119 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_LOGGING_H */</span>
+00123 <span class="keywordtype">void</span> <a class="code" href=
+"group__snmp__logging.html#ga22">netsnmp_logging_restart</a>(<span class="keywordtype">void</span>);
+00124 <span class="preprocessor">#ifdef __cplusplus</span>
+00125 }
+00126 <span class="preprocessor">#endif</span>
+00127 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_LOGGING_H */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:49 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

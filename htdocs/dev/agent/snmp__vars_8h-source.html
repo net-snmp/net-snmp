@@ -116,36 +116,39 @@
 00094     };
 00095 
 00096     <span class="keywordtype">int</span>             <a class="code" href=
-"group__library.html#ga21">init_agent</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *);
+"group__library.html#ga23">init_agent</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *);
 00097     <span class="keywordtype">void</span>            shutdown_agent(<span class="keywordtype">void</span>);
 00098 
-00099 <span class="preprocessor">#ifdef USING_AGENTX_SUBAGENT_MODULE</span>
-00100     <span class="keywordtype">void</span>            netsnmp_enable_subagent(<span class="keywordtype">void</span>);
-00101 <span class="preprocessor">#endif</span>
-00102 
-00103 <span class="preprocessor">#ifndef _AGENT_REGISTRY_H</span>
-00104 <span class="preprocessor">#include &lt;net-snmp/agent/agent_handler.h&gt;</span>
-00105 <span class="preprocessor">#include &lt;net-snmp/agent/var_struct.h&gt;</span>
-00106 <span class="preprocessor">#include &lt;net-snmp/agent/agent_registry.h&gt;</span>
-00107 <span class="preprocessor">#endif</span>
-00108 
-00109     <span class="comment">/*</span>
-00110 <span class="comment">     * fail overloads non-negative integer value. it must be -1 ! </span>
-00111 <span class="comment">     */</span>
-00112 <span class="preprocessor">#define MATCH_FAILED    (-1)</span>
-00113 <span class="preprocessor">#define MATCH_SUCCEEDED 0</span>
-00114 
-00115 <span class="preprocessor">#ifdef __cplusplus</span>
-00116 }
-00117 <span class="preprocessor">#endif</span>
-00118 <span class="preprocessor">#endif                          </span><span class="comment">/* _SNMP_VARS_H_ */</span>
+00099     <span class="keywordtype">int</span>             should_init(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *module_name);
+00100     <span class="keywordtype">void</span>            add_to_init_list(<span class="keywordtype">char</span> *module_list);
+00101 
+00102 <span class="preprocessor">#ifdef USING_AGENTX_SUBAGENT_MODULE</span>
+00103     <span class="keywordtype">void</span>            netsnmp_enable_subagent(<span class="keywordtype">void</span>);
+00104 <span class="preprocessor">#endif</span>
+00105 
+00106 <span class="preprocessor">#ifndef _AGENT_REGISTRY_H</span>
+00107 <span class="preprocessor">#include &lt;net-snmp/agent/agent_handler.h&gt;</span>
+00108 <span class="preprocessor">#include &lt;net-snmp/agent/var_struct.h&gt;</span>
+00109 <span class="preprocessor">#include &lt;net-snmp/agent/agent_registry.h&gt;</span>
+00110 <span class="preprocessor">#endif</span>
+00111 
+00112     <span class="comment">/*</span>
+00113 <span class="comment">     * fail overloads non-negative integer value. it must be -1 ! </span>
+00114 <span class="comment">     */</span>
+00115 <span class="preprocessor">#define MATCH_FAILED    (-1)</span>
+00116 <span class="preprocessor">#define MATCH_SUCCEEDED 0</span>
+00117 
+00118 <span class="preprocessor">#ifdef __cplusplus</span>
+00119 }
+00120 <span class="preprocessor">#endif</span>
+00121 <span class="preprocessor">#endif                          </span><span class="comment">/* _SNMP_VARS_H_ */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:49 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

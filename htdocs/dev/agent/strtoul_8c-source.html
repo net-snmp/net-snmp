@@ -30,121 +30,116 @@
 00010 <span class="comment"> * 2. Redistributions in binary form must reproduce the above copyright</span>
 00011 <span class="comment"> *        notice, this list of conditions and the following disclaimer in the</span>
 00012 <span class="comment"> *        documentation and/or other materials provided with the distribution.</span>
-00013 <span class="comment"> * 3. All advertising materials mentioning features or use of this software</span>
-00014 <span class="comment"> *        must display the following acknowledgement:</span>
-00015 <span class="comment"> *      This product includes software developed by the University of</span>
-00016 <span class="comment"> *      California, Berkeley and its contributors.</span>
-00017 <span class="comment"> * 4. Neither the name of the University nor the names of its contributors</span>
-00018 <span class="comment"> *        may be used to endorse or promote products derived from this software</span>
-00019 <span class="comment"> *        without specific prior written permission.</span>
-00020 <span class="comment"> *</span>
-00021 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND</span>
-00022 <span class="comment"> * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span>
-00023 <span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span>
-00024 <span class="comment"> * ARE DISCLAIMED.      IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE</span>
-00025 <span class="comment"> * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL</span>
-00026 <span class="comment"> * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS</span>
-00027 <span class="comment"> * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)</span>
-00028 <span class="comment"> * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</span>
-00029 <span class="comment"> * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY</span>
-00030 <span class="comment"> * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF</span>
-00031 <span class="comment"> * SUCH DAMAGE.</span>
-00032 <span class="comment"> */</span>
+00013 <span class="comment"> * 3. Neither the name of the University nor the names of its contributors</span>
+00014 <span class="comment"> *        may be used to endorse or promote products derived from this software</span>
+00015 <span class="comment"> *        without specific prior written permission.</span>
+00016 <span class="comment"> *</span>
+00017 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND</span>
+00018 <span class="comment"> * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span>
+00019 <span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span>
+00020 <span class="comment"> * ARE DISCLAIMED.      IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE</span>
+00021 <span class="comment"> * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL</span>
+00022 <span class="comment"> * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS</span>
+00023 <span class="comment"> * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)</span>
+00024 <span class="comment"> * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</span>
+00025 <span class="comment"> * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY</span>
+00026 <span class="comment"> * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF</span>
+00027 <span class="comment"> * SUCH DAMAGE.</span>
+00028 <span class="comment"> */</span>
+00029 
+00030 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00031 
+00032 <span class="preprocessor">#if !HAVE_STRTOUL</span>
 00033 
-00034 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
-00035 
-00036 <span class="preprocessor">#if !HAVE_STRTOUL</span>
-00037 
-00038 <span class="preprocessor">#if defined(LIBC_SCCS) &amp;&amp; !defined(lint)</span>
-00039 <span class="keyword">static</span> <span class="keywordtype">char</span>     sccsid[] = <span class=
+00034 <span class="preprocessor">#if defined(LIBC_SCCS) &amp;&amp; !defined(lint)</span>
+00035 <span class="keyword">static</span> <span class="keywordtype">char</span>     sccsid[] = <span class=
 "stringliteral">"@(#)strtoul.c   8.1 (Berkeley) 6/4/93"</span>;
-00040 <span class="preprocessor">#endif                          </span><span class="comment">/* LIBC_SCCS and not lint */</span>
-00041 
-00042 <span class="preprocessor">#if HAVE_LIMITS_H</span>
-00043 <span class="preprocessor">#include &lt;limits.h&gt;</span>
-00044 <span class="preprocessor">#endif</span>
-00045 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
-00046 <span class="preprocessor">#include &lt;errno.h&gt;</span>
-00047 <span class="preprocessor">#if HAVE_STDLIB_H</span>
-00048 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
-00049 <span class="preprocessor">#endif</span>
-00050 
-00051 <span class="comment">/*</span>
-00052 <span class="comment"> * Convert a string to an unsigned long integer.</span>
-00053 <span class="comment"> *</span>
-00054 <span class="comment"> * Ignores `locale' stuff.  Assumes that the upper and lower case</span>
-00055 <span class="comment"> * alphabets and digits are each contiguous.</span>
-00056 <span class="comment"> */</span>
-00057 <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>
-00058 strtoul(<span class="keyword">const</span> <span class="keywordtype">char</span> *nptr, <span class=
+00036 <span class="preprocessor">#endif                          </span><span class="comment">/* LIBC_SCCS and not lint */</span>
+00037 
+00038 <span class="preprocessor">#if HAVE_LIMITS_H</span>
+00039 <span class="preprocessor">#include &lt;limits.h&gt;</span>
+00040 <span class="preprocessor">#endif</span>
+00041 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+00042 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+00043 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00044 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00045 <span class="preprocessor">#endif</span>
+00046 
+00047 <span class="comment">/*</span>
+00048 <span class="comment"> * Convert a string to an unsigned long integer.</span>
+00049 <span class="comment"> *</span>
+00050 <span class="comment"> * Ignores `locale' stuff.  Assumes that the upper and lower case</span>
+00051 <span class="comment"> * alphabets and digits are each contiguous.</span>
+00052 <span class="comment"> */</span>
+00053 <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>
+00054 strtoul(<span class="keyword">const</span> <span class="keywordtype">char</span> *nptr, <span class=
 "keywordtype">char</span> **endptr, <span class="keywordtype">int</span> base)
-00059 {
-00060     <span class="keyword">const</span> <span class="keywordtype">char</span>     *s = nptr;
-00061     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   acc;
-00062     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>   c;
-00063     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   cutoff;
-00064     <span class="keywordtype">int</span>             neg = 0, any, cutlim;
-00065 
-00066     <span class="comment">/*</span>
-00067 <span class="comment">     * See strtol for comments as to the logic used.</span>
-00068 <span class="comment">     */</span>
-00069     <span class="keywordflow">do</span> {
+00055 {
+00056     <span class="keyword">const</span> <span class="keywordtype">char</span>     *s = nptr;
+00057     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   acc;
+00058     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>   c;
+00059     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   cutoff;
+00060     <span class="keywordtype">int</span>             neg = 0, any, cutlim;
+00061 
+00062     <span class="comment">/*</span>
+00063 <span class="comment">     * See strtol for comments as to the logic used.</span>
+00064 <span class="comment">     */</span>
+00065     <span class="keywordflow">do</span> {
+00066         c = *s++;
+00067     } <span class="keywordflow">while</span> (isspace(c));
+00068     <span class="keywordflow">if</span> (c == <span class="charliteral">'-'</span>) {
+00069         neg = 1;
 00070         c = *s++;
-00071     } <span class="keywordflow">while</span> (isspace(c));
-00072     <span class="keywordflow">if</span> (c == <span class="charliteral">'-'</span>) {
-00073         neg = 1;
-00074         c = *s++;
-00075     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c == <span class="charliteral">'+'</span>)
-00076         c = *s++;
-00077     <span class="keywordflow">if</span> ((base == 0 || base == 16) &amp;&amp; c == <span class=
+00071     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c == <span class="charliteral">'+'</span>)
+00072         c = *s++;
+00073     <span class="keywordflow">if</span> ((base == 0 || base == 16) &amp;&amp; c == <span class=
 "charliteral">'0'</span> &amp;&amp; (*s == <span class="charliteral">'x'</span> || *s == <span class="charliteral">'X'</span>)) {
-00078         c = s[1];
-00079         s += 2;
-00080         base = 16;
-00081     }
-00082     <span class="keywordflow">if</span> (base == 0)
-00083         base = c == <span class="charliteral">'0'</span> ? 8 : 10;
-00084     cutoff = (<span class="keywordtype">unsigned</span> long) ULONG_MAX / (<span class=
+00074         c = s[1];
+00075         s += 2;
+00076         base = 16;
+00077     }
+00078     <span class="keywordflow">if</span> (base == 0)
+00079         base = c == <span class="charliteral">'0'</span> ? 8 : 10;
+00080     cutoff = (<span class="keywordtype">unsigned</span> long) ULONG_MAX / (<span class=
 "keywordtype">unsigned</span> long) base;
-00085     cutlim = (<span class="keywordtype">unsigned</span> long) ULONG_MAX % (<span class=
+00081     cutlim = (<span class="keywordtype">unsigned</span> long) ULONG_MAX % (<span class=
 "keywordtype">unsigned</span> long) base;
-00086     <span class="keywordflow">for</span> (acc = 0, any = 0;; c = *s++) {
-00087         <span class="keywordflow">if</span> (!isascii(c))
-00088             <span class="keywordflow">break</span>;
-00089         <span class="keywordflow">if</span> (isdigit(c))
-00090             c -= <span class="charliteral">'0'</span>;
-00091         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (isalpha(c))
-00092             c -= isupper(c) ? <span class="charliteral">'A'</span> - 10 : <span class="charliteral">'a'</span> - 10;
-00093         <span class="keywordflow">else</span>
-00094             <span class="keywordflow">break</span>;
-00095         <span class="keywordflow">if</span> (c &gt;= base)
-00096             <span class="keywordflow">break</span>;
-00097         <span class="keywordflow">if</span> (any &lt; 0 || acc &gt; cutoff || (acc == cutoff &amp;&amp; c &gt; cutlim))
-00098             any = -1;
-00099         <span class="keywordflow">else</span> {
-00100             any = 1;
-00101             acc *= base;
-00102             acc += c;
-00103         }
-00104     }
-00105     <span class="keywordflow">if</span> (any &lt; 0) {
-00106         acc = ULONG_MAX;
-00107         errno = ERANGE;
-00108     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (neg)
-00109         acc = -acc;
-00110     <span class="keywordflow">if</span> (endptr != 0)
-00111         *endptr = (<span class="keywordtype">char</span> *) (any ? s - 1 : nptr);
-00112     <span class="keywordflow">return</span> (acc);
-00113 }
-00114 
-00115 <span class="preprocessor">#endif                          </span><span class="comment">/* !HAVE_STRTOUL */</span>
+00082     <span class="keywordflow">for</span> (acc = 0, any = 0;; c = *s++) {
+00083         <span class="keywordflow">if</span> (!isascii(c))
+00084             <span class="keywordflow">break</span>;
+00085         <span class="keywordflow">if</span> (isdigit(c))
+00086             c -= <span class="charliteral">'0'</span>;
+00087         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (isalpha(c))
+00088             c -= isupper(c) ? <span class="charliteral">'A'</span> - 10 : <span class="charliteral">'a'</span> - 10;
+00089         <span class="keywordflow">else</span>
+00090             <span class="keywordflow">break</span>;
+00091         <span class="keywordflow">if</span> (c &gt;= base)
+00092             <span class="keywordflow">break</span>;
+00093         <span class="keywordflow">if</span> (any &lt; 0 || acc &gt; cutoff || (acc == cutoff &amp;&amp; c &gt; cutlim))
+00094             any = -1;
+00095         <span class="keywordflow">else</span> {
+00096             any = 1;
+00097             acc *= base;
+00098             acc += c;
+00099         }
+00100     }
+00101     <span class="keywordflow">if</span> (any &lt; 0) {
+00102         acc = ULONG_MAX;
+00103         errno = ERANGE;
+00104     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (neg)
+00105         acc = -acc;
+00106     <span class="keywordflow">if</span> (endptr != 0)
+00107         *endptr = (<span class="keywordtype">char</span> *) (any ? s - 1 : nptr);
+00108     <span class="keywordflow">return</span> (acc);
+00109 }
+00110 
+00111 <span class="preprocessor">#endif                          </span><span class="comment">/* !HAVE_STRTOUL */</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:42 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:50 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

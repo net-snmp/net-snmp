@@ -39,166 +39,166 @@
 00018 
 00019 <span class="preprocessor">#define         NETSNMP_TRANSPORT_FLAG_STREAM   0x01</span>
 00020 <span class="preprocessor">#define         NETSNMP_TRANSPORT_FLAG_LISTEN   0x02</span>
-00021 
-00022 <span class="comment">/*  The standard SNMP domains.  */</span>
-00023 
-00024 <span class="keyword">extern</span> oid      netsnmpUDPDomain[];     <span class=
+00021 <span class="preprocessor">#define         NETSNMP_TRANSPORT_FLAG_TUNNELED 0x04</span>
+00022 
+00023 <span class="comment">/*  The standard SNMP domains.  */</span>
+00024 
+00025 <span class="keyword">extern</span> oid      netsnmpUDPDomain[];     <span class=
 "comment">/*      = { 1, 3, 6, 1, 6, 1, 1 };  */</span>
-00025 <span class="keyword">extern</span> oid      netsnmpCLNSDomain[];    <span class=
+00026 <span class="keyword">extern</span> oid      netsnmpCLNSDomain[];    <span class=
 "comment">/*      = { 1, 3, 6, 1, 6, 1, 2 };  */</span>
-00026 <span class="keyword">extern</span> oid      netsnmpCONSDomain[];    <span class=
+00027 <span class="keyword">extern</span> oid      netsnmpCONSDomain[];    <span class=
 "comment">/*      = { 1, 3, 6, 1, 6, 1, 3 };  */</span>
-00027 <span class="keyword">extern</span> oid      netsnmpDDPDomain[];     <span class=
+00028 <span class="keyword">extern</span> oid      netsnmpDDPDomain[];     <span class=
 "comment">/*      = { 1, 3, 6, 1, 6, 1, 4 };  */</span>
-00028 <span class="keyword">extern</span> oid      netsnmpIPXDomain[];     <span class=
+00029 <span class="keyword">extern</span> oid      netsnmpIPXDomain[];     <span class=
 "comment">/*      = { 1, 3, 6, 1, 6, 1, 5 };  */</span>
-00029 <span class="keyword">extern</span> size_t   netsnmpUDPDomain_len;
-00030 <span class="keyword">extern</span> size_t   netsnmpCLNSDomain_len;
-00031 <span class="keyword">extern</span> size_t   netsnmpCONSDomain_len;
-00032 <span class="keyword">extern</span> size_t   netsnmpDDPDomain_len;
-00033 <span class="keyword">extern</span> size_t   netsnmpIPXDomain_len;
-00034 
-00035 <span class="comment">/*  Structure which defines the transport-independent API.  */</span>
-00036 
-00037 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_transport_s {
-00038     <span class="comment">/*  The transport domain object identifier.  */</span>
-00039 
-00040     <span class="keyword">const</span> oid      *domain;
-00041     <span class="keywordtype">int</span>             domain_length;  <span class=
+00030 <span class="keyword">extern</span> size_t   netsnmpUDPDomain_len;
+00031 <span class="keyword">extern</span> size_t   netsnmpCLNSDomain_len;
+00032 <span class="keyword">extern</span> size_t   netsnmpCONSDomain_len;
+00033 <span class="keyword">extern</span> size_t   netsnmpDDPDomain_len;
+00034 <span class="keyword">extern</span> size_t   netsnmpIPXDomain_len;
+00035 
+00036 <span class="comment">/*  Structure which defines the transport-independent API.  */</span>
+00037 
+00038 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_transport_s {
+00039     <span class="comment">/*  The transport domain object identifier.  */</span>
+00040 
+00041     <span class="keyword">const</span> oid      *domain;
+00042     <span class="keywordtype">int</span>             domain_length;  <span class=
 "comment">/*  In sub-IDs, not octets.  */</span>
-00042 
-00043     <span class="comment">/*  Local transport address (in relevant SNMP-style encoding).  */</span>
-00044     
-00045     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  *local;
-00046     <span class="keywordtype">int</span>             local_length;   <span class="comment">/*  In octets.  */</span>
-00047 
-00048     <span class="comment">/*  Remote transport address (in relevant SNMP-style encoding).  */</span>
-00049 
-00050     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  *remote;
-00051     <span class="keywordtype">int</span>             remote_length;  <span class="comment">/*  In octets.  */</span>
-00052 
-00053     <span class="comment">/*  The actual socket.  */</span>
-00054     
-00055     <span class="keywordtype">int</span>             sock;
-00056 
-00057     <span class="comment">/*  Flags (see #definitions above).  */</span>
-00058 
-00059     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    flags;
-00060 
-00061     <span class="comment">/*  Protocol-specific opaque data pointer.  */</span>
-00062 
-00063     <span class="keywordtype">void</span>           *data;
-00064     <span class="keywordtype">int</span>             data_length;
-00065 
-00066     <span class="comment">/*  Maximum size of PDU that can be sent/received by this transport.  */</span>
-00067 
-00068     size_t          msgMaxSize;
-00069 
-00070     <span class="comment">/*  Callbacks.  Arguments are:</span>
-00071 <span class="comment">     *          </span>
-00072 <span class="comment">     *              "this" pointer, fd, buf, size, *opaque, *opaque_length  </span>
-00073 <span class="comment">     */</span>
-00074 
-00075     int             (*f_recv)   (<span class="keyword">struct </span>netsnmp_transport_s *, <span class=
+00043 
+00044     <span class="comment">/*  Local transport address (in relevant SNMP-style encoding).  */</span>
+00045     
+00046     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  *local;
+00047     <span class="keywordtype">int</span>             local_length;   <span class="comment">/*  In octets.  */</span>
+00048 
+00049     <span class="comment">/*  Remote transport address (in relevant SNMP-style encoding).  */</span>
+00050 
+00051     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  *remote;
+00052     <span class="keywordtype">int</span>             remote_length;  <span class="comment">/*  In octets.  */</span>
+00053 
+00054     <span class="comment">/*  The actual socket.  */</span>
+00055     
+00056     <span class="keywordtype">int</span>             sock;
+00057 
+00058     <span class="comment">/*  Flags (see #definitions above).  */</span>
+00059 
+00060     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    flags;
+00061 
+00062     <span class="comment">/*  Protocol-specific opaque data pointer.  */</span>
+00063 
+00064     <span class="keywordtype">void</span>           *data;
+00065     <span class="keywordtype">int</span>             data_length;
+00066 
+00067     <span class="comment">/*  Maximum size of PDU that can be sent/received by this transport.  */</span>
+00068 
+00069     size_t          msgMaxSize;
+00070 
+00071     <span class="comment">/*  Callbacks.  Arguments are:</span>
+00072 <span class="comment">     *          </span>
+00073 <span class="comment">     *              "this" pointer, fd, buf, size, *opaque, *opaque_length  </span>
+00074 <span class="comment">     */</span>
+00075 
+00076     int             (*f_recv)   (<span class="keyword">struct </span>netsnmp_transport_s *, <span class=
 "keywordtype">void</span> *,
-00076                                  int, <span class="keywordtype">void</span> **, <span class="keywordtype">int</span> *);
-00077     int             (*f_send)   (<span class="keyword">struct </span>netsnmp_transport_s *, <span class=
+00077                                  int, <span class="keywordtype">void</span> **, <span class="keywordtype">int</span> *);
+00078     int             (*f_send)   (<span class="keyword">struct </span>netsnmp_transport_s *, <span class=
 "keywordtype">void</span> *,
-00078                                  int, <span class="keywordtype">void</span> **, <span class="keywordtype">int</span> *);
-00079     int             (*f_close)  (<span class="keyword">struct </span>netsnmp_transport_s *);
-00080 
-00081     <span class="comment">/*  This callback is only necessary for stream-oriented transports.  */</span>
-00082 
-00083     int             (*f_accept) (<span class="keyword">struct </span>netsnmp_transport_s *);
-00084 
-00085     <span class="comment">/*  Optional callback to format a transport address.  */</span>
-00086 
-00087     <span class="keywordtype">char</span>           *(*f_fmtaddr)(<span class=
+00079                                  int, <span class="keywordtype">void</span> **, <span class="keywordtype">int</span> *);
+00080     int             (*f_close)  (<span class="keyword">struct </span>netsnmp_transport_s *);
+00081 
+00082     <span class="comment">/*  This callback is only necessary for stream-oriented transports.  */</span>
+00083 
+00084     int             (*f_accept) (<span class="keyword">struct </span>netsnmp_transport_s *);
+00085 
+00086     <span class="comment">/*  Optional callback to format a transport address.  */</span>
+00087 
+00088     <span class="keywordtype">char</span>           *(*f_fmtaddr)(<span class=
 "keyword">struct </span>netsnmp_transport_s *, <span class="keywordtype">void</span> *,
-00088                                  int);
-00089 } netsnmp_transport;
-00090 
-00091 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_transport_list_s {
-00092     netsnmp_transport *transport;
-00093     <span class="keyword">struct </span>netsnmp_transport_list_s *next;
-00094 } netsnmp_transport_list;
-00095 
-00096 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_tdomain_s {
-00097     <span class="keyword">const</span> oid      *name;
-00098     size_t          name_length;
-00099     <span class="keyword">const</span> <span class="keywordtype">char</span>    **prefix;
-00100     netsnmp_transport *(*f_create_from_tstring) (<span class="keyword">const</span> <span class=
+00089                                  int);
+00090 } netsnmp_transport;
+00091 
+00092 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_transport_list_s {
+00093     netsnmp_transport *transport;
+00094     <span class="keyword">struct </span>netsnmp_transport_list_s *next;
+00095 } netsnmp_transport_list;
+00096 
+00097 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_tdomain_s {
+00098     <span class="keyword">const</span> oid      *name;
+00099     size_t          name_length;
+00100     <span class="keyword">const</span> <span class="keywordtype">char</span>    **prefix;
+00101     netsnmp_transport *(*f_create_from_tstring) (<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *, int);
-00101     netsnmp_transport *(*f_create_from_ostring) (<span class="keyword">const</span> u_char *,  size_t, int);
-00102 
-00103     <span class="keyword">struct </span>netsnmp_tdomain_s *next;
-00104 } netsnmp_tdomain;
-00105 
+00102     netsnmp_transport *(*f_create_from_ostring) (<span class="keyword">const</span> u_char *,  size_t, int);
+00103 
+00104     <span class="keyword">struct </span>netsnmp_tdomain_s *next;
+00105 } netsnmp_tdomain;
 00106 
-00107 <span class="comment">/*  Some utility functions.  */</span>
-00108 
-00109 <span class="keywordtype">int</span> netsnmp_transport_add_to_list(netsnmp_transport_list **transport_list,
-00110                                   netsnmp_transport *transport);
-00111 <span class="keywordtype">int</span> netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
-00112                                        netsnmp_transport *transport);
-00113 
+00107 
+00108 <span class="comment">/*  Some utility functions.  */</span>
+00109 
+00110 <span class="keywordtype">int</span> netsnmp_transport_add_to_list(netsnmp_transport_list **transport_list,
+00111                                   netsnmp_transport *transport);
+00112 <span class="keywordtype">int</span> netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
+00113                                        netsnmp_transport *transport);
 00114 
-00115 <span class="comment">/*</span>
-00116 <span class="comment"> * Return an exact (deep) copy of t, or NULL if there is a memory allocation</span>
-00117 <span class="comment"> * problem (for instance).</span>
-00118 <span class="comment"> */</span>
-00119 
-00120 netsnmp_transport *netsnmp_transport_copy(netsnmp_transport *t);
-00121 
+00115 
+00116 <span class="comment">/*</span>
+00117 <span class="comment"> * Return an exact (deep) copy of t, or NULL if there is a memory allocation</span>
+00118 <span class="comment"> * problem (for instance).</span>
+00119 <span class="comment"> */</span>
+00120 
+00121 netsnmp_transport *netsnmp_transport_copy(netsnmp_transport *t);
 00122 
-00123 <span class="comment">/*  Free an netsnmp_transport.  */</span>
-00124 
-00125 <span class="keywordtype">void</span>            netsnmp_transport_free(netsnmp_transport *t);
-00126 
+00123 
+00124 <span class="comment">/*  Free an netsnmp_transport.  */</span>
+00125 
+00126 <span class="keywordtype">void</span>            netsnmp_transport_free(netsnmp_transport *t);
 00127 
-00128 <span class="comment">/*</span>
-00129 <span class="comment"> * If the passed oid (in_oid, in_len) corresponds to a supported transport</span>
-00130 <span class="comment"> * domain, return 1; if not return 0.  If out_oid is not NULL and out_len is</span>
-00131 <span class="comment"> * not NULL, then the "internal" oid which should be used to identify this</span>
-00132 <span class="comment"> * domain (e.g. in pdu-&gt;tDomain etc.) is written to *out_oid and its length to</span>
-00133 <span class="comment"> * *out_len.</span>
-00134 <span class="comment"> */</span>
-00135 
-00136 <span class="keywordtype">int</span>             netsnmp_tdomain_support(<span class=
+00128 
+00129 <span class="comment">/*</span>
+00130 <span class="comment"> * If the passed oid (in_oid, in_len) corresponds to a supported transport</span>
+00131 <span class="comment"> * domain, return 1; if not return 0.  If out_oid is not NULL and out_len is</span>
+00132 <span class="comment"> * not NULL, then the "internal" oid which should be used to identify this</span>
+00133 <span class="comment"> * domain (e.g. in pdu-&gt;tDomain etc.) is written to *out_oid and its length to</span>
+00134 <span class="comment"> * *out_len.</span>
+00135 <span class="comment"> */</span>
+00136 
+00137 <span class="keywordtype">int</span>             netsnmp_tdomain_support(<span class=
 "keyword">const</span> oid *in_oid, size_t in_len,
-00137                                         <span class="keyword">const</span> oid **out_oid, size_t *out_len);
-00138 
-00139 <span class="keywordtype">int</span>             netsnmp_tdomain_register(netsnmp_tdomain *domain);
-00140     
-00141 <span class="keywordtype">int</span>             netsnmp_tdomain_unregister(netsnmp_tdomain *domain);
-00142 
-00143 <span class="keywordtype">void</span>            netsnmp_clear_tdomain_list(<span class="keywordtype">void</span>);
-00144 
-00145 <span class="keywordtype">void</span>            netsnmp_tdomain_init(<span class="keywordtype">void</span>);
-00146 
-00147 netsnmp_transport *netsnmp_tdomain_transport(<span class="keyword">const</span> <span class=
+00138                                         <span class="keyword">const</span> oid **out_oid, size_t *out_len);
+00139 
+00140 <span class="keywordtype">int</span>             netsnmp_tdomain_register(netsnmp_tdomain *domain);
+00141     
+00142 <span class="keywordtype">int</span>             netsnmp_tdomain_unregister(netsnmp_tdomain *domain);
+00143 
+00144 <span class="keywordtype">void</span>            netsnmp_clear_tdomain_list(<span class="keywordtype">void</span>);
+00145 
+00146 <span class="keywordtype">void</span>            netsnmp_tdomain_init(<span class="keywordtype">void</span>);
+00147 
+00148 netsnmp_transport *netsnmp_tdomain_transport(<span class="keyword">const</span> <span class=
 "keywordtype">char</span> *string,
-00148                                              <span class="keywordtype">int</span> local,
-00149                                              <span class="keyword">const</span> <span class="keywordtype">char</span>
-00150                                              *default_domain);
-00151 
-00152 netsnmp_transport *netsnmp_tdomain_transport_oid(<span class="keyword">const</span> oid * dom,
-00153                                                  size_t dom_len,
-00154                                                  <span class="keyword">const</span> u_char * o,
-00155                                                  size_t o_len,
-00156                                                  <span class="keywordtype">int</span> local);
-00157 
-00158 <span class="preprocessor">#ifdef __cplusplus</span>
-00159 }
-00160 <span class="preprocessor">#endif</span>
-00161 <span class="preprocessor">#endif</span><span class="comment">/*_SNMP_TRANSPORT_H*/</span>
+00149                                              <span class="keywordtype">int</span> local,
+00150                                              <span class="keyword">const</span> <span class="keywordtype">char</span>
+00151                                              *default_domain);
+00152 
+00153 netsnmp_transport *netsnmp_tdomain_transport_oid(<span class="keyword">const</span> oid * dom,
+00154                                                  size_t dom_len,
+00155                                                  <span class="keyword">const</span> u_char * o,
+00156                                                  size_t o_len,
+00157                                                  <span class="keywordtype">int</span> local);
+00158 
+00159 <span class="preprocessor">#ifdef __cplusplus</span>
+00160 }
+00161 <span class="preprocessor">#endif</span>
+00162 <span class="preprocessor">#endif</span><span class="comment">/*_SNMP_TRANSPORT_H*/</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:41 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:49 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

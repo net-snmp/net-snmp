@@ -59,896 +59,892 @@
 00039 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
 00040 <span class="preprocessor">#endif</span>
 00041 
-00042 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
-00043 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
-00044 <span class="preprocessor">#endif</span>
-00045 
-00046 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
-00047 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
-00048 <span class="preprocessor">#include &lt;net-snmp/agent/agent_callbacks.h&gt;</span>
-00049 <span class="preprocessor">#include &lt;net-snmp/agent/agent_index.h&gt;</span>
-00050 
-00051 <span class="preprocessor">#include "snmpd.h"</span>
-00052 <span class="preprocessor">#include "mibgroup/struct.h"</span>
-00053 <span class="preprocessor">#include &lt;net-snmp/agent/table.h&gt;</span>
-00054 <span class="preprocessor">#include &lt;net-snmp/agent/table_iterator.h&gt;</span>
-00055 <span class="preprocessor">#include "mib_module_includes.h"</span>
-00056 
-00057 <span class="preprocessor">#ifdef USING_AGENTX_SUBAGENT_MODULE</span>
-00058 <span class="preprocessor">#include "agentx/subagent.h"</span>
-00059 <span class="preprocessor">#include "agentx/client.h"</span>
-00060 <span class="preprocessor">#endif</span>
+00042 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00043 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00044 <span class="preprocessor">#include &lt;net-snmp/agent/agent_callbacks.h&gt;</span>
+00045 <span class="preprocessor">#include &lt;net-snmp/agent/agent_index.h&gt;</span>
+00046 
+00047 <span class="preprocessor">#include "snmpd.h"</span>
+00048 <span class="preprocessor">#include "mibgroup/struct.h"</span>
+00049 <span class="preprocessor">#include &lt;net-snmp/agent/table.h&gt;</span>
+00050 <span class="preprocessor">#include &lt;net-snmp/agent/table_iterator.h&gt;</span>
+00051 <span class="preprocessor">#include "mib_module_includes.h"</span>
+00052 
+00053 <span class="preprocessor">#ifdef USING_AGENTX_SUBAGENT_MODULE</span>
+00054 <span class="preprocessor">#include "agentx/subagent.h"</span>
+00055 <span class="preprocessor">#include "agentx/client.h"</span>
+00056 <span class="preprocessor">#endif</span>
+00057 
+00058         <span class="comment">/*</span>
+00059 <span class="comment">         * Initial support for index allocation</span>
+00060 <span class="comment">         */</span>
 00061 
-00062         <span class="comment">/*</span>
-00063 <span class="comment">         * Initial support for index allocation</span>
-00064 <span class="comment">         */</span>
-00065 
-00066 <span class="keyword">struct </span>snmp_index {
-00067     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *varbind;     <span class=
+00062 <span class="keyword">struct </span>snmp_index {
+00063     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *varbind;     <span class=
 "comment">/* or pointer to var_list ? */</span>
-00068     <span class="keywordtype">int</span>             allocated;
-00069     <a class="code" href="structsnmp__session.html">netsnmp_session</a> *session;
-00070     <span class="keyword">struct </span>snmp_index *next_oid;
-00071     <span class="keyword">struct </span>snmp_index *prev_oid;
-00072     <span class="keyword">struct </span>snmp_index *next_idx;
-00073 }              *snmp_index_head = NULL;
-00074 
-00075 <span class="keyword">extern</span> <a class="code" href="structsnmp__session.html">netsnmp_session</a> *main_session;
-00076 
-00077 <span class="comment">/*</span>
-00078 <span class="comment"> * The caller is responsible for free()ing the memory returned by</span>
-00079 <span class="comment"> * this function.  </span>
-00080 <span class="comment"> */</span>
-00081 
-00082 <span class="keywordtype">char</span>           *
-00083 register_string_index(oid * name, size_t name_len, <span class="keywordtype">char</span> *cp)
-00084 {
-00085     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind, *res;
-00086 
-00087     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
+00064     <span class="keywordtype">int</span>             allocated;
+00065     <a class="code" href="structsnmp__session.html">netsnmp_session</a> *session;
+00066     <span class="keyword">struct </span>snmp_index *next_oid;
+00067     <span class="keyword">struct </span>snmp_index *prev_oid;
+00068     <span class="keyword">struct </span>snmp_index *next_idx;
+00069 }              *snmp_index_head = NULL;
+00070 
+00071 <span class="keyword">extern</span> <a class="code" href="structsnmp__session.html">netsnmp_session</a> *main_session;
+00072 
+00073 <span class="comment">/*</span>
+00074 <span class="comment"> * The caller is responsible for free()ing the memory returned by</span>
+00075 <span class="comment"> * this function.  </span>
+00076 <span class="comment"> */</span>
+00077 
+00078 <span class="keywordtype">char</span>           *
+00079 register_string_index(oid * name, size_t name_len, <span class="keywordtype">char</span> *cp)
+00080 {
+00081     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind, *res;
+00082 
+00083     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a>));
-00088     varbind.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_OCTET_STR;
-00089     snmp_set_var_objid(&amp;varbind, name, name_len);
-00090     <span class="keywordflow">if</span> (cp != ANY_STRING_INDEX) {
-00091         snmp_set_var_value(&amp;varbind, (u_char *) cp, strlen(cp));
-00092         res = register_index(&amp;varbind, ALLOCATE_THIS_INDEX, main_session);
-00093     } <span class="keywordflow">else</span> {
-00094         res = register_index(&amp;varbind, ALLOCATE_ANY_INDEX, main_session);
-00095     }
-00096 
-00097     <span class="keywordflow">if</span> (res == NULL) {
-00098         <span class="keywordflow">return</span> NULL;
-00099     } <span class="keywordflow">else</span> {
-00100         <span class="keywordtype">char</span>           *rv = strdup(res-&gt;<a class="code" href=
+00084     varbind.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_OCTET_STR;
+00085     snmp_set_var_objid(&amp;varbind, name, name_len);
+00086     <span class="keywordflow">if</span> (cp != ANY_STRING_INDEX) {
+00087         <a class="code" href=
+"group__snmp__client.html#ga25">snmp_set_var_value</a>(&amp;varbind, (u_char *) cp, strlen(cp));
+00088         res = register_index(&amp;varbind, ALLOCATE_THIS_INDEX, main_session);
+00089     } <span class="keywordflow">else</span> {
+00090         res = register_index(&amp;varbind, ALLOCATE_ANY_INDEX, main_session);
+00091     }
+00092 
+00093     <span class="keywordflow">if</span> (res == NULL) {
+00094         <span class="keywordflow">return</span> NULL;
+00095     } <span class="keywordflow">else</span> {
+00096         <span class="keywordtype">char</span>           *rv = strdup(res-&gt;<a class="code" href=
 "structvariable__list.html#o4">val</a>.string);
-00101         free(res);
-00102         <span class="keywordflow">return</span> rv;
-00103     }
-00104 }
-00105 
-00106 <span class="keywordtype">int</span>
-00107 register_int_index(oid * name, size_t name_len, <span class="keywordtype">int</span> val)
-00108 {
-00109     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind, *res;
-00110 
-00111     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
+00097         free(res);
+00098         <span class="keywordflow">return</span> rv;
+00099     }
+00100 }
+00101 
+00102 <span class="keywordtype">int</span>
+00103 register_int_index(oid * name, size_t name_len, <span class="keywordtype">int</span> val)
+00104 {
+00105     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind, *res;
+00106 
+00107     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a>));
-00112     varbind.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_INTEGER;
-00113     snmp_set_var_objid(&amp;varbind, name, name_len);
-00114     varbind.<a class="code" href="structvariable__list.html#o4">val</a>.string = varbind.<a class="code" href=
+00108     varbind.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_INTEGER;
+00109     snmp_set_var_objid(&amp;varbind, name, name_len);
+00110     varbind.<a class="code" href="structvariable__list.html#o4">val</a>.string = varbind.<a class="code" href=
 "structvariable__list.html#o7">buf</a>;
-00115     <span class="keywordflow">if</span> (val != ANY_INTEGER_INDEX) {
-00116         varbind.<a class="code" href="structvariable__list.html#o5">val_len</a> = <span class=
+00111     <span class="keywordflow">if</span> (val != ANY_INTEGER_INDEX) {
+00112         varbind.<a class="code" href="structvariable__list.html#o5">val_len</a> = <span class=
 "keyword">sizeof</span>(long);
-00117         *varbind.<a class="code" href="structvariable__list.html#o4">val</a>.integer = val;
-00118         res = register_index(&amp;varbind, ALLOCATE_THIS_INDEX, main_session);
-00119     } <span class="keywordflow">else</span> {
-00120         res = register_index(&amp;varbind, ALLOCATE_ANY_INDEX, main_session);
-00121     }
-00122 
-00123     <span class="keywordflow">if</span> (res == NULL) {
-00124         <span class="keywordflow">return</span> -1;
-00125     } <span class="keywordflow">else</span> {
-00126         <span class="keywordtype">int</span>             rv = *(res-&gt;<a class="code" href=
+00113         *varbind.<a class="code" href="structvariable__list.html#o4">val</a>.integer = val;
+00114         res = register_index(&amp;varbind, ALLOCATE_THIS_INDEX, main_session);
+00115     } <span class="keywordflow">else</span> {
+00116         res = register_index(&amp;varbind, ALLOCATE_ANY_INDEX, main_session);
+00117     }
+00118 
+00119     <span class="keywordflow">if</span> (res == NULL) {
+00120         <span class="keywordflow">return</span> -1;
+00121     } <span class="keywordflow">else</span> {
+00122         <span class="keywordtype">int</span>             rv = *(res-&gt;<a class="code" href=
 "structvariable__list.html#o4">val</a>.integer);
-00127         free(res);
-00128         <span class="keywordflow">return</span> rv;
-00129     }
-00130 }
-00131 
-00132 <span class="comment">/*</span>
-00133 <span class="comment"> * The caller is responsible for free()ing the memory returned by</span>
-00134 <span class="comment"> * this function.  </span>
-00135 <span class="comment"> */</span>
-00136 
-00137 <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *
-00138 register_oid_index(oid * name, size_t name_len,
-00139                    oid * value, size_t value_len)
-00140 {
-00141     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind;
-00142 
-00143     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
+00123         free(res);
+00124         <span class="keywordflow">return</span> rv;
+00125     }
+00126 }
+00127 
+00128 <span class="comment">/*</span>
+00129 <span class="comment"> * The caller is responsible for free()ing the memory returned by</span>
+00130 <span class="comment"> * this function.  </span>
+00131 <span class="comment"> */</span>
+00132 
+00133 <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *
+00134 register_oid_index(oid * name, size_t name_len,
+00135                    oid * value, size_t value_len)
+00136 {
+00137     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind;
+00138 
+00139     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a>));
-00144     varbind.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_OBJECT_ID;
-00145     snmp_set_var_objid(&amp;varbind, name, name_len);
-00146     <span class="keywordflow">if</span> (value != ANY_OID_INDEX) {
-00147         snmp_set_var_value(&amp;varbind, (u_char *) value,
-00148                            value_len * <span class="keyword">sizeof</span>(oid));
-00149         <span class="keywordflow">return</span> register_index(&amp;varbind, ALLOCATE_THIS_INDEX, main_session);
-00150     } <span class="keywordflow">else</span> {
-00151         <span class="keywordflow">return</span> register_index(&amp;varbind, ALLOCATE_ANY_INDEX, main_session);
-00152     }
-00153 }
-00154 
-00155 <span class="comment">/*</span>
-00156 <span class="comment"> * The caller is responsible for free()ing the memory returned by</span>
-00157 <span class="comment"> * this function.  </span>
-00158 <span class="comment"> */</span>
-00159 
-00160 <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *
-00161 register_index(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * varbind, <span class=
+00140     varbind.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_OBJECT_ID;
+00141     snmp_set_var_objid(&amp;varbind, name, name_len);
+00142     <span class="keywordflow">if</span> (value != ANY_OID_INDEX) {
+00143         <a class="code" href="group__snmp__client.html#ga25">snmp_set_var_value</a>(&amp;varbind, (u_char *) value,
+00144                            value_len * <span class="keyword">sizeof</span>(oid));
+00145         <span class="keywordflow">return</span> register_index(&amp;varbind, ALLOCATE_THIS_INDEX, main_session);
+00146     } <span class="keywordflow">else</span> {
+00147         <span class="keywordflow">return</span> register_index(&amp;varbind, ALLOCATE_ANY_INDEX, main_session);
+00148     }
+00149 }
+00150 
+00151 <span class="comment">/*</span>
+00152 <span class="comment"> * The caller is responsible for free()ing the memory returned by</span>
+00153 <span class="comment"> * this function.  </span>
+00154 <span class="comment"> */</span>
+00155 
+00156 <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *
+00157 register_index(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * varbind, <span class=
 "keywordtype">int</span> flags,
-00162                <a class="code" href="structsnmp__session.html">netsnmp_session</a> * ss)
-00163 {
-00164     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *rv = NULL;
-00165     <span class="keyword">struct </span>snmp_index *new_index, *idxptr, *idxptr2;
-00166     <span class="keyword">struct </span>snmp_index *prev_oid_ptr, *prev_idx_ptr;
-00167     <span class="keywordtype">int</span>             res, res2, i;
-00168 
-00169     DEBUGMSGTL((<span class="stringliteral">"register_index"</span>, <span class="stringliteral">"register "</span>));
-00170     DEBUGMSGVAR((<span class="stringliteral">"register_index"</span>, varbind));
-00171     DEBUGMSG((<span class="stringliteral">"register_index"</span>, <span class=
+00158                <a class="code" href="structsnmp__session.html">netsnmp_session</a> * ss)
+00159 {
+00160     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *rv = NULL;
+00161     <span class="keyword">struct </span>snmp_index *new_index, *idxptr, *idxptr2;
+00162     <span class="keyword">struct </span>snmp_index *prev_oid_ptr, *prev_idx_ptr;
+00163     <span class="keywordtype">int</span>             res, res2, i;
+00164 
+00165     DEBUGMSGTL((<span class="stringliteral">"register_index"</span>, <span class="stringliteral">"register "</span>));
+00166     DEBUGMSGVAR((<span class="stringliteral">"register_index"</span>, varbind));
+00167     DEBUGMSG((<span class="stringliteral">"register_index"</span>, <span class=
 "stringliteral">"for session %08p\n"</span>, ss));
-00172 
-00173 <span class="preprocessor">#if defined(USING_AGENTX_SUBAGENT_MODULE) &amp;&amp; !defined(TESTING)</span>
-00174     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-00175                                NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
-00176         <span class="keywordflow">return</span> (agentx_register_index(ss, varbind, flags));
-00177     }
-00178 <span class="preprocessor">#endif</span>
-00179     <span class="comment">/*</span>
-00180 <span class="comment">     * Look for the requested OID entry </span>
-00181 <span class="comment">     */</span>
-00182     prev_oid_ptr = NULL;
-00183     prev_idx_ptr = NULL;
-00184     res = 1;
-00185     res2 = 1;
-00186     <span class="keywordflow">for</span> (idxptr = snmp_index_head; idxptr != NULL;
-00187          prev_oid_ptr = idxptr, idxptr = idxptr-&gt;next_oid) {
-00188         <span class="keywordflow">if</span> ((res = <a class="code" href=
-"group__library.html#ga98">snmp_oid_compare</a>(varbind-&gt;<a class="code" href=
+00168 
+00169 <span class="preprocessor">#if defined(USING_AGENTX_SUBAGENT_MODULE) &amp;&amp; !defined(TESTING)</span>
+00170     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00171                                NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
+00172         <span class="keywordflow">return</span> (agentx_register_index(ss, varbind, flags));
+00173     }
+00174 <span class="preprocessor">#endif</span>
+00175     <span class="comment">/*</span>
+00176 <span class="comment">     * Look for the requested OID entry </span>
+00177 <span class="comment">     */</span>
+00178     prev_oid_ptr = NULL;
+00179     prev_idx_ptr = NULL;
+00180     res = 1;
+00181     res2 = 1;
+00182     <span class="keywordflow">for</span> (idxptr = snmp_index_head; idxptr != NULL;
+00183          prev_oid_ptr = idxptr, idxptr = idxptr-&gt;next_oid) {
+00184         <span class="keywordflow">if</span> ((res = <a class="code" href=
+"group__library.html#ga103">snmp_oid_compare</a>(varbind-&gt;<a class="code" href=
 "structvariable__list.html#o1">name</a>, varbind-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>,
-00189                                     idxptr-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
-00190                                     idxptr-&gt;varbind-&gt;<a class="code" href=
+00185                                     idxptr-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00186                                     idxptr-&gt;varbind-&gt;<a class="code" href=
 "structvariable__list.html#o2">name_length</a>)) &lt;= 0)
-00191             <span class="keywordflow">break</span>;
-00192     }
-00193 
-00194     <span class="comment">/*</span>
-00195 <span class="comment">     * Found the OID - now look at the registered indices </span>
-00196 <span class="comment">     */</span>
-00197     <span class="keywordflow">if</span> (res == 0 &amp;&amp; idxptr) {
-00198         <span class="keywordflow">if</span> (varbind-&gt;<a class="code" href=
+00187             <span class="keywordflow">break</span>;
+00188     }
+00189 
+00190     <span class="comment">/*</span>
+00191 <span class="comment">     * Found the OID - now look at the registered indices </span>
+00192 <span class="comment">     */</span>
+00193     <span class="keywordflow">if</span> (res == 0 &amp;&amp; idxptr) {
+00194         <span class="keywordflow">if</span> (varbind-&gt;<a class="code" href=
 "structvariable__list.html#o3">type</a> != idxptr-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o3">type</a>)
-00199             <span class="keywordflow">return</span> NULL;        <span class="comment">/* wrong type */</span>
-00200 
-00201         <span class="comment">/*</span>
-00202 <span class="comment">         * If we've been asked for an arbitrary new value,</span>
-00203 <span class="comment">         *      then find the end of the list.</span>
-00204 <span class="comment">         * If we've been asked for any arbitrary value,</span>
-00205 <span class="comment">         *      then look for an unused entry, and use that.</span>
-00206 <span class="comment">         *      If there aren't any, continue as for new.</span>
-00207 <span class="comment">         * Otherwise, locate the given value in the (sorted)</span>
-00208 <span class="comment">         *      list of already allocated values</span>
-00209 <span class="comment">         */</span>
-00210         <span class="keywordflow">if</span> (flags &amp; ALLOCATE_ANY_INDEX) {
-00211             <span class="keywordflow">for</span> (idxptr2 = idxptr; idxptr2 != NULL;
-00212                  prev_idx_ptr = idxptr2, idxptr2 = idxptr2-&gt;next_idx) {
-00213 
-00214                 <span class="keywordflow">if</span> (flags == ALLOCATE_ANY_INDEX &amp;&amp; !(idxptr2-&gt;allocated)) {
-00215                     <span class="keywordflow">if</span> ((rv =
-00216                          snmp_clone_varbind(idxptr2-&gt;varbind)) != NULL) {
-00217                         idxptr2-&gt;session = ss;
-00218                         idxptr2-&gt;allocated = 1;
-00219                     }
-00220                     <span class="keywordflow">return</span> rv;
-00221                 }
-00222             }
-00223         } <span class="keywordflow">else</span> {
-00224             <span class="keywordflow">for</span> (idxptr2 = idxptr; idxptr2 != NULL;
-00225                  prev_idx_ptr = idxptr2, idxptr2 = idxptr2-&gt;next_idx) {
-00226                 <span class="keywordflow">switch</span> (varbind-&gt;<a class="code" href=
+00195             <span class="keywordflow">return</span> NULL;        <span class="comment">/* wrong type */</span>
+00196 
+00197         <span class="comment">/*</span>
+00198 <span class="comment">         * If we've been asked for an arbitrary new value,</span>
+00199 <span class="comment">         *      then find the end of the list.</span>
+00200 <span class="comment">         * If we've been asked for any arbitrary value,</span>
+00201 <span class="comment">         *      then look for an unused entry, and use that.</span>
+00202 <span class="comment">         *      If there aren't any, continue as for new.</span>
+00203 <span class="comment">         * Otherwise, locate the given value in the (sorted)</span>
+00204 <span class="comment">         *      list of already allocated values</span>
+00205 <span class="comment">         */</span>
+00206         <span class="keywordflow">if</span> (flags &amp; ALLOCATE_ANY_INDEX) {
+00207             <span class="keywordflow">for</span> (idxptr2 = idxptr; idxptr2 != NULL;
+00208                  prev_idx_ptr = idxptr2, idxptr2 = idxptr2-&gt;next_idx) {
+00209 
+00210                 <span class="keywordflow">if</span> (flags == ALLOCATE_ANY_INDEX &amp;&amp; !(idxptr2-&gt;allocated)) {
+00211                     <span class="keywordflow">if</span> ((rv =
+00212                          snmp_clone_varbind(idxptr2-&gt;varbind)) != NULL) {
+00213                         idxptr2-&gt;session = ss;
+00214                         idxptr2-&gt;allocated = 1;
+00215                     }
+00216                     <span class="keywordflow">return</span> rv;
+00217                 }
+00218             }
+00219         } <span class="keywordflow">else</span> {
+00220             <span class="keywordflow">for</span> (idxptr2 = idxptr; idxptr2 != NULL;
+00221                  prev_idx_ptr = idxptr2, idxptr2 = idxptr2-&gt;next_idx) {
+00222                 <span class="keywordflow">switch</span> (varbind-&gt;<a class="code" href=
 "structvariable__list.html#o3">type</a>) {
-00227                 <span class="keywordflow">case</span> ASN_INTEGER:
-00228                     res2 =
-00229                         (*varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.integer -
-00230                          *idxptr2-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.integer);
-00231                     <span class="keywordflow">break</span>;
-00232                 <span class="keywordflow">case</span> ASN_OCTET_STR:
-00233                     i = <a class="code" href="group__util.html#ga46">SNMP_MIN</a>(varbind-&gt;<a class="code" href=
+00223                 <span class="keywordflow">case</span> ASN_INTEGER:
+00224                     res2 =
+00225                         (*varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.integer -
+00226                          *idxptr2-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.integer);
+00227                     <span class="keywordflow">break</span>;
+00228                 <span class="keywordflow">case</span> ASN_OCTET_STR:
+00229                     i = <a class="code" href="group__util.html#ga46">SNMP_MIN</a>(varbind-&gt;<a class="code" href=
 "structvariable__list.html#o5">val_len</a>,
-00234                                  idxptr2-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a>);
-00235                     res2 =
-00236                         memcmp(varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string,
-00237                                idxptr2-&gt;varbind-&gt;<a class="code" href=
+00230                                  idxptr2-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a>);
+00231                     res2 =
+00232                         memcmp(varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string,
+00233                                idxptr2-&gt;varbind-&gt;<a class="code" href=
 "structvariable__list.html#o4">val</a>.string, i);
-00238                     <span class="keywordflow">break</span>;
-00239                 <span class="keywordflow">case</span> ASN_OBJECT_ID:
-00240                     res2 =
-00241                         <a class="code" href="group__library.html#ga98">snmp_oid_compare</a>(varbind-&gt;<a class="code"
+00234                     <span class="keywordflow">break</span>;
+00235                 <span class="keywordflow">case</span> ASN_OBJECT_ID:
+00236                     res2 =
+00237                         <a class="code" href="group__library.html#ga103">snmp_oid_compare</a>(varbind-&gt;<a class="code"
 href="structvariable__list.html#o4">val</a>.objid,
-00242                                          varbind-&gt;<a class="code" href=
+00238                                          varbind-&gt;<a class="code" href=
 "structvariable__list.html#o5">val_len</a> / <span class="keyword">sizeof</span>(oid),
-00243                                          idxptr2-&gt;varbind-&gt;<a class="code" href=
+00239                                          idxptr2-&gt;varbind-&gt;<a class="code" href=
 "structvariable__list.html#o4">val</a>.objid,
-00244                                          idxptr2-&gt;varbind-&gt;<a class="code" href=
+00240                                          idxptr2-&gt;varbind-&gt;<a class="code" href=
 "structvariable__list.html#o5">val_len</a> /
-00245                                          <span class="keyword">sizeof</span>(oid));
-00246                     <span class="keywordflow">break</span>;
-00247                 <span class="keywordflow">default</span>:
-00248                     <span class="keywordflow">return</span> NULL;        <span class="comment">/* wrong type */</span>
-00249                 }
-00250                 <span class="keywordflow">if</span> (res2 &lt;= 0)
-00251                     <span class="keywordflow">break</span>;
-00252             }
-00253             <span class="keywordflow">if</span> (res2 == 0) {
-00254                 <span class="keywordflow">if</span> (idxptr2-&gt;allocated) {
-00255                     <span class="comment">/*</span>
-00256 <span class="comment">                     * No good: the index is in use.  </span>
-00257 <span class="comment">                     */</span>
-00258                     <span class="keywordflow">return</span> NULL;
-00259                 } <span class="keywordflow">else</span> {
-00260                     <span class="comment">/*</span>
-00261 <span class="comment">                     * Okay, it's unallocated, we can just claim ownership</span>
-00262 <span class="comment">                     * here.  </span>
-00263 <span class="comment">                     */</span>
-00264                     <span class="keywordflow">if</span> ((rv =
-00265                          snmp_clone_varbind(idxptr2-&gt;varbind)) != NULL) {
-00266                         idxptr2-&gt;session = ss;
-00267                         idxptr2-&gt;allocated = 1;
-00268                     }
-00269                     <span class="keywordflow">return</span> rv;
-00270                 }
-00271             }
-00272         }
-00273     }
-00274 
-00275     <span class="comment">/*</span>
-00276 <span class="comment">     * OK - we've now located where the new entry needs to</span>
-00277 <span class="comment">     *      be fitted into the index registry tree          </span>
-00278 <span class="comment">     * To recap:</span>
-00279 <span class="comment">     *      'prev_oid_ptr' points to the head of the OID index</span>
-00280 <span class="comment">     *          list prior to this one.  If this is null, then</span>
-00281 <span class="comment">     *          it means that this is the first OID in the list.</span>
-00282 <span class="comment">     *      'idxptr' points either to the head of this OID list,</span>
-00283 <span class="comment">     *          or the next OID (if this is a new OID request)</span>
-00284 <span class="comment">     *          These can be distinguished by the value of 'res'.</span>
-00285 <span class="comment">     *</span>
-00286 <span class="comment">     *      'prev_idx_ptr' points to the index entry that sorts</span>
-00287 <span class="comment">     *          immediately prior to the requested value (if any).</span>
-00288 <span class="comment">     *          If an arbitrary value is required, then this will</span>
-00289 <span class="comment">     *          point to the last allocated index.</span>
-00290 <span class="comment">     *          If this pointer is null, then either this is a new</span>
-00291 <span class="comment">     *          OID request, or the requested value is the first</span>
-00292 <span class="comment">     *          in the list.</span>
-00293 <span class="comment">     *      'idxptr2' points to the next sorted index (if any)</span>
-00294 <span class="comment">     *          but is not actually needed any more.</span>
-00295 <span class="comment">     *</span>
-00296 <span class="comment">     *  Clear?  Good!</span>
-00297 <span class="comment">     *      I hope you've been paying attention.</span>
-00298 <span class="comment">     *          There'll be a test later :-)</span>
-00299 <span class="comment">     */</span>
-00300 
-00301     <span class="comment">/*</span>
-00302 <span class="comment">     *      We proceed by creating the new entry</span>
-00303 <span class="comment">     *         (by copying the entry provided)</span>
-00304 <span class="comment">     */</span>
-00305     new_index = (<span class="keyword">struct </span>snmp_index *) calloc(1, <span class=
+00241                                          <span class="keyword">sizeof</span>(oid));
+00242                     <span class="keywordflow">break</span>;
+00243                 <span class="keywordflow">default</span>:
+00244                     <span class="keywordflow">return</span> NULL;        <span class="comment">/* wrong type */</span>
+00245                 }
+00246                 <span class="keywordflow">if</span> (res2 &lt;= 0)
+00247                     <span class="keywordflow">break</span>;
+00248             }
+00249             <span class="keywordflow">if</span> (res2 == 0) {
+00250                 <span class="keywordflow">if</span> (idxptr2-&gt;allocated) {
+00251                     <span class="comment">/*</span>
+00252 <span class="comment">                     * No good: the index is in use.  </span>
+00253 <span class="comment">                     */</span>
+00254                     <span class="keywordflow">return</span> NULL;
+00255                 } <span class="keywordflow">else</span> {
+00256                     <span class="comment">/*</span>
+00257 <span class="comment">                     * Okay, it's unallocated, we can just claim ownership</span>
+00258 <span class="comment">                     * here.  </span>
+00259 <span class="comment">                     */</span>
+00260                     <span class="keywordflow">if</span> ((rv =
+00261                          snmp_clone_varbind(idxptr2-&gt;varbind)) != NULL) {
+00262                         idxptr2-&gt;session = ss;
+00263                         idxptr2-&gt;allocated = 1;
+00264                     }
+00265                     <span class="keywordflow">return</span> rv;
+00266                 }
+00267             }
+00268         }
+00269     }
+00270 
+00271     <span class="comment">/*</span>
+00272 <span class="comment">     * OK - we've now located where the new entry needs to</span>
+00273 <span class="comment">     *      be fitted into the index registry tree          </span>
+00274 <span class="comment">     * To recap:</span>
+00275 <span class="comment">     *      'prev_oid_ptr' points to the head of the OID index</span>
+00276 <span class="comment">     *          list prior to this one.  If this is null, then</span>
+00277 <span class="comment">     *          it means that this is the first OID in the list.</span>
+00278 <span class="comment">     *      'idxptr' points either to the head of this OID list,</span>
+00279 <span class="comment">     *          or the next OID (if this is a new OID request)</span>
+00280 <span class="comment">     *          These can be distinguished by the value of 'res'.</span>
+00281 <span class="comment">     *</span>
+00282 <span class="comment">     *      'prev_idx_ptr' points to the index entry that sorts</span>
+00283 <span class="comment">     *          immediately prior to the requested value (if any).</span>
+00284 <span class="comment">     *          If an arbitrary value is required, then this will</span>
+00285 <span class="comment">     *          point to the last allocated index.</span>
+00286 <span class="comment">     *          If this pointer is null, then either this is a new</span>
+00287 <span class="comment">     *          OID request, or the requested value is the first</span>
+00288 <span class="comment">     *          in the list.</span>
+00289 <span class="comment">     *      'idxptr2' points to the next sorted index (if any)</span>
+00290 <span class="comment">     *          but is not actually needed any more.</span>
+00291 <span class="comment">     *</span>
+00292 <span class="comment">     *  Clear?  Good!</span>
+00293 <span class="comment">     *      I hope you've been paying attention.</span>
+00294 <span class="comment">     *          There'll be a test later :-)</span>
+00295 <span class="comment">     */</span>
+00296 
+00297     <span class="comment">/*</span>
+00298 <span class="comment">     *      We proceed by creating the new entry</span>
+00299 <span class="comment">     *         (by copying the entry provided)</span>
+00300 <span class="comment">     */</span>
+00301     new_index = (<span class="keyword">struct </span>snmp_index *) calloc(1, <span class=
 "keyword">sizeof</span>(<span class="keyword">struct</span> snmp_index));
-00306     <span class="keywordflow">if</span> (new_index == NULL)
-00307         <span class="keywordflow">return</span> NULL;
-00308 
-00309     <span class="keywordflow">if</span> (0 == snmp_varlist_add_variable(&amp;new_index-&gt;varbind,
-00310                                        varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
-00311                                        varbind-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>,
-00312                                        varbind-&gt;<a class="code" href="structvariable__list.html#o3">type</a>,
-00313                                        varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string,
-00314                                        varbind-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a>)) {
-00315         <span class="comment">/*</span>
-00316 <span class="comment">         * if (snmp_clone_var( varbind, new_index-&gt;varbind ) != 0 ) </span>
-00317 <span class="comment">         */</span>
-00318         free(new_index);
-00319         <span class="keywordflow">return</span> NULL;
-00320     }
-00321     new_index-&gt;session = ss;
-00322     new_index-&gt;allocated = 1;
-00323 
-00324     <span class="keywordflow">if</span> (varbind-&gt;<a class="code" href=
+00302     <span class="keywordflow">if</span> (new_index == NULL)
+00303         <span class="keywordflow">return</span> NULL;
+00304 
+00305     <span class="keywordflow">if</span> (0 == snmp_varlist_add_variable(&amp;new_index-&gt;varbind,
+00306                                        varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00307                                        varbind-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>,
+00308                                        varbind-&gt;<a class="code" href="structvariable__list.html#o3">type</a>,
+00309                                        varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string,
+00310                                        varbind-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a>)) {
+00311         <span class="comment">/*</span>
+00312 <span class="comment">         * if (snmp_clone_var( varbind, new_index-&gt;varbind ) != 0 ) </span>
+00313 <span class="comment">         */</span>
+00314         free(new_index);
+00315         <span class="keywordflow">return</span> NULL;
+00316     }
+00317     new_index-&gt;session = ss;
+00318     new_index-&gt;allocated = 1;
+00319 
+00320     <span class="keywordflow">if</span> (varbind-&gt;<a class="code" href=
 "structvariable__list.html#o3">type</a> == ASN_OCTET_STR &amp;&amp; flags == ALLOCATE_THIS_INDEX)
-00325         new_index-&gt;varbind-&gt;val.string[new_index-&gt;varbind-&gt;val_len] = 0;
-00326 
-00327     <span class="comment">/*</span>
-00328 <span class="comment">     * If we've been given a value, then we can use that, but</span>
-00329 <span class="comment">     *    otherwise, we need to create a new value for this entry.</span>
-00330 <span class="comment">     * Note that ANY_INDEX and NEW_INDEX are both covered by this</span>
-00331 <span class="comment">     *   test (since NEW_INDEX &amp; ANY_INDEX = ANY_INDEX, remember?)</span>
-00332 <span class="comment">     */</span>
-00333     <span class="keywordflow">if</span> (flags &amp; ALLOCATE_ANY_INDEX) {
-00334         <span class="keywordflow">if</span> (prev_idx_ptr) {
-00335             <span class="keywordflow">if</span> (snmp_clone_var(prev_idx_ptr-&gt;varbind, new_index-&gt;varbind)
-00336                 != 0) {
-00337                 free(new_index);
-00338                 <span class="keywordflow">return</span> NULL;
-00339             }
-00340         } <span class="keywordflow">else</span>
-00341             new_index-&gt;varbind-&gt;val.string = new_index-&gt;varbind-&gt;buf;
-00342 
-00343         <span class="keywordflow">switch</span> (varbind-&gt;<a class="code" href=
+00321         new_index-&gt;varbind-&gt;val.string[new_index-&gt;varbind-&gt;val_len] = 0;
+00322 
+00323     <span class="comment">/*</span>
+00324 <span class="comment">     * If we've been given a value, then we can use that, but</span>
+00325 <span class="comment">     *    otherwise, we need to create a new value for this entry.</span>
+00326 <span class="comment">     * Note that ANY_INDEX and NEW_INDEX are both covered by this</span>
+00327 <span class="comment">     *   test (since NEW_INDEX &amp; ANY_INDEX = ANY_INDEX, remember?)</span>
+00328 <span class="comment">     */</span>
+00329     <span class="keywordflow">if</span> (flags &amp; ALLOCATE_ANY_INDEX) {
+00330         <span class="keywordflow">if</span> (prev_idx_ptr) {
+00331             <span class="keywordflow">if</span> (snmp_clone_var(prev_idx_ptr-&gt;varbind, new_index-&gt;varbind)
+00332                 != 0) {
+00333                 free(new_index);
+00334                 <span class="keywordflow">return</span> NULL;
+00335             }
+00336         } <span class="keywordflow">else</span>
+00337             new_index-&gt;varbind-&gt;val.string = new_index-&gt;varbind-&gt;buf;
+00338 
+00339         <span class="keywordflow">switch</span> (varbind-&gt;<a class="code" href=
 "structvariable__list.html#o3">type</a>) {
-00344         <span class="keywordflow">case</span> ASN_INTEGER:
-00345             <span class="keywordflow">if</span> (prev_idx_ptr) {
-00346                 (*new_index-&gt;varbind-&gt;val.integer)++;
-00347             } <span class="keywordflow">else</span>
-00348                 *(new_index-&gt;varbind-&gt;val.integer) = 1;
-00349             new_index-&gt;varbind-&gt;val_len = <span class="keyword">sizeof</span>(long);
-00350             <span class="keywordflow">break</span>;
-00351         <span class="keywordflow">case</span> ASN_OCTET_STR:
-00352             <span class="keywordflow">if</span> (prev_idx_ptr) {
-00353                 i = new_index-&gt;varbind-&gt;val_len - 1;
-00354                 <span class="keywordflow">while</span> (new_index-&gt;varbind-&gt;buf[i] == <span class=
+00340         <span class="keywordflow">case</span> ASN_INTEGER:
+00341             <span class="keywordflow">if</span> (prev_idx_ptr) {
+00342                 (*new_index-&gt;varbind-&gt;val.integer)++;
+00343             } <span class="keywordflow">else</span>
+00344                 *(new_index-&gt;varbind-&gt;val.integer) = 1;
+00345             new_index-&gt;varbind-&gt;val_len = <span class="keyword">sizeof</span>(long);
+00346             <span class="keywordflow">break</span>;
+00347         <span class="keywordflow">case</span> ASN_OCTET_STR:
+00348             <span class="keywordflow">if</span> (prev_idx_ptr) {
+00349                 i = new_index-&gt;varbind-&gt;val_len - 1;
+00350                 <span class="keywordflow">while</span> (new_index-&gt;varbind-&gt;buf[i] == <span class=
 "charliteral">'z'</span>) {
-00355                     new_index-&gt;varbind-&gt;buf[i] = <span class="charliteral">'a'</span>;
-00356                     i--;
-00357                     <span class="keywordflow">if</span> (i &lt; 0) {
-00358                         i = new_index-&gt;varbind-&gt;val_len;
-00359                         new_index-&gt;varbind-&gt;buf[i] = <span class="charliteral">'a'</span>;
-00360                         new_index-&gt;varbind-&gt;buf[i + 1] = 0;
-00361                     }
-00362                 }
-00363                 new_index-&gt;varbind-&gt;buf[i]++;
-00364             } <span class="keywordflow">else</span>
-00365                 strcpy((<span class="keywordtype">char</span> *) new_index-&gt;varbind-&gt;buf, <span class=
+00351                     new_index-&gt;varbind-&gt;buf[i] = <span class="charliteral">'a'</span>;
+00352                     i--;
+00353                     <span class="keywordflow">if</span> (i &lt; 0) {
+00354                         i = new_index-&gt;varbind-&gt;val_len;
+00355                         new_index-&gt;varbind-&gt;buf[i] = <span class="charliteral">'a'</span>;
+00356                         new_index-&gt;varbind-&gt;buf[i + 1] = 0;
+00357                     }
+00358                 }
+00359                 new_index-&gt;varbind-&gt;buf[i]++;
+00360             } <span class="keywordflow">else</span>
+00361                 strcpy((<span class="keywordtype">char</span> *) new_index-&gt;varbind-&gt;buf, <span class=
 "stringliteral">"aaaa"</span>);
-00366             new_index-&gt;varbind-&gt;val_len =
-00367                 strlen((<span class="keywordtype">char</span> *) new_index-&gt;varbind-&gt;buf);
-00368             <span class="keywordflow">break</span>;
-00369         <span class="keywordflow">case</span> ASN_OBJECT_ID:
-00370             <span class="keywordflow">if</span> (prev_idx_ptr) {
-00371                 i = prev_idx_ptr-&gt;varbind-&gt;val_len / <span class="keyword">sizeof</span>(oid) - 1;
-00372                 <span class="keywordflow">while</span> (new_index-&gt;varbind-&gt;val.objid[i] == 255) {
-00373                     new_index-&gt;varbind-&gt;val.objid[i] = 1;
-00374                     i--;
-00375                     <span class="keywordflow">if</span> (i == 0 &amp;&amp; new_index-&gt;varbind-&gt;val.objid[0] == 2) {
-00376                         new_index-&gt;varbind-&gt;val.objid[0] = 1;
-00377                         i = new_index-&gt;varbind-&gt;val_len / <span class="keyword">sizeof</span>(oid);
-00378                         new_index-&gt;varbind-&gt;val.objid[i] = 0;
-00379                         new_index-&gt;varbind-&gt;val_len += <span class="keyword">sizeof</span>(oid);
-00380                     }
-00381                 }
-00382                 new_index-&gt;varbind-&gt;val.objid[i]++;
-00383             } <span class="keywordflow">else</span> {
-00384                 <span class="comment">/*</span>
-00385 <span class="comment">                 * If the requested OID name is small enough,</span>
-00386 <span class="comment">                 * *   append another OID (1) and use this as the</span>
-00387 <span class="comment">                 * *   default starting value for new indexes.</span>
-00388 <span class="comment">                 */</span>
-00389                 <span class="keywordflow">if</span> ((varbind-&gt;<a class="code" href=
+00362             new_index-&gt;varbind-&gt;val_len =
+00363                 strlen((<span class="keywordtype">char</span> *) new_index-&gt;varbind-&gt;buf);
+00364             <span class="keywordflow">break</span>;
+00365         <span class="keywordflow">case</span> ASN_OBJECT_ID:
+00366             <span class="keywordflow">if</span> (prev_idx_ptr) {
+00367                 i = prev_idx_ptr-&gt;varbind-&gt;val_len / <span class="keyword">sizeof</span>(oid) - 1;
+00368                 <span class="keywordflow">while</span> (new_index-&gt;varbind-&gt;val.objid[i] == 255) {
+00369                     new_index-&gt;varbind-&gt;val.objid[i] = 1;
+00370                     i--;
+00371                     <span class="keywordflow">if</span> (i == 0 &amp;&amp; new_index-&gt;varbind-&gt;val.objid[0] == 2) {
+00372                         new_index-&gt;varbind-&gt;val.objid[0] = 1;
+00373                         i = new_index-&gt;varbind-&gt;val_len / <span class="keyword">sizeof</span>(oid);
+00374                         new_index-&gt;varbind-&gt;val.objid[i] = 0;
+00375                         new_index-&gt;varbind-&gt;val_len += <span class="keyword">sizeof</span>(oid);
+00376                     }
+00377                 }
+00378                 new_index-&gt;varbind-&gt;val.objid[i]++;
+00379             } <span class="keywordflow">else</span> {
+00380                 <span class="comment">/*</span>
+00381 <span class="comment">                 * If the requested OID name is small enough,</span>
+00382 <span class="comment">                 * *   append another OID (1) and use this as the</span>
+00383 <span class="comment">                 * *   default starting value for new indexes.</span>
+00384 <span class="comment">                 */</span>
+00385                 <span class="keywordflow">if</span> ((varbind-&gt;<a class="code" href=
 "structvariable__list.html#o2">name_length</a> + 1) * <span class="keyword">sizeof</span>(oid) &lt;= 40) {
-00390                     <span class="keywordflow">for</span> (i = 0; i &lt; (int) varbind-&gt;<a class="code" href=
+00386                     <span class="keywordflow">for</span> (i = 0; i &lt; (int) varbind-&gt;<a class="code" href=
 "structvariable__list.html#o2">name_length</a>; i++)
-00391                         new_index-&gt;varbind-&gt;val.objid[i] =
-00392                             varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>[i];
-00393                     new_index-&gt;varbind-&gt;<a class="code" href=
+00387                         new_index-&gt;varbind-&gt;val.objid[i] =
+00388                             varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>[i];
+00389                     new_index-&gt;varbind-&gt;<a class="code" href=
 "structvariable__list.html#o4">val</a>.objid[varbind-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>] =
-00394                         1;
-00395                     new_index-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> =
-00396                         (varbind-&gt;<a class="code" href=
+00390                         1;
+00391                     new_index-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> =
+00392                         (varbind-&gt;<a class="code" href=
 "structvariable__list.html#o2">name_length</a> + 1) * <span class="keyword">sizeof</span>(oid);
-00397                 } <span class="keywordflow">else</span> {
-00398                     <span class="comment">/*</span>
-00399 <span class="comment">                     * Otherwise use '.1.1.1.1...' </span>
-00400 <span class="comment">                     */</span>
-00401                     i = 40 / <span class="keyword">sizeof</span>(oid);
-00402                     <span class="keywordflow">if</span> (i &gt; 4)
-00403                         i = 4;
-00404                     new_index-&gt;varbind-&gt;<a class="code" href=
+00393                 } <span class="keywordflow">else</span> {
+00394                     <span class="comment">/*</span>
+00395 <span class="comment">                     * Otherwise use '.1.1.1.1...' </span>
+00396 <span class="comment">                     */</span>
+00397                     i = 40 / <span class="keyword">sizeof</span>(oid);
+00398                     <span class="keywordflow">if</span> (i &gt; 4)
+00399                         i = 4;
+00400                     new_index-&gt;varbind-&gt;<a class="code" href=
 "structvariable__list.html#o5">val_len</a> = i * (<span class="keyword">sizeof</span>(oid));
-00405                     <span class="keywordflow">for</span> (i--; i &gt;= 0; i--)
-00406                         new_index-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid[i] = 1;
-00407                 }
-00408             }
-00409             <span class="keywordflow">break</span>;
-00410         <span class="keywordflow">default</span>:
-00411             snmp_free_var(new_index-&gt;varbind);
-00412             free(new_index);
-00413             <span class="keywordflow">return</span> NULL;        <span class=
+00401                     <span class="keywordflow">for</span> (i--; i &gt;= 0; i--)
+00402                         new_index-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid[i] = 1;
+00403                 }
+00404             }
+00405             <span class="keywordflow">break</span>;
+00406         <span class="keywordflow">default</span>:
+00407             snmp_free_var(new_index-&gt;varbind);
+00408             free(new_index);
+00409             <span class="keywordflow">return</span> NULL;        <span class=
 "comment">/* Index type not supported */</span>
-00414         }
-00415     }
+00410         }
+00411     }
+00412 
+00413     <span class="comment">/*</span>
+00414 <span class="comment">     * Try to duplicate the new varbind for return.  </span>
+00415 <span class="comment">     */</span>
 00416 
-00417     <span class="comment">/*</span>
-00418 <span class="comment">     * Try to duplicate the new varbind for return.  </span>
-00419 <span class="comment">     */</span>
-00420 
-00421     <span class="keywordflow">if</span> ((rv = snmp_clone_varbind(new_index-&gt;varbind)) == NULL) {
-00422         snmp_free_var(new_index-&gt;varbind);
-00423         free(new_index);
-00424         <span class="keywordflow">return</span> NULL;
-00425     }
-00426 
-00427     <span class="comment">/*</span>
-00428 <span class="comment">     * Right - we've set up the new entry.</span>
-00429 <span class="comment">     * All that remains is to link it into the tree.</span>
-00430 <span class="comment">     * There are a number of possible cases here,</span>
-00431 <span class="comment">     *   so watch carefully.</span>
-00432 <span class="comment">     */</span>
-00433     <span class="keywordflow">if</span> (prev_idx_ptr) {
-00434         new_index-&gt;next_idx = prev_idx_ptr-&gt;next_idx;
-00435         new_index-&gt;next_oid = prev_idx_ptr-&gt;next_oid;
-00436         prev_idx_ptr-&gt;next_idx = new_index;
-00437     } <span class="keywordflow">else</span> {
-00438         <span class="keywordflow">if</span> (res == 0 &amp;&amp; idxptr) {
-00439             new_index-&gt;next_idx = idxptr;
-00440             new_index-&gt;next_oid = idxptr-&gt;next_oid;
-00441         } <span class="keywordflow">else</span> {
-00442             new_index-&gt;next_idx = NULL;
-00443             new_index-&gt;next_oid = idxptr;
-00444         }
-00445 
-00446         <span class="keywordflow">if</span> (prev_oid_ptr) {
-00447             <span class="keywordflow">while</span> (prev_oid_ptr) {
-00448                 prev_oid_ptr-&gt;next_oid = new_index;
-00449                 prev_oid_ptr = prev_oid_ptr-&gt;next_idx;
-00450             }
-00451         } <span class="keywordflow">else</span>
-00452             snmp_index_head = new_index;
-00453     }
-00454     <span class="keywordflow">return</span> rv;
-00455 }
-00456 
-00457         <span class="comment">/*</span>
-00458 <span class="comment">         * Release an allocated index,</span>
-00459 <span class="comment">         *   to allow it to be used elsewhere</span>
-00460 <span class="comment">         */</span>
-00461 <span class="keywordtype">int</span>
-00462 release_index(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * varbind)
-00463 {
-00464     <span class="keywordflow">return</span> (unregister_index(varbind, TRUE, NULL));
-00465 }
-00466 
-00467         <span class="comment">/*</span>
-00468 <span class="comment">         * Completely remove an allocated index,</span>
-00469 <span class="comment">         *   due to errors in the registration process.</span>
-00470 <span class="comment">         */</span>
-00471 <span class="keywordtype">int</span>
-00472 remove_index(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * varbind, <a class="code" href=
+00417     <span class="keywordflow">if</span> ((rv = snmp_clone_varbind(new_index-&gt;varbind)) == NULL) {
+00418         snmp_free_var(new_index-&gt;varbind);
+00419         free(new_index);
+00420         <span class="keywordflow">return</span> NULL;
+00421     }
+00422 
+00423     <span class="comment">/*</span>
+00424 <span class="comment">     * Right - we've set up the new entry.</span>
+00425 <span class="comment">     * All that remains is to link it into the tree.</span>
+00426 <span class="comment">     * There are a number of possible cases here,</span>
+00427 <span class="comment">     *   so watch carefully.</span>
+00428 <span class="comment">     */</span>
+00429     <span class="keywordflow">if</span> (prev_idx_ptr) {
+00430         new_index-&gt;next_idx = prev_idx_ptr-&gt;next_idx;
+00431         new_index-&gt;next_oid = prev_idx_ptr-&gt;next_oid;
+00432         prev_idx_ptr-&gt;next_idx = new_index;
+00433     } <span class="keywordflow">else</span> {
+00434         <span class="keywordflow">if</span> (res == 0 &amp;&amp; idxptr) {
+00435             new_index-&gt;next_idx = idxptr;
+00436             new_index-&gt;next_oid = idxptr-&gt;next_oid;
+00437         } <span class="keywordflow">else</span> {
+00438             new_index-&gt;next_idx = NULL;
+00439             new_index-&gt;next_oid = idxptr;
+00440         }
+00441 
+00442         <span class="keywordflow">if</span> (prev_oid_ptr) {
+00443             <span class="keywordflow">while</span> (prev_oid_ptr) {
+00444                 prev_oid_ptr-&gt;next_oid = new_index;
+00445                 prev_oid_ptr = prev_oid_ptr-&gt;next_idx;
+00446             }
+00447         } <span class="keywordflow">else</span>
+00448             snmp_index_head = new_index;
+00449     }
+00450     <span class="keywordflow">return</span> rv;
+00451 }
+00452 
+00453         <span class="comment">/*</span>
+00454 <span class="comment">         * Release an allocated index,</span>
+00455 <span class="comment">         *   to allow it to be used elsewhere</span>
+00456 <span class="comment">         */</span>
+00457 <span class="keywordtype">int</span>
+00458 release_index(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * varbind)
+00459 {
+00460     <span class="keywordflow">return</span> (unregister_index(varbind, TRUE, NULL));
+00461 }
+00462 
+00463         <span class="comment">/*</span>
+00464 <span class="comment">         * Completely remove an allocated index,</span>
+00465 <span class="comment">         *   due to errors in the registration process.</span>
+00466 <span class="comment">         */</span>
+00467 <span class="keywordtype">int</span>
+00468 remove_index(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * varbind, <a class="code" href=
 "structsnmp__session.html">netsnmp_session</a> * ss)
-00473 {
-00474     <span class="keywordflow">return</span> (unregister_index(varbind, FALSE, ss));
-00475 }
-00476 
-00477 <span class="keywordtype">void</span>
-00478 unregister_index_by_session(<a class="code" href="structsnmp__session.html">netsnmp_session</a> * ss)
-00479 {
-00480     <span class="keyword">struct </span>snmp_index *idxptr, *idxptr2;
-00481     <span class="keywordflow">for</span> (idxptr = snmp_index_head; idxptr != NULL;
-00482          idxptr = idxptr-&gt;next_oid)
-00483         <span class="keywordflow">for</span> (idxptr2 = idxptr; idxptr2 != NULL;
-00484              idxptr2 = idxptr2-&gt;next_idx)
-00485             <span class="keywordflow">if</span> (idxptr2-&gt;session == ss) {
-00486                 idxptr2-&gt;allocated = 0;
-00487                 idxptr2-&gt;session = NULL;
-00488             }
-00489 }
-00490 
-00491 
-00492 <span class="keywordtype">int</span>
-00493 unregister_index(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * varbind, <span class=
+00469 {
+00470     <span class="keywordflow">return</span> (unregister_index(varbind, FALSE, ss));
+00471 }
+00472 
+00473 <span class="keywordtype">void</span>
+00474 unregister_index_by_session(<a class="code" href="structsnmp__session.html">netsnmp_session</a> * ss)
+00475 {
+00476     <span class="keyword">struct </span>snmp_index *idxptr, *idxptr2;
+00477     <span class="keywordflow">for</span> (idxptr = snmp_index_head; idxptr != NULL;
+00478          idxptr = idxptr-&gt;next_oid)
+00479         <span class="keywordflow">for</span> (idxptr2 = idxptr; idxptr2 != NULL;
+00480              idxptr2 = idxptr2-&gt;next_idx)
+00481             <span class="keywordflow">if</span> (idxptr2-&gt;session == ss) {
+00482                 idxptr2-&gt;allocated = 0;
+00483                 idxptr2-&gt;session = NULL;
+00484             }
+00485 }
+00486 
+00487 
+00488 <span class="keywordtype">int</span>
+00489 unregister_index(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * varbind, <span class=
 "keywordtype">int</span> remember,
-00494                  <a class="code" href="structsnmp__session.html">netsnmp_session</a> * ss)
-00495 {
-00496     <span class="keyword">struct </span>snmp_index *idxptr, *idxptr2;
-00497     <span class="keyword">struct </span>snmp_index *prev_oid_ptr, *prev_idx_ptr;
-00498     <span class="keywordtype">int</span>             res, res2, i;
-00499 
-00500 <span class="preprocessor">#if defined(USING_AGENTX_SUBAGENT_MODULE) &amp;&amp; !defined(TESTING)</span>
-00501     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-00502                                NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
-00503         <span class="keywordflow">return</span> (agentx_unregister_index(ss, varbind));
-00504     }
-00505 <span class="preprocessor">#endif</span>
-00506     <span class="comment">/*</span>
-00507 <span class="comment">     * Look for the requested OID entry </span>
-00508 <span class="comment">     */</span>
-00509     prev_oid_ptr = NULL;
-00510     prev_idx_ptr = NULL;
-00511     res = 1;
-00512     res2 = 1;
-00513     <span class="keywordflow">for</span> (idxptr = snmp_index_head; idxptr != NULL;
-00514          prev_oid_ptr = idxptr, idxptr = idxptr-&gt;next_oid) {
-00515         <span class="keywordflow">if</span> ((res = <a class="code" href=
-"group__library.html#ga98">snmp_oid_compare</a>(varbind-&gt;<a class="code" href=
+00490                  <a class="code" href="structsnmp__session.html">netsnmp_session</a> * ss)
+00491 {
+00492     <span class="keyword">struct </span>snmp_index *idxptr, *idxptr2;
+00493     <span class="keyword">struct </span>snmp_index *prev_oid_ptr, *prev_idx_ptr;
+00494     <span class="keywordtype">int</span>             res, res2, i;
+00495 
+00496 <span class="preprocessor">#if defined(USING_AGENTX_SUBAGENT_MODULE) &amp;&amp; !defined(TESTING)</span>
+00497     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00498                                NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
+00499         <span class="keywordflow">return</span> (agentx_unregister_index(ss, varbind));
+00500     }
+00501 <span class="preprocessor">#endif</span>
+00502     <span class="comment">/*</span>
+00503 <span class="comment">     * Look for the requested OID entry </span>
+00504 <span class="comment">     */</span>
+00505     prev_oid_ptr = NULL;
+00506     prev_idx_ptr = NULL;
+00507     res = 1;
+00508     res2 = 1;
+00509     <span class="keywordflow">for</span> (idxptr = snmp_index_head; idxptr != NULL;
+00510          prev_oid_ptr = idxptr, idxptr = idxptr-&gt;next_oid) {
+00511         <span class="keywordflow">if</span> ((res = <a class="code" href=
+"group__library.html#ga103">snmp_oid_compare</a>(varbind-&gt;<a class="code" href=
 "structvariable__list.html#o1">name</a>, varbind-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>,
-00516                                     idxptr-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
-00517                                     idxptr-&gt;varbind-&gt;<a class="code" href=
+00512                                     idxptr-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00513                                     idxptr-&gt;varbind-&gt;<a class="code" href=
 "structvariable__list.html#o2">name_length</a>)) &lt;= 0)
-00518             <span class="keywordflow">break</span>;
-00519     }
-00520 
-00521     <span class="keywordflow">if</span> (res != 0)
-00522         <span class="keywordflow">return</span> INDEX_ERR_NOT_ALLOCATED;
-00523     <span class="keywordflow">if</span> (varbind-&gt;<a class="code" href=
+00514             <span class="keywordflow">break</span>;
+00515     }
+00516 
+00517     <span class="keywordflow">if</span> (res != 0)
+00518         <span class="keywordflow">return</span> INDEX_ERR_NOT_ALLOCATED;
+00519     <span class="keywordflow">if</span> (varbind-&gt;<a class="code" href=
 "structvariable__list.html#o3">type</a> != idxptr-&gt;varbind-&gt;<a class="code" href="structvariable__list.html#o3">type</a>)
-00524         <span class="keywordflow">return</span> INDEX_ERR_WRONG_TYPE;
-00525 
-00526     <span class="keywordflow">for</span> (idxptr2 = idxptr; idxptr2 != NULL;
-00527          prev_idx_ptr = idxptr2, idxptr2 = idxptr2-&gt;next_idx) {
-00528         i = <a class="code" href="group__util.html#ga46">SNMP_MIN</a>(varbind-&gt;<a class="code" href=
+00520         <span class="keywordflow">return</span> INDEX_ERR_WRONG_TYPE;
+00521 
+00522     <span class="keywordflow">for</span> (idxptr2 = idxptr; idxptr2 != NULL;
+00523          prev_idx_ptr = idxptr2, idxptr2 = idxptr2-&gt;next_idx) {
+00524         i = <a class="code" href="group__util.html#ga46">SNMP_MIN</a>(varbind-&gt;<a class="code" href=
 "structvariable__list.html#o5">val_len</a>, idxptr2-&gt;varbind-&gt;<a class="code" href=
 "structvariable__list.html#o5">val_len</a>);
-00529         res2 =
-00530             memcmp(varbind-&gt;<a class="code" href=
+00525         res2 =
+00526             memcmp(varbind-&gt;<a class="code" href=
 "structvariable__list.html#o4">val</a>.string, idxptr2-&gt;varbind-&gt;<a class="code" href=
 "structvariable__list.html#o4">val</a>.string, i);
-00531         <span class="keywordflow">if</span> (res2 &lt;= 0)
-00532             <span class="keywordflow">break</span>;
-00533     }
-00534     <span class="keywordflow">if</span> (res2 != 0 || (res2 == 0 &amp;&amp; !idxptr2-&gt;allocated)) {
-00535         <span class="keywordflow">return</span> INDEX_ERR_NOT_ALLOCATED;
-00536     }
-00537     <span class="keywordflow">if</span> (ss != idxptr2-&gt;session)
-00538         <span class="keywordflow">return</span> INDEX_ERR_WRONG_SESSION;
-00539 
-00540     <span class="comment">/*</span>
-00541 <span class="comment">     *  If this is a "normal" index unregistration,</span>
-00542 <span class="comment">     *      mark the index entry as unused, but leave</span>
-00543 <span class="comment">     *      it in situ.  This allows differentiation</span>
-00544 <span class="comment">     *      between ANY_INDEX and NEW_INDEX</span>
-00545 <span class="comment">     */</span>
-00546     <span class="keywordflow">if</span> (remember) {
-00547         idxptr2-&gt;allocated = 0; <span class="comment">/* Unused index */</span>
-00548         idxptr2-&gt;session = NULL;
-00549         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00550     }
-00551     <span class="comment">/*</span>
-00552 <span class="comment">     *  If this is a failed attempt to register a</span>
-00553 <span class="comment">     *      number of indexes, the successful ones</span>
-00554 <span class="comment">     *      must be removed completely.</span>
-00555 <span class="comment">     */</span>
-00556     <span class="keywordflow">if</span> (prev_idx_ptr) {
-00557         prev_idx_ptr-&gt;next_idx = idxptr2-&gt;next_idx;
-00558     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (prev_oid_ptr) {
-00559         <span class="keywordflow">if</span> (idxptr2-&gt;next_idx)  <span class=
+00527         <span class="keywordflow">if</span> (res2 &lt;= 0)
+00528             <span class="keywordflow">break</span>;
+00529     }
+00530     <span class="keywordflow">if</span> (res2 != 0 || (res2 == 0 &amp;&amp; !idxptr2-&gt;allocated)) {
+00531         <span class="keywordflow">return</span> INDEX_ERR_NOT_ALLOCATED;
+00532     }
+00533     <span class="keywordflow">if</span> (ss != idxptr2-&gt;session)
+00534         <span class="keywordflow">return</span> INDEX_ERR_WRONG_SESSION;
+00535 
+00536     <span class="comment">/*</span>
+00537 <span class="comment">     *  If this is a "normal" index unregistration,</span>
+00538 <span class="comment">     *      mark the index entry as unused, but leave</span>
+00539 <span class="comment">     *      it in situ.  This allows differentiation</span>
+00540 <span class="comment">     *      between ANY_INDEX and NEW_INDEX</span>
+00541 <span class="comment">     */</span>
+00542     <span class="keywordflow">if</span> (remember) {
+00543         idxptr2-&gt;allocated = 0; <span class="comment">/* Unused index */</span>
+00544         idxptr2-&gt;session = NULL;
+00545         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00546     }
+00547     <span class="comment">/*</span>
+00548 <span class="comment">     *  If this is a failed attempt to register a</span>
+00549 <span class="comment">     *      number of indexes, the successful ones</span>
+00550 <span class="comment">     *      must be removed completely.</span>
+00551 <span class="comment">     */</span>
+00552     <span class="keywordflow">if</span> (prev_idx_ptr) {
+00553         prev_idx_ptr-&gt;next_idx = idxptr2-&gt;next_idx;
+00554     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (prev_oid_ptr) {
+00555         <span class="keywordflow">if</span> (idxptr2-&gt;next_idx)  <span class=
 "comment">/* Use p_idx_ptr as a temp variable */</span>
-00560             prev_idx_ptr = idxptr2-&gt;next_idx;
-00561         <span class="keywordflow">else</span>
-00562             prev_idx_ptr = idxptr2-&gt;next_oid;
-00563         <span class="keywordflow">while</span> (prev_oid_ptr) {
-00564             prev_oid_ptr-&gt;next_oid = prev_idx_ptr;
-00565             prev_oid_ptr = prev_oid_ptr-&gt;next_idx;
-00566         }
-00567     } <span class="keywordflow">else</span> {
-00568         <span class="keywordflow">if</span> (idxptr2-&gt;next_idx)
-00569             snmp_index_head = idxptr2-&gt;next_idx;
-00570         <span class="keywordflow">else</span>
-00571             snmp_index_head = idxptr2-&gt;next_oid;
-00572     }
-00573     snmp_free_var(idxptr2-&gt;varbind);
-00574     free(idxptr2);
-00575     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
-00576 }
-00577 
-00578 <span class="keywordtype">int</span>
-00579 unregister_string_index(oid * name, size_t name_len, <span class="keywordtype">char</span> *cp)
-00580 {
-00581     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind;
-00582 
-00583     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
+00556             prev_idx_ptr = idxptr2-&gt;next_idx;
+00557         <span class="keywordflow">else</span>
+00558             prev_idx_ptr = idxptr2-&gt;next_oid;
+00559         <span class="keywordflow">while</span> (prev_oid_ptr) {
+00560             prev_oid_ptr-&gt;next_oid = prev_idx_ptr;
+00561             prev_oid_ptr = prev_oid_ptr-&gt;next_idx;
+00562         }
+00563     } <span class="keywordflow">else</span> {
+00564         <span class="keywordflow">if</span> (idxptr2-&gt;next_idx)
+00565             snmp_index_head = idxptr2-&gt;next_idx;
+00566         <span class="keywordflow">else</span>
+00567             snmp_index_head = idxptr2-&gt;next_oid;
+00568     }
+00569     snmp_free_var(idxptr2-&gt;varbind);
+00570     free(idxptr2);
+00571     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00572 }
+00573 
+00574 <span class="keywordtype">int</span>
+00575 unregister_string_index(oid * name, size_t name_len, <span class="keywordtype">char</span> *cp)
+00576 {
+00577     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind;
+00578 
+00579     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a>));
-00584     varbind.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_OCTET_STR;
-00585     snmp_set_var_objid(&amp;varbind, name, name_len);
-00586     snmp_set_var_value(&amp;varbind, (u_char *) cp, strlen(cp));
-00587     <span class="keywordflow">return</span> (unregister_index(&amp;varbind, FALSE, main_session));
-00588 }
-00589 
-00590 <span class="keywordtype">int</span>
-00591 unregister_int_index(oid * name, size_t name_len, <span class="keywordtype">int</span> val)
-00592 {
-00593     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind;
-00594 
-00595     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
+00580     varbind.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_OCTET_STR;
+00581     snmp_set_var_objid(&amp;varbind, name, name_len);
+00582     <a class="code" href="group__snmp__client.html#ga25">snmp_set_var_value</a>(&amp;varbind, (u_char *) cp, strlen(cp));
+00583     <span class="keywordflow">return</span> (unregister_index(&amp;varbind, FALSE, main_session));
+00584 }
+00585 
+00586 <span class="keywordtype">int</span>
+00587 unregister_int_index(oid * name, size_t name_len, <span class="keywordtype">int</span> val)
+00588 {
+00589     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind;
+00590 
+00591     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a>));
-00596     varbind.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_INTEGER;
-00597     snmp_set_var_objid(&amp;varbind, name, name_len);
-00598     varbind.<a class="code" href="structvariable__list.html#o4">val</a>.string = varbind.<a class="code" href=
+00592     varbind.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_INTEGER;
+00593     snmp_set_var_objid(&amp;varbind, name, name_len);
+00594     varbind.<a class="code" href="structvariable__list.html#o4">val</a>.string = varbind.<a class="code" href=
 "structvariable__list.html#o7">buf</a>;
-00599     varbind.<a class="code" href="structvariable__list.html#o5">val_len</a> = <span class="keyword">sizeof</span>(long);
-00600     *varbind.<a class="code" href="structvariable__list.html#o4">val</a>.integer = val;
-00601     <span class="keywordflow">return</span> (unregister_index(&amp;varbind, FALSE, main_session));
-00602 }
-00603 
-00604 <span class="keywordtype">int</span>
-00605 unregister_oid_index(oid * name, size_t name_len,
-00606                      oid * value, size_t value_len)
-00607 {
-00608     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind;
-00609 
-00610     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
+00595     varbind.<a class="code" href="structvariable__list.html#o5">val_len</a> = <span class="keyword">sizeof</span>(long);
+00596     *varbind.<a class="code" href="structvariable__list.html#o4">val</a>.integer = val;
+00597     <span class="keywordflow">return</span> (unregister_index(&amp;varbind, FALSE, main_session));
+00598 }
+00599 
+00600 <span class="keywordtype">int</span>
+00601 unregister_oid_index(oid * name, size_t name_len,
+00602                      oid * value, size_t value_len)
+00603 {
+00604     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind;
+00605 
+00606     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a>));
-00611     varbind.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_OBJECT_ID;
-00612     snmp_set_var_objid(&amp;varbind, name, name_len);
-00613     snmp_set_var_value(&amp;varbind, (u_char *) value,
-00614                        value_len * <span class="keyword">sizeof</span>(oid));
-00615     <span class="keywordflow">return</span> (unregister_index(&amp;varbind, FALSE, main_session));
-00616 }
-00617 
-00618 <span class="keywordtype">void</span>
-00619 dump_idx_registry(<span class="keywordtype">void</span>)
-00620 {
-00621     <span class="keyword">struct </span>snmp_index *idxptr, *idxptr2;
-00622     u_char         *sbuf = NULL, *ebuf = NULL;
-00623     size_t          sbuf_len = 0, sout_len = 0, ebuf_len = 0, eout_len = 0;
+00607     varbind.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_OBJECT_ID;
+00608     snmp_set_var_objid(&amp;varbind, name, name_len);
+00609     <a class="code" href="group__snmp__client.html#ga25">snmp_set_var_value</a>(&amp;varbind, (u_char *) value,
+00610                        value_len * <span class="keyword">sizeof</span>(oid));
+00611     <span class="keywordflow">return</span> (unregister_index(&amp;varbind, FALSE, main_session));
+00612 }
+00613 
+00614 <span class="keywordtype">void</span>
+00615 dump_idx_registry(<span class="keywordtype">void</span>)
+00616 {
+00617     <span class="keyword">struct </span>snmp_index *idxptr, *idxptr2;
+00618     u_char         *sbuf = NULL, *ebuf = NULL;
+00619     size_t          sbuf_len = 0, sout_len = 0, ebuf_len = 0, eout_len = 0;
+00620 
+00621     <span class="keywordflow">if</span> (snmp_index_head != NULL) {
+00622         printf(<span class="stringliteral">"\nIndex Allocations:\n"</span>);
+00623     }
 00624 
-00625     <span class="keywordflow">if</span> (snmp_index_head != NULL) {
-00626         printf(<span class="stringliteral">"\nIndex Allocations:\n"</span>);
-00627     }
-00628 
-00629     <span class="keywordflow">for</span> (idxptr = snmp_index_head; idxptr != NULL;
-00630          idxptr = idxptr-&gt;next_oid) {
-00631         sout_len = 0;
-00632         <span class="keywordflow">if</span> (sprint_realloc_objid(&amp;sbuf, &amp;sbuf_len, &amp;sout_len, 1,
-00633                                  idxptr-&gt;varbind-&gt;name,
-00634                                  idxptr-&gt;varbind-&gt;name_length)) {
-00635             printf(<span class="stringliteral">"%s indexes:\n"</span>, sbuf);
-00636         } <span class="keywordflow">else</span> {
-00637             printf(<span class="stringliteral">"%s [TRUNCATED] indexes:\n"</span>, sbuf);
-00638         }
-00639 
-00640         <span class="keywordflow">for</span> (idxptr2 = idxptr; idxptr2 != NULL;
-00641              idxptr2 = idxptr2-&gt;next_idx) {
-00642             <span class="keywordflow">switch</span> (idxptr2-&gt;varbind-&gt;type) {
-00643             <span class="keywordflow">case</span> ASN_INTEGER:
-00644                 printf(<span class="stringliteral">"    %ld for session %8p, allocated %d\n"</span>,
-00645                        *idxptr2-&gt;varbind-&gt;val.integer, idxptr2-&gt;session,
-00646                        idxptr2-&gt;allocated);
-00647                 <span class="keywordflow">break</span>;
-00648             <span class="keywordflow">case</span> ASN_OCTET_STR:
-00649                 printf(<span class="stringliteral">"    \"%s\" for session %8p, allocated %d\n"</span>,
-00650                        idxptr2-&gt;varbind-&gt;val.string, idxptr2-&gt;session,
-00651                        idxptr2-&gt;allocated);
-00652                 <span class="keywordflow">break</span>;
-00653             <span class="keywordflow">case</span> ASN_OBJECT_ID:
-00654                 eout_len = 0;
-00655                 <span class="keywordflow">if</span> (sprint_realloc_objid(&amp;ebuf, &amp;ebuf_len, &amp;eout_len, 1,
-00656                                          idxptr2-&gt;varbind-&gt;val.objid,
-00657                                          idxptr2-&gt;varbind-&gt;val_len /
-00658                                          <span class="keyword">sizeof</span>(oid))) {
-00659                     printf(<span class="stringliteral">"    %s for session %8p, allocated %d\n"</span>, ebuf,
-00660                            idxptr2-&gt;session, idxptr2-&gt;allocated);
-00661                 } <span class="keywordflow">else</span> {
-00662                     printf
-00663                         (<span class="stringliteral">"    %s [TRUNCATED] for sess %8p, allocated %d\n"</span>,
-00664                          ebuf, idxptr2-&gt;session, idxptr2-&gt;allocated);
-00665                 }
-00666                 <span class="keywordflow">break</span>;
-00667             <span class="keywordflow">default</span>:
-00668                 printf(<span class="stringliteral">"unsupported type (%d/0x%02x)\n"</span>,
-00669                        idxptr2-&gt;varbind-&gt;type, idxptr2-&gt;varbind-&gt;type);
-00670             }
-00671         }
+00625     <span class="keywordflow">for</span> (idxptr = snmp_index_head; idxptr != NULL;
+00626          idxptr = idxptr-&gt;next_oid) {
+00627         sout_len = 0;
+00628         <span class="keywordflow">if</span> (sprint_realloc_objid(&amp;sbuf, &amp;sbuf_len, &amp;sout_len, 1,
+00629                                  idxptr-&gt;varbind-&gt;name,
+00630                                  idxptr-&gt;varbind-&gt;name_length)) {
+00631             printf(<span class="stringliteral">"%s indexes:\n"</span>, sbuf);
+00632         } <span class="keywordflow">else</span> {
+00633             printf(<span class="stringliteral">"%s [TRUNCATED] indexes:\n"</span>, sbuf);
+00634         }
+00635 
+00636         <span class="keywordflow">for</span> (idxptr2 = idxptr; idxptr2 != NULL;
+00637              idxptr2 = idxptr2-&gt;next_idx) {
+00638             <span class="keywordflow">switch</span> (idxptr2-&gt;varbind-&gt;type) {
+00639             <span class="keywordflow">case</span> ASN_INTEGER:
+00640                 printf(<span class="stringliteral">"    %ld for session %8p, allocated %d\n"</span>,
+00641                        *idxptr2-&gt;varbind-&gt;val.integer, idxptr2-&gt;session,
+00642                        idxptr2-&gt;allocated);
+00643                 <span class="keywordflow">break</span>;
+00644             <span class="keywordflow">case</span> ASN_OCTET_STR:
+00645                 printf(<span class="stringliteral">"    \"%s\" for session %8p, allocated %d\n"</span>,
+00646                        idxptr2-&gt;varbind-&gt;val.string, idxptr2-&gt;session,
+00647                        idxptr2-&gt;allocated);
+00648                 <span class="keywordflow">break</span>;
+00649             <span class="keywordflow">case</span> ASN_OBJECT_ID:
+00650                 eout_len = 0;
+00651                 <span class="keywordflow">if</span> (sprint_realloc_objid(&amp;ebuf, &amp;ebuf_len, &amp;eout_len, 1,
+00652                                          idxptr2-&gt;varbind-&gt;val.objid,
+00653                                          idxptr2-&gt;varbind-&gt;val_len /
+00654                                          <span class="keyword">sizeof</span>(oid))) {
+00655                     printf(<span class="stringliteral">"    %s for session %8p, allocated %d\n"</span>, ebuf,
+00656                            idxptr2-&gt;session, idxptr2-&gt;allocated);
+00657                 } <span class="keywordflow">else</span> {
+00658                     printf
+00659                         (<span class="stringliteral">"    %s [TRUNCATED] for sess %8p, allocated %d\n"</span>,
+00660                          ebuf, idxptr2-&gt;session, idxptr2-&gt;allocated);
+00661                 }
+00662                 <span class="keywordflow">break</span>;
+00663             <span class="keywordflow">default</span>:
+00664                 printf(<span class="stringliteral">"unsupported type (%d/0x%02x)\n"</span>,
+00665                        idxptr2-&gt;varbind-&gt;type, idxptr2-&gt;varbind-&gt;type);
+00666             }
+00667         }
+00668     }
+00669 
+00670     <span class="keywordflow">if</span> (sbuf != NULL) {
+00671         free(sbuf);
 00672     }
-00673 
-00674     <span class="keywordflow">if</span> (sbuf != NULL) {
-00675         free(sbuf);
-00676     }
-00677     <span class="keywordflow">if</span> (ebuf != NULL) {
-00678         free(ebuf);
-00679     }
-00680 }
-00681 
-00682 <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>
-00683 count_indexes(oid * name, size_t namelen, <span class="keywordtype">int</span> include_unallocated)
-00684 {
-00685     <span class="keyword">struct </span>snmp_index *i = NULL, *j = NULL;
-00686     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   n = 0;
-00687 
-00688     <span class="keywordflow">for</span> (i = snmp_index_head; i != NULL; i = i-&gt;next_oid) {
-00689         <span class="keywordflow">if</span> (<a class="code" href=
-"group__library.html#ga100">netsnmp_oid_equals</a>(name, namelen,
-00690                              i-&gt;varbind-&gt;name,
-00691                              i-&gt;varbind-&gt;name_length) == 0) {
-00692             <span class="keywordflow">for</span> (j = i; j != NULL; j = j-&gt;next_idx) {
-00693                 <span class="keywordflow">if</span> (j-&gt;allocated || include_unallocated) {
-00694                     n++;
-00695                 }
-00696             }
-00697         }
-00698     }
-00699     <span class="keywordflow">return</span> n;
-00700 }
-00701 
+00673     <span class="keywordflow">if</span> (ebuf != NULL) {
+00674         free(ebuf);
+00675     }
+00676 }
+00677 
+00678 <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>
+00679 count_indexes(oid * name, size_t namelen, <span class="keywordtype">int</span> include_unallocated)
+00680 {
+00681     <span class="keyword">struct </span>snmp_index *i = NULL, *j = NULL;
+00682     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   n = 0;
+00683 
+00684     <span class="keywordflow">for</span> (i = snmp_index_head; i != NULL; i = i-&gt;next_oid) {
+00685         <span class="keywordflow">if</span> (<a class="code" href=
+"group__library.html#ga106">netsnmp_oid_equals</a>(name, namelen,
+00686                              i-&gt;varbind-&gt;name,
+00687                              i-&gt;varbind-&gt;name_length) == 0) {
+00688             <span class="keywordflow">for</span> (j = i; j != NULL; j = j-&gt;next_idx) {
+00689                 <span class="keywordflow">if</span> (j-&gt;allocated || include_unallocated) {
+00690                     n++;
+00691                 }
+00692             }
+00693         }
+00694     }
+00695     <span class="keywordflow">return</span> n;
+00696 }
+00697 
+00698 
+00699 <span class="preprocessor">#ifdef TESTING</span>
+00700 <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind;
+00701 <a class="code" href="structsnmp__session.html">netsnmp_session</a> main_sess, *main_session = &amp;main_sess;
 00702 
-00703 <span class="preprocessor">#ifdef TESTING</span>
-00704 <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> varbind;
-00705 <a class="code" href="structsnmp__session.html">netsnmp_session</a> main_sess, *main_session = &amp;main_sess;
-00706 
-00707 <span class="keywordtype">void</span>
-00708 test_string_register(<span class="keywordtype">int</span> n, <span class="keywordtype">char</span> *cp)
-00709 {
-00710     varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>[4] = n;
-00711     <span class="keywordflow">if</span> (register_string_index(varbind-&gt;<a class="code" href=
+00703 <span class="keywordtype">void</span>
+00704 test_string_register(<span class="keywordtype">int</span> n, <span class="keywordtype">char</span> *cp)
+00705 {
+00706     varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>[4] = n;
+00707     <span class="keywordflow">if</span> (register_string_index(varbind-&gt;<a class="code" href=
 "structvariable__list.html#o1">name</a>, varbind.<a class="code" href="structvariable__list.html#o2">name_length</a>, cp) ==
-00712         NULL)
-00713         printf(<span class="stringliteral">"allocating %s failed\n"</span>, cp);
-00714 }
-00715 
-00716 <span class="keywordtype">void</span>
-00717 test_int_register(<span class="keywordtype">int</span> n, <span class="keywordtype">int</span> val)
-00718 {
-00719     varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>[4] = n;
-00720     <span class="keywordflow">if</span> (register_int_index(varbind-&gt;<a class="code" href=
+00708         NULL)
+00709         printf(<span class="stringliteral">"allocating %s failed\n"</span>, cp);
+00710 }
+00711 
+00712 <span class="keywordtype">void</span>
+00713 test_int_register(<span class="keywordtype">int</span> n, <span class="keywordtype">int</span> val)
+00714 {
+00715     varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>[4] = n;
+00716     <span class="keywordflow">if</span> (register_int_index(varbind-&gt;<a class="code" href=
 "structvariable__list.html#o1">name</a>, varbind.<a class="code" href="structvariable__list.html#o2">name_length</a>, val) == -1)
-00721         printf(<span class="stringliteral">"allocating %d/%d failed\n"</span>, n, val);
-00722 }
-00723 
-00724 <span class="keywordtype">void</span>
-00725 test_oid_register(<span class="keywordtype">int</span> n, <span class="keywordtype">int</span> subid)
-00726 {
-00727     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *res;
-00728 
-00729     varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>[4] = n;
-00730     <span class="keywordflow">if</span> (subid != -1) {
-00731         varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid[5] = subid;
-00732         res = register_oid_index(varbind-&gt;<a class="code" href=
+00717         printf(<span class="stringliteral">"allocating %d/%d failed\n"</span>, n, val);
+00718 }
+00719 
+00720 <span class="keywordtype">void</span>
+00721 test_oid_register(<span class="keywordtype">int</span> n, <span class="keywordtype">int</span> subid)
+00722 {
+00723     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *res;
+00724 
+00725     varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>[4] = n;
+00726     <span class="keywordflow">if</span> (subid != -1) {
+00727         varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid[5] = subid;
+00728         res = register_oid_index(varbind-&gt;<a class="code" href=
 "structvariable__list.html#o1">name</a>, varbind.<a class="code" href="structvariable__list.html#o2">name_length</a>,
-00733                                  varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid,
-00734                                  varbind-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> / <span class=
+00729                                  varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid,
+00730                                  varbind-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> / <span class=
 "keyword">sizeof</span>(oid));
-00735     } <span class="keywordflow">else</span>
-00736         res =
-00737             register_oid_index(varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>, varbind.<a class=
+00731     } <span class="keywordflow">else</span>
+00732         res =
+00733             register_oid_index(varbind-&gt;<a class="code" href="structvariable__list.html#o1">name</a>, varbind.<a class=
 "code" href="structvariable__list.html#o2">name_length</a>, NULL,
-00738                                0);
+00734                                0);
+00735 
+00736     <span class="keywordflow">if</span> (res == NULL)
+00737         printf(<span class="stringliteral">"allocating %d/%d failed\n"</span>, n, subid);
+00738 }
 00739 
-00740     <span class="keywordflow">if</span> (res == NULL)
-00741         printf(<span class="stringliteral">"allocating %d/%d failed\n"</span>, n, subid);
-00742 }
-00743 
-00744 <span class="keywordtype">void</span>
-00745 main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> argv[])
-00746 {
-00747     oid             name[] = { 1, 2, 3, 4, 0 };
-00748     <span class="keywordtype">int</span>             i;
-00749 
-00750     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
+00740 <span class="keywordtype">void</span>
+00741 main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> argv[])
+00742 {
+00743     oid             name[] = { 1, 2, 3, 4, 0 };
+00744     <span class="keywordtype">int</span>             i;
+00745 
+00746     memset(&amp;varbind, 0, <span class="keyword">sizeof</span>(<a class="code" href=
 "structvariable__list.html">netsnmp_variable_list</a>));
-00751     snmp_set_var_objid(&amp;varbind, name, 5);
-00752     varbind-&gt;<a class="code" href="structvariable__list.html#o3">type</a> = ASN_OCTET_STR;
-00753     <span class="comment">/*</span>
-00754 <span class="comment">     * Test index structure linking:</span>
-00755 <span class="comment">     *      a) sorted by OID</span>
-00756 <span class="comment">     */</span>
-00757     test_string_register(20, <span class="stringliteral">"empty OID"</span>);
-00758     test_string_register(10, <span class="stringliteral">"first OID"</span>);
-00759     test_string_register(40, <span class="stringliteral">"last OID"</span>);
-00760     test_string_register(30, <span class="stringliteral">"middle OID"</span>);
-00761 
-00762     <span class="comment">/*</span>
-00763 <span class="comment">     *      b) sorted by index value</span>
-00764 <span class="comment">     */</span>
-00765     test_string_register(25, <span class="stringliteral">"eee: empty IDX"</span>);
-00766     test_string_register(25, <span class="stringliteral">"aaa: first IDX"</span>);
-00767     test_string_register(25, <span class="stringliteral">"zzz: last IDX"</span>);
-00768     test_string_register(25, <span class="stringliteral">"mmm: middle IDX"</span>);
-00769     printf(<span class="stringliteral">"This next one should fail....\n"</span>);
-00770     test_string_register(25, <span class="stringliteral">"eee: empty IDX"</span>); <span class=
+00747     snmp_set_var_objid(&amp;varbind, name, 5);
+00748     varbind-&gt;<a class="code" href="structvariable__list.html#o3">type</a> = ASN_OCTET_STR;
+00749     <span class="comment">/*</span>
+00750 <span class="comment">     * Test index structure linking:</span>
+00751 <span class="comment">     *      a) sorted by OID</span>
+00752 <span class="comment">     */</span>
+00753     test_string_register(20, <span class="stringliteral">"empty OID"</span>);
+00754     test_string_register(10, <span class="stringliteral">"first OID"</span>);
+00755     test_string_register(40, <span class="stringliteral">"last OID"</span>);
+00756     test_string_register(30, <span class="stringliteral">"middle OID"</span>);
+00757 
+00758     <span class="comment">/*</span>
+00759 <span class="comment">     *      b) sorted by index value</span>
+00760 <span class="comment">     */</span>
+00761     test_string_register(25, <span class="stringliteral">"eee: empty IDX"</span>);
+00762     test_string_register(25, <span class="stringliteral">"aaa: first IDX"</span>);
+00763     test_string_register(25, <span class="stringliteral">"zzz: last IDX"</span>);
+00764     test_string_register(25, <span class="stringliteral">"mmm: middle IDX"</span>);
+00765     printf(<span class="stringliteral">"This next one should fail....\n"</span>);
+00766     test_string_register(25, <span class="stringliteral">"eee: empty IDX"</span>); <span class=
 "comment">/* duplicate */</span>
-00771     printf(<span class="stringliteral">"done\n"</span>);
-00772 
-00773     <span class="comment">/*</span>
-00774 <span class="comment">     *      c) test initial index linking</span>
-00775 <span class="comment">     */</span>
-00776     test_string_register(5, <span class="stringliteral">"eee: empty initial IDX"</span>);
-00777     test_string_register(5, <span class="stringliteral">"aaa: replace initial IDX"</span>);
-00778 
-00779     <span class="comment">/*</span>
-00780 <span class="comment">     *      Did it all work?</span>
-00781 <span class="comment">     */</span>
-00782     dump_idx_registry();
-00783     unregister_index_by_session(main_session);
-00784     <span class="comment">/*</span>
-00785 <span class="comment">     *  Now test index allocation</span>
-00786 <span class="comment">     *      a) integer values</span>
-00787 <span class="comment">     */</span>
-00788     test_int_register(110, -1); <span class="comment">/* empty */</span>
-00789     test_int_register(110, -1); <span class="comment">/* append */</span>
-00790     test_int_register(110, 10); <span class="comment">/* append exact */</span>
-00791     printf(<span class="stringliteral">"This next one should fail....\n"</span>);
-00792     test_int_register(110, 10); <span class="comment">/* exact duplicate */</span>
-00793     printf(<span class="stringliteral">"done\n"</span>);
-00794     test_int_register(110, -1); <span class="comment">/* append */</span>
-00795     test_int_register(110, 5);  <span class="comment">/* insert exact */</span>
-00796 
-00797     <span class="comment">/*</span>
-00798 <span class="comment">     *      b) string values</span>
-00799 <span class="comment">     */</span>
-00800     test_string_register(120, NULL);    <span class="comment">/* empty */</span>
-00801     test_string_register(120, NULL);    <span class="comment">/* append */</span>
-00802     test_string_register(120, <span class="stringliteral">"aaaz"</span>);
-00803     test_string_register(120, NULL);    <span class="comment">/* minor rollover */</span>
-00804     test_string_register(120, <span class="stringliteral">"zzzz"</span>);
-00805     test_string_register(120, NULL);    <span class="comment">/* major rollover */</span>
+00767     printf(<span class="stringliteral">"done\n"</span>);
+00768 
+00769     <span class="comment">/*</span>
+00770 <span class="comment">     *      c) test initial index linking</span>
+00771 <span class="comment">     */</span>
+00772     test_string_register(5, <span class="stringliteral">"eee: empty initial IDX"</span>);
+00773     test_string_register(5, <span class="stringliteral">"aaa: replace initial IDX"</span>);
+00774 
+00775     <span class="comment">/*</span>
+00776 <span class="comment">     *      Did it all work?</span>
+00777 <span class="comment">     */</span>
+00778     dump_idx_registry();
+00779     unregister_index_by_session(main_session);
+00780     <span class="comment">/*</span>
+00781 <span class="comment">     *  Now test index allocation</span>
+00782 <span class="comment">     *      a) integer values</span>
+00783 <span class="comment">     */</span>
+00784     test_int_register(110, -1); <span class="comment">/* empty */</span>
+00785     test_int_register(110, -1); <span class="comment">/* append */</span>
+00786     test_int_register(110, 10); <span class="comment">/* append exact */</span>
+00787     printf(<span class="stringliteral">"This next one should fail....\n"</span>);
+00788     test_int_register(110, 10); <span class="comment">/* exact duplicate */</span>
+00789     printf(<span class="stringliteral">"done\n"</span>);
+00790     test_int_register(110, -1); <span class="comment">/* append */</span>
+00791     test_int_register(110, 5);  <span class="comment">/* insert exact */</span>
+00792 
+00793     <span class="comment">/*</span>
+00794 <span class="comment">     *      b) string values</span>
+00795 <span class="comment">     */</span>
+00796     test_string_register(120, NULL);    <span class="comment">/* empty */</span>
+00797     test_string_register(120, NULL);    <span class="comment">/* append */</span>
+00798     test_string_register(120, <span class="stringliteral">"aaaz"</span>);
+00799     test_string_register(120, NULL);    <span class="comment">/* minor rollover */</span>
+00800     test_string_register(120, <span class="stringliteral">"zzzz"</span>);
+00801     test_string_register(120, NULL);    <span class="comment">/* major rollover */</span>
+00802 
+00803     <span class="comment">/*</span>
+00804 <span class="comment">     *      c) OID values</span>
+00805 <span class="comment">     */</span>
 00806 
-00807     <span class="comment">/*</span>
-00808 <span class="comment">     *      c) OID values</span>
-00809 <span class="comment">     */</span>
-00810 
-00811     test_oid_register(130, -1); <span class="comment">/* empty */</span>
-00812     test_oid_register(130, -1); <span class="comment">/* append */</span>
-00813 
-00814     varbind-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> = varbind.<a class="code" href=
+00807     test_oid_register(130, -1); <span class="comment">/* empty */</span>
+00808     test_oid_register(130, -1); <span class="comment">/* append */</span>
+00809 
+00810     varbind-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> = varbind.<a class="code" href=
 "structvariable__list.html#o2">name_length</a> * <span class="keyword">sizeof</span>(oid);
-00815     memcpy(varbind-&gt;<a class="code" href="structvariable__list.html#o7">buf</a>, varbind.<a class="code" href=
+00811     memcpy(varbind-&gt;<a class="code" href="structvariable__list.html#o7">buf</a>, varbind.<a class="code" href=
 "structvariable__list.html#o1">name</a>, varbind.<a class="code" href="structvariable__list.html#o5">val_len</a>);
-00816     varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid = (oid *) varbind.<a class="code" href=
+00812     varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid = (oid *) varbind.<a class="code" href=
 "structvariable__list.html#o7">buf</a>;
-00817     varbind-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> += <span class=
+00813     varbind-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> += <span class=
 "keyword">sizeof</span>(oid);
-00818 
-00819     test_oid_register(130, 255);        <span class="comment">/* append exact */</span>
-00820     test_oid_register(130, -1); <span class="comment">/* minor rollover */</span>
-00821     test_oid_register(130, 100);        <span class="comment">/* insert exact */</span>
-00822     printf(<span class="stringliteral">"This next one should fail....\n"</span>);
-00823     test_oid_register(130, 100);        <span class="comment">/* exact duplicate */</span>
-00824     printf(<span class="stringliteral">"done\n"</span>);
-00825 
-00826     varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid = (oid *) varbind.<a class="code" href=
+00814 
+00815     test_oid_register(130, 255);        <span class="comment">/* append exact */</span>
+00816     test_oid_register(130, -1); <span class="comment">/* minor rollover */</span>
+00817     test_oid_register(130, 100);        <span class="comment">/* insert exact */</span>
+00818     printf(<span class="stringliteral">"This next one should fail....\n"</span>);
+00819     test_oid_register(130, 100);        <span class="comment">/* exact duplicate */</span>
+00820     printf(<span class="stringliteral">"done\n"</span>);
+00821 
+00822     varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid = (oid *) varbind.<a class="code" href=
 "structvariable__list.html#o7">buf</a>;
-00827     <span class="keywordflow">for</span> (i = 0; i &lt; 6; i++)
-00828         varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid[i] = 255;
-00829     varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid[0] = 1;
-00830     test_oid_register(130, 255);        <span class="comment">/* set up rollover  */</span>
-00831     test_oid_register(130, -1); <span class="comment">/* medium rollover */</span>
-00832 
-00833     <span class="keywordflow">for</span> (i = 0; i &lt; 6; i++)
-00834         varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid[i] = 255;
-00835     varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid[0] = 2;
-00836     test_oid_register(130, 255);        <span class="comment">/* set up rollover  */</span>
-00837     test_oid_register(130, -1); <span class="comment">/* major rollover */</span>
-00838 
-00839     <span class="comment">/*</span>
-00840 <span class="comment">     *      Did it all work?</span>
-00841 <span class="comment">     */</span>
-00842     dump_idx_registry();
-00843 
-00844     <span class="comment">/*</span>
-00845 <span class="comment">     *      Test the various "invalid" requests</span>
-00846 <span class="comment">     *      (unsupported types, mis-matched types, etc)</span>
-00847 <span class="comment">     */</span>
-00848     printf(<span class="stringliteral">"The rest of these should fail....\n"</span>);
-00849     test_oid_register(110, -1);
-00850     test_oid_register(110, 100);
-00851     test_oid_register(120, -1);
-00852     test_oid_register(120, 100);
-00853     test_string_register(110, NULL);
-00854     test_string_register(110, <span class="stringliteral">"aaaa"</span>);
-00855     test_string_register(130, NULL);
-00856     test_string_register(130, <span class="stringliteral">"aaaa"</span>);
-00857     test_int_register(120, -1);
-00858     test_int_register(120, 1);
-00859     test_int_register(130, -1);
-00860     test_int_register(130, 1);
-00861     printf(<span class="stringliteral">"done - this dump should be the same as before\n"</span>);
-00862     dump_idx_registry();
-00863 }
-00864 <span class="preprocessor">#endif</span>
+00823     <span class="keywordflow">for</span> (i = 0; i &lt; 6; i++)
+00824         varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid[i] = 255;
+00825     varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid[0] = 1;
+00826     test_oid_register(130, 255);        <span class="comment">/* set up rollover  */</span>
+00827     test_oid_register(130, -1); <span class="comment">/* medium rollover */</span>
+00828 
+00829     <span class="keywordflow">for</span> (i = 0; i &lt; 6; i++)
+00830         varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid[i] = 255;
+00831     varbind-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.objid[0] = 2;
+00832     test_oid_register(130, 255);        <span class="comment">/* set up rollover  */</span>
+00833     test_oid_register(130, -1); <span class="comment">/* major rollover */</span>
+00834 
+00835     <span class="comment">/*</span>
+00836 <span class="comment">     *      Did it all work?</span>
+00837 <span class="comment">     */</span>
+00838     dump_idx_registry();
+00839 
+00840     <span class="comment">/*</span>
+00841 <span class="comment">     *      Test the various "invalid" requests</span>
+00842 <span class="comment">     *      (unsupported types, mis-matched types, etc)</span>
+00843 <span class="comment">     */</span>
+00844     printf(<span class="stringliteral">"The rest of these should fail....\n"</span>);
+00845     test_oid_register(110, -1);
+00846     test_oid_register(110, 100);
+00847     test_oid_register(120, -1);
+00848     test_oid_register(120, 100);
+00849     test_string_register(110, NULL);
+00850     test_string_register(110, <span class="stringliteral">"aaaa"</span>);
+00851     test_string_register(130, NULL);
+00852     test_string_register(130, <span class="stringliteral">"aaaa"</span>);
+00853     test_int_register(120, -1);
+00854     test_int_register(120, 1);
+00855     test_int_register(130, -1);
+00856     test_int_register(130, 1);
+00857     printf(<span class="stringliteral">"done - this dump should be the same as before\n"</span>);
+00858     dump_idx_registry();
+00859 }
+00860 <span class="preprocessor">#endif</span>
 </pre>
   </div>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:36 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:43 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->

@@ -22,13 +22,63 @@
       <td colspan="2">
         <br />
 
+        <h2>Defines</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga17" doxytag=
+      "callback::CALLBACK_NAME_LOGGING" id="ga17"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>CALLBACK_NAME_LOGGING</b>&nbsp;&nbsp;&nbsp;1</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga18" doxytag=
+      "callback::LOCK_PER_CALLBACK_SUBID" id="ga18"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>LOCK_PER_CALLBACK_SUBID</b>&nbsp;&nbsp;&nbsp;1</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga19" doxytag=
+      "callback::CALLBACK_LOCK" id="ga19"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>CALLBACK_LOCK</b>(maj, min)&nbsp;&nbsp;&nbsp;++_locks[major][minor]</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga20" doxytag=
+      "callback::CALLBACK_UNLOCK" id="ga20"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>CALLBACK_UNLOCK</b>(maj, min)&nbsp;&nbsp;&nbsp;--_locks[major][minor]</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
         <h2>Functions</h2>
       </td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga2" doxytag=
-      "callback::init_callbacks" id="ga2"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga5" doxytag=
+      "callback::_callback_lock" id="ga5"></a> NETSNMP_STATIC_INLINE int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>_callback_lock</b> (int major, int minor, const char *warn, int assert)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga6" doxytag=
+      "callback::_callback_unlock" id="ga6"></a> NETSNMP_STATIC_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>_callback_unlock</b> (int major, int minor)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga7" doxytag=
+      "callback::init_callbacks" id="ga7"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>init_callbacks</b> (void)</td>
     </tr>
@@ -36,19 +86,19 @@
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
 
-      <td class="memItemRight" valign="bottom"><a class="el" href="group__callback.html#ga3">snmp_register_callback</a> (int
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__callback.html#ga8">snmp_register_callback</a> (int
       major, int minor, SNMPCallback *new_callback, void *arg)</td>
     </tr>
 
     <tr>
       <td class="mdescLeft">&nbsp;</td>
 
-      <td class="mdescRight">This function registers a generic callback function. <a href="#ga3"></a><br /></td>
+      <td class="mdescRight">This function registers a generic callback function. <a href="#ga8"></a><br /></td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga4" doxytag=
-      "callback::netsnmp_register_callback" id="ga4"></a> int&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga9" doxytag=
+      "callback::netsnmp_register_callback" id="ga9"></a> int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>netsnmp_register_callback</b> (int major, int minor, SNMPCallback
       *new_callback, void *arg, int priority)</td>
@@ -57,7 +107,7 @@
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
 
-      <td class="memItemRight" valign="bottom"><a class="el" href="group__callback.html#ga5">snmp_call_callbacks</a> (int major,
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__callback.html#ga10">snmp_call_callbacks</a> (int major,
       int minor, void *caller_arg)</td>
     </tr>
 
@@ -65,19 +115,19 @@
       <td class="mdescLeft">&nbsp;</td>
 
       <td class="mdescRight">This function calls the callback function for each registered callback of type major and minor.
-      <a href="#ga5"></a><br /></td>
+      <a href="#ga10"></a><br /></td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga6" doxytag=
-      "callback::snmp_count_callbacks" id="ga6"></a> int&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga11" doxytag=
+      "callback::snmp_count_callbacks" id="ga11"></a> int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>snmp_count_callbacks</b> (int major, int minor)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga7" doxytag=
-      "callback::snmp_callback_available" id="ga7"></a> int&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga12" doxytag=
+      "callback::snmp_callback_available" id="ga12"></a> int&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>snmp_callback_available</b> (int major, int minor)</td>
     </tr>
@@ -85,7 +135,7 @@
     <tr>
       <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
 
-      <td class="memItemRight" valign="bottom"><a class="el" href="group__callback.html#ga8">snmp_unregister_callback</a> (int
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__callback.html#ga13">snmp_unregister_callback</a> (int
       major, int minor, SNMPCallback *target, void *arg, int matchargs)</td>
     </tr>
 
@@ -93,26 +143,131 @@
       <td class="mdescLeft">&nbsp;</td>
 
       <td class="mdescRight">This function unregisters a specified callback function given a major and minor type. <a href=
-      "#ga8"></a><br /></td>
+      "#ga13"></a><br /></td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga9" doxytag=
-      "callback::clear_callback" id="ga9"></a> void&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__callback.html#ga14">netsnmp_callback_clear_client_arg</a> (void *ptr, int i, int j)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">find and clear client args that match ptr <a href="#ga14"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga15" doxytag=
+      "callback::clear_callback" id="ga15"></a> void&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>clear_callback</b> (void)</td>
     </tr>
 
     <tr>
-      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga10" doxytag=
-      "callback::snmp_callback_list" id="ga10"></a> snmp_gen_callback *&nbsp;</td>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga16" doxytag=
+      "callback::snmp_callback_list" id="ga16"></a> snmp_gen_callback *&nbsp;</td>
 
       <td class="memItemRight" valign="bottom"><b>snmp_callback_list</b> (int major, int minor)</td>
     </tr>
   </table>
   <hr />
 
-  <h2>Function Documentation</h2><a class="anchor" name="ga5" doxytag="callback.c::snmp_call_callbacks" id="ga5"></a>
+  <h2>Function Documentation</h2><a class="anchor" name="ga14" doxytag="callback.c::netsnmp_callback_clear_client_arg" id=
+  "ga14"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_callback_clear_client_arg</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">void *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>ptr</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>i</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>j</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>find and clear client args that match ptr</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>ptr</em>&nbsp;</td>
+
+                <td>pointer to search for</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>i</em>&nbsp;</td>
+
+                <td>callback id to start at</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>j</em>&nbsp;</td>
+
+                <td>callback subid to start at</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="callback_8c-source.html#l00456">456</a> of file <a class="el" href=
+        "callback_8c-source.html">callback.c</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga10" doxytag="callback.c::snmp_call_callbacks" id="ga10"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -210,24 +365,22 @@
           <dt><b>See also:</b></dt>
 
           <dd>
-            <a class="el" href="group__callback.html#ga3">snmp_register_callback</a>
+            <a class="el" href="group__callback.html#ga8">snmp_register_callback</a>
 
-            <p><a class="el" href="group__callback.html#ga8">snmp_unregister_callback</a></p>
+            <p><a class="el" href="group__callback.html#ga13">snmp_unregister_callback</a></p>
           </dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="callback_8c-source.html#l00182">182</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="callback_8c-source.html#l00280">280</a> of file <a class="el" href=
         "callback_8c-source.html">callback.c</a>.</p>
 
-        <p>References <a class="el" href="snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
-
-        <p>Referenced by <a class="el" href="agent__registry_8c-source.html#l01236">netsnmp_acm_check_subtree()</a>, <a class=
-        "el" href="old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>, <a class="el" href=
-        "snmp__api_8c-source.html#l00846">snmp_shutdown()</a>, and <a class="el" href=
-        "agent__registry_8c-source.html#l00916">unregister_mib_context()</a>.</p>
+        <p>Referenced by <a class="el" href="agent__registry_8c-source.html#l01286">netsnmp_acm_check_subtree()</a>, <a class=
+        "el" href="old__api_8c-source.html#l00106">netsnmp_register_mib_table_row()</a>, <a class="el" href=
+        "snmp__api_8c-source.html#l00862">snmp_shutdown()</a>, and <a class="el" href=
+        "agent__registry_8c-source.html#l00958">unregister_mib_context()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga3" doxytag="callback.c::snmp_register_callback" id="ga3"></a>
+  </table><a class="anchor" name="ga8" doxytag="callback.c::snmp_register_callback" id="ga8"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -379,19 +532,19 @@
           <dt><b>See also:</b></dt>
 
           <dd>
-            <a class="el" href="group__callback.html#ga5">snmp_call_callbacks</a>
+            <a class="el" href="group__callback.html#ga10">snmp_call_callbacks</a>
 
-            <p><a class="el" href="group__callback.html#ga8">snmp_unregister_callback</a></p>
+            <p><a class="el" href="group__callback.html#ga13">snmp_unregister_callback</a></p>
           </dd>
         </dl>
 
-        <p>Definition at line <a class="el" href="callback_8c-source.html#l00115">115</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="callback_8c-source.html#l00212">212</a> of file <a class="el" href=
         "callback_8c-source.html">callback.c</a>.</p>
 
-        <p>Referenced by <a class="el" href="data__list_8c-source.html#l00220">netsnmp_register_save_list()</a>.</p>
+        <p>Referenced by <a class="el" href="data__list_8c-source.html#l00231">netsnmp_register_save_list()</a>.</p>
       </td>
     </tr>
-  </table><a class="anchor" name="ga8" doxytag="callback.c::snmp_unregister_callback" id="ga8"></a>
+  </table><a class="anchor" name="ga13" doxytag="callback.c::snmp_unregister_callback" id="ga13"></a>
 
   <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
     <tr>
@@ -527,27 +680,25 @@
           <dt><b>See also:</b></dt>
 
           <dd>
-            <a class="el" href="group__callback.html#ga3">snmp_register_callback</a>
+            <a class="el" href="group__callback.html#ga8">snmp_register_callback</a>
 
-            <p><a class="el" href="group__callback.html#ga5">snmp_call_callbacks</a></p>
+            <p><a class="el" href="group__callback.html#ga10">snmp_call_callbacks</a></p>
           </dd>
         </dl>
 
         <p>set cleanup flag?</p>
 
-        <p>Definition at line <a class="el" href="callback_8c-source.html#l00295">295</a> of file <a class="el" href=
+        <p>Definition at line <a class="el" href="callback_8c-source.html#l00400">400</a> of file <a class="el" href=
         "callback_8c-source.html">callback.c</a>.</p>
 
-        <p>References <a class="el" href="tools_8h-source.html#l00053">SNMP_FREE</a>, and <a class="el" href=
-        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+        <p>References <a class="el" href="tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
       </td>
     </tr>
   </table>
   <hr size="1" />
 
   <address style="align: right;">
-    <small><!--#include virtual="/sfbutton.html" --><br />
-    Generated on Thu Nov 25 17:51:44 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    <small>Generated on Fri Dec 30 13:47:55 2005 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
     "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
   </address>
 <!-- CONTENT END -->
