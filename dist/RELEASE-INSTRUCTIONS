@@ -310,6 +310,11 @@ RELEASING:
 
   12) bug Wes to update the freshmeat entries and the open source
       developers web page entries. 
+
+  13) For a major new-feature release (eg 5.3), create the patches
+      branch after the final release.
+
+	$ cvs rtag -r Ext-5-3 -b V5-3-patches net-snmp
       
 
 ***************************************************************************
