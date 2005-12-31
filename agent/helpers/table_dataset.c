@@ -852,6 +852,7 @@ _table_set_add_indexes(netsnmp_table_data_set *table_set, struct tree *tp)
     struct index_list *index;
     struct tree     *indexnode;
     u_char          type;
+    int             fixed_len = 0;
     
     /*
      * loop through indexes and add types 
@@ -876,17 +877,34 @@ _table_set_add_indexes(netsnmp_table_data_set *table_set, struct tree *tp)
          * if implied, mark it as such. also mark fixed length
          * octet strings as implied (ie no length prefix) as well.
          * */
-        if ((index->isimplied) ||
-            ((TYPE_OCTETSTR == indexnode->type) &&  /* octet str */
-             (NULL != indexnode->ranges) &&         /* & has range */
-             (NULL == indexnode->ranges->next) &&   /*   but only one */
-             (indexnode->ranges->high ==            /*   & high==low */
-              indexnode->ranges->low)))
+        if ((TYPE_OCTETSTR == indexnode->type) &&  /* octet str */
+            (NULL != indexnode->ranges) &&         /* & has range */
+            (NULL == indexnode->ranges->next) &&   /*   but only one */
+            (indexnode->ranges->high ==            /*   & high==low */
+             indexnode->ranges->low)) {
+            type |= ASN_PRIVATE;
+            fixed_len = indexnode->ranges->high;
+        }
+        else if (index->isimplied)
             type |= ASN_PRIVATE;
         
         DEBUGMSGTL(("table_set_add_table",
                     "adding default index of type %d\n", type));
         netsnmp_table_dataset_add_index(table_set, type);
+
+        /*
+         * hack alert: for fixed lenght strings, save the
+         * lenght for use during oid parsing.
+         */
+        if (fixed_len) {
+            /*
+             * find last (just added) index
+             */
+            netsnmp_variable_list *var =  table_set->table->indexes_template;
+            while (NULL != var->next_variable)
+                var = var->next_variable;
+            var->val_len = fixed_len;
+        }
     }
 }
 /** @internal */
