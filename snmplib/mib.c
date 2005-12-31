@@ -3703,7 +3703,16 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
         case ASN_OBJECT_ID:
         case ASN_PRIV_IMPLIED_OBJECT_ID:
             if (var->type == ASN_PRIV_IMPLIED_OBJECT_ID) {
-                uitmp = *oidLen;
+                /*
+                 * might not be implied, might be fixed len. check if
+                 * caller set up val len, and use it if they did.
+                 */
+                if (0 == var->val_len)
+                    uitmp = *oidLen;
+                else {
+                    DEBUGMSGTL(("parse_oid_indexes:fix", "fixed len oid\n"));
+                    uitmp = var->val_len;
+                }
             } else {
                 if (*oidLen) {
                     uitmp = *oidIndex++;
@@ -3743,7 +3752,16 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
         case ASN_OCTET_STR:
         case ASN_PRIV_IMPLIED_OCTET_STR:
             if (var->type == ASN_PRIV_IMPLIED_OCTET_STR) {
-                uitmp = *oidLen;
+                /*
+                 * might not be implied, might be fixed len. check if
+                 * caller set up val len, and use it if they did.
+                 */
+                if (0 == var->val_len)
+                    uitmp = *oidLen;
+                else {
+                    DEBUGMSGTL(("parse_oid_indexes:fix", "fixed len str\n"));
+                    uitmp = var->val_len;
+                }
             } else {
                 if (*oidLen) {
                     uitmp = *oidIndex++;
