@@ -1,6 +1,14 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.2.3*
+
+    snmpusm:
+      - allows to use old and/or new localized key instead of passphrase with
+        option -Ck
+      - new option -CE to specify usmUserEngineID (necessary to manage
+        snmptrapd's usmUserTable)
+
 *5.2.2*
 
  New:
