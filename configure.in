@@ -262,7 +262,7 @@ AC_ARG_ENABLE(debugging,
 [  --enable-debugging              Outputs extra debugging information at all
                                   times.  Normally, you should not enable this,
                                   but instead use the -D flag of the commands,
-                                  which toggles debbuging output at runtime.
+                                  which toggles debuging output at runtime.
   --disable-debugging             Disallows debugging code to be built in.
                                   This might provide some speed benefits.],
     AC_DEFINE(SNMP_ALWAYS_DEBUG))
@@ -2384,7 +2384,7 @@ if test "x$with_rpm" != "xno" && \
 
   # two variants of bzip2 need checking.
   AC_ARG_WITH(bzip2,
-  [  --with-bzip2[=DIR]        use libbzip2 in DIR],[
+  [  --with-bzip2[=DIR]        use libbz2 in DIR],[
     if test -d "$withval"; then
       CPPFLAGS="${CPPFLAGS} -I$withval/include"
       LDFLAGS="${LDFLAGS} -L$withval/lib"
