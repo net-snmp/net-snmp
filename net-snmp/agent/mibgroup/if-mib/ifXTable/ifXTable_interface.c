@@ -2012,7 +2012,7 @@ _ifXTable_container_row_restore(const char *token, char *buf)
         ++found;
     }
     if (0 == found) {
-        snmp_log(LOG_ERR, "error parsing ifXTable row; no columns found");
+        snmp_log(LOG_ERR, "error parsing ifXTable row; no columns found\n");
         ifTable_release_rowreq_ctx(rowreq_ctx);
         return;
     }
@@ -2028,7 +2028,7 @@ _ifXTable_container_row_restore(const char *token, char *buf)
      * and bail.
      */
     if ((buf == NULL) || (*buf != LINE_TERM_CHAR)) {
-        snmp_log(LOG_ERR, "error parsing ifXTable row around column %d",
+        snmp_log(LOG_ERR, "error parsing ifXTable row around column %d\n",
                  col);
         return;
     }
@@ -2067,10 +2067,6 @@ _ifXTable_container_col_save(ifXTable_rowreq_ctx * rowreq_ctx,
     case COLUMN_IFLINKUPDOWNTRAPENABLE:   /** INTEGER = ASN_INTEGER */
         buf +=
             sprintf(buf, "%ld", rowreq_ctx->data.ifLinkUpDownTrapEnable);
-        break;
-
-    case COLUMN_IFPROMISCUOUSMODE:   /** TruthValue = ASN_INTEGER */
-        buf += sprintf(buf, "%ld", rowreq_ctx->data.ifPromiscuousMode);
         break;
 
     case COLUMN_IFALIAS:   /** DisplayString = ASN_OCTET_STR */
@@ -2115,13 +2111,6 @@ _ifXTable_container_col_restore(ifXTable_rowreq_ctx * rowreq_ctx,
         buf = read_config_read_memory(ASN_INTEGER, buf,
                                       (char *) &rowreq_ctx->data.
                                       ifLinkUpDownTrapEnable, &len);
-        break;
-
-    case COLUMN_IFPROMISCUOUSMODE:   /** TruthValue = ASN_INTEGER */
-        len = sizeof(rowreq_ctx->data.ifPromiscuousMode);
-        buf = read_config_read_memory(ASN_INTEGER, buf,
-                                      (char *) &rowreq_ctx->data.
-                                      ifPromiscuousMode, &len);
         break;
 
     case COLUMN_IFALIAS:   /** DisplayString = ASN_OCTET_STR */
