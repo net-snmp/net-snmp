@@ -652,7 +652,7 @@ var_ifEntry(struct variable *vp,
 
     if (Interface_Scan_By_Index(interface, &if_msg, if_name, NULL) != 0)
         return NULL;
-    while (if_ptr && strcmp(Name, if_ptr->name))
+    while (if_ptr && strcmp(if_name, if_ptr->name))
         if_ptr = if_ptr->next;
 
     switch (vp->magic) {
@@ -2547,8 +2547,13 @@ var_ifEntry(struct variable * vp,
     len = sizeof ifmd;
     if (sysctl(sname, 6, &ifmd, &len, 0, 0) < 0)
         return NULL;
-    while (if_ptr && strcmp(Name, if_ptr->name))
-        if_ptr = if_ptr->next;
+    /*
+     * where to get name to check overrides?
+     *
+     * while (if_ptr && strcmp(Name, if_ptr->name))
+     *     if_ptr = if_ptr->next;
+     */
+    if_ptr = NULL;  /* XXX until we find name to check overrides */
 
     switch (vp->magic) {
     case IFINDEX:
@@ -2777,8 +2782,13 @@ var_ifEntry(struct variable * vp,
     ifRow.dwIndex = ifIndex;
     if (GetIfEntry(&ifRow) != NO_ERROR)
         return NULL;
-    while (if_ptr && strcmp(Name, if_ptr->name))
-        if_ptr = if_ptr->next;
+    /*
+     * where to get name to check overrides?
+     *
+     * while (if_ptr && strcmp(Name, if_ptr->name))
+     *     if_ptr = if_ptr->next;
+     */
+    if_ptr = NULL;  /* XXX until we find name to check overrides */
 
     switch (vp->magic) {
     case IFINDEX:
