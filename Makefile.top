@@ -68,7 +68,7 @@ CC	        = @CC@
 # Note: maintenance releases (eg 5.2.x) should never have changes
 #       that would require a current to be incremented.
 #
-LIBCURRENT  = 10
+LIBCURRENT  = 11
 LIBAGE      = 0
 LIBREVISION = 0
 
