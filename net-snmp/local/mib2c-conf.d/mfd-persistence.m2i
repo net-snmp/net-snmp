@@ -318,7 +318,7 @@ _${context}_container_row_restore(const char *token, char *buf)
         ++found;
     }
     if (0 == found) {
-        snmp_log(LOG_ERR, "error parsing ${context} row; no columns found");
+        snmp_log(LOG_ERR, "error parsing ${context} row; no columns found\n");
         ${context}_release_rowreq_ctx( rowreq_ctx );
         return;
     }
@@ -334,7 +334,7 @@ _${context}_container_row_restore(const char *token, char *buf)
      * delete the row and bail.
      */
     if ((buf == NULL) || (*buf != LINE_TERM_CHAR)) {
-        snmp_log(LOG_ERR, "error parsing ${context} row around column %d",
+        snmp_log(LOG_ERR, "error parsing ${context} row around column %d\n",
                  col);
         ${context}_release_rowreq_ctx( rowreq_ctx );
         return;
