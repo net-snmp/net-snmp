@@ -1313,7 +1313,11 @@ ifPromiscuousMode_get(ifXTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ifPromiscuousMode data.
      * copy (* ifPromiscuousMode_val_ptr ) from rowreq_ctx->data
      */
-    (*ifPromiscuousMode_val_ptr) = rowreq_ctx->data.ifPromiscuousMode;
+    /** this is coming from the interface entry, which is a boolean */
+    if (rowreq_ctx->data.ifPromiscuousMode)
+        (*ifPromiscuousMode_val_ptr) = 1;
+    else
+        (*ifPromiscuousMode_val_ptr) = 2;
 
     return MFD_SUCCESS;
 }                               /* ifPromiscuousMode_get */
