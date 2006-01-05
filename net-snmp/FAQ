@@ -1,7 +1,11 @@
       Frequently Asked Questions (FAQ) for the UCD/Net-SNMP package
       =============================================================
 		       FAQ Author: Dave Shield
-	        net-snmp Version: 5.3 CVS branch
+<<<<<<< FAQ
+	        net-snmp Version: 5.4.dev CVS branch
+=======
+	        net-snmp Version: 5.4.dev CVS branch
+>>>>>>> 5.80
 	    net-snmp/ucd-snmp Project Leader: Wes Hardaker
 	     Email: net-snmp-coders@lists.sourceforge.net
 
