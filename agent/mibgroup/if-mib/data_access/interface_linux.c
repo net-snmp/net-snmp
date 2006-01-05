@@ -358,6 +358,18 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
             entry->os_flags &= ~IFF_RUNNING;
         }
 
+        /*
+         * check for promiscuous mode.
+         *  NOTE: there are 2 ways to set promiscuous mode in Linux
+         *  (kernels later than 2.2.something) - using ioctls and
+         *  using setsockopt. The ioctl method tested here does not
+         *  detect if an interface was set using setsockopt. google
+         *  on IFF_PROMISC and linux to see lots of arguments about it.
+         */
+        if(entry->os_flags & IFF_PROMISC) {
+            entry->promiscuous = 1; /* boolean */
+        }
+
         netsnmp_access_interface_entry_overrides(entry);
 
         /*
