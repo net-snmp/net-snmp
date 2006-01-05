@@ -275,7 +275,6 @@ config_exclude(mibII/interfaces)
         /*
          * ifPromiscuousMode(16)/TruthValue/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
          */
-        u_long          dummy_to_keep_struct_size;
 #define ifPromiscuousMode ifentry->promiscuous
 
         /*
