@@ -35,7 +35,7 @@ BuildRequires: perl
 # because perl(Tk) is optional, automatic dependencies will never succeed:
 AutoReqProv: no
 Requires: openssl, popt, rpm, zlib, bzip2-libs, beecrypt, elfutils-libelf, glibc
-Provides: net-snmp, net-snmp-utils, libnetsnmp.so.5, libnetsnmpagent.so.5, libnetsnmphelpers.so.5, libnetsnmpmibs.so.5, libnetsnmptrapd.so.5
+Provides: net-snmp, net-snmp-utils, libnetsnmp.so.11, libnetsnmpagent.so.11, libnetsnmphelpers.so.11, libnetsnmpmibs.so.11, libnetsnmptrapd.so.11
 %if %{embedded_perl}
 Requires: perl
 %endif
