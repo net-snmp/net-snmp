@@ -6257,6 +6257,7 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
             vars->val.objid = (oid *) malloc(vars->val_len);
         }
         if (vars->val.objid == NULL) {
+            snmp_free_var(vars);
             return NULL;
         }
         memmove(vars->val.objid, value, vars->val_len);
@@ -6271,6 +6272,7 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
             vars->val.string = (u_char *) malloc(vars->val_len + 1);
         }
         if (vars->val.string == NULL) {
+            snmp_free_var(vars);
             return NULL;
         }
         memmove(vars->val.string, value, vars->val_len);
