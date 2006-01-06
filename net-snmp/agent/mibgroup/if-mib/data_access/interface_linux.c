@@ -339,6 +339,12 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
     if (!strcmp(entry->name, "lo") && rec_pkt > 0 && !snd_pkt)
         snd_pkt = rec_pkt;
     
+    /*
+     * subtract out multicast packets from rec_pkt before
+     * we store it as unicast counter.
+     */
+    rec_pkt -= rec_mcast;
+
     entry->stats.ibytes.low = rec_oct & 0xffffffff;
     entry->stats.iucast.low = rec_pkt & 0xffffffff;
     entry->stats.imcast.low = rec_mcast & 0xffffffff;
