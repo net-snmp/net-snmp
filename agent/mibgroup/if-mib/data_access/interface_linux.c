@@ -263,6 +263,11 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          * xxx-rks: get descr by linking mem from /proc/pci and /proc/iomem
          */
 
+        /*
+         * subtract out multicast packets from rec_pkt before
+         * we store it as unicast counter.
+         */
+        rec_pkt -= rec_mcast;
 
         entry->stats.ibytes.low = rec_oct & 0xffffffff;
         entry->stats.iucast.low = rec_pkt & 0xffffffff;
