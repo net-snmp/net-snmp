@@ -493,11 +493,14 @@ struct vacm_viewEntry *
 snmpNotifyFilterTable_vacm_view_subtree(const char *profile)
 {
     oid             tmp_oid[MAX_OID_LEN];
-    netsnmp_index   tmp_idx = { 0, tmp_oid };
+    netsnmp_index   tmp_idx;
     int             i, j;
     netsnmp_void_array *s;
     struct vacm_viewEntry *tmp;
     snmpNotifyFilterTable_rowreq_ctx *rowreq;
+
+    tmp_idx.len = 0;
+    tmp_idx.oids = tmp_oid;
 
     /*
      * get the container
