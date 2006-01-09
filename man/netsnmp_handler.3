@@ -1,4 +1,4 @@
-.TH "Net-SNMP Agent handler and extensibility API" 3 "29 Jun 2005" "net-snmp" \" -*- nroff -*-
+.TH "Net-SNMP Agent handler and extensibility API" 3 "9 Jan 2006" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -9,40 +9,44 @@ Net-SNMP Agent handler and extensibility API \- The basic theory goes something 
 
 .in +1c
 .ti -1c
-.RI "group\fButility_handlers: simplify request processing\fP"
+.RI "group\fButility_handlers\fP"
 .br
-.RI "\fIA group of handlers intended to simplify certain aspects of processing a request for a MIB object. \fP"
+.RI "\fISimplify request processing A group of handlers intended to simplify certain aspects of processing a request for a MIB object. \fP"
 .PP
 .in +1c
 
 .ti -1c
-.RI "group\fBleaf_handlers: process individual leaf objects\fP"
+.RI "group\fBleaf_handlers\fP"
 .br
-.RI "\fIA group of handlers to implement individual leaf objects and instances (both scalar objects, and individual objects and instances within a table). \fP"
+.RI "\fIProcess individual leaf objects A group of handlers to implement individual leaf objects and instances (both scalar objects, and individual objects and instances within a table). \fP"
 .PP
 .in +1c
 
 .ti -1c
-.RI "group\fBbaby_steps: calls your handler in baby_steps for set processing.\fP"
+.RI "group\fBbaby_steps\fP"
 .br
-.ti -1c
-.RI "group\fBold_api: Calls mib module code written in the old style of code.\fP"
-.br
-.RI "\fIThis is a backwards compatilibity module that allows code written in the old API to be run under the new handler based architecture. \fP"
+.RI "\fICalls your handler in baby_steps for set processing. \fP"
 .PP
 .in +1c
 
 .ti -1c
-.RI "group\fBstash_cache: automatically caches data for certain handlers.\fP"
+.RI "group\fBold_api\fP"
 .br
-.RI "\fIThis handler caches data in an optimized way which may aleviate the need for the lower level handlers to perform as much optimization. \fP"
+.RI "\fICalls mib module code written in the old style of code. \fP"
 .PP
 .in +1c
 
 .ti -1c
-.RI "group\fBtable: Helps you implement a table.\fP"
+.RI "group\fBstash_cache\fP"
 .br
-.RI "\fIThis handler helps you implement a table by doing some of the processing for you. \fP"
+.RI "\fIAutomatically caches data for certain handlers. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group\fBtable\fP"
+.br
+.RI "\fIHelps you implement a table. \fP"
 .PP
 
 .in -1c

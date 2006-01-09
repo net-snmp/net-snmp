@@ -1,8 +1,10 @@
-.TH "instance: process individual MIB instances easily." 3 "29 Jun 2005" "net-snmp" \" -*- nroff -*-
+.TH "instance" 3 "9 Jan 2006" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-instance: process individual MIB instances easily. \- 
+instance \- Process individual MIB instances easily.  
+
+.PP
 .SS "Functions"
 
 .in +1c
@@ -59,6 +61,9 @@ instance: process individual MIB instances easily. \-
 .RI "int \fBnetsnmp_instance_helper_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
 .in -1c
+.SH "Detailed Description"
+.PP 
+Process individual MIB instances easily. 
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_instance_handler (void)"
@@ -72,7 +77,7 @@ Creates an instance helper handler, calls netsnmp_create_handler, which then cou
 Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method 
 .RE
 .PP
-Definition at line 46 of file instance.c.
+Definition at line 47 of file instance.c.
 .PP
 References netsnmp_create_handler().
 .PP
@@ -97,7 +102,7 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 71 of file instance.c.
+Definition at line 72 of file instance.c.
 .PP
 References netsnmp_get_instance_handler(), netsnmp_handler_registration, netsnmp_inject_handler(), and netsnmp_register_serialize().
 .PP
@@ -128,7 +133,7 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 .in +1c
 \fBscalar_int.c\fP.
 .PP
-Definition at line 252 of file instance.c.
+Definition at line 253 of file instance.c.
 .PP
 References netsnmp_handler_registration, and netsnmp_register_instance().
 .SS "int netsnmp_register_read_only_instance (\fBnetsnmp_handler_registration\fP * reginfo)"
@@ -145,6 +150,6 @@ This function injects a 'read only' handler into the handler chain prior to seri
 MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILED and MIB_DUPLICATE_REGISTRATION. 
 .RE
 .PP
-Definition at line 96 of file instance.c.
+Definition at line 97 of file instance.c.
 .PP
 References netsnmp_get_instance_handler(), netsnmp_get_read_only_handler(), netsnmp_handler_registration, netsnmp_inject_handler(), and netsnmp_register_serialize().

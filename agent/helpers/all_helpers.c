@@ -43,7 +43,8 @@ netsnmp_init_helpers(void)
     netsnmp_init_stash_cache_helper();
 }
 
-/** @defgroup utilities utility_handlers: simplify request processing
+/** @defgroup utilities utility_handlers
+ *  Simplify request processing
  *  A group of handlers intended to simplify certain aspects of processing
  *  a request for a MIB object.  These helpers do not implement any MIB
  *  objects themselves.  Rather they handle specific generic situations,
@@ -52,7 +53,8 @@ netsnmp_init_helpers(void)
  *  @ingroup handler
  */
 
-/** @defgroup leaf leaf_handlers: process individual leaf objects
+/** @defgroup leaf leaf_handlers
+ *  Process individual leaf objects
  *  A group of handlers to implement individual leaf objects and instances
  *  (both scalar objects, and individual objects and instances within a table).
  *  These handlers will typically allow control to be passed down to a lower

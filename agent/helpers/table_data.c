@@ -17,7 +17,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup table_data table_data: Helps you implement a table with datamatted storage.
+/** @defgroup table_data table_data
+ *  Helps you implement a table with datamatted storage.
  *  @ingroup table
  *
  *  This helper helps you implement a table where all the indexes are

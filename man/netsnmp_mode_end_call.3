@@ -1,8 +1,8 @@
-.TH "mode_end_call: at the end of a series of requests, call another handler hook." 3 "29 Jun 2005" "net-snmp" \" -*- nroff -*-
+.TH "mode_end_call" 3 "9 Jan 2006" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-mode_end_call: at the end of a series of requests, call another handler hook. \- Handlers that want to loop through a series of requests and then receive a callback at the end of a particular MODE can use this helper to make this possible.  
+mode_end_call \- At the end of a series of requests, call another handler hook.  
 
 .PP
 .SS "Functions"
@@ -22,7 +22,7 @@ mode_end_call: at the end of a series of requests, call another handler hook. \-
 .in -1c
 .SH "Detailed Description"
 .PP 
-Handlers that want to loop through a series of requests and then receive a callback at the end of a particular MODE can use this helper to make this possible. For most modules, this is not needed as the handler itself could perform a for() loop around the request list and then perform its actions afterwards. However, if something like the serialize helper is in use this isn't possible because not all the requests for a given handler are being passed downward in a single group. Thus, this helper *must* be added above other helpers like the serialize helper to be useful.
+At the end of a series of requests, call another handler hook. Handlers that want to loop through a series of requests and then receive a callback at the end of a particular MODE can use this helper to make this possible. For most modules, this is not needed as the handler itself could perform a for() loop around the request list and then perform its actions afterwards. However, if something like the serialize helper is in use this isn't possible because not all the requests for a given handler are being passed downward in a single group. Thus, this helper *must* be added above other helpers like the serialize helper to be useful.
 .PP
 Multiple mode specific handlers can be registered and will be called in the order they were regestered in. Callbacks regesterd with a mode of NETSNMP_MODE_END_ALL_MODES will be called for all modes. 
 .SH "Function Documentation"
@@ -39,7 +39,7 @@ returns a mode_end_call handler that can be injected into a given handler chain.
 An injectable Net-SNMP handler. 
 .RE
 .PP
-Definition at line 48 of file mode_end_call.c.
+Definition at line 49 of file mode_end_call.c.
 .PP
 References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), and netsnmp_mib_handler.
 .SS "netsnmp_mode_handler_list* netsnmp_mode_end_call_add_mode_callback (netsnmp_mode_handler_list * endlist, int mode, \fBnetsnmp_mib_handler\fP * callbackh)"
@@ -58,6 +58,6 @@ adds a mode specific callback to the callback list. \fBParameters:\fP
 the new registration information list upon success. 
 .RE
 .PP
-Definition at line 68 of file mode_end_call.c.
+Definition at line 69 of file mode_end_call.c.
 .PP
 References netsnmp_mib_handler, netsnmp_mib_handler_s::next, and SNMP_MALLOC_TYPEDEF.

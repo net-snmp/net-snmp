@@ -1,4 +1,4 @@
-.TH "A generic callback mechanism" 3 "29 Jun 2005" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "9 Jan 2006" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -33,6 +33,7 @@ A generic callback mechanism \-
 .ti -1c
 .RI "int \fBnetsnmp_callback_clear_client_arg\fP (void *ptr, int i, int j)"
 .br
+.RI "\fIfind and clear client args that match ptr \fP"
 .ti -1c
 .RI "void \fBclear_callback\fP (void)"
 .br
@@ -42,6 +43,18 @@ A generic callback mechanism \-
 .in -1c
 .SH "Function Documentation"
 .PP 
+.SS "int netsnmp_callback_clear_client_arg (void * ptr, int i, int j)"
+.PP
+find and clear client args that match ptr \fBParameters:\fP
+.RS 4
+\fIptr\fP pointer to search for 
+.br
+\fIi\fP callback id to start at 
+.br
+\fIj\fP callback subid to start at 
+.RE
+.PP
+Definition at line 292 of file callback.c.
 .SS "int snmp_call_callbacks (int major, int minor, void * caller_arg)"
 .PP
 This function calls the callback function for each registered callback of type major and minor. \fBParameters:\fP

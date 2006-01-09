@@ -1,4 +1,4 @@
-.TH "The Net-SNMP library" 3 "29 Jun 2005" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "9 Jan 2006" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -129,7 +129,7 @@ The Net-SNMP library \-
 .RI "#define \fBMAXIMUM_PACKET_SIZE\fP   0x7fffffff"
 .br
 .ti -1c
-.RI "#define \fBDEBUGPRINTPDUTYPE\fP(token, type)"
+.RI "#define \fBDEBUGPRINTPDUTYPE\fP(token, type)   DEBUGDUMPSECTION(token, snmp_pdu_type(type))"
 .br
 .ti -1c
 .RI "#define \fBERROR_STAT_LENGTH\fP   11"
@@ -166,6 +166,9 @@ The Net-SNMP library \-
 .br
 .ti -1c
 .RI "const char * \fBstrerror\fP (int err)"
+.br
+.ti -1c
+.RI "const char * \fBsnmp_pdu_type\fP (int type)"
 .br
 .ti -1c
 .RI "long \fBsnmp_get_next_reqid\fP (void)"
@@ -433,41 +436,6 @@ The Net-SNMP library \-
 .in -1c
 .SH "Define Documentation"
 .PP 
-.SS "#define DEBUGPRINTPDUTYPE(token, type)"
-.PP
-\fBValue:\fP.nf
-switch(type) { \
-      case SNMP_MSG_GET: \
-        DEBUGDUMPSECTION(token, 'PDU-GET'); \
-        break; \
-      case SNMP_MSG_GETNEXT: \
-        DEBUGDUMPSECTION(token, 'PDU-GETNEXT'); \
-        break; \
-      case SNMP_MSG_RESPONSE: \
-        DEBUGDUMPSECTION(token, 'PDU-RESPONSE'); \
-        break; \
-      case SNMP_MSG_SET: \
-        DEBUGDUMPSECTION(token, 'PDU-SET'); \
-        break; \
-      case SNMP_MSG_GETBULK: \
-        DEBUGDUMPSECTION(token, 'PDU-GETBULK'); \
-        break; \
-      case SNMP_MSG_INFORM: \
-        DEBUGDUMPSECTION(token, 'PDU-INFORM'); \
-        break; \
-      case SNMP_MSG_TRAP2: \
-        DEBUGDUMPSECTION(token, 'PDU-TRAP2'); \
-        break; \
-      case SNMP_MSG_REPORT: \
-        DEBUGDUMPSECTION(token, 'PDU-REPORT'); \
-        break; \
-      default: \
-        DEBUGDUMPSECTION(token, 'PDU-UNKNOWN'); \
-        break; \
-    }
-.fi
-.PP
-Definition at line 375 of file snmp_api.c.
 .SS "#define timercmp(tvp, uvp, cmp)"
 .PP
 \fBValue:\fP.nf
@@ -483,7 +451,7 @@ Definition at line 145 of file snmp_api.c.
 .PP 
 .SS "int _sess_read (void * sessp, fd_set * fdset)"
 .PP
-Definition at line 5198 of file snmp_api.c.
+Definition at line 5206 of file snmp_api.c.
 .PP
 References snmp_session::callback, snmp_session::callback_magic, snmp_session::s_errno, snmp_session::s_snmp_errno, SNMP_FREE, and snmp_log().
 .SS "int init_agent (const char * app)"
@@ -525,7 +493,7 @@ void
 \fBinit_agent\fP 
 .RE
 .PP
-Definition at line 767 of file snmp_api.c.
+Definition at line 775 of file snmp_api.c.
 .PP
 References init_mib().
 .SS "int netsnmp_oid_equals (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -548,7 +516,7 @@ Compares 2 OIDs to determine if they are exactly equal. This should be faster th
 0 if they are equal, 1 if they are not. 
 .RE
 .PP
-Definition at line 6128 of file snmp_api.c.
+Definition at line 6140 of file snmp_api.c.
 .PP
 Referenced by netsnmp_old_api_helper(), and unregister_mib_context().
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -569,7 +537,7 @@ Given two OIDs, determine the common prefix to them both. \fBParameters:\fP
 length of largest common index of commonality. 1 = first, 0 if none * or -1 on error. 
 .RE
 .PP
-Definition at line 6184 of file snmp_api.c.
+Definition at line 6196 of file snmp_api.c.
 .PP
 References SNMP_MIN.
 .PP
@@ -594,7 +562,7 @@ Identical to netsnmp_oid_equals, except only the length up to len1 is compared. 
 0 if one is a common prefix of the other. 
 .RE
 .PP
-Definition at line 6164 of file snmp_api.c.
+Definition at line 6176 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 lexicographical compare two object identifiers. Caution: this method is called often by command responder applications (ie, agent).
@@ -604,7 +572,7 @@ lexicographical compare two object identifiers. Caution: this method is called o
 -1 if name1 < name2, 0 if name1 = name2, 1 if name1 > name2 
 .RE
 .PP
-Definition at line 6060 of file snmp_api.c.
+Definition at line 6072 of file snmp_api.c.
 .PP
 Referenced by check_getnext_results(), netsnmp_check_getnext_reply(), netsnmp_insert_iterator_context(), netsnmp_row_merge_helper_handler(), netsnmp_table_data_add_row(), netsnmp_table_data_get_from_oid(), netsnmp_table_data_helper_handler(), netsnmp_table_iterator_helper_handler(), snmp_oidtree_compare(), and table_helper_handler().
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -625,7 +593,7 @@ Compares 2 OIDs to determine if they are equal up until the shortest length. \fB
 0 if they are equal, 1 if in_name1 is > in_name2, or -1 if <. 
 .RE
 .PP
-Definition at line 6109 of file snmp_api.c.
+Definition at line 6121 of file snmp_api.c.
 .PP
 References snmp_oid_compare().
 .SS "void snmp_shutdown (const char * type)"
@@ -640,6 +608,6 @@ Shuts down the application, saving any needed persistent storage, and appropriat
 void 
 .RE
 .PP
-Definition at line 835 of file snmp_api.c.
+Definition at line 843 of file snmp_api.c.
 .PP
 References shutdown_mib(), snmp_alarm_unregister_all(), and snmp_call_callbacks().

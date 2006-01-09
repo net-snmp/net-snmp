@@ -1,4 +1,4 @@
-.TH "net-snmp agent related processing" 3 "29 Jun 2005" "net-snmp" \" -*- nroff -*-
+.TH "net-snmp agent related processing" 3 "9 Jan 2006" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -273,6 +273,9 @@ net-snmp agent related processing \-
 .RI "int \fBlog_addresses\fP = 0"
 .br
 .ti -1c
+.RI "int \fBnetsnmp_running\fP = 1"
+.br
+.ti -1c
 .RI "netsnmp_agent_session * \fBagent_delegated_list\fP = NULL"
 .br
 .ti -1c
@@ -283,6 +286,9 @@ net-snmp agent related processing \-
 .br
 .ti -1c
 .RI "timeval \fBstarttime\fP"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_running\fP"
 .br
 .ti -1c
 .RI "int \fBlog_addresses\fP"

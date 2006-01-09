@@ -15,7 +15,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup serialize serialize: Calls sub handlers one request at a time.
+/** @defgroup serialize serialize
+ *  Calls sub handlers one request at a time.
  *  @ingroup utilities
  *  This functionally passes in one request at a time
  *  into lower handlers rather than a whole bunch of requests at once.

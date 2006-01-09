@@ -36,7 +36,8 @@ typedef struct newrow_stash_s {
     int             deleted;
 } newrow_stash;
 
-/** @defgroup table_dataset table_dataset: Helps you implement a table with automatted storage.
+/** @defgroup table_dataset table_dataset
+ *  Helps you implement a table with automatted storage.
  *  @ingroup table_data
  *
  *  This handler helps you implement a table where all the data is
