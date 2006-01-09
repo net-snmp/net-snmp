@@ -18,7 +18,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup tdata tdata: Implement a table with datamatted storage.
+/** @defgroup tdata tdata
+ *  Implement a table with datamatted storage.
  *  @ingroup table
  *
  *  This helper helps you implement a table where all the rows are

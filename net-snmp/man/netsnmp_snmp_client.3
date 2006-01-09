@@ -1,4 +1,4 @@
-.TH "various PDU processing routines" 3 "28 Dec 2005" "Version 5.2" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "9 Jan 2006" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,7 +10,7 @@ various PDU processing routines \-
 .RI "#define \fBBSD4_2\fP"
 .br
 .ti -1c
-.RI "#define \fBNFDBITS\fP   (sizeof(fd_mask) * NBBY)"
+.RI "#define \fBNFDBITS\fP   (sizeof(fd_mask) * NBBY)        /* bits per mask */"
 .br
 .ti -1c
 .RI "#define \fBFD_SET\fP(n, p)   ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))"
@@ -138,9 +138,7 @@ various PDU processing routines \-
 .PP 
 .SS "int snmp_set_var_typed_value (\fBnetsnmp_variable_list\fP * newvar, u_char type, const u_char * val_str, size_t val_len)"
 .PP
-snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. 
-.PP
-Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.
+snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -164,16 +162,14 @@ returns 0 on success and 1 on a malloc error
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 686 of file snmp_client.c.
+Definition at line 687 of file snmp_client.c.
 .PP
 References snmp_set_var_value(), and variable_list::type.
 .PP
 Referenced by check_getnext_results(), handle_pdu(), netsnmp_check_getnext_reply(), netsnmp_instance_num_file_handler(), netsnmp_old_api_helper(), netsnmp_table_build_result(), and snmp_set_var_value().
 .SS "int snmp_set_var_value (\fBnetsnmp_variable_list\fP * vars, const u_char * value, size_t len)"
 .PP
-FALL THROUGH 
-.PP
-Definition at line 753 of file snmp_client.c.
+Definition at line 754 of file snmp_client.c.
 .PP
 References variable_list::buf, snmp_session::callback, snmp_session::callback_magic, snmp_pdu::errstat, variable_list::name, variable_list::name_length, variable_list::next_variable, snmp_log(), snmp_oidtree_compare(), snmp_set_var_typed_value(), variable_list::type, variable_list::val, variable_list::val_len, and snmp_pdu::variables.
 .PP
@@ -182,9 +178,7 @@ Referenced by snmp_set_var_typed_value().
 .PP 
 .SS "const char* error_string[19]"
 .PP
-\fBInitial value:\fP
-.PP
-.nf
+\fBInitial value:\fP.nf
  {
     '(noError) No Error',
     '(tooBig) Response message would have been too large.',
@@ -208,4 +202,4 @@ Referenced by snmp_set_var_typed_value().
 }
 .fi
 .PP
-Definition at line 1125 of file snmp_client.c.
+Definition at line 1126 of file snmp_client.c.
