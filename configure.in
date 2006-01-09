@@ -681,7 +681,7 @@ AC_ARG_WITH(ucd-snmp-compatibility,,
 #
 # setup install targets
 #
-if test "x$enable_ucd_snmp_compatibility" != "xno" ; then
+if test "x$enable_ucd_snmp_compatibility" == "xyes" ; then
   installucdheaders=installucdheaders
   installucdlibs=installucdlibs
   AC_MSG_CACHE_ADD(UCD-SNMP compatability:     enabled)
