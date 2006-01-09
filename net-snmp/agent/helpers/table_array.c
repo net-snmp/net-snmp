@@ -62,7 +62,8 @@ typedef struct table_container_data_s {
 
 } table_container_data;
 
-/** @defgroup table_array table_array: Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups.
+/** @defgroup table_array table_array
+ *  Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups.
  *  @ingroup table
  *
  *  The table_array handler is used (automatically) in conjuntion
