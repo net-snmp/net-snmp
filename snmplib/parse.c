@@ -110,6 +110,8 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
+#include <errno.h>
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
@@ -2152,6 +2154,8 @@ parse_ranges(FILE * fp, struct range_list **retp)
         if (nexttype == RANGE) {
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
             high = strtol(nexttoken, NULL, 10);
+            if ( errno == ERANGE )
+                print_error("Upper bound not handled correctly", nexttoken, nexttype);
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
         }
         *rpp = (struct range_list *) calloc(1, sizeof(struct range_list));
