@@ -11,7 +11,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup multiplexer multiplexer: splits mode requests into calls to different handlers.
+/** @defgroup multiplexer multiplexer
+ *  Splits mode requests into calls to different handlers.
  *  @ingroup utilities
  * The multiplexer helper lets you split the calling chain depending
  * on the calling mode (get vs getnext vs set).  Useful if you want

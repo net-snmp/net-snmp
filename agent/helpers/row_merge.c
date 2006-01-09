@@ -15,7 +15,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup row_merge row_merge: Calls sub handlers with request for one row at a time.
+/** @defgroup row_merge row_merge
+ *  Calls sub handlers with request for one row at a time.
  *  @ingroup utilities
  *  This helper splits a whole bunch of requests into chunks based on the row
  *  index that they refer to, and passes all requests for a given row to the lower handlers.

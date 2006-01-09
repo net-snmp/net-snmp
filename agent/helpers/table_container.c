@@ -53,7 +53,8 @@ typedef struct container_table_data_s {
 
 } container_table_data;
 
-/** @defgroup table_container table_container: Helps you implement a table when data can be found via a netsnmp_container.
+/** @defgroup table_container table_container
+ *  Helps you implement a table when data can be found via a netsnmp_container.
  *  @ingroup table
  *
  *  The table_container handler is used (automatically) in conjuntion
