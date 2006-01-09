@@ -19,8 +19,8 @@
 #endif
 
 
-/** @defgroup watcher watcher: watch a specified variable and process
- *   it as an instance or scalar object
+/** @defgroup watcher watcher
+ *  Watch a specified variable and process it as an instance or scalar object
  *  @ingroup leaf
  *  @{
  */

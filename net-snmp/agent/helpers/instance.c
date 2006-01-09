@@ -28,7 +28,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup instance instance: process individual MIB instances easily.
+/** @defgroup instance instance
+ *  Process individual MIB instances easily.
  *  @ingroup leaf
  *  @{
  */

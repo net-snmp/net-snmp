@@ -19,7 +19,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup scalar_group_group scalar_group: process groups of scalars.
+/** @defgroup scalar_group_group scalar_group
+ *  Process groups of scalars.
  *  @ingroup leaf
  *  @{
  */

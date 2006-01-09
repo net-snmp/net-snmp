@@ -19,7 +19,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup mode_end_call mode_end_call: at the end of a series of requests, call another handler hook.
+/** @defgroup mode_end_call mode_end_call
+ *  At the end of a series of requests, call another handler hook.
  *  Handlers that want to loop through a series of requests and then
  *  receive a callback at the end of a particular MODE can use this
  *  helper to make this possible.  For most modules, this is not
