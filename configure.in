@@ -862,17 +862,17 @@ AC_ARG_ENABLE(defaults,,
 
 AC_ARG_ENABLE(ucd-snmp-compatibility,
 [  --enable-ucd-snmp-compatibility Install ucd-snmp look-alike headers and libs.
-], ucd_compat=yes, ucd_compat=no)
+])
 AC_ARG_WITH(ucd-snmp-compatibility,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-ucd-snmp-compatibility/--disable-ucd-snmp-compatibility instead ]) )
 
 #
 # setup install targets
 #
-if test "x$ucd_compat" != "xno" ; then	
+if test "x$enable_ucd_snmp_compatibility" == "xyes" ; then
   installucdheaders=installucdheaders
   installucdlibs=installucdlibs
-  AC_MSG_CACHE_ADD(UCD-SNMP compatability:     enabled)
+  AC_MSG_CACHE_ADD(UCD-SNMP compatibility:     enabled)
 fi
 AC_SUBST(installucdheaders)
 AC_SUBST(installucdlibs)
