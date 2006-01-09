@@ -12,7 +12,8 @@
  * distributed with the Net-SNMP package.
  */
 
-/** @defgroup table_iterator table_iterator: The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.
+/** @defgroup table_iterator table_iterator
+ *  The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.
  *  @ingroup table
     Functionally, it is a specialized version of the more
     generic table helper but easies the burden of GETNEXT processing by

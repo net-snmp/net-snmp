@@ -37,7 +37,8 @@ static void     table_helper_cleanup(netsnmp_agent_request_info *reqinfo,
                                      int status);
 static void     table_data_free_func(void *data);
 
-/** @defgroup table table: Helps you implement a table.
+/** @defgroup table table
+ *  Helps you implement a table.
  *  @ingroup handler
  *
  *  This handler helps you implement a table by doing some of the

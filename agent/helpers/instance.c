@@ -28,7 +28,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup instance instance: process scalars and other instances easily.
+/** @defgroup instance instance
+ *  Process scalars and other instances easily.
  *  @ingroup handler
  *  @{
  */

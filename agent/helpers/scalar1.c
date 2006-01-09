@@ -18,7 +18,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup scalar scalar: process scalars easily.
+/** @defgroup scalar scalar
+ *  Process scalars easily.
  *  @ingroup handler
  *  @{
  */
