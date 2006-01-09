@@ -14,8 +14,8 @@
 #include <net-snmp/agent/instance.h>
 #include <net-snmp/agent/scalar.h>
 
-/** @defgroup watcher watcher: watch a specified variable and process
- *   it as an instance or scalar object
+/** @defgroup watcher watcher
+ *  Watch a specified variable and process it as an instance or scalar object
  *  @ingroup leaf
  *  @{
  */

@@ -5,9 +5,8 @@
  */
 
 /** @defgroup table_generic generic_table_API
+ *  General requirements for a table helper.
  *  @ingroup table
- *
- * General requirements for a table helper.
  *
  * A given table helper need not implement the whole of this API,
  *   and may need to adjust the prototype of certain routines.
