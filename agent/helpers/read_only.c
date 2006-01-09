@@ -11,7 +11,8 @@
 
 #include <net-snmp/agent/read_only.h>
 
-/** @defgroup read_only read_only: make your handler read_only automatically 
+/** @defgroup read_only read_only
+ *  Make your handler read_only automatically 
  *  The only purpose of this handler is to return an
  *  appropriate error for any requests passed to it in a SET mode.
  *  Inserting it into your handler chain will ensure you're never

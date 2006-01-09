@@ -21,7 +21,8 @@
 
 #include <net-snmp/agent/debug_handler.h>
 
-/** @defgroup debug debug: print out debugging information about the handler chain being called.
+/** @defgroup debug debug
+ *  Print out debugging information about the handler chain being called.
  *  This is a useful module for run-time
  *  debugging of requests as the pass this handler in a calling chain.
  *  All debugging output is done via the standard debugging routines

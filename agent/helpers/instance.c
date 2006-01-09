@@ -31,7 +31,8 @@ typedef struct netsnmp_num_file_instance_s {
     int   flags;
 } netsnmp_num_file_instance;
 
-/** @defgroup instance instance: process individual MIB instances easily.
+/** @defgroup instance instance
+ *  Process individual MIB instances easily.
  *  @ingroup leaf
  *  @{
  */
