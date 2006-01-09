@@ -15,7 +15,8 @@
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/read_only.h>
 
-/** @defgroup scalar_group_group scalar_group: process groups of scalars.
+/** @defgroup scalar_group_group scalar_group
+ *  Process groups of scalars.
  *  @ingroup leaf
  *  @{
  */

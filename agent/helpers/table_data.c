@@ -13,7 +13,8 @@
 #include <net-snmp/agent/table_data.h>
 #include <net-snmp/agent/read_only.h>
 
-/** @defgroup table_data table_data: Helps you implement a table with datamatted storage.
+/** @defgroup table_data table_data
+ *  Helps you implement a table with datamatted storage.
  *  @ingroup table
  *
  *  This helper is obsolete.  If you are writing a new module, please

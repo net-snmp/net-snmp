@@ -45,7 +45,8 @@ _baby_steps_access_multiplexer(netsnmp_mib_handler *handler,
                                netsnmp_agent_request_info *reqinfo,
                                netsnmp_request_info *requests);
     
-/** @defgroup baby_steps baby_steps: calls your handler in baby_steps for set processing.
+/** @defgroup baby_steps baby_steps
+ *  Calls your handler in baby_steps for set processing.
  *  @ingroup handler
  *  @{
  */
@@ -323,7 +324,8 @@ netsnmp_baby_steps_handler_init(void)
 
 /** @} */
 
-/** @defgroup baby_steps baby_steps_access_multiplexer: calls individual access methods based on baby_step mode.
+/** @defgroup baby_steps baby_steps_access_multiplexer
+ *  Calls individual access methods based on baby_step mode.
  *  @ingroup handler
  *  @{
  */
