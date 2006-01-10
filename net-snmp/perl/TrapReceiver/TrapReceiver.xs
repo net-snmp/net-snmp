@@ -248,7 +248,7 @@ trapd_register(regoid, perlcallback)
                     netsnmp_add_default_traphandler(perl_trapd_handler);
             } else if (!snmp_parse_oid(regoid, myoid, &myoid_len)) {
                 snmp_log(LOG_ERR,
-                         "Failed to parse oid for perl registration: %s %d\n",
+                         "Failed to parse oid for perl registration: %s\n",
                          regoid);
                 RETVAL = 0;
                 return;
