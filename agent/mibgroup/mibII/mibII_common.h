@@ -63,9 +63,13 @@
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
+/* IRIX 6.5 build breaks on sys/socketvar.h because _KMEMUSER brings in 
+/*   sys/pda.h which doesn't compile */
+#ifndef irix6
 #if HAVE_SYS_SOCKETVAR_H
 #include <sys/socketvar.h>
 #endif
+#endif  /* irix6 */
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
