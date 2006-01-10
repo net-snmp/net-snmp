@@ -2779,7 +2779,9 @@ check_getnext_results(netsnmp_agent_session *asp)
             /*
              * out of range? 
              */
-            if (snmp_oid_compare(request->requestvb->name,
+            if (request->requestvb->type != ASN_NULL &&
+                request->requestvb->type != ASN_PRIV_RETRY &&
+                snmp_oid_compare(request->requestvb->name,
                                  request->requestvb->name_length,
                                  request->range_end,
                                  request->range_end_len) >= 0) {
