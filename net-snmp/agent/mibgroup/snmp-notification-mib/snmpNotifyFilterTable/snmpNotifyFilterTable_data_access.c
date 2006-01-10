@@ -498,6 +498,7 @@ snmpNotifyFilterTable_vacm_view_subtree(const char *profile)
     netsnmp_void_array *s;
     struct vacm_viewEntry *tmp;
     snmpNotifyFilterTable_rowreq_ctx *rowreq;
+    netsnmp_container *c;
 
     tmp_idx.len = 0;
     tmp_idx.oids = tmp_oid;
@@ -505,7 +506,7 @@ snmpNotifyFilterTable_vacm_view_subtree(const char *profile)
     /*
      * get the container
      */
-    netsnmp_container *c = snmpNotifyFilterTable_container_get();
+    c = snmpNotifyFilterTable_container_get();
     if ((NULL == profile) || (NULL == c))
         return NULL;
 
