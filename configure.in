@@ -2646,9 +2646,28 @@ AC_CHECK_HEADERS(linux/ethtool.h,,,
 #endif
 ]])
 # BSDi3 headers
-AC_CHECK_HEADERS(sys/stat.h sys/vnode.h)
-# irix headers
-AC_CHECK_HEADERS(sys/hashing.h sys/tcpipstats.h sys/sysmp.h)
+AC_CHECK_HEADERS(sys/stat.h)
+# BSDi3/IRIX headers
+# at least IRIX 6.5 needs _KMEMUSER and sys/types.h (mprot_t) to compile 
+#   sys/vnode.h
+AC_CHECK_HEADERS(sys/vnode.h,,,
+[
+#define _KMEMUSER 1
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+])
+# at least IRIX 6.5 needs sys/sema.h (mrlock_t) to compile sys/hashing.h
+AC_CHECK_HEADERS(sys/sema.h)
+AC_CHECK_HEADERS(sys/hashing.h,,,
+AC_INCLUDES_DEFAULT([])
+[
+#if HAVE_SYS_SEMA_H
+#include <sys/sema.h>
+#endif
+])
+# more IRIX headers
+AC_CHECK_HEADERS(sys/tcpipstats.h sys/sysmp.h)
 # from smux stuff
 AC_CHECK_HEADERS(err.h sys/filio.h sgtty.h)
 # AIX needs this for statfs func
