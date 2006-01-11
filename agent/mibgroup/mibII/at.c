@@ -106,7 +106,7 @@
 #include <net-snmp/data_access/interface.h>
 
 #if defined(HAVE_SYS_SYSCTL_H) && !defined(CAN_USE_SYSCTL)
-# if defined(RTF_LLINFO) && !defined(irix6)
+# if defined(RTF_LLINFO) 
 #  define CAN_USE_SYSCTL 1
 # endif
 #endif
@@ -791,7 +791,11 @@ ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
         sdl = (struct sockaddr_dl *) (sin + 1);
         rtnext += rtm->rtm_msglen;
         if (sdl->sdl_alen) {
+#ifdef irix6
+            *IPAddr = sin->sarp_addr.s_addr;
+#else
             *IPAddr = sin->sin_addr.s_addr;
+#endif
             memcpy(PhysAddr, (char *) LLADDR(sdl), sdl->sdl_alen);
             *ifIndex = sdl->sdl_index;
             *ifType = 1;        /* XXX */
