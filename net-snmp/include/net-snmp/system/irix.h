@@ -1,8 +1,8 @@
 /*
  * irix.h
  * 
- * Date Created: Mon Feb 16 22:19:39 1998
- * Author:       Simon Leinen  <simon@switch.ch>
+ * Date Created:   Mon Feb 16 22:19:39 1998
+ * Initial Author: Simon Leinen  <simon@switch.ch>
  */
 
 #include <net-snmp/system/generic.h>
@@ -15,6 +15,8 @@
 #undef ICMPSTAT_SYMBOL
 #undef TCPSTAT_SYMBOL
 #undef UDPSTAT_SYMBOL
+
+#define ARP_SCAN_FOUR_ARGUMENTS 1
 
 #define _KMEMUSER 1
 
