@@ -1,21 +1,6 @@
 /*
  * parse.c
  *
- * Update: 1998-09-22 <mslifcak@iss.net>
- * Clear nbuckets in init_node_hash.
- * New method xcalloc returns zeroed data structures.
- * New method alloc_node encapsulates common node creation.
- * New method to configure terminate comment at end of line.
- * New method to configure accept underscore in labels.
- *
- * Update: 1998-10-10 <daves@csc.liv.ac.uk>
- * fully qualified OID parsing patch
- *
- * Update: 1998-10-20 <daves@csc.liv.ac.uk>
- * merge_anon_children patch
- *
- * Update: 1998-10-21 <mslifcak@iss.net>
- * Merge_parse_objectid associates information with last node in chain.
  */
 /* Portions of this file are subject to the following copyrights.  See
  * the Net-SNMP's COPYING file for more details and other copyrights
@@ -51,6 +36,9 @@ SOFTWARE.
 
 #ifndef DISABLE_MIB_LOADING
 
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #include <stdio.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -62,7 +50,9 @@ SOFTWARE.
 #endif
 #include <ctype.h>
 #include <sys/types.h>
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
 
 /*
  * Wow.  This is ugly.  -- Wes 
