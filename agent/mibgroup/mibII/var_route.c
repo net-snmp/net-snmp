@@ -116,7 +116,7 @@ var_ipRouteEntry(struct variable *vp,
     u_char         *ap;
     oid            *op;
 
-    *write_method = write_rte;
+    *write_method = NULL;  /* write_rte;  XXX:  SET support not really implemented */
 
 #if 0
   /** 
@@ -434,7 +434,7 @@ var_ipRouteEntry(struct variable * vp,
     struct in_ifaddr rt_ifnetaddr;
 #endif
 
-    *write_method = write_rte;
+    *write_method = NULL;  /* write_rte;  XXX:  SET support not really implemented */
 
     /** 
      ** this optimisation fails, if there is only a single route avail.
@@ -723,7 +723,7 @@ var_ipRouteEntry(struct variable * vp,
     req_e           req_type;
     static uint32_t ipaddr_return;
 
-    *write_method = write_rte;
+    *write_method = NULL;  /* write_rte;  XXX:  SET support not really implemented */
 
     /*
      * fill in object part of name for current (less sizeof instance part) 
@@ -1778,7 +1778,7 @@ var_ipRouteEntry(struct variable * vp,
     static int      saveNameLen, saveExact;
     static oid      saveName[14], Current[14];
 
-    *write_method = write_rte;
+    *write_method = NULL;  /* write_rte;  XXX:  SET support not really implemented */
 
 #if 0
     /*
