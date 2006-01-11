@@ -2167,8 +2167,13 @@ parse_ranges(FILE * fp, struct range_list **retp)
         if (nexttype == RANGE) {
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
             high = strtol(nexttoken, NULL, 10);
-            if ( errno == ERANGE )
-                print_error("Upper bound not handled correctly", nexttoken, nexttype);
+            if ( high == LONG_MAX && errno == ERANGE ) {
+                if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_MIB_WARNINGS))
+                    snmp_log(LOG_WARNING,
+                             "Warning: Upper bound not handled correctly (%s != %d): At line %d in %s\n",
+                                 nexttoken, high, mibLine, File);
+            }
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
         }
         *rpp = (struct range_list *) calloc(1, sizeof(struct range_list));
