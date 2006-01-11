@@ -286,7 +286,7 @@ EOF
     # finish file
     cat >> $tmpfile <<EOF
 
-  /* ustMain will be used to read ustMain.conf files. */
+  /* $outname will be used to read $outname.conf files. */
   init_snmp("$outname");
 
   /* In case we recevie a request to stop (kill -TERM or kill -INT) */
