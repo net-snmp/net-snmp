@@ -643,6 +643,16 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
                     const char *inpeername, int remote_port)
 {
     char           *cp = NULL, *peername = NULL;
+#if HAVE_GETADDRINFO
+    struct addrinfo *addrs = NULL;
+    struct addrinfo hint;
+    int             err;
+#elif HAVE_GETIPNODEBYNAME
+    struct hostent *hp = NULL;
+    int             err;
+#elif HAVE_GETHOSTBYNAME
+    struct hostent *hp = NULL;
+#endif
 
     if (addr == NULL) {
         return 0;
@@ -707,8 +717,42 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
             /*
              * Well, it must be a hostname then.  
              */
-#ifdef  HAVE_GETHOSTBYNAME
-            struct hostent *hp = gethostbyname(peername);
+#if HAVE_GETADDRINFO
+            memset(&hint, 0, sizeof hint);
+            hint.ai_flags = 0;
+            hint.ai_family = PF_INET;
+            hint.ai_socktype = SOCK_DGRAM;
+            hint.ai_protocol = 0;
+
+            err = getaddrinfo(peername, NULL, &hint, &addrs);
+            if (err != 0) {
+                snmp_log(LOG_ERR, "getaddrinfo: %s %s\n", peername,
+                         gai_strerror(err));
+                free(peername);
+                return 0;
+            }
+            if (addrs != NULL) {
+                DEBUGMSGTL(("netsnmp_sockaddr_in", "hostname (resolved okay)\n"));
+                memcpy(&addr->sin_addr,
+                       &((struct sockaddr_in *) addrs->ai_addr)->sin_addr,
+                       sizeof(struct in_addr));
+		freeaddrinfo(addrs);
+            }
+            else {
+                DEBUGMSGTL(("netsnmp_sockaddr_in", "Failed to resolve IPv4 hostname\n"));
+            }
+#elif HAVE_GETIPNODEBYNAME
+            hp = getipnodebyname(peername, AF_INET, 0, &err);
+            if (hp == NULL) {
+                DEBUGMSGTL(("netsnmp_sockaddr_in",
+                            "hostname (couldn't resolve = %d)\n", err));
+                free(peername);
+                return 0;
+            }
+            DEBUGMSGTL(("netsnmp_sockaddr_in", "hostname (resolved okay)\n"));
+            memcpy(&(addr->sin_addr), hp->h_addr, hp->h_length);
+#elif HAVE_GETHOSTBYNAME
+            hp = gethostbyname(peername);
             if (hp == NULL) {
                 DEBUGMSGTL(("netsnmp_sockaddr_in",
                             "hostname (couldn't resolve)\n"));
@@ -727,8 +771,11 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
                 }
             }
 #else                           /*HAVE_GETHOSTBYNAME */
-            DEBUGMSGTL(("netsnmp_sockaddr_in",
-                        "hostname (no gethostbyname)\n"));
+            /*
+             * There is no name resolving function available.  
+             */
+            snmp_log(LOG_ERR,
+                     "no getaddrinfo()/getipnodebyname()/gethostbyname()\n");
             free(peername);
             return 0;
 #endif                          /*HAVE_GETHOSTBYNAME */
