@@ -86,7 +86,7 @@ trap daemon and then exit.
 .TP
 .B -I \fI[-]INITLIST
 Specifies which modules should (or should not) be initialized
-when the agent starts up.  If the comma-separated
+when snmptrapd starts up.  If the comma-separated
 .I INITLIST
 is preceded
 with a '-', it is the list of modules that should \fInot\fR be started.
@@ -95,7 +95,7 @@ want to be started.  Otherwise,
 .I INITLIST
 Otherwise this is the list of the \fIonly\fR modules that should be started.
 
-To get a list of compiled modules, run the agent with the arguments
+To get a list of compiled modules, run snmptrapd with the arguments
 .I "-Dmib_init -H"
 (assuming debugging support has been compiled in).
 .TP
