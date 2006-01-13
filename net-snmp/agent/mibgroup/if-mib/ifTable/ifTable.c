@@ -1874,6 +1874,14 @@ ifTable_undo_setup(ifTable_rowreq_ctx * rowreq_ctx)
      * set up ifTable undo information, in preparation for a set.
      * Undo storage is in (* ifSpecific_val_ptr_ptr )*
      */
+    /*
+     * other tables share our container/context and call
+     * this function. so we need to check and see if
+     * someone else already allocated the ifentry
+     */
+    if (NULL != rowreq_ctx->undo->ifentry)
+        return MFD_SUCCESS;
+    
     rowreq_ctx->undo->ifentry =
         netsnmp_access_interface_entry_create(rowreq_ctx->data.ifentry->
                                               name,
