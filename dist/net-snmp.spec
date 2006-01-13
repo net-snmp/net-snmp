@@ -20,7 +20,7 @@
 #
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
-Version: 5.3
+Version: 5.3.0.1
 # update release for vendor release. (eg 1.rh9, 1.rh72, 1.ydl3, 1.ydl23)
 Release: 1
 URL: http://net-snmp.sourceforge.net/
@@ -35,7 +35,7 @@ BuildRequires: perl
 # because perl(Tk) is optional, automatic dependencies will never succeed:
 AutoReqProv: no
 Requires: openssl, popt, rpm, zlib, bzip2-libs, beecrypt, elfutils-libelf, glibc
-Provides: net-snmp, net-snmp-utils, libnetsnmp.so.5, libnetsnmpagent.so.5, libnetsnmphelpers.so.5, libnetsnmpmibs.so.5, libnetsnmptrapd.so.5
+Provides: net-snmp, net-snmp-utils, libnetsnmp.so.10, libnetsnmpagent.so.10, libnetsnmphelpers.so.10, libnetsnmpmibs.so.10, libnetsnmptrapd.so.10
 %if %{embedded_perl}
 Requires: perl
 %endif
