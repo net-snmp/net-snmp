@@ -187,7 +187,6 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
 {
     FILE           *fin;
     char            line[256];
-    u_int           tmp;
 
     /*
      * get the retransmit time
@@ -226,7 +225,7 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
     /*
      * get the reachable time
      */
-    snprintf(line,sizeof(line),"/proc/sys/net/ipv6/conf/%s/base_reachable_time",
+    snprintf(line,sizeof(line),"/proc/sys/net/ipv6/neigh/%s/base_reachable_time",
              entry->name);
     if (!(fin = fopen(line, "r"))) {
         DEBUGMSGTL(("access:interface",
@@ -234,8 +233,8 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
     }
     else {
         if (fgets(line, sizeof(line), fin)) {
-            tmp = atoi(line);
-            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_FORWARDING;
+            entry->reachable_time = atoi(line) * 1000; /* sec to millisec */
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_REACHABLE;
         }
         fclose(fin);
     }
