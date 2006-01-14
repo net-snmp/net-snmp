@@ -1,4 +1,4 @@
-.TH "Trap generation routines for mib modules to use" 3 "28 Dec 2005" "Version 5.2" "net-snmp" \" -*- nroff -*-
+.TH "Trap generation routines for mib modules to use" 3 "13 Jan 2006" "Version 5.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -110,7 +110,7 @@ Trap generation routines for mib modules to use \-
 
 .in +1c
 .ti -1c
-.RI "trap_sink * \fBsinks\fP = NULL"
+.RI "\fBtrap_sink\fP * \fBsinks\fP = NULL"
 .br
 .ti -1c
 .RI "timeval \fBstarttime\fP"
@@ -195,6 +195,10 @@ Trap generation routines for mib modules to use \-
 Captures responses or the lack there of from INFORMs that were sent 1) a response is received from an INFORM 2) one isn't received and the retries/timeouts have failed. 
 .PP
 Definition at line 809 of file agent_trap.c.
+.PP
+References snmp_increment_statistic().
+.PP
+Referenced by send_trap_to_sess().
 .SS "void send_easy_trap (int trap, int specific)"
 .PP
 Sends an SNMPv1 trap (or the SNMPv2 equivalent) to the list of configured trap destinations (or 'sinks'), using the provided values for the generic trap type and specific trap value. 
@@ -215,14 +219,16 @@ void
 .PP
 \fBSee also:\fP
 .RS 4
-send_enterprise_trap_vars 
+\fBsend_enterprise_trap_vars\fP 
 .PP
-\fBsend_v2trap\fP 
+\fBsend_v2trap\fP
 .RE
 .PP
 
 .PP
 Definition at line 923 of file agent_trap.c.
+.PP
+References NULL, and send_trap_vars().
 .PP
 Referenced by handle_snmp_packet().
 .SS "void send_v2trap (\fBnetsnmp_variable_list\fP * vars)"
@@ -247,7 +253,7 @@ void
 .RS 4
 \fBsend_easy_trap\fP 
 .PP
-send_enterprise_trap_vars 
+\fBsend_enterprise_trap_vars\fP
 .RE
 .PP
 
@@ -257,6 +263,8 @@ send_enterprise_trap_vars
 \fBnotification.c\fP.
 .PP
 Definition at line 952 of file agent_trap.c.
+.PP
+References send_trap_vars().
 .SS "void snmpd_free_trapsinks (void)"
 .PP
 This function allows you to make a distinction between generic traps from different classes of equipment. 
@@ -300,17 +308,17 @@ void
 .RS 4
 \fBsend_easy_trap\fP 
 .PP
-\fBsend_v2trap\fP 
+\fBsend_v2trap\fP
 .RE
 .PP
 
 .PP
 Definition at line 349 of file agent_trap.c.
 .PP
-References snmp_session::next.
+References trap_sink::next.
 .SH "Variable Documentation"
 .PP 
-.SS "oid snmptrapenterprise_oid[]"
+.SS "oid \fBsnmptrapenterprise_oid\fP[]"
 .PP
 \fBInitial value:\fP
 .PP
@@ -320,3 +328,5 @@ References snmp_session::next.
 .fi
 .PP
 Definition at line 98 of file agent_trap.c.
+.PP
+Referenced by convert_v1pdu_to_v2(), convert_v2pdu_to_v1(), init_traps(), and netsnmp_send_traps().
