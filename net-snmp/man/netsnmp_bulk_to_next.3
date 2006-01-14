@@ -1,4 +1,4 @@
-.TH "bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler." 3 "28 Dec 2005" "Version 5.2" "net-snmp" \" -*- nroff -*-
+.TH "bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler." 3 "13 Jan 2006" "Version 5.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -28,7 +28,7 @@ bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler. \-
 .PP 
 The only purpose of this handler is to convert a GETBULK request to a GETNEXT request. 
 .PP
-It is inserted into handler chains where the handler has not set the HANDLER_CAN_GETBULK flag. 
+It is inserted into handler chains where the handler has not set the HANDLER_CAN_GETBULK flag.
 .SH "Function Documentation"
 .PP 
 .SS "void netsnmp_bulk_to_next_fix_requests (\fBnetsnmp_request_info\fP * requests)"
@@ -37,14 +37,16 @@ takes answered requests and decrements the repeat count and updates the requests
 .PP
 Definition at line 41 of file bulk_to_next.c.
 .PP
-References variable_list::name, variable_list::name_length, netsnmp_request_info_s::next, variable_list::next_variable, netsnmp_request_info_s::repeat, netsnmp_request_info_s::requestvb, and variable_list::type.
+References variable_list::name, variable_list::name_length, netsnmp_request_info_s::next, variable_list::next_variable, netsnmp_request_info_s::repeat, netsnmp_request_info_s::requestvb, snmp_set_var_objid(), and variable_list::type.
+.PP
+Referenced by netsnmp_bulk_to_next_helper().
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_bulk_to_next_handler (void)"
 .PP
 returns a bulk_to_next handler that can be injected into a given handler chain. 
 .PP
 Definition at line 26 of file bulk_to_next.c.
 .PP
-References netsnmp_mib_handler_s::flags, netsnmp_create_handler(), and netsnmp_mib_handler.
+References netsnmp_mib_handler_s::flags, MIB_HANDLER_AUTO_NEXT, netsnmp_bulk_to_next_helper(), netsnmp_create_handler(), and NULL.
 .PP
 Referenced by netsnmp_init_bulk_to_next_helper(), and netsnmp_register_handler().
 .SS "void netsnmp_init_bulk_to_next_helper (void)"

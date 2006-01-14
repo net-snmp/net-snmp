@@ -927,7 +927,7 @@ vacm_create_simple(const char *token, char *confline,
         view_ptr = NULL;
     }
 
-    if (viewtypes & VACM_VIEW_WRITE)
+    if (viewtypes & VACM_VIEW_WRITE_BIT)
         rw = viewname;
 
     commcount++;
@@ -1008,8 +1008,8 @@ vacm_create_simple(const char *token, char *confline,
     /*
      * map everything together 
      */
-    if (viewtypes == VACM_VIEW_READ ||
-        viewtypes == (VACM_VIEW_READ || VACM_VIEW_WRITE)) {
+    if ((viewtypes == VACM_VIEW_READ_BIT) ||
+        (viewtypes == (VACM_VIEW_READ_BIT | VACM_VIEW_WRITE_BIT))) {
         /* Use the simple line access command */
         /*
          * access  anonymousGroupNameNUM  "" MODEL AUTHTYPE prefix anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] 
