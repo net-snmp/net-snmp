@@ -2199,6 +2199,7 @@ ifPromiscuousMode_undo_setup(ifXTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:455:o: |-> Setup ifPromiscuousMode undo.
      */
+#ifdef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
     /*
      * copy ifPromiscuousMode data
      * set rowreq_ctx->undo->ifPromiscuousMode from rowreq_ctx->data.ifPromiscuousMode
@@ -2207,7 +2208,6 @@ ifPromiscuousMode_undo_setup(ifXTable_rowreq_ctx * rowreq_ctx)
         rowreq_ctx->data.ifPromiscuousMode;
 
 
-#ifdef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
     return MFD_SUCCESS;
 #else
     return MFD_NOT_VALID_EVER;
@@ -2259,13 +2259,14 @@ ifPromiscuousMode_undo(ifXTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:456:o: |-> Clean up ifPromiscuousMode undo.
      */
+#ifdef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
     /*
      * copy ifPromiscuousMode data
      * set rowreq_ctx->data.ifPromiscuousMode from rowreq_ctx->undo->ifPromiscuousMode
      */
     rowreq_ctx->data.ifPromiscuousMode =
         rowreq_ctx->undo->ifPromiscuousMode;
-
+#endif
 
     return MFD_SUCCESS;
 }                               /* ifPromiscuousMode_undo */
