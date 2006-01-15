@@ -1779,22 +1779,6 @@ ifTable_undo_setup(ifTable_rowreq_ctx * rowreq_ctx)
      * TODO:451:M: |-> Setup ifTable undo.
      * set up ifTable undo information, in preparation for a set.
      */
-    /*
-     * other tables share our container/context and call
-     * this function. so we need to check and see if
-     * someone else already allocated the ifentry
-     */
-    if (NULL != rowreq_ctx->undo->ifentry)
-        return MFD_SUCCESS;
-    
-    rowreq_ctx->undo->ifentry =
-        netsnmp_access_interface_entry_create(rowreq_ctx->data.ifentry->
-                                              name, rowreq_ctx->data.ifentry->index);
-    if (NULL == rowreq_ctx->undo->ifentry)
-        rc = MFD_ERROR;
-    else
-        netsnmp_access_interface_entry_copy(rowreq_ctx->undo->ifentry,
-                                            rowreq_ctx->data.ifentry);
 
     return rc;
 }                               /* ifTable_undo_setup */
