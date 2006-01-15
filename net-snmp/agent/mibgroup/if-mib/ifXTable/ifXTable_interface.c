@@ -70,8 +70,6 @@ typedef struct ifXTable_interface_ctx_s {
 
     netsnmp_baby_steps_access_methods access_multiplexer;
 
-    u_int           table_dirty;
-
 } ifXTable_interface_ctx;
 
 static ifXTable_interface_ctx ifXTable_if_ctx;
@@ -110,16 +108,13 @@ ifXTable_container_size(void)
 u_int
 ifXTable_dirty_get(void)
 {
-    return ifXTable_if_ctx.table_dirty;
+    return ifTable_dirty_get();
 }
 
 void
 ifXTable_dirty_set(u_int status)
 {
-    DEBUGMSGTL(("ifXTable:ifXTable_dirty_set",
-                "called. was %d, now %d\n",
-                ifXTable_if_ctx.table_dirty, status));
-    ifXTable_if_ctx.table_dirty = status;
+    ifTable_dirty_set( status );
 }
 
 /*
@@ -1293,18 +1288,15 @@ _mfd_ifXTable_undo_setup(netsnmp_mib_handler *handler,
     /*
      * allocate undo context
      */
-    rowreq_ctx->undo = ifXTable_allocate_data();
-    if (NULL == rowreq_ctx->undo) {
-        /** msg already logged */
-        netsnmp_request_set_error_all(requests,
-                                      SNMP_ERR_RESOURCEUNAVAILABLE);
+    rc = _mfd_ifTable_undo_setup_allocate(rowreq_ctx);
+    if (MFD_SUCCESS != rc) {
+        netsnmp_request_set_error_all(requests, rc);
         return SNMP_ERR_NOERROR;
     }
 
     /*
      * row undo setup
      */
-    rowreq_ctx->column_set_flags = 0;
     rc = ifXTable_undo_setup(rowreq_ctx);
     if (MFD_SUCCESS != rc) {
         DEBUGMSGTL(("ifXTable:mfd", "error %d from "
@@ -1374,10 +1366,7 @@ _mfd_ifXTable_undo_cleanup(netsnmp_mib_handler *handler,
     /*
      * release undo context, if needed
      */
-    if (rowreq_ctx->undo) {
-        ifXTable_release_data(rowreq_ctx->undo);
-        rowreq_ctx->undo = NULL;
-    }
+    _mfd_ifTable_undo_setup_release(rowreq_ctx);
 
 
     return SNMP_ERR_NOERROR;
