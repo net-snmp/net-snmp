@@ -1646,15 +1646,6 @@ ifXTable_undo_setup(ifXTable_rowreq_ctx * rowreq_ctx)
      * TODO:451:M: |-> Setup ifXTable undo.
      * set up ifXTable undo information, in preparation for a set.
      */
-#ifdef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
-    /*
-     * promiscuous is the only entry we use that is in the
-     * ifentry struct, so we need to make sure it has been
-     * allocated.
-     */
-    if (NULL == rowreq_ctx->undo->ifentry)
-        rc = ifTable_undo_setup(rowreq_ctx);
-#endif
 
     return rc;
 }                               /* ifXTable_undo_setup */
