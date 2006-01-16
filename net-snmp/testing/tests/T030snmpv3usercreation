@@ -24,7 +24,7 @@ NEWPRIVPASS=newprivpass
 NEWAUTHPRIVPASS=newauthprivpass
 
 # configure agent
-CONFIGAGENT rouser $NEWUSER
+CONFIGAGENT rwuser $NEWUSER
 
 # Start the agent
 STARTAGENT
