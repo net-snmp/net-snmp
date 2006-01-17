@@ -2156,8 +2156,9 @@ parse_ranges(FILE * fp, struct range_list **retp)
         nexttype = get_token(fp, nexttoken, MAXTOKEN);
         if (nexttype == RANGE) {
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
+            errno = 0;
             high = strtol(nexttoken, NULL, 10);
-            if ( high == LONG_MAX && errno == ERANGE ) {
+            if ( errno == ERANGE ) {
                 if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_MIB_WARNINGS))
                     snmp_log(LOG_WARNING,
