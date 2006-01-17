@@ -4385,11 +4385,6 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
     return NULL;
 }
 
-/**
- * Clone of get_symbol that doesn't take a buffer argument.
- *
- * @see get_symbol
- */
 struct tree    *
 get_tree(const oid * objid, size_t objidlen, struct tree *subtree)
 {

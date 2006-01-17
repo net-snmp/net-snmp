@@ -130,7 +130,6 @@ SOFTWARE.
     int             get_wild_node(const char *, oid *, size_t *);
     int             get_node(const char *, oid *, size_t *);
     oid            *snmp_parse_oid(const char *, oid *, size_t *);
-    struct tree    *get_symbol(oid *, size_t, struct tree *, char *);
     struct tree    *get_tree(const oid *, size_t, struct tree *);
     struct tree    *get_tree_head(void);
     void            set_function(struct tree *);
