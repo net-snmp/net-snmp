@@ -26,8 +26,8 @@ VERSION_TAG=`echo Ext-$(VERSION) | sed 's/\./-/g;'`
 WITH_PERL=1
 EMBED_PERL=0
 
-# Define the RPM architecture, i.e., 'noarch', 'i386', 'i686', etc.
-ARCH = `uname -m`
+# Define the RPM architecture, i.e., 'ppc', 'i386', etc.
+ARCH = `uname -i`
 
 # Directory structure expected by 'rpm' program
 RPM_BASE := $(PWD)/rpm
@@ -91,7 +91,7 @@ PERLOPTS += --with embedded_perl
 endif
 
 RPM_OPTS := \
-    --define='_topdir $(PWD)/rpm' \
+    --define='_topdir $(RPM_BASE)' \
     --define='_includedir /usr/include/net-snmp' \
     --target $(ARCH) $(PERLOPTS)
 
