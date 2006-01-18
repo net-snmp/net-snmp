@@ -405,7 +405,7 @@ usage_to_file(FILE * ofp)
     -f will require reading from the stdin/terminal, ignoring a) and b).\n\
     -P will prevent prompts for passphrases to stdout from being printed.\n\
 \n\
-    <engineID> is intepreted as a hex string when preceeded by \"0x\",\n\
+    <engineID> is interpreted as a hex string when preceeded by \"0x\",\n\
     otherwise it is created to contain \"text\".  If nothing is given,\n\
     <engineID> is constructed from the first IP address for the local host.\n\
 		" NL, (s = getenv("HOME")) ? s : "$HOME", local_passphrase_filename);
@@ -415,7 +415,7 @@ usage_to_file(FILE * ofp)
      * FIX -- make this possible?
      * -r [0x]<random_bits> Random bits used in KeyChange XOR.
      * 
-     * <engineID> and <random_bits> are intepreted as hex strings when
+     * <engineID> and <random_bits> are interpreted as hex strings when
      * preceeded by \"0x\", otherwise <engineID> is created to contain \"text\"
      * and <random_bits> are the same as the ascii input.
      * 
