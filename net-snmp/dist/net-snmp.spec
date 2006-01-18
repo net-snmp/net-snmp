@@ -26,6 +26,7 @@ Release: 1
 URL: http://net-snmp.sourceforge.net/
 License: BSDish
 Group: System Environment/Daemons
+Vendor: Net-SNMP project
 Source: http://prdownloads.sourceforge.net/net-snmp/net-snmp-%{version}.tar.gz
 Prereq: openssl
 Obsoletes: cmu-snmp ucd-snmp ucd-snmp-utils
