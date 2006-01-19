@@ -480,16 +480,6 @@ main(int argc, char *argv[])
 #endif
 
         }
-        rval = generate_Ku(session.securityAuthProto,
-                           session.securityAuthProtoLen,
-                           (u_char *) newpass, strlen(newpass),
-                           newKu, &newKu_len);
-
-        if (rval != SNMPERR_SUCCESS) {
-            snmp_perror(argv[0]);
-            fprintf(stderr, "generating the old Ku failed\n");
-            exit(1);
-        }
 
 	if (uselocalizedkey && (strncmp(oldpass, "0x", 2) == 0)) {
 	    /*
@@ -520,7 +510,7 @@ main(int argc, char *argv[])
 	    
 	    if (rval != SNMPERR_SUCCESS) {
 	        snmp_perror(argv[0]);
-	        fprintf(stderr, "generating the new Ku failed\n");
+	        fprintf(stderr, "generating the old Ku failed\n");
 	        exit(1);
 	    }
 
@@ -556,6 +546,17 @@ main(int argc, char *argv[])
 	    memcpy(newkul, buf, newkul_len);
 	    SNMP_FREE(buf);
 	} else {
+            rval = generate_Ku(session.securityAuthProto,
+                               session.securityAuthProtoLen,
+                               (u_char *) newpass, strlen(newpass),
+                               newKu, &newKu_len);
+
+            if (rval != SNMPERR_SUCCESS) {
+                snmp_perror(argv[0]);
+                fprintf(stderr, "generating the new Ku failed\n");
+                exit(1);
+            }
+
 	    rval = generate_kul(session.securityAuthProto,
 				session.securityAuthProtoLen,
 				usmUserEngineID, usmUserEngineIDLen,
