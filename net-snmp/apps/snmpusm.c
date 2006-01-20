@@ -108,6 +108,7 @@ privKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 9},
 ownPrivKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 10},
 usmUserCloneFrom[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 4},
 usmUserSecurityName[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 3},
+usmUserPublic[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 11},
 usmUserStatus[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 13},
 /* diffie helman change key objects */
 usmDHUserAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 1 },
@@ -125,6 +126,7 @@ oid            *dhauthKeyChange = usmDHUserAuthKeyChange,
 int             doauthkey = 0, doprivkey = 0, uselocalizedkey = 0;
 size_t          usmUserEngineIDLen = 0;
 u_char         *usmUserEngineID = NULL;
+char           *usmUserPublic_val = NULL;
 
 
 void
@@ -135,21 +137,23 @@ usage(void)
     fprintf(stderr, " COMMAND\n\n");
     snmp_parse_args_descriptions(stderr);
     fprintf(stderr, "\nsnmpusm commands:\n");
-    fprintf(stderr, "  [-CE ENGINE-ID] create     USER [CLONEFROM-USER]\n");
-    fprintf(stderr, "  [-CE ENGINE-ID] delete     USER\n");
-    fprintf(stderr, "  [-CE ENGINE-ID] cloneFrom  USER CLONEFROM-USER\n");
-    fprintf(stderr, "  [-CE ENGINE-ID] activate   USER\n");
-    fprintf(stderr, "  [-CE ENGINE-ID] deactivate USER\n");
-    fprintf(stderr, "  [-CE ENGINE-ID] [-Ca] [-Cx] changekey [USER]\n");
+    fprintf(stderr, "  [options] create     USER [CLONEFROM-USER]\n");
+    fprintf(stderr, "  [options] delete     USER\n");
+    fprintf(stderr, "  [options] cloneFrom  USER CLONEFROM-USER\n");
+    fprintf(stderr, "  [options] activate   USER\n");
+    fprintf(stderr, "  [options] deactivate USER\n");
+    fprintf(stderr, "  [options] [-Ca] [-Cx] changekey [USER]\n");
     fprintf(stderr,
-            "  [-CE ENGINE-ID] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]\n");
+            "  [options] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]\n");
     fprintf(stderr,
-            "  [-CE ENGINE-ID] (-Ca|-Cx) -Ck passwd OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]\n");
-    fprintf(stderr, "\t\t-CE ENGINE-ID\tSet usmUserEngineID (e.g. 800000020109840301).\n");
-    fprintf(stderr, "\t\t-Cx\t\tChange the privacy key.\n");
-    fprintf(stderr, "\t\t-Ca\t\tChange the authentication key.\n");
-    fprintf(stderr, "\t\t-Ck\t\tAllows to use localized key (must start with 0x)\n");
-    fprintf(stderr, "\t\t\t\tinstead of passphrase.\n");
+            "  [options] (-Ca|-Cx) -Ck passwd OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]\n");
+    fprintf(stderr, "\nsnmpusm options:\n");
+    fprintf(stderr, "\t-CE ENGINE-ID\tSet usmUserEngineID (e.g. 800000020109840301).\n");
+    fprintf(stderr, "\t-Cp STRING\tSet usmUserPublic value to STRING.\n");
+    fprintf(stderr, "\t-Cx\t\tChange the privacy key.\n");
+    fprintf(stderr, "\t-Ca\t\tChange the authentication key.\n");
+    fprintf(stderr, "\t-Ck\t\tAllows to use localized key (must start with 0x)\n");
+    fprintf(stderr, "\t\t\tinstead of passphrase.\n");
 }
 
 /*
@@ -173,15 +177,11 @@ setup_oid(oid * it, size_t * len, u_char * id, size_t idlen,
         it[itIndex++] = user[i];
     }
 
-    /*
-     * fprintf(stdout, "setup_oid: ");  
-     */
-    /*
-     * fprint_objid(stdout, it, *len);  
-     */
-    /*
-     * fprintf(stdout, "\n");  
-     */
+#ifdef SNMP_TESTING_CODE
+    fprintf(stdout, "setup_oid: ");  
+    fprint_objid(stdout, it, *len);  
+    fprintf(stdout, "\n");  
+#endif
 }
 
 #if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
@@ -264,6 +264,16 @@ optProc(int argc, char *const *argv, int opt)
 	    case 'k':
 	        uselocalizedkey = 1;
 		break;
+
+	    case 'p':
+                if (optind < argc) {
+		    usmUserPublic_val =  argv[optind];
+                } else {
+                    fprintf(stderr, "Bad -Cp option: no argument given\n");
+                    exit(1);
+                }
+                optind++;
+                break;
 
 	    case 'E': {
 	        size_t ebuf_len = 32; /* XXX: MAX_ENGINEID_LENGTH */
@@ -914,6 +924,18 @@ main(int argc, char *argv[])
         exit(1);
     }
 
+    /*
+     * add usmUserPublic if specified (via -Cp)
+     */
+    if (usmUserPublic_val) {
+        name_length = USM_OID_LEN;
+	setup_oid(usmUserPublic, &name_length,
+		  usmUserEngineID, usmUserEngineIDLen,
+		  session.securityName);
+	snmp_pdu_add_variable(pdu, usmUserPublic, name_length,
+			      ASN_OCTET_STR, usmUserPublic_val, 
+			      strlen(usmUserPublic_val));	  
+    }
 
     /*
      * do the request 
