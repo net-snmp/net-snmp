@@ -5,6 +5,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
     snmpusm:
       - performance improvement when changing localized keys
+      - new option -Cp to set usmUserPublic value
 
 
 *5.3*
