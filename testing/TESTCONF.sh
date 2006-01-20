@@ -110,8 +110,9 @@ elif test -x /usr/sbin/netstat ; then
 else
     NETSTAT=""
 fi
-if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
-    SNMP_SNMPD_PORT="8765"
+
+PROBE_FOR_PORT() {
+    BASE_PORT=$1
     MAX_RETRIES=3
     if test -x "$NETSTAT" ; then
         if test -z "$RANDOM"; then
@@ -119,13 +120,13 @@ if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
         fi
         while :
         do
-            IN_USE=`$NETSTAT -a -n 2>/dev/null | grep "[\.:]$SNMP_SNMPD_PORT "`
+            IN_USE=`$NETSTAT -a -n 2>/dev/null | grep "[\.:]$BASE_PORT "`
             if [ $? -eq 0 ]; then
-                #ECHO "Port $SNMP_SNMPD_PORT in use:"
+                #ECHO "Port $BASE_PORT in use:"
                 #echo "->$IN_USE"
-                SNMP_SNMPD_PORT=`expr $SNMP_SNMPD_PORT + \( $RANDOM % 100 \)`
+                BASE_PORT=`expr $BASE_PORT + \( $RANDOM % 100 \)`
             else
-                #echo "Using port $SNMP_SNMPD_PORT"
+                echo "$BASE_PORT"
                 break
             fi
             MAX_RETRIES=`expr $MAX_RETRIES - 1`
@@ -135,9 +136,16 @@ if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
             fi
         done
     fi
+}
+
+if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
+    SNMP_SNMPD_PORT=`PROBE_FOR_PORT 8765`
 fi
 if [ "x$SNMP_SNMPTRAPD_PORT" = "x" ]; then
-    SNMP_SNMPTRAPD_PORT=`expr $SNMP_SNMPD_PORT - 1`
+    SNMP_SNMPTRAPD_PORT=`PROBE_FOR_PORT 5678`
+fi
+if [ "x$SNMP_AGENTX_PORT" = "x" ]; then
+    SNMP_AGENTX_PORT=`PROBE_FOR_PORT 7676`
 fi
 if [ "x$SNMP_TRANSPORT_SPEC" = "x" ];then
 	SNMP_TRANSPORT_SPEC="udp"
