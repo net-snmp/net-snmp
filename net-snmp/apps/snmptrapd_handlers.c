@@ -122,7 +122,10 @@ parse_forward(const char *token, char *line)
     DEBUGMSGTL(("read_config:forward", "registering forward for: "));
     if (!strcmp(buf, "default")) {
         DEBUGMSG(("read_config:forward", "default"));
-        traph = netsnmp_add_default_traphandler( forward_handler );
+        if ( !strcmp( cptr, "agentx" ))
+            traph = netsnmp_add_default_traphandler( axforward_handler );
+        else
+            traph = netsnmp_add_default_traphandler( forward_handler );
     } else {
 
         if (!read_objid(buf, obuf, &olen)) {
@@ -134,7 +137,10 @@ parse_forward(const char *token, char *line)
             return;
         }
         DEBUGMSGOID(("read_config:forward", obuf, olen));
-        traph = netsnmp_add_traphandler( forward_handler, obuf, olen );
+        if ( !strcmp( cptr, "agentx" ))
+            traph = netsnmp_add_traphandler( axforward_handler, obuf, olen );
+        else
+            traph = netsnmp_add_traphandler( forward_handler, obuf, olen );
     }
 
     DEBUGMSG(("read_config:forward", "\n"));
@@ -888,6 +894,17 @@ int   event_handler( netsnmp_pdu           *pdu,
     return NETSNMPTRAPD_HANDLER_OK;
 }
 
+
+/*
+ *  Trap handler for forwarding to the AgentX master agent
+ */
+int axforward_handler( netsnmp_pdu           *pdu,
+                       netsnmp_transport     *transport,
+                       netsnmp_trapd_handler *handler)
+{
+    send_v2trap( pdu->variables );
+    return NETSNMPTRAPD_HANDLER_OK;
+}
 
 /*
  *  Trap handler for forwarding to another destination
