@@ -29,6 +29,7 @@ Netsnmp_Trap_Handler   print_handler;
 Netsnmp_Trap_Handler   command_handler;
 Netsnmp_Trap_Handler   event_handler;
 Netsnmp_Trap_Handler   forward_handler;
+Netsnmp_Trap_Handler   axforward_handler;
 Netsnmp_Trap_Handler   notification_handler;
 
 void free_trap1_fmt(void);
