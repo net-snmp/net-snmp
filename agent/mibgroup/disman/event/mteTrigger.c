@@ -741,6 +741,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
             /*
              * Determine the value to be monitored...
              */
+            if ( !vp1->val.integer ) {  /* No value */
+                if ( vp2 )
+                    vp2 = vp2->next_variable;
+                continue;
+            }
             if (entry->flags & MTE_TRIGGER_FLAG_DELTA) {
                 if (entry->flags & MTE_TRIGGER_FLAG_DWILD) {
                     /*
@@ -873,6 +878,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
             /*
              * Determine the value to be monitored...
              */
+            if ( !vp1->val.integer ) {  /* No value */
+                if ( vp2 )
+                    vp2 = vp2->next_variable;
+                continue;
+            }
             if (entry->flags & MTE_TRIGGER_FLAG_DELTA) {
                 if (entry->flags & MTE_TRIGGER_FLAG_DWILD) {
                     /*
@@ -994,7 +1004,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
              *  (similar to previous delta-sample processing,
              *   but without the discontinuity marker checks)
              */
-            if (vp2->type == ASN_NULL) {
+            if (!vp2) {
+                break;   /* Run out of 'old' values */
+            }
+            if (( !vp1->val.integer ) ||
+                (vp2->type == ASN_NULL)) {
                 vp2 = vp2->next_variable;
                 continue;
             }
