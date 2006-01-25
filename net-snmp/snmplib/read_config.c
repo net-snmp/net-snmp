@@ -172,7 +172,7 @@ register_app_prenetsnmp_mib_handler(const char *token,
  * management of where to put tokens as the module or modules get more complex
  * in regard to handling token registrations.
  *
- * @param type     the configuration file used, e.g., if snmp.conf is the file
+ * @param type_param the configuration file used, e.g., if snmp.conf is the file
  *                 where the token is located use "snmp" here.
  *                 If NULL the configuration file used will be snmpd.conf.
  *
@@ -1729,7 +1729,7 @@ read_config_read_objid(char *readfrom, oid ** objid, size_t * len)
  *
  * @param type the asn data type to be read in.
  *
- * @param readform the configuration line data to be read.
+ * @param readfrom the configuration line data to be read.
  *
  * @param dataptr an allocated pointer expected to match the type being read
  *        (int *, u_int *, char **, oid **)

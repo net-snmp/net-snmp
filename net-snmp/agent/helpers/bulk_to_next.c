@@ -117,3 +117,5 @@ netsnmp_init_bulk_to_next_helper(void)
     netsnmp_register_handler_by_name("bulk_to_next",
                                      netsnmp_get_bulk_to_next_handler());
 }
+/**  @} */
+

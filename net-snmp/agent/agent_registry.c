@@ -1914,4 +1914,4 @@ unregister_signal(int sig)
 
 #endif                          /* !WIN32 */
 
-/**  }@ */
+/**  @} */

@@ -436,35 +436,10 @@ snmp_log_options_usage(const char *lead, FILE * outf)
 }
 
 /**
- * This snmp logging function allows variable argument list given the
- * specified priority, format and a populated va_list structure.
- * The default logfile this function writes to is /var/log/snmpd.log.
+ * Is logging done?
  *
- * @param priority is an integer representing the type of message to be written
- *	to the snmp log file.  The types are errors, warning, and information.
- *      	The error types are:
- *		- LOG_EMERG       system is unusable 
- *		- LOG_ALERT       action must be taken immediately 
- *		- LOG_CRIT        critical conditions 
- *		- LOG_ERR         error conditions
- *	The warning type is:
- *              - LOG_WARNING     warning conditions 
- *	The information types are:
- *		- LOG_NOTICE      normal but significant condition
- *		- LOG_INFO        informational
- *      	- LOG_DEBUG       debug-level messages
+ * @return Returns 0 if logging is off, 1 when it is done.
  *
- * @param format is a pointer to a char representing the variable argument list
- *	format used.
- *
- * @param ap is a va_list type used to traverse the list of arguments.
- *
- * @return Returns 0 on success, -1 when the code could not format the log-
- *         string, -2 when dynamic memory could not be allocated if the length
- *         of the log buffer is greater then 1024 bytes.  For each of these
- *         errors a LOG_ERR messgae is written to the logfile.
- *
- * @see snmp_log
  */
 int
 snmp_get_do_logging(void)
@@ -1123,6 +1098,37 @@ snmp_log_string(int priority, const char *str)
 /* ==================================================== */
 
 
+/**
+ * This snmp logging function allows variable argument list given the
+ * specified priority, format and a populated va_list structure.
+ * The default logfile this function writes to is /var/log/snmpd.log.
+ *
+ * @param priority is an integer representing the type of message to be written
+ *	to the snmp log file.  The types are errors, warning, and information.
+ *      - The error types are:
+ *        - LOG_EMERG       system is unusable 
+ *        - LOG_ALERT       action must be taken immediately 
+ *        - LOG_CRIT        critical conditions 
+ *        - LOG_ERR         error conditions
+ *      - The warning type is:
+ *        - LOG_WARNING     warning conditions 
+ *      - The information types are:
+ *        - LOG_NOTICE      normal but significant condition
+ *        - LOG_INFO        informational
+ *        - LOG_DEBUG       debug-level messages
+ *
+ * @param format is a pointer to a char representing the variable argument list
+ *	format used.
+ *
+ * @param ap is a va_list type used to traverse the list of arguments.
+ *
+ * @return Returns 0 on success, -1 when the code could not format the log-
+ *         string, -2 when dynamic memory could not be allocated if the length
+ *         of the log buffer is greater then 1024 bytes.  For each of these
+ *         errors a LOG_ERR messgae is written to the logfile.
+ *
+ * @see snmp_log
+ */
 int
 snmp_vlog(int priority, const char *format, va_list ap)
 {

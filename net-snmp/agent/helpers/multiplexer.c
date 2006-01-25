@@ -119,3 +119,5 @@ netsnmp_multiplexer_helper_handler(netsnmp_mib_handler *handler,
     }
     return netsnmp_call_handler(handler, reginfo, reqinfo, requests);
 }
+/**  @} */
+

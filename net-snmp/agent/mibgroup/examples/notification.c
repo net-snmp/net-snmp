@@ -58,6 +58,7 @@ init_notification(void)
  *  
  *  
  *  I.e. it's
+ * @verbatim
  *                                           ___  trapsink
  *                                          /
  *      send_easy_trap \___  [  Trap      ] ____  trap2sink
@@ -71,6 +72,7 @@ init_notification(void)
  *       send_v2trap     ------------------->  trap2sink
  *       ????            ------------------->  informsink
  *       ????            ------------------->  trapsess
+ * @endverbatim
  */
 void
 send_example_notification(unsigned int clientreg, void *clientarg)

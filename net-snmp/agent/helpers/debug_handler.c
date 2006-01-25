@@ -160,3 +160,5 @@ netsnmp_init_debug_helper(void)
 {
     netsnmp_register_handler_by_name("debug", netsnmp_get_debug_handler());
 }
+/**  @} */
+

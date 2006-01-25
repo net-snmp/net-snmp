@@ -100,7 +100,7 @@ typedef struct table_container_data_s {
  *
  *  The generated code will also have code to handle SNMP-SET processing.
  *  If your table does not support any SET operations, simply comment
- *  out the #define <PREFIX>_SET_HANDLING (where <PREFIX> is your
+ *  out the \#define \<PREFIX\>_SET_HANDLING (where \<PREFIX\> is your
  *  table name) in the header file.
  *
  *  SET processing modifies the row in-place. The duplicate_row
@@ -110,13 +110,13 @@ typedef struct table_container_data_s {
  *  from the copy.
  *
  *  Code will be generated to handle row creation. This code may be
- *  disabled by commenting out the #define <PREFIX>_ROW_CREATION
+ *  disabled by commenting out the \#define \<PREFIX\>_ROW_CREATION
  *  in the header file.
  *
  *  If your table contains a RowStatus object, by default the
  *  code will not allow object in an active row to be modified.
  *  To allow active rows to be modified, remove the comment block
- *  around the #define <PREFIX>_CAN_MODIFY_ACTIVE_ROW in the header
+ *  around the \#define \<PREFIX\>_CAN_MODIFY_ACTIVE_ROW in the header
  *  file.
  *
  *  Code will be generated to maintain a secondary index for all
@@ -298,7 +298,7 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
 
 /** @} */
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/** @cond */
 /**********************************************************************
  **********************************************************************
  **********************************************************************
@@ -872,4 +872,4 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
     
     return rc;
 }
-#endif /** DOXYGEN_SHOULD_SKIP_THIS */
+/** @endcond */

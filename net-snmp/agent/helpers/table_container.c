@@ -220,7 +220,7 @@ netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
 
 /** @} */
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/** @cond */
 /**********************************************************************
  **********************************************************************
  *                                                                    *
@@ -519,6 +519,7 @@ _container_table_handler(netsnmp_mib_handler *handler,
 
     return rc;
 }
+/** @endcond */
 
 /** retrieve the container used by the table_container helper */
 netsnmp_container*

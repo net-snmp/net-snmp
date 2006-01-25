@@ -916,7 +916,7 @@ timeval_tticks(struct timeval *tv)
  *               
  * Windows:      Returns a pointer to the desired environment variable  
  *               if it exists.  If it does not, the variable is looked up
- *               in the registry in HKCU\Net-SNMP or HKLM\Net-SNMP
+ *               in the registry in HKCU\\Net-SNMP or HKLM\\Net-SNMP
  *               (whichever it finds first) and stores the result in the 
  *               environment variable.  It then returns a pointer to 
  *               environment variable.

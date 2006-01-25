@@ -1209,6 +1209,5 @@ netsnmp_table_set_num_rows(netsnmp_table_data_set *table)
     return netsnmp_table_data_num_rows(table->table);
 }
 
-/*
- * @} 
+/** @} 
  */
