@@ -19,7 +19,8 @@
 
 #include "ipv6InterfaceTable_data_access.h"
 
-/** @defgroup data_access data_access: Routines to access data
+/** @ingroup interface 
+ * @addtogroup data_access data_access: Routines to access data
  *
  * These routines are used to locate the data used to satisfy
  * requests.
@@ -207,7 +208,7 @@ ipv6InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *
 /**
  * container shutdown
  *
- * @param container_ptr_ptr A pointer to the container.
+ * @param container_ptr A pointer to the container.
  *
  *  This function is called at shutdown to allow you to customize certain
  *  aspects of the access method. For the most part, it is for advanced

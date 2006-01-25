@@ -1272,7 +1272,6 @@ netsnmp_table_set_add_indexes(va_alist)
     va_end(debugargs);
 }
 
-/*
- * @} 
+/** @} 
  */
 

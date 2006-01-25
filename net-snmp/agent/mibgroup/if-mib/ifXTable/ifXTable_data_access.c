@@ -19,7 +19,8 @@
 
 #include "ifXTable_data_access.h"
 
-/** @defgroup data_access data_access: Routines to access data
+/** @ingroup interface 
+ * @addtogroup data_access data_access: Routines to access data
  *
  * These routines are used to locate the data used to satisfy
  * requests.

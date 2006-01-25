@@ -187,6 +187,5 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_GENERR;
 }
 
-/*
- * @} 
+/** @} 
  */

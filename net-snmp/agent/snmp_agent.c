@@ -3389,7 +3389,7 @@ netsnmp_request_set_error(netsnmp_request_info *request, int error_value)
 
 /** set error for all requests
  * @param requests request list
- * @param error_value error value for requests
+ * @param error error value for requests
  * @return SNMPERR_SUCCESS, or an error code
  */
 NETSNMP_INLINE int
