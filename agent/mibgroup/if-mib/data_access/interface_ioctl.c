@@ -30,7 +30,10 @@
  * ioctl wrapper
  *
  * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
- * @param ifentry : ifentry to update
+ * @param  which
+ * @param ifrq
+ * param ifentry : ifentry to update
+ * @param name
  *
  * @retval  0 : success
  * @retval -1 : invalid parameters
@@ -369,7 +372,7 @@ netsnmp_access_interface_ioctl_mtu_get(int fd,
  * interface entry ifIndex ioctl wrapper
  *
  * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
- * @param ifentry : ifentry to update
+ * @param name   : ifentry to update
  *
  * @retval  0 : not found
  * @retval !0 : ifIndex
@@ -396,9 +399,10 @@ netsnmp_access_interface_ioctl_ifindex_get(int fd, const char *name)
 /**
  * check an interface for ipv4 addresses
  *
- * @parm sd      : open socket descriptor
- * @parm if_name : optional name. takes precedent over if_index.
- * @parm if_index: optional if index. only used if no if_name specified
+ * @param sd      : open socket descriptor
+ * @param if_name : optional name. takes precedent over if_index.
+ * @param if_index: optional if index. only used if no if_name specified
+ * @param flags   :
  *
  * @retval < 0 : error
  * @retval   0 : no ip v4 addresses

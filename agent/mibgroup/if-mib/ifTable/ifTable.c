@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for ifTable
+/** \page MFD helper for ifTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -181,7 +181,7 @@ ifTable_rowreq_ctx_init(ifTable_rowreq_ctx * rowreq_ctx,
 
 /**
  * extra context cleanup
- *
+ * @param rowreq_ctx
  */
 void
 ifTable_rowreq_ctx_cleanup(ifTable_rowreq_ctx * rowreq_ctx)
@@ -201,6 +201,7 @@ ifTable_rowreq_ctx_cleanup(ifTable_rowreq_ctx * rowreq_ctx)
 
 /**
  * pre-request callback
+ * @param  user_context
  *
  *
  * @retval MFD_SUCCESS              : success.
@@ -226,6 +227,7 @@ ifTable_pre_request(ifTable_registration * user_context)
  *   deleted rows have been removed from the container and
  *   released.
  *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -286,6 +288,7 @@ ifTable_post_request(ifTable_registration * user_context, int rc)
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param ifIndex_val
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -315,6 +318,7 @@ ifTable_indexes_set_tbl_idx(ifTable_mib_index * tbl_idx, long ifIndex_val)
  * set row context indexes
  *
  * @param reqreq_ctx the row context that needs updated indexes
+ * @param ifIndex_val
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -1964,8 +1968,7 @@ ifTable_undo_cleanup(ifTable_rowreq_ctx * rowreq_ctx)
  * ifTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ifTable_rowreq_ctx
- *        Pointer to the users context.
+ * @param rowreq_ctx Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
  * @retval MFD_ERROR   : error
@@ -2040,7 +2043,7 @@ ifTable_commit(ifTable_rowreq_ctx * rowreq_ctx)
  * ifTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ifTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -2274,6 +2277,8 @@ ifAdminStatus_undo(ifTable_rowreq_ctx * rowreq_ctx)
  * set. The definitions for the COLUMN_*_FLAG bits can be found in
  * ifTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
+ *
+ * @param rowreq_ctx
  *
  * @retval MFD_SUCCESS all the changes to the row are legal
  * @retval MFD_ERROR   one or more changes are not legal

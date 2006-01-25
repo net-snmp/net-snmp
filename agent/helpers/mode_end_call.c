@@ -56,7 +56,7 @@ netsnmp_get_mode_end_call_handler(netsnmp_mode_handler_list *endlist)
 }
 
 /** adds a mode specific callback to the callback list.
- * @param endinfo the information structure for the mode_end_call helper.  Can be NULL to create a new list.
+ * @param endlist the information structure for the mode_end_call helper.  Can be NULL to create a new list.
  * @param mode the mode to be called upon.  A mode of NETSNMP_MODE_END_ALL_MODES = all modes.
  * @param callbackh the netsnmp_mib_handler callback to call.
  * @return the new registration information list upon success.
@@ -113,3 +113,5 @@ netsnmp_mode_end_call_helper(netsnmp_mib_handler *handler,
     
     return ret2;
 }
+/**  @} */
+

@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @addtogroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -409,3 +409,5 @@ config_require(ip-mib/inetNetToMediaTable/inetNetToMediaTable_data_access)
 }
 #endif
 #endif                          /* INETNETTOMEDIATABLE_H */
+/**  @} */
+

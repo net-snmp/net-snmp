@@ -54,8 +54,7 @@ extern int netsnmp_arch_interface_index_find(const char*name);
 #endif
 
 
-/**---------------------------------------------------------------------*/
-/*
+/**
  * initialization
  */
 void

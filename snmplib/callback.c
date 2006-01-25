@@ -202,8 +202,8 @@ init_callbacks(void)
  *	Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >=
  *	MAX_CALLBACK_SUBIDS or a snmp_gen_callback pointer could not be 
  *	allocated, otherwise SNMPERR_SUCCESS is returned.
- * 	- #define MAX_CALLBACK_IDS    2
- *	- #define MAX_CALLBACK_SUBIDS 16
+ * 	- \#define MAX_CALLBACK_IDS    2
+ *	- \#define MAX_CALLBACK_SUBIDS 16
  *
  * @see snmp_call_callbacks
  * @see snmp_unregister_callback
