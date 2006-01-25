@@ -1015,7 +1015,6 @@ unregister_mib_context(oid * name, size_t len, int priority,
         if (child == NULL)      /* Didn't find the given name */
             break;
     }
-    netsnmp_subtree_free(myptr);
 
     memset(&reg_parms, 0x0, sizeof(reg_parms));
     reg_parms.name = name;
@@ -1028,6 +1027,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_UNREGISTER_OID, &reg_parms);
 
+    netsnmp_subtree_free(myptr);
     netsnmp_set_lookup_cache_size(old_lookup_cache_val);
     invalidate_lookup_cache(context);
     return MIB_UNREGISTERED_OK;
