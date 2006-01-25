@@ -1001,6 +1001,5 @@ netsnmp_table_data_entry_next_byoid(netsnmp_table_data *table,
  *
  * ================================== */
 
-/*
- * @} 
+/** @} 
  */

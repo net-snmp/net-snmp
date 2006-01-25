@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for ipSystemStatsTable
+/** \page MFD helper for ipSystemStatsTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -165,6 +165,7 @@ ipSystemStatsTable_rowreq_ctx_cleanup(ipSystemStatsTable_rowreq_ctx *
 /**
  * pre-request callback
  *
+ * @param user_context
  *
  * @retval MFD_SUCCESS              : success.
  * @retval MFD_ERROR                : other error
@@ -189,7 +190,7 @@ ipSystemStatsTable_pre_request(ipSystemStatsTable_registration *
  *   New rows have been inserted into the container, and
  *   deleted rows have been removed from the container and
  *   released.
- *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -272,6 +273,7 @@ ipSystemStatsTable_release_data(ipSystemStatsTable_data * data)
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param ipSystemStatsIPVersion_val
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.

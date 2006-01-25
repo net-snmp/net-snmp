@@ -108,7 +108,8 @@ usmDHSetKey(struct usmUser *user, int for_auth_key,
     return MFD_ERROR;
 }
 
-/** @defgroup data_set data_set: Routines to set data
+/** @ingroup data_access 
+ * @defgroup data_set data_set: Routines to set data
  *
  * These routines are used to set the value for individual objects. The
  * row context is passed, along with the new value.
@@ -325,7 +326,7 @@ usmDHUserKeyTable_undo_cleanup(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
  * usmDHUserKeyTable_oids.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param usmDHUserKeyTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -366,7 +367,7 @@ usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
  * usmDHUserKeyTable_oids.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param usmDHUserKeyTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -407,7 +408,7 @@ usmDHUserKeyTable_undo_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
  *
  * THERE IS NO ATTEMPT AT RECOVERY FOR ERRORS FROM THIS STATE!
  *
- * @param usmDHUserKeyTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success

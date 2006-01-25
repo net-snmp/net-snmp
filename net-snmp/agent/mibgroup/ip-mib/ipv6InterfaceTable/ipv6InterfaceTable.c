@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for ipv6InterfaceTable
+/** \page MFD helper for ipv6InterfaceTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -152,7 +152,7 @@ ipv6InterfaceTable_rowreq_ctx_init(ipv6InterfaceTable_rowreq_ctx *
 
 /**
  * extra context cleanup
- *
+ * @param rowreq_ctx
  */
 void
 ipv6InterfaceTable_rowreq_ctx_cleanup(ipv6InterfaceTable_rowreq_ctx *
@@ -170,6 +170,7 @@ ipv6InterfaceTable_rowreq_ctx_cleanup(ipv6InterfaceTable_rowreq_ctx *
 /**
  * pre-request callback
  *
+ * @param user_context
  *
  * @retval MFD_SUCCESS              : success.
  * @retval MFD_ERROR                : other error
@@ -194,7 +195,7 @@ ipv6InterfaceTable_pre_request(ipv6InterfaceTable_registration *
  *   New rows have been inserted into the container, and
  *   deleted rows have been removed from the container and
  *   released.
- *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -905,7 +906,7 @@ ipv6InterfaceTable_undo_cleanup(ipv6InterfaceTable_rowreq_ctx * rowreq_ctx)
  * ipv6InterfaceTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ipv6InterfaceTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -997,7 +998,7 @@ ipv6InterfaceTable_commit(ipv6InterfaceTable_rowreq_ctx * rowreq_ctx)
  * ipv6InterfaceTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ipv6InterfaceTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
