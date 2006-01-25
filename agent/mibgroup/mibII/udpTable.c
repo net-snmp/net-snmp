@@ -539,6 +539,8 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         /*
          * Not interested in 'idle' entries, apparently....
          */
+        DEBUGMSGTL(("mibII/udpTable", "UDP Entry %x:%d (%d)\n",
+                     entry.udpLocalAddress, entry.udpLocalPort, entry.udpEntryInfo.ue_state));
         if (entry.udpEntryInfo.ue_state == MIB2_UDP_idle) {
             /*
              * Build up a linked list copy of the getMibstat results
