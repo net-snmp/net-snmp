@@ -15,6 +15,8 @@
  *  @param type    The incoming data type.
  *  @param val     The value to be checked.
  *  @param val_len The length of data stored in val (in bytes).
+ *  @param old_val
+ *  @param old_val_len
  *  @return 0 if the incoming value is legal, an SNMP error code otherwise.
  */
 int
@@ -40,6 +42,8 @@ check_netSnmpHostAddressType_local(int type, long *val, size_t val_len,
  *  @param type    The incoming data type.
  *  @param val     The value to be checked.
  *  @param val_len The length of data stored in val (in bytes).
+ *  @param old_val
+ *  @param old_val_len
  *  @return 0 if the incoming value is legal, an SNMP error code otherwise.
  */
 int
@@ -65,6 +69,8 @@ check_netSnmpHostAddress_local(int type, char *val, size_t val_len,
  *  @param type    The incoming data type.
  *  @param val     The value to be checked.
  *  @param val_len The length of data stored in val (in bytes).
+ *  @param old_val
+ *  @param old_val_len
  *  @return 0 if the incoming value is legal, an SNMP error code otherwise.
  */
 int
@@ -90,6 +96,8 @@ check_netSnmpHostStorage_local(int type, long *val, size_t val_len,
  *  @param type    The incoming data type.
  *  @param val     The value to be checked.
  *  @param val_len The length of data stored in val (in bytes).
+ *  @param old_val
+ *  @param old_val_len
  *  @return 0 if the incoming value is legal, an SNMP error code otherwise.
  */
 int

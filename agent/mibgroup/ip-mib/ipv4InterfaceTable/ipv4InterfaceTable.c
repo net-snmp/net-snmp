@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for ipv4InterfaceTable
+/** \page MFD helper for ipv4InterfaceTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -154,6 +154,7 @@ ipv4InterfaceTable_rowreq_ctx_init(ipv4InterfaceTable_rowreq_ctx *
 
 /**
  * extra context cleanup
+ * @param rowreq_ctx
  *
  */
 void
@@ -172,6 +173,7 @@ ipv4InterfaceTable_rowreq_ctx_cleanup(ipv4InterfaceTable_rowreq_ctx *
 /**
  * pre-request callback
  *
+ * @param user_context
  *
  * @retval MFD_SUCCESS              : success.
  * @retval MFD_ERROR                : other error
@@ -197,6 +199,7 @@ ipv4InterfaceTable_pre_request(ipv4InterfaceTable_registration *
  *   deleted rows have been removed from the container and
  *   released.
  *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -649,7 +652,7 @@ ipv4InterfaceTable_undo_cleanup(ipv4InterfaceTable_rowreq_ctx * rowreq_ctx)
  * ipv4InterfaceTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ipv4InterfaceTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -723,7 +726,7 @@ ipv4InterfaceTable_commit(ipv4InterfaceTable_rowreq_ctx * rowreq_ctx)
  * ipv4InterfaceTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ipv4InterfaceTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success

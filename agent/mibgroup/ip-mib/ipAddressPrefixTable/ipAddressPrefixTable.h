@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @addtogroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -312,3 +312,5 @@ config_require(ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access)
 }
 #endif
 #endif                          /* IPADDRESSPREFIXTABLE_H */
+/**  @} */
+

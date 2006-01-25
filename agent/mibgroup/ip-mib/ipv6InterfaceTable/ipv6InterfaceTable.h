@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @addtogroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -966,3 +966,5 @@ config_require(ip-mib/ipv6InterfaceTable/ipv6InterfaceTable_data_access)
 }
 #endif
 #endif                          /* IPV6INTERFACETABLE_H */
+/** @} */
+

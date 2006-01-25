@@ -471,4 +471,5 @@ netsnmp_register_read_only_counter32_scalar(const char *name,
                    (void *)it, sizeof( u_long ),
                    ASN_COUNTER, WATCHER_FIXED_SIZE ));
 }
+/**  @} */
 

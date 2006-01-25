@@ -262,7 +262,7 @@ sprint_char(char *buf, const u_char ch)
  * @param allow_realloc if not zero reallocate the buffer to fit the 
  *                      needed size.
  * @param cp       the array of characters to encode.
- * @param len      the array length of cp.
+ * @param line_len the array length of cp.
  * 
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
@@ -1204,8 +1204,8 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
  * @param out_len  Incremented by the number of characters printed.
  * @param allow_realloc if not zero reallocate the buffer to fit the 
  *                      needed size.
- * @param var      The variable to encode.
- * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param val      The variable to encode.
+ * @param decimaltype The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may _NOT_ be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
@@ -6559,3 +6559,5 @@ snprint_double(char *buf, size_t buf_len,
         return -1;
 }
 #endif
+/** @} */
+

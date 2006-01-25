@@ -287,6 +287,9 @@ isZeroU64(const U64 * pu64)
  * @param adjust : set to 1 to auto-increment new_val->high
  *                 if a 32bit wrap is detected.
  *
+ * @param old_val
+ * @param new_val
+ *
  *@Note:
  * The old and new values must be be from within a time period
  * which would only allow the 32bit portion of the counter to

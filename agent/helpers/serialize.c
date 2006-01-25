@@ -95,3 +95,5 @@ netsnmp_init_serialize(void)
     netsnmp_register_handler_by_name("serialize",
                                      netsnmp_get_serialize_handler());
 }
+/**  @} */
+
