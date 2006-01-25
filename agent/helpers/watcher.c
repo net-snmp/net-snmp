@@ -293,6 +293,7 @@ netsnmp_register_watched_spinlock(netsnmp_handler_registration *reginfo,
     netsnmp_inject_handler(reginfo, whandler);
     return netsnmp_register_watched_scalar(reginfo, winfo);
 }
+/**  @} */
 
 
 int

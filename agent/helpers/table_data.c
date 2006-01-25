@@ -747,6 +747,5 @@ netsnmp_table_data_num_rows(netsnmp_table_data *table)
     }
     return i;
 }
-/*
- * @} 
+/** @} 
  */

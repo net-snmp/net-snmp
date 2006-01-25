@@ -38,8 +38,6 @@
  * Creates an instance helper handler, calls netsnmp_create_handler, which
  * then could be registered, using netsnmp_register_handler().
  *
- * @param void
- *
  * @return Returns a pointer to a netsnmp_mib_handler struct which contains
  *	the handler's name and the access method
  */
@@ -741,6 +739,5 @@ netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_GENERR;
 }
 
-/*
- * @} 
+/** @} 
  */

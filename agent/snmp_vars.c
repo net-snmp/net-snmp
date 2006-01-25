@@ -447,3 +447,5 @@ should_init(const char *module_name)
      */
     return DO_INITIALIZE;
 }
+/**  @} */
+

@@ -180,3 +180,5 @@ netsnmp_container_null_init(void)
     netsnmp_container_register("null",
                                netsnmp_container_get_null_factory());
 }
+/**  @} */
+

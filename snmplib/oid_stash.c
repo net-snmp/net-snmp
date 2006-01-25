@@ -276,8 +276,8 @@ netsnmp_oid_stash_getnext_node(netsnmp_oid_stash_node *root,
     the data not the entire node.
 
  * @param root the top of the stash
- * @param oid the oid to search for
- * @param the length of the search oid.
+ * @param lookup the oid to search for
+ * @param lookup_len the length of the search oid.
  */
 void           *
 netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
@@ -296,6 +296,9 @@ netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
  * pointer.  It can also be called directly, of course.  The last
  * argument (clientarg) is the only one that is used.  The rest are
  * ignored by the function.
+ * @param majorID
+ * @param minorID
+ * @param serverarg
  * @param clientarg A pointer to a netsnmp_oid_stash_save_info structure.
  */
 int

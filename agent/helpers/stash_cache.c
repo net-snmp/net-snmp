@@ -191,3 +191,5 @@ netsnmp_init_stash_cache_helper(void)
     netsnmp_register_handler_by_name("stash_cache",
                                      netsnmp_get_stash_cache_handler());
 }
+/**  @} */
+
