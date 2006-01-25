@@ -117,3 +117,5 @@ netsnmp_stash_to_next_helper(netsnmp_mib_handler *handler,
 
     return ret;
 }
+/**  @} */
+

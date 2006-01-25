@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for ipAddressPrefixTable
+/** \page MFD helper for ipAddressPrefixTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -190,6 +190,7 @@ ipAddressPrefixTable_pre_request(ipAddressPrefixTable_registration *
  *   deleted rows have been removed from the container and
  *   released.
  *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -232,6 +233,11 @@ ipAddressPrefixTable_post_request(ipAddressPrefixTable_registration *
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param ipAddressPrefixIfIndex_val
+ * @param ipAddressPrefixType_val
+ * @param ipAddressPrefixPrefix_val_ptr
+ * @param ipAddressPrefixPrefix_val_ptr_len
+ * @param ipAddressPrefixLength_val
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.

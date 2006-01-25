@@ -355,3 +355,5 @@ netsnmp_init_row_merge(void)
     netsnmp_register_handler_by_name("row_merge",
                                      netsnmp_get_row_merge_handler(-1));
 }
+/**  @} */
+

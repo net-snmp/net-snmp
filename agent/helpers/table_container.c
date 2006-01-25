@@ -414,7 +414,7 @@ netsnmp_container_table_row_insert(netsnmp_request_info *request,
     }
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/** @cond */
 /**********************************************************************
  **********************************************************************
  *                                                                    *
@@ -646,7 +646,7 @@ _container_table_handler(netsnmp_mib_handler *handler,
 
     return rc;
 }
-#endif /** DOXYGEN_SHOULD_SKIP_THIS */
+/** @endcond */
 
 
 /* ==================================

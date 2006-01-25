@@ -76,7 +76,8 @@ usmDHGetUserKeyChange(struct usmUser *user, int for_auth_key,
     return MFD_SUCCESS;
 }
 
-/** @defgroup data_get data_get: Routines to get data
+/** @ingroup data_access 
+ * @defgroup data_get data_get: Routines to get data
  *
  * TODO:230:M: Implement usmDHUserKeyTable get routines.
  * TODO:240:M: Implement usmDHUserKeyTable mapping routines (if any).
@@ -166,6 +167,10 @@ usmDHUserKeyTable_release_data(usmDHUserKeyTable_data * data)
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param usmUserEngineID_val_ptr
+ * @param usmUserEngineID_val_ptr_len
+ * @param usmUserName_val_ptr
+ * @param usmUserName_val_ptr_len
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.

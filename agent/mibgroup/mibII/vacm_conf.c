@@ -1145,7 +1145,7 @@ vacm_in_view_callback(int majorID, int minorID, void *serverarg,
  *                         subtree has both allowed and disallowed portions)
  *
  * Debug output listed as follows:
- *	<securityName> <groupName> <viewName> <viewType>
+ *	\<securityName\> \<groupName\> \<viewName\> \<viewType\>
  */
 int
 vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
@@ -1197,7 +1197,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
  *                         subtree has both allowed and disallowed portions)
  *
  * Debug output listed as follows:
- *	<securityName> <groupName> <viewName> <viewType>
+ *	\<securityName\> \<groupName\> \<viewName\> \<viewType\>
  */
 int
 vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,

@@ -609,3 +609,5 @@ release_cached_resources(unsigned int regNo, void *clientargs)
                             0, release_cached_resources, NULL);
     }
 }
+/**  @} */
+

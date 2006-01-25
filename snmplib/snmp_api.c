@@ -7182,3 +7182,5 @@ snmp_init_statistics(void)
 {
     memset(statistics, 0, sizeof(statistics));
 }
+/**  @} */
+

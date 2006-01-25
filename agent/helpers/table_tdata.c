@@ -551,6 +551,5 @@ netsnmp_tdata_compare_subtree_oid(netsnmp_tdata_row     *row,
                                  compareto,   compareto_len);
 }
 
-/*
- * @} 
+/** @} 
  */

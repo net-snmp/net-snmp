@@ -12,7 +12,8 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @ingroup agent
+ * @defgroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -715,3 +716,5 @@ config_exclude(mibII/interfaces)
 }
 #endif
 #endif                          /* IFTABLE_H */
+/**  @} */
+
