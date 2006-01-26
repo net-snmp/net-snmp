@@ -18,7 +18,7 @@
  *
  * $$hack:$
  */
-/** @defgroup interface: Routines to interface to Net-SNMP
+/** @ingroup interface: Routines to interface to Net-SNMP
  *
  * \warning This code should not be modified, called directly,
  *          or used to interpret functionality. It is subject to
@@ -92,6 +92,7 @@ void ${context}_valid_columns_set(netsnmp_column_info *vc);
 @eval $m2c_save = "$name"@
 @eval $name = "${name}_INTERFACE"@
 @include generic-header-bottom.m2i@
+/** @} */
 @eval $name = "$m2c_save"@
 ########################################################################
 ########################################################################
