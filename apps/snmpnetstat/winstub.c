@@ -9,6 +9,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
 
 #if (defined(WIN32) || defined(cygwin) || defined(aix4))
 
