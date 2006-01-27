@@ -298,6 +298,7 @@ static const char *api_errors[-SNMPERR_MAX + 1] = {
     "Out of memory (malloc failure)",   /* SNMPERR_MALLOC */
     "Kerberos related error",   /* SNMPERR_KRB5 */
     "Protocol error",		/* SNMPERR_PROTOCOL */
+    "OID not increasing",       /* SNMPERR_OID_NONINCREASING */
 };
 
 static const char *secLevelName[] = {

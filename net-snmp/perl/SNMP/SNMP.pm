@@ -116,6 +116,8 @@ $save_descriptions = 0; #tied scalar to control saving descriptions during
 $best_guess = 0;  # determine whether or not to enable best-guess regular
                   # expression object name translation.  1 = Regex (-Ib),
 		  # 2 = random (-IR)
+$non_increasing = 0; # stop polling with an "OID not increasing"-error
+                     # when an OID does not increases in bulkwalk.
 $replace_newer = 0; # determine whether or not to tell the parser to replace
                     # older MIB modules with newer ones when loading MIBs.
                     # WARNING: This can cause an incorrect hierarchy.
@@ -542,6 +544,7 @@ sub new {
    $this->{UseSprintValue} = $SNMP::use_sprint_value 
        unless exists $this->{UseSprintValue};
    $this->{BestGuess} = $SNMP::best_guess unless exists $this->{BestGuess};
+   $this->{NonIncreasing} ||= $SNMP::non_increasing;
    $this->{UseEnums} = $SNMP::use_enums unless exists $this->{UseEnums};
    $this->{UseNumeric} = $SNMP::use_numeric unless exists $this->{UseNumeric};
 
@@ -570,6 +573,7 @@ sub update {
    $this->{UseSprintValue} = $SNMP::use_sprint_value 
        unless exists $this->{UseSprintValue};
    $this->{BestGuess} = $SNMP::best_guess unless exists $this->{BestGuess};
+   $this->{NonIncreasing} ||= $SNMP::non_increasing;
    $this->{UseEnums} = $SNMP::use_enums unless exists $this->{UseEnums};
    $this->{UseNumeric} = $SNMP::use_numeric unless exists $this->{UseNumeric};
 
@@ -1524,6 +1528,14 @@ creation. this setting controls how <tags> are parsed.  setting to
 0 causes a regular lookup.  setting to 1 causes a regular expression 
 match (defined as -Ib in snmpcmd) and setting to 2 causes a random 
 access lookup (defined as -IR in snmpcmd).
+
+=item NonIncreasing
+
+defaults to the value of SNMP::non_increasing at time of session
+creation. this setting controls if a non-increasing OID during
+bulkwalk will causes an error. setting to 0 causes the default
+behaviour (which may, in very badly performing agents, result in a never-ending loop).
+setting to 1 causes an error (OID not increasing) when this error occur.
 
 =item ErrorStr
 
