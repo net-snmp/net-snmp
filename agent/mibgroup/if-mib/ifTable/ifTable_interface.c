@@ -1360,7 +1360,6 @@ int
 _mfd_ifTable_undo_setup_allocate(ifTable_rowreq_ctx *rowreq_ctx)
 {
     int             rc = MFD_SUCCESS;
-    netsnmp_data_list *dl;
 
     if (NULL == rowreq_ctx)
         return MFD_ERROR;
@@ -1390,27 +1389,13 @@ _mfd_ifTable_undo_setup_allocate(ifTable_rowreq_ctx *rowreq_ctx)
             else {
                 netsnmp_access_interface_entry_copy(rowreq_ctx->undo->ifentry,
                                                     rowreq_ctx->data.ifentry);
-                dl = netsnmp_data_list_add_data(&rowreq_ctx->ifTable_data_list,
-                                                "ifentry:undo", (void*)1, NULL);
-                if (NULL == dl) {
-                    snmp_log(LOG_ERR,"malloc failed\n");
-                    netsnmp_access_interface_entry_free(rowreq_ctx->undo->ifentry);
-                    rc = SNMP_ERR_RESOURCEUNAVAILABLE;
-                    netsnmp_access_interface_entry_free(rowreq_ctx->data.ifentry);
-                    ifTable_release_data(rowreq_ctx->undo);
-                    rowreq_ctx->undo = NULL;
-                }
+                netsnmp_assert(0 == rowreq_ctx->undo_ref_count);
             }
         }
     }
-    else {
-        dl = netsnmp_get_list_node(rowreq_ctx->ifTable_data_list,
-                                   "ifentry:undo");
-        netsnmp_assert(NULL != dl);
-        ++((int)dl->data);
-        DEBUGMSGTL(("internal:ifTable:_mfd_ifTable_undo_setup_allocate",
-                    "++refcount = %d\n",(int)dl->data));
-    }
+    ++rowreq_ctx->undo_ref_count;
+    DEBUGMSGTL(("internal:ifTable:_mfd_ifTable_undo_setup_allocate",
+                "++undo_refcount = %d\n",rowreq_ctx->undo_ref_count));
 
     return rc;
 }
@@ -1479,21 +1464,14 @@ _mfd_ifTable_undo_setup(netsnmp_mib_handler *handler,
 void
 _mfd_ifTable_undo_setup_release(ifTable_rowreq_ctx *rowreq_ctx)
 {
-    netsnmp_data_list *dl;
+    netsnmp_assert(rowreq_ctx->undo_ref_count > 0);
+    --rowreq_ctx->undo_ref_count;
+    snmp_log(LOG_ERR, "undo_refcount at %d\n", rowreq_ctx->undo_ref_count);
 
-    dl = netsnmp_get_list_node(rowreq_ctx->ifTable_data_list,
-                               "ifentry:undo");
-    if (NULL == dl)
-        return; /* better to lead than double free */
-
-    --((int)dl->data);
-    snmp_log(LOG_ERR, "--refcount at %d\n", (int)dl->data);
-
-    if (0 == (int)dl->data) {
+    if (0 == rowreq_ctx->undo_ref_count) {
         netsnmp_access_interface_entry_free(rowreq_ctx->undo->ifentry);
         ifTable_release_data(rowreq_ctx->undo);
         rowreq_ctx->undo = NULL;
-        netsnmp_remove_list_node(&rowreq_ctx->ifTable_data_list,"ifentry:undo");
     }
 }
 
