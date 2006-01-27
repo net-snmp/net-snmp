@@ -1957,6 +1957,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
    SV **err_ind_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorInd", 8, 1);
+   int check =  SvIV(*hv_fetch((HV*)SvRV(context->sess_ref), "NonIncreasing",13,1));
 
    DBPRT(3, (DBOUT "bulkwalk: sess_ref = 0x%p, sess_ptr_sv = 0x%p\n",
              context->sess_ref, sess_ptr_sv));
@@ -2114,6 +2115,16 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 				   context->reqbase[pix].last_oid,
 				   context->reqbase[pix].last_len) == 0)
 	 {
+            if (check) 
+            {
+               DBPRT(2, (DBOUT "Error: OID not increasing: %s\n",
+                         snprint_objid(_debugx, sizeof(_debugx), vars->name,vars->name_length)));
+               sv_setpv(*err_str_svp, (char*)snmp_api_errstring(SNMPERR_OID_NONINCREASING));
+               sv_setiv(*err_num_svp, SNMPERR_OID_NONINCREASING);
+               sv_setiv(*err_ind_svp, pix);
+               goto err;
+            }
+              
 	    DBPRT(2, (DBOUT "Ignoring repeat oid: %s\n",
 			snprint_objid(_debugx, sizeof(_debugx), vars->name,vars->name_length)));
 

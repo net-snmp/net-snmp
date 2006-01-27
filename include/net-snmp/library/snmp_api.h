@@ -488,8 +488,9 @@ typedef struct request_list {
 #define SNMPERR_MALLOC			(-62)
 #define SNMPERR_KRB5			(-63)
 #define SNMPERR_PROTOCOL		(-64)
+#define SNMPERR_OID_NONINCREASING       (-65)
 
-#define SNMPERR_MAX			(-64)
+#define SNMPERR_MAX			(-65)
 
 #define non_repeaters	errstat
 #define max_repetitions errindex
