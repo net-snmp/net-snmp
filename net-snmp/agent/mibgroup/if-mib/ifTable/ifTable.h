@@ -363,6 +363,7 @@ config_exclude(mibII/interfaces)
          * TODO:131:o: |   |-> Add useful data to ifTable rowreq context.
          */
         char            known_missing;
+	u_char          undo_ref_count;
 
         /*
          * storage for future expansion
