@@ -608,5 +608,3 @@ netsnmp_container_table_row_extract(netsnmp_request_info *request)
     return netsnmp_request_get_list_data(request, TABLE_CONTAINER_ROW);
 }
 #endif /* inline */
-
-#endif /** DOXYGEN_SHOULD_SKIP_THIS */
