@@ -1814,6 +1814,15 @@ read_config_read_data(int type, char *readfrom, void *dataptr,
             readfrom = skip_token(readfrom);
             return readfrom;
 
+        case ASN_IPADDRESS:
+            intp = (int *) dataptr;
+            *intp = inet_addr(readfrom);
+            if ((*intp == -1) &&
+                (strncmp(readfrom, "255.255.255.255", 15) != 0))
+                return NULL;
+            readfrom = skip_token(readfrom);
+            return readfrom;
+
         case ASN_OCTET_STR:
         case ASN_BIT_STR:
             charpp = (char **) dataptr;
@@ -1869,6 +1878,17 @@ read_config_read_memory(int type, char *readfrom,
         readfrom = copy_nword(readfrom, buf, sizeof(buf));
         *uintp = strtoul(buf, NULL, 0);
         *len = sizeof(unsigned int);
+        return readfrom;
+
+    case ASN_IPADDRESS:
+        if (*len < sizeof(int))
+            return NULL;
+        intp = (int *) dataptr;
+        readfrom = copy_nword(readfrom, buf, sizeof(buf));
+        *intp = inet_addr(buf);
+        if ((*intp == -1) && (strcmp(buf, "255.255.255.255") != 0))
+            return NULL;
+        *len = sizeof(int);
         return readfrom;
 
     case ASN_OCTET_STR:
@@ -1943,6 +1963,7 @@ read_config_store_data_prefix(char prefix, int type, char *storeto,
     int            *intp;
     u_char        **charpp;
     unsigned int   *uintp;
+    struct in_addr  in;
     oid           **oidpp;
 
     if (dataptr && storeto)
@@ -1956,6 +1977,11 @@ read_config_store_data_prefix(char prefix, int type, char *storeto,
         case ASN_UNSIGNED:
             uintp = (unsigned int *) dataptr;
             sprintf(storeto, "%c%u", prefix, *uintp);
+            return (storeto + strlen(storeto));
+
+        case ASN_IPADDRESS:
+            in.s_addr = (unsigned int *) dataptr;
+            sprintf(storeto, "%c%s", prefix, inet_ntoa(in));
             return (storeto + strlen(storeto));
 
         case ASN_OCTET_STR:
