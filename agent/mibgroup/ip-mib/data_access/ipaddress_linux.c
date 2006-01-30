@@ -180,7 +180,7 @@ int
 _load_v6(netsnmp_container *container, int idx_offset)
 {
     FILE           *in;
-    char            line[80], addr[33], if_name[IFNAMSIZ];
+    char            line[80], addr[40], if_name[IFNAMSIZ];
     u_char          *buf;
     int             if_index, pfx_len, scope, flags, rc = 0;
     size_t          in_len, out_len;
@@ -219,7 +219,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
          * F: flags (see include/linux/rtnetlink.h, net/ipv6/addrconf.c)
          * I: interface
          */
-        rc = sscanf(line, "%32s %02x %02x %02x %02x %8s\n",
+        rc = sscanf(line, "%39s %02x %02x %02x %02x %8s\n",
                     addr, &if_index, &pfx_len, &scope, &flags, if_name);
         if( 6 != rc ) {
             snmp_log(LOG_ERR, PROCFILE " data format error (%d!=6), line ==|%s|\n",
@@ -241,7 +241,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
         netsnmp_assert(16 == in_len);
         out_len = 0;
         buf = entry->ia_address;
-        if(1 != snmp_hex_to_binary(&buf,
+        if(1 != netsnmp_hex_to_binary(&buf,
                                    &in_len, &out_len, 0, addr)) {
             snmp_log(LOG_ERR,"error parsing '%s', skipping\n",
                      entry->ia_address);
