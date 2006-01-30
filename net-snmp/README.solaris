@@ -220,7 +220,7 @@ components of the development environment.
 
 If you are using FORTE:
 
-PATH=/usr/bin:/usr/sbin:/usr/ccs/bin/:opt/SUNWspro/bin:/usr/local/bin:
+PATH=/usr/bin:/usr/sbin:/usr/ccs/bin:/opt/SUNWspro/bin:/usr/local/bin:
 
 If you are using gcc:
 
