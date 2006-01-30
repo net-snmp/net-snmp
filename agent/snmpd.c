@@ -912,16 +912,6 @@ main(int argc, char *argv[])
         Exit(1);                /*  Exit logs exit val for us  */
     }
 
-    /*
-     * Store persistent data immediately in case we crash later.  
-     */
-    snmp_store(app_name);
-
-    /*
-     * Send coldstart trap if possible.  
-     */
-    send_easy_trap(0, 0);
-
 #if HAVE_GETPID
     if (pid_file != NULL) {
         /*
@@ -951,6 +941,17 @@ main(int argc, char *argv[])
 #endif
 
 #if HAVE_UNISTD_H
+    cptr = get_persistent_directory();
+    mkdirhier( cptr, AGENT_DIRECTORY_MODE, 0 );
+   
+    uid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
+			     NETSNMP_DS_AGENT_USERID);
+    gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
+			     NETSNMP_DS_AGENT_GROUPID);
+    
+    if ( uid != 0 || gid != 0 )
+        chown( cptr, uid, gid );
+
 #ifdef HAVE_SETGID
     if ((gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 				  NETSNMP_DS_AGENT_GROUPID)) != 0) {
@@ -982,6 +983,16 @@ main(int argc, char *argv[])
     }
 #endif
 #endif
+
+    /*
+     * Store persistent data immediately in case we crash later.  
+     */
+    snmp_store(app_name);
+
+    /*
+     * Send coldstart trap if possible.  
+     */
+    send_easy_trap(0, 0);
 
     /*
      * We're up, log our version number.  
