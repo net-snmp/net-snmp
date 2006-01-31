@@ -1637,7 +1637,7 @@ create_user_from_session(netsnmp_session * session)
 {
     struct usmUser *user;
     int             user_just_created = 0;
-    u_char *cp;
+    char *cp;
 
     /*
      * - don't create-another/copy-into user for this session by default
