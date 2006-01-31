@@ -207,7 +207,8 @@ netsnmp_udp_close(netsnmp_transport *t)
 static int
 _sock_buffer_maximize(int s, int optname, const char *buftype, int size)
 {
-    int            curbuf = 0, curbuflen = sizeof(int);
+    int            curbuf = 0;
+    size_t         curbuflen = sizeof(int);
     int            lo, mid, hi;
 
     /*
@@ -366,7 +367,8 @@ netsnmp_sock_buffer_set(int s, int optname, int local, int size)
     return -1;
 #else
     const char     *buftype;
-    int            curbuf = 0, curbuflen = sizeof(int);
+    int            curbuf = 0;
+    size_t         curbuflen = sizeof(int);
 
 #   ifndef  SO_SNDBUF
     if (SO_SNDBUF == optname) {

@@ -299,7 +299,7 @@ debug_is_token_registered(const char *token)
             CONTAINER_INSERT(dbg_stats, found);
         }
         ++found->enabled;
-//        snmp_log(LOG_ERR,"tok %s, %d hits\n", token, found->enabled);
+    /*  snmp_log(LOG_ERR,"tok %s, %d hits\n", token, found->enabled);  */
     }
 #endif
 
@@ -581,7 +581,7 @@ _debug_cmp( const void *lhs, const void *rhs )
     netsnmp_token_descr *dbg_l = (netsnmp_token_descr *)lhs;
     netsnmp_token_descr *dbg_r = (netsnmp_token_descr *)rhs;
 
-//    snmp_log(LOG_ERR,"%s/%s\n",dbg_l->token_name, dbg_r->token_name);
+ /* snmp_log(LOG_ERR,"%s/%s\n",dbg_l->token_name, dbg_r->token_name); */
     return strcmp(dbg_l->token_name, dbg_r->token_name);
 }
 
