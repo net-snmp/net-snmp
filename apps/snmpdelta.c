@@ -243,10 +243,10 @@ print_log(char *file, char *message)
 void
 sprint_descriptor(char *buffer, struct varInfo *vip)
 {
-    u_char         *buf = NULL, *cp = NULL;
+    char           *buf = NULL, *cp = NULL;
     size_t          buf_len = 0, out_len = 0;
 
-    if (!sprint_realloc_objid(&buf, &buf_len, &out_len, 1,
+    if (!sprint_realloc_objid((u_char **)&buf, &buf_len, &out_len, 1,
                               vip->info_oid, vip->oidlen)) {
         if (buf != NULL) {
             free(buf);
