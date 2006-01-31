@@ -190,14 +190,14 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
                size_t outkey_len,
                netsnmp_pdu *pdu, const char *keyname,
                oid *keyoid, size_t keyoid_len) {
-    char *dhkeychange;
+    u_char *dhkeychange;
     DH *dh;
     BIGNUM *other_pub;
     u_char *key;
     size_t key_len;
     unsigned char *cp;
             
-    dhkeychange = (char *) malloc(2 * vars->val_len * sizeof(char));
+    dhkeychange = (u_char *) malloc(2 * vars->val_len * sizeof(char));
     memcpy(dhkeychange, vars->val.string, vars->val_len);
 
     cp = dhvar->val.string;
