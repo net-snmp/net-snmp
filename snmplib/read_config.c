@@ -201,7 +201,6 @@ register_config_handler(const char *type_param,
     struct config_files **ctmp = &config_files;
     struct config_line **ltmp;
     const char     *type = type_param;
-    char           *st;
 
     if (type == NULL) {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
@@ -286,7 +285,6 @@ unregister_config_handler(const char *type_param, const char *token)
     struct config_files **ctmp = &config_files;
     struct config_line **ltmp, *ltmp2;
     const char     *type = type_param;
-    char           *st;
 
     if (type == NULL) {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
@@ -1590,7 +1588,7 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
             }
         } else {
             readfrom = copy_nword(readfrom, (char *) *str, *len);
-            *len = strlen(*str);
+            *len = strlen((char *) *str);
         }
     }
 
