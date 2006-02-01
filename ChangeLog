@@ -1,3 +1,482 @@
+Changes: V5.1.3 -> V5.1.4
+-------------------------------------------------------------------------------
+
+2006-02-01 14:48  hardaker
+
+   * agent/helpers/Makefile.depend,
+     agent/mibgroup/Makefile.depend, agent/Makefile.depend
+, apps/Makefile.depend,
+     apps/snmpnetstat/Makefile.depend,
+     snmplib/Makefile.depend:
+
+   make depend
+
+2006-02-01 14:46  hardaker
+
+   * Makefile.top:
+
+   update libtool commenting
+
+2006-02-01 14:45  hardaker
+
+   * man/: netsnmp_Container_iterator.3, netsnmp_agent.3
+, netsnmp_agent_registry.3,
+     netsnmp_agent_trap.3, netsnmp_asn1_packet_parse.3
+, netsnmp_baby_steps.3,
+     netsnmp_bulk_to_next.3, netsnmp_cache_handler.3
+, netsnmp_callback.3, netsnmp_container.3
+, netsnmp_data_list.3, netsnmp_debug.3
+, netsnmp_default_store.3,
+     netsnmp_handler.3, netsnmp_instance.3,
+     netsnmp_iterator_info_s.3, netsnmp_leaf.3,
+     netsnmp_library.3, netsnmp_mib_utilities.3,
+     netsnmp_mode_end_call.3, netsnmp_multiplexer.3
+, netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3
+, netsnmp_row_merge.3, netsnmp_scalar.3
+, netsnmp_scalar_group_group.3,
+     netsnmp_serialize.3, netsnmp_snmp_agent.3,
+     netsnmp_snmp_alarm.3, netsnmp_snmp_client.3
+, netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3
+, netsnmp_snmp_session.3,
+     netsnmp_stash_cache.3, netsnmp_table.3,
+     netsnmp_table_array.3, netsnmp_table_data.3
+, netsnmp_table_dataset.3,
+     netsnmp_table_iterator.3, netsnmp_table_iterator.h.3
+, netsnmp_util.3, netsnmp_utilities.3
+, netsnmp_variable_list.3, netsnmp_watcher.3
+:
+
+   documentation update
+
+2006-02-01 14:37  hardaker
+
+   * Makefile.top, configure, configure.in
+:
+
+   version update
+
+2006-02-01 14:26  hardaker
+
+   * man/snmpcmd.1.def:
+
+   more docs on limitations of -Ir
+
+2006-02-01 08:50  tanders
+
+   * NEWS:
+
+   prepare (slowly) for 5.1.4.pre1
+
+2006-02-01 03:00  tanders
+
+   * man/snmpnetstat.1:
+
+   fix manual page formatting errors (snmpnetstat.1 part of Debian patch #17 for 5.2.2, original author Nicolas Francois)
+
+2006-02-01 02:13  dts12
+
+   * agent/: agent_index.c, agent_registry.c,
+     agent_trap.c, helpers/instance.c,
+     helpers/table.c, helpers/table_dataset.c,
+     helpers/table_iterator.c, mibgroup/agent/nsDebug.c
+, mibgroup/agent/nsModuleTable.c,
+     mibgroup/agentx/master_admin.c, mibgroup/mibII/at.c
+, mibgroup/mibII/interfaces.c,
+     mibgroup/mibII/tcpTable.c,
+     mibgroup/mibII/vacm_context.c,
+     mibgroup/mibII/vacm_vars.c, mibgroup/mibII/var_route.c
+, mibgroup/notification/snmpNotifyTable.c,
+     mibgroup/target/snmpTargetAddrEntry.c,
+     mibgroup/ucd-snmp/disk.c, mibgroup/utilities/override.c
+:
+
+   Fix assorted signedness mismatches.
+
+2006-02-01 01:50  tanders
+
+   * apps/snmpnetstat/Makefile.in:
+
+   build fix: properly set -I flags
+
+2006-02-01 01:21  tanders
+
+   * snmplib/read_config.c:
+
+   add missing whitespace
+
+2006-01-31 04:51  dts12
+
+   * apps/: snmpdelta.c, snmptable.c,
+     snmptrapd_handlers.c, snmptrapd_log.c:
+
+   Fix assorted signedness mismatches.
+
+2006-01-31 04:10  dts12
+
+   * snmplib/: read_config.c, tools.c:
+
+   Fix assorted signedness mismatches.
+
+2006-01-30 01:26  tanders
+
+   * README.solaris:
+
+   fix PATH typo
+
+2006-01-27 03:12  dts12
+
+   * apps/snmpnetstat/: .cvsignore, Makefile.depend
+, Makefile.in, ffs.c, if.c
+, inet.c, inet6.c, iquery.c
+, main.c, main.h, netstat.h
+, route.c, snmpnetstat, winstub.c
+:
+
+   Copy (redistributable) snmpnetstat rewrite from 5.2.x branch
+
+2006-01-25 07:37  dts12
+
+   * agent/agent_registry.c:
+
+   Don't be in such a rush to release MIB registration structure.
+   See Patch #1386528
+
+2006-01-24 06:40  dts12
+
+   * perl/SNMP/SNMP.xs:
+
+   Check "TimeStamp" reference before use (in line with
+   the other occurances in this file).  See Bug #1375282
+
+2006-01-24 02:30  tanders
+
+   * configure, configure.in:
+
+   replace "==" by "=" when using "test" (reported by Magnus Fromreide)
+
+2006-01-18 07:18  tanders
+
+   * apps/encode_keychange.c:
+
+   fix typo
+
+2006-01-17 07:45  dts12
+
+   * testing/tests/T030snmpv3usercreation:
+
+   Fix tests to work with --disable-privacy  (Back-port of 5.3 patch)
+   See Bug #981792
+
+2006-01-17 06:53  dts12
+
+   * snmplib/parse.c:
+
+   Downgrade upper-bound parsing problems to a warning,
+   and recognise them properly.
+   Protect "#include <sys/stat.h>", and remove old changelog comments.
+
+2006-01-11 07:09  dts12
+
+   * net-snmp-config.in:
+
+   Correct a misleading comment.
+
+2006-01-11 07:02  dts12
+
+   * snmplib/parse.c:
+
+   Associate MIB node types with the *last* entry parsed from the
+   definition value, not the first.  Fixes problem with MIB definitions
+   that use intermediate subidentifiers (see bug #759412)
+
+2006-01-11 06:54  dts12
+
+   * agent/helpers/table_dataset.c:
+
+   Clarify the behaviour of netsnmp_table_dataset_remove_row()
+
+2006-01-09 13:53  rstory
+
+   * include/ucd-snmp/.cvsignore:
+
+   don't ignore ucd-snmp-config.h, since it's no longer a generated file
+
+2006-01-09 13:35  tanders
+
+   * configure.in, configure:
+
+   revert to --disable-ucd-snmp-compatibility being the default again
+
+2006-01-09 07:06  dts12
+
+   * agent/helpers/all_helpers.c, agent/helpers/baby_steps.c
+, agent/helpers/bulk_to_next.c,
+     agent/helpers/cache_handler.c,
+     agent/helpers/debug_handler.c, agent/helpers/instance.c
+, agent/helpers/mode_end_call.c,
+     agent/helpers/multiplexer.c, agent/helpers/old_api.c
+, agent/helpers/read_only.c,
+     agent/helpers/row_merge.c, agent/helpers/scalar.c
+, agent/helpers/scalar_group.c,
+     agent/helpers/serialize.c, agent/helpers/stash_cache.c
+, agent/helpers/table.c,
+     agent/helpers/table_array.c,
+     agent/helpers/table_data.c,
+     agent/helpers/table_dataset.c,
+     agent/helpers/table_iterator.c,
+     agent/helpers/watcher.c,
+     man/netsnmp_Container_iterator.3, man/netsnmp_agent.3
+, man/netsnmp_agent_registry.3,
+     man/netsnmp_agent_trap.3,
+     man/netsnmp_asn1_packet_parse.3,
+     man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3
+, man/netsnmp_cache_handler.3,
+     man/netsnmp_callback.3, man/netsnmp_container.3
+, man/netsnmp_data_list.3, man/netsnmp_debug.3
+, man/netsnmp_default_store.3,
+     man/netsnmp_handler.3, man/netsnmp_instance.3
+, man/netsnmp_iterator_info_s.3,
+     man/netsnmp_leaf.3, man/netsnmp_library.3,
+     man/netsnmp_mib_utilities.3,
+     man/netsnmp_mode_end_call.3, man/netsnmp_multiplexer.3
+, man/netsnmp_netsnmp_agent_request_info_s.3,
+     man/netsnmp_netsnmp_column_info_t.3,
+     man/netsnmp_netsnmp_data_list_s.3,
+     man/netsnmp_netsnmp_handler_registration_s.3,
+     man/netsnmp_netsnmp_iterator_info_s.3,
+     man/netsnmp_netsnmp_mib_handler_methods.3,
+     man/netsnmp_netsnmp_mib_handler_s.3,
+     man/netsnmp_netsnmp_request_info_s.3,
+     man/netsnmp_netsnmp_table_registration_info_s.3,
+     man/netsnmp_netsnmp_table_request_info_s.3,
+     man/netsnmp_oid_stash.3, man/netsnmp_old_api.3
+, man/netsnmp_read_config.3,
+     man/netsnmp_read_only.3, man/netsnmp_row_merge.3
+, man/netsnmp_scalar.3,
+     man/netsnmp_scalar_group_group.3,
+     man/netsnmp_serialize.3, man/netsnmp_snmp_agent.3
+, man/netsnmp_snmp_alarm.3,
+     man/netsnmp_snmp_client.3, man/netsnmp_snmp_logging.3
+, man/netsnmp_snmp_pdu.3,
+     man/netsnmp_snmp_session.3, man/netsnmp_stash_cache.3
+, man/netsnmp_table.3,
+     man/netsnmp_table_array.3, man/netsnmp_table_data.3
+, snmplib/container_null.c,
+     man/netsnmp_table_dataset.3,
+     man/netsnmp_table_iterator.3, man/netsnmp_util.3
+, man/netsnmp_utilities.3,
+     man/netsnmp_variable_list.3, man/netsnmp_watcher.3
+:
+
+   Adjust doxygen "defgroup" comments to improve auto-generated man page format.
+   See bug #835321
+
+2006-01-09 05:36  dts12
+
+   * agent/mibgroup/mibII/route_write.c:
+
+   Don't try to use SIOC(ADD|DEL)RT if they aren't defined
+   (Backport of revision 5.7).  Fixes build on OpenBSD (Bug #877096)
+
+2006-01-09 05:13  dts12
+
+   * snmplib/parse.c:
+
+   Report failure to parse ranges correctly (Bug #411594/757121)
+
+2006-01-06 15:15  tanders
+
+   * agent/mibgroup/mibII/udpTable.c:
+
+   fix udpTable on Solaris/x86: host byte order for udpLocalPort (bug 1393197)
+
+2006-01-05 08:30  dts12
+
+   * local/mib2c.old-api.conf:
+
+   Display correct MIB group names in comments.  (Bug #1076655)
+
+2006-01-02 15:51  tanders
+
+   * configure, configure.in:
+
+   --disable-ucd-snmp-compatibility and --enable-ucd-snmp-compatibility=no now actually *disable* UCD-SNMP compatibility instead of enabling it
+
+2005-12-13 05:07  tanders
+
+   * README.snmpv3:
+
+   add AES and our binary releases *do* support encryption
+
+2005-12-11 10:25  rstory
+
+   * agent/mibgroup/testhandler.c:
+
+   advance next pointer before continue
+
+2005-12-07 04:29  rstory
+
+   * configure:
+
+   update for configure.in
+
+2005-12-07 04:27  rstory
+
+   * configure.in:
+
+   - fix mini-agent tests so that --disable doesn't actually enable it
+
+2005-12-06 09:51  rstory
+
+   * agent/Makefile.in:
+
+   fix 1297878: header_generic and header_simple_table prototypes
+
+2005-12-06 09:11  rstory
+
+   * agent/snmp_agent.c, agent/snmpd.c,
+     apps/snmptrapd.c:
+
+   - fix 1356769: agent consumes CPU, doesnt respond to SIGTERM
+     - app local running -> agent lib global netsnmp_running
+     - while(1) -> while(netsnmp_running)
+
+2005-12-06 08:31  rstory
+
+   * snmplib/snmp_api.c:
+
+   fix 1337534: Read problem on stream sockets
+
+2005-12-06 08:02  rstory
+
+   * agent/mibgroup/versiontag:
+
+   - sync branches
+     - don't specify repository if inside cvs dir (-d CVS)
+     - only set default CVS user if we need it
+
+2005-12-06 05:52  dts12
+
+   * apps/snmpstatus.c:
+
+   Don't crash-and-burn on SNMP exceptions (see bug #1278809)
+
+2005-12-05 08:06  rstory
+
+   * snmplib/: snmp_api.c, snmp_client.c:
+
+   - fix bug 1370856: ip address encoding is broken 64Bit
+
+2005-11-30 10:30  hardaker
+
+   * win32/dist/: README.build.win32.txt, README.txt
+, tosock1.sh:
+
+   removed dist files only to be distributed in the main CVS branch
+
+2005-11-30 09:59  hardaker
+
+   * dist/: Makefile, README, README.build-scripts
+, RELEASE-INSTRUCTIONS, net-snmp.spec
+, nsb-config, nsb-functions,
+     nsb-nightly, nsb-package, nsb-platform
+, snmpd-init.d:
+
+   removed dist files only to be distributed in the main CVS branch
+
+2005-11-20 15:03  tanders
+
+   * mibs/NET-SNMP-TC.txt:
+
+   update LAST-UPDATED field to reflect recent changes
+
+2005-11-17 11:34  rstory
+
+   * agent/mibgroup/ucd_snmp.h:
+
+   add memory/vmstats for freebsd6, netbsdelf2
+
+2005-11-10 16:48  tanders
+
+   * testing/tests/T0160snmpv2cbulkget:
+
+   fix typo
+
+2005-11-10 02:07  dts12
+
+   * apps/snmpnetstat/snmpnetstat:
+
+   file snmpnetstat was added on branch V5-1-patches on 2006-01-27 11:12:19 +0000
+
+2005-11-10 02:01  dts12
+
+   * apps/snmpnetstat/iquery.c:
+
+   file iquery.c was added on branch V5-1-patches on 2006-01-27 11:12:19 +0000
+
+2005-11-08 10:12  tanders
+
+   * apps/snmpnetstat/if.c:
+
+   build fix: put #include <net-snmp/net-snmp-config.h> back in. Probably the last change before it gets pulled anyway:-)
+
+2005-11-07 06:39  dts12
+
+   * apps/snmpnetstat/ffs.c:
+
+   file ffs.c was added on branch V5-1-patches on 2006-01-27 11:12:19 +0000
+
+2005-10-27 02:42  dts12
+
+   * snmplib/: getopt.c, strtol.c, strtoul.c
+:
+
+   Remove UCB advertising clause (rescinded 22 July 1999)
+
+2005-10-27 02:38  dts12
+
+   * apps/snmpnetstat/if.c, apps/snmpnetstat/inet.c
+, apps/snmpnetstat/inet6.c,
+     apps/snmpnetstat/main.c, apps/snmpnetstat/route.c
+, man/snmpnetstat.1:
+
+   Update BSD copyright license with the current version.
+
+2005-10-26 14:47  tanders
+
+   * man/snmpd.8.def:
+
+   document generic --<name>=<value> command-line option
+
+2005-10-26 14:29  tanders
+
+   * man/snmptrapd.8.def:
+
+   document generic --<name>=<value> command-line option
+
+2005-10-24 10:27  hardaker
+
+   * apps/snmptrapd_handlers.c:
+
+   drop packets with session errnos attached to them
+
+2005-10-23 16:45  tanders
+
+   * snmplib/snmpv3.c:
+
+   fix typo
+	
 Changes: V5.1.2 -> V5.1.3.pre1
 -------------------------------------------------------------------------------
 2005-06-20 09:56  rstory

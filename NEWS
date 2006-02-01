@@ -9,6 +9,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
      snmpnetstat53, and we've provided a snmpnetstat wrapper script to
      make the command line options backwards compatible.  As a side
      effect, however, it now finally supports SNMPv3 at least.
+   - shared library version number no longer matches the release number. We
+     now follow the versioning scheme recommended by libtool. For the 5.1.4
+     release this means that the libraries now have a SONAME ending with
+     ".so.8", e.g. libnetsnmp.so.8.
 
  Ports:
    Win32:
