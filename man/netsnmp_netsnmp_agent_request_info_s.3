@@ -1,4 +1,4 @@
-.TH "netsnmp_agent_request_info_s" 3 "9 Jan 2006" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_agent_request_info_s" 3 "1 Feb 2006" "Version 5.1.3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -25,7 +25,7 @@ netsnmp_agent_request_info_s \- The agent transaction request structure.
 .br
 .RI "\fInot used yet (for 5.2) \fP"
 .ti -1c
-.RI "netsnmp_agent_session_s * \fBasp\fP"
+.RI "\fBnetsnmp_agent_session_s\fP * \fBasp\fP"
 .br
 .RI "\fIpdu contains authinfo, eg \fP"
 .ti -1c
@@ -41,20 +41,26 @@ The agent transaction request structure.
 .PP
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 160 of file snmp_agent.h.
+Definition at line 156 of file snmp_agent.h.
 .SH "Field Documentation"
 .PP 
-.SS "struct netsnmp_agent_session_s* \fBnetsnmp_agent_request_info_s::asp\fP"
+.SS "struct \fBnetsnmp_agent_session_s\fP* \fBnetsnmp_agent_request_info_s::asp\fP"
 .PP
-pdu contains authinfo, eg Definition at line 167 of file snmp_agent.h.
+pdu contains authinfo, eg 
 .PP
-Referenced by netsnmp_create_delegated_cache(), and netsnmp_old_api_helper().
+Definition at line 163 of file snmp_agent.h.
+.PP
+Referenced by get_set_cache(), handle_var_requests(), and netsnmp_create_delegated_cache().
 .SS "int \fBnetsnmp_agent_request_info_s::next_mode_fail\fP"
 .PP
-not used yet (for 5.2) Definition at line 165 of file snmp_agent.h.
+not used yet (for 5.2) 
+.PP
+Definition at line 161 of file snmp_agent.h.
 .SS "int \fBnetsnmp_agent_request_info_s::next_mode_ok\fP"
 .PP
-only valid for baby step modes Definition at line 163 of file snmp_agent.h.
+only valid for baby step modes 
+.PP
+Definition at line 159 of file snmp_agent.h.
 .PP
 Referenced by netsnmp_baby_steps_helper().
 
