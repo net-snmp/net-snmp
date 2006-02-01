@@ -22,7 +22,7 @@ OBJS=	inet.o inet6.o if.o main.o route.o winstub.o ffs.o iquery.o
 LOBJS=	inet.lo inet6.lo if.lo main.lo route.lo winstub.lo ffs.lo iquery.lo
 TARG= snmpnetstat53$(EXEEXT)
 
-CPPFLAGS= $(TOP_INCLUDES)  @CPPFLAGS@
+CPPFLAGS= -I$(top_srcdir)/include -I../../include @CPPFLAGS@
 
 USELIBS= ../../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 LIBS=	 ../../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @LIBS@
