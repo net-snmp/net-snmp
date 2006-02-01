@@ -257,7 +257,7 @@ tcp   *.chargen                     *.*                            LISTEN
 tcp   *.ftp                         *.*                            LISTEN
 tcp   *.telnet                      *.*                            LISTEN
 tcp   *.smtp                        *.*                            LISTEN
-...
+\&...
 
 Active Internet (udp) Connections
 Proto Local Address
@@ -266,7 +266,7 @@ udp    *.discard
 udp    *.daytime
 udp    *.chargen
 udp    *.time
-...
+\&...
 .fi
 .PP
 % snmpnetstat -v 2c -c public -i testhost
@@ -291,7 +291,7 @@ tcp   *.chargen                     *.*                            LISTEN
 tcp   *.ftp                         *.*                            LISTEN
 tcp   *.telnet                      *.*                            LISTEN
 tcp   *.smtp                        *.*                            LISTEN
-...
+\&...
 .fi
 .SH SEE ALSO
 snmpcmd(1),
