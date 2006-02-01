@@ -1266,8 +1266,8 @@ Route_Scan_Reload(void)
     while (fgets(line, sizeof(line), in)) {
         struct rtentry  rtent;
         char            rtent_name[32];
-        int             refcnt, flags, metric;
-        unsigned        use;
+        int             use, metric;
+        unsigned        flags, refcnt;
 
         rt = &rtent;
         memset((char *) rt, (0), sizeof(*rt));
@@ -1280,16 +1280,13 @@ Route_Scan_Reload(void)
          */
         if (8 != sscanf(line, "%s %x %x %x %u %d %d %x %*d %*d %*d\n",
                         rt->rt_dev,
-                        &(((struct sockaddr_in *) &(rtent.rt_dst))->
-                          sin_addr.s_addr),
-                        &(((struct sockaddr_in *) &(rtent.rt_gateway))->
-                          sin_addr.s_addr),
+                        &(((struct sockaddr_in *) &(rtent.rt_dst))->sin_addr.s_addr),
+                        &(((struct sockaddr_in *) &(rtent.rt_gateway))->sin_addr.s_addr),
                         /*
                          * XXX: fix type of the args 
                          */
                         &flags, &refcnt, &use, &metric,
-                        &(((struct sockaddr_in *) &(rtent.rt_genmask))->
-                          sin_addr.s_addr)))
+                        &(((struct sockaddr_in *) &(rtent.rt_genmask))->sin_addr.s_addr)))
             continue;
 
         strncpy(name, rt->rt_dev, sizeof(name));

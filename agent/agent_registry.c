@@ -1643,15 +1643,14 @@ dump_registry(void)
                             sprint_realloc_objid(&s, &sl, &sl_o, 1,
                                                  vp->name, vp->namelen);
                             printf("\t%s[%s] %p var %s\n", myptr2->label_a,
-                                   myptr2->reginfo->handlerName ? myptr2->
-                                   reginfo->handlerName : "no-name",
-                                   myptr2->reginfo, s);
+                                   myptr2->reginfo->handlerName ?
+                                   myptr2->reginfo->handlerName : "no-name",
+                                   (void*)myptr2->reginfo, s);
                         } else {
                             printf("\t%s %s %p\n", myptr2->label_a,
-                                   myptr2->reginfo->handlerName ? myptr2->
-                                   reginfo->
-                                   handlerName : "no-handler-name",
-                                   myptr2->reginfo);
+                                   myptr2->reginfo->handlerName ?
+                                   myptr2->reginfo->handlerName : "no-handler-name",
+                                   (void*)myptr2->reginfo);
                         }
                     }
                 }

@@ -576,7 +576,8 @@ ARP_Scan_Init(void)
     FILE           *in;
     int             i;
     char            line[128];
-    int             za, zb, zc, zd, ze, zf, zg, zh, zi, zj;
+    int             za, zb, zc, zd;
+    unsigned int    ze, zf, zg, zh, zi, zj;
     char            ifname[21];
 
     arptab_current = 0;         /* Anytime this is called we need to reset 'current' */
@@ -600,7 +601,7 @@ ARP_Scan_Init(void)
     i = 0;
     while (fgets(line, sizeof(line), in)) {
         u_long          tmp_a;
-        int             tmp_flags;
+        unsigned int    tmp_flags;
         if (i >= arptab_curr_max_size) {
             struct arptab  *newtab = (struct arptab *)
                 realloc(at, (sizeof(struct arptab) *

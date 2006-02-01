@@ -560,7 +560,8 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         struct inpcb    pcb, *nnew;
         static int      linux_states[12] =
             { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
-        int             state, lp, fp, uid;
+        unsigned int    state, lp, fp;
+        int             uid;
 
         if (6 != sscanf(line,
                         "%*d: %x:%x %x:%x %x %*X:%*X %*X:%*X %*X %d",

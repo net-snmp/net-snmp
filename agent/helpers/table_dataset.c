@@ -263,7 +263,7 @@ netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
 
         SNMP_FREE(data->data.voidp);
         if (value_len) {
-            if (memdup(&data->data.string, value, (value_len)) !=
+            if (memdup(&data->data.string, (const u_char *)value, (value_len)) !=
                 SNMPERR_SUCCESS) {
                 snmp_log(LOG_CRIT, "no memory in netsnmp_set_row_column");
                 return SNMPERR_MALLOC;
@@ -492,7 +492,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                 continue;
             }
             stashp = (netsnmp_oid_stash_node **)
-                netsnmp_table_get_or_create_row_stash(reqinfo, buf);
+                netsnmp_table_get_or_create_row_stash(reqinfo, (u_char*)buf);
 
             newrowstash
                 = netsnmp_oid_stash_get_data(*stashp, suffix, suffix_len);
@@ -670,7 +670,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
              * modify row and set new value 
              */
             SNMP_FREE(data->data.string);
-            data->data.string =
+            data->data.string = (u_char *)
                 netsnmp_strdup_and_null(request->requestvb->val.string,
                                         request->requestvb->val_len);
             if (!data->data.string) {

@@ -156,7 +156,7 @@ static void       add_device(char *path, char *device,
 static void       modify_disk_parameters(int index, int minspace,
 	                                 int minpercent);
 static int        disk_exists(char *path);
-static u_char    *find_device(char *path);
+static char      *find_device(char *path);
 
 struct diskpart {
     char            device[STRMAX];
@@ -465,7 +465,7 @@ find_and_add_allDisks(int minpercent)
  
 }
 
-static u_char *
+static char *
 find_device(char *path)
 {
 #if HAVE_GETMNTENT

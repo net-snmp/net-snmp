@@ -1574,7 +1574,6 @@ _ethtools_if_speed(int fd, struct ifreq ifr)
 * realization is made. 
 */
 unsigned int getIfSpeed(int fd, struct ifreq ifr){
-	unsigned int retspeed = 10000000;
 #ifdef linux
 #   if HAVE_LINUX_ETHTOOLS_H
    return _ethtool_if_speed(fd, ifr);
@@ -1582,7 +1581,8 @@ unsigned int getIfSpeed(int fd, struct ifreq ifr){
    return _mii_if_speed(fd, ifr);
 #   endif /* HAVE_LINUX_ETHTOOLS_H */
 #else /*!linux*/			   
-   return retspeed;
+    unsigned int retspeed = 10000000;
+    return retspeed;
 #endif
 }
 

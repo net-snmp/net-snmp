@@ -642,12 +642,14 @@ dump_idx_registry(void)
             switch (idxptr2->varbind->type) {
             case ASN_INTEGER:
                 printf("    %ld for session %8p, allocated %d\n",
-                       *idxptr2->varbind->val.integer, idxptr2->session,
+                       *idxptr2->varbind->val.integer,
+                       (void*)idxptr2->session,
                        idxptr2->allocated);
                 break;
             case ASN_OCTET_STR:
                 printf("    \"%s\" for session %8p, allocated %d\n",
-                       idxptr2->varbind->val.string, idxptr2->session,
+                       idxptr2->varbind->val.string,
+                       (void*)idxptr2->session,
                        idxptr2->allocated);
                 break;
             case ASN_OBJECT_ID:
@@ -657,11 +659,11 @@ dump_idx_registry(void)
                                          idxptr2->varbind->val_len /
                                          sizeof(oid))) {
                     printf("    %s for session %8p, allocated %d\n", ebuf,
-                           idxptr2->session, idxptr2->allocated);
+                           (void*)idxptr2->session, idxptr2->allocated);
                 } else {
                     printf
                         ("    %s [TRUNCATED] for sess %8p, allocated %d\n",
-                         ebuf, idxptr2->session, idxptr2->allocated);
+                         ebuf, (void*)idxptr2->session, idxptr2->allocated);
                 }
                 break;
             default:

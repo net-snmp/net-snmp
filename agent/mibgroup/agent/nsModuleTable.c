@@ -267,10 +267,11 @@ nsModuleTable_handler(netsnmp_mib_handler *handler,
             case COLUMN_NSMODULENAME:
 		if (tree->reginfo->handlerName) {
                     snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                           tree->reginfo->handlerName,
+                                         (u_char*)tree->reginfo->handlerName,
                                            strlen(tree->reginfo->handlerName));
                 } else {
-                    snmp_set_var_typed_value(var, ASN_OCTET_STR, "", 0);
+                    snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                             (const u_char*)"", 0);
 		}
                 break;
 
