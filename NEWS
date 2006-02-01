@@ -1,14 +1,25 @@
-bThis file contains major changes in released revisions.  Please read
+This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.1.4*
- Fixes:
-   - Perl getnext didn't honor explicit reference to MIB file
+
+ New:
+   - Due to a copyright statement that didn't allow modifications,
+     snmpnetstat was completely rewritten.  The new binary is named
+     snmpnetstat53, and we've provided a snmpnetstat wrapper script to
+     make the command line options backwards compatible.  As a side
+     effect, however, it now finally supports SNMPv3 at least.
 
  Ports:
    Win32:
      - patch 1258146: MinGW/Cygwin winservicerc.lo compile error
      - Fix for 'select: No such file or directory' in snmpdelta
+
+ Fixes:
+   - Perl getnext didn't honor explicit reference to MIB file
+   - Fix assorted signedness mismatches
+   - Lots of other bug fixes
+
 
 *5.1.3*
  Fixes:
@@ -60,7 +71,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
      - fix bug 1055781: get-next fails to step into interfaces group correctly
 
    NetBSD:
-     - integragte fixes from NetBSD port
+     - integrate fixes from NetBSD port
 
    Win32:
      - Cygwin compiler fixes
