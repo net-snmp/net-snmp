@@ -28,6 +28,131 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/**
+ * @defgroup asn1_packet_parse asn1 parsing and datatype manipulation routines.
+ * @ingroup library
+ *
+ * @{
+ * 
+ * Note on 
+ * 
+ * Re-allocating reverse ASN.1 encoder functions.  Synopsis:
+ *
+ * \code
+ *
+ * u_char *buf = (u_char*)malloc(100);
+ * u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
+ * size_t buf_len = 100, offset = 0;
+ * long data = 12345;
+ * int allow_realloc = 1;
+ * 
+ * if (asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+ *                            type, &data, sizeof(long)) == 0) {
+ *     error;
+ * }
+ * 
+ * \endcode
+ *
+ * NOTE WELL: after calling one of these functions with allow_realloc
+ * non-zero, buf might have moved, buf_len might have grown and
+ * offset will have increased by the size of the encoded data.
+ * You should **NEVER** do something like this:
+ * 
+ * \code
+ *
+ * u_char *buf = (u_char *)malloc(100), *ptr;
+ * u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
+ * size_t buf_len = 100, offset = 0;
+ * long data1 = 1234, data2 = 5678;
+ * int rc = 0, allow_realloc = 1;
+ * 
+ * rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+ *                                type, &data1, sizeof(long));
+ * ptr = buf[buf_len - offset];   / * points at encoding of data1 * /
+ * if (rc == 0) {
+ *      error;
+ * }
+ * rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+ *                              type, &data2, sizeof(long));
+ * make use of ptr here;
+ * 
+ * \endcode
+ * 
+ * ptr is **INVALID** at this point.  In general, you should store the
+ * offset value and compute pointers when you need them:
+ * 
+ * 
+ * \code
+ *
+ * u_char *buf = (u_char *)malloc(100), *ptr;
+ * u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
+ * size_t buf_len = 100, offset = 0, ptr_offset;
+ * long data1 = 1234, data2 = 5678;
+ * int rc = 0, allow_realloc = 1;
+ * 
+ * rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+ *                              type, &data1, sizeof(long));
+ * ptr_offset = offset;
+ * if (rc == 0) {
+ *      error;
+ * }
+ * rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+ *                              type, &data2, sizeof(long));
+ * ptr = buf + buf_len - ptr_offset
+ * make use of ptr here;
+ * 
+ * \endcode
+ * 
+ * 
+ * Here, you can see that ptr will be a valid pointer even if the block of
+ * memory has been moved, as it may well have been.  Plenty of examples of
+ * usage all over asn1.c, snmp_api.c, snmpusm.c.
+ * 
+ * The other thing you should **NEVER** do is to pass a pointer to a buffer
+ * on the stack as the first argument when allow_realloc is non-zero, unless
+ * you really know what you are doing and your machine/compiler allows you to
+ * free non-heap memory.  There are rumours that such things exist, but many
+ * consider them no more than the wild tales of a fool.
+ * 
+ * Of course, you can pass allow_realloc as zero, to indicate that you do not
+ * wish the packet buffer to be reallocated for some reason; perhaps because
+ * it is on the stack.  This may be useful to emulate the functionality of
+ * the old API:
+ *
+ * \code 
+ * 
+ * u_char my_static_buffer[100], *cp = NULL;
+ * size_t my_static_buffer_len = 100;
+ * float my_pi = (float)22/(float)7;
+ * 
+ * cp = asn_rbuild_float(my_static_buffer, &my_static_buffer_len,
+ *                       ASN_OPAQUE_FLOAT, &my_pi, sizeof(float));
+ * if (cp == NULL) {
+ * error;
+ * }
+ * 
+ * \endcode
+ * 
+ * IS EQUIVALENT TO:
+ * 
+ * \code
+ * 
+ * u_char my_static_buffer[100];
+ * size_t my_static_buffer_len = 100, my_offset = 0;
+ * float my_pi = (float)22/(float)7;
+ * int rc = 0;
+ * 
+ * rc = asn_realloc_rbuild_float(&my_static_buffer, &my_static_buffer_len,
+ *                               &my_offset, 0,
+ *                               ASN_OPAQUE_FLOAT, &my_pi, sizeof(float));
+ * if (rc == 0) {
+ *   error;
+ * }
+ * \endcode
+ * 
+ */
+
+
 #include <net-snmp/net-snmp-config.h>
 
 #ifdef KINETICS
@@ -73,6 +198,14 @@ SOFTWARE.
 
 #include <net-snmp/library/snmp_api.h>
 
+/**
+ * @internal
+ * output an error for a wrong size
+ * 
+ * @param str        error string
+ * @param wrongsize  wrong size
+ * @param rightsize  expected size
+ */
 static
     void
 _asn_size_err(const char *str, size_t wrongsize, size_t rightsize)
@@ -80,11 +213,20 @@ _asn_size_err(const char *str, size_t wrongsize, size_t rightsize)
     char            ebuf[128];
 
     snprintf(ebuf, sizeof(ebuf),
-            "%s size %d: s/b %d", str, wrongsize, rightsize);
+            "%s size %lu: s/b %lu", str,
+	    (unsigned long)wrongsize, (unsigned long)rightsize);
     ebuf[ sizeof(ebuf)-1 ] = 0;
     ERROR_MSG(ebuf);
 }
 
+/**
+ * @internal 
+ * output an error for a wrong length
+ * 
+ * @param str        error string
+ * @param wrongsize  wrong  length
+ * @param rightsize  expected length
+ */
 static
     void
 _asn_length_err(const char *str, size_t wrongsize, size_t rightsize)
@@ -92,14 +234,23 @@ _asn_length_err(const char *str, size_t wrongsize, size_t rightsize)
     char            ebuf[128];
 
     snprintf(ebuf, sizeof(ebuf),
-            "%s length %d too large: exceeds %d", str, wrongsize,
-            rightsize);
+            "%s length %lu too large: exceeds %lu", str,
+	    (unsigned long)wrongsize, (unsigned long)rightsize);
     ebuf[ sizeof(ebuf)-1 ] = 0;
     ERROR_MSG(ebuf);
 }
 
-/*
+/**
+ * @internal
  * call after asn_parse_length to verify result.
+ * 
+ * @param str  error string
+ * @param bufp start of buffer
+ * @param data start of data
+ * @param plen  ?
+ * @param dlen  ?
+ * 
+ * @return 1 on error 0 on success
  */
 static
     int
@@ -129,8 +280,17 @@ _asn_parse_length_check(const char *str,
     return 0;
 }
 
-/*
+
+/**
+ * @internal 
  * call after asn_build_header to verify result.
+ * 
+ * @param str     error string to output
+ * @param data    data pointer to verify (NULL => error )
+ * @param datalen  data len to check
+ * @param typedlen  type length
+ * 
+ * @return 0 on success, 1 on error
  */
 static
     int
@@ -147,8 +307,8 @@ _asn_build_header_check(const char *str, u_char * data,
     }
     if (datalen < typedlen) {
         snprintf(ebuf, sizeof(ebuf),
-                "%s: bad header, length too short: %d < %d", str,
-                datalen, typedlen);
+                "%s: bad header, length too short: %lu < %lu", str,
+                (unsigned long)datalen, (unsigned long)typedlen);
         ebuf[ sizeof(ebuf)-1 ] = 0;
         ERROR_MSG(ebuf);
         return 1;
@@ -156,6 +316,17 @@ _asn_build_header_check(const char *str, u_char * data,
     return 0;
 }
 
+/**
+ * @internal 
+ * call after asn_build_header to verify result.
+ * 
+ * @param str       error string
+ * @param pkt       packet to check
+ * @param pkt_len  length of the packet
+ * @param typedlen length of the type
+ * 
+ * @return 0 on success 1 on error 
+ */
 static
     int
 _asn_realloc_build_header_check(const char *str,
@@ -173,8 +344,8 @@ _asn_realloc_build_header_check(const char *str,
 
     if (*pkt_len < typedlen) {
         snprintf(ebuf, sizeof(ebuf),
-                "%s: bad header, length too short: %d < %d", str,
-                *pkt_len, typedlen);
+                "%s: bad header, length too short: %lu < %lu", str,
+                (unsigned long)*pkt_len, (unsigned long)typedlen);
         ebuf[ sizeof(ebuf)-1 ] = 0;
         ERROR_MSG(ebuf);
         return 1;
@@ -182,8 +353,14 @@ _asn_realloc_build_header_check(const char *str,
     return 0;
 }
 
-/*
+/**
+ * @internal 
  * checks the incoming packet for validity and returns its size or 0 
+ * 
+ * @param pkt The packet 
+ * @param len The length to check 
+ * 
+ * @return The size of the packet if valid; 0 otherwise
  */
 int
 asn_check_packet(u_char * pkt, size_t len)
@@ -235,8 +412,10 @@ _asn_bitstring_check(const char *str, size_t asn_length, u_char datum)
     return 0;
 }
 
-/*
+/**
+ * @internal 
  * asn_parse_int - pulls a long out of an int type.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the end of this object.
@@ -244,15 +423,16 @@ _asn_bitstring_check(const char *str, size_t asn_length, u_char datum)
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_parse_int(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char     *type         OUT - asn type of object
- long       *intp         IN/OUT - pointer to start of output buffer
- int         intsize      IN - size of output buffer
+ *  
+ * @param data       IN - pointer to start of object
+ * @param datalength IN/OUT - number of valid bytes left in buffer
+ * @param type       OUT - asn type of object
+ * @param intp       IN/OUT - pointer to start of output buffer
+ * @param intsize    IN - size of output buffer
+ * 
+ * @return pointer to the first byte past the end
+ *   of this object (i.e. the start of the next object) Returns NULL on any error
  */
-
 u_char         *
 asn_parse_int(u_char * data,
               size_t * datalength,
@@ -290,6 +470,13 @@ asn_parse_int(u_char * data,
     while (asn_length--)
         value = (value << 8) | *bufp++;
 
+#if SIZEOF_LONG != 4
+    if ((unsigned long)value > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating integer value to 32 bits\n");
+        value &= 0xffffffff;
+    }
+#endif
+
     DEBUGMSG(("dumpv_recv", "  Integer:\t%ld (0x%.2X)\n", value, value));
 
     *intp = value;
@@ -297,8 +484,10 @@ asn_parse_int(u_char * data,
 }
 
 
-/*
+/**
+ * @internal 
  * asn_parse_unsigned_int - pulls an unsigned long out of an ASN int type.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the end of this object.
@@ -306,13 +495,15 @@ asn_parse_int(u_char * data,
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_parse_unsigned_int(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char     *type         OUT - asn type of object
- u_long     *intp         IN/OUT - pointer to start of output buffer
- int         intsize      IN - size of output buffer
+ *  
+ * @param data       IN - pointer to start of object
+ * @param datalength IN/OUT - number of valid bytes left in buffer
+ * @param type       OUT - asn type of object
+ * @param intp       IN/OUT - pointer to start of output buffer
+ * @param intsize    IN - size of output buffer
+ * 
+ * @return pointer to the first byte past the end
+ *   of this object (i.e. the start of the next object) Returns NULL on any error
  */
 u_char         *
 asn_parse_unsigned_int(u_char * data,
@@ -351,6 +542,13 @@ asn_parse_unsigned_int(u_char * data,
     while (asn_length--)
         value = (value << 8) | *bufp++;
 
+#if SIZEOF_LONG != 4
+    if (value > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating uinteger value to 32 bits\n");
+        value &= 0xffffffff;
+    }
+#endif
+
     DEBUGMSG(("dumpv_recv", "  UInteger:\t%ld (0x%.2X)\n", value, value));
 
     *intp = value;
@@ -358,8 +556,10 @@ asn_parse_unsigned_int(u_char * data,
 }
 
 
-/*
+/**
+ * @internal 
  * asn_build_int - builds an ASN object containing an integer.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the end of this object.
@@ -367,13 +567,17 @@ asn_parse_unsigned_int(u_char * data,
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_build_int(
- u_char     *data         IN - pointer to start of output buffer
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- int         type         IN  - asn type of object
- long       *intp         IN - pointer to start of long integer
- int         intsize      IN - size of input buffer
+ * 
+ * 
+ * @param data         IN - pointer to start of output buffer
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         IN  - asn type of objec
+ * @param intp         IN - pointer to start of long integer
+ * @param intsize      IN - size of input buffer
+ * 
+ * @return  Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
  */
 u_char         *
 asn_build_int(u_char * data,
@@ -394,6 +598,12 @@ asn_build_int(u_char * data,
         return NULL;
     }
     integer = *intp;
+#if SIZEOF_LONG != 4
+    if ((unsigned long)integer > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating integer value to 32 bits\n");
+        integer &= 0xffffffff;
+    }
+#endif
     /*
      * Truncate "unnecessary" bytes off of the most significant end of this
      * 2's complement integer.  There should be no sequence of 9
@@ -428,8 +638,11 @@ asn_build_int(u_char * data,
 }
 
 
-/*
+
+/**
+ * @internal 
  * asn_build_unsigned_int - builds an ASN object containing an integer.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the end of this object.
@@ -437,13 +650,17 @@ asn_build_int(u_char * data,
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_build_unsigned_int(
- u_char     *data         IN - pointer to start of output buffer
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char      type         IN  - asn type of object
- u_long     *intp         IN - pointer to start of long integer
- int         intsize      IN - size of input buffer
+ * 
+ * 
+ * @param data         IN - pointer to start of output buffer
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         IN  - asn type of objec
+ * @param intp         IN - pointer to start of long integer
+ * @param intsize      IN - size of input buffer
+ * 
+ * @return  Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
  */
 u_char         *
 asn_build_unsigned_int(u_char * data,
@@ -466,6 +683,12 @@ asn_build_unsigned_int(u_char * data,
         return NULL;
     }
     integer = *intp;
+#if SIZEOF_LONG != 4
+    if (integer > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating uinteger value to 32 bits\n");
+        integer &= 0xffffffff;
+    }
+#endif
     mask = ((u_long) 0xFF) << (8 * (sizeof(long) - 1));
     /*
      * mask is 0xFF000000 on a big-endian machine 
@@ -515,34 +738,38 @@ asn_build_unsigned_int(u_char * data,
 }
 
 
-/*
+/**
+ * @internal 
  * asn_parse_string - pulls an octet string out of an ASN octet string type.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the beginning of the next object.
  *
  *  "string" is filled with the octet string.
+ * ASN.1 octet string   ::=      primstring | cmpdstring
+ * primstring           ::= 0x04 asnlength byte {byte}*
+ * cmpdstring           ::= 0x24 asnlength string {string}*
  *
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- *
- * u_char * asn_parse_string(
- *     u_char     *data         IN - pointer to start of object
- *     int        *datalength   IN/OUT - number of valid bytes left in buffer
- *     u_char     *type         OUT - asn type of object
- *     u_char     *string       IN/OUT - pointer to start of output buffer
- *     int        *strlength    IN/OUT - size of output buffer
- *
- *
- * ASN.1 octet string   ::=      primstring | cmpdstring
- * primstring           ::= 0x04 asnlength byte {byte}*
- * cmpdstring           ::= 0x24 asnlength string {string}*
+ * 
+ * @param data        IN - pointer to start of object
+ * @param datalength  IN/OUT - number of valid bytes left in buffer
+ * @param type        OUT - asn type of object 
+ * @param string      IN/OUT - pointer to start of output buffer
+ * @param strlength   IN/OUT - size of output buffer
+ * 
+ * @return  Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
  */
+
 u_char         *
 asn_parse_string(u_char * data,
                  size_t * datalength,
-                 u_char * type, u_char * string, size_t * strlength)
+                 u_char * type, u_char * str, size_t * strlength)
 {
     static const char *errpre = "parse string";
     u_char         *bufp = data;
@@ -562,9 +789,9 @@ asn_parse_string(u_char * data,
 
     DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 
-    memmove(string, bufp, asn_length);
+    memmove(str, bufp, asn_length);
     if (*strlength > (int) asn_length)
-        string[asn_length] = 0;
+        str[asn_length] = 0;
     *strlength = (int) asn_length;
     *datalength -= (int) asn_length + (bufp - data);
 
@@ -573,7 +800,7 @@ asn_parse_string(u_char * data,
         size_t          l = (buf != NULL) ? (1 + asn_length) : 0, ol = 0;
 
         if (sprint_realloc_asciistring
-            (&buf, &l, &ol, 1, string, asn_length)) {
+            (&buf, &l, &ol, 1, str, asn_length)) {
             DEBUGMSG(("dumpv_recv", "  String:\t%s\n", buf));
         } else {
             if (buf == NULL) {
@@ -592,8 +819,10 @@ asn_parse_string(u_char * data,
 }
 
 
-/*
+/**
+ * @internal
  * asn_build_string - Builds an ASN octet string object containing the input string.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the beginning of the next object.
@@ -601,18 +830,21 @@ asn_parse_string(u_char * data,
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_build_string(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char      type         IN - asn type of object
- u_char     *string       IN - pointer to start of input buffer
- int         strlength    IN - size of input buffer
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         IN - asn type of object
+ * @param string       IN - pointer to start of input buffer
+ * @param strlength    IN - size of input buffer
+ * @return  Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
  */
+
 u_char         *
 asn_build_string(u_char * data,
                  size_t * datalength,
-                 u_char type, const u_char * string, size_t strlength)
+                 u_char type, const u_char * str, size_t strlength)
 {
     /*
      * ASN.1 octet string ::= primstring | cmpdstring
@@ -629,10 +861,10 @@ asn_build_string(u_char * data,
         return NULL;
 
     if (strlength) {
-        if (string == NULL) {
+        if (str == NULL) {
             memset(data, 0, strlength);
         } else {
-            memmove(data, string, strlength);
+            memmove(data, str, strlength);
         }
     }
     *datalength -= strlength;
@@ -642,7 +874,7 @@ asn_build_string(u_char * data,
         size_t          l = (buf != NULL) ? (1 + strlength) : 0, ol = 0;
 
         if (sprint_realloc_asciistring
-            (&buf, &l, &ol, 1, string, strlength)) {
+            (&buf, &l, &ol, 1, str, strlength)) {
             DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
         } else {
             if (buf == NULL) {
@@ -661,19 +893,24 @@ asn_build_string(u_char * data,
 
 
 
-/*
+/**
+ * @internal
  * asn_parse_header - interprets the ID and length of the current object.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   in this object following the id and length.
  *
  *  Returns a pointer to the first byte of the contents of this object.
  *  Returns NULL on any error.
- 
- u_char * asn_parse_header(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char     *type         OUT - asn type of object
+ *
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         OUT - asn type of object
+ * @return  Returns a pointer to the first byte of the contents of this object.
+ *          Returns NULL on any error.
+ *
  */
 u_char         *
 asn_parse_header(u_char * data, size_t * datalength, u_char * type)
@@ -749,8 +986,19 @@ asn_parse_header(u_char * data, size_t * datalength, u_char * type)
     return bufp;
 }
 
-/*
- * same as asn_parse_header with test for expected type.
+/**
+ * @internal
+ * same as asn_parse_header with test for expected type
+ *
+ * @see asn_parse_header
+ *
+ * @param data          IN - pointer to start of object
+ * @param datalength    IN/OUT - number of valid bytes left in buffer
+ * @param type          OUT - asn type of object
+ * @param expected_type IN expected type
+ * @return  Returns a pointer to the first byte of the contents of this object.
+ *          Returns NULL on any error.
+ *
  */
 u_char         *
 asn_parse_sequence(u_char * data, size_t * datalength, u_char * type, u_char expected_type,     /* must be this type */
@@ -771,9 +1019,11 @@ asn_parse_sequence(u_char * data, size_t * datalength, u_char * type, u_char exp
 
 
 
-/*
+/**
+ * @internal
  * asn_build_header - builds an ASN header for an object with the ID and
  * length specified.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   in this object following the id and length.
@@ -783,12 +1033,13 @@ asn_parse_sequence(u_char * data, size_t * datalength, u_char * type, u_char exp
  *
  *  Returns a pointer to the first byte of the contents of this object.
  *  Returns NULL on any error.
- 
- u_char * asn_build_header(
- u_char     *data         IN - pointer to start of object
- size_t     *datalength   IN/OUT - number of valid bytes left in buffer
- u_char      type         IN - asn type of object
- size_t      length       IN - length of object
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         IN - asn type of object
+ * @param length       IN - length of object
+ * @return Returns a pointer to the first byte of the contents of this object.
+ *          Returns NULL on any error.
  */
 u_char         *
 asn_build_header(u_char * data,
@@ -798,8 +1049,8 @@ asn_build_header(u_char * data,
 
     if (*datalength < 1) {
         snprintf(ebuf, sizeof(ebuf),
-                "bad header length < 1 :%d, %d", *datalength,
-                length);
+                "bad header length < 1 :%lu, %lu",
+		(unsigned long)*datalength, (unsigned long)length);
         ebuf[ sizeof(ebuf)-1 ] = 0;
         ERROR_MSG(ebuf);
         return NULL;
@@ -809,8 +1060,10 @@ asn_build_header(u_char * data,
     return asn_build_length(data, datalength, length);
 }
 
-/*
+/**
+ * @internal
  * asn_build_sequence - builds an ASN header for a sequence with the ID and
+ *
  * length specified.
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
@@ -821,12 +1074,14 @@ asn_build_header(u_char * data,
  *
  *  Returns a pointer to the first byte of the contents of this object.
  *  Returns NULL on any error.
- 
- u_char * asn_build_sequence(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char      type         IN - asn type of object
- int         length       IN - length of object
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         IN - asn type of object
+ * @param length       IN - length of object
+ *
+ * @return Returns a pointer to the first byte of the contents of this object.
+ *         Returns NULL on any error.
  */
 u_char         *
 asn_build_sequence(u_char * data,
@@ -851,17 +1106,22 @@ asn_build_sequence(u_char * data,
     return data;
 }
 
-/*
+/**
+ * @internal
  * asn_parse_length - interprets the length of the current object.
+ *
  *  On exit, length contains the value of this length field.
  *
  *  Returns a pointer to the first byte after this length
  *  field (aka: the start of the data field).
  *  Returns NULL on any error.
- 
- u_char * asn_parse_length(
- u_char     *data         IN - pointer to start of length field
- u_long     *length       OUT - value of length field
+ *
+ * @param data         IN - pointer to start of length field
+ * @param length       OUT - value of length field
+ *
+ *  @return Returns a pointer to the first byte after this length
+ *          field (aka: the start of the data field).
+ *          Returns NULL on any error.
  */
 u_char         *
 asn_parse_length(u_char * data, u_long * length)
@@ -887,8 +1147,8 @@ asn_parse_length(u_char * data, u_long * length)
         }
         if (lengthbyte > sizeof(long)) {
             snprintf(ebuf, sizeof(ebuf),
-                    "%s: data length %d > %d not supported", errpre,
-                    lengthbyte, sizeof(long));
+                    "%s: data length %d > %lu not supported", errpre,
+                    lengthbyte, (unsigned long)sizeof(long));
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return NULL;
@@ -914,12 +1174,25 @@ asn_parse_length(u_char * data, u_long * length)
     }
 }
 
-/*
- * 
- * u_char * asn_build_length(
- * u_char     *data         IN - pointer to start of object
- * int        *datalength   IN/OUT - number of valid bytes left in buffer
- * int         length       IN - length of object
+/**
+ * @internal
+ * asn_build_length - builds an ASN header for a length with
+ * length specified.
+ *
+ *  On entry, datalength is input as the number of valid bytes following
+ *   "data".  On exit, it is returned as the number of valid bytes
+ *   in this object following the length.
+ *
+ *
+ *  Returns a pointer to the first byte of the contents of this object.
+ *  Returns NULL on any error.
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param length       IN - length of object
+ *
+ * @return Returns a pointer to the first byte of the contents of this object.
+ *         Returns NULL on any error.
  */
 u_char         *
 asn_build_length(u_char * data, size_t * datalength, size_t length)
@@ -935,8 +1208,8 @@ asn_build_length(u_char * data, size_t * datalength, size_t length)
     if (length < 0x80) {
         if (*datalength < 1) {
             snprintf(ebuf, sizeof(ebuf),
-                    "%s: bad length < 1 :%d, %d", errpre,
-                    *datalength, length);
+                    "%s: bad length < 1 :%lu, %lu", errpre,
+                    (unsigned long)*datalength, (unsigned long)length);
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return NULL;
@@ -945,8 +1218,8 @@ asn_build_length(u_char * data, size_t * datalength, size_t length)
     } else if (length <= 0xFF) {
         if (*datalength < 2) {
             snprintf(ebuf, sizeof(ebuf),
-                    "%s: bad length < 2 :%d, %d", errpre,
-                    *datalength, length);
+                    "%s: bad length < 2 :%lu, %lu", errpre,
+                    (unsigned long)*datalength, (unsigned long)length);
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return NULL;
@@ -956,8 +1229,8 @@ asn_build_length(u_char * data, size_t * datalength, size_t length)
     } else {                    /* 0xFF < length <= 0xFFFF */
         if (*datalength < 3) {
             snprintf(ebuf, sizeof(ebuf),
-                    "%s: bad length < 3 :%d, %d", errpre,
-                    *datalength, length);
+                    "%s: bad length < 3 :%lu, %lu", errpre,
+                    (unsigned long)*datalength, (unsigned long)length);
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return NULL;
@@ -971,8 +1244,10 @@ asn_build_length(u_char * data, size_t * datalength, size_t length)
 
 }
 
-/*
+/**
+ * @internal
  * asn_parse_objid - pulls an object indentifier out of an ASN object identifier type.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the beginning of the next object.
@@ -982,13 +1257,17 @@ asn_build_length(u_char * data, size_t * datalength, size_t length)
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_parse_objid(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char     *type         OUT - asn type of object
- oid        *objid        IN/OUT - pointer to start of output buffer
- int        *objidlength  IN/OUT - number of sub-id's in objid
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         OUT - asn type of object
+ * @param objid        IN/OUT - pointer to start of output buffer
+ * @param objidlength  IN/OUT - number of sub-id's in objid
+ *
+ *  @return Returns a pointer to the first byte past the end
+ *   of this object (i.e. the start of the next object).
+ *  Returns NULL on any error.
+ *
  */
 u_char         *
 asn_parse_objid(u_char * data,
@@ -1033,15 +1312,19 @@ asn_parse_objid(u_char * data,
                 (subidentifier << 7) + (*(u_char *) bufp & ~ASN_BIT8);
             length--;
         } while (*(u_char *) bufp++ & ASN_BIT8);        /* last byte has high bit clear */
-        /*
-         * ?? note, this test will never be true, since the largest value
-         * of subidentifier is the value of MAX_SUBID! 
-         */
+
+#if defined(EIGHTBIT_SUBIDS) || (SIZEOF_LONG != 4)
         if (subidentifier > (u_long) MAX_SUBID) {
             ERROR_MSG("subidentifier too large");
             return NULL;
         }
+#endif
         *oidp++ = (oid) subidentifier;
+    }
+
+    if (0 != length) {
+        ERROR_MSG("OID length exceeds buffer size");
+        return NULL;
     }
 
     /*
@@ -1075,9 +1358,11 @@ asn_parse_objid(u_char * data,
     return bufp;
 }
 
-/*
+/**
+ * @internal
  * asn_build_objid - Builds an ASN object identifier object containing the
  * input string.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the beginning of the next object.
@@ -1085,13 +1370,16 @@ asn_parse_objid(u_char * data,
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_build_objid(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- int        type         IN - asn type of object
- oid        *objid        IN - pointer to start of input buffer
- int         objidlength  IN - number of sub-id's in objid
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         IN - asn type of object
+ * @param objid        IN - pointer to start of input buffer
+ * @param objidlength  IN - number of sub-id's in objid
+ *
+ * @return   Returns a pointer to the first byte past the end
+ *           of this object (i.e. the start of the next object).
+ *           Returns NULL on any error.
  */
 u_char         *
 asn_build_objid(u_char * data,
@@ -1177,6 +1465,12 @@ asn_build_objid(u_char * data,
         if (i >= (int) objidlength)
             break;
         objid_val = *op++;	/* XXX - doesn't handle 2.X (X > 40) */
+#if SIZEOF_LONG != 4
+        if (objid_val > 0xffffffff) {
+            snmp_log(LOG_ERR,"truncating objid value to 32 bits\n");
+            objid_val &= 0xffffffff;
+        }
+#endif
     }
 
     /*
@@ -1192,8 +1486,13 @@ asn_build_objid(u_char * data,
      */
     for (i = 1, objid_val = first_objid_val, op = objid + 2;
          i < (int) objidlength; i++) {
-        if (i != 1)
+        if (i != 1) {
             objid_val = *op++;
+#if SIZEOF_LONG != 4
+            if (objid_val > 0xffffffff) /* already logged warning above */
+                objid_val &= 0xffffffff;
+#endif
+        }
         switch (objid_size[i]) {
         case 1:
             *data++ = (u_char) objid_val;
@@ -1238,8 +1537,10 @@ asn_build_objid(u_char * data,
     return data;
 }
 
-/*
+/**
+ * @internal
  * asn_parse_null - Interprets an ASN null type.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the beginning of the next object.
@@ -1247,11 +1548,13 @@ asn_build_objid(u_char * data,
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_parse_null(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char     *type         OUT - asn type of object
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         OUT - asn type of object
+ *  @return Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
  */
 u_char         *
 asn_parse_null(u_char * data, size_t * datalength, u_char * type)
@@ -1282,8 +1585,10 @@ asn_parse_null(u_char * data, size_t * datalength, u_char * type)
 }
 
 
-/*
+/**
+ * @internal
  * asn_build_null - Builds an ASN null object.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the beginning of the next object.
@@ -1291,11 +1596,14 @@ asn_parse_null(u_char * data, size_t * datalength, u_char * type)
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_build_null(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char      type         IN - asn type of object
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         IN - asn type of object
+ * @retun  Returns a pointer to the first byte past the end
+ *         of this object (i.e. the start of the next object).
+ *         Returns NULL on any error.
+ *
  */
 u_char         *
 asn_build_null(u_char * data, size_t * datalength, u_char type)
@@ -1312,8 +1620,10 @@ asn_build_null(u_char * data, size_t * datalength, u_char type)
     return data;
 }
 
-/*
+/**
+ * @internal
  * asn_parse_bitstring - pulls a bitstring out of an ASN bitstring type.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the beginning of the next object.
@@ -1323,18 +1633,20 @@ asn_build_null(u_char * data, size_t * datalength, u_char type)
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_parse_bitstring(
- u_char     *data         IN - pointer to start of object
- size_t     *datalength   IN/OUT - number of valid bytes left in buffer
- u_char     *type         OUT - asn type of object
- u_char     *string       IN/OUT - pointer to start of output buffer
- size_t     *strlength    IN/OUT - size of output buffer
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         OUT - asn type of object
+ * @param string       IN/OUT - pointer to start of output buffer
+ * @param strlength    IN/OUT - size of output buffer
+ * @return Returns a pointer to the first byte past the end
+ *         of this object (i.e. the start of the next object).
+ *         Returns NULL on any error.
  */
 u_char         *
 asn_parse_bitstring(u_char * data,
                     size_t * datalength,
-                    u_char * type, u_char * string, size_t * strlength)
+                    u_char * type, u_char * str, size_t * strlength)
 {
     /*
      * bitstring ::= 0x03 asnlength unused {byte}*
@@ -1361,16 +1673,18 @@ asn_parse_bitstring(u_char * data,
     DEBUGMSGHEX(("dumpv_recv", data, asn_length));
     DEBUGMSG(("dumpv_recv", "\n"));
 
-    memmove(string, bufp, asn_length);
+    memmove(str, bufp, asn_length);
     *strlength = (int) asn_length;
     *datalength -= (int) asn_length + (bufp - data);
     return bufp + asn_length;
 }
 
 
-/*
+/**
+ * @internal
  * asn_build_bitstring - Builds an ASN bit string object containing the
  * input string.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the beginning of the next object.
@@ -1378,34 +1692,36 @@ asn_parse_bitstring(u_char * data,
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_build_bitstring(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char      type         IN - asn type of object
- u_char     *string       IN - pointer to start of input buffer
- int         strlength    IN - size of input buffer
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         IN - asn type of object
+ * @param string       IN - pointer to start of input buffer
+ * @param strlength    IN - size of input buffer
+ * @return Returns a pointer to the first byte past the end
+ *         of this object (i.e. the start of the next object).
+ *         Returns NULL on any error.
  */
 u_char         *
 asn_build_bitstring(u_char * data,
                     size_t * datalength,
-                    u_char type, u_char * string, size_t strlength)
+                    u_char type, u_char * str, size_t strlength)
 {
     /*
      * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
      */
     static const char *errpre = "build bitstring";
     if (_asn_bitstring_check
-        (errpre, strlength, ((string) ? *string : (u_char) 0)))
+        (errpre, strlength, (u_char)((str) ? *str :  0)))
         return NULL;
 
     data = asn_build_header(data, datalength, type, strlength);
     if (_asn_build_header_check(errpre, data, *datalength, strlength))
         return NULL;
 
-    if (strlength > 0 && string)
-        memmove(data, string, strlength);
-    else if (strlength > 0 && !string) {
+    if (strlength > 0 && str)
+        memmove(data, str, strlength);
+    else if (strlength > 0 && !str) {
         ERROR_MSG("no string passed into asn_build_bitstring\n");
         return NULL;
     }
@@ -1418,9 +1734,11 @@ asn_build_bitstring(u_char * data,
     return data + strlength;
 }
 
-/*
+/**
+ * @internal
  * asn_parse_unsigned_int64 - pulls a 64 bit unsigned long out of an ASN int
  * type.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the end of this object.
@@ -1428,13 +1746,15 @@ asn_build_bitstring(u_char * data,
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_parse_unsigned_int64(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char     *type         OUT - asn type of object
- struct counter64 *cp     IN/OUT - pointer to counter struct
- int         countersize  IN - size of output buffer
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         OUT - asn type of object
+ * @param cp           IN/OUT - pointer to counter struct
+ * @param countersize  IN - size of output buffer
+ * @return  Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
  */
 u_char         *
 asn_parse_unsigned_int64(u_char * data,
@@ -1500,6 +1820,17 @@ asn_parse_unsigned_int64(u_char * data,
         low = (low << 8) | *bufp++;
     }
 
+#if SIZEOF_LONG != 4
+    if (high > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating counter64 high value to 32 bits\n");
+        high &= 0xffffffff;
+    }
+    if (low > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating counter64 low value to 32 bits\n");
+        low &= 0xffffffff;
+    }
+#endif
+
     cp->low = low;
     cp->high = high;
 
@@ -1513,8 +1844,10 @@ asn_parse_unsigned_int64(u_char * data,
 }
 
 
-/*
+/**
+ * @internal
  * asn_build_unsigned_int64 - builds an ASN object containing a 64 bit integer.
+ *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the end of this object.
@@ -1522,13 +1855,15 @@ asn_parse_unsigned_int64(u_char * data,
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_build_unsigned_int64(
- u_char     *data         IN - pointer to start of output buffer
- size_t     *datalength   IN/OUT - number of valid bytes left in buffer
- u_char      type         IN  - asn type of object
- struct counter64 *cp     IN - pointer to counter struct
- size_t      countersize  IN - size of input buffer
+ *
+ * @param data         IN - pointer to start of output buffer
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         IN  - asn type of object
+ * @param cp           IN - pointer to counter struct
+ * @param countersize  IN - size of input buffer
+ * @return  Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
  */
 u_char         *
 asn_build_unsigned_int64(u_char * data,
@@ -1556,6 +1891,16 @@ asn_build_unsigned_int64(u_char * data,
     intsize = 8;
     low = cp->low;
     high = cp->high;
+#if SIZEOF_LONG != 4
+    if (high > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating counter64 high value to 32 bits\n");
+        high &= 0xffffffff;
+    }
+    if (low > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating counter64 low value to 32 bits\n");
+        low &= 0xffffffff;
+    }
+#endif
     mask = ((u_long) 0xFF) << (8 * (sizeof(long) - 1));
     /*
      * mask is 0xFF000000 on a big-endian machine 
@@ -1664,14 +2009,28 @@ asn_build_unsigned_int64(u_char * data,
 
 #ifdef OPAQUE_SPECIAL_TYPES
 
-/*
- * 
- * u_char * asn_parse_signed_int64(
- * u_char     *data         IN - pointer to start of object
- * int        *datalength   IN/OUT - number of valid bytes left in buffer
- * u_char     *type         OUT - asn type of object
- * struct counter64 *cp     IN/OUT - pointer to counter struct
- * int         countersize  IN - size of output buffer
+
+/**
+ * @internal
+ * asn_parse_signed_int64 - pulls a 64 bit signed long out of an ASN int
+ * type.
+ *
+ *  On entry, datalength is input as the number of valid bytes following
+ *   "data".  On exit, it is returned as the number of valid bytes
+ *   following the end of this object.
+ *
+ *  Returns a pointer to the first byte past the end
+ *   of this object (i.e. the start of the next object).
+ *  Returns NULL on any error.
+ 
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         OUT - asn type of object
+ * @param cp           IN/OUT - pointer to counter struct
+ * @param countersize  IN - size of output buffer
+ * @return  Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
  */
 
 u_char         *
@@ -1740,6 +2099,17 @@ asn_parse_signed_int64(u_char * data,
         low = (low << 8) | *bufp++;
     }
 
+#if SIZEOF_LONG != 4
+    if (high > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating counter64 high value to 32 bits\n");
+        high &= 0xffffffff;
+    }
+    if (low > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating counter64 low value to 32 bits\n");
+        low &= 0xffffffff;
+    }
+#endif
+
     cp->low = low;
     cp->high = high;
 
@@ -1753,14 +2123,27 @@ asn_parse_signed_int64(u_char * data,
 }
 
 
-/*
- * 
- * u_char * asn_build_signed_int64(
- * u_char     *data         IN - pointer to start of object
- * int        *datalength   IN/OUT - number of valid bytes left in buffer
- * u_char      type         IN - asn type of object
- * struct counter64 *cp     IN - pointer to counter struct
- * int         countersize  IN - size of input buffer
+
+/**
+ * @internal
+ * asn_build_signed_int64 - builds an ASN object containing a 64 bit integer.
+ *
+ *  On entry, datalength is input as the number of valid bytes following
+ *   "data".  On exit, it is returned as the number of valid bytes
+ *   following the end of this object.
+ *
+ *  Returns a pointer to the first byte past the end
+ *   of this object (i.e. the start of the next object).
+ *  Returns NULL on any error.
+ *
+ * @param data         IN - pointer to start of output buffer
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         IN  - asn type of object
+ * @param cp           IN - pointer to counter struct
+ * @param countersize  IN - size of input buffer
+ * @return  Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
  */
 u_char         *
 asn_build_signed_int64(u_char * data,
@@ -1789,6 +2172,16 @@ asn_build_signed_int64(u_char * data,
     memcpy(&c64, cp, sizeof(struct counter64)); /* we're may modify it */
     low = c64.low;
     high = c64.high;
+#if SIZEOF_LONG != 4
+    if (high > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating counter64 high value to 32 bits\n");
+        high &= 0xffffffff;
+    }
+    if (low > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating counter64 low value to 32 bits\n");
+        low &= 0xffffffff;
+    }
+#endif
 
     /*
      * Truncate "unnecessary" bytes off of the most significant end of this
@@ -1840,7 +2233,8 @@ asn_build_signed_int64(u_char * data,
 }
 
 
-/*
+/**
+ * @internal
  * asn_parse_float - pulls a single precision floating-point out of an opaque type.
  *
  *  On entry, datalength is input as the number of valid bytes following
@@ -1850,13 +2244,15 @@ asn_build_signed_int64(u_char * data,
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_parse_float(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char     *type         OUT - asn type of object
- float      *floatp       IN/OUT - pointer to float
- int         floatsize    IN - size of output buffer
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         OUT - asn type of object
+ * @param floatp       IN/OUT - pointer to float
+ * @param floatsize    IN - size of output buffer
+ * @return  Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
  */
 u_char         *
 asn_parse_float(u_char * data,
@@ -1922,7 +2318,8 @@ asn_parse_float(u_char * data,
     return bufp;
 }
 
-/*
+/**
+ * @internal
  * asn_build_float - builds an ASN object containing a single precision floating-point
  *                    number in an Opaque value.
  *
@@ -1933,13 +2330,16 @@ asn_parse_float(u_char * data,
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
- 
- u_char * asn_build_float(
- u_char     *data         IN - pointer to start of object
- int        *datalength   IN/OUT - number of valid bytes left in buffer
- u_char      type         IN - asn type of object
- float      *floatp       IN - pointer to float
- int         floatsize    IN - size of input buffer
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         IN - asn type of object
+ * @param floatp       IN - pointer to float
+ * @param floatsize    IN - size of input buffer
+ * @return  Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
+
  */
 u_char         *
 asn_build_float(u_char * data,
@@ -1997,14 +2397,27 @@ asn_build_float(u_char * data,
     return data;
 }
 
-/*
- * 
- * u_char * asn_parse_double(
- * u_char     *data         IN - pointer to start of object
- * int        *datalength   IN/OUT - number of valid bytes left in buffer
- * u_char     *type         OUT - asn type of object
- * double     *doublep      IN/OUT - pointer to double
- * int         doublesize   IN - size of output buffer
+
+/**
+ * @internal
+ * asn_parse_double - pulls a double out of an opaque type.
+ *
+ *  On entry, datalength is input as the number of valid bytes following
+ *   "data".  On exit, it is returned as the number of valid bytes
+ *   following the end of this object.
+ *
+ *  Returns a pointer to the first byte past the end
+ *   of this object (i.e. the start of the next object).
+ *  Returns NULL on any error.
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         OUT - asn type of object
+ * @param doublep       IN/OUT - pointer to double
+ * @param doublesize    IN - size of output buffer
+ * @return  Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
  */
 u_char         *
 asn_parse_double(u_char * data,
@@ -2074,14 +2487,28 @@ asn_parse_double(u_char * data,
     return bufp;
 }
 
-/*
- * 
- * u_char * asn_build_double(
- * u_char     *data         IN - pointer to start of object
- * int        *datalength   IN/OUT - number of valid bytes left in buffer
- * u_char      type         IN - asn type of object
- * double     *doublep      IN - pointer to double
- * int         doublesize   IN - size of input buffer
+
+/**
+ * @internal
+ * asn_build_double - builds an ASN object containing a double
+ *                    number in an Opaque value.
+ *
+ *  On entry, datalength is input as the number of valid bytes following
+ *   "data".  On exit, it is returned as the number of valid bytes
+ *   following the end of this object.
+ *
+ *  Returns a pointer to the first byte past the end
+ *   of this object (i.e. the start of the next object).
+ *  Returns NULL on any error.
+ *
+ * @param data         IN - pointer to start of object
+ * @param datalength   IN/OUT - number of valid bytes left in buffer
+ * @param type         IN - asn type of object
+ * @param doublep      IN - pointer to double
+ * @param doublesize   IN - size of input buffer
+ * @return  Returns a pointer to the first byte past the end
+ *          of this object (i.e. the start of the next object).
+ *          Returns NULL on any error.
  */
 u_char         *
 asn_build_double(u_char * data,
@@ -2145,15 +2572,20 @@ asn_build_double(u_char * data,
 #endif                          /* OPAQUE_SPECIAL_TYPES */
 
 
-/*
+/**
+ * @internal
  * This function increases the size of the buffer pointed to by *pkt, which
  * is initially of size *pkt_len.  Contents are preserved **AT THE TOP END OF 
  * THE BUFFER** (hence making this function useful for reverse encoding).
  * You can change the reallocation scheme, but you **MUST** guarantee to
  * allocate **AT LEAST** one extra byte.  If memory cannot be reallocated,
- * then return 0; otherwise return 1.  
+ * then return 0; otherwise return 1.   
+ * 
+ * @param pkt     buffer to increase
+ * @param pkt_len initial buffer size
+ * 
+ * @return 1 on success 0 on error (memory cannot be reallocated)
  */
-
 int
 asn_realloc(u_char ** pkt, size_t * pkt_len)
 {
@@ -2181,6 +2613,20 @@ asn_realloc(u_char ** pkt, size_t * pkt_len)
 
 #ifdef USE_REVERSE_ASNENCODING
 
+/**
+ * @internal
+ * reverse  builds an ASN header for a length with
+ * length specified.
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param length  IN - length of object
+ *
+ * @return 1 on success, 0 on error
+ */
 int
 asn_realloc_rbuild_length(u_char ** pkt, size_t * pkt_len,
                           size_t * offset, int r, size_t length)
@@ -2194,8 +2640,8 @@ asn_realloc_rbuild_length(u_char ** pkt, size_t * pkt_len,
         if (((*pkt_len - *offset) < 1)
             && !(r && asn_realloc(pkt, pkt_len))) {
             snprintf(ebuf, sizeof(ebuf),
-                    "%s: bad length < 1 :%d, %d", errpre,
-                    *pkt_len - *offset, length);
+                    "%s: bad length < 1 :%ld, %lu", errpre,
+                    (long)(*pkt_len - *offset), (unsigned long)length);
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return 0;
@@ -2206,8 +2652,8 @@ asn_realloc_rbuild_length(u_char ** pkt, size_t * pkt_len,
             if (((*pkt_len - *offset) < 1)
                 && !(r && asn_realloc(pkt, pkt_len))) {
                 snprintf(ebuf, sizeof(ebuf),
-                        "%s: bad length < 1 :%d, %d", errpre,
-                        *pkt_len - *offset, length);
+                        "%s: bad length < 1 :%ld, %lu", errpre,
+                        (long)(*pkt_len - *offset), (unsigned long)length);
                 ebuf[ sizeof(ebuf)-1 ] = 0;
                 ERROR_MSG(ebuf);
                 return 0;
@@ -2219,8 +2665,8 @@ asn_realloc_rbuild_length(u_char ** pkt, size_t * pkt_len,
         while ((*pkt_len - *offset) < 2) {
             if (!(r && asn_realloc(pkt, pkt_len))) {
                 snprintf(ebuf, sizeof(ebuf),
-                        "%s: bad length < 1 :%d, %d", errpre,
-                        *pkt_len - *offset, length);
+                        "%s: bad length < 1 :%ld, %lu", errpre,
+                        (long)(*pkt_len - *offset), (unsigned long)length);
                 ebuf[ sizeof(ebuf)-1 ] = 0;
                 ERROR_MSG(ebuf);
                 return 0;
@@ -2235,6 +2681,23 @@ asn_realloc_rbuild_length(u_char ** pkt, size_t * pkt_len,
     return 1;
 }
 
+/**
+ * @internal
+ * builds an ASN header for an object with the ID and
+ * length specified.
+ *
+ * @see asn_build_header
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param type   IN - type of object
+ * @param length   IN - length of object
+ *
+ * @return 1 on success, 0 on error
+ */
 int
 asn_realloc_rbuild_header(u_char ** pkt, size_t * pkt_len,
                           size_t * offset, int r,
@@ -2246,8 +2709,8 @@ asn_realloc_rbuild_header(u_char ** pkt, size_t * pkt_len,
         if (((*pkt_len - *offset) < 1)
             && !(r && asn_realloc(pkt, pkt_len))) {
             snprintf(ebuf, sizeof(ebuf),
-                    "bad header length < 1 :%d, %d",
-                    *pkt_len - *offset, length);
+                    "bad header length < 1 :%ld, %lu",
+                    (long)(*pkt_len - *offset), (unsigned long)length);
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return 0;
@@ -2258,6 +2721,23 @@ asn_realloc_rbuild_header(u_char ** pkt, size_t * pkt_len,
     return 0;
 }
 
+/**
+ * @internal
+ * builds an ASN object containing an int.
+ *
+ * @see asn_build_int
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param type    IN - type of object
+ * @param intp    IN - pointer to start of long integer
+ * @param intsize IN - size of input buffer
+ *
+ * @return 1 on success, 0 on error
+ */
 int
 asn_realloc_rbuild_int(u_char ** pkt, size_t * pkt_len,
                        size_t * offset, int r,
@@ -2272,6 +2752,12 @@ asn_realloc_rbuild_int(u_char ** pkt, size_t * pkt_len,
         _asn_size_err(errpre, intsize, sizeof(long));
         return 0;
     }
+#if SIZEOF_LONG != 4
+    if ((unsigned long)integer > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating integer value to 32 bits\n");
+        integer &= 0xffffffff;
+    }
+#endif
 
     if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
         return 0;
@@ -2317,11 +2803,29 @@ asn_realloc_rbuild_int(u_char ** pkt, size_t * pkt_len,
     return 0;
 }
 
+/**
+ * @internal
+ * builds an ASN object containing an string.
+ *
+ * @see asn_build_string 
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param type    IN - type of object
+ * @param string    IN - pointer to start of the string
+ * @param strlength IN - size of input buffer
+ *
+ * @return 1 on success, 0 on error
+ */
+
 int
 asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
                           size_t * offset, int r,
                           u_char type,
-                          const u_char * string, size_t strlength)
+                          const u_char * str, size_t strlength)
 {
     static const char *errpre = "build string";
     size_t          start_offset = *offset;
@@ -2333,7 +2837,7 @@ asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
     }
 
     *offset += strlength;
-    memcpy(*pkt + *pkt_len - *offset, string, strlength);
+    memcpy(*pkt + *pkt_len - *offset, str, strlength);
 
     if (asn_realloc_rbuild_header
         (pkt, pkt_len, offset, r, type, strlength)) {
@@ -2352,7 +2856,7 @@ asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
                         (buf != NULL) ? (2 * strlength) : 0, ol = 0;
 
                     if (sprint_realloc_asciistring
-                        (&buf, &l, &ol, 1, string, strlength)) {
+                        (&buf, &l, &ol, 1, str, strlength)) {
                         DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
                     } else {
                         if (buf == NULL) {
@@ -2375,6 +2879,23 @@ asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
     return 0;
 }
 
+/**
+ * @internal
+ * builds an ASN object containing an unsigned int.
+ *
+ * @see asn_build_unsigned_int
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param type    IN - type of object
+ * @param intp    IN - pointer to start of unsigned int
+ * @param intsize IN - size of input buffer
+ *
+ * @return 1 on success, 0 on error
+ */
 int
 asn_realloc_rbuild_unsigned_int(u_char ** pkt, size_t * pkt_len,
                                 size_t * offset, int r,
@@ -2388,6 +2909,13 @@ asn_realloc_rbuild_unsigned_int(u_char ** pkt, size_t * pkt_len,
         _asn_size_err(errpre, intsize, sizeof(unsigned long));
         return 0;
     }
+
+#if SIZEOF_LONG != 4
+    if (integer > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating uinteger value to 32 bits\n");
+        integer &= 0xffffffff;
+    }
+#endif
 
     if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
         return 0;
@@ -2433,6 +2961,23 @@ asn_realloc_rbuild_unsigned_int(u_char ** pkt, size_t * pkt_len,
     return 0;
 }
 
+/**
+ * @internal
+ * builds an ASN object containing an sequence.
+ *
+ * @see asn_build_sequence
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param type    IN - type of object
+ * @param length IN - length of object
+ *
+ * @return 1 on success, 0 on error
+ */
+
 int
 asn_realloc_rbuild_sequence(u_char ** pkt, size_t * pkt_len,
                             size_t * offset, int r,
@@ -2441,6 +2986,24 @@ asn_realloc_rbuild_sequence(u_char ** pkt, size_t * pkt_len,
     return asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type,
                                      length);
 }
+
+/**
+ * @internal
+ * builds an ASN object containing an objid.
+ *
+ * @see asn_build_objid
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param type    IN - type of object
+ * @param objid   IN - pointer to the object id
+ * @param objidlength  IN - length of the input 
+ *
+ * @return 1 on success, 0 on error
+ */
 
 int
 asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
@@ -2489,6 +3052,12 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
     } else {
         for (i = objidlength; i > 2; i--) {
             tmpint = objid[i - 1];
+#if SIZEOF_LONG != 4
+            if ((unsigned long)tmpint > 0xffffffff) {
+                snmp_log(LOG_ERR,"truncating oid subid to 32 bits\n");
+                tmpint &= 0xffffffff;
+            }
+#endif
 
             if (((*pkt_len - *offset) < 1)
                 && !(r && asn_realloc(pkt, pkt_len))) {
@@ -2554,6 +3123,22 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
     return 0;
 }
 
+/**
+ * @internal
+ * builds an ASN object containing an null object.
+ *
+ * @see asn_build_null
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param type    IN - type of object
+ *
+ * @return 1 on success, 0 on error
+ */
+
 int
 asn_realloc_rbuild_null(u_char ** pkt, size_t * pkt_len,
                         size_t * offset, int r, u_char type)
@@ -2573,11 +3158,29 @@ asn_realloc_rbuild_null(u_char ** pkt, size_t * pkt_len,
     }
 }
 
+/**
+ * @internal
+ * builds an ASN object containing an bitstring.
+ *
+ * @see asn_build_bitstring
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param type    IN - type of object
+ * @param string   IN - pointer to the string
+ * @param strlength  IN - length of the input 
+ *
+ * @return 1 on success, 0 on error
+ */
+
 int
 asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
                              size_t * offset, int r,
                              u_char type,
-                             u_char * string, size_t strlength)
+                             u_char * str, size_t strlength)
 {
     /*
      * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
@@ -2592,7 +3195,7 @@ asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
     }
 
     *offset += strlength;
-    memcpy(*pkt + *pkt_len - *offset, string, strlength);
+    memcpy(*pkt + *pkt_len - *offset, str, strlength);
 
     if (asn_realloc_rbuild_header
         (pkt, pkt_len, offset, r, type, strlength)) {
@@ -2611,7 +3214,7 @@ asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
                         (buf != NULL) ? (2 * strlength) : 0, ol = 0;
 
                     if (sprint_realloc_asciistring
-                        (&buf, &l, &ol, 1, string, strlength)) {
+                        (&buf, &l, &ol, 1, str, strlength)) {
                         DEBUGMSG(("dumpv_send", "  Bitstring:\t%s\n",
                                   buf));
                     } else {
@@ -2636,6 +3239,23 @@ asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
     return 0;
 }
 
+/**
+ * @internal
+ * builds an ASN object containing an unsigned int64.
+ *
+ * @see asn_build_unsigned_int64
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param type    IN - type of object
+ * @param cp           IN - pointer to counter struct
+ * @param countersize  IN - size of input buffer
+ *
+ * @return 1 on success, 0 on error
+ */
 int
 asn_realloc_rbuild_unsigned_int64(u_char ** pkt, size_t * pkt_len,
                                   size_t * offset, int r,
@@ -2654,6 +3274,16 @@ asn_realloc_rbuild_unsigned_int64(u_char ** pkt, size_t * pkt_len,
                       sizeof(struct counter64));
         return 0;
     }
+#if SIZEOF_LONG != 4
+    if (high > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating counter64 high value to 32 bits\n");
+        high &= 0xffffffff;
+    }
+    if (low > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating counter64 low value to 32 bits\n");
+        low &= 0xffffffff;
+    }
+#endif
 
     /*
      * Encode the low 4 bytes first.  
@@ -2799,6 +3429,25 @@ asn_realloc_rbuild_unsigned_int64(u_char ** pkt, size_t * pkt_len,
 }
 
 #ifdef OPAQUE_SPECIAL_TYPES
+
+
+/**
+ * @internal
+ * builds an ASN object containing an signed int64.
+ *
+ * @see asn_build_signed_int64
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param type    IN - type of object
+ * @param cp           IN - pointer to counter struct
+ * @param countersize  IN - size of input buffer
+ *
+ * @return 1 on success, 0 on error
+ */
 int
 asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
                                 size_t * offset, int r,
@@ -2817,6 +3466,17 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
                       sizeof(struct counter64));
         return 0;
     }
+
+#if SIZEOF_LONG != 4
+    if (high > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating counter64 high value to 32 bits\n");
+        high &= 0xffffffff;
+    }
+    if (low > 0xffffffff) {
+        snmp_log(LOG_ERR,"truncating counter64 low value to 32 bits\n");
+        low &= 0xffffffff;
+    }
+#endif
 
     /*
      * Encode the low 4 bytes first.  
@@ -2915,6 +3575,24 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
     return 1;
 }
 
+/**
+ * @internal
+ * builds an ASN object containing an float.
+ *
+ * @see asn_build_float
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param type       IN - type of object
+ * @param floatp     IN - pointer to the float
+ * @param floatsize  IN - size of input buffer
+ *
+ * @return 1 on success, 0 on error
+ */
+
 int
 asn_realloc_rbuild_float(u_char ** pkt, size_t * pkt_len,
                          size_t * offset, int r,
@@ -2973,6 +3651,24 @@ asn_realloc_rbuild_float(u_char ** pkt, size_t * pkt_len,
 
     return 0;
 }
+
+/**
+ * @internal
+ * builds an ASN object containing an double.
+ *
+ * @see asn_build_double
+ * 
+ * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt_len IN/OUT address to an integer containing the size of pkt.
+ * @param offset  IN/OUT offset to the start of the buffer where to write
+ * @param r       IN if not zero reallocate the buffer to fit the 
+ *                needed size.
+ * @param type    IN - type of object
+ * @param doublep           IN - pointer to double
+ * @param doublesize  IN - size of input buffer
+ *
+ * @return 1 on success, 0 on error
+ */
 
 int
 asn_realloc_rbuild_double(u_char ** pkt, size_t * pkt_len,
@@ -3038,3 +3734,6 @@ asn_realloc_rbuild_double(u_char ** pkt, size_t * pkt_len,
 
 #endif                          /* OPAQUE_SPECIAL_TYPES */
 #endif                          /*  USE_REVERSE_ASNENCODING  */
+/**
+ * @}
+ */

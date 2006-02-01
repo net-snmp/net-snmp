@@ -14,7 +14,7 @@ netsnmp_container *netsnmp_container_get_null(void);
 
 
 #ifdef  __cplusplus
-};
+}
 #endif
 
 #endif /** NETSNMP_CONTAINER_NULL_H */

@@ -98,7 +98,7 @@ struct varInfo {
     int             spoiled;
 };
 
-struct varInfo  varinfo[128];
+struct varInfo  varinfo[MAX_ARGS];
 int             current_name = 0;
 int             period = 1;
 int             deltat = 0, timestamp = 0, fileout = 0, dosum =
@@ -243,10 +243,10 @@ print_log(char *file, char *message)
 void
 sprint_descriptor(char *buffer, struct varInfo *vip)
 {
-    u_char         *buf = NULL, *cp = NULL;
+    char           *buf = NULL, *cp = NULL;
     size_t          buf_len = 0, out_len = 0;
 
-    if (!sprint_realloc_objid(&buf, &buf_len, &out_len, 1,
+    if (!sprint_realloc_objid((u_char **)&buf, &buf_len, &out_len, 1,
                               vip->info_oid, vip->oidlen)) {
         if (buf != NULL) {
             free(buf);
@@ -303,6 +303,11 @@ processFileArgs(char *fileName)
         if (blank)
             continue;
         buf[strlen(buf) - 1] = 0;
+	if (current_name >= MAX_ARGS) {
+	    fprintf(stderr, "Too many variables read at line %d of %s (max %d)\n",
+	    	linenumber, fileName, MAX_ARGS);
+	    exit(1);
+	}
         varinfo[current_name++].name = strdup(buf);
     }
     fclose(fp);
@@ -312,6 +317,9 @@ processFileArgs(char *fileName)
 void
 wait_for_period(int period)
 {
+#ifdef WIN32
+    Sleep(period * 1000);
+#else                   /* WIN32 */
     struct timeval  m_time, *tv = &m_time;
     struct tm       tm;
     int             count;
@@ -362,6 +370,7 @@ wait_for_period(int period)
             break;
         }
     }
+#endif                   /* WIN32 */
 }
 
 oid             sysUpTimeOid[9] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
@@ -410,8 +419,14 @@ main(int argc, char *argv[])
 
     gateway = session.peername;
 
-    for (; optind < argc; optind++)
+    for (; optind < argc; optind++) {
+	if (current_name >= MAX_ARGS) {
+	    fprintf(stderr, "%s: Too many variables specified (max %d)\n",
+	    	argv[optind], MAX_ARGS);
+	    exit(1);
+	}
         varinfo[current_name++].name = argv[optind];
+    }
 
     if (current_name == 0) {
         usage();
@@ -419,6 +434,11 @@ main(int argc, char *argv[])
     }
 
     if (dosum) {
+	if (current_name >= MAX_ARGS) {
+	    fprintf(stderr, "Too many variables specified (max %d)\n",
+	    	MAX_ARGS);
+	    exit(1);
+	}
         varinfo[current_name++].name = 0;
     }
 
@@ -515,7 +535,7 @@ main(int argc, char *argv[])
 
                 vars = response->variables;
                 if (deltat) {
-                    if (!vars) {
+                    if (!vars || !vars->val.integer) {
                         fprintf(stderr, "Missing variable in reply\n");
                         continue;
                     } else {
@@ -530,7 +550,7 @@ main(int argc, char *argv[])
                     vip = varinfo + count;
 
                     if (vip->oidlen) {
-                        if (!vars) {
+                        if (!vars || !vars->val.integer) {
                             fprintf(stderr, "Missing variable in reply\n");
                             break;
                         }

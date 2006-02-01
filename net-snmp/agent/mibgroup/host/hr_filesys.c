@@ -6,6 +6,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include "host_res.h"
 #include "hr_filesys.h"
+#include "hr_storage.h"
 #include <net-snmp/utilities.h>
 
 #if HAVE_MNTENT_H
@@ -85,6 +86,15 @@ struct mnttab  *HRFS_entry = &HRFS_entry_struct;
 #define	HRFS_type	mnt_fstype
 #define	HRFS_statfs	statvfs
 
+#elif defined(HAVE_STATVFS) && defined(__NetBSD__)
+
+static struct statvfs	*fsstats = NULL;
+struct statvfs		*HRFS_entry;
+static int		fscount;
+#define HRFS_mount	f_mntonname
+#define	HRFS_name	f_mntfromname
+#define HRFS_statfs	statvfs
+#define	HRFS_type	f_fstypename
 #elif defined(HAVE_GETFSSTAT)
 static struct statfs *fsstats = 0;
 static int      fscount;
@@ -113,6 +123,16 @@ struct mntent  *HRFS_entry;
 #define	HRFS_mount	mnt_dir
 #define	HRFS_type	mnt_type
 #define	HRFS_statfs	statfs
+
+#ifdef linux
+#define MNTTYPE_CD9660	"iso9660"
+#define MNTTYPE_EXT2FS	"ext2"
+#define MNTTYPE_EXT3FS	"ext3"
+#define MNTTYPE_SMBFS	"smbfs"
+#define MNTTYPE_MSDOS	"msdos"
+#define MNTTYPE_FAT32	"vfat"
+#define MNTTYPE_NTFS	"ntfs"
+#endif	/* linux */
 
 #endif
 
@@ -252,7 +272,7 @@ var_hrfilesys(struct variable *vp,
               int exact, size_t * var_len, WriteMethod ** write_method)
 {
     int             fsys_idx;
-    static char     string[100];
+    static char     string[1024];
     char           *mnt_type;
 
     fsys_idx =
@@ -362,7 +382,7 @@ var_hrfilesys(struct variable *vp,
 #endif
 #ifdef MNTTYPE_UFS
         else if (!strcmp(mnt_type, MNTTYPE_UFS))
-#if defined(BerkelyFS) && !defined(MNTTYPE_HFS)
+#if (defined(BerkelyFS) && !defined(MNTTYPE_HFS)) || defined(solaris2)
             fsys_type_id[fsys_type_len - 1] = 3;
 #else                           /* SysV */
             fsys_type_id[fsys_type_len - 1] = 4;        /* or 3? XXX */
@@ -380,6 +400,10 @@ var_hrfilesys(struct variable *vp,
         else if (!strcmp(mnt_type, MNTTYPE_MSDOS))
             fsys_type_id[fsys_type_len - 1] = 5;
 #endif
+#ifdef MNTTYPE_FAT32
+        else if (!strcmp(mnt_type, MNTTYPE_FAT32))
+            fsys_type_id[fsys_type_len - 1] = 22;
+#endif
 #ifdef MNTTYPE_CDFS
         else if (!strcmp(mnt_type, MNTTYPE_CDFS))
 #ifdef RockRidge
@@ -388,9 +412,21 @@ var_hrfilesys(struct variable *vp,
             fsys_type_id[fsys_type_len - 1] = 12;
 #endif
 #endif
+#ifdef MNTTYPE_HSFS
+        else if (!strcmp(mnt_type, MNTTYPE_HSFS))
+            fsys_type_id[fsys_type_len - 1] = 13;
+#endif
 #ifdef MNTTYPE_ISO9660
         else if (!strcmp(mnt_type, MNTTYPE_ISO9660))
             fsys_type_id[fsys_type_len - 1] = 12;
+#endif
+#ifdef MNTTYPE_CD9660
+        else if (!strcmp(mnt_type, MNTTYPE_CD9660))
+            fsys_type_id[fsys_type_len - 1] = 12;
+#endif
+#ifdef MNTTYPE_SMBFS
+        else if (!strcmp(mnt_type, MNTTYPE_SMBFS))
+            fsys_type_id[fsys_type_len - 1] = 14;
 #endif
 #ifdef MNTTYPE_NFS
         else if (!strcmp(mnt_type, MNTTYPE_NFS))
@@ -408,6 +444,10 @@ var_hrfilesys(struct variable *vp,
         else if (!strcmp(mnt_type, MNTTYPE_EXT2FS))
             fsys_type_id[fsys_type_len - 1] = 23;
 #endif
+#ifdef MNTTYPE_EXT3FS
+        else if (!strcmp(mnt_type, MNTTYPE_EXT3FS))
+            fsys_type_id[fsys_type_len - 1] = 23;
+#endif
 #ifdef MNTTYPE_NTFS
         else if (!strcmp(mnt_type, MNTTYPE_NTFS))
             fsys_type_id[fsys_type_len - 1] = 9;
@@ -421,7 +461,9 @@ var_hrfilesys(struct variable *vp,
         return (u_char *) fsys_type_id;
 
     case HRFSYS_ACCESS:
-#if HAVE_GETFSSTAT
+#if defined(HAVE_STATVFS) && defined(__NetBSD__)
+	long_return = HRFS_entry->f_flag & MNT_RDONLY ? 2 : 1;
+#elif defined(HAVE_GETFSSTAT)
         long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
 #elif defined(cygwin)
         long_return = 1;
@@ -440,7 +482,7 @@ var_hrfilesys(struct variable *vp,
             long_return = 2;    /* others probably aren't */
         return (u_char *) & long_return;
     case HRFSYS_STOREIDX:
-        long_return = fsys_idx; /* Use the same indices */
+        long_return = fsys_idx + HRS_TYPE_FIXED_MAX;
         return (u_char *) & long_return;
     case HRFSYS_FULLDUMP:
         return when_dumped(HRFS_entry->HRFS_name, FULL_DUMP, var_len);
@@ -494,15 +536,24 @@ const char     *HRFS_ignores[] = {
 #ifdef MNTTYPE_PROC
     MNTTYPE_PROC,
 #endif
+#ifdef MNTTYPE_PROCFS
+    MNTTYPE_PROCFS,
+#endif
 #ifdef MNTTYPE_AUTOFS
     MNTTYPE_AUTOFS,
-#endif
+#else
     "autofs",
+#endif
 #ifdef linux
     "devpts",
+    "devfs",
+    "usbdevfs",
+    "tmpfs",
     "shm",
 #endif
 #ifdef solaris2
+    "mntfs",
+    "proc",
     "fd",
 #endif
     0
@@ -586,6 +637,9 @@ Check_HR_FileSys_NFS (void)
 #if defined(MNTTYPE_NFS3)
 	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS3) ||
 #endif
+#if defined(MNTTYPE_SMBFS)
+	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_SMBFS) ||
+#endif
 #if defined(MNTTYPE_LOFS)
 	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_LOFS) ||
 #endif
@@ -621,7 +675,7 @@ when_dumped(char *filesys, int level, size_t * length)
 {
     time_t          dumpdate = 0, tmp;
     FILE           *dump_fp;
-    char            line[100];
+    char            line[1024];
     char           *cp1, *cp2, *cp3;
 
     /*
@@ -750,10 +804,14 @@ Get_FSSize(char *dev)
   		 * in case of 512 (f_blocks/2) is returned
   		 * otherwise (f_blocks*(f_bsize/1024)) is returned
   		 */
+#if defined(solaris2) && defined(STRUCT_STATVFS_HAS_F_FRSIZE)
+                return (statfs_buf.f_blocks*(statfs_buf.f_frsize/1024));
+#else
   		if (statfs_buf.f_bsize == 512)
   		    return (statfs_buf.f_blocks/2);
                 else
   		    return (statfs_buf.f_blocks*(statfs_buf.f_bsize/1024));
+#endif
             else
                 return -1;
         }
