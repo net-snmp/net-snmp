@@ -6,14 +6,6 @@ top_builddir=../..
 INSTALLBINPROGS=snmpnetstat53$(EXEEXT)
 INSTALLBINSCRIPTS=$(srcdir)/snmpnetstat
 
-# use GNU vpath, if available, to only set a path for source and headers
-# VPATH will pick up objects too, which is bad if you are sharing a
-# source dir...
-@GNU_vpath@ %.h $(srcdir)
-@GNU_vpath@ %.c $(srcdir)
-# fallback to regular VPATH for non-gnu...
-@NON_GNU_VPATH@ $(srcdir)
-
 #
 # build info
 #
