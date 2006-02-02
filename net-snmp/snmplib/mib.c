@@ -2904,7 +2904,10 @@ read_objid(const char *input, oid * output, size_t * out_len)
 #endif /* DISABLE_MIB_LOADING */
 
 #ifndef DISABLE_MIB_LOADING
-    if (root == NULL) {
+    if ((root == NULL) && (tree_head != NULL)) {
+        root = tree_head;
+    }
+    else if (root == NULL) {
         SET_SNMP_ERROR(SNMPERR_NOMIB);
         *out_len = 0;
         return 0;
