@@ -1235,7 +1235,7 @@ main(int argc, char *argv[])
         numfds = 0;
         FD_ZERO(&readfds);
         FD_ZERO(&writefds);
-        FD_ZERO(&writefds);
+        FD_ZERO(&exceptfds);
         block = 0;
         tvp = &timeout;
         timerclear(tvp);
