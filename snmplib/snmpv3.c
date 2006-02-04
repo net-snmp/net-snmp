@@ -758,7 +758,6 @@ usm_parse_create_usmUser(const char *token, char *line)
     size_t          userKeyLen = SNMP_MAXBUF_SMALL;
     size_t          privKeyLen = 0;
     size_t          ret;
-    int             ret2;
     int             testcase;
 
     newuser = usm_create_user();
@@ -853,9 +852,9 @@ usm_parse_create_usmUser(const char *token, char *line)
     } else if (strcmp(buf,"-l") != 0) {
         /* a password is specified */
         userKeyLen = sizeof(userKey);
-        ret2 = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
+        ret = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
                           (u_char *) buf, strlen(buf), userKey, &userKeyLen);
-        if (ret2 != SNMPERR_SUCCESS) {
+        if (ret != SNMPERR_SUCCESS) {
             config_perror("could not generate the authentication key from the "
                           "supplied pass phrase.");
             usm_free_user(newuser);
@@ -866,19 +865,19 @@ usm_parse_create_usmUser(const char *token, char *line)
     /*
      * And turn it into a localized key 
      */
-    ret2 = sc_get_properlength(newuser->authProtocol,
-                               newuser->authProtocolLen);
-    if (ret2 <= 0) {
+    ret =
+        sc_get_properlength(newuser->authProtocol,
+                            newuser->authProtocolLen);
+    if (ret <= 0) {
         config_perror("Could not get proper authentication protocol key length");
         return;
     }
-    newuser->authKey = (u_char *) malloc(ret2);
+    newuser->authKey = (u_char *) malloc(ret);
 
     if (strcmp(buf,"-l") == 0) {
         /* a local key is directly specified */
         cp = copy_nword(cp, buf, sizeof(buf));
         newuser->authKeyLen = 0;
-        ret = ret2;
         if (!snmp_hex_to_binary(&newuser->authKey, &ret,
                                 &newuser->authKeyLen, 0, buf)) {
             config_perror("invalid key value argument to -l");
@@ -891,12 +890,12 @@ usm_parse_create_usmUser(const char *token, char *line)
             return;
         }
     } else {
-        newuser->authKeyLen = ret2;
-        ret2 = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
-                            newuser->engineID, newuser->engineIDLen,
-                             userKey, userKeyLen,
-                             newuser->authKey, &newuser->authKeyLen);
-        if (ret2 != SNMPERR_SUCCESS) {
+        newuser->authKeyLen = ret;
+        ret = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
+                           newuser->engineID, newuser->engineIDLen,
+                           userKey, userKeyLen,
+                           newuser->authKey, &newuser->authKeyLen);
+        if (ret != SNMPERR_SUCCESS) {
             config_perror("could not generate localized authentication key "
                           "(Kul) from the master key (Ku).");
             usm_free_user(newuser);
@@ -962,9 +961,9 @@ usm_parse_create_usmUser(const char *token, char *line)
         } else if (strcmp(buf,"-l") != 0) {
             /* a password is specified */
             userKeyLen = sizeof(userKey);
-            ret2 = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
+            ret = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
                               (u_char *) buf, strlen(buf), userKey, &userKeyLen);
-            if (ret2 != SNMPERR_SUCCESS) {
+            if (ret != SNMPERR_SUCCESS) {
                 config_perror("could not generate the privacy key from the "
                               "supplied pass phrase.");
                 usm_free_user(newuser);
@@ -975,9 +974,10 @@ usm_parse_create_usmUser(const char *token, char *line)
         /*
          * And turn it into a localized key 
          */
-        ret2 = sc_get_properlength(newuser->authProtocol,
-                                   newuser->authProtocolLen);
-        if (ret2 < 0) {
+        ret =
+            sc_get_properlength(newuser->authProtocol,
+                                newuser->authProtocolLen);
+        if (ret < 0) {
             config_perror("could not get proper key length to use for the "
                           "privacy algorithm.");
             usm_free_user(newuser);
@@ -988,7 +988,6 @@ usm_parse_create_usmUser(const char *token, char *line)
         if (strcmp(buf,"-l") == 0) {
             /* a local key is directly specified */
             cp = copy_nword(cp, buf, sizeof(buf));
-            ret = ret2;
             newuser->privKeyLen = 0;
             if (!snmp_hex_to_binary(&newuser->privKey, &ret,
                                     &newuser->privKeyLen, 0, buf)) {
@@ -997,12 +996,12 @@ usm_parse_create_usmUser(const char *token, char *line)
                 return;
             }
         } else {
-            newuser->privKeyLen = ret2;
-            ret2 = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
-                                newuser->engineID, newuser->engineIDLen,
-                                userKey, userKeyLen,
-                                newuser->privKey, &newuser->privKeyLen);
-            if (ret2 != SNMPERR_SUCCESS) {
+            newuser->privKeyLen = ret;
+            ret = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
+                               newuser->engineID, newuser->engineIDLen,
+                               userKey, userKeyLen,
+                               newuser->privKey, &newuser->privKeyLen);
+            if (ret != SNMPERR_SUCCESS) {
                 config_perror("could not generate localized privacy key "
                               "(Kul) from the master key (Ku).");
                 usm_free_user(newuser);
@@ -1519,7 +1518,7 @@ snmpv3_clone_engineID(u_char ** dest, size_t * destlen, u_char * src,
  *
  * Generates a malloced copy of our engineID.
  *
- * 'length' is set to the length of engineID  -OR-  0 on failure.
+ * 'length' is set to the length of engineID  -OR-  < 0 on failure.
  */
 u_char         *
 snmpv3_generate_engineID(size_t * length)
