@@ -1230,6 +1230,7 @@ AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(long long)
 AC_CHECK_TYPES([int32_t, uint32_t, u_int32_t])
 AC_CHECK_TYPES([int64_t, uint64_t, u_int64_t])
+AC_CHECK_TYPES([off64_t])
 
 # guess IPv6 stack type.
 if test "x$enable_ipv6" = "xyes"; then
@@ -2956,6 +2957,7 @@ AC_CHECK_FUNCS(signal setsid sigset sigblock sighold strerror setenv vsnprintf s
 AC_CHECK_FUNCS(sigaction)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(execv system fork getpid strncasecmp sigalrm)
+AC_CHECK_FUNCS(lseek64)
 if test "x$with_rpm" != "xno" && \
         echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
   OLDLIBS=$LIBS
@@ -3590,6 +3592,16 @@ AC_CHECK_STRUCT_FOR([
 #include <nlist.h>
 #endif
 ],nlist,n_value)
+
+# struct nlist64 (IRIX)
+AC_CHECK_STRUCT_FOR([
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_NLIST_H
+#include <nlist.h>
+#endif
+],nlist64, n_value)
 
 # check struct ipstat for various things
 AC_CHECK_STRUCT_FOR([
