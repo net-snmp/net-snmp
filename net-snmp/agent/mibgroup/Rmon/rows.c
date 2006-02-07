@@ -18,11 +18,11 @@
  * SOFTWARE.
  ******************************************************************/
 
+#include <net-snmp/net-snmp-config.h>
 #include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -796,7 +796,7 @@ ROWDATAAPI_header_DataEntry(struct variable * vp, oid * name,
     ctrl_indx = vp->namelen >= *length ? 0 : name[vp->namelen];
     if (ctrl_indx)
         data_index =
-            (vp->namelen + 1 >= *length) ? 0 : name[vp->namelen + 1];
+            ((int)(vp->namelen + 1) >= (int)*length) ? 0 : name[vp->namelen + 1];
     else
         data_index = 0;
 
@@ -808,7 +808,7 @@ ROWDATAAPI_header_DataEntry(struct variable * vp, oid * name,
                 bptr = scrlr->first_data_ptr;
                 for (iii = 0; iii < scrlr->data_stored && bptr;
                      iii++, bptr = bptr->next) {
-                    if (bptr->data_index == data_index)
+                    if ((long)bptr->data_index == data_index)
                         break;
                 }
                 if (!bptr)
@@ -829,11 +829,11 @@ ROWDATAAPI_header_DataEntry(struct variable * vp, oid * name,
             bptr = scrlr->first_data_ptr;
             for (iii = 0; iii < scrlr->data_stored && bptr;
                  iii++, bptr = bptr->next) {
-                if (bptr->data_index && bptr->data_index > data_index)
+                if (bptr->data_index && (long)bptr->data_index > data_index)
                     break;
             }
 
-            if (bptr && bptr->data_index <= data_index)
+            if (bptr && (long)bptr->data_index <= data_index)
                 bptr = NULL;
 
             if (!bptr) {        /* travel to next row */

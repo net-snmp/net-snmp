@@ -1518,7 +1518,7 @@ compiler."
 	esac # case $deplib
 	if test $found = yes || test -f "$lib"; then :
 	else
-	  $echo "$modename: cannot find the library \`$lib'" 1>&2
+	  $echo "$modename: cannot find the library \`$lib' (lib${name}.la: $deplib)" 1>&2
 	  exit 1
 	fi
 

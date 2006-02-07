@@ -17,3 +17,4 @@
 #define ARP_SCAN_FOUR_ARGUMENTS 1
 
 #define UTMP_HAS_NO_TYPE 1
+#define UTMP_HAS_NO_PID 1

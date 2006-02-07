@@ -47,6 +47,7 @@
 #include "snmpd.h"
 #include "agentx/protocol.h"
 #include "agentx/client.h"
+#include "agentx/agentx_config.h"
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_trap.h>
 #ifdef USING_MIBII_SYSORTABLE_MODULE
@@ -97,6 +98,10 @@ init_subagent(void)
                "the callback transport is not available.\n");
     return;
 #else
+    snmpd_register_config_handler("agentxsocket",
+                                  agentx_parse_agentx_socket, NULL,
+                                  "AgentX bind address");
+
     if (agentx_callback_sess == NULL) {
         agentx_callback_sess = netsnmp_callback_open(callback_master_num,
                                                      handle_subagent_response,
@@ -200,10 +205,29 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
     ns_subagent_magic *smagic = NULL;
 
     if (operation == NETSNMP_CALLBACK_OP_DISCONNECT) {
+        struct synch_state *state = (struct synch_state *) magic;
         int             period =
-            netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
+            netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
         DEBUGMSGTL(("agentx/subagent",
                     "transport disconnect indication\n"));
+
+        /*
+         * deal with existing session. This happend if agentx sends
+         * a message to the master, but the master goes away before
+         * a response is sent. agentx will spin in snmp_synch_response_cb,
+         * waiting for a response. At the very least, the waiting
+         * flag must be set to break that loop. The rest is copied
+         * from disconnect handling in snmp_sync_input.
+         */
+        if(state) {
+            state->waiting = 0;
+            state->pdu = NULL;
+            state->status = STAT_ERROR;
+            session->s_snmp_errno = SNMPERR_ABORT;
+            SET_SNMP_ERROR(SNMPERR_ABORT);
+        }
+
         /*
          * Deregister the ping alarm, if any, and invalidate all other
          * references to this session.  
@@ -681,8 +705,8 @@ subagent_open_master_session(void)
     sess.timeout = SNMP_DEFAULT_TIMEOUT;
     sess.flags |= SNMP_FLAGS_STREAM_SOCKET;
     if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET)) {
-        sess.peername =
-            netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET);
+        sess.peername = strdup(
+            netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET));
     } else {
         sess.peername = strdup(AGENTX_SOCKET);
     }
@@ -916,6 +940,7 @@ agentx_check_session(unsigned int clientreg, void *clientarg)
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_INDEX_STOP, (void *) ss);
         snmp_close(main_session);
+        register_mib_detach();
         main_session = NULL;
         agentx_reopen_session(0, NULL);
     } else {

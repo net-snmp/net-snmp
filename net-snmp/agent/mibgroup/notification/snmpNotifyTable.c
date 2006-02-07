@@ -543,7 +543,7 @@ is_delim(const char c)
 }
 
 int
-snmpTagValid(const char *tag, const size_t tagLen)
+snmpTagValid(const u_char *tag, const size_t tagLen)
 {
     size_t          i = 0;
 
