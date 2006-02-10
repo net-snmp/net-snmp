@@ -69,7 +69,7 @@ void
 netsnmp_parse_override(const char *token, char *line)
 {
     char           *cp;
-    char            buf[SNMP_MAXBUF];
+    char            buf[SNMP_MAXBUF], namebuf[SNMP_MAXBUF];
     int             readwrite = 0;
     oid             oidbuf[MAX_OID_LEN];
     size_t          oidbuf_len = sizeof(oidbuf);
@@ -77,10 +77,10 @@ netsnmp_parse_override(const char *token, char *line)
     override_data  *thedata;
     netsnmp_handler_registration *the_reg;
 
-    cp = copy_nword(line, buf, sizeof(buf) - 1);
-    if (strcmp(buf, "-rw") == 0) {
+    cp = copy_nword(line, namebuf, sizeof(namebuf) - 1);
+    if (strcmp(namebuf, "-rw") == 0) {
         readwrite = 1;
-        cp = copy_nword(cp, buf, sizeof(buf) - 1);
+        cp = copy_nword(cp, namebuf, sizeof(namebuf) - 1);
     }
 
     if (!cp) {
@@ -88,7 +88,7 @@ netsnmp_parse_override(const char *token, char *line)
         return;
     }
 
-    if (!snmp_parse_oid(buf, oidbuf, &oidbuf_len)) {
+    if (!snmp_parse_oid(namebuf, oidbuf, &oidbuf_len)) {
         config_perror("illegal oid");
         return;
     }
@@ -171,6 +171,7 @@ netsnmp_parse_override(const char *token, char *line)
         return;
     }
 
+    the_reg->handlerName = strdup(namebuf);
     the_reg->priority = 255;
     the_reg->modes = (readwrite) ? HANDLER_CAN_RWRITE : HANDLER_CAN_RONLY;
     the_reg->handler =
