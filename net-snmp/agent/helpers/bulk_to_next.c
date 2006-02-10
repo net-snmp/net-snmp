@@ -43,12 +43,22 @@ netsnmp_bulk_to_next_fix_requests(netsnmp_request_info *requests)
 {
     netsnmp_request_info *request;
     /*
+     * Make sure that:
+     *    - repeats remain
+     *    - last handler provided an answer
+     *    - answer didn't exceed range end (ala check_getnext_results)
+     *    - there is a next variable
+     * then
      * update the varbinds for the next request series 
      */
     for (request = requests; request; request = request->next) {
         if (request->repeat > 0 &&
             request->requestvb->type != ASN_NULL &&
             request->requestvb->type != ASN_PRIV_RETRY &&
+            (snmp_oid_compare(request->requestvb->name,
+                              request->requestvb->name_length,
+                              request->range_end,
+                              request->range_end_len) < 0) &&
             request->requestvb->next_variable ) {
             request->repeat--;
             snmp_set_var_objid(request->requestvb->next_variable,
@@ -56,6 +66,12 @@ netsnmp_bulk_to_next_fix_requests(netsnmp_request_info *requests)
                                request->requestvb->name_length);
             request->requestvb = request->requestvb->next_variable;
             request->requestvb->type = ASN_PRIV_RETRY;
+            /*
+             * if inclusive == 2, it was set in check_getnext_results for
+             * the previous requestvb. Now that we've moved on, clear it.
+             */
+            if (2 == request->inclusive)
+                request->inclusive = 0;
         }
     }
 }
