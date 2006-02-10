@@ -1407,7 +1407,7 @@ _mfd_ifTable_undo_setup_allocate(ifTable_rowreq_ctx *rowreq_ctx)
         dl = netsnmp_get_list_node(rowreq_ctx->ifTable_data_list,
                                    "ifentry:undo");
         netsnmp_assert(NULL != dl);
-        ++((int)dl->data);
+        ++(*(int*)&dl->data);
         DEBUGMSGTL(("internal:ifTable:_mfd_ifTable_undo_setup_allocate",
                     "++refcount = %d\n",(int)dl->data));
     }
@@ -1486,7 +1486,7 @@ _mfd_ifTable_undo_setup_release(ifTable_rowreq_ctx *rowreq_ctx)
     if (NULL == dl)
         return; /* better to lead than double free */
 
-    --((int)dl->data);
+    --(*(int*)&dl->data);
     snmp_log(LOG_ERR, "--refcount at %d\n", (int)dl->data);
 
     if (0 == (int)dl->data) {
