@@ -21,6 +21,7 @@ SKIPIF DISABLE_SNMPV2C
 snmp_version=v2c
 TESTCOMMUNITY=testcommunity
 
+CONFIGTRAPD [snmp] persistentDir $SNMP_TMP_PERSISTENTDIR
 CONFIGTRAPD authcommunity execute $TESTCOMMUNITY
 CONFIGTRAPD doNotLogTraps true
 CONFIGTRAPD traphandle default $0 $1 traphandle
