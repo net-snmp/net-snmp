@@ -44,6 +44,12 @@ ifTable_registration ifTable_user_context;
 void            initialize_table_ifTable(void);
 void            shutdown_table_ifTable(void);
 
+static int
+_if_number_handler(netsnmp_mib_handler *handler,
+                   netsnmp_handler_registration *reginfo,
+                   netsnmp_agent_request_info *reqinfo,
+                   netsnmp_request_info *requests);
+
 
 /**
  * Initializes the ifTable module
@@ -135,6 +141,24 @@ initialize_table_ifTable(void)
      * call interface initialization code
      */
     _ifTable_initialize_interface(user_context, flags);
+
+    /*
+     * register scalar for ifNumber
+     */
+    {
+        oid             reg_oid[] =
+            { IFTABLE_NUMBER };
+        netsnmp_handler_registration *myreg;
+
+        myreg =
+            netsnmp_create_handler_registration("if number",
+                                                _if_number_handler,
+                                                &reg_oid,
+                                                OID_LENGTH(reg_oid),
+                                                HANDLER_CAN_RONLY);
+        netsnmp_register_instance(myreg);
+    }
+
 }                               /* initialize_table_ifTable */
 
 /**
@@ -2301,6 +2325,27 @@ ifTable_check_dependencies(ifTable_rowreq_ctx * rowreq_ctx)
      */
     return rc;
 }                               /* ifTable_check_dependencies */
+
+
+static int
+_if_number_handler(netsnmp_mib_handler *handler,
+                      netsnmp_handler_registration *reginfo,
+                      netsnmp_agent_request_info *reqinfo,
+                      netsnmp_request_info *requests)
+{
+    if (MODE_GET == reqinfo->mode) {
+        int val = ifTable_container_size();
+        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                                 (u_char *) &val, sizeof(val));
+    } else
+        netsnmp_assert("bad mode in RO handler");
+    
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                         requests);
+    
+    return SNMP_ERR_NOERROR;
+}
 
 /** @} */
 /** @{ */
