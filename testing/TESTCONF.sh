@@ -113,7 +113,7 @@ fi
 
 PROBE_FOR_PORT() {
     BASE_PORT=$1
-    MAX_RETRIES=3
+    MAX_RETRIES=10
     if test -x "$NETSTAT" ; then
         if test -z "$RANDOM"; then
             RANDOM=2
@@ -131,7 +131,8 @@ PROBE_FOR_PORT() {
             fi
             MAX_RETRIES=`expr $MAX_RETRIES - 1`
             if [ $MAX_RETRIES -eq 0 ]; then
-                echo "ERROR: Could not find available port."
+                echo "ERROR: Could not find available port." >&2
+                echo "NOPORT"
                 exit 255
             fi
         done
