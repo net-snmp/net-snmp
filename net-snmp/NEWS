@@ -3,6 +3,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.2.3*
 
+    snmpd:
+      - fix trap processing from SMUX peers (patch 1430824 from Dell,
+        submitted by SuSE)
+
     snmpusm:
       - allows to use old and/or new localized key instead of passphrase with
         option -Ck
