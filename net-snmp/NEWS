@@ -3,9 +3,25 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.4*
 
+    snmpd:
+      - fix trap processing from SMUX peers (patch 1430824 from Dell,
+        submitted by SuSE)
+
     snmpusm:
       - performance improvement when changing localized keys
       - new option -Cp to set usmUserPublic value
+
+
+*5.3.0.1*
+
+  *** Security Fix ***
+
+    - In version 5.3 much of the authorization control was rewritten.
+      There was a bug in the new code that resulted in granting write
+      access to read-only users or communities which were configured
+      using the "rocommunity" or "rouser" snmpd.conf tokens.  5.3.0.1
+      fixes this problem.  Users are encouraged to immediately update
+      their installations if they use either of these tokens.
 
 
 *5.3*
