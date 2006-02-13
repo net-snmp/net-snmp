@@ -1919,10 +1919,10 @@ smux_trap_process(u_char * rsp, size_t * len)
             snmptrap_ptr = snmptrap_ptr->next_variable;
         }
 
-        snmp_set_var_objid(snmptrap_ptr, var_name, var_name_len);
-        snmp_set_var_value(snmptrap_ptr, (char *) var_val, var_val_len);
         snmptrap_ptr->type = vartype;
         snmptrap_ptr->next_variable = NULL;
+        snmp_set_var_objid(snmptrap_ptr, var_name, var_name_len);
+        snmp_set_var_value(snmptrap_ptr, (char *) var_val, var_val_len);
 
     }
 
