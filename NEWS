@@ -1,6 +1,12 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.0.11*
+
+ Fixes:
+   - fix trap processing from SMUX peers (patch 1430824 from Dell,
+     submitted by SuSE)
+
 *5.0.10.2*
  Security:
    - Fixed a denial of service vulnerability when stream sockets have
