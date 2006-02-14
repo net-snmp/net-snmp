@@ -15,7 +15,7 @@ extern          "C" {
      * scalars
      */
 #define IFTABLE_LAST_CHANGE  1,3,6,1,2,1,31,1,5
-#define IFTABLE_NUMBER  1,3,6,1,2,1,2,1,0
+#define IFTABLE_NUMBER  1,3,6,1,2,1,2,1
 
 
     /*

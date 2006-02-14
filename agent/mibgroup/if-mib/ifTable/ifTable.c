@@ -153,10 +153,10 @@ initialize_table_ifTable(void)
         myreg =
             netsnmp_create_handler_registration("if number",
                                                 _if_number_handler,
-                                                &reg_oid,
+                                                reg_oid,
                                                 OID_LENGTH(reg_oid),
                                                 HANDLER_CAN_RONLY);
-        netsnmp_register_instance(myreg);
+        netsnmp_register_scalar(myreg);
     }
 
 }                               /* initialize_table_ifTable */
