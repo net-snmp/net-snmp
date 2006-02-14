@@ -279,25 +279,16 @@ which use the "IP Helper API" (IPHLPAPI).
 To determine what code is disabled when the PSDK is not used, search the
 source code for HAVE_WIN32_PLATFORM_SDK.
 
-The PSDK can be downloaded from:
+The PSDK can be downloaded from the MSDN site.  Go to http://msdn.microsoft.com 
+and do a search for 'psdk download' (without the quotes).  You should find both
+a web install and a full install.  
 
-    http://msdn.microsoft.com/downloads/
+When installing the SDK, all that is required is the 'Core'.
 
-as follows:
-
-    -  Using Internet Explorer (Netscape / Mozilla won't work), go to the 
-       above URL
-    -  From the menu at the left, Click "Downloads by Topic";
-            From the main window, Click "Platform SDK".
-    -  From the new window that appears, select "Core SDK".
-    -  The full Core SDK is ~240Mb (expanding to ~560Mb on installation).
-       In fact, the only portion that's required is the basic "Build
-       Environment" (36Mb) So it's safe to deselect the pre-release version,
-       documentation, sample code and 64-bit elements.
-
-    -  Once this package has installed, from the Start Menu run
-       "Programs ->Microsoft Platform SDK... -> Visual Studio Registration
-       ->Register PSDK Directories with Visual Studio"
+Once this package has installed, from the Start Menu run 
+  "Programs ->Microsoft Platform SDK... -> 
+   Visual Studio Registration ->
+   Register PSDK Directories with Visual Studio"
 
 If you are compiling using any of the following systems, the PSDK download
 is not necessary, as the required parts of the PSDK are included with the 
