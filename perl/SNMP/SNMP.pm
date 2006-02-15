@@ -698,6 +698,14 @@ sub gettable {
     } else {
 	# XXX: requires specification in numeric OID...  ack.!
 	@columns = @{$options->{'columns'}};
+
+	# if the columns aren't numeric, we need to turn them into
+	# numeric columns...
+	map {
+	    if ($_ !~ /\.1\.3/) {
+		$_ = $SNMP::MIB{$_}{'objectID'};
+	    }
+	} @columns;
     }
 
     # create the initial walking info.
@@ -714,7 +722,7 @@ sub gettable {
     $vbl = $varbinds;
 	
     my $repeatcount;
-    if ($opts->{nogetbulk}) {
+    if ($this->{Version} == 1 || $opts->{nogetbulk}) {
 	$repeatcount = 1;
     } elsif ($options->{'repeat'}) {
 	$repeatcount = $options->{'repeat'};
