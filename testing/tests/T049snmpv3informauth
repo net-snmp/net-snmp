@@ -12,6 +12,7 @@ HEADER "SNMPv3 informs ($DEFSECURITYLEVEL) received and sent by tools"
 
 . ./Sv3usmconfigtrapd
 CONFIGTRAPD authuser log $TESTAUTHUSER $DEFSECURITYLEVEL
+CONFIGTRAPD agentxsocket /dev/null
 
 STARTTRAPD
 
