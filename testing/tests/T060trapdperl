@@ -28,7 +28,7 @@ CONFIGTRAPD agentxsocket /dev/null
 
 STARTTRAPD
 
-CAPTURE "snmptrap -d -Ci -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 0 $TESTOID system.sysContact.0 s handled_trap_$snmp_version"
+CAPTURE "snmptrap -Ci -t $SNMP_SLEEP -d -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 0 $TESTOID system.sysContact.0 s handled_trap_$snmp_version"
 
 STOPTRAPD
 
