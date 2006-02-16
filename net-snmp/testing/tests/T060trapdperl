@@ -20,11 +20,11 @@ echo "use blib qw(${SNMP_UPDIR}/perl);" > ${SNMP_TMPDIR}/snmp_perl_trapd.pl
 echo "use NetSNMP::TrapReceiver;" >> ${SNMP_TMPDIR}/snmp_perl_trapd.pl
 
 CONFIGTRAPD authcommunity execute $TESTCOMMUNITY
-#CONFIGTRAPD doNotLogTraps true
 CONFIGTRAPD perlInitFile ${SNMP_TMPDIR}/snmp_perl_trapd.pl
 CONFIGTRAPD 'perl sub my_receiver { open LOG,">'$EMBPERL_LOGFILE'"; print LOG "handled_by_embperl"; close LOG };'
 CONFIGTRAPD 'perl NetSNMP::TrapReceiver::register("'$TESTOID'", \&my_receiver) || warn "registered_perl_handler_failed\n";'
 CONFIGTRAPD 'perl print STDERR "registered_perl_handler_ok\n";'
+CONFIGTRAPD agentxsocket /dev/null
 
 STARTTRAPD
 
