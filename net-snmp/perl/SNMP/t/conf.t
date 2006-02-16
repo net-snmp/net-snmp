@@ -42,7 +42,7 @@ ok($myint == 1);
 if ($myint != 1) {
     die "\n\n\n" . "*" x 75 . "\nBIG PROBLEM: I wasn't able to read
     data from a configuration file.  This likely means that you've
-    complied th net-snmp package with static libraries, which can
+    compiled the net-snmp package with static libraries, which can
     cause real problems with the perl module.  Please reconfigure your
     net-snmp package for use with shared libraries (run configure with
     --enable-shared)\n" . "*" x 75 . "\n\n\n\n";

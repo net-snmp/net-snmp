@@ -35,7 +35,8 @@ get_first_context(void **my_loop_context, void **my_data_context,
     *my_loop_context = context_ptr;
     *my_data_context = context_ptr;
 
-    snmp_set_var_value(put_data, context_ptr->context_name,
+    snmp_set_var_value(put_data,
+                     (u_char*)context_ptr->context_name,
                        strlen(context_ptr->context_name));
     return put_data;
 }
@@ -63,7 +64,8 @@ get_next_context(void **my_loop_context,
     if (!context_ptr)
         return NULL;
 
-    snmp_set_var_value(put_data, context_ptr->context_name,
+    snmp_set_var_value(put_data,
+                     (u_char*)context_ptr->context_name,
                        strlen(context_ptr->context_name));
     return put_data;
 }
@@ -141,7 +143,7 @@ vacm_context_handler(netsnmp_mib_handler *handler,
              * only one column should ever reach us, so don't check it 
              */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                     context_ptr->context_name,
+                                   (u_char*)context_ptr->context_name,
                                      strlen(context_ptr->context_name));
 
             break;

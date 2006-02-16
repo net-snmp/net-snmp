@@ -4,6 +4,14 @@
 
 top_builddir	= ..
 
+# use GNU vpath, if available, to only set a path for source and headers
+# VPATH will pick up objects too, which is bad if you are sharing a
+# source dir...
+@GNU_vpath@ %.h $(srcdir)
+@GNU_vpath@ %.c $(srcdir)
+# fallback to regular VPATH for non-gnu...
+@NON_GNU_VPATH@ $(srcdir)
+
 #
 # what to install
 #
@@ -31,7 +39,10 @@ INSTALLBUILTSUBDIRHEADERS=../include/net-snmp/agent/mib_module_config.h \
 			mibgroup/mib_module_includes.h
 INSTALLBUILTSUBDIR=agent
 
-OTHERINSTALL=@EMBEDPERLINSTALL@
+INCLUDEMIBGROUPDIR=agent/mibgroup
+INCLUDEMIBGROUPDIRHEADERS=util_funcs.h
+
+OTHERINSTALL=installmibgroupheaders @EMBEDPERLINSTALL@
 OTHERUNINSTALL=@EMBEDPERLUNINSTALL@
 
 # XXX: need to install these  They're really UCD specific, however.
@@ -66,7 +77,7 @@ USELIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 HELPERLIB	= helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 LOCAL_LIBS	= 
 LIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @AGENTLIBS@
-OUR_AGENT_LIBS	= $(INSTALLLIBS) $(HELPERLIB) @WRAPLIBS@ $(LIBS) @DLLIBS@
+OUR_AGENT_LIBS	= $(INSTALLLIBS) $(HELPERLIB) @WRAPLIBS@ $(LIBS)
 CPPFLAGS	= -I../include -I$(top_srcdir)/include \
 		  -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
 		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
@@ -88,8 +99,8 @@ LLIBAGENTOBJS=snmp_agent.lo snmp_vars.lo agent_read_config.lo \
 	agent_handler.lo @OTHERAGENTLIBLOBJS@
 
 # The agent objects.
-AGENTOBJS=snmpd.o
-LAGENTOBJS=snmpd.lo
+AGENTOBJS=snmpd.o @other_agentobjs@
+LAGENTOBJS=snmpd.lo @other_lagentobjs@
 
 #
 # Define OBJS and LOBJS for clean target (just this directory)
@@ -127,6 +138,12 @@ libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
 	$(LIB_LD_CMD) libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION) ${LMIBOBJS}  $(LIB_LD_LIBS)
 	$(RANLIB) libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
+agentlib: libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+
+miblib: libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+
+libs: $(INSTALLLIBS)
+
 embedperlinstall:
 	  @$(SHELL) $(srcdir)/../mkinstalldirs $(INSTALL_PREFIX)$(snmplibdir)
 	  @$(INSTALL) $(srcdir)/snmp_perl.pl $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl.pl
@@ -135,6 +152,17 @@ embedperlinstall:
 embedperluninstall:
 	  @rm -f $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl.pl
 	  @echo "removed snmp_perl.pl from $(INSTALL_PREFIX)$(snmplibdir)"
+
+installmibgroupheaders:
+	@if test "$(INCLUDEMIBGROUPDIRHEADERS)" != "" ; then \
+                echo creating directory $(INSTALL_PREFIX)$(includedir)/agent ; \
+                it="$(INCLUDEMIBGROUPDIRHEADERS)" ; \
+                $(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir)/agent ; \
+                for i in $$it ; do \
+                        $(INSTALL_DATA) $(top_srcdir)/$(INCLUDEMIBGROUPDIR)/$$i $(INSTALL_PREFIX)$(includedir)/agent ; \
+                        echo "installing $$i in $(INSTALL_PREFIX)$(includedir)/agent" ; \
+                done \
+        fi
 
 snmp_vars.lo: @module_list_h@
 read_config.lo: @module_list_h@

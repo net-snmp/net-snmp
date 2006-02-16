@@ -37,7 +37,8 @@ static u_short set_mode_map[SNMP_MSG_INTERNAL_SET_MAX][BABY_STEPS_PER_MODE_MAX] 
       MODE_BSTEP_POST_REQUEST}
 };
     
-/** @defgroup baby_steps baby_steps: calls your handler in baby_steps for set processing.
+/** @defgroup baby_steps baby_steps
+ *  Calls your handler in baby_steps for set processing.
  *  @ingroup handler
  *  @{
  */

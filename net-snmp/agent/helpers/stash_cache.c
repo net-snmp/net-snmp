@@ -15,7 +15,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup stash_cache stash_cache: automatically caches data for certain handlers.
+/** @defgroup stash_cache stash_cache
+ *  Automatically caches data for certain handlers.
  *  This handler caches data in an optimized way which may aleviate
  *  the need for the lower level handlers to perform as much
  *  optimization.  Specifically, somewhere in the lower level handlers

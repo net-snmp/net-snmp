@@ -105,7 +105,7 @@ static int      use_getbulk = 1;
 static int      max_getbulk = 10;
 
 void            usage(void);
-void            get_field_names(char *);
+void            get_field_names(void);
 void            get_table_entries(netsnmp_session * ss);
 void            getbulk_table_entries(netsnmp_session * ss);
 void            print_table(void);
@@ -192,7 +192,7 @@ optProc(int argc, char *const *argv, int opt)
 			max_getbulk = atoi(argv[optind]);
 			if (max_getbulk == 0) {
 			    usage();
-			    fprintf(stderr, "Bad -Cc option: %s\n", 
+			    fprintf(stderr, "Bad -Cr option: %s\n", 
 				    argv[optind]);
 			    exit(1);
 			}
@@ -253,7 +253,6 @@ int
 main(int argc, char *argv[])
 {
     netsnmp_session session, *ss;
-    char           *tblname;
     int            total_entries = 0;
 
     setvbuf(stdout, NULL, _IOLBF, 1024);
@@ -292,15 +291,8 @@ main(int argc, char *argv[])
     }
     localdebug = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
                                         NETSNMP_DS_LIB_DUMP_PACKET);
-    tblname = strrchr(argv[optind], '.');
-    if (!tblname)
-        tblname = strrchr(argv[optind], ':');
-    if (tblname)
-        ++tblname;
-    else
-        tblname = argv[optind];
 
-    get_field_names(tblname);
+    get_field_names();
     reverse_fields();
 
     /*
@@ -459,9 +451,9 @@ print_table(void)
 }
 
 void
-get_field_names(char *tblname)
+get_field_names(void)
 {
-    u_char         *buf = NULL, *name_p = NULL;
+    char           *buf = NULL, *name_p = NULL;
     size_t          buf_len = 0, out_len = 0;
 #ifndef DISABLE_MIB_LOADING
     struct tree    *tbl = NULL;
@@ -469,7 +461,7 @@ get_field_names(char *tblname)
     int             going = 1;
 
 #ifndef DISABLE_MIB_LOADING
-    tbl = find_tree_node(tblname, -1);
+    tbl = get_tree(root, rootlen, get_tree_head());
     if (tbl) {
         tbl = tbl->child_list;
         if (tbl) {
@@ -483,7 +475,7 @@ get_field_names(char *tblname)
 #endif /* DISABLE_MIB_LOADING */
 
     if (sprint_realloc_objid
-        (&buf, &buf_len, &out_len, 1, root, rootlen - 1)) {
+        ((u_char **)&buf, &buf_len, &out_len, 1, root, rootlen - 1)) {
         table_name = buf;
         buf = NULL;
         buf_len = out_len = 0;
@@ -517,7 +509,7 @@ get_field_names(char *tblname)
 #endif /* DISABLE_MIB_LOADING */
         out_len = 0;
         if (sprint_realloc_objid
-            (&buf, &buf_len, &out_len, 1, root, rootlen + 1)) {
+            ((u_char **)&buf, &buf_len, &out_len, 1, root, rootlen + 1)) {
             name_p = strrchr(buf, '.');
             if (name_p == NULL) {
                 name_p = strrchr(buf, ':');
@@ -596,7 +588,7 @@ get_table_entries(netsnmp_session * ss)
     int             status;
     int             i;
     int             col;
-    u_char         *buf = NULL;
+    char           *buf = NULL;
     size_t          out_len = 0, buf_len = 0;
     char           *cp;
     char           *name_p = NULL;
@@ -696,7 +688,7 @@ get_table_entries(netsnmp_session * ss)
                                name_length * sizeof(oid));
                         out_len = 0;
                         if (!sprint_realloc_objid
-                            (&buf, &buf_len, &out_len, 1, vars->name,
+                            ((u_char **)&buf, &buf_len, &out_len, 1, vars->name,
                              vars->name_length)) {
                             break;
                         }
@@ -745,7 +737,7 @@ get_table_entries(netsnmp_session * ss)
                         printf("%s => taken\n", buf);
                     }
                     out_len = 0;
-                    sprint_realloc_value(&buf, &buf_len, &out_len, 1,
+                    sprint_realloc_value((u_char **)&buf, &buf_len, &out_len, 1,
                                          vars->name, vars->name_length,
                                          vars);
                     for (cp = buf; *cp; cp++) {
@@ -781,6 +773,7 @@ get_table_entries(netsnmp_session * ss)
                 running = 0;
                 if (response->errstat == SNMP_ERR_NOSUCHNAME) {
                     printf("End of MIB\n");
+                    end_of_table = 1;
                 } else {
                     fprintf(stderr, "Error in packet.\nReason: %s\n",
                             snmp_errstring(response->errstat));
@@ -824,7 +817,7 @@ getbulk_table_entries(netsnmp_session * ss)
     int             status;
     int             i;
     int             row, col;
-    u_char         *buf = NULL;
+    char           *buf = NULL;
     size_t          buf_len = 0, out_len = 0;
     char           *cp;
     char           *name_p = NULL;
@@ -852,7 +845,7 @@ getbulk_table_entries(netsnmp_session * ss)
                 last_var = NULL;
                 while (vars) {
                     out_len = 0;
-                    sprint_realloc_objid(&buf, &buf_len, &out_len, 1,
+                    sprint_realloc_objid((u_char **)&buf, &buf_len, &out_len, 1,
                                          vars->name, vars->name_length);
                     if (vars->type == SNMP_ENDOFMIBVIEW ||
                         memcmp(vars->name, name,
@@ -935,7 +928,7 @@ getbulk_table_entries(netsnmp_session * ss)
                     }
                     dp = data + row * fields;
                     out_len = 0;
-                    sprint_realloc_value(&buf, &buf_len, &out_len, 1,
+                    sprint_realloc_value((u_char **)&buf, &buf_len, &out_len, 1,
                                          vars->name, vars->name_length,
                                          vars);
                     for (cp = buf; *cp; cp++)

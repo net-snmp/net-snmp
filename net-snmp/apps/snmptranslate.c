@@ -121,6 +121,7 @@ main(int argc, char *argv[])
     int             print = 0;
     int             find_all = 0;
     int             width = 1000000;
+    int             logopt = 0;
 
     /*
      * usage: snmptranslate name
@@ -226,6 +227,7 @@ main(int argc, char *argv[])
             if (snmp_log_options(optarg, argc, argv) < 0) {
                 return (-1);
             }
+	    logopt = 1;
             break;
         default:
             fprintf(stderr, "invalid option: -%c\n", arg);
@@ -234,6 +236,9 @@ main(int argc, char *argv[])
             break;
         }
     }
+
+    if (!logopt)
+	snmp_enable_stderrlog();
 
     init_snmp("snmpapp");
     if (optind < argc)

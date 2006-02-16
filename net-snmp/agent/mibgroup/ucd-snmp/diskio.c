@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 /*
@@ -33,13 +44,22 @@ static time_t   cache_time = 0;
 #ifdef solaris2
 #include <kstat.h>
 
-#define MAX_DISKS 20
+#define MAX_DISKS 128
 
 static kstat_ctl_t *kc;
 static kstat_t *ksp;
 static kstat_io_t kio;
 static int      cache_disknr = -1;
 #endif                          /* solaris2 */
+
+#if defined(aix4) || defined(aix5)
+/*
+ * handle disk statistics via libperfstat
+ */
+#include <libperfstat.h>
+static perfstat_disk_t *ps_disk;	/* storage for all disk values */
+static int ps_numdisks;			/* number of disks in system, may change while running */
+#endif
 
 #if defined(bsdi3) || defined(bsdi4)
 #include <string.h>
@@ -49,14 +69,20 @@ static int      cache_disknr = -1;
 #endif                          /* bsdi */
 
 #if defined (freebsd4) || defined(freebsd5)
+#include <sys/param.h>
+#if __FreeBSD_version >= 500101
+#include <sys/resource.h>       /* for CPUSTATES in devstat.h */
+#else
 #include <sys/dkstat.h>
+#endif
 #include <devstat.h>
 #endif                          /* freebsd */
 
-#ifdef linux
-#define MAX_DISKS 20
-#include <assert.h>
-#endif /* linux */
+#if defined(freebsd5) && __FreeBSD_version >= 500107
+  #define GETDEVS(x) devstat_getdevs(NULL, (x))
+#else
+  #define GETDEVS(x) getdevs((x))
+#endif
 
 #if defined (darwin)
 #include <CoreFoundation/CoreFoundation.h>
@@ -68,7 +94,6 @@ static int      cache_disknr = -1;
 static mach_port_t masterPort;		/* to communicate with I/O Kit	*/
 #endif                          /* darwin */
 
-static char     type[20];
 void            diskio_parse_config(const char *, char *);
 FILE           *file;
 
@@ -135,12 +160,6 @@ init_diskio(void)
     REGISTER_MIB("diskio", diskio_variables, variable2,
                  diskio_variables_oid);
 
-    /*
-     * Added to parse snmpd.conf - abby
-     */
-    snmpd_register_config_handler("diskio", diskio_parse_config,
-                                  NULL, "diskio [device-type]");
-
 #ifdef solaris2
     kc = kstat_open();
 
@@ -154,12 +173,14 @@ init_diskio(void)
      */
     IOMasterPort(bootstrap_port, &masterPort);
 #endif
-}
 
-void
-diskio_parse_config(const char *token, char *cptr)
-{
-    copy_nword(cptr, type, sizeof(type));
+#if defined(aix4) || defined(aix5)
+    /*
+     * initialize values to gather information on first request
+     */
+    ps_numdisks = 0;
+    ps_disk = NULL;
+#endif
 }
 
 #ifdef solaris2
@@ -231,16 +252,16 @@ var_diskio(struct variable * vp,
         *var_len = strlen(ksp->ks_name);
         return (u_char *) ksp->ks_name;
     case DISKIO_NREAD:
-        long_ret = (signed long) kio.nread;
+        long_ret = (uint32_t) kio.nread;
         return (u_char *) & long_ret;
     case DISKIO_NWRITTEN:
-        long_ret = (signed long) kio.nwritten;
+        long_ret = (uint32_t) kio.nwritten;
         return (u_char *) & long_ret;
     case DISKIO_READS:
-        long_ret = (signed long) kio.reads;
+        long_ret = (uint32_t) kio.reads;
         return (u_char *) & long_ret;
     case DISKIO_WRITES:
-        long_ret = (signed long) kio.writes;
+        long_ret = (uint32_t) kio.writes;
         return (u_char *) & long_ret;
 
     default:
@@ -381,11 +402,17 @@ getstats(void)
     }
     if (stat == NULL) {
         stat = (struct statinfo *) malloc(sizeof(struct statinfo));
-        stat->dinfo = (struct devinfo *) malloc(sizeof(struct devinfo));
+        if (stat != NULL)
+            stat->dinfo = (struct devinfo *) malloc(sizeof(struct devinfo));
+        if (stat == NULL || stat->dinfo == NULL) {
+		SNMP_FREE(stat);
+        	fprintf(stderr, "Memory alloc error - devinfo\n");
+		return 1;
+	}
+        memset(stat->dinfo, 0, sizeof(struct devinfo));
     }
-    memset(stat->dinfo, 0, sizeof(struct devinfo));
 
-    if ((getdevs(stat)) == -1) {
+    if (GETDEVS(stat) == -1) {
         fprintf(stderr, "Can't get devices:%s\n", devstat_errbuf);
         return 1;
     }
@@ -435,16 +462,32 @@ var_diskio(struct variable * vp,
         *var_len = strlen(stat->dinfo->devices[indx].device_name);
         return (u_char *) stat->dinfo->devices[indx].device_name;
     case DISKIO_NREAD:
+#if defined(freebsd5) && __FreeBSD_version >= 500107
+        long_ret = (signed long) stat->dinfo->devices[indx].bytes[DEVSTAT_READ];
+#else
         long_ret = (signed long) stat->dinfo->devices[indx].bytes_read;
+#endif
         return (u_char *) & long_ret;
     case DISKIO_NWRITTEN:
+#if defined(freebsd5) && __FreeBSD_version >= 500107
+        long_ret = (signed long) stat->dinfo->devices[indx].bytes[DEVSTAT_WRITE];
+#else
         long_ret = (signed long) stat->dinfo->devices[indx].bytes_written;
+#endif
         return (u_char *) & long_ret;
     case DISKIO_READS:
+#if defined(freebsd5) && __FreeBSD_version >= 500107
+        long_ret = (signed long) stat->dinfo->devices[indx].operations[DEVSTAT_READ];
+#else
         long_ret = (signed long) stat->dinfo->devices[indx].num_reads;
+#endif
         return (u_char *) & long_ret;
     case DISKIO_WRITES:
+#if defined(freebsd5) && __FreeBSD_version >= 500107
+        long_ret = (signed long) stat->dinfo->devices[indx].operations[DEVSTAT_WRITE];
+#else
         long_ret = (signed long) stat->dinfo->devices[indx].num_writes;
+#endif
         return (u_char *) & long_ret;
 
     default:
@@ -456,94 +499,118 @@ var_diskio(struct variable * vp,
 
 
 #ifdef linux
+
+#define DISK_INCR 2
+
 typedef struct linux_diskio
 {
     int major;
     int  minor;
-    long  blocks;
+    unsigned long  blocks;
     char name[256];
-    long  rio;
-    long  rmerge;
-    long  rsect;
-    long     ruse;
-    long wio;
-    long  wmerge;
-    long  wsect;
-    long  wuse;
-    long  running;
-    long  use;
-    long  aveq;
+    unsigned long  rio;
+    unsigned long  rmerge;
+    unsigned long  rsect;
+    unsigned long  ruse;
+    unsigned long  wio;
+    unsigned long  wmerge;
+    unsigned long  wsect;
+    unsigned long  wuse;
+    unsigned long  running;
+    unsigned long  use;
+    unsigned long  aveq;
 } linux_diskio;
 
 typedef struct linux_diskio_header
 {
     linux_diskio* indices;
     int length;
+    int alloc;
 } linux_diskio_header;
 
-linux_diskio_header head;
-int inited=0;
+static linux_diskio_header head;
 
 
 int getstats(void)
 {
-	FILE* parts;
-	int x = 0;
-  time_t now;
+    FILE* parts;
+    time_t now;
 
-  now = time(NULL);
-  if (cache_time + CACHE_TIMEOUT > now) {
-    return 0;
-  }
+    now = time(NULL);
+    if (cache_time + CACHE_TIMEOUT > now) {
+        return 0;
+    }
 
-        /* remove the indicies and repopulate */
-	if (head.indices)
-		free(head.indices);
+    if (!head.indices) {
+	head.alloc = DISK_INCR;
+	head.indices = (linux_diskio *)malloc(head.alloc*sizeof(linux_diskio));
+    }
+    head.length  = 0;
 
+    memset(head.indices, 0, head.alloc*sizeof(linux_diskio));
 
-	head.indices = (struct linux_diskio*)malloc(
-		sizeof(struct linux_diskio[MAX_DISKS]));
-	head.length  = 0;
-
-	memset(head.indices, (sizeof(linux_diskio) * MAX_DISKS), 0);
-
-
+    /* Is this a 2.6 kernel? */
+    parts = fopen("/proc/diskstats", "r");
+    if (parts) {
+	char buffer[1024];
+	while (fgets(buffer, sizeof(buffer), parts)) {
+	    linux_diskio* pTemp;
+	    if (head.length == head.alloc) {
+		head.alloc += DISK_INCR;
+		head.indices = (linux_diskio *)realloc(head.indices, head.alloc*sizeof(linux_diskio));
+	    }
+	    pTemp = &head.indices[head.length];
+	    sscanf (buffer, "%d %d", &pTemp->major, &pTemp->minor);
+	    if (pTemp->minor == 0)
+		sscanf (buffer, "%d %d %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+		    &pTemp->major, &pTemp->minor, pTemp->name,
+		    &pTemp->rio, &pTemp->rmerge, &pTemp->rsect, &pTemp->ruse,
+		    &pTemp->wio, &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,
+		    &pTemp->running, &pTemp->use, &pTemp->aveq);
+	    else
+		sscanf (buffer, "%d %d %s %lu %lu %lu %lu\n",
+		    &pTemp->major, &pTemp->minor, pTemp->name,
+		    &pTemp->rio, &pTemp->rsect,
+		    &pTemp->wio, &pTemp->wsect);
+	    head.length++;
+	}
+    }
+    else {
+	/* See if a 2.4 kernel */
+	char buffer[1024];
 	parts = fopen("/proc/partitions", "r");
-	assert(parts!=NULL);
-
-	while (42)
-	{
-		/*
-		first few fscanfs are garbage we don't care about. skip it.
-		Probably a better way to do this, but I cheaped out on ya :).
-		*/
-		if (x < 2)
-		{
-			char buffer[1024];
-			fgets(buffer, sizeof(buffer), parts);
-		} else {
-			
-			linux_diskio* pTemp = &head.indices[head.length];
-
-			if ((feof(parts) != 0) || head.length >= MAX_DISKS)
-				break;
-
-			fscanf (parts, "%d %d %ld %s %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld\n",
-				&pTemp->major,
-				&pTemp->minor, &pTemp->blocks, pTemp->name, &pTemp->rio,
-				&pTemp->rmerge, &pTemp->rsect, &pTemp->ruse, &pTemp->wio,
-				&pTemp->wmerge, &pTemp->wsect, &pTemp->wuse, &pTemp->running,
-				&pTemp->use, &pTemp->aveq);
-
-			head.length++;
-		}
-		x++;
+	if (!parts) {
+	    snmp_log_perror("/proc/partitions");
+	    return 1;
 	}
 
+	/*
+	 * first few fscanfs are garbage we don't care about. skip it.
+	 */
+	fgets(buffer, sizeof(buffer), parts);
+	fgets(buffer, sizeof(buffer), parts);
 
-	fclose(parts);
-  cache_time = now;
-  return(0);
+	while (! feof(parts)) {
+	    linux_diskio* pTemp;
+
+	    if (head.length == head.alloc) {
+		head.alloc += DISK_INCR;
+		head.indices = (linux_diskio *)realloc(head.indices, head.alloc*sizeof(linux_diskio));
+	    }
+	    pTemp = &head.indices[head.length];
+
+	    fscanf (parts, "%d %d %lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+		    &pTemp->major, &pTemp->minor, &pTemp->blocks, pTemp->name,
+		    &pTemp->rio, &pTemp->rmerge, &pTemp->rsect, &pTemp->ruse,
+		    &pTemp->wio, &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,
+		    &pTemp->running, &pTemp->use, &pTemp->aveq);
+	    head.length++;
+	}
+    }
+
+    fclose(parts);
+    cache_time = now;
+    return 0;
 }
 
 u_char *
@@ -554,12 +621,12 @@ var_diskio(struct variable * vp,
 	   size_t * var_len,
 	   WriteMethod ** write_method)
 {
-  unsigned int indx;
-  static long long_ret;
+    unsigned int indx;
+    static unsigned long long_ret;
 
-	if (getstats()==1) {
-		return(NULL);
-	}
+    if (getstats() == 1) {
+	return NULL;
+    }
 
  if (header_simple_table(vp, name, length, exact, var_len, write_method, head.length))
     {
@@ -573,26 +640,26 @@ var_diskio(struct variable * vp,
 
   switch (vp->magic) {
     case DISKIO_INDEX:
-      long_ret = (long) indx+1;
+      long_ret = indx+1;
       return (u_char *) &long_ret;
     case DISKIO_DEVICE:
       *var_len = strlen(head.indices[indx].name);
       return (u_char *) head.indices[indx].name;
     case DISKIO_NREAD:
-      long_ret = (signed long) head.indices[indx].rio;
+      long_ret = head.indices[indx].rsect*512;
       return (u_char *) & long_ret;
     case DISKIO_NWRITTEN:
-      long_ret = (signed long) head.indices[indx].wio;
+      long_ret = head.indices[indx].wsect*512;
       return (u_char *) & long_ret;
     case DISKIO_READS:
-      long_ret = (signed long) head.indices[indx].ruse;
+      long_ret = head.indices[indx].rio;
       return (u_char *) & long_ret;
     case DISKIO_WRITES:
-      long_ret = (signed long) head.indices[indx].wuse;
+      long_ret = head.indices[indx].wio;
       return (u_char *) & long_ret;
 
     default:
-      ERROR_MSG("diskio.c: don't know how to handle this request.");
+	snmp_log(LOG_ERR, "diskio.c: don't know how to handle %d request\n", vp->magic);
   }
   return NULL;
 }
@@ -825,3 +892,93 @@ var_diskio(struct variable * vp,
 }
 #endif                          /* darwin */
 
+
+#if defined(aix4) || defined(aix5)
+/*
+ * collect statistics for all disks
+ */
+int
+collect_disks(void)
+{
+    time_t          now;
+    int             i;
+    perfstat_id_t   first;
+
+    /* cache valid? if yes, just return */
+    now = time(NULL);
+    if (ps_disk != NULL && cache_time + CACHE_TIMEOUT > now) {
+        return 0;
+    }
+
+    /* get number of disks we have */
+    i = perfstat_disk(NULL, NULL, sizeof(perfstat_disk_t), 0);
+    if(i <= 0) return 1;
+
+    /* if number of disks differs or structures are uninitialized, init them */
+    if(i != ps_numdisks || ps_disk == NULL) {
+        if(ps_disk != NULL) free(ps_disk);
+        ps_numdisks = i;
+        ps_disk = malloc(sizeof(perfstat_disk_t) * ps_numdisks);
+        if(ps_disk == NULL) return 1;
+    }
+
+    /* gather statistics about all disks we have */
+    strcpy(first.name, "");
+    i = perfstat_disk(&first, ps_disk, sizeof(perfstat_disk_t), ps_numdisks);
+    if(i != ps_numdisks) return 1;
+
+    cache_time = now;
+    return 0;
+}
+
+
+u_char         *
+var_diskio(struct variable * vp,
+           oid * name,
+           size_t * length,
+           int exact, size_t * var_len, WriteMethod ** write_method)
+{
+    static long     long_ret;
+    unsigned int    indx;
+
+    /* get disk statistics */
+    if (collect_disks())
+        return NULL;
+
+    if (header_simple_table
+        (vp, name, length, exact, var_len, write_method, ps_numdisks))
+        return NULL;
+
+    indx = (unsigned int) (name[*length - 1] - 1);
+    if (indx >= ps_numdisks)
+        return NULL;
+
+    /* deliver requested data on requested disk */
+    switch (vp->magic) {
+    case DISKIO_INDEX:
+        long_ret = (long) indx;
+        return (u_char *) & long_ret;
+    case DISKIO_DEVICE:
+        *var_len = strlen(ps_disk[indx].name);
+        return (u_char *) ps_disk[indx].name;
+    case DISKIO_NREAD:
+        long_ret = (signed long) ps_disk[indx].rblks * ps_disk[indx].bsize;
+        return (u_char *) & long_ret;
+    case DISKIO_NWRITTEN:
+        long_ret = (signed long) ps_disk[indx].wblks * ps_disk[indx].bsize;
+        return (u_char *) & long_ret;
+    case DISKIO_READS:
+        long_ret = (signed long) ps_disk[indx].xfers;
+        return (u_char *) & long_ret;
+    case DISKIO_WRITES:
+        long_ret = (signed long) 0;	/* AIX has just one value for read/write transfers */
+        return (u_char *) & long_ret;
+
+    default:
+        ERROR_MSG("diskio.c: don't know how to handle this request.");
+    }
+
+    /* return NULL in case of error */
+    return NULL;
+}
+#endif                          /* aix 4/5 */

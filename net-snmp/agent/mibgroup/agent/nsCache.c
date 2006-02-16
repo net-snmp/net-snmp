@@ -270,9 +270,9 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
                     netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHINSTANCE);
                     continue;
 		}
+		status = cache_entry->timeout;
 	        snmp_set_var_typed_value(request->requestvb, ASN_INTEGER,
-                                         (u_char*)&cache_entry->timeout,
-                                            sizeof(cache_entry->timeout));
+                                         (u_char*)&status, sizeof(status));
 	        break;
 
             case NSCACHE_STATUS:
