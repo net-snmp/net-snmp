@@ -10,6 +10,7 @@ HEADER snmptrapd discards of incorrect view types
 
 CONFIGTRAPD createUser testuser
 CONFIGTRAPD authuser execute testuser noAuthNoPriv
+CONFIGTRAPD agentxsocket /dev/null
 
 STARTTRAPD
 
