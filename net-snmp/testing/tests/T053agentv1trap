@@ -15,6 +15,7 @@ SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
 CONFIGAGENT trapsink localhost public $SNMP_SNMPTRAPD_PORT
 
 CONFIGTRAPD authcommunity log public
+CONFIGTRAPD agentxsocket /dev/null
 
 STARTTRAPD
 
