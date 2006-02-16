@@ -14,6 +14,8 @@ SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
 . ./Sv3config
 CONFIGAGENT trapsink localhost public $SNMP_SNMPTRAPD_PORT
 
+CONFIGTRAPD agentxsocket /dev/null
+
 STARTTRAPD
 
 # initialize only the example mib, and not the notification mib stuff
