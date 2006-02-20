@@ -226,9 +226,6 @@ presumably you have - don't you love recursion?) www.net-snmp.org/download/
 
 Uncompress it and untar it in a working directory eg. /usr/local/src/net-snmp
 
-Note:  Sun's tar (/usr/bin/tar) may have problem with long directory
-paths.  You may need to install gnu tar available from www.sunfreeware.com.
-
 In order to save a lot of typing, you should create a "configure" 
 script eg. bcc.sh in the directory below eg. /usr/local/src.
 
@@ -342,8 +339,6 @@ Type the following: (using the sample above)
    tar -xvf /usr/local/dist/net-snmp-5.0.9-SunOS_5.8_sun4u.tar
 
 The binaries, libraries, etc. will be installed in /usr/local.
-
-There may be a problem with Sun's tar.  See discussion above.
 
 Remove the tar file to save space.  Create an snmpd.conf (see below)
 or use an existing one from another machine.
