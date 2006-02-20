@@ -107,15 +107,10 @@ functionality is turned on by default and may be unnecessary if
 you aren't using ORACLE's Enterprise Manager.  Refer to ORACLE's
 documentation on how to disable it.
 
-C.  gnu tar
-
-At present the application will not untar properly using Sun's tar.
-The problem may be related to path length.  A working tar
-is available at www.sunfreeware.com.
 
 If you have decided to compile your own net-snmp, you will need ...
 
-D.  A compilation environment
+C.  A compilation environment
 
 -a compiler (gcc or Sun's Forte cc) or the gcc libraries
    (note, the cc in /usr/ucb is NOT a full-blown compiler)
