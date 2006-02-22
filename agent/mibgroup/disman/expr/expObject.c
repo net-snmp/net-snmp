@@ -138,9 +138,9 @@ expObject_getFirst( char *expOwner, char *expName )
     memset(&owner_var, 0, sizeof(netsnmp_variable_list));
     memset(&name_var,  0, sizeof(netsnmp_variable_list));
     snmp_set_var_typed_value( &owner_var, ASN_OCTET_STR,
-                                expOwner, strlen(expOwner));
+                       (u_char*)expOwner, strlen(expOwner));
     snmp_set_var_typed_value( &name_var,  ASN_OCTET_STR,
-                                expName,  strlen(expName));
+                       (u_char*)expName,  strlen(expName));
     owner_var.next_variable = &name_var;
     row = netsnmp_tdata_row_next_byidx( expObject_table_data, &owner_var );
 
@@ -193,12 +193,21 @@ _expObject_buildList( oid *root, size_t root_len, size_t prefix_len,
 {
     netsnmp_variable_list *query_list = NULL;
     netsnmp_variable_list *vp1,  *vp2 = NULL;
+    oid    name[ MAX_OID_LEN ];
+    int i;
 
     if ( prefix_len ) {
         /*
-         * For wildcarded objects, build a list of all desired instances...
+         * For wildcarded objects, build a list of all relevant
+         *   instances, using the template_list to provide the
+         *   necessary instance suffixes.
          */
+        memset( name, 0, sizeof(name));
+        memcpy( name, root, root_len*sizeof(oid));
         for ( vp1 = template_list; vp1; vp1=vp1->next_variable ) {
+            /*
+             * Append a new varbind to the list for this object ...
+             */
             if ( !query_list ) {
                 query_list = (netsnmp_variable_list*)
                                  SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
@@ -209,13 +218,11 @@ _expObject_buildList( oid *root, size_t root_len, size_t prefix_len,
                 vp2 = vp2->next_variable;
             }
             /*
-             * ... appending each suffix in turn to the basic OID.
+             * ... and set the OID using the template suffix
              */
-            snmp_set_var_objid( vp2, root, root_len );
-        /*
-            snmp_add_oid_instances( vp2->name+root_len, vp1->name+prefix_len,
-                                             vp1->name_len-prefix_len)
-         */
+            for ( i=0; i <= vp1->name_length - prefix_len; i++)
+                name[ root_len+i ] = vp1->name[ prefix_len+i ];
+            snmp_set_var_objid( vp2, name, root_len+i );
         }
     } else {
         /*
@@ -236,29 +243,50 @@ expObject_getData( struct expExpression  *expr, struct expObject  *obj )
     int res;
 
     /*
-     * Retrieve and store the basic object value(s)...
-     *   (including previous values if necessary)
+     * Retrieve and store the basic object value(s)
+     *   (keeping the previous values if necessary)
      */
-    if (!( obj->flags & EXP_OBJ_FLAG_PREFIX )) {
-        if ( obj->flags & EXP_OBJ_FLAG_OWILD )
+    if (obj->flags & EXP_OBJ_FLAG_PREFIX ) {
+        /*
+         * If this is the expExpressionPrefix object, then
+         *   we already have the necessary list of values.
+         *   There's no need to retrieve it again.
+         * This also takes care of releasing the prefix list
+         *   once the results are no longer needed.
+         */
+        var = expr->pvars;
+    } else {
+        if (!(obj->flags & EXP_OBJ_FLAG_OWILD ))
+            /*
+             * Set up the request 'list' for an
+             *   exact (non-wildcarded) object.
+             */
+            var = _expObject_buildList( obj->expObjectID,
+                                        obj->expObjectID_len, 0, NULL );
+        else {
+            if ( !expr->expPrefix_len ) {
+                /*
+                 * You can't really have wildcarded objects unless
+                 *   the expression as a whole is wildcarded too.
+                 */
+                return;
+            }
+            /*
+             * Set up the request list for a wildcarded object
+             */
             var = _expObject_buildList( obj->expObjectID,
                                         obj->expObjectID_len,
                                        expr->expPrefix_len,
                                        expr->pvars );
-        else
-            var = _expObject_buildList( obj->expObjectID,
-                                        obj->expObjectID_len, 0, NULL );
+        }
         res = netsnmp_query_get( var, expr->session );
-    } else {
-        /*
-         * Re-use the expExpressionPrefix result list.
-         * This approach also takes care of freeing
-         *   these results when they're no longer needed.
-         */
-        var = expr->pvars;
     }
     
-    if ( obj->expObjectSampleType != 1 ) {
+    if ( obj->expObjectSampleType != EXPSAMPLETYPE_ABSOLUTE ) {
+        /*
+         * For Delta (and Changed) samples, we need
+         *   to store the previous value as well.
+         */
         if ( obj->old_vars )
             snmp_free_varbind( obj->old_vars );
         obj->old_vars = obj->vars;
@@ -269,9 +297,11 @@ expObject_getData( struct expExpression  *expr, struct expObject  *obj )
 
 
     /*
-     * ... discontinuity marker(s) for delta-valued samples...
+     * For Delta samples, there may be a discontinuity marker
+     *   (or set of wildcarded markers) to be sampled as well.
+     *   This necessarily requires storing the previous marker(s).
      */
-    if (( obj->expObjectSampleType != 1 ) &&
+    if (( obj->expObjectSampleType != EXPSAMPLETYPE_ABSOLUTE ) &&
         ( obj->flags & EXP_OBJ_FLAG_DDISC )) {
 
         if ( obj->flags & EXP_OBJ_FLAG_DWILD )
@@ -290,7 +320,9 @@ expObject_getData( struct expExpression  *expr, struct expObject  *obj )
     }
 
     /*
-     * ... and expObjectConditional values (if specified).
+     * If there's an expObjectConditional value specified
+     *   (or set of wildcarded values) then add these to the
+     *   ever-growing collection of retrieved values.
      */
     if ( obj->expObjCond_len ) {
         if ( obj->flags & EXP_OBJ_FLAG_CWILD )
