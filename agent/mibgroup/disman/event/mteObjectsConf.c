@@ -61,7 +61,6 @@ parse_mteOTable(const char *token, char *line)
     DEBUGMSG(("disman:event:conf", "(%s, %s, %d) ", owner, oname, index));
 
     row   = mteObjects_createEntry( owner, oname, index, 0 );
-    //entry = (struct mteObject *)netsnmp_tdata_row_entry( row );
     entry = (struct mteObject *)row->data;
 
     

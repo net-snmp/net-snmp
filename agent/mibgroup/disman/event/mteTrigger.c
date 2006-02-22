@@ -117,7 +117,7 @@ mteTrigger_createEntry(char *mteOwner, char *mteTName, int fixed)
     netsnmp_table_row_add_index(row, ASN_PRIV_IMPLIED_OCTET_STR,
                                 entry->mteTName, mteTName_len);
 
-  //entry->mteTriggerTest         = MTE_TRIGGER_BOOLEAN;
+ /* entry->mteTriggerTest         = MTE_TRIGGER_BOOLEAN; */
     entry->mteTriggerValueID_len  = 2;  /* .0.0 */
     entry->mteTriggerFrequency    = 600;
     memcpy(entry->mteDeltaDiscontID, _sysUpTime_instance,

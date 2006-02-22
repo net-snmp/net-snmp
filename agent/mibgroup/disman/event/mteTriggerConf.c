@@ -92,7 +92,6 @@ _find_mteTrigger_entry( char *owner, char *tname )
     if (!row)
         return NULL;
     
-    //return (struct mteTrigger *)netsnmp_tdata_row_entry( row );
     return (struct mteTrigger *)row->data;
 }
 
@@ -506,7 +505,7 @@ parse_mteMonitor(const char *token, char *line)
      */
     entry = _find_typed_mteTrigger_entry( "snmpd.conf", tname+2, test );
     if (!entry) {
-        //mteObjects_removeEntries( "snmpd.conf", tname );
+        /* mteObjects_removeEntries( "snmpd.conf", tname ); */
         return;
     }
 
