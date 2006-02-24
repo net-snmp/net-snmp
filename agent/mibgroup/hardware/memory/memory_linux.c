@@ -120,7 +120,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     }
 
 
-    mem = netsnmp_memory_get_byIdx( -1, 1 );  /* Memory info */
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MEMORY, 1 );
     if (!mem) {
         snmp_log_perror("No Memory info entry");
     } else {
@@ -130,7 +130,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->other = memshared;
     }
 
-    mem = netsnmp_memory_get_byIdx( -2, 1 );  /* Swap info */
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 1 );
     if (!mem) {
         snmp_log_perror("No Swap info entry");
     } else {
@@ -139,12 +139,13 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->free = swapfree;
     }
 
-    mem = netsnmp_memory_get_byIdx( -3, 1 );  /* Buffer info */
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MISC, 1 );
     if (!mem) {
-        snmp_log_perror("No Buffer info entry");
+        snmp_log_perror("No Buffer, etc info entry");
     } else {
         mem->units = 1024;
         mem->size = buffers;
+        mem->free = memfree+swapfree;
         mem->other = cached;
     }
 
