@@ -4,11 +4,17 @@
 #include <net-snmp/agent/hardware/memory.h>
 
 #include <unistd.h>
+#include <sys/sysctl.h>
 
-/*
- * Retained from UCD implementation
- */
-
+#if defined(HAVE_UVM_UVM_PARAM_H) && defined(HAVE_UVM_UVM_EXTERN_H)
+#include <uvm/uvm_param.h>
+#include <uvm/uvm_extern.h>
+#elif defined(HAVE_VM_VM_PARAM_H) && defined(HAVE_VM_VM_EXTERN_H)
+#include <vm/vm_param.h>
+#include <vm/vm_extern.h>
+#else
+#error memory_netbsd1.c: Is this really a NetBSD system?
+#endif
 
 
     /*
@@ -39,8 +45,8 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     if (!mem) {
         snmp_log_perror("No Memory info entry");
     } else {
-        mem->units = uvmexp.pagesize;  /* ??? */
-        mem->size  = phys_mem;
+        mem->units = uvmexp.pagesize;
+        mem->size  = phys_mem/uvmexp.pagesize;
         mem->free  = uvmexp.free;
     }
 
@@ -58,9 +64,9 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         snmp_log_perror("No Buffer, etc info entry");
     } else {
         mem->units = uvmexp.pagesize;
-        mem->size  = -1
+        mem->size  = -1;
         mem->free  = total.t_free;
-        mem->other = -1
+        mem->other = -1;
     }
 
     /*
