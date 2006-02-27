@@ -87,55 +87,64 @@ handle_memory(netsnmp_mib_handler *handler,
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 0 );
             if (!mem_info)
                goto NOSUCH;
-            val = mem_info->size;     /* swaptotal */
+            val  =  mem_info->size;     /* swaptotal */
+            val *= (mem_info->units/1024);
             break;
         case MEMORY_SWAP_AVAIL:
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 0 );
             if (!mem_info)
                goto NOSUCH;
-            val = mem_info->free;     /* swapfree */
+            val  =  mem_info->free;     /* swapfree */
+            val *= (mem_info->units/1024);
             break;
         case MEMORY_REAL_TOTAL:
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MEMORY, 0 );
             if (!mem_info)
                goto NOSUCH;
-            val = mem_info->size;     /* memtotal */
+            val  =  mem_info->size;     /* memtotal */
+            val *= (mem_info->units/1024);
             break;
         case MEMORY_REAL_AVAIL:
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MEMORY, 0 );
             if (!mem_info)
                goto NOSUCH;
-            val = mem_info->free;     /* memfree */
+            val  =  mem_info->free;     /* memfree */
+            val *= (mem_info->units/1024);
             break;
         case MEMORY_STXT_TOTAL:
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_STEXT, 0 );
             if (!mem_info)
                goto NOSUCH;
-            val = mem_info->size;
+            val  =  mem_info->size;
+            val *= (mem_info->units/1024);
             break;
         case MEMORY_STXT_AVAIL:    /* XXX - Or used ? */
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_STEXT, 0 );
             if (!mem_info)
                goto NOSUCH;
-            val = mem_info->free;  /* XXX - Or size-free ? */
+            val  =  mem_info->free;  /* XXX - Or size-free ? */
+            val *= (mem_info->units/1024);
             break;
         case MEMORY_RTXT_TOTAL:
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_RTEXT, 0 );
             if (!mem_info)
                goto NOSUCH;
-            val = mem_info->size;
+            val  =  mem_info->size;
+            val *= (mem_info->units/1024);
             break;
         case MEMORY_RTXT_AVAIL:    /* XXX - Or used ? */
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_RTEXT, 0 );
             if (!mem_info)
                goto NOSUCH;
-            val = mem_info->free;  /* XXX - Or size-free ? */
+            val  =  mem_info->free;  /* XXX - Or size-free ? */
+            val *= (mem_info->units/1024);
             break;
         case MEMORY_FREE:
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MISC, 0 );
             if (!mem_info)
                goto NOSUCH;
-            val = mem_info->free;     /* memfree + swapfree */
+            val  =  mem_info->free;     /* memfree + swapfree */
+            val *= (mem_info->units/1024);
             break;
         case MEMORY_SWAP_MIN:
             val = minimum_swap;
@@ -144,19 +153,22 @@ handle_memory(netsnmp_mib_handler *handler,
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MEMORY, 0 );
             if (!mem_info)
                goto NOSUCH;
-            val = mem_info->other;     /* memshared */
+            val  =  mem_info->other;     /* memshared */
+            val *= (mem_info->units/1024);
             break;
         case MEMORY_BUFFER:
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MISC, 0 );
             if (!mem_info || mem_info->size == -1)
                goto NOSUCH;
-            val = mem_info->size;      /* buffers */
+            val  =  mem_info->size;      /* buffers */
+            val *= (mem_info->units/1024);
             break;
         case MEMORY_CACHED:
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MISC, 0 );
             if (!mem_info || mem_info->other == -1)
                goto NOSUCH;
-            val = mem_info->other;     /* cached */
+            val  =  mem_info->other;     /* cached */
+            val *= (mem_info->units/1024);
             break;
         case MEMORY_SWAP_ERROR:
                                           /* XXX - or NS_MEM_TYPE_MISC */

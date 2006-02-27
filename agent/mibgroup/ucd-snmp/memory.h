@@ -5,6 +5,8 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+config_require(hardware/memory)
+
 /*
  * function declarations 
  */
