@@ -2,7 +2,9 @@ typedef struct netsnmp_memory_info_s netsnmp_memory_info;
 
 #define NETSNMP_MEM_TYPE_MEMORY  1
 #define NETSNMP_MEM_TYPE_SWAP    2
-#define NETSNMP_MEM_TYPE_BUFFERS 3
+#define NETSNMP_MEM_TYPE_MISC    3
+#define NETSNMP_MEM_TYPE_STEXT   4
+#define NETSNMP_MEM_TYPE_RTEXT   5
 
 struct netsnmp_memory_info_s {
      int  idx;
