@@ -1,13 +1,28 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/auto_nlist.h>
 #include <net-snmp/agent/hardware/memory.h>
 
 #include <unistd.h>
+#include <sys/param.h>
+#include <sys/fcntl.h>
+#include <sys/sysctl.h>
+#include <sys/vmmeter.h>
+#include <kvm.h>
+
+#if HAVE_SYS_VMPARAM_H
+#include <sys/vmparam.h>
+#else
+#include <vm/vm_param.h>
+#endif
 
 /*
  * Retained from UCD implementation
  */
+
+#define SUM_SYMBOL       "cnt"
+#define BUFSPACE_SYMBOL  "bufspace"
 
 quad_t    swapTotal;
 quad_t    swapUsed;
@@ -112,9 +127,9 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     if (!mem) {
         snmp_log_perror("No Memory info entry");
     } else {
-        mem->units = vmem.v_page.size;
-        mem->size  = phys_mem;
-        mem->free  = vmem.v_free.count;
+        mem->units = vmem.v_page_size;
+        mem->size  = phys_mem/vmem.v_page_size;
+        mem->free  = vmem.v_free_count;
         mem->other = total.t_vmshr + total.t_avmshr +
                      total.t_rmshr + total.t_armshr;
     }
@@ -136,16 +151,16 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     if (!mem) {
         snmp_log_perror("No Buffer, etc info entry");
     } else {
-        mem->units = vmem.v_page.size;
-        mem->size  = bufspace;
+        mem->units = vmem.v_page_size;
+        mem->size  = bufspace/vmem.v_page_size;
         mem->free  = total.t_free;
 #ifdef openbsd2
         mem->other = -1;
 #else
 #ifdef darwin
-        mem->other = vmmem.v_lookups;
+        mem->other = vmem.v_lookups;
 #else
-        mem->other = vmmem.v_cache_count;
+        mem->other = vmem.v_cache_count;
 #endif
 #endif
     }
