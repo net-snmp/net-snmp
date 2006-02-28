@@ -151,6 +151,8 @@ handle_long_opt(const char *myoptarg)
      * else it's a long option, so process it like name=value 
      */
     cp = malloc(strlen(myoptarg) + 3);
+    if (!cp)
+        return;
     strcpy(cp, myoptarg);
     cp2 = strchr(cp, '=');
     if (!cp2 && !strchr(cp, ' ')) {
@@ -187,6 +189,7 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
     char           *Xpsz = NULL;
     char           *Cpsz = NULL;
     char            Opts[BUF_SIZE];
+    int            logopt = 0;
 
     /*
      * initialize session to default values 
@@ -364,6 +367,7 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
             if (snmp_log_options(optarg, argc, argv) < 0) {
                 return (-1);
             }
+	    logopt = 1;
             break;
 
 #define SNMPV3_CMD_OPTIONS
@@ -489,7 +493,8 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
                 session->securityPrivProto = usmDESPrivProtocol;
                 session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
 #ifdef HAVE_AES
-            } else if (!strcasecmp(optarg, "AES128")) {
+            } else if (!strcasecmp(optarg, "AES128")
+                       || !strcasecmp(optarg, "AES")) {
                 session->securityPrivProto = usmAES128PrivProtocol;
                 session->securityPrivProtoLen = USM_PRIV_PROTO_AES128_LEN;
             } else if (!strcasecmp(optarg, "AES192")) {
@@ -548,6 +553,9 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
         }
     }
     DEBUGMSGTL(("snmp_parse_args", "finished: %d/%d\n", optind, argc));
+
+    if (!logopt)
+	snmp_enable_stderrlog();
 
     /*
      * read in MIB database and initialize the snmp library

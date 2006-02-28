@@ -64,7 +64,6 @@ SOFTWARE.
         int             d_namlen;       /* Name length */
         char            d_name[257];    /* file name */
     } _DIRECT;
-#endif /* HAVE_DIRENT_H */
 
     /*
      * structure for dir operations 
@@ -80,6 +79,7 @@ SOFTWARE.
     DIR            *opendir(const char *filename);
     struct direct  *readdir(DIR * dirp);
     int             closedir(DIR * dirp);
+#endif /* HAVE_DIRENT_H */
 
 #ifndef HAVE_GETTIMEOFDAY
     int             gettimeofday(struct timeval *, struct timezone *tz);
@@ -119,6 +119,8 @@ SOFTWARE.
 
     int             calculate_time_diff(struct timeval *,
                                         struct timeval *);
+    u_int           calculate_sectime_diff(struct timeval *now,
+                                           struct timeval *then);
 
 #ifndef HAVE_STRCASESTR
     char           *strcasestr(const char *, const char *);
@@ -138,6 +140,9 @@ SOFTWARE.
 #ifndef HAVE_STRLCPY
     size_t            strlcpy(char *, const char *, size_t);
 #endif
+
+    int             netsnmp_os_prematch(const char *ospmname,
+                                        const char *ospmrelprefix);
 
 #ifdef __cplusplus
 }

@@ -176,7 +176,9 @@ incrByU16(U64 * pu64, unsigned int u16)
      */
     pu64->low = (ulT1 + u16) & 0x0FFFFFFFFL;
     pu64->high++;
-
+#if SIZEOF_LONG != 4
+    pu64->high &= 0xffffffff;
+#endif
 }                               /* incrByV16 */
 
 void
@@ -185,8 +187,15 @@ incrByU32(U64 * pu64, unsigned int u32)
     unsigned int    tmp;
     tmp = pu64->low;
     pu64->low += u32;
-    if (pu64->low < tmp)
+#if SIZEOF_LONG != 4
+    pu64->low &= 0xffffffff;
+#endif
+    if (pu64->low < tmp) {
         pu64->high++;
+#if SIZEOF_LONG != 4
+        pu64->high &= 0xffffffff;
+#endif
+    }
 }
 
 /*
@@ -213,7 +222,6 @@ u64Subtract(U64 * pu64one, U64 * pu64two, U64 * pu64out)
 void
 zeroU64(U64 * pu64)
 {
-
     pu64->low = 0;
     pu64->high = 0;
 }                               /* zeroU64 */
@@ -298,7 +306,7 @@ void
 }
 
 int
-read64(U64 * i64, const char *string)
+read64(U64 * i64, const char *str)
 {
     U64             i64p;
     unsigned int    u;
@@ -306,18 +314,18 @@ read64(U64 * i64, const char *string)
     int             ok = 0;
 
     zeroU64(i64);
-    if (*string == '-') {
+    if (*str == '-') {
         sign = 1;
-        string++;
+        str++;
     }
 
-    while (*string && isdigit(*string)) {
+    while (*str && isdigit(*str)) {
         ok = 1;
-        u = *string - '0';
+        u = *str - '0';
         multBy10(*i64, &i64p);
         memcpy(i64, &i64p, sizeof(i64p));
         incrByU16(i64, u);
-        string++;
+        str++;
     }
     if (sign) {
         i64->high = ~i64->high;

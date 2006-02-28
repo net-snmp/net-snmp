@@ -202,7 +202,7 @@ READVIEW
 .IP
 The name of the MIB view
 (as set up by
-.b createView
+.B createView
 or equivalent)
 defining the MIB objects for which this request may request the current values.
 .IP
@@ -212,7 +212,7 @@ WRITEVIEW
 .IP
 The name of the MIB view
 (as set up by
-.b createView
+.B createView
 or equivalent)
 defining the MIB objects for which this request may potentially SET new values.
 .IP
@@ -222,7 +222,7 @@ NOTIFYVIEW
 .IP
 The name of the MIB view
 (as set up by
-.b createView
+.B createView
 or equivalent)
 defining the MIB objects which may be included in notification request.
 .IP

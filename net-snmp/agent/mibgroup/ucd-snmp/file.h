@@ -16,8 +16,10 @@ void            file_free_config(void);
 void            file_parse_config(const char *, char *);
 extern FindVarMethod var_file_table;
 
+#define FILE_NAME_MAX SNMP_MAXPATH
+
 struct filestat {
-    char            name[256];
+    char            name[FILE_NAME_MAX];
     int             size;
     int             max;
 };

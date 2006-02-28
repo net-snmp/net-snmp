@@ -13,6 +13,16 @@ fi
 CONFIGAGENT com2sec testcommunitysec1  default testcommunity1
 CONFIGAGENT com2sec testcommunitysec2  default testcommunity2
 
+if [ "$SNMP_TRANSPORT_SPEC" = "udp6" -o "$SNMP_TRANSPORT_SPEC" = "tcp6" ];then 
+CONFIGAGENT com2sec6 testcommunitysec1  default testcommunity1
+CONFIGAGENT com2sec6 testcommunitysec2  default testcommunity2
+fi
+
+if [ "$SNMP_TRANSPORT_SPEC" = "unix" ];then 
+CONFIGAGENT com2secunix testcommunitysec1  testcommunity1
+CONFIGAGENT com2secunix testcommunitysec2  testcommunity2
+fi
+
 CONFIGAGENT group   testcommunitygroup1  $snmp_version     testcommunitysec1
 CONFIGAGENT group   testcommunitygroup2  $snmp_version     testcommunitysec2
 

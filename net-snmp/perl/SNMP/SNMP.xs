@@ -12,6 +12,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <errno.h>
@@ -28,8 +30,10 @@
 #ifndef MSVC_PERL
 	#include <unistd.h>
 #endif
-/* XXX This is a problem if regex.h is not on the system. */
+
+#ifdef HAVE_REGEX_H
 #include <regex.h>
+#endif
 
 #ifndef __P
 #define __P(x) x
@@ -54,18 +58,12 @@
 #ifdef WIN32
 #define SOCK_STARTUP winsock_startup()
 #define SOCK_CLEANUP winsock_cleanup()
-#define DLL_IMPORT   __declspec( dllimport )
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #else
 #define SOCK_STARTUP
 #define SOCK_CLEANUP
-#define DLL_IMPORT
 #endif
-
-DLL_IMPORT extern struct tree *Mib;
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
 
 #include "perlsnmp.h"
 
@@ -81,7 +79,7 @@ DLL_IMPORT extern struct tree *Mib;
 
 #define TYPE_UNKNOWN 0
 #define MAX_TYPE_NAME_LEN 16
-#define STR_BUF_SIZE 1024
+#define STR_BUF_SIZE (MAX_TYPE_NAME_LEN * MAX_OID_LEN)
 #define ENG_ID_BUF_SIZE 32
 
 #define SYS_UPTIME_OID_LEN 9
@@ -153,8 +151,8 @@ typedef struct bulktbl {
    oid	req_oid[MAX_OID_LEN];	/* The OID originally requested.    */
    oid	last_oid[MAX_OID_LEN];	/* Last-seen OID under this branch. */
    AV	*vars;			/* Array of Varbinds for this OID.  */
-   char	req_len;		/* Length of requested OID.         */
-   char	last_len;		/* Length of last-seen OID.         */
+   int	req_len;		/* Length of requested OID.         */
+   int	last_len;		/* Length of last-seen OID.         */
    char norepeat;		/* Is this a non-repeater OID?      */
    char	complete;		/* Non-zero if this tree complete.  */
    char	ignore;			/* Ignore this OID, not requested.  */
@@ -799,19 +797,55 @@ compute_match(search_base, key)
 const char *search_base;
 const char *key;
 {
-   int rc;
-   regex_t parsetree;
-   regmatch_t pmatch;
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+    int             rc;
+    regex_t         parsetree;
+    regmatch_t      pmatch;
+    rc = regcomp(&parsetree, key, REG_ICASE | REG_EXTENDED);
+    if (rc == 0)
+        rc = regexec(&parsetree, search_base, 1, &pmatch, 0);
+    regfree(&parsetree);
+    if (rc == 0) {
+        /*
+         * found 
+         */
+        return pmatch.rm_so;
+    }
+#else                           /* use our own wildcard matcher */
+    /*
+     * first find the longest matching substring (ick) 
+     */
+    char           *first = NULL, *result = NULL, *entry;
+    const char     *position;
+    char           *newkey = strdup(key);
+    char           *st;
 
-   rc = regcomp(&parsetree, key, REG_ICASE | REG_EXTENDED);
-   if (rc == 0)
-      rc = regexec(&parsetree, search_base, 1, &pmatch, 0);
-   regfree(&parsetree);
-   if (rc == 0) {
-      return pmatch.rm_so;
-   }
 
-   return MAX_BAD;
+    entry = strtok_r(newkey, "*", &st);
+    position = search_base;
+    while (entry) {
+        result = strcasestr(position, entry);
+
+        if (result == NULL) {
+            free(newkey);
+            return MAX_BAD;
+        }
+
+        if (first == NULL)
+            first = result;
+
+        position = result + strlen(entry);
+        entry = strtok_r(NULL, "*", &st);
+    }
+    free(newkey);
+    if (result)
+        return (first - search_base);
+#endif
+
+    /*
+     * not found 
+     */
+    return MAX_BAD;
 }
 
 /* Convert a tag (string) to an OID array              */
@@ -827,11 +861,9 @@ int    best_guess;
 {
    struct tree *tp = NULL;
    struct tree *rtp = NULL;
-   DLL_IMPORT extern struct tree *tree_head;
    oid newname[MAX_OID_LEN], *op;
    int newname_len = 0;
    const char *cp = NULL;
-   char ch;
    char *module = NULL;
 
    char str_buf[STR_BUF_SIZE];
@@ -904,7 +936,7 @@ int    best_guess;
    /* else best_guess is off and it is a single leaf */
    /* single symbolic                                */
    else { 
-      rtp = tp = find_node(tag, Mib);
+      rtp = tp = find_node(tag, get_tree_head());
       if (tp) {
          if (type) *type = tp->type;
          if ((oid_arr == NULL) || (oid_arr_len == NULL)) return rtp;
@@ -976,15 +1008,16 @@ char * soid_str;
 {
    char soid_buf[STR_BUF_SIZE];
    char *cp;
+   char *st;
 
    if (!soid_str || !*soid_str) return SUCCESS;/* successfully added nothing */
    if (*soid_str == '.') soid_str++;
    strcpy(soid_buf, soid_str);
-   cp = strtok(soid_buf,".");
+   cp = strtok_r(soid_buf,".",&st);
    while (cp) {
      sscanf(cp, "%lu", &(doid_arr[(*doid_arr_len)++]));
      /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
-     cp = strtok(NULL,".");
+     cp = strtok_r(NULL,".",&st);
    }
    return(SUCCESS);
 }
@@ -1004,7 +1037,6 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
     netsnmp_variable_list *vars;
     oid oidbuf[MAX_OID_LEN];
     int ret = SUCCESS;
-    struct tree *tp;
 
     if (pdu->variables == NULL){
 	pdu->variables = vars =
@@ -1347,10 +1379,20 @@ void *cb_data;
             type = __translate_asn_type(vars->type);
          }
          __get_label_iid(str_buf,&label,&iid,getlabel_flag);
-         av_store(varbind, VARBIND_TAG_F,
-                  newSVpv(label, strlen(label)));
-         av_store(varbind, VARBIND_IID_F,
-                  newSVpv(iid, strlen(iid)));
+         if (label) {
+             av_store(varbind, VARBIND_TAG_F,
+                      newSVpv(label, strlen(label)));
+         } else {
+             av_store(varbind, VARBIND_TAG_F,
+                      newSVpv("", 0));
+         }
+         if (iid) {
+             av_store(varbind, VARBIND_IID_F,
+                      newSVpv(iid, strlen(iid)));
+         } else {
+             av_store(varbind, VARBIND_IID_F,
+                      newSVpv("", 0));
+         }
          __get_type_str(type, tmp_type_str);
          tmp_sv = newSVpv(tmp_type_str, strlen(tmp_type_str));
          av_store(varbind, VARBIND_TYPE_F, tmp_sv);
@@ -2122,7 +2164,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 ** assume that we've walked past the end of the subtree.  Set this
 	 ** subtree to be completed, and go on to the next variable.
 	 */
-	 if ((vars->name_length < expect->req_len) ||
+	 if (((int)vars->name_length < expect->req_len) ||
 	     (memcmp(vars->name, expect->req_oid, expect->req_len*sizeof(oid))))
 	 {
 	    DBPRT(2,(DBOUT "      walked off branch - marking subtree as complete.\n"));
@@ -2537,10 +2579,6 @@ not_there:
 
 MODULE = SNMP		PACKAGE = SNMP		PREFIX = snmp
 
-BOOT:
-# first blank line terminates bootstrap code
-    Mib = 0;
-
 
 double
 constant(name,arg)
@@ -2673,6 +2711,11 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                    snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
                                         USM_AUTH_PROTO_SHA_LEN);
               session.securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
+           } else if (!strcmp(auth_proto, "DEFAULT")) {
+               const oid *theoid =
+                   get_default_authtype(&session.securityAuthProtoLen);
+               session.securityAuthProto = 
+                   snmp_duplicate_objid(theoid, session.securityAuthProtoLen);
            } else {
               if (verbose)
                  warn("error:snmp_new_v3_session:Unsupported authentication protocol(%s)\n", auth_proto);
@@ -2695,6 +2738,11 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                   snmp_duplicate_objid(usmDESPrivProtocol,
                                        USM_PRIV_PROTO_DES_LEN);
               session.securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+           } else if (!strcmp(priv_proto, "DEFAULT")) {
+               const oid *theoid =
+                   get_default_privtype(&session.securityPrivProtoLen);
+               session.securityPrivProto =
+                   snmp_duplicate_objid(theoid, session.securityPrivProtoLen);
            } else {
               if (verbose)
                  warn("error:snmp_new_v3_session:Unsupported privacy protocol(%s)\n", priv_proto);
@@ -2798,13 +2846,9 @@ void
 snmp_init_mib_internals()
 	CODE:
         {
-        int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
-
-        /* should test better to see if it has been done already */
-	if (Mib == NULL) {
-           if (verbose) warn("initializing MIB internals (empty)\n");
-           /* init_mib_internals(); */
-        }
+	int notused = 1;
+	/* this function does nothing */
+	/* it is kept only for backwards compatibility */
         }
 
 
@@ -2816,33 +2860,29 @@ snmp_read_mib(mib_file, force=0)
         {
         int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
-        /* if (Mib && force) __free_tree(Mib); needs more work to cleanup */
-
         if ((mib_file == NULL) || (*mib_file == '\0')) {
-           if (Mib == NULL) {
+           if (get_tree_head() == NULL) {
               if (verbose) warn("initializing MIB\n");
-              /* init_mib_internals(); */
               init_mib();
-              if (Mib) {
+              if (get_tree_head()) {
                  if (verbose) warn("done\n");
               } else {
                  if (verbose) warn("failed\n");
               }
 	   }
         } else {
-           if (verbose) warn("reading MIB: %s [%s:%s]\n", mib_file, DEFAULT_MIBDIRS, DEFAULT_MIBS);
-           /* if (Mib == NULL) init_mib_internals();*/
+           if (verbose) warn("reading MIB: %s\n", mib_file);
            if (strcmp("ALL",mib_file))
               read_mib(mib_file);
            else
              read_all_mibs();
-           if (Mib) {
+           if (get_tree_head()) {
               if (verbose) warn("done\n");
            } else {
               if (verbose) warn("failed\n");
            }
         }
-        RETVAL = (I32)Mib;
+        RETVAL = (I32)get_tree_head();
         }
         OUTPUT:
         RETVAL
@@ -2860,12 +2900,12 @@ snmp_read_module(module)
         } else {
            read_module(module);
         }
-        if (Mib) {
+        if (get_tree_head()) {
            if (verbose) warn("Read %s\n", module);
         } else {
            if (verbose) warn("Failed reading %s\n", module);
         }
-        RETVAL = (I32)Mib;
+        RETVAL = (I32)get_tree_head();
         }
         OUTPUT:
         RETVAL
@@ -3311,6 +3351,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            int status;
 	   u_char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
            size_t str_buf_len = sizeof(str_buf);
+           u_char tmp_buf_prefix[STR_BUF_SIZE];
+           u_char str_buf_prefix[STR_BUF_SIZE];
            size_t out_len = 0;
            int buf_over = 0;
            char *label;
@@ -3321,6 +3363,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 	   int old_format;
 	   SV *sv_timestamp = NULL;
            int best_guess;
+           char *tmp_prefix_ptr;
+           char *st;
 	   
            New (0, oid_arr, MAX_OID_LEN, oid);
 
@@ -3352,6 +3396,17 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
                     varbind = (AV*) SvRV(*varbind_ref);
+
+                    /* If the varbind includes the module prefix, capture it for use later */
+                    strncpy(tmp_buf_prefix, __av_elem_pv(varbind, VARBIND_TAG_F, ".0"), STR_BUF_SIZE);
+                    tmp_prefix_ptr = strstr(tmp_buf_prefix,"::");
+                    if (tmp_prefix_ptr) {
+                      tmp_prefix_ptr = strtok_r(tmp_buf_prefix, "::", &st);
+                      strncpy(str_buf_prefix, tmp_prefix_ptr, STR_BUF_SIZE);
+                    }
+                    else {
+                      *str_buf_prefix = '\0';
+                    }
 
                     tp = __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, ".0"),
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
@@ -3447,6 +3502,13 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                                                            vars->name,vars->name_length);
                     str_buf[sizeof(str_buf)-1] = '\0';
 
+                    /* Prepend the module prefix to the next OID if needed */
+                    if (*str_buf_prefix) {
+                      strncat(str_buf_prefix, "::", STR_BUF_SIZE - strlen(str_buf_prefix) - 2);
+                      strncat(str_buf_prefix, str_buf, STR_BUF_SIZE - strlen(str_buf_prefix));
+                      strncpy(str_buf, str_buf_prefix, STR_BUF_SIZE);
+                    }
+                    
                     if (__is_leaf(tp)) {
                        type = tp->type;
                     } else {
@@ -3622,7 +3684,8 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                                        *err_str_svp, *err_num_svp,
 				       *err_ind_svp);
 
-	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
+	      if (SvIOK(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)) &&
+                  SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
 	         sv_timestamp = newSViv((IV)time(NULL));
 
 	      av_clear(varlist);
@@ -3674,12 +3737,20 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                        type = __translate_asn_type(vars->type);
                     }
                     __get_label_iid(str_buf,&label,&iid,getlabel_flag);
-
-		    av_store(varbind, VARBIND_TAG_F,
-			     newSVpv(label, strlen(label)));
-		    av_store(varbind, VARBIND_IID_F,
-			     newSVpv(iid, strlen(iid)));
-
+                    if (label) {
+                        av_store(varbind, VARBIND_TAG_F,
+                                 newSVpv(label, strlen(label)));
+                    } else {
+                        av_store(varbind, VARBIND_TAG_F,
+                                 newSVpv("", 0));
+                    }
+                    if (iid) {
+                        av_store(varbind, VARBIND_IID_F,
+                                 newSVpv(iid, strlen(iid)));
+                    } else {
+                        av_store(varbind, VARBIND_IID_F,
+                                 newSVpv("", 0));
+                    }
                     __get_type_str(type, tmp_type_str);
 		    av_store(varbind, VARBIND_TYPE_F, newSVpv(tmp_type_str,
 				     strlen(tmp_type_str)));
@@ -4476,7 +4547,6 @@ snmp_get_type(tag, best_guess)
 	   struct tree *tp  = NULL;
 	   static char type_str[MAX_TYPE_NAME_LEN];
            char *ret = NULL;
-           int best_guess;
 
            if (tag && *tag) tp = __tag2oid(tag, NULL, NULL, NULL, NULL, best_guess);
            if (tp) __get_type_str(tp->type, ret = type_str);
@@ -4627,7 +4697,8 @@ snmp_set_replace_newer(val)
 	int val
 	CODE:
 	{
-	   netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_REPLACE);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_LIB_MIB_REPLACE, val);
 	}
 
 void
@@ -4819,8 +4890,8 @@ snmp_check_timeout()
 
 MODULE = SNMP	PACKAGE = SNMP::MIB::NODE 	PREFIX = snmp_mib_node_
 SV *
-snmp_mib_node_TIEHASH(class,key,tp=0)
-	char *	class
+snmp_mib_node_TIEHASH(cl,key,tp=0)
+	char *	cl
 	char *	key
         IV tp
 	CODE:
@@ -4829,7 +4900,7 @@ snmp_mib_node_TIEHASH(class,key,tp=0)
            if (!tp) tp = (IV)__tag2oid(key, NULL, NULL, NULL, NULL,0);
            if (tp) {
               ST(0) = sv_newmortal();
-              sv_setref_iv(ST(0), class, tp);
+              sv_setref_iv(ST(0), cl, tp);
            } else {
               ST(0) = &sv_undef;
            }
@@ -4855,7 +4926,6 @@ snmp_mib_node_FETCH(tp_ref, key)
            HV *mib_hv, *enum_hv, *range_hv;
            AV *index_av, *varbind_av, *ranges_av;
            MAGIC *mg = NULL;
-           DLL_IMPORT extern struct tree *tree_head;
 
            if (SvROK(tp_ref)) tp = (SnmpMibNode*)SvIV((SV*)SvRV(tp_ref));
 
@@ -4944,13 +5014,18 @@ snmp_mib_node_FETCH(tp_ref, key)
                  if (strncmp("indexes", key, strlen(key))) break;
                  index_av = newAV();
                  if (tp->augments) {
-                     tptmp = find_best_tree_node(tp->augments, tree_head, NULL);
+ 	             clear_tree_flags(get_tree_head()); 
+                     tptmp = find_best_tree_node(tp->augments, get_tree_head(), NULL);
+                     if (tptmp == NULL) {
+                        tptmp = tp;
+                     }
                  } else {
                      tptmp = tp;
                  }
-                 for(ip=tptmp->indexes; ip != NULL; ip = ip->next) {
-                    av_push(index_av,newSVpv((ip->ilabel),strlen(ip->ilabel)));
-                 }
+                 if (tptmp)
+                     for(ip=tptmp->indexes; ip != NULL; ip = ip->next) {
+                         av_push(index_av,newSVpv((ip->ilabel),strlen(ip->ilabel)));
+                     }
                 sv_setsv(ST(0), newRV((SV*)index_av));
                 break;
 	      case 'l': /* label */
