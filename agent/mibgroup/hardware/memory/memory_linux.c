@@ -31,6 +31,9 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
 
     netsnmp_memory_info *mem;
 
+    /*
+     * Retrieve the memory information from the underlying O/S...
+     */
     if ((statfd = open(MEMINFO_FILE, O_RDONLY, 0)) == -1) {
         snmp_log_perror(MEMINFO_FILE);
         return -1;
@@ -64,10 +67,9 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         snmp_log_perror(MEMINFO_FILE);
     }
 
-        /*
-         * Overall Memory statistics
-         */
-
+    /*
+     * ... parse this into a more useable form...
+     */
     b = strstr(buff, "MemTotal: ");
     if (b) 
         sscanf(b, "MemTotal: %lu", &memtotal);
@@ -118,42 +120,83 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         if (first)
             snmp_log(LOG_ERR, "No SwapFree line in /proc/meminfo\n");
     }
+    first = 0;
 
 
-    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MEMORY, 1 );
+    /*
+     * ... and save this in a standard form.
+     */
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 1 );
     if (!mem) {
-        snmp_log_perror("No Memory info entry");
+        snmp_log_perror("No Physical Memory info entry");
     } else {
+        if (!mem->descr)
+             mem->descr = strdup("Physical memory");
         mem->units = 1024;
-        mem->size = memtotal;
-        mem->free = memfree;
-        mem->other = memshared;
+        mem->size  = memtotal;
+        mem->free  = memfree;
+        mem->other = -1;
+    }
+
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_VIRTMEM, 1 );
+    if (!mem) {
+        snmp_log_perror("No Virtual Memory info entry");
+    } else {
+        if (!mem->descr)
+             mem->descr = strdup("Virtual memory");
+        mem->units = 1024;
+        mem->size  = memtotal+swaptotal;
+        mem->free  = memfree +swapfree;
+        mem->other = -1;
+    }
+
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SHARED, 1 );
+    if (!mem) {
+        snmp_log_perror("No Shared Memory info entry");
+    } else {
+        if (!mem->descr)
+             mem->descr = strdup("Shared memory");
+        mem->units = 1024;
+        mem->size  = memshared;
+        mem->free  = -1;
+        mem->other = -1;
+    }
+
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_CACHED, 1 );
+    if (!mem) {
+        snmp_log_perror("No Cached Memory info entry");
+    } else {
+        if (!mem->descr)
+             mem->descr = strdup("Cached memory");
+        mem->units = 1024;
+        mem->size  = cached;
+        mem->free  = -1;
+        mem->other = -1;
     }
 
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 1 );
     if (!mem) {
         snmp_log_perror("No Swap info entry");
     } else {
+        if (!mem->descr)
+             mem->descr = strdup("Swap space");
         mem->units = 1024;
-        mem->size = swaptotal;
-        mem->free = swapfree;
+        mem->size  = swaptotal;
+        mem->free  = swapfree;
+        mem->other = -1;
     }
 
-    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MISC, 1 );
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MBUF, 1 );
     if (!mem) {
         snmp_log_perror("No Buffer, etc info entry");
     } else {
+        if (!mem->descr)
+             mem->descr = strdup("Memory buffers");
         mem->units = 1024;
-        mem->size = buffers;
-        mem->free = memfree+swapfree;
-        mem->other = cached;
+        mem->size  = buffers;
+        mem->free  = -1;
+        mem->other = -1;
     }
 
-    /*
-     * XXX - TODO: extract individual memory/swap information
-     *    (Into separate netsnmp_memory_info data structures)
-     */
-
-    first = 0;
     return 0;
 }

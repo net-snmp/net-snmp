@@ -79,10 +79,12 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
 
     netsnmp_memory_info *mem;
 
-    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MEMORY, 1 );
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 1 );
     if (!mem) {
         snmp_log_perror("No Memory info entry");
     } else {
+        if (!mem->descr)
+            mem->descr = strdup( "Physical memory" );
         mem->units = P2KB(1)*1024;
         mem->size  = sysconf(_SC_PHYSMEM);
         mem->free  = sysconf(_SC_FREEMEM);
@@ -92,11 +94,14 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     if (!mem) {
         snmp_log_perror("No Swap info entry");
     } else {
+        if (!mem->descr)
+            mem->descr = strdup( "Swap space" );
         mem->units = S2KB(1)*1024;
         mem->size = getTotalSwap();
         mem->free = getFreeSwap();
     }
 
+/*
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MISC, 1 );
     if (!mem) {
         snmp_log_perror("No Buffer, etc info entry");
@@ -106,11 +111,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->free = getTotalFree();
         mem->other = -1;
     }
-
-    /*
-     * XXX - TODO: extract individual memory/swap information
-     *    (Into separate netsnmp_memory_info data structures)
-     */
+*/
 
     return 0;
 }
