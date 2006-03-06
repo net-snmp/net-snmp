@@ -33,6 +33,7 @@ config_arch_require(netbsdelf, ucd-snmp/vmstat_netbsd1)
 config_arch_require(netbsdelf2, ucd-snmp/vmstat_netbsd1)
 config_arch_require(netbsdelf3, ucd-snmp/vmstat_netbsd1)
 config_arch_require(openbsd2, ucd-snmp/vmstat_netbsd1)
+config_arch_require(openbsd3, ucd-snmp/vmstat_netbsd1)
 config_arch_require(bsdi4, ucd-snmp/vmstat_bsdi4)
 #ifndef darwin8
 config_arch_require(darwin1, ucd-snmp/vmstat_freebsd2)
