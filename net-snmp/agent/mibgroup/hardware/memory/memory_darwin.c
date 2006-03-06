@@ -164,24 +164,31 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     swapSize = swapsize();   /* in 'pagesize'? */
     swapUsed = pages_swapped();
 
-    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MEMORY, 1 );
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 1 );
     if (!mem) {
         snmp_log_perror("No Memory info entry");
     } else {
+        if (!mem->descr)
+            mem->descr = strdup( "Physical memory" );
         mem->units = pagesize;   /* XXX - ??? */
         mem->size  = phys_mem;
         mem->free  = phys_mem - pages_used;
+        mem->other = -1;
     }
 
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 1 );
     if (!mem) {
         snmp_log_perror("No Swap info entry");
     } else {
+        if (!mem->descr)
+            mem->descr = strdup( "Swap space" );
         mem->units = pagesize;   /* XXX - ??? */
         mem->size  = swapSize;
         mem->free  = swapSize - swapUsed;
+        mem->other = -1;
     }
 
+/*
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MISC, 1 );
     if (!mem) {
         snmp_log_perror("No Buffer, etc info entry");
@@ -191,11 +198,6 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->free  = (phys_mem - pages_used) + (swapSize - swapUsed);
         mem->other = -1;
     }
-
-    /*
-     * XXX - TODO: extract individual memory/swap information
-     *    (Into separate netsnmp_memory_info data structures)
-     */
-
+*/
     return 0;
 }
