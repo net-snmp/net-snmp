@@ -5,83 +5,83 @@
 
 #include <sys/pstat.h>
 
-/*
- * Retained from UCD implementation
- */
-int
-get_swapinfo(struct swapinfo *swap)
-{
 
-    struct pst_swapinfo pss;
-    int             i = 0;
-
-    while (pstat_getswap(&pss, sizeof(pss), (size_t) 1, i) != -1) {
-        if (pss.pss_idx == (unsigned) i) {
-            swap->total_swap += pss.pss_nblksenabled;
-            swap->free_swap += 4 * pss.pss_nfpgs;       /* nfpgs is in 4-byte blocks - who knows why? */
-            i++;
-        } else
-            return;
-    }
-}                               /* end get_swapinfo */
-
-
+void get_swapinfo(long *total, long *free, long *size);
 
     /*
      * Load the latest memory usage statistics
      */
 int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
 
-    struct swapinfo swap;
     struct pst_static pst;
     struct pst_dynamic psd;
     netsnmp_memory_info *mem;
+    long total_swap = 0;
+    long free_swap  = 0;
+    long size  = 0;
 
-    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MEMORY, 1 );
+    /*
+     * Retrieve the memory information from the underlying O/S...
+     */
+    if (pstat_getstatic(&pst, sizeof(pst), (size_t) 1, 0) == -1) {
+        snmp_log(LOG_ERR, "memory_hpux: pstat_getstatic failed!\n");
+        return -1;
+    }
+    if (pstat_getdynamic(&psd, sizeof(psd), (size_t) 1, 0) == -1) {
+        snmp_log(LOG_ERR, "memory_hpux: pstat_getdynamic failed!\n");
+        return -1;
+    }
+
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 1 );
     if (!mem) {
         snmp_log_perror("No Memory info entry");
     } else {
-        if (pstat_getstatic(&pst, sizeof(pst), (size_t) 1, 0) == -1) {
-            snmp_log(LOG_ERR, "memory_hpux: pstat_getstatic failed!\n");
-            return -1;
-        }
-        if (pstat_getdynamic(&psd, sizeof(psd), (size_t) 1, 0) == -1) {
-            snmp_log(LOG_ERR, "memory_hpux: pstat_getdynamic failed!\n");
-            return -1;
-        }
+        if (!mem->descr)
+            mem->descr = strdup( "Physical memory" );
         mem->units = pst.page_size;
         mem->size  = pst.physical_memory;
         mem->free  = psd.psd_free;
+        mem->other = -1;
     }
 
+    get_swapinfo(&total_swap, &free_swap, &size);
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 1 );
     if (!mem) {
         snmp_log_perror("No Swap info entry");
     } else {
-        getswapinfo(&swap);
-        mem->units = 1024;
-        mem->size = swap.total_swap;
-        mem->free = swap.free_swap;
+        if (!mem->descr)
+            mem->descr = strdup( "Swap space (total)" );
+        mem->units = size;
+        mem->size  = total_swap;
+        mem->free  = free_swap;
+        mem->other = -1;
     }
 
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_STEXT, 1 );
     if (!mem) {
         snmp_log_perror("No Swap text entry");
     } else {
+        if (!mem->descr)
+            mem->descr = strdup( "Swapped text pages" );
         mem->units = pst.page_size;
         mem->size  = psd.psd_vmtxt;
         mem->free  = psd.psd_avmtxt;
+        mem->other = -1;
     }
 
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_RTEXT, 1 );
     if (!mem) {
         snmp_log_perror("No real text entry");
     } else {
+        if (!mem->descr)
+            mem->descr = strdup( "Real text pages" );
         mem->units = pst.page_size;
         mem->size  = psd.psd_rmtxt;
         mem->free  = psd.psd_armtxt;
+	mem->other = -1;
     }
 
+/*
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MISC, 1 );
     if (!mem) {
         snmp_log_perror("No Buffer, etc info entry");
@@ -91,11 +91,42 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->free = (pst.page_size/1024)*psd.psd_free + swap.free_swap;
         mem->other = -1;
     }
-
-    /*
-     * XXX - TODO: extract individual memory/swap information
-     *    (Into separate netsnmp_memory_info data structures)
-     */
-
+ */
     return 0;
 }
+/*
+ * Retained from UCD implementation
+ */
+void
+get_swapinfo(long *total, long *free, long *size)
+{
+    struct pst_swapinfo  pss;
+    netsnmp_memory_info *mem;
+    int  i = 0;
+    char buf[1024];
+
+    while (pstat_getswap(&pss, sizeof(pss), (size_t) 1, i) != -1) {
+        if (pss.pss_idx == (unsigned) i) {
+            /*
+             * TODO - Skip if only one swap device
+             */
+            mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP+1+i, 1 );
+            if (!mem)
+                continue;
+            if (!mem->descr) {
+                sprintf(buf, "swap #%d %s", i, pss.pss_mntpt);
+                mem->descr = strdup( buf );
+            }
+            mem->units = pss.pss_swapchunk;
+            mem->size  = pss.pss_nblksenabled;    /* Or pss_nblks      ? */
+            mem->free  = pss.pss_nfpgs;           /* Or pss_nblksavail ? */
+            mem->other = -1;
+            *total += mem->size;
+            *free  += mem->other;
+            *size   = pss.pss_swapchunk;  /* Hopefully consistent! */
+            i++;
+        } else
+            return;
+    }
+}                               /* end get_swapinfo */
+

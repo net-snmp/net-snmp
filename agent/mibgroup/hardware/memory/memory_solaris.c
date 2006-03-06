@@ -8,6 +8,10 @@
 #include <sys/stat.h>
 #include <sys/swap.h>
 
+#ifndef MAXSTRSIZE
+#define MAXSTRSIZE 1024
+#endif
+
 /*
  * Retained from UCD implementation
  */
@@ -113,10 +117,12 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
 #endif
     netsnmp_memory_info *mem;
 
-    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MEMORY, 1 );
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 1 );
     if (!mem) {
         snmp_log_perror("No Memory info entry");
     } else {
+        if (!mem->descr)
+            mem->descr = strdup( "Physical memory" );
         mem->units = getpagesize();
 #ifdef _SC_PHYS_PAGES
         mem->size  = sysconf(_SC_PHYS_PAGES);
@@ -131,17 +137,22 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
 #else
         mem->free = getTotalFree() - getFreeSwap();
 #endif
+        mem->other = -1;
     }
 
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 1 );
     if (!mem) {
         snmp_log_perror("No Swap info entry");
     } else {
+        if (!mem->descr)
+            mem->descr = strdup( "Swap space" );
         mem->units = getpagesize();
         mem->size = getTotalSwap();
         mem->free = getFreeSwap();
+        mem->other = -1;
     }
 
+/*
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MISC, 1 );
     if (!mem) {
         snmp_log_perror("No Buffer, etc info entry");
@@ -151,11 +162,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->free = getTotalFree();
         mem->other = -1;
     }
-
-    /*
-     * XXX - TODO: extract individual memory/swap information
-     *    (Into separate netsnmp_memory_info data structures)
-     */
+*/
 
     return 0;
 }

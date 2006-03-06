@@ -73,6 +73,16 @@ netsnmp_memory_info *netsnmp_memory_get_byIdx(  int idx, int create ) {
     return NULL;  /* Shouldn't happen! */
 }
 
+netsnmp_memory_info *netsnmp_memory_get_next_byIdx( int idx, int type ) {
+    netsnmp_memory_info *mem;
+
+    for ( mem=_mem_head; mem; mem=mem->next )
+        if (mem->type == type && mem->idx > idx)    /* Or treat as bits? */
+            return mem;
+    return NULL;
+}
+
+
 
 netsnmp_cache *netsnmp_memory_get_cache( void ) {
     return _mem_cache;
