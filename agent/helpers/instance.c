@@ -387,14 +387,18 @@ netsnmp_register_num_file_instance(const char *name,
     if ((NULL == nfi) ||
         (NULL == (nfi->file_name = strdup(file_name)))) {
         snmp_log(LOG_ERR, "could not not allocate memory\n");
+        if (NULL != nfi)
+            free(nfi); /* SNMP_FREE overkill on local var */
         return MIB_REGISTRATION_FAILED;
     }
 
     myreg = get_reg(name, "file_num_handler", reg_oid, reg_oid_len, nfi,
                     mode, netsnmp_instance_num_file_handler,
                     subhandler, contextName);
-    if (NULL == myreg)
+    if (NULL == myreg) {
+        free(nfi); /* SNMP_FREE overkill on local var */
         return MIB_REGISTRATION_FAILED;
+    }
 
     nfi->type = asn_type;
 
