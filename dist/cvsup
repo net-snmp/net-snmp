@@ -7,6 +7,18 @@ TAG=
 WO=0
 DEST=
 
+# gnu tar (as of 1.15.1) is unable to create portable tar archives, 
+# especially if long file names (>100 char) are present.
+# star is a better replacement.
+if [ -x /usr/bin/star ]; then
+    TAR="/usr/bin/star -Hustar -c -f"
+elif [ -x /bin/tar ]; then
+    TAR="/bin/tar cf"
+else
+    echo "neither /usr/bin/star nor /bin/tar found."
+    exit
+fi
+
 if [ "x$1" = "x-u" ]; then
     DEST=$2
     shift 2
@@ -97,7 +109,7 @@ if [ ! -z $DEST ]; then
 #    echo $PWD
     DATE=`date +%Y%m%d_%H%M`
     SOURCE=$REP-cvs-$TAG"_$DATE"
-    tar cf /tmp/$SOURCE.tar $SUBD
+    $TAR /tmp/$SOURCE.tar $SUBD
     gzip -f --best /tmp/$SOURCE.tar
     scp /tmp/$SOURCE.tar.gz $DEST
     rm -f /tmp/$SOURCE.tar.gz
