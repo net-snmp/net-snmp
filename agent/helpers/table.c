@@ -298,7 +298,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                              var->name, tmp_len) > 0) {
             if (reqinfo->mode == MODE_GETNEXT) {
                 if (var->name != var->name_loc)
-                    free(var->name);
+                    SNMP_FREE(var->name);
                 snmp_set_var_objid(var, reginfo->rootoid,
                                    reginfo->rootoid_len);
             } else {
