@@ -1038,7 +1038,7 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
                                  int var_subid, oid range_ubound,
                                  const char *context)
 {
-    netsnmp_subtree *list, *myptr;
+    netsnmp_subtree *list, *myptr, *futureptr;
     netsnmp_subtree *prev, *child;       /* loop through children */
     struct register_parameters reg_parms;
     oid             range_lbound = name[var_subid - 1];
@@ -1072,7 +1072,11 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
         netsnmp_subtree_unload(child, prev, context);
         myptr = child;          /* remember this for later */
 
-        for (list = myptr->next; list != NULL; list = list->next) {
+        for (list = myptr->next; list != NULL; list = futureptr) {
+            /* remember the next spot in the list in case we free this node */
+            futureptr = list->next;
+
+            /* check each child */
             for (child = list, prev = NULL; child != NULL;
                  prev = child, child = child->children) {
 
@@ -1084,6 +1088,8 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
                     break;
                 }
             }
+
+            /* XXX: wjh: not sure why we're bailing here */
             if (child == NULL) {        /* Didn't find the given name */
                 break;
             }
