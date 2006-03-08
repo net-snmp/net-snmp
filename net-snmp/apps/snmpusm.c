@@ -223,9 +223,14 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
         return SNMPERR_GENERR;
     key = (u_char *) malloc(key_len * sizeof(u_char));
 
-    other_pub = BN_bin2bn(vars->val.string, vars->val_len, NULL);
-    if (!other_pub)
+    if (!key)
         return SNMPERR_GENERR;
+
+    other_pub = BN_bin2bn(vars->val.string, vars->val_len, NULL);
+    if (!other_pub) {
+        SNMP_FREE(key);
+        return SNMPERR_GENERR;
+    }
 
     if (DH_compute_key(key, other_pub, dh)) {
         u_char *kp;
