@@ -912,6 +912,12 @@ int   forward_handler( netsnmp_pdu           *pdu,
     session.peername = cp;
     session.version  = pdu->version;
     ss = snmp_open( &session );
+    if (!ss)
+        return NETSNMPTRAPD_HANDLER_FAILED;
+
+    /* XXX: wjh we should be caching sessions here and not always
+       reopening a session.  It's very ineffecient, especially with v3
+       INFORMS which may require engineID probing */
 
     pdu2 = snmp_clone_pdu(pdu);
     if (pdu2->transport_data) {
