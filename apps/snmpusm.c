@@ -198,19 +198,27 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     unsigned char *cp;
             
     dhkeychange = (char *) malloc(2 * vars->val_len * sizeof(char));
+    if (!dhkeychange)
+        return SNMPERR_GENERR;
     memcpy(dhkeychange, vars->val.string, vars->val_len);
 
     cp = dhvar->val.string;
     dh = d2i_DHparams(NULL, (const unsigned char **) &cp,
                       dhvar->val_len);
 
-    if (!dh || !dh->g || !dh->p)
+    if (!dh || !dh->g || !dh->p) {
+        SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
+    }
+    
     DH_generate_key(dh);
-    if (!dh->pub_key)
+    if (!dh->pub_key) {
+        SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
+    }
             
     if (vars->val_len != BN_num_bytes(dh->pub_key)) {
+        SNMP_FREE(dhkeychange);
         fprintf(stderr,"incorrect diffie-helman lengths (%d != %d)\n",
                 vars->val_len, BN_num_bytes(dh->pub_key));
         return SNMPERR_GENERR;
@@ -219,15 +227,20 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     BN_bn2bin(dh->pub_key, dhkeychange + vars->val_len);
 
     key_len = DH_size(dh);
-    if (!key_len)
+    if (!key_len) {
+        SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
+    }
     key = (u_char *) malloc(key_len * sizeof(u_char));
 
-    if (!key)
+    if (!key) {
+        SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
+    }
 
     other_pub = BN_bin2bn(vars->val.string, vars->val_len, NULL);
     if (!other_pub) {
+        SNMP_FREE(dhkeychange);
         SNMP_FREE(key);
         return SNMPERR_GENERR;
     }
@@ -246,6 +259,10 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     snmp_pdu_add_variable(pdu, keyoid, keyoid_len,
                           ASN_OCTET_STR, dhkeychange,
                           2 * vars->val_len);
+
+    SNMP_FREE(dhkeychange);
+    SNMP_FREE(other_pub);
+    SNMP_FREE(key);
 
     return SNMPERR_SUCCESS;
 }
