@@ -324,8 +324,10 @@ void detect_hrproc(void)
     }
     nrprocs = 1;
     proc_descriptions = (char**)malloc(sizeof(char*)*nrprocs);
-    if (!proc_descriptions)
+    if (!proc_descriptions) {
+        fclose(fp);
 	return;
+    }
     proc_descriptions[0] =
         strdup("An electronic chip that makes the computer work.");
     i = -1;
@@ -337,8 +339,10 @@ void detect_hrproc(void)
         if ((i!=-1) && (i >= nrprocs)) {
 	    nrprocs++;
     	    proc_descriptions = (char**)realloc(proc_descriptions, sizeof(char*)*nrprocs);
-	    if (!proc_descriptions)
+	    if (!proc_descriptions) {
+                fclose(fp);
 		return;
+            }
 	    proc_descriptions[i] = strdup("An electronic chip that makes the computer work."); /* will be overwritten */
         }
 
