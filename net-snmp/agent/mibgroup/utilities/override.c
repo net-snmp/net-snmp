@@ -153,11 +153,12 @@ netsnmp_parse_override(const char *token, char *line)
         buf[0] = 0;
 
     thedata = SNMP_MALLOC_TYPEDEF(override_data);
-    thedata->type = type;
     if (!thedata) {
         config_perror("memory allocation failure");
         return;
     }
+
+    thedata->type = type;
 
     switch (type) {
     case ASN_INTEGER:
