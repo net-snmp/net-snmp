@@ -159,6 +159,7 @@ netsnmp_table_container_register(netsnmp_handler_registration *reginfo,
 
     if (!cb) {
         snmp_log(LOG_ERR, "table_array registration with no callbacks\n" );
+        free(tad); /* SNMP_FREE is overkill for local var */
         return SNMPERR_GENERR;
     }
     /*
@@ -169,17 +170,21 @@ netsnmp_table_container_register(netsnmp_handler_registration *reginfo,
           (NULL==cb->row_copy)) )) {
         snmp_log(LOG_ERR, "table_array registration with incomplete "
                  "callback structure.\n");
+        free(tad); /* SNMP_FREE is overkill for local var */
         return SNMPERR_GENERR;
     }
 
-    if (NULL==container)
+    if (NULL==container) {
         tad->table = netsnmp_container_find("table_array");
-    else
+        snmp_log(LOG_ERR, "table_array couldn't allocate container\n" );
+        free(tad); /* SNMP_FREE is overkill for local var */
+        return SNMPERR_GENERR;
+    } else
         tad->table = container;
-    if (NULL==container->compare)
-        container->compare = netsnmp_compare_netsnmp_index;
-    if (NULL==container->ncompare)
-        container->ncompare = netsnmp_ncompare_netsnmp_index;
+    if (NULL==tad->table->compare)
+        tad->table->compare = netsnmp_compare_netsnmp_index;
+    if (NULL==tad->table->ncompare)
+        tad->table->ncompare = netsnmp_ncompare_netsnmp_index;
     
     tad->cb = cb;
 
