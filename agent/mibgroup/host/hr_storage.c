@@ -12,7 +12,9 @@
 #endif
 
 #include <sys/types.h>
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -33,7 +35,7 @@
 # endif
 #endif
 
-#ifndef mingw32
+#if (!defined(mingw32) && !defined(WIN32))
 #if HAVE_UTMPX_H
 #include <utmpx.h>
 #else
