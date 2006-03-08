@@ -354,6 +354,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
                         addr->sun_path, errno, strerror(errno)));
             netsnmp_unix_close(t);
             netsnmp_transport_free(t);
+            return NULL;
         }
 
     } else {
