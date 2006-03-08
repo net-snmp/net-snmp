@@ -3799,7 +3799,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
             if (uitmp > (int) (*oidLen)) {
                 for (i = 0; i < *oidLen; ++i)
                     var->val.string[i] = (u_char) * oidIndex++;
-                for (i = 0; i < uitmp; ++i)
+                for (i = *oidLen; i < uitmp; ++i)
                     var->val.string[i] = '\0';
                 (*oidLen) = 0;
             } else {
