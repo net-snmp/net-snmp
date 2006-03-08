@@ -133,7 +133,6 @@ a:hover {background-color:#eee;}
   
   /* Ugly brilliant hack removed - messed up Konqueror.  Just set height anyways otherwise ie6 messed up */
   height:40px; /* the correct height */
-  background: url('/images/postcards2.jpg');
   background-repeat: repeat; 
 }
 /* I've heard this called the "be nice to Opera 5" rule. Basically, it feeds correct 
