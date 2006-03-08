@@ -82,6 +82,8 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
     }
 
     if (!vacm_is_configured()) {
+        if (newpdu)
+            snmp_free_pdu(newpdu);
         snmp_log(LOG_WARNING, "No access configuration - dropping trap.\n");
         return NETSNMPTRAPD_HANDLER_FINISH;
     }
