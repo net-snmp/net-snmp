@@ -92,8 +92,11 @@ init_vacm_context(void)
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
     iinfo = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
 
-    if (!table_info || !iinfo)
+    if (!table_info || !iinfo) {
+        SNMP_FREE(table_info);
+        SNMP_FREE(iinfo);
         return;
+    }
 
     netsnmp_table_helper_add_index(table_info, ASN_OCTET_STR)
         table_info->min_column = 1;
