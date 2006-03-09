@@ -323,6 +323,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         break;
 
     case AGENTX_MSG_RESPONSE:
+        SNMP_FREE(smagic);
         DEBUGMSGTL(("agentx/subagent", "  -> response\n"));
         return 1;
 
@@ -333,6 +334,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         DEBUGMSGTL(("agentx/subagent", "  -> testset\n"));
         asi = save_set_vars(session, pdu);
         if (asi == NULL) {
+            SNMP_FREE(smagic);
             snmp_log(LOG_WARNING, "save_set_vars() failed\n");
             return 1;
         }
@@ -345,10 +347,12 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         DEBUGMSGTL(("agentx/subagent", "  -> commitset\n"));
         asi = restore_set_vars(session, pdu);
         if (asi == NULL) {
+            SNMP_FREE(smagic);
             snmp_log(LOG_WARNING, "restore_set_vars() failed\n");
             return 1;
         }
         if (asi->mode != SNMP_MSG_INTERNAL_SET_RESERVE2) {
+            SNMP_FREE(smagic);
             snmp_log(LOG_WARNING,
                      "dropping bad AgentX request (wrong mode %d)\n",
                      asi->mode);
@@ -363,6 +367,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         DEBUGMSGTL(("agentx/subagent", "  -> cleanupset\n"));
         asi = restore_set_vars(session, pdu);
         if (asi == NULL) {
+            SNMP_FREE(smagic);
             snmp_log(LOG_WARNING, "restore_set_vars() failed\n");
             return 1;
         }
@@ -385,6 +390,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         DEBUGMSGTL(("agentx/subagent", "  -> undoset\n"));
         asi = restore_set_vars(session, pdu);
         if (asi == NULL) {
+            SNMP_FREE(smagic);
             snmp_log(LOG_WARNING, "restore_set_vars() failed\n");
             return 1;
         }
@@ -394,6 +400,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         break;
 
     default:
+        SNMP_FREE(smagic);
         DEBUGMSGTL(("agentx/subagent", "  -> unknown command %d (%02x)\n",
                     pdu->command, pdu->command));
         return 0;
