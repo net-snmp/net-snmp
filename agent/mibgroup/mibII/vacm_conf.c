@@ -1257,7 +1257,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             ) {
             if (!netsnmp_udp_getSecName(pdu->transport_data,
                                         pdu->transport_data_length,
-                                        (char *) pdu->community,
+                                        (char *) (pdu->community || ""),
                                         pdu->community_len, &sn,
                                         &contextName)) {
                 /*
@@ -1277,7 +1277,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             ) {
             if (!netsnmp_udp6_getSecName(pdu->transport_data,
                                          pdu->transport_data_length,
-                                         (char *) pdu->community,
+                                         (char *) (pdu->community || ""),
                                          pdu->community_len, &sn,
                                          &contextName)) {
                 /*
@@ -1294,7 +1294,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
         } else if (pdu->tDomain == netsnmp_UnixDomain){
             if (!netsnmp_unix_getSecName(pdu->transport_data,
                                          pdu->transport_data_length,
-                                         (char *) pdu->community,
+                                         (char *) (pdu->community || ""),
                                          pdu->community_len, &sn,
                                          &contextName)) {
 					sn = NULL;
