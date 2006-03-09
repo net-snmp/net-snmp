@@ -102,16 +102,22 @@ netsnmp_tdata_clone_row(netsnmp_tdata_row *row)
 
     if (row->indexes) {
         newrow->indexes = snmp_clone_varbind(newrow->indexes);
-        if (!newrow->indexes)
+        if (!newrow->indexes) {
+            SNMP_FREE(newrow);
             return NULL;
+        }
     }
 
     if (row->oid_index.oids) {
         memdup((u_char **) & newrow->oid_index.oids,
                (u_char *) row->oid_index.oids,
                row->oid_index.len * sizeof(oid));
-        if (!newrow->oid_index.oids)
+        if (!newrow->oid_index.oids) {
+            if (newrow->indexes)
+                snmp_free_varbind(newrow->indexes);
+            SNMP_FREE(newrow);
             return NULL;
+        }
     }
 
     return newrow;
