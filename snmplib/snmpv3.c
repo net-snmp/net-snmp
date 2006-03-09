@@ -1356,10 +1356,11 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
 
     c_engineID = snmpv3_generate_engineID(&engineIDLen);
 
-    if (engineIDLen == 0) {
+    if (engineIDLen == 0 || !c_engineID) {
         /*
          * Somethine went wrong - help! 
          */
+        SNMP_FREE(c_engineID);
         return SNMPERR_GENERR;
     }
 
