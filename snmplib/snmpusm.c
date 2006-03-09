@@ -2423,8 +2423,9 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
      */
     if ((user = usm_get_user_from_list(secEngineID, *secEngineIDLen,
                                        secName, userList,
-                                       (sess->isAuthoritative ==
-                                        SNMP_SESS_AUTHORITATIVE) ? 0 : 1))
+                                       (((sess && sess->isAuthoritative ==
+                                          SNMP_SESS_AUTHORITATIVE) ||
+                                         (!sess)) ? 0 : 1)))
         == NULL) {
         DEBUGMSGTL(("usm", "Unknown User(%s)\n", secName));
         if (snmp_increment_statistic(STAT_USMSTATSUNKNOWNUSERNAMES) == 0) {
