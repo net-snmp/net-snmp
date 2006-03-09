@@ -70,6 +70,7 @@ netsnmp_memory_info *netsnmp_memory_get_byIdx(  int idx, int create ) {
             return mem;
         }
     }
+    SNMP_FREE(mem);
     return NULL;  /* Shouldn't happen! */
 }
 
