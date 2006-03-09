@@ -12,97 +12,7 @@
 #define MAXSTRSIZE 1024
 #endif
 
-/*
- * Retained from UCD implementation
- */
-long
-getTotalSwap(void)
-{
-    long            total_mem;
-
-    size_t          num;
-    int             i, n;
-    swaptbl_t      *s;
-    char           *strtab;
-
-    total_mem = 0;
-
-    num = swapctl(SC_GETNSWP, 0);
-    s = malloc(num * sizeof(swapent_t) + sizeof(struct swaptable));
-    if (s) {
-        strtab = (char *) malloc((num + 1) * MAXSTRSIZE);
-        if (strtab) {
-            for (i = 0; i < (num + 1); i++) {
-                s->swt_ent[i].ste_path = strtab + (i * MAXSTRSIZE);
-            }
-            s->swt_n = num + 1;
-            n = swapctl(SC_LIST, s);
-
-            for (i = 0; i < n; i++)
-                total_mem += s->swt_ent[i].ste_pages;
-
-            free(strtab);
-        }
-        free(s);
-    }
-
-    return (total_mem);
-}
-
-/*
- * returns -1 if malloc fails.
- */
-long
-getFreeSwap(void)
-{
-    long            free_mem = -1;
-
-    size_t          num;
-    int             i, n;
-    swaptbl_t      *s;
-    char           *strtab;
-
-    num = swapctl(SC_GETNSWP, 0);
-    s = malloc(num * sizeof(swapent_t) + sizeof(struct swaptable));
-    if (s) {
-        strtab = (char *) malloc((num + 1) * MAXSTRSIZE);
-        if (strtab) {
-            free_mem = 0;
-            for (i = 0; i < (num + 1); i++) {
-                s->swt_ent[i].ste_path = strtab + (i * MAXSTRSIZE);
-            }
-            s->swt_n = num + 1;
-            n = swapctl(SC_LIST, s);
-
-            for (i = 0; i < n; i++)
-                free_mem += s->swt_ent[i].ste_free;
-
-            free(strtab);
-        }
-        free(s);
-    }
-
-    return (free_mem);
-}
-
-long
-getTotalFree(void)
-{
-    unsigned long   free_mem, allocated, reserved, available, used_size;
-    struct anoninfo ai;
-
-    if (-1 == swapctl(SC_AINFO, &ai)) {
-        snmp_log_perror("swapctl(SC_AINFO)");
-	return 0;
-    }
-    allocated = ai.ani_max - ai.ani_free;
-    reserved = (ai.ani_resv - allocated);
-    available = (ai.ani_max - ai.ani_resv);     /* K-byte */
-    free_mem = used_size = reserved + allocated;
-    free_mem = available;
-    return (free_mem);
-}
-
+void getSwapInfo(long *total_mem, long *free_mem);
 
 
     /*
@@ -115,28 +25,52 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     kstat_t        *ksp1;
     kstat_named_t  *kn;
 #endif
+#ifdef SC_AINFO
+    struct anoninfo ai;
+#endif
+
+    long   phys_mem   = 0;
+    long   phys_free  = 0;
+    long   swap_pages = 0;
+    long   swap_free  = 0;
+    long   pagesize   = 0;
     netsnmp_memory_info *mem;
 
+    /*
+     * Retrieve the memory information from the underlying O/S...
+     */
+    pagesize = getpagesize();
+    getSwapInfo( &swap_pages, &swap_free );
+#ifdef SC_AINFO
+    swapctl(&ai);
+#endif
+#ifdef _SC_PHYS_PAGES
+    phys_mem  = sysconf(_SC_PHYS_PAGES);
+    phys_free = sysconf(_SC_AVPHYS_PAGES);
+#else
+    ksp1 = kstat_lookup(kstat_fd, "unix", 0, "system_pages");
+    kstat_read(kstat_fd, ksp1, 0);
+    kn = kstat_data_lookup(ksp1, "physmem");
+    phys_mem  = kn->value.ul;
+#ifdef SC_AINFO
+    phys_free = (ai.ani_max - ai.ani_resv) - swap_free;
+#else
+    phys_free = -1;
+#endif
+#endif
+
+    /*
+     * ... and save this in a standard form.
+     */
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 1 );
     if (!mem) {
         snmp_log_perror("No Memory info entry");
     } else {
         if (!mem->descr)
             mem->descr = strdup( "Physical memory" );
-        mem->units = getpagesize();
-#ifdef _SC_PHYS_PAGES
-        mem->size  = sysconf(_SC_PHYS_PAGES);
-#else
-        ksp1 = kstat_lookup(kstat_fd, "unix", 0, "system_pages");
-        kstat_read(kstat_fd, ksp1, 0);
-        kn = kstat_data_lookup(ksp1, "physmem");
-        mem->size = kn->value.ul;
-#endif
-#ifdef _SC_AVPHYS_PAGES
-        mem->free = sysconf(_SC_AVPHYS_PAGES);
-#else
-        mem->free = getTotalFree() - getFreeSwap();
-#endif
+        mem->units = pagesize;
+        mem->size  = phys_mem;
+        mem->free  = phys_free;
         mem->other = -1;
     }
 
@@ -146,9 +80,9 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     } else {
         if (!mem->descr)
             mem->descr = strdup( "Swap space" );
-        mem->units = getpagesize();
-        mem->size = getTotalSwap();
-        mem->free = getFreeSwap();
+        mem->units = pagesize;
+        mem->size  = swap_pages;
+        mem->free  = swap_free;
         mem->other = -1;
     }
 
@@ -165,4 +99,60 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
 */
 
     return 0;
+}
+
+/*
+ * Adapted from UCD implementation
+ */
+void
+getSwapInfo(long *total_mem, long *total_free)
+{
+    size_t          num;
+    int             i, n;
+    swaptbl_t      *s;
+    netsnmp_memory_info *mem;
+    char           *strtab;
+    char buf[1024];
+
+    num = swapctl(SC_GETNSWP, 0);
+    s = malloc(num * sizeof(swapent_t) + sizeof(struct swaptable));
+    if (!s)
+        return;
+
+    strtab = (char *) malloc((num + 1) * MAXSTRSIZE);
+    if (!strtab) {
+        free(s);
+        return;
+    }
+
+    for (i = 0; i < (num + 1); i++) {
+        s->swt_ent[i].ste_path = strtab + (i * MAXSTRSIZE);
+    }
+    s->swt_n = num + 1;
+    n = swapctl(SC_LIST, s);
+
+    if (n > 1) {
+      for (i = 0; i < n; ++i) {
+        mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP+1+i, 1 );
+        if (!mem)
+            continue;
+        if (!mem->descr) {
+            sprintf(buf, "swap #%d %s", i, s->swt_ent[i].ste_path);
+            mem->descr = strdup( buf );
+        }
+        mem->units = getpagesize();
+        mem->size  = s->swt_ent[i].ste_pages;
+        mem->free  = s->swt_ent[i].ste_free;
+        mem->other = -1;
+        *total_mem  += mem->size;
+        *total_free += mem->free;
+      }
+    }
+    else {
+        *total_mem  = s->swt_ent[0].ste_pages;
+        *total_free = s->swt_ent[0].ste_free;
+    }
+
+    free(strtab);
+    free(s);
 }
