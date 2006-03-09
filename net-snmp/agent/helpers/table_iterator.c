@@ -106,11 +106,16 @@
 netsnmp_mib_handler *
 netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
 {
-    netsnmp_mib_handler *me =
+    netsnmp_mib_handler *me;
+
+    if (!iinfo)
+        return;
+
+    me =
         netsnmp_create_handler(TABLE_ITERATOR_NAME,
                                netsnmp_table_iterator_helper_handler);
 
-    if (!me || !iinfo)
+    if (!me)
         return NULL;
 
     me->myvoid = iinfo;
