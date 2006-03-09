@@ -223,7 +223,12 @@ netsnmp_parse_override(const char *token, char *line)
     memdup((u_char **) & the_reg->rootoid, (const u_char *) oidbuf,
            oidbuf_len * sizeof(oid));
     the_reg->rootoid_len = oidbuf_len;
-    if (!the_reg->rootoid) {
+    if (!the_reg->rootoid || !the_reg->handler || !the_reg->handlerName) {
+        if (the_reg->handler)
+            SNMP_FREE(the_reg->handler->handler_name);
+        SNMP_FREE(the_reg->handler);
+        SNMP_FREE(the_reg->handlerName);
+        SNMP_FREE(the_reg);
         config_perror("memory allocation failure");
         free(thedata);
         return;
