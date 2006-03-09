@@ -447,11 +447,12 @@ schedTable_createEntry(const char *schedOwner, const char *schedName)
      * Set the indexing for this entry, both in the row
      *  data structure, and in the table_data helper.
      */
-    if (schedOwner)
+    if (schedOwner) {
         memcpy(entry->schedOwner, schedOwner, strlen(schedOwner));
     memcpy(    entry->schedName,  schedName,  strlen(schedName));
     netsnmp_tdata_row_add_index(row, ASN_OCTET_STR,
-                                entry->schedOwner, strlen(schedOwner));
+                                (entry->schedOwner || ""),
+                                ((schedOwner) ? strlen(schedOwner) : 0));
     netsnmp_tdata_row_add_index(row, ASN_OCTET_STR,
                                 entry->schedName,  strlen(schedName));
     /*
