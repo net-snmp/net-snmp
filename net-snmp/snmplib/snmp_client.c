@@ -1196,6 +1196,7 @@ static int _query(netsnmp_variable_list *list,
         ret = snmp_synch_response( _def_query_session, pdu, &response );
     else {
         /* No session specified */
+        snmp_free_pdu(pdu);
         return SNMP_ERR_GENERR;
     }
 
