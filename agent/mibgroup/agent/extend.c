@@ -1133,6 +1133,9 @@ _extend_find_entry( netsnmp_request_info       *request,
                 line_idx = 1;
             }
 
+            if (!eptr)
+                return NULL;    /* (assuming there is one) */
+
             /*
              *  If we're working with the same entry that was requested,
              *  see whether we've reached the end of the output...
