@@ -1578,7 +1578,8 @@ snmp_sess_add_ex(netsnmp_session * in_session,
             snmp_sess_close(slp);
             slp = NULL;
         }
-        if (create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
+        if (slp &&
+            create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
             slp->session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;
             DEBUGMSGTL(("snmp_api",
                         "_sess_open(): failed(2) to create a new user from session\n"));
