@@ -43,17 +43,18 @@ GetOptions(\%opts,
 	   ['b|braches=s',     'Branches to apply to (eg 5.1,5.2,...)'],
 	   ['m|commit-msg=s',  'Default commit message to use'],
 	   ['D|subdir=s',      'Apply patches to a subdirectory'],
+	   ['u|no-update',     'Do not run cvs update in the directory first.  Only use this if it\'s known clean.'],
 	  );
+
+my %bs;
+if ($opts{'b'}) {
+    map { $bs{$_} = 1; } split(/,\s*/,$opts{'b'}); 
+}
 
 my $qw = new QWizard();
 my $pris = load_primaries();
 $qw->{'primaries'} = $pris;
 
-#print Dumper($pris);
-
-if ($opts{'b'}) {
-    map { $qw->qwparam($_,1); } split(/,\s*/,$opts{'b'}); 
-}
 $qw->qwparam('cvscommit',$opts{'m'}) if ($opts{'m'});
 
 $qw->magic('top');
@@ -63,7 +64,7 @@ sub make_tops {
     foreach my $k (@codetrees) {
 	push @tops, 
 	  qw_checkbox($k, "Apply to $k", 1, 0, 
-		      default => $qw->qwparam($k),
+		      default => $qw->qwparam($k) || $bs{$k},
 		      override => 1);
     }
     return @tops;
@@ -84,7 +85,7 @@ sub load_primaries {
 			     return "patch file doesn't exist" if (! -f qwparam('patchfile'))
 			 }),
 		  qw_checkbox('noupdate','Don\'t run cvs update/revert first:', 
-			      1, 0)],
+			      1, 0, default => $opts{'u'} || 0)],
 		  [],[],sub_modules => ['commit', 'commitmsg', 'maketest',
 					'edit', 'applying', 'check',
 					'patch_info']),
@@ -281,7 +282,7 @@ sub capture {
     }
     close(I);
     $result = $? >> 8;
-    $results .= "RESULT: $result\n";
+    $results .= "RESULT: " . (($result) ? "FAIL" : "SUCCESS") . "($result)\n";
     return $results;
 }
 
