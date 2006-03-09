@@ -60,6 +60,7 @@ netsnmp_get_timed_bare_stash_cache_handler(int timeout, oid *rootoid, size_t roo
 
     handler->next = netsnmp_create_handler("stash_cache", netsnmp_stash_cache_helper);
     if (!handler->next) {
+        netsnmp_handler_free(handler);
         free(cinfo);
         return NULL;
     }
