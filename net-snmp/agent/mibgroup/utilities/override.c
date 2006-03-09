@@ -198,6 +198,7 @@ netsnmp_parse_override(const char *token, char *line)
         break;
 
     default:
+        SNMP_FREE(thedata);
         config_perror("illegal/unsupported type specified");
         return;
     }
