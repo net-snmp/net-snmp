@@ -172,8 +172,11 @@ vacm_parse_config_view(const char *token, char *line)
     vptr =
         vacm_createViewEntry(view.viewName, view.viewSubtree,
                              view.viewSubtreeLen);
-    if (!vptr)
+    if (!vptr) {
+        SNMP_FREE(view.viewSubtree);
+        SNMP_FREE(view.viewName);
         return;
+    }
 
     vptr->viewStatus = view.viewStatus;
     vptr->viewStorageType = view.viewStorageType;
