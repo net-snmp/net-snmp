@@ -642,7 +642,7 @@ netsnmp_view_destroy(struct vacm_viewEntry **head, const char *viewName,
                 break;
             lastvp = vp;
         }
-        if (!vp)
+        if (!vp || !lastvp)
             return;
         lastvp->next = vp->next;
     }
@@ -765,7 +765,7 @@ vacm_destroyGroupEntry(int securityModel, const char *securityName)
                 break;
             lastvp = vp;
         }
-        if (!vp)
+        if (!vp || !lastvp)
             return;
         lastvp->next = vp->next;
     }
@@ -928,7 +928,7 @@ vacm_destroyAccessEntry(const char *groupName,
                 break;
             lastvp = vp;
         }
-        if (!vp)
+        if (!vp || !lastvp)
             return;
         lastvp->next = vp->next;
     }
