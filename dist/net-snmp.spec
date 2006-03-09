@@ -20,10 +20,10 @@
 #
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
-Version: 5.4.dev
+Version: 5.3.0.1
 # update release for vendor release. (eg 1.rh9, 1.rh72, 1.ydl3, 1.ydl23)
 Release: 1
-URL: http://net-snmp.sourceforge.net/
+URL: http://www.net-snmp.org/
 License: BSDish
 Group: System Environment/Daemons
 Vendor: Net-SNMP project
@@ -193,6 +193,12 @@ rm -rf $RPM_BUILD_ROOT
 echo "No additional verification is done for net-snmp"
 
 %changelog
+* Fri Jan 13 2006 hardaker <hardaker@users.sf.net>
+- Update to 5.3.0.1
+
+* Wed Dec 28 2005 hardaker <hardaker@users.sf.net>
+- Update to 5.3
+
 * Tue Oct 28 2003 rs <rstory@users.sourceforge.net>
 - fix conditional perl build after reading rpm docs
 
