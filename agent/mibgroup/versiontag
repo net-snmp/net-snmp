@@ -28,6 +28,8 @@ if [ $2 = "tar" ]; then
     if [ -x /usr/bin/star ]; then
         TAR="/usr/bin/star -Hustar -z -c -f"
     elif [ -x /bin/tar ]; then
+        echo "WARNING: about to create non-portable tar archives using GNU tar."
+        echo "You'd better install /usr/bin/star and rerun."
         TAR="/bin/tar czf"
     else
         echo "neither /usr/bin/star nor /bin/tar found."
