@@ -181,6 +181,7 @@ _load_v4(netsnmp_container *container, int idx_offset)
         CONTAINER_INSERT(container, entry);
     }
 
+    fclose(in);
     if( rc < 0 )
         return rc;
 
