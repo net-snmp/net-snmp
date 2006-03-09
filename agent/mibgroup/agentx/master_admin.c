@@ -131,8 +131,11 @@ close_agentx_session(netsnmp_session * session, int sessid)
 {
     netsnmp_session *sp, **prevNext;
 
+    if (!session)
+        return AGENTX_ERR_NOT_OPEN;
+
     DEBUGMSGTL(("agentx/master", "close %08p, %d\n", session, sessid));
-    if (session != NULL && sessid == -1) {
+    if (sessid == -1) {
         unregister_mibs_by_session(session);
         unregister_index_by_session(session);
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
