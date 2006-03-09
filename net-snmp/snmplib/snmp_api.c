@@ -3774,6 +3774,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
         parms.msg_flags = msg_flags;
         ret_val = (*sptr->decode) (&parms);
     } else {
+        SNMP_FREE(mallocbuf);
         DEBUGINDENTLESS();
         snmp_log(LOG_WARNING, "security service %ld can't decode packets\n",
                  msg_sec_model);
