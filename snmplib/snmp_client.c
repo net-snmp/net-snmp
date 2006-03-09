@@ -174,7 +174,7 @@ snmp_synch_input(int op,
 
     state->waiting = 0;
 
-    if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE && pdu) {
         if (pdu->command == SNMP_MSG_REPORT) {
             rpt_type = snmpv3_get_report_type(pdu);
             if (SNMPV3_IGNORE_UNAUTH_REPORTS ||
