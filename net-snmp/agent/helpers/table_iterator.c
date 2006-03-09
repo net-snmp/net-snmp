@@ -449,6 +449,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         snmp_log(LOG_WARNING,
                                  "invalid index list or failed malloc for table %s\n",
                                  reginfo->handlerName);
+                        netsnmp_free_request_data_sets(reqtmp);
+                        SNMP_FREE(reqtmp);
                         return SNMP_ERR_NOERROR;
                     }
                 }
@@ -505,9 +507,10 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         build_oid_noalloc(myname, MAX_OID_LEN, &myname_len,
                                           coloid, coloid_len, index_search);
                         reqinfo->mode = MODE_GET;
-                        ldata =
-                            netsnmp_get_list_node(reqtmp->parent_data,
-                                                  TABLE_ITERATOR_NAME);
+                        if (reqtmp)
+                            ldata =
+                                netsnmp_get_list_node(reqtmp->parent_data,
+                                                      TABLE_ITERATOR_NAME);
                         if (!ldata) {
                             netsnmp_request_add_list_data(reqtmp,
                                                           netsnmp_create_data_list
