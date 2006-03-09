@@ -290,6 +290,11 @@ _free_extension( netsnmp_extend *extension, extend_registration_block *ereg )
                 break;
             eprev = eptr;
         }
+        if (!eptr) {
+            snmp_log(LOG_ERR,
+                     "extend: fell off end of list before finding extension\n");
+            return;
+        }
         if (eprev)
             eprev->next = eptr->next;
         else
