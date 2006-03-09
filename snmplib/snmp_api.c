@@ -1577,7 +1577,7 @@ snmp_sess_add_ex(netsnmp_session * in_session,
         if (!snmpv3_engineID_probe(slp, in_session)) {
             DEBUGMSGTL(("snmp_sess_add", "engine ID probe failed\n"));
             snmp_sess_close(slp);
-            slp = NULL;
+            return NULL;
         }
         if (create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
             slp->session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;
