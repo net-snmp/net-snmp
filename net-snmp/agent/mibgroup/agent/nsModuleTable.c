@@ -41,8 +41,13 @@ initialize_table_nsModuleTable(void)
                                                      (nsModuleTable_oid),
                                                      HANDLER_CAN_RWRITE);
 
-    if (!my_handler || !table_info || !iinfo)
+    if (!my_handler || !table_info || !iinfo) {
+        if (my_handler)
+            netsnmp_handler_registration_free(my_handler);
+        SNMP_FREE(table_info);
+        SNMP_FREE(iinfo);
         return;                 /* mallocs failed */
+    }
 
     /***************************************************
      * Setting up the table's definition
@@ -121,8 +126,10 @@ nsModuleTable_get_first_data_point(void **my_loop_context,
     /* Skip empty context registrations */
     while (!ctree->context_ptr->first_subtree) {
         ctree->context_ptr = ctree->context_ptr->next;
-        if (!ctree->context_ptr)
+        if (!ctree->context_ptr) {
+            SNMP_FREE(ctree);
             return NULL;
+        }
     }
     ctree->tree = ctree->context_ptr->first_subtree;
 
