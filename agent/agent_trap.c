@@ -654,6 +654,7 @@ netsnmp_send_traps(int trap, int specific,
         if (!template_v2pdu) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to construct v2 template PDU\n");
+            snmp_free_varbind(vblist);
             return -1;
         }
 
@@ -676,6 +677,7 @@ netsnmp_send_traps(int trap, int specific,
                 snmp_log(LOG_WARNING,
                      "send_trap: failed to insert sysUptime varbind\n");
                 snmp_free_pdu(template_v2pdu);
+                snmp_free_varbind(vblist);
                 return -1;
             }
             template_v2pdu->variables = var;
@@ -734,6 +736,7 @@ netsnmp_send_traps(int trap, int specific,
         if (!template_v1pdu) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to construct v1 template PDU\n");
+            snmp_free_varbind(vblist);
             return -1;
         }
         template_v1pdu->trap_type     = trap;
@@ -744,6 +747,7 @@ netsnmp_send_traps(int trap, int specific,
                        enterprise, enterprise_length * sizeof(oid))) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to set v1 enterprise OID\n");
+            snmp_free_varbind(vblist);
             snmp_free_pdu(template_v1pdu);
             return -1;
         }
