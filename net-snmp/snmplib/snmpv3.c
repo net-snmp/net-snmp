@@ -652,7 +652,7 @@ setup_engineID(u_char ** eidp, const char *text)
         break;
     case ENGINEID_TYPE_TEXT:
         bufp[4] = ENGINEID_TYPE_TEXT;
-        memcpy((char *) bufp + 5, text, strlen(text));
+        memcpy((char *) bufp + 5, (text), strlen(text));
         break;
 #ifdef HAVE_GETHOSTNAME
 #ifdef AF_INET6
