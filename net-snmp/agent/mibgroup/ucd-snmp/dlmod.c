@@ -482,8 +482,8 @@ write_dlmodName(int action,
         snmp_log(LOG_ERR, "write to dlmodName not ASN_OCTET_STR\n");
         return SNMP_ERR_WRONGTYPE;
     }
-    if (var_val_len > sizeof(dlm->name)) {
-        snmp_log(LOG_ERR, "write to dlmodName: bad length\n");
+    if (var_val_len > sizeof(dlm->name)-1) {
+        snmp_log(LOG_ERR, "write to dlmodName: bad length: too long\n");
         return SNMP_ERR_WRONGLENGTH;
     }
     if (action == COMMIT) {
