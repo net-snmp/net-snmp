@@ -449,6 +449,7 @@ schedTable_createEntry(const char *schedOwner, const char *schedName)
      */
     if (schedOwner) {
         memcpy(entry->schedOwner, schedOwner, strlen(schedOwner));
+    }
     memcpy(    entry->schedName,  schedName,  strlen(schedName));
     netsnmp_tdata_row_add_index(row, ASN_OCTET_STR,
                                 (entry->schedOwner || ""),
