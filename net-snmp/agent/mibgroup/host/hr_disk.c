@@ -281,8 +281,8 @@ parse_disk_config(const char *token, char *cptr)
                 config_perror("Out of memory");
                 SNMP_FREE(d_new);
                 SNMP_FREE(di_curr);
-                SNMP_FREE(di_ret);
-                SNMP_FREE(di_str);
+                SNMP_FREE(d_set);
+                SNMP_FREE(d_str);
                 return;
             }
             for (i = 0; i < sizeof(details_set); i++)
@@ -310,8 +310,8 @@ parse_disk_config(const char *token, char *cptr)
                     ("Syntax error in NAME: invalid set specified");
                 SNMP_FREE(d_new);
                 SNMP_FREE(di_curr);
-                SNMP_FREE(di_ret);
-                SNMP_FREE(di_str);
+                SNMP_FREE(d_set);
+                SNMP_FREE(d_str);
                 return;
             }
             if (neg) {
@@ -331,7 +331,7 @@ parse_disk_config(const char *token, char *cptr)
                 SNMP_FREE(d_new);
                 SNMP_FREE(d_str);
                 SNMP_FREE(di_curr);
-                SNMP_FREE(di_ret);
+                SNMP_FREE(d_set);
                 config_perror("Out of memory");
                 return;
             }
@@ -351,8 +351,8 @@ parse_disk_config(const char *token, char *cptr)
             SNMP_FREE(di_curr->item_next);
             SNMP_FREE(d_new);
             SNMP_FREE(di_curr);
-            SNMP_FREE(di_ret);
-            SNMP_FREE(di_str);
+            SNMP_FREE(d_set);
+            SNMP_FREE(d_str);
             config_perror("Out of memory");
             return;
         }
