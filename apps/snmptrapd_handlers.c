@@ -913,7 +913,7 @@ int   forward_handler( netsnmp_pdu           *pdu,
     session.version  = pdu->version;
     ss = snmp_open( &session );
     if (!ss)
-        return NETSNMPTRAPD_HANDLER_FAILED;
+        return NETSNMPTRAPD_HANDLER_FAIL;
 
     /* XXX: wjh we should be caching sessions here and not always
        reopening a session.  It's very ineffecient, especially with v3
