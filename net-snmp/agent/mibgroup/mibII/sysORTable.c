@@ -167,38 +167,41 @@ register_sysORTable_sess(oid * oidin,
                          size_t oidlen,
                          const char *descr, netsnmp_session * ss)
 {
-    struct sysORTable **ptr = &table;
+    struct sysORTable *ptr, **nptr;
     struct register_sysOR_parameters reg_sysOR_parms;
 
     DEBUGMSGTL(("mibII/sysORTable", "sysORTable registering: "));
     DEBUGMSGOID(("mibII/sysORTable", oidin, oidlen));
     DEBUGMSG(("mibII/sysORTable", "\n"));
 
-    while (*ptr != NULL)
-        ptr = &((*ptr)->next);
-    *ptr = (struct sysORTable *) malloc(sizeof(struct sysORTable));
-    if (*ptr == NULL) {
+    ptr = (struct sysORTable *) malloc(sizeof(struct sysORTable));
+    if (ptr == NULL) {
         return SYS_ORTABLE_REGISTRATION_FAILED;
     }
-    (*ptr)->OR_descr = (char *) malloc(strlen(descr) + 1);
-    if ((*ptr)->OR_descr == NULL) {
-        free(*ptr);
+    ptr->OR_descr = (char *) strdup(descr);
+    if (ptr->OR_descr == NULL) {
+        free(ptr);
         return SYS_ORTABLE_REGISTRATION_FAILED;
     }
-    strcpy((*ptr)->OR_descr, descr);
-    (*ptr)->OR_oidlen = oidlen;
-    (*ptr)->OR_oid = (oid *) malloc(sizeof(oid) * oidlen);
-    if ((*ptr)->OR_oid == NULL) {
-        free(*ptr);
-        free((*ptr)->OR_descr);
+    ptr->OR_oidlen = oidlen;
+    ptr->OR_oid = (oid *) malloc(sizeof(oid) * oidlen);
+    if (ptr->OR_oid == NULL) {
+        free(ptr->OR_descr);
+        free(ptr);
         return SYS_ORTABLE_REGISTRATION_FAILED;
     }
-    memcpy((*ptr)->OR_oid, oidin, sizeof(oid) * oidlen);
-    gettimeofday(&((*ptr)->OR_uptime), NULL);
+    memcpy(ptr->OR_oid, oidin, sizeof(oid) * oidlen);
+    gettimeofday(&(ptr->OR_uptime), NULL);
     gettimeofday(&(sysOR_lastchange), NULL);
-    (*ptr)->OR_sess = ss;
-    (*ptr)->next = NULL;
+    ptr->OR_sess = ss;
+    ptr->next = NULL;
     numEntries++;
+
+    /* add this entry to the end of the chained list */
+    nptr = &table;
+    while (*nptr != NULL)
+        nptr = &((*nptr)->next);
+    *nptr = ptr;
 
     reg_sysOR_parms.name = oidin;
     reg_sysOR_parms.namelen = oidlen;
@@ -221,7 +224,7 @@ int
 unregister_sysORTable_sess(oid * oidin,
                            size_t oidlen, netsnmp_session * ss)
 {
-    struct sysORTable **ptr = &table, *next, *prev = NULL;
+    struct sysORTable *ptr, *prev = NULL, *next;
     int             found = SYS_ORTABLE_NO_SUCH_REGISTRATION;
     struct register_sysOR_parameters reg_sysOR_parms;
 
@@ -229,28 +232,26 @@ unregister_sysORTable_sess(oid * oidin,
     DEBUGMSGOID(("mibII/sysORTable", oidin, oidlen));
     DEBUGMSG(("mibII/sysORTable", "\n"));
 
-    while (*ptr != NULL) {
-        next = (*ptr)->next;
-        if (snmp_oid_compare
-            (oidin, oidlen, (*ptr)->OR_oid, (*ptr)->OR_oidlen) == 0) {
-            if ((*ptr)->OR_sess != ss)
-                continue;       /* different session */
+    for (ptr = table; ptr; ptr = next)
+    {
+        next = ptr->next;
+        if (ptr->OR_sess == ss &&
+          (snmp_oid_compare(oidin, oidlen, ptr->OR_oid, ptr->OR_oidlen) == 0))
+        {
             if (prev == NULL)
-                table = (*ptr)->next;
+                table = ptr->next;
             else
-                prev->next = (*ptr)->next;
+                prev->next = ptr->next;
 
-            free((*ptr)->OR_descr);
-            free((*ptr)->OR_oid);
-            free((*ptr));
+            free(ptr->OR_oid);
+            free(ptr->OR_descr);
+            free(ptr);
             numEntries--;
             gettimeofday(&(sysOR_lastchange), NULL);
             found = SYS_ORTABLE_UNREGISTERED_OK;
             break;
-        } else {
-            prev = *ptr;
-        }
-        ptr  = &next;
+        } else
+            prev = ptr;
     }
 
     reg_sysOR_parms.name = oidin;
@@ -271,9 +272,10 @@ unregister_sysORTable(oid * oidin, size_t oidlen)
 void
 unregister_sysORTable_by_session(netsnmp_session * ss)
 {
-    struct sysORTable *ptr = table, *prev = NULL, *next;
+    struct sysORTable *ptr, *prev = NULL, *next;
 
-    while (ptr != NULL) {
+    for (ptr = table; ptr; ptr = next)
+    {
         next = ptr->next;
         if (((ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess == ss) ||
             (!(ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess &&
@@ -282,13 +284,12 @@ unregister_sysORTable_by_session(netsnmp_session * ss)
                 table = next;
             else
                 prev->next = next;
-            free(ptr->OR_descr);
             free(ptr->OR_oid);
+            free(ptr->OR_descr);
             free(ptr);
             numEntries--;
             gettimeofday(&(sysOR_lastchange), NULL);
         } else
             prev = ptr;
-        ptr = next;
     }
 }

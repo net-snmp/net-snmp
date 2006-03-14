@@ -118,6 +118,12 @@ nsModuleTable_get_first_data_point(void **my_loop_context,
     ctree = SNMP_MALLOC_TYPEDEF(context_tree_ptr);
 
     ctree->context_ptr = get_top_context_cache();
+    /* Skip empty context registrations */
+    while (!ctree->context_ptr->first_subtree) {
+        ctree->context_ptr = ctree->context_ptr->next;
+        if (!ctree->context_ptr)
+            return NULL;
+    }
     ctree->tree = ctree->context_ptr->first_subtree;
 
     *my_loop_context = ctree;
@@ -261,10 +267,11 @@ nsModuleTable_handler(netsnmp_mib_handler *handler,
             case COLUMN_NSMODULENAME:
 		if (tree->reginfo->handlerName) {
                     snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                           tree->reginfo->handlerName,
+                                         (u_char*)tree->reginfo->handlerName,
                                            strlen(tree->reginfo->handlerName));
                 } else {
-                    snmp_set_var_typed_value(var, ASN_OCTET_STR, "", 0);
+                    snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                             (const u_char*)"", 0);
 		}
                 break;
 

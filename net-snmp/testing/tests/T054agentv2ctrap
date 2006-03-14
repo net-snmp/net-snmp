@@ -20,7 +20,7 @@ AGENT_FLAGS="$AGENT_FLAGS"
 STARTAGENT
 
 #DELAY
-CAPTURE "snmpset -On -t 3 -r 0 $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial udp:localhost:$SNMP_SNMPD_PORT ucdavis.254.8.0 i 1"
+CAPTURE "snmpset -On -t 3 -r 0 $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT ucdavis.254.8.0 i 1"
 
 STOPAGENT
 

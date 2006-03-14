@@ -93,5 +93,5 @@ if [ ! -z $DEST ]; then
     tar cf /tmp/$SOURCE.tar $SUBD
     gzip -f --best /tmp/$SOURCE.tar
     scp /tmp/$SOURCE.tar.gz $DEST
-    rm -f tmp/$SOURCE*
+    rm -f /tmp/$SOURCE.tar.gz
 fi

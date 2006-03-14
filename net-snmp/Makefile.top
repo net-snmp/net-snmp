@@ -51,16 +51,26 @@ EXEEXT		= @EXEEXT@
 
 # Misc Compiling Stuff
 CC	        = @CC@
-# version number is prefixed by a 0 for a better shared library version number
-#
-# ok, use libtool proper versioning:
-LIBCURRENT  = 6
-LIBREVISION = 0
-LIBAGE      = 1
 
-# generally, LIBCURRENT should stay the same unless major changes occur.
-# Increment REVISION every release.  
-# Increment AGE if new stuff is available.
+# use libtool versioning the way they recommend.
+# The (slightly clarified) rules:
+#
+# - If any interfaces/structures have been removed or changed since the
+#   last update, increment current, and set age and revision to 0. Stop.
+#
+# - If any interfaces have been added since the last public release, then
+#   increment current and age, and set revision to 0. Stop.
+# 
+# - If the source code has changed at all since the last update,
+#   then increment revision (c:r:a becomes c:r+1:a). 
+#
+# Note: maintenance releases (eg 5.2.x) should never have changes
+#       that would require a current to be incremented.
+#
+LIBCURRENT  = 8
+LIBAGE      = 0
+LIBREVISION = 0
+
 LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) -o
 LIB_EXTENSION   = la
 LIB_VERSION     =
@@ -70,6 +80,9 @@ LINK		= $(LIBTOOL) --mode=link $(CC)
 RANLIB		= :
 
 # libtool definitions
-.SUFFIXES: .c .o .lo
+.SUFFIXES: .c .o .lo .rc
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+.rc.lo:
+	$(LIBTOOL) --mode=compile windres -o $@ $<
+

@@ -112,7 +112,7 @@ typedef struct {
     int             leading_zeroes;     /* if true, display with leading zeroes */
 } options_type;
 
-char            separator[3];
+char            separator[32];
 
 /*
  * These symbols define the characters that the parser recognizes.
@@ -612,7 +612,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
          * Write a numerical address.  
          */
         if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                         inet_ntoa(*agent_inaddr))) {
+                         (u_char *)inet_ntoa(*agent_inaddr))) {
             if (temp_buf != NULL) {
                 free(temp_buf);
             }
@@ -631,7 +631,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
         if (host != NULL) {
             if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                             host->h_name)) {
+                             (u_char *)host->h_name)) {
                 if (temp_buf != NULL) {
                     free(temp_buf);
                 }
@@ -639,7 +639,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
             }
         } else {
             if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                             inet_ntoa(*agent_inaddr))) {
+                             (u_char *)inet_ntoa(*agent_inaddr))) {
                 if (temp_buf != NULL) {
                     free(temp_buf);
                 }
@@ -657,7 +657,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                 transport->f_fmtaddr(transport, pdu->transport_data,
                                      pdu->transport_data_length);
             if (!snmp_strcat
-                (&temp_buf, &temp_buf_len, &temp_out_len, 1, tstr)) {
+                (&temp_buf, &temp_buf_len, &temp_out_len, 1, (u_char *)tstr)) {
                 if (tstr != NULL) {
                     free(tstr);
                 }
@@ -716,7 +716,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                 if (host != NULL) {
                     if (!snmp_strcat
                         (&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                         host->h_name)) {
+                         (u_char *)host->h_name)) {
                         if (temp_buf != NULL) {
                             free(temp_buf);
                         }
@@ -725,7 +725,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                 } else {
                     if (!snmp_strcat
                         (&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                         inet_ntoa(addr->sin_addr))) {
+                         (u_char *)inet_ntoa(addr->sin_addr))) {
                         if (temp_buf != NULL) {
                             free(temp_buf);
                         }
@@ -751,7 +751,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                 transport->f_fmtaddr(transport, pdu->transport_data,
                                      pdu->transport_data_length);
             if (!snmp_strcat
-                (&temp_buf, &temp_buf_len, &temp_out_len, 1, tstr)) {
+                (&temp_buf, &temp_buf_len, &temp_out_len, 1, (u_char *)tstr)) {
                 if (tstr != NULL) {
                     free(tstr);
                 }
@@ -973,7 +973,7 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
              */
             if (options->alt_format ||
                 vars != pdu->variables ) {
-                if (!snmp_strcat(&temp_buf, &tbuf_len, &tout_len, 1, sep)) {
+                if (!snmp_strcat(&temp_buf, &tbuf_len, &tout_len, 1, (const u_char *)sep)) {
                     if (temp_buf != NULL) {
                         free(temp_buf);
                     }
@@ -1235,7 +1235,10 @@ realloc_handle_backslash(u_char ** buf, size_t * buf_len, size_t * out_len,
                            (const u_char *) "\\");
     case '?':
         return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                           (const u_char *) "\?");
+                           (const u_char *) "?");
+    case '%':
+        return snmp_strcat(buf, buf_len, out_len, allow_realloc,
+                           (const u_char *) "%");
     case '\'':
         return snmp_strcat(buf, buf_len, out_len, allow_realloc,
                            (const u_char *) "\'");
@@ -1341,13 +1344,20 @@ realloc_format_plain_trap(u_char ** buf, size_t * buf_len,
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
              (const u_char *) "(via ")) {
+            if (tstr != NULL) {
+                free(tstr);
+            }
             return 0;
         }
-        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, tstr)) {
+        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tstr)) {
+            if (tstr != NULL) {
+                free(tstr);
+            }
+            return 0;
+        }
+        if (tstr != NULL) {
             free(tstr);
-            return 0;
         }
-        free(tstr);
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
              (const u_char *) ") ")) {
@@ -1381,7 +1391,7 @@ realloc_format_plain_trap(u_char ** buf, size_t * buf_len,
         return 0;
     }
     if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                     trap_description(pdu->trap_type))) {
+                     (const u_char *)trap_description(pdu->trap_type))) {
         return 0;
     }
     if (!snmp_strcat
@@ -1563,26 +1573,30 @@ realloc_format_trap(u_char ** buf, size_t * buf_len, size_t * out_len,
              * Parse the separator character
              * XXX - Possibly need to handle quoted strings ??
              */
-            if (next_chr == '\\') {
-                /*
-                 * Handle backslash interpretation
-                 * Print to "separator" string rather than the output buffer
-                 *    (a bit of a hack, but it should work!)
-                 */
-                int i, j;
-                i = sizeof(separator);
-                j = 0;
-                memset(separator, 0, i);
-                next_chr = format_str[++fmt_idx];
-                if (!realloc_handle_backslash
-                    ((u_char **)&separator, &i, &j, 0, next_chr)) {
-                    return 0;
-                }
-            } else {
-                separator[0] = next_chr;
-            }
-            separator[1] = (options.alt_format ? ' ': '\0');
-            state = PARSE_NORMAL;
+	    {   char *sep = separator;
+		size_t i, j;
+		i = sizeof(separator);
+		j = 0;
+		memset(separator, 0, i);
+		while (j < i && next_chr && next_chr != CHR_FMT_DELIM) {
+		    if (next_chr == '\\') {
+			/*
+			 * Handle backslash interpretation
+			 * Print to "separator" string rather than the output buffer
+			 *    (a bit of a hack, but it should work!)
+			 */
+			next_chr = format_str[++fmt_idx];
+			if (!realloc_handle_backslash
+			    ((u_char **)&sep, &i, &j, 0, next_chr)) {
+			    return 0;
+			}
+		    } else {
+			separator[j++] = next_chr;
+		    }
+		    next_chr = format_str[++fmt_idx];
+		}
+	    }
+            state = PARSE_IN_FORMAT;
             break;
 
         case PARSE_BACKSLASH:

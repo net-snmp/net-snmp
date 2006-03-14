@@ -56,7 +56,6 @@
 #if HAVE_MTAB_H
 #include <mtab.h>
 #endif
-#include <sys/stat.h>
 #include <errno.h>
 #if HAVE_FSTAB_H
 #include <fstab.h>
@@ -215,6 +214,7 @@ int
 try_getloadavg(double *r_ave, size_t s_ave)
 {
     double         *pave = r_ave;
+#ifndef HAVE_GETLOADAVG
 #ifdef HAVE_SYS_FIXPOINT_H
     fix             favenrun[3];
 #endif
@@ -234,7 +234,7 @@ try_getloadavg(double *r_ave, size_t s_ave)
 #if defined(hpux10) || defined(hpux11)
   struct pst_dynamic pst_buf;
 #endif
-
+#endif	/* HAVE_GETLOADAVG */
 
 #ifdef HAVE_GETLOADAVG
     if (getloadavg(pave, s_ave) == -1)

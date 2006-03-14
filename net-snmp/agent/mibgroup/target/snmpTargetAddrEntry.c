@@ -972,7 +972,7 @@ write_snmpTargetAddrTAddress(int action,
                              u_char * statP, oid * name, size_t name_len)
 {
     struct targetAddrTable_struct *target = NULL;
-    static char    *old_addr = NULL;
+    static u_char  *old_addr = NULL;
     static size_t   old_len = 0;
 
     if (action == RESERVE1) {
@@ -1114,7 +1114,7 @@ write_snmpTargetAddrTimeout(int action,
         if ((temp_struct =
              search_snmpTargetAddrTable(snmpTargetAddrOID,
                                         snmpTargetAddrOIDLen, name, &name_len,
-                                        1)) == 0) {
+                                        1)) != 0) {
             temp_struct->timeout = long_ret;
         }
     }
@@ -1186,7 +1186,7 @@ is_delim(const char c)
 }
 
 int
-snmpTagListValid(const char *tagList, const size_t tagListLen)
+snmpTagListValid(const u_char *tagList, const size_t tagListLen)
 {
     size_t          i = 0;
     int             inTag = 0;
@@ -1323,7 +1323,7 @@ write_snmpTargetAddrParams(int action,
             }
 
             old_params = target->params;
-            target->params = (u_char *) malloc(var_val_len + 1);
+            target->params = (char *) malloc(var_val_len + 1);
             if (target->params == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
