@@ -42,7 +42,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     pagesize = getpagesize();
     getSwapInfo( &swap_pages, &swap_free );
 #ifdef SC_AINFO
-    swapctl(&ai);
+    swapctl(SC_AINFO, &ai);
 #endif
 #ifdef _SC_PHYS_PAGES
     phys_mem  = sysconf(_SC_PHYS_PAGES);
