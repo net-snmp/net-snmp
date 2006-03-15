@@ -557,7 +557,10 @@ parse_mteMonitor(const char *token, char *line)
              * ... and the specified event...
              */
             memset(entry->mteTExEvOwner,  0,     MTE_STR1_LEN+1);
-            memcpy(entry->mteTExEvOwner,  "snmpd.conf",      10);
+            if ( ename[0] == '_' )
+                memcpy(entry->mteTExEvOwner,  "_snmpd",       6);
+            else
+                memcpy(entry->mteTExEvOwner,  "snmpd.conf",  10);
             memcpy(entry->mteTExEvent,    ename, MTE_STR1_LEN+1);
         } else {
             /*
@@ -587,7 +590,10 @@ parse_mteMonitor(const char *token, char *line)
              * ... and the specified event...
              */
             memset(entry->mteTBoolEvOwner,  0,     MTE_STR1_LEN+1);
-            memcpy(entry->mteTBoolEvOwner,  "snmpd.conf",      10);
+            if ( ename[0] == '_' )
+                memcpy(entry->mteTBoolEvOwner,  "_snmpd",       6);
+            else
+                memcpy(entry->mteTBoolEvOwner,  "snmpd.conf",  10);
             memcpy(entry->mteTBoolEvent,    ename, MTE_STR1_LEN+1);
         } else {
             /*
@@ -620,10 +626,16 @@ parse_mteMonitor(const char *token, char *line)
                  *  (using the same event for all triggers)
                  */
                 memset(entry->mteTThRiseOwner,  0,     MTE_STR1_LEN+1);
-                memcpy(entry->mteTThRiseOwner,  "snmpd.conf",      10);
+                if ( ename[0] == '_' )
+                    memcpy(entry->mteTThRiseOwner,  "_snmpd",       6);
+                else
+                    memcpy(entry->mteTThRiseOwner,  "snmpd.conf",  10);
                 memcpy(entry->mteTThRiseEvent,  ename, MTE_STR1_LEN+1);
                 memset(entry->mteTThFallOwner,  0,     MTE_STR1_LEN+1);
-                memcpy(entry->mteTThFallOwner,  "snmpd.conf",      10);
+                if ( ename[0] == '_' )
+                    memcpy(entry->mteTThFallOwner,  "_snmpd",       6);
+                else
+                    memcpy(entry->mteTThFallOwner,  "snmpd.conf",  10);
                 memcpy(entry->mteTThFallEvent,  ename, MTE_STR1_LEN+1);
             } else {
                 /*
@@ -662,10 +674,16 @@ parse_mteMonitor(const char *token, char *line)
              */
             if ( ename[0] ) {
                 memset(entry->mteTThDRiseOwner,  0,     MTE_STR1_LEN+1);
-                memcpy(entry->mteTThDRiseOwner,  "snmpd.conf",      10);
+                if ( ename[0] == '_' )
+                    memcpy(entry->mteTThDRiseOwner,  "_snmpd",       6);
+                else
+                    memcpy(entry->mteTThDRiseOwner,  "snmpd.conf",  10);
                 memcpy(entry->mteTThDRiseEvent,  ename, MTE_STR1_LEN+1);
                 memset(entry->mteTThDFallOwner,  0,     MTE_STR1_LEN+1);
-                memcpy(entry->mteTThDFallOwner,  "snmpd.conf",      10);
+                if ( ename[0] == '_' )
+                    memcpy(entry->mteTThDFallOwner,  "_snmpd",       6);
+                else
+                    memcpy(entry->mteTThDFallOwner,  "snmpd.conf",  10);
                 memcpy(entry->mteTThDFallEvent,  ename, MTE_STR1_LEN+1);
             } else {
                 memset(entry->mteTThDRiseOwner,  0,     MTE_STR1_LEN+1);
