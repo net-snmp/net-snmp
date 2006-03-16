@@ -826,8 +826,8 @@ mteTrigger_run( unsigned int reg, void *clientarg)
              *     to remember whether the trigger has already fired)
              */
             if ( cmp ) {
-                if ((!entry->old_results &&
-                     (entry->flags & MTE_TRIGGER_FLAG_BSTART)) ||
+                if ((entry->old_results ||
+                     (entry->flags & MTE_TRIGGER_FLAG_BSTART)) &&
                     (vp1->index & MTE_ARMED_BOOLEAN )) {
                     DEBUGMSGTL(( "disman:event:trigger:fire",
                                  "Firing boolean test: "));
@@ -923,8 +923,8 @@ mteTrigger_run( unsigned int reg, void *clientarg)
              */
             cmp = vp1->index;   /* working copy of 'armed' flags */
             if ( value >= entry->mteTThRiseValue ) {
-                if ((!entry->old_results &&
-                     (entry->mteTThStartup & MTE_THRESH_START_RISE)) || 
+                if ((entry->old_results ||
+                     (entry->mteTThStartup & MTE_THRESH_START_RISE)) &&
                     (vp1->index & MTE_ARMED_TH_RISE )) {
                     DEBUGMSGTL(( "disman:event:trigger:fire",
                                  "Firing rising threshold test: "));
@@ -952,8 +952,8 @@ mteTrigger_run( unsigned int reg, void *clientarg)
             }
 
             if ( value <= entry->mteTThFallValue ) {
-                if ((!entry->old_results &&
-                     (entry->mteTThStartup & MTE_THRESH_START_FALL)) || 
+                if ((entry->old_results ||
+                     (entry->mteTThStartup & MTE_THRESH_START_FALL)) &&
                     (vp1->index & MTE_ARMED_TH_FALL )) {
                     DEBUGMSGTL(( "disman:event:trigger:fire",
                                  "Firing falling threshold test: "));
