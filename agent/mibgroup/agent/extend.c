@@ -1169,8 +1169,9 @@ _extend_find_entry( netsnmp_request_info       *request,
              * now we've found the appropriate entry (and line),
              * we need to update the varbind OID ...
              */
-            memcpy( oid_buf, extend_out2_oid, sizeof(extend_out2_oid));
-            oid_len = OID_LENGTH(extend_out2_oid);
+            oid_len = ereg->oid_len;
+            memcpy( oid_buf, ereg->root_oid, oid_len*sizeof(oid));
+            oid_buf[ oid_len++ ] = 4;    /* nsExtendOutput2Table */
             oid_buf[ oid_len++ ] = 1;    /* nsExtendOutput2Entry */
             oid_buf[ oid_len++ ] = COLUMN_EXTOUT2_OUTLINE;
                                          /* string token index */
