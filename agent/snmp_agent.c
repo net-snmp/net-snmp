@@ -797,9 +797,20 @@ netsnmp_agent_check_packet(netsnmp_session * session,
     char           *addr_string = NULL;
 #ifdef  USE_LIBWRAP
     char *tcpudpaddr, *name;
+    short not_log_connection;
 
-    name = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+    name = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                  NETSNMP_DS_LIB_APPTYPE);
+
+    /* not_log_connection will be 1 if we should skip the messages */
+    not_log_connection = netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                                NETSNMP_DS_AGENT_DONT_LOG_TCPWRAPPERS_CONNECTS);
+
+    /*
+     * handle the error case
+     * default to logging the messages
+     */
+    if (not_log_connection == SNMPERR_GENERR) not_log_connection = 0;
 #endif
 
     /*
@@ -830,7 +841,9 @@ netsnmp_agent_check_packet(netsnmp_session * session,
             *xp = '\0';
  
         if (hosts_ctl(name, STRING_UNKNOWN, sbuf, STRING_UNKNOWN)) {
-            snmp_log(allow_severity, "Connection from %s\n", addr_string);
+            if (!not_log_connection) {
+                snmp_log(allow_severity, "Connection from %s\n", addr_string);
+            }
         } else {
             snmp_log(deny_severity, "Connection from %s REFUSED\n",
                      addr_string);
@@ -845,7 +858,9 @@ netsnmp_agent_check_packet(netsnmp_session * session,
         if (0 == strncmp(addr_string, "callback", 8))
             ;
         else if (hosts_ctl(name, STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
-            snmp_log(allow_severity, "Connection from <UNKNOWN> (%s)\n", addr_string);
+            if (!not_log_connection) {
+                snmp_log(allow_severity, "Connection from <UNKNOWN> (%s)\n", addr_string);
+            };
             addr_string = strdup("<UNKNOWN>");
         } else {
             snmp_log(deny_severity, "Connection from <UNKNOWN> (%s) REFUSED\n", addr_string);

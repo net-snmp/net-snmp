@@ -1348,6 +1348,11 @@ for some reason is failing to implement it properly,
 this module will convert all getbulk requests to
 getnext requests before the final module receives it.
 .RE
+.IP "dontLogTCPWrappersConnects"
+If the \fBsnmpd\fR was compiled with TCP Wrapper support, it
+logs every connection made to the agent. This setting disables
+the log messages for accepted connections. Denied connections will
+still be logged.
 .IP "Figuring out module names"
 To figure out which modules you can inject things into,
 run \fBsnmpwalk\fR on the \fCnsModuleTable\fR which will give
