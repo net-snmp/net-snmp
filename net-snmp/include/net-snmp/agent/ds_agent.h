@@ -18,6 +18,7 @@
 #define NETSNMP_DS_AGENT_NO_CACHING     8       /* 1 = disable netsnmp_cache */
 #define NETSNMP_DS_AGENT_STRICT_DISMAN  9       /* 1 = "correct" object ordering */
 #define NETSNMP_DS_AGENT_DONT_RETAIN_NOTIFICATIONS 10   /* 1 = disable trap logging */
+#define NETSNMP_DS_AGENT_DONT_LOG_TCPWRAPPERS_CONNECTS 12   /* 1 = disable logging */
 #define NETSNMP_DS_APP_DONT_LOG         NETSNMP_DS_AGENT_DONT_RETAIN_NOTIFICATIONS /* compat */
 
 /* WARNING: The trap receiver uses DS flags and must not conflict with

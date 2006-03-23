@@ -255,6 +255,9 @@ init_agent_read_config(const char *app)
     netsnmp_ds_register_config(ASN_BOOLEAN, app, "leave_pidfile", 
 			       NETSNMP_DS_APPLICATION_ID,
 			       NETSNMP_DS_AGENT_LEAVE_PIDFILE);
+    netsnmp_ds_register_config(ASN_BOOLEAN, app, "dontLogTCPWrappersConnects",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DONT_LOG_TCPWRAPPERS_CONNECTS);
     netsnmp_init_handler_conf();
 
 #include "agent_module_dot_conf.h"
