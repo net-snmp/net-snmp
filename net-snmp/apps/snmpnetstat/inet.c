@@ -253,6 +253,7 @@ _dump_stats( const char *name, oid *oid_buf, size_t buf_len,
     }
  
     if (netsnmp_query_get( var, ss ) != SNMP_ERR_NOERROR) {
+        /* Need to fix and re-try SNMPv1 errors */
         snmp_free_var( var );
         return;
     }
@@ -262,6 +263,9 @@ _dump_stats( const char *name, oid *oid_buf, size_t buf_len,
         stat =  vp->name[buf_len-2];
         /* XXX - Check that  sp->entry == stat  */
 
+        /* Skip exceptions or missing values */
+        if ( !vp->val.integer )
+            continue;
         /*
          * If '-Cs' was specified twice,
          *   then only display non-zero stats.
@@ -336,7 +340,7 @@ icmp_stats(const char *name)
         {10, "Timestamp Request: %d"},
         {11, "Timestamp Reply: %d"},
         {12, "Address Mask Request: %d"},
-        {13, "Addrss Mask Reply:%d"},
+        {13, "Address Mask Reply: %d"},
         {0, ""}
     };
     struct stat_table icmp_outhistogram[] = {
@@ -350,7 +354,7 @@ icmp_stats(const char *name)
         {23, "Timestamp Request: %d"},
         {24, "Timestamp Reply: %d"},
         {25, "Address Mask Request: %d"},
-        {26, "Addrss Mask Reply:%d"},
+        {26, "Address Mask Reply: %d"},
         {0, ""}
     };
 
