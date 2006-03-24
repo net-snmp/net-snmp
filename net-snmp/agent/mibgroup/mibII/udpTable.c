@@ -3,6 +3,17 @@
  *
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 #include "mibII_common.h"
 
@@ -54,9 +65,22 @@ struct netsnmp_udpEntry_s {
 #ifdef linux
 #define INP_NEXT_SYMBOL		inp_next
 #endif
+
+#if defined(freebsd4) || defined(darwin)
+typedef struct netsnmp_inpcb_s netsnmp_inpcb;
+struct netsnmp_inpcb_s {
+    struct inpcb    pcb;
+    int             state;
+    netsnmp_inpcb  *inp_next;
+};
+#define	UDPTABLE_ENTRY_TYPE	netsnmp_inpcb 
+#define	UDPTABLE_LOCALADDRESS	pcb.inp_laddr.s_addr 
+#define	UDPTABLE_LOCALPORT	pcb.inp_lport
+#else
 #define	UDPTABLE_ENTRY_TYPE	struct inpcb 
 #define	UDPTABLE_LOCALADDRESS	inp_laddr.s_addr 
 #define	UDPTABLE_LOCALPORT	inp_lport
+#endif
 #define	UDPTABLE_IS_LINKED_LIST
 
 #endif                          /* WIN32 */
@@ -149,7 +173,7 @@ udpTable_handler(netsnmp_mib_handler          *handler,
     netsnmp_table_request_info *table_info;
     UDPTABLE_ENTRY_TYPE	  *entry;
     oid      subid;
-    long     port;
+    long     port,addr;
 
     DEBUGMSGTL(("mibII/udpTable", "Handler - mode %s\n",
                     se_find_label_in_slist("agent_mode", reqinfo->mode)));
@@ -171,17 +195,26 @@ udpTable_handler(netsnmp_mib_handler          *handler,
             switch (subid) {
             case UDPLOCALADDRESS:
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+                addr = ntohl(*IN6_EXTRACT_V4ADDR(pcb->inp_laddr));
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
-                              (u_char*)IN6_EXTRACT_V4ADDR(pcb->inp_laddr),
-                                sizeof(IN6_EXTRACT_V4ADDR(pcb->inp_laddr)));
+                                         (u_char*)&addr,
+                                         sizeof(addr));
 #else
+                addr = ntohl(entry->UDPTABLE_LOCALADDRESS);
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
-                                 (u_char *)&entry->UDPTABLE_LOCALADDRESS,
-                                     sizeof(entry->UDPTABLE_LOCALADDRESS));
+                                         (u_char *)&addr,
+                                         sizeof(addr));
 #endif
                 break;
             case UDPLOCALPORT:
-                port = ntohs(entry->UDPTABLE_LOCALPORT);
+#ifdef solaris2
+                /*
+                 * Solaris udpLocalPort is in host byte order
+                 */
+                port = (u_short)entry->UDPTABLE_LOCALPORT;
+#else
+                port = ntohs((u_short)entry->UDPTABLE_LOCALPORT);
+#endif
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -254,9 +287,15 @@ udpTable_next_entry( void **loop_context,
     /*
      * Set up the indexing for the specified row...
      */
+#ifdef WIN32
+    port = ntohl((u_long)udp_head[i].UDPTABLE_LOCALADDRESS);
+    snmp_set_var_value(index, (u_char *)&port,
+                                  sizeof(udp_head[i].UDPTABLE_LOCALADDRESS));
+#else
     snmp_set_var_value(index, (u_char *)&udp_head[i].UDPTABLE_LOCALADDRESS,
                                   sizeof(udp_head[i].UDPTABLE_LOCALADDRESS));
-    port = ntohs(udp_head[i].UDPTABLE_LOCALPORT);
+#endif 
+    port = ntohs((u_short)udp_head[i].UDPTABLE_LOCALPORT);
     snmp_set_var_value(index->next_variable,
                                (u_char*)&port, sizeof(port));
     /*
@@ -271,8 +310,15 @@ udpTable_next_entry( void **loop_context,
 void
 udpTable_free(netsnmp_cache *cache, void *magic)
 {
+#ifdef WIN32
+    if (udp_head) {
+		/* the allocated structure is a count followed by table entries */
+		free((char *)(udp_head) - sizeof(DWORD));
+	}
+#else
     if (udp_head)
         free(udp_head);
+#endif
     udp_head = NULL;
     udp_size = 0;
 }
@@ -322,7 +368,14 @@ udpTable_next_entry( void **loop_context,
     snmp_set_var_value(index, (u_char*)&entry->UDPTABLE_LOCALADDRESS,
                                  sizeof(entry->UDPTABLE_LOCALADDRESS));
 #endif
+#ifdef solaris2
+    /*
+     * Solaris udpLocalPort is in host byte order
+     */
+    port = entry->UDPTABLE_LOCALPORT;
+#else
     port = ntohs(entry->UDPTABLE_LOCALPORT);
+#endif
     snmp_set_var_value(index->next_variable,
                                (u_char*)&port, sizeof(port));
 
@@ -435,8 +488,9 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         if (state != 7)         /* fix me:  UDP_LISTEN ??? */
             continue;
 
+        /* store in network byte order */
+        pcb.inp_laddr.s_addr = htonl(pcb.inp_laddr.s_addr);
         pcb.inp_lport = htons((unsigned short) (lport));
-        pcb.inp_fport = htons(pcb.inp_fport);
 
         nnew = SNMP_MALLOC_TYPEDEF(struct inpcb);
         if (nnew == NULL)
@@ -540,11 +594,13 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     }
     if (status == NO_ERROR) {
         DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table\n"));
-        udp_size = pUdpTable->dwNumEntries;
+        udp_size = pUdpTable->dwNumEntries -1;  /* entries are counted starting with 0 */
         udp_head = pUdpTable->table;
         return 0;
     }
     DEBUGMSGTL(("mibII/udpTable", "Failed to load UDP Table (win32)\n"));
+    if (pUdpTable)
+	free(pUdpTable);
     return -1;
 }
 #else                           /* WIN32 */
@@ -557,7 +613,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     int      sname[] = { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_PCBLIST };
     char     *udpcb_buf = NULL;
     struct xinpgen *xig = NULL;
-    struct inpcb   *nnew;
+    UDPTABLE_ENTRY_TYPE  *nnew;
 
     udpTable_free(NULL, NULL);
 
@@ -581,12 +637,17 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
 
     while (xig && (xig->xig_len > sizeof(struct xinpgen))) {
-        nnew = SNMP_MALLOC_TYPEDEF(struct inpcb);
+        nnew = SNMP_MALLOC_TYPEDEF(UDPTABLE_ENTRY_TYPE);
         if (!nnew)
             break;
+#if defined(freebsd4) || defined(darwin)
+        memcpy(nnew, &((struct xinpcb *) xig)->xi_inp, sizeof(struct inpcb));
+	nnew->inp_next = udp_head;
+#else
         memcpy(nnew, ((struct xinpcb *) xig)->xi_inp, sizeof(struct inpcb));
-
 	nnew->next = udp_head;		/* XXX - ?? Check 'next' pointer */
+#endif
+
 	udp_head   = nnew;
         xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
     }

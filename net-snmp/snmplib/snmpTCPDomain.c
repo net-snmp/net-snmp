@@ -28,6 +28,11 @@
 #include <fcntl.h>
 #endif
 
+#if HAVE_WINSOCK_H
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -39,10 +44,8 @@
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpTCPDomain.h>
 
-
 oid netsnmp_snmpTCPDomain[8] = { 1, 3, 6, 1, 3, 91, 1, 1 };
 static netsnmp_tdomain tcpDomain;
-
 
 /*
  * Return a string representing the address in data, or else the "far end"
@@ -167,7 +170,7 @@ netsnmp_tcp_accept(netsnmp_transport *t)
     struct sockaddr *farend = NULL;
     int             newsock = -1, sockflags = 0;
     socklen_t       farendlen = sizeof(struct sockaddr_in);
-    char           *string = NULL;
+    char           *str = NULL;
 
     farend = (struct sockaddr *) malloc(sizeof(struct sockaddr_in));
 
@@ -195,9 +198,9 @@ netsnmp_tcp_accept(netsnmp_transport *t)
 
         t->data = farend;
         t->data_length = farendlen;
-        string = netsnmp_tcp_fmtaddr(NULL, farend, farendlen);
-        DEBUGMSGTL(("netsnmp_tcp", "accept succeeded (from %s)\n", string));
-        free(string);
+        str = netsnmp_tcp_fmtaddr(NULL, farend, farendlen);
+        DEBUGMSGTL(("netsnmp_tcp", "accept succeeded (from %s)\n", str));
+        free(str);
 
         /*
          * Try to make the new socket blocking.  
@@ -372,11 +375,11 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
 
 
 netsnmp_transport *
-netsnmp_tcp_create_tstring(const char *string, int local)
+netsnmp_tcp_create_tstring(const char *str, int local)
 {
     struct sockaddr_in addr;
 
-    if (netsnmp_sockaddr_in(&addr, string, 0)) {
+    if (netsnmp_sockaddr_in(&addr, str, 0)) {
         return netsnmp_tcp_transport(&addr, local);
     } else {
         return NULL;
@@ -391,9 +394,10 @@ netsnmp_tcp_create_ostring(const u_char * o, size_t o_len, int local)
     struct sockaddr_in addr;
 
     if (o_len == 6) {
+        unsigned short porttmp = (o[4] << 8) + o[5];
         addr.sin_family = AF_INET;
         memcpy((u_char *) & (addr.sin_addr.s_addr), o, 4);
-        addr.sin_port = ntohs((o[4] << 8) + o[5]);
+        addr.sin_port = htons(porttmp);
         return netsnmp_tcp_transport(&addr, local);
     }
     return NULL;

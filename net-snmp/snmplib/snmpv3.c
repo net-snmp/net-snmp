@@ -3,9 +3,12 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
-
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #include <stdio.h>
 #include <sys/types.h>
+
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
@@ -19,6 +22,10 @@
 # else
 #  include <time.h>
 # endif
+#endif
+#if HAVE_SYS_TIMES_H
+/* lumentis: replaced gettimeofday() with times() */
+#include <sys/times.h>
 #endif
 #if HAVE_STRING_H
 #include <string.h>
@@ -93,6 +100,18 @@ static size_t   defaultAuthTypeLen = 0;
 static const oid *defaultPrivType = NULL;
 static size_t   defaultPrivTypeLen = 0;
 
+/* this is probably an over-kill ifdef, but why not */
+#if defined(HAVE_SYS_TIMES_H) && defined(HAVE_UNISTD_H) && defined(HAVE_TIMES) && defined(_SC_CLK_TCK) && defined(HAVE_SYSCONF) && defined(UINT_MAX)
+
+#define SNMP_USE_TIMES 1
+
+static clock_t snmpv3startClock;
+static long clockticks = 0;
+static unsigned int lastcalltime = 0;
+static unsigned int wrapcounter = 0;
+
+#endif /* times() tests */
+
 #if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
 static int      getHwAddress(const char *networkDevice, char *addressOut);
 #endif
@@ -129,7 +148,8 @@ snmpv3_privtype_conf(const char *word, char *cptr)
         defaultPrivType = usmDESPrivProtocol;
 #if HAVE_AES
     /* XXX AES: assumes oid length == des oid length */
-    else if (strcasecmp(cptr, "AES128") == 0)
+    else if ((strcasecmp(cptr, "AES128") == 0)
+             || (strcasecmp(cptr, "AES") == 0))
         defaultPrivType = usmAES128PrivProtocol;
     else if (strcasecmp(cptr, "AES192") == 0)
         defaultPrivType = usmAES192PrivProtocol;
@@ -410,21 +430,18 @@ setup_engineID(u_char ** eidp, const char *text)
 
     engineIDIsSet = 1;
 
-    /*
-     * get the host name and save the information 
-     */
 #ifdef HAVE_GETHOSTNAME
-    gethostname((char *) buf, sizeof(buf));
-    hent = gethostbyname((char *) buf);
-    /*
-     * Determine if we are using IPV6 
-     */
 #ifdef AF_INET6
     /*
      * see if they selected IPV4 or IPV6 support 
      */
     if ((ENGINEID_TYPE_IPV6 == localEngineIDType) ||
         (ENGINEID_TYPE_IPV4 == localEngineIDType)) {
+        /*
+         * get the host name and save the information 
+         */
+        gethostname((char *) buf, sizeof(buf));
+        hent = gethostbyname((char *) buf);
         if (hent && hent->h_addrtype == AF_INET6) {
             localEngineIDType = ENGINEID_TYPE_IPV6;
         } else {
@@ -436,11 +453,18 @@ setup_engineID(u_char ** eidp, const char *text)
     }
 #else
     /*
-     * No IPV6 support.  Check if they selected IPV6 engineID type.  If so
-     * * make it IPV4 for them 
+     * No IPV6 support.  Check if they selected IPV6 engineID type.
+     *  If so make it IPV4 for them 
      */
     if (ENGINEID_TYPE_IPV6 == localEngineIDType) {
         localEngineIDType = ENGINEID_TYPE_IPV4;
+    }
+    if (ENGINEID_TYPE_IPV4 == localEngineIDType) {
+        /*
+         * get the host name and save the information 
+         */
+        gethostname((char *) buf, sizeof(buf));
+        hent = gethostbyname((char *) buf);
     }
 #endif
 #endif                          /* HAVE_GETHOSTNAME */
@@ -727,7 +751,7 @@ usm_parse_create_usmUser(const char *token, char *line)
                       (u_char *) buf, strlen(buf), userKey, &userKeyLen);
     if (ret != SNMPERR_SUCCESS) {
         config_perror("could not generate the authentication key from the "
-                      "suppiled pass phrase.");
+                      "supplied pass phrase.");
         usm_free_user(newuser);
         return;
     }
@@ -756,13 +780,13 @@ usm_parse_create_usmUser(const char *token, char *line)
         memcpy(newuser->privProtocol, usmDESPrivProtocol,
                sizeof(usmDESPrivProtocol));
 #ifdef HAVE_AES
-    } else if (strncmp(cp, "AES128", 3) == 0) {
+    } else if (strncmp(cp, "AES128", 6) == 0) {
         memcpy(newuser->privProtocol, usmAES128PrivProtocol,
                sizeof(usmAES128PrivProtocol));
-    } else if (strncmp(cp, "AES192", 3) == 0) {
+    } else if (strncmp(cp, "AES192", 6) == 0) {
         memcpy(newuser->privProtocol, usmAES192PrivProtocol,
                sizeof(usmAES192PrivProtocol));
-    } else if (strncmp(cp, "AES256", 3) == 0) {
+    } else if (strncmp(cp, "AES256", 6) == 0) {
         memcpy(newuser->privProtocol, usmAES256PrivProtocol,
                sizeof(usmAES256PrivProtocol));
 #endif
@@ -983,6 +1007,16 @@ oldengineID_conf(const char *word, char *cptr)
     read_config_read_octet_string(cptr, &oldEngineID, &oldEngineIDLength);
 }
 
+/*
+ * merely call 
+ */
+void
+get_enginetime_alarm(unsigned int regnum, void *clientargs)
+{
+    /* we do this every so (rarely) often just to make sure we watch
+       wrapping of the times() output */
+    snmpv3_local_snmpEngineTime();
+}
 
 /*******************************************************************-o-******
  * init_snmpv3
@@ -997,6 +1031,17 @@ oldengineID_conf(const char *word, char *cptr)
 void
 init_snmpv3(const char *type)
 {
+#if SNMP_USE_TIMES
+  struct tms dummy;
+
+  /* fixme: -1 is fault code... */
+  snmpv3startClock = times(&dummy);
+
+  /* remember how many ticks per second there are, since times() returns this */
+
+  clockticks = sysconf(_SC_CLK_TCK);
+
+#endif /* SNMP_USE_TIMES */
 
     gettimeofday(&snmpv3starttime, NULL);
 
@@ -1074,9 +1119,9 @@ init_snmpv3(const char *type)
     register_config_handler("snmp", "defPrivType", snmpv3_privtype_conf,
                             NULL,
 #ifdef HAVE_AES
-                            "DES (AES support not available)");
-#else
                             "DES|AES128|AES192|AES256");
+#else
+                            "DES (AES support not available)");
 #endif
     register_config_handler("snmp", "defSecurityLevel",
                             snmpv3_secLevel_conf, NULL,
@@ -1300,11 +1345,33 @@ snmpv3_generate_engineID(size_t * length)
 u_long
 snmpv3_local_snmpEngineTime(void)
 {
+#ifdef SNMP_USE_TIMES
+  struct tms dummy;
+  clock_t now = times(&dummy);
+  /* fixme: -1 is fault code... */
+  unsigned int result;
+
+  if (now < snmpv3startClock) {
+      result = UINT_MAX - (snmpv3startClock - now);
+  } else {
+      result = now - snmpv3startClock;
+  }
+  if (result < lastcalltime) {
+      /* wrapped */
+      wrapcounter++;
+  }
+  lastcalltime = result;
+  result =  (UINT_MAX/clockticks)*wrapcounter + result/clockticks;
+
+  return result;
+#else /* !SNMP_USE_TIMES */
     struct timeval  now;
 
     gettimeofday(&now, NULL);
-    return calculate_time_diff(&now, &snmpv3starttime) / 100;
+    return calculate_sectime_diff(&now, &snmpv3starttime);
+#endif /* HAVE_SYS_TIMES_H */
 }
+
 
 
 /*

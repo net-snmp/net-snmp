@@ -109,7 +109,7 @@ var_extensible_version(struct variable *vp,
         long_ret = name[8];
         return ((u_char *) (&long_ret));
     case VERTAG:
-        sprintf(errmsg, NetSnmpVersionInfo);
+        sprintf(errmsg, netsnmp_get_version());
         *var_len = strlen(errmsg);
         return ((u_char *) errmsg);
     case VERDATE:

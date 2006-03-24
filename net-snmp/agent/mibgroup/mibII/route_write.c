@@ -75,11 +75,10 @@
 #include "route_write.h"
 
 #ifdef cygwin
-#define WIN32
 #include <windows.h>
 #endif
 
-#ifndef WIN32
+#if !defined (WIN32) && !defined (cygwin)
 
 #ifndef STRUCT_RTENTRY_HAS_RT_DST
 #define rt_dst rt_nodes->rn_key
@@ -93,19 +92,25 @@
 #define SIOCDELRT SIOCDELMULTI
 #endif
 
+#ifdef linux
+#define NETSNMP_ROUTE_WRITE_PROTOCOL PF_ROUTE
+#else
+#define NETSNMP_ROUTE_WRITE_PROTOCOL 0
+#endif
+
 int
 addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
-#ifndef dynix
+#if defined SIOCADDRT && !defined(irix6)
     struct sockaddr_in dst;
     struct sockaddr_in gateway;
-    int             s;
+    int             s, rc;
     RTENTRY         route;
 
-    s = socket(AF_INET, SOCK_RAW, 0);
+    s = socket(AF_INET, SOCK_RAW, NETSNMP_ROUTE_WRITE_PROTOCOL);
     if (s < 0) {
         snmp_log_perror("socket");
-        return 0;
+        return -1;
     }
 
 
@@ -125,30 +130,16 @@ addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 #ifndef RTENTRY_4_4
     route.rt_hash = iff;
 #endif
-#ifdef irix6
-    return 0;
-#else
-    return (ioctl(s, SIOCADDRT, (caddr_t) & route));
-#endif
 
-#else                           /* dynix */
-    /*
-     *  Throws up the following errors:
-     *
-     * "mibII/route_write.c", line 113: undefined struct/union member: rt_nodes
-     * "mibII/route_write.c", line 113: undefined struct/union member: rn_key
-     * "mibII/route_write.c", line 113: left operand of "->" must be pointer to struct/union
-     * "mibII/route_write.c", line 118: undefined struct/union member: rt_pad1
-     * "mibII/route_write.c", line 123: undefined symbol: SIOCADDRT
-     * "mibII/route_write.c", line 155: undefined struct/union member: rt_nodes
-     * "mibII/route_write.c", line 155: undefined struct/union member: rn_key
-     * "mibII/route_write.c", line 155: left operand of "->" must be pointer to struct/union
-     * "mibII/route_write.c", line 160: undefined struct/union member: rt_pad1
-     * "mibII/route_write.c", line 166: undefined symbol: SIOCDELRT
-     */
-    return 0;
-#endif
+    rc = ioctl(s, SIOCADDRT, (caddr_t) & route);
+    close(s);
+    if (rc < 0)
+        snmp_log_perror("ioctl");
+    return rc;
 
+#else                           /* SIOCADDRT */
+    return -1;
+#endif
 }
 
 
@@ -156,14 +147,14 @@ addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 int
 delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
-#ifndef dynix
+#if defined SIOCDELRT && !defined(irix6)
 
     struct sockaddr_in dst;
     struct sockaddr_in gateway;
-    int             s;
+    int             s, rc;
     RTENTRY         route;
 
-    s = socket(AF_INET, SOCK_RAW, 0);
+    s = socket(AF_INET, SOCK_RAW, NETSNMP_ROUTE_WRITE_PROTOCOL);
     if (s < 0) {
         snmp_log_perror("socket");
         return 0;
@@ -187,16 +178,11 @@ delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
     route.rt_hash = iff;
 #endif
 
-#ifdef irix6
-    return 0;
-#else
-    return (ioctl(s, SIOCDELRT, (caddr_t) & route));
-#endif
+    rc = ioctl(s, SIOCDELRT, (caddr_t) & route);
+    close(s);
+    return rc;
 
-#else                           /* dynix */
-    /*
-     * See 'addRoute' for the list of errors.
-     */
+#else                           /* SIOCDELRT */
     return 0;
 #endif
 }
@@ -343,18 +329,19 @@ write_rte(int action,
             snmp_log(LOG_ERR, "newCacheRTE");
             return SNMP_ERR_RESOURCEUNAVAILABLE;
         }
+        rp->rt_dst = dst;
         rp->rt_type = rp->xx_type = 2;
 
     } else if (action == COMMIT) {
 
 
     } else if (action == FREE) {
-        if (rp->rt_type == 2) { /* was invalid before */
+        if (rp && rp->rt_type == 2) { /* was invalid before */
             delCacheRTE(dst);
         }
     }
 
-
+    netsnmp_assert(NULL != rp); /* should have found or created rp */
 
 
     switch (var) {
@@ -538,7 +525,7 @@ write_rte(int action,
     return SNMP_ERR_NOERROR;
 }
 
-#else                           /* WIN32 */
+#else                           /* WIN32 cygwin */
 #include <iphlpapi.h>
 
 extern PMIB_IPFORWARDROW route_row;
@@ -773,4 +760,4 @@ write_rte(int action,
     return retval;
 }
 
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */

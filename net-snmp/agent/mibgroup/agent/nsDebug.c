@@ -108,7 +108,7 @@ handle_nsDebugEnabled(netsnmp_mib_handler *handler,
                 netsnmp_agent_request_info *reqinfo,
                 netsnmp_request_info *requests)
 {
-    int enabled;
+    long enabled;
     netsnmp_request_info *request=NULL;
 
     switch (reqinfo->mode) {
@@ -163,7 +163,7 @@ handle_nsDebugOutputAll(netsnmp_mib_handler *handler,
                 netsnmp_agent_request_info *reqinfo,
                 netsnmp_request_info *requests)
 {
-    int enabled;
+    long enabled;
     netsnmp_request_info *request=NULL;
 
     switch (reqinfo->mode) {
@@ -218,7 +218,7 @@ handle_nsDebugDumpPdu(netsnmp_mib_handler *handler,
                 netsnmp_agent_request_info *reqinfo,
                 netsnmp_request_info *requests)
 {
-    int enabled;
+    long enabled;
     netsnmp_request_info *request=NULL;
 
     switch (reqinfo->mode) {
@@ -288,7 +288,8 @@ get_first_debug_entry(void **loop_context, void **data_context,
     if ( i==debug_num_tokens )
         return NULL;
 
-    snmp_set_var_value(index, dbg_tokens[i].token_name,
+    snmp_set_var_value(index,
+                     (u_char*)dbg_tokens[i].token_name,
 		       strlen(dbg_tokens[i].token_name));
     *loop_context = (void*)i;
     *data_context = (void*)&dbg_tokens[i];
@@ -309,7 +310,8 @@ get_next_debug_entry(void **loop_context, void **data_context,
     if ( i==debug_num_tokens )
         return NULL;
 
-    snmp_set_var_value(index, dbg_tokens[i].token_name,
+    snmp_set_var_value(index,
+                     (u_char*)dbg_tokens[i].token_name,
 		       strlen(dbg_tokens[i].token_name));
     *loop_context = (void*)i;
     *data_context = (void*)&dbg_tokens[i];
@@ -426,7 +428,7 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
 		 * Create the entry, and set the enabled field appropriately
 		 */
                 table_info = netsnmp_extract_table_info(request);
-                debug_register_tokens(table_info->indexes->val.string);
+                debug_register_tokens((char*)table_info->indexes->val.string);
 #ifdef UMMMMM
                 if (*request->requestvb->val.integer == RS_CREATEANDWAIT) {
 		    /* XXX - how to locate the entry ??  */

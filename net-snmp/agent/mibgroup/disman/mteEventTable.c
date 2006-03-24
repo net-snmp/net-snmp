@@ -203,7 +203,7 @@ parse_notificationEvent(const char *token, char *line) {
 
 
     /* columns */
-    tc = 0x80;
+    tc = (u_char)0x80;
     netsnmp_set_row_column(row, COLUMN_MTEEVENTACTIONS, ASN_OCTET_STR,
                            &tc, 1);
     tlong = MTETRIGGERENABLED_TRUE;

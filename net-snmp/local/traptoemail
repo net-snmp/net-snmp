@@ -62,7 +62,7 @@ $message->to(@ARGV) || die "failed to send to the recepients ",join(",",@ARGV),"
 $message->data();
 $message->datasend("To: " . join(", ",@ARGV) . "\n");
 $message->datasend("From: $opts{f}\n");
-$message->datasend("Subject: trap received from $hostname: $varbinds[1]\n");
+$message->datasend("Subject: trap received from $hostname: $values[1]\n");
 $message->datasend("\n");
 $message->datasend("Host: $hostname ($ipaddress)\n");
 for($i = 0; $i <= $#oids; $i++) {

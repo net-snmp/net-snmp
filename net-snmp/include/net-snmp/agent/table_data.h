@@ -33,6 +33,7 @@ extern          "C" {
         int             flags;  /* not currently used */
         int             store_indexes;
         netsnmp_table_row *first_row;
+        netsnmp_table_row *last_row;
     } netsnmp_table_data;
 
     netsnmp_mib_handler *netsnmp_get_table_data_handler(netsnmp_table_data
@@ -100,9 +101,10 @@ extern          "C" {
 
 
     Netsnmp_Node_Handler netsnmp_table_data_helper_handler;
+    int netsnmp_table_data_num_rows(netsnmp_table_data *table);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* _TABLE_DATA_HANDLER_H_ */

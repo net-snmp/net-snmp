@@ -110,12 +110,13 @@ void
 debug_register_tokens(char *tokens)
 {
     char           *newp, *cp;
+    char           *st;
 
     if (tokens == 0 || *tokens == 0)
         return;
 
-    newp = strdup(tokens);      /* strtok messes it up */
-    cp = strtok(newp, DEBUG_TOKEN_DELIMITER);
+    newp = strdup(tokens);      /* strtok_r messes it up */
+    cp = strtok_r(newp, DEBUG_TOKEN_DELIMITER, &st);
     while (cp) {
         if (strlen(cp) < MAX_DEBUG_TOKEN_LEN) {
             if (strcasecmp(cp, DEBUG_ALWAYS_TOKEN) == 0) {
@@ -129,7 +130,7 @@ debug_register_tokens(char *tokens)
         } else {
             snmp_log(LOG_NOTICE, "Debug token %s over length", cp);
         }
-        cp = strtok(NULL, DEBUG_TOKEN_DELIMITER);
+        cp = strtok_r(NULL, DEBUG_TOKEN_DELIMITER, &st);
     }
     free(newp);
 }
@@ -295,7 +296,8 @@ void
 debugmsg_suboid(const char *token, const oid * theoid, size_t len)
 {
     u_char         *buf = NULL;
-    size_t          buf_len = 0, out_len = 0, buf_overflow = 0;
+    size_t          buf_len = 0, out_len = 0;
+    int             buf_overflow = 0;
 
     netsnmp_sprint_realloc_objid(&buf, &buf_len, &out_len, 1,
                                  &buf_overflow, theoid, len);
@@ -353,8 +355,9 @@ debugmsg_oidrange(const char *token, const oid * theoid, size_t len,
                                   len);
     } else {
         char            tmpbuf[128];
+        /* XXX - ? check for 0 == var_subid -1 ? */
         rc = sprint_realloc_objid(&buf, &buf_len, &out_len, 1, theoid,
-                                  var_subid);
+                                  var_subid-1); /* Adjust for C's 0-based array indexing */
         if (rc) {
             sprintf(tmpbuf, ".%lu--%lu", theoid[var_subid - 1],
                     range_ubound);

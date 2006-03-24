@@ -17,7 +17,7 @@ extern oid      usmNoPrivProtocol[10];  /* == { 1,3,6,1,6,3,10,1,2,1 }; */
 extern oid      usmDESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,2 }; */
 
 /* XXX: OIDs not defined yet */
-extern oid      usmAES128PrivProtocol[10]; /* == { XXX, 1, 2 }; */
+extern oid      usmAES128PrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,4 }; */
 extern oid      usmAES192PrivProtocol[10]; /* == { XXX, 1, 3 }; */
 extern oid      usmAES256PrivProtocol[10]; /* == { XXX, 1, 4 }; */
 

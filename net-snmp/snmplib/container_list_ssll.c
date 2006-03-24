@@ -60,7 +60,7 @@ _get(netsnmp_container *c, const void *key, int exact)
         }
     }
 
-    return curr ? curr->data : NULL;
+    return curr ? (void *)curr->data : NULL;
 }
 
 /**********************************************************************
@@ -186,7 +186,7 @@ _ssll_for_each(netsnmp_container *c, netsnmp_container_obj_func *f,
         return;
     
     for(curr = sl->head; curr; curr = curr->next)
-        (*f) (curr->data, context);
+        (*f) ((void *)curr->data, context);
 }
 
 /**********************************************************************

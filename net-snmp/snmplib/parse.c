@@ -1,21 +1,6 @@
 /*
  * parse.c
  *
- * Update: 1998-09-22 <mslifcak@iss.net>
- * Clear nbuckets in init_node_hash.
- * New method xcalloc returns zeroed data structures.
- * New method alloc_node encapsulates common node creation.
- * New method to configure terminate comment at end of line.
- * New method to configure accept underscore in labels.
- *
- * Update: 1998-10-10 <daves@csc.liv.ac.uk>
- * fully qualified OID parsing patch
- *
- * Update: 1998-10-20 <daves@csc.liv.ac.uk>
- * merge_anon_children patch
- *
- * Update: 1998-10-21 <mslifcak@iss.net>
- * Merge_parse_objectid associates information with last node in chain.
  */
 /* Portions of this file are subject to the following copyrights.  See
  * the Net-SNMP's COPYING file for more details and other copyrights
@@ -62,7 +47,9 @@ SOFTWARE.
 #endif
 #include <ctype.h>
 #include <sys/types.h>
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
 
 /*
  * Wow.  This is ugly.  -- Wes 
@@ -110,6 +97,8 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
+#include <errno.h>
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
@@ -130,7 +119,7 @@ struct subid_s {
     char           *label;
 };
 
-#define MAXTC   1024
+#define MAXTC   4096
 struct tc {                     /* textual conventions */
     int             type;
     int             modid;
@@ -495,11 +484,13 @@ static struct module_compatability module_map[] = {
     {"RFC1213-MIB", "UDP-MIB", "udp", 3},
     {"RFC1213-MIB", "SNMPv2-SMI", "transmission", 0},
     {"RFC1213-MIB", "SNMPv2-MIB", "snmp", 4},
+    {"RFC1231-MIB", "TOKENRING-MIB", NULL, 0},
     {"RFC1271-MIB", "RMON-MIB", NULL, 0},
     {"RFC1286-MIB", "SOURCE-ROUTING-MIB", "dot1dSr", 7},
     {"RFC1286-MIB", "BRIDGE-MIB", NULL, 0},
     {"RFC1315-MIB", "FRAME-RELAY-DTE-MIB", NULL, 0},
     {"RFC1316-MIB", "CHARACTER-MIB", NULL, 0},
+    {"RFC1406-MIB", "DS1-MIB", NULL, 0},
     {"RFC-1213", "RFC1213-MIB", NULL, 0},
 };
 
@@ -572,9 +563,9 @@ static struct node *parse_macro(FILE *, char *);
 static void     parse_imports(FILE *);
 static struct node *parse(FILE *, struct node *);
 
-static int      read_module_internal(const char *);
-static void     read_module_replacements(const char *);
-static void     read_import_replacements(const char *,
+static int     read_module_internal(const char *);
+static int     read_module_replacements(const char *);
+static int     read_import_replacements(const char *,
                                          struct module_import *);
 
 static void     new_module(const char *, const char *);
@@ -753,18 +744,18 @@ get_mib_parse_error_count(void)
 
 
 static void
-print_error(const char *string, const char *token, int type)
+print_error(const char *str, const char *token, int type)
 {
     erroneousMibs++;
     DEBUGMSGTL(("parse-mibs", "\n"));
     if (type == ENDOFFILE)
-        snmp_log(LOG_ERR, "%s (EOF): At line %d in %s\n", string, mibLine,
+        snmp_log(LOG_ERR, "%s (EOF): At line %d in %s\n", str, mibLine,
                  File);
     else if (token && *token)
-        snmp_log(LOG_ERR, "%s (%s): At line %d in %s\n", string, token,
+        snmp_log(LOG_ERR, "%s (%s): At line %d in %s\n", str, token,
                  mibLine, File);
     else
-        snmp_log(LOG_ERR, "%s: At line %d in %s\n", string, mibLine, File);
+        snmp_log(LOG_ERR, "%s: At line %d in %s\n", str, mibLine, File);
 }
 
 static void
@@ -1233,9 +1224,10 @@ compute_match(const char *search_base, const char *key)
     char           *first = NULL, *result = NULL, *entry;
     const char     *position;
     char           *newkey = strdup(key);
+    char           *st;
 
 
-    entry = strtok(newkey, "*");
+    entry = strtok_r(newkey, "*", &st);
     position = search_base;
     while (entry) {
         result = strcasestr(position, entry);
@@ -1249,7 +1241,7 @@ compute_match(const char *search_base, const char *key)
             first = result;
 
         position = result + strlen(entry);
-        entry = strtok(NULL, "*");
+        entry = strtok_r(NULL, "*", &st);
     }
     free(newkey);
     if (result)
@@ -1677,7 +1669,6 @@ do_linkup(struct module *mp, struct node *np)
             continue;
         tp = find_tree_node(mip->label, mip->modid);
         if (!tp) {
-            if (mip->modid != -1)
                 snmp_log(LOG_WARNING,
                          "Did not find '%s' in module %s (%s)\n",
                          mip->label, module_name(mip->modid, modbuf),
@@ -2149,7 +2140,15 @@ parse_ranges(FILE * fp, struct range_list **retp)
         nexttype = get_token(fp, nexttoken, MAXTOKEN);
         if (nexttype == RANGE) {
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
+            errno = 0;
             high = strtol(nexttoken, NULL, 10);
+            if ( errno == ERANGE ) {
+                if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_MIB_WARNINGS))
+                    snmp_log(LOG_WARNING,
+                             "Warning: Upper bound not handled correctly (%s != %d): At line %d in %s\n",
+                                 nexttoken, high, mibLine, File);
+            }
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
         }
         *rpp = (struct range_list *) calloc(1, sizeof(struct range_list));
@@ -2673,6 +2672,10 @@ parse_objectgroup(FILE * fp, char *name, int what, struct objgroup **ol)
                 goto skip;
             }
             o = (struct objgroup *) malloc(sizeof(struct objgroup));
+            if (!o) {
+                print_error("Resource failure", token, type);
+                goto skip;
+            }
             o->line = mibLine;
             o->name = strdup(token);
             o->next = *ol;
@@ -2951,6 +2954,8 @@ compliance_lookup(const char *name, int modid)
     if (modid == -1) {
         struct objgroup *op =
             (struct objgroup *) malloc(sizeof(struct objgroup));
+        if (!op)
+            return 0;
         op->next = objgroups;
         op->name = strdup(name);
         op->line = mibLine;
@@ -3506,9 +3511,12 @@ parse_imports(FILE * fp)
              * Recursively read any pre-requisite modules
              */
             if (read_module_internal(token) == MODULE_NOT_FOUND) {
+		int found = 0;
                 for (; old_i < import_count; ++old_i) {
-                    read_import_replacements(token, &import_list[old_i]);
+                    found += read_import_replacements(token, &import_list[old_i]);
                 }
+		if (!found)
+		    print_module_not_found(token);
             }
         }
         type = get_token(fp, token, MAXTOKEN);
@@ -3603,7 +3611,7 @@ module_name(int modid, char *cp)
             return (cp);
         }
 
-    DEBUGMSGTL(("parse-mibs", "Module %d not found\n", modid));
+    if (modid != -1) DEBUGMSGTL(("parse-mibs", "Module %d not found\n", modid));
     sprintf(cp, "#%d", modid);
     return (cp);
 }
@@ -3637,7 +3645,7 @@ add_module_replacement(const char *old_module,
     module_map_head = mcp;
 }
 
-static void
+static int
 read_module_replacements(const char *name)
 {
     struct module_compatability *mcp;
@@ -3651,16 +3659,13 @@ read_module_replacements(const char *name)
                          mcp->new_module, name, File);
 	    }
             (void) read_module(mcp->new_module);
-            return;
+            return 1;
         }
     }
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-			       NETSNMP_DS_LIB_MIB_ERRORS)) {
-        print_module_not_found(name);
-    }
+    return 0;
 }
 
-static void
+static int
 read_import_replacements(const char *old_module_name,
                          struct module_import *identifier)
 {
@@ -3692,7 +3697,7 @@ read_import_replacements(const char *old_module_name,
 		}
                 (void) read_module(mcp->new_module);
                 identifier->modid = which_module(mcp->new_module);
-                return;         /* finished! */
+                return 1;         /* finished! */
             }
         }
     }
@@ -3700,7 +3705,7 @@ read_import_replacements(const char *old_module_name,
     /*
      * If no exact match, load everything relevant
      */
-    read_module_replacements(old_module_name);
+    return read_module_replacements(old_module_name);
 }
 
 
@@ -3748,10 +3753,6 @@ read_module_internal(const char *name)
             return MODULE_LOADED_OK;
         }
 
-    if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 	
-			   NETSNMP_DS_LIB_MIB_WARNINGS) > 1) {
-        snmp_log(LOG_WARNING, "Module %s not found\n", name);
-    }
     return MODULE_NOT_FOUND;
 }
 
@@ -3830,7 +3831,8 @@ struct tree    *
 read_module(const char *name)
 {
     if (read_module_internal(name) == MODULE_NOT_FOUND)
-        read_module_replacements(name);
+        if (!read_module_replacements(name))
+	    print_module_not_found(name);
     return tree_head;
 }
 
@@ -4337,14 +4339,14 @@ parse(FILE * fp, struct node *root)
             return NULL;
         }
         if (nnp) {
-            if (nnp->type == TYPE_OTHER)
-                nnp->type = type;
             if (np)
                 np->next = nnp;
             else
                 np = root = nnp;
             while (np->next)
                 np = np->next;
+            if (np->type == TYPE_OTHER)
+                np->type = type;
         }
     }
     DEBUGMSGTL(("parse-file", "End of file (%s)\n", File));
@@ -4561,6 +4563,12 @@ snmp_get_token(FILE * fp, char *token, int maxtlen)
     return get_token(fp, token, maxtlen);
 }
 
+/* For Win32 platforms, the directory does not maintain a last modification
+ * date that we can compare with the modification date of the .index file.
+ * Therefore there is no way to know whether any .index file is valid.
+ * This is the reason for the #if !(defined(WIN32) || defined(cygwin))
+ * in the add_mibdir function
+ */
 int
 add_mibdir(const char *dirname)
 {
