@@ -341,7 +341,12 @@ _new_extension( char *exec_name, int exec_flags, extend_registration_block *ereg
     extension->row = row;
     netsnmp_table_row_add_index( row, ASN_OCTET_STR,
                                  exec_name, strlen(exec_name));
-    netsnmp_table_data_add_row( dinfo, row);
+    if ( netsnmp_table_data_add_row( dinfo, row) != SNMPERR_SUCCESS ) {
+        /* _free_extension( extension, ereg ); */
+        SNMP_FREE( extension );  /* Probably not sufficient */
+        SNMP_FREE( row );
+        return NULL;
+    }
 
     ereg->num_entries++;
         /*
