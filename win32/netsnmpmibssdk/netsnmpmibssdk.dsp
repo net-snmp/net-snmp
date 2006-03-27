@@ -85,13 +85,9 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 # Begin Source File
 
-+ SOURCE=..\..\agent\mibgroup\mibII\setSerialNo.c
-
-+ # End Source File
-
-+ # Begin Source File
-
-+ 
+SOURCE=..\..\agent\mibgroup\mibII\setSerialNo.c
+# End Source File
+# Begin Source File
 
 SOURCE=..\..\agent\mibgroup\mibII\snmp_mib.c
 # End Source File
