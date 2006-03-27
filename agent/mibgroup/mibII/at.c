@@ -382,6 +382,7 @@ var_atEntry(struct variable * vp,
     int             Found = 0;
     req_e           req_type;
     int             offset, olength;
+    static uint32_t ipaddr_return;
 
     /*
      * fill in object part of name for current (less sizeof instance part) 

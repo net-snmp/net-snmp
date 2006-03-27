@@ -371,6 +371,7 @@ var_tcpEntry(struct variable * vp,
     mib2_tcpConnEntry_t Lowentry, Nextentry, entry;
     req_e           req_type;
     int             Found = 0;
+    static uint32_t ipaddr_return;
 
     memset(&Lowentry, 0, sizeof(Lowentry));
     memcpy((char *) newname, (char *) vp->name, vp->namelen * sizeof(oid));
