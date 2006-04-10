@@ -2285,8 +2285,6 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    return pix;
 
    err:
-   if (pdu)
-      snmp_free_pdu(pdu);
    return -1;
 
 }
@@ -2312,7 +2310,7 @@ _bulkwalk_finish(walk_context *context, int okay)
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
 
-   dXSARGS;
+   dSP;
 
    async = SvTRUE(context->perl_cb);
 
@@ -2321,8 +2319,6 @@ _bulkwalk_finish(walk_context *context, int okay)
    ** items pushed onto the stack.  For async, create a new array and push
    ** the references onto it.  The array is then passed to the Perl callback.
    */
-   if (!async)
-      SP -= items;
 
    DBPRT(1, (DBOUT "Bulwalk %s (saved %d/%d), ", okay ? "completed" : "had error",
 					context->oid_saved, context->oid_total));
@@ -4141,7 +4137,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      */
 	      if ((i = _bulkwalk_recv_pdu(context, pdu)) <= 0) {
 		 DBPRT(2,(DBOUT "bulkwalk_recv_pdu() returned %d (error/empty)\n", i));
-		 break;
+		 goto err;
 	      }
 
               /* Free the returned pdu.  Don't bother to do this for the async
