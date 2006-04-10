@@ -86,6 +86,10 @@
 #if solaris2
 #include "kernel_sunos5.h"
 #endif
+#if defined(aix4) || defined(aix5)
+#include <procinfo.h>
+#include <sys/types.h>
+#endif
 
         /*********************
 	 *
@@ -117,6 +121,8 @@ struct pst_dynamic pst_dyn;
 struct kinfo_proc *proc_table;
 #elif defined(solaris2)
 int            *proc_table;
+#elif defined(aix4) || defined(aix5)
+struct procsinfo *proc_table;
 #else
 struct proc    *proc_table;
 #endif
@@ -584,6 +590,12 @@ var_hrswrun(struct variable * vp,
         strncpy(string, proc_buf->p_user.u_comm, sizeof(string));
         string[ sizeof(string)-1 ] = 0;
 #endif
+#elif defined(aix4) || defined(aix5)
+        strncpy(string, proc_table[LowProcIndex].pi_comm, sizeof(string));
+        string[ sizeof(string)-1 ] = 0;
+        cp = strchr(string, ' ');
+        if (cp != NULL)
+            *cp = '\0';
 #elif HAVE_KVM_GETPROCS
     #if defined(freebsd5) && __FreeBSD_version >= 500014
         strcpy(string, proc_table[LowProcIndex].ki_comm);
@@ -697,6 +709,12 @@ var_hrswrun(struct variable * vp,
             *cp1++ = *cp++;
         *cp1 = 0;
 #endif
+#elif defined(aix4) || defined(aix5)
+        strncpy(string, proc_table[LowProcIndex].pi_comm, sizeof(string));
+        string[ sizeof(string)-1 ] = 0;
+        cp = strchr(string, ' ');
+        if (cp != NULL)
+            *cp = '\0';
 #elif HAVE_KVM_GETPROCS
     #if defined(freebsd5) && __FreeBSD_version >= 500014
         strcpy(string, proc_table[LowProcIndex].ki_comm);
@@ -796,6 +814,13 @@ var_hrswrun(struct variable * vp,
             cp++;
         strcpy(string, cp);
 #endif
+#elif defined(aix4) || defined(aix5)
+        cp = strchr(proc_table[LowProcIndex].pi_comm, ' ');
+        if (cp != NULL) {
+            cp++;
+            sprintf(string, "%s", cp);
+        } else
+            string[0] = '\0';
 #elif HAVE_KVM_GETPROCS
         string[0] = 0;
         argv = kvm_getargv(kd, proc_table + LowProcIndex, sizeof(string));
@@ -869,6 +894,11 @@ var_hrswrun(struct variable * vp,
             long_return = 2;    /* operatingSystem */
         else
             long_return = 4;    /* application */
+#elif defined(aix4) || defined(aix5)
+		if (proc_table[LowProcIndex].pi_flags & SKPROC) {
+			long_return = 2;	/* kernel process */
+		} else
+			long_return = 4;	/* application */
 #elif HAVE_KVM_GETPROCS
     #if defined(freebsd5) && __FreeBSD_version >= 500014
 	if (proc_table[LowProcIndex].ki_flag & P_SYSTEM) {
@@ -931,6 +961,8 @@ var_hrswrun(struct variable * vp,
 #else
         switch (proc_buf->p_stat) {
 #endif
+#elif defined(aix4) || defined(aix5)
+        switch (proc_table[LowProcIndex].pi_state) {
 #else
         switch (proc_table[LowProcIndex].p_stat) {
 #endif
@@ -1076,11 +1108,11 @@ var_hrswrun(struct variable * vp,
                 long_return = 0;
             }
         }
-#elif defined(aix4)
-        long_return = proc_table[LowProcIndex].p_ru.ru_utime.tv_sec * 100 +
-            proc_table[LowProcIndex].p_ru.ru_utime.tv_usec / 10000 +
-            proc_table[LowProcIndex].p_ru.ru_stime.tv_sec * 100 +
-            proc_table[LowProcIndex].p_ru.ru_stime.tv_usec / 10000;
+#elif defined(aix4) || defined(aix5)
+        long_return = proc_table[LowProcIndex].pi_ru.ru_utime.tv_sec * 100 +
+            proc_table[LowProcIndex].pi_ru.ru_utime.tv_usec / 10000000 + /* nanoseconds */
+            proc_table[LowProcIndex].pi_ru.ru_stime.tv_sec * 100 +
+            proc_table[LowProcIndex].pi_ru.ru_stime.tv_usec / 10000000; /* nanoseconds */
 #else
         long_return = proc_table[LowProcIndex].p_utime.tv_sec * 100 +
             proc_table[LowProcIndex].p_utime.tv_usec / 10000 +
@@ -1099,6 +1131,8 @@ var_hrswrun(struct variable * vp,
 #else
         long_return = proc_buf->p_swrss;
 #endif
+#elif defined(aix4) || defined(aix5)
+        long_return = proc_table[LowProcIndex].pi_size * getpagesize() / 1024;
 #elif HAVE_KVM_GETPROCS && !defined(darwin8)
   #if defined(freebsd5) && __FreeBSD_version >= 500014
 	    /* XXX
@@ -1338,6 +1372,33 @@ Init_HR_SWRun(void)
                 proc_table[current_proc_entry++] = atoi(dp->d_name);
         closedir(f);
     }
+#elif defined(aix4) || defined(aix5)
+    {
+		pid_t proc_index = 0;
+		int avail = 1024;
+		if (proc_table) {
+			free(proc_table);
+		}
+		nproc = 0;
+		proc_table = malloc(sizeof(proc_table[0]) * avail);
+		for (;;) {
+			int got;
+			if (!proc_table) {
+				nproc = 0;
+				snmp_log_perror("Init_HR_SWRun-malloc");
+				return;
+			}
+			got = getprocs(proc_table + nproc, sizeof(proc_table[0]),
+						   0, sizeof(struct fdsinfo),
+						   &proc_index, avail - nproc);
+			nproc += got;
+			if (nproc < avail) {
+				break;
+			}
+			avail += 1024;
+			proc_table = realloc(proc_table, avail * sizeof(proc_table[0]));
+		}
+    }
 #elif HAVE_KVM_GETPROCS
     {
         if (kd == NULL) {
@@ -1402,6 +1463,11 @@ Get_Next_HR_SWRun(void)
         if (proc_table[current_proc_entry].kp_proc.p_stat != 0)
             return proc_table[current_proc_entry++].kp_proc.p_pid;
     #endif
+#elif defined(aix4) || defined(aix5)
+        if (proc_table[current_proc_entry].pi_state != 0)
+            return proc_table[current_proc_entry++].pi_pid;
+        else
+            ++current_proc_entry;
 #else
         if (proc_table[current_proc_entry].p_stat != 0)
             return proc_table[current_proc_entry++].p_pid;
@@ -1432,7 +1498,10 @@ count_processes(void)
 #if defined(hpux10) || defined(hpux11) || HAVE_KVM_GETPROCS || defined(solaris2)
     total = nproc;
 #else
-#if !defined(linux) && !defined(cygwin) && !defined(dynix)
+#if defined(aix4) || defined(aix5)
+    for (i = 0; i < nproc; ++i) {
+        if (proc_table[i].pi_state != 0)
+#elif !defined(linux) && !defined(cygwin) && !defined(dynix)
     for (i = 0; i < nproc; ++i) {
         if (proc_table[i].p_stat != 0)
 #else
