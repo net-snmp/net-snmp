@@ -24,6 +24,8 @@ config_require(if-mib/data_access/interface)
 #if defined( linux )
 config_require(if-mib/data_access/interface_linux)
 config_require(if-mib/data_access/interface_ioctl)
+#elif defined( openbsd3 )
+config_require(if-mib/data_access/interface_openbsd)
 #else
 #   define NETSNMP_ACCESS_INTERFACE_NOARCH 1
 #endif
