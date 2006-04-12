@@ -272,6 +272,7 @@ nsop_get_indexes(oid1)
         oid *oidp;
         size_t oidp_len;
         AV *myret;
+        int is_private;
 
     CODE:
         {
@@ -346,10 +347,15 @@ nsop_get_indexes(oid1)
                     && indexnode->ranges->low == indexnode->ranges->high) {
                     vbdata.val_len = indexnode->ranges->high;
                     vbdata.type |= ASN_PRIVATE;
+                    is_private = 1;
                 } else {
                     vbdata.val_len = 0;
-                    if (index->isimplied)
+                    if (index->isimplied) {
                         vbdata.type |= ASN_PRIVATE;
+                        is_private = 1;
+                    } else {
+                        is_private = 0;
+                    }
                 }
 
                 /* possible memory leak: vbdata.data should be freed later */
@@ -359,7 +365,7 @@ nsop_get_indexes(oid1)
                     return;
                 }
                 out_len = 0;
-                if (vbdata.type & ASN_PRIVATE)
+                if (is_private)
                     vbdata.type ^= ASN_PRIVATE;
                 out_len =
                     __snprint_value (buf, buf_len, &vbdata, indexnode,
