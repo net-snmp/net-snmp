@@ -359,7 +359,7 @@ nsop_get_indexes(oid1)
                     return;
                 }
                 out_len = 0;
-                if (index->isimplied)
+                if (vbdata.type & ASN_PRIVATE)
                     vbdata.type ^= ASN_PRIVATE;
                 out_len =
                     __snprint_value (buf, buf_len, &vbdata, indexnode,
