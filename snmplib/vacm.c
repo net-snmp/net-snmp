@@ -162,6 +162,7 @@ vacm_parse_config_view(const char *token, char *line)
     line = skip_token(line);
     view.viewType = atoi(line);
     line = skip_token(line);
+    len = sizeof(view.viewName);
     line =
         read_config_read_octet_string(line, (u_char **) & viewName, &len);
     view.viewSubtreeLen = MAX_OID_LEN;
@@ -247,8 +248,10 @@ vacm_parse_config_access(const char *token, char *line)
     line = skip_token(line);
     access.contextMatch = atoi(line);
     line = skip_token(line);
+    len = sizeof(access.groupName);
     line =
         read_config_read_octet_string(line, (u_char **) & groupName, &len);
+    len = sizeof(access.contextPrefix);
     line =
         read_config_read_octet_string(line, (u_char **) & contextPrefix,
                                       &len);
@@ -265,12 +268,15 @@ vacm_parse_config_access(const char *token, char *line)
     aptr->securityLevel = access.securityLevel;
     aptr->contextMatch = access.contextMatch;
     readView = (char *) aptr->views[VACM_VIEW_READ];
+    len = sizeof(aptr->views[VACM_VIEW_READ]);
     line =
         read_config_read_octet_string(line, (u_char **) & readView, &len);
     writeView = (char *) aptr->views[VACM_VIEW_WRITE];
+    len = sizeof(aptr->views[VACM_VIEW_WRITE]);
     line =
         read_config_read_octet_string(line, (u_char **) & writeView, &len);
     notifyView = (char *) aptr->views[VACM_VIEW_NOTIFY];
+    len = sizeof(aptr->views[VACM_VIEW_NOTIFY]);
     line =
         read_config_read_octet_string(line, (u_char **) & notifyView,
                                       &len);
@@ -319,6 +325,7 @@ vacm_parse_config_group(const char *token, char *line)
     line = skip_token(line);
     group.securityModel = atoi(line);
     line = skip_token(line);
+    len = sizeof(group.securityName);
     line =
         read_config_read_octet_string(line, (u_char **) & securityName,
                                       &len);
@@ -330,6 +337,7 @@ vacm_parse_config_group(const char *token, char *line)
     gptr->status = group.status;
     gptr->storageType = group.storageType;
     groupName = (char *) gptr->groupName;
+    len = sizeof(group.groupName);
     line =
         read_config_read_octet_string(line, (u_char **) & groupName, &len);
 }
