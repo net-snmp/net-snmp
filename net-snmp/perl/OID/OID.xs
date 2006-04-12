@@ -335,23 +335,15 @@ nsop_get_indexes(oid1)
                 }
                 vbdata.type = mib_to_asn_type(indexnode->type);
 
-                /* check for fixed length strings */
-                fprintf(stderr, "check: %d %x\n", vbdata.type,
-                        indexnode->ranges);
-                if (indexnode->ranges) {
-                    fprintf(stderr, "  check: %d %d\n",
-                            indexnode->ranges->low, indexnode->ranges->high);
-                }
-                
                 if (vbdata.type == (u_char) -1) {
                     RETVAL = NULL;
                     return; /* XXX: not good.  half populated stack? */
                 }
 
+                /* check for fixed length strings */
                 if (vbdata.type == ASN_OCTET_STR &&
                     indexnode->ranges && !indexnode->ranges->next
                     && indexnode->ranges->low == indexnode->ranges->high) {
-                    fprintf(stderr, "here\n");
                     vbdata.val_len = indexnode->ranges->high;
                     vbdata.type |= ASN_PRIVATE;
                 } else {
