@@ -334,13 +334,32 @@ nsop_get_indexes(oid1)
                     return;             /* xxx mem leak */
                 }
                 vbdata.type = mib_to_asn_type(indexnode->type);
+
+                /* check for fixed length strings */
+                fprintf(stderr, "check: %d %x\n", vbdata.type,
+                        indexnode->ranges);
+                if (indexnode->ranges) {
+                    fprintf(stderr, "  check: %d %d\n",
+                            indexnode->ranges->low, indexnode->ranges->high);
+                }
                 
                 if (vbdata.type == (u_char) -1) {
                     RETVAL = NULL;
                     return; /* XXX: not good.  half populated stack? */
                 }
-                if (index->isimplied)
+
+                if (vbdata.type == ASN_OCTET_STR &&
+                    indexnode->ranges && !indexnode->ranges->next
+                    && indexnode->ranges->low == indexnode->ranges->high) {
+                    fprintf(stderr, "here\n");
+                    vbdata.val_len = indexnode->ranges->high;
                     vbdata.type |= ASN_PRIVATE;
+                } else {
+                    vbdata.val_len = 0;
+                    if (index->isimplied)
+                        vbdata.type |= ASN_PRIVATE;
+                }
+
                 /* possible memory leak: vbdata.data should be freed later */
                 if (parse_one_oid_index(&oidp, &oidp_len, &vbdata, 0)
                     != SNMPERR_SUCCESS) {
