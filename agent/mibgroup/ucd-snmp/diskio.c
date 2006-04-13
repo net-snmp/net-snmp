@@ -722,13 +722,11 @@ int getstats(void)
 	    }
 	    pTemp = &head.indices[head.length];
 	    sscanf (buffer, "%d %d", &pTemp->major, &pTemp->minor);
-	    if (pTemp->minor == 0)
-		sscanf (buffer, "%d %d %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+ 	    if (sscanf (buffer, "%d %d %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		    &pTemp->major, &pTemp->minor, pTemp->name,
 		    &pTemp->rio, &pTemp->rmerge, &pTemp->rsect, &pTemp->ruse,
 		    &pTemp->wio, &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,
-		    &pTemp->running, &pTemp->use, &pTemp->aveq);
-	    else
+ 		    &pTemp->running, &pTemp->use, &pTemp->aveq) != 14)
 		sscanf (buffer, "%d %d %s %lu %lu %lu %lu\n",
 		    &pTemp->major, &pTemp->minor, pTemp->name,
 		    &pTemp->rio, &pTemp->rsect,
