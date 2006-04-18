@@ -290,7 +290,7 @@ are interpreted in the same way as for \fIauthgroup\fR.
 If CONTEXT is specified, access is configured within this SNMPv3 context
 (or contexts with this prefix if the CONTEXT field ends with '*').
 Otherwise the default context ("") is used.
-.IP "setaccess CONTEXT MODEL LEVEL PREFIX VIEW TYPES"
+.IP "setaccess GROUP CONTEXT MODEL LEVEL PREFIX VIEW TYPES"
 is a direct equivalent to the original \fIaccess\fR directive, typically
 listing the view types as \fIread\fR or \fIread,write\fR as appropriate.
 (or see 'snmptrapd.conf(5)' for other possibilities).
