@@ -611,8 +611,7 @@ netsnmp_config_remember_free_list(struct read_config_memory **mem)
         SNMP_FREE((*mem)->line);
         tmpmem = (*mem)->next;
         SNMP_FREE(*mem);
-        *mem = NULL;
-        mem = &tmpmem;
+        *mem = tmpmem;
     }
 }
 
