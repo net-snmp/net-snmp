@@ -11,6 +11,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - performance improvement when changing localized keys
       - new option -Cp to set usmUserPublic value
 
+    mib2c:
+      - A new perl module provides easier embedded perl support.
+        run "mib2c -c mib2c.perl.conf OID" to help you start using it.
+
 
 *5.3.0.1*
 
