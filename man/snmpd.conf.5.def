@@ -263,18 +263,18 @@ configure various different view types.  As far as the main SNMP agent is
 concerned, the two main view types are \fIread\fR and \fIwrite\fR,
 corresponding to the READ and WRITE views of the main \fIaccess\fR directive.
 See the 'snmptrapd.conf(5)' man page for discussion of other view types.
-.IP "authcommunity TYPES  COMMUNITY   [SOURCE [OID | -v VIEW]]"
+.IP "authcommunity TYPES  COMMUNITY   [SOURCE [OID | -V VIEW]]"
 is an alternative to the \fIrocommunity\fR/\fIrwcommunity\fR directives.
 TYPES will usually be \fIread\fR or \fIread,write\fR respectively.
 The view specification can either be an OID subtree (as before),
 or a named view (defined using the
 \fIview\fR directive) for greater flexibility.  If this is omitted,
 then access will be allowed to the full OID tree.
-.IP "authuser   TYPES [-s MODEL] USER  [LEVEL [OID | -v VIEW]]"
+.IP "authuser   TYPES [-s MODEL] USER  [LEVEL [OID | -V VIEW]]"
 is an alternative to the \fIrouser\fR/\fIrwuser\fR directives.
 The fields TYPES, OID and VIEW have the same meaning as for
 \fIauthcommunity\fR.
-.IP "authgroup  TYPES [-s MODEL] GROUP [LEVEL [OID | -v VIEW]]"
+.IP "authgroup  TYPES [-s MODEL] GROUP [LEVEL [OID | -V VIEW]]"
 is a companion to the \fIauthuser\fR directive, specifying access
 for a particular group (defined using the \fIgroup\fR directive as usual).
 Both \fIauthuser\fR and \fIauthgroup\fR default to authenticated requests -
