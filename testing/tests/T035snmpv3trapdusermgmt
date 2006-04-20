@@ -108,6 +108,16 @@ CAPTURE "snmptrap -Ci -t $SNMP_SLEEP -d -v 3 -u $NEWUSER -l ap -a $DEFAUTHTYPE -
 DELAY
 CHECKTRAPDORDIE "received_inform_ap2"
 
+## 3) persistency I: reconfigure (SIGHUP), re-test
+
+# reconfigure snmptrapd
+HUPTRAPD
+
+# test (ap)
+CAPTURE "snmptrap -Ci -t $SNMP_SLEEP -d -v 3 -u $NEWUSER -l ap -a $DEFAUTHTYPE -3k $NEWAUTHKEY -x $DEFPRIVTYPE -3K $NEWPRIVKEY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 0 .1.3.6.1.6.3.1.1.5.1 system.sysContact.0 s received_inform_ap3"
+DELAY
+CHECKTRAPDORDIE "received_inform_ap3"
+
 ## stop daemons and finish
 STOPTRAPD
 STOPAGENT
