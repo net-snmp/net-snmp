@@ -6,6 +6,16 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     snmpd:
       - fix trap processing from SMUX peers (patch 1430824 from Dell,
         submitted by SuSE)
+      - fix disman/event monitoring crashes (see official patch 1429059)
+      - fix bug 1399369: ifNumber broken
+      - fix bug 1473289: SIGHUP breaks daemons (official patch 1473289)
+
+    snmptrapd:
+      - fix bug 1420758/1458815: snmptrapd aborts/loops in select()
+      - fix bug 1473289: SIGHUP breaks daemons
+
+    snmplib:
+      - fix bug 1421725: OID lookups fail (see official patch 1421725)
 
     snmpusm:
       - performance improvement when changing localized keys
@@ -13,7 +23,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
     mib2c:
       - A new perl module provides easier embedded perl support.
-        run "mib2c -c mib2c.perl.conf OID" to help you start using it.
+        Run "mib2c -c mib2c.perl.conf OID" to help you start using it.
+
+    misc:
+      - Coverity fixes
 
 
 *5.3.0.1*
