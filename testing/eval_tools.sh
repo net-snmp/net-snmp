@@ -429,6 +429,34 @@ STARTTRAPD() {
     WAITFORTRAPD "NET-SNMP version"
 }
 
+## sending SIGHUP for reconfiguration
+#
+HUPPROG() {
+    if [ -f $1 ]; then
+        if [ "x$OSTYPE" = "xmsys" ]; then
+          COMMAND='echo "Skipping SIGHUP (not supported by kill.exe on MinGW)"'
+        else
+          COMMAND="kill -HUP `cat $1`"
+        fi
+	echo $COMMAND >> $SNMP_TMPDIR/invoked
+	$COMMAND > /dev/null 2>&1
+    fi
+}
+
+HUPAGENT() {
+    HUPPROG $SNMP_SNMPD_PID_FILE
+    if [ "x$OSTYPE" != "xmsys" ]; then
+        WAITFORAGENT "restarted"
+    fi
+}
+
+HUPTRAPD() {
+    HUPPROG $SNMP_SNMPTRAPD_PID_FILE
+    if [ "x$OSTYPE" != "xmsys" ]; then
+        WAITFORTRAPD "restarted"
+    fi
+}
+
 
 ## used by STOPAGENT and STOPTRAPD
 # delay before kill to allow previous action to finish
