@@ -1304,6 +1304,7 @@ void
 trapd_update_config(void)
 {
     free_config();
+    vacm_standard_views(0,0,NULL,NULL);
     read_configs();
 }
 
