@@ -12,6 +12,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
     snmptrapd:
       - fix bug 1420758/1458815: snmptrapd aborts/loops in select()
+        (official patch 1420758)
       - fix re-init of daemons after SIGHUP (official patch 1473289)
 
     snmplib:
