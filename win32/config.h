@@ -460,6 +460,10 @@ extern "C" {
 /* Define if you have the <syslog.h> header file.  */
 #undef HAVE_SYSLOG_H
 
+#ifndef LOG_DAEMON
+#define       LOG_DAEMON      (3<<3)  /* system daemons */
+#endif
+
 /* Define if you have the <ufs/ffs/fs.h> header file.  */
 #undef HAVE_UFS_FFS_FS_H
 
