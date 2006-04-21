@@ -281,9 +281,20 @@ _dump_stats( const char *name, oid *oid_buf, size_t buf_len,
     }
 
     printf("%s:\n", name);
-    for (vp=var, sp=stable; vp; vp=vp->next_variable, sp++) {
+    sp=stable;
+    for (vp=var; vp; vp=vp->next_variable, sp++) {
+        /*
+         * Match the returned results against
+         *   the original stats table.
+         */
         stat =  vp->name[buf_len-2];
-        /* XXX - Check that  sp->entry == stat  */
+        while (sp->entry < stat) {
+            sp++;
+            if (sp->entry == 0)
+                break;
+        }
+        if (sp->entry > stat)
+            continue;
 
         /* Skip exceptions or missing values */
         if ( !vp->val.integer )
