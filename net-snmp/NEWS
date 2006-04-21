@@ -6,16 +6,17 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     snmpd:
       - fix trap processing from SMUX peers (patch 1430824 from Dell,
         submitted by SuSE)
-      - fix disman/event monitoring crashes (see official patch 1429059)
+      - fix disman/event monitoring crashes (official patch 1429059)
       - fix bug 1399369: ifNumber broken
-      - fix bug 1473289: SIGHUP breaks daemons (official patch 1473289)
+      - fix re-init of daemons after SIGHUP (official patch 1473289)
 
     snmptrapd:
       - fix bug 1420758/1458815: snmptrapd aborts/loops in select()
-      - fix bug 1473289: SIGHUP breaks daemons
+      - fix re-init of daemons after SIGHUP (official patch 1473289)
 
     snmplib:
-      - fix bug 1421725: OID lookups fail (see official patch 1421725)
+      - fix OID lookups for fully qualified object names (eg .iso.org)
+        (official patch 1421725)
 
     snmpusm:
       - performance improvement when changing localized keys
