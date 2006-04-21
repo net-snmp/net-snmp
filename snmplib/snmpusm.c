@@ -1334,7 +1334,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
      * 
      * None of these are to be free'd - they are either pointing to
      * what's in the secStateRef or to something either in the
-     * actual prarmeter list or the user list.
+     * actual parameter list or the user list.
      */
 
     char           *theName = NULL;
@@ -2494,7 +2494,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                                                user->authKey,
                                                user->authKeyLen) == -1) {
             DEBUGMSGTL(("usm", "%s\n",
-                        "Couldn't cache authentiation key."));
+                        "Couldn't cache authentication key."));
             return SNMPERR_USM_GENERICERROR;
         }
 
