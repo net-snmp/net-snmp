@@ -1190,6 +1190,7 @@ static int _query(netsnmp_variable_list *list,
      * Clone the varbind list into the request PDU...
      */
     pdu->variables = snmp_clone_varbind( list );
+retry:
     if ( session )
         ret = snmp_synch_response(            session, pdu, &response );
     else if (_def_query_session)
@@ -1208,7 +1209,23 @@ static int _query(netsnmp_variable_list *list,
      */
     if ( ret == SNMP_ERR_NOERROR ) {
         if ( response->errstat != SNMP_ERR_NOERROR ) {
+            /*
+             * If the request failed, then remove the
+             *  offending varbind and try again.
+             *  (all except SET requests)
+             *
+             * XXX - implement a library version of
+             *       NETSNMP_DS_APP_DONT_FIX_PDUS ??
+             */
             ret = response->errstat;
+            if (request != SNMP_MSG_SET &&
+                response->errindex != 0) {
+                pdu = snmp_fix_pdu( response, request );
+                snmp_free_pdu( response );
+                response = NULL;
+                if ( pdu != NULL )
+                    goto retry;
+            }
         } else {
             for (vb1 = response->variables, vb2 = list;
                  vb1;
