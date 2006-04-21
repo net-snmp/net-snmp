@@ -55,6 +55,21 @@ static char *rcsid = "$OpenBSD: if.c,v 1.42 2005/03/13 16:05:50 mpf Exp $";
 #endif
 
 #include <stdio.h>
+#include <sys/types.h>
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -92,6 +107,7 @@ static char *rcsid = "$OpenBSD: if.c,v 1.42 2005/03/13 16:05:50 mpf Exp $";
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
+#include "system.h"
 
 #include "main.h"
 #include "netstat.h"

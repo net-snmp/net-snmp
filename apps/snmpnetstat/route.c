@@ -85,6 +85,7 @@ static char *rcsid = "$OpenBSD: route.c,v 1.66 2004/11/17 01:47:20 itojun Exp $"
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
+#include "system.h"
 
 #ifndef INET
 #define INET
@@ -352,7 +353,7 @@ routename(in_addr_t in)
 	}
 	cp = NULL;
 	if (!nflag) {
-		hp = gethostbyaddr((char *)&in, sizeof (struct in_addr),
+		hp = gethostbyaddr((char *)&in, sizeof (in_addr_t),
 		    AF_INET);
 		if (hp) {
 			if ((cp = strchr(hp->h_name, '.')) &&
