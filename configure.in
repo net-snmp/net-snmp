@@ -2640,11 +2640,15 @@ AC_CHECK_HEADERS(vm/swap_pager.h,,,
 #endif
 ]])
 # linux ethtool
+# requires special hacks to get around various problems on older linux kernels.
+# major ugh....
 AC_CHECK_HEADERS(linux/ethtool.h,,,
 [[
-#if HAVE_PCI_PCI_H
-#include <pci/pci.h>
-#endif
+#include <sys/types.h>
+typedef unsigned long long u64;         /* hack, so we may include kernel's ethtool.h */
+typedef __uint32_t u32;         /* ditto */
+typedef __uint16_t u16;         /* ditto */
+typedef __uint8_t u8;           /* ditto */
 ]])
 # BSDi3 headers
 AC_CHECK_HEADERS(sys/stat.h)
