@@ -1,4 +1,4 @@
-.TH "netsnmp_agent_request_info_s" 3 "9 Jan 2006" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_agent_request_info_s" 3 "30 Apr 2006" "Version 5.0.10" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -21,7 +21,7 @@ netsnmp_agent_request_info_s \- The agent transaction request structure.
 .br
 .RI "\fIpdu contains authinfo, eg \fP"
 .ti -1c
-.RI "netsnmp_agent_session_s * \fBasp\fP"
+.RI "\fBnetsnmp_agent_session_s\fP * \fBasp\fP"
 .br
 .ti -1c
 .RI "\fBnetsnmp_data_list\fP * \fBagent_data\fP"
@@ -36,12 +36,14 @@ The agent transaction request structure.
 .PP
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 131 of file snmp_agent.h.
+Definition at line 127 of file snmp_agent.h.
 .SH "Field Documentation"
 .PP 
 .SS "\fBnetsnmp_pdu\fP* \fBnetsnmp_agent_request_info_s::pdu\fP"
 .PP
-pdu contains authinfo, eg Definition at line 134 of file snmp_agent.h.
+pdu contains authinfo, eg 
+.PP
+Definition at line 130 of file snmp_agent.h.
 
 .SH "Author"
 .PP 

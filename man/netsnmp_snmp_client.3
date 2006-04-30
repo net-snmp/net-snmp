@@ -1,4 +1,4 @@
-.TH "various PDU processing routines" 3 "9 Jan 2006" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "30 Apr 2006" "Version 5.0.10" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,7 +10,7 @@ various PDU processing routines \-
 .RI "#define \fBBSD4_2\fP"
 .br
 .ti -1c
-.RI "#define \fBNFDBITS\fP   (sizeof(fd_mask) * NBBY)        /* bits per mask */"
+.RI "#define \fBNFDBITS\fP   (sizeof(\fBfd_mask\fP) * NBBY)"
 .br
 .ti -1c
 .RI "#define \fBFD_SET\fP(n, p)   ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))"
@@ -114,7 +114,9 @@ various PDU processing routines \-
 .PP 
 .SS "int snmp_set_var_typed_value (\fBnetsnmp_variable_list\fP * newvar, u_char type, const u_char * val_str, size_t val_len)"
 .PP
-snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.
+snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. 
+.PP
+Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -138,16 +140,18 @@ returns 0 on success and 1 on a malloc error
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 671 of file snmp_client.c.
+Definition at line 670 of file snmp_client.c.
 .PP
-References variable_list::type.
+References snmp_set_var_value(), and variable_list::type.
 .PP
-Referenced by netsnmp_old_api_helper(), netsnmp_table_build_result(), and netsnmp_table_data_build_result().
+Referenced by netsnmp_instance_counter32_handler(), netsnmp_instance_int_handler(), netsnmp_instance_long_handler(), netsnmp_instance_ulong_handler(), netsnmp_table_build_result(), netsnmp_table_data_build_result(), netsnmp_watched_timestamp_handler(), netsnmp_watcher_helper_handler(), snmp_replace_var_types(), and snmp_reset_var_types().
 .SH "Variable Documentation"
 .PP 
-.SS "const char* error_string[19]"
+.SS "const char* \fBerror_string\fP[19]"
 .PP
-\fBInitial value:\fP.nf
+\fBInitial value:\fP
+.PP
+.nf
  {
     '(noError) No Error',
     '(tooBig) Response message would have been too large.',
@@ -171,4 +175,4 @@ Referenced by netsnmp_old_api_helper(), netsnmp_table_build_result(), and netsnm
 }
 .fi
 .PP
-Definition at line 923 of file snmp_client.c.
+Definition at line 922 of file snmp_client.c.
