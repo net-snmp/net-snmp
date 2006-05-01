@@ -1,4 +1,4 @@
-.TH "generic_table_API" 3 "9 Jan 2006" "net-snmp" \" -*- nroff -*-
+.TH "generic_table_API" 3 "30 Apr 2006" "Version 5.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -9,28 +9,28 @@ generic_table_API \- General requirements for a table helper.
 
 .in +1c
 .ti -1c
-.RI "group\fBtable_maintenance\fP"
+.RI "\fBtable_maintenance\fP"
 .br
 .RI "\fIRoutines for maintaining the contents of a table. \fP"
 .PP
 .in +1c
 
 .ti -1c
-.RI "group\fBmib_maintenance\fP"
+.RI "\fBmib_maintenance\fP"
 .br
 .RI "\fIRoutines for maintaining a MIB table. \fP"
 .PP
 .in +1c
 
 .ti -1c
-.RI "group\fBtable_rows\fP"
+.RI "\fBtable_rows\fP"
 .br
 .RI "\fIRoutines for working with the rows of a table. \fP"
 .PP
 .in +1c
 
 .ti -1c
-.RI "group\fBtable_indexes\fP"
+.RI "\fBtable_indexes\fP"
 .br
 .RI "\fIRoutines for working with row indexes. \fP"
 .PP
@@ -38,4 +38,6 @@ generic_table_API \- General requirements for a table helper.
 .in -1c
 .SH "Detailed Description"
 .PP 
-General requirements for a table helper. A given table helper need not implement the whole of this API, and may need to adjust the prototype of certain routines. But this description provides a suitable standard design framework. 
+General requirements for a table helper. 
+.PP
+A given table helper need not implement the whole of this API, and may need to adjust the prototype of certain routines. But this description provides a suitable standard design framework. 
