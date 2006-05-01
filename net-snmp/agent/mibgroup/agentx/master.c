@@ -445,6 +445,11 @@ agentx_master_handler(netsnmp_mib_handler *handler,
                 "agentx master handler starting, mode = 0x%02x\n",
                 reqinfo->mode));
 
+    if (!ax_session) {
+        netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
+        return SNMP_ERR_NOERROR;
+    }        
+
     /*
      * build a new pdu based on the pdu type coming in 
      */
@@ -491,7 +496,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
         return SNMP_ERR_NOERROR;
     }
 
-    if (!pdu || !ax_session) {
+    if (!pdu) {
         netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
         return SNMP_ERR_NOERROR;
     }

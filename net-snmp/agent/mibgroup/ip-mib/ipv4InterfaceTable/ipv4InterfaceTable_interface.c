@@ -68,8 +68,6 @@ typedef struct ipv4InterfaceTable_interface_ctx_s {
 
     netsnmp_baby_steps_access_methods access_multiplexer;
 
-    u_int           table_dirty;
-
     u_long          last_changed;
 
 } ipv4InterfaceTable_interface_ctx;
@@ -115,16 +113,13 @@ ipv4InterfaceTable_container_size(void)
 u_int
 ipv4InterfaceTable_dirty_get(void)
 {
-    return ipv4InterfaceTable_if_ctx.table_dirty;
+    return ifTable_dirty_get();
 }
 
 void
 ipv4InterfaceTable_dirty_set(u_int status)
 {
-    DEBUGMSGTL(("ipv4InterfaceTable:ipv4InterfaceTable_dirty_set",
-                "called. was %d, now %d\n",
-                ipv4InterfaceTable_if_ctx.table_dirty, status));
-    ipv4InterfaceTable_if_ctx.table_dirty = status;
+    ifTable_dirty_set(status);
 }
 
 /*
@@ -843,18 +838,15 @@ _mfd_ipv4InterfaceTable_undo_setup(netsnmp_mib_handler *handler,
     /*
      * allocate undo context
      */
-    rowreq_ctx->undo = ipv4InterfaceTable_allocate_data();
-    if (NULL == rowreq_ctx->undo) {
-        /** msg already logged */
-        netsnmp_request_set_error_all(requests,
-                                      SNMP_ERR_RESOURCEUNAVAILABLE);
+    rc = _mfd_ifTable_undo_setup_allocate(rowreq_ctx);
+    if (MFD_SUCCESS != rc) {
+        netsnmp_request_set_error_all(requests, rc);
         return SNMP_ERR_NOERROR;
     }
 
     /*
      * row undo setup
      */
-    rowreq_ctx->column_set_flags = 0;
     rc = ipv4InterfaceTable_undo_setup(rowreq_ctx);
     if (MFD_SUCCESS != rc) {
         DEBUGMSGTL(("ipv4InterfaceTable:mfd", "error %d from "
@@ -925,11 +917,7 @@ _mfd_ipv4InterfaceTable_undo_cleanup(netsnmp_mib_handler *handler,
     /*
      * release undo context, if needed
      */
-    if (rowreq_ctx->undo) {
-        ifTable_release_data(rowreq_ctx->undo);
-        rowreq_ctx->undo = NULL;
-    }
-
+    _mfd_ifTable_undo_setup_release(rowreq_ctx);
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ipv4InterfaceTable_undo_cleanup */

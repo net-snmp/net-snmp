@@ -22,6 +22,19 @@ if [ $2 = "tag" ]; then
 fi
 
 if [ $2 = "tar" ]; then
+    # gnu tar (as of 1.15.1) is unable to create portable tar archives, 
+    # especially if long file names (>100 char) are present.
+    # star is a better replacement.
+    if [ -x /usr/bin/star ]; then
+        TAR="/usr/bin/star -Hustar -z -c -f"
+    elif [ -x /bin/tar ]; then
+        echo "WARNING: about to create non-portable tar archives using GNU tar."
+        echo "You'd better install /usr/bin/star and rerun."
+        TAR="/bin/tar czf"
+    else
+        echo "neither /usr/bin/star nor /bin/tar found."
+        exit 0
+    fi
     if [ -d CVS ]; then
         $DOIT cvs export -d net-snmp-$VERSION -r $VERSIONTAG net-snmp
     else
@@ -31,7 +44,7 @@ if [ $2 = "tar" ]; then
         $DOIT cvs -d $CVSUSER@cvs.sourceforge.net:/cvsroot/net-snmp export -d net-snmp-$VERSION -r $VERSIONTAG net-snmp
     fi
     $DOIT net-snmp-$VERSION/remove-files net-snmp-$VERSION
-    $DOIT tar czf net-snmp-$VERSION.tar.gz net-snmp-$VERSION
+    $DOIT $TAR net-snmp-$VERSION.tar.gz net-snmp-$VERSION
     $DOIT md5sum net-snmp-$VERSION.tar.gz > net-snmp-$VERSION.tar.gz.md5
 fi
 

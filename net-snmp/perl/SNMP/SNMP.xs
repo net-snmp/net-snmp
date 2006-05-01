@@ -2274,8 +2274,6 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    return pix;
 
    err:
-   if (pdu)
-      snmp_free_pdu(pdu);
    return -1;
 
 }
@@ -2301,7 +2299,7 @@ _bulkwalk_finish(walk_context *context, int okay)
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
 
-   dXSARGS;
+   dSP;
 
    async = SvTRUE(context->perl_cb);
 
@@ -2310,8 +2308,6 @@ _bulkwalk_finish(walk_context *context, int okay)
    ** items pushed onto the stack.  For async, create a new array and push
    ** the references onto it.  The array is then passed to the Perl callback.
    */
-   if (!async)
-      SP -= items;
 
    DBPRT(1, (DBOUT "Bulwalk %s (saved %d/%d), ", okay ? "completed" : "had error",
 					context->oid_saved, context->oid_total));
@@ -2864,7 +2860,7 @@ snmp_update_session(sess_ref, version, community, peer, lport, retries, timeout)
 	   }
            if (ss->version == -1) {
 		if (verbose)
-                   warn("Unsupported SNMP version (%s)\n", version);
+                   warn("snmp_update_session: Unsupported SNMP version (%s)\n", version);
                 goto update_end;
 	   }
            /* WARNING LEAKAGE but I cant free lib memory under win32 */
@@ -2895,9 +2891,9 @@ snmp_add_mib_dir(mib_dir,force=0)
 	   result = add_mibdir(mib_dir);
         }
         if (result) {
-           if (verbose) warn("Added mib dir %s\n", mib_dir);
+           if (verbose) warn("snmp_add_mib_dir: Added mib dir %s\n", mib_dir);
         } else {
-           if (verbose) warn("Failed to add %s\n", mib_dir);
+           if (verbose) warn("snmp_add_mib_dir: Failed to add %s\n", mib_dir);
         }
         RETVAL = (I32)result;
         }
@@ -2924,7 +2920,7 @@ snmp_read_mib(mib_file, force=0)
 
         if ((mib_file == NULL) || (*mib_file == '\0')) {
            if (get_tree_head() == NULL) {
-              if (verbose) warn("initializing MIB\n");
+              if (verbose) warn("snmp_read_mib: initializing MIB\n");
               init_mib();
               if (get_tree_head()) {
                  if (verbose) warn("done\n");
@@ -2933,7 +2929,7 @@ snmp_read_mib(mib_file, force=0)
               }
 	   }
         } else {
-           if (verbose) warn("reading MIB: %s\n", mib_file);
+           if (verbose) warn("snmp_read_mib: reading MIB: %s\n", mib_file);
            if (strcmp("ALL",mib_file))
               read_mib(mib_file);
            else
@@ -3080,7 +3076,7 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
 				       SvCUR(*varbind_val_f):0), type);
 
 		    if (verbose && res == FAILURE)
-		      warn("error: adding variable/value to PDU");
+		      warn("error: set: adding variable/value to PDU");
                  } /* if var_ref is ok */
               } /* for all the vars */
 
@@ -3243,9 +3239,11 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
 	      for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
+                    char *tag_pv;
                     varbind = (AV*) SvRV(*varbind_ref);
 
-                    tp = __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, ".0"),
+                    tag_pv = __av_elem_pv(varbind, VARBIND_TAG_F, ".0");
+                    tp = __tag2oid(tag_pv,
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
                               oid_arr, &oid_arr_len, NULL, best_guess);
 
@@ -3253,7 +3251,8 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
   		       snmp_add_null_var(pdu, oid_arr, oid_arr_len);
 		    } else {
                        if (verbose)
-                          warn("error: set: unknown object ID");
+                          warn("error: get: unknown object ID (%s)",
+                                                 (tag_pv?tag_pv:"<null>"));
 	               sv_catpv(*err_str_svp,
                                (char*)snmp_api_errstring(SNMPERR_UNKNOWN_OBJID));
                        sv_setiv(*err_num_svp, SNMPERR_UNKNOWN_OBJID);
@@ -3462,6 +3461,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 	      for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
+                    char *tag_pv;
                     varbind = (AV*) SvRV(*varbind_ref);
 
                     /* If the varbind includes the module prefix, capture it for use later */
@@ -3475,7 +3475,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                       *str_buf_prefix = '\0';
                     }
 
-                    tp = __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, ".0"),
+                    tag_pv = __av_elem_pv(varbind, VARBIND_TAG_F, ".0");
+                    tp = __tag2oid(tag_pv,
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
                               oid_arr, &oid_arr_len, NULL, best_guess);
 
@@ -3483,7 +3484,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
   		       snmp_add_null_var(pdu, oid_arr, oid_arr_len);
 		    } else {
                        if (verbose)
-                          warn("error: set: unknown object ID");
+                          warn("error: getnext: unknown object ID (%s)",
+                                                 (tag_pv?tag_pv:"<null>"));
 	               sv_catpv(*err_str_svp,
                                (char*)snmp_api_errstring(SNMPERR_UNKNOWN_OBJID));
                        sv_setiv(*err_num_svp, SNMPERR_UNKNOWN_OBJID);
@@ -3703,8 +3705,10 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 	      for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
+                    char *tag_pv;
                     varbind = (AV*) SvRV(*varbind_ref);
-                    __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, "0"),
+                    tag_pv = __av_elem_pv(varbind, VARBIND_TAG_F, "0");
+                    __tag2oid(tag_pv,
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
                               oid_arr, &oid_arr_len, NULL, best_guess);
 
@@ -3713,7 +3717,8 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
   		       snmp_add_null_var(pdu, oid_arr, oid_arr_len);
 		    } else {
                        if (verbose)
-                          warn("error: set: unknown object ID");
+                          warn("error: getbulk: unknown object ID (%s)",
+                                                 (tag_pv?tag_pv:"<null>"));
 	               sv_catpv(*err_str_svp,
                                (char*)snmp_api_errstring(SNMPERR_UNKNOWN_OBJID));
                        sv_setiv(*err_num_svp, SNMPERR_UNKNOWN_OBJID);
@@ -3751,7 +3756,8 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                                        *err_str_svp, *err_num_svp,
 				       *err_ind_svp);
 
-	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
+	      if (SvIOK(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)) &&
+                  SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
 	         sv_timestamp = newSViv((IV)time(NULL));
 
 	      av_clear(varlist);
@@ -3887,7 +3893,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 
 	   if (!SvROK(sess_ref) || !SvROK(varlist_ref)) {
 	      if (verbose)
-		 warn("Bad session or varlist reference!\n");
+		 warn("bulkwalk: Bad session or varlist reference!\n");
 
 	      XSRETURN_UNDEF;
 	   }
@@ -4120,7 +4126,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      */
 	      if ((i = _bulkwalk_recv_pdu(context, pdu)) <= 0) {
 		 DBPRT(2,(DBOUT "bulkwalk_recv_pdu() returned %d (error/empty)\n", i));
-		 break;
+		 goto err;
 	      }
 
               /* Free the returned pdu.  Don't bother to do this for the async

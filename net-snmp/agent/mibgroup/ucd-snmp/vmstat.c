@@ -202,8 +202,9 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
     static int      first = 1;
     static char    *buff = NULL, *vmbuff = NULL;
     static int      bsize = 0, vmbsize = 0;
-    char           *b;
+    char           *b, *c;
     time_t          now;
+    unsigned long long cpunum;
     unsigned long long cusell = 0, cicell = 0, csysll = 0, cidell = 0,
         ciowll = 0, cirqll = 0, csoftll = 0, ctll = 0, itotll = 0, i1ll = 0;
 
@@ -245,6 +246,11 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
 
     *itot = 0;
     *i1 = 1;
+    c = buff;
+    while ((c = strstr(c+1, "cpu")) != NULL)
+        b = c;
+    sscanf(b, "cpu%llu", &cpunum);
+    cpunum++;
     b = strstr(buff, "cpu ");
     if (b) {
 	if (!has_cpu_26 ||
@@ -255,14 +261,15 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
                    &cidell);
 	    *ciow = *cirq = *csoft = 0;
 	} else {
-  	    *ciow = (unsigned long)ciowll;
-  	    *cirq = (unsigned long)cirqll;
-  	    *csoft = (unsigned long)csoftll;
+  	    *ciow = (unsigned long)(ciowll/cpunum);
+  	    *cirq = (unsigned long)(cirqll/cpunum);
+  	    *csoft = (unsigned long)(csoftll/cpunum);
  	}
-	*cuse = (unsigned long)cusell;
-	*cice = (unsigned long)cicell;
-	*csys = (unsigned long)csysll;
-	*cide = (unsigned long)cidell;
+	*cuse = (unsigned long)(cusell/cpunum);
+	*cice = (unsigned long)(cicell/cpunum);
+	*csys = (unsigned long)(csysll/cpunum);
+	*cide = (unsigned long)(cidell/cpunum);
+
     }
     else {
 	if (first)

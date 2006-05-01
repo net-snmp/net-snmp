@@ -11,7 +11,8 @@
 
 #include <net-snmp/agent/row_merge.h>
 
-/** @defgroup row_merge row_merge: Calls sub handlers with request for one row at a time.
+/** @defgroup row_merge row_merge
+ *  Calls sub handlers with request for one row at a time.
  *  @ingroup utilities
  *  This helper splits a whole bunch of requests into chunks based on the row
  *  index that they refer to, and passes all requests for a given row to the lower handlers.
@@ -354,3 +355,5 @@ netsnmp_init_row_merge(void)
     netsnmp_register_handler_by_name("row_merge",
                                      netsnmp_get_row_merge_handler(-1));
 }
+/**  @} */
+

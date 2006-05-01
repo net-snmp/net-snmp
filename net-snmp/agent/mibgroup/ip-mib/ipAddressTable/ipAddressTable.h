@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @addtogroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -453,3 +453,5 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access)
 }
 #endif
 #endif                          /* IPADDRESSTABLE_H */
+/**  @} */
+

@@ -667,9 +667,11 @@ write_snmpNotifyFilterProfileRowStatus(int action,
             /*
              * set the flag? 
              */
-            old_value = StorageTmp->snmpNotifyFilterProfileRowStatus;
-            StorageTmp->snmpNotifyFilterProfileRowStatus =
-                *((long *) var_val);
+            if (StorageTmp) { /* should always be true */
+                old_value = StorageTmp->snmpNotifyFilterProfileRowStatus;
+                StorageTmp->snmpNotifyFilterProfileRowStatus =
+                    *((long *) var_val);
+            }
         } else {
             /*
              * destroy...  extract it for now 
@@ -719,7 +721,8 @@ write_snmpNotifyFilterProfileRowStatus(int action,
             snmpNotifyFilterProfileTable_add(StorageDel);
             StorageDel = NULL;
         } else if (set_value != RS_DESTROY) {
-            StorageTmp->snmpNotifyFilterProfileRowStatus = old_value;
+            if (StorageTmp)
+                StorageTmp->snmpNotifyFilterProfileRowStatus = old_value;
         }
         break;
 

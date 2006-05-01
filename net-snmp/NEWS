@@ -1,6 +1,42 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.3.1*
+
+    snmpd:
+      - fix trap processing from SMUX peers (patch 1430824 from Dell,
+        submitted by SuSE)
+      - fix disman/event monitoring crashes (official patch 1429059)
+      - fix bug 1399369: ifNumber broken
+      - fix re-init of daemons after SIGHUP (official patch 1473289)
+
+    snmptrapd:
+      - fix bug 1420758/1458815: snmptrapd aborts/loops in select()
+        (official patch 1420758)
+      - fix re-init of daemons after SIGHUP (official patch 1473289)
+
+    snmplib:
+      - fix OID lookups for fully qualified object names (eg .iso.org)
+        (official patch 1421725)
+
+    snmpusm:
+      - performance improvement when changing localized keys
+
+    misc:
+      - Coverity fixes
+
+*5.3.0.1*
+
+  *** Security Fix ***
+
+    - In version 5.3 much of the authorization control was rewritten.
+      There was a bug in the new code that resulted in granting write
+      access to read-only users or communities which were configured
+      using the "rocommunity" or "rouser" snmpd.conf tokens.  5.3.0.1
+      fixes this problem.  Users are encouraged to immediately update
+      their installations if they use either of these tokens.
+
+
 *5.3*
 
  *** Important Notes ***

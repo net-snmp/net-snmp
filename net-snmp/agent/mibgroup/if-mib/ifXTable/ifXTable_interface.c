@@ -70,8 +70,6 @@ typedef struct ifXTable_interface_ctx_s {
 
     netsnmp_baby_steps_access_methods access_multiplexer;
 
-    u_int           table_dirty;
-
 } ifXTable_interface_ctx;
 
 static ifXTable_interface_ctx ifXTable_if_ctx;
@@ -110,16 +108,13 @@ ifXTable_container_size(void)
 u_int
 ifXTable_dirty_get(void)
 {
-    return ifXTable_if_ctx.table_dirty;
+    return ifTable_dirty_get();
 }
 
 void
 ifXTable_dirty_set(u_int status)
 {
-    DEBUGMSGTL(("ifXTable:ifXTable_dirty_set",
-                "called. was %d, now %d\n",
-                ifXTable_if_ctx.table_dirty, status));
-    ifXTable_if_ctx.table_dirty = status;
+    ifTable_dirty_set( status );
 }
 
 /*
@@ -1293,18 +1288,15 @@ _mfd_ifXTable_undo_setup(netsnmp_mib_handler *handler,
     /*
      * allocate undo context
      */
-    rowreq_ctx->undo = ifXTable_allocate_data();
-    if (NULL == rowreq_ctx->undo) {
-        /** msg already logged */
-        netsnmp_request_set_error_all(requests,
-                                      SNMP_ERR_RESOURCEUNAVAILABLE);
+    rc = _mfd_ifTable_undo_setup_allocate(rowreq_ctx);
+    if (MFD_SUCCESS != rc) {
+        netsnmp_request_set_error_all(requests, rc);
         return SNMP_ERR_NOERROR;
     }
 
     /*
      * row undo setup
      */
-    rowreq_ctx->column_set_flags = 0;
     rc = ifXTable_undo_setup(rowreq_ctx);
     if (MFD_SUCCESS != rc) {
         DEBUGMSGTL(("ifXTable:mfd", "error %d from "
@@ -1374,10 +1366,7 @@ _mfd_ifXTable_undo_cleanup(netsnmp_mib_handler *handler,
     /*
      * release undo context, if needed
      */
-    if (rowreq_ctx->undo) {
-        ifXTable_release_data(rowreq_ctx->undo);
-        rowreq_ctx->undo = NULL;
-    }
+    _mfd_ifTable_undo_setup_release(rowreq_ctx);
 
 
     return SNMP_ERR_NOERROR;
@@ -2012,7 +2001,7 @@ _ifXTable_container_row_restore(const char *token, char *buf)
         ++found;
     }
     if (0 == found) {
-        snmp_log(LOG_ERR, "error parsing ifXTable row; no columns found");
+        snmp_log(LOG_ERR, "error parsing ifXTable row; no columns found\n");
         ifTable_release_rowreq_ctx(rowreq_ctx);
         return;
     }
@@ -2028,7 +2017,7 @@ _ifXTable_container_row_restore(const char *token, char *buf)
      * and bail.
      */
     if ((buf == NULL) || (*buf != LINE_TERM_CHAR)) {
-        snmp_log(LOG_ERR, "error parsing ifXTable row around column %d",
+        snmp_log(LOG_ERR, "error parsing ifXTable row around column %d\n",
                  col);
         return;
     }
@@ -2067,10 +2056,6 @@ _ifXTable_container_col_save(ifXTable_rowreq_ctx * rowreq_ctx,
     case COLUMN_IFLINKUPDOWNTRAPENABLE:   /** INTEGER = ASN_INTEGER */
         buf +=
             sprintf(buf, "%ld", rowreq_ctx->data.ifLinkUpDownTrapEnable);
-        break;
-
-    case COLUMN_IFPROMISCUOUSMODE:   /** TruthValue = ASN_INTEGER */
-        buf += sprintf(buf, "%ld", rowreq_ctx->data.ifPromiscuousMode);
         break;
 
     case COLUMN_IFALIAS:   /** DisplayString = ASN_OCTET_STR */
@@ -2115,13 +2100,6 @@ _ifXTable_container_col_restore(ifXTable_rowreq_ctx * rowreq_ctx,
         buf = read_config_read_memory(ASN_INTEGER, buf,
                                       (char *) &rowreq_ctx->data.
                                       ifLinkUpDownTrapEnable, &len);
-        break;
-
-    case COLUMN_IFPROMISCUOUSMODE:   /** TruthValue = ASN_INTEGER */
-        len = sizeof(rowreq_ctx->data.ifPromiscuousMode);
-        buf = read_config_read_memory(ASN_INTEGER, buf,
-                                      (char *) &rowreq_ctx->data.
-                                      ifPromiscuousMode, &len);
         break;
 
     case COLUMN_IFALIAS:   /** DisplayString = ASN_OCTET_STR */

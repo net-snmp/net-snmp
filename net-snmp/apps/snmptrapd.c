@@ -1235,7 +1235,7 @@ main(int argc, char *argv[])
         numfds = 0;
         FD_ZERO(&readfds);
         FD_ZERO(&writefds);
-        FD_ZERO(&writefds);
+        FD_ZERO(&exceptfds);
         block = 0;
         tvp = &timeout;
         timerclear(tvp);
@@ -1304,6 +1304,7 @@ void
 trapd_update_config(void)
 {
     free_config();
+    vacm_standard_views(0,0,NULL,NULL);
     read_configs();
 }
 

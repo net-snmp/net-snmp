@@ -374,7 +374,7 @@ netsnmp_ipaddress_prefix_copy(u_char *dst, u_char *src, int addr_len, int pfx_le
 /**
  * copy the prefix portion of an ip address
  *
- * @parm  mask  network byte order make
+ * @param  mask  network byte order make
  *
  * @returns number of prefix bits
  */

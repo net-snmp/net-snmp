@@ -114,8 +114,8 @@ expExpression_createRow(char *expOwner, char *expName, int fixed)
     netsnmp_tdata_row_add_index(row, ASN_OCTET_STR,
                                 entry->expName, expName_len);
 
-    entry->expValueType = 1;  /* counter32 */
-    entry->expErrorCount = 1;  /* XXX */
+    entry->expValueType  = EXPVALTYPE_COUNTER;
+    entry->expErrorCount = 0;
     if (fixed)
         entry->flags |= EXP_FLAG_FIXED;
 
@@ -161,8 +161,10 @@ expExpression_getNextEntry( char *owner, char *name )
 
     memset(&owner_var, 0, sizeof(netsnmp_variable_list));
     memset(&name_var,  0, sizeof(netsnmp_variable_list));
-    snmp_set_var_typed_value( &owner_var, ASN_OCTET_STR, owner, strlen(owner));
-    snmp_set_var_typed_value( &name_var,  ASN_OCTET_STR, name,  strlen(name));
+    snmp_set_var_typed_value( &owner_var, ASN_OCTET_STR,
+                          (u_char*)owner, strlen(owner));
+    snmp_set_var_typed_value( &name_var,  ASN_OCTET_STR,
+                          (u_char*)name,  strlen(name));
     owner_var.next_variable = &name_var;
 
     return (struct expExpression *)
@@ -177,8 +179,10 @@ expExpression_getEntry( char *owner, char *name )
 
     memset(&owner_var, 0, sizeof(netsnmp_variable_list));
     memset(&name_var,  0, sizeof(netsnmp_variable_list));
-    snmp_set_var_typed_value( &owner_var, ASN_OCTET_STR, owner, strlen(owner));
-    snmp_set_var_typed_value( &name_var,  ASN_OCTET_STR, name,  strlen(name));
+    snmp_set_var_typed_value( &owner_var, ASN_OCTET_STR,
+                          (u_char*)owner, strlen(owner));
+    snmp_set_var_typed_value( &name_var,  ASN_OCTET_STR,
+                          (u_char*)name,  strlen(name));
     owner_var.next_variable = &name_var;
 
     return (struct expExpression *)
@@ -208,6 +212,7 @@ expExpression_getData( unsigned int reg, void *clientarg )
     struct expExpression  *entry = (struct expExpression *)clientarg;
     netsnmp_tdata_row     *row;
     netsnmp_variable_list *var;
+    int ret;
 
     if ( !entry && reg ) {
         snmp_alarm_unregister( reg );
@@ -242,10 +247,18 @@ expExpression_getData( unsigned int reg, void *clientarg )
      */
 
     /*
-     * For a wildcarded expression, walk the expExpressionPrefix 
-     *   object.  The results can be used be used to determine
-     *   the object instances to retrieve (rather than walking 
-     *   each object separately, and merging the results).
+     * For a wildcarded expression, expExpressionPrefix is used
+     *   to determine which object instances to retrieve.
+     * (For a non-wildcarded expression, we already know
+     *   explicitly which object instances will be needed).
+     *
+     * If we walk this object here, then the results can be
+     *   used to build the necessary GET requests for each
+     *   individual parameter object (within expObject_getData)
+     *
+     * This will probably be simpler (and definitely more efficient)
+     *   than walking the object instances separately and merging
+     *   merging the results).
      *
      * NB: Releasing any old results is handled by expObject_getData.
      *     Assigning to 'entry->pvars' without first releasing the
@@ -255,7 +268,8 @@ expExpression_getData( unsigned int reg, void *clientarg )
         var = (netsnmp_variable_list *)
                    SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
         snmp_set_var_objid( var, entry->expPrefix, entry->expPrefix_len);
-        netsnmp_query_walk( var, entry->session );
+        ret = netsnmp_query_walk( var, entry->session );
+        DEBUGMSGTL(("disman:expr:run", "Walk returned %d\n", ret ));
         entry->pvars = var;
     }
 
@@ -281,6 +295,7 @@ expExpression_getData( unsigned int reg, void *clientarg )
           row;
           row = expObject_getNext( row )) {
 
+        /* XXX - may need to check whether owner/name still match */
         expObject_getData( entry, (struct expObject *)row->data);
     }
 }
@@ -289,6 +304,7 @@ expExpression_getData( unsigned int reg, void *clientarg )
 void
 expExpression_enable( struct expExpression *entry )
 {
+    DEBUGMSG(("disman:expr:run", "Enabling %s\n", entry->expName));
     if (!entry)
         return;
 

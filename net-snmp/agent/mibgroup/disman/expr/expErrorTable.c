@@ -90,7 +90,7 @@ expErrorTable_handler(netsnmp_mib_handler *handler,
             switch (tinfo->colnum) {
             case COLUMN_EXPERRORTIME:
                 snmp_set_var_typed_integer(request->requestvb, ASN_TIMETICKS,
-                                           entry->expErrorIndex);
+                                           entry->expErrorTime);
                 break;
             case COLUMN_EXPERRORINDEX:
                 snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,

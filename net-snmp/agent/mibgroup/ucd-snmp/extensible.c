@@ -540,6 +540,8 @@ var_extensible_relocatable(struct variable *vp,
     long_ret = *length;
     for (i = 1; i <= (int) numrelocs; i++) {
         exten = get_exten_instance(relocs, i);
+        if (!exten)
+            continue;
         if ((int) exten->miblen == (int) vp->namelen - 1) {
             memcpy(myvp.name, exten->miboid, exten->miblen * sizeof(oid));
             myvp.namelen = exten->miblen;
@@ -651,6 +653,8 @@ find_extensible(netsnmp_subtree *tp, oid *tname, size_t tnamelen, int exact)
 
     for (i = 1; i <= (int) numrelocs; i++) {
         exten = get_exten_instance(relocs, i);
+        if (!exten)
+            continue;
         if (exten->miblen != 0) {
             memcpy(myvp.name, exten->miboid, exten->miblen * sizeof(oid));
             memcpy(name, tname, tnamelen * sizeof(oid));
