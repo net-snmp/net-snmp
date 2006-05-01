@@ -6,7 +6,7 @@ package AnyData::Storage::SNMP;
 ##   scalar sets?
 ##   multi-hosts
 
-$AnyData::Storage::VERSION = '5.3.1.dev';
+$AnyData::Storage::VERSION = '5.3.1.pre1';
 use strict;
 
 use vars qw(@basecols);
