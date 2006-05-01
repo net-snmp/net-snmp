@@ -190,7 +190,7 @@ and
 .I snmp_send
 is indicated by return of 0.  A successful status will return a 1 for
 .I snmp_close
-and then request id of the packet for
+and the request id of the packet for
 .I snmp_send.
 Upon successful return from
 .I snmp_send

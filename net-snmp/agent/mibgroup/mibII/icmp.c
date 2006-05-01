@@ -2,6 +2,16 @@
  *  ICMP MIB group implementation - icmp.c
  *
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -258,57 +268,83 @@ var_icmp(struct variable *vp,
     switch (vp->magic) {
 #ifdef USES_SNMP_DESIGNED_ICMPSTAT
     case ICMPINMSGS:
-        return (u_char *) & icmpstat.icmpInMsgs;
+        long_return = icmpstat.icmpInMsgs;
+	return (u_char *) & long_return;
     case ICMPINERRORS:
-        return (u_char *) & icmpstat.icmpInErrors;
+        long_return = icmpstat.icmpInErrors;
+	return (u_char *) & long_return;
     case ICMPINDESTUNREACHS:
-        return (u_char *) & icmpstat.icmpInDestUnreachs;
+        long_return = icmpstat.icmpInDestUnreachs;
+	return (u_char *) & long_return;
     case ICMPINTIMEEXCDS:
-        return (u_char *) & icmpstat.icmpInTimeExcds;
+        long_return = icmpstat.icmpInTimeExcds;
+	return (u_char *) & long_return;
     case ICMPINPARMPROBS:
-        return (u_char *) & icmpstat.icmpInParmProbs;
+        long_return = icmpstat.icmpInParmProbs;
+	return (u_char *) & long_return;
     case ICMPINSRCQUENCHS:
-        return (u_char *) & icmpstat.icmpInSrcQuenchs;
+        long_return = icmpstat.icmpInSrcQuenchs;
+	return (u_char *) & long_return;
     case ICMPINREDIRECTS:
-        return (u_char *) & icmpstat.icmpInRedirects;
+        long_return = icmpstat.icmpInRedirects;
+	return (u_char *) & long_return;
     case ICMPINECHOS:
-        return (u_char *) & icmpstat.icmpInEchos;
+        long_return = icmpstat.icmpInEchos;
+	return (u_char *) & long_return;
     case ICMPINECHOREPS:
-        return (u_char *) & icmpstat.icmpInEchoReps;
+        long_return = icmpstat.icmpInEchoReps;
+	return (u_char *) & long_return;
     case ICMPINTIMESTAMPS:
-        return (u_char *) & icmpstat.icmpInTimestamps;
+        long_return = icmpstat.icmpInTimestamps;
+	return (u_char *) & long_return;
     case ICMPINTIMESTAMPREPS:
-        return (u_char *) & icmpstat.icmpInTimestampReps;
+        long_return = icmpstat.icmpInTimestampReps;
+	return (u_char *) & long_return;
     case ICMPINADDRMASKS:
-        return (u_char *) & icmpstat.icmpInAddrMasks;
+        long_return = icmpstat.icmpInAddrMasks;
+	return (u_char *) & long_return;
     case ICMPINADDRMASKREPS:
-        return (u_char *) & icmpstat.icmpInAddrMaskReps;
+        long_return = icmpstat.icmpInAddrMaskReps;
+	return (u_char *) & long_return;
     case ICMPOUTMSGS:
-        return (u_char *) & icmpstat.icmpOutMsgs;
+        long_return = icmpstat.icmpOutMsgs;
+	return (u_char *) & long_return;
     case ICMPOUTERRORS:
-        return (u_char *) & icmpstat.icmpOutErrors;
+        long_return = icmpstat.icmpOutErrors;
+	return (u_char *) & long_return;
     case ICMPOUTDESTUNREACHS:
-        return (u_char *) & icmpstat.icmpOutDestUnreachs;
+        long_return = icmpstat.icmpOutDestUnreachs;
+	return (u_char *) & long_return;
     case ICMPOUTTIMEEXCDS:
-        return (u_char *) & icmpstat.icmpOutTimeExcds;
+        long_return = icmpstat.icmpOutTimeExcds;
+	return (u_char *) & long_return;
     case ICMPOUTPARMPROBS:
-        return (u_char *) & icmpstat.icmpOutParmProbs;
+        long_return = icmpstat.icmpOutParmProbs;
+	return (u_char *) & long_return;
     case ICMPOUTSRCQUENCHS:
-        return (u_char *) & icmpstat.icmpOutSrcQuenchs;
+        long_return = icmpstat.icmpOutSrcQuenchs;
+	return (u_char *) & long_return;
     case ICMPOUTREDIRECTS:
-        return (u_char *) & icmpstat.icmpOutRedirects;
+        long_return = icmpstat.icmpOutRedirects;
+	return (u_char *) & long_return;
     case ICMPOUTECHOS:
-        return (u_char *) & icmpstat.icmpOutEchos;
+        long_return = icmpstat.icmpOutEchos;
+	return (u_char *) & long_return;
     case ICMPOUTECHOREPS:
-        return (u_char *) & icmpstat.icmpOutEchoReps;
+        long_return = icmpstat.icmpOutEchoReps;
+	return (u_char *) & long_return;
     case ICMPOUTTIMESTAMPS:
-        return (u_char *) & icmpstat.icmpOutTimestamps;
+        long_return = icmpstat.icmpOutTimestamps;
+	return (u_char *) & long_return;
     case ICMPOUTTIMESTAMPREPS:
-        return (u_char *) & icmpstat.icmpOutTimestampReps;
+        long_return = icmpstat.icmpOutTimestampReps;
+	return (u_char *) & long_return;
     case ICMPOUTADDRMASKS:
-        return (u_char *) & icmpstat.icmpOutAddrMasks;
+        long_return =  icmpstat.icmpOutAddrMasks;
+	return (u_char *) & long_return;
     case ICMPOUTADDRMASKREPS:
-        return (u_char *) & icmpstat.icmpOutAddrMaskReps;
+        long_return = icmpstat.icmpOutAddrMaskReps;
+	return (u_char *) & long_return;
 #endif                          /* USES_SNMP_DESIGNED_ICMPSTAT */
 
 #ifdef USES_TRADITIONAL_ICMPSTAT

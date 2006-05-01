@@ -110,20 +110,16 @@ __END__
 
 =head1 NAME
 
-NetSNMP::ASN - Perl extension for blah blah blah
+NetSNMP::ASN - Perl extension for SNMP ASN.1 types
 
 =head1 SYNOPSIS
 
-  use NetSNMP::ASN;
-  blah blah blah
+  use NetSNMP::ASN qw(':all');
+  my $asn_int = ASN_INTEGER;
 
 =head1 DESCRIPTION
 
-Stub documentation for NetSNMP::ASN, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+The NetSNMP::ASN module provides the ASN.1 types for SNMP.
 
 =head2 EXPORT
 
@@ -155,9 +151,11 @@ None by default.
 
 =head1 AUTHOR
 
-A. U. Thor, a.u.thor@a.galaxy.far.far.away
+Wes Hardaker, E<lt>hardaker@users.sourceforge.netE<gt>
 
 =head1 SEE ALSO
+
+SNMP(3pm), NetSNMP::OID(3pm)
 
 perl(1).
 

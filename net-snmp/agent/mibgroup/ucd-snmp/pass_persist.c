@@ -120,7 +120,8 @@ pass_persist_parse_config(const char *token, char *cptr)
         strncpy((*ppass)->command, cptr, tcptr - cptr);
         (*ppass)->command[tcptr - cptr] = 0;
     }
-    strcpy((*ppass)->name, (*ppass)->command);
+    strncpy((*ppass)->name, (*ppass)->command, sizeof((*ppass)->name));
+    (*ppass)->name[ sizeof((*ppass)->name)-1 ] = 0;
     (*ppass)->next = NULL;
 
     register_mib("pass_persist",
@@ -131,7 +132,7 @@ pass_persist_parse_config(const char *token, char *cptr)
     /*
      * argggg -- pasthrus must be sorted 
      */
-    if (numpersistpassthrus > 0) {
+    if (numpersistpassthrus > 1) {
         etmp = (struct extensible **)
             malloc(((sizeof(struct extensible *)) * numpersistpassthrus));
         if (etmp == NULL)
@@ -286,7 +287,7 @@ var_extensible_pass_persist(struct variable *vp,
                     long_ret = strtol(buf2, NULL, 10);
                     vp->type = ASN_INTEGER;
                     return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "unsigned", 7)) {
+                } else if (!strncasecmp(buf, "unsigned", 8)) {
                     *var_len = sizeof(long_ret);
                     long_ret = strtoul(buf2, NULL, 10);
                     vp->type = ASN_UNSIGNED;
@@ -300,7 +301,7 @@ var_extensible_pass_persist(struct variable *vp,
                     *var_len = asc2bin(buf2);
                     vp->type = ASN_OCTET_STR;
                     return ((unsigned char *) buf2);
-                } else if (!strncasecmp(buf, "opaque", 5)) {
+                } else if (!strncasecmp(buf, "opaque", 6)) {
                     *var_len = asc2bin(buf2);
                     vp->type = ASN_OPAQUE;
                     return ((unsigned char *) buf2);
@@ -360,7 +361,6 @@ setPassPersist(int action,
     char            buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
     long            tmp;
     unsigned long   utmp;
-    int             itmp;
 
     /*
      * Make sure that our basic pipe structure is malloced 
@@ -394,42 +394,41 @@ setPassPersist(int action,
                 tmp = *((long *) var_val);
                 switch (var_val_type) {
                 case ASN_INTEGER:
-                    sprintf(buf, "integer %d", (int) tmp);
+                    sprintf(buf, "integer %d\n", (int) tmp);
                     break;
                 case ASN_COUNTER:
-                    sprintf(buf, "counter %d", (int) tmp);
+                    sprintf(buf, "counter %d\n", (int) tmp);
                     break;
                 case ASN_GAUGE:
-                    sprintf(buf, "gauge %d", (int) tmp);
+                    sprintf(buf, "gauge %d\n", (int) tmp);
                     break;
                 case ASN_TIMETICKS:
-                    sprintf(buf, "timeticks %d", (int) tmp);
+                    sprintf(buf, "timeticks %d\n", (int) tmp);
                     break;
                 }
                 break;
             case ASN_IPADDRESS:
                 utmp = *((u_long *) var_val);
                 utmp = ntohl(utmp);
-                sprintf(buf, "ipaddress %d.%d.%d.%d",
+                sprintf(buf, "ipaddress %d.%d.%d.%d\n",
                         (int) ((utmp & 0xff000000) >> (8 * 3)),
                         (int) ((utmp & 0xff0000) >> (8 * 2)),
                         (int) ((utmp & 0xff00) >> (8)),
                         (int) ((utmp & 0xff)));
                 break;
             case ASN_OCTET_STR:
-                itmp = sizeof(buf2);
                 memcpy(buf2, var_val, var_val_len);
                 if (var_val_len == 0)
-                    sprintf(buf, "string \"\"");
+                    sprintf(buf, "string \"\"\n");
                 else if (bin2asc(buf2, var_val_len) == (int) var_val_len)
-                    snprintf(buf, sizeof(buf), "string \"%s\"", buf2);
+                    snprintf(buf, sizeof(buf), "string \"%s\"\n", buf2);
                 else
-                    snprintf(buf, sizeof(buf), "octet \"%s\"", buf2);
+                    snprintf(buf, sizeof(buf), "octet \"%s\"\n", buf2);
                 buf[ sizeof(buf)-1 ] = 0;
                 break;
             case ASN_OBJECT_ID:
                 sprint_mib_oid(buf2, (oid *) var_val, var_val_len);
-                snprintf(buf, sizeof(buf), "objectid \"%s\"", buf2);
+                snprintf(buf, sizeof(buf), "objectid \"%s\"\n", buf2);
                 buf[ sizeof(buf)-1 ] = 0;
                 break;
             }
@@ -456,9 +455,9 @@ setPassPersist(int action,
                 return SNMP_ERR_NOTWRITABLE;
             }
 
-            if (!strncasecmp(buf, "not-writable", 11)) {
+            if (!strncasecmp(buf, "not-writable", 12)) {
                 return SNMP_ERR_NOTWRITABLE;
-            } else if (!strncasecmp(buf, "wrong-type", 9)) {
+            } else if (!strncasecmp(buf, "wrong-type", 10)) {
                 return SNMP_ERR_WRONGTYPE;
             }
             return SNMP_ERR_NOERROR;

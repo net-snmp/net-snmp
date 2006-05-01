@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 /*
  * keytools.c
  */
@@ -36,6 +47,10 @@
 #ifdef USE_INTERNAL_MD5
 #include <net-snmp/library/md5.h>
 #endif
+#endif
+
+#ifdef USE_PKCS
+#include <security/cryptoki.h>
 #endif
 
 #include <net-snmp/library/scapi.h>
@@ -176,7 +191,41 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     return rval;
 
 }                               /* end generate_Ku() */
+#elif USE_PKCS
+{
+    int             rval = SNMPERR_SUCCESS;
 
+    /*
+     * Sanity check.
+     */
+    if (!hashtype || !P || !Ku || !kulen || (*kulen <= 0)
+        || (hashtype_len != USM_LENGTH_OID_TRANSFORM)) {
+        QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
+    }
+
+    if (pplen < USM_LENGTH_P_MIN) {
+        snmp_log(LOG_ERR, "Error: passphrase chosen is below the length "
+                 "requirements of the USM (min=%d).\n",USM_LENGTH_P_MIN);
+        snmp_set_detail("The supplied password length is too short.");
+        QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
+    }
+
+    /*
+     * Setup for the transform type.
+     */
+
+    if (ISTRANSFORM(hashtype, HMACMD5Auth))
+        return pkcs_generate_Ku(CKM_MD5, P, pplen, Ku, kulen);
+    else if (ISTRANSFORM(hashtype, HMACSHA1Auth))
+        return pkcs_generate_Ku(CKM_SHA_1, P, pplen, Ku, kulen);
+    else {
+        return (SNMPERR_GENERR);
+    }
+
+  generate_Ku_quit:
+
+    return rval;
+}                               /* end generate_Ku() */
 #else
 _KEYTOOLS_NOT_AVAILABLE
 #endif                          /* internal or openssl */
@@ -223,7 +272,7 @@ generate_kul(const oid * hashtype, u_int hashtype_len,
              u_char * engineID, size_t engineID_len,
              u_char * Ku, size_t ku_len,
              u_char * Kul, size_t * kul_len)
-#if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5)
+#if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5) || defined(USE_PKCS)
 {
     int             rval = SNMPERR_SUCCESS;
     u_int           nbytes = 0;
@@ -329,7 +378,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
                  u_char * oldkey, size_t oldkey_len,
                  u_char * newkey, size_t newkey_len,
                  u_char * kcstring, size_t * kcstring_len)
-#if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5)
+#if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5) || defined(USE_PKCS)
 {
     int             rval = SNMPERR_SUCCESS;
     size_t          properlength;
@@ -454,7 +503,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
                  u_char * oldkey, size_t oldkey_len,
                  u_char * kcstring, size_t kcstring_len,
                  u_char * newkey, size_t * newkey_len)
-#if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5)
+#if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5) || defined(USE_PKCS)
 {
     int             rval = SNMPERR_SUCCESS;
     size_t          properlength = 0;

@@ -237,6 +237,14 @@ SOURCE=..\..\snmplib\snmpv3.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\strlcpy.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\strtok_r.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\system.c
 # End Source File
 # Begin Source File

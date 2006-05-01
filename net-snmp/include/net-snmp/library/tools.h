@@ -35,6 +35,7 @@ extern          "C" {
 #define SNMP_MAXBUF_MESSAGE	1500
 
 #define SNMP_MAXOID		64
+#define SNMP_MAX_CMDLINE_OIDS   128
 
 #define SNMP_FILEMODE_CLOSED	0600
 #define SNMP_FILEMODE_OPEN	0644
@@ -44,7 +45,7 @@ extern          "C" {
 
 
 
-#define SNMP_FREE(s)		if (s) { free((void *)s); s=NULL; }
+#define SNMP_FREE(s)		do { if (s) { free((void *)s); s=NULL; } } while(0)
 
     /*
      * XXX Not optimal everywhere. 

@@ -1,4 +1,4 @@
 Makefile
-snmpnetstat
+snmpnetstat53
 *.lo
 .libs

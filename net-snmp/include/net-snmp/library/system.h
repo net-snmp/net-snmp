@@ -5,6 +5,10 @@
 extern          "C" {
 #endif
 
+/* Portions of this file are subject to the following copyrights.  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /***********************************************************
         Copyright 1993 by Carnegie Mellon University
 
@@ -26,9 +30,15 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
     /*
      * Definitions for the system dependent library file
      */
+#ifndef MSVC_PERL
 #ifdef WIN32
 
     /*
@@ -77,6 +87,7 @@ SOFTWARE.
 #define SOCK_CLEANUP
 
 #endif                          /* WIN32 */
+#endif				/* MSVC_PERL */
 
 #include <net-snmp/types.h>     /* For definition of in_addr_t */
 
@@ -108,6 +119,9 @@ SOFTWARE.
 
     int             mkdirhier(const char *pathname, mode_t mode,
                               int skiplast);
+#ifndef HAVE_STRLCPY
+    size_t            strlcpy(char *, const char *, size_t);
+#endif
 
 #ifdef __cplusplus
 }

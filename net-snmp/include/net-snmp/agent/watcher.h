@@ -36,7 +36,7 @@ netsnmp_mib_handler  *netsnmp_get_watched_timestamp_handler(void);
 Netsnmp_Node_Handler  netsnmp_watched_timestamp_handler;
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /** NETSNMP_WATCHER_H */

@@ -84,7 +84,7 @@ se_find_list(unsigned int major, unsigned int minor)
 }
 
 int
-se_find_value_in_list(struct snmp_enum_list *list, char *label)
+se_find_value_in_list(struct snmp_enum_list *list, const char *label)
 {
     if (!list)
         return SE_DNE;          /* XXX: um, no good solution here */
@@ -98,7 +98,7 @@ se_find_value_in_list(struct snmp_enum_list *list, char *label)
 }
 
 int
-se_find_value(unsigned int major, unsigned int minor, char *label)
+se_find_value(unsigned int major, unsigned int minor, const char *label)
 {
     return se_find_value_in_list(se_find_list(major, minor), label);
 }
@@ -204,7 +204,7 @@ se_find_label_in_slist(const char *listname, int value)
 
 
 int
-se_find_value_in_slist(const char *listname, char *label)
+se_find_value_in_slist(const char *listname, const char *label)
 {
     return (se_find_value_in_list(se_find_slist(listname), label));
 }

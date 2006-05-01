@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #ifndef AGENT_HANDLER_H
 #define AGENT_HANDLER_H
 
@@ -5,14 +15,26 @@
 extern          "C" {
 #endif
 
-/** @addgroup handler */
+/** @file agent_handler.h
+ *
+ *  @addtogroup handler
+ *
+ * @{
+ */
 
-    struct netsnmp_handler_registration_s;
+struct netsnmp_handler_registration_s;
 
-    typedef struct netsnmp_mib_handler_s {
+/** @typedef struct netsnmp_mib_handler_s netsnmp_mib_handler
+ * Typedefs the netsnmp_mib_handler_s struct into  netsnmp_mib_handler */
+
+/** @struct netsnmp_mib_handler_s
+ *  the mib handler structure to be registered
+ */
+typedef struct netsnmp_mib_handler_s {
         char           *handler_name;
-        void           *myvoid; /* for handler's internal use */
-
+	/** for handler's internal use */
+        void           *myvoid; 
+	
         int             (*access_method) (struct netsnmp_mib_handler_s *,
                                           struct
                                           netsnmp_handler_registration_s *,
@@ -22,7 +44,7 @@ extern          "C" {
 
         struct netsnmp_mib_handler_s *next;
         struct netsnmp_mib_handler_s *prev;
-    } netsnmp_mib_handler;
+} netsnmp_mib_handler;
 
 #define HANDLER_CAN_GETANDGETNEXT     0x1       /* must be able to do both */
 #define HANDLER_CAN_SET               0x2
@@ -32,27 +54,35 @@ extern          "C" {
 #define HANDLER_CAN_RWRITE  (HANDLER_CAN_GETANDGETNEXT | HANDLER_CAN_SET)
 #define HANDLER_CAN_DEFAULT HANDLER_CAN_RONLY
 
-    /*
-     * root registration info 
-     */
-    typedef struct netsnmp_handler_registration_s {
+/** @typedef struct netsnmp_handler_registration_s netsnmp_handler_registration
+ * Typedefs the netsnmp_handler_registration_s struct into netsnmp_handler_registration  */
 
-        char           *handlerName;    /* for mrTable listings, and other uses */
-        char           *contextName;    /* NULL = default context */
+/** @struct netsnmp_handler_registration_s
+ *  Root registration info.
+ *  The variables handlerName, contextName, and rootoid need to be allocated
+ *  on the heap, when the registration structure is unregistered using
+ *  unregister_mib_context() the code attempts to free them.
+ */
+typedef struct netsnmp_handler_registration_s {
 
-        /*
+	/** for mrTable listings, and other uses */
+        char           *handlerName;
+	/** NULL = default context */
+        char           *contextName;    
+
+        /**
          * where are we registered at? 
          */
         oid            *rootoid;
         size_t          rootoid_len;
 
-        /*
+        /**
          * handler details 
          */
         netsnmp_mib_handler *handler;
         int             modes;
 
-        /*
+        /**
          * more optional stuff 
          */
         int             priority;
@@ -61,15 +91,18 @@ extern          "C" {
         int             timeout;
         int             global_cacheid;
 
-    } netsnmp_handler_registration;
+} netsnmp_handler_registration;
 
-    /*
-     * function handler definitions 
-     */
-    typedef int     (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo,        /* pointer to registration struct */
-                                            netsnmp_agent_request_info *reqinfo,        /* pointer to current transaction */
-                                            netsnmp_request_info
-                                            *requests);
+/*
+ * function handler definitions 
+ */
+
+typedef int (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler,
+    /** pointer to registration struct */
+    netsnmp_handler_registration *reginfo,
+    /** pointer to current transaction */
+    netsnmp_agent_request_info *reqinfo,
+    netsnmp_request_info *requests);
 
     typedef struct netsnmp_delegated_cache_s {
         int             transaction_id;
@@ -86,6 +119,8 @@ extern          "C" {
     void            netsnmp_init_handler_conf(void);
     int             netsnmp_register_handler(netsnmp_handler_registration
                                              *reginfo);
+    int             netsnmp_unregister_handler(netsnmp_handler_registration
+                                               *reginfo);
     int            
         netsnmp_register_handler_nocallback(netsnmp_handler_registration
                                             *reginfo);
@@ -124,77 +159,39 @@ extern          "C" {
     netsnmp_mib_handler *netsnmp_create_handler(const char *name,
                                                 Netsnmp_Node_Handler *
                                                 handler_access_method);
-    netsnmp_handler_registration *netsnmp_create_handler_registration(const
-                                                                      char
-                                                                      *name,
-                                                                      Netsnmp_Node_Handler
-                                                                      *
-                                                                      handler_access_method,
-                                                                      oid *
-                                                                      reg_oid,
-                                                                      size_t
-                                                                      reg_oid_len,
-                                                                      int
-                                                                      modes);
-    inline netsnmp_delegated_cache
+    netsnmp_handler_registration *
+        netsnmp_create_handler_registration(const char *name,
+                                            Netsnmp_Node_Handler *
+                                               handler_access_method,
+                                            oid * reg_oid,
+                                            size_t reg_oid_len,
+                                            int modes);
+
+    NETSNMP_INLINE netsnmp_delegated_cache
         *netsnmp_create_delegated_cache(netsnmp_mib_handler *,
                                         netsnmp_handler_registration *,
                                         netsnmp_agent_request_info *,
                                         netsnmp_request_info *, void *);
-    inline void     netsnmp_free_delegated_cache(netsnmp_delegated_cache
+    NETSNMP_INLINE void     netsnmp_free_delegated_cache(netsnmp_delegated_cache
                                                  *dcache);
-    inline netsnmp_delegated_cache
+    NETSNMP_INLINE netsnmp_delegated_cache
         *netsnmp_handler_check_cache(netsnmp_delegated_cache *dcache);
     void            netsnmp_register_handler_by_name(const char *,
                                                      netsnmp_mib_handler
                                                      *);
 
-    inline void
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+    NETSNMP_INLINE void
         netsnmp_request_add_list_data(netsnmp_request_info *request,
                                       netsnmp_data_list *node);
 
-    inline void    *netsnmp_request_get_list_data(netsnmp_request_info
+    NETSNMP_INLINE void    *netsnmp_request_get_list_data(netsnmp_request_info
                                                   *request,
                                                   const char *name);
 
-    inline void
-     
-        
-        
-        
-        
-        
-        
-        
-        
+    NETSNMP_INLINE void
               netsnmp_free_request_data_set(netsnmp_request_info *request);
 
-    inline void
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
+    NETSNMP_INLINE void
              netsnmp_free_request_data_sets(netsnmp_request_info *request);
 
     void            netsnmp_handler_free(netsnmp_mib_handler *);
@@ -213,7 +210,8 @@ extern          "C" {
                                                     const char *);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* AGENT_HANDLER_H */
+/** @} */

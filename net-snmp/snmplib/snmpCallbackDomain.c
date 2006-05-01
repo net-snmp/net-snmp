@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -503,3 +505,5 @@ netsnmp_callback_open(int attach_to,
             ((netsnmp_callback_info *) callback_tr->data)->callback_num;
     return callback_ss;
 }
+
+#endif /* SNMP_TRANSPORT_CALLBACK_DOMAIN */
