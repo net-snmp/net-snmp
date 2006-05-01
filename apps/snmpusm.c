@@ -967,7 +967,7 @@ main(int argc, char *argv[])
     if (status == STAT_SUCCESS) {
         if (response) {
             if (response->errstat == SNMP_ERR_NOERROR) {
-                fprintf(stderr, "%s\n", successNotes[command - 1]);
+                fprintf(stdout, "%s\n", successNotes[command - 1]);
             } else {
                 fprintf(stderr, "Error in packet.\nReason: %s\n",
                         snmp_errstring(response->errstat));
