@@ -13,6 +13,11 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - new option -CE to specify usmUserEngineID (necessary to manage
         snmptrapd's usmUserTable)
 
+ Ports:
+   HP-UX:
+      - fix ipAdEntBcastAddr for HP-UX 11.0/11i (patch 1481012)
+
+
 *5.2.2*
 
  New:

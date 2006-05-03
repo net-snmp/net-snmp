@@ -321,7 +321,7 @@ var_ipAddrEntry(struct variable *vp,
 #endif
     case IPADBCASTADDR:
 #ifdef hpux11
-        long_return = lowin_ifaddr.BcastAddr;
+        long_return = lowin_ifaddr.BcastAddr & 1;
 #elif defined(linux) || defined(sunV3)
         *var_len = sizeof(long_return);
         long_return =
