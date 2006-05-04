@@ -1909,9 +1909,14 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
                                                      tp->start_len,
                                                      tp->end_a,
                                                      tp->end_len);
-                result =
-                    netsnmp_acm_check_subtree(asp->pdu,
-                                              tp->start_a, prefix_len);
+                if (prefix_len < 1) {
+                    /* ack...  bad bad thing happened */
+                    result = VACM_NOTINVIEW;
+                } else {
+                    result =
+                        netsnmp_acm_check_subtree(asp->pdu,
+                                                  tp->start_a, prefix_len);
+                }
             }
             else
                 break;
