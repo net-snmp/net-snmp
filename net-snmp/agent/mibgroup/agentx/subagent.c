@@ -423,6 +423,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
             snmp_log(LOG_WARNING,
                      "dropping bad AgentX request (wrong mode %d)\n",
                      asi->mode);
+            SNMP_FREE(retmagic);
             return 1;
         }
         mycallback = handle_subagent_set_response;
