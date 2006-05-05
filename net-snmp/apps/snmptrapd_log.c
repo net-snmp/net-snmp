@@ -1067,7 +1067,7 @@ realloc_handle_auth_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     switch (pdu->command) {
 
     case CHR_SNMP_VERSION:
-        out_len = snprintf(temp_buf, tbuf_len, "%ld", pdu->version);
+        *out_len = snprintf(temp_buf, tbuf_len, "%ld", pdu->version);
         break;
 
     default:
