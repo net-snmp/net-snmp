@@ -201,7 +201,8 @@ nsb-config-all()
    # use libwrap if we can find the header
    #
    if [ -f /usr/include/tcpd.h ]; then
-      NSB_EXTRA_CONFIG="$NSB_EXTRA_CONFIG --with-libwrap"
+      NSB_LIBWRAP=${NSB_LIBWRAP:="--with-libwrap"}
+      NSB_EXTRA_CONFIG="$NSB_EXTRA_CONFIG $NSB_LIBWRAP"
    fi
 
    #
