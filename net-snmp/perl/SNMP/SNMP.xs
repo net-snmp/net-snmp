@@ -512,15 +512,35 @@ int flag;
 	  break;
 
         case ASN_COUNTER64:
+#ifdef OPAQUE_SPECIAL_TYPES
+        case ASN_OPAQUE_COUNTER64:
+        case ASN_OPAQUE_U64:
+#endif
           printU64(buf,(struct counter64 *)var->val.counter64);
           len = strlen(buf);
           break;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+        case ASN_OPAQUE_I64:
+          printI64(buf,(struct counter64 *)var->val.counter64);
+          len = strlen(buf);
+          break;
+#endif
 
         case ASN_BIT_STR:
             snprint_bitstring(buf, sizeof(buf), var, NULL, NULL, NULL);
             len = strlen(buf);
             break;
-
+#ifdef OPAQUE_SPECIAL_TYPES
+        case ASN_OPAQUE_FLOAT:
+         sprintf(buf,"%f", var->val.floatVal);
+         break;
+         
+        case ASN_OPAQUE_DOUBLE:
+         sprintf(buf,"%f", var->val.doubleVal);
+         break;
+#endif
+         
         case ASN_NSAP:
         default:
            warn("snprint_value: asn type not handled %d\n",var->type);
