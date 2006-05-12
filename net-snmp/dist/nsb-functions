@@ -41,15 +41,24 @@ NSB_SKIP_INSTALL=${NSB_SKIP_INSTALL:=0}
 NSB_ERR_CTX_LINES=${NSB_ERR_CTX_LINES:=25}
 NSB_DIST_TRANSPORTS="UDP TCP Unix Callback"
 NSB_EXTRA_TRANSPORTS=""
-NSB_DIST_MODULES=${NSB_DIST_MODULES:="host disman/event-mib"}
+NSB_DIST_MODULES=${NSB_DIST_MODULES:="host disman/event-mib smux"}
 NSB_EXTRA_MODULES=${NSB_EXTRA_MODULES:="examples examples/example smux Rmon"}
 #testhandler
 NSB_EXTRA_CONFIG=${NSB_EXTRA_CONFIG:=""}
+NSB_SHARED=${NSB_SHARED:="--enable-shared"}
 NSB_VIEW=cat
-NSB_PERL=
-#NSB_PERL=--enable-embedded-perl
 NSB_FLOW=
 NSB_DATE=${NSB_DATE:=`date +%y%m%d_%H%M`}
+
+## embedded perl
+NSB_DIRLINK_DIRS="perl mibs include"
+NSB_PERL=${NSB_PERL:=""}
+#NSB_PERL=${NSB_PERL:="--enable-embedded-perl"}
+if [ "x$NSB_PERL" != "x" ]; then
+  NSB_SKIP_DIRLINK=${NSB_SKIP_DIRLINK:=0}
+else
+  NSB_SKIP_DIRLINK=${NSB_SKIP_DIRLINK:=1}
+fi
 
 #
 # System specific additions
@@ -185,7 +194,7 @@ nsb-config-all()
    case `uname -s` in
 
    Linux)
-      NSB_EXTRA_CONFIG="$NSB_EXTRA_CONFIG --enable-ipv6"
+      NSB_IPV6=${NSB_IPV6:="--enable-ipv6"}
       NSB_EXTRA_TRANSPORTS="IPX"
       ;;
 
@@ -193,7 +202,7 @@ nsb-config-all()
    #   ;;
 
    *)
-      NSB_EXTRA_CONFIG="$NSB_EXTRA_CONFIG --enable-ipv6"
+      NSB_IPV6=${NSB_IPV6:="--enable-ipv6"}
       ;;
    esac
 
@@ -228,13 +237,13 @@ nsb-config-all()
       --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
-       $NSB_PERL --enable-shared 
+      $NSB_SHARED $NSB_IPV6 $NSB_PERL
    $ngc_src/configure  --with-defaults \
       --prefix=$ngc_dest \
       --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
-      $NSB_PERL --enable-shared
+      $NSB_SHARED $NSB_IPV6 $NSB_PERL
    # I'd like to add ' | tee nsb-config.$NSB_DATE' to save output, but then
    # I'd lose the rc from configure, which I need... sigh
    ngc_rc=$?
@@ -287,6 +296,21 @@ nsb-upload()
    /usr/bin/scp config.log configure-summary nsb-make-all.$NSB_DATE nsb-make-test.$NSB_DATE\
                  $target
    cd $dir
+}
+
+nsb-dir-link()
+{
+  if [ $# -lt 2 ]; then
+    nsb-abort "usage: nsb-dir-link src_dir dst_dir"
+  fi
+  link_src_dir=$1
+  link_dst_dir=$2
+  nsb-flow set up shadow directory $link_dst_dir
+  $NSB_DIRLINK $link_src_dir $link_dst_dir
+  rc=$?
+  if [ $rc -ne 0 ];then
+    nsb-abort "Error during nsb-link-dir (rc=$rc)"
+  fi
 }
 
 nsb-make()
@@ -440,6 +464,14 @@ nsb-build()
       nsb-prompt "press enter to continue"
    fi
 
+   if [ $NSB_SKIP_DIRLINK -eq 1 ]; then
+      nsb-info "Skipping nsb-dir-link"
+   else
+      for d in $NSB_DIRLINK_DIRS; do
+        nsb-dir-link $src_dir/$d $build_dir/$d
+      done
+   fi
+
    if [ $NSB_SKIP_BUILD -eq 1 ]; then
       nsb-info "Skipping 'make all'"
    else
@@ -459,7 +491,8 @@ nsb-build()
       nsb-info "Skipping 'make install'"
    else
       nsb-prompt "No errors found, press enter to install"
-      nsb-make install
+      # DESTDIR makes sure the perl stuff goes into $dest_dir, too
+      nsb-make install DESTDIR=$dest_dir
    fi
 
    return 0
