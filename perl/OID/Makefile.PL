@@ -81,7 +81,7 @@ sub InitMakeParams {
 #	} else {
 #	    $Params{'PREREQ_PM'} = {'SNMP' => '5.0'};
 	}
-	$Params{'CCFLAGS'} =~ s/ -W[-\w]+//g; # ignore developer warnings
+	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
 	if ($Params{'LIBS'} eq "" || $Params{'CCFLAGS'} eq "") {
 	    die "You need to install net-snmp first (I can't find net-snmp-config)";
 	}
