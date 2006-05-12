@@ -93,7 +93,7 @@ sub InitMakeParams {
 #	} else {
 #	    $Params{'PREREQ_PM'} = { 'NetSNMP::default_store' => 0.01 };
 	}
-	$Params{'CCFLAGS'} =~ s/ -W[-\w]+//g; # ignore developer warnings
+	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
 	if (!$ENV{'NETSNMP_PREFIX'}) {
 	    $prefix            = `$opts->{'nsconfig'} --prefix`;
 	    chomp($prefix);

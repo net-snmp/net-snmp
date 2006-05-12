@@ -814,7 +814,7 @@ sub gettable {
 	    my $nindexes = $noid->get_indexes();
 	    if (!$nindexes || ref($nindexes) ne 'ARRAY' ||
 		$#indexes != $#$nindexes) {
-		print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes: $noid => " . ref($nindexes) . " [should be an ARRAY], expended # indexes = $#indexes\n";
+		print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes:\n  $noid => " . ref($nindexes) . "\n   [should be an ARRAY]\n  expended # indexes = $#indexes\n";
 		if (ref($nindexes) eq 'ARRAY') {
 		    print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes: " . ref($nindexes) . " $#indexes $#$nindexes\n";
 		}
