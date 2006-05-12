@@ -56,7 +56,7 @@ echo '$agent = new NetSNMP::agent('"'dont_init_agent' => 1, 'dont_init_lib' => 1
 
 CONFIGAGENT perlInitFile ${SNMP_TMPDIR}/snmp_perl.pl
 CONFIGAGENT "perl do '$EMBPERL_AGENT';"
-CONFIGAGENT 'perl print STDERR "registered_perl_agent_ok\n";'
+CONFIGAGENT 'perl print STDERR "registered_perl_agent_ok";'
 
 STARTAGENT
 
