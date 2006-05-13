@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
@@ -311,6 +322,10 @@ write_rte(int action,
         return SNMP_ERR_NOCREATION;
     }
 
+#ifdef solaris2		/* not implemented */
+    return SNMP_ERR_NOTWRITABLE;
+#endif
+
     var = name[9];
 
     dst = *((u_long *) & name[10]);
@@ -335,7 +350,7 @@ write_rte(int action,
 
 
     } else if (action == FREE) {
-        if (rp->rt_type == 2) { /* was invalid before */
+        if (rp && rp->rt_type == 2) { /* was invalid before */
             delCacheRTE(dst);
         }
     }

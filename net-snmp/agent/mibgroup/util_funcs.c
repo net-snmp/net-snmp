@@ -1,6 +1,12 @@
 /*
  * util_funcs.c
  */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -805,7 +811,7 @@ struct internal_mib_table {
 };
 
 mib_table_t
-Initialise_Table(int size, int timeout, RELOAD reload, COMPARE compare)
+Initialise_Table(int size, int timeout, RELOAD *reload, COMPARE *compare)
 {
     struct internal_mib_table *t;
 

@@ -98,7 +98,7 @@ struct varInfo {
     int             spoiled;
 };
 
-struct varInfo  varinfo[128];
+struct varInfo  varinfo[MAX_ARGS];
 int             current_name = 0;
 int             period = 1;
 int             deltat = 0, timestamp = 0, fileout = 0, dosum =
@@ -303,6 +303,11 @@ processFileArgs(char *fileName)
         if (blank)
             continue;
         buf[strlen(buf) - 1] = 0;
+	if (current_name >= MAX_ARGS) {
+	    fprintf(stderr, "Too many variables read at line %d of %s (max %d)\n",
+	    	linenumber, fileName, MAX_ARGS);
+	    exit(1);
+	}
         varinfo[current_name++].name = strdup(buf);
     }
     fclose(fp);
@@ -410,8 +415,14 @@ main(int argc, char *argv[])
 
     gateway = session.peername;
 
-    for (; optind < argc; optind++)
+    for (; optind < argc; optind++) {
+	if (current_name >= MAX_ARGS) {
+	    fprintf(stderr, "%s: Too many variables specified (max %d)\n",
+	    	argv[optind], MAX_ARGS);
+	    exit(1);
+	}
         varinfo[current_name++].name = argv[optind];
+    }
 
     if (current_name == 0) {
         usage();
@@ -419,6 +430,11 @@ main(int argc, char *argv[])
     }
 
     if (dosum) {
+	if (current_name >= MAX_ARGS) {
+	    fprintf(stderr, "Too many variables specified (max %d)\n",
+	    	MAX_ARGS);
+	    exit(1);
+	}
         varinfo[current_name++].name = 0;
     }
 
@@ -515,7 +531,7 @@ main(int argc, char *argv[])
 
                 vars = response->variables;
                 if (deltat) {
-                    if (!vars) {
+                    if (!vars || !vars->val.integer) {
                         fprintf(stderr, "Missing variable in reply\n");
                         continue;
                     } else {
@@ -530,7 +546,7 @@ main(int argc, char *argv[])
                     vip = varinfo + count;
 
                     if (vip->oidlen) {
-                        if (!vars) {
+                        if (!vars || !vars->val.integer) {
                             fprintf(stderr, "Missing variable in reply\n");
                             break;
                         }
@@ -564,6 +580,8 @@ main(int argc, char *argv[])
                     if (tableForm) {
                         if (count == begin) {
                             sprintf(outstr, "%s", timestring + 1);
+                        } else {
+                            outstr[0] = '\0';
                         }
                     } else {
                         sprintf(outstr, "%s %s", timestring,

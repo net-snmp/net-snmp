@@ -17,7 +17,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup table_data table_data: Helps you implement a table with datamatted storage.
+/** @defgroup table_data table_data
+ *  Helps you implement a table with datamatted storage.
  *  @ingroup table
  *
  *  This helper helps you implement a table where all the indexes are
@@ -70,7 +71,7 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
 
     if (!row->index_oid) {
         snmp_log(LOG_ERR,
-                 "illegal data attempted to be added to table %s\n",
+                 "illegal data attempted to be added to table (no index)%s\n",
                  table->name);
         return SNMPERR_GENERR;
     }
@@ -91,7 +92,7 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
              * exact match.  Duplicate entries illegal 
              */
             snmp_log(LOG_WARNING,
-                     "duplicate table data attempted to be entered\n");
+                     "duplicate table data attempted to be entered. row exists\n");
             return SNMPERR_GENERR;
         }
     }
@@ -190,7 +191,7 @@ netsnmp_table_data_remove_and_delete_row(netsnmp_table_data *table,
 }
 
 /** swaps out origrow with newrow.  This does *not* delete/free anything! */
-inline void
+NETSNMP_INLINE void
 netsnmp_table_data_replace_row(netsnmp_table_data *table,
                                netsnmp_table_row *origrow,
                                netsnmp_table_row *newrow)
@@ -338,7 +339,9 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                 row = table->first_row;
                 table_info->colnum = table_reg_info->min_column;
             } else if (regresult == 0 && request->requestvb->name_length ==
-                       reginfo->rootoid_len + 1) {
+                       reginfo->rootoid_len + 1 &&
+                       /* entry node must be 1, but any column is ok */
+                       request->requestvb->name[reginfo->rootoid_len] == 1) {
                 /*
                  * exactly to the entry 
                  */
@@ -346,8 +349,8 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                 table_info->colnum = table_reg_info->min_column;
             } else if (regresult == 0 && request->requestvb->name_length ==
                        reginfo->rootoid_len + 2 &&
-                       request->requestvb->name[reginfo->rootoid_len -
-                                                2] == 1) {
+                       /* entry node must be 1, but any column is ok */
+                       request->requestvb->name[reginfo->rootoid_len] == 1) {
                 /*
                  * exactly to the column 
                  */
@@ -505,9 +508,13 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                  *  user-provided handlers to override the dataset handler
                  *  if this proves necessary.
                  */
-                if (requests->requestvb->type == ASN_NULL ||
-                    requests->requestvb->type == SNMP_NOSUCHINSTANCE) {
-                    requests->requestvb->type = ASN_PRIV_RETRY;
+                if (request->requestvb->type == ASN_NULL ||
+                    request->requestvb->type == SNMP_NOSUCHINSTANCE) {
+                    request->requestvb->type = ASN_PRIV_RETRY;
+                }
+                    /* XXX - Move on to the next object */
+                if (request->requestvb->type == SNMP_NOSUCHOBJECT) {
+                    request->requestvb->type = ASN_PRIV_RETRY;
                 }
             }
             reqinfo->mode = oldmode;

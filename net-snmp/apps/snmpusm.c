@@ -6,6 +6,16 @@
  * XXX read passwords from prompts
  * XXX customize responses with user names, etc.
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_STDLIB_H
@@ -103,7 +113,7 @@ usage(void)
     fprintf(stderr, "  delete    USER\n");
     fprintf(stderr, "  cloneFrom USER CLONEFROM-USER\n");
     fprintf(stderr,
-            "  passwd    [-Co] [-Ca] [-Cx] OLD-PASSPHRASE NEW-PASSPHRASE\n");
+            "  [-Co] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE\n");
     fprintf(stderr, "\t\t-Co\t\tUse the ownKeyChange objects.\n");
     fprintf(stderr, "\t\t-Cx\t\tChange the privacy key.\n");
     fprintf(stderr, "\t\t-Ca\t\tChange the authentication key.\n");
@@ -249,7 +259,7 @@ main(int argc, char *argv[])
     pdu = snmp_pdu_create(SNMP_MSG_SET);
 
     if (arg >= argc) {
-        fprintf(stderr, "Please specify a opreation to perform.\n");
+        fprintf(stderr, "Please specify a operation to perform.\n");
         usage();
         exit(1);
     }
@@ -411,17 +421,19 @@ main(int argc, char *argv[])
         }
 
         command = CMD_CREATE;
-        setup_oid(usmUserStatus, &name_length,
-                  ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
-        longvar = RS_CREATEANDGO;
-        snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
-                              ASN_INTEGER, (u_char *) & longvar,
-                              sizeof(longvar));
 
         if (++arg < argc) {
             /*
-             * clone the new user from another user as well 
+             * clone the new user from an existing user
+             *   (and make them active immediately)
              */
+            setup_oid(usmUserStatus, &name_length,
+                      ss->contextEngineID, ss->contextEngineIDLen, argv[arg-1]);
+            longvar = RS_CREATEANDGO;
+            snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
+                                  ASN_INTEGER, (u_char *) & longvar,
+                                  sizeof(longvar));
+
             setup_oid(usmUserCloneFrom, &name_length,
                       ss->contextEngineID, ss->contextEngineIDLen,
                       argv[arg - 1]);
@@ -432,6 +444,17 @@ main(int argc, char *argv[])
                                   ASN_OBJECT_ID,
                                   (u_char *) usmUserSecurityName,
                                   sizeof(oid) * name_length2);
+        } else {
+            /*
+             * create a new (unauthenticated) user from scratch
+             * The Net-SNMP agent won't allow such a user to be made active.
+             */
+            setup_oid(usmUserStatus, &name_length,
+                      ss->contextEngineID, ss->contextEngineIDLen, argv[arg-1]);
+            longvar = RS_CREATEANDWAIT;
+            snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
+                                  ASN_INTEGER, (u_char *) & longvar,
+                                  sizeof(longvar));
         }
 
     } else if (strcmp(argv[arg], CMD_CLONEFROM_NAME) == 0) {
@@ -448,6 +471,12 @@ main(int argc, char *argv[])
         }
 
         command = CMD_CLONEFROM;
+        setup_oid(usmUserStatus, &name_length,
+                  ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
+        longvar = RS_ACTIVE;
+        snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
+                              ASN_INTEGER, (u_char *) & longvar,
+                              sizeof(longvar));
         setup_oid(usmUserCloneFrom, &name_length,
                   ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
 

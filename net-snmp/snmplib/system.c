@@ -1,6 +1,10 @@
 /*
  * system.c
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /***********************************************************
         Copyright 1992 by Carnegie Mellon University
 
@@ -22,6 +26,12 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 /*
  * System dependent routines go here
  */
@@ -109,6 +119,10 @@ SOFTWARE.
 #include <sys/stat.h>
 #endif
 
+#if defined(hpux10) || defined(hpux11)
+#include <sys/pstat.h>
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
@@ -160,7 +174,7 @@ opendir(const char *filename)
     /*
      * check to see if filename is a directory 
      */
-    if (stat(filename, &sbuf) < 0 || sbuf.st_mode & S_IFDIR == 0) {
+    if ((stat(filename, &sbuf) < 0) || ((sbuf.st_mode & S_IFDIR) == 0)) {
         return NULL;
     }
 
@@ -557,6 +571,9 @@ long
 get_boottime(void)
 {
     static long     boottime_csecs = 0;
+#if defined(hpux10) || defined(hpux11)
+    struct pst_static pst_buf;
+#else
     struct timeval  boottime;
 #ifdef	CAN_USE_SYSCTL
     int             mib[2];
@@ -571,12 +588,17 @@ get_boottime(void)
 #endif
         {(char *) ""}
     };
-#endif
+#endif                          /* CAN_USE_SYSCTL */
+#endif                          /* hpux10 || hpux 11 */
 
 
     if (boottime_csecs != 0)
         return (boottime_csecs);
 
+#if defined(hpux10) || defined(hpux11)
+    pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0);
+    boottime_csecs = pst_buf.boot_time * 100;
+#else
 #ifdef CAN_USE_SYSCTL
     mib[0] = CTL_KERN;
     mib[1] = KERN_BOOTTIME;
@@ -599,6 +621,7 @@ get_boottime(void)
     close(kmem);
     boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
 #endif                          /* CAN_USE_SYSCTL */
+#endif                          /* hpux10 || hpux 11 */
 
     return (boottime_csecs);
 }
@@ -637,8 +660,8 @@ get_uptime(void)
             if (kid != -1) {
                 named = kstat_data_lookup(ks, "lbolt");
                 if (named) {
-#ifdef KSTAT_DATA_INT32
-                    lbolt = named->value.ul;
+#ifdef KSTAT_DATA_UINT32
+                    lbolt = named->value.ui32;
 #else
                     lbolt = named->value.ul;
 #endif
@@ -837,17 +860,31 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     char           *ourcopy = strdup(pathname);
     char           *entry;
     char            buf[SNMP_MAXPATH];
+    char           *st;
 
-    entry = strtok(ourcopy, "/");
+    entry = strtok_r(ourcopy, "/", &st);
 
     buf[0] = '\0';
+
+#ifdef WIN32
+    /*
+     * Check if first entry contains a drive-letter
+     *   e.g  "c:\path"
+     */
+    if ((entry) && (':' == entry[1]) &&
+        (('\0' == entry[2]) || ('/' == entry[2]) || ('\\' == entry[1]))) {
+        strcat(buf, entry);
+        entry = strtok_r(NULL, "/", &st);
+    }
+#endif
+
     /*
      * check to see if filename is a directory 
      */
     while (entry) {
         strcat(buf, "/");
         strcat(buf, entry);
-        entry = strtok(NULL, "/");
+        entry = strtok_r(NULL, "/", &st);
         if (entry == NULL && skiplast)
             break;
         if (stat(buf, &sbuf) < 0) {
@@ -856,13 +893,14 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
              */
             snmp_log(LOG_INFO, "Creating directory: %s\n", buf);
 #ifdef WIN32
-            CreateDirectory(buf, NULL);
+            if (CreateDirectory(buf, NULL) == 0)
 #else
-            if (mkdir(buf, mode) == -1) {
+            if (mkdir(buf, mode) == -1)
+#endif
+            {
                 free(ourcopy);
                 return SNMPERR_GENERR;
             }
-#endif
         } else {
             /*
              * exists, is it a file? 

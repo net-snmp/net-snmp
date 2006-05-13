@@ -133,7 +133,7 @@ To actually USE the Kerberos Security Model, do the following:
    (the one that lives in /usr/local/share/snmp/snmpd.conf, or whereever
    you have configured on your system):
 
-   rwuser -s userid@YOUR.REALM
+   rwuser -s ksm userid@YOUR.REALM
 
    to allow the Kerberos principal 'userid@YOUR.REALM' read/write access to
    the MIB tree.

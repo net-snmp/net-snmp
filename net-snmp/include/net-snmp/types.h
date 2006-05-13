@@ -90,7 +90,7 @@ typedef u_int in_addr_t;
     } netsnmp_void_array;
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* NET_SNMP_TYPES_H */

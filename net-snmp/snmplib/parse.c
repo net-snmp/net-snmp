@@ -1,21 +1,10 @@
 /*
  * parse.c
  *
- * Update: 1998-09-22 <mslifcak@iss.net>
- * Clear nbuckets in init_node_hash.
- * New method xcalloc returns zeroed data structures.
- * New method alloc_node encapsulates common node creation.
- * New method to configure terminate comment at end of line.
- * New method to configure accept underscore in labels.
- *
- * Update: 1998-10-10 <daves@csc.liv.ac.uk>
- * fully qualified OID parsing patch
- *
- * Update: 1998-10-20 <daves@csc.liv.ac.uk>
- * merge_anon_children patch
- *
- * Update: 1998-10-21 <mslifcak@iss.net>
- * Merge_parse_objectid associates information with last node in chain.
+ */
+/* Portions of this file are subject to the following copyrights.  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
  */
 /******************************************************************
         Copyright 1989, 1991, 1992 by Carnegie Mellon University
@@ -38,6 +27,11 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
@@ -51,7 +45,9 @@ SOFTWARE.
 #endif
 #include <ctype.h>
 #include <sys/types.h>
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
 
 /*
  * Wow.  This is ugly.  -- Wes 
@@ -99,6 +95,8 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
+#include <errno.h>
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
@@ -119,7 +117,7 @@ struct subid_s {
     char           *label;
 };
 
-#define MAXTC   1024
+#define MAXTC   4096
 struct tc {                     /* textual conventions */
     int             type;
     int             modid;
@@ -484,11 +482,13 @@ static struct module_compatability module_map[] = {
     {"RFC1213-MIB", "UDP-MIB", "udp", 3},
     {"RFC1213-MIB", "SNMPv2-SMI", "transmission", 0},
     {"RFC1213-MIB", "SNMPv2-MIB", "snmp", 4},
+    {"RFC1231-MIB", "TOKENRING-MIB", NULL, 0},
     {"RFC1271-MIB", "RMON-MIB", NULL, 0},
     {"RFC1286-MIB", "SOURCE-ROUTING-MIB", "dot1dSr", 7},
     {"RFC1286-MIB", "BRIDGE-MIB", NULL, 0},
     {"RFC1315-MIB", "FRAME-RELAY-DTE-MIB", NULL, 0},
     {"RFC1316-MIB", "CHARACTER-MIB", NULL, 0},
+    {"RFC1406-MIB", "DS1-MIB", NULL, 0},
     {"RFC-1213", "RFC1213-MIB", NULL, 0},
 };
 
@@ -1223,9 +1223,10 @@ compute_match(const char *search_base, const char *key)
     char           *first = NULL, *result = NULL, *entry;
     const char     *position;
     char           *newkey = strdup(key);
+    char           *st;
 
 
-    entry = strtok(newkey, "*");
+    entry = strtok_r(newkey, "*", &st);
     position = search_base;
     while (entry) {
         result = strcasestr(position, entry);
@@ -1239,7 +1240,7 @@ compute_match(const char *search_base, const char *key)
             first = result;
 
         position = result + strlen(entry);
-        entry = strtok(NULL, "*");
+        entry = strtok_r(NULL, "*", &st);
     }
     free(newkey);
     if (result)
@@ -2135,7 +2136,15 @@ parse_ranges(FILE * fp, struct range_list **retp)
         nexttype = get_token(fp, nexttoken, MAXTOKEN);
         if (nexttype == RANGE) {
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
+            errno = 0;
             high = strtol(nexttoken, NULL, 10);
+            if ( errno == ERANGE ) {
+                if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_MIB_WARNINGS))
+                    snmp_log(LOG_WARNING,
+                             "Warning: Upper bound not handled correctly (%s != %d): At line %d in %s\n",
+                                 nexttoken, high, mibLine, File);
+            }
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
         }
         *rpp = (struct range_list *) calloc(1, sizeof(struct range_list));
@@ -3762,6 +3771,25 @@ adopt_orphans(void)
 		    if (tp) {
 			do_subtree(tp, &np);
 			adopted = 1;
+                        /*
+                         * if do_subtree adopted the entire bucket, stop
+                         */
+                        if(NULL == nbuckets[i])
+                            break;
+
+                        /*
+                         * do_subtree may modify nbuckets, and if np
+                         * was adopted, np->next probably isn't an orphan
+                         * anymore. if np is still in the bucket (do_subtree
+                         * didn't adopt it) keep on plugging. otherwise
+                         * start over, at the top of the bucket.
+                         */
+                        for(onp = nbuckets[i]; onp; onp = onp->next)
+                            if(onp == np)
+                                break;
+                        if(NULL == onp) { /* not in the list */
+                            np = nbuckets[i]; /* start over */
+                        }
 		    }
 		}
             }
@@ -4304,14 +4332,14 @@ parse(FILE * fp, struct node *root)
             return NULL;
         }
         if (nnp) {
-            if (nnp->type == TYPE_OTHER)
-                nnp->type = type;
             if (np)
                 np->next = nnp;
             else
                 np = root = nnp;
             while (np->next)
                 np = np->next;
+            if (np->type == TYPE_OTHER)
+                np->type = type;
         }
     }
     DEBUGMSGTL(("parse-file", "End of file (%s)\n", File));
@@ -4539,6 +4567,8 @@ add_mibdir(const char *dirname)
     char            tmpstr[300];
     int             count = 0;
 #if !(defined(WIN32) || defined(cygwin))
+    char space;
+    char newline;
     struct stat     dir_stat, idx_stat;
     char            tmpstr1[300];
 #endif
@@ -4551,8 +4581,23 @@ add_mibdir(const char *dirname)
         if (dir_stat.st_mtime < idx_stat.st_mtime) {
             DEBUGMSGTL(("parse-mibs", "The index is good\n"));
             if ((ip = fopen(token, "r")) != NULL) {
-                while (fscanf(ip, "%s %[^\n]\n", token, tmpstr) == 2) {
-                    snprintf(tmpstr1, sizeof(tmpstr1), "%s/%s", dirname, tmpstr);
+                while (fscanf(ip, "%127s%c%299s%c", token, &space, tmpstr,
+		    &newline) == 4) {
+
+		    /*
+		     * If an overflow of the token or tmpstr buffers has been
+		     * found log a message and break out of the while loop,
+		     * thus the rest of the file tokens will be ignored.
+		     */
+		    if (space != ' ' || newline != '\n') {
+			snmp_log(LOG_ERR,
+			    "add_mibdir: strings scanned in from %s/%s " \
+			    "are too large.  count = %d\n ", dirname,
+			    ".index", count);
+			    break;
+		    }
+		   
+		    snprintf(tmpstr1, sizeof(tmpstr1), "%s/%s", dirname, tmpstr);
                     tmpstr1[ sizeof(tmpstr1)-1 ] = 0;
                     new_module(token, tmpstr1);
                     count++;

@@ -83,7 +83,7 @@ u_char          smux_str[SMUXMAXSTRLEN];
 int             smux_listen_sd = -1;
 
 static struct timeval smux_rcv_timeout;
-static u_long   smux_reqid;
+static long   smux_reqid;
 
 void            init_smux(void);
 static u_char  *smux_open_process(int, u_char *, size_t *, int *);
@@ -98,7 +98,7 @@ static void     smux_list_detach(smux_reg **, smux_reg **);
 static void     smux_replace_active(smux_reg *, smux_reg *);
 static void     smux_peer_cleanup(int);
 static int      smux_auth_peer(oid *, size_t, char *, int);
-static int      smux_build(u_char, u_long, oid *,
+static int      smux_build(u_char, long, oid *,
                            size_t *, u_char, u_char *, size_t, u_char *,
                            size_t *);
 static int      smux_list_add(smux_reg **, smux_reg *);
@@ -323,7 +323,7 @@ var_smux_write(int action,
     u_char          buf[SMUXMAXPKTSIZE], *ptr, sout[3], type;
     int             reterr;
     size_t          var_len, datalen, name_length, packet_len;
-    int             len;
+    ssize_t	     len;
     long            reqid, errsts, erridx;
     u_char          var_type, *dataptr;
 
@@ -418,7 +418,7 @@ var_smux_write(int action,
             packet_len = len;
             ptr = asn_parse_header(buf, &packet_len, &type);
             packet_len += (ptr - buf);
-            if (len > packet_len) {
+            if (len > (ssize_t)packet_len) {
                 /*
                  * set length to receive only the first packet 
                  */
@@ -533,7 +533,8 @@ smux_accept(int sd)
     struct sockaddr_in in_socket;
     struct timeval  tv;
     int             fail, fd, alen;
-    int             length, len;
+    int             length;
+    ssize_t 	     len;
 
     alen = sizeof(struct sockaddr_in);
     /*
@@ -1522,7 +1523,7 @@ smux_parse_var(u_char * varbind,
  */
 static int
 smux_build(u_char type,
-           u_long reqid,
+           long reqid,
            oid * objid,
            size_t * oidlen,
            u_char val_type,
@@ -1543,10 +1544,13 @@ smux_build(u_char type,
     /*
      * build reqid 
      */
-    ptr = asn_build_unsigned_int(ptr, &len,
+    ptr = asn_build_int(ptr, &len,
                                  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                            ASN_INTEGER), &reqid,
                                  sizeof(reqid));
+    if (ptr == NULL) {
+        return -1;
+    }
 
     /*
      * build err stat 
@@ -1554,6 +1558,9 @@ smux_build(u_char type,
     ptr = asn_build_int(ptr, &len,
                         (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                   ASN_INTEGER), &errstat, sizeof(errstat));
+    if (ptr == NULL) {
+        return -1;
+    }
 
     /*
      * build err index 
@@ -1562,6 +1569,9 @@ smux_build(u_char type,
                         (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                   ASN_INTEGER), &errindex,
                         sizeof(errindex));
+    if (ptr == NULL) {
+        return -1;
+    }
 
     save2 = ptr;
     ptr += 4;
@@ -1577,6 +1587,9 @@ smux_build(u_char type,
      */
     ptr = snmp_build_var_op(ptr, objid, oidlen, val_type, val_len,
                             val, &len);
+    if (ptr == NULL) {
+        return -1;
+    }
 
     len = ptr - save1;
     asn_build_sequence(save1, &len, type, (ptr - save1 - 4));
@@ -1695,7 +1708,7 @@ smux_trap_process(u_char * rsp, size_t * len)
 {
     oid             sa_enterpriseoid[MAX_OID_LEN], var_name[MAX_OID_LEN];
     size_t          datalen, var_name_len, var_val_len, maxlen;
-    int             sa_enterpriseoid_len;
+    size_t	     sa_enterpriseoid_len;
     u_char          vartype, *ptr, *var_val;
 
     long            trap, specific;
@@ -1710,7 +1723,7 @@ smux_trap_process(u_char * rsp, size_t * len)
     /*
      * parse the sub-agent enterprise oid 
      */
-    datalen = MAX_OID_LEN;
+    sa_enterpriseoid_len = MAX_OID_LEN;
     if ((ptr = asn_parse_objid(ptr, len,
                                &vartype, (oid *) & sa_enterpriseoid,
                                &sa_enterpriseoid_len)) == NULL) {
@@ -1884,10 +1897,10 @@ smux_trap_process(u_char * rsp, size_t * len)
             snmptrap_ptr = snmptrap_ptr->next_variable;
         }
 
-        snmp_set_var_objid(snmptrap_ptr, var_name, var_name_len);
-        snmp_set_var_value(snmptrap_ptr, (char *) var_val, var_val_len);
         snmptrap_ptr->type = vartype;
         snmptrap_ptr->next_variable = NULL;
+        snmp_set_var_objid(snmptrap_ptr, var_name, var_name_len);
+        snmp_set_var_value(snmptrap_ptr, (char *) var_val, var_val_len);
 
     }
 
@@ -1905,3 +1918,4 @@ smux_trap_process(u_char * rsp, size_t * len)
     return ptr;
 
 }
+

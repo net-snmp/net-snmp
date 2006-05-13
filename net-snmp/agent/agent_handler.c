@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
@@ -15,7 +25,7 @@
  * New Handler based API 
  */
 /***********************************************************************/
-/** @defgroup handler Agent handler API
+/** @defgroup handler Net-SNMP Agent handler and extensibility API
  *  @ingroup agent
  *
  *  The basic theory goes something like this: In the past, with the
@@ -73,6 +83,17 @@
 /** creates a netsnmp_mib_handler structure given a name and a access method.
  *  The returned handler should then be @link netsnmp_register_handler()
  *  registered.@endlink
+ *
+ *  @param name is the handler name and is copied then assigned to
+ *              netsnmp_mib_handler->handler_name
+ *
+ *  @param handler_access_method is a function pointer used as the access
+ *	   method for this handler registration instance for whatever required
+ *         needs.
+ *
+ *  @return a pointer to a populated netsnmp_mib_handler struct to be
+ *          registered
+ *
  *  @see netsnmp_create_handler_registration()
  *  @see netsnmp_register_handler()
  */
@@ -92,6 +113,38 @@ netsnmp_create_handler(const char *name,
  *  be set to the default value of only HANDLER_CAN_DEFAULT, which is
  *  by default read-only GET and GETNEXT requests.
  *  @note This ends up calling netsnmp_create_handler(name, handler_access_method)
+ *  @param name is the handler name and is copied then assigned to
+ *              netsnmp_handler_registration->handlerName.
+ *
+ *  @param handler_access_method is a function pointer used as the access
+ *	method for this handler registration instance for whatever required
+ *	needs.
+ *
+ *  @param reg_oid is the registration location oid.
+ *
+ *  @param reg_oid_len is the length of reg_oid, can use the macro,
+ *         OID_LENGTH
+ *
+ *  @param modes is used to configure read/write access.  If modes == 0, 
+ *	then modes will automatically be set to the default 
+ *	value of only HANDLER_CAN_DEFAULT, which is by default read-only GET 
+ *	and GETNEXT requests.  The other two mode options are read only, 
+ *	HANDLER_CAN_RONLY, and read/write, HANDLER_CAN_RWRITE.
+ *
+ *		- HANDLER_CAN_GETANDGETNEXT
+ *		- HANDLER_CAN_SET
+ *		- HANDLER_CAN_GETBULK      
+ *
+ *		- HANDLER_CAN_RONLY   (HANDLER_CAN_GETANDGETNEXT)
+ *		- HANDLER_CAN_RWRITE  (HANDLER_CAN_GETANDGETNEXT | 
+ *			HANDLER_CAN_SET)
+ *		- HANDLER_CAN_DEFAULT HANDLER_CAN_RONLY
+ *
+ *  @return Returns a pointer to a netsnmp_handler_registration struct.
+ *          NULL is returned only when memory could not be allocated for the 
+ *          netsnmp_handler_registration struct.
+ *
+ *
  *  @see netsnmp_create_handler()
  *  @see netsnmp_register_handler()
  */
@@ -112,6 +165,7 @@ netsnmp_create_handler_registration(const char *name,
         the_reg->modes = HANDLER_CAN_DEFAULT;
 
     the_reg->handler = netsnmp_create_handler(name, handler_access_method);
+    the_reg->priority = DEFAULT_MIB_PRIORITY;
     if (name)
         the_reg->handlerName = strdup(name);
     memdup((u_char **) & the_reg->rootoid, (const u_char *) reg_oid,
@@ -168,6 +222,16 @@ netsnmp_register_handler(netsnmp_handler_registration *reginfo)
                                 reginfo->range_ubound, NULL,
                                 reginfo->contextName, reginfo->timeout, 0,
                                 reginfo, 1);
+}
+                                                                                        
+/** unregister a handler, as defined by the netsnmp_handler_registration pointer. */
+int
+netsnmp_unregister_handler(netsnmp_handler_registration *reginfo)
+{
+    return unregister_mib_context(reginfo->rootoid, reginfo->rootoid_len,
+                                  reginfo->priority,
+                                  reginfo->range_subid, reginfo->range_ubound,
+                                  reginfo->contextName);
 }
 
 /** register a handler, as defined by the netsnmp_handler_registration pointer. */
@@ -301,7 +365,7 @@ netsnmp_call_handlers(netsnmp_handler_registration *reginfo,
 }
 
 /** calls a handler with with appropriate NULL checking of arguments, etc. */
-inline int
+NETSNMP_INLINE int
 netsnmp_call_handler(netsnmp_mib_handler *next_handler,
                      netsnmp_handler_registration *reginfo,
                      netsnmp_agent_request_info *reqinfo,
@@ -336,7 +400,7 @@ netsnmp_call_handler(netsnmp_mib_handler *next_handler,
 
 /** calls the next handler in the chain after the current one with
    with appropriate NULL checking, etc. */
-inline int
+NETSNMP_INLINE int
 netsnmp_call_next_handler(netsnmp_mib_handler *current,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info *reqinfo,
@@ -354,7 +418,7 @@ netsnmp_call_next_handler(netsnmp_mib_handler *current,
 
 /** calls the next handler in the chain after the current one with
    with appropriate NULL checking, etc. */
-inline int
+NETSNMP_INLINE int
 netsnmp_call_next_handler_one_request(netsnmp_mib_handler *current,
                                       netsnmp_handler_registration *reginfo,
                                       netsnmp_agent_request_info *reqinfo,
@@ -506,7 +570,7 @@ netsnmp_handler_registration_dup(netsnmp_handler_registration *reginfo)
 /** creates a cache of information which can be saved for future
    reference.  Use netsnmp_handler_check_cache() later to make sure it's still
    valid before referencing it in the future. */
-inline netsnmp_delegated_cache *
+NETSNMP_INLINE netsnmp_delegated_cache *
 netsnmp_create_delegated_cache(netsnmp_mib_handler *handler,
                                netsnmp_handler_registration *reginfo,
                                netsnmp_agent_request_info *reqinfo,
@@ -530,7 +594,7 @@ netsnmp_create_delegated_cache(netsnmp_mib_handler *handler,
 /** check's a given cache and returns it if it is still valid (ie, the
    agent still considers it to be an outstanding request.  Returns
    NULL if it's no longer valid. */
-inline netsnmp_delegated_cache *
+NETSNMP_INLINE netsnmp_delegated_cache *
 netsnmp_handler_check_cache(netsnmp_delegated_cache *dcache)
 {
     if (!dcache)
@@ -544,7 +608,7 @@ netsnmp_handler_check_cache(netsnmp_delegated_cache *dcache)
 }
 
 /** frees a cache once you're finished using it */
-inline void
+NETSNMP_INLINE void
 netsnmp_free_delegated_cache(netsnmp_delegated_cache *dcache)
 {
     /*
@@ -568,8 +632,17 @@ netsnmp_handler_mark_requests_as_delegated(netsnmp_request_info *requests,
     }
 }
 
-/** add data to a request that can be extracted later by submodules */
-inline void
+/** add data to a request that can be extracted later by submodules
+ *
+ * @param requset the netsnmp request info structure
+ *
+ * @param node this is the data to be added to the linked list
+ *             request->parent_data
+ *
+ * @return void
+ *
+ */
+NETSNMP_INLINE void
 netsnmp_request_add_list_data(netsnmp_request_info *request,
                               netsnmp_data_list *node)
 {
@@ -581,8 +654,18 @@ netsnmp_request_add_list_data(netsnmp_request_info *request,
     }
 }
 
-/** extract data from a request that was added previously by a parent module */
-inline void    *
+/** extract data from a request that was added previously by a parent module
+ *
+ * @param request the netsnmp request info function
+ *
+ * @param name used to compare against the request->parent_data->name value,
+ *             if a match is found request->parent_data->data is returned
+ *
+ * @return a void pointer(request->parent_data->data), otherwise NULL is
+ *         returned if request is NULL or request->parent_data is NULL or
+ *         request->parent_data object is not found.
+ */
+NETSNMP_INLINE void    *
 netsnmp_request_get_list_data(netsnmp_request_info *request,
                               const char *name)
 {
@@ -592,7 +675,7 @@ netsnmp_request_get_list_data(netsnmp_request_info *request,
 }
 
 /** Free the extra data stored in a request */
-inline void
+NETSNMP_INLINE void
 netsnmp_free_request_data_set(netsnmp_request_info *request)
 {
     if (request)
@@ -600,7 +683,7 @@ netsnmp_free_request_data_set(netsnmp_request_info *request)
 }
 
 /** Free the extra data stored in a bunch of requests (all data in the chain) */
-inline void
+NETSNMP_INLINE void
 netsnmp_free_request_data_sets(netsnmp_request_info *request)
 {
     if (request && request->parent_data) {

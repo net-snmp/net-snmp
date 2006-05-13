@@ -289,12 +289,16 @@ snmp_build_var_op(u_char * data,
         break;
 #endif                          /* OPAQUE_SPECIAL_TYPES */
     default:
-        ERROR_MSG("wrong type");
-        return NULL;
+	{
+	char error_buf[64];
+	snprintf(error_buf, sizeof(error_buf),
+		"wrong type in snmp_build_var_op: %d", var_val_type);
+        ERROR_MSG(error_buf);
+        data = NULL;
+	}
     }
     DEBUGINDENTLESS();
     if (data == NULL) {
-        ERROR_MSG("Can't build value");
         return NULL;
     }
     dummyLen = (data - dataPtr) - headerLen;
@@ -402,13 +406,17 @@ snmp_realloc_rbuild_var_op(u_char ** pkt, size_t * pkt_len,
         break;
 #endif                          /* OPAQUE_SPECIAL_TYPES */
     default:
-        ERROR_MSG("wrong type");
-        return 0;
+	{
+	char error_buf[64];
+	snprintf(error_buf, sizeof(error_buf),
+		"wrong type in snmp_realloc_rbuild_var_op: %d", var_val_type);
+        ERROR_MSG(error_buf);
+        rc = 0;
+	}
     }
     DEBUGINDENTLESS();
 
     if (rc == 0) {
-        ERROR_MSG("Can't build value");
         return 0;
     }
 

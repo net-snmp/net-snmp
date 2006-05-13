@@ -92,7 +92,7 @@ localinstall:
 	@if test "x$(PERLPROG)" != "x" ; then \
 	  for i in $(PERLSCRIPTS) ; do $(INSTALL) $$i.made $(bindir)/$$i ; echo "install:  installed $$i in $(bindir)" ; done ; \
 	  $(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir) ; \
-	  for i in $(DATASRCS) ; do $(INSTALL) $(srcdir)/$$i $(snmplibdir)/$$i ; echo "install:  installed $$i in $(snmplibdir)" ; done ; \
+	  for i in $(DATASRCS) ; do $(INSTALL_DATA) $(srcdir)/$$i $(snmplibdir)/$$i ; echo "install:  installed $$i in $(snmplibdir)" ; done ; \
 	  for i in $(CONFDIRS); do $(SHELL) $(srcdir)/../mkinstalldirs $(CONFINSTALLDIR)/$$i ; done ; \
-	  for i in $(CONFFILES); do $(INSTALL) $(srcdir)/$(CONFDATASRC)/$$i $(CONFINSTALLDIR)/$$i; echo "install:  installed $$i in $(CONFINSTALLDIR)"; done \
+	  for i in $(CONFFILES); do $(INSTALL_DATA) $(srcdir)/$(CONFDATASRC)/$$i $(CONFINSTALLDIR)/$$i; echo "install:  installed $$i in $(CONFINSTALLDIR)"; done \
 	fi

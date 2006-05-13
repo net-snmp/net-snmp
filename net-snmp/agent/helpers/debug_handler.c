@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_STRING_H
@@ -15,7 +25,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup debug debug: print out debugging information about the handler chain being called.
+/** @defgroup debug debug
+ *  Print out debugging information about the handler chain being called.
  *  This is a useful module for run-time
  *  debugging of requests as the pass this handler in a calling chain.
  *  All debugging output is done via the standard debugging routines
@@ -92,7 +103,8 @@ netsnmp_debug_helper(netsnmp_mib_handler *handler,
     DEBUGMSGTL(("helper:debug", "    Name:        %s\n",
                 reginfo->handlerName));
     DEBUGMSGTL(("helper:debug", "    Context:     %s\n",
-                reginfo->contextName));
+                (NULL == reginfo->contextName)
+                ? "NULL" : reginfo->contextName));
     DEBUGMSGTL(("helper:debug", "    Base OID:    "));
     DEBUGMSGOID(("helper:debug", reginfo->rootoid, reginfo->rootoid_len));
     DEBUGMSG(("helper:debug", "\n"));

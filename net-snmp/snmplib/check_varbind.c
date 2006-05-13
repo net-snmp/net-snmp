@@ -33,7 +33,7 @@ netsnmp_check_vb_int_range(netsnmp_variable_list *var, int low, int high)
         return rc;
     
     if ((*var->val.integer < low) || (*var->val.integer > high)) {
-        rc = SNMP_ERR_BADVALUE;
+        rc = SNMP_ERR_WRONGVALUE;
     }
 
     return rc;
