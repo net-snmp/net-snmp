@@ -2,6 +2,107 @@
 
 Changes: V5.3 -> V5.3.1
 
+2006-05-12 15:07  hardaker
+
+   * perl/: ASN/Makefile.PL, OID/Makefile.PL,
+     SNMP/Makefile.PL, SNMP/SNMP.pm,
+     SNMP/SNMP.xs, TrapReceiver/Makefile.PL,
+     agent/Makefile.PL, agent/default_store/Makefile.PL
+, default_store/Makefile.PL:
+
+   change -W flag substition to be exact match of flags to remove, rather than removing any -W flag for portability reasons
+
+2006-05-12 07:48  tanders
+
+   * testing/tests/T050snmpv3trap:
+
+   introduce delays to not lose traps
+
+2006-05-12 07:46  tanders
+
+   * testing/tests/: T060trapdperl, T061agentperl:
+
+   fix newline issues
+
+2006-05-12 07:45  tanders
+
+   * README.aix:
+
+   update README for AIX based on build test experience on AIX 4.3.3/5.1/5.2/5.3
+
+2006-05-12 07:43  tanders
+
+   * testing/tests/: T053agentv1trap, T054agentv2ctrap
+, T055agentv1mintrap, T056agentv2cmintrap
+, T113agentxtrap:
+
+   ensure the tests work even if UCD-SNMP-MIB isn't in defaults MIBS list
+
+2006-05-08 07:45  hardaker
+
+   * dist/: Makefile, README.build-scripts,
+     RELEASE-INSTRUCTIONS, cvsup, makerelease
+, net-snmp.spec, nsb-config,
+     nsb-functions, nsb-nightly, nsb-package
+, nsb-platform:
+
+   cleaned dist dir to branch release files
+
+2006-05-08 00:47  tanders
+
+   * agent/mibgroup/Rmon/row_api.h:
+
+   build fix for C89 compilers (e.g. xlc on AIX 4.3.3): no trailing comma after last entry of a "typedef enum"
+
+2006-05-05 16:03  tanders
+
+   * dist/nsb-functions:
+
+   further tweaking of the exception regex
+
+2006-05-05 15:26  tanders
+
+   * README.irix:
+
+   initial README for IRIX
+
+2006-05-05 14:51  hardaker
+
+   * apps/snmptrapd_log.c:
+
+   put the snprintf length into a dereferenced pointer
+
+2006-05-05 14:22  tanders
+
+   * configure, configure.in:
+
+   fix IRIX 6.5 "present but cannot be compiled" warning for sys/vnode.h and sys/h
+   ashing.h
+
+2006-05-04 14:44  hardaker
+
+   * agent/snmp_agent.c:
+
+   covertiy 135: double check netsnmp_oid_find_prefix returns a positive result (should only happen in broken-tree cases)
+
+2006-05-04 14:36  hardaker
+
+   * agent/mibgroup/agentx/subagent.c:
+
+   coverity #136: free mem leak in rare bad-agentx packet case
+
+2006-05-03 13:59  tanders
+
+   * NEWS, agent/mibgroup/mibII/ipAddr.c:
+
+   [ 1481012 ] HP-UX 11.0/11i: ipAdEntBcastAddr wrong (patch submitted by Johannes Schmidt-Fischer)
+
+2006-04-30 22:56  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.3.1.pre1 )
+
 2006-04-30 22:48  hardaker
 
    * snmplib/snmp_debug.c:
