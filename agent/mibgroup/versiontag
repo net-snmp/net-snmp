@@ -28,7 +28,7 @@ if [ $2 = "tar" ]; then
         if [ "x$CVSUSER" = "x" ] ; then
           CVSUSER=hardaker
         fi
-        $DOIT cvs -d $CVSUSER@cvs.sourceforge.net:/cvsroot/net-snmp export -d net-snmp-$VERSION -r $VERSIONTAG net-snmp
+        $DOIT cvs -d $CVSUSER@net-snmp.cvs.sourceforge.net:/cvsroot/net-snmp export -d net-snmp-$VERSION -r $VERSIONTAG net-snmp
     fi
     $DOIT net-snmp-$VERSION/remove-files net-snmp-$VERSION
     # XXX: we should be testing for existance of star first...
