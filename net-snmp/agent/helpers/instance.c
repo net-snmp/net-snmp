@@ -31,7 +31,8 @@ typedef struct netsnmp_num_file_instance_s {
     int   flags;
 } netsnmp_num_file_instance;
 
-/** @defgroup instance instance: process individual MIB instances easily.
+/** @defgroup instance instance
+ *  Process individual MIB instances easily.
  *  @ingroup leaf
  *  @{
  */
@@ -39,8 +40,6 @@ typedef struct netsnmp_num_file_instance_s {
 /**
  * Creates an instance helper handler, calls netsnmp_create_handler, which
  * then could be registered, using netsnmp_register_handler().
- *
- * @param void
  *
  * @return Returns a pointer to a netsnmp_mib_handler struct which contains
  *	the handler's name and the access method
@@ -388,14 +387,18 @@ netsnmp_register_num_file_instance(const char *name,
     if ((NULL == nfi) ||
         (NULL == (nfi->file_name = strdup(file_name)))) {
         snmp_log(LOG_ERR, "could not not allocate memory\n");
+        if (NULL != nfi)
+            free(nfi); /* SNMP_FREE overkill on local var */
         return MIB_REGISTRATION_FAILED;
     }
 
     myreg = get_reg(name, "file_num_handler", reg_oid, reg_oid_len, nfi,
                     mode, netsnmp_instance_num_file_handler,
                     subhandler, contextName);
-    if (NULL == myreg)
+    if (NULL == myreg) {
+        free(nfi); /* SNMP_FREE overkill on local var */
         return MIB_REGISTRATION_FAILED;
+    }
 
     nfi->type = asn_type;
 
@@ -908,6 +911,5 @@ netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_GENERR;
 }
 
-/*
- * @} 
+/** @} 
  */

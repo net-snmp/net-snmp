@@ -696,7 +696,7 @@ int getstats(void)
 {
     FILE* parts;
     time_t now;
-
+    
     now = time(NULL);
     if (cache_time + CACHE_TIMEOUT > now) {
         return 0;
@@ -722,13 +722,11 @@ int getstats(void)
 	    }
 	    pTemp = &head.indices[head.length];
 	    sscanf (buffer, "%d %d", &pTemp->major, &pTemp->minor);
-	    if (pTemp->minor == 0)
-		sscanf (buffer, "%d %d %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+ 	    if (sscanf (buffer, "%d %d %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		    &pTemp->major, &pTemp->minor, pTemp->name,
 		    &pTemp->rio, &pTemp->rmerge, &pTemp->rsect, &pTemp->ruse,
 		    &pTemp->wio, &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,
-		    &pTemp->running, &pTemp->use, &pTemp->aveq);
-	    else
+ 		    &pTemp->running, &pTemp->use, &pTemp->aveq) != 14)
 		sscanf (buffer, "%d %d %s %lu %lu %lu %lu\n",
 		    &pTemp->major, &pTemp->minor, pTemp->name,
 		    &pTemp->rio, &pTemp->rsect,
@@ -784,6 +782,7 @@ var_diskio(struct variable * vp,
 {
     unsigned int indx;
     static unsigned long long_ret;
+    static struct counter64 c64_ret;
 
     if (getstats() == 1) {
 	return NULL;
@@ -818,7 +817,16 @@ var_diskio(struct variable * vp,
     case DISKIO_WRITES:
       long_ret = head.indices[indx].wio;
       return (u_char *) & long_ret;
-
+    case DISKIO_NREADX:
+      *var_len = 8;
+      c64_ret.low = head.indices[indx].rsect * 512 & 0xffffffff;
+      c64_ret.high = head.indices[indx].rsect >> (32 - 9);
+      return (u_char *) & c64_ret;
+    case DISKIO_NWRITTENX:
+      *var_len = 8;
+      c64_ret.low = head.indices[indx].wsect * 512 & 0xffffffff;
+      c64_ret.high = head.indices[indx].wsect >> (32 - 9);
+      return (u_char *) & c64_ret;
     default:
 	snmp_log(LOG_ERR, "diskio.c: don't know how to handle %d request\n", vp->magic);
   }

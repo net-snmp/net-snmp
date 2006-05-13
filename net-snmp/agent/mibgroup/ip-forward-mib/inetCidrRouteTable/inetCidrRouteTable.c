@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for inetCidrRouteTable
+/** \page MFD helper for inetCidrRouteTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -202,6 +202,7 @@ inetCidrRouteTable_pre_request(inetCidrRouteTable_registration *
  *   deleted rows have been removed from the container and
  *   released.
  *
+ * @param user_context 
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -300,7 +301,15 @@ inetCidrRouteTable_release_data(inetCidrRouteTable_data * data)
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
- *
+ * @param inetCidrRouteDestType_val
+ * @param inetCidrRouteDest_val_ptr
+ * @param inetCidrRouteDest_val_ptr_len
+ * @param inetCidrRoutePfxLen_val
+ * @param inetCidrRoutePolicy_val_ptr
+ * @param inetCidrRoutePolicy_val_ptr_len
+ * @param inetCidrRouteNextHopType_val
+ * @param inetCidrRouteNextHop_val_ptr
+ * @param inetCidrRouteNextHop_val_ptr_len
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
  *
@@ -414,7 +423,16 @@ inetCidrRouteTable_indexes_set_tbl_idx(inetCidrRouteTable_mib_index *
  * @internal
  * set row context indexes
  *
- * @param reqreq_ctx the row context that needs updated indexes
+ * @param rowreq_ctx the row context that needs updated indexes
+ * @param inetCidrRouteDestType_val
+ * @param inetCidrRouteDest_val_ptr
+ * @param inetCidrRouteDest_val_ptr_len
+ * @param inetCidrRoutePfxLen_val
+ * @param inetCidrRoutePolicy_val_ptr
+ * @param inetCidrRoutePolicy_val_ptr_len
+ * @param inetCidrRouteNextHopType_val
+ * @param inetCidrRouteNextHop_val_ptr
+ * @param inetCidrRouteNextHop_val_ptr_len
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -1359,7 +1377,7 @@ inetCidrRouteTable_undo_cleanup(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
  * inetCidrRouteTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param inetCidrRouteTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -1454,7 +1472,7 @@ inetCidrRouteTable_commit(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
  * inetCidrRouteTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param inetCidrRouteTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success

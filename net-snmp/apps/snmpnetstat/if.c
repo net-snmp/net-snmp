@@ -127,7 +127,7 @@ _set_address( struct _if_info *cur_if )
      */
     for (vp=addr_if_var, vp2=addr_mask_var;  vp;
          vp=vp->next_variable, vp2=vp2->next_variable) {
-        if ( *vp->val.integer == cur_if->ifindex )
+        if ( vp->val.integer && *vp->val.integer == cur_if->ifindex )
             break;
     }
     if (vp2) {
@@ -265,6 +265,8 @@ intpr(int interval)
             break;
         cur_if->ifindex = var->name[ var->name_length-1 ];
         for ( vp=var; vp; vp=vp->next_variable ) {
+            if ( ! vp->val.integer )
+                continue;
             if ( var->name[ var->name_length-1 ] != cur_if->ifindex ) {
                 /*
                  * Inconsistent index information
@@ -608,6 +610,8 @@ loop:
         cur_if->ift_dr = 0;
         cur_if->ifIndex = var->name[ ifcol_len-1 ];
         for (vp=var; vp; vp=vp->next_variable) {
+            if ( ! vp->val.integer )
+                continue;
             switch (vp->name[ifcol_len-2]) {
             case 10:    /* ifInOctets */
                 cur_if->ift_ib = *vp->val.integer;
@@ -703,6 +707,8 @@ loop:
                 break;    /* End of Table */
             
             for ( vp=var; vp; vp=vp->next_variable ) {
+                if ( ! vp->val.integer )
+                    continue;
                 switch ( vp->name[ ifcol_len-2 ] ) {
                 case 10:    /* ifInOctets */
                     sum->ift_ib += *vp->val.integer;

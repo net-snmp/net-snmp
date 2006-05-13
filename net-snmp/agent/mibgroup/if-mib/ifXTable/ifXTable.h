@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @addtogroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -454,3 +454,5 @@ config_require(if-mib/ifXTable/ifXTable_data_access)
 }
 #endif
 #endif                          /* IFXTABLE_H */
+/**  @} */
+

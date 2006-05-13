@@ -306,45 +306,6 @@ create_v2_inform_session(char *sink, u_short sinkport, char *com)
 }
 #endif
 
-/**
- * This function allows you to make a distinction between generic 
- * traps from different classes of equipment. For example, you may want 
- * to handle a SNMP_TRAP_LINKDOWN trap for a particular device in a 
- * different manner to a generic system SNMP_TRAP_LINKDOWN trap.
- *   
- *
- *  @param trap is the generic trap type.  The trap types are:
- *		- SNMP_TRAP_COLDSTART:
- *			cold start
- *		- SNMP_TRAP_WARMSTART:
- *			warm start
- *		- SNMP_TRAP_LINKDOWN:
- *			link down
- *		- SNMP_TRAP_LINKUP:
- *			link up
- *		- SNMP_TRAP_AUTHFAIL:
- *			authentication failure
- *		- SNMP_TRAP_EGPNEIGHBORLOSS:
- *			egp neighbor loss
- *		- SNMP_TRAP_ENTERPRISESPECIFIC:
- *			enterprise specific
- *			
- *  @param specific is the specific trap value.
- *
- *  @param enterprise is an enterprise oid in which you want to send specifc 
- *	traps from. 
- *
- *  @param enterprise_length is the length of the enterprise oid, use macro,
- *	OID_LENGTH, to compute length.
- *
- *  @param vars is used to supply list of variable bindings to form an SNMPv2 
- *	trap.
- *
- *  @return void
- *
- *  @see send_easy_trap
- *  @see send_v2trap
- */
 void
 snmpd_free_trapsinks(void)
 {
@@ -591,11 +552,53 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
     return template_v2pdu;
 }
 
+/**
+ * This function allows you to make a distinction between generic 
+ * traps from different classes of equipment. For example, you may want 
+ * to handle a SNMP_TRAP_LINKDOWN trap for a particular device in a 
+ * different manner to a generic system SNMP_TRAP_LINKDOWN trap.
+ *   
+ *
+ * @param trap is the generic trap type.  The trap types are:
+ *		- SNMP_TRAP_COLDSTART:
+ *			cold start
+ *		- SNMP_TRAP_WARMSTART:
+ *			warm start
+ *		- SNMP_TRAP_LINKDOWN:
+ *			link down
+ *		- SNMP_TRAP_LINKUP:
+ *			link up
+ *		- SNMP_TRAP_AUTHFAIL:
+ *			authentication failure
+ *		- SNMP_TRAP_EGPNEIGHBORLOSS:
+ *			egp neighbor loss
+ *		- SNMP_TRAP_ENTERPRISESPECIFIC:
+ *			enterprise specific
+ *			
+ * @param specific is the specific trap value.
+ *
+ * @param enterprise is an enterprise oid in which you want to send specifc 
+ *	traps from. 
+ *
+ * @param enterprise_length is the length of the enterprise oid, use macro,
+ *	OID_LENGTH, to compute length.
+ *
+ * @param vars is used to supply list of variable bindings to form an SNMPv2 
+ *	trap.
+ *
+ * @param context currently unused 
+ *
+ * @param flags currently unused 
+ *
+ * @return void
+ *
+ * @see send_easy_trap
+ * @see send_v2trap
+ */
 int
 netsnmp_send_traps(int trap, int specific,
                           oid * enterprise, int enterprise_length,
                           netsnmp_variable_list * vars,
-                          /* These next two are currently unused */
                           char * context, int flags)
 {
     netsnmp_pdu           *template_v1pdu;
@@ -633,6 +636,7 @@ netsnmp_send_traps(int trap, int specific,
         if (!template_v2pdu) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to construct v2 template PDU\n");
+            snmp_free_varbind(vblist);
             return -1;
         }
 
@@ -655,6 +659,7 @@ netsnmp_send_traps(int trap, int specific,
                 snmp_log(LOG_WARNING,
                      "send_trap: failed to insert sysUptime varbind\n");
                 snmp_free_pdu(template_v2pdu);
+                snmp_free_varbind(vblist);
                 return -1;
             }
             template_v2pdu->variables = var;
@@ -713,6 +718,7 @@ netsnmp_send_traps(int trap, int specific,
         if (!template_v1pdu) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to construct v1 template PDU\n");
+            snmp_free_varbind(vblist);
             return -1;
         }
         template_v1pdu->trap_type     = trap;
@@ -723,6 +729,7 @@ netsnmp_send_traps(int trap, int specific,
                        enterprise, enterprise_length * sizeof(oid))) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to set v1 enterprise OID\n");
+            snmp_free_varbind(vblist);
             snmp_free_pdu(template_v1pdu);
             return -1;
         }

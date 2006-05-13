@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for ifTable
+/** \page MFD helper for ifTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -43,6 +43,12 @@ ifTable_registration ifTable_user_context;
 
 void            initialize_table_ifTable(void);
 void            shutdown_table_ifTable(void);
+
+static int
+_if_number_handler(netsnmp_mib_handler *handler,
+                   netsnmp_handler_registration *reginfo,
+                   netsnmp_agent_request_info *reqinfo,
+                   netsnmp_request_info *requests);
 
 
 /**
@@ -135,6 +141,24 @@ initialize_table_ifTable(void)
      * call interface initialization code
      */
     _ifTable_initialize_interface(user_context, flags);
+
+    /*
+     * register scalar for ifNumber
+     */
+    {
+        oid             reg_oid[] =
+            { IFTABLE_NUMBER };
+        netsnmp_handler_registration *myreg;
+
+        myreg =
+            netsnmp_create_handler_registration("if number",
+                                                _if_number_handler,
+                                                reg_oid,
+                                                OID_LENGTH(reg_oid),
+                                                HANDLER_CAN_RONLY);
+        netsnmp_register_scalar(myreg);
+    }
+
 }                               /* initialize_table_ifTable */
 
 /**
@@ -181,7 +205,7 @@ ifTable_rowreq_ctx_init(ifTable_rowreq_ctx * rowreq_ctx,
 
 /**
  * extra context cleanup
- *
+ * @param rowreq_ctx
  */
 void
 ifTable_rowreq_ctx_cleanup(ifTable_rowreq_ctx * rowreq_ctx)
@@ -201,6 +225,7 @@ ifTable_rowreq_ctx_cleanup(ifTable_rowreq_ctx * rowreq_ctx)
 
 /**
  * pre-request callback
+ * @param  user_context
  *
  *
  * @retval MFD_SUCCESS              : success.
@@ -226,6 +251,7 @@ ifTable_pre_request(ifTable_registration * user_context)
  *   deleted rows have been removed from the container and
  *   released.
  *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -286,6 +312,7 @@ ifTable_post_request(ifTable_registration * user_context, int rc)
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param ifIndex_val
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -315,6 +342,7 @@ ifTable_indexes_set_tbl_idx(ifTable_mib_index * tbl_idx, long ifIndex_val)
  * set row context indexes
  *
  * @param reqreq_ctx the row context that needs updated indexes
+ * @param ifIndex_val
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -1874,16 +1902,6 @@ ifTable_undo_setup(ifTable_rowreq_ctx * rowreq_ctx)
      * set up ifTable undo information, in preparation for a set.
      * Undo storage is in (* ifSpecific_val_ptr_ptr )*
      */
-    rowreq_ctx->undo->ifentry =
-        netsnmp_access_interface_entry_create(rowreq_ctx->data.ifentry->
-                                              name,
-                                              rowreq_ctx->data.ifentry->
-                                              index);
-    if (NULL == rowreq_ctx->undo->ifentry)
-        rc = MFD_ERROR;
-    else
-        netsnmp_access_interface_entry_copy(rowreq_ctx->undo->ifentry,
-                                            rowreq_ctx->data.ifentry);
 
     return rc;
 }                               /* ifTable_undo_setup */
@@ -1974,8 +1992,7 @@ ifTable_undo_cleanup(ifTable_rowreq_ctx * rowreq_ctx)
  * ifTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ifTable_rowreq_ctx
- *        Pointer to the users context.
+ * @param rowreq_ctx Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
  * @retval MFD_ERROR   : error
@@ -2050,7 +2067,7 @@ ifTable_commit(ifTable_rowreq_ctx * rowreq_ctx)
  * ifTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ifTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -2285,6 +2302,8 @@ ifAdminStatus_undo(ifTable_rowreq_ctx * rowreq_ctx)
  * ifTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
+ * @param rowreq_ctx
+ *
  * @retval MFD_SUCCESS all the changes to the row are legal
  * @retval MFD_ERROR   one or more changes are not legal
  *
@@ -2306,6 +2325,27 @@ ifTable_check_dependencies(ifTable_rowreq_ctx * rowreq_ctx)
      */
     return rc;
 }                               /* ifTable_check_dependencies */
+
+
+static int
+_if_number_handler(netsnmp_mib_handler *handler,
+                      netsnmp_handler_registration *reginfo,
+                      netsnmp_agent_request_info *reqinfo,
+                      netsnmp_request_info *requests)
+{
+    if (MODE_GET == reqinfo->mode) {
+        int val = ifTable_container_size();
+        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                                 (u_char *) &val, sizeof(val));
+    } else
+        netsnmp_assert("bad mode in RO handler");
+    
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                         requests);
+    
+    return SNMP_ERR_NOERROR;
+}
 
 /** @} */
 /** @{ */

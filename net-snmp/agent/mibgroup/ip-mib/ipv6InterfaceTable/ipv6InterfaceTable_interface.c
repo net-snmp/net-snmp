@@ -70,8 +70,6 @@ typedef struct ipv6InterfaceTable_interface_ctx_s {
 
     netsnmp_baby_steps_access_methods access_multiplexer;
 
-    u_int           table_dirty;
-
     u_long          last_changed;
 
 } ipv6InterfaceTable_interface_ctx;
@@ -117,16 +115,13 @@ ipv6InterfaceTable_container_size(void)
 u_int
 ipv6InterfaceTable_dirty_get(void)
 {
-    return ipv6InterfaceTable_if_ctx.table_dirty;
+    return ifTable_dirty_get();
 }
 
 void
 ipv6InterfaceTable_dirty_set(u_int status)
 {
-    DEBUGMSGTL(("ipv6InterfaceTable:ipv6InterfaceTable_dirty_set",
-                "called. was %d, now %d\n",
-                ipv6InterfaceTable_if_ctx.table_dirty, status));
-    ipv6InterfaceTable_if_ctx.table_dirty = status;
+    ifTable_dirty_set(status);
 }
 
 /*
@@ -905,18 +900,15 @@ _mfd_ipv6InterfaceTable_undo_setup(netsnmp_mib_handler *handler,
     /*
      * allocate undo context
      */
-    rowreq_ctx->undo = ifTable_allocate_data();
-    if (NULL == rowreq_ctx->undo) {
-        /** msg already logged */
-        netsnmp_request_set_error_all(requests,
-                                      SNMP_ERR_RESOURCEUNAVAILABLE);
+    rc = _mfd_ifTable_undo_setup_allocate(rowreq_ctx);
+    if (MFD_SUCCESS != rc) {
+        netsnmp_request_set_error_all(requests,rc);
         return SNMP_ERR_NOERROR;
     }
 
     /*
      * row undo setup
      */
-    rowreq_ctx->column_set_flags = 0;
     rc = ipv6InterfaceTable_undo_setup(rowreq_ctx);
     if (MFD_SUCCESS != rc) {
         DEBUGMSGTL(("ipv6InterfaceTable:mfd", "error %d from "
@@ -987,11 +979,7 @@ _mfd_ipv6InterfaceTable_undo_cleanup(netsnmp_mib_handler *handler,
     /*
      * release undo context, if needed
      */
-    if (rowreq_ctx->undo) {
-        ifTable_release_data(rowreq_ctx->undo);
-        rowreq_ctx->undo = NULL;
-    }
-
+    _mfd_ifTable_undo_setup_release(rowreq_ctx);
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ipv6InterfaceTable_undo_cleanup */
