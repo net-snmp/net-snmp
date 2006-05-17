@@ -7,6 +7,7 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #else
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #endif
