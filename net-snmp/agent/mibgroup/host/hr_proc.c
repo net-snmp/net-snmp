@@ -331,7 +331,8 @@ void detect_hrproc(void)
     proc_descriptions[0] =
         strdup("An electronic chip that makes the computer work.");
     i = -1;
-    while (fgets(tmpbuf, BUFSIZ, fp)) {
+    while (fgets(tmpbuf, sizeof(tmpbuf), fp)) {
+        /* note that some older (eg 2.4) kernels don't have a processor line */
 	if (!strncmp(tmpbuf,"processor\t",strlen("processor\t")))
 		i++;
 	if (!strncmp(tmpbuf,"processor ",strlen("processor ")))
@@ -343,7 +344,7 @@ void detect_hrproc(void)
                 fclose(fp);
 		return;
             }
-	    proc_descriptions[i] = strdup("An electronic chip that makes the computer work."); /* will be overwritten */
+	    proc_descriptions[nrprocs-1] = strdup("An electronic chip that makes the computer work."); /* will be overwritten */
         }
 
 #if defined(__i386__) || defined(__x86_64__)
@@ -356,9 +357,9 @@ void detect_hrproc(void)
 	    cp++;
 	    while ( cp && isspace(*cp))
 	        cp++;
-            if (proc_descriptions[i])
-                free(proc_descriptions[i]);
-	    proc_descriptions[i] = strdup(cp);
+            if (proc_descriptions[nrprocs-1])
+                free(proc_descriptions[nrprocs-1]);
+	    proc_descriptions[nrprocs-1] = strdup(cp);
         }
         if ( !strncmp( tmpbuf, "model name", 10)) {
            char *s;
@@ -370,18 +371,18 @@ void detect_hrproc(void)
 	    cp++;
 	    while ( cp && isspace(*cp))
 	        cp++;
-            if (!proc_descriptions[i]) {
+            if (!proc_descriptions[nrprocs-1]) {
 	        s = malloc(strlen(": ")+strlen(cp)+1);
 		strcpy(s,": ");
                 strcat(s,cp);
-		proc_descriptions[i] = s;
+		proc_descriptions[nrprocs-1] = s;
             } else {
-		s = malloc(strlen(proc_descriptions[i])+strlen(": ")+strlen(cp)+1);
-		strcpy(s,proc_descriptions[i]);
+		s = malloc(strlen(proc_descriptions[nrprocs-1])+strlen(": ")+strlen(cp)+1);
+		strcpy(s,proc_descriptions[nrprocs-1]);
 		strcat(s,": ");
 		strcat(s,cp);
-		free(proc_descriptions[i]);
-		proc_descriptions[i] = s;
+		free(proc_descriptions[nrprocs-1]);
+		proc_descriptions[nrprocs-1] = s;
             }
         }
 #endif
@@ -397,9 +398,9 @@ void detect_hrproc(void)
 	    cp++;
 	    while ( cp && isspace(*cp))
 	        cp++;
-            if (proc_descriptions[i])
-                free(proc_descriptions[i]);
-	    proc_descriptions[i] = strdup(cp);
+            if (proc_descriptions[nrprocs-1])
+                free(proc_descriptions[nrprocs-1]);
+	    proc_descriptions[nrprocs-1] = strdup(cp);
 	}
 #endif
 #if defined(__ia64__)
@@ -415,15 +416,15 @@ void detect_hrproc(void)
 	    cp++;
 	    while ( cp && isspace(*cp))
 	        cp++;
-            if (proc_descriptions[i])
-                free(proc_descriptions[i]);
-	    proc_descriptions[i] = strdup(cp);
+            if (proc_descriptions[nrprocs-1])
+                free(proc_descriptions[nrprocs-1]);
+	    proc_descriptions[nrprocs-1] = strdup(cp);
         }
 #endif
 #if defined(__s390__) || defined(__s390x__)
-	/* 2.4 kernel has stuff before the first processor line */
- 	if (i != -1)
-            proc_descriptions[i] = strdup("An S/390 CPU");
+        if (proc_descriptions[nrprocs-1])
+            free(proc_descriptions[nrprocs-1]);
+        proc_descriptions[nrprocs-1] = strdup("An S/390 CPU");
 #endif
     }
     DEBUGMSG(("hr_proc::detect_hrproc","registered %d processors", nrprocs));
