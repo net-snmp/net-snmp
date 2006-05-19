@@ -903,7 +903,7 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
 
     if (result == 0) {
         snmp_sess_perror("snmpd: send_trap", sess);
-        /* snmp_free_pdu(pdu); */
+        snmp_free_pdu(pdu);
     } else {
         snmp_increment_statistic(STAT_SNMPOUTTRAPS);
         snmp_increment_statistic(STAT_SNMPOUTPKTS);
