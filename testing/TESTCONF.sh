@@ -96,6 +96,8 @@ SNMP_SNMPD_PID_FILE="$SNMP_TMPDIR/snmpd.pid"
 SNMP_SNMPD_LOG_FILE="$SNMP_TMPDIR/snmpd.log"
 SNMP_AGENTX_PID_FILE="$SNMP_TMPDIR/agentx.pid"
 SNMP_AGENTX_LOG_FILE="$SNMP_TMPDIR/agentx.log"
+SNMPCONFPATH=${SNMP_TMPDIR}:${SNMP_TMP_PERSISTENTDIR}
+export SNMPCONFPATH
 #SNMP_PERSISTENT_FILE="$SNMP_TMP_PERSISTENTDIR/persistent-store.conf"
 #export SNMP_PERSISTENT_FILE
 
@@ -162,7 +164,7 @@ export SNMP_FLAGS SNMP_SNMPD_PORT SNMP_SNMPTRAPD_PORT
 # Make sure the agent doesn't parse any config file but what we give it.  
 # this is mainly to protect against a broken agent that doesn't
 # properly handle combinations of -c and -C.  (since I've broke it before).
-SNMPCONFPATH="$SNMP_TMPDIR/does-not-exist"
-export SNMPCONFPATH
+#SNMPCONFPATH="$SNMP_TMPDIR/does-not-exist"
+#export SNMPCONFPATH
 
 fi # Only allow ourselves to be eval'ed once
