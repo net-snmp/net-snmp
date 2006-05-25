@@ -20,9 +20,8 @@ if [ "x$SNMP_TRANSPORT_SPEC" = "xunix" ]; then
   AGENT_FLAGS="$AGENT_FLAGS -x $SNMP_TMPDIR/agentx_socket"
   TRAPD_FLAGS="$TRAPD_FLAGS -x $SNMP_TMPDIR/agentx_socket"
 else
-  # XXX: try different ports if 7676/tcp is busy -- Bug 1335767
-  AGENT_FLAGS="$AGENT_FLAGS -x tcp:${SNMP_TEST_DEST}7676"
-  TRAPD_FLAGS="$TRAPD_FLAGS -x tcp:${SNMP_TEST_DEST}7676"
+  AGENT_FLAGS="$AGENT_FLAGS -x tcp:${SNMP_TEST_DEST}${SNMP_AGENTX_PORT}"
+  TRAPD_FLAGS="$TRAPD_FLAGS -x tcp:${SNMP_TEST_DEST}${SNMP_AGENTX_PORT}"
 fi
 
 # standard SNMPv3 USM agent configuration
