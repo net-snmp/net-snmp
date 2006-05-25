@@ -164,7 +164,7 @@ export SNMP_FLAGS SNMP_SNMPD_PORT SNMP_SNMPTRAPD_PORT
 # Make sure the agent doesn't parse any config file but what we give it.  
 # this is mainly to protect against a broken agent that doesn't
 # properly handle combinations of -c and -C.  (since I've broke it before).
-SNMPCONFPATH="$SNMP_TMPDIR/does-not-exist"
-export SNMPCONFPATH
+#SNMPCONFPATH="$SNMP_TMPDIR/does-not-exist"
+#export SNMPCONFPATH
 
 fi # Only allow ourselves to be eval'ed once
