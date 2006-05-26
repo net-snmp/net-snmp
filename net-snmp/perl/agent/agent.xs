@@ -394,19 +394,19 @@ handler_wrapper(netsnmp_mib_handler          *handler,
         PUSHMARK(sp);
         rarg = newSViv(0);
         arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_mib_handler");
-        sv_setiv(arg, (int) handler);
+        sv_setiv(arg, (IV) handler);
         XPUSHs(sv_2mortal(rarg));
         rarg = newSViv(0);
         arg = newSVrv(rarg, "NetSNMP::agent::reginfo");
-        sv_setiv(arg, (int) reginfo);
+        sv_setiv(arg, (IV) reginfo);
         XPUSHs(sv_2mortal(rarg));
         rarg = newSViv(0);
         arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_agent_request_info");
-        sv_setiv(arg, (int) reqinfo);
+        sv_setiv(arg, (IV) reqinfo);
         XPUSHs(sv_2mortal(rarg));
         rarg = newSViv(0);
         arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_request_infoPtr");
-        sv_setiv(arg, (int) requests);
+        sv_setiv(arg, (IV) requests);
         XPUSHs(sv_2mortal(rarg));
         PUTBACK;
         if (SvTYPE(cb) == SVt_PVCV) {
@@ -567,7 +567,7 @@ nsahr_getRootOID(me)
 
         rarg = newSViv((int) 0);
         arg = newSVrv(rarg, "netsnmp_oidPtr");
-        sv_setiv(arg, (int) o);
+        sv_setiv(arg, (IV) o);
 
         XPUSHs(rarg);
 
@@ -606,7 +606,7 @@ getOID(me)
 
         rarg = newSViv((int) 0);
         arg = newSVrv(rarg, "netsnmp_oidPtr");
-        sv_setiv(arg, (int) o);
+        sv_setiv(arg, (IV) o);
 
         XPUSHs(rarg);
 
@@ -996,7 +996,7 @@ nari_next(me)
                 request = request->next;
                 rarg = newSViv(0);
                 arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_request_infoPtr");
-                sv_setiv(arg, (int) request);
+                sv_setiv(arg, (IV) request);
                 ST(0) = rarg;
             } else {
                 ST(0) = &sv_undef;
