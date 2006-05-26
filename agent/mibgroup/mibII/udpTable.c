@@ -200,7 +200,13 @@ udpTable_handler(netsnmp_mib_handler          *handler,
                                          (u_char*)&addr,
                                          sizeof(addr));
 #else
+#ifdef solaris2
+                /* solaris x86 already stores stuff in host order;
+                   non x86 is already big endian host order as well */
                 addr = ntohl(entry->UDPTABLE_LOCALADDRESS);
+#else
+                addr = entry->UDPTABLE_LOCALADDRESS;
+#endif
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
                                          (u_char *)&addr,
                                          sizeof(addr));
