@@ -4010,7 +4010,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      /* Get a handle on this entry in the request table. */
 	      bt_entry = &context->req_oids[context->nreq_oids];
 
-	      DBPRT(1,(DBOUT "  request %d: ", (int)varlist_ind));
+	      DBPRT(1,(DBOUT "  request %d: ", (int) varlist_ind));
 
 	      /* Get the request varbind from the varlist, parse it out to
 	      ** tag and index, and copy it to the req_oid[] array slots.
@@ -4124,8 +4124,8 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      }
 
 	      /* Sent okay...  Return the request ID in 'pdu' as an SvIV. */
-	      DBPRT(1,(DBOUT "Okay, request id is %d\n", (int)pdu));
-/*	      XSRETURN_IV((int)pdu); */
+	      DBPRT(1,(DBOUT "Okay, request id is %d\n", (intptr_t) pdu));
+/*	      XSRETURN_IV((intptr_t)pdu); */
 	      XPUSHs(sv_2mortal(newSViv(pdu)));
 	      XSRETURN(1);
 	   }
