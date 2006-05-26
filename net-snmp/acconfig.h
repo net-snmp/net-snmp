@@ -186,6 +186,12 @@
 /* define if you have type u_int64_t */
 #undef HAVE_U_INT64_T
 
+/* define if you have type intptr_t */
+#undef HAVE_INTPTR_T
+
+/* define if you have type uintptr_t */
+#undef HAVE_UINTPTR_T
+
 /* define if you have getdevs() */
 #undef HAVE_GETDEVS
 
