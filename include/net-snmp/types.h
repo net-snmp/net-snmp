@@ -126,6 +126,24 @@ typedef unsigned INT64_T uint64_t;
 #endif
 #endif
 
+#ifndef HAVE_UINTPTR_T
+#if SIZEOF_LONG == 8
+/* likely 64bit machine with 64bit addressing? */
+    typedef long uintptr_t;
+#else
+    typedef unsigned uintptr_t;
+#endif
+#endif
+
+#ifndef HAVE_INTPTR_T
+#if SIZEOF_LONG == 8
+/* likely 64bit machine with 64bit addressing? */
+    typedef long intptr_t;
+#else
+    typedef int intptr_t;
+#endif
+#endif
+    
     /*
      *  For the initial release, this will just refer to the
      *  relevant UCD header files.
