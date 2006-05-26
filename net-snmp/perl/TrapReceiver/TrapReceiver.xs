@@ -115,9 +115,9 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
 #ifdef CALL_EXTERNAL_OID_NEW
         PUSHMARK(sp);
 
-        rarg = sv_2mortal(newSViv((int) 0));
+        rarg = sv_2mortal(newSViv((IV) 0));
         arg = sv_2mortal(newSVrv(rarg, "netsnmp_oidPtr"));
-        sv_setiv(arg, (int) o);
+        sv_setiv(arg, (IV) o);
         XPUSHs(rarg);
 
         PUTBACK;
