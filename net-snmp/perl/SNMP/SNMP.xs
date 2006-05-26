@@ -2960,7 +2960,7 @@ snmp_read_mib(mib_file, force=0)
               if (verbose) warn("failed\n");
            }
         }
-        RETVAL = (I32)get_tree_head();
+        RETVAL = (IV)get_tree_head();
         }
         OUTPUT:
         RETVAL
@@ -2983,7 +2983,7 @@ snmp_read_module(module)
         } else {
            if (verbose) warn("Failed reading %s\n", module);
         }
-        RETVAL = (I32)get_tree_head();
+        RETVAL = (IV)get_tree_head();
         }
         OUTPUT:
         RETVAL
@@ -4115,7 +4115,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      /* Sent okay...  Return the request ID in 'pdu' as an SvIV. */
 	      DBPRT(1,(DBOUT "Okay, request id is %d\n", (int)pdu));
 /*	      XSRETURN_IV((int)pdu); */
-	      XPUSHs(sv_2mortal(newSViv((int)pdu)));
+	      XPUSHs(sv_2mortal(newSViv(pdu)));
 	      XSRETURN(1);
 	   }
 

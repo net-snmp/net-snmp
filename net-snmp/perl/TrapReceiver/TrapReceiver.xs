@@ -136,7 +136,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         {
             HV *hv = newHV();
             SV *rv = newRV_noinc((SV *) hv);
-            SV *rvsub = newRV_noinc((SV *) newSViv((U32) o));
+            SV *rvsub = newRV_noinc((SV *) newSViv((UV) o));
             SV *sv;
             rvsub = sv_bless(rvsub, gv_stashpv("netsnmp_oidPtr", 1));
             hv_store(hv, "oidptr", 6,  rvsub, 0);
