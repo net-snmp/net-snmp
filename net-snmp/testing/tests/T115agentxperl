@@ -91,7 +91,7 @@ CONFIGAGENT agentxsocket $AGENTX_SOCKET
 STARTAGENT
 
 # start perl subagent
-/usr/bin/env SNMPCONFPATH=${SNMP_TMPDIR}:${SNMP_TMP_PERSISTENTDIR} perl $PERL_SUBAGENT $SNMP_AGENTX_PID_FILE >$SNMP_AGENTX_LOG_FILE 2>&1
+/usr/bin/env LD_LIBRARY_PATH=${SNMP_UPDIR}/snmplib/.libs:${SNMP_UPDIR}/agent/.libs:${SNMP_UPDIR}/agent/helpers/.libs SNMPCONFPATH=${SNMP_TMPDIR}:${SNMP_TMP_PERSISTENTDIR} perl $PERL_SUBAGENT $SNMP_AGENTX_PID_FILE >$SNMP_AGENTX_LOG_FILE 2>&1
 DELAY
 
 ## 1) SNMP GET against mib object implemented by the perl subagent
