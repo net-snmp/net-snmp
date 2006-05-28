@@ -409,7 +409,7 @@ STARTAGENT() {
     LOG_FILE=$SNMP_SNMPD_LOG_FILE
     PORT_SPEC="$SNMP_SNMPD_PORT"
     if [ "x$SNMP_TRANSPORT_SPEC" != "x" ]; then
-        PORT_SPEC="$SNMP_TRANSPORT_SPEC:$PORT_SPEC"
+        PORT_SPEC="${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${PORT_SPEC}"
     fi
     STARTPROG
     WAITFORAGENT "NET-SNMP version"
@@ -423,10 +423,38 @@ STARTTRAPD() {
     LOG_FILE=$SNMP_SNMPTRAPD_LOG_FILE
     PORT_SPEC="$SNMP_SNMPTRAPD_PORT"
     if [ "x$SNMP_TRANSPORT_SPEC" != "x" ]; then
-        PORT_SPEC="$SNMP_TRANSPORT_SPEC:$PORT_SPEC"
+        PORT_SPEC="${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${PORT_SPEC}"
     fi
     STARTPROG
     WAITFORTRAPD "NET-SNMP version"
+}
+
+## sending SIGHUP for reconfiguration
+#
+HUPPROG() {
+    if [ -f $1 ]; then
+        if [ "x$OSTYPE" = "xmsys" ]; then
+          COMMAND='echo "Skipping SIGHUP (not supported by kill.exe on MinGW)"'
+        else
+          COMMAND="kill -HUP `cat $1`"
+        fi
+	echo $COMMAND >> $SNMP_TMPDIR/invoked
+	$COMMAND > /dev/null 2>&1
+    fi
+}
+
+HUPAGENT() {
+    HUPPROG $SNMP_SNMPD_PID_FILE
+    if [ "x$OSTYPE" != "xmsys" ]; then
+        WAITFORAGENT "restarted"
+    fi
+}
+
+HUPTRAPD() {
+    HUPPROG $SNMP_SNMPTRAPD_PID_FILE
+    if [ "x$OSTYPE" != "xmsys" ]; then
+        WAITFORTRAPD "restarted"
+    fi
 }
 
 

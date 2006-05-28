@@ -15,7 +15,7 @@ SKIPIF DISABLE_SNMPV2C
 # standard V3 configuration for initial user
 . ./Sv3config
 # config the proxy
-CONFIGAGENT proxy -t 2 -r 1 -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:${SNMP_TEST_DEST}7676 system
+CONFIGAGENT proxy -t 2 -r 1 -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:${SNMP_TEST_DEST}${SNMP_AGENTX_PORT} system
 
 # Start the agent without initializing the system mib.
 ORIG_AGENT_FLAGS="$AGENT_FLAGS"
@@ -39,7 +39,7 @@ STARTAGENT
 #  echo "syscontact testcontact" >> $SNMP_CONFIG_FILE
   AGENT_FLAGS="$ORIG_AGENT_FLAGS -Dmib_init"
   ORIG_SNMP_SNMPD_PORT=$SNMP_SNMPD_PORT
-  SNMP_SNMPD_PORT="7676"
+  SNMP_SNMPD_PORT="${SNMP_AGENTX_PORT}"
   STARTAGENT
   SNMP_SNMPD_PORT=$ORIG_SNMP_SNMPD_PORT
 

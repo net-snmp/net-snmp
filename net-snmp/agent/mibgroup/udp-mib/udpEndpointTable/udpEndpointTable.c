@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for udpEndpointTable
+/** \page MFD helper for udpEndpointTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -123,7 +123,7 @@ shutdown_table_udpEndpointTable(void)
 /**
  * pre-request callback
  *
- *
+ * @param user_context
  * @retval MFD_SUCCESS              : success.
  * @retval MFD_ERROR                : other error
  */
@@ -147,7 +147,7 @@ udpEndpointTable_pre_request(udpEndpointTable_registration * user_context)
  *   New rows have been inserted into the container, and
  *   deleted rows have been removed from the container and
  *   released.
- *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -191,6 +191,15 @@ udpEndpointTable_post_request(udpEndpointTable_registration * user_context,
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param udpEndpointLocalAddressType_val
+ * @param udpEndpointLocalAddress_val_ptr
+ * @param udpEndpointLocalAddress_val_ptr_len
+ * @param udpEndpointLocalPort_val
+ * @param udpEndpointRemoteAddressType_val
+ * @param udpEndpointRemoteAddress_val_ptr
+ * @param udpEndpointRemoteAddress_val_ptr_len
+ * @param udpEndpointRemotePort_val
+ * @param udpEndpointInstance_val
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.

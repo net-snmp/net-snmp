@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for tcpListenerTable
+/** \page MFD helper for tcpListenerTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -183,7 +183,7 @@ tcpListenerTable_pre_request(tcpListenerTable_registration * user_context)
  *   New rows have been inserted into the container, and
  *   deleted rows have been removed from the container and
  *   released.
- *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -269,6 +269,10 @@ tcpListenerTable_release_data(tcpListenerTable_data * data)
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param tcpListenerLocalAddressType_val
+ * @param tcpListenerLocalAddress_val_ptr
+ * @param tcpListenerLocalAddress_val_ptr_len
+ * @param tcpListenerLocalPort_val
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.

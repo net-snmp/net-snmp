@@ -11,7 +11,8 @@
 
 #include <net-snmp/agent/bulk_to_next.h>
 
-/** @defgroup bulk_to_next bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler.
+/** @defgroup bulk_to_next bulk_to_next
+ *  Convert GETBULK requests into GETNEXT requests for the handler.
  *  The only purpose of this handler is to convert a GETBULK request
  *  to a GETNEXT request.  It is inserted into handler chains where
  *  the handler has not set the HANDLER_CAN_GETBULK flag.
@@ -124,3 +125,5 @@ netsnmp_init_bulk_to_next_helper(void)
     netsnmp_register_handler_by_name("bulk_to_next",
                                      netsnmp_get_bulk_to_next_handler());
 }
+/**  @} */
+

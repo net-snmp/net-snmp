@@ -33,8 +33,8 @@
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_assert.h>
 
-/** @defgroup container null_container: Helps you implement specialized
- *  containers.
+/** @defgroup container null_container
+ *  Helps you implement specialized containers.
  *  @ingroup container
  *
  *  This is a simple container that doesn't actually contain anything.
@@ -180,3 +180,5 @@ netsnmp_container_null_init(void)
     netsnmp_container_register("null",
                                netsnmp_container_get_null_factory());
 }
+/**  @} */
+

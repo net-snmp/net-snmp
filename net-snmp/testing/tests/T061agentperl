@@ -16,13 +16,15 @@ TESTCOMMUNITY=testcommunity
 . ./Sv2cconfig
 
 TESTOID=.1.3.6.1.4.1.8872.9999.9999.1.0
+TESTOID2=.1.3.6.1.4.1.8872.9999.9999.2.0
 EMBPERL_AGENT=${SNMP_TMPDIR}/hello.pl
 cat >$EMBPERL_AGENT <<END
-#!/usr/bin/perl
+#!/usr/bin/env perl
 # minimal embedded perl agent
 
 my \$regat = '.1.3.6.1.4.1.8872.9999.9999'; # netSnmpPlayPen
-my \$myoid = \$regat . ".1.0"; # the hello world OID
+my \$myoid = \$regat . ".1.0"; # the "hello world" OID
+my \$myoid2 = \$regat . ".2.0"; # the "hello again world" OID
 
 use NetSNMP::OID qw(:all);
 use NetSNMP::agent qw(:all);
@@ -39,6 +41,9 @@ sub my_snmp_handler {
       if (\$request->getOID() == new NetSNMP::OID(\$myoid)) {
         \$request->setValue(ASN_OCTET_STR, "hello world");
         last;
+      } elsif (\$request->getOID() == new NetSNMP::OID(\$myoid2)) {
+        \$request->setValue(ASN_OCTET_STR, "hello again world");
+        last;
       }
     }
   }
@@ -51,14 +56,20 @@ echo '$agent = new NetSNMP::agent('"'dont_init_agent' => 1, 'dont_init_lib' => 1
 
 CONFIGAGENT perlInitFile ${SNMP_TMPDIR}/snmp_perl.pl
 CONFIGAGENT "perl do '$EMBPERL_AGENT';"
-CONFIGAGENT 'perl print STDERR "registered_perl_agent_ok\n";'
+CONFIGAGENT 'perl print STDERR "registered_perl_agent_ok";'
 
 STARTAGENT
 
+## 1) SNMP GET against embedded perl mib module
 CAPTURE "snmpget -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT $TESTOID"
-
 CHECK "hello world"
 
+## 2) persistency: reconfigure (HUP), re-test
+HUPAGENT
+CAPTURE "snmpget -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT $TESTOID2"
+CHECK "hello again world"
+
+## stop
 STOPAGENT
 
 FINISHED

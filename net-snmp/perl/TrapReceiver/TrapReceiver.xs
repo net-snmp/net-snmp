@@ -115,9 +115,9 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
 #ifdef CALL_EXTERNAL_OID_NEW
         PUSHMARK(sp);
 
-        rarg = sv_2mortal(newSViv((int) 0));
+        rarg = sv_2mortal(newSViv((IV) 0));
         arg = sv_2mortal(newSVrv(rarg, "netsnmp_oidPtr"));
-        sv_setiv(arg, (int) o);
+        sv_setiv(arg, (IV) o);
         XPUSHs(rarg);
 
         PUTBACK;
@@ -136,7 +136,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         {
             HV *hv = newHV();
             SV *rv = newRV_noinc((SV *) hv);
-            SV *rvsub = newRV_noinc((SV *) newSViv((U32) o));
+            SV *rvsub = newRV_noinc((SV *) newSViv((UV) o));
             SV *sv;
             rvsub = sv_bless(rvsub, gv_stashpv("netsnmp_oidPtr", 1));
             hv_store(hv, "oidptr", 6,  rvsub, 0);
@@ -248,7 +248,7 @@ trapd_register(regoid, perlcallback)
                     netsnmp_add_default_traphandler(perl_trapd_handler);
             } else if (!snmp_parse_oid(regoid, myoid, &myoid_len)) {
                 snmp_log(LOG_ERR,
-                         "Failed to parse oid for perl registration: %s %d\n",
+                         "Failed to parse oid for perl registration: %s\n",
                          regoid);
                 RETVAL = 0;
                 return;
