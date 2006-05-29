@@ -7,7 +7,10 @@ if [ "x$snmp_version" = "x" ]; then
   snmp_version="any"
 fi
 
+[ "x$SNMP_SMUX_SOCKET" = "x" ] && SNMP_SMUX_SOCKET=/dev/null
+
 CONFIGAGENT [snmp] persistentdir $SNMP_TMP_PERSISTENTDIR
+CONFIGAGENT smuxsocket $SNMP_SMUX_SOCKET
 
 CONFIGAGENT com2sec testcommunitysec  default testcommunity
 if [ "$SNMP_TRANSPORT_SPEC" = "udp6" -o "$SNMP_TRANSPORT_SPEC" = "tcp6" ];then 
