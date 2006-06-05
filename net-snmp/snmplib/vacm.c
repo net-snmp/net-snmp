@@ -440,6 +440,7 @@ netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
         return VACM_NOTINVIEW;
     view[0] = glen;
     strcpy(view + 1, viewName);
+    DEBUGMSGTL(("9:vacm:checkSubtree", "view %s\n", viewName));
     for (vp = head; vp; vp = vp->next) {
         if (!memcmp(view, vp->viewName, glen + 1)) {
             /*
@@ -476,6 +477,7 @@ netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
                      * the previous or (equal and lexicographically greater
                      * than the previous). 
                      */
+                    DEBUGMSGTL(("9:vacm:checkSubtree", " %s matched?\n", vp->viewName));
     
                     if (vpShorter == NULL
                         || vp->viewSubtreeLen > vpShorter->viewSubtreeLen
@@ -523,6 +525,7 @@ netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
                      * with a different view type, then parts of the subtree 
                      * are included and others are excluded, so return UNKNOWN.
                      */
+                    DEBUGMSGTL(("9:vacm:checkSubtree", " %s matched?\n", vp->viewName));
                     if (vpLonger != NULL
                         && (vpLonger->viewType != vp->viewType)) {
                         DEBUGMSGTL(("vacm:checkSubtree", ", %s\n", "unknown"));
@@ -535,6 +538,7 @@ netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
             }
         }
     }
+    DEBUGMSGTL(("9:vacm:checkSubtree", " %s matched\n", vp->viewName));
 
     /*
      * If we found a matching view subtree with a longer OID than the provided
