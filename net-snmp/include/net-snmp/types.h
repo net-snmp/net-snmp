@@ -162,7 +162,7 @@ typedef unsigned INT64_T uint64_t;
  */
 
     typedef struct netsnmp_index_s {
-       int          len;
+       size_t      len;
        oid         *oids;
     } netsnmp_index;
 
