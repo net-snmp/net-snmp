@@ -517,7 +517,6 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
                 DEBUGMSGTL(("proxy", "  ignoring error response\n"));
                 netsnmp_handler_mark_requests_as_delegated(requests,
                                                            REQUEST_IS_NOT_DELEGATED);
-                netsnmp_free_delegated_cache(cache);
             }
             else
                 netsnmp_set_request_error(cache->reqinfo, requests, pdu->errstat);
