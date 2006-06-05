@@ -394,6 +394,12 @@ parse_mteMonitor(const char *token, char *line)
             case 'u':   /*  user */
                 cp     = copy_nword(cp, buf, SPRINT_MAX_LEN);
                 sess   = netsnmp_iquery_user_session(buf);
+                if (NULL == sess) {
+                    snmp_log(LOG_ERR, "user name %s not found\n", buf);
+                    config_perror("Unknown user name\n");
+                    mteObjects_removeEntries( "snmpd.conf", tname );
+                    return;
+                }
                 break;
             }
         } else {
@@ -501,6 +507,16 @@ parse_mteMonitor(const char *token, char *line)
             break;
     }
 
+    if (NULL == sess) {
+        sess = netsnmp_query_get_default_session();
+        if (NULL == sess) {
+            config_perror
+                ("You must specify a default user name using the agentSecName token\n");
+            mteObjects_removeEntries( "snmpd.conf", tname );
+            return;
+        }
+    }
+
     /*
      *  ... and then create the new trigger entry...
      */
@@ -527,10 +543,7 @@ parse_mteMonitor(const char *token, char *line)
         mteObjects_removeEntries( "snmpd.conf", tname );
         return;
     }
-    if (sess)
-        entry->session           = sess;
-    else
-        entry->session           = netsnmp_query_get_default_session();
+    entry->session               = sess;
     entry->flags                |= flags;
     entry->mteTriggerTest       |= test;
     entry->mteTriggerFrequency   = repeat;
@@ -854,7 +867,7 @@ parse_mteTTable(const char *token, char *line)
     size_t len;
     struct mteTrigger *entry;
 
-    DEBUGMSGTL(("disman:event:conf", "Parsing mteTriggerTable config...  "));
+    DEBUGMSGTL(("disman:event:conf", "Parsing mteTriggerTable config...\n"));
 
     /*
      * Read in the index information for this entry
