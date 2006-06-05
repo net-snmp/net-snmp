@@ -182,7 +182,7 @@ _mteTrigger_failure( /* int error, */ const char *msg )
      *           (if configured to do so)
      */
     mteTriggerFailures++;
-    snmp_log(LOG_ERR, msg );
+    snmp_log(LOG_ERR, "%s\n", msg );
     return;
 }
 
@@ -1100,10 +1100,14 @@ mteTrigger_enable( struct mteTrigger *entry )
     }
 
     if (entry->mteTriggerFrequency) {
+        /*
+         * register once to run ASAP, and another to run
+         * at the trigger frequency
+         */
+        snmp_alarm_register(0, 0, mteTrigger_run, entry );
         entry->alarm = snmp_alarm_register(
                            entry->mteTriggerFrequency, SA_REPEAT,
                            mteTrigger_run, entry );
-        mteTrigger_run( entry->alarm, (void*)entry );
     }
 }
 
