@@ -1929,6 +1929,7 @@ _ifTable_container_init(ifTable_interface_ctx * if_ctx)
         return;
     }
 
+    if_ctx->container->container_name = strdup("ifTable container");
     if (NULL != if_ctx->cache)
         if_ctx->cache->magic = (void *) if_ctx->container;
 }                               /* _ifTable_container_init */
