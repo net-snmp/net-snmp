@@ -82,6 +82,7 @@ SOFTWARE.
 #include "default_store.h"
 
 #define DS_APP_DONT_FIX_PDUS 0
+#define SNMP_MAX_CMDLINE_OIDS	128
 
 static void optProc(int argc, char *const *argv, int opt)
 {
@@ -120,7 +121,7 @@ int main(int argc, char *argv[])
     int   arg;
     int   count;
     int   current_name = 0;
-    char  *names[128];
+    char  *names[SNMP_MAX_CMDLINE_OIDS];
     oid   name[MAX_OID_LEN];
     size_t name_length;
     int   status;
@@ -142,6 +143,12 @@ int main(int argc, char *argv[])
       fprintf(stderr, "Missing object name\n");
       usage();
       exit(1);
+    }
+    if ((argc - arg) > SNMP_MAX_CMDLINE_OIDS) {
+        fprintf(stderr, "Too many object identifiers specified. ");
+        fprintf(stderr, "Only %d allowed in one request.\n", SNMP_MAX_CMDLINE_OIDS);
+        usage();
+        exit(1);
     }
 
     /* get the object names */

@@ -80,6 +80,8 @@ SOFTWARE.
 #include "snmp_debug.h"
 #include "int64.h"
 
+#define SNMP_MAX_CMDLINE_OIDS	128
+
 int failures = 0;
 
 void usage(void)
@@ -117,9 +119,9 @@ int main(int argc, char *argv[])
     int current_name = 0;
     int current_type = 0;
     int current_value = 0;
-    char *names[128];
-    char types[128];
-    char *values[128];
+    char *names[SNMP_MAX_CMDLINE_OIDS];
+    char types[SNMP_MAX_CMDLINE_OIDS];
+    char *values[SNMP_MAX_CMDLINE_OIDS];
     oid name[MAX_OID_LEN];
     size_t name_length;
     int status;
@@ -142,6 +144,12 @@ int main(int argc, char *argv[])
       fprintf(stderr, "Missing object name\n");
       usage();
       exit(1);
+    }
+    if ((argc - arg) > 3*SNMP_MAX_CMDLINE_OIDS) {
+        fprintf(stderr, "Too many object identifiers specified. ");
+        fprintf(stderr, "Only %d allowed in one request.\n", SNMP_MAX_CMDLINE_OIDS);
+        usage();
+        exit(1);
     }
 
     /* get object names, types, and values */
