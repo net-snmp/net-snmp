@@ -1,10 +1,102 @@
 -------------------------------------------------------------------------------
 
-Changes: V4.2.7.pre1 -> V4.2.7
+Changes: V4.2.6 -> V4.2.7
+
+2006-06-06 09:25  dts12
+
+   * README:
+
+   Bring mailing list information into line with the v5 branches.
+
+2006-06-06 09:23  dts12
+
+   * apps/: snmpget.c, snmpgetnext.c, snmpset.c
+
+   Validate the request against the maximum number of varbinds supported
+   (Patch #826714 from Jeremy Puhlman)
+
+2006-06-06 09:11  dts12
+
+   * agent/mibgroup/host/hr_storage.c,
+     agent/mibgroup/host/hr_swrun.c,
+     s/freebsd4.h, s/freebsd5.h, s/freebsd6.h:
+
+   Tweak v4 line to work with current FreeBSD releases.
+
+2006-04-21 13:46  dts12
+
+   * win32/: config.h, snmpnetstat/snmpnetstat.dsp
+
+   Build new snmpnetstat under Windows
+
+2006-04-21 13:42  dts12
+
+   * apps/snmpnetstat/: if.c, main.c, route.c
+
+   Windows portability fixes
+
+2006-04-21 13:38  dts12
+
+   * apps/snmpnetstat/: inet.c, iquery.c
+
+   Skip missing entries (rather than crashing out completely)
+
+2006-03-24 16:39  dts12
+
+   * apps/snmpnetstat/: Makefile.in, if.c,
+     inet.c, ffs.c, inet6.c, iquery.c,
+     main.c, main.h, netstat.h, route.c,
+     snmpnetstat, strlcpy.c, winstub.c, winstub.h:
+
+   Copy/port (redistributable) snmpnetstat rewrite
+
+2005-12-06 14:05  dts12
+
+   * apps/snmpstatus.c:
+
+   Don't crash-and-burn on SNMP exceptions (see bug #1278809)
+
+2005-11-10 10:07  dts12
+
+   * apps/snmpnetstat/snmpnetstat:
+
+   file snmpnetstat was added on branch V4-2-patches on 2006-03-24 16:39:36 +0000
+
+2005-11-10 10:01  dts12
+
+   * apps/snmpnetstat/iquery.c:
+
+   file iquery.c was added on branch V4-2-patches on 2006-03-24 16:39:36 +0000
+
+2005-11-07 14:39  dts12
+
+   * apps/snmpnetstat/ffs.c:
+
+   file ffs.c was added on branch V4-2-patches on 2006-03-24 16:39:36 +0000
+
+2005-06-30 05:01  hardaker
+
+   * snmplib/snmp_api.c:
+
+   Properly check check_packet return code for negative values
+
+2005-06-24 14:32  dts12
+
+   * sedscript.in, version.h,
+     perl/SNMP/SNMP.pm:
+
+   - (version.h sedscript.in): version tag ( 4.2.7 )
+
+2005-06-24 14:29  dts12
+
+   * ChangeLog, FAQ, README:
+
+   update for release 4.2.7
 
 2005-05-09 12:53  dts12
 
-   * agent/mibgroup/ucd-snmp/: memory_netbsd1.c, vmstat_netbsd1.c:
+   * agent/mibgroup/ucd-snmp/: memory_netbsd1.c,
+     vmstat_netbsd1.c:
 
    Fix bogus #ifdef syntax
 
@@ -37,10 +129,6 @@ Changes: V4.2.7.pre1 -> V4.2.7
    * ChangeLog, README, NEWS:
 
    Update preparatory for 4.2.7
-
--------------------------------------------------------------------------------
-
-Changes: V4.2.6 -> V4.2.7.pre1
 
 2005-05-05 14:34  dts12
 
