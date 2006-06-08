@@ -283,7 +283,7 @@ void system_parse_config_sysObjectID(const char *token, char *cptr)
                  "sysobjectid token not a parsable OID:\n\t%s",
                  cptr);
         config_perror(tmpbuf);
-        memcpy(sysObjectID, version_sysoid, version_sysoid_len);
+        memcpy(sysObjectID, version_sysoid, version_sysoid_len * sizeof(oid));
         sysObjectIDLength = version_sysoid_len;
     }
 }
@@ -417,7 +417,7 @@ init_system_mib(void)
 #endif
 
     /* default sysObjectID */
-    memcpy(sysObjectID, version_sysoid, version_sysoid_len);
+    memcpy(sysObjectID, version_sysoid, version_sysoid_len * sizeof(oid));
     sysObjectIDLength = version_sysoid_len;
 
     /*
