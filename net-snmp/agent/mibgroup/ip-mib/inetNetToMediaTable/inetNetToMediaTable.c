@@ -917,7 +917,7 @@ inetNetToMediaTable_commit(inetNetToMediaTable_rowreq_ctx * rowreq_ctx)
      *    processing in case of a failure.
      */
 #if 1
-#warning nettomedia commit
+    /** xxx-rks:9 nettomedia commit */
 #else
     if (save_flags & FLAG_INETNETTOMEDIAPHYSADDRESS) {
         save_flags &= ~FLAG_INETNETTOMEDIAPHYSADDRESS;  /* clear inetNetToMediaPhysAddress */
