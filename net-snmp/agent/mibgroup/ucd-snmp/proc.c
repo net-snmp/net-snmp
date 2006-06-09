@@ -137,7 +137,7 @@ void procfix_parse_config(const char *token, char* cptr)
   struct myproc *procp;
 
   /* don't allow two entries with the same name */
-  cptr = copy_word(cptr,tmpname);
+  cptr = copy_nword(cptr,tmpname, sizeof(tmpname));
   if ((procp = get_proc_by_name(tmpname)) == NULL) {
     config_perror("No proc entry registered for this proc name yet.");
     return;
@@ -158,7 +158,7 @@ void proc_parse_config(const char *token, char* cptr)
   struct myproc **procp = &procwatch;
 
   /* don't allow two entries with the same name */
-  copy_word(cptr,tmpname);
+  copy_nword(cptr,tmpname, sizeof(tmpname));
   if (get_proc_by_name(tmpname) != NULL) {
     config_perror("Already have an entry for this process.");
     return;
@@ -173,7 +173,7 @@ void proc_parse_config(const char *token, char* cptr)
     return; /* memory alloc error */
   numprocs++;
   /* not blank and not a comment */
-  copy_word(cptr,(*procp)->name);
+  copy_nword(cptr,(*procp)->name, sizeof((*procp)->name));
   cptr = skip_not_white(cptr);
   if ((cptr = skip_white(cptr))) 
     {
@@ -248,19 +248,23 @@ u_char *var_extensible_proc(struct variable *vp,
         if (long_ret < 0) {
           errmsg[0] = 0;   /* catch out of mem errors return 0 count */
         } else if (proc->min && long_ret < proc->min) {
-          sprintf(errmsg,"Too few %s running (# = %d)",
+          snprintf(errmsg, sizeof(errmsg),
+                  "Too few %s running (# = %d)",
                   proc->name, (int) long_ret);
         }
         else if (proc->max && long_ret > proc->max) {
-          sprintf(errmsg,"Too many %s running (# = %d)",
+          snprintf(errmsg, sizeof(errmsg),
+                  "Too many %s running (# = %d)",
                   proc->name, (int) long_ret);
         }
         else if (proc->min == 0 && proc->max == 0 && long_ret < 1) {
-          sprintf(errmsg,"No %s process running.", proc->name);
+          snprintf(errmsg, sizeof(errmsg),
+                  "No %s process running.", proc->name);
         }
         else {
           errmsg[0] = 0;
         }
+        errmsg[ sizeof(errmsg)-1 ] = 0;
         *var_len = strlen(errmsg);
         return((u_char *) errmsg);
       case ERRORFIX:
@@ -634,7 +638,7 @@ int sh_count_procs(char *procname)
   int slow = strstr (PSCMD, "ax") != NULL;
   
   strcpy(ex.command,PSCMD);
-  if ((fd = get_exec_output(&ex)) > 0) {
+  if ((fd = get_exec_output(&ex)) >= 0) {
     if ((file = fdopen(fd,"r")) == NULL) {
       setPerrorstatus("fdopen");
       close(fd);
@@ -652,14 +656,14 @@ int sh_count_procs(char *procname)
 	    cp = strchr(cptr, ']');
 	    if (cp) *cp = 0;
 	  }
-	  copy_word(cptr, line);
+	  copy_nword(cptr, line, sizeof(line));
 	  cp = line+strlen(line)-1;
 	  if (*cp == ':') *cp = 0;
 	}
 	else {
           if ((cptr = find_field(line,LASTFIELD)) == NULL)
             continue;
-          copy_word(cptr,line);
+          copy_nword(cptr,line, sizeof(line));
 	}
         if (!strcmp(line,procname)) ret++;
       }

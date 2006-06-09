@@ -102,7 +102,7 @@ usage (void)
 {
   fprintf(stderr,"Usage: snmpbulkget ");
   snmp_parse_args_usage(stderr);
-  fprintf(stderr," [<objectID>]\n\n");
+  fprintf(stderr," OID [OID]...\n\n");
   snmp_parse_args_descriptions(stderr);
   fprintf(stderr,"  -B <nonrep> <rep>\tfirst <nonrep> objects are non-repeaters\n");
   fprintf(stderr,"\t\t\tmaximum <rep> repetitions over the remainder\n");

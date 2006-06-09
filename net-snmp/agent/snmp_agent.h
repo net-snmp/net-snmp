@@ -7,6 +7,10 @@
 #ifndef SNMP_AGENT_H
 #define SNMP_AGENT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SNMP_MAX_PDU_SIZE 64000 /* local constraint on PDU size sent by agent
                                   (see also SNMP_MAX_MSG_SIZE in snmp_api.h) */
 
@@ -38,5 +42,9 @@ int init_master_agent(int dest_port,
                        int (*pre_parse) (struct snmp_session *, snmp_ipaddr),
                        int (*post_parse) (struct snmp_session *, struct snmp_pdu *,int));
 int agent_check_and_process(int block);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

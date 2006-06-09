@@ -142,21 +142,31 @@ static void optProc(int argc, char *const *argv, int opt)
 	while (*optarg) {
           switch (*optarg++) {
           case 'w':
-	    if ( argv[optind] )
-               max_width = atoi(argv[optind]);
-            if (max_width == 0) {
-               fprintf(stderr, "Bad -Cw option: %s\n", argv[optind]);
+	    if ( optind < argc ) {
+	       if ( argv[optind] )
+                  max_width = atoi(argv[optind]);
+               if (max_width == 0) {
+                  fprintf(stderr, "Bad -Cw option: %s\n", argv[optind]);
+                  usage();
+               }
+	       optind++;
+	    } else {
+               fprintf(stderr, "Bad -Cw option: no argument given\n");
                usage();
-            }
-	    optind++;
+	    }
             break;
           case 'f':
-            field_separator = argv[optind];
-            if ( !field_separator ) {
-               fprintf(stderr, "Bad -Cf option: %s\n", argv[optind]);
+	    if ( optind < argc ) {
+               field_separator = argv[optind];
+               if ( !field_separator ) {
+                  fprintf(stderr, "Bad -Cf option: %s\n", argv[optind]);
+                  usage();
+               }
+	       optind++;
+	    } else {
+               fprintf(stderr, "Bad -Cf option: no argument given\n");
                usage();
-            }
-	    optind++;
+	    }
             break;
           case 'h':
             headers_only = 1;
@@ -182,7 +192,9 @@ static void optProc(int argc, char *const *argv, int opt)
           }
        }
        break;
+#ifndef DEPRECATED_CLI_OPTIONS
     case 'w':
+      fprintf(stderr, "Warning: -w option is deprecated - use -Cw\n");
       max_width = atoi(optarg);
       if (max_width == 0) {
 	fprintf(stderr, "Bad -w option: %s\n", optarg);
@@ -190,11 +202,14 @@ static void optProc(int argc, char *const *argv, int opt)
       }
       break;
     case 'b':
+      fprintf(stderr, "Warning: -b option is deprecated - use -Cb\n");
       brief = 1;
       break;
     case 'i':
+      fprintf(stderr, "Warning: -i option is deprecated - use -Ci\n");
       show_index = 1;
       break;
+#endif
     }
 }
 
@@ -202,16 +217,31 @@ void usage(void)
 {
   fprintf(stdout,"Usage: snmptable ");
   snmp_parse_args_usage(stdout);
-  fprintf(stdout," <objectID>\n\n");
+  fprintf(stdout," TABLE-OID\n\n");
   snmp_parse_args_descriptions(stdout);
-  fprintf(stdout,"  -Cw <W>\tprint table in parts of W characters width\n");
-  fprintf(stdout,"  -Cf <F>\tprint an F delimited table\n");
-  fprintf(stdout,"  -Cb\t\tbrief field names\n");
-  fprintf(stdout,"  -CB\t\tdon't use GETBULK requests\n");
-  fprintf(stdout,"  -Ci\t\tprint index value\n");
-  fprintf(stdout,"  -Ch\t\tprint only the column headers\n");
-  fprintf(stdout,"  -CH\t\tprint no column headers\n");
+  fprintf(stderr, "  -C <APPOPTS>\tsnmptable specific options\n");
+  fprintf(stderr, "\t\t  APPOPTS values:\n");
+  fprintf(stderr, "\t\t      b    : brief field names\n");
+  fprintf(stderr, "\t\t      B    : don't use GETBULK requests\n");
+  fprintf(stderr, "\t\t      f STR: print the table delimited with STR\n");
+  fprintf(stderr, "\t\t      h    : print only the column headers\n");
+  fprintf(stderr, "\t\t      H    : don't print the column headers\n");
+  fprintf(stderr, "\t\t      i    : print the index values\n");
+  fprintf(stderr, "\t\t      w NUM: print the table in parts of NUM characters width\n");
   exit(1);
+}
+
+void
+reverse_fields(void)
+{
+  struct column tmp;
+  int i;
+
+  for (i = 0; i < fields / 2; i++) {
+    memcpy(&tmp, &(column[i]), sizeof(struct column));
+    memcpy(&(column[i]), &(column[fields - 1 - i]), sizeof(struct column));
+    memcpy(&(column[fields - 1 - i]), &tmp, sizeof(struct column));
+  }
 }
 
 int main(int argc, char *argv[])
@@ -223,7 +253,11 @@ int main(int argc, char *argv[])
   snmp_set_quick_print(1);
 
   /* get the common command line arguments */
+#ifndef DEPRECATED_CLI_OPTIONS
   switch (snmp_parse_args(argc, argv, &session, "w:C:bi", optProc)) {
+#else
+  switch (snmp_parse_args(argc, argv, &session, "C:", optProc)) {
+#endif
   case  -2:
     exit(0);
   case -1:
@@ -259,6 +293,7 @@ int main(int argc, char *argv[])
     tblname = NULL;
 
   get_field_names( tblname );
+  reverse_fields();
 
   /* open an SNMP session */
   SOCK_STARTUP;
@@ -344,7 +379,8 @@ void print_table (void)
 
 void get_field_names( char* tblname )
 {
-  char string_buf[SPRINT_MAX_LEN];
+  char *string_buf = malloc(SPRINT_MAX_LEN);
+  int buf_len = SPRINT_MAX_LEN, str_len = 0;
   char *name_p;
   struct tree *tbl = NULL;
   int going = 1;
@@ -361,10 +397,13 @@ void get_field_names( char* tblname )
     root[rootlen++] = tbl->subid;
     tbl = tbl->child_list;
   }
-  else
+  else {
     root[rootlen++] = 1;
+    going = 0;
+  }
 
-  sprint_objid(string_buf, root, rootlen-1);
+  sprint_realloc_objid((u_char **)&string_buf, &buf_len, &str_len, 1,
+	  root, rootlen-1);
   table_name = strdup(string_buf);
 
   fields = 0;
@@ -374,6 +413,9 @@ void get_field_names( char* tblname )
       if (tbl->access == MIB_ACCESS_NOACCESS) {
 	fields--;
 	tbl = tbl->next_peer;
+	if (!tbl) {
+	  going = 0;
+	}
 	continue;
       }
       root[ rootlen ] = tbl->subid;
@@ -382,7 +424,9 @@ void get_field_names( char* tblname )
     }
     else
       root[rootlen] = fields;
-    sprint_objid(string_buf, root, rootlen+1);
+    str_len = 0;
+    sprint_realloc_objid((u_char **)&string_buf, &buf_len, &str_len, 1,
+	    root, rootlen+1);
     name_p = strrchr(string_buf, '.');
     if (!name_p) name_p = strrchr(string_buf, ':');
     if (!name_p) name_p = string_buf;
@@ -427,6 +471,7 @@ void get_field_names( char* tblname )
       }
     }
   }
+  free(string_buf);
 }
 
 void get_table_entries( struct snmp_session *ss )
@@ -438,7 +483,8 @@ void get_table_entries( struct snmp_session *ss )
   int   status;
   int   i;
   int   col;
-  char  string_buf[SPRINT_MAX_LEN], *cp;
+  char  *string_buf = malloc(SPRINT_MAX_LEN), *cp;
+  int	buf_len = SPRINT_MAX_LEN, str_len = 0;
   char  *name_p = NULL;
   char  **dp;
   int end_of_table = 0;
@@ -489,7 +535,11 @@ void get_table_entries( struct snmp_session *ss )
 	for (vars = response->variables; vars; vars = vars->next_variable) {
 	  col++;
 	  name[rootlen] = column[col].subid;
-	  if (localdebug) sprint_variable(string_buf, vars->name, vars->name_length, vars);
+	  if (localdebug) {
+	    str_len = 0;
+	    sprint_realloc_variable((u_char **)&string_buf, &buf_len, &str_len, 1,
+		    vars->name, vars->name_length, vars);
+	  }
 	  if( (vars->name_length < name_length) ||
               ((int)vars->name[rootlen] != column[col].subid) ||
 	      memcmp(name, vars->name, name_length * sizeof(oid)) != 0 ||
@@ -505,7 +555,9 @@ void get_table_entries( struct snmp_session *ss )
 	    have_current_index = 1;
 	    name_length = vars->name_length;
 	    memcpy(name, vars->name, name_length*sizeof(oid));
-	    sprint_objid(string_buf, vars->name, vars->name_length); 
+	    str_len = 0;
+	    sprint_realloc_objid((u_char **)&string_buf, &buf_len, &str_len, 1,
+		    vars->name, vars->name_length); 
 	    i = vars->name_length - rootlen + 1;
 	    if (localdebug || show_index ) {
 	      if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX))
@@ -535,7 +587,9 @@ void get_table_entries( struct snmp_session *ss )
 	  }
 	  
 	  if (localdebug) printf("%s => taken\n", string_buf);
-	  sprint_value(string_buf, vars->name, vars->name_length, vars);
+	  str_len = 0;
+	  sprint_realloc_value((u_char **)&string_buf, &buf_len, &str_len, 1,
+		  vars->name, vars->name_length, vars);
 	  for (cp = string_buf; *cp; cp++) if (*cp == '\n') *cp = ' ';
 	  dp[col] = strdup(string_buf);
 	  i = strlen(string_buf);
@@ -583,6 +637,7 @@ void get_table_entries( struct snmp_session *ss )
     if (response)
       snmp_free_pdu(response);
   }
+  free(string_buf);
 }
 
 void getbulk_table_entries( struct snmp_session *ss )
@@ -594,7 +649,8 @@ void getbulk_table_entries( struct snmp_session *ss )
   int   status;
   int   i;
   int   row, col;
-  char  string_buf[SPRINT_MAX_LEN], *cp;
+  char  *string_buf = malloc(SPRINT_MAX_LEN), *cp;
+  int	buf_len = SPRINT_MAX_LEN, str_len = 0;
   char  *name_p = NULL;
   char  **dp;
 
@@ -613,7 +669,9 @@ void getbulk_table_entries( struct snmp_session *ss )
 	vars = response->variables;
 	last_var = NULL;
 	while (vars) {
-	  sprint_objid(string_buf, vars->name, vars->name_length);
+	  str_len = 0;
+	  sprint_realloc_objid((u_char **)&string_buf, &buf_len, &str_len, 1,
+		  vars->name, vars->name_length);
 	  if (vars->type == SNMP_ENDOFMIBVIEW || memcmp(vars->name, name, rootlen*sizeof(oid)) != 0) {
 	    if (localdebug)
 	      printf("%s => end of table\n", string_buf);
@@ -662,7 +720,9 @@ void getbulk_table_entries( struct snmp_session *ss )
 	    if (i > index_width) index_width = i;
 	  }
 	  dp = data+row*fields;
-	  sprint_value(string_buf, vars->name, vars->name_length, vars);
+	  str_len = 0;
+	  sprint_realloc_value((u_char **)&string_buf, &buf_len, &str_len, 1,
+		  vars->name, vars->name_length, vars);
 	  for (cp = string_buf; *cp; cp++)
 	    if (*cp == '\n') *cp = ' ';
 	  for (col = 0; col < fields; col++)
@@ -710,4 +770,5 @@ void getbulk_table_entries( struct snmp_session *ss )
     if (response)
       snmp_free_pdu(response);
   }
+  free(string_buf);
 }

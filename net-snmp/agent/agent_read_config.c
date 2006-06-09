@@ -50,6 +50,12 @@
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#if HAVE_SYS_SOCKETVAR_H
+#if dynix
+#include <sys/param.h>
+#endif
+#include <sys/socketvar.h>
+#endif
 #elif HAVE_WINSOCK_H
 #include <winsock.h>
 #endif 
@@ -101,6 +107,7 @@
 #include "system.h"
 #include "snmp_debug.h"
 #include "snmp_alarm.h"
+#include "agent_callbacks.h"
 #include "default_store.h"
 #include "ds_agent.h"
 #include "mib_module_includes.h"
@@ -115,13 +122,18 @@ void snmpd_set_agent_user(const char *token, char *cptr)
 struct passwd *info;
 #endif
  
-    if (cptr[0] == '#')
-        ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, atoi(&cptr[1]));
-
+    if (cptr[0] == '#') {
+        char *ecp;
+	int uid;
+	uid = strtoul(cptr+1, &ecp, 10);
+	if (*ecp != 0) config_perror("Bad number");
+	else ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, uid);
+    }
 #if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
-    if ((info = getpwnam(cptr)) != NULL) {
+    else if ((info = getpwnam(cptr)) != NULL) {
         ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, info->pw_uid);
     }
+    else config_perror("User not found in passwd database");
 #endif
 }
 
@@ -131,13 +143,17 @@ void snmpd_set_agent_group(const char *token, char *cptr)
 struct group *info;
 #endif
  
-    if (cptr[0] == '#')
-        ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, atoi(&cptr[1]));
-
+    if (cptr[0] == '#') {
+    	char *ecp;
+	int gid = strtoul(cptr+1, &ecp, 10);
+	if (*ecp != 0) config_perror("Bad number");
+        else ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, gid);
+    }
 #if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
-    if ((info = getgrnam(cptr)) != NULL) {
+    else if ((info = getgrnam(cptr)) != NULL) {
         ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, info->gr_gid);
     }
+    else config_perror("Group not found in group database");
 #endif
 }
 #endif
@@ -152,12 +168,13 @@ void snmpd_set_agent_address(const char *token, char *cptr)
 
     if (ptr)
 	/* append to the older specification string */
-	sprintf(buf,"%s,%s", ptr, cptr);
+	snprintf(buf, sizeof(buf), "%s,%s", ptr, cptr);
     else
-	strcpy(buf,cptr);
+	strncpy(buf, cptr, sizeof(buf));
+    buf[sizeof(buf)-1] = '\0';
 
     DEBUGMSGTL(("snmpd_ports","port spec: %s\n", buf));
-    ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, strdup(buf));
+    ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, buf);
 
 }
 
@@ -169,6 +186,9 @@ void init_agent_read_config (const char *app)
   register_app_config_handler("authtrapenable",
                           snmpd_parse_config_authtrap, NULL,
                           "1 | 2\t\t(1 = enable, 2 = disable)");
+  register_app_config_handler("pauthtrapenable",
+			  snmpd_parse_config_authtrap, NULL, NULL);
+
 
   if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT ) {
       register_app_config_handler("trapsink",
@@ -208,6 +228,8 @@ void init_agent_read_config (const char *app)
 
 void update_config(void)
 {
+  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                      SNMPD_CALLBACK_PRE_UPDATE_CONFIG, NULL);
   free_config();
   read_configs();
 }

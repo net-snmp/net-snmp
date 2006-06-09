@@ -8,23 +8,36 @@
 #include <stdlib.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
-#  include <sys/time.h>
+#  include <sys/time.h> 
 # else
 #  include <time.h>
 # endif
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
 #endif
 #if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#include <sys/errno.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include "asn1.h"
@@ -306,12 +319,12 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 
     case AGENTX_MSG_RESPONSE:
         DEBUGMSGTL(("agentx/subagent","  -> response\n"));
-	free( asp );
+	free_agent_snmp_session( asp );
 	return 1;
 
     default:
         DEBUGMSGTL(("agentx/subagent","  -> unknown (%d)\n", pdu->command ));
-	free( asp );
+	free_agent_snmp_session( asp );
 	return 0;
     }
 	
@@ -331,7 +344,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	asp->pdu = NULL;
 	free_agent_snmp_session( asp );
     }
-    DEBUGMSGTL(("agentx/subagent","  FINISHED\n\n"));
+    DEBUGMSGTL(("agentx/subagent","  FINISHED\n"));
 
     return 1;
 }
@@ -382,16 +395,19 @@ agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
 
 
 static int
-subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
-  struct snmp_session *thesession = (struct snmp_session *) clientarg;
-  DEBUGMSGTL(("agentx/subagent","shutting down session....\n"));
+subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg)
+{
+  struct snmp_session *thesession = (struct snmp_session *)clientarg;
+  DEBUGMSGTL(("agentx/subagent", "shutting down session....\n"));
   if (thesession == NULL) {
-    DEBUGMSGTL(("agentx/subagent","Empty session to shutdown\n"));
+    DEBUGMSGTL(("agentx/subagent", "Empty session to shutdown\n"));
+    main_session = NULL;
     return 0;
   }
   agentx_close_session(thesession, AGENTX_CLOSE_SHUTDOWN);
   snmp_close(thesession);
-  DEBUGMSGTL(("agentx/subagent","shut down finished.\n"));
+  main_session = NULL;
+  DEBUGMSGTL(("agentx/subagent", "shut down finished.\n"));
   return 1;
 }
 
@@ -427,9 +443,9 @@ subagent_pre_init( void )
     sess.timeout = SNMP_DEFAULT_TIMEOUT;
     sess.flags  |= SNMP_FLAGS_STREAM_SOCKET;
     if ( ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET) )
-	sess.peername = strdup(ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET));
+	sess.peername = ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET);
     else
-	sess.peername = strdup(AGENTX_SOCKET);
+	sess.peername = AGENTX_SOCKET;
  
     sess.local_port  = 0;		/* client */
     sess.remote_port = AGENTX_PORT;	/* default port */

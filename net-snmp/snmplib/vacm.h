@@ -95,7 +95,7 @@ void vacm_destroyViewEntry (const char *, oid *, size_t);
 void vacm_destroyAllViewEntries (void);
 
 struct vacm_viewEntry *
-vacm_getViewEntry (const char *, oid *, size_t);
+vacm_getViewEntry (const char *, oid *, size_t, int);
 /*
  * Returns a pointer to the viewEntry with the
  * same viewName and viewSubtree
@@ -149,6 +149,7 @@ struct vacm_securityEntry *vacm_createSecurityEntry (const char *);
 struct vacm_securityEntry *vacm_getSecurityEntry (const char *);
 void vacm_scanSecurityInit (void);
 struct vacm_securityEntry *vacm_scanSecurityEntry (void);
+int vacm_is_configured(void);
 
 void vacm_save(const char *token, const char *type);
 void vacm_save_view(struct vacm_viewEntry *view, const char *token, const char *type);

@@ -72,7 +72,8 @@ int     sc_get_transform_type(oid *hashtype, u_int hashtype_len,
  */
 #define	_SCAPI_NOT_CONFIGURED			\
 {						\
-        DEBUGPL(("SCAPI not configured");      \
+        snmp_log(LOG_ERR, "Encryption support not enabled.\n"); \
+        DEBUGPL(("SCAPI not configured"));      \
 	return SNMPERR_SC_NOT_CONFIGURED;	\
 }
 

@@ -74,5 +74,5 @@ info -        system.sysUpTime.0 becomes SNMPv2-MIB::sysUpTime.0
 info  command line equivelent: 1 = -Os, 2 = -OS
 info  arguments: (1|2)
 question 1 Shorten OIDs (0|1|2)
-validanswer 1 ^(1|2)$
+validanswer 1 ^(0|1|2)$
 

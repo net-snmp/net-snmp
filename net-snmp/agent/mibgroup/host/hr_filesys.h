@@ -9,9 +9,10 @@ extern void	init_hr_filesys (void);
 extern void	Init_HR_FileSys (void);
 extern FindVarMethod var_hrfilesys;
 extern int   Get_Next_HR_FileSys (void);
+extern int   Check_HR_FileSys_NFS (void);
 
 extern int   	Get_FSIndex (char *);
-extern int   	Get_FSSize (char *);	/* Temporary */
+extern long   	Get_FSSize (char *);	/* Temporary */
 
 
 #endif /* _MIBGROUP_HRFSYS_H */

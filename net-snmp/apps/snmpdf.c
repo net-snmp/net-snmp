@@ -90,8 +90,9 @@ usage (void)
   snmp_parse_args_usage(stderr);
   fprintf(stderr,"\n\n");
   snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "\nsnmpdf options:\n");
-  fprintf(stderr, "\t-Cu\tUse UCD-SNMP dskTable to do the calculations.\n");
+  fprintf(stderr, "  -C <APPOPTS>\tsnmpdf specific options\n");
+  fprintf(stderr, "\t\t  APPOPTS values:\n");
+  fprintf(stderr, "\t\t      u: Use UCD-SNMP dskTable to do the calculations.\n");
   fprintf(stderr, "\t\t[Normally the HOST-RESOURCES-MIB is consulted first.]\n");
 }
 
@@ -108,8 +109,7 @@ static void optProc(int argc, char *const *argv, int opt)
                         break;
                     default:
                         fprintf(stderr,
-                                "Unknown flag passed to -C: %c\n", *optarg);
-                        usage();
+                                "Unknown flag passed to -C: %c\n", optarg[-1]);
                         exit(1);
                 }
             }
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
 
         while(vlp) {
             size_t units;
-            unsigned long long hssize, hsused;
+            unsigned long hssize, hsused;
             char descr[SPRINT_MAX_LEN];
         
             pdu = snmp_pdu_create(SNMP_MSG_GET);
@@ -265,17 +265,19 @@ int main(int argc, char *argv[])
             descr[vlp2->val_len] = '\0';
 
             vlp2 = vlp2->next_variable;
-            units = *(vlp2->val.integer);
+            units = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             vlp2 = vlp2->next_variable;
-            hssize = *(vlp2->val.integer);
+            hssize = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             vlp2 = vlp2->next_variable;
-            hsused = *(vlp2->val.integer);
+            hsused = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
-            printf("%-18s %15lld %15lld %15lld %4lld%%\n", descr,
-                   ((units)?(hssize*units/1024):hssize), hsused,
-                   hssize-hsused, (hssize)?(100*hsused/hssize):hsused);
+            printf("%-18s %15lu %15lu %15lu %4lu%%\n", descr,
+                   units ? hssize*(units/1024) : hssize,
+		   units ? hsused*(units/1024) : hsused,
+                   units ? (hssize-hsused)*(units/1024) : hssize-hsused,
+		   hssize ? 100*hsused/hssize : hsused);
 
             vlp = vlp->next_variable;
             snmp_free_pdu(response);
@@ -295,7 +297,7 @@ int main(int argc, char *argv[])
         vlp = collect(ss, pdu, base, base_length);
 
         while(vlp) {
-            unsigned int hssize, hsused;
+            unsigned long hssize, hsused;
             char descr[SPRINT_MAX_LEN];
         
             pdu = snmp_pdu_create(SNMP_MSG_GET);
@@ -323,9 +325,11 @@ int main(int argc, char *argv[])
             vlp2 = vlp2->next_variable;
             hsused = *(vlp2->val.integer);
 
-            printf("%-18s %15d %15d %15d %4d%%\n", descr,
-                   ((units)?(hssize*units/1024):hssize), hsused,
-                   hssize-hsused, (hssize)?(100*hsused/hssize):hsused);
+            printf("%-18s %15lu %15lu %15lu %4lu%%\n", descr,
+                   units ? hssize*(units/1024) : hssize,
+		   units ? hsused*(units/1024) : hsused,
+                   units ? (hssize-hsused)*(units/1024) : hssize-hsused,
+		   hssize ? 100*hsused/hssize : hsused);
 
             vlp = vlp->next_variable;
             snmp_free_pdu(response);
@@ -334,7 +338,7 @@ int main(int argc, char *argv[])
     }
     
     if (count == 0) {
-        fprintf(stderr, "Failed to locate any partions.\n");
+        fprintf(stderr, "Failed to locate any partitions.\n");
         exit(1);
     }
             

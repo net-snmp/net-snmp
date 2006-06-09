@@ -4,8 +4,20 @@
  */
 
 #include <config.h>
+
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "host_res.h"
 #include "hr_disk.h"
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include <fcntl.h>
 #if HAVE_UNISTD_H
@@ -56,6 +68,22 @@
 # endif
 #endif
 
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
+#ifdef linux
+/*
+ * define BLKGETSIZE from <linux/fs.h>:
+ * Note: cannot include this file completely due to errors with redefinition
+ * of structures (at least with older linux versions) --jsf
+ */
+#define BLKGETSIZE _IO(0x12,96) /* return device size */
+#endif
+
+#include "agent_read_config.h"
+#include "read_config.h"
+
 #define HRD_MONOTONICALLY_INCREASING
 
 	/*********************
@@ -67,22 +95,24 @@
 
 void  Init_HR_Disk (void);
 int   Get_Next_HR_Disk (void);
-void  Save_HR_Disk_General (void);
-void  Save_HR_Disk_Specific (void);
-int   Query_Disk (int);
-int   Is_It_Writeable (void);
-int   What_Type_Disk (void);
-int   Is_It_Removeable (void);
-const char *describe_disk (int);
-int header_hrdisk (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
-void Add_HR_Disk_entry (const char *, char, char, char, char, char);
+int   Get_Next_HR_Disk_Partition (char *, size_t, int);
+static void  Add_HR_Disk_entry (const char *, int, int, int, int, const char *, int, int);
+static void  Save_HR_Disk_General (void);
+static void  Save_HR_Disk_Specific (void);
+static int   Query_Disk (int, const char *);
+static int   Is_It_Writeable (void);
+static int   What_Type_Disk (void);
+static int   Is_It_Removeable (void);
+static const char *describe_disk (int);
 
-int HRD_type_index;
-int HRD_index;
+int header_hrdisk (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
+
+static int HRD_type_index;
+static int HRD_index;
 static char HRD_savedModel[40];
 static long HRD_savedCapacity = 1044;
 static int  HRD_savedFlags;
-     time_t HRD_history[HRDEV_TYPE_MASK];
+static time_t HRD_history[HRDEV_TYPE_MASK];
 
 #ifdef DIOC_DESCRIBE
 static disk_describe_type HRD_info;
@@ -106,6 +136,9 @@ static struct hd_driveid HRD_info;
 #ifdef DIOCGDINFO
 static struct disklabel HRD_info;
 #endif
+
+static void parse_disk_config(const char *, char *);
+static void free_disk_config(void);
 
 	/*********************
 	 *
@@ -139,29 +172,31 @@ void init_hr_disk(void)
 #endif
 
 #if defined(linux)
-    Add_HR_Disk_entry ( "/dev/hd%c%c", 'a', 'd', '\0', '1', '6' );
-    Add_HR_Disk_entry ( "/dev/sd%c%c", 'a', 'g', '\0', '1', '6' );
-    Add_HR_Disk_entry ( "/dev/fd%c%c", '0', '0', '\0', '\0', '\0' );
+    Add_HR_Disk_entry ( "/dev/hd%c%d", -1, -1, 'a', 'l', "/dev/hd%c", 1, 15 );
+    Add_HR_Disk_entry ( "/dev/sd%c%d", -1, -1, 'a', 'p', "/dev/sd%c", 1, 15 );
+    Add_HR_Disk_entry ( "/dev/md%d",   -1, -1,   0,   3, "/dev/md%d", 0, 0 );
+    Add_HR_Disk_entry ( "/dev/fd%d",   -1, -1,   0,   1, "/dev/fd%d", 0, 0 );
 #elif defined(hpux)
-#ifdef hpux10
-    Add_HR_Disk_entry ( "/dev/rdsk/c0t%cd%c", '0', '6', '0', '0', '4' );
-#else
-    Add_HR_Disk_entry ( "/dev/rdsk/c201d%cs%c", '0', '6', '0', '0', '4' );
+#if defined(hpux10) || defined(hpux11)
+    Add_HR_Disk_entry ( "/dev/rdsk/c%dt%xd%d", 0, 1, 0, 15, "/dev/rdsk/c%dt%xd0", 0, 4 );
+#else /* hpux9 */
+    Add_HR_Disk_entry ( "/dev/rdsk/c%dd%xs%d", 201, 201, 0, 15, "/dev/rdsk/c%dd%xs0", 0, 4 );
 #endif
 #elif defined(solaris2)
-    Add_HR_Disk_entry ( "/dev/rdsk/c0t%cd0s%c", '0', '6', '0', '0', '7' );
-    Add_HR_Disk_entry ( "/dev/rdsk/c0d%cs%c", '0', '3', '0', '0', '7' );
+    Add_HR_Disk_entry ( "/dev/rdsk/c%dt%dd0s%d", 0, 1, 0, 15, "/dev/rdsk/c%dt%dd0s0", 0, 7 );
+    Add_HR_Disk_entry ( "/dev/rdsk/c%dd%ds%d",   0, 1, 0, 15, "/dev/rdsk/c%dd%ds0", 0, 7 );
+#elif defined(freebsd4)
+    Add_HR_Disk_entry ( "/dev/ad%ds%d%c", 0, 1, 1, 4, "/dev/ad%ds%d", 'a', 'h');
+    Add_HR_Disk_entry ( "/dev/da%ds%d%c", 0, 1, 1, 4, "/dev/da%ds%d", 'a', 'h');
 #elif defined(freebsd3)
-    Add_HR_Disk_entry ("/dev/wd0s%c%c", '1', '4', '\0', 'a', 'h');
-    Add_HR_Disk_entry ("/dev/wd1s%c%c", '1', '4', '\0', 'a', 'h');
-    Add_HR_Disk_entry ("/dev/sd0s%c%c", '1', '4', '\0', 'a', 'h');
-    Add_HR_Disk_entry ("/dev/sd1s%c%c", '1', '4', '\0', 'a', 'h');
+    Add_HR_Disk_entry ( "/dev/wd%ds%d%c", 0, 1, 1, 4, "/dev/wd%ds%d", 'a', 'h');
+    Add_HR_Disk_entry ( "/dev/sd%ds%d%c", 0, 1, 1, 4, "/dev/sd%ds%d", 'a', 'h');
 #elif defined(freebsd2)
-    Add_HR_Disk_entry ("/dev/wd%c%c", '0', '3', '\0', 'a', 'h');
-    Add_HR_Disk_entry ("/dev/sd%c%c", '0', '3', '\0', 'a', 'h');
+    Add_HR_Disk_entry ( "/dev/wd%d%c", -1, -1, 0, 3, "/dev/wd%d", 'a', 'h');
+    Add_HR_Disk_entry ( "/dev/sd%d%c", -1, -1, 0, 3, "/dev/sd%d", 'a', 'h');
 #elif defined(netbsd1)
-    Add_HR_Disk_entry ("/dev/wd%c%c", '0', '3', 'c', 'a', 'h');
-    Add_HR_Disk_entry ("/dev/sd%c%c", '0', '3', 'c', 'a', 'h');
+    Add_HR_Disk_entry ( "/dev/wd%d%c", -1, -1, 0, 3, "/dev/wd%dc", 'a', 'h');
+    Add_HR_Disk_entry ( "/dev/sd%d%c", -1, -1, 0, 3, "/dev/sd%dc", 'a', 'h');
 #endif
 
     device_descr[ HRDEV_DISK ] = describe_disk;	
@@ -169,9 +204,221 @@ void init_hr_disk(void)
     HRD_savedCapacity = 0;
 
     for ( i=0 ; i<HRDEV_TYPE_MASK ; ++i )
-	HRD_history[i] = 0;
+	HRD_history[i] = -1;
 
     REGISTER_MIB("host/hr_disk", hrdisk_variables, variable4, hrdisk_variables_oid);
+
+    snmpd_register_config_handler("ignoredisk", parse_disk_config,
+				  free_disk_config, "name");
+}
+
+#define ITEM_STRING	1
+#define ITEM_SET	2
+#define ITEM_STAR	3
+#define ITEM_ANY	4
+
+typedef unsigned char details_set[32];
+
+typedef struct _conf_disk_item {
+    int item_type;	/* ITEM_STRING, ITEM_SET, ITEM_STAR, ITEM_ANY */
+    void *item_details;	/* content depends upon item_type */
+    struct _conf_disk_item *item_next;
+} conf_disk_item;
+
+typedef struct _conf_disk_list {
+    conf_disk_item *list_item;
+    struct _conf_disk_list *list_next;
+} conf_disk_list;
+static conf_disk_list *conf_list;
+
+static int match_disk_config(const char *);
+static int match_disk_config_item(const char *, conf_disk_item *);
+
+static void
+parse_disk_config(const char *token, char *cptr)
+{
+    conf_disk_list *d_new;
+    conf_disk_item *di_curr;
+    details_set *d_set;
+    char *name, *p, *d_str, c;
+    unsigned int i, neg, c1, c2;
+
+    name = strtok(cptr, " \t");
+    if (!name) {
+	config_perror("Missing NAME parameter");
+	return;
+    }
+    d_new = (conf_disk_list *)malloc(sizeof(conf_disk_list));
+    if (!d_new) {
+	config_perror("Out of memory");
+	return;
+    }
+    di_curr = (conf_disk_item *)malloc(sizeof(conf_disk_item));
+    if (!di_curr) {
+	config_perror("Out of memory");
+	return;
+    }
+    d_new->list_item = di_curr;
+    for (;;) {
+	if (*name == '?') {
+	    di_curr->item_type = ITEM_ANY;
+	    di_curr->item_details = (void *)0;
+	    name++;
+	} else if (*name == '*') {
+	    di_curr->item_type = ITEM_STAR;
+	    di_curr->item_details = (void *)0;
+	    name++;
+	} else if (*name == '[') {
+	    d_set = (details_set *)malloc(sizeof(details_set));
+	    if (!d_set) {
+		config_perror("Out of memory");
+		return;
+	    }
+	    for (i = 0; i < sizeof(details_set); i++)
+		(*d_set)[i] = (unsigned char)0;
+	    name++;
+	    if (*name == '^' || *name == '!') {
+		neg = 1;
+		name++;
+	    } else {
+		neg = 0;
+	    }
+	    while (*name && *name != ']') {
+		c1 = ((unsigned int)*name++) & 0xff;
+		if (*name == '-' && *(name + 1) != ']') {
+		    name++;
+		    c2 = ((unsigned int)*name++) & 0xff;
+		} else {
+		    c2 = c1;
+		}
+		for (i = c1; i <= c2; i++)
+		    (*d_set)[i / 8] |= (unsigned char)(1 << (i % 8));
+	    }
+	    if (*name != ']') {
+		config_perror("Syntax error in NAME: invalid set specified");
+		return;
+	    }
+	    if (neg) {
+		for (i = 0; i < sizeof(details_set); i++)
+		    (*d_set)[i] = (*d_set)[i] ^ (unsigned char)0xff;
+	    }
+	    di_curr->item_type = ITEM_SET;
+	    di_curr->item_details = (void *)d_set;
+	    name++;
+	} else {
+	    for (p = name; *p != '\0' && *p != '?' && *p != '*' && *p != '[';
+		p++);
+	    c = *p;
+	    *p = '\0';
+	    d_str = (char *)malloc(strlen(name) + 1);
+	    if (!d_str) {
+		config_perror("Out of memory");
+		return;
+	    }
+	    strcpy(d_str, name);
+	    *p = c;
+	    di_curr->item_type = ITEM_STRING;
+	    di_curr->item_details = (void *)d_str;
+	    name = p;
+	}
+	if (!*name) {
+	    di_curr->item_next = (conf_disk_item *)0;
+	    break;
+	}
+	di_curr->item_next = (conf_disk_item *)malloc(sizeof(conf_disk_item));
+	if (!di_curr->item_next) {
+	    config_perror("Out of memory");
+	    return;
+	}
+	di_curr = di_curr->item_next;
+    }
+    d_new->list_next = conf_list;
+    conf_list = d_new;
+}
+
+static void
+free_disk_config(void)
+{
+    conf_disk_list *d_ptr = conf_list, *d_next;
+    conf_disk_item *di_ptr, *di_next;
+
+    while (d_ptr) {
+	d_next = d_ptr->list_next;
+	di_ptr = d_ptr->list_item;
+	while (di_ptr) {
+	    di_next = di_ptr->item_next;
+	    if (di_ptr->item_details)
+		free(di_ptr->item_details);
+	    free((void *)di_ptr);
+	    di_ptr = di_next;
+	}
+	free((void *)d_ptr);
+	d_ptr = d_next;
+    }
+    conf_list = (conf_disk_list *)0;
+}
+
+static int
+match_disk_config_item(const char *name, conf_disk_item *di_ptr)
+{
+    int result = 0;
+    size_t len;
+    details_set *d_set;
+    unsigned int c;
+
+    if (di_ptr) {
+	switch (di_ptr->item_type) {
+	    case ITEM_STRING:
+		len = strlen((const char *)di_ptr->item_details);
+		if (!strncmp(name, (const char *)di_ptr->item_details, len))
+		    result = match_disk_config_item(name + len,
+						    di_ptr->item_next);
+		break;
+	    case ITEM_SET:
+		if (*name) {
+		    d_set = (details_set *)di_ptr->item_details;
+		    c = ((unsigned int)*name) & 0xff;
+		    if ((*d_set)[c / 8] & (unsigned char)(1 << (c % 8)))
+			result = match_disk_config_item(name + 1,
+							di_ptr->item_next);
+		}
+		break;
+	    case ITEM_STAR:
+		if (di_ptr->item_next) {
+		    for (; !result && *name; name++)
+			result = match_disk_config_item(name,
+							di_ptr->item_next);
+		} else {
+		    result = 1;
+		}
+		break;
+	    case ITEM_ANY:
+		if (*name)
+		    result = match_disk_config_item(name + 1,
+						    di_ptr->item_next);
+		break;
+	}
+    } else {
+	if (*name == '\0')
+	    result = 1;
+    }
+
+    return result;
+}
+
+static int
+match_disk_config(const char *name)
+{
+    conf_disk_list *d_ptr = conf_list;
+
+    while (d_ptr) {
+	if (match_disk_config_item(name, d_ptr->list_item))
+	    return 1;		/* match found in ignorelist */
+	d_ptr = d_ptr->list_next;
+    }
+
+    /* no match in ignorelist */
+    return 0;
 }
 
 /*
@@ -294,53 +541,70 @@ var_hrdisk(struct variable *vp,
 	 *
 	 *********************/
 
-#define MAX_NUMBER_DISK_TYPES	10	/* probably should be a variable */
-#define MAX_DISKS_PER_TYPE	7	/* SCSI disks - not a hard limit */
-#define	HRDISK_TYPE_SHIFT	3	/* log2 MAX_DISKS_PER_TYPE+1 */
+#define MAX_NUMBER_DISK_TYPES	16	/* probably should be a variable */
+#define MAX_DISKS_PER_TYPE	15	/* SCSI disks - not a hard limit */
+#define	HRDISK_TYPE_SHIFT	4	/* log2 (MAX_DISKS_PER_TYPE+1) */
 
-const char *disk_device_strings[ MAX_NUMBER_DISK_TYPES ];
-char disk_device_id[   MAX_NUMBER_DISK_TYPES ];
-char disk_device_last[ MAX_NUMBER_DISK_TYPES ];
-char disk_device_full[ MAX_NUMBER_DISK_TYPES ];
-char disk_partition_first[   MAX_NUMBER_DISK_TYPES ];
-char disk_partition_last[    MAX_NUMBER_DISK_TYPES ];
-int HR_number_disk_types = 0;
+typedef struct {
+    const char *disk_devpart_string;	/* printf() format disk part. name */
+    short disk_controller;		/* controller id or -1 if NA */
+    short disk_device_first;		/* first device id */
+    short disk_device_last;		/* last device id */
+    const char *disk_devfull_string;	/* printf() format full disk name */
+    short disk_partition_first;		/* first partition id */
+    short disk_partition_last;		/* last partition id */
+} HRD_disk_t;
 
+static HRD_disk_t disk_devices[ MAX_NUMBER_DISK_TYPES ];
+static int HR_number_disk_types = 0;
 
-void
-Add_HR_Disk_entry (const char *dev_string,
-		   char first_dev, 
-		   char last_dev,
-		   char full_dev,
-		   char first_partn, 
-		   char last_partn)
+static void
+Add_HR_Disk_entry (const char *devpart_string,
+		   int first_ctl,
+		   int last_ctl,
+		   int first_dev, 
+		   int last_dev,
+		   const char *devfull_string,
+		   int first_partn, 
+		   int last_partn)
 {
-    disk_device_strings[ HR_number_disk_types ] = dev_string;
-    disk_device_id[      HR_number_disk_types ] = first_dev;
-    disk_device_last[    HR_number_disk_types ] = last_dev;
-    disk_device_full[    HR_number_disk_types ] = full_dev;
-    disk_partition_first[HR_number_disk_types ] = first_partn;
-    disk_partition_last[ HR_number_disk_types ] = last_partn;
+    while ( first_ctl <= last_ctl ) {
+	disk_devices[ HR_number_disk_types ].disk_devpart_string =
+	    devpart_string;
+	disk_devices[ HR_number_disk_types ].disk_controller = first_ctl;
+	disk_devices[ HR_number_disk_types ].disk_device_first = first_dev;
+	disk_devices[ HR_number_disk_types ].disk_device_last = last_dev;
+	disk_devices[ HR_number_disk_types ].disk_devfull_string =
+	    devfull_string;
+	disk_devices[ HR_number_disk_types ].disk_partition_first = first_partn;
+	disk_devices[ HR_number_disk_types ].disk_partition_last = last_partn;
 
-		/*
-		 * Split long runs of disks into separate "types"
-		 */
-    while ( last_dev - first_dev > MAX_DISKS_PER_TYPE ) {
-	first_dev = first_dev+MAX_DISKS_PER_TYPE;
-	disk_device_last[HR_number_disk_types] = first_dev-1;
+	/*
+	 * Split long runs of disks into separate "types"
+	 */
+	while ( last_dev - first_dev > MAX_DISKS_PER_TYPE ) {
+	    first_dev = first_dev + MAX_DISKS_PER_TYPE;
+	    disk_devices[ HR_number_disk_types ].disk_device_last =
+		first_dev - 1;
+	    HR_number_disk_types++;
+
+	    disk_devices[ HR_number_disk_types ].disk_devpart_string =
+		devpart_string;
+	    disk_devices[ HR_number_disk_types ].disk_controller = first_ctl;
+	    disk_devices[ HR_number_disk_types ].disk_device_first = first_dev;
+	    disk_devices[ HR_number_disk_types ].disk_device_last = last_dev;
+	    disk_devices[ HR_number_disk_types ].disk_devfull_string =
+		devfull_string;
+	    disk_devices[ HR_number_disk_types ].disk_partition_first =
+		first_partn;
+	    disk_devices[ HR_number_disk_types ].disk_partition_last =
+		last_partn;
+	}
+
+	first_ctl++;
 	HR_number_disk_types++;
-
-	disk_device_strings[ HR_number_disk_types ] = dev_string;
-	disk_device_id[      HR_number_disk_types ] = first_dev;
-	disk_device_last[    HR_number_disk_types ] = last_dev;
-	disk_device_full[    HR_number_disk_types ] = full_dev;
-	disk_partition_first[HR_number_disk_types ] = first_partn;
-	disk_partition_last[ HR_number_disk_types ] = last_partn;
     }
-
-    HR_number_disk_types++;
 }
-  
 
 void
 Init_HR_Disk(void)
@@ -364,8 +628,8 @@ Get_Next_HR_Disk (void)
     DEBUGMSGTL(("host/hr_disk","Next_Disk type %d of %d\n",
 			 HRD_type_index, HR_number_disk_types));
     while ( HRD_type_index < HR_number_disk_types ) {
-	max_disks = disk_device_last[    HRD_type_index ] -
-		    disk_device_id[      HRD_type_index ] +1;
+	max_disks = disk_devices[ HRD_type_index ].disk_device_last -
+		    disk_devices[ HRD_type_index ].disk_device_first + 1;
         DEBUGMSGTL(("host/hr_disk","Next_Disk max %d of type %d\n",
 			 max_disks, HRD_type_index ));
 
@@ -379,24 +643,59 @@ Get_Next_HR_Disk (void)
 			 * This has a *major* impact on run
 			 *   times (by a factor of 10!)
 			 */
-	    if (( HRD_history[ iindex ] != 0 ) &&
+	    if (( HRD_history[ iindex ] > 0 ) &&
 		(( now - HRD_history[ iindex ]) < 60 ))
 	    {
 			HRD_index++;
 			continue;
 	    }
 
-		/* Construct the device name in "string" */
-	    sprintf(string, disk_device_strings[ HRD_type_index ], 
-			    disk_device_id[      HRD_type_index ] + HRD_index,
-			    disk_device_full[    HRD_type_index ] );
+		/* Construct the full device name in "string" */
+	    if ( disk_devices[ HRD_type_index ].disk_controller != -1 ) {
+		snprintf( string, sizeof(string),
+		    disk_devices[ HRD_type_index ].disk_devfull_string,
+		    disk_devices[ HRD_type_index ].disk_controller,
+		    disk_devices[ HRD_type_index ].disk_device_first +
+			HRD_index);
+	    } else {
+		snprintf( string, sizeof(string),
+		    disk_devices[ HRD_type_index ].disk_devfull_string,
+		    disk_devices[ HRD_type_index ].disk_device_first +
+			HRD_index);
+	    }
+            string[ sizeof(string)-1 ] = 0;
 
 	    DEBUGMSGTL(("host/hr_disk", "Get_Next_HR_Disk: %s (%d/%d)\n",
                         string, HRD_type_index, HRD_index ));
 	
-	    fd = open( string, O_RDONLY  );
+	    if ( HRD_history[ iindex ] == -1 ) {
+		/*
+		 * check whether this device is in the "ignoredisk" list in
+		 * the config file. if yes this device will be marked as
+		 * invalid for the future, i.e. it won't ever be checked
+		 * again.
+		 */
+		if (match_disk_config(string)) {
+		    /* device name matches entry in ignoredisk list */
+		    DEBUGMSGTL(("host/hr_disk",
+				"Get_Next_HR_Disk: %s ignored\n", string ));
+		    HRD_history[ iindex ] = LONG_MAX;
+		    HRD_index++;
+		    continue;
+		}
+	    }
+
+	    /* use O_NDELAY to avoid CDROM spin-up and media detection
+	     * (too slow) --okir */
+	    /* at least with HP-UX 11.0 this doesn't seem to work properly
+	     * when accessing an empty CDROM device --jsf */
+#ifdef O_NDELAY /* I'm sure everything has it, but just in case...  --Wes */
+	    fd = open( string, O_RDONLY | O_NDELAY );
+#else
+	    fd = open( string, O_RDONLY );
+#endif
 	    if (fd != -1 ) {
-		result = Query_Disk( fd );
+		result = Query_Disk( fd, string );
 		close(fd);
 		if ( result != -1 ) {
 		    HRD_history[ iindex ] = 0;
@@ -413,7 +712,41 @@ Get_Next_HR_Disk (void)
     return -1;
 }
 
-void
+int
+Get_Next_HR_Disk_Partition (char *string, size_t str_len, int HRP_index)
+{
+    DEBUGMSGTL(("host/hr_disk","Next_Partition type %d/%d:%d\n",
+			 HRD_type_index, HRD_type_index, HRP_index));
+
+	/* no more partition names => return -1 */
+    if ( disk_devices[ HRD_type_index ].disk_partition_last -
+		disk_devices[ HRD_type_index ].disk_partition_first + 1
+	    <= HRP_index) {
+	return -1;
+    }
+
+	/* Construct the partition name in "string" */
+    if ( disk_devices[ HRD_type_index ].disk_controller != -1 ) {
+	snprintf( string, str_len,
+	    disk_devices[ HRD_type_index ].disk_devpart_string,
+	    disk_devices[ HRD_type_index ].disk_controller,
+	    disk_devices[ HRD_type_index ].disk_device_first + HRD_index,
+	    disk_devices[ HRD_type_index ].disk_partition_first + HRP_index);
+    } else {
+	snprintf( string, str_len,
+	    disk_devices[ HRD_type_index ].disk_devpart_string,
+	    disk_devices[ HRD_type_index ].disk_device_first + HRD_index,
+	    disk_devices[ HRD_type_index ].disk_partition_first + HRP_index);
+    }
+    string[ str_len-1 ] = 0;
+
+    DEBUGMSGTL(("host/hr_disk", "Get_Next_HR_Disk_Partition: %s (%d/%d:%d)\n",
+	string, HRD_type_index, HRD_index, HRP_index ));
+
+    return 0;
+}
+
+static void
 Save_HR_Disk_Specific (void)
 {
 #ifdef DIOC_DESCRIBE
@@ -438,24 +771,30 @@ Save_HR_Disk_Specific (void)
 #endif
 }
 
-void
+static void
 Save_HR_Disk_General (void)
 {
 #ifdef DIOC_DESCRIBE
-    strcpy( HRD_savedModel,  HRD_info.model_num );   
+    strncpy( HRD_savedModel,  HRD_info.model_num, sizeof(HRD_savedModel)-1 );   
+    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
 #endif
 #ifdef DKIOCINFO
-    strcpy( HRD_savedModel,  HRD_info.dki_dname );   
+    strncpy( HRD_savedModel,  HRD_info.dki_dname, sizeof(HRD_savedModel)-1 );   
+    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
 #endif
 #ifdef HAVE_LINUX_HDREG_H
-    strcpy( HRD_savedModel,  (const char *)HRD_info.model );   
+    strncpy( HRD_savedModel,  (const char *)HRD_info.model,
+                    sizeof(HRD_savedModel)-1 );
+    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
 #endif
 #ifdef DIOCGDINFO
-    strcpy( HRD_savedModel,  dktypenames[HRD_info.d_type]);
+    strncpy( HRD_savedModel,  dktypenames[HRD_info.d_type],
+                    sizeof(HRD_savedModel)-1 );   
+    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
 #endif
 }
 
-const char *
+static const char *
 describe_disk(int idx)
 {
     if ( HRD_savedModel[0] == '\0' )
@@ -465,8 +804,8 @@ describe_disk(int idx)
 }
 
 
-int
-Query_Disk(int fd)
+static int
+Query_Disk(int fd, const char *devfull)
 {
     int result = -1;
 
@@ -483,8 +822,25 @@ Query_Disk(int fd)
 #endif
 
 #ifdef HAVE_LINUX_HDREG_H
-    if ( HRD_type_index == 0 )		/* Hard disk only */
+    if ( HRD_type_index == 0 )		/* IDE hard disk */
 	result = ioctl( fd, HDIO_GET_IDENTITY, &HRD_info );
+    else if ( HRD_type_index <= 2 ) {	/* SCSI hard disk and md devices */
+	long h;
+	result = ioctl( fd, BLKGETSIZE, &h);
+	if ( result != -1 && HRD_type_index == 2 && h == 0L)
+	    result = -1;		/* ignore empty md devices */
+	if ( result != -1 ) {
+	    HRD_info.lba_capacity = h;
+	    if (HRD_type_index == 1)
+		snprintf( HRD_info.model, sizeof(HRD_info.model),
+                        "SCSI disk (%s)", devfull );
+	    else
+		snprintf( HRD_info.model, sizeof(HRD_info.model),
+                        "RAID disk (%s)", devfull );
+	    HRD_info.model[ sizeof(HRD_info.model)-1 ] = 0;
+	    HRD_info.config = 0;
+	}
+    }
 #endif
 
 #ifdef DIOCGDINFO
@@ -495,7 +851,7 @@ Query_Disk(int fd)
 }
 
 
-int
+static int
 Is_It_Writeable(void)
 {
 #ifdef DIOC_DESCRIBE
@@ -512,7 +868,7 @@ Is_It_Writeable(void)
     return(1);		/* read-write */
 }
 
-int
+static int
 What_Type_Disk(void)
 {
 #ifdef DIOC_DESCRIBE
@@ -585,7 +941,7 @@ What_Type_Disk(void)
     return(2);			/* Unknown */
 }
 
-int
+static int
 Is_It_Removeable(void)
 {
 #ifdef DIOC_DESCRIBE

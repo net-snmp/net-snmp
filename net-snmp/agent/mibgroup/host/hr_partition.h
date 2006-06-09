@@ -6,7 +6,6 @@
 #define _MIBGROUP_HRPART_H
 
 extern void	init_hr_partition (void);
-extern void	Init_HR_Partition (void);
 extern FindVarMethod var_hrpartition;
 
 

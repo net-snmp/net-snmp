@@ -1,11 +1,15 @@
 Note, this is based on the text from a web page, which can be found in 
-the documentation section of the http://www.netsnmp.org web page.
+the documentation section of the http://www.net-snmp.org web page.
 
 Extending the UCD-SNMP agent
 ============================
 
 This document describes the procedure for writing code to extend
-the functionality of the UCD-SNMP network management agent.
+the functionality of the v4 UCD-SNMP network management agent.
+Modules written using this procedure will also work with the v5
+Net-SNMP agent, though this will not take advantage of the new
+handler-based helper mechanisms.  See the on-line documentation
+for more information and examples of that mechanism.
 We would be very interested in comment and feedback about how useful
 useful you find this description, and ways in which it could be improved.
 

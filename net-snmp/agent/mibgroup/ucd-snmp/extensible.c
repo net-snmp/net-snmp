@@ -196,7 +196,7 @@ void extensible_parse_config(const char *token, char* cptr)
 
   /* name */
   cptr = skip_white(cptr);
-  copy_word(cptr,ptmp->name);
+  copy_nword(cptr,ptmp->name, sizeof(ptmp->name));
   cptr = skip_not_white(cptr);
   cptr = skip_white(cptr);
   /* command */
@@ -288,7 +288,7 @@ void execfix_parse_config(const char *token, char* cptr) {
   struct extensible *execp;
 
   /* don't allow two entries with the same name */
-  cptr = copy_word(cptr,tmpname);
+  cptr = copy_nword(cptr,tmpname, sizeof(tmpname));
   if ((execp = get_exec_by_name(tmpname)) == NULL) {
     config_perror("No exec entry registered for this exec name yet.");
     return;
@@ -299,7 +299,8 @@ void execfix_parse_config(const char *token, char* cptr) {
     return;
   }
 
-  strcpy(execp->fixcmd, cptr);
+  strncpy(execp->fixcmd, cptr, sizeof(execp->fixcmd));
+  execp->fixcmd[ sizeof(execp->fixcmd)-1 ] = 0;
 }
 
 u_char *var_extensible_shell(struct variable *vp,
@@ -381,7 +382,7 @@ fixExecError(int action,
     tmp = *((long *) var_val);
     if ((tmp == 1) && (action == COMMIT) && (exten->fixcmd[0] != 0)) {
       sprintf(ex.command, exten->fixcmd);
-      if ((fd = get_exec_output(&ex))) {
+      if ((fd = get_exec_output(&ex)) != -1) {
         file = fdopen(fd,"r");
         while (fgets(ex.output,sizeof(ex.output),file) != NULL);
         fclose(file);
@@ -467,7 +468,7 @@ u_char *var_extensible_relocatable(struct variable *vp,
       return((u_char *) (&long_ret));
     case ERRORMSG:   /* first line of text returned from the process */
       if (exten->type == EXECPROC) {
-        if ((fd = get_exec_output(exten))){
+        if ((fd = get_exec_output(exten)) != -1){
           file = fdopen(fd,"r");
           for (i=0;i != (int)name[*length-1];i++) {
             if (fgets(errmsg,sizeof(errmsg),file) == NULL) {
@@ -488,7 +489,8 @@ u_char *var_extensible_relocatable(struct variable *vp,
           return(NULL);
         }
         shell_command(exten);
-        strcpy(errmsg,exten->output);
+        strncpy(errmsg, exten->output, sizeof(errmsg));
+        errmsg[ sizeof(errmsg)-1 ] = 0;
       }
       *var_len = strlen(errmsg);
       if (errmsg[*var_len-1] == '\n')

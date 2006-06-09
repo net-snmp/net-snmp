@@ -75,14 +75,16 @@ int show_all_matched_objects (FILE *, const char *, oid *, size_t *, int, int);
 void usage(void)
 {
   fprintf(stderr,
-	  "usage: snmptranslate [options] [<objectID>]\n\n");
+	  "Usage: snmptranslate [options] [<objectID>]\n\n");
   fprintf(stderr, "  -h\t\tPrint this help message.\n");
   fprintf(stderr,
           "  -V\t\tPrint snmptranslate version then exit.\n");
   fprintf(stderr,
-          "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
+          "  -m MIBS\tuse MIBS list instead of the default mib list.\n");
   fprintf(stderr,
-	  "  -D\t\tenable snmplib debugging messages\n");
+	  "  -D TOKEN[,...]\n\t\tEnable snmplib debugging messages.");
+  fprintf(stderr,
+	  " See snmpcmd(1) man page \n\t\tfor more information.\n" );
   fprintf(stderr,
           "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
   fprintf(stderr,
@@ -90,27 +92,29 @@ void usage(void)
   fprintf(stderr,
           "  -T <TRANSOPTS> Print one or more MIB symbol reports.\n");
   fprintf(stderr,
-          "  \t\tTRANSOPTS values:\n");
+          "  \t\t  TRANSOPTS values:\n");
   fprintf(stderr,
-          "  \t\t    d: Print full details of the given OID.\n");
+          "  \t\t      a: Print ascii format symbol table.\n");
   fprintf(stderr,
-          "  \t\t    p: Print tree format symbol table.\n");
+          "  \t\t      B: Print all matching objects for a regex search.\n");
   fprintf(stderr,
-          "  \t\t    a: Print ascii format symbol table.\n");
+          "  \t\t      d: Print full details of the given OID.\n");
   fprintf(stderr,
-          "  \t\t    l: Enable labeled OID report.\n");
+          "  \t\t      l: Enable labeled OID report.\n");
   fprintf(stderr,
-          "  \t\t    o: Enable OID report.\n");
+          "  \t\t      o: Enable OID report.\n");
   fprintf(stderr,
-          "  \t\t    s: Enable dotted symbolic report.\n");
+          "  \t\t      p: Print tree format symbol table.\n");
   fprintf(stderr,
-          "  \t\t    t: Enable alternately formatted symbolic suffix report.\n");
+          "  \t\t      s: Enable dotted symbolic report.\n");
+  fprintf(stderr,
+          "  \t\t      t: Enable alternately formatted symbolic suffix report.\n");
   fprintf(stderr, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
-  snmp_mib_toggle_options_usage("\t\t", stderr);
+  snmp_mib_toggle_options_usage("\t\t  ", stderr);
   fprintf(stderr, "  -O <OUTOPTS>\tToggle various defaults controlling output display:\n");
-  snmp_out_toggle_options_usage("\t\t", stderr);
+  snmp_out_toggle_options_usage("\t\t  ", stderr);
   fprintf(stderr, "  -I <INOPTS>\tToggle various defaults controlling input parsing:\n");
-  snmp_in_toggle_options_usage("\t\t", stderr);
+  snmp_in_toggle_options_usage("\t\t  ", stderr);
   exit(1);
 }
 
@@ -191,10 +195,10 @@ int main(int argc, char *argv[])
 #endif /* DEPRECATED_CLI_OPTIONS */
 
         case 'm':
-            setenv("MIBS", optarg, 1);
+            snmp_setenv("MIBS", optarg, 1);
             break;
         case 'M':
-            setenv("MIBDIRS", optarg, 1);
+            snmp_setenv("MIBDIRS", optarg, 1);
             break;
 #ifdef DEPRECATED_CLI_OPTIONS
 	case 'w':
@@ -342,6 +346,11 @@ int main(int argc, char *argv[])
         if (print == 1) {
             struct tree *tp;
             tp = get_tree(name, name_length, get_tree_head());
+            if ( tp == NULL ) {
+                fprintf(stderr, "Unable to find a matching object identifier for \"%s\"\n",
+                        current_name);
+	        exit(1);
+	    }
             print_mib_tree (stdout, tp, width);
         } else {
             print_objid(name, name_length);

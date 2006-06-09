@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPSET 1 "17 Jun 1998"
+.TH SNMPSET 1 "21 Jun 2001"
 .UC 4
 .SH NAME
 snmpset - communicates with a network entity using SNMP SET Requests.
@@ -70,10 +70,14 @@ IPADDRESS
 BITS
 .PD
 .RE
+If you have the proper MIB file loaded, you can, in most cases, replace the
+type with an '=' sign. For an object of type OCTET STRING this will assume
+a string like the 's' type notation. For other type it will do "The
+Right Thing".
 .PP
 For example
 .PP
-.I "snmpset test-hub private system.sysContact.0 s dpz@noc.rutgers.edu ip.ipforwarding.0 i 2"
+.I "snmpset test-hub private system.sysContact.0 s dpz@noc.rutgers.edu ip.ipforwarding.0 = 2"
 .I 
 .PP
 will set the variables sysContact.0 and ipforwarding.0:
