@@ -641,7 +641,7 @@ var_hrstore(struct variable *vp,
 			long_return = 0;
 			for (i = 0; i < sizeof(mbstat.m_mtypes)/sizeof(mbstat.m_mtypes[0]); i++)
 			    long_return += mbstat.m_mtypes[i];
-#elif defined(MBSTAT_SYMBOL)
+#elif defined(MBSTAT_SYMBOL) && defined(STRUCT_MBSTAT_HAS_M_MBUFS)
 			long_return = mbstat.m_mbufs;
 #elif defined(NO_DUMMY_VALUES)
 			return NULL;
@@ -700,7 +700,7 @@ var_hrstore(struct variable *vp,
 				    * mbpool.pr_size
 				+ (mclpool.pr_nget - mclpool.pr_nput)
 				    * mclpool.pr_size;
-#elif defined(MBSTAT_SYMBOL)
+#elif defined(MBSTAT_SYMBOL) && defined(STRUCT_MBSTAT_HAS_M_CLUSTERS)
 			long_return = mbstat.m_clusters - mbstat.m_clfree;	/* unlikely, but... */
 #elif defined(NO_DUMMY_VALUES)
 			return NULL;
