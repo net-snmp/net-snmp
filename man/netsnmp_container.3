@@ -1,4 +1,4 @@
-.TH "null_container" 3 "9 Jan 2006" "net-snmp" \" -*- nroff -*-
+.TH "null_container" 3 "10 Jun 2006" "Version 5.2.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -9,7 +9,7 @@ null_container \- Helps you implement specialized containers.
 
 .in +1c
 .ti -1c
-.RI "group\fBnull_container\fP"
+.RI "\fBnull_container\fP"
 .br
 .RI "\fIHelps you implement specialized containers. \fP"
 .PP
@@ -30,7 +30,9 @@ null_container \- Helps you implement specialized containers.
 .in -1c
 .SH "Detailed Description"
 .PP 
-Helps you implement specialized containers. This is a simple container that doesn't actually contain anything. All the methods simply log a debug message and return.
+Helps you implement specialized containers. 
+.PP
+This is a simple container that doesn't actually contain anything. All the methods simply log a debug message and return.
 .PP
 The original intent for this container is as a wrapper for a specialized container. Implement the functions you need, create a null_container, and override the default functions with your specialized versions.
 .PP
