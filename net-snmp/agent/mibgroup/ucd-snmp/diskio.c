@@ -178,7 +178,7 @@ init_diskio(void)
     kc = kstat_open();
 
     if (kc == NULL)
-        snmp_log(LOG_ERR, "diskio: Couln't open kstat\n");
+        snmp_log(LOG_ERR, "diskio: Couldn't open kstat\n");
 #endif
 
 #ifdef darwin
