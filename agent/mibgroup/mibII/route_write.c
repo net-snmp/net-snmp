@@ -110,6 +110,7 @@ int addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 #else
 int addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
+#if defined SIOCADDRT
     struct sockaddr_in     dst;
     struct sockaddr_in     gateway;
     int                    s;
@@ -143,7 +144,9 @@ int addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 #else
     return (ioctl(s, SIOCADDRT , (caddr_t)&route));
 #endif
-
+#else          /* SIOCADDRT */
+    return 0;
+#endif
 }
 #endif
 
@@ -172,8 +175,7 @@ int delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 #else
 int delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
-
-
+#if defined SIOCDELRT
     struct sockaddr_in     dst;
     struct sockaddr_in     gateway;
     int                    s;
@@ -208,7 +210,9 @@ int delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 #else
     return (ioctl(s, SIOCDELRT , (caddr_t)&route));
 #endif
-
+#else    /* SIOCDELRT */
+    return 0;
+#endif
 }
 #endif
 
