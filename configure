@@ -1125,7 +1125,7 @@ Miscellaneous:
   --with-defaults          Use defaults for prompted values.
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-pic              try to use only PIC/non-PIC objects default=use both
-  --with-libwrap=LIBPATH Compile in libwrap (tcp_wrappers) support.
+  --with-libwrap=LIBPATH  Compile in libwrap (tcp_wrappers) support.
   --with-zlib=DIR        use libz in DIR
 
 Some influential environment variables:
@@ -10092,7 +10092,8 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <tcpd.h>
+#include <sys/types.h>
+		     #include <tcpd.h>
 		     int allow_severity = 0;
 		     int deny_severity  = 0;
 
@@ -10126,7 +10127,9 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
+
+
+	    echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 	    cat >>confdefs.h <<\_ACEOF
 #define USE_LIBWRAP 1
@@ -10138,7 +10141,8 @@ else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-echo "$as_me:$LINENO: result: no" >&5
+
+	    echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 	    # Linux RedHat 6.1 won't link libwrap without libnsl
 	    echo "$as_me:$LINENO: checking for yp_get_default_domain" >&5
@@ -10152,10 +10156,231 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-/* Define yp_get_default_domain to an innocuous variant
+/* Define yp_get_default_domain to an innocuous variant, in case <limits.h> declares yp_get_default_domain.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define yp_get_default_domain innocuous_yp_get_default_domain
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char yp_get_default_domain (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef yp_get_default_domain
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char yp_get_default_domain ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_yp_get_default_domain) || defined (__stub___yp_get_default_domain)
+choke me
+#else
+char (*f) () = yp_get_default_domain;
+#endif
+#ifdef __cplusplus
+}
+#endif
+
+int
+main ()
+{
+return f != yp_get_default_domain;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_func_yp_get_default_domain=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_func_yp_get_default_domain=no
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_func_yp_get_default_domain" >&5
+echo "${ECHO_T}$ac_cv_func_yp_get_default_domain" >&6
+if test $ac_cv_func_yp_get_default_domain = yes; then
+  :
+else
+
+echo "$as_me:$LINENO: checking for yp_get_default_domain in -lnsl" >&5
+echo $ECHO_N "checking for yp_get_default_domain in -lnsl... $ECHO_C" >&6
+if test "${ac_cv_lib_nsl_yp_get_default_domain+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lnsl  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char yp_get_default_domain ();
+int
+main ()
+{
+yp_get_default_domain ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_nsl_yp_get_default_domain=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_nsl_yp_get_default_domain=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_nsl_yp_get_default_domain" >&5
+echo "${ECHO_T}$ac_cv_lib_nsl_yp_get_default_domain" >&6
+if test $ac_cv_lib_nsl_yp_get_default_domain = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBNSL 1
+_ACEOF
+
+  LIBS="-lnsl $LIBS"
+
+fi
+
+fi
+
+	    echo "$as_me:$LINENO: checking for TCP wrappers library -lwrap linked with -lnsl" >&5
+echo $ECHO_N "checking for TCP wrappers library -lwrap linked with -lnsl... $ECHO_C" >&6
+	    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <sys/types.h>
+		         #include <tcpd.h>
+		         int allow_severity = 0;
+	                 int deny_severity  = 0;
+
+int
+main ()
+{
+hosts_access((void *)0)
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+			cat >>confdefs.h <<\_ACEOF
+#define USE_LIBWRAP 1
+_ACEOF
+
+			test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
+			WRAPLIBS="$WRAPLIBS -lwrap -lnsl"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+			{ { echo "$as_me:$LINENO: error: Asked to use libwrap but I couldn't find it." >&5
+echo "$as_me: error: Asked to use libwrap but I couldn't find it." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+    CPPFLAGS=${_cppflags}
     LDFLAGS=${_ldflags}
     LIBS=${_libs}
   fi
@@ -15713,6 +15938,7 @@ _ACEOF
 
 fi
 
+
 # this should use AC_CHECK_TYPE, but it's broken at least in 2.13-14
 # so we do it by hand.
 echo "$as_me:$LINENO: checking for socklen_t" >&5
@@ -15736,11 +15962,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-socklen_t^a-zA-Z_0-9
- to prevent m4 from eating character classes
-  $EGREP "
-socklen_t[^a-zA-Z_0-9]
-" >/dev/null 2>&1; then
+  $EGREP "socklen_t[^a-zA-Z_0-9]" >/dev/null 2>&1; then
   ac_cv_type_socklen_t=yes
 else
   ac_cv_type_socklen_t=no
@@ -15781,11 +16003,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-in_addr_t^a-zA-Z_0-9
- to prevent m4 from eating character classes
-  $EGREP "
-in_addr_t[^a-zA-Z_0-9]
-" >/dev/null 2>&1; then
+  $EGREP "in_addr_t[^a-zA-Z_0-9]" >/dev/null 2>&1; then
   ac_cv_type_in_addr_t=yes
 else
   ac_cv_type_in_addr_t=no

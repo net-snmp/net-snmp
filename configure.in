@@ -958,7 +958,7 @@ _cppflags="${CPPFLAGS}"
 _ldflags="${LDFLAGS}"
 
 AC_ARG_WITH(libwrap,
-[  --with-libwrap[=LIBPATH] Compile in libwrap (tcp_wrappers) support.],[
+[  --with-libwrap[=LIBPATH]  Compile in libwrap (tcp_wrappers) support.],[
   if test "$with_libwrap" != "no"; then
     if test "$with_libwrap" != "yes"; then
       CPPFLAGS="${CPPFLAGS} -I$with_libwrap/include"
@@ -967,26 +967,28 @@ AC_ARG_WITH(libwrap,
 
     _libs=${LIBS}
     AC_CHECK_HEADER(tcpd.h, ,
-	    AC_MSG_ERROR(Asked to use libwrap but I couldn't find tcpd.h.))
+	    AC_MSG_ERROR([Asked to use libwrap but I couldn't find tcpd.h.]))
 
     LIBS="$LIBS -lwrap"
-	AC_MSG_CHECKING(for TCP wrappers library -lwrap)
-	AC_TRY_LINK([#include <tcpd.h>
+	AC_MSG_CHECKING([for TCP wrappers library -lwrap])
+	AC_TRY_LINK([#include <sys/types.h>
+		     #include <tcpd.h>
 		     int allow_severity = 0;
 		     int deny_severity  = 0;
-		    ],[hosts_access((void *)0)],
+		    ],[hosts_access((void *)0)],[
 
-	    AC_MSG_RESULT(yes)
+	    AC_MSG_RESULT([yes])
 	    AC_DEFINE(USE_LIBWRAP)
 	    test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
-	    WRAPLIBS="$WRAPLIBS -lwrap",
-
-	    AC_MSG_RESULT(no)
+	    WRAPLIBS="$WRAPLIBS -lwrap"],
+        [
+	    AC_MSG_RESULT([no])
 	    # Linux RedHat 6.1 won't link libwrap without libnsl
 	    AC_CHECK_FUNC(yp_get_default_domain, ,
 		AC_CHECK_LIB(nsl, yp_get_default_domain))
-	    AC_MSG_CHECKING(for TCP wrappers library -lwrap linked with -lnsl)
-	    AC_TRY_LINK([#include <tcpd.h>
+	    AC_MSG_CHECKING([for TCP wrappers library -lwrap linked with -lnsl])
+	    AC_TRY_LINK([#include <sys/types.h>
+		         #include <tcpd.h>
 		         int allow_severity = 0;
 	                 int deny_severity  = 0;
 	 		],[hosts_access((void *)0)],
@@ -997,8 +999,8 @@ AC_ARG_WITH(libwrap,
 			WRAPLIBS="$WRAPLIBS -lwrap -lnsl",
 
 			AC_MSG_RESULT(no)
-			AC_MSG_ERROR(Asked to use libwrap but I couldn't find it.))
-	    CPPFLAGS=${_cppflags})
+			AC_MSG_ERROR(Asked to use libwrap but I couldn't find it.))])
+    CPPFLAGS=${_cppflags}
     LDFLAGS=${_ldflags}
     LIBS=${_libs}
   fi
@@ -1179,23 +1181,22 @@ fi
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_HEADER_TIME
+
 # this should use AC_CHECK_TYPE, but it's broken at least in 2.13-14
 # so we do it by hand.
-AC_MSG_CHECKING(for socklen_t)
+AC_MSG_CHECKING([for socklen_t])
 AC_CACHE_VAL(ac_cv_type_$1,
-[AC_EGREP_CPP(
-changequote(<<,>>)
-<<socklen_t[^a-zA-Z_0-9]>>
-changequote([,]), [#include <sys/types.h>
+[AC_EGREP_CPP([socklen_t@<:@^a-zA-Z_0-9@:>@],
+[#include <sys/types.h>
 #if STDC_HEADERS
 #include <stdlib.h>
 #include <stddef.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif], ac_cv_type_socklen_t=yes, ac_cv_type_socklen_t=no)])
+#endif], [ac_cv_type_socklen_t=yes], [ac_cv_type_socklen_t=no])])
 
-AC_MSG_RESULT($ac_cv_type_socklen_t)
+AC_MSG_RESULT([$ac_cv_type_socklen_t])
 if test $ac_cv_type_socklen_t = yes; then
   AC_DEFINE(HAVE_SOCKLEN_T)
 fi
@@ -1203,10 +1204,8 @@ fi
 # AIX keeps in_addr_t in /usr/include/netinet/in.h
 AC_MSG_CHECKING(for in_addr_t)
 AC_CACHE_VAL(ac_cv_type_$1,
-[AC_EGREP_CPP(
-changequote(<<,>>)
-<<in_addr_t[^a-zA-Z_0-9]>>
-changequote([,]), [#include <sys/types.h>
+[AC_EGREP_CPP([in_addr_t@<:@^a-zA-Z_0-9@:>@],
+[#include <sys/types.h>
 #if STDC_HEADERS
 #include <stdlib.h>
 #include <stddef.h>
