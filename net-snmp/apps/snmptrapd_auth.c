@@ -75,16 +75,18 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
 #ifndef DISABLE_SNMPV1
     if (pdu->version == SNMP_VERSION_1)
         newpdu = convert_v1pdu_to_v2(pdu);
+        if (!newpdu) {
+            snmp_log(LOG_ERR, "Failed to duplicate incoming PDU.  Refusing to authorize.\n");
+            return NETSNMPTRAPD_HANDLER_FINISH;
+        }
+    }
 #endif
 
-    if (!newpdu) {
-        snmp_log(LOG_ERR, "Failed to duplicate incoming PDU.  Refusing to authorize.\n");
-        return NETSNMPTRAPD_HANDLER_FINISH;
-    }
-
     if (!vacm_is_configured()) {
-        if (newpdu)
+#ifndef DISABLE_SNMPV1
+        if (newpdu != pdu)
             snmp_free_pdu(newpdu);
+#endif
         snmp_log(LOG_WARNING, "No access configuration - dropping trap.\n");
         return NETSNMPTRAPD_HANDLER_FINISH;
     }
@@ -100,8 +102,10 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
     /* make sure we can continue: we found the snmpTrapOID.0 and its an oid */
     if (!var || var->type != ASN_OBJECT_ID) {
         snmp_log(LOG_ERR, "Can't determine trap identifier; refusing to authorize it\n");
+#ifndef DISABLE_SNMPV1
         if (newpdu != pdu)
             snmp_free_pdu(newpdu);
+#endif
         return NETSNMPTRAPD_HANDLER_FINISH;
     }
 
@@ -125,15 +129,19 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
     if (ret) {
         /* we have policy to at least do "something".  Remember and continue. */
         lastlookup = ret;
+#ifndef DISABLE_SNMPV1
         if (newpdu != pdu)
             snmp_free_pdu(newpdu);
+#endif
         return NETSNMPTRAPD_HANDLER_OK;
     }
 
     /* No policy was met, so we drop the PDU from further processing */
     DEBUGMSGTL(("snmptrapd:auth", "Dropping unauthorized message\n"));
+#ifndef DISABLE_SNMPV1
     if (newpdu != pdu)
         snmp_free_pdu(newpdu);
+#endif
     return NETSNMPTRAPD_HANDLER_FINISH;
 }
 
