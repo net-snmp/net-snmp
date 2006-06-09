@@ -618,7 +618,7 @@ var_vacm_view(struct variable * vp,
         return (u_char *) gp->viewSubtree;
 
     case VIEWMASK:
-        *var_len = (gp->viewSubtreeLen + 7) / 8;
+        *var_len = gp->viewMaskLen;
         return (u_char *) gp->viewMask;
 
     case VIEWTYPE:
@@ -1072,8 +1072,8 @@ access_parse_accessEntry(oid * name, size_t name_len)
 {
     struct vacm_accessEntry *aptr;
 
-    char           *newGroupName;
-    char           *newContextPrefix;
+    char           *newGroupName = NULL;
+    char           *newContextPrefix = NULL;
     int             model, level;
     size_t          groupNameLen, contextPrefixLen;
 
@@ -1092,8 +1092,8 @@ access_parse_accessEntry(oid * name, size_t name_len)
      */
     aptr =
         vacm_getAccessEntry(newGroupName, newContextPrefix, model, level);
-    free(newContextPrefix);
-    free(newGroupName);
+    SNMP_FREE(newContextPrefix);
+    SNMP_FREE(newGroupName);
 
     return aptr;
 
@@ -1639,7 +1639,11 @@ write_vacmViewStatus(int action,
         vptr =
             vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen,
                               VACM_MODE_IGNORE_MASK);
-
+        if (vptr &&
+            netsnmp_oid_equals(vptr->viewSubtree + 1, vptr->viewSubtreeLen - 1,
+                               newViewSubtree + 1, viewSubtreeLen - 1) != 0) {
+            vptr = NULL;
+        }
         if (vptr != NULL) {
             if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
                 free(newViewName);

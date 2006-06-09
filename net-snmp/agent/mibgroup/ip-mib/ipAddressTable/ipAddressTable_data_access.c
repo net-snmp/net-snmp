@@ -285,7 +285,6 @@ _add_new_entry(netsnmp_ipaddress_entry * ipaddress_entry,
 int
 ipAddressTable_cache_load(netsnmp_container * container)
 {
-    ipAddressTable_rowreq_ctx *rowreq_ctx;
     netsnmp_container *ipaddress_container;
     void           *tmp_ptr[2];
 

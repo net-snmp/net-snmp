@@ -19,6 +19,7 @@ top_builddir=..
 # source dir...
 @GNU_vpath@ %.h $(srcdir)
 @GNU_vpath@ %.c $(srcdir)
+@GNU_vpath@ %.rc $(srcdir)
 # fallback to regular VPATH for non-gnu...
 @NON_GNU_VPATH@ $(srcdir)
 

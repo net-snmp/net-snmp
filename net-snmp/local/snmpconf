@@ -26,59 +26,25 @@ if ($^O eq 'MSWin32') {
 %tokenitems=qw(line 1 info 1 comment 1);
 %arrayitems=qw(question 1 validanswer 1);
 
-if ($^O ne 'MSWin32') {
-  # default folder for snmpconf-data
-  if (defined($ENV{SNMPSHAREPATH})) {
-    $opts{'c'} = "$ENV{SNMPSHAREPATH}/snmpconf-data";
-  }
-  else {
-    $opts{'c'} = "/usr/local/share/snmp/snmpconf-data";
-  }
-  
-  # default config file path
-  if (defined($ENV{SNMPCONFPATH})) {
-    $confpath = "$ENV{SNMPCONFPATH}";
-  }
-  else {
-    $confpath = "/usr/local/share/snmp";
-  }
+# default folder for snmpconf-data
+if (defined(&my_getenv("SNMPSHAREPATH"))) {
+  $opts{'c'} = &my_getenv("SNMPSHAREPATH") . "/snmpconf-data";
 }
-else
-{
-  my $temp;
-
-  # default folder for snmpconf-data
-  $temp = &win32_reg_read("SOFTWARE\\Net-SNMP","SNMPSHAREPATH");
-  if ($temp ne "") {
-    $opts{'c'} = "$temp/snmpconf-data";
-  }
-  else {
-    if (defined($ENV{SNMPSHAREPATH})) {
-      $opts{'c'} = "$ENV{SNMPSHAREPATH}/snmpconf-data";
-    }
-    else {
-      $opts{'c'} = "/usr/local/share/snmp/snmpconf-data";
-    }
-  }
-
-  # default config file path
-  $temp = &win32_reg_read("SOFTWARE\\Net-SNMP","SNMPCONFPATH");
-  if ($temp ne "") {
-    $confpath = "$temp";
-  }
-  else {    
-    if (defined($ENV{SNMPCONFPATH})) {
-      $confpath = "$ENV{SNMPCONFPATH}";
-    }
-    else {
-      $confpath = "/usr/local/share/snmp";
-    }
-  }
+else {
+  $opts{'c'} = "/usr/local/share/snmp/snmpconf-data";
+}
+ 
+# default config file path
+if (defined(&my_getenv("SNMPCONFPATH"))) {
+  $confpath = &my_getenv("SNMPCONFPATH");
+}
+else {
+  $confpath = "/usr/local/share/snmp";
 }
 
 # home environment variable
-if (defined($ENV{HOME})) {
-  $home = "$ENV{HOME}/.snmp";
+if (defined(&my_getenv("HOME"))) {
+  $home = &my_getenv("HOME") . "/.snmp";
 }
 else {
   $home = "(HOME dir - n/a)";
@@ -126,13 +92,100 @@ if ($opts{'G'}) {
 }
 
 #
+# Expand the search path in case it contains multiple directories
+# separated by : (Unix) or ; (Win32)
+#
+my $ENV_SEPARATOR = ':';
+if ($^O eq 'MSWin32') {
+  $ENV_SEPARATOR = ';';
+}
+my @searchpath = split(/$ENV_SEPARATOR/, $confpath);
+push @searchpath, "/usr/local/etc/snmp";
+push @searchpath, ".";
+push @searchpath, "$home";
+
+# Remove trailing /'s or \'s
+for (my $i=0; $i <= $#searchpath; $i++) {
+  $searchpath[$i] =~ /(.*?)([\/\\])*$/;
+  $searchpath[$i] = $1;
+}
+
+# Determine persistent directory.  Order of preference:
+# 
+# file in SNMP_PERSISTENT_FILE environment variable
+# directory defined by persistentDir snmp.conf variable
+# directory in SNMP_PERSISTENT_DIR environment variable
+# default PERSISTENT_DIRECTORY directory
+my $persistentDir = "";
+my $persistentFile = "";
+
+# SNMP_PERSISTENT_FILE environment variable
+if (defined(&my_getenv("SNMP_PERSISTENT_FILE"))) {
+  $persistentFile = &my_getenv("SNMP_PERSISTENT_FILE");
+  debug ("persistent file: SNMP_PERSISTENT_FILE environment variable set\n");
+}
+
+# snmp.conf persistentDir
+if (!($persistentDir) && !($persistentFile)) {
+  foreach my $i (@searchpath) {
+    debug ("Searching file $i/snmp.conf for persistentDir\n");
+    my $temp = get_persistentDir("$i/snmp.conf");
+    if ($temp) {
+      debug("persistent directory: set to $temp in $i/snmp.conf\n");
+      $persistentDir = $temp;
+      last;
+    }
+  }
+}
+
+# SNMP_PERSISTENT_DIR environment variable
+if (!($persistentDir) && !($persistentFile)) {
+  if (&my_getenv("SNMP_PERSISTENT_DIR")) {
+    $persistentDir = &my_getenv("SNMP_PERSISTENT_DIR");
+    debug ("persistent directory: SNMP_PERSISTENT_DIR environment variable set\n");
+  }
+}
+
+# PERSISTENT_DIRECTORY default variable
+if (!($persistentDir) && !($persistentFile)) {
+  $persistentDir = "/var/net-snmp";
+  debug ("persistent directory: Using default value\n");
+}
+
+# Rebuild search path without persistent folder
+# Note:  persistent file handled in Find existing 
+# files to possibly read in section
+if ($persistentDir) {
+  # Remove trailing /'s or \'s
+  $persistentDir =~ /(.*?)([\/\\])*$/;
+  $persistentDir = $1;
+  debug ("persistent directory: $persistentDir\n");
+
+  my @searchpath_old = @searchpath;
+  @searchpath = ();
+  foreach my $path_temp (@searchpath_old) {
+    if ($path_temp eq $persistentDir) {
+      debug("skipping persistent directory $path_temp\n");
+      next;
+    }
+    push @searchpath, $path_temp;
+  }
+}
+
+# Reset $confpath to the first path
+$confpath = $searchpath[0];
+
+#
 # Find existing files to possibly read in.
 #
-my @searchpath = ("$confpath","/usr/local/etc/snmp", ".", "$home");
 push @searchpath, $opts{I} if ($opts{I});
 foreach my $i (@searchpath) {
     debug("searching $i\n");
     foreach my $ft (keys(%filetypes)) {
+        if ("$i/$ft" eq $persistentFile) {
+          debug("skipping persistent file $i/$ft\n");
+          next;
+        }
 	debug("searching for $i/$ft\n");
 	$knownfiles{"$i/$ft"} = $ft if (-f "$i/$ft");
 	my $localft = $ft;
@@ -227,7 +280,7 @@ foreach my $i (@didfiles) {
 	if ($opts{'i'} || $opts{'I'}) {
           $opts{'I'} = "$confpath" if (!$opts{'I'});
 
-          if (! (-d "$opts{'I'}") && ! (mkdir ("$opts{'I'}"))) {
+          if (! (-d "$opts{'I'}") && ! (mkdir ("$opts{'I'}", 0755))) {
 	    print "\nCould not create $opts{'I'} directory: $!\n";
 	    print ("File $didfile{$i} left in current directory\n");
 	  }
@@ -242,7 +295,7 @@ foreach my $i (@didfiles) {
             }
           }
 	} elsif ($opts{'p'}) {
-	  if (! (-d "$home") && ! (mkdir ("$home"))) {
+	  if (! (-d "$home") && ! (mkdir ("$home", 0755))) {
 	    print "\nCould not create $home directory: $!\n";
 	    print ("File $didfile{$i} left in current directory\n");
 	  }
@@ -793,6 +846,27 @@ sub my_Dumper {
     }
 }
 
+sub get_persistentDir {
+    my $file = shift;
+    my $result = 0;
+    if (! -f $file) {
+	return 0;
+    }
+    open(I,$file);
+    while(<I>) {
+	next if (/^\s*\#/);
+	next if (/^\s*$/);
+	chomp;
+	my ($token, $rest) = /^\s*(\w+)\s+(.*)/;
+        if (lc($token) eq "persistentdir") {
+          $result = $rest;
+        }
+        next;
+    }
+    close(I);
+    return $result;
+}
+
 # Usage:   &win32_reg_read("key", "value")
 # Example: &win32_reg_read("SOFTWARE\\Net-SNMP","SNMPSHAREPATH");
 # Returns: Value if found in HKCU or HCLM.  Otherwise an empty string.
@@ -831,4 +905,29 @@ sub win32_reg_read {
   }
   return "";
 }
- 
+
+# Usage:   &my_getenv("key")
+# Example: &my_getenv("SNMPSHAREPATH");
+# Returns: Unix:  Environment variable value (undef if not defined)
+#          Win32: HKCU\Software\Net-SNMP\(key) or
+#          Win32: HKLM\Software\Net-SNMP\(key) or
+#          Win32: Environment variable value (undef if not defined)
+sub my_getenv {
+  my $key = shift;
+  
+  # Unix
+  if ($^O ne 'MSWin32') {
+    return $ENV{$key};
+  }
+  # Windows
+  else {
+    my $temp = &win32_reg_read("SOFTWARE\\Net-SNMP","$key");
+    if ($temp ne "") {
+      return $temp;
+    }
+    else {
+      return $ENV{$key};
+    }
+  }
+}
+

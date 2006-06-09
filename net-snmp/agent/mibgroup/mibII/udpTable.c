@@ -54,7 +54,7 @@ struct netsnmp_udpEntry_s {
 #define	UDPTABLE_IS_LINKED_LIST
 #else
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
 #include <iphlpapi.h>
 #define	UDPTABLE_ENTRY_TYPE	MIB_UDPROW		/* ??? */
 #define	UDPTABLE_LOCALADDRESS	dwLocalAddr
@@ -66,7 +66,7 @@ struct netsnmp_udpEntry_s {
 #define INP_NEXT_SYMBOL		inp_next
 #endif
 
-#if defined(freebsd4) || defined(darwin)
+#if defined(freebsd4) || defined(darwin) || defined(osf5)
 typedef struct netsnmp_inpcb_s netsnmp_inpcb;
 struct netsnmp_inpcb_s {
     struct inpcb    pcb;
@@ -83,7 +83,7 @@ struct netsnmp_inpcb_s {
 #endif
 #define	UDPTABLE_IS_LINKED_LIST
 
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */
 #endif                          /* solaris2 */
 #endif                          /* hpux11 */
 
@@ -137,9 +137,9 @@ init_udpTable(void)
     iinfo->get_first_data_point = udpTable_first_entry;
     iinfo->get_next_data_point  = udpTable_next_entry;
     iinfo->table_reginfo        = table_info;
-#if defined(WIN32) || defined(solaris2)
+#if defined (WIN32) || defined (cygwin) || defined (solaris2)
     iinfo->flags               |= NETSNMP_ITERATOR_FLAG_SORTED;
-#endif /* WIN32 || solaris2 */
+#endif /* WIN32 || cygwin || solaris2 */
 
 
     /*
@@ -173,7 +173,7 @@ udpTable_handler(netsnmp_mib_handler          *handler,
     netsnmp_table_request_info *table_info;
     UDPTABLE_ENTRY_TYPE	  *entry;
     oid      subid;
-    long     port;
+    long     port,addr;
 
     DEBUGMSGTL(("mibII/udpTable", "Handler - mode %s\n",
                     se_find_label_in_slist("agent_mode", reqinfo->mode)));
@@ -195,17 +195,32 @@ udpTable_handler(netsnmp_mib_handler          *handler,
             switch (subid) {
             case UDPLOCALADDRESS:
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+                addr = ntohl(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr));
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
-                              (u_char*)IN6_EXTRACT_V4ADDR(pcb->inp_laddr),
-                                sizeof(IN6_EXTRACT_V4ADDR(pcb->inp_laddr)));
+                                         (u_char*)&addr,
+                                         sizeof(addr));
 #else
+#ifdef solaris2
+                /* solaris x86 already stores stuff in host order;
+                   non x86 is already big endian host order as well */
+                addr = ntohl(entry->UDPTABLE_LOCALADDRESS);
+#else
+                addr = entry->UDPTABLE_LOCALADDRESS;
+#endif
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
-                                 (u_char *)&entry->UDPTABLE_LOCALADDRESS,
-                                     sizeof(entry->UDPTABLE_LOCALADDRESS));
+                                         (u_char *)&addr,
+                                         sizeof(addr));
 #endif
                 break;
             case UDPLOCALPORT:
+#ifdef solaris2
+                /*
+                 * Solaris udpLocalPort is in host byte order
+                 */
+                port = (u_short)entry->UDPTABLE_LOCALPORT;
+#else
                 port = ntohs((u_short)entry->UDPTABLE_LOCALPORT);
+#endif
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -278,7 +293,7 @@ udpTable_next_entry( void **loop_context,
     /*
      * Set up the indexing for the specified row...
      */
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     port = ntohl((u_long)udp_head[i].UDPTABLE_LOCALADDRESS);
     snmp_set_var_value(index, (u_char *)&port,
                                   sizeof(udp_head[i].UDPTABLE_LOCALADDRESS));
@@ -301,7 +316,7 @@ udpTable_next_entry( void **loop_context,
 void
 udpTable_free(netsnmp_cache *cache, void *magic)
 {
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     if (udp_head) {
 		/* the allocated structure is a count followed by table entries */
 		free((char *)(udp_head) - sizeof(DWORD));
@@ -353,13 +368,20 @@ udpTable_next_entry( void **loop_context,
      */
 #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
                 snmp_set_var_value(index,
-                              (u_char*)&IN6_EXTRACT_V4ADDR(entry->inp_laddr),
-                                 sizeof(IN6_EXTRACT_V4ADDR(entry->inp_laddr)));
+                              (u_char*)&IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr),
+                                 sizeof(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr)));
 #else
     snmp_set_var_value(index, (u_char*)&entry->UDPTABLE_LOCALADDRESS,
                                  sizeof(entry->UDPTABLE_LOCALADDRESS));
 #endif
+#ifdef solaris2
+    /*
+     * Solaris udpLocalPort is in host byte order
+     */
+    port = entry->UDPTABLE_LOCALPORT;
+#else
     port = ntohs(entry->UDPTABLE_LOCALPORT);
+#endif
     snmp_set_var_value(index->next_variable,
                                (u_char*)&port, sizeof(port));
 
@@ -472,8 +494,10 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         if (state != 7)         /* fix me:  UDP_LISTEN ??? */
             continue;
 
+        /* store in network byte order */
+        pcb.inp_laddr.s_addr = htonl(pcb.inp_laddr.s_addr);
         pcb.inp_lport = htons((unsigned short) (lport));
-        pcb.inp_fport = htons(pcb.inp_fport);
+        pcb.inp_fport = htons(pcb.inp_fport); /* FIXME: remove */
 
         nnew = SNMP_MALLOC_TYPEDEF(struct inpcb);
         if (nnew == NULL)
@@ -554,7 +578,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
 }
 #else                           /* solaris2 */
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
 int
 udpTable_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -586,7 +610,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
 	free(pUdpTable);
     return -1;
 }
-#else                           /* WIN32 */
+#else                           /* WIN32 cygwin*/
 
 #if (defined(CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST))
 int
@@ -737,7 +761,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
 #endif				/* UDB_SYMBOL */
 #endif				/* PCB_TABLE */
 #endif		/* (defined(CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST)) */
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin*/
 #endif                          /* linux */
 #endif                          /* solaris2 */
 #endif                          /* hpux11 */

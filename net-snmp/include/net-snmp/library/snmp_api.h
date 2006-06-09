@@ -484,8 +484,9 @@ typedef struct request_list {
 #define SNMPERR_VAR_TYPE		(-61)
 #define SNMPERR_MALLOC			(-62)
 #define SNMPERR_KRB5			(-63)
+#define SNMPERR_PROTOCOL		(-64)
 
-#define SNMPERR_MAX			(-63)
+#define SNMPERR_MAX			(-64)
 
 #define non_repeaters	errstat
 #define max_repetitions errindex
@@ -977,6 +978,7 @@ struct variable_list {
                                            netsnmp_session * ss);
     void            snmp_sess_perror(const char *prog_string,
                                      netsnmp_session * ss);
+    const char *    snmp_pdu_type(int type);
 
     /*
      * end single session API 

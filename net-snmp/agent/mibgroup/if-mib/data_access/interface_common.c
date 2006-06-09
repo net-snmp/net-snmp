@@ -38,7 +38,7 @@ static void _free_interface_config(void);
  * These shouldn't be called by the general public, so they aren't in
  * the header file.
  */
-#ifdef NETSNMP_ACCESS_INTERFACE_NOARCH
+#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
 extern void netsnmp_arch_interface_init(void);
 extern int
 netsnmp_arch_interface_container_load(netsnmp_container* container,
@@ -437,14 +437,15 @@ netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
 
     if (NULL == prev_vals->old_stats) {
         /*
-         * if we don't have old stats, they can't have wrapped, so just copy
+         * if we don't have old stats, copy previous stats
          */
         prev_vals->old_stats = SNMP_MALLOC_TYPEDEF(netsnmp_interface_stats);
         if (NULL == prev_vals->old_stats) {
             return -2;
         }
+        memcpy(prev_vals->old_stats, &prev_vals->stats, sizeof(new_vals->stats));
     }
-    else {
+
         netsnmp_c64_check32_and_update(&prev_vals->stats.ibytes,
                                        &new_vals->stats.ibytes,
                                        &prev_vals->old_stats->ibytes,
@@ -477,7 +478,6 @@ netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
                                        &new_vals->stats.obcast,
                                        &prev_vals->old_stats->obcast,
                                        &need_wrap_check);
-    }
     
     /*
      * if we've decided we no longer need to check wraps, free old stats
@@ -485,12 +485,13 @@ netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
     if (0 == need_wrap_check) {
         SNMP_FREE(prev_vals->old_stats);
     }
-    
-    /*
-     * update old stats from new stats.
-     * careful - old_stats is a pointer to stats...
-     */
-    memcpy(prev_vals->old_stats, &new_vals->stats, sizeof(new_vals->stats));
+    else {
+        /*
+         * update old stats from new stats.
+         * careful - old_stats is a pointer to stats...
+         */
+        memcpy(prev_vals->old_stats, &new_vals->stats, sizeof(new_vals->stats));
+    }
     
     return 0;
 }

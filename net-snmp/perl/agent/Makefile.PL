@@ -87,7 +87,7 @@ sub InitMakeParams {
 #	} else {
 #	    $Params{'PREREQ_PM'} = {'NetSNMP::OID' => '0.1'};
 	}
-	$Params{'CCFLAGS'} =~ s/ -W[-\w]+//g; # ignore developer warnings
+	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
 	if ($Params{'LIBS'} eq "" || $Params{'CCFLAGS'} eq "") {
 	    die "You need to install net-snmp first (I can't find net-snmp-config)";
 	}
@@ -135,7 +135,10 @@ sub NetSNMPGetOpts {
       $basedir =~ /(.*?)\\perl.*/;
       $basedir = $1;
       print "Net-SNMP base directory: $basedir\n";
-
+      if ($basedir =~ / /) {
+        die "\nA space has been detected in the base directory.  This is not " .
+            "supported\nPlease rename the folder and try again.\n\n";
+      }
     }
     else
     {

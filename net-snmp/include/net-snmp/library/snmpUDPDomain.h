@@ -42,6 +42,10 @@ int             netsnmp_udp_getSecName(void *opaque, int olength,
                                        char **secname,
                                        char **contextName);
 
+int             netsnmp_sock_buffer_set(int s, int optname, int local,
+                                        int size);
+
+
 /*
  * "Constructor" for transport domain object.  
  */

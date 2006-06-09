@@ -20,3 +20,7 @@
 #  undef NETSNMP_ENABLE_INLINE
 #  define NETSNMP_ENABLE_INLINE 0
 #endif
+
+#ifndef UINT32_MAX
+#  define UINT32_MAX UINT_MAX
+#endif

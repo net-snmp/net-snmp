@@ -1,35 +1,23 @@
 #!/usr/bin/perl
-
+#
+# Creates a .xhtml compliant index.html file
+#
 my $infile = shift @ARGV;
 
 map { s/\.[0-9]$//; $pages{$_} = 1; } @ARGV;
 
 open(I,$infile);
 $first = 1;
-print "<HTML>
-<HEAD>
-<title>Net-SNMP manual pages</title>
-<style type=\"text/css\">
-<!--
-h2{background:#ccccee}
-table{background:#bbeebb}
--->
-</style>
-</head>
-<BODY bgcolor=\"#ffffff\" background=\"../ucd-snmp-bg3.gif\">
-<h2>Other Net-SNMP Documantion</h2>
-<ul>
-<table width=100%>
-<tr><td width=30%><a href=\"http://www.Net-SNMP.org/tutorial-5/\">The Net-SNMP Tutorial</td><td>A complete tutorial describing how to use the commands, a bit how SNMP works, and how to develop applications and agent plugins.</tr>
-<tr><td width=30%><a href=\"http://www.Net-SNMP.org/#Documentation\">Net-SNMP Home Page Documentation</a.</td><td>A high-level summary of Net-SNMP related documentation</td></tr>
-<tr><td width=30%><a href=\"http://www.Net-SNMP.org/tutorial-5/agent/\">API documentation</a></td><td>Documentation generated from Doxygen formatted source code comments</td></tr>
-</table>
-</ul>
-";
+print '<p class="SectionTitle">
+Man pages
+</p>
+';
+
 while (<I>) {
     if (/^#\s*(.*)/) {
-	print "</table></ul>\n" if (!$first);
-	print "<h2>$1</h2>\n<ul><table width=\"100%\">\n";
+	print "</table>\n" if (!$first);
+	print "<h2>$1</h2>\n";
+        print "<table width=\"100%\">\n";
 	$first = 0;
     } else {
 	my $name = $_;
@@ -40,27 +28,39 @@ while (<I>) {
 	}
 	open(H,"$name.html");
 	while (<H>) {
-	    if (/<TITLE>(.*)<\/TITLE>/) {
+	    if (/<h1>(.*?)<\/h1>/i) {
 		$title = $1;
 	    }
-	    if (/<H2>NAME<\/H2>/) {
-		$_ = <H>;
+            
+	    if (/<h2>NAME<\/h2>(.*)/i) {
+                $_ = $1;
+
+                # Ignore blank lines
 		while (/^\s*$/) {
 		    $_ = <H>;
 		}
-		$title = $_;
+
+                $title = $_;
 		chomp($title);
-		$title =~ s/\s*$name\s*-\s*//;
-	    }
+                $title =~ s/\s*$name\s*-\s*//;
+
+                # Remove any complete <> tags
+                $title =~ s/<.*>//i;
+                # Remove any half open tags               
+                $title =~ s/<.*//i;
+              }
 	}
 	close(H);
-	print " <tr><td width=\"30%\"><a href=\"$name.html\">$name</a></td><td>$title</td></tr>\n";
+	print "  <tr>\n";
+        print "    <td width=\"30%\"><a href=\"$name.html\">$name</a></td>\n";
+        print "    <td>$title</td>\n";
+        print "  </tr>\n";
+        print "\n";
 	delete $pages{$name};
     }
 }
-print "</table></ul>
-<!--#include virtual=\"/sfbutton.html\" -->
-</BODY></HTML>\n";
+print '</table>
+<br/>';
 
 @left = keys(%pages);
 if ($#left > -1) {

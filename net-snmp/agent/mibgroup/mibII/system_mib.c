@@ -74,7 +74,9 @@ char            sysName[SYS_STRING_LEN] = SYS_NAME;
 char            sysLocation[SYS_STRING_LEN] = SYS_LOC;
 oid             sysObjectID[MAX_OID_LEN];
 size_t          sysObjectIDLength;
-oid             version_sysoid[] = { SYSTEM_MIB };
+
+extern oid      version_sysoid[];
+extern int      version_sysoid_len;
 
 char            oldversion_descr[SYS_STRING_LEN];
 char            oldsysContact[SYS_STRING_LEN];
@@ -93,7 +95,7 @@ WriteMethod     writeSystem;
 int             header_system(struct variable *, oid *, size_t *, int,
                               size_t *, WriteMethod **);
 
-#if HAVE_WINSOCK_H
+#if (defined (WIN32) && defined (HAVE_WIN32_PLATFORM_SDK)) || defined (mingw32)
 static void     windowsOSVersionString(char [], size_t);
 #endif
 
@@ -281,8 +283,8 @@ void system_parse_config_sysObjectID(const char *token, char *cptr)
                  "sysobjectid token not a parsable OID:\n\t%s",
                  cptr);
         config_perror(tmpbuf);
-        memcpy(sysObjectID, version_sysoid, sizeof(version_sysoid));
-        sysObjectIDLength = OID_LENGTH(version_sysoid);
+        memcpy(sysObjectID, version_sysoid, version_sysoid_len * sizeof(oid));
+        sysObjectIDLength = version_sysoid_len;
     }
 }
 
@@ -369,7 +371,7 @@ init_system_mib(void)
     version_descr[sizeof(version_descr) - 1] = 0;
     version_descr[strlen(version_descr) - 1] = 0;       /* chomp new line */
 #else
-#if HAVE_WINSOCK_H
+#if (defined (WIN32) && defined (HAVE_WIN32_PLATFORM_SDK)) || defined (mingw32)
     windowsOSVersionString(version_descr, sizeof(version_descr));
 #else
     strcpy(version_descr, "unknown");
@@ -383,7 +385,7 @@ init_system_mib(void)
 #ifdef HAVE_UNAME
     strncpy(sysName, utsName.nodename, sizeof(sysName));
 #else
-#if HAVE_EXECV
+#if defined (HAVE_EXECV) && !defined (mingw32)
     sprintf(extmp.command, "%s -n", UNAMEPROG);
     /*
      * setup defaults 
@@ -399,7 +401,7 @@ init_system_mib(void)
 #endif                          /* HAVE_UNAME */
 #endif                          /* HAVE_GETHOSTNAME */
 
-#if HAVE_WINSOCK_H
+#if (defined (WIN32) && defined (HAVE_WIN32_PLATFORM_SDK)) || defined (mingw32)
   {
     HKEY hKey;
     /* Default sysContact is the registered windows user */
@@ -415,8 +417,8 @@ init_system_mib(void)
 #endif
 
     /* default sysObjectID */
-    memcpy(sysObjectID, version_sysoid, sizeof(version_sysoid));
-    sysObjectIDLength = OID_LENGTH(version_sysoid);
+    memcpy(sysObjectID, version_sysoid, version_sysoid_len * sizeof(oid));
+    sysObjectIDLength = version_sysoid_len;
 
     /*
      * register ourselves with the agent to handle our mib tree 
@@ -644,7 +646,7 @@ writeSystem(int action,
 	 *
 	 *********************/
 
-#if HAVE_WINSOCK_H
+#if (defined (WIN32) && defined (HAVE_WIN32_PLATFORM_SDK)) || defined (mingw32)
 static void
 windowsOSVersionString(char stringbuf[], size_t stringbuflen)
 {
@@ -725,7 +727,7 @@ windowsOSVersionString(char stringbuf[], size_t stringbuflen)
                    } else if (strcmpi("SERVERNT", productType) == 0) {
                       strcat(windowsVersion, " Advanced Server");
                    }
-                   sprintf(versionStr, " %d.%d", osVersionInfo.dwMajorVersion, osVersionInfo.dwMinorVersion);
+                   sprintf(versionStr, " %d.%d", (int)osVersionInfo.dwMajorVersion, (int)osVersionInfo.dwMinorVersion);
                    strcat(windowsVersion, versionStr);
                 }
                 RegCloseKey(hKey);
@@ -759,9 +761,9 @@ windowsOSVersionString(char stringbuf[], size_t stringbuflen)
     /* Output is made to look like results from uname -a */
     snprintf(stringbuf, stringbuflen,
             "Windows %s %d.%d.%d %s %s %s", hostname,
-             osVersionInfo.dwMajorVersion, osVersionInfo.dwMinorVersion,
-             osVersionInfo.dwBuildNumber, osVersionInfo.szCSDVersion,
+             (int)osVersionInfo.dwMajorVersion, (int)osVersionInfo.dwMinorVersion,
+             (int)osVersionInfo.dwBuildNumber, osVersionInfo.szCSDVersion,
              windowsVersion, identifier);
 }
-#endif /* HAVE_WINSOCK_H */
+#endif /* WIN32 and HAVE_WIN32_PLATFORM_SDK or mingw32 */
 

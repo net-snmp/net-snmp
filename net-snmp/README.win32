@@ -13,6 +13,7 @@ The remainder of this guide has the following sections :
 
 Status as of 28-May-2004 for Win32 platforms
 Interactions with Other Vendor's Products
+Co-existence with Microsoft SNMP services
 Installing Platform SDK
 Microsoft Visual C++ - Overview
 Microsoft Visual C++ - Configure / nmake - Building
@@ -30,6 +31,7 @@ MinGW - Building with OpenSSL
 Configuring Net-SNMP
 How to Register the Net-SNMP Agent and Trap Daemon as Windows services
 Notes on SET support for WIN32 ports
+Notes on preprocessor defines for MSVC, MinGW and Cygwin
 Acknowledgements
 
 
@@ -98,16 +100,169 @@ The next subsection relates to items that are built using Visual Studio
 
   -  The Net-SNMP agent and trap receiver will fail to start if either 
      cannot bind to their connect port (161 for agent, 162 for trap receiver).
-     Check the Services panel to be sure no other SNMP program conflicts.
+     Check the Services panel to be sure no other SNMP program conflicts. See
+     the section titled 'Co-existence with Microsoft SNMP services' below.
 
   -  Running the Net-SNMP agent instead of the MS supplied one works
-     (at the loss of most of the functionality).
+     (at the loss of most of the functionality).   See the section titled 
+     'Co-existence with Microsoft SNMP services' below.
 
   -  The Net-SNMP agent does not use the MS SNMP.dll, therefore it cannot 
-     run as an extensible part of the MS agent.
+     run as an extensible part of the MS agent.  It is possible to use a third
+     party proxy agent for the MS agent to 'proxy' requests to the Net-SNMP
+     agent listening on a different UDP port on the same machine.
 
   -  Snmptrapd does not "share" nor multiplex traps with SNMPTRAP.EXE,
      a program that is available from Microsoft or ACE#COMM.
+
+
+***************************************************************************
+*
+* Co-existence with Microsoft SNMP services
+*
+***************************************************************************
+
+If the Microsoft SNMP agent service (SNMP Service) is running, the Net-SNMP 
+agent (snmpd) will fail to start as it will not be able to bind to the default
+TCP/IP port of 161.
+
+If the Microsoft SNMP Trap Receiver service is running, the Net-SNMP trap 
+receiver (snmptrapd) will fail to start as it will not be able to bind to the 
+default TCP/IP port of 162.
+
+It is not a requirement to install the Net-SNMP agent (snmpd) or trap receiver
+(snmptrapd).  All the command line utilties such as snmpget.exe, snmpset.exe 
+and the Perl modules will work without the Net-SNMP services.  All the 
+utilities will work against any SNMP agent.
+
+The main benefit of running the Microsoft SNMP agent instead of the Net-SNMP 
+agent is that many Windows applications such as Microsoft SQL Server, 
+Microsoft Exchange etc, extend the Microsoft agent.  Net-SNMP is NOT a drop 
+in replacement for the Microsoft agent.  Running Net-SNMP in place of the 
+Microsoft agent will prevent the other applications from working with SNMP.  
+Also, the Net-SNMP agent does not contain as many MIBs as the Microsoft agent.  
+For example, as of August 2005, the HOST-RESOURCES (host) MIB is not yet
+implemented in Net-SNMP.
+
+There are many benefits of running the Net-SNMP agent instead of the Microsoft
+such as you can extend the agent using various features found in snmpd.conf 
+such as pass and pass_persist (support for others are being added), you can
+use SNMP v3, and there is more granular access control.
+
+To allow both the Microsoft and Net-SNMP agent / trap receiver to run at the 
+same time, the default TCP/IP port must be changed on either the Microsoft or 
+Net-SNMP version of the application.
+
+The Net-SNMP ports for snmpd and snmptrapd can be modified via snmpd.conf and 
+snmptrapd.conf or by using a command line option with each program.  See the 
+Net-SNMP Help file for instructions on changing the port number.
+
+The Microsoft services use the 'snmp' and 'snmptrap' entries in the SERVICES 
+file (%SystemRoot%\system32\drivers\etc\services) to determine the port to bind
+the service to when the service starts.  Simply modify the entries and restart 
+the affected services.
+
+Note:  Changing the default port the service listens on will prevent it from 
+       accepting requests or receiving traps from standard SNMP devices and 
+       management stations unless they have also been reconfigured to use the 
+       new port numbers.
+
+It is possible to configure Net-SNMP agent to listen on the default UDP port
+(161), have the Microsoft agent listen on another port such as 1161, and have
+Net-SNMP proxy (forward) requests to the Microsoft agent.  This will allow you
+to use the advanced features of Net-SNMP while still being able to query
+the Microsoft agent and subagents.  To this, follow these steps:
+
+ 1.  Change the port that the Microsoft agent listens on.
+
+ 2.  Configure the Microsoft agent to only accept requests from localhost.  
+     This can be set in the Security tab for the SNMP service in Windows 2000+.
+     This is recommended to prevent users from querying the Microsoft agent
+     directly.
+ 
+ 3.  Add a r/c community string to the Microsoft agent.  This can be set in 
+     the Security tab for the SNMP service in Windows 2000+.  This will give 
+     Net-SNMP full SNMP access.  User access can be restricted by Net-SNMP
+     as explained below.
+ 
+ 4.  Restart the Microsoft SNMP service.
+
+ 5.  Configure Net-SNMP to proxy requests to the Microsoft agent.  To have it
+     forward ALL requests to the Microsoft agent, add the following line to 
+     snmpd.conf:
+ 
+       proxy  -v 1 -c public localhost:1161 .1.3
+ 
+     To only forward a section of the MIB tree such as the host section, use:
+ 
+       proxy  -v 1 -c public localhost:1161 host
+ 
+ 6.  Start the Net-SNMP agent.
+ 
+     Notes: If Net-SNMP has built in support for an OID and the proxy statement
+            is not for a specific OID, then it will respond instead of proxying
+            the request.  For example, if you proxy the 'system' tree and issue
+            an snmpget for sysDescr.0, Net-SNMP will respond with it's own 
+            version of sysDescr.0 instead of forwarding it.  To prevent Net-SNMP
+            from doing this, you must prevent the system MIB from being 
+            initialized when snmpd.exe is started by specifying what MIBS to 
+            initialize using the -I switch.
+  
+            If you are forwarding everything to the Microsoft agent (.1.3), 
+            start snmpd.exe using:
+ 
+              snmpd.exe -Ivacm_conf,proxy,pass,pass_persist
+ 
+            The above will enable proxy, pass and pass_persist support.  See the
+            snmpd man page for more information on the -I switch.
+ 
+            If you are forwarding a section of the tree that is not immplemented
+            in Net-SNMP such as 'host', you do not need to use the -I switch as
+            Net-SNMP will forward the request.  This may cause issues in the 
+            future if newer versions of Net-SNMP implement the section of the
+            tree you are forwarding, such as the HOST-RESOURCES MIB.
+ 
+            The pass and pass_persist commands will work even if the entire 
+            tree is proxied to the Microsoft Agent.
+ 
+ 7.  Test the agent.  If you have forwarded the entire tree, issue an snmpget
+     for sysDescr.0.  For example:
+ 
+       snmpget -v 1 -c public localhost sysDescr.0
+ 
+     The Microsoft agent will respond in a format similar to:
+ 
+       Hardware: x86 Family 15 Model 12 Stepping 0 AT/AT COMPATIBLE - Software: 
+        Windows 2000 Version 5.0 (Build 2195 Uniprocessor Free)
+  
+     The Net-SNMP agent would normally respond in a format similar to:
+ 
+       Windows host1 5.0.2195 Service Pack 4 2000 Server x86 Family 15 Model 12
+        Stepping 0
+
+If you had previously configured the Microsoft agent with multiple community 
+strings to restrict who can read and write to the OID tree, the security
+settings should be transferred to snmpd.conf.  For example, if the Microsoft
+agent was configured with:
+
+ Community              Rights
+ ---------------------------------
+ public                 read
+ S3cur39876             read/write
+ Sn0wb0ard345           read/create
+
+Add the following to snmpd.conf:
+
+ rocommunity  public
+ rwcommunity  S3cur39876
+ rwcommunity  Sn0wb0ard345
+
+It is possible to add more granular security using Net-SNMP.  For example, to 
+restrict the public community string to only read the system tree, use:
+
+ rocommunity  public 0.0.0.0 system
+
+See the snmpd.conf man page for more information on configuring security.
 
 
 ***************************************************************************
@@ -116,30 +271,42 @@ The next subsection relates to items that are built using Visual Studio
 *
 ***************************************************************************
 
-The core elements of the mibII group of the agent use the "IP Helper API"
-which is part of Microsoft's "Core Platform SDK".  This is typically
-not installed by default, but can be downloaded from
+If you are compiling using Microsoft Visual C++ 6.0, it is recommended that
+you install the Core Platform SDK (PSDK).  Without the PSDK, some functionality
+will be disabled such as the core elements of the mibII group of the agent 
+which use the "IP Helper API" (IPHLPAPI).
 
-		http://msdn.microsoft.com/downloads/
+To determine what code is disabled when the PSDK is not used, search the
+source code for HAVE_WIN32_PLATFORM_SDK.
 
-as follows:
+The PSDK can be downloaded from the MSDN site.  Go to http://msdn.microsoft.com 
+and do a search for 'psdk download' (without the quotes).  You should find both
+a web install and a full install.  
 
-    -  Using Internet Explorer (Netscape won't work), go to the above URL
-    -  From the menu at the left, Click "Downloads by Topic";
-            From the main window, Click "Platform SDK".
-    -  From the new window that appears, select "Core SDK".
-    -  The full Core SDK is ~240Mb (expanding to ~560Mb on installation).
-       In fact, the only portion that's required is the basic "Build
-       Environment" (36Mb) So it's safe to deselect the pre-release version,
-       documentation, sample code and 64-bit elements.
+When installing the SDK, all that is required is the 'Core'.
 
-    -  Once this package has installed, from the Start Menu run
-       "Programs ->Microsoft Platform SDK... -> Visual Studio Registration
-       ->Register PSDK Directories with Visual Studio"
+Once this package has installed, from the Start Menu run 
+  "Programs ->Microsoft Platform SDK... -> 
+   Visual Studio Registration ->
+   Register PSDK Directories with Visual Studio"
+
+If you are compiling using any of the following systems, the PSDK download
+is not necessary, as the required parts of the PSDK are included with the 
+installation of the compiler:
+
+    - Microsoft Development Environment 2002 (MSVC 7.0)
+    - Microsoft Development Environment 2003 (MSVC 7.1)
+    - Cygwin (gcc)
+    - MinGW (gcc)
+
+In order for the process part of the host resources MIB to work under Windows
+NT you will need to obtain PSAPI.DLL. This is available under the download 
+section of www.microsoft.com.  The DLL is included with Windows 2000 and XP, 
+and is also part of the VC++ distribution.  
 
 If you are building Net-SNMP using Cygwin, go now to "Cygwin - Building".
 If you are building Net-SNMP using MinGW, go now to "MinGW - Building".
-Otherwise, see the Building section below in order to build the agent.
+Otherwise, see the Building section below.
 
 
 ***************************************************************************
@@ -170,8 +337,9 @@ of projects, plus 'libdll.dsw' which contains a minimal set of projects
 for use with the Perl module only.  
 
 Win32.dsw is for developers who have not installed the Platform SDK from 
-Microsoft's MSDN SDK Update site.  Win32sdk.dsw is for those who have.   
-This only affects building the agent.
+Microsoft's MSDN SDK Update site when using Microsoft Visual Studio 6.0.
+Win32sdk.dsw is for those who have or who are using the Microsoft Development 
+Environment 2002/2003 (MSVC 7.0/7.1), Cygwin (gcc) or MinGW (gcc).
 
 Libdll.dsw compiles a DLL version of snmplib (netsnmp.dll) which should 
 only be used for the Perl module.  Using netsnmp.dll for other components 
@@ -265,28 +433,28 @@ steps to build using build.bat:
 
 4.  The following screen will appear:
 
-    Net-SNMP build options
-    ======================
+    Net-SNMP build and install options
+    ==================================
     
-    1. OpenSSL support:      disabled
-    2. Platform SDK support: disabled
-
-    3. Install path:         c:/usr
-    4. Install after build:  enabled
-
-    5. Perl modules:         disabled
-    6. Install perl modules: disabled
-
-    7. Quiet build (logged): enabled
-    8. Debug mode:           disabled
-    9. IPv6 transports:      disabled
+    1.  OpenSSL support:            disabled
+    2.  Platform SDK support:       disabled
     
-    F. Finished - start build
-    Q. Quit - abort build
-
-    Select option to set / toggle:
-
-
+    3.  Install path:               c:/usr
+    4.  Install after build:        enabled
+    
+    5.  Perl modules:               disabled
+    6.  Install perl modules:       disabled
+    
+    7.  Quiet build (logged):       enabled
+    8.  Debug mode:                 disabled
+    9.  IPv6 transports:            disabled
+    
+    10. Install development files   disabled
+    
+    F.  Finished - start build
+    Q.  Quit - abort build
+    
+    Select option to set / toggle: 
 
 5.  Toggle the options on and off as desired by typing the line number 
     followed by <enter>.  
@@ -326,6 +494,10 @@ steps to build using build.bat:
     See perlmake.out for Perl test results
     
     Done!
+
+7.  If the folder that Net-SNMP was installed to is ever changed, modify the 
+    system environment variables or registry keys as explained in the 
+    'Configuration_Overview.html' file located in win32/dist/htmlhelp.
 
 
 Manual build using Configure / nmake
@@ -416,26 +588,37 @@ Note:  The Configure option --linktype=static (or not specifying a linktype)
 The win32sdk.dsw workspace will build the agent that provides mib-II objects
 for network interface layers, and the IP, ICMP, TCP and UDP tables.  This
 workspace requires the Platform SDK to be installed.  Use the win32.dsw 
-workspace if you don't have or don't need these features.
+workspace if you don't have or don't need these features.  Note:  Other 
+features may be disabled if the Platform SDK is not used.  See the section
+'Installing Platform SDK' for more information.
 
-1.  If SNMPv3 encryption capabilities or SHA authentication is required,
-    install the OpenSSL DLL and library file as described in the section 
-    'Microsoft Visual C++ - Building with OpenSSL" and then continue with 
-    step 2.
+1. If SNMPv3 encryption capabilities or SHA authentication is required,
+   install the OpenSSL DLL and library file as described in the section 
+   'Microsoft Visual C++ - Building with OpenSSL" and then continue with 
+   step 2.
 
-2.  The default installation path is c:\usr.  This folder will contain all
-    the binaries, MIB files, configuration files etc.  To change the location,
-    the win32\net-snmp\net-snmp-config.h file needs to be modified by changing
-    the INSTALL_BASE variable. 
+2. The default installation path is c:\usr.  This folder will contain all
+   the binaries, MIB files, configuration files etc.  To change the location,
+   the win32\net-snmp\net-snmp-config.h file needs to be modified by changing
+   the INSTALL_BASE variable. 
 
-    Note:
+   Note:
   
-      All paths in net-snmp-config.h use the "/" UNIX pathname delimiter.
-      If a drive letter is not specified, the current drive letter is assumed.
+     All paths in net-snmp-config.h use the "/" UNIX pathname delimiter.
+     If a drive letter is not specified, the current drive letter is assumed.
 
-      For example: #define INSTALL_BASE "c:/usr".  
+     For example: #define INSTALL_BASE "c:/usr".  
 
-3. Build the applications
+3. If you are using win32sdk, the Platform SDK must be enabled.  Edit the 
+   the win32\net-snmp\net-snmp-config.h file and *change*:
+
+        /* #undef HAVE_WIN32_PLATFORM_SDK */
+
+   to:
+
+        #define HAVE_WIN32_PLATFORM_SDK 1
+
+4. Build the applications
 
    MS VC++ 6.0:
    ------------
@@ -467,7 +650,7 @@ workspace if you don't have or don't need these features.
        save to a text file if there is some information to share.
    m.  Click "File->Close Solution".
   
-4.  If the Perl modules are required, continue with the next section:
+5.  If the Perl modules are required, continue with the next section:
     'Microsoft Visual C++ - Building the Perl SNMP modules'.
 
     Otherwise, continue with the section: 
@@ -500,8 +683,11 @@ not be possible.  For example, the conf module tests will fail.
 3.  Open win32\net-snmp\net-snmp-config.h using a text editor.
 
 4.  *Change* the following line which is located near the top of the file:
-        #undef NETSNMP_USE_DLL
-    *To*
+
+        /* #undef NETSNMP_USE_DLL */
+
+    *to*
+
         #define NETSNMP_USE_DLL 1
 
 5.  Make a backup of the new net-snmp-config.h which contains settings
@@ -630,6 +816,10 @@ components to an install directory named in the INSTALL_BASE variable.
     open a _new_ command prompt window, and type:
 
     snmptranslate -IR -Td linkDown
+
+8.  If the folder that Net-SNMP was installed to is ever changed, modify the 
+    system environment variables or registry keys as explained in the 
+    'Configuration_Overview.html' file located in win32/dist/htmlhelp.
 
 
 ***************************************************************************
@@ -896,16 +1086,18 @@ The following configure options creates a working set of programs:
 
 ./configure \
 	--with-mib-modules="host agentx disman/event-mib examples/example" \
-	--with-out-mib-modules=host/hr_network \
+	--with-out-mib-modules=host/hr_network --with-libs="-lws2_32" \
 
 If you want to use SNMPv3 auth and privacy features, add:
 	--with-openssl="/usr" \
 
 If you want to use IPv6 transports, add:
-	--enable-ipv6 --with-transports="TCPIPv6 UDPIPv6" \
-	--with-libs="-lws2_32" \
+	--enable-ipv6 --with-transports="TCPIPv6 UDPIPv6"
 
-
+Note:  The source code should *not* be in a folder that contains a space.  For
+       example, compiling in your 'My Documents' or your Desktop (usually
+       c:\Documents and Settings\xxxx\Desktop) is not supported.
+        
 This has been tested for Windows 98 and Windows NT 4.0.  In order for
 the process part of the host resources MIB to work under NT you will need
 to get hold of the PSAPI.DLL. This available under the download section
@@ -919,6 +1111,10 @@ Earlier releases of Cygwin may need to use the configure flag
 but this regular expression support has since been incorporated
 into the main Cygwin package, and it is no longer necessary to
 include it separately.
+
+If the folder that Net-SNMP was installed to is ever changed, modify the 
+system environment variables or registry keys as explained in the 
+'Configuration_Overview.html' file located in win32/dist/htmlhelp.
 
 
 ***************************************************************************
@@ -936,6 +1132,10 @@ builds under MinGW with MSyS is available at:
 
         http://www.boedog.com/net-snmp/gnu_regex/regex-0-12-mingw-r2.tar.gz
 
+Note:  The source code should *not* be in a folder that contains a space.  For
+       example, compiling in your 'My Documents' or your Desktop (usually
+       c:\Documents and Settings\xxxx\Desktop) is not supported.
+       
 1.  Build and install GNU regex following the instructions in the 
     regex-0-12-mingw-r2 README.
 
@@ -977,7 +1177,11 @@ builds under MinGW with MSyS is available at:
 
 6.  Type "make install" to install the package.
 
+7.  If the folder that Net-SNMP was installed to is ever changed, modify the 
+    system environment variables or registry keys as explained in the 
+    'Configuration_Overview.html' file located in win32/dist/htmlhelp.
 
+       
 ***************************************************************************
 *
 * MinGW - Building with OpenSSL
@@ -1019,7 +1223,7 @@ Follow these steps to install OpenSSL:
 
 Online documentation is available from the Net-SNMP home page at:
 
-http://www.net-snmp.org/#Documentation
+http://www.net-snmp.org/docs/
 
 All configuration files should be placed in the INSTALL_BASE\etc\snmp folder.
 The INSTALL_BASE folder is defined in the win32\net-snmp\net-snmp-config.h
@@ -1038,6 +1242,10 @@ path to the snmpconf Perl script.  For example:
 You can now run snmpconf using the standard command line such as:
 
   snmpconf -i
+
+For detailed information on using environment variables and the registry to 
+configure Net-SNMP, see the 'Configuration_Overview.html' file in 
+win32/dist/htmlhelp.
 
 
 ***************************************************************************
@@ -1093,22 +1301,20 @@ the -h switch:
 Notes: -H will display all available snmpd.conf, snmptrapd.conf and snmp.conf
        configuration file options, not the command line options.
 
-       Like all Net-SNMP applications, snmpd and snmptrapd will read the 
-       system environment variables SNMPCONFPATH, SNMPSHAREPATH etc even when
-       run as a service.  Due to a limitation in the Windows SCM, if any system
-       environment variables are changed, the system will need to be rebooted 
-       to allow the services to access the changed environment variables (see 
-       Microsoft knowledge base article 821761).  Therefore, if the location 
-       of the various configuration files is different than what was selected 
-       during compilation, a reboot will be required after setting the environment
-       variables, otherwise the services may fail to start.
-
-       If Net-SNMP was installed from a .exe binary release and was installed 
-       in a non default directory, a reboot will be required to allow the
-       services to access the SNMPCONFPATH and SNMPSHAREPATH variables.  
-       If the system is not rebooted, the services may fail to start and they 
-       will not be able to locate any configuration or MIB files.
-     
+       Like all Net-SNMP applications, snmpd and snmptrapd will use the 
+       SNMPCONFPATH and SNMPSHAREPATH environment variables when run as a 
+       service.  The registry is the recommended method for defining these 
+       variables due to a limitation in the Windows Service Control Manager 
+       (SCM).  When running as a service, if any system environment variables
+       are changed, the system will need to be rebooted to allow the services 
+       to access the changed environment variables (see Microsoft knowledge 
+       base article  821761).  Therefore, when running snmpd or snmptrapd as 
+       a service, if SNMPCONFPATH or SNMPSHAREPATH is changed, a reboot will 
+       be required after setting the environment variables, otherwise the 
+       services may fail to start.  Using the registry to store the environment 
+       variables eliminates this problem.  See the 'Configuration_Overview.html'
+       file in win32/dist/htmlhelp for more information on using the registry.
+    
 
 Unregistering the services
 --------------------------
@@ -1287,7 +1493,41 @@ tcpConnState of tcpConnTable is writable and the only value which may
 be set by a management station is deleteTCB(12)
 
 
+***************************************************************************
+*
+* Notes on preprocessor defines for MSVC, MinGW and Cygwin
+*
+***************************************************************************
 
+When adding Windows specific code, one or more of the following defines should
+be used:
+
+Define:                  Description:
+-------                  ------------
+WIN32                    Defined by MSVC & MinGW
+
+_MSC_VER                 Defined by MSVC only (standard MSVC macro)
+
+mingw32                  Defined by MinGW only
+
+cygwin                   Defined by Cygwin only
+
+HAVE_WIN32_PLATFORM_SDK  Should be defined if the Microsoft Platform SDK is
+                         installed and registered with MSVC or enabled for
+                         MinGW or Cygwin
+
+MinGW and Cygwin do not require the Microsoft Platform SDK as they both should
+contain most if not all of the functionality provided by the SDK.  When adding
+code that requires the PSDK under MSVC, the following can usually be used:
+
+ #if defined (HAVE_WIN32_PLATFORM_SDK) || defined (mingw32) || defined (cygwin)
+                         
+As listed above, Cygwin does NOT define WIN32.  When adding generic Windows 
+code that will work with MSVC, MinGW and Cygwin, the following should be used:
+
+ #if defined (WIN32) || defined (cygwin)
+
+  
 ***************************************************************************
 *
 * Acknowledgements
