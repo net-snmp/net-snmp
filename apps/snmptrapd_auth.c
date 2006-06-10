@@ -73,7 +73,7 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
     
     /* convert to v2 so we can check it in a consistent manner */
 #ifndef DISABLE_SNMPV1
-    if (pdu->version == SNMP_VERSION_1)
+    if (pdu->version == SNMP_VERSION_1) {
         newpdu = convert_v1pdu_to_v2(pdu);
         if (!newpdu) {
             snmp_log(LOG_ERR, "Failed to duplicate incoming PDU.  Refusing to authorize.\n");
