@@ -48,7 +48,7 @@ enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoPublicStri
       errors will differ greatly between SNMPv1 and SNMPv2c:
 <pre>
 <ul>
-% <b>snmpset -v 2c -c badcommunity test.net-snmp.org ucdDemoPublicString.0 s "hello"</b>
+% <b>snmpset -v 1 -c badcommunity test.net-snmp.org ucdDemoPublicString.0 s "hello"</b>
 Error in packet.
 Reason: (noSuchName) There is no such variable name in this MIB.
 This name doesn't exist: ucdDemoPublicString.0
