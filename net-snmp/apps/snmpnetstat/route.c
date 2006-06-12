@@ -42,6 +42,10 @@ static char *rcsid = "$OpenBSD: route.c,v 1.66 2004/11/17 01:47:20 itojun Exp $"
 
 #include <net-snmp/net-snmp-config.h>
 
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
