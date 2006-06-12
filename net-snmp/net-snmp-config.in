@@ -99,6 +99,9 @@ else
     --persistent-directory|--persistent-dir)
       echo @PERSISTENT_DIRECTORY@
       ;;
+    --perlprog|--perl)
+      echo @PERLPROG@
+      ;;
     #################################################### compile
     --base-cflags)
       echo @CFLAGS@ @CPPFLAGS@ -I${NSC_INCLUDEDIR}
@@ -559,6 +562,7 @@ if test "x$usage" = "xyes"; then
   echo "    --default-mibdirs     display default list of MIB directories"
   echo "    --snmpconfpath        display default SNMPCONFPATH"
   echo "    --persistent-directory display default persistent directory"
+  echo "    --perlprog            display path to perl for the perl modules"
   echo ""
   exit
 fi  
