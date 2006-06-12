@@ -120,19 +120,24 @@ initialize_table_inetCidrRouteTable(void)
         oid             reg_oid[] =
             { INETCIDRROUTENUMBER_OID };
         netsnmp_handler_registration *myreg;
+        netsnmp_mib_handler *handler;
 
         myreg =
             netsnmp_create_handler_registration("route number",
                                                 _route_number_handler,
-                                                &reg_oid,
+                                                reg_oid,
                                                 OID_LENGTH(reg_oid),
                                                 HANDLER_CAN_RONLY);
-        netsnmp_register_instance(myreg);
-
         /*
-         * load the cache to give us an initial value
+         * snarf cache to use w/cache handler to make sure the
+         * container is loaded w/up to date data.
          */
-        inetCidrRouteTable_container_load(inetCidrRouteTable_container_get());
+        netsnmp_assert(NULL != inetCidrRouteTable_get_cache());
+        handler =
+            netsnmp_cache_handler_get(inetCidrRouteTable_get_cache());
+        netsnmp_inject_handler(myreg, handler);
+        
+        netsnmp_register_instance(myreg);
     }
 }                               /* initialize_table_inetCidrRouteTable */
 
