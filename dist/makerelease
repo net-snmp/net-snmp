@@ -15,7 +15,7 @@ LocalGetOptions(\%opts,
 
 
 my $version = shift;
-die "No version suppiled" if (!$version);
+die "No version supplied" if (!$version);
 my $vtag = $version;
 $vtag =~ s/\./-/g;
 $vtag = "Ext-" . $vtag;
@@ -33,7 +33,7 @@ manualstep('human:version',
      Makefile.top (usually just for initial pre-release):
         See comments above LIBCURRENT, LIBAGE and LIBREVISION
 
-     Configure.in:
+     configure.in:
           AC_INIT([Net-SNMP], [$version], [net-snmp-coders\@lists.sourceforge.net])
                                ^^^^^
   [I'll run autoconf for you after you're done]
@@ -54,6 +54,9 @@ System("build:test","make test");
 #
 # checks and changes
 #
+manualstep("docs:doxygenconf",
+	   "You need to edit doxygen.conf to update the version number.
+");
 System("docs:make","make docs");
 System("docs:mancp","make mancp");
 System("docs:commit","cvs commit -m \"documentation update\" man");
