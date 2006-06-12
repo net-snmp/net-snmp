@@ -2274,7 +2274,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             view = in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
                              asp->pdu, varbind_ptr->type);
             if (view != VACM_SUCCESS)
-                return SNMP_ERR_NOTWRITABLE;
+                return SNMP_ERR_NOACCESS;
             break;
 
         case SNMP_MSG_GETNEXT:
