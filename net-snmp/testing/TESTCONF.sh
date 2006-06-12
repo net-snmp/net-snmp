@@ -89,10 +89,17 @@ fi
 SNMP_TESTDIR="$SNMP_BASEDIR/tests"
 SNMP_CONFIG_FILE="$SNMP_TMPDIR/snmpd.conf"
 SNMPTRAPD_CONFIG_FILE="$SNMP_TMPDIR/snmptrapd.conf"
+AGENTX_CONFIG_FILE="$SNMP_TMPDIR/agentx.conf"
 SNMP_SNMPTRAPD_LOG_FILE="$SNMP_TMPDIR/snmptrapd.log"
 SNMP_SNMPTRAPD_PID_FILE="$SNMP_TMPDIR/snmptrapd.pid"
 SNMP_SNMPD_PID_FILE="$SNMP_TMPDIR/snmpd.pid"
 SNMP_SNMPD_LOG_FILE="$SNMP_TMPDIR/snmpd.log"
+SNMP_AGENTX_PID_FILE="$SNMP_TMPDIR/agentx.pid"
+SNMP_AGENTX_LOG_FILE="$SNMP_TMPDIR/agentx.log"
+SNMPCONFPATH=${SNMP_TMPDIR}:${SNMP_TMP_PERSISTENTDIR}
+export SNMPCONFPATH
+SNMP_PERSISTENT_DIR=$SNMP_TMP_PERSISTENTDIR
+export SNMP_PERSISTENT_DIR
 #SNMP_PERSISTENT_FILE="$SNMP_TMP_PERSISTENTDIR/persistent-store.conf"
 #export SNMP_PERSISTENT_FILE
 
@@ -110,34 +117,43 @@ elif test -x /usr/sbin/netstat ; then
 else
     NETSTAT=""
 fi
-if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
-    SNMP_SNMPD_PORT="8765"
-    MAX_RETRIES=3
+
+PROBE_FOR_PORT() {
+    BASE_PORT=$1
+    MAX_RETRIES=10
     if test -x "$NETSTAT" ; then
         if test -z "$RANDOM"; then
             RANDOM=2
         fi
         while :
         do
-            IN_USE=`$NETSTAT -a -n 2>/dev/null | grep "[\.:]$SNMP_SNMPD_PORT "`
+            IN_USE=`$NETSTAT -a -n 2>/dev/null | grep "[\.:]$BASE_PORT "`
             if [ $? -eq 0 ]; then
-                #ECHO "Port $SNMP_SNMPD_PORT in use:"
+                #ECHO "Port $BASE_PORT in use:"
                 #echo "->$IN_USE"
-                SNMP_SNMPD_PORT=`expr $SNMP_SNMPD_PORT + \( $RANDOM % 100 \)`
+                BASE_PORT=`expr $BASE_PORT + \( $RANDOM % 100 \)`
             else
-                #echo "Using port $SNMP_SNMPD_PORT"
+                echo "$BASE_PORT"
                 break
             fi
             MAX_RETRIES=`expr $MAX_RETRIES - 1`
             if [ $MAX_RETRIES -eq 0 ]; then
-                echo "ERROR: Could not find available port."
+                echo "ERROR: Could not find available port." >&2
+                echo "NOPORT"
                 exit 255
             fi
         done
     fi
+}
+
+if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
+    SNMP_SNMPD_PORT=`PROBE_FOR_PORT 8765`
 fi
 if [ "x$SNMP_SNMPTRAPD_PORT" = "x" ]; then
-    SNMP_SNMPTRAPD_PORT=`expr $SNMP_SNMPD_PORT - 1`
+    SNMP_SNMPTRAPD_PORT=`PROBE_FOR_PORT 5678`
+fi
+if [ "x$SNMP_AGENTX_PORT" = "x" ]; then
+    SNMP_AGENTX_PORT=`PROBE_FOR_PORT 7676`
 fi
 if [ "x$SNMP_TRANSPORT_SPEC" = "x" ];then
 	SNMP_TRANSPORT_SPEC="udp"
@@ -150,7 +166,7 @@ export SNMP_FLAGS SNMP_SNMPD_PORT SNMP_SNMPTRAPD_PORT
 # Make sure the agent doesn't parse any config file but what we give it.  
 # this is mainly to protect against a broken agent that doesn't
 # properly handle combinations of -c and -C.  (since I've broke it before).
-SNMPCONFPATH="$SNMP_TMPDIR/does-not-exist"
-export SNMPCONFPATH
+#SNMPCONFPATH="$SNMP_TMPDIR/does-not-exist"
+#export SNMPCONFPATH
 
 fi # Only allow ourselves to be eval'ed once

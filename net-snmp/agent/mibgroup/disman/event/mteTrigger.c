@@ -117,7 +117,7 @@ mteTrigger_createEntry(char *mteOwner, char *mteTName, int fixed)
     netsnmp_table_row_add_index(row, ASN_PRIV_IMPLIED_OCTET_STR,
                                 entry->mteTName, mteTName_len);
 
-  //entry->mteTriggerTest         = MTE_TRIGGER_BOOLEAN;
+ /* entry->mteTriggerTest         = MTE_TRIGGER_BOOLEAN; */
     entry->mteTriggerValueID_len  = 2;  /* .0.0 */
     entry->mteTriggerFrequency    = 600;
     memcpy(entry->mteDeltaDiscontID, _sysUpTime_instance,
@@ -182,7 +182,7 @@ _mteTrigger_failure( /* int error, */ const char *msg )
      *           (if configured to do so)
      */
     mteTriggerFailures++;
-    snmp_log(LOG_ERR, msg );
+    snmp_log(LOG_ERR, "%s\n", msg );
     return;
 }
 
@@ -741,6 +741,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
             /*
              * Determine the value to be monitored...
              */
+            if ( !vp1->val.integer ) {  /* No value */
+                if ( vp2 )
+                    vp2 = vp2->next_variable;
+                continue;
+            }
             if (entry->flags & MTE_TRIGGER_FLAG_DELTA) {
                 if (entry->flags & MTE_TRIGGER_FLAG_DWILD) {
                     /*
@@ -821,8 +826,8 @@ mteTrigger_run( unsigned int reg, void *clientarg)
              *     to remember whether the trigger has already fired)
              */
             if ( cmp ) {
-                if ((!entry->old_results &&
-                     (entry->flags & MTE_TRIGGER_FLAG_BSTART)) ||
+                if ((entry->old_results ||
+                     (entry->flags & MTE_TRIGGER_FLAG_BSTART)) &&
                     (vp1->index & MTE_ARMED_BOOLEAN )) {
                     DEBUGMSGTL(( "disman:event:trigger:fire",
                                  "Firing boolean test: "));
@@ -873,6 +878,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
             /*
              * Determine the value to be monitored...
              */
+            if ( !vp1->val.integer ) {  /* No value */
+                if ( vp2 )
+                    vp2 = vp2->next_variable;
+                continue;
+            }
             if (entry->flags & MTE_TRIGGER_FLAG_DELTA) {
                 if (entry->flags & MTE_TRIGGER_FLAG_DWILD) {
                     /*
@@ -913,8 +923,8 @@ mteTrigger_run( unsigned int reg, void *clientarg)
              */
             cmp = vp1->index;   /* working copy of 'armed' flags */
             if ( value >= entry->mteTThRiseValue ) {
-                if ((!entry->old_results &&
-                     (entry->mteTThStartup & MTE_THRESH_START_RISE)) || 
+                if ((entry->old_results ||
+                     (entry->mteTThStartup & MTE_THRESH_START_RISE)) &&
                     (vp1->index & MTE_ARMED_TH_RISE )) {
                     DEBUGMSGTL(( "disman:event:trigger:fire",
                                  "Firing rising threshold test: "));
@@ -942,8 +952,8 @@ mteTrigger_run( unsigned int reg, void *clientarg)
             }
 
             if ( value <= entry->mteTThFallValue ) {
-                if ((!entry->old_results &&
-                     (entry->mteTThStartup & MTE_THRESH_START_FALL)) || 
+                if ((entry->old_results ||
+                     (entry->mteTThStartup & MTE_THRESH_START_FALL)) &&
                     (vp1->index & MTE_ARMED_TH_FALL )) {
                     DEBUGMSGTL(( "disman:event:trigger:fire",
                                  "Firing falling threshold test: "));
@@ -994,7 +1004,11 @@ mteTrigger_run( unsigned int reg, void *clientarg)
              *  (similar to previous delta-sample processing,
              *   but without the discontinuity marker checks)
              */
-            if (vp2->type == ASN_NULL) {
+            if (!vp2) {
+                break;   /* Run out of 'old' values */
+            }
+            if (( !vp1->val.integer ) ||
+                (vp2->type == ASN_NULL)) {
                 vp2 = vp2->next_variable;
                 continue;
             }
@@ -1086,10 +1100,14 @@ mteTrigger_enable( struct mteTrigger *entry )
     }
 
     if (entry->mteTriggerFrequency) {
+        /*
+         * register once to run ASAP, and another to run
+         * at the trigger frequency
+         */
+        snmp_alarm_register(0, 0, mteTrigger_run, entry );
         entry->alarm = snmp_alarm_register(
                            entry->mteTriggerFrequency, SA_REPEAT,
                            mteTrigger_run, entry );
-        mteTrigger_run( entry->alarm, (void*)entry );
     }
 }
 

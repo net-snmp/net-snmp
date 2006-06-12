@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for ipAddressTable
+/** \page MFD helper for ipAddressTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -161,6 +161,7 @@ ipAddressTable_rowreq_ctx_cleanup(ipAddressTable_rowreq_ctx * rowreq_ctx)
 /**
  * pre-request callback
  *
+ * @param user_context
  *
  * @retval MFD_SUCCESS              : success.
  * @retval MFD_ERROR                : other error
@@ -186,6 +187,7 @@ ipAddressTable_pre_request(ipAddressTable_registration * user_context)
  *   deleted rows have been removed from the container and
  *   released.
  *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -317,7 +319,7 @@ The address type of ipAddressAddr.
  * @note generation and use of this function can be turned off by re-running
  * mib2c after adding the following line to the file
  * default-node-ipAddressAddrType.m2d :
- *   @eval $m2c_node_skip_mapping = 1@
+ *   @verbatim $m2c_node_skip_mapping = 1@endverbatim
  *
  * @remark
  *  If the values for your data type don't exactly match the
@@ -360,6 +362,9 @@ ipAddressAddrType_map(u_long * mib_ipAddressAddrType_val_ptr,
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param ipAddressAddrType_val
+ * @param ipAddressAddr_val_ptr
+ * @param ipAddressAddr_val_ptr_len
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -1237,7 +1242,7 @@ ipAddressTable_undo_cleanup(ipAddressTable_rowreq_ctx * rowreq_ctx)
  * ipAddressTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ipAddressTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -1337,7 +1342,7 @@ ipAddressTable_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
  * ipAddressTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ipAddressTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success

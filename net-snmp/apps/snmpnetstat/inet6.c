@@ -72,6 +72,17 @@ extern int WSAAPI getnameinfo(const struct sockaddr*,socklen_t,char*,DWORD, char
 #endif
 #endif                  /* WIN32 */
 
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
 #include <net-snmp/net-snmp-includes.h>
 
 #if HAVE_UNISTD_H

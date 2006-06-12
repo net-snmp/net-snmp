@@ -200,14 +200,27 @@ udpTable_handler(netsnmp_mib_handler          *handler,
                                          (u_char*)&addr,
                                          sizeof(addr));
 #else
+#ifdef solaris2
+                /* solaris x86 already stores stuff in host order;
+                   non x86 is already big endian host order as well */
                 addr = ntohl(entry->UDPTABLE_LOCALADDRESS);
+#else
+                addr = entry->UDPTABLE_LOCALADDRESS;
+#endif
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
                                          (u_char *)&addr,
                                          sizeof(addr));
 #endif
                 break;
             case UDPLOCALPORT:
+#ifdef solaris2
+                /*
+                 * Solaris udpLocalPort is in host byte order
+                 */
+                port = (u_short)entry->UDPTABLE_LOCALPORT;
+#else
                 port = ntohs((u_short)entry->UDPTABLE_LOCALPORT);
+#endif
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -361,7 +374,14 @@ udpTable_next_entry( void **loop_context,
     snmp_set_var_value(index, (u_char*)&entry->UDPTABLE_LOCALADDRESS,
                                  sizeof(entry->UDPTABLE_LOCALADDRESS));
 #endif
+#ifdef solaris2
+    /*
+     * Solaris udpLocalPort is in host byte order
+     */
+    port = entry->UDPTABLE_LOCALPORT;
+#else
     port = ntohs(entry->UDPTABLE_LOCALPORT);
+#endif
     snmp_set_var_value(index->next_variable,
                                (u_char*)&port, sizeof(port));
 

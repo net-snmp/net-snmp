@@ -174,7 +174,7 @@ snmp_synch_input(int op,
 
     state->waiting = 0;
 
-    if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE && pdu) {
         if (pdu->command == SNMP_MSG_REPORT) {
             rpt_type = snmpv3_get_report_type(pdu);
             if (SNMPV3_IGNORE_UNAUTH_REPORTS ||
@@ -1190,12 +1190,14 @@ static int _query(netsnmp_variable_list *list,
      * Clone the varbind list into the request PDU...
      */
     pdu->variables = snmp_clone_varbind( list );
+retry:
     if ( session )
         ret = snmp_synch_response(            session, pdu, &response );
     else if (_def_query_session)
         ret = snmp_synch_response( _def_query_session, pdu, &response );
     else {
         /* No session specified */
+        snmp_free_pdu(pdu);
         return SNMP_ERR_GENERR;
     }
 
@@ -1207,7 +1209,23 @@ static int _query(netsnmp_variable_list *list,
      */
     if ( ret == SNMP_ERR_NOERROR ) {
         if ( response->errstat != SNMP_ERR_NOERROR ) {
+            /*
+             * If the request failed, then remove the
+             *  offending varbind and try again.
+             *  (all except SET requests)
+             *
+             * XXX - implement a library version of
+             *       NETSNMP_DS_APP_DONT_FIX_PDUS ??
+             */
             ret = response->errstat;
+            if (request != SNMP_MSG_SET &&
+                response->errindex != 0) {
+                pdu = snmp_fix_pdu( response, request );
+                snmp_free_pdu( response );
+                response = NULL;
+                if ( pdu != NULL )
+                    goto retry;
+            }
         } else {
             for (vb1 = response->variables, vb2 = list;
                  vb1;

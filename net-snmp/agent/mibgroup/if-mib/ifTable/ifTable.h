@@ -12,7 +12,8 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @ingroup agent
+ * @defgroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -275,7 +276,8 @@ config_exclude(mibII/interfaces)
         /*
          * ifPromiscuousMode(16)/TruthValue/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
          */
-        u_long          ifPromiscuousMode;
+        u_long          dummy_to_keep_struct_size;
+#define ifPromiscuousMode ifentry->promiscuous
 
         /*
          * ifConnectorPresent(17)/TruthValue/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
@@ -714,3 +716,5 @@ config_exclude(mibII/interfaces)
 }
 #endif
 #endif                          /* IFTABLE_H */
+/**  @} */
+

@@ -58,7 +58,7 @@ extern          "C" {
      */
 
 
-    /*
+    /**
      * callback header
      */
     typedef struct netsnmp_monitor_callback_header_s {

@@ -85,3 +85,23 @@ sub find_files {
     }
 }
 
+
+sub Check_Version {
+    my $foundversion = 0;
+    open(I,"<Makefile");
+    while (<I>) {
+	if (/^VERSION = (.*)/) {
+	    my $perlver = $1;
+	    my $srcver = `$opts->{'nsconfig'} --version`;
+	    chomp($srcver);
+	    $perlver =~ s/pre/0./;
+	    if ($srcver ne $perlver) {
+		die "ERROR: Net-SNMP installed version ($srcver) doesn't match this version ($perlver)\n";
+	    }
+	    $foundversion = 1;
+	    last;
+	}
+    }
+    die "ERROR: Couldn't find version number of this module\n" if (!$foundversion);
+    close(I);
+}

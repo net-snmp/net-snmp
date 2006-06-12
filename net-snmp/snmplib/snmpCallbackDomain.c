@@ -264,8 +264,11 @@ netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
         cp->return_transport_num = mystuff->callback_num;
 
         other_side = find_transport_from_callback_num(mystuff->linkedto);
-        if (!other_side)
+        if (!other_side) {
+            snmp_free_pdu(cp->pdu);
+            SNMP_FREE(cp);
             return -1;
+        }
 
 	while (rc < 0) {
 #ifdef WIN32
@@ -299,8 +302,11 @@ netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
             *opaque = NULL;
         }
         other_side = find_transport_from_callback_num(from);
-        if (!other_side)
+        if (!other_side) {
+            snmp_free_pdu(cp->pdu);
+            SNMP_FREE(cp);
             return -1;
+        }
 	while (rc < 0) {
 #ifdef WIN32
 	    rc = send(((netsnmp_callback_info*) other_side->data)->pipefds[1], " ", 1, 0);

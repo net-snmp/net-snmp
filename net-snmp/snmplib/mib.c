@@ -262,7 +262,7 @@ sprint_char(char *buf, const u_char ch)
  * @param allow_realloc if not zero reallocate the buffer to fit the 
  *                      needed size.
  * @param cp       the array of characters to encode.
- * @param len      the array length of cp.
+ * @param line_len the array length of cp.
  * 
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
@@ -1204,8 +1204,8 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
  * @param out_len  Incremented by the number of characters printed.
  * @param allow_realloc if not zero reallocate the buffer to fit the 
  *                      needed size.
- * @param var      The variable to encode.
- * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param val      The variable to encode.
+ * @param decimaltype The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may _NOT_ be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
@@ -2861,7 +2861,7 @@ int
 read_objid(const char *input, oid * output, size_t * out_len)
 {                               /* number of subid's in "output" */
 #ifndef DISABLE_MIB_LOADING
-    struct tree    *root = tree_head;
+    struct tree    *root = tree_top;
 #endif /* DISABLE_MIB_LOADING */
     char            buf[SPRINT_MAX_LEN];
     int             ret, max_out_len;
@@ -2904,7 +2904,10 @@ read_objid(const char *input, oid * output, size_t * out_len)
 #endif /* DISABLE_MIB_LOADING */
 
 #ifndef DISABLE_MIB_LOADING
-    if (root == NULL) {
+    if ((root == NULL) && (tree_head != NULL)) {
+        root = tree_head;
+    }
+    else if (root == NULL) {
         SET_SNMP_ERROR(SNMPERR_NOMIB);
         *out_len = 0;
         return 0;
@@ -3778,7 +3781,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
             if (uitmp > (int) (*oidLen)) {
                 for (i = 0; i < *oidLen; ++i)
                     var->val.string[i] = (u_char) * oidIndex++;
-                for (i = 0; i < uitmp; ++i)
+                for (i = *oidLen; i < uitmp; ++i)
                     var->val.string[i] = '\0';
                 (*oidLen) = 0;
             } else {
@@ -4382,11 +4385,6 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
     return NULL;
 }
 
-/**
- * Clone of get_symbol that doesn't take a buffer argument.
- *
- * @see get_symbol
- */
 struct tree    *
 get_tree(const oid * objid, size_t objidlen, struct tree *subtree)
 {
@@ -6546,3 +6544,5 @@ snprint_double(char *buf, size_t buf_len,
         return -1;
 }
 #endif
+/** @} */
+

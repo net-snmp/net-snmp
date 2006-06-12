@@ -16,6 +16,7 @@ SKIPIF DISABLE_SNMPV1
 CONFIGAGENT trapsink localhost public $SNMP_SNMPTRAPD_PORT
 CONFIGAGENT authtrapenable 1
 CONFIGTRAPD authcommunity log public
+CONFIGTRAPD agentxsocket /dev/null
 
 STARTTRAPD
 

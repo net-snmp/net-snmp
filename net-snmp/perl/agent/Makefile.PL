@@ -8,6 +8,8 @@ my %MakeParams = ();
 
 WriteMakefile(%MakeParams);
 
+Check_Version();
+
 sub InitMakeParams {
     my $opts;
     my %Params = (
@@ -87,7 +89,7 @@ sub InitMakeParams {
 #	} else {
 #	    $Params{'PREREQ_PM'} = {'NetSNMP::OID' => '0.1'};
 	}
-	$Params{'CCFLAGS'} =~ s/ -W[-\w]+//g; # ignore developer warnings
+	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
 	if ($Params{'LIBS'} eq "" || $Params{'CCFLAGS'} eq "") {
 	    die "You need to install net-snmp first (I can't find net-snmp-config)";
 	}
@@ -184,3 +186,22 @@ sub find_files {
     }
 }
 
+sub Check_Version {
+    my $foundversion = 0;
+    open(I,"<Makefile");
+    while (<I>) {
+	if (/^VERSION = (.*)/) {
+	    my $perlver = $1;
+	    my $srcver = `$opts->{'nsconfig'} --version`;
+	    chomp($srcver);
+	    $perlver =~ s/pre/0./;
+	    if ($srcver ne $perlver) {
+		die "ERROR: Net-SNMP installed version ($srcver) doesn't match this version ($perlver)\n";
+	    }
+	    $foundversion = 1;
+	    last;
+	}
+    }
+    die "ERROR: Couldn't find version number of this module\n" if (!$foundversion);
+    close(I);
+}

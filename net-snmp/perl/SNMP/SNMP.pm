@@ -7,7 +7,7 @@
 #     modify it under the same terms as Perl itself.
 
 package SNMP;
-$VERSION = '5.3.rc2';   # current release version number
+$VERSION = '5.3.1.rc1';   # current release version number
 
 require Exporter;
 require DynaLoader;
@@ -698,6 +698,14 @@ sub gettable {
     } else {
 	# XXX: requires specification in numeric OID...  ack.!
 	@columns = @{$options->{'columns'}};
+
+	# if the columns aren't numeric, we need to turn them into
+	# numeric columns...
+	map {
+	    if ($_ !~ /\.1\.3/) {
+		$_ = $SNMP::MIB{$_}{'objectID'};
+	    }
+	} @columns;
     }
 
     # create the initial walking info.
@@ -714,7 +722,7 @@ sub gettable {
     $vbl = $varbinds;
 	
     my $repeatcount;
-    if ($opts->{nogetbulk}) {
+    if ($this->{Version} == 1 || $opts->{nogetbulk}) {
 	$repeatcount = 1;
     } elsif ($options->{'repeat'}) {
 	$repeatcount = $options->{'repeat'};
@@ -806,7 +814,7 @@ sub gettable {
 	    my $nindexes = $noid->get_indexes();
 	    if (!$nindexes || ref($nindexes) ne 'ARRAY' ||
 		$#indexes != $#$nindexes) {
-		print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes: $noid => " . ref($nindexes) . " [should be an ARRAY], expended # indexes = $#indexes\n";
+		print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes:\n  $noid => " . ref($nindexes) . "\n   [should be an ARRAY]\n  expended # indexes = $#indexes\n";
 		if (ref($nindexes) eq 'ARRAY') {
 		    print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes: " . ref($nindexes) . " $#indexes $#$nindexes\n";
 		}

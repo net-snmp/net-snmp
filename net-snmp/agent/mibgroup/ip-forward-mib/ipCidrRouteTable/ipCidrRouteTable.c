@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for ipCidrRouteTable
+/** \page MFD helper for ipCidrRouteTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -165,6 +165,7 @@ ipCidrRouteTable_rowreq_ctx_cleanup(ipCidrRouteTable_rowreq_ctx *
 /**
  * pre-request callback
  *
+ * @param user_context
  *
  * @retval MFD_SUCCESS              : success.
  * @retval MFD_ERROR                : other error
@@ -189,7 +190,7 @@ ipCidrRouteTable_pre_request(ipCidrRouteTable_registration * user_context)
  *   New rows have been inserted into the container, and
  *   deleted rows have been removed from the container and
  *   released.
- *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -291,6 +292,10 @@ ipCidrRouteTable_release_data(ipCidrRouteTable_data * data)
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param ipCidrRouteDest_val
+ * @param ipCidrRouteMask_val
+ * @param ipCidrRouteTos_val
+ * @param ipCidrRouteNextHop_val
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -1319,7 +1324,7 @@ ipCidrRouteTable_undo_cleanup(ipCidrRouteTable_rowreq_ctx * rowreq_ctx)
  * ipCidrRouteTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ipCidrRouteTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -1546,7 +1551,7 @@ ipCidrRouteTable_commit(ipCidrRouteTable_rowreq_ctx * rowreq_ctx)
  * ipCidrRouteTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ipCidrRouteTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success

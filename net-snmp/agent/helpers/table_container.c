@@ -49,7 +49,8 @@ typedef struct container_table_data_s {
 
 } container_table_data;
 
-/** @defgroup table_container table_container: Helps you implement a table when data can be found via a netsnmp_container.
+/** @defgroup table_container table_container
+ *  Helps you implement a table when data can be found via a netsnmp_container.
  *  @ingroup table
  *
  *  The table_container handler is used (automatically) in conjuntion
@@ -413,7 +414,7 @@ netsnmp_container_table_row_insert(netsnmp_request_info *request,
     }
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/** @cond */
 /**********************************************************************
  **********************************************************************
  *                                                                    *
@@ -645,7 +646,7 @@ _container_table_handler(netsnmp_mib_handler *handler,
 
     return rc;
 }
-#endif /** DOXYGEN_SHOULD_SKIP_THIS */
+/** @endcond */
 
 
 /* ==================================
