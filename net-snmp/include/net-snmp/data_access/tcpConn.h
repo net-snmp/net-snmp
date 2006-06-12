@@ -6,6 +6,9 @@
 #ifndef NETSNMP_ACCESS_TCPCONN_H
 #define NETSNMP_ACCESS_TCPCONN_H
 
+/** need def of NETSNMP_ACCESS_IPADDRESS_BUF_SIZE */
+#include <net-snmp/data_access/ipaddress.h>
+
 # ifdef __cplusplus
 extern          "C" {
 #endif
@@ -14,11 +17,6 @@ extern          "C" {
 /*
  * structure definitions
  */
-#if defined( INET6 )
-#   define NETSNMP_ACCESS_IPADDRESS_BUF_SIZE 20 /* for ip6z */
-#else
-#   define NETSNMP_ACCESS_IPADDRESS_BUF_SIZE 4
-#endif
 
 /*
  * netsnmp_tcpconn_entry
