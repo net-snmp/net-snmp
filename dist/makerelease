@@ -55,8 +55,8 @@ System("build:test","make test");
 # checks and changes
 #
 manualstep("docs:doxygenconf",
-	   "You need to edit doxygen.conf to update the version number.
-");
+	   "You need to edit doxygen.conf to update the version number.");
+System("docs:doxygencommit","cvs commit -m \"version update\" doxygen.conf");
 System("docs:make","make docs");
 System("docs:mancp","make mancp");
 System("docs:commit","cvs commit -m \"documentation update\" man");
