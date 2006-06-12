@@ -69,6 +69,8 @@ extern          "C" {
     u_int           inetCidrRouteTable_dirty_get(void);
     void            inetCidrRouteTable_dirty_set(u_int status);
          
+    netsnmp_cache  *inetCidrRouteTable_get_cache(void);
+
     inetCidrRouteTable_rowreq_ctx
         * inetCidrRouteTable_allocate_rowreq_ctx(inetCidrRouteTable_data *,
                                                  void *);
