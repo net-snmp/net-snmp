@@ -2,6 +2,248 @@
 
 Changes: V5.3 -> V5.3.1
 
+2006-06-12 16:54  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3
+, netsnmp_agent_trap.3,
+     netsnmp_asn1_packet_parse.3, netsnmp_baby_steps.3
+, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3
+, netsnmp_container.3, netsnmp_data_list.3
+, netsnmp_debug.3, netsnmp_default_store.3
+, netsnmp_handler.3, netsnmp_instance.3
+, netsnmp_iterator_info_s.3, netsnmp_leaf.3
+, netsnmp_library.3,
+     netsnmp_mib_maintenance.3, netsnmp_mib_utilities.3
+, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3
+, netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3
+, netsnmp_snmp_client.3,
+     netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3,
+     netsnmp_snmp_session.3, netsnmp_stash_cache.3
+, netsnmp_stash_to_next.3, netsnmp_table.3
+, netsnmp_table_array.3,
+     netsnmp_table_container.3, netsnmp_table_data.3
+, netsnmp_table_dataset.3,
+     netsnmp_table_generic.3, netsnmp_table_indexes.3
+, netsnmp_table_iterator.3,
+     netsnmp_table_iterator.h.3,
+     netsnmp_table_maintenance.3, netsnmp_table_rows.3
+, netsnmp_tdata.3, netsnmp_util.3,
+     netsnmp_utilities.3, netsnmp_variable_list.3
+, netsnmp_watcher.3:
+
+   documentation update
+
+2006-06-12 16:42  tanders
+
+   * testing/TESTCONF.sh:
+
+   introduce "net-snmp-config --perlprog" and use it in the "AgentX subagent in perl" test
+
+2006-06-12 16:40  hardaker
+
+   * configure, configure.in:
+
+   version update
+
+2006-06-12 16:00  tanders
+
+   * net-snmp-config.in, testing/tests/T115agentxperl
+:
+
+   introduce "net-snmp-config --perlprog" and use it in the "AgentX subagent in perl" test
+
+2006-06-12 15:44  rstory
+
+   * local/mib2c-conf.d/mfd-interface.m2c:
+
+   define mfd_*_rowreq_from_index if persistent enabled
+
+2006-06-12 13:23  rstory
+
+   * apps/snmpnetstat/: inet6.c, route.c:
+
+   add sys/types.h to fix OS X build
+
+2006-06-12 13:01  rstory
+
+   * agent/mibgroup/ip-forward-mib/inetCidrRouteTable/:
+     inetCidrRouteTable.c, inetCidrRouteTable_constants.h
+, inetCidrRouteTable_interface.c,
+     inetCidrRouteTable_interface.h:
+
+   add miss inetCidrRouteNumber scalar
+
+2006-06-12 10:27  hardaker
+
+   * testing/tests/T141snmpv2cvacmgetfail:
+
+   fix for new failure error code
+
+2006-06-12 10:11  hardaker
+
+   * agent/snmp_agent.c:
+
+   Fix bug reported by Robert Wilcox: return no access instead of not writable on VACM denials
+
+2006-06-12 09:00  hardaker
+
+   * perl/: Makefile.subs.pl, ASN/Makefile.PL,
+     OID/Makefile.PL, SNMP/Makefile.PL,
+     TrapReceiver/Makefile.PL, agent/Makefile.PL,
+     agent/default_store/Makefile.PL:
+
+   finally a working version of the version working check
+
+2006-06-12 08:54  hardaker
+
+   * perl/: Makefile.subs.pl, ASN/Makefile.PL,
+     OID/Makefile.PL, SNMP/Makefile.PL,
+     TrapReceiver/Makefile.PL, agent/Makefile.PL,
+     agent/default_store/Makefile.PL:
+
+   fix preX version numbers before checking
+
+2006-06-12 08:46  hardaker
+
+   * perl/: Makefile.subs.pl, ASN/Makefile.PL,
+     OID/Makefile.PL, SNMP/Makefile.PL,
+     TrapReceiver/Makefile.PL, agent/Makefile.PL,
+     agent/default_store/Makefile.PL:
+
+   check the perl module version number against the net-snmp version number
+
+2006-06-12 01:16  tanders
+
+   * doxygen.conf:
+
+   version update
+
+2006-06-09 13:42  tanders
+
+   * agent/mibgroup/ucd-snmp/diskio.c:
+
+   fix typo
+
+2006-06-09 05:54  rstory
+
+   * apps/snmptrapd_auth.c:
+
+   - don't free pdu if it's not a clone
+
+2006-06-07 05:24  tanders
+
+   * agent/agent_registry.c:
+
+   patch from Dave to prevent crash with -Dregister_mib
+
+2006-06-07 05:13  tanders
+
+   * apps/snmpnetstat/route.c:
+
+   include netinet/in.h and arpa/inet.h to pick up ntohl on hpux10.20
+
+2006-06-05 15:37  rstory
+
+   * agent/mibgroup/ucd-snmp/proxy.c:
+
+   fix double-free of delegated cache
+
+2006-06-05 14:27  rstory
+
+   * testing/tests/T141snmpv2cvacmgetfail:
+
+   add vacm set tests
+
+2006-06-05 14:21  rstory
+
+   * testing/tests/Svacmconfig:
+
+   add (ro|rw)community config for rw vacm test
+
+2006-06-05 10:38  rstory
+
+   * agent/mibgroup/host/hr_storage.c:
+
+   add missing MBUF stats for darwin
+
+2006-06-05 10:34  rstory
+
+   * agent/mibgroup/disman/event/mteTrigger.c:
+
+   - use new ability to schedule alarm in 0 sec to run mte tirggers asap after
+     startup, instead of during config file parsing
+   - add missing \n to log msg
+
+2006-06-05 10:31  rstory
+
+   * snmplib/snmp_alarm.c:
+
+   - allow a 0 time in snmp_alarm_register, to mean run ASAP (i.e. 1 usec)
+   - allow sec/usec of 0 in sa_update_entry, except for SA_REPEAT case
+
+2006-06-05 10:26  rstory
+
+   * agent/mibgroup/disman/event/mteTriggerConf.c:
+
+   - log error (and don't create entry) if sess user not found
+   - log error if agentSecName (default user) not specified
+   - add missing \n to debug msg
+
+2006-06-01 06:29  rstory
+
+   * agent/mibgroup/host/hr_swrun.c:
+
+   enforce MIB object lengths
+
+2006-05-29 02:39  tanders
+
+   * testing/tests/: Sv3config, Sv3usmconfigagent,
+     Svanyconfig:
+
+   don't open default smux port/socket
+
+2006-05-29 01:35  tanders
+
+   * testing/tests/T060trapdperl:
+
+   re-fix newline issues
+
+2006-05-28 13:13  tanders
+
+   * perl/TrapReceiver/TrapReceiver.xs:
+
+   temporary workaround to prevent snmptrapd embedded perl crash on x86_64 (bug 1494882)
+
+2006-05-27 23:58  hardaker
+
+   * testing/tests/: T059trapdtraphandle, T060trapdperl
+:
+
+   use CHECKORDIE instead of CHECKFILE when doing multiple checks (was succeeding when it shouldn't have).  Also, open embedded perl LOG in append mode so second routine doesn't trump the first
+
+2006-05-27 23:21  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.3.1.pre3 )
+
 2006-05-27 23:05  hardaker
 
    * man/: netsnmp_agent.3, netsnmp_agent_registry.3
