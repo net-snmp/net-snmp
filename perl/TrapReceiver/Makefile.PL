@@ -224,6 +224,7 @@ sub Check_Version {
 	    my $perlver = $1;
 	    my $srcver = `$opts->{'nsconfig'} --version`;
 	    chomp($srcver);
+	    $perlver =~ s/pre/0./;
 	    if ($srcver ne $1) {
 		die "ERROR: Net-SNMP installed version ($srcver) doesn't match this version ($perlver)\n";
 	    }
