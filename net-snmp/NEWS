@@ -22,6 +22,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     snmpusm:
       - performance improvement when changing localized keys
 
+    perl:
+      - The perl modules now check to make sure they're building
+        against the proper Net-SNMP version. 
+
     misc:
       - Coverity fixes
 
