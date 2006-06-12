@@ -35,6 +35,12 @@ inetCidrRouteTable_registration inetCidrRouteTable_user_context;
 void            initialize_table_inetCidrRouteTable(void);
 void            shutdown_table_inetCidrRouteTable(void);
 
+int
+_route_number_handler(netsnmp_mib_handler *handler,
+                      netsnmp_handler_registration *reginfo,
+                      netsnmp_agent_request_info *reqinfo,
+                      netsnmp_request_info *requests);
+
 
 /**
  * Initializes the inetCidrRouteTable module
@@ -106,6 +112,33 @@ initialize_table_inetCidrRouteTable(void)
      * call interface initialization code
      */
     _inetCidrRouteTable_initialize_interface(user_context, flags);
+
+    /*
+     * regester scalar for route number
+     */
+    {
+        oid             reg_oid[] =
+            { INETCIDRROUTENUMBER_OID };
+        netsnmp_handler_registration *myreg;
+        netsnmp_mib_handler *handler;
+
+        myreg =
+            netsnmp_create_handler_registration("route number",
+                                                _route_number_handler,
+                                                reg_oid,
+                                                OID_LENGTH(reg_oid),
+                                                HANDLER_CAN_RONLY);
+        /*
+         * snarf cache to use w/cache handler to make sure the
+         * container is loaded w/up to date data.
+         */
+        netsnmp_assert(NULL != inetCidrRouteTable_get_cache());
+        handler =
+            netsnmp_cache_handler_get(inetCidrRouteTable_get_cache());
+        netsnmp_inject_handler(myreg, handler);
+        
+        netsnmp_register_instance(myreg);
+    }
 }                               /* initialize_table_inetCidrRouteTable */
 
 /**
@@ -2613,6 +2646,27 @@ inetCidrRouteTable_check_dependencies(inetCidrRouteTable_rowreq_ctx *
 
     return rc;
 }                               /* inetCidrRouteTable_check_dependencies */
+
+
+int
+_route_number_handler(netsnmp_mib_handler *handler,
+                      netsnmp_handler_registration *reginfo,
+                      netsnmp_agent_request_info *reqinfo,
+                      netsnmp_request_info *requests)
+{
+    if (MODE_GET == reqinfo->mode) {
+        int val = inetCidrRouteTable_container_size();
+        snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
+                                 (u_char *) &val, sizeof(val));
+    } else
+        netsnmp_assert("bad mode in RO handler");
+    
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                         requests);
+    
+    return SNMP_ERR_NOERROR;
+}
 
 /** @} */
 /** @{ */
