@@ -232,12 +232,12 @@ var_hrsys(struct variable *vp,
 #elif defined(hpux10) || defined(hpux11)
 	    pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0);
 	    long_return = pst_buf.max_proc;
-#elif defined(NPROC_SYMBOL)
-	    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof (int));
-	    long_return = nproc;
 #elif defined(solaris2)
 	    getKstatRaw("unix", "var", sizeof v, &v);
 	    long_return = v.v_proc;
+#elif defined(NPROC_SYMBOL)
+	    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof (int));
+	    long_return = nproc;
 #else
 #if NO_DUMMY_VALUES
 	    return NULL;
