@@ -607,7 +607,7 @@ netsnmp_register_mib(const char *moduleName,
     DEBUGMSGOIDRANGE(("register_mib", mibloc, mibloclen, range_subid,
                       range_ubound));
     DEBUGMSG(("register_mib", " with context \"%s\"\n",
-                                    (context ? context : "(null)")));
+              SNMP_STRORNULL(context)));
 
     /*
      * verify that the passed context is equal to the context
