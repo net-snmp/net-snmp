@@ -32,6 +32,8 @@ use blib qw(${SNMP_UPDIR}/perl);
 use NetSNMP::OID qw(:all);
 use NetSNMP::agent qw(:all);
 use NetSNMP::ASN qw(:all);
+use NetSNMP::agent::default_store;
+use NetSNMP::default_store qw(:all);
 use SNMP;
 
 ## double-fork daemon
@@ -64,6 +66,8 @@ sub my_snmp_handler {
 }
 sub shut_it_down { \$running = 0; }
 
+    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_NO_ROOT_ACCESS, 1);
     my \$agent = new NetSNMP::agent('Name' => 'hello', 'AgentX' => 1);
     my \$regoid = new NetSNMP::OID(\$regat);
     \$agent->register("hello", \$regoid, \&my_snmp_handler);
