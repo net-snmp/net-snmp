@@ -115,7 +115,7 @@ _callback_lock(int major, int minor, const char* warn, int assert)
 #ifdef CALLBACK_NAME_LOGGING
     DEBUGMSGTL(("9:callback:lock", "locked (%s,%s)\n",
                 types[major], (SNMP_CALLBACK_LIBRARY == major) ?
-                lib[minor] : NULL));
+                SNMP_STRORNULL(lib[minor]) : "null"));
 #endif
     if (CALLBACK_LOCK(major,minor) > 1)
         {
@@ -147,7 +147,7 @@ _callback_unlock(int major, int minor)
 #ifdef CALLBACK_NAME_LOGGING
     DEBUGMSGTL(("9:callback:lock", "unlocked (%s,%s)\n",
                 types[major], (SNMP_CALLBACK_LIBRARY == major) ?
-                lib[minor] : NULL));
+                SNMP_STRORNULL(lib[minor]) : "null"));
 #endif
 }
 
