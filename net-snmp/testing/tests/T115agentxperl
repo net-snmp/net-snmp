@@ -32,6 +32,7 @@ use blib qw(${SNMP_UPDIR}/perl);
 use NetSNMP::OID qw(:all);
 use NetSNMP::agent qw(:all);
 use NetSNMP::ASN qw(:all);
+use NetSNMP::agent::default_store;
 use NetSNMP::default_store qw(:all);
 use SNMP;
 
