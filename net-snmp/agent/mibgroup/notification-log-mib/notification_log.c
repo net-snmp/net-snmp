@@ -468,7 +468,7 @@ init_notification_log(void)
                                     NETSNMP_DS_NOTIF_LOG_CTX);
 
     DEBUGMSGTL(("notification_log", "registering with '%s' context\n",
-                   context));
+                   SNMP_STRORNULL(context)));
 
     /*
      * static variables 

@@ -46,7 +46,7 @@ extern          "C" {
 #define BYTESIZE(bitsize)       ((bitsize + 7) >> 3)
 #define ROUNDUP8(x)		( ( (x+7) >> 3 ) * 8 )
 
-
+#define SNMP_STRORNULL(x)       ( x ? x : "(null)")
 
 /** @def SNMP_FREE(s)
     Frees a pointer only if it is !NULL and sets its value to NULL */
