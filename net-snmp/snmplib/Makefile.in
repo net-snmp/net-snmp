@@ -1,3 +1,13 @@
+# Portions of this file are subject to the following copyright.  See
+# the Net-SNMP's COPYING file for more details and other copyrights
+# that may apply:
+#
+# Portions of this file are copyrighted by:
+# Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+# Use is subject to license terms specified in the COPYING file
+# distributed with the Net-SNMP package.
+#
+
 #
 # Makefile for snmplib
 #
@@ -108,13 +118,13 @@ INSTALLUCDLIBS=libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 #
 CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	snmp_auth.c asn1.c md5.c snmp_parse_args.c		\
-	system.c vacm.c int64.c read_config.c 			\
+	system.c vacm.c int64.c read_config.c pkcs.c		\
 	snmp_debug.c tools.c  snmp_logging.c			\
 	snmpv3.c lcd_time.c keytools.c		                \
 	scapi.c callback.c default_store.c snmp_alarm.c		\
 	data_list.c oid_stash.c 				\
 	mt_support.c snmp_enum.c snmp-tc.c 			\
-	snprintf.c strtol.c strtoul.c				\
+	snprintf.c strlcpy.c strtol.c strtoul.c	strtok_r.c	\
 	snmp_transport.c                                        \
 	@transport_src_list@ \
 	snmp_secmod.c snmp_version.c                            \
@@ -122,9 +132,37 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	check_varbind.c container.c container_binary_array.c	\
 	cmu_compat.c ucd_compat.c
 
-OBJS=	$(CSRCS:.c=.o)
+OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
+	snmp_auth.o asn1.o md5.o snmp_parse_args.o		\
+	system.o vacm.o int64.o read_config.o pkcs.o		\
+	snmp_debug.o tools.o  snmp_logging.o			\
+	snmpv3.o lcd_time.o keytools.o		                \
+	scapi.o callback.o default_store.o snmp_alarm.o		\
+	data_list.o oid_stash.o 				\
+	mt_support.o snmp_enum.o snmp-tc.o 			\
+	snprintf.o strlcpy.o strtol.o strtoul.o	strtok_r.o	\
+	snmp_transport.o                                        \
+	@transport_obj_list@ \
+	snmp_secmod.o snmp_version.o                            \
+	@security_obj_list@ \
+	check_varbind.o container.o container_binary_array.o	\
+	cmu_compat.o ucd_compat.o
 
-LOBJS=	$(CSRCS:.c=.lo)
+LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 		\
+	snmp_auth.lo asn1.lo md5.lo snmp_parse_args.lo		\
+	system.lo vacm.lo int64.lo read_config.lo pkcs.lo		\
+	snmp_debug.lo tools.lo  snmp_logging.lo			\
+	snmpv3.lo lcd_time.lo keytools.lo		                \
+	scapi.lo callback.lo default_store.lo snmp_alarm.lo		\
+	data_list.lo oid_stash.lo 				\
+	mt_support.lo snmp_enum.lo snmp-tc.lo 			\
+	snprintf.lo strlcpy.lo strtol.lo strtoul.lo	strtok_r.lo	\
+	snmp_transport.lo                                        \
+	@transport_lobj_list@ \
+	snmp_secmod.lo snmp_version.lo                            \
+	@security_lobj_list@ \
+	check_varbind.lo container.lo container_binary_array.lo	\
+	cmu_compat.lo ucd_compat.lo
 
 # just in case someone wants to remove libtool, change this to OBJS.
 TOBJS=$(LOBJS)

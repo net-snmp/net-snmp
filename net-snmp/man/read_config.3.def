@@ -116,7 +116,7 @@ space following the token.
 .SH RESOURCE FREEING HANDLERS
 .PP
 If the parameter
-.I freefunc
+.I releaser
 passed to
 .B register_config_handler
 is non-NULL, then the function specified is called if and when the
@@ -255,6 +255,7 @@ previously received a registration request for.
 The configuration files read are found by using the colon separated
 .I SNMPCONFPATH
 environment variable (or its default value, which will be
+SYSCONFDIR/snmp, followed by
 DATADIR/snmp, followed by LIBDIR/snmp, followed by $HOME/.snmp) and
 reading in the files found that match both the prefix registered and
 the two suffixes
@@ -283,7 +284,7 @@ function that it should abort the operation of the application.
 SNMPCONFPATH
 A colon separated list of directories to search for configuration
 files in.
-Default: DATADIR/snmp:LIBDIR/snmp:$HOME/.snmp
+Default: SYSCONFDIR/snmp:DATADIR/snmp:LIBDIR/snmp:$HOME/.snmp
 .SH "SEE ALSO"
 .BR mib_api "(3), " snmp_api (3)
 .\" Local Variables:

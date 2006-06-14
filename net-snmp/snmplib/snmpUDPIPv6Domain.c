@@ -1074,7 +1074,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                     config_perror("getnameinfo failed");
                 }
                 memmove(ai->ai_addr, &net, sizeof(struct sockaddr_in6));
-                inet_make_mask_addr(AF_INET6, &mask.sin6_addr, 128);
+                inet_make_mask_addr(AF_INET6, &mask.sin6_addr, 127);
 
                 e = (com2Sec6Entry *) malloc(sizeof(com2Sec6Entry));
                 if (e == NULL) {

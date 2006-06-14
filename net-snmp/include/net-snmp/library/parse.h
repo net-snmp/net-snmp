@@ -120,10 +120,10 @@ SOFTWARE.
         char           *hint;
         char           *units;
         int             (*printomat) (u_char **, size_t *, size_t *, int,
-                                      netsnmp_variable_list *,
-                                      struct enum_list *, const char *,
+                                      const netsnmp_variable_list *,
+                                      const struct enum_list *, const char *,
                                       const char *);
-        void            (*printer) (char *, netsnmp_variable_list *, struct enum_list *, const char *, const char *);   /* Value printing function */
+        void            (*printer) (char *, const netsnmp_variable_list *, const struct enum_list *, const char *, const char *);   /* Value printing function */
         char           *description;    /* description (a quoted string) */
         int             reported;       /* 1=report started in print_subtree... */
         char           *defaultValue;

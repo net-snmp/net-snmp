@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /GX /Z7 /Od /I "..\..\agent" /I "..\..\agent\mibgroup" /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MTd /W3 /GX /Z7 /Od /I "..\..\agent" /I "..\..\agent\mibgroup" /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR /YX /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0xffffffff
 BSC32=bscmake.exe
@@ -80,6 +80,9 @@ LIB32=link.exe -lib
 
 # Name "libagent - Win32 Release"
 # Name "libagent - Win32 Debug"
+# Begin Group "Source Files"
+
+# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
 SOURCE=..\..\agent\agent_handler.c
@@ -108,5 +111,38 @@ SOURCE=..\..\agent\snmp_agent.c
 
 SOURCE=..\..\agent\snmp_vars.c
 # End Source File
+# End Group
+# Begin Group "Header Files"
+
+# PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\agent_handler.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\agent_index.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\agent_read_config.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\agent_registry.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\agent_trap.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\snmp_agent.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\snmp_vars.h"
+# End Source File
+# End Group
 # End Target
 # End Project

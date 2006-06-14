@@ -10,10 +10,9 @@ HEADER SNMPv2c get of system.sysUpTime.0
 
 # standard V2C configuration: testcomunnity
 . ./Sv2cconfig
-
 STARTAGENT
 
-CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 2c udp:localhost:$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
 
 STOPAGENT
 

@@ -2,7 +2,21 @@
  * logging.c - generic logging for snmp-agent
  * * Contributed by Ragnar Kjørstad, ucd@ragnark.vestdata.no 1999-06-26 
  */
-
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/** @defgroup snmp_logging generic logging for net-snmp 
+ *  @ingroup library
+ * 
+ *  @{
+ */
 #include <net-snmp/net-snmp-config.h>
 #include <stdio.h>
 #if HAVE_MALLOC_H
@@ -336,6 +350,37 @@ snmp_log_string(int priority, const char *string)
     }
 }
 
+/**
+ * This snmp logging function allows variable argument list given the
+ * specified priority, format and a populated va_list structure.
+ * The default logfile this function writes to is /var/log/snmpd.log.
+ *
+ * @param priority is an integer representing the type of message to be written
+ *	to the snmp log file.  The types are errors, warning, and information.
+ *      	The error types are:
+ *		- LOG_EMERG       system is unusable 
+ *		- LOG_ALERT       action must be taken immediately 
+ *		- LOG_CRIT        critical conditions 
+ *		- LOG_ERR         error conditions
+ *	The warning type is:
+ *              - LOG_WARNING     warning conditions 
+ *	The information types are:
+ *		- LOG_NOTICE      normal but significant condition
+ *		- LOG_INFO        informational
+ *      	- LOG_DEBUG       debug-level messages
+ *
+ * @param format is a pointer to a char representing the variable argument list
+ *	format used.
+ *
+ * @param ap is a va_list type used to traverse the list of arguments.
+ *
+ * @return Returns 0 on success, -1 when the code could not format the log-
+ *         string, -2 when dynamic memory could not be allocated if the length
+ *         of the log buffer is greater then 1024 bytes.  For each of these
+ *         errors a LOG_ERR messgae is written to the logfile.
+ *
+ * @see snmp_log
+ */
 int
 snmp_vlog(int priority, const char *format, va_list ap)
 {
@@ -372,7 +417,13 @@ snmp_vlog(int priority, const char *format, va_list ap)
     return 0;
 }
 
-
+/**
+ * This snmp logging function allows variable argument list given the
+ * specified format and priority.  Calls the snmp_vlog function.
+ * The default logfile this function writes to is /var/log/snmpd.log.
+ *
+ * @see snmp_vlog
+ */
 int
 #if HAVE_STDARG_H
 snmp_log(int priority, const char *format, ...)
@@ -417,3 +468,4 @@ snmp_log_perror(const char *s)
             snmp_log(LOG_ERR, "Error %d out-of-range\n", errno);
     }
 }
+/**  @} */

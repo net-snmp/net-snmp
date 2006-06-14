@@ -1,7 +1,21 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /*
- * snmp_agent.h
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/*
+ * @file snmp_agent.h
  *
+ * @addtogroup agent
+ * @addtogroup table
  * External definitions for functions and variables in snmp_agent.c.
+ *
+ * @{
  */
 
 #ifndef SNMP_AGENT_H
@@ -30,24 +44,38 @@ extern          "C" {
      */
 
     extern int      lastAddrAge;
-
+	/** @typedef struct netsnmp_request_info_s netsnmp_request_info
+	 * Typedefs the netsnmp_request_info_s struct into
+	 * netsnmp_request_info*/
+	/** @struct netsnmp_request_info_s
+	 * The netsnmp request info structure.
+	 */
     typedef struct netsnmp_request_info_s {
-        netsnmp_variable_list *requestvb;
+	/**
+	 * variable bindings
+	 */
+	netsnmp_variable_list *requestvb;
 
-        /*
-         * can be used to pass information on a per-request basis from a
-         * helper to the later handlers 
-         */
+	/**
+	 * can be used to pass information on a per-request basis from a
+	 * helper to the later handlers 
+	 */
         netsnmp_data_list *parent_data;
 
-        oid            *range_end;      /* don't free, reference to (struct tree)->end */
+	/** don't free, reference to (struct tree)->end */
+        oid            *range_end;      
         size_t          range_end_len;
         int             delegated;
         int             processed;
         int             inclusive;
         int             status;
-        int             index; /* index in original pdu */
-        int             repeat; /* get-bulk */
+	/** index in original pdu */
+	int             index;
+	/** get-bulk */
+        int             repeat; 
+
+        int             orig_repeat;
+        netsnmp_variable_list *requestvb_start;
 
         struct netsnmp_request_info_s *next;
         struct netsnmp_request_info_s *prev;
@@ -88,19 +116,28 @@ extern          "C" {
 #define MODE_SET_UNDO         SNMP_MSG_INTERNAL_SET_UNDO
 #define MODE_IS_SET(x)         (!MODE_IS_GET(x))
 
-    typedef struct netsnmp_agent_request_info_s {
-        int             mode;
-        netsnmp_pdu    *pdu;    /* pdu contains authinfo, eg */
-        struct netsnmp_agent_session_s *asp;    /* may not be needed */
-        /*
-         * can be used to pass information on a per-pdu basis from a
-         * helper to the later handlers 
-         */
-        netsnmp_data_list *agent_data;
+/** @typedef struct netsnmp_agent_request_info_s netsnmp_agent_request_info
+ * Typedefs the netsnmp_agent_request_info_s struct into
+ * netsnmp_agent_request_info
+ */
+
+/** @struct netsnmp_agent_request_info_s
+ * The agent transaction request structure
+ */
+typedef struct netsnmp_agent_request_info_s {
+	int             mode;
+	/** pdu contains authinfo, eg */
+	netsnmp_pdu    *pdu;    
+	struct netsnmp_agent_session_s *asp;    /* may not be needed */
+	/*
+	 * can be used to pass information on a per-pdu basis from a
+	 * helper to the later handlers 
+	 */
+	netsnmp_data_list *agent_data;
         /*
          * ... 
          */
-    } netsnmp_agent_request_info;
+} netsnmp_agent_request_info;
 
     typedef struct netsnmp_cachemap_s {
         int             globalid;
@@ -201,22 +238,23 @@ extern          "C" {
                                                 *t);
     void            netsnmp_deregister_agent_nsap(int handle);
 
-    inline void
+    NETSNMP_INLINE void
         netsnmp_agent_add_list_data(netsnmp_agent_request_info *agent,
                                     netsnmp_data_list *node);
 
-    inline void    *netsnmp_agent_get_list_data(netsnmp_agent_request_info
+    NETSNMP_INLINE void    *netsnmp_agent_get_list_data(netsnmp_agent_request_info
                                                 *agent, const char *name);
 
-    inline void
+    NETSNMP_INLINE void
             netsnmp_free_agent_data_set(netsnmp_agent_request_info *agent);
 
-    inline void
+    NETSNMP_INLINE void
            netsnmp_free_agent_data_sets(netsnmp_agent_request_info *agent);
-    inline void    
+    NETSNMP_INLINE void    
         netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari);
 
 #ifdef __cplusplus
 }
 #endif
 #endif
+/** @} */

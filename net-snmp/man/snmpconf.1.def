@@ -1,4 +1,4 @@
-.TH SNMPGET 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPCONF 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpconf - creates and modifies SNMP configuration files
@@ -117,7 +117,7 @@ debugging output in the form of Perl variable dumps.
 .IP "snmpconf -g basic_setup"
 Have I mentioned this command enough yet?  It's designed to walk
 someone through an initial setup for the
-.I snmpd(1)
+.I snmpd(8)
 daemon.  Really, you should try it.
 .IP "snmpconf -R /usr/local/snmp/snmpd.conf -a -f snmpd.conf"
 Automatically reads in an snmpd.conf file (for example) and adds
@@ -128,4 +128,4 @@ is actually a very generic utility that could be easily
 configured to help construct just about any kind of configuration
 file.  Its default configuration set of files are SNMP based.
 .SH SEE ALSO
-snmpd(1), snmp_config(5), snmp.conf(5), snmpd.conf(5)
+snmpd(8), snmp_config(5), snmp.conf(5), snmpd.conf(5)

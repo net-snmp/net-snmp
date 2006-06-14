@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 /*
  *  Host Resources MIB - Running Software group implementation - hr_swrun.c
  *      (also includes Running Software Performance group )
@@ -20,6 +31,7 @@
 #endif
 #if HAVE_SYS_USER_H
 #ifdef solaris2
+#include <libgen.h>
 #define _KMEMUSER
 #endif
 #include <sys/user.h>
@@ -453,7 +465,7 @@ var_hrswrun(struct variable * vp,
             int exact, size_t * var_len, WriteMethod ** write_method)
 {
     int             pid = 0;
-    static char     string[256];
+    static char     string[1024];
 #ifdef HAVE_SYS_PSTAT_H
     struct pst_status proc_buf;
 #elif defined(solaris2)
@@ -475,7 +487,7 @@ var_hrswrun(struct variable * vp,
 #endif
 #ifdef linux
     FILE           *fp;
-    char            buf[256];
+    char            buf[1024];
     int             i;
 #endif
     char           *cp;
@@ -551,10 +563,14 @@ var_hrswrun(struct variable * vp,
             *cp = '\0';
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
-        if (proc_buf)
-            strncpy(string, proc_buf->pr_fname, sizeof(string));
-        else
+        if (proc_buf) { 
+            char *pos=strchr(proc_buf->pr_psargs,' ');
+            if (pos != NULL) *pos = '\0';
+            strlcpy(string, basename(proc_buf->pr_psargs),sizeof(string));
+            if (pos != NULL) *pos=' ';
+        } else {
             strcpy(string, "<exited>");
+        }
         string[ sizeof(string)-1 ] = 0;
 #else
         strncpy(string, proc_buf->p_user.u_comm, sizeof(string));
@@ -564,8 +580,11 @@ var_hrswrun(struct variable * vp,
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
 #elif defined(linux)
         sprintf(string, "/proc/%d/status", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            strcpy(string, "<exited>");
+            *var_len = strlen(string);
+            return (u_char *) string;
+        }
         fgets(buf, sizeof(buf), fp);    /* Name: process name */
         cp = buf;
         while (*cp != ':')
@@ -576,7 +595,8 @@ var_hrswrun(struct variable * vp,
         strcpy(string, cp);
         fclose(fp);
 #elif defined(cygwin)
-        if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED))
+        /* if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED)) */
+        if (lowproc.process_state & PID_EXITED || (lowproc.exitcode & ~0xffff))
             strcpy(string, "<defunct>");
         else if (lowproc.ppid) {
             cygwin_conv_to_posix_path(lowproc.progname, string);
@@ -669,8 +689,11 @@ var_hrswrun(struct variable * vp,
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
 #elif defined(linux)
         sprintf(string, "/proc/%d/cmdline", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            strcpy(string, "<exited>");
+            *var_len = strlen(string);
+            return (u_char *) string;
+        }
         if (fgets(buf, sizeof(buf) - 1, fp))    /* argv[0] '\0' argv[1] '\0' .... */
             strcpy(string, buf);
         else {
@@ -693,7 +716,8 @@ var_hrswrun(struct variable * vp,
         }
         fclose(fp);
 #elif defined(cygwin)
-        if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED))
+        /* if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED)) */
+        if (lowproc.process_state & PID_EXITED || (lowproc.exitcode & ~0xffff))
             strcpy(string, "<defunct>");
         else if (lowproc.ppid)
             cygwin_conv_to_posix_path(lowproc.progname, string);
@@ -769,8 +793,11 @@ var_hrswrun(struct variable * vp,
         }
 #elif defined(linux)
         sprintf(string, "/proc/%d/cmdline", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            strcpy(string, "");
+            *var_len = 0;
+            return (u_char *) string;
+        }
         memset(buf, 0, sizeof(buf));
 
         /*
@@ -832,7 +859,8 @@ var_hrswrun(struct variable * vp,
 #if defined(cygwin)
         if (lowproc.process_state & PID_STOPPED)
             long_return = 3;    /* notRunnable */
-        else if (lowproc.process_state & PID_ZOMBIE)
+        /* else if (lowproc.process_state & PID_ZOMBIE) */
+        else if (lowproc.exitcode & ~0xffff)
             long_return = 4;    /* invalid */
         else
             long_return = 1;    /* running */
@@ -957,8 +985,10 @@ var_hrswrun(struct variable * vp,
             proc_table[LowProcIndex].kp_proc.p_iticks;
 #elif defined(linux)
         sprintf(string, "/proc/%d/stat", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            long_return = 0;
+            return (u_char *) & long_return;
+        }
         fgets(buf, sizeof(buf), fp);
         cp = buf;
         for (i = 0; i < 13; ++i) {      /* skip 13 fields */
@@ -1034,8 +1064,10 @@ var_hrswrun(struct variable * vp,
 #endif
 #elif defined(linux)
         sprintf(string, "/proc/%d/stat", pid);
-        if ((fp = fopen(string, "r")) == NULL)
-            return NULL;
+        if ((fp = fopen(string, "r")) == NULL) {
+            long_return = 0;
+            return (u_char *) & long_return;
+        }
         fgets(buf, sizeof(buf), fp);
         cp = buf;
         for (i = 0; i < 23; ++i) {      /* skip 23 fields */
@@ -1107,6 +1139,8 @@ int
 Get_Next_HR_SWRun(void)
 {
     int             pid;
+    if (procdir == NULL)
+      return -1;
     procentry_p = readdir(procdir);
 
     if (procentry_p == NULL)

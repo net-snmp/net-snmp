@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 /*- This is a -*- C -*- compatible code file
  *
  * Code for SUNOS5_INSTRUMENTATION
@@ -69,22 +80,22 @@ kstat_ctl_t    *kstat_fd = 0;
 static
 mibcache        Mibcache[MIBCACHE_SIZE] = {
     {MIB_SYSTEM, 0, (void *) -1, 0, 0, 0, 0},
-    {MIB_INTERFACES, 10 * sizeof(mib2_ifEntry_t), (void *) -1, 0, 10, 0,
+    {MIB_INTERFACES, 10 * sizeof(mib2_ifEntry_t), (void *) -1, 0, 30, 0,
      0},
     {MIB_AT, 0, (void *) -1, 0, 0, 0, 0},
-    {MIB_IP, sizeof(mib2_ip_t), (void *) -1, 0, 20, 0, 0},
-    {MIB_IP_ADDR, 20 * sizeof(mib2_ipAddrEntry_t), (void *) -1, 0, 20, 0,
+    {MIB_IP, sizeof(mib2_ip_t), (void *) -1, 0, 60, 0, 0},
+    {MIB_IP_ADDR, 20 * sizeof(mib2_ipAddrEntry_t), (void *) -1, 0, 60, 0,
      0},
-    {MIB_IP_ROUTE, 200 * sizeof(mib2_ipRouteEntry_t), (void *) -1, 0, 10,
+    {MIB_IP_ROUTE, 200 * sizeof(mib2_ipRouteEntry_t), (void *) -1, 0, 30,
      0, 0},
     {MIB_IP_NET, 100 * sizeof(mib2_ipNetToMediaEntry_t), (void *) -1, 0,
-     100, 0, 0},
-    {MIB_ICMP, sizeof(mib2_icmp_t), (void *) -1, 0, 20, 0, 0},
-    {MIB_TCP, sizeof(mib2_tcp_t), (void *) -1, 0, 20, 0, 0},
-    {MIB_TCP_CONN, 1000 * sizeof(mib2_tcpConnEntry_t), (void *) -1, 0, 15,
+     300, 0, 0},
+    {MIB_ICMP, sizeof(mib2_icmp_t), (void *) -1, 0, 60, 0, 0},
+    {MIB_TCP, sizeof(mib2_tcp_t), (void *) -1, 0, 60, 0, 0},
+    {MIB_TCP_CONN, 1000 * sizeof(mib2_tcpConnEntry_t), (void *) -1, 0, 30,
      0, 0},
-    {MIB_UDP, sizeof(mib2_udp_t), (void *) -1, 0, 15, 0, 0},
-    {MIB_UDP_LISTEN, 1000 * sizeof(mib2_udpEntry_t), (void *) -1, 0, 15, 0,
+    {MIB_UDP, sizeof(mib2_udp_t), (void *) -1, 0, 30, 0, 0},
+    {MIB_UDP_LISTEN, 1000 * sizeof(mib2_udpEntry_t), (void *) -1, 0, 30, 0,
      0},
     {MIB_EGP, 0, (void *) -1, 0, 0, 0, 0},
     {MIB_CMOT, 0, (void *) -1, 0, 0, 0, 0},
@@ -114,7 +125,7 @@ mibmap          Mibmap[MIBCACHE_SIZE] = {
     {0},
 };
 
-static int      sd = -1;        /* /dev/ip stream descriptor. */
+static int      sd = -1;        /* /dev/arp stream descriptor. */
 
 /*-
  * Static function prototypes (use void as argument type if there are none)
@@ -139,7 +150,7 @@ Name_cmp(void *, void *);
 static void
 init_mibcache_element(mibcache * cp);
 
-#define	STREAM_DEV	"/dev/ip"
+#define	STREAM_DEV	"/dev/arp"
 #define	BUFSIZE		40960   /* Buffer for  messages (should be modulo(pagesize) */
 
 /*-
@@ -188,13 +199,20 @@ void
 init_kernel_sunos5(void)
 {
     static int creg   = 0;
-    const  int period = 5;
+    const  int period = 30;
+    int    alarm_id   = 0;
 
     if (creg == 0) {
-	creg = snmp_alarm_register(period, SA_REPEAT, kernel_sunos5_cache_age,
-				   (void *)period);
+	alarm_id = snmp_alarm_register(5, NULL, kernel_sunos5_cache_age,
+                                       NULL);
+	DEBUGMSGTL(("kernel_sunos5", "registered alarm %d with period 5s\n", 
+		    alarm_id));
+	alarm_id = snmp_alarm_register(period, SA_REPEAT, 
+                                       kernel_sunos5_cache_age,
+                                       (void *)period);
 	DEBUGMSGTL(("kernel_sunos5", "registered alarm %d with period %ds\n", 
-		    creg, period));
+		    alarm_id, period));
+        ++creg;
     }
 }
 
@@ -542,8 +560,12 @@ getMibstat(mibgroup_e grid, void *resp, size_t entrysize,
 	    cachep->cache_length = length;
 	    if (rc == 1)    /* Found but there are more unread data */
 		cachep->cache_flags |= CACHE_MOREDATA;
-	    else
+	    else {
 		cachep->cache_flags &= ~CACHE_MOREDATA;
+                if (rc > 1)  {
+                    cachep->cache_time = 0;
+                    }
+                 }
 	    cachep->cache_comp = (void *) comp;
 	    cachep->cache_arg = arg;
 	} else {
@@ -589,7 +611,7 @@ getentry(req_e req_type, void *bufaddr, size_t len,
      * Here we have to perform address arithmetic with pointer to void. Ugly...
      */
 
-    for (; len != 0; len -= entrysize, bp = (char *) bp + entrysize) {
+    for (; len > 0; len -= entrysize, bp = (char *) bp + entrysize) {
 	if (rp != (void *) NULL) {
 	    *rp = bp;
 	}
@@ -682,10 +704,6 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
 
     if (sd == -1) {         /* First time */
 	if ((sd = open(STREAM_DEV, O_RDWR)) == -1) {
-	    ret = -1;
-	    goto Return;
-	}
-	if (ioctl(sd, I_PUSH, "arp") == -1) {
 	    ret = -1;
 	    goto Return;
 	}
@@ -898,7 +916,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	ifp->ifType = 1;
 	ifp->ifSpeed = 0;
 
-	if ((getKstat(ifrp->ifr_name, "ifspeed", &ifp->ifSpeed) == 0) &&
+	if ((getKstatInt(NULL,ifrp->ifr_name, "ifspeed", &ifp->ifSpeed) == 0) &&
 	    (ifp->ifSpeed != 0)) {
 	    /*
 	     * check for SunOS patch with half implemented ifSpeed 
@@ -906,7 +924,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	    if (ifp->ifSpeed < 10000) {
                     ifp->ifSpeed *= 1000000;
 	    }
-	} else if (getKstat(ifrp->ifr_name, "ifSpeed", &ifp->ifSpeed) == 0) {
+	} else if (getKstatInt(NULL,ifrp->ifr_name, "ifSpeed", &ifp->ifSpeed) == 0) {
 	    /*
 	     * this is good 
 	     */
@@ -944,13 +962,13 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	    ifp->ifType = 6;
 	    break;
 
-	case 'f':          /* fa (Fore ATM */
+	case 'f':          /* fa (Fore ATM) */
 	    if (!ifp->ifSpeed)
 		ifp->ifSpeed = 155000000;
 	    ifp->ifType = 37;
 	    break;
 
-	case 'q':         /* qe (QuadEther)/qa (Fore ATM)/qfe (QuadFastEther)*/
+	case 'q':         /* qe (QuadEther)/qa (Fore ATM)/qfe (QuadFastEther) */
 	    if (ifrp->ifr_name[1] == 'a') {
 		if (!ifp->ifSpeed)
 		    ifp->ifSpeed = 155000000;
@@ -965,49 +983,53 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 		ifp->ifType = 6;
 	    }
 	    break;
+
+	case 'i':          /* ibd (Infiniband) */
+	    ifp->ifType = 199;
+	    break;
 	}
 
 	if (!strchr(ifrp->ifr_name, ':')) {
 	    Counter l_tmp;
 
-	    if (getKstat(ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) < 0){
+	    if (getKstatInt(NULL,ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) == 0){
 		ret = -1;
 		goto Return;
 	    }
             
-	    if (getKstat(ifrp->ifr_name, "rbytes", &ifp->ifInOctets) < 0) {
-                    ifp->ifInOctets = ifp->ifInUcastPkts * 308; /* XXX */
+	    if (getKstatInt(NULL,ifrp->ifr_name, "wrbytes", &ifp->ifInOctets) == 0) {
+                    ifp->ifInOctets = ifp->ifInUcastPkts * 308; 
 	    }
             
-	    if (getKstat(ifrp->ifr_name, "opackets",&ifp->ifOutUcastPkts) < 0){
+	    if (getKstatInt(NULL,ifrp->ifr_name, "opackets",&ifp->ifOutUcastPkts) == 0){
 		ret = -1;
 		goto Return;
 	    }
             
-	    if (getKstat(ifrp->ifr_name, "obytes", &ifp->ifOutOctets) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "obytes", &ifp->ifOutOctets) == 0) {
 		ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;       /* XXX */
 	    }
 
 	    if (ifp->ifType == 24)  /* Loopback */
 		continue;
 
-	    if (getKstat(ifrp->ifr_name, "ierrors", &ifp->ifInErrors) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "ierrors", &ifp->ifInErrors) == 0) {
 		ret = -1;
 		goto Return;
 	    }
 
-	    if (getKstat(ifrp->ifr_name, "oerrors", &ifp->ifOutErrors) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "oerrors", &ifp->ifOutErrors) == 0) {
 		ret = -1;
 		goto Return;
 	    }
 
-	    if (getKstat(ifrp->ifr_name, "brdcstrcv",&ifp->ifInNUcastPkts)==0&&
-		getKstat(ifrp->ifr_name, "multircv", &l_tmp) == 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "brdcstrcv",&ifp->ifInNUcastPkts)==1&&
+		getKstatInt(NULL,ifrp->ifr_name, "multircv", &l_tmp) == 1) {
 		ifp->ifInNUcastPkts += l_tmp;
 	    }
 
-	    if (getKstat(ifrp->ifr_name,"brdcstxmt",&ifp->ifOutNUcastPkts)==0&&
-		getKstat(ifrp->ifr_name, "multixmt", &l_tmp) == 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name,"brdcstxmt",&ifp->ifOutNUcastPkts)==1&&
+		getKstatInt(NULL,ifrp->ifr_name, "multixmt", &l_tmp) == 1) {
 		ifp->ifOutNUcastPkts += l_tmp;
 	    }
 	}
