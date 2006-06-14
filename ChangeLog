@@ -1,5 +1,64 @@
 -------------------------------------------------------------------------------
 
+2006-06-14 10:15  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3
+, netsnmp_agent_trap.3,
+     netsnmp_asn1_packet_parse.3, netsnmp_bulk_to_next.3
+, netsnmp_callback.3, netsnmp_debug.3
+, netsnmp_default_store.3, netsnmp_handler.3
+, netsnmp_instance.3, netsnmp_library.3
+, netsnmp_mib_utilities.3,
+     netsnmp_mode_end_call.3, netsnmp_multiplexer.3
+, netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_old_api.3, netsnmp_read_config.3,
+     netsnmp_read_only.3, netsnmp_scalar.3,
+     netsnmp_serialize.3, netsnmp_snmp_alarm.3,
+     netsnmp_snmp_client.3, netsnmp_snmp_logging.3
+, netsnmp_snmp_pdu.3, netsnmp_snmp_session.3
+, netsnmp_table.3, netsnmp_table_array.3
+, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_iterator.3
+, netsnmp_todo.3, netsnmp_variable_list.3
+, netsnmp_watcher.3:
+
+   documentation update
+
+2006-06-14 10:05  hardaker
+
+   * configure, configure.in:
+
+   version update
+
+2006-06-07 05:13  tanders
+
+   * apps/snmpnetstat/route.c:
+
+   include netinet/in.h and arpa/inet.h to pick up ntohl on hpux10.20
+
+2006-05-13 00:21  hardaker
+
+   * agent/mibgroup/versiontag:
+
+   update CVS host name
+
+2006-05-13 00:17  hardaker
+
+   * FAQ, README, sedscript.in,
+     perl/SNMP/SNMP.pm, snmplib/snmp_version.c
+:
+
+   - (snmplib/snmp_version.c sedscript.in): version tag ( 5.0.11.rc2 )
+
 Changes: V5.0.10.2 -> V5.0.11
 
 2006-05-13 00:05  hardaker
