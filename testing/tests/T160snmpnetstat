@@ -4,11 +4,15 @@
 
 HEADER "if snmpnetstat finds the running agent in udpTable"
 
-if test `uname -s` = "HP-UX" ; then
-    if test `id -u` != "0" ; then
-        # The agent needs to be run as root - else force skip
-        SKIP
-    fi
+# on some systems the agent needs to be run as root to access udpTable
+# - else force skip
+if test "x`id -u`" != "x0" ; then
+  os="`uname -s`"
+  case "x$os" in
+    xHP-UX)   SKIP;;
+    xNetBSD)  SKIP;;
+    xOpenBSD) SKIP;;
+  esac
 fi
 
 SKIPIF DISABLE_SNMPV2C
