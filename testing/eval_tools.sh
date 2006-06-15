@@ -489,7 +489,7 @@ FINISHED() {
             continue
         fi
 	pid=`cat $pfile`
-	ps -e | egrep "^[	 ]*$pid[	 ]+" > /dev/null 2>&1
+	ps -e 2>/dev/null | egrep "^[	 ]*$pid[	 ]+" > /dev/null 2>&1
 	if [ $? = 0 ] ; then
 	    SNMP_SAVE_TMPDIR=yes
             if [ "x$OSTYPE" = "xmsys" ]; then
