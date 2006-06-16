@@ -13,9 +13,15 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - new option -CE to specify usmUserEngineID (necessary to manage
         snmptrapd's usmUserTable)
 
+    Perl:
+      - check the perl module version number against the net-snmp version
+        number
+
  Ports:
    HP-UX:
       - fix ipAdEntBcastAddr for HP-UX 11.0/11i (patch 1481012)
+   Mac OS X:
+      - build fix for snmpnetstat
 
 
 *5.2.2*
