@@ -136,7 +136,11 @@ Note: With ActiveState Perl (currently at 5.8.2 build 808) and possibly other
       failure of test #3 in the SNMP conf test (perl/SNMP/t/conf.t).  The 
       change to the SNMPCONFPATH env variable is not seen by the calls to the 
       C SNMP module.
-      
+
+Note: The source code should *not* be in a folder that contains a space.  For
+      example, compiling in your 'My Documents' or your Desktop (usually
+      c:\Documents and Settings\xxxx\Desktop) is not supported.
+     
 Automatic building / testing with nmakeperl.bat:
 
 1.  Ensure a static version of Net-SNMP has been compiled and installed.  Also
@@ -205,10 +209,10 @@ Manual building / testing:
 
         Example: "C:\winnt\system32\gnu_regex.dll"
 
-4.  Set the environment PATH to locate "nmake", "cl", and "link".
+3.  Set the environment PATH to locate "nmake", "cl", and "link".
     Visual Studio installs a VCVARS32.BAT for this purpose.
 
-3.  Using a command prompt window, cd to the perl directory.
+4.  Using a command prompt window, cd to the perl directory.
 
 5.  Type: 
 
@@ -254,6 +258,10 @@ If you get an error saying your system can't compile, you are probably missing
 the regex library.  Install regex from 
 http://mirrors.sunsite.dk/cygwin/release/regex/regex-4.4-2-src.tar.bz2
 
+Note: The source code should *not* be in a folder that contains a space.  For
+      example, compiling in your 'My Documents' or your Desktop (usually
+      c:\Documents and Settings\xxxx\Desktop) is not supported.
+
 
 Win32 (MinGW):
 
@@ -264,6 +272,10 @@ Note:  As of February 25th, 2004, the MinGW build of Net-SNMP does not
        modules may not work.  For example, sharing configurations between
        modules which is why the SNMP conf test fails.
 
+Note: The source code should *not* be in a folder that contains a space.  For
+      example, compiling in your 'My Documents' or your Desktop (usually
+      c:\Documents and Settings\xxxx\Desktop) is not supported.
+       
 These directions are for MinGW 3.1.0 with MSYS 1.0.9 and ActiveState Perl.
 Compiling the Perl modules using a MinGW built Perl environment has not
 been tested.

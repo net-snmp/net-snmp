@@ -57,6 +57,8 @@ extern          "C" {
                                              SNMPCallback * new_callback,
                                              void *arg, int matchargs);
     void            clear_callback (void);
+    int             netsnmp_callback_clear_client_arg(void *, int i, int j);
+
     struct snmp_gen_callback *snmp_callback_list(int major, int minor);
 
 #ifdef __cplusplus

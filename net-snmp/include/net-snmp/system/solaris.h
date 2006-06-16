@@ -20,3 +20,7 @@
 #undef PROC_SYMBOL
 #undef TOTAL_MEMORY_SYMBOL
 #undef MBSTAT_SYMBOL
+
+/* get some required prototypes (strtok_r) from include files */
+#define __EXTENSIONS__
+

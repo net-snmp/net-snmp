@@ -75,12 +75,16 @@
 
 
 
+#ifdef USING_IF_MIB_IFTABLE_IFTABLE_MODULE
+#include "if-mib/ifTable/ifTable.h"
+#else
 /*
  * This is used, because the TUNNEL-MIB augments ifTable. 
  */
 extern unsigned char *var_ifEntry(struct variable *,
                                   oid *, size_t *,
                                   int, size_t *, WriteMethod **);
+#endif
 
 
 /*
@@ -204,6 +208,7 @@ init_tunnel(void)
 static int
 getType(int index)
 {
+#ifndef USING_IF_MIB_IFTABLE_IFTABLE_MODULE
     oid             name[MAX_OID_LEN] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 3 };
     size_t          length = 10;
     struct variable ifType_variable =
@@ -224,6 +229,17 @@ getType(int index)
         return 0;
 
     return *(int *) p;
+#else
+    ifTable_mib_index imi;
+    ifTable_rowreq_ctx *rr;
+
+    imi.ifIndex = index;
+    rr = ifTable_row_find_by_mib_index(&imi);
+    if (NULL == rr)
+        return 0;
+
+    return rr->data.ifType;
+#endif
 }
 
 
@@ -231,6 +247,7 @@ getType(int index)
 static char    *
 getName(int index)
 {
+#ifndef USING_IF_MIB_IFTABLE_IFTABLE_MODULE
     oid             name[MAX_OID_LEN] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 2 };
     size_t          length = 10;
     struct variable ifName_variable =
@@ -251,6 +268,9 @@ getName(int index)
         return NULL;
 
     return p;
+#else
+    return netsnmp_access_interface_name_find(index);
+#endif
 }
 
 

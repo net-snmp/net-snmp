@@ -44,7 +44,7 @@ INCLUDESUBDIRHEADERS=all_helpers.h \
 # Build info
 #
 # -I. -I.. -I../..
-CPPFLAGS= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) -I$(MIBGROUP_INCLUDES) \
+CPPFLAGS= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 	$(SNMPLIB_INCLUDES) @CPPFLAGS@
 
 SRCS =  all_helpers.c \
@@ -71,9 +71,53 @@ SRCS =  all_helpers.c \
 	table.c \
 	mode_end_call.c
 
-OBJS =  $(SRCS:.c=.o)
+OBJS =  all_helpers.o \
+	baby_steps.o \
+	cache_handler.o \
+	multiplexer.o \
+	read_only.o \
+	bulk_to_next.o \
+	instance.o \
+	scalar.o \
+	scalar_group.o \
+	watcher.o \
+	null.o \
+	debug_handler.o \
+	old_api.o \
+	row_merge.o \
+	serialize.o \
+	stash_cache.o \
+	table_array.o \
+	table_container.o \
+	table_iterator.o \
+	table_data.o \
+	table_dataset.o \
+	table.o \
+	mode_end_call.o
 
-LOBJS = $(SRCS:.c=.lo)
+LOBJS = all_helpers.lo \
+	baby_steps.lo \
+	cache_handler.lo \
+	multiplexer.lo \
+	read_only.lo \
+	bulk_to_next.lo \
+	instance.lo \
+	scalar.lo \
+	scalar_group.lo \
+	watcher.lo \
+	null.lo \
+	debug_handler.lo \
+	old_api.lo \
+	row_merge.lo \
+	serialize.lo \
+	stash_cache.lo \
+	table_array.lo \
+	table_container.lo \
+	table_iterator.lo \
+	table_data.lo \
+	table_dataset.lo \
+	table.lo \
+	mode_end_call.lo
 
 all: standardall
 

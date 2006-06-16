@@ -8,6 +8,8 @@ my %MakeParams = ();
 
 WriteMakefile(%MakeParams);
 
+Check_Version();
+
 if  (eval {require ExtUtils::Constant; 1}) {
   # If you edit these definitions to change the constants used by this module,
   # you will need to use the generated const-c.inc and const-xs.inc
@@ -117,7 +119,7 @@ sub InitMakeParams {
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 	}
 
-	$Params{'CCFLAGS'} =~ s/ -W[-\w]+//g; # ignore developer warnings
+	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
 	if ($Params{'CCFLAGS'} eq "") {
 	    die "You need to install net-snmp first (I can't find net-snmp-config)";
 	}
@@ -137,7 +139,7 @@ sub NetSNMPGetOpts {
 
       # Grab command line options first.  Only used if environment variables are not set
       GetOptions("NET-SNMP-IN-SOURCE=s" => \$ret{'insource'},
-        "NET-SNMP-PATH=s"      => \$ret{'prefix'},
+        "NET-SNMP-PATH=s"      => \$ret{'prefix'},          
         "NET-SNMP-DEBUG=s"     => \$ret{'debug'});
 
       if ($ENV{'NET-SNMP-IN-SOURCE'})
@@ -159,17 +161,20 @@ sub NetSNMPGetOpts {
       $ENV{'NET-SNMP-IN-SOURCE'}    = $ret{'insource'};
       $ENV{'NET-SNMP-PATH'}         = $ret{'prefix'};
       $ENV{'NET-SNMP-DEBUG'}        = $ret{'debug'};
-
+     
       $basedir = `%COMSPEC% /c cd`;
       chomp $basedir;
       $basedir =~ /(.*?)\\perl.*/;
       $basedir = $1;
       print "Net-SNMP base directory: $basedir\n";
-
+      if ($basedir =~ / /) {
+        die "\nA space has been detected in the base directory.  This is not " .
+            "supported\nPlease rename the folder and try again.\n\n";
+      }
     }
     else
     {
-      if ($ENV{'NET-SNMP-CONFIG'} &&
+      if ($ENV{'NET-SNMP-CONFIG'} && 
         $ENV{'NET-SNMP-IN-SOURCE'}) {
 	# have env vars, pull from there
 	$ret{'nsconfig'} = $ENV{'NET-SNMP-CONFIG'};
@@ -189,7 +194,7 @@ sub NetSNMPGetOpts {
 	$ENV{'NET-SNMP-IN-SOURCE'} = $ret{'insource'};
       }
     }	
-
+    
     $ret{'nsconfig'} =~ s/ROOTPATH/$rootpath/;
 
     $ret{'rootpath'} = $rootpath;
@@ -209,4 +214,24 @@ sub find_files {
 	    return $dir;
 	}
     }
+}
+
+sub Check_Version {
+    my $foundversion = 0;
+    open(I,"<Makefile");
+    while (<I>) {
+	if (/^VERSION = (.*)/) {
+	    my $perlver = $1;
+	    my $srcver = `$opts->{'nsconfig'} --version`;
+	    chomp($srcver);
+	    $perlver =~ s/pre/0./;
+	    if ($srcver ne $perlver) {
+		die "ERROR: Net-SNMP installed version ($srcver) doesn't match this version ($perlver)\n";
+	    }
+	    $foundversion = 1;
+	    last;
+	}
+    }
+    die "ERROR: Couldn't find version number of this module\n" if (!$foundversion);
+    close(I);
 }

@@ -1114,7 +1114,7 @@ write_snmpTargetAddrTimeout(int action,
         if ((temp_struct =
              search_snmpTargetAddrTable(snmpTargetAddrOID,
                                         snmpTargetAddrOIDLen, name, &name_len,
-                                        1)) == 0) {
+                                        1)) != 0) {
             temp_struct->timeout = long_ret;
         }
     }
@@ -1453,8 +1453,12 @@ snmpTargetAddr_createNewRow(oid * name, size_t name_len)
     newNameLen = name_len - snmpTargetAddrOIDLen;
     if (newNameLen > 0) {
         temp_struct = snmpTargetAddrTable_create();
+        if (!temp_struct)
+            return SNMP_ERR_GENERR;
         temp_struct->name = (char *) malloc(newNameLen + 1);
         if (temp_struct->name == NULL) {
+            SNMP_FREE(temp_struct->tagList);
+            SNMP_FREE(temp_struct);
             return 0;
         }
 

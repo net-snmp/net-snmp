@@ -403,19 +403,23 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
 #if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
 {
 #if defined(USE_OPENSSL) || defined(USE_PKCS)
-    int             rval = SNMPERR_SUCCESS;
+    int            rval = SNMPERR_SUCCESS;
 #endif
+    int            ret;
 
 #ifdef USE_OPENSSL
-    const EVP_MD         *hashfn;
+    const EVP_MD   *hashfn;
     EVP_MD_CTX     ctx, *cptr;
+    unsigned int   tmp_len;
 #endif
 
     DEBUGTRACE;
 
     if (hashtype == NULL || hashtypelen < 0 || buf == NULL ||
-        buf_len < 0 || MAC == NULL || MAC_len == NULL ||
-        (int) (*MAC_len) < sc_get_properlength(hashtype, hashtypelen))
+        buf_len <= 0 || MAC == NULL || MAC_len == NULL )
+        return (SNMPERR_GENERR);
+    ret = sc_get_properlength(hashtype, hashtypelen);
+    if (( ret < 0 ) || (*MAC_len < ret ))
         return (SNMPERR_GENERR);
 
 #ifdef USE_OPENSSL
@@ -457,13 +461,16 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
 
 /** do the final pass */
 #if defined(OLD_DES)
-    EVP_DigestFinal(cptr, MAC, MAC_len);
+    EVP_DigestFinal(cptr, MAC, &tmp_len);
+    *MAC_len = tmp_len;
 #else /* !OLD_DES */
     if (SSLeay() < 0x907000) {
-        EVP_DigestFinal(cptr, MAC, MAC_len);
+        EVP_DigestFinal(cptr, MAC, &tmp_len);
+        *MAC_len = tmp_len;
         free(cptr);
     } else {
-        EVP_DigestFinal_ex(cptr, MAC, MAC_len);
+        EVP_DigestFinal_ex(cptr, MAC, &tmp_len);
+        *MAC_len = tmp_len;
         EVP_MD_CTX_cleanup(cptr);
     }
 #endif                          /* OLD_DES */

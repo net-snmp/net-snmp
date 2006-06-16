@@ -1,8 +1,8 @@
-.TH "table_container: Helps you implement a table when data can be found via a netsnmp_container." 3 "5 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "table_container" 3 "16 Jun 2006" "Version 5.2.3.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-table_container: Helps you implement a table when data can be found via a netsnmp_container. \- The table_container handler is used (automatically) in conjuntion with the \fBtable\fP handler.  
+table_container \- Helps you implement a table when data can be found via a netsnmp_container.  
 
 .PP
 .SS "Functions"
@@ -18,7 +18,11 @@ table_container: Helps you implement a table when data can be found via a netsnm
 .in -1c
 .SH "Detailed Description"
 .PP 
-The table_container handler is used (automatically) in conjuntion with the \fBtable\fP handler. This handler will use the index information provided by the \fB\fP handler to find the row needed to process the request.
+Helps you implement a table when data can be found via a netsnmp_container. 
+.PP
+The table_container handler is used (automatically) in conjuntion with the \fBtable\fP handler.
+.PP
+This handler will use the index information provided by the \fB\fP handler to find the row needed to process the request.
 .PP
 The container must use one of 3 key types. It is the sub-handler's responsibility to ensure that the container and key type match (unless neither is specified, in which case a default will be used.)
 .PP
@@ -30,7 +34,7 @@ TABLE_CONTAINER_KEY_VARBIND_INDEX The container should do comparisons based on a
 .PP
 TABLE_CONTAINER_KEY_VARBIND_RAW (NOTE: unimplemented) While not yet implemented, future plans include passing the request varbind with the full OID to a container.
 .PP
-If a key type is not specified at registration time, the default ket type of TABLE_CONTAINER_KEY_NETSNMP_INDEX will be used. If a container is provided, or the handler name is aliased to a container type, the container must use a netsnmp index.
+If a key type is not specified at registration time, the default key type of TABLE_CONTAINER_KEY_NETSNMP_INDEX will be used. If a container is provided, or the handler name is aliased to a container type, the container must use a netsnmp index.
 .PP
 If no container is provided, a lookup will be made based on the sub-handler's name, or if that isn't found, 'table_container'. The table_container key type will be netsnmp_index.
 .PP
@@ -53,6 +57,8 @@ This helper and it's API are still being tested and are subject to change.
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_container_table_handler_get (\fBnetsnmp_table_registration_info\fP * tabreg, netsnmp_container * container, char key_type)"
 .PP
-register specified callbacks for the specified table/oid. Definition at line 156 of file table_container.c.
+register specified callbacks for the specified table/oid. 
 .PP
-References netsnmp_mib_handler_s::flags, netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_mib_handler, snmp_log(), and SNMP_MALLOC_TYPEDEF.
+Definition at line 157 of file table_container.c.
+.PP
+References netsnmp_mib_handler_s::flags, netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), snmp_log(), and SNMP_MALLOC_TYPEDEF.
