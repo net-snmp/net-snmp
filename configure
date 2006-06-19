@@ -9193,7 +9193,7 @@ echo "$as_me: WARNING: mib module \"$i\" uses the \"config_load_mib\" directive"
       echo "#define USING_${sym}_MODULE 1" >> mib_module_config.h
       echo " " >> mib_module_config.h
 
-      echo $ac_n " $i$ac_c" >&6
+      echo $ECHO_N " $i$ECHO_C" >&6
 
     fi
   done
@@ -25384,7 +25384,7 @@ EOF
 
 read tmpinput
 ac_cv_have_warned="yes"
-echo $ac_n "disabling above prompt for future runs...  $ac_c"
+echo $ECHO_N "disabling above prompt for future runs...  $ECHO_C"
 else
   ac_cv_have_warned="no"
 fi
@@ -25422,7 +25422,7 @@ else
   echo "" >&6
 
 if test "x$defaults" = "xno"; then
-echo $ac_n "
+echo $ECHO_N "
 
 *** System Contact Information:
 
@@ -25431,7 +25431,7 @@ running on.  This information is available in the MIB-II tree.  This
 can also be over-ridden using the \"syscontact\" syntax in the agent's
 configuration files.
 
-System Contact Information ($ME@$LOC): $ac_c"
+System Contact Information ($ME@$LOC): $ECHO_C"
 read tmpinput
 if test "$tmpinput" = "" -a "$ME@$LOC" != ""; then
   tmpinput="$ME@$LOC"
@@ -25444,7 +25444,7 @@ fi
 
 
 eval ac_cv_user_prompt_SYS_CONTACT=\$SYS_CONTACT
-echo $ac_n "setting $MSG_CHECK to...  $ac_c" >&6
+echo $ECHO_N "setting $MSG_CHECK to...  $ECHO_C" >&6
 
 fi
 echo "$as_me:$LINENO: result: $ac_cv_user_prompt_SYS_CONTACT" >&5
@@ -25482,7 +25482,7 @@ else
   echo "" >&6
 
 if test "x$defaults" = "xno"; then
-echo $ac_n "
+echo $ECHO_N "
 
 *** System Location:
 
@@ -25490,7 +25490,7 @@ echo $ac_n "
 available in the MIB-II tree.  this can also be over-ridden using the
 \"syslocation\" syntax in the agent's configuration files.
 
-System Location (Unknown): $ac_c"
+System Location (Unknown): $ECHO_C"
 read tmpinput
 if test "$tmpinput" = "" -a "Unknown" != ""; then
   tmpinput="Unknown"
@@ -25503,7 +25503,7 @@ fi
 
 
 eval ac_cv_user_prompt_SYS_LOC=\$SYS_LOC
-echo $ac_n "setting $MSG_CHECK to...  $ac_c" >&6
+echo $ECHO_N "setting $MSG_CHECK to...  $ECHO_C" >&6
 
 fi
 echo "$as_me:$LINENO: result: $ac_cv_user_prompt_SYS_LOC" >&5
@@ -25548,7 +25548,7 @@ else
   echo "" >&6
 
 if test "x$defaults" = "xno"; then
-echo $ac_n "
+echo $ECHO_N "
 
 *** Logfile location:
 
@@ -25557,7 +25557,7 @@ information & errors to.  If not defined (enter the keyword \"none\"
 at the prompt below) the agent will use stdout and stderr instead.
 (Note: This value can be over-ridden using command line options.)
 
-Location to write logfile ($defaultlog): $ac_c"
+Location to write logfile ($defaultlog): $ECHO_C"
 read tmpinput
 if test "$tmpinput" = "" -a "$defaultlog" != ""; then
   tmpinput="$defaultlog"
@@ -25570,7 +25570,7 @@ fi
 
 
 eval ac_cv_user_prompt_LOGFILE=\$LOGFILE
-echo $ac_n "setting $MSG_CHECK to...  $ac_c" >&6
+echo $ECHO_N "setting $MSG_CHECK to...  $ECHO_C" >&6
 
 fi
 echo "$as_me:$LINENO: result: $ac_cv_user_prompt_LOGFILE" >&5
@@ -25613,14 +25613,14 @@ else
   echo "" >&6
 
 if test "x$defaults" = "xno"; then
-echo $ac_n "
+echo $ECHO_N "
 
 *** snmpd persistent storage location:
 
 	Enter a directory for the snmp library to store persistent
 data in the form of a configuration file.
 
-Location to write persistent information ($defaultstore): $ac_c"
+Location to write persistent information ($defaultstore): $ECHO_C"
 read tmpinput
 if test "$tmpinput" = "" -a "$defaultstore" != ""; then
   tmpinput="$defaultstore"
@@ -25633,7 +25633,7 @@ fi
 
 
 eval ac_cv_user_prompt_PERSISTENT_DIRECTORY=\$PERSISTENT_DIRECTORY
-echo $ac_n "setting $MSG_CHECK to...  $ac_c" >&6
+echo $ECHO_N "setting $MSG_CHECK to...  $ECHO_C" >&6
 
 fi
 echo "$as_me:$LINENO: result: $ac_cv_user_prompt_PERSISTENT_DIRECTORY" >&5

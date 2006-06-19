@@ -818,7 +818,7 @@ while test "x$new_module_list" != "x"; do
       echo "#define USING_${sym}_MODULE 1" >> mib_module_config.h
       echo " " >> mib_module_config.h
       changequote([, ])
-      echo $ac_n " $i$ac_c" >&AC_FD_MSG
+      echo $ECHO_N " $i$ECHO_C" >&AC_FD_MSG
       changequote(, )
     fi
   done
@@ -1993,7 +1993,7 @@ EOF
 
 read tmpinput
 ac_cv_have_warned="yes"
-echo $ac_n "disabling above prompt for future runs...  $ac_c"
+echo $ECHO_N "disabling above prompt for future runs...  $ECHO_C"
 else
   ac_cv_have_warned="no"
 fi

@@ -11,7 +11,7 @@ dnl changequote(<<, >>) dnl
 dnl <<
 [
 if test "x$defaults" = "xno"; then
-echo $ac_n "$2 ($3): $ac_c"
+echo $ECHO_N "$2 ($3): $ECHO_C"
 read tmpinput
 if test "$tmpinput" = "" -a "$3" != ""; then
   tmpinput="$3"
@@ -43,7 +43,7 @@ AC_CACHE_CHECK($MSG_CHECK, ac_cv_user_prompt_$1,
 [echo "" >&AC_FD_MSG
 AC_PROMPT_USER_NO_DEFINE($1,[$2],$3)
 eval ac_cv_user_prompt_$1=\$$1
-echo $ac_n "setting $MSG_CHECK to...  $ac_c" >&AC_FD_MSG
+echo $ECHO_N "setting $MSG_CHECK to...  $ECHO_C" >&AC_FD_MSG
 ])
 if test "$ac_cv_user_prompt_$1" != "none"; then
   if test "$4" != ""; then
