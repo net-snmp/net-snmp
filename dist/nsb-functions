@@ -45,6 +45,7 @@ NSB_DIST_MODULES=${NSB_DIST_MODULES:="host disman/event-mib smux"}
 NSB_EXTRA_MODULES=${NSB_EXTRA_MODULES:="examples examples/example smux Rmon"}
 #testhandler
 NSB_EXTRA_CONFIG=${NSB_EXTRA_CONFIG:=""}
+NSB_PREFIX=${NSB_PREFIX:="/usr"}
 NSB_EXTRA_INSTALL=${NSB_EXTRA_INSTALL:=""}
 NSB_SHARED=${NSB_SHARED:="--enable-shared"}
 NSB_VIEW=cat
@@ -154,12 +155,12 @@ nsb-config-dist()
    # inside of single quotes, so use double quotes
    #
    echo $ngc_src/configure --with-sys-location=Unknown \
-      --prefix=$ngc_dest \
+      --prefix="$NSB_PREFIX" \
       --disable-developer $NSB_EXTRA_CONFIG \
       --with-sys-contact='System Administrator' \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
    $ngc_src/configure --with-sys-location=Unknown \
-      --prefix=$ngc_dest \
+      --prefix="$NSB_PREFIX" \
       --disable-developer $NSB_EXTRA_CONFIG \
       --with-sys-contact='System Administrator' \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
@@ -175,7 +176,7 @@ nsb-config-all()
 {
    nsb-flow config-all
    if [ $# -lt 1 ]; then
-      nsb-abort "usage: nsb-config-with src_dir"
+      nsb-abort "usage: nsb-config-all src_dir"
    fi
    ngc_src=$1
    if [ ! -d $ngc_src ]; then
@@ -234,13 +235,13 @@ nsb-config-all()
    # inside of single quotes, so use double quotes
    #
    echo $ngc_src/configure  --with-defaults \
-      --prefix=$ngc_dest \
+      --prefix="$NSB_PREFIX" \
       --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
       $NSB_SHARED $NSB_IPV6 $NSB_PERL
    $ngc_src/configure  --with-defaults \
-      --prefix=$ngc_dest \
+      --prefix="$NSB_PREFIX" \
       --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
