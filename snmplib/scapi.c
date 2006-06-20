@@ -640,11 +640,11 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 		memcpy(my_iv, iv, ivlen);
 		/* encrypt the data */
 		DES_ncbc_encrypt(plaintext, ciphertext, plast, key_sch, 
-				 (des_cblock *) my_iv, DES_ENCRYPT);
+				 (DES_cblock *) my_iv, DES_ENCRYPT);
                 if (pad > 0) {
                     /* then encrypt the pad block */
                     DES_ncbc_encrypt(pad_block, ciphertext+plast, pad_size, 
-                                     key_sch, (des_cblock *)my_iv, DES_ENCRYPT);
+                                     key_sch, (DES_cblock *)my_iv, DES_ENCRYPT);
                     *ctlen = plast + pad_size;
                 } else {
                     *ctlen = plast;
@@ -771,7 +771,7 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 	
 		memcpy(my_iv, iv, ivlen);
 		DES_cbc_encrypt(ciphertext, plaintext, ctlen, key_sch, 
-				(des_cblock *) my_iv, DES_DECRYPT);
+				(DES_cblock *) my_iv, DES_DECRYPT);
                 *ptlen = ctlen;
 	}
 
