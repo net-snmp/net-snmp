@@ -2,6 +2,87 @@
 
 Changes: V4.2.6 -> V4.2.7
 
+2006-06-20 10:35  dts12
+
+   * agent/mibgroup/ucd_snmp.h:
+
+   Pick up memory/cpu modules for modern NetBSD & OpenBSD systems
+
+2006-06-20 10:29  dts12
+
+   * agent/mibgroup/host/: hr_filesys.c, hr_storage.c
+:
+
+   Backport trontor's fix for bug #942498, for NetBSD
+
+2006-06-20 10:26  dts12
+
+   * snmplib/scapi.c:
+
+   openssl 0.9.7 support for DES changes.
+
+2006-06-19 09:08  dts12
+
+   * aclocal.m4, configure, configure.in:
+
+   Fix displaying of "non-new-line" prompts.
+
+2006-06-12 16:51  dts12
+
+   * agent/mibgroup/host/hr_system.c:
+
+   Tweak order of code alternatives, for Solaris compilation.
+
+2006-06-09 14:34  dts12
+
+   * configure, configure.in:
+
+   Dave is:  a) incurably optimistic, and   b) incredibly stubborn
+   Can I uncross my fingers now?
+
+2006-06-09 13:43  dts12
+
+   * testing/tests/: T055agentv1mintrap, T056agentv2cmintrap
+
+   Fix minor typo
+
+2006-06-09 13:40  dts12
+
+   * agent/mibgroup/mibII/route_write.c:
+
+   Don't try to use SIOC(ADD|DEL)RT if they aren't defined
+
+2006-06-09 13:38  dts12
+
+   * agent/mibgroup/host/hr_storage.c:
+
+   Don't use m_clusters if not available
+
+2006-06-09 13:36  dts12
+
+   * snmplib/scapi.c:
+
+   OpenSSL 0.9.7 support for DES changes
+
+2006-06-09 13:32  dts12
+
+   * configure, configure.in:
+
+   Attempt to upgrade configure to 2.57 (fingers crossed)
+
+2006-06-09 13:31  dts12
+
+   * configure.in:
+
+   Check mbstat struct for m_clusters (freebsd apparently dropped it)
+
+2006-06-06 10:20  dts12
+
+   * FAQ, README, sedscript.in,
+     version.h, perl/SNMP/SNMP.pm:
+
+   - (version.h sedscript.in): version tag ( 4.2.7.rc1 )
+
 2006-06-06 09:25  dts12
 
    * README:
