@@ -45,6 +45,7 @@ NSB_DIST_MODULES=${NSB_DIST_MODULES:="host disman/event-mib smux"}
 NSB_EXTRA_MODULES=${NSB_EXTRA_MODULES:="examples examples/example smux Rmon"}
 #testhandler
 NSB_EXTRA_CONFIG=${NSB_EXTRA_CONFIG:=""}
+NSB_EXTRA_INSTALL=${NSB_EXTRA_INSTALL:=""}
 NSB_SHARED=${NSB_SHARED:="--enable-shared"}
 NSB_VIEW=cat
 NSB_FLOW=
@@ -492,7 +493,7 @@ nsb-build()
    else
       nsb-prompt "No errors found, press enter to install"
       # DESTDIR makes sure the perl stuff goes into $dest_dir, too
-      nsb-make install DESTDIR=$dest_dir
+      nsb-make install DESTDIR=$dest_dir $NSB_EXTRA_INSTALL
    fi
 
    return 0
