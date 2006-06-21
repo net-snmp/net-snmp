@@ -23,6 +23,7 @@ struct snmp_alarm {
 
 /* the ones you should need */
 void snmp_alarm_unregister(unsigned int clientreg);
+void snmp_alarm_unregister_all(void);
 unsigned int snmp_alarm_register(unsigned int when, unsigned int flags,
                                  SNMPAlarmCallback *thecallback,
                                  void *clientarg);

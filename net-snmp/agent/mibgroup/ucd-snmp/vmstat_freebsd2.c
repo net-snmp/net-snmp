@@ -22,7 +22,11 @@
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
 
+#if HAVE_SYS_VMPARAM_H
+#include <sys/vmparam.h>
+#else
 #include <vm/vm_param.h>
+#endif
 
 #include <time.h>
 #include <nlist.h>
@@ -41,6 +45,7 @@
 #include "util_funcs.h"
 
 #include "vmstat.h"
+#include "vmstat_freebsd2.h"
 #include "auto_nlist.h"
 
 
@@ -56,6 +61,8 @@
 
 /* CPU percentage */
 #define CPU_PRC         100
+
+static FindVarMethod var_extensible_vmstat;
 
 void init_vmstat_freebsd2(void) 
 {
@@ -76,6 +83,10 @@ void init_vmstat_freebsd2(void)
     {CPURAWNICE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWNICE}},
     {CPURAWSYSTEM, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWSYSTEM}},
     {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
+    {CPURAWKERNEL, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWKERNEL}},
+    {CPURAWINTR, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWINTR}},
+    {SYSRAWINTERRUPTS, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {SYSRAWINTERRUPTS}},
+    {SYSRAWCONTEXT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {SYSRAWCONTEXT}},
 /* Future use: */
 /*
   {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
@@ -109,6 +120,7 @@ getuptime(void )
 	return(uptime);
 }
 
+static
 unsigned char *var_extensible_vmstat(struct variable *vp,
 				     oid *name,
 				     size_t *length,
@@ -180,20 +192,20 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 	*var_len = strlen(errmsg);
 	return((u_char *) (errmsg));
     case SWAPIN:
-#ifdef openbsd2
+#if defined(openbsd2) || defined(darwin)
 	long_ret = ptok(mem_new.v_swpin - mem_old.v_swpin);
 #else
-	long_ret = ptok(mem_new.v_swapin - mem_old.v_swapin + 
-			mem_new.v_vnodein - mem_old.v_vnodein);
+	long_ret = ptok(mem_new.v_swappgsin - mem_old.v_swappgsin + 
+			mem_new.v_vnodepgsin - mem_old.v_vnodepgsin);
 #endif
 	long_ret = rate(long_ret);
 	return((u_char *) (&long_ret));
     case SWAPOUT:
-#ifdef openbsd2
+#if defined(openbsd2) || defined(darwin)
 	long_ret = ptok(mem_new.v_swpout - mem_old.v_swpout);
 #else
-	long_ret = ptok(mem_new.v_swapout - mem_old.v_swapout + 
-			mem_new.v_vnodeout - mem_old.v_vnodeout);
+	long_ret = ptok(mem_new.v_swappgsout - mem_old.v_swappgsout + 
+			mem_new.v_vnodepgsout - mem_old.v_vnodepgsout);
 #endif
 	long_ret = rate(long_ret);
 	return((u_char *) (&long_ret));
@@ -241,6 +253,18 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 	return((u_char *) (&long_ret));
     case CPURAWIDLE:
 	long_ret = cpu_new[CP_IDLE];
+	return((u_char *) (&long_ret));
+    case CPURAWKERNEL:
+	long_ret = cpu_new[CP_SYS];
+	return((u_char *) (&long_ret));
+    case CPURAWINTR:
+	long_ret = cpu_new[CP_INTR];
+	return((u_char *) (&long_ret));
+    case SYSRAWINTERRUPTS:
+	long_ret = mem_new.v_intr;
+	return((u_char *) (&long_ret));
+    case SYSRAWCONTEXT:
+	long_ret = mem_new.v_swtch;
 	return((u_char *) (&long_ret));
 /* reserved for future use */
 /*

@@ -31,14 +31,15 @@ do_version () {
 
 
 do_usage () {
-    echo "Usage: smistrip [-Vhn] [-d dir] [-s suffix] [-m module] file1 [file2 [...]]"
+    echo "Usage: smistrip [-Vhn] [-d dir] [-s suffix] [-m modules] file ..."
     echo "-V         show version and license information"
     echo "-h         show usage information"
     echo "-n         do not write module files"
     echo "-d dir     write module to directory dir"
     echo "-x suffix  append suffix to the module file name"
-    echo "-m module  strip only the specified module"
-    echo "file1 ...  input files to parse (RFCs, I-Ds, ...)"
+    echo "-m modules strip only the specified modules. For a list of modules"
+    echo "           use : as a separator"
+    echo "file ...   input files to parse (RFCs, I-Ds, ...)"
 }
 
 
@@ -66,9 +67,9 @@ do_strip () {
     }
 
     # a blank line - suppress multiple
-    /^[ \t]*$/ {
+    /^[ \t\r]*$/ {
         if (collect)
-	    if (line[n-1] != "" && line[n-1] !~ /,[ \t]*$/) line[n++] = ""    
+	    if (line[n-1] != "" && line[n-1] !~ /,[ \t\r]*$/) line[n++] = ""    
 	next
     }
 
@@ -88,10 +89,10 @@ do_strip () {
     }
 
     # end of module
-    /^[ \t]*END[ \t]*$/ {
+    /^[ \t]*END[ \t\r]*$/ {
 	if (macro)
 	    macro = 0
-	else if (length(single) == 0 || single == module) {
+	else if (length(single) == 0 || match(":"single":", ":"module":")) {
 	    strip = 99
 	    for (i = 0 ; i < n ; i++) {
 		# find the minimum column that contains non-blank characters
@@ -102,9 +103,9 @@ do_strip () {
 
 	    if (test != "1") {
 		if (dir)
-		   f = dir "/" module suffix
+		    f = dir "/" module suffix
 		else
-		   f = module suffix
+		    f = module suffix
 		for (i = 0 ; i < n ; i++)
 		    print substr(line[i], strip) >f
 	    }
@@ -113,6 +114,8 @@ do_strip () {
 	    module = ""
 	    collect = 0
 	}
+	else
+	    print module ": ignored."
     }
     '
 }

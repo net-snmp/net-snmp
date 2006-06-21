@@ -20,5 +20,6 @@ while(!/^\# DO NOT DELETE THIS LINE/) {
 
 while (<G>) {
     next if (/:\s*$/);
+    s/\.o:/.lo:/;
     print O $_;
 } 

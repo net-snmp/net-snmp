@@ -60,7 +60,7 @@ init_usmUser(void)
                                 usm_parse_config_usmUser, NULL, NULL);
   snmpd_register_config_handler("createUser",
                                 usm_parse_create_usmUser, NULL,
-                                "username (MD5|SHA) passphrase [DES] [passphrase]");
+                                "username (MD5|SHA) passphrase [DES [passphrase]]");
 
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
@@ -322,7 +322,8 @@ var_usmUser(
           if (result == 0) {
             /* found an exact match.  Need the next one for !exact */
             uptr = nptr->next;
-          } else if (result == 1) {
+            break;
+          } else if (result == -1) {
             uptr = nptr;
           }
         }

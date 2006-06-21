@@ -25,7 +25,7 @@ struct udp_mib	cached_udp_mib;
 
 #define IP_STATS_LINE	"Ip: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu"
 #define ICMP_STATS_LINE	"Icmp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu"
-#define TCP_STATS_LINE	"Tcp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu"
+#define TCP_STATS_LINE	"Tcp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu"
 #define UDP_STATS_LINE	"Udp: %lu %lu %lu %lu"
 
 #define IP_STATS_PREFIX_LEN	4
@@ -54,8 +54,10 @@ linux_read_mibII_stats ( void )
     }
 
     if (linux_mibII_stats_cache_marker &&
-	(!atime_ready( linux_mibII_stats_cache_marker, LINUX_STATS_CACHE_TIMEOUT*1000 )))
+	(!atime_ready( linux_mibII_stats_cache_marker, LINUX_STATS_CACHE_TIMEOUT*1000 ))) {
+	fclose (in);
 	return 0;
+    }
 
     if (linux_mibII_stats_cache_marker )
 	atime_setMarker( linux_mibII_stats_cache_marker );
@@ -117,7 +119,7 @@ linux_read_mibII_stats ( void )
 				&cached_icmp_mib.icmpOutAddrMaskReps);
 	}
 	else if (!strncmp( line, TCP_STATS_LINE, TCP_STATS_PREFIX_LEN )) {
-	    sscanf ( line, TCP_STATS_LINE,
+	    int ret = sscanf ( line, TCP_STATS_LINE,
 				&cached_tcp_mib.tcpRtoAlgorithm,
 				&cached_tcp_mib.tcpRtoMin,
 				&cached_tcp_mib.tcpRtoMax,
@@ -129,7 +131,11 @@ linux_read_mibII_stats ( void )
 				&cached_tcp_mib.tcpCurrEstab,
 				&cached_tcp_mib.tcpInSegs,
 				&cached_tcp_mib.tcpOutSegs,
-				&cached_tcp_mib.tcpRetransSegs);
+				&cached_tcp_mib.tcpRetransSegs,
+				&cached_tcp_mib.tcpInErrs,
+				&cached_tcp_mib.tcpOutRsts);
+	    cached_tcp_mib.tcpInErrsValid = (ret > 12) ? 1 : 0;
+	    cached_tcp_mib.tcpOutRstsValid = (ret > 13) ? 1 : 0;
 	}
 	else if (!strncmp( line, UDP_STATS_LINE, UDP_STATS_PREFIX_LEN )) {
 	    sscanf ( line, UDP_STATS_LINE,

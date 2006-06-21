@@ -112,6 +112,9 @@ static void optProc(int argc, char *const *argv, int opt)
                     case 'f':
                         ds_toggle_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS);
                         break;
+		    default:
+		        fprintf(stderr, "Unknown flag passed to -C: %c\n", optarg[-1]);
+			exit(1);
                 }
             }
             break;
@@ -120,12 +123,13 @@ static void optProc(int argc, char *const *argv, int opt)
 
 void usage(void)
 {
-  fprintf(stderr,"Usage: snmpstatus [-Cf]");
+  fprintf(stderr,"Usage: snmpstatus");
   snmp_parse_args_usage(stderr);
   fprintf(stderr,"\n\n");
   snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "snmpstatus specific options\n");
-  fprintf(stderr, "  -Cf\t\tDon't fix errors and retry the request.\n");
+  fprintf(stderr, "  -C <APPOPTS>\tsnmpstatus specific options\n");
+  fprintf(stderr, "\t\t  APPOPTS values:\n");
+  fprintf(stderr, "\t\t      f: Don't fix errors and retry the request.\n");
 }
 
 
@@ -188,15 +192,18 @@ retry:
             sysdescr[vars->val_len] = '\0';
           }
           if (vars->name_length == length_sysUpTime &&
-              !memcmp(objid_sysUpTime, vars->name, sizeof(objid_sysUpTime))){
+              !memcmp(objid_sysUpTime, vars->name, sizeof(objid_sysUpTime))
+              && vars->val.integer){
             uptime = *vars->val.integer;
           }
           if (vars->name_length == length_ipInReceives &&
-              !memcmp(objid_ipInReceives, vars->name, sizeof(objid_ipInReceives))){
+              !memcmp(objid_ipInReceives, vars->name, sizeof(objid_ipInReceives))
+              && vars->val.integer){
             ipin = *vars->val.integer;
           }
           if (vars->name_length == length_ipOutRequests &&
-              !memcmp(objid_ipOutRequests, vars->name, sizeof(objid_ipOutRequests))){
+              !memcmp(objid_ipOutRequests, vars->name, sizeof(objid_ipOutRequests))
+              && vars->val.integer){
             ipout = *vars->val.integer;
           }
         }

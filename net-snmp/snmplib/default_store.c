@@ -20,6 +20,12 @@
 #include <winsock.h>
 #endif
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -40,6 +46,8 @@ int ds_integers[DS_MAX_IDS][DS_MAX_SUBIDS];
 char ds_booleans[DS_MAX_IDS][DS_MAX_SUBIDS/8];  /* bit vector storage. */
 char *ds_strings[DS_MAX_IDS][DS_MAX_SUBIDS];
 void *ds_voids[DS_MAX_IDS][DS_MAX_SUBIDS];
+/* Prototype definitions */
+void ds_handle_config(const char *token, char *line);
 
 int
 ds_set_boolean(int storeid, int which, int value) {
@@ -116,7 +124,13 @@ ds_set_string(int storeid, int which, const char *value) {
     return SNMPERR_GENERR;
     
   DEBUGMSGTL(("ds_set_string","Setting %d:%d = %s\n", storeid, which,
-              value));
+              (value ? value : "(null)")));
+
+  /*
+   * Is some silly person calling us with our own pointer?
+   */
+  if (ds_strings[storeid][which] == value)
+    return SNMPERR_SUCCESS;
 
   if (ds_strings[storeid][which] != NULL)
     free(ds_strings[storeid][which]);
@@ -166,6 +180,7 @@ void
 ds_handle_config(const char *token, char *line) {
   struct ds_read_config *drsp;
   char buf[SNMP_MAXBUF];
+  char *value, *endptr;
   int itmp;
 
   DEBUGMSGTL(("ds_handle_config", "handling %s\n", token));
@@ -177,28 +192,31 @@ ds_handle_config(const char *token, char *line) {
                 drsp->token, drsp->type, drsp->storeid, drsp->which));
     switch (drsp->type) {
       case ASN_BOOLEAN:
-        if (strncasecmp(line,"yes",3) == 0 || strncasecmp(line,"true",4) == 0) {
+	value = strtok(line, " \t\n");
+        if (strcasecmp(value,"yes") == 0 || strcasecmp(value,"true") == 0) {
           itmp = 1;
-        } else if (strncasecmp(line,"no",3) == 0 ||
-                strncasecmp(line,"false",5) == 0) {
+        } else if (strcasecmp(value,"no") == 0 || strcasecmp(value,"false") == 0) {
           itmp = 0;
-        } else if (atoi(line) > 0) {
-          itmp = 1;
         } else {
-          itmp = 0;
+	  itmp = strtol(value, &endptr, 10);
+	  if (*endptr != 0 || itmp < 0 || itmp > 1)
+	    config_perror("Should be yes|no|true|false|0|1");
         }
         ds_set_boolean(drsp->storeid, drsp->which, itmp);
         DEBUGMSGTL(("ds_handle_config", "bool: %d\n", itmp));
         break;
 
       case ASN_INTEGER:
-        ds_set_int(drsp->storeid, drsp->which, atoi(line));
-        DEBUGMSGTL(("ds_handle_config", "int: %d\n", atoi(line)));
+	value = strtok(line, " \t\n");
+	itmp = strtol(value, &endptr, 10);
+	if (*endptr != 0) config_perror("Bad integer value");
+	else ds_set_int(drsp->storeid, drsp->which, itmp);
+        DEBUGMSGTL(("ds_handle_config", "int: %d\n", itmp));
         break;
 
       case ASN_OCTET_STR:
         if (*line == '"') {
-            copy_word(line, buf);
+            copy_nword(line, buf, sizeof(buf));
             ds_set_string(drsp->storeid, drsp->which, buf);
         } else {
             ds_set_string(drsp->storeid, drsp->which, line);

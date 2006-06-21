@@ -17,18 +17,9 @@
 #include <unistd.h>
 #endif
 #include <ctype.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
+
+#if HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 
 #include "mibincl.h"
@@ -42,8 +33,6 @@
 
 #include <dlfcn.h>
 #include "dlmod.h"
-
-static long long_return;
 
 static struct dlmod *dlmods = NULL;
 static int          dlmod_next_index = 1;
@@ -71,7 +60,7 @@ void
 init_dlmod (void) 
 {
     char *p;
-    int l;
+    int len;
 
     REGISTER_MIB("dlmod", dlmod_variables, variable4, dlmod_variables_oid);
 
@@ -85,16 +74,19 @@ init_dlmod (void)
 
     p = getenv("SNMPDLMODPATH");
     strncpy(dlmod_path, SNMPDLMODPATH, sizeof(dlmod_path));
+    dlmod_path[ sizeof(dlmod_path)-1 ] = 0;
     if (p) {
 	if (p[0] == ':') {
-	    l = strlen(dlmod_path);
-	    if (dlmod_path[l - 1] != ':') 
-		strncat(dlmod_path, ":", sizeof(dlmod_path) - l);
-	    strncat(dlmod_path, p + 1, 
-		    sizeof(dlmod_path) - strlen(dlmod_path));
+	    len = strlen(dlmod_path);
+	    if (dlmod_path[len - 1] != ':') {
+		strncat(dlmod_path, ":", sizeof(dlmod_path) - len -1);
+		len++;
+	    }
+	    strncat(dlmod_path, p + 1,   sizeof(dlmod_path) - len);
 	} else 
 	    strncpy(dlmod_path, p, sizeof(dlmod_path));
     }
+    dlmod_path[ sizeof(dlmod_path)-1 ] = 0;
     DEBUGMSGTL(("dlmod", "dlmod_path: %s\n", dlmod_path));
 }
 
@@ -111,7 +103,7 @@ dlmod_create_module (void)
     struct dlmod **pdlmod, *dlm;
 
     DEBUGMSGTL(("dlmod", "dlmod_create_module\n"));
-    dlm = calloc(1, sizeof(struct dlmod));
+    dlm = (struct dlmod *)calloc(1, sizeof(struct dlmod));
     if (dlm == NULL) 
 	return NULL;
 
@@ -377,9 +369,9 @@ var_dlmod(struct variable *vp,
 static struct dlmod *
 header_dlmodEntry(struct variable *vp,
 		  oid *name,
-		  int *length,
+		  size_t *length,
 		  int exact,
-		  int *var_len,
+		  size_t *var_len,
 		  WriteMethod **write_method)
 {
 #define DLMODENTRY_NAME_LENGTH 12
@@ -445,14 +437,14 @@ var_dlmodEntry(struct variable *vp,
     case DLMODNAME:
 	*write_method = write_dlmodName;
 	*var_len = strlen(dlm->name);
-	return dlm->name;
+	return (unsigned char*) dlm->name;
     case DLMODPATH:
 	*write_method = write_dlmodPath;
 	*var_len = strlen(dlm->path);
-	return dlm->path;
+	return (unsigned char*) dlm->path;
     case DLMODERROR:
 	*var_len = strlen(dlm->error);
-	return dlm->error;
+	return (unsigned char*) dlm->error;
     case DLMODSTATUS:
 	*write_method = write_dlmodStatus;
 	long_return = dlm->status;
@@ -487,7 +479,7 @@ write_dlmodName(int action,
 	dlm = dlmod_get_by_index(name[12]);
 	if (!dlm || dlm->status == DLMOD_LOADED) 
 	    return SNMP_ERR_RESOURCEUNAVAILABLE;
-	strncpy(dlm->name, var_val, var_val_len);
+	strncpy(dlm->name, (const char*)var_val, var_val_len);
 	dlm->name[var_val_len] = 0;
     }
     return SNMP_ERR_NOERROR;
@@ -516,7 +508,7 @@ write_dlmodPath(int action,
 	dlm = dlmod_get_by_index(name[12]);
 	if (!dlm || dlm->status == DLMOD_LOADED) 
 	    return SNMP_ERR_RESOURCEUNAVAILABLE;
-	strncpy(dlm->path, var_val, var_val_len);
+	strncpy(dlm->path, (const char*)var_val, var_val_len);
 	dlm->path[var_val_len] = 0;
     }
     return SNMP_ERR_NOERROR;

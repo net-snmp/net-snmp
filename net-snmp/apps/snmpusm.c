@@ -114,13 +114,15 @@ usage (void)
   fprintf(stderr," COMMAND\n\n");
   snmp_parse_args_descriptions(stderr);
   fprintf(stderr, "\nsnmpusm commands:\n");
-  fprintf(stderr, "  create    USER [CLONEFROM]\n");
+  fprintf(stderr, "  create    USER [CLONEFROM-USER]\n");
   fprintf(stderr, "  delete    USER\n");
-  fprintf(stderr, "  cloneFrom USER FROM\n");
-  fprintf(stderr, "  passwd    [-Co] [-Ca] [-Cx] old_passphrase new_passphrase\n");
-  fprintf(stderr, "\t\t-Co\t\tUse the ownKeyChange objects.\n");
-  fprintf(stderr, "\t\t-Cx\t\tChange the privacy key.\n");
-  fprintf(stderr, "\t\t-Ca\t\tChange the authentication key.\n");
+  fprintf(stderr, "  cloneFrom USER CLONEFROM-FROM\n");
+  fprintf(stderr, "  passwd    [-Co] [-Ca] [-Cx] OLD-PASSPHRASE NEW-PASSPHRASE\n");
+  fprintf(stderr, "  -C <PWOPTS>\tpasswd specific options\n");
+  fprintf(stderr, "\t\t  PWOPTS values:\n");
+  fprintf(stderr, "\t\t      a: Change the authentication key.\n");
+  fprintf(stderr, "\t\t      o: Use the ownKeyChange objects.\n");
+  fprintf(stderr, "\t\t      x: Change the privacy key.\n");
 }
 
 /* setup_oid appends to the oid the index for the engineid/user */
@@ -128,8 +130,6 @@ void
 setup_oid(oid *it, size_t *len, u_char *id, size_t idlen, const char *user)
 {
   int i;
-  char c_oid[SPRINT_MAX_LEN];
-
   int itIndex = 12;
 
   *len = itIndex + 1 + idlen + 1 + strlen(user);
@@ -141,9 +141,6 @@ setup_oid(oid *it, size_t *len, u_char *id, size_t idlen, const char *user)
   it[itIndex++] = strlen(user);
   for(i=0; i < (int)strlen(user); i++)
     it[itIndex++] = user[i];
-
-  sprint_objid(c_oid, it, *len);
-  /* fprintf(stdout, "setup_oid : %s\n", c_oid); */
 }
 
 static void optProc(int argc, char *const *argv, int opt)
@@ -167,8 +164,7 @@ static void optProc(int argc, char *const *argv, int opt)
 
                     default:
                         fprintf(stderr,
-                                "Unknown flag passed to -C: %c\n", *optarg);
-                        usage();
+                                "Unknown flag passed to -C: %c\n", optarg[-1]);
                         exit(1);
                 }
             }

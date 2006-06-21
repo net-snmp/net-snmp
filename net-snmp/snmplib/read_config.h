@@ -48,6 +48,7 @@ char *skip_white (char *);
 char *skip_not_white (char *);
 char *skip_token(char *);
 char *copy_word (char *, char *);
+char *copy_nword (char *, char *, int);
 void read_config_with_type (const char *, const char *);
 struct config_line *register_config_handler (const char *, const char *,
                                              void (*parser)(const char *, char *),
@@ -80,6 +81,11 @@ void  read_app_config_store(const char *line);
 void  snmp_save_persistent(const char *type);
 void  snmp_clean_persistent(const char *type);
 struct config_line *read_config_get_handlers(const char *type);
+
+void set_configuration_directory(const char *dir);
+const char *get_configuration_directory(void);
+void set_persistent_directory(const char *dir);
+const char *get_persistent_directory(void);
 
 #ifdef __cplusplus
 }

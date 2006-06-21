@@ -1,5 +1,5 @@
 # Microsoft Developer Studio Project File - Name="libucdmibs" - Package Owner=<4>
-# Microsoft Developer Studio Generated Build File, Format Version 5.00
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
@@ -22,9 +22,11 @@ CFG=libucdmibs - Win32 Debug
 !MESSAGE 
 
 # Begin Project
+# PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
+RSC=rc.exe
 
 !IF  "$(CFG)" == "libucdmibs - Win32 Release"
 
@@ -38,11 +40,10 @@ CPP=cl.exe
 # PROP Output_Dir "../lib"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
-RSC=rc.exe
-# ADD BASE RSC /l 0x409
-# ADD RSC /l 0x409
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\agent" /I "..\..\snmplib" /I "..\..\agent\mibgroup" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD BASE RSC /l 0x409
+# ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -62,11 +63,10 @@ LIB32=link.exe -lib
 # PROP Output_Dir "../lib"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-RSC=rc.exe
-# ADD BASE RSC /l 0x409
-# ADD RSC /l 0x409
 # ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /GX /Od /I "." /I ".." /I "..\..\agent" /I "..\..\snmplib" /I "..\..\agent\mibgroup" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /ZI /c
+# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /I "." /I ".." /I "..\..\agent" /I "..\..\snmplib" /I "..\..\agent\mibgroup" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD BASE RSC /l 0x409
+# ADD RSC /l 0xffffffff
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -85,11 +85,31 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\mibII\snmp_mib.c
+SOURCE=..\..\agent\mibgroup\mibII\at.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\mibII\system_mib.c
+SOURCE=..\..\agent\mibgroup\mibII\icmp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\interfaces.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\ip.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\ipAddr.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\route_write.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\snmp_mib.c
 # End Source File
 # Begin Source File
 
@@ -97,10 +117,36 @@ SOURCE=..\..\agent\mibgroup\mibII\sysORTable.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\mibII\system_mib.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\tcp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\tcpTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\udp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\udpTable.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\mibII\vacm_vars.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\var_route.c
 # End Source File
 # End Group
 # Begin Group "examples"
+
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\examples\example.c
@@ -116,6 +162,10 @@ SOURCE=..\..\agent\mibgroup\examples\ucdDemoPublic.c
 # Begin Source File
 
 SOURCE="..\..\agent\mibgroup\ucd-snmp\disk.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\agent\mibgroup\ucd-snmp\dlmod.c"
 # End Source File
 # Begin Source File
 
@@ -139,7 +189,15 @@ SOURCE="..\..\agent\mibgroup\ucd-snmp\pass.c"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\agent\mibgroup\ucd-snmp\pass_persist.c"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\agent\mibgroup\ucd-snmp\proc.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\agent\mibgroup\ucd-snmp\proxy.c"
 # End Source File
 # Begin Source File
 
@@ -170,6 +228,22 @@ SOURCE=..\..\agent\mibgroup\snmpv3\usmStats.c
 SOURCE=..\..\agent\mibgroup\snmpv3\usmUser.c
 # End Source File
 # End Group
+# Begin Group "notification"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\notification\snmpNotifyFilterProfileTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\notification\snmpNotifyFilterTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\notification\snmpNotifyTable.c
+# End Source File
+# End Group
 # Begin Group "target"
 
 # PROP Default_Filter ""
@@ -181,7 +255,43 @@ SOURCE=..\..\agent\mibgroup\target\snmpTargetAddrEntry.c
 
 SOURCE=..\..\agent\mibgroup\target\snmpTargetParamsEntry.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\target\target.c
+# End Source File
 # End Group
+# Begin Group "agentx"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\client.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\master.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\master_admin.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\master_request.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\protocol.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\subagent.c
+# End Source File
+# End Group
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\header_complex.c
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mib_modules.c

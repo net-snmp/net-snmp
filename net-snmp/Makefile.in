@@ -19,7 +19,7 @@ CPP		= @CPP@ 						\
 
 CPP = @CPP@ -I$(srcdir)/agent/mibgroup -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
 
-INSTALLHEADERS=ucd-snmp-config.h $(srcdir)/version.h
+INSTALLHEADERS=ucd-snmp-config.h $(srcdir)/version.h mib_module_config.h
 
 all:	sedscript EXAMPLE.conf ucd-snmp-config.h subdirs
 
@@ -94,7 +94,7 @@ clean:
 distclean: clean configclean
 
 configclean:
-	rm -f config.cache config.status config.log config.h
+	rm -f config.cache config.status config.log config.h libtool
 	rm -f Makefile snmplib/Makefile				\
 		agent/Makefile agent/mibgroup/Makefile		\
 		apps/Makefile  apps/snmpnetstat/Makefile	\
@@ -119,7 +119,7 @@ $(srcdir)/configure: configure.in aclocal.m4
 #
 $(srcdir)/config.h.in: stamp-h.in
 $(srcdir)/stamp-h.in: configure.in acconfig.h
-	cd ${srcdir} && $(AUTOHEADER)
+	cd ${srcdir} && LC_COLLATE=C $(AUTOHEADER)
 	echo timestamp > ${srcdir}/stamp-h.in
 
 config.h: stamp-h

@@ -57,9 +57,9 @@ extern FindVarMethod var_snmpTargetParamsEntry;
 void snmpd_parse_config_targetParams(const char *, char *);
 
 WriteMethod write_snmpTargetParamsMPModel;
-WriteMethod write_snmpTargetParamsSecurityModel;
-WriteMethod write_snmpTargetParamsSecurityName;
-WriteMethod write_snmpTargetParamsSecurityLevel;
+WriteMethod write_snmpTargetParamsSecModel;
+WriteMethod write_snmpTargetParamsSecName;
+WriteMethod write_snmpTargetParamsSecLevel;
 WriteMethod write_snmpTargetParamsStorageType;
 WriteMethod write_snmpTargetParamsRowStatus;
 

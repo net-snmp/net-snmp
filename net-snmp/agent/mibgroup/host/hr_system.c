@@ -4,6 +4,11 @@
  */
 
 #include <config.h>
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include "mibincl.h"
 #include "host.h"
@@ -17,10 +22,28 @@
 #include <sys/param.h>
 #include "sys/proc.h"
 #endif
+#if HAVE_UTMPX_H
+#include <utmpx.h>
+#else
 #include <utmp.h>
+#endif
 
-#if defined(LINUX) && __GNU_LIBRARY__ < 6
-#include "linux/tasks.h"
+#ifdef linux
+#ifdef HAVE_LINUX_TASKS_H
+#include <linux/tasks.h>
+#else
+/*  If this file doesn't exist, then there is no hard limit on the number
+    of processes, so return 0 for hrSystemMaxProcesses.  */
+#define NR_TASKS	0
+#endif
+#endif
+
+#ifdef solaris2
+#include <sys/var.h>
+#endif
+
+#if defined(hpux10) || defined(hpux11)
+#include <sys/pstat.h>
 #endif
 
 #ifdef HAVE_SYS_SYSCTL_H
@@ -31,7 +54,7 @@
 #define UTMP_FILE _PATH_UTMP
 #endif
 
-#ifdef UTMP_FILE
+#if defined(UTMP_FILE) && !HAVE_UTMPX_H
 void setutent (void);
 void endutent (void);
 struct utmp *getutent (void);
@@ -142,15 +165,21 @@ var_hrsys(struct variable *vp,
 {
     static char string[100];
     time_t	now;
+#if !defined(NR_TASKS) && !defined(solaris2) && !defined(hpux10) && !defined(hpux11)
+    int		nproc = 0;
+#endif
 #ifdef linux
     FILE       *fp;
 #endif
-#if (defined(NPROC_SYMBOL) && !defined(NR_TASKS)) || defined(bsdi2)
-    int		nproc = 0;
-#endif
-#ifdef bsdi2
+#if CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
     static int maxproc_mib[] = { CTL_KERN, KERN_MAXPROC };
     int buf_size;
+#endif
+#ifdef solaris2
+    struct var v;
+#endif
+#if defined(hpux10) || defined(hpux11)
+    struct pst_static pst_buf;
 #endif
 
     if (header_hrsys(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
@@ -193,16 +222,20 @@ var_hrsys(struct variable *vp,
 #endif
 	    return (u_char *)&long_return;
 	case HRSYS_MAXPROCS:
-#ifdef NR_TASKS
+#if defined(NR_TASKS)
 	    long_return = NR_TASKS;	/* <linux/tasks.h> */
-#else
-#ifdef bsdi2
+#elif CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
 	    buf_size = sizeof(nproc);
 	    if (sysctl(maxproc_mib, 2, &nproc, &buf_size, NULL, 0) < 0)
 		    return NULL;
 	    long_return = nproc;
-#endif
-#ifdef NPROC_SYMBOL
+#elif defined(hpux10) || defined(hpux11)
+	    pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0);
+	    long_return = pst_buf.max_proc;
+#elif defined(solaris2)
+	    getKstatRaw("unix", "var", sizeof v, &v);
+	    long_return = v.v_proc;
+#elif defined(NPROC_SYMBOL)
 	    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof (int));
 	    long_return = nproc;
 #else
@@ -210,7 +243,6 @@ var_hrsys(struct variable *vp,
 	    return NULL;
 #endif
 	    long_return = 0;
-#endif
 #endif
 	    return (u_char *)&long_return;
 	default:
@@ -238,7 +270,14 @@ static int get_load_dev(void)
 static int count_users(void)
 {
      int total=0;
+#if HAVE_UTMPX_H
+#define setutent setutxent
+#define getutent getutxent
+#define endutent endutxent
+     struct utmpx *utmp_p;
+#else
      struct utmp *utmp_p;
+#endif
 
      setutent();
      while ( (utmp_p = getutent()) != NULL ) {
@@ -251,7 +290,7 @@ static int count_users(void)
      return total;
 }
 
-#ifdef UTMP_FILE
+#if defined(UTMP_FILE) && !HAVE_UTMPX_H
 
 static FILE *utmp_file;
 static struct utmp utmp_rec;

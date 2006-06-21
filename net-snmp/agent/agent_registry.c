@@ -35,6 +35,9 @@
 #  include <time.h>
 # endif
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -277,8 +280,10 @@ load_subtree( struct subtree *new_sub )
 	    		new2 = split_subtree( new_sub,
 					tree1->end, tree1->end_len);
 			res = load_subtree( new_sub );
-			if ( res != MIB_REGISTERED_OK )
+			if ( res != MIB_REGISTERED_OK ) {
+			    free_subtree(new2);
 			    return res;
+			}
 			return load_subtree( new2 );
 
 	 }
@@ -358,11 +363,13 @@ register_mib_context(const char *moduleName,
 	if ( res != MIB_REGISTERED_OK ) {
 	    unregister_mib_context( mibloc, mibloclen, priority,
 				  range_subid, range_ubound, context);
-	    return MIB_REGISTRATION_FAILED;
+	    return res;
 	}
     }
+  } else if (res == MIB_DUPLICATE_REGISTRATION ||
+	     res == MIB_REGISTRATION_FAILED) {
+      free_subtree(subtree);
   }
-
 
   reg_parms.name = mibloc;
   reg_parms.namelen = mibloclen;
@@ -370,6 +377,10 @@ register_mib_context(const char *moduleName,
   reg_parms.range_subid  = range_subid;
   reg_parms.range_ubound = range_ubound;
   reg_parms.timeout = timeout;
+
+  /*  Should this really be called if the registration hasn't actually 
+      succeeded?  */
+
   snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REGISTER_OID,
                       &reg_parms);
 
@@ -778,8 +789,10 @@ void dump_registry( void )
     char end_oid[SPRINT_MAX_LEN];
 
     for( myptr = subtrees ; myptr != NULL; myptr = myptr->next) {
-	sprint_objid(start_oid, myptr->start, myptr->start_len);
-	sprint_objid(end_oid, myptr->end, myptr->end_len);
+	snprint_objid(start_oid, sizeof(start_oid),
+                     myptr->start, myptr->start_len);
+	snprint_objid(end_oid, sizeof(end_oid),
+                     myptr->end, myptr->end_len);
 	printf("%c %s - %s %c\n",
 		( myptr->variables ? ' ' : '(' ),
 		  start_oid, end_oid,
@@ -854,6 +867,7 @@ int unregister_readfd(int fd) {
 	    external_readfdlen--;
 	    for (j = i; j < external_readfdlen; j++) {
 		external_readfd[j] = external_readfd[j+1];
+                external_readfdfunc[j] = external_readfdfunc[j+1];
 		external_readfd_data[j] = external_readfd_data[j+1];
 	    }
 	    DEBUGMSGTL(("unregister_readfd", "unregistered fd %d\n", fd));
@@ -871,6 +885,7 @@ int unregister_writefd(int fd) {
 	    external_writefdlen--;
 	    for (j = i; j < external_writefdlen; j++) {
 		external_writefd[j] = external_writefd[j+1];
+                external_writefdfunc[j] = external_writefdfunc[j+1];
 		external_writefd_data[j] = external_writefd_data[j+1];
 	    }
 	    DEBUGMSGTL(("unregister_writefd", "unregistered fd %d\n", fd));
@@ -888,6 +903,7 @@ int unregister_exceptfd(int fd) {
 	    external_exceptfdlen--;
 	    for (j = i; j < external_exceptfdlen; j++) {
 		external_exceptfd[j] = external_exceptfd[j+1];
+                external_exceptfdfunc[j] = external_exceptfdfunc[j+1];
 		external_exceptfd_data[j] = external_exceptfd_data[j+1];
 	    }
 	    DEBUGMSGTL(("unregister_exceptfd", "unregistered fd %d\n", fd));
@@ -907,7 +923,7 @@ void (* external_signal_handler[NUM_EXTERNAL_SIGS])(int);
  *       below for every single that might be handled by register_signal().
  */
 
-void agent_SIGCHLD_handler(int sig)
+RETSIGTYPE agent_SIGCHLD_handler(int sig)
 {
   external_signal_scheduled[SIGCHLD]++;
 #ifndef HAVE_SIGACTION
@@ -915,7 +931,7 @@ void agent_SIGCHLD_handler(int sig)
    * a signal handler is reset once it gets called. Ensure that it
    * remains active.
    */
-  signal(SIGCHLD, (void *)agent_SIGCHLD_handler);
+  signal(SIGCHLD, agent_SIGCHLD_handler);
 #endif
 }
 

@@ -5,9 +5,15 @@
  */
 
 #include <config.h>
-#include "mibincl.h"
 
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -26,7 +32,15 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
@@ -42,7 +56,9 @@
 #if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
+#if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
@@ -62,9 +78,6 @@
 #endif
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
-#endif
-#if HAVE_STRING_H
-#include <string.h>
 #endif
 #ifdef solaris2
 #include "kernel_sunos5.h"
@@ -87,7 +100,9 @@
 #undef TCP_NODELAY
 #undef TCP_MAXSEG
 #endif
+#if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
+#endif
 #if HAVE_NETINET_TCPIP_H
 #include <netinet/tcpip.h>
 #endif
@@ -109,11 +124,17 @@
 #endif
 
 #include "auto_nlist.h"
+#include "mibincl.h"
 
 #ifdef hpux
 #include <sys/mib.h>
 #include <netinet/mib_kern.h>
 #endif /* hpux */
+
+#ifdef cygwin
+#define WIN32
+#include <windows.h>
+#endif
 
 #include "tcp.h"
 #include "tcpTable.h"
@@ -138,7 +159,7 @@
 	 *  System specific implementation functions
 	 *
 	 *********************/
-
+#ifndef WIN32
 #ifndef solaris2
 
 u_char *
@@ -152,14 +173,19 @@ var_tcpEntry(struct variable *vp,
     int i;
     oid newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
     u_char *cp;
+#ifdef hpux11
+    int LowState;
+    static mib_tcpConnEnt tcp, Lowtcp;
+#else
     int State, LowState;
     static struct inpcb inpcb, Lowinpcb;
+#endif
     
     /*
      *	Allow for a kernel w/o TCP
      */
 #ifdef TCPSTAT_SYMBOL
-#ifndef linux
+#if !defined(linux) && !defined(hpux11)
     if (auto_nlist_value(TCPSTAT_SYMBOL) == -1) return(NULL);
 #endif
 #endif
@@ -168,35 +194,59 @@ var_tcpEntry(struct variable *vp,
 	lowest[0] = 9999;
 
 	/* find "next" connection */
+#ifndef hpux11
 Again:
+#endif
 LowState = -1;	    /* Don't have one yet */
 	TCP_Scan_Init();
 	for (;;) {
+#ifdef hpux11
+	    if ((i = TCP_Scan_Next(&tcp)) == 0) break;  /* Done */
+	    cp = (u_char *)&tcp.LocalAddress;
+#else	/* hpux11 */
 	    if ((i = TCP_Scan_Next(&State, &inpcb)) < 0) goto Again;
 	    if (i == 0) break;	    /* Done */
 	    cp = (u_char *)&inpcb.inp_laddr.s_addr;
+#endif	/* hpux11 */
 	    op = newname + 10;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    
+#ifdef hpux11
+	    newname[14] = (unsigned short)tcp.LocalPort;
+#else
 	    newname[14] = ntohs(inpcb.inp_lport);
+#endif
 
+#ifdef hpux11
+	    cp = (u_char *)&tcp.RemAddress;
+#else
 	    cp = (u_char *)&inpcb.inp_faddr.s_addr;
+#endif
 	    op = newname + 15;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    
+#ifdef hpux11
+            newname[19] = (unsigned short)tcp.RemPort;
+#else
 	    newname[19] = ntohs(inpcb.inp_fport);
+#endif
 
 	    if (exact){
 		if (snmp_oid_compare(newname, 20, name, *length) == 0){
 		    memcpy( (char *)lowest,(char *)newname, 20 * sizeof(oid));
+#ifdef hpux11
+		    LowState = tcp.State;
+		    Lowtcp = tcp;
+#else	/* hpux11 */
 		    LowState = State;
 		    Lowinpcb = inpcb;
+#endif	/* hpux11 */
 		    break;  /* no need to search further */
 		}
 	    } else {
@@ -207,8 +257,13 @@ LowState = -1;	    /* Don't have one yet */
 		     * previous lowest, save this one as the "next" one.
 		     */
 		    memcpy( (char *)lowest,(char *)newname, 20 * sizeof(oid));
+#ifdef hpux11
+		    LowState = tcp.State;
+		    Lowtcp = tcp;
+#else	/* hpux11 */
 		    LowState = State;
 		    Lowinpcb = inpcb;
+#endif	/* hpux11 */
 		}
 	    }
 	}
@@ -219,22 +274,43 @@ LowState = -1;	    /* Don't have one yet */
 	*var_len = sizeof(long);
 	switch (vp->magic) {
 	    case TCPCONNSTATE: {
+#ifdef hpux11
+		long_return = LowState;
+		return (u_char *) &long_return;
+#else	/* hpux11 */
 #ifndef hpux
 		static int StateMap[]={1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11};
 #else
               static int StateMap[]={1, 2, 3, -1, 4, 5, 8, 6, 10, 9, 7, 11};
 #endif
 		return (u_char *) &StateMap[LowState];
+#endif	/* hpux11 */
 	    }
 	    case TCPCONNLOCALADDRESS:
+#ifdef hpux11
+		return (u_char *) &Lowtcp.LocalAddress;
+#else
 		return (u_char *) &Lowinpcb.inp_laddr.s_addr;
+#endif
 	    case TCPCONNLOCALPORT:
+#ifdef hpux11
+		long_return = (unsigned short)Lowtcp.LocalPort;
+#else
 		long_return = ntohs(Lowinpcb.inp_lport);
+#endif
 		return (u_char *) &long_return;
 	    case TCPCONNREMADDRESS:
+#ifdef hpux11
+		return (u_char *) &Lowtcp.RemAddress;
+#else
 		return (u_char *) &Lowinpcb.inp_faddr.s_addr;
+#endif
 	    case TCPCONNREMPORT:
+#ifdef hpux11
+		long_return = (unsigned short)Lowtcp.RemPort;
+#else
 		long_return = ntohs(Lowinpcb.inp_fport);
+#endif
 		return (u_char *) &long_return;
 	}
     return NULL;
@@ -351,7 +427,7 @@ var_tcpEntry(struct variable *vp,
 
 
 #ifndef solaris2
-#ifndef linux
+#if !defined(linux) && !defined(hpux11)
 /*
  *	Print INTERNET connections
  */
@@ -418,14 +494,19 @@ Again:	/*
 	}
 	return(Established);
 }
-#endif
+#endif	/* !linux && !hpux11 */
 
+#ifdef hpux11
+static int tcptab_size, tcptab_current;
+static mib_tcpConnEnt *tcp = (mib_tcpConnEnt *)0;
+#else
 static struct inpcb tcp_inpcb, *tcp_prev;
 #ifdef PCB_TABLE
 static struct inpcb *tcp_next, *tcp_head;
 #endif
 #ifdef linux
 static struct inpcb *inpcb_list;
+#endif
 #endif
 
 #if defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)
@@ -435,6 +516,43 @@ static struct xinpgen *xig = NULL;
 
 void TCP_Scan_Init (void)
 {
+#ifdef hpux11
+
+    int fd;
+    struct nmparms p;
+    int val;
+    unsigned int ulen;
+    int ret;
+
+    if (tcp) free(tcp);
+    tcp = (mib_tcpConnEnt *)0;
+    tcptab_size = 0;
+
+    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) >= 0) {
+	p.objid = ID_tcpConnNumEnt;
+	p.buffer = (void *)&val;
+	ulen = sizeof(int);
+	p.len = &ulen;
+	if ((ret = get_mib_info(fd, &p)) == 0)
+	    tcptab_size = val;
+
+	if (tcptab_size > 0) {
+	    ulen = (unsigned)tcptab_size * sizeof(mib_tcpConnEnt);
+	    tcp = (mib_tcpConnEnt *)malloc(ulen);
+	    p.objid = ID_tcpConnTable;
+	    p.buffer = (void *)tcp;
+	    p.len = &ulen;
+	    if ((ret = get_mib_info(fd, &p)) < 0)
+		tcptab_size = 0;
+	}
+
+	close_mib(fd);
+    }
+
+    tcptab_current = 0;
+
+#else /* hpux11 */
+
 #if !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST)
 #ifdef PCB_TABLE
     struct inpcbtable table;
@@ -551,8 +669,25 @@ void TCP_Scan_Init (void)
 	return;
     }
 #endif /*  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST) */
+#endif	/* hpux11 */
 }
 
+#ifdef hpux11
+int TCP_Scan_Next(mib_tcpConnEnt *RetTcp)
+{
+    if (tcptab_current < tcptab_size) {
+	/* copy values */
+	*RetTcp = tcp[tcptab_current];
+	/* increment to point to next entry */
+	tcptab_current++;
+	/* return success */
+	return (1);
+    }
+
+    /* return done */
+    return (0);
+}
+#else	/* hpux11 */
 int TCP_Scan_Next(int *State,
 		  struct inpcb *RetInPcb)
 {
@@ -613,4 +748,177 @@ int TCP_Scan_Next(int *State,
 #endif /*  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST) */
 	return(1);	/* "OK" */
 }
+#endif	/* hpux11 */
 #endif /* solaris2 */
+
+#else /* WIN32 */
+#include <iphlpapi.h>
+WriteMethod writeTcpEntry;
+MIB_TCPROW tcp_row;
+u_char *
+var_tcpEntry(struct variable *vp,
+	     oid *name,
+	     size_t *length,
+	     int exact,
+	     size_t *var_len,
+	     WriteMethod **write_method)
+{
+    oid newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
+    u_char *cp;
+    int LowState = -1;
+    static PMIB_TCPTABLE pTcpTable = NULL;
+    DWORD status = NO_ERROR;
+    DWORD dwActualSize = 0;
+    UINT i;
+    struct timeval now;
+    static long Time_Of_Last_Reload = 0;
+
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));    
+
+    /*
+     * save some cpu-cycles, and reload after 5 secs...
+     */
+    gettimeofday (&now, (struct timezone *) 0);
+    if ((Time_Of_Last_Reload + 5 <= now.tv_sec) || (pTcpTable == NULL) )
+    {
+        if(pTcpTable != NULL)
+            free(pTcpTable);
+        Time_Of_Last_Reload = now.tv_sec;
+        /* query for buffer size needed */
+        status = GetTcpTable(pTcpTable, &dwActualSize, TRUE);
+        if (status == ERROR_INSUFFICIENT_BUFFER)
+        {
+            pTcpTable = (PMIB_TCPTABLE) malloc(dwActualSize);
+            if(pTcpTable != NULL){  
+                /* Get the sorted TCP table */
+                status = GetTcpTable(pTcpTable, &dwActualSize, TRUE);
+            }
+        }
+    }
+   
+    if(status == NO_ERROR)
+    {
+        for (i = 0; i < pTcpTable->dwNumEntries; ++i)
+        {
+	   
+            cp = (u_char *)&pTcpTable->table[i].dwLocalAddr;
+            op = newname + 10;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            *op++ = *cp++;
+    
+            newname[14] = ntohs((unsigned short)(0x0000FFFF & pTcpTable->table[i].dwLocalPort));
+
+            cp = (u_char *)&pTcpTable->table[i].dwRemoteAddr;
+            op = newname + 15;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            *op++ = *cp++;
+        
+            newname[19] = ntohs((unsigned short)(0x0000FFFF & pTcpTable->table[i].dwRemotePort));
+
+            if (exact){
+                if (snmp_oid_compare(newname, 20, name, *length) == 0){
+                    memcpy( (char *)lowest,(char *)newname, 20 * sizeof(oid));
+                    LowState = i;
+                    break;  /* no need to search further */
+                }
+            } else {
+                if (snmp_oid_compare(newname, 20, name, *length) > 0)
+                 {
+                    memcpy( (char *)lowest,(char *)newname, 20 * sizeof(oid));
+                    LowState = i;
+                    break; /* As the table is sorted, no need to search further */
+                }
+            }
+        }
+    }
+    if ((LowState < 0) || (status != NO_ERROR))
+      return(NULL);
+    memcpy( (char *)name,(char *)lowest, (vp->namelen + 10) * sizeof(oid));
+    *length = vp->namelen + 10;
+    *write_method = 0;
+    *var_len = sizeof(long);
+    switch (vp->magic) {
+        case TCPCONNSTATE:
+            *write_method = writeTcpEntry;
+            tcp_row = pTcpTable->table[i];
+             return (u_char *) &pTcpTable->table[i].dwState;
+
+        case TCPCONNLOCALADDRESS:
+            return (u_char *) &pTcpTable->table[i].dwLocalAddr;
+        case TCPCONNLOCALPORT:
+            long_return = ntohs((unsigned short)(0x0000FFFF & pTcpTable->table[i].dwLocalPort));
+            return (u_char *) &long_return;
+        case TCPCONNREMADDRESS:
+            return (u_char *) &pTcpTable->table[i].dwRemoteAddr;
+        case TCPCONNREMPORT:
+            long_return = ntohs((unsigned short)(0x0000FFFF & pTcpTable->table[i].dwRemotePort));
+            return (u_char *) &long_return;
+        default:
+            DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_tcpEntry\n", vp->magic));
+    }
+    return NULL;
+}
+
+int
+writeTcpEntry(int action,	     
+	    u_char *var_val,
+	    u_char var_val_type,
+	    size_t var_val_len,
+	    u_char *statP,
+	    oid *name,
+	    size_t name_len)
+{
+   static int oldbuf;
+   DWORD status = NO_ERROR;
+   /* Only tcpConnState is writable */
+   if((char)name[9] != 1)
+     return SNMP_ERR_NOTWRITABLE;
+
+    switch ( action ) {
+	case RESERVE1:		/* Check values for acceptability */
+	    if (var_val_type != ASN_INTEGER){
+                snmp_log(LOG_ERR, "not integer\n");
+		     return SNMP_ERR_WRONGTYPE;
+	    }
+	    if (var_val_len > sizeof(int)){
+                snmp_log(LOG_ERR, "bad length\n");
+		     return SNMP_ERR_WRONGLENGTH;
+	    }	      
+      if((int)(*var_val) != MIB_TCP_STATE_DELETE_TCB){
+        snmp_log(LOG_ERR, "not supported admin state\n");
+		    return SNMP_ERR_WRONGVALUE;
+		}
+	    break;
+
+	case RESERVE2:		/* Allocate memory and similar resources */
+		/* Using static strings, so nothing needs to be done */
+    
+	    break;
+
+	case ACTION:		
+    /* Save the old value, in case of UNDO */    
+      oldbuf   = tcp_row.dwState;
+      tcp_row.dwState = (int)*var_val;
+	    break;
+
+	case UNDO:		/* Reverse the SET action and free resources */
+   	  tcp_row.dwState = oldbuf;
+	    break;
+
+	case COMMIT:		/* Confirm the SET, performing any irreversible actions,
+					and free resources */    
+    if((status = SetTcpEntry(&tcp_row)) != NO_ERROR){
+            snmp_log(LOG_ERR,  "Error while trying to write connState %d, status = %d \n", 
+                               tcp_row.dwState, status);
+            return SNMP_ERR_COMMITFAILED;
+    }    
+	case FREE:		/* Free any resources allocated */    
+	    break;
+    }
+    return SNMP_ERR_NOERROR;
+} /* end of writeTcpEntry */
+#endif /* WIN32 */

@@ -1,37 +1,27 @@
 #
-# Copyright (c) 1987 Regents of the University of California.
-# All rights reserved.
+# snmpnetstat Makefile
 #
-# Redistribution and use in source and binary forms are permitted
-# provided that the above copyright notice and this paragraph are
-# duplicated in all such forms and that any documentation,
-# advertising materials, and other materials related to such
-# distribution and use acknowledge that the software was developed
-# by the University of California, Berkeley.  The name of the
-# University may not be used to endorse or promote products derived
-# from this software without specific prior written permission.
-# THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
-# IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
-# WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#	@(#)Makefile	5.10 (Berkeley) 9/20/88
-#
+
 top_builddir=../..
-SRCS=	inet.c inet6.c if.c main.c route.c winstub.c
-OBJS=	inet.o inet6.o if.o main.o route.o winstub.o
-LOBJS=	inet.lo inet6.lo if.lo main.lo route.lo winstub.lo
-TARG= snmpnetstat$(EXEEXT)
+SRCS=	inet.c inet6.c if.c main.c route.c winstub.c ffs.c iquery.c strlcpy.c
+OBJS=	inet.o inet6.o if.o main.o route.o winstub.o ffs.o iquery.o strlcpy.o
+LOBJS=	inet.lo inet6.lo if.lo main.lo route.lo winstub.lo ffs.lo iquery.lo strlcpy.lo
+TARG= snmpnetstat53$(EXEEXT)
+INSTALLBINPROGS=$(TARG)
+INSTALLBINSCRIPTS=$(srcdir)/snmpnetstat$(EXEEXT)
 
 CPPFLAGS=-I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib @CPPFLAGS@
 
 #LOCAL_LIBS = -L../../snmplib
 LOCAL_LIBS =
 #LIBS=	 $(CC_RUNTIME_ARG) -lsnmp @LIBS@
+USELIBS= ../../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 LIBS=	 ../../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @LIBS@
 
 all: $(TARG)
 
-snmpnetstat$(EXEEXT): ${LOBJS} ${USELIBS}
+snmpnetstat53$(EXEEXT): ${LOBJS} ${USELIBS}
 	${LINK} -o $@ ${LOBJS} ${LOCAL_LIBS} ${LDFLAGS} ${LIBS}
 
 distclean: clean
@@ -69,25 +59,22 @@ makefileindepend: nosysdepend
 
 if.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
 if.lo: ../../m/generic.h  
-if.lo: ./../../snmplib/getopt.h 
 if.lo:  main.h ./../../snmplib/asn1.h
 if.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
 if.lo: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h
 if.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-if.lo: ../../snmplib/system.h 
-if.lo:  netstat.h
-inet.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
-inet.lo: ../../m/generic.h  
-inet.lo: ./../../snmplib/getopt.h  
-inet.lo:   main.h
-inet.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-inet.lo: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h
-inet.lo: ./../../snmplib/mib.h ./../../snmplib/snmp.h netstat.h
+if.lo: ../../snmplib/system.h netstat.h
 inet6.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
 inet6.lo: ../../m/generic.h
+inet.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
+inet.lo: ../../m/generic.h  
+inet.lo:  main.h ./../../snmplib/asn1.h
+inet.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
+inet.lo: ./../../snmplib/snmp_client.h ./../../snmplib/mib.h
+inet.lo: ./../../snmplib/snmp.h netstat.h
 main.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
 main.lo: ../../m/generic.h  
-main.lo: ./../../snmplib/getopt.h 
+main.lo:  ./../../snmplib/getopt.h
 main.lo:  ./../../snmplib/asn1.h
 main.lo: ./../../snmplib/mib.h ./../../snmplib/snmp.h
 main.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
@@ -96,7 +83,6 @@ main.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/system.h
 main.lo: ./../../snmplib/default_store.h netstat.h
 route.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
 route.lo: ../../m/generic.h  
-route.lo:  ./../../snmplib/getopt.h
 route.lo:  main.h ./../../snmplib/asn1.h
 route.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
 route.lo: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h

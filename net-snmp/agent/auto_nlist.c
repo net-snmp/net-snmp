@@ -1,6 +1,11 @@
 #include <config.h>
 
 #ifdef CAN_USE_NLIST
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -9,6 +14,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 #ifdef HAVE_NLIST_H
 #include <nlist.h>
 #endif
@@ -18,6 +26,12 @@
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
+#endif
+
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #endif
 
 #include "auto_nlist.h"
@@ -218,4 +232,9 @@ auto_nlist_print_tree(int indent,
   }
 }
 #endif
-#endif /* CAN_USE_NLIST */
+#else /* !CAN_USE_NLIST */
+int
+auto_nlist_noop(void) {
+    return 0;
+}
+#endif /* !CAN_USE_NLIST */

@@ -14,7 +14,23 @@
 # it returns.
 #
 
-use SNMP;
+# SNMP
+my $havesnmp = eval {require SNMP;};
+
+if (!$havesnmp) {
+    print "
+ERROR: You don't have the SNMP perl module installed.  Please obtain
+this by getting the latest source release of the ucd-snmp toolkit from
+http://www.net-snmp.org/download/ .  The perl module is contained in
+the perl/SNMP directory.  See the INSTALL file there for instructions.
+
+";
+    exit;
+}
+
+if ($havesnmp) {
+    eval { import SNMP; }
+}
 use FileHandle;
 
 #use strict 'vars';
@@ -40,11 +56,11 @@ sub usage {
 
 while($#ARGV >= 0) {
     $_ = shift;
-    $configfile = shift if (/-c/);
-    $debug = 1 if (/-d/);
-    $nostats = 1 if (/-s/);
-    usage && exit(1) if (/-h/);
-    $outputName = shift if (/-f/);
+    $configfile = shift if (/^-c/);
+    $debug = 1 if (/^-d/);
+    $nostats = 1 if (/^-s/);
+    usage && exit(1) if (/^-h/);
+    $outputName = shift if (/^-f/);
     $oid = $_ if (/^[^-]/);
 }
  
@@ -66,6 +82,11 @@ if (!defined($oid)) {
 }
 
 $mib = $SNMP::MIB{$oid};
+if ($mib->{'label'} eq "mib-2") {
+    print STDERR "Couldn\'t find mib node $oid\n";
+    print STDERR "(Note, this should be a MIB object, not a file)\n";
+    exit(1);
+}
 $_ = $commaoid = $fulloid = $mib->{'objectID'};
 if (!defined ($fulloid)) {
     print STDERR "Couldn\'t find mib reference: $oid\n";
@@ -167,7 +188,9 @@ close(DOTC);
 print "  depth: $depth\n";
 print "  Number of Lines Created:\n";
 system("wc -l $outputName.c $outputName.h");
-print "Done.\n";
+print "Done.\n\n";
+print "NOTE: the code that has been created for you is merely a starting template.\n";
+print "      You will have to modify it in order to make it work properly.\n";
 
 #============================================
 #

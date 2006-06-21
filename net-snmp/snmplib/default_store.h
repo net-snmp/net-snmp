@@ -41,6 +41,7 @@ extern "C" {
 #define DS_LIB_REVERSE_ENCODE      20 /* encode packets from back to front */
 #define DS_LIB_PRINT_BARE_VALUE	   21 /* just print value (not OID = value) */
 #define DS_LIB_EXTENDED_INDEX	   22 /* print extended index format [x1][x2] */
+#define DS_LIB_PRINT_HEX_TEXT      23 /* print ASCII text along with hex strings */
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
@@ -51,14 +52,16 @@ extern "C" {
                                       like #1 but supply mib module too == 2. */
 
 /* library strings */
-#define DS_LIB_SECNAME         0
-#define DS_LIB_CONTEXT         1
-#define DS_LIB_PASSPHRASE      2
-#define DS_LIB_AUTHPASSPHRASE  3
-#define DS_LIB_PRIVPASSPHRASE  4
-#define DS_LIB_OPTIONALCONFIG  5
-#define DS_LIB_APPTYPE         6
-#define DS_LIB_COMMUNITY       7
+#define DS_LIB_SECNAME           0
+#define DS_LIB_CONTEXT           1
+#define DS_LIB_PASSPHRASE        2
+#define DS_LIB_AUTHPASSPHRASE    3
+#define DS_LIB_PRIVPASSPHRASE    4
+#define DS_LIB_OPTIONALCONFIG    5
+#define DS_LIB_APPTYPE           6
+#define DS_LIB_COMMUNITY         7
+#define DS_LIB_PERSISTENT_DIR    8
+#define DS_LIB_CONFIGURATION_DIR 9
 
 /* end storage definitions */
 

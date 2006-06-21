@@ -16,6 +16,12 @@
 #endif
 #include <errno.h>
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "host_res.h"
 #include "hr_partition.h"
 #include "hr_filesys.h"
@@ -36,10 +42,9 @@ static int  HRP_savedDiskIndex;
 static int  HRP_savedPartIndex;
 static char HRP_savedName[100];
 
-extern int   HRD_index;
-extern int   HRD_type_index;
+static int  HRP_DiskIndex;
 
-void  Save_HR_Partition (int, int);
+static void  Save_HR_Partition (int, int);
 
 
 	/*********************
@@ -48,8 +53,8 @@ void  Save_HR_Partition (int, int);
 	 *
 	 *********************/
 
-void  Init_HR_Partition (void);
-int   Get_Next_HR_Partition (void);
+static void  Init_HR_Partition (void);
+static int   Get_Next_HR_Partition (void);
 int header_hrpartition (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
 
@@ -128,9 +133,9 @@ header_hrpartition(struct variable *vp,
 	( *length > HRPART_DISK_NAME_LENGTH )) {
         LowDiskIndex = (name[HRPART_DISK_NAME_LENGTH] & ((1<<HRDEV_TYPE_SHIFT)-1));
 
-	while ( HRD_index < LowDiskIndex ) {
+	while ( HRP_DiskIndex < LowDiskIndex ) {
             Init_HR_Partition();	/* moves to next disk */
-	    if ( HRD_index == -1 );
+	    if ( HRP_DiskIndex == -1 )
 		return(MATCH_FAILED);
 	}
     }
@@ -139,26 +144,26 @@ header_hrpartition(struct variable *vp,
         part_idx = Get_Next_HR_Partition();
         if ( part_idx == 0 )
 	    break;
-	newname[HRPART_DISK_NAME_LENGTH] = (HRDEV_DISK << HRDEV_TYPE_SHIFT) + HRD_index;
+	newname[HRPART_DISK_NAME_LENGTH] = (HRDEV_DISK << HRDEV_TYPE_SHIFT) + HRP_DiskIndex;
 	newname[HRPART_ENTRY_NAME_LENGTH] = part_idx;
         result = snmp_oid_compare(name, *length, newname, vp->namelen + 2);
         if (exact && (result == 0)) {
-	    Save_HR_Partition( HRD_index, part_idx );
-	    LowDiskIndex = HRD_index;
+	    Save_HR_Partition( HRP_DiskIndex, part_idx );
+	    LowDiskIndex = HRP_DiskIndex;
 	    LowPartIndex = part_idx;
             break;
 	}
 	if (!exact && (result < 0)) {
 	    if ( LowPartIndex == -1 ) {
-		Save_HR_Partition( HRD_index, part_idx );
-	        LowDiskIndex = HRD_index;
+		Save_HR_Partition( HRP_DiskIndex, part_idx );
+	        LowDiskIndex = HRP_DiskIndex;
 	        LowPartIndex = part_idx;
 	    }
-	    else if ( LowDiskIndex < HRD_index )
+	    else if ( LowDiskIndex < HRP_DiskIndex )
 		break;
 	    else if ( part_idx < LowPartIndex ) {
-		Save_HR_Partition( HRD_index, part_idx );
-	        LowDiskIndex = HRD_index;
+		Save_HR_Partition( HRP_DiskIndex, part_idx );
+	        LowDiskIndex = HRP_DiskIndex;
 	        LowPartIndex = part_idx;
 	    }
 #ifdef HRP_MONOTONICALLY_INCREASING
@@ -244,49 +249,45 @@ var_hrpartition(struct variable *vp,
 	 *********************/
 
 static int HRP_index;
-extern char *disk_device_strings[];
-extern char disk_device_id[];
-extern char disk_device_last[];
-extern char disk_device_full[];
-extern char disk_partition_first[];
-extern char disk_partition_last[];
 
-void
+static void
 Init_HR_Partition (void)
 {
-   (void)Get_Next_HR_Disk();
+   HRP_DiskIndex = Get_Next_HR_Disk();
+   if (HRP_DiskIndex != -1)
+       HRP_DiskIndex &= ((1 << HRDEV_TYPE_SHIFT) - 1);
 
    HRP_index = -1;
 }
 
-int
+static int
 Get_Next_HR_Partition (void)
 {
     char string[100];
-    int max_partitions;
     int fd;
 
-    if ( HRD_index == -1 )
+    if ( HRP_DiskIndex == -1 ) {
 	return 0;
+    }
 
     HRP_index++;
-    max_partitions = disk_partition_last[ HRD_type_index ]
-		   - disk_partition_first[ HRD_type_index ] +1;
-    while ( HRP_index < max_partitions ) {
-	sprintf(string, disk_device_strings[  HRD_type_index ],
-			disk_device_id[       HRD_type_index ] + HRD_index,
-			disk_partition_first[ HRD_type_index ] + HRP_index );
+    while ( Get_Next_HR_Disk_Partition( string, sizeof(string), HRP_index ) != -1 ) {
 	DEBUGMSGTL(("host/hr_partition",
-                    "Get_Next_HR_Partition: %s (%d/%d:%d)\n",
-                    string, HRD_type_index, HRD_index, HRP_index ));
+                    "Get_Next_HR_Partition: %s (:%d)\n",
+                    string, HRP_index ));
 
-	fd=open( string, O_RDONLY  );
+#ifdef O_NDELAY
+	fd=open( string, O_RDONLY|O_NDELAY);
+#else
+	fd=open( string, O_RDONLY);
+#endif
 	if (fd != -1 ) {
             close(fd);
             return HRP_index+1;
 	}
-	else if (errno == EBUSY)
+	else if (errno == EBUSY) {
 	    return HRP_index+1;
+	}
 	HRP_index++;
     }
 
@@ -297,13 +298,11 @@ Get_Next_HR_Partition (void)
     return( Get_Next_HR_Partition() );
 }
 
-void
+static void
 Save_HR_Partition(int disk_idx, 
 		  int part_idx)
 {
    HRP_savedDiskIndex = disk_idx;
    HRP_savedPartIndex = part_idx;
-   sprintf( HRP_savedName, disk_device_strings[  HRD_type_index ],
-			   disk_device_id[       HRD_type_index ] + HRD_index,
-			   disk_partition_first[ HRD_type_index ] + HRP_index );
+   (void) Get_Next_HR_Disk_Partition ( HRP_savedName, sizeof(HRP_savedName), HRP_index );
 }

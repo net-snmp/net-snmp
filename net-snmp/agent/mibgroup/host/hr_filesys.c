@@ -4,9 +4,17 @@
  */
 
 #include <config.h>
+
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "host_res.h"
 #include "hr_filesys.h"
 #include "hr_utils.h"
+#include "tools.h"
 
 #if HAVE_MNTENT_H
 #include <mntent.h>
@@ -38,7 +46,7 @@
 #include <stdlib.h>
 #endif
 
-#if defined(freebsd3) || defined(bsdi4)
+#if defined(bsdi4) || defined(freebsd3) || defined(freebsd4) || defined(freebsd5)
 #if HAVE_GETFSSTAT
 #if defined(MFSNAMELEN)
 #define MOUNT_NFS	"nfs"
@@ -85,6 +93,15 @@ struct mnttab *HRFS_entry = &HRFS_entry_struct;
 #define	HRFS_type	mnt_fstype
 #define	HRFS_statfs	statvfs
 
+#elif defined(HAVE_STATVFS) && defined(__NetBSD__)
+static struct statvfs	*fsstats = NULL;
+struct statvfs		*HRFS_entry;
+static int		fscount;
+#define HRFS_mount	f_mntonname
+#define	HRFS_name	f_mntfromname
+#define HRFS_statfs	statvfs
+#define	HRFS_type	f_fstypename
+
 #elif defined(HAVE_GETFSSTAT)
 static struct statfs *fsstats = 0;
 static int fscount;
@@ -97,6 +114,14 @@ struct statfs *HRFS_entry;
 #endif
 #define HRFS_mount	f_mntonname
 #define HRFS_name	f_mntfromname
+
+#elif defined(dynix)
+
+struct mntent *HRFS_entry;
+#define	HRFS_name	mnt_fsname
+#define	HRFS_mount	mnt_dir
+#define	HRFS_type	mnt_type
+#define	HRFS_statfs	statvfs
 
 #else
 
@@ -254,26 +279,23 @@ var_hrfilesys(struct variable *vp,
 	    long_return = fsys_idx;
 	    return (u_char *)&long_return;
 	case HRFSYS_MOUNT:
-	    sprintf(string, HRFS_entry->HRFS_mount);
+	    snprintf(string, sizeof(string), HRFS_entry->HRFS_mount);
+	    string[ sizeof(string)-1 ] = 0;
 	    *var_len = strlen(string);
 	    return (u_char *) string;
 	case HRFSYS_RMOUNT:
-#if HAVE_GETFSSTAT
-#if defined(MFSNAMELEN)
-	    if (!strcmp(HRFS_entry->HRFS_type, MOUNT_NFS))
-#else
-	    if (HRFS_entry->HRFS_type == MOUNT_NFS)
-#endif
-#else
-	    if (!strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS))
-#endif
-	        sprintf(string, HRFS_entry->HRFS_name);
-	    else
+	    if (Check_HR_FileSys_NFS()) {
+	        snprintf(string, sizeof(string), HRFS_entry->HRFS_name);
+	        string[ sizeof(string)-1 ] = 0;
+	    } else
 		string[0] = '\0';
 	    *var_len = strlen(string);
 	    return (u_char *) string;
 
 	case HRFSYS_TYPE:
+	    if (Check_HR_FileSys_NFS())
+	        fsys_type_id[fsys_type_len-1] = 14;
+            else {
 			/*
 			 * Not sufficient to identity the file
 			 *   type precisely, but it's a start.
@@ -367,24 +389,21 @@ var_hrfilesys(struct variable *vp,
 	    else if (!strcmp( mnt_type, MNTTYPE_NTFS))
 			fsys_type_id[fsys_type_len-1] = 9;
 #endif
-#ifdef MNTTYPE_EXT2FS
-	    else if (!strcmp( mnt_type, MNTTYPE_EXT2FS))
-			fsys_type_id[fsys_type_len-1] = 23;
-#endif
-#ifdef MNTTYPE_NTFS
-	    else if (!strcmp( mnt_type, MNTTYPE_NTFS))
-			fsys_type_id[fsys_type_len-1] = 9;
-#endif
 	    else
 			fsys_type_id[fsys_type_len-1] = 1;	/* Other */
 #endif /* HAVE_GETFSSTAT */
+            }
 
             *var_len = sizeof(fsys_type_id);
 	    return (u_char *)fsys_type_id;
 
 	case HRFSYS_ACCESS:
-#if HAVE_GETFSSTAT
+#if defined(HAVE_STATVFS) && defined(__NetBSD__)
+	    long_return = HRFS_entry->f_flag  & MNT_RDONLY ? 2 : 1;
+#elif defined(HAVE_GETFSSTAT)
 	    long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
+#elif defined(cygwin)
+	    long_return = 1;
 #else
 	    if ( hasmntopt( HRFS_entry, "ro" ) != NULL )
 	        long_return = 2;	/* Read Only */
@@ -435,7 +454,7 @@ Init_HR_FileSys (void)
       free((char *)fsstats);
     fsstats = NULL;
     fsstats = malloc(fscount*sizeof(*fsstats));
-    HRFS_index = getfsstat(fsstats, fscount*sizeof(*fsstats), MNT_NOWAIT);
+    getfsstat(fsstats, fscount*sizeof(*fsstats), MNT_NOWAIT);
     HRFS_index = 0;
 #else
    HRFS_index = 1;
@@ -455,7 +474,17 @@ const char *HRFS_ignores[] = {
 #ifdef MNTTYPE_PROC
 	MNTTYPE_PROC,
 #endif
+#ifdef MNTTYPE_AUTOFS
+	MNTTYPE_AUTOFS,
+#endif
 	"autofs",
+#ifdef linux
+	"devpts",
+	"shm",
+#endif
+#ifdef solaris2
+	"fd",
+#endif
 	0
 };
 
@@ -465,7 +494,7 @@ Get_Next_HR_FileSys (void)
 #if HAVE_GETFSSTAT
     if (HRFS_index >= fscount) return -1;
     HRFS_entry = fsstats+HRFS_index;
-    return HRFS_index++;
+    return ++HRFS_index;
 #else
     const char **cpp;
 		/*
@@ -509,6 +538,46 @@ Get_Next_HR_FileSys (void)
 
     return HRFS_index++;
 #endif /* HAVE_GETFSSTAT */
+}
+
+/*
+ * this function checks whether the current file system (info can be found
+ * in HRFS_entry) is a NFS file system
+ * HRFS_entry must be valid prior to calling this function
+ * returns 1 if NFS file system, 0 otherwise
+ */
+int
+Check_HR_FileSys_NFS (void)
+{
+#if HAVE_GETFSSTAT
+#if defined(MFSNAMELEN)
+    if (!strcmp(HRFS_entry->HRFS_type, MOUNT_NFS))
+#else
+    if (HRFS_entry->HRFS_type == MOUNT_NFS)
+#endif
+#else /* HAVE_GETFSSTAT */
+    if ( HRFS_entry->HRFS_type != NULL && (
+#if defined(MNTTYPE_NFS)
+	!strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS) ||
+#else
+	!strcmp( HRFS_entry->HRFS_type, "nfs") ||
+#endif
+#if defined(MNTTYPE_NFS3)
+	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS3) ||
+#endif
+#if defined(MNTTYPE_LOFS)
+	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_LOFS) ||
+#endif
+	    /*
+	     * MVFS is Rational ClearCase's view file system
+	     * it is similiar to NFS file systems in that it is mounted
+	     * locally or remotely from the ClearCase server
+	     */
+	    !strcmp( HRFS_entry->HRFS_type, "mvfs")))
+#endif /* HAVE_GETFSSTAT */
+	return 1;	/* NFS file system */
+
+    return 0;		/* no NFS file system */
 }
 
 void
@@ -608,14 +677,18 @@ when_dumped(char *filesys,
 char *
 cook_device(char *dev)
 {
-    static char cooked_dev[MAXPATHLEN];
+    static char cooked_dev[SNMP_MAXPATH];
 
     if ( !strncmp( dev, RAW_DEVICE_PREFIX, strlen(RAW_DEVICE_PREFIX))) {
-	strcpy( cooked_dev, COOKED_DEVICE_PREFIX );
-	strcat( cooked_dev, dev+strlen(RAW_DEVICE_PREFIX) );
+	strncpy( cooked_dev, COOKED_DEVICE_PREFIX, sizeof(cooked_dev)-1 );
+	cooked_dev[ sizeof(cooked_dev)-1 ] = 0;
+	strncat( cooked_dev, dev+strlen(RAW_DEVICE_PREFIX),
+                 sizeof(cooked_dev)-strlen(cooked_dev)-1 );
+	cooked_dev[ sizeof(cooked_dev)-1 ] = 0;
+    } else {
+	strncpy( cooked_dev, dev, sizeof(cooked_dev)-1 );
+	cooked_dev[ sizeof(cooked_dev)-1 ] = 0;
     }
-    else
-	strcpy( cooked_dev, dev );
 
     return( cooked_dev );
 }
@@ -639,7 +712,7 @@ Get_FSIndex(char *dev)
     return 0;
 }
 
-int
+long
 Get_FSSize(char *dev)
 {
     struct HRFS_statfs statfs_buf;
@@ -652,7 +725,19 @@ Get_FSSize(char *dev)
 	    End_HR_FileSys();
 
 	    if (HRFS_statfs( HRFS_entry->HRFS_mount, &statfs_buf) != -1 )
-	        return (statfs_buf.f_blocks*statfs_buf.f_bsize)/1024;
+ 		/*
+ 		 * with large file systems the following calculation produces
+ 		 * an overflow:
+ 		 * (statfs_buf.f_blocks*statfs_buf.f_bsize)/1024
+ 		 *
+ 		 * assumption: f_bsize is either 512 or a multiple of 1024
+ 		 * in case of 512 (f_blocks/2) is returned
+ 		 * otherwise (f_blocks*(f_bsize/1024)) is returned
+ 		 */
+ 		if (statfs_buf.f_bsize == 512)
+ 		    return (statfs_buf.f_blocks/2);
+	        else
+	            return (statfs_buf.f_blocks*statfs_buf.f_bsize)/1024;
 	    else
 		return -1;
 	}

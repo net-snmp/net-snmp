@@ -41,6 +41,10 @@
 #endif
 #include <getopt.h>
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
@@ -55,17 +59,9 @@
 #include "agent_callbacks.h"
 #include "tools.h"
 #include "snmp_logging.h"
+#include "callback.h"
 
 #include "mib_module_config.h"
-
-#ifdef USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE
-#include "snmp_vars.h"
-#include "snmp-tc.h"
-#include "target/snmpTargetAddrEntry.h"
-#include "target/snmpTargetParamsEntry.h"
-#include "notification/snmpNotifyTable.h"
-#endif
-
 
 struct trap_sink {
     struct snmp_session	*sesp;
@@ -82,8 +78,8 @@ extern struct timeval	starttime;
 
 oid objid_enterprisetrap[] = { EXTENSIBLEMIB, 251 };
 oid version_id[]	   = { EXTENSIBLEMIB, AGENTID, OSTYPE };
-int enterprisetrap_len = OID_LENGTH( objid_enterprisetrap );
-int version_id_len     = OID_LENGTH( version_id );
+size_t enterprisetrap_len = OID_LENGTH( objid_enterprisetrap );
+size_t version_id_len     = OID_LENGTH( version_id );
 
 #define SNMPV2_TRAPS_PREFIX	SNMP_OID_SNMPMODULES,1,1,5
 oid  cold_start_oid[] =		{ SNMPV2_TRAPS_PREFIX, 1 };	/* SNMPv2-MIB */
@@ -97,15 +93,16 @@ oid  egp_xxx_oid[] =		{ SNMPV2_TRAPS_PREFIX, 99 };	/* ??? */
 oid  snmptrap_oid[] 	      =	{ SNMPV2_TRAP_OBJS_PREFIX, 1, 0 };
 oid  snmptrapenterprise_oid[] =	{ SNMPV2_TRAP_OBJS_PREFIX, 3, 0 };
 oid  sysuptime_oid[] 	      =	{ SNMP_OID_MIB2,1,3,0 };
-int  snmptrap_oid_len 	      =	OID_LENGTH(snmptrap_oid);
-int  snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
-int  sysuptime_oid_len 	      =	OID_LENGTH(sysuptime_oid);
+size_t  snmptrap_oid_len 	      =	OID_LENGTH(snmptrap_oid);
+size_t  snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
+size_t  sysuptime_oid_len 	      =	OID_LENGTH(sysuptime_oid);
 
 
 #define SNMP_AUTHENTICATED_TRAPS_ENABLED	1
 #define SNMP_AUTHENTICATED_TRAPS_DISABLED	2
 
 int	 snmp_enableauthentraps	= SNMP_AUTHENTICATED_TRAPS_DISABLED;
+int	 snmp_enableauthentrapsset = 0;
 char	*snmp_trapcommunity	= NULL;
 
 /* Prototypes */
@@ -133,115 +130,32 @@ static void free_trap_session (struct trap_sink *sp)
 
 int add_trap_session( struct snmp_session *ss, int pdutype, int confirm, int version )
 {
-#ifdef USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE
-#define MAX_ENTRIES 1024
-    struct targetAddrTable_struct *ptr;
-    struct targetParamTable_struct *pptr;
-    struct snmpNotifyTable_data *nptr;
-    int i;
-    char buf[SNMP_MAXBUF_SMALL];
-    oid udpdomain[] = { 1,3,6,1,6,1,1 };
-    int udpdomainlen = sizeof(udpdomain)/sizeof(oid);
-#ifdef HAVE_GETHOSTBYNAME
-    struct hostent *hp;
-#endif
-
-    if (!ss)
-        return (0);
-
-        for(i=0; i < MAX_ENTRIES; i++) {
-            sprintf(buf, "internal%d", i);
-            if (get_addrForName(buf) == NULL && get_paramEntry(buf) == NULL)
-                break;
-        }
-        if (i == MAX_ENTRIES) {
-            snmp_sess_close(ss);
-            return(0);
-        }
-
-        /* address */
-        ptr = snmpTargetAddrTable_create();
-        ptr->name = strdup(buf);
-        memcpy(ptr->tDomain, udpdomain, udpdomainlen*sizeof(oid));
-        ptr->tDomainLen = udpdomainlen;
-
-#ifdef HAVE_GETHOSTBYNAME
-        hp = gethostbyname(ss->peername);
-        if (hp != NULL){
-            /* XXX: fix for other domain types */
-            ptr->tAddressLen = hp->h_length + 2;
-            ptr->tAddress = malloc(ptr->tAddressLen);
-            memmove(ptr->tAddress, hp->h_addr, hp->h_length);
-            ptr->tAddress[hp->h_length] = (ss->remote_port & 0xff00) >> 8;
-            ptr->tAddress[hp->h_length+1] = (ss->remote_port & 0xff);
-        } else {
-#endif /* HAVE_GETHOSTBYNAME */
-            ptr->tAddressLen = 6;
-            ptr->tAddress = calloc(1, ptr->tAddressLen);
-#ifdef HAVE_GETHOSTBYNAME
-        }
-#endif /* HAVE_GETHOSTBYNAME */
-        ptr->timeout = ss->timeout/1000;
-        ptr->retryCount = ss->retries;
-        ptr->tagList = strdup(ptr->name);
-        ptr->params = strdup(ptr->name);
-        ptr->storageType = ST_READONLY;
-        ptr->rowStatus = RS_ACTIVE;
-        ptr->sess = ss;
-        DEBUGMSGTL(("trapsess", "adding to trap table\n"));
-        snmpTargetAddrTable_add(ptr);
-
-        /* param */
-        pptr = snmpTargetParamTable_create();
-        pptr->paramName = strdup(buf);
-        pptr->mpModel = ss->version;
-        if (ss->version == SNMP_VERSION_3) {
-            pptr->secModel = ss->securityModel;
-            pptr->secLevel = ss->securityLevel;
-            memdup((void *) &pptr->secName, (void *) ss->securityName,
-                   ss->securityNameLen+1);
-	    pptr->secName[ss->securityNameLen] = 0;
-        } else {
-            pptr->secModel = ss->version == SNMP_VERSION_1 ?
-	      			SNMP_SEC_MODEL_SNMPv1 : SNMP_SEC_MODEL_SNMPv2c;
-            pptr->secLevel = SNMP_SEC_LEVEL_NOAUTH;
-            pptr->secName = NULL;
-            if (ss->community && (ss->community_len > 0)) {
-                memdup((void *) &pptr->secName, (void *) ss->community,
-                   ss->community_len+1);
-		pptr->secName[ss->community_len] = 0;
-	    }
-        }
-        pptr->storageType = ST_READONLY;
-        pptr->rowStatus = RS_ACTIVE;
-        snmpTargetParamTable_add(pptr);
-            
-        /* notify table */
-        nptr = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
-        nptr->snmpNotifyName = strdup(buf);
-        nptr->snmpNotifyNameLen = strlen(buf);
-        nptr->snmpNotifyTag = strdup(buf);
-        nptr->snmpNotifyTagLen = strlen(buf);
-        nptr->snmpNotifyCommand = pdutype;
-        nptr->snmpNotifyType = confirm ?
-            SNMPNOTIFYTYPE_TRAP : SNMPNOTIFYTYPE_INFORM;
-        nptr->snmpNotifyStorageType = ST_READONLY;
-        nptr->snmpNotifyRowStatus = RS_ACTIVE;
-
-        snmpNotifyTable_add(nptr);
-#else /* ! USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE */
-    struct trap_sink *new_sink;
+    if (snmp_callback_available(SNMP_CALLBACK_APPLICATION,
+                                SNMPD_CALLBACK_REGISTER_NOTIFICATIONS) ==
+        SNMPERR_SUCCESS) {
+        /* something else wants to handle notification registrations */
+        struct agent_add_trap_args args;
+        DEBUGMSGTL(("add_trap_session","adding callback trap sink\n"));
+        args.ss = ss;
+        args.confirm = confirm;
+        snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                       SNMPD_CALLBACK_REGISTER_NOTIFICATIONS,
+                       (void *) &args);
+    } else {
+        /* no other support exists, handle it ourselves. */
+        struct trap_sink *new_sink;
     
-    new_sink = (struct trap_sink *) malloc (sizeof (*new_sink));
-    if ( new_sink == NULL )
-	return 0;
+        DEBUGMSGTL(("add_trap_session","adding internal trap sink\n"));
+        new_sink = (struct trap_sink *) malloc (sizeof (*new_sink));
+        if ( new_sink == NULL )
+            return 0;
 
-    new_sink->sesp    = ss;
-    new_sink->pdutype = pdutype;
-    new_sink->version = version;
-    new_sink->next    = sinks;
-    sinks = new_sink;
-#endif
+        new_sink->sesp    = ss;
+        new_sink->pdutype = pdutype;
+        new_sink->version = version;
+        new_sink->next    = sinks;
+        sinks = new_sink;
+    }
     return 1;
 }
 
@@ -326,7 +240,7 @@ void snmpd_free_trapsinks (void)
 	 *
 	 *******************/
 
-void convert_v2_to_v1( struct variable_list *vars, struct snmp_pdu *template )
+void convert_v2_to_v1( struct variable_list *vars, struct snmp_pdu *template_pdu )
 {
     struct variable_list *v, *trap_v=NULL, *ent_v=NULL;
     oid  trap_prefix[] = { SNMPV2_TRAPS_PREFIX };
@@ -351,13 +265,13 @@ void convert_v2_to_v1( struct variable_list *vars, struct snmp_pdu *template )
 		 */
     if ( snmp_oid_compare( trap_v->val.objid, OID_LENGTH(trap_prefix), 
     			   trap_prefix,       OID_LENGTH(trap_prefix)) == 0 ) {
-	template->trap_type     = trap_v->val.objid[OID_LENGTH(trap_prefix)]-1;
-	template->specific_type = 0;
+	template_pdu->trap_type     = trap_v->val.objid[OID_LENGTH(trap_prefix)]-1;
+	template_pdu->specific_type = 0;
     }
     else {
 	len = trap_v->val_len /sizeof( oid );
-	template->trap_type     = 6;	/* enterprise specific */
-	template->specific_type = trap_v->val.objid[len-1];
+	template_pdu->trap_type     = 6;	/* enterprise specific */
+	template_pdu->specific_type = trap_v->val.objid[len-1];
     }
 
 		/*
@@ -421,13 +335,17 @@ void send_enterprise_trap_vars (int trap,
 		 *  Create a template PDU, ready for sending
 		 */
     template_pdu = snmp_pdu_create( SNMP_MSG_TRAP );
-    if ( template_pdu == NULL )
+    if ( template_pdu == NULL ) {
+		/* Free memory if value stored dynamically */
+	snmp_set_var_value( &enterprise_var, NULL, 0);
 	return;
+    }
     template_pdu->trap_type     = trap;
     template_pdu->specific_type = specific;
     if ( snmp_clone_mem((void **)&template_pdu->enterprise,
 				enterprise, enterprise_length*sizeof(oid))) {
 	snmp_free_pdu( template_pdu );
+	snmp_set_var_value( &enterprise_var, NULL, 0);
 	return;
     }
     template_pdu->enterprise_length = enterprise_length;
@@ -488,6 +406,7 @@ void send_enterprise_trap_vars (int trap,
 	case SNMP_TRAP_AUTHFAIL:
 		if (snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_DISABLED) {
 		    snmp_free_pdu(template_pdu);
+		    snmp_set_var_value( &enterprise_var, NULL, 0);
 		    return;
 		}
 		snmp_set_var_value( &snmptrap_var,
@@ -557,6 +476,9 @@ void send_enterprise_trap_vars (int trap,
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_SEND_TRAP1,
                         template_pdu);
 
+		/* Free memory if values stored dynamically */
+    snmp_set_var_value( &enterprise_var, NULL, 0);
+    snmp_set_var_value( &snmptrap_var, NULL, 0);
 	/* Ensure we don't free anything we shouldn't */
     if ( last_var )
 	last_var->next_variable = NULL;
@@ -636,16 +558,38 @@ void snmpd_parse_config_authtrap(const char *token,
     int i;
 
     i = atoi(cptr);
-    if ( i == 0 ) {
-	if ( !strcmp( cptr, "enable" ))
+    if (i == 0) {
+	if (strcmp(cptr, "enable") == 0) {
 	    i = SNMP_AUTHENTICATED_TRAPS_ENABLED;
-	else if ( !strcmp( cptr, "disable" ))
+	} else if (strcmp(cptr, "disable") == 0) {
 	    i = SNMP_AUTHENTICATED_TRAPS_DISABLED;
+	}
     }
-    if (i < 1 || i > 2)
+    if (i < 1 || i > 2) {
 	config_perror("authtrapenable must be 1 or 2");
-    else
+    } else {
+	if (strcmp(token, "pauthtrapenable") == 0) {
+	    if (snmp_enableauthentrapsset < 0) {
+		/*  This is bogus (and shouldn't happen anyway) -- the value
+		    of snmpEnableAuthenTraps.0 is already configured
+		    read-only.  */
+		snmp_log(LOG_WARNING, "ignoring attempted override of read-only snmpEnableAuthenTraps.0\n");
+		return;
+	    } else {
+		snmp_enableauthentrapsset++;
+	    }
+	} else {
+	    if (snmp_enableauthentrapsset > 0) {
+		/*  This is bogus (and shouldn't happen anyway) -- we already
+		    read a persistent value of snmpEnableAuthenTraps.0, which
+		    we should ignore in favour of this one.  */
+		snmp_log(LOG_WARNING, "ignoring attempted override of read-only snmpEnableAuthenTraps.0\n");
+		/*  Fall through and copy in this value.  */
+	    }
+	    snmp_enableauthentrapsset = -1;
+	}
 	snmp_enableauthentraps = i;
+    }
 }
 
 void snmpd_parse_config_trapsink(const char *token, 
@@ -670,7 +614,8 @@ void snmpd_parse_config_trapsink(const char *token,
     }
     if (create_v1_trap_session(sp, sinkport,
 			       cp ? cp : snmp_trapcommunity) == 0) {
-	sprintf(tmpbuf,"cannot create trapsink: %s", cptr);
+	snprintf(tmpbuf, sizeof(tmpbuf), "cannot create trapsink: %s", cptr);
+        tmpbuf[sizeof(tmpbuf)-1] = '\0';
 	config_perror(tmpbuf);
     }
 }
@@ -698,7 +643,8 @@ snmpd_parse_config_trap2sink(const char *word, char *cptr)
     }
     if (create_v2_trap_session(sp, sinkport,
 			       cp ? cp : snmp_trapcommunity) == 0) {
-	sprintf(tmpbuf,"cannot create trap2sink: %s", cptr);
+	snprintf(tmpbuf, sizeof(tmpbuf), "cannot create trap2sink: %s", cptr);
+        tmpbuf[sizeof(tmpbuf)-1] = '\0';
 	config_perror(tmpbuf);
     }
 }
@@ -725,7 +671,8 @@ snmpd_parse_config_informsink(const char *word, char *cptr)
     }
     if (create_v2_inform_session(sp, sinkport,
 				 cp ? cp : snmp_trapcommunity) == 0) {
-	sprintf(tmpbuf,"cannot create informsink: %s", cptr);
+	snprintf(tmpbuf, sizeof(tmpbuf), "cannot create informsink: %s", cptr);
+        tmpbuf[sizeof(tmpbuf)-1] = '\0';
 	config_perror(tmpbuf);
     }
 }
@@ -756,7 +703,7 @@ static void trapOptProc(int argc, char *const *argv, int opt)
 
 void
 snmpd_parse_config_trapsess(const char *word, char *cptr) {
-    char args[MAX_ARGS][SPRINT_MAX_LEN], *argv[MAX_ARGS];
+    char *argv[MAX_ARGS];
     int argn, arg;
     struct snmp_session session, *ss;
 
@@ -764,17 +711,23 @@ snmpd_parse_config_trapsess(const char *word, char *cptr) {
     traptype = SNMP_MSG_TRAP2;
 
     /* create the argv[] like array */
-    strcpy(argv[0] = args[0], "snmpd-trapsess"); /* bogus entry for getopt() */
-    for(argn = 1; cptr && argn < MAX_ARGS;
-        cptr = copy_word(cptr, argv[argn] = args[argn++])) {
+    argv[0] = strdup("snmpd-trapsess"); /* bogus entry for getopt() */
+    for(argn = 1; cptr && argn < MAX_ARGS; argn++) {
+	argv[argn] = strdup(cptr); /* more than enough room */
+        cptr = copy_word(cptr, argv[argn]);
     }
 
     arg = snmp_parse_args(argn, argv, &session, "C:", trapOptProc);
+#ifdef XXX_BROKEN /* parse_args doesn't clone memory like it should */
+    do { free(argv[--argn]); } while (argn > 0);
+#endif
 
+    if (session.remote_port == SNMP_DEFAULT_REMPORT)
+        session.remote_port = SNMP_TRAP_PORT;
     ss = snmp_open (&session);
 
     if (!ss) {
-        config_perror("snmpd: failed to parse this line");
+        config_perror("snmpd: failed to parse this line or the remote trap receiver is down.  Pausible cause:");
         snmp_sess_perror("snmpd: snmpd_parse_config_trapsess()", &session);
         return;
     }
@@ -790,7 +743,7 @@ void
 snmpd_parse_config_trapcommunity(const char *word, char *cptr)
 {
     if (snmp_trapcommunity) free(snmp_trapcommunity);
-    snmp_trapcommunity = malloc (strlen(cptr)+1);
+    snmp_trapcommunity = (char *)malloc (strlen(cptr)+1);
     copy_word(cptr, snmp_trapcommunity);
 }
 

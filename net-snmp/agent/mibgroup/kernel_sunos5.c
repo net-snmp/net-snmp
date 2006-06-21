@@ -81,7 +81,7 @@ mibcache Mibcache[MIBCACHE_SIZE] = {
 {MIB_TCP,		sizeof(mib2_tcp_t),			(void *)-1, 0, 20, 0, 0},
 {MIB_TCP_CONN,		1000*sizeof(mib2_tcpConnEntry_t),	(void *)-1, 0, 15, 0, 0},
 {MIB_UDP,		sizeof(mib2_udp_t),			(void *)-1, 0, 15, 0, 0},
-{MIB_UDP_LISTEN,	100*sizeof(mib2_udpEntry_t),		(void *)-1, 0, 15, 0, 0},
+{MIB_UDP_LISTEN,	1000*sizeof(mib2_udpEntry_t),		(void *)-1, 0, 15, 0, 0},
 {MIB_EGP,		0,					(void *)-1, 0, 0, 0, 0},
 {MIB_CMOT,		0,					(void *)-1, 0, 0, 0, 0},
 {MIB_TRANSMISSION,	0,					(void *)-1, 0, 0, 0, 0},
@@ -110,7 +110,7 @@ mibmap	Mibmap[MIBCACHE_SIZE] = {
 {0},
 };
 
-static	int		sd = -1;	/* /dev/ip stream descriptor. */
+static	int		sd = -1;	/* /dev/arp stream descriptor. */
 
 /*-
  * Static function prototypes (use void as argument type if there are none)
@@ -135,7 +135,7 @@ Name_cmp(void *, void *);
 static void
 init_mibcache_element(mibcache *cp);
 
-#define	STREAM_DEV	"/dev/ip"
+#define	STREAM_DEV	"/dev/arp"
 #define	BUFSIZE		40960		/* Buffer for  messages (should be modulo(pagesize) */
 
 /*-
@@ -165,7 +165,6 @@ extern "C" {
 int getKstatInt(const char *classname, const char *statname,
 		const char *varname, int *value)
 {
-    kstat_ctl_t *ksc;
     kstat_t *ks;
     kid_t kid;
     kstat_named_t *named;
@@ -174,19 +173,28 @@ int getKstatInt(const char *classname, const char *statname,
     if (kstat_fd == 0) {
         kstat_fd = kstat_open();
         if (kstat_fd == 0) {
-          snmp_log(LOG_ERR, "kstat_open(): failed\n");
+            snmp_log(LOG_ERR, "kstat_open(): failed\n");
+	    goto Return;
         }
     }
-    if ((ksc = kstat_fd) == NULL)
-    {
-        goto Return;
+    ks = kstat_lookup (kstat_fd, classname, -1, statname);
+    if (ks == NULL) {
+	DEBUGMSGTL(("kernel_sunos5", "cannot find kstat %s %s\n",
+		    classname, statname));
+      	goto Return;
     }
-    ks = kstat_lookup (ksc, classname, -1, statname);
-    if (ks == NULL) goto Return;
-    kid = kstat_read (ksc, ks, NULL);
-    if (kid == -1) goto Return;
+    kid = kstat_read (kstat_fd, ks, NULL);
+    if (kid == -1) {
+	DEBUGMSGTL(("kernel_sunos5", "cannot read kstat %s %s\n",
+		    classname, statname));
+	goto Return;
+    }
     named = kstat_data_lookup(ks, varname);
-    if (named == NULL) goto Return;
+    if (named == NULL) {
+	DEBUGMSGTL(("kernel_sunos5", "cannot lookup kstat %s %s %s\n",
+		    classname, statname, varname));
+	goto Return;
+    }
 
     ret = 1;	/* maybe successful */
     switch (named->data_type) {
@@ -227,15 +235,57 @@ Return:
     return ret;
 }
 
+int getKstatRaw(const char *classname, const char *statname,
+		size_t len, void *buf)
+{
+    kstat_t *ks;
+    kid_t kid;
+    int ret = 0;  /* fail unless ... */
+
+    if (kstat_fd == 0) {
+        kstat_fd = kstat_open();
+        if (kstat_fd == 0) {
+            snmp_log(LOG_ERR, "kstat_open(): failed\n");
+	    goto Return;
+        }
+    }
+    ks = kstat_lookup (kstat_fd, classname, -1, statname);
+    if (ks == NULL) {
+	DEBUGMSGTL(("kernel_sunos5", "cannot find kstat %s %s\n",
+		    classname, statname));
+	goto Return;
+    }
+    if (ks->ks_type != KSTAT_TYPE_RAW) {
+	DEBUGMSGTL(("kernel_sunos5", "not raw type kstat %s %s: type %d\n",
+		    classname, statname, ks->ks_type));
+	goto Return;
+    }
+    kid = kstat_read (kstat_fd, ks, NULL);
+    if (kid == -1) {
+	DEBUGMSGTL(("kernel_sunos5", "cannot read kstat %s %s\n",
+		    classname, statname));
+	goto Return;
+    }
+    if (ks->ks_data_size != len) {
+	DEBUGMSGTL(("kernel_sunos5", "wrong kstat length %s %s: %d != %d\n",
+		    classname, statname, ks->ks_data_size, len));
+	goto Return;
+    }
+    memcpy(buf, ks->ks_data, len);
+    ret = 1;	/* maybe successful */
+
+Return:
+    return ret;
+}
+
 int
 getKstat(const char *statname, const char *varname, void *value)
 {
-  kstat_ctl_t   *ksc;
   kstat_t	*ks, *kstat_data;
   kstat_named_t *d;
   size_t	i, instance;
   char		module_name[64];
-  int		ret;
+  int		ret = -10;
   u_longlong_t	val;		/* The largest value */
   void		*v;
 
@@ -244,16 +294,12 @@ getKstat(const char *statname, const char *varname, void *value)
   else
     v = value;
 
-    if (kstat_fd == 0) {
-        kstat_fd = kstat_open();
-        if (kstat_fd == 0) {
+  if (kstat_fd == 0) {
+      kstat_fd = kstat_open();
+      if (kstat_fd == 0) {
           snmp_log(LOG_ERR, "kstat_open(): failed\n");
-        }
-    }
-  if ((ksc = kstat_fd) == NULL)
-  {
-    ret = -10;
-    goto Return;		/* kstat errors */
+	  goto Return;
+      }
   }
   if (statname == NULL || varname == NULL) {
     ret = -20;
@@ -261,12 +307,14 @@ getKstat(const char *statname, const char *varname, void *value)
   }
   /* First, get "kstat_headers" statistics. It should
      contain all available modules. */
-  if ((ks = kstat_lookup(ksc, "unix", 0, "kstat_headers")) == NULL) {
-    ret = -10;
+  if ((ks = kstat_lookup(kstat_fd, "unix", 0, "kstat_headers")) == NULL) {
+    DEBUGMSGTL(("kernel_sunos5", "cannot lookup kstat %s %s\n",
+		"unix", "kstat_headers"));
     goto Return;		/* kstat errors */
   }
-  if (kstat_read(ksc, ks, NULL) <= 0) {
-    ret = -10;
+  if (kstat_read(kstat_fd, ks, NULL) <= 0) {
+    DEBUGMSGTL(("kernel_sunos5", "cannot read kstat %s %s\n",
+		"unix", "kstat_headers"));
     goto Return;		/* kstat errors */
   }
   kstat_data = ks->ks_data;
@@ -289,12 +337,14 @@ getKstat(const char *statname, const char *varname, void *value)
     goto Return;		/* Not found */
   }
   /* Get the named statistics */
-  if ((ks = kstat_lookup(ksc, module_name, instance, statname)) == NULL) {
-    ret = -10;
+  if ((ks = kstat_lookup(kstat_fd, module_name, instance, statname)) == NULL) {
+    DEBUGMSGTL(("kernel_sunos5", "cannot lookup kstat %s %u %s\n",
+		module_name, instance, statname));
     goto Return;		/* kstat errors */
   }
-  if (kstat_read(ksc, ks, NULL) <= 0) {
-    ret = -10;
+  if (kstat_read(kstat_fd, ks, NULL) <= 0) {
+    DEBUGMSGTL(("kernel_sunos5", "cannot read kstat %s %u %s\n",
+		module_name, instance, statname));
     goto Return;		/* kstat errors */
   }
   /* This function expects only name/value type of statistics,
@@ -321,11 +371,11 @@ getKstat(const char *statname, const char *varname, void *value)
 	DEBUGMSGTL(("kernel_sunos5", "value: %u\n", d->value.ui32));
 	break;
       case KSTAT_DATA_INT64:
-	*(Counter *)v = d->value.i64;
+	*(int64_t *)v = d->value.i64;
 	DEBUGMSGTL(("kernel_sunos5", "value: %ld\n", d->value.i64));
 	break;
       case KSTAT_DATA_UINT64:
-	*(Counter *)v = d->value.ui64;
+	*(uint64_t *)v = d->value.ui64;
 	DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", d->value.ui64));
 	break;
 #else
@@ -365,7 +415,7 @@ getKstat(const char *statname, const char *varname, void *value)
     }
   }
   ret = -4;			/* Name not found */
- Return:
+Return:
   return (ret);
 }
 
@@ -567,10 +617,6 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, size_t entry
       ret = -1;
       goto Return;
     }
-    if (ioctl(sd, I_PUSH, "arp") == -1) {
-      ret = -1;
-      goto Return;
-    }
     if (ioctl(sd, I_PUSH, "tcp") == -1) {
       ret = -1;
       goto Return;
@@ -623,7 +669,7 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, size_t entry
     }
     if (strbuf.len >= sizeof(struct T_error_ack)
 	&& tea->PRIM_type == T_ERROR_ACK) {
-      ret = -(tea->TLI_error == TSYSERR) ? tea->UNIX_error : EPROTO;/* Protocol error */
+      ret = -((tea->TLI_error == TSYSERR)?tea->UNIX_error:EPROTO); /* Protocol error */
       break;
     }
     if (rc != MOREDATA
@@ -755,41 +801,56 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	    goto Return;
 	}
 	ifp->ifMtu = ifrp->ifr_metric;
-	ifp->ifSpeed = 10000000; 	/* Best guess */
 	ifp->ifType = 1;
+	ifp->ifSpeed = 0;
+	if (getKstat(ifrp->ifr_name, "ifspeed", &ifp->ifSpeed) == 0 && ifp->ifSpeed != 0) {
+	    /* check for SunOS patch with half implemented ifSpeed */
+            if (ifp->ifSpeed < 10000)
+		ifp->ifSpeed *= 1000000;
+        }
+	else if (getKstat(ifrp->ifr_name, "ifSpeed", &ifp->ifSpeed) == 0) {
+	    /* this is good */
+	}
 	switch (ifrp->ifr_name[0]) {
 	case 'l': /* le / lo / lane (ATM LAN Emulation) */
-		if (ifrp->ifr_name[1] == 'o') {
-			ifp->ifSpeed = 127000000;
-			ifp->ifType = 24;
-		} else if (ifrp->ifr_name[1] == 'e') {
-			ifp->ifSpeed = 10000000;
-			ifp->ifType = 6;
-		} else if (ifrp->ifr_name[1] == 'a') {
-			ifp->ifSpeed = 155000000;
-			ifp->ifType = 37;
-		}
-		break;
-	case 'h': /* hme */
-		ifp->ifSpeed = 100000000;
-		ifp->ifType = 6;
-		break;
+	    if (ifrp->ifr_name[1] == 'o') {
+		    if (!ifp->ifSpeed) ifp->ifSpeed = 127000000;
+		    ifp->ifType = 24;
+	    } else if (ifrp->ifr_name[1] == 'e') {
+		    if (!ifp->ifSpeed) ifp->ifSpeed = 10000000;
+		    ifp->ifType = 6;
+	    } else if (ifrp->ifr_name[1] == 'a') {
+		    if (!ifp->ifSpeed) ifp->ifSpeed = 155000000;
+		    ifp->ifType = 37;
+	    }
+	    break;
+	case 'g': /* ge (gigabit ethernet card) */
+	    if (!ifp->ifSpeed) ifp->ifSpeed = 1000000000;
+	    ifp->ifType = 6;
+	    break;
+	case 'h': /* hme (SBus card) */
+	case 'e': /* eri (PCI card) */
+	case 'b': /* be */
+	case 'd': /* dmfe -- found on netra X1 */
+	    if (!ifp->ifSpeed) ifp->ifSpeed = 100000000;
+	    ifp->ifType = 6;
+	    break;
 	case 'f': /* fa (Fore ATM */
-		ifp->ifSpeed = 155000000;
-		ifp->ifType = 37;
-		break;
+	    if (!ifp->ifSpeed) ifp->ifSpeed = 155000000;
+	    ifp->ifType = 37;
+	    break;
 	case 'q': /* qe (QuadEther) / qa (Fore ATM) / qfe (QuadFastEther) */
-		if (ifrp->ifr_name[1] == 'a') {
-			ifp->ifSpeed = 155000000;
-			ifp->ifType = 37;
-		} else if (ifrp->ifr_name[1] == 'e') {
-			ifp->ifSpeed = 10000000;
-			ifp->ifType = 6;
-		} else if (ifrp->ifr_name[1] == 'f') {
-			ifp->ifSpeed = 100000000;
-			ifp->ifType = 6;
-		}
-		break;
+	    if (ifrp->ifr_name[1] == 'a') {
+		    if (!ifp->ifSpeed) ifp->ifSpeed = 155000000;
+		    ifp->ifType = 37;
+	    } else if (ifrp->ifr_name[1] == 'e') {
+		    if (!ifp->ifSpeed) ifp->ifSpeed = 10000000;
+		    ifp->ifType = 6;
+	    } else if (ifrp->ifr_name[1] == 'f') {
+		    if (!ifp->ifSpeed) ifp->ifSpeed = 100000000;
+		    ifp->ifType = 6;
+	    }
+	    break;
 	}
 	if (!strchr (ifrp->ifr_name, ':')) {
 	    Counter l_tmp;

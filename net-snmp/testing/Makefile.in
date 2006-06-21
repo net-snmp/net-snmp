@@ -31,6 +31,7 @@ stest:    scapitest.o $(PARSEOBJS) $(USELIBS)
 
 clean:
 	rm -f *.o core *.core $(TARG)
+	-rm -fr /tmp/snmp-test*
 
 install: installdirs $(TARG)
 	@for i in $(TARG) ; \
@@ -56,12 +57,12 @@ makefileindepend: nosysdepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-T.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
 etimetest.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 etimetest.lo: ../m/generic.h  
-etimetest.lo: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
-etimetest.lo: ./../snmplib/tools.h ./../snmplib/lcd_time.h
-etimetest.lo: ./../snmplib/snmp_debug.h ./../snmplib/callback.h
+etimetest.lo:  ./../snmplib/asn1.h
+etimetest.lo: ./../snmplib/snmp_api.h ./../snmplib/tools.h
+etimetest.lo: ./../snmplib/lcd_time.h ./../snmplib/snmp_debug.h
+etimetest.lo: ./../snmplib/callback.h
 keymanagetest.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 keymanagetest.lo: ../m/generic.h  
 keymanagetest.lo:  ./../snmplib/asn1.h
@@ -70,11 +71,13 @@ keymanagetest.lo: ./../snmplib/tools.h ./../snmplib/scapi.h
 keymanagetest.lo: ./../snmplib/transform_oids.h ./../snmplib/callback.h
 misctest.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 misctest.lo: ../m/generic.h  
-misctest.lo: ./../snmplib/asn1.h ./../snmplib/snmp_api.h ./../snmplib/tools.h
+misctest.lo:  ./../snmplib/asn1.h
+misctest.lo: ./../snmplib/snmp_api.h ./../snmplib/tools.h
 misctest.lo: ./../snmplib/transform_oids.h ./../snmplib/callback.h
 scapitest.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 scapitest.lo: ../m/generic.h  
-scapitest.lo: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
-scapitest.lo: ./../snmplib/keytools.h ./../snmplib/tools.h
-scapitest.lo: ./../snmplib/scapi.h ./../snmplib/transform_oids.h
-scapitest.lo: ./../snmplib/callback.h 
+scapitest.lo:  ./../snmplib/asn1.h
+scapitest.lo: ./../snmplib/snmp_api.h ./../snmplib/keytools.h
+scapitest.lo: ./../snmplib/tools.h ./../snmplib/scapi.h
+scapitest.lo: ./../snmplib/transform_oids.h ./../snmplib/callback.h
+T.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
