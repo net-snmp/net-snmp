@@ -1,4 +1,4 @@
-.TH "debug" 3 "16 Jun 2006" "Version 5.2.3.pre2" "net-snmp" \" -*- nroff -*-
+.TH "debug" 3 "23 Jun 2006" "Version 5.2.3.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -71,7 +71,7 @@ returns a debug handler that can be injected into a given handler chain.
 .PP
 Definition at line 55 of file debug_handler.c.
 .PP
-References netsnmp_create_handler().
+References netsnmp_create_handler(), and netsnmp_debug_helper().
 .PP
 Referenced by netsnmp_init_debug_helper().
 .SS "void netsnmp_init_bulk_to_next_helper (void)"
@@ -94,7 +94,7 @@ call the initialization sequence for all handlers with init_ routines.
 .PP
 Definition at line 36 of file all_helpers.c.
 .PP
-References netsnmp_init_bulk_to_next_helper(), netsnmp_init_debug_helper(), netsnmp_init_read_only_helper(), netsnmp_init_serialize(), and netsnmp_init_stash_cache_helper().
+References netsnmp_init_bulk_to_next_helper(), netsnmp_init_debug_helper(), netsnmp_init_read_only_helper(), netsnmp_init_serialize(), netsnmp_init_stash_cache_helper(), and netsnmp_init_table_dataset().
 .PP
 Referenced by init_agent().
 .SS "void netsnmp_init_read_only_helper (void)"
