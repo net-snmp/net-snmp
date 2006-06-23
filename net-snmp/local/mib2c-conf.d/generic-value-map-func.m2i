@@ -30,10 +30,8 @@ int
 ${node}_map($m2c_node_map_param)
 {
 @if $m2c_node_needlength == 1@
-@   if $m2c_include_examples == 1@
     int converted_len;
 
-@   end@
     netsnmp_assert(NULL != raw_$m2c_node_param_val_name);
     netsnmp_assert((NULL != mib_$m2c_node_param_ref_name) && (NULL != mib_$m2c_node_param_ref_lname));
 @else@
@@ -83,7 +81,7 @@ ${node}_map($m2c_node_map_param)
 
 @    end@ # foreach
              default:
-                 snmp_log(LOG_ERR, "couldn't map value %d for $node\n", raw_$m2c_node_param_val_name );
+                 snmp_log(LOG_ERR, "couldn't map value %ld for $node\n", raw_$m2c_node_param_val_name );
                  return MFD_ERROR;
     }
 ##

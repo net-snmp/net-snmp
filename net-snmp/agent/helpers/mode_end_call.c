@@ -19,7 +19,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup mode_end_call mode_end_call: at the end of a series of requests, call another handler hook.
+/** @defgroup mode_end_call mode_end_call
+ *  At the end of a series of requests, call another handler hook.
  *  Handlers that want to loop through a series of requests and then
  *  receive a callback at the end of a particular MODE can use this
  *  helper to make this possible.  For most modules, this is not
@@ -59,7 +60,7 @@ netsnmp_get_mode_end_call_handler(netsnmp_mode_handler_list *endlist)
 }
 
 /** adds a mode specific callback to the callback list.
- * @param endinfo the information structure for the mode_end_call helper.  Can be NULL to create a new list.
+ * @param endlist the information structure for the mode_end_call helper.  Can be NULL to create a new list.
  * @param mode the mode to be called upon.  A mode of NETSNMP_MODE_END_ALL_MODES = all modes.
  * @param callbackh the netsnmp_mib_handler callback to call.
  * @return the new registration information list upon success.
@@ -116,3 +117,5 @@ netsnmp_mode_end_call_helper(netsnmp_mib_handler *handler,
     
     return ret2;
 }
+/**  @} */
+

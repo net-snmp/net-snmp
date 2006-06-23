@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @defgroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -261,7 +261,8 @@ extern          "C" {
         /*
          * ifPromiscuousMode(16)/TruthValue/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
          */
-        u_long          ifPromiscuousMode;
+        u_long          dummy_to_keep_struct_size;
+#define ifPromiscuousMode ifentry->promiscuous
 
         /*
          * ifConnectorPresent(17)/TruthValue/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
@@ -374,9 +375,10 @@ extern          "C" {
     int             ifTable_post_request(ifTable_registration_ptr
                                          user_context);
 
-    int             ifTable_init_rowreq_ctx(ifTable_rowreq_ctx *
-                                            rowreq_ctx);
-    void            ifTable_cleanup_rowreq_ctx(ifTable_rowreq_ctx *
+    int             ifTable_rowreq_ctx_init(ifTable_rowreq_ctx *
+                                            rowreq_ctx,
+                                            void *userreq_ctx);
+    void            ifTable_rowreq_ctx_cleanup(ifTable_rowreq_ctx *
                                                rowreq_ctx);
 
     int             ifTable_check_dependencies(ifTable_rowreq_ctx *

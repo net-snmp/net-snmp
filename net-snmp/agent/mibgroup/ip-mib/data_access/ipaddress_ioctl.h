@@ -32,3 +32,5 @@ netsnmp_ioctl_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
 _ioctl_extras *
 netsnmp_ioctl_ipaddress_extras_get(netsnmp_ipaddress_entry *entry);
 
+int
+_netsnmp_ioctl_ipaddress_delete_v4(netsnmp_ipaddress_entry * entry);

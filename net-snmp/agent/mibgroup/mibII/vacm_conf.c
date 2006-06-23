@@ -326,7 +326,8 @@ vacm_parse_view(const char *token, char *param)
     struct vacm_viewEntry *vp;
     oid             suboid[MAX_OID_LEN];
     size_t          suboid_len = 0;
-    u_char          viewMask[sizeof(vp->viewMask)];
+    size_t          mask_len = 0;
+    u_char          viewMask[VACMSTRINGLEN];
     int             i;
     char            *st;
 
@@ -378,6 +379,7 @@ vacm_parse_view(const char *token, char *param)
             viewMask[i] = val;
             i++;
         }
+        mask_len = i;
     } else {
         for (i = 0; i < sizeof(viewMask); i++)
             viewMask[i] = 0xff;
@@ -388,6 +390,7 @@ vacm_parse_view(const char *token, char *param)
         return;
     }
     memcpy(vp->viewMask, viewMask, sizeof(viewMask));
+    vp->viewMaskLen = mask_len;
     vp->viewType = inclexcl;
     vp->viewStorageType = SNMP_STORAGE_PERMANENT;
     vp->viewStatus = SNMP_ROW_ACTIVE;
@@ -622,7 +625,7 @@ vacm_warn_if_not_configured(int majorID, int minorID, void *serverarg,
     if (NULL==name)
         name = "snmpd";
     
-    if (!vacm_is_configured()) {
+    if (!vacm_is_configured() && !strcmp( name, "snmpd" )) {
         snmp_log(LOG_WARNING,
                  "Warning: no access control information configured.\n  It's "
                  "unlikely this agent can serve any useful purpose in this "
@@ -671,7 +674,7 @@ vacm_in_view_callback(int majorID, int minorID, void *serverarg,
  *              subtree has both allowed and disallowed portions)
  *
  * Debug output listed as follows:
- *	<securityName> <groupName> <viewName> <viewType>
+ *	\<securityName\> \<groupName\> \<viewName\> \<viewType\>
  */
 int
 vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
@@ -684,6 +687,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     char           *contextName = vacm_default_context;
     char           *vn;
     char           *sn = NULL;
+    char           *pdu_community;
     /*
      * len defined by the vacmContextName object 
      */
@@ -692,6 +696,9 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
 
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     if (pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c) {
+        pdu_community = pdu->community;
+        if (!pdu_community)
+            pdu_community = "";
         if (snmp_get_do_debugging()) {
             char           *buf;
             if (pdu->community) {
@@ -722,7 +729,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             ) {
             if (!netsnmp_udp_getSecName(pdu->transport_data,
                                         pdu->transport_data_length,
-                                        (char *) pdu->community,
+                                        (char *) pdu_community,
                                         pdu->community_len, &sn,
                                         &contextName)) {
                 /*
@@ -742,7 +749,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             ) {
             if (!netsnmp_udp6_getSecName(pdu->transport_data,
                                          pdu->transport_data_length,
-                                         (char *) pdu->community,
+                                         (char *) pdu_community,
                                          pdu->community_len, &sn,
                                          &contextName)) {
                 /*
@@ -759,7 +766,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
         } else if (pdu->tDomain == netsnmp_UnixDomain){
             if (!netsnmp_unix_getSecName(pdu->transport_data,
                                          pdu->transport_data_length,
-                                         (char *) pdu->community,
+                                         (char *) pdu_community,
                                          pdu->community_len, &sn,
                                          &contextName)) {
 					sn = NULL;

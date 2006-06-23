@@ -9,6 +9,7 @@ HEADER SNMPv3 informs received and sent by tools
 #
 
 CONFIGTRAPD createUser testuser
+CONFIGTRAPD agentxsocket /dev/null
 
 STARTTRAPD
 

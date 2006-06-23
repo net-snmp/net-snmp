@@ -89,19 +89,22 @@ if test -x /bin/netstat ; then
     NETSTAT=/bin/netstat
 elif test -x /usr/bin/netstat ; then
     NETSTAT=/usr/bin/netstat
+elif test -x /usr/sbin/netstat ; then
+    # e.g. Tru64 Unix
+    NETSTAT=/usr/sbin/netstat
 else
     NETSTAT=""
 fi
 if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
     SNMP_SNMPD_PORT="8765"
     MAX_RETRIES=3
-    if test -x $NETSTAT ; then
+    if test -x "$NETSTAT" ; then
         if test -z "$RANDOM"; then
             RANDOM=2
         fi
         while :
         do
-            IN_USE=`$NETSTAT -a 2>/dev/null | grep "[\.:]$SNMP_SNMPD_PORT "`
+            IN_USE=`$NETSTAT -a -n 2>/dev/null | grep "[\.:]$SNMP_SNMPD_PORT "`
             if [ $? -eq 0 ]; then
                 #ECHO "Port $SNMP_SNMPD_PORT in use:"
                 #echo "->$IN_USE"

@@ -32,11 +32,11 @@
 
 /* other required module components */
     /* *INDENT-OFF*  */
-config_require(${name}_interface);
-config_require(${name}_data_access);
+config_require($name.module/${name}/${name}_interface);
+config_require($name.module/${name}/${name}_data_access);
 @if $m2c_create_fewer_files != 1@
-config_require(${name}_data_get);
-config_require(${name}_data_set);
+config_require($name.module/${name}/${name}_data_get);
+config_require($name.module/${name}/${name}_data_set);
     /* *INDENT-ON*  */
 
 /* OID and column number definitions for $context */
@@ -123,7 +123,7 @@ typedef struct ${context}_rowreq_ctx_s {
 @   end@ # settable
 
     /*
-     * flags per row. Currently, the first 8 bits are reserverd
+     * flags per row. Currently, the first (lower) 8 bits are reserved
      * for the user. See mfd.h for other flags.
      */
     u_int                       rowreq_flags;
@@ -156,8 +156,8 @@ typedef struct ${context}_ref_rowreq_ctx_s {
     int ${context}_post_request(${context}_registration_ptr user_context);
 
 @   if $m2c_data_init == 1@
-    int ${context}_init_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx);
-    void ${context}_cleanup_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx);
+    int ${context}_rowreq_ctx_init(${context}_rowreq_ctx *rowreq_ctx);
+    void ${context}_rowreq_ctx_cleanup(${context}_rowreq_ctx *rowreq_ctx);
 
 @   end@
 @    if "$m2c_data_context" ne "generated"@
@@ -417,4 +417,4 @@ ${context}_post_request(${context}_registration_ptr user_context)
 @run mfd-interface.m2c@
 @run mfd-data-access.m2c@
 @run mfd-readme.m2c@
-@run mfd-doxygen.m2c@
+##@run mfd-doxygen.m2c@

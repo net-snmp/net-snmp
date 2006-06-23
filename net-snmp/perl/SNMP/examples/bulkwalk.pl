@@ -1,8 +1,3 @@
-#!/usr/local/bin/perl
-#
-# $Id$
-#
-
 use SNMP;
 
 # Hard-coded hostname and community.  This is icky, but I didn't want to 

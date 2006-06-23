@@ -72,7 +72,7 @@ check_setup()
     do
         if [ ! -d $d ]; then
             echo "Creating missing directory $d"
-            mkdir $d
+            mkdir -p $d
             if [ $? -ne 0 ]; then
                 error "Could not create directory $d"
                 rc=0
@@ -118,7 +118,7 @@ do_diff()
     # d     smaller changes
     #    --exclude='*Makefile' --unidirectional-new-file
     safecd $1
-    diff -U $FUZZ -p -b -w --show-c-function \
+    diff -U $FUZZ -p -b -w --show-c-function -I "$Id:" \
         --exclude='default-*' --exclude='*.orig' --exclude='*.rej' \
         --exclude='*~' --exclude='*.bak' --exclude='.*' --exclude="#*" \
         --exclude="*.deps" \

@@ -19,8 +19,8 @@
 #endif
 
 
-/** @defgroup watcher watcher: watch a specified variable and process
- *   it as an instance or scalar object
+/** @defgroup watcher watcher
+ *  Watch a specified variable and process it as an instance or scalar object
  *  @ingroup leaf
  *  @{
  */
@@ -217,7 +217,7 @@ netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
                                netsnmp_request_info *requests)
 {
     marker_t timestamp = (marker_t) handler->myvoid;
-    int      uptime;
+    long     uptime;
     int      cmp;
 
     DEBUGMSGTL(("helper:watcher:timestamp",
@@ -293,6 +293,7 @@ netsnmp_register_watched_spinlock(netsnmp_handler_registration *reginfo,
     netsnmp_inject_handler(reginfo, whandler);
     return netsnmp_register_watched_scalar(reginfo, winfo);
 }
+/**  @} */
 
 
 int

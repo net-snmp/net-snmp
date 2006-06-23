@@ -138,7 +138,7 @@ typedef struct netsnmp_interface_entry_s {
  * conf file overrides
  */
 typedef struct _conf_if_list {
-    char           *name;
+    const char     *name;
     int             type;
     u_long          speed;
     struct _conf_if_list *next;
@@ -150,6 +150,7 @@ typedef struct _conf_if_list {
 /*
  * ACCESS function prototypes
  */
+void init_interface_common(void);
 void netsnmp_access_interface_init(void);
 
 /*
@@ -180,6 +181,10 @@ netsnmp_interface_entry *
 netsnmp_access_interface_entry_create(const char *name, oid if_index);
 
 void netsnmp_access_interface_entry_free(netsnmp_interface_entry * entry);
+
+int
+netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
+	                                                int ifAdminStatus);
 
 /*
  * find entry in container

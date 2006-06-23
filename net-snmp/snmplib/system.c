@@ -126,6 +126,10 @@ SOFTWARE.
 #include <sys/pstat.h>
 #endif
 
+#if HAVE_SYS_UTSNAME_H
+#include <sys/utsname.h>
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
@@ -275,7 +279,7 @@ opendir(const char *filename)
     /*
      * check to see if filename is a directory 
      */
-    if (stat(filename, &sbuf) < 0 || sbuf.st_mode & S_IFDIR == 0) {
+    if ((stat(filename, &sbuf) < 0) || ((sbuf.st_mode & S_IFDIR) == 0)) {
         return NULL;
     }
 
@@ -502,7 +506,8 @@ get_uptime(void)
      * min requirement is one PERF_DATA_BLOCK plus one PERF_OBJECT_TYPE 
      */
     perfdata = (PPERF_DATA_BLOCK) malloc(buffersize);
-
+    if (!perfdata)
+        return 0;
 
     memset(perfdata, 0, buffersize);
 
@@ -710,7 +715,7 @@ get_boottime(void)
 
     len = sizeof(boottime);
 
-    sysctl(mib, 2, &boottime, &len, NULL, NULL);
+    sysctl(mib, 2, &boottime, &len, NULL, 0);
     boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
 #else                           /* CAN_USE_SYSCTL */
     if ((kmem = open("/dev/kmem", 0)) < 0)
@@ -1068,7 +1073,6 @@ netsnmp_os_prematch(const char *ospmname,
                     const char *ospmrelprefix)
 {
 #if HAVE_SYS_UTSNAME_H
-#include <sys/utsname.h>
 static int printOSonce = 1;
   struct utsname utsbuf;
   if ( 0 != uname(&utsbuf))
