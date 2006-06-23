@@ -15,8 +15,8 @@ ipe./asn1.lo: ../include/net-snmp/library/snmp-tc.h
 ipe./asn1.lo: ../include/net-snmp/library/snmp_client.h
 ipe./asn1.lo: ../include/net-snmp/library/snmp_debug.h
 ipe./asn1.lo: ../include/net-snmp/library/snmp_logging.h
-ipe./asn1.lo: ../include/net-snmp/utilities.h 
-ipe./asn1.lo: ../include/net-snmp/library/system.h
+ipe./asn1.lo:  ../include/net-snmp/utilities.h
+ipe./asn1.lo:  ../include/net-snmp/library/system.h
 ipe./asn1.lo: ../include/net-snmp/library/tools.h
 ipe./asn1.lo: ../include/net-snmp/library/int64.h
 ipe./asn1.lo: ../include/net-snmp/library/mt_support.h
@@ -678,8 +678,7 @@ ipe./md5.lo: ../include/net-snmp/system/linux.h
 ipe./md5.lo: ../include/net-snmp/system/sysv.h
 ipe./md5.lo: ../include/net-snmp/system/generic.h
 ipe./md5.lo: ../include/net-snmp/machine/generic.h 
-ipe./md5.lo:  ../include/net-snmp/utilities.h
-ipe./md5.lo: ../include/net-snmp/types.h 
+ipe./md5.lo: ../include/net-snmp/utilities.h ../include/net-snmp/types.h
 ipe./md5.lo: ../include/net-snmp/definitions.h
 ipe./md5.lo: ../include/net-snmp/library/snmp_api.h
 ipe./md5.lo: ../include/net-snmp/library/asn1.h
@@ -721,7 +720,7 @@ ipe./mib.lo: ../include/net-snmp/output_api.h
 ipe./mib.lo: ../include/net-snmp/library/snmp_client.h
 ipe./mib.lo: ../include/net-snmp/library/snmp_debug.h
 ipe./mib.lo: ../include/net-snmp/library/snmp_logging.h 
-ipe./mib.lo:  ../include/net-snmp/config_api.h
+ipe./mib.lo: ../include/net-snmp/config_api.h
 ipe./mib.lo: ../include/net-snmp/library/read_config.h
 ipe./mib.lo: ../include/net-snmp/library/default_store.h
 ipe./mib.lo: ../include/net-snmp/library/snmp_parse_args.h
@@ -1163,7 +1162,7 @@ ipe./snmp_client.lo: ../include/net-snmp/system/linux.h
 ipe./snmp_client.lo: ../include/net-snmp/system/sysv.h
 ipe./snmp_client.lo: ../include/net-snmp/system/generic.h
 ipe./snmp_client.lo: ../include/net-snmp/machine/generic.h
-ipe./snmp_client.lo:  ../include/net-snmp/types.h
+ipe./snmp_client.lo: ../include/net-snmp/types.h 
 ipe./snmp_client.lo: ../include/net-snmp/definitions.h
 ipe./snmp_client.lo: ../include/net-snmp/library/snmp_api.h
 ipe./snmp_client.lo: ../include/net-snmp/library/asn1.h
@@ -1739,8 +1738,8 @@ ipe./system.lo: ../include/net-snmp/system/linux.h
 ipe./system.lo: ../include/net-snmp/system/sysv.h
 ipe./system.lo: ../include/net-snmp/system/generic.h
 ipe./system.lo: ../include/net-snmp/machine/generic.h 
-ipe./system.lo: ../include/net-snmp/types.h 
-ipe./system.lo: ../include/net-snmp/definitions.h
+ipe./system.lo:  ../include/net-snmp/types.h
+ipe./system.lo:  ../include/net-snmp/definitions.h
 ipe./system.lo: ../include/net-snmp/library/snmp_api.h
 ipe./system.lo: ../include/net-snmp/library/asn1.h
 ipe./system.lo: ../include/net-snmp/library/snmp_impl.h

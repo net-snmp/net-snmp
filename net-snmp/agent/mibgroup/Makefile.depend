@@ -3792,7 +3792,7 @@ ipe./host/hr_storage.lo: ../../include/net-snmp/system/linux.h
 ipe./host/hr_storage.lo: ../../include/net-snmp/system/sysv.h
 ipe./host/hr_storage.lo: ../../include/net-snmp/system/generic.h
 ipe./host/hr_storage.lo: ../../include/net-snmp/machine/generic.h
-ipe./host/hr_storage.lo: host_res.h 
+ipe./host/hr_storage.lo:  host_res.h
 ipe./host/hr_storage.lo: ../../include/net-snmp/net-snmp-includes.h
 ipe./host/hr_storage.lo: ../../include/net-snmp/definitions.h
 ipe./host/hr_storage.lo: ../../include/net-snmp/types.h
@@ -3867,7 +3867,7 @@ ipe./host/hr_swinst.lo: ../../include/net-snmp/system/linux.h
 ipe./host/hr_swinst.lo: ../../include/net-snmp/system/sysv.h
 ipe./host/hr_swinst.lo: ../../include/net-snmp/system/generic.h
 ipe./host/hr_swinst.lo: ../../include/net-snmp/machine/generic.h
-ipe./host/hr_swinst.lo:  host_res.h
+ipe./host/hr_swinst.lo: host_res.h 
 ipe./host/hr_swinst.lo: ../../include/net-snmp/net-snmp-includes.h
 ipe./host/hr_swinst.lo: ../../include/net-snmp/definitions.h
 ipe./host/hr_swinst.lo: ../../include/net-snmp/types.h
@@ -3950,7 +3950,8 @@ ipe./host/hr_swrun.lo: ../../include/net-snmp/library/snmp-tc.h
 ipe./host/hr_swrun.lo: ../../include/net-snmp/library/snmp_client.h
 ipe./host/hr_swrun.lo: ../../include/net-snmp/library/snmp_debug.h
 ipe./host/hr_swrun.lo: ../../include/net-snmp/library/snmp_logging.h
-ipe./host/hr_swrun.lo: host_res.h ../../include/net-snmp/net-snmp-includes.h
+ipe./host/hr_swrun.lo:  host_res.h
+ipe./host/hr_swrun.lo: ../../include/net-snmp/net-snmp-includes.h
 ipe./host/hr_swrun.lo: ../../include/net-snmp/utilities.h
 ipe./host/hr_swrun.lo: ../../include/net-snmp/library/system.h
 ipe./host/hr_swrun.lo: ../../include/net-snmp/library/tools.h
@@ -4214,7 +4215,7 @@ ipe./mibII/icmp.lo: ../../include/net-snmp/system/sysv.h
 ipe./mibII/icmp.lo: ../../include/net-snmp/system/generic.h
 ipe./mibII/icmp.lo: ../../include/net-snmp/machine/generic.h
 ipe./mibII/icmp.lo: ./mibII/mibII_common.h 
-ipe./mibII/icmp.lo:  ../../agent/kernel.h
+ipe./mibII/icmp.lo: ../../agent/kernel.h 
 ipe./mibII/icmp.lo: ../../include/net-snmp/net-snmp-includes.h
 ipe./mibII/icmp.lo: ../../include/net-snmp/definitions.h
 ipe./mibII/icmp.lo: ../../include/net-snmp/types.h 
@@ -4522,7 +4523,7 @@ ipe./mibII/ip.lo: ../../include/net-snmp/system/sysv.h
 ipe./mibII/ip.lo: ../../include/net-snmp/system/generic.h
 ipe./mibII/ip.lo: ../../include/net-snmp/machine/generic.h
 ipe./mibII/ip.lo: ./mibII/mibII_common.h 
-ipe./mibII/ip.lo: ../../agent/kernel.h 
+ipe./mibII/ip.lo:  ../../agent/kernel.h
 ipe./mibII/ip.lo: ../../include/net-snmp/net-snmp-includes.h
 ipe./mibII/ip.lo: ../../include/net-snmp/definitions.h
 ipe./mibII/ip.lo: ../../include/net-snmp/types.h 
@@ -5701,7 +5702,7 @@ ipe./mibII/tcp.lo: ../../include/net-snmp/system/sysv.h
 ipe./mibII/tcp.lo: ../../include/net-snmp/system/generic.h
 ipe./mibII/tcp.lo: ../../include/net-snmp/machine/generic.h
 ipe./mibII/tcp.lo: ./mibII/mibII_common.h 
-ipe./mibII/tcp.lo:  ../../agent/kernel.h
+ipe./mibII/tcp.lo: ../../agent/kernel.h 
 ipe./mibII/tcp.lo: ../../include/net-snmp/net-snmp-includes.h
 ipe./mibII/tcp.lo: ../../include/net-snmp/definitions.h
 ipe./mibII/tcp.lo: ../../include/net-snmp/types.h 
@@ -5906,7 +5907,7 @@ ipe./mibII/udp.lo: ../../include/net-snmp/system/sysv.h
 ipe./mibII/udp.lo: ../../include/net-snmp/system/generic.h
 ipe./mibII/udp.lo: ../../include/net-snmp/machine/generic.h
 ipe./mibII/udp.lo: ./mibII/mibII_common.h 
-ipe./mibII/udp.lo:  ../../agent/kernel.h
+ipe./mibII/udp.lo: ../../agent/kernel.h 
 ipe./mibII/udp.lo: ../../include/net-snmp/net-snmp-includes.h
 ipe./mibII/udp.lo: ../../include/net-snmp/definitions.h
 ipe./mibII/udp.lo: ../../include/net-snmp/types.h 
