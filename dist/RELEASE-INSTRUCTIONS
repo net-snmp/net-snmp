@@ -295,24 +295,30 @@ RELEASING:
      mechanism, but the second has to be done using the "edit this
      release" button.
 
- 11) Make a home-page news announcement.  Go to the net-snmp project
-     page and click "news" and then "submit news".  It shouldn't need
-     approval if you're a core developer (and you're logged in).
+ 11'-14')  For pre-releases, submit a note to net-snmp-coders with
+     an announcement and call for testing.  For release-candidates,
+     a similar announcement should go to net-snmp-users instead.
 
- 12) Wait a week and if everything is ok, then submit a note to
-     net-snmp-announce@lists.sf.net with a global announcement.  I
-     wait a week to ensure there are no major problems before making
-     a huge announcement.  I often make a immediate announcement to
-     the users list to get some initial feedback.  If there are
-     problems and another release is coming shortly, don't announce
-     to the mailing list and announce the next one instead.  In the
-     announcement include the NEWS snippet since the last release.
+ 11) For full releases, announce the new release on net-snmp-users,
+     including the NEWS snippet of significant changes since the last
+     release.  Also announce it as a news item on the project home-page.
+     Go to to the net-snmp project page and click "news" and then
+     "submit news".  It shouldn't need approval if you're a core
+     developer (and you're logged in)
 
-  12) bug Wes to update the freshmeat entries and the open source
-      developers web page entries. 
+ 12) Wait a week to ensure that there are no major problems with the
+     release, and then (assuming everything is ok) submit a note to
+     net-snmp-announce@lists.sf.net with a global announcement.
+        If there are problems and another release is planned to fix
+     them, don't announce the broken version - wait for the updated
+     one instead.
 
-  13) For a major new-feature release (eg 5.3), create the patches
-      branch after the final release.
+ 13) Once the release has been formally advertised on the announce
+     list, start bugging Wes to update the freshmeat entries and the
+     open source developers web page entries. 
+
+ 14) For a major new-feature release (eg 5.3), create the patches
+     branch immediately after the final release.
 
 	$ cvs rtag -r Ext-5-3 -b V5-3-patches net-snmp
       
