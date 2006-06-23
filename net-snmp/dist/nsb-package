@@ -14,7 +14,7 @@ usage()
    echo "          [-h host] [-p path]"
    echo ""
    echo " VERSION    : release number (eg 5.2.2)"
-   echo " -s NSB_SRC_DIRIR  : soure directory [$HOME/src/net-snmp-VERSION]"
+   echo " -s NSB_SRC_DIR  : source directory [$HOME/src/net-snmp-VERSION]"
    echo " -b BUILDD  : build directory [$HOME/build/]"
    echo "              NOTE-platform will be appended to build directory"
    echo " -i NSB_INSTALL_DIR: install directory [$HOME/build/\$PLATFORM/usr/local]"
@@ -39,7 +39,7 @@ usage()
 #set -x
 
 #
-# find nsb-platform based on te path to this script
+# find nsb-platform based on the path to this script
 #
 EXE_PATH=${0%nsb-package}
 EXE_PATH=${EXE_PATH%/}
