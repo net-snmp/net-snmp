@@ -19,3 +19,5 @@
 #else
 #define UTMP_FILE "/var/run/utmp"
 #endif
+
+#define UDP_ADDRESSES_IN_HOST_ORDER 1
