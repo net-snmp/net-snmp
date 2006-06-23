@@ -1,4 +1,4 @@
-.TH "bulk_to_next" 3 "16 Jun 2006" "Version 5.2.3.pre2" "net-snmp" \" -*- nroff -*-
+.TH "bulk_to_next" 3 "23 Jun 2006" "Version 5.2.3.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -37,14 +37,16 @@ takes answered requests and decrements the repeat count and updates the requests
 .PP
 Definition at line 46 of file bulk_to_next.c.
 .PP
-References variable_list::name, variable_list::name_length, netsnmp_request_info_s::next, variable_list::next_variable, netsnmp_request_info_s::repeat, netsnmp_request_info_s::requestvb, and variable_list::type.
+References variable_list::name, variable_list::name_length, netsnmp_request_info_s::next, variable_list::next_variable, netsnmp_request_info_s::repeat, netsnmp_request_info_s::requestvb, snmp_set_var_objid(), and variable_list::type.
+.PP
+Referenced by netsnmp_bulk_to_next_helper().
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_bulk_to_next_handler (void)"
 .PP
 returns a bulk_to_next handler that can be injected into a given handler chain. 
 .PP
 Definition at line 31 of file bulk_to_next.c.
 .PP
-References netsnmp_mib_handler_s::flags, and netsnmp_create_handler().
+References netsnmp_mib_handler_s::flags, MIB_HANDLER_AUTO_NEXT, netsnmp_bulk_to_next_helper(), netsnmp_create_handler(), and NULL.
 .PP
 Referenced by netsnmp_init_bulk_to_next_helper(), and netsnmp_register_handler().
 .SS "void netsnmp_init_bulk_to_next_helper (void)"
