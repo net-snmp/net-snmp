@@ -11,3 +11,6 @@
 #undef bsdlike
 #undef MBSTAT_SYMBOL
 #undef TOTAL_MEMORY_SYMBOL
+
+#define UDP_ADDRESSES_IN_HOST_ORDER 1
+#define UDP_PORTS_IN_HOST_ORDER 1

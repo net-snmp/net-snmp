@@ -104,6 +104,19 @@ int                      udp_size  = 0;	/* Only used for table-based systems */
 #define UDP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
 
+#ifdef UDP_ADDRESSES_IN_HOST_ORDER
+#define CONVERT_ADDRESS(x) x
+#else
+#define CONVERT_ADDRESS(x) ntohl(x)
+#endif
+
+#ifdef UDP_PORTS_IN_HOST_ORDER
+#define CONVERT_PORT(x) x
+#else
+#define CONVERT_PORT(x) ntohs(x)
+#endif
+
+
 oid             udpTable_oid[] = { SNMP_OID_MIB2, 7, 5 };
 
 void
@@ -200,27 +213,14 @@ udpTable_handler(netsnmp_mib_handler          *handler,
                                          (u_char*)&addr,
                                          sizeof(addr));
 #else
-#ifdef solaris2
-                /* solaris x86 already stores stuff in host order;
-                   non x86 is already big endian host order as well */
-                addr = entry->UDPTABLE_LOCALADDRESS;
-#else
-                addr = ntohl(entry->UDPTABLE_LOCALADDRESS);
-#endif
+                addr = CONVERT_ADDRESS(entry->UDPTABLE_LOCALADDRESS);
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
                                          (u_char *)&addr,
                                          sizeof(addr));
 #endif
                 break;
             case UDPLOCALPORT:
-#ifdef solaris2
-                /*
-                 * Solaris udpLocalPort is in host byte order
-                 */
-                port = (u_short)entry->UDPTABLE_LOCALPORT;
-#else
-                port = ntohs((u_short)entry->UDPTABLE_LOCALPORT);
-#endif
+                port = CONVERT_PORT((u_short)entry->UDPTABLE_LOCALPORT);
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -293,15 +293,10 @@ udpTable_next_entry( void **loop_context,
     /*
      * Set up the indexing for the specified row...
      */
-#if defined (WIN32) || defined (cygwin)
-    port = ntohl((u_long)udp_head[i].UDPTABLE_LOCALADDRESS);
+    port = CONVERT_ADDRESS((u_long)udp_head[i].UDPTABLE_LOCALADDRESS);
     snmp_set_var_value(index, (u_char *)&port,
                                   sizeof(udp_head[i].UDPTABLE_LOCALADDRESS));
-#else
-    snmp_set_var_value(index, (u_char *)&udp_head[i].UDPTABLE_LOCALADDRESS,
-                                  sizeof(udp_head[i].UDPTABLE_LOCALADDRESS));
-#endif 
-    port = ntohs((u_short)udp_head[i].UDPTABLE_LOCALPORT);
+    port = CONVERT_PORT((u_short)udp_head[i].UDPTABLE_LOCALPORT);
     snmp_set_var_value(index->next_variable,
                                (u_char*)&port, sizeof(port));
     /*
@@ -374,14 +369,7 @@ udpTable_next_entry( void **loop_context,
     snmp_set_var_value(index, (u_char*)&entry->UDPTABLE_LOCALADDRESS,
                                  sizeof(entry->UDPTABLE_LOCALADDRESS));
 #endif
-#ifdef solaris2
-    /*
-     * Solaris udpLocalPort is in host byte order
-     */
-    port = entry->UDPTABLE_LOCALPORT;
-#else
-    port = ntohs(entry->UDPTABLE_LOCALPORT);
-#endif
+    port = CONVERT_PORT(entry->UDPTABLE_LOCALPORT);
     snmp_set_var_value(index->next_variable,
                                (u_char*)&port, sizeof(port));
 
