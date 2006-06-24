@@ -175,7 +175,9 @@ sub find_files {
     }
 }
 
+
 sub Check_Version {
+  if (($Config{'osname'} ne 'MSWin32' || $ENV{'OSTYPE'} eq 'msys')) {
     my $foundversion = 0;
     open(I,"<Makefile");
     while (<I>) {
@@ -193,4 +195,5 @@ sub Check_Version {
     }
     die "ERROR: Couldn't find version number of this module\n" if (!$foundversion);
     close(I);
+  }
 }
