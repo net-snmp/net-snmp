@@ -134,7 +134,7 @@ sub NetSNMPGetOpts {
     my $rootpath = shift;
     $rootpath = "../" if (!$rootpath);
     $rootpath .= '/' if ($rootpath !~ /\/$/);
-
+    
     if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} ne 'msys')) {
 
       # Grab command line options first.  Only used if environment variables are not set
@@ -160,7 +160,7 @@ sub NetSNMPGetOpts {
       # Update environment variables in case they are needed
       $ENV{'NET-SNMP-IN-SOURCE'}    = $ret{'insource'};
       $ENV{'NET-SNMP-PATH'}         = $ret{'prefix'};
-      $ENV{'NET-SNMP-DEBUG'}        = $ret{'debug'};
+      $ENV{'NET-SNMP-DEBUG'}        = $ret{'debug'};        
      
       $basedir = `%COMSPEC% /c cd`;
       chomp $basedir;
@@ -216,7 +216,9 @@ sub find_files {
     }
 }
 
+
 sub Check_Version {
+  if (($Config{'osname'} ne 'MSWin32' || $ENV{'OSTYPE'} eq 'msys')) {
     my $foundversion = 0;
     open(I,"<Makefile");
     while (<I>) {
@@ -234,4 +236,5 @@ sub Check_Version {
     }
     die "ERROR: Couldn't find version number of this module\n" if (!$foundversion);
     close(I);
+  }
 }
