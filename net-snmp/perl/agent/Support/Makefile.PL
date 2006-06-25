@@ -2,6 +2,7 @@ use ExtUtils::MakeMaker;
 require 5;
 use Config;
 use Getopt::Long;
+my $lib_version;
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -72,12 +73,13 @@ sub InitMakeParams {
     }
     else
     {
-      $opts = NetSNMPGetOpts();
+      $opts = NetSNMPGetOpts("../../");
       $Params{'LIBS'}    = `$opts->{'nsconfig'} --libs`;
       chomp($Params{'LIBS'});
       $Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
       chomp($Params{'CCFLAGS'});
       $Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
+      $lib_version = `$opts->{'nsconfig'} --version`;
       
       if (lc($opts->{'insource'}) eq "true") {
 	$Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};
@@ -179,13 +181,15 @@ sub find_files {
     }
 }
 
+
 sub Check_Version {
+  if (($Config{'osname'} ne 'MSWin32' || $ENV{'OSTYPE'} eq 'msys')) {
     my $foundversion = 0;
     open(I,"<Makefile");
     while (<I>) {
 	if (/^VERSION = (.*)/) {
 	    my $perlver = $1;
-	    my $srcver = `$opts->{'nsconfig'} --version`;
+	    my $srcver = $lib_version;
 	    chomp($srcver);
 	    $perlver =~ s/pre/0./;
 	    if ($srcver ne $perlver) {
@@ -197,4 +201,5 @@ sub Check_Version {
     }
     die "ERROR: Couldn't find version number of this module\n" if (!$foundversion);
     close(I);
+  }
 }
