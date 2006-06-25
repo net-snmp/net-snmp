@@ -93,7 +93,7 @@ sub Check_Version {
     while (<I>) {
 	if (/^VERSION = (.*)/) {
 	    my $perlver = $1;
-	    my $srcver = `$opts->{'nsconfig'} --version`;
+	    my $srcver = $lib_version;
 	    chomp($srcver);
 	    $perlver =~ s/pre/0./;
 	    if ($srcver ne $perlver) {
