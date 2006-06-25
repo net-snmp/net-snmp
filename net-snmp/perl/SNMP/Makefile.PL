@@ -2,6 +2,7 @@ use ExtUtils::MakeMaker;
 require 5;
 use Config;
 use Getopt::Long;
+my $lib_version;
 my %MakeParams = ();
 my $opts;
 
@@ -89,6 +90,7 @@ sub InitMakeParams {
 	} else {
 	    $Params{'CCFLAGS'} = $ENV{'NETSNMP_CCFLAGS'};
 	}
+        $lib_version = `$opts->{'nsconfig'} --version`;
 	if (lc($opts->{'insource'}) eq "true") {
 	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
@@ -317,7 +319,7 @@ sub Check_Version {
     while (<I>) {
 	if (/^VERSION = (.*)/) {
 	    my $perlver = $1;
-	    my $srcver = `$opts->{'nsconfig'} --version`;
+	    my $srcver = $lib_version;
 	    chomp($srcver);
 	    $perlver =~ s/pre/0./;
 	    if ($srcver ne $perlver) {
