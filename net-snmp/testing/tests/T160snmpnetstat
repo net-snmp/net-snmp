@@ -6,14 +6,11 @@ HEADER "if snmpnetstat finds the running agent in udpTable"
 
 # on some systems the agent needs to be run as root to access udpTable
 # - else force skip
-if test "x`id -u`" != "x0" ; then
-  os="`uname -s`"
-  case "x$os" in
-    xHP-UX)   SKIP;;
-    xNetBSD)  SKIP;;
-    xOpenBSD) SKIP;;
-  esac
-fi
+case "x`uname -s`" in
+  xHP-UX)   [ "x`id -u`" != "x0" ] && SKIP;;
+  xNetBSD)  [ "x`id -u`" != "x0" ] && SKIP;;
+  xOpenBSD) [ "x`id -u`" != "x0" ] && SKIP;;
+esac
 
 SKIPIF DISABLE_SNMPV2C
 SKIPIFNOT USING_MIBII_UDPTABLE_MODULE
