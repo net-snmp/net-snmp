@@ -115,6 +115,9 @@ elif test -x /usr/bin/netstat ; then
 elif test -x /usr/sbin/netstat ; then
     # e.g. Tru64 Unix
     NETSTAT=/usr/sbin/netstat
+elif test -x /usr/etc/netstat ; then
+    # e.g. IRIX
+    NETSTAT=/usr/etc/netstat
 else
     NETSTAT=""
 fi
