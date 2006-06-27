@@ -105,15 +105,17 @@ int                      udp_size  = 0;	/* Only used for table-based systems */
 #endif
 
 #ifdef UDP_ADDRESSES_IN_HOST_ORDER
-#define CONVERT_ADDRESS(x) x
+#define UDP_ADDRESS_TO_HOST_ORDER(x) x
+#define UDP_ADDRESS_TO_NETWORK_ORDER(x) htonl(x)
 #else
-#define CONVERT_ADDRESS(x) ntohl(x)
+#define UDP_ADDRESS_TO_HOST_ORDER(x) ntohl(x)
+#define UDP_ADDRESS_TO_NETWORK_ORDER(x) x
 #endif
 
 #ifdef UDP_PORTS_IN_HOST_ORDER
-#define CONVERT_PORT(x) x
+#define UDP_PORT_TO_HOST_ORDER(x) x
 #else
-#define CONVERT_PORT(x) ntohs(x)
+#define UDP_PORT_TO_HOST_ORDER(x) ntohs(x)
 #endif
 
 
@@ -213,14 +215,14 @@ udpTable_handler(netsnmp_mib_handler          *handler,
                                          (u_char*)&addr,
                                          sizeof(addr));
 #else
-                addr = CONVERT_ADDRESS(entry->UDPTABLE_LOCALADDRESS);
+                addr = UDP_ADDRESS_TO_HOST_ORDER(entry->UDPTABLE_LOCALADDRESS);
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
                                          (u_char *)&addr,
                                          sizeof(addr));
 #endif
                 break;
             case UDPLOCALPORT:
-                port = CONVERT_PORT((u_short)entry->UDPTABLE_LOCALPORT);
+                port = UDP_PORT_TO_HOST_ORDER((u_short)entry->UDPTABLE_LOCALPORT);
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -293,10 +295,15 @@ udpTable_next_entry( void **loop_context,
     /*
      * Set up the indexing for the specified row...
      */
-    port = CONVERT_ADDRESS((u_long)udp_head[i].UDPTABLE_LOCALADDRESS);
+#if defined (WIN32) || defined (cygwin)
+    port = ntohl((u_long)udp_head[i].UDPTABLE_LOCALADDRESS);
     snmp_set_var_value(index, (u_char *)&port,
                                   sizeof(udp_head[i].UDPTABLE_LOCALADDRESS));
-    port = CONVERT_PORT((u_short)udp_head[i].UDPTABLE_LOCALPORT);
+#else
+    snmp_set_var_value(index, (u_char *)&udp_head[i].UDPTABLE_LOCALADDRESS,
+                                  sizeof(udp_head[i].UDPTABLE_LOCALADDRESS));
+#endif
+    port = UDP_PORT_TO_HOST_ORDER((u_short)udp_head[i].UDPTABLE_LOCALPORT);
     snmp_set_var_value(index->next_variable,
                                (u_char*)&port, sizeof(port));
     /*
@@ -353,7 +360,7 @@ udpTable_next_entry( void **loop_context,
                      netsnmp_iterator_info *data)
 {
     UDPTABLE_ENTRY_TYPE	 *entry = (UDPTABLE_ENTRY_TYPE *)*loop_context;
-    long port;
+    long port, addr;
 
     if (!entry)
         return NULL;
@@ -366,10 +373,11 @@ udpTable_next_entry( void **loop_context,
                               (u_char*)&IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr),
                                  sizeof(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr)));
 #else
-    snmp_set_var_value(index, (u_char*)&entry->UDPTABLE_LOCALADDRESS,
+    addr = UDP_ADDRESS_TO_NETWORK_ORDER((u_long)entry->UDPTABLE_LOCALADDRESS);
+    snmp_set_var_value(index, (u_char *)&addr,
                                  sizeof(entry->UDPTABLE_LOCALADDRESS));
 #endif
-    port = CONVERT_PORT(entry->UDPTABLE_LOCALPORT);
+    port = UDP_PORT_TO_HOST_ORDER(entry->UDPTABLE_LOCALPORT);
     snmp_set_var_value(index->next_variable,
                                (u_char*)&port, sizeof(port));
 
