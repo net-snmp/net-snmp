@@ -87,12 +87,13 @@ sub find_files {
 
 
 sub Check_Version {
+  if (($Config{'osname'} ne 'MSWin32' || $ENV{'OSTYPE'} eq 'msys')) {
     my $foundversion = 0;
     open(I,"<Makefile");
     while (<I>) {
 	if (/^VERSION = (.*)/) {
 	    my $perlver = $1;
-	    my $srcver = `$opts->{'nsconfig'} --version`;
+	    my $srcver = $lib_version;
 	    chomp($srcver);
 	    $perlver =~ s/pre/0./;
 	    if ($srcver ne $perlver) {
@@ -104,4 +105,5 @@ sub Check_Version {
     }
     die "ERROR: Couldn't find version number of this module\n" if (!$foundversion);
     close(I);
+  }
 }
