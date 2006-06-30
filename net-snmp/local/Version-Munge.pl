@@ -70,7 +70,6 @@ my @exprs = (
 	       files => [qw(perl/SNMP/SNMP.pm
 			    perl/agent/agent.pm
 			    perl/agent/default_store/default_store.pm
-			    perl/agent/Support/Support.pm
 			    perl/default_store/default_store.pm
 			    perl/OID/OID.pm
 			    perl/ASN/ASN.pm
