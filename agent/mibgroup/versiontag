@@ -17,10 +17,6 @@ else
     VERSIONTAG=`echo Ext-$1 | sed 's/\./-/g;'`
 fi
 
-if [ $2 = "tag" ]; then
-    $DOIT cvs tag $VERSIONTAG
-fi
-
 if [ $2 = "tar" ]; then
     # gnu tar (as of 1.15.1) is unable to create portable tar archives, 
     # especially if long file names (>100 char) are present.
