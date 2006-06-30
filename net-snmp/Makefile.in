@@ -286,13 +286,6 @@ TAGS:
 #
 # Internal distribution packaging, etc.
 #
-version:
-	@if test "x$(VERSION)" = "x"; then \
-	  echo "you need to supply a VERSION string."; \
-	  exit 2; \
-	fi
-	$(PERL) local/Version-Munge.pl -T $(VERSION) -M -V -D -C
-
 tag:
 	@if test "x$(VERSION)" = "x"; then \
 	  echo "you need to supply a VERSION string."; \
@@ -333,7 +326,7 @@ makefilecheck:
 	@grep -n "\.c=" `$(FIND) $(top_srcdir) -name "Makefile.*"`
 	@exit 1
 
-dist: version tag tar
+dist: tag tar
 
 FAQ.html:
 	local/FAQ2HTML FAQ
