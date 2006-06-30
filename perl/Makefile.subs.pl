@@ -89,7 +89,7 @@ sub find_files {
 sub Check_Version {
   if (($Config{'osname'} ne 'MSWin32' || $ENV{'OSTYPE'} eq 'msys')) {
     my $foundversion = 0;
-    return if ($ENV{'DONT_CHECK_VERSION'});
+    return if ($ENV{'NETSNMP_DONT_CHECK_VERSION'});
     open(I,"<Makefile");
     while (<I>) {
 	if (/^VERSION = (.*)/) {
@@ -111,8 +111,8 @@ source code and the associated perl modules directly from
 
    http://www.net-snmp.org/
 
-If you want to continue anyway please set the DONT_CHECK_VERSION environmental
-variable to 1 and re-run the Makefile.PL script.\n";
+If you want to continue anyway please set the NETSNMP_DONT_CHECK_VERSION
+environmental variable to 1 and re-run the Makefile.PL script.\n";
 		    exit(1);
 		}
 	    }
