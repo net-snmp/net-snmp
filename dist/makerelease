@@ -28,20 +28,16 @@ System("cvsupdate","cvs -q update");
 
 # modify Makefile.top and configure.in
 manualstep('human:version',
-	   "You need to edit Makefile.top and configure.in to update the version number.
+	   "You (may) need to edit Makefile.top to update the library version numbering.
 
      Makefile.top (usually just for initial pre-release):
         See comments above LIBCURRENT, LIBAGE and LIBREVISION
 
-     configure.in:
-          AC_INIT([Net-SNMP], [$version], [net-snmp-coders\@lists.sourceforge.net])
-                               ^^^^^
-  [I'll run autoconf for you after you're done]
+  [I'll commit the file for you after you're done]
 ");
 
-System("version:autoconf","autoconf");
 System("version:commit",
-       "cvs commit -m \"version update\" Makefile.top configure.in configure");
+       "cvs commit -m \"version update\" Makefile.top");
 
 #
 # configure and build and test it
@@ -100,6 +96,11 @@ manualstep("docs:README",
 System("docs:commit",
        "cvs commit -m \"version update\" README NEWS");
 
+System("release:versionstamp",
+       "perl local/Version-Munge.pl -v $version -M -P -C");
+
+System("release:tag",
+       "cvs tag -F $vtag");
 
 my $me = `whoami`;
 chomp($me);
@@ -116,7 +117,8 @@ my $pkg = "net-snmp-${version}.tar.gz";
 
 my $sig;
 
-system("gpg --list-secret-keys net-snmp-admin");
+System("release:searching-gpg-keys",
+       "gpg --list-secret-keys net-snmp-admin");
 if($? != 0) {
     $sig = "net-snmp-${version}.tar.gz.md5";
     System("release:md5","md5sum $pkg > $sig");
@@ -131,7 +133,11 @@ System("cvsupdate","cvs -q update");
 
 #
 # XXX: auto upload to SF?
+#   NO: I actually did this once and actually uploaded a tar-ball that
+#   I later decided wasn't a good one and then couldn't remove it from
+#   the upload dir. -- Wes
 #
+print STDERR "**************************************** FINISHED ********************\n";
 print STDERR "\nDouble check CVS update is right above\n\n";
 print STDERR "Run this to upload to SF:\n";
 print STDERR "  ncftpput upload.sf.net incoming net-snmp-${version}.tar.gz $sig\n";
@@ -143,8 +149,9 @@ sub System {
     my $cmd = $descr = join(" ", @_);
     my $rc;
     while (dostep($name)) {
-	print STDERR "    running: ",$cmd,"\n";
-	system(@_) if (!$opts{'n'});
+	print STDERR "  running: ",$cmd,"\n";
+	last if ($opts{'n'});
+	system(@_);
 	$rc = checkresult();
         last if ($rc == 0);
     }
@@ -201,6 +208,8 @@ sub manualstep {
 	print STDERR "\n\n",join(" ",@_);
 
 	print STDERR "\n\n  Hit return when done:  ";
+
+	return 1 if ($opts{'n'});
 
 	my $bogus = <STDIN>;
 	return 1;
