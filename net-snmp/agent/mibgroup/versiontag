@@ -17,10 +17,6 @@ else
     VERSIONTAG=`echo Ext-$1 | sed 's/\./-/g;'`
 fi
 
-if [ $2 = "tag" ]; then
-    $DOIT cvs tag $VERSIONTAG
-fi
-
 if [ $2 = "tar" ]; then
     if [ -d CVS ]; then
         $DOIT cvs export -d net-snmp-$VERSION -r $VERSIONTAG net-snmp
