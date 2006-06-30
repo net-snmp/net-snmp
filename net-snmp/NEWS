@@ -6,6 +6,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     snmpd:
       - fix trap processing from SMUX peers (patch 1430824 from Dell,
         submitted by SuSE)
+      - udpTable byte-order fixes
 
     snmpusm:
       - allows to use old and/or new localized key instead of passphrase with
