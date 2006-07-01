@@ -43,7 +43,9 @@ my @exprs = (
 	     { type => 'docs',
 	       expr => 'Version: [\.0-9a-zA-Z]+' =>
 	       repl => 'Version: $VERSION', 
-	       files => [qw(README FAQ dist/net-snmp.spec)]},
+	       files => [qw(README FAQ dist/net-snmp.spec)],
+	       not_required => {'dist/net-snmp.spec' => 1}
+	     },
 
 	     # sed files
 	     { type => 'sed',
@@ -55,13 +57,16 @@ my @exprs = (
 	     { type => 'Makefile',
 	       expr => 'VERSION = \'(.*)\'',
 	       repl => 'VERSION = \'$VERSION\'',
-	       files => [qw(dist/Makefile)]},
+	       files => [qw(dist/Makefile)],
+	       not_required => {'dist/Makefile' => 1}
+	     },
 
 	     # Doxygen config
 	     { type => 'doxygen',
 	       expr => 'PROJECT_NUMBER(\s+)=(\s+)\'(.*)\'',
 	       repl => 'PROJECT_NUMBER$1=$2\'$VERSION\'',
-	       files => [qw(doxygen.conf)]},
+	       files => [qw(doxygen.conf)]
+	     },
 
 	     # perl files
 	     { type => 'perl',
@@ -69,15 +74,17 @@ my @exprs = (
 	       repl => 'VERSION = \'$VERSION_FLOAT\'',
 	       files => [qw(perl/SNMP/SNMP.pm
 			    perl/agent/agent.pm
-			    perl/agent/default_store/default_store.pm
 			    perl/agent/Support/Support.pm
+			    perl/agent/default_store/default_store.pm
 			    perl/default_store/default_store.pm
 			    perl/OID/OID.pm
 			    perl/ASN/ASN.pm
 			    perl/AnyData_SNMP/Storage.pm
 			    perl/AnyData_SNMP/Format.pm
 			    perl/TrapReceiver/TrapReceiver.pm
-			   )]},
+			   )],
+	       not_required => {'perl/agent/Support/Support.pm' => 1}
+	     },
 
 	     # configure script files
 	     { type => 'configure',
@@ -133,8 +140,13 @@ for ($i = 0; $i <= $#exprs; $i++) {
 
 	# make sure it exists
 	if (! -f $f) {
-	    print STDERR "FAILED to find file $f\n";
-	    exit(1);
+	    if (!exists($exprs[$i]->{'not_required'}{$f})) {
+		print STDERR "FAILED to find file $f\n";
+		exit(1);
+	    } else {
+		print STDERR "SKIPPING file $f\n";
+		next;
+	    }
 	}
 
 	# modify the files with the version
@@ -174,8 +186,8 @@ for ($i = 0; $i <= $#exprs; $i++) {
 if ($opts{'C'}) {
     my $files = join(" ",@files);
     print "committing $files\n" if ($opts{'V'});
-    system("cvs commit -m \"- version tag ( $VERSION )\" $files");
-    exit($?);
+    $ret = system("cvs commit -m \"- version tag ( $VERSION )\" $files");
+    exit($ret);
 }
 
 sub floatize_version {
