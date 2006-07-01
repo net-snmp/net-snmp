@@ -51,6 +51,7 @@ expValueTable_getEntry(netsnmp_variable_list * indexes,
     struct expExpression  *exp;
     netsnmp_variable_list *res, *vp, *vp2;
     oid nullInstance[] = {0, 0, 0};
+    int  plen;
     size_t len;
     unsigned int type = colnum-1; /* column object subIDs and type
                                       enumerations are off by one. */
@@ -61,45 +62,71 @@ expValueTable_getEntry(netsnmp_variable_list * indexes,
         return 0;
     }
 
+    DEBUGMSGTL(( "disman:expr:val", "get (%d) entry (%s, %s, ", mode,
+               indexes->val.string, indexes->next_variable->val.string));
+    DEBUGMSGOID(("disman:expr:val",
+               indexes->next_variable->next_variable->val.objid,
+               indexes->next_variable->next_variable->val_len/sizeof(oid)));
+    DEBUGMSG((   "disman:expr:val", ")\n"));
+
+    /*
+     * Locate the expression that we've been asked to evaluate
+     */
     if (!indexes->val_len || !indexes->next_variable->val_len ) {
         /*
          * Incomplete expression specification
          */
         if (mode == MODE_GETNEXT || mode == MODE_GETBULK) {
             exp = expExpression_getFirstEntry();
+            DEBUGMSGTL(( "disman:expr:val", "first entry (%x)\n", exp ));
         } else {
+            DEBUGMSGTL(( "disman:expr:val", "incomplete request\n" ));
             return NULL;        /* No match */
         }
     } else {
-        exp = expExpression_getEntry( indexes->val.string,
-                                      indexes->next_variable->val.string);
+        exp = expExpression_getEntry( (char*)indexes->val.string,
+                                      (char*)indexes->next_variable->val.string);
+        DEBUGMSGTL(( "disman:expr:val", "using entry (%x)\n", exp ));
     }
 
     /*
      * We know what type of value was requested,
      *   so ignore any non-matching expressions.
      */
-              /* XXX - force string results */
-    while (exp && /*exp->expValueType*/ 6 != type) {
+    while (exp && exp->expValueType != type) {
         if (mode != MODE_GETNEXT && mode != MODE_GETBULK) {
+            DEBUGMSGTL(( "disman:expr:val", "wrong type (%d != %d)\n",
+                          type, (exp ? exp->expValueType : 0 )));
             return NULL;        /* Wrong type */
         }
+NEXT_EXP:
         exp = expExpression_getNextEntry( exp->expOwner, exp->expName );
+        DEBUGMSGTL(( "disman:expr:val", "using next entry (%x)\n", exp ));
     }
-    if (!exp)
-        return NULL;    /* No match (of the required type */
+    if (!exp) {
+        DEBUGMSGTL(( "disman:expr:val", "no more entries\n"));
+        return NULL;    /* No match (of the required type) */
+    }
 
 
+    /*
+     * Now consider which instance of the chosen expression is needed
+     */
     vp  = indexes->next_variable->next_variable;
     if ( mode == MODE_GET ) {
         /*
          * For a GET request, check that the specified value instance
-         *   is appropriate, and evaluate the expression using it
+         *   is valid, and evaluate the expression using this.
          */
-        if ( !vp->val_len )
+        if ( !vp || !vp->val_len ) {
+            DEBUGMSGTL(( "disman:expr:val", "no instance index\n"));
             return NULL;  /* No instance provided */
-        if ( vp->val.objid[0] != 0 )
+        }
+        if ( vp->val.objid[0] != 0 ) {
+            DEBUGMSGTL(( "disman:expr:val",
+                         "non-zero instance (%d)\n", vp->val.objid[0]));
             return NULL;  /* Invalid instance */
+        }
 
         if (exp->expPrefix_len == 0 ) {
             /*
@@ -108,15 +135,20 @@ expValueTable_getEntry(netsnmp_variable_list * indexes,
              */
             if ( vp->val_len != 3*sizeof(oid) ||
                  vp->val.objid[1] != 0 ||
-                 vp->val.objid[2] != 0 )
+                 vp->val.objid[2] != 0 ) {
+                DEBUGMSGTL(( "disman:expr:val", "invalid scalar instance\n"));
                 return NULL;
+            }
             res = expValue_evaluateExpression( exp, NULL, 0 );
+            DEBUGMSGTL(( "disman:expr:val", "scalar get returned (%x)\n", res));
         } else {
             /*
-             *   Skip the leading '.0'
+             * Otherwise, skip the leading '.0' and use
+             *   the remaining instance subidentifiers.
              */
             res = expValue_evaluateExpression( exp, vp->val.objid+1,
                                            vp->val_len/sizeof(oid)-1);
+            DEBUGMSGTL(( "disman:expr:val", "w/card get returned (%x)\n", res));
         }
     } else {
         /*
@@ -125,49 +157,85 @@ expValueTable_getEntry(netsnmp_variable_list * indexes,
          *   that, updating the index list appropriately.
          */
         if ( vp->val_len > 0 && vp->val.objid[0] != 0 ) {
+            DEBUGMSGTL(( "disman:expr:val",
+                         "non-zero next instance (%d)\n", vp->val.objid[0]));
             return NULL;        /* All valid instances start with .0 */
         }
-        if (exp->expPrefix_len == 0 ) {
+        plen = exp->expPrefix_len;
+        if (plen == 0 ) {
             /*
              * The only valid instances for GETNEXT on a
              *   non-wildcarded expression are .0 and .0.0
+             *   Anything else is too late.
              */
             if ((vp->val_len > 2*sizeof(oid)) ||
                 (vp->val_len == 2*sizeof(oid) &&
-                      vp->val.objid[1] != 0))
+                      vp->val.objid[1] != 0)) {
+                DEBUGMSGTL(( "disman:expr:val", "invalid scalar next instance\n"));
                 return NULL;        /* Invalid instance */
-     
-            snmp_set_var_typed_value( indexes, ASN_OCTET_STR,
-                             exp->expOwner, strlen(exp->expOwner));
-            snmp_set_var_typed_value( indexes->next_variable, ASN_OCTET_STR,
-                             exp->expName, strlen(exp->expName));
-            snmp_set_var_typed_value( vp, ASN_PRIV_IMPLIED_OBJECT_ID,
-                             (u_char*)nullInstance, 3*sizeof(oid));
-            res = expValue_evaluateExpression( exp, NULL, 0 );
-
-        } else {
-            if ( vp->val_len == 0 )
-                 vp2 = exp->pvars;   /* Use the first instance */
-            else {
-                 /* XXX - TODO: Search pvars list for the next instance */
-                 vp2 = exp->pvars;
             }
-            len = vp2->name_length - exp->expPrefix_len;
+     
+            /*
+             * Make sure the index varbind list refers to the
+             *   (only) valid instance of this expression,
+             *   and evaluate it.
+             */
             snmp_set_var_typed_value( indexes, ASN_OCTET_STR,
-                             exp->expOwner, strlen(exp->expOwner));
+                       (u_char*)exp->expOwner, strlen(exp->expOwner));
             snmp_set_var_typed_value( indexes->next_variable, ASN_OCTET_STR,
-                             exp->expName, strlen(exp->expName));
+                       (u_char*)exp->expName,  strlen(exp->expName));
             snmp_set_var_typed_value( vp, ASN_PRIV_IMPLIED_OBJECT_ID,
-                  (u_char*)(vp2->name+exp->expPrefix_len), len);
+                       (u_char*)nullInstance, 3*sizeof(oid));
+            res = expValue_evaluateExpression( exp, NULL, 0 );
+            DEBUGMSGTL(( "disman:expr:val", "scalar next returned (%x)\n", res));
+        } else {
+            /*
+             * Now comes the interesting case - finding the
+             *   appropriate instance of a wildcarded expression.
+             */
+            if ( vp->val_len == 0 ) {
+                 if ( !exp->pvars ) {
+                     DEBUGMSGTL(( "disman:expr:val", "no instances\n"));
+                     goto NEXT_EXP;
+                 }
+                 DEBUGMSGTL(( "disman:expr:val", "using first instance\n"));
+                 vp2 = exp->pvars;
+            } else {
+                 /*
+                  * Search the list of instances for the (first) greater one
+                  *   XXX - This comparison relies on the OID of the prefix
+                  *         object being the same length as the wildcarded
+                  *         parameter objects.  It ain't necessarily so.
+                  */
+                 for ( vp2 = exp->pvars; vp2; vp2->next_variable ) {
+                     if ( snmp_oid_compare( vp2->name        + plen,
+                                            vp2->name_length - plen,
+                                            vp->name,
+                                            vp->name_length) < 0 ) {
+                         DEBUGMSGTL(( "disman:expr:val", "next instance "));
+                         DEBUGMSGOID(("disman:expr:val",  vp2->name, vp2->name_length ));
+                         DEBUGMSG((   "disman:expr:val", "\n"));
+                         break;
+                     }
+                 }
+                 if (!vp2) {
+                     DEBUGMSGTL(( "disman:expr:val", "no next instance\n"));
+                     goto NEXT_EXP;
+                 }
+            }
+            snmp_set_var_typed_value( indexes, ASN_OCTET_STR,
+                       (u_char*)exp->expOwner, strlen(exp->expOwner));
+            snmp_set_var_typed_value( indexes->next_variable, ASN_OCTET_STR,
+                       (u_char*)exp->expName,  strlen(exp->expName));
+            if (vp2) {
+                len = vp2->name_length - exp->expPrefix_len;
+                snmp_set_var_typed_value( vp, ASN_PRIV_IMPLIED_OBJECT_ID,
+                      (u_char*)(vp2->name+exp->expPrefix_len), len);
+            }
             res = expValue_evaluateExpression( exp, vp->val.objid+1, len-1);
+            DEBUGMSGTL(( "disman:expr:val", "w/card next returned (%x)\n", res));
         }
     }
-
-    /*
-     * XXX - Check that the returned varbind is a valid result.
-     *   If it's reporting an error, update the expError info,
-     *   release the varbind, and return NULL.
-     */
     return res;
 }
 
@@ -184,7 +252,8 @@ expValueTable_handler(netsnmp_mib_handler *handler,
     netsnmp_variable_list      *value;
     oid    expValueOID[] = { 1, 3, 6, 1, 2, 1, 90, 1, 3, 1, 1, 99 };
     size_t expValueOID_len = OID_LENGTH(expValueOID);
-    oid   *name_ptr;
+    oid    name_buf[ MAX_OID_LEN ];
+    oid   *name_ptr = name_buf;
     size_t name_buf_len = MAX_OID_LEN;
 
     DEBUGMSGTL(("disman:expr:mib", "Expression Value Table handler (%d)\n",
@@ -197,7 +266,7 @@ expValueTable_handler(netsnmp_mib_handler *handler,
             value = expValueTable_getEntry(tinfo->indexes,
                                            reqinfo->mode,
                                            tinfo->colnum);
-            if (!value) {
+            if (!value || !value->val.integer) {
                 netsnmp_set_request_error(reqinfo, request,
                                          (reqinfo->mode == MODE_GET) ? 
                                                  SNMP_NOSUCHINSTANCE :
@@ -210,12 +279,10 @@ expValueTable_handler(netsnmp_mib_handler *handler,
                   *   to match the instance just evaluated.
                   * (XXX - Is this the appropriate mechanism?)
                   */
-                build_oid( &name_ptr, &name_buf_len,
-                           expValueOID, expValueOID_len,
-                           tinfo->indexes );
-                name_ptr[ expValueOID_len -1 ] = tinfo->colnum;
-                snmp_set_var_objid(request->requestvb, name_ptr, name_buf_len);
-                SNMP_FREE(name_ptr);
+                build_oid_noalloc( name_buf, MAX_OID_LEN, &name_buf_len,
+                           expValueOID, expValueOID_len, tinfo->indexes );
+                name_buf[ expValueOID_len -1 ] = tinfo->colnum;
+                snmp_set_var_objid(request->requestvb, name_buf, name_buf_len);
             }
 
             switch (tinfo->colnum) {
@@ -245,11 +312,11 @@ expValueTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_EXPVALUEOIDVAL:
                 snmp_set_var_typed_value(  request->requestvb, ASN_OBJECT_ID,
-                                   (char *)value->val.objid,   value->val_len);
+                                   (u_char *)value->val.objid, value->val_len);
                 break;
             case COLUMN_EXPVALUECOUNTER64VAL:
                 snmp_set_var_typed_value(  request->requestvb, ASN_COUNTER64,
-                                 (char *)value->val.counter64, value->val_len);
+                               (u_char *)value->val.counter64, value->val_len);
                 break;
             }
         }

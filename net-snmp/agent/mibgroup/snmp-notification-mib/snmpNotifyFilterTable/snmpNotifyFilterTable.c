@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for snmpNotifyFilterTable
+/** \page MFD helper for snmpNotifyFilterTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -160,7 +160,7 @@ snmpNotifyFilterTable_rowreq_ctx_init(snmpNotifyFilterTable_rowreq_ctx *
 
 /**
  * extra context cleanup
- *
+ * @param  rowreq_ctx
  */
 void
 snmpNotifyFilterTable_rowreq_ctx_cleanup(snmpNotifyFilterTable_rowreq_ctx *
@@ -182,9 +182,9 @@ snmpNotifyFilterTable_rowreq_ctx_cleanup(snmpNotifyFilterTable_rowreq_ctx *
  * Note that this is not a 'dirty' check (i.e. if a row has changed),
  * but a check for volatile rows that should not be saved between
  * restarts.
- *
- * return 1 if the row should be stored
- * return 0 if the row should not be stored
+ * @param rowreq_ctx
+ * @retval  1 if the row should be stored
+ * @retval  0 if the row should not be stored
  */
 int
  
@@ -214,7 +214,7 @@ int
 /**
  * pre-request callback
  *
- *
+ * @param user_context
  * @retval MFD_SUCCESS              : success.
  * @retval MFD_ERROR                : other error
  */
@@ -238,7 +238,7 @@ snmpNotifyFilterTable_pre_request(snmpNotifyFilterTable_registration *
  *   New rows have been inserted into the container, and
  *   deleted rows have been removed from the container and
  *   released.
- *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -300,6 +300,10 @@ snmpNotifyFilterTable_post_request(snmpNotifyFilterTable_registration *
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param snmpNotifyFilterProfileName_val_ptr
+ * @param snmpNotifyFilterProfileName_val_ptr_len
+ * @param snmpNotifyFilterSubtree_val_ptr
+ * @param snmpNotifyFilterSubtree_val_ptr_len
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -370,7 +374,11 @@ snmpNotifyFilterTable_indexes_set_tbl_idx(snmpNotifyFilterTable_mib_index *
  * @internal
  * set row context indexes
  *
- * @param reqreq_ctx the row context that needs updated indexes
+ * @param rowreq_ctx the row context that needs updated indexes
+ * @param snmpNotifyFilterProfileName_val_ptr
+ * @param snmpNotifyFilterProfileName_val_ptr_len
+ * @param snmpNotifyFilterSubtree_val_ptr
+ * @param snmpNotifyFilterSubtree_val_ptr_len
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -940,7 +948,7 @@ snmpNotifyFilterTable_undo_cleanup(snmpNotifyFilterTable_rowreq_ctx *
  * snmpNotifyFilterTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param snmpNotifyFilterTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -976,7 +984,7 @@ snmpNotifyFilterTable_commit(snmpNotifyFilterTable_rowreq_ctx * rowreq_ctx)
  * snmpNotifyFilterTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param snmpNotifyFilterTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success

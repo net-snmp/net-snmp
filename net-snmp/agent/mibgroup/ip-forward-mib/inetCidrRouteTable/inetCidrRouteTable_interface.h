@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** @defgroup interface: Routines to interface to Net-SNMP
+/** @ingroup interface Routines to interface to Net-SNMP
  *
  * \warning This code should not be modified, called directly,
  *          or used to interpret functionality. It is subject to
@@ -69,6 +69,8 @@ extern          "C" {
     u_int           inetCidrRouteTable_dirty_get(void);
     void            inetCidrRouteTable_dirty_set(u_int status);
          
+    netsnmp_cache  *inetCidrRouteTable_get_cache(void);
+
     inetCidrRouteTable_rowreq_ctx
         * inetCidrRouteTable_allocate_rowreq_ctx(inetCidrRouteTable_data *,
                                                  void *);
@@ -96,3 +98,5 @@ extern          "C" {
 }
 #endif
 #endif                          /* INETCIDRROUTETABLE_INTERFACE_H */
+/**  @} */
+

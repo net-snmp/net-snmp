@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** @defgroup interface: Routines to interface to Net-SNMP
+/** @ingroup interface Routines to interface to Net-SNMP
  *
  * \warning This code should not be modified, called directly,
  *          or used to interpret functionality. It is subject to
@@ -174,3 +174,5 @@ extern          "C" {
 }
 #endif
 #endif                          /* IPV6INTERFACETABLE_INTERFACE_H */
+/** @} */
+

@@ -38,7 +38,8 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
                             netsnmp_agent_request_info *reqinfo,
                             netsnmp_request_info *requests);
 
-/** @defgroup table table: Helps you implement a table.
+/** @defgroup table table
+ *  Helps you implement a table.
  *  @ingroup handler
  *
  *  This handler helps you implement a table by doing some of the
@@ -297,7 +298,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                              var->name, tmp_len) > 0) {
             if (reqinfo->mode == MODE_GETNEXT) {
                 if (var->name != var->name_loc)
-                    free(var->name);
+                    SNMP_FREE(var->name);
                 snmp_set_var_objid(var, reginfo->rootoid,
                                    reginfo->rootoid_len);
             } else {

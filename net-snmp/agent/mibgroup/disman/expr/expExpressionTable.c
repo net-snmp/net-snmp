@@ -88,7 +88,7 @@ expExpressionTable_handler(netsnmp_mib_handler *handler,
             switch (tinfo->colnum) {
             case COLUMN_EXPEXPRESSION:
                 snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
-                                         entry->expExpression,
+                                (u_char*)entry->expExpression,
                                   strlen(entry->expExpression));
                 break;
             case COLUMN_EXPEXPRESSIONVALUETYPE:
@@ -97,7 +97,7 @@ expExpressionTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_EXPEXPRESSIONCOMMENT:
                 snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
-                                         entry->expComment,
+                                (u_char*)entry->expComment,
                                   strlen(entry->expComment));
                 break;
             case COLUMN_EXPEXPRESSIONDELTAINTERVAL:

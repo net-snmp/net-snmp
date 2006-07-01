@@ -1862,8 +1862,12 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
         prefix_len = netsnmp_oid_find_prefix(tp->start_a,
                                              tp->start_len,
                                              tp->end_a, tp->end_len);
-        result =
-            netsnmp_acm_check_subtree(asp->pdu, tp->start_a, prefix_len);
+        if (prefix_len < 1) {
+            result = VACM_NOTINVIEW; /* ack...  bad bad thing happened */
+        } else {
+            result =
+                netsnmp_acm_check_subtree(asp->pdu, tp->start_a, prefix_len);
+        }
 
         while (result == VACM_NOTINVIEW) {
             /* the entire subtree is not in view. Skip it. */
@@ -1880,9 +1884,14 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
                                                      tp->start_len,
                                                      tp->end_a,
                                                      tp->end_len);
-                result =
-                    netsnmp_acm_check_subtree(asp->pdu,
-                                              tp->start_a, prefix_len);
+                if (prefix_len < 1) {
+                    /* ack...  bad bad thing happened */
+                    result = VACM_NOTINVIEW;
+                } else {
+                    result =
+                        netsnmp_acm_check_subtree(asp->pdu,
+                                                  tp->start_a, prefix_len);
+                }
             }
             else
                 break;
@@ -2240,7 +2249,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             view = in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
                              asp->pdu, varbind_ptr->type);
             if (view != VACM_SUCCESS)
-                return SNMP_ERR_NOTWRITABLE;
+                return SNMP_ERR_NOACCESS;
             break;
 
         case SNMP_MSG_GETNEXT:
@@ -3389,7 +3398,7 @@ netsnmp_request_set_error(netsnmp_request_info *request, int error_value)
 
 /** set error for all requests
  * @param requests request list
- * @param error_value error value for requests
+ * @param error error value for requests
  * @return SNMPERR_SUCCESS, or an error code
  */
 NETSNMP_INLINE int

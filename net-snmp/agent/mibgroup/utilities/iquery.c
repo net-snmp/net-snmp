@@ -142,8 +142,10 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
      * have iquery sessions created, and re-using the appropriate one.  
      */
     extern int callback_master_num;
-    netsnmp_session *ss = netsnmp_callback_open( callback_master_num,
-                                                 NULL, NULL, NULL);
+    netsnmp_session *ss = NULL;
+
+#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
+    ss = netsnmp_callback_open( callback_master_num, NULL, NULL, NULL);
     if (ss) {
         ss->version       = version;
         ss->securityModel = secModel;
@@ -158,6 +160,8 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
             ss->community_len = strlen(secName);
         }
     }
+#endif
+
     return ss;
 }
 

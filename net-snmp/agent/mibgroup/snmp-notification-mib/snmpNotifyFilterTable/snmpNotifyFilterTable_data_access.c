@@ -20,7 +20,8 @@
 
 #include "snmpNotifyFilterTable_data_access.h"
 
-/** @defgroup data_access data_access: Routines to access data
+/** @ingroup interface 
+ * @addtogroup data_access data_access: Routines to access data
  *
  * These routines are used to locate the data used to satisfy
  * requests.
@@ -110,7 +111,7 @@ snmpNotifyFilterTable_container_init(netsnmp_container **container_ptr_ptr)
 /**
  * container shutdown
  *
- * @param container_ptr_ptr A pointer to the container.
+ * @param container_ptr A pointer to the container.
  *
  *  This function is called at shutdown to allow you to customize certain
  *  aspects of the access method. For the most part, it is for advanced
@@ -456,7 +457,7 @@ snmpNotifyFilterSubtree_check_index(snmpNotifyFilterTable_rowreq_ctx *
  *
  * @param snmpNotifyFilterTable_reg
  *        Pointer to the user registration data
- * @param snmpNotifyFilterTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  * @retval MFD_SUCCESS            : success
  * @retval MFD_CANNOT_CREATE_NOW  : index not valid right now
@@ -493,16 +494,20 @@ struct vacm_viewEntry *
 snmpNotifyFilterTable_vacm_view_subtree(const char *profile)
 {
     oid             tmp_oid[MAX_OID_LEN];
-    netsnmp_index   tmp_idx = { 0, tmp_oid };
+    netsnmp_index   tmp_idx;
     int             i, j;
     netsnmp_void_array *s;
     struct vacm_viewEntry *tmp;
     snmpNotifyFilterTable_rowreq_ctx *rowreq;
+    netsnmp_container *c;
+
+    tmp_idx.len = 0;
+    tmp_idx.oids = tmp_oid;
 
     /*
      * get the container
      */
-    netsnmp_container *c = snmpNotifyFilterTable_container_get();
+    c = snmpNotifyFilterTable_container_get();
     if ((NULL == profile) || (NULL == c))
         return NULL;
 

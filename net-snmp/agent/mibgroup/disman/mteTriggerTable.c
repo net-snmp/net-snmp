@@ -3284,7 +3284,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
     size_t          next_oid_len;
     long           *value, *old_value, x;
     struct last_state *laststate;
-    char            lastbool = 0, boolresult = 0, lastthresh = 0, senttrap = 0;
+    char            lastbool = 0, boolresult = 0, lastthresh = 0;
 
     if (!item) {
         /*
@@ -3306,6 +3306,10 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
     do {
         pdu = snmp_pdu_create(msg_type);
         snmp_add_null_var(pdu, next_oid, next_oid_len);
+
+        if(response)
+            snmp_free_pdu(response);
+		
         response = mte_get_response(item, pdu);
         if (!response)
             break;              /* XXX: proper failure */
@@ -3319,7 +3323,6 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                               item->mteTriggerValueIDLen) != 0)) {
             DEBUGMSGTL(("mteTriggerTable",
                         "DONE, last varbind processed\n"));
-            snmp_free_pdu(response);
             break;
         }
 
@@ -3343,7 +3346,6 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                           sizeof(mteTriggerFailure) / sizeof(oid),
                           next_oid, next_oid_len, &failure,
                           NULL, NULL, "failure: bad type");
-            snmp_free_pdu(response);
             /*
              * RFC2981, p.15: "If the value syntax of those objects
              * [returned by a getNext-style match] is not usable, that
@@ -3412,7 +3414,6 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                 run_mte_events(item, next_oid, next_oid_len,
                                item->mteTriggerExistenceEventOwner,
                                item->mteTriggerExistenceEvent);
-                senttrap = 1;
             }
 
             if ((item->mteTriggerExistenceTest[0] &
@@ -3433,7 +3434,6 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                 run_mte_events(item, next_oid, next_oid_len,
                                item->mteTriggerExistenceEventOwner,
                                item->mteTriggerExistenceEvent);
-                senttrap = 1;
             }
         }
 
@@ -3519,7 +3519,6 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                 run_mte_events(item, next_oid, next_oid_len,
                                item->mteTriggerBooleanEventOwner,
                                item->mteTriggerBooleanEvent);
-                senttrap = 1;
             }
 
             DEBUGMSGTL(("mteTriggerTable",
@@ -3572,7 +3571,6 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                 run_mte_events(item, next_oid, next_oid_len,
                                item->mteTriggerThresholdRisingEventOwner,
                                item->mteTriggerThresholdRisingEvent);
-                senttrap = 1;
             }
             if (((item->started == MTE_STARTED && laststate &&
                   lastthresh == MTE_THRESHOLD_HIGH) ||
@@ -3591,7 +3589,6 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                 run_mte_events(item, next_oid, next_oid_len,
                                item->mteTriggerThresholdFallingEventOwner,
                                item->mteTriggerThresholdFallingEvent);
-                senttrap = 1;
             }
 
         }
@@ -3640,14 +3637,10 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
             last_state_clean(laststate);
         }
 
-        /*
-         * We are now done with the response PDU.  
-         */
-        if (senttrap) 
-            senttrap = 0;
-        else
-            snmp_free_pdu(response);
     } while (item->mteTriggerValueIDWildcard == TV_TRUE);
+
+    if(response)
+        snmp_free_pdu(response);
 
     /*
      * loop through old values for DNE cases 

@@ -12,6 +12,10 @@ while (<>) {
 	while (<I>) {
 	    last if (!/^#/);
 	    s/^#\s+//;
+	    # Avoid ' at the beginning of a line
+	    s/^'/\\&'/;
+	    # Quotes in a quoted argument must be doubled.
+	    s/"/""/g;
 	    s/^(\@.*\@)$/.IP "$1"/;
 	    print;
 	}
@@ -25,6 +29,10 @@ while (<>) {
 	    last if (!/^#/);
 	    next if (/^#\s*$/);
 	    s/^#\s+//;
+	    # Avoid ' at the beginning of a line
+	    s/^'/\\&'/;
+	    # Quotes in a quoted argument must be doubled.
+	    s/"/""/g;
 	    s/^(\S+)\s+--\s+(.*)/.IP "$1"\n$2/;
 	    print;
 	}

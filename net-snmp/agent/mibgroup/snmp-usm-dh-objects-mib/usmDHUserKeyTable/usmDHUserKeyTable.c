@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for usmDHUserKeyTable
+/** \page MFD helper for usmDHUserKeyTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -141,7 +141,7 @@ usmDHUserKeyTable_rowreq_ctx_init(usmDHUserKeyTable_rowreq_ctx *
 
 /**
  * extra context cleanup
- *
+ * @param rowreq_ctx
  */
 void
 usmDHUserKeyTable_rowreq_ctx_cleanup(usmDHUserKeyTable_rowreq_ctx *
@@ -184,7 +184,7 @@ usmDHUserKeyTable_pre_request(usmDHUserKeyTable_registration *
  *   New rows have been inserted into the container, and
  *   deleted rows have been removed from the container and
  *   released.
- *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.

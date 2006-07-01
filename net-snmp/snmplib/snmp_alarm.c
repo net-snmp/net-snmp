@@ -89,12 +89,6 @@ init_snmp_alarm(void)
 void
 sa_update_entry(struct snmp_alarm *a)
 {
-    if (a->t.tv_sec == 0 && a->t.tv_usec == 0) {
-        DEBUGMSGTL(("snmp_alarm",
-                    "update_entry: illegal interval specified\n"));
-        return;
-    }
-
     if (a->t_last.tv_sec == 0 && a->t_last.tv_usec == 0) {
         struct timeval  t_now;
         /*
@@ -117,6 +111,13 @@ sa_update_entry(struct snmp_alarm *a)
          * We've been called but not reset for the next call.  
          */
         if (a->flags & SA_REPEAT) {
+            if (a->t.tv_sec == 0 && a->t.tv_usec == 0) {
+                DEBUGMSGTL(("snmp_alarm",
+                            "update_entry: illegal interval specified\n"));
+                snmp_alarm_unregister(a->clientreg);
+                return;
+            }
+
             a->t_next.tv_sec = a->t_last.tv_sec + a->t.tv_sec;
             a->t_next.tv_usec = a->t_last.tv_usec + a->t.tv_usec;
 
@@ -415,8 +416,13 @@ snmp_alarm_register(unsigned int when, unsigned int flags,
     if (*sa_pptr == NULL)
         return 0;
 
-    (*sa_pptr)->t.tv_sec = when;
-    (*sa_pptr)->t.tv_usec = 0;
+    if (0 == when) {
+        (*sa_pptr)->t.tv_sec = 0;
+        (*sa_pptr)->t.tv_usec = 1;
+    } else {
+        (*sa_pptr)->t.tv_sec = when;
+        (*sa_pptr)->t.tv_usec = 0;
+    }
     (*sa_pptr)->flags = flags;
     (*sa_pptr)->clientarg = clientarg;
     (*sa_pptr)->thecallback = thecallback;

@@ -87,7 +87,6 @@ _find_mteEvent_entry( char *owner, char *ename )
     if (!row)
         return NULL;
 
-    //return (struct mteEvent *)netsnmp_tdata_row_entry( row );
     return (struct mteEvent *)row->data;
 }
 

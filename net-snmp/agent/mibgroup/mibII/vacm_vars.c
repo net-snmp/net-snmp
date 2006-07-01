@@ -1068,8 +1068,8 @@ access_parse_accessEntry(oid * name, size_t name_len)
 {
     struct vacm_accessEntry *aptr;
 
-    char           *newGroupName;
-    char           *newContextPrefix;
+    char           *newGroupName = NULL;
+    char           *newContextPrefix = NULL;
     int             model, level;
     size_t          groupNameLen, contextPrefixLen;
 
@@ -1088,8 +1088,8 @@ access_parse_accessEntry(oid * name, size_t name_len)
      */
     aptr =
         vacm_getAccessEntry(newGroupName, newContextPrefix, model, level);
-    free(newContextPrefix);
-    free(newGroupName);
+    SNMP_FREE(newContextPrefix);
+    SNMP_FREE(newGroupName);
 
     return aptr;
 
