@@ -1,4 +1,4 @@
-.TH "Memory Utility Routines" 3 "12 Jun 2006" "Version 5.3.1.rc1" "net-snmp" \" -*- nroff -*-
+.TH "Memory Utility Routines" 3 "30 Jun 2006" "Version 5.3.1.rc2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -38,6 +38,9 @@ Memory Utility Routines \-
 .br
 .ti -1c
 .RI "#define \fBROUNDUP8\fP(x)   ( ( (x+7) >> 3 ) * 8 )"
+.br
+.ti -1c
+.RI "#define \fBSNMP_STRORNULL\fP(x)   ( x ? x : '(null)')"
 .br
 .ti -1c
 .RI "#define \fBSNMP_FREE\fP(s)   do { if (s) { free((void *)s); s=NULL; } } while(0)"
@@ -212,7 +215,7 @@ Memory Utility Routines \-
 \fBValue:\fP
 .PP
 .nf
-{                                                 \
+{                                                     \
         now.tv_sec--;                                   \
         now.tv_usec += 1000000L;                        \
         diff.tv_sec  = now.tv_sec  - then.tv_sec;       \
