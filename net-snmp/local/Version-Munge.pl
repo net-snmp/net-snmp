@@ -87,6 +87,13 @@ my @exprs = (
 	       exec => 'autoconf',
 	       exfiles => [qw(configure)],
 	     },
+
+	     # configure script files
+	     { type => 'doxygen',
+	       expr => 'PROJECT_NUMBER\s*= (.*)',
+	       repl => 'PROJECT_NUMBER         = $VERSION',
+	       files => [qw(doxygen.conf)],
+	     },
 	    );
 
 #
