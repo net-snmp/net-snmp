@@ -4,3 +4,4 @@
 .orig
 *.lo
 Makefile
+.libs

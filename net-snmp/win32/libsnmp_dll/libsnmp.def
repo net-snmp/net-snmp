@@ -406,6 +406,10 @@ EXPORTS
 	netsnmp_udp6_agent_config_tokens_register
 	init_usm_conf
 	strtok_r
+        snmp_reset_var_buffers
+        netsnmp_container_add_index
+        netsnmp_container_find
+        netsnmp_c64_check32_and_update
 ;IPv6        netsnmp_udp6_parse_security
 ;IPv6        netsnmp_udp6_getSecName
 ;IPv6        netsnmp_TCPIPv6Domain

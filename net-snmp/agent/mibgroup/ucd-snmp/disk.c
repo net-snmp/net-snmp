@@ -73,14 +73,16 @@
 #if HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #endif
-#if (!defined(HAVE_STATVFS)) && defined(HAVE_STATFS)
+#if defined(HAVE_STATFS)
 #if HAVE_SYS_MOUNT_H
 #include <sys/mount.h>
 #endif
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
+#if !defined(HAVE_STATVFS)
 #define statvfs statfs
+#endif
 #endif
 #if HAVE_VM_VM_H
 #include <vm/vm.h>

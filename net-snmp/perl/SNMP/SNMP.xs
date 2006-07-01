@@ -514,15 +514,35 @@ int flag;
 	  break;
 
         case ASN_COUNTER64:
+#ifdef OPAQUE_SPECIAL_TYPES
+        case ASN_OPAQUE_COUNTER64:
+        case ASN_OPAQUE_U64:
+#endif
           printU64(buf,(struct counter64 *)var->val.counter64);
           len = strlen(buf);
           break;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+        case ASN_OPAQUE_I64:
+          printI64(buf,(struct counter64 *)var->val.counter64);
+          len = strlen(buf);
+          break;
+#endif
 
         case ASN_BIT_STR:
             snprint_bitstring(buf, sizeof(buf), var, NULL, NULL, NULL);
             len = strlen(buf);
             break;
-
+#ifdef OPAQUE_SPECIAL_TYPES
+        case ASN_OPAQUE_FLOAT:
+         sprintf(buf,"%f", var->val.floatVal);
+         break;
+         
+        case ASN_OPAQUE_DOUBLE:
+         sprintf(buf,"%f", var->val.doubleVal);
+         break;
+#endif
+         
         case ASN_NSAP:
         default:
            warn("snprint_value: asn type not handled %d\n",var->type);
@@ -819,9 +839,10 @@ const char *key;
     char           *first = NULL, *result = NULL, *entry;
     const char     *position;
     char           *newkey = strdup(key);
+    char           *st;
 
 
-    entry = strtok(newkey, "*");
+    entry = strtok_r(newkey, "*", &st);
     position = search_base;
     while (entry) {
         result = strcasestr(position, entry);
@@ -835,7 +856,7 @@ const char *key;
             first = result;
 
         position = result + strlen(entry);
-        entry = strtok(NULL, "*");
+        entry = strtok_r(NULL, "*", &st);
     }
     free(newkey);
     if (result)
@@ -1008,15 +1029,16 @@ char * soid_str;
 {
    char soid_buf[STR_BUF_SIZE];
    char *cp;
+   char *st;
 
    if (!soid_str || !*soid_str) return SUCCESS;/* successfully added nothing */
    if (*soid_str == '.') soid_str++;
    strcpy(soid_buf, soid_str);
-   cp = strtok(soid_buf,".");
+   cp = strtok_r(soid_buf,".",&st);
    while (cp) {
      sscanf(cp, "%lu", &(doid_arr[(*doid_arr_len)++]));
      /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
-     cp = strtok(NULL,".");
+     cp = strtok_r(NULL,".",&st);
    }
    return(SUCCESS);
 }
@@ -2274,8 +2296,6 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    return pix;
 
    err:
-   if (pdu)
-      snmp_free_pdu(pdu);
    return -1;
 
 }
@@ -2301,7 +2321,7 @@ _bulkwalk_finish(walk_context *context, int okay)
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
 
-   dXSARGS;
+   dSP;
 
    async = SvTRUE(context->perl_cb);
 
@@ -2310,8 +2330,6 @@ _bulkwalk_finish(walk_context *context, int okay)
    ** items pushed onto the stack.  For async, create a new array and push
    ** the references onto it.  The array is then passed to the Perl callback.
    */
-   if (!async)
-      SP -= items;
 
    DBPRT(1, (DBOUT "Bulwalk %s (saved %d/%d), ", okay ? "completed" : "had error",
 					context->oid_saved, context->oid_total));
@@ -2864,7 +2882,7 @@ snmp_update_session(sess_ref, version, community, peer, lport, retries, timeout)
 	   }
            if (ss->version == -1) {
 		if (verbose)
-                   warn("Unsupported SNMP version (%s)\n", version);
+                   warn("snmp_update_session: Unsupported SNMP version (%s)\n", version);
                 goto update_end;
 	   }
            /* WARNING LEAKAGE but I cant free lib memory under win32 */
@@ -2895,9 +2913,9 @@ snmp_add_mib_dir(mib_dir,force=0)
 	   result = add_mibdir(mib_dir);
         }
         if (result) {
-           if (verbose) warn("Added mib dir %s\n", mib_dir);
+           if (verbose) warn("snmp_add_mib_dir: Added mib dir %s\n", mib_dir);
         } else {
-           if (verbose) warn("Failed to add %s\n", mib_dir);
+           if (verbose) warn("snmp_add_mib_dir: Failed to add %s\n", mib_dir);
         }
         RETVAL = (I32)result;
         }
@@ -2924,7 +2942,7 @@ snmp_read_mib(mib_file, force=0)
 
         if ((mib_file == NULL) || (*mib_file == '\0')) {
            if (get_tree_head() == NULL) {
-              if (verbose) warn("initializing MIB\n");
+              if (verbose) warn("snmp_read_mib: initializing MIB\n");
               init_mib();
               if (get_tree_head()) {
                  if (verbose) warn("done\n");
@@ -2933,7 +2951,7 @@ snmp_read_mib(mib_file, force=0)
               }
 	   }
         } else {
-           if (verbose) warn("reading MIB: %s\n", mib_file);
+           if (verbose) warn("snmp_read_mib: reading MIB: %s\n", mib_file);
            if (strcmp("ALL",mib_file))
               read_mib(mib_file);
            else
@@ -2944,7 +2962,7 @@ snmp_read_mib(mib_file, force=0)
               if (verbose) warn("failed\n");
            }
         }
-        RETVAL = (I32)get_tree_head();
+        RETVAL = (IV)get_tree_head();
         }
         OUTPUT:
         RETVAL
@@ -2967,7 +2985,7 @@ snmp_read_module(module)
         } else {
            if (verbose) warn("Failed reading %s\n", module);
         }
-        RETVAL = (I32)get_tree_head();
+        RETVAL = (IV)get_tree_head();
         }
         OUTPUT:
         RETVAL
@@ -3080,7 +3098,7 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
 				       SvCUR(*varbind_val_f):0), type);
 
 		    if (verbose && res == FAILURE)
-		      warn("error: adding variable/value to PDU");
+		      warn("error: set: adding variable/value to PDU");
                  } /* if var_ref is ok */
               } /* for all the vars */
 
@@ -3238,9 +3256,11 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
 	      for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
+                    char *tag_pv;
                     varbind = (AV*) SvRV(*varbind_ref);
 
-                    tp = __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, ".0"),
+                    tag_pv = __av_elem_pv(varbind, VARBIND_TAG_F, ".0");
+                    tp = __tag2oid(tag_pv,
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
                               oid_arr, &oid_arr_len, NULL, best_guess);
 
@@ -3248,7 +3268,8 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
   		       snmp_add_null_var(pdu, oid_arr, oid_arr_len);
 		    } else {
                        if (verbose)
-                          warn("error: set: unknown object ID");
+                          warn("error: get: unknown object ID (%s)",
+                                                 (tag_pv?tag_pv:"<null>"));
 	               sv_catpv(*err_str_svp,
                                (char*)snmp_api_errstring(SNMPERR_UNKNOWN_OBJID));
                        sv_setiv(*err_num_svp, SNMPERR_UNKNOWN_OBJID);
@@ -3413,6 +3434,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            int status;
 	   u_char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
            size_t str_buf_len = sizeof(str_buf);
+           u_char tmp_buf_prefix[STR_BUF_SIZE];
+           u_char str_buf_prefix[STR_BUF_SIZE];
            size_t out_len = 0;
            int buf_over = 0;
            char *label;
@@ -3423,6 +3446,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 	   int old_format;
 	   SV *sv_timestamp = NULL;
            int best_guess;
+           char *tmp_prefix_ptr;
+           char *st;
 	   
            New (0, oid_arr, MAX_OID_LEN, oid);
 
@@ -3453,9 +3478,22 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 	      for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
+                    char *tag_pv;
                     varbind = (AV*) SvRV(*varbind_ref);
 
-                    tp = __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, ".0"),
+                    /* If the varbind includes the module prefix, capture it for use later */
+                    strncpy(tmp_buf_prefix, __av_elem_pv(varbind, VARBIND_TAG_F, ".0"), STR_BUF_SIZE);
+                    tmp_prefix_ptr = strstr(tmp_buf_prefix,"::");
+                    if (tmp_prefix_ptr) {
+                      tmp_prefix_ptr = strtok_r(tmp_buf_prefix, "::", &st);
+                      strncpy(str_buf_prefix, tmp_prefix_ptr, STR_BUF_SIZE);
+                    }
+                    else {
+                      *str_buf_prefix = '\0';
+                    }
+
+                    tag_pv = __av_elem_pv(varbind, VARBIND_TAG_F, ".0");
+                    tp = __tag2oid(tag_pv,
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
                               oid_arr, &oid_arr_len, NULL, best_guess);
 
@@ -3463,7 +3501,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
   		       snmp_add_null_var(pdu, oid_arr, oid_arr_len);
 		    } else {
                        if (verbose)
-                          warn("error: set: unknown object ID");
+                          warn("error: getnext: unknown object ID (%s)",
+                                                 (tag_pv?tag_pv:"<null>"));
 	               sv_catpv(*err_str_svp,
                                (char*)snmp_api_errstring(SNMPERR_UNKNOWN_OBJID));
                        sv_setiv(*err_num_svp, SNMPERR_UNKNOWN_OBJID);
@@ -3549,6 +3588,13 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                                                            vars->name,vars->name_length);
                     str_buf[sizeof(str_buf)-1] = '\0';
 
+                    /* Prepend the module prefix to the next OID if needed */
+                    if (*str_buf_prefix) {
+                      strncat(str_buf_prefix, "::", STR_BUF_SIZE - strlen(str_buf_prefix) - 2);
+                      strncat(str_buf_prefix, str_buf, STR_BUF_SIZE - strlen(str_buf_prefix));
+                      strncpy(str_buf, str_buf_prefix, STR_BUF_SIZE);
+                    }
+                    
                     if (__is_leaf(tp)) {
                        type = tp->type;
                     } else {
@@ -3676,8 +3722,10 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 	      for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
+                    char *tag_pv;
                     varbind = (AV*) SvRV(*varbind_ref);
-                    __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, "0"),
+                    tag_pv = __av_elem_pv(varbind, VARBIND_TAG_F, "0");
+                    __tag2oid(tag_pv,
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
                               oid_arr, &oid_arr_len, NULL, best_guess);
 
@@ -3686,7 +3734,8 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
   		       snmp_add_null_var(pdu, oid_arr, oid_arr_len);
 		    } else {
                        if (verbose)
-                          warn("error: set: unknown object ID");
+                          warn("error: getbulk: unknown object ID (%s)",
+                                                 (tag_pv?tag_pv:"<null>"));
 	               sv_catpv(*err_str_svp,
                                (char*)snmp_api_errstring(SNMPERR_UNKNOWN_OBJID));
                        sv_setiv(*err_num_svp, SNMPERR_UNKNOWN_OBJID);
@@ -3724,7 +3773,8 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                                        *err_str_svp, *err_num_svp,
 				       *err_ind_svp);
 
-	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
+	      if (SvIOK(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)) &&
+                  SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
 	         sv_timestamp = newSViv((IV)time(NULL));
 
 	      av_clear(varlist);
@@ -3860,7 +3910,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 
 	   if (!SvROK(sess_ref) || !SvROK(varlist_ref)) {
 	      if (verbose)
-		 warn("Bad session or varlist reference!\n");
+		 warn("bulkwalk: Bad session or varlist reference!\n");
 
 	      XSRETURN_UNDEF;
 	   }
@@ -3946,7 +3996,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      /* Get a handle on this entry in the request table. */
 	      bt_entry = &context->req_oids[context->nreq_oids];
 
-	      DBPRT(1,(DBOUT "  request %d: ", (int)varlist_ind));
+	      DBPRT(1,(DBOUT "  request %d: ", (int) varlist_ind));
 
 	      /* Get the request varbind from the varlist, parse it out to
 	      ** tag and index, and copy it to the req_oid[] array slots.
@@ -4060,9 +4110,9 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      }
 
 	      /* Sent okay...  Return the request ID in 'pdu' as an SvIV. */
-	      DBPRT(1,(DBOUT "Okay, request id is %d\n", (int)pdu));
-/*	      XSRETURN_IV((int)pdu); */
-	      XPUSHs(sv_2mortal(newSViv((int)pdu)));
+	      DBPRT(1,(DBOUT "Okay, request id is %d\n", (intptr_t) pdu));
+/*	      XSRETURN_IV((intptr_t)pdu); */
+	      XPUSHs(sv_2mortal(newSViv(pdu)));
 	      XSRETURN(1);
 	   }
 
@@ -4093,7 +4143,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      */
 	      if ((i = _bulkwalk_recv_pdu(context, pdu)) <= 0) {
 		 DBPRT(2,(DBOUT "bulkwalk_recv_pdu() returned %d (error/empty)\n", i));
-		 break;
+		 goto err;
 	      }
 
               /* Free the returned pdu.  Don't bother to do this for the async
@@ -4939,8 +4989,8 @@ snmp_check_timeout()
 
 MODULE = SNMP	PACKAGE = SNMP::MIB::NODE 	PREFIX = snmp_mib_node_
 SV *
-snmp_mib_node_TIEHASH(class,key,tp=0)
-	char *	class
+snmp_mib_node_TIEHASH(cl,key,tp=0)
+	char *	cl
 	char *	key
         IV tp
 	CODE:
@@ -4949,7 +4999,7 @@ snmp_mib_node_TIEHASH(class,key,tp=0)
            if (!tp) tp = (IV)__tag2oid(key, NULL, NULL, NULL, NULL,0);
            if (tp) {
               ST(0) = sv_newmortal();
-              sv_setref_iv(ST(0), class, tp);
+              sv_setref_iv(ST(0), cl, tp);
            } else {
               ST(0) = &sv_undef;
            }

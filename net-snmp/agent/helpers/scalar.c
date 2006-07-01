@@ -29,7 +29,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup scalar scalar: process scalars easily.
+/** @defgroup scalar scalar
+ *  Process scalars easily.
  *  @ingroup leaf
  *  @{
  */
@@ -38,8 +39,6 @@
  * Creates a scalar handler calling netsnmp_create_handler with a
  * handler name defaulted to "scalar" and access method, 
  * netsnmp_scalar_helper_handler.
- *
- * @param void
  *
  * @return Returns a pointer to a netsnmp_mib_handler struct which contains
  *	the handler's name and the access method
@@ -197,6 +196,5 @@ netsnmp_scalar_helper_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_GENERR;
 }
 
-/*
- * @} 
+/** @} 
  */

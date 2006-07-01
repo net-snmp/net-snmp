@@ -123,6 +123,11 @@ ifTable_container_init(netsnmp_container ** container_ptr_ptr,
      * cache. Do not change the magic pointer, as it is used
      * by the MFD helper.
      */
+    /*
+     * since we set AUTO_RELOAD below, this timer controls how
+     * often the cache is reloaded. A 10 Mbps stream can wrap if*Octets in ~57 minutes.
+     * At 100 Mbps it is ~5 minutes, and at 1 Gbps, ~34 seconds.
+     */
     cache->timeout = IFTABLE_CACHE_TIMEOUT;     /* seconds */
 
     /*
@@ -159,7 +164,8 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
             DEBUGMSGTL(("ifTable:access", "updating missing entry\n"));
             rowreq_ctx->known_missing = 1;
             rowreq_ctx->data.ifAdminStatus = IFADMINSTATUS_DOWN;
-            if (rowreq_ctx->data.ifOperStatus != IFOPERSTATUS_DOWN)
+            if ((!(ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE))
+                && (rowreq_ctx->data.ifOperStatus != IFOPERSTATUS_DOWN))
                 oper_changed = 1;
             rowreq_ctx->data.ifOperStatus = IFOPERSTATUS_DOWN;
         }
@@ -194,7 +200,7 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
                                             ifentry);
 
         /*
-         * remove entry from ifcontainer
+         * remove entry from temporary ifcontainer
          */
         CONTAINER_REMOVE(ifcontainer, ifentry);
         netsnmp_access_interface_entry_free(ifentry);
