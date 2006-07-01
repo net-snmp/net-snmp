@@ -1,5 +1,260 @@
 -------------------------------------------------------------------------------
 
+2006-06-30 21:46  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3
+, netsnmp_agent_trap.3,
+     netsnmp_asn1_packet_parse.3, netsnmp_baby_steps.3
+, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3
+, netsnmp_container.3, netsnmp_data_list.3
+, netsnmp_debug.3, netsnmp_default_store.3
+, netsnmp_handler.3, netsnmp_instance.3
+, netsnmp_iterator_info_s.3, netsnmp_leaf.3
+, netsnmp_library.3,
+     netsnmp_mib_maintenance.3, netsnmp_mib_utilities.3
+, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3
+, netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3
+, netsnmp_snmp_client.3,
+     netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3,
+     netsnmp_snmp_session.3, netsnmp_stash_cache.3
+, netsnmp_stash_to_next.3, netsnmp_table.3
+, netsnmp_table_array.3,
+     netsnmp_table_container.3, netsnmp_table_data.3
+, netsnmp_table_dataset.3,
+     netsnmp_table_generic.3, netsnmp_table_indexes.3
+, netsnmp_table_iterator.3,
+     netsnmp_table_iterator.h.3,
+     netsnmp_table_maintenance.3, netsnmp_table_rows.3
+, netsnmp_tdata.3, netsnmp_util.3,
+     netsnmp_utilities.3, netsnmp_variable_list.3
+, netsnmp_watcher.3:
+
+   documentation update
+
+2006-06-30 21:46  hardaker
+
+   * doxygen.conf:
+
+   - version tag ( 5.3.1.rc2 )
+
+2006-06-30 21:45  hardaker
+
+   * local/Version-Munge.pl:
+
+   doxygen.conf support
+
+2006-06-30 21:24  hardaker
+
+   * local/Version-Munge.pl:
+
+   check for file existence
+
+2006-06-30 21:07  hardaker
+
+   * local/Version-Munge.pl:
+
+   exit with the cvs commit status if run
+
+2006-06-30 15:53  hardaker
+
+   * perl/: Makefile.PL, Makefile.subs.pl,
+     ASN/Makefile.PL, OID/Makefile.PL,
+     SNMP/Makefile.PL, TrapReceiver/Makefile.PL,
+     agent/Makefile.PL, agent/default_store/Makefile.PL
+, default_store/Makefile.PL:
+
+   better env name for not checking the version
+
+2006-06-30 15:26  hardaker
+
+   * perl/: Makefile.PL, Makefile.subs.pl,
+     ASN/ASN.pm, ASN/Makefile.PL,
+     AnyData_SNMP/Storage.pm, OID/Makefile.PL,
+     OID/OID.pm, SNMP/Makefile.PL, SNMP/SNMP.pm
+, TrapReceiver/Makefile.PL,
+     TrapReceiver/TrapReceiver.pm, agent/Makefile.PL
+, agent/agent.pm,
+     agent/default_store/Makefile.PL,
+     agent/default_store/default_store.pm,
+     default_store/Makefile.PL,
+     default_store/default_store.pm:
+
+   new perl versioning support
+
+2006-06-30 15:19  hardaker
+
+   * local/Version-Munge.pl:
+
+   much better support for cvs commit, version numbering, etc
+
+2006-06-30 15:17  hardaker
+
+   * Makefile.in:
+
+   remove version changing support; now in makerelease
+
+2006-06-30 15:16  hardaker
+
+   * agent/mibgroup/versiontag:
+
+   remove tag support from versiontag; now in makerelease
+
+2006-06-30 15:14  hardaker
+
+   * perl/SNMP/: MANIFEST, MANIFEST.SKIP:
+
+   manifest changes for upcoming CPAN release (needs more)
+
+2006-06-28 09:35  dts12
+
+   * include/net-snmp/system/mingw32.h,
+     win32/net-snmp/net-snmp-config.h:
+
+   Ensure UDP addresses are handled correctly on Windows x86 systems.
+
+2006-06-27 11:40  tanders
+
+   * testing/tests/: T061agentperl, T115agentxperl
+:
+
+   set DYLD_LIBRARY_PATH for OSX and SHLIB_PATH for HP-UX
+
+2006-06-27 09:42  rstory
+
+   * README.osX:
+
+   remove embeded perl info; add perl agentx info
+
+2006-06-27 08:25  tanders
+
+   * agent/mibgroup/mibII/udpTable.c:
+
+   fix more udpTable byte-order issues (indices) on *BSD and Solaris/x86
+
+2006-06-26 18:00  alex_b
+
+   * perl/: Makefile.PL, Makefile.makefiles,
+     Makefile.subs.pl, make-perl-makefiles,
+     ASN/Makefile.PL, OID/Makefile.PL,
+     SNMP/Makefile.PL, TrapReceiver/Makefile.PL,
+     agent/Makefile.PL, agent/default_store/Makefile.PL
+, default_store/Makefile.PL:
+
+   -'perl Makefile.PL -NET-SNMP-IN-SOURCE=true' was not working.  Fix: call
+    'nsconfig' --version inside of InitMakeParams instead of Check_Version
+   -Support module: NetSNMPGetOpts call should pass parent folder so net-snmp-config
+    can be found
+   -Skip version check for Win32 MSVC
+   -add TrapReceiver and agent/Support to Makefile.makefiles
+   -make-perl-makefiles:  rename files AFTER closing them, not before
+
+2006-06-26 15:28  tanders
+
+   * testing/TESTCONF.sh:
+
+   add netstat path for IRIX
+
+2006-06-26 08:33  tanders
+
+   * include/net-snmp/system/netbsd.h:
+
+   udpTable byte-order fix (values only) for NetBSD and OpenBSD
+
+2006-06-25 14:43  tanders
+
+   * testing/tests/T061agentperl:
+
+   prepend (instead of replace) a non-empty LD_LIBRARY_PATH; fixes test errors on systems that rely on it
+
+2006-06-25 14:25  tanders
+
+   * testing/tests/T160snmpnetstat:
+
+   fix test error on Solaris etc.: only use "id -u" on systems that support it
+
+2006-06-23 12:50  tanders
+
+   * testing/tests/T160snmpnetstat:
+
+   check for 127.0.0.1., not just , to identify byte-order issues
+
+2006-06-23 09:06  hardaker
+
+   * agent/mibgroup/mibII/udpTable.c,
+     include/net-snmp/system/cygwin.h,
+     include/net-snmp/system/freebsd.h,
+     include/net-snmp/system/solaris.h:
+
+   Clean fixing of ordering problems with kernel storage of UDP values
+
+2006-06-23 02:47  tanders
+
+   * agent/mibgroup/mibII/udpTable.c:
+
+   fix earlier "don't reverse address byte order for solaris (specifically x86) for local addresses" patch that broke byte order for all platforms
+
+2006-06-20 12:12  tanders
+
+   * testing/tests/T061agentperl:
+
+   more portable way of exporting
+
+2006-06-20 05:41  tanders
+
+   * testing/tests/T061agentperl:
+
+   set LD_LIBRARY_PATH to make sure that NetSNMP::agent's agent.so can load (uninstalled) libnetsnmp*.so; otherwise test fails at least on FreeBSD
+
+2006-06-15 15:10  tanders
+
+   * testing/eval_tools.sh:
+
+   suppress stderr warnings for "ps -e" in order to fix [false] nightly build error messages on SF CF host alpha-linux1
+
+2006-06-15 06:52  tanders
+
+   * testing/tests/T160snmpnetstat:
+
+   add OpenBSD and NetBSD to the list of systems that require root privileges for udpTable (according to Dave's testing)
+
+2006-06-13 14:53  tanders
+
+   * testing/tests/T115agentxperl:
+
+   fix NETSNMP_DS_AGENT_NO_ROOT_ACCESS setting (needed for e.g. Solaris 2.6)
+
+2006-06-13 05:50  tanders
+
+   * agent/agent_registry.c,
+     agent/mibgroup/notification-log-mib/notification_log.c
+, include/net-snmp/library/tools.h,
+     snmplib/callback.c:
+
+   fix bug 1505341: agent segfaults on Solaris with -DALL
+
+2006-06-12 16:59  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   - (perl/TrapReceiver/TrapReceiver.pm): version tag ( 5.3.1.rc1 )
+
 Changes: V5.3 -> V5.3.1
 
 2006-06-12 16:54  hardaker
