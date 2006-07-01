@@ -70,6 +70,7 @@ my @exprs = (
 	       files => [qw(perl/SNMP/SNMP.pm
 			    perl/agent/agent.pm
 			    perl/agent/default_store/default_store.pm
+			    perl/agent/Support/Support.pm
 			    perl/default_store/default_store.pm
 			    perl/OID/OID.pm
 			    perl/ASN/ASN.pm
@@ -161,6 +162,7 @@ if ($opts{'C'}) {
     my $files = join(" ",@files);
     print "committing $files\n" if ($opts{'V'});
     system("cvs commit -m \"- version tag ( $VERSION )\" $files");
+    exit($?);
 }
 
 sub floatize_version {
