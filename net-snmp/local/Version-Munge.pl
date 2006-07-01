@@ -124,6 +124,12 @@ for ($i = 0; $i <= $#exprs; $i++) {
 	    system("cvs update $f");
 	}
 
+	# make sure it exists
+	if (! -f $f) {
+	    print STDERR "FAILED to find file $f\n";
+	    exit(1);
+	}
+
 	# modify the files with the version
 	if ($opts{'M'}) {
 	    rename ($f,"$f.bak");
