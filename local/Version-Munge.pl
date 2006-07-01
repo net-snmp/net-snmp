@@ -162,6 +162,7 @@ if ($opts{'C'}) {
     my $files = join(" ",@files);
     print "committing $files\n" if ($opts{'V'});
     system("cvs commit -m \"- version tag ( $VERSION )\" $files");
+    exit($?);
 }
 
 sub floatize_version {
