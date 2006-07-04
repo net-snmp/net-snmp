@@ -2088,7 +2088,9 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
     while ((type = get_token(fp, token, MAXTOKEN)) != ENDOFFILE) {
         if (type == RIGHTBRACKET)
             break;
-        if (type == LABEL) {
+        /* some enums use "deprecated" to indicate a no longer value label */
+        /* (EG: IP-MIB's IpAddressStatusTC) */
+        if (type == LABEL || type == DEPRECATED) {
             /*
              * this is an enumerated label 
              */
