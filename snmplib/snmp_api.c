@@ -758,6 +758,7 @@ init_snmp_enums(void)
     se_add_pair_to_slist("asntypes", strdup("integer"), ASN_INTEGER);
     se_add_pair_to_slist("asntypes", strdup("counter"), ASN_COUNTER);
     se_add_pair_to_slist("asntypes", strdup("uinteger"), ASN_GAUGE);
+    se_add_pair_to_slist("asntypes", strdup("unsigned"), ASN_UNSIGNED); /* RFC 1902 - same as GAUGE */
     se_add_pair_to_slist("asntypes", strdup("timeticks"), ASN_TIMETICKS);
     se_add_pair_to_slist("asntypes", strdup("counter64"), ASN_COUNTER64);
     se_add_pair_to_slist("asntypes", strdup("octet_str"), ASN_OCTET_STR);
