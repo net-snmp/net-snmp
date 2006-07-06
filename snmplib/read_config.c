@@ -1979,7 +1979,7 @@ read_config_store_data_prefix(char prefix, int type, char *storeto,
             return (storeto + strlen(storeto));
 
         case ASN_IPADDRESS:
-            in.s_addr = (unsigned int *) dataptr;
+            in.s_addr = *(unsigned int *) dataptr; 
             sprintf(storeto, "%c%s", prefix, inet_ntoa(in));
             return (storeto + strlen(storeto));
 
