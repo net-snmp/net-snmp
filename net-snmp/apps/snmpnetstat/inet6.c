@@ -42,36 +42,20 @@ static char sccsid[] = "@(#)inet.c	8.4 (Berkeley) 4/20/94";
 
 #include <net-snmp/net-snmp-config.h>
 
-/*
- * hack-o-matic for Cygwin to use winsock2
-*/
-#if defined(cygwin)
-#undef HAVE_UNISTD_H
-#undef HAVE_NETINET_IN_H
-#undef HAVE_ARPA_INET_H
-#undef HAVE_SYS_PARAM_H
-#undef HAVE_SYS_SELECT_H
-#undef HAVE_SYS_SOCKET_H
-#undef HAVE_IN_ADDR_T
+#if HAVE_UNISTD_H
+#include <unistd.h>
 #endif
-
-#if defined(HAVE_WINSOCK_H) || defined(cygwin)
+#if HAVE_WINSOCK_H
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include "winstub.h"
-
-extern const char *inet_ntop(int, const void*, char*, size_t);
-
-#ifdef cygwin
-extern int WSAAPI getnameinfo(const struct sockaddr*,socklen_t,char*,DWORD, char*,DWORD,int);
 #endif
-
-#else                  /* WIN32 */
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#endif                  /* WIN32 */
-
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -84,10 +68,6 @@ extern int WSAAPI getnameinfo(const struct sockaddr*,socklen_t,char*,DWORD, char
 #endif
 
 #include <net-snmp/net-snmp-includes.h>
-
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #include "main.h"
 #include "netstat.h"
