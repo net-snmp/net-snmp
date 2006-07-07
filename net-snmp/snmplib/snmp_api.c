@@ -877,6 +877,8 @@ snmp_shutdown(const char *type)
     netsnmp_clear_tdomain_list();
     clear_callback();
     netsnmp_ds_shutdown();
+    clear_user_list();
+    free_etimelist();
 }
 
 
