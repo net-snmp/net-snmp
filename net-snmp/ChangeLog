@@ -2,6 +2,12 @@
 
 Changes: V5.3 -> V5.3.1.rc3
 
+2006-07-07 13:25  hardaker
+
+   * agent/mibgroup/if-mib/ifTable/ifTable_data_access.c:
+
+   Patch from robert to fix a potential NULL dereference
+
 2006-07-07 13:06  hardaker
 
    * man/: netsnmp_agent.3, netsnmp_agent_registry.3
