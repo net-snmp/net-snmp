@@ -2,6 +2,114 @@
 
 Changes: V5.2.2 -> V5.2.3
 
+2006-07-08 01:11  tanders
+
+   * apps/: Makefile.depend, snmpnetstat/Makefile.depend
+:
+
+   make depend
+
+2006-07-08 01:09  tanders
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3
+, netsnmp_agent_trap.3,
+     netsnmp_asn1_packet_parse.3, netsnmp_baby_steps.3
+, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3
+, netsnmp_container.3, netsnmp_data_list.3
+, netsnmp_debug.3, netsnmp_default_store.3
+, netsnmp_handler.3, netsnmp_instance.3
+, netsnmp_iterator_info_s.3, netsnmp_leaf.3
+, netsnmp_library.3,
+     netsnmp_mib_utilities.3, netsnmp_mode_end_call.3
+, netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3
+, netsnmp_row_merge.3, netsnmp_scalar.3
+, netsnmp_scalar_group_group.3,
+     netsnmp_serialize.3, netsnmp_snmp_agent.3,
+     netsnmp_snmp_alarm.3, netsnmp_snmp_client.3
+, netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3
+, netsnmp_snmp_session.3,
+     netsnmp_stash_cache.3, netsnmp_table.3,
+     netsnmp_table_array.3, netsnmp_table_container.3
+, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_iterator.3
+, netsnmp_table_iterator.h.3,
+     netsnmp_util.3, netsnmp_utilities.3,
+     netsnmp_variable_list.3, netsnmp_watcher.3
+:
+
+   documentation update
+
+2006-07-08 01:08  tanders
+
+   * doxygen.conf:
+
+   version update
+
+2006-07-08 00:36  tanders
+
+   * apps/snmpnetstat/inet6.c:
+
+   Dave's patch for compilation fixes for windows
+
+2006-07-05 17:51  rstory
+
+   * mibs/: DISMAN-NSLOOKUP-MIB.txt, DISMAN-PING-MIB.txt
+, DISMAN-TRACEROUTE-MIB.txt:
+
+   update from RFC 4560
+
+2006-07-01 07:12  hardaker
+
+   * local/Version-Munge.pl:
+
+   support for optional files (don't exist in every branch)
+
+2006-07-01 06:45  hardaker
+
+   * local/Version-Munge.pl:
+
+   doxygen.conf support
+
+2006-07-01 06:24  hardaker
+
+   * local/Version-Munge.pl:
+
+   check for file existence
+
+2006-07-01 06:07  hardaker
+
+   * local/Version-Munge.pl:
+
+   exit with the cvs commit status if run
+
+2006-07-01 02:28  tanders
+
+   * FAQ, README, configure,
+     configure.in, sedscript.in,
+     snmplib/snmp_version.c:
+
+   version tag ( 5.3.1.rc1 )
+
+2006-07-01 01:51  tanders
+
+   * ChangeLog, NEWS:
+
+   version update
+
 2006-07-01 01:45  tanders
 
    * man/: netsnmp_agent.3, netsnmp_agent_registry.3
