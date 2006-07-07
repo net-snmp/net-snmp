@@ -18,12 +18,19 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - check the perl module version number against the net-snmp version
         number
 
+    MIBs:
+      - update DISMAN-NSLOOKUP-MIB.txt, DISMAN-PING-MIB.txt and
+        DISMAN-TRACEROUTE-MIB.txt (from RFC 4560)
+
  Ports:
    HP-UX:
       - fix ipAdEntBcastAddr for HP-UX 11.0/11i (patch 1481012)
    Mac OS X:
       - build fix for snmpnetstat
+   Windows:
+      - build fix for snmpnetstat
 
+ Many other miscellaneous bug fixes
 
 *5.2.2*
 
