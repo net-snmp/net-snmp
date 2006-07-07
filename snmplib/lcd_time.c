@@ -278,7 +278,42 @@ void free_enginetime(unsigned char *engineID, size_t engineID_len)
 
 }
 
+/*******************************************************************-o-****
+**
+ * free_etimelist
+ *
+ * Parameters:
+ *   None
+ *      
+ * Returns:
+ *   void
+ *
+ *
+ * Free all of the memory used by entries in the etimelist.
+ *
+ */
+void free_etimelist(void)
+{
+     int index = 0;
+     Enginetime e = 0;
+     Enginetime nextE = 0;
 
+     for( ; index < ETIMELIST_SIZE; ++index)
+     {
+           e = etimelist[index];
+
+           while(e != 0)
+           {
+                 nextE = e->next;
+                 SNMP_FREE(e->engineID);
+                 SNMP_FREE(e);
+                 e = nextE;
+           }
+
+           etimelist[index] = 0;
+     }
+     return;
+}
 
 /*******************************************************************-o-******
  * set_enginetime
