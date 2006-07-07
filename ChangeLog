@@ -2,6 +2,84 @@
 
 Changes: V5.3 -> V5.3.1.rc3
 
+2006-07-07 15:07  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3
+, netsnmp_agent_trap.3,
+     netsnmp_asn1_packet_parse.3, netsnmp_baby_steps.3
+, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3
+, netsnmp_container.3, netsnmp_data_list.3
+, netsnmp_debug.3, netsnmp_default_store.3
+, netsnmp_handler.3, netsnmp_instance.3
+, netsnmp_iterator_info_s.3, netsnmp_leaf.3
+, netsnmp_library.3,
+     netsnmp_mib_maintenance.3, netsnmp_mib_utilities.3
+, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3
+, netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3
+, netsnmp_snmp_client.3,
+     netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3,
+     netsnmp_snmp_session.3, netsnmp_stash_cache.3
+, netsnmp_stash_to_next.3, netsnmp_table.3
+, netsnmp_table_array.3,
+     netsnmp_table_container.3, netsnmp_table_data.3
+, netsnmp_table_dataset.3,
+     netsnmp_table_generic.3, netsnmp_table_indexes.3
+, netsnmp_table_iterator.3,
+     netsnmp_table_iterator.h.3,
+     netsnmp_table_maintenance.3, netsnmp_table_rows.3
+, netsnmp_tdata.3, netsnmp_util.3,
+     netsnmp_utilities.3, netsnmp_variable_list.3
+, netsnmp_watcher.3:
+
+   documentation update
+
+2006-07-07 15:06  hardaker
+
+   * doxygen.conf:
+
+   - version tag ( 5.3.1.rc4 )
+
+2006-07-07 14:52  hardaker
+
+   * apps/snmpnetstat/inet6.c:
+
+   Dave's patch for compilation fixes for windows
+
+2006-07-07 14:51  hardaker
+
+   * configure, configure.in:
+
+   Dave's patch to remove host mib support for windows by default
+
+2006-07-07 13:29  hardaker
+
+   * ChangeLog:
+
+   added note about patch from robert
+
+2006-07-07 13:25  hardaker
+
+   * agent/mibgroup/if-mib/ifTable/ifTable_data_access.c:
+
+   Patch from robert to fix a potential NULL dereference
+
 2006-07-07 13:25  hardaker
 
    * agent/mibgroup/if-mib/ifTable/ifTable_data_access.c:
