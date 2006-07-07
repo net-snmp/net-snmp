@@ -297,6 +297,7 @@ var_ipAddrEntry(struct variable *vp,
         long_return = lowin_ifaddr.Addr;
         return (u_char *) & long_return;
 #elif defined(linux) || defined(sunV3)
+        *var_len = sizeof(((struct sockaddr_in *) &lowin_ifnet.if_addr)->sin_addr.s_addr);
         return (u_char *) & ((struct sockaddr_in *) &lowin_ifnet.if_addr)->
             sin_addr.s_addr;
 #else
@@ -311,6 +312,7 @@ var_ipAddrEntry(struct variable *vp,
         long_return = lowin_ifaddr.NetMask;
         return (u_char *) & long_return;
 #elif defined(linux)
+        *var_len = sizeof(((struct sockaddr_in *) &lowin_ifnet.ia_subnetmask)->sin_addr.s_addr);
         return (u_char *) & ((struct sockaddr_in *) &lowin_ifnet.
                              ia_subnetmask)->sin_addr.s_addr;
 #elif !defined(sunV3)
@@ -319,8 +321,9 @@ var_ipAddrEntry(struct variable *vp,
 #endif
     case IPADBCASTADDR:
 #ifdef hpux11
-        long_return = lowin_ifaddr.BcastAddr;
+        long_return = lowin_ifaddr.BcastAddr & 1;
 #elif defined(linux) || defined(sunV3)
+        *var_len = sizeof(long_return);
         long_return =
             ntohl(((struct sockaddr_in *) &lowin_ifnet.ifu_broadaddr)->
                   sin_addr.s_addr) & 1;

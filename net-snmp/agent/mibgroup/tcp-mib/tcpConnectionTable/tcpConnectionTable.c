@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for tcpConnectionTable
+/** \page MFD helper for tcpConnectionTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -160,7 +160,7 @@ tcpConnectionTable_rowreq_ctx_cleanup(tcpConnectionTable_rowreq_ctx *
 /**
  * pre-request callback
  *
- *
+ * @param user_context
  * @retval MFD_SUCCESS              : success.
  * @retval MFD_ERROR                : other error
  */
@@ -184,7 +184,7 @@ tcpConnectionTable_pre_request(tcpConnectionTable_registration *
  *   New rows have been inserted into the container, and
  *   deleted rows have been removed from the container and
  *   released.
- *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -284,6 +284,14 @@ tcpConnectionTable_release_data(tcpConnectionTable_data * data)
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param tcpConnectionLocalAddressType_val
+ * @param tcpConnectionLocalAddress_val_ptr
+ * @param tcpConnectionLocalAddress_val_ptr_len
+ * @param tcpConnectionLocalPort_val
+ * @param tcpConnectionRemAddressType_val
+ * @param tcpConnectionRemAddress_val_ptr
+ * @param tcpConnectionRemAddress_val_ptr_len
+ * @param tcpConnectionRemPort_val
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -788,7 +796,7 @@ tcpConnectionTable_undo_cleanup(tcpConnectionTable_rowreq_ctx * rowreq_ctx)
  * tcpConnectionTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param tcpConnectionTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -861,7 +869,7 @@ tcpConnectionTable_commit(tcpConnectionTable_rowreq_ctx * rowreq_ctx)
  * tcpConnectionTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param tcpConnectionTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success

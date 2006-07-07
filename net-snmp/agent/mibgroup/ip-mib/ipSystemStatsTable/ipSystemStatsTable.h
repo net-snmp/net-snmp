@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @addtogroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -1201,3 +1201,5 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
 }
 #endif
 #endif                          /* IPSYSTEMSTATSTABLE_H */
+/**  @} */
+

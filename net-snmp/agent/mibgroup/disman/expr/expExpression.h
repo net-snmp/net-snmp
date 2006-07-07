@@ -1,6 +1,8 @@
 #ifndef EXPEXPRESSION_H
 #define EXPEXPRESSION_H
 
+#include "disman/expr/exp_enum.h"
+
     /*
      * Flags relating to the expression table ....
      */

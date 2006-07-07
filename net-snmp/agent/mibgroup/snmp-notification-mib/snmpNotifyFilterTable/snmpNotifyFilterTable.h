@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @addtogroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -929,3 +929,5 @@ config_require(snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable
 }
 #endif
 #endif                          /* SNMPNOTIFYFILTERTABLE_H */
+/**  @} */
+

@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for ifXTable
+/** \page MFD helper for ifXTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -156,7 +156,7 @@ ifXTable_rowreq_ctx_cleanup(ifXTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(0);
 }                               /* ifXTable_rowreq_ctx_cleanup */
 
-/************************************************************
+/**
  * the *_should_save routine is called to determine if a row
  * should be stored persistently.
  *
@@ -164,8 +164,10 @@ ifXTable_rowreq_ctx_cleanup(ifXTable_rowreq_ctx * rowreq_ctx)
  * but a check for volatile rows that should not be saved between
  * restarts.
  *
- * return 1 if the row should be stored
- * return 0 if the row should not be stored
+ * @param rowreq_ctx
+ * 
+ * @return 1 if the row should be stored
+ * @return 0 if the row should not be stored
  */
 int
 ifXTable_container_should_save(ifXTable_rowreq_ctx * rowreq_ctx)
@@ -177,7 +179,7 @@ ifXTable_container_should_save(ifXTable_rowreq_ctx * rowreq_ctx)
 /**
  * pre-request callback
  *
- *
+ * @param user_context
  * @retval MFD_SUCCESS              : success.
  * @retval MFD_ERROR                : other error
  */
@@ -201,6 +203,7 @@ ifXTable_pre_request(ifXTable_registration * user_context)
  *   deleted rows have been removed from the container and
  *   released.
  *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -261,6 +264,7 @@ ifXTable_post_request(ifXTable_registration * user_context, int rc)
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param ifIndex_val
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -291,6 +295,7 @@ ifXTable_indexes_set_tbl_idx(ifXTable_mib_index * tbl_idx,
  * set row context indexes
  *
  * @param reqreq_ctx the row context that needs updated indexes
+ * @param ifIndex_val
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -1313,7 +1318,11 @@ ifPromiscuousMode_get(ifXTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ifPromiscuousMode data.
      * copy (* ifPromiscuousMode_val_ptr ) from rowreq_ctx->data
      */
-    (*ifPromiscuousMode_val_ptr) = rowreq_ctx->data.ifPromiscuousMode;
+    /** this is coming from the interface entry, which is a boolean */
+    if (rowreq_ctx->data.ifPromiscuousMode)
+        (*ifPromiscuousMode_val_ptr) = 1;
+    else
+        (*ifPromiscuousMode_val_ptr) = 2;
 
     return MFD_SUCCESS;
 }                               /* ifPromiscuousMode_get */
@@ -1764,7 +1773,7 @@ ifXTable_undo_cleanup(ifXTable_rowreq_ctx * rowreq_ctx)
  * ifXTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ifXTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -1862,7 +1871,7 @@ ifXTable_commit(ifXTable_rowreq_ctx * rowreq_ctx)
  * ifXTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param ifXTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -2195,6 +2204,7 @@ ifPromiscuousMode_undo_setup(ifXTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:455:o: |-> Setup ifPromiscuousMode undo.
      */
+#ifdef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
     /*
      * copy ifPromiscuousMode data
      * set rowreq_ctx->undo->ifPromiscuousMode from rowreq_ctx->data.ifPromiscuousMode
@@ -2203,7 +2213,6 @@ ifPromiscuousMode_undo_setup(ifXTable_rowreq_ctx * rowreq_ctx)
         rowreq_ctx->data.ifPromiscuousMode;
 
 
-#ifdef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
     return MFD_SUCCESS;
 #else
     return MFD_NOT_VALID_EVER;
@@ -2255,13 +2264,14 @@ ifPromiscuousMode_undo(ifXTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:456:o: |-> Clean up ifPromiscuousMode undo.
      */
+#ifdef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
     /*
      * copy ifPromiscuousMode data
      * set rowreq_ctx->data.ifPromiscuousMode from rowreq_ctx->undo->ifPromiscuousMode
      */
     rowreq_ctx->data.ifPromiscuousMode =
         rowreq_ctx->undo->ifPromiscuousMode;
-
+#endif
 
     return MFD_SUCCESS;
 }                               /* ifPromiscuousMode_undo */

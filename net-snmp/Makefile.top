@@ -26,7 +26,8 @@ man8dir		= $(mandir)/man8
 snmplibdir	= $(datadir)/snmp
 mibdir		= $(snmplibdir)/mibs
 persistentdir	= @PERSISTENT_DIRECTORY@
-INSTALL_PREFIX  = @INSTALL_PREFIX@
+DESTDIR         = @INSTALL_PREFIX@
+INSTALL_PREFIX  = $(DESTDIR)
 
 #
 # Programs
@@ -70,7 +71,7 @@ CC	        = @CC@
 #
 LIBCURRENT  = 10
 LIBAGE      = 0
-LIBREVISION = 0
+LIBREVISION = 1
 
 LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) -o
 LIB_EXTENSION   = la

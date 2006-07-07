@@ -263,7 +263,7 @@ netsnmp_container_add_index(netsnmp_container *primary,
 
 /*------------------------------------------------------------------
  * These functions should EXACTLY match the inline version in
- * container.h. If you chance one, change them both.
+ * container.h. If you change one, change them both.
  */
 int CONTAINER_INSERT(netsnmp_container *x, const void *k)
 { 
@@ -288,7 +288,7 @@ int CONTAINER_INSERT(netsnmp_container *x, const void *k)
 
 /*------------------------------------------------------------------
  * These functions should EXACTLY match the inline version in
- * container.h. If you chance one, change them both.
+ * container.h. If you change one, change them both.
  */
 int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
 {
@@ -312,7 +312,7 @@ int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
 
 /*------------------------------------------------------------------
  * These functions should EXACTLY match the inline version in
- * container.h. If you chance one, change them both.
+ * container.h. If you change one, change them both.
  */
 int CONTAINER_FREE(netsnmp_container *x)
 {

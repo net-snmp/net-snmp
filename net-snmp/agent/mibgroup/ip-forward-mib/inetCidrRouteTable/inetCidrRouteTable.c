@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for inetCidrRouteTable
+/** \page MFD helper for inetCidrRouteTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -34,6 +34,12 @@ inetCidrRouteTable_registration inetCidrRouteTable_user_context;
 
 void            initialize_table_inetCidrRouteTable(void);
 void            shutdown_table_inetCidrRouteTable(void);
+
+int
+_route_number_handler(netsnmp_mib_handler *handler,
+                      netsnmp_handler_registration *reginfo,
+                      netsnmp_agent_request_info *reqinfo,
+                      netsnmp_request_info *requests);
 
 
 /**
@@ -106,6 +112,33 @@ initialize_table_inetCidrRouteTable(void)
      * call interface initialization code
      */
     _inetCidrRouteTable_initialize_interface(user_context, flags);
+
+    /*
+     * regester scalar for route number
+     */
+    {
+        oid             reg_oid[] =
+            { INETCIDRROUTENUMBER_OID };
+        netsnmp_handler_registration *myreg;
+        netsnmp_mib_handler *handler;
+
+        myreg =
+            netsnmp_create_handler_registration("route number",
+                                                _route_number_handler,
+                                                reg_oid,
+                                                OID_LENGTH(reg_oid),
+                                                HANDLER_CAN_RONLY);
+        /*
+         * snarf cache to use w/cache handler to make sure the
+         * container is loaded w/up to date data.
+         */
+        netsnmp_assert(NULL != inetCidrRouteTable_get_cache());
+        handler =
+            netsnmp_cache_handler_get(inetCidrRouteTable_get_cache());
+        netsnmp_inject_handler(myreg, handler);
+        
+        netsnmp_register_instance(myreg);
+    }
 }                               /* initialize_table_inetCidrRouteTable */
 
 /**
@@ -202,6 +235,7 @@ inetCidrRouteTable_pre_request(inetCidrRouteTable_registration *
  *   deleted rows have been removed from the container and
  *   released.
  *
+ * @param user_context 
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -300,7 +334,15 @@ inetCidrRouteTable_release_data(inetCidrRouteTable_data * data)
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
- *
+ * @param inetCidrRouteDestType_val
+ * @param inetCidrRouteDest_val_ptr
+ * @param inetCidrRouteDest_val_ptr_len
+ * @param inetCidrRoutePfxLen_val
+ * @param inetCidrRoutePolicy_val_ptr
+ * @param inetCidrRoutePolicy_val_ptr_len
+ * @param inetCidrRouteNextHopType_val
+ * @param inetCidrRouteNextHop_val_ptr
+ * @param inetCidrRouteNextHop_val_ptr_len
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
  *
@@ -414,7 +456,16 @@ inetCidrRouteTable_indexes_set_tbl_idx(inetCidrRouteTable_mib_index *
  * @internal
  * set row context indexes
  *
- * @param reqreq_ctx the row context that needs updated indexes
+ * @param rowreq_ctx the row context that needs updated indexes
+ * @param inetCidrRouteDestType_val
+ * @param inetCidrRouteDest_val_ptr
+ * @param inetCidrRouteDest_val_ptr_len
+ * @param inetCidrRoutePfxLen_val
+ * @param inetCidrRoutePolicy_val_ptr
+ * @param inetCidrRoutePolicy_val_ptr_len
+ * @param inetCidrRouteNextHopType_val
+ * @param inetCidrRouteNextHop_val_ptr
+ * @param inetCidrRouteNextHop_val_ptr_len
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -1359,7 +1410,7 @@ inetCidrRouteTable_undo_cleanup(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
  * inetCidrRouteTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param inetCidrRouteTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -1454,7 +1505,7 @@ inetCidrRouteTable_commit(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
  * inetCidrRouteTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param inetCidrRouteTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -2595,6 +2646,27 @@ inetCidrRouteTable_check_dependencies(inetCidrRouteTable_rowreq_ctx *
 
     return rc;
 }                               /* inetCidrRouteTable_check_dependencies */
+
+
+int
+_route_number_handler(netsnmp_mib_handler *handler,
+                      netsnmp_handler_registration *reginfo,
+                      netsnmp_agent_request_info *reqinfo,
+                      netsnmp_request_info *requests)
+{
+    if (MODE_GET == reqinfo->mode) {
+        int val = inetCidrRouteTable_container_size();
+        snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
+                                 (u_char *) &val, sizeof(val));
+    } else
+        netsnmp_assert("bad mode in RO handler");
+    
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                         requests);
+    
+    return SNMP_ERR_NOERROR;
+}
 
 /** @} */
 /** @{ */

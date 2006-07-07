@@ -660,6 +660,10 @@ var_hrswrun(struct variable * vp,
             if (*cp == '\n')
                 --(*var_len);
         }
+        if (*var_len > 64) { /* MIB limit */
+            *var_len = 64;
+            string[64] = '\0';
+        }
         return (u_char *) string;
     case HRSWRUN_ID:
         *var_len = nullOidLen;
@@ -762,6 +766,10 @@ var_hrswrun(struct variable * vp,
         sprintf(string, "/bin/wombat");
 #endif
         *var_len = strlen(string);
+        if (*var_len > 128) { /* MIB limit */
+            *var_len = 128;
+            string[128] = '\0';
+        }
         return (u_char *) string;
     case HRSWRUN_PARAMS:
 #ifdef HAVE_SYS_PSTAT_H
@@ -862,6 +870,10 @@ var_hrswrun(struct variable * vp,
         sprintf(string, "-h -q -v");
 #endif
         *var_len = strlen(string);
+        if (*var_len > 128) { /* MIB limit */
+            *var_len = 128;
+            string[128] = '\0';
+        }
         return (u_char *) string;
     case HRSWRUN_TYPE:
 #ifdef PID_MAXSYS

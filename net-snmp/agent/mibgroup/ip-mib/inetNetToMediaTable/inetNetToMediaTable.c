@@ -4,7 +4,7 @@
  *
  * $Id$
  */
-/** \mainpage MFD helper for inetNetToMediaTable
+/** \page MFD helper for inetNetToMediaTable
  *
  * \section intro Introduction
  * Introductory text.
@@ -190,6 +190,7 @@ inetNetToMediaTable_pre_request(inetNetToMediaTable_registration *
  *   deleted rows have been removed from the container and
  *   released.
  *
+ * @param user_context
  * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
@@ -289,6 +290,10 @@ inetNetToMediaTable_release_data(inetNetToMediaTable_data * data)
  * set mib index(es)
  *
  * @param tbl_idx mib index structure
+ * @param inetNetToMediaIfIndex_val
+ * @param inetNetToMediaNetAddressType_val
+ * @param inetNetToMediaNetAddress_val_ptr
+ * @param inetNetToMediaNetAddress_val_ptr_len
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
@@ -966,7 +971,7 @@ inetNetToMediaTable_undo_cleanup(inetNetToMediaTable_rowreq_ctx *
  * inetNetToMediaTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param inetNetToMediaTable_rowreq_ctx
+ * @param rowreq_ctx
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -1079,7 +1084,7 @@ inetNetToMediaTable_commit(inetNetToMediaTable_rowreq_ctx * rowreq_ctx)
  * inetNetToMediaTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
- * @param inetNetToMediaTable_rowreq_ctx
+ * @param rowreq_ctx 
  *        Pointer to the users context.
  *
  * @retval MFD_SUCCESS : success
@@ -1711,6 +1716,8 @@ inetNetToMediaRowStatus_undo(inetNetToMediaTable_rowreq_ctx * rowreq_ctx)
  * set. The definitions for the COLUMN_*_FLAG bits can be found in
  * inetNetToMediaTable.h.
  * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
+ *
+ * @param rowreq_ctx
  *
  * @retval MFD_SUCCESS all the changes to the row are legal
  * @retval MFD_ERROR   one or more changes are not legal

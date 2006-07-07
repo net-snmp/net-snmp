@@ -8,6 +8,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "utilities/iquery.h"
 #include "disman/expr/expExpression.h"
+#include "disman/expr/expObject.h"
 #include "disman/expr/expExpressionConf.h"
 
 /* Initializes the expExpressionConf module */
@@ -20,6 +21,7 @@ init_expExpressionConf(void)
      * Register config handler for user-level (fixed) expressions...
      *    XXX - TODO
      */
+    snmpd_register_config_handler("expression", parse_expression, NULL, NULL);
 
     /*
      * ... and persistent storage of dynamically configured entries.
@@ -71,6 +73,116 @@ _parse_expECols( char *line, struct expExpression *entry )
     return line;
 }
 
+
+void
+parse_expression(const char *token, char *line)
+{
+    char   buf[ SPRINT_MAX_LEN];
+    char   ename[EXP_STR1_LEN+1];
+    oid    name_buf[MAX_OID_LEN];
+    size_t name_len;
+    char *cp, *cp2;
+    struct expExpression *entry;
+    struct expObject     *object;
+    netsnmp_session *sess = NULL;
+    int    type=EXPVALTYPE_COUNTER;
+    int    i=1;
+
+    DEBUGMSGTL(("disman:expr:conf", "Parsing expression config...  "));
+
+    memset(buf,   0, sizeof(buf));
+    memset(ename, 0, sizeof(ename));
+
+    for (cp = copy_nword(line, buf, SPRINT_MAX_LEN);
+         ;
+         cp = copy_nword(cp,   buf, SPRINT_MAX_LEN)) {
+
+        if (buf[0] == '-' ) {
+            switch (buf[1]) {
+            case 't':   /*  type */
+                switch (buf[2]) {
+                case 'c':   type = EXPVALTYPE_COUNTER;   break;
+                case 'u':   type = EXPVALTYPE_UNSIGNED;  break;
+                case 't':   type = EXPVALTYPE_TIMETICKS; break;
+                case 'i':   type = EXPVALTYPE_INTEGER;   break;
+                case 'a':   type = EXPVALTYPE_IPADDRESS; break;
+                case 's':   type = EXPVALTYPE_STRING;    break;
+                case 'o':   type = EXPVALTYPE_OID;       break;
+                case 'C':   type = EXPVALTYPE_COUNTER64; break;
+                }
+                break;
+            case 'u':   /*  user */
+                cp     = copy_nword(cp, buf, SPRINT_MAX_LEN);
+                sess   = netsnmp_iquery_user_session(buf);
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+
+    memcpy(ename, buf, sizeof(ename));
+ /* cp    = copy_nword(line, ename, sizeof(ename)); */
+    entry = expExpression_createEntry( "snmpd.conf", ename, 1 );
+    if (!entry)
+        return;
+
+    cp2 = entry->expExpression;
+    while (cp && *cp) {
+        /*
+         * Copy everything that can't possibly be a MIB
+         * object name into the expression field...
+         */
+        /*   XXX - TODO - Handle string literals */
+        if (!isalpha(*cp)) {
+           *cp2++ = *cp++;
+           continue;
+        }
+        /*
+         * ... and copy the defined functions across as well
+         *   XXX - TODO
+         */
+
+        /*
+         * Anything else is presumably a MIB object (or instance).
+         * Create an entry in the expObjectTable, and insert a
+         *   corresponding parameter in the expression itself.
+         */
+        name_len = MAX_OID_LEN;
+        cp = copy_nword(cp, buf, SPRINT_MAX_LEN);
+        snmp_parse_oid( buf, name_buf, &name_len );
+        object = expObject_createEntry( "snmpd.conf", ename, i, 1 );
+        memcpy( object->expObjectID, name_buf, name_len*sizeof(oid));
+        object->expObjectID_len = name_len;
+        object->flags |= EXP_OBJ_FLAG_VALID
+                      |  EXP_OBJ_FLAG_ACTIVE
+                      |  EXP_OBJ_FLAG_OWILD;
+        /*
+         * The first such object can also be used as the
+         * expExpressionPrefix
+         */
+        if ( i == 1 ) {
+            memcpy( entry->expPrefix, name_buf, name_len*sizeof(oid));
+            entry->expPrefix_len = name_len;
+            object->flags |= EXP_OBJ_FLAG_PREFIX;
+        }
+        sprintf(cp2, "$%d", i++);
+        while (*cp2)
+            cp2++;  /* Skip over this parameter */
+    }
+
+    if (sess)
+        entry->session      = sess;
+    else
+        entry->session      = netsnmp_query_get_default_session();
+    entry->expDeltaInterval = 10;
+    entry->expValueType     = type;
+    entry->flags |= EXP_FLAG_VALID
+                 |  EXP_FLAG_ACTIVE;
+    expExpression_enable( entry );
+    DEBUGMSG(("disman:expr:conf", "(%s, %s)\n", ename,
+                                                entry->expExpression));
+}
 
 void
 parse_expETable(const char *token, char *line)

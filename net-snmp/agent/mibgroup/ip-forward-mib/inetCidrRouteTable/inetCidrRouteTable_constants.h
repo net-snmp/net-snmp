@@ -15,6 +15,7 @@ extern          "C" {
     /*
      * column number definitions for table inetCidrRouteTable 
      */
+#define INETCIDRROUTENUMBER_OID              1,3,6,1,2,1,4,24,6,0
 #define INETCIDRROUTETABLE_OID              1,3,6,1,2,1,4,24,7
 
 #define COLUMN_INETCIDRROUTEDESTTYPE         1

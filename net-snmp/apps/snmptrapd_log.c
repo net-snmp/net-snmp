@@ -127,6 +127,8 @@ typedef enum {
     CHR_LEAD_ZERO = '0',        /* use leading zeroes */
     CHR_ALT_FORM = '#',         /* use alternate format */
     CHR_FIELD_SEP = '.',        /* separates width and precision fields */
+
+    /* Date / Time Information */
     CHR_CUR_TIME = 't',         /* current time, Unix format */
     CHR_CUR_YEAR = 'y',         /* current year */
     CHR_CUR_MONTH = 'm',        /* current month */
@@ -141,8 +143,18 @@ typedef enum {
     CHR_UP_HOUR = 'H',          /* uptime hour */
     CHR_UP_MIN = 'J',           /* uptime minute */
     CHR_UP_SEC = 'K',           /* uptime second */
+
+    /* transport information */
     CHR_AGENT_IP = 'a',         /* agent's IP address */
     CHR_AGENT_NAME = 'A',       /* agent's host name if available */
+
+    /* authentication information */
+    CHR_SNMP_VERSION = 's',     /* SNMP Version Number */
+    CHR_SNMP_SECMOD  = 'S',     /* SNMPv3 Security Model Version Number */
+    CHR_SNMP_USER = 'u',        /* SNMPv3 secName or v1/v2c community */
+    CHR_TRAP_CONTEXTID = 'E',   /* SNMPv3 context engineID if available */
+
+    /* PDU information */
     CHR_PDU_IP = 'b',           /* PDU's IP address */
     CHR_PDU_NAME = 'B',         /* PDU's host name if available */
     CHR_PDU_ENT = 'N',          /* PDU's enterprise string */
@@ -151,7 +163,8 @@ typedef enum {
     CHR_TRAP_DESC = 'W',        /* trap's description (textual) */
     CHR_TRAP_STYPE = 'q',       /* trap's subtype */
     CHR_TRAP_VARSEP = 'V',      /* character (or string) to separate variables */
-    CHR_TRAP_VARS = 'v'         /* tab-separated list of trap's variables */
+    CHR_TRAP_VARS = 'v'        /* tab-separated list of trap's variables */
+
 } parse_chr_type;
 
 /*
@@ -215,6 +228,20 @@ typedef enum {
 
 #define is_pdu_ip_cmd(chr) ((((chr) == CHR_PDU_IP)   \
 			  || ((chr) == CHR_PDU_NAME)) ? TRUE : FALSE)
+
+     /*
+      * Function:
+      *    Returns true if the character outputs information about the SNMP
+      *      authentication information
+      * Input Parameters:
+      *    chr - the character to check
+      */
+
+#define is_auth_cmd(chr) ((((chr) == CHR_SNMP_VERSION       \
+                            || (chr) == CHR_SNMP_VERSION     \
+                            || (chr) == CHR_SNMP_USER                   \
+                            || (chr) == CHR_TRAP_CONTEXTID)) ? TRUE : FALSE)
+
      /*
       * Function:
       *    Returns true if the character outputs information about the PDU's
@@ -239,6 +266,7 @@ typedef enum {
 
 #define is_fmt_cmd(chr) ((is_cur_time_cmd (chr)     \
 			  || is_up_time_cmd (chr)   \
+			  || is_auth_cmd (chr)   \
 			  || is_agent_cmd (chr)     \
 			  || is_pdu_ip_cmd (chr)    \
                           || ((chr) == CHR_PDU_ENT) \
@@ -1005,6 +1033,56 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                                    &temp_buf, options);
 }
 
+static int
+realloc_handle_auth_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
+                        int allow_realloc,
+                        options_type * options, netsnmp_pdu *pdu)
+     /*
+      * Function:
+      *     Handle a format command that deals with authentication
+      * information.
+      * Append the information to the buffer subject to the buffer's 
+      * length limit.
+      *
+      * Input Parameters:
+      *    buf, buf_len, out_len, allow_realloc - standard relocatable
+      *                                           buffer parameters
+      *    options - options governing how to write the field
+      *    pdu     - information about this trap 
+      */
+{
+    netsnmp_variable_list *vars;        /* variables assoc with trap */
+    char            fmt_cmd = options->cmd;     /* what we're outputting */
+    u_char         *temp_buf = NULL;
+    size_t          tbuf_len = 64, tout_len = 0;
+    const char           *sep = separator;
+    const char           *default_sep = "\t";
+    const char           *default_alt_sep = ", ";
+
+    if ((temp_buf = calloc(tbuf_len, 1)) == NULL) {
+        return 0;
+    }
+
+    fprintf(stderr, "here\n\n");
+    switch (pdu->command) {
+
+    case CHR_SNMP_VERSION:
+        *out_len = snprintf(temp_buf, tbuf_len, "%ld", pdu->version);
+        break;
+
+    default:
+        /*
+         * Don't know how to handle this command - write the character itself.  
+         */
+        temp_buf[0] = fmt_cmd;
+    }
+
+    /*
+     * Output with correct justification, leading zeroes, etc.  
+     */
+    return realloc_output_temp_bfr(buf, buf_len, out_len, allow_realloc,
+                                   &temp_buf, options);
+}
 
 static int
 realloc_handle_wrap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
@@ -1176,6 +1254,9 @@ realloc_dispatch_format_cmd(u_char ** buf, size_t * buf_len,
                                      options, pdu, transport);
     } else if (is_trap_cmd(fmt_cmd)) {
         return realloc_handle_trap_fmt(buf, buf_len, out_len,
+                                       allow_realloc, options, pdu);
+    } else if (is_auth_cmd(fmt_cmd)) {
+        return realloc_handle_auth_fmt(buf, buf_len, out_len,
                                        allow_realloc, options, pdu);
     } else if (fmt_cmd == CHR_PDU_ENT) {
         return realloc_handle_ent_fmt(buf, buf_len, out_len, allow_realloc,

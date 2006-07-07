@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @addtogroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -267,3 +267,5 @@ config_require(tcp-mib/tcpListenerTable/tcpListenerTable_data_access)
 }
 #endif
 #endif                          /* TCPLISTENERTABLE_H */
+/**  @} */
+
