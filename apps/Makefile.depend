@@ -1505,8 +1505,7 @@ ipe./snmpnetstat/inet6.lo: ../include/net-snmp/library/lcd_time.h
 ipe./snmpnetstat/inet6.lo: ../include/net-snmp/library/snmp_secmod.h
 ipe./snmpnetstat/inet6.lo: ../include/net-snmp/library/snmpv3-security-includes.h
 ipe./snmpnetstat/inet6.lo: ../include/net-snmp/library/snmpusm.h
-ipe./snmpnetstat/inet6.lo:  ./snmpnetstat/main.h
-ipe./snmpnetstat/inet6.lo: ./snmpnetstat/netstat.h
+ipe./snmpnetstat/inet6.lo: ./snmpnetstat/main.h ./snmpnetstat/netstat.h
 ipe./snmpnetstat/inet.lo: ../include/net-snmp/net-snmp-config.h
 ipe./snmpnetstat/inet.lo: ../include/net-snmp/system/linux.h
 ipe./snmpnetstat/inet.lo: ../include/net-snmp/system/sysv.h
