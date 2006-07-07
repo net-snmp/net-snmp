@@ -104,7 +104,7 @@ netsnmp_arch_udp_endpoint_container_load(netsnmp_container *container,
 }
 
 /**
- * @interal
+ * @internal
  * process token value index line
  */
 static int

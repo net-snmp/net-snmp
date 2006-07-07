@@ -32,6 +32,8 @@
 
 #define UTMP_FILE _PATH_UTMP
 
+#define UDP_ADDRESSES_IN_HOST_ORDER 1
+
 #ifndef netbsd1
 # define netbsd1 1
 #endif

@@ -24,12 +24,11 @@
 #include <sys/types.h>
 
 #ifdef HAVE_LINUX_ETHTOOL_H
-#   ifdef HAVE_ASM_TYPES_H
-#      include <asm/types.h>
-#   endif /* HAVE_ASM_TYPES_H */
-#   ifdef HAVE_PCI_PCI_H
-#      include <pci/pci.h> /* for u32 typedef in linux/ethtool */
-#   endif /* HAVE_PCI_PCI_H */
+#include <sys/types.h>
+typedef unsigned long long u64;         /* hack, so we may include kernel's ethtool.h */
+typedef __uint32_t u32;         /* ditto */
+typedef __uint16_t u16;         /* ditto */
+typedef __uint8_t u8;           /* ditto */
 #include <linux/ethtool.h>
 #endif /* HAVE_LINUX_ETHTOOL_H */
 #include <linux/sockios.h>
@@ -187,7 +186,6 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
 {
     FILE           *fin;
     char            line[256];
-    u_int           tmp;
 
     /*
      * get the retransmit time
@@ -226,7 +224,7 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
     /*
      * get the reachable time
      */
-    snprintf(line,sizeof(line),"/proc/sys/net/ipv6/conf/%s/base_reachable_time",
+    snprintf(line,sizeof(line),"/proc/sys/net/ipv6/neigh/%s/base_reachable_time",
              entry->name);
     if (!(fin = fopen(line, "r"))) {
         DEBUGMSGTL(("access:interface",
@@ -234,8 +232,8 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
     }
     else {
         if (fgets(line, sizeof(line), fin)) {
-            tmp = atoi(line);
-            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_FORWARDING;
+            entry->reachable_time = atoi(line) * 1000; /* sec to millisec */
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_REACHABLE;
         }
         fclose(fin);
     }
@@ -339,6 +337,12 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
     if (!strcmp(entry->name, "lo") && rec_pkt > 0 && !snd_pkt)
         snd_pkt = rec_pkt;
     
+    /*
+     * subtract out multicast packets from rec_pkt before
+     * we store it as unicast counter.
+     */
+    rec_pkt -= rec_mcast;
+
     entry->stats.ibytes.low = rec_oct & 0xffffffff;
     entry->stats.iucast.low = rec_pkt & 0xffffffff;
     entry->stats.imcast.low = rec_mcast & 0xffffffff;
@@ -590,6 +594,18 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          */
         if((entry->speed == 0) && (entry->os_flags & IFF_UP)) {
             entry->os_flags &= ~IFF_RUNNING;
+        }
+
+        /*
+         * check for promiscuous mode.
+         *  NOTE: there are 2 ways to set promiscuous mode in Linux
+         *  (kernels later than 2.2.something) - using ioctls and
+         *  using setsockopt. The ioctl method tested here does not
+         *  detect if an interface was set using setsockopt. google
+         *  on IFF_PROMISC and linux to see lots of arguments about it.
+         */
+        if(entry->os_flags & IFF_PROMISC) {
+            entry->promiscuous = 1; /* boolean */
         }
 
         /*

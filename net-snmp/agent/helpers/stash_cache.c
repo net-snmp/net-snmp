@@ -15,7 +15,8 @@
 extern NetsnmpCacheLoad _netsnmp_stash_cache_load;
 extern NetsnmpCacheFree _netsnmp_stash_cache_free;
  
-/** @defgroup stash_cache stash_cache: automatically caches data for certain handlers.
+/** @defgroup stash_cache stash_cache
+ *  Automatically caches data for certain handlers.
  *  This handler caches data in an optimized way which may aleviate
  *  the need for the lower level handlers to perform as much
  *  optimization.  Specifically, somewhere in the lower level handlers
@@ -59,6 +60,7 @@ netsnmp_get_timed_bare_stash_cache_handler(int timeout, oid *rootoid, size_t roo
 
     handler->next = netsnmp_create_handler("stash_cache", netsnmp_stash_cache_helper);
     if (!handler->next) {
+        netsnmp_handler_free(handler);
         free(cinfo);
         return NULL;
     }
@@ -233,3 +235,5 @@ netsnmp_init_stash_cache_helper(void)
     netsnmp_register_handler_by_name("stash_cache",
                                      netsnmp_get_stash_cache_handler());
 }
+/**  @} */
+

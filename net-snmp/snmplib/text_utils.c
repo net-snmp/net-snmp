@@ -418,6 +418,7 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
             break;
         }
     }
+    SNMP_FREE(mem);
 }
 
 /*------------------------------------------------------------------
@@ -426,7 +427,7 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
  *
  */
 /**
- * @interal
+ * @internal
  * process token value index line
  */
 int

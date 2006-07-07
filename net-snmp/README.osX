@@ -5,19 +5,26 @@ This is what I had to do to get it to work for me. Your mileage may vary.
 If this doesn't work for you, or you have fixes for any problems listed,
 please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
 
-  - 10.4.x 
+  - ALL
 
-     - 10.4.x Embedded perl module dyld error
+    - Test 44 (Perl AgentX Subagent) fails.
 
-        - If you have enabled embedded perl modules and are getting a
-          dyld error when starting snmpd or snmptrapd, reconfigure and
-          add '--with-ldflags=-flat_namespace' to your configure arguments.
+      - There are 2 issues here. One is the perl can't find the
+        net-snmp shared libraries, because they aren't installed yet.
+        Setting DYLD_LIBRARY_PATH helps here, but one link error
+        remains:
+
+           /usr/bin/perl Undefined symbols: _boot_DynaLoader
+
+        Unless you need a perl based AgentX subagent, you can ignore
+        this error.
 
      - nlist doesn't support icmpstat
 
        - disable the icmp module during configure by specifying
          "--with-out-mib-modules=mibII/icmp", or at startup by adding
          "-I -icmp" to the snmpd command line.
+
 
   - 10.3.x and earlier
 
@@ -38,10 +45,4 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
                    --infodir=/usr/share/info --with-libwrap --with-defaults
                    --prefix=/usr --with-persistent-directory=/var/db/ucd-snmp
                    --with-mib-modules=host
-
-     - nlist doesn't support icmpstat
-
-       - disable the icmp module during configure by specifying
-         "--with-out-mib-modules=mibII/icmp", or at startup by adding
-         "-I -icmp" to the snmpd command line.
 

@@ -110,6 +110,7 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
     fgets(line, sizeof(line), devin);
     len = strlen(line);
     if (224 != len) {
+        fclose(devin);
         snmp_log(LOG_ERR, "unexpected header length in /proc/net/snmp."
                  " %d != 224\n", len);
         return -4;

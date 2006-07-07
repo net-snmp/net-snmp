@@ -126,6 +126,13 @@ inetCidrRouteTable_dirty_set(u_int status)
     inetCidrRouteTable_if_ctx.table_dirty = status;
 }
 
+netsnmp_cache  *
+inetCidrRouteTable_get_cache(void)
+{
+    return inetCidrRouteTable_if_ctx.cache;
+}
+
+
 /*
  * mfd multiplexer modes
  */

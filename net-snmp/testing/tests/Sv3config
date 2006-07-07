@@ -1,6 +1,9 @@
 #!/bin/sh
 
+[ "x$SNMP_SMUX_SOCKET" = "x" ] && SNMP_SMUX_SOCKET=/dev/null
+
 CONFIGAGENT [snmp] persistentdir $SNMP_TMP_PERSISTENTDIR
+CONFIGAGENT smuxsocket $SNMP_SMUX_SOCKET
 
 # XXX: auto-switch to a supported protocol instead.
 if test "x$DEFAUTHTYPE" = "x"; then

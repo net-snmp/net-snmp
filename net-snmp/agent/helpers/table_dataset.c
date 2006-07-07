@@ -32,7 +32,8 @@ typedef struct newrow_stash_s {
     int             deleted;
 } newrow_stash;
 
-/** @defgroup table_dataset table_dataset: Helps you implement a table with automatted storage.
+/** @defgroup table_dataset table_dataset
+ *  Helps you implement a table with automatted storage.
  *  @ingroup table_data
  *
  *  This helper is obsolete.  If you are writing a new module, please
@@ -186,7 +187,7 @@ netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
     netsnmp_table_data_replace_row(table->table, origrow, newrow);
 }
 
-/** removes a row from the table, but doesn't delete/free anything */
+/** removes a row from the table, but doesn't delete/free the column values */
 NETSNMP_INLINE void
 netsnmp_table_dataset_remove_row(netsnmp_table_data_set *table,
                                  netsnmp_table_row *row)
@@ -197,7 +198,7 @@ netsnmp_table_dataset_remove_row(netsnmp_table_data_set *table,
     netsnmp_table_data_remove_and_delete_row(table->table, row);
 }
 
-/** removes a row from the table and then deletes it (and all it's data) */
+/** removes a row from the table and then deletes it (and all its data) */
 NETSNMP_INLINE void
 netsnmp_table_dataset_remove_and_delete_row(netsnmp_table_data_set *table,
                                             netsnmp_table_row *row)
@@ -1271,7 +1272,6 @@ netsnmp_table_set_add_indexes(va_alist)
     va_end(debugargs);
 }
 
-/*
- * @} 
+/** @} 
  */
 

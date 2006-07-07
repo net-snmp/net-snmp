@@ -652,7 +652,7 @@ setup_engineID(u_char ** eidp, const char *text)
         break;
     case ENGINEID_TYPE_TEXT:
         bufp[4] = ENGINEID_TYPE_TEXT;
-        memcpy((char *) bufp + 5, text, strlen(text));
+        memcpy((char *) bufp + 5, (text), strlen(text));
         break;
 #ifdef HAVE_GETHOSTNAME
 #ifdef AF_INET6
@@ -1356,10 +1356,11 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
 
     c_engineID = snmpv3_generate_engineID(&engineIDLen);
 
-    if (engineIDLen == 0) {
+    if (engineIDLen == 0 || !c_engineID) {
         /*
          * Somethine went wrong - help! 
          */
+        SNMP_FREE(c_engineID);
         return SNMPERR_GENERR;
     }
 
