@@ -1729,7 +1729,7 @@ else
    default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:HOST-RESOURCES-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB:DISMAN-EVENT-MIB:DISMAN-SCHEDULE-MIB
 
    case $target_os in
-      linux* | | freebsd* | dynix* | solaris2* | hpux* | aix* )
+      linux* | freebsd* | dynix* | solaris2* | hpux* | aix* )
          new_module_list="$new_module_list host"
          ;;
       *)
