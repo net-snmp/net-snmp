@@ -282,7 +282,11 @@ Get_Next_HR_Partition(void)
                     "Get_Next_HR_Partition: %s (:%d)\n",
                     string, HRP_index));
 
+#ifdef O_NDELAY
+        fd = open(string, O_RDONLY|O_NDELAY);
+#else
         fd = open(string, O_RDONLY);
+#endif
         if (fd != -1) {
             close(fd);
             return HRP_index + 1;

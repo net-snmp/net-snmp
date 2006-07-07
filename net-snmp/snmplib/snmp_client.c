@@ -81,6 +81,9 @@ SOFTWARE.
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#if HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -96,6 +99,8 @@ SOFTWARE.
 #include <net-snmp/library/snmp_client.h>
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/mib.h>
+#include <net-snmp/library/snmp_logging.h>
+#include <net-snmp/library/snmp_assert.h>
 
 
 #ifndef BSD4_3
@@ -169,7 +174,7 @@ snmp_synch_input(int op,
 
     state->waiting = 0;
 
-    if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE && pdu) {
         if (pdu->command == SNMP_MSG_REPORT) {
             rpt_type = snmpv3_get_report_type(pdu);
             if (SNMPV3_IGNORE_UNAUTH_REPORTS ||
@@ -187,6 +192,16 @@ snmp_synch_input(int op,
             state->pdu = snmp_clone_pdu(pdu);
             state->status = STAT_SUCCESS;
             session->s_snmp_errno = SNMPERR_SUCCESS;
+        }
+        else {
+            char msg_buf[50];
+            state->status = STAT_ERROR;
+            session->s_snmp_errno = SNMPERR_PROTOCOL;
+            SET_SNMP_ERROR(SNMPERR_PROTOCOL);
+            snprintf(msg_buf, sizeof(msg_buf), "Expected RESPONSE-PDU but got %s-PDU",
+                     snmp_pdu_type(pdu->command));
+            snmp_set_detail(msg_buf);
+            return 0;
         }
     } else if (op == NETSNMP_CALLBACK_OP_TIMED_OUT) {
         state->pdu = NULL;
@@ -235,9 +250,9 @@ snmp_clone_var(netsnmp_variable_list * var, netsnmp_variable_list * newvar)
         return 1;
 
     /*
-     * need a pointer and a length to copy a string value. 
+     * need a pointer to copy a string value. 
      */
-    if (var->val.string && var->val_len) {
+    if (var->val.string) {
         if (var->val.string != &var->buf[0]) {
             if (var->val_len <= sizeof(var->buf))
                 newvar->val.string = newvar->buf;
@@ -299,7 +314,8 @@ snmp_reset_var_buffers(netsnmp_variable_list * var)
             var->name_length = 0;
         }
         if (var->val.string != var->buf) {
-            free(var->val.string);
+            if (NULL != var->val.string)
+                free(var->val.string);
             var->val.string = var->buf;
             var->val_len = 0;
         }
@@ -713,41 +729,203 @@ find_varbind_of_type(netsnmp_variable_list * var_ptr, u_char type)
  */
 
 int
-snmp_set_var_value(netsnmp_variable_list * newvar,
-                   const u_char * val_str, size_t val_len)
+snmp_set_var_value(netsnmp_variable_list * vars,
+                   const u_char * value, size_t len)
 {
+    int             largeval = 1;
+
     /*
      * xxx-rks: why the unconditional free? why not use existing
-     * memory, if val_len < newvar->val_len ?
+     * memory, if len < vars->val_len ?
      */
-    if (newvar->val.string && newvar->val.string != newvar->buf) {
-        free(newvar->val.string);
+    if (vars->val.string && vars->val.string != vars->buf) {
+        free(vars->val.string);
     }
-
-    newvar->val.string = 0;
-    newvar->val_len = 0;
+    vars->val.string = 0;
+    vars->val_len = 0;
 
     /*
-     * need a pointer and a length to copy a string value. 
+     * use built-in storage for smaller values 
      */
-    if (val_str && val_len) {
-        if (val_len <= sizeof(newvar->buf))
-            newvar->val.string = newvar->buf;
-        else {
-            newvar->val.string = (u_char *) malloc(val_len);
-            if (!newvar->val.string)
-                return 1;
-        }
-        memmove(newvar->val.string, val_str, val_len);
-        newvar->val_len = val_len;
-    } else if (val_str) {
-        /*
-         * NULL STRING != NULL ptr 
-         */
-        newvar->val.string = newvar->buf;
-        newvar->val.string[0] = '\0';
-        newvar->val_len = 0;
+    if (len <= (sizeof(vars->buf) - 1)) {
+        vars->val.string = (u_char *) vars->buf;
+        largeval = 0;
     }
+
+    if ((0 == len) || (NULL == value)) {
+        vars->val.string[0] = 0;
+        return 0;
+    }
+
+    vars->val_len = len;
+    switch (vars->type) {
+    case ASN_INTEGER:
+    case ASN_UNSIGNED:
+    case ASN_TIMETICKS:
+    case ASN_COUNTER:
+        if (value) {
+            if (vars->val_len == sizeof(int)) {
+                if (ASN_INTEGER == vars->type) {
+                    const int      *val_int 
+                        = (const int *) value;
+                    *(vars->val.integer) = (long) *val_int;
+                } else {
+                    const u_int    *val_uint
+                        = (const u_int *) value;
+                    *(vars->val.integer) = (unsigned long) *val_uint;
+                }
+            }
+#if SIZEOF_LONG != SIZEOF_INT
+            else if (vars->val_len == sizeof(long)){
+                const u_long   *val_ulong
+                    = (const u_long *) value;
+                *(vars->val.integer) = *val_ulong;
+                if (*(vars->val.integer) > 0xffffffff) {
+                    snmp_log(LOG_ERR,"truncating integer value > 32 bits\n");
+                    *(vars->val.integer) &= 0xffffffff;
+                }
+            }
+#endif
+#if SIZEOF_LONG != SIZEOF_LONG_LONG
+#if defined (WIN32) && !defined (mingw32)
+            else if (vars->val_len == sizeof(__int64)){
+                const unsigned __int64   *val_ullong
+                    = (const unsigned __int64 *) value;
+#else
+                else if (vars->val_len == sizeof(long long)){
+                const unsigned long long   *val_ullong
+                    = (const unsigned long long *) value;
+#endif
+                *(vars->val.integer) = (long) *val_ullong;
+                if (*(vars->val.integer) > 0xffffffff) {
+                    snmp_log(LOG_ERR,"truncating integer value > 32 bits\n");
+                    *(vars->val.integer) &= 0xffffffff;
+                }
+            }
+#endif
+#if SIZEOF_SHORT != SIZEOF_INT
+            else if (vars->val_len == sizeof(short)) {
+                if (ASN_INTEGER == vars->type) {
+                    const short      *val_short 
+                        = (const short *) value;
+                    *(vars->val.integer) = (long) *val_short;
+                } else {
+                    const u_short    *val_ushort
+                        = (const u_short *) value;
+                    *(vars->val.integer) = (unsigned long) *val_ushort;
+                }
+            }
+#endif
+            else if (vars->val_len == sizeof(char)) {
+                if (ASN_INTEGER == vars->type) {
+                    const char      *val_char 
+                        = (const char *) value;
+                    *(vars->val.integer) = (long) *val_char;
+                } else {
+                    *(vars->val.integer) = (unsigned long) *value;
+                }
+            }
+            else {
+                snmp_log(LOG_ERR,"bad size for integer-like type (%d)\n",
+                         vars->val_len);
+                return (1);
+            }
+        } else
+            *(vars->val.integer) = 0;
+        vars->val_len = sizeof(long);
+        break;
+
+    case ASN_OBJECT_ID:
+    case ASN_PRIV_IMPLIED_OBJECT_ID:
+    case ASN_PRIV_INCL_RANGE:
+    case ASN_PRIV_EXCL_RANGE:
+        if (largeval) {
+            vars->val.objid = (oid *) malloc(vars->val_len);
+        }
+        if (vars->val.objid == NULL) {
+            snmp_log(LOG_ERR,"no storage for OID\n");
+            return 1;
+        }
+        memmove(vars->val.objid, value, vars->val_len);
+        break;
+
+    case ASN_IPADDRESS: /* snmp_build_var_op treats IPADDR like a string */
+        if (4 != vars->val_len) {
+            netsnmp_assert("ipaddress length == 4");
+        }
+        /** FALL THROUGH */
+    case ASN_PRIV_IMPLIED_OCTET_STR:
+    case ASN_OCTET_STR:
+    case ASN_BIT_STR:
+    case ASN_OPAQUE:
+    case ASN_NSAP:
+        if (largeval) {
+            vars->val.string = (u_char *) malloc(vars->val_len + 1);
+        }
+        if (vars->val.string == NULL) {
+            snmp_log(LOG_ERR,"no storage for OID\n");
+            return 1;
+        }
+        memmove(vars->val.string, value, vars->val_len);
+        /*
+         * Make sure the string is zero-terminated; some bits of code make
+         * this assumption.  Easier to do this here than fix all these wrong
+         * assumptions.  
+         */
+        vars->val.string[vars->val_len] = '\0';
+        break;
+
+    case SNMP_NOSUCHOBJECT:
+    case SNMP_NOSUCHINSTANCE:
+    case SNMP_ENDOFMIBVIEW:
+    case ASN_NULL:
+        vars->val_len = 0;
+        vars->val.string = NULL;
+        break;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+    case ASN_OPAQUE_U64:
+    case ASN_OPAQUE_I64:
+#endif                          /* OPAQUE_SPECIAL_TYPES */
+    case ASN_COUNTER64:
+        if (largeval) {
+            snmp_log(LOG_ERR,"bad size for counter 64 (%d)\n",
+                     vars->val_len);
+            return (1);
+        }
+        vars->val_len = sizeof(struct counter64);
+        memmove(vars->val.counter64, value, vars->val_len);
+        break;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+    case ASN_OPAQUE_FLOAT:
+        if (largeval) {
+            snmp_log(LOG_ERR,"bad size for opaque float (%d)\n",
+                     vars->val_len);
+            return (1);
+        }
+        vars->val_len = sizeof(float);
+        memmove(vars->val.floatVal, value, vars->val_len);
+        break;
+
+    case ASN_OPAQUE_DOUBLE:
+        if (largeval) {
+            snmp_log(LOG_ERR,"bad size for opaque double (%d)\n",
+                     vars->val_len);
+            return (1);
+        }
+        vars->val_len = sizeof(double);
+        memmove(vars->val.doubleVal, value, vars->val_len);
+        break;
+
+#endif                          /* OPAQUE_SPECIAL_TYPES */
+
+    default:
+        snmp_log(LOG_ERR,"no storage for OID\n");
+        snmp_set_detail("Internal error in type switching\n");
+        return (1);
+    }
+
     return 0;
 }
 

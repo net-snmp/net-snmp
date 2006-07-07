@@ -27,6 +27,7 @@ CLEAN :
 	-@erase "$(INTDIR)\header_complex.obj"
 	-@erase "$(INTDIR)\icmp.obj"
 	-@erase "$(INTDIR)\interfaces.obj"
+	-@erase "$(INTDIR)\interface_common.obj"
 	-@erase "$(INTDIR)\ip.obj"
 	-@erase "$(INTDIR)\ipAddr.obj"
 	-@erase "$(INTDIR)\loadave.obj"
@@ -180,6 +181,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\at.obj" \
 	"$(INTDIR)\icmp.obj" \
 	"$(INTDIR)\interfaces.obj" \
+	"$(INTDIR)\interface_common.obj" \
 	"$(INTDIR)\ip.obj" \
 	"$(INTDIR)\ipAddr.obj" \
 	"$(INTDIR)\route_write.obj" \
@@ -226,6 +228,7 @@ CLEAN :
 	-@erase "$(INTDIR)\header_complex.obj"
 	-@erase "$(INTDIR)\icmp.obj"
 	-@erase "$(INTDIR)\interfaces.obj"
+	-@erase "$(INTDIR)\interface_common.obj"
 	-@erase "$(INTDIR)\ip.obj"
 	-@erase "$(INTDIR)\ipAddr.obj"
 	-@erase "$(INTDIR)\loadave.obj"
@@ -380,6 +383,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\at.obj" \
 	"$(INTDIR)\icmp.obj" \
 	"$(INTDIR)\interfaces.obj" \
+	"$(INTDIR)\interface_common.obj" \	
 	"$(INTDIR)\ip.obj" \
 	"$(INTDIR)\ipAddr.obj" \
 	"$(INTDIR)\route_write.obj" \
@@ -694,6 +698,12 @@ SOURCE=..\..\agent\mibgroup\mibII\icmp.c
 SOURCE=..\..\agent\mibgroup\mibII\interfaces.c
 
 "$(INTDIR)\interfaces.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\if-mib\data_access\interface_common.c
+
+"$(INTDIR)\interface_common.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

@@ -58,6 +58,7 @@ init_notification(void)
  *  
  *  
  *  I.e. it's
+ * @verbatim
  *                                           ___  trapsink
  *                                          /
  *      send_easy_trap \___  [  Trap      ] ____  trap2sink
@@ -71,6 +72,7 @@ init_notification(void)
  *       send_v2trap     ------------------->  trap2sink
  *       ????            ------------------->  informsink
  *       ????            ------------------->  trapsess
+ * @endverbatim
  */
 void
 send_example_notification(unsigned int clientreg, void *clientarg)
@@ -105,7 +107,7 @@ send_example_notification(unsigned int clientreg, void *clientarg)
      * here is where we store the variables to be sent in the trap 
      */
     netsnmp_variable_list *notification_vars = NULL;
-    char *heartbeat_name = "A girl named Maria";
+    const char *heartbeat_name = "A girl named Maria";
 #ifdef  RANDOM_HEARTBEAT
     int  heartbeat_rate = rand() % 60;
 #else

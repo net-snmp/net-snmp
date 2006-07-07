@@ -34,19 +34,33 @@ oid             snmpEngine_variables_oid[] =
     { 1, 3, 6, 1, 6, 3, 10, 2, 1 };
 
 void
+register_snmpEngine_scalars(void)
+{
+    REGISTER_MIB("snmpv3/snmpEngine", snmpEngine_variables, variable2,
+                 snmpEngine_variables_oid);
+}
+
+void
+register_snmpEngine_scalars_context(const char *contextName)
+{
+    register_mib_context("snmpv3/snmpEngine",
+                         (struct variable *) snmpEngine_variables,
+                         sizeof(struct variable2),
+                         sizeof(snmpEngine_variables)/sizeof(struct variable2),
+                         snmpEngine_variables_oid,
+                         sizeof(snmpEngine_variables_oid)/sizeof(oid),
+                         DEFAULT_MIB_PRIORITY, 0, 0, NULL,
+                         contextName, -1, 0);
+}
+
+void
 init_snmpEngine(void)
 {
 #ifdef USING_MIBII_SYSORTABLE_MODULE
     static oid      reg[] = { 1, 3, 6, 1, 6, 3, 10, 3, 1, 1 };
     register_sysORTable(reg, 10, "The SNMP Management Architecture MIB.");
 #endif
-
-    REGISTER_MIB("snmpv3/snmpEngine", snmpEngine_variables, variable2,
-                 snmpEngine_variables_oid);
-
-    /*
-     * place any initialization routines needed here 
-     */
+    register_snmpEngine_scalars();
 }
 
 extern struct timeval starttime;
@@ -165,7 +179,7 @@ write_engineBoots(int action,
 /*
  * write_engineTime():
  * 
- * This is technically not writable a writable mib object, but we
+ * This is technically not a writable mib object, but we
  * allow it so we can run some time synchronization tests.
  */
 int

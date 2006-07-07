@@ -16,10 +16,8 @@
 int ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
                                ${context}_rowreq_ctx *rowreq_ctx);
 @   end@
-@   if ("$m2c_data_context" ne "generated") || ($m2c_data_init == 1)@
 int ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx);
 int ${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx);
-@   end@
 int ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx);
 int ${context}_undo_commit( ${context}_rowreq_ctx *rowreq_ctx);
 @   if $m2c_irreversible_commit == 1@
@@ -186,7 +184,6 @@ ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
 
 @end@ # row creation
 ##----------------------------------------------------------------------
-@if ("$m2c_data_context" ne "generated") || ($m2c_data_init == 1)@
 /**
  * Setup up context with information needed to undo a set request.
  *
@@ -267,7 +264,6 @@ ${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx)
     return rc;
 } /* ${context}_undo_cleanup */
 
-@end@ // ne generated
 ##----------------------------------------------------------------------
 /**
  * commit new values.

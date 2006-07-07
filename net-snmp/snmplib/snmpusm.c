@@ -1334,7 +1334,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
      * 
      * None of these are to be free'd - they are either pointing to
      * what's in the secStateRef or to something either in the
-     * actual prarmeter list or the user list.
+     * actual parameter list or the user list.
      */
 
     char           *theName = NULL;
@@ -2423,8 +2423,9 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
      */
     if ((user = usm_get_user_from_list(secEngineID, *secEngineIDLen,
                                        secName, userList,
-                                       (sess->isAuthoritative ==
-                                        SNMP_SESS_AUTHORITATIVE) ? 0 : 1))
+                                       (((sess && sess->isAuthoritative ==
+                                          SNMP_SESS_AUTHORITATIVE) ||
+                                         (!sess)) ? 0 : 1)))
         == NULL) {
         DEBUGMSGTL(("usm", "Unknown User(%s)\n", secName));
         if (snmp_increment_statistic(STAT_USMSTATSUNKNOWNUSERNAMES) == 0) {
@@ -2493,7 +2494,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                                                user->authKey,
                                                user->authKeyLen) == -1) {
             DEBUGMSGTL(("usm", "%s\n",
-                        "Couldn't cache authentiation key."));
+                        "Couldn't cache authentication key."));
             return SNMPERR_USM_GENERICERROR;
         }
 
@@ -2815,8 +2816,10 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
                                          USM_LENGTH_OID_TRANSFORM);
 #endif
 
-    SNMP_FREE(noNameUser->engineID);
-    noNameUser->engineIDLen = 0;
+    if ( noNameUser) {
+        SNMP_FREE(noNameUser->engineID);
+        noNameUser->engineIDLen = 0;
+    }
 
     return SNMPERR_SUCCESS;
 }                               /* end init_usm_post_config() */

@@ -508,6 +508,7 @@ Check_HRSW_cache(void *xxx)
         if (swi->swi_timestamp == sb.st_mtime)
             return;
         swi->swi_timestamp = sb.st_mtime;
+        swi->swi_maxrec = 0;
     }
 
     /*

@@ -1,35 +1,35 @@
-.TH SNMPUSM 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPUSM 1 "22 Oct 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpusm - creates and maintains SNMPv3 users on a network entity
 .SH SYNOPSIS
 .B snmpusm
-[COMMON OPTIONS] 
+[COMMON OPTIONS] [-CE ENGINE-ID]
 .B create
 USER [CLONEFROM-USER]
 .br
 .B snmpusm
-[COMMON OPTIONS] 
+[COMMON OPTIONS] [-CE ENGINE-ID]
 .B delete
 USER
 .br
 .B snmpusm
-[COMMON OPTIONS]
+[COMMON OPTIONS] [-CE ENGINE-ID]
 .B cloneFrom
 USER CLONEFROM-USER
 .br
 .B snmpusm
-[COMMON OPTIONS] [-Ca] [-Cx]
+[COMMON OPTIONS] [-CE ENGINE-ID] [-Ca] [-Cx]
 .B passwd
 OLD-PASSPHRASE NEW-PASSPHRASE [USER]
 .br
 .B snmpusm
-[COMMON OPTIONS] <-Ca | -Cx> -Ck
+[COMMON OPTIONS] [-CE ENGINE-ID] <-Ca | -Cx> -Ck
 .B passwd
-OLD-LOCALIZED-KEY NEW-PASSPHRASE [USER]
+OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]
 .br
 .B snmpusm
-[COMMON OPTIONS] [-Ca] [-Cx]
+[COMMON OPTIONS] [-CE ENGINE-ID] [-Ca] [-Cx]
 .B changekey [USER]
 
 .SH DESCRIPTION
@@ -43,6 +43,11 @@ configured on a running SNMP agent.
 
 .SH OPTIONS
 .TP
+.BI -CE " ENGINE-ID"
+Set usmUserEngineID to be used as part of the index of the usmUserTable.
+Default is to use the contextEngineID (set via -E or probed) as the 
+usmUserEngineID.
+.TP
 .BI -Ca
 Change the authentication key.
 .TP
@@ -50,15 +55,16 @@ Change the authentication key.
 Change the privacy key.
 .TP
 .BI -Ck
-Use old localized key instead of old passphrase.  When this option
-is used, either the -Ca or -Cx (but not both) option must also be used.
+Allows to use localized key (must start with 0x) instead of passphrase.
+When this option is used, either the -Ca or -Cx (but not both) option must also
+be used.
 
 .SH CREATING USERS
 .PP
 An unauthenticated SNMPv3 user can be created using the command
 .IP
 .B snmpusm
-create USER
+[-CE ENGINE-ID] create USER
 .PP
 This constructs an (inactive) entry in the usmUserTable,
 with no authentication or privacy settings.
@@ -71,7 +77,7 @@ In order to activate this entry, it is necessary to "clone" an existing
 user, using the command
 .IP
 .B snmpusm
-cloneFrom USER CLONEFROM-USER
+[-CE ENGINE-ID] cloneFrom USER CLONEFROM-USER
 .PP
 The USER entry then inherits the same authentication and privacy
 settings (including pass phrases) as the CLONEFROM user.
@@ -80,7 +86,7 @@ settings (including pass phrases) as the CLONEFROM user.
 These two steps can be combined into one, by using the command
 .IP
 .B snmpusm
-create USER CLONEFROM-USER
+[-CE ENGINE-ID] create USER CLONEFROM-USER
 
 .PP
 The two forms of the
@@ -98,7 +104,7 @@ protocols to use for a given user, and it is only possible to do this
 once.  Subsequent attempts to reclone onto the same user will appear
 to succeed, but will be silently ignored.
 This (somewhat unexpected) behaviour is mandated by the SNMPv3
-USM specifications (RFC 2474).
+USM specifications (RFC 3414).
 To change the authentication and privacy settings for a given user,
 it is necessary to delete and recreate the user entry.
 This is
@@ -116,7 +122,7 @@ configuration directive.
 A user can be deleted from the usmUserTable using the command
 .IP
 .B snmpusm
-delete USER
+[-CE ENGINE-ID] delete USER
 
 .SH CHANGING PASS PHRASES
 User profiles contain private keys that are never
@@ -127,7 +133,7 @@ user's old passphrase as well as the new one.
 This uses the command
 .IP
 .B snmpusm
-[-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]
+[-CE ENGINE-ID] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]
 
 .PP
 After cloning a new user entry from the appropriate template,
@@ -142,7 +148,7 @@ are changed.
 
 .IP
 .B snmpusm
-[-Ca] [-Cx] changekey [USER]
+[-CE ENGINE-ID] [-Ca] [-Cx] changekey [USER]
 
 .PP
 This command changes the key in a perfect-forward-secrecy compliant
@@ -166,11 +172,12 @@ sub-command is used:
 
 .IP
 .B snmpusm
-<-Ca | -Cx> -Ck passwd OLD-LOCALIZED-KEY NEW-PASSPHRASE [USER]
+[-CE ENGINE-ID] <-Ca | -Cx> -Ck passwd OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]
 
 .PP
-Either the -Ca or the -Cx option must be specified.  The OLD-LOCALIZED-KEY
-parameter is the localized key that was printed out by the
+Either the -Ca or the -Cx option must be specified.  The OLD-KEY-OR-PASSPHRASE
+and/or NEW-KEY-OR-PASSPHRASE arguments can either be a passphrase or a
+localized key starting with "0x", e.g. as printed out by the
 .B changekey
 sub-command.
 
@@ -237,4 +244,4 @@ This command will not work with the community-based versions,
 even if they have write access to the table.
 
 .SH "SEE ALSO"
-snmpd.conf(5), snmp.conf(5), RFC 2574
+snmpd.conf(5), snmp.conf(5), RFC 3414

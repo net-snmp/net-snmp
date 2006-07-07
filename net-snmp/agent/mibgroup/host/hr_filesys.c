@@ -511,12 +511,20 @@ void
 Init_HR_FileSys(void)
 {
 #if HAVE_GETFSSTAT
+#if defined(HAVE_STATVFS) && defined(__NetBSD__)
+    fscount = getvfsstat(NULL, 0, ST_NOWAIT);
+#else
     fscount = getfsstat(NULL, 0, MNT_NOWAIT);
+#endif
     if (fsstats)
         free((char *) fsstats);
     fsstats = NULL;
     fsstats = malloc(fscount * sizeof(*fsstats));
+#if defined(HAVE_STATVFS) && defined(__NetBSD__)
+    getvfsstat(fsstats, fscount * sizeof(*fsstats), ST_NOWAIT);
+#else
     getfsstat(fsstats, fscount * sizeof(*fsstats), MNT_NOWAIT);
+#endif
     HRFS_index = 0;
 #else
     HRFS_index = 1;

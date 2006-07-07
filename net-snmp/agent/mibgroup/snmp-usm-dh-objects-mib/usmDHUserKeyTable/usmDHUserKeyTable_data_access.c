@@ -124,9 +124,16 @@ usmDHUserKeyTable_container_init(netsnmp_container ** container_ptr_ptr,
      *
      * Also for advanced users, you can set parameters for the
      * cache. Do not change the magic pointer, as it is used
-     * by the MFD helper.
+     * by the MFD helper. To completely disable caching, set
+     * cache->enabled to 0.
+     *
+     * other tables access our data pool (usm user list), so not caching
+     * is the safest thing to do. The other option would be to add a
+     * callback when the list is changed, or a last changed object to
+     * verify the list hasn't changed. Until then, reload the cache for
+     * every request.
      */
-    cache->timeout = USMDHUSERKEYTABLE_CACHE_TIMEOUT;   /* seconds */
+    cache->timeout = -1;   /* seconds */
 }                               /* usmDHUserKeyTable_container_init */
 
 /**
