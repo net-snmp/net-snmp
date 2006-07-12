@@ -1135,7 +1135,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 		goto Return;
 	    }
             
-	    if (getKstatInt(NULL,ifrp->ifr_name, "wrbytes", &ifp->ifInOctets) != 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "rbytes", &ifp->ifInOctets) != 0) {
                     ifp->ifInOctets = ifp->ifInUcastPkts * 308; 
 	    }
             
