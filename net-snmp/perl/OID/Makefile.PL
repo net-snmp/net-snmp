@@ -5,11 +5,14 @@ use ExtUtils::MakeMaker;
 require 5;
 use Config;
 use Getopt::Long;
+my $lib_version;
 my %MakeParams = ();
 
 %MakeParams = InitMakeParams();
 
 WriteMakefile(%MakeParams);
+
+Check_Version();
 
 sub InitMakeParams {
     my $opts;
@@ -75,13 +78,14 @@ sub InitMakeParams {
 	$Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
 	chomp($Params{'CCFLAGS'});
 	$Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
+        $lib_version = `$opts->{'nsconfig'} --version`;
 	if (lc($opts->{'insource'}) eq "true") {
 	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 #	} else {
 #	    $Params{'PREREQ_PM'} = {'SNMP' => '5.0'};
 	}
-	$Params{'CCFLAGS'} =~ s/ -W[-\w]+//g; # ignore developer warnings
+	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
 	if ($Params{'LIBS'} eq "" || $Params{'CCFLAGS'} eq "") {
 	    die "You need to install net-snmp first (I can't find net-snmp-config)";
 	}
@@ -178,3 +182,48 @@ sub find_files {
     }
 }
 
+
+sub Check_Version {
+  if (($Config{'osname'} ne 'MSWin32' || $ENV{'OSTYPE'} eq 'msys')) {
+    my $foundversion = 0;
+    return if ($ENV{'NETSNMP_DONT_CHECK_VERSION'});
+    open(I,"<Makefile");
+    while (<I>) {
+	if (/^VERSION = (.*)/) {
+	    my $perlver = $1;
+	    my $srcver = $lib_version;
+	    chomp($srcver);
+	    my $srcfloat = floatize_version($srcver);
+	    $perlver =~ s/pre/0./;
+	    if ($srcfloat ne $perlver) {
+		if (!$foundversion) {
+		    print STDERR "ERROR:
+Net-SNMP installed version: $srcver => $srcfloat
+Perl Module Version:        $perlver
+
+These versions must match for perfect support of the module.  It is possible
+that different versions may work together, but it is strongly recommended
+that you make these two versions identical.  You can get the Net-SNMP
+source code and the associated perl modules directly from 
+
+   http://www.net-snmp.org/
+
+If you want to continue anyway please set the NETSNMP_DONT_CHECK_VERSION
+environmental variable to 1 and re-run the Makefile.PL script.\n";
+		    exit(1);
+		}
+	    }
+	    $foundversion = 1;
+	    last;
+	}
+    }
+    close(I);
+    die "ERROR: Couldn't find version number of this module\n" 
+      if (!$foundversion);
+  }
+}
+
+sub floatize_version {
+    my ($major, $minor, $patch, $opps) = ($_[0] =~ /^(\d+)\.(\d+)\.?(\d*)\.?(\d*)/);
+    return $major + $minor/100 + $patch/10000 + $opps/100000;
+}

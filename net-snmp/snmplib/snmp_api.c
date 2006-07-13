@@ -1578,7 +1578,8 @@ snmp_sess_add_ex(netsnmp_session * in_session,
             snmp_sess_close(slp);
             slp = NULL;
         }
-        if (create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
+        if (slp &&
+            create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
             slp->session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;
             DEBUGMSGTL(("snmp_api",
                         "_sess_open(): failed(2) to create a new user from session\n"));
@@ -1728,6 +1729,7 @@ create_user_from_session(netsnmp_session * session)
     if (session->securityAuthLocalKey != NULL
         && session->securityAuthLocalKeyLen != 0) {
         /* already localized key passed in.  use it */
+        SNMP_FREE(user->authKey);
         if (memdup(&user->authKey, session->securityAuthLocalKey,
                    session->securityAuthLocalKeyLen) != SNMPERR_SUCCESS) {
             usm_free_user(user);
@@ -1755,6 +1757,7 @@ create_user_from_session(netsnmp_session * session)
     } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
                                            NETSNMP_DS_LIB_AUTHLOCALIZEDKEY))) {
         size_t buflen = USM_AUTH_KU_LEN;
+        SNMP_FREE(user->authKey);
         user->authKey = malloc(buflen); /* max length needed */
         user->authKeyLen = 0;
         /* it will be a hex string */
@@ -1771,6 +1774,7 @@ create_user_from_session(netsnmp_session * session)
     if (session->securityPrivLocalKey != NULL
         && session->securityPrivLocalKeyLen != 0) {
         /* already localized key passed in.  use it */
+        SNMP_FREE(user->privKey);
         if (memdup(&user->privKey, session->securityPrivLocalKey,
                    session->securityPrivLocalKeyLen) != SNMPERR_SUCCESS) {
             usm_free_user(user);
@@ -1798,6 +1802,7 @@ create_user_from_session(netsnmp_session * session)
     } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
                                            NETSNMP_DS_LIB_PRIVLOCALIZEDKEY))) {
         size_t buflen = USM_PRIV_KU_LEN;
+        SNMP_FREE(user->privKey);
         user->privKey = malloc(buflen); /* max length needed */
         user->privKeyLen = 0;
         /* it will be a hex string */
@@ -3811,6 +3816,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
         parms.msg_flags = msg_flags;
         ret_val = (*sptr->decode) (&parms);
     } else {
+        SNMP_FREE(mallocbuf);
         DEBUGINDENTLESS();
         snmp_log(LOG_WARNING, "security service %ld can't decode packets\n",
                  msg_sec_model);
@@ -7178,3 +7184,5 @@ snmp_init_statistics(void)
 {
     memset(statistics, 0, sizeof(statistics));
 }
+/**  @} */
+

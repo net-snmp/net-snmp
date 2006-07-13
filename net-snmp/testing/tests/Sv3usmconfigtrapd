@@ -3,7 +3,7 @@
 # SNMPv3 USM config for snmptrapd
 #
 
-TRAPD_ENGINEID=0x0x80001f88802b3d0e06bbdf4e43
+TRAPD_ENGINEID=0x80001f88802b3d0e06bbdf4e43
 
 ## common SNMPv3 USM config
 . ./Sv3usmconfigbase

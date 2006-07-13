@@ -28,7 +28,8 @@
  */
 static int      _first_load = 1;
 
-/** @defgroup data_access data_access: Routines to access data
+/** @ingroup interface 
+ * @defgroup data_access data_access: Routines to access data
  *
  * These routines are used to locate the data used to satisfy
  * requests.
@@ -158,6 +159,8 @@ static void
 _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
                                    netsnmp_container *ifcontainer)
 {
+    char            oper_changed = 0;
+
     /*
      * check for matching entry. We can do this directly, since
      * both containers use the same index.
@@ -191,6 +194,9 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
             DEBUGMSGTL(("ifTable:access", "updating missing entry\n"));
             rowreq_ctx->known_missing = 1;
             rowreq_ctx->data.ifAdminStatus = IFADMINSTATUS_DOWN;
+            if ((!(rowreq_ctx->data.ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE))
+                && (rowreq_ctx->data.ifOperStatus != IFOPERSTATUS_DOWN))
+                oper_changed = 1;
             rowreq_ctx->data.ifOperStatus = IFOPERSTATUS_DOWN;
         }
     } else {
@@ -215,8 +221,11 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
         }
 
         /*
-         * update our ifentry
+         * Check for changes, then update
          */
+        if ((!(ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE))
+            && (rowreq_ctx->data.ifOperStatus != ifentry->oper_status))
+            oper_changed = 1;
         netsnmp_access_interface_entry_copy(rowreq_ctx->data.ifentry,
                                             ifentry);
 
@@ -226,6 +235,13 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
         CONTAINER_REMOVE(ifcontainer, ifentry);
         netsnmp_access_interface_entry_free(ifentry);
     }
+
+    /*
+     * if ifOperStatus changed, update ifLastChange
+     */
+    if (oper_changed)
+        rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
+
 }
 
 /**
@@ -284,7 +300,7 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
 /**
  * container shutdown
  *
- * @param container_ptr_ptr A pointer to the container.
+ * @param container_ptr A pointer to the container.
  *
  *  This function is called at shutdown to allow you to customize certain
  *  aspects of the access method. For the most part, it is for advanced

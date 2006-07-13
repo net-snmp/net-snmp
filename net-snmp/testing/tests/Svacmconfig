@@ -11,6 +11,8 @@ fi
 
 CONFIGAGENT [snmp] persistentdir $SNMP_TMP_PERSISTENTDIR
 
+CONFIGAGENT rocommunity testrocommunity 127.0.0.1 .1.3.6.1.2.1.1.5.0
+CONFIGAGENT rwcommunity testrwcommunity 127.0.0.1 .1.3.6.1.2.1.1.5.0
 
 CONFIGAGENT com2sec testcommunitysec1  default testcommunity1
 CONFIGAGENT com2sec testcommunitysec2  default testcommunity2

@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @addtogroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -302,3 +302,5 @@ config_require(udp-mib/udpEndpointTable/udpEndpointTable_data_access)
 }
 #endif
 #endif                          /* UDPENDPOINTTABLE_H */
+/**  @} */
+

@@ -733,9 +733,9 @@ really_try_next:
                 long_return = -1;
 	        break;
 #if defined(MBSTAT_SYMBOL)
-	    case HRS_TYPE_MBUF:
+           case HRS_TYPE_MBUF:
                 long_return = mbstat.m_mbufs;
-                break; 
+                break;
 #endif
 #elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
             case HRS_TYPE_MEM:
@@ -821,6 +821,11 @@ really_try_next:
 	    case HRS_TYPE_SWAP:
 		long_return = -1;
 		break;
+#if defined(MBSTAT_SYMBOL)
+           case HRS_TYPE_MBUF:
+                long_return = mbstat.m_mbufs;
+                break;
+#endif
 #elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
             case HRS_TYPE_MEM:
                 long_return = memory_totals.t_arm;

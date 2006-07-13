@@ -1,4 +1,4 @@
-.TH "various PDU processing routines" 3 "20 Dec 2005" "Version 5.2" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "13 Jul 2006" "Version 5.3.1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,7 +10,7 @@ various PDU processing routines \-
 .RI "#define \fBBSD4_2\fP"
 .br
 .ti -1c
-.RI "#define \fBNFDBITS\fP   (sizeof(fd_mask) * NBBY)"
+.RI "#define \fBNFDBITS\fP   (sizeof(\fBfd_mask\fP) * NBBY)"
 .br
 .ti -1c
 .RI "#define \fBFD_SET\fP(n, p)   ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))"
@@ -168,19 +168,19 @@ Definition at line 686 of file snmp_client.c.
 .PP
 References snmp_set_var_value(), and variable_list::type.
 .PP
-Referenced by check_getnext_results(), handle_pdu(), netsnmp_check_getnext_reply(), netsnmp_instance_num_file_handler(), netsnmp_old_api_helper(), netsnmp_table_build_result(), and snmp_set_var_value().
+Referenced by _reorder_getbulk(), check_getnext_results(), handle_pdu(), netsnmp_check_getnext_reply(), netsnmp_instance_counter32_handler(), netsnmp_instance_int_handler(), netsnmp_instance_long_handler(), netsnmp_instance_num_file_handler(), netsnmp_instance_ulong_handler(), netsnmp_stash_cache_helper(), netsnmp_table_build_result(), netsnmp_table_data_build_result(), netsnmp_watched_timestamp_handler(), netsnmp_watcher_helper_handler(), snmp_replace_var_types(), and snmp_reset_var_types().
 .SS "int snmp_set_var_value (\fBnetsnmp_variable_list\fP * vars, const u_char * value, size_t len)"
 .PP
 FALL THROUGH 
 .PP
 Definition at line 753 of file snmp_client.c.
 .PP
-References variable_list::buf, snmp_session::callback, snmp_session::callback_magic, snmp_pdu::errstat, variable_list::name, variable_list::name_length, variable_list::next_variable, snmp_log(), snmp_oidtree_compare(), snmp_set_var_typed_value(), variable_list::type, variable_list::val, variable_list::val_len, and snmp_pdu::variables.
+References variable_list::buf, netsnmp_vardata::counter64, netsnmp_vardata::integer, NULL, netsnmp_vardata::objid, snmp_log(), snmp_set_detail(), netsnmp_vardata::string, variable_list::type, variable_list::val, and variable_list::val_len.
 .PP
-Referenced by snmp_set_var_typed_value().
+Referenced by parse_one_oid_index(), snmp_set_var_typed_integer(), snmp_set_var_typed_value(), and snmp_varlist_add_variable().
 .SH "Variable Documentation"
 .PP 
-.SS "const char* error_string[19]"
+.SS "const char* \fBerror_string\fP[19]"
 .PP
 \fBInitial value:\fP
 .PP

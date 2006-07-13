@@ -4,12 +4,13 @@
 
 HEADER "if snmpnetstat finds the running agent in udpTable"
 
-if test `uname -s` = "HP-UX" ; then
-    if test `id -u` != "0" ; then
-        # The agent needs to be run as root - else force skip
-        SKIP
-    fi
-fi
+# on some systems the agent needs to be run as root to access udpTable
+# - else force skip
+case "x`uname -s`" in
+  xHP-UX)   [ "x`id -u`" != "x0" ] && SKIP;;
+  xNetBSD)  [ "x`id -u`" != "x0" ] && SKIP;;
+  xOpenBSD) [ "x`id -u`" != "x0" ] && SKIP;;
+esac
 
 SKIPIF DISABLE_SNMPV2C
 SKIPIFNOT USING_MIBII_UDPTABLE_MODULE
@@ -31,7 +32,7 @@ snmp_version=v2c
 STARTAGENT
 
 CAPTURE "$SNMPNETSTAT -Cn -Cp udp -$snmp_version -c testcommunity $SNMP_TEST_DEST$SNMP_SNMPD_PORT"
-CHECKORDIE "$SNMP_SNMPD_PORT"
+CHECKORDIE "127.0.0.1.$SNMP_SNMPD_PORT"
 
 STOPAGENT
 FINISHED

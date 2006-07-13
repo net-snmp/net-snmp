@@ -606,7 +606,8 @@ netsnmp_register_mib(const char *moduleName,
     DEBUGMSGTL(("register_mib", "registering \"%s\" at ", moduleName));
     DEBUGMSGOIDRANGE(("register_mib", mibloc, mibloclen, range_subid,
                       range_ubound));
-    DEBUGMSG(("register_mib", " with context \"%s\"\n", context));
+    DEBUGMSG(("register_mib", " with context \"%s\"\n",
+              SNMP_STRORNULL(context)));
 
     /*
      * verify that the passed context is equal to the context
@@ -1015,7 +1016,6 @@ unregister_mib_context(oid * name, size_t len, int priority,
         if (child == NULL)      /* Didn't find the given name */
             break;
     }
-    netsnmp_subtree_free(myptr);
 
     memset(&reg_parms, 0x0, sizeof(reg_parms));
     reg_parms.name = name;
@@ -1028,6 +1028,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_UNREGISTER_OID, &reg_parms);
 
+    netsnmp_subtree_free(myptr);
     netsnmp_set_lookup_cache_size(old_lookup_cache_val);
     invalidate_lookup_cache(context);
     return MIB_UNREGISTERED_OK;
@@ -1038,7 +1039,7 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
                                  int var_subid, oid range_ubound,
                                  const char *context)
 {
-    netsnmp_subtree *list, *myptr;
+    netsnmp_subtree *list, *myptr, *futureptr;
     netsnmp_subtree *prev, *child;       /* loop through children */
     struct register_parameters reg_parms;
     oid             range_lbound = name[var_subid - 1];
@@ -1072,7 +1073,11 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
         netsnmp_subtree_unload(child, prev, context);
         myptr = child;          /* remember this for later */
 
-        for (list = myptr->next; list != NULL; list = list->next) {
+        for (list = myptr->next; list != NULL; list = futureptr) {
+            /* remember the next spot in the list in case we free this node */
+            futureptr = list->next;
+
+            /* check each child */
             for (child = list, prev = NULL; child != NULL;
                  prev = child, child = child->children) {
 
@@ -1084,6 +1089,8 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
                     break;
                 }
             }
+
+            /* XXX: wjh: not sure why we're bailing here */
             if (child == NULL) {        /* Didn't find the given name */
                 break;
             }
@@ -1844,4 +1851,4 @@ unregister_signal(int sig)
 
 #endif                          /* !WIN32 */
 
-/**  }@ */
+/**  @} */

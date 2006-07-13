@@ -12,7 +12,8 @@
 #include <net-snmp/agent/stash_cache.h>
 #include <net-snmp/agent/stash_to_next.h>
 
-/** @defgroup stash_to_next stash_to_next: convert GET_STASH requests into GETNEXT requests for the handler.
+/** @defgroup stash_to_next stash_to_next
+ *  Convert GET_STASH requests into GETNEXT requests for the handler.
  *  The purpose of this handler is to convert a GET_STASH auto-cache request
  *  to a series of GETNEXT requests.  It can be inserted into a handler chain
  *  where the lower-level handlers don't process such requests themselves.
@@ -116,3 +117,5 @@ netsnmp_stash_to_next_helper(netsnmp_mib_handler *handler,
 
     return ret;
 }
+/**  @} */
+

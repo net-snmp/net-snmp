@@ -1356,6 +1356,64 @@ _ifTable_undo_setup_column(ifTable_rowreq_ctx * rowreq_ctx, int column)
     return rc;
 }                               /* _ifTable_undo_setup_column */
 
+int
+_mfd_ifTable_undo_setup_allocate(ifTable_rowreq_ctx *rowreq_ctx)
+{
+    int             rc = MFD_SUCCESS;
+    netsnmp_data_list *dl;
+
+    if (NULL == rowreq_ctx)
+        return MFD_ERROR;
+
+    /*
+     * other tables share our container/context and call
+     * this function. so we need to check and see if
+     * someone else already allocated the ifentry
+     */
+    if (NULL == rowreq_ctx->undo) {
+        rowreq_ctx->undo = ifTable_allocate_data();
+        if (NULL == rowreq_ctx->undo) {
+            /** msg already logged */
+            rc = SNMP_ERR_RESOURCEUNAVAILABLE;
+        }
+        else {
+            rowreq_ctx->undo->ifentry =
+                netsnmp_access_interface_entry_create(rowreq_ctx->data.ifentry->
+                                                      name,
+                                                      rowreq_ctx->data.ifentry->
+                                                      index);
+            if (NULL == rowreq_ctx->undo->ifentry) {
+                rc = SNMP_ERR_RESOURCEUNAVAILABLE;
+                ifTable_release_data(rowreq_ctx->undo);
+                rowreq_ctx->undo = NULL;
+            }
+            else {
+                netsnmp_access_interface_entry_copy(rowreq_ctx->undo->ifentry,
+                                                    rowreq_ctx->data.ifentry);
+                dl = netsnmp_data_list_add_data(&rowreq_ctx->ifTable_data_list,
+                                                "ifentry:undo", (void*)1, NULL);
+                if (NULL == dl) {
+                    snmp_log(LOG_ERR,"malloc failed\n");
+                    netsnmp_access_interface_entry_free(rowreq_ctx->undo->ifentry);
+                    rc = SNMP_ERR_RESOURCEUNAVAILABLE;
+                    netsnmp_access_interface_entry_free(rowreq_ctx->data.ifentry);
+                    ifTable_release_data(rowreq_ctx->undo);
+                    rowreq_ctx->undo = NULL;
+                }
+            }
+        }
+    }
+    else {
+        dl = netsnmp_get_list_node(rowreq_ctx->ifTable_data_list,
+                                   "ifentry:undo");
+        netsnmp_assert(NULL != dl);
+        ++(*(int*)&dl->data);
+        DEBUGMSGTL(("internal:ifTable:_mfd_ifTable_undo_setup_allocate",
+                    "++refcount = %d\n",(int)dl->data));
+    }
+
+    return rc;
+}
 
 /**
  * @internal
@@ -1378,18 +1436,15 @@ _mfd_ifTable_undo_setup(netsnmp_mib_handler *handler,
     /*
      * allocate undo context
      */
-    rowreq_ctx->undo = ifTable_allocate_data();
-    if (NULL == rowreq_ctx->undo) {
-        /** msg already logged */
-        netsnmp_request_set_error_all(requests,
-                                      SNMP_ERR_RESOURCEUNAVAILABLE);
+    rc = _mfd_ifTable_undo_setup_allocate(rowreq_ctx);
+    if (MFD_SUCCESS != rc) {
+        netsnmp_request_set_error_all(requests, rc);
         return SNMP_ERR_NOERROR;
     }
 
     /*
      * row undo setup
      */
-    rowreq_ctx->column_set_flags = 0;
     rc = ifTable_undo_setup(rowreq_ctx);
     if (MFD_SUCCESS != rc) {
         DEBUGMSGTL(("ifTable:mfd", "error %d from "
@@ -1420,6 +1475,27 @@ _mfd_ifTable_undo_setup(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ifTable_undo_setup */
+
+void
+_mfd_ifTable_undo_setup_release(ifTable_rowreq_ctx *rowreq_ctx)
+{
+    netsnmp_data_list *dl;
+
+    dl = netsnmp_get_list_node(rowreq_ctx->ifTable_data_list,
+                               "ifentry:undo");
+    if (NULL == dl)
+        return; /* better to lead than double free */
+
+    --(*(int*)&dl->data);
+    snmp_log(LOG_ERR, "--refcount at %d\n", (int)dl->data);
+
+    if (0 == (int)dl->data) {
+        netsnmp_access_interface_entry_free(rowreq_ctx->undo->ifentry);
+        ifTable_release_data(rowreq_ctx->undo);
+        rowreq_ctx->undo = NULL;
+        netsnmp_remove_list_node(&rowreq_ctx->ifTable_data_list,"ifentry:undo");
+    }
+}
 
 /**
  * @internal
@@ -1458,10 +1534,7 @@ _mfd_ifTable_undo_cleanup(netsnmp_mib_handler *handler,
     /*
      * release undo context, if needed
      */
-    if (rowreq_ctx->undo) {
-        ifTable_release_data(rowreq_ctx->undo);
-        rowreq_ctx->undo = NULL;
-    }
+    _mfd_ifTable_undo_setup_release(rowreq_ctx);
 
 
     return SNMP_ERR_NOERROR;
