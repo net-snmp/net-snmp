@@ -4,112 +4,60 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 *5.2.3*
 
     snmpd:
-      - fix trap processing from SMUX peers (patch 1430824 from Dell,
-        submitted by SuSE)
-      - udpTable byte-order fixes
-      - build fixes, e.g. for latest gcc
-      - return no access instead of not writable on VACM denials
-      - fix length of sysObjectID
-      - proxy: fix double-free of delegated cache
-      - plug memory leak on trap sending
-      - ensure proper ipAddress size with 64bit
-      - prevent endless loop in table_iterator
-      - extend: recognise failed/duplicate registrations, and don't plough 
-        on regardless
-      - extend: root second output table correctly
-      - disman/mteTriggerTable: Don't release the response PDU prematurely, 
-        before trying to extract OIDs from it
-      - don't be in such a rush to release MIB registration structure
-      - ifTable: improved undo handling
-      - ifXTable: update to report proper value from promiscuous mode
-      - testhandler: fix infinite loop, advance next pointer before continue
-      - ip-mib: don't free the container if asked not to
-      - ifTable: reduce cache reload timeout below wrap threshold for 
-        gigabit interfaces
-      - fix agent consumes CPU, doesnt respond to SIGTERM
-      - diskio: fix getdevs memory leak
+      - Build fixes, e.g. for latest gcc
+      - Return no access instead of not writable on VACM denials
+      - Prevent endless loop in table_iterator
+      - extend: recognize failed/duplicate registrations
+      - Various robustness fixes for some mib implementations
+      - A few memory leak fixes
+      - Other misc bug fixes.
 
     snmptrapd:
-      - prevent crash wrt. logging
-      - workaround to prevent snmptrapd embedded perl crash on x86_64
+      - Fixed support for snmptrapd embedded perl on x86_64
+      - Other misc bug fixes.
 
     library:
-      - make SNMPv3 traps work again (fix session user creation; official
-        patch 1374087)
-      - fix netsnmp_config_remember_free_list memory leak
-      - VACM: init length wasn't getting initialized properly
-      - fix assorted unsigned comparisons against 0
-      - release memory before re-allocating it
-      - warn on upper-bound parsing problems
-      - Associate MIB node types with the *last* entry parsed from the
-        definition value, not the first. Fixes problem with MIB definitions
-        that use intermediate subidentifiers
-      - fix snmptranslate -Td output for UNITS
-      - fix ip address encoding on 64Bit
+      - Make SNMPv3 traps work again (user creation; official patch 1374087)
+      - Fixes typing issues problem with MIB definitions that use
+        intermediate sub-identifiers
+      - Fix snmptranslate -Td output for UNITS
+      - Fix IP address encoding issues on 64Bit architectures
 
     snmpusm:
-      - allows to use old and/or new localized key instead of passphrase with
-        option -Ck
-      - new option -CE to specify usmUserEngineID (necessary to manage
+      - Usage of localized keys instead of passphrases with -Ck
+      - New option -CE to specify usmUserEngineID (necessary to manage
         snmptrapd's usmUserTable)
 
     snmpnetstat:
-      - skip missing entries (rather than crashing out completely)
-      - don't choke on SNMPv2 exceptions
+      - Skip missing entries
+      - Don't choke on SNMPv2 PDU exceptions
 
     snmpstatus:
-      - don't crash-and-burn on SNMP exceptions
+      - Don't choke on SNMPv2 PDU exceptions
 
     mib2c:
-      - fix mib2c.old-api.conf oid suffixes, suffix lengths
-      - mib2c.old-api.conf: display correct MIB group names in comments
-      - mib2c.int_watch.conf: use LOG_ERR instead of LOG_ERROR
+      - Misc bug fixes in some of the output styles
 
     Perl:
-      - check the perl module version number against the net-snmp version
-        number
-      - properly cast pointers to an IV instead of an int to fix 64bit issues
-      - fix segfault on perl async bulkwalk
-      - improved/fixed perl warnings
-      - check "TimeStamp" reference before use
-      - TrapReceiver: fix format string bug
+      - Check the perl module version number against the net-snmp version
+      - Fixes for 64bit issues
+      - Misc other fixes
 
     MIBs:
-      - update DISMAN-NSLOOKUP-MIB.txt, DISMAN-PING-MIB.txt and
-        DISMAN-TRACEROUTE-MIB.txt (from RFC 4560)
-      - IANAifType-MIB: Version 20051010
+      - Updated DISMAN-NSLOOKUP-MIB.txt, DISMAN-PING-MIB.txt,
+        DISMAN-TRACEROUTE-MIB.txt, and the IANAifType-MIB
 
  Ports:
    Linux:
-      - build fix for RH9 (official patch 1376177)
-      - fix compilation with ethtool
-      - diskIOTable contains invalid data for some devices on Linux
-      - fix Linux CPU counters on SMP machines
-      - tunnel mib fails to build w/ if-mib rewrite
-      - if-mib: subtract multicast packets from total packets for unicast 
-        packets
-   HP-UX:
-      - fix ipAdEntBcastAddr for HP-UX 11.0/11i
-      - build fixes
-   Mac OS X:
-      - build fix for snmpnetstat
-   Windows:
-      - build fix for snmpnetstat
-   OpenBSD:
-      - build fix: prevent duplicate include
-      - prevent configure warning
+      - Fix compilation with ethtool
+      - Fix Linux CPU counters on SMP machines
+   HP-UX, Mac OS X, OpenBSD, and Windows:
+      - Misc build fixes
 
  Misc:
-      - many fixes for issues reported by Coverity
-      - comprehensive review of in-line documentation
-      - make install: DESTDIR support
-      - fix --enable-mini-agent
-      - fix quoting on CONFIGURE_OPTIONS
-      - reworked dist directory
-      - the release tarball is now created with "star" instead of GNU tar
-        for enhanced portability (especially wrt. vendor tar implementations)
-      - many other miscellaneous bug fixes
-
+      - Comprehensive review of in-line documentation
+      - Make install: DESTDIR support
+      - Many other miscellaneous bug fixes
 
 *5.2.2*
 
