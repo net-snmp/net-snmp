@@ -28,8 +28,11 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
         perl support. (patch 1369996 from Peter Martin)
         Run "mib2c -c mib2c.perl.conf OID" to help you start using it.
 
+    perl:
+      - gettable() now supports asynchronous callback functions
+
     misc:
-      - Coverity fixes
+      - Many misc fixes
 
  Ports:
    HP-UX:
