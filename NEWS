@@ -51,7 +51,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
    Linux:
       - Fix compilation with ethtool
       - Fix Linux CPU counters on SMP machines
-   HP-UX, Mac OS X, OpenBSD, and Windows:
+   HP-UX, Mac OS X, OpenBSD, IRIX, AIX and Windows:
       - Misc build fixes
 
  Misc:
