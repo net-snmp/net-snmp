@@ -653,8 +653,11 @@ sub gettable {
     # i.e. we have reached the end of this table.
     #
 
-    my ($this, $root_oid, $options) = @_;
-    my ($textnode, $stopconds, $varbinds, $vbl, $res, %result_hash, $repeat);
+    my $state;
+
+    my ($this, $root_oid, @options) = @_;
+    $state->{'options'} = {@options};
+    my ($textnode, $varbinds, $vbl, $res, $repeat);
 
     # translate the OID into numeric form if its not
     if ($root_oid !~ /^[\.0-9]+$/) {
@@ -668,12 +671,12 @@ sub gettable {
     return if (!$root_oid);
 
     # deficed if we're going to parse indexes
-    my $parse_indexes = (defined($options->{'noindexes'})) ? 
+    my $parse_indexes = (defined($state->{'options'}{'noindexes'})) ? 
       0 : $have_netsnmp_oid;
 
     # get the list of columns we should look at.
     my @columns;
-    if (!$options->{'columns'}) {
+    if (!$state->{'options'}{'columns'}) {
 	if ($textnode) {
 	    my %indexes;
 
@@ -688,20 +691,20 @@ sub gettable {
 	    # calculate the list of accessible columns that aren't indexes
 	    my $children = $SNMP::MIB{$textnode}{'children'}[0]{'children'};
 	    foreach my $c (@$children) {
-		push @columns,
+		push @{$state->{'columns'}},
 		  $root_oid . ".1." . $c->{'subID'}
 		    if (!$indexes{$c->{'label'}});
 	    }
-	    if ($#columns == -1) {
+	    if ($#{$state->{'columns'}} == -1) {
 		# some tables are only indexes, and we need to walk at
 		# least one column.  We pick the last.
-		push @columns, $root_oid . ".1." .
+		push @{$state->{'columns'}}, $root_oid . ".1." .
 		  $children->[$#$children]{'subID'};
 	    }
 	}
     } else {
 	# XXX: requires specification in numeric OID...  ack.!
-	@columns = @{$options->{'columns'}};
+	@{$state->{'columns'}} = @{$state->{'options'}{'columns'}};
 
 	# if the columns aren't numeric, we need to turn them into
 	# numeric columns...
@@ -709,56 +712,86 @@ sub gettable {
 	    if ($_ !~ /\.1\.3/) {
 		$_ = $SNMP::MIB{$_}{'objectID'};
 	    }
-	} @columns;
+	} @{$state->{'columns'}};
     }
 
     # create the initial walking info.
-    foreach my $c (@columns) {
-	push @$varbinds, [$c];
-	push @$stopconds, $c;
+    foreach my $c (@{$state->{'columns'}}) {
+	push @{$state->{'varbinds'}}, [$c];
+	push @{$state->{'stopconds'}}, $c;
     }
 
-    if ($#$varbinds == -1) {
+    if ($#{$state->{'varbinds'}} == -1) {
 	print STDERR "ack: gettable failed to find any columns to look for.\n";
 	return;
     }
 
-    $vbl = $varbinds;
+    $vbl = $state->{'varbinds'};
 	
     my $repeatcount;
     if ($this->{Version} == 1 || $opts->{nogetbulk}) {
-	$repeatcount = 1;
-    } elsif ($options->{'repeat'}) {
-	$repeatcount = $options->{'repeat'};
-    } elsif ($#$varbinds == -1) {
-	$repeatcount = 1;
+	$state->{'repeatcount'} = 1;
+    } elsif ($state->{'options'}{'repeat'}) {
+	$state->{'repeatcount'} = $state->{'options'}{'repeat'};
+    } elsif ($#{$state->{'varbinds'}} == -1) {
+	$state->{'repeatcount'} = 1;
     } else {
 	# experimentally determined maybe guess at a best repeat value
 	# 1000 bytes max (safe), 30 bytes average for encoding of the
 	# varbind (experimentally determined to be closer to
 	# 26.  Again, being safe.  Then devide by the number of
 	# varbinds.
-	$repeatcount = int(1000 / 36 / ($#$varbinds + 1));
+	$state->{'repeatcount'} = int(1000 / 36 / ($#{$state->{'varbinds'}} + 1));
     }
 
-    if ($this->{Version} > 1 && !$options->{'nogetbulk'}) {
-	$res = $this->getbulk(0, $repeatcount, $vbl);
+    #
+    # if we've been configured with a callback, then call the
+    # sub-functions with a callback to our own "next" processing
+    # function (_gettable_do_it).  or else call the blocking method and
+    # call the next processing function ourself.
+    #
+    if ($state->{'options'}{'callback'}) {
+	if ($this->{Version} > 1 && !$state->{'options'}{'nogetbulk'}) {
+	    $res = $this->getbulk(0, $state->{'repeatcount'}, $vbl,
+				  [\&_gettable_do_it, $this, $vbl,
+				   $parse_indexes, $textnode, $state]);
+	} else {
+	    $res = $this->getnext($vbl,
+				  [\&_gettable_do_it, $this, $vbl,
+				   $parse_indexes, $textnode, $state]);
+	}
     } else {
-	$res = $this->getnext($vbl);
+	if ($this->{Version} > 1 && !$state->{'options'}{'nogetbulk'}) {
+	    $res = $this->getbulk(0, $state->{'repeatcount'}, $vbl);
+	} else {
+	    $res = $this->getnext($vbl);
+	}
+	return $this->_gettable_do_it($vbl, $parse_indexes, $textnode, $state);
     }
+    return 0;
+}
+
+use strict;
+
+sub _gettable_do_it() {
+    my ($this, $vbl, $parse_indexes, $textnode, $state) = @_;
+
+    my ($res);
+
+    $vbl = $_[$#_] if ($state->{'options'}{'callback'});
 
     while ($#$vbl > -1 && !$this->{ErrorNum}) {
-	if ($#$vbl + 1 != ($#$stopconds + 1) * $repeatcount) {
+	if ($#$vbl + 1 != ($#{$state->{'stopconds'}} + 1) * $state->{'repeatcount'}) {
 	    print STDERR "ack: gettable results not appropriate\n";
-	    my @k = keys(%result_hash);
+	    my @k = keys(%{$state->{'result_hash'}});
 	    last if ($#k > -1);  # bail with what we have
 	    return;
 	}
 
-	$varbinds = [];
+	$state->{'varbinds'} = [];
 	my $newstopconds;
 
-	my $lastsetstart = ($repeatcount-1) * ($#$stopconds+1);
+	my $lastsetstart = ($state->{'repeatcount'}-1) * ($#{$state->{'stopconds'}}+1);
 
 	for (my $i = 0; $i <= $#$vbl; $i++) {
 	    my $row_oid = SNMP::translateObj($vbl->[$i][0]);
@@ -767,12 +800,13 @@ sub gettable {
 	    my $row_value = $vbl->[$i][2];
 	    my $row_type = $vbl->[$i][3];
 
-	    if ($row_oid =~ /^$stopconds->[$i % ($#$stopconds+1)]/) {
+	    if ($row_oid =~ 
+		/^$state->{'stopconds'}->[$i % ($#{$state->{'stopconds'}}+1)]/){
 
 		if ($row_type eq "OBJECTID") {
 
-				# If the value returned is an OID, translate this
-				# back in to a textual OID
+		    # If the value returned is an OID, translate this
+		    # back in to a textual OID
 
 		    $row_value = SNMP::translateObj($row_value);
 
@@ -780,59 +814,100 @@ sub gettable {
 
 		# Place the results in a hash
 
-		$result_hash{$row_index}{$row_text} = $row_value;
+		$state->{'result_hash'}{$row_index}{$row_text} = $row_value;
 
 		# continue past this next time
 		if ($i >= $lastsetstart) {
-		    push @$newstopconds, $stopconds->[$i%($#$stopconds+1)];
-		    push @$varbinds,[$vbl->[$i][0],$vbl->[$i][1]];
+		    push @$newstopconds,
+		      $state->{'stopconds'}->[$i%($#{$state->{'stopconds'}}+1)];
+		    push @{$state->{'varbinds'}},[$vbl->[$i][0],$vbl->[$i][1]];
 		}
 	    }
 	}
 	if ($#$newstopconds == -1) {
 	    last;
 	}
-	if ($#$varbinds == -1) {
+	if ($#{$state->{'varbinds'}} == -1) {
 	    print "gettable ack.  shouldn't get here\n";
 	}
-	$vbl = $varbinds;
-	$stopconds = $newstopconds;
+	$vbl = $state->{'varbinds'};
+	$state->{'stopconds'} = $newstopconds;
 
-	if ($this->{Version} > 1 && !$options->{'nogetbulk'}) {
-	    $res = $this->getbulk(0, $repeatcount, $vbl);
+        #
+        # if we've been configured with a callback, then call the
+        # sub-functions with a callback to our own "next" processing
+        # function (_gettable_do_it).  or else call the blocking method and
+        # call the next processing function ourself.
+        #
+	if ($state->{'options'}{'callback'}) {
+	    if ($this->{Version} > 1 && !$state->{'options'}{'nogetbulk'}) {
+		$res = $this->getbulk(0, $state->{'repeatcount'}, $vbl,
+				      [\&_gettable_do_it, $this, $vbl,
+				       $parse_indexes, $textnode, $state]);
+	    } else {
+		$res = $this->getnext($vbl,
+				      [\&_gettable_do_it, $this, $vbl,
+				       $parse_indexes, $textnode, $state]);
+	    }
+	    return;
 	} else {
-	    $res = $this->getnext($vbl);
+	    if ($this->{Version} > 1 && !$state->{'options'}{'nogetbulk'}) {
+		$res = $this->getbulk(0, $state->{'repeatcount'}, $vbl);
+	    } else {
+		$res = $this->getnext($vbl);
+	    }
 	}
     }
 
-    # calculate indexes
+    # finish up
+    _gettable_end_routine($state, $parse_indexes, $textnode);
+
+    # return the hash if no callback was specified
+    if (!$state->{'options'}{'callback'}) {
+	return($state->{'result_hash'});
+    }
+
+    #
+    # if they provided a callback, call it
+    #   (if an array pass the args as well)
+    #
+    if (ref($state->{'options'}{'callback'}) eq 'ARRAY') {
+	my $code = shift @{$state->{'options'}{'callback'}};
+	$code->(@{$state->{'options'}{'callback'}}, $state->{'result_hash'});
+    } else {
+	$state->{'options'}{'callback'}->($state->{'result_hash'});
+    }
+}
+
+sub _gettable_end_routine {
+    my ($state, $parse_indexes, $textnode) = @_;
     if ($parse_indexes) {
 	my @indexes = @{$SNMP::MIB{$textnode}{'children'}[0]{'indexes'}};
 	my $i;
-	foreach my $trow (keys(%result_hash)) {
-	    my $noid = new NetSNMP::OID($columns[0] . "." . $trow);
+	foreach my $trow (keys(%{$state->{'result_hash'}})) {
+	    my $noid = new NetSNMP::OID($state->{'columns'}[0] . "." . $trow);
 	    if (!$noid) {
-		print STDERR "***** ERROR parsing $columns[0].$trow MIB OID\n";
+		print STDERR "***** ERROR parsing $state->{'columns'}[0].$trow MIB OID\n";
 		next;
 	    }
 	    my $nindexes = $noid->get_indexes();
 	    if (!$nindexes || ref($nindexes) ne 'ARRAY' ||
 		$#indexes != $#$nindexes) {
-		print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes:\n  $noid => " . ref($nindexes) . "\n   [should be an ARRAY]\n  expended # indexes = $#indexes\n";
+		print STDERR "***** ERROR parsing $state->{'columns'}[0].$trow MIB indexes:\n  $noid => " . ref($nindexes) . "\n   [should be an ARRAY]\n  expended # indexes = $#indexes\n";
 		if (ref($nindexes) eq 'ARRAY') {
-		    print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes: " . ref($nindexes) . " $#indexes $#$nindexes\n";
+		    print STDERR "***** ERROR parsing $state->{'columns'}[0].$trow MIB indexes: " . ref($nindexes) . " $#indexes $#$nindexes\n";
 		}
 		next;
 	    }
 
 	    for ($i = 0; $i <= $#indexes; $i++) {
-		$result_hash{$trow}{$indexes[$i]} = $nindexes->[$i];
+		$state->{'result_hash'}{$trow}{$indexes[$i]} = $nindexes->[$i];
 	    }
 	}
     }
-
-    return(\%result_hash);
 }
+no strict;
+
 
 sub fget {
    my $this = shift;
@@ -1752,6 +1827,34 @@ Force the use of GETNEXT rather than GETBULK.  (always true for
 SNMPv1, as it doesn't have GETBULK anyway).  Some agents are great
 implementers of GETBULK and this allows you to force the use of
 GETNEXT oprations instead.
+
+=item callback => \&subroutine
+
+=item callback => [\&subroutine, optarg1, optarg2, ...]
+
+If a callback is specified, gettable will return quickly without
+returning results.  When the results are finally retrieved the
+callback subroutine will be called (see the other sections defining
+callback behaviour and how to make use of SNMP::MainLoop which is
+required fro this to work).  An additional argument of the normal hash
+result will be added to the callback subroutine arguments.
+
+Note 1: internally, the gettable function uses it's own callbacks
+which are passed to getnext/getbulk as appropriate.
+
+Note 2: callback support is only available in the SNMP module version
+5.04 and above.  To test for this in code intending to support both
+versions prior to 5.04 and and 5.04 and up, the following should work:
+
+  if ($response = $sess->gettable('ifTable', callback => \&my_sub)) {
+      # got a response, gettable doesn't support callback
+      my_sub($response);
+      $no_mainloop = 1;
+  }
+
+Deciding on whether to use SNMP::MainLoop is left as an excersize to
+the reader since it depends on whether your code uses other callbacks
+as well.
 
 =back
 
