@@ -8,7 +8,6 @@ fi
 cd $DIR
 
 touch stamp-h.in stamp-h configure
-rm -f remove-files
 rm -f makedepend.in
 rm -f agent/mibgroup/versiontag
 rm -f ISSUES
@@ -16,3 +15,5 @@ rm -f makenosysdepend.pl
 rm -f makefileindepend.pl
 rm -f dist/RELEASE-INSTRUCTIONS
 rm -f dist/changelogfix
+find . -name .cvsignore | xargs rm -f
+rm -f remove-files

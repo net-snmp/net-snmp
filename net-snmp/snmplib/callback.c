@@ -105,8 +105,8 @@ init_callbacks(void)
  *	Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >=
  *	MAX_CALLBACK_SUBIDS or a snmp_gen_callback pointer could not be 
  *	allocated, otherwise SNMPERR_SUCCESS is returned.
- * 	- #define MAX_CALLBACK_IDS    2
- *	- #define MAX_CALLBACK_SUBIDS 16
+ * 	- \#define MAX_CALLBACK_IDS    2
+ *	- \#define MAX_CALLBACK_SUBIDS 16
  *
  * @see snmp_call_callbacks
  * @see snmp_unregister_callback
@@ -335,11 +335,53 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
     return count;
 }
 
+/**
+ * find and clear client args that match ptr
+ *
+ * @param ptr  pointer to search for
+ * @param i    callback id to start at
+ * @param j    callback subid to start at
+ */
+int
+netsnmp_callback_clear_client_arg(void *ptr, int i, int j)
+{
+    struct snmp_gen_callback *scp = NULL;
+    int rc = 0;
+
+    /*
+     * don't init i and j before loop, since the caller specified
+     * the starting point explicitly. But *after* the i loop has
+     * finished executing once, init j to 0 for the next pass
+     * through the subids.
+     */
+    for (; i < MAX_CALLBACK_IDS; i++,j=0) {
+        for (; j < MAX_CALLBACK_SUBIDS; j++) {
+            scp = thecallbacks[i][j]; 
+            while (scp != NULL) {
+                if ((NULL != scp->sc_callback) &&
+                    (scp->sc_client_arg != NULL) &&
+                    (scp->sc_client_arg == ptr)) {
+                    DEBUGMSGTL(("9:callback", "  clearing %p at [%d,%d]\n", ptr, i, j));
+                    scp->sc_client_arg = NULL;
+                    ++rc;
+                }
+                scp = scp->next;
+            }
+        }
+    }
+
+    if (0 != rc) {
+        DEBUGMSGTL(("callback", "removed %d client args\n", rc));
+    }
+
+    return rc;
+}
+
 void
 clear_callback(void)
 {
-    unsigned int i = 0, j = 0; 
-    struct snmp_gen_callback *scp = NULL, *next = NULL;
+    unsigned int i = 0, j = 0;
+    struct snmp_gen_callback *scp = NULL;
 
     if(++_lock > 1) {
         snmp_log(LOG_WARNING,
@@ -348,17 +390,33 @@ clear_callback(void)
     }
     DEBUGMSGTL(("callback", "clear callback\n"));
     for (i = 0; i < MAX_CALLBACK_IDS; i++) {
-	for (j = 0; j < MAX_CALLBACK_SUBIDS; j++) {
-	    scp = thecallbacks[i][j]; 
-	    while (scp != NULL) {
-		next = scp->next;
-		if ((NULL != scp->sc_callback) && (scp->sc_client_arg != NULL))
-		    SNMP_FREE(scp->sc_client_arg);
-		SNMP_FREE(scp);
-		scp = next;
-	    }
-	    thecallbacks[i][j] = NULL;
-	}
+        for (j = 0; j < MAX_CALLBACK_SUBIDS; j++) {
+            scp = thecallbacks[i][j];
+            while (scp != NULL) {
+                thecallbacks[i][j] = scp->next;
+                /*
+                 * if there is a client arg, check for duplicates
+                 * and then free it.
+                 */
+                if ((NULL != scp->sc_callback) &&
+                    (scp->sc_client_arg != NULL)) {
+                    void *tmp_arg;
+                    /*
+                     * save the client arg, then set it to null so that it
+                     * won't look like a duplicate, then check for duplicates
+                     * starting at the current i,j (earlier dups should have
+                     * already been found) and free the pointer.
+                     */
+                    tmp_arg = scp->sc_client_arg;
+                    scp->sc_client_arg = NULL;
+                    DEBUGMSGTL(("9:callback", "  freeing %p at [%d,%d]\n", tmp_arg, i, j));
+                    (void)netsnmp_callback_clear_client_arg(tmp_arg, i, j);
+                    free(tmp_arg);
+                }
+                SNMP_FREE(scp);
+                scp = thecallbacks[i][j];
+            }
+        }
     }
     --_lock;
 }

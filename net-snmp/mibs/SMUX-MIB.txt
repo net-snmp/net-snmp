@@ -3,8 +3,6 @@ SMUX-MIB DEFINITIONS ::= BEGIN
 IMPORTS
         enterprises
                 FROM RFC1155-SMI
-	DisplayString
-		FROM RFC1213-MIB
         OBJECT-TYPE
                 FROM RFC1212;
 
@@ -122,7 +120,7 @@ smuxTsubtree    OBJECT-TYPE
         ::= { smuxTreeEntry 1 }
 
 smuxTpriority OBJECT-TYPE
-        SYNTAX  INTEGER (0..'7fffffff'h)
+        SYNTAX  INTEGER (0..'07fffffff'h)
         ACCESS  read-only
         STATUS  mandatory
         DESCRIPTION

@@ -42,7 +42,8 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
                             netsnmp_agent_request_info *reqinfo,
                             netsnmp_request_info *requests);
 
-/** @defgroup table table: Helps you implement a table.
+/** @defgroup table table
+ *  Helps you implement a table.
  *  @ingroup handler
  *
  *  This handler helps you implement a table by doing some of the
@@ -301,7 +302,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                              var->name, tmp_len) > 0) {
             if (reqinfo->mode == MODE_GETNEXT) {
                 if (var->name != var->name_loc)
-                    free(var->name);
+                    SNMP_FREE(var->name);
                 snmp_set_var_objid(var, reginfo->rootoid,
                                    reginfo->rootoid_len);
             } else {
@@ -326,9 +327,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
         }
         /*
          * if it is not in range, then mark it in the request list 
-         * because we can't process it. If the request is not a GETNEXT 
-         * then set the error to NOSUCHOBJECT so nobody else wastes time
-         * trying to process it.  
+         * because we can't process it, and set an error so
+         * nobody else wastes time trying to process it either.  
          */
         if (out_of_range) {
             DEBUGMSGTL(("helper:table", "  Not processed: "));
@@ -338,10 +338,12 @@ table_helper_handler(netsnmp_mib_handler *handler,
             /*
              *  Reject requests of the form 'myTable.N'   (N != 1)
              */
-            if (reqinfo->mode != MODE_GETNEXT) {
+            if (reqinfo->mode == MODE_SET_RESERVE1)
+                table_helper_cleanup(reqinfo, request,
+                                     SNMP_ERR_NOTWRITABLE);
+            else if (reqinfo->mode == MODE_GET)
                 table_helper_cleanup(reqinfo, request,
                                      SNMP_NOSUCHOBJECT);
-            }
             continue;
         }
 
@@ -405,10 +407,12 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 /*
                  *  Reject requests of the form 'myEntry.N'   (invalid N)
                  */
-                if (reqinfo->mode != MODE_GETNEXT) {
+                if (reqinfo->mode == MODE_SET_RESERVE1)
+                    table_helper_cleanup(reqinfo, request,
+                                         SNMP_ERR_NOTWRITABLE);
+                else if (reqinfo->mode == MODE_GET)
                     table_helper_cleanup(reqinfo, request,
                                          SNMP_NOSUCHOBJECT);
-                }
                 continue;
             }
             /*
@@ -454,16 +458,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
                        tbl_req_info->index_oid_len * sizeof(oid));
                 tmp_name = tbl_req_info->index_oid;
             }
-        } else if (reqinfo->mode != MODE_GETNEXT) {
-            /*
-             * oid is NOT long enough to contain index info, and this is
-             * NOT a GETNEXT, so we can't do anything with it.
-             *
-             * Reject requests of the form 'myTable' or 'myEntry'
-             */
-            table_helper_cleanup(reqinfo, request, SNMP_NOSUCHOBJECT);
-            continue;
-        } else {
+        } else if (reqinfo->mode == MODE_GETNEXT ||
+                   reqinfo->mode == MODE_GETBULK) {
             /*
              * oid is NOT long enough to contain column or index info, so start
              * at the minimum column. Set index oid len to 0 because we don't
@@ -472,6 +468,19 @@ table_helper_handler(netsnmp_mib_handler *handler,
             DEBUGMSGTL(("helper:table", "  no column/index in request\n"));
             tbl_req_info->index_oid_len = 0;
             tbl_req_info->colnum = tbl_info->min_column;
+        } else {
+            /*
+             * oid is NOT long enough to contain index info,
+             * so we can't do anything with it.
+             *
+             * Reject requests of the form 'myTable' or 'myEntry'
+             */
+            if (reqinfo->mode == MODE_GET ) {
+                table_helper_cleanup(reqinfo, request, SNMP_NOSUCHOBJECT);
+            } else if (reqinfo->mode == MODE_SET_RESERVE1 ) {
+                table_helper_cleanup(reqinfo, request, SNMP_ERR_NOTWRITABLE);
+            }
+            continue;
         }
 
         /*
@@ -668,10 +677,10 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
 
     if (reqinfo->mode == MODE_GETNEXT) {
         for(request = requests ; request; request = request->next) {
-            if (request->requestvb->type == ASN_NULL && request->processed)
+            if ((request->requestvb->type == ASN_NULL && request->processed) ||
+                request->delegated)
                 continue;
-            if (request->requestvb->type == ASN_NULL ||
-                request->requestvb->type == SNMP_NOSUCHINSTANCE) {
+            if (request->requestvb->type == SNMP_NOSUCHINSTANCE) {
                 /*
                  * get next skipped this value for this column, we
                  * need to keep searching forward 
@@ -697,6 +706,13 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
                                        coloid, reginfo->rootoid_len + 2);
                     
                     request->requestvb->type = ASN_PRIV_RETRY;
+                }
+                else {
+                    /*
+                     * If we don't have column info, reset to null so
+                     * the agent will move on to the next table.
+                     */
+                    request->requestvb->type = ASN_NULL;
                 }
             }
         }
@@ -766,7 +782,7 @@ netsnmp_table_build_result(netsnmp_handler_registration *reginfo,
 /** given a registration info object, a request object and the table
  *  info object it builds the request->requestvb->name oid from the
  *  index values and column information found in the table_info
- *  object.
+ *  object. Index values are extracted from the table_info varbinds.
  */
 int
 netsnmp_table_build_oid(netsnmp_handler_registration *reginfo,
@@ -800,7 +816,10 @@ netsnmp_table_build_oid(netsnmp_handler_registration *reginfo,
     return SNMPERR_SUCCESS;
 }
 
-/** Builds an oid from index information.
+/** given a registration info object, a request object and the table
+ *  info object it builds the request->requestvb->name oid from the
+ *  index values and column information found in the table_info
+ *  object.  Index values are extracted from the table_info index oid.
  */
 int
 netsnmp_table_build_oid_from_index(netsnmp_handler_registration *reginfo,
@@ -836,6 +855,11 @@ netsnmp_update_variable_list_from_index(netsnmp_table_request_info *tri)
 {
     if (!tri)
         return SNMPERR_GENERR;
+
+    /*
+     * free any existing allocated memory, then parse oid into varbinds
+     */
+    snmp_reset_var_buffers( tri->indexes);
 
     return parse_oid_indexes(tri->index_oid, tri->index_oid_len,
                              tri->indexes);
@@ -1054,6 +1078,13 @@ netsnmp_table_helper_add_indexes(va_alist)
     va_end(debugargs);
 }
 
+static void
+_row_stash_data_list_free(void *ptr) {
+    netsnmp_oid_stash_node **tmp = (netsnmp_oid_stash_node **)ptr;
+    netsnmp_oid_stash_free(tmp, NULL);
+    free(ptr);
+}
+
 /** returns a row-wide place to store data in.
     @todo This function will likely change to add free pointer functions. */
 netsnmp_oid_stash_node **
@@ -1074,12 +1105,9 @@ netsnmp_table_get_or_create_row_stash(netsnmp_agent_request_info *reqinfo,
             return NULL;        /* ack. out of mem */
 
         netsnmp_agent_add_list_data(reqinfo,
-                                    /*
-                                     * XXX: free: wrong 
-                                     */
                                     netsnmp_create_data_list(storage_name,
                                                              stashp,
-                                                             free));
+                                                             _row_stash_data_list_free));
     }
     return stashp;
 }

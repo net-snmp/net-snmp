@@ -388,7 +388,7 @@ STARTPROG() {
 #------------------------------------ -o-
 STARTAGENT() {
     SNMPDSTARTED=1
-    COMMAND="snmpd $SNMP_FLAGS -r -U -P $SNMP_SNMPD_PID_FILE -Lf $SNMP_SNMPD_LOG_FILE $AGENT_FLAGS"
+    COMMAND="snmpd $SNMP_FLAGS -r -U -p $SNMP_SNMPD_PID_FILE -Lf $SNMP_SNMPD_LOG_FILE $AGENT_FLAGS"
     CFG_FILE=$SNMP_CONFIG_FILE
     LOG_FILE=$SNMP_SNMPD_LOG_FILE
     PORT_SPEC="$SNMP_SNMPD_PORT"
@@ -489,7 +489,7 @@ FINISHED() {
             continue
         fi
 	pid=`cat $pfile`
-	ps -e | egrep "^[	 ]*$pid[	 ]+" > /dev/null 2>&1
+	ps -e 2>/dev/null | egrep "^[	 ]*$pid[	 ]+" > /dev/null 2>&1
 	if [ $? = 0 ] ; then
 	    SNMP_SAVE_TMPDIR=yes
             if [ "x$OSTYPE" = "xmsys" ]; then

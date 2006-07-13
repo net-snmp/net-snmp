@@ -4,7 +4,8 @@
 
 HEADER AgentX trap sending support
 
-SKIPIFNOT USING_AGENTX_MODULE
+SKIPIFNOT USING_AGENTX_MASTER_MODULE
+SKIPIFNOT USING_AGENTX_SUBAGENT_MODULE
 SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
 
 #
@@ -29,7 +30,7 @@ AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -example"
 STARTAGENT
 
 # test to see that the current agent doesn't support the example mib
-CAPTURE "snmpget -On -t 3 $SNMP_FLAGS $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT ucdavis.254.1.0"
+CAPTURE "snmpget -On -t 3 $SNMP_FLAGS $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT UCD-SNMP-MIB::ucdavis.254.1.0"
 
 CHECK "No Such Object"
 
@@ -46,14 +47,14 @@ if test "$snmp_last_test_result" = 1; then
   STARTAGENT
 
   # test to see that the agent now supports the example mib
-  CAPTURE "snmpget -On $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT ucdavis.254.1.0"
+  CAPTURE "snmpget -On $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT UCD-SNMP-MIB::ucdavis.254.1.0"
 
   CHECK "life the universe and everything"
 
   if test "$snmp_last_test_result" = 1; then
 
     # test to see that the agent now sends a trap from the exmaple mib
-    CAPTURE "snmpset -On -r 0 -t 3 $SNMP_FLAGS $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT ucdavis.254.8.0 i 1"
+    CAPTURE "snmpset -On -r 0 -t 3 $SNMP_FLAGS $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT UCD-SNMP-MIB::ucdavis.254.8.0 i 1"
     DELAY
     CHECKTRAPD "life the universe and everything"
 

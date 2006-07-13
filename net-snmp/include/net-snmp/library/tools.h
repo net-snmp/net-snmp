@@ -1,5 +1,5 @@
 /**
- * @file tools.h
+ * @file library/tools.h
  * @defgroup util Memory Utility Routines
  * @ingroup library
  * @{

@@ -145,7 +145,7 @@ enum {
     MTAGROUPRECEIVEDVOLUME = 23 | NEEDS_STATS,
     MTAGROUPTRANSMITTEDVOLUME = 25 | NEEDS_STATS,
     MTAGROUPNAME = 43,
-    MTAGROUPHIERARCHY = 49,
+    MTAGROUPHIERARCHY = 49
 };
 
 /*
@@ -176,7 +176,7 @@ static struct variable3 mta_variables[] = {
      {2, 1, 8}},
     {MTAGROUPNAME, ASN_OCTET_STR, RONLY, var_mtaGroupEntry, 3, {2, 1, 25}},
     {MTAGROUPHIERARCHY, ASN_INTEGER, RONLY, var_mtaGroupEntry, 3,
-     {2, 1, 31}},
+     {2, 1, 31}}
 };
  /**/
 /** "other macros and structures" */

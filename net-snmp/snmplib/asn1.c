@@ -198,6 +198,39 @@ SOFTWARE.
 
 #include <net-snmp/library/snmp_api.h>
 
+#ifndef INT32_MAX
+#   define INT32_MAX 2147483647
+#endif
+
+#ifndef INT32_MIN
+#   define INT32_MIN (0 - INT32_MAX - 1)
+#endif
+
+
+#if SIZEOF_LONG == 4
+#  define CHECK_OVERFLOW_S(x,y)
+#  define CHECK_OVERFLOW_U(x,y)
+#else
+#  define CHECK_OVERFLOW_S(x,y) do { int trunc = 0;                     \
+        if (x > INT32_MAX) {                                            \
+            trunc = 1;                                                  \
+            x &= 0xffffffff;                                            \
+        } else if (x < INT32_MIN) {                                     \
+            trunc = 1;                                                  \
+            x = 0 - (x & 0xffffffff);                                   \
+        }                                                               \
+        if (trunc)                                                      \
+            snmp_log(LOG_ERR,"truncating signed value to 32 bits (%d)\n",y); \
+    } while(0)
+
+#  define CHECK_OVERFLOW_U(x,y) do {                                    \
+        if (x > UINT32_MAX) {                                           \
+            x &= 0xffffffff;                                            \
+            snmp_log(LOG_ERR,"truncating unsigned value to 32 bits (%d)\n",y); \
+        }                                                               \
+    } while(0)
+#endif
+
 /**
  * @internal
  * output an error for a wrong size
@@ -470,6 +503,8 @@ asn_parse_int(u_char * data,
     while (asn_length--)
         value = (value << 8) | *bufp++;
 
+    CHECK_OVERFLOW_S(value,1);
+
     DEBUGMSG(("dumpv_recv", "  Integer:\t%ld (0x%.2X)\n", value, value));
 
     *intp = value;
@@ -535,6 +570,8 @@ asn_parse_unsigned_int(u_char * data,
     while (asn_length--)
         value = (value << 8) | *bufp++;
 
+    CHECK_OVERFLOW_U(value,2);
+
     DEBUGMSG(("dumpv_recv", "  UInteger:\t%ld (0x%.2X)\n", value, value));
 
     *intp = value;
@@ -584,6 +621,7 @@ asn_build_int(u_char * data,
         return NULL;
     }
     integer = *intp;
+    CHECK_OVERFLOW_S(integer,3);
     /*
      * Truncate "unnecessary" bytes off of the most significant end of this
      * 2's complement integer.  There should be no sequence of 9
@@ -663,6 +701,8 @@ asn_build_unsigned_int(u_char * data,
         return NULL;
     }
     integer = *intp;
+    CHECK_OVERFLOW_U(integer,4);
+
     mask = ((u_long) 0xFF) << (8 * (sizeof(long) - 1));
     /*
      * mask is 0xFF000000 on a big-endian machine 
@@ -743,7 +783,7 @@ asn_build_unsigned_int(u_char * data,
 u_char         *
 asn_parse_string(u_char * data,
                  size_t * datalength,
-                 u_char * type, u_char * string, size_t * strlength)
+                 u_char * type, u_char * str, size_t * strlength)
 {
     static const char *errpre = "parse string";
     u_char         *bufp = data;
@@ -763,9 +803,9 @@ asn_parse_string(u_char * data,
 
     DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 
-    memmove(string, bufp, asn_length);
+    memmove(str, bufp, asn_length);
     if (*strlength > (int) asn_length)
-        string[asn_length] = 0;
+        str[asn_length] = 0;
     *strlength = (int) asn_length;
     *datalength -= (int) asn_length + (bufp - data);
 
@@ -774,7 +814,7 @@ asn_parse_string(u_char * data,
         size_t          l = (buf != NULL) ? (1 + asn_length) : 0, ol = 0;
 
         if (sprint_realloc_asciistring
-            (&buf, &l, &ol, 1, string, asn_length)) {
+            (&buf, &l, &ol, 1, str, asn_length)) {
             DEBUGMSG(("dumpv_recv", "  String:\t%s\n", buf));
         } else {
             if (buf == NULL) {
@@ -818,7 +858,7 @@ asn_parse_string(u_char * data,
 u_char         *
 asn_build_string(u_char * data,
                  size_t * datalength,
-                 u_char type, const u_char * string, size_t strlength)
+                 u_char type, const u_char * str, size_t strlength)
 {
     /*
      * ASN.1 octet string ::= primstring | cmpdstring
@@ -835,10 +875,10 @@ asn_build_string(u_char * data,
         return NULL;
 
     if (strlength) {
-        if (string == NULL) {
+        if (str == NULL) {
             memset(data, 0, strlength);
         } else {
-            memmove(data, string, strlength);
+            memmove(data, str, strlength);
         }
     }
     *datalength -= strlength;
@@ -848,7 +888,7 @@ asn_build_string(u_char * data,
         size_t          l = (buf != NULL) ? (1 + strlength) : 0, ol = 0;
 
         if (sprint_realloc_asciistring
-            (&buf, &l, &ol, 1, string, strlength)) {
+            (&buf, &l, &ol, 1, str, strlength)) {
             DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
         } else {
             if (buf == NULL) {
@@ -1286,17 +1326,19 @@ asn_parse_objid(u_char * data,
                 (subidentifier << 7) + (*(u_char *) bufp & ~ASN_BIT8);
             length--;
         } while (*(u_char *) bufp++ & ASN_BIT8);        /* last byte has high bit clear */
-        /*
-         * ?? note, this test will never be true, since the largest value
-         * of subidentifier is the value of MAX_SUBID! 
-	 *
-	 * Yes: PC-LINT says the same thing
-         */
+
+#if defined(EIGHTBIT_SUBIDS) || (SIZEOF_LONG != 4)
         if (subidentifier > (u_long) MAX_SUBID) {
             ERROR_MSG("subidentifier too large");
             return NULL;
         }
+#endif
         *oidp++ = (oid) subidentifier;
+    }
+
+    if (0 != length) {
+        ERROR_MSG("OID length exceeds buffer size");
+        return NULL;
     }
 
     /*
@@ -1417,6 +1459,8 @@ asn_build_objid(u_char * data,
      * calculate the number of bytes needed to store the encoded value 
      */
     for (i = 1, asnlength = 0;;) {
+
+        CHECK_OVERFLOW_U(objid_val,5);
         if (objid_val < (unsigned) 0x80) {
             objid_size[i] = 1;
             asnlength += 1;
@@ -1452,8 +1496,13 @@ asn_build_objid(u_char * data,
      */
     for (i = 1, objid_val = first_objid_val, op = objid + 2;
          i < (int) objidlength; i++) {
-        if (i != 1)
+        if (i != 1) {
             objid_val = *op++;
+#if SIZEOF_LONG != 4
+            if (objid_val > 0xffffffff) /* already logged warning above */
+                objid_val &= 0xffffffff;
+#endif
+        }
         switch (objid_size[i]) {
         case 1:
             *data++ = (u_char) objid_val;
@@ -1607,7 +1656,7 @@ asn_build_null(u_char * data, size_t * datalength, u_char type)
 u_char         *
 asn_parse_bitstring(u_char * data,
                     size_t * datalength,
-                    u_char * type, u_char * string, size_t * strlength)
+                    u_char * type, u_char * str, size_t * strlength)
 {
     /*
      * bitstring ::= 0x03 asnlength unused {byte}*
@@ -1634,7 +1683,7 @@ asn_parse_bitstring(u_char * data,
     DEBUGMSGHEX(("dumpv_recv", data, asn_length));
     DEBUGMSG(("dumpv_recv", "\n"));
 
-    memmove(string, bufp, asn_length);
+    memmove(str, bufp, asn_length);
     *strlength = (int) asn_length;
     *datalength -= (int) asn_length + (bufp - data);
     return bufp + asn_length;
@@ -1666,23 +1715,23 @@ asn_parse_bitstring(u_char * data,
 u_char         *
 asn_build_bitstring(u_char * data,
                     size_t * datalength,
-                    u_char type, const u_char * string, size_t strlength)
+                    u_char type, const u_char * str, size_t strlength)
 {
     /*
      * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
      */
     static const char *errpre = "build bitstring";
     if (_asn_bitstring_check
-        (errpre, strlength, (u_char)((string) ? *string :  0)))
+        (errpre, strlength, (u_char)((str) ? *str :  0)))
         return NULL;
 
     data = asn_build_header(data, datalength, type, strlength);
     if (_asn_build_header_check(errpre, data, *datalength, strlength))
         return NULL;
 
-    if (strlength > 0 && string)
-        memmove(data, string, strlength);
-    else if (strlength > 0 && !string) {
+    if (strlength > 0 && str)
+        memmove(data, str, strlength);
+    else if (strlength > 0 && !str) {
         ERROR_MSG("no string passed into asn_build_bitstring\n");
         return NULL;
     }
@@ -1781,6 +1830,9 @@ asn_parse_unsigned_int64(u_char * data,
         low = (low << 8) | *bufp++;
     }
 
+    CHECK_OVERFLOW_U(high,6);
+    CHECK_OVERFLOW_U(low,6);
+
     cp->low = low;
     cp->high = high;
 
@@ -1841,6 +1893,10 @@ asn_build_unsigned_int64(u_char * data,
     intsize = 8;
     low = cp->low;
     high = cp->high;
+
+    CHECK_OVERFLOW_U(high,7);
+    CHECK_OVERFLOW_U(low,7);
+
     mask = ((u_long) 0xFF) << (8 * (sizeof(long) - 1));
     /*
      * mask is 0xFF000000 on a big-endian machine 
@@ -2039,6 +2095,9 @@ asn_parse_signed_int64(u_char * data,
         low = (low << 8) | *bufp++;
     }
 
+    CHECK_OVERFLOW_U(high,8);
+    CHECK_OVERFLOW_U(low,8);
+
     cp->low = low;
     cp->high = high;
 
@@ -2101,6 +2160,9 @@ asn_build_signed_int64(u_char * data,
     memcpy(&c64, cp, sizeof(struct counter64)); /* we're may modify it */
     low = c64.low;
     high = c64.high;
+
+    CHECK_OVERFLOW_S(high,9);
+    CHECK_OVERFLOW_U(low,9);
 
     /*
      * Truncate "unnecessary" bytes off of the most significant end of this
@@ -2664,13 +2726,16 @@ asn_realloc_rbuild_int(u_char ** pkt, size_t * pkt_len,
 {
     static const char *errpre = "build int";
     register long   integer = *intp;
-    int             testvalue = (*intp < 0) ? -1 : 0;
+    int             testvalue;
     size_t          start_offset = *offset;
 
     if (intsize != sizeof(long)) {
         _asn_size_err(errpre, intsize, sizeof(long));
         return 0;
     }
+
+    CHECK_OVERFLOW_S(integer,10);
+    testvalue = (*intp < 0) ? -1 : 0;
 
     if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
         return 0;
@@ -2738,7 +2803,7 @@ int
 asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
                           size_t * offset, int r,
                           u_char type,
-                          const u_char * string, size_t strlength)
+                          const u_char * str, size_t strlength)
 {
     static const char *errpre = "build string";
     size_t          start_offset = *offset;
@@ -2750,7 +2815,7 @@ asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
     }
 
     *offset += strlength;
-    memcpy(*pkt + *pkt_len - *offset, string, strlength);
+    memcpy(*pkt + *pkt_len - *offset, str, strlength);
 
     if (asn_realloc_rbuild_header
         (pkt, pkt_len, offset, r, type, strlength)) {
@@ -2769,7 +2834,7 @@ asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
                         (buf != NULL) ? (2 * strlength) : 0, ol = 0;
 
                     if (sprint_realloc_asciistring
-                        (&buf, &l, &ol, 1, string, strlength)) {
+                        (&buf, &l, &ol, 1, str, strlength)) {
                         DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
                     } else {
                         if (buf == NULL) {
@@ -2822,6 +2887,8 @@ asn_realloc_rbuild_unsigned_int(u_char ** pkt, size_t * pkt_len,
         _asn_size_err(errpre, intsize, sizeof(unsigned long));
         return 0;
     }
+
+    CHECK_OVERFLOW_U(integer,11);
 
     if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
         return 0;
@@ -2958,6 +3025,7 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
     } else {
         for (i = objidlength; i > 2; i--) {
             tmpint = objid[i - 1];
+            CHECK_OVERFLOW_U(tmpint,12);
 
             if (((*pkt_len - *offset) < 1)
                 && !(r && asn_realloc(pkt, pkt_len))) {
@@ -3080,7 +3148,7 @@ int
 asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
                              size_t * offset, int r,
                              u_char type,
-                             const u_char * string, size_t strlength)
+                             const u_char * str, size_t strlength)
 {
     /*
      * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
@@ -3095,7 +3163,7 @@ asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
     }
 
     *offset += strlength;
-    memcpy(*pkt + *pkt_len - *offset, string, strlength);
+    memcpy(*pkt + *pkt_len - *offset, str, strlength);
 
     if (asn_realloc_rbuild_header
         (pkt, pkt_len, offset, r, type, strlength)) {
@@ -3114,7 +3182,7 @@ asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
                         (buf != NULL) ? (2 * strlength) : 0, ol = 0;
 
                     if (sprint_realloc_asciistring
-                        (&buf, &l, &ol, 1, string, strlength)) {
+                        (&buf, &l, &ol, 1, str, strlength)) {
                         DEBUGMSG(("dumpv_send", "  Bitstring:\t%s\n",
                                   buf));
                     } else {
@@ -3174,6 +3242,9 @@ asn_realloc_rbuild_unsigned_int64(u_char ** pkt, size_t * pkt_len,
                       sizeof(struct counter64));
         return 0;
     }
+
+    CHECK_OVERFLOW_U(high,13);
+    CHECK_OVERFLOW_U(low,13);
 
     /*
      * Encode the low 4 bytes first.  
@@ -3356,6 +3427,9 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
                       sizeof(struct counter64));
         return 0;
     }
+
+    CHECK_OVERFLOW_S(high,14);
+    CHECK_OVERFLOW_U(low,14);
 
     /*
      * Encode the low 4 bytes first.  

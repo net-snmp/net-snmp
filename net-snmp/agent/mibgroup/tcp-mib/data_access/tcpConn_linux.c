@@ -55,7 +55,7 @@ netsnmp_arch_tcpconn_delete(netsnmp_tcpconn_entry *entry)
 {
     if (NULL == entry)
         return -1;
-#warning "tcpConn delete"
+    /** xxx-rks:9 tcpConn delete not implemented */
     return -1;
 }
 
