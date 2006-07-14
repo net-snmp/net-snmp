@@ -1,38 +1,67 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
-*5.3.1*
+*5.2.3*
 
     snmpd:
-      - fix trap processing from SMUX peers (patch 1430824 from Dell,
-        submitted by SuSE)
-      - fix disman/event monitoring crashes (official patch 1429059)
-      - fix bug 1399369: ifNumber broken
-      - fix re-init of daemons after SIGHUP (official patch 1473289)
+      - Build fixes, e.g. for latest gcc
+      - Return no access instead of not writable on VACM denials
+      - Prevent endless loop in table_iterator
+      - extend: recognize failed/duplicate registrations
+      - Various robustness fixes for some mib implementations
+      - A few memory leak fixes
+      - Other misc bug fixes.
 
     snmptrapd:
-      - fix bug 1420758/1458815: snmptrapd aborts/loops in select()
-        (official patch 1420758)
-      - fix re-init of daemons after SIGHUP (official patch 1473289)
+      - Fixed support for snmptrapd embedded perl on x86_64
+      - Other misc bug fixes.
 
-    snmplib:
-      - fix OID lookups for fully qualified object names (eg .iso.org)
-        (official patch 1421725)
+    library:
+      - Make SNMPv3 traps work again (user creation; official patch 1374087)
+      - Fixes typing issues problem with MIB definitions that use
+        intermediate sub-identifiers
+      - Fix snmptranslate -Td output for UNITS
+      - Fix IP address encoding issues on 64Bit architectures
+      - snmp alarm callbacks can be scheduled for ASAP
 
     snmpusm:
+      - Usage of localized keys instead of passphrases with -Ck
+      - New option -CE to specify usmUserEngineID (necessary to manage
+        snmptrapd's usmUserTable)
       - performance improvement when changing localized keys
 
-    perl:
-      - The perl modules now check to make sure they're building
-        against the proper Net-SNMP version. 
+    snmpnetstat:
+      - Skip missing entries
+      - Don't choke on SNMPv2 PDU exceptions
 
-    misc:
-      - Coverity fixes
+    snmpstatus:
+      - Don't choke on SNMPv2 PDU exceptions
 
- Ports:
-   HP-UX:
-      - fix ipAdEntBcastAddr for HP-UX 11.0/11i (patch 1481012)
+    mib2c:
+      - Misc bug fixes in some of the output styles
 
+    Perl:
+      - New perl version numbering to meet CPAN criteria
+      - Check the perl module version number against the net-snmp version
+      - Fixes for 64bit issues
+      - Misc other fixes
+      - The detected perl binary is reported via net-snmp-config
+
+    MIBs:
+      - Updated DISMAN-NSLOOKUP-MIB.txt, DISMAN-PING-MIB.txt,
+        DISMAN-TRACEROUTE-MIB.txt, and the IANAifType-MIB
+
+   Ports:
+     Linux:
+        - Fix compilation with ethtool
+        - Fix Linux CPU counters on SMP machines
+     HP-UX, Mac OS X, OpenBSD, and Windows:
+        - Misc build fixes
+     
+   Misc:
+     - DESTDIR install path supported
+     - A number of improvements to the testing suite, including new tests
+     - Many miscellaneous bug fixes
 
 *5.3.0.1*
 
