@@ -529,6 +529,7 @@ var_ipRouteEntry(struct variable * vp,
 
     switch (vp->magic) {
     case IPROUTEDEST:
+        *var_len = 4;
 #if NEED_KLGETSA
         sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
         return (u_char *) & (sa->sin_addr.s_addr);
@@ -587,6 +588,7 @@ var_ipRouteEntry(struct variable * vp,
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTENEXTHOP:
+        *var_len = 4;
 #if NEED_KLGETSA
         sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
         return (u_char *) & (sa->sin_addr.s_addr);
@@ -629,6 +631,7 @@ var_ipRouteEntry(struct variable * vp,
         long_return = 0;
         return (u_char *) & long_return;
     case IPROUTEMASK:
+        *var_len = 4;
 #if NEED_KLGETSA
         /*
          * XXX - Almost certainly not right
