@@ -97,6 +97,7 @@ netsnmp_debug_helper(netsnmp_mib_handler *handler,
 
     netsnmp_mib_handler *hptr;
     int             i, ret, count;
+    char           *cp;
 
     DEBUGMSGTL(("helper:debug", "Entering Debugging Helper:\n"));
     DEBUGMSGTL(("helper:debug", "  Handler Registration Info:\n"));
@@ -113,9 +114,9 @@ netsnmp_debug_helper(netsnmp_mib_handler *handler,
                 reginfo->modes));
     for (count = 0, i = reginfo->modes; i; i = i >> 1, count++) {
         if (i & 0x01) {
-            DEBUGMSG(("helper:debug", "%s | ",
-                      se_find_label_in_slist("handler_can_mode",
-                                             0x01 << count)));
+            cp = se_find_label_in_slist("handler_can_mode",
+                                             0x01 << count);
+            DEBUGMSG(("helper:debug", "%s | ", (cp ? cp : "(NULL)")));
         }
     }
     DEBUGMSG(("helper:debug", "\n"));
