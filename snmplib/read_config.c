@@ -1609,8 +1609,8 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
                          *len, ilen);
                 DEBUGMSGTL(("read_config_read_octet_string",
                             "buffer too small (%d < %d)", *len, ilen));
-                cptr = skip_not_white(readfrom);
-                return skip_white(cptr);
+                cptr1 = skip_not_white(readfrom);
+                return skip_white(cptr1);
             }
             cptr = *str;
         }
@@ -1653,7 +1653,7 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
             }
         } else {
             readfrom = copy_nword(readfrom, (char *) *str, *len);
-            *len = strlen(*str);
+            *len = strlen((char *)*str);
         }
     }
 
