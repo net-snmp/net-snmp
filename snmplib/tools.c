@@ -254,7 +254,7 @@ memdup(u_char ** to, const u_char * from, size_t size)
 char           *
 netsnmp_strdup_and_null(const u_char * from, size_t from_len)
 {
-    u_char         *ret;
+    char         *ret;
 
     if (from_len == 0 || from[from_len - 1] != '\0') {
         ret = malloc(from_len + 1);
