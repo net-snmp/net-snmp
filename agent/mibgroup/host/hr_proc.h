@@ -6,6 +6,7 @@
 #define _MIBGROUP_HRPROC_H
 
 config_require(ucd-snmp/loadave)
+config_require(host/hr_device)
 
 #ifdef solaris2
 extern void kstat_CPU(void);
