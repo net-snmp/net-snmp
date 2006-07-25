@@ -974,7 +974,7 @@ usm_parse_create_usmUser(const char *token, char *line)
             usm_free_user(newuser);
             return;
         }
-        newuser->privKey = (u_char *) malloc(ret);
+        newuser->privKey = (u_char *) malloc(ret2);
 
         if (strcmp(buf,"-l") == 0) {
             /* a local key is directly specified */
