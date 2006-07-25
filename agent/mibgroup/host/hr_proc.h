@@ -7,6 +7,7 @@
 
 config_require(ucd-snmp/loadave)
 config_arch_require(linux,hardware/cpu)
+config_require(host/hr_device)
 
 #ifdef solaris2
 extern void kstat_CPU(void);
