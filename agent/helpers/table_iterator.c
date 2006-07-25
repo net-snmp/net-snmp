@@ -490,6 +490,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
          *   so that we'll know when we're finished
          */
         for(request = requests ; request; request = request->next)
+          if (!request->processed)
             request_count++;
         notdone = 1;
         while(notdone) {
@@ -501,7 +502,19 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     /* previously done */
                     index_search = free_this_index_search;
                 } else {
-                    table_info = netsnmp_extract_table_info(requests);
+                    for(request=requests ; request; request=request->next) {
+                        table_info = netsnmp_extract_table_info(request);
+                        if (table_info)
+                            break;
+                    }
+                    if (!table_info) {
+                        snmp_log(LOG_WARNING,
+                                 "no valid requests for iterator table %s\n",
+                                 reginfo->handlerName);
+                        netsnmp_free_request_data_sets(reqtmp);
+                        SNMP_FREE(reqtmp);
+                        return SNMP_ERR_NOERROR;
+                    }
                     index_search = snmp_clone_varbind(table_info->indexes);
                     free_this_index_search = index_search;
 
