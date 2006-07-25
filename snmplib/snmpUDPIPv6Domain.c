@@ -351,6 +351,7 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
 #elif HAVE_GETHOSTBYNAME
     struct hostent *hp = NULL;
 #endif
+    int             portno;
 
     if (addr == NULL) {
         return 0;
@@ -440,7 +441,11 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                          (void *) &(addr->sin6_addr))) {
                         DEBUGMSGTL(("netsnmp_sockaddr_in6",
                                     "IPv6 address with square brankets\n"));
-                        addr->sin6_port = htons(SNMP_PORT);
+                        portno = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+				                    NETSNMP_DS_LIB_DEFAULT_PORT);
+                        if (portno <= 0)
+                            portno = SNMP_PORT;
+                        addr->sin6_port = htons(portno);
 #ifdef HAVE_IF_NAMETOINDEX
                         addr->sin6_scope_id = if_index;
 #endif
