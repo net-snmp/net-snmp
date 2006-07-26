@@ -176,6 +176,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                 thissess.securityNameLen =
                                     strlen(thissess.securityName);
                                 thissess.securityLevel = param->secLevel;
+                                thissess.securityModel = param->secModel;
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
                             } else {
                                 thissess.community =
