@@ -1167,19 +1167,25 @@ snmp_vlog(int priority, const char *format, va_list ap)
     char            buffer[LOGLENGTH];
     int             length;
     char           *dynamic;
+    va_list         aq;
 
+    va_copy(aq, ap);
     length = vsnprintf(buffer, LOGLENGTH, format, ap);
 
-    if (length == 0)
+    if (length == 0) {
+        va_end(aq);
         return (0);             /* Empty string */
+    }
 
     if (length == -1) {
         snmp_log_string(LOG_ERR, "Could not format log-string\n");
+        va_end(aq);
         return (-1);
     }
 
     if (length < LOGLENGTH) {
         snmp_log_string(priority, buffer);
+        va_end(aq);
         return (0);
     }
 
@@ -1188,12 +1194,14 @@ snmp_vlog(int priority, const char *format, va_list ap)
         snmp_log_string(LOG_ERR,
                         "Could not allocate memory for log-message\n");
         snmp_log_string(priority, buffer);
+        va_end(aq);
         return (-2);
     }
 
-    vsnprintf(dynamic, length + 1, format, ap);
+    vsnprintf(dynamic, length + 1, format, aq);
     snmp_log_string(priority, dynamic);
     free(dynamic);
+    va_end(aq);
     return 0;
 }
 
