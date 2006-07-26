@@ -274,15 +274,23 @@ extensible_parse_config(const char *token, char *cptr)
     sprintf(ptmp->fixcmd, EXECFIXCMD, ptmp->name);
 #endif
     if (ptmp->miblen > 0) {
+      /*
+       * For relocatable "exec" entries,
+       * register the new (not-strictly-valid) MIB subtree...
+       */
         register_mib(token,
                      (struct variable *) extensible_relocatable_variables,
                      sizeof(struct variable2), 
                      sizeof(extensible_relocatable_variables) /
                      sizeof(*extensible_relocatable_variables),
                      ptmp->miboid, ptmp->miblen);
-    }
 
-    if (scount > 1) {
+      /*
+       * ... and ensure the entries are sorted by OID.
+       * This isn't needed for entries in the main extTable (which
+       * don't have MIB OIDs explicitly associated with them anyway)
+       */
+      if (scount > 1) {
         int i;
         struct extensible **etmp = (struct extensible **)
             malloc(((sizeof(struct extensible *)) * scount));
@@ -302,6 +310,7 @@ extensible_parse_config(const char *token, char *cptr)
         }
         ptmp->next = NULL;
         free(etmp);
+      }
     }
 }
 
