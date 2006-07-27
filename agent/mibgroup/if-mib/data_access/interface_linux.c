@@ -22,9 +22,10 @@
 #include "interface_ioctl.h"
 
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #ifdef HAVE_LINUX_ETHTOOL_H
-#include <sys/types.h>
 typedef unsigned long long u64;         /* hack, so we may include kernel's ethtool.h */
 typedef __uint32_t u32;         /* ditto */
 typedef __uint16_t u16;         /* ditto */
@@ -40,13 +41,32 @@ unsigned int
 netsnmp_linux_interface_get_if_speed_mii(int fd, const char *name);
 #endif
 
+#define PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS "/proc/sys/net/ipv%d/neigh/%s/retrans_time_ms"
+#define PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME    "/proc/sys/net/ipv%d/neigh/%s/retrans_time"
+static char *proc_sys_retrans_time;
+static unsigned short retrans_time_factor = 1;
 
 void
 netsnmp_arch_interface_init(void)
 {
     /*
-     * nothing to do
+     * Check which retransmit time interface is available
      */
+    char proc_path[ 64+IF_NAMESIZE];
+    char proc_path2[64+IF_NAMESIZE];
+    struct stat st;
+
+    snprintf(proc_path,  sizeof(proc_path),
+             PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS, 6, "default");
+    snprintf(proc_path2, sizeof(proc_path2),
+             PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS, 4, "default");
+
+    if ((stat(proc_path, &st) == 0) || (stat(proc_path2, &st) == 0)) {
+        proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS;
+    } else {
+        proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME;
+        retrans_time_factor = 10;
+    }
 }
 
 /*
@@ -161,7 +181,7 @@ _arch_interface_flags_v4_get(netsnmp_interface_entry *entry)
     /*
      * get the retransmit time
      */
-    snprintf(line,sizeof(line),"/proc/sys/net/ipv4/neigh/%s/retrans_time",
+    snprintf(line,sizeof(line), proc_sys_retrans_time, 4,
              entry->name);
     if (!(fin = fopen(line, "r"))) {
         DEBUGMSGTL(("access:interface",
@@ -169,7 +189,7 @@ _arch_interface_flags_v4_get(netsnmp_interface_entry *entry)
     }
     else {
         if (fgets(line, sizeof(line), fin)) {
-            entry->retransmit_v4 = atoi(line) * 100;
+            entry->retransmit_v4 = atoi(line) * retrans_time_factor;
             entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V4_RETRANSMIT;
         }
         fclose(fin);
@@ -190,7 +210,7 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
     /*
      * get the retransmit time
      */
-    snprintf(line,sizeof(line),"/proc/sys/net/ipv6/neigh/%s/retrans_time",
+    snprintf(line,sizeof(line), proc_sys_retrans_time, 6,
              entry->name);
     if (!(fin = fopen(line, "r"))) {
         DEBUGMSGTL(("access:interface",
@@ -198,7 +218,7 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
     }
     else {
         if (fgets(line, sizeof(line), fin)) {
-            entry->retransmit_v6 = atoi(line);
+            entry->retransmit_v6 = atoi(line) * retrans_time_factor;
             entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_RETRANSMIT;
         }
         fclose(fin);
@@ -454,7 +474,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
      */
     while (fgets(line, sizeof(line), devin)) {
         char           *stats, *ifstart = line;
-        int             flags;
+        u_int           flags;
         oid             if_index;
 
         flags = 0;
