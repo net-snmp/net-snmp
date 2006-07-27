@@ -87,6 +87,12 @@ SOFTWARE.
 #if HAVE_PROCESS_H              /* Win32-getpid */
 #include <process.h>
 #endif
+#if HAVE_PWD_H
+#include <pwd.h>
+#endif
+#if HAVE_GRP_H
+#include <grp.h>
+#endif
 #include <signal.h>
 #include <errno.h>
 
@@ -312,6 +318,10 @@ usage(void)
     fprintf(stderr, "  -f\t\t\tdo not fork from the shell\n");
     fprintf(stderr,
             "  -F FORMAT\t\tuse specified format for logging to standard error\n");
+#if HAVE_UNISTD_H
+    fprintf(stderr, "  -g GID\t\tchange to this numeric gid after opening\n"
+	   "\t\t\t  transport endpoints\n");
+#endif
     fprintf(stderr, "  -h, --help\t\tdisplay this usage message\n");
     fprintf(stderr,
             "  -H\t\t\tdisplay configuration file directives understood\n");
@@ -331,6 +341,10 @@ usage(void)
     fprintf(stderr, "  \t\t\t  Note that some parameters are not relevant when running as a service\n");
 #endif
     fprintf(stderr, "  -t\t\t\tPrevent traps from being logged to syslog\n");
+#if HAVE_UNISTD_H
+    fprintf(stderr, "  -u UID\t\tchange to this uid (numeric or textual) after\n"
+	   "\t\t\t  opening transport endpoints\n");
+#endif
 #ifdef WIN32SERVICE
     fprintf(stderr, "  -unregister\t\tunregister as a Windows service\n");
     fprintf(stderr, "  \t\t\t  (followed -quiet to prevent message popups)\n");
@@ -350,7 +364,6 @@ usage(void)
     fprintf(stderr, "  -P\t\t\tuse -f -Le  instead\n");
     fprintf(stderr, "  -s\t\t\tuse -Lsd instead\n");
     fprintf(stderr, "  -S d|i|0-7\t\tuse -Ls <facility> instead\n");
-    fprintf(stderr, "  -u FILE\t\tuse -p <FILE> instead\n");
 }
 
 static void
@@ -517,6 +530,65 @@ parse_config_pidFile(const char *token, char *cptr)
   pid_file = strdup (cptr);
 }
 
+#ifdef HAVE_UNISTD_H
+void
+parse_config_agentuser(const char *token, char *cptr)
+{
+#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
+    struct passwd  *info;
+#endif
+
+    if (cptr[0] == '#') {
+        char           *ecp;
+        int             uid;
+        uid = strtoul(cptr + 1, &ecp, 10);
+        if (*ecp != 0) {
+            config_perror("Bad number");
+	} else {
+	    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_USERID, uid);
+	}
+    }
+#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
+    else if ((info = getpwnam(cptr)) != NULL) {
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+			   NETSNMP_DS_AGENT_USERID, info->pw_uid);
+    } else {
+        config_perror("User not found in passwd database");
+    }
+    endpwent();
+#endif
+}
+
+void
+parse_config_agentgroup(const char *token, char *cptr)
+{
+#if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
+    struct group   *info;
+#endif
+
+    if (cptr[0] == '#') {
+        char           *ecp;
+        int             gid = strtoul(cptr + 1, &ecp, 10);
+        if (*ecp != 0) {
+            config_perror("Bad number");
+	} else {
+            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_GROUPID, gid);
+	}
+    }
+#if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
+    else if ((info = getgrnam(cptr)) != NULL) {
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+			   NETSNMP_DS_AGENT_GROUPID, info->gr_gid);
+    } else {
+        config_perror("Group not found in group database");
+    }
+    endpwent();
+#endif
+}
+#endif
+
 void
 parse_config_logOption(const char *token, char *cptr)
 {
@@ -583,10 +655,11 @@ SnmpTrapdMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "ac:CdD::efF:hHI:L:m:M:no:PqsS:tvx:O:-:";
+    char            options[128] = "ac:CdD::efF:g:hHI:L:m:M:no:O:PqsS:tu:vx:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
     int             arg, i = 0, depmsg = 0;
+    int             uid = 0, gid = 0;
     int             count, numfds, block;
     fd_set          readfds,writefds,exceptfds;
     struct timeval  timeout, *tvp;
@@ -623,6 +696,12 @@ main(int argc, char *argv[])
     register_config_handler("snmptrapd", "pidFile",
                             parse_config_pidFile, NULL, "string");
 #endif
+#ifdef HAVE_UNISTD_H
+    register_config_handler("snmptrapd", "agentuser",
+                            parse_config_agentuser, NULL, "userid");
+    register_config_handler("snmptrapd", "agentgroup",
+                            parse_config_agentgroup, NULL, "groupid");
+#endif
     
     register_config_handler("snmptrapd", "logOption",
                             parse_config_logOption, NULL, "string");
@@ -649,7 +728,7 @@ main(int argc, char *argv[])
      * Add some options if they are available.  
      */
 #if HAVE_GETPID
-    strcat(options, "p:u:");
+    strcat(options, "p:");
 #endif
 
 #ifdef WIN32
@@ -726,6 +805,18 @@ main(int argc, char *argv[])
                 exit(1);
             }
             break;
+
+#if HAVE_UNISTD_H
+        case 'g':
+            if (optarg != NULL) {
+                netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+				   NETSNMP_DS_AGENT_GROUPID, gid = atoi(optarg));
+            } else {
+                usage();
+                exit(1);
+            }
+            break;
+#endif
 
         case 'h':
             usage();
@@ -856,6 +947,17 @@ main(int argc, char *argv[])
             }
             break;
 
+#if HAVE_GETPID
+        case 'p':
+            if (optarg != NULL) {
+                parse_config_pidFile(NULL, optarg);
+            } else {
+                usage();
+                exit(1);
+            }
+            break;
+#endif
+
         case 'P':
             fprintf(stderr,
                     "Warning: -P option is deprecated; use -f -Le instead\n");
@@ -878,14 +980,28 @@ main(int argc, char *argv[])
             SyslogTrap++;
             break;
 
-
-#if HAVE_GETPID
+#if HAVE_UNISTD_H
         case 'u':
-            fprintf(stderr,
-                    "Warning: -u option is deprecated; use -p instead\n");
-        case 'p':
             if (optarg != NULL) {
-                parse_config_pidFile(NULL, optarg);
+                char           *ecp;
+
+                uid = strtoul(optarg, &ecp, 10);
+                if (*ecp) {
+#if HAVE_GETPWNAM && HAVE_PWD_H
+                    struct passwd  *info;
+                    info = getpwnam(optarg);
+                    if (info) {
+                        uid = info->pw_uid;
+                    } else {
+#endif
+                        fprintf(stderr, "Bad user id: %s\n", optarg);
+                        exit(1);
+#if HAVE_GETPWNAM && HAVE_PWD_H
+                    }
+#endif
+                }
+                netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+				   NETSNMP_DS_AGENT_USERID, uid);
             } else {
                 usage();
                 exit(1);
@@ -1210,6 +1326,39 @@ main(int argc, char *argv[])
      * ignore early sighup during startup
      */
     reconfig = 0;
+
+#if HAVE_UNISTD_H
+#ifdef HAVE_SETGID
+    if ((gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
+				  NETSNMP_DS_AGENT_GROUPID)) != 0) {
+        DEBUGMSGTL(("snmptrapd/main", "Changing gid to %d.\n", gid));
+        if (setgid(gid) == -1
+#ifdef HAVE_SETGROUPS
+            || setgroups(1, (gid_t *)&gid) == -1
+#endif
+            ) {
+            snmp_log_perror("setgid failed");
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+                exit(1);
+            }
+        }
+    }
+#endif
+#ifdef HAVE_SETUID
+    if ((uid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
+				  NETSNMP_DS_AGENT_USERID)) != 0) {
+        DEBUGMSGTL(("snmptrapd/main", "Changing uid to %d.\n", uid));
+        if (setuid(uid) == -1) {
+            snmp_log_perror("setuid failed");
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+                exit(1);
+            }
+        }
+    }
+#endif
+#endif
 
 #ifdef WIN32SERVICE
     trapd_status = SNMPTRAPD_RUNNING;
