@@ -39,15 +39,15 @@
 #include <stdlib.h>
 #endif
 
-#if defined(bsdi4) || defined(freebsd3) || defined(freebsd4) || defined(freebsd5)
-#if HAVE_GETFSSTAT
-#if defined(MFSNAMELEN)
+#if defined(bsdi4) || defined(freebsd3) || defined(freebsd4) || defined(freebsd5) || defined(darwin)
+#if HAVE_GETFSSTAT && defined(MFSNAMELEN)
 #define MOUNT_NFS	"nfs"
 #define MNTTYPE_UFS	"ufs"
 #define BerkelyFS
 #define MNTTYPE_FFS	"ffs"
 #define MNTTYPE_NFS	"nfs"
 #define MNTTYPE_NFS3	"nfs"
+#define MNTTYPE_HFS	"hfs"
 #define MNTTYPE_MFS	"mfs"
 #define MNTTYPE_MSDOS	"msdos"
 #define MNTTYPE_LFS	"lfs"
@@ -64,7 +64,6 @@
 #define MNTTYPE_EXT2FS	"ext2fs"
 #define MNTTYPE_CFS	"coda"
 #define MNTTYPE_NTFS	"ntfs"
-#endif
 #endif
 #endif                          /* freebsd3 */
 
@@ -320,6 +319,9 @@ var_hrfilesys(struct variable *vp,
         case MOUNT_NFS:
             fsys_type_id[fsys_type_len - 1] = 14;
             break;
+        case MOUNT_HFS:
+            fsys_type_id[fsys_type_len - 1] = 7;
+            break;
         case MOUNT_MFS:
             fsys_type_id[fsys_type_len - 1] = 8;
             break;
@@ -379,11 +381,7 @@ var_hrfilesys(struct variable *vp,
             fsys_type_id[fsys_type_len - 1] = 2;        /* unknown */
 #ifdef MNTTYPE_HFS
         else if (!strcmp(mnt_type, MNTTYPE_HFS))
-#ifdef BerkelyFS
-            fsys_type_id[fsys_type_len - 1] = 3;
-#else                           /* SysV */
-            fsys_type_id[fsys_type_len - 1] = 4;
-#endif
+            fsys_type_id[fsys_type_len - 1] = 7;
 #endif
 #ifdef MNTTYPE_UFS
         else if (!strcmp(mnt_type, MNTTYPE_UFS))
@@ -624,11 +622,9 @@ Get_Next_HR_FileSys(void)
 int
 Check_HR_FileSys_NFS (void)
 {
-#if HAVE_GETFSSTAT
-#if defined(MFSNAMELEN)
-    if (!strcmp(HRFS_entry->HRFS_type, MOUNT_NFS))
-#else
-    if (HRFS_entry->HRFS_type == MOUNT_NFS)
+#if HAVE_GETFSSTAT && !defined(MFSNAMELEN)
+    if ((HRFS_entry->HRFS_type == MOUNT_NFS) ||
+        (HRFS_entry->HRFS_type == MOUNT_AFS))
 #endif
 #else /* HAVE_GETFSSTAT */
     if ( HRFS_entry->HRFS_type != NULL && (
@@ -638,20 +634,23 @@ Check_HR_FileSys_NFS (void)
 	!strcmp( HRFS_entry->HRFS_type, "nfs") ||
 #endif
 #if defined(MNTTYPE_NFS3)
-	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS3) ||
+	!strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS3) ||
 #endif
 #if defined(MNTTYPE_SMBFS)
-	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_SMBFS) ||
+	!strcmp( HRFS_entry->HRFS_type, MNTTYPE_SMBFS) ||
 #endif
 #if defined(MNTTYPE_LOFS)
-	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_LOFS) ||
+	!strcmp( HRFS_entry->HRFS_type, MNTTYPE_LOFS) ||
+#endif
+#if defined(MNTTYPE_AFP)
+	!strcmp( HRFS_entry->HRFS_type, MNTTYPE_AFP) ||
 #endif
 	    /*
 	     * MVFS is Rational ClearCase's view file system
 	     * it is similiar to NFS file systems in that it is mounted
 	     * locally or remotely from the ClearCase server
 	     */
-	    !strcmp( HRFS_entry->HRFS_type, "mvfs")))
+	!strcmp( HRFS_entry->HRFS_type, "mvfs")))
 #endif /* HAVE_GETFSSTAT */
 	return 1;	/* NFS file system */
 
