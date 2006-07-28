@@ -142,7 +142,7 @@ init_nlist(struct nlist nl[])
     }
     kvm_close(kernel);
 #else                           /* ! HAVE_KVM_OPENFILES */
-#if defined(aix4) && defined(HAVE_KNLIST)
+#if (defined(aix4) || defined(aix5)) && defined(HAVE_KNLIST)
     if (knlist(nl, 1, sizeof(struct nlist)) == -1) {
         DEBUGMSGTL(("auto_nlist", "knlist failed on symbol:  %s\n",
                     nl[0].n_name));
@@ -172,7 +172,7 @@ init_nlist(struct nlist nl[])
 #endif                          /*aix4 */
 #endif                          /* ! HAVE_KVM_OPENFILES */
     for (ret = 0; nl[ret].n_name != NULL; ret++) {
-#ifdef aix4
+#if defined(aix4) || defined(aix5)
         if (nl[ret].n_type == 0 && nl[ret].n_value != 0)
             nl[ret].n_type = 1;
 #endif

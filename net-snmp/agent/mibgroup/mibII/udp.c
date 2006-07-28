@@ -57,6 +57,15 @@
 #define UDP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
 
+#if defined(HAVE_LIBPERFSTAT_H) && (defined(aix4) || defined(aix5)) && !defined(FIRST_PROTOCOL)
+#include <libperfstat.h>
+#ifdef FIRST_PROTOCOL
+perfstat_protocol_t ps_proto;
+perfstat_id_t ps_name;
+#define _USE_PERFSTAT_PROTOCOL 1
+#endif
+#endif
+
         /*********************
 	 *
 	 *  Kernel & interface information,
@@ -105,6 +114,7 @@ init_udp(void)
     REGISTER_SYSOR_ENTRY(udp_module_oid,
                          "The MIB module for managing UDP implementations");
 
+#if !defined(_USE_PERFSTAT_PROTOCOL)
 #ifdef UDPSTAT_SYMBOL
     auto_nlist(UDPSTAT_SYMBOL, 0, 0);
 #endif
@@ -113,6 +123,7 @@ init_udp(void)
 #endif
 #ifdef solaris2
     init_kernel_sunos5();
+#endif
 #endif
 }
 
@@ -157,7 +168,6 @@ init_udp(void)
 UDP_STAT_STRUCTURE udpstat;
 
 
-
         /*********************
 	 *
 	 *  System independent handler (mostly)
@@ -183,7 +193,9 @@ udp_handler(netsnmp_mib_handler          *handler,
      *    cache handler, higher up the handler chain.
      * But just to be safe, check this and load it manually if necessary
      */
-#ifndef hpux11
+#if defined(_USE_PERFSTAT_PROTOCOL)
+    udp_load(NULL, NULL);
+#elif !defined(hpux11)
     if (!netsnmp_cache_is_valid(reqinfo, reginfo->handlerName)) {
         netsnmp_assert("cache" == "valid"); /* always false */
         udp_load( NULL, NULL );	/* XXX - check for failure */
@@ -230,9 +242,7 @@ udp_handler(netsnmp_mib_handler          *handler,
     case UDPINERRORS:
         ret_value = udpstat.udpInErrors;
         break;
-#else			/* USES_SNMP_DESIGNED_UDPSTAT */
-
-#ifdef USES_TRADITIONAL_UDPSTAT
+#elif defined(USES_TRADITIONAL_UDPSTAT) && !defined(_USE_PERFSTAT_PROTOCOL)
 #ifdef HAVE_SYS_TCPIPSTATS_H
     /*
      * This actually reads statistics for *all* the groups together,
@@ -280,9 +290,7 @@ udp_handler(netsnmp_mib_handler          *handler,
 #ifdef HAVE_SYS_TCPIPSTATS_H
 #undef udpstat
 #endif
-#else			/* USES_TRADITIONAL_UDPSTAT */
-
-#ifdef hpux11
+#elif defined(hpux11)
     case UDPINDATAGRAMS:
     case UDPNOPORTS:
     case UDPOUTDATAGRAMS:
@@ -298,8 +306,7 @@ udp_handler(netsnmp_mib_handler          *handler,
 	}
         ret_value = udpstat;
         break;
-#else			/* hpux11 */
-#ifdef WIN32
+#elif defined(WIN32)
     case UDPINDATAGRAMS:
         ret_value = udpstat.dwInDatagrams;
         break;
@@ -312,9 +319,19 @@ udp_handler(netsnmp_mib_handler          *handler,
     case UDPINERRORS:
         ret_value = udpstat.dwInErrors;
         break;
-#endif			/* WIN32 */
-#endif			/* hpux11 */
-#endif			/* USES_TRADITIONAL_UDPSTAT */
+#elif defined(_USE_PERFSTAT_PROTOCOL)
+    case UDPINDATAGRAMS:
+        ret_value = ps_proto.u.udp.ipackets;
+        break;
+    case UDPNOPORTS:
+        ret_value = ps_proto.u.udp.no_socket;
+        break;
+    case UDPOUTDATAGRAMS:
+        ret_value = ps_proto.u.udp.opackets;
+        break;
+    case UDPINERRORS:
+        ret_value = ps_proto.u.udp.ierrors;
+        break;
 #endif			/* USES_SNMP_DESIGNED_UDPSTAT */
 
 	    }
@@ -394,8 +411,7 @@ udp_load(netsnmp_cache *cache, void *vmagic)
                (ret < 0 ? "Failed to load" : "Loaded"),  magic));
     return (ret);         /* 0: ok, < 0: error */
 }
-#else                           /* hpux11 */
-#ifdef linux
+#elif defined(linux)
 int
 udp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -410,8 +426,7 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else                           /* linux */
-#ifdef solaris2
+#elif defined(solaris2)
 int
 udp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -448,8 +463,7 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else                           /* solaris2 */
-#ifdef WIN32
+#elif defined(WIN32)
 int
 udp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -464,8 +478,24 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else                           /* WIN32 */
-#if (defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS))
+#elif defined(_USE_PERFSTAT_PROTOCOL)
+int
+udp_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+
+    strcpy(ps_name.name, "udp");
+    ret_value = perfstat_protocol(&ps_name, &ps_proto, sizeof(ps_proto), 1);
+
+    if ( ret_value < 0 ) {
+        DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP scalar Group (AIX)\n"));
+    } else {
+        ret_value = 0;
+        DEBUGMSGTL(("mibII/udpScalar", "Loaded UDP scalar Group (AIX)\n"));
+    }
+    return ret_value;
+}
+#elif (defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS))
 int
 udp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -482,8 +512,7 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else		/* (defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS)) */
-#ifdef HAVE_SYS_TCPIPSTATS_H
+#elif defined(HAVE_SYS_TCPIPSTATS_H)
 int
 udp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -498,8 +527,7 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else				/* HAVE_SYS_TCPIPSTATS_H */
-#ifdef UDPSTAT_SYMBOL
+#elif defined(UDPSTAT_SYMBOL)
 int
 udp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -524,17 +552,15 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP scalar Group (null)\n"));
     return ret_value;
 }
-#endif				/* UDPSTAT_SYMBOL */
-#endif				/* HAVE_SYS_TCPIPSTATS_H */
-#endif		/* (defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS)) */
 #endif                          /* hpux11 */
-#endif                          /* linux */
-#endif                          /* solaris2 */
-#endif                          /* WIN32 */
 
 
 void
 udp_free(netsnmp_cache *cache, void *magic)
 {
+#if defined(_USE_PERFSTAT_PROTOCOL)
+    memset(&ps_proto, 0, sizeof(ps_proto));
+#else
     memset(&udpstat, 0, sizeof(udpstat));
+#endif
 }
