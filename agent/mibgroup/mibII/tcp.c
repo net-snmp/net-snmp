@@ -62,6 +62,15 @@
 #define TCP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
 
+#if defined(HAVE_LIBPERFSTAT_H) && (defined(aix4) || defined(aix5)) && !defined(FIRST_PROTOCOL)
+#include <libperfstat.h>
+#ifdef FIRST_PROTOCOL
+perfstat_protocol_t ps_proto;
+perfstat_id_t ps_name;
+#define _USE_FIRST_PROTOCOL 1
+#endif
+#endif
+
         /*********************
 	 *
 	 *  Kernel & interface information,
@@ -121,6 +130,7 @@ init_tcp(void)
     REGISTER_SYSOR_ENTRY(tcp_module_oid,
                          "The MIB module for managing TCP implementations");
 
+#if !defined(_USE_FIRST_PROTOCOL)
 #ifdef TCPSTAT_SYMBOL
     auto_nlist(TCPSTAT_SYMBOL, 0, 0);
 #endif
@@ -132,6 +142,7 @@ init_tcp(void)
 #endif
 #ifdef solaris2
     init_kernel_sunos5();
+#endif
 #endif
 }
 
@@ -200,7 +211,9 @@ tcp_handler(netsnmp_mib_handler          *handler,
      *    cache handler, higher up the handler chain.
      * But just to be safe, check this and load it manually if necessary
      */
-#ifndef hpux11
+#if defined(_USE_FIRST_PROTOCOL)
+    tcp_load(NULL, NULL);
+#elif !defined(hpux11)
     if (!netsnmp_cache_is_valid(reqinfo, reginfo->handlerName)) {
         netsnmp_assert("cache" == "valid"); /* always false */
         tcp_load( NULL, NULL );	/* XXX - check for failure */
@@ -275,8 +288,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
             continue;
 	}
         break;
-#else			/* solaris2 */
-#ifdef linux
+#elif defined(linux)
         if (tcpstat.tcpInErrsValid) {
             ret_value = tcpstat.tcpInErrs;
             break;
@@ -287,7 +299,6 @@ tcp_handler(netsnmp_mib_handler          *handler,
 #else			/* linux */
         netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
         continue;
-#endif			/* linux */
 #endif			/* solaris2 */
     case TCPOUTRSTS:
 #ifdef linux
@@ -298,9 +309,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
 #endif			/* linux */
         netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
         continue;
-#else			/* USES_SNMP_DESIGNED_TCPSTAT */
-
-#ifdef USES_TRADITIONAL_TCPSTAT
+#elif defined(USES_TRADITIONAL_TCPSTAT) && !defined(_USE_FIRST_PROTOCOL)
 #ifdef HAVE_SYS_TCPIPSTATS_H
     /*
      * This actually reads statistics for *all* the groups together,
@@ -382,9 +391,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
 #ifdef HAVE_SYS_TCPIPSTATS_H
 #undef tcpstat
 #endif
-#else			/* USES_TRADITIONAL_TCPSTAT */
-
-#ifdef hpux11
+#elif defined(hpux11)
     case TCPRTOALGORITHM:
     case TCPRTOMIN:
     case TCPRTOMAX:
@@ -414,9 +421,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
 	}
         ret_value = tcpstat;
         break;
-#else			/* hpux11 */
-
-#if defined (WIN32) || defined (cygwin)
+#elif defined (WIN32) || defined (cygwin)
     case TCPRTOALGORITHM:
         ret_value = tcpstat.dwRtoAlgorithm;
         type = ASN_INTEGER;
@@ -464,9 +469,55 @@ tcp_handler(netsnmp_mib_handler          *handler,
     case TCPOUTRSTS:
         ret_value = tcpstat.dwOutRsts;
         break;
-#endif			/* WIN32 cygwin */
-#endif			/* hpux11 */
-#endif			/* USES_TRADITIONAL_TCPSTAT */
+#elif defined(_USE_FIRST_PROTOCOL)
+    case TCPRTOALGORITHM:
+        ret_value = 4;
+        type = ASN_INTEGER;
+        break;
+    case TCPRTOMIN:
+        ret_value = 0;
+        type = ASN_INTEGER;
+        break;
+    case TCPRTOMAX:
+        ret_value = 0;
+        type = ASN_INTEGER;
+        break;
+    case TCPMAXCONN:
+        ret_value = -1;
+        type = ASN_INTEGER;
+        break;
+    case TCPACTIVEOPENS:
+        ret_value = ps_proto.u.tcp.initiated;
+        break;
+    case TCPPASSIVEOPENS:
+        ret_value = ps_proto.u.tcp.accepted;
+        break;
+    case TCPATTEMPTFAILS:
+        ret_value = ps_proto.u.tcp.dropped;
+        break;
+    case TCPESTABRESETS:
+        ret_value = ps_proto.u.tcp.dropped;
+        break;
+    case TCPCURRESTAB:
+        /* this value is currently missing */
+        ret_value = 0; /*ps_proto.u.tcp.established;*/
+        type = ASN_GAUGE;
+        break;
+    case TCPINSEGS:
+        ret_value = ps_proto.u.tcp.ipackets;
+        break;
+    case TCPOUTSEGS:
+        ret_value = ps_proto.u.tcp.opackets;
+        break;
+    case TCPRETRANSSEGS:
+        ret_value = 0;
+        break;
+    case TCPINERRS:
+        ret_value = ps_proto.u.tcp.ierrors;
+        break;
+    case TCPOUTRSTS:
+        ret_value = 0;
+        break;
 #endif			/* USES_SNMP_DESIGNED_TCPSTAT */
 
     case TCPCONNTABLE:
@@ -586,8 +637,7 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
                (ret < 0 ? "Failed to load" : "Loaded"),  magic));
     return (ret);         /* 0: ok, < 0: error */
 }
-#else                           /* hpux11 */
-#ifdef linux
+#elif defined(linux)
 int
 tcp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -602,8 +652,7 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else                           /* linux */
-#ifdef solaris2
+#elif defined(solaris2)
 int
 tcp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -640,8 +689,7 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else                           /* solaris2 */
-#if defined (WIN32) || defined (cygwin)
+#elif defined (WIN32) || defined (cygwin)
 int
 tcp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -656,8 +704,24 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else                           /* WIN32 cygwin */
-#if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_STATS))
+#elif defined(_USE_FIRST_PROTOCOL)
+int
+tcp_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+
+    strcpy(ps_name.name, "tcp");
+    ret_value = perfstat_protocol(&ps_name, &ps_proto, sizeof(ps_proto), 1);
+
+    if ( ret_value < 0 ) {
+        DEBUGMSGTL(("mibII/tcpScalar", "Failed to load TCP scalar Group (AIX)\n"));
+    } else {
+        ret_value = 0;
+        DEBUGMSGTL(("mibII/tcpScalar", "Loaded TCP scalar Group (AIX)\n"));
+    }
+    return ret_value;
+}
+#elif (defined(CAN_USE_SYSCTL) && defined(TCPCTL_STATS))
 int
 tcp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -674,8 +738,7 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else		/* (defined(CAN_USE_SYSCTL) && defined(TCPCTL_STATS)) */
-#ifdef HAVE_SYS_TCPIPSTATS_H
+#elif defined(HAVE_SYS_TCPIPSTATS_H)
 int
 tcp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -690,8 +753,7 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else				/* HAVE_SYS_TCPIPSTATS_H */
-#ifdef TCPSTAT_SYMBOL
+#elif defined(TCPSTAT_SYMBOL)
 int
 tcp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -716,17 +778,16 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     DEBUGMSGTL(("mibII/tcpScalar", "Failed to load TCP scalar Group (null)\n"));
     return ret_value;
 }
-#endif				/* TCPSTAT_SYMBOL */
-#endif				/* HAVE_SYS_TCPIPSTATS_H */
-#endif		/* (defined(CAN_USE_SYSCTL) && defined(TCPCTL_STATS)) */
-#endif                          /* hpux11 */
-#endif                          /* linux */
-#endif                          /* solaris2 */
 #endif                          /* WIN32 cygwin */
 
 
 void
 tcp_free(netsnmp_cache *cache, void *magic)
 {
+#if defined(_USE_FIRST_PROTOCOL)
+    memset(&ps_proto, 0, sizeof(ps_proto));
+#else
     memset(&tcpstat, 0, sizeof(tcpstat));
+#endif
 }
+

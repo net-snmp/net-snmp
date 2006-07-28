@@ -31,6 +31,15 @@
 #define ICMP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
 
+#if defined(HAVE_LIBPERFSTAT_H) && (defined(aix4) || defined(aix5)) && !defined(FIRST_PROTOCOL)
+#include <libperfstat.h>
+#ifdef FIRST_PROTOCOL
+perfstat_protocol_t ps_proto;
+perfstat_id_t ps_name;
+#define _USE_PERFSTAT_PROTOCOL 1
+#endif
+#endif
+
         /*********************
 	 *
 	 *  Kernel & interface information,
@@ -86,11 +95,13 @@ init_icmp(void)
                              "The MIB module for managing IP and ICMP implementations");
 #endif
 
+#if !defined(_USE_PERFSTAT_PROTOCOL)
 #ifdef ICMPSTAT_SYMBOL
     auto_nlist(ICMPSTAT_SYMBOL, 0, 0);
 #endif
 #ifdef solaris2
     init_kernel_sunos5();
+#endif
 #endif
 }
 
@@ -134,7 +145,6 @@ init_icmp(void)
 #define USES_TRADITIONAL_ICMPSTAT
 #endif
 
-
 ICMP_STAT_STRUCTURE icmpstat;
 
 
@@ -164,7 +174,9 @@ icmp_handler(netsnmp_mib_handler          *handler,
      *    cache handler, higher up the handler chain.
      * But just to be safe, check this and load it manually if necessary
      */
-#ifndef hpux11
+#if defined(_USE_PERFSTAT_PROTOCOL)
+    icmp_load(NULL, NULL);
+#elif !defined(hpux11)
     if (!netsnmp_cache_is_valid(reqinfo, reginfo->handlerName)) {
         netsnmp_assert("cache" == "valid"); /* always false */
         icmp_load( NULL, NULL );	/* XXX - check for failure */
@@ -268,9 +280,7 @@ icmp_handler(netsnmp_mib_handler          *handler,
     case ICMPOUTADDRMASKREPS:
         ret_value = icmpstat.icmpOutAddrMaskReps;
         break;
-#else                          /* USES_SNMP_DESIGNED_ICMPSTAT */
-
-#ifdef USES_TRADITIONAL_ICMPSTAT
+#elif defined(USES_TRADITIONAL_ICMPSTAT) && !defined(_USE_PERFSTAT_PROTOCOL)
     case ICMPINMSGS:
         ret_value = icmpstat.icps_badcode +
             icmpstat.icps_tooshort +
@@ -357,9 +367,7 @@ icmp_handler(netsnmp_mib_handler          *handler,
     case ICMPOUTADDRMASKREPS:
         ret_value = icmpstat.icps_outhist[ICMP_MASKREPLY];
         break;
-#else                          /* USES_TRADITIONAL_ICMPSTAT */
-
-#ifdef hpux11
+#elif defined(hpux11)
     case ICMPINMSGS:
     case ICMPINERRORS:
     case ICMPINDESTUNREACHS:
@@ -397,9 +405,7 @@ icmp_handler(netsnmp_mib_handler          *handler,
 	}
         ret_value = icmpstat;
         break;
-#else                          /* hpux11 */
-
-#if defined (WIN32) || defined (cygwin)
+#elif defined (WIN32) || defined (cygwin)
     case ICMPINMSGS:
         ret_value = icmpstat.stats.icmpInStats.dwMsgs;
         break;
@@ -478,9 +484,45 @@ icmp_handler(netsnmp_mib_handler          *handler,
     case ICMPOUTADDRMASKREPS:
         ret_value = icmpstat.stats.icmpOutStats.dwAddrMaskReps;
         break;
-#endif                          /* WIN32 cygwin */
-#endif                          /* hpux11 */
-#endif                          /* USES_TRADITIONAL_ICMPSTAT */
+#elif defined(_USE_PERFSTAT_PROTOCOL)
+    case ICMPINMSGS:
+        ret_value = ps_proto.u.icmp.received;
+        break;
+    case ICMPINERRORS:
+        ret_value = ps_proto.u.icmp.errors;
+        break;
+    case ICMPINDESTUNREACHS:
+    case ICMPINTIMEEXCDS:
+    case ICMPINPARMPROBS:
+    case ICMPINSRCQUENCHS:
+    case ICMPINREDIRECTS:
+    case ICMPINECHOS:
+    case ICMPINECHOREPS:
+    case ICMPINTIMESTAMPS:
+    case ICMPINTIMESTAMPREPS:
+    case ICMPINADDRMASKS:
+    case ICMPINADDRMASKREPS:
+        ret_value = 0;
+        break;
+    case ICMPOUTMSGS:
+        ret_value = ps_proto.u.icmp.sent;
+        break;
+    case ICMPOUTERRORS:
+        ret_value = ps_proto.u.icmp.errors;
+        break;
+    case ICMPOUTDESTUNREACHS:
+    case ICMPOUTTIMEEXCDS:
+    case ICMPOUTPARMPROBS:
+    case ICMPOUTSRCQUENCHS:
+    case ICMPOUTREDIRECTS:
+    case ICMPOUTECHOS:
+    case ICMPOUTECHOREPS:
+    case ICMPOUTTIMESTAMPS:
+    case ICMPOUTTIMESTAMPREPS:
+    case ICMPOUTADDRMASKS:
+    case ICMPOUTADDRMASKREPS:
+        ret_value = 0;
+        break;
 #endif                          /* USES_SNMP_DESIGNED_ICMPSTAT */
 	    }
 	    snmp_set_var_typed_value(request->requestvb, ASN_COUNTER,
@@ -625,8 +667,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
                (ret < 0 ? "Failed to load" : "Loaded"),  magic));
     return (ret);               /* 0: ok, < 0: error */
 }
-#else                           /* hpux11 */
-#ifdef linux
+#elif defined(linux)
 int
 icmp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -641,8 +682,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else		/* linux */
-#ifdef solaris2
+#elif defined(solaris2)
 int
 icmp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -659,8 +699,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else		/* solaris2 */
-#if defined (WIN32) || defined (cygwin)
+#elif defined (WIN32) || defined (cygwin)
 int
 icmp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -675,8 +714,24 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else		/* WIN32 cygwin */
-#if (defined(CAN_USE_SYSCTL) && defined(ICMPCTL_STATS))
+#elif defined(_USE_PERFSTAT_PROTOCOL)
+int
+icmp_load(netsnmp_cache *cache, void *vmagic)
+{
+    long            ret_value = -1;
+
+    strcpy(ps_name.name, "icmp");
+    ret_value = perfstat_protocol(&ps_name, &ps_proto, sizeof(ps_proto), 1);
+
+    if ( ret_value < 0 ) {
+        DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (AIX)\n"));
+    } else {
+        ret_value = 0;
+        DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (AIX)\n"));
+    }
+    return ret_value;
+}
+#elif defined(CAN_USE_SYSCTL) && defined(ICMPCTL_STATS)
 int
 icmp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -694,8 +749,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else		/* CAN_USE_SYSCTL && ICMPCTL_STATS */
-#ifdef HAVE_SYS_TCPIPSTATS_H
+#elif defined(HAVE_SYS_TCPIPSTATS_H)
 int
 icmp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -711,8 +765,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else		/* HAVE_SYS_TCPIPSTATS_H */
-#ifdef ICMPSTAT_SYMBOL
+#elif defined(ICMPSTAT_SYMBOL)
 int
 icmp_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -737,16 +790,14 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (null)\n"));
     return ret_value;
 }
-#endif		/* ICMPSTAT_SYMBOL */
-#endif		/* HAVE_SYS_TCPIPSTATS_H */
-#endif		/* CAN_USE_SYSCTL && ICMPCTL_STATS */
-#endif		/* WIN32 cygwin */
-#endif		/* solaris2 */
-#endif		/* linux */
 #endif		/* hpux11 */
 
 void
 icmp_free(netsnmp_cache *cache, void *magic)
 {
+#if defined(_USE_PERFSTAT_PROTOCOL)
+    memset(&ps_proto, 0, sizeof(ps_proto));
+#else
     memset(&icmpstat, 0, sizeof(icmpstat));
+#endif
 }

@@ -39,6 +39,12 @@
 #include <stdlib.h>
 #endif
 
+#if defined(aix4) || defined(aix5)
+#include <sys/mntctl.h>
+#include <sys/vmount.h>
+#include <sys/statfs.h>
+#endif
+
 #if defined(bsdi4) || defined(freebsd3) || defined(freebsd4) || defined(freebsd5) || defined(darwin)
 #if HAVE_GETFSSTAT && defined(MFSNAMELEN)
 #define MOUNT_NFS	"nfs"
@@ -122,6 +128,17 @@ static int		fscount;
 #define HRFS_statfs	win_statfs
 #define	HRFS_type	f_type
 
+#elif defined(aix4) || defined(aix5)
+
+struct vmount *aixmnt, *aixcurr;
+struct HRFS_entry {
+	char *HRFS_name;
+	char *HRFS_mount;
+	int HRFS_type;
+	int HRFS_flags;
+} *HRFS_entry;
+#define HRFS_statfs statfs
+
 #else
 struct mntent  *HRFS_entry;
 #define	HRFS_name	mnt_fsname
@@ -185,6 +202,10 @@ init_hr_filesys(void)
 {
     REGISTER_MIB("host/hr_filesys", hrfsys_variables, variable4,
                  hrfsys_variables_oid);
+#if defined(aix4) || defined(aix5) /* something leaks, make it idiot-safe */
+    aixmnt = NULL;
+    aixcurr = NULL;
+#endif
 }
 
 /*
@@ -375,6 +396,31 @@ var_hrfilesys(struct variable *vp,
             break;
 #endif
         }
+#elif defined(aix4) || defined(aix5)
+        switch (HRFS_entry->HRFS_type) {
+        case MNT_AIX:
+        case MNT_JFS:
+            fsys_type_id[fsys_type_len - 1] = 3;
+            break;
+        case MNT_CDROM:
+            fsys_type_id[fsys_type_len - 1] = 12;
+            break;
+#ifdef MNT_NAMEFS
+        case MNT_NAMEFS:
+#endif
+#ifdef MNT_PROCFS
+        case MNT_PROCFS:
+#endif
+        case MNT_SFS:
+        case MNT_CACHEFS:
+            fsys_type_id[fsys_type_len - 1] = 1;
+            break;
+        case MNT_NFS:
+        case MNT_NFS3:
+        case MNT_AUTOFS:
+            fsys_type_id[fsys_type_len - 1] = 14;
+            break;
+        }
 #else
         mnt_type = HRFS_entry->HRFS_type;
         if (mnt_type == NULL)
@@ -470,6 +516,8 @@ var_hrfilesys(struct variable *vp,
         long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
 #elif defined(cygwin)
         long_return = 1;
+#elif defined(aix4) || defined(aix5)
+        long_return = (HRFS_entry->HRFS_flags & MNT_READONLY) == 0 ? 1 : 2;
 #else
         if (hasmntopt(HRFS_entry, "ro") != NULL)
             long_return = 2;    /* Read Only */
@@ -529,6 +577,29 @@ Init_HR_FileSys(void)
     getfsstat(fsstats, fscount * sizeof(*fsstats), MNT_NOWAIT);
 #endif
     HRFS_index = 0;
+#elif defined(aix4) || defined(aix5)
+    int ret;
+    uint size;
+    ret = 0;
+    size = 0;
+    if(aixmnt != NULL) free(aixmnt); /* something leaks, make it idiot-safe */
+    aixmnt = NULL;
+    aixcurr = NULL;
+    HRFS_index = 0;
+    ret = mntctl(MCTL_QUERY, sizeof(uint), &size);
+    if(ret == 0 && size > 0) {
+        aixmnt = malloc(size + sizeof(struct HRFS_entry));
+        if(aixmnt != NULL) {
+            (char *) HRFS_entry = (char *) aixmnt + size;
+            ret = mntctl(MCTL_QUERY, size, aixmnt);
+            HRFS_index = 1;
+            if(ret <= 0) {
+                free(aixmnt);
+                aixmnt = NULL;
+                HRFS_entry = NULL;
+            } else aixcurr = aixmnt;
+        }
+    }
 #else
     HRFS_index = 1;
     if (fp != NULL)
@@ -578,6 +649,31 @@ Get_Next_HR_FileSys(void)
         return -1;
     HRFS_entry = fsstats + HRFS_index;
     return ++HRFS_index;
+#elif defined(aix4) || defined(aix5)
+    if(aixcurr == NULL) {
+        if(aixmnt != NULL) free(aixmnt);
+        aixmnt = NULL;
+        HRFS_entry = NULL;
+        return -1;
+    }
+    HRFS_entry->HRFS_name = vmt2dataptr(aixcurr, VMT_OBJECT);
+    HRFS_entry->HRFS_mount = vmt2dataptr(aixcurr, VMT_STUB);
+    HRFS_entry->HRFS_type = aixcurr->vmt_gfstype;
+    HRFS_entry->HRFS_flags = aixcurr->vmt_flags;
+    (char *) aixcurr = (char *) aixcurr + aixcurr->vmt_length;
+    if((char *) aixcurr >= (char *) HRFS_entry) aixcurr = NULL;
+    switch(HRFS_entry->HRFS_type) {
+#ifdef MNT_NAMEFS
+        case MNT_NAMEFS:
+#endif
+#ifdef MNT_PROCFS
+        case MNT_PROCFS:
+#endif
+        case MNT_SFS:
+            return Get_Next_HR_FileSys();
+            break;
+    }
+    return HRFS_index++;
 #else
     const char    **cpp;
 
@@ -625,7 +721,8 @@ Check_HR_FileSys_NFS (void)
 #if HAVE_GETFSSTAT && !defined(MFSNAMELEN)
     if ((HRFS_entry->HRFS_type == MOUNT_NFS) ||
         (HRFS_entry->HRFS_type == MOUNT_AFS))
-#endif
+#elif defined(aix4) || defined(aix5)
+    if(HRFS_entry->HRFS_type == MNT_NFS || HRFS_entry->HRFS_type == MNT_NFS3)
 #else /* HAVE_GETFSSTAT */
     if ( HRFS_entry->HRFS_type != NULL && (
 #if defined(MNTTYPE_NFS)
@@ -664,6 +761,13 @@ End_HR_FileSys(void)
     if (fsstats)
         free((char *) fsstats);
     fsstats = NULL;
+#elif defined(aix4) || defined(aix5)
+    if(aixmnt != NULL) {
+        free(aixmnt);
+        aixmnt = NULL;
+        aixcurr = NULL;
+        HRFS_entry = NULL;
+    }
 #else
     if (fp != NULL)
         fclose(fp);

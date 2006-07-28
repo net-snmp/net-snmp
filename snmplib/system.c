@@ -743,7 +743,7 @@ get_boottime(void)
 long
 get_uptime(void)
 {
-#if !defined(solaris2) && !defined(linux) && !defined(cygwin)
+#if !defined(solaris2) && !defined(linux) && !defined(cygwin) && !defined(aix4) && !defined(aix5)
     struct timeval  now;
     long            boottime_csecs, nowtime_csecs;
 
@@ -754,6 +754,20 @@ get_uptime(void)
     nowtime_csecs = (now.tv_sec * 100) + (now.tv_usec / 10000);
 
     return (nowtime_csecs - boottime_csecs);
+#endif
+
+#if defined(aix4) || defined(aix5)
+    struct nlist nl;
+    int kmem;
+    time_t lbolt;
+    nl.n_name = "lbolt";
+    if(knlist(&nl, 1, sizeof(struct nlist)) != 0) return(0);
+    if(nl.n_type == 0 || nl.n_value == 0) return(0);
+    if((kmem = open("/dev/mem", 0)) < 0) return 0;
+    lseek(kmem, (long) nl.n_value, L_SET);
+    read(kmem, &lbolt, sizeof(lbolt));
+    close(kmem);
+    return(lbolt);
 #endif
 
 #ifdef solaris2
