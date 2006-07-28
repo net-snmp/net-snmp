@@ -2457,11 +2457,12 @@ if test $? -eq 0 ; then
         *)
             AC_CHECK_HEADER(sensors/sensors.h,,
                 [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find sensors/sensors.h])])
-            AC_CHECK_LIB(sensors, sensors_get_detected_chips, LIBS="${LIBS} -lsensors",
+            AC_CHECK_LIB(sensors, sensors_get_detected_chips, SENSORLIBS="-lsensors",
                 [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find -lsensors])])
             ;;
         esac
 fi
+AC_SUBST(SENSORLIBS)
 
 #
 # Install the various perl modules
@@ -2824,6 +2825,7 @@ if test "x$useopenssl" != "xno" ; then
         encrmodes="[disabled]"
     fi
     AC_DEFINE(USE_OPENSSL)
+    LIBCRYPTO="-lcrypto"
     AC_MSG_RESULT(OpenSSL Support)
 elif test "x$usepkcs" != "xno" ; then
     authmodes="MD5 SHA1"
@@ -2843,6 +2845,7 @@ fi
 if test "x$enable_md5" = "xno"; then
     authmodes=`echo $authmodes | sed 's/MD5 *//;'`
 fi
+AC_SUBST(LIBCRYPTO)
 
 AC_MSG_CACHE_ADD(Authentication support:     $authmodes)
 AC_MSG_CACHE_ADD(Encryption support:         $encrmodes)
