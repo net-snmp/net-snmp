@@ -110,6 +110,10 @@
 #endif
 #endif                          /* ifndef dynix */
 
+#if (defined(aix4) || defined(aix5)) && HAVE_LIBPERFSTAT_H
+#include <libperfstat.h>
+#endif
+
 #if defined(darwin8) /* This is to use host_statistics on OS X */
 #include <mach/mach.h>
 #endif

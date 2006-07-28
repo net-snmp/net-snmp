@@ -105,6 +105,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 
 #ifdef USE_OPENSSL
     EVP_MD_CTX     *ctx = malloc(sizeof(EVP_MD_CTX));
+    unsigned int    tmp_len;
 #else
     MDstruct        MD;
 #endif
@@ -162,7 +163,9 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     }
 
 #ifdef USE_OPENSSL
-    EVP_DigestFinal(ctx, (unsigned char *) Ku, (unsigned int *) kulen);
+    tmp_len = *kulen;
+    EVP_DigestFinal(ctx, (unsigned char *) Ku, &tmp_len);
+    *kulen = tmp_len;
     /*
      * what about free() 
      */

@@ -800,12 +800,16 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case IFPHYSADDRESS:
         Interface_Get_Ether_By_Index(interface, return_buf);
+#if defined(aix4) || defined(aix5)
+	*var_len = 0;
+#else
         if ((return_buf[0] == 0) && (return_buf[1] == 0) &&
             (return_buf[2] == 0) && (return_buf[3] == 0) &&
             (return_buf[4] == 0) && (return_buf[5] == 0))
             *var_len = 0;
         else
             *var_len = 6;
+#endif
         return (u_char *) return_buf;
     case IFADMINSTATUS:
         long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
@@ -845,7 +849,11 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case IFINOCTETS:
 #ifdef STRUCT_IFNET_HAS_IF_IBYTES
+#if defined(aix4) || defined(aix5)
+        long_return = (u_long) ifnet.if_ibytes & 0xffffffff;
+#else
         long_return = (u_long) ifnet.if_ibytes;
+#endif
 #else
 #if NO_DUMMY_VALUES
         return NULL;
@@ -855,15 +863,27 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case IFINUCASTPKTS:
         {
+#if defined(aix4) || defined(aix5)
+            long_return = (u_long) ifnet.if_ipackets & 0xffffffff;
+#else
             long_return = (u_long) ifnet.if_ipackets;
+#endif
 #if STRUCT_IFNET_HAS_IF_IMCASTS
+#if defined(aix4) || defined(aix5)
+            long_return -= (u_long) ifnet.if_imcasts & 0xffffffff;
+#else
             long_return -= (u_long) ifnet.if_imcasts;
+#endif
 #endif
         }
         return (u_char *) & long_return;
     case IFINNUCASTPKTS:
 #if STRUCT_IFNET_HAS_IF_IMCASTS
+#if defined(aix4) || defined(aix5)
+        long_return = (u_long) ifnet.if_imcasts & 0xffffffff;
+#else
         long_return = (u_long) ifnet.if_imcasts;
+#endif
 #else
 #if NO_DUMMY_VALUES
         return NULL;
@@ -873,7 +893,11 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case IFINDISCARDS:
 #if STRUCT_IFNET_HAS_IF_IQDROPS
+#if defined(aix4) || defined(aix5)
+        long_return = (u_long) ifnet.if_iqdrops & 0xffffffff;
+#else
         long_return = (u_long) ifnet.if_iqdrops;
+#endif
 #else
 #if NO_DUMMY_VALUES
         return NULL;
@@ -882,11 +906,19 @@ var_ifEntry(struct variable *vp,
 #endif
         return (u_char *) & long_return;
     case IFINERRORS:
+#if defined(aix4) || defined(aix5)
+        long_return = (u_long) ifnet.if_ierrors & 0xffffffff;
+#else
         long_return = (u_long) ifnet.if_ierrors;
+#endif
         return (u_char *) & long_return;
     case IFINUNKNOWNPROTOS:
 #if STRUCT_IFNET_HAS_IF_NOPROTO
+#if defined(aix4) || defined(aix5)
+        long_return = (u_long) ifnet.if_noproto & 0xffffffff;
+#else
         long_return = (u_long) ifnet.if_noproto;
+#endif
 #else
 #if NO_DUMMY_VALUES
         return NULL;
@@ -896,7 +928,11 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case IFOUTOCTETS:
 #ifdef STRUCT_IFNET_HAS_IF_OBYTES
+#if defined(aix4) || defined(aix5)
+        long_return = (u_long) ifnet.if_obytes & 0xffffffff;
+#else
         long_return = (u_long) ifnet.if_obytes;
+#endif
 #else
 #if NO_DUMMY_VALUES
         return NULL;
@@ -906,15 +942,27 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case IFOUTUCASTPKTS:
         {
+#if defined(aix4) || defined(aix5)
+            long_return = (u_long) ifnet.if_opackets & 0xffffffff;
+#else
             long_return = (u_long) ifnet.if_opackets;
+#endif;
 #if STRUCT_IFNET_HAS_IF_OMCASTS
+#if defined(aix4) || defined(aix5)
+            long_return -= (u_long) ifnet.if_omcasts & 0xffffffff;
+#else
             long_return -= (u_long) ifnet.if_omcasts;
+#endif
 #endif
         }
         return (u_char *) & long_return;
     case IFOUTNUCASTPKTS:
 #if STRUCT_IFNET_HAS_IF_OMCASTS
+#if defined(aix4) || defined(aix5)
+        long_return = (u_long) ifnet.if_omcasts & 0xffffffff;
+#else
         long_return = (u_long) ifnet.if_omcasts;
+#endif
 #else
 #if NO_DUMMY_VALUES
         return NULL;
@@ -923,13 +971,25 @@ var_ifEntry(struct variable *vp,
 #endif
         return (u_char *) & long_return;
     case IFOUTDISCARDS:
+#if defined(aix4) || defined(aix5)
+        long_return = ifnet.if_snd.ifq_drops & 0xffffffff;
+#else
         long_return = ifnet.if_snd.ifq_drops;
+#endif
         return (u_char *) & long_return;
     case IFOUTERRORS:
+#if defined(aix4) || defined(aix5)
+        long_return = ifnet.if_oerrors & 0xffffffff;
+#else
         long_return = ifnet.if_oerrors;
+#endif
         return (u_char *) & long_return;
     case IFOUTQLEN:
+#if defined(aix4) || defined(aix5)
+        long_return = ifnet.if_snd.ifq_len & 0xffffffff;
+#else
         long_return = ifnet.if_snd.ifq_len;
+#endif
         return (u_char *) & long_return;
     case IFSPECIFIC:
         *var_len = nullOidLen;
