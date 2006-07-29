@@ -100,8 +100,7 @@ netsnmp_debug_helper(netsnmp_mib_handler *handler,
     DEBUGMSGTL(("helper:debug", "    Name:        %s\n",
                 reginfo->handlerName));
     DEBUGMSGTL(("helper:debug", "    Context:     %s\n",
-                (NULL == reginfo->contextName)
-                ? "NULL" : reginfo->contextName));
+                SNMP_STRORNULL(reginfo->contextName));
     DEBUGMSGTL(("helper:debug", "    Base OID:    "));
     DEBUGMSGOID(("helper:debug", reginfo->rootoid, reginfo->rootoid_len));
     DEBUGMSG(("helper:debug", "\n"));
@@ -112,7 +111,7 @@ netsnmp_debug_helper(netsnmp_mib_handler *handler,
         if (i & 0x01) {
             cp = se_find_label_in_slist("handler_can_mode",
                                              0x01 << count);
-            DEBUGMSG(("helper:debug", "%s | ", (cp ? cp : "(NULL)")));
+            DEBUGMSG(("helper:debug", "%s | ", SNMP_STRORNULL(cp));
         }
     }
     DEBUGMSG(("helper:debug", "\n"));
