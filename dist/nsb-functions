@@ -359,7 +359,7 @@ nsb-make()
    # checking $? would only get us the rc from tee, which is useless
 
    nsb-info "Checking for errors..."
-   egrep -i "error|fail|warn|no such|exists|\*\*\*" $nsb_make_OUTPUT \
+   egrep -i "error|fail|warn|no such|exists|t find|\*\*\*" $nsb_make_OUTPUT \
          > nsb-make-$target-allerrs.$NSB_DATE
    # allow for a few exceptions
    egrep -v -i "testing .*failure|[a-z&_](fail|error)|warn|error(mib|\.3)|SNMP_ERR|In function|= FAILURE|/\*" nsb-make-$target-allerrs.$NSB_DATE \
