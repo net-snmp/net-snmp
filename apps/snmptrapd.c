@@ -1127,9 +1127,6 @@ main(int argc, char *argv[])
 #ifdef USING_SNMPV3_SNMPENGINE_MODULE
         extern void register_snmpEngine_scalars_context(const char *);
 #endif
-#ifdef USING_SNMPV3_USMUSER_MODULE
-        extern void init_register_usmUser_context(const char *);
-#endif
         subagent_init();
 #ifdef USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE
         /* register the notification log table */
@@ -1151,14 +1148,17 @@ main(int argc, char *argv[])
          */
         register_snmpEngine_scalars_context("snmptrapd");
 #endif
+    }
+#endif /* USING_AGENTX_SUBAGENT_MODULE && !SNMPTRAPD_DISABLE_AGENTX */
 
-        /* register our authorization handler */
-        init_netsnmp_trapd_auth();
+    /* register our authorization handler */
+    init_netsnmp_trapd_auth();
 
-#ifdef USING_SNMPV3_USMUSER_MODULE
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX) && defined(USING_SNMPV3_USMUSER_MODULE)
+    if (agentx_subagent) {
+        extern void init_register_usmUser_context(const char *);
         /* register ourselves as having a USM user database */
         init_register_usmUser_context("snmptrapd");
-#endif
     }
 #endif
 
