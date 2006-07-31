@@ -641,7 +641,9 @@ sub get {
 }
 
 
-$have_netsnmp_oid = eval { require NetSNMP::OID; };
+use strict;
+
+my $have_netsnmp_oid = eval { require NetSNMP::OID; };
 sub gettable {
 
     #
@@ -729,7 +731,7 @@ sub gettable {
     $vbl = $state->{'varbinds'};
 	
     my $repeatcount;
-    if ($this->{Version} == 1 || $opts->{nogetbulk}) {
+    if ($this->{Version} == 1 || $state->{'options'}{nogetbulk}) {
 	$state->{'repeatcount'} = 1;
     } elsif ($state->{'options'}{'repeat'}) {
 	$state->{'repeatcount'} = $state->{'options'}{'repeat'};
@@ -771,8 +773,6 @@ sub gettable {
     return 0;
 }
 
-use strict;
-
 sub _gettable_do_it() {
     my ($this, $vbl, $parse_indexes, $textnode, $state) = @_;
 
@@ -781,8 +781,12 @@ sub _gettable_do_it() {
     $vbl = $_[$#_] if ($state->{'options'}{'callback'});
 
     while ($#$vbl > -1 && !$this->{ErrorNum}) {
-	if ($#$vbl + 1 != ($#{$state->{'stopconds'}} + 1) * $state->{'repeatcount'}) {
-	    print STDERR "ack: gettable results not appropriate\n";
+	if (($#$vbl + 1) % ($#{$state->{'stopconds'}} + 1) != 0) {
+	    if ($vbl->[$#$vbl][2] ne 'ENDOFMIBVIEW') {
+		# unless it's an end of mib view we didn't get the
+		# proper number of results back.
+		print STDERR "ack: gettable results not appropriate\n";
+	    }
 	    my @k = keys(%{$state->{'result_hash'}});
 	    last if ($#k > -1);  # bail with what we have
 	    return;
@@ -801,7 +805,8 @@ sub _gettable_do_it() {
 	    my $row_type = $vbl->[$i][3];
 
 	    if ($row_oid =~ 
-		/^$state->{'stopconds'}->[$i % ($#{$state->{'stopconds'}}+1)]/){
+		/^$state->{'stopconds'}[$i % ($#{$state->{'stopconds'}}+1)]/ &&
+		$row_value ne 'ENDOFMIBVIEW' ){
 
 		if ($row_type eq "OBJECTID") {
 
