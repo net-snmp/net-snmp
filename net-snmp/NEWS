@@ -30,6 +30,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
     perl:
       - gettable() now supports asynchronous callback functions
+      - gettable() was fairly broken in prior versions 
 
     misc:
       - Many misc fixes
