@@ -645,7 +645,8 @@ sub gettable {
     # i.e. we have reached the end of this table.
     #
 
-    my ($this, $root_oid, $options) = @_;
+    my ($this, $root_oid, %options) = @_;
+    my $options = \%options;
     my ($textnode, $stopconds, $varbinds, $vbl, $res, %result_hash, $repeat);
 
     # translate the OID into numeric form if its not
@@ -712,7 +713,7 @@ sub gettable {
     $vbl = $varbinds;
 	
     my $repeatcount;
-    if ($this->{Version} == 1 || $opts->{nogetbulk}) {
+    if ($this->{Version} == 1 || $options->{nogetbulk}) {
 	$repeatcount = 1;
     } elsif ($options->{'repeat'}) {
 	$repeatcount = $options->{'repeat'};
@@ -732,7 +733,7 @@ sub gettable {
     }
 
     while ($#$vbl > -1 && !$this->{ErrorNum}) {
-	if ($#$vbl + 1 != ($#$stopconds + 1) * $repeatcount) {
+	if (($#$vbl + 1) % ($#$stopconds + 1) != 0) {
 	    print STDERR "ack: gettable results not appropriate\n";
 	    my @k = keys(%result_hash);
 	    last if ($#k > -1);  # bail with what we have
@@ -751,12 +752,12 @@ sub gettable {
 	    my $row_value = $vbl->[$i][2];
 	    my $row_type = $vbl->[$i][3];
 
-	    if ($row_oid =~ /^$stopconds->[$i % ($#$stopconds+1)]/) {
-
+	    if ($row_oid =~ /^$stopconds->[$i % ($#$stopconds+1)]/ &&
+		$row_value ne 'ENDOFMIBVIEW') {
 		if ($row_type eq "OBJECTID") {
 
-				# If the value returned is an OID, translate this
-				# back in to a textual OID
+		    # If the value returned is an OID, translate this
+		    # back in to a textual OID
 
 		    $row_value = SNMP::translateObj($row_value);
 
