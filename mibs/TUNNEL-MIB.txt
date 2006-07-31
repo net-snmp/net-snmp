@@ -4,13 +4,13 @@ IMPORTS
     MODULE-IDENTITY, OBJECT-TYPE, transmission,
     Integer32, IpAddress    FROM SNMPv2-SMI          -- [RFC2578]
 
-    RowStatus, StorageType  FROM SNMPv2-TC           -- [RFC3579]
+    RowStatus, StorageType  FROM SNMPv2-TC           -- [RFC2579]
 
     MODULE-COMPLIANCE,
     OBJECT-GROUP            FROM SNMPv2-CONF         -- [RFC2580]
 
     InetAddressType,
-    InetAddress             FROM INET-ADDRESS-MIB    -- [RFC3291]
+    InetAddress             FROM INET-ADDRESS-MIB    -- [RFC4001]
 
     IPv6FlowLabelOrAny      FROM IPV6-FLOW-LABEL-MIB -- [RFC3595]
 
@@ -20,7 +20,7 @@ IMPORTS
     IANAtunnelType          FROM IANAifType-MIB;     -- [IFTYPE]
 
 tunnelMIB MODULE-IDENTITY
-    LAST-UPDATED "200410161200Z" -- October 16, 2004
+    LAST-UPDATED "200505160000Z" -- May 16, 2005
     ORGANIZATION "IETF IP Version 6 (IPv6) Working Group"
     CONTACT-INFO
             " Dave Thaler
@@ -33,19 +33,13 @@ tunnelMIB MODULE-IDENTITY
             independent of the specific encapsulation scheme in
             use.
 
-            Copyright (C) The Internet Society (date).  This
-            version of this MIB module is part of RFC yyyy;  see
+            Copyright (C) The Internet Society (2005).  This
+            version of this MIB module is part of RFC 4087;  see
             the RFC itself for full legal notices."
--- RFC Ed.: replace yyyy with actual RFC number & remove this note
 
 
 
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
-    REVISION     "200410161200Z" -- October 16, 2004
+    REVISION     "200505160000Z" -- May 16, 2005
     DESCRIPTION
             "IPv4-specific objects were deprecated, including
             tunnelIfLocalAddress, tunnelIfRemoteAddress, the
@@ -71,8 +65,7 @@ Draft                     Inet Tunnel MIB             October 2004
             type, and is now an IANA-maintained textual
             convention.
 
-            Published as RFC yyyy."
--- RFC Ed.: replace yyyy with actual RFC number & remove this note
+            Published as RFC 4087."
     REVISION     "199908241200Z" -- August 24, 1999
     DESCRIPTION
             "Initial version, published as RFC 2667."
@@ -90,18 +83,13 @@ tunnel      OBJECT IDENTIFIER ::= { tunnelMIBObjects 1 }
 tunnelIfTable OBJECT-TYPE
     SYNTAX     SEQUENCE OF TunnelIfEntry
     MAX-ACCESS not-accessible
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
     STATUS     current
     DESCRIPTION
             "The (conceptual) table containing information on
             configured tunnels."
+
+
+
     ::= { tunnel 1 }
 
 tunnelIfEntry OBJECT-TYPE
@@ -143,14 +131,6 @@ tunnelIfLocalAddress OBJECT-TYPE
     ::= { tunnelIfEntry 1 }
 
 tunnelIfRemoteAddress OBJECT-TYPE
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
     SYNTAX     IpAddress
     MAX-ACCESS read-only
     STATUS     deprecated
@@ -158,6 +138,9 @@ Draft                     Inet Tunnel MIB             October 2004
             "The address of the remote endpoint of the tunnel
             (i.e., the destination address used in the outer IP
             header), or 0.0.0.0 if unknown, or an IPv6 address, or
+
+
+
             the tunnel is not a point-to-point link (e.g., if it
             is a 6to4 tunnel).
 
@@ -196,14 +179,6 @@ tunnelIfSecurity OBJECT-TYPE
             header.  The value ipsec indicates that IPsec is used
             between the tunnel endpoints for authentication or
             encryption or both.  More specific security-related
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
             information may be available in a MIB module for the
             security protocol in use."
     ::= { tunnelIfEntry 5 }
@@ -214,10 +189,13 @@ tunnelIfTOS OBJECT-TYPE
     STATUS     current
     DESCRIPTION
             "The method used to set the high 6 bits (the
+
+
+
             differentiated services codepoint) of the IPv4 TOS or
             IPv6 Traffic Class in the outer IP header.  A value of
             -1 indicates that the bits are copied from the
-            payload's header. A value of -2 indicates that a
+            payload's header.  A value of -2 indicates that a
             traffic conditioner is invoked and more information
             may be available in a traffic conditioner MIB module.
             A value between 0 and 63 inclusive indicates that the
@@ -225,7 +203,7 @@ tunnelIfTOS OBJECT-TYPE
 
             Note: instead of the name tunnelIfTOS, a better name
             would have been tunnelIfDSCPMethod, but the existing
-            name appeared in RFC 2776 and existing objects cannot
+            name appeared in RFC 2667 and existing objects cannot
             be renamed."
     ::= { tunnelIfEntry 6 }
 
@@ -249,14 +227,6 @@ tunnelIfAddressType OBJECT-TYPE
     MAX-ACCESS read-write
     STATUS     current
     DESCRIPTION
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
             "The type of address in the corresponding
             tunnelIfLocalInetAddress and tunnelIfRemoteInetAddress
             objects."
@@ -270,6 +240,9 @@ tunnelIfLocalInetAddress OBJECT-TYPE
             "The address of the local endpoint of the tunnel
             (i.e., the source address used in the outer IP
             header).  If the address is unknown, the value is
+
+
+
             0.0.0.0 for IPv4 or :: for IPv6.  The type of this
             object is given by tunnelIfAddressType."
     ::= { tunnelIfEntry 9 }
@@ -302,14 +275,6 @@ tunnelIfEncapsLimit OBJECT-TYPE
 
 tunnelConfigTable OBJECT-TYPE
     SYNTAX     SEQUENCE OF TunnelConfigEntry
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
     MAX-ACCESS not-accessible
     STATUS     deprecated
     DESCRIPTION
@@ -325,6 +290,9 @@ Draft                     Inet Tunnel MIB             October 2004
             Since this table does not support IPv6, it is
             deprecated in favor of tunnelInetConfigTable."
     ::= { tunnel 2 }
+
+
+
 
 tunnelConfigEntry OBJECT-TYPE
     SYNTAX     TunnelConfigEntry
@@ -355,14 +323,6 @@ tunnelConfigLocalAddress OBJECT-TYPE
     SYNTAX     IpAddress
     MAX-ACCESS not-accessible
     STATUS     deprecated
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
     DESCRIPTION
             "The address of the local endpoint of the tunnel, or
             0.0.0.0 if the device is free to choose any of its
@@ -382,6 +342,8 @@ tunnelConfigRemoteAddress OBJECT-TYPE
             Since this object does not support IPv6, it is
             deprecated in favor of tunnelInetConfigRemoteAddress."
     ::= { tunnelConfigEntry 2 }
+
+
 
 tunnelConfigEncapsMethod OBJECT-TYPE
     SYNTAX     IANAtunnelType
@@ -408,14 +370,6 @@ tunnelConfigID OBJECT-TYPE
             allow multiple parallel tunnels, the manager is
             responsible for choosing any ID which does not
             conflict with an existing row, such as choosing a
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
             random number.
 
             Since this object does not support IPv6, it is
@@ -439,11 +393,14 @@ tunnelConfigIfIndex OBJECT-TYPE
 
 tunnelConfigStatus OBJECT-TYPE
     SYNTAX     RowStatus
+
+
+
     MAX-ACCESS read-create
     STATUS     deprecated
     DESCRIPTION
             "The status of this row, by which new entries may be
-            created, or old entries deleted from this table. The
+            created, or old entries deleted from this table.  The
             agent need not support setting this object to
             createAndWait or notInService since there are no other
             writable objects in this table, and writable objects
@@ -461,14 +418,6 @@ tunnelConfigStatus OBJECT-TYPE
             pseudo-random number to use as the tunnelConfigID and
             set tunnelConfigStatus to createAndGo.  In the event
             that this ID is already in use and an
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
             inconsistentValue is returned in response to the set
             operation, the management station should simply select
             a new pseudo-random number and retry the operation.
@@ -495,6 +444,9 @@ tunnelInetConfigTable OBJECT-TYPE
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
+
+
+
             "The (conceptual) table containing information on
             configured tunnels.  This table can be used to map a
             set of tunnel endpoints to the associated ifIndex
@@ -514,14 +466,6 @@ tunnelInetConfigEntry OBJECT-TYPE
             on a particular configured tunnel.  Note that there is
             a 128 subid maximum for object OIDs.  Implementers
             need to be aware that if the total number of octets in
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
             tunnelInetConfigLocalAddress and
             tunnelInetConfigRemoteAddress exceeds 110 then OIDs of
             column instances in this table will have more than 128
@@ -551,6 +495,9 @@ TunnelInetConfigEntry ::= SEQUENCE {
 }
 
 tunnelInetConfigAddressType OBJECT-TYPE
+
+
+
     SYNTAX     InetAddressType
     MAX-ACCESS not-accessible
     STATUS     current
@@ -567,14 +514,6 @@ tunnelInetConfigLocalAddress OBJECT-TYPE
             "The address of the local endpoint of the tunnel, or
             0.0.0.0 (for IPv4) or :: (for IPv6) if the device is
             free to choose any of its addresses at tunnel
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
             establishment time."
     ::= { tunnelInetConfigEntry 2 }
 
@@ -607,6 +546,9 @@ tunnelInetConfigID OBJECT-TYPE
             1.  For encapsulation methods (such as L2F) which
             allow multiple parallel tunnels, the manager is
             responsible for choosing any ID which does not
+
+
+
             conflict with an existing row, such as choosing a
             random number."
     ::= { tunnelInetConfigEntry 5 }
@@ -620,14 +562,6 @@ tunnelInetConfigIfIndex OBJECT-TYPE
             is active, then this object contains the value of
             ifIndex corresponding to the tunnel interface.  A
             value of 0 is not legal in the active state, and means
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
             that the interface index has not yet been assigned."
     ::= { tunnelInetConfigEntry 6 }
 
@@ -637,7 +571,7 @@ tunnelInetConfigStatus OBJECT-TYPE
     STATUS     current
     DESCRIPTION
             "The status of this row, by which new entries may be
-            created, or old entries deleted from this table. The
+            created, or old entries deleted from this table.  The
             agent need not support setting this object to
             createAndWait or notInService since there are no other
             writable objects in this table, and writable objects
@@ -663,6 +597,9 @@ tunnelInetConfigStatus OBJECT-TYPE
             index to be assigned by the agent in an
             implementation-dependent manner, and corresponding
             rows will be instantiated in the ifTable and the
+
+
+
             tunnelIfTable.  The status of this row will become
             active as soon as the agent assigns the interface
             index, regardless of whether the interface is
@@ -672,14 +609,6 @@ tunnelInetConfigStatus OBJECT-TYPE
             corresponding row in the ifTable and in the
             tunnelIfTable."
     ::= { tunnelInetConfigEntry 7 }
-
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
 
 tunnelInetConfigStorageType OBJECT-TYPE
     SYNTAX     StorageType
@@ -719,6 +648,9 @@ tunnelMIBCompliance MODULE-COMPLIANCE
 
         OBJECT      tunnelIfTOS
         MIN-ACCESS  read-only
+
+
+
         DESCRIPTION
             "Write access is not required."
 
@@ -726,14 +658,6 @@ tunnelMIBCompliance MODULE-COMPLIANCE
         MIN-ACCESS  read-only
         DESCRIPTION
             "Write access is not required."
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
    ::= { tunnelMIBCompliances 1 }
 
 tunnelMIBInetFullCompliance MODULE-COMPLIANCE
@@ -748,7 +672,7 @@ tunnelMIBInetFullCompliance MODULE-COMPLIANCE
                                       ipv4z(3), ipv6z(4) }
         DESCRIPTION
             "An implementation is only required to support IPv4
-            and/or IPv6 addresses. An implementation only needs to
+            and/or IPv6 addresses.  An implementation only needs to
             support the addresses it actually supports on the
             device."
    ::= { tunnelMIBCompliances 2 }
@@ -776,23 +700,17 @@ tunnelMIBInetReadOnlyCompliance MODULE-COMPLIANCE
         DESCRIPTION
             "Write access is not required."
 
+
+
         OBJECT      tunnelIfAddressType
         SYNTAX      InetAddressType { ipv4(1), ipv6(2),
                                       ipv4z(3), ipv6z(4) }
-
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
-
-
         MIN-ACCESS  read-only
         DESCRIPTION
             "Write access is not required.
 
             An implementation is only required to support IPv4
-            and/or IPv6 addresses. An implementation only needs to
+            and/or IPv6 addresses.  An implementation only needs to
             support the addresses it actually supports on the
             device."
 
@@ -833,11 +751,6 @@ tunnelMIBBasicGroup OBJECT-GROUP
     DESCRIPTION
             "A collection of objects to support basic management
 
-
-
-
-
-Draft                     Inet Tunnel MIB             October 2004
 
 
             of IPv4 Tunnels.  Since this group cannot support
