@@ -1,6 +1,12 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+
+*5.2.4*
+
+    Perl:
+     - gettable() was fairly broken in the 5.3.1 release.
+
 *5.2.3*
 
     snmpd:
