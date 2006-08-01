@@ -322,6 +322,13 @@ RELEASING:
      htdocs/dev/schedule.html
      htdocs/download/index.html
 
+     and, ideally, the IRC topic.
+
+ 15) For a major new-feature release, also update the following htdocs
+     file:
+
+     htdocs/page-top.html
+
  16) For a major new-feature release (eg 5.3), create the patches
      branch immediately after the final release.
 
@@ -330,9 +337,9 @@ RELEASING:
  17) Update the official patches tracker set
 
      - the "official patches" tracker should have all patches marked
-       for the current branches as level 9.  The previous release on
+       for the current branches as priority 9.  The previous release on
        any given branch should be downgraded to 5, and all older than
-       that should be deleted.
+       that should be downgraded to 1 and closed.
 
 ***************************************************************************
 CREATING BINARY DISTRIBUTIONS
