@@ -324,7 +324,7 @@ RELEASING:
 
      and, ideally, the IRC topic.
 
- 15) For a major new-feature release, also update the following htdocs
+ 15) For the latest final release, also update the following htdocs
      file:
 
      htdocs/page-top.html
