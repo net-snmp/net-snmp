@@ -46,7 +46,11 @@
  * If you discover one of these, please pass it on and I'll
  * put it in.
  *
- * To see these messages, run the daemon as follows:
+ * It was recently discovered that the sensors code had not be following
+ * the MIB for some sensors.  The MIB required reporting some items
+ * in mV and mC.  These changes have been noted in the source.
+ *
+ * To see debugging messages, run the daemon as follows:
  * 
  * /usr/local/sbin/snmpd -f -L -Ducd-snmp/lmSensors
  * (change path to wherever you installed it)
@@ -407,7 +411,8 @@ sensor_load(void)
 /* *******  picld sensor procedures * */
 #ifdef HAVE_PICL_H
 
-/* the following are generic modules for reading sensor information*/
+/* the following are generic modules for reading sensor information
+   the scale variable handles miniVolts */
 
 static int
 read_num_sensor(picl_nodehdl_t childh, char *prop ,int scale, int *value)
@@ -518,6 +523,8 @@ read_enum_sensor(picl_nodehdl_t childh, char **options, u_int *value)
   DEBUGMSGTL(("ucd-snmp/lmSensors", "read_enum_sensor value is %d\n", *value));
   return(error_code);
 } /* end of read_enum_sensor() */
+
+/* scale variable handles miniVolts*/
  
 static int
 process_num_sensor(picl_nodehdl_t childh, 
@@ -588,14 +595,14 @@ process_temperature_sensor(picl_nodehdl_t childh,
                                char propname[PICL_PROPNAMELEN_MAX])
 {
   process_num_sensor(childh, propname, "Temperature", TEMP_TYPE, 1000);
-}
+} /* MIB asks for mC */
 
 static int
 process_voltage_sensor(picl_nodehdl_t childh,
                       char propname[PICL_PROPNAMELEN_MAX])
 {
   process_num_sensor(childh, propname, "Voltage", VOLT_TYPE, 1000);
-}
+} /* MIB asks for mV */
 
 static int
 process_digital_sensor(picl_nodehdl_t childh,
@@ -735,8 +742,8 @@ _sensor_load(time_t t)
 #ifdef solaris2
     int i,j;
     int typ;
-    int temp;
-    int other;
+    int temp=0; /* do not reset this later, more than one typ has temperatures*/
+    int other=0;
     const char *fantypes[]={"CPU","PWR","AFB"};
     kstat_ctl_t *kc;
     kstat_t *kp;
@@ -799,6 +806,7 @@ if (kc == 0) {
     DEBUGMSG(("ucd-snmp/lmSensors", "couldn't open kstat"));
     } /* endif kc */
 else{
+    temp = 0;
     kp = kstat_lookup(kc, ENVCTRL_MODULE_NAME, 0, ENVCTRL_KSTAT_FANSTAT);
     if (kp == 0) {
         DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup fan kstat\n"));
@@ -833,18 +841,19 @@ else{
             DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't read power supply kstat\n"));
             } /* endif kstatread fan */
         else{
-            typ = 2;
+            typ = 0; /* this is a power supply temperature, not a voltage*/
             power_info = (envctrl_ps_t *) kp->ks_data;
             sensor_array[typ].n = kp->ks_ndata;
             for (i=0; i < kp->ks_ndata; i++){
-                DEBUGMSG(("ucd-snmp/lmSensors", "found instance %d psupply temp %d %dW OK %d share %d limit %d\n",
-                    power_info->instance, power_info->ps_tempr,power_info->ps_rating,
+                DEBUGMSG(("ucd-snmp/lmSensors", "found instance %d psupply temp mC %d %dW OK %d share %d limit %d\n",
+                    power_info->instance, power_info->ps_tempr*1000,power_info->ps_rating,
                     power_info->ps_ok,power_info->curr_share_ok,power_info->limit_ok));
-                sensor_array[typ].sensor[i].value = power_info->ps_tempr;
-                snprintf(sensor_array[typ].sensor[i].name,(MAX_NAME-1),
+                sensor_array[typ].sensor[temp].value = power_info->ps_tempr*1000;
+                snprintf(sensor_array[typ].sensor[temp].name,(MAX_NAME-1),
                          "power supply %d",power_info->instance);
-                sensor_array[typ].sensor[i].name[MAX_NAME - 1] = '\0';
-                power_info++;
+                sensor_array[typ].sensor[temp].name[MAX_NAME - 1] = '\0';
+                power_info++; /* increment the data structure */
+                temp++; /* increment the temperature sensor array element */
                 } /* end for power_info */
             } /* end else kstatread power supply */
         } /* end else lookup power supplies*/
@@ -859,7 +868,6 @@ else{
             } /* endif kstatread enclosure */
         else{
             enc_info = (envctrl_encl_t *) kp->ks_data; 
-            temp = 0;
             other = 0;
             for (i=0; i < kp->ks_ndata; i++){
                switch (enc_info->type){
@@ -872,9 +880,9 @@ else{
                    other++;
                    break;
                case ENVCTRL_ENCL_AMBTEMPR:
-                   DEBUGMSG(("ucd-snmp/lmSensors", "ambient temp %d\n",enc_info->value));
+                   DEBUGMSG(("ucd-snmp/lmSensors", "ambient temp mC %d\n",enc_info->value*1000));
                    typ = 0; /* temperature sensor */
-                   sensor_array[typ].sensor[temp].value = enc_info->value;
+                   sensor_array[typ].sensor[temp].value = enc_info->value*1000;
                    strncpy(sensor_array[typ].sensor[temp].name,"Ambient",MAX_NAME-1);
                    sensor_array[typ].sensor[temp].name[MAX_NAME-1]='\0'; /* null terminate */
                    temp++;
@@ -896,11 +904,11 @@ else{
                    other++;
                    break;
                case ENVCTRL_ENCL_CPUTEMPR:
-                   DEBUGMSG(("ucd-snmp/lmSensors", "CPU%d temperature %d\n",enc_info->instance,enc_info->value));
+                   DEBUGMSG(("ucd-snmp/lmSensors", "CPU%d temperature mC %d\n",enc_info->instance,enc_info->value*1000));
                    typ = 0; /* temperature sensor */
-                   sensor_array[typ].sensor[temp].value = enc_info->value;
+                   sensor_array[typ].sensor[temp].value = enc_info->value*1000;
                    snprintf(sensor_array[typ].sensor[temp].name,MAX_NAME,"CPU%d",enc_info->instance);
-                   sensor_array[typ].sensor[other].name[MAX_NAME-1]='\0'; /* null terminate */
+                   sensor_array[typ].sensor[temp].name[MAX_NAME-1]='\0'; /* null terminate */
                    temp++;
                    break;
                default:
