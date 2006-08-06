@@ -590,7 +590,7 @@ Init_HR_FileSys(void)
     if(ret == 0 && size > 0) {
         aixmnt = malloc(size + sizeof(struct HRFS_entry));
         if(aixmnt != NULL) {
-            (char *) HRFS_entry = (char *) aixmnt + size;
+            HRFS_entry = (char *) aixmnt + size;
             ret = mntctl(MCTL_QUERY, size, aixmnt);
             HRFS_index = 1;
             if(ret <= 0) {
@@ -660,7 +660,7 @@ Get_Next_HR_FileSys(void)
     HRFS_entry->HRFS_mount = vmt2dataptr(aixcurr, VMT_STUB);
     HRFS_entry->HRFS_type = aixcurr->vmt_gfstype;
     HRFS_entry->HRFS_flags = aixcurr->vmt_flags;
-    (char *) aixcurr = (char *) aixcurr + aixcurr->vmt_length;
+    aixcurr = (char *) aixcurr + aixcurr->vmt_length;
     if((char *) aixcurr >= (char *) HRFS_entry) aixcurr = NULL;
     switch(HRFS_entry->HRFS_type) {
 #ifdef MNT_NAMEFS
