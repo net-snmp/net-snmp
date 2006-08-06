@@ -1166,7 +1166,7 @@ var_hrswrun(struct variable * vp,
         long_return = (lowpsinfo.pr_rssize * MMU_PAGESIZE) / 1024;
 #elif defined(aix4) || defined(aix5)
         long_return = (lowpinfo.pi_size * getpagesize()) / 1024;
- defined(solaris2)
+#elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
         long_return = proc_buf ? proc_buf->pr_rssize : 0;
 #else
@@ -1572,10 +1572,12 @@ count_processes(void)
 #if defined(hpux10) || defined(hpux11) || HAVE_KVM_GETPROCS || defined(solaris2)
     total = nproc;
 #else
-#if defined(aix4) || defined(aix5)
+/* superseded code for AIX */
+/* #if defined(aix4) || defined(aix5)
     for (i = 0; i < nproc; ++i) {
         if (proc_table[i].pi_state != 0)
-#elif !defined(linux) && !defined(cygwin) && !defined(dynix)
+*/
+#if !defined(linux) && !defined(cygwin) && !defined(dynix) && !defined(aix4) && !defined(aix5)
     for (i = 0; i < nproc; ++i) {
         if (proc_table[i].p_stat != 0)
 #else
