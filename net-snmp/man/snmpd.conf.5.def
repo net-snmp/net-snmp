@@ -640,7 +640,7 @@ OP should be one of the defined
 comparison operators (!=, ==, <, <=, >, >=) and VALUE should be an
 integer value to compare against.
 .IP "OID MIN MAX [DMIN DMAX]"
-defines a \fIthreshold(1)\fR monitor test.
+defines a \fIthreshold(2)\fR monitor test.
 MIN and MAX are integer values, specifying lower and upper thresholds.
 If the value of the monitored OID falls below the lower threshold (MIN)
 or rises above the upper threshold (MAX), then the monitor entry will
