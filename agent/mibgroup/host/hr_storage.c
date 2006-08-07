@@ -454,7 +454,7 @@ header_hrstoreEntry(struct variable *vp,
                        ((int) vp->namelen + 1) * sizeof(oid));
                 *length = vp->namelen + 1;
             }
-            mem = 0xffffffff;   /* To indicate 'success' */
+            mem = (netsnmp_memory_info*)0xffffffff;   /* To indicate 'success' */
         }
     }
 
