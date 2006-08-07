@@ -100,19 +100,16 @@ else
 fi
 if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
     SNMP_SNMPD_PORT="8765"
-    MAX_RETRIES=3
+    MAX_RETRIES=10
     if test -x "$NETSTAT" ; then
         if test -z "$RANDOM"; then
             RANDOM=2
         fi
         while :
         do
+            SNMP_SNMPD_PORT=`expr $SNMP_SNMPD_PORT + \( $RANDOM % 100 \)`
             IN_USE=`$NETSTAT -a -n 2>/dev/null | grep "[\.:]$SNMP_SNMPD_PORT "`
-            if [ $? -eq 0 ]; then
-                #ECHO "Port $SNMP_SNMPD_PORT in use:"
-                #echo "->$IN_USE"
-                SNMP_SNMPD_PORT=`expr $SNMP_SNMPD_PORT + \( $RANDOM % 100 \)`
-            else
+            if [ $? -ne 0 ]; then
                 #echo "Using port $SNMP_SNMPD_PORT"
                 break
             fi
