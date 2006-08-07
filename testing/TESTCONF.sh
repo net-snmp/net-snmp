@@ -131,12 +131,9 @@ PROBE_FOR_PORT() {
         fi
         while :
         do
+            BASE_PORT=`expr $BASE_PORT + \( $RANDOM % 100 \)`
             IN_USE=`$NETSTAT -a -n 2>/dev/null | grep "[\.:]$BASE_PORT "`
-            if [ $? -eq 0 ]; then
-                #ECHO "Port $BASE_PORT in use:"
-                #echo "->$IN_USE"
-                BASE_PORT=`expr $BASE_PORT + \( $RANDOM % 100 \)`
-            else
+            if [ $? -ne 0 ]; then
                 echo "$BASE_PORT"
                 break
             fi
