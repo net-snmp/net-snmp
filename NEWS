@@ -4,11 +4,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 *5.4*
 
     snmpd:
-      - fix trap processing from SMUX peers (patch 1430824 from Dell,
-        submitted by SuSE)
       - fix disman/event monitoring crashes (official patch 1429059)
       - fix bug 1399369: ifNumber broken
       - fix re-init of daemons after SIGHUP (official patch 1473289)
+      - fix trap processing from SMUX peers (patch 1430824)
 
     snmptrapd:
       - fix bug 1420758/1458815: snmptrapd aborts/loops in select()
@@ -33,6 +32,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - gettable() was fairly broken in prior versions 
 
     misc:
+      - libtool update to 1.5.22
       - Many misc fixes
 
  Ports:
