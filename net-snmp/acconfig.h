@@ -12,7 +12,7 @@
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
-/* config.h:  a general config file */
+/* net-snmp/net-snmp-config.h:  net-snmp configuration */
 
 /* Default (SNMP) version number for the tools to use */
 #define DEFAULT_SNMP_VERSION 3
@@ -604,8 +604,9 @@
 #endif
 #endif
 
-/* define if you have librpm and libdb */
+/* define if you have libdb, libnm or librpm, respectively */
 #undef HAVE_LIBDB
+#undef HAVE_LIBNM
 #undef HAVE_LIBRPM
 
 /* define if you have pkginfo */
