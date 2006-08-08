@@ -10,6 +10,7 @@ config_require(util_funcs)
 config_add_mib(LM-SENSORS-MIB)
 
      void            init_lmSensors(void);
+     void            shutdown_lmSensors(void);
      FindVarMethod   var_lmSensorsTable;
 
 #endif                          /* _MIBGROUP_LMSENSORS_H */
