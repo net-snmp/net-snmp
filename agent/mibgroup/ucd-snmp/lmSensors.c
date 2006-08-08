@@ -30,9 +30,9 @@
  * The lmSensors component delivers the information documented in the
  * LM-SENSORS-MIB.  The information is divided up as follows:
  *
- * -temperatures (Celsius)
+ * -temperatures (in thousandsths of a Celsius degree)
  * -fans (rpm's)
- * -voltages
+ * -voltages (in milliVolts)
  * -other (switches, LEDs and  i2c's (things that use the i2c bus))
  * NOTE: This version does not support gpio's.  Still on the learning curve.
  *
@@ -252,8 +252,6 @@ var_lmSensorsTable(struct variable *vp,
     int             s_index;
     int             s_type = -1;
     int             n_sensors;
-/*    int             err = 0;  why is this here? */
-    unsigned char* ret = NULL;
 
     _sensor         s;
 
