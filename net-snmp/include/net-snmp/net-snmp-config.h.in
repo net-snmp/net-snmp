@@ -13,7 +13,7 @@
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
-/* config.h:  a general config file */
+/* net-snmp/net-snmp-config.h:  net-snmp configuration */
 
 /* Default (SNMP) version number for the tools to use */
 #define DEFAULT_SNMP_VERSION 3
@@ -308,6 +308,9 @@
 
 /* Define to 1 if the system has the type `int64_t'. */
 #undef HAVE_INT64_T
+
+/* Define to 1 if the system has the type `intptr_t'. */
+#undef HAVE_INTPTR_T
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -791,6 +794,9 @@
 /* Define to 1 if you have the <sys/select.h> header file. */
 #undef HAVE_SYS_SELECT_H
 
+/* Define to 1 if you have the <sys/sema.h> header file. */
+#undef HAVE_SYS_SEMA_H
+
 /* Define to 1 if you have the <sys/socketvar.h> header file. */
 #undef HAVE_SYS_SOCKETVAR_H
 
@@ -898,9 +904,6 @@
 
 /* Define to 1 if the system has the type `uintptr_t'. */
 #undef HAVE_UINTPTR_T
-
-/* Define to 1 if the system has the type `intptr_t'. */
-#undef HAVE_INTPTR_T
 
 /* Define to 1 if you have the `uname' function. */
 #undef HAVE_UNAME
@@ -1037,6 +1040,12 @@
 
 /* define if you have type u_int64_t */
 #undef HAVE_U_INT64_T
+
+/* define if you have type intptr_t */
+#undef HAVE_INTPTR_T
+
+/* define if you have type uintptr_t */
+#undef HAVE_UINTPTR_T
 
 /* define if you have getdevs() */
 #undef HAVE_GETDEVS
@@ -1448,8 +1457,9 @@
 #endif
 #endif
 
-/* define if you have librpm and libdb */
+/* define if you have libdb, libnm or librpm, respectively */
 #undef HAVE_LIBDB
+#undef HAVE_LIBNM
 #undef HAVE_LIBRPM
 
 /* define if you have pkginfo */
