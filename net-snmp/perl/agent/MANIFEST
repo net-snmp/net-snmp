@@ -2,6 +2,7 @@ Changes
 MANIFEST
 Makefile.PL
 agent.pm
+netsnmp_request_infoPtr.pm
 agent.xs
 test.pl
 typemap
