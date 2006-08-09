@@ -23,6 +23,8 @@ t/notify.t
 t/mibload.t
 t/snmptest.conf
 t/startagent.pl
+t/conftest.conf
+t/snmptest.conf
 examples/async1.pl
 examples/async2.pl
 examples/bulkwalk.pl
