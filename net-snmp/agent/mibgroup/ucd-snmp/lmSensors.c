@@ -252,6 +252,7 @@ var_lmSensorsTable(struct variable *vp,
     int             s_index;
     int             s_type = -1;
     int             n_sensors;
+    unsigned char* ret = NULL;
 
     _sensor         s;
 
