@@ -5,3 +5,4 @@ OID.pm
 OID.xs
 README
 test.pl
+typemap
