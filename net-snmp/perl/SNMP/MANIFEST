@@ -31,5 +31,7 @@ t/README
 t/session.t
 t/set.t
 t/startagent.pl
+t/conftest.conf
+t/snmptest.conf
 TODO
 typemap
