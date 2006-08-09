@@ -188,9 +188,11 @@ sub Check_Version {
 	    chomp($srcver);
 	    my $srcfloat = floatize_version($srcver);
 	    $perlver =~ s/pre/0./;
-	    # we allow for up to 99 perl-only revisions, which is more
-	    # than enough.
-	    if ($srcfloat < $perlver || $srcfloat > $perlver + .0000099) {
+	    # we allow for perl/CPAN-only revisions beyond the default
+	    # version formatting of net-snmp itself.
+	    $perlver =~ s/(\.\d{5}).*/\1/;
+	    $perlver =~ s/0*$//;
+	    if ($srcfloat ne $perlver) {
 		if (!$foundversion) {
 		    print STDERR "ERROR:
 Net-SNMP installed version: $srcver => $srcfloat
