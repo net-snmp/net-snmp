@@ -86,9 +86,12 @@
 #include <net-snmp/library/callback.h>
 #define LOGLENGTH 1024
 
-#ifndef va_copy
+#ifdef va_copy
+#define NEED_VA_END_AFTER_VA_COPY
+#else
 #ifdef __vacopy
 #define vacopy __vacopy
+#define NEED_VA_END_AFTER_VA_COPY
 #else
 #define va_copy(dest, src) memcpy (&dest, &src, sizeof (va_list))
 #endif
@@ -1149,19 +1152,25 @@ snmp_vlog(int priority, const char *format, va_list ap)
     length = vsnprintf(buffer, LOGLENGTH, format, ap);
 
     if (length == 0) {
+#ifdef NEED_VA_END_AFTER_VA_COPY
         va_end(aq);
+#endif
         return (0);             /* Empty string */
     }
 
     if (length == -1) {
         snmp_log_string(LOG_ERR, "Could not format log-string\n");
+#ifdef NEED_VA_END_AFTER_VA_COPY
         va_end(aq);
+#endif
         return (-1);
     }
 
     if (length < LOGLENGTH) {
         snmp_log_string(priority, buffer);
+#ifdef NEED_VA_END_AFTER_VA_COPY
         va_end(aq);
+#endif
         return (0);
     }
 
@@ -1170,7 +1179,9 @@ snmp_vlog(int priority, const char *format, va_list ap)
         snmp_log_string(LOG_ERR,
                         "Could not allocate memory for log-message\n");
         snmp_log_string(priority, buffer);
+#ifdef NEED_VA_END_AFTER_VA_COPY
         va_end(aq);
+#endif
         return (-2);
     }
 
