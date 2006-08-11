@@ -86,6 +86,14 @@
 #include <net-snmp/library/callback.h>
 #define LOGLENGTH 1024
 
+#ifndef va_copy
+#ifdef __vacopy
+#define vacopy __vacopy
+#else
+#define va_copy(dest, src) memcpy (&dest, &src, sizeof (va_list))
+#endif
+#endif
+
 /*
  * logh_head:  A list of all log handlers, in increasing order of priority
  * logh_priorities:  'Indexes' into this list, by priority
