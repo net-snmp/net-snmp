@@ -1182,6 +1182,7 @@ snmp_vlog(int priority, const char *format, va_list ap)
 
     va_copy(aq, ap);
     length = vsnprintf(buffer, LOGLENGTH, format, ap);
+    va_end(ap);
 
     if (length == 0) {
 #ifdef NEED_VA_END_AFTER_VA_COPY
