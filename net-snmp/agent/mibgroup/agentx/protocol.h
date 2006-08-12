@@ -12,7 +12,9 @@ extern          "C" {
      */
 
 #define AGENTX_PORT	705
+#ifndef AGENTX_SOCKET
 #define AGENTX_SOCKET	"/var/agentx/master"
+#endif
 
     /*
      * AgentX versions 
