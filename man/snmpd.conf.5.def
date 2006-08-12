@@ -1248,7 +1248,7 @@ and sub-agents:
 .IP "agentXSocket [<transport-specifier>:]<transport-address>[,...]"
 defines the address the master agent listens at, or the subagent
 should connect to.
-The default is the Unix Domain socket \fC/var/agentx/master\fR.
+The default is the Unix Domain socket \fCAGENTX_SOCKET\fR.
 Another common alternative is \fCtcp:localhost:705\fR.
 See the section
 .B LISTENING ADDRESSES
