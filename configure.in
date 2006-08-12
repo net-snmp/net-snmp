@@ -517,7 +517,7 @@ AC_ARG_ENABLE(persistent-directory,,
 default_persistent_mask=077
 AC_ARG_WITH(persistent-mask,
 [  --with-persistent-mask=\"mask\"  Default mask for persistent data storage.
-                                    (Default: $default_persistent_mask)],[
+                                  (Default: 077)],[
   if test "$withval" = yes; then
     AC_MSG_ERROR([ Please provide a mask value ]);
   fi
@@ -532,11 +532,26 @@ AC_ARG_ENABLE(persistent-mask,,
 
 AC_ARG_WITH(copy_persistent_files,
 [  --with-copy-persistent-files=\"no\" Don't copy persistent files
-                                       (or use \"yes\" to copy them).
-                                       (Default: yes)],
+                                     (or use \"yes\" to copy them).
+                                     (Default: yes)],
     ac_cv_user_prompt_COPY_PERSISTENT_FILES="$with_copy_persistent_files")
 AC_ARG_ENABLE(copy_persistent_files,,
 	AC_MSG_ERROR([ Invalid option. Use --with-copy_persistent_files/--without-copy_persistent_files instead ]) )
+
+default_agentx_socket="/var/agentx/master"
+AC_ARG_WITH(agentx-socket,
+[  --with-agentx-socket=FILE         AgentX socket (Default: /var/agentx/master)],[
+  if test "$withval" = yes; then
+    AC_MSG_ERROR([ Please provide a full path ]);
+  fi
+  AC_MSG_RESULT(using AgentX socket $withval)
+  AC_DEFINE_UNQUOTED(AGENTX_SOCKET,"$withval",[Unix domain socket for AgentX master-subagent communication])
+],[
+  AC_MSG_RESULT(using default AgentX socket $default_agentx_socket)
+  AC_DEFINE_UNQUOTED(AGENTX_SOCKET,"$default_agentx_socket",[Unix domain socket for AgentX master-subagent communication])
+])
+AC_ARG_ENABLE(agentx-socket,,
+	AC_MSG_ERROR([ Invalid option. Use --with-agentx-socket instead ]) )
 
 AC_ARG_WITH(default-snmp-version,
 [  --with-default-snmp-version=\"3\" Default version of SNMP to use.
