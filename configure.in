@@ -1614,7 +1614,7 @@ AC_SUBST(security_hdr_list)
 AC_SUBST(security_obj_list) 	 
 AC_SUBST(security_lobj_list)
 AC_MSG_RESULT($new_with_security)
-AC_MSG_CACHE_ADD(SNMPv3 Security Modules:   $new_with_security)
+AC_MSG_CACHE_ADD(SNMPv3 Security Modules:    $new_with_security)
 
 #
 # Handle the special case of KSM to see which crypto API we support
@@ -1737,6 +1737,12 @@ done
 AC_MSG_CHECKING([for and configuring mib modules to use])
 changequote(, )
 
+# set up the CPP command
+MODULECPP="$CPP -D$PARTIALTARGETOS -I${srcdir}/include -I${srcdir}/agent/mibgroup"
+if test "x$enable_mfd_rewrites" = "xyes"; then
+  MODULECPP="$MODULECPP -DNETSNMP_ENABLE_MFD_REWRITES"
+fi
+
 module_list=""
 module_list_code=""
 mib_module_list=""
@@ -1746,26 +1752,18 @@ agent_module_list_code=""
 new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
 new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
 
+# set up initial module list
+new_module_list="default_modules $new_with_mib_modules"
+
+# minor modifications
 if test "x$enable_agent" = "xno"; then
    # minimum mib module list for snmptrapd
    new_module_list="mibII/vacm_vars utilities/execute $new_with_mib_modules"
    default_mibs=SNMPv2-MIB:RFC1213-MIB
    default_mibs_install=" "
 elif test "x$mini_agent" = "xyes"; then
-   new_module_list="snmpv3mibs mibII/snmp_mib mibII/system_mib mibII/sysORTable mibII/vacm_vars utilities/execute $new_with_mib_modules"
-   default_mibs=SNMPv2-MIB:RFC1213-MIB
-   default_mibs_install=" "
-else
-   new_module_list="mibII ucd_snmp snmpv3mibs notification notification-log-mib target agent_mibs agentx disman/event-mib disman/schedule utilities $new_with_mib_modules"
-   default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:HOST-RESOURCES-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB:DISMAN-EVENT-MIB:DISMAN-SCHEDULE-MIB
-
-   case $target_os in
-      linux* | freebsd* | dynix* | solaris2* | hpux* | aix* )
-         new_module_list="$new_module_list host"
-         ;;
-      *)
-         ;;
-   esac
+   # define the mini agent flag to reduce our load list from default_mibs.h
+   MODULECPP="$MODULECPP -DNETSNMP_MINI_AGENT"
 fi
 
 if test "x$transport_callback_disabled" = "xyes"; then
@@ -1808,12 +1806,7 @@ done
 
 changequote([, ])
 AC_MSG_RESULT([$new_module_list.])
-AC_MSG_CACHE_ADD(Agent MIB code:            $new_module_list)
 
-MODULECPP="$CPP -D$PARTIALTARGETOS -I${srcdir}/include -I${srcdir}/agent/mibgroup"
-if test "x$enable_mfd_rewrites" = "xyes"; then
-  MODULECPP="$MODULECPP -DNETSNMP_ENABLE_MFD_REWRITES"
-fi
 changequote(, )
 
 #---------------------
@@ -1825,6 +1818,7 @@ if test "x$with_mib_cfg_debug" = "xyes"; then
 else
    module_debug=0
 fi
+first_pass=1
 while test "x$new_module_list" != "x"; do
   if test $module_debug -eq 1; then
       echo -e "\n****************************************************************"
@@ -1849,12 +1843,19 @@ while test "x$new_module_list" != "x"; do
         echo "$i already tested"
       fi
     else
+
+      #---------------------
+      # build a psuedo include header that includes current config and
+      # system symbols:
+      echo "#include "'"'"$ac_cv_SYSTEM_INCLUDE_FILE"'"' > module_tmp_header.h
+      echo "#include "'"'"$srcdir/$mibdir/$i.h"'"' >> module_tmp_header.h
+
       #---------------------
       # process modules header, checking for config_ pseudo-macros
       #
       module_type=mib_module
       if test -f $srcdir/$mibdir/$i.h; then
-        module_type=`$MODULECPP $srcdir/$mibdir/$i.h | grep config_belongs_in | sed 's@.*config_belongs_in(\([^)]*\)).*@\1@'`
+        module_type=`$MODULECPP module_tmp_header.h | grep config_belongs_in | sed 's@.*config_belongs_in(\([^)]*\)).*@\1@'`
       fi
       if [ "x$module_type" = "x" ]; then
         module_type=mib_module
@@ -1864,7 +1865,7 @@ while test "x$new_module_list" != "x"; do
         #---------------------
         # check if $i has any conflicts
         #
-	new_list_excl="`$MODULECPP $srcdir/$mibdir/$i.h | grep config_exclude | sed 's/.*config_exclude(\(.*\)).*/\1/'`"
+	new_list_excl=`$MODULECPP module_tmp_header.h | grep config_exclude | sed 's/.*config_exclude(\(.*\)).*/\1/'`
 	if test "x$new_list_excl" != "x"; then
           if test $module_debug -eq 1; then
              echo "$i excludes $new_list_excl"
@@ -1893,7 +1894,7 @@ while test "x$new_module_list" != "x"; do
         #---------------------
         # check if $i has any architecture specific requirements
         #
-        new_list_arch=`grep config_arch_require $srcdir/$mibdir/$i.h | sed 's/.*config_arch_require(\(.*\), *\(.*\)).*/\1-xarchx-\2/'`
+        new_list_arch=`$MODULECPP module_tmp_header.h | grep config_arch_require | sed 's/.*config_arch_require(\(.*\), *\(.*\)).*/\1-xarchx-\2/'`
 	if test "x$new_list_arch" != "x"; then
           for j in $new_list_arch
 	    do
@@ -1909,7 +1910,7 @@ while test "x$new_module_list" != "x"; do
         #---------------------
         # check if $i has any other required modules
         #
-	new_list="$new_list `$MODULECPP $srcdir/$mibdir/$i.h | grep config_require | sed 's/.*config_require(\(.*\)).*/\1/'`"
+	new_list="$new_list `$MODULECPP module_tmp_header.h | grep config_require | sed 's/.*config_require(\(.*\)).*/\1/'`"
         if test $module_debug -eq 1; then
           echo " $i will test: $new_list"
         fi
@@ -1950,7 +1951,7 @@ while test "x$new_module_list" != "x"; do
         #---------------------
         # check if $i has any mibs to add
         #
-	new_mibs=`$MODULECPP $srcdir/$mibdir/$i.h | grep config_add_mib | sed 's/.*config_add_mib(\(.*\)).*/\1/'`
+	new_mibs=`$MODULECPP module_tmp_header.h | grep config_add_mib | sed 's/.*config_add_mib(\(.*\)).*/\1/'`
 	if test "x$new_mibs" != "x"; then
 	    for j in $new_mibs
 		do
@@ -1979,7 +1980,7 @@ while test "x$new_module_list" != "x"; do
         #-------------------
         # check for unsupported config_load_mib
         #
-        if $MODULECPP $srcdir/$mibdir/$i.h | grep config_load_mib > /dev/null 2>&1; then
+        if $MODULECPP module_tmp_header.h | grep config_load_mib > /dev/null 2>&1; then
           changequote([, ])
           AC_MSG_WARN([mib module error])
       	  AC_MSG_WARN([mib module "$i" uses the "config_load_mib" directive, which is no longer supported.  It probably won't work.])
@@ -1988,11 +1989,11 @@ while test "x$new_module_list" != "x"; do
         #-------------------
         # check for config_parse_dot_conf
         #
-        $MODULECPP $srcdir/$mibdir/$i.h | grep config_parse_dot_conf | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
+        $MODULECPP module_tmp_header.h | grep config_parse_dot_conf | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
         #---------------------
         # check if $i has any errors, or warnings
         #
-	error=`$MODULECPP $srcdir/$mibdir/$i.h | grep config_error | sed 's/.*config_error(\(.*\)).*/\1/'`
+	error=`$MODULECPP module_tmp_header.h | grep config_error | sed 's/.*config_error(\(.*\)).*/\1/'`
 	if test "x$error" != "x"; then
           changequote([, ])
           echo
@@ -2000,7 +2001,7 @@ while test "x$new_module_list" != "x"; do
           AC_MSG_ERROR([$i: *** $error ***])
           changequote(, )
         fi
-	warning=`$MODULECPP $srcdir/$mibdir/$i.h | grep config_warning | sed 's/.*config_warning(\(.*\)).*/\1/'`
+	warning=`$MODULECPP module_tmp_header.h | grep config_warning | sed 's/.*config_warning(\(.*\)).*/\1/'`
 	if test "x$warning" != "x"; then
           all_warnings="$all_warnings $warning
 "
@@ -2086,6 +2087,13 @@ while test "x$new_module_list" != "x"; do
       changequote(, )
     fi #
   done # for i in $new_module_list
+
+  # remember the top level modules for later reporting
+  if test $first_pass = 1 ; then
+    # remember this list for later reporting
+    top_level_modules="$new_module_list => $new_list_two"
+    first_pass=0
+  fi
   #-------------------
   # if $i added new modules vis config_*, check those modules for requirements too
   #
@@ -2148,6 +2156,7 @@ AC_MSG_RESULT(.)
 if test $module_debug -eq 1; then
 AC_MSG_CACHE_ADD(Agent MIB code:            $module_list)
 fi
+AC_MSG_CACHE_ADD(Agent MIB code:            $top_level_modules)
 
 # end hairy agent module processing
 
