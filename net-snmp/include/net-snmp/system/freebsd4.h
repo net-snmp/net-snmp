@@ -1,7 +1,7 @@
 #include "freebsd.h"
 
 /*
- * freebsd4 is a superset of freebsd2 and freebsd3 
+ * freebsd4 is a superset of all since freebsd2
  */
 #define freebsd2 1
 #define freebsd3 1
