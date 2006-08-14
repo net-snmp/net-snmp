@@ -21,3 +21,6 @@
 #endif
 
 #define UDP_ADDRESSES_IN_HOST_ORDER 1
+
+/* define the extra mib modules that are supported */
+#define NETSNMP_INCLUDE_HOST_RESOURCES
