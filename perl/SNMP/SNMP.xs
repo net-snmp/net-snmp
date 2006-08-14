@@ -1,9 +1,9 @@
 /* -*- C -*-
-     SNMP.xs -- Perl 5 interface to the UCD SNMP toolkit
+     SNMP.xs -- Perl 5 interface to the Net-SNMP toolkit
 
-     written by G. S. Marzot (gmarzot@nortelnetworks.com)
+     written by G. S. Marzot (marz@users.sourceforge.org)
 
-     Copyright (c) 1995-1999 G. S. Marzot. All rights reserved.
+     Copyright (c) 1995-2006 G. S. Marzot. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 */
