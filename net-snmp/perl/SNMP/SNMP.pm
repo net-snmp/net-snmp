@@ -1,8 +1,8 @@
-# SNMP.pm -- Perl 5 interface to the net-snmp toolkit
+# SNMP.pm -- Perl 5 interface to the Net-SNMP toolkit
 #
-# written by G. S. Marzot (gmarzot@nortelnetworks.com)
+# written by G. S. Marzot (marz@users.sourceforge.org)
 #
-#     Copyright (c) 1995-2000 G. S. Marzot. All rights reserved.
+#     Copyright (c) 1995-2006 G. S. Marzot. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
@@ -560,7 +560,7 @@ sub update {
 # host, community name change, timeout, retry changes etc. Unfortunately not
 # working yet because some updates (the address in particular) need to be
 # done on the internal session pointer which cannot be fetched w/o touching
-# globals at this point which breaks win32. A patch to the ucd-snmp toolkit
+# globals at this point which breaks win32. A patch to the net-snmp toolkit
 # is needed
    my $this = shift;
    my ($name, $aliases, $host_type, $len, $thisaddr);
@@ -2099,7 +2099,7 @@ the current version specifier (e.g., 3.1.0)
 default '1', set to 0 to disable automatic reading
 of the MIB upon session creation. set to non-zero
 to call initMib at session creation which will result
-in MIB loading according to UCD env. variables (see
+in MIB loading according to Net-SNMP env. variables (see
 man mib_api)
 
 =item $SNMP::verbose
@@ -2288,7 +2288,7 @@ allows dynamic parsing of the mib and explicit
 specification of mib file independent of enviroment
 variables. called with no args acts like initMib,
 loading MIBs indicated by environment variables (see
-ucd mib_api docs). passing non-zero second arg
+Net-SNMP mib_api docs). passing non-zero second arg
 forces previous mib to be freed and replaced
 B<(Note: second arg not working since freeing previous
 Mib is more involved than before)>.
@@ -2298,7 +2298,7 @@ Mib is more involved than before)>.
 calls library init_mib function if Mib not already
 loaded - does nothing if Mib already loaded. will
 parse directories and load modules according to
-environment variables described in UCD documentations.
+environment variables described in Net-SNMP documentations.
 (see man mib_api, MIBDIRS, MIBS, MIBFILE(S), etc.)
 
 =item &SNMP::addMibDirs(<dir>,...)
@@ -2408,10 +2408,10 @@ SNMP::TrapSession::trap
 If problems occur there are number areas to look at to narrow down the
 possibilities.
 
-The first step should be to test the UCD SNMP installation
+The first step should be to test the Net-SNMP installation
 independently from the Perl5 SNMP interface.
 
-Try running the apps from the UCD SNMP distribution.
+Try running the apps from the Net-SNMP distribution.
 
 Make sure your agent (snmpd) is running and properly configured with
 read-write access for the community you are using.
@@ -2419,16 +2419,16 @@ read-write access for the community you are using.
 Ensure that your MIBs are installed and enviroment variables are set
 appropriately (see man mib_api)
 
-Be sure to remove old ucd-snmp installations and ensure headers and
+Be sure to remove old net-snmp installations and ensure headers and
 libraries from old CMU installations are not being used by mistake.
 
 If the problem occurs during compilation/linking check that the snmp
-library being linked is actually the UCD SNMP library (there have been
+library being linked is actually the Net-SNMP library (there have been
 name conflicts with existing snmp libs).
 
 Also check that the header files are correct and up to date.
 
-Sometimes compiling the UCD SNMP library with
+Sometimes compiling the Net-SNMP library with
 'position-independent-code' enabled is required (HPUX specifically).
 
 If you cannot resolve the problem you can post to
@@ -2436,7 +2436,7 @@ comp.lang.perl.modules or
 net-snmp-users@net-snmp-users@lists.sourceforge.net
 
 please give sufficient information to analyze the problem (OS type,
-versions for OS/Perl/UCD/compiler, complete error output, etc.)
+versions for OS/Perl/Net-SNMP/compiler, complete error output, etc.)
 
 =head1 Acknowledgements
 
