@@ -22,6 +22,9 @@
 #define SNMPV2ANY   0xA000       /* V2 Any type (includes NoAuth) */
 #define SNMPV2AUTH  0x8000       /* V2 Authenticated requests only */
 
+/* define if configured as a "mini-agent" */
+#undef NETSNMP_MINI_AGENT
+
 /* default list of mibs to load */
 
 #define DEFAULT_MIBS "IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB"
