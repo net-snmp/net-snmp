@@ -29,3 +29,9 @@
 
 /* define the extra mib modules that are supported */
 #define NETSNMP_INCLUDE_HOST_RESOURCES
+
+/* Solaris 2.6+ */
+#define _SLASH_PROC_METHOD_ 1
+
+/* Solaris 7+ */
+#define DONT_USE_NLIST 1
