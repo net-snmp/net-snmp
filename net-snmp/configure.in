@@ -1879,8 +1879,10 @@ while test "x$new_module_list" != "x"; do
           for j in $new_list_arch
 	    do
 	    archtest=`echo $j | sed 's/-xarchx-.*//'`
-	    if test "x$target_os" = "x$archtest" -o "x$PARTIALTARGETOS" = "x$archtest"; then
+	    # target_os likely got changed to a #define of 1...
+	    if test "x$archtest" = "x1" -o "x$target_os" = "x$archtest" -o "x$PARTIALTARGETOS" = "x$archtest"; then
 	      new_list="$new_list `echo $j | sed 's/.*-xarchx-//'`"
+              AC_MSG_MODULE_DBG(" $i required adding arch files: `echo $j | sed 's/.*-xarchx-//'`")
 	    fi
 	  done
 	fi
