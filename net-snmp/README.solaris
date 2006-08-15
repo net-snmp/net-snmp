@@ -1220,7 +1220,7 @@ you will also need to ship the Perl which you created in /usr/local/net-snmp.
 above, this is not an issue -- Bruce Shaw <Bruce.Shaw at shaw.ca>)
 
 The version of sed in /usr/ucb on Solaris 2.5.1 and 2.6 can't
-cope with the size of the subsitution strings used in config.status.
+cope with the size of the substitution strings used in config.status.
 
 Putting /usr/bin ahead of /usr/ucb in the search path fixes this.
 

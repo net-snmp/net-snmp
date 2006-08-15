@@ -140,7 +140,7 @@ Print version information for the trap daemon and then exit.
 .TP
 .B -x \fIADDRESS
 Connect to the AgentX master agent on the specified address,
-rather than the default 'AGENTX_SOCKET'.
+rather than the default AGENTX_SOCKET.
 See \fIsnmpd(8)\fR for details of the format of such addresses.
 .TP
 .BI -- "name"="value"
