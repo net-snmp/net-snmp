@@ -1735,7 +1735,6 @@ done
 # Do hairy agent module processing.
 #
 AC_MSG_CHECKING([for and configuring mib modules to use])
-changequote(, )
 
 # set up the CPP command
 MODULECPP="$CPP -D$PARTIALTARGETOS -I${srcdir}/include -I${srcdir}/agent/mibgroup"
@@ -1767,9 +1766,7 @@ elif test "x$mini_agent" = "xyes"; then
 fi
 
 if test "x$transport_callback_disabled" = "xyes"; then
-        changequote([, ])
         AC_MSG_WARN(Disabling Callback transport will disable AgentX support.)
-        changequote(, )
         new_with_out_mib_modules="agentx $new_with_out_mib_modules"
 fi
 
@@ -1785,7 +1782,6 @@ module_list_h=""
 for i in $test_modules
  do
   if echo " $new_with_out_mib_modules " | grep " $i " > /dev/null; then
-    changequote([, ])
     mib_cfg_msg="mib module '$i' is both included and excluded."
     AC_MSG_WARN([mib module conflict])
     if test "x$with_mib_cfg_checks" = "xyes"; then
@@ -1798,16 +1794,12 @@ for i in $test_modules
       AC_MSG_WARN([$mib_cfg_msg It will be excluded])
       AC_MSG_CACHE_ADD([*** MIB Module warning *** $mib_cfg_msg It has been excluded.])
     fi
-    changequote(, )
   else
     new_module_list="$new_module_list $i"
   fi
 done
 
-changequote([, ])
 AC_MSG_RESULT([$new_module_list.])
-
-changequote(, )
 
 #---------------------
 # loop over module list
@@ -1820,28 +1812,20 @@ else
 fi
 first_pass=1
 while test "x$new_module_list" != "x"; do
-  if test $module_debug -eq 1; then
-      echo -e "\n****************************************************************"
-      echo "nml: $new_module_list"
-  fi
+  AC_MSG_MODULE_DBG(-e,"\n****************************************************************")
+  AC_MSG_MODULE_DBG("nml: $new_module_list")
   for i in $new_module_list
     do
-    if test $module_debug -eq 1; then
-      echo -e "\n================================================================"
-      echo "testing $i"
-    fi
+    AC_MSG_MODULE_DBG(-e "\n================================================================")
+    AC_MSG_MODULE_DBG("testing $i")
     need_header=0
     #---------------------
     # make sure module wasn't explicity excluded, or already added
     #
     if echo " $new_with_out_mib_modules " | grep " $i " > /dev/null; then
-      if test $module_debug -eq 1; then
-        echo "$i was excluded"
-      fi
+      AC_MSG_MODULE_DBG("$i was excluded")
     elif echo " $module_list " | grep " $i " > /dev/null; then
-      if test $module_debug -eq 1; then
-        echo "$i already tested"
-      fi
+      AC_MSG_MODULE_DBG("$i already tested")
     else
 
       #---------------------
@@ -1855,9 +1839,11 @@ while test "x$new_module_list" != "x"; do
       #
       module_type=mib_module
       if test -f $srcdir/$mibdir/$i.h; then
+        changequote(, )
         module_type=`$MODULECPP module_tmp_header.h | grep config_belongs_in | sed 's@.*config_belongs_in(\([^)]*\)).*@\1@'`
+        changequote([, ])
       fi
-      if [ "x$module_type" = "x" ]; then
+      if test "x$module_type" = "x" ; then
         module_type=mib_module
       fi
       if test -f $srcdir/$mibdir/$i.h; then
@@ -1867,13 +1853,10 @@ while test "x$new_module_list" != "x"; do
         #
 	new_list_excl=`$MODULECPP module_tmp_header.h | grep config_exclude | sed 's/.*config_exclude(\(.*\)).*/\1/'`
 	if test "x$new_list_excl" != "x"; then
-          if test $module_debug -eq 1; then
-             echo "$i excludes $new_list_excl"
-          fi
+          AC_MSG_MODULE_DBG("$i excludes $new_list_excl")
 	  for j in $new_list_excl
 	    do
 	    if echo " $module_list $new_mib_module_list $new_list_two " | grep " $j " > /dev/null; then
-	      changequote([, ])
               mib_cfg_msg="mib module '$i' excludes module '$j' but another module requires it"
               AC_MSG_WARN([mib module error])
               if test "x$with_mib_cfg_checks" = "xyes"; then
@@ -1882,12 +1865,9 @@ while test "x$new_module_list" != "x"; do
 	        AC_MSG_WARN([$mib_cfg_msg])
                 AC_MSG_CACHE_ADD([*** MIB Module warning *** $mib_cfg_msg])
               fi
-              changequote(, )
 	    else
 	      new_with_out_mib_modules="$j $new_with_out_mib_modules"
-              if test $module_debug -eq 1; then
-                echo "$j added to excluded list"
-              fi
+              AC_MSG_MODULE_DBG("$j added to excluded list")
 	    fi
 	  done
 	fi
@@ -1904,29 +1884,20 @@ while test "x$new_module_list" != "x"; do
 	    fi
 	  done
 	fi
-        if test $module_debug -eq 1; then
-          echo " $i required arch files: $new_list_arch"
-        fi
+        AC_MSG_MODULE_DBG(" $i required arch files: $new_list_arch")
         #---------------------
         # check if $i has any other required modules
         #
 	new_list="$new_list `$MODULECPP module_tmp_header.h | grep config_require | sed 's/.*config_require(\(.*\)).*/\1/'`"
-        if test $module_debug -eq 1; then
-          echo " $i will test: $new_list"
-        fi
+        AC_MSG_MODULE_DBG(" $i will test: $new_list")
 	if test "x$new_list" != "x"; then
 	  for j in $new_list
 	    do
-            if test $module_debug -eq 1; then
-              echo -n " $i wants to add $j: "
-            fi
+            AC_MSG_MODULE_DBG(-n " $i wants to add $j: ")
 	    if test ! -f $srcdir/$mibdir/$j.h -a ! -f $srcdir/$mibdir/$j.c; then
-	      changequote([, ])
               AC_MSG_WARN([mib module error])
 	      AC_MSG_ERROR([mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir])
-              changequote(, )
 	    elif echo " $new_with_out_mib_modules " | grep " $j " > /dev/null; then
-              changequote([, ])
               mib_cfg_msg="mib module '$i' requires module '$j' but someone told me to compile without it"
               AC_MSG_WARN([mib module error])
               if test "x$with_mib_cfg_checks" = "xyes"; then
@@ -1935,16 +1906,11 @@ while test "x$new_module_list" != "x"; do
                 AC_MSG_WARN([$mib_cfg_msg])
                 AC_MSG_CACHE_ADD([*** MIB Module warning *** $mib_cfg_msg])
               fi
-              changequote(, )
 	    elif echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
-              if test $module_debug -eq 1; then
-                echo "  $j included previously"
-              fi
+              AC_MSG_MODULE_DBG("  $j included previously")
 	    else
 	      new_list_two="$new_list_two $j"
-              if test $module_debug -eq 1; then
-                echo "  $j included"
-              fi
+              AC_MSG_MODULE_DBG("  $j included")
 	    fi
 	  done
 	fi
@@ -1970,9 +1936,7 @@ while test "x$new_module_list" != "x"; do
         #-------------------
         # add $i to module list
         #
-        if test $module_debug -eq 1; then 
-           echo "  $i added (based on $i.h)"
-        fi
+        AC_MSG_MODULE_DBG("  $i added (based on $i.h)")
         module_list="$module_list $i"
         module_list_h="$module_list_h mibgroup/$i.h"
         eval ${module_type}_list="\"\$${module_type}_list $i\""
@@ -1981,25 +1945,23 @@ while test "x$new_module_list" != "x"; do
         # check for unsupported config_load_mib
         #
         if $MODULECPP module_tmp_header.h | grep config_load_mib > /dev/null 2>&1; then
-          changequote([, ])
           AC_MSG_WARN([mib module error])
       	  AC_MSG_WARN([mib module "$i" uses the "config_load_mib" directive, which is no longer supported.  It probably won't work.])
-          changequote(, )
         fi # grep config_load_mib
         #-------------------
         # check for config_parse_dot_conf
         #
+        changequote(, )
         $MODULECPP module_tmp_header.h | grep config_parse_dot_conf | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
+	changequote([, ])
         #---------------------
         # check if $i has any errors, or warnings
         #
 	error=`$MODULECPP module_tmp_header.h | grep config_error | sed 's/.*config_error(\(.*\)).*/\1/'`
 	if test "x$error" != "x"; then
-          changequote([, ])
           echo
           echo
           AC_MSG_ERROR([$i: *** $error ***])
-          changequote(, )
         fi
 	warning=`$MODULECPP module_tmp_header.h | grep config_warning | sed 's/.*config_warning(\(.*\)).*/\1/'`
 	if test "x$warning" != "x"; then
@@ -2008,21 +1970,15 @@ while test "x$new_module_list" != "x"; do
         fi
       elif test -f $srcdir/$mibdir/$i.c; then
         if echo " $module_list $new_list_two $new_module_list " | grep " $i      " > /dev/null; then
-           if test $module_debug -eq 1; then 
-             echo "  $i already included"
-           fi
+           AC_MSG_MODULE_DBG("  $i already included")
         else
-           if test $module_debug -eq 1; then 
-             echo "  $i added (based on $i.c)"
-           fi
+           AC_MSG_MODULE_DBG("  $i added (based on $i.c)")
 	   module_list="$module_list $i"
 	   mib_module_list="$mib_module_list $i"
         fi
       else # no $i.h or $i.c
-        changequote([, ])
         AC_MSG_WARN([mib module error])
 	AC_MSG_ERROR([module files $i.h or $i.c could not be found in $srcdir/$mibdir])
-        changequote(, )
       fi # no $i.h
       #-------------------
       # check for init/shutdown routines too
@@ -2031,20 +1987,14 @@ while test "x$new_module_list" != "x"; do
         module_list_code="$module_list_code $i"
         eval ${module_type}_list_code="\"\$${module_type}_list_code $i\""
         mnm=`echo $i | sed 's/.*\///;s/\.c$//;'`
-        if test $module_debug -eq 1; then
-          echo -e "\nchecking '$srcdir/$mibdir/$i.c' ($mnm/`basename $i`) C file for init/shutdown"
-        fi
+        AC_MSG_MODULE_DBG(-e "\nchecking '$srcdir/$mibdir/$i.c' ($mnm/`basename $i`) C file for init/shutdown")
         if test "x$mnm" != "x`basename $i`"; then
-           changequote([, ])
            AC_MSG_WARN([mib module error])
 	   AC_MSG_ERROR([conflicting names: $mnm != `basename $i`])
-           changequote(, )
         fi
         temp_init=`grep init_$mnm $srcdir/$mibdir/$i.c | grep -v _init_$mnm`
 	if test "x$temp_init" != "x"; then
-            if test $module_debug -eq 1; then
-              echo -e "adding init_$mnm() to list"
-            fi
+            AC_MSG_MODULE_DBG(-e "adding init_$mnm() to list")
             need_header=1
 	    echo "  if (should_init(\"$mnm\")) init_$mnm();" >> $mibdir/${module_type}_inits.h
 	fi
@@ -2068,23 +2018,25 @@ while test "x$new_module_list" != "x"; do
       #-------------------
       # check for output directory (for building outside of source tree
       #
+      changequote(, )
       if test "x`echo $i | sed 's/\///g;'`" != "x$i"; then
 	mnd=`echo $i | sed 's/\/[^/]*$//;'`
 	if test ! -d ./$mibdir/$mnd; then
 	    module_directories="$module_directories ./$mibdir/$mnd"
 	fi
       fi # module directory test
+      changequote([, ])
       #-------------------
       # define USING_*_MODULE
       #
+      changequote(, )
       sym="`echo ${i} | sed 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
+      changequote([, ])
       echo "/* Define if compiling with the ${i} module files.  */" >> include/net-snmp/agent/${module_type}_config.h
       echo "#define USING_${sym}_MODULE 1" >> include/net-snmp/agent/${module_type}_config.h
       echo " " >> include/net-snmp/agent/${module_type}_config.h
       #-------------------
-      changequote([, ])
       echo $ECHO_N " $i$ECHO_C"
-      changequote(, )
     fi #
   done # for i in $new_module_list
 
@@ -2104,6 +2056,7 @@ done # while test "x$new_module_list" != "x"; do
 #-------------------
 # build module lists for Makefiles
 #
+changequote(, )
 module_list_o=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.o /g'`
 module_list_lo=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.lo /g'`
 module_list_c=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
@@ -2119,12 +2072,12 @@ agent_module_list_lo=`echo "$agent_module_list_code " | sed 's/\([^ ]\) /\1.lo /
 agent_module_list_c=`echo "$agent_module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
 agentgroup_list_o=`echo " $agent_module_list_o " | sed 's@ \([^ ]*\)\.o@ mibgroup/\1.o @g'`
 agentgroup_list_lo=`echo " $agent_module_list_lo " | sed 's@ \([^ ]*\)\.lo@ mibgroup/\1.lo @g'`
+changequote([, ])
 
 if test $module_debug -eq 1; then
    echo -e "\nFinal module list: $module_list_code"
    exit
 fi
-changequote([, ])
 if test "x$with_mib_cfg_checks" = "xyes"; then
   AC_MSG_CACHE_ADD([Agent Module list: $module_list_code])
 fi
