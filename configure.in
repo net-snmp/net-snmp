@@ -2055,6 +2055,9 @@ while test "x$new_module_list" != "x"; do
   new_list_two=""
 done # while test "x$new_module_list" != "x"; do
 
+# cleanup
+rm -f module_tmp_header.h
+
 #-------------------
 # build module lists for Makefiles
 #
