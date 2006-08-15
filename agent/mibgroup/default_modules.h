@@ -47,7 +47,7 @@ config_add_mib(DISMAN-EVENT-MIB)
 config_add_mib(DISMAN-SCHEDULE-MIB)
 
 /* architecture specific extra modules */
-/* these symbols are set in the host specific net-snmp/system/*.h files */
+/* these symbols are set in the host specific net-snmp/system/<os>.h files */
 #ifdef NETSNMP_INCLUDE_HOST_RESOURCES
     config_require(host)
 #endif
