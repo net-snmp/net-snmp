@@ -1239,7 +1239,7 @@ have the same userid as the agent.
 .PP
 There is one directive specifically relevant to running as
 an AgentX sub-agent:
-.IP "agentPingInterval NUM"
+.IP "agentXPingInterval NUM"
 will make the subagent try and reconnect every NUM seconds to the
 master if it ever becomes (or starts) disconnected.
 .PP

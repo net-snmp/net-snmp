@@ -631,7 +631,7 @@ on the master side, and:
 agentXSocket   tcp:localhost:705
 agentXTimeout  10
 agentXRetries  1
-agentPingInterval 600
+agentXPingInterval 600
 .fi
 .RE
 on the client.
