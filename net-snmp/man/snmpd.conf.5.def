@@ -198,7 +198,7 @@ Defines the permissions of the AgentX socket. socket_perms and directory_perms m
 .P
 You can also put the following in your subagent.conf file (where
 "subagent" is the name you used in your init_snmp("subagent") api call:
-.IP "agentPingInterval NUM"
+.IP "agentXPingInterval NUM"
 This makes the subagent try and reconnect every NUM seconds to the
 master if it ever becomes (or starts) disconnected.
 .SH SMUX SUB-AGENTS
