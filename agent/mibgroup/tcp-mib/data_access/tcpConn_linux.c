@@ -127,7 +127,8 @@ _load4(netsnmp_container *container, u_int load_flags)
      */
     while (fgets(line, sizeof(line), in)) {
         netsnmp_tcpconn_entry *entry;
-        int             state, rc, local_port, remote_port, buf_len, offset, tmp_state;
+        int             state, rc, local_port, remote_port, tmp_state;
+        size_t          buf_len, offset;
         u_char          local_addr[10], remote_addr[10];
         u_char         *tmp_ptr;
 
@@ -248,8 +249,8 @@ _load6(netsnmp_container *container, u_int load_flags)
      */
     while (fgets(line, sizeof(line), in)) {
         netsnmp_tcpconn_entry *entry;
-        int             state, rc, local_port, remote_port, buf_len, offset,
-                        tmp_state;
+        int             state, rc, local_port, remote_port, tmp_state;
+        size_t          buf_len, offset,
         u_char          local_addr[48], remote_addr[48];
         u_char         *tmp_ptr;
 
