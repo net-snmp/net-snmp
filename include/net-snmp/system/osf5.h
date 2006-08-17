@@ -1,6 +1,6 @@
 #include <net-snmp/system/generic.h>
 
-#define osf4
+#define osf4 osf4
 
 /* Needed by <sys/socket.h> to give us the correct sockaddr structures */
 #ifndef _SOCKADDR_LEN
