@@ -477,6 +477,7 @@ ${context}_allocate_rowreq_ctx($m2c_tmp)
     if(NULL == rowreq_ctx) {
         snmp_log(LOG_ERR,"Couldn't allocate memory for a "
                  "${context}_rowreq_ctx.\n");
+        return NULL;
     }
 @if $m2c_data_allocate == 1@
     else {
