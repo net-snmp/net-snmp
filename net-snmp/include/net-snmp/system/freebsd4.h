@@ -3,8 +3,8 @@
 /*
  * freebsd4 is a superset of all since freebsd2
  */
-#define freebsd2 1
-#define freebsd3 1
+#define freebsd2 freebsd2
+#define freebsd3 freebsd3
 
 #undef IFADDR_SYMBOL
 #define IFADDR_SYMBOL "in_ifaddrhead"

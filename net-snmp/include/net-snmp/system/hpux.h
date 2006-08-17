@@ -1,5 +1,7 @@
 #include "sysv.h"
 
+#define hpux hpux
+
 #ifdef hpux11
 #define DONT_USE_NLIST 1
 #endif
@@ -61,8 +63,6 @@
 #define ARP_SCAN_FOUR_ARGUMENTS
 
 #define rt_pad1 rt_refcnt
-
-#define hpux 1
 
 /*
  * disable inline for non-gcc compiler

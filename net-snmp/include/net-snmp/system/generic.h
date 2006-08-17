@@ -1,5 +1,5 @@
 
-#define bsdlike 1
+#define bsdlike bsdlike
 
 /*
  * nlist symbols in ip.c 

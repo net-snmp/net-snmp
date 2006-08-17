@@ -18,7 +18,7 @@
 /*
  * maybe I should have used _SEQUENT_ in all this code..  dunno 
  */
-#define dynix 1
+#define dynix dynix
 
 #undef TOTAL_MEMORY_SYMBOL
 #undef MBSTAT_SYMBOL
