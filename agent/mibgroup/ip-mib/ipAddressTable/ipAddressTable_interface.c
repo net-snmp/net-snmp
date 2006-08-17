@@ -518,6 +518,7 @@ ipAddressTable_allocate_rowreq_ctx(ipAddressTable_data * data,
     if (NULL == rowreq_ctx) {
         snmp_log(LOG_ERR, "Couldn't allocate memory for a "
                  "ipAddressTable_rowreq_ctx.\n");
+        return NULL;
     } else {
         if (NULL != data) {
             /*
