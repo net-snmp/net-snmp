@@ -4,7 +4,7 @@
  * should be made to mingw32.h - Andy
  */
 #ifndef mingw32
-#define mingw32 1
+#define mingw32 mingw32
 #endif
 
 #include "mingw32.h"
