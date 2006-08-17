@@ -2622,6 +2622,7 @@ init_mib(void)
             (char *) malloc(strlen(DEFAULT_MIBS) + strlen(env_var) + 2);
         if (!entry) {
             DEBUGMSGTL(("init_mib", "env mibs malloc failed"));
+            SNMP_FREE(env_var);
             return;
         } else {
             if (*env_var == '+')
