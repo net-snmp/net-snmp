@@ -576,6 +576,11 @@ setup_engineID(u_char ** eidp, const char *text)
     len = 5;                    /* always have 5 leading bytes */
     switch (localEngineIDType) {
     case ENGINEID_TYPE_TEXT:
+        if (NULL == text) {
+            snmp_log(LOG_ERR,
+                     "Can't set up engineID of type text from an empty string.\n");
+            return -1;
+        }
         len += strlen(text);    /* 5 leading bytes+text. No NULL char */
         break;
 #if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
