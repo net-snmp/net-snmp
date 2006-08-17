@@ -628,6 +628,7 @@ snmpNotifyFilterTable_allocate_rowreq_ctx(void *user_init_ctx)
     if (NULL == rowreq_ctx) {
         snmp_log(LOG_ERR, "Couldn't allocate memory for a "
                  "snmpNotifyFilterTable_rowreq_ctx.\n");
+        return NULL;
     }
 
     rowreq_ctx->oid_idx.oids = rowreq_ctx->oid_tmp;
