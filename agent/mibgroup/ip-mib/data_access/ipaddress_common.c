@@ -166,6 +166,7 @@ netsnmp_access_ipaddress_entry_create(void)
     if (SNMP_ERR_NOERROR != rc) {
         DEBUGMSGT(("access:ipaddress:create","error %d in arch init\n"));
         netsnmp_access_ipaddress_entry_free(entry);
+        entry = NULL;
     }
 
     return entry;
