@@ -582,6 +582,7 @@ inetCidrRouteTable_allocate_rowreq_ctx(inetCidrRouteTable_data * data)
     if (NULL == rowreq_ctx) {
         snmp_log(LOG_ERR, "Couldn't allocate memory for a "
                  "inetCidrRouteTable_rowreq_ctx.\n");
+        return NULL;
     } else {
         if (NULL != data) {
             rowreq_ctx->data = data;
