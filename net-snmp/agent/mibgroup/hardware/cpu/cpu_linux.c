@@ -46,7 +46,7 @@ void init_cpu_linux( void ) {
 #endif
         }
 
-#ifdef DESCR2_FIELD
+#ifdef DESCR_FIELD
         if (!strncmp( buf, DESCR_FIELD, strlen(DESCR_FIELD))) {
             cp = strchr( buf, ':' );
             strcpy( cpu->descr, cp+2 );
@@ -76,17 +76,11 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     static int   bsize = 0;
     static int   first = 1;
     static int   has_cpu_26 = 1;
-    int          statfd;
-    char        *b;
+    int          statfd, i;
+    char        *b1, *b2;
     unsigned long long cusell = 0, cicell = 0, csysll = 0, cidell = 0,
                        ciowll = 0, cirqll = 0, csoftll = 0;
     netsnmp_cpu_info* cpu;
-
-    cpu = netsnmp_cpu_get_byIdx( -1, 0 );
-    if (!cpu) {
-        snmp_log_perror("No CPU info entry");
-        return -1;
-    }
 
     if ((statfd = open(STAT_FILE, O_RDONLY, 0)) == -1) {
         snmp_log_perror(STAT_FILE);
@@ -106,15 +100,32 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     close(statfd);
 
         /*
-         * Overall CPU statistics
+         * CPU statistics (overall and per-CPU)
          */
-    b = strstr(buff, "cpu ");
-    if (b) {
+    b1 = buff;
+    while ( b2 = strstr( b1, "cpu" )) {
+        if (b2[3] == ' ') {
+            cpu = netsnmp_cpu_get_byIdx( -1, 0 );
+            if (!cpu) {
+                snmp_log_perror("No (overall) CPU info entry");
+                return -1;
+            }
+            b1 = b2+4; /* Skip "cpu " */
+        } else {
+            sscanf( b2, "cpu%d", &i );
+            cpu = netsnmp_cpu_get_byIdx( i, 0 );
+            if (!cpu) {
+                snmp_log_perror("Missing CPU info entry");
+                break;
+            }
+            b1 = b2+5; /* Skip "cpuN " */
+        }
+
 	if (!has_cpu_26 ||
-            sscanf(b, "cpu  %llu %llu %llu %llu %llu %llu %llu", &cusell,
+            sscanf(b1, "%llu %llu %llu %llu %llu %llu %llu", &cusell,
                    &cicell, &csysll, &cidell, &ciowll, &cirqll, &csoftll) != 7) {
 	    has_cpu_26 = 0;
-	    sscanf(b, "cpu  %llu %llu %llu %llu", &cusell, &cicell, &csysll,
+	    sscanf(b1, "%llu %llu %llu %llu", &cusell, &cicell, &csysll,
                    &cidell);
 
 	} else {
@@ -126,7 +137,8 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
         cpu->nice_ticks = (unsigned long)cicell;
         cpu->sys_ticks  = (unsigned long)csysll;
         cpu->idle_ticks = (unsigned long)cidell;
-    } else {
+    }
+    if ( b1 == buff ) {
 	if (first)
 	    snmp_log(LOG_ERR, "No cpu line in %s\n", STAT_FILE);
     }
@@ -135,6 +147,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
          * Interrupt/Context Switch statistics
          *   XXX - Do these really belong here ?
          */
+    cpu = netsnmp_cpu_get_byIdx( -1, 0 );
     _cpu_load_swap_etc( buff, cpu );
 
     /*
@@ -181,7 +194,7 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
 	b = strstr(vmbuff, "pgpgin ");
 	if (b) {
 	    sscanf(b, "pgpgin %llu", &pin);
-            cpu->pageIn  = (unsigned long)pin;
+            cpu->pageIn  = (unsigned long)pin*2;  /* ??? */
 	} else {
 	    if (first)
 		snmp_log(LOG_ERR, "No pgpgin line in %s\n", VMSTAT_FILE);
@@ -190,7 +203,7 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
 	b = strstr(vmbuff, "pgpgout ");
 	if (b) {
 	    sscanf(b, "pgpgout %llu", &pout);
-            cpu->pageOut = (unsigned long)pout;
+            cpu->pageOut = (unsigned long)pout*2;  /* ??? */
 	} else {
 	    if (first)
 		snmp_log(LOG_ERR, "No pgpgout line in %s\n", VMSTAT_FILE);
