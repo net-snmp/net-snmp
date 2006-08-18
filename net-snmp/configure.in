@@ -2513,9 +2513,24 @@ if test "x$embed_perl" = "xyes"; then
     LDFLAGS="$LDFLAGS $PERLLDOPTS"
 
     # newer perl vs older perl call functions
-    AC_CHECK_FUNCS(Perl_eval_pv eval_pv perl_eval_pv)
+    AC_CHECK_FUNCS(eval_pv)
+
+    # sigh: this has a CAPITAL P in perl, which ends up being the same
+    # autoconf define as the lower case so we have to treat them *BOTH*
+    # specially.  Wonderful.
+    AC_CHECK_FUNC(perl_eval_pv, AC_DEFINE(HAVE_PERL_EVAL_PV_LC))
+    AC_CHECK_FUNC(Perl_eval_pv, AC_DEFINE(HAVE_PERL_EVAL_PV_UC))
 
     LDFLAGS="$OLDLDFLAGS"
+
+    if test "x$ac_cv_func_perl_eval_pv" != "xyes" -a "x$ac_cv_func_Perl_eval_pv" != "xyes" -a "x$ac_cv_func_eval_pv" != "xyes" ; then
+      AC_MSG_ERROR([You requested embeded perl, but I could not find the eval_pv or perl_eval_pv functions])
+    fi
+
+    PERLCC=`$ac_cv_path_PERLPROG -V | $ac_cv_path_PERLPROG -n -e 'print if (s/^\s*cc=.(\w+).,.*/$1/);'`
+    if test "x$CC" != "x$PERLCC" ; then
+      AC_MSG_ERROR([Perl was compiled with $PERLCC but you are using $CC which likely will not work for embedded perl support.])
+    fi
 
     AC_DEFINE(NETSNMP_EMBEDDED_PERL)
     OTHERAGENTLIBOBJS="snmp_perl.o"
