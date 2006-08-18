@@ -81,12 +81,17 @@ do_something_perlish(char *something)
     /* newer perl */
     eval_pv(something, TRUE);
 #else
-#ifdef HAVE_PERL_EVAL_PV
-    /* older perl */
+#ifdef HAVE_PERL_EVAL_PV_UC
+    /* older perl? */
+    Perl_eval_pv(something, TRUE);
+#else /* !HAVE_PERL_EVAL_PV_UC */
+#ifdef HAVE_PERL_EVAL_PV_LC
+    /* older perl? */
     perl_eval_pv(something, TRUE);
-#else /* !HAVE_PERL_EVAL_PV */
+#else /* HAVE_PERL_EVAL_PV_LC */
 #error embedded perl broken 
-#endif /* !HAVE_PERL_EVAL_PV */
+#endif /* !HAVE_PERL_EVAL_PV_LC */
+#endif /* !HAVE_PERL_EVAL_PV_UC */
 #endif /* !HAVE_EVAL_PV */
     DEBUGMSGTL(("perl", "finished calling perl\n"));
 }

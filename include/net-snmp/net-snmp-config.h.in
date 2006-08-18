@@ -95,6 +95,12 @@
 /* define if you are embedding perl in the main agent */
 #undef NETSNMP_EMBEDDED_PERL
 
+/* define if you have the perl_eval_pv() function */
+#undef HAVE_PERL_EVAL_PV_LC
+
+/* define if you have the Perl_eval_pv() function */
+#undef HAVE_PERL_EVAL_PV_UC
+
 /* define the system type include file here */
 #define SYSTEM_INCLUDE_FILE <net-snmp/system/generic.h>
 
