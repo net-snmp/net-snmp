@@ -81,7 +81,7 @@ do_something_perlish(char *something)
     /* newer perl */
     eval_pv(something, TRUE);
 #else
-#ifdef HAVE_PERL_EVAL_PV_LC
+#if defined(HAVE_PERL_EVAL_PV_LC) || defined(perl_eval_pv)
     /* older perl? */
     perl_eval_pv(something, TRUE);
 #else /* HAVE_PERL_EVAL_PV_LC */
