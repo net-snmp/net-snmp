@@ -169,16 +169,14 @@ _cpu_update_stats( unsigned int reg, void* magic ) {
             cpu->history[i].sys_hist   = cpu->sys_ticks;
             cpu->history[i].idle_hist  = cpu->idle_ticks;
             cpu->history[i].nice_hist  = cpu->nice_ticks;
-            cpu->history[i].total_hist = cpu->user_ticks +
-                                         cpu->nice_ticks +
-                                         cpu->sys_ticks +
-                                         cpu->idle_ticks +
-                                         cpu->wait_ticks +
-                                         cpu->kern_ticks +
-                                         cpu->intrpt_ticks +
-                                         cpu->sirq_ticks;
+            cpu->history[i].total_hist = cpu->total_ticks;
+
             cpu->history[i].ctx_hist   = cpu->nCtxSwitches;
             cpu->history[i].intr_hist  = cpu->nInterrupts;
+            cpu->history[i].swpi_hist  = cpu->swapIn;
+            cpu->history[i].swpo_hist  = cpu->swapOut;
+            cpu->history[i].pagei_hist = cpu->pageIn;
+            cpu->history[i].pageo_hist = cpu->pageOut;
         }
     }
 
@@ -187,4 +185,14 @@ _cpu_update_stats( unsigned int reg, void* magic ) {
      * retrieve the latest set of data.
      */
     netsnmp_cpu_arch_load( NULL, NULL );
+    for ( cpu=_cpu_head; cpu; cpu=cpu->next ) {
+        cpu->total_ticks = cpu->user_ticks +
+                           cpu->nice_ticks +
+                           cpu->sys_ticks +
+                           cpu->idle_ticks +
+                           cpu->wait_ticks +
+                           cpu->kern_ticks +
+                           cpu->intrpt_ticks +
+                           cpu->sirq_ticks;
+    }
 }
