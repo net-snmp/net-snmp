@@ -7,8 +7,13 @@ struct netsnmp_cpu_history {
      long idle_hist;
      long nice_hist;
      long total_hist;
+
      long ctx_hist;
      long intr_hist;
+     long swpi_hist;
+     long swpo_hist;
+     long pagei_hist;
+     long pageo_hist;
 };
 
 struct netsnmp_cpu_info_s {
@@ -26,6 +31,9 @@ struct netsnmp_cpu_info_s {
      long kern_ticks;
      long intrpt_ticks;
      long sirq_ticks;
+
+     long total_ticks;
+     long sys2_ticks;  /* For non-atomic system counts */
 
                  /* For paging-related UCD stats */
               /* XXX - Do these belong elsewhere ?? */
