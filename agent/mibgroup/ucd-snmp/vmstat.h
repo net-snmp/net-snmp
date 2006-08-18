@@ -9,8 +9,8 @@ config_require(hardware/cpu)
 
 #include "mibdefs.h"
 
-FindVarMethod   var_extensible_vmstat;
-void            init_vmstat(void);
+Netsnmp_Node_Handler   vmstat_handler;
+void              init_vmstat(void);
 
 #define SWAPIN 3
 #define SWAPOUT 4
