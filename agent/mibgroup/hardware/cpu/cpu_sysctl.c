@@ -61,20 +61,35 @@ void init_cpu_sysctl( void ) {
 #endif
  */
 
-#if defined(VM_CNT)                       /* BSDi */
-#define NETSNMP_VM_STATS       VM_CNT
-#define NETSNMP_VM_STATS_TYPE  struct vmmeter
-   /* v_intr, v_swtch, v_swpin, v_swpout */
+#if defined(VM_UVMEXP2) || defined(VM_UVMEXP) 
+    #define NS_VM_INTR		intrs
+    #define NS_VM_SWTCH		swtch
+    #define NS_VM_PAGEIN	pageins
+    #define NS_VM_PAGEOUT	pdpageouts
+    #define NS_VM_SWAPIN	swapins
+    #define NS_VM_SWAPOUT	swapouts
+
+#if defined(VM_UVMEXP2)                   /* NetBSD 1.6+ */
+#define NETSNMP_VM_STATS       VM_UVMEXP2
+#define NETSNMP_VM_STATS_TYPE  struct uvmexp_sysctl
+#else /* VM_UVMEXP */                     /* OpenBSD 3+, NetBSD 1.6+ */
+#define NETSNMP_VM_STATS       VM_UVMEXP
+#define NETSNMP_VM_STATS_TYPE  struct uvmexp
+#endif  /* VM_UVMEXP2 || VM_UVMEXP */
+
 #elif defined(VM_METER)                   /* OpenBSD, NetBSD, FreeBSD */
 #define NETSNMP_VM_STATS       VM_METER
 #define NETSNMP_VM_STATS_TYPE  struct vmtotal
-#elif defined(VM_UVMEXP)                  /* OpenBSD 3+, NetBSD 1.6+ */
-#define NETSNMP_VM_STATS       VM_UVMEXP
-#define NETSNMP_VM_STATS_TYPE  struct uvmexp
-   /* intrs, swtch, NULL, NULL */
-#elif defined(VM_UVMEXP2)                 /* NetBSD 1.6+ */
-#define NETSNMP_VM_STATS       VM_UVMEXP2
-#define NETSNMP_VM_STATS_TYPE  struct uvmexp
+
+#elif defined(VM_CNT)                     /* BSDi */
+#define NETSNMP_VM_STATS       VM_CNT
+#define NETSNMP_VM_STATS_TYPE  struct vmmeter
+    #define NS_VM_INTR		v_intr
+    #define NS_VM_SWTCH		v_swtch
+    #undef  NS_VM_PAGEIN
+    #undef  NS_VM_PAGEOUT
+    #define NS_VM_SWAPIN	v_swpin
+    #define NS_VM_SWAPOUT	v_swpout
 #endif
 
 
@@ -99,7 +114,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     int            mcpu_mib[] = { CTL_KERN, NETSNMP_KERN_MCPU };
     int            mcpu_size  = sizeof(NETSNMP_KERN_MCPU_TYPE);
 #endif
-    NETSNMP_VM_STATS_TYPE *mem_stats;
+    NETSNMP_VM_STATS_TYPE mem_stats;
     int            mem_mib[] = { CTL_VM, NETSNMP_VM_STATS };
     int            mem_size  = sizeof(NETSNMP_VM_STATS_TYPE);
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
@@ -117,15 +132,17 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
          * Interrupt/Context Switch statistics
          *   XXX - Do these really belong here ?
          */
-  /*
     sysctl(mem_mib, 2, &mem_stats, &mem_size, NULL, 0);
-    cpu->pageIn  = (unsigned long)xxx.yyy;
-    cpu->pageOut = (unsigned long)xxx.yyz;
-    cpu->nInterrupts  = (unsigned long)mem_stats.v_intr;
-    cpu->nCtxSwitches = (unsigned long)mem_stats.v_swtch;
-    cpu->swapIn  = (unsigned long)mem_stats.v_swpin;
-    cpu->swapOut = (unsigned long)mem_stats.v_swpout;
-   */
+    cpu->nInterrupts  = (unsigned long)mem_stats.NS_VM_INTR;
+    cpu->nCtxSwitches = (unsigned long)mem_stats.NS_VM_SWTCH;
+    cpu->swapIn       = (unsigned long)mem_stats.NS_VM_SWAPIN;
+    cpu->swapOut      = (unsigned long)mem_stats.NS_VM_SWAPOUT;
+#ifdef NS_VM_PAGEIN
+    cpu->pageIn       = (unsigned long)mem_stats.NS_VM_PAGEIN;
+#endif
+#ifdef NS_VM_PAGEOUT
+    cpu->pageOut      = (unsigned long)mem_stats.NS_VM_PAGEOUT;
+#endif
 
 #ifdef NETSNMP_KERN_MCPU
     mcpu_stats = malloc(n*sizeof(NETSNMP_KERN_MCPU_TYPE));
