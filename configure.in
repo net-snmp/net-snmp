@@ -826,11 +826,17 @@ AC_ARG_ENABLE(embedded-perl,
                                   [forces --with-perl-modules as well.]],
     embed_perl="$enableval", embed_perl="no")
 
+AC_ARG_ENABLE(perl-cc-checks,
+[  --disable-perl-cc-checks        Disable configure checks for whether Perl's
+                                 C Compiler is compatible with ours.])
+
 # Common perl mistakes
 AC_ARG_ENABLE(perl-modules,,
 	AC_MSG_ERROR([ Invalid option. Use --with-perl-modules/--without-perl-modules instead ]) )
 AC_ARG_WITH(embedded-perl,,
-	AC_MSG_ERROR([ Invalid option. Use --enable-embedded-perl=(yes|no) instead ]) )
+	AC_MSG_ERROR([ Invalid option. Use --enable-embedded-perl/--disable-embedded-perl instead ]) )
+AC_ARG_WITH(perl-cc-checks,,
+	AC_MSG_ERROR([ Invalid option. Use --enable-perl-cc-checks/--disable-perl-cc-checks instead ]) )
 
 AC_ARG_WITH(server-send-buf,
 [
@@ -968,6 +974,7 @@ if test "x$embed_perl" = "xyes"; then
     fi
 fi
 
+AC_LANG([C])
 AC_PROG_CC
 AC_PROG_CPP
 AC_AIX
@@ -2569,6 +2576,32 @@ if test "x$embed_perl" = "xyes"; then
       AC_MSG_ERROR(--enable-embedded-perl requested but no perl executable found)
     fi
 
+    #
+    # perl cc checks
+    #
+    if test "xenable_perl_cc_checks" != "xno"; then
+      AC_MSG_CHECKING([for perl cc])
+      PERLCC=`$ac_cv_path_PERLPROG -V:cc | $ac_cv_path_PERLPROG -n -e 'print if (s/^\s*cc=.(\w+).;\s*/$1/);'`
+      AC_MSG_RESULT([$PERLCC])
+
+      AC_MSG_CHECKING([whether $PERLCC is a GNU C compiler])
+      OLDCC=$CC
+      CC="$PERLCC"
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
+#ifndef __GNUC__
+  choke me
+#endif
+      ]])], [perlcc_is_gnu=yes], [perlcc_is_gnu=no])
+      AC_MSG_RESULT([$perlcc_is_gnu])
+      CC=$OLDCC
+      if test "x$GCC" = "xyes" -a "x$perlcc_is_gnu" = "xno"; then
+        AC_MSG_ERROR([We're using a GNU C compiler ($CC) while Perl has been compiled with a non-GNU compiler ($PERLCC). This likely won't work for embedded perl support. Use --disable-perl-cc-checks to disable this check or --disable-embedded-perl to disable embedded perl functionality altogether."])
+      fi
+      if test "x$GCC" != "xyes" -a "x$perlcc_is_gnu" = "xyes"; then
+        AC_MSG_ERROR([We're using a non-GNU C compiler ($CC) while Perl has been compiled with a GNU compiler ($PERLCC). This likely won't work for embedded perl support. Use --disable-perl-cc-checks to disable this check or --disable-embedded-perl to disable embedded perl functionality altogether."])
+      fi
+    fi
+
     AC_MSG_CHECKING([for perl CFLAGS])
     perlcflags=`$myperl -MExtUtils::Embed -e ccopts`
     AC_MSG_RESULT($perlcflags)
@@ -2595,11 +2628,6 @@ if test "x$embed_perl" = "xyes"; then
 
     if test "x$ac_cv_func_perl_eval_pv" != "xyes" -a "x$ac_cv_func_Perl_eval_pv" != "xyes" -a "x$ac_cv_func_eval_pv" != "xyes" ; then
       AC_MSG_ERROR([You requested embeded perl, but I could not find the eval_pv or perl_eval_pv functions])
-    fi
-
-    PERLCC=`$ac_cv_path_PERLPROG -V:cc | $ac_cv_path_PERLPROG -n -e 'print if (s/^\s*cc=.(\w+).;\s*/$1/);'`
-    if test "x$CC" != "x$PERLCC" ; then
-      AC_MSG_ERROR([Perl was compiled with $PERLCC but you are using $CC which likely will not work for embedded perl support.])
     fi
 
     AC_DEFINE(NETSNMP_EMBEDDED_PERL)
