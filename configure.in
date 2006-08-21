@@ -1743,7 +1743,7 @@ done
 AC_MSG_CHECKING([for and configuring mib modules to use])
 
 # set up the CPP command
-MODULECPP="$CPP -D$PARTIALTARGETOS -I${srcdir}/include -I${srcdir}/agent/mibgroup"
+MODULECPP="$CPP -U$PARTIALTARGETOS -D$PARTIALTARGETOS=$PARTIALTARGETOS -I${srcdir}/include -I${srcdir}/agent/mibgroup"
 if test "x$enable_mfd_rewrites" = "xyes"; then
   MODULECPP="$MODULECPP -DNETSNMP_ENABLE_MFD_REWRITES"
 fi
