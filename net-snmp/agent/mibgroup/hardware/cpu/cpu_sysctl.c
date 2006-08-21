@@ -104,7 +104,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     int            mem_size  = sizeof(NETSNMP_VM_STATS_TYPE);
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
 
-    sysctl(cpu_mib, 2, &cpu_stats, &cpu_size, NULL, 0);
+    sysctl(cpu_mib, 2,  cpu_stats, &cpu_size, NULL, 0);
     cpu->user_ticks = (unsigned long)cpu_stats[CP_USER];
     cpu->nice_ticks = (unsigned long)cpu_stats[CP_NICE];
     cpu->sys2_ticks = (unsigned long)cpu_stats[CP_SYS]+cpu_stats[CP_INTR];
