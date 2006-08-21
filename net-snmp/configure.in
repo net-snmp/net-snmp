@@ -2595,10 +2595,10 @@ if test "x$embed_perl" = "xyes"; then
       AC_MSG_RESULT([$perlcc_is_gnu])
       CC=$OLDCC
       if test "x$GCC" = "xyes" -a "x$perlcc_is_gnu" = "xno"; then
-        AC_MSG_ERROR([We're using a GNU C compiler ($CC) while Perl has been compiled with a non-GNU compiler ($PERLCC). This likely won't work for embedded perl support. Use --disable-perl-cc-checks to disable this check or --disable-embedded-perl to disable embedded perl functionality altogether."])
+        AC_MSG_ERROR([This build is using a GNU C compiler ($CC) while Perl has been compiled with a non-GNU (or non-working) compiler ($PERLCC). This likely won't work for embedded perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or disable embedded perl functionality altogether (--disable-embedded-perl)."])
       fi
       if test "x$GCC" != "xyes" -a "x$perlcc_is_gnu" = "xyes"; then
-        AC_MSG_ERROR([We're using a non-GNU C compiler ($CC) while Perl has been compiled with a GNU compiler ($PERLCC). This likely won't work for embedded perl support. Use --disable-perl-cc-checks to disable this check or --disable-embedded-perl to disable embedded perl functionality altogether."])
+        AC_MSG_ERROR([This build is using a non-GNU C compiler ($CC) while Perl has been compiled with a GNU compiler ($PERLCC). This likely won't work for embedded perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or disable embedded perl functionality altogether (--disable-embedded-perl)."])
       fi
     fi
 
