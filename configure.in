@@ -971,7 +971,6 @@ fi
 AC_PROG_CC
 AC_PROG_CPP
 AC_AIX
-AC_EXEEXT
 
 # libtool stuff for shared/static libraries.
 AC_LIBTOOL_DLOPEN
@@ -1906,19 +1905,21 @@ while test "x$new_module_list" != "x"; do
         #
         # check if $i has any architecture specific requirements
         #
-        new_list_arch=`$MODULECPP module_tmp_header.h | grep config_arch_require | sed 's/.*config_arch_require(\(.*\), *\(.*\)).*/\1-xarchx-\2/'`
+        changequote(, )
+        new_list_arch=`$MODULECPP module_tmp_header.h | grep config_arch_require | sed 's/.*config_arch_require( *\([^ ]*\) *, *\(.*\)).*/\1-xarchx-\2/'`
+        changequote([, ])
 	if test "x$new_list_arch" != "x"; then
           for j in $new_list_arch
 	    do
 	    archtest=`echo $j | sed 's/-xarchx-.*//'`
-	    # target_os likely got changed to a #define of 1...
+	    # target_os may have been changed to a #define of 1...
 	    if test "x$archtest" = "x1" -o "x$target_os" = "x$archtest" -o "x$PARTIALTARGETOS" = "x$archtest"; then
 	      new_list="$new_list `echo $j | sed 's/.*-xarchx-//'`"
               AC_MSG_MODULE_DBG(" $i required adding arch files: `echo $j | sed 's/.*-xarchx-//'`")
 	    fi
 	  done
 	fi
-        AC_MSG_MODULE_DBG(" $i required arch files: $new_list_arch")
+        AC_MSG_MODULE_DBG(" $i required arch files: $new_list")
 
         #---------------------
       	# macro: config_require(modules)
