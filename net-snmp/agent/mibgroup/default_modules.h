@@ -27,7 +27,7 @@ config_require(notification-log-mib)
 config_require(target)
 config_require(agent_mibs)
 config_require(agentx)
-config_require(disman/event-mib)
+config_require(disman/event)
 config_require(disman/schedule)
 config_require(utilities)
 
