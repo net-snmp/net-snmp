@@ -168,7 +168,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/memory.h>
 
-#if solaris2
+#ifdef solaris2
 #include "kernel_sunos5.h"
 #endif
 
