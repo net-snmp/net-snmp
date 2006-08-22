@@ -84,7 +84,7 @@ perfstat_id_t ps_name;
                  * But only define it under FreeBSD, since it
                  *   breaks other systems (notable AIX)
                  */
-#if defined (freebsd4)
+#ifdef freebsd4
 int  hz = 1000;
 #endif
 
@@ -137,7 +137,7 @@ init_tcp(void)
 #ifdef TCP_SYMBOL
     auto_nlist(TCP_SYMBOL, 0, 0);
 #endif
-#if freebsd4
+#ifdef freebsd4
     hz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
 #endif
 #ifdef solaris2
