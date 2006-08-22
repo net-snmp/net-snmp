@@ -86,7 +86,7 @@
 #include "hr_swrun.h"
 #include <net-snmp/agent/auto_nlist.h>
 #include "kernel.h"
-#if solaris2
+#ifdef solaris2
 #include "kernel_sunos5.h"
 #endif
 #if defined(aix4) || defined(aix5)
