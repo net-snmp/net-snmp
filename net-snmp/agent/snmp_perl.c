@@ -87,7 +87,7 @@ do_something_perlish(char *something)
 #else /* HAVE_PERL_EVAL_PV_LC */
 #ifdef HAVE_PERL_EVAL_PV_UC
     /* older perl? */
-    Perl_eval_pv(something, TRUE);
+    Perl_eval_pv(my_perl, something, TRUE);
 #else /* !HAVE_PERL_EVAL_PV_UC */
 #error embedded perl broken 
 #endif /* !HAVE_PERL_EVAL_PV_LC */
