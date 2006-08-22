@@ -70,7 +70,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
         cpu->nCtxSwitches = (unsigned long)cs.pswitch;
     }
 
-    if (perfstat_memory((perfstat_id_t *)NULL, &ms,
+    if (perfstat_memory_total((perfstat_id_t *)NULL, &ms,
                      sizeof(perfstat_memory_total_t), 1) > 0) {
         cpu->swapIn  = (unsigned long)ms.pgspins;
         cpu->swapOut = (unsigned long)ms.pgspouts;
