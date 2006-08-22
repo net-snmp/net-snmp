@@ -12,6 +12,7 @@
 #include <sys/types.h>
 
 #include <sys/sched.h>
+#include <sys/param.h>
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
 #ifdef HAVE_VM_VM_PARAM_H
@@ -40,12 +41,19 @@ void init_cpu_sysctl( void ) {
     }
 }
 
+
+#define NETSNMP_CPU_STATS long
 #if defined(KERN_CPUSTATS)                /* BSDi */
 #define NETSNMP_KERN_CPU  KERN_CPUSTATS
 #elif defined(KERN_CPTIME)                /* OpenBSD */
 #define NETSNMP_KERN_CPU  KERN_CPTIME
 #elif defined(KERN_CP_TIME)               /* NetBSD */
 #define NETSNMP_KERN_CPU  KERN_CP_TIME
+
+#if defined(netbsdelf3)
+#undef  NETSNMP_CPU_STATS 
+#define NETSNMP_CPU_STATS uint64_t
+#endif
 #else
 #error "No CPU statistics sysctl token"
 #endif
@@ -106,7 +114,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
      *   is correct for the {Open,Net}BSD versions too.
      * Don't fight it, Dave - go with the flow....
      */
-    long           cpu_stats[CPUSTATES];
+    NETSNMP_CPU_STATS cpu_stats[CPUSTATES];
     int            cpu_mib[] = { CTL_KERN, NETSNMP_KERN_CPU };
     int            cpu_size  = sizeof(cpu_stats);
 #ifdef NETSNMP_KERN_MCPU 
