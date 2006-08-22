@@ -159,7 +159,7 @@
 #include <nlist.h>
 #endif
 
-#if solaris2
+#ifdef solaris2
 #include "kernel_sunos5.h"
 #endif
 
