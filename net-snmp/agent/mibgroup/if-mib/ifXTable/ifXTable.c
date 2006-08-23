@@ -1224,7 +1224,10 @@ ifHighSpeed_get(ifXTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ifHighSpeed data.
      * set (* ifHighSpeed_val_ptr ) from rowreq_ctx->data
      */
-    (*ifHighSpeed_val_ptr) = rowreq_ctx->data.ifHighSpeed;
+    if (0 == rowreq_ctx->data.ifHighSpeed)
+        (*ifHighSpeed_val_ptr) = rowreq_ctx->data.ifSpeed;
+    else
+        (*ifHighSpeed_val_ptr) = rowreq_ctx->data.ifHighSpeed;
 
     return MFD_SUCCESS;
 }                               /* ifHighSpeed_get */
