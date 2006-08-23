@@ -257,12 +257,12 @@ netsnmp_strdup_and_null(const u_char * from, size_t from_len)
     char         *ret;
 
     if (from_len == 0 || from[from_len - 1] != '\0') {
-        ret = malloc(from_len + 1);
+        ret = (char *)malloc(from_len + 1);
         if (!ret)
             return NULL;
         ret[from_len] = '\0';
     } else {
-        ret = malloc(from_len);
+        ret = (char *)malloc(from_len);
         if (!ret)
             return NULL;
         ret[from_len - 1] = '\0';

@@ -683,9 +683,9 @@ setup_engineID(u_char ** eidp, const char *text)
              * use default NIC if none provided 
              */
             if (NULL == engineIDNic) {
-                x = getHwAddress(DEFAULT_NIC, &bufp[5]);
+	      x = getHwAddress(DEFAULT_NIC, (char *)&bufp[5]);
             } else {
-                x = getHwAddress(engineIDNic, &bufp[5]);
+	      x = getHwAddress((char *)engineIDNic, (char *)&bufp[5]);
             }
             if (0 != x)
                 /*

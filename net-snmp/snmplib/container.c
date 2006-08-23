@@ -102,7 +102,7 @@ netsnmp_container_register_with_compare(const char* name, netsnmp_factory *f,
     container_type *ct, tmp;
 
     tmp.name = (char *)name;
-    ct = CONTAINER_FIND(containers, &tmp);
+    ct = (container_type *)CONTAINER_FIND(containers, &tmp);
     if (NULL!=ct) {
         DEBUGMSGT(("container_registry",
                    "replacing previous container factory\n"));
@@ -137,7 +137,7 @@ netsnmp_container_get_factory(const char *type)
     container_type ct, *found;
     
     ct.name = type;
-    found = CONTAINER_FIND(containers, &ct);
+    found = (container_type *)CONTAINER_FIND(containers, &ct);
 
     return found ? found->factory : NULL;
 }
@@ -173,7 +173,7 @@ netsnmp_container_get_ct(const char *type)
     container_type ct;
     
     ct.name = type;
-    return CONTAINER_FIND(containers, &ct);
+    return (container_type *)CONTAINER_FIND(containers, &ct);
 }
 
 static container_type *
@@ -209,7 +209,7 @@ netsnmp_container_get(const char *type)
     netsnmp_container *c;
     container_type *ct = netsnmp_container_get_ct(type);
     if (ct) {
-        c = ct->factory->produce();
+        c = (netsnmp_container *)(ct->factory->produce());
         if (c && ct->compare)
             c->compare = ct->compare;
         return c;
@@ -224,7 +224,7 @@ netsnmp_container *
 netsnmp_container_find(const char *type)
 {
     container_type *ct = netsnmp_container_find_ct(type);
-    netsnmp_container *c = ct ? ct->factory->produce() : NULL;
+    netsnmp_container *c = ct ? (netsnmp_container *)(ct->factory->produce()) : NULL;
 
     /*
      * provide default compare

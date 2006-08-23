@@ -104,7 +104,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     u_char          buf[USM_LENGTH_KU_HASHBLOCK], *bufp;
 
 #ifdef USE_OPENSSL
-    EVP_MD_CTX     *ctx = malloc(sizeof(EVP_MD_CTX));
+    EVP_MD_CTX     *ctx = (EVP_MD_CTX *)malloc(sizeof(EVP_MD_CTX));
     unsigned int    tmp_len;
 #else
     MDstruct        MD;
