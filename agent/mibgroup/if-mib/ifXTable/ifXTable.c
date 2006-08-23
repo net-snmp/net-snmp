@@ -1192,6 +1192,9 @@ ifLinkUpDownTrapEnable_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     netsnmp_assert(NULL != rowreq_ctx);
 
+    if (0 == rowreq_ctx->data.ifLinkUpDownTrapEnable)
+        return MFD_SKIP;
+
     /*
      * TODO:231:o: |-> Extract the current value of the ifLinkUpDownTrapEnable data.
      * copy (* ifLinkUpDownTrapEnable_val_ptr ) from rowreq_ctx->data
@@ -1375,6 +1378,9 @@ ifConnectorPresent_get(ifXTable_rowreq_ctx * rowreq_ctx,
     DEBUGMSGTL(("verbose:ifXTable:ifConnectorPresent_get", "called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
+
+    if (0 == rowreq_ctx->data.ifConnectorPresent)
+        return MFD_SKIP;
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifConnectorPresent data.
