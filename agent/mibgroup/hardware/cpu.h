@@ -15,4 +15,5 @@ config_arch_require(netbsdelf3, hardware/cpu/cpu_sysctl)
 config_arch_require(openbsd2,   hardware/cpu/cpu_sysctl)
 config_arch_require(openbsd3,   hardware/cpu/cpu_sysctl)
 
+config_arch_require(aix4, hardware/cpu/cpu_perfstat)
 config_arch_require(aix5, hardware/cpu/cpu_perfstat)
