@@ -279,7 +279,7 @@ netsnmp_register_save_list(netsnmp_data_list **datalist,
 int
 netsnmp_save_all_data_callback(int major, int minor,
                                void *serverarg, void *clientarg) {
-    netsnmp_data_list_saveinfo *info = clientarg;
+    netsnmp_data_list_saveinfo *info = (netsnmp_data_list_saveinfo *)clientarg;
 
     if (!clientarg) {
         snmp_log(LOG_WARNING, "netsnmp_save_all_data_callback called with no passed data");
@@ -336,7 +336,7 @@ netsnmp_read_data_callback(const char *token, char *line) {
     void *data = NULL;
 
     /* find the stashed information about what we're parsing */
-    info = netsnmp_get_list_data(saveHead, token);
+    info = (netsnmp_data_list_saveinfo *) netsnmp_get_list_data(saveHead, token);
     if (!info) {
         snmp_log(LOG_WARNING, "netsnmp_read_data_callback called without previously registered subparser");
         return;

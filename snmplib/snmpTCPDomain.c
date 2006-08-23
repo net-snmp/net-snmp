@@ -281,7 +281,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
          */
 
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
-        t->local = malloc(6);
+        t->local = (u_char *)malloc(6);
         if (t->local == NULL) {
             netsnmp_tcp_close(t);
             netsnmp_transport_free(t);
@@ -338,7 +338,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
          */
 
     } else {
-        t->remote = malloc(6);
+      t->remote = (u_char *)malloc(6);
         if (t->remote == NULL) {
             netsnmp_tcp_close(t);
             netsnmp_transport_free(t);
@@ -427,7 +427,7 @@ netsnmp_tcp_ctor(void)
 {
     tcpDomain.name = netsnmp_snmpTCPDomain;
     tcpDomain.name_length = sizeof(netsnmp_snmpTCPDomain) / sizeof(oid);
-    tcpDomain.prefix = calloc(2, sizeof(char *));
+    tcpDomain.prefix = (const char **)calloc(2, sizeof(char *));
     tcpDomain.prefix[0] = "tcp";
 
     tcpDomain.f_create_from_tstring = netsnmp_tcp_create_tstring;

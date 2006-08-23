@@ -1761,7 +1761,7 @@ create_user_from_session(netsnmp_session * session)
                                            NETSNMP_DS_LIB_AUTHLOCALIZEDKEY))) {
         size_t buflen = USM_AUTH_KU_LEN;
         SNMP_FREE(user->authKey);
-        user->authKey = malloc(buflen); /* max length needed */
+        user->authKey = (u_char *)malloc(buflen); /* max length needed */
         user->authKeyLen = 0;
         /* it will be a hex string */
         if (!snmp_hex_to_binary(&user->authKey, &buflen, &user->authKeyLen,
@@ -1806,7 +1806,7 @@ create_user_from_session(netsnmp_session * session)
                                            NETSNMP_DS_LIB_PRIVLOCALIZEDKEY))) {
         size_t buflen = USM_PRIV_KU_LEN;
         SNMP_FREE(user->privKey);
-        user->privKey = malloc(buflen); /* max length needed */
+        user->privKey = (u_char *)malloc(buflen); /* max length needed */
         user->privKeyLen = 0;
         /* it will be a hex string */
         if (!snmp_hex_to_binary(&user->privKey, &buflen, &user->privKeyLen,
@@ -4755,7 +4755,7 @@ _sess_async_send(void *sessp,
         return 0;
     }
 
-    if ((pktbuf = malloc(2048)) == NULL) {
+    if ((pktbuf = (u_char *)malloc(2048)) == NULL) {
         DEBUGMSGTL(("sess_async_send",
                     "couldn't malloc initial packet buffer\n"));
         session->s_snmp_errno = SNMPERR_MALLOC;
@@ -5740,7 +5740,7 @@ _sess_read(void *sessp, fd_set * fdset)
                     isp->packet, pptr, isp->packet_len, isp->packet,
                     isp->packet_len));
 
-        if ((rxbuf = realloc(isp->packet, isp->packet_len)) == NULL) {
+        if ((rxbuf = (u_char *)realloc(isp->packet, isp->packet_len)) == NULL) {
             /*
              * I don't see why this should ever fail, but it's not a big deal.
              */
@@ -6024,7 +6024,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
         return 0;
     }
 
-    if ((pktbuf = malloc(2048)) == NULL) {
+    if ((pktbuf = (u_char *)malloc(2048)) == NULL) {
         DEBUGMSGTL(("sess_resend",
                     "couldn't malloc initial packet buffer\n"));
         return 0;
@@ -6799,7 +6799,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             goto type_error;
         }
 #endif /* DISABLE_MIB_LOADING */
-        if ((buf = malloc(sizeof(oid) * MAX_OID_LEN)) == NULL) {
+        if ((buf = (u_char *)malloc(sizeof(oid) * MAX_OID_LEN)) == NULL) {
             result = SNMPERR_MALLOC;
         } else {
             tint = MAX_OID_LEN;
@@ -6970,7 +6970,7 @@ snmp_add_var(netsnmp_pdu *pdu,
 
     default:
         result = SNMPERR_VAR_TYPE;
-	buf = calloc(1, 4);
+	buf = (u_char *)calloc(1, 4);
 	if (buf != NULL) {
 	    sprintf((char *)buf, "\"%c\"", type);
 	    snmp_set_detail((char *)buf);
