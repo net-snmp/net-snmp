@@ -49,7 +49,7 @@ netsnmp_oid_stash_create_sized_node(size_t mysize)
     ret = SNMP_MALLOC_TYPEDEF(netsnmp_oid_stash_node);
     if (!ret)
         return NULL;
-    ret->children = (netsnmp_oid_stash_node_s**) calloc(mysize, sizeof(netsnmp_oid_stash_node *));
+    ret->children = (netsnmp_oid_stash_node**) calloc(mysize, sizeof(netsnmp_oid_stash_node *));
     if (!ret->children) {
         free(ret);
         return NULL;
