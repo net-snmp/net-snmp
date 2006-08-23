@@ -32,7 +32,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
 {
     oid  obj;
     long value = 0;
-    u_char *cp;
+    char cp[300];
     netsnmp_cpu_info *info = netsnmp_cpu_get_byIdx( -1, 0 );
 
     switch (reqinfo->mode) {
@@ -44,7 +44,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
              break;
              
         case ERRORNAME:            /* dummy name */
-             cp = "systemStats";
+             sprintf(cp, "systemStats");
              snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
                                       cp, strlen(cp));
              break;
@@ -193,7 +193,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
         case SWAPIN:
              if ( info->history[0].total_hist ) {
                  value  = (info->swapIn - info->history[0].swpi_hist)/60;
-                 //value *= PAGE_SIZE;
+                 /* ??? value *= PAGE_SIZE;  */
                  snmp_set_var_typed_integer(requests->requestvb,
                                             ASN_INTEGER, value);
              }
@@ -201,7 +201,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
         case SWAPOUT:
              if ( info->history[0].total_hist ) {
                  value  = (info->swapOut - info->history[0].swpo_hist)/60;
-                 //value *= PAGE_SIZE;
+                 /* ??? value *= PAGE_SIZE;  */
                  snmp_set_var_typed_integer(requests->requestvb,
                                             ASN_INTEGER, value);
              }
@@ -234,8 +234,14 @@ vmstat_handler(netsnmp_mib_handler          *handler,
              break;
 
         default:
-//             snmp_log(LOG_ERR,
-//                 "unknown object (%d) in vmstat_handler\n", (int)obj);
+/*
+   XXX - The systemStats group is "holely", so walking it would
+         trigger this message repeatedly.  We really need a form
+         of the table column registration mechanism, that would
+         work with scalar groups.
+               snmp_log(LOG_ERR,
+                   "unknown object (%d) in vmstat_handler\n", (int)obj);
+ */
              break;
         }
         break;
