@@ -1911,7 +1911,7 @@ while test "x$new_module_list" != "x"; do
         # check if $i has any architecture specific requirements
         #
         changequote(, )
-        new_list_arch=`$MODULECPP module_tmp_header.h | grep config_arch_require | sed 's/.*config_arch_require( *\([^ ]*\) *, *\(.*\)).*/\1-xarchx-\2/'`
+        new_list_arch=`$MODULECPP module_tmp_header.h | grep config_arch_require | sed 's/.*config_arch_require( *\([^ ]*\) *, *\([^ ]*\) *).*/\1-xarchx-\2/'`
         changequote([, ])
 	if test "x$new_list_arch" != "x"; then
           for j in $new_list_arch
