@@ -1265,7 +1265,7 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
             tmp[0] = '.';
         }
     }
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, tmp);
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tmp);
 }
 
 
@@ -2425,7 +2425,7 @@ netsnmp_set_mib_directory(const char *dir)
     if (olddir) {
         if ((*dir == '+') || (*dir == '-')) {
             /** New dir starts with '+', thus we add it. */
-            tmpdir = malloc(strlen(dir) + strlen(olddir) + 2);
+            tmpdir = (char *)malloc(strlen(dir) + strlen(olddir) + 2);
             if (!tmpdir) {
                 DEBUGMSGTL(("read_config:initmib", "set mibdir malloc failed"));
                 return;
@@ -3799,7 +3799,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
             if (var->val.string == NULL)
                 return SNMPERR_GENERR;
 
-            if (uitmp > (int) (*oidLen)) {
+            if ((size_t)uitmp > (*oidLen)) {
                 for (i = 0; i < *oidLen; ++i)
                     var->val.string[i] = (u_char) * oidIndex++;
                 for (i = *oidLen; i < uitmp; ++i)
@@ -4528,14 +4528,14 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
             cp = tmpbuf;
         }
 
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, tp->label) ||
-        !snmp_strcat(buf, buf_len, out_len, allow_realloc, cp) ||
-        !snmp_strcat(buf, buf_len, out_len, allow_realloc, "\n")) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tp->label) ||
+        !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)cp) ||
+        !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n")) {
         return 0;
     }
     if (!print_tree_node(buf, buf_len, out_len, allow_realloc, tp, width))
         return 0;
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "::= {"))
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"::= {"))
         return 0;
     pos = 5;
     while (objidlen > 1) {
@@ -4551,11 +4551,11 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
                 len = strlen(tmpbuf);
                 if (pos + len + 2 > width) {
                     if (!snmp_strcat(buf, buf_len, out_len,
-                                     allow_realloc, "\n     "))
+                                     allow_realloc, (u_char *)"\n     "))
                         return 0;
                     pos = 5;
                 }
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, tmpbuf))
+                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tmpbuf))
                     return 0;
                 pos += len;
                 objid++;
@@ -4572,11 +4572,11 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
         sprintf(tmpbuf, " %lu", *objid);
         len = strlen(tmpbuf);
         if (pos + len + 2 > width) {
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\n     "))
+            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,  (u_char *)"\n     "))
                 return 0;
             pos = 5;
         }
-        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, tmpbuf))
+        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tmpbuf))
             return 0;
         pos += len;
         objid++;
@@ -4585,11 +4585,11 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
     sprintf(tmpbuf, " %lu }", *objid);
     len = strlen(tmpbuf);
     if (pos + len + 2 > width) {
-        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\n     "))
+        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n     "))
             return 0;
         pos = 5;
     }
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, tmpbuf))
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tmpbuf))
         return 0;
     return 1;
 }
@@ -4605,8 +4605,8 @@ print_tree_node(u_char ** buf, size_t * buf_len,
 
     if (tp) {
         module_name(tp->modid, str);
-        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "  -- FROM\t") ||
-            !snmp_strcat(buf, buf_len, out_len, allow_realloc, str))
+        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"  -- FROM\t") ||
+            !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)str))
             return 0;
         pos = 16+strlen(str);
         for (i = 1, prevmod = tp->modid; i < tp->number_modules; i++) {
@@ -4615,29 +4615,29 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 len = strlen(str);
                 if (pos + len + 2 > width) {
                     if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                                     ",\n  --\t\t"))
+                                     (u_char *)",\n  --\t\t"))
                         return 0;
                     pos = 16;
                 }
                 else {
-                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, ", "))
+                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)", "))
                         return 0;
                     pos += 2;
                 }
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str))
+                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)str))
                     return 0;
                 pos += len;
             }
             prevmod = tp->module_list[i];
         }
-        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\n"))
+        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n"))
             return 0;
         if (tp->tc_index != -1) {
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             "  -- TEXTUAL CONVENTION ") ||
+                             (u_char *)"  -- TEXTUAL CONVENTION ") ||
                 !snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             get_tc_descriptor(tp->tc_index)) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, "\n"))
+                             (u_char *)get_tc_descriptor(tp->tc_index)) ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n"))
                 return 0;
         }
         switch (tp->type) {
@@ -4702,13 +4702,13 @@ print_tree_node(u_char ** buf, size_t * buf_len,
 #endif                          /* SNMP_TESTING_CODE */
         if (cp)
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             "  SYNTAX\t") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, cp))
+                             (u_char *)"  SYNTAX\t") ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)cp))
                 return 0;
         if (tp->ranges) {
             struct range_list *rp = tp->ranges;
             int             first = 1;
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, " ("))
+            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)" ("))
                 return 0;
             while (rp) {
                 if (rp->low == rp->high)
@@ -4716,58 +4716,58 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 else
                     sprintf(str, "%s%d..%d", (first ? "" : " | "),
                                               rp->low, rp->high);
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str))
+                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)str))
                     return 0;
                 if (first)
                     first = 0;
                 rp = rp->next;
             }
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, ") "))
+            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)") "))
                 return 0;
         }
         if (tp->enums) {
             struct enum_list *ep = tp->enums;
             int             first = 1;
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, " {"))
+            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)" {"))
                 return 0;
             pos = 16 + strlen(cp) + 2;
             while (ep) {
                 if (first)
                     first = 0;
                 else
-                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, ", "))
+                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)", "))
                         return 0;
                 snprintf(str, sizeof(str), "%s(%d)", ep->label, ep->value);
                 str[ sizeof(str)-1 ] = 0;
                 len = strlen(str);
                 if (pos + len + 2 > width) {
                     if (!snmp_strcat(buf, buf_len, out_len,
-                                     allow_realloc, "\n\t\t  "))
+                                     allow_realloc, (u_char *)"\n\t\t  "))
                         return 0;
                     pos = 18;
                 }
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str))
+                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)str))
                     return 0;
                 pos += len + 2;
                 ep = ep->next;
             }
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "} "))
+            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"} "))
                 return 0;
         }
         if (cp)
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\n"))
+            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n"))
                 return 0;
         if (tp->hint)
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             "  DISPLAY-HINT\t\"") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, tp->hint) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"\n"))
+                             (u_char *)"  DISPLAY-HINT\t\"") ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tp->hint) ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\"\n"))
                 return 0;
         if (tp->units)
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             "  UNITS\t\t\"") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, tp->units) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"\n"))
+                             (u_char *)"  UNITS\t\t\"") ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tp->units) ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\"\n"))
                 return 0;
         switch (tp->access) {
         case MIB_ACCESS_READONLY:
@@ -4797,9 +4797,9 @@ print_tree_node(u_char ** buf, size_t * buf_len,
         }
         if (cp)
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             "  MAX-ACCESS\t") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, cp) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, "\n"))
+                             (u_char *)"  MAX-ACCESS\t") ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)cp) ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n"))
                 return 0;
         switch (tp->status) {
         case MIB_STATUS_MANDATORY:
@@ -4832,28 +4832,28 @@ print_tree_node(u_char ** buf, size_t * buf_len,
 #endif                          /* SNMP_TESTING_CODE */
         if (cp)
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             "  STATUS\t") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, cp) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, "\n"))
+                             (u_char *)"  STATUS\t") ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)cp) ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n"))
                 return 0;
         if (tp->augments)
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             "  AUGMENTS\t{ ") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, tp->augments) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, " }\n"))
+                             (u_char *)"  AUGMENTS\t{ ") ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tp->augments) ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)" }\n"))
                 return 0;
         if (tp->indexes) {
             struct index_list *ip = tp->indexes;
             int             first = 1;
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             "  INDEX\t\t{ "))
+                             (u_char *)"  INDEX\t\t{ "))
                 return 0;
             pos = 16 + 2;
             while (ip) {
                 if (first)
                     first = 0;
                 else
-                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, ", "))
+                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)", "))
                         return 0;
                 snprintf(str, sizeof(str), "%s%s",
                         ip->isimplied ? "IMPLIED " : "",
@@ -4861,16 +4861,16 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 str[ sizeof(str)-1 ] = 0;
                 len = strlen(str);
                 if (pos + len + 2 > width) {
-                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\n\t\t  "))
+                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n\t\t  "))
                         return 0;
                     pos = 16 + 2;
                 }
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str))
+                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)str))
                     return 0;
                 pos += len + 2;
                 ip = ip->next;
             }
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, " }\n"))
+            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)" }\n"))
                 return 0;
         }
         if (tp->varbinds) {
@@ -4879,11 +4879,11 @@ print_tree_node(u_char ** buf, size_t * buf_len,
 
             if (tp->type == TYPE_TRAPTYPE) {
                 if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                    "  VARIABLES\t{ "))
+                    (u_char *)"  VARIABLES\t{ "))
                     return 0;
             } else {
                 if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                    "  OBJECTS\t{ "))
+                    (u_char *)"  OBJECTS\t{ "))
                     return 0;
             }
             pos = 16 + 2;
@@ -4891,39 +4891,39 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 if (first)
                     first = 0;
                 else
-                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, ", "))
+                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)", "))
                         return 0;
                 snprintf(str, sizeof(str), "%s", vp->vblabel);
                 str[ sizeof(str)-1 ] = 0;
                 len = strlen(str);
                 if (pos + len + 2 > width) {
                     if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                                    "\n\t\t  "))
+                                    (u_char *)"\n\t\t  "))
                         return 0;
                     pos = 16 + 2;
                 }
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str))
+                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)str))
                     return 0;
                 pos += len + 2;
                 vp = vp->next;
             }
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, " }\n"))
+            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)" }\n"))
                 return 0;
         }
         if (tp->description)
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             "  DESCRIPTION\t\"") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, tp->description) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"\n"))
+                             (u_char *)"  DESCRIPTION\t\"") ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tp->description) ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\"\n"))
                 return 0;
         if (tp->defaultValue)
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             "  DEFVAL\t{ ") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, tp->defaultValue) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, " }\n"))
+                             (u_char *)"  DEFVAL\t{ ") ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tp->defaultValue) ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)" }\n"))
                 return 0;
     } else
-        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "No description\n"))
+        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"No description\n"))
             return 0;
     return 1;
 }
@@ -5833,7 +5833,7 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
             prefix = "";
         if ((strlen(suffix) + strlen(prefix) + strlen(argv) + 2) > tmpbuf_len) {
             tmpbuf_len = strlen(suffix) + strlen(argv) + strlen(prefix) + 2;
-            tmpbuf = realloc(tmpbuf, tmpbuf_len);
+            tmpbuf = (char *)realloc(tmpbuf, tmpbuf_len);
         }
         snprintf(tmpbuf, tmpbuf_len, "%s%s%s%s", prefix, argv,
                  ((suffix[0] == '.' || suffix[0] == '\0') ? "" : "."),

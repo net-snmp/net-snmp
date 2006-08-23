@@ -505,7 +505,7 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
 #endif
     case SNMP_VERSION_3:
         if (pdu->securityNameLen == 0) {
-            pdu->securityName = malloc(sp->securityNameLen);
+	  pdu->securityName = (char *)malloc(sp->securityNameLen);
             if (pdu->securityName == NULL) {
                 sp->s_snmp_errno = SNMPERR_MALLOC;
                 return -1;

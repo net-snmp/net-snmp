@@ -308,7 +308,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
 
     if (local) {
-        t->local = malloc(strlen(addr->sun_path));
+      t->local = (u_char *)malloc(strlen(addr->sun_path));
         if (t->local == NULL) {
             netsnmp_transport_free(t);
             return NULL;
@@ -358,7 +358,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         }
 
     } else {
-        t->remote = malloc(strlen(addr->sun_path));
+      t->remote = (u_char *)malloc(strlen(addr->sun_path));
         if (t->remote == NULL) {
             netsnmp_transport_free(t);
             return NULL;
@@ -432,7 +432,7 @@ netsnmp_unix_create_ostring(const u_char * o, size_t o_len, int local)
     if (o_len > 0 && o_len < (sizeof(addr.sun_path) - 1)) {
         addr.sun_family = AF_UNIX;
         memset(addr.sun_path, 0, sizeof(addr.sun_path));
-        strncpy(addr.sun_path, o, o_len);
+        strncpy(addr.sun_path, (char *)o, o_len);
         return netsnmp_unix_transport(&addr, local);
     } else {
         if (o_len > 0) {
@@ -449,7 +449,7 @@ netsnmp_unix_ctor(void)
 {
     unixDomain.name = netsnmp_UnixDomain;
     unixDomain.name_length = sizeof(netsnmp_UnixDomain) / sizeof(oid);
-    unixDomain.prefix = calloc(2, sizeof(char *));
+    unixDomain.prefix = (const char**)calloc(2, sizeof(char *));
     unixDomain.prefix[0] = "unix";
 
     unixDomain.f_create_from_tstring = netsnmp_unix_create_tstring;

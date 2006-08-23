@@ -524,7 +524,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
          * be INADDR_ANY, but certainly includes a port number.
          */
 
-        t->local = malloc(6);
+      t->local = (u_char *) malloc(6);
         if (t->local == NULL) {
             netsnmp_transport_free(t);
             return NULL;
@@ -564,7 +564,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
          */
 
         t->data = malloc(sizeof(struct sockaddr_in));
-        t->remote = malloc(6);
+        t->remote = (u_char *)malloc(6);
         if (t->data == NULL || t->remote == NULL) {
             netsnmp_transport_free(t);
             return NULL;
@@ -1140,7 +1140,7 @@ netsnmp_udp_ctor(void)
 {
     udpDomain.name = netsnmpUDPDomain;
     udpDomain.name_length = netsnmpUDPDomain_len;
-    udpDomain.prefix = calloc(2, sizeof(char *));
+    udpDomain.prefix = (const char**)calloc(2, sizeof(char *));
     udpDomain.prefix[0] = "udp";
 
     udpDomain.f_create_from_tstring = netsnmp_udp_create_tstring;

@@ -448,7 +448,7 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
     if (SSLeay() < 0x907000) {
         /* the old version of the struct was bigger and thus more
            memory is needed. should be 152, but we use 256 for safety. */
-        cptr = malloc(256);
+        cptr = (EVP_MD_CTX *)malloc(256);
         EVP_DigestInit(cptr, hashfn);
     } else {
         EVP_MD_CTX_init(cptr);

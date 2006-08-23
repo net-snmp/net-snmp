@@ -398,14 +398,14 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
             memcpy(new_data, t->data, t->max_size * t->data_size);
             SNMP_FREE(t->data);
         }
-        t->data = new_data;
+        t->data = (void**)new_data;
         t->max_size = new_max;
     }
 
     /*
      * Insert the new entry into the data array
      */
-    t->data[t->count++] = entry;
+    t->data[t->count++] = (void *)entry;
     t->dirty = 1;
     return 0;
 }
@@ -484,7 +484,7 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
     /*
      * find matching items
      */
-    start = end = binary_search_for_start(key, c);
+    start = end = binary_search_for_start((netsnmp_index *)key, c);
     if (start == -1)
         return 0;
 
@@ -495,7 +495,7 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
     }
 
     *len = end - start + 1;
-    subset = malloc((*len) * t->data_size);
+    subset = (void **)malloc((*len) * t->data_size);
     if (subset)
         memcpy(subset, &t->data[start], t->data_size * (*len));
 

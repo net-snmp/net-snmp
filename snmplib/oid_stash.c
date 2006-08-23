@@ -49,7 +49,7 @@ netsnmp_oid_stash_create_sized_node(size_t mysize)
     ret = SNMP_MALLOC_TYPEDEF(netsnmp_oid_stash_node);
     if (!ret)
         return NULL;
-    ret->children = calloc(mysize, sizeof(netsnmp_oid_stash_node *));
+    ret->children = (netsnmp_oid_stash_node_s**) calloc(mysize, sizeof(netsnmp_oid_stash_node *));
     if (!ret->children) {
         free(ret);
         return NULL;
@@ -309,7 +309,7 @@ netsnmp_oid_stash_store_all(int majorID, int minorID,
     if (!clientarg)
         return SNMP_ERR_NOERROR;
     
-    sinfo = clientarg;
+    sinfo = (netsnmp_oid_stash_save_info *) clientarg;
     netsnmp_oid_stash_store(*(sinfo->root), sinfo->token, sinfo->dumpfn,
                             oidbase,0);
     return SNMP_ERR_NOERROR;
