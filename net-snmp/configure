@@ -20145,6 +20145,21 @@ echo "${ECHO_T}no" >&6
   SET_MAKE="MAKE=${MAKE-make}"
 fi
 
+echo "$as_me:$LINENO: checking for egrep" >&5
+echo $ECHO_N "checking for egrep... $ECHO_C" >&6
+if test "${ac_cv_prog_egrep+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if echo a | (grep -E '(a|b)') >/dev/null 2>&1
+    then ac_cv_prog_egrep='grep -E'
+    else ac_cv_prog_egrep='egrep'
+    fi
+fi
+echo "$as_me:$LINENO: result: $ac_cv_prog_egrep" >&5
+echo "${ECHO_T}$ac_cv_prog_egrep" >&6
+ EGREP=$ac_cv_prog_egrep
+
+
 # Extract the first word of "ps", so it can be a program name with args.
 set dummy ps; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -35147,17 +35162,17 @@ echo $ECHO_N "checking for correct flags to ps... $ECHO_C" >&6
 if test "${ac_cv_ps_flags+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  if test "`($PSPROG -e 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+  if test "`($PSPROG -e 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-e"
-elif test "`($PSPROG -el 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+elif test "`($PSPROG -el 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-el"
-elif test "`($PSPROG acx 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+elif test "`($PSPROG acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="acx"
-elif test "`($PSPROG -acx 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+elif test "`($PSPROG -acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-acx"
-elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | egrep ' ps *$' | awk '{print $NF}'`" = "ps" ; then
+elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | $EGREP ' ps *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-o pid,tt,state,time,ucomm"
-elif test "`($PSPROG ax 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+elif test "`($PSPROG ax 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="ax"
 elif test "x$PARTIALTARGETOS" = "xcygwin"; then
   ac_cv_ps_flags="-e"
