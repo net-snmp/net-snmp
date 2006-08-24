@@ -1458,7 +1458,7 @@ netsnmp_subtree_find_prev(oid *name, size_t len, netsnmp_subtree *subtree,
     lookup_cache *lookup_cache = NULL;
     netsnmp_subtree *myptr = NULL, *previous = NULL;
     int cmp = 1;
-    int ll_off = 0;
+    size_t ll_off = 0;
 
     if (subtree) {
         myptr = subtree;

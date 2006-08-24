@@ -803,7 +803,7 @@ free_config(void)
 void
 read_configs_optional(const char *optional_config, int when)
 {
-    char *newp, *cp, *st;
+    char *newp, *cp, *st = NULL;
     char *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				       NETSNMP_DS_LIB_APPTYPE);
 
@@ -1641,7 +1641,7 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
                 snmp_log(LOG_WARNING,"buffer too small to read octet string (%d < %d)\n",
                          *len, ilen);
                 DEBUGMSGTL(("read_config_read_octet_string",
-                            "buffer too small (%d < %d)", *len, ilen));
+                            "buffer too small (%lu < %lu)", (unsigned long)*len, (unsigned long)ilen));
                 cptr1 = skip_not_white(readfrom);
                 return skip_white(cptr1);
             }
