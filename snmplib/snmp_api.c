@@ -4861,12 +4861,12 @@ _sess_async_send(void *sessp,
                 transport->f_fmtaddr(transport, pdu->transport_data,
                                      pdu->transport_data_length);
             if (dest_txt != NULL) {
-                snmp_log(LOG_DEBUG, "\nSending %u bytes to %s\n", length,
+                snmp_log(LOG_DEBUG, "\nSending %lu bytes to %s\n", (unsigned long)length,
                          dest_txt);
                 SNMP_FREE(dest_txt);
             } else {
-                snmp_log(LOG_DEBUG, "\nSending %u bytes to <UNKNOWN>\n",
-                         length);
+                snmp_log(LOG_DEBUG, "\nSending %lu bytes to <UNKNOWN>\n",
+                         (unsigned long)length);
             }
         }
         xdump(packet, length, "");
@@ -5709,8 +5709,8 @@ _sess_read(void *sessp, fd_set * fdset)
              * Obviously this should never happen!  
              */
             snmp_log(LOG_ERR,
-                     "too large packet_len = %d, dropping connection %d\n",
-                     isp->packet_len, transport->sock);
+                     "too large packet_len = %lu, dropping connection %d\n",
+                     (unsigned long)(isp->packet_len), transport->sock);
             transport->f_close(transport);
             /** XXX-rks: why no SNMP_FREE(isp->packet); ?? */
             return -1;
@@ -6085,12 +6085,12 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
             str = transport->f_fmtaddr(transport, rp->pdu->transport_data,
                                        rp->pdu->transport_data_length);
             if (str != NULL) {
-                snmp_log(LOG_DEBUG, "\nResending %d bytes to %s\n", length,
-                         str);
+                snmp_log(LOG_DEBUG, "\nResending %lu bytes to %s\n", 
+                         (unsigned long)length, str);
                 SNMP_FREE(str);
             } else {
-                snmp_log(LOG_DEBUG, "\nResending %d bytes to <UNKNOWN>\n",
-                         length);
+                snmp_log(LOG_DEBUG, "\nResending %lu bytes to <UNKNOWN>\n",
+                         (unsigned long)length);
             }
         }
         xdump(packet, length, "");
