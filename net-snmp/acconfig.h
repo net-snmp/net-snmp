@@ -699,6 +699,8 @@
 #define config_parse_dot_conf(w,x,y,z)
 #define config_add_mib(x)
 #define config_belongs_in(x)
+#define config_error(x)
+#define config_warning(x)
   
 #if defined (WIN32) || defined (mingw32) || defined (cygwin)
 #define ENV_SEPARATOR ";"
