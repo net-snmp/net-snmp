@@ -101,6 +101,10 @@
 /* define if you have the Perl_eval_pv() function */
 #undef HAVE_PERL_EVAL_PV_UC
 
+/* Define to 1 if you have the `perl_eval_pv' function. */
+#undef HAVE_PERL_EVAL_PV
+
+
 /* define the system type include file here */
 #define SYSTEM_INCLUDE_FILE <net-snmp/system/generic.h>
 
@@ -578,9 +582,6 @@
 
 /* Define to 1 if you have the <pci/pci.h> header file. */
 #undef HAVE_PCI_PCI_H
-
-/* Define to 1 if you have the `perl_eval_pv' function. */
-#undef HAVE_PERL_EVAL_PV
 
 /* Define to 1 if you have the <picl.h> header file. */
 #undef HAVE_PICL_H
@@ -1563,6 +1564,8 @@
 #define config_parse_dot_conf(w,x,y,z)
 #define config_add_mib(x)
 #define config_belongs_in(x)
+#define config_error(x)
+#define config_warning(x)
   
 #if defined (WIN32) || defined (mingw32) || defined (cygwin)
 #define ENV_SEPARATOR ";"
