@@ -351,13 +351,14 @@ static int
 sensor_init(void)
 {
     int             res;
-    DEBUGMSG(("ucd-snmp/lmSensors", "=> sensor_init\n"));
 #ifndef solaris2
     char            filename[] = CONFIG_FILE_NAME;
     time_t          t = time(NULL);
     FILE            *fp = fopen(filename, "r");
     int             i = 0;
   
+    DEBUGMSG(("ucd-snmp/lmSensors", "=> sensor_init\n"));
+
     for (i = 0; i < N_TYPES; i++)
     {
         sensor_array[i].n = 0;
