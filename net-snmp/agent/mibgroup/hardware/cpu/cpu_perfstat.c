@@ -19,18 +19,18 @@
      *   (including descriptions)
      */
 void init_cpu_perfstat( void ) {
-    int                   i,n;
+    int                   i;
     perfstat_id_t         name;
     perfstat_cpu_t       *cs2;
     netsnmp_cpu_info     *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
     strcpy(cpu->name, "Overall CPU statistics");
 
-    n   = perfstat_cpu( NULL, NULL, sizeof(perfstat_cpu_t), 0 );
-    cs2 = malloc( n*sizeof(perfstat_cpu_t));
+    cpu_num = perfstat_cpu( NULL, NULL, sizeof(perfstat_cpu_t), 0 );
+    cs2 = malloc( cpu_num*sizeof(perfstat_cpu_t));
  
     strcpy( name.name, "");
-    if (perfstat_cpu(&name, cs2, sizeof(perfstat_cpu_t), n) > 0) {
-        for ( i = 0; i < n; i++ ) {
+    if (perfstat_cpu(&name, cs2, sizeof(perfstat_cpu_t), cpu_num) > 0) {
+        for ( i = 0; i < cpu_num; i++ ) {
             cpu = netsnmp_cpu_get_byIdx( i, 1 );
             sprintf( cpu->name, cs2[i].name);
         }
@@ -80,7 +80,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     /*
      * Per-CPU statistics
      */
-    n   = cs.ncpus;
+    n   = cs.ncpus;   /* XXX - Compare against cpu_num */
     cs2 = malloc( n*sizeof(perfstat_cpu_t));
     strcpy( name.name, "");
     if (perfstat_cpu(&name, cs2, sizeof(perfstat_cpu_t), n) > 0) {
