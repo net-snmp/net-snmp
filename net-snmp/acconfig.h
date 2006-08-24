@@ -101,6 +101,10 @@
 /* define if you have the Perl_eval_pv() function */
 #undef HAVE_PERL_EVAL_PV_UC
 
+/* Define to 1 if you have the `perl_eval_pv' function. */
+#undef HAVE_PERL_EVAL_PV
+
+
 /* define the system type include file here */
 #define SYSTEM_INCLUDE_FILE <net-snmp/system/generic.h>
 
