@@ -989,6 +989,7 @@ AC_SUBST(LIBTOOL_DEPS)
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
+AC_PROG_EGREP
 AC_PATH_PROG([PSPROG],ps)
 AC_PATH_PROG([PERLPROG],perl)
 AC_CHECK_PROGS(WHOAMI, whoami logname, whoami)
@@ -3037,17 +3038,17 @@ fi
 
 # Check ps args
 AC_CACHE_CHECK([for correct flags to ps], ac_cv_ps_flags,
-[if test "`($PSPROG -e 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+[if test "`($PSPROG -e 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-e"
-elif test "`($PSPROG -el 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+elif test "`($PSPROG -el 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-el"
-elif test "`($PSPROG acx 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+elif test "`($PSPROG acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="acx"
-elif test "`($PSPROG -acx 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+elif test "`($PSPROG -acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-acx"
-elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | egrep ' ps *$' | awk '{print $NF}'`" = "ps" ; then
+elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | $EGREP ' ps *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-o pid,tt,state,time,ucomm"
-elif test "`($PSPROG ax 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+elif test "`($PSPROG ax 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="ax"
 elif test "x$PARTIALTARGETOS" = "xcygwin"; then
   ac_cv_ps_flags="-e"
