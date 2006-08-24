@@ -1,4 +1,5 @@
 typedef struct netsnmp_cpu_info_s netsnmp_cpu_info;
+extern int cpu_num;
 
                  /* For rolling averages */
 struct netsnmp_cpu_history {
@@ -37,6 +38,7 @@ struct netsnmp_cpu_info_s {
 
                  /* For paging-related UCD stats */
               /* XXX - Do these belong elsewhere ?? */
+              /* XXX - Do Not Use - Subject to Change */
      long pageIn;
      long pageOut;
      long swapIn;

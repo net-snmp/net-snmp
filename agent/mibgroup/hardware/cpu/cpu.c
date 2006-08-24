@@ -8,6 +8,7 @@ static void _cpu_update_stats( unsigned int, void* );
 
 int _cpuAutoUpdate =  5;
 int _cpuHistoryLen;
+int  cpu_num = 0;
 
 netsnmp_cpu_info *_cpu_head  = NULL;
 netsnmp_cpu_info *_cpu_tail  = NULL;
