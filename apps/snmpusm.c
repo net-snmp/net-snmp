@@ -220,8 +220,8 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
             
     if (vars->val_len != BN_num_bytes(dh->pub_key)) {
         SNMP_FREE(dhkeychange);
-        fprintf(stderr,"incorrect diffie-helman lengths (%d != %d)\n",
-                vars->val_len, BN_num_bytes(dh->pub_key));
+        fprintf(stderr,"incorrect diffie-helman lengths (%lu != %d)\n",
+                (unsigned long)vars->val_len, BN_num_bytes(dh->pub_key));
         return SNMPERR_GENERR;
     }
 
