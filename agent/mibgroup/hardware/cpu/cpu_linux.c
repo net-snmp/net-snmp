@@ -32,13 +32,14 @@
 void init_cpu_linux( void ) {
     FILE *fp;
     char buf[1024], *cp;
-    int  i;
+    int  i, n = 0;
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
     strcpy(cpu->name, "Overall CPU statistics");
 
     fp = fopen( CPU_FILE, "r" );
     while ( fgets( buf, sizeof(buf), fp)) {
         if ( sscanf( buf, "processor : %d", &i ) == 1)  {
+            n++;
             cpu = netsnmp_cpu_get_byIdx( i, 1 );
             sprintf( cpu->name, "cpu%d", i );
 #if defined(__s390__) || defined(__s390x__)
@@ -64,6 +65,7 @@ void init_cpu_linux( void ) {
 #endif
     }
     fclose(fp);
+    cpu_num = n;
 }
 
 void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu );
