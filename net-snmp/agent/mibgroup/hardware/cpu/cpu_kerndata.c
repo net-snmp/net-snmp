@@ -16,20 +16,21 @@
 #include <vm/vm_param.h>
 #include <vm/vm_extern.h>
 
-ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-#define CPU_SYMBOL  "cp_time"
-#define MEM_SYMBOL  "cnt"
 
     /*
      * Initialise the list of CPUs on the system
      *   (including descriptions)
      */
 void init_cpu_nlist( void ) {
-    netsnmp_cpu_info     *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
+    int                i;
+    netsnmp_cpu_info  *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
     strcpy(cpu->name, "Overall CPU statistics");
 
-    /* XXX - per-CPU structures ? */
+    cpu_num = tmp_ctl( TMP_NENG, 0 );
+    for ( i=0; i < cpu_num; i++ ) {
+        cpu = netsnmp_cpu_get_byIdx( i, 1 );
+        sprintf( cpu->name, "cpu%d", i );
+    }
 }
 
 
@@ -37,34 +38,56 @@ void init_cpu_nlist( void ) {
      * Load the latest CPU usage statistics
      */
 int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
-    long   cpu_stats[CPUSTATES];
-    struct vmmeter mem_stats;
-    netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
+    int               i;
+    exp_vmmeter_t    *vminfo;
+    size_t            vminfo_size;
+    netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 0 );
+    netsnmp_cpu_info *cpu2;
 
-    auto_nlist( CPU_SYMBOL, (char *) cpu_stats, sizeof(cpu_stats));
-    auto_nlist( MEM_SYMBOL, (char *)&mem_stats, sizeof(mem_stats));
+        /* Clear overall stats, ready for summing individual CPUs */
+    cpu->user_ticks = 0;
+    cpu->idle_ticks = 0;
+    cpu->kern_ticks = 0;
+    cpu->wait_ticks = 0;
+    cpu->sys2_ticks = 0;
+    cpu->swapIn       = 0;
+    cpu->swapOut      = 0;
+    cpu->nInterrupts  = 0;
+    cpu->nCtxSwitches = 0;
 
-    cpu->user_ticks = (unsigned long)cpu_stats[0];
-    cpu->nice_ticks = (unsigned long)cpu_stats[1];
-    cpu->sys_ticks  = (unsigned long)cpu_stats[2];
-    cpu->idle_ticks = (unsigned long)cpu_stats[3];
-        /* intrpt_ticks, wait_ticks, kern_ticks, sirq_ticks unused */
+    vminfo_size = cpu_num * sizeof(exp_vmmeter_t);
+    vminfo      = (exp_vmmeter_t *)malloc( vminfo_size );
+    getkerninfo(VMMETER_DATAID, vminfo, vminfo_size);
 
-        /*
-         * Interrupt/Context Switch statistics
-         *   XXX - Do these really belong here ?
-         */
-    cpu->swapIn  = (unsigned long)mem_stats.v_swpin;
-    cpu->swapOut = (unsigned long)mem_stats.v_swpout;
-    cpu->nInterrupts  = (unsigned long)mem_stats.v_intr;
-    cpu->nCtxSwitches = (unsigned long)mem_stats.v_swtch;
+    for ( i=0; i < cpu_num; i++ ) {
+        cpu2 = netsnmp_cpu_get_byIdx( i, 0 );
 
-#ifdef PER_CPU_INFO
-    for ( i = 0; i < n; i++ ) {
-        cpu = netsnmp_cpu_get_byIdx( i, 1 );
-        /* XXX - per-CPU statistics */
+        cpu2->user_ticks = (unsigned long)vminfo[i].v_time[V_CPU_USER];
+        cpu2->idle_ticks = (unsigned long)vminfo[i].v_time[V_CPU_IDLE];
+        cpu2->kern_ticks = (unsigned long)vminfo[i].v_time[V_CPU_KERNEL];
+        cpu2->wait_ticks = (unsigned long)vminfo[i].v_time[V_CPU_STREAM];
+        cpu2->sys2_ticks = (unsigned long)vminfo[i].v_time[V_CPU_KERNEL]+
+                                          vminfo[i].v_time[V_CPU_STREAM];
+            /* nice_ticks, intrpt_ticks, sirq_ticks unused */
+
+            /* sum these for the overall stats */
+        cpu->user_ticks += (unsigned long)vminfo[i].v_time[V_CPU_USER];
+        cpu->idle_ticks += (unsigned long)vminfo[i].v_time[V_CPU_IDLE];
+        cpu->kern_ticks += (unsigned long)vminfo[i].v_time[V_CPU_KERNEL];
+        cpu->wait_ticks += (unsigned long)vminfo[i].v_time[V_CPU_STREAM];
+        cpu->sys2_ticks += (unsigned long)vminfo[i].v_time[V_CPU_KERNEL]+
+                                          vminfo[i].v_time[V_CPU_STREAM];
+
+            /*
+             * Interrupt/Context Switch statistics
+             *   XXX - Do these really belong here ?
+             */
+        cpu->swapIn       += (unsigned long)vminfo[i].v_swpin;
+        cpu->swapOut      += (unsigned long)vminfo[i].v_swpout;
+        cpu->pageIn       += (unsigned long)vminfo[i].v_phread;
+        cpu->pageOut      += (unsigned long)vminfo[i].v_phwrite;
+        cpu->nInterrupts  += (unsigned long)vminfo[i].v_intr;
+        cpu->nCtxSwitches += (unsigned long)vminfo[i].v_swtch;
     }
-#endif
-
     return 0;
 }
