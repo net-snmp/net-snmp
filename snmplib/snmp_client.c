@@ -848,7 +848,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
             }
             else {
                 snmp_log(LOG_ERR,"bad size for integer-like type (%d)\n",
-                         vars->val_len);
+                         (int)vars->val_len);
                 return (1);
             }
         } else
@@ -911,7 +911,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
     case ASN_COUNTER64:
         if (largeval) {
             snmp_log(LOG_ERR,"bad size for counter 64 (%d)\n",
-                     vars->val_len);
+                     (int)vars->val_len);
             return (1);
         }
         vars->val_len = sizeof(struct counter64);
@@ -922,7 +922,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
     case ASN_OPAQUE_FLOAT:
         if (largeval) {
             snmp_log(LOG_ERR,"bad size for opaque float (%d)\n",
-                     vars->val_len);
+                     (int)vars->val_len);
             return (1);
         }
         vars->val_len = sizeof(float);
@@ -932,7 +932,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
     case ASN_OPAQUE_DOUBLE:
         if (largeval) {
             snmp_log(LOG_ERR,"bad size for opaque double (%d)\n",
-                     vars->val_len);
+                     (int)vars->val_len);
             return (1);
         }
         vars->val_len = sizeof(double);
