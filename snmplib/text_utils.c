@@ -461,7 +461,7 @@ _process_line_tvi(netsnmp_line_info *line_info, void *mem,
     /*
      * get value
      */
-    switch((int)lpi->user_context) {
+    switch((int)(intptr_t)lpi->user_context) {
 
         case PMLP_TYPE_UNSIGNED:
             tvi->value.ul = strtoul(ptr, NULL, 0);
@@ -497,7 +497,7 @@ _process_line_tvi(netsnmp_line_info *line_info, void *mem,
 
         default:
             snmp_log(LOG_ERR,"unsupported value type %d\n",
-                     (int)lpi->user_context);
+                     (int)(intptr_t)lpi->user_context);
             break;
     }
     

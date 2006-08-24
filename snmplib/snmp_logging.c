@@ -391,7 +391,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
             if (facility == -1)  return -1;
             logh->pri_max = pri_max;
             logh->token   = strdup(snmp_log_syslogname(0));
-            logh->magic   = (void *)facility;
+            logh->magic   = (void *)(intptr_t)facility;
 	    snmp_enable_syslog_ident(snmp_log_syslogname(0), facility);
 	}
         break;
@@ -611,7 +611,7 @@ netsnmp_logging_restart(void)
             continue;
         if (logh->type == NETSNMP_LOGHANDLER_SYSLOG) {
             snmp_disable_syslog_entry(logh);
-            snmp_enable_syslog_ident(logh->token,(int)logh->magic);
+            snmp_enable_syslog_ident(logh->token,(int)(intptr_t)logh->magic);
         }
         else if (logh->type == NETSNMP_LOGHANDLER_FILE) {
             snmp_disable_filelog_entry(logh);
@@ -1027,7 +1027,7 @@ log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *str)
 	 */
     if (!(logh->imagic)) {
         const char *ident    = logh->token;
-        int   facility = (int)logh->magic;
+        int   facility = (int)(intptr_t)logh->magic;
         if (!ident)
             ident = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                           NETSNMP_DS_LIB_APPTYPE);
