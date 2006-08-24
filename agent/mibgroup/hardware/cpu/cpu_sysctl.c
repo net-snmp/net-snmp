@@ -29,16 +29,22 @@
      */
 void init_cpu_sysctl( void ) {
     int               i, n;
-    int               ncpu_mib[] = { CTL_HW, HW_NCPU };
+    int               ncpu_mib[]  = { CTL_HW, HW_NCPU };
+    int               model_mib[] = { CTL_HW, HW_MODEL };
+    char              descr[ SNMP_MAXBUF ];
     netsnmp_cpu_info  *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
     strcpy(cpu->name, "Overall CPU statistics");
 
     i = sizeof(n);
     sysctl(ncpu_mib, 2, &n, &i, NULL, 0);
+    i = sizeof(descr);
+    sysctl(model_mib, 2, descr, &i, NULL, 0);
     for ( i = 0; i < n; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 1 );
-        sprintf( cpu->name, "cpu%d", i );
+        sprintf( cpu->name,  "cpu%d", i );
+        sprintf( cpu->descr, "%s", descr );
     }
+    cpu_num = n;
 }
 
 
@@ -153,10 +159,10 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 #endif
 
 #ifdef NETSNMP_KERN_MCPU
-    mcpu_stats = malloc(n*sizeof(NETSNMP_KERN_MCPU_TYPE));
+    mcpu_stats = malloc(cpu_num*sizeof(NETSNMP_KERN_MCPU_TYPE));
     sysctl(mcpu_mib, 2, mcpu_stats,
-           n*sizeof(NETSNMP_KERN_MCPU_TYPE), NULL, 0);
-    for ( i = 0; i < n; i++ ) {
+           cpu_num*sizeof(NETSNMP_KERN_MCPU_TYPE), NULL, 0);
+    for ( i = 0; i < cpu_num; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 1 );
         /* XXX - per-CPU statistics - mcpu_mib[i].??? */
     }

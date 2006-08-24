@@ -22,8 +22,10 @@ extern int           cpu_num;
      *   (including descriptions)
      */
 void init_cpu_nlist( void ) {
-    int               i=0;
+    int               i, n=0, clock, state_begin;
+    char              ctype[15], ftype[15], state[10];
     kstat_t          *ksp;
+    kstat_ctl_t      *kc;
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
     strcpy(cpu->name, "Overall CPU statistics");
 
@@ -34,9 +36,36 @@ void init_cpu_nlist( void ) {
     if (ksp = kstat_fd->kc_chain; ksp != NULL; ksp = ksp->ks_next) {
         if (ksp->ks_flags & KSTAT_FLAG_INVALID)
             continue;
-        if (strcmp(ksp->ks_module, "cpu_stat") == 0) {
+        if ((strcmp(ksp->ks_module, "cpu_info") == 0) &&
+            (strcmp(ksp->ks_class,  "misc"    ) == 0)) {
+            kstat_read(kc, ksp, NULL );
+            n++;
+            clock = 999999;
+            memset(ctype, 0, sizeof(ctype));
+            memset(ftype, 0, sizeof(ftype));
+            memset(state, 0, sizeof(state));
+            for (i=0; i<ksp->ks_ndata; i++) {
+                ks_data = ksp->ks_data[i];
+                if ( strcmp( ks_data->name, "state" ) == 0 ) {
+                    strncpy( state, ks_data->value.c, sizeof(state));
+                    state[sizeof(state)-1] = '\0';
+                } else if ( strcmp( ks_data->name, "state_begin" ) == 0 ) {
+                    state_begin = ks_data->value.i32;
+                } else if ( strcmp( ks_data->name, "cpu_type" ) == 0 ) {
+                    strncpy( ctype, ks_data->value.c, sizeof(ctype));
+                    state[sizeof(ctype)-1] = '\0';
+                } else if ( strcmp( ks_data->name, "fpu_type" ) == 0 ) {
+                    strncpy( ftype, ks_data->value.c, sizeof(ftype));
+                    state[sizeof(ftype)-1] = '\0';
+                } else if ( strcmp( ks_data->name, "clock_MHz" ) == 0 ) {
+                    clock = ks_data->value.i32;
+                }
+            }
+            i   = kdp->ks_instance;
             cpu = netsnmp_cpu_get_byIdx( i, 1 );
-            sprintf( cpu->name, "cpu%d", i++ );
+            sprintf( cpu->name,  "cpu%d", i );
+            sprintf( cpu->descr, "CPU %d Sun %d MHz %s with %s FPU %s",
+                                 i, clock, ctype, ftype, state  );
         }
     }
     cpu_num = i;
@@ -50,7 +79,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     int               i=0;
     kstat_t          *ksp;
     cpu_stat_t        cs;
-    netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
+    netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 0 );
     netsnmp_cpu_info *cpu2;
 
         /* Clear overall stats, ready for summing individual CPUs */
@@ -101,6 +130,6 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
             cpu->nInterrupts  += (unsigned long)cs.cpu_sysinfo.intr;
             cpu->nCtxSwitches += (unsigned long)cs.cpu_sysinfo.pswitch;
         }
-
+    }
     return 0;
 }
