@@ -21,11 +21,14 @@
  *    be handled in the *_hpux.h header file.
  */
 config_require(if-mib/data_access/interface)
+
 #if defined( linux )
 config_require(if-mib/data_access/interface_linux)
 config_require(if-mib/data_access/interface_ioctl)
-#elif defined( openbsd3 )
-config_require(if-mib/data_access/interface_openbsd)
+
+#elif defined( openbsd3 ) || defined( freebsd4 ) || defined( freebsd5 ) || defined( freebsd6 )
+config_require(if-mib/data_access/interface_sysctl)
+
 #else
 #   define NETSNMP_ACCESS_INTERFACE_NOARCH 1
 #endif
