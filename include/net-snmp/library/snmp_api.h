@@ -392,7 +392,8 @@ typedef struct request_list {
 
 #define SNMP_DETAIL_SIZE        512
 
-#define SNMP_FLAGS_DONT_PROBE      0x100        /* don't probe for an engineID */
+#define SNMP_FLAGS_USER_CREATED    0x200      /* USM user has been created */
+#define SNMP_FLAGS_DONT_PROBE      0x100      /* don't probe for an engineID */
 #define SNMP_FLAGS_STREAM_SOCKET   0x80
 #define SNMP_FLAGS_LISTENING       0x40 /* Server stream sockets only */
 #define SNMP_FLAGS_SUBSESSION      0x20

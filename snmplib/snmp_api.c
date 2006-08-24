@@ -1433,6 +1433,13 @@ _sess_open(netsnmp_session * in_session)
         snmp_sess_close(slp);
         return 0;
     }
+    if (create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
+        in_session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;       /* XX?? */
+        DEBUGMSGTL(("snmp_api",
+                    "_sess_open(): failed(2) to create a new user from session\n"));
+        return 0;
+    }
+    
     session->flags &= ~SNMP_FLAGS_DONT_PROBE;
 
 
@@ -1565,6 +1572,12 @@ snmp_sess_add_ex(netsnmp_session * in_session,
             snmp_sess_close(slp);
             slp = NULL;
         }
+        if (create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
+            slp->session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;
+            DEBUGMSGTL(("snmp_api",
+                        "_sess_open(): failed(2) to create a new user from session\n"));
+            return 0;
+        }
     }
 
     return (void *) slp;
@@ -1618,6 +1631,18 @@ create_user_from_session(netsnmp_session * session)
     struct usmUser *user;
     int             user_just_created = 0;
     char *cp;
+
+    /*
+     * - don't create-another/copy-into user for this session by default
+     * - bail now (no error) if we don't have an engineID
+     */
+    if (SNMP_FLAGS_USER_CREATED == (session->flags & SNMP_FLAGS_USER_CREATED) ||
+        session->securityModel != SNMP_SEC_MODEL_USM ||
+        session->version != SNMP_VERSION_3 ||
+        session->securityEngineIDLen == 0)
+        return SNMPERR_SUCCESS;
+
+    session->flags |= SNMP_FLAGS_USER_CREATED;
 
     /*
      * now that we have the engineID, create an entry in the USM list
@@ -4692,6 +4717,16 @@ _sess_async_send(void *sessp,
         rc = snmpv3_engineID_probe(slp, session);
         if (rc == 0)
             return 0; /* s_snmp_errno already set */
+    }
+
+    /*
+     * check to see if we need to create a v3 user from the session info
+     */
+    if (create_user_from_session(session) != SNMPERR_SUCCESS) {
+        session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;  /* XX?? */
+        DEBUGMSGTL(("snmp_api",
+                    "snmp_sess_open(): failed(2) to create a new user from session\n"));
+        return 0;
     }
 
     if ((pktbuf = malloc(2048)) == NULL) {
