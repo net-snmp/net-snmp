@@ -17,6 +17,8 @@
 #include <vm/vm_param.h>
 #include <vm/vm_extern.h>
 
+#include <sys/sysctl.h>
+
 #define CPU_SYMBOL  "cp_time"
 #define MEM_SYMBOL  "cnt"
 
@@ -25,10 +27,22 @@
      *   (including descriptions)
      */
 void init_cpu_nlist( void ) {
+    int            i, n;
+    int            ncpu_mib[] = { CTL_HW, HW_NCPU  };
+    int           model_mib[] = { CTL_HW, HW_MODEL };
+    char           descr[ SNMP_MAXBUF ];
     netsnmp_cpu_info     *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
     strcpy(cpu->name, "Overall CPU statistics");
 
-    /* XXX - per-CPU structures ? */
+    sysctl(ncpu_mib,  2, &n,    sizeof(n),     NULL, 0);
+    sysctl(model_mib, 2, descr, sizeof(descr), NULL, 0);
+
+    for ( i=0; i<n; i++ ) {
+        cpu = netsnmp_cpu_get_byIdx( i, 1 );
+        sprintf(cpu->name, "cpu%d", i);
+        sprintf(cpu->descr, "%s", descr);
+    }
+    cpu_num = n;
 }
 
 

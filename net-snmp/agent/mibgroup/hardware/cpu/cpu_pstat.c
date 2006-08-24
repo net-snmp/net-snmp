@@ -20,17 +20,44 @@
      *   (including descriptions)
      */
 void init_cpu_nlist( void ) {
-    int                   i;
+    int                   i, cpuversion;
     struct pst_dynamic    psd;
+    char                  descr[ SNMP_MAXBUF ];
     netsnmp_cpu_info     *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
     strcpy(cpu->name, "Overall CPU statistics");
+
+#ifdef _SC_CPU_VERSION
+    cpuversion = sysconf( _SC_CPU_VERSION );
+    switch (cpuversion) {
+    case CPU_HP_MC68020:
+        snprintf(descr, SNMP_MAXBUF, " Motorola MC68020 ");
+    case CPU_HP_MC68030:
+        snprintf(descr, SNMP_MAXBUF, " Motorola MC68030 ");
+    case CPU_HP_MC68040:
+        snprintf(descr, SNMP_MAXBUF, " Motorola MC68040 ");
+    case CPU_PA_RISC1_0:
+        snprintf(descr, SNMP_MAXBUF, " HP PA-RISC 1.0 ");
+    case CPU_PA_RISC1_1:
+        snprintf(descr, SNMP_MAXBUF, " HP PA-RISC 1.1 ");
+    case CPU_PA_RISC1_2:
+        snprintf(descr, SNMP_MAXBUF, " HP PA-RISC 1.2 ");
+    case CPU_PA_RISC2_0:
+        snprintf(descr, SNMP_MAXBUF, " HP PA-RISC 2.0 ");
+    default:
+        snprintf(descr, SNMP_MAXBUF, "An electronic chip with an HP label");
+    }
+#else
+    snprintf(descr, SNMP_MAXBUF, "An electronic chip without(?) an HP label");
+#endif
 
     if (pstat_getdynamic(&psd, sizeof(psd), 1, 0) > 0) {
         for ( i = 0; i < psd.psd_proc_cnt; i++ ) {
             cpu = netsnmp_cpu_get_byIdx( i, 1 );
             sprintf( cpu->name, "cpu%d", i );
+            sprintf( cpu->descr, descr );
         }
     }
+    cpu_num = psd.psd_proc_cnt;
 }
 
 
@@ -44,6 +71,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
 
     pstat_getdynamic(&psd, sizeof(psd), 1, 0);
+    /* XXX - Compare cpu_num against psd.psd_proc_cnt */
     cpu->user_ticks = (unsigned long)psd.psd_cpu_time[CP_USER];
     cpu->nice_ticks = (unsigned long)psd.psd_cpu_time[CP_NICE];
     cpu->sys2_ticks = (unsigned long)psd.psd_cpu_time[CP_SYS]+
