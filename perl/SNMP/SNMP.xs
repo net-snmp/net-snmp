@@ -1914,7 +1914,7 @@ _bulkwalk_send_pdu(walk_context *context)
       ** we sent in this request.  Note that this is not a valid SNMP PDU,
       ** but that's because a response has not yet been received.
       */
-      return (netsnmp_pdu *)reqid;
+      return (netsnmp_pdu *)(intptr_t)reqid;
    }
 
    /* This code is for synchronous mode support.
