@@ -4,7 +4,7 @@
 void init_netsnmp_trapd_auth(void);
 int netsnmp_trapd_auth(netsnmp_pdu *pdu, netsnmp_transport *transport,
                        netsnmp_trapd_handler *handler);
-
+int netsnmp_trapd_check_auth(int authtypes);
 
 #define TRAP_AUTH_LOG (1 << VACM_VIEW_LOG)      /* displaying and logging */
 #define TRAP_AUTH_EXE (1 << VACM_VIEW_EXECUTE)  /* executing code or binaries */
