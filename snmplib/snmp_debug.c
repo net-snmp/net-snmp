@@ -423,11 +423,11 @@ debugmsg_oidrange(const char *token, const oid * theoid, size_t len,
         if (rc) {
             sprintf(tmpbuf, ".%lu--%lu", theoid[var_subid - 1],
                     range_ubound);
-            rc = snmp_strcat(&buf, &buf_len, &out_len, 1, (u_char *)tmpbuf);
+            rc = snmp_cstrcat(&buf, &buf_len, &out_len, 1, tmpbuf);
             if (rc) {
                 for (i = var_subid; i < len; i++) {
                     sprintf(tmpbuf, ".%lu", theoid[i]);
-                    if (!snmp_strcat(&buf, &buf_len, &out_len, 1, (u_char *)tmpbuf)) {
+                    if (!snmp_cstrcat(&buf, &buf_len, &out_len, 1, tmpbuf)) {
                         break;
                     }
                 }
