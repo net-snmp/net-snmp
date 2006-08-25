@@ -7,7 +7,7 @@ if [ "x$snmp_version" = "x" ]; then
   snmp_version="any"
 fi
 
-[ "x$SNMP_SMUX_SOCKET" = "x" ] && SNMP_SMUX_SOCKET=/dev/null
+[ "x$SNMP_SMUX_SOCKET" = "x" ] && SNMP_SMUX_SOCKET=${SNMP_TMPDIR}/smux_socket
 
 CONFIGAGENT [snmp] persistentdir $SNMP_TMP_PERSISTENTDIR
 CONFIGAGENT smuxsocket $SNMP_SMUX_SOCKET
