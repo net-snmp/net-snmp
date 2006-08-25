@@ -1074,7 +1074,7 @@ t        *     d) any other global handlers
         traph = netsnmp_auth_global_traphandlers;
         DEBUGMSGTL(("snmptrapd", "Running auth trap handlers\n"));
 	while (traph) {
-            if (!netsnmp_trapd_check_auth(traph->authtypes, pdu)) {
+            if (!netsnmp_trapd_check_auth(traph->authtypes)) {
                 traph = traph->nexth;
                 continue; /* we continue on and skip this one */
             }
@@ -1092,7 +1092,7 @@ t        *     d) any other global handlers
         traph = netsnmp_pre_global_traphandlers;
         DEBUGMSGTL(("snmptrapd", "Running pre-global trap handlers\n"));
 	while (traph) {
-            if (!netsnmp_trapd_check_auth(traph->authtypes, pdu)) {
+            if (!netsnmp_trapd_check_auth(traph->authtypes)) {
                 traph = traph->nexth;
                 continue; /* we continue on and skip this one */
             }
@@ -1110,7 +1110,7 @@ t        *     d) any other global handlers
         DEBUGMSGTL(("snmptrapd", "Running trap specific handlers\n"));
         traph = netsnmp_get_traphandler(trapOid, trapOidLen);
 	while (traph) {
-            if (!netsnmp_trapd_check_auth(traph->authtypes, pdu)) {
+            if (!netsnmp_trapd_check_auth(traph->authtypes)) {
                 traph = traph->nexth;
                 continue; /* we continue on and skip this one */
             }
@@ -1128,7 +1128,7 @@ t        *     d) any other global handlers
         DEBUGMSGTL(("snmptrapd", "Running global handlers\n"));
         traph = netsnmp_post_global_traphandlers;
 	while (traph) {
-            if (!netsnmp_trapd_check_auth(traph->authtypes, pdu)) {
+            if (!netsnmp_trapd_check_auth(traph->authtypes)) {
                 traph = traph->nexth;
                 continue; /* we continue on and skip this one */
             }
