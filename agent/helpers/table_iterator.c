@@ -171,7 +171,7 @@ netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
     netsnmp_mib_handler *me;
 
     if (!iinfo)
-        return;
+        return NULL;
 
     me =
         netsnmp_create_handler(TABLE_ITERATOR_NAME,
