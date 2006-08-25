@@ -1004,7 +1004,7 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     char           *ourcopy = strdup(pathname);
     char           *entry;
     char            buf[SNMP_MAXPATH];
-    char           *st;
+    char           *st = NULL;
 
 #if defined (WIN32) || defined (cygwin)
     /* convert backslash to forward slash */

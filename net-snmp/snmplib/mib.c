@@ -2526,7 +2526,7 @@ init_mib(void)
     const char     *prefix;
     char           *env_var, *entry;
     PrefixListPtr   pp = &mib_prefixes[0];
-    char           *st;
+    char           *st = NULL;
 
     if (Mib)
         return;

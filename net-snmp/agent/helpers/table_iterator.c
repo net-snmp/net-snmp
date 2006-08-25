@@ -403,7 +403,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_variable_list *old_indexes = NULL, *vb;
     netsnmp_table_registration_info *table_reg_info = NULL;
     int i;
-    netsnmp_data_list    *ldata;
+    netsnmp_data_list    *ldata = NULL;
     
     iinfo = (netsnmp_iterator_info *) handler->myvoid;
     if (!iinfo || !reginfo || !reqinfo)
