@@ -1,5 +1,8 @@
 #!/bin/sh
 
+[ "x$SNMP_SMUX_SOCKET" = "x" ] && SNMP_SMUX_SOCKET=${SNMP_TMPDIR}/smux_socket
+CONFIGAGENT smuxsocket $SNMP_SMUX_SOCKET
+
 # XXX: auto-switch to a supported protocol instead.
 if test "x$DEFAUTHTYPE" = "x"; then
     if grep '^#define USE_OPENSSL 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
