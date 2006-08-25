@@ -188,7 +188,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         /* reference to code */
         perl_call_sv(SvRV(pcallback), G_DISCARD);
     } else {
-        snmp_log(LOG_ERR, " tried to call a perl function but failed to understand its type: (ref = %x, svrok: %lu, SVTYPE: %lu)\n", pcallback, SvROK(pcallback), SvTYPE(pcallback));
+        snmp_log(LOG_ERR, " tried to call a perl function but failed to understand its type: (ref = %x, svrok: %lu, SVTYPE: %lu)\n", (uintptr_t)pcallback, SvROK(pcallback), SvTYPE(pcallback));
     }
 
 #ifdef DUMPIT
