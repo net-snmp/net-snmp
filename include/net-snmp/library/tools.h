@@ -176,6 +176,7 @@ extern          "C" {
                                            size_t * out_len,
                                            int allow_realloc,
                                            const char *decimal);
+#define snmp_cstrcat(b,l,o,a,s) snmp_strcat(b,l,o,a,(const u_char *)s)
     int             snmp_strcat(u_char ** buf, size_t * buf_len,
                                 size_t * out_len, int allow_realloc,
                                 const u_char * s);
