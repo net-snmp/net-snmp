@@ -136,7 +136,7 @@ void
 debug_register_tokens(char *tokens)
 {
     char           *newp, *cp;
-    char           *st;
+    char           *st = NULL;
     int             status;
 
     if (tokens == 0 || *tokens == 0)
