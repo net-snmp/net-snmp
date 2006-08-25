@@ -103,6 +103,7 @@ SOFTWARE.
 #include "snmptrapd_log.h"
 #include "snmptrapd_auth.h"
 #include "notification-log-mib/notification_log.h"
+#include "mibII/vacm_conf.h"
 
 /*
  * Include winservice.h to support Windows Service
