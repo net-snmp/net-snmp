@@ -191,7 +191,7 @@ handle_memory(netsnmp_mib_handler *handler,
                                      (u_char *)buf, strlen(buf));
             return SNMP_ERR_NOERROR;
         default:
-            snmp_log(LOG_ERR, "unknown object (%d) in handle_memory\n",
+            snmp_log(LOG_ERR, "unknown object (%lu) in handle_memory\n",
                      requests->requestvb->name[ memory_object_index ]);
 NOSUCH:
             netsnmp_set_request_error( reqinfo, requests, SNMP_NOSUCHOBJECT );
