@@ -439,8 +439,8 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
     if ((var->type != ASN_OCTET_STR) && 
         (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT))) {
         const char      str[] = "Wrong Type (should be OCTET STRING): ";
-        if (snmp_strcat
-            (buf, buf_len, out_len, allow_realloc, (const u_char *) str)) {
+        if (snmp_cstrcat
+            (buf, buf_len, out_len, allow_realloc, str)) {
             return sprint_realloc_by_type(buf, buf_len, out_len,
                                           allow_realloc, var, NULL, NULL,
                                           NULL);
@@ -457,8 +457,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
         u_char         *ecp;
 
         if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (const u_char *) "STRING: ")) {
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "STRING: ")) {
                 return 0;
             }
         }
@@ -508,25 +507,22 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                     } else {
                         sprintf(intbuf, "%lx", value);
                     }
-                    if (!snmp_strcat
-                        (buf, buf_len, out_len, allow_realloc,
-                         (u_char *) intbuf)) {
+                    if (!snmp_cstrcat
+                        (buf, buf_len, out_len, allow_realloc, intbuf)) {
                         return 0;
                     }
                     break;
                 case 'd':
                     sprintf(intbuf, "%ld", value);
-                    if (!snmp_strcat
-                        (buf, buf_len, out_len, allow_realloc,
-                         (u_char *) intbuf)) {
+                    if (!snmp_cstrcat
+                        (buf, buf_len, out_len, allow_realloc, intbuf)) {
                         return 0;
                     }
                     break;
                 case 'o':
                     sprintf(intbuf, "%lo", value);
-                    if (!snmp_strcat
-                        (buf, buf_len, out_len, allow_realloc,
-                         (u_char *) intbuf)) {
+                    if (!snmp_cstrcat
+                        (buf, buf_len, out_len, allow_realloc, intbuf)) {
                         return 0;
                     }
                     break;
@@ -545,14 +541,12 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                     break;
                 default:
                     *out_len = saved_out_len;
-                    if (snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                                    (const u_char *) "(Bad hint ignored: ")
-                        && snmp_strcat(buf, buf_len, out_len,
-                                       allow_realloc,
-                                       (const u_char *) saved_hint)
-                        && snmp_strcat(buf, buf_len, out_len,
-                                       allow_realloc,
-                                       (const u_char *) ") ")) {
+                    if (snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                     "(Bad hint ignored: ")
+                        && snmp_cstrcat(buf, buf_len, out_len,
+                                       allow_realloc, saved_hint)
+                        && snmp_cstrcat(buf, buf_len, out_len,
+                                       allow_realloc, ") ")) {
                         return sprint_realloc_octet_string(buf, buf_len,
                                                            out_len,
                                                            allow_realloc,
@@ -589,11 +583,9 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
         }
 
         if (units) {
-            return (snmp_strcat
-                    (buf, buf_len, out_len, allow_realloc,
-                     (const u_char *) " ")
-                    && snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                                   (const u_char *) units));
+            return (snmp_cstrcat
+                    (buf, buf_len, out_len, allow_realloc, " ")
+                    && snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
         }
         if ((*out_len >= *buf_len) &&
             !(allow_realloc && snmp_realloc(buf, buf_len))) {
@@ -628,21 +620,17 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
     }
 
     if (var->val_len == 0) {
-        return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                           (const u_char *) "\"\"");
+        return snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\"\"");
     }
 
     if (hex) {
         if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
-            if (!snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) "\"")) {
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\"")) {
                 return 0;
             }
         } else {
-            if (!snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) "Hex-STRING: ")) {
+            if (!snmp_cstrcat
+                (buf, buf_len, out_len, allow_realloc, "Hex-STRING: ")) {
                 return 0;
             }
         }
@@ -653,22 +641,19 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
         }
 
         if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
-            if (!snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) "\"")) {
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\"")) {
                 return 0;
             }
         }
     } else {
         if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (const u_char *) "STRING: ")) {
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                             "STRING: ")) {
                 return 0;
             }
         }
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc,
-             (const u_char *) "\"")) {
+        if (!snmp_cstrcat
+            (buf, buf_len, out_len, allow_realloc, "\"")) {
             return 0;
         }
         if (!sprint_realloc_asciistring
@@ -676,19 +661,14 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
              var->val_len)) {
             return 0;
         }
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc,
-             (const u_char *) "\"")) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\"")) {
             return 0;
         }
     }
 
     if (units) {
-        return (snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " ")
-                && snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                               (const u_char *) units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ")
+                && snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -726,8 +706,8 @@ sprint_realloc_float(u_char ** buf, size_t * buf_len,
 {
     if ((var->type != ASN_OPAQUE_FLOAT) &&
         (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT))) {
-        u_char          str[] = "Wrong Type (should be Float): ";
-        if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+        if (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, 
+                         "Wrong Type (should be Float): ")) {
             return sprint_realloc_by_type(buf, buf_len, out_len,
                                           allow_realloc, var, NULL, NULL,
                                           NULL);
@@ -737,9 +717,8 @@ sprint_realloc_float(u_char ** buf, size_t * buf_len,
     }
 
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc,
-             (const u_char *) "Opaque: Float: ")) {
+        if (!snmp_cstrcat
+            (buf, buf_len, out_len, allow_realloc, "Opaque: Float: ")) {
             return 0;
         }
     }
@@ -759,11 +738,8 @@ sprint_realloc_float(u_char ** buf, size_t * buf_len,
     *out_len += strlen((char *) (*buf + *out_len));
 
     if (units) {
-        return (snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " ")
-                && snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                               (const u_char *) units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ")
+                && snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -800,9 +776,9 @@ sprint_realloc_double(u_char ** buf, size_t * buf_len,
 {
     if ((var->type != ASN_OPAQUE_DOUBLE) && 
         (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT))) {
-        const char      str[] = "Wrong Type (should be Double): ";
-        if (snmp_strcat
-            (buf, buf_len, out_len, allow_realloc, (const u_char *) str)) {
+        if (snmp_cstrcat
+            (buf, buf_len, out_len, allow_realloc, 
+             "Wrong Type (should be Double): ")) {
             return sprint_realloc_by_type(buf, buf_len, out_len,
                                           allow_realloc, var, NULL, NULL,
                                           NULL);
@@ -812,9 +788,8 @@ sprint_realloc_double(u_char ** buf, size_t * buf_len,
     }
 
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc,
-             (const u_char *) "Opaque: Float: ")) {
+        if (!snmp_cstrcat
+            (buf, buf_len, out_len, allow_realloc, "Opaque: Float: ")) {
             return 0;
         }
     }
@@ -833,11 +808,9 @@ sprint_realloc_double(u_char ** buf, size_t * buf_len,
     *out_len += strlen((char *) (*buf + *out_len));
 
     if (units) {
-        return (snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " ")
-                && snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                               (const u_char *) units));
+        return (snmp_cstrcat
+                (buf, buf_len, out_len, allow_realloc, " ")
+                && snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -882,8 +855,8 @@ sprint_realloc_counter64(u_char ** buf, size_t * buf_len, size_t * out_len,
         && var->type != ASN_OPAQUE_I64 && var->type != ASN_OPAQUE_U64
 #endif
         ) && (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT))) {
-        u_char          str[] = "Wrong Type (should be Counter64): ";
-        if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+        if (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, 
+                        "Wrong Type (should be Counter64): ")) {
             return sprint_realloc_by_type(buf, buf_len, out_len,
                                           allow_realloc, var, NULL, NULL,
                                           NULL);
@@ -895,9 +868,8 @@ sprint_realloc_counter64(u_char ** buf, size_t * buf_len, size_t * out_len,
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
 #ifdef OPAQUE_SPECIAL_TYPES
         if (var->type != ASN_COUNTER64) {
-            if (!snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) "Opaque: ")) {
+            if (!snmp_cstrcat
+                (buf, buf_len, out_len, allow_realloc, "Opaque: ")) {
                 return 0;
             }
         }
@@ -905,25 +877,22 @@ sprint_realloc_counter64(u_char ** buf, size_t * buf_len, size_t * out_len,
 #ifdef OPAQUE_SPECIAL_TYPES
         switch (var->type) {
         case ASN_OPAQUE_U64:
-            if (!snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) "UInt64: ")) {
+            if (!snmp_cstrcat
+                (buf, buf_len, out_len, allow_realloc, "UInt64: ")) {
                 return 0;
             }
             break;
         case ASN_OPAQUE_I64:
-            if (!snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) "Int64: ")) {
+            if (!snmp_cstrcat
+                (buf, buf_len, out_len, allow_realloc, "Int64: ")) {
                 return 0;
             }
             break;
         case ASN_COUNTER64:
         case ASN_OPAQUE_COUNTER64:
 #endif
-            if (!snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) "Counter64: ")) {
+            if (!snmp_cstrcat
+                (buf, buf_len, out_len, allow_realloc, "Counter64: ")) {
                 return 0;
             }
 #ifdef OPAQUE_SPECIAL_TYPES
@@ -933,17 +902,13 @@ sprint_realloc_counter64(u_char ** buf, size_t * buf_len, size_t * out_len,
 #ifdef OPAQUE_SPECIAL_TYPES
     if (var->type == ASN_OPAQUE_I64) {
         printI64(a64buf, var->val.counter64);
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc,
-             (const u_char *) a64buf)) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, a64buf)) {
             return 0;
         }
     } else {
 #endif
         printU64(a64buf, var->val.counter64);
-        if (!snmp_strcat
-            (buf, buf_len, out_len, allow_realloc,
-             (const u_char *) a64buf)) {
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, a64buf)) {
             return 0;
         }
 #ifdef OPAQUE_SPECIAL_TYPES
@@ -951,11 +916,8 @@ sprint_realloc_counter64(u_char ** buf, size_t * buf_len, size_t * out_len,
 #endif
 
     if (units) {
-        return (snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " ")
-                && snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                               (const u_char *) units));
+        return (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ")
+                && snmp_cstrcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
 }
@@ -996,8 +958,8 @@ sprint_realloc_opaque(u_char ** buf, size_t * buf_len,
         && var->type != ASN_OPAQUE_FLOAT && var->type != ASN_OPAQUE_DOUBLE
 #endif                          /* OPAQUE_SPECIAL_TYPES */
         ) && (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT))) {
-        u_char          str[] = "Wrong Type (should be Opaque): ";
-        if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+        if (snmp_cstrcat(buf, buf_len, out_len, allow_realloc, 
+                         "Wrong Type (should be Opaque): ")) {
             return sprint_realloc_by_type(buf, buf_len, out_len,
                                           allow_realloc, var, NULL, NULL,
                                           NULL);
@@ -4528,14 +4490,14 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
             cp = tmpbuf;
         }
 
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tp->label) ||
-        !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)cp) ||
-        !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n")) {
+    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tp->label) ||
+        !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, cp) ||
+        !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n")) {
         return 0;
     }
     if (!print_tree_node(buf, buf_len, out_len, allow_realloc, tp, width))
         return 0;
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"::= {"))
+    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "::= {"))
         return 0;
     pos = 5;
     while (objidlen > 1) {
@@ -4550,12 +4512,12 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
                     sprintf(tmpbuf, " %lu", subtree->subid);
                 len = strlen(tmpbuf);
                 if (pos + len + 2 > width) {
-                    if (!snmp_strcat(buf, buf_len, out_len,
-                                     allow_realloc, (u_char *)"\n     "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len,
+                                     allow_realloc, "\n     "))
                         return 0;
                     pos = 5;
                 }
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tmpbuf))
+                if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tmpbuf))
                     return 0;
                 pos += len;
                 objid++;
@@ -4572,11 +4534,11 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
         sprintf(tmpbuf, " %lu", *objid);
         len = strlen(tmpbuf);
         if (pos + len + 2 > width) {
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,  (u_char *)"\n     "))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n     "))
                 return 0;
             pos = 5;
         }
-        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tmpbuf))
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tmpbuf))
             return 0;
         pos += len;
         objid++;
@@ -4585,11 +4547,11 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
     sprintf(tmpbuf, " %lu }", *objid);
     len = strlen(tmpbuf);
     if (pos + len + 2 > width) {
-        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n     "))
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n     "))
             return 0;
         pos = 5;
     }
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tmpbuf))
+    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tmpbuf))
         return 0;
     return 1;
 }
@@ -4605,8 +4567,8 @@ print_tree_node(u_char ** buf, size_t * buf_len,
 
     if (tp) {
         module_name(tp->modid, str);
-        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"  -- FROM\t") ||
-            !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)str))
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "  -- FROM\t") ||
+            !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str))
             return 0;
         pos = 16+strlen(str);
         for (i = 1, prevmod = tp->modid; i < tp->number_modules; i++) {
@@ -4614,30 +4576,30 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 module_name(tp->module_list[i], str);
                 len = strlen(str);
                 if (pos + len + 2 > width) {
-                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                                     (u_char *)",\n  --\t\t"))
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                     ",\n  --\t\t"))
                         return 0;
                     pos = 16;
                 }
                 else {
-                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)", "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, ", "))
                         return 0;
                     pos += 2;
                 }
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)str))
+                if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str))
                     return 0;
                 pos += len;
             }
             prevmod = tp->module_list[i];
         }
-        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n"))
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n"))
             return 0;
         if (tp->tc_index != -1) {
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (u_char *)"  -- TEXTUAL CONVENTION ") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (u_char *)get_tc_descriptor(tp->tc_index)) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n"))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                              "  -- TEXTUAL CONVENTION ") ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                              get_tc_descriptor(tp->tc_index)) ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n"))
                 return 0;
         }
         switch (tp->type) {
@@ -4701,14 +4663,14 @@ print_tree_node(u_char ** buf, size_t * buf_len,
         }
 #endif                          /* SNMP_TESTING_CODE */
         if (cp)
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (u_char *)"  SYNTAX\t") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)cp))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                             "  SYNTAX\t") ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, cp))
                 return 0;
         if (tp->ranges) {
             struct range_list *rp = tp->ranges;
             int             first = 1;
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)" ("))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " ("))
                 return 0;
             while (rp) {
                 if (rp->low == rp->high)
@@ -4716,58 +4678,58 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 else
                     sprintf(str, "%s%d..%d", (first ? "" : " | "),
                                               rp->low, rp->high);
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)str))
+                if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str))
                     return 0;
                 if (first)
                     first = 0;
                 rp = rp->next;
             }
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)") "))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, ") "))
                 return 0;
         }
         if (tp->enums) {
             struct enum_list *ep = tp->enums;
             int             first = 1;
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)" {"))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " {"))
                 return 0;
             pos = 16 + strlen(cp) + 2;
             while (ep) {
                 if (first)
                     first = 0;
                 else
-                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)", "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, ", "))
                         return 0;
                 snprintf(str, sizeof(str), "%s(%d)", ep->label, ep->value);
                 str[ sizeof(str)-1 ] = 0;
                 len = strlen(str);
                 if (pos + len + 2 > width) {
-                    if (!snmp_strcat(buf, buf_len, out_len,
-                                     allow_realloc, (u_char *)"\n\t\t  "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len,
+                                     allow_realloc, "\n\t\t  "))
                         return 0;
                     pos = 18;
                 }
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)str))
+                if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str))
                     return 0;
                 pos += len + 2;
                 ep = ep->next;
             }
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"} "))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "} "))
                 return 0;
         }
         if (cp)
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n"))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n"))
                 return 0;
         if (tp->hint)
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (u_char *)"  DISPLAY-HINT\t\"") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tp->hint) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\"\n"))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                             "  DISPLAY-HINT\t\"") ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tp->hint) ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\"\n"))
                 return 0;
         if (tp->units)
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (u_char *)"  UNITS\t\t\"") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tp->units) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\"\n"))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                             "  UNITS\t\t\"") ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tp->units) ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\"\n"))
                 return 0;
         switch (tp->access) {
         case MIB_ACCESS_READONLY:
@@ -4796,10 +4758,10 @@ print_tree_node(u_char ** buf, size_t * buf_len,
             cp = str;
         }
         if (cp)
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (u_char *)"  MAX-ACCESS\t") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)cp) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n"))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                             "  MAX-ACCESS\t") ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, cp) ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n"))
                 return 0;
         switch (tp->status) {
         case MIB_STATUS_MANDATORY:
@@ -4831,29 +4793,29 @@ print_tree_node(u_char ** buf, size_t * buf_len,
         }
 #endif                          /* SNMP_TESTING_CODE */
         if (cp)
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (u_char *)"  STATUS\t") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)cp) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n"))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                             "  STATUS\t") ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, cp) ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n"))
                 return 0;
         if (tp->augments)
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (u_char *)"  AUGMENTS\t{ ") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tp->augments) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)" }\n"))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                             "  AUGMENTS\t{ ") ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tp->augments) ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " }\n"))
                 return 0;
         if (tp->indexes) {
             struct index_list *ip = tp->indexes;
             int             first = 1;
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (u_char *)"  INDEX\t\t{ "))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                             "  INDEX\t\t{ "))
                 return 0;
             pos = 16 + 2;
             while (ip) {
                 if (first)
                     first = 0;
                 else
-                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)", "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, ", "))
                         return 0;
                 snprintf(str, sizeof(str), "%s%s",
                         ip->isimplied ? "IMPLIED " : "",
@@ -4861,16 +4823,16 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 str[ sizeof(str)-1 ] = 0;
                 len = strlen(str);
                 if (pos + len + 2 > width) {
-                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\n\t\t  "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n\t\t  "))
                         return 0;
                     pos = 16 + 2;
                 }
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)str))
+                if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str))
                     return 0;
                 pos += len + 2;
                 ip = ip->next;
             }
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)" }\n"))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " }\n"))
                 return 0;
         }
         if (tp->varbinds) {
@@ -4878,12 +4840,12 @@ print_tree_node(u_char ** buf, size_t * buf_len,
             int             first = 1;
 
             if (tp->type == TYPE_TRAPTYPE) {
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                    (u_char *)"  VARIABLES\t{ "))
+                if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                    "  VARIABLES\t{ "))
                     return 0;
             } else {
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                    (u_char *)"  OBJECTS\t{ "))
+                if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                    "  OBJECTS\t{ "))
                     return 0;
             }
             pos = 16 + 2;
@@ -4891,39 +4853,39 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 if (first)
                     first = 0;
                 else
-                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)", "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, ", "))
                         return 0;
                 snprintf(str, sizeof(str), "%s", vp->vblabel);
                 str[ sizeof(str)-1 ] = 0;
                 len = strlen(str);
                 if (pos + len + 2 > width) {
-                    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                                    (u_char *)"\n\t\t  "))
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                    "\n\t\t  "))
                         return 0;
                     pos = 16 + 2;
                 }
-                if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)str))
+                if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, str))
                     return 0;
                 pos += len + 2;
                 vp = vp->next;
             }
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)" }\n"))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " }\n"))
                 return 0;
         }
         if (tp->description)
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (u_char *)"  DESCRIPTION\t\"") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tp->description) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"\"\n"))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                              "  DESCRIPTION\t\"") ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tp->description) ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\"\n"))
                 return 0;
         if (tp->defaultValue)
-            if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             (u_char *)"  DEFVAL\t{ ") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)tp->defaultValue) ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)" }\n"))
+            if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                              "  DEFVAL\t{ ") ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tp->defaultValue) ||
+                !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, " }\n"))
                 return 0;
     } else
-        if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char *)"No description\n"))
+        if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "No description\n"))
             return 0;
     return 1;
 }
