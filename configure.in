@@ -1081,7 +1081,13 @@ PARTIALTARGETOS=`echo $target_os | sed 's/[-._].*//'`
 if test "x$PARTIALTARGETOS" = "xmingw32msvc"; then
 	CFLAGS="$CFLAGS -Dmingw32"
 fi
-CFLAGS="$CFLAGS -D$PARTIALTARGETOS=$PARTIALTARGETOS"
+# "-U" doesn't work on all compilers, so only add it for gcc
+# XXX: ideally replace by a configure check for a working "-U"
+if test "x$GCC" = "xyes"; then
+  CFLAGS="$CFLAGS -U$PARTIALTARGETOS -D$PARTIALTARGETOS=$PARTIALTARGETOS"
+else
+  CFLAGS="$CFLAGS -D$PARTIALTARGETOS=$PARTIALTARGETOS"
+fi
 changequote([, ])
 AC_MSG_CACHE_ADD(Building for:               $PARTIALTARGETOS)
 
