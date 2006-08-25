@@ -147,7 +147,7 @@ netsnmp_container_find_factory(const char *type_list)
 {
     netsnmp_factory   *f = NULL;
     char              *list, *entry;
-    char              *st;
+    char              *st = NULL;
 
     if (NULL==type_list)
         return NULL;
@@ -181,7 +181,7 @@ netsnmp_container_find_ct(const char *type_list)
 {
     container_type    *ct = NULL;
     char              *list, *entry;
-    char              *st;
+    char              *st = NULL;
 
     if (NULL==type_list)
         return NULL;
