@@ -4126,6 +4126,31 @@ AC_CONFIG_FILES([net-snmp-config:net-snmp-config.in],
 		[chmod +x net-snmp-config])
 
 AC_CONFIG_COMMANDS([default], echo timestamp > stamp-h)
+
+#
+# protect PACKAGE_* variables
+#
+AH_VERBATIM([PACKAGE_BUGREPORT],[/* Define to the address where bug reports for this package should be sent. */
+#ifndef PACKAGE_BUGREPORT
+#undef PACKAGE_BUGREPORT
+#endif])
+AH_VERBATIM([PACKAGE_NAME],[/* Define to the full name of this package. */
+#ifndef PACKAGE_NAME
+#undef PACKAGE_NAME
+#endif])
+AH_VERBATIM([PACKAGE_STRING],[/* Define to the full name and version of this package. */
+#ifndef PACKAGE_STRING
+#undef PACKAGE_STRING
+#endif])
+AH_VERBATIM([PACKAGE_TARNAME],[/* Define to the one symbol short name of this package. */
+#ifndef PACKAGE_TARNAME
+#undef PACKAGE_TARNAME
+#endif])
+AH_VERBATIM([PACKAGE_VERSION],[/* Define to the version of this package. */
+#ifndef PACKAGE_VERSION
+#undef PACKAGE_VERSION
+#endif])
+
 AC_OUTPUT
 
 AC_MSG_CACHE_DISPLAY()
