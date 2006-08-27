@@ -41,6 +41,7 @@ void init_cpu_linux( void ) {
         if ( sscanf( buf, "processor : %d", &i ) == 1)  {
             n++;
             cpu = netsnmp_cpu_get_byIdx( i, 1 );
+            cpu->status = 2;  /* running */
             sprintf( cpu->name, "cpu%d", i );
 #if defined(__s390__) || defined(__s390x__)
             strcat( cpu->descr, "An S/390 CPU" );
