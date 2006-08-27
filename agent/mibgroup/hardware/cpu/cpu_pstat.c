@@ -68,7 +68,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     int                   i;
     struct pst_dynamic    psd;
     struct pst_vminfo     psv;
-    netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
+    netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 0 );
 
     pstat_getdynamic(&psd, sizeof(psd), 1, 0);
     /* XXX - Compare cpu_num against psd.psd_proc_cnt */
@@ -94,7 +94,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 
 
     for ( i = 0; i < psd.psd_proc_cnt; i++ ) {
-        cpu = netsnmp_cpu_get_byIdx( i, 1 );
+        cpu = netsnmp_cpu_get_byIdx( i, 0 );
         cpu->user_ticks = (unsigned long)psd.psd_mp_cpu_time[i][CP_USER];
         cpu->nice_ticks = (unsigned long)psd.psd_mp_cpu_time[i][CP_NICE];
         cpu->sys2_ticks = (unsigned long)psd.psd_mp_cpu_time[i][CP_SYS]+
