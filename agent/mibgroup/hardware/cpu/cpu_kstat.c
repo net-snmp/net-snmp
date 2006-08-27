@@ -16,6 +16,7 @@
 
 extern kstat_ctl_t  *kstat_fd;
 extern int           cpu_num;
+int _cpu_status(char *state);
 
     /*
      * Initialise the list of CPUs on the system
@@ -66,6 +67,7 @@ void init_cpu_nlist( void ) {
             sprintf( cpu->name,  "cpu%d", i );
             sprintf( cpu->descr, "CPU %d Sun %d MHz %s with %s FPU %s",
                                  i, clock, ctype, ftype, state  );
+            cpu->status = _cpu_status(state); /* XXX - or in 'n_c_a_load' ? */
         }
     }
     cpu_num = i;
@@ -132,4 +134,25 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
         }
     }
     return 0;
+}
+
+int
+_cpu_status( char *state)
+{
+    /*
+     * hrDeviceStatus OBJECT-TYPE
+     * SYNTAX     INTEGER {
+     * unknown(1), running(2), warning(3), testing(4), down(5)
+     * }
+     */
+    if (strcmp(state,"on-line")==0)
+        { return 2; /* running */ } 
+    else if (strcmp(state,"off-line")==0)
+        { return 5; /* down */ }
+    else if (strcmp(state,"missing")==0)
+        { return 3; /* warning, went missing */ }
+    else if (strcmp(state,"testing")==0)
+        { return 4; /* somebody must be testing code somewhere */ }
+    else
+        { return 1; /* unknown */ }
 }

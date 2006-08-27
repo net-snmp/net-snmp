@@ -22,6 +22,7 @@ struct netsnmp_cpu_info_s {
                  /* For hrDeviceTable */
      char name[  SNMP_MAXBUF ];
      char descr[ SNMP_MAXBUF ];
+     int  status;
 
                  /* For UCD cpu stats */
      long user_ticks;
