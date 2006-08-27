@@ -13,6 +13,7 @@
 
 #include <libperfstat.h>
 
+void _cpu_copy_stats( netsnmp_cpu_info *cpu );
 
     /*
      * Initialise the list of CPUs on the system
@@ -48,7 +49,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     perfstat_cpu_total_t    cs;
     perfstat_cpu_t         *cs2;
     perfstat_memory_total_t ms;
-    netsnmp_cpu_info       *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
+    netsnmp_cpu_info       *cpu = netsnmp_cpu_get_byIdx( -1, 0 );
 
     if (perfstat_cpu_total((perfstat_id_t *)NULL, &cs,
                      sizeof(perfstat_cpu_total_t), 1) > 0) {
@@ -85,7 +86,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     strcpy( name.name, "");
     if (perfstat_cpu(&name, cs2, sizeof(perfstat_cpu_t), n) > 0) {
         for ( i = 0; i < n; i++ ) {
-            cpu = netsnmp_cpu_get_byIdx( i, 1 );
+            cpu = netsnmp_cpu_get_byIdx( i, 0 );
             cpu->user_ticks = (unsigned long)cs2[i].user;
             cpu->sys_ticks  = (unsigned long)cs2[i].sys;
             cpu->wait_ticks = (unsigned long)cs2[i].wait;
@@ -95,6 +96,8 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
             cpu->nCtxSwitches = (unsigned long)cs2[i].pswitch;
             /* Interrupt stats only apply overall, not per-CPU */
         }
+    } else {
+        _cpu_copy_stats( cpu );
     }
     free(cs2);
 

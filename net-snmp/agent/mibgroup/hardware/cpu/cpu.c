@@ -197,3 +197,31 @@ _cpu_update_stats( unsigned int reg, void* magic ) {
                            cpu->sirq_ticks;
     }
 }
+
+void _cpu_copy_stats( netsnmp_cpu_info *cpu )
+{
+    netsnmp_cpu_info *cpu2;
+
+        /*
+         * Copy "overall" statistics to the 'cpu0' entry
+         *  on single CPU systems where this isn't done automatically
+         */
+    cpu2 = netsnmp_cpu_get_byIdx( 0, 1 );
+    if (!cpu || !cpu2) return;
+    cpu2->user_ticks = cpu->user_ticks;
+    cpu2->nice_ticks = cpu->nice_ticks;
+    cpu2->sys_ticks  = cpu->sys_ticks;
+    cpu2->sys2_ticks = cpu->sys2_ticks;
+    cpu2->idle_ticks = cpu->idle_ticks;
+    cpu2->wait_ticks = cpu->wait_ticks;
+    cpu2->kern_ticks = cpu->kern_ticks;
+    cpu2->intrpt_ticks = cpu->intrpt_ticks;
+    cpu2->sirq_ticks = cpu->sirq_ticks;
+
+    cpu2->nInterrupts  = cpu->nInterrupts;
+    cpu2->nCtxSwitches = cpu->nCtxSwitches;
+    cpu2->swapIn     = cpu->swapIn;
+    cpu2->swapOut    = cpu->swapOut;
+    cpu2->pageIn     = cpu->pageIn;
+    cpu2->pageOut    = cpu->pageOut;
+}

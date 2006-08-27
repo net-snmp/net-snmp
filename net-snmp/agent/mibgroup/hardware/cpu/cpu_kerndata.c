@@ -27,6 +27,8 @@ void init_cpu_nlist( void ) {
     strcpy(cpu->name, "Overall CPU statistics");
 
     cpu_num = tmp_ctl( TMP_NENG, 0 );
+    if ( cpu_num <= 0 )
+         cpu_num = 1;  /* Single CPU system */
     for ( i=0; i < cpu_num; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 1 );
         sprintf( cpu->name, "cpu%d", i );
