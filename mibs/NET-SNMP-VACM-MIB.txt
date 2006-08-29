@@ -11,6 +11,10 @@ IMPORTS
     netSnmpObjects, netSnmpGroups
 	FROM NET-SNMP-MIB
 
+    vacmGroupName, vacmAccessContextPrefix, vacmAccessSecurityModel,
+    vacmAccessSecurityLevel
+        FROM SNMP-VIEW-BASED-ACM-MIB
+
     OBJECT-TYPE, MODULE-IDENTITY
         FROM SNMPv2-SMI
 
@@ -32,6 +36,9 @@ netSnmpVacmMIB MODULE-IDENTITY
           email:    net-snmp-coders@lists.sourceforge.net"
     DESCRIPTION
          "Defines Net-SNMP extensions to the standard VACM view table."
+    REVISION     "200608270000Z"
+    DESCRIPTION
+        "First draft"
     ::= { netSnmpObjects 9 }
 
 
