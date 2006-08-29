@@ -22,6 +22,7 @@
 #include <vm/vm_extern.h>
 #endif
 
+void _cpu_copy_stats( netsnmp_cpu_info *cpu );
 
     /*
      * Initialise the list of CPUs on the system
@@ -37,10 +38,13 @@ void init_cpu_sysctl( void ) {
 
     i = sizeof(n);
     sysctl(ncpu_mib, 2, &n, &i, NULL, 0);
+    if ( n <= 0 )
+        n = 1;   /* Single CPU system */
     i = sizeof(descr);
     sysctl(model_mib, 2, descr, &i, NULL, 0);
     for ( i = 0; i < n; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 1 );
+        cpu->status = 2;  /* running */
         sprintf( cpu->name,  "cpu%d", i );
         sprintf( cpu->descr, "%s", descr );
     }
@@ -131,7 +135,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     NETSNMP_VM_STATS_TYPE mem_stats;
     int            mem_mib[] = { CTL_VM, NETSNMP_VM_STATS };
     int            mem_size  = sizeof(NETSNMP_VM_STATS_TYPE);
-    netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
+    netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 0 );
 
     sysctl(cpu_mib, 2,  cpu_stats, &cpu_size, NULL, 0);
     cpu->user_ticks = (unsigned long)cpu_stats[CP_USER];
@@ -163,9 +167,12 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     sysctl(mcpu_mib, 2, mcpu_stats,
            cpu_num*sizeof(NETSNMP_KERN_MCPU_TYPE), NULL, 0);
     for ( i = 0; i < cpu_num; i++ ) {
-        cpu = netsnmp_cpu_get_byIdx( i, 1 );
+        cpu = netsnmp_cpu_get_byIdx( i, 0 );
         /* XXX - per-CPU statistics - mcpu_mib[i].??? */
     }
+#else
+        /* Copy "overall" figures to cpu0 entry */
+    _cpu_copy_stats( cpu );
 #endif
 
     return 0;
