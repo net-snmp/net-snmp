@@ -909,11 +909,21 @@ netsnmp_check_getnext_reply(netsnmp_request_info *request,
             /*
              * the new result must be better than the old 
              */
+#ifdef ONLY_WORKS_WITH_ONE_VARBIND
             if (!*outvar)
                 *outvar = snmp_clone_varbind(newvar);
 	    else
+                /* 
+                 * TODO: walk the full varbind list, setting
+                 *       *all* the values - not just the first.
+                 */
                 snmp_set_var_typed_value(*outvar, newvar->type,
 				newvar->val.string, newvar->val_len);
+#else  /* Interim replacement approach - less efficient, but it works! */
+            if (*outvar)
+                snmp_free_varbind(*outvar);
+            *outvar = snmp_clone_varbind(newvar);
+#endif
             snmp_set_var_objid(*outvar, myname, myname_len);
 
             return 1;
