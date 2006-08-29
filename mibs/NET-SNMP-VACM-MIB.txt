@@ -116,7 +116,7 @@ nsVacmViewName OBJECT-TYPE
     ::= { nsVacmAccessEntry 3 }
 
 
-vacmAccessStorageType OBJECT-TYPE
+nsVacmStorageType OBJECT-TYPE
     SYNTAX       StorageType
     MAX-ACCESS   read-create
     STATUS       current
@@ -132,7 +132,7 @@ vacmAccessStorageType OBJECT-TYPE
     DEFVAL      { nonVolatile }
     ::= { nsVacmAccessEntry 4 }
 
-nsVacmAccessStatus OBJECT-TYPE
+nsVacmStatus OBJECT-TYPE
     SYNTAX       RowStatus
     MAX-ACCESS   read-create
     STATUS       current
