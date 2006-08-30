@@ -99,6 +99,7 @@ vacm_save(const char *token, const char *type)
     struct vacm_viewEntry *vptr;
     struct vacm_accessEntry *aptr;
     struct vacm_groupEntry *gptr;
+    int i;
 
     for (vptr = viewList; vptr != NULL; vptr = vptr->next) {
         if (vptr->viewStorageType == ST_NONVOLATILE)
@@ -106,8 +107,18 @@ vacm_save(const char *token, const char *type)
     }
 
     for (aptr = accessList; aptr != NULL; aptr = aptr->next) {
-        if (aptr->storageType == ST_NONVOLATILE)
-            vacm_save_access(aptr, token, type);
+        if (aptr->storageType == ST_NONVOLATILE) {
+            /* Store the standard views (if set) */
+            if ( aptr->views[VACM_VIEW_READ  ][0] ||
+                 aptr->views[VACM_VIEW_WRITE ][0] ||
+                 aptr->views[VACM_VIEW_NOTIFY][0] )
+                vacm_save_access(aptr, token, type);
+            /* Store any other (valid) access views */
+            for ( i=VACM_VIEW_NOTIFY+1; i<VACM_MAX_VIEWS; i++ ) {
+                if ( aptr->views[i][0] )
+                    vacm_save_auth_access(aptr, token, type, i);
+            }
+        }
     }
 
     for (gptr = groupList; gptr != NULL; gptr = gptr->next) {
@@ -229,13 +240,47 @@ vacm_save_access(struct vacm_accessEntry *access_entry, const char *token,
 }
 
 void
-vacm_parse_config_access(const char *token, char *line)
+vacm_save_auth_access(struct vacm_accessEntry *access_entry,
+                      const char *token, const char *type, int authtype)
+{
+    char            line[4096];
+    char           *cptr;
+
+    memset(line, 0, sizeof(line));
+    snprintf(line, sizeof(line), "%s%s %d %d %d %d %d ",
+            token, "AuthAccess", access_entry->status,
+            access_entry->storageType, access_entry->securityModel,
+            access_entry->securityLevel, access_entry->contextMatch);
+    line[ sizeof(line)-1 ] = 0;
+    cptr = &line[strlen(line)]; /* the NULL */
+    cptr =
+        read_config_save_octet_string(cptr,
+                                      (u_char *) access_entry->groupName + 1,
+                                      access_entry->groupName[0] + 1);
+    *cptr++ = ' ';
+    cptr =
+        read_config_save_octet_string(cptr,
+                                      (u_char *) access_entry->contextPrefix + 1,
+                                      access_entry->contextPrefix[0] + 1);
+
+    snprintf(cptr, sizeof(line)-(cptr-line), " %d ", authtype);
+    while ( *cptr )
+        cptr++;
+
+    *cptr++ = ' ';
+    cptr = read_config_save_octet_string(cptr,
+                               (u_char *)access_entry->views[authtype],
+                                  strlen(access_entry->views[authtype]) + 1);
+
+    read_config_store(type, line);
+}
+
+char *
+_vacm_parse_config_access_common(struct vacm_accessEntry **aptr, char *line)
 {
     struct vacm_accessEntry access;
-    struct vacm_accessEntry *aptr;
-    char           *contextPrefix = (char *) &access.contextPrefix;
-    char           *groupName = (char *) &access.groupName;
-    char           *readView, *writeView, *notifyView;
+    char           *cPrefix = (char *) &access.contextPrefix;
+    char           *gName   = (char *) &access.groupName;
     size_t          len;
 
     access.status = atoi(line);
@@ -248,25 +293,42 @@ vacm_parse_config_access(const char *token, char *line)
     line = skip_token(line);
     access.contextMatch = atoi(line);
     line = skip_token(line);
-    len = sizeof(access.groupName);
-    line =
-        read_config_read_octet_string(line, (u_char **) & groupName, &len);
-    len = sizeof(access.contextPrefix);
-    line =
-        read_config_read_octet_string(line, (u_char **) & contextPrefix,
-                                      &len);
+    len  = sizeof(access.groupName);
+    line = read_config_read_octet_string(line, (u_char **) &gName,   &len);
+    len  = sizeof(access.contextPrefix);
+    line = read_config_read_octet_string(line, (u_char **) &cPrefix, &len);
 
-    aptr = vacm_createAccessEntry(access.groupName, access.contextPrefix,
+    *aptr = vacm_getAccessEntry(access.groupName,
+                                  access.contextPrefix,
                                   access.securityModel,
                                   access.securityLevel);
-    if (!aptr)
+    if (!*aptr)
+        *aptr = vacm_createAccessEntry(access.groupName,
+                                  access.contextPrefix,
+                                  access.securityModel,
+                                  access.securityLevel);
+    if (!*aptr)
+        return NULL;
+
+    (*aptr)->status = access.status;
+    (*aptr)->storageType   = access.storageType;
+    (*aptr)->securityModel = access.securityModel;
+    (*aptr)->securityLevel = access.securityLevel;
+    (*aptr)->contextMatch  = access.contextMatch;
+    return line;
+}
+
+void
+vacm_parse_config_access(const char *token, char *line)
+{
+    struct vacm_accessEntry *aptr;
+    char           *readView, *writeView, *notifyView;
+    size_t          len;
+
+    line = _vacm_parse_config_access_common(&aptr, line);
+    if (!line)
         return;
 
-    aptr->status = access.status;
-    aptr->storageType = access.storageType;
-    aptr->securityModel = access.securityModel;
-    aptr->securityLevel = access.securityLevel;
-    aptr->contextMatch = access.contextMatch;
     readView = (char *) aptr->views[VACM_VIEW_READ];
     len = sizeof(aptr->views[VACM_VIEW_READ]);
     line =
@@ -280,6 +342,26 @@ vacm_parse_config_access(const char *token, char *line)
     line =
         read_config_read_octet_string(line, (u_char **) & notifyView,
                                       &len);
+}
+
+void
+vacm_parse_config_auth_access(const char *token, char *line)
+{
+    struct vacm_accessEntry *aptr;
+    int             authtype;
+    char           *view;
+    size_t          len;
+
+    line = _vacm_parse_config_access_common(&aptr, line);
+    if (!line)
+        return;
+
+    authtype = atoi(line);
+    line = skip_token(line);
+
+    view = (char *) aptr->views[authtype];
+    len  = sizeof(aptr->views[authtype]);
+    line = read_config_read_octet_string(line, (u_char **) & view, &len);
 }
 
 /*
