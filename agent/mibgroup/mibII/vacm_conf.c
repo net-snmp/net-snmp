@@ -94,6 +94,8 @@ init_vacm_config_tokens(void) {
                                   NULL, NULL);
     snmpd_register_config_handler("vacmAccess", vacm_parse_config_access,
                                   NULL, NULL);
+    snmpd_register_config_handler("vacmAuthAccess", vacm_parse_config_auth_access,
+                                  NULL, NULL);
 
     /* easy community auth handler */
     snmpd_register_config_handler("authcommunity",
