@@ -533,11 +533,13 @@ int flag;
             break;
 #ifdef OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_FLOAT:
-         sprintf(buf,"%f", var->val.floatVal);
+	  if (var->val.floatVal)
+	    sprintf(buf,"%f", *var->val.floatVal);
          break;
          
         case ASN_OPAQUE_DOUBLE:
-         sprintf(buf,"%f", var->val.doubleVal);
+	  if (var->val.doubleVal)
+	    sprintf(buf,"%f", *var->val.doubleVal);
          break;
 #endif
          
