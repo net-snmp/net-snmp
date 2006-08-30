@@ -212,12 +212,16 @@ extern          "C" {
                                    const char *token, const char *type);
     void            vacm_save_access(struct vacm_accessEntry *access_entry,
                                      const char *token, const char *type);
+    void            vacm_save_auth_access(struct vacm_accessEntry *access_entry,
+                                     const char *token, const char *type, int authtype);
     void            vacm_save_group(struct vacm_groupEntry *group_entry,
                                     const char *token, const char *type);
 
     void            vacm_parse_config_view(const char *token, char *line);
     void            vacm_parse_config_group(const char *token, char *line);
     void            vacm_parse_config_access(const char *token,
+                                             char *line);
+    void            vacm_parse_config_auth_access(const char *token,
                                              char *line);
 
     int             store_vacm(int majorID, int minorID, void *serverarg,
