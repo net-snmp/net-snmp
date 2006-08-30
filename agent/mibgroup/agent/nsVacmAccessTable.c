@@ -136,7 +136,9 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
     netsnmp_variable_list      *idx;
     struct vacm_accessEntry    *entry;
     char atype[20];
-    int  viewIdx;
+    int  viewIdx, ret;
+    char *gName, *cPrefix;
+    int  model, level;
 
     switch (reqinfo->mode) {
         /*
@@ -180,6 +182,117 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
         }
         break;
 
+        /*
+         * Write-support
+         */
+    case MODE_SET_RESERVE1:
+        for (request = requests; request; request = request->next) {
+            entry = (struct vacm_accessEntry *)
+                netsnmp_extract_iterator_context(request);
+            table_info = netsnmp_extract_table_info(request);
+            ret = SNMP_ERR_NOERROR;
+
+            /* XXX - check authtype token - ?? WHERE ?? */
+            switch (table_info->colnum) {
+            case COLUMN_NSVACMCONTEXTMATCH:
+                ret = netsnmp_check_vb_int_range(request->requestvb, 1, 2);
+                break;
+            case COLUMN_NSVACMVIEWNAME:
+                ret = netsnmp_check_vb_type_and_max_size(request->requestvb,
+                                                         ASN_OCTET_STR,
+                                                         VACM_MAX_STRING);
+                break;
+            case COLUMN_VACMACCESSSTORAGETYPE:
+                ret = netsnmp_check_vb_storagetype(request->requestvb,
+                          (/*entry ? entry->storageType :*/ SNMP_STORAGE_NONE));
+                break;
+            case COLUMN_NSVACMACCESSSTATUS:
+                /*
+                 * XXX - Too simplistic
+                 * 
+                 * Because we're inserting a table into an existing table,
+                 *   it's quite possible for the vacmAccessTable entry to
+                 *   exist, even if this is a "new" nsVacmAccessEntry.
+                 * 
+                 * This will need more careful checking before we go live.
+                 */
+                ret = netsnmp_check_vb_rowstatus(request->requestvb,
+                          (entry ? entry->status : RS_NONEXISTENT));
+                break;
+            }
+            if ( ret != SNMP_ERR_NOERROR ) {
+                netsnmp_set_request_error(reqinfo, request, ret);
+                return SNMP_ERR_NOERROR;
+            }
+        }
+        break;
+
+    case MODE_SET_RESERVE2:
+        for (request = requests; request; request = request->next) {
+            entry = (struct vacm_accessEntry *)
+                netsnmp_extract_iterator_context(request);
+            table_info = netsnmp_extract_table_info(request);
+
+            switch (table_info->colnum) {
+            case COLUMN_NSVACMACCESSSTATUS:
+                switch (*request->requestvb->val.integer) {
+                case RS_CREATEANDGO:
+                case RS_CREATEANDWAIT:
+                    if (!entry) {
+                         idx = table_info->indexes; gName = idx->val.string;
+                         idx = idx->next_variable;  cPrefix = idx->val.string;
+                         idx = idx->next_variable;  model = *idx->val.integer;
+                         idx = idx->next_variable;  level = *idx->val.integer;
+                         entry = vacm_createAccessEntry( gName, cPrefix, model, level );
+                         entry->storageType = ST_NONVOLATILE;
+                         netsnmp_insert_iterator_context(request, (void*)entry);
+                    }
+                }
+            }
+        }
+        break;
+
+    case MODE_SET_FREE:
+    case MODE_SET_UNDO:
+        /* XXX - TODO */
+        break;
+
+    case MODE_SET_ACTION:
+        /* ??? Empty ??? */
+        break;
+
+    case MODE_SET_COMMIT:
+        for (request = requests; request; request = request->next) {
+            entry = (struct vacm_accessEntry *)
+                netsnmp_extract_iterator_context(request);
+            table_info = netsnmp_extract_table_info(request);
+            if ( !entry )
+                continue;  /* Shouldn't happen */
+
+            switch (table_info->colnum) {
+            case COLUMN_NSVACMCONTEXTMATCH:
+                entry->contextMatch = *request->requestvb->val.integer;
+                break;
+            case COLUMN_NSVACMVIEWNAME:
+                /* Extract the authType token from the list of indexes */
+                idx = table_info->indexes->next_variable->next_variable->next_variable->next_variable;
+                memset(atype, 0, sizeof(atype));
+                strncpy(atype, idx->val.string, idx->val_len);
+                viewIdx = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, atype);
+
+                memset( entry->views[viewIdx], 0, VACMSTRINGLEN );
+                memcpy( entry->views[viewIdx], request->requestvb->val.string,
+                                               request->requestvb->val_len);
+                break;
+            case COLUMN_VACMACCESSSTORAGETYPE:
+                entry->storageType = *request->requestvb->val.integer;
+                break;
+            case COLUMN_NSVACMACCESSSTATUS:
+                entry->status = *request->requestvb->val.integer;
+                break;
+            }
+        }
+        break;
     }
     return SNMP_ERR_NOERROR;
 }
