@@ -286,6 +286,7 @@ generate_kul(const oid * hashtype, u_int hashtype_len,
     int             rval = SNMPERR_SUCCESS;
     u_int           nbytes = 0;
     size_t          properlength;
+    int             iproperlength;
 
     u_char          buf[SNMP_MAXBUF];
 #ifdef SNMP_TESTING_CODE
@@ -303,10 +304,11 @@ generate_kul(const oid * hashtype, u_int hashtype_len,
     }
 
 
-    properlength = sc_get_properlength(hashtype, hashtype_len);
-    if (properlength == SNMPERR_GENERR)
+    iproperlength = sc_get_properlength(hashtype, hashtype_len);
+    if (iproperlength == SNMPERR_GENERR)
         QUITFUN(SNMPERR_GENERR, generate_kul_quit);
 
+    properlength = (size_t) iproperlength;
 
     if (((int) *kul_len < properlength) || ((int) ku_len < properlength)) {
         QUITFUN(SNMPERR_GENERR, generate_kul_quit);
