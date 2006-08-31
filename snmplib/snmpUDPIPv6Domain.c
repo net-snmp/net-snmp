@@ -67,6 +67,12 @@ const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #include <dmalloc.h>
 #endif
 
+#if STRUCT_SOCKADDR_STORAGE_HAS_SS_FAMILY
+#define SS_FAMILY ss_family
+#elif STRUCT_SOCKADDR_STORAGE_HAS___SS_FAMILY
+#define SS_FAMILY __ss_family
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
@@ -873,10 +879,10 @@ masked_address_are_equal(int af, struct sockaddr_storage *from,
 
     switch (af) {
     case PF_INET:
-        if (mask->ss_family != PF_INET || network->ss_family != PF_INET) {
+        if (mask->SS_FAMILY != PF_INET || network->SS_FAMILY != PF_INET) {
             return -1;
         }
-        ss.ss_family = PF_INET;
+        ss.SS_FAMILY = PF_INET;
         inet_addr_and(PF_INET,
                       &((struct sockaddr_in *) from)->sin_addr,
                       &((struct sockaddr_in *) mask)->sin_addr,
@@ -889,10 +895,10 @@ masked_address_are_equal(int af, struct sockaddr_storage *from,
         }
         break;
     case PF_INET6:
-        if (mask->ss_family != PF_INET6 || network->ss_family != PF_INET6) {
+        if (mask->SS_FAMILY != PF_INET6 || network->SS_FAMILY != PF_INET6) {
             return -1;
         }
-        ss.ss_family = PF_INET6;
+        ss.SS_FAMILY = PF_INET6;
         inet_addr_and(PF_INET6,
                       &((struct sockaddr_in6 *) from)->sin6_addr,
                       &((struct sockaddr_in6 *) mask)->sin6_addr,
