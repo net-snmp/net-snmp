@@ -518,6 +518,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
 {
     int             rval = SNMPERR_SUCCESS;
     size_t          properlength = 0;
+    int             iproperlength = 0;
     u_int           nbytes = 0;
 
     u_char         *bufp, tmp_buf[SNMP_MAXBUF];
@@ -539,10 +540,11 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
     /*
      * Setup for the transform type.
      */
-    properlength = sc_get_properlength(hashtype, hashtype_len);
-    if (properlength == SNMPERR_GENERR)
+    iproperlength = sc_get_properlength(hashtype, hashtype_len);
+    if (iproperlength == SNMPERR_GENERR)
         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
 
+    properlength = (size_t) iproperlength;
 
     if (((oldkey_len * 2) != kcstring_len) || (*newkey_len < oldkey_len)) {
         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
