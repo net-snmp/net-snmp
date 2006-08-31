@@ -3285,6 +3285,30 @@ AC_CHECK_STRUCT_FOR([
 ], sockaddr, sa_union.sa_generic.sa_family2, no)
 
 AC_CHECK_STRUCT_FOR([
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+], sockaddr_storage, ss_family, no)
+
+AC_CHECK_STRUCT_FOR([
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+], sockaddr_storage, __ss_family, no)
+
+AC_CHECK_STRUCT_FOR([
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif

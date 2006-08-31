@@ -1110,6 +1110,12 @@
 /* Does struct sockaddr have a sa_family2 field? */
 #undef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2
 
+/* Does struct sockaddr_storage have a ss_family field? */
+#undef STRUCT_SOCKADDR_HAS_SS_FAMILY
+
+/* Does struct sockaddr_storage have a __ss_family field? */
+#undef STRUCT_SOCKADDR_HAS___SS_FAMILY
+
 /* Does struct in6_addr have a s6_un.sa6_ladd field? */
 #undef STRUCT_IN6_ADDR_HAS_S6_UN_SA6_LADDR
 
