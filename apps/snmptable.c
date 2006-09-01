@@ -443,15 +443,17 @@ get_field_names(void)
         fprintf(stderr, "Was that a table? %s\n", table_name);
         exit(1);
     }
-    *name_p = 0;
-    memmove(name, root, rootlen * sizeof(oid));
-    name_length = rootlen + 1;
-    name_p = strrchr(buf, '.');
-    if (name_p == NULL) {
-        name_p = strrchr(buf, ':');
-    }
-    if (name_p != NULL) {
+    if (name_p) {
         *name_p = 0;
+        memmove(name, root, rootlen * sizeof(oid));
+        name_length = rootlen + 1;
+        name_p = strrchr(buf, '.');
+        if (name_p == NULL) {
+            name_p = strrchr(buf, ':');
+        }
+        if (name_p != NULL) {
+            *name_p = 0;
+        }
     }
     if (brief && fields > 1) {
         char           *f1, *f2;
