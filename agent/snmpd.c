@@ -419,7 +419,7 @@ SnmpDaemonMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "aAc:CdD::fhHI:l:L:m:M:n:p:P:qrsS:UvV-:";
+    char            options[128] = "aAc:CdD::fhHI:l:L:m:M:n:p:P:qrsS:UvV-:Y:";
     int             arg, i, ret;
     int             dont_fork = 0, do_help = 0;
     int             log_set = 0;
@@ -789,6 +789,10 @@ main(int argc, char *argv[])
             usage(argv[0]);
             exit(1);
 #endif
+            break;
+
+        case 'Y':
+            netsnmp_config_remember(optarg);
             break;
 
         default:
