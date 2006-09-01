@@ -11,7 +11,7 @@
 
 typedef struct netsnmp_oid_s {
     oid                 *name;
-    unsigned int         len;
+    size_t               len;
     oid                  namebuf[ MAX_OID_LEN ];
 } netsnmp_oid;
 

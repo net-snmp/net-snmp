@@ -3,8 +3,13 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.3.2*
 
+    snmptrapd:
+      - disabling AgentX broke snmptrapd auth
+
     Perl:
-     - gettable() was fairly broken in the 5.3.1 release.
+      - gettable() was fairly broken in the 5.3.1 release.
+      - OID handling was fully broken on various 64bit platforms
+
 
 *5.3.1*
 
