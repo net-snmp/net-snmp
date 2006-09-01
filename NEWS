@@ -1,6 +1,12 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.1.5*
+
+ Perl
+   - OID handling was fully broken on various 64bit platforms
+
+
 *5.1.4*
 
  New:
@@ -20,6 +26,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
      - Fix for 'select: No such file or directory' in snmpdelta
 
  Fixes:
+   - fix trap processing from SMUX peers (patch 1430824 from Dell,
+     submitted by SuSE)
+   - fix override registration, so override tokens work (bug 1023859)
    - Perl getnext didn't honor explicit reference to MIB file
    - Fix assorted signedness mismatches
    - Lots of other bug fixes

@@ -18,9 +18,9 @@ typedef struct handler_cb_data_s {
 } handler_cb_data;
 
 typedef struct netsnmp_oid_s {
-    unsigned int        *name;
-    unsigned int         len;
-    unsigned int         namebuf[ MAX_OID_LEN ];
+    oid                 *name;
+    size_t               len;
+    oid                  namebuf[ MAX_OID_LEN ];
 } netsnmp_oid;
 
 static int have_done_agent = 0;
