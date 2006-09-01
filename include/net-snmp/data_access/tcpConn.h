@@ -74,6 +74,7 @@ extern          "C" {
 #define NETSNMP_ACCESS_TCPCONN_LOAD_NOFLAGS               0x0000
 #define NETSNMP_ACCESS_TCPCONN_LOAD_NOLISTEN              0x0001
 #define NETSNMP_ACCESS_TCPCONN_LOAD_ONLYLISTEN            0x0002
+#define NETSNMP_ACCESS_TCPCONN_LOAD_IPV4_ONLY             0x0004
 
     void netsnmp_access_tcpconn_container_free(netsnmp_container *container,
                                                u_int free_flags);

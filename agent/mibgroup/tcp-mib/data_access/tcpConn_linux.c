@@ -80,23 +80,30 @@ netsnmp_arch_tcpconn_container_load(netsnmp_container *container,
 {
     int rc = 0;
 
-    rc = _load4(container, load_flags);
-    if(rc < 0) {
-        u_int flags = NETSNMP_ACCESS_TCPCONN_FREE_KEEP_CONTAINER;
-        netsnmp_access_tcpconn_container_free(container, flags);
-        return rc;
+    DEBUGMSGTL(("access:tcpconn:container",
+                "tcpconn_container_arch_load (flags %p)\n", load_flags));
+
+    if (NULL == container) {
+        snmp_log(LOG_ERR, "no container specified/found for access_tcpconn\n");
+        return -1;
     }
+
+    rc = _load4(container, load_flags);
 
 #if defined (INET6)
-    rc = _load6(container, load_flags);
-    if(rc < 0) {
-        u_int flags = NETSNMP_ACCESS_TCPCONN_FREE_KEEP_CONTAINER;
-        netsnmp_access_tcpconn_container_free(container, flags);
+    if((0 != rc) || (load_flags & NETSNMP_ACCESS_TCPCONN_LOAD_IPV4_ONLY))
         return rc;
-    }
+
+    /*
+     * load ipv6. ipv6 module might not be loaded,
+     * so ignore -2 err (file not found)
+     */
+    rc = _load6(container, load_flags);
+    if (-2 == rc)
+        rc = 0;
 #endif
 
-    return 0;
+    return rc;
 }
 
 /**
@@ -231,6 +238,26 @@ _load6(netsnmp_container *container, u_int load_flags)
     int             rc = 0;
     FILE           *in;
     char            line[180];
+    static int      log_open_err = 1;
+
+    netsnmp_assert(NULL != container);
+
+#undef PROCFILE
+#define PROCFILE "/proc/net/tcp6"
+    if (!(in = fopen(PROCFILE, "r"))) {
+        snmp_log(LOG_ERR,"could not open " PROCFILE "\n");
+        if (1 == log_open_err) {
+            snmp_log(LOG_ERR,"could not open " PROCFILE "\n");
+            log_open_err = 0;
+        }
+        return -2;
+    }
+    /*
+     * if we turned off logging of open errors, turn it back on now that
+     * we have been able to open the file.
+     */
+    if (0 == log_open_err)
+        log_open_err = 1;
     
     netsnmp_assert(NULL != container);
 
@@ -250,7 +277,7 @@ _load6(netsnmp_container *container, u_int load_flags)
     while (fgets(line, sizeof(line), in)) {
         netsnmp_tcpconn_entry *entry;
         int             state, rc, local_port, remote_port, tmp_state;
-        size_t          buf_len, offset,
+        size_t          buf_len, offset;
         u_char          local_addr[48], remote_addr[48];
         u_char         *tmp_ptr;
 
