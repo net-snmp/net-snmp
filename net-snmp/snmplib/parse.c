@@ -3490,18 +3490,27 @@ parse_macro(FILE * fp, char *name)
     while (type != EQUALS && type != ENDOFFILE) {
         type = get_token(fp, token, sizeof(token));
     }
-    if (type != EQUALS)
+    if (type != EQUALS) {
+        if (np)
+            free_node(np);
         return NULL;
+    }
     while (type != BEGIN && type != ENDOFFILE) {
         type = get_token(fp, token, sizeof(token));
     }
-    if (type != BEGIN)
+    if (type != BEGIN) {
+        if (np)
+            free_node(np);
         return NULL;
+    }
     while (type != END && type != ENDOFFILE) {
         type = get_token(fp, token, sizeof(token));
     }
-    if (type != END)
+    if (type != END) {
+        if (np)
+            free_node(np);
         return NULL;
+    }
 
     if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 			   NETSNMP_DS_LIB_MIB_WARNINGS)) {
