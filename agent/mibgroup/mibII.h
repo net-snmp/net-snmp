@@ -18,5 +18,5 @@ config_require(mibII/setSerialNo)
  * linux.
  */
 #if defined( linux )
-config_require(ip-mib if-mib ip-forward-mib)
+config_require(ip-mib if-mib ip-forward-mib tcp-mib udp-mib)
 #endif
