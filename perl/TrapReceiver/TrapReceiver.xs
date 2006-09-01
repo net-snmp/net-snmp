@@ -18,9 +18,9 @@ typedef struct trapd_cb_data_s {
 } trapd_cb_data;
 
 typedef struct netsnmp_oid_s {
-    unsigned int        *name;
-    unsigned int         len;
-    unsigned int         namebuf[ MAX_OID_LEN ];
+    oid                 *name;
+    size_t               len;
+    oid                  namebuf[ MAX_OID_LEN ];
 } netsnmp_oid;
 
 int   perl_trapd_handler( netsnmp_pdu           *pdu,
