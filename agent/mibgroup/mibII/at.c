@@ -314,7 +314,7 @@ var_atEntry(struct variable *vp,
         *var_len = sizeof(LowPhysAddr);
         return (u_char *) LowPhysAddr;
     case IPMEDIANETADDRESS:    /* also ATNETADDRESS */
-        *var_len = sizeof long_return;
+	*var_len = sizeof(uint32_t);
         long_return = LowAddr;
         return (u_char *) & long_return;
     case IPMEDIATYPE:
@@ -454,7 +454,7 @@ var_atEntry(struct variable * vp,
         *var_len = Lowentry.ipNetToMediaPhysAddress.o_length;
         return Lowentry.ipNetToMediaPhysAddress.o_bytes;
     case IPMEDIANETADDRESS:
-        *var_len = sizeof(Lowentry.ipNetToMediaNetAddress);
+	*var_len = sizeof(uint32_t);
         return (u_char *) &Lowentry.ipNetToMediaNetAddress;
     case IPMEDIATYPE:
         *var_len = sizeof long_return;
@@ -957,7 +957,7 @@ var_atEntry(struct variable *vp,
         free(pIpNetTable);
         return (u_char *) return_buf;
     case IPMEDIANETADDRESS:    /* also ATNETADDRESS */
-        *var_len = sizeof long_return;
+	*var_len = sizeof(uint32_t);
         long_return = pIpNetTable->table[i].dwAddr;
         free(pIpNetTable);
         return (u_char *) & long_return;

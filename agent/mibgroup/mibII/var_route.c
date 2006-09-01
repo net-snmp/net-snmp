@@ -227,6 +227,7 @@ var_ipRouteEntry(struct variable *vp,
 
     switch (vp->magic) {
     case IPROUTEDEST:
+	*var_len = sizeof(uint32_t);
         return (u_char *) get_in_address((struct sockaddr *) (rtp + 1),
                                          rtp->rtm_addrs, RTA_DST);
     case IPROUTEIFINDEX:
@@ -260,6 +261,7 @@ var_ipRouteEntry(struct variable *vp,
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTENEXTHOP:
+	*var_len = sizeof(uint32_t);
         return (u_char *) get_in_address((struct sockaddr *) (rtp + 1),
                                          rtp->rtm_addrs, RTA_GATEWAY);
     case IPROUTETYPE:
@@ -530,7 +532,7 @@ var_ipRouteEntry(struct variable * vp,
 
     switch (vp->magic) {
     case IPROUTEDEST:
-        *var_len = 4;
+	*var_len = sizeof(uint32_t);
 #if NEED_KLGETSA
         sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
         return (u_char *) & (sa->sin_addr.s_addr);
@@ -589,7 +591,7 @@ var_ipRouteEntry(struct variable * vp,
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTENEXTHOP:
-        *var_len = 4;
+	*var_len = sizeof(uint32_t);
 #if NEED_KLGETSA
         sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
         return (u_char *) & (sa->sin_addr.s_addr);
@@ -1561,6 +1563,7 @@ var_ipRouteEntry(struct variable *vp,
 
     switch (vp->magic) {
     case IPROUTEDEST:
+	*var_len = sizeof(uint32_t);
         *write_method = write_rte;
         long_return = pIpRtrTable->table[RtIndex].dwForwardDest;
         return (u_char *) & long_return;
@@ -1589,6 +1592,7 @@ var_ipRouteEntry(struct variable *vp,
         long_return = pIpRtrTable->table[RtIndex].dwForwardMetric5;
         return (u_char *) & long_return;
     case IPROUTENEXTHOP:
+	*var_len = sizeof(uint32_t);
         *write_method = write_rte;
         long_return = pIpRtrTable->table[RtIndex].dwForwardNextHop;
         return (u_char *) & long_return;
@@ -1852,10 +1856,11 @@ var_ipRouteEntry(struct variable * vp,
         *length = 14;
     }
 
-    *var_len = sizeof long_return;
+    *var_len = sizeof(long_return);
 
     switch (vp->magic) {
     case IPROUTEDEST:
+	*var_len = sizeof(uint32_t);
         long_return = rt->dest.s_addr;
         return (u_char *) & long_return;
 
@@ -1880,6 +1885,7 @@ var_ipRouteEntry(struct variable * vp,
         return (u_char *) & long_return;
 
     case IPROUTENEXTHOP:
+	*var_len = sizeof(uint32_t);
         if (rt->gateway.s_addr == 0 && rt->ifa.s_addr == 0)
             long_return = 0;
         else if (rt->gateway.s_addr == 0)
