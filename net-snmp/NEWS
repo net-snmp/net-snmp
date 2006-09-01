@@ -4,8 +4,13 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.2.4*
 
+    library:
+      - *really* make SNMPv3 traps work again (user creation; 
+        announced as fixed in 5.2.3, but this wasn't the case)
+
     Perl:
-     - gettable() was fairly broken in the 5.3.1 release.
+      - gettable() was fairly broken in the 5.3.1 release.
+      - OID handling was fully broken on various 64bit platforms
 
 *5.2.3*
 
@@ -23,7 +28,6 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - Other misc bug fixes.
 
     library:
-      - Make SNMPv3 traps work again (user creation; official patch 1374087)
       - Fixes typing issues problem with MIB definitions that use
         intermediate sub-identifiers
       - Fix snmptranslate -Td output for UNITS
