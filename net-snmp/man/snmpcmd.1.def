@@ -242,6 +242,8 @@ boots/time with an authenticated value stored in the LCD.
 It is typically not necessary to specify this option, as these values
 will usually be discovered automatically.
 .TP
+.BI -Y "name"="value"
+.TP
 .BI -- "name"="value"
 Allows to specify any token ("name") supported in the
 .I snmp.conf
