@@ -1,6 +1,12 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.0.12*
+
+ Perl
+   - OID handling was fully broken on various 64bit platforms
+
+
 *5.0.11*
  New:
    - Due to a copyright statement that didn't allow modifications,
