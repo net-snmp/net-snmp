@@ -112,9 +112,9 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
                      struct netsnmp_line_process_info_s* lpi)
 {
     netsnmp_udp_endpoint_entry *ep = (netsnmp_udp_endpoint_entry *)mem;
-    char                 *ptr;
+    char                 *ptr, *sep;
     u_char               *u_ptr;
-    size_t                u_ptr_len, offset;
+    size_t                u_ptr_len, offset, len;
 
     /*
      * skip 'sl'
@@ -135,10 +135,22 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
     /*
      * get local address. ignore error on hex conversion, since that
      * function doesn't like the ':' between address and port. check the
-     * offset to see if it worked.
+     * offset to see if it worked. May need to flip string too.
      */
     u_ptr = ep->loc_addr;
     u_ptr_len = sizeof(ep->loc_addr);
+    sep = strchr(ptr, ':');
+    if (NULL == sep) {
+        DEBUGMSGTL(("text:util:tvi", "no ':' '%s'\n",
+                    line_info->start));
+        return PMLP_RC_MEMORY_UNUSED;
+    }
+    len = (sep - ptr);
+    if (-1 == netsnmp_addrstr_hton(ptr, len)) {
+        DEBUGMSGTL(("text:util:tvi", "bad length %d for loc addr '%s'\n",
+                    u_ptr_len, line_info->start));
+        return PMLP_RC_MEMORY_UNUSED;
+    }
     offset = 0;
     netsnmp_hex_to_binary(&u_ptr, &u_ptr_len, &offset, 0, ptr, NULL);
     if ((4 != offset) && (16 != offset)) {
@@ -159,14 +171,26 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
     /*
      * get remote address. ignore error on hex conversion, since that
      * function doesn't like the ':' between address and port. check the
-     * offset to see if it worked.
+     * offset to see if it worked. May need to flip string too.
      */
     u_ptr = ep->rmt_addr;
     u_ptr_len = sizeof(ep->rmt_addr);
+    sep = strchr(ptr, ':');
+    if (NULL == sep) {
+        DEBUGMSGTL(("text:util:tvi", "no ':' '%s'\n",
+                    line_info->start));
+        return PMLP_RC_MEMORY_UNUSED;
+    }
+    len = (sep - ptr);
+    if (-1 == netsnmp_addrstr_hton(ptr, len)) {
+        DEBUGMSGTL(("text:util:tvi", "bad length %d for rmt addr '%s'\n",
+                    u_ptr_len, line_info->start));
+        return PMLP_RC_MEMORY_UNUSED;
+    }
     offset = 0;
     netsnmp_hex_to_binary(&u_ptr, &u_ptr_len, &offset, 0, ptr, NULL);
     if ((4 != offset) && (16 != offset)) {
-        DEBUGMSGTL(("text:util:tvi", "bad offset %d for loc addr '%s'\n",
+        DEBUGMSGTL(("text:util:tvi", "bad offset %d for rmt addr '%s'\n",
                     offset, line_info->start));
         return PMLP_RC_MEMORY_UNUSED;
     }
