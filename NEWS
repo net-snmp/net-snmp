@@ -23,6 +23,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - new option -Cp to set usmUserPublic value
 
     mib2c:
+      - New mib2c.emulation.conf provides a quick way to do simplistic
+        emulation of an entire MIB or MIB branch.
       - A new perl module NetSNMP::agent::Support provides easier embedded 
         perl support. (patch 1369996 from Peter Martin)
         Run "mib2c -c mib2c.perl.conf OID" to help you start using it.
@@ -36,8 +38,11 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - Many misc fixes
 
  Ports:
-   HP-UX:
-      - fix ipAdEntBcastAddr for HP-UX 11.0/11i (patch 1481012)
+   Non-linux:
+      - fix 8 byte IpAddress in at, ip and route MIBs.
+
+   Linux:
+      - add IPv6 aware UDP and TCP mibs to default module list
 
 
 *5.3.0.1*
