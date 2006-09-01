@@ -18,9 +18,13 @@
 %{?_with_embedded_perl:%define include_perl 1}
 %{?_with_perl_modules:%define include_perl 1}
 #
+# library version (see Makefile.top)
+#
+%define libcurrent 11
+#
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
-Version: 5.3.0.1
+Version: 5.4.dev
 # update release for vendor release. (eg 1.rh9, 1.rh72, 1.ydl3, 1.ydl23)
 Release: 1
 URL: http://www.net-snmp.org/
@@ -36,7 +40,7 @@ BuildRequires: perl, beecrypt-devel elfutils-libelf-devel
 # because perl(Tk) is optional, automatic dependencies will never succeed:
 AutoReqProv: no
 Requires: openssl, popt, rpm, zlib, bzip2-libs, beecrypt, elfutils-libelf, glibc
-Provides: net-snmp, net-snmp-utils, libnetsnmp.so.11, libnetsnmpagent.so.11, libnetsnmphelpers.so.11, libnetsnmpmibs.so.11, libnetsnmptrapd.so.11
+Provides: net-snmp, net-snmp-utils, libnetsnmp.so.%{libcurrent}, libnetsnmpagent.so.%{libcurrent}, libnetsnmphelpers.so.%{libcurrent}, libnetsnmpmibs.so.%{libcurrent}, libnetsnmptrapd.so.%{libcurrent}
 %if %{embedded_perl}
 Requires: perl
 %endif
@@ -70,7 +74,7 @@ useful for building SNMP applications, agents, and sub-agents.
 Group: System Environment/Libraries
 Summary: The perl modules provided with Net-SNMP
 AutoReqProv: no
-Provides: ASN.so, OID.so, SNMP.so, TrapReceiver.so, agent.so, default_store.so, perl(NetSNMP::ASN), perl(NetSNMP::OID), perl(NetSNMP::TrapReceiver), perl(NetSNMP::agent), perl(NetSNMP::agent::default_store), perl(NetSNMP::agent::netsnmp_request_infoPtr), perl(NetSNMP::default_store), perl(SNMP), perl(SNMP::DEBUGGING), perl(SNMP::DEBUG_INTERNALS), perl(SNMP::DUMP_PACKET), perl(SNMP::MIB), perl(SNMP::MIB::MIB_OPTIONS), perl(SNMP::MIB::NODE), perl(SNMP::MIB::REPLACE_NEWER), perl(SNMP::MIB::SAVE_DESCR), perl(SNMP::Session), perl(SNMP::TrapSession), perl(SNMP::VarList), perl(SNMP::Varbind), net-snmp-perlmods
+Provides: ASN.so, OID.so, SNMP.so, TrapReceiver.so, agent.so, default_store.so, perl(NetSNMP::ASN), perl(NetSNMP::OID), perl(NetSNMP::TrapReceiver), perl(NetSNMP::agent), perl(NetSNMP::agent::default_store), perl(NetSNMP::agent::netsnmp_request_infoPtr), perl(NetSNMP::agent::Support) perl(NetSNMP::default_store), perl(SNMP), perl(SNMP::DEBUGGING), perl(SNMP::DEBUG_INTERNALS), perl(SNMP::DUMP_PACKET), perl(SNMP::MIB), perl(SNMP::MIB::MIB_OPTIONS), perl(SNMP::MIB::NODE), perl(SNMP::MIB::REPLACE_NEWER), perl(SNMP::MIB::SAVE_DESCR), perl(SNMP::Session), perl(SNMP::TrapSession), perl(SNMP::VarList), perl(SNMP::Varbind), net-snmp-perlmods
 Requires: net-snmp = %{version}, perl
 
 %description perlmods
@@ -87,7 +91,7 @@ exit 1
 
 %build
 %configure --with-defaults --with-sys-contact="Unknown" \
-	--with-mib-modules="host disman/event-mib smux" \
+	--with-mib-modules="host disman/event smux" \
 	--with-sysconfdir="/etc/net-snmp"               \
 	--enable-shared \
 	%{?_with_perl_modules: --with-perl-modules="PREFIX=$RPM_BUILD_ROOT%{_prefix} INSTALLDIRS=vendor"} \
@@ -159,6 +163,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc EXAMPLE.conf.def FAQ INSTALL NEWS PORTING TODO
 %doc README README.agentx README.hpux11 README.krb5
 %doc README.snmpv3 README.solaris README.thread README.win32
+%doc README.aix README.osX README.tru64 README.irix README.agent-mibs
+%doc README.Panasonic_AM3X.txt
 	 
 #%config(noreplace) /etc/net-snmp/snmpd.conf
 	 
@@ -193,6 +199,14 @@ rm -rf $RPM_BUILD_ROOT
 echo "No additional verification is done for net-snmp"
 
 %changelog
+* Fri Sep  1 2006 Thomas Anders <tanders@users.sf.net>
+- Update to 5.4.dev
+- introduce %{libcurrent}
+- use new disman/event name
+- add: README.aix README.osX README.tru64 README.irix README.agent-mibs
+  README.Panasonic_AM3X.txt
+- add new NetSNMP::agent::Support
+
 * Fri Jan 13 2006 hardaker <hardaker@users.sf.net>
 - Update to 5.3.0.1
 
