@@ -1304,7 +1304,16 @@ Thanks to Dave Shield and Johannes Schmidt-Fischer
 -- Bruce Shaw <Bruce.Shaw at shaw.ca>
 
 ------------------------------------------------------------
-14. Wish list
+14. IPv6
+
+Starting with net-snmp 5.4 you can enable the UDPIPv6 and TCPIPv6 transports
+on Solaris. There's no support for the IPv6 MIBs, though, so you'll have to 
+configure like this:
+
+  ./configure --enable-ipv6 --with-out-mib-modules="mibII/ipv6"
+
+------------------------------------------------------------
+15. Wish list
 
 A.  Code cleanup
 
@@ -1326,7 +1335,7 @@ How to get ORACLE's SNMP functionality to work as a sub-agent.
 -- Bruce Shaw <Bruce.Shaw at shaw.ca>
 
 ------------------------------------------------------------
-15.  Known Bugs!!
+16.  Known Bugs!!
 
 A.  hrDeviceTable (HOST-RESOURCES-MIB)
 

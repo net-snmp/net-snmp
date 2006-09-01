@@ -25,15 +25,24 @@ The Perl package (5.00503) shipped with Tru64 Unix 5.1 isn't complete enough
 to allow to build net-snmp with embedded Perl support. If you need embedded
 Perl support, do your own Perl installation first.
 
+3. IPv6
+-------
 
-3. Testing
+Starting with net-snmp 5.4 you can enable the UDPIPv6 and TCPIPv6 transports
+on Tru64 Unix 5.1. There's no support for the IPv6 MIBs, though, so you'll 
+have to configure like this:
+
+  ./configure --enable-ipv6 --with-out-mib-modules="mibII/ipv6"
+
+
+4. Testing
 ----------
 
 "make test" reports a number of problems on Tru64 Unix. It is yet to be checked
 whether these are problems in the test scripts or the toolkit.
 
 
-4. Feedback
+5. Feedback
 -----------
 
 Please also see README and PORTING.
