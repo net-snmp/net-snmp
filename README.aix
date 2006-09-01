@@ -6,16 +6,14 @@ Some notes for the AIX port
 
 There are the following known problems on AIX:
 
-1) Shared libraries
+1) Shared libraries / embedded perl
 
 Building net-snmp on AIX with shared libraries is known to either make the
 applications not start at all or segfault. The workaround is to disable shared
-libraries:
+libraries as well as embedded perl (which requires shared libraries):
 
-   ./configure --disable-shared
+   ./configure --disable-shared --disable-embedded-perl
 
-Until this issue is resolved, there's also no way to use embedded perl (which
-requires shared libraries) on AIX.
 
 2) "grep: capacity exceeded" during configure
 
@@ -32,6 +30,15 @@ Accessing certain MIB objects on AIX 5.x machines running a 64-bit kernel will
 trigger nlist errors. If the agent aborts due to those errors, you may want to 
 try running "snmpd -r ..." which instructs the agent to ignore them. Later
 net-snmp versions are expected to improve the support for AIX 64-bit kernels.
+
+4) IPv6
+
+Starting with net-snmp 5.4 you can enable the UDPIPv6 and TCPIPv6 transports 
+on AIX 5.x. There's no support for the IPv6 MIBs, though, so you'll have to 
+configure like this:
+
+  ./configure --disable-shared --disable-embedded-perl --enable-ipv6 \
+              --with-out-mib-modules="mibII/ipv6"
 
 
 2. Patches
