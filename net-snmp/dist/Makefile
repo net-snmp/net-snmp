@@ -52,7 +52,7 @@ clean:
 # 'rpm' expects a compressed archive (.tar.gz) of the source directory
 # to exist (in the rpm/SOURCES directory) before it is run.
 # --------------------------------------------------------------------
-CVSROOT = :pserver:anonymous@cvs.net-snmp.sourceforge.net:/cvsroot/net-snmp
+CVSROOT = :pserver:anonymous@net-snmp.cvs.sourceforge.net:/cvsroot/net-snmp
 
 PKG_VER := $(NAME)-$(VERSION)
 
