@@ -669,6 +669,9 @@ main(int argc, char *argv[])
     int             agentx_subagent = 1;
 #endif
     netsnmp_trapd_handler *traph;
+#ifdef NETSNMP_EMBEDDED_PERL
+    extern void init_perl(void);
+#endif
 
 #ifdef SIGTERM
     signal(SIGTERM, term_handler);
@@ -1158,9 +1161,10 @@ main(int argc, char *argv[])
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX) && defined(USING_SNMPV3_USMUSER_MODULE)
     if (agentx_subagent) {
         extern void init_register_usmUser_context(const char *);
+        extern void init_register_nsVacm_context(const char *);
         /* register ourselves as having a USM user database */
         init_register_usmUser_context("snmptrapd");
-        extern void init_register_nsVacm_context(const char *);
+        /* register net-snmp vacm extensions */
         init_register_nsVacm_context("snmptrapd");
     }
 #endif
