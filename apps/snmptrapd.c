@@ -1160,6 +1160,8 @@ main(int argc, char *argv[])
         extern void init_register_usmUser_context(const char *);
         /* register ourselves as having a USM user database */
         init_register_usmUser_context("snmptrapd");
+        extern void init_register_nsVacm_context(const char *);
+        init_register_nsVacm_context("snmptrapd");
     }
 #endif
 
