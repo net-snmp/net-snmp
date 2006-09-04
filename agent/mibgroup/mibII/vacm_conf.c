@@ -830,7 +830,7 @@ vacm_create_simple(const char *token, char *confline,
     char           *cp;
     char            secname[SPRINT_MAX_LEN];
     char            grpname[SPRINT_MAX_LEN];
-    char            authtype[SPRINT_MAX_LEN];
+    char            authlevel[SPRINT_MAX_LEN];
     static int      commcount = 0;
     /* Conveniently, the community-based security
        model values can also be used as bit flags */
@@ -856,7 +856,7 @@ vacm_create_simple(const char *token, char *confline,
              * -s model ... 
              */
             if (cp)
-                cp = copy_nword(cp, model, sizeof(authtype));
+                cp = copy_nword(cp, model, sizeof(model));
             if (!cp) {
                 config_perror("illegal line");
                 return;
@@ -867,13 +867,13 @@ vacm_create_simple(const char *token, char *confline,
             strcpy(model, "usm");
         }
         /*
-         * authentication type 
+         * authentication level 
          */
         if (cp && *cp)
-            cp = copy_nword(cp, authtype, sizeof(authtype));
+            cp = copy_nword(cp, authlevel, sizeof(authlevel));
         else
-            strcpy(authtype, "auth");
-        DEBUGMSGTL((token, "setting auth type: \"%s\"\n", authtype));
+            strcpy(authlevel, "auth");
+        DEBUGMSGTL((token, "setting auth level: \"%s\"\n", authlevel));
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     } else {
         if (strcmp(community, "-v") == 0) {
@@ -881,7 +881,7 @@ vacm_create_simple(const char *token, char *confline,
              * -v version ... 
              */
             if (cp)
-                cp = copy_nword(cp, model, sizeof(authtype));
+                cp = copy_nword(cp, model, sizeof(model));
             if (!cp) {
                 config_perror("illegal line");
                 return;
@@ -906,9 +906,9 @@ vacm_create_simple(const char *token, char *confline,
             strcpy(addressname, "default");
         }
         /*
-         * authtype has to be noauth 
+         * authlevel has to be noauth 
          */
-        strcpy(authtype, "noauth");
+        strcpy(authlevel, "noauth");
 #endif /* support for community based SNMP */
     }
 
@@ -1018,7 +1018,7 @@ vacm_create_simple(const char *token, char *confline,
          */
         snprintf(line, sizeof(line),
                  "%s  \"\" %s %s prefix %s %s %s",
-                 grpname, model, authtype, viewname, rw, rw);
+                 grpname, model, authlevel, viewname, rw, rw);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "access", line));
         vacm_parse_access("access", line);
@@ -1033,7 +1033,7 @@ vacm_create_simple(const char *token, char *confline,
             if (viewtypes & (1 << i)) {
                 snprintf(line, sizeof(line),
                          "%s  \"\" %s %s prefix %s %s",
-                         grpname, model, authtype,
+                         grpname, model, authlevel,
                          se_find_label_in_slist(VACM_VIEW_ENUM_NAME, i),
                          viewname);
                 line[ sizeof(line)-1 ] = 0;
