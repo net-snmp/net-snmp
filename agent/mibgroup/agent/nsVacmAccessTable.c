@@ -11,7 +11,7 @@
 
 /** Initializes the nsVacmAccessTable module */
 void
-init_nsVacmAccessTable(void)
+init_register_nsVacm_context(const char *context)
 {
     /*
      * Initialize the nsVacmAccessTable table by defining its
@@ -45,7 +45,16 @@ init_nsVacmAccessTable(void)
     iinfo->get_next_data_point  = nsVacmAccessTable_get_next_data_point;
     iinfo->table_reginfo = table_info;
 
+    if ( context && context[0] )
+        reg->contextName = strdup(context);
+
     netsnmp_register_table_iterator(reg, iinfo);
+}
+
+void
+init_nsVacmAccessTable(void)
+{
+    init_register_nsVacm_context("");
 }
 
 
