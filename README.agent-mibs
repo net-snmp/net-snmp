@@ -369,6 +369,10 @@ NET-SNMP-AGENT-MIB
  nstAgentModules              A         5.0     O 
 
 ------------------------------------------------------------------------------
+NET-SNMP-VACM-MIB
+ nsVacmAccessTable            A         5.4     I agent/nsVacmAccessTable.c
+
+------------------------------------------------------------------------------
 MTA-MIB
  mtaTable                     U         4.2     O mibII/mta_sendmail.c
  mtaGroupTable                U         4.2     O mibII/mta_sendmail.c
