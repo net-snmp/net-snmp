@@ -1,1 +1,3 @@
 tcpConn_test
+.libs
+*.lo
