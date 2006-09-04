@@ -106,7 +106,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
          * CPU statistics (overall and per-CPU)
          */
     b1 = buff;
-    while ( b2 = strstr( b1, "cpu" )) {
+    while ((b2 = strstr( b1, "cpu" ))) {
         if (b2[3] == ' ') {
             cpu = netsnmp_cpu_get_byIdx( -1, 0 );
             if (!cpu) {
