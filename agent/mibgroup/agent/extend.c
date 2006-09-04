@@ -392,6 +392,11 @@ extend_parse_config(const char *token, char *cptr)
         oid_len = MAX_OID_LEN - 2;
         read_objid( exec_name, oid_buf, &oid_len );
         cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
+        if (!strcmp( token, "sh"   ) ||
+            !strcmp( token, "exec" )) {
+            config_perror("ERROR: This output format has been deprecated - Please use the 'extend' directive instead" );
+            return;
+        }
     } else {
         memcpy( oid_buf, ns_extend_oid, sizeof(ns_extend_oid));
         oid_len = OID_LENGTH(ns_extend_oid);
