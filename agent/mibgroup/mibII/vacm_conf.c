@@ -831,6 +831,7 @@ vacm_create_simple(const char *token, char *confline,
     char            secname[SPRINT_MAX_LEN];
     char            grpname[SPRINT_MAX_LEN];
     char            authlevel[SPRINT_MAX_LEN];
+    char            context[SPRINT_MAX_LEN];
     static int      commcount = 0;
     /* Conveniently, the community-based security
        model values can also be used as bit flags */
@@ -841,6 +842,7 @@ vacm_create_simple(const char *token, char *confline,
      * init 
      */
     strcpy(model, "any");
+    memset(context, 0, sizeof(context));
 
     /*
      * community name or user name 
@@ -928,6 +930,11 @@ vacm_create_simple(const char *token, char *confline,
         strcpy(viewname, "_all_");
         view_ptr = NULL;
     }
+    /*
+     * optional, non-default context
+     */
+    if (cp && *cp)
+        cp = copy_nword(cp, context, sizeof(context));
 
     if (viewtypes & VACM_VIEW_WRITE_BIT)
         rw = viewname;
@@ -1017,8 +1024,9 @@ vacm_create_simple(const char *token, char *confline,
          * access  anonymousGroupNameNUM  "" MODEL AUTHTYPE prefix anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] 
          */
         snprintf(line, sizeof(line),
-                 "%s  \"\" %s %s prefix %s %s %s",
-                 grpname, model, authlevel, viewname, rw, rw);
+                 "%s %s %s %s prefix %s %s %s",
+                 grpname, context[0] ? context : "\"\"",
+                 model, authlevel, viewname, rw, rw);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "access", line));
         vacm_parse_access("access", line);
@@ -1032,8 +1040,9 @@ vacm_create_simple(const char *token, char *confline,
         for(i = 0; i <= VACM_MAX_VIEWS; i++) {
             if (viewtypes & (1 << i)) {
                 snprintf(line, sizeof(line),
-                         "%s  \"\" %s %s prefix %s %s",
-                         grpname, model, authlevel,
+                         "%s %s %s %s prefix %s %s",
+                         grpname, context[0] ? context : "\"\"",
+                         model, authlevel,
                          se_find_label_in_slist(VACM_VIEW_ENUM_NAME, i),
                          viewname);
                 line[ sizeof(line)-1 ] = 0;
