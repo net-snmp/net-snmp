@@ -220,7 +220,7 @@ extensible_parse_config(const char *token, char *cptr)
         /*
          * its a relocatable extensible mib 
          */
-        config_perror("WARNING: This output format is being deprecated - Please use the 'extend' directive instead" );
+        config_perror("WARNING: This output format has been deprecated - Please use the 'extend' directive instead" );
         for (pp = &relocs, numrelocs++; *pp; pp = &((*pp)->next));
         (*pp) = ptmp;
         pp = &relocs; scount = numrelocs;
