@@ -99,15 +99,15 @@ newView:
     }
     if (entry) {
         len = entry->groupName[0];
-        snmp_set_var_value(idx, entry->groupName+1, len);
+        snmp_set_var_value(idx, (u_char *)entry->groupName+1, len);
         idx = idx->next_variable;
         len = entry->contextPrefix[0];
-        snmp_set_var_value(idx, entry->contextPrefix+1, len);
+        snmp_set_var_value(idx, (u_char *)entry->contextPrefix+1, len);
         idx = idx->next_variable;
-        snmp_set_var_value(idx, &entry->securityModel,
+        snmp_set_var_value(idx, (u_char *)&entry->securityModel,
                            sizeof(entry->securityModel));
         idx = idx->next_variable;
-        snmp_set_var_value(idx, &entry->securityLevel,
+        snmp_set_var_value(idx, (u_char *)&entry->securityLevel,
                            sizeof(entry->securityLevel));
         /*
          * Find the next valid authType view - skipping unused entries
@@ -121,7 +121,7 @@ newView:
             goto newView;
         cp = se_find_label_in_slist(VACM_VIEW_ENUM_NAME, nsViewIdx++);
         DEBUGMSGTL(("nsVacm", "nextDP %s:%s (%d)\n", entry->groupName+1, cp, nsViewIdx-1));
-        snmp_set_var_value(idx, cp, strlen(cp));
+        snmp_set_var_value(idx, (u_char *)cp, strlen(cp));
         idx = idx->next_variable;
         *my_data_context = (void *) entry;
         *my_loop_context = (void *) entry;
@@ -162,7 +162,7 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
             /* Extract the authType token from the list of indexes */
             idx = table_info->indexes->next_variable->next_variable->next_variable->next_variable;
             memset(atype, 0, sizeof(atype));
-            strncpy(atype, idx->val.string, idx->val_len);
+            strncpy(atype, (char *)idx->val.string, idx->val_len);
             viewIdx = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, atype);
             DEBUGMSGTL(("nsVacm", "GET %s (%d)\n", idx->val.string, viewIdx));
 
@@ -176,7 +176,7 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_NSVACMVIEWNAME:
                 snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
-                                         entry->views[ viewIdx ],
+                               (u_char *)entry->views[ viewIdx ],
                                   strlen(entry->views[ viewIdx ]));
                 break;
             case COLUMN_VACMACCESSSTORAGETYPE:
@@ -201,7 +201,6 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
             table_info = netsnmp_extract_table_info(request);
             ret = SNMP_ERR_NOERROR;
 
-            /* XXX - check authtype token - ?? WHERE ?? */
             switch (table_info->colnum) {
             case COLUMN_NSVACMCONTEXTMATCH:
                 ret = netsnmp_check_vb_int_range(request->requestvb, 1, 2);
@@ -217,18 +216,47 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_NSVACMACCESSSTATUS:
                 /*
-                 * XXX - Too simplistic
-                 * 
-                 * Because we're inserting a table into an existing table,
-                 *   it's quite possible for the vacmAccessTable entry to
-                 *   exist, even if this is a "new" nsVacmAccessEntry.
-                 * 
-                 * This will need more careful checking before we go live.
+                 * The usual 'check_vb_rowstatus' call is too simplistic
+                 *   to be used here.  Because we're implementing a table
+                 *   within an existing table, it's quite possible for a
+                 *   the vacmAccessTable entry to exist, even if this is
+                 *   a "new" nsVacmAccessEntry.
+                 *
+                 * We can check that the value being assigned is suitable
+                 *   for a RowStatus syntax object, but the transition
+                 *   checks need to be done explicitly.
                  */
-                ret = netsnmp_check_vb_rowstatus(request->requestvb,
-                          (entry ? entry->status : RS_NONEXISTENT));
+                ret = netsnmp_check_vb_rowstatus_value(request->requestvb);
+                if ( ret != SNMP_ERR_NOERROR )
+                    break;
+
+                /*
+                 * Extract the authType token from the list of indexes
+                 */
+                idx = table_info->indexes->next_variable->next_variable->next_variable->next_variable;
+                memset(atype, 0, sizeof(atype));
+                strncpy(atype, (char *)idx->val.string, idx->val_len);
+                viewIdx = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, atype);
+                if ( viewIdx < 0 ) {
+                    ret = SNMP_ERR_NOCREATION;
+                    break;
+                }
+                switch ( *request->requestvb->val.integer ) {
+                case RS_ACTIVE:
+                case RS_NOTINSERVICE:
+                    /* Check that this particular view is already set */
+                    if ( !entry || !entry->views[viewIdx][0] )
+                        ret = SNMP_ERR_INCONSISTENTVALUE;
+                    break;
+                case RS_CREATEANDWAIT:
+                case RS_CREATEANDGO:
+                    /* Check that this particular view is not yet set */
+                    if ( entry && entry->views[viewIdx][0] )
+                        ret = SNMP_ERR_INCONSISTENTVALUE;
+                    break;
+                }
                 break;
-            }
+            } /* switch(colnum) */
             if ( ret != SNMP_ERR_NOERROR ) {
                 netsnmp_set_request_error(reqinfo, request, ret);
                 return SNMP_ERR_NOERROR;
@@ -248,8 +276,8 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
                 case RS_CREATEANDGO:
                 case RS_CREATEANDWAIT:
                     if (!entry) {
-                         idx = table_info->indexes; gName = idx->val.string;
-                         idx = idx->next_variable;  cPrefix = idx->val.string;
+                         idx = table_info->indexes; gName = (char*)idx->val.string;
+                         idx = idx->next_variable;  cPrefix = (char*)idx->val.string;
                          idx = idx->next_variable;  model = *idx->val.integer;
                          idx = idx->next_variable;  level = *idx->val.integer;
                          entry = vacm_createAccessEntry( gName, cPrefix, model, level );
@@ -278,17 +306,17 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
             if ( !entry )
                 continue;  /* Shouldn't happen */
 
+            /* Extract the authType token from the list of indexes */
+            idx = table_info->indexes->next_variable->next_variable->next_variable->next_variable;
+            memset(atype, 0, sizeof(atype));
+            strncpy(atype, (char *)idx->val.string, idx->val_len);
+            viewIdx = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, atype);
+
             switch (table_info->colnum) {
             case COLUMN_NSVACMCONTEXTMATCH:
                 entry->contextMatch = *request->requestvb->val.integer;
                 break;
             case COLUMN_NSVACMVIEWNAME:
-                /* Extract the authType token from the list of indexes */
-                idx = table_info->indexes->next_variable->next_variable->next_variable->next_variable;
-                memset(atype, 0, sizeof(atype));
-                strncpy(atype, idx->val.string, idx->val_len);
-                viewIdx = se_find_value_in_slist(VACM_VIEW_ENUM_NAME, atype);
-
                 memset( entry->views[viewIdx], 0, VACMSTRINGLEN );
                 memcpy( entry->views[viewIdx], request->requestvb->val.string,
                                                request->requestvb->val_len);
@@ -297,7 +325,11 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
                 entry->storageType = *request->requestvb->val.integer;
                 break;
             case COLUMN_NSVACMACCESSSTATUS:
-                entry->status = *request->requestvb->val.integer;
+                switch (*request->requestvb->val.integer) {
+                case RS_DESTROY:
+                    memset( entry->views[viewIdx], 0, VACMSTRINGLEN );
+                    break;
+                }
                 break;
             }
         }
