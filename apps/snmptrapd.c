@@ -1158,14 +1158,18 @@ main(int argc, char *argv[])
     /* register our authorization handler */
     init_netsnmp_trapd_auth();
 
-#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX) && defined(USING_SNMPV3_USMUSER_MODULE)
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
     if (agentx_subagent) {
+#if defined(USING_SNMPV3_USMUSER_MODULE)
         extern void init_register_usmUser_context(const char *);
-        extern void init_register_nsVacm_context(const char *);
         /* register ourselves as having a USM user database */
         init_register_usmUser_context("snmptrapd");
+#endif
+#if defined(USING_AGENT_NSVACMACCESSTABLE_MODULE)
+        extern void init_register_nsVacm_context(const char *);
         /* register net-snmp vacm extensions */
         init_register_nsVacm_context("snmptrapd");
+#endif
     }
 #endif
 
