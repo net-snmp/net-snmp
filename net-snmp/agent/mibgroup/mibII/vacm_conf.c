@@ -827,11 +827,12 @@ vacm_create_simple(const char *token, char *confline,
 #endif
     const char     *rw = "none";
     char            model[SPRINT_MAX_LEN];
-    char           *cp;
+    char           *cp, *tmp;
     char            secname[SPRINT_MAX_LEN];
     char            grpname[SPRINT_MAX_LEN];
     char            authlevel[SPRINT_MAX_LEN];
     char            context[SPRINT_MAX_LEN];
+    int             ctxprefix = 0;
     static int      commcount = 0;
     /* Conveniently, the community-based security
        model values can also be used as bit flags */
@@ -933,8 +934,14 @@ vacm_create_simple(const char *token, char *confline,
     /*
      * optional, non-default context
      */
-    if (cp && *cp)
+    if (cp && *cp) {
         cp = copy_nword(cp, context, sizeof(context));
+        tmp = (context + strlen(context)-1);
+        if (tmp && *tmp == '*') {
+            *tmp = '\0';
+            ctxprefix = 1;
+        }
+    }
 
     if (viewtypes & VACM_VIEW_WRITE_BIT)
         rw = viewname;
@@ -1024,9 +1031,11 @@ vacm_create_simple(const char *token, char *confline,
          * access  anonymousGroupNameNUM  "" MODEL AUTHTYPE prefix anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] 
          */
         snprintf(line, sizeof(line),
-                 "%s %s %s %s prefix %s %s %s",
+                 "%s %s %s %s %s %s %s %s",
                  grpname, context[0] ? context : "\"\"",
-                 model, authlevel, viewname, rw, rw);
+                 model, authlevel,
+                (ctxprefix ? "prefix" : "exact"),
+                 viewname, rw, rw);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "access", line));
         vacm_parse_access("access", line);
@@ -1040,9 +1049,10 @@ vacm_create_simple(const char *token, char *confline,
         for(i = 0; i <= VACM_MAX_VIEWS; i++) {
             if (viewtypes & (1 << i)) {
                 snprintf(line, sizeof(line),
-                         "%s %s %s %s prefix %s %s",
+                         "%s %s %s %s %s %s %s",
                          grpname, context[0] ? context : "\"\"",
                          model, authlevel,
+                        (ctxprefix ? "prefix" : "exact"),
                          se_find_label_in_slist(VACM_VIEW_ENUM_NAME, i),
                          viewname);
                 line[ sizeof(line)-1 ] = 0;
