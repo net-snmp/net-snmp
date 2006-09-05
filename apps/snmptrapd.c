@@ -1160,13 +1160,15 @@ main(int argc, char *argv[])
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
     if (agentx_subagent) {
-#if defined(USING_SNMPV3_USMUSER_MODULE)
+#ifdef USING_AGENT_NSVACMACCESSTABLE_MODULE
+        extern void init_register_nsVacm_context(const char *);
+#endif
+#ifdef USING_SNMPV3_USMUSER_MODULE
         extern void init_register_usmUser_context(const char *);
         /* register ourselves as having a USM user database */
         init_register_usmUser_context("snmptrapd");
 #endif
-#if defined(USING_AGENT_NSVACMACCESSTABLE_MODULE)
-        extern void init_register_nsVacm_context(const char *);
+#ifdef USING_AGENT_NSVACMACCESSTABLE_MODULE
         /* register net-snmp vacm extensions */
         init_register_nsVacm_context("snmptrapd");
 #endif
