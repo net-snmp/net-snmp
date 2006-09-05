@@ -4,10 +4,14 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 *5.4*
 
     snmpd:
+      - new MIB table for managing Net-SNMP access control extensions
+          (see NET-SNMP-VACM-MIB)
       - fix disman/event monitoring crashes (official patch 1429059)
       - fix bug 1399369: ifNumber broken
       - fix re-init of daemons after SIGHUP (official patch 1473289)
       - fix trap processing from SMUX peers (patch 1430824)
+      - access control settings now only apply to the default context
+          unless explicitly stated.
 
     snmptrapd:
       - fix bug 1420758/1458815: snmptrapd aborts/loops in select()
@@ -21,6 +25,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     snmpusm:
       - performance improvement when changing localized keys
       - new option -Cp to set usmUserPublic value
+
+    snmpvacm:
+      - new commands to manipulate Net-SNMP access control extensions
 
     mib2c:
       - New mib2c.emulation.conf provides a quick way to do simplistic
