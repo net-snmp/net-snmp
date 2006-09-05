@@ -257,6 +257,7 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
         if (0 != rm_status->count)
             netsnmp_assert(saved_requests[i] == request);
         saved_requests[i] = request;
+        saved_requests[i]->prev = NULL;
     }
     saved_requests[i] = NULL;
 
@@ -302,6 +303,7 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
                 DEBUGMSG(("helper:row_merge", " match\n"));
                 saved_requests[tail]->next = saved_requests[j];
                 saved_requests[j]->next    = NULL;
+                saved_requests[j]->prev = saved_requests[tail];
 	        saved_status[j] = ROW_MERGE_ACTIVE;
 	        tail = j;
             }
@@ -338,8 +340,11 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
     /*
      * restore original linked list
      */
-    for (i=0; i<count; i++)
+    for (i=0; i<count; i++) {
 	saved_requests[i]->next = saved_requests[i+1];
+        if (i>0)
+	    saved_requests[i]->prev = saved_requests[i-1];
+    }
 
     return final_rc;
 }
