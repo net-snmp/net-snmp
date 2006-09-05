@@ -160,31 +160,39 @@ required by the encrypting algorithm (MD5: 16 bytes, SHA: 20 bytes).
 Most simple access control requirements can be specified using the
 directives \fIrouser\fR/\fIrwuser\fR (for SNMPv3) or
 \fIrocommunity\fR/\fIrwcommunity\fR (for SNMPv1 or SNMPv2c).
-.IP "rouser USER [noauth|auth|priv [OID]]"
-.IP "rwuser USER [noauth|auth|priv [OID]]"
+.IP "rouser USER [noauth|auth|priv [OID | -V VIEW [CONTEXT]]]"
+.IP "rwuser USER [noauth|auth|priv [OID | -V VIEW [CONTEXT]]]"
 specify an SNMPv3 user that will be allowed read-only (GET and GETNEXT)
 or read-write (GET, GETNEXT and SET) access respectively.
 By default, this will provide access to the full OID tree for authenticated
-(including encrypted) SNMPv3 requests.
+(including encrypted) SNMPv3 requests, using the default context.
 An alternative minimum security level can be specified using \fInoauth\fR
 (to allow unauthenticated requests), or \fIpriv\fR (to enforce use of
 encryption).  The OID field restricts access for that
-user to the subtree rooted at the given OID.
-.IP "rocommunity COMMUNITY [SOURCE [OID]]"
-.IP "rwcommunity COMMUNITY [SOURCE [OID]]"
+user to the subtree rooted at the given OID, or the named view.
+An optional context can also be specified, or "context*" to denote a context
+prefix.  The token "*" will match all possible contexts.
+.IP
+NB: This is a change in behaviour from preview releases, where this directive
+would match all contexts by default.  The original behaviour can be restored
+by appending (some or all of) "auth -V _all_ *" to the previous directive.
+.IP "rocommunity COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]"
+.IP "rwcommunity COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]"
 specify an SNMPv1 or SNMPv2c community that will be allowed read-only
 (GET and GETNEXT) or read-write (GET, GETNEXT and SET) access respectively.
 By default, this will provide access to the full OID tree for such requests,
 regardless of where they were sent from. The SOURCE token can be used to
 restrict access to requests from the specified system(s) - see
 \fIcom2sec\fR for the full details.  The OID field restricts access for
-that community to the subtree rooted at the given OID.
-.IP "rocommunity6 COMMUNITY [SOURCE [OID]]"
-.IP "rwcommunity6 COMMUNITY [SOURCE [OID]]"
+that community to the subtree rooted at the given OID, or named view.
+Contexts are typically less relevant to community-based SNMP versions,
+but the same behaviour applies here.
+.IP "rocommunity6 COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]"
+.IP "rwcommunity6 COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]"
 are directives relating to requests received using IPv6
 (if the agent supports such transport domains).
-The interpretation of the SOURCE and OID tokens are exactly the same as for
-the IPv4 versions.
+The interpretation of the SOURCE, OID, VIEW and CONTEXT tokens are exactly
+the same as for the IPv4 versions.
 .PP
 In each case, only one directive should be specified for a given SNMPv3 user,
 or community string.
