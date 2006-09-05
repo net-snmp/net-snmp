@@ -32,6 +32,16 @@ GROUPNAME [CONTEXTPREFIX] MODEL LEVEL CONTEXTMATCH READVIEW WRITEVIEW NOTIFYVIEW
 [COMMON OPTIONS] 
 .B deleteAccess
 GROUPNAME [CONTEXTPREFIX] MODEL LEVEL
+.br
+.B snmpvacm
+[COMMON OPTIONS] 
+.B createAuth
+GROUPNAME [CONTEXTPREFIX] MODEL LEVEL AUTHTYPE CONTEXTMATCH VIEW 
+.br
+.B snmpvacm
+[COMMON OPTIONS] 
+.B deleteAuth
+GROUPNAME [CONTEXTPREFIX] MODEL LEVEL AUTHTYPE
 
 .SH DESCRIPTION
 .B snmpvacm
@@ -236,6 +246,44 @@ security model and security level values,
 which should match those used in the corresponding
 .B createAccess
 command (or equivalent).
+
+.SS createAuth \fRGROUPNAME [CONTEXTPREFIX] MODEL LEVEL AUTHTYPE CONTEXTMATCH VIEW\fP
+Create an entry in the Net-SNMP extension to the standard access table,
+thus allowing a certain type of access to the MIB view for the principals
+in the specified group.
+The interpretation of GROUPNAME, CONTEXTPREFIX, MODEL, LEVEL and CONTEXTMATCH
+are the same as for the
+.B createAccess
+directive.
+The extension access table is indexed by the group name, context prefix,
+security model, security level and authtype values.
+.PP
+AUTHTYPE
+.IP
+The style of access that this entry should be applied to.
+See
+.I "snmpd.conf(5)"
+and
+.I "snmptrapd.conf(5)"
+for details of valid tokens.
+.PP
+VIEW
+.IP
+The name of the MIB view
+(as set up by
+.B createView
+or equivalent)
+defining the MIB objects for which this style of access is authorized.
+
+.SS deleteAuth \fRGROUPNAME [CONTEXTPREFIX] MODEL LEVEL AUTHTYPE\fP
+Delete an entry from the extension access table, thus removing the specified
+access control settings.
+The entry to be removed is indexed by the group name, context prefix,
+security model, security level and authtype values,
+which should match those used in the corresponding
+.B createAuth
+command (or equivalent).
+
 .SH EXAMPLES
 .PP
 Given a pre-existing user

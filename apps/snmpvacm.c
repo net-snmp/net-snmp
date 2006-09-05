@@ -65,8 +65,12 @@ int             main(int, char **);
 #define CMD_CREATEVIEW      		5
 #define CMD_DELETEVIEW_NAME 		"deleteView"
 #define CMD_DELETEVIEW      		6
+#define CMD_CREATEAUTH_NAME     	"createAuth"
+#define CMD_CREATEAUTH          	7
+#define CMD_DELETEAUTH_NAME 		"deleteAuth"
+#define CMD_DELETEAUTH      		8
 
-#define CMD_NUM    6
+#define CMD_NUM    8
 
 static const char *successNotes[CMD_NUM] = {
     "Sec2group successfully created.",
@@ -74,12 +78,15 @@ static const char *successNotes[CMD_NUM] = {
     "Access successfully created.",
     "Access successfully deleted.",
     "View successfully created.",
-    "View successfully deleted."
+    "View successfully deleted.",
+    "AuthAccess successfully created.",
+    "AuthAccess successfully deleted."
 };
 
 #define                   SEC2GROUP_OID_LEN	11
 #define                   ACCESS_OID_LEN   	11
 #define                   VIEW_OID_LEN    	12
+#define                   AUTH_OID_LEN   	12
 
 static oid      vacmGroupName[MAX_OID_LEN] =
     { 1, 3, 6, 1, 6, 3, 16, 1, 2, 1, 3 },
@@ -101,6 +108,12 @@ static oid      vacmGroupName[MAX_OID_LEN] =
 
 ;
 
+#define NSVACMACCESSTABLE    1, 3, 6, 1, 4, 1, 8072, 1, 9, 1
+static oid nsVacmContextPfx[MAX_OID_LEN]  = { NSVACMACCESSTABLE, 1, 2 };
+static oid nsVacmViewName[MAX_OID_LEN]    = { NSVACMACCESSTABLE, 1, 3 };
+static oid nsVacmStorageType[MAX_OID_LEN] = { NSVACMACCESSTABLE, 1, 4 };
+static oid nsVacmRowStatus[MAX_OID_LEN]   = { NSVACMACCESSTABLE, 1, 5 };
+
 int             viewTreeFamilyType = 1;
 
 void
@@ -117,8 +130,39 @@ usage(void)
     fprintf(stderr, "        deleteSec2Group  MODEL SECURITYNAME\n");
     fprintf(stderr, "  [-Ce] createView       NAME SUBTREE [MASK]\n");
     fprintf(stderr, "        deleteView       NAME SUBTREE\n");
+    fprintf(stderr, "        createAuth       GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL AUTHTYPE CONTEXTMATCH VIEWNAME\n");
+    fprintf(stderr, "        deleteAuth       GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL AUTHTYPE\n");
 }
 
+
+void
+auth_oid(oid * it, size_t * len, const char *groupName,
+           const char *prefix, int model, int level, const char *authtype)
+{
+    int             i;
+    int             itIndex = AUTH_OID_LEN;
+
+    it[itIndex++] = strlen(groupName);
+    for (i = 0; i < (int) strlen(groupName); i++)
+        it[itIndex++] = groupName[i];
+
+    if (prefix) {
+        *len += strlen(prefix);
+        it[itIndex++] = strlen(prefix);
+        for (i = 0; i < (int) strlen(prefix); i++)
+            it[itIndex++] = prefix[i];
+    } else
+        it[itIndex++] = 0;
+
+    it[itIndex++] = model;
+    it[itIndex++] = level;
+
+    it[itIndex++] = strlen(authtype);
+    for (i = 0; i < (int) strlen(authtype); i++)
+        it[itIndex++] = authtype[i];
+
+    *len = itIndex;
+}
 
 void
 access_oid(oid * it, size_t * len, const char *groupName,
@@ -241,7 +285,7 @@ main(int argc, char *argv[])
     int             command = 0;
     long            longvar;
     int             secModel, secLevel, contextMatch, val, i = 0;
-    char           *mask, *groupName, *prefix;
+    char           *mask, *groupName, *prefix, *authtype;
     u_char          viewMask[VACMSTRINGLEN];
     char           *st;
 
@@ -530,6 +574,103 @@ main(int argc, char *argv[])
         snmp_pdu_add_variable(pdu, vacmAccessNotifyViewName, name_length,
                               ASN_OCTET_STR, (u_char *) argv[arg + 6],
                               strlen(argv[arg + 6]));
+    } else if (strcmp(argv[arg], CMD_DELETEAUTH_NAME) == 0)
+        /*
+         * deleteAuth: delete authAccess entry
+         *
+         * deleteAuth  GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL AUTHTYPE
+         *
+         */
+    {
+        if (++arg + 4 > argc) {
+            fprintf(stderr,
+                    "You must specify the authAccess entry to delete\n");
+            usage();
+            exit(1);
+        }
+
+        command = CMD_DELETEAUTH;
+        name_length = AUTH_OID_LEN;
+        groupName = argv[arg];
+        if (arg + 5 == argc)
+            prefix = argv[++arg];
+        else
+            prefix = NULL;
+
+        if (sscanf(argv[arg + 1], "%d", &secModel) == 0) {
+            printf("invalid security model\n");
+            usage();
+            exit(1);
+        }
+        if (sscanf(argv[arg + 2], "%d", &secLevel) == 0) {
+            printf("invalid security level\n");
+            usage();
+            exit(1);
+        }
+        authtype = argv[arg+3];
+        auth_oid(nsVacmRowStatus, &name_length, groupName, prefix,
+                   secModel, secLevel, authtype);
+        longvar = RS_DESTROY;
+        snmp_pdu_add_variable(pdu, nsVacmRowStatus, name_length,
+                              ASN_INTEGER, (u_char *) & longvar,
+                              sizeof(longvar));
+    } else if (strcmp(argv[arg], CMD_CREATEAUTH_NAME) == 0)
+        /*
+         * createAuth: create authAccess entry
+         *
+         * createAuth  GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL AUTHTYPE CONTEXTMATCH VIEWNAME
+         *
+         */
+    {
+        if (++arg + 6 > argc) {
+            fprintf(stderr,
+                    "You must specify the authAccess entry to create\n");
+            usage();
+            exit(1);
+        }
+
+        command = CMD_CREATEAUTH;
+        name_length = AUTH_OID_LEN;
+        groupName = argv[arg];
+        if (arg + 7 == argc)
+            prefix = argv[++arg];
+        else
+            prefix = NULL;
+
+        if (sscanf(argv[arg + 1], "%d", &secModel) == 0) {
+            printf("invalid security model\n");
+            usage();
+            exit(1);
+        }
+        if (sscanf(argv[arg + 2], "%d", &secLevel) == 0) {
+            printf("invalid security level\n");
+            usage();
+            exit(1);
+        }
+        authtype = argv[arg+3];
+        auth_oid(nsVacmRowStatus, &name_length, groupName, prefix,
+                   secModel, secLevel, authtype);
+        longvar = RS_CREATEANDGO;
+        snmp_pdu_add_variable(pdu, nsVacmRowStatus, name_length,
+                              ASN_INTEGER, (u_char *) & longvar,
+                              sizeof(longvar));
+
+        auth_oid(nsVacmContextPfx, &name_length, groupName, prefix,
+                   secModel, secLevel, authtype);
+        if (sscanf(argv[arg + 4], "%d", &contextMatch) == 0) {
+            printf("invalid contextMatch\n");
+            usage();
+            exit(1);
+        }
+        snmp_pdu_add_variable(pdu, nsVacmContextPfx, name_length,
+                              ASN_INTEGER, (u_char *) & contextMatch,
+                              sizeof(contextMatch));
+
+        auth_oid(nsVacmViewName, &name_length, groupName, prefix,
+                   secModel, secLevel, authtype);
+        snmp_pdu_add_variable(pdu, nsVacmViewName, name_length,
+                              ASN_OCTET_STR, (u_char *) argv[arg + 5],
+                              strlen(argv[arg + 5]));
     } else {
         printf("Unknown command\n");
         usage();
