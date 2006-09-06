@@ -139,7 +139,7 @@ config_exclude(mibII/interfaces)
         /*
          * ifInNUcastPkts(12)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifInNUcastPkts;
+#define ifInNUcastPkts ifentry->stats.inucast
 
         /*
          * ifInDiscards(13)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
@@ -206,22 +206,22 @@ config_exclude(mibII/interfaces)
         /*
          * ifInMulticastPkts(2)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifInMulticastPkts;
+#define ifInMulticastPkts ifentry->stats.imcast.low
 
         /*
          * ifInBroadcastPkts(3)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifInBroadcastPkts;
+#define ifInBroadcastPkts ifentry->stats.ibcast.low
 
         /*
          * ifOutMulticastPkts(4)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifOutMulticastPkts;
+#define ifOutMulticastPkts ifentry->stats.omcast.low
 
         /*
          * ifOutBroadcastPkts(5)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifOutBroadcastPkts;
+#define ifOutBroadcastPkts ifentry->stats.obcast.low
 
         /*
          * ifHCInOctets(6)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
@@ -271,7 +271,7 @@ config_exclude(mibII/interfaces)
         /*
          * ifHighSpeed(15)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifHighSpeed;
+#define ifHighSpeed ifentry->speed_high
 
         /*
          * ifPromiscuousMode(16)/TruthValue/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h

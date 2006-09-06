@@ -383,11 +383,13 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
     
     /*
      * calculated stats.
-         *
-         *  we have imcast, but not ibcast.
-         */
+     *
+     *  we have imcast, but not ibcast.
+     */
     entry->stats.inucast = entry->stats.imcast.low +
         entry->stats.ibcast.low;
+    entry->stats.onucast = entry->stats.omcast.low +
+        entry->stats.obcast.low;
     
     return 0;
 }
