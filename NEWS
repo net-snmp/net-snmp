@@ -48,6 +48,11 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
    Non-linux:
       - fix 8 byte IpAddress in at, ip and route MIBs.
 
+   FreeBSD:
+   OpenBSD:
+      - experimental support for 64bit interface counters (ifXTable). enable
+        via '--with-mib-modules=if-mib'.
+
    Linux:
       - add IPv6 aware UDP and TCP mibs to default module list
 
