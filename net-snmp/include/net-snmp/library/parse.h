@@ -191,6 +191,7 @@ SOFTWARE.
 #define TYPE_MODID	    24
 #define TYPE_AGENTCAP       25
 #define TYPE_MODCOMP        26
+#define TYPE_OBJIDENTITY    27
 
 #define MIB_ACCESS_READONLY    18
 #define MIB_ACCESS_READWRITE   19
