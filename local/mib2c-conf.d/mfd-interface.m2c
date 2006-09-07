@@ -651,7 +651,7 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
 
 ########################################################################
 ##
-@if ($m2c_table_row_creation == 1) || ($m2c_table_persistent == 1@)@
+@if ($m2c_table_row_creation == 1) || ($m2c_table_persistent == 1)@
 /**
  * @internal
  * wrapper
