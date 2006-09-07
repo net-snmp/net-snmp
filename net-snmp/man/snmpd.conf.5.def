@@ -171,11 +171,8 @@ An alternative minimum security level can be specified using \fInoauth\fR
 encryption).  The OID field restricts access for that
 user to the subtree rooted at the given OID, or the named view.
 An optional context can also be specified, or "context*" to denote a context
-prefix.  The token "*" will match all possible contexts.
-.IP
-NB: This is a change in behaviour from preview releases, where this directive
-would match all contexts by default.  The original behaviour can be restored
-by appending (some or all of) "auth -V _all_ *" to the previous directive.
+prefix.  If no context field is specified (or the token "*" is used), the
+directive will match all possible contexts.
 .IP "rocommunity COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]"
 .IP "rwcommunity COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]"
 specify an SNMPv1 or SNMPv2c community that will be allowed read-only
