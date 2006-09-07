@@ -10,8 +10,6 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - fix bug 1399369: ifNumber broken
       - fix re-init of daemons after SIGHUP (official patch 1473289)
       - fix trap processing from SMUX peers (patch 1430824)
-      - access control settings now only apply to the default context
-          unless explicitly stated.
 
     snmptrapd:
       - fix bug 1420758/1458815: snmptrapd aborts/loops in select()
