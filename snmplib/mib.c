@@ -4482,6 +4482,9 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
         case TYPE_MODID:
             cp = " MODULE-IDENTITY";
             break;
+        case TYPE_OBJIDENTITY:
+            cp = " OBJECT-IDENTITY";
+            break;
         case TYPE_MODCOMP:
             cp = " MODULE-COMPLIANCE";
             break;
