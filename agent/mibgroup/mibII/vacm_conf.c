@@ -832,7 +832,7 @@ vacm_create_simple(const char *token, char *confline,
     char            grpname[SPRINT_MAX_LEN];
     char            authlevel[SPRINT_MAX_LEN];
     char            context[SPRINT_MAX_LEN];
-    int             ctxprefix = 0;
+    int             ctxprefix = 1;  /* Default to matching all contexts */
     static int      commcount = 0;
     /* Conveniently, the community-based security
        model values can also be used as bit flags */
@@ -940,6 +940,16 @@ vacm_create_simple(const char *token, char *confline,
         if (tmp && *tmp == '*') {
             *tmp = '\0';
             ctxprefix = 1;
+        } else {
+            /*
+             * If no context field is given, then we default to matching
+             *   all contexts (for compatability with previous releases).
+             * But if a field context is specified (not ending with '*')
+             *   then this should be taken as an exact match.
+             * Specifying a context field of "" will match the default
+             *   context (and *only* the default context).
+             */
+            ctxprefix = 0;
         }
     }
 
