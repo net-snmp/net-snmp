@@ -198,7 +198,9 @@ extern          "C" {
     int             marker_tticks(marker_t pm);
     int             timeval_tticks(struct timeval *tv);
     char            *netsnmp_getenv(const char *name);
-    
+
+    int             netsnmp_addrstr_hton(char *ptr, size_t len);
+
 #ifdef __cplusplus
 }
 #endif
