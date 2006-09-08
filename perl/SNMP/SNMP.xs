@@ -2336,6 +2336,8 @@ _bulkwalk_finish(walk_context *context, int okay)
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
 
    dSP;
+   dMARK;
+   dITEMS;
 
    async = SvTRUE(context->perl_cb);
 
@@ -2344,6 +2346,8 @@ _bulkwalk_finish(walk_context *context, int okay)
    ** items pushed onto the stack.  For async, create a new array and push
    ** the references onto it.  The array is then passed to the Perl callback.
    */
+   if(!async)
+       SP -= items;
 
    DBPRT(1, (DBOUT "Bulwalk %s (saved %d/%d), ", okay ? "completed" : "had error",
 					context->oid_saved, context->oid_total));
@@ -2413,6 +2417,8 @@ _bulkwalk_finish(walk_context *context, int okay)
    ** saved vs. received, total time, etc) available to caller so they
    ** can adjust their request parameters and/or re-order requests.
    */
+   if(!async)
+       SP -= items;
 
    PUTBACK;
 
