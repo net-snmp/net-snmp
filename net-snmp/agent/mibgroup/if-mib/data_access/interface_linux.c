@@ -293,6 +293,8 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          */
         entry->stats.inucast = entry->stats.imcast.low +
             entry->stats.ibcast.low;
+        entry->stats.onucast = entry->stats.omcast.low +
+            entry->stats.obcast.low;
 
         /*
          * use ioctls for some stuff
