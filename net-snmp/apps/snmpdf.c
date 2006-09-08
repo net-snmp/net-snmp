@@ -174,6 +174,11 @@ collect(netsnmp_session * ss, netsnmp_pdu *pdu,
             snmp_sess_perror("snmpdf", ss);
             exit(1);
         }
+        if (response->errstat != SNMP_ERR_NOERROR) {
+            fprintf(stderr, "snmpdf: Error in packet: %s\n"
+                      snmp_errstring(response->errstat));
+            exit(1);
+        }
         if (response && snmp_oid_compare(response->variables->name,
                                          SNMP_MIN(base_length,
                                                   response->variables->
