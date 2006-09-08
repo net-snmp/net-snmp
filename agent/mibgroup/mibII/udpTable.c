@@ -213,12 +213,12 @@ udpTable_handler(netsnmp_mib_handler          *handler,
                 addr = ntohl(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr));
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
                                          (u_char*)&addr,
-                                         sizeof(addr));
+                                         sizeof(uint32_t));
 #else
                 addr = UDP_ADDRESS_TO_HOST_ORDER(entry->UDPTABLE_LOCALADDRESS);
 	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
                                          (u_char *)&addr,
-                                         sizeof(addr));
+                                         sizeof(uint32_t));
 #endif
                 break;
             case UDPLOCALPORT:
