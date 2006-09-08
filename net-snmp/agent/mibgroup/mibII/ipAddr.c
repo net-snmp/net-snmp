@@ -293,6 +293,7 @@ var_ipAddrEntry(struct variable *vp,
     *var_len = sizeof(long_return);
     switch (vp->magic) {
     case IPADADDR:
+       *var_len = sizeof(uint32_t);
 #ifdef hpux11
         long_return = lowin_ifaddr.Addr;
         return (u_char *) & long_return;
@@ -308,6 +309,7 @@ var_ipAddrEntry(struct variable *vp,
         long_return = lowinterface;
         return (u_char *) & long_return;
     case IPADNETMASK:
+       *var_len = sizeof(uint32_t);
 #ifdef hpux11
         long_return = lowin_ifaddr.NetMask;
         return (u_char *) & long_return;
@@ -912,6 +914,7 @@ var_ipAddrEntry(struct variable *vp,
     *var_len = sizeof(long_return);
     switch (vp->magic) {
     case IPADADDR:
+       *var_len = sizeof(uint32_t);
         long_return = ifs[i].addr.s_addr;
         return (u_char *) & long_return;
 
@@ -920,6 +923,7 @@ var_ipAddrEntry(struct variable *vp,
         return (u_char *) & long_return;
 
     case IPADNETMASK:
+       *var_len = sizeof(uint32_t);
         long_return = ifs[i].mask.s_addr;
         return (u_char *) & long_return;
 
@@ -1021,6 +1025,7 @@ var_ipAddrEntry(struct variable *vp,
     *var_len = sizeof(long_return);
     switch (vp->magic) {
     case IPADADDR:
+       *var_len = sizeof(uint32_t);
         long_return = pIpAddrTable->table[i].dwAddr;
         return (u_char *) & long_return;
 
@@ -1030,6 +1035,7 @@ var_ipAddrEntry(struct variable *vp,
         return (u_char *) & long_return;
 
     case IPADNETMASK:
+       *var_len = sizeof(uint32_t);
         long_return = pIpAddrTable->table[i].dwMask;
         free(pIpAddrTable);
         return (u_char *) & long_return;
