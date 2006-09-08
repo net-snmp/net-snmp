@@ -169,11 +169,20 @@ _load4(netsnmp_container *container, u_int load_flags)
             break;
         }
 
-        entry->loc_port = htons((unsigned short) local_port);
-        entry->rmt_port = htons((unsigned short) remote_port);
+        /** oddly enough, these appear to already be in network order */
+        entry->loc_port = (unsigned short) local_port;
+        entry->rmt_port = (unsigned short) remote_port;
         entry->tcpConnState = state;
+        
+        /** the addr string may need work */
         buf_len = strlen(local_addr);
-        netsnmp_assert(8 == buf_len);
+        if ((8 != buf_len) ||
+            (-1 == netsnmp_addrstr_hton(local_addr, 8))) {
+            DEBUGMSGT(("verbose:access:tcpconn:container",
+                       " error processing local address\n"));
+            netsnmp_access_tcpconn_entry_free(entry);
+            continue;
+        }
         offset = 0;
         tmp_ptr = entry->loc_addr;
         rc = netsnmp_hex_to_binary(&tmp_ptr, &buf_len,
@@ -188,8 +197,15 @@ _load4(netsnmp_container *container, u_int load_flags)
             continue;
         }
 
-        buf_len = strlen(remote_addr);
-        netsnmp_assert(8 == buf_len);
+        /** the addr string may need work */
+        buf_len = strlen((char*)remote_addr);
+        if ((8 != buf_len) ||
+            (-1 == netsnmp_addrstr_hton(remote_addr, 8))) {
+            DEBUGMSGT(("verbose:access:tcpconn:container",
+                       " error processing remote address\n"));
+            netsnmp_access_tcpconn_entry_free(entry);
+            continue;
+        }
         offset = 0;
         tmp_ptr = entry->rmt_addr;
         rc = netsnmp_hex_to_binary(&tmp_ptr, &buf_len,
@@ -244,6 +260,8 @@ _load6(netsnmp_container *container, u_int load_flags)
     fgets(line, sizeof(line), in); /* skip header */
 
     /*
+     * Note: PPC (big endian)
+     *
      *   sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
      *  0: 00000000000000000000000000000001:1466 00000000000000000000000000000000:0000 0A 00000000:00000000 00:00000000 00000000   500        0 326699 1 efb81580 3000 0 0 2 -1
      */
@@ -291,11 +309,20 @@ _load6(netsnmp_container *container, u_int load_flags)
             break;
         }
 
-        entry->loc_port = htons((unsigned short) local_port);
-        entry->rmt_port = htons((unsigned short) remote_port);
+        /** oddly enough, these appear to already be in network order */
+        entry->loc_port = (unsigned short) local_port;
+        entry->rmt_port = (unsigned short) remote_port;
         entry->tcpConnState = state;
 
-        buf_len = strlen(local_addr);
+        /** the addr string may need work */
+        buf_len = strlen((char*)local_addr);
+        if ((32 != buf_len) ||
+            (-1 == netsnmp_addrstr_hton(local_addr, 32))) {
+            DEBUGMSGT(("verbose:access:tcpconn:container",
+                       " error processing local address\n"));
+            netsnmp_access_tcpconn_entry_free(entry);
+            continue;
+        }
         offset = 0;
         tmp_ptr = entry->loc_addr;
         rc = netsnmp_hex_to_binary(&tmp_ptr, &buf_len,
@@ -310,7 +337,14 @@ _load6(netsnmp_container *container, u_int load_flags)
             continue;
         }
 
-        buf_len = strlen(remote_addr);
+        buf_len = strlen((char*)remote_addr);
+        if ((32 != buf_len) ||
+            (-1 == netsnmp_addrstr_hton(remote_addr, 32))) {
+            DEBUGMSGT(("verbose:access:tcpconn:container",
+                       " error processing remote address\n"));
+            netsnmp_access_tcpconn_entry_free(entry);
+            continue;
+        }
         offset = 0;
         tmp_ptr = entry->rmt_addr;
         rc = netsnmp_hex_to_binary(&tmp_ptr, &buf_len,
