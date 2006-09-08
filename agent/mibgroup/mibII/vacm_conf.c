@@ -844,6 +844,8 @@ vacm_create_simple(const char *token, char *confline,
      */
     strcpy(model, "any");
     memset(context, 0, sizeof(context));
+    memset(secname, 0, sizeof(secname));
+    memset(grpname, 0, sizeof(grpname));
 
     /*
      * community name or user name 
@@ -1008,6 +1010,9 @@ vacm_create_simple(const char *token, char *confline,
              * group   anonymousGroupNameNUM  any      anonymousSecNameNUM 
              */
             snprintf(grpname, sizeof(grpname), "grp%.28s", secname);
+            for (tmp=grpname; *tmp; tmp++)
+                if (!isalnum(*tmp))
+                    *tmp = '_';
             snprintf(line, sizeof(line),
                      "%s %s %s", grpname, model, secname);
             line[ sizeof(line)-1 ] = 0;
@@ -1016,6 +1021,9 @@ vacm_create_simple(const char *token, char *confline,
         }
     } else {
         snprintf(grpname, sizeof(grpname), "grp%.28s", secname);
+        for (tmp=grpname; *tmp; tmp++)
+            if (!isalnum(*tmp))
+                *tmp = '_';
     }
 
     /*
