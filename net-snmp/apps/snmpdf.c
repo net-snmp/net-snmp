@@ -175,7 +175,7 @@ collect(netsnmp_session * ss, netsnmp_pdu *pdu,
             exit(1);
         }
         if (response->errstat != SNMP_ERR_NOERROR) {
-            fprintf(stderr, "snmpdf: Error in packet: %s\n"
+            fprintf(stderr, "snmpdf: Error in packet: %s\n",
                       snmp_errstring(response->errstat));
             exit(1);
         }
