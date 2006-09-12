@@ -3915,9 +3915,9 @@ fi
 # attempt to figure out if sysctl is usable
 
 if test $cross_compiling = yes; then
-  AC_MSG_WARN([Can't check sysctl, manually define CAN_USE_SYSCTL if platform support available])
+  AC_MSG_WARN([Can't check sysctl, manually define NETSNMP_CAN_USE_SYSCTL if platform support available])
 else
-  AC_CACHE_CHECK(if sysctl can read kernel information,ac_cv_CAN_USE_SYSCTL,
+  AC_CACHE_CHECK(if sysctl can read kernel information,ac_cv_NETSNMP_CAN_USE_SYSCTL,
   [AC_TRY_RUN([
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -3952,11 +3952,11 @@ main() {
   else
     exit(1);
 }
-  ], ac_cv_CAN_USE_SYSCTL=yes, ac_cv_CAN_USE_SYSCTL=no, ac_cv_CAN_USE_SYSCTL=no)])
+  ], ac_cv_NETSNMP_CAN_USE_SYSCTL=yes, ac_cv_NETSNMP_CAN_USE_SYSCTL=no, ac_cv_NETSNMP_CAN_USE_SYSCTL=no)])
 fi
 
-if test "x$ac_cv_CAN_USE_SYSCTL" = "xyes"; then
-  AC_DEFINE(CAN_USE_SYSCTL)
+if test "x$ac_cv_NETSNMP_CAN_USE_SYSCTL" = "xyes"; then
+  AC_DEFINE(NETSNMP_CAN_USE_SYSCTL)
 fi
 
 #
