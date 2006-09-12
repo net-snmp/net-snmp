@@ -822,13 +822,14 @@ Perl:
 ])
 
 AC_ARG_ENABLE(embedded-perl,
-[  --enable-embedded-perl          Embed perl in the SNMP agent and snmptrapd.
-                                  [forces --with-perl-modules as well.]],
-    embed_perl="$enableval", embed_perl="no")
+[  --disable-embedded-perl         Disable embedded Perl in the SNMP agent and
+                                  snmptrapd. [enabled by default]],
+    embed_perl="$enableval", embed_perl="yes")
 
 AC_ARG_ENABLE(perl-cc-checks,
 [  --disable-perl-cc-checks        Disable configure checks for whether Perl's
-                                 C Compiler is compatible with ours.])
+                                 C Compiler is compatible with ours when
+                                 embedded perl is enabled.])
 
 # Common perl mistakes
 AC_ARG_ENABLE(perl-modules,,
@@ -957,21 +958,6 @@ fi
 if test "x$developer" != "xno" -a -f $srcdir/remove-files; then
   # turn on the developer flag when taken from a CVS checkout (not a release)
   developer="yes"
-fi
-
-# disable --enable-shared by default in cvs/developer cases.
-if test "x$developer" = "xyes"; then
-  # don't do anything if option set via cmdline
-  if test "${enable_shared+set}" != set; then
-    enable_shared=no
-  fi
-fi
-
-# perl requires shared libs
-if test "x$embed_perl" = "xyes"; then
-    if test "x$enable_shared" != "xyes"; then
-      AC_MSG_ERROR(--enable-embedded-perl requires --enable-shared)
-    fi
 fi
 
 AC_LANG([C])
@@ -2596,6 +2582,11 @@ if test "x$embed_perl" = "xyes"; then
     myperl=$ac_cv_path_PERLPROG
     if test $myperl = "no"; then
       AC_MSG_ERROR(--enable-embedded-perl requested but no perl executable found)
+    fi
+
+    # embedded perl requires shared libraries
+    if test "x$enable_shared" != "xyes"; then
+      AC_MSG_ERROR(--enable-embedded-perl requires --enable-shared)
     fi
 
     #
