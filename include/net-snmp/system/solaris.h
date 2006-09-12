@@ -34,4 +34,4 @@
 #define _SLASH_PROC_METHOD_ 1
 
 /* Solaris 7+ */
-#define DONT_USE_NLIST 1
+#define NETSNMP_DONT_USE_NLIST 1
