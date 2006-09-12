@@ -235,7 +235,7 @@
 #undef IFNET_NEEDS_KERNEL
 
 /* sysctl works to get boottime, etc... */
-#undef CAN_USE_SYSCTL
+#undef NETSNMP_CAN_USE_SYSCTL
 
 /* define if SIOCGIFADDR exists in sys/ioctl.h */
 #undef SYS_IOCTL_H_HAS_SIOCGIFADDR
@@ -1137,6 +1137,10 @@
 
 #ifdef NETSNMP_CAN_USE_NLIST
 #define CAN_USE_NLIST NETSNMP_CAN_USE_NLIST
+#endif
+
+#ifdef NETSNMP_CAN_USE_SYSCTL
+#define CAN_USE_SYSCTL NETSNMP_CAN_USE_SYSCTL
 #endif
 
 #endif /* NETSNMP_NO_LEGACY_DEFINITIONS */
