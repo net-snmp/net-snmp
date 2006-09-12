@@ -894,11 +894,11 @@ vacm_createAccessEntry(const char *groupName,
             break;
         if (cmp < 0)
             goto next;
-        if (lp->securityModel < securityModel)
-            break;
         if (lp->securityModel > securityModel)
+            break;
+        if (lp->securityModel < securityModel)
             goto next;
-        if (lp->securityLevel < securityLevel)
+        if (lp->securityLevel > securityLevel)
             break;
       next:
         op = lp;
