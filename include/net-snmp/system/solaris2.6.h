@@ -1,2 +1,2 @@
 #include "solaris.h"
-#undef DONT_USE_NLIST
+#undef NETSNMP_DONT_USE_NLIST

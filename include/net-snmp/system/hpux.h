@@ -3,7 +3,7 @@
 #define hpux hpux
 
 #ifdef hpux11
-#define DONT_USE_NLIST 1
+#define NETSNMP_DONT_USE_NLIST 1
 #endif
 
 #undef TCP_TTL_SYMBOL

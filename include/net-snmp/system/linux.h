@@ -1,6 +1,6 @@
 #include "sysv.h"
 
-#define DONT_USE_NLIST 1
+#define NETSNMP_DONT_USE_NLIST 1
 
 #undef NPROC_SYMBOL
 
