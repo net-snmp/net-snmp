@@ -22,7 +22,7 @@ AC_MSG_CACHE_INIT()
 #
 # save the configure arguments
 #
-AC_DEFINE_UNQUOTED(CONFIGURE_OPTIONS,"$ac_configure_args")
+AC_DEFINE_UNQUOTED(NETSNMP_CONFIGURE_OPTIONS,"$ac_configure_args")
 CONFIGURE_OPTIONS="\"$ac_configure_args"\"
 AC_SUBST(CONFIGURE_OPTIONS)
 
@@ -167,7 +167,7 @@ AC_ARG_ENABLE(mib-loading,
 [  --disable-mib-loading           Do not include code that parses and 
                                   manipulates the mib files.])
 if test "x$enable_mib_loading" = "xno"; then
-  AC_DEFINE([DISABLE_MIB_LOADING], 1, 
+  AC_DEFINE([NETSNMP_DISABLE_MIB_LOADING], 1, 
             [Define if mib loading and parsing code should not be included])
 fi
 AC_ARG_WITH(mib-loading,,
@@ -178,7 +178,7 @@ SNMP_VERSIONS=""
 AC_ARG_ENABLE(snmpv1,
 [  --disable-snmpv1                Do not include code that implements SNMPv1.])
 if test "x$enable_snmpv1" = "xno"; then
-  AC_DEFINE([DISABLE_SNMPV1], 1, 
+  AC_DEFINE([NETSNMP_DISABLE_SNMPV1], 1, 
             [Define if SNMPv1 code should not be included])
 else
   SNMP_VERSIONS="$SNMP_VERSIONS 1"
@@ -189,7 +189,7 @@ AC_ARG_WITH(snmpv1,,
 AC_ARG_ENABLE(snmpv2c,
 [  --disable-snmpv2c               Do not include code that implements SNMPv2c.])
 if test "x$enable_snmpv2c" = "xno"; then
-  AC_DEFINE([DISABLE_SNMPV2C], 1, 
+  AC_DEFINE([NETSNMP_DISABLE_SNMPV2C], 1, 
             [Define if SNMPv2c code should not be included])
 else
   SNMP_VERSIONS="$SNMP_VERSIONS 2c"
@@ -203,7 +203,7 @@ AC_MSG_CACHE_ADD(SNMP Versions Supported:   $SNMP_VERSIONS)
 AC_ARG_ENABLE(set-support,
 [  --disable-set-support           Do not allow SNMP set requests.])
 if test "x$enable_set_support" = "xno"; then
-  AC_DEFINE([DISABLE_SET_SUPPORT], 1, 
+  AC_DEFINE([NETSNMP_DISABLE_SET_SUPPORT], 1, 
             [Define if SNMP SET support should be disabled])
 fi
 AC_ARG_WITH(set-support,,
@@ -212,7 +212,7 @@ AC_ARG_WITH(set-support,,
 AC_ARG_ENABLE(des,
 [  --disable-des                   Do not support DES encryption.])
 if test "x$enable_des" = "xno"; then
-  AC_DEFINE([DISABLE_DES], 1, 
+  AC_DEFINE([NETSNMP_DISABLE_DES], 1, 
             [Define if DES encryption should not be supported])
 fi
 AC_ARG_WITH(des,,
@@ -221,7 +221,7 @@ AC_ARG_WITH(des,,
 AC_ARG_ENABLE(privacy,
 [  --disable-privacy               Don't compile in support for privacy (encryption).])
 if test "x$enable_privacy" != "xno"; then
-  AC_DEFINE(SCAPI_AUTHPRIV)
+  AC_DEFINE(NETSNMP_ENABLE_SCAPI_AUTHPRIV)
 fi
 AC_ARG_WITH(privacy,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-privacy/--disable-privacy instead ]) )
@@ -229,7 +229,7 @@ AC_ARG_WITH(privacy,,
 AC_ARG_ENABLE(md5,
 [  --disable-md5                   Do not support MD5 authentication.])
 if test "x$enable_md5" = "xno"; then
-  AC_DEFINE([DISABLE_MD5], 1, 
+  AC_DEFINE([NETSNMP_DISABLE_MD5], 1, 
             [Define if MD5 authentication should not be supported])
 fi
 AC_ARG_WITH(md5,,
@@ -241,7 +241,7 @@ if test "x$enable_internal_md5" = "xyes"; then
   if test "x$enable_md5" = "xno"; then
     AC_MSG_ERROR(You can not specify both --enable-internal-md5 and --disable-md5)
   else
-    AC_DEFINE(USE_INTERNAL_MD5)
+    AC_DEFINE(NETSNMP_USE_INTERNAL_MD5)
   fi
 fi
 AC_ARG_WITH(internal-md5,,
@@ -250,7 +250,7 @@ AC_ARG_WITH(internal-md5,,
 AC_ARG_ENABLE(ipv6,
 [  --enable-ipv6                   Generate IPv6 ready version.],
     [if test "x$enable_ipv6" = "xyes"; then
-      AC_DEFINE(INET6)
+      AC_DEFINE(NETSNMP_ENABLE_IPV6)
     fi])
 AC_ARG_WITH(ipv6,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-ipv6/--disable-ipv6 instead ]) )
@@ -258,7 +258,7 @@ AC_ARG_WITH(ipv6,,
 AC_ARG_ENABLE(local-smux,
 [  --enable-local-smux             Restrict SMUX connections to localhost (by default).],
     [if test "x$enable_local_smux" = "xyes"; then
-      AC_DEFINE(LOCAL_SMUX)
+      AC_DEFINE(NETSNMP_ENABLE_LOCAL_SMUX)
     fi])
 AC_ARG_WITH(local-smux,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-local-smux/--disable-local-smux instead ]) )
@@ -270,7 +270,7 @@ AC_ARG_ENABLE(debugging,
                                   which toggles debuging output at runtime.
   --disable-debugging             Disallows debugging code to be built in.
                                   This might provide some speed benefits.],
-    AC_DEFINE(SNMP_ALWAYS_DEBUG))
+    AC_DEFINE(NETSNMP_ALWAYS_DEBUG))
 AC_ARG_WITH(debugging,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-debugging/--disable-debugging instead ]) )
 
@@ -282,7 +282,7 @@ AC_ARG_WITH(developer,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-developer/--disable-developer instead ]) )
 
 if test "x$enable_debugging" = "xno"; then
-    AC_DEFINE(SNMP_NO_DEBUGGING)
+    AC_DEFINE(NETSNMP_NO_DEBUGGING)
 fi
 
 AC_ARG_WITH(dmalloc,
@@ -380,14 +380,14 @@ AC_ARG_ENABLE(rpm,,
 
 AC_ARG_ENABLE(agentx-dom-sock-only,
 [  --enable-agentx-dom-sock-only   Disable UDP/TCP transports for agentx.],
-AC_DEFINE(AGENTX_DOM_SOCK_ONLY))
+AC_DEFINE(NETSNMP_AGENTX_DOM_SOCK_ONLY))
 AC_ARG_WITH(agentx-dom-sock-only,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-agentx-dom-sock-only/--disable-agentx-dom-sock-only instead ]) )
 
 AC_ARG_ENABLE(snmptrapd-subagent,
 [  --disable-snmptrapd-subagent    Disable agentx subagent code in snmptrapd.])
 if test "x$enable_snmptrapd_subagent" = "xno"; then
-  AC_DEFINE(SNMPTRAPD_DISABLE_AGENTX)
+  AC_DEFINE(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
 fi
 AC_ARG_WITH(snmptrapd-subagent,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-snmptrapd-subagent/--disable-snmptrapd-subagent instead ]) )
@@ -406,8 +406,8 @@ AC_ARG_ENABLE(opaque-special-types,,
 AC_ARG_WITH(mibdirs,
 [  --with-mibdirs=\"dir1:dir2:\"   Default directories to look for mibs.
                                   (Default: \$HOME/.snmp/mibs:DATADIR/snmp/mibs)],
-    [DEFAULT_MIBDIRS="$with_mibdirs"
-    AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$with_mibdirs")])
+    [NETSNMP_DEFAULT_MIBDIRS="$with_mibdirs"
+    AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_MIBDIRS,"$with_mibdirs")])
 AC_ARG_ENABLE(mibdirs,,
 	AC_MSG_ERROR([ Invalid option. Use --with-mibdirs/--without-mibdirs instead ]) )
 
@@ -418,13 +418,13 @@ AC_ARG_WITH(mibs,
                                   with the addition of any mibs used
                                   by the mib modules the agent is
                                   configured with)],
-    DEFAULT_MIBS="$with_mibs")
+    NETSNMP_DEFAULT_MIBS="$with_mibs")
 # enable-mibs is valid too, but means something else
 
 AC_ARG_WITH(mibfiles,
 [  --with-mibfiles=\"file1:file2\" Default mib files to load.
                                   (Default:  none.  uses IDs above instead.)],
-    AC_DEFINE_UNQUOTED(DEFAULT_MIBFILES,"$with_mibfiles"))
+    AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_MIBFILES,"$with_mibfiles"))
 AC_ARG_ENABLE(mibfiles,,
 	AC_MSG_ERROR([ Invalid option. Use --with-mibfiles/--without-mibfiles instead ]) )
 
@@ -474,7 +474,7 @@ AC_ARG_ENABLE(testing-code,
                                   only be used for testing of certain
                                   SNMP functionalities.  This should *not* 
                                   be turned on for production use.  Ever.],
-    AC_DEFINE(SNMP_TESTING_CODE))
+    AC_DEFINE(NETSNMP_ENABLE_TESTING_CODE))
 AC_ARG_WITH(testing-code,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-testing-code/--disable-testing-code instead ]) )
 
@@ -515,7 +515,7 @@ AC_ARG_ENABLE(dummy-values,,
 
 AC_ARG_WITH(persistent-directory,
 [  --with-persistent-directory=\"directory\"
-                                  Default directory for persistent data storage.],ac_cv_user_prompt_PERSISTENT_DIRECTORY="$with_persistent_directory")
+                                  Default directory for persistent data storage.],ac_cv_user_prompt_NETSNMP_PERSISTENT_DIRECTORY="$with_persistent_directory")
 AC_ARG_ENABLE(persistent-directory,,
 	AC_MSG_ERROR([ Invalid option. Use --with-persistent-directory/--without-persistent-directory instead ]) )
 
@@ -527,10 +527,10 @@ AC_ARG_WITH(persistent-mask,
     AC_MSG_ERROR([ Please provide a mask value ]);
   fi
   AC_MSG_RESULT(using default persistent mask $withval)
-  AC_DEFINE_UNQUOTED(PERSISTENT_MASK,$withval)
+  AC_DEFINE_UNQUOTED(NETSNMP_PERSISTENT_MASK,$withval)
 ],[
   AC_MSG_RESULT(using default persistent mask $default_persistent_mask)
-  AC_DEFINE_UNQUOTED(PERSISTENT_MASK,$default_persistent_mask)
+  AC_DEFINE_UNQUOTED(NETSNMP_PERSISTENT_MASK,$default_persistent_mask)
 ])
 AC_ARG_ENABLE(persistent-mask,,
 	AC_MSG_ERROR([ Invalid option. Use --with-persistent-mask instead ]) )
@@ -550,10 +550,10 @@ AC_ARG_WITH(agentx-socket,
     AC_MSG_ERROR([ Please provide a full path ]);
   fi
   AC_MSG_RESULT(using AgentX socket $withval)
-  AC_DEFINE_UNQUOTED(AGENTX_SOCKET,"$withval",[Unix domain socket for AgentX master-subagent communication])
+  AC_DEFINE_UNQUOTED(NETSNMP_AGENTX_SOCKET,"$withval",[Unix domain socket for AgentX master-subagent communication])
 ],[
   AC_MSG_RESULT(using default AgentX socket $default_agentx_socket)
-  AC_DEFINE_UNQUOTED(AGENTX_SOCKET,"$default_agentx_socket",[Unix domain socket for AgentX master-subagent communication])
+  AC_DEFINE_UNQUOTED(NETSNMP_AGENTX_SOCKET,"$default_agentx_socket",[Unix domain socket for AgentX master-subagent communication])
 ])
 AC_ARG_ENABLE(agentx-socket,,
 	AC_MSG_ERROR([ Invalid option. Use --with-agentx-socket instead ]) )
@@ -562,14 +562,14 @@ AC_ARG_WITH(default-snmp-version,
 [  --with-default-snmp-version=\"3\" Default version of SNMP to use.
                                     (Default: 3)
                                     Legal values: 1, 2 (for SNMPv2c) or 3.],
-    ac_cv_user_prompt_DEFAULT_SNMP_VERSION="$with_default_snmp_version")
+    ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION="$with_default_snmp_version")
 AC_ARG_ENABLE(default-snmp-version,,
 	AC_MSG_ERROR([ Invalid option. Use --with-default-snmp-version/--without-default-snmp-version instead ]) )
 
 # we test this now and later as well.  we test it now so configure can die
 # early on with an error rather than waiting till the end of the script.
-if test "x$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "x"; then
-  if test "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "1" -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "2" -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "3"; then
+if test "x$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "x"; then
+  if test "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "1" -a "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "2" -a "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "3"; then
     AC_MSG_ERROR(Illegal version number passed to --with-default-snmp-version)
   fi
 fi
@@ -577,20 +577,20 @@ fi
 AC_ARG_WITH(sys_contact,
 [  --with-sys-contact=\"who@where\"  Default system contact.
                                     (Default: LOGIN@DOMAINNAME)],
-    ac_cv_user_prompt_SYS_CONTACT="$with_sys_contact")
+    ac_cv_user_prompt_NETSNMP_SYS_CONTACT="$with_sys_contact")
 AC_ARG_ENABLE(sys_contact,,
 	AC_MSG_ERROR([ Invalid option. Use --with-sys-contact/--without-sys-contact instead ]) )
 
 AC_ARG_WITH(sys_location,
 [  --with-sys-location=\"location\"  Default system location.
                                     (Default: Unknown)],
-    ac_cv_user_prompt_SYS_LOC="$with_sys_location")
+    ac_cv_user_prompt_NETSNMP_SYS_LOC="$with_sys_location")
 AC_ARG_ENABLE(sys_location,,
 	AC_MSG_ERROR([ Invalid option. Use --with-sys-location/--without-sys-location instead ]) )
 
 AC_ARG_WITH(logfile,
 [  --with-logfile=\"location\"       Default log file location for snmpd.],
-    ac_cv_user_prompt_LOGFILE="$with_logfile")
+    ac_cv_user_prompt_NETSNMP_LOGFILE="$with_logfile")
 AC_ARG_ENABLE(logfile,,
 	AC_MSG_ERROR([ Invalid option. Use --with-logfile/--without-logfile instead ]) )
 
@@ -738,11 +738,11 @@ AC_ARG_WITH(enterprise-oid,
   if test "$withval" = yes; then
     AC_MSG_ERROR([ Please provide a value for the enterprise number ]);
   fi
-  AC_DEFINE_UNQUOTED(ENTERPRISE_OID, $withval)
+  AC_DEFINE_UNQUOTED(NETSNMP_ENTERPRISE_OID, $withval)
   ent_oid="1,3,6,1,4,1,$withval"
-  AC_DEFINE_UNQUOTED(ENTERPRISE_MIB, $ent_oid)
+  AC_DEFINE_UNQUOTED(NETSNMP_ENTERPRISE_MIB, $ent_oid)
   ent_dot_oid="1.3.6.1.4.1.$withval"
-  AC_DEFINE_UNQUOTED(ENTERPRISE_DOT_MIB, $ent_dot_oid)
+  AC_DEFINE_UNQUOTED(NETSNMP_ENTERPRISE_DOT_MIB, $ent_dot_oid)
   AC_MSG_RESULT(using enterprise number $withval)
 ],[
   AC_MSG_RESULT(using default "enterprise.net-snmp")
@@ -760,11 +760,11 @@ AC_ARG_WITH(enterprise-sysoid,
     AC_MSG_ERROR([ Please provide a base OID value ]);
   fi
   sys_oid=`echo "$withval" | sed 's/^\.//' | sed 's/\./\,/g'`
-  AC_DEFINE_UNQUOTED(SYSTEM_MIB, $sys_oid)
+  AC_DEFINE_UNQUOTED(NETSNMP_SYSTEM_MIB, $sys_oid)
   sys_dot_oid=`echo "$withval" | sed 's/^\.//'`
-  AC_DEFINE_UNQUOTED(SYSTEM_DOT_MIB, $sys_dot_oid)
+  AC_DEFINE_UNQUOTED(NETSNMP_SYSTEM_DOT_MIB, $sys_dot_oid)
   sysoid_len=`echo "$withval" | sed 's/[^\.]//g' | awk -F\. '{ print NF }'`
-  AC_DEFINE_UNQUOTED(SYSTEM_DOT_MIB_LENGTH, $sysoid_len)
+  AC_DEFINE_UNQUOTED(NETSNMP_SYSTEM_DOT_MIB_LENGTH, $sysoid_len)
   AC_MSG_RESULT(using enterprise sysOID $withval ....)
 ],[
   AC_MSG_RESULT(using default enterprise sysOID "NET-SNMP-MIB::netSnmpAgentOIDs...")
@@ -782,11 +782,11 @@ AC_ARG_WITH(enterprise-notification-oid,
     AC_MSG_ERROR([ Please provide a base OID value ]);
   fi
   notification_oid=`echo "$withval" | sed 's/^\.//' | sed 's/\./\,/g'`
-  AC_DEFINE_UNQUOTED(NOTIFICATION_MIB, $notification_oid)
+  AC_DEFINE_UNQUOTED(NETSNMP_NOTIFICATION_MIB, $notification_oid)
   notification_dot_oid=`echo "$withval" | sed 's/^\.//'`
-  AC_DEFINE_UNQUOTED(NOTIFICATION_DOT_MIB, $notification_dot_oid)
+  AC_DEFINE_UNQUOTED(NETSNMP_NOTIFICATION_DOT_MIB, $notification_dot_oid)
   notificationoid_len=`echo "$withval" | sed 's/[^\.]//g' | awk -F\. '{ print NF }'`
-  AC_DEFINE_UNQUOTED(NOTIFICATION_DOT_MIB_LENGTH, $notificationoid_len)
+  AC_DEFINE_UNQUOTED(NETSNMP_NOTIFICATION_DOT_MIB_LENGTH, $notificationoid_len)
   AC_MSG_RESULT(using enterprise notifications $withval)
 ],[
   AC_MSG_RESULT(using default notifications "NET-SNMP-MIB::netSnmpNotifications")
@@ -856,7 +856,7 @@ Network Buffers:
    if test "$withval" = yes; then
     AC_MSG_ERROR([ Please provide a positive number for the server send buffer ])
    fi
-   AC_DEFINE_UNQUOTED(DEFAULT_SERVER_SEND_BUF, $withval)],
+   AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_SERVER_SEND_BUF, $withval)],
    AC_MSG_RESULT([using OS default send buffer size for server sockets]) )
 AC_ARG_ENABLE(server-send-buf,,
 	AC_MSG_ERROR([ Invalid option. Use --with-server-send-buf/--without-server-send-buf instead ]) )
@@ -866,7 +866,7 @@ AC_ARG_WITH(server-recv-buf,
   if test "$withval" = yes; then
     AC_MSG_ERROR([ Please provide a positive number for the server recv buffer ])
   fi
-  AC_DEFINE_UNQUOTED(DEFAULT_SERVER_RECV_BUF, $withval)],
+  AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_SERVER_RECV_BUF, $withval)],
   AC_MSG_RESULT([using OS default recv buffer size for server sockets]) )
 AC_ARG_ENABLE(server-recv-buf,,
 	AC_MSG_ERROR([ Invalid option. Use --with-server-recv-buf/--without-server-recv-buf instead ]) )
@@ -877,7 +877,7 @@ AC_ARG_WITH(client-send-buf,
   if test "$withval" = yes; then
     AC_MSG_ERROR([ Please provide a positive number for the client send buffer ])
   fi
-  AC_DEFINE_UNQUOTED(DEFAULT_CLIENT_SEND_BUF, $withval)],
+  AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_CLIENT_SEND_BUF, $withval)],
   AC_MSG_RESULT([using OS default send buffer size for client sockets]) )
 AC_ARG_ENABLE(client-send-buf,,
 	AC_MSG_ERROR([ Invalid option. Use --with-client-send-buf/--without-client-send-buf instead ]) )
@@ -887,7 +887,7 @@ AC_ARG_WITH(client-recv-buf,
   if test "$withval" = yes; then
     AC_MSG_ERROR([ Please provide a positive number for the client recv buffer ])
   fi
-  AC_DEFINE_UNQUOTED(DEFAULT_CLIENT_RECV_BUF, $withval)],
+  AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_CLIENT_RECV_BUF, $withval)],
   AC_MSG_RESULT([using OS default recv buffer size for client sockets]) )
 AC_ARG_ENABLE(client-recv-buf,,
 	AC_MSG_ERROR([ Invalid option. Use --with-client-recv-buf/--without-client-recv-buf instead ]) )
@@ -922,22 +922,22 @@ AC_SUBST(installucdlibs)
 
 # Only define if specifically chosen as --without (i.e., default to true). 
 if test "x$with_root_access" = "xno"; then
-  AC_DEFINE(NO_ROOT_ACCESS)
+  AC_DEFINE(NETSNMP_NO_ROOT_ACCESS)
 fi
 
 # Only define if specifically chosen as --without (i.e., default to true).
 if test "x$with_kmem_usage" = "xno"; then
-  AC_DEFINE(NO_KMEM_USAGE)
+  AC_DEFINE(NETSNMP_NO_KMEM_USAGE)
 fi
 
 # Define unless specifically suppressed (i.e., option defaults to false). 
 if test "x$with_dummy_values" != "xyes"; then
-  AC_DEFINE(NO_DUMMY_VALUES)
+  AC_DEFINE(NETSNMP_NO_DUMMY_VALUES)
 fi
 
 # Only define if specifically chosen as --without (i.e., default to true). 
 if test "x$with_opaque_special_types" != "xno"; then
-  AC_DEFINE(OPAQUE_SPECIAL_TYPES)
+  AC_DEFINE(NETSNMP_WITH_OPAQUE_SPECIAL_TYPES)
 fi
 
 
@@ -1128,11 +1128,11 @@ done
 if test "x$filebase" = "x$last"; then
     filebase="generic"
 fi
-ac_cv_SYSTEM_INCLUDE_FILE="net-snmp/system/$filebase.h"
+ac_cv_NETSNMP_SYSTEM_INCLUDE_FILE="net-snmp/system/$filebase.h"
 
 changequote([, ])
-AC_MSG_RESULT($ac_cv_SYSTEM_INCLUDE_FILE)
-AC_DEFINE_UNQUOTED(SYSTEM_INCLUDE_FILE, "$ac_cv_SYSTEM_INCLUDE_FILE")
+AC_MSG_RESULT($ac_cv_NETSNMP_SYSTEM_INCLUDE_FILE)
+AC_DEFINE_UNQUOTED(NETSNMP_SYSTEM_INCLUDE_FILE, "$ac_cv_NETSNMP_SYSTEM_INCLUDE_FILE")
 
 # second part, the CPU type.
 
@@ -1148,11 +1148,11 @@ done
 if test "x$filebase" = "x$last"; then
     filebase="generic"
 fi
-ac_cv_MACHINE_INCLUDE_FILE="net-snmp/machine/$filebase.h"
+ac_cv_NETSNMP_MACHINE_INCLUDE_FILE="net-snmp/machine/$filebase.h"
 changequote([, ])
-AC_MSG_RESULT([$ac_cv_MACHINE_INCLUDE_FILE])
+AC_MSG_RESULT([$ac_cv_NETSNMP_MACHINE_INCLUDE_FILE])
 
-AC_DEFINE_UNQUOTED(MACHINE_INCLUDE_FILE, "$ac_cv_MACHINE_INCLUDE_FILE")
+AC_DEFINE_UNQUOTED(NETSNMP_MACHINE_INCLUDE_FILE, "$ac_cv_NETSNMP_MACHINE_INCLUDE_FILE")
 
 AC_PATH_PROG([CCPATH],$CC)
 # watch out for /usr/ucb/cc on solaris, it doesn't work with this package.
@@ -1246,11 +1246,11 @@ done
 AC_DEFINE_UNQUOTED(SNMPSHAREPATH,"$SNMPSHAREPATH")
 AC_SUBST(SNMPSHAREPATH)
 
-if test "x$DEFAULT_MIBDIRS" = "x"; then
-  DEFAULT_MIBDIRS="\$HOME/.snmp/mibs:$SNMPSHAREPATH/mibs"
-  AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$DEFAULT_MIBDIRS")
+if test "x$NETSNMP_DEFAULT_MIBDIRS" = "x"; then
+  NETSNMP_DEFAULT_MIBDIRS="\$HOME/.snmp/mibs:$SNMPSHAREPATH/mibs"
+  AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_MIBDIRS,"$NETSNMP_DEFAULT_MIBDIRS")
 fi
-AC_SUBST(DEFAULT_MIBDIRS)
+AC_SUBST(NETSNMP_DEFAULT_MIBDIRS)
 
 SNMPCONFPATH=""
 tmpset="$sysconfdir/snmp"
@@ -1297,7 +1297,7 @@ yes
 #endif],
 				[v6type=$i; v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
-				CFLAGS="-DINET6 $CFLAGS"])
+				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
 		kame)
 			AC_EGREP_CPP(yes, [
@@ -1308,7 +1308,7 @@ yes
 				[v6type=$i; v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
 				v6trylibc=yes;
-				CFLAGS="-DINET6 $CFLAGS"])
+				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
 		inria)
 			AC_EGREP_CPP(yes, [
@@ -1320,7 +1320,7 @@ yes
 				v6lib=dummy;
 				v6libdir=none;
 				v6trylibc=yes;
-				CFLAGS="-DINET6 $CFLAGS"])
+				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
 		zeta)
 			AC_EGREP_CPP(yes, [
@@ -1331,7 +1331,7 @@ yes
 #endif],
 				[v6type=$i; v6lib=inet6;
 				v6libdir=/usr/local/v6/lib;
-				CFLAGS="-DINET6 $CFLAGS"])
+				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
 		linux-glibc)
 			AC_EGREP_CPP(yes, [
@@ -1343,14 +1343,14 @@ yes
 				v6lib=dummy;
 				v6libdir=none;
 				v6trylibc=yes;
-				CFLAGS="-DINET6 $CFLAGS"])
+				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"])
 			;;
 		linux-inet6)
 			if test -d /usr/inet6; then
 				v6type=$i
 				v6lib=inet6
 				v6libdir=/usr/inet6/lib
-				CFLAGS="-DINET6 $CFLAGS"
+				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
 			fi
 			;;
 		generic)
@@ -1367,7 +1367,7 @@ yes
 				v6lib=dummy
 				v6libdir=none
 				v6trylibc=yes
-				CFLAGS="-DINET6 $CFLAGS"
+				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
                         fi
 			;;
 		esac
@@ -1399,7 +1399,7 @@ fi
 #
 
 if test "x$with_res_locks" = "xyes"; then
-  AC_DEFINE(NS_REENTRANT)
+  AC_DEFINE(NETSNMP_REENTRANT)
 
     case $target_os in
 
@@ -1534,7 +1534,7 @@ for i in $new_transport_list; do
         transport_hdr_list="$transport_hdr $transport_hdr_list"
       fi
       transport_def=`echo $i | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
-      transport_def_list="SNMP_TRANSPORT_"$transport_def"_DOMAIN $transport_def_list"
+      transport_def_list="NETSNMP_TRANSPORT_"$transport_def"_DOMAIN $transport_def_list"
     else
       echo
       AC_MSG_ERROR(Cannot find file $srcdir/$rel_transport_src to support SNMP transport domain $i.)
@@ -1626,7 +1626,7 @@ for i in $new_with_security; do
   security_hdr_list="$security_hdr_list $hfile"
   security_obj_list="$security_obj_list snmp"$i".o" 	 
   security_lobj_list="$security_lobj_list snmp"$i".lo"
-  def_name="SNMP_SECMOD_"`echo $i | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
+  def_name="NETSNMP_SECMOD_"`echo $i | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
   echo "init_"$i"();" >> $security_init_file
   echo "#include <net-snmp/library/$hfile>" >> $security_incl_file
   AC_DEFINE_UNQUOTED($def_name)
@@ -1643,7 +1643,7 @@ AC_MSG_CACHE_ADD(SNMPv3 Security Modules:    $new_with_security)
 # Handle the special case of KSM to see which crypto API we support
 #
 
-ac_cv_MIT_NEW_CRYPTO=no
+ac_cv_NETSNMP_USE_KERBEROS_MIT=no
 rebuilt_new_with_security=
 already_checked_krb5=no
 
@@ -1701,7 +1701,7 @@ do
     )])
     AC_MSG_RESULT($ac_cv_heimdal)
     if test $ac_cv_heimdal = yes; then
-      AC_DEFINE(HEIMDAL)
+      AC_DEFINE(NETSNMP_USE_KERBEROS_HEIMDAL)
       if test no = $krb5_config; then
 	LIBS="$LIBS -lkrb5 -lasn1 -lcom_err -lroken"
       fi
@@ -1711,15 +1711,15 @@ do
 
     AC_MSG_CHECKING([to see which crypto API we need to use])
     AC_CHECK_FUNC(krb5_c_encrypt,[
-    AC_CACHE_VAL(ac_cv_MIT_NEW_CRYPTO,
+    AC_CACHE_VAL(ac_cv_NETSNMP_USE_KERBEROS_MIT,
       AC_CHECK_LIB(k5crypto, krb5_init_context,
-	ac_cv_MIT_NEW_CRYPTO=yes, ac_cv_MIT_NEW_CRYPTo=no
+	ac_cv_NETSNMP_USE_KERBEROS_MIT=yes, ac_cv_MIT_NEW_CRYPTo=no
       )
     )
 
-    if test yes = $ac_cv_MIT_NEW_CRYPTO; then
+    if test yes = $ac_cv_NETSNMP_USE_KERBEROS_MIT; then
       AC_MSG_RESULT(new MIT crypto API)
-      AC_DEFINE(MIT_NEW_CRYPTO)
+      AC_DEFINE(NETSNMP_USE_KERBEROS_MIT)
       if test no = $krb5_config; then
 	LIBS="$LIBS -lk5crypto"
       fi
@@ -1863,7 +1863,7 @@ while test "x$new_module_list" != "x"; do
       #---------------------
       # build a pseudo include header that includes current config and
       # system symbols:
-      echo "#include "'"'"$ac_cv_SYSTEM_INCLUDE_FILE"'"' > module_tmp_header.h
+      echo "#include "'"'"$ac_cv_NETSNMP_SYSTEM_INCLUDE_FILE"'"' > module_tmp_header.h
       echo "#include "'"'"$srcdir/$mibdir/$i.h"'"' >> module_tmp_header.h
 
       #---------------------
@@ -2222,21 +2222,21 @@ AC_MSG_RESULT(.)
 # Define default mibs
 #
 AC_MSG_CHECKING([default mib files to read])
-if test "x$DEFAULT_MIBS" = "x"; then
-  DEFAULT_MIBS="$default_mibs"
+if test "x$NETSNMP_DEFAULT_MIBS" = "x"; then
+  NETSNMP_DEFAULT_MIBS="$default_mibs"
 fi
 if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
   # mingw32 and cygwin use ';' as the environment variable separator char
   ENV_SEPARATOR=";"
-  DEFAULT_MIBS=`echo "$DEFAULT_MIBS" | sed 's/:/;/g'`
+  NETSNMP_DEFAULT_MIBS=`echo "$NETSNMP_DEFAULT_MIBS" | sed 's/:/;/g'`
   default_mibs=`echo "$default_mibs" | sed 's/:/;/g'`
 else
   ENV_SEPARATOR=":"
 fi
 AC_SUBST(ENV_SEPARATOR)
-AC_DEFINE_UNQUOTED(DEFAULT_MIBS,"$DEFAULT_MIBS")
-AC_SUBST(DEFAULT_MIBS)
-AC_MSG_RESULT($DEFAULT_MIBS)
+AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_MIBS,"$NETSNMP_DEFAULT_MIBS")
+AC_SUBST(NETSNMP_DEFAULT_MIBS)
+AC_MSG_RESULT($NETSNMP_DEFAULT_MIBS)
 
 AC_MSG_CHECKING([whether we have to build PIC code])
 echo " $module_list " | grep " ucd-snmp/dlmod " >/dev/null
@@ -2420,7 +2420,7 @@ AC_ARG_WITH(libwrap,
 		    ],[hosts_access((void *)0)],[
 
 	    AC_MSG_RESULT([yes])
-	    AC_DEFINE(USE_LIBWRAP)
+	    AC_DEFINE(NETSNMP_USE_LIBWRAP)
 	    test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
 	    WRAPLIBS="$WRAPLIBS -lwrap"],
         [
@@ -2436,7 +2436,7 @@ AC_ARG_WITH(libwrap,
 	 		],[hosts_access((void *)0)],
 
 			AC_MSG_RESULT(yes)
-			AC_DEFINE(USE_LIBWRAP)
+			AC_DEFINE(NETSNMP_USE_LIBWRAP)
 			test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
 			WRAPLIBS="$WRAPLIBS -lwrap -lnsl",
 
@@ -2982,12 +2982,12 @@ elif test "x$usepkcs" != "xno" ; then
     else
         encrmodes="[disabled]"
     fi
-    AC_DEFINE(USE_PKCS)
+    AC_DEFINE(NETSNMP_USE_PKCS11)
     AC_MSG_RESULT(PKCS11 Support)
 elif test "x$enable_md5" != "xno"; then
     authmodes="MD5"
     encrmodes=""
-    AC_DEFINE(USE_INTERNAL_MD5)
+    AC_DEFINE(NETSNMP_USE_INTERNAL_MD5)
     AC_MSG_RESULT(Internal MD5 Support)
 fi
 if test "x$enable_md5" = "xno"; then
@@ -3986,7 +3986,7 @@ AC_SUBST(OTHERAGENTLIBLOBJS)
 # Prompt for various bits of user information
 #
 
-if test "x$ac_cv_user_prompt_LOGFILE" = "x" -o "x$ac_cv_user_prompt_SYS_LOC" = "x" -o "x$ac_cv_user_prompt_SYS_CONTACT" = "x" -o "x$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" = "x"; then
+if test "x$ac_cv_user_prompt_NETSNMP_LOGFILE" = "x" -o "x$ac_cv_user_promptNETSNMP__SYS_LOC" = "x" -o "x$ac_cv_user_prompt_NETSNMP_SYS_CONTACT" = "x" -o "x$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" = "x"; then
 AC_CACHE_CHECK(if you have run configure before, ac_cv_have_warned,
 [
 if test "x$defaults" = "xno"; then
@@ -4024,7 +4024,7 @@ else
   LOC="@no.where"
 fi
 
-AC_PROMPT_USER(DEFAULT_SNMP_VERSION,[
+AC_PROMPT_USER(NETSNMP_DEFAULT_SNMP_VERSION,[
 
 *** Default SNMP Version:
 
@@ -4047,11 +4047,11 @@ will avoid this prompt.
 Default version of SNMP to use],3,unquoted)
 
 # we tested this above before the prompt, but the prompt may give a new value.
-if test "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "1" -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "2" -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "3"; then
+if test "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "1" -a "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "2" -a "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "3"; then
   AC_MSG_ERROR([Illegal version number.  Only 1, 2 (for SNMPv2c) and 3 are supported.])
 fi
 
-AC_PROMPT_USER(SYS_CONTACT,[
+AC_PROMPT_USER(NETSNMP_SYS_CONTACT,[
 
 *** System Contact Information:
 
@@ -4064,7 +4064,7 @@ will avoid this prompt.
 
 System Contact Information],$ME@$LOC,quoted)
 
-AC_PROMPT_USER(SYS_LOC,[
+AC_PROMPT_USER(NETSNMP_SYS_LOC,[
 
 *** System Location:
 
@@ -4082,7 +4082,7 @@ else
   defaultlog="/usr/adm/snmpd.log"
 fi
   
-AC_PROMPT_USER(LOGFILE,[
+AC_PROMPT_USER(NETSNMP_LOGFILE,[
 
 *** Logfile location:
 
@@ -4103,7 +4103,7 @@ else
   ucddefaultstore="/etc/ucd-snmp"
 fi
   
-AC_PROMPT_USER(PERSISTENT_DIRECTORY,[
+AC_PROMPT_USER(NETSNMP_PERSISTENT_DIRECTORY,[
 
 *** snmpd persistent storage location:
 
@@ -4120,7 +4120,7 @@ you'd rather.
 
 Location to write persistent information],$defaultstore,quoted)
 
-PERSISTENT_DIRECTORY=$ac_cv_user_prompt_PERSISTENT_DIRECTORY
+PERSISTENT_DIRECTORY=$ac_cv_user_prompt_NETSNMP_PERSISTENT_DIRECTORY
 AC_SUBST(PERSISTENT_DIRECTORY)
 UCDPERSISTENT_DIRECTORY=$ucddefaultstore
 AC_SUBST(UCDPERSISTENT_DIRECTORY)
