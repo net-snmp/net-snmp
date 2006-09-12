@@ -3,6 +3,17 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.4*
 
+ *** Important Notes ***
+
+    Several very significant changes have been made in Net-SNMP for this
+    release that warrant special attention.
+
+    - The default configuration now enables embedded Perl and the Perl 
+      modules unless explicitly disabled. You may use the 
+      --disable-embedded-perl and --without-perl-modules configure options, 
+      respectively, to revert to the former default configuration.
+
+
     snmpd:
       - new MIB table for managing Net-SNMP access control extensions
           (see NET-SNMP-VACM-MIB)
@@ -37,22 +48,22 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     perl:
       - gettable() now supports asynchronous callback functions
       - gettable() was fairly broken in prior versions 
+      - OID handling was fully broken on various 64bit platforms
 
     misc:
       - libtool update to 1.5.22
       - Many misc fixes
 
  Ports:
-   Non-linux:
+   Non-Linux:
       - fix 8 byte IpAddress in at, ip and route MIBs.
-
+      - UDPIPv6 and TCPIPv6 transports now compile on recent UN*X platforms
+   Linux:
+      - add IPv6 aware UDP and TCP mibs to default module list
    FreeBSD:
    OpenBSD:
       - experimental support for 64bit interface counters (ifXTable). enable
         via '--with-mib-modules=if-mib'.
-
-   Linux:
-      - add IPv6 aware UDP and TCP mibs to default module list
 
 
 *5.3.0.1*
