@@ -34,6 +34,11 @@ Compiler Options:
   --with-cc=CC                    use CC to compile (default=gcc).],
     [CC=$with_cc;export CC])
 
+AC_ARG_WITH(linkcc, [
+Compiler Options:
+  --with-linkcc=CC                use CC to link (default=gcc).],
+    [LINKCC=$with_linkcc;export LINKCC])
+
 AC_ARG_WITH(ar,
 [  --with-ar=AR                    use AR as the archiver.],
     [AR=$with_ar; export AR])
@@ -963,6 +968,8 @@ fi
 AC_LANG([C])
 AC_PROG_CC
 AC_PROG_CPP
+LINKCC=${LINKCC-"$CC"}
+AC_SUBST(LINKCC)
 AC_AIX
 
 # libtool stuff for shared/static libraries.
