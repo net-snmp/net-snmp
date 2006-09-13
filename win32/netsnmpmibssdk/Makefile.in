@@ -57,6 +57,7 @@ CLEAN :
 	-@erase "$(INTDIR)\route_write.obj"
 	-@erase "$(INTDIR)\setSerialNo.obj"
 	-@erase "$(INTDIR)\smux.obj"
+#	-@erase "$(INTDIR)\winExtDLL.obj"
 	-@erase "$(INTDIR)\snmp_mib.obj"
 	-@erase "$(INTDIR)\snmpEngine.obj"
 	-@erase "$(INTDIR)\snmpMPDStats.obj"
@@ -207,6 +208,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\header_complex.obj" \
 	"$(INTDIR)\mib_modules.obj" \
 	"$(INTDIR)\util_funcs.obj" \
+#	"$(INTDIR)\winExtDLL.obj" \
 	"$(INTDIR)\smux.obj"
 
 "..\lib\$(OUTDIR)\netsnmpmibs.lib" : "..\lib\$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
@@ -262,6 +264,7 @@ CLEAN :
 	-@erase "$(INTDIR)\route_write.obj"
 	-@erase "$(INTDIR)\setSerialNo.obj"
 	-@erase "$(INTDIR)\smux.obj"
+#	-@erase "$(INTDIR)\winExtDLL.obj"
 	-@erase "$(INTDIR)\snmp_mib.obj"
 	-@erase "$(INTDIR)\snmpEngine.obj"
 	-@erase "$(INTDIR)\snmpMPDStats.obj"
@@ -413,6 +416,8 @@ LIB32_OBJS= \
 	"$(INTDIR)\header_complex.obj" \
 	"$(INTDIR)\mib_modules.obj" \
 	"$(INTDIR)\util_funcs.obj" \
+	"$(INTDIR)\smux.obj" \
+#	"$(INTDIR)\winExtDLL.obj" \
 	"$(INTDIR)\smux.obj"
 
 "..\lib\$(OUTDIR)\netsnmpmibs.lib" : "..\lib\$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
@@ -851,6 +856,12 @@ SOURCE=..\..\agent\mibgroup\smux\smux.c
 
 "$(INTDIR)\smux.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+#SOURCE=..\..\agent\mibgroup\winExtDLL.c
+
+#"$(INTDIR)\winExtDLL.obj" : $(SOURCE) "$(INTDIR)"
+#	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
 SOURCE=..\..\agent\mibgroup\util_funcs.c
