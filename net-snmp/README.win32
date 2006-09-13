@@ -13,6 +13,7 @@ The remainder of this guide has the following sections :
 
 Status as of 28-May-2004 for Win32 platforms
 Interactions with Other Vendor's Products
+Running Net-SNMP as a replacement for the Microsoft SNMP service
 Co-existence with Microsoft SNMP services
 Installing Platform SDK
 Microsoft Visual C++ - Overview
@@ -114,6 +115,67 @@ The next subsection relates to items that are built using Visual Studio
 
   -  Snmptrapd does not "share" nor multiplex traps with SNMPTRAP.EXE,
      a program that is available from Microsoft or ACE#COMM.
+
+
+***************************************************************************
+*
+* Running Net-SNMP as a replacement for the Microsoft SNMP service
+*
+***************************************************************************
+
+As of Net-SNMP 5.4, the Net-SNMP agent is able to load the Windows SNMP
+service extension DLLs by using the Net-SNMP winExtDLL extension.
+
+The current limitations are:
+
+-The list of DLLs to load is currently hard coded in 
+ agent\mibgroup\winExtDLL.c.
+-Only SNMP v1 data types are available for Windows SNMP extensions
+ even if the extension supports the SNMP v2 data types.
+-Traps are not passed from the Windows SNMP extension to Net-SNMP.
+
+These limitations should be resolved in the near future.
+
+
+Enabling the Windows SNMP extension agents
+------------------------------------------
+
+The following snmpd.conf configuration parameter must be set to enable snmpd
+to load the Windows SNMP extension agents:
+
+        winExtDLL      1
+
+The recommended way to start snmpd is with the following command line:
+
+ snmpd.exe -Ivacm_conf,proxy,pass,pass_persist,winExtDLL,handler
+
+This will ensure that no Net-SNMP MIBs are loaded that could conflict with
+the Windows SNMP extensions.  If other third party / custom Net-SNMP modules
+are required, they can be added to the above command line.
+
+
+Compiling Net-SNMP with the winExtDLL extension (MSVC)
+------------------------------------------------------
+
+Microsoft PSDK required.
+
+-modify win32\net-snmp\net-snmp-config.h.in and add:
+ #define USING_WINEXTDLL_MODULE 1
+
+-modify win32\netsnmpmibssdk\Makefile.in
+  or
+ modify win32\netsnmpmibssdk\netsnmpmibssdk.dsp 
+ and uncomment winExtDLL lines
+
+-add to LIB32_FLAGS in win32\netsnmpmibssdk\Makefile.in: MgmtAPI.lib snmpapi.lib 
+  or
+ add to # ADD LIB32 in win32\netsnmpmibssdk\netsnmpmibssdk.dsp: MgmtAPI.lib snmpapi.lib 
+
+-This extension requires the PSDK including the Snmp.h header file.
+ Including Snmp.h will conflict with existing Net-SNMP defines for
+ ASN_OCTETSTRING etc.  To resolve this, create a copy of Snmp.h in
+ the PSDK include/ folder called Snmp-winExtDLL.h and change all
+ occurances of ASN_ to MS_ASN_
 
 
 ***************************************************************************

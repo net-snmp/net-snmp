@@ -109,3 +109,8 @@
 #ifdef USING_MIBII_IPV6_MODULE
   if (should_init("ipv6")) init_ipv6();
 #endif
+
+#ifdef USING_WINEXTDLL_MODULE
+  if (should_init("winExtDLL")) init_winExtDLL();
+#endif
+

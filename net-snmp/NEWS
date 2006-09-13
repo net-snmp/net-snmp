@@ -64,6 +64,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
    OpenBSD:
       - experimental support for 64bit interface counters (ifXTable). enable
         via '--with-mib-modules=if-mib'.
+   Win32:
+      - new winExtDLL extension module to allow snmpd to load Windows SNMP
+        service extension DLLs to provide support for HOST-RESOURCES-MIB
+        and other MIBs provided with Windows.
 
 
 *5.3.0.1*
