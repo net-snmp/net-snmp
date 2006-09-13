@@ -1,4 +1,6 @@
 top_builddir=../..
+# currently assumes gcc:    (XXX: fix via configure tests)
+DLFLAGS=-fPIC -shared
 
 # use GNU vpath, if available, to only set a path for source and headers
 # VPATH will pick up objects too, which is bad if you are sharing a
@@ -12,6 +14,8 @@ top_builddir=../..
 CPPFLAGS= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 	$(SNMPLIB_INCLUDES) @CPPFLAGS@ $(LIB_CFLAGS)
 
+OTHERCLEANTARGETS=@dllcleans@
+
 # Need a special .c -> .o definition here to make sure we place the
 # object files in the sub directory.
 
@@ -24,3 +28,4 @@ SRCS  = @mib_module_list_c@
 
 all: standardall $(LOBJS)
 
+@module_rules@

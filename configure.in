@@ -1775,7 +1775,7 @@ new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
 new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
 
 # set up initial module list
-new_module_list="default_modules $new_with_mib_modules"
+new_module_list="$new_with_mib_modules default_modules"
 
 # minor modifications
 if test "x$enable_agent" = "xno"; then
@@ -1835,6 +1835,10 @@ else
 fi
 first_pass=1
 
+output_to=normal
+module_rules=module_rules.mk
+echo "# contents below built automatically by configure; do not edit by hand" > $module_rules
+
 #---------------------
 # until we have an empty module list...
 #   (modules may add new modules, and until all dependencies are done...)
@@ -1846,11 +1850,66 @@ while test "x$new_module_list" != "x"; do
   #---------------------
   # loop over all the modules in the current list
   #
-  for i in $new_module_list
+  for j in $new_module_list
     do
+
+    #---------------------
+    # figure out which sub-blocks to build in parts
+    if echo "$j" | grep "=" ; then
+       # build a shared object file
+       # format: sofilename=module1:module2
+       # XXX: currently doesn't do this
+       dl_name=`echo $j | sed 's/=.*//'`
+       dl_names="$dl_names $dl_name"
+       dl_objects=`echo $j | sed 's/.*=//'`
+       module_sublist=`echo $dl_objects | sed 's/:/ /g'`
+       saved_sublist=""
+       saved_sublist_code=""
+       output_to=separate
+
+       # create output files
+       output_inits="agent/mibgroup/${dl_name}-dll.c"
+       output_hdrs="agent/mibgroup/${dl_name}-hdrs.h"
+       AC_MSG_MODULE_DBG("creating dll file: $output_inits")
+       for ofile in $output_inits $output_hdrs ; do
+       	 if test -f $ofile ; then
+       	   if grep "this file created automatically by configure" $ofile > /dev/null 2>&1 ; then
+       	     :
+       	   else
+       	     AC_MSG_ERROR([$ofile already existed ; can't build dll object $dl_name])
+       	   fi
+       	 fi
+         cat > $ofile << EOFIF
+/* Do not edit; this file created automatically by configure */
+EOFIF
+       done
+
+       cat >> $output_inits << EOFOC
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "${dl_name}-hdrs.h"
+void
+init_$dl_name(void) {
+EOFOC
+    else
+       # not a special token invocation
+       module_sublist=$j
+       output_to=normal
+       output_t=
+    fi
+
+    while test "x$module_sublist" != "x" ; do
+
+    #---------------------
+    # loop over all the modules in the sub list
+    for i in $module_sublist
+    do
+
     AC_MSG_MODULE_DBG(-e "\n================================================================")
     AC_MSG_MODULE_DBG("testing $i")
     need_header=0
+
     #---------------------
     # make sure module wasn't explicity excluded, or already added
     #
@@ -1885,7 +1944,10 @@ while test "x$new_module_list" != "x"; do
       if test "x$module_type" = "x" ; then
         module_type=mib_module
       fi
-
+      if test "x$output_to" = "xnormal" ; then
+       	output_inits="$mibdir/${module_type}_inits.h"
+       	output_hdrs="$mibdir/${module_type}_includes.h"
+      fi
 
       #---------------------
       # does the header file for the module exist?
@@ -2072,9 +2134,19 @@ while test "x$new_module_list" != "x"; do
       #-------------------
       # check for init/shutdown routines too
       #
+      has_c_code=no
       if test -f $srcdir/$mibdir/$i.c; then
-        module_list_code="$module_list_code $i"
-        eval ${module_type}_list_code="\"\$${module_type}_list_code $i\""
+        if test "x$output_to" = "xnormal" ; then
+          module_list_code="$module_list_code $i"
+          eval ${module_type}_list_code="\"\$${module_type}_list_code $i\""
+        else
+          saved_sublist_code="$saved_sublist_code $i"
+	  cat >> $module_rules << EOFR
+$i.o: $i.c
+	\$(CC) -c \$(CPPFLAGS) \$(CFLAGS) \$(DLFLAGS) -o \$@ \$<
+
+EOFR
+        fi
         mnm=`echo $i | sed 's/.*\///;s/\.c$//;'`
         AC_MSG_MODULE_DBG(-e "\nchecking '$srcdir/$mibdir/$i.c' ($mnm/`basename $i`) C file for init/shutdown")
         if test "x$mnm" != "x`basename $i`"; then
@@ -2085,7 +2157,7 @@ while test "x$new_module_list" != "x"; do
 	if test "x$temp_init" != "x"; then
             AC_MSG_MODULE_DBG(-e "adding init_$mnm() to list")
             need_header=1
-	    echo "  if (should_init(\"$mnm\")) init_$mnm();" >> $mibdir/${module_type}_inits.h
+	    echo "  if (should_init(\"$mnm\")) init_$mnm();" >> $output_inits
 	fi
 	grep shutdown_$mnm $srcdir/$mibdir/$i.c > /dev/null
         if test $? -eq 0 ; then
@@ -2101,10 +2173,10 @@ while test "x$new_module_list" != "x"; do
       # if there is a shutdown/init list,
       #
       if test $need_header -eq 1 ; then
-           echo '#include "'"mibgroup/$i.h"'"' >> $mibdir/${module_type}_includes.h
-        else
-           echo '/*#include "'"mibgroup/$i.h"'"*/' >> $mibdir/${module_type}_includes.h
-        fi
+         echo '#include "'"mibgroup/$i.h"'"' >> $output_hdrs
+      else
+         echo '/*#include "'"mibgroup/$i.h"'"*/' >> $output_hdrs
+      fi
 
       #-------------------
       # check for output directory (for building outside of source tree
@@ -2131,7 +2203,41 @@ while test "x$new_module_list" != "x"; do
       #-------------------
       echo $ECHO_N " $i$ECHO_C"
     fi #
-  done # for i in $new_module_list
+    done # for i in $module_sublist
+
+    if test "$output_to" = "separate" ; then
+      if test "x$new_list_two" = "x" ; then
+        # no new sub-modules to add to the current target
+        output_to="normal"
+
+        # create the .so rule
+        saved_sublist_o=`echo "$saved_sublist_code " | sed 's/^ *//g;s/  */.o /g;'`
+        cat >> $module_rules << EOFM
+${dl_name}-dll.o: ${dl_name}-dll.c
+	\$(CC) -c \$(CPPFLAGS) \$(CFLAGS) \$(DLFLAGS) -o \$@ \$<
+
+${dl_name}.so: $saved_sublist_o ${dl_name}-dll.o
+	\$(CC) \$(CPPFLAGS) \$(CFLAGS) \$(DLFLAGS) -o \$@ $saved_sublist_o ${dl_name}-dll.o
+
+EOFM
+        cat >> $output_inits << EOFOCFIN
+}
+EOFOCFIN
+        dllcleans="$saved_sublist_o $dllcleans"
+        output_inits=""
+        module_sublist=""
+      else
+        # a module had sub-modules required; keep goin'
+        saved_sublist="$saved_sublist $module_sublist"
+        module_sublist="$new_list_two"
+        new_list_two=""
+      fi
+    else
+      module_sublist=""
+    fi
+
+    done # while module_sublist
+  done # for j in $new_module_list
 
   # remember the top level modules for later reporting
   if test $first_pass = 1 ; then
@@ -2145,6 +2251,9 @@ while test "x$new_module_list" != "x"; do
   #
   # transfer the new module to check list to the normal variable
   #
+  if test "x$new_list_two" ; then
+    output_to=normal
+  fi
   new_module_list="$new_list_two"
   new_list_two=""
 done # while test "x$new_module_list" != "x"; do
@@ -2202,6 +2311,8 @@ AC_SUBST(module_list)
 AC_SUBST(mib_module_list)
 AC_SUBST(agent_module_list)
 AC_SUBST(default_mibs_install)
+AC_SUBST(dllcleans)
+AC_SUBST_FILE(module_rules)
 
 AC_MSG_RESULT(.)
 
