@@ -162,3 +162,7 @@
 #include "mibgroup/examples/ucdDemoPublic.h"
 #endif
 
+#ifdef USING_WINEXTDLL_MODULE
+#include "mibgroup/winExtDLL.h"
+#endif
+

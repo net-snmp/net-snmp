@@ -1682,6 +1682,9 @@ typedef unsigned short   uint16_t;
 /* CFG Define if compiling with the smux module files.  */
 /* #undef USING_SMUX_MODULE */
 
+/* Define if compiling with the winExtDLL module.  */
+/* #undef USING_WINEXTDLL_MODULE */
+
 /*
  * Module configuration and control ends here.
  */
