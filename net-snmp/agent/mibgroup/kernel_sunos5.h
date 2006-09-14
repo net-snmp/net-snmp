@@ -12,6 +12,10 @@
 
 #include <inet/mib2.h>
 
+#ifndef HAVE_COUNTER64
+typedef uint64_t Counter64;
+#endif
+
 #define	COPY_IPADDR(fp, from, tp, to) 					\
 	fp = from;							\
 	tp = to;							\
@@ -23,13 +27,15 @@
 #ifndef ZZ_SUNOS5_INSTR         /* duplicate include prevention */
 #define ZZ_SUNOS5_INSTR
 
+#ifdef MIB2_IP_TRAFFIC_STATS
+#define SOLARIS_HAVE_RFC4293_SUPPORT
+#endif
 
 /*-
  * Manifest constants
  */
 
 #define KSTAT_DATA_MAX	100     /* Maximum number of kstat entries. To be changed later  */
-#define MIBCACHE_SIZE	20      /* Number of MIB cache entries */
 
 /*-
  * Macros
@@ -59,7 +65,9 @@ typedef enum {
     MIB_EGP = 12,
     MIB_CMOT = 13,
     MIB_TRANSMISSION = 14,
-    MIB_SNMP = 15
+    MIB_SNMP = 15,
+    MIB_IP6_ADDR = 16,
+    MIBCACHE_SIZE	
 } mibgroup_e;
 
 /*-
@@ -120,6 +128,24 @@ typedef struct mib2_ifEntry {
     Counter         ifOutErrors;        /* ifEntry 20 */
     Gauge           ifOutQLen;  /* ifEntry 21 */
     int             ifSpecific; /* ifEntry 22 */
+
+    /*
+     * Support ifXTable.
+     */
+    Counter64       ifHCInOctets;
+    Counter64       ifHCInUcastPkts;
+    Counter64       ifHCInMulticastPkts;
+    Counter64       ifHCInBroadcastPkts;
+    Counter64       ifHCOutOctets;
+    Counter64       ifHCOutUcastPkts;
+    Counter64       ifHCOutMulticastPkts;
+    Counter64       ifHCOutBroadcastPkts;
+
+    /*
+     * Counters not part of ifTable or ifXTable
+     */
+    Counter         ifCollisions;
+    int             flags;           /* interface flags (IFF_*) */
 } mib2_ifEntry_t;
 
 /*-
