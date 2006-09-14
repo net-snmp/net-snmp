@@ -40,6 +40,10 @@ config_exclude(mibII/interfaces)
 
     config_require(if-mib/data_access/interface_sysctl)
 
+#   elif defined( solaris2 )
+
+    config_require(if-mib/data_access/interface_solaris2)
+
 #   else
 
     config_error(This platform does not yet support IF-MIB rewrites)

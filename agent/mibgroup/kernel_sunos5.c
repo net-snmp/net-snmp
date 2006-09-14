@@ -78,7 +78,7 @@ kstat_ctl_t    *kstat_fd = 0;
  */
 
 static
-mibcache        Mibcache[MIBCACHE_SIZE] = {
+mibcache        Mibcache[MIBCACHE_SIZE+1] = {
     {MIB_SYSTEM, 0, (void *) -1, 0, 0, 0, 0},
     {MIB_INTERFACES, 10 * sizeof(mib2_ifEntry_t), (void *) -1, 0, 30, 0,
      0},
@@ -101,11 +101,12 @@ mibcache        Mibcache[MIBCACHE_SIZE] = {
     {MIB_CMOT, 0, (void *) -1, 0, 0, 0, 0},
     {MIB_TRANSMISSION, 0, (void *) -1, 0, 0, 0, 0},
     {MIB_SNMP, 0, (void *) -1, 0, 0, 0, 0},
+    {MIB_IP6_ADDR, 20 * sizeof(mib2_ipv6AddrEntry_t), (void *)-1, 0, 30, 0, 0},
     {0},
 };
 
 static
-mibmap          Mibmap[MIBCACHE_SIZE] = {
+mibmap          Mibmap[MIBCACHE_SIZE+1] = {
     {MIB2_SYSTEM, 0,},
     {MIB2_INTERFACES, 0,},
     {MIB2_AT, 0,},
@@ -122,6 +123,7 @@ mibmap          Mibmap[MIBCACHE_SIZE] = {
     {MIB2_CMOT, 0,},
     {MIB2_TRANSMISSION, 0,},
     {MIB2_SNMP, 0,},
+    {MIB2_IP6, MIB2_IP6_ADDR},
     {0},
 };
 
@@ -729,6 +731,17 @@ getentry(req_e req_type, void *bufaddr, size_t len,
     void *bp = bufaddr, **rp = resp;
     int previous_found = 0;
     
+    if ((len > 0) && (len % entrysize != 0)) {
+        /* 
+         * The data in the cache does not make sense, the size must be a 
+         * multiple of the entry. Could be caused by alignment issues etc. 
+         */
+        DEBUGMSGTL(("kernel_sunos5", 
+            "bad cache length %d - not multiple of entry size %d\n", 
+            len, entrysize));
+        return NOT_FOUND;
+    }
+
     /*
      * Here we have to perform address arithmetic with pointer to void. Ugly...
      */
@@ -1035,6 +1048,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	ifp->ifAdminStatus = (ifrp->ifr_flags & IFF_UP) ? 1 : 2;
 	ifp->ifOperStatus = ((ifrp->ifr_flags & IFF_UP) && (ifrp->ifr_flags & IFF_RUNNING)) ? 1 : 2;
 	ifp->ifLastChange = 0;      /* Who knows ...  */
+        ifp->flags = ifrp->ifr_flags;
 
 	if (ioctl(ifsd, SIOCGIFMTU, ifrp) < 0) {
 	    ret = -1;
@@ -1130,23 +1144,51 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	if (!strchr(ifrp->ifr_name, ':')) {
 	    Counter l_tmp;
 
-	    if (getKstatInt(NULL,ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) != 0){
-		ret = -1;
-		goto Return;
-	    }
+            /*
+             * First try to grab 64-bit counters; if they are not available,
+             * fall back to 32-bit.
+             */
+            if (getKstat(ifrp->ifr_name, "ipackets64",
+                        &ifp->ifHCInUcastPkts) != 0) {
+                if (getKstatInt(NULL,ifrp->ifr_name, "ipackets", 
+                               &ifp->ifInUcastPkts) != 0) {
+                    ret = -1;
+                    goto Return;
+                }
+	    } else { 
+                ifp->ifInUcastPkts = 
+                    (uint32_t)(ifp->ifHCInUcastPkts & 0xffffffff); 
+            }
             
-	    if (getKstatInt(NULL,ifrp->ifr_name, "rbytes", &ifp->ifInOctets) != 0) {
+            if (getKstat(ifrp->ifr_name, "rbytes64",
+                        &ifp->ifHCInOctets) != 0) {
+	        if (getKstatInt(NULL,ifrp->ifr_name, "rbytes", 
+                               &ifp->ifInOctets) != 0)  
                     ifp->ifInOctets = ifp->ifInUcastPkts * 308; 
-	    }
+	    } else {
+                ifp->ifInOctets = (uint32_t)(ifp->ifHCInOctets & 0xffffffff);
+            }
+           
+            if (getKstat(ifrp->ifr_name, "opackets64",
+                        &ifp->ifHCOutUcastPkts) != 0) { 
+                if (getKstatInt(NULL, ifrp->ifr_name, "opackets", 
+                               &ifp->ifOutUcastPkts) != 0) {
+		    ret = -1;
+		    goto Return;
+	         }
+            } else {
+                 ifp->ifOutUcastPkts = 
+                     (uint32_t)(ifp->ifHCOutUcastPkts & 0xffffffff);
+            }
             
-	    if (getKstatInt(NULL,ifrp->ifr_name, "opackets",&ifp->ifOutUcastPkts) != 0){
-		ret = -1;
-		goto Return;
-	    }
-            
-	    if (getKstatInt(NULL,ifrp->ifr_name, "obytes", &ifp->ifOutOctets) != 0) {
-		ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;       /* XXX */
-	    }
+            if (getKstat(ifrp->ifr_name, "obytes64",
+                        &ifp->ifHCOutOctets) != 0) {
+                if (getKstatInt(NULL, ifrp->ifr_name, "obytes", 
+                               &ifp->ifOutOctets) != 0) 
+                    ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;    /* XXX */
+            } else {
+                ifp->ifOutOctets = (uint32_t)(ifp->ifHCOutOctets & 0xffffffff);
+            }
 
 	    if (ifp->ifType == 24)  /* Loopback */
 		continue;
@@ -1161,15 +1203,35 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 		goto Return;
 	    }
 
-	    if (getKstatInt(NULL,ifrp->ifr_name, "brdcstrcv",&ifp->ifInNUcastPkts) == 0 &&
-		getKstatInt(NULL,ifrp->ifr_name, "multircv", &l_tmp) == 0) {
-		ifp->ifInNUcastPkts += l_tmp;
-	    }
 
-	    if (getKstatInt(NULL,ifrp->ifr_name,"brdcstxmt",&ifp->ifOutNUcastPkts) == 0 &&
-		getKstatInt(NULL,ifrp->ifr_name, "multixmt", &l_tmp) == 0) {
-		ifp->ifOutNUcastPkts += l_tmp;
-	    }
+	    /* Try to grab some additional information */
+	    getKstatInt(NULL,ifrp->ifr_name, "collisions", 
+	                &ifp->ifCollisions); 
+	    getKstatInt(NULL,ifrp->ifr_name, "unknowns", 
+	                &ifp->ifInUnknownProtos); 
+
+            /*
+             * TODO some NICs maintain 64-bit counters for multi/broadcast
+             * packets; should try to get that information.
+             */
+	    if (getKstatInt(NULL,ifrp->ifr_name, "brdcstrcv", &l_tmp) == 0) 
+                ifp->ifHCInBroadcastPkts = l_tmp;
+
+            if (getKstatInt(NULL,ifrp->ifr_name, "multircv", &l_tmp) == 0)
+                ifp->ifHCInMulticastPkts = l_tmp;
+
+            ifp->ifInNUcastPkts =
+                (uint32_t)(ifp->ifHCInBroadcastPkts + ifp->ifHCInMulticastPkts);
+
+            if (getKstatInt(NULL,ifrp->ifr_name, "brdcstxmt", &l_tmp) == 0)
+                ifp->ifHCOutBroadcastPkts = l_tmp;
+
+            if (getKstatInt(NULL,ifrp->ifr_name, "multixmt", &l_tmp) == 0)
+                ifp->ifHCOutMulticastPkts = l_tmp;
+
+            ifp->ifOutNUcastPkts =
+                (uint32_t)(ifp->ifHCOutBroadcastPkts + 
+                           ifp->ifHCOutMulticastPkts);
 	}
 
 	/*
