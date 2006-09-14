@@ -1,9 +1,9 @@
 /*
- * module to include the ifTable implementation modules  
+ * module to include the ifTable implementation modules
+ *
  */
-/*
- */
-#if defined( linux ) || defined( openbsd3 )
+
+#ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
 config_require(if-mib/ifTable)
 #else
 config_require(mibII/interfaces)
