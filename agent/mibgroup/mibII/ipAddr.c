@@ -696,9 +696,16 @@ var_ipAddrEntry(struct variable * vp,
         ipaddr_return = Lowentry.ipAdEntAddr;
         return (u_char *) & ipaddr_return;
     case IPADIFINDEX:
+#ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
+        Lowentry.ipAdEntIfIndex.o_bytes[Lowentry.ipAdEntIfIndex.o_length] = '\0';
         long_return =
-            Interface_Index_By_Name(Lowentry.ipAdEntIfIndex.o_bytes,
-                                    Lowentry.ipAdEntIfIndex.o_length);
+            netsnmp_access_interface_index_find(Lowentry.
+                                                ipAdEntIfIndex.o_bytes);
+#else
+        long_return =
+           Interface_Index_By_Name(Lowentry.ipAdEntIfIndex.o_bytes,
+                                   Lowentry.ipAdEntIfIndex.o_length);
+#endif
         return (u_char *) & long_return;
     case IPADNETMASK:
 	*var_len = sizeof(uint32_t);
