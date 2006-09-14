@@ -302,6 +302,9 @@
 /* Define to 1 if you have the `cgetnext' function. */
 #undef HAVE_CGETNEXT
 
+/* Define to 1 if the system has the type `Counter64'. */
+#undef HAVE_COUNTER64
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
