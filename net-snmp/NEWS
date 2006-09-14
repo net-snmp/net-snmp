@@ -60,9 +60,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - UDPIPv6 and TCPIPv6 transports now compile on recent UN*X platforms
    Linux:
       - add IPv6 aware UDP and TCP mibs to default module list
-   FreeBSD:
-   OpenBSD:
-      - experimental support for 64bit interface counters (ifXTable). enable
+   Solaris, FreeBSD, OpenBSD:
+      - Experimental support for 64bit interface counters (ifXTable). Enable
         via '--with-mib-modules=if-mib'.
    Win32:
       - new winExtDLL extension module to allow snmpd to load Windows SNMP
