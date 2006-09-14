@@ -1082,6 +1082,10 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	}
 
 	switch (ifrp->ifr_name[0]) {
+        case 'a':          /* ath (802.11) */
+            if (ifrp->ifr_name[1] == 't' && ifrp->ifr_name[2] == 'h')
+                ifp->ifType = 71;
+            break;
 	case 'l':          /* le / lo / lane (ATM LAN Emulation) */
 	    if (ifrp->ifr_name[1] == 'o') {
 		if (!ifp->ifSpeed)
@@ -1136,8 +1140,11 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	    }
 	    break;
 
-	case 'i':          /* ibd (Infiniband) */
-	    ifp->ifType = 199;
+       case 'i':          /* ibd (Infiniband)/ip.tun (IP tunnel) */
+            if (ifrp->ifr_name[1] == 'b')
+               ifp->ifType = 199;
+            else if (ifrp->ifr_name[1] == 'p')
+                ifp->ifType = 131
 	    break;
 	}
 
