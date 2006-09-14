@@ -210,6 +210,23 @@ mteTrigger_run( unsigned int reg, void *clientarg)
         return;
     }
 
+    {
+	extern netsnmp_agent_session *netsnmp_processing_set;
+	if (netsnmp_processing_set) {
+	    /*
+	     * netsnmp_handle_request will not be responsive to our efforts to
+	     *	Retrieve the requested MIB value(s)...
+	     * so we will skip it.
+	     * https://sourceforge.net/tracker/
+	     *	index.php?func=detail&aid=1557406&group_id=12694&atid=112694
+	     */
+	    DEBUGMSGTL(("disman:event:trigger:monitor",
+		"Skipping trigger (%s) while netsnmp_processing_set\n",
+		entry->mteTName));
+	    return;
+	}
+    }
+
     /*
      * Retrieve the requested MIB value(s)...
      */
