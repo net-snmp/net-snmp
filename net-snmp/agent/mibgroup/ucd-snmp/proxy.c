@@ -518,6 +518,25 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
                 netsnmp_handler_mark_requests_as_delegated(requests,
                                                            REQUEST_IS_NOT_DELEGATED);
             }
+	    else if ((cache->reqinfo->mode == MODE_SET_ACTION)) {
+		/*
+		 * In order for netsnmp_wrap_up_request to consider the
+		 * SET request complete,
+		 * there must be no delegated requests pending.
+		 * https://sourceforge.net/tracker/
+		 *	?func=detail&atid=112694&aid=1554261&group_id=12694
+		 */
+		DEBUGMSGTL(("proxy",
+		    "got SET error %s, index %d\n",
+		    snmp_errstring(pdu->errstat), pdu->errindex));
+		netsnmp_handler_mark_requests_as_delegated(
+		    requests, REQUEST_IS_NOT_DELEGATED);
+		/*
+		 * XXX - both here and below, shouldn't the error be set
+		 * on the request with request->index == pdu->errindex ?
+		 */
+		netsnmp_set_request_error(cache->reqinfo, requests, pdu->errstat);
+	    }
             else
                 netsnmp_set_request_error(cache->reqinfo, requests, pdu->errstat);
 
