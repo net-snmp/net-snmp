@@ -6,6 +6,11 @@
 #ifndef NETSNMP_ACCESS_INTERFACE_CONFIG_H
 #define NETSNMP_ACCESS_INTERFACE_CONFIG_H
 
+/*
+ * all platforms use this generic code
+ */
+config_require(if-mib/data_access/interface)
+
 /**---------------------------------------------------------------------*/
 /*
  * configure required files
@@ -20,15 +25,26 @@
  *    HPUX11 had different reuirements than other HPUX, that should
  *    be handled in the *_hpux.h header file.
  */
-config_require(if-mib/data_access/interface)
 
-#if defined( linux )
-config_require(if-mib/data_access/interface_linux)
-config_require(if-mib/data_access/interface_ioctl)
+#ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
 
-#elif defined( openbsd3 ) || defined( freebsd4 ) || defined( freebsd5 ) || defined( freebsd6 )
-config_require(if-mib/data_access/interface_sysctl)
+config_exclude(mibII/interfaces)
 
+#   if defined( linux )
+
+    config_require(if-mib/data_access/interface_linux)
+    config_require(if-mib/data_access/interface_ioctl)
+
+#   elif defined( openbsd3 ) || \
+    defined( freebsd4 ) || defined( freebsd5 ) || defined( freebsd6 )
+
+    config_require(if-mib/data_access/interface_sysctl)
+
+#   else
+
+    config_error(This platform does not yet support IF-MIB rewrites)
+
+#   endif
 #else
 #   define NETSNMP_ACCESS_INTERFACE_NOARCH 1
 #endif
