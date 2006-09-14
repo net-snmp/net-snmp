@@ -69,7 +69,7 @@ config_require(ip-mib/ipv6InterfaceTable/ipv6InterfaceTable_data_access)
     /*
      * ipv6InterfaceReasmMaxSize(2)/UNSIGNED32/ASN_UNSIGNED/u_long(u_long)//l/A/w/e/R/d/h
      */
-#define ipv6InterfaceReasmMaxSize ifentry->reasm_max
+#define ipv6InterfaceReasmMaxSize ifentry->reasm_max_v6
 
     /*
      * ipv6InterfaceIdentifier(3)/Ipv6AddressIfIdentifierTC/ASN_OCTET_STR/char(char)//L/A/w/e/R/d/H

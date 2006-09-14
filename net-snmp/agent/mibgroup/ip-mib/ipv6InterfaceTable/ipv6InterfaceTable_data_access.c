@@ -168,8 +168,8 @@ ipv6InterfaceTable_check_entry_for_updates(const ifTable_rowreq_ctx *
                 /** reasm */
                    ((entry->
                      ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_REASMMAX)
-                    && (entry->reasm_max !=
-                        ift_rrc->data.ifentry->reasm_max)) ||
+                    && (entry->reasm_max_v6 !=
+                        ift_rrc->data.ifentry->reasm_max_v6)) ||
                 /** reachable time */
                    ((entry->
                      ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_REACHABLE)
