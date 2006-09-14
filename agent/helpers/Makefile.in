@@ -71,6 +71,7 @@ SRCS =  all_helpers.c \
 	table_data.c \
 	table_dataset.c \
 	table_tdata.c \
+	table_row.c \
 	table.c \
 	mode_end_call.c
 
@@ -97,6 +98,7 @@ OBJS =  all_helpers.o \
 	table_data.o \
 	table_dataset.o \
 	table_tdata.o \
+	table_row.o \
 	table.o \
 	mode_end_call.o
 
@@ -123,6 +125,7 @@ LOBJS = all_helpers.lo \
 	table_data.lo \
 	table_dataset.lo \
 	table_tdata.lo \
+	table_row.lo \
 	table.lo \
 	mode_end_call.lo
 
