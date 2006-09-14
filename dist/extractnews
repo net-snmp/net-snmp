@@ -1,0 +1,58 @@
+#!/usr/bin/perl
+
+use strict;
+use Text::Wrap;
+my %output;
+my $text;
+my %stash;
+
+while(<>) {
+    my ($file, $component, $patbug, $nums, $text);
+
+    # don't use this:
+    #   FILE: BUGS: 123,456: text
+    ($file, $patbug, $nums, $text) = 
+      /(NEWS|CHANGES):\s*-*\s*\[*(BUG|PATCH)(?:ES|S|):*\s*([\d,\s*]*)\]*:*\s*-*\s*(.*)/;
+
+    # or this:
+    #   FILE: component - text
+    ($file, $component, $text) = 
+      /(NEWS|CHANGES):\s*(\w+)\s*-+\s*(.*)/ if (!$file);
+
+    # what you should use:
+    #   FILE: component: text
+    #      or
+    #   FILE: component: BUGS: 123,456: text
+    ($file, $component, $patbug, $nums, $text) = 
+      /(NEWS|CHANGES):\s*([^:]+):\s*-*\s*\[*(BUG|PATCH)*(?:ES|S|):*\s*([\d,\s*]*)\]*:*\s*-*\s*(.*)/ if (!$file);
+
+    # component left out
+    # FILE: [BUGS: 123,456]: text
+    ($file, $patbug, $nums, $text) = 
+      /(NEWS|CHANGES):\s*\[*(BUG|PATCH)*(?:ES|S|):*\s*([\d,\s*]*)\]*:*\s*-*\s*(.*)/ if (!$file);
+
+    next if (!$file);
+
+    next if (exists($stash{$text}));
+    $stash{$text} = 1;
+
+    $component = "unspecified" if (!$component);
+    if ($patbug) {
+	$text = wrap("      - ","        ","[$patbug $nums]: $text") . "\n";
+    } else {
+	$text = wrap("      - ","        ","$text") . "\n";
+    }
+	
+    push @{$output{'CHANGES'}{$component}}, $text;
+    push @{$output{'NEWS'}{$component}}, $text if ($file eq 'NEWS');
+}
+
+foreach my $f (qw(NEWS CHANGES)) {
+    open(O,">$f.new");
+    foreach my $cat (keys(%{$output{$f}})) {
+	print O "    $cat:\n";
+	print O @{$output{$f}{$cat}};
+	print O "\n";
+    }
+    close(O);
+}
