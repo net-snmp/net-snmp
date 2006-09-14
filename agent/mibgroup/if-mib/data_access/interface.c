@@ -605,7 +605,8 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
     lhs->mtu = rhs->mtu;
     lhs->lastchange = rhs->lastchange;
     lhs->discontinuity = rhs->discontinuity;
-    lhs->reasm_max = rhs->reasm_max;
+    lhs->reasm_max_v4 = rhs->reasm_max_v4;
+    lhs->reasm_max_v6 = rhs->reasm_max_v6;
     lhs->admin_status = rhs->admin_status;
     lhs->oper_status = rhs->oper_status;
     lhs->promiscuous = rhs->promiscuous;

@@ -69,7 +69,7 @@ config_require(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_data_access)
     /*
      * ipv4InterfaceReasmMaxSize(2)/INTEGER32/ASN_INTEGER/long(long)//l/A/w/e/R/d/h
      */
-#define ipv4InterfaceReasmMaxSize ifentry->reasm_max
+#define ipv4InterfaceReasmMaxSize ifentry->reasm_max_v4
 
     /*
      * ipv4InterfaceEnableStatus(3)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
