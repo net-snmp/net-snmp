@@ -142,7 +142,8 @@ typedef struct netsnmp_interface_entry_s {
     u_long  lastchange;
     time_t  discontinuity;
 
-    uint16_t     reasm_max; /* 0..65535 */
+    uint16_t     reasm_max_v4; /* 0..65535 */
+    uint16_t     reasm_max_v6; /* 1500..65535 */
     char  admin_status;
     char  oper_status;
 
