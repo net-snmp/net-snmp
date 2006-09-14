@@ -64,6 +64,10 @@ extern          "C" {
 #define IFOPERSTATUS_UP  1
 #define IFOPERSTATUS_DOWN  2
 #define IFOPERSTATUS_TESTING  3
+#define IFOPERSTATUS_UNKNOWN  4
+#define IFOPERSTATUS_DORMANT  5
+#define IFOPERSTATUS_NOTPRESENT 6
+#define IFOPERSTATUS_LOWERLAYERDOWN 7
 
 #endif                          /* ifOperStatus_ENUMS */
 
