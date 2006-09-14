@@ -339,17 +339,23 @@ AT_Cmp(void *addr, void *ep)
 {
     mib2_ipNetToMediaEntry_t *mp = (mib2_ipNetToMediaEntry_t *) ep;
     int             ret = -1;
+    oid             index;
+
+#ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
+    mp->ipNetToMediaIfIndex.o_bytes[mp->ipNetToMediaIfIndex.o_length] = '\0';
+    index = netsnmp_access_interface_index_find(
+                    mp->ipNetToMediaIfIndex.o_bytes),
+#else
+    index = Interface_Index_By_Name(mp->ipNetToMediaIfIndex.o_bytes,
+                                    mp->ipNetToMediaIfIndex.o_length)
+#endif
     DEBUGMSGTL(("mibII/at", "......... AT_Cmp %lx<>%lx %d<>%d (%.5s)\n",
                 mp->ipNetToMediaNetAddress, ((if_ip_t *) addr)->ipAddr,
-                ((if_ip_t *) addr)->ifIdx,
-                Interface_Index_By_Name(mp->ipNetToMediaIfIndex.o_bytes,
-                                        mp->ipNetToMediaIfIndex.o_length),
+                ((if_ip_t *) addr)->ifIdx, index,
                 mp->ipNetToMediaIfIndex.o_bytes));
     if (mp->ipNetToMediaNetAddress != ((if_ip_t *) addr)->ipAddr)
         ret = 1;
-    else if (((if_ip_t *) addr)->ifIdx !=
-             Interface_Index_By_Name(mp->ipNetToMediaIfIndex.o_bytes,
-                                     mp->ipNetToMediaIfIndex.o_length))
+    else if (((if_ip_t *) addr)->ifIdx != index)
         ret = 1;
     else
         ret = 0;
@@ -401,9 +407,15 @@ var_atEntry(struct variable * vp,
             (MIB_IP_NET, &entry, sizeof(mib2_ipNetToMediaEntry_t),
              req_type, &AT_Cmp, &NextAddr) != 0)
             break;
-        current[AT_IFINDEX_OFF] =
-            Interface_Index_By_Name(entry.ipNetToMediaIfIndex.o_bytes,
-                                    entry.ipNetToMediaIfIndex.o_length);
+#ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
+        entry.ipNetToMediaIfIndex.o_bytes[entry.ipNetToMediaIfIndex.o_length] = '\0';
+        current[AT_IFINDEX_OFF] = netsnmp_access_interface_index_find(
+           entry.ipNetToMediaIfIndex.o_bytes);
+#else
+        current[AT_IFINDEX_OFF] = 
+           Interface_Index_By_Name(entry.ipNetToMediaIfIndex.o_bytes,
+                                   entry.ipNetToMediaIfIndex.o_length);
+#endif
         if (current[6] == 3) {  /* AT group oid */
             current[AT_IFINDEX_OFF + 1] = 1;
             offset = AT_IFINDEX_OFF + 2;
@@ -446,9 +458,16 @@ var_atEntry(struct variable * vp,
     switch (vp->magic) {
     case IPMEDIAIFINDEX:
         *var_len = sizeof long_return;
-        long_return =
-            Interface_Index_By_Name(Lowentry.ipNetToMediaIfIndex.o_bytes,
-                                    Lowentry.ipNetToMediaIfIndex.o_length);
+#ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
+        Lowentry.ipNetToMediaIfIndex.o_bytes[
+            Lowentry.ipNetToMediaIfIndex.o_length] = '\0';
+        long_return = netsnmp_access_interface_index_find(
+            Lowentry.ipNetToMediaIfIndex.o_bytes);
+#else
+        long_return = Interface_Index_By_Name(
+            Lowentry.ipNetToMediaIfIndex.o_bytes,
+            Lowentry.ipNetToMediaIfIndex.o_length);
+#endif
         return (u_char *) & long_return;
     case IPMEDIAPHYSADDRESS:
         *var_len = Lowentry.ipNetToMediaPhysAddress.o_length;
