@@ -1144,7 +1144,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
             if (ifrp->ifr_name[1] == 'b')
                ifp->ifType = 199;
             else if (ifrp->ifr_name[1] == 'p')
-                ifp->ifType = 131
+                ifp->ifType = 131;
 	    break;
 	}
 
