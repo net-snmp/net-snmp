@@ -344,10 +344,10 @@ AT_Cmp(void *addr, void *ep)
 #ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
     mp->ipNetToMediaIfIndex.o_bytes[mp->ipNetToMediaIfIndex.o_length] = '\0';
     index = netsnmp_access_interface_index_find(
-                    mp->ipNetToMediaIfIndex.o_bytes),
+                    mp->ipNetToMediaIfIndex.o_bytes);
 #else
     index = Interface_Index_By_Name(mp->ipNetToMediaIfIndex.o_bytes,
-                                    mp->ipNetToMediaIfIndex.o_length)
+                                    mp->ipNetToMediaIfIndex.o_length);
 #endif
     DEBUGMSGTL(("mibII/at", "......... AT_Cmp %lx<>%lx %d<>%d (%.5s)\n",
                 mp->ipNetToMediaNetAddress, ((if_ip_t *) addr)->ipAddr,
