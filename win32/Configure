@@ -352,7 +352,7 @@ while (<MAKE_IN>)
       s/^.*#undef HAVE_WIN32_PLATFORM_SDK.*/#define HAVE_WIN32_PLATFORM_SDK 1/;
     }
     if ($openssl == 1) {
-      s/^.*#undef USE_OPENSSL.*/#define USE_OPENSSL 1/;
+      s/^.*#undef NETSNMP_USE_OPENSSL.*/#define NETSNMP_USE_OPENSSL 1/;
     }
     if ($b_ipv6 == 1) {
       s/^.*#undef INET6.*/#define INET6 1/;

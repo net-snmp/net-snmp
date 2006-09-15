@@ -26,7 +26,7 @@
 [ "x$DEFSECURITYLEVEL" = "x" ] && DEFSECURITYLEVEL=authPriv
 
 ## auto-probe best auth type
-if grep '^#define USE_OPENSSL 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
+if grep '^#define NETSNMP_USE_OPENSSL 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
   MAXAUTHTYPE=SHA
 else
   # MD5 is always available internally
@@ -35,7 +35,7 @@ fi
 
 ## auto-probe best priv type
 # XXX: HAVE_AES depends on cpp logic, so we need to test for lower-level stuff
-if grep '^#define USE_OPENSSL 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null; then
+if grep '^#define NETSNMP_USE_OPENSSL 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null; then
   if grep '^#define HAVE_OPENSSL_AES_H 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null && \
    grep '^#define HAVE_AES_CFB128_ENCRYPT 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
     MAXPRIVTYPE=AES

@@ -3150,7 +3150,7 @@ if test "x$useopenssl" != "xno" ; then
     else
         encrmodes="[disabled]"
     fi
-    AC_DEFINE(USE_OPENSSL)
+    AC_DEFINE(NETSNMP_USE_OPENSSL)
     LIBCRYPTO="-lcrypto"
     AC_MSG_RESULT(OpenSSL Support)
 elif test "x$usepkcs" != "xno" ; then
