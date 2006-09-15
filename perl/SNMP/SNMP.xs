@@ -2581,12 +2581,12 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "NETSNMP_DEFAULT_VERSION"))
-#ifdef NETSNMP_DEFAULT_VERSION
-	    return NETSNMP_DEFAULT_VERSION;
+	if (strEQ(name, "SNMP_DEFAULT_VERSION"))
+#ifdef NETSNMP_DEFAULT_SNMP_VERSION
+	    return NETSNMP_DEFAULT_SNMP_VERSION;
 #else
-#ifdef NETSNMP_DEFAULT_VERSION
-	    return NETSNMP_DEFAULT_VERSION;
+#ifdef SNMP_DEFAULT_VERSION
+	    return SNMP_DEFAULT_VERSION;
 #else
 	    goto not_there;
 #endif
