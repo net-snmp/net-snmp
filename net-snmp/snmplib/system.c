@@ -130,6 +130,14 @@ SOFTWARE.
 #include <sys/utsname.h>
 #endif
 
+#if HAVE_SYS_SYSTEMCFG_H
+#include <sys/systemcfg.h>
+#endif
+
+#if HAVE_SYS_SYSTEMINFO_H
+#include <sys/systeminfo.h>
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
@@ -1110,3 +1118,31 @@ static int printOSonce = 1;
 #endif /* HAVE_SYS_UTSNAME_H */
 }
 
+/**
+ * netsnmp_os_kernel_width determines kernel width at runtime
+ * Currently implemented for IRIX, AIX and Tru64 Unix
+ *
+ * @return kernel width (usually 32 or 64) on success, -1 on error
+ */
+int
+netsnmp_os_kernel_width(void)
+{
+#ifdef irix6
+  char buf[8];
+  sysinfo(_MIPS_SI_OS_NAME, buf, 7);
+  if (strncmp("IRIX64", buf, 6) == 0) {
+    return 64;
+  } else if (strncmp("IRIX", buf, 4) == 0) {
+    return 32;
+  } else {
+    return -1;
+  }
+#elif defined(aix4) || defined(aix5)
+  return (__KERNEL_32() ? 32 : (__KERNEL_64() ? 64 : -1));
+#elif defined(osf4) || defined(osf5) || defined(__alpha)
+  return 64; /* Alpha is always 64bit */
+#else
+  /* kernel width detection not implemented */
+  return -1;
+#endif
+}
