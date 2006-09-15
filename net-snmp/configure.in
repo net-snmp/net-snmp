@@ -3000,7 +3000,7 @@ AC_INCLUDES_DEFAULT([])
 #endif
 ])
 # more IRIX headers
-AC_CHECK_HEADERS(sys/tcpipstats.h sys/sysmp.h sys/systeminfo.h)
+AC_CHECK_HEADERS(sys/tcpipstats.h sys/sysmp.h sys/systeminfo.h sys/sysget.h)
 # AIX system configuration
 AC_CHECK_HEADER(sys/systemcfg.h)
 # from smux stuff
