@@ -146,6 +146,7 @@ SOFTWARE.
 
     int             netsnmp_os_prematch(const char *ospmname,
                                         const char *ospmrelprefix);
+    int             netsnmp_os_kernel_width(void);
 
 #ifdef __cplusplus
 }
