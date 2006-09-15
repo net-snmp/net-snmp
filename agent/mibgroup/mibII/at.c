@@ -105,9 +105,9 @@
 
 #include <net-snmp/data_access/interface.h>
 
-#if defined(HAVE_SYS_SYSCTL_H) && !defined(CAN_USE_SYSCTL)
+#if defined(HAVE_SYS_SYSCTL_H) && !defined(NETSNMP_CAN_USE_SYSCTL)
 # if defined(RTF_LLINFO) 
-#  define CAN_USE_SYSCTL 1
+#  define NETSNMP_CAN_USE_SYSCTL 1
 # endif
 #endif
 
@@ -304,7 +304,7 @@ var_atEntry(struct variable *vp,
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
         long_return = lowIfIndex;
 #else                           /* ARP_SCAN_FOUR_ARGUMENTS */
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 1;        /* XXX */
@@ -497,7 +497,7 @@ var_atEntry(struct variable * vp,
 #ifndef solaris2
 
 static int      arptab_size, arptab_current;
-#if CAN_USE_SYSCTL
+#if NETSNMP_CAN_USE_SYSCTL
 static char    *lim, *rtnext;
 static char    *at = 0;
 #else
@@ -522,12 +522,12 @@ static struct arptab *at = NULL;
 static int      arptab_curr_max_size = 0;
 
 #endif
-#endif                          /* CAN_USE_SYSCTL */
+#endif                          /* NETSNMP_CAN_USE_SYSCTL */
 
 static void
 ARP_Scan_Init(void)
 {
-#ifndef CAN_USE_SYSCTL
+#ifndef NETSNMP_CAN_USE_SYSCTL
 #ifndef linux
 #ifdef hpux11
 
@@ -667,7 +667,7 @@ ARP_Scan_Init(void)
     fclose(in);
     time(&tm);
 #endif                          /* linux */
-#else                           /* CAN_USE_SYSCTL */
+#else                           /* NETSNMP_CAN_USE_SYSCTL */
 
     int             mib[6];
     size_t          needed;
@@ -698,7 +698,7 @@ ARP_Scan_Init(void)
         }
     }
 
-#endif                          /* CAN_USE_SYSCTL */
+#endif                          /* NETSNMP_CAN_USE_SYSCTL */
 }
 
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
@@ -710,7 +710,7 @@ static int
 ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
 #endif
 {
-#ifndef CAN_USE_SYSCTL
+#ifndef NETSNMP_CAN_USE_SYSCTL
 #ifdef linux
     if (arptab_current < arptab_size) {
         /*
@@ -799,7 +799,7 @@ ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
 
     return 0;                   /* we need someone with an irix box to fix this section */
 
-#else                           /* !CAN_USE_SYSCTL */
+#else                           /* !NETSNMP_CAN_USE_SYSCTL */
     struct rt_msghdr *rtm;
     struct sockaddr_inarp *sin;
     struct sockaddr_dl *sdl;
@@ -822,7 +822,7 @@ ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
         }
     }
     return (0);                 /* "EOF" */
-#endif                          /* !CAN_USE_SYSCTL */
+#endif                          /* !NETSNMP_CAN_USE_SYSCTL */
 }
 #endif                          /* solaris2 */
 

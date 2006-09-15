@@ -343,13 +343,13 @@ typedef struct request_list {
 #define SNMP_DEFAULT_VERSION	    -1
 #define SNMP_DEFAULT_SECMODEL	    -1
 #define SNMP_DEFAULT_CONTEXT        ""
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
 #define SNMP_DEFAULT_AUTH_PROTO     usmHMACMD5AuthProtocol
 #else
 #define SNMP_DEFAULT_AUTH_PROTO     usmHMACSHA1AuthProtocol
 #endif
 #define SNMP_DEFAULT_AUTH_PROTOLEN  USM_LENGTH_OID_TRANSFORM
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
 #define SNMP_DEFAULT_PRIV_PROTO     usmDESPrivProtocol
 #else
 #define SNMP_DEFAULT_PRIV_PROTO     usmAESPrivProtocol
@@ -501,13 +501,13 @@ typedef union {
    oid            *objid;
    u_char         *bitstring;
    struct counter64 *counter64;
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
    float          *floatVal;
    double         *doubleVal;
    /*
     * t_union *unionVal; 
     */
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
 } netsnmp_vardata;
 
 
@@ -737,7 +737,7 @@ struct variable_list {
                                             const oid * in_name2, size_t len2);
     void            init_snmp(const char *);
     u_char         *snmp_pdu_build(netsnmp_pdu *, u_char *, size_t *);
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
     u_char         *snmp_pdu_rbuild(netsnmp_pdu *, u_char *, size_t *);
 #endif
     int             snmpv3_parse(netsnmp_pdu *, u_char *, size_t *,
@@ -783,7 +783,7 @@ struct variable_list {
     /*
      * New re-allocating reverse encoding functions.  
      */
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
 
     int        snmpv3_packet_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
                                      size_t * offset,

@@ -499,7 +499,7 @@ hash_engineID(u_char * engineID, u_int engineID_len)
     /*
      * Hash engineID into a list index.
      */
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
     rval = sc_hash(usmHMACMD5AuthProtocol,
                    sizeof(usmHMACMD5AuthProtocol) / sizeof(oid),
                    engineID, engineID_len, buf, &buf_len);
@@ -525,7 +525,7 @@ hash_engineID(u_char * engineID, u_int engineID_len)
 
 
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
 /*******************************************************************-o-******
  * dump_etimelist_entry
  *
@@ -548,11 +548,11 @@ dump_etimelist_entry(Enginetime e, int count)
 
 
     buflen = e->engineID_len;
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     if (!(s = dump_snmpEngineID(e->engineID, &buflen))) {
 #endif
         binary_to_hex(e->engineID, e->engineID_len, &s);
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     }
 #endif
 
@@ -602,4 +602,4 @@ dump_etimelist(void)
     DEBUGMSG(("dump_etimelist", "\n"));
 
 }                               /* end dump_etimelist() */
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */

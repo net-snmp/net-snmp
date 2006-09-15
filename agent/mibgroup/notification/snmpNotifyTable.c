@@ -223,14 +223,14 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg)
          */
 
         for (sptr = sess; sptr; sptr = sptr->next) {
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
             if (sptr->version == SNMP_VERSION_1 &&
                 minor == SNMPD_CALLBACK_SEND_TRAP1) {
                 send = 1;
             } else
 #endif
             if ((sptr->version == SNMP_VERSION_3
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
                  || sptr->version == SNMP_VERSION_2c
 #endif
                 ) && minor == SNMPD_CALLBACK_SEND_TRAP2) {
@@ -337,10 +337,10 @@ notifyTable_register_notifications(int major, int minor,
                ss->securityNameLen);
         pptr->secName[ss->securityNameLen] = 0;
     }
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
        else {
         pptr->secModel = 
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
             ss->version == SNMP_VERSION_1 ?  SNMP_SEC_MODEL_SNMPv1 : 
 #endif
                                              SNMP_SEC_MODEL_SNMPv2c;

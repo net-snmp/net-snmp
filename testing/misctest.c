@@ -249,7 +249,7 @@ test_dumpseid(void)
             SNMP_FREE(t);
             t = buf;
         }
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
         s = dump_snmpEngineID(t, &tlen);
         printf("%s    (len=%d)\n", s, tlen);
 #endif

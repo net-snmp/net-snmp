@@ -221,7 +221,7 @@ var_hrsys(struct variable * vp,
 #ifdef linux
     FILE           *fp;
 #endif
-#if CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
+#if NETSNMP_CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
     static int      maxproc_mib[] = { CTL_KERN, KERN_MAXPROC };
     int             buf_size;
 #endif
@@ -262,7 +262,7 @@ var_hrsys(struct variable * vp,
         }
         strlcpy(string,bootparam,sizeof(string));
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         sprintf(string, "ask Dave");    /* XXX */
@@ -276,7 +276,7 @@ var_hrsys(struct variable * vp,
 #if USING_HOST_HR_SWRUN_MODULE
         long_return = count_processes();
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;
@@ -285,7 +285,7 @@ var_hrsys(struct variable * vp,
     case HRSYS_MAXPROCS:
 #if defined(NR_TASKS)
         long_return = NR_TASKS; /* <linux/tasks.h> */
-#elif CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
+#elif NETSNMP_CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
         buf_size = sizeof(nproc);
         if (sysctl(maxproc_mib, 2, &nproc, &buf_size, NULL, 0) < 0)
             return NULL;
@@ -300,7 +300,7 @@ var_hrsys(struct variable * vp,
         auto_nlist(NPROC_SYMBOL, (char *) &nproc, sizeof(int));
         long_return = nproc;
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;

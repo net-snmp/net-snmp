@@ -64,7 +64,7 @@ init_file(void)
      * Define the OID pointer to the top of the mib tree that we're
      * registering underneath 
      */
-    oid             file_variables_oid[] = { UCDAVIS_MIB, 15, 1 };
+    oid             file_variables_oid[] = { NETSNMP_UCDAVIS_MIB, 15, 1 };
 
     /*
      * register ourselves with the agent to handle our mib tree 

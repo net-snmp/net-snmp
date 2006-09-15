@@ -53,10 +53,10 @@ extern          "C" {
             oid            *objid;
             u_char         *bitstring;
             struct counter64 *counter64;
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
             float          *floatVal;
             double         *doubleVal;
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
         } data;
         u_long          data_len;
 

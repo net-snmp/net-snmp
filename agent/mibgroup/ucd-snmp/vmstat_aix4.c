@@ -20,7 +20,7 @@
  * To make lint skip the debug code and stop complaining 
  */
 #ifdef __lint
-#define SNMP_NO_DEBUGGING 1
+#define NETSNMP_NO_DEBUGGING 1
 #endif
 
 /*
@@ -199,7 +199,7 @@ init_vmstat_aix4(void)
 	 * Define the OID pointer to the top of the mib tree that we're 
 	 * registering underneath 
 	 */
-	oid			 vmstat_variables_oid[] = { UCDAVIS_MIB, 11 };
+	oid			 vmstat_variables_oid[] = { NETSNMP_UCDAVIS_MIB, 11 };
 
 	/*
 	 * register ourselves with the agent to handle our mib tree 

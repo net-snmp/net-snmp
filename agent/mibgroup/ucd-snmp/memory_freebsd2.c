@@ -121,7 +121,7 @@ init_memory_freebsd2(void)
      * Define the OID pointer to the top of the mib tree that we're
      * registering underneath 
      */
-    oid             mem_variables_oid[] = { UCDAVIS_MIB, MEMMIBNUM };
+    oid             mem_variables_oid[] = { NETSNMP_UCDAVIS_MIB, NETSNMP_MEMMIBNUM };
 
     /*
      * register ourselves with the agent to handle our mib tree 
@@ -326,7 +326,7 @@ var_extensible_mem(struct variable *vp,
     case MEMUSEDSWAPTXT:
     case MEMTOTALREALTXT:
     case MEMUSEDREALTXT:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_ret = -1;

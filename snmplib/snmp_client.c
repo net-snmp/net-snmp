@@ -904,10 +904,10 @@ snmp_set_var_value(netsnmp_variable_list * vars,
         vars->val.string = NULL;
         break;
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_U64:
     case ASN_OPAQUE_I64:
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
     case ASN_COUNTER64:
         if (largeval) {
             snmp_log(LOG_ERR,"bad size for counter 64 (%d)\n",
@@ -918,7 +918,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
         memmove(vars->val.counter64, value, vars->val_len);
         break;
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_FLOAT:
         if (largeval) {
             snmp_log(LOG_ERR,"bad size for opaque float (%d)\n",
@@ -939,7 +939,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
         memmove(vars->val.doubleVal, value, vars->val_len);
         break;
 
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
 
     default:
         snmp_log(LOG_ERR,"no storage for OID\n");
@@ -1000,7 +1000,7 @@ snmp_synch_response_cb(netsnmp_session * ss,
     while (state->waiting) {
         numfds = 0;
         FD_ZERO(&fdset);
-        block = SNMPBLOCK;
+        block = NETSNMP_SNMPBLOCK;
         tvp = &timeout;
         timerclear(tvp);
         snmp_select_info(&numfds, &fdset, tvp, &block);
@@ -1079,7 +1079,7 @@ snmp_sess_synch_response(void *sessp,
     while (state->waiting) {
         numfds = 0;
         FD_ZERO(&fdset);
-        block = SNMPBLOCK;
+        block = NETSNMP_SNMPBLOCK;
         tvp = &timeout;
         timerclear(tvp);
         snmp_sess_select_info(sessp, &numfds, &fdset, tvp, &block);

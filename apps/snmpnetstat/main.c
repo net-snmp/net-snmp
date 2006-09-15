@@ -366,7 +366,7 @@ main(int argc, char *argv[])
 			if (af == AF_INET || af == AF_UNSPEC)
 				mrt_stats(nl[N_MRTPROTO].n_value,
 				    nl[N_MRTSTAT].n_value);
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 			if (af == AF_INET6 || af == AF_UNSPEC)
 				mrt6_stats(nl[N_MRT6PROTO].n_value,
 				    nl[N_MRT6STAT].n_value);
@@ -378,7 +378,7 @@ main(int argc, char *argv[])
 				    nl[N_MFCHASHTBL].n_value,
 				    nl[N_MFCHASH].n_value,
 				    nl[N_VIFTABLE].n_value);
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 			if (af == AF_INET6 || af == AF_UNSPEC)
 				mroute6pr(nl[N_MRT6PROTO].n_value,
 				    nl[N_MF6CTABLE].n_value,

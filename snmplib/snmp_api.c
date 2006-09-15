@@ -127,10 +127,10 @@ SOFTWARE.
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_secmod.h>
-#ifdef SNMP_SECMOD_USM
+#ifdef NETSNMP_SECMOD_USM
 #include <net-snmp/library/snmpusm.h>
 #endif
-#ifdef SNMP_SECMOD_KSM
+#ifdef NETSNMP_SECMOD_KSM
 #include <net-snmp/library/snmpksm.h>
 #endif
 #include <net-snmp/library/keytools.h>
@@ -631,9 +631,9 @@ _init_snmp(void)
     Reqid = 1;
 
     snmp_res_init();            /* initialize the mt locking structures */
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     init_mib_internals();
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
     netsnmp_tdomain_init();
 
     gettimeofday(&tv, (struct timezone *) 0);
@@ -679,10 +679,10 @@ _init_snmp(void)
     netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
                        NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH, 16);
 
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
 			   NETSNMP_DS_LIB_REVERSE_ENCODE,
-			   DEFAULT_ASNENCODING_DIRECTION);
+			   NETSNMP_DEFAULT_ASNENCODING_DIRECTION);
 #endif
 }
 
@@ -720,7 +720,7 @@ register_default_handlers(void)
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE);
     netsnmp_ds_register_config(ASN_INTEGER, "snmp", "defaultPort",
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DEFAULT_PORT);
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defCommunity",
                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_COMMUNITY);
 #endif
@@ -767,7 +767,7 @@ init_snmp_enums(void)
     se_add_pair_to_slist("asntypes", strdup("nsap"), ASN_NSAP);
     se_add_pair_to_slist("asntypes", strdup("object_id"), ASN_OBJECT_ID);
     se_add_pair_to_slist("asntypes", strdup("null"), ASN_NULL);
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     se_add_pair_to_slist("asntypes", strdup("opaque_counter64"),
                          ASN_OPAQUE_COUNTER64);
     se_add_pair_to_slist("asntypes", strdup("opaque_u64"), ASN_OPAQUE_U64);
@@ -834,9 +834,9 @@ init_snmp(const char *type)
     init_vacm();
 
     read_premib_configs();
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     init_mib();
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
     read_configs();
 
@@ -867,9 +867,9 @@ snmp_shutdown(const char *type)
     snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN, NULL);
     snmp_alarm_unregister_all();
     snmp_close_sessions();
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     shutdown_mib();
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
     unregister_all_config_handlers();
     netsnmp_container_free_list();
     clear_sec_mod();
@@ -1018,7 +1018,7 @@ _sess_copy(netsnmp_session * in_session)
     /*
      * Fill in defaults if necessary 
      */
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     if (in_session->community_len != SNMP_DEFAULT_COMMUNITY_LEN) {
         ucp = (u_char *) malloc(in_session->community_len);
         if (ucp != NULL)
@@ -1031,7 +1031,7 @@ _sess_copy(netsnmp_session * in_session)
             if (ucp)
                 memmove(ucp, cp, session->community_len);
         } else {
-#ifdef NO_ZEROLENGTH_COMMUNITY
+#ifdef NETSNMP_NO_ZEROLENGTH_COMMUNITY
             session->community_len = strlen(DEFAULT_COMMUNITY);
             ucp = (u_char *) malloc(session->community_len);
             if (ucp)
@@ -2210,14 +2210,14 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
                   "ERROR: undefined")), secLevelName[pdu->securityLevel]));
 
     DEBUGDUMPSECTION("send", "SNMPv3 Message");
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
         ret = snmpv3_packet_realloc_rbuild(pkt, pkt_len, offset,
                                            session, pdu, NULL, 0);
     } else {
 #endif
         ret = snmpv3_packet_build(session, pdu, *pkt, pkt_len, NULL, 0);
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
     }
 #endif
     DEBUGINDENTLESS();
@@ -2357,7 +2357,7 @@ snmpv3_header_build(netsnmp_session * session, netsnmp_pdu *pdu,
 
 }                               /* end snmpv3_header_build() */
 
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
 
 int
 snmpv3_header_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
@@ -2447,7 +2447,7 @@ snmpv3_header_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
     DEBUGINDENTLESS();
     return rc;
 }                               /* end snmpv3_header_realloc_rbuild() */
-#endif                          /* USE_REVERSE_ASNENCODING */
+#endif                          /* NETSNMP_USE_REVERSE_ASNENCODING */
 
 static u_char  *
 snmpv3_scopedPDU_header_build(netsnmp_pdu *pdu,
@@ -2490,7 +2490,7 @@ snmpv3_scopedPDU_header_build(netsnmp_pdu *pdu,
 }                               /* end snmpv3_scopedPDU_header_build() */
 
 
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
 int
 snmpv3_scopedPDU_header_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
                                        size_t * offset, netsnmp_pdu *pdu,
@@ -2534,9 +2534,9 @@ snmpv3_scopedPDU_header_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
 
     return rc;
 }                               /* end snmpv3_scopedPDU_header_realloc_rbuild() */
-#endif                          /* USE_REVERSE_ASNENCODING */
+#endif                          /* NETSNMP_USE_REVERSE_ASNENCODING */
 
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
 /*
  * returns 0 if success, -1 if fail, not 0 if SM build failure 
  */
@@ -2643,7 +2643,7 @@ snmpv3_packet_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
     SNMP_FREE(hdrbuf);
     return rc;
 }                               /* end snmpv3_packet_realloc_rbuild() */
-#endif                          /* USE_REVERSE_ASNENCODING */
+#endif                          /* NETSNMP_USE_REVERSE_ASNENCODING */
 
 /*
  * returns 0 if success, -1 if fail, not 0 if SM build failure 
@@ -2768,7 +2768,7 @@ static int
 _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             netsnmp_session * session, netsnmp_pdu *pdu)
 {
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     u_char         *h0e = 0;
     size_t          start_offset = *offset;
     long            version;
@@ -2814,7 +2814,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
          * Fallthrough 
          */
     case SNMP_MSG_INFORM:
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
         /*
          * not supported in SNMPv1 and SNMPsec 
          */
@@ -2833,7 +2833,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         /*
          * not supported in SNMPv1 and SNMPsec 
          */
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
         if (pdu->version == SNMP_VERSION_1) {
             session->s_snmp_errno = SNMPERR_V2_IN_V1;
             return -1;
@@ -2853,7 +2853,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         /*
          * *only* supported in SNMPv1 and SNMPsec 
          */
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
         if (pdu->version != SNMP_VERSION_1) {
             session->s_snmp_errno = SNMPERR_V1_IN_V2;
             return -1;
@@ -2903,14 +2903,14 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
      */
     h0 = *pkt;
     switch (pdu->version) {
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     case SNMP_VERSION_1:
 #endif
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
 #endif
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
-#ifdef NO_ZEROLENGTH_COMMUNITY
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
+#ifdef NETSNMP_NO_ZEROLENGTH_COMMUNITY
         if (pdu->community_len == 0) {
             if (session->community_len == 0) {
                 session->s_snmp_errno = SNMPERR_BAD_COMMUNITY;
@@ -2925,7 +2925,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
                     session->community, session->community_len);
             pdu->community_len = session->community_len;
         }
-#else                           /* !NO_ZEROLENGTH_COMMUNITY */
+#else                           /* !NETSNMP_NO_ZEROLENGTH_COMMUNITY */
         if (pdu->community_len == 0 && pdu->command != SNMP_MSG_RESPONSE) {
             /*
              * copy session community exactly to pdu community 
@@ -2948,11 +2948,11 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             }
             pdu->community_len = session->community_len;
         }
-#endif                          /* !NO_ZEROLENGTH_COMMUNITY */
+#endif                          /* !NETSNMP_NO_ZEROLENGTH_COMMUNITY */
 
         DEBUGMSGTL(("snmp_send", "Building SNMPv%d message...\n",
                     (1 + pdu->version)));
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
         if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
             DEBUGPRINTPDUTYPE("send", pdu->command);
             rc = snmp_pdu_realloc_rbuild(pkt, pkt_len, offset, pdu);
@@ -2993,13 +2993,13 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             /*
              * Build the final sequence.  
              */
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
             if (pdu->version == SNMP_VERSION_1) {
                 DEBUGDUMPSECTION("send", "SNMPv1 Message");
             } else {
 #endif
                 DEBUGDUMPSECTION("send", "SNMPv2c Message");
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
             }
 #endif
             rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset, 1,
@@ -3014,7 +3014,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             return 0;
         } else {
 
-#endif                          /* USE_REVERSE_ASNENCODING */
+#endif                          /* NETSNMP_USE_REVERSE_ASNENCODING */
             /*
              * Save current location and build SEQUENCE tag and length
              * placeholder for SNMP message sequence
@@ -3028,13 +3028,13 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             }
             h0e = cp;
 
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
             if (pdu->version == SNMP_VERSION_1) {
                 DEBUGDUMPSECTION("send", "SNMPv1 Message");
             } else {
 #endif
                 DEBUGDUMPSECTION("send", "SNMPv2c Message");
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
             }
 #endif
 
@@ -3065,9 +3065,9 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
                 return -1;
             break;
 
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
         }
-#endif                          /* USE_REVERSE_ASNENCODING */
+#endif                          /* NETSNMP_USE_REVERSE_ASNENCODING */
         break;
 #endif /* support for community based SNMP */
     case SNMP_VERSION_2p:
@@ -3090,13 +3090,13 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
      * insert the actual length of the message sequence 
      */
     switch (pdu->version) {
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     case SNMP_VERSION_1:
 #endif
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
 #endif
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
         asn_build_sequence(*pkt, &length,
                            (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
                            cp - h0e);
@@ -3306,7 +3306,7 @@ snmp_pdu_build(netsnmp_pdu *pdu, u_char * cp, size_t * out_length)
     return cp;
 }
 
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
 /*
  * On error, returns 0 (likely an encoding problem).  
  */
@@ -3524,7 +3524,7 @@ snmp_pdu_realloc_rbuild(u_char ** pkt, size_t * pkt_len, size_t * offset,
                                      *offset - start_offset);
     return rc;
 }
-#endif                          /* USE_REVERSE_ASNENCODING */
+#endif                          /* NETSNMP_USE_REVERSE_ASNENCODING */
 
 /*
  * Parses the packet received to determine version, either directly
@@ -4076,7 +4076,7 @@ _snmp_parse(void *sessp,
             netsnmp_session * session,
             netsnmp_pdu *pdu, u_char * data, size_t length)
 {
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     u_char          community[COMMUNITY_MAX_LEN];
     size_t          community_length = COMMUNITY_MAX_LEN;
 #endif
@@ -4099,26 +4099,26 @@ _snmp_parse(void *sessp,
     }
 
     switch (pdu->version) {
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     case SNMP_VERSION_1:
 #endif
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
 #endif
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
         DEBUGMSGTL(("snmp_api", "Parsing SNMPv%d message...\n",
                     (1 + pdu->version)));
 
         /*
          * authenticates message and returns length if valid 
          */
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
         if (pdu->version == SNMP_VERSION_1) {
             DEBUGDUMPSECTION("recv", "SNMPv1 message\n");
         } else {
 #endif
             DEBUGDUMPSECTION("recv", "SNMPv2c message\n");
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
         }
 #endif
         data = snmp_comstr_parse(data, &length,
@@ -4138,7 +4138,7 @@ _snmp_parse(void *sessp,
          */
         pdu->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
         pdu->securityModel = 
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
             (pdu->version == SNMP_VERSION_1) ? SNMP_SEC_MODEL_SNMPv1 : 
 #endif
                                                SNMP_SEC_MODEL_SNMPv2c;
@@ -4448,10 +4448,10 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
                                    (u_long *) vp->val.integer,
                                    vp->val_len);
             break;
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_COUNTER64:
         case ASN_OPAQUE_U64:
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
         case ASN_COUNTER64:
             vp->val.counter64 = (struct counter64 *) vp->buf;
             vp->val_len = sizeof(struct counter64);
@@ -4459,7 +4459,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
                                      (struct counter64 *) vp->val.
                                      counter64, vp->val_len);
             break;
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_FLOAT:
             vp->val.floatVal = (float *) vp->buf;
             vp->val_len = sizeof(float);
@@ -4480,7 +4480,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
                                    sizeof(*vp->val.counter64));
 
             break;
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
         case ASN_OCTET_STR:
         case ASN_IPADDRESS:
         case ASN_OPAQUE:
@@ -4805,7 +4805,7 @@ _sess_async_send(void *sessp,
         length = pktbuf_len;
         result = isp->hook_build(session, pdu, pktbuf, &length);
     } else {
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
         if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
             result =
                 snmp_build(&pktbuf, &pktbuf_len, &offset, session, pdu);
@@ -4816,7 +4816,7 @@ _sess_async_send(void *sessp,
             packet = pktbuf;
             length = pktbuf_len;
             result = snmp_build(&pktbuf, &length, &offset, session, pdu);
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
         }
 #endif
     }
@@ -6052,7 +6052,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
         length = pktbuf_len;
         result = isp->hook_build(sp, rp->pdu, pktbuf, &length);
     } else {
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
         if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
             result =
                 snmp_build(&pktbuf, &pktbuf_len, &offset, sp, rp->pdu);
@@ -6063,7 +6063,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
             packet = pktbuf;
             length = pktbuf_len;
             result = snmp_build(&pktbuf, &length, &offset, sp, rp->pdu);
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
         }
 #endif
     }
@@ -6585,14 +6585,14 @@ snmp_add_var(netsnmp_pdu *pdu,
     const char     *cp;
     char           *ecp, *vp;
     int             result = SNMPERR_SUCCESS;
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     int             check = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 					     NETSNMP_DS_LIB_DONT_CHECK_RANGE);
     int             do_hint = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 					     NETSNMP_DS_LIB_NO_DISPLAY_HINT);
     u_char         *hintptr;
     struct tree    *tp;
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
     u_char         *buf = NULL;
     const u_char   *buf_ptr = NULL;
     size_t          buf_len = 0, value_len = 0, tint;
@@ -6600,13 +6600,13 @@ snmp_add_var(netsnmp_pdu *pdu,
     long            ltmp;
     int             itmp;
     struct enum_list *ep;
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     double          dtmp;
     float           ftmp;
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
     struct counter64 c64tmp;
 
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     tp = get_tree(name, name_length, get_tree_head());
     if (!tp || !tp->type || tp->type > TYPE_SIMPLE_LAST) {
         check = 0;
@@ -6653,23 +6653,23 @@ snmp_add_var(netsnmp_pdu *pdu,
             break;
         }
     }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
     switch (type) {
     case 'i':
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_INTEGER
             && tp->type != TYPE_INTEGER32) {
             value = "INTEGER";
             result = SNMPERR_VALUE;
             goto type_error;
         }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         if (!*value)
             goto fail;
         ltmp = strtol(value, &ecp, 10);
         if (*ecp) {
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
             ep = tp ? tp->enums : NULL;
             while (ep) {
                 if (strcmp(value, ep->label) == 0) {
@@ -6679,31 +6679,31 @@ snmp_add_var(netsnmp_pdu *pdu,
                 ep = ep->next;
             }
             if (!ep) {
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
                 result = SNMPERR_BAD_NAME;
                 snmp_set_detail(value);
                 break;
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
             }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         }
 
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (!_check_range(tp, ltmp, &result, value))
             break;
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER,
                               (u_char *) & ltmp, sizeof(ltmp));
         break;
 
     case 'u':
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_GAUGE && tp->type != TYPE_UNSIGNED32) {
             value = "Unsigned32";
             result = SNMPERR_VALUE;
             goto type_error;
         }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         ltmp = strtoul(value, &ecp, 10);
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED,
@@ -6713,13 +6713,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case '3':
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_UINTEGER) {
             value = "UInteger32";
             result = SNMPERR_VALUE;
             goto type_error;
         }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         ltmp = strtoul(value, &ecp, 10);
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_UINTEGER,
@@ -6729,13 +6729,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case 'c':
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_COUNTER) {
             value = "Counter32";
             result = SNMPERR_VALUE;
             goto type_error;
         }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         ltmp = strtoul(value, &ecp, 10);
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
@@ -6745,13 +6745,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case 'C':
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_COUNTER64) {
             value = "Counter64";
             result = SNMPERR_VALUE;
             goto type_error;
         }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         if (read64(&c64tmp, value))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER64,
                                   (u_char *) & c64tmp, sizeof(c64tmp));
@@ -6760,13 +6760,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case 't':
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_TIMETICKS) {
             value = "Timeticks";
             result = SNMPERR_VALUE;
             goto type_error;
         }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         ltmp = strtoul(value, &ecp, 10);
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS,
@@ -6776,13 +6776,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case 'a':
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_IPADDR) {
             value = "IpAddress";
             result = SNMPERR_VALUE;
             goto type_error;
         }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         atmp = inet_addr(value);
         if (atmp != (long) -1 || !strcmp(value, "255.255.255.255"))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS,
@@ -6792,13 +6792,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case 'o':
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_OBJID) {
             value = "OBJECT IDENTIFIER";
             result = SNMPERR_VALUE;
             goto type_error;
         }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         if ((buf = (u_char *)malloc(sizeof(oid) * MAX_OID_LEN)) == NULL) {
             result = SNMPERR_MALLOC;
         } else {
@@ -6816,7 +6816,7 @@ snmp_add_var(netsnmp_pdu *pdu,
     case 's':
     case 'x':
     case 'd':
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_OCTETSTR && tp->type != TYPE_BITSTRING) {
             value = "OCTET STRING";
             result = SNMPERR_VALUE;
@@ -6831,7 +6831,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             hintptr = buf;
             break;
         }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         if (type == 'd') {
             if (!snmp_decimal_to_binary
                 (&buf, &buf_len, &value_len, 1, value)) {
@@ -6853,10 +6853,10 @@ snmp_add_var(netsnmp_pdu *pdu,
             buf_ptr = (u_char *)value;
             value_len = strlen(value);
         }
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (!_check_range(tp, value_len, &result, "Bad string length"))
             break;
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
                               buf_ptr, value_len);
         break;
@@ -6866,13 +6866,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case 'b':
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (check && (tp->type != TYPE_BITSTRING || !tp->enums)) {
             value = "BITS";
             result = SNMPERR_VALUE;
             goto type_error;
         }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         tint = 0;
         if ((buf = (u_char *) malloc(256)) == NULL) {
             result = SNMPERR_MALLOC;
@@ -6882,13 +6882,13 @@ snmp_add_var(netsnmp_pdu *pdu,
             memset(buf, 0, buf_len);
         }
 
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         for (ep = tp ? tp->enums : NULL; ep; ep = ep->next) {
             if (ep->value / 8 >= (int) tint) {
                 tint = ep->value / 8 + 1;
             }
         }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 	vp = strdup(value);
 	for (cp = strtok_r(vp, " ,\t", &st); cp; cp = strtok_r(NULL, " ,\t", &st)) {
@@ -6896,7 +6896,7 @@ snmp_add_var(netsnmp_pdu *pdu,
 
             ltmp = strtoul(cp, &ecp, 0);
             if (*ecp != 0) {
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
                 for (ep = tp ? tp->enums : NULL; ep != NULL; ep = ep->next) {
                     if (strncmp(ep->label, cp, strlen(ep->label)) == 0) {
                         break;
@@ -6905,15 +6905,15 @@ snmp_add_var(netsnmp_pdu *pdu,
                 if (ep != NULL) {
                     ltmp = ep->value;
                 } else {
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
                     result = SNMPERR_BAD_NAME;
                     snmp_set_detail(cp);
                     SNMP_FREE(buf);
 		    SNMP_FREE(vp);
                     goto out;
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
                 }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
             }
 
             ix = ltmp / 8;
@@ -6933,7 +6933,7 @@ snmp_add_var(netsnmp_pdu *pdu,
                               buf, tint);
         break;
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case 'U':
         if (read64(&c64tmp, value))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_U64,
@@ -6966,7 +6966,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         else
             goto fail;
         break;
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
 
     default:
         result = SNMPERR_VAR_TYPE;
@@ -6982,7 +6982,7 @@ snmp_add_var(netsnmp_pdu *pdu,
     SET_SNMP_ERROR(result);
     return result;
 
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
   type_error:
     {
         char            error_msg[256];
@@ -7048,7 +7048,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         snmp_set_detail(error_msg);
         goto out;
     }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
   fail:
     result = SNMPERR_VALUE;
     snmp_set_detail(value);

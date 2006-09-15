@@ -1,6 +1,6 @@
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef CAN_USE_NLIST
+#ifdef NETSNMP_CAN_USE_NLIST
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -114,7 +114,7 @@ auto_nlist(const char *string, char *var, int size)
 static void
 init_nlist(struct nlist nl[])
 {
-#ifdef CAN_USE_NLIST
+#ifdef NETSNMP_CAN_USE_NLIST
     int             ret;
 #if HAVE_KVM_OPENFILES
     kvm_t          *kernel;
@@ -187,7 +187,7 @@ init_nlist(struct nlist nl[])
                         (unsigned int) nl[ret].n_value));
         }
     }
-#endif                          /* CAN_USE_NLIST */
+#endif                          /* NETSNMP_CAN_USE_NLIST */
 }
 
 int
@@ -228,11 +228,11 @@ auto_nlist_print_tree(int indent, struct autonlist *ptr)
     }
 }
 #endif
-#else                           /* !CAN_USE_NLIST */
+#else                           /* !NETSNMP_CAN_USE_NLIST */
 #include <net-snmp/agent/auto_nlist.h>
 int
 auto_nlist_noop(void)
 {
     return 0;
 }
-#endif                          /* CAN_USE_NLIST */
+#endif                          /* NETSNMP_CAN_USE_NLIST */

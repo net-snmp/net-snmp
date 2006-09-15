@@ -117,7 +117,7 @@ SOFTWARE.
 
 #endif
 
-#if USE_LIBWRAP
+#if NETSNMP_USE_LIBWRAP
 #include <tcpd.h>
 #endif
 
@@ -406,7 +406,7 @@ static int
 pre_parse(netsnmp_session * session, netsnmp_transport *transport,
           void *transport_data, int transport_data_length)
 {
-#if USE_LIBWRAP
+#if NETSNMP_USE_LIBWRAP
     char *addr_string = NULL;
 
     if (transport != NULL && transport->f_fmtaddr != NULL) {
@@ -447,7 +447,7 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
             return 0;
         }
     }
-#endif/*  USE_LIBWRAP  */
+#endif/*  NETSNMP_USE_LIBWRAP  */
     return 1;
 }
 

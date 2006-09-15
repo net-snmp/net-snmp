@@ -70,7 +70,7 @@ init_versioninfo(void)
      * registering underneath 
      */
     oid             version_variables_oid[] =
-        { UCDAVIS_MIB, VERSIONMIBNUM };
+        { NETSNMP_UCDAVIS_MIB, NETSNMP_VERSIONMIBNUM };
 
     /*
      * register ourselves with the agent to handle our mib tree 
@@ -93,8 +93,8 @@ var_extensible_version(struct variable *vp,
     static char     errmsg[300];
     char           *cptr;
     time_t          curtime;
-#ifdef CONFIGURE_OPTIONS
-    static char     config_opts[] = CONFIGURE_OPTIONS;
+#ifdef NETSNMP_CONFIGURE_OPTIONS
+    static char     config_opts[] = NETSNMP_CONFIGURE_OPTIONS;
 #endif
 
     DEBUGMSGTL(("ucd-snmp/versioninfo", "var_extensible_version: "));
@@ -128,7 +128,7 @@ var_extensible_version(struct variable *vp,
         *var_len = strlen(errmsg);
         return ((u_char *) errmsg);
     case VERCONFIG:
-#ifdef CONFIGURE_OPTIONS
+#ifdef NETSNMP_CONFIGURE_OPTIONS
         *var_len = strlen(config_opts);
         if (*var_len > 1024)
             *var_len = 1024;    /* mib imposed restriction */

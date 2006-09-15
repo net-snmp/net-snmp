@@ -20,7 +20,7 @@
 #include <net-snmp/library/snmp_api.h>
 
 #include <net-snmp/library/mib.h>
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
 #include <net-snmp/library/parse.h>
 #endif
 #include <net-snmp/library/callback.h>

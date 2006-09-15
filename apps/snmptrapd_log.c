@@ -718,7 +718,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
          * for the UDP and TCP transport domains (we don't want to try to be
          * too clever here).  
          */
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
+#ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
         if (transport != NULL && (transport->domain == netsnmpUDPDomain ||
                                   transport->domain ==
                                   netsnmp_snmpTCPDomain)) {
@@ -1115,7 +1115,7 @@ realloc_handle_wrap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     switch (pdu->version) {
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     case SNMP_VERSION_1:
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
@@ -1124,7 +1124,7 @@ realloc_handle_wrap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
         break;
 #endif
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
@@ -1143,13 +1143,13 @@ realloc_handle_wrap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     switch (pdu->version) {
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     case SNMP_VERSION_1:
 #endif
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
 #endif
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
              (const u_char *) ", community ")) {

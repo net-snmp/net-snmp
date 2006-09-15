@@ -39,7 +39,7 @@
 #define SNMP_DEBUG_ACTIVE             1
 #define SNMP_DEBUG_EXCLUDED           2
 
-static int      dodebug = SNMP_ALWAYS_DEBUG;
+static int      dodebug = NETSNMP_ALWAYS_DEBUG;
 int             debug_num_tokens = 0;
 int             debug_num_excluded = 0;
 static int      debug_print_everything = 0;

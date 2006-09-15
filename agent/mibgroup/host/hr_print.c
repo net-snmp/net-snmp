@@ -175,7 +175,7 @@ var_hrprint(struct variable * vp,
         long_return = printer_detail_status(print_idx);
         return (u_char *) & long_return;
     case HRPRINT_ERROR:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;        /* Null string */

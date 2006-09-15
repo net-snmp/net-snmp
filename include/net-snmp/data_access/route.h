@@ -14,7 +14,7 @@ extern          "C" {
 /*
  * structure definitions
  */
-#if defined( INET6 )
+#if defined( NETSNMP_ENABLE_IPV6 )
 #   define NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE 16
 #else
 #   define NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE 4

@@ -605,7 +605,7 @@ really_try_next:
         return (u_char *) & long_return;
     case HRSTORE_FAILS:
         if (store_idx > NETSNMP_MEM_TYPE_MAX)
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
 	    goto try_next;
 #else
             long_return = 0;

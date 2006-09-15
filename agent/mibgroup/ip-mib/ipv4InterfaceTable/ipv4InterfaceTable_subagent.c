@@ -39,7 +39,7 @@ usage(void)
          "\t-H\tDisplay a list of configuration file directives\n"
          "\t\tunderstood by the agent and then exit.\n"
          "\t-M\tRun as a normal SNMP Agent instead of an AgentX sub-agent.\n"
-         "\t-x ADDRESS\tconnect to master agent at ADDRESS (default AGENTX_SOCKET).\n"
+         "\t-x ADDRESS\tconnect to master agent at ADDRESS (default NETSNMP_AGENTX_SOCKET).\n"
          "\t-L\tDo not open a log file; print all messages to stderr.\n");
     exit(0);
 }

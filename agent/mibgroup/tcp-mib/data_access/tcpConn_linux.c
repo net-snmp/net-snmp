@@ -16,7 +16,7 @@ static int
 linux_states[12] = { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
 
 static int _load4(netsnmp_container *container, u_int flags);
-#if defined (INET6)
+#if defined (NETSNMP_ENABLE_IPV6)
 static int _load6(netsnmp_container *container, u_int flags);
 #endif
 
@@ -90,7 +90,7 @@ netsnmp_arch_tcpconn_container_load(netsnmp_container *container,
 
     rc = _load4(container, load_flags);
 
-#if defined (INET6)
+#if defined (NETSNMP_ENABLE_IPV6)
     if((0 != rc) || (load_flags & NETSNMP_ACCESS_TCPCONN_LOAD_IPV4_ONLY))
         return rc;
 
@@ -242,7 +242,7 @@ _load4(netsnmp_container *container, u_int load_flags)
     return 0;
 }
 
-#if defined (INET6)
+#if defined (NETSNMP_ENABLE_IPV6)
 /**
  *
  * @retval  0 no errors
@@ -401,4 +401,4 @@ _load6(netsnmp_container *container, u_int load_flags)
 
     return 0;
 }
-#endif /* INET6 */
+#endif /* NETSNMP_ENABLE_IPV6 */

@@ -554,7 +554,7 @@ var_hrswrun(struct variable * vp,
 
     switch (vp->magic) {
     case HRSWRUN_OSINDEX:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #else
         /* 
@@ -673,7 +673,7 @@ var_hrswrun(struct variable * vp,
         if (cp > string && strcasecmp(cp, ".exe") == 0)
             *cp = '\0';
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         sprintf(string, "process name");
@@ -798,7 +798,7 @@ var_hrswrun(struct variable * vp,
         } else
             strcpy(string, "* unknown");
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         sprintf(string, "/bin/wombat");
@@ -911,7 +911,7 @@ var_hrswrun(struct variable * vp,
 #elif defined(cygwin)
         string[0] = 0;
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         sprintf(string, "-h -q -v");
@@ -1235,7 +1235,7 @@ var_hrswrun(struct variable * vp,
             }
         }
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 16 * 1024;        /* XXX - 16M! */

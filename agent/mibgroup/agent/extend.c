@@ -44,7 +44,7 @@ netsnmp_old_extend *compatability_entries;
 
 WriteMethod fixExec2Error;
 FindVarMethod var_extensible_old;
-oid  old_extensible_variables_oid[] = { UCDAVIS_MIB, SHELLMIBNUM, 1 };
+oid  old_extensible_variables_oid[] = { NETSNMP_UCDAVIS_MIB, NETSNMP_SHELLMIBNUM, 1 };
 struct variable2 old_extensible_variables[] = {
     {MIBINDEX,     ASN_INTEGER,   RONLY, var_extensible_old, 1, {MIBINDEX}},
     {ERRORNAME,    ASN_OCTET_STR, RONLY, var_extensible_old, 1, {ERRORNAME}},

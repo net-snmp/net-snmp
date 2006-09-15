@@ -697,7 +697,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 }
 #else                           /* WIN32 cygwin */
 
-#if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST))
+#if (defined(NETSNMP_CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST))
 
 #if defined(freebsd4) || defined(darwin)
     #define NS_ELEM struct xtcpcb
@@ -762,7 +762,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 }
 #undef NS_ELEM
 
-#else		/* (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)) */
+#else		/* (defined(NETSNMP_CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)) */
 #ifdef PCB_TABLE
 int
 tcpTable_load(netsnmp_cache *cache, void *vmagic)
@@ -875,7 +875,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 }
 #endif				/* UDB_SYMBOL */
 #endif				/* PCB_TABLE */
-#endif		/* (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)) */
+#endif		/* (defined(NETSNMP_CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)) */
 #endif                          /* WIN32 cygwin */
 #endif                          /* linux */
 #endif                          /* solaris2 */

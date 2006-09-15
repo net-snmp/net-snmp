@@ -1,7 +1,7 @@
 #ifndef _SNMPSTDDOMAIN_H
 #define _SNMPSTDDOMAIN_H
 
-#ifdef SNMP_TRANSPORT_STD_DOMAIN
+#ifdef NETSNMP_TRANSPORT_STD_DOMAIN
 
 #ifdef __cplusplus
 extern          "C" {
@@ -36,6 +36,6 @@ extern oid netsnmp_snmpSTDDomain[];
 #ifdef __cplusplus
 }
 #endif
-#endif                          /*SNMP_TRANSPORT_STD_DOMAIN */
+#endif                          /*NETSNMP_TRANSPORT_STD_DOMAIN */
 
 #endif/*_SNMPSTDDOMAIN_H*/

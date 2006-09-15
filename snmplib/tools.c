@@ -585,7 +585,7 @@ dump_chunk(const char *debugtoken, const char *title, const u_char * buf,
  * FIX	Use something other than snprint_hexstring which doesn't add 
  *	trailing spaces and (sometimes embedded) newlines...
  */
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
 char           *
 dump_snmpEngineID(const u_char * estring, size_t * estring_len)
 {
@@ -759,7 +759,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
 
 #undef eb
 }                               /* end dump_snmpEngineID() */
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
 
 /**

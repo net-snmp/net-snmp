@@ -331,7 +331,7 @@ agentx_realloc_build_string(u_char ** buf, size_t * buf_len,
     return 1;
 }
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
 int
 agentx_realloc_build_double(u_char ** buf, size_t * buf_len,
                             size_t * out_len, int allow_realloc,
@@ -393,7 +393,7 @@ agentx_realloc_build_varbind(u_char ** buf, size_t * buf_len,
 {
     DEBUGDUMPHEADER("send", "VarBind");
     DEBUGDUMPHEADER("send", "type");
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     if ((vp->type == ASN_OPAQUE_FLOAT) || (vp->type == ASN_OPAQUE_DOUBLE)
         || (vp->type == ASN_OPAQUE_I64) || (vp->type == ASN_OPAQUE_U64)
         || (vp->type == ASN_OPAQUE_COUNTER64)) {
@@ -462,7 +462,7 @@ agentx_realloc_build_varbind(u_char ** buf, size_t * buf_len,
         }
         break;
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_FLOAT:
         DEBUGDUMPHEADER("send", "Build Opaque Float");
         DEBUGPRINTINDENT("dumpv_send");
@@ -1278,7 +1278,7 @@ agentx_parse_opaque(u_char * data, size_t * length, int *type,
 
     buf = opaque_buf;
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     if ((buf[0] != ASN_OPAQUE_TAG1) || (*opaque_len <= 3))
         return cp;              /* Unrecognised opaque type */
 

@@ -60,7 +60,7 @@
  */
 
 static int	inet_pton4(const char *src, u_char *dst, int pton);
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 static int	inet_pton6(const char *src, u_char *dst);
 #endif
 
@@ -85,7 +85,7 @@ inet_pton(af, src, dst)
 	switch (af) {
 	case AF_INET:
 		return (inet_pton4(src, dst, 1));
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 	case AF_INET6:
 		return (inet_pton6(src, dst));
 #endif
@@ -217,7 +217,7 @@ inet_pton4(src, dst, pton)
 	return (1);
 }
 
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 /* int
  * inet_pton6(src, dst)
  *	convert presentation level address to network order binary form.

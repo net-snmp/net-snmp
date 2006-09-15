@@ -79,8 +79,8 @@ struct trap_sink *sinks = NULL;
 
 extern struct timeval starttime;
 
-oid             objid_enterprisetrap[] = { NOTIFICATION_MIB };
-oid             trap_version_id[] = { SYSTEM_MIB };
+oid             objid_enterprisetrap[] = { NETSNMP_NOTIFICATION_MIB };
+oid             trap_version_id[] = { NETSNMP_SYSTEM_MIB };
 int             enterprisetrap_len;
 int             trap_version_id_len;
 
@@ -107,7 +107,7 @@ oid             agentaddr_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 3, 0 };
 size_t          agentaddr_oid_len;
 oid             community_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 4, 0 };
 size_t          community_oid_len;
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 char           *snmp_trapcommunity = NULL;
 #endif
 
@@ -224,7 +224,7 @@ remove_trap_session(netsnmp_session * ss)
     return 0;
 }
 
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 int
 create_trap_session(char *sink, u_short sinkport,
                     char *com, int version, int pdutype)
@@ -281,7 +281,7 @@ create_trap_session(char *sink, u_short sinkport,
 }
 #endif /* support for community based SNMP */
 
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
 static int
 create_v1_trap_session(char *sink, u_short sinkport, char *com)
 {
@@ -290,7 +290,7 @@ create_v1_trap_session(char *sink, u_short sinkport, char *com)
 }
 #endif
 
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
 static int
 create_v2_trap_session(char *sink, u_short sinkport, char *com)
 {
@@ -774,14 +774,14 @@ netsnmp_send_traps(int trap, int specific,
      *   providing an appropriately formatted PDU in each case
      */
     for (sink = sinks; sink; sink = sink->next) {
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
         if (sink->version == SNMP_VERSION_1) {
             send_trap_to_sess(sink->sesp, template_v1pdu);
         } else {
 #endif
             template_v2pdu->command = sink->pdutype;
             send_trap_to_sess(sink->sesp, template_v2pdu);
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
         }
 #endif
     }
@@ -862,7 +862,7 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
     DEBUGMSGTL(("trap", "sending trap type=%d, version=%d\n",
                 template_pdu->command, sess->version));
 
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     if (sess->version == SNMP_VERSION_1 &&
         (template_pdu->command != SNMP_MSG_TRAP))
         return;                 /* Skip v1 sinks for v2 only traps */
@@ -910,10 +910,10 @@ send_trap_vars(int trap, int specific, netsnmp_variable_list * vars)
  *
  * This function eventually calls send_enterprise_trap_vars.  If the
  * trap type is not set to SNMP_TRAP_ENTERPRISESPECIFIC the enterprise 
- * and enterprise_length paramater is set to the pre defined SYSTEM_MIB 
+ * and enterprise_length paramater is set to the pre defined NETSNMP_SYSTEM_MIB 
  * oid and length respectively.  If the trap type is set to 
  * SNMP_TRAP_ENTERPRISESPECIFIC the enterprise and enterprise_length 
- * parameters are set to the pre-defined NOTIFICATION_MIB oid and length 
+ * parameters are set to the pre-defined NETSNMP_NOTIFICATION_MIB oid and length 
  * respectively.
  *
  * @param trap is the generic trap type.
@@ -940,10 +940,10 @@ send_easy_trap(int trap, int specific)
  *
  * This function eventually calls send_enterprise_trap_vars.  If the
  * trap type is not set to SNMP_TRAP_ENTERPRISESPECIFIC the enterprise 
- * and enterprise_length paramater is set to the pre defined SYSTEM_MIB 
+ * and enterprise_length paramater is set to the pre defined NETSNMP_SYSTEM_MIB 
  * oid and length respectively.  If the trap type is set to 
  * SNMP_TRAP_ENTERPRISESPECIFIC the enterprise and enterprise_length 
- * parameters are set to the pre-defined NOTIFICATION_MIB oid and length 
+ * parameters are set to the pre-defined NETSNMP_NOTIFICATION_MIB oid and length 
  * respectively.
  *
  * @param vars is used to supply list of variable bindings to form an SNMPv2 
@@ -1023,7 +1023,7 @@ snmpd_parse_config_authtrap(const char *token, char *cptr)
     }
 }
 
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
 void
 snmpd_parse_config_trapsink(const char *token, char *cptr)
 {
@@ -1056,7 +1056,7 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
 }
 #endif
 
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
 void
 snmpd_parse_config_trap2sink(const char *word, char *cptr)
 {
@@ -1195,19 +1195,19 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
             ss->securityEngineIDLen = len;
     }
 
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     if (ss->version == SNMP_VERSION_1) {
         add_trap_session(ss, SNMP_MSG_TRAP, 0, SNMP_VERSION_1);
     } else {
 #endif
         add_trap_session(ss, traptype, (traptype == SNMP_MSG_INFORM),
                          ss->version);
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     }
 #endif
 }
 
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 void
 snmpd_parse_config_trapcommunity(const char *word, char *cptr)
 {

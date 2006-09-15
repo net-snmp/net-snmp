@@ -25,25 +25,25 @@
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpCallbackDomain.h>
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
 #include <net-snmp/library/snmpUnixDomain.h>
 #endif
-#ifdef SNMP_TRANSPORT_UDP_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UDP_DOMAIN
 #include <net-snmp/library/snmpUDPDomain.h>
 #endif
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
+#ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
 #include <net-snmp/library/snmpTCPDomain.h>
 #endif
-#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 #endif
-#ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
 #include <net-snmp/library/snmpTCPIPv6Domain.h>
 #endif
-#ifdef SNMP_TRANSPORT_IPX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_IPX_DOMAIN
 #include <net-snmp/library/snmpIPXDomain.h>
 #endif
-#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
+#ifdef NETSNMP_TRANSPORT_AAL5PVC_DOMAIN
 #include <net-snmp/library/snmpAAL5PVCDomain.h>
 #endif
 

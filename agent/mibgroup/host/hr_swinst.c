@@ -392,7 +392,7 @@ var_hrswinst(struct variable * vp,
             else
                 long_return = 0;        /* predates this agent */
         } else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
             return NULL;
 #else
             long_return = 363136200;
@@ -466,7 +466,7 @@ var_hrswinst(struct variable * vp,
                 stat(string, &stat_buf);
                 ret = date_n_time(&stat_buf.st_mtime, var_len);
             } else {
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
                 return NULL;
 #endif
                 sprintf(string, "back in the mists of time");

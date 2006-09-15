@@ -177,7 +177,7 @@ init_extensible(void)
      * registering underneath 
      */
     oid             extensible_variables_oid[] =
-        { UCDAVIS_MIB, SHELLMIBNUM, 1 };
+        { NETSNMP_UCDAVIS_MIB, NETSNMP_SHELLMIBNUM, 1 };
 
     /*
      * register ourselves with the agent to handle our mib tree 
@@ -270,8 +270,8 @@ extensible_parse_config(const char *token, char *cptr)
         strncpy(ptmp->command, cptr, tcptr - cptr);
         ptmp->command[tcptr - cptr] = 0;
     }
-#ifdef EXECFIXCMD
-    sprintf(ptmp->fixcmd, EXECFIXCMD, ptmp->name);
+#ifdef NETSNMP_EXECFIXCMD
+    sprintf(ptmp->fixcmd, NETSNMP_EXECFIXCMD, ptmp->name);
 #endif
     if (ptmp->miblen > 0) {
       /*

@@ -453,7 +453,7 @@ inet6name(const unsigned char *in6)
 	static char line[NI_MAXHOST];
 	static char domain[MAXHOSTNAMELEN];
 	static int first = 1;
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 	struct hostent *hp;
 	char hbuf[NI_MAXHOST];
 	const int niflag = NI_NUMERICHOST;
@@ -469,7 +469,7 @@ inet6name(const unsigned char *in6)
 		else
 			domain[0] = '\0';
 	}
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 	cp = 0;
 	if (!nflag && !IN6_IS_ADDR_UNSPECIFIED(in6p)) {
 		hp = gethostbyaddr((const char *)in6p, sizeof(*in6p), AF_INET6);

@@ -269,7 +269,7 @@ run_exec_command( char *command, char *input,
         exit(1);	/* End of child */
 
     } else if (pid > 0) {
-        char            cache[MAXCACHESIZE];
+        char            cache[NETSNMP_MAXCACHESIZE];
         char           *cache_ptr;
         ssize_t         count, cache_size, offset = 0;
         int             waited = 0, numfds;
@@ -318,7 +318,7 @@ run_exec_command( char *command, char *input,
          */
         DEBUGMSGTL(("verbose:run:exec","  waiting for child %d...\n", pid));
         numfds = opipe[0] + 1;
-        i = MAXREADCOUNT;
+        i = NETSNMP_MAXREADCOUNT;
         for (; i; --i) {
             /*
              * set up data for select

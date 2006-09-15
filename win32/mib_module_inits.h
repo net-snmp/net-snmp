@@ -80,7 +80,7 @@
   if (should_init("override")) init_override();
 
 #ifdef USING_DISMAN_EVENT_MIB_MODULE
-#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
+#ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
   if (should_init("mteTriggerTable")) init_mteTriggerTable();
 #endif
   if (should_init("mteTriggerDeltaTable")) init_mteTriggerDeltaTable();

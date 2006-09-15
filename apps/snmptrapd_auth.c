@@ -72,7 +72,7 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
         return NETSNMPTRAPD_HANDLER_FINISH;
     
     /* convert to v2 so we can check it in a consistent manner */
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     if (pdu->version == SNMP_VERSION_1) {
         newpdu = convert_v1pdu_to_v2(pdu);
         if (!newpdu) {
@@ -83,7 +83,7 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
 #endif
 
     if (!vacm_is_configured()) {
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
         if (newpdu != pdu)
             snmp_free_pdu(newpdu);
 #endif
@@ -102,7 +102,7 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
     /* make sure we can continue: we found the snmpTrapOID.0 and its an oid */
     if (!var || var->type != ASN_OBJECT_ID) {
         snmp_log(LOG_ERR, "Can't determine trap identifier; refusing to authorize it\n");
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
         if (newpdu != pdu)
             snmp_free_pdu(newpdu);
 #endif
@@ -129,7 +129,7 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
     if (ret) {
         /* we have policy to at least do "something".  Remember and continue. */
         lastlookup = ret;
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
         if (newpdu != pdu)
             snmp_free_pdu(newpdu);
 #endif
@@ -138,7 +138,7 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
 
     /* No policy was met, so we drop the PDU from further processing */
     DEBUGMSGTL(("snmptrapd:auth", "Dropping unauthorized message\n"));
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     if (newpdu != pdu)
         snmp_free_pdu(newpdu);
 #endif
