@@ -217,7 +217,7 @@ sub HasSSL {
 	return undef;
     }
     while (<C>) {
-	$has_ssl++, last if /^\s*#define\s+USE_OPENSSL/;
+	$has_ssl++, last if /^\s*#define\s+NETSNMP_USE_OPENSSL/;
     }
     close C;
     return $has_ssl;

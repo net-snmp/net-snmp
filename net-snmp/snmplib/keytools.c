@@ -41,7 +41,7 @@
 #include <net-snmp/utilities.h>
 
 #include <net-snmp/library/snmp_api.h>
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
 #	include <openssl/hmac.h>
 #else
 #ifdef NETSNMP_USE_INTERNAL_MD5
@@ -94,7 +94,7 @@
 int
 generate_Ku(const oid * hashtype, u_int hashtype_len,
             u_char * P, size_t pplen, u_char * Ku, size_t * kulen)
-#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(USE_OPENSSL)
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL)
 {
     int             rval = SNMPERR_SUCCESS,
         nbytes = USM_LENGTH_EXPANDED_PASSPHRASE;
@@ -103,7 +103,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 
     u_char          buf[USM_LENGTH_KU_HASHBLOCK], *bufp;
 
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
     EVP_MD_CTX     *ctx = (EVP_MD_CTX *)malloc(sizeof(EVP_MD_CTX));
     unsigned int    tmp_len;
 #else
@@ -128,7 +128,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     /*
      * Setup for the transform type.
      */
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
 
 #ifndef NETSNMP_DISABLE_MD5
     if (ISTRANSFORM(hashtype, HMACMD5Auth))
@@ -143,26 +143,26 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     }
 #else
     MDbegin(&MD);
-#endif                          /* USE_OPENSSL */
+#endif                          /* NETSNMP_USE_OPENSSL */
 
     while (nbytes > 0) {
         bufp = buf;
         for (i = 0; i < USM_LENGTH_KU_HASHBLOCK; i++) {
             *bufp++ = P[pindex++ % pplen];
         }
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
         EVP_DigestUpdate(ctx, buf, USM_LENGTH_KU_HASHBLOCK);
 #elif NETSNMP_USE_INTERNAL_MD5
         if (MDupdate(&MD, buf, USM_LENGTH_KU_HASHBLOCK * 8)) {
             rval = SNMPERR_USM_ENCRYPTIONERROR;
             goto md5_fin;
         }
-#endif                          /* USE_OPENSSL */
+#endif                          /* NETSNMP_USE_OPENSSL */
 
         nbytes -= USM_LENGTH_KU_HASHBLOCK;
     }
 
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
     tmp_len = *kulen;
     EVP_DigestFinal(ctx, (unsigned char *) Ku, &tmp_len);
     *kulen = tmp_len;
@@ -191,7 +191,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 
   generate_Ku_quit:
     memset(buf, 0, sizeof(buf));
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
     free(ctx);
 #endif
     return rval;
@@ -281,7 +281,7 @@ generate_kul(const oid * hashtype, u_int hashtype_len,
              u_char * engineID, size_t engineID_len,
              u_char * Ku, size_t ku_len,
              u_char * Kul, size_t * kul_len)
-#if defined(USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11)
+#if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
     u_int           nbytes = 0;
@@ -389,7 +389,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
                  u_char * oldkey, size_t oldkey_len,
                  u_char * newkey, size_t newkey_len,
                  u_char * kcstring, size_t * kcstring_len)
-#if defined(USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11)
+#if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
     size_t          properlength;
@@ -514,7 +514,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
                  u_char * oldkey, size_t oldkey_len,
                  u_char * kcstring, size_t kcstring_len,
                  u_char * newkey, size_t * newkey_len)
-#if defined(USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11)
+#if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
     size_t          properlength = 0;
