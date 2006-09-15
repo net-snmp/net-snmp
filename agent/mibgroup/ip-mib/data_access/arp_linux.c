@@ -31,7 +31,7 @@ netsnmp_access_arp_container_arch_load(netsnmp_container *container)
         return rc;
     }
 
-#if defined (INET6) && 0 /* xx-rks: arp for v6? */
+#if defined (NETSNMP_ENABLE_IPV6) && 0 /* xx-rks: arp for v6? */
     idx_offset = rc;
 
     rc = _load_v6(container, idx_offset);

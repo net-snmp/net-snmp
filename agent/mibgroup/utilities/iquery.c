@@ -25,13 +25,13 @@ netsnmp_parse_iqueryVersion(const char *token, char *line)
 {
     char buf[1024];
 
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     if (!strcmp( line, "1" ))
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_1);
     else 
 #endif
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
          if (!strcmp( line, "2"  ) || !strcasecmp( line, "2c" ))
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_2c);
@@ -144,7 +144,7 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
     extern int callback_master_num;
     netsnmp_session *ss = NULL;
 
-#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
+#ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
     ss = netsnmp_callback_open( callback_master_num, NULL, NULL, NULL);
     if (ss) {
         ss->version       = version;

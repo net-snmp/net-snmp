@@ -247,7 +247,7 @@ really_try_next:
             strncpy(string, tmp_str, sizeof(string)-1);
             string[ sizeof(string)-1] = 0;
         } else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
             goto try_next;
 #else
             sprintf(string, "a black box of some sort");
@@ -266,7 +266,7 @@ really_try_next:
         if (device_status[type] != NULL)
             long_return = ((*device_status[type]) (dev_idx));
         else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
             goto try_next;
 #else
             long_return = 2;    /* Assume running */
@@ -278,7 +278,7 @@ really_try_next:
         if (device_errors[type] != NULL)
             long_return = (*device_errors[type]) (dev_idx);
         else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
             goto try_next;
 #else
             long_return = 0;    /* Assume OK */

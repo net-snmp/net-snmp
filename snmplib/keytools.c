@@ -44,12 +44,12 @@
 #ifdef USE_OPENSSL
 #	include <openssl/hmac.h>
 #else
-#ifdef USE_INTERNAL_MD5
+#ifdef NETSNMP_USE_INTERNAL_MD5
 #include <net-snmp/library/md5.h>
 #endif
 #endif
 
-#ifdef USE_PKCS
+#ifdef NETSNMP_USE_PKCS11
 #include <security/cryptoki.h>
 #endif
 
@@ -94,7 +94,7 @@
 int
 generate_Ku(const oid * hashtype, u_int hashtype_len,
             u_char * P, size_t pplen, u_char * Ku, size_t * kulen)
-#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(USE_OPENSSL)
 {
     int             rval = SNMPERR_SUCCESS,
         nbytes = USM_LENGTH_EXPANDED_PASSPHRASE;
@@ -130,7 +130,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
      */
 #ifdef USE_OPENSSL
 
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
     if (ISTRANSFORM(hashtype, HMACMD5Auth))
         EVP_DigestInit(ctx, EVP_md5());
     else
@@ -152,7 +152,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
         }
 #ifdef USE_OPENSSL
         EVP_DigestUpdate(ctx, buf, USM_LENGTH_KU_HASHBLOCK);
-#elif USE_INTERNAL_MD5
+#elif NETSNMP_USE_INTERNAL_MD5
         if (MDupdate(&MD, buf, USM_LENGTH_KU_HASHBLOCK * 8)) {
             rval = SNMPERR_USM_ENCRYPTIONERROR;
             goto md5_fin;
@@ -169,7 +169,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     /*
      * what about free() 
      */
-#elif USE_INTERNAL_MD5
+#elif NETSNMP_USE_INTERNAL_MD5
     if (MDupdate(&MD, buf, 0)) {
         rval = SNMPERR_USM_ENCRYPTIONERROR;
         goto md5_fin;
@@ -178,15 +178,15 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     MDget(&MD, Ku, *kulen);
   md5_fin:
     memset(&MD, 0, sizeof(MD));
-#endif                          /* USE_INTERNAL_MD5 */
+#endif                          /* NETSNMP_USE_INTERNAL_MD5 */
 
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     DEBUGMSGTL(("generate_Ku", "generating Ku (from %s): ", P));
     for (i = 0; i < *kulen; i++)
         DEBUGMSG(("generate_Ku", "%02x", Ku[i]));
     DEBUGMSG(("generate_Ku", "\n"));
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
 
   generate_Ku_quit:
@@ -197,7 +197,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     return rval;
 
 }                               /* end generate_Ku() */
-#elif USE_PKCS
+#elif NETSNMP_USE_PKCS11
 {
     int             rval = SNMPERR_SUCCESS;
 
@@ -220,7 +220,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
      * Setup for the transform type.
      */
 
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
     if (ISTRANSFORM(hashtype, HMACMD5Auth))
         return pkcs_generate_Ku(CKM_MD5, P, pplen, Ku, kulen);
     else
@@ -281,7 +281,7 @@ generate_kul(const oid * hashtype, u_int hashtype_len,
              u_char * engineID, size_t engineID_len,
              u_char * Ku, size_t ku_len,
              u_char * Kul, size_t * kul_len)
-#if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5) || defined(USE_PKCS)
+#if defined(USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
     u_int           nbytes = 0;
@@ -289,7 +289,7 @@ generate_kul(const oid * hashtype, u_int hashtype_len,
     int             iproperlength;
 
     u_char          buf[SNMP_MAXBUF];
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     int             i;
 #endif
 
@@ -328,12 +328,12 @@ generate_kul(const oid * hashtype, u_int hashtype_len,
 
     rval = sc_hash(hashtype, hashtype_len, buf, nbytes, Kul, kul_len);
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     DEBUGMSGTL(("generate_kul", "generating Kul (from Ku): "));
     for (i = 0; i < *kul_len; i++)
         DEBUGMSG(("generate_kul", "%02x", Kul[i]));
     DEBUGMSG(("generate_kul", "keytools\n"));
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
     QUITFUN(rval, generate_kul_quit);
 
@@ -389,7 +389,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
                  u_char * oldkey, size_t oldkey_len,
                  u_char * newkey, size_t newkey_len,
                  u_char * kcstring, size_t * kcstring_len)
-#if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5) || defined(USE_PKCS)
+#if defined(USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
     size_t          properlength;
@@ -431,18 +431,18 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
      */
     nbytes = properlength;
 
-#if defined(SNMP_TESTING_CODE) && defined(RANDOMZEROS)
+#if defined(NETSNMP_ENABLE_TESTING_CODE) && defined(RANDOMZEROS)
     memset(kcstring, 0, nbytes);
     DEBUGMSG(("encode_keychange",
               "** Using all zero bits for \"random\" delta of )"
               "the keychange string! **\n"));
-#else                           /* !SNMP_TESTING_CODE */
+#else                           /* !NETSNMP_ENABLE_TESTING_CODE */
     rval = sc_random(kcstring, &nbytes);
     QUITFUN(rval, encode_keychange_quit);
     if ((int) nbytes != properlength) {
         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
     }
-#endif                          /* !SNMP_TESTING_CODE */
+#endif                          /* !NETSNMP_ENABLE_TESTING_CODE */
 
     tmpbuf = (u_char *) malloc(properlength * 2);
     if (tmpbuf) {
@@ -514,7 +514,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
                  u_char * oldkey, size_t oldkey_len,
                  u_char * kcstring, size_t kcstring_len,
                  u_char * newkey, size_t * newkey_len)
-#if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5) || defined(USE_PKCS)
+#if defined(USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
     size_t          properlength = 0;

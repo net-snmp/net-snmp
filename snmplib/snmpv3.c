@@ -119,7 +119,7 @@ static int      getHwAddress(const char *networkDevice, char *addressOut);
 void
 snmpv3_authtype_conf(const char *word, char *cptr)
 {
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
     if (strcasecmp(cptr, "MD5") == 0)
         defaultAuthType = usmHMACMD5AuthProtocol;
     else
@@ -149,7 +149,7 @@ snmpv3_privtype_conf(const char *word, char *cptr)
 {
     int testcase = 0;
 
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
     if (strcasecmp(cptr, "DES") == 0) {
         testcase = 1;
         defaultPrivType = usmDESPrivProtocol;
@@ -174,7 +174,7 @@ const oid      *
 get_default_privtype(size_t * len)
 {
     if (defaultPrivType == NULL) {
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
         defaultPrivType = usmDESPrivProtocol;
 #else
         defaultPrivType = usmAESPrivProtocol;
@@ -360,7 +360,7 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
         break;
 
     case 'a':
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
         if (!strcasecmp(optarg, "MD5")) {
             session->securityAuthProto = usmHMACMD5AuthProtocol;
             session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
@@ -379,7 +379,7 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
 
     case 'x':
         testcase = 0;
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
         if (!strcasecmp(optarg, "DES")) {
             session->securityPrivProto = usmDESPrivProtocol;
             session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
@@ -505,7 +505,7 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
 int
 setup_engineID(u_char ** eidp, const char *text)
 {
-    int             enterpriseid = htonl(ENTERPRISE_OID),
+    int             enterpriseid = htonl(NETSNMP_ENTERPRISE_OID),
         netsnmpoid = htonl(NETSNMP_OID),
         localsetup = (eidp) ? 0 : 1;
 
@@ -825,7 +825,7 @@ usm_parse_create_usmUser(const char *token, char *line)
     /*
      * READ: Authentication Type 
      */
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
     if (strncmp(cp, "MD5", 3) == 0) {
         memcpy(newuser->authProtocol, usmHMACMD5AuthProtocol,
                sizeof(usmHMACMD5AuthProtocol));
@@ -923,7 +923,7 @@ usm_parse_create_usmUser(const char *token, char *line)
      * READ: Privacy Type 
      */
     testcase = 0;
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
     if (strncmp(cp, "DES", 3) == 0) {
         memcpy(newuser->privProtocol, usmDESPrivProtocol,
                sizeof(usmDESPrivProtocol));
@@ -1163,7 +1163,7 @@ void
 version_conf(const char *word, char *cptr)
 {
     int valid = 0;
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     if ((strcmp(cptr,  "1") == 0) ||
         (strcmp(cptr, "v1") == 0)) {
         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION, 
@@ -1171,7 +1171,7 @@ version_conf(const char *word, char *cptr)
         valid = 1;
     }
 #endif
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
     if ((strcasecmp(cptr,  "2c") == 0) ||
                (strcasecmp(cptr, "v2c") == 0)) {
         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION, 
@@ -1655,7 +1655,7 @@ getHwAddress(const char *networkDevice, /* e.g. "eth0", "eth1" */
 }
 #endif
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
 /*
  * snmpv3_set_engineBootsAndTime(): this function does not exist.  Go away. 
  */

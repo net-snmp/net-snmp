@@ -350,7 +350,7 @@ test_etime(void)
      */
     OUTPUT("Dump the list and then sleep.");
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     dump_etimelist();
 #endif
 
@@ -414,7 +414,7 @@ test_etime(void)
     sleep(sleeptime);
     fprintf(stdout, "\n");
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     dump_etimelist();
 #endif
 

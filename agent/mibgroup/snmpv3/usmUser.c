@@ -712,7 +712,7 @@ write_usmUserAuthProtocol(int action,
                 ((oid *) var_val, var_val_len / sizeof(oid),
                  usmNoAuthProtocol,
                  sizeof(usmNoAuthProtocol) / sizeof(oid)) == 0
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
                 || snmp_oid_compare((oid *) var_val,
                                     var_val_len / sizeof(oid),
                                     usmHMACMD5AuthProtocol,
@@ -823,7 +823,7 @@ write_usmUserAuthKeyChange(int action,
         if ((uptr = usm_parse_user(name, name_len)) == NULL) {
             return SNMP_ERR_INCONSISTENTNAME;
         } else {
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
             if (snmp_oid_compare(uptr->authProtocol, uptr->authProtocolLen,
                                  usmHMACMD5AuthProtocol,
                                  sizeof(usmHMACMD5AuthProtocol) /
@@ -987,7 +987,7 @@ write_usmUserPrivProtocol(int action,
                     ((oid *) var_val, var_val_len / sizeof(oid),
                      usmNoPrivProtocol,
                      sizeof(usmNoPrivProtocol) / sizeof(oid)) != 0
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
                     && snmp_oid_compare((oid *) var_val,
                                         var_val_len / sizeof(oid),
                                         usmDESPrivProtocol,
@@ -1075,7 +1075,7 @@ write_usmUserPrivKeyChange(int action,
         if ((uptr = usm_parse_user(name, name_len)) == NULL) {
             return SNMP_ERR_INCONSISTENTNAME;
         } else {
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
             if (snmp_oid_compare(uptr->privProtocol, uptr->privProtocolLen,
                                  usmDESPrivProtocol,
                                  sizeof(usmDESPrivProtocol) /

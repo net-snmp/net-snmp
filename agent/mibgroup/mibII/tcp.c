@@ -721,7 +721,7 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#elif (defined(CAN_USE_SYSCTL) && defined(TCPCTL_STATS))
+#elif (defined(NETSNMP_CAN_USE_SYSCTL) && defined(TCPCTL_STATS))
 int
 tcp_load(netsnmp_cache *cache, void *vmagic)
 {

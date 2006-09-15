@@ -64,10 +64,10 @@
 	 *********************/
 
 #define SYS_STRING_LEN	256
-char            version_descr[SYS_STRING_LEN] = VERS_DESC;
-char            sysContact[SYS_STRING_LEN] = SYS_CONTACT;
-char            sysName[SYS_STRING_LEN] = SYS_NAME;
-char            sysLocation[SYS_STRING_LEN] = SYS_LOC;
+char            version_descr[SYS_STRING_LEN] = NETSNMP_VERS_DESC;
+char            sysContact[SYS_STRING_LEN] = NETSNMP_SYS_CONTACT;
+char            sysName[SYS_STRING_LEN] = NETSNMP_SYS_NAME;
+char            sysLocation[SYS_STRING_LEN] = NETSNMP_SYS_LOC;
 oid             sysObjectID[MAX_OID_LEN];
 size_t          sysObjectIDLength;
 
@@ -504,7 +504,7 @@ var_system(struct variable *vp,
         *write_method = writeSystem;
         return (u_char *) sysLocation;
     case SYSSERVICES:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         if (!sysServicesConfiged)
             return NULL;
 #endif

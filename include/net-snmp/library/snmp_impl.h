@@ -94,7 +94,7 @@ SOFTWARE.
 #define ASN_COUNTER64   (ASN_APPLICATION | 6)
 #define ASN_UINTEGER    (ASN_APPLICATION | 7)   /* historic - don't use */
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     /*
      * defined types from draft-perkins-opaque-01.txt 
      */
@@ -102,7 +102,7 @@ SOFTWARE.
 #define ASN_DOUBLE	    (ASN_APPLICATION | 9)
 #define ASN_INTEGER64        (ASN_APPLICATION | 10)
 #define ASN_UNSIGNED64       (ASN_APPLICATION | 11)
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
 
     /*
      * changed to ERROR_MSG to eliminate conflict with other includes 

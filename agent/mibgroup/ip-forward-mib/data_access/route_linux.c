@@ -190,7 +190,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
     return 0;
 }
 
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 static int
 _load_ipv6(netsnmp_container* container, u_long *index )
 {
@@ -365,7 +365,7 @@ netsnmp_access_route_container_arch_load(netsnmp_container* container,
 
     rc = _load_ipv4(container, &count);
     
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
     if((0 != rc) || (load_flags & NETSNMP_ACCESS_ROUTE_LOAD_IPV4_ONLY))
         return rc;
 

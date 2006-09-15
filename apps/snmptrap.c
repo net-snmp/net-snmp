@@ -156,7 +156,7 @@ main(int argc, char *argv[])
     char           *trap = NULL;
     char           *prognam;
     int             exitval = 0;
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     char           *specific = NULL, *description = NULL, *agent = NULL;
     in_addr_t      *pdu_in_addr_t;
 #endif
@@ -249,7 +249,7 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     if (session.version == SNMP_VERSION_1) {
         if (inform) {
             fprintf(stderr, "Cannot send INFORM as SNMPv1 PDU\n");

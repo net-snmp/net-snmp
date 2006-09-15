@@ -88,10 +88,10 @@ usage(void)
             "\ti: INTEGER, u: unsigned INTEGER, t: TIMETICKS, a: IPADDRESS\n");
     fprintf(stderr,
             "\to: OBJID, s: STRING, x: HEX STRING, d: DECIMAL STRING, b: BITS\n");
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     fprintf(stderr,
             "\tU: unsigned int64, I: signed int64, F: float, D: double\n");
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
 
 }
 
@@ -184,12 +184,12 @@ main(int argc, char *argv[])
             case 'x':
             case 'd':
             case 'b':
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
             case 'I':
             case 'U':
             case 'F':
             case 'D':
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
                 types[current_type++] = *argv[arg++];
                 break;
             default:

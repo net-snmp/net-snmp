@@ -191,7 +191,7 @@ main(int argc, char **argv)
     /*
      * Convert and error check transform_type.
      */
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
     if (!strcmp(transform_type_input, "md5")) {
         transform_type = usmHMACMD5AuthProtocol;
 
@@ -210,7 +210,7 @@ main(int argc, char **argv)
 
     if (verbose) {
         fprintf(stderr, "Hash:\t\t%s\n",
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
                 (transform_type == usmHMACMD5AuthProtocol)
                 ? "usmHMACMD5AuthProtocol" :
 #endif
@@ -239,7 +239,7 @@ main(int argc, char **argv)
 
     }
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     if (verbose) {
         fprintf(stderr, "EngineID:\t%s\n",
                 /*

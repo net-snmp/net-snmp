@@ -60,11 +60,11 @@ typedef struct newrow_stash_s {
 
 void
 netsnmp_init_table_dataset(void) {
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     register_app_config_handler("table",
                                 netsnmp_config_parse_table_set, NULL,
                                 "tableoid");
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
     register_app_config_handler("add_row", netsnmp_config_parse_add_row,
                                 NULL, "table_name indexes... values...");
 }
@@ -844,7 +844,7 @@ netsnmp_register_auto_data_table(netsnmp_table_data_set *table_set,
     netsnmp_add_list_data(&auto_tables, netsnmp_create_data_list(registration_name, tables, NULL));     /* XXX */
 }
 
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
 static void
 _table_set_add_indexes(netsnmp_table_data_set *table_set, struct tree *tp)
 {
@@ -1038,7 +1038,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
 
     netsnmp_register_auto_data_table(table_set, NULL);
 }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 /** @internal */
 void

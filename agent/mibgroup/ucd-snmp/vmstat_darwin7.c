@@ -120,7 +120,7 @@ init_vmstat_darwin7(void)
      * Define the OID pointer to the top of the mib tree that we're
      * registering underneath 
      */
-    oid             vmstat_variables_oid[] = { UCDAVIS_MIB, 11 };
+    oid             vmstat_variables_oid[] = { NETSNMP_UCDAVIS_MIB, 11 };
 
     /*
      * register ourselves with the agent to handle our mib tree 
@@ -247,13 +247,13 @@ var_extensible_vmstat(struct variable *vp,
         long_ret = rate(long_ret);
         return ((u_char *) (&long_ret));
     case IOSENT:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_ret = -1;
         return ((u_char *) (&long_ret));
     case IORECEIVE:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_ret = -1;

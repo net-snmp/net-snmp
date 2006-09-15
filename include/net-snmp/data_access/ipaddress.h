@@ -14,7 +14,7 @@ extern          "C" {
 /*
  * structure definitions
  */
-#if defined( INET6 )
+#if defined( NETSNMP_ENABLE_IPV6 )
 #   define NETSNMP_ACCESS_IPADDRESS_BUF_SIZE 16   /* xxx-rks: 20, for ip6z? */
 #else
 #   define NETSNMP_ACCESS_IPADDRESS_BUF_SIZE 4

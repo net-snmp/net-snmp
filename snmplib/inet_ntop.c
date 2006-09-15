@@ -62,9 +62,9 @@
  */
 
 static const char *inet_ntop4(const u_char *src, char *dst, size_t size);
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 static const char *inet_ntop6(const u_char *src, char *dst, size_t size);
-#endif /* INET6 */
+#endif /* NETSNMP_ENABLE_IPV6 */
 
 /* char *
  * inet_ntop(af, src, dst, size)
@@ -85,7 +85,7 @@ inet_ntop(af, src, dst, size)
 	switch (af) {
 	case AF_INET:
 		return (inet_ntop4(src, dst, size));
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 	case AF_INET6:
 		return (inet_ntop6(src, dst, size));
 #endif
@@ -124,7 +124,7 @@ inet_ntop4(src, dst, size)
 	return (dst);
 }
 
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 /* const char *
  * inet_ntop6(src, dst, size)
  *	convert IPv6 binary address into presentation (printable) format

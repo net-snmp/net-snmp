@@ -512,7 +512,7 @@ int flag;
 	  break;
 
         case ASN_COUNTER64:
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_COUNTER64:
         case ASN_OPAQUE_U64:
 #endif
@@ -520,7 +520,7 @@ int flag;
           len = strlen(buf);
           break;
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_I64:
           printI64(buf,(struct counter64 *)var->val.counter64);
           len = strlen(buf);
@@ -531,7 +531,7 @@ int flag;
             snprint_bitstring(buf, sizeof(buf), var, NULL, NULL, NULL);
             len = strlen(buf);
             break;
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_FLOAT:
 	  if (var->val.floatVal)
 	    sprintf(buf,"%f", *var->val.floatVal);
@@ -2581,12 +2581,12 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SNMP_DEFAULT_VERSION"))
-#ifdef DEFAULT_SNMP_VERSION
-	    return DEFAULT_SNMP_VERSION;
+	if (strEQ(name, "NETSNMP_DEFAULT_VERSION"))
+#ifdef NETSNMP_DEFAULT_VERSION
+	    return NETSNMP_DEFAULT_VERSION;
 #else
-#ifdef SNMP_DEFAULT_VERSION
-	    return SNMP_DEFAULT_VERSION;
+#ifdef NETSNMP_DEFAULT_VERSION
+	    return NETSNMP_DEFAULT_VERSION;
 #else
 	    goto not_there;
 #endif
@@ -2606,9 +2606,7 @@ int arg;
     errno = EINVAL;
     return 0;
 
-#ifndef NETSNMP_CALLBACK_OP_TIMED_OUT
 not_there:
-#endif
     errno = ENOENT;
     return 0;
 }
@@ -2653,12 +2651,12 @@ snmp_new_session(version, community, peer, lport, retries, timeout)
            __libraries_init("perl");
            
            session.version = -1;
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
 	   if (!strcmp(version, "1")) {
 		session.version = SNMP_VERSION_1;
            }
 #endif
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
            if ((!strcmp(version, "2")) || (!strcmp(version, "2c"))) {
 		session.version = SNMP_VERSION_2c;
            }
@@ -2754,7 +2752,7 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                              (char **) &session.contextEngineID);
            session.engineBoots = eng_boots;
            session.engineTime = eng_time;
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
            if (!strcmp(auth_proto, "MD5")) {
                session.securityAuthProto = 
                   snmp_duplicate_objid(usmHMACMD5AuthProtocol,
@@ -2804,7 +2802,7 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                    }
                }
            }
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
            if (!strcmp(priv_proto, "DES")) {
               session.securityPrivProto =
                   snmp_duplicate_objid(usmDESPrivProtocol,
@@ -2887,12 +2885,12 @@ snmp_update_session(sess_ref, version, community, peer, lport, retries, timeout)
            if (!ss) goto update_end;
 
            ss->version = -1;
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
            if (!strcmp(version, "1")) {
 		ss->version = SNMP_VERSION_1;
            }
 #endif
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
            if (!strcmp(version, "2") || !strcmp(version, "2c")) {
 		ss->version = SNMP_VERSION_2c;
 	   }

@@ -256,7 +256,7 @@ snmp_build_var_op(u_char * data,
         data = asn_build_unsigned_int(data, listlength, var_val_type,
                                       (u_long *) var_val, var_val_len);
         break;
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_COUNTER64:
     case ASN_OPAQUE_U64:
 #endif
@@ -288,7 +288,7 @@ snmp_build_var_op(u_char * data,
     case SNMP_ENDOFMIBVIEW:
         data = asn_build_null(data, listlength, var_val_type);
         break;
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_FLOAT:
         data = asn_build_float(data, listlength, var_val_type,
                                (float *) var_val, var_val_len);
@@ -302,7 +302,7 @@ snmp_build_var_op(u_char * data,
                                       (struct counter64 *) var_val,
                                       var_val_len);
         break;
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
     default:
 	{
 	char error_buf[64];
@@ -324,7 +324,7 @@ snmp_build_var_op(u_char * data,
     return data;
 }
 
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
 int
 snmp_realloc_rbuild_var_op(u_char ** pkt, size_t * pkt_len,
                            size_t * offset, int allow_realloc,
@@ -357,7 +357,7 @@ snmp_realloc_rbuild_var_op(u_char ** pkt, size_t * pkt_len,
                                              var_val_len);
         break;
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_COUNTER64:
     case ASN_OPAQUE_U64:
 #endif
@@ -400,7 +400,7 @@ snmp_realloc_rbuild_var_op(u_char ** pkt, size_t * pkt_len,
                                      var_val_type);
         break;
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_FLOAT:
         rc = asn_realloc_rbuild_float(pkt, pkt_len, offset, allow_realloc,
                                       var_val_type, (float *) var_val,
@@ -419,7 +419,7 @@ snmp_realloc_rbuild_var_op(u_char ** pkt, size_t * pkt_len,
                                              (struct counter64 *) var_val,
                                              var_val_len);
         break;
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
     default:
 	{
 	char error_buf[64];
@@ -461,4 +461,4 @@ snmp_realloc_rbuild_var_op(u_char ** pkt, size_t * pkt_len,
     return rc;
 }
 
-#endif                          /* USE_REVERSE_ASNENCODING */
+#endif                          /* NETSNMP_USE_REVERSE_ASNENCODING */

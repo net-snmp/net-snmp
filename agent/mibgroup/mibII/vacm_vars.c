@@ -78,7 +78,7 @@ init_vacm_vars(void)
     static oid      reg[] = { SNMP_OID_SNMPMODULES, 16, 2, 2, 1 };
 #endif
 
-#define PRIVRW	(SNMPV2ANY | 0x5000)
+#define PRIVRW	(NETSNMP_SNMPV2ANY | 0x5000)
 
     struct variable1 vacm_sec2group[] = {
         {SECURITYGROUP, ASN_OCTET_STR, RWRITE, var_vacm_sec2group, 1, {3}},

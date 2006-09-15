@@ -547,7 +547,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
         case ASN_TIMETICKS:
         case ASN_UINTEGER:
         case ASN_COUNTER64:
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_COUNTER64:
         case ASN_OPAQUE_U64:
         case ASN_OPAQUE_I64:

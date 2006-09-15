@@ -612,7 +612,7 @@ asn_build_int(u_char * data,
     static const char *errpre = "build int";
     register long   integer;
     register u_long mask;
-#ifndef SNMP_NO_DEBUGGING
+#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
 #endif
 
@@ -692,7 +692,7 @@ asn_build_unsigned_int(u_char * data,
     register u_long integer;
     register u_long mask;
     int             add_null_byte = 0;
-#ifndef SNMP_NO_DEBUGGING
+#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
 #endif
 
@@ -866,7 +866,7 @@ asn_build_string(u_char * data,
      * cmpdstring ::= 0x24 asnlength string {string}*
      * This code will never send a compound string.
      */
-#ifndef SNMP_NO_DEBUGGING
+#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
 #endif
     data = asn_build_header(data, datalength, type, strlength);
@@ -962,7 +962,7 @@ asn_parse_header(u_char * data, size_t * datalength, u_char * type)
      */
 #endif
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
 
     if ((*type == ASN_OPAQUE) && (*bufp == ASN_OPAQUE_TAG1)) {
 
@@ -993,7 +993,7 @@ asn_parse_header(u_char * data, size_t * datalength, u_char * type)
                                     asn_length, *datalength))
             return NULL;
     }
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
 
     *datalength = (int) asn_length;
 
@@ -1412,7 +1412,7 @@ asn_build_objid(u_char * data,
     register u_long objid_val;
     u_long          first_objid_val;
     register int    i;
-#ifndef SNMP_NO_DEBUGGING
+#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
 #endif
 
@@ -1621,7 +1621,7 @@ asn_build_null(u_char * data, size_t * datalength, u_char type)
     /*
      * ASN.1 null ::= 0x05 0x00
      */
-#ifndef SNMP_NO_DEBUGGING
+#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
 #endif
     data = asn_build_header(data, datalength, type, 0);
@@ -1792,7 +1792,7 @@ asn_parse_unsigned_int64(u_char * data,
         return NULL;
 
     DEBUGDUMPSETUP("recv", data, bufp - data);
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     /*
      * 64 bit counters as opaque 
      */
@@ -1813,7 +1813,7 @@ asn_parse_unsigned_int64(u_char * data,
                                     asn_length, *datalength))
             return NULL;
     }
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
     if (((int) asn_length > uint64sizelimit) ||
         (((int) asn_length == uint64sizelimit) && *bufp != 0x00)) {
         _asn_length_err(errpre, (size_t) asn_length, uint64sizelimit);
@@ -1881,7 +1881,7 @@ asn_build_unsigned_int64(u_char * data,
     register u_long mask, mask2;
     int             add_null_byte = 0;
     size_t          intsize;
-#ifndef SNMP_NO_DEBUGGING
+#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
 #endif
 
@@ -1926,7 +1926,7 @@ asn_build_unsigned_int64(u_char * data,
             low <<= 8;
         }
     }
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     /*
      * encode a Counter64 as an opaque (it also works in SNMPv1) 
      */
@@ -1973,15 +1973,15 @@ asn_build_unsigned_int64(u_char * data,
         *data++ = (u_char) intsize;
         *datalength = *datalength - 3;
     } else {
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
         data = asn_build_header(data, datalength, type, intsize);
         if (_asn_build_header_check
             ("build uint64", data, *datalength, intsize))
             return NULL;
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     }
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
     *datalength -= intsize;
     if (add_null_byte == 1) {
         *data++ = '\0';
@@ -2003,7 +2003,7 @@ asn_build_unsigned_int64(u_char * data,
     return data;
 }
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
 
 
 /**
@@ -2147,7 +2147,7 @@ asn_build_signed_int64(u_char * data,
     register u_int  mask, mask2;
     u_long          low, high;
     size_t          intsize;
-#ifndef SNMP_NO_DEBUGGING
+#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
 #endif
 
@@ -2332,7 +2332,7 @@ asn_build_float(u_char * data,
         int             intVal;
         u_char          c[sizeof(float)];
     } fu;
-#ifndef SNMP_NO_DEBUGGING
+#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
 #endif
 
@@ -2502,7 +2502,7 @@ asn_build_double(u_char * data,
         int             intVal[2];
         u_char          c[sizeof(double)];
     } fu;
-#ifndef SNMP_NO_DEBUGGING
+#ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
 #endif
 
@@ -2550,7 +2550,7 @@ asn_build_double(u_char * data,
     return data;
 }
 
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
 
 
 /**
@@ -2592,7 +2592,7 @@ asn_realloc(u_char ** pkt, size_t * pkt_len)
     return 0;
 }
 
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
 
 /**
  * @internal
@@ -3315,7 +3315,7 @@ asn_realloc_rbuild_unsigned_int64(u_char ** pkt, size_t * pkt_len,
 
     intsize = *offset - start_offset;
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     /*
      * Encode a Counter64 as an opaque (it also works in SNMPv1).  
      */
@@ -3370,7 +3370,7 @@ asn_realloc_rbuild_unsigned_int64(u_char ** pkt, size_t * pkt_len,
         }
     } else {
 
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
         if (asn_realloc_rbuild_header
             (pkt, pkt_len, offset, r, type, intsize)) {
             if (_asn_realloc_build_header_check
@@ -3380,16 +3380,16 @@ asn_realloc_rbuild_unsigned_int64(u_char ** pkt, size_t * pkt_len,
         } else {
             return 0;
         }
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     }
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
 
     DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset), intsize);
     DEBUGMSG(("dumpv_send", "  U64:\t%lu %lu\n", cp->high, cp->low));
     return 1;
 }
 
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
 
 
 /**
@@ -3685,8 +3685,8 @@ asn_realloc_rbuild_double(u_char ** pkt, size_t * pkt_len,
     return 0;
 }
 
-#endif                          /* OPAQUE_SPECIAL_TYPES */
-#endif                          /*  USE_REVERSE_ASNENCODING  */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
+#endif                          /*  NETSNMP_USE_REVERSE_ASNENCODING  */
 /**
  * @}
  */

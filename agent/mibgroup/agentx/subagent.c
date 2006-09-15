@@ -130,11 +130,11 @@ subagent_init(void)
     netsnmp_assert(netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                           NETSNMP_DS_AGENT_ROLE) == SUB_AGENT);
 
-#ifndef SNMP_TRANSPORT_CALLBACK_DOMAIN
+#ifndef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
     snmp_log(LOG_WARNING,"AgentX subagent has been disabled because "
                "the callback transport is not available.\n");
     return -1;
-#endif /* SNMP_TRANSPORT_CALLBACK_DOMAIN */
+#endif /* NETSNMP_TRANSPORT_CALLBACK_DOMAIN */
 
     /*
      * open (local) callback session
@@ -758,7 +758,7 @@ subagent_open_master_session(void)
         sess.peername = strdup(
             netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET));
     } else {
-        sess.peername = strdup(AGENTX_SOCKET);
+        sess.peername = strdup(NETSNMP_AGENTX_SOCKET);
     }
 
     sess.local_port = 0;        /* client */

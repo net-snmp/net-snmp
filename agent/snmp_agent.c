@@ -92,7 +92,7 @@ SOFTWARE.
 #include <syslog.h>
 #endif
 
-#ifdef USE_LIBWRAP
+#ifdef NETSNMP_USE_LIBWRAP
 #include <tcpd.h>
 int             allow_severity = LOG_INFO;
 int             deny_severity = LOG_WARNING;
@@ -116,7 +116,7 @@ int             deny_severity = LOG_WARNING;
 #include "smux/smux.h"
 #endif
 
-oid      version_sysoid[] = { SYSTEM_MIB };
+oid      version_sysoid[] = { NETSNMP_SYSTEM_MIB };
 int      version_sysoid_len = OID_LENGTH(version_sysoid);
 
 #define SNMP_ADDRCACHE_SIZE 10
@@ -795,7 +795,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
                            void *transport_data, int transport_data_length)
 {
     char           *addr_string = NULL;
-#ifdef  USE_LIBWRAP
+#ifdef  NETSNMP_USE_LIBWRAP
     char *tcpudpaddr, *name;
     short not_log_connection;
 
@@ -828,7 +828,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
          * Don't forget to free() it.  
          */
     }
-#ifdef  USE_LIBWRAP
+#ifdef  NETSNMP_USE_LIBWRAP
     /* Catch udp,udp6,tcp,tcp6 transports using "[" */
     tcpudpaddr = strstr(addr_string, "[");
     if ( tcpudpaddr != 0 ) {
@@ -867,7 +867,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
             return 0;
         }
     }
-#endif                          /*USE_LIBWRAP */
+#endif                          /*NETSNMP_USE_LIBWRAP */
 
     snmp_increment_statistic(STAT_SNMPINPKTS);
 
@@ -1554,7 +1554,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
          * May need to "dumb down" a SET error status for a
          * v1 query.  See RFC2576 - section 4.3
          */
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
         if ((asp->pdu->command == SNMP_MSG_SET) &&
             (asp->pdu->version == SNMP_VERSION_1)) {
             switch (asp->status) {
@@ -1823,11 +1823,11 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
              * access control setup is incorrect 
              */
             send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
-#if defined(DISABLE_SNMPV1)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
+#if defined(NETSNMP_DISABLE_SNMPV1)
             if (asp->pdu->version != SNMP_VERSION_2c) {
 #else
-#if defined(DISABLE_SNMPV2C)
+#if defined(NETSNMP_DISABLE_SNMPV2C)
             if (asp->pdu->version != SNMP_VERSION_1) {
 #else
             if (asp->pdu->version != SNMP_VERSION_1
@@ -1849,7 +1849,7 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
                  */
                 netsnmp_remove_and_free_agent_snmp_session(asp);
                 return 0;
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
             }
 #endif /* support for community based SNMP */
         }
@@ -3302,7 +3302,7 @@ handle_pdu(netsnmp_agent_session *asp)
         break;
 
     case SNMP_MSG_SET:
-#ifdef DISABLE_SET_SUPPORT
+#ifdef NETSNMP_DISABLE_SET_SUPPORT
         return SNMP_ERR_NOTWRITABLE;
 #else
         /*

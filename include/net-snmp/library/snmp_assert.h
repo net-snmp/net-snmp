@@ -31,9 +31,9 @@
 #   define netsnmp_assert(x)  assert( x )
 #else
 /*
- *  if asserts weren't requested, just log, unless SNMP_NO_DEBUGGING specified
+ *  if asserts weren't requested, just log, unless NETSNMP_NO_DEBUGGING specified
  */
-#   ifndef SNMP_NO_DEBUGGING
+#   ifndef NETSNMP_NO_DEBUGGING
 #      ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
 #         define netsnmp_assert(x)  do { \
                  if ( x ) \

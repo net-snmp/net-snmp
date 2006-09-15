@@ -153,7 +153,7 @@ init_loadave(void)
          {LOADMAXVAL}},
         {LOADAVEINT, ASN_INTEGER, RONLY, var_extensible_loadave, 1,
          {LOADAVEINT}},
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
         {LOADAVEFLOAT, ASN_OPAQUE_FLOAT, RONLY, var_extensible_loadave, 1,
          {LOADAVEFLOAT}},
 #endif
@@ -168,7 +168,7 @@ init_loadave(void)
      * registering underneath 
      */
     oid             loadave_variables_oid[] =
-        { UCDAVIS_MIB, LOADAVEMIBNUM, 1 };
+        { NETSNMP_UCDAVIS_MIB, NETSNMP_LOADAVEMIBNUM, 1 };
 
     /*
      * register ourselves with the agent to handle our mib tree 
@@ -202,7 +202,7 @@ loadave_free_config(void)
     int             i;
 
     for (i = 0; i <= 2; i++)
-        maxload[i] = DEFMAXLOADAVE;
+        maxload[i] = NETSNMP_DEFMAXLOADAVE;
 }
 
 /*
@@ -262,7 +262,7 @@ try_getloadavg(double *r_ave, size_t s_ave)
     r_ave[1] = pst_buf.psd_avg_5_min;
     r_ave[2] = pst_buf.psd_avg_15_min;
 #elif !defined(cygwin)
-#ifdef CAN_USE_NLIST
+#ifdef NETSNMP_CAN_USE_NLIST
 #if defined(aix4) || defined(aix5)
     if(perfstat_cpu_total((perfstat_id_t *)NULL, &cs, sizeof(perfstat_cpu_total_t), 1) > 0) {
         r_ave[0] = cs.loadavg[0] / 65536.0;
@@ -339,7 +339,7 @@ var_extensible_loadave(struct variable * vp,
     case LOADAVEINT:
         long_ret = (u_long) (avenrun[name[*length - 1] - 1] * 100);
         return ((u_char *) (&long_ret));
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case LOADAVEFLOAT:
         float_ret = (float) avenrun[name[*length - 1] - 1];
         *var_len = sizeof(float_ret);

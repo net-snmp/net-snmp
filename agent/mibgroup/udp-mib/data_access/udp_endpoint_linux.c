@@ -20,7 +20,7 @@
 #include <fcntl.h>
 
 static int _load4(netsnmp_container *container, u_int flags);
-#if defined (INET6)
+#if defined (NETSNMP_ENABLE_IPV6)
 static int _load6(netsnmp_container *container, u_int flags);
 #endif
 
@@ -91,7 +91,7 @@ netsnmp_arch_udp_endpoint_container_load(netsnmp_container *container,
         return rc;
     }
 
-#if defined (INET6)
+#if defined (NETSNMP_ENABLE_IPV6)
     rc = _load6(container, load_flags);
     if(rc < 0) {
         u_int flags = NETSNMP_ACCESS_UDP_ENDPOINT_FREE_KEEP_CONTAINER;
@@ -249,7 +249,7 @@ _load4(netsnmp_container *container, u_int load_flags)
     return (NULL == container);
 }
 
-#if defined (INET6)
+#if defined (NETSNMP_ENABLE_IPV6)
 /**
  *
  * @retval  0 no errors
@@ -281,4 +281,4 @@ _load6(netsnmp_container *container, u_int load_flags)
 
     return (NULL == container);
 }
-#endif /* INET6 */
+#endif /* NETSNMP_ENABLE_IPV6 */

@@ -5,7 +5,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef CAN_USE_NLIST
+#ifdef NETSNMP_CAN_USE_NLIST
 
 #include <sys/types.h>
 #if HAVE_STDLIB_H
@@ -174,7 +174,7 @@ klookup(unsigned long off, char *target, int siz)
     if ((retsiz = klseek((off_t) off)) != off) {
         snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
         snmp_log_perror("klseek");
-#ifdef EXIT_ON_BAD_KLREAD
+#ifdef NETSNMP_EXIT_ON_BAD_KLREAD
         exit(1);
 #endif
         return (0);
@@ -188,7 +188,7 @@ klookup(unsigned long off, char *target, int siz)
             snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
             snmp_log_perror("klread");
         }
-#ifdef EXIT_ON_BAD_KLREAD
+#ifdef NETSNMP_EXIT_ON_BAD_KLREAD
         exit(1);
 #endif
         return (0);
@@ -198,4 +198,4 @@ klookup(unsigned long off, char *target, int siz)
 
 #endif                          /* HAVE_KVM_H */
 
-#endif                          /* CAN_USE_NLIST */
+#endif                          /* NETSNMP_CAN_USE_NLIST */

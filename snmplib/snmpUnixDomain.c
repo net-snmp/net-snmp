@@ -458,7 +458,7 @@ netsnmp_unix_ctor(void)
     netsnmp_tdomain_register(&unixDomain);
 }
 
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 /* support for SNMPv1 and SNMPv2c on unix domain*/
 
 #define EXAMPLE_COMMUNITY "COMMUNITY"
@@ -640,7 +640,7 @@ netsnmp_unix_com2SecList_free(void)
 void
 netsnmp_unix_agent_config_tokens_register(void)
 {
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     register_app_config_handler("com2secunix", netsnmp_unix_parse_security,
                                 netsnmp_unix_com2SecList_free,
                                 "[-Cn CONTEXT] secName sockpath community");

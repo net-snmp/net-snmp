@@ -1,5 +1,5 @@
 
-#ifdef CAN_USE_NLIST
+#ifdef NETSNMP_CAN_USE_NLIST
 extern void     init_kmem(const char *);
 extern int      klookup(unsigned long, char *, int);
 #endif

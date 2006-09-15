@@ -227,7 +227,7 @@ pr_family(int af)
 	case AF_INET:
 		afname = "Internet";
 		break;
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 	case AF_INET6:
 		afname = "Internet6";
 		break;
@@ -260,7 +260,7 @@ pr_family(int af)
 }
 
 /* column widths; each followed by one space */
-#ifndef INET6
+#ifndef NETSNMP_ENABLE_IPV6
 #define	WID_DST(af)	26	/* width of destination column */
 #define	WID_GW(af)	18	/* width of gateway column */
 #else
@@ -274,7 +274,7 @@ pr_family(int af)
 #define	WID_DST(af)	((af) == AF_INET6 ? (nflag ? 29 : 18) : 18)
 #define	WID_GW(af)	((af) == AF_INET6 ? (nflag ? 25 : 18) : 18)
 #endif
-#endif /* INET6 */
+#endif /* NETSNMP_ENABLE_IPV6 */
 
 /*
  * Print header for routing table columns.
@@ -383,8 +383,8 @@ netname(in_addr_t in, in_addr_t mask)
 	return (line);
 }
 
-#undef INET6
-#ifdef INET6
+#undef NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_ENABLE_IPV6
 char *
 netname6(struct sockaddr_in6 *sa6, struct in6_addr *mask)
 {
@@ -488,7 +488,7 @@ routename6(struct sockaddr_in6 *sa6)
 		strlcpy(line, "", sizeof line);
 	return line;
 }
-#endif /*INET6*/
+#endif /*NETSNMP_ENABLE_IPV6*/
 
 char *
 s_rtflags( struct route_entry *rp )

@@ -114,7 +114,7 @@
 #if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
 #endif
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 #if HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
@@ -125,8 +125,8 @@
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
-#ifdef INET6
-#if HAVE_NETINET6_IP6_VAR_H
+#ifdef NETSNMP_ENABLE_IPV6
+#if HAVE_NETNETSNMP_ENABLE_IPV6_IP6_VAR_H
 #include <netinet6/ip6_var.h>
 #endif
 #endif
@@ -190,7 +190,7 @@
 #if HAVE_OSRELDATE_H
 #include <osreldate.h>
 #endif
-#ifdef CAN_USE_SYSCTL
+#ifdef NETSNMP_CAN_USE_SYSCTL
 #include <sys/sysctl.h>
 #endif
 
@@ -651,7 +651,7 @@ var_ifEntry(struct variable *vp,
 #ifdef if_odrops
         long_return = (u_long) if_msg.ifm_data.ifi_odrops;
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;
@@ -791,7 +791,7 @@ var_ifEntry(struct variable *vp,
             if (ifnet.if_type == IFT_ISDNPRIMARY)
                 long_return = 64000 * 30;
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
             return NULL;
 #endif
             long_return = (u_long) 10000000;
@@ -841,7 +841,7 @@ var_ifEntry(struct variable *vp,
                     starttime.tv_usec) / 10000);
         }
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;        /* XXX */
@@ -855,7 +855,7 @@ var_ifEntry(struct variable *vp,
         long_return = (u_long) ifnet.if_ibytes;
 #endif
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = (u_long) ifnet.if_ipackets * 308; /* XXX */
@@ -885,7 +885,7 @@ var_ifEntry(struct variable *vp,
         long_return = (u_long) ifnet.if_imcasts;
 #endif
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = (u_long) 0;       /* XXX */
@@ -899,7 +899,7 @@ var_ifEntry(struct variable *vp,
         long_return = (u_long) ifnet.if_iqdrops;
 #endif
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = (u_long) 0;       /* XXX */
@@ -920,7 +920,7 @@ var_ifEntry(struct variable *vp,
         long_return = (u_long) ifnet.if_noproto;
 #endif
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = (u_long) 0;       /* XXX */
@@ -934,7 +934,7 @@ var_ifEntry(struct variable *vp,
         long_return = (u_long) ifnet.if_obytes;
 #endif
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = (u_long) ifnet.if_opackets * 308; /* XXX */
@@ -964,7 +964,7 @@ var_ifEntry(struct variable *vp,
         long_return = (u_long) ifnet.if_omcasts;
 #endif
 #else
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = (u_long) 0;       /* XXX */

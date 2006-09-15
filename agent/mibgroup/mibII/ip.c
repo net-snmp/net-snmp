@@ -824,7 +824,7 @@ ip_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#elif defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS)
+#elif defined(NETSNMP_CAN_USE_SYSCTL) && defined(IPCTL_STATS)
 int
 ip_load(netsnmp_cache *cache, void *vmagic)
 {

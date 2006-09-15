@@ -99,7 +99,7 @@ snmp_parse_args_descriptions(FILE * outf)
             "  -H\t\t\tdisplay configuration file directives understood\n");
     fprintf(outf, "  -v 1|2c|3\t\tspecifies SNMP version to use\n");
     fprintf(outf, "  -V, --version\t\tdisplay package version number\n");
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     fprintf(outf, "SNMP Version 1 or 2c specific\n");
     fprintf(outf, "  -c COMMUNITY\t\tset the community string\n");
 #endif /* support for community based SNMP */
@@ -137,7 +137,7 @@ snmp_parse_args_descriptions(FILE * outf)
             "  -m MIB[:...]\t\tload given list of MIBs (ALL loads everything)\n");
     fprintf(outf,
             "  -M DIR[:...]\t\tlook in given list of directories for MIBs\n");
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     fprintf(outf,
             "  -P MIBOPTS\t\tToggle various defaults controlling MIB parsing:\n");
     snmp_mib_toggle_options_usage("\t\t\t  ", outf);
@@ -270,7 +270,7 @@ snmp_parse_args(int argc,
             netsnmp_config_remember(optarg);
             break;
 
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         case 'm':
             setenv("MIBS", optarg, 1);
             break;
@@ -278,7 +278,7 @@ snmp_parse_args(int argc,
         case 'M':
             netsnmp_set_mib_directory(optarg);
             break;
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
         case 'O':
             cp = snmp_out_toggle_options(optarg);
@@ -298,7 +298,7 @@ snmp_parse_args(int argc,
             }
             break;
 
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         case 'P':
             cp = snmp_mib_toggle_options(optarg);
             if (cp != NULL) {
@@ -307,7 +307,7 @@ snmp_parse_args(int argc,
                 return (-1);
             }
             break;
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
         case 'D':
             debug_register_tokens(optarg);
@@ -321,12 +321,12 @@ snmp_parse_args(int argc,
 
         case 'v':
             session->version = -1;
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
             if (!strcmp(optarg, "1")) {
                 session->version = SNMP_VERSION_1;
             }
 #endif
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
             if (!strcasecmp(optarg, "2c")) {
                 session->version = SNMP_VERSION_2c;
             }
@@ -517,7 +517,7 @@ snmp_parse_args(int argc,
             break;
 
         case 'a':
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
             if (!strcasecmp(optarg, "MD5")) {
                 session->securityAuthProto = usmHMACMD5AuthProtocol;
                 session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
@@ -536,7 +536,7 @@ snmp_parse_args(int argc,
 
         case 'x':
             testcase = 0;
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
             if (!strcasecmp(optarg, "DES")) {
                 testcase = 1;
                 session->securityPrivProto = usmDESPrivProtocol;
@@ -623,14 +623,14 @@ snmp_parse_args(int argc,
          * compile time default version 
          */
         if (!session->version) {
-            switch (DEFAULT_SNMP_VERSION) {
-#ifndef DISABLE_SNMPV1
+            switch (NETSNMP_DEFAULT_SNMP_VERSION) {
+#ifndef NETSNMP_DISABLE_SNMPV1
             case 1:
                 session->version = SNMP_VERSION_1;
                 break;
 #endif
 
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
             case 2:
                 session->version = SNMP_VERSION_2c;
                 break;
@@ -645,7 +645,7 @@ snmp_parse_args(int argc,
                 return(-2);
             }
         } else {
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
             if (session->version == NETSNMP_DS_SNMP_VERSION_1)  /* bogus value.  version 1 actually = 0 */
                 session->version = SNMP_VERSION_1;
 #endif
@@ -667,7 +667,7 @@ snmp_parse_args(int argc,
                 snmp_duplicate_objid(def, session->securityAuthProtoLen);
         }
         if (session->securityAuthProto == NULL) {
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
             /*
              * assume MD5
              */
@@ -708,7 +708,7 @@ snmp_parse_args(int argc,
             /*
              * assume DES 
              */
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
             session->securityPrivProto =
                 snmp_duplicate_objid(usmDESPrivProtocol,
                                      USM_PRIV_PROTO_DES_LEN);
@@ -741,17 +741,17 @@ snmp_parse_args(int argc,
     }
     session->peername = argv[optind++]; /* hostname */
 
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     /*
      * If v1 or v2c, check community has been set, either by a -c option above,
      * or via a default token somewhere.  
      * If neither, it will be taken from the incoming request PDU.
      */
 
-#if defined(DISABLE_SNMPV1)
+#if defined(NETSNMP_DISABLE_SNMPV1)
     if (session->version == SNMP_VERSION_2c)
 #else 
-#if defined(DISABLE_SNMPV2C)
+#if defined(NETSNMP_DISABLE_SNMPV2C)
     if (session->version == SNMP_VERSION_1)
 #else
     if (session->version == SNMP_VERSION_1 ||

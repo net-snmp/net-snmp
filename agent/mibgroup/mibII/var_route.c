@@ -50,7 +50,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "route_headers.h"
 #define CACHE_TIME (120)        /* Seconds */
 
-#if !defined(CAN_USE_SYSCTL)
+#if !defined(NETSNMP_CAN_USE_SYSCTL)
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -237,25 +237,25 @@ var_ipRouteEntry(struct variable *vp,
         long_return = (rtp->rtm_flags & RTF_UP) ? 1 : 0;
         return (u_char *) & long_return;
     case IPROUTEMETRIC2:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTEMETRIC3:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTEMETRIC4:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTEMETRIC5:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
@@ -281,7 +281,7 @@ var_ipRouteEntry(struct variable *vp,
             ? 2 : (rtp->rtm_flags & RTF_DYNAMIC) ? 4 : 1;
         return (u_char *) & long_return;
     case IPROUTEAGE:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;
@@ -442,7 +442,7 @@ var_ipRouteEntry(struct variable * vp,
      ** this optimisation fails, if there is only a single route avail.
      ** it is a very special case, but better leave it out ...
      **/
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
     saveNameLen = 0;
 #endif
     if (rtsize <= 1)
@@ -561,7 +561,7 @@ var_ipRouteEntry(struct variable * vp,
 #ifdef hpux11
         long_return = rt[RtIndex].Metric2;
         return (u_char *) & long_return;
-#elif defined(NO_DUMMY_VALUES)
+#elif defined(NETSNMP_NO_DUMMY_VALUES)
         return NULL;
 #endif
         long_return = -1;
@@ -570,7 +570,7 @@ var_ipRouteEntry(struct variable * vp,
 #ifdef hpux11
         long_return = rt[RtIndex].Metric3;
         return (u_char *) & long_return;
-#elif defined(NO_DUMMY_VALUES)
+#elif defined(NETSNMP_NO_DUMMY_VALUES)
         return NULL;
 #endif
         long_return = -1;
@@ -579,13 +579,13 @@ var_ipRouteEntry(struct variable * vp,
 #ifdef hpux11
         long_return = rt[RtIndex].Metric4;
         return (u_char *) & long_return;
-#elif defined(NO_DUMMY_VALUES)
+#elif defined(NETSNMP_NO_DUMMY_VALUES)
         return NULL;
 #endif
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTEMETRIC5:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
@@ -628,7 +628,7 @@ var_ipRouteEntry(struct variable * vp,
 #ifdef hpux11
         long_return = rt[RtIndex].Age;
         return (u_char *) & long_return;
-#elif defined(NO_DUMMY_VALUES)
+#elif defined(NETSNMP_NO_DUMMY_VALUES)
         return NULL;
 #endif
         long_return = 0;
@@ -640,7 +640,7 @@ var_ipRouteEntry(struct variable * vp,
          * XXX - Almost certainly not right
          * but I don't have a suitable system to test this on 
          */
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;
@@ -1445,7 +1445,7 @@ var_ipRouteEntry(struct variable *vp,
      ** this optimisation fails, if there is only a single route avail.
      ** it is a very special case, but better leave it out ...
      **/
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
     saveNameLen = 0;
 #endif
     if (route_row == NULL) {
@@ -1630,7 +1630,7 @@ var_ipRouteEntry(struct variable *vp,
 
 #endif                          /* WIN32 cygwin */
 
-#else                           /* CAN_USE_SYSCTL */
+#else                           /* NETSNMP_CAN_USE_SYSCTL */
 
 static
 TAILQ_HEAD(, snmprt)
@@ -1918,7 +1918,7 @@ var_ipRouteEntry(struct variable * vp,
         return (u_char *) & long_return;
 
     case IPROUTEAGE:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;
@@ -1944,7 +1944,7 @@ init_var_route(void)
     ;
 }
 
-#endif                          /* CAN_USE_SYSCTL */
+#endif                          /* NETSNMP_CAN_USE_SYSCTL */
 
 #if defined(HAVE_SYS_SYSCTL_H) && !defined(linux)
 /*
