@@ -962,7 +962,7 @@ Project changes
 
  1. Edit the win32\net-snmp\net-snmp-config.h header file.  Add:
 
-	#define USE_OPENSSL 1
+	#define NETSNMP_USE_OPENSSL 1
 
  2. Open Visual Studio, add the link line to the Project Settings
     for all the applications, and especially for the libsnmp_dll project,

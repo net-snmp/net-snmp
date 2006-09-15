@@ -66,7 +66,7 @@
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/transform_oids.h>
 
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
@@ -158,7 +158,7 @@ sc_init(void)
 {
     int             rval = SNMPERR_SUCCESS;
 
-#ifndef USE_OPENSSL
+#ifndef NETSNMP_USE_OPENSSL
 #ifdef NETSNMP_USE_INTERNAL_MD5
     struct timeval  tv;
 
@@ -177,7 +177,7 @@ sc_init(void)
      * XXX ogud: The only reason to do anything here with openssl is to 
      * * XXX ogud: seed random number generator 
      */
-#endif                          /* ifndef USE_OPENSSL */
+#endif                          /* ifndef NETSNMP_USE_OPENSSL */
     return rval;
 }                               /* end sc_init() */
 
@@ -193,7 +193,7 @@ sc_init(void)
  */
 int
 sc_random(u_char * buf, size_t * buflen)
-#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
 #ifdef NETSNMP_USE_INTERNAL_MD5
@@ -204,7 +204,7 @@ sc_random(u_char * buf, size_t * buflen)
 
     DEBUGTRACE;
 
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
     RAND_bytes(buf, *buflen);   /* will never fail */
 #elif NETSNMP_USE_PKCS11			/* NETSNMP_USE_PKCS11 */
     pkcs_random(buf, *buflen);
@@ -225,7 +225,7 @@ sc_random(u_char * buf, size_t * buflen)
     memcpy(ucp, &rndval, *buflen % sizeof(rndval));
 
     rval = SNMPERR_SUCCESS;
-#endif                          /* USE_OPENSSL */
+#endif                          /* NETSNMP_USE_OPENSSL */
     return rval;
 
 }                               /* end sc_random() */
@@ -265,13 +265,13 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
                        u_char * key, u_int keylen,
                        u_char * message, u_int msglen,
                        u_char * MAC, size_t * maclen)
-#if  defined(NETSNMP_USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
+#if  defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
     int             properlength;
 
     u_char          buf[SNMP_MAXBUF_SMALL];
-#if  defined(USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
+#if  defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
     size_t             buf_len = sizeof(buf);
 #endif
 
@@ -304,7 +304,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
     if (((int) keylen < properlength)) {
         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
     /*
      * Determine transform type.
      */
@@ -358,7 +358,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
         rval = SNMPERR_GENERR;
         goto sc_generate_keyed_hash_quit;
     }
-#endif                          /* USE_OPENSSL */
+#endif                          /* NETSNMP_USE_OPENSSL */
 
 #ifdef NETSNMP_ENABLE_TESTING_CODE
     {
@@ -400,14 +400,14 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
 int
 sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
         size_t buf_len, u_char * MAC, size_t * MAC_len)
-#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
 {
-#if defined(USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
+#if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
     int            rval = SNMPERR_SUCCESS;
 #endif
     int            ret;
 
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
     const EVP_MD   *hashfn;
     EVP_MD_CTX     ctx, *cptr;
     unsigned int   tmp_len;
@@ -422,7 +422,7 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
     if (( ret < 0 ) || (*MAC_len < ret ))
         return (SNMPERR_GENERR);
 
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
     /*
      * Determine transform type.
      */
@@ -501,11 +501,11 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
         *MAC_len = 16;
     return SNMPERR_SUCCESS;
 
-#endif                          /* USE_OPENSSL */
+#endif                          /* NETSNMP_USE_OPENSSL */
 }
-#else                           /* !defined(USE_OPENSSL) && !defined(NETSNMP_USE_INTERNAL_MD5) */
+#else                           /* !defined(NETSNMP_USE_OPENSSL) && !defined(NETSNMP_USE_INTERNAL_MD5) */
 _SCAPI_NOT_CONFIGURED
-#endif                          /* !defined(USE_OPENSSL) && !defined(NETSNMP_USE_INTERNAL_MD5) */
+#endif                          /* !defined(NETSNMP_USE_OPENSSL) && !defined(NETSNMP_USE_INTERNAL_MD5) */
 /*******************************************************************-o-******
  * sc_check_keyed_hash
  *
@@ -534,7 +534,7 @@ sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
                     u_char * key, u_int keylen,
                     u_char * message, u_int msglen,
                     u_char * MAC, u_int maclen)
-#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
     size_t          buf_len = SNMP_MAXBUF_SMALL;
@@ -622,7 +622,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
            u_char * iv, u_int ivlen,
            u_char * plaintext, u_int ptlen,
            u_char * ciphertext, size_t * ctlen)
-#if defined(USE_OPENSSL)
+#if defined(NETSNMP_USE_OPENSSL)
 {
     int             rval = SNMPERR_SUCCESS;
     u_int           properlength = 0, properlength_iv = 0;
@@ -895,7 +895,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
            u_char * iv, u_int ivlen,
            u_char * ciphertext, u_int ctlen,
            u_char * plaintext, size_t * ptlen)
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
 {
 
     int             rval = SNMPERR_SUCCESS;
@@ -1074,4 +1074,4 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
 #	endif                   /* NETSNMP_USE_INTERNAL_MD5 */
 #endif                          /*  */
 }
-#endif                          /* USE_OPENSSL */
+#endif                          /* NETSNMP_USE_OPENSSL */
