@@ -17,13 +17,13 @@
 
 struct variable2 snmpEngine_variables[] = {
     {SNMPENGINEID, ASN_OCTET_STR, RONLY, var_snmpEngine, 1, {1}},
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     {SNMPENGINEBOOTS, ASN_INTEGER, RWRITE, var_snmpEngine, 1, {2}},
     {SNMPENGINETIME, ASN_INTEGER, RWRITE, var_snmpEngine, 1, {3}},
-#else                           /* !SNMP_TESTING_CODE */
+#else                           /* !NETSNMP_ENABLE_TESTING_CODE */
     {SNMPENGINEBOOTS, ASN_INTEGER, RONLY, var_snmpEngine, 1, {2}},
     {SNMPENGINETIME, ASN_INTEGER, RONLY, var_snmpEngine, 1, {3}},
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
     {SNMPENGINEMAXMESSAGESIZE, ASN_INTEGER, RONLY, var_snmpEngine, 1, {4}},
 };
 
@@ -65,12 +65,12 @@ init_snmpEngine(void)
 
 extern struct timeval starttime;
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
 int             write_engineBoots(int, u_char *, u_char, size_t, u_char *,
                                   oid *, size_t);
 int             write_engineTime(int, u_char *, u_char, size_t, u_char *,
                                  oid *, size_t);
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
 u_char         *
 var_snmpEngine(struct variable *vp,
@@ -104,16 +104,16 @@ var_snmpEngine(struct variable *vp,
         return (unsigned char *) engineID;
 
     case SNMPENGINEBOOTS:
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
         *write_method = write_engineBoots;
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
         long_ret = snmpv3_local_snmpEngineBoots();
         return (unsigned char *) &long_ret;
 
     case SNMPENGINETIME:
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
         *write_method = write_engineTime;
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
         long_ret = snmpv3_local_snmpEngineTime();
         return (unsigned char *) &long_ret;
 
@@ -128,7 +128,7 @@ var_snmpEngine(struct variable *vp,
     return 0;
 }
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
 /*
  * write_engineBoots():
  * 
@@ -223,4 +223,4 @@ write_engineTime(int action,
     return SNMP_ERR_NOERROR;
 }
 
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */

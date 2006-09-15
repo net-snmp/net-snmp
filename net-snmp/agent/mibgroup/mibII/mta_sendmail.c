@@ -37,7 +37,7 @@
 
 /** "include files" */
 #ifdef __lint
-# define SNMP_NO_DEBUGGING 1    /* keeps lint from complaining about the DEBUGMSG* macros */
+# define NETSNMP_NO_DEBUGGING 1    /* keeps lint from complaining about the DEBUGMSG* macros */
 #endif
 
 #include <net-snmp/net-snmp-config.h>

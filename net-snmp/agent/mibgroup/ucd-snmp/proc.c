@@ -97,7 +97,7 @@ init_proc(void)
      * Define the OID pointer to the top of the mib tree that we're
      * registering underneath 
      */
-    oid             proc_variables_oid[] = { UCDAVIS_MIB, PROCMIBNUM, 1 };
+    oid             proc_variables_oid[] = { NETSNMP_UCDAVIS_MIB, NETSNMP_PROCMIBNUM, 1 };
 
     /*
      * register ourselves with the agent to handle our mib tree 
@@ -213,8 +213,8 @@ proc_parse_config(const char *token, char *cptr)
         (*procp)->max = 0;
         (*procp)->min = 0;
     }
-#ifdef PROCFIXCMD
-    sprintf((*procp)->fixcmd, PROCFIXCMD, (*procp)->name);
+#ifdef NETSNMP_PROCFIXCMD
+    sprintf((*procp)->fixcmd, NETSNMP_PROCFIXCMD, (*procp)->name);
 #endif
     DEBUGMSGTL(("ucd-snmp/proc", "Read:  %s (%d) (%d)\n",
                 (*procp)->name, (*procp)->max, (*procp)->min));
@@ -399,7 +399,7 @@ sh_count_procs(char *procname)
     return ret;
 }
 
-#elif OSTYPE == LINUXID
+#elif OSTYPE == NETSNMP_LINUXID
 
 #include <dirent.h>
 #include <fcntl.h>
@@ -465,7 +465,7 @@ sh_count_procs(char *procname)
     return total;
 }
 
-#elif OSTYPE == ULTRIXID
+#elif OSTYPE == NETSNMP_ULTRIXID
 
 #define	NPROCS		32      /* number of proces to read at once */
 
@@ -646,7 +646,7 @@ getstruct(off_t loc, char *name, off_t dest, int size)
         return (0);
     return (1);
 }
-#elif OSTYPE == SOLARISID
+#elif OSTYPE == NETSNMP_SOLARISID
 
 #ifdef _SLASH_PROC_METHOD_
 
@@ -758,7 +758,7 @@ sh_count_procs(char *procname)
     char            line[STRMAX], *cptr, *cp;
     int             ret = 0, fd;
     FILE           *file;
-#ifndef EXCACHETIME
+#ifndef NETSNMP_EXCACHETIME
 #endif
     struct extensible ex;
     int             slow = strstr(PSCMD, "ax") != NULL;
@@ -789,7 +789,7 @@ sh_count_procs(char *procname)
                 if (*cp == ':')
                     *cp = 0;
             } else {
-                if ((cptr = find_field(line, LASTFIELD)) == NULL)
+                if ((cptr = find_field(line, NETSNMP_LASTFIELD)) == NULL)
                     continue;
                 copy_nword(cptr, line, sizeof(line));
             }

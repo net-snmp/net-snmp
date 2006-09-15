@@ -54,7 +54,7 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 
-#ifdef USE_INTERNAL_MD5
+#ifdef NETSNMP_USE_INTERNAL_MD5
 #include <net-snmp/library/md5.h>
 #endif
 #include <net-snmp/library/snmp_api.h>
@@ -75,7 +75,7 @@
 #include <openssl/aes.h>
 #endif
 
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
 #ifdef STRUCT_DES_KS_STRUCT_HAS_WEAK_KEY
 /* these are older names for newer structures that exist in openssl .9.7 */
 #define DES_key_schedule    des_key_schedule 
@@ -89,7 +89,7 @@
 
 #endif /* HAVE_OPENSSL */
 
-#ifdef USE_PKCS
+#ifdef NETSNMP_USE_PKCS11
 #include <security/cryptoki.h>
 #endif
 
@@ -118,7 +118,7 @@ sc_get_properlength(const oid * hashtype, u_int hashtype_len)
     /*
      * Determine transform type hash length.
      */
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
     if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
         return BYTESIZE(SNMP_TRANS_AUTHLEN_HMACMD5);
     } else
@@ -133,7 +133,7 @@ int
 sc_get_proper_priv_length(const oid * privtype, u_int privtype_len)
 {
     int properlength = 0;
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
     if (ISTRANSFORM(privtype, DESPriv)) {
         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
     }
@@ -159,7 +159,7 @@ sc_init(void)
     int             rval = SNMPERR_SUCCESS;
 
 #ifndef USE_OPENSSL
-#ifdef USE_INTERNAL_MD5
+#ifdef NETSNMP_USE_INTERNAL_MD5
     struct timeval  tv;
 
     DEBUGTRACE;
@@ -167,12 +167,12 @@ sc_init(void)
     gettimeofday(&tv, (struct timezone *) 0);
 
     srandom(tv.tv_sec ^ tv.tv_usec);
-#elif USE_PKCS
+#elif NETSNMP_USE_PKCS11
     DEBUGTRACE;
     rval = pkcs_init();
 #else
     rval = SNMPERR_SC_NOT_CONFIGURED;
-#endif                           /* USE_INTERNAL_MD5 */
+#endif                           /* NETSNMP_USE_INTERNAL_MD5 */
     /*
      * XXX ogud: The only reason to do anything here with openssl is to 
      * * XXX ogud: seed random number generator 
@@ -193,10 +193,10 @@ sc_init(void)
  */
 int
 sc_random(u_char * buf, size_t * buflen)
-#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
-#ifdef USE_INTERNAL_MD5
+#ifdef NETSNMP_USE_INTERNAL_MD5
     int             i;
     int             rndval;
     u_char         *ucp = buf;
@@ -206,9 +206,9 @@ sc_random(u_char * buf, size_t * buflen)
 
 #ifdef USE_OPENSSL
     RAND_bytes(buf, *buflen);   /* will never fail */
-#elif USE_PKCS			/* USE_PKCS */
+#elif NETSNMP_USE_PKCS11			/* NETSNMP_USE_PKCS11 */
     pkcs_random(buf, *buflen);
-#else                           /* USE_INTERNAL_MD5 */
+#else                           /* NETSNMP_USE_INTERNAL_MD5 */
     /*
      * fill the buffer with random integers.  Note that random()
      * is defined in config.h and may not be truly the random()
@@ -265,19 +265,19 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
                        u_char * key, u_int keylen,
                        u_char * message, u_int msglen,
                        u_char * MAC, size_t * maclen)
-#if  defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
+#if  defined(NETSNMP_USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
     int             properlength;
 
     u_char          buf[SNMP_MAXBUF_SMALL];
-#if  defined(USE_OPENSSL) || defined(USE_PKCS)
+#if  defined(USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
     size_t             buf_len = sizeof(buf);
 #endif
 
     DEBUGTRACE;
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     {
         int             i;
         DEBUGMSG(("sc_generate_keyed_hash",
@@ -286,7 +286,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
             DEBUGMSG(("sc_generate_keyed_hash", "%02x", key[i] & 0xff));
         DEBUGMSG(("sc_generate_keyed_hash", " (%d)\n", keylen));
     }
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
     /*
      * Sanity check.
@@ -308,7 +308,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
     /*
      * Determine transform type.
      */
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
     if (ISTRANSFORM(authtype, HMACMD5Auth))
         HMAC(EVP_md5(), key, keylen, message, msglen, buf, &buf_len);
     else
@@ -325,9 +325,9 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
         *maclen = buf_len;
     memcpy(MAC, buf, *maclen);
 
-#elif USE_PKCS                    /* USE_PKCS */
+#elif NETSNMP_USE_PKCS11                    /* NETSNMP_USE_PKCS11 */
 
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
     if (ISTRANSFORM(authtype, HMACMD5Auth)) {
 	if (pkcs_sign(CKM_MD5_HMAC,key, keylen, message,
 			msglen, buf, &buf_len) != SNMPERR_SUCCESS) {
@@ -351,7 +351,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
         *maclen = buf_len;
     memcpy(MAC, buf, *maclen);
 
-#else                            /* USE_INTERNAL_MD5 */
+#else                            /* NETSNMP_USE_INTERNAL_MD5 */
     if ((int) *maclen > properlength)
         *maclen = properlength;
     if (MDsign(message, msglen, MAC, *maclen, key, keylen)) {
@@ -360,7 +360,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
     }
 #endif                          /* USE_OPENSSL */
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     {
         char           *s;
         int             len = binary_to_hex(MAC, *maclen, &s);
@@ -369,7 +369,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
         SNMP_ZERO(s, len);
         SNMP_FREE(s);
     }
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
   sc_generate_keyed_hash_quit:
     SNMP_ZERO(buf, SNMP_MAXBUF_SMALL);
@@ -400,9 +400,9 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
 int
 sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
         size_t buf_len, u_char * MAC, size_t * MAC_len)
-#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
 {
-#if defined(USE_OPENSSL) || defined(USE_PKCS)
+#if defined(USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
     int            rval = SNMPERR_SUCCESS;
 #endif
     int            ret;
@@ -426,7 +426,7 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
     /*
      * Determine transform type.
      */
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
     if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
         hashfn = (const EVP_MD *) EVP_md5();
     } else
@@ -475,9 +475,9 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
     }
 #endif                          /* OLD_DES */
     return (rval);
-#elif USE_PKCS                  /* USE_PKCS */
+#elif NETSNMP_USE_PKCS11                  /* NETSNMP_USE_PKCS11 */
 
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
     if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
 	rval = pkcs_digest(CKM_MD5, buf, buf_len, MAC, &tmp_len);
         *MAC_len = tmp_len;
@@ -492,7 +492,7 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
 
      return (rval);
 
-#else                           /* USE_INTERNAL_MD5 */
+#else                           /* NETSNMP_USE_INTERNAL_MD5 */
 
     if (MDchecksum(buf, buf_len, MAC, *MAC_len)) {
         return SNMPERR_GENERR;
@@ -503,9 +503,9 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
 
 #endif                          /* USE_OPENSSL */
 }
-#else                           /* !defined(USE_OPENSSL) && !defined(USE_INTERNAL_MD5) */
+#else                           /* !defined(USE_OPENSSL) && !defined(NETSNMP_USE_INTERNAL_MD5) */
 _SCAPI_NOT_CONFIGURED
-#endif                          /* !defined(USE_OPENSSL) && !defined(USE_INTERNAL_MD5) */
+#endif                          /* !defined(USE_OPENSSL) && !defined(NETSNMP_USE_INTERNAL_MD5) */
 /*******************************************************************-o-******
  * sc_check_keyed_hash
  *
@@ -534,7 +534,7 @@ sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
                     u_char * key, u_int keylen,
                     u_char * message, u_int msglen,
                     u_char * MAC, u_int maclen)
-#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
     size_t          buf_len = SNMP_MAXBUF_SMALL;
@@ -543,7 +543,7 @@ sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
 
     DEBUGTRACE;
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     {
         int             i;
         DEBUGMSG(("scapi", "sc_check_keyed_hash():    key=0x"));
@@ -551,7 +551,7 @@ sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
             DEBUGMSG(("scapi", "%02x", key[i] & 0xff));
         DEBUGMSG(("scapi", " (%d)\n", keylen));
     }
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
     /*
      * Sanity check.
@@ -590,7 +590,7 @@ sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
 
 #else
 _SCAPI_NOT_CONFIGURED
-#endif                          /* USE_INTERNAL_MD5 */
+#endif                          /* NETSNMP_USE_INTERNAL_MD5 */
 /*******************************************************************-o-******
  * sc_encrypt
  *
@@ -630,7 +630,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     u_char          my_iv[128];  /* ditto */
     int             pad, plast, pad_size = 0;
     int             have_trans;
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
 #ifdef OLD_DES
     DES_key_schedule key_sch;
 #else
@@ -649,7 +649,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     /*
      * Sanity check.
      */
-#if	!defined(SCAPI_AUTHPRIV)
+#if	!defined(NETSNMP_ENABLE_SCAPI_AUTHPRIV)
     snmp_log(LOG_ERR, "Encryption support not enabled.\n");
     return SNMPERR_SC_NOT_CONFIGURED;
 #endif
@@ -661,7 +661,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     } else if (ptlen > *ctlen) {
         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
     }
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     {
         size_t          buf_len = 128, out_len = 0;
         u_char         *buf = (u_char *) malloc(buf_len);
@@ -694,14 +694,14 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
                         "encrypt: malloc fail for debug output\n"));
         }
     }
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
 
     /*
      * Determine privacy transform.
      */
     have_trans = 0;
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
     if (ISTRANSFORM(privtype, DESPriv)) {
         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
@@ -726,7 +726,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
 
     memset(my_iv, 0, sizeof(my_iv));
 
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
     if (ISTRANSFORM(privtype, DESPriv)) {
 
         /*
@@ -784,7 +784,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
      */
     memset(my_iv, 0, sizeof(my_iv));
     memset(pad_block, 0, sizeof(pad_block));
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
     memset(key_struct, 0, sizeof(key_struct));
 #ifdef OLD_DES
     memset(&key_sch, 0, sizeof(key_sch));
@@ -798,7 +798,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     return rval;
 
 }                               /* end sc_encrypt() */
-#elif defined(USE_PKCS)
+#elif defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
     u_int           properlength, properlength_iv;
@@ -809,7 +809,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     /*
      * Sanity check.
      */
-#if	!defined(SCAPI_AUTHPRIV)
+#if	!defined(NETSNMP_ENABLE_SCAPI_AUTHPRIV)
     snmp_log(LOG_ERR, "Encryption support not enabled.\n");
     return SNMPERR_SC_NOT_CONFIGURED;
 #endif
@@ -849,7 +849,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
 }
 #else
 {
-#	if USE_INTERNAL_MD5
+#	if NETSNMP_USE_INTERNAL_MD5
     {
         snmp_log(LOG_ERR, "Encryption support not enabled.\n");
         DEBUGMSGTL(("scapi", "Encrypt function not defined.\n"));
@@ -858,7 +858,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
 
 #	else
     _SCAPI_NOT_CONFIGURED
-#	endif                   /* USE_INTERNAL_MD5 */
+#	endif                   /* NETSNMP_USE_INTERNAL_MD5 */
 }
 #endif                          /* */
 
@@ -900,7 +900,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
 
     int             rval = SNMPERR_SUCCESS;
     u_char          my_iv[128];
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
 #ifdef OLD_DES
     DES_key_schedule key_sch;
 #else
@@ -923,7 +923,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
         || (privtypelen != USM_LENGTH_OID_TRANSFORM)) {
         QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
     }
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     {
         size_t          buf_len = 128, out_len = 0;
         u_char         *buf = (u_char *) malloc(buf_len);
@@ -948,13 +948,13 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
                         "decrypt: malloc fail for debug output\n"));
         }
     }
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
     /*
      * Determine privacy transform.
      */
     have_transform = 0;
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
     if (ISTRANSFORM(privtype, DESPriv)) {
         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
@@ -977,7 +977,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
     }
 
     memset(my_iv, 0, sizeof(my_iv));
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
     if (ISTRANSFORM(privtype, DESPriv)) {
         memcpy(key_struct, key, sizeof(key_struct));
         (void) DES_key_sched(&key_struct, key_sch);
@@ -1006,7 +1006,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
      * exit cond 
      */
   sc_decrypt_quit:
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
 #ifdef OLD_DES
     memset(&key_sch, 0, sizeof(key_sch));
 #else
@@ -1017,7 +1017,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
     memset(my_iv, 0, sizeof(my_iv));
     return rval;
 }				/* USE OPEN_SSL */
-#elif USE_PKCS                  /* USE PKCS */
+#elif NETSNMP_USE_PKCS11                  /* USE PKCS */
 {
     int             rval = SNMPERR_SUCCESS;
     u_int           properlength, properlength_iv;
@@ -1059,11 +1059,11 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
 }				/* USE PKCS */
 #else
 {
-#if	!defined(SCAPI_AUTHPRIV)
+#if	!defined(NETSNMP_ENABLE_SCAPI_AUTHPRIV)
     snmp_log(LOG_ERR, "Encryption support not enabled.\n");
     return SNMPERR_SC_NOT_CONFIGURED;
 #else
-#	if USE_INTERNAL_MD5
+#	if NETSNMP_USE_INTERNAL_MD5
     {
         DEBUGMSGTL(("scapi", "Decryption function not defined.\n"));
         return SNMPERR_SC_GENERAL_FAILURE;
@@ -1071,7 +1071,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
 
 #	else
     _SCAPI_NOT_CONFIGURED
-#	endif                   /* USE_INTERNAL_MD5 */
+#	endif                   /* NETSNMP_USE_INTERNAL_MD5 */
 #endif                          /*  */
 }
 #endif                          /* USE_OPENSSL */

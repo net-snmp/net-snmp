@@ -258,11 +258,11 @@ proxy_fill_in_session(netsnmp_mib_handler *handler,
         return 0;
     }
 
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
-#if defined(DISABLE_SNMPV1)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
+#if defined(NETSNMP_DISABLE_SNMPV1)
     if (session->version == SNMP_VERSION_2c) {
 #else
-#if defined(DISABLE_SNMPV2C)
+#if defined(NETSNMP_DISABLE_SNMPV2C)
     if (session->version == SNMP_VERSION_1) {
 #else
     if (session->version == SNMP_VERSION_1 ||

@@ -169,9 +169,9 @@ typedef long    fd_mask;
 /*
  * Globals.
  */
-#ifdef USE_LIBWRAP
+#ifdef NETSNMP_USE_LIBWRAP
 #include <tcpd.h>
-#endif                          /* USE_LIBWRAP */
+#endif                          /* NETSNMP_USE_LIBWRAP */
 
 #define TIMETICK         500000L
 
@@ -471,7 +471,7 @@ main(int argc, char *argv[])
     signal(SIGXFSZ, SnmpdCatchRandomSignal);
 #endif
 
-#ifdef NO_ROOT_ACCESS
+#ifdef NETSNMP_NO_ROOT_ACCESS
     /*
      * Default to no.  
      */
@@ -840,9 +840,9 @@ main(int argc, char *argv[])
 					  NETSNMP_DS_AGENT_PORTS)));
     }
 
-#ifdef LOGFILE
+#ifdef NETSNMP_LOGFILE
     if (0 == log_set)
-        snmp_enable_filelog(LOGFILE,
+        snmp_enable_filelog(NETSNMP_LOGFILE,
                             netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                                    NETSNMP_DS_LIB_APPEND_LOGFILES));
 #endif
@@ -946,7 +946,7 @@ main(int argc, char *argv[])
 
 #if HAVE_UNISTD_H
     cptr = get_persistent_directory();
-    mkdirhier( cptr, AGENT_DIRECTORY_MODE, 0 );
+    mkdirhier( cptr, NETSNMP_AGENT_DIRECTORY_MODE, 0 );
    
     uid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 			     NETSNMP_DS_AGENT_USERID);

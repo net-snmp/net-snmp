@@ -1,4 +1,4 @@
-#if defined(CAN_USE_SYSCTL)
+#if defined(NETSNMP_CAN_USE_SYSCTL)
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -30,7 +30,7 @@
 #include "struct.h"
 #include "util_funcs.h"
 
-#else /* !CAN_USE_SYSCTL */
+#else /* !NETSNMP_CAN_USE_SYSCTL */
 
 #define GATEWAY                 /* MultiNet is always configured this way! */
 #include <stdio.h>
@@ -177,4 +177,4 @@
 #include <windows.h>
 #endif
 
-#endif /* !CAN_USE_SYSCTL */
+#endif /* !NETSNMP_CAN_USE_SYSCTL */

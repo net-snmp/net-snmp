@@ -76,14 +76,14 @@
 #include <net-snmp/library/snmpusm.h>
 
 oid             usmNoAuthProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 1, 1 };
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
 oid             usmHMACMD5AuthProtocol[10] =
     { 1, 3, 6, 1, 6, 3, 10, 1, 1, 2 };
 #endif
 oid             usmHMACSHA1AuthProtocol[10] =
     { 1, 3, 6, 1, 6, 3, 10, 1, 1, 3 };
 oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
 oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
 #endif
 oid             usmAESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 4 };
@@ -268,7 +268,7 @@ usm_set_usmStateReference_sec_level(struct usmStateReference *ref,
 
 
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
 /*******************************************************************-o-******
  * emergency_print
  *
@@ -302,7 +302,7 @@ emergency_print(u_char * field, u_int length)
     fflush(0);
 
 }                               /* end emergency_print() */
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
 
 /*******************************************************************-o-******
@@ -574,7 +574,7 @@ usm_calc_offsets(size_t globalDataLen,  /* SNMPv3Message + HeaderData */
 
 
 
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
 /*******************************************************************-o-******
  * usm_set_salt
  *
@@ -999,9 +999,9 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
 
     ptr_len = *wholeMsgLen = theTotalLength;
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     memset(&ptr[globalDataLen], 0xFF, theTotalLength - globalDataLen);
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
     /*
      * Do the encryption.
@@ -1026,7 +1026,7 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
             }
         } 
 #endif
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
         if (ISTRANSFORM(thePrivProtocol, DESPriv)) {
             if (!thePrivKey ||
                 (usm_set_salt(salt, &salt_length,
@@ -1050,7 +1050,7 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
             usm_free_usmStateReference(secStateRef);
             return SNMPERR_USM_ENCRYPTIONERROR;
         }
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
         if (debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
             dump_chunk("usm/dump", "This data was encrypted:",
                        scopedPdu, scopedPduLen);
@@ -1255,7 +1255,7 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
 
 }                               /* end usm_generate_out_msg() */
 
-#ifdef USE_REVERSE_ASNENCODING
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
 int
 usm_secmod_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 {
@@ -1320,7 +1320,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
     )
 {
     size_t          msgAuthParmLen = 0;
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     size_t          theTotalLength;
 #endif
 
@@ -1510,7 +1510,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
             }
         } 
 #endif
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
         if (ISTRANSFORM(thePrivProtocol, DESPriv)) {
             salt_length = BYTESIZE(USM_DES_SALT_LENGTH);
             save_salt_length = BYTESIZE(USM_DES_SALT_LENGTH);
@@ -1526,7 +1526,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
             }
         }
 #endif
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
         if (debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
             dump_chunk("usm/dump", "This data was encrypted:",
                        scopedPdu, scopedPduLen);
@@ -1548,7 +1548,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
          * Write the encrypted scopedPdu back into the packet buffer.  
          */
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
         theTotalLength = *wholeMsgLen;
 #endif
         *offset = 0;
@@ -1557,7 +1557,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
                                                  ASN_PRIMITIVE |
                                                  ASN_OCTET_STR),
                                        ciphertext, ciphertextlen);
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
         if (debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
             dump_chunk("usm/dump", "salt + Encrypted form: ", salt,
                        salt_length);
@@ -2562,7 +2562,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             return SNMPERR_USM_PARSEERROR;
         }
 
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
         if (ISTRANSFORM(user->privProtocol, DESPriv)) {
             /*
              * From RFC2574:
@@ -2620,7 +2620,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             }
             return SNMPERR_USM_DECRYPTIONERROR;
         }
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
         if (debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
             dump_chunk("usm/dump", "Cypher Text", value_ptr, remaining);
             dump_chunk("usm/dump", "salt + Encrypted form:",
@@ -2796,10 +2796,10 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
     }
 #endif
     
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
     noNameUser = usm_create_initial_user("", usmHMACMD5AuthProtocol,
                                          USM_LENGTH_OID_TRANSFORM,
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
                                          usmDESPrivProtocol,
 #else
                                          usmAESPrivProtocol,
@@ -2808,7 +2808,7 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
 #else
     noNameUser = usm_create_initial_user("", usmHMACSHA1AuthProtocol,
                                          USM_LENGTH_OID_TRANSFORM,
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
                                          usmDESPrivProtocol,
 #else
                                          usmAESPrivProtocol,
@@ -3573,7 +3573,7 @@ usm_read_user(char *line)
                                   &user->privProtocolLen);
     line = read_config_read_octet_string(line, &user->privKey,
                                          &user->privKeyLen);
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
     if (ISTRANSFORM(user->privProtocol, DESPriv)) {
         /* DES uses a 128 bit key, 64 bits of which is a salt */
         expected_privKeyLen = 16;

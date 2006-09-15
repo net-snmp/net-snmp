@@ -132,7 +132,7 @@ init_icmp(void)
 #define ICMP_STAT_STRUCTURE MIB_ICMP
 #endif
 
-/* ?? #if (defined(CAN_USE_SYSCTL) && defined(ICMPCTL_STATS)) ?? */
+/* ?? #if (defined(NETSNMP_CAN_USE_SYSCTL) && defined(ICMPCTL_STATS)) ?? */
 
 #ifdef HAVE_SYS_ICMPIPSTATS_H
 /* or #ifdef		HAVE_SYS_TCPIPSTATS_H  ??? */
@@ -731,7 +731,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#elif defined(CAN_USE_SYSCTL) && defined(ICMPCTL_STATS)
+#elif defined(NETSNMP_CAN_USE_SYSCTL) && defined(ICMPCTL_STATS)
 int
 icmp_load(netsnmp_cache *cache, void *vmagic)
 {

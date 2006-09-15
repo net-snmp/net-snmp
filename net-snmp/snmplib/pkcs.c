@@ -9,7 +9,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
-#ifdef USE_PKCS
+#ifdef NETSNMP_USE_PKCS11
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>

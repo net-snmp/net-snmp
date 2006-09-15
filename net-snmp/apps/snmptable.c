@@ -309,7 +309,7 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     if (ss->version == SNMP_VERSION_1)
         use_getbulk = 0;
 #endif
@@ -457,12 +457,12 @@ get_field_names(void)
 {
     char           *buf = NULL, *name_p = NULL;
     size_t          buf_len = 0, out_len = 0;
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     struct tree    *tbl = NULL;
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
     int             going = 1;
 
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     tbl = get_tree(root, rootlen, get_tree_head());
     if (tbl) {
         tbl = tbl->child_list;
@@ -474,7 +474,7 @@ get_field_names(void)
             going = 0;
         }
     }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
     if (sprint_realloc_objid
         ((u_char **)&buf, &buf_len, &out_len, 1, root, rootlen - 1)) {
@@ -489,7 +489,7 @@ get_field_names(void)
     fields = 0;
     while (going) {
         fields++;
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (tbl) {
             if (tbl->access == MIB_ACCESS_NOACCESS) {
                 fields--;
@@ -504,11 +504,11 @@ get_field_names(void)
             if (!tbl)
                 going = 0;
         } else {
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
             root[rootlen] = fields;
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         out_len = 0;
         if (sprint_realloc_objid
             ((u_char **)&buf, &buf_len, &out_len, 1, root, rootlen + 1)) {

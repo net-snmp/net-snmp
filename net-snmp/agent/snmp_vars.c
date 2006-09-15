@@ -110,7 +110,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
 #endif
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 #if HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
@@ -124,8 +124,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
-#ifdef INET6
-#if HAVE_NETINET6_IP6_VAR_H
+#ifdef NETSNMP_ENABLE_IPV6
+#if HAVE_NETNETSNMP_ENABLE_IPV6_IP6_VAR_H
 #include <netinet6/ip6_var.h>
 #endif
 #endif
@@ -235,7 +235,7 @@ struct timeval  starttime;
 
 int             callback_master_num = -1;
 
-#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
+#ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
 netsnmp_session *callback_master_sess = NULL;
 
 static void
@@ -290,7 +290,7 @@ init_agent(const char *app)
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
 			   NETSNMP_DS_LIB_ALARM_DONT_USE_SIG, 1);
 
-#ifdef CAN_USE_NLIST
+#ifdef NETSNMP_CAN_USE_NLIST
     init_kmem("/dev/kmem");
 #endif
 
@@ -321,13 +321,13 @@ init_agent(const char *app)
     /*
      * Register configuration tokens from transport modules.  
      */
-#ifdef SNMP_TRANSPORT_UDP_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UDP_DOMAIN
     netsnmp_udp_agent_config_tokens_register();
 #endif
-#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     netsnmp_udp6_agent_config_tokens_register();
 #endif
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
     netsnmp_unix_agent_config_tokens_register();
 #endif
 

@@ -104,7 +104,7 @@
 #endif
 
 
-#ifdef EXCACHETIME
+#ifdef NETSNMP_EXCACHETIME
 static long     cachetime;
 #endif
 
@@ -221,7 +221,7 @@ get_exten_instance(struct extensible *exten, size_t inst)
 void
 wait_on_exec(struct extensible *ex)
 {
-#ifndef EXCACHETIME
+#ifndef NETSNMP_EXCACHETIME
     if (ex->pid && waitpid(ex->pid, &ex->result, 0) < 0) {
         setPerrorstatus("waitpid");
     }
@@ -236,10 +236,10 @@ get_exec_output(struct extensible *ex)
 {
 #if HAVE_EXECV
     char            cachefile[STRMAX];
-    char            cache[MAXCACHESIZE];
+    char            cache[NETSNMP_MAXCACHESIZE];
     ssize_t         cachebytes;
     int             cfd;
-#ifdef EXCACHETIME
+#ifdef NETSNMP_EXCACHETIME
     long            curtime;
     static char     lastcmd[STRMAX];
     static int      lastresult;
@@ -247,16 +247,16 @@ get_exec_output(struct extensible *ex)
 
     DEBUGMSGTL(("exec:get_exec_output","calling %s\n", ex->command));
 
-    sprintf(cachefile, "%s/%s", get_persistent_directory(), CACHEFILE);
-#ifdef EXCACHETIME
+    sprintf(cachefile, "%s/%s", get_persistent_directory(), NETSNMP_CACHEFILE);
+#ifdef NETSNMP_EXCACHETIME
     curtime = time(NULL);
-    if (curtime > (cachetime + EXCACHETIME) ||
+    if (curtime > (cachetime + NETSNMP_EXCACHETIME) ||
         strcmp(ex->command, lastcmd) != 0) {
         strcpy(lastcmd, ex->command);
         cachetime = curtime;
 #endif
 
-        cachebytes = MAXCACHESIZE;
+        cachebytes = NETSNMP_MAXCACHESIZE;
         ex->result = run_exec_command( ex->command, NULL, cache, &cachebytes );
 
         unlink(cachefile);
@@ -272,7 +272,7 @@ get_exec_output(struct extensible *ex)
         if (cachebytes > 0)
             write(cfd, (void *) cache, cachebytes);
         close(cfd);
-#ifdef EXCACHETIME
+#ifdef NETSNMP_EXCACHETIME
         lastresult = ex->result;
     } else {
         ex->result = lastresult;
@@ -598,7 +598,7 @@ clear_cache(int action,
     }
     tmp = *((long *) var_val);
     if (tmp == 1 && action == COMMIT) {
-#ifdef EXCACHETIME
+#ifdef NETSNMP_EXCACHETIME
         cachetime = 0;          /* reset the cache next read */
 #endif
     }
@@ -642,7 +642,7 @@ restart_hook(int action,
 #ifdef SIGALRM
         signal(SIGALRM, restart_doit);
 #endif
-        alarm(RESTARTSLEEP);
+        alarm(NETSNMP_RESTARTSLEEP);
     }
     return SNMP_ERR_NOERROR;
 }
@@ -856,7 +856,7 @@ find_field(char *ptr, int field)
     int             i;
     char           *init = ptr;
 
-    if (field == LASTFIELD) {
+    if (field == NETSNMP_LASTFIELD) {
         /*
          * skip to end 
          */

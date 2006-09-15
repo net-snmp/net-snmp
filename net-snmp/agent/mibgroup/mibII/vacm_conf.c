@@ -132,12 +132,12 @@ init_vacm_config_tokens(void) {
  */
 void
 init_vacm_snmpd_easy_tokens(void) {
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     snmpd_register_config_handler("rwcommunity", vacm_parse_rwcommunity, NULL,
                                   "community [default|hostname|network/bits [oid]]");
     snmpd_register_config_handler("rocommunity", vacm_parse_rocommunity, NULL,
                                   "community [default|hostname|network/bits [oid]]");
-#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     snmpd_register_config_handler("rwcommunity6", vacm_parse_rwcommunity6, NULL,
                                   "community [default|hostname|network/bits [oid]]");
     snmpd_register_config_handler("rocommunity6", vacm_parse_rocommunity6, NULL,
@@ -822,7 +822,7 @@ vacm_create_simple(const char *token, char *confline,
     char            theoid[SPRINT_MAX_LEN];
     char            viewname[SPRINT_MAX_LEN];
     char           *view_ptr = viewname;
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     char            addressname[SPRINT_MAX_LEN];
 #endif
     const char     *rw = "none";
@@ -879,7 +879,7 @@ vacm_create_simple(const char *token, char *confline,
         else
             strcpy(authlevel, "auth");
         DEBUGMSGTL((token, "setting auth level: \"%s\"\n", authlevel));
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     } else {
         if (strcmp(community, "-v") == 0) {
             /*
@@ -960,7 +960,7 @@ vacm_create_simple(const char *token, char *confline,
 
     commcount++;
 
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     if (parsetype == VACM_CREATE_SIMPLE_COMIPV4 ||
         parsetype == VACM_CREATE_SIMPLE_COM) {
         vacm_gen_com2sec(commcount, community, addressname,
@@ -969,7 +969,7 @@ vacm_create_simple(const char *token, char *confline,
                          view_ptr, sizeof(viewname), commversion);
     }
     
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
     if (parsetype == VACM_CREATE_SIMPLE_COMUNIX ||
         parsetype == VACM_CREATE_SIMPLE_COM) {
         snprintf(line, sizeof(line), "%s %s '%s'",
@@ -980,7 +980,7 @@ vacm_create_simple(const char *token, char *confline,
     }
 #endif
 
-#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     if (parsetype == VACM_CREATE_SIMPLE_COMIPV6 ||
         parsetype == VACM_CREATE_SIMPLE_COM) {
         vacm_gen_com2sec(commcount, community, addressname,
@@ -1257,11 +1257,11 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
 #define CONTEXTNAMEINDEXLEN 32
     char            contextNameIndex[CONTEXTNAMEINDEXLEN + 1];
 
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
-#if defined(DISABLE_SNMPV1)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
+#if defined(NETSNMP_DISABLE_SNMPV1)
     if (pdu->version == SNMP_VERSION_2c)
 #else
-#if defined(DISABLE_SNMPV2C)
+#if defined(NETSNMP_DISABLE_SNMPV2C)
     if (pdu->version == SNMP_VERSION_1)
 #else
     if (pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c)
@@ -1295,7 +1295,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
          */
 
         if (pdu->tDomain == netsnmpUDPDomain
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
+#ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
             || pdu->tDomain == netsnmp_snmpTCPDomain
 #endif
             ) {
@@ -1313,9 +1313,9 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             SNMP_FREE(pdu->contextName);
             pdu->contextName = strdup(contextName);
             pdu->contextNameLen = strlen(contextName);
-#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
         } else if (pdu->tDomain == netsnmp_UDPIPv6Domain
-#ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
                    || pdu->tDomain == netsnmp_TCPIPv6Domain
 #endif
             ) {
@@ -1334,7 +1334,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             pdu->contextName = strdup(contextName);
             pdu->contextNameLen = strlen(contextName);
 #endif
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
         } else if (pdu->tDomain == netsnmp_UnixDomain){
             if (!netsnmp_unix_getSecName(pdu->transport_data,
                                          pdu->transport_data_length,
@@ -1378,7 +1378,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     }
 
     if (sn == NULL) {
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
         snmp_increment_statistic(STAT_SNMPINBADCOMMUNITYNAMES);
 #endif
         DEBUGMSGTL(("mibII/vacm_vars",
@@ -1453,11 +1453,11 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     DEBUGMSG(("mibII/vacm_vars", ", vt=%d\n", vp->viewType));
 
     if (vp->viewType == SNMP_VIEW_EXCLUDED) {
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
-#if defined(DISABLE_SNMPV1)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
+#if defined(NETSNMP_DISABLE_SNMPV1)
         if (pdu->version == SNMP_VERSION_2c)
 #else
-#if defined(DISABLE_SNMPV2C)
+#if defined(NETSNMP_DISABLE_SNMPV2C)
         if (pdu->version == SNMP_VERSION_1)
 #else
         if (pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c)

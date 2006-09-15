@@ -60,7 +60,7 @@ real_init_master(void)
     char *agentx_sockets;
     char *cp1, *cp2;
 
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
     int agentx_dir_perm;
     int agentx_sock_perm;
     int agentx_sock_user;
@@ -74,7 +74,7 @@ real_init_master(void)
                               NETSNMP_DS_AGENT_X_SOCKET)) {
        agentx_sockets = strdup(netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
                                                      NETSNMP_DS_AGENT_X_SOCKET));
-#ifdef AGENTX_DOM_SOCK_ONLY
+#ifdef NETSNMP_AGENTX_DOM_SOCK_ONLY
        if (agentx_sockets[0] != '/') {
            /* unix:/path */
            if (agentx_sockets[5] != '/') {
@@ -86,7 +86,7 @@ real_init_master(void)
        }
 #endif
     } else {
-        agentx_sockets = strdup(AGENTX_SOCKET);
+        agentx_sockets = strdup(NETSNMP_AGENTX_SOCKET);
     }
 
 
@@ -115,7 +115,7 @@ real_init_master(void)
 	}
     
         if (sess.peername[0] == '/') {
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
             /*
              *  If this is a Unix pathname,
              *  try and create the directory first.
@@ -123,7 +123,7 @@ real_init_master(void)
             agentx_dir_perm = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
                                                  NETSNMP_DS_AGENT_X_DIR_PERM);
             if (agentx_dir_perm == 0)
-                agentx_dir_perm = AGENT_DIRECTORY_MODE;
+                agentx_dir_perm = NETSNMP_AGENT_DIRECTORY_MODE;
             if (mkdirhier(sess.peername, (mode_t)agentx_dir_perm, 1)) {
                 snmp_log(LOG_ERR,
                          "Failed to create the directory for the agentX socket: %s\n",
@@ -171,7 +171,7 @@ real_init_master(void)
             }
         }
 
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
     /*
      * Apply any settings to the ownership/permissions of the AgentX socket
      */

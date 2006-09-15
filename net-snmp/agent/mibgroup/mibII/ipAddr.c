@@ -145,7 +145,7 @@
 
 #if !defined (WIN32) && !defined (cygwin)
 
-#if !defined(CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
+#if !defined(NETSNMP_CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
 #ifndef solaris2
 
 #if defined(freebsd2) || defined(hpux11) || defined(linux)
@@ -343,7 +343,7 @@ var_ipAddrEntry(struct variable *vp,
 #ifdef hpux11
         long_return = lowin_ifaddr.ReasmMaxSize;
         return (u_char *) & long_return;
-#elif defined(NO_DUMMY_VALUES)
+#elif defined(NETSNMP_NO_DUMMY_VALUES)
         return NULL;
 #else
         long_return = -1;
@@ -735,7 +735,7 @@ var_ipAddrEntry(struct variable * vp,
 	 *********************/
 
 
-#else                           /* CAN_USE_SYSCTL && IPCTL_STATS */
+#else                           /* NETSNMP_CAN_USE_SYSCTL && IPCTL_STATS */
 
 /*
  * Ideally, this would be combined with the code in interfaces.c.
@@ -939,7 +939,7 @@ var_ipAddrEntry(struct variable *vp,
         return (u_char *) & long_return;
 
     case IPADREASMMAX:
-#if NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #else
         long_return = -1;
@@ -953,7 +953,7 @@ var_ipAddrEntry(struct variable *vp,
     return NULL;
 }
 
-#endif                          /* CAN_USE_SYSCTL && IPCTL_STATS */
+#endif                          /* NETSNMP_CAN_USE_SYSCTL && IPCTL_STATS */
 
 #else                           /* WIN32 cygwin */
 #include <iphlpapi.h>

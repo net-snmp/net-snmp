@@ -177,7 +177,7 @@ setup_oid(oid * it, size_t * len, u_char * id, size_t idlen,
         it[itIndex++] = user[i];
     }
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     fprintf(stdout, "setup_oid: ");  
     fprint_objid(stdout, it, *len);  
     fprintf(stdout, "\n");  
@@ -498,7 +498,7 @@ main(int argc, char *argv[])
             /*
              * assume MD5 
              */
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
             session.securityAuthProtoLen =
                 sizeof(usmHMACMD5AuthProtocol) / sizeof(oid);
             session.securityAuthProto =
@@ -613,7 +613,7 @@ main(int argc, char *argv[])
                 exit(1);
             }
                 
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
             if (ISTRANSFORM(session.securityPrivProto, DESPriv)) {
                 /* DES uses a 128 bit key, 64 bits of which is a salt */
                 oldkulpriv_len = newkulpriv_len = 16;
@@ -920,7 +920,7 @@ main(int argc, char *argv[])
         }
         if (doprivkey) {
 	    size_t dhprivKeyLen = 0;
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
 	    if (ISTRANSFORM(ss->securityPrivProto, DESPriv)) {
                 /* DES uses a 128 bit key, 64 bits of which is a salt */
 	        dhprivKeyLen = 16;

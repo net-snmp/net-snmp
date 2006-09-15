@@ -94,11 +94,11 @@ usage(void)
     fprintf(stderr, "\t\t\t  z:  enable MIB child OID report\n");
     fprintf(stderr,
             "\t\t\t  t:  enable alternate format symbolic suffix report\n");
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     fprintf(stderr,
             "  -P MIBOPTS\t\tToggle various defaults controlling mib parsing:\n");
     snmp_mib_toggle_options_usage("\t\t\t  ", stderr);
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
     fprintf(stderr,
             "  -O OUTOPTS\t\tToggle various defaults controlling output display:\n");
     snmp_out_toggle_options_usage("\t\t\t  ", stderr);
@@ -154,7 +154,7 @@ main(int argc, char *argv[])
 		exit (1);
 	    }
 	    break;
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         case 'P':
             cp = snmp_mib_toggle_options(optarg);
             if (cp != NULL) {
@@ -163,7 +163,7 @@ main(int argc, char *argv[])
                 exit(1);
             }
             break;
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         case 'O':
             cp = snmp_out_toggle_options(optarg);
             if (cp != NULL) {
@@ -183,7 +183,7 @@ main(int argc, char *argv[])
         case 'T':
             for (cp = optarg; *cp; cp++) {
                 switch (*cp) {
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
                 case 'l':
                     print = 3;
                     print_oid_report_enable_labeledoid();
@@ -204,7 +204,7 @@ main(int argc, char *argv[])
                     print = 3;
                     print_oid_report_enable_mibchildoid();
                     break;
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
                 case 'd':
                     description = 1;
                     snmp_set_save_descriptions(1);
@@ -249,7 +249,7 @@ main(int argc, char *argv[])
         default:
             usage();
             exit(1);
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         case 1:
             print_mib_tree(stdout, get_tree_head(), width);
             break;
@@ -259,7 +259,7 @@ main(int argc, char *argv[])
         case 3:
             print_oid_report(stdout);
             break;
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         }
         exit(0);
     }
@@ -267,15 +267,15 @@ main(int argc, char *argv[])
     do {
         name_length = MAX_OID_LEN;
         if (snmp_get_random_access()) {
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
             if (!get_node(current_name, name, &name_length)) {
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
                 fprintf(stderr, "Unknown object identifier: %s\n",
                         current_name);
                 exit(2);
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
             }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         } else if (find_all) {
             if (0 == show_all_matched_objects(stdout, current_name,
                                               name, &name_length,
@@ -288,16 +288,16 @@ main(int argc, char *argv[])
             exit(0);
         } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 					  NETSNMP_DS_LIB_REGEX_ACCESS)) {
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
             if (0 == get_wild_node(current_name, name, &name_length)) {
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
                 fprintf(stderr,
                         "Unable to find a matching object identifier for \"%s\"\n",
                         current_name);
                 exit(1);
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
             }
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         } else {
             if (!read_objid(current_name, name, &name_length)) {
                 snmp_perror(current_name);
@@ -307,25 +307,25 @@ main(int argc, char *argv[])
 
 
         if (print == 1) {
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
             struct tree    *tp;
             tp = get_tree(name, name_length, get_tree_head());
             if (tp == NULL) {
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
                 snmp_log(LOG_ERR,
                         "Unable to find a matching object identifier for \"%s\"\n",
                         current_name);
                 exit(1);
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
             }
             print_mib_tree(stdout, tp, width);
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         } else {
             print_objid(name, name_length);
             if (description) {
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
                 print_description(name, name_length, width);
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
             }
         }
         current_name = argv[++optind];
@@ -346,24 +346,24 @@ show_all_matched_objects(FILE * fp, const char *patmatch, oid * name, size_t * n
 {
     int             result = 0, count = 0;
     size_t          savlen = *name_length;
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     clear_tree_flags(get_tree_head());
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
 
     while (1) {
         *name_length = savlen;
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         result = get_wild_node(patmatch, name, name_length);
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         if (!result)
             break;
         count++;
 
         fprint_objid(fp, name, *name_length);
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
         if (f_desc)
             fprint_description(fp, name, *name_length, width);
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
     }
 
     return (count);

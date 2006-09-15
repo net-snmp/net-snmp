@@ -1,6 +1,6 @@
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 
 /*
  * hack-o-matic for Cygwin to use winsock2
@@ -919,7 +919,7 @@ masked_address_are_equal(int af, struct sockaddr_storage *from,
     }
 }
 
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 /*
  * The following functions provide the "com2sec6" configuration token
  * functionality for compatibility.  
@@ -1212,7 +1212,7 @@ netsnmp_udp6_com2Sec6List_free(void)
 void
 netsnmp_udp6_agent_config_tokens_register(void)
 {
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     register_app_config_handler("com2sec6", netsnmp_udp6_parse_security,
                                 netsnmp_udp6_com2Sec6List_free,
                                 "[-Cn CONTEXT] secName IPv6-network-address[/netmask] community");
@@ -1221,7 +1221,7 @@ netsnmp_udp6_agent_config_tokens_register(void)
 
 
 
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 /*
  * Return 0 if there are no com2sec entries, or return 1 if there ARE com2sec 
  * entries.  On return, if a com2sec entry matched the passed parameters,
@@ -1366,5 +1366,5 @@ netsnmp_udp6_agent_config_tokens_register(void)
 { }
 #endif
 
-#endif /* SNMP_TRANSPORT_UDPIPV6_DOMAIN */
+#endif /* NETSNMP_TRANSPORT_UDPIPV6_DOMAIN */
 

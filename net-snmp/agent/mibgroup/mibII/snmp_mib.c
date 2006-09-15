@@ -51,7 +51,7 @@ struct variable1 snmp_variables[] = {
     {SNMPINPKTS, ASN_COUNTER, RONLY, var_snmp, 1, {1}},
     {SNMPOUTPKTS, ASN_COUNTER, RONLY, var_snmp, 1, {2}},
     {SNMPINBADVERSIONS, ASN_COUNTER, RONLY, var_snmp, 1, {3}},
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     {SNMPINBADCOMMUNITYNAMES, ASN_COUNTER, RONLY, var_snmp, 1, {4}},
     {SNMPINBADCOMMUNITYUSES, ASN_COUNTER, RONLY, var_snmp, 1, {5}},
 #endif /* support for community based SNMP */

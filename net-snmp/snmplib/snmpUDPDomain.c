@@ -405,32 +405,32 @@ _sock_buffer_size_get(int optname, int local, const char **buftype)
         if (local) {
             size = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
                     NETSNMP_DS_LIB_SERVERSENDBUF);
-#ifdef DEFAULT_SERVER_SEND_BUF
+#ifdef NETSNMP_DEFAULT_SERVER_SEND_BUF
             if (size <= 0)
-               size = DEFAULT_SERVER_SEND_BUF;
+               size = NETSNMP_DEFAULT_SERVER_SEND_BUF;
 #endif
         } else {
             size = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
                     NETSNMP_DS_LIB_CLIENTSENDBUF);
-#ifdef DEFAULT_CLIENT_SEND_BUF
+#ifdef NETSNMP_DEFAULT_CLIENT_SEND_BUF
             if (size <= 0)
-               size = DEFAULT_CLIENT_SEND_BUF;
+               size = NETSNMP_DEFAULT_CLIENT_SEND_BUF;
 #endif
         }
     } else if (optname == SO_RCVBUF) {
         if (local) {
             size = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
                     NETSNMP_DS_LIB_SERVERRECVBUF);
-#ifdef DEFAULT_SERVER_RECV_BUF
+#ifdef NETSNMP_DEFAULT_SERVER_RECV_BUF
             if (size <= 0)
-               size = DEFAULT_SERVER_RECV_BUF;
+               size = NETSNMP_DEFAULT_SERVER_RECV_BUF;
 #endif
         } else {
             size = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
                     NETSNMP_DS_LIB_CLIENTRECVBUF);
-#ifdef DEFAULT_CLIENT_RECV_BUF
+#ifdef NETSNMP_DEFAULT_CLIENT_RECV_BUF
             if (size <= 0)
-               size = DEFAULT_CLIENT_RECV_BUF;
+               size = NETSNMP_DEFAULT_CLIENT_RECV_BUF;
 #endif
         }
     } else {
@@ -909,7 +909,7 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
 
 
 
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 /*
  * The following functions provide the "com2sec" configuration token
  * functionality for compatibility.  
@@ -1133,7 +1133,7 @@ netsnmp_udp_com2SecList_free(void)
 void
 netsnmp_udp_agent_config_tokens_register(void)
 {
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     register_app_config_handler("com2sec", netsnmp_udp_parse_security,
                                 netsnmp_udp_com2SecList_free,
                                 "[-Cn CONTEXT] secName IPv4-network-address[/netmask] community");
@@ -1149,7 +1149,7 @@ netsnmp_udp_agent_config_tokens_register(void)
  * parameters did not match any com2sec entry.  
  */
 
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 int
 netsnmp_udp_getSecName(void *opaque, int olength,
                        const char *community,

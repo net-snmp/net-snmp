@@ -1,6 +1,6 @@
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
 
 /*
  * hack-o-matic for Cygwin to use winsock2
@@ -487,5 +487,5 @@ netsnmp_tcp6_ctor(void)
     netsnmp_tdomain_register(&tcp6Domain);
 }
 
-#endif /* SNMP_TRANSPORT_TCPIPV6_DOMAIN */
+#endif /* NETSNMP_TRANSPORT_TCPIPV6_DOMAIN */
 

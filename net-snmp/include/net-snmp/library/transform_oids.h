@@ -11,12 +11,12 @@ extern          "C" {
  */
 
 extern oid      usmNoAuthProtocol[10];  /* == { 1,3,6,1,6,3,10,1,1,1 }; */
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
 extern oid      usmHMACMD5AuthProtocol[10];     /* == { 1,3,6,1,6,3,10,1,1,2 }; */
 #endif
 extern oid      usmHMACSHA1AuthProtocol[10];    /* == { 1,3,6,1,6,3,10,1,1,3 }; */
 extern oid      usmNoPrivProtocol[10];  /* == { 1,3,6,1,6,3,10,1,2,1 }; */
-#ifndef DISABLE_DES
+#ifndef NETSNMP_DISABLE_DES
 extern oid      usmDESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,2 }; */
 #endif
 

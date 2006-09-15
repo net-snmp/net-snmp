@@ -141,7 +141,7 @@ void
 seterrorstatus(const char *to, int prior)
 {
     if (errorstatusprior <= prior ||
-        (ERRORTIMELENGTH < (time(NULL) - errorstatustime))) {
+        (NETSNMP_ERRORTIMELENGTH < (time(NULL) - errorstatustime))) {
         strncpy(errorstring, to, sizeof(errorstring));
         errorstring[ sizeof(errorstring)-1 ] = 0;
         errorstatusprior = prior;
@@ -173,7 +173,7 @@ init_errormib(void)
      * registering underneath 
      */
     oid             extensible_error_variables_oid[] =
-        { UCDAVIS_MIB, ERRORMIBNUM };
+        { NETSNMP_UCDAVIS_MIB, NETSNMP_ERRORMIBNUM };
 
     /*
      * register ourselves with the agent to handle our mib tree 
@@ -220,10 +220,10 @@ var_extensible_errors(struct variable *vp,
         return ((u_char *) errmsg);
     case ERRORFLAG:
         long_ret =
-            (ERRORTIMELENGTH >= time(NULL) - errorstatustime) ? 1 : 0;
+            (NETSNMP_ERRORTIMELENGTH >= time(NULL) - errorstatustime) ? 1 : 0;
         return ((u_char *) (&long_ret));
     case ERRORMSG:
-        if ((ERRORTIMELENGTH >= time(NULL) - errorstatustime) ? 1 : 0) {
+        if ((NETSNMP_ERRORTIMELENGTH >= time(NULL) - errorstatustime) ? 1 : 0) {
             strncpy(errmsg, errorstring, sizeof(errmsg));
             errmsg[ sizeof(errmsg)-1 ] = 0;
         } else

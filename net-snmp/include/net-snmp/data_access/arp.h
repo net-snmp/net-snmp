@@ -11,7 +11,7 @@ extern          "C" {
 #endif
 
 /**---------------------------------------------------------------------*/
-#if defined( INET6 )
+#if defined( NETSNMP_ENABLE_IPV6 )
 #   define NETSNMP_ACCESS_ARP_IPADDR_BUF_SIZE 16
 #else
 #   define NETSNMP_ACCESS_ARP_IPADDR_BUF_SIZE 4

@@ -1,7 +1,7 @@
 #ifndef _SNMPUNIXDOMAIN_H
 #define _SNMPUNIXDOMAIN_H
 
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
 
 #ifdef __cplusplus
 extern          "C" {
@@ -44,6 +44,6 @@ void            netsnmp_unix_ctor(void);
 #ifdef __cplusplus
 }
 #endif
-#endif                          /*SNMP_TRANSPORT_UNIX_DOMAIN */
+#endif                          /*NETSNMP_TRANSPORT_UNIX_DOMAIN */
 
 #endif/*_SNMPUNIXDOMAIN_H*/

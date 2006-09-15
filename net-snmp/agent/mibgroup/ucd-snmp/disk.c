@@ -192,7 +192,7 @@ struct variable2 extensible_disk_variables[] = {
  * Define the OID pointer to the top of the mib tree that we're
  * registering underneath 
  */
-oid             disk_variables_oid[] = { UCDAVIS_MIB, DISKMIBNUM, 1 };
+oid             disk_variables_oid[] = { NETSNMP_UCDAVIS_MIB, NETSNMP_DISKMIBNUM, 1 };
 
 void
 init_disk(void)
@@ -281,7 +281,7 @@ disk_parse_config(const char *token, char *cptr)
           minpercent = atoi(cptr);
       }
   } else {
-      minspace = DEFDISKMINIMUMSPACE;
+      minspace = NETSNMP_DEFDISKMINIMUMSPACE;
       minpercent = -1;
   }
 

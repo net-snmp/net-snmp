@@ -40,7 +40,7 @@
 #if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
 #endif
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 #if HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
@@ -72,8 +72,8 @@
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
-#ifdef INET6
-#if HAVE_NETINET6_IP6_VAR_H
+#ifdef NETSNMP_ENABLE_IPV6
+#if HAVE_NETNETSNMP_ENABLE_IPV6_IP6_VAR_H
 #include <netinet6/ip6_var.h>
 #endif
 #endif
@@ -216,13 +216,13 @@ init_agent_read_config(const char *app)
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_AGENT_ROLE) == MASTER_AGENT) {
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
         register_app_config_handler("trapsink",
                                     snmpd_parse_config_trapsink,
                                     snmpd_free_trapsinks,
                                     "host [community] [port]");
 #endif
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
         register_app_config_handler("trap2sink",
                                     snmpd_parse_config_trap2sink, NULL,
                                     "host [community] [port]");
@@ -234,7 +234,7 @@ init_agent_read_config(const char *app)
                                     snmpd_parse_config_trapsess, NULL,
                                     "[snmpcmdargs] host");
     }
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     register_app_config_handler("trapcommunity",
                                 snmpd_parse_config_trapcommunity,
                                 snmpd_free_trapcommunity,

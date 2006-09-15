@@ -34,7 +34,7 @@ SOFTWARE.
  */
 #include <net-snmp/net-snmp-config.h>
 
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
 
 #if HAVE_LIMITS_H
 #include <limits.h>
@@ -5473,4 +5473,4 @@ tree_from_node(struct tree *tp, struct node *np)
     set_function(tp);
 }
 
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */

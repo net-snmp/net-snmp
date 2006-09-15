@@ -137,7 +137,7 @@ extern          "C" {
                                                         *ref,
                                                         int sec_level);
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
     void            emergency_print(u_char * field, u_int length);
 #endif
 

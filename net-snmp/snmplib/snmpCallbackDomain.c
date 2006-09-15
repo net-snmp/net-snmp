@@ -51,7 +51,7 @@
 #define NETSNMP_STREAM_QUEUE_LEN  5
 #endif
 
-#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
+#ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
 
 static netsnmp_transport_list *trlist = NULL;
 
@@ -480,13 +480,13 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
      * Copy missing values from session defaults
      */
     switch (pdu->version) {
-#ifndef DISABLE_SNMPV1
+#ifndef NETSNMP_DISABLE_SNMPV1
     case SNMP_VERSION_1:
 #endif
-#ifndef DISABLE_SNMPV2C
+#ifndef NETSNMP_DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
 #endif
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
         if (pdu->community_len == 0) {
             if (sp->community_len == 0) {
                 sp->s_snmp_errno = SNMPERR_BAD_COMMUNITY;
@@ -620,4 +620,4 @@ netsnmp_clear_callback_list(void)
 
 }
 
-#endif /* SNMP_TRANSPORT_CALLBACK_DOMAIN */
+#endif /* NETSNMP_TRANSPORT_CALLBACK_DOMAIN */

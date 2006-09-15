@@ -73,8 +73,8 @@
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
-#ifdef INET6
-#if HAVE_NETINET6_IP6_VAR_H
+#ifdef NETSNMP_ENABLE_IPV6
+#if HAVE_NETNETSNMP_ENABLE_IPV6_IP6_VAR_H
 #include <netinet6/ip6_var.h>
 #endif
 #endif

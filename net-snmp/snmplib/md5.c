@@ -46,7 +46,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifndef DISABLE_MD5
+#ifndef NETSNMP_DISABLE_MD5
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -116,7 +116,7 @@
 void            MDreverse(unsigned int *);
 static void     MDblock(MDptr, unsigned int *);
 
-#ifdef SNMP_TESTING_CODE
+#ifdef NETSNMP_ENABLE_TESTING_CODE
 /*
  * MDprint(MDp)
  * ** Print message digest buffer MDp as 32 hexadecimal digits.
@@ -134,7 +134,7 @@ MDprint(MDptr MDp)
     printf("\n");
     fflush(stdout);
 }
-#endif                          /* SNMP_TESTING_CODE */
+#endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
 /*
  * MDbegin(MDp)
@@ -534,4 +534,4 @@ MDget(MDstruct * MD, u_char * buf, size_t buflen)
  * ****************************(cut)****************************************
  */
 
-#endif /* DISABLE_MD5 */
+#endif /* NETSNMP_DISABLE_MD5 */

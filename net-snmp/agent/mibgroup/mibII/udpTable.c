@@ -610,7 +610,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
 }
 #else                           /* WIN32 cygwin*/
 
-#if (defined(CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST))
+#if (defined(NETSNMP_CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST))
 int
 udpTable_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -665,7 +665,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     DEBUGMSGTL(("mibII/udpTable", "Failed to load UDP Table (sysctl)\n"));
     return -1;
 }
-#else		/* (defined(CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST)) */
+#else		/* (defined(NETSNMP_CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST)) */
 #ifdef PCB_TABLE
 int
 udpTable_load(netsnmp_cache *cache, void *vmagic)
@@ -758,7 +758,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
 }
 #endif				/* UDB_SYMBOL */
 #endif				/* PCB_TABLE */
-#endif		/* (defined(CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST)) */
+#endif		/* (defined(NETSNMP_CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST)) */
 #endif                          /* WIN32 cygwin*/
 #endif                          /* linux */
 #endif                          /* solaris2 */

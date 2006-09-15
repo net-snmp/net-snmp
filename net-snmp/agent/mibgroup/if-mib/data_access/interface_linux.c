@@ -92,7 +92,7 @@ void
 _arch_interface_has_ipv6(oid if_index, u_int *flags,
                          netsnmp_container *addr_container)
 {
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
     netsnmp_ipaddress_entry *addr_entry = NULL;
     netsnmp_iterator        *addr_it = NULL;
     u_int                    addr_container_flags = 0; /* must init to 0 */
@@ -103,7 +103,7 @@ _arch_interface_has_ipv6(oid if_index, u_int *flags,
 
     *flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_IPV6;
 
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
     /*
      * get ipv6 addresses
      */
@@ -197,7 +197,7 @@ _arch_interface_flags_v4_get(netsnmp_interface_entry *entry)
 }
 
 
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
 /**
  * @internal
  */
@@ -258,7 +258,7 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
         fclose(fin);
     }
 }
-#endif /* INET6 */
+#endif /* NETSNMP_ENABLE_IPV6 */
 
 /**
  * @internal
@@ -410,7 +410,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     netsnmp_interface_entry *entry = NULL;
     static char     scan_expected = 0;
     int             fd;
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
     netsnmp_container *addr_container;
 #endif
 
@@ -438,7 +438,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         return -2;
     }
 
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
     /*
      * get ipv6 addresses
      */
@@ -514,7 +514,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          * ip version is to look for ip addresses. If anyone
          * knows a better way, put it here!
          */
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
         _arch_interface_has_ipv6(if_index, &flags, addr_container);
 #endif
         netsnmp_access_interface_ioctl_has_ipv4(fd, ifstart, 0, &flags);
@@ -534,7 +534,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 
         entry = netsnmp_access_interface_entry_create(ifstart, 0);
         if(NULL == entry) {
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
             netsnmp_access_ipaddress_container_free(addr_container, 0);
 #endif
             netsnmp_access_interface_container_free(container,
@@ -646,17 +646,17 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         if (flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV4)
             _arch_interface_flags_v4_get(entry);
 
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
         if (flags & NETSNMP_INTERFACE_FLAGS_HAS_IPV6)
             _arch_interface_flags_v6_get(entry);
-#endif /* INET6 */
+#endif /* NETSNMP_ENABLE_IPV6 */
 
         /*
          * add to container
          */
         CONTAINER_INSERT(container, entry);
     }
-#ifdef INET6
+#ifdef NETSNMP_ENABLE_IPV6
     netsnmp_access_ipaddress_container_free(addr_container, 0);
 #endif
     fclose(devin);

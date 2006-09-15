@@ -92,7 +92,7 @@ SOFTWARE.
  * Globals.
  */
 
-#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 /*******************************************************************-o-******
  * snmp_comstr_parse
  *

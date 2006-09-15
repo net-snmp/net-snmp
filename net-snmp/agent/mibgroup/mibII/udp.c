@@ -46,7 +46,7 @@
 #include "udpTable.h"
 #include "sysORTable.h"
 
-#ifdef CAN_USE_SYSCTL
+#ifdef NETSNMP_CAN_USE_SYSCTL
 #include <sys/sysctl.h>
 #endif
 
@@ -495,7 +495,7 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#elif (defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS))
+#elif (defined(NETSNMP_CAN_USE_SYSCTL) && defined(UDPCTL_STATS))
 int
 udp_load(netsnmp_cache *cache, void *vmagic)
 {

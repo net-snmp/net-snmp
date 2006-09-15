@@ -16,7 +16,7 @@
 #include <errno.h>
 #include <sys/ioctl.h>
 
-#if defined (INET6)
+#if defined (NETSNMP_ENABLE_IPV6)
 #include <linux/types.h>
 #include <asm/types.h>
 #include <linux/rtnetlink.h>
@@ -143,7 +143,7 @@ netsnmp_arch_ipaddress_container_load(netsnmp_container *container,
         }
     }
 
-#if defined (INET6)
+#if defined (NETSNMP_ENABLE_IPV6)
 
     if (0 == (load_flags & NETSNMP_ACCESS_IPADDRESS_LOAD_IPV4_ONLY)) {
         if (rc < 0)
@@ -173,7 +173,7 @@ netsnmp_arch_ipaddress_container_load(netsnmp_container *container,
     return rc;
 }
 
-#if defined (INET6)
+#if defined (NETSNMP_ENABLE_IPV6)
 /**
  */
 int

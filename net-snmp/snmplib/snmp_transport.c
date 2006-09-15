@@ -21,25 +21,25 @@
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPDomain.h>
-#ifdef SNMP_TRANSPORT_TLS_DOMAIN
+#ifdef NETSNMP_TRANSPORT_TLS_DOMAIN
 #include <net-snmp/library/snmpTLSDomain.h>
 #endif
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
+#ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
 #include <net-snmp/library/snmpTCPDomain.h>
 #endif
-#ifdef SNMP_TRANSPORT_IPX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_IPX_DOMAIN
 #include <net-snmp/library/snmpIPXDomain.h>
 #endif
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
 #include <net-snmp/library/snmpUnixDomain.h>
 #endif
-#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
+#ifdef NETSNMP_TRANSPORT_AAL5PVC_DOMAIN
 #include <net-snmp/library/snmpAAL5PVCDomain.h>
 #endif
-#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 #endif
-#ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
 #include <net-snmp/library/snmpTCPIPv6Domain.h>
 #endif
 #include <net-snmp/library/snmp_api.h>
@@ -195,25 +195,25 @@ netsnmp_tdomain_init(void)
 {
     DEBUGMSGTL(("tdomain", "netsnmp_tdomain_init() called\n"));
     netsnmp_udp_ctor();
-#ifdef SNMP_TRANSPORT_STD_DOMAIN
+#ifdef NETSNMP_TRANSPORT_STD_DOMAIN
     netsnmp_std_ctor();
 #endif
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
+#ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
     netsnmp_tcp_ctor();
 #endif
-#ifdef SNMP_TRANSPORT_IPX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_IPX_DOMAIN
     netsnmp_ipx_ctor();
 #endif
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
     netsnmp_unix_ctor();
 #endif
-#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
+#ifdef NETSNMP_TRANSPORT_AAL5PVC_DOMAIN
     netsnmp_aal5pvc_ctor();
 #endif
-#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     netsnmp_udp6_ctor();
 #endif
-#ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
+#ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
     netsnmp_tcp6_ctor();
 #endif
     netsnmp_tdomain_dump();

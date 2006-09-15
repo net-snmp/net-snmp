@@ -145,7 +145,7 @@ init_mteTriggerTable(void)
 {
     DEBUGMSGTL(("mteTriggerTable", "initializing...  "));
 
-#ifndef SNMP_TRANSPORT_CALLBACK_DOMAIN
+#ifndef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
     snmp_log(LOG_WARNING,"mteTriggerTable has been disabled because "
                "the callback transport is not available.\n");
     return;
@@ -192,7 +192,7 @@ init_mteTriggerTable(void)
     se_add_pair_to_slist("mteBooleanOperators", strdup(">="),
                          MTETRIGGERBOOLEANCOMPARISON_GREATEROREQUAL);
 
-#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
+#ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
     /*
      * open a 'callback' session to the main agent 
      */
@@ -3124,11 +3124,11 @@ mte_is_integer_type(unsigned char type)
     case ASN_TIMETICKS:
     case ASN_UINTEGER:
     case ASN_COUNTER64:
-#ifdef OPAQUE_SPECIAL_TYPES
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_COUNTER64:
     case ASN_OPAQUE_U64:
     case ASN_OPAQUE_I64:
-#endif                          /* OPAQUE_SPECIAL_TYPES */
+#endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
         return 1;
     default:
         return 0;
