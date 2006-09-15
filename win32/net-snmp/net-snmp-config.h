@@ -18,27 +18,27 @@
 /* config.h:  a general config file */
 
 /* Default (SNMP) version number for the tools to use */
-#define DEFAULT_SNMP_VERSION 3
+#define NETSNMP_DEFAULT_SNMP_VERSION 3
 
 /* don't change these values! */
-#define SNMPV1      0xAAAA       /* readable by anyone */
-#define SNMPV2ANY   0xA000       /* V2 Any type (includes NoAuth) */
-#define SNMPV2AUTH  0x8000       /* V2 Authenticated requests only */
+#define NETSNMP_SNMPV1      0xAAAA       /* readable by anyone */
+#define NETSNMP_SNMPV2ANY   0xA000       /* V2 Any type (includes NoAuth) */
+#define NETSNMP_SNMPV2AUTH  0x8000       /* V2 Authenticated requests only */
 
 /* default list of mibs to load */
 
-#define DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;HOST-RESOURCES-MIB;SNMPv2-MIB;RFC1213-MIB;NOTIFICATION-LOG-MIB;UCD-SNMP-MIB;UCD-DEMO-MIB;SNMP-TARGET-MIB;NET-SNMP-AGENT-MIB;DISMAN-EVENT-MIB;SNMP-VIEW-BASED-ACM-MIB;SNMP-COMMUNITY-MIB;UCD-DLMOD-MIB;SNMP-FRAMEWORK-MIB;SNMP-MPD-MIB;SNMP-USER-BASED-SM-MIB;SNMP-NOTIFICATION-MIB;SNMPv2-TM"
+#define NETSNMP_DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;HOST-RESOURCES-MIB;SNMPv2-MIB;RFC1213-MIB;NOTIFICATION-LOG-MIB;UCD-SNMP-MIB;UCD-DEMO-MIB;SNMP-TARGET-MIB;NET-SNMP-AGENT-MIB;DISMAN-EVENT-MIB;SNMP-VIEW-BASED-ACM-MIB;SNMP-COMMUNITY-MIB;UCD-DLMOD-MIB;SNMP-FRAMEWORK-MIB;SNMP-MPD-MIB;SNMP-USER-BASED-SM-MIB;SNMP-NOTIFICATION-MIB;SNMPv2-TM"
 
 /* default location to look for mibs to load using the above tokens
    and/or those in the MIBS envrionment variable*/
-#define DEFAULT_MIBDIRS INSTALL_BASE ## "/share/snmp/mibs"
+#define NETSNMP_DEFAULT_MIBDIRS INSTALL_BASE ## "/share/snmp/mibs"
 
 /* default mib files to load, specified by path. */
-/* #undef DEFAULT_MIBFILES */
+/* #undef NETSNMP_DEFAULT_MIBFILES */
 
 /* should we compile to use special opaque types: float, double,
    counter64, i64, ui64, union? */
-#define OPAQUE_SPECIAL_TYPES 1
+#define NETSNMP_WITH_OPAQUE_SPECIAL_TYPES 1
 
 /* comment the next line if you are compiling with libsnmp.h
    and are not using the UC-Davis SNMP library. */
@@ -46,13 +46,13 @@
 
 /* define if you want to compile support for both authentication and
    privacy support. */
-#define SCAPI_AUTHPRIV 1
+#define NETSNMP_ENABLE_SCAPI_AUTHPRIV 1
 
 /* define if you are using the MD5 code ...*/
-/* #undef USE_INTERNAL_MD5 */
+/* #undef NETSNMP_USE_INTERNAL_MD5 */
 
 /* define if you are using the codeS11 library ...*/
-/* #undef USE_PKCS */
+/* #undef NETSNMP_USE_PKCS11 */
 
 /* add in recent CMU library extensions (not complete) */
 /* #undef CMU_COMPATIBLE */
@@ -62,33 +62,33 @@
 
 /* debugging stuff */
 /* if defined, we optimize the code to exclude all debugging calls. */
-/* #undef SNMP_NO_DEBUGGING */
+/* #undef NETSNMP_NO_DEBUGGING */
 /* ignore the -D flag and always print debugging information */
-#define SNMP_ALWAYS_DEBUG 0
+#define NETSNMP_ALWAYS_DEBUG 0
 
 /* reverse encoding BER packets is both faster and more efficient in space. */
-#define USE_REVERSE_ASNENCODING       1
-#define DEFAULT_ASNENCODING_DIRECTION 1 /* 1 = reverse, 0 = forwards */
+#define NETSNMP_USE_REVERSE_ASNENCODING       1
+#define NETSNMP_DEFAULT_ASNENCODING_DIRECTION 1 /* 1 = reverse, 0 = forwards */
 
-/* PERSISTENT_DIRECTORY: If defined, the library is capabile of saving
+/* NETSNMP_PERSISTENT_DIRECTORY: If defined, the library is capabile of saving
    persisant information to this directory in the form of configuration
-   lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
-#define PERSISTENT_DIRECTORY INSTALL_BASE ## "/snmp/persist"
+   lines: NETSNMP_PERSISTENT_DIRECTORY/NAME.persistent.conf */
+#define NETSNMP_PERSISTENT_DIRECTORY INSTALL_BASE ## "/snmp/persist"
 
-/* PERSISTENT_MASK: the umask permissions to set up persistent files with */
-/* #undef PERSISTENT_MASK -- no win32 umask */
+/* NETSNMP_PERSISTENT_MASK: the umask permissions to set up persistent files with */
+/* #undef NETSNMP_PERSISTENT_MASK -- no win32 umask */
 
-/* AGENT_DIRECTORY_MODE: the mode the agents should use to create
+/* NETSNMP_AGENT_DIRECTORY_MODE: the mode the agents should use to create
    directories with. Since the data stored here is probably sensitive, it
    probably should be read-only by root/administrator. */
-#define AGENT_DIRECTORY_MODE 0700
+#define NETSNMP_AGENT_DIRECTORY_MODE 0700
 
-/* MAX_PERSISTENT_BACKUPS:
+/* NETSNMP_MAX_PERSISTENT_BACKUPS:
  *   The maximum number of persistent backups the library will try to
  *   read from the persistent cache directory.  If an application fails to
  *   close down successfully more than this number of times, data will be lost.
  */
-#define MAX_PERSISTENT_BACKUPS 10
+#define NETSNMP_MAX_PERSISTENT_BACKUPS 10
 
 
 /* define if you are embedding perl in the main agent */
@@ -96,10 +96,10 @@
 
 #if notused
 /* define the system type include file here */
-#define SYSTEM_INCLUDE_FILE <net-snmp/system/generic.h>
+#define NETSNMP_SYSTEM_INCLUDE_FILE <net-snmp/system/generic.h>
 
 /* define the machine (cpu) type include file here */
-#define MACHINE_INCLUDE_FILE <net-snmp/machine/generic.h>
+#define NETSNMP_MACHINE_INCLUDE_FILE <net-snmp/machine/generic.h>
 #endif
 
 /* SNMPLIBDIR contains important files */
@@ -109,18 +109,18 @@
 #define SNMPCONFPATH INSTALL_BASE ## "/etc/snmp"
 #define SNMPDLMODPATH INSTALL_BASE ## "/lib/dlmod"
 
-/* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
+/* NETSNMP_LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
    place.  (stdin is closed so that sh scripts won't wait for it) */
-/* #undef LOGFILE */
+/* #undef NETSNMP_LOGFILE */
 
 /* default system contact */
-#define SYS_CONTACT "unknown"
+#define NETSNMP_SYS_CONTACT "unknown"
 
 /* system location */
-#define SYS_LOC "unknown"
+#define NETSNMP_SYS_LOC "unknown"
 
 /* Use libwrap to handle allow/deny hosts? */
-/* #undef USE_LIBWRAP */
+/* #undef NETSNMP_USE_LIBWRAP */
 
 /* Use dmalloc to do malloc debugging? */
 /* #undef HAVE_DMALLOC_H */
@@ -145,16 +145,16 @@
 #define NETSNMP_TEMP_FILE_PATTERN INSTALL_BASE ## "/temp/snmpdXXXXXX"
 
 /* testing code sections. */
-/* #undef SNMP_TESTING_CODE */
+/* #undef NETSNMP_ENABLE_TESTING_CODE */
 
 /* If you don't have root access don't exit upon kmem errors */
-/* #undef NO_ROOT_ACCESS */
+/* #undef NETSNMP_NO_ROOT_ACCESS */
 
 /* If we don't want to use kmem. */
-/* #undef NO_KMEM_USAGE */
+/* #undef NETSNMP_NO_KMEM_USAGE */
 
 /* If you don't want the agent to report on variables it doesn't have data for */
-#define NO_DUMMY_VALUES 1
+#define NETSNMP_NO_DUMMY_VALUES 1
 
 /* Define if statfs takes 2 args and the second argument has
    type struct fs_data. [Ultrix] */
@@ -174,19 +174,19 @@
 /* #undef C_ALLOCA */
 
 /* Define if DES encryption should not be supported */
-/* #undef DISABLE_DES */
+/* #undef NETSNMP_DISABLE_DES */
 
 /* Define if MD5 authentication should not be supported */
-/* #undef DISABLE_MD5 */
+/* #undef NETSNMP_DISABLE_MD5 */
 
 /* Define if mib loading and parsing code should not be included */
-/* #undef DISABLE_MIB_LOADING */
+/* #undef NETSNMP_DISABLE_MIB_LOADING */
 
 /* Define if SNMPv1 code should not be included */
-/* #undef DISABLE_SNMPV1 */
+/* #undef NETSNMP_DISABLE_SNMPV1 */
 
 /* Define if SNMPv2c code should not be included */
-/* #undef DISABLE_SNMPV2C */
+/* #undef NETSNMP_DISABLE_SNMPV2C */
 
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 /* #undef HAVE_AES_CFB128_ENCRYPT */
@@ -434,28 +434,28 @@
 /* #undef HAVE_NETDB_H */
 
 /* Define to 1 if you have the <netinet6/in6_pcb.h> header file. */
-/* #undef HAVE_NETINET6_IN6_PCB_H */
+/* #undef HAVE_NETNETSNMP_ENABLE_IPV6_IN6_PCB_H */
 
 /* Define to 1 if you have the <netinet6/in6_var.h> header file. */
-/* #undef HAVE_NETINET6_IN6_VAR_H */
+/* #undef HAVE_NETNETSNMP_ENABLE_IPV6_IN6_VAR_H */
 
 /* Define to 1 if you have the <netinet6/ip6_var.h> header file. */
-/* #undef HAVE_NETINET6_IP6_VAR_H */
+/* #undef HAVE_NETNETSNMP_ENABLE_IPV6_IP6_VAR_H */
 
 /* Define to 1 if you have the <netinet6/nd6.h> header file. */
-/* #undef HAVE_NETINET6_ND6_H */
+/* #undef HAVE_NETNETSNMP_ENABLE_IPV6_ND6_H */
 
 /* Define to 1 if you have the <netinet6/tcp6_fsm.h> header file. */
-/* #undef HAVE_NETINET6_TCP6_FSM_H */
+/* #undef HAVE_NETNETSNMP_ENABLE_IPV6_TCP6_FSM_H */
 
 /* Define to 1 if you have the <netinet6/tcp6.h> header file. */
-/* #undef HAVE_NETINET6_TCP6_H */
+/* #undef HAVE_NETNETSNMP_ENABLE_IPV6_TCP6_H */
 
 /* Define to 1 if you have the <netinet6/tcp6_timer.h> header file. */
-/* #undef HAVE_NETINET6_TCP6_TIMER_H */
+/* #undef HAVE_NETNETSNMP_ENABLE_IPV6_TCP6_TIMER_H */
 
 /* Define to 1 if you have the <netinet6/tcp6_var.h> header file. */
-/* #undef HAVE_NETINET6_TCP6_VAR_H */
+/* #undef HAVE_NETNETSNMP_ENABLE_IPV6_TCP6_VAR_H */
 
 /* Define to 1 if you have the <netinet/icmp_var.h> header file. */
 /* #undef HAVE_NETINET_ICMP_VAR_H */
@@ -1098,7 +1098,7 @@
 /* #undef IFNET_NEEDS_KERNEL */
 
 /* sysctl works to get boottime, etc... */
-/* #undef CAN_USE_SYSCTL */
+/* #undef NETSNMP_CAN_USE_SYSCTL */
 
 /* type check for in_addr_t */
 /* #undef in_addr_t */
@@ -1112,160 +1112,160 @@
 /* Mib-2 tree Info */
 /* These are the system information variables. */
 
-#define VERS_DESC   "unknown"             /* overridden at run time */
-#define SYS_NAME    "unknown"             /* overridden at run time */
+#define NETSNMP_VERS_DESC   "unknown"             /* overridden at run time */
+#define NETSNMP_SYS_NAME    "unknown"             /* overridden at run time */
 
 /* comment out the second define to turn off functionality for any of
    these: (See README for details) */
 
 /*   proc PROCESSNAME [MAX] [MIN] */
-#define PROCMIBNUM 2
+#define NETSNMP_PROCMIBNUM 2
 
 /*   exec/shell NAME COMMAND      */
-#define SHELLMIBNUM 8
+#define NETSNMP_SHELLMIBNUM 8
 
 /*   swap MIN                     */
-#define MEMMIBNUM 4
+#define NETSNMP_MEMMIBNUM 4
 
 /*   disk DISK MINSIZE            */
-#define DISKMIBNUM 9
+#define NETSNMP_DISKMIBNUM 9
 
 /*   load 1 5 15                  */
-#define LOADAVEMIBNUM 10
+#define NETSNMP_LOADAVEMIBNUM 10
 
 /* which version are you using? This mibloc will tell you */
-#define VERSIONMIBNUM 100
+#define NETSNMP_VERSIONMIBNUM 100
 
 /* Reports errors the agent runs into */
 /* (typically its "can't fork, no mem" problems) */
-#define ERRORMIBNUM 101
+#define NETSNMP_ERRORMIBNUM 101
 
 /* The sub id of EXTENSIBLEMIB returned to queries of
    .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 */
-#define AGENTID 250
+#define NETSNMP_AGENTID 250
 
-/* This ID is returned after the AGENTID above.  IE, the resulting
+/* This ID is returned after the NETSNMP_AGENTID above.  IE, the resulting
    value returned by a query to sysObjectID is
-   EXTENSIBLEMIB.AGENTID.???, where ??? is defined below by OSTYPE */
+   EXTENSIBLEMIB.NETSNMP_AGENTID.???, where ??? is defined below by OSTYPE */
 
-#define HPUX9ID 1
-#define SUNOS4ID 2
-#define SOLARISID 3
-#define OSFID 4
-#define ULTRIXID 5
-#define HPUX10ID 6
-#define NETBSD1ID 7
-#define FREEBSDID 8
-#define IRIXID 9
-#define LINUXID 10
-#define BSDIID 11
-#define OPENBSDID 12
-#define WIN32ID 13
-#define HPUX11ID 14
-#define UNKNOWNID 255
+#define NETSNMP_HPUX9ID 1
+#define NETSNMP_SUNOS4ID 2
+#define NETSNMP_SOLARISID 3
+#define NETSNMP_OSFID 4
+#define NETSNMP_ULTRIXID 5
+#define NETSNMP_HPUX10ID 6
+#define NETSNMP_NETBSD1ID 7
+#define NETSNMP_FREEBSDID 8
+#define NETSNMP_IRIXID 9
+#define NETSNMP_LINUXID 10
+#define NETSNMP_BSDIID 11
+#define NETSNMP_OPENBSDID 12
+#define NETSNMP_WIN32ID 13
+#define NETSNMP_HPUX11ID 14
+#define NETSNMP_UNKNOWNID 255
 
 #ifdef hpux9
-#define OSTYPE HPUX9ID
+#define OSTYPE NETSNMP_HPUX9ID
 #endif
 #ifdef hpux10
-#define OSTYPE HPUX10ID
+#define OSTYPE NETSNMP_HPUX10ID
 #endif
 #ifdef hpux11
-#define OSTYPE HPUX11ID
+#define OSTYPE NETSNMP_HPUX11ID
 #endif
 #ifdef sunos4
-#define OSTYPE SUNOS4ID
+#define OSTYPE NETSNMP_SUNOS4ID
 #endif
 #ifdef solaris2
-#define OSTYPE SOLARISID
+#define OSTYPE NETSNMP_SOLARISID
 #endif
 #if defined(osf3) || defined(osf4) || defined(osf5)
-#define OSTYPE OSFID
+#define OSTYPE NETSNMP_OSFID
 #endif
 #ifdef ultrix4
-#define OSTYPE ULTRIXID
+#define OSTYPE NETSNMP_ULTRIXID
 #endif
 #ifdef netbsd1
-#define OSTYPE NETBSD1ID
+#define OSTYPE NETSNMP_NETBSD1ID
 #endif
 #if defined(__FreeBSD__)
-#define OSTYPE FREEBSDID
+#define OSTYPE NETSNMP_FREEBSDID
 #endif
 #if defined(irix6) || defined(irix5)
-#define OSTYPE IRIXID
+#define OSTYPE NETSNMP_IRIXID
 #endif
 #ifdef linux
-#define OSTYPE LINUXID
+#define OSTYPE NETSNMP_LINUXID
 #endif
 #if defined(bsdi2) || defined(bsdi3) || defined(bsdi4)
-#define OSTYPE BSDIID
+#define OSTYPE NETSNMP_BSDIID
 #endif
 #ifdef openbsd2
-#define OSTYPE OPENBSDID
+#define OSTYPE NETSNMP_OPENBSDID
 #endif
 #ifdef WIN32
-#define OSTYPE WIN32ID
+#define OSTYPE NETSNMP_WIN32ID
 #endif
 /* unknown */
 #ifndef OSTYPE
-#define OSTYPE UNKNOWNID
+#define OSTYPE NETSNMP_UNKNOWNID
 #endif
 
 /* The enterprise number has been assigned by the IANA group.   */
 /* Optionally, this may point to the location in the tree your  */
 /* company/organization has been allocated.                     */
 /* The assigned enterprise number for the NET_SNMP MIB modules. */
-#define ENTERPRISE_OID			8072
-#define ENTERPRISE_MIB			1,3,6,1,4,1,8072
-#define ENTERPRISE_DOT_MIB		1.3.6.1.4.1.8072
-#define ENTERPRISE_DOT_MIB_LENGTH	7
+#define NETSNMP_ENTERPRISE_OID			8072
+#define NETSNMP_ENTERPRISE_MIB			1,3,6,1,4,1,8072
+#define NETSNMP_ENTERPRISE_DOT_MIB		1.3.6.1.4.1.8072
+#define NETSNMP_NETSNMP_ENTERPRISE_DOT_MIB_LENGTH	7
 
 /* The assigned enterprise number for sysObjectID. */
-#define SYSTEM_MIB		1,3,6,1,4,1,8072,3,2,OSTYPE
-#define SYSTEM_DOT_MIB		1.3.6.1.4.1.8072.3.2.OSTYPE
-#define SYSTEM_DOT_MIB_LENGTH	10
+#define NETSNMP_SYSTEM_MIB		1,3,6,1,4,1,8072,3,2,OSTYPE
+#define NETSNMP_SYSTEM_DOT_MIB		1.3.6.1.4.1.8072.3.2.OSTYPE
+#define NETSNMP_NETSNMP_SYSTEM_DOT_MIB_LENGTH	10
 
 /* The assigned enterprise number for notifications. */
-#define NOTIFICATION_MIB		1,3,6,1,4,1,8072,4
-#define NOTIFICATION_DOT_MIB		1.3.6.1.4.1.8072.4
-#define NOTIFICATION_DOT_MIB_LENGTH	8
+#define NETSNMP_NOTIFICATION_MIB		1,3,6,1,4,1,8072,4
+#define NETSNMP_NOTIFICATION_DOT_MIB		1.3.6.1.4.1.8072.4
+#define NETSNMP_NETSNMP_NOTIFICATION_DOT_MIB_LENGTH	8
 
 /* this is the location of the ucdavis mib tree.  It shouldn't be
    changed, as the places it is used are expected to be constant
    values or are directly tied to the UCD-SNMP-MIB. */
-#define UCDAVIS_OID		2021
-#define UCDAVIS_MIB		1,3,6,1,4,1,2021
-#define UCDAVIS_DOT_MIB		1.3.6.1.4.1.2021
-#define UCDAVIS_DOT_MIB_LENGTH	7
+#define NETSNMP_UCDAVIS_OID		2021
+#define NETSNMP_UCDAVIS_MIB		1,3,6,1,4,1,2021
+#define NETSNMP_UCDAVIS_DOT_MIB		1.3.6.1.4.1.2021
+#define NETSNMP_NETSNMP_UCDAVIS_DOT_MIB_LENGTH	7
 
 /* this is the location of the net-snmp mib tree.  It shouldn't be
    changed, as the places it is used are expected to be constant
    values or are directly tied to the UCD-SNMP-MIB. */
-#define NETSNMP_OID		8072
-#define NETSNMP_MIB		1,3,6,1,4,1,8072
-#define NETSNMP_DOT_MIB		1.3.6.1.4.1.8072
-#define NETSNMP_DOT_MIB_LENGTH	7
-      
+#define NETSNMP_OID             8072
+#define NETSNMP_MIB             1,3,6,1,4,1,8072
+#define NETSNMP_DOT_MIB         1.3.6.1.4.1.8072
+#define NETSNMP_DOT_MIB_LENGTH  7
+
 /* how long to wait (seconds) for error querys before reseting the error trap.*/
-#define ERRORTIMELENGTH 600
+#define NETSNMP_ERRORTIMELENGTH 600
 
 /* Exec command to fix PROC problems */
 /* %s will be replaced by the process name in error */
 
-/* #define PROCFIXCMD "/usr/bin/perl /local/scripts/fixproc %s" */
+/* #define NETSNMP_PROCFIXCMD "/usr/bin/perl /local/scripts/fixproc %s" */
 
 /* Exec command to fix EXEC problems */
 /* %s will be replaced by the exec/script name in error */
 
-/* #define EXECFIXCMD "/usr/bin/perl /local/scripts/fixproc %s" */
+/* #define NETSNMP_EXECFIXCMD "/usr/bin/perl /local/scripts/fixproc %s" */
 
 /* Should exec output Cashing be used (speeds up things greatly), and
    if so, After how many seconds should the cache re-newed?  Note:
    Don't define CASHETIME to disable cashing completely */
 
-#define EXCACHETIME 30
-#define CACHEFILE ".snmp-exec-cache"
-#define MAXCACHESIZE (200*80)   /* roughly 200 lines max */
+#define NETSNMP_EXCACHETIME 30
+#define NETSNMP_CACHEFILE ".snmp-exec-cache"
+#define NETSNMP_MAXCACHESIZE (200*80)   /* roughly 200 lines max */
 
 #define MAXDISKS 50                      /* can't scan more than this number */
 
@@ -1273,35 +1273,35 @@
 
 /* default of 100 meg minimum if the minimum size is not specified in
    the config file */
-#define DEFDISKMINIMUMSPACE 100000
+#define NETSNMP_DEFDISKMINIMUMSPACE 100000
 
-#define DEFMAXLOADAVE 12.0      /* default maximum load average before error */
+#define NETSNMP_DEFMAXLOADAVE 12.0      /* default maximum load average before error */
 
 /* Because of sleep(1)s, this will also be time to wait (in seconds) for exec
    to finish */
-#define MAXREADCOUNT 100   /* max times to loop reading output from execs. */
+#define NETSNMP_MAXREADCOUNT 100   /* max times to loop reading output from execs. */
 
 /* The original CMU code had this hardcoded as = 1 */
-#define SNMPBLOCK 1       /* Set if snmpgets should block and never timeout */
+#define NETSNMP_SNMPBLOCK 1       /* Set if snmpgets should block and never timeout */
 
 /* How long to wait before restarting the agent after a snmpset to
-   EXTENSIBLEMIB.VERSIONMIBNUM.VERRESTARTAGENT.  This is
+   EXTENSIBLEMIB.NETSNMP_VERSIONMIBNUM.VERRESTARTAGENT.  This is
    necessary to finish the snmpset reply before restarting. */
-#define RESTARTSLEEP 5
+#define NETSNMP_RESTARTSLEEP 5
 
 /* Number of community strings to store */
-#define NUM_COMMUNITIES	5
+#define NETSNMP_NUM_COMMUNITIES	5
 
 /* UNdefine to allow specifying zero-length community string */
-/* #define NO_ZEROLENGTH_COMMUNITY 1 */
+/* #define NETSNMP_NO_ZEROLENGTH_COMMUNITY 1 */
 
-/* #define EXIT_ON_BAD_KLREAD  */
+/* #define NETSNMP_EXIT_ON_BAD_KLREAD  */
 /* define to exit the agent on a bad kernel read */
 
-#define LASTFIELD -1      /* internal define */
+#define NETSNMP_LASTFIELD -1      /* internal define */
 
 /* configure options specified */
-#define CONFIGURE_OPTIONS ""
+#define NETSNMP_CONFIGURE_OPTIONS ""
 
 /* got socklen_t? */
 #ifdef HAVE_WIN32_PLATFORM_SDK
@@ -1369,7 +1369,7 @@
 #else /* ! USE_OPENSSL */
 
 /* define if you are using the MD5 code ...*/
-#define USE_INTERNAL_MD5 1
+#define NETSNMP_USE_INTERNAL_MD5 1
 
 #endif /* ! USE_OPENSSL */
 
@@ -1421,49 +1421,49 @@
 
 /*  This is defined if support for the UDP/IP transport domain is
     available.   */
-#define SNMP_TRANSPORT_UDP_DOMAIN 1
+#define NETSNMP_TRANSPORT_UDP_DOMAIN 1
 
 /*  This is defined if support for the "callback" transport domain is
     available.   */
-#define SNMP_TRANSPORT_CALLBACK_DOMAIN 1
+#define NETSNMP_TRANSPORT_CALLBACK_DOMAIN 1
 
 /*  This is defined if support for the TCP/IP transport domain is
     available.  */
-#define SNMP_TRANSPORT_TCP_DOMAIN 1
+#define NETSNMP_TRANSPORT_TCP_DOMAIN 1
 
 /*  This is defined if support for the Unix transport domain
     (a.k.a. "local IPC") is available.  */
-/* #undef SNMP_TRANSPORT_UNIX_DOMAIN */
+/* #undef NETSNMP_TRANSPORT_UNIX_DOMAIN */
 
 /*  This is defined if support for the AAL5 PVC transport domain is
     available.  */
-/* #undef SNMP_TRANSPORT_AAL5PVC_DOMAIN */
+/* #undef NETSNMP_TRANSPORT_AAL5PVC_DOMAIN */
 
 /*  This is defined if support for the IPX transport domain is
     available.  */
-/* #undef SNMP_TRANSPORT_IPX_DOMAIN */
+/* #undef NETSNMP_TRANSPORT_IPX_DOMAIN */
 
-/* XXX do not modify. change the INET6 define instead */
+/* XXX do not modify. change the NETSNMP_ENABLE_IPV6 define instead */
 /*  This is defined if support for the UDP/IPv6 transport domain is
     available.  */
-/* #undef SNMP_TRANSPORT_UDPIPV6_DOMAIN */
+/* #undef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN */
 
-/* XXX do not modify. change the INET6 define instead */
+/* XXX do not modify. change the NETSNMP_ENABLE_IPV6 define instead */
 /*  This is defined if support for the TCP/IPv6 transport domain is
     available.  */
-/* #undef SNMP_TRANSPORT_TCPIPV6_DOMAIN */
+/* #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN */
 
 /* define this if the USM security module is available */
-#define SNMP_SECMOD_USM 1
+#define NETSNMP_SECMOD_USM 1
 
 /* define this if the KSM (kerberos based snmp) security module is available */
-/* #undef SNMP_SECMOD_KSM */
+/* #undef NETSNMP_SECMOD_KSM */
 
 /* define this if we're using the new MIT crypto API */
-/* #undef MIT_NEW_CRYPTO */
+/* #undef NETSNMP_USE_KERBEROS_MIT */
 
 /* define if you want to build with reentrant/threaded code (incomplete)*/
-/* #undef NS_REENTRANT */
+/* #undef NETSNMP_REENTRANT */
 
 /* on aix, if you have perfstat */
 /* #undef HAVE_PERFSTAT */
@@ -1525,8 +1525,8 @@
 #define NETSNMP_ENABLE_INLINE 1
 
 #if notused
-#include SYSTEM_INCLUDE_FILE
-#include MACHINE_INCLUDE_FILE
+#include NETSNMP_SYSTEM_INCLUDE_FILE
+#include NETSNMP_MACHINE_INCLUDE_FILE
 #endif
 
 #if NETSNMP_ENABLE_INLINE && !defined(NETSNMP_NO_INLINE)
@@ -1608,19 +1608,19 @@ typedef unsigned short   uint16_t;
 #  define NETSNMP_IMPORT extern
 #endif
 
-#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST) && !defined(NO_KMEM_USAGE)
-#define CAN_USE_NLIST
+#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST) && !defined(NETSNMP_NO_KMEM_USAGE)
+#define NETSNMP_CAN_USE_NLIST
 #endif
 
 #if HAVE_DMALLOC_H
 #define DMALLOC_FUNC_CHECK
 #endif
 
-/* #undef INET6 */
-/* #undef LOCAL_SMUX */
+/* #undef NETSNMP_ENABLE_IPV6 */
+/* #undef NETSNMP_ENABLE_LOCAL_SMUX */
 
 /* define if agentx transport is to use domain sockets only */
-/* #undef AGENTX_DOM_SOCK_ONLY */
+/* #undef NETSNMP_AGENTX_DOM_SOCK_ONLY */
 
 #ifndef LOG_DAEMON
 #define       LOG_DAEMON      (3<<3)  /* system daemons */
@@ -1628,23 +1628,23 @@ typedef unsigned short   uint16_t;
 
 #if UCD_COMPATIBLE
 /* old and in the way */
-#define EXTENSIBLEMIB UCDAVIS_MIB
+#define EXTENSIBLEMIB NETSNMP_UCDAVIS_MIB
 #endif
 
 #if defined(_MSC_VER)
 /* this bit of magic enables or disables IPv6 transports */
-  #if INET6
+  #if NETSNMP_ENABLE_IPV6
     /* "dont have" implies "compile here" for snmplib/inet_?to?.c */
     #undef HAVE_INET_NTOP
     #undef HAVE_INET_PTON
-    #define SNMP_TRANSPORT_TCPIPV6_DOMAIN 1
-    #define SNMP_TRANSPORT_UDPIPV6_DOMAIN 1
+    #define NETSNMP_TRANSPORT_TCPIPV6_DOMAIN 1
+    #define NETSNMP_TRANSPORT_UDPIPV6_DOMAIN 1
   #else
     /* "have" implies "dont compile here" for snmplib/inet_?to?.c */
     #define HAVE_INET_NTOP 1
     #define HAVE_INET_PTON 1
-    #undef SNMP_TRANSPORT_TCPIPV6_DOMAIN
-    #undef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+    #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
+    #undef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
   #endif
 #endif
 
