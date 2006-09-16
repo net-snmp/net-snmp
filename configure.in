@@ -3002,7 +3002,7 @@ AC_INCLUDES_DEFAULT([])
 # more IRIX headers
 AC_CHECK_HEADERS(sys/tcpipstats.h sys/sysmp.h sys/systeminfo.h sys/sysget.h)
 # AIX system configuration
-AC_CHECK_HEADER(sys/systemcfg.h)
+AC_CHECK_HEADERS(sys/systemcfg.h)
 # from smux stuff
 AC_CHECK_HEADERS(err.h sys/filio.h sgtty.h)
 # AIX needs this for statfs func
