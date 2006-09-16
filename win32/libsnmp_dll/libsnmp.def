@@ -270,6 +270,7 @@ EXPORTS
 	vacm_scanViewInit
 	vacm_scanViewNext
 	vacm_checkSubtree
+	vacm_parse_config_auth_access
 	snmp_synch_response_cb
 	snmp_clone_varbind
 	snmp_free_varbind

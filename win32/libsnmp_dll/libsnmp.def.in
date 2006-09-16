@@ -262,6 +262,7 @@ EXPORTS
 	vacm_parse_config_access
 	vacm_parse_config_group
 	vacm_parse_config_view
+	vacm_parse_config_auth_access
 	store_vacm
 	vacm_scanGroupInit
 	vacm_scanGroupNext
