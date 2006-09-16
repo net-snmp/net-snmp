@@ -920,6 +920,9 @@
 /* Define to 1 if you have the <sys/sysmp.h> header file. */
 #undef HAVE_SYS_SYSMP_H
 
+/* Define to 1 if you have the <sys/systemcfg.h> header file. */
+#undef HAVE_SYS_SYSTEMCFG_H
+
 /* Define to 1 if you have the <sys/systeminfo.h> header file. */
 #undef HAVE_SYS_SYSTEMINFO_H
 
