@@ -68,6 +68,8 @@
 #define SZBUF_MAX               1024
 #define SZBUF_DLLNAME_MAX       32
 #define MAX_WINEXT_DLLS         100
+#define MAX_KEY_LENGTH          255
+#define MAX_VALUE_NAME          16383
 
 /* Structure to hold name, pointers to functions and MIB tree supported by
  * each Windows SNMP Extension DLL */
@@ -87,21 +89,16 @@ winExtensionAgents winExtensionAgent_temp;      /* For sorting */
 /* List of agents: HKLM\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ExtensionAgents
  * This will be changed so that the list is loaded from the registry or from snmpd.conf */
 
-char extDLLs[100][32] = {
-  "lmmib2.dll",
-  "inetmib1.dll",
-  "hostmib.dll",
-  "snmpmib.dll",
-  "evntagnt.dll",
-  "igmpagnt.dll",
-  "mcastmib.dll",
-  "rtipxmib.dll"  
-};
-int extDLLs_last = 7;
+char *extDLLs[MAX_WINEXT_DLLS];
+int extDLLs_index = 0;
+
 
 void printAsnObjectIdentifier(AsnObjectIdentifier myAsnObjectIdentifier);
 void winExtDLL_parse_config_winExtDLL(const char *token, char *cptr);
 void winExtDLL_free_config_winExtDLL(void);
+
+void read_ExtensionAgents_list();
+void read_ExtensionAgents_list2(const TCHAR *);
 
 void init_winExtDLL(void)
 {
@@ -645,6 +642,8 @@ winExtDLL_parse_config_winExtDLL(const char *token, char *cptr)
   HANDLE hInst = NULL;
 
   DEBUGMSGTL(("winExtDLL", "winExtDLL_parse_config_winExtDLL called\n"));        
+
+  read_ExtensionAgents_list();  
   
   if (atoi(cptr) == 0) {
     DEBUGMSGTL(("winExtDLL", "winExtDLL in snmpd.conf not set to 1.  Aborting initialization.\n"));        
@@ -661,7 +660,7 @@ winExtDLL_parse_config_winExtDLL(const char *token, char *cptr)
   }
 
   /* Load all the DLLs */
-  for (DLLnum = 0; DLLnum <= extDLLs_last; DLLnum++) {
+  for (DLLnum = 0; DLLnum <= extDLLs_index; DLLnum++) {
 
     DEBUGMSGTL(("winExtDLL", "---------------------------------\n"));
     DEBUGMSGTL(("winExtDLL", "DLL to load: %s, DLL number: %d, winExtensionAgent_num: %d\n", extDLLs[DLLnum], DLLnum,
@@ -811,5 +810,130 @@ winExtDLL_parse_config_winExtDLL(const char *token, char *cptr)
 void winExtDLL_free_config_winExtDLL(void) {
 }
 
+void read_ExtensionAgents_list() {
+  HKEY          hKey; 
+  unsigned char * key_value = NULL;
+  DWORD         key_value_size = 0;
+  DWORD         key_value_type = 0;
+  DWORD         valueSize = MAX_VALUE_NAME; 
+  int           i;
+  TCHAR         valueName[MAX_VALUE_NAME];
+  TCHAR         valueName2[MAX_VALUE_NAME];
+  DWORD         retCode;
+  
+  DEBUGMSGTL(("winExtDLL", "read_ExtensionAgents_list called\n"));
 
+  /* The Windows SNMP service stores the list of extension agents to be loaded in the
+   * registry under HKLM\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ExtensionAgents.
+   * This list contains a list of other keys that contain the actual file path to the DLL.
+   */
+
+  /* Open SYSTEM\\CurrentControlSet\\Services\\SNMP\\Parameters\\ExtensionAgent */
+  retCode = RegOpenKeyExA(
+      HKEY_LOCAL_MACHINE, 
+      "SYSTEM\\CurrentControlSet\\Services\\SNMP\\Parameters\\ExtensionAgents", 
+      0, 
+      KEY_QUERY_VALUE, 
+      &hKey);
+  
+  if (retCode == ERROR_SUCCESS) {
+    /* Enumerate list of extension agents.  This is a list of other keys that contain the
+     * actual filename of the extension agent.  */
+    for (i=0; retCode==ERROR_SUCCESS; i++) 
+    { 
+      valueSize = MAX_VALUE_NAME; 
+      valueName[0] = '\0'; 
+      retCode = RegEnumValue(
+          hKey,
+          i,
+          valueName, 
+          &valueSize, 
+          NULL, 
+          NULL,
+          NULL,
+          NULL);
+      
+      if (retCode == ERROR_SUCCESS ) 
+      { 
+        /* Get key name that contains the actual filename of the extension agent */
+        DEBUGMSGTL(("winExtDLL", "Registry: (%d) %s\n", i+1, valueName));
+        
+        key_value_size = MAX_VALUE_NAME;
+        if (RegQueryValueExA(
+              hKey, 
+              valueName, 
+              NULL, 
+              &key_value_type, 
+              valueName2, 
+              &key_value_size) == ERROR_SUCCESS) {
+        }
+        DEBUGMSGTL(("winExtDLL", "key_value: %s\n",valueName2));
+        read_ExtensionAgents_list2(valueName2);
+        extDLLs_index++;
+      }
+    }
+    if (extDLLs_index)
+      extDLLs_index--;
+  }
+}
+
+void read_ExtensionAgents_list2(const TCHAR *keyName) {
+  HKEY          hKey; 
+  unsigned char * key_value = NULL;
+  DWORD         key_value_size = 0;
+  DWORD         key_value_type = 0;
+  DWORD         valueSize = MAX_VALUE_NAME; 
+  TCHAR         valueName[MAX_VALUE_NAME];
+  TCHAR         valueNameExpanded[MAX_VALUE_NAME];
+  int           i;
+  DWORD         retCode;
+  
+  DEBUGMSGTL(("winExtDLL", "read_ExtensionAgents_list2 called\n"));
+  DEBUGMSGTL(("winExtDLL", "Registry: Opening key %s\n", keyName));
+
+  /* Open extension agent's key */
+  retCode = RegOpenKeyExA(
+      HKEY_LOCAL_MACHINE, 
+      keyName, 
+      0, 
+      KEY_QUERY_VALUE, 
+      &hKey);
+  
+  if (retCode == ERROR_SUCCESS) {
+    /* Read Pathname value */
+
+    DEBUGMSGTL(("winExtDLL", "Registry: Reading value for %s\n", keyName));
+       
+    key_value_size = MAX_VALUE_NAME;
+    retCode = RegQueryValueExA(
+        hKey, 
+        "Pathname", 
+        NULL, 
+        &key_value_type, 
+        valueName, 
+        &key_value_size);
+    
+    if (retCode == ERROR_SUCCESS) {
+      valueName[key_value_size-1] = NULL;               /* Make sure last element is a NULL */        
+      DEBUGMSGTL(("winExtDLL", "Extension agent Pathname size: %d\n",key_value_size));
+      DEBUGMSGTL(("winExtDLL", "Extension agent Pathname: %s\n",valueName));
+
+      if (ExpandEnvironmentStrings(valueName, valueNameExpanded, MAX_VALUE_NAME)) {
+        DEBUGMSGTL(("winExtDLL", "Extension agent Pathname expanded: %s\n",valueNameExpanded));
+        if (extDLLs_index < MAX_WINEXT_DLLS) {
+
+          extDLLs[extDLLs_index] = (char *) malloc((sizeof(char) * strlen(valueNameExpanded)));         
+          
+          if (extDLLs[extDLLs_index]) {
+            strcpy(extDLLs[extDLLs_index], valueNameExpanded );
+            DEBUGMSGTL(("winExtDLL", "Extension agent Pathname expanded extDLLs: %s\n",extDLLs[extDLLs_index]));
+          }
+          else {
+            DEBUGMSGTL(("winExtDLL", "Could not allocate memory for extDLLs[%d]\n",extDLLs_index));
+          }
+        }
+      }      
+    }
+  }
+}
 
