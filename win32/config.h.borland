@@ -8,7 +8,7 @@
 
 /* don't change these values! */
 #define NETSNMP_SNMPV1      0xAAAA       /* readable by anyone */
-#define NETSNMP_NETSNMP_SNMPV2ANY   0xA000       /* V2 Any type (includes NoAuth) */
+#define NETSNMP_SNMPV2ANY   0xA000       /* V2 Any type (includes NoAuth) */
 #define NETSNMP_SNMPV2AUTH  0x8000       /* V2 Authenticated requests only */
 
 /* default list of mibs to load */
