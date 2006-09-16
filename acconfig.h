@@ -817,7 +817,7 @@
 #undef CMU_COMPATIBLE
 
 /* final conclusion on nlist usage */
-#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST) && !defined(NETSNMP_NO_KMEM_USAGE)
+#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(NETSNMP_DONT_USE_NLIST) && !defined(NETSNMP_NO_KMEM_USAGE)
 #define NETSNMP_CAN_USE_NLIST
 #endif
 
@@ -1137,6 +1137,10 @@
 
 #ifdef NETSNMP_DISABLE_MD5
 # define DISABLE_MD5 NETSNMP_DISABLE_MD5
+#endif
+
+#ifdef NETSNMP_DONT_USE_NLIST
+# define DONT_USE_NLIST NETSNMP_DONT_USE_NLIST
 #endif
 
 #ifdef NETSNMP_CAN_USE_NLIST
