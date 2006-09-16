@@ -128,8 +128,6 @@ service extension DLLs by using the Net-SNMP winExtDLL extension.
 
 The current limitations are:
 
--The list of DLLs to load is currently hard coded in 
- agent\mibgroup\winExtDLL.c.
 -Only SNMP v1 data types are available for Windows SNMP extensions
  even if the extension supports the SNMP v2 data types.
 -Traps are not passed from the Windows SNMP extension to Net-SNMP.
