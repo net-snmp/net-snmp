@@ -368,8 +368,8 @@ netsnmp_add_traphandler(Netsnmp_Trap_Handler handler,
     for (traph2 = netsnmp_specific_traphandlers;
          traph2; traph2 = traph2->nextt) {
 	    		/* XXX - check this! */
-        if (snmp_oid_compare(traph2->trapoid, traph2->trapoid_len,
-                             trapOid, trapOidLen) <= 0)
+        if (snmp_oidtree_compare(traph2->trapoid, traph2->trapoid_len,
+                                 trapOid, trapOidLen) <= 0)
 	    break;
     }
     if (traph2) {
