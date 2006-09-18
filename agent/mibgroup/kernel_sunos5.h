@@ -31,6 +31,10 @@ typedef uint64_t Counter64;
 #define SOLARIS_HAVE_RFC4293_SUPPORT
 #endif
 
+#ifdef MIB2_IP6
+#define SOLARIS_HAVE_IPV6_MIB_SUPPORT
+#endif
+
 /*-
  * Manifest constants
  */
@@ -66,7 +70,9 @@ typedef enum {
     MIB_CMOT = 13,
     MIB_TRANSMISSION = 14,
     MIB_SNMP = 15,
+#ifdef SOLARIS_HAVE_IPV6_MIB_SUPPORT
     MIB_IP6_ADDR = 16,
+#endif
     MIBCACHE_SIZE	
 } mibgroup_e;
 
