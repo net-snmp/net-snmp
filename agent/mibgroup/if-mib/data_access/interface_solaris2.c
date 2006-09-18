@@ -13,13 +13,17 @@
 #include "if-mib/data_access/interface.h"
 #include <sys/ioctl.h>
 #include <sys/sockio.h>
+#include <strings.h>
 
-static void _set_ip_flags_v4(netsnmp_interface_entry *, mib2_ipAddrEntry_t *);
-static void _set_ip_flags_v6(netsnmp_interface_entry *, mib2_ipv6AddrEntry_t *);
+static int _set_ip_flags_v4(netsnmp_interface_entry *, mib2_ifEntry_t *);
 static int _match_ifname_v4addr(void *ifname, void *ipaddr);
+static int _get_v4addr(mib2_ifEntry_t *ife, mib2_ipAddrEntry_t *e);
+
+static int _set_ip_flags_v6(netsnmp_interface_entry *, mib2_ifEntry_t *);
+#ifdef SOLARIS_HAVE_IPV6_MIB_SUPPORT
+static int _get_v6addr(mib2_ifEntry_t *ife, mib2_ipv6AddrEntry_t *ipv6e);
 static int _match_ifname_v6addr(void *ifname, void *ipaddr);
-static int _get_v4addr(mib2_ifEntry_t *ife, mib2_ipAddrEntry_t *ipv4e);
-static int _get_v6addr(mib2_ifEntry_t *ife, mib2_ipv6AddrEntry_t *ipv4e);
+#endif
 
 void
 netsnmp_arch_interface_init(void)
@@ -36,7 +40,6 @@ netsnmp_arch_interface_init(void)
 oid
 netsnmp_arch_interface_index_find(const char *name)
 {
-    int             rc;
     int             sd;
     struct ifreq    ifr;
 
@@ -69,8 +72,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 {
     netsnmp_interface_entry *entry = NULL;
     mib2_ifEntry_t          ife; 
-    mib2_ipAddrEntry_t      ipv4e;
-    mib2_ipv6AddrEntry_t    ipv6e;
     int                     rc;
     req_e                   req = GET_FIRST;
     int                     error = 0;
@@ -88,30 +89,34 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
             &Get_everything, NULL)) == 0) {
         
         req = GET_NEXT;
-
-        if (l_flags & NETSNMP_ACCESS_INTERFACE_LOAD_IP4_ONLY &&
-            _get_v4addr(&ife, &ipv4e) == 0) {
-            continue;
-        } else if (l_flags & NETSNMP_ACCESS_INTERFACE_LOAD_IP6_ONLY &&
-               _get_v6addr(&ife, &ipv6e) == 0) {
-            continue;
-        } else {
-            _get_v4addr(&ife, &ipv4e);
-            _get_v6addr(&ife, &ipv6e);
-        }
-        /*
-         * First collect the information needed by IF-MIB
-         */
+	
         DEBUGMSGTL(("access:interface:container:arch", 
                     "processing '%s'\n", ife.ifDescr.o_bytes));
         entry = 
             netsnmp_access_interface_entry_create(ife.ifDescr.o_bytes, 
-                                                          ife.ifIndex);
+                                                  ife.ifIndex);
         if (entry == NULL) { 
             error = 1;
             break;
         }
         entry->ns_flags = 0;
+
+        if (l_flags & NETSNMP_ACCESS_INTERFACE_LOAD_IP4_ONLY &&
+            _set_ip_flags_v4(entry, &ife) == 0) {
+            netsnmp_access_interface_entry_free(entry);
+            continue;
+        } else if (l_flags & NETSNMP_ACCESS_INTERFACE_LOAD_IP6_ONLY &&
+                   _set_ip_flags_v6(entry, &ife) == 0) {
+            netsnmp_access_interface_entry_free(entry);
+            continue;
+        } else { 
+            (void) _set_ip_flags_v4(entry, &ife);
+            (void) _set_ip_flags_v6(entry, &ife);
+        }
+
+        /*
+         * collect the information needed by IF-MIB
+         */
         entry->paddr = malloc(ife.ifPhysAddress.o_length);
         if (entry->paddr == NULL) {
             error = 1;
@@ -205,15 +210,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         netsnmp_access_interface_entry_overrides(entry);
 
         /*
-         * Add information for ipv[46]InterfaceTable. Also, if the
-         * interface has either a v4 or a v6 address it is flagged
-         * as being active.
-         */
-
-        _set_ip_flags_v4(entry, &ipv4e);
-        _set_ip_flags_v6(entry, &ipv6e);
-
-        /*
          * add to container
          */
         CONTAINER_INSERT(container, entry);
@@ -232,13 +228,15 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 /**
  * @internal
  */
-static void
-_set_ip_flags_v4(netsnmp_interface_entry *entry, mib2_ipAddrEntry_t *ipv4e)
+static int 
+_set_ip_flags_v4(netsnmp_interface_entry *entry, mib2_ifEntry_t *ife)
 {
-    if (ipv4e->ipAdEntIfIndex.o_length > 0) {
-        entry->reasm_max_v4 = ipv4e->ipAdEntReasmMaxSize;
+    mib2_ipAddrEntry_t ipv4e; 
+
+    if (_get_v4addr(ife, &ipv4e) > 0) {
+        entry->reasm_max_v4 = ipv4e.ipAdEntReasmMaxSize;
 #if defined( SOLARIS_HAVE_RFC4293_SUPPORT )
-        entry->retransmit_v4 = ipv4e->ipAdEntRetransmitTime;
+        entry->retransmit_v4 = ipv4e.ipAdEntRetransmitTime;
 #endif
         entry->ns_flags |= 
             NETSNMP_INTERFACE_FLAGS_HAS_IPV4 |
@@ -246,21 +244,27 @@ _set_ip_flags_v4(netsnmp_interface_entry *entry, mib2_ipAddrEntry_t *ipv4e)
             NETSNMP_INTERFACE_FLAGS_HAS_V4_RETRANSMIT |
 #endif
             NETSNMP_INTERFACE_FLAGS_HAS_V4_REASMMAX;
+        return (1);
     }
+    return (0);
 }
+
 /**
  * @internal
  */
-static void
-_set_ip_flags_v6(netsnmp_interface_entry *entry, mib2_ipv6AddrEntry_t *ipv6e)
+static int 
+_set_ip_flags_v6(netsnmp_interface_entry *entry, mib2_ifEntry_t *ife)
 {
-    if (ipv6e->ipv6AddrIfIndex.o_length > 0) {
+#ifdef SOLARIS_HAVE_IPV6_MIB_SUPPORT
+    mib2_ipv6AddrEntry_t ipv6e;
+
+    if (_get_v6addr(ife, &ipv6e) > 0) {
         entry->ns_flags |= 
             NETSNMP_INTERFACE_FLAGS_HAS_IPV6;
 #if defined( SOLARIS_HAVE_RFC4293_SUPPORT )
-        entry->reasm_max_v6 = ipv6e->ipv6AddrReasmMaxSize;
-        entry->retransmit_v6 = ipv6e->ipv6AddrRetransmitTime;
-        entry->reachable_time = ipv6e->ipv6AddrReachableTime;
+        entry->reasm_max_v6 = ipv6e.ipv6AddrReasmMaxSize;
+        entry->retransmit_v6 = ipv6e.ipv6AddrRetransmitTime;
+        entry->reachable_time = ipv6e.ipv6AddrReachableTime;
         entry->ns_flags |= 
             NETSNMP_INTERFACE_FLAGS_HAS_V6_REASMMAX |
             NETSNMP_INTERFACE_FLAGS_HAS_V6_RETRANSMIT |
@@ -271,7 +275,10 @@ _set_ip_flags_v6(netsnmp_interface_entry *entry, mib2_ipv6AddrEntry_t *ipv6e)
         /* XXX Don't have this info, 1500 is the minimum */
         entry->reasm_max_v6 = 1500; 
 #endif /* SOLARIS_HAVE_RFC4293_SUPPORT */
+        return (1);
     }
+#endif /* SOLARIS_HAVE_IPV6_MIB_SUPPORT */
+    return (0);
 }
 
 /**
@@ -306,6 +313,7 @@ _get_v4addr(mib2_ifEntry_t *ife, mib2_ipAddrEntry_t *ipv4e)
     return (0);
 }
 
+#ifdef SOLARIS_HAVE_IPV6_MIB_SUPPORT
 /**
  * @internal
  */
@@ -338,6 +346,7 @@ _get_v6addr(mib2_ifEntry_t *ife, mib2_ipv6AddrEntry_t *ipv6e)
     bzero((void *)ipv6e, sizeof(*ipv6e));
     return (0);
 }
+#endif /* SOLARIS_HAVE_IPV6_MIB_SUPPORT */
 
 int
 netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
