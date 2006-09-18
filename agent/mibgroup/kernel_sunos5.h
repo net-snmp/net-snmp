@@ -10,6 +10,9 @@
  *
  */
 
+#ifndef _KERNEL_SUNOS5_H        /* duplicate include prevention */
+#define _KERNEL_SUNOS5_H
+
 #include <inet/mib2.h>
 
 #ifndef HAVE_COUNTER64
@@ -23,9 +26,6 @@ typedef uint64_t Counter64;
 	*tp++ = *fp++;							\
 	*tp++ = *fp++;							\
 	*tp++ = *fp++;
-
-#ifndef ZZ_SUNOS5_INSTR         /* duplicate include prevention */
-#define ZZ_SUNOS5_INSTR
 
 #ifdef MIB2_IP_TRAFFIC_STATS
 #define SOLARIS_HAVE_RFC4293_SUPPORT
