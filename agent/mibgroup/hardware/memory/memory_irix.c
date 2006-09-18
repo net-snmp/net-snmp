@@ -23,11 +23,14 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     /*
      * Retrieve the memory information from the underlying O/S...
      */
+    DEBUGMSGTL(("hardware/memory/memory_irix", "Start retrieving values from OS\n"));
     pagesz = getpagesize();
+    DEBUGMSGTL(("hardware/memory/memory_irix", "Page size: %d\n", pagesz));
     rminfosz = (int)sysmp(MP_SASZ, MPSA_RMINFO);
+    DEBUGMSGTL(("hardware/memory/memory_irix", "rminfo size: %d\n", rminfosz));
     if (sysmp(MP_SAGET, MPSA_RMINFO, &meminfo, rminfosz) < 0) {
-        snmp_log_perror("sysmp");
-        return;
+	snmp_log(LOG_ERR, "memory_irix: sysmp failed!\n");
+        return -1;
     }
 
     /*
@@ -43,6 +46,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->size  = meminfo.physmem;
         mem->free  = meminfo.availrmem;
         mem->other = -1;
+        DEBUGMSGTL(("hardware/memory/memory_irix", "Physical memory: size %u, free %u\n", mem->size, mem->free));
     }
 
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_VIRTMEM, 1 );
@@ -52,9 +56,10 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         if (!mem->descr)
              mem->descr = strdup("Virtual memory");
         mem->units = pagesz;
-        mem->size  = meminfo.freemem;
+        mem->size  = meminfo.availsmem + (meminfo.physmem - meminfo.availrmem);
         mem->free  = meminfo.availsmem;
         mem->other = -1;
+        DEBUGMSGTL(("hardware/memory/memory_irix", "Virtual memory: size %u, free %u\n", mem->size, mem->free));
     }
 
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 1 );
@@ -64,7 +69,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         if (!mem->descr)
              mem->descr = strdup("Swap space");
         mem->units = pagesz;
-        mem->size  = meminfo.freemem - meminfo.physmem;
+        mem->size  = meminfo.availsmem - meminfo.availrmem;
         mem->free  = meminfo.availsmem - meminfo.availrmem;
         mem->other = -1;
     }
