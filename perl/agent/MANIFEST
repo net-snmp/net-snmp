@@ -10,4 +10,6 @@ default_store/Makefile.PL
 default_store/default_store.pm
 default_store/default_store.xs
 default_store/test.pl
+Support/Makefile.PL
+Support/Support.pm
 
