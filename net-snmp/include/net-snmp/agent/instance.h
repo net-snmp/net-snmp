@@ -145,6 +145,7 @@ Netsnmp_Node_Handler netsnmp_instance_helper_handler;
 Netsnmp_Node_Handler netsnmp_instance_ulong_handler;
 Netsnmp_Node_Handler netsnmp_instance_long_handler;
 Netsnmp_Node_Handler netsnmp_instance_int_handler;
+Netsnmp_Node_Handler netsnmp_instance_uint_handler;
 Netsnmp_Node_Handler netsnmp_instance_counter32_handler;
 Netsnmp_Node_Handler netsnmp_instance_num_file_handler;
 
