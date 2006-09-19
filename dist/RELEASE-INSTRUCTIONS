@@ -6,6 +6,25 @@ the CMU code to make the agent "extensible", and hence the beginning
 tag name.
    -- Wes 2002-08
 
+
+CVS commit messages that generate auto-NEWS and auto-CHANGES
+extractions should be formatted like the following examples.  The
+extraction script is actually fairly lenient but you should try to
+stick to the following formats only please.  Everything for a
+particular entry must go on a single line, though it can be at the end
+of a line.  All entries marked CHANGES will go into the CHANGES file.
+All entries marked NEWS go into the NEWS and CHANGES file.
+
+  NEWS: snmpd: I did something really cool to the agent
+  CHANGES: snmptrapd: fixed something minor in snmptrapd
+  NEWS: perl: PATCH: 123,456: Applied patches 123 and 456 to support perl6
+  CHANGES: BUG: 13: Fixed bug 13 and secured the world at large against hackers
+
+Text before the above formatting will be ignored.  Text until the next
+newline or end is included in the description text.  Description text
+will be auto-line-wrapped.  See the dist/extractnews file for nasty
+regexp details.
+
 ***************************************************************************
 **** IMPORTANT NOTES:
   - Don't *ever* release a second tar ball under the same name as the
