@@ -38,11 +38,15 @@ void _init_builtin_mteEvent( const char *event, const char *oname,
 void
 init_mteEvent(void)
 {
+    static int _defaults_init = 0;
     init_event_table_data();
 
     /*
      * Insert fixed events for the default trigger notifications
      */
+    if ( _defaults_init)
+        return;
+
     _init_default_mteEvent( "mteTriggerFired",    "_triggerFire", 1 );
     _init_default_mteEvent( "mteTriggerRising",   "_triggerFire", 2 );
     _init_default_mteEvent( "mteTriggerFalling",  "_triggerFire", 3 );
@@ -50,6 +54,7 @@ init_mteEvent(void)
 
     _init_link_mteEvent( "linkDown", "_linkUpDown", 3 );
     _init_link_mteEvent( "linkUp",   "_linkUpDown", 4 );
+    _defaults_init = 1;
 }
 
 void
