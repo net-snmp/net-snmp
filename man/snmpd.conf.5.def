@@ -385,6 +385,11 @@ to determine the list of devices that will be scanned.
 .IP
 The pattern can include one or more wildcard expressions.
 See \fIsnmpd.examples(5)\fR for illustration of the wildcard syntax.
+.IP "skipNFSInHostResources [1|2]"
+controls whether NFS and NFS-like file systems should be omitted
+from the hrStorageTable (1) or not (2).
+If the Net-SNMP agent gets hung on NFS-mounted filesystems, you
+can try setting this to '1'.
 .IP "storageUseNFS [1|2]"
 controls how NFS and NFS-like file systems should be reported
 in the hrStorageTable.
