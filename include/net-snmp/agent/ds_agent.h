@@ -20,6 +20,7 @@
 #define NETSNMP_DS_AGENT_DONT_RETAIN_NOTIFICATIONS 10   /* 1 = disable trap logging */
 #define NETSNMP_DS_AGENT_DONT_LOG_TCPWRAPPERS_CONNECTS 12   /* 1 = disable logging */
 #define NETSNMP_DS_APP_DONT_LOG         NETSNMP_DS_AGENT_DONT_RETAIN_NOTIFICATIONS /* compat */
+#define NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES    13   /* 1 = don't store NFS entries in hrStorageTable */
 
 /* WARNING: The trap receiver uses DS flags and must not conflict with
    these!  If you use a value above 15, change the minimimum DS bool
