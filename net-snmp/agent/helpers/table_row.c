@@ -85,6 +85,7 @@ netsnmp_table_row_handler_get(void *row)
     }
 
     handler->myvoid = (void*)row;
+    handler->flags |= MIB_HANDLER_INSTANCE;
  /* handler->flags |= MIB_HANDLER_AUTO_NEXT;  ??? */
     
     return handler;

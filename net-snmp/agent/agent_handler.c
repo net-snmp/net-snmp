@@ -202,6 +202,8 @@ int
 netsnmp_register_handler(netsnmp_handler_registration *reginfo)
 {
     netsnmp_mib_handler *handler;
+    int flags = 0;
+
     if (reginfo == NULL) {
         snmp_log(LOG_ERR, "netsnmp_register_handler() called illegally\n");
         netsnmp_assert(reginfo != NULL);
@@ -245,13 +247,18 @@ netsnmp_register_handler(netsnmp_handler_registration *reginfo)
                                netsnmp_get_bulk_to_next_handler());
     }
 
+    for (handler = reginfo->handler; handler; handler = handler->next) {
+        if (handler->flags & MIB_HANDLER_INSTANCE)
+            flags = FULLY_QUALIFIED_INSTANCE;
+    }
+
     return netsnmp_register_mib(reginfo->handlerName,
                                 NULL, 0, 0,
                                 reginfo->rootoid, reginfo->rootoid_len,
                                 reginfo->priority,
                                 reginfo->range_subid,
                                 reginfo->range_ubound, NULL,
-                                reginfo->contextName, reginfo->timeout, 0,
+                                reginfo->contextName, reginfo->timeout, flags,
                                 reginfo, 1);
 }
 

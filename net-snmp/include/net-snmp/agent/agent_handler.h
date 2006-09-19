@@ -31,6 +31,7 @@ struct netsnmp_handler_registration_s;
  */
 #define MIB_HANDLER_AUTO_NEXT                   0x00000001
 #define MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE     0x00000002
+#define MIB_HANDLER_INSTANCE                    0x00000004
 
 #define MIB_HANDLER_CUSTOM4                     0x10000000
 #define MIB_HANDLER_CUSTOM3                     0x20000000
