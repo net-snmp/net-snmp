@@ -1386,7 +1386,8 @@ ifConnectorPresent_get(ifXTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ifConnectorPresent data.
      * copy (* ifConnectorPresent_val_ptr ) from rowreq_ctx->data
      */
-    (*ifConnectorPresent_val_ptr) = rowreq_ctx->data.ifConnectorPresent;
+    (*ifConnectorPresent_val_ptr) = rowreq_ctx->data.ifConnectorPresent ?
+        TV_TRUE : TV_FALSE;
 
     return MFD_SUCCESS;
 }                               /* ifConnectorPresent_get */
