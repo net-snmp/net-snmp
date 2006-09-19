@@ -211,6 +211,34 @@ netsnmp_register_long_instance(const char *name,
     return netsnmp_register_instance(myreg);
 }
 
+
+int
+netsnmp_register_read_only_uint_instance(const char *name,
+                                         oid * reg_oid, size_t reg_oid_len,
+                                         unsigned int *it,
+                                         Netsnmp_Node_Handler * subhandler)
+{
+    netsnmp_handler_registration *myreg;
+
+    myreg = get_reg(name, "uint_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RONLY, netsnmp_instance_uint_handler,
+                    subhandler, NULL);
+    return netsnmp_register_read_only_instance(myreg);
+}
+
+int
+netsnmp_register_uint_instance(const char *name,
+                               oid * reg_oid, size_t reg_oid_len,
+                               unsigned int *it, Netsnmp_Node_Handler * subhandler)
+{
+    netsnmp_handler_registration *myreg;
+
+    myreg = get_reg(name, "uint_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RWRITE, netsnmp_instance_uint_handler,
+                    subhandler, NULL);
+    return netsnmp_register_instance(myreg);
+}
+
 int
 netsnmp_register_read_only_int_instance(const char *name,
                                 oid * reg_oid, size_t reg_oid_len,
@@ -589,7 +617,7 @@ netsnmp_instance_long_handler(netsnmp_mib_handler *handler,
         /*
          * store old info for undo later 
          */
-        memdup((u_char **) & it_save, (u_char *) it, sizeof(u_long));
+        memdup((u_char **) & it_save, (u_char *) it, sizeof(long));
         if (it_save == NULL) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);
@@ -669,7 +697,7 @@ netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
         /*
          * store old info for undo later 
          */
-        memdup((u_char **) & it_save, (u_char *) it, sizeof(u_long));
+        memdup((u_char **) & it_save, (u_char *) it, sizeof(int));
         if (it_save == NULL) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);
@@ -832,6 +860,86 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
         break;
     }
 
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                         requests);
+    return SNMP_ERR_NOERROR;
+}
+
+int
+netsnmp_instance_uint_handler(netsnmp_mib_handler *handler,
+                              netsnmp_handler_registration *reginfo,
+                              netsnmp_agent_request_info *reqinfo,
+                              netsnmp_request_info *requests)
+{
+
+    unsigned int *it = (unsigned int *) handler->myvoid;
+    unsigned int *it_save;
+    unsigned long tmp_it;
+    
+    DEBUGMSGTL(("netsnmp_instance_uint_handler", "Got request:  %d\n",
+                reqinfo->mode));
+
+    switch (reqinfo->mode) {
+        /*
+         * data requests 
+         */
+    case MODE_GET:
+	/*
+	 * Use a long here, otherwise on 64 bit use of an int would fail
+	 */
+	tmp_it = *it;
+        snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
+                                 (u_char *) &tmp_it, sizeof(unsigned long));
+        break;
+
+        /*
+         * SET requests.  Should only get here if registered RWRITE 
+         */
+    case MODE_SET_RESERVE1:
+        if (requests->requestvb->type != ASN_UNSIGNED)
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_ERR_WRONGTYPE);
+        break;
+
+    case MODE_SET_RESERVE2:
+        /*
+         * store old info for undo later 
+         */
+        memdup((u_char **) & it_save, (u_char *) it, sizeof(u_int));
+        if (it_save == NULL) {
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_ERR_RESOURCEUNAVAILABLE);
+            return SNMP_ERR_NOERROR;
+        }
+        netsnmp_request_add_list_data(requests,
+                                      netsnmp_create_data_list
+                                      (INSTANCE_HANDLER_NAME, it_save,
+                                       free));
+        break;
+
+    case MODE_SET_ACTION:
+        /*
+         * update current 
+         */
+        DEBUGMSGTL(("testhandler", "updated uint %d -> %l\n", *it,
+                    *(requests->requestvb->val.integer)));
+        *it = (unsigned int) *(requests->requestvb->val.integer);
+        break;
+
+    case MODE_SET_UNDO:
+        *it =
+            *((u_int *) netsnmp_request_get_list_data(requests,
+                                                      INSTANCE_HANDLER_NAME));
+        break;
+
+    case MODE_SET_COMMIT:
+    case MODE_SET_FREE:
+        /*
+         * nothing to do 
+         */
+        break;
+    }
     if (handler->next && handler->next->access_method)
         return netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                          requests);
