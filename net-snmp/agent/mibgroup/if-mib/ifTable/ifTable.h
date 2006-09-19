@@ -282,7 +282,7 @@ config_exclude(mibII/interfaces)
         /*
          * ifConnectorPresent(17)/TruthValue/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
          */
-        u_long          ifConnectorPresent;
+#define ifConnectorPresent ifentry->connector_present
 
         /*
          * ifAlias(18)/DisplayString/ASN_OCTET_STR/char(char)//L/A/W/e/R/d/H
