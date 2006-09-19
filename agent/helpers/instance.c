@@ -72,7 +72,9 @@ netsnmp_get_instance_handler(void)
 int
 netsnmp_register_instance(netsnmp_handler_registration *reginfo)
 {
-    netsnmp_inject_handler(reginfo, netsnmp_get_instance_handler());
+    netsnmp_mib_handler *handler = netsnmp_get_instance_handler();
+    handler->flags |= MIB_HANDLER_INSTANCE;
+    netsnmp_inject_handler(reginfo, handler);
     return netsnmp_register_serialize(reginfo);
 }
 
