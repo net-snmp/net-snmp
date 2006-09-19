@@ -1348,7 +1348,10 @@ void *cb_data;
 	av_push(traplist, newSVpv(cp,strlen(cp)));
 	av_push(traplist, newSViv(pdu->trap_type));
 	av_push(traplist, newSViv(pdu->specific_type));
-        av_push(traplist, newSVuv(pdu->time));
+        /* perl didn't have perlSVuv until 5.6.0 */
+        tmp_sv=newSViv(0);
+        sv_setuv(tmp_sv, pdu->time);
+        av_push(traplist, tmp_sv);
     }
       /* FALLTHRU */
     case SNMP_MSG_RESPONSE:
