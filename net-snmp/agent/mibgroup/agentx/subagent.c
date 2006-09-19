@@ -739,6 +739,7 @@ agentx_unregister_callbacks(netsnmp_session * ss)
 int
 subagent_open_master_session(void)
 {
+    netsnmp_transport *t;
     netsnmp_session sess;
 
     DEBUGMSGTL(("agentx/subagent", "opening session...\n"));
@@ -754,47 +755,53 @@ subagent_open_master_session(void)
     sess.retries = SNMP_DEFAULT_RETRIES;
     sess.timeout = SNMP_DEFAULT_TIMEOUT;
     sess.flags |= SNMP_FLAGS_STREAM_SOCKET;
-    if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET)) {
-        sess.peername = strdup(
-            netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET));
-    } else {
-        sess.peername = strdup(NETSNMP_AGENTX_SOCKET);
-    }
-
-    sess.local_port = 0;        /* client */
-    sess.remote_port = AGENTX_PORT;     /* default port */
     sess.callback = handle_agentx_packet;
     sess.authenticator = NULL;
-    main_session = snmp_open_ex(&sess, NULL, agentx_parse, NULL, NULL,
-                                agentx_realloc_build, agentx_check_packet);
 
-    if (main_session == NULL) {
+    t = netsnmp_transport_open_client(
+            "agentx", netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                            NETSNMP_DS_AGENT_X_SOCKET));
+    if (t == NULL) {
         /*
          * Diagnose snmp_open errors with the input
          * netsnmp_session pointer.  
          */
-        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS)) {
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                    NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS)) {
             char buf[1024];
-            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                snprintf(buf, sizeof(buf), "Warning: "
-                         "Failed to connect to the agentx master agent (%s)",
-                         sess.peername);
+            const char *socket =
+                netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                      NETSNMP_DS_AGENT_X_SOCKET);
+            snprintf(buf, sizeof(buf), "Warning: "
+                     "Failed to connect to the agentx master agent (%s)",
+                     socket ? socket : "[NIL]");
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                        NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
                 netsnmp_sess_log_error(LOG_WARNING, buf, &sess);
             } else {
-                snprintf(buf, sizeof(buf), "Error: "
-                         "Failed to connect to the agentx master agent (%s)",
-                         sess.peername);
                 snmp_sess_perror(buf, &sess);
             }
         }
-        if (sess.peername)
-            /* was memduped above and is no longer needed */
-            free(sess.peername);
         return -1;
     }
-    if (sess.peername)
-        /* was memduped above and is no longer needed */
-        free(sess.peername);
+
+    main_session =
+        snmp_add_full(&sess, t, NULL, agentx_parse, NULL, NULL,
+                      agentx_realloc_build, agentx_check_packet, NULL);
+
+    if (main_session == NULL) {
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                    NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS)) {
+            char buf[1024];
+            snprintf(buf, sizeof(buf), "Error: "
+                     "Failed to create the agentx master agent session (%s)",
+                     netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                           NETSNMP_DS_AGENT_X_SOCKET));
+            snmp_sess_perror(buf, &sess);
+        }
+        netsnmp_transport_free(t);
+        return -1;
+    }
 
     /*
      * I don't know why 1 is success instead of the usual 0 = noerr, 

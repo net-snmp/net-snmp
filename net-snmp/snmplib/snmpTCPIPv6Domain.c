@@ -432,14 +432,19 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
     return t;
 }
 
-
+/*
+ * Not extern but still defined in snmpUDPIPv6Domain.c
+ */
+extern int
+netsnmp_sockaddr_in6_2(struct sockaddr_in6*, const char*, const char*);
 
 netsnmp_transport *
-netsnmp_tcp6_create_tstring(const char *str, int local)
+netsnmp_tcp6_create_tstring(const char *str, int local,
+			    const char *default_target)
 {
     struct sockaddr_in6 addr;
 
-    if (netsnmp_sockaddr_in6(&addr, str, 0)) {
+    if (netsnmp_sockaddr_in6_2(&addr, str, default_target)) {
         return netsnmp_tcp6_transport(&addr, local);
     } else {
         return NULL;
@@ -477,7 +482,7 @@ netsnmp_tcp6_ctor(void)
 {
     tcp6Domain.name = netsnmp_TCPIPv6Domain;
     tcp6Domain.name_length = sizeof(netsnmp_TCPIPv6Domain) / sizeof(oid);
-    tcp6Domain.f_create_from_tstring = netsnmp_tcp6_create_tstring;
+    tcp6Domain.f_create_from_tstring_new = netsnmp_tcp6_create_tstring;
     tcp6Domain.f_create_from_ostring = netsnmp_tcp6_create_ostring;
     tcp6Domain.prefix = calloc(4, sizeof(char *));
     tcp6Domain.prefix[0] = "tcp6";

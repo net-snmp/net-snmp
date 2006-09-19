@@ -58,7 +58,7 @@ real_init_master(void)
 {
     netsnmp_session sess, *session;
     char *agentx_sockets;
-    char *cp1, *cp2;
+    char *cp1;
 
 #ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
     int agentx_dir_perm;
@@ -86,7 +86,7 @@ real_init_master(void)
        }
 #endif
     } else {
-        agentx_sockets = strdup(NETSNMP_AGENTX_SOCKET);
+        agentx_sockets = strdup("");
     }
 
 
@@ -99,19 +99,17 @@ real_init_master(void)
     sess.retries = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                       NETSNMP_DS_AGENT_AGENTX_RETRIES);
     cp1 = agentx_sockets;
-    while (1) {
+    while (cp1) {
+        netsnmp_transport *t;
         /*
          *  If the AgentX socket string contains multiple descriptors,
          *  then pick this apart and handle them one by one.
          *
          */
-        cp2 = strchr(cp1, ',');
-        if (cp2 != NULL) {
-            *cp2 = '\0';
-	}
         sess.peername = cp1;
-        if (cp2 != NULL) {
-            cp1 = cp2+1;
+        cp1 = strchr(sess.peername, ',');
+        if (cp1 != NULL) {
+            *cp1++ = '\0';
 	}
     
         if (sess.peername[0] == '/') {
@@ -142,65 +140,68 @@ real_init_master(void)
         sess.local_port = AGENTX_PORT;      /* Indicate server & set default port */
         sess.remote_port = 0;
         sess.callback = handle_master_agentx_packet;
-        session = snmp_open_ex(&sess, NULL, agentx_parse, NULL, NULL,
-                               agentx_realloc_build, agentx_check_packet);
-    
-        if (session == NULL && sess.s_errno == EADDRINUSE) {
+        errno = 0;
+        t = netsnmp_transport_open_server("agentx", sess.peername);
+        if (t == NULL && errno == EADDRINUSE) {
             /*
              * Could be a left-over socket (now deleted)
              * Try again
              */
-            session = snmp_open_ex(&sess, NULL, agentx_parse, NULL, NULL,
-                                   agentx_realloc_build, agentx_check_packet);
+            t = netsnmp_transport_open_server("agentx", sess.peername);
         }
-    
-        if (session == NULL) {
+        if (t == NULL) {
             /*
-             * diagnose snmp_open errors with the input netsnmp_session pointer 
+             * diagnose snmp_open errors with the input netsnmp_session
+             * pointer.
              */
             char buf[1024];
-            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                        NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
                 snprintf(buf, sizeof(buf),
-                    "Error: Couldn't open a master agentx socket to listen on (%s)", sess.peername);
+                         "Error: Couldn't open a master agentx socket to "
+                         "listen on (%s)", sess.peername);
                 snmp_sess_perror(buf, &sess);
                 exit(1);
             } else {
                 snprintf(buf, sizeof(buf),
-                    "Warning: Couldn't open a master agentx socket to listen on (%s)", sess.peername);
+                         "Warning: Couldn't open a master agentx socket to "
+                         "listen on (%s)", sess.peername);
                 netsnmp_sess_log_error(LOG_WARNING, buf, &sess);
             }
+        } else {
+            session =
+                snmp_add_full(&sess, t, NULL, agentx_parse, NULL, NULL,
+                              agentx_realloc_build, agentx_check_packet, NULL);
+        }
+        if (session == NULL) {
+            netsnmp_transport_free(t);
         }
 
 #ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
-    /*
-     * Apply any settings to the ownership/permissions of the AgentX socket
-     */
-    agentx_sock_perm = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
-                                          NETSNMP_DS_AGENT_X_SOCK_PERM);
-    agentx_sock_user = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
-                                          NETSNMP_DS_AGENT_X_SOCK_USER);
-    agentx_sock_group = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
-                                          NETSNMP_DS_AGENT_X_SOCK_GROUP);
+        /*
+         * Apply any settings to the ownership/permissions of the AgentX socket
+         */
+        agentx_sock_perm = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                                              NETSNMP_DS_AGENT_X_SOCK_PERM);
+        agentx_sock_user = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                                              NETSNMP_DS_AGENT_X_SOCK_USER);
+        agentx_sock_group = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                                               NETSNMP_DS_AGENT_X_SOCK_GROUP);
 
-    if (agentx_sock_perm != 0)
-        chmod(sess.peername, agentx_sock_perm);
-    if (agentx_sock_user || agentx_sock_group) {
-        /*
-         * If either of user or group haven't been set,
-         *  then leave them unchanged.
-         */
-        if (agentx_sock_user == 0 )
-            agentx_sock_user = -1;
-        if (agentx_sock_group == 0 )
-            agentx_sock_group = -1;
-        chown(sess.peername, agentx_sock_user, agentx_sock_group);
-    }
+        if (agentx_sock_perm != 0)
+            chmod(sess.peername, agentx_sock_perm);
+        if (agentx_sock_user || agentx_sock_group) {
+            /*
+             * If either of user or group haven't been set,
+             *  then leave them unchanged.
+             */
+            if (agentx_sock_user == 0 )
+                agentx_sock_user = -1;
+            if (agentx_sock_group == 0 )
+                agentx_sock_group = -1;
+            chown(sess.peername, agentx_sock_user, agentx_sock_group);
+        }
 #endif
-        /*
-         * If we've processed the last (or only) socket, then we're done.
-         */
-        if (!cp2)
-            break;
     }
 
     SNMP_FREE(agentx_sockets);

@@ -276,117 +276,142 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
  */
 
 int
-netsnmp_sockaddr_ipx(struct sockaddr_ipx *addr, const char *peername)
+netsnmp_sockaddr_ipx2(struct sockaddr_ipx *addr, const char *peername,
+		      const char *default_target)
 {
-    char           *cp = NULL;
-    unsigned int    network = 0, i = 0;
+    char           *input = NULL, *def = NULL;
+    const char     *network, *node, *port;
+    char           *tmp;
+    unsigned long   i;
 
     if (addr == NULL) {
         return 0;
     }
     memset(addr, 0, sizeof(struct sockaddr_ipx));
 
-    DEBUGMSGTL(("netsnmp_sockaddr_ipx", "addr %p, peername \"%s\"\n",
-                addr, peername ? peername : "[NIL]"));
+    DEBUGMSGTL(("netsnmp_sockaddr_ipx",
+		"addr %p, peername \"%s\" default_target \"%s\"\n",
+                addr, peername ? peername : "[NIL]",
+		default_target ? default_target : "[NIL]"));
 
     addr->sipx_family = AF_IPX;
     addr->sipx_type = 4;        /*  Specified in RFC 1420.  */
 
-    if (peername == NULL) {
-        return 0;
+    network = input = strdup(peername ? peername : "");
+    tmp = strchr(network, ':');
+    if (tmp != NULL) {
+        DEBUGMSGTL(("netsnmp_sockaddr_ipx", "Node identified\n"));
+        *tmp++ = '\0';
+	node = tmp;
+        tmp = strchr(tmp, '/');
+    } else {
+        node = NULL;
+        tmp = strchr(network, '/');
+    }
+    if (tmp != NULL) {
+        DEBUGMSGTL(("netsnmp_sockaddr_ipx", "Port identified\n"));
+        *tmp++ = '\0';
+        port = tmp;
+    } else
+        port = NULL;
+
+    DEBUGMSGTL(("netsnmp_sockaddr_ipx", "Address: %s:%s/%s\n",
+                network ? network : "[NIL]", node ? node : "[NIL]",
+                port ? port : "[NIL]"));
+
+    def = strdup(default_target ? default_target : "");
+    if (network == NULL || *network == '\0')
+        network = def;
+    tmp = strchr(def, ':');
+    if (tmp != NULL) {
+        *tmp++ = '\0';
+	if (node == NULL || *node == '\0')
+            node = tmp;
+        tmp = strchr(tmp, '/');
+    } else
+        tmp = strchr(def, '/');
+    if (tmp != NULL) {
+        *tmp++ = '\0';
+        if (port == NULL || *port == '\0')
+            port = tmp;
     }
 
-    /*
-     * Skip leading white space.  
-     */
+    DEBUGMSGTL(("netsnmp_sockaddr_ipx", "Address: %s:%s/%s\n",
+                network ? network : "[NIL]", node ? node : "[NIL]",
+                port ? port : "[NIL]"));
 
-    while (*peername && isspace((int) *peername)) {
-        peername++;
-    }
+    if (network == NULL || *network == '\0')
+        network = "0";
 
-    if (!*peername) {
-        /*
-         * Completely blank address.  Let this mean "any network, any address,
-         * default SNMP port".  
-         */
-        addr->sipx_network = htonl(0);
-        for (i = 0; i < 6; i++) {
-            addr->sipx_node[i] = 0;
-        }
-        addr->sipx_port = htons(SNMP_IPX_DEFAULT_PORT);
-        return 1;
-    }
+    if (node == NULL || *node == '\0')
+        node = "000000000000";
 
-    /*
-     * Try to get a leading network address.  
-     */
+    if (port == NULL || *port == '\0')
+#define val(x) __STRING(x)
+        port = val(SNMP_IPX_DEFAULT_PORT);
+#undef val
 
-    network = strtoul(peername, &cp, 16);
-    if (cp != peername) {
+    DEBUGMSGTL(("netsnmp_sockaddr_ipx", "Address: %s:%s/%s\n",
+                network ? network : "[NIL]", node ? node : "[NIL]",
+                port ? port : "[NIL]"));
+
+    if(sscanf(network, "%8lx%*c", &i) == 1) {
         DEBUGMSGTL(("netsnmp_sockaddr_ipx", "network parsed okay\n"));
-        addr->sipx_network = htonl(network);
-        peername = cp;
+        addr->sipx_network = htonl(i);
     } else {
         DEBUGMSGTL(("netsnmp_sockaddr_ipx",
-                    "no network part of address\n"));
-        addr->sipx_network = htonl(0);
-    }
-
-    if (*peername == ':') {
-        /*
-         * Okay we are looking for a node number plus optionally a port here.  
-         */
-        int             node[6] = { 0, 0, 0, 0, 0, 0 }, rc = 0;
-        unsigned short  port = 0;
-        rc = sscanf(peername, ":%02X%02X%02X%02X%02X%02X/%hu",
-                    &node[0], &node[1], &node[2], &node[3], &node[4],
-                    &node[5], &port);
-        if (rc < 6) {
-            DEBUGMSGTL(("netsnmp_sockaddr_ipx",
-                        "no node -- fail (rc %d)\n", rc));
-            return 0;
-        } else if (rc == 6) {
-            DEBUGMSGTL(("netsnmp_sockaddr_ipx", "node, no port\n"));
-            for (i = 0; i < 6; i++) {
-                addr->sipx_node[i] = node[i];
-            }
-            addr->sipx_port = htons(SNMP_IPX_DEFAULT_PORT);
-        } else if (rc == 7) {
-            DEBUGMSGTL(("netsnmp_sockaddr_ipx", "node and port\n"));
-            for (i = 0; i < 6; i++) {
-                addr->sipx_node[i] = node[i];
-            }
-            addr->sipx_port = htons(port);
-        }
-    } else if (*peername == '/') {
-        /*
-         * Okay we are just looking for a port number here.  
-         */
-        unsigned short  port = 0;
-        for (i = 0; i < 6; i++) {
-            addr->sipx_node[i] = 0;
-        }
-        if (sscanf(peername, "/%hu", &port) != 1) {
-            DEBUGMSGTL(("netsnmp_sockaddr_ipx", "no port\n"));
-            addr->sipx_port = htons(SNMP_IPX_DEFAULT_PORT);
-        } else {
-            addr->sipx_port = htons(port);
-        }
-    } else {
+                    "failed to parse network part of address\n"));
+        free(def);
+        free(input);
         return 0;
     }
 
+    if(sscanf(node, "%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx%*c",
+              &addr->sipx_node[0], &addr->sipx_node[1],
+              &addr->sipx_node[2], &addr->sipx_node[3],
+              &addr->sipx_node[4], &addr->sipx_node[5]) == 6) {
+        DEBUGMSGTL(("netsnmp_sockaddr_ipx", "node parsed okay\n"));
+    } else {
+        DEBUGMSGTL(("netsnmp_sockaddr_ipx",
+                    "failed to parse node part of address\n"));
+        free(def);
+        free(input);
+        return 0;
+    }
+
+    if(sscanf(port, "%lu%*c", &i) == 1) {
+        DEBUGMSGTL(("netsnmp_sockaddr_ipx", "port parsed okay\n"));
+        addr->sipx_port = htons(i);
+    } else {
+        DEBUGMSGTL(("netsnmp_sockaddr_ipx",
+                    "failed to parse port part of address\n"));
+        free(def);
+        free(input);
+        return 0;
+    }
+
+    free(def);
+    free(input);
     return 1;
 }
 
 
 
+int
+netsnmp_sockaddr_ipx(struct sockaddr_ipx *addr, const char *peername)
+{
+    return netsnmp_sockaddr_ipx2(addr, peername, NULL);
+}
+
+
+
 netsnmp_transport *
-netsnmp_ipx_create_tstring(const char *str, int local)
+netsnmp_ipx_create_tstring(const char *str, int local,
+			   const char *default_target)
 {
     struct sockaddr_ipx addr;
 
-    if (netsnmp_sockaddr_ipx(&addr, str)) {
+    if (netsnmp_sockaddr_ipx2(&addr, str, default_target)) {
         return netsnmp_ipx_transport(&addr, local);
     } else {
         return NULL;
@@ -420,7 +445,7 @@ netsnmp_ipx_ctor(void)
     ipxDomain.prefix = calloc(2, sizeof(char *));
     ipxDomain.prefix[0] = "ipx";
 
-    ipxDomain.f_create_from_tstring = netsnmp_ipx_create_tstring;
+    ipxDomain.f_create_from_tstring_new = netsnmp_ipx_create_tstring;
     ipxDomain.f_create_from_ostring = netsnmp_ipx_create_ostring;
 
     netsnmp_tdomain_register(&ipxDomain);

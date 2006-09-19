@@ -25,7 +25,8 @@ extern oid netsnmp_snmpSTDDomain[];
     } netsnmp_std_data;
     
     netsnmp_transport *netsnmp_std_transport(const char *instring,
-                                             size_t instring_len);
+                                             size_t instring_len,
+                                             const char *default_target);
 
     /*
      * "Constructor" for transport domain object.  

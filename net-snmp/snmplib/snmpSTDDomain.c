@@ -148,7 +148,8 @@ netsnmp_std_accept(netsnmp_transport *t)
  */
 
 netsnmp_transport *
-netsnmp_std_transport(const char *instring, size_t instring_len)
+netsnmp_std_transport(const char *instring, size_t instring_len,
+		      const char *default_target)
 {
     netsnmp_transport *t;
 
@@ -181,6 +182,11 @@ netsnmp_std_transport(const char *instring, size_t instring_len)
      * if instring is not null length, it specifies a path to a prog
      * XXX: plus args
      */
+    if (instring_len == 0 && default_target != NULL) {
+	instring = default_target;
+	instring_len = strlen(default_target);
+    }
+
     if (instring_len != 0) {
         int infd[2], outfd[2];  /* sockets to and from the client */
         int childpid;
@@ -251,15 +257,16 @@ netsnmp_std_transport(const char *instring, size_t instring_len)
 }
 
 netsnmp_transport *
-netsnmp_std_create_tstring(const char *instring, int local)
+netsnmp_std_create_tstring(const char *instring, int local,
+			   const char *default_target)
 {
-    return netsnmp_std_transport(instring, strlen(instring));
+    return netsnmp_std_transport(instring, strlen(instring), default_target);
 }
 
 netsnmp_transport *
 netsnmp_std_create_ostring(const u_char * o, size_t o_len, int local)
 {
-    return netsnmp_std_transport(o, o_len);
+    return netsnmp_std_transport(o, o_len, NULL);
 }
 
 void
@@ -270,7 +277,7 @@ netsnmp_std_ctor(void)
     stdDomain.prefix = calloc(2, sizeof(char *));
     stdDomain.prefix[0] = "std";
 
-    stdDomain.f_create_from_tstring = netsnmp_std_create_tstring;
+    stdDomain.f_create_from_tstring_new = netsnmp_std_create_tstring;
     stdDomain.f_create_from_ostring = netsnmp_std_create_ostring;
 
     netsnmp_tdomain_register(&stdDomain);
