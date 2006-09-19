@@ -410,9 +410,9 @@ _reorder_getbulk(netsnmp_agent_session *asp)
 {
     int             i, n = 0, r = 0;
     int             repeats = asp->pdu->errindex;
-    int             j;
+    int             j, k;
     int             all_eoMib;
-    netsnmp_variable_list *prev = NULL;
+    netsnmp_variable_list *prev = NULL, *curr;
             
     if (asp->vbcount == 0)  /* Nothing to do! */
         return;
@@ -430,6 +430,35 @@ _reorder_getbulk(netsnmp_agent_session *asp)
     if (r == 0)
         return;
             
+    /* Fix endOfMibView entries. */
+    for (i = 0; i < r; i++) {
+        prev = NULL;
+        for (j = 0; j < repeats; j++) {
+	    curr = asp->bulkcache[i * repeats + j];
+            /*
+             *  If we don't have a valid name for a given repetition
+             *   (and probably for all the ones that follow as well),
+             *   extend the previous result to indicate 'endOfMibView'.
+             *  Or if the repetition already has type endOfMibView make
+             *   sure it has the correct objid (i.e. that of the previous
+             *   entry or that of the original request).
+             */
+            if (curr->name_length == 0 || curr->type == SNMP_ENDOFMIBVIEW) {
+		if (prev == NULL) {
+		    /* Use objid from original pdu. */
+		    prev = asp->orig_pdu->variables;
+		    for (k = i; prev && k > 0; k--)
+			prev = prev->next_variable;
+		}
+		if (prev) {
+		    snmp_set_var_objid(curr, prev->name, prev->name_length);
+		    snmp_set_var_typed_value(curr, SNMP_ENDOFMIBVIEW, NULL, 0);
+		}
+            }
+            prev = curr;
+        }
+    }
+
     /*
      * For each of the original repeating varbinds (except the last),
      *  go through the block of results for that varbind,
@@ -437,28 +466,12 @@ _reorder_getbulk(netsnmp_agent_session *asp)
      *  in the next block.
      */
     for (i = 0; i < r - 1; i++) {
-        prev = NULL;
         for (j = 0; j < repeats; j++) {
-            /*
-             *  If we don't have a valid name for a given repetition
-             *   (and probably for all the ones that follow as well),
-             *   extend the previous result to indicate 'endOfMibView'
-             */
-            if (asp->bulkcache[i * repeats + j]->name_length == 0
-                && prev) {
-                snmp_set_var_objid(
-                    asp->bulkcache[i * repeats + j],
-                    prev->name, prev->name_length);
-                snmp_set_var_typed_value(
-                    asp->bulkcache[i * repeats + j],
-                    SNMP_ENDOFMIBVIEW, NULL, 0);
-            }
-            prev = asp->bulkcache[i * repeats + j];
-
             asp->bulkcache[i * repeats + j]->next_variable =
                 asp->bulkcache[(i + 1) * repeats + j];
         }
     }
+
     /*
      * For the last of the original repeating varbinds,
      *  go through that block of results, and link each
@@ -467,37 +480,9 @@ _reorder_getbulk(netsnmp_agent_session *asp)
      * The very last instance of this block is left untouched
      *  since it (correctly) points to the end of the list.
      */
-    if (r > 0) {
-        prev = NULL;
-        for (j = 0; j < repeats - 1; j++) {
-            /*
-             *  Fill in missing names with 'endOfMibView' as above...
-             */
-            if (asp->bulkcache[(r - 1) * repeats + j]->name_length == 0
-                && prev) {
-                snmp_set_var_objid(
-                    asp->bulkcache[(r - 1) * repeats + j],
-                    prev->name, prev->name_length);
-                snmp_set_var_typed_value(
-                    asp->bulkcache[(r - 1) * repeats + j],
-                    SNMP_ENDOFMIBVIEW, NULL, 0);
-            }
-            prev = asp->bulkcache[(r - 1) * repeats + j];
-            asp->bulkcache[(r - 1) * repeats + j]->next_variable =
-                asp->bulkcache[j + 1];
-        }
-        /*
-         *  ... Not forgetting the very last entry
-         */
-        if (asp->bulkcache[r * repeats - 1]->name_length == 0
-            && prev) {
-            snmp_set_var_objid(
-                asp->bulkcache[r * repeats - 1],
-                prev->name, prev->name_length);
-            snmp_set_var_typed_value(
-                asp->bulkcache[r * repeats - 1],
-                SNMP_ENDOFMIBVIEW, NULL, 0);
-        }
+    for (j = 0; j < repeats - 1; j++) {
+	asp->bulkcache[(r - 1) * repeats + j]->next_variable = 
+	    asp->bulkcache[j + 1];
     }
 
     /*
@@ -534,6 +519,27 @@ _reorder_getbulk(netsnmp_agent_session *asp)
                 break;
             }
         }
+    }
+}
+
+
+/* EndOfMibView replies to a GETNEXT request should according to RFC3416
+ *  have the object ID set to that of the request. Our tree search 
+ *  algorithm will sometimes break that requirement. This function will
+ *  fix that.
+ */
+NETSNMP_STATIC_INLINE void
+_fix_endofmibview(netsnmp_agent_session *asp)
+{
+    netsnmp_variable_list *vb, *ovb;
+
+    if (asp->vbcount == 0)  /* Nothing to do! */
+        return;
+
+    for (vb = asp->pdu->variables, ovb = asp->orig_pdu->variables;
+	 vb && ovb; vb = vb->next_variable, ovb = ovb->next_variable) {
+	if (vb->type == SNMP_ENDOFMIBVIEW)
+	    snmp_set_var_objid(vb, ovb->name, ovb->name_length);
     }
 }
 
@@ -1511,6 +1517,10 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
                  * some stuff needs to be saved in special subagent cases 
                  */
                 save_set_cache(asp);
+                break;
+
+            case SNMP_MSG_GETNEXT:
+                _fix_endofmibview(asp);
                 break;
 
             case SNMP_MSG_GETBULK:
