@@ -25,6 +25,26 @@ newline or end is included in the description text.  Description text
 will be auto-line-wrapped.  See the dist/extractnews file for nasty
 regexp details.
 
+Valid tokens can technically be anything, but based on past history
+they should be one of:
+
+  snmpd
+  snmptrapd
+  snmplib
+  apps
+  snmpusm, snmpget, ...           # if it applies to just one
+  building
+  documentation
+  perl
+  mib2c
+  Linux, Solaris, Win32, FreeBSD, OpenBSD
+  misc
+
+The release maintainer will still need to edit and classify these
+further, of course, but this merely provides a start for them.
+
+
+
 ***************************************************************************
 **** IMPORTANT NOTES:
   - Don't *ever* release a second tar ball under the same name as the
