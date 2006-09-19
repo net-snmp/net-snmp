@@ -116,7 +116,7 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 
 # define netsnmp_dstaddr(x) (&(((struct in_pktinfo *)(CMSG_DATA(x)))->ipi_addr))
 
-static int netsnmp_udp_recvfrom(int s, char *buf, int len, struct sockaddr *from, int *fromlen, struct in_addr *dstip)
+static int netsnmp_udp_recvfrom(int s, char *buf, int len, struct sockaddr *from, socklen_t *fromlen, struct in_addr *dstip)
 {
     int r;
     struct iovec iov[1];
@@ -865,7 +865,7 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
             DEBUGMSGTL(("netsnmp_sockaddr_in",
                         "check destination %s\n", host));
 
-            if (inet_aton(host, &addr->sin_addr)) {
+            if (inet_pton(AF_INET, host, &addr->sin_addr)) {
                 /* Do nothing */
             } else {
 #if HAVE_GETADDRINFO
