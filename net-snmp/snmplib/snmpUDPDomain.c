@@ -592,7 +592,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
         return NULL;
     }
 
-    addr_pair = (struct	udp_addr_pair *) malloc(sizeof(netsnmp_udp_addr_pair));
+    addr_pair = (netsnmp_udp_addr_pair *) malloc(sizeof(netsnmp_udp_addr_pair));
     if (addr_pair == NULL) {
         return NULL;
     }
@@ -643,7 +643,6 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
 #if defined(linux) && defined(IP_PKTINFO)
         { 
             int sockopt = 1;
-            int sockoptlen = sizeof(int);
             if (setsockopt(t->sock, SOL_IP, IP_PKTINFO, &sockopt, sizeof sockopt) == -1) {
                 DEBUGMSGTL(("netsnmp_udp", "couldn't set IP_PKTINFO: %s\n",
                     strerror(errno)));
@@ -865,73 +864,69 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
             DEBUGMSGTL(("netsnmp_sockaddr_in",
                         "check destination %s\n", host));
 
-            if (inet_pton(AF_INET, host, &addr->sin_addr)) {
-                /* Do nothing */
-            } else {
 #if HAVE_GETADDRINFO
-              memset(&hint, 0, sizeof hint);
-              hint.ai_flags = 0;
-              hint.ai_family = PF_INET;
-              hint.ai_socktype = SOCK_DGRAM;
-              hint.ai_protocol = 0;
+            memset(&hint, 0, sizeof hint);
+            hint.ai_flags = 0;
+            hint.ai_family = PF_INET;
+            hint.ai_socktype = SOCK_DGRAM;
+            hint.ai_protocol = 0;
 
-              err = getaddrinfo(peername, NULL, &hint, &addrs);
-              if (err != 0) {
-                  snmp_log(LOG_ERR, "getaddrinfo: %s %s\n", peername,
-                           gai_strerror(err));
-                  free(peername);
-                  return 0;
-              }
-              if (addrs != NULL) {
-                  DEBUGMSGTL(("netsnmp_sockaddr_in",
-                              "hostname (resolved okay)\n"));
-                  memcpy(&addr->sin_addr,
-                         &((struct sockaddr_in *) addrs->ai_addr)->sin_addr,
-                         sizeof(struct in_addr));
-                  freeaddrinfo(addrs);
-              }
-              else {
-                  DEBUGMSGTL(("netsnmp_sockaddr_in",
-                              "Failed to resolve IPv4 hostname\n"));
-              }
-#elif HAVE_GETIPNODEBYNAME
-              hp = getipnodebyname(peername, AF_INET, 0, &err);
-              if (hp == NULL) {
-                  DEBUGMSGTL(("netsnmp_sockaddr_in",
-                              "hostname (couldn't resolve = %d)\n", err));
-                  free(peername);
-                  return 0;
-              }
-              DEBUGMSGTL(("netsnmp_sockaddr_in",
-                          "hostname (resolved okay)\n"));
-              memcpy(&(addr->sin_addr), hp->h_addr, hp->h_length);
-#elif HAVE_GETHOSTBYNAME
-              hp = gethostbyname(host);
-              if (hp == NULL) {
-                  DEBUGMSGTL(("netsnmp_sockaddr_in",
-                              "hostname (couldn't resolve)\n"));
-                  free(peername);
-                  return 0;
-              } else if (hp->h_addrtype != AF_INET) {
-                  DEBUGMSGTL(("netsnmp_sockaddr_in",
-                              "hostname (not AF_INET!)\n"));
-                  free(peername);
-                  return 0;
-              } else {
-                  DEBUGMSGTL(("netsnmp_sockaddr_in",
-                              "hostname (resolved okay)\n"));
-                  memcpy(&addr->sin_addr, hp->h_addr, hp->h_length);
-              }
-#else /* HAVE_GETHOSTBYNAME */
-              /*
-               * There is no name resolving function available.
-               */
-              DEBUGMSGTL(("netsnmp_sockaddr_in",
-                          "no getaddrinfo()/getipnodebyname()/gethostbyname()\n"));
-              free(peername);
-              return 0;
-#endif /* HAVE_GETHOSTBYNAME */
+            err = getaddrinfo(peername, NULL, &hint, &addrs);
+            if (err != 0) {
+                snmp_log(LOG_ERR, "getaddrinfo: %s %s\n", peername,
+                         gai_strerror(err));
+                free(peername);
+                return 0;
             }
+            if (addrs != NULL) {
+                DEBUGMSGTL(("netsnmp_sockaddr_in",
+                            "hostname (resolved okay)\n"));
+                memcpy(&addr->sin_addr,
+                       &((struct sockaddr_in *) addrs->ai_addr)->sin_addr,
+                       sizeof(struct in_addr));
+                freeaddrinfo(addrs);
+            }
+            else {
+                DEBUGMSGTL(("netsnmp_sockaddr_in",
+                            "Failed to resolve IPv4 hostname\n"));
+            }
+#elif HAVE_GETHOSTBYNAME
+            hp = gethostbyname(host);
+            if (hp == NULL) {
+                DEBUGMSGTL(("netsnmp_sockaddr_in",
+                            "hostname (couldn't resolve)\n"));
+                free(peername);
+                return 0;
+            } else if (hp->h_addrtype != AF_INET) {
+                DEBUGMSGTL(("netsnmp_sockaddr_in",
+                            "hostname (not AF_INET!)\n"));
+                free(peername);
+                return 0;
+            } else {
+                DEBUGMSGTL(("netsnmp_sockaddr_in",
+                            "hostname (resolved okay)\n"));
+                memcpy(&addr->sin_addr, hp->h_addr, hp->h_length);
+            }
+#elif HAVE_GETIPNODEBYNAME
+            hp = getipnodebyname(peername, AF_INET, 0, &err);
+            if (hp == NULL) {
+                DEBUGMSGTL(("netsnmp_sockaddr_in",
+                            "hostname (couldn't resolve = %d)\n", err));
+                free(peername);
+                return 0;
+            }
+            DEBUGMSGTL(("netsnmp_sockaddr_in",
+                        "hostname (resolved okay)\n"));
+            memcpy(&(addr->sin_addr), hp->h_addr, hp->h_length);
+#else /* HAVE_GETIPNODEBYNAME */
+            /*
+             * There is no name resolving function available.
+             */
+            DEBUGMSGTL(("netsnmp_sockaddr_in",
+                        "no getaddrinfo()/getipnodebyname()/gethostbyname()\n"));
+            free(peername);
+            return 0;
+#endif /* HAVE_GETHOSTBYNAME */
         }
 	free(peername);
     }
