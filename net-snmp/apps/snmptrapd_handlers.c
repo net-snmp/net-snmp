@@ -80,9 +80,18 @@ snmptrapd_parse_traphandle(const char *token, char *line)
     size_t          olen = MAX_OID_LEN;
     char           *cptr;
     netsnmp_trapd_handler *traph;
+    int             flags = 0;
 
     cptr = copy_nword(line, buf, sizeof(buf));
+
+    /* check for the -t flag which matches an entire tree */
+    if (strcmp(buf, "-t") == 0) {
+        flags |= NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE;
+        cptr = copy_nword(cptr, buf, sizeof(buf));
+    }
+        
     DEBUGMSGTL(("read_config:traphandle", "registering handler for: "));
+
     if (!strcmp(buf, "default")) {
         DEBUGMSG(("read_config:traphandle", "default"));
         traph = netsnmp_add_default_traphandler( command_handler );
@@ -103,6 +112,7 @@ snmptrapd_parse_traphandle(const char *token, char *line)
     DEBUGMSG(("read_config:traphandle", "\n"));
 
     if (traph) {
+        traph->flags = flags;
         traph->authtypes = TRAP_AUTH_EXE;
         traph->token = strdup(cptr);
     }
@@ -481,8 +491,12 @@ netsnmp_get_traphandler( oid *trapOid, int trapOidLen ) {
     for (traph = netsnmp_specific_traphandlers;
          traph; traph=traph->nextt ) {
 
-        if ( !snmp_oidtree_compare(traph->trapoid, traph->trapoid_len,
-                                   trapOid, trapOidLen)) {
+        if (((traph->flags & NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE) &&
+             snmp_oidtree_compare(traph->trapoid, traph->trapoid_len,
+                                  trapOid, trapOidLen) == 0) ||
+            (!(traph->flags & NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE) &&
+             snmp_oid_compare(traph->trapoid, traph->trapoid_len,
+                              trapOid, trapOidLen)) == 0) {
             DEBUGMSGTL(( "snmptrapd", "get_traphandler matched (%x)\n", traph));
 	    return traph;
 	}

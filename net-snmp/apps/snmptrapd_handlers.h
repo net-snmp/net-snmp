@@ -8,6 +8,8 @@ typedef int (Netsnmp_Trap_Handler)(netsnmp_pdu           *pdu,
                                    netsnmp_trapd_handler *handler);
 
 
+#define NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE 1
+
 struct netsnmp_trapd_handler_s {
      oid  *trapoid;
      int   trapoid_len;
@@ -15,6 +17,7 @@ struct netsnmp_trapd_handler_s {
      char *format;		/* Formatting string */
      int   version;		/* ??? */
      int   authtypes;
+     int   flags;
      Netsnmp_Trap_Handler *handler;
      void *handler_data;
 

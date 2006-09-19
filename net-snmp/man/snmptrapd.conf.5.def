@@ -167,12 +167,16 @@ the (long obsolete) M2M-MIB.
 As well as logging incoming notifications, they can also
 be forwarded on to another notification receiver, or passed
 to an external program for specialised processing.
-.IP "traphandle OID|default PROGRAM [ARGS ...]"
+.IP "traphandle [-t] OID|default PROGRAM [ARGS ...]"
 invokes the specified program (with the given arguments) whenever a
 notification is received with a \fCsnmpTrapOID\fR value matching the
 OID token.  If this field is \fIdefault\fR then the program will be
 invoked for any notification not matching another (OID specific)
 \fItraphandle\fR entry.
+.IP
+If the -t flag is specified than any OID from a trap that occurs below
+the OID specified will be matched.  EG, specifying an OID of .1.3.6.1.4.1 
+will match traps coming from an trap defined in the enterprise tree.
 .RS
 .IP Note:
 An SNMPv1 trap will be converted to an equivalent SNMPv2-style
