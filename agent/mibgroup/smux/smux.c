@@ -137,6 +137,8 @@ void
 smux_parse_peer_auth(const char *token, char *cptr)
 {
     smux_peer_auth *aptr;
+    char           *password_cptr;
+    int             cptr_len;
 
     if ((aptr =
          (smux_peer_auth *) calloc(1, sizeof(smux_peer_auth))) == NULL) {
@@ -160,13 +162,21 @@ smux_parse_peer_auth(const char *token, char *cptr)
     /*
      * oid 
      */
+    password_cptr = strchr(cptr, ' ');
+    cptr_len = strlen(cptr);
+    if (password_cptr)
+        *password_cptr = 0x0;
+
     aptr->sa_oid_len = MAX_OID_LEN;
     read_objid( cptr, aptr->sa_oid, &aptr->sa_oid_len );
 
     DEBUGMSGTL(("smux_conf", "parsing registration for: %s\n", cptr));
 
-    cptr = skip_token(cptr);
-    DEBUGMSGTL(("smux_conf", "password is: %s\n", cptr ? cptr : "NULL"));
+    if ((&password_cptr - &cptr + 1) < cptr_len) {
+        cptr = ++password_cptr;
+        DEBUGMSGTL(("smux_conf", "password is: %s\n",
+                    SNMP_STRORNULL(cptr)));
+    }
 
     /*
      * password 
