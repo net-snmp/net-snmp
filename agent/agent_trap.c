@@ -225,25 +225,14 @@ remove_trap_session(netsnmp_session * ss)
 }
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
-int
-create_trap_session(char *sink, u_short sinkport,
-                    char *com, int version, int pdutype)
+static int
+create_trap_session2(const char *sink, const char* sinkport,
+		     char *com, int version, int pdutype)
 {
+    netsnmp_transport *t;
     netsnmp_session session, *sesp;
-    char           *peername = NULL;
-    int             len;
-
-    len = strlen(sink) + 4 + 32;
-    if ((peername = malloc(len)) == NULL) {
-        return 0;
-    } else if (NULL != strchr(sink,':')) {
-        snprintf(peername, len, "%s", sink);
-    } else {
-        snprintf(peername, len, "udp:%s:%hu", sink, sinkport);
-    }
 
     memset(&session, 0, sizeof(netsnmp_session));
-    session.peername = peername;
     session.version = version;
     if (com) {
         session.community = (u_char *) com;
@@ -265,44 +254,62 @@ create_trap_session(char *sink, u_short sinkport,
                                        NETSNMP_DS_LIB_CLIENT_ADDR)) && 
         ((0 == strcmp("localhost",sink)) || (0 == strcmp("127.0.0.1",sink))))
         session.localname = "localhost";
-    sesp = snmp_open(&session);
-    free(peername);
 
-    if (sesp) {
-        return add_trap_session(sesp, pdutype,
-                                (pdutype == SNMP_MSG_INFORM), version);
+    t = netsnmp_tdomain_transport_full("snmptrap", sink, 0, NULL, sinkport);
+    if (t != NULL) {
+	sesp = snmp_add(&session, t, NULL, NULL);
+
+	if (sesp) {
+	    return add_trap_session(sesp, pdutype,
+				    (pdutype == SNMP_MSG_INFORM), version);
+	}
     }
-
     /*
      * diagnose snmp_open errors with the input netsnmp_session pointer 
      */
     snmp_sess_perror("snmpd: create_trap_session", &session);
     return 0;
 }
+
+int
+create_trap_session(char *sink, u_short sinkport,
+		    char *com, int version, int pdutype)
+{
+    char buf[sizeof(sinkport) * 3 + 2];
+    if (sinkport != 0) {
+	sprintf(buf, ":%hu", sinkport);
+	snmp_log(LOG_NOTICE,
+		 "Using a separate port number is deprecated, please correct "
+		 "the sink specification instead");
+    }
+    return create_trap_session2(sink, sinkport ? buf : NULL, com, version,
+				pdutype);
+}
+
 #endif /* support for community based SNMP */
 
 #ifndef NETSNMP_DISABLE_SNMPV1
 static int
-create_v1_trap_session(char *sink, u_short sinkport, char *com)
+create_v1_trap_session(char *sink, const char *sinkport, char *com)
 {
-    return create_trap_session(sink, sinkport, com,
-                               SNMP_VERSION_1, SNMP_MSG_TRAP);
+    return create_trap_session2(sink, sinkport, com,
+				SNMP_VERSION_1, SNMP_MSG_TRAP);
 }
 #endif
 
 #ifndef NETSNMP_DISABLE_SNMPV2C
 static int
-create_v2_trap_session(char *sink, u_short sinkport, char *com)
+create_v2_trap_session(const char *sink, const char *sinkport, char *com)
 {
-    return create_trap_session(sink, sinkport, com,
-                               SNMP_VERSION_2c, SNMP_MSG_TRAP2);
+    return create_trap_session2(sink, sinkport, com,
+				SNMP_VERSION_2c, SNMP_MSG_TRAP2);
 }
 
 static int
-create_v2_inform_session(char *sink, u_short sinkport, char *com)
+create_v2_inform_session(const char *sink, const char *sinkport, char *com)
 {
-    return create_trap_session(sink, sinkport, com,
-                               SNMP_VERSION_2c, SNMP_MSG_INFORM);
+    return create_trap_session2(sink, sinkport, com,
+				SNMP_VERSION_2c, SNMP_MSG_INFORM);
 }
 #endif
 
@@ -1029,7 +1036,6 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
 {
     char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
-    int             sinkport;
     char            *st;
 
     if (!snmp_trapcommunity)
@@ -1038,17 +1044,9 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
     cp = strtok_r(NULL, " \t\n", &st);
     if (cp)
         pp = strtok_r(NULL, " \t\n", &st);
-    if (cp && pp) {
-        sinkport = atoi(pp);
-        if ((sinkport < 1) || (sinkport > 0xffff)) {
-            config_perror("trapsink port out of range");
-            sinkport = SNMP_TRAP_PORT;
-        }
-    } else {
-        sinkport = SNMP_TRAP_PORT;
-    }
-    if (create_v1_trap_session(sp, (u_short)sinkport,
-                               cp ? cp : snmp_trapcommunity) == 0) {
+    if (pp)
+	config_pwarn("The separate port argument to trapsink is deprecated");
+    if (create_v1_trap_session(sp, pp, cp ? cp : snmp_trapcommunity) == 0) {
         snprintf(tmpbuf, sizeof(tmpbuf), "cannot create trapsink: %s", cptr);
         tmpbuf[sizeof(tmpbuf)-1] = '\0';
         config_perror(tmpbuf);
@@ -1071,17 +1069,9 @@ snmpd_parse_config_trap2sink(const char *word, char *cptr)
     cp = strtok_r(NULL, " \t\n", &st);
     if (cp)
         pp = strtok_r(NULL, " \t\n", &st);
-    if (cp && pp) {
-        sinkport = atoi(pp);
-        if ((sinkport < 1) || (sinkport > 0xffff)) {
-            config_perror("trapsink port out of range");
-            sinkport = SNMP_TRAP_PORT;
-        }
-    } else {
-        sinkport = SNMP_TRAP_PORT;
-    }
-    if (create_v2_trap_session(sp, (u_short)sinkport,
-                               cp ? cp : snmp_trapcommunity) == 0) {
+    if (pp)
+	config_pwarn("The separate port argument to trapsink2 is deprecated");
+    if (create_v2_trap_session(sp, pp, cp ? cp : snmp_trapcommunity) == 0) {
         snprintf(tmpbuf, sizeof(tmpbuf), "cannot create trap2sink: %s", cptr);
         tmpbuf[sizeof(tmpbuf)-1] = '\0';
         config_perror(tmpbuf);
@@ -1102,17 +1092,9 @@ snmpd_parse_config_informsink(const char *word, char *cptr)
     cp = strtok_r(NULL, " \t\n", &st);
     if (cp)
         pp = strtok_r(NULL, " \t\n", &st);
-    if (cp && pp) {
-        sinkport = atoi(pp);
-        if ((sinkport < 1) || (sinkport > 0xffff)) {
-            config_perror("trapsink port out of range");
-            sinkport = SNMP_TRAP_PORT;
-        }
-    } else {
-        sinkport = SNMP_TRAP_PORT;
-    }
-    if (create_v2_inform_session(sp, (u_short)sinkport,
-                                 cp ? cp : snmp_trapcommunity) == 0) {
+    if (pp)
+	config_pwarn("The separate port argument to informsink is deprecated");
+    if (create_v2_inform_session(sp, pp, cp ? cp : snmp_trapcommunity) == 0) {
         snprintf(tmpbuf, sizeof(tmpbuf), "cannot create informsink: %s", cptr);
         tmpbuf[sizeof(tmpbuf)-1] = '\0';
         config_perror(tmpbuf);

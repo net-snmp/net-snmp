@@ -43,6 +43,7 @@
 #include <net-snmp/library/snmpTCPIPv6Domain.h>
 #endif
 #include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/snmp_service.h>
 
 
 /*
@@ -305,98 +306,130 @@ netsnmp_tdomain_unregister(netsnmp_tdomain *n)
 }
 
 
-
+/*
+ * Locate the appropriate transport domain and call the create function for
+ * it.
+ */
 netsnmp_transport *
-netsnmp_tdomain_transport(const char *str, int local,
-                          const char *default_domain)
+netsnmp_tdomain_transport_full(const char *application,
+			       const char *str, int local,
+			       const char *default_domain,
+			       const char *default_target)
 {
-    netsnmp_tdomain *d;
+    netsnmp_tdomain *d, *match = NULL;
     netsnmp_transport *t = NULL;
-    const char     *spec, *addr;
-    char           *cp, *mystring;
+    const char     *spec, *addr = NULL, *addr2;
+    char           *cp, *mystring = NULL;
     int             i;
 
-    if (str == NULL) {
-        return NULL;
-    }
+    DEBUGMSGTL(("tdomain",
+		"tdomain_transport_full(\"%s\", \"%s\", %d, \"%s\", \"%s\")\n",
+		application, str ? str : "[NIL]", local,
+		default_domain ? default_domain : "[NIL]",
+		default_target ? default_target : "[NIL]"));
 
-    if ((mystring = strdup(str)) == NULL) {
-        DEBUGMSGTL(("tdomain", "can't strdup(\"%s\")\n", str));
-        return NULL;
-    }
+    /* First try - assume that there is a domain in str (domain:target) */
 
-    if ((cp = strchr(mystring, ':')) == NULL) {
-        /*
-         * There doesn't appear to be a transport specifier.  
-         */
-        DEBUGMSGTL(("tdomain", "no specifier in \"%s\"\n", mystring));
-        if (*mystring == '/') {
-            spec = "unix";
-            addr = mystring;
-        } else {
-            if (default_domain) {
-                spec = default_domain;
-            } else {
-                spec = "udp";
-            }
-            addr = mystring;
-        }
-    } else {
-        *cp = '\0';
-        spec = mystring;
-        addr = cp + 1;
-    }
-    DEBUGMSGTL(("tdomain", "specifier \"%s\" address \"%s\"\n", spec,
-                addr));
+    if (str != NULL) {
+	if ((mystring = strdup(str)) == NULL) {
+	    DEBUGMSGTL(("tdomain", "can't strdup(\"%s\")\n", str));
+	    return NULL;
+	}
 
-    for (d = domain_list; d != NULL; d = d->next) {
-        for (i = 0; d->prefix[i] != NULL; i++) {
-            if (strcasecmp(d->prefix[i], spec) == 0) {
-                DEBUGMSGTL(("tdomain", "specifier \"%s\" matched\n",
-                            spec));
-                t = d->f_create_from_tstring(addr, local);
-                SNMP_FREE(mystring);
-                return t;
-            }
-        }
+	if ((cp = strchr(mystring, ':')) != NULL) {
+	    *cp = '\0';
+	    spec = mystring;
+	    addr = cp + 1;
+
+	    for (d = domain_list; d != NULL && match == NULL; d = d->next)
+		for (i = 0; d->prefix[i] != NULL && match == NULL; i++)
+		    if (strcasecmp(d->prefix[i], spec) == 0)
+			match = d;
+	    if (match != NULL)
+		DEBUGMSGTL(("tdomain",
+			    "Found domain \"%s\" from specifier \"%s\"\n",
+			    match->prefix[0], spec));
+	    else
+		DEBUGMSGTL(("tdomain",
+			    "Found no domain from specifier \"%s\"\n", spec));
+	}
     }
 
     /*
-     * Okay no match so far.  Consider the possibility that we have something
-     * like hostname.domain.com:port which will have confused the parser above.
-     * Try and match again with the appropriate default domain.  
+     * Second try, if there is no domain in str (target), then try the
+     * default domain
      */
 
-    if (default_domain) {
-        spec = default_domain;
-    } else {
-        spec = "udp";
-    }
-    if (cp) {
-        *cp = ':';
+    if (match == NULL) {
+	addr = str;
+	if (addr && *addr == '/') {
+	    spec = "unix";
+	    DEBUGMSGTL(("tdomain",
+			"Address starts with '/', so assume \"unix\" "
+			"domain\n"));
+	} else if (default_domain) {
+	    spec = default_domain;
+	    DEBUGMSGTL(("tdomain",
+			"Use user specified default domain \"%s\"\n", spec));
+	} else {
+	    spec = netsnmp_lookup_default_domain(application);
+	    if (spec == NULL) {
+		spec = "udp";
+		DEBUGMSGTL(("tdomain",
+			    "No default domain found, assume \"udp\"\n"));
+	    } else {
+		DEBUGMSGTL(("tdomain",
+			    "Use application default domain \"%s\"\n", spec));
+	    }
+	}
+	for (d = domain_list; d != NULL && match == NULL; d = d->next)
+	    for (i = 0; d->prefix[i] != NULL && match == NULL; i++)
+		if (strcasecmp(d->prefix[i], spec) == 0)
+		    match = d;
+	if (match != NULL)
+	    DEBUGMSGTL(("tdomain",
+			"Found domain \"%s\" from specifier \"%s\"\n",
+			match->prefix[0], spec));
+	else {
+	    DEBUGMSGTL(("tdomain",
+			"Found no domain from specifier \"%s\"\n", spec));
+	    SNMP_FREE(mystring);
+	    snmp_log(LOG_ERR,
+		     "No support for any checked transport domain\n");
+	    return NULL;
+	}
     }
 
-    addr = mystring;
+    /*
+     * Ok, we know what domain to use, lets see what default data that should
+     * be used
+     */
+
+    if (default_target != NULL)
+	addr2 = default_target;
+    else
+	addr2 = netsnmp_lookup_default_target(application, match->prefix[0]);
+
     DEBUGMSGTL(("tdomain",
-                "try again with specifier \"%s\" address \"%s\"\n", spec,
-                addr));
+		"domain \"%s\" address \"%s\" default address \"%s\"\n",
+		match->prefix[0], addr ? addr : "[NIL]",
+		addr2 ? addr2 : "[NIL]"));
 
-    for (d = domain_list; d != NULL; d = d->next) {
-        for (i = 0; d->prefix[i] != NULL; i++) {
-            if (strcmp(d->prefix[i], spec) == 0) {
-                DEBUGMSGTL(("tdomain", "specifier \"%s\" matched\n",
-                            spec));
-                t = d->f_create_from_tstring(addr, local);
-                SNMP_FREE(mystring);
-                return t;
-            }
-        }
-    }
-
-    snmp_log(LOG_ERR, "No support for requested transport domain \"%s\"\n",
-             spec);
+    if (match->f_create_from_tstring)
+      t = match->f_create_from_tstring(addr, local);
+    else
+      t = match->f_create_from_tstring_new(addr, local, addr2);
     SNMP_FREE(mystring);
-    return NULL;
+    return t;
+}
+
+
+netsnmp_transport *
+netsnmp_tdomain_transport(const char *str, int local,
+			  const char *default_domain)
+{
+    return netsnmp_tdomain_transport_full("snmp", str, local, default_domain,
+					  NULL);
 }
 
 
@@ -425,6 +458,23 @@ netsnmp_tdomain_transport_oid(const oid * dom,
     return NULL;
 }
 
+netsnmp_transport*
+netsnmp_transport_open(const char* application, const char* str, int local)
+{
+    return netsnmp_tdomain_transport_full(application, str, local, NULL, NULL);
+}
+
+netsnmp_transport*
+netsnmp_transport_open_server(const char* application, const char* str)
+{
+    return netsnmp_tdomain_transport_full(application, str, 1, NULL, NULL);
+}
+
+netsnmp_transport*
+netsnmp_transport_open_client(const char* application, const char* str)
+{
+    return netsnmp_tdomain_transport_full(application, str, 0, NULL, NULL);
+}
 
 /** adds a transport to a linked list of transports.
     Returns 1 on failure, 0 on success */

@@ -48,6 +48,14 @@ oid netsnmp_snmpTCPDomain[] = { TRANSPORT_DOMAIN_TCP_IP };
 static netsnmp_tdomain tcpDomain;
 
 /*
+ * Not static since it is needed here as well as in snmpUDPDomain, but not
+ * public either
+ */
+int
+netsnmp_sockaddr_in2(struct sockaddr_in *addr,
+                     const char *inpeername, const char *default_target);
+
+/*
  * Return a string representing the address in data, or else the "far end"
  * address if data is NULL.  
  */
@@ -392,11 +400,12 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
 
 
 netsnmp_transport *
-netsnmp_tcp_create_tstring(const char *str, int local)
+netsnmp_tcp_create_tstring(const char *str, int local,
+			   const char *default_target)
 {
     struct sockaddr_in addr;
 
-    if (netsnmp_sockaddr_in(&addr, str, 0)) {
+    if (netsnmp_sockaddr_in2(&addr, str, default_target)) {
         return netsnmp_tcp_transport(&addr, local);
     } else {
         return NULL;
@@ -430,7 +439,7 @@ netsnmp_tcp_ctor(void)
     tcpDomain.prefix = (const char **)calloc(2, sizeof(char *));
     tcpDomain.prefix[0] = "tcp";
 
-    tcpDomain.f_create_from_tstring = netsnmp_tcp_create_tstring;
+    tcpDomain.f_create_from_tstring_new = netsnmp_tcp_create_tstring;
     tcpDomain.f_create_from_ostring = netsnmp_tcp_create_ostring;
 
     netsnmp_tdomain_register(&tcpDomain);

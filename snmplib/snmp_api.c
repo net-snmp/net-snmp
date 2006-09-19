@@ -137,6 +137,7 @@ SOFTWARE.
 #include <net-snmp/library/lcd_time.h>
 #include <net-snmp/library/snmp_alarm.h>
 #include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmp_service.h>
 #include <net-snmp/library/vacm.h>
 
 static void     _init_snmp(void);
@@ -664,6 +665,9 @@ _init_snmp(void)
     Reqid = tmpReqid;
     Msgid = tmpMsgid;
 
+    netsnmp_register_default_domain("snmp", "udp");
+    netsnmp_register_default_domain("snmptrap", "udp");
+
 #ifdef HAVE_GETSERVBYNAME
     servp = getservbyname("snmp", "udp");
     if (servp) {
@@ -673,6 +677,17 @@ _init_snmp(void)
         s_port = ntohs(servp->s_port);
     }
 #endif
+
+    netsnmp_register_default_target("snmp", "udp", ":161");
+    netsnmp_register_default_target("snmp", "tcp", ":161");
+    netsnmp_register_default_target("snmp", "udp6", ":161");
+    netsnmp_register_default_target("snmp", "tcp6", ":161");
+    netsnmp_register_default_target("snmp", "ipx", "/36879");
+    netsnmp_register_default_target("snmptrap", "udp", ":162");
+    netsnmp_register_default_target("snmptrap", "tcp", ":162");
+    netsnmp_register_default_target("snmptrap", "udp6", ":162");
+    netsnmp_register_default_target("snmptrap", "tcp6", ":162");
+    netsnmp_register_default_target("snmptrap", "ipx", "/36880");
 
     netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
 		       NETSNMP_DS_LIB_DEFAULT_PORT, s_port);
@@ -750,6 +765,7 @@ register_default_handlers(void)
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noPersistentSave",
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE);
+    netsnmp_register_service_handlers();
 }
 
 void
@@ -1415,13 +1431,13 @@ _sess_open(netsnmp_session * in_session)
     }
 
     if (session->flags & SNMP_FLAGS_STREAM_SOCKET) {
-        slp->transport = netsnmp_tdomain_transport(session->peername,
-                                                   session->local_port,
-                                                   "tcp");
+        slp->transport =
+	  netsnmp_tdomain_transport_full("snmp", session->peername,
+					 session->local_port, "tcp", NULL);
     } else {
-        slp->transport = netsnmp_tdomain_transport(session->peername,
-                                                   session->local_port,
-                                                   "udp");
+        slp->transport =
+	  netsnmp_tdomain_transport_full("snmp", session->peername,
+					 session->local_port, "udp", NULL);
     }
 
     if (NULL != session->localname)

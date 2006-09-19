@@ -290,9 +290,13 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
 
 
 netsnmp_transport *
-netsnmp_aal5pvc_create_tstring(const char *str, int local)
+netsnmp_aal5pvc_create_tstring(const char *str, int local,
+			       const char *default_target)
 {
     struct sockaddr_atmpvc addr;
+
+    if (str == NULL || *str == '\0')
+	str = default_target;
 
     if (str != NULL) {
         addr.sap_family = AF_ATMPVC;
@@ -346,7 +350,7 @@ netsnmp_aal5pvc_ctor(void)
     aal5pvcDomain.prefix[0] = "aal5pvc";
     aal5pvcDomain.prefix[1] = "pvc";
 
-    aal5pvcDomain.f_create_from_tstring = netsnmp_aal5pvc_create_tstring;
+    aal5pvcDomain.f_create_from_tstring_new = netsnmp_aal5pvc_create_tstring;
     aal5pvcDomain.f_create_from_ostring = netsnmp_aal5pvc_create_ostring;
 
     netsnmp_tdomain_register(&aal5pvcDomain);

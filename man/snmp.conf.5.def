@@ -26,6 +26,12 @@ to standard command-line options, which are described in the
 .PP
 These directives can be divided into several distinct groups.
 .SH CLIENT BEHAVIOUR
+.IP "defDomain application domain"
+The transport domain that should be used for a certain application type unless
+something else is specified.
+.IP "defTarget application domain target"
+The target that should be used for connections to a certain application if the
+connection should be in a specific domain.
 .IP "defaultPort PORT"
 defines the default UDP port that client SNMP applications will
 attempt to connect to.  This can be overridden by explicitly

@@ -24,6 +24,7 @@
 #include <net-snmp/library/callback.h>
 
 #include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmp_service.h>
 #include <net-snmp/library/snmpCallbackDomain.h>
 #ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
 #include <net-snmp/library/snmpUnixDomain.h>

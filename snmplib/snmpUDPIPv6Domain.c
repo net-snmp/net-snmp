@@ -340,10 +340,12 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
 }
 
 
-
+/*
+ * Not extern but used from here and snmpTCPIPv6Domain.C
+ */
 int
-netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
-                     const char *inpeername, int remote_port)
+netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
+                       const char *inpeername, const char *default_target)
 {
     char           *cp = NULL, *peername = NULL;
     char            debug_addr[INET6_ADDRSTRLEN];
@@ -363,21 +365,24 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
         return 0;
     }
 
-    DEBUGMSGTL(("netsnmp_sockaddr_in6", "addr %p, peername \"%s\"\n",
-                addr, inpeername ? inpeername : "[NIL]"));
+    DEBUGMSGTL(("netsnmp_sockaddr_in6",
+		"addr %p, peername \"%s\", default_target \"%s\"\n",
+                addr, inpeername ? inpeername : "[NIL]",
+		default_target ? default_target : "[NIL]"));
 
-    memset(addr, 0, sizeof(struct sockaddr_in6));
-    addr->sin6_family = AF_INET6;
-    addr->sin6_addr = in6addr_any;
+    if (default_target == NULL ||
+	netsnmp_sockaddr_in6_2(addr, default_target, NULL) == 0) {
+	int port;
+	memset(addr, 0, sizeof(struct sockaddr_in6));
+	addr->sin6_family = AF_INET6;
+	addr->sin6_addr = in6addr_any;
 
-    if (remote_port > 0) {
-        addr->sin6_port = htons(remote_port);
-    } else if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
-				  NETSNMP_DS_LIB_DEFAULT_PORT) > 0) {
-        addr->sin6_port = htons(netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
-						 NETSNMP_DS_LIB_DEFAULT_PORT));
-    } else {
-        addr->sin6_port = htons(SNMP_PORT);
+	port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+				  NETSNMP_DS_LIB_DEFAULT_PORT);
+	if (port <= 0)
+	    port = SNMP_PORT;
+
+        addr->sin6_port = htons((u_short)port);
     }
 
     if (inpeername != NULL) {
@@ -606,6 +611,15 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
     return 1;
 }
 
+
+int
+netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
+                     const char *inpeername, int remote_port)
+{
+    char buf[sizeof(remote_port) * 3 + 2];
+    sprintf(buf, ":%u", remote_port);
+    return netsnmp_sockaddr_in6_2(addr, inpeername, remote_port ? buf : NULL);
+}
 
 /*
  * int
@@ -1304,11 +1318,12 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
 #endif /* support for community based SNMP */
 
 netsnmp_transport *
-netsnmp_udp6_create_tstring(const char *str, int local)
+netsnmp_udp6_create_tstring(const char *str, int local,
+			    const char *default_target)
 {
     struct sockaddr_in6 addr;
 
-    if (netsnmp_sockaddr_in6(&addr, str, 0)) {
+    if (netsnmp_sockaddr_in6_2(&addr, str, default_target)) {
         return netsnmp_udp6_transport(&addr, local);
     } else {
         return NULL;
@@ -1346,7 +1361,7 @@ netsnmp_udp6_ctor(void)
 {
     udp6Domain.name = netsnmp_UDPIPv6Domain;
     udp6Domain.name_length = sizeof(netsnmp_UDPIPv6Domain) / sizeof(oid);
-    udp6Domain.f_create_from_tstring = netsnmp_udp6_create_tstring;
+    udp6Domain.f_create_from_tstring_new = netsnmp_udp6_create_tstring;
     udp6Domain.f_create_from_ostring = netsnmp_udp6_create_ostring;
     udp6Domain.prefix = calloc(5, sizeof(char *));
     udp6Domain.prefix[0] = "udp6";
