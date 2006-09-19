@@ -197,6 +197,21 @@ udpEndpointTable_container_shutdown(netsnmp_container *container_ptr)
  *  data here.
  *
  */
+static u_long
+_address_type_from_len(int addrlen) {
+	switch (addrlen) {
+	case 4: 
+		return INETADDRESSTYPE_IPV4;
+	case 16: 
+		return INETADDRESSTYPE_IPV6;
+	case 0: 
+		return INETADDRESSTYPE_UNKNOWN;
+	default:
+		/* To get same behavior as before */
+		return INETADDRESSTYPE_IPV4;
+	}
+}
+
 int
 udpEndpointTable_container_load(netsnmp_container *container)
 {
@@ -208,8 +223,8 @@ udpEndpointTable_container_load(netsnmp_container *container)
     /*
      * temporary storage for index values
      */
-    u_long          udpEndpointLocalAddressType;
-
+    u_long	udpEndpointLocalAddressType;
+    u_long	udpEndpointRemoteAddressType;
 
     DEBUGMSGTL(("verbose:udpEndpointTable:udpEndpointTable_container_load",
                 "called\n"));
@@ -238,18 +253,19 @@ udpEndpointTable_container_load(netsnmp_container *container)
             snmp_log(LOG_ERR, "memory allocation failed\n");
             return MFD_RESOURCE_UNAVAILABLE;
         }
-        udpEndpointLocalAddressType = (16 == ep->loc_addr_len) ?
-            INETADDRESSTYPE_IPV6 : INETADDRESSTYPE_IPV4;
+        udpEndpointLocalAddressType = _address_type_from_len(ep->loc_addr_len);
+	udpEndpointRemoteAddressType = _address_type_from_len(ep->rmt_addr_len);
         if (MFD_SUCCESS !=
             udpEndpointTable_indexes_set(rowreq_ctx,
                                          udpEndpointLocalAddressType,
                                          ep->loc_addr,
                                          ep->loc_addr_len,
                                          ep->loc_port,
-                                         udpEndpointLocalAddressType,
+                                         udpEndpointRemoteAddressType,
                                          ep->rmt_addr,
                                          ep->rmt_addr_len,
-                                         ep->rmt_port, 0)) {
+                                         ep->rmt_port,
+                                         ep->instance)) {
             snmp_log(LOG_ERR,
                      "error setting index while loading "
                      "udpEndpointTable data.\n");
