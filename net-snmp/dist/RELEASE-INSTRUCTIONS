@@ -19,6 +19,8 @@ All entries marked NEWS go into the NEWS and CHANGES file.
   CHANGES: snmptrapd: fixed something minor in snmptrapd
   NEWS: perl: PATCH: 123,456: Applied patches 123 and 456 to support perl6
   CHANGES: BUG: 13: Fixed bug 13 and secured the world at large against hackers
+  NEWS: perl: PATCH: 123: from Robert: did something
+  NEWS: perl: PATCH: 123: from "Robert Story": did something else
 
 Text before the above formatting will be ignored.  Text until the next
 newline or end is included in the description text.  Description text
