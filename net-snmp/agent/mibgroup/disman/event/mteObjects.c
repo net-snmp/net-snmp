@@ -61,6 +61,10 @@ int
 _init_default_mteObject_lists( int majorID, int minorID,
                                void *serverargs, void *clientarg)
 {
+    static int _defaults_init = 0;
+
+    if (_defaults_init)
+        return 0;
                                                    /* mteHotTrigger     */
     _init_default_mteObject( "_triggerFire", ".1.3.6.1.2.1.88.2.1.1", 1, 0);
                                                    /* mteHotTargetName  */
@@ -91,6 +95,7 @@ _init_default_mteObject_lists( int majorID, int minorID,
                                                    /* ifOperStatus  */
     _init_default_mteObject( "_linkUpDown", ".1.3.6.1.2.1.2.2.1.8", 3, 1);
 
+    _defaults_init = 1;
     return 0;
 }
 
