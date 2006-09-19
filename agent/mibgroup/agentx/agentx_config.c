@@ -25,6 +25,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "snmpd.h"
 #include "agentx/agentx_config.h"
+#include "agentx/protocol.h"
 
 /* ---------------------------------------------------------------------
  *
@@ -201,6 +202,11 @@ agentx_config_init(void)
     /*
      * Common tokens for master/subagent
      */
+    netsnmp_register_default_domain("agentx", "unix");
+    netsnmp_register_default_target("agentx", "unix", AGENTX_SOCKET);
+#define val(x) __STRING(x)
+    netsnmp_register_default_target("agentx", "tcp", ":" val(AGENTX_PORT));
+#undef val
     agentx_register_config_handler("agentxsocket",
                                   agentx_parse_agentx_socket, NULL,
                                   "AgentX bind address");

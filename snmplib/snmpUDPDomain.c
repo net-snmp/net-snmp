@@ -74,6 +74,9 @@ typedef struct netsnmp_udp_addr_pair_s {
  * (ie don't put it in a public header.)
  */
 void _netsnmp_udp_sockopt_set(int fd, int server);
+int
+netsnmp_sockaddr_in2(struct sockaddr_in *addr,
+                     const char *inpeername, const char *default_target);
 
 /*
  * Return a string representing the address in data, or else the "far end"
@@ -668,7 +671,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
                                               NETSNMP_DS_LIB_CLIENT_ADDR);
         if (client_socket) {
             struct sockaddr_in client_addr;
-            netsnmp_sockaddr_in( &client_addr, client_socket, 0);
+            netsnmp_sockaddr_in2(&client_addr, client_socket, NULL);
             client_addr.sin_port = 0;
             bind(t->sock, (struct sockaddr *)&client_addr,
                   sizeof(struct sockaddr));
@@ -756,10 +759,9 @@ _netsnmp_udp_sockopt_set(int fd, int local)
 }
 
 int
-netsnmp_sockaddr_in(struct sockaddr_in *addr,
-                    const char *inpeername, int remote_port)
+netsnmp_sockaddr_in2(struct sockaddr_in *addr,
+                     const char *inpeername, const char *default_target)
 {
-    char           *cp = NULL, *peername = NULL;
 #if HAVE_GETADDRINFO
     struct addrinfo *addrs = NULL;
     struct addrinfo hint;
@@ -774,24 +776,30 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
     if (addr == NULL) {
         return 0;
     }
-    memset(addr, 0, sizeof(struct sockaddr_in));
 
-    DEBUGMSGTL(("netsnmp_sockaddr_in", "addr %p, peername \"%s\"\n",
-                addr, inpeername ? inpeername : "[NIL]"));
+    DEBUGMSGTL(("netsnmp_sockaddr_in",
+                "addr %p, inpeername \"%s\", default_target \"%s\"\n",
+                addr, inpeername ? inpeername : "[NIL]",
+                default_target ? default_target : "[NIL]"));
 
-    addr->sin_addr.s_addr = htonl(INADDR_ANY);
-    addr->sin_family = AF_INET;
-    if (remote_port > 0) {
-        addr->sin_port = htons((u_short)remote_port);
-    } else if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
-				  NETSNMP_DS_LIB_DEFAULT_PORT) > 0) {
-        addr->sin_port = htons((u_short)netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
-						 NETSNMP_DS_LIB_DEFAULT_PORT));
-    } else {
-        addr->sin_port = htons(SNMP_PORT);
+    if (default_target == NULL ||
+	netsnmp_sockaddr_in2(addr, default_target, NULL) == 0) {
+	int port;
+
+	memset(addr, 0, sizeof(struct sockaddr_in));
+	addr->sin_addr.s_addr = htonl(INADDR_ANY);
+	addr->sin_family = AF_INET;
+	port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+				  NETSNMP_DS_LIB_DEFAULT_PORT);
+	if (port == 0)
+	    port = SNMP_PORT;
+	addr->sin_port = htons((u_short)port);
     }
 
-    if (inpeername != NULL) {
+    if (inpeername != NULL && *inpeername != '\0') {
+	const char     *host, *port;
+	char           *peername = NULL;
+        char           *cp;
         /*
          * Duplicate the peername because we might want to mank around with
          * it.  
@@ -808,106 +816,144 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
         cp = strchr(peername, ':');
         if (cp != NULL) {
             *cp = '\0';
-            cp++;
-            if (atoi(cp) != 0) {
-                DEBUGMSGTL(("netsnmp_sockaddr_in",
-                            "port number suffix :%d\n", atoi(cp)));
-                addr->sin_port = htons((u_short)atoi(cp));
-            }
+            port = cp + 1;
+            host = peername;
+        } else {
+            host = NULL;
+            port = peername;
         }
 
-        for (cp = peername; *cp && isdigit((int) *cp); cp++);
-        if (!*cp && atoi(peername) != 0) {
-            /*
-             * Okay, it looks like just a port number.  
-             */
-            DEBUGMSGTL(("netsnmp_sockaddr_in", "totally numeric: %d\n",
-                        atoi(peername)));
-            addr->sin_port = htons((u_short)atoi(peername));
-        } else if (inet_addr(peername) != INADDR_NONE) {
-            /*
-             * It looks like an IP address.  
-             */
-            DEBUGMSGTL(("netsnmp_sockaddr_in", "IP address\n"));
-            addr->sin_addr.s_addr = inet_addr(peername);
-        } else {
-            /*
-             * Well, it must be a hostname then.  
-             */
-#if HAVE_GETADDRINFO
-            memset(&hint, 0, sizeof hint);
-            hint.ai_flags = 0;
-            hint.ai_family = PF_INET;
-            hint.ai_socktype = SOCK_DGRAM;
-            hint.ai_protocol = 0;
+        /*
+         * Try to convert the user port specifier
+         */
+        if (port && *port == '\0')
+            port = NULL;
 
-            err = getaddrinfo(peername, NULL, &hint, &addrs);
-            if (err != 0) {
-                snmp_log(LOG_ERR, "getaddrinfo: %s %s\n", peername,
-                         gai_strerror(err));
-                free(peername);
-                return 0;
-            }
-            if (addrs != NULL) {
-                DEBUGMSGTL(("netsnmp_sockaddr_in", "hostname (resolved okay)\n"));
-                memcpy(&addr->sin_addr,
-                       &((struct sockaddr_in *) addrs->ai_addr)->sin_addr,
-                       sizeof(struct in_addr));
-		freeaddrinfo(addrs);
-            }
+        if (port != NULL) {
+            long int l;
+            char* ep;
+
+            DEBUGMSGTL(("netsnmp_sockaddr_in", "check user service %s\n",
+                        port));
+
+            l = strtol(port, &ep, 10);
+            if (ep != port && *ep == '\0' && 0 <= l && l <= 0x0ffff)
+                addr->sin_port = htons((u_short)l);
             else {
-                DEBUGMSGTL(("netsnmp_sockaddr_in", "Failed to resolve IPv4 hostname\n"));
-            }
-#elif HAVE_GETIPNODEBYNAME
-            hp = getipnodebyname(peername, AF_INET, 0, &err);
-            if (hp == NULL) {
-                DEBUGMSGTL(("netsnmp_sockaddr_in",
-                            "hostname (couldn't resolve = %d)\n", err));
-                free(peername);
-                return 0;
-            }
-            DEBUGMSGTL(("netsnmp_sockaddr_in", "hostname (resolved okay)\n"));
-            memcpy(&(addr->sin_addr), hp->h_addr, hp->h_length);
-#elif HAVE_GETHOSTBYNAME
-            hp = gethostbyname(peername);
-            if (hp == NULL) {
-                DEBUGMSGTL(("netsnmp_sockaddr_in",
-                            "hostname (couldn't resolve)\n"));
-                free(peername);
-                return 0;
-            } else {
-                if (hp->h_addrtype != AF_INET) {
+                if (host == NULL) {
                     DEBUGMSGTL(("netsnmp_sockaddr_in",
-                                "hostname (not AF_INET!)\n"));
-                    free(peername);
-                    return 0;
+                                "servname not numeric, "
+				"check if it really is a destination)"));
+                    host = port;
+                    port = NULL;
                 } else {
                     DEBUGMSGTL(("netsnmp_sockaddr_in",
-                                "hostname (resolved okay)\n"));
-                    memcpy(&(addr->sin_addr), hp->h_addr, hp->h_length);
+                                "servname not numeric"));
+                    free(peername);
+                    return 0;
                 }
             }
-#else                           /*HAVE_GETHOSTBYNAME */
-            /*
-             * There is no name resolving function available.  
-             */
-            snmp_log(LOG_ERR,
-                     "no getaddrinfo()/getipnodebyname()/gethostbyname()\n");
-            free(peername);
-            return 0;
-#endif                          /*HAVE_GETHOSTBYNAME */
         }
-    } else {
-        DEBUGMSGTL(("netsnmp_sockaddr_in", "NULL peername"));
-        return 0;
+
+        /*
+         * Try to convert the user host specifier
+         */
+        if (host && *host == '\0')
+            host = NULL;
+
+        if (host != NULL) {
+            DEBUGMSGTL(("netsnmp_sockaddr_in",
+                        "check destination %s\n", host));
+
+            if (inet_aton(host, &addr->sin_addr)) {
+                /* Do nothing */
+            } else {
+#if HAVE_GETADDRINFO
+              memset(&hint, 0, sizeof hint);
+              hint.ai_flags = 0;
+              hint.ai_family = PF_INET;
+              hint.ai_socktype = SOCK_DGRAM;
+              hint.ai_protocol = 0;
+
+              err = getaddrinfo(peername, NULL, &hint, &addrs);
+              if (err != 0) {
+                  snmp_log(LOG_ERR, "getaddrinfo: %s %s\n", peername,
+                           gai_strerror(err));
+                  free(peername);
+                  return 0;
+              }
+              if (addrs != NULL) {
+                  DEBUGMSGTL(("netsnmp_sockaddr_in",
+                              "hostname (resolved okay)\n"));
+                  memcpy(&addr->sin_addr,
+                         &((struct sockaddr_in *) addrs->ai_addr)->sin_addr,
+                         sizeof(struct in_addr));
+                  freeaddrinfo(addrs);
+              }
+              else {
+                  DEBUGMSGTL(("netsnmp_sockaddr_in",
+                              "Failed to resolve IPv4 hostname\n"));
+              }
+#elif HAVE_GETIPNODEBYNAME
+              hp = getipnodebyname(peername, AF_INET, 0, &err);
+              if (hp == NULL) {
+                  DEBUGMSGTL(("netsnmp_sockaddr_in",
+                              "hostname (couldn't resolve = %d)\n", err));
+                  free(peername);
+                  return 0;
+              }
+              DEBUGMSGTL(("netsnmp_sockaddr_in",
+                          "hostname (resolved okay)\n"));
+              memcpy(&(addr->sin_addr), hp->h_addr, hp->h_length);
+#elif HAVE_GETHOSTBYNAME
+              hp = gethostbyname(host);
+              if (hp == NULL) {
+                  DEBUGMSGTL(("netsnmp_sockaddr_in",
+                              "hostname (couldn't resolve)\n"));
+                  free(peername);
+                  return 0;
+              } else if (hp->h_addrtype != AF_INET) {
+                  DEBUGMSGTL(("netsnmp_sockaddr_in",
+                              "hostname (not AF_INET!)\n"));
+                  free(peername);
+                  return 0;
+              } else {
+                  DEBUGMSGTL(("netsnmp_sockaddr_in",
+                              "hostname (resolved okay)\n"));
+                  memcpy(&addr->sin_addr, hp->h_addr, hp->h_length);
+              }
+#else /* HAVE_GETHOSTBYNAME */
+              /*
+               * There is no name resolving function available.
+               */
+              DEBUGMSGTL(("netsnmp_sockaddr_in",
+                          "no getaddrinfo()/getipnodebyname()/gethostbyname()\n"));
+              free(peername);
+              return 0;
+#endif /* HAVE_GETHOSTBYNAME */
+            }
+        }
+	free(peername);
     }
+
+    /*
+     * Finished
+     */
+
     DEBUGMSGTL(("netsnmp_sockaddr_in", "return { AF_INET, %s:%hu }\n",
                 inet_ntoa(addr->sin_addr), ntohs(addr->sin_port)));
-    free(peername);
     return 1;
 }
 
 
+int
+netsnmp_sockaddr_in(struct sockaddr_in *addr,
+                    const char *inpeername, int remote_port)
+{
+    char buf[sizeof(int) * 3 + 2];
+    sprintf(buf, ":%u", remote_port);
+    return netsnmp_sockaddr_in2(addr, inpeername, remote_port ? buf : NULL);
+}
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 /*
@@ -1223,11 +1269,12 @@ netsnmp_udp_getSecName(void *opaque, int olength,
 
 
 netsnmp_transport *
-netsnmp_udp_create_tstring(const char *str, int local)
+netsnmp_udp_create_tstring(const char *str, int local,
+			   const char *default_target)
 {
     struct sockaddr_in addr;
 
-    if (netsnmp_sockaddr_in(&addr, str, 0)) {
+    if (netsnmp_sockaddr_in2(&addr, str, default_target)) {
         return netsnmp_udp_transport(&addr, local);
     } else {
         return NULL;
@@ -1259,7 +1306,7 @@ netsnmp_udp_ctor(void)
     udpDomain.prefix = (const char**)calloc(2, sizeof(char *));
     udpDomain.prefix[0] = "udp";
 
-    udpDomain.f_create_from_tstring = netsnmp_udp_create_tstring;
+    udpDomain.f_create_from_tstring_new = netsnmp_udp_create_tstring;
     udpDomain.f_create_from_ostring = netsnmp_udp_create_ostring;
 
     netsnmp_tdomain_register(&udpDomain);

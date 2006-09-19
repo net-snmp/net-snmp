@@ -1189,16 +1189,12 @@ init_master_agent(void)
         /*
          * No, so just specify the default port.  
          */
-        if (netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_FLAGS) & SNMP_FLAGS_STREAM_SOCKET) {
-            sprintf(buf, "tcp:%d", SNMP_PORT);
-        } else {
-            sprintf(buf, "udp:%d", SNMP_PORT);
-        }
+        buf[0] = 0;
     }
 
-    DEBUGMSGTL(("snmp_agent", "final port spec: %s\n", buf));
-    cptr = strtok_r(buf, ",", &st);
-    while (cptr) {
+    DEBUGMSGTL(("snmp_agent", "final port spec: \"%s\"\n", buf));
+    st = buf;
+    do {
         /*
          * Specification format: 
          * 
@@ -1211,20 +1207,21 @@ init_master_agent(void)
          * 
          */
 
+	cptr = st;
+	st = strchr(st, ',');
+	if (st)
+	    *st++ = '\0';
+
         DEBUGMSGTL(("snmp_agent", "installing master agent on port %s\n",
                     cptr));
 
-        if (!cptr || !(*cptr)) {
-            snmp_log(LOG_ERR, "improper port specification\n");
-            return 1;
-        }
-
         if (strncasecmp(cptr, "none", 4) == 0) {
             DEBUGMSGTL(("snmp_agent",
-                        "init_master_agent; pseudo-transport \"none\" requested\n"));
+                        "init_master_agent; pseudo-transport \"none\" "
+			"requested\n"));
             return 0;
         }
-        transport = netsnmp_tdomain_transport(cptr, 1, "udp");
+        transport = netsnmp_transport_open_server("snmp", cptr);
 
         if (transport == NULL) {
             snmp_log(LOG_ERR, "Error opening specified endpoint \"%s\"\n",
@@ -1234,20 +1231,15 @@ init_master_agent(void)
 
         if (netsnmp_register_agent_nsap(transport) == 0) {
             snmp_log(LOG_ERR,
-                     "Error registering specified transport \"%s\" as an agent NSAP\n",
-                     cptr);
+                     "Error registering specified transport \"%s\" as an "
+		     "agent NSAP\n", cptr);
             return 1;
         } else {
             DEBUGMSGTL(("snmp_agent",
-                        "init_master_agent; \"%s\" registered as an agent NSAP\n",
-                        cptr));
+                        "init_master_agent; \"%s\" registered as an agent "
+			"NSAP\n", cptr));
         }
-
-        /*
-         * Next transport please...  
-         */
-        cptr = strtok_r(NULL, ",", &st);
-    }
+    } while(st && *st != '\0');
 
     return 0;
 }

@@ -1298,7 +1298,7 @@ main(int argc, char *argv[])
         } else {
             cp2 = cp;
         }
-        transport = netsnmp_tdomain_transport(cp2, 1, "udp");
+        transport = netsnmp_transport_open_server("snmptrap", cp2);
         if (transport == NULL) {
             snmp_log(LOG_ERR, "couldn't open %s -- errno %d (\"%s\")\n",
                      cp2, errno, strerror(errno));
