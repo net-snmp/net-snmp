@@ -23,8 +23,12 @@ while(<>) {
     #   FILE: component: text
     #      or
     #   FILE: component: BUGS: 123,456: text
+    #
+    #      or
+    #   FILE: component: PATCH: 123,456: from someone text
+    #   FILE: component: PATCH: 123,456: from "someone long" text
     ($file, $component, $patbug, $nums, $text) = 
-      /(NEWS|CHANGES):\s*([^:]+):\s*-*\s*\[*(BUG|PATCH)*(?:ES|S|):*\s*([\d,\s*]*)\]*:*\s*-*\s*(.*)/ if (!$file);
+      /(NEWS|CHANGES):\s*([^:]+):\s*-*\s*\[*(BUG|PATCH)*(?:ES|S|):*\s*([\d,\s*]*)\]*:*\s*-*\s*(?:from ["'][^"]+["']|from \w+|):*\s*(.*)/ if (!$file);
 
     # component left out
     # FILE: [BUGS: 123,456]: text
