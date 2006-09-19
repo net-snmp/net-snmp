@@ -39,6 +39,8 @@ extern          "C" {
 
         u_short   loc_port;
         u_short   rmt_port;
+
+        u_int     instance;
    
     } netsnmp_udp_endpoint_entry;
 

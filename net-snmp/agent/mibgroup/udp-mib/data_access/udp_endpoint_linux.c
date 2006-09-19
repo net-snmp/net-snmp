@@ -209,6 +209,12 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
      */
     ep->state = strtol(ptr, &ptr, 16);
 
+    /*
+     * no support for instance, just set it to zero to obtain the
+     * original behavior.
+     */
+    ep->instance = 0;
+
     ep->index = (u_int)(lpi->user_context);
     lpi->user_context = (void*)((u_int)(lpi->user_context) + 1);
 
