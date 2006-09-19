@@ -2319,9 +2319,21 @@ _bulkwalk_finish(walk_context *context, int okay)
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
 
+#ifdef dITEMS
    dSP;
    dMARK;
    dITEMS;
+#else
+   /* unfortunately this may pop a mark, which is not what we want */
+   /* older perl versions don't declare dITEMS though and the
+      following declars it but also uses dAXMARK instead of dMARK
+      which is the bad popping version */
+   dSP;
+   dMARK;
+
+   /* err...  This is essentially what the newer dITEMS does */
+   I32 items = sp - mark;
+#endif
 
    async = SvTRUE(context->perl_cb);
 
