@@ -283,11 +283,15 @@ init_hr_storage(void)
     REGISTER_MIB("host/hr_storage", hrstore_variables, variable4,
                  hrstore_variables_oid);
 
+    snmpd_register_config_handler("skipNFSInHostResources", parse_storage_config, NULL,
+	"1 | 2\t\t(1 = enable, 2 = disable)");
+
     snmpd_register_config_handler("storageUseNFS", parse_storage_config, NULL,
 	"1 | 2\t\t(1 = enable, 2 = disable)");
 }
 
 static int storageUseNFS = 0;	/* initially disabled */
+static int skipNFSInHostResources = 0;	/* initially disabled */
 
 static void
 parse_storage_config(const char *token, char *cptr)
@@ -298,10 +302,22 @@ parse_storage_config(const char *token, char *cptr)
 
     val = strtok_r(cptr, " \t", &st);
     if (!val) {
-        config_perror("Missing FLAG parameter in storageUseNFS");
+    	char tmpbuf[] = "Missing FLAG parameter in storage....NFS";
+	char *p = strstr(tmpbuf, "storage");
+	strncpy(p, sizeof(tmpbuf) - (p - tmpbuf), token);
+	tmpbuf[sizeof(tmpbuf) - 1] = '\0';
+        config_perror(tmpbuf);
         return;
     }
     ival = atoi(val);
+    if (0 == strcmp(token, "skipNFSInHostResources")) {
+    	if (ival != 0 && ival != 1) {
+	    config_perror("skipNFSInHostResources must be 0 or 1");
+            return;
+	}
+        skipNFSInHostResources = (ival == 1) ? 1 : 0;
+	return;
+    }
     if (ival < 1 || ival > 2) {
         config_perror("storageUseNFS must be 1 or 2");
         return;
@@ -514,6 +530,8 @@ really_try_next:
 	    return NULL;
 
         store_idx = name[ HRSTORE_ENTRY_NAME_LENGTH ];
+        if (skipNFSInHostResources == 1 && Check_HR_FileSys_NFS())
+            return NULL;
         if (store_idx > NETSNMP_MEM_TYPE_MAX ) {
 	    if (HRFS_statfs(HRFS_entry->HRFS_mount, &stat_buf) < 0) {
 		snmp_log_perror(HRFS_entry->HRFS_mount);
