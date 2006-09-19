@@ -43,9 +43,14 @@ netsnmp_linux_interface_get_if_speed_mii(int fd, const char *name);
 
 #define PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME_MS "/proc/sys/net/ipv%d/neigh/%s/retrans_time_ms"
 #define PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME    "/proc/sys/net/ipv%d/neigh/%s/retrans_time"
-static char *proc_sys_retrans_time;
+static const char *proc_sys_retrans_time;
 static unsigned short retrans_time_factor = 1;
 
+
+#define PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS "/proc/sys/net/ipv%d/neigh/%s/base_reachable_time_ms"
+#define PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME "/proc/sys/net/ipv%d/neigh/%s/base_reachable_time"
+static const char *proc_sys_basereachable_time;
+static unsigned short basereachable_time_ms = 0;
 void
 netsnmp_arch_interface_init(void)
 {
@@ -66,6 +71,17 @@ netsnmp_arch_interface_init(void)
     } else {
         proc_sys_retrans_time = PROC_SYS_NET_IPVx_NEIGH_RETRANS_TIME;
         retrans_time_factor = 10;
+    }
+
+    snprintf(proc_path,  sizeof(proc_path),  PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS, 6, "default");
+    snprintf(proc_path2,  sizeof(proc_path),  PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME, 4, "default");
+
+    if ((stat(proc_path, &st) == 0) || (stat(proc_path2, &st) == 0)) {
+        proc_sys_basereachable_time = PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME_MS;
+        basereachable_time_ms = 1;
+    }
+    else {
+        proc_sys_basereachable_time = PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME;
     }
 }
 
@@ -227,7 +243,7 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
     /*
      * get the forwarding status
      */
-    snprintf(line,sizeof(line),"/proc/sys/net/ipv6/conf/%s/forwarding",
+    snprintf(line, sizeof(line), "/proc/sys/net/ipv6/conf/%s/forwarding",
              entry->name);
     if (!(fin = fopen(line, "r"))) {
         DEBUGMSGTL(("access:interface",
@@ -244,15 +260,19 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
     /*
      * get the reachable time
      */
-    snprintf(line,sizeof(line),"/proc/sys/net/ipv6/neigh/%s/base_reachable_time",
-             entry->name);
+    snprintf(line, sizeof(line), proc_sys_basereachable_time, entry->name);
     if (!(fin = fopen(line, "r"))) {
         DEBUGMSGTL(("access:interface",
                     "Failed to open %s\n", line));
     }
     else {
         if (fgets(line, sizeof(line), fin)) {
-            entry->reachable_time = atoi(line) * 1000; /* sec to millisec */
+            if (basereachable_time_ms) {
+                entry->reachable_time = atoi(line); /* millisec */
+            } else {
+                entry->reachable_time = atoi(line)*1000; /* sec to  millisec */
+            }
+
             entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_REACHABLE;
         }
         fclose(fin);
