@@ -4128,7 +4128,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      /* Sent okay...  Return the request ID in 'pdu' as an SvIV. */
 	      DBPRT(1,(DBOUT "Okay, request id is %d\n", (intptr_t) pdu));
 /*	      XSRETURN_IV((intptr_t)pdu); */
-	      XPUSHs(sv_2mortal(newSViv(pdu)));
+	      XPUSHs(sv_2mortal(newSViv((IV)pdu)));
 	      XSRETURN(1);
 	   }
 
