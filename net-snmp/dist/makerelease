@@ -42,8 +42,9 @@ System("version:commit",
 #
 # configure and build and test it
 #
+my $configureargs = "--cache=config.cache --with-defaults '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=IPX' --enable-ipv6 --enable-embedded-perl --enable-shared"
 System("build:distclean","make distclean") if (-f 'Makefile');
-System("build:configure","./configure --cache=config.cache --with-defaults '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=IPX' --enable-ipv6 --enable-embedded-perl --enable-shared");
+System("build:configure","./configure $configureargs");
 System("build:make","make");
 System("build:test","make test");
 
@@ -134,7 +135,15 @@ if($? != 0) {
     System("release:gpg","gpg -u net-snmp-admin -a --detach-sign $pkg");
 }
 
-System("cvsupdate","cvs -q update");
+System("posttest:untar", "rm -rf net-snmp-${version}");
+System("posttest:untar", "tar xzf net-snmp-${version}.tar.gz");
+chdir("net-snmp-${version}");
+System("posttest:configure","./configure $configureargs");
+System("posttest:make","make");
+System("posttest:test","make test");
+chdir("..");
+
+System("release:cvsupdate","cvs -q update");
 
 #
 # XXX: auto upload to SF?
@@ -143,7 +152,7 @@ System("cvsupdate","cvs -q update");
 #   the upload dir. -- Wes
 #
 print STDERR "**************************************** FINISHED ********************\n";
-print STDERR "\nDouble check CVS update is right above\n\n";
+print STDERR "\nDouble check CVS update is right above (no modified files)\n\n";
 print STDERR "Run this to upload to SF:\n";
 print STDERR "  ncftpput upload.sf.net incoming net-snmp-${version}.tar.gz $sig\n";
 
