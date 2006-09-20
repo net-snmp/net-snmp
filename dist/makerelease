@@ -88,12 +88,18 @@ System("changelog:commit","cvs commit -m \"version update\" ChangeLog");
 #
 # doc update
 #
+System("docs:newnews",
+       "perl local/extractnews -s ----- -e -----");
+
 manualstep("docs:README",
-	   "You should check or update the README and NEWS files.
-  [The version number will be auto-incremented later however]");
+	   "You should check or update the README, CHANGES and NEWS files.
+  New text has been created in CHANGES.new and NEWS.new that needs
+  to be edited and moved to the CHANGES and NEWS files if appropriate.
+
+  [File version numbers will be auto-incremented later however]");
 
 System("docs:commit",
-       "cvs commit -m \"version update\" README NEWS");
+       "cvs commit -m \"version update\" README NEWS CHANGES");
 
 System("release:versionstamp",
        "perl local/Version-Munge.pl -v $version -M -P -C");
@@ -220,11 +226,13 @@ sub manualstep {
 # getopt long gui portability code
 #
 sub LocalGetOptions {
-    if ($#ARGV == -1 && eval {require Getopt::GUI::Long;}) {
+    if (eval {require Getopt::GUI::Long;}) {
 	import Getopt::GUI::Long;
+	Getopt::GUI::Long::Configure(qw(display_help no_ignore_case));
 	return GetOptions(@_);
     } else {
 	require Getopt::Long;
+	Getopt::Long::Configure(qw(auto_help no_ignore_case));
 	import Getopt::Long;
     }
     GetOptions(LocalOptionsMap(@_));
