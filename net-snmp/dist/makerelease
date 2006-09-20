@@ -89,7 +89,7 @@ System("changelog:commit","cvs commit -m \"version update\" ChangeLog");
 # doc update
 #
 System("docs:newnews",
-       "perl local/extractnews -s ----- -e -----");
+       "perl dist/extractnews -s ----- -e ----- ChangeLog");
 
 manualstep("docs:README",
 	   "You should check or update the README, CHANGES and NEWS files.
