@@ -1,0 +1,64 @@
+This file contains major and medium level changes in released
+revisions.  Please read the ChangeLog file for a more detailed listing
+of changes/bug fixes.
+
+*5.4*
+
+    snmptrapd:
+      - the traphandle directive now supports a -t switch to indicate
+	matching any OID in the tree below the specified OID
+      - [PATCH 1536773]: support partial oid matching
+
+    build:
+      - [BUG 1416481]: Support specifying an explicit linker.
+
+    snmpdf:
+      - [BUG 1515507]: Handle failed requests better
+
+    perl:
+      - Fixed the perl bulkwalk function
+
+    snmplib:
+      - [PATCH 1282566]: to rework transport creation to allow for
+	alternative interpretations of the address and a more flexible
+	transport registration system
+      - [BUGS: 1537459, BUGS: 1540745] Fix missing MIB parsing tokens
+
+    mib2c:
+      - [BUG 1479916]: Restore consistency in row creation code.
+
+    snmpd:
+      - [PATCH 1550725]: A new uint instance helper to match the existing
+	int, long and ulong helpers
+      - [BUG 1527930]: fix smux authentication
+      - [PATCH 1561277]: use net.ipv6.neigh.lo.base_reachable_time_ms
+	instead of deprecated base_reachable_time
+      - [BUG 1474468]: ifConnectorPresent always returns 0
+      - [PATCH 1524755]: to better support the UDPTable for unknown address
+	types
+      - [PATCH 1534877]: to add support for skipping NFS entries in the
+	host resources hrStorageTable.	See the skipNFSInHostResources
+	token in the snmpd.conf file for details.
+      - [PATCH 1557514 ]: Do not attempt to collect data during SET
+	processing.
+      - [BUG 1535903]: Support spaces within security names
+      - Agent builds default module list from a default_mibs.h rather than
+	a hard coded configure list
+
+    misc:
+      - Most net-snmp specific defines are now (also) available under a
+	proper NETSNMP_ prefix. The older, potentially conflicting names as
+	well as the autoconf variables can now be turned off by a special
+	define.
+
+    agent:
+      - [BUG 1427410]: Set auth engineID for SNMPv3 traps.
+      - [BUG 1502267]: Build access list in the correct order.
+
+    unspecified:
+
+      - [PATCH 1509943]: responses will get sent from the original dest IP
+	address when possible.
+      - [PATCH 1554827]: from rtyle: fix handling of failed proxy SET
+	requests
+
