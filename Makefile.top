@@ -70,7 +70,11 @@ LINKCC	        = @LINKCC@
 # Note: maintenance releases (eg 5.2.x) should never have changes
 #       that would require a current to be incremented.
 #
-LIBCURRENT  = 11
+# policy: we increment major releases of LIBCURRENT by 5 starting at
+# 5.3 was at 10, 5.4 is at 15, ...  This leaves some room for needed
+# changes for past releases if absolutely necessary.
+# 
+LIBCURRENT  = 15
 LIBAGE      = 0
 LIBREVISION = 0
 
