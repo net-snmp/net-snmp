@@ -492,11 +492,11 @@ netsnmp_get_traphandler( oid *trapOid, int trapOidLen ) {
          traph; traph=traph->nextt ) {
 
         if (((traph->flags & NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE) &&
-             snmp_oidtree_compare(traph->trapoid, traph->trapoid_len,
+             snmp_oidsubtree_compare(traph->trapoid, traph->trapoid_len,
                                   trapOid, trapOidLen) == 0) ||
             (!(traph->flags & NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE) &&
              snmp_oid_compare(traph->trapoid, traph->trapoid_len,
-                              trapOid, trapOidLen)) == 0) {
+                              trapOid, trapOidLen) == 0)) {
             DEBUGMSGTL(( "snmptrapd", "get_traphandler matched (%x)\n", traph));
 	    return traph;
 	}
