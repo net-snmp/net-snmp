@@ -59,6 +59,7 @@ CLEAN :
 	-@erase "$(INTDIR)\snmp_secmod.obj"
 	-@erase "$(INTDIR)\snmp_transport.obj"
 	-@erase "$(INTDIR)\snmp_version.obj"
+	-@erase "$(INTDIR)\snmp_service.obj"
 	-@erase "$(INTDIR)\snmpCallbackDomain.obj"
 	-@erase "$(INTDIR)\snmpTCPDomain.obj"
 	-@erase "$(INTDIR)\snmpTCPIPv6Domain.obj"
@@ -169,6 +170,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\snmp_secmod.obj" \
 	"$(INTDIR)\snmp_transport.obj" \
 	"$(INTDIR)\snmp_version.obj" \
+	"$(INTDIR)\snmp_service.obj" \
 	"$(INTDIR)\snmpCallbackDomain.obj" \
 	"$(INTDIR)\snmpTCPDomain.obj" \
 	"$(INTDIR)\snmpTCPIPv6Domain.obj" \
@@ -233,6 +235,7 @@ CLEAN :
 	-@erase "$(INTDIR)\snmp_secmod.obj"
 	-@erase "$(INTDIR)\snmp_transport.obj"
 	-@erase "$(INTDIR)\snmp_version.obj"
+	-@erase "$(INTDIR)\snmp_service.obj"
 	-@erase "$(INTDIR)\snmpCallbackDomain.obj"
 	-@erase "$(INTDIR)\snmpTCPDomain.obj"
 	-@erase "$(INTDIR)\snmpTCPIPv6Domain.obj"
@@ -345,6 +348,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\snmp_secmod.obj" \
 	"$(INTDIR)\snmp_transport.obj" \
 	"$(INTDIR)\snmp_version.obj" \
+	"$(INTDIR)\snmp_service.obj" \
 	"$(INTDIR)\snmpCallbackDomain.obj" \
 	"$(INTDIR)\snmpTCPDomain.obj" \
 	"$(INTDIR)\snmpTCPIPv6Domain.obj" \
@@ -598,6 +602,12 @@ SOURCE=..\..\snmplib\snmp_transport.c
 SOURCE=..\..\snmplib\snmp_version.c
 
 "$(INTDIR)\snmp_version.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\snmplib\snmp_service.c
+
+"$(INTDIR)\snmp_service.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
