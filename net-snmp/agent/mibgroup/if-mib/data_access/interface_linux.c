@@ -260,7 +260,7 @@ _arch_interface_flags_v6_get(netsnmp_interface_entry *entry)
     /*
      * get the reachable time
      */
-    snprintf(line, sizeof(line), proc_sys_basereachable_time, entry->name);
+    snprintf(line, sizeof(line), proc_sys_basereachable_time, 6, entry->name);
     if (!(fin = fopen(line, "r"))) {
         DEBUGMSGTL(("access:interface",
                     "Failed to open %s\n", line));
