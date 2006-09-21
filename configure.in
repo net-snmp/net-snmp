@@ -1008,13 +1008,13 @@ AC_C_INLINE
 
 # get version number.
 AC_MSG_CHECKING([for net-snmp version number])
-VERSION=`grep NetSnmpVersionInfo.*= $srcdir/snmplib/snmp_version.c | sed 's/";.*//;s/.*"//;s/pre/0./;'`
+VERSION=`grep NetSnmpVersionInfo.*= $srcdir/snmplib/snmp_version.c | sed 's/";.*//;s/.*"//;'`
 
 # create the release version number....  I'm not sure this is used
 # anywhere any longer.
-RVERSION=`echo $VERSION | sed 's/";.*//;s/.*"//;s/pre/0./;'`
+_release_version=`echo $VERSION | sed 's/";.*//;s/.*"//;s/pre/0./;'`
 changequote(, )
-RELEASEVERSION=`echo $RVERSION | sed 's/^\([0-9]\)\.\([0-9]\)/\1:\2:0/'`
+RELEASEVERSION=`echo $_release_version | sed 's/^\([0-9]\)\.\([0-9]\)/\1:\2:0/'`
 changequote([, ])
 
 AC_SUBST(VERSION)
