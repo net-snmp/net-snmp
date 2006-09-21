@@ -422,6 +422,14 @@ EXPORTS
         parse_secLevel_conf
         netsnmp_query_set_default_session
         netsnmp_ds_parse_boolean
+        netsnmp_register_default_target
+        netsnmp_register_default_domain
+        netsnmp_register_service_handlers
+        netsnmp_transport_open_server
+        netsnmp_tdomain_transport_full
+        snmp_add_full
+        netsnmp_transport_open_client
+        snmp_oidsubtree_compare
 ;IPv6        netsnmp_udp6_parse_security
 ;IPv6        netsnmp_udp6_getSecName
 ;IPv6        netsnmp_TCPIPv6Domain
