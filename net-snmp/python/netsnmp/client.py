@@ -1,0 +1,214 @@
+import client_intf
+import string
+import re
+import types
+
+# control verbosity of error output
+verbose = 1
+
+secLevelMap = { 'noAuthNoPriv':1, 'authNoPriv':2, 'authPriv':3 }
+
+def _parse_session_args(kargs):
+    sessArgs = {
+        'Version':3,
+        'DestHost':'localhost',
+        'Community':'public',
+        'Timeout':1000000,
+        'Retries':3,
+        'RemotePort':161,
+        'LocalPort':0,
+        'SecLevel':'noAuthNoPriv',
+        'SecName':'initial',
+        'PrivProto':'DEFAULT',
+        'PrivPass':'',
+        'AuthProto':'DEFAULT',
+        'AuthPass':'',
+        'ContextEngineId':'',
+        'SecEngineId':'',
+        'Context':'',
+        'Engineboots':0,
+        'Enginetime':0,
+        }
+    keys = kargs.keys()
+    for key in keys:
+        if sessArgs.has_key(key):
+            sessArgs[key] = kargs[key]
+        else:
+            print stderr, "ERROR: unknown key", key
+    return sessArgs
+    
+
+class Varbind(object):
+    def __init__(self, tag=None, iid=None, val=None, type=None):
+        self.tag = tag
+        self.iid = str(iid)
+        self.val = val
+        self.type = type
+        # parse iid out of tag if needed
+        if iid == None and tag != None:
+            print "varbind tag, iid==None:", tag
+            regex = re.compile(r'^((?:\.\d+)+|(?:\.?\w+(?:\-*\w+)+)+)\.?(.*)$')
+            match = regex.match(tag)
+            if match:
+                (self.tag, self.iid) = match.group(1,2)
+        print "varbind:", self.tag,":", self.iid,":", self.val,":", self.type
+
+class VarList(object):
+    def __init__(self, *vs):
+        self.varbinds = []
+        print "VarList __init__:", str(vs)
+        for var in vs:
+            print var, "\n"
+            if isinstance(var, netsnmp.client.Varbind):
+                self.varbinds.append(var)
+            else:
+                self.varbinds.append(Varbind(var))
+
+    def __len__(self):
+        return len(self.varbinds)
+    
+    def __getitem__(self, index):
+        return self.varbinds[index]
+
+    def __setitem__(self, index, val):
+        if isinstance(val, netsnmp.client.Varbind):
+            self.varbinds[index] = val
+        else:
+            raise TypeError
+
+    def __iter__(self):
+        return iter(self.varbinds)
+
+    def __delitem__(self, index):
+        del self.varbinds[index]
+
+    def __repr__(self):
+        return repr(self.varbinds)
+
+    def __getslice__(self, i, j):
+        return self.varbinds[i:j]
+
+    def append(self, *vars):
+         for var in vars:
+            if isinstance(var, netsnmp.client.Varbind):
+                self.varbinds.append(var)
+            else:
+                raise TypeError
+       
+
+
+class Session(object):
+    def __init__(self, **args):
+        self.sess_ptr = None
+        self.UseLongNames = 0
+        self.UseNumeric = 0
+        self.UseSprintValue = 0
+        self.UseEnums = 0
+        self.BestGuess = 0
+        self.RetryNoSuch = 0
+        self.ErrorStr = ''
+        self.ErrorNum = 0
+        self.ErrorInd = 0
+    
+        sess_args = _parse_session_args(args)
+
+        for k,v in sess_args.items():
+            self.__dict__[k] = v
+
+        print "secLevel = ", secLevelMap[sess_args['SecLevel']]
+        
+        if sess_args['Version'] == 3:
+            self._sess_ptr = client_intf.session_v3(
+                sess_args['Version'],
+                sess_args['DestHost'],
+                sess_args['LocalPort'],
+                sess_args['Retries'],
+                sess_args['Timeout'],
+                sess_args['SecName'],
+                secLevelMap[sess_args['SecLevel']],
+                sess_args['SecEngineId'],
+                sess_args['ContextEngineId'],
+                sess_args['Context'],
+                sess_args['AuthProto'],
+                sess_args['AuthPass'],
+                sess_args['PrivProto'],
+                sess_args['PrivPass'],
+                sess_args['Engineboots'],
+                sess_args['Enginetime'])
+        else:
+            self._sess_ptr = client_intf.session(
+                sess_args['Version'],
+                sess_args['Community'],
+                sess_args['DestHost'],
+                sess_args['LocalPort'],
+                sess_args['Retries'],
+                sess_args['Timeout'])
+        
+    def get(self, varlist):
+        res = client_intf.get(self, varlist)
+        return res
+
+    def set(self, varlist):
+        res = client_intf.set(self, varlist)
+        return res
+    
+    def getnext(self, varlist):
+        res = client_intf.getnext(self, varlist)
+        return res
+
+    def getbulk(self, nonrepeaters, maxrepetitions, varlist):
+        if self.Version == 1:
+            return None
+        res = client_intf.getbulk(self, nonrepeaters, maxrepetitions, varlist)
+        return res
+
+import netsnmp
+        
+def snmpget(*args, **kargs):
+    sess = Session(**kargs)
+    var_list = VarList()
+    for arg in args:
+        if isinstance(arg, netsnmp.client.Varbind):
+            var_list.append(arg)
+        else:
+            var_list.append(Varbind(arg))
+            
+    res = sess.get(var_list)
+    return res
+
+def snmpset(*args, **kargs):
+    sess = Session(**kargs)
+    var_list = VarList()
+    for arg in args:
+        if isinstance(arg, netsnmp.client.Varbind):
+            var_list.append(arg)
+        else:
+            var_list.append(Varbind(arg))
+
+    res = sess.set(var_list)
+    return res
+
+def snmpgetnext(*args, **kargs):
+    sess = Session(**kargs)
+    var_list = VarList()
+    for arg in args:
+        if isinstance(arg, netsnmp.client.Varbind):
+            var_list.append(arg)
+        else:
+            var_list.append(Varbind(arg))
+
+    res = sess.getnext(var_list)
+    return res
+
+def snmpwalk(*args, **kargs):
+    sess = Session(**kargs)
+    var_list = VarList()
+    for arg in args:
+        if isinstance(arg, netsnmp.client.Varbind):
+            var_list.append(arg)
+        else:
+            var_list.append(Varbind(arg))
+
+    res = sess.getnext(var_list)
+    return res
+    
