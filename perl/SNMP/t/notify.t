@@ -90,6 +90,6 @@ if (defined($s3)) {
     print "res = $res\n";
 }
   
-ok($res =~ /^0 but true/);
+ok(defined($res) && ($res =~ /^0 but true/));
 
 snmptest_cleanup();
