@@ -1,0 +1,22 @@
+
+	       Net-SNMP Bindings to the Python Language
+
+About:
+  The files in this directory are for bindings the Net-SNMP libraries to
+  the python language.  From within python code you can call request the
+  Net-SNMP libraries to perform SNMP requests.
+
+Building:
+  python setup.py build
+  python setup.py test  [requires a running agent; see netsnmp/tests/snmpd.conf]
+  python setup.py install
+
+Documentation:
+  More TBD
+
+Authors:
+  The initial brunt of code was written by Giovanni Marzot at SPARTA,
+  Inc. and the development was funded by Science Logic, Inc.
+
+License:
+  Please see the LICENSE file contained with this binding module
