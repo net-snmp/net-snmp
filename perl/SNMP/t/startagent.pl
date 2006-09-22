@@ -106,14 +106,14 @@ if ($^O !~ /win32/i) {
     if (-r $snmpd_cmd and -x $snmpd_cmd) {
       $basedir = `pwd`;
       chomp $basedir;
-      system "$snmpd_cmd -r -Lf t/snmptest.log -C -c $basedir/t/snmptest.conf -p $basedir/t/snmpd.pid ${agent_host}:${agent_port} > /dev/null 2>&1";
+      system "$snmpd_cmd -r -Lf t/snmptest.log -M+$mibdir -C -c $basedir/t/snmptest.conf -p $basedir/t/snmpd.pid ${agent_host}:${agent_port} > /dev/null 2>&1";
     } else {
       warn("Couldn't run snmpd\n");
     }
   }
   if ($snmptrapd_cmd) {
     if (-r $snmptrapd_cmd and -x $snmptrapd_cmd) {
-      system "$snmptrapd_cmd -p t/snmptrapd.pid -C -c t/snmptest.conf -C ${agent_host}:${trap_port} > /dev/null 2>&1";
+      system "$snmptrapd_cmd -p t/snmptrapd.pid -M+$mibdir -C -c t/snmptest.conf -C ${agent_host}:${trap_port} > /dev/null 2>&1";
     } else {
       warn("Couldn't run snmptrapd\n");
     }
