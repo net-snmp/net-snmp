@@ -27,7 +27,7 @@ Introduction:
 Availability:
 
    The most recent release of the Python 'netsnmp' module can be found
-   bundled with the latest Net-SNMP distibution available from:
+   bundled with the latest Net-SNMP distribution available from:
 
      http://www.net-snmp.org/download.html
 
@@ -251,7 +251,7 @@ Trouble Shooting:
    possibilities.
 
    The first step should be to test the Net-SNMP installation
-   independently from the Perl5 SNMP interface.
+   independently from the Python 'netsnmp' Extension.
 
    Try running the apps from the Net-SNMP distribution.
 
@@ -273,10 +273,10 @@ Trouble Shooting:
    Sometimes compiling the Net-SNMP library with
    'position-independent-code' enabled is required (HPUX specifically).
 
-   If you cannot resolve the problem you can post to
-   comp.lang.perl.modules or email net-snmp-users@lists.sourceforge.net.
+   If you cannot resolve the problem you can email 
+   net-snmp-users@lists.sourceforge.net.
 
-   please give sufficient information to analyze the problem (OS type,
+   Please give sufficient information to analyze the problem (OS type,
    versions for OS/python/net-SNMP/compiler, complete error output, etc.)
 
 Acknowledgments:
