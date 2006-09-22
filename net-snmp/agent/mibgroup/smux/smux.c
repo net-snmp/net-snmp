@@ -176,7 +176,7 @@ smux_parse_peer_auth(const char *token, char *cptr)
     if ((&password_cptr - &cptr + 1) < cptr_len) {
         cptr = ++password_cptr;
         DEBUGMSGTL(("smux_conf", "password is: %s\n",
-                    SNMP_STRORNULL(cptr)));
+                    ( cptr ? cptr : "(null)")));
     }
 
     /*
