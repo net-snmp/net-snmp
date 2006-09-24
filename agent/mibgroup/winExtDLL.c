@@ -78,6 +78,7 @@ typedef struct {
   DWORD (WINAPI *xSnmpExtensionInit)(DWORD, HANDLE*, AsnObjectIdentifier*);
   DWORD (WINAPI *xSnmpExtensionInitEx)(AsnObjectIdentifier*);
   DWORD (WINAPI *xSnmpExtensionQuery)(BYTE, SnmpVarBindList* ,AsnInteger32* ,AsnInteger32*);
+  DWORD (WINAPI *xSnmpExtensionQueryEx)(DWORD, DWORD, SnmpVarBindList*, AsnOctetString*, AsnInteger32*, AsnInteger32*);
   netsnmp_handler_registration *my_handler;
   oid           name[MAX_OID_LEN];
   size_t        name_length;
@@ -152,7 +153,6 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     u_char          netsnmp_ASN_type;
     u_char          windows_ASN_type;
 
-  
     // WinSNMP variables:
     BOOL result;   
     SnmpVarBind *mySnmpVarBind;
@@ -162,11 +162,12 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     int i=0;
 
     DWORD (WINAPI *xSnmpExtensionQuery)(BYTE, SnmpVarBindList* ,AsnInteger32* ,AsnInteger32*);
+    DWORD (WINAPI *xSnmpExtensionQueryEx)(DWORD, DWORD, SnmpVarBindList*, AsnOctetString*, AsnInteger32*, AsnInteger32*);
     
     DEBUGMSGTL(("winExtDLL", "-----------------------------------------\n"));
     DEBUGMSGTL(("winExtDLL", "var_winExtDLL handler starting, mode = %d\n",
                 reqinfo->mode));
-    
+   
     switch (reqinfo->mode) {
     case MODE_GET:
     case MODE_GETNEXT:
@@ -188,6 +189,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 
         /* Loop through all the winExtensionAgent's looking for a matching handler */
         xSnmpExtensionQuery = NULL;
+        xSnmpExtensionQueryEx = NULL;
         for (i=0; winExtensionAgent[i].xSnmpExtensionInit && i < MAX_WINEXT_DLLS; i++) {
           DEBUGMSGTL(("winExtDLL", "Looping through all the winExtensionAgent's looking for a matching handler.\n"));
           
@@ -197,10 +199,11 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
             DEBUGMSGTL(("winExtDLL", "\n"));
             xSnmpExtensionQuery = winExtensionAgent[i].xSnmpExtensionQuery;
+            xSnmpExtensionQueryEx = winExtensionAgent[i].xSnmpExtensionQueryEx;
             break;
           }
         }
-        if (! (xSnmpExtensionQuery)) {
+        if (! (xSnmpExtensionQuery || xSnmpExtensionQueryEx)) {
           DEBUGMSGTL(("winExtDLL","Could not find a handler for the requested OID.  This should never happen!!\n"));
           return SNMP_ERR_GENERR;
         }
@@ -246,7 +249,14 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 		
         if (reqinfo->mode == MODE_GET) {
           DEBUGMSGTL(("winExtDLL", "win: MODE_GET\n"));
-          result = xSnmpExtensionQuery(SNMP_PDU_GET, &pVarBindList, &pErrorStatus, &pErrorIndex);
+/*          if (xSnmpExtensionQueryEx) {
+            DEBUGMSGTL(("winExtDLL", "Calling xSnmpExtensionQueryEx\n"));
+            result = xSnmpExtensionQueryEx(SNMP_PDU_GET, 1, &pVarBindList, NULL, &pErrorStatus, &pErrorIndex);
+          }
+          else { */
+            DEBUGMSGTL(("winExtDLL", "Calling xSnmpExtensionQuery\n"));
+            result = xSnmpExtensionQuery(SNMP_PDU_GET, &pVarBindList, &pErrorStatus, &pErrorIndex);
+/*          } */
         }
         else if (reqinfo->mode == MODE_GETNEXT) {
           DEBUGMSGTL(("winExtDLL", "win: MODE_GETNEXT\n"));
@@ -282,11 +292,11 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             netsnmp_ASN_type = ASN_INTEGER;
             DEBUGMSGTL(("winExtDLL", "MS_ASN_INTEGER = ASN_INTEGER\n"));
             break;
-          case MS_ASN_UNSIGNED32:
+          case MS_ASN_UNSIGNED32:       // SNMP v2
             netsnmp_ASN_type = ASN_UNSIGNED;
             DEBUGMSGTL(("winExtDLL", "MS_ASN_UNSIGNED32 = ASN_UNSIGNED\n"));
             break;
-          case MS_ASN_COUNTER64:
+          case MS_ASN_COUNTER64:       // SNMP v2
             netsnmp_ASN_type = ASN_COUNTER64;
             DEBUGMSGTL(("winExtDLL", "MS_ASN_COUNTER64 = ASN_COUNTER64\n"));
             break;
@@ -408,7 +418,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
 
-        DEBUGMSGTL(("winExtDLL", "SET requested\n"));
+      DEBUGMSGTL(("winExtDLL", "SET requested\n"));
       
       for (request = requests; request; request=request->next) {
 
@@ -420,6 +430,25 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 
         DEBUGMSGTL(("winExtDLL", "Var type requested: %d\n",var->type));
 
+        /* Loop through all the winExtensionAgent's looking for a matching handler */
+        xSnmpExtensionQuery = NULL;
+        for (i=0; winExtensionAgent[i].xSnmpExtensionInit && i < MAX_WINEXT_DLLS; i++) {
+          DEBUGMSGTL(("winExtDLL", "Looping through all the winExtensionAgent's looking for a matching handler.\n"));
+          
+          if (snmp_oidtree_compare(var->name, var->name_length, winExtensionAgent[i].name, 
+                winExtensionAgent[i].name_length) >= 0) {
+            DEBUGMSGTL(("winExtDLL", "Found match:\n"));
+            DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
+            DEBUGMSGTL(("winExtDLL", "\n"));
+            xSnmpExtensionQuery = winExtensionAgent[i].xSnmpExtensionQuery;
+            break;
+          }
+        }
+        if (! (xSnmpExtensionQuery)) {
+          DEBUGMSGTL(("winExtDLL","Could not find a handler for the requested OID.  This should never happen!!\n"));
+          return SNMP_ERR_GENERR;
+        }
+        
         // Set Windows ASN type based on closest match to Net-SNMP ASN type
         switch (var->type) {
           case ASN_OCTET_STR:
@@ -480,7 +509,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         // Query
 	mySnmpVarBind = (SnmpVarBind *) SnmpUtilMemAlloc(sizeof (SnmpVarBind));
 	if (mySnmpVarBind) {
-
+        
           // Convert OID from Net-SNMP to Windows         
           mySnmpVarBind->name.ids = (UINT *) SnmpUtilMemAlloc(sizeof (UINT) *var->name_length);
 
@@ -504,7 +533,6 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             return (0);
           }
         }
-        
         pVarBindList.list = (SnmpVarBind *) SnmpUtilMemAlloc(sizeof (SnmpVarBind));
         if (pVarBindList.list) {
           pVarBindList.list = mySnmpVarBind;
@@ -580,6 +608,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
           default:
             break;      
         }  
+
         
         result = xSnmpExtensionQuery(SNMP_PDU_SET, &pVarBindList, &pErrorStatus, &pErrorIndex);
         DEBUGMSGTL(("winExtDLL", "win: Result of xSnmpExtensionQuery: %d\n",result));        
@@ -686,11 +715,22 @@ winExtDLL_parse_config_winExtDLL(const char *token, char *cptr)
     strncpy(winExtensionAgent[winExtensionAgent_num].dll_name, extDLLs[DLLnum], SZBUF_DLLNAME_MAX-1);
     winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInit = (DWORD (WINAPI *)(DWORD, HANDLE*, AsnObjectIdentifier*)) 
       GetProcAddress ((HMODULE) hInst, "SnmpExtensionInit");
+
     winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInitEx = (DWORD (WINAPI *)(AsnObjectIdentifier*)) 
       GetProcAddress ((HMODULE) hInst, "SnmpExtensionInitEx");
+
     winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQuery = 
       (DWORD (WINAPI *)(BYTE, SnmpVarBindList* ,AsnInteger32* ,AsnInteger32*)) 
       GetProcAddress ((HMODULE) hInst, "SnmpExtensionQuery");
+
+    winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQueryEx = 
+      (DWORD (WINAPI *)(DWORD, DWORD, SnmpVarBindList*, AsnOctetString*, AsnInteger32*, AsnInteger32*))
+      GetProcAddress ((HMODULE) hInst, "SnmpExtensionQueryEx");
+
+    if (winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQuery)
+      DEBUGMSGTL(("winExtDLL", "xSnmpExtensionQuery found\n"));
+    if (winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQueryEx)
+      DEBUGMSGTL(("winExtDLL", "xSnmpExtensionQueryEx found\n"));
 
     // Init and get first supported view from Windows SNMP extension DLL  
     result = winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInit(dwUptimeReference, &subagentTrapEvent, &pSupportedView);
@@ -738,6 +778,7 @@ winExtDLL_parse_config_winExtDLL(const char *token, char *cptr)
       winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInit = winExtensionAgent[winExtensionAgent_num-1].xSnmpExtensionInit;
       winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInitEx = winExtensionAgent[winExtensionAgent_num-1].xSnmpExtensionInitEx;
       winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQuery = winExtensionAgent[winExtensionAgent_num-1].xSnmpExtensionQuery;
+      winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQueryEx = winExtensionAgent[winExtensionAgent_num-1].xSnmpExtensionQueryEx;
       
       result = winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInitEx(&pSupportedView);
       
