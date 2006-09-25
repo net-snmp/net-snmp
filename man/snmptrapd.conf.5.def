@@ -183,6 +183,9 @@ supports a simple form of wildcard suffixing.  By appending the character
 notification based within subtree rooted at the specified OID.
 For example, an OID token of \fC.1.3.6.1.4.1*\fP would match any enterprise
 specific notification (including the specified OID itself).
+An OID token of \fC.1.3.6.1.4.1.*\fP would would work in much the same way,
+but would not match this exact OID - just notifications that lay strictly
+below this root.
 Note that this syntax does not support full regular expressions or
 wildcards - an OID token of the form \fCoid.*.subids\fR is \fBnot\fC valid.
 .IP
