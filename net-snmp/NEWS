@@ -16,9 +16,9 @@ changes/bug fixes.
       - Some preliminary support for automatic building of dynamically
         loadable mib module code.
       - Most net-snmp specific defines are now (also) available under
-	a proper NETSNMP_ prefix. The older, potentially conflicting
-	names as well as the autoconf variables can now be turned off
-	easily within 3rd party code.
+        a proper NETSNMP_ prefix. The older, potentially conflicting
+        names as well as the autoconf variables can now be turned off
+        easily within 3rd party code.
       - libtool update to 1.5.22
 
     snmpd:
@@ -26,23 +26,23 @@ changes/bug fixes.
         (see NET-SNMP-VACM-MIB).  These extensions to the VACM MIB are
         Net-SNMP specific and are used primarily by snmptrapd at this point.
       - [PATCH 1550725]: A new uint instance helper to match the existing
-	int, long and ulong helpers
+        int, long and ulong helpers
       - [PATCH 1534877]: to add support for skipping NFS entries in the
-	host resources hrStorageTable.	See the skipNFSInHostResources
-	token in the snmpd.conf file for details.
+        host resources hrStorageTable.	See the skipNFSInHostResources
+        token in the snmpd.conf file for details.
       - Agent builds default module list from a default_mibs.h rather than
-	a hard coded configure list
+        a hard coded configure list
 
     snmptrapd:
       - the traphandle directive now supports a -t switch to indicate
-	matching any OID in the tree below the specified OID
+        matching any OID in the tree below the specified OID
 
     snmplib:
       - [PATCH 1282566]: to rework transport creation to allow for
-	alternative interpretations of the address and a more flexible
-	transport registration system
+        alternative interpretations of the address and a more flexible
+        transport registration system
       - [PATCH 1509943]: responses will get sent from the original dest IP
-	address when possible.
+        address when possible.
 
     snmpusm:
       - performance improvement when changing localized keys
@@ -226,7 +226,7 @@ changes/bug fixes.
       - Embedded perl support for trap handlers (much faster than traphandles).
           (configure --with-embedded-perl ; see 'perldoc NetSNMP::TrapReceiver')
       - the snmptrapd usmUser table can be controlled through SNMP & AgentX
-	  (the snmptrapd registers MIBs under the "snmptrapd" SNMPv3 context)
+          (the snmptrapd registers MIBs under the "snmptrapd" SNMPv3 context)
 
     agent:
       - community strings can be mapped to individual SNMPv3 contexts
@@ -1330,4 +1330,4 @@ UCD-SNMP NEWS:
 
 *3.0*
 
-	Initial (public) Release
+        Initial (public) Release
