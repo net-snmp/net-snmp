@@ -106,7 +106,7 @@ netsnmp_udp6_fmtaddr(netsnmp_transport *t, void *data, int len)
         char addr[INET6_ADDRSTRLEN];
         char tmp[INET6_ADDRSTRLEN + 8];
 
-        sprintf(tmp, "UDP/IPv6: [%s]:%hd",
+        sprintf(tmp, "UDP/IPv6: [%s]:%hu",
                 inet_ntop(AF_INET6, (void *) &(to->sin6_addr), addr,
                           INET6_ADDRSTRLEN), ntohs(to->sin6_port));
         return strdup(tmp);
