@@ -165,7 +165,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - Embedded perl support for trap handlers (much faster than traphandles).
           (configure --with-embedded-perl ; see 'perldoc NetSNMP::TrapReceiver')
       - the snmptrapd usmUser table can be controlled through SNMP & AgentX
-	  (the snmptrapd registers MIBs under the "snmptrapd" SNMPv3 context)
+          (the snmptrapd registers MIBs under the "snmptrapd" SNMPv3 context)
 
     agent:
       - community strings can be mapped to individual SNMPv3 contexts
@@ -1269,4 +1269,4 @@ UCD-SNMP NEWS:
 
 *3.0*
 
-	Initial (public) Release
+        Initial (public) Release
