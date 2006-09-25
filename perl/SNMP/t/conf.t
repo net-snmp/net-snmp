@@ -5,6 +5,7 @@ BEGIN {
         chdir 't' if -d 't';
         @INC = '../lib' if -d '../lib';
     }
+    $ENV{'MIBS'} = '';
 }
 
 # This merely checks to see if the default_store routines work from
