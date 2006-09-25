@@ -46,19 +46,17 @@ class Varbind(object):
         self.type = type
         # parse iid out of tag if needed
         if iid == None and tag != None:
-            print "varbind tag, iid==None:", tag
             regex = re.compile(r'^((?:\.\d+)+|(?:\.?\w+(?:\-*\w+)+)+)\.?(.*)$')
             match = regex.match(tag)
             if match:
                 (self.tag, self.iid) = match.group(1,2)
-        print "varbind:", self.tag,":", self.iid,":", self.val,":", self.type
+
 
 class VarList(object):
     def __init__(self, *vs):
         self.varbinds = []
-        print "VarList __init__:", str(vs)
+
         for var in vs:
-            print var, "\n"
             if isinstance(var, netsnmp.client.Varbind):
                 self.varbinds.append(var)
             else:
@@ -115,10 +113,8 @@ class Session(object):
         for k,v in sess_args.items():
             self.__dict__[k] = v
 
-        print "secLevel = ", secLevelMap[sess_args['SecLevel']]
-        
         if sess_args['Version'] == 3:
-            self._sess_ptr = client_intf.session_v3(
+            self.sess_ptr = client_intf.session_v3(
                 sess_args['Version'],
                 sess_args['DestHost'],
                 sess_args['LocalPort'],
@@ -136,7 +132,7 @@ class Session(object):
                 sess_args['Engineboots'],
                 sess_args['Enginetime'])
         else:
-            self._sess_ptr = client_intf.session(
+            self.sess_ptr = client_intf.session(
                 sess_args['Version'],
                 sess_args['Community'],
                 sess_args['DestHost'],
