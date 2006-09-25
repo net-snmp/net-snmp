@@ -83,11 +83,12 @@ class BasicTests(unittest.TestCase):
         sess.UseEnums = 1
 #        sess.UseLongNames = 1
         
-        vars = netsnmp.VarList(var, netsnmp.Varbind('sysUpTime', 0),
+        vars = netsnmp.VarList(netsnmp.Varbind('sysUpTime', 0),
                                netsnmp.Varbind('sysContact', 0),
                                netsnmp.Varbind('sysLocation', 0))
         vals = sess.get(vars)
         print "v2 sess.get result:", vals, "\n"
+
         vals = sess.getnext(vars)
         print "v2 sess.getnext result:", vals, "\n"
 
@@ -118,11 +119,12 @@ class BasicTests(unittest.TestCase):
 
         sess.UseSprintValue = 1
 
-        vars = netsnmp.VarList(var, netsnmp.Varbind('sysUpTime', 0),
+        vars = netsnmp.VarList(netsnmp.Varbind('sysUpTime', 0),
                                netsnmp.Varbind('sysContact', 0),
                                netsnmp.Varbind('sysLocation', 0))
         vals = sess.get(vars)
         print "v3 sess.get result:", vals, "\n"
+        
         vals = sess.getnext(vars)
         print "v3 sess.getnext result:", vals, "\n"
 
