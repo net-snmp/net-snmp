@@ -702,6 +702,7 @@ int getstats(void)
     else {
 	/* See if a 2.4 kernel */
 	char buffer[1024];
+	int rc;
 	parts = fopen("/proc/partitions", "r");
 	if (!parts) {
 	    snmp_log_perror("/proc/partitions");
@@ -723,11 +724,15 @@ int getstats(void)
 	    }
 	    pTemp = &head.indices[head.length];
 
-	    fscanf (parts, "%d %d %lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+	    rc = fscanf (parts, "%d %d %lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		    &pTemp->major, &pTemp->minor, &pTemp->blocks, pTemp->name,
 		    &pTemp->rio, &pTemp->rmerge, &pTemp->rsect, &pTemp->ruse,
 		    &pTemp->wio, &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,
 		    &pTemp->running, &pTemp->use, &pTemp->aveq);
+            if (rc != 15) {
+               snmp_log(LOG_ERR, "diskio.c: cannot find statistics in /proc/partitions\n");
+               return 1;
+            }
 	    head.length++;
 	}
     }
