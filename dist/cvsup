@@ -11,9 +11,9 @@ DEST=
 # especially if long file names (>100 char) are present.
 # star is a better replacement.
 if [ -x /usr/bin/star ]; then
-    TAR="/usr/bin/star -Hustar -c -f"
+    TAR='/usr/bin/star -Hustar -not -pat="*/CVS/*" -c -f'
 elif [ -x /bin/tar ]; then
-    TAR="/bin/tar cf"
+    TAR="/bin/tar --exclude=CVS -c -f"
 else
     echo "neither /usr/bin/star nor /bin/tar found."
     exit
