@@ -167,26 +167,34 @@ the (long obsolete) M2M-MIB.
 As well as logging incoming notifications, they can also
 be forwarded on to another notification receiver, or passed
 to an external program for specialised processing.
-.IP "traphandle [-t] OID|default PROGRAM [ARGS ...]"
+.IP "traphandle OID|default PROGRAM [ARGS ...]"
 invokes the specified program (with the given arguments) whenever a
-notification is received with a \fCsnmpTrapOID\fR value matching the
-OID token.  If this field is \fIdefault\fR then the program will be
+notification is received that matches the OID token.  For SNMPv2c and
+SNMPv3 notifications, this token will be compared against the
+\fCsnmpTrapOID\fR value taken from the notification.  For SNMPv1 traps,
+the generic and specific trap values and the enterprise OID will be
+converted into the equivalent OID (following RFC 2576).
+.IP
+Typically, the OID token will be the name (or numeric OID) of a
+NOTIFICATION-TYPE object, and the specified program will be invoked for
+notifications that match this OID exactly.  However this token also
+supports a simple form of wildcard suffixing.  By appending the character
+'*' to the OID token, the corresponding program will be invoked for any
+notification based within subtree rooted at the specified OID.
+For example, an OID token of \fC.1.3.6.1.4.1*\fP would match any enterprise
+specific notification (including the specified OID itself).
+Note that this syntax does not support full regular expressions or
+wildcards - an OID token of the form \fCoid.*.subids\fR is \fBnot\fC valid.
+.IP
+If the OID field is the token \fIdefault\fR then the program will be
 invoked for any notification not matching another (OID specific)
 \fItraphandle\fR entry.
-.IP
-If the -t flag is specified than any OID from a trap that occurs below
-the OID specified will be matched.  EG, specifying an OID of .1.3.6.1.4.1 
-will match traps coming from an trap defined in the enterprise tree.
-.RS
-.IP Note:
-An SNMPv1 trap will be converted to an equivalent SNMPv2-style
-notification (following RFC 2576), before selecting the trap
-handler(s) to call.  This will affect both the OIDs listed
-in \fItraphandle\fR entries, and the format of the data passed
-to the trap handler program.
-.RE
-The program is fed details about the notification to its standard input,
-in the following format, one entry per line:
+.PP
+Details of the notification are fed to the program via its standard input.
+Note that this will always use the SNMPv2-style notification format, with
+SNMPv1 traps being converted as per RFC 2576, before being passed to the
+program.
+The input format is as follows, one entry per line:
 .RS
 .IP HOSTNAME
 The name of the host that sent the notification, as determined by
