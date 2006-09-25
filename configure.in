@@ -2785,6 +2785,20 @@ if test "x$install_perl" != "xno" ; then
     fi
 fi
 
+if test "x$install_perl" != "xno" ; then
+  AC_MSG_CHECKING([if we are in the source tree so we can install perl modules])
+  if test "x$top_srcdir" != "x." ; then
+    if test "x$install_perl" = "xtry" ; then
+      install_perl="no"
+      AC_MSG_RESULT([No])
+    else
+      AC_MSG_ERROR([perl modules can not be built outside the source directory])
+    fi
+  else
+      AC_MSG_RESULT([Yes])
+  fi
+fi      
+
 # check the perl compiler name
 if test "x$install_perl" != "xno" ; then
     #
