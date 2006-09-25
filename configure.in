@@ -2045,16 +2045,18 @@ while test "x$new_module_list" != "x"; do
               AC_MSG_WARN([mib module error])
 	      AC_MSG_ERROR([mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir])
 	    elif echo " $new_with_out_mib_modules " | grep " $j " > /dev/null; then
-              mib_cfg_msg="mib module '$i' requires module '$j' but someone told me to compile without it"
-              AC_MSG_WARN([mib module error])
-              if test "x$with_mib_cfg_checks" = "xyes"; then
-                AC_MSG_ERROR([$mib_cfg_msg])
-              else
-                AC_MSG_WARN([$mib_cfg_msg])
-                AC_MSG_CACHE_ADD([*** MIB Module warning *** $mib_cfg_msg])
-              fi
+	      if test "x$i" != "xdefault_modules" ; then
+                mib_cfg_msg="mib module '$i' requires module '$j' but someone told me to compile without it"
+                AC_MSG_WARN([mib module error])
+                if test "x$with_mib_cfg_checks" = "xyes"; then
+                  AC_MSG_ERROR([$mib_cfg_msg])
+                else
+                  AC_MSG_WARN([$mib_cfg_msg])
+                  AC_MSG_CACHE_ADD([*** MIB Module warning *** $mib_cfg_msg])
+                fi
 #	    elif echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
 #              AC_MSG_MODULE_DBG("  $j included previously")
+              fi
 	    else
 	      new_list_two="$new_list_two $j"
               AC_MSG_MODULE_DBG("  $j included")
