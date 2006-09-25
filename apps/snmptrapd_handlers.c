@@ -97,9 +97,10 @@ snmptrapd_parse_traphandle(const char *token, char *line)
             flags |= NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE;
             *(cp--) = '\0';
             if ( *cp == '.' ) {
-                /* XXX 
-                 * Do we want to distinguish between 'oid.*' & 'oid*' ?
+                /* 
+                 * Distinguish between 'oid.*' & 'oid*'
                  */
+                flags |= NETSNMP_TRAPHANDLER_FLAG_STRICT_SUBTREE;
                 *(cp--) = '\0';
             }
         }
@@ -497,14 +498,39 @@ netsnmp_get_traphandler( oid *trapOid, int trapOidLen ) {
     for (traph = netsnmp_specific_traphandlers;
          traph; traph=traph->nextt ) {
 
-        if (((traph->flags & NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE) &&
-             snmp_oidsubtree_compare(traph->trapoid, traph->trapoid_len,
-                                  trapOid, trapOidLen) == 0) ||
-            (!(traph->flags & NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE) &&
-             snmp_oid_compare(traph->trapoid, traph->trapoid_len,
-                              trapOid, trapOidLen) == 0)) {
-            DEBUGMSGTL(( "snmptrapd", "get_traphandler matched (%x)\n", traph));
-	    return traph;
+        /*
+         * If the trap handler wasn't wildcarded, then the trapOID
+         *   should match the registered OID exactly.
+         */
+        if (!(traph->flags & NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE)) {
+            if (snmp_oid_compare(traph->trapoid, traph->trapoid_len,
+                                 trapOid, trapOidLen) == 0) {
+                DEBUGMSGTL(( "snmptrapd", "get_traphandler exact match (%x)\n", traph));
+	        return traph;
+            }
+	} else {
+           /*
+            * If the trap handler *was* wildcarded, then the trapOID
+            *   should have the registered OID as a prefix...
+            */
+            if (snmp_oidsubtree_compare(traph->trapoid,
+                                        traph->trapoid_len,
+                                        trapOid, trapOidLen) == 0) {
+                if (traph->flags & NETSNMP_TRAPHANDLER_FLAG_STRICT_SUBTREE) {
+                    /*
+                     * ... and (optionally) *strictly* as a prefix
+                     *   i.e. not including an exact match.
+                     */
+                    if (snmp_oid_compare(traph->trapoid, traph->trapoid_len,
+                                         trapOid, trapOidLen) != 0) {
+                        DEBUGMSGTL(( "snmptrapd", "get_traphandler strict subtree match (%x)\n", traph));
+	                return traph;
+                    }
+                } else {
+                    DEBUGMSGTL(( "snmptrapd", "get_traphandler subtree match (%x)\n", traph));
+	            return traph;
+                }
+            }
 	}
     }
 
