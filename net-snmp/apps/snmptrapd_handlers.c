@@ -78,25 +78,31 @@ snmptrapd_parse_traphandle(const char *token, char *line)
     char            buf[STRINGMAX];
     oid             obuf[MAX_OID_LEN];
     size_t          olen = MAX_OID_LEN;
-    char           *cptr;
+    char           *cptr, *cp;
     netsnmp_trapd_handler *traph;
     int             flags = 0;
 
+    memset( buf, 0, sizeof(buf));
+    memset(obuf, 0, sizeof(obuf));
     cptr = copy_nword(line, buf, sizeof(buf));
 
-    /* check for the -t flag which matches an entire tree */
-    if (strcmp(buf, "-t") == 0) {
-        flags |= NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE;
-        cptr = copy_nword(cptr, buf, sizeof(buf));
-    }
-        
     DEBUGMSGTL(("read_config:traphandle", "registering handler for: "));
 
     if (!strcmp(buf, "default")) {
         DEBUGMSG(("read_config:traphandle", "default"));
         traph = netsnmp_add_default_traphandler( command_handler );
     } else {
-
+        cp = buf+strlen(buf)-1;
+        if ( *cp == '*' ) {
+            flags |= NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE;
+            *(cp--) = '\0';
+            if ( *cp == '.' ) {
+                /* XXX 
+                 * Do we want to distinguish between 'oid.*' & 'oid*' ?
+                 */
+                *(cp--) = '\0';
+            }
+        }
         if (!read_objid(buf, obuf, &olen)) {
             char            buf1[STRINGMAX];
             snprintf(buf1,  sizeof(buf1),
