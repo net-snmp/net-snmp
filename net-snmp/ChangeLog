@@ -1,6 +1,310 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.3.1 -> V5.4
+Changes: V5.3.1 -> V5.4.pre2
+
+2006-09-25 21:49  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3,
+     netsnmp_agent_trap.3, netsnmp_asn1_packet_parse.3,
+     netsnmp_baby_steps.3, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3,
+     netsnmp_container.3, netsnmp_data_list.3,
+     netsnmp_debug.3, netsnmp_default_store.3,
+     netsnmp_handler.3, netsnmp_instance.3,
+     netsnmp_iterator_info_s.3, netsnmp_leaf.3,
+     netsnmp_library.3, netsnmp_mib_maintenance.3,
+     netsnmp_mib_utilities.3, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3,
+     netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3,
+     netsnmp_snmp_client.3, netsnmp_snmp_logging.3,
+     netsnmp_snmp_pdu.3, netsnmp_snmp_session.3,
+     netsnmp_stash_cache.3, netsnmp_stash_to_next.3,
+     netsnmp_table.3, netsnmp_table_array.3,
+     netsnmp_table_container.3, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_generic.3,
+     netsnmp_table_indexes.3, netsnmp_table_iterator.3,
+     netsnmp_table_iterator.h.3, netsnmp_table_maintenance.3
+, netsnmp_table_rows.3, netsnmp_tdata.3,
+     netsnmp_util.3, netsnmp_utilities.3,
+     netsnmp_variable_list.3, netsnmp_watcher.3:
+
+   documentation update
+
+2006-09-25 21:49  hardaker
+
+   * doxygen.conf:
+
+   - version tag ( 5.4.pre2 )
+
+2006-09-25 21:37  hardaker
+
+   * dist/makerelease:
+
+   fixed syntax error
+
+2006-09-25 17:37  hardaker
+
+   * include/net-snmp/net-snmp-config.h.in:
+
+   ran autoheader
+
+2006-09-25 17:26  hardaker
+
+   * Makefile.in, configure, configure.in:
+
+   Update for a --with-python-modules flag; will run into some of the same build-in-place issues that perl has but it's a start
+
+2006-09-25 17:04  hardaker
+
+   * python/README:
+
+   minor wording changes
+
+2006-09-25 16:57  hardaker
+
+   * agent/mibgroup/ucd-snmp/diskio.c:
+
+   CHANGES: snmpd: BUG: 1559358: from tramker: check scanf results for diskio scanning
+
+2006-09-25 16:54  hardaker
+
+   * configure, configure.in:
+
+   CHANGES: snmpd: BUGS: 1564233: Have configure test for rpm headers not just the libraries
+
+2006-09-25 14:55  hardaker
+
+   * configure, configure.in:
+
+   don't warn about excluding required modules when the current file is default_mibs
+
+2006-09-25 14:33  tanders
+
+   * snmplib/snmpUDPIPv6Domain.c:
+
+   CHANGES: snmplib: PATCH: 1565293: from adp: UDPIPv6 transport reports wrong port number
+
+2006-09-25 10:52  hardaker
+
+   * configure, configure.in:
+
+   tests to see if we're in the main source tree so we can install the perl modules or not
+
+2006-09-25 09:25  tanders
+
+   * perl/SNMP/t/: async.t, bulkwalk.t, conf.t,
+     get.t, getnext.t, mib.t, mibload.t,
+     notify.t, session.t, set.t:
+
+   Make perl test suite work even if net-snmp isn't installed yet.
+
+2006-09-25 08:48  tanders
+
+   * perl/agent/test.pl:
+
+   NetSNMP::agent tests neither need config nor MIBs
+
+2006-09-25 08:21  rstory
+
+   * dist/cvsup:
+
+   exclude CVS files from nighly tarballs
+
+2006-09-25 07:30  marz
+
+   * python/netsnmp/: client.py, client_intf.c,
+     tests/test.py:
+
+   adding getbulk, removing some debug
+
+2006-09-25 05:35  tanders
+
+   * NEWS:
+
+   Don't mix tabs and spaces for indentation. Convert all (rarely used) tabs to spaces.
+
+2006-09-25 01:42  dts12
+
+   * apps/snmptrapd_handlers.c, apps/snmptrapd_handlers.h
+, man/snmptrapd.conf.5.def:
+
+   Distinguish between "OID.*" and "OID*" wildcard syntax (exclusive and
+   inclusive subtree matches respectively).
+
+2006-09-25 01:38  dts12
+
+   * apps/snmptrapd_handlers.c, man/snmptrapd.conf.5.def
+:
+
+   Implement (and document) "OID.*" syntax for subtree matching.
+
+2006-09-24 15:28  alex_b
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Win32: winExtDLL - Fix bug with set requests, start to add SNMPv2 support.
+
+2006-09-23 00:13  tanders
+
+   * perl/OID/test.pl:
+
+   OID.pm tests shouldn't depend on *installed* MIBs
+
+2006-09-22 14:18  tanders
+
+   * python/README:
+
+   some nit-picking
+
+2006-09-22 13:56  tanders
+
+   * perl/SNMP/t/startagent.pl:
+
+   SNMP.pm perl tests shouldn't depend on *installed* MIBs
+
+2006-09-22 12:47  marz
+
+   * python/README:
+
+   README edits
+
+2006-09-22 12:03  marz
+
+   * python/README:
+
+   mods to README with some usage info
+
+2006-09-22 10:25  hardaker
+
+   * python/README:
+
+   proper naming
+
+2006-09-22 10:25  hardaker
+
+   * python/: LICENSE, README:
+
+   added a readme and license file
+
+2006-09-22 10:20  hardaker
+
+   * COPYING:
+
+   date update
+
+2006-09-22 07:58  marz
+
+   * python/: setup.py, netsnmp/__init__.py,
+     netsnmp/client.py, netsnmp/client_intf.c,
+     netsnmp/tests/__init__.py, netsnmp/tests/snmpd.conf,
+     netsnmp/tests/test.py:
+
+   Adding initial alpha support for net-snmp python binding
+
+2006-09-22 04:47  tanders
+
+   * dist/nsb-functions:
+
+   Don't fail on "LOG_ERR".
+
+2006-09-22 03:29  tanders
+
+   * perl/SNMP/t/: notify.t, startagent.pl:
+
+   fix SNMP.pm notify test (start snmptrapd with valid options)
+
+2006-09-21 09:15  alex_b
+
+   * win32/: libsnmp/Makefile.in, libsnmp/libsnmp.dsp,
+     libsnmp_dll/Makefile.in, libsnmp_dll/libsnmp.def,
+     libsnmp_dll/libsnmp.def.in, libsnmp_dll/libsnmp_dll.dsp
+:
+
+   Windows build fixes.
+
+2006-09-21 07:43  tanders
+
+   * perl/TrapReceiver/perl_snmptrapd.h:
+
+   Sync struct netsnmp_trapd_handler_s with the library code again (add "flags").
+
+2006-09-21 06:09  tanders
+
+   * agent/mibgroup/if-mib/data_access/interface_linux.c:
+
+   fix potential segfault introduced by patch 1561277
+
+2006-09-21 05:21  tanders
+
+   * agent/mibgroup/smux/smux.c:
+
+   #include <net-snmp/library/tools.h> for SNMP_STRORNULL
+
+2006-09-21 03:49  tanders
+
+   * configure, configure.in:
+
+   *really* keep preX/rcX in version strings
+
+2006-09-20 19:25  hardaker
+
+   * agent/mibgroup/agentx/agentx_config.c:
+
+   change agentx socket define to NETSNMP_ prefixed
+
+2006-09-20 13:26  dts12
+
+   * apps/snmptrapd_handlers.c,
+     include/net-snmp/library/snmp_api.h, snmplib/snmp_api.c
+:
+
+   Check incoming trap OIDs as an extension of the traphandle OID
+   (but not the other way round!)
+
+2006-09-20 09:48  hardaker
+
+   * configure, configure.in:
+
+   don't change pre tags to 0. to avoid badly generated version numbers
+
+2006-09-20 07:45  hardaker
+
+   * dist/makerelease:
+
+   automatted testing of the produced tar-ball
+
+2006-09-19 22:23  hardaker
+
+   * dist/makerelease:
+
+   fix path to extractnews
+
+2006-09-19 22:18  hardaker
+
+   * FAQ, README, configure.in, sedscript.in
+, snmplib/snmp_version.c, configure,
+     dist/net-snmp.spec:
+
+   - version tag ( 5.4.pre1 )
+
+-------------------------------------------------------------------------------
+
+Changes: V5.3.1 -> V5.4.pre1
 
 2006-09-19 17:29  hardaker
 
