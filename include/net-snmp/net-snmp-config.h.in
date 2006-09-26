@@ -684,8 +684,14 @@
 /* Define to 1 if you have the `rpmGetPath' function. */
 #undef HAVE_RPMGETPATH
 
+/* Define to 1 if you have the <rpm/header.h> header file. */
+#undef HAVE_RPM_HEADER_H
+
 /* Define to 1 if you have the <rpm/rpmdb.h> header file. */
 #undef HAVE_RPM_RPMDB_H
+
+/* Define to 1 if you have the <rpm/rpmlib.h> header file. */
+#undef HAVE_RPM_RPMLIB_H
 
 /* Define to 1 if you have the <search.h> header file. */
 #undef HAVE_SEARCH_H
