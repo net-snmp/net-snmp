@@ -818,11 +818,13 @@ Perl:
                                   of the net-snmp toolkit.  If ARGS is
                                   specified, they're passed to the
                                   Makefile.PL script.],[
-    install_perl=yes
-    if test "$withval" = yes; then
-      PERLARGS=""
+    if test "$withval" = "no"; then
+      install_perl="no"
     else
-      PERLARGS="$withval"
+      install_perl="yes"
+      if test "$withval" != "yes"; then
+        PERLARGS="$withval"
+      fi
     fi
 ], install_perl="try")
 
