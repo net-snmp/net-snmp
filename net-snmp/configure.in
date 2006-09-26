@@ -3020,11 +3020,13 @@ LIBS=$NONAGENTLIBS
 PYTHONTARGS=""
 PYTHONINSTALLTARGS=""
 PYTHONUNINSTALLTARGS=""
+PYTHONCLEANTARGS=""
 AC_MSG_CHECKING([If we should install the python bindings])
 if test "x$install_python" = "xyes" ; then
     PYTHONTARGS="pythonmodules"
     PYTHONINSTALLTARGS="pythoninstall"
     PYTHONUNINSTALLTARGS="pythonuninstall"
+    PYTHONCLEANTARGS="pythonclean"
     AC_MSG_CACHE_ADD(SNMP Python modules:        building)
     AC_MSG_RESULT([yes])
 else
@@ -3034,6 +3036,7 @@ fi
 AC_SUBST(PYTHONTARGS)
 AC_SUBST(PYTHONINSTALLTARGS)
 AC_SUBST(PYTHONUNINSTALLTARGS)
+AC_SUBST(PYTHONCLEANTARGS)
 AC_SUBST(PYTHONARGS)
 
 
