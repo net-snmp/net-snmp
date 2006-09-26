@@ -44,6 +44,12 @@ of changes/bug fixes.
       - [BUG 1535903]: Support spaces within security names
       - Agent builds default module list from a default_mibs.h rather than
 	a hard coded configure list
+      - [BUG 1559358]: check scanf results for diskio scanning
+      - [BUG 1564233]: Have configure test for rpm headers not just the
+	libraries
+
+    snmplib:
+      - [PATCH 1565293]: UDPIPv6 transport reports wrong port number
 
     misc:
       - Most net-snmp specific defines are now (also) available under a
