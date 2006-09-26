@@ -12,6 +12,10 @@ changes/bug fixes.
       configuration.
 
   New:
+    python:
+      - Python bindings to the Net-SNMP project are now available in
+        the python sub-directory.  See the README file there for details. 
+
     build:
       - Some preliminary support for automatic building of dynamically
         loadable mib module code.
