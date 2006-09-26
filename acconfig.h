@@ -558,7 +558,7 @@
 #if defined(bsdi2) || defined(bsdi3) || defined(bsdi4)
 #define NETSNMP_OSTYPE NETSNMP_BSDIID
 #endif
-#if defined(openbsd2) || defined(openbsd3)
+#if defined(openbsd2) || defined(openbsd3) || defined(openbsd4)
 #define NETSNMP_OSTYPE NETSNMP_OPENBSDID
 #endif
 #ifdef WIN32
