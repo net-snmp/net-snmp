@@ -80,8 +80,7 @@ Operational Description:
    module through an object oriented interface for modularity and ease
    of use.  The primary class is netsnmp.Session which encapsulates
    the persistent aspects of a connection between the management
-   application and the managed agent. Internally the class is
-   implemented as a blessed hash reference. This class supplies 'get',
+   application and the managed agent. This class supplies 'get',
    'getnext', 'getbulk', 'set' and other method calls. 
 
    A description of the fields which can be specified when instantiating an
@@ -91,7 +90,7 @@ Operational Description:
 
     DestHost    - default 'localhost', hostname or ip addr of SNMP agent
     Community   - default 'public', SNMP community string (used for both R/W)
-    Version     - default '3', [2 (same as 2c), 2c, 3]
+    Version     - default '3', [1, 2 (equiv to 2c), 3]
     RemotePort  - default '161', allow remote UDP port to be overridden
     Timeout     - default '500000', micro-seconds before retry
     Retries     - default '3', retries before failure
@@ -167,21 +166,25 @@ Operational Description:
 		      n Varbinds in the list as defined by <non-repeaters>. 
                       For the remaining Varbinds, the next m lexico instances 
                       are retrieved each of the remaining Varbinds, 
-                      where m is <max-repeaters>.
+                      where m is <max-repeaters>. Returns a tuple of values 
+		      retrieved.
+
    Acceptable variable formats:
 
     netsnmp.VarList:  - represents an list of Varbind objects to get or set.
+                        takes are arguments and unspecified number of Varbinds,
+			or tuples which will be converted to Varbinds.
 
 
     netsnmp.Varbind:  - represents a single MIB object to get or set
-                      implemented as Python[<tag>, <iid>, <val>, <type>].
-                      <tag>  - one of the following forms:
-                             1) leaf identifier (e.g., 'sysDescr') assumed to be
-                                unique for practical purposes
-                             2) fully qualified identifier (e.g.,
-   			     '.iso.org.dod.internet.mgmt.mib-2.system.sysDescr')
-                             3) fully qualified, dotted-decimal, numeric OID (e.g.,
-                                '.1.3.6.1.2.1.1.1')
+			implemented as Python[<tag>, <iid>, <val>, <type>].
+			<tag>  - one of the following forms:
+                           1) leaf identifier (e.g., 'sysDescr') assumed to be
+                           unique for practical purposes
+                           2) fully qualified identifier (e.g.,
+   			   '.iso.org.dod.internet.mgmt.mib-2.system.sysDescr')
+                           3) fully qualified, dotted-decimal, numeric OID 
+			   (e.g., '.1.3.6.1.2.1.1.1')
                       <iid>  - the dotted-decimal, instance identifier. for
                                scalar MIB objects use '0'
    		      <val>  - the SNMP data value retrieved from or being set
@@ -200,7 +203,6 @@ Operational Description:
 			    TICKS,  => decimal unsigned integer,
 			    OPAQUE => perl scalar containing octets,
 			    NULL,  => perl scalar containing nothing,
-
 
                       <type> - SNMP data type (see list above), this field is
                                populated by 'get' and 'getnext' operations. In
@@ -221,6 +223,7 @@ Operational Description:
 			    0 => no output, 
 			    1 => enables warning/info
 
+(needs implementation)
     $SNMP::debugging     - default '0', controls debugging output level
                            within SNMP module and libsnmp
                            1 => enables 'SNMP::verbose' (see above)
@@ -232,17 +235,24 @@ Operational Description:
 
    Exported 'netsnmp' package utility functions:
 
-   snmpget() - takes args of netsnmp.Session preceded by those of the
+   snmpget(<Varbind/VarList>), <Session args>) 
+			 - takes args of netsnmp.Session preceded by those 
+			 of the corresponding netsnmp.Session method
+
+   snmpgetnext(<Varbind/VarList>), <Session args>)
+             - takes args of netsnmp.Session preceded by those of the
                corresponding netsnmp.Session method
 
-   snmpgetnext() - takes args of netsnmp.Session preceded by those of the
+   snmpgetbulk(<Varbind/VarList>), <Session args>)
+             - takes args of netsnmp.Session preceded by those of the
                corresponding netsnmp.Session method
 
-
-   snmpset() - takes args of netsnmp.Session preceded by those of the
+   snmpset(<Varbind/VarList>), <Session args>)
+             - takes args of netsnmp.Session preceded by those of the
                corresponding netsnmp.Session method
 
-   snmptrap() - takes args of netsnmp.Session preceded by those of the
+   snmpwalk(nonrepeaters, maxrepetitions, <Varbind/VarList>), <Session args>)) 
+             - takes args of netsnmp.Session preceded by those of the
                corresponding netsnmp.Session method
 
 Trouble Shooting:
@@ -293,4 +303,10 @@ License:
 
 Copyright:
 
-  <no additional required?>
+     Copyright (c) 2006 G. S. Marzot. All rights reserved.
+     This program is free software; you can redistribute it and/or
+     modify it under the same terms as Net-SNMP itself.
+
+     Copyright (c) 2006 SPARTA, Inc.  All Rights Reserved.  This
+     program is free software; you can redistribute it and/or modify
+     it under the same terms as Net-SNMP itself.

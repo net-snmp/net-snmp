@@ -51,6 +51,9 @@ class Varbind(object):
             if match:
                 (self.tag, self.iid) = match.group(1,2)
 
+    def print_str(self):
+        return self.tag, self.iid, self.val, self.type
+
 
 class VarList(object):
     def __init__(self, *vs):
@@ -168,7 +171,6 @@ def snmpget(*args, **kargs):
             var_list.append(arg)
         else:
             var_list.append(Varbind(arg))
-            
     res = sess.get(var_list)
     return res
 
@@ -180,7 +182,6 @@ def snmpset(*args, **kargs):
             var_list.append(arg)
         else:
             var_list.append(Varbind(arg))
-
     res = sess.set(var_list)
     return res
 
@@ -192,8 +193,18 @@ def snmpgetnext(*args, **kargs):
             var_list.append(arg)
         else:
             var_list.append(Varbind(arg))
-
     res = sess.getnext(var_list)
+    return res
+
+def snmpgetbulk(nonrepeaters, maxrepetitions,*args, **kargs):
+    sess = Session(**kargs)
+    var_list = VarList()
+    for arg in args:
+        if isinstance(arg, netsnmp.client.Varbind):
+            var_list.append(arg)
+        else:
+            var_list.append(Varbind(arg))
+    res = sess.getbulk(nonrepeaters, maxrepetitions, var_list)
     return res
 
 def snmpwalk(*args, **kargs):
@@ -204,7 +215,6 @@ def snmpwalk(*args, **kargs):
             var_list.append(arg)
         else:
             var_list.append(Varbind(arg))
-
     res = sess.getnext(var_list)
     return res
     
