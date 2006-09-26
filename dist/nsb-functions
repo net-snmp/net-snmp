@@ -456,6 +456,14 @@ nsb-build()
       fi
    fi
 
+   if [ $NSB_SKIP_DIRLINK -eq 1 ]; then
+      nsb-info "Skipping nsb-dir-link"
+   else
+      for d in $NSB_DIRLINK_DIRS; do
+        nsb-dir-link $src_dir/$d $build_dir/$d
+      done
+   fi
+
    if [ $NSB_SKIP_CONFIG -ne 1 ]; then
       nsb-info "Configuring... (log is nsb-config.$NSB_DATE)"
       if [ $nsb_config_all -eq 0 ]; then
@@ -464,14 +472,6 @@ nsb-build()
           nsb-config-all $src_dir $dest_dir
       fi
       nsb-prompt "press enter to continue"
-   fi
-
-   if [ $NSB_SKIP_DIRLINK -eq 1 ]; then
-      nsb-info "Skipping nsb-dir-link"
-   else
-      for d in $NSB_DIRLINK_DIRS; do
-        nsb-dir-link $src_dir/$d $build_dir/$d
-      done
    fi
 
    if [ $NSB_SKIP_BUILD -eq 1 ]; then
