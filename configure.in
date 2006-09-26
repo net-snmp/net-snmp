@@ -2263,7 +2263,7 @@ AC_CHECK_HEADER(rpm/rpmlib.h,rpmlib_h=yes,rpmlib_h=no)
 AC_CHECK_HEADER(rpm/header.h,rpmheader_h=yes,rpmheader_h=no)
 
 if test "x$rpmheader_h" = "xno" -o "x$rpmlib_h" = "xno" ; then
-  if test "x$with_rpm" != "xyes" ; then
+  if test "x$with_rpm" = "xyes" ; then
     AC_MSG_ERROR([Could not find either the RPM header files needed and was specifically asked to use RPM support])
   else
     with_rpm=no
