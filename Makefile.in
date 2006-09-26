@@ -149,7 +149,7 @@ testdirs:
 distall: ${srcdir}/configure ${srcdir}/include/net-snmp/net-snmp-config.h 
 
 OTHERCLEANTARGETS=EXAMPLE.conf sedscript
-OTHERCLEANTODOS=perlclean pythonclean
+OTHERCLEANTODOS=perlclean @PYTHONCLEANTARGS@
 
 #
 # perl specific build rules
@@ -223,7 +223,7 @@ pythontest:
 	fi
 
 pythonclean:
-	( cd python ; $(PYMAKE) clean )
+	@( cd python ; $(PYMAKE) clean )
 
 
 #
