@@ -844,6 +844,27 @@ AC_ARG_WITH(embedded-perl,,
 AC_ARG_WITH(perl-cc-checks,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-perl-cc-checks/--disable-perl-cc-checks instead ]) )
 
+
+#
+# Python specific
+#
+AC_ARG_WITH(python-modules,
+[
+Python:
+  --with-python-modules[=ARGS]    Install the python bindings along with the
+                                  rest of the net-snmp toolkit.  If ARGS is
+                                  specified, they're passed to the
+                                  setup.py script as arguments.],[
+    install_python=yes
+    if test "$withval" = yes; then
+      PYTHONARGS=""
+    else
+      PYTHONARGS="$withval"
+    fi
+], install_python="no")
+
+# other flags
+
 AC_ARG_WITH(server-send-buf,
 [
 Network Buffers:
@@ -2801,7 +2822,7 @@ fi
 
 if test "x$install_perl" != "xno" ; then
   AC_MSG_CHECKING([if we are in the source tree so we can install perl modules])
-  if test "x$top_srcdir" != "x." ; then
+  if test "x$srcdir" != "x." ; then
     if test "x$install_perl" = "xtry" ; then
       install_perl="no"
       AC_MSG_RESULT([No])
@@ -2992,6 +3013,30 @@ AC_SUBST(PERLARGS)
 # reset libs
 AGENTLIBS=$LIBS
 LIBS=$NONAGENTLIBS
+
+
+
+# python support
+PYTHONTARGS=""
+PYTHONINSTALLTARGS=""
+PYTHONUNINSTALLTARGS=""
+AC_MSG_CHECKING([If we should install the python bindings])
+if test "x$install_python" = "xyes" ; then
+    PYTHONTARGS="pythonmodules"
+    PYTHONINSTALLTARGS="pythoninstall"
+    PYTHONUNINSTALLTARGS="pythonuninstall"
+    AC_MSG_CACHE_ADD(SNMP Python modules:        building)
+    AC_MSG_RESULT([yes])
+else
+    AC_MSG_CACHE_ADD(SNMP Python modules:        disabled)
+    AC_MSG_RESULT([no])
+fi
+AC_SUBST(PYTHONTARGS)
+AC_SUBST(PYTHONINSTALLTARGS)
+AC_SUBST(PYTHONUNINSTALLTARGS)
+AC_SUBST(PYTHONARGS)
+
+
 
 # Checks for header files.
 AC_HEADER_STDC
