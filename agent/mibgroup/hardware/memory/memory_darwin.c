@@ -4,6 +4,11 @@
 #include <net-snmp/agent/hardware/memory.h>
 
 #include <unistd.h>
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <mach/mach.h>
 
 /*
  * Retained from UCD implementation
