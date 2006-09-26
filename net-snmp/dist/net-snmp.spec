@@ -1,7 +1,7 @@
 #
 # Default to no perl
 #
-%define include_perl 0
+%define include_perl 1
 #
 # Check for -with embedded_perl
 #
@@ -20,11 +20,11 @@
 #
 # library version (see Makefile.top)
 #
-%define libcurrent 11
+%define libcurrent 15
 #
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
-Version: 5.4.pre1
+Version: 5.4.pre2
 # update release for vendor release. (eg 1.rh9, 1.rh72, 1.ydl3, 1.ydl23)
 Release: 1
 URL: http://www.net-snmp.org/
@@ -44,6 +44,7 @@ Provides: net-snmp, net-snmp-utils, libnetsnmp.so.%{libcurrent}, libnetsnmpagent
 %if %{embedded_perl}
 Requires: perl
 %endif
+Patch1:         netsnmp.5.4.pre1.config.patch
 
 %description
 
@@ -88,6 +89,8 @@ echo "'-with embedded_perl' requires '-with perl_modules'"
 exit 1
 %endif
 %setup -q
+
+%patch1 -p0
 
 %build
 %configure --with-defaults --with-sys-contact="Unknown" \
