@@ -69,8 +69,8 @@ static int __add_var_val_str (netsnmp_pdu *, oid *, int, char *,
 
 
 /* Wrapper around fprintf(stderr, ...) for clean and easy debug output. */
-#ifdef	DEBUGGING
 static int _debug_level = 0;
+#ifdef	DEBUGGING
 #define	DBPRT(severity, otherargs)					\
 	do {								\
 	    if (_debug_level && severity <= _debug_level) {		\
@@ -178,7 +178,8 @@ __is_leaf (tp)
 struct tree* tp;
 {
    char buf[MAX_TYPE_NAME_LEN];
-   return (tp && __get_type_str(tp->type,buf));
+   return (tp && (__get_type_str(tp->type,buf) || 
+		  (tp->parent && __get_type_str(tp->parent->type,buf) )));
 }
 
 static SnmpMibNode*
@@ -547,6 +548,8 @@ char * str;
 	case TYPE_NSAPADDRESS:
         default: /* unsupported types for now */
            strcpy(str, "");
+	   if (_debug_level) printf("__get_type_str:FAILURE(%d)\n", type);
+
            return(FAILURE);
    }
    return SUCCESS;
@@ -1054,7 +1057,7 @@ retry:
          *err_num = ss->s_snmp_errno;
          break;
    }
-   if (*err_num) printf("XXX sync PDU: %s\n", err_str);
+   if (_debug_level && *err_num) printf("XXX sync PDU: %s\n", err_str);
    return(status);
 }
 
@@ -1483,15 +1486,21 @@ netsnmp_get(PyObject *self, PyObject *args)
 	tp = netsnmp_sprint_realloc_objid_tree(&str_bufp, &str_buf_len,
 					       &out_len, 0, &buf_over,
 					       vars->name,vars->name_length);
+	if (_debug_level) printf("netsnmp_get:str_bufp:%s:%d:%d\n",str_bufp,str_buf_len,out_len);
+
 	str_buf[sizeof(str_buf)-1] = '\0';
 
 	if (__is_leaf(tp)) {
 	  type = tp->type;
 	  getlabel_flag &= ~NON_LEAF_NAME;
+	  if (_debug_level) printf("netsnmp_get:is_leaf:%d\n",type);
 	} else {
 	  getlabel_flag |= NON_LEAF_NAME;
 	  type = __translate_asn_type(vars->type);
+	  if (_debug_level) printf("netsnmp_get:!is_leaf:%d\n",tp->type);
 	}
+	
+	if (_debug_level) printf("netsnmp_get:str_buf:%s\n",str_buf);
 
 	__get_label_iid(str_buf, &tag, &iid, getlabel_flag);
 
@@ -1618,6 +1627,8 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 	tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, 
 		       NULL, best_guess);
 
+	if (_debug_level) printf("netsnmp_getnext: filling request: %s:%s:%d:%d\n", tag, iid, oid_arr_len,best_guess);
+
 	if (oid_arr_len) {
 	  snmp_add_null_var(pdu, oid_arr, oid_arr_len);
 	  varlist_len++;
@@ -1700,6 +1711,8 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 	}
 
 	__get_label_iid(str_buf, &tag, &iid, getlabel_flag);
+
+	if (_debug_level) printf("netsnmp_getnext: filling response: %s:%s\n", tag, iid);
 
 	if (tag) {
 	  PyObject_SetAttrString(varbind, "tag", Py_BuildValue("s",tag));

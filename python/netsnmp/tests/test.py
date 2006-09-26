@@ -89,6 +89,8 @@ class BasicTests(unittest.TestCase):
         vals = sess.get(vars)
         print "v2 sess.get result:", vals, "\n"
 
+        
+        print "before getnext:", vars.varbinds[0].print_str()
         vals = sess.getnext(vars)
         print "v2 sess.getnext result:", vals, "\n"
 
