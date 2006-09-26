@@ -42,7 +42,7 @@ System("version:commit",
 #
 # configure and build and test it
 #
-my $configureargs = "--cache=config.cache --with-defaults '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=IPX' --enable-ipv6 --enable-embedded-perl --enable-shared"
+my $configureargs = "--cache=config.cache --with-defaults '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=IPX' --enable-ipv6 --enable-embedded-perl --enable-shared";
 System("build:distclean","make distclean") if (-f 'Makefile');
 System("build:configure","./configure $configureargs");
 System("build:make","make");
