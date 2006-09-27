@@ -339,11 +339,11 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     if_list = malloc(if_list_size);
     if (if_list == NULL) {
         snmp_log(LOG_ERR, "could not allocate memory for interface info "
-                 "(%u bytes)\n", if_list_size);
+                 "(%lu bytes)\n", if_list_size);
         return -3;
     } else {
         DEBUGMSGTL(("access:interface:container:sysctl",
-                    "allocated %u bytes for if_list\n", if_list_size));
+                    "allocated %lu bytes for if_list\n", if_list_size));
     }
 
     if (sysctl(sysctl_oid, sizeof(sysctl_oid)/sizeof(int), if_list,
@@ -446,7 +446,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         }
 
         entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V4_REASMMAX;
-        entry->reasm_max = IP_MAXPACKET;
+        entry->reasm_max_v4 = entry->reasm_max_v6 = IP_MAXPACKET;
 
         /* get counters */
         entry->stats.ibytes.low = ifp->ifm_data.ifi_ibytes;
