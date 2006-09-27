@@ -40,6 +40,9 @@ netsnmp_arch_interface_init(void)
 oid
 netsnmp_arch_interface_index_find(const char *name)
 {
+#if defined(HAVE_IF_NAMETOINDEX)
+    return if_nametoindex(name);
+#else /* use GIFINDEX */
     int             sd;
     struct ifreq    ifr;
 
@@ -59,6 +62,7 @@ netsnmp_arch_interface_index_find(const char *name)
 
     close(sd);
     return (ifr.ifr_index);
+#endif /* defined(HAVE_IF_NAMETOINDEX) */
 }
 
 /*
@@ -119,6 +123,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          */
         entry->paddr = malloc(ife.ifPhysAddress.o_length);
         if (entry->paddr == NULL) {
+            netsnmp_access_interface_entry_free(entry);
             error = 1;
             break;
         }
@@ -214,6 +219,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          */
         CONTAINER_INSERT(container, entry);
     } 
+    DEBUGMSGTL(("access:interface:container:arch", "rc = %d\n", rc)); 
 
     if (error) {
         DEBUGMSGTL(("access:interface:container:arch", 
@@ -262,6 +268,13 @@ _set_ip_flags_v6(netsnmp_interface_entry *entry, mib2_ifEntry_t *ife)
         entry->ns_flags |= 
             NETSNMP_INTERFACE_FLAGS_HAS_IPV6;
 #if defined( SOLARIS_HAVE_RFC4293_SUPPORT )
+        if (ipv6e.ipv6AddrIdentifierLen <= sizeof(entry->v6_if_id)) {
+            entry->v6_if_id_len = ipv6e.ipv6AddrIdentifierLen;
+            (void)memcpy(&entry->v6_if_id, &ipv6e.ipv6AddrIdentifier, 
+                         entry->v6_if_id_len);
+            entry->ns_flags |= 
+                NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID;
+        }
         entry->reasm_max_v6 = ipv6e.ipv6AddrReasmMaxSize;
         entry->retransmit_v6 = ipv6e.ipv6AddrRetransmitTime;
         entry->reachable_time = ipv6e.ipv6AddrReachableTime;
@@ -270,7 +283,7 @@ _set_ip_flags_v6(netsnmp_interface_entry *entry, mib2_ifEntry_t *ife)
             NETSNMP_INTERFACE_FLAGS_HAS_V6_RETRANSMIT |
             NETSNMP_INTERFACE_FLAGS_HAS_V6_REACHABLE;
 
-        /* XXX forwarding, identifier, etc. */
+        /* XXX forwarding info missing */
 #else
         /* XXX Don't have this info, 1500 is the minimum */
         entry->reasm_max_v6 = 1500; 
