@@ -1,5 +1,184 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.4.pre2 -> V5.4.pre3
+
+2006-09-27 14:28  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3,
+     netsnmp_agent_trap.3, netsnmp_asn1_packet_parse.3,
+     netsnmp_baby_steps.3, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3,
+     netsnmp_container.3, netsnmp_data_list.3,
+     netsnmp_debug.3, netsnmp_default_store.3,
+     netsnmp_handler.3, netsnmp_instance.3,
+     netsnmp_iterator_info_s.3, netsnmp_leaf.3,
+     netsnmp_library.3, netsnmp_mib_maintenance.3,
+     netsnmp_mib_utilities.3, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3,
+     netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3,
+     netsnmp_snmp_client.3, netsnmp_snmp_logging.3,
+     netsnmp_snmp_pdu.3, netsnmp_snmp_session.3,
+     netsnmp_stash_cache.3, netsnmp_stash_to_next.3,
+     netsnmp_table.3, netsnmp_table_array.3,
+     netsnmp_table_container.3, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_generic.3,
+     netsnmp_table_indexes.3, netsnmp_table_iterator.3,
+     netsnmp_table_iterator.h.3, netsnmp_table_maintenance.3
+, netsnmp_table_rows.3, netsnmp_tdata.3,
+     netsnmp_util.3, netsnmp_utilities.3,
+     netsnmp_variable_list.3, netsnmp_watcher.3:
+
+   documentation update
+
+2006-09-27 14:28  hardaker
+
+   * doxygen.conf:
+
+   - version tag ( 5.4.pre3 )
+
+2006-09-27 14:16  hardaker
+
+   * configure, configure.in:
+
+   fix:cflags ->:ccflags
+
+2006-09-27 13:36  tanders
+
+   * agent/mibgroup/if-mib/data_access/interface_solaris2.c:
+
+   CHANGES: snmpd: PATCH: 1566523: from apersson: Memory leak in if-mib (Solaris)
+   - take advantage of if_nametoindex() when possible
+   - grab the IPv6 interface Identifier if available
+
+2006-09-27 10:54  rstory
+
+   * agent/mibgroup/if-mib/data_access/interface_sysctl.c:
+
+   - update for new reasm_max v4/v6 split
+   - add 'l' to printf spec for size_t param
+
+2006-09-27 10:48  hardaker
+
+   * configure, configure.in:
+
+   check for largefile support on solaris and disable embedded perl when on
+
+2006-09-27 09:51  tanders
+
+   * FAQ:
+
+   update platform list
+
+2006-09-27 06:56  tanders
+
+   * configure, configure.in:
+
+   fix --without-python-modules
+
+2006-09-26 16:34  rstory
+
+   * agent/mibgroup/if-mib/data_access/interface.h:
+
+   add openbsd4 to sysctl interface list
+
+2006-09-26 15:44  tanders
+
+   * acconfig.h, include/net-snmp/net-snmp-config.h.in:
+
+   add support for openbsd4
+
+2006-09-26 15:39  tanders
+
+   * agent/mibgroup/hardware/memory.h:
+
+   add support for openbsd4
+
+2006-09-26 14:40  tanders
+
+   * configure, configure.in:
+
+   Consistently say "Perl", not "perl".
+
+2006-09-26 14:21  hardaker
+
+   * Makefile.in:
+
+   don't need to double clean python
+
+2006-09-26 14:19  tanders
+
+   * configure, configure.in:
+
+   fix --without-perl-modules
+
+2006-09-26 12:43  dts12
+
+   * agent/mibgroup/hardware/memory/memory_darwin.c:
+
+   Include some (probably not all) necessary header files.
+
+2006-09-26 12:23  hardaker
+
+   * Makefile.in, configure, configure.in:
+
+   fixed python make clean when no python support was requested
+
+2006-09-26 09:39  tanders
+
+   * dist/nsb-functions:
+
+   set up symlinks before running configure to survive the new perl tests
+
+2006-09-26 09:34  hardaker
+
+   * configure, configure.in:
+
+   change the perl tests to allow for symlinks
+
+2006-09-26 09:09  hardaker
+
+   * configure.in, configure:
+
+   fixed rpm checks...  oppps
+
+2006-09-26 09:09  tanders
+
+   * README.aix:
+
+   documented AIX sed issues
+
+2006-09-26 07:49  marz
+
+   * python/: README, netsnmp/client.py,
+     netsnmp/client_intf.c, netsnmp/tests/test.py:
+
+   cleanup, weird leaf obj handling, added snmpgetbulk
+
+2006-09-25 21:58  hardaker
+
+   * FAQ, README, configure, configure.in
+, sedscript.in, dist/net-snmp.spec,
+     snmplib/snmp_version.c:
+
+   - version tag ( 5.4.pre2 )
+
+-------------------------------------------------------------------------------
+
 Changes: V5.3.1 -> V5.4.pre2
 
 2006-09-25 21:49  hardaker
