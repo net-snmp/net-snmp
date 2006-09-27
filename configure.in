@@ -2902,7 +2902,34 @@ else
   fi
 fi
 
+####################
 # on to embedding...
+
+# check the compiler flags for illegal tokens
+case $target_os in
+    solaris*)
+      if test "x$embed_perl" != "xno" ; then
+          #
+          # perl cc checks
+          #
+          AC_MSG_CHECKING([for problematic perl cc flags on suns])
+          if $myperl -V:cflags | grep LARGEFILE > /dev/null ; then
+            if test "x$embed_perl" = "xtry" ; then
+              embed_perl="no"
+            else
+              AC_MSG_ERROR([Perl was compiled with LARGEFILE support which will break Net-SNMP.  Unfortunately this means you will not be able to use embedded perl support with the current perl.])
+            fi
+          else
+            AC_MSG_RESULT([none known])
+          fi
+      fi
+    ;;
+
+    *)
+    ;;
+esac
+
+
 # check the cflags
 if test "x$embed_perl" != "xno" ; then
     AC_MSG_CHECKING([for Perl CFLAGS])
