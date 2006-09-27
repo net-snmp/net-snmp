@@ -2913,7 +2913,7 @@ case $target_os in
           # perl cc checks
           #
           AC_MSG_CHECKING([for problematic perl cc flags on suns])
-          if $myperl -V:cflags | grep LARGEFILE > /dev/null ; then
+          if $myperl -V:ccflags | grep LARGEFILE > /dev/null ; then
             if test "x$embed_perl" = "xtry" ; then
               embed_perl="no"
             else
