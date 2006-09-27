@@ -857,9 +857,12 @@ Python:
                                   rest of the net-snmp toolkit.  If ARGS is
                                   specified, they're passed to the
                                   setup.py script as arguments.],[
-    install_python=yes
-    if test "$withval" = yes; then
+    install_python="yes"
+    if test "$withval" = "yes"; then
       PYTHONARGS=""
+    elif test "$withval" = "no"; then
+      PYTHONARGS=""
+      install_python="no"
     else
       PYTHONARGS="$withval"
     fi
