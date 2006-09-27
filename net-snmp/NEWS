@@ -72,6 +72,7 @@ changes/bug fixes.
    Solaris, FreeBSD, OpenBSD:
       - Experimental support for 64bit interface counters (ifXTable). Enable
         via '--with-mib-modules=if-mib'.
+      - [PATCH 1566523]: Memory leak in if-mib
 
    Win32:
       - new winExtDLL extension module to allow snmpd to load Windows SNMP
