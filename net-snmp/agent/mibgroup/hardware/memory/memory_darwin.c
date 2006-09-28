@@ -3,12 +3,12 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/memory.h>
 
-#include <unistd.h>
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <sys/stat.h>
 #include <dirent.h>
-#include <mach/mach.h>
+#include <unistd.h>
+#include <mach/mach_host.h>
+#include <sys/stat.h>
+#include <sys/sysctl.h>
+
 
 /*
  * Retained from UCD implementation
@@ -160,10 +160,11 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     off_t           swapSize;
     off_t           swapUsed;
     vm_statistics_data_t vm_stat;
+    int count = HOST_VM_INFO_COUNT;
 
     sysctl(phys_mem_mib, 2, &phys_mem, &phys_mem_size, NULL, 0);
     sysctl(pagesize_mib, 2, &pagesize, &pagesize_size, NULL, 0);
-    host_statistics(mach_host_self(),HOST_VM_INFO,&vm_stat,&count);
+    host_statistics(mach_host_self(),HOST_VM_INFO,(host_info_t)&vm_stat,&count);
     pages_used = vm_stat.active_count + vm_stat.inactive_count
                                       + vm_stat.wire_count;
     swapSize = swapsize();   /* in 'pagesize'? */
