@@ -2018,18 +2018,14 @@ netsnmp_walk(PyObject *self, PyObject *args)
 		       old_format);
 
 
-#ifdef nope
     if (PyErr_Occurred()) {
       /* propagate error */
       if (verbose)
 	printf("error: walk response processing: unknown python error");
       Py_DECREF(val_tuple);
     } else { 
-#endif
       ret = val_tuple; /* success, return tuple of values */
-#ifdef nope
     }
-#endif
   }
 
  done:
