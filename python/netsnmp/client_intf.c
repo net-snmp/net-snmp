@@ -2176,10 +2176,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 
       if(response && response->variables) {
 	/* clear varlist to receive response varbinds*/
-        printf("var bind length: %d\n", PySequence_Length(varbinds));
 	PySequence_DelSlice(varbinds, 0, PySequence_Length(varbinds));
-
-        printf("var bind length: %d\n", PySequence_Length(varbinds));
 
         if (PyErr_Occurred()) {
             /* propagate error */
