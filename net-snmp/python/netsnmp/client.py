@@ -161,6 +161,10 @@ class Session(object):
         res = client_intf.getbulk(self, nonrepeaters, maxrepetitions, varlist)
         return res
 
+    def walk(self, varlist):
+        res = client_intf.walk(self, varlist)
+        return res
+
 import netsnmp
         
 def snmpget(*args, **kargs):
@@ -209,12 +213,17 @@ def snmpgetbulk(nonrepeaters, maxrepetitions,*args, **kargs):
 
 def snmpwalk(*args, **kargs):
     sess = Session(**kargs)
-    var_list = VarList()
-    for arg in args:
-        if isinstance(arg, netsnmp.client.Varbind):
-            var_list.append(arg)
-        else:
-            var_list.append(Varbind(arg))
-    res = sess.getnext(var_list)
+    if isinstance(args[0], netsnmp.client.VarList):
+        var_list = args[0]
+    else:
+        var_list = VarList()
+        for arg in args:
+            if isinstance(arg, netsnmp.client.Varbind):
+                var_list.append(arg)
+            else:
+                var_list.append(Varbind(arg))
+    for var in var_list:
+        print "  ",var.tag, var.iid, "=", var.val, '(',var.type,')'
+    res = sess.walk(var_list)
     return res
     
