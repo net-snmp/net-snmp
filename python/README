@@ -169,6 +169,20 @@ Operational Description:
                       where m is <max-repeaters>. Returns a tuple of values 
 		      retrieved.
 
+    walk(<netsnmp.VarList object>)
+             	    - Performs multiple GETNEXT requests in order to
+             	      return a tuple of values retrieved from the MIB
+             	      below the Varbind passed in.  The VarList passed
+             	      in will be updated to contain a complete set of
+             	      Varbinds created for the results of the walk.
+
+             	      Note that only one varbind should be contained in the
+             	      VarList passed in.  The code is structured to maybe
+             	      handle this is the the future, but right now walking
+             	      multiple trees at once is not yet supported and will
+             	      produce insufficient results.
+
+
    Acceptable variable formats:
 
     netsnmp.VarList:  - represents an list of Varbind objects to get or set.
@@ -259,12 +273,21 @@ Operational Description:
                otherwise False.
 
    snmpwalk(<Varbind/VarList>, <Session args>)) 
-             - takes args of netsnmp.Session preceded by a Varbind
-               or VarList from which the 'walk' operation will start.
-               returns a tuple of Varbinds retreived from the MIB
-               at or below the Varbind(s) passed in. The input 
-               Varbind/VarList is unaltered. On failure an empty tuple
-               is returned.
+             - takes args of netsnmp.Session preceded by a Varbind or
+               VarList from which the 'walk' operation will start.
+               Returns a tuple of values retrieved from the MIB below
+               the Varbind passed in.  If a VarList is passed in it
+               will be updated to contain a complete set of VarBinds
+               created for the results of the walk.  It is not
+               recommended to pass in just a Varbind since you loose
+               the ability to examine the returned OIDs.  But, if only
+               a Varbind is passed in it will be returned unaltered.
+
+               Note that only one varbind should be contained in the
+               VarList passed in.  The code is structured to maybe
+               handle this is the the future, but right now walking
+               multiple trees at once is not yet supported and will
+               produce insufficient results.
 
 Trouble Shooting:
 
