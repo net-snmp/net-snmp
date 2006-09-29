@@ -83,7 +83,7 @@ class BasicTests(unittest.TestCase):
                                DestHost='localhost',
                                Community='public')
         
-        vars = netsnmp.VarList(var, netsnmp.Varbind('sysUpTime', 0),
+        vars = netsnmp.VarList(netsnmp.Varbind('sysUpTime', 0),
                                netsnmp.Varbind('sysContact', 0),
                                netsnmp.Varbind('sysLocation', 0))
         vals = sess.get(vars)
