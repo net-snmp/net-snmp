@@ -1771,8 +1771,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   PyObject *session;
   PyObject *varlist;
   PyObject *varbind;
-  PyObject *val_tuple;
-  PyObject *ret = NULL;
+  PyObject *val_tuple = NULL;
   PyObject *varbinds;
   int varlist_len = 0;
   int varlist_ind;
@@ -1848,7 +1847,9 @@ netsnmp_walk(PyObject *self, PyObject *args)
       tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, 
       	       NULL, best_guess);
 
-      if (_debug_level) printf("netsnmp_walk: filling request: %s:%s:%d:%d\n", tag, iid, oid_arr_len,best_guess);
+      if (_debug_level) 
+	printf("netsnmp_walk: filling request: %s:%s:%d:%d\n", 
+	       tag, iid, oid_arr_len,best_guess);
 
       if (oid_arr_len) {
         snmp_add_null_var(pdu, oid_arr, oid_arr_len);
@@ -1952,7 +1953,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
     	  str_buf[sizeof(str_buf)-1] = '\0';
 
     	  if (__is_leaf(tp)) {
-    	    type = tp->type;
+	    type = (tp->type ? tp->type : tp->parent->type);
     	    getlabel_flag &= ~NON_LEAF_NAME;
     	  } else {
     	    getlabel_flag |= NON_LEAF_NAME;
@@ -1963,44 +1964,35 @@ netsnmp_walk(PyObject *self, PyObject *args)
 
     	  if (_debug_level) printf("netsnmp_walk: filling response: %s:%s\n", tag, iid);
 
-    	  if (tag) {
-    	    PyObject_SetAttrString(varbind, "tag", Py_BuildValue("s",tag));
-    	  } else {
-    	    PyObject_SetAttrString(varbind, "tag", Py_BuildValue(""));
-    	  }
-
-    	  if (iid) {
-    	    PyObject_SetAttrString(varbind, "iid", Py_BuildValue("s",iid));
-    	  } else {
-    	    PyObject_SetAttrString(varbind, "iid", Py_BuildValue(""));
-    	  }
+	  py_netsnmp_attr_set_string(varbind, "tag", tag);
+	  py_netsnmp_attr_set_string(varbind, "iid", iid);
 
     	  __get_type_str(type, type_str);
-    	  PyObject_SetAttrString(varbind, "type", Py_BuildValue("s", type_str));
+
+	  py_netsnmp_attr_set_string(varbind, "type", type_str);
 
     	  len = __snprint_value(str_buf,sizeof(str_buf),
-                                  vars,tp,type,sprintval_flag);
+				vars,tp,type,sprintval_flag);
     	  str_buf[len] = '\0';
 
-    	  PyObject_SetAttrString(varbind, "val", 
-                                   Py_BuildValue("s#", str_buf, len));
+	  py_netsnmp_attr_set_string(varbind, "val", str_buf);
             
-            /* push the varbind onto the return varbinds */
-            PyList_Append(varbinds, varbind);
+	  /* push the varbind onto the return varbinds */
+	  PyList_Append(varbinds, varbind);
 
     	  /* save in return tuple as well */
-            /* save in return tuple as well - steals ref */
-            _PyTuple_Resize(&val_tuple, result_count+1);
-            PyTuple_SetItem(val_tuple, result_count++, 
-                            Py_BuildValue("s#", str_buf, len));
+	  /* save in return tuple as well - steals ref */
+	  _PyTuple_Resize(&val_tuple, result_count+1);
+	  PyTuple_SetItem(val_tuple, result_count++, 
+			  Py_BuildValue("s#", str_buf, len));
             
     	  Py_DECREF(varbind);
 
           } else {
-    	  /* Return None for this variable. */
+	    /* Return None for this variable. */
             _PyTuple_Resize(&val_tuple, result_count+1);
-    	  PyTuple_SetItem(val_tuple, result_count++, Py_BuildValue(""));
-    	  printf("netsnmp_walk: bad varbind (%d)\n", varlist_ind);
+	    PyTuple_SetItem(val_tuple, result_count++, Py_BuildValue(""));
+	    printf("netsnmp_walk: bad varbind (%d)\n", varlist_ind);
           }	
         }
         /* reuse the response as the next pdu to send */
@@ -2009,7 +2001,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
                           response->variables->name_length);
       }
       if (response)
-          snmp_free_pdu(response);
+	snmp_free_pdu(response);
     }
 
     /* Reset the library's behavior for numeric/symbolic OID's. */
@@ -2023,14 +2015,12 @@ netsnmp_walk(PyObject *self, PyObject *args)
       if (verbose)
 	printf("error: walk response processing: unknown python error");
       Py_DECREF(val_tuple);
-    } else { 
-      ret = val_tuple; /* success, return tuple of values */
-    }
+    } 
   }
 
  done:
   SAFE_FREE(oid_arr);
-  return (ret ? ret : Py_BuildValue(""));
+  return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
 
