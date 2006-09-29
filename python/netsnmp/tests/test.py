@@ -50,9 +50,9 @@ class BasicTests(unittest.TestCase):
         print "v1 set var: ",  var.tag, var.iid, "=", var.val, '(',var.type,')'
         
         print "----------------------------------------\n"
-        vars = netsnmp.VarList(netsnmp.Varbind('ifTable'))
+        vars = netsnmp.VarList(netsnmp.Varbind('system'))
 
-        print "v1 walk in: "
+        print "v1 varlist walk in: "
         for var in vars:
             print "  ",var.tag, var.iid, "=", var.val, '(',var.type,')'
 
@@ -62,16 +62,19 @@ class BasicTests(unittest.TestCase):
                                Community='public')
         print "v1 snmpwalk result: ", res, "\n"
 
+        for var in vars:
+            print var.tag, var.iid, "=", var.val, '(',var.type,')'
+       
         
         print "----------------------------------------\n"
 
-        print "v1 walk in: "
+        print "v1 varbind walk in: "
         var = netsnmp.Varbind('system')
-        res = netsnmp.snmpwalk(netsnmp.Varbind('system'),
+        res = netsnmp.snmpwalk(var,
                                Version = 1,
                                DestHost='localhost',
                                Community='public')
-        print "v1 snmpwalk result: ", res, "\n"
+        print "v1 snmpwalk result (should be = orig): ", res, "\n"
 
         print var.tag, var.iid, "=", var.val, '(',var.type,')'
         
