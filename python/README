@@ -235,25 +235,36 @@ Operational Description:
 
    Exported 'netsnmp' package utility functions:
 
-   snmpget(<Varbind/VarList>), <Session args>) 
-			 - takes args of netsnmp.Session preceded by those 
-			 of the corresponding netsnmp.Session method
+   snmpget(<Varbind/VarList>, <Session args>) 
+             - takes args of netsnmp.Session preceded by those of the 
+               corresponding netsnmp.Session method. Returns a tuple with 
+               Varbind values fetched, and input is updated to contain
+               complete Varbinds fetched. 
 
-   snmpgetnext(<Varbind/VarList>), <Session args>)
+   snmpgetnext(<Varbind/VarList>, <Session args>)
              - takes args of netsnmp.Session preceded by those of the
-               corresponding netsnmp.Session method
+               corresponding netsnmp.Session method. Returns a tuple with 
+               Varbind values fetched, and input is updated to contain
+               complete Varbinds fetched. 
 
-   snmpgetbulk(<Varbind/VarList>), <Session args>)
+   snmpgetbulk(nonrepeaters, maxrepetitions,<VarList>, <Session args>)
              - takes args of netsnmp.Session preceded by those of the
-               corresponding netsnmp.Session method
+               corresponding netsnmp.Session method. Returns a tuple with 
+               Varbind values fetched, and VarList is updated to contain
+               complete Varbinds fetched. 
 
-   snmpset(<Varbind/VarList>), <Session args>)
+   snmpset(<Varbind/VarList>, <Session args>)
              - takes args of netsnmp.Session preceded by those of the
-               corresponding netsnmp.Session method
+               corresponding netsnmp.Session method. returns True on success,
+               otherwise False.
 
-   snmpwalk(nonrepeaters, maxrepetitions, <Varbind/VarList>), <Session args>)) 
-             - takes args of netsnmp.Session preceded by those of the
-               corresponding netsnmp.Session method
+   snmpwalk(<Varbind/VarList>, <Session args>)) 
+             - takes args of netsnmp.Session preceded by a Varbind
+               or VarList from which the 'walk' operation will start.
+               returns a tuple of Varbinds retreived from the MIB
+               at or below the Varbind(s) passed in. The input 
+               Varbind/VarList is unaltered. On failure an empty tuple
+               is returned.
 
 Trouble Shooting:
 
@@ -303,10 +314,10 @@ License:
 
 Copyright:
 
-     Copyright (c) 2006 G. S. Marzot. All rights reserved.
-     This program is free software; you can redistribute it and/or
-     modify it under the same terms as Net-SNMP itself.
+   Copyright (c) 2006 G. S. Marzot. All rights reserved.
+   This program is free software; you can redistribute it and/or
+   modify it under the same terms as Net-SNMP itself.
 
-     Copyright (c) 2006 SPARTA, Inc.  All Rights Reserved.  This
-     program is free software; you can redistribute it and/or modify
-     it under the same terms as Net-SNMP itself.
+   Copyright (c) 2006 SPARTA, Inc.  All Rights Reserved.  This
+   program is free software; you can redistribute it and/or modify
+   it under the same terms as Net-SNMP itself.
