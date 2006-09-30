@@ -128,8 +128,6 @@ service extension DLLs by using the Net-SNMP winExtDLL extension.
 
 The current limitations are:
 
--Only SNMP v1 data types are available for Windows SNMP extensions
- even if the extension supports the SNMP v2 data types.
 -Traps are not passed from the Windows SNMP extension to Net-SNMP.
 
 These limitations should be resolved in the near future.
@@ -137,11 +135,6 @@ These limitations should be resolved in the near future.
 
 Enabling the Windows SNMP extension agents
 ------------------------------------------
-
-The following snmpd.conf configuration parameter must be set to enable snmpd
-to load the Windows SNMP extension agents:
-
-        winExtDLL      1
 
 The recommended way to start snmpd is with the following command line:
 
