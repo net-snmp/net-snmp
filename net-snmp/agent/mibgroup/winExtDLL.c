@@ -87,12 +87,8 @@ typedef struct {
 winExtensionAgents winExtensionAgent[MAX_WINEXT_DLLS];
 winExtensionAgents winExtensionAgent_temp;      /* For sorting */
 
-/* List of agents: HKLM\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ExtensionAgents
- * This will be changed so that the list is loaded from the registry or from snmpd.conf */
-
 char *extDLLs[MAX_WINEXT_DLLS];
 int extDLLs_index = 0;
-
 
 void printAsnObjectIdentifier(AsnObjectIdentifier myAsnObjectIdentifier);
 void winExtDLL_parse_config_winExtDLL(const char *token, char *cptr);
@@ -103,13 +99,208 @@ void read_ExtensionAgents_list2(const TCHAR *);
 
 void init_winExtDLL(void)
 {
+  // Windows SNMP
+  DWORD dwUptimeReference = 0;
+  HANDLE subagentTrapEvent;
+  AsnObjectIdentifier pSupportedView;
+  BOOL result;
+
+  // Net-SNMP
+  oid name[MAX_OID_LEN];
+  size_t length = 0;
+  int i;
+  int DLLnum = 0;
+  int winExtensionAgent_num = 0;
+  
+  int iter, indx;
+  
+  netsnmp_handler_registration *my_handler;
+
+  HANDLE hInst = NULL;
+
   DEBUGMSGTL(("winExtDLL", "init_winExtDLL called\n"));
   
   snmpd_register_config_handler("winExtDLL",
       winExtDLL_parse_config_winExtDLL,
       winExtDLL_free_config_winExtDLL,
       "winExtDLL value");
+  
+  DEBUGMSGTL(("winExtDLL", "winExtDLL_parse_config_winExtDLL called\n"));        
 
+  read_ExtensionAgents_list();  
+  
+  DEBUGMSGTL(("winExtDLL", "winExtDLL enabled.\n"));        
+  
+  DEBUGMSGTL(("winExtDLL", "Size of winExtensionAgent: %d\n",sizeof(winExtensionAgent) / sizeof(winExtensionAgents)));
+
+  for(i=0; i <= sizeof(winExtensionAgent) / sizeof(winExtensionAgents); i++) {
+    winExtensionAgent[0].xSnmpExtensionInit = NULL;
+    winExtensionAgent[0].xSnmpExtensionInitEx = NULL;
+  }
+
+  /* Load all the DLLs */
+  for (DLLnum = 0; DLLnum <= extDLLs_index; DLLnum++) {
+
+    if (! (extDLLs[DLLnum]))
+      continue;
+
+    DEBUGMSGTL(("winExtDLL", "---------------------------------\n"));
+    DEBUGMSGTL(("winExtDLL", "DLL to load: %s, DLL number: %d, winExtensionAgent_num: %d\n", extDLLs[DLLnum], DLLnum,
+          winExtensionAgent_num));
+    DEBUGMSGTL(("winExtDLL", "Size of DLL to load: %d\n", strlen(extDLLs[DLLnum])));
+    
+    hInst = LoadLibrary(extDLLs[DLLnum]);
+    
+    //hInst = LoadLibrary("hostmib.dll");
+    //HANDLE hInst = LoadLibrary("inetmib1.dll");       // RFC1156Agent
+    //HANDLE hInst = LoadLibrary("lmmib2.dll");         // LANManagerMIB2Agent
+    //HANDLE hInst = LoadLibrary("snmpmib.dll");
+    if (hInst == NULL)
+    {
+      DEBUGMSGTL(("winExtDLL","Could not load Windows extension DLL %s.\n", extDLLs[DLLnum]));
+      snmp_log(LOG_ERR,
+          "Could not load Windows extension DLL: %s.\n", extDLLs[DLLnum]);
+      continue;
+    }
+    else {
+      DEBUGMSGTL(("winExtDLL","DLL loaded.\n"));
+    }
+    
+    strncpy(winExtensionAgent[winExtensionAgent_num].dll_name, extDLLs[DLLnum], SZBUF_DLLNAME_MAX-1);
+    winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInit = (DWORD (WINAPI *)(DWORD, HANDLE*, AsnObjectIdentifier*)) 
+      GetProcAddress ((HMODULE) hInst, "SnmpExtensionInit");
+
+    winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInitEx = (DWORD (WINAPI *)(AsnObjectIdentifier*)) 
+      GetProcAddress ((HMODULE) hInst, "SnmpExtensionInitEx");
+
+    winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQuery = 
+      (DWORD (WINAPI *)(BYTE, SnmpVarBindList* ,AsnInteger32* ,AsnInteger32*)) 
+      GetProcAddress ((HMODULE) hInst, "SnmpExtensionQuery");
+
+    winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQueryEx = 
+      (DWORD (WINAPI *)(DWORD, DWORD, SnmpVarBindList*, AsnOctetString*, AsnInteger32*, AsnInteger32*))
+      GetProcAddress ((HMODULE) hInst, "SnmpExtensionQueryEx");
+
+    if (winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQuery)
+      DEBUGMSGTL(("winExtDLL", "xSnmpExtensionQuery found\n"));
+    if (winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQueryEx)
+      DEBUGMSGTL(("winExtDLL", "xSnmpExtensionQueryEx found\n"));
+
+    // Init and get first supported view from Windows SNMP extension DLL  
+    result = winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInit(dwUptimeReference, &subagentTrapEvent, &pSupportedView);
+
+    printAsnObjectIdentifier(pSupportedView);
+
+    // Convert OID from Windows 'supported view' to Net-SNMP
+    for (i = 0; i < (pSupportedView.idLength > MAX_OID_LEN?MAX_OID_LEN:pSupportedView.idLength); i++) {
+      name[i] = (oid)pSupportedView.ids[i];
+    }
+    length = i;
+
+    memcpy(winExtensionAgent[winExtensionAgent_num].name, name, sizeof(name));
+    winExtensionAgent[winExtensionAgent_num].name_length = length;
+ 
+    DEBUGMSGTL(("winExtDLL", "\nWindows OID converted to Net-SNMP:"));
+    DEBUGMSGOID(("winExtDLL", name, length));
+    DEBUGMSGTL(("winExtDLL", "---\n"));
+    
+    winExtensionAgent[winExtensionAgent_num].my_handler = netsnmp_create_handler_registration("winExtDLL",
+        var_winExtDLL,
+        name,
+        length,
+        HANDLER_CAN_RWRITE);
+    
+    if (!winExtensionAgent[winExtensionAgent_num].my_handler) {
+      snmp_log(LOG_ERR,
+          "malloc failed registering handler for winExtDLL");
+      DEBUGMSGTL(("winExtDLL", "malloc failed registering handler for winExtDLL"));
+      return (-1);
+    }
+    else {
+      DEBUGMSGTL(("winExtDLL", "handler registered\n"));
+    }
+    
+    netsnmp_register_handler(winExtensionAgent[winExtensionAgent_num].my_handler);
+
+    // Check for additional supported views and register them with the same handler
+    if (winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInitEx) {
+      DEBUGMSGTL(("winExtDLL", "xSnmpExtensionInitEx found\n"));
+
+      winExtensionAgent_num++;
+
+      strncpy(winExtensionAgent[winExtensionAgent_num].dll_name, winExtensionAgent[winExtensionAgent_num-1].dll_name, SZBUF_DLLNAME_MAX-1);
+      winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInit = winExtensionAgent[winExtensionAgent_num-1].xSnmpExtensionInit;
+      winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInitEx = winExtensionAgent[winExtensionAgent_num-1].xSnmpExtensionInitEx;
+      winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQuery = winExtensionAgent[winExtensionAgent_num-1].xSnmpExtensionQuery;
+      winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQueryEx = winExtensionAgent[winExtensionAgent_num-1].xSnmpExtensionQueryEx;
+      
+      result = winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInitEx(&pSupportedView);
+      
+      printAsnObjectIdentifier(pSupportedView);
+      
+      // Convert OID from Windows 'supported view' to Net-SNMP
+      for (i = 0; i < (pSupportedView.idLength > MAX_OID_LEN?MAX_OID_LEN:pSupportedView.idLength); i++) {
+        name[i] = (oid)pSupportedView.ids[i];
+      }
+      length = i;
+
+      memcpy(winExtensionAgent[winExtensionAgent_num].name, name, sizeof(name));
+      winExtensionAgent[winExtensionAgent_num].name_length = length;
+
+      DEBUGMSGTL(("winExtDLL", "\nWindows OID converted to Net-SNMP:"));
+      DEBUGMSGOID(("winExtDLL", name, length));
+      DEBUGMSGTL(("winExtDLL", "---\n"));
+      
+      winExtensionAgent[winExtensionAgent_num].my_handler = netsnmp_create_handler_registration("winExtDLL",
+          var_winExtDLL,
+          name,
+          length,
+          HANDLER_CAN_RWRITE);
+      
+      if (!winExtensionAgent[winExtensionAgent_num].my_handler) {
+        snmp_log(LOG_ERR,
+            "malloc failed registering handler for winExtDLL");
+        DEBUGMSGTL(("winExtDLL", "malloc failed registering handler for winExtDLL"));
+        return (-1);
+      }
+      else {
+        DEBUGMSGTL(("winExtDLL", "handler registered\n"));
+      }
+      netsnmp_register_handler(winExtensionAgent[winExtensionAgent_num].my_handler);
+    }
+    winExtensionAgent_num++;
+    
+  }
+  DEBUGMSGTL(("winExtDLL", "\n\nDumping Windows extension OIDs\n"));
+  for (i=0; winExtensionAgent[i].xSnmpExtensionInit; i++) {
+    DEBUGMSGTL(("winExtDLL", "DLL name: %s\n",winExtensionAgent[i].dll_name));
+    DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
+    DEBUGMSGTL(("winExtDLL", "\n"));
+  }
+  DEBUGMSGTL(("winExtDLL", "\n"));
+
+  /* Reverse sort array of winExtensionAgents */
+  i = sizeof(winExtensionAgent) / sizeof(winExtensionAgents);
+  DEBUGMSGTL(("winExtDLL", "\nSorting...\n"));
+  for (iter=0; iter < i-1; iter++) {
+    for (indx=0; indx < i-1; indx++) {
+      if (snmp_oidtree_compare(winExtensionAgent[indx].name, winExtensionAgent[indx].name_length,
+            winExtensionAgent[indx+1].name, winExtensionAgent[indx+1].name_length) < 0) {
+        winExtensionAgent_temp = winExtensionAgent[indx];
+        winExtensionAgent[indx] = winExtensionAgent[indx+1];
+        winExtensionAgent[indx+1] = winExtensionAgent_temp;
+      }
+    }
+  }
+  DEBUGMSGTL(("winExtDLL", "\n\nDumping Windows extension OIDs\n"));
+  for (i=0; winExtensionAgent[i].xSnmpExtensionInit; i++) {
+    DEBUGMSGTL(("winExtDLL", "DLL name: %s\n",winExtensionAgent[i].dll_name));
+    DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
+    DEBUGMSGTL(("winExtDLL", "\n"));
+  }
+  DEBUGMSGTL(("winExtDLL", "\n"));
+
+  
 }
 
 void printAsnObjectIdentifier(AsnObjectIdentifier myAsnObjectIdentifier) {
@@ -167,7 +358,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     DEBUGMSGTL(("winExtDLL", "-----------------------------------------\n"));
     DEBUGMSGTL(("winExtDLL", "var_winExtDLL handler starting, mode = %d\n",
                 reqinfo->mode));
-   
+    
     switch (reqinfo->mode) {
     case MODE_GET:
     case MODE_GETNEXT:
@@ -249,14 +440,14 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 		
         if (reqinfo->mode == MODE_GET) {
           DEBUGMSGTL(("winExtDLL", "win: MODE_GET\n"));
-/*          if (xSnmpExtensionQueryEx) {
+          if (xSnmpExtensionQueryEx) {
             DEBUGMSGTL(("winExtDLL", "Calling xSnmpExtensionQueryEx\n"));
             result = xSnmpExtensionQueryEx(SNMP_PDU_GET, 1, &pVarBindList, NULL, &pErrorStatus, &pErrorIndex);
           }
-          else { */
+          else { 
             DEBUGMSGTL(("winExtDLL", "Calling xSnmpExtensionQuery\n"));
             result = xSnmpExtensionQuery(SNMP_PDU_GET, &pVarBindList, &pErrorStatus, &pErrorIndex);
-/*          } */
+          } 
         }
         else if (reqinfo->mode == MODE_GETNEXT) {
           DEBUGMSGTL(("winExtDLL", "win: MODE_GETNEXT\n"));
@@ -651,200 +842,6 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 void
 winExtDLL_parse_config_winExtDLL(const char *token, char *cptr)
 {
-  // Windows SNMP
-  DWORD dwUptimeReference = 0;
-  HANDLE subagentTrapEvent;
-  AsnObjectIdentifier pSupportedView;
-  BOOL result;
-
-  // Net-SNMP
-  oid name[MAX_OID_LEN];
-  size_t length = 0;
-  int i;
-  int DLLnum = 0;
-  int winExtensionAgent_num = 0;
-  
-  int iter, indx;
-  
-  netsnmp_handler_registration *my_handler;
-
-  HANDLE hInst = NULL;
-
-  DEBUGMSGTL(("winExtDLL", "winExtDLL_parse_config_winExtDLL called\n"));        
-
-  read_ExtensionAgents_list();  
-  
-  if (atoi(cptr) == 0) {
-    DEBUGMSGTL(("winExtDLL", "winExtDLL in snmpd.conf not set to 1.  Aborting initialization.\n"));        
-    return 0;
-  }
-
-  DEBUGMSGTL(("winExtDLL", "winExtDLL enabled.\n"));        
-  
-  DEBUGMSGTL(("winExtDLL", "Size of winExtensionAgent: %d\n",sizeof(winExtensionAgent) / sizeof(winExtensionAgents)));
-
-  for(i=0; i <= sizeof(winExtensionAgent) / sizeof(winExtensionAgents); i++) {
-    winExtensionAgent[0].xSnmpExtensionInit = NULL;
-    winExtensionAgent[0].xSnmpExtensionInitEx = NULL;
-  }
-
-  /* Load all the DLLs */
-  for (DLLnum = 0; DLLnum <= extDLLs_index; DLLnum++) {
-
-    DEBUGMSGTL(("winExtDLL", "---------------------------------\n"));
-    DEBUGMSGTL(("winExtDLL", "DLL to load: %s, DLL number: %d, winExtensionAgent_num: %d\n", extDLLs[DLLnum], DLLnum,
-          winExtensionAgent_num));
-    
-    hInst = LoadLibrary(extDLLs[DLLnum]);
-    
-    //hInst = LoadLibrary("hostmib.dll");
-    //HANDLE hInst = LoadLibrary("inetmib1.dll");       // RFC1156Agent
-    //HANDLE hInst = LoadLibrary("lmmib2.dll");         // LANManagerMIB2Agent
-    //HANDLE hInst = LoadLibrary("snmpmib.dll");
-    if (hInst == NULL)
-    {
-      DEBUGMSGTL(("winExtDLL","Could not load Windows extension DLL %s.\n", extDLLs[DLLnum]));
-      snmp_log(LOG_ERR,
-          "Could not load Windows extension DLL: %s.\n", extDLLs[DLLnum]);
-      continue;
-    }
-    else {
-      DEBUGMSGTL(("winExtDLL","DLL loaded.\n"));
-    }
-    
-    strncpy(winExtensionAgent[winExtensionAgent_num].dll_name, extDLLs[DLLnum], SZBUF_DLLNAME_MAX-1);
-    winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInit = (DWORD (WINAPI *)(DWORD, HANDLE*, AsnObjectIdentifier*)) 
-      GetProcAddress ((HMODULE) hInst, "SnmpExtensionInit");
-
-    winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInitEx = (DWORD (WINAPI *)(AsnObjectIdentifier*)) 
-      GetProcAddress ((HMODULE) hInst, "SnmpExtensionInitEx");
-
-    winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQuery = 
-      (DWORD (WINAPI *)(BYTE, SnmpVarBindList* ,AsnInteger32* ,AsnInteger32*)) 
-      GetProcAddress ((HMODULE) hInst, "SnmpExtensionQuery");
-
-    winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQueryEx = 
-      (DWORD (WINAPI *)(DWORD, DWORD, SnmpVarBindList*, AsnOctetString*, AsnInteger32*, AsnInteger32*))
-      GetProcAddress ((HMODULE) hInst, "SnmpExtensionQueryEx");
-
-    if (winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQuery)
-      DEBUGMSGTL(("winExtDLL", "xSnmpExtensionQuery found\n"));
-    if (winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQueryEx)
-      DEBUGMSGTL(("winExtDLL", "xSnmpExtensionQueryEx found\n"));
-
-    // Init and get first supported view from Windows SNMP extension DLL  
-    result = winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInit(dwUptimeReference, &subagentTrapEvent, &pSupportedView);
-
-    printAsnObjectIdentifier(pSupportedView);
-
-    // Convert OID from Windows 'supported view' to Net-SNMP
-    for (i = 0; i < (pSupportedView.idLength > MAX_OID_LEN?MAX_OID_LEN:pSupportedView.idLength); i++) {
-      name[i] = (oid)pSupportedView.ids[i];
-    }
-    length = i;
-
-    memcpy(winExtensionAgent[winExtensionAgent_num].name, name, sizeof(name));
-    winExtensionAgent[winExtensionAgent_num].name_length = length;
- 
-    DEBUGMSGTL(("winExtDLL", "\nWindows OID converted to Net-SNMP:"));
-    DEBUGMSGOID(("winExtDLL", name, length));
-    DEBUGMSGTL(("winExtDLL", "---\n"));
-    
-    winExtensionAgent[winExtensionAgent_num].my_handler = netsnmp_create_handler_registration("winExtDLL",
-        var_winExtDLL,
-        name,
-        length,
-        HANDLER_CAN_RWRITE);
-    
-    if (!winExtensionAgent[winExtensionAgent_num].my_handler) {
-      snmp_log(LOG_ERR,
-          "malloc failed registering handler for winExtDLL");
-      DEBUGMSGTL(("winExtDLL", "malloc failed registering handler for winExtDLL"));
-      return (-1);
-    }
-    else {
-      DEBUGMSGTL(("winExtDLL", "handler registered\n"));
-    }
-    
-    netsnmp_register_handler(winExtensionAgent[winExtensionAgent_num].my_handler);
-
-    // Check for additional supported views and register them with the same handler
-    if (winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInitEx) {
-      DEBUGMSGTL(("winExtDLL", "xSnmpExtensionInitEx found\n"));
-
-      winExtensionAgent_num++;
-
-      strncpy(winExtensionAgent[winExtensionAgent_num].dll_name, winExtensionAgent[winExtensionAgent_num-1].dll_name, SZBUF_DLLNAME_MAX-1);
-      winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInit = winExtensionAgent[winExtensionAgent_num-1].xSnmpExtensionInit;
-      winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInitEx = winExtensionAgent[winExtensionAgent_num-1].xSnmpExtensionInitEx;
-      winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQuery = winExtensionAgent[winExtensionAgent_num-1].xSnmpExtensionQuery;
-      winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQueryEx = winExtensionAgent[winExtensionAgent_num-1].xSnmpExtensionQueryEx;
-      
-      result = winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInitEx(&pSupportedView);
-      
-      printAsnObjectIdentifier(pSupportedView);
-      
-      // Convert OID from Windows 'supported view' to Net-SNMP
-      for (i = 0; i < (pSupportedView.idLength > MAX_OID_LEN?MAX_OID_LEN:pSupportedView.idLength); i++) {
-        name[i] = (oid)pSupportedView.ids[i];
-      }
-      length = i;
-
-      memcpy(winExtensionAgent[winExtensionAgent_num].name, name, sizeof(name));
-      winExtensionAgent[winExtensionAgent_num].name_length = length;
-
-      DEBUGMSGTL(("winExtDLL", "\nWindows OID converted to Net-SNMP:"));
-      DEBUGMSGOID(("winExtDLL", name, length));
-      DEBUGMSGTL(("winExtDLL", "---\n"));
-      
-      winExtensionAgent[winExtensionAgent_num].my_handler = netsnmp_create_handler_registration("winExtDLL",
-          var_winExtDLL,
-          name,
-          length,
-          HANDLER_CAN_RWRITE);
-      
-      if (!winExtensionAgent[winExtensionAgent_num].my_handler) {
-        snmp_log(LOG_ERR,
-            "malloc failed registering handler for winExtDLL");
-        DEBUGMSGTL(("winExtDLL", "malloc failed registering handler for winExtDLL"));
-        return (-1);
-      }
-      else {
-        DEBUGMSGTL(("winExtDLL", "handler registered\n"));
-      }
-      netsnmp_register_handler(winExtensionAgent[winExtensionAgent_num].my_handler);
-    }
-    winExtensionAgent_num++;
-    
-  }
-  DEBUGMSGTL(("winExtDLL", "\n\nDumping Windows extension OIDs\n"));
-  for (i=0; winExtensionAgent[i].xSnmpExtensionInit; i++) {
-    DEBUGMSGTL(("winExtDLL", "DLL name: %s\n",winExtensionAgent[i].dll_name));
-    DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
-    DEBUGMSGTL(("winExtDLL", "\n"));
-  }
-  DEBUGMSGTL(("winExtDLL", "\n"));
-
-  /* Reverse sort array of winExtensionAgents */
-  i = sizeof(winExtensionAgent) / sizeof(winExtensionAgents);
-  DEBUGMSGTL(("winExtDLL", "\nSorting...\n"));
-  for (iter=0; iter < i-1; iter++) {
-    for (indx=0; indx < i-1; indx++) {
-      if (snmp_oidtree_compare(winExtensionAgent[indx].name, winExtensionAgent[indx].name_length,
-            winExtensionAgent[indx+1].name, winExtensionAgent[indx+1].name_length) < 0) {
-        winExtensionAgent_temp = winExtensionAgent[indx];
-        winExtensionAgent[indx] = winExtensionAgent[indx+1];
-        winExtensionAgent[indx+1] = winExtensionAgent_temp;
-      }
-    }
-  }
-  DEBUGMSGTL(("winExtDLL", "\n\nDumping Windows extension OIDs\n"));
-  for (i=0; winExtensionAgent[i].xSnmpExtensionInit; i++) {
-    DEBUGMSGTL(("winExtDLL", "DLL name: %s\n",winExtensionAgent[i].dll_name));
-    DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
-    DEBUGMSGTL(("winExtDLL", "\n"));
-  }
-  DEBUGMSGTL(("winExtDLL", "\n"));
 
 }
 
@@ -963,16 +960,20 @@ void read_ExtensionAgents_list2(const TCHAR *keyName) {
         DEBUGMSGTL(("winExtDLL", "Extension agent Pathname expanded: %s\n",valueNameExpanded));
         if (extDLLs_index < MAX_WINEXT_DLLS) {
 
-          extDLLs[extDLLs_index] = (char *) malloc((sizeof(char) * strlen(valueNameExpanded)));         
+          extDLLs[extDLLs_index] = strdup(valueNameExpanded);
           
           if (extDLLs[extDLLs_index]) {
             strcpy(extDLLs[extDLLs_index], valueNameExpanded );
             DEBUGMSGTL(("winExtDLL", "Extension agent Pathname expanded extDLLs: %s\n",extDLLs[extDLLs_index]));
+            DEBUGMSGTL(("winExtDLL", "Extension agent Pathname size: %d\n",strlen(extDLLs[extDLLs_index])));
           }
           else {
             DEBUGMSGTL(("winExtDLL", "Could not allocate memory for extDLLs[%d]\n",extDLLs_index));
           }
         }
+      }
+      else {
+        DEBUGMSGTL(("winExtDLL", "ExpandEnvironmentStrings failed\n"));
       }      
     }
   }
