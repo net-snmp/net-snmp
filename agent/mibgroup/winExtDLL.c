@@ -4,20 +4,27 @@
  *
  *  Created 9/9/06
  *
- * Purpose:  To use existing extensiono (MIB) DLLs used by the Windows SNMP 
- *           service to allow Net-SNMP to be a replacement for the Windows 
- *           SNMP service.
+ * Purpose:  To load Windows SNMP Service extension DLLs provided with Windows
+ *           (such as hostmib.dll).  This allows Net-SNMP to be a replacement 
+ *           for the Windows SNMP service.
  *
  * Notes:    This extension requires the PSDK including the Snmp.h header file.
  *           Including Snmp.h will conflict with existing Net-SNMP defines for
  *           ASN_OCTETSTRING etc.  To resolve this, create a copy of Snmp.h in
  *           the PSDK include/ folder called Snmp-winExtDLL.h and change all
  *           occurances of ASN_ to MS_ASN_
+ *
+ *           This extension requires that the Windows SNMP Service is installed
+ *           but set to disabled.  This is required so that the extension DLLs 
+ *           are available for loading, and also because this extension and the 
+ *           existing Windows extensions use the Windows SNMP API from snmpapi.dll.
+ *
+ *           This extension is NOT for dynamically loading Net-SNMP extensions.
  */
 
 #include <windows.h>
 #include <cstdio>
-#include <Snmp-WinExtDLL.h>                  // Modified Windows SDK snmp.h.  See Notes above
+#include <Snmp-winExtDLL.h>                  // Modified Windows SDK snmp.h.  See Notes above
 #include <mgmtapi.h>
 
 /*
@@ -70,6 +77,11 @@
 #define MAX_WINEXT_DLLS         100
 #define MAX_KEY_LENGTH          255
 #define MAX_VALUE_NAME          16383
+#define MAX_WINEXT_TRAP_EVENTS  100
+
+#define DEBUGMSGWINOID(x)     do {if (_DBG_IF_) {__DBGMSGWINOID(x);} }while(0)
+#define __DBGMSGWINOID(x)     debugmsg_win_oid x
+void debugmsg_win_oid(const char *token, const AsnObjectIdentifier * theoid);
 
 /* Structure to hold name, pointers to functions and MIB tree supported by
  * each Windows SNMP Extension DLL */
@@ -79,6 +91,8 @@ typedef struct {
   DWORD (WINAPI *xSnmpExtensionInitEx)(AsnObjectIdentifier*);
   DWORD (WINAPI *xSnmpExtensionQuery)(BYTE, SnmpVarBindList* ,AsnInteger32* ,AsnInteger32*);
   DWORD (WINAPI *xSnmpExtensionQueryEx)(DWORD, DWORD, SnmpVarBindList*, AsnOctetString*, AsnInteger32*, AsnInteger32*);
+  BOOL  (WINAPI *xSnmpExtensionTrap)( AsnObjectIdentifier *, AsnInteger *, AsnInteger *, AsnTimeticks *, SnmpVarBindList * );
+  HANDLE        *subagentTrapEvent;
   netsnmp_handler_registration *my_handler;
   oid           name[MAX_OID_LEN];
   size_t        name_length;
@@ -90,12 +104,22 @@ winExtensionAgents winExtensionAgent_temp;      /* For sorting */
 char *extDLLs[MAX_WINEXT_DLLS];
 int extDLLs_index = 0;
 
-void printAsnObjectIdentifier(AsnObjectIdentifier myAsnObjectIdentifier);
+HANDLE *subagentTrapEvents[MAX_WINEXT_TRAP_EVENTS];
+int subagentTrapEvents_index = 0;
+
 void winExtDLL_parse_config_winExtDLL(const char *token, char *cptr);
 void winExtDLL_free_config_winExtDLL(void);
 
 void read_ExtensionAgents_list();
 void read_ExtensionAgents_list2(const TCHAR *);
+
+DWORD WINAPI subagentTrapMonitor(LPVOID lpParam);
+void send_trap(
+    AsnObjectIdentifier *, 
+    AsnInteger *, 
+    AsnInteger *, 
+    AsnTimeticks *,    
+    SnmpVarBindList *);
 
 void init_winExtDLL(void)
 {
@@ -104,6 +128,8 @@ void init_winExtDLL(void)
   HANDLE subagentTrapEvent;
   AsnObjectIdentifier pSupportedView;
   BOOL result;
+  HANDLE hThread;
+  DWORD IDThread;
 
   // Net-SNMP
   oid name[MAX_OID_LEN];
@@ -144,7 +170,7 @@ void init_winExtDLL(void)
     if (! (extDLLs[DLLnum]))
       continue;
 
-    DEBUGMSGTL(("winExtDLL", "---------------------------------\n"));
+    DEBUGMSGTL(("winExtDLL", "-----------------------------------------\n"));
     DEBUGMSGTL(("winExtDLL", "DLL to load: %s, DLL number: %d, winExtensionAgent_num: %d\n", extDLLs[DLLnum], DLLnum,
           winExtensionAgent_num));
     DEBUGMSGTL(("winExtDLL", "Size of DLL to load: %d\n", strlen(extDLLs[DLLnum])));
@@ -181,15 +207,34 @@ void init_winExtDLL(void)
       (DWORD (WINAPI *)(DWORD, DWORD, SnmpVarBindList*, AsnOctetString*, AsnInteger32*, AsnInteger32*))
       GetProcAddress ((HMODULE) hInst, "SnmpExtensionQueryEx");
 
+    winExtensionAgent[winExtensionAgent_num].xSnmpExtensionTrap = 
+      (BOOL  (WINAPI *)(AsnObjectIdentifier *, AsnInteger *, AsnInteger *, AsnTimeticks *, SnmpVarBindList * ))
+      GetProcAddress ((HMODULE) hInst, "SnmpExtensionTrap");
+
     if (winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQuery)
       DEBUGMSGTL(("winExtDLL", "xSnmpExtensionQuery found\n"));
     if (winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQueryEx)
       DEBUGMSGTL(("winExtDLL", "xSnmpExtensionQueryEx found\n"));
+    if (winExtensionAgent[winExtensionAgent_num].xSnmpExtensionQuery)
+      DEBUGMSGTL(("winExtDLL", "xSnmpExtensionTrap found\n"));
 
     // Init and get first supported view from Windows SNMP extension DLL  
     result = winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInit(dwUptimeReference, &subagentTrapEvent, &pSupportedView);
 
-    printAsnObjectIdentifier(pSupportedView);
+
+    DEBUGMSGTL(("winExtDLL", "Supported view: "));
+    DEBUGMSGWINOID(("winExtDLL", &pSupportedView));
+    DEBUGMSG(("winExtDLL", "\n"));
+
+    // Store the subagent's trap handler, even if it's NULL
+    winExtensionAgent[winExtensionAgent_num].subagentTrapEvent = subagentTrapEvent;
+
+    // Store the subagent's trap handler in a global array for use by waitformultipleobjects()
+    if (subagentTrapEvent) {
+      DEBUGMSGTL(("winExtDLL", "Trap handler defined.  Storing...\n"));
+      subagentTrapEvents[subagentTrapEvents_index] = subagentTrapEvent;
+      subagentTrapEvents_index++;
+    }
 
     // Convert OID from Windows 'supported view' to Net-SNMP
     for (i = 0; i < (pSupportedView.idLength > MAX_OID_LEN?MAX_OID_LEN:pSupportedView.idLength); i++) {
@@ -200,9 +245,9 @@ void init_winExtDLL(void)
     memcpy(winExtensionAgent[winExtensionAgent_num].name, name, sizeof(name));
     winExtensionAgent[winExtensionAgent_num].name_length = length;
  
-    DEBUGMSGTL(("winExtDLL", "\nWindows OID converted to Net-SNMP:"));
+    DEBUGMSGTL(("winExtDLL", "Windows OID converted to Net-SNMP: "));
     DEBUGMSGOID(("winExtDLL", name, length));
-    DEBUGMSGTL(("winExtDLL", "---\n"));
+    DEBUGMSG(("winExtDLL", "\n"));
     
     winExtensionAgent[winExtensionAgent_num].my_handler = netsnmp_create_handler_registration("winExtDLL",
         var_winExtDLL,
@@ -236,7 +281,9 @@ void init_winExtDLL(void)
       
       result = winExtensionAgent[winExtensionAgent_num].xSnmpExtensionInitEx(&pSupportedView);
       
-      printAsnObjectIdentifier(pSupportedView);
+      DEBUGMSGTL(("winExtDLL", "Supported view: "));
+      DEBUGMSGWINOID(("winExtDLL", &pSupportedView));
+      DEBUGMSG(("winExtDLL", "\n"));
       
       // Convert OID from Windows 'supported view' to Net-SNMP
       for (i = 0; i < (pSupportedView.idLength > MAX_OID_LEN?MAX_OID_LEN:pSupportedView.idLength); i++) {
@@ -247,9 +294,9 @@ void init_winExtDLL(void)
       memcpy(winExtensionAgent[winExtensionAgent_num].name, name, sizeof(name));
       winExtensionAgent[winExtensionAgent_num].name_length = length;
 
-      DEBUGMSGTL(("winExtDLL", "\nWindows OID converted to Net-SNMP:"));
+      DEBUGMSGTL(("winExtDLL", "Windows OID converted to Net-SNMP: "));
       DEBUGMSGOID(("winExtDLL", name, length));
-      DEBUGMSGTL(("winExtDLL", "---\n"));
+      DEBUGMSG(("winExtDLL", "\n"));
       
       winExtensionAgent[winExtensionAgent_num].my_handler = netsnmp_create_handler_registration("winExtDLL",
           var_winExtDLL,
@@ -271,17 +318,18 @@ void init_winExtDLL(void)
     winExtensionAgent_num++;
     
   }
+  /*
   DEBUGMSGTL(("winExtDLL", "\n\nDumping Windows extension OIDs\n"));
   for (i=0; winExtensionAgent[i].xSnmpExtensionInit; i++) {
-    DEBUGMSGTL(("winExtDLL", "DLL name: %s\n",winExtensionAgent[i].dll_name));
+    DEBUGMSGTL(("winExtDLL", "DLL name: %s, view: ",winExtensionAgent[i].dll_name));
     DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
-    DEBUGMSGTL(("winExtDLL", "\n"));
+    DEBUGMSG(("winExtDLL", "\n"));
   }
-  DEBUGMSGTL(("winExtDLL", "\n"));
+  DEBUGMSGTL(("winExtDLL", "\n"));*/
 
   /* Reverse sort array of winExtensionAgents */
   i = sizeof(winExtensionAgent) / sizeof(winExtensionAgents);
-  DEBUGMSGTL(("winExtDLL", "\nSorting...\n"));
+  //DEBUGMSGTL(("winExtDLL", "Sorting...\n"));
   for (iter=0; iter < i-1; iter++) {
     for (indx=0; indx < i-1; indx++) {
       if (snmp_oidtree_compare(winExtensionAgent[indx].name, winExtensionAgent[indx].name_length,
@@ -292,30 +340,29 @@ void init_winExtDLL(void)
       }
     }
   }
-  DEBUGMSGTL(("winExtDLL", "\n\nDumping Windows extension OIDs\n"));
+  DEBUGMSGTL(("winExtDLL", "Dumping sorted Windows extension OIDs\n"));
   for (i=0; winExtensionAgent[i].xSnmpExtensionInit; i++) {
-    DEBUGMSGTL(("winExtDLL", "DLL name: %s\n",winExtensionAgent[i].dll_name));
+    DEBUGMSGTL(("winExtDLL", "DLL name: %s, view: ",winExtensionAgent[i].dll_name));
     DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
-    DEBUGMSGTL(("winExtDLL", "\n"));
+    DEBUGMSG(("winExtDLL", "\n"));
   }
-  DEBUGMSGTL(("winExtDLL", "\n"));
 
-  
+  DEBUGMSGTL(("winExtDLL", "Number of subagentTrapEvents: %d\n",subagentTrapEvents_index));
+
+
+  if (subagentTrapEvents_index) {
+    DEBUGMSGTL(("winExtDLL", "Creating thread to monitor for subagent trap events\n"));
+
+    hThread = CreateThread(
+        NULL,
+        0,
+        subagentTrapMonitor,
+        &subagentTrapEvents,
+        NULL,
+        0
+        &IDThread);
+  }
 }
-
-void printAsnObjectIdentifier(AsnObjectIdentifier myAsnObjectIdentifier) {
-  int i;
-  
-  DEBUGMSGTL(("winExtDLL","AsnObjectIdentifier length: %d\n",myAsnObjectIdentifier.idLength));
-    
-  DEBUGMSGTL(("winExtDLL","AsnObjectIdentifier:        "));
-
-    for (i = 0; i < myAsnObjectIdentifier.idLength; i++) {
-      DEBUGMSGTL(("winExtDLL",".%d",myAsnObjectIdentifier.ids[i]));
-    }
-  DEBUGMSGTL(("winExtDLL","\n"));
-}
-
 
 int
 var_winExtDLL(netsnmp_mib_handler *handler,
@@ -372,9 +419,9 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 
         var = request->requestvb;
         
-        DEBUGMSGTL(("winExtDLL", "\nrequested:"));
+        DEBUGMSGTL(("winExtDLL", "Requested: "));
         DEBUGMSGOID(("winExtDLL", var->name, var->name_length));
-        DEBUGMSGTL(("\nwinExtDLL", "---\n"));       
+        DEBUGMSG(("winExtDLL", "\n"));       
 
         DEBUGMSGTL(("winExtDLL", "Var type requested: %d\n",var->type));
 
@@ -386,9 +433,9 @@ var_winExtDLL(netsnmp_mib_handler *handler,
           
           if (snmp_oidtree_compare(var->name, var->name_length, winExtensionAgent[i].name, 
                 winExtensionAgent[i].name_length) >= 0) {
-            DEBUGMSGTL(("winExtDLL", "Found match:\n"));
+            DEBUGMSGTL(("winExtDLL", "Found match: "));
             DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
-            DEBUGMSGTL(("winExtDLL", "\n"));
+            DEBUGMSG(("winExtDLL", "\n"));
             xSnmpExtensionQuery = winExtensionAgent[i].xSnmpExtensionQuery;
             xSnmpExtensionQueryEx = winExtensionAgent[i].xSnmpExtensionQueryEx;
             break;
@@ -414,13 +461,10 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             }
             mySnmpVarBind->name.idLength = i;
 
-            // Print OID
-            DEBUGMSGTL(("winExtDLL","Windows OID length: %d\n",mySnmpVarBind->name.idLength));
-            DEBUGMSGTL(("winExtDLL","Windows OID: "));
-            for (i = 0; i < mySnmpVarBind->name.idLength; i++) {
-              DEBUGMSGTL(("winExtDLL",".%d",mySnmpVarBind->name.ids[i]));
-            }
-            DEBUGMSGTL(("winExtDLL","\n"));
+            DEBUGMSGTL(("winExtDLL", "Windows OID: "));
+            DEBUGMSGWINOID(("winExtDLL", mySnmpVarBind));
+            DEBUGMSG(("winExtDLL", "\n"));
+
           }
           else {
             DEBUGMSGTL(("winExtDLL", "\nyCould not allocate memory for Windows SNMP varbind.\n"));
@@ -460,9 +504,10 @@ var_winExtDLL(netsnmp_mib_handler *handler,
           }
           var->name_length = i;
 
-          DEBUGMSGTL(("winExtDLL", "\nOID to return because request was a GETNEXT:"));
+          DEBUGMSGTL(("winExtDLL", "OID to return because request was a GETNEXT: "));
           DEBUGMSGOID(("winExtDLL", var->name, var->name_length));
-          DEBUGMSGTL(("\nwinExtDLL", "---\n"));                 
+          DEBUGMSG(("winExtDLL", "\n"));                 
+
           DEBUGMSGTL(("winExtDLL", "Var type to return: %d\n",var->type));
 
         }       
@@ -577,8 +622,9 @@ var_winExtDLL(netsnmp_mib_handler *handler,
           case MS_ASN_OBJECTIDENTIFIER:
             // Convert OID to Net-SNMP
 
-            DEBUGMSGTL(("winExtDLL", "Printing returned OID\n"));
-            printAsnObjectIdentifier(mySnmpVarBind->value.asnValue.object);
+            DEBUGMSGTL(("winExtDLL", "Returned OID: "));
+            DEBUGMSGWINOID(("winExtDLL", &mySnmpVarBind->value.asnValue.object));
+            DEBUGMSG(("winExtDLL", "\n"));
            
             // Convert OID from Windows to Net-SNMP
             for (i = 0; i < (mySnmpVarBind->value.asnValue.object.idLength > MAX_OID_LEN?MAX_OID_LEN:
@@ -587,9 +633,9 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             }
             ret_oid_length = i;
            
-            DEBUGMSGTL(("winExtDLL", "\n!Windows OID converted to Net-SNMP:"));
+            DEBUGMSGTL(("winExtDLL", "Windows OID converted to Net-SNMP: "));
             DEBUGMSGOID(("winExtDLL", ret_oid, ret_oid_length));
-            DEBUGMSGTL(("winExtDLL", "---\n"));
+            DEBUGMSG(("winExtDLL", "\n"));
                       
             snmp_set_var_typed_value(var, netsnmp_ASN_type,
                 ret_oid,
@@ -615,9 +661,9 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 
         var = request->requestvb;
         
-        DEBUGMSGTL(("winExtDLL", "\nrequested:"));
+        DEBUGMSGTL(("winExtDLL", "requested: "));
         DEBUGMSGOID(("winExtDLL", var->name, var->name_length));
-        DEBUGMSGTL(("\nwinExtDLL", "---\n"));       
+        DEBUGMSG(("winExtDLL", "\n"));       
 
         DEBUGMSGTL(("winExtDLL", "Var type requested: %d\n",var->type));
 
@@ -628,9 +674,9 @@ var_winExtDLL(netsnmp_mib_handler *handler,
           
           if (snmp_oidtree_compare(var->name, var->name_length, winExtensionAgent[i].name, 
                 winExtensionAgent[i].name_length) >= 0) {
-            DEBUGMSGTL(("winExtDLL", "Found match:\n"));
+            DEBUGMSGTL(("winExtDLL", "Found match: "));
             DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
-            DEBUGMSGTL(("winExtDLL", "\n"));
+            DEBUGMSG(("winExtDLL", "\n"));
             xSnmpExtensionQuery = winExtensionAgent[i].xSnmpExtensionQuery;
             break;
           }
@@ -771,8 +817,10 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             temp_oid_length = var->val_len / sizeof(oid);           
             
             DEBUGMSGTL(("winExtDLL","Sizeof var->val.objid: %d\n", temp_oid_length));
-            DEBUGMSGTL(("winExtDLL","OID: from user\n"));
+
+            DEBUGMSGTL(("winExtDLL","OID: from user "));
             DEBUGMSGOID(("winExtDLL", temp_oid, temp_oid_length));
+            DEBUGMSG(("winExtDLL","\n"));
             
             mySnmpVarBind->name.ids = (UINT *) SnmpUtilMemAlloc(sizeof (UINT) * temp_oid_length);
 
@@ -894,6 +942,7 @@ void read_ExtensionAgents_list() {
       if (retCode == ERROR_SUCCESS ) 
       { 
         /* Get key name that contains the actual filename of the extension agent */
+        DEBUGMSGTL(("winExtDLL", "-----------------------------------------\n"));
         DEBUGMSGTL(("winExtDLL", "Registry: (%d) %s\n", i+1, valueName));
         
         key_value_size = MAX_VALUE_NAME;
@@ -978,4 +1027,309 @@ void read_ExtensionAgents_list2(const TCHAR *keyName) {
     }
   }
 }
+
+DWORD WINAPI subagentTrapMonitor(LPVOID lpParam) {
+  DWORD dwWaitResult;
+  BOOL bResult;
+  int i;
+  netsnmp_variable_list *notification_vars = NULL;
+
+  // Windows SNMP
+  AsnObjectIdentifier   pEnterprise;
+  AsnInteger            pGenericTrap;
+  AsnInteger            pSpecificTrap;
+  AsnTimeticks          pTimeStamp;
+  SnmpVarBindList       pVariableBindings;
+ 
+  DEBUGMSGTL(("winExtDLL", "subagentTrapMonitor called\n"));
+
+  while (1) {
+
+    dwWaitResult = WaitForMultipleObjects(
+        subagentTrapEvents_index,
+        subagentTrapEvents,
+        FALSE,
+        INFINITE);
+
+    
+    DEBUGMSGTL(("winExtDLL", "---------------------------------------------\n"));
+    DEBUGMSGTL(("winExtDLL", "subagentTrapMonitor received a trap event (index: %d)\n",dwWaitResult));
+
+    
+    /* Loop through all the winExtensionAgent's looking for a matching handler */
+    for (i=0;  winExtensionAgent[i].xSnmpExtensionInit && i < MAX_WINEXT_DLLS; i++) {
+      DEBUGMSGTL(("winExtDLL", "Looping through all the winExtensionAgent's looking for a matching trap handler.\n"));
+
+      if (winExtensionAgent[i].subagentTrapEvent == subagentTrapEvents[dwWaitResult]) {
+        DEBUGMSGTL(("winExtDLL", "Found match: "));
+        DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
+        DEBUGMSG(("winExtDLL", "\n"));
+
+        if (winExtensionAgent[i].xSnmpExtensionTrap)
+          DEBUGMSGTL(("winExtDLL", "xSnmpExtensionTrap exists for this subagent\n"));
+        else {
+          DEBUGMSGTL(("winExtDLL", "xSnmpExtensionTrap does NOT exist for this subagent\n"));
+          continue;
+        }
+
+        pEnterprise.ids = NULL;
+        pEnterprise.idLength = 0;
+        pGenericTrap = pSpecificTrap = NULL;
+        pTimeStamp = 0;
+        pVariableBindings.list = NULL;
+        pVariableBindings.len = 0;
+
+        DEBUGMSGTL(("winExtDLL", "Calling SnmpExtensionTrap\n"));
+        bResult = winExtensionAgent[i].xSnmpExtensionTrap(
+            &pEnterprise,
+            &pGenericTrap,
+            &pSpecificTrap,
+            &pTimeStamp,
+            &pVariableBindings);
+        
+        DEBUGMSGTL(("winExtDLL", "result of SnmpExtensionTrap call:  %d\n",bResult));
+
+        if (pGenericTrap)
+          DEBUGMSGTL(("winExtDLL", "GenericTrap: %d\n",pGenericTrap));
+        if (pSpecificTrap)
+          DEBUGMSGTL(("winExtDLL", "SpecificTrap: %d\n",pSpecificTrap));
+
+        // Send the trap
+        send_trap(
+            &pEnterprise, 
+            &pGenericTrap, 
+            &pSpecificTrap, 
+            &pTimeStamp,
+            &pVariableBindings);
+
+        // Look for more traps from this agent (if result is TRUE there are more traps)
+        while(bResult) {
+          DEBUGMSGTL(("winExtDLL", "More traps to process.  Calling SnmpExtensionTrap again\n"));
+
+
+          pEnterprise.ids = NULL;
+          pEnterprise.idLength = 0;
+          pGenericTrap = pSpecificTrap = NULL;
+          pTimeStamp = 0;
+          pVariableBindings.list = NULL;
+          pVariableBindings.len = 0;
+
+          bResult = winExtensionAgent[i].xSnmpExtensionTrap(
+              &pEnterprise,
+              &pGenericTrap,
+              &pSpecificTrap,
+              &pTimeStamp,
+              &pVariableBindings);
+          
+          DEBUGMSGTL(("winExtDLL", "result of SnmpExtensionTrap call:  %d\n",bResult));
+
+          // Send the trap
+          send_trap(
+              &pEnterprise, 
+              &pGenericTrap, 
+              &pSpecificTrap,
+              &pTimeStamp,
+              &pVariableBindings);
+        }
+      }
+    }
+  }
+  return 1;
+}
+
+
+void send_trap(
+    AsnObjectIdentifier *pEnterprise, 
+    AsnInteger *pGenericTrap, 
+    AsnInteger *pSpecificTrap, 
+    AsnTimeticks *pTimeStamp,
+    SnmpVarBindList *pVariableBindings) {
+
+  int           i, j;
+  SnmpVarBind   mySnmpVarBind;
+  oid           my_oid[MAX_OID_LEN];               // Holder for pVariableBindings OIDs
+  size_t        my_oid_length = 0;                 // Holder for pVariableBindings OIDs
+
+  oid           enterprise_oid[MAX_OID_LEN];       // Holder for enterprise OID
+  size_t        enterprise_oid_length = 0;          // Holder for enterprise OID
+
+  u_char        netsnmp_ASN_type;
+
+  /*
+   * here is where we store the variables to be sent in the trap 
+   */
+  netsnmp_variable_list *notification_vars = NULL;
+  
+  /*
+   * In the notification, we have to assign our notification OID to
+   * the snmpTrapOID.0 object. Here is it's definition. 
+   */
+  oid             objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
+  size_t          objid_snmptrap_len = OID_LENGTH(objid_snmptrap);
+
+  DEBUGMSGTL(("winExtDLL", "send_trap() called\n"));
+  DEBUGMSGTL(("winExtDLL", "pVariableBindings length: %d\n",pVariableBindings->len));
+
+  
+  if (*pGenericTrap == 6) {
+    // Convert OID from Windows to Net-SNMP so Net-SNMP
+    for (j = 0; j < (pEnterprise->idLength > MAX_OID_LEN?MAX_OID_LEN:pEnterprise->idLength); j++) {
+      enterprise_oid[j] = (oid)pEnterprise->ids[j];
+    }
+    enterprise_oid_length = j;
+  }
+
+  for (i = 0; i< pVariableBindings->len; i++) {
+
+    mySnmpVarBind = pVariableBindings->list[i];
+
+    // Convert OID from Windows to Net-SNMP so Net-SNMP
+    for (j = 0; j < (pVariableBindings->list->name.idLength > MAX_OID_LEN?MAX_OID_LEN:pVariableBindings->list->name.idLength); j++) {
+      my_oid[j] = (oid)pVariableBindings->list->name.ids[j];
+    }
+    my_oid_length = j;
+
+    DEBUGMSGTL(("winExtDLL", "OID in trap variable binding: "));
+    DEBUGMSGOID(("winExtDLL", my_oid, my_oid_length));
+    DEBUGMSG(("winExtDLL", "\n"));
+
+    if (*pGenericTrap == 6) {
+
+      /*
+       * add in the trap definition object 
+       */
+      snmp_varlist_add_variable(&notification_vars,
+          /*
+           * the snmpTrapOID.0 variable 
+           */
+          objid_snmptrap, objid_snmptrap_len,
+          /*
+           * value type is an OID 
+           */
+          ASN_OBJECT_ID,
+          /*
+           * value contents is our notification OID 
+           */
+          (u_char *) enterprise_oid,
+          /*
+           * size in bytes
+           */
+          enterprise_oid_length);
+
+      DEBUGMSGTL(("winExtDLL", "Enterprise OID: "));
+      DEBUGMSGOID(("winExtDLL", enterprise_oid, enterprise_oid_length));
+      DEBUGMSG(("winExtDLL", "\n"));
+
+      // Set Net-SNMP ASN type based on closest match to Windows ASN type
+      switch (pVariableBindings->list->value.asnType) {
+        case MS_ASN_OCTETSTRING:
+          netsnmp_ASN_type = ASN_OCTET_STR;
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_OCTETSTRING = ASN_OCTET_STR\n"));
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_OCTETSTRING = %s\n",pVariableBindings->list->value.asnValue.string.stream));
+          snmp_varlist_add_variable(&notification_vars,
+              my_oid, my_oid_length,
+              ASN_OCTET_STR,
+              pVariableBindings->list->value.asnValue.string.stream,
+              strlen(pVariableBindings->list->value.asnValue.string.stream));
+          break;
+        case MS_ASN_INTEGER:          // And MS_ASN_INTEGER32
+          netsnmp_ASN_type = ASN_INTEGER;
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_INTEGER = ASN_INTEGER\n"));
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_INTEGER = %d\n",pVariableBindings->list->value.asnValue.number));
+          snmp_varlist_add_variable(&notification_vars,
+              my_oid, my_oid_length,
+              ASN_INTEGER,
+              (u_char *)&pVariableBindings->list->value.asnValue.number,
+              sizeof(pVariableBindings->list->value.asnValue.number));
+          break;
+        case MS_ASN_UNSIGNED32:       // SNMP v2
+          netsnmp_ASN_type = ASN_UNSIGNED;
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_UNSIGNED32 = ASN_UNSIGNED\n"));
+          break;
+        case MS_ASN_COUNTER64:       // SNMP v2
+          netsnmp_ASN_type = ASN_COUNTER64;
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_COUNTER64 = ASN_COUNTER64\n"));
+          break;
+        case MS_ASN_BITS:
+          netsnmp_ASN_type = ASN_BIT_STR;
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_BITS = ASN_BIT_STR\n"));
+          break;
+        case MS_ASN_OBJECTIDENTIFIER:
+          netsnmp_ASN_type = ASN_OBJECT_ID;
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_OBJECTIDENTIFIER = ASN_OBJECT_ID\n"));
+          break;
+        case MS_ASN_SEQUENCE:
+          netsnmp_ASN_type = ASN_SEQUENCE;
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_SEQUENCE = ASN_SEQUENCE\n"));
+          break;
+        case MS_ASN_IPADDRESS:
+          netsnmp_ASN_type = ASN_IPADDRESS;
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_IPADDRESS = ASN_IPADDRESS\n"));
+          break;
+        case MS_ASN_COUNTER32:
+          netsnmp_ASN_type = ASN_COUNTER;
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_COUNTER32 = ASN_COUNTER\n"));
+          break;
+        case MS_ASN_GAUGE32:
+          netsnmp_ASN_type = ASN_GAUGE;
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_GAUGE32 = ASN_GAUGE\n"));
+          break;
+        case MS_ASN_TIMETICKS:
+          netsnmp_ASN_type = ASN_TIMETICKS;
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_TIMETICKS = ASN_TIMETICKS\n"));
+          break;
+        case MS_ASN_OPAQUE:
+          netsnmp_ASN_type = ASN_OPAQUE;
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_OPAQUE = ASN_OPAQUE\n"));
+          break;
+        default:
+          netsnmp_ASN_type = ASN_INTEGER;
+          DEBUGMSGTL(("winExtDLL", "Defaulting to ASN_INTEGER\n"));
+          break;
+      }
+      /*
+       * send the trap out.  This will send it to all registered
+       * receivers (see the "SETTING UP TRAP AND/OR INFORM DESTINATIONS"
+       * section of the snmpd.conf manual page. 
+       */
+
+      DEBUGMSGTL(("winExtDLL", "sending v2 trap\n"));
+      send_v2trap(notification_vars);
+
+      /*
+       * free the created notification variable list 
+       */
+      DEBUGMSGTL(("winExtDLL", "cleaning up\n"));
+      snmp_free_varbind(notification_vars);
+
+    }
+    else {
+      DEBUGMSGTL(("winExtDLL", "sending v1 trap\n"));
+      send_easy_trap(*pGenericTrap, *pSpecificTrap);
+    }
+  }
+}
+
+/* DEBUGMSGWINOID */
+void
+debugmsg_win_oid(const char *token, const AsnObjectIdentifier * theoid)
+{
+    u_char          buf[MAX_OID_LEN];
+    u_char          temp[10];
+    size_t          buf_len = 0, out_len = 0;
+    int             i;
+
+    buf[0] = '\0';
+
+    for (i = 0; i < theoid->idLength; i++) {
+      sprintf(temp, ".%d", theoid->ids[i]);
+      strcat(buf, temp);
+    }
+
+    if (buf != NULL) {
+      debugmsg(token, "%s", buf);
+      //DEBUGMSGTL((token, "%s\n", buf));
+    }
+}
+
 
