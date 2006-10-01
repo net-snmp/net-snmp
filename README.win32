@@ -126,11 +126,10 @@ The next subsection relates to items that are built using Visual Studio
 As of Net-SNMP 5.4, the Net-SNMP agent is able to load the Windows SNMP
 service extension DLLs by using the Net-SNMP winExtDLL extension.
 
-The current limitations are:
-
--Traps are not passed from the Windows SNMP extension to Net-SNMP.
-
-These limitations should be resolved in the near future.
+The Windows SNMP service must be installed, but the service must be disabled.  
+This is required so that the extension DLLs are available for loading, and 
+also because this extension and the existing Windows extensions use the 
+Windows SNMP API from snmpapi.dll.
 
 
 Enabling the Windows SNMP extension agents
