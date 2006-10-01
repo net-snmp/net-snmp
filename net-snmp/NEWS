@@ -76,7 +76,7 @@ changes/bug fixes.
 
    Win32:
       - new winExtDLL extension module to allow snmpd to load Windows SNMP
-        service extension DLLs to provide support for HOST-RESOURCES-MIB
+        Service extension DLLs to provide support for HOST-RESOURCES-MIB
         and other MIBs provided with Windows.
 
   Fixes:
