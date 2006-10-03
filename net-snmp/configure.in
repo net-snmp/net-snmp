@@ -1105,14 +1105,26 @@ PARTIALTARGETOS=`echo $target_os | sed 's/[-._].*//'`
 if test "x$PARTIALTARGETOS" = "xmingw32msvc"; then
 	CFLAGS="$CFLAGS -Dmingw32"
 fi
-# "-U" doesn't work on all compilers, so only add it for gcc
-# XXX: ideally replace by a configure check for a working "-U"
-if test "x$GCC" = "xyes"; then
-  CFLAGS="$CFLAGS -U$PARTIALTARGETOS -D$PARTIALTARGETOS=$PARTIALTARGETOS"
-else
-  CFLAGS="$CFLAGS -D$PARTIALTARGETOS=$PARTIALTARGETOS"
-fi
+
+#
+# Check whether we can use -Ux -Dx=x with the expected behaviour
+#
 changequote([, ])
+AC_MSG_CHECKING([whether to un-define target system token (before redefining)])
+OLD_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="-U$PARTIALTARGETOS -D$PARTIALTARGETOS=$PARTIALTARGETOS"
+
+AC_EGREP_CPP(yes,[[
+#ifdef $PARTIALTARGETOS
+yes
+#endif
+]],
+[PARTIALTARGETFLAGS="-U$PARTIALTARGETOS -D$PARTIALTARGETOS=$PARTIALTARGETOS"
+ AC_MSG_RESULT([yes])],
+[PARTIALTARGETFLAGS="-D$PARTIALTARGETOS=$PARTIALTARGETOS"
+ AC_MSG_RESULT([no])])
+CFLAGS="$CFLAGS $PARTIALTARGETFLAGS"
+CPPFLAGS="$OLDCPPFLAGS"
 AC_MSG_CACHE_ADD(Building for:               $PARTIALTARGETOS)
 
 # AIX has problems with shared libs
@@ -1794,7 +1806,7 @@ done
 AC_MSG_CHECKING([for and configuring mib modules to use])
 
 # set up the CPP command
-MODULECPP="$CPP -U$PARTIALTARGETOS -D$PARTIALTARGETOS=$PARTIALTARGETOS -I${srcdir}/include -I${srcdir}/agent/mibgroup"
+MODULECPP="$CPP $PARTIALTARGETFLAGS -I${srcdir}/include -I${srcdir}/agent/mibgroup"
 if test "x$enable_mfd_rewrites" = "xyes"; then
   MODULECPP="$MODULECPP -DNETSNMP_ENABLE_MFD_REWRITES"
 fi
