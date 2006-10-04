@@ -12,6 +12,9 @@ config_require(hardware/cpu/cpu_sysctl)
 #elif (defined(aix4) || defined(aix5))
 config_require(hardware/cpu/cpu_perfstat)
 
+#elif (defined(solaris2))
+config_require(hardware/cpu/cpu_kstat)
+
 #else
 config_require(hardware/cpu/cpu_null)
 #endif
