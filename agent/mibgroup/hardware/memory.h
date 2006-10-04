@@ -1,23 +1,32 @@
 config_require(hardware/memory/hw_mem)
-config_arch_require(aix4,      hardware/memory/memory_aix)
-config_arch_require(aix5,      hardware/memory/memory_aix)
-config_arch_require(darwin8,   hardware/memory/memory_darwin)
-config_arch_require(dynix,     hardware/memory/memory_dynix)
-config_arch_require(freebsd2,  hardware/memory/memory_freebsd)
-config_arch_require(freebsd3,  hardware/memory/memory_freebsd)
-config_arch_require(freebsd4,  hardware/memory/memory_freebsd)
-config_arch_require(freebsd5,  hardware/memory/memory_freebsd)
-config_arch_require(freebsd6,  hardware/memory/memory_freebsd)
-config_arch_require(hpux10,    hardware/memory/memory_hpux)
-config_arch_require(hpux11,    hardware/memory/memory_hpux)
-config_arch_require(irix6,     hardware/memory/memory_irix)
-config_arch_require(linux,     hardware/memory/memory_linux)
-config_arch_require(netbsd,    hardware/memory/memory_netbsd)
-config_arch_require(netbsd1,   hardware/memory/memory_netbsd)
-config_arch_require(netbsdelf, hardware/memory/memory_netbsd)
-config_arch_require(netbsdelf2,hardware/memory/memory_netbsd)
-config_arch_require(netbsdelf3,hardware/memory/memory_netbsd)
-config_arch_require(openbsd2,  hardware/memory/memory_netbsd)
-config_arch_require(openbsd3,  hardware/memory/memory_netbsd)
-config_arch_require(openbsd4,  hardware/memory/memory_netbsd)
-config_arch_require(solaris2,  hardware/memory/memory_solaris)
+
+#if defined(linux)
+config_require(hardware/memory/memory_linux)
+
+#elif (defined(freebsd2) || defined(freebsd3) || defined(freebsd4)  || defined(freebsd5)|| defined(freebsd6))
+config_require(hardware/memory/memory_freebsd)
+
+#elif (defined(netbsd) || defined(netbsd1) || defined(netbsdelf) || defined(netbsdelf2)|| defined(netbsdelf3) || defined(openbsd2) || defined(openbsd3) || defined(openbsd4))
+config_require(hardware/memory/memory_netbsd)
+
+#elif (defined(aix4) || defined(aix5))
+config_require(hardware/memory/memory_aix)
+
+#elif (defined(solaris2))
+config_require(hardware/memory/memory_solaris)
+
+#elif (defined(irix6))
+config_require(hardware/memory/memory_irix)
+
+#elif (defined(darwin8))
+config_require(hardware/memory/memory_darwin)
+
+#elif (defined(dynix))
+config_require(hardware/memory/memory_dynix)
+
+#elif (defined(hpux10) || defined(hpux11))
+config_require(hardware/memory/memory_hpux)
+
+#else
+config_require(hardware/memory/memory_null)
+#endif
