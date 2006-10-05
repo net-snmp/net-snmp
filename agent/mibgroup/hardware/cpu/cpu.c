@@ -55,19 +55,27 @@ netsnmp_cpu_info *netsnmp_cpu_get_byIdx(  int idx, int create ) {
         /*
          * Find the specified CPU entry
          */
+    DEBUGMSGTL(("cpu", "cpu_get_byIdx %d ", idx));
     for ( cpu=_cpu_head; cpu; cpu=cpu->next ) {
-        if ( cpu->idx == idx )
+        if ( cpu->idx == idx ) {
+            DEBUGMSG(("cpu", "(found)\n"));
             return cpu;
+        }
     }
-    if (!create)
+    if (!create) {
+        DEBUGMSG(("cpu", "(not found)\n"));
         return NULL;
+    }
 
         /*
          * Create a new CPU entry, and insert it into the list....
          */
     cpu = SNMP_MALLOC_TYPEDEF( netsnmp_cpu_info );
-    if (!cpu)
+    if (!cpu) {
         return NULL;
+        DEBUGMSG(("cpu", "(failed)\n"));
+    }
+    DEBUGMSG(("cpu", "(created)\n"));
     cpu->idx = idx;
         /* ... either as the first (or only) entry....  */
     if ( !_cpu_head || _cpu_head->idx > idx ) {
