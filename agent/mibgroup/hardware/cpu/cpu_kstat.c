@@ -34,6 +34,7 @@ void init_cpu_kstat( void ) {
         kstat_fd = kstat_open();
     kstat_chain_update( kstat_fd );
 
+    DEBUGMSGTL(("cpu", "cpu_kstat init\n "));
     for (ksp = kstat_fd->kc_chain; ksp != NULL; ksp = ksp->ks_next) {
         if (ksp->ks_flags & KSTAT_FLAG_INVALID)
             continue;
@@ -95,6 +96,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     cpu->nCtxSwitches = 0;
 
     kstat_chain_update( kstat_fd );
+    DEBUGMSGTL(("cpu", "cpu_kstat load\n "));
     for (ksp = kstat_fd->kc_chain; ksp != NULL; ksp = ksp->ks_next) {
         if (ksp->ks_flags & KSTAT_FLAG_INVALID)
             continue;
@@ -104,6 +106,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
             if ((ksp->ks_type != KSTAT_TYPE_RAW) ||
                 (ksp->ks_data_size != sizeof(cs))||
                 (kstat_read(kstat_fd, ksp, &cs) == -1)) {
+                DEBUGMSGTL(("cpu", "cpu_kstat load failed (%d)\n ", i));
                 break;   /* or continue ? */
             }
 
