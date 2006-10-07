@@ -22,8 +22,8 @@ SKIPIF DISABLE_SNMPV1
 
 STARTAGENT
 
-# ask for hrStorageSize.3 which is considered swap size on Solaris
-CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 1 $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.25.2.3.1.5.3"
+# ask for hrStorageSize.10 which reports overall swap size
+CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 1 $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.25.2.3.1.5.10"
 
 STOPAGENT
 
