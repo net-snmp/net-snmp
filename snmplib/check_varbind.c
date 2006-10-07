@@ -175,7 +175,7 @@ netsnmp_check_vb_truthvalue(const netsnmp_variable_list *var)
     if (NULL == var)
         return SNMP_ERR_GENERR;
     
-    if ((rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER, sizeof(int))))
+    if ((rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER, sizeof(long))))
         return rc;
     
     return netsnmp_check_vb_int_range(var, 1, 2);
@@ -189,7 +189,7 @@ netsnmp_check_vb_rowstatus_value(const netsnmp_variable_list *var)
     if (NULL == var)
         return SNMP_ERR_GENERR;
     
-    if ((rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER, sizeof(int))))
+    if ((rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER, sizeof(long))))
         return rc;
     
     if (*var->val.integer == RS_NOTREADY)
@@ -221,7 +221,7 @@ netsnmp_check_vb_storagetype(const netsnmp_variable_list *var, int old_value)
     if (NULL == var)
         return SNMP_ERR_GENERR;
     
-    if ((rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER, sizeof(int))))
+    if ((rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER, sizeof(long))))
         return rc;
     
     if ((rc = netsnmp_check_vb_int_range(var, SNMP_STORAGE_NONE,
