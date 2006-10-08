@@ -1,5 +1,6 @@
 #include "sysv.h"
 
+#undef hpux
 #define hpux hpux
 
 #ifdef hpux11
