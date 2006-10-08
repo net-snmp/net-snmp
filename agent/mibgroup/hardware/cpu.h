@@ -15,6 +15,9 @@ config_require(hardware/cpu/cpu_perfstat)
 #elif (defined(solaris2))
 config_require(hardware/cpu/cpu_kstat)
 
+#elif (defined(hpux10) || defined(hpux11))
+config_require(hardware/cpu/cpu_pstat)
+
 #else
 config_require(hardware/cpu/cpu_null)
 #endif

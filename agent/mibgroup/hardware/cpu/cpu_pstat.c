@@ -19,7 +19,7 @@
      * Initialise the list of CPUs on the system
      *   (including descriptions)
      */
-void init_cpu_nlist( void ) {
+void init_cpu_pstat( void ) {
     int                   i, cpuversion;
     struct pst_dynamic    psd;
     char                  descr[ SNMP_MAXBUF ];
