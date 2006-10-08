@@ -127,7 +127,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
          *     has a full minute's history collected.
          */
         case CPUUSER:
-             if ( info->history[0].total_hist ) {
+             if ( info->history && info->history[0].total_hist ) {
                  value  = (info->user_ticks  - info->history[0].user_hist)*100;
                  value /= (info->total_ticks - info->history[0].total_hist);
                  snmp_set_var_typed_integer(requests->requestvb,
@@ -135,7 +135,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
              }
              break;
         case CPUSYSTEM:
-             if ( info->history[0].total_hist ) {
+             if ( info->history && info->history[0].total_hist ) {
                      /* or sys2_ticks ??? */
                  value  = (info->sys_ticks  - info->history[0].sys_hist)*100;
                  value /= (info->total_ticks - info->history[0].total_hist);
@@ -144,7 +144,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
              }
              break;
         case CPUIDLE:
-             if ( info->history[0].total_hist ) {
+             if ( info->history && info->history[0].total_hist ) {
                  value  = (info->idle_ticks  - info->history[0].idle_hist)*100;
                  value /= (info->total_ticks - info->history[0].total_hist);
                  snmp_set_var_typed_integer(requests->requestvb,
@@ -165,14 +165,14 @@ vmstat_handler(netsnmp_mib_handler          *handler,
                                         info->nCtxSwitches );
              break;
         case SYSINTERRUPTS:
-             if ( info->history[0].total_hist ) {
+             if ( info->history && info->history[0].total_hist ) {
                  value  = (info->nInterrupts - info->history[0].intr_hist)/60;
                  snmp_set_var_typed_integer(requests->requestvb,
                                             ASN_INTEGER, value);
              }
              break;
         case SYSCONTEXT:
-             if ( info->history[0].total_hist ) {
+             if ( info->history && info->history[0].total_hist ) {
                  value  = (info->nCtxSwitches - info->history[0].ctx_hist)/60;
                  snmp_set_var_typed_integer(requests->requestvb,
                                             ASN_INTEGER, value);
@@ -191,7 +191,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
                                         info->swapOut );
              break;
         case SWAPIN:
-             if ( info->history[0].total_hist ) {
+             if ( info->history && info->history[0].total_hist ) {
                  value  = (info->swapIn - info->history[0].swpi_hist)/60;
                  /* ??? value *= PAGE_SIZE;  */
                  snmp_set_var_typed_integer(requests->requestvb,
@@ -199,7 +199,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
              }
              break;
         case SWAPOUT:
-             if ( info->history[0].total_hist ) {
+             if ( info->history && info->history[0].total_hist ) {
                  value  = (info->swapOut - info->history[0].swpo_hist)/60;
                  /* ??? value *= PAGE_SIZE;  */
                  snmp_set_var_typed_integer(requests->requestvb,
@@ -219,14 +219,14 @@ vmstat_handler(netsnmp_mib_handler          *handler,
                                         info->pageIn );
              break;
         case IOSENT:
-             if ( info->history[0].total_hist ) {
+             if ( info->history && info->history[0].total_hist ) {
                  value  = (info->pageOut - info->history[0].pageo_hist)/60;
                  snmp_set_var_typed_integer(requests->requestvb,
                                             ASN_INTEGER, value);
              }
              break;
         case IORECEIVE:
-             if ( info->history[0].total_hist ) {
+             if ( info->history && info->history[0].total_hist ) {
                  value  = (info->pageIn - info->history[0].pagei_hist)/60;
                  snmp_set_var_typed_integer(requests->requestvb,
                                             ASN_INTEGER, value);
