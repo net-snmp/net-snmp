@@ -362,7 +362,7 @@ nsb-make()
    egrep -i "error|fail|warn|no such|exists|t find |ermission denied|\*\*\*" $nsb_make_OUTPUT \
          > nsb-make-$target-allerrs.$NSB_DATE
    # allow for a few exceptions
-   egrep -v -i "testing .*failure|[a-z&_](fail|error)|warn|error(mib|\.3)|(LOG|SNMP)_ERR|In function|= FAILURE|/\*" nsb-make-$target-allerrs.$NSB_DATE \
+   egrep -v -i "testing .*failure|[a-z&_](fail|error)|warn|error(mib|\.3)|(LOG|SNMP)_ERR|In function|= FAILURE|DEBUGMSG|/\*" nsb-make-$target-allerrs.$NSB_DATE \
          > nsb-make-$target-errs.$NSB_DATE
    if [ -s nsb-make-$target-errs.$NSB_DATE ]; then
       nsb-prompt "press enter to view errors"
