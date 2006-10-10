@@ -20,6 +20,8 @@
 config_require(tcp-mib/data_access/tcpConn_common)
 #if defined( linux )
 config_require(tcp-mib/data_access/tcpConn_linux)
+#elif defined( solaris2 )
+config_require(tcp-mib/data_access/tcpConn_solaris2)
 #else
 #   define NETSNMP_TCPCONN_COMMON_ONLY
 #endif
