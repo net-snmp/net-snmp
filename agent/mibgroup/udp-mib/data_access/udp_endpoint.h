@@ -20,6 +20,8 @@
 config_require(udp-mib/data_access/udp_endpoint_common)
 #if defined( linux )
 config_require(udp-mib/data_access/udp_endpoint_linux)
+#elif defined( solaris2 )
+config_require(udp-mib/data_access/udp_endpoint_solaris2)
 #else
 #   define NETSNMP_UDP_ENDPOINT_COMMON_ONLY
 #endif
