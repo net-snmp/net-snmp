@@ -72,6 +72,8 @@ typedef enum {
     MIB_SNMP = 15,
 #ifdef SOLARIS_HAVE_IPV6_MIB_SUPPORT
     MIB_IP6_ADDR = 16,
+    MIB_TCP6_CONN,
+    MIB_UDP6_ENDPOINT,
 #endif
     MIBCACHE_SIZE	
 } mibgroup_e;
