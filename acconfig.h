@@ -204,6 +204,9 @@
 /* nlist.n_value */
 #undef STRUCT_NLIST_HAS_N_VALUE
 
+/* nlist64.n_value */
+#undef STRUCT_NLIST64_HAS_N_VALUE
+
 /* ipstat structure tests */
 #undef STRUCT_IPSTAT_HAS_IPS_CANTFORWARD
 #undef STRUCT_IPSTAT_HAS_IPS_CANTFRAG
