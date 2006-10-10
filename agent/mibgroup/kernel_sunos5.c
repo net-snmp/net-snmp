@@ -1059,7 +1059,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
                 }
             }
             if (ioctl(ifsd6, SIOCGLIFFLAGS, lifrp) < 0) {
-                snmp_log(LOG_ERR, "SIOCGIFFLAGS %s: %s\n", 
+                snmp_log(LOG_ERR, "SIOCGLIFFLAGS %s: %s\n", 
                          lifrp->lifr_name, strerror(errno));
                 continue;
             }
@@ -1068,7 +1068,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
         if_flags = lifrp->lifr_flags;
             
         if (ioctl(if_isv6?ifsd6:ifsd, SIOCGLIFMTU, lifrp) < 0) {
-            DEBUGMSGTL(("kernel_sunos5", "...... SIOCGIFMTU failed\n"));
+            DEBUGMSGTL(("kernel_sunos5", "...... SIOCGLIFMTU failed\n"));
             continue;
         }
 
