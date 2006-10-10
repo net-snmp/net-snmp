@@ -630,6 +630,9 @@
 /* Define to 1 if you have the `nlist' function. */
 #undef HAVE_NLIST
 
+/* Define to 1 if you have the `nlist64' function. */
+#undef HAVE_NLIST64
+
 /* Define to 1 if you have the <nlist.h> header file. */
 #undef HAVE_NLIST_H
 
@@ -665,6 +668,9 @@
 
 /* Define to 1 if you have the <pkglocs.h> header file. */
 #undef HAVE_PKGLOCS_H
+
+/* Define to 1 if you have the `pread64' function. */
+#undef HAVE_PREAD64
 
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H
