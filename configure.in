@@ -2571,6 +2571,7 @@ case $target_os in
 	linux*) ;;
 	irix*) # Check for nlist in mld (irix)
 		AC_CHECK_LIB(elf, nlist)
+		AC_CHECK_LIB(elf, nlist64)
 		AC_CHECK_LIB(mld, nlist)
 		;;
 	*) # default
@@ -2760,7 +2761,7 @@ AC_CHECK_LIB(kvm, kvm_read)
 AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_FUNCS(dlopen)
 
-AC_CHECK_FUNCS(kvm_openfiles nlist knlist kvm_getprocs kvm_getswapinfo)
+AC_CHECK_FUNCS(kvm_openfiles nlist nlist64 knlist kvm_getprocs kvm_getswapinfo)
 echo " $module_list " | grep " ucd-snmp/diskio " >/dev/null
 # whether we need -ldevstat for diskio MIB
 if test $? -eq 0 ; then
@@ -3515,7 +3516,7 @@ AC_CHECK_FUNCS(signal setsid sigset sigblock sighold strerror setenv vsnprintf s
 AC_CHECK_FUNCS(sigaction)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(execv system fork getpid strncasecmp sigalrm)
-AC_CHECK_FUNCS(lseek64)
+AC_CHECK_FUNCS(lseek64 pread64)
 if test "x$with_rpm" != "xno" && \
         echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
   OLDLIBS=$LIBS
