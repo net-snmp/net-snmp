@@ -52,6 +52,7 @@
 #include <sys/stropts.h>
 #include <sys/tihdr.h>
 #include <sys/tiuser.h>
+#include <sys/dlpi.h>
 #include <inet/common.h>
 #include <inet/mib2.h>
 #include <inet/ip.h>
@@ -149,6 +150,16 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
 static int
 getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type, mib2_ifEntry_t *resp,
       size_t *length, int (*comp)(void *, void *), void *arg);
+static void 
+set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags,int mtu);
+static int get_if_stats(mib2_ifEntry_t *ifp);
+
+static int get_phys_address(mib2_ifEntry_t *ifp);
+static int _dlpi_phys_address(int fd, char *paddr, int maxlen, int *paddrlen);
+static int _dlpi_attach(int fd, int ppa);
+static int _dlpi_parse_devname(char *devname, int *ppap);
+
+
 
 static int
 Name_cmp(void *, void *);
@@ -989,6 +1000,132 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
  * Get info for interfaces group. Mimics getmib interface as much as possible
  * to be substituted later if SunSoft decides to extend its mib2 interface.
  */
+#if defined(HAVE_IF_NAMEINDEX) && defined(NETSNMP_INCLUDE_IFTABLE_REWRITES)
+static int
+getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
+      mib2_ifEntry_t *resp,  size_t *length, int (*comp)(void *, void *),
+      void *arg)
+{
+    int             i, ret;
+    int             ifsd, ifsd6 = -1;
+    struct lifreq   lifreq, *lifrp;
+    mib2_ifEntry_t *ifp;
+    int             nentries = size / sizeof(mib2_ifEntry_t);
+    found_e         result = NOT_FOUND;
+    boolean_t       if_isv6;
+    uint64_t        if_flags;    
+    struct if_nameindex *ifname, *ifnp;
+
+    lifrp = &lifreq; 
+
+    if ((ifsd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        return -1;
+    }
+
+    DEBUGMSGTL(("kernel_sunos5", "...... using if_nameindex\n"));
+    if ((ifname = if_nameindex()) == NULL) {
+        ret = -1;
+        goto Return;
+    }
+    
+    /*
+     * Gather information about each interface found. We try to handle errors
+     * gracefully: if an error occurs while processing an interface we simply
+     * move along to the next one. Previously, the function returned with an
+     * error right away. 
+     *
+     * if_nameindex() already eliminates duplicate interfaces, so no extra
+     * checks are needed for interfaces that have both IPv4 and IPv6 plumbed
+     */
+ Again:
+    for (i = 0, ifnp = ifname, ifp = (mib2_ifEntry_t *) ifbuf; 
+     ifnp->if_index != 0 && (i < nentries); ifnp++) {
+
+        DEBUGMSGTL(("kernel_sunos5", "...... getif %s\n", ifnp->if_name));
+        memcpy(lifrp->lifr_name, ifnp->if_name, LIFNAMSIZ);
+        if_isv6 = B_FALSE;
+
+        if (ioctl(ifsd, SIOCGLIFFLAGS, lifrp) < 0) {
+            if (ifsd6 == -1) {
+                if ((ifsd6 = socket(AF_INET6, SOCK_DGRAM, 0)) < 0) {
+                    ret = -1;
+                    goto Return;
+                }
+            }
+            if (ioctl(ifsd6, SIOCGLIFFLAGS, lifrp) < 0) {
+                snmp_log(LOG_ERR, "SIOCGIFFLAGS %s: %s\n", 
+                         lifrp->lifr_name, strerror(errno));
+                continue;
+            }
+            if_isv6 = B_TRUE;
+        } 
+        if_flags = lifrp->lifr_flags;
+            
+        if (ioctl(if_isv6?ifsd6:ifsd, SIOCGLIFMTU, lifrp) < 0) {
+            DEBUGMSGTL(("kernel_sunos5", "...... SIOCGIFMTU failed\n"));
+            continue;
+        }
+
+        memset(ifp, 0, sizeof(mib2_ifEntry_t));
+
+        set_if_info(ifp, ifnp->if_index, ifnp->if_name, if_flags, 
+                    lifrp->lifr_metric);
+
+        if (get_if_stats(ifp) < 0) {
+            DEBUGMSGTL(("kernel_sunos5", "...... get_if_stats failed\n"));
+            continue;
+        }
+
+        /* try to obtain the physical address */
+        (void) get_phys_address(ifp);
+
+        /*
+         * Once we reach here we know that all went well, so move to
+         * the next ifEntry. 
+         */
+        i++;
+        ifp++;
+    }
+
+    if ((req_type == GET_NEXT) && (result == NEED_NEXT)) {
+            /*
+             * End of buffer, so "next" is the first item in the next buffer 
+             */
+        req_type = GET_FIRST;
+    }
+
+    result = getentry(req_type, (void *) ifbuf, size, sizeof(mib2_ifEntry_t),
+              (void *)resp, comp, arg);
+
+    if ((result != FOUND) && (i == nentries) && ifnp->if_index != 0) { 
+    /*
+     * We reached the end of supplied buffer, but there is
+     * some more stuff to read, so continue.
+     */
+        goto Again;
+    }
+
+    if (result != FOUND) {
+        ret = 2;
+    } else {
+        if (ifnp->if_index != 0) {
+            ret = 1;        /* Found and more data to fetch */
+        } else {
+            ret = 0;        /* Found and no more data */
+        }
+        *length = i * sizeof(mib2_ifEntry_t);       /* Actual cache length */
+    }
+
+ Return:
+    if (ifname)
+        if_freenameindex(ifname);
+    close(ifsd);
+    if (ifsd6 != -1)
+        close(ifsd6);
+    return ret;
+}
+#else /* only rely on SIOCGIFCONF to get interface information */ 
+
 static int
 getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
       mib2_ifEntry_t *resp,  size_t *length, int (*comp)(void *, void *),
@@ -1003,6 +1140,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
     mib2_ifEntry_t *ifp;
     mib2_ipNetToMediaEntry_t Media;
     int             nentries = size / sizeof(mib2_ifEntry_t);
+    int             if_flags = 0;
     found_e         result = NOT_FOUND;
 
     if ((ifsd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -1044,207 +1182,21 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	    snmp_log(LOG_ERR, "SIOCGIFFLAGS %s: %s\n", ifrp->ifr_name, strerror(errno));
 	    goto Return;
 	}
-
-	memset(ifp, 0, sizeof(mib2_ifEntry_t));
-	ifp->ifIndex = idx;
-	ifp->ifDescr.o_length = strlen(ifrp->ifr_name);
-	strcpy(ifp->ifDescr.o_bytes, ifrp->ifr_name);
-	ifp->ifAdminStatus = (ifrp->ifr_flags & IFF_UP) ? 1 : 2;
-	ifp->ifOperStatus = ((ifrp->ifr_flags & IFF_UP) && (ifrp->ifr_flags & IFF_RUNNING)) ? 1 : 2;
-	ifp->ifLastChange = 0;      /* Who knows ...  */
-        ifp->flags = ifrp->ifr_flags;
+        if_flags = ifrp->ifr_flags;
 
 	if (ioctl(ifsd, SIOCGIFMTU, ifrp) < 0) {
 	    ret = -1;
 	    DEBUGMSGTL(("kernel_sunos5", "...... SIOCGIFMTU failed\n"));
 	    goto Return;
 	}
-	ifp->ifMtu = ifrp->ifr_metric;
-	ifp->ifType = 1;
-	ifp->ifSpeed = 0;
 
-        /* make ifOperStatus depend on link status if available */
-	if (ifp->ifAdminStatus == 1) {
-            int i_tmp;
-            /* only UPed interfaces get correct link status - if any */
-            if (getKstatInt(NULL,ifrp->ifr_name,"link_up",&i_tmp) == 0) {
-                ifp->ifOperStatus = i_tmp ? 1 : 2;
-            }
-	}
-	if ((getKstatInt(NULL,ifrp->ifr_name, "ifspeed", &ifp->ifSpeed) == 0) &&
-	    (ifp->ifSpeed != 0)) {
-	    /*
-	     * check for SunOS patch with half implemented ifSpeed 
-	     */
-	    if (ifp->ifSpeed < 10000) {
-                    ifp->ifSpeed *= 1000000;
-	    }
-	} else if (getKstatInt(NULL,ifrp->ifr_name, "ifSpeed", &ifp->ifSpeed) == 0) {
-	    /*
-	     * this is good 
-	     */
-	}
-
-	switch (ifrp->ifr_name[0]) {
-        case 'a':          /* ath (802.11) */
-            if (ifrp->ifr_name[1] == 't' && ifrp->ifr_name[2] == 'h')
-                ifp->ifType = 71;
-            break;
-	case 'l':          /* le / lo / lane (ATM LAN Emulation) */
-	    if (ifrp->ifr_name[1] == 'o') {
-		if (!ifp->ifSpeed)
-		    ifp->ifSpeed = 127000000;
-		ifp->ifType = 24;
-	    } else if (ifrp->ifr_name[1] == 'e') {
-		if (!ifp->ifSpeed)
-		    ifp->ifSpeed = 10000000;
-		ifp->ifType = 6;
-	    } else if (ifrp->ifr_name[1] == 'a') {
-		if (!ifp->ifSpeed)
-		    ifp->ifSpeed = 155000000;
-		ifp->ifType = 37;
-	    }
-	    break;
-
-	case 'g':          /* ge (gigabit ethernet card)  */
-	case 'c':          /* ce (Cassini Gigabit-Ethernet (PCI) */
-	    if (!ifp->ifSpeed)
-		ifp->ifSpeed = 1000000000;
-	    ifp->ifType = 6;
-	    break;
-
-	case 'h':          /* hme (SBus card) */
-	case 'e':          /* eri (PCI card) */
-	case 'b':          /* be */
-	case 'd':          /* dmfe -- found on netra X1 */
-	    if (!ifp->ifSpeed)
-		ifp->ifSpeed = 100000000;
-	    ifp->ifType = 6;
-	    break;
-
-	case 'f':          /* fa (Fore ATM) */
-	    if (!ifp->ifSpeed)
-		ifp->ifSpeed = 155000000;
-	    ifp->ifType = 37;
-	    break;
-
-	case 'q':         /* qe (QuadEther)/qa (Fore ATM)/qfe (QuadFastEther) */
-	    if (ifrp->ifr_name[1] == 'a') {
-		if (!ifp->ifSpeed)
-		    ifp->ifSpeed = 155000000;
-		ifp->ifType = 37;
-	    } else if (ifrp->ifr_name[1] == 'e') {
-		if (!ifp->ifSpeed)
-		    ifp->ifSpeed = 10000000;
-		ifp->ifType = 6;
-	    } else if (ifrp->ifr_name[1] == 'f') {
-		if (!ifp->ifSpeed)
-		    ifp->ifSpeed = 100000000;
-		ifp->ifType = 6;
-	    }
-	    break;
-
-       case 'i':          /* ibd (Infiniband)/ip.tun (IP tunnel) */
-            if (ifrp->ifr_name[1] == 'b')
-               ifp->ifType = 199;
-            else if (ifrp->ifr_name[1] == 'p')
-                ifp->ifType = 131;
-	    break;
-	}
-
-	if (!strchr(ifrp->ifr_name, ':')) {
-	    Counter l_tmp;
-
-            /*
-             * First try to grab 64-bit counters; if they are not available,
-             * fall back to 32-bit.
-             */
-            if (getKstat(ifrp->ifr_name, "ipackets64",
-                        &ifp->ifHCInUcastPkts) != 0) {
-                if (getKstatInt(NULL,ifrp->ifr_name, "ipackets", 
-                               &ifp->ifInUcastPkts) != 0) {
-                    ret = -1;
-                    goto Return;
-                }
-	    } else { 
-                ifp->ifInUcastPkts = 
-                    (uint32_t)(ifp->ifHCInUcastPkts & 0xffffffff); 
-            }
-            
-            if (getKstat(ifrp->ifr_name, "rbytes64",
-                        &ifp->ifHCInOctets) != 0) {
-	        if (getKstatInt(NULL,ifrp->ifr_name, "rbytes", 
-                               &ifp->ifInOctets) != 0)  
-                    ifp->ifInOctets = ifp->ifInUcastPkts * 308; 
-	    } else {
-                ifp->ifInOctets = (uint32_t)(ifp->ifHCInOctets & 0xffffffff);
-            }
-           
-            if (getKstat(ifrp->ifr_name, "opackets64",
-                        &ifp->ifHCOutUcastPkts) != 0) { 
-                if (getKstatInt(NULL, ifrp->ifr_name, "opackets", 
-                               &ifp->ifOutUcastPkts) != 0) {
-		    ret = -1;
-		    goto Return;
-	         }
-            } else {
-                 ifp->ifOutUcastPkts = 
-                     (uint32_t)(ifp->ifHCOutUcastPkts & 0xffffffff);
-            }
-            
-            if (getKstat(ifrp->ifr_name, "obytes64",
-                        &ifp->ifHCOutOctets) != 0) {
-                if (getKstatInt(NULL, ifrp->ifr_name, "obytes", 
-                               &ifp->ifOutOctets) != 0) 
-                    ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;    /* XXX */
-            } else {
-                ifp->ifOutOctets = (uint32_t)(ifp->ifHCOutOctets & 0xffffffff);
-            }
-
-	    if (ifp->ifType == 24)  /* Loopback */
-		continue;
-
-	    if (getKstatInt(NULL,ifrp->ifr_name, "ierrors", &ifp->ifInErrors) != 0) {
-		ret = -1;
-		goto Return;
-	    }
-
-	    if (getKstatInt(NULL,ifrp->ifr_name, "oerrors", &ifp->ifOutErrors) != 0) {
-		ret = -1;
-		goto Return;
-	    }
-
-
-	    /* Try to grab some additional information */
-	    getKstatInt(NULL,ifrp->ifr_name, "collisions", 
-	                &ifp->ifCollisions); 
-	    getKstatInt(NULL,ifrp->ifr_name, "unknowns", 
-	                &ifp->ifInUnknownProtos); 
-
-            /*
-             * TODO some NICs maintain 64-bit counters for multi/broadcast
-             * packets; should try to get that information.
-             */
-	    if (getKstatInt(NULL,ifrp->ifr_name, "brdcstrcv", &l_tmp) == 0) 
-                ifp->ifHCInBroadcastPkts = l_tmp;
-
-            if (getKstatInt(NULL,ifrp->ifr_name, "multircv", &l_tmp) == 0)
-                ifp->ifHCInMulticastPkts = l_tmp;
-
-            ifp->ifInNUcastPkts =
-                (uint32_t)(ifp->ifHCInBroadcastPkts + ifp->ifHCInMulticastPkts);
-
-            if (getKstatInt(NULL,ifrp->ifr_name, "brdcstxmt", &l_tmp) == 0)
-                ifp->ifHCOutBroadcastPkts = l_tmp;
-
-            if (getKstatInt(NULL,ifrp->ifr_name, "multixmt", &l_tmp) == 0)
-                ifp->ifHCOutMulticastPkts = l_tmp;
-
-            ifp->ifOutNUcastPkts =
-                (uint32_t)(ifp->ifHCOutBroadcastPkts + 
-                           ifp->ifHCOutMulticastPkts);
-	}
-
+	memset(ifp, 0, sizeof(mib2_ifEntry_t));
+	set_if_info(ifp, idx, ifrp->ifr_name, if_flags, ifrp->ifr_metric);
+	
+        if (get_if_stats(ifp) < 0) {
+            ret = -1;
+            goto Return;
+        }
 	/*
 	 * An attempt to determine the physical address of the interface.
 	 * There should be a more elegant solution using DLPI, but "the margin
@@ -1297,6 +1249,364 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
  Return:
     close(ifsd);
     return ret;
+}
+#endif /*defined(HAVE_IF_NAMEINDEX)&&defined(NETSNMP_INCLUDE_IFTABLE_REWRITES)*/
+
+static void
+set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags, int mtu)
+{ 
+    /*
+     * Set basic information 
+     */
+    ifp->ifIndex = index;
+    ifp->ifDescr.o_length = strlen(name);
+    strcpy(ifp->ifDescr.o_bytes, name);
+    ifp->ifAdminStatus = (flags & IFF_UP) ? 1 : 2;
+    ifp->ifOperStatus = ((flags & IFF_UP) && (flags & IFF_RUNNING)) ? 1 : 2;
+    ifp->ifLastChange = 0;      /* Who knows ...  */
+    ifp->flags = flags;
+    ifp->ifMtu = mtu;
+
+    /* make ifOperStatus depend on link status if available */
+    if (ifp->ifAdminStatus == 1) {
+        int i_tmp;
+        /* only UPed interfaces get correct link status - if any */
+        if (getKstatInt(NULL, name,"link_up",&i_tmp) == 0) {
+            ifp->ifOperStatus = i_tmp ? 1 : 2;
+        }
+    }
+
+    /*
+     * Set link Type and Speed
+     */
+    ifp->ifType = 1;
+    ifp->ifSpeed = 0;
+
+    if ((getKstatInt(NULL, name, "ifspeed", &ifp->ifSpeed) == 0) &&
+        (ifp->ifSpeed != 0)) {
+        /*
+         * check for SunOS patch with half implemented ifSpeed 
+         */
+        if (ifp->ifSpeed < 10000) {
+            ifp->ifSpeed *= 1000000;
+        }
+    } else if (getKstatInt(NULL, name, "ifSpeed", &ifp->ifSpeed) == 0) {
+        /*
+         * this is good 
+         */
+    }
+
+    switch (name[0]) {
+    case 'a':          /* ath (802.11) */
+        if (name[1] == 't' && name[2] == 'h')
+            ifp->ifType = 71;
+        break;
+    case 'l':          /* le / lo / lane (ATM LAN Emulation) */
+        if (name[1] == 'o') {
+        if (!ifp->ifSpeed)
+            ifp->ifSpeed = 127000000;
+        ifp->ifType = 24;
+        } else if (name[1] == 'e') {
+        if (!ifp->ifSpeed)
+            ifp->ifSpeed = 10000000;
+        ifp->ifType = 6;
+        } else if (name[1] == 'a') {
+        if (!ifp->ifSpeed)
+            ifp->ifSpeed = 155000000;
+        ifp->ifType = 37;
+        }
+        break;
+
+    case 'g':          /* ge (gigabit ethernet card)  */
+    case 'c':          /* ce (Cassini Gigabit-Ethernet (PCI) */
+        if (!ifp->ifSpeed)
+        ifp->ifSpeed = 1000000000;
+        ifp->ifType = 6;
+        break;
+
+    case 'h':          /* hme (SBus card) */
+    case 'e':          /* eri (PCI card) */
+    case 'b':          /* be */
+    case 'd':          /* dmfe -- found on netra X1 */
+        if (!ifp->ifSpeed)
+        ifp->ifSpeed = 100000000;
+        ifp->ifType = 6;
+        break;
+
+    case 'f':          /* fa (Fore ATM) */
+        if (!ifp->ifSpeed)
+        ifp->ifSpeed = 155000000;
+        ifp->ifType = 37;
+        break;
+
+    case 'q':         /* qe (QuadEther)/qa (Fore ATM)/qfe (QuadFastEther) */
+        if (name[1] == 'a') {
+        if (!ifp->ifSpeed)
+            ifp->ifSpeed = 155000000;
+        ifp->ifType = 37;
+        } else if (name[1] == 'e') {
+            if (!ifp->ifSpeed)
+                ifp->ifSpeed = 10000000;
+            ifp->ifType = 6;
+        } else if (name[1] == 'f') {
+            if (!ifp->ifSpeed)
+                ifp->ifSpeed = 100000000;
+            ifp->ifType = 6;
+        }
+        break;
+
+    case 'i':          /* ibd (Infiniband)/ip.tun (IP tunnel) */
+        if (name[1] == 'b')
+            ifp->ifType = 199;
+        else if (name[1] == 'p')
+            ifp->ifType = 131;
+        break;
+    }
+}
+
+static int 
+get_if_stats(mib2_ifEntry_t *ifp)
+{
+    Counter l_tmp;
+    char *name = ifp->ifDescr.o_bytes;
+
+    if (strchr(name, ':'))
+        return (0); 
+
+    /*
+     * First try to grab 64-bit counters; if they are not available,
+     * fall back to 32-bit.
+     */
+    if (getKstat(name, "ipackets64", &ifp->ifHCInUcastPkts) != 0) {
+        if (getKstatInt(NULL, name, "ipackets", &ifp->ifInUcastPkts) != 0) {
+            return (-1);
+        }
+    } else { 
+            ifp->ifInUcastPkts = (uint32_t)(ifp->ifHCInUcastPkts & 0xffffffff); 
+    }
+    
+    if (getKstat(name, "rbytes64", &ifp->ifHCInOctets) != 0) {
+        if (getKstatInt(NULL, name, "rbytes", &ifp->ifInOctets) != 0) {
+            ifp->ifInOctets = ifp->ifInUcastPkts * 308; 
+        }
+    } else {
+            ifp->ifInOctets = (uint32_t)(ifp->ifHCInOctets & 0xffffffff);
+    }
+   
+    if (getKstat(name, "opackets64", &ifp->ifHCOutUcastPkts) != 0) {
+        if (getKstatInt(NULL, name, "opackets", &ifp->ifOutUcastPkts) != 0) {
+            return (-1);
+        }
+    } else {
+         ifp->ifOutUcastPkts = (uint32_t)(ifp->ifHCOutUcastPkts & 0xffffffff);
+    }
+    
+    if (getKstat(name, "obytes64", &ifp->ifHCOutOctets) != 0) {
+        if (getKstatInt(NULL, name, "obytes", &ifp->ifOutOctets) != 0) { 
+            ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;    /* XXX */
+        }
+    } else {
+        ifp->ifOutOctets = (uint32_t)(ifp->ifHCOutOctets & 0xffffffff);
+    }
+
+    if (ifp->ifType == 24)  /* Loopback */
+        return (0);
+
+    if (getKstatInt(NULL, name, "ierrors", &ifp->ifInErrors) != 0) {
+        return (-1);
+    }
+
+    if (getKstatInt(NULL, name, "oerrors", &ifp->ifOutErrors) != 0) {
+        return (-1);
+    }
+
+    /* Try to grab some additional information */
+    getKstatInt(NULL, name, "collisions", &ifp->ifCollisions); 
+    getKstatInt(NULL, name, "unknowns", &ifp->ifInUnknownProtos); 
+                
+
+    /*
+     * TODO some NICs maintain 64-bit counters for multi/broadcast
+     * packets; should try to get that information.
+     */
+    if (getKstatInt(NULL, name, "brdcstrcv", &l_tmp) == 0) 
+        ifp->ifHCInBroadcastPkts = l_tmp;
+
+    if (getKstatInt(NULL, name, "multircv", &l_tmp) == 0)
+        ifp->ifHCInMulticastPkts = l_tmp;
+
+    ifp->ifInNUcastPkts = (uint32_t)(ifp->ifHCInBroadcastPkts + 
+                                     ifp->ifHCInMulticastPkts);
+
+    if (getKstatInt(NULL, name, "brdcstxmt", &l_tmp) == 0)
+        ifp->ifHCOutBroadcastPkts = l_tmp;
+
+    if (getKstatInt(NULL, name, "multixmt", &l_tmp) == 0)
+        ifp->ifHCOutMulticastPkts = l_tmp;
+
+    ifp->ifOutNUcastPkts = (uint32_t)(ifp->ifHCOutBroadcastPkts + 
+                                      ifp->ifHCOutMulticastPkts);
+}
+
+/*
+ * Obtain the physical address using DLPI. Pieces of this code is directly
+ * taken from libdlpi, which unfortunately is not yet commonly available. 
+ */
+
+static int 
+get_phys_address(mib2_ifEntry_t *ifp)
+{
+    char                  *devstr;
+    int                   fd;
+    int                   ppa = -1;
+    int                   rc = -1;
+
+    DEBUGMSGTL(("kernel_sunos5", "get_phys_address called\n"));
+
+    if ((devstr = malloc(5 + ifp->ifDescr.o_length + 1)) == NULL)
+        return (-1);
+    (void) sprintf(devstr, "/dev/%s", ifp->ifDescr.o_bytes);
+    DEBUGMSGTL(("kernel_sunos5:dlpi", "devstr(%s)\n", devstr));
+    /*
+     * First try opening the device using style 1, if the device does not
+     * exist we try style 2. Modules will not be pushed, so something like
+     * ip tunnels will not work. 
+     */
+    if ((fd = PrivoxyWindowOpen(devstr, O_RDWR | O_NONBLOCK)) != -1) {
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "style1 open(%s)\n", devstr));
+        rc = _dlpi_phys_address(fd, ifp->ifPhysAddress.o_bytes,
+                                sizeof(ifp->ifPhysAddress.o_bytes),
+                                &ifp->ifPhysAddress.o_length);
+    } else if (_dlpi_parse_devname(devstr, &ppa) == 0) {
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 parse: %s, %d\n", 
+                    devstr, ppa));
+        /* try style 2 */
+        if ((fd = PrivoxyWindowOpen(devstr, O_RDWR | O_NONBLOCK)) != -1) {
+             DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 open(%s)\n", devstr));
+             if (_dlpi_attach(fd, ppa) == 0) {
+                 DEBUGMSGTL(("kernel_sunos5:dlpi", "attached\n"));
+                 rc = _dlpi_phys_address(fd, ifp->ifPhysAddress.o_bytes,
+                                         sizeof(ifp->ifPhysAddress.o_bytes),
+                                         &ifp->ifPhysAddress.o_length);
+             }
+         } 
+     }
+
+     free(devstr);
+     if (fd != -1)
+         close(fd);
+
+     if (rc == 0) {
+         /* successful */        
+         DEBUGMSGTL(("kernel_sunos5:dlpi", "got phys addr using DLPI\n"));
+         return (0);
+     } else {
+         DEBUGMSGTL(("kernel_sunos5:dlpi", "unable to get phys address\n"));
+         return (-1);
+     }
+}
+
+/*
+ *
+ */
+static int
+_dlpi_phys_address(int fd, char *addr, int maxlen, int *addrlen)
+{
+    dl_phys_addr_req_t  paddr_req;
+    union DL_primitives *dlp;
+    struct strbuf       ctlbuf;
+    char                buf[MAX(DL_PHYS_ADDR_ACK_SIZE+64, DL_ERROR_ACK_SIZE)];
+    int                 flag = 0;
+
+    paddr_req.dl_primitive = DL_PHYS_ADDR_REQ;
+    paddr_req.dl_addr_type = DL_CURR_PHYS_ADDR;
+    ctlbuf.buf = (char *)&paddr_req;
+    ctlbuf.len = DL_PHYS_ADDR_REQ_SIZE;
+    if (putmsg(fd, &ctlbuf, NULL, 0) < 0)
+        return (-1);
+    
+    ctlbuf.maxlen = sizeof(buf);
+    ctlbuf.len = 0;
+    ctlbuf.buf = buf;
+    if (getmsg(fd, &ctlbuf, NULL, &flag) != 0)
+        return (-1);
+
+    if (ctlbuf.len < sizeof(t_uscalar_t))
+        return (-1);
+    dlp = (union DL_primitives *)buf;
+    switch (dlp->dl_primitive) {
+    case DL_PHYS_ADDR_ACK: {
+        dl_phys_addr_ack_t *phyp = (dl_phys_addr_ack_t *)buf;
+
+        if (ctlbuf.len < DL_PHYS_ADDR_ACK_SIZE || phyp->dl_addr_length > maxlen)
+            return (-1); 
+        (void) memcpy(addr, buf+phyp->dl_addr_offset, phyp->dl_addr_length);
+        *addrlen = phyp->dl_addr_length;
+        return (0);
+    }
+    case DL_ERROR_ACK: {
+        dl_error_ack_t *errp = (dl_error_ack_t *)buf;
+
+        if (ctlbuf.len < DL_ERROR_ACK_SIZE)
+            return (-1);
+        return (errp->dl_errno);
+    }
+    default:
+        return (-1);
+    }
+}
+
+static int
+_dlpi_attach(int fd, int ppa)
+{
+    dl_attach_req_t     attach_req;
+    struct strbuf       ctlbuf;
+    union DL_primitives *dlp;
+    char                buf[MAX(DL_OK_ACK_SIZE, DL_ERROR_ACK_SIZE)];
+    int                 flag = 0;
+   
+    attach_req.dl_primitive = DL_ATTACH_REQ;
+    attach_req.dl_ppa = ppa;
+    ctlbuf.buf = (char *)&attach_req;
+    ctlbuf.len = DL_ATTACH_REQ_SIZE;
+    if (putmsg(fd, &ctlbuf, NULL, 0) != 0)
+        return (-1);
+
+    ctlbuf.buf = buf;
+    ctlbuf.len = 0;
+    ctlbuf.maxlen = sizeof(buf);
+    if (getmsg(fd, &ctlbuf, NULL, &flag) != 0)
+        return (-1);
+
+    if (ctlbuf.len < sizeof(t_uscalar_t))
+        return (-1); 
+
+    dlp = (union DL_primitives *)buf;
+    if (dlp->dl_primitive == DL_OK_ACK && ctlbuf.len >= DL_OK_ACK_SIZE)
+        return (0); 
+    return (-1);
+}
+
+static int
+_dlpi_parse_devname(char *devname, int *ppap)
+{
+    int ppa = 0;
+    int m = 1;
+    int i = strlen(devname) - 1;
+
+    while (i >= 0 && isdigit(devname[i])) {
+        ppa += m * (devname[i] - '0'); 
+        m *= 10;
+        i--;
+    }
+
+    if (m == 1) {
+        return (-1);
+    }
+    *ppap = ppa;
+    devname[i + 1] = '\0';
+
+    return (0);
 }
 
 /*
