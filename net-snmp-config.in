@@ -21,7 +21,7 @@ check_build_dir()
          return
       fi
       # make sure we can find build dir
-      if ! test -d $build_dir/snmplib/.libs ; then
+      if test ! -d $build_dir/snmplib/.libs ; then
          echo "$build_dir does not appear to be a build directory."
          exit 1
       fi
@@ -285,10 +285,10 @@ else
       echo "adding the following line to $outfile:"
       echo "  " $line
       # in case it hasn't ever been started yet, start it.
-      if ! test -d $outdir ; then
+      if test ! -d $outdir ; then
           mkdir $outdir
       fi
-      if ! test -d $outfile ; then
+      if test ! -d $outfile ; then
           touch $outfile
       fi
       echo $line >> $outfile
@@ -297,7 +297,7 @@ else
       line="$token $user"
       echo "adding the following line to $outfile:"
       echo "  " $line
-      if ! test -d $outfile ; then
+      if test ! -d $outfile ; then
           touch $outfile
       fi
       echo $line >> $outfile
