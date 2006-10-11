@@ -11,3 +11,8 @@
 #ifndef UINT32_MAX
 #define UINT32_MAX	(4294967295U)
 #endif
+
+/* define the extra mib modules that are supported */
+#ifdef NETSNMP_ENABLE_MFD_REWRITES
+#define NETSNMP_INCLUDE_IFTABLE_REWRITES
+#endif
