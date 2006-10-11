@@ -1478,7 +1478,7 @@ get_phys_address(mib2_ifEntry_t *ifp)
      * exist we try style 2. Modules will not be pushed, so something like
      * ip tunnels will not work. 
      */
-    if ((fd = PrivoxyWindowOpen(devstr, O_RDWR | O_NONBLOCK)) != -1) {
+    if ((fd = open(devstr, O_RDWR | O_NONBLOCK)) != -1) {
         DEBUGMSGTL(("kernel_sunos5:dlpi", "style1 open(%s)\n", devstr));
         rc = _dlpi_phys_address(fd, ifp->ifPhysAddress.o_bytes,
                                 sizeof(ifp->ifPhysAddress.o_bytes),
@@ -1487,7 +1487,7 @@ get_phys_address(mib2_ifEntry_t *ifp)
         DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 parse: %s, %d\n", 
                     devstr, ppa));
         /* try style 2 */
-        if ((fd = PrivoxyWindowOpen(devstr, O_RDWR | O_NONBLOCK)) != -1) {
+        if ((fd = open(devstr, O_RDWR | O_NONBLOCK)) != -1) {
              DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 open(%s)\n", devstr));
              if (_dlpi_attach(fd, ppa) == 0) {
                  DEBUGMSGTL(("kernel_sunos5:dlpi", "attached\n"));
