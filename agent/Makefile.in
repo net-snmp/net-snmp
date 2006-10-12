@@ -166,9 +166,9 @@ installmibgroupheaders:
                 done \
         fi
 
-snmp_vars.lo: @agent_module_list_h@
-mib_modules.lo: @mib_module_list_h@ mibgroup/mib_module_inits.h
+#snmp_vars.lo: @agent_module_list_h@
+#mib_modules.lo: @mib_module_list_h@ mibgroup/mib_module_inits.h
 #
 # dependency for snmplib object. it's here because the headers listed
 # are relative to the agent directory.
-read_config.lo: @module_list_h@
+#read_config.lo: @module_list_h@
