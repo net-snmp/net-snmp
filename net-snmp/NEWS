@@ -34,6 +34,14 @@ changes/bug fixes.
       - [PATCH 1534877]: to add support for skipping NFS entries in the
         host resources hrStorageTable.	See the skipNFSInHostResources
         token in the snmpd.conf file for details.
+      - A "hardware abstraction layer", to localise the O/S-specific
+        aspects of retrieving system data.  This first appeared in the
+        5.3.x line, but this release now starts to actively use it for
+        implementing particular MIB modules.
+        This has resulted in some minor changes in behaviour - some index
+        values in the hrStorageTable have changed from earlier releases,
+        and the (non-raw) memory statistics are now consistent, reporting
+        percentage usage calculated over the last minute on _all_ systems.
       - Agent builds default module list from a default_mibs.h rather than
         a hard coded configure list
 
