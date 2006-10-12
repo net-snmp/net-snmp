@@ -69,7 +69,7 @@ auto_nlist_value(const char *string)
 #endif
         it->nl[1].n_name = 0;
         init_nlist(it->nl);
-if !(defined(aix4) || defined(aix5))
+#if !(defined(aix4) || defined(aix5))
         if (it->nl[0].n_type == 0) {
             strcpy(it->nl[0].n_name, string);
             init_nlist(it->nl);
