@@ -62,14 +62,14 @@ auto_nlist_value(const char *string)
          * allocate an extra byte for inclusion of a preceding '_' later 
          */
         it->nl[0].n_name = (char *) malloc(strlen(string) + 2);
-#ifdef aix4
+#if defined(aix4) || defined(aix5)
         strcpy(it->nl[0].n_name, string);
 #else
         sprintf(it->nl[0].n_name, "_%s", string);
 #endif
         it->nl[1].n_name = 0;
         init_nlist(it->nl);
-#ifndef aix4
+if !(defined(aix4) || defined(aix5))
         if (it->nl[0].n_type == 0) {
             strcpy(it->nl[0].n_name, string);
             init_nlist(it->nl);
