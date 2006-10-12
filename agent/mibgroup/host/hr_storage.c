@@ -104,19 +104,18 @@
 #if defined(CTL_HW) && defined(HW_PAGESIZE)
 #define USE_SYSCTL
 #endif
-#if defined(CTL_VM) && (defined(VM_METER) || defined(VM_UVMEXP)) && !defined(darwin8)
+#if USE_MACH_HOST_STATISTICS
+#include <mach/mach.h>
+#elif defined(CTL_VM) && (defined(VM_METER) || defined(VM_UVMEXP))
 #define USE_SYSCTL_VM
 #endif
-#endif
+#endif                          /* if HAVE_SYS_SYSCTL_H */
 #endif                          /* ifndef dynix */
 
 #if (defined(aix4) || defined(aix5)) && HAVE_LIBPERFSTAT_H
 #include <libperfstat.h>
 #endif
 
-#if defined(darwin8) /* This is to use host_statistics on OS X */
-#include <mach/mach.h>
-#endif
 
 #include "host_res.h"
 #include "hr_storage.h"
@@ -233,7 +232,7 @@ extern struct mntent *HRFS_entry;
 
 #endif
 	
-#if defined(darwin8) /* This is to use host_statistics() on OS X */
+#if defined(USE_MACH_HOST_STATISTICS)
 mach_port_t myHost;
 #endif
 
