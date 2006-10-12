@@ -18,7 +18,7 @@ config_require(hardware/memory/memory_solaris)
 #elif (defined(irix6))
 config_require(hardware/memory/memory_irix)
 
-#elif (defined(darwin8) || defined(darwin9))
+#elif (defined(darwin7) || defined(darwin8) || defined(darwin9))
 config_require(hardware/memory/memory_darwin)
 
 #elif (defined(dynix))
