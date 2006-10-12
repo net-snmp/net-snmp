@@ -570,7 +570,7 @@
 #if defined(aix3) || defined(aix4) || defined(aix5)
 #define NETSNMP_OSTYPE NETSNMP_AIXID
 #endif
-#ifdef darwin8
+#if defined(darwin) && (darwin >= 8)
 #define NETSNMP_OSTYPE NETSNMP_MACOSXID
 #endif
 /* unknown */
