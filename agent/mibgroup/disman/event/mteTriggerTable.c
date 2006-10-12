@@ -367,7 +367,7 @@ mteTriggerTable_handler(netsnmp_mib_handler *handler,
                 memcpy(entry->mteTriggerValueID,
                        request->requestvb->val.string,
                        request->requestvb->val_len);
-                entry->mteTriggerValueID_len = request->requestvb->val_len;
+                entry->mteTriggerValueID_len = request->requestvb->val_len/sizeof(oid);
                 break;
             case COLUMN_MTETRIGGERVALUEIDWILDCARD:
                 if (*request->requestvb->val.integer == TV_TRUE)
