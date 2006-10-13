@@ -239,7 +239,7 @@ accompanied by \fBtwo\fR \fIgroup\fR directives.
 .IP "view VNAME TYPE OID [MASK]"
 defines a named "view" - a subset of the overall OID tree. This is most
 commonly a single subtree, but several \fIview\fR directives can be given
-with the same view name, to build up a more complex collection of OIDs.
+with the same view name (VNAME), to build up a more complex collection of OIDs.
 TYPE is either \fIincluded\fR or \fIexcluded\fR, which can again define
 a more complex view (e.g by excluding certain sensitive objects
 from an otherwise accessible subtree).
