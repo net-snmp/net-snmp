@@ -324,7 +324,7 @@ RTENTRY **netsnmp_get_routes(size_t *size) {
 }
 #endif                          /* hpux11 */
 
-#if !(defined(linux) || defined(solaris2) || defined(hpux11)) || !defined(RTHOST_SYMBOL) || !defined(RTNET_SYMBOL)
+#if !(defined(linux) || defined(solaris2) || defined(hpux11)) && defined(RTHOST_SYMBOL) && defined(RTNET_SYMBOL)
 #define NUM_ROUTE_SYMBOLS 2
 static char    *route_symbols[] = {
     RTHOST_SYMBOL,
