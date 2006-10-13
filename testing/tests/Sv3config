@@ -1,6 +1,6 @@
 #!/bin/sh
 
-[ "x$SNMP_SMUX_SOCKET" = "x" ] && SNMP_SMUX_SOCKET=${SNMP_TMPDIR}/smux_socket
+[ "x$SNMP_SMUX_SOCKET" = "x" ] && SNMP_SMUX_SOCKET=1.0.0.0
 CONFIGAGENT smuxsocket $SNMP_SMUX_SOCKET
 
 # XXX: auto-switch to a supported protocol instead.
