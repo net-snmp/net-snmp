@@ -1238,16 +1238,12 @@ A suitable entry for an OSPF routing daemon (such as \fIgated\fR,
 .I smuxpeer .1.3.6.1.2.1.14 ospf_pass
 .RE
 .RE
-.IP "smuxsocket [<transport-specifier>:]<transport-address>[,...]"
-defines the address for SMUX peers to communicate with the Net-SNMP agent.
-The default is to listen on TCP port 199 on all IPv4 interfaces, unless the 
-package has been configured with "--enable-local-smux" at build time,
-which causes it to only listen on tcp:127.0.0.1:199 by default.
-See the section
-.B LISTENING ADDRESSES
-in the
-.I snmpd(8)
-manual page for more information about the format of addresses.
+.IP "smuxsocket <IPv4-address>"
+defines the IPv4 address for SMUX peers to communicate with the Net-SNMP agent.
+The default is to listen on all IPv4 interfaces ("0.0.0.0"), unless the 
+package has been configured with "--enable-local-smux" at build time, which 
+causes it to only listen on 127.0.0.1 by default. SMUX uses the well-known
+TCP port 199.
 .PP
 Note the Net-SNMP agent will only operate as a SMUX \fImaster\fR
 agent. It does not support acting in a SMUX subagent role.
