@@ -576,6 +576,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         DEBUGMSGTL(("winExtDLL", "Net-SNMP object type for returned value: %d\n",netsnmp_ASN_type));
 
         switch (mySnmpVarBind->value.asnType) {
+          case MS_ASN_IPADDRESS:
           case MS_ASN_OCTETSTRING:           
             
             strncpy(ret_szbuf_temp, mySnmpVarBind->value.asnValue.string.stream, (mySnmpVarBind->value.asnValue.string.length > 
@@ -601,7 +602,6 @@ var_winExtDLL(netsnmp_mib_handler *handler,
           case MS_ASN_COUNTER64:
           case MS_ASN_BITS:
           case MS_ASN_SEQUENCE:
-          case MS_ASN_IPADDRESS:
           case MS_ASN_COUNTER32:
           case MS_ASN_GAUGE32:
           case MS_ASN_TIMETICKS:
@@ -784,6 +784,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         mySnmpVarBind->value.asnType = windows_ASN_type;
           
         switch (var->type) {
+          case ASN_IPADDRESS:
           case ASN_OCTET_STR:            
 
             strncpy(set_szbuf_temp, var->val.string, strlen(var->val.string) * sizeof(var->val.string));           // FIXME: overflow
@@ -802,7 +803,6 @@ var_winExtDLL(netsnmp_mib_handler *handler,
           case ASN_COUNTER64:
           case ASN_BIT_STR:
           case ASN_SEQUENCE:
-          case ASN_IPADDRESS:
           case ASN_COUNTER:
           case ASN_TIMETICKS:
           case ASN_OPAQUE:        
@@ -1153,7 +1153,8 @@ void send_trap(
   oid           enterprise_oid[MAX_OID_LEN];       // Holder for enterprise OID
   size_t        enterprise_oid_length = 0;          // Holder for enterprise OID
 
-  u_char        netsnmp_ASN_type;
+  oid      ret_oid[MAX_OID_LEN];               // Holder for return OIDs
+  size_t   ret_oid_length = 0;                 // Holder for return OIDs
 
   /*
    * here is where we store the variables to be sent in the trap 
@@ -1222,8 +1223,7 @@ void send_trap(
 
       // Set Net-SNMP ASN type based on closest match to Windows ASN type
       switch (pVariableBindings->list->value.asnType) {
-        case MS_ASN_OCTETSTRING:
-          netsnmp_ASN_type = ASN_OCTET_STR;
+        case MS_ASN_OCTETSTRING:        // AsnOctetString
           DEBUGMSGTL(("winExtDLL", "MS_ASN_OCTETSTRING = ASN_OCTET_STR\n"));
           DEBUGMSGTL(("winExtDLL", "MS_ASN_OCTETSTRING = %s\n",pVariableBindings->list->value.asnValue.string.stream));
           snmp_varlist_add_variable(&notification_vars,
@@ -1233,7 +1233,6 @@ void send_trap(
               strlen(pVariableBindings->list->value.asnValue.string.stream));
           break;
         case MS_ASN_INTEGER:          // And MS_ASN_INTEGER32
-          netsnmp_ASN_type = ASN_INTEGER;
           DEBUGMSGTL(("winExtDLL", "MS_ASN_INTEGER = ASN_INTEGER\n"));
           DEBUGMSGTL(("winExtDLL", "MS_ASN_INTEGER = %d\n",pVariableBindings->list->value.asnValue.number));
           snmp_varlist_add_variable(&notification_vars,
@@ -1243,47 +1242,108 @@ void send_trap(
               sizeof(pVariableBindings->list->value.asnValue.number));
           break;
         case MS_ASN_UNSIGNED32:       // SNMP v2
-          netsnmp_ASN_type = ASN_UNSIGNED;
           DEBUGMSGTL(("winExtDLL", "MS_ASN_UNSIGNED32 = ASN_UNSIGNED\n"));
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_UNSIGNED32 = %d\n",pVariableBindings->list->value.asnValue.unsigned32));
+          snmp_varlist_add_variable(&notification_vars,
+              my_oid, my_oid_length,
+              ASN_UNSIGNED,
+              (u_char *)&pVariableBindings->list->value.asnValue.unsigned32,
+              sizeof(pVariableBindings->list->value.asnValue.unsigned32));
           break;
         case MS_ASN_COUNTER64:       // SNMP v2
-          netsnmp_ASN_type = ASN_COUNTER64;
           DEBUGMSGTL(("winExtDLL", "MS_ASN_COUNTER64 = ASN_COUNTER64\n"));
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_COUNTER64 = %d\n",pVariableBindings->list->value.asnValue.counter64));
+          snmp_varlist_add_variable(&notification_vars,
+              my_oid, my_oid_length,
+              ASN_COUNTER64,
+              (u_char *)&pVariableBindings->list->value.asnValue.counter64,
+              sizeof(pVariableBindings->list->value.asnValue.counter64));
           break;
-        case MS_ASN_BITS:
-          netsnmp_ASN_type = ASN_BIT_STR;
+        case MS_ASN_BITS:               // AsnOctetString
           DEBUGMSGTL(("winExtDLL", "MS_ASN_BITS = ASN_BIT_STR\n"));
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_BITS = %s\n",pVariableBindings->list->value.asnValue.bits.stream));
+          snmp_varlist_add_variable(&notification_vars,
+              my_oid, my_oid_length,
+              ASN_BIT_STR,
+              pVariableBindings->list->value.asnValue.bits.stream,
+              strlen(pVariableBindings->list->value.asnValue.bits.stream));
           break;
-        case MS_ASN_OBJECTIDENTIFIER:
-          netsnmp_ASN_type = ASN_OBJECT_ID;
+        case MS_ASN_OBJECTIDENTIFIER:   // AsnObjectIdentifier
           DEBUGMSGTL(("winExtDLL", "MS_ASN_OBJECTIDENTIFIER = ASN_OBJECT_ID\n"));
+          // Convert OID to Net-SNMP
+
+          DEBUGMSGTL(("winExtDLL", "Returned OID: "));
+          DEBUGMSGWINOID(("winExtDLL", &pVariableBindings->list->value.asnValue.object));
+          DEBUGMSG(("winExtDLL", "\n"));
+          
+          // Convert OID from Windows to Net-SNMP
+          for (i = 0; i < (pVariableBindings->list->value.asnValue.object.idLength > MAX_OID_LEN?MAX_OID_LEN:
+                pVariableBindings->list->value.asnValue.object.idLength); i++) {
+            ret_oid[i] = (oid)pVariableBindings->list->value.asnValue.object.ids[i];
+          }
+          ret_oid_length = i;
+          
+          DEBUGMSGTL(("winExtDLL", "Windows OID converted to Net-SNMP: "));
+          DEBUGMSGOID(("winExtDLL", ret_oid, ret_oid_length));
+          DEBUGMSG(("winExtDLL", "\n"));
+
+          snmp_varlist_add_variable(&notification_vars,
+              my_oid, my_oid_length,
+              ASN_OBJECT_ID,
+              (u_char *)&ret_oid,
+              ret_oid_length);
           break;
-        case MS_ASN_SEQUENCE:
-          netsnmp_ASN_type = ASN_SEQUENCE;
+        case MS_ASN_SEQUENCE:           // AsnOctetString
           DEBUGMSGTL(("winExtDLL", "MS_ASN_SEQUENCE = ASN_SEQUENCE\n"));
+          snmp_varlist_add_variable(&notification_vars,
+              my_oid, my_oid_length,
+              ASN_SEQUENCE,
+              pVariableBindings->list->value.asnValue.sequence.stream,
+              strlen(pVariableBindings->list->value.asnValue.sequence.stream));
           break;
-        case MS_ASN_IPADDRESS:
-          netsnmp_ASN_type = ASN_IPADDRESS;
+        case MS_ASN_IPADDRESS:          // AsnOctetString
           DEBUGMSGTL(("winExtDLL", "MS_ASN_IPADDRESS = ASN_IPADDRESS\n"));
+          snmp_varlist_add_variable(&notification_vars,
+              my_oid, my_oid_length,
+              ASN_IPADDRESS,
+              pVariableBindings->list->value.asnValue.address.stream,
+              strlen(pVariableBindings->list->value.asnValue.address.stream));
           break;
-        case MS_ASN_COUNTER32:
-          netsnmp_ASN_type = ASN_COUNTER;
+        case MS_ASN_COUNTER32:          
           DEBUGMSGTL(("winExtDLL", "MS_ASN_COUNTER32 = ASN_COUNTER\n"));
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_COUNTER32 = %d\n",pVariableBindings->list->value.asnValue.counter));
+          snmp_varlist_add_variable(&notification_vars,
+              my_oid, my_oid_length,
+              ASN_COUNTER,
+              (u_char *)&pVariableBindings->list->value.asnValue.counter,
+              sizeof(pVariableBindings->list->value.asnValue.counter));
           break;
         case MS_ASN_GAUGE32:
-          netsnmp_ASN_type = ASN_GAUGE;
           DEBUGMSGTL(("winExtDLL", "MS_ASN_GAUGE32 = ASN_GAUGE\n"));
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_GAUGE32 = %d\n",pVariableBindings->list->value.asnValue.gauge));
+          snmp_varlist_add_variable(&notification_vars,
+              my_oid, my_oid_length,
+              ASN_GAUGE,
+              (u_char *)&pVariableBindings->list->value.asnValue.gauge,
+              sizeof(pVariableBindings->list->value.asnValue.gauge));
           break;
         case MS_ASN_TIMETICKS:
-          netsnmp_ASN_type = ASN_TIMETICKS;
           DEBUGMSGTL(("winExtDLL", "MS_ASN_TIMETICKS = ASN_TIMETICKS\n"));
+          DEBUGMSGTL(("winExtDLL", "MS_ASN_TIMETICKS = %d\n",pVariableBindings->list->value.asnValue.ticks));
+          snmp_varlist_add_variable(&notification_vars,
+              my_oid, my_oid_length,
+              ASN_TIMETICKS,
+              (u_char *)&pVariableBindings->list->value.asnValue.ticks,
+              sizeof(pVariableBindings->list->value.asnValue.ticks));
           break;
-        case MS_ASN_OPAQUE:
-          netsnmp_ASN_type = ASN_OPAQUE;
+        case MS_ASN_OPAQUE:             // AsnOctetString
           DEBUGMSGTL(("winExtDLL", "MS_ASN_OPAQUE = ASN_OPAQUE\n"));
-          break;
+          snmp_varlist_add_variable(&notification_vars,
+              my_oid, my_oid_length,
+              ASN_OPAQUE,
+              pVariableBindings->list->value.asnValue.arbitrary.stream,
+              strlen(pVariableBindings->list->value.asnValue.arbitrary.stream));          break;
         default:
-          netsnmp_ASN_type = ASN_INTEGER;
           DEBUGMSGTL(("winExtDLL", "Defaulting to ASN_INTEGER\n"));
           break;
       }
