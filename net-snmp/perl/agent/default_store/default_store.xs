@@ -118,14 +118,6 @@ constant(char *name, int len, int arg)
 	    goto not_there;
 #endif
 	}
-    case 'H':
-	if (strEQ(name + 0, "NETSNMP_DS_AGENT_H")) {	/*  removed */
-#ifdef NETSNMP_DS_AGENT_H
-	    return NETSNMP_DS_AGENT_H;
-#else
-	    goto not_there;
-#endif
-	}
     case 'I':
 	if (strEQ(name + 0, "NETSNMP_DS_AGENT_INTERNAL_SECNAME")) {	/*  removed */
 #ifdef NETSNMP_DS_AGENT_INTERNAL_SECNAME
