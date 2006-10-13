@@ -674,6 +674,8 @@ defines a \fIboolean(1)\fR monitor test.
 OP should be one of the defined
 comparison operators (!=, ==, <, <=, >, >=) and VALUE should be an
 integer value to compare against.
+Note that there \fBmust\fP be whitespace around the OP token.
+A comparison such as \fCOID !=0\fP will not be handled correctly.
 .IP "OID MIN MAX [DMIN DMAX]"
 defines a \fIthreshold(2)\fR monitor test.
 MIN and MAX are integer values, specifying lower and upper thresholds.
