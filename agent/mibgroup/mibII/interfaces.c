@@ -946,7 +946,7 @@ var_ifEntry(struct variable *vp,
             long_return = (u_long) ifnet.if_opackets & 0xffffffff;
 #else
             long_return = (u_long) ifnet.if_opackets;
-#endif;
+#endif
 #if STRUCT_IFNET_HAS_IF_OMCASTS
 #if defined(aix4) || defined(aix5)
             long_return -= (u_long) ifnet.if_omcasts & 0xffffffff;
