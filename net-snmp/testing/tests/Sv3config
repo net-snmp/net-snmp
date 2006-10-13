@@ -1,6 +1,6 @@
 #!/bin/sh
 
-[ "x$SNMP_SMUX_SOCKET" = "x" ] && SNMP_SMUX_SOCKET=${SNMP_TMPDIR}/smux_socket
+[ "x$SNMP_SMUX_SOCKET" = "x" ] && SNMP_SMUX_SOCKET=1.0.0.0
 
 CONFIGAGENT [snmp] persistentdir $SNMP_TMP_PERSISTENTDIR
 CONFIGAGENT smuxsocket $SNMP_SMUX_SOCKET
