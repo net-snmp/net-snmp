@@ -589,7 +589,7 @@ proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
 .SS SMUX Sub-Agents
 .RS
 .nf
-smuxsocket [<transport-specifier>:]<transport-address>[,...]"
+smuxsocket 127.0.0.1
 smuxpeer .1.3.6.1.2.1.14 ospf_pass
 .fi
 .RE
