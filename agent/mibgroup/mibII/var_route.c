@@ -404,10 +404,9 @@ static union {
 struct sockaddr_in *
 klgetsa(struct sockaddr_in *dst)
 {
-    klookup((u_long) dst, (char *) &klgetsatmp.sin, sizeof klgetsatmp.sin);
+    NETSNMP_KLOOKUP(dst, (char *) &klgetsatmp.sin, sizeof klgetsatmp.sin);
     if (klgetsatmp.sin.sin_len > sizeof(klgetsatmp.sin))
-        klookup((u_long) dst, (char *) &klgetsatmp.sin,
-                klgetsatmp.sin.sin_len);
+        NETSNMP_KLOOKUP(dst, (char *) &klgetsatmp.sin, klgetsatmp.sin.sin_len);
     return (&klgetsatmp.sin);
 }
 #endif
@@ -653,9 +652,9 @@ var_ipRouteEntry(struct variable * vp,
             long_return = 0;    /* Default route */
         else {
 #ifndef linux
-            klookup((unsigned long) rthead[RtIndex]->rt_ifp,
+            NETSNMP_KLOOKUP(rthead[RtIndex]->rt_ifp,
                     (char *) &rt_ifnet, sizeof(rt_ifnet));
-            klookup((unsigned long) rt_ifnet.if_addrlist,
+            NETSNMP_KLOOKUP(rt_ifnet.if_addrlist,
                     (char *) &rt_ifnetaddr, sizeof(rt_ifnetaddr));
 
             long_return = rt_ifnetaddr.ia_subnetmask;
@@ -864,9 +863,8 @@ load_rtentries(struct radix_node *pt)
     register char  *cp;
 #endif
 
-    if (!klookup
-        ((unsigned long) pt, (char *) &node, sizeof(struct radix_node))) {
-        DEBUGMSGTL(("mibII/var_route", "Fail\n"));
+    if (!NETSNMP_KLOOKUP(pt, (char *) &node, sizeof(struct radix_node))) {
+        DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
         return;
     }
     if (node.rn_b >= 0) {
@@ -884,20 +882,19 @@ load_rtentries(struct radix_node *pt)
         /*
          * get the route 
          */
-        klookup((unsigned long) pt, (char *) &rt, sizeof(RTENTRY));
+        NETSNMP_KLOOKUP(pt, (char *) &rt, sizeof(RTENTRY));
 
         if (rt.rt_ifp != 0) {
-            klookup((unsigned long) rt.rt_ifp, (char *) &ifnet,
-                    sizeof(ifnet));
+            NETSNMP_KLOOKUP(rt.rt_ifp, (char *) &ifnet, sizeof(ifnet));
 #if STRUCT_IFNET_HAS_IF_XNAME
 #if defined(netbsd1) || defined(openbsd2)
             strncpy(name, ifnet.if_xname, sizeof name);
 #else
-            klookup((unsigned long) ifnet.if_xname, name, sizeof name);
+            NETSNMP_KLOOKUP(ifnet.if_xname, name, sizeof name);
 #endif
             name[sizeof(name) - 1] = '\0';
 #else
-            klookup((unsigned long) ifnet.if_name, name, sizeof name);
+            NETSNMP_KLOOKUP(ifnet.if_name, name, sizeof name);
             name[sizeof(name) - 1] = '\0';
             cp = (char *) strchr(name, '\0');
             string_append_int(cp, ifnet.if_unit);
@@ -1045,8 +1042,7 @@ Route_Scan_Reload(void)
     for (i = 0; i <= AF_MAX; i++) {
         if (rt_table[i] == 0)
             continue;
-        if (klookup
-            ((unsigned long) rt_table[i], (char *) &head, sizeof(head))) {
+        if (NETSNMP_KLOOKUP(rt_table[i], (char *) &head, sizeof(head))) {
             load_rtentries(head.rnh_treetop);
         }
     }
@@ -1066,13 +1062,13 @@ Route_Scan_Reload(void)
                 /*
                  *      Dig the route out of the kernel...
                  */
-                klookup(m, (char *) &mb, sizeof(mb));
+                NETSNMP_KLOOKUP(m, (char *) &mb, sizeof(mb));
                 m = mb.rt_next;
 
                 rt = &mb;
                 if (rt->rt_ifp != 0) {
-                    klookup(rt->rt_ifp, (char *) &ifnet, sizeof(ifnet));
-                    klookup(ifnet.if_name, name, 16);
+                    NETSNMP_KLOOKUP(rt->rt_ifp, (char *) &ifnet, sizeof(ifnet));
+                    NETSNMP_KLOOKUP(ifnet.if_name, name, 16);
                     name[15] = '\0';
                     cp = (char *) strchr(name, '\0');
                     string_append_int(cp, ifnet.if_unit);
@@ -1183,15 +1179,14 @@ Route_Scan_Reload(void)
                 /*
                  *  Dig the route out of the kernel...
                  */
-                klookup((unsigned long) m, (char *) &mb, sizeof(mb));
+                NETSNMP_KLOOKUP(m, (char *) &mb, sizeof(mb));
                 m = mb.m_next;
                 rt = mtod(&mb, RTENTRY *);
 
                 if (rt->rt_ifp != 0) {
 
-                    klookup((unsigned long) rt->rt_ifp, (char *) &ifnet,
-                            sizeof(ifnet));
-                    klookup((unsigned long) ifnet.if_name, name, 16);
+                    NETSNMP_KLOOKUP(rt->rt_ifp, (char *) &ifnet, sizeof(ifnet));
+                    NETSNMP_KLOOKUP(ifnet.if_name, name, 16);
                     name[15] = '\0';
                     cp = (char *) strchr(name, '\0');
                     string_append_int(cp, ifnet.if_unit);

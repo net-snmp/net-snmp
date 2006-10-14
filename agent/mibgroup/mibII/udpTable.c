@@ -689,7 +689,8 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         nnew = SNMP_MALLOC_TYPEDEF(struct inpcb);
         if (!nnew)
             break;
-        klookup((unsigned long) entry, (char *) nnew, sizeof(struct inpcb));
+
+        NETSNMP_KLOOKUP(entry, (char *) nnew, sizeof(struct inpcb));
 
         entry    = nnew->inp_queue.cqe_next;	/* Next kernel entry */
 	nnew->inp_queue.cqe_next = udp_head;
@@ -731,7 +732,8 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         nnew = SNMP_MALLOC_TYPEDEF(struct inpcb);
         if (!nnew)
             break;
-        klookup((unsigned long) entry, (char *) nnew, sizeof(struct inpcb));
+
+        NETSNMP_KLOOKUP(entry, (char *) nnew, sizeof(struct inpcb));
 
         entry    = nnew->INP_NEXT_SYMBOL;		/* Next kernel entry */
 	nnew->INP_NEXT_SYMBOL = udp_head;

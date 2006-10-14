@@ -83,7 +83,7 @@ auto_nlist_value(const char *string)
 	    }
             return (-1);
         } else {
-            DEBUGMSGTL(("auto_nlist", "nlist:  found symbol %s at %x.\n",
+            DEBUGMSGTL(("auto_nlist:auto_nlist_value", "found symbol %s at %x.\n",
                         it->symbol, it->nl[0].n_value));
             return (it->nl[0].n_value);
         }
@@ -144,7 +144,7 @@ init_nlist(struct nlist nl[])
 #else                           /* ! HAVE_KVM_OPENFILES */
 #if (defined(aix4) || defined(aix5)) && defined(HAVE_KNLIST)
     if (knlist(nl, 1, sizeof(struct nlist)) == -1) {
-        DEBUGMSGTL(("auto_nlist", "knlist failed on symbol:  %s\n",
+        DEBUGMSGTL(("auto_nlist:init_nlist", "knlist failed on symbol:  %s\n",
                     nl[0].n_name));
         if (errno == EFAULT) {
             nl[0].n_type = 0;
@@ -179,11 +179,11 @@ init_nlist(struct nlist nl[])
         if (nl[ret].n_type == 0) {
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                DEBUGMSGTL(("auto_nlist", "nlist err:  %s not found\n",
+                DEBUGMSGTL(("auto_nlist:init_nlist", "nlist err:  %s not found\n",
                             nl[ret].n_name));
 	    }
         } else {
-            DEBUGMSGTL(("auto_nlist", "nlist: %s 0x%X\n", nl[ret].n_name,
+            DEBUGMSGTL(("auto_nlist:init_nlist", "nlist: %s 0x%X\n", nl[ret].n_name,
                         (unsigned int) nl[ret].n_value));
         }
     }
