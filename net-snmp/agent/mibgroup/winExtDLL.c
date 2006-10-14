@@ -108,7 +108,6 @@ int extDLLs_index = 0;
 HANDLE *subagentTrapEvents[MAX_WINEXT_TRAP_EVENTS];
 int subagentTrapEvents_index = 0;
 
-void winExtDLL_parse_config_winExtDLL(const char *token, char *cptr);
 void winExtDLL_free_config_winExtDLL(void);
 
 void read_ExtensionAgents_list();
@@ -149,13 +148,6 @@ void init_winExtDLL(void)
 
   DEBUGMSGTL(("winExtDLL", "init_winExtDLL called\n"));
   
-  snmpd_register_config_handler("winExtDLL",
-      winExtDLL_parse_config_winExtDLL,
-      winExtDLL_free_config_winExtDLL,
-      "winExtDLL value");
-  
-  DEBUGMSGTL(("winExtDLL", "winExtDLL_parse_config_winExtDLL called\n"));        
-
   read_ExtensionAgents_list();  
   
   DEBUGMSGTL(("winExtDLL", "winExtDLL enabled.\n"));        
@@ -383,7 +375,6 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 {
 
     netsnmp_request_info *request = requests;
-    u_char         *configured = NULL;
     netsnmp_variable_list *var;
     
     static char     ret_szbuf_temp[SZBUF_MAX];          // Holder for return strings
@@ -401,6 +392,8 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     static u_long   accesses = 7;
     u_char          netsnmp_ASN_type;
     u_char          windows_ASN_type;
+
+    char          *stringtemp;
 
     // WinSNMP variables:
     BOOL result;   
@@ -458,38 +451,38 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         }
         
         // Query
-	mySnmpVarBind = (SnmpVarBind *) SnmpUtilMemAlloc(sizeof (SnmpVarBind));
-	if (mySnmpVarBind) {
+        pVarBindList.list = (SnmpVarBind *) SnmpUtilMemAlloc(sizeof (SnmpVarBind));
+        if (pVarBindList.list) {
 
           // Convert OID from Net-SNMP to Windows         
-
-          mySnmpVarBind->name.ids = (UINT *) SnmpUtilMemAlloc(sizeof (UINT) *var->name_length);
-
-          if (mySnmpVarBind->name.ids) {
+         
+          pVarBindList.list->name.ids = (UINT *) SnmpUtilMemAlloc(sizeof (UINT) *var->name_length);
+          
+          if (pVarBindList.list->name.ids) {
             // Actual copy
+
+            
             for (i = 0; i < var->name_length; i++) {
-              mySnmpVarBind->name.ids[i] = (UINT)var->name[i];
+              pVarBindList.list->name.ids[i] = (UINT)var->name[i];
             }
-            mySnmpVarBind->name.idLength = i;
-
+            pVarBindList.list->name.idLength = i;
+            
             DEBUGMSGTL(("winExtDLL", "Windows OID: "));
-            DEBUGMSGWINOID(("winExtDLL", mySnmpVarBind));
+            DEBUGMSGWINOID(("winExtDLL", pVarBindList.list));
             DEBUGMSG(("winExtDLL", "\n"));
-
+            
           }
           else {
             DEBUGMSGTL(("winExtDLL", "\nyCould not allocate memory for Windows SNMP varbind.\n"));
             return (0);
           }
-        }
 
-        pVarBindList.list = (SnmpVarBind *) SnmpUtilMemAlloc(sizeof (SnmpVarBind));
-        if (pVarBindList.list) {
-          pVarBindList.list = mySnmpVarBind;
+          //pVarBindList.list = pVarBindList.list;
+
           pVarBindList.len = 1;          
 	}
         else {
-          DEBUGMSGTL(("winExtDLL", "\nyCould not allocate memory for Windows SNMP varbind list.\n"));
+          DEBUGMSGTL(("winExtDLL", "Could not allocate memory for Windows SNMP varbind list.\n"));
           return (0);
         }        
 		
@@ -510,8 +503,8 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 
           // Convert OID from Windows to Net-SNMP so Net-SNMP has the new 'next' OID
           // FIXME:  Do we need to realloc var->name or is is MAX_OID_LEN?
-          for (i = 0; i < (mySnmpVarBind->name.idLength > MAX_OID_LEN?MAX_OID_LEN:mySnmpVarBind->name.idLength); i++) {
-            var->name[i] = (oid)mySnmpVarBind->name.ids[i];
+          for (i = 0; i < (pVarBindList.list->name.idLength > MAX_OID_LEN?MAX_OID_LEN:pVarBindList.list->name.idLength); i++) {
+            var->name[i] = (oid)pVarBindList.list->name.ids[i];
           }
           var->name_length = i;
 
@@ -527,10 +520,10 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         
         DEBUGMSGTL(("winExtDLL", "win: Error status of xSnmpExtensionQuery: %d\n",pErrorStatus));
 
-        DEBUGMSGTL(("winExtDLL", "win: asnType: %d\n",mySnmpVarBind->value.asnType));
+        DEBUGMSGTL(("winExtDLL", "win: asnType: %d\n",pVarBindList.list->value.asnType));
       
         // Set Net-SNMP ASN type based on closest match to Windows ASN type
-        switch (mySnmpVarBind->value.asnType) {
+        switch (pVarBindList.list->value.asnType) {
           case MS_ASN_OCTETSTRING:
             netsnmp_ASN_type = ASN_OCTET_STR;
             DEBUGMSGTL(("winExtDLL", "MS_ASN_OCTETSTRING = ASN_OCTET_STR\n"));
@@ -586,15 +579,15 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 
         DEBUGMSGTL(("winExtDLL", "Net-SNMP object type for returned value: %d\n",netsnmp_ASN_type));
 
-        switch (mySnmpVarBind->value.asnType) {
+        switch (pVarBindList.list->value.asnType) {
           case MS_ASN_IPADDRESS:
           case MS_ASN_OCTETSTRING:           
             
-            strncpy(ret_szbuf_temp, mySnmpVarBind->value.asnValue.string.stream, (mySnmpVarBind->value.asnValue.string.length > 
-                  SZBUF_MAX?SZBUF_MAX:mySnmpVarBind->value.asnValue.string.length));
+            strncpy(ret_szbuf_temp, pVarBindList.list->value.asnValue.string.stream, (pVarBindList.list->value.asnValue.string.length > 
+                  SZBUF_MAX?SZBUF_MAX:pVarBindList.list->value.asnValue.string.length));
            
-            if (mySnmpVarBind->value.asnValue.string.length < SZBUF_MAX) 
-              ret_szbuf_temp[mySnmpVarBind->value.asnValue.string.length] = '\0';
+            if (pVarBindList.list->value.asnValue.string.length < SZBUF_MAX) 
+              ret_szbuf_temp[pVarBindList.list->value.asnValue.string.length] = '\0';
             else
               ret_szbuf_temp[SZBUF_MAX-1] = '\0';
 
@@ -618,9 +611,9 @@ var_winExtDLL(netsnmp_mib_handler *handler,
           case MS_ASN_TIMETICKS:
           case MS_ASN_OPAQUE:
 
-            DEBUGMSGTL(("winExtDLL", "win: Long: %ld\n",mySnmpVarBind->value.asnValue.number));
+            DEBUGMSGTL(("winExtDLL", "win: Long: %ld\n",pVarBindList.list->value.asnValue.number));
 
-            ret_long = mySnmpVarBind->value.asnValue.number;
+            ret_long = pVarBindList.list->value.asnValue.number;
 
             // Return results
             snmp_set_var_typed_value(var, netsnmp_ASN_type,
@@ -634,13 +627,13 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             // Convert OID to Net-SNMP
 
             DEBUGMSGTL(("winExtDLL", "Returned OID: "));
-            DEBUGMSGWINOID(("winExtDLL", &mySnmpVarBind->value.asnValue.object));
+            DEBUGMSGWINOID(("winExtDLL", &pVarBindList.list->value.asnValue.object));
             DEBUGMSG(("winExtDLL", "\n"));
            
             // Convert OID from Windows to Net-SNMP
-            for (i = 0; i < (mySnmpVarBind->value.asnValue.object.idLength > MAX_OID_LEN?MAX_OID_LEN:
-                  mySnmpVarBind->value.asnValue.object.idLength); i++) {
-              ret_oid[i] = (oid)mySnmpVarBind->value.asnValue.object.ids[i];
+            for (i = 0; i < (pVarBindList.list->value.asnValue.object.idLength > MAX_OID_LEN?MAX_OID_LEN:
+                  pVarBindList.list->value.asnValue.object.idLength); i++) {
+              ret_oid[i] = (oid)pVarBindList.list->value.asnValue.object.ids[i];
             }
             ret_oid_length = i;
            
@@ -658,7 +651,9 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             
           default:
             break;
-        }        
+        }
+        if (&pVarBindList)
+          SnmpUtilVarBindListFree(&pVarBindList);
       }  
       break;
 
@@ -755,35 +750,29 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         DEBUGMSGTL(("winExtDLL", "Net-SNMP object type for returned value: %d\n",windows_ASN_type));
 
         // Query
-	mySnmpVarBind = (SnmpVarBind *) SnmpUtilMemAlloc(sizeof (SnmpVarBind));
-	if (mySnmpVarBind) {
-        
+        pVarBindList.list = (SnmpVarBind *) SnmpUtilMemAlloc(sizeof (SnmpVarBind));
+        if (pVarBindList.list) {
           // Convert OID from Net-SNMP to Windows         
-          mySnmpVarBind->name.ids = (UINT *) SnmpUtilMemAlloc(sizeof (UINT) *var->name_length);
+          pVarBindList.list->name.ids = (UINT *) SnmpUtilMemAlloc(sizeof (UINT) *var->name_length);
 
-          if (mySnmpVarBind->name.ids) {
+          if (pVarBindList.list->name.ids) {
             // Actual copy
             for (i = 0; i < var->name_length; i++) {
-              mySnmpVarBind->name.ids[i] = (UINT)var->name[i];
+              pVarBindList.list->name.ids[i] = (UINT)var->name[i];
             }
-            mySnmpVarBind->name.idLength = i;
+            pVarBindList.list->name.idLength = i;
 
             // Print OID
-            DEBUGMSGTL(("winExtDLL","Windows OID length: %d\n",mySnmpVarBind->name.idLength));
+            DEBUGMSGTL(("winExtDLL","Windows OID length: %d\n",pVarBindList.list->name.idLength));
             DEBUGMSGTL(("winExtDLL","Windows OID: "));
-            for (i = 0; i < mySnmpVarBind->name.idLength; i++) {
-              DEBUGMSGTL(("winExtDLL",".%d",mySnmpVarBind->name.ids[i]));
-            }
-            DEBUGMSGTL(("winExtDLL","\n"));
+            DEBUGMSGWINOID(("winExtDLL", pVarBindList.list));
+            DEBUGMSG(("winExtDLL", "\n"));
           }
           else {
             DEBUGMSGTL(("winExtDLL", "\nyCould not allocate memory for Windows SNMP varbind.\n"));
             return (0);
           }
-        }
-        pVarBindList.list = (SnmpVarBind *) SnmpUtilMemAlloc(sizeof (SnmpVarBind));
-        if (pVarBindList.list) {
-          pVarBindList.list = mySnmpVarBind;
+          //pVarBindList.list = pVarBindList.list;
           pVarBindList.len = 1;          
 	}
         else {
@@ -792,20 +781,23 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         }
 		        
         // Set Windows ASN type
-        mySnmpVarBind->value.asnType = windows_ASN_type;
+        pVarBindList.list->value.asnType = windows_ASN_type;
           
         switch (var->type) {
           case ASN_IPADDRESS:
           case ASN_OCTET_STR:            
 
-            strncpy(set_szbuf_temp, var->val.string, strlen(var->val.string) * sizeof(var->val.string));           // FIXME: overflow
+            strncpy(set_szbuf_temp, var->val.string, (var->val_len > SZBUF_MAX?SZBUF_MAX:var->val_len));
+
+            // Make sure string is terminated
+            set_szbuf_temp[var->val_len > SZBUF_MAX?SZBUF_MAX:var->val_len] = '\0';
 
             DEBUGMSGTL(("winExtDLL", "String to write: %s\n",set_szbuf_temp));
             DEBUGMSGTL(("winExtDLL", "Length of string to write: %d\n",strlen(set_szbuf_temp)));
 
-            mySnmpVarBind->value.asnValue.string.stream = set_szbuf_temp;
-            mySnmpVarBind->value.asnValue.string.length = strlen(set_szbuf_temp);
-            mySnmpVarBind->value.asnValue.string.dynamic = 0;
+            pVarBindList.list->value.asnValue.string.stream = stringtemp;
+            pVarBindList.list->value.asnValue.string.length = strlen(stringtemp);
+            pVarBindList.list->value.asnValue.string.dynamic = 0;
             
             break;
 
@@ -818,7 +810,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
           case ASN_TIMETICKS:
           case ASN_OPAQUE:        
             
-            mySnmpVarBind->value.asnValue.number = *(var->val.integer);
+            pVarBindList.list->value.asnValue.number = *(var->val.integer);
             break;
               
           case ASN_OBJECT_ID:
@@ -845,31 +837,35 @@ var_winExtDLL(netsnmp_mib_handler *handler,
               // Print OID
               DEBUGMSGTL(("winExtDLL","Windows OID length: %d\n",mySnmpVarBind->name.idLength));
               DEBUGMSGTL(("winExtDLL","Windows OID: "));
-              for (i = 0; i < mySnmpVarBind->name.idLength; i++) {
-                DEBUGMSGTL(("winExtDLL",".%d",mySnmpVarBind->name.ids[i]));
-              }
-              DEBUGMSGTL(("winExtDLL","\n"));
+              DEBUGMSGWINOID(("winExtDLL", mySnmpVarBind));
+              DEBUGMSG(("winExtDLL", "\n"));
             }
             else {
               DEBUGMSGTL(("winExtDLL", "\nyCould not allocate memory for Windows SNMP varbind.\n"));
               return SNMP_ERR_GENERR;
             }
+            SnmpUtilOidCpy(&pVarBindList.list->value.asnValue.object, &mySnmpVarBind->name);
+            //pVarBindList.list->value.asnValue.object = mySnmpVarBind->name;
+            if (mySnmpVarBind)
+              SnmpUtilVarBindFree(mySnmpVarBind);
             
           default:
             break;      
         }  
-
         
         result = xSnmpExtensionQuery(SNMP_PDU_SET, &pVarBindList, &pErrorStatus, &pErrorIndex);
         DEBUGMSGTL(("winExtDLL", "win: Result of xSnmpExtensionQuery: %d\n",result));        
         DEBUGMSGTL(("winExtDLL", "win: Error status of xSnmpExtensionQuery: %d\n",pErrorStatus));
-        DEBUGMSGTL(("winExtDLL", "win: asnType: %d\n",mySnmpVarBind->value.asnType));
+        DEBUGMSGTL(("winExtDLL", "win: asnType: %d\n",pVarBindList.list->value.asnType));
 
         if (result == 0) {
           DEBUGMSGTL(("winExtDLL", "\nyxWindows SnmpExtensionQuery failure.\n"));
           return SNMP_ERR_GENERR;
         }
         
+        if (&pVarBindList)
+          SnmpUtilVarBindListFree(&pVarBindList);
+
         if (pErrorStatus) {
           switch (pErrorStatus) {
             case SNMP_ERRORSTATUS_INCONSISTENTNAME:
@@ -896,12 +892,6 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     }
 
     return SNMP_ERR_NOERROR;
-}
-
-void
-winExtDLL_parse_config_winExtDLL(const char *token, char *cptr)
-{
-
 }
 
 void winExtDLL_free_config_winExtDLL(void) {
@@ -1278,7 +1268,12 @@ void subagentTrapCheck() {
       break;
     }
   }
+
+  // Events should be auto-reset, but just in case..
   ResetEvent(dwWaitResult);
+
+  SnmpUtilVarBindListFree(&pVariableBindings);
+
   return 1;
 }
 
