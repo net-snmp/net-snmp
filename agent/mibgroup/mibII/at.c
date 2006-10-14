@@ -772,8 +772,8 @@ ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
             continue;
         }
 
-        klookup(at_ptr, (char *) &at_entry, sizeof(struct arptab));
-        klookup(at_entry.at_ac, (char *) &at_com, sizeof(struct arpcom));
+        NETSNMP_KLOOKUP(at_ptr, (char *) &at_entry, sizeof(struct arptab));
+        NETSNMP_KLOOKUP(at_entry.at_ac, (char *) &at_com, sizeof(struct arpcom));
 
         at_ptr = at_entry.at_next;
         atab = &at_entry;

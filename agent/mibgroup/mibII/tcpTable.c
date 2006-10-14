@@ -789,8 +789,8 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
         if (!nnew)
             break;
-        klookup((unsigned long) entry, (char *)&(nnew->pcb), sizeof(struct inpcb));
-        klookup((int) nnew->pcb.inp_ppcb, (char *)&tcpcb, sizeof(struct tcpcb));
+        NETSNMP_KLOOKUP(entry, (char *)&(nnew->pcb), sizeof(struct inpcb));
+        NETSNMP_KLOOKUP(nnew->pcb.inp_ppcb, (char *)&tcpcb, sizeof(struct tcpcb));
 	nnew->state = StateMap[tcpcb.t_state];
         if (nnew->state == 5 /* established */ ||
             nnew->state == 8 /*  closeWait  */ )
@@ -843,8 +843,8 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
         if (!nnew)
             break;
-        klookup((unsigned long) entry, (char *)&(nnew->pcb), sizeof(struct inpcb));
-        klookup((int) nnew->pcb.inp_ppcb, (char *)&tcpcb, sizeof(struct tcpcb));
+        NETSNMP_KLOOKUP(entry, (char *)&(nnew->pcb), sizeof(struct inpcb));
+        NETSNMP_KLOOKUP(nnew->pcb.inp_ppcb, (char *)&tcpcb, sizeof(struct tcpcb));
 	nnew->state    = StateMap[tcpcb.t_state];
         if (nnew->state == 5 /* established */ ||
             nnew->state == 8 /*  closeWait  */ )
