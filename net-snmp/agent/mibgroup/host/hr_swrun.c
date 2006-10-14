@@ -1511,7 +1511,7 @@ Init_HR_SWRun(void)
             snmp_log_perror("Init_HR_SWRun-auto_nlist PROC");
             return;
         }
-        if (klookup(proc_table_base, (char *) proc_table, bytes) == 0) {
+        if (NETSNMP_KLOOKUP(proc_table_base, (char *) proc_table, bytes) == 0) {
             nproc = 0;
             snmp_log_perror("Init_HR_SWRun-klookup");
             return;

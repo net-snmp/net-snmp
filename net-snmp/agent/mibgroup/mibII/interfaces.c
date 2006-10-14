@@ -1804,9 +1804,8 @@ Interface_Scan_Next(short *Index,
          *      Get the "ifnet" structure and extract the device name
          */
 #ifndef linux
-        klookup((unsigned long) ifnetaddr, (char *) &ifnet, sizeof ifnet);
-        klookup((unsigned long) ifnet.if_name, (char *) saveName,
-                sizeof saveName);
+        NETSNMP_KLOOKUP(ifnetaddr, (char *) &ifnet, sizeof ifnet);
+        NETSNMP_KLOOKUP(ifnet.if_name, (char *) saveName, sizeof saveName);
 
        /*
         * The purpose of this comparison is lost in the mists of time.
@@ -1926,18 +1925,16 @@ Interface_Scan_Next(short *Index,
         /*
          *      Get the "ifnet" structure and extract the device name
          */
-        klookup((unsigned long) ifnetaddr, (char *) &ifnet, sizeof ifnet);
+        NETSNMP_KLOOKUP(ifnetaddr, (char *) &ifnet, sizeof ifnet);
 #if STRUCT_IFNET_HAS_IF_XNAME
 #if defined(netbsd1) || defined(openbsd2)
         strncpy(saveName, ifnet.if_xname, sizeof saveName);
 #else
-        klookup((unsigned long) ifnet.if_xname, (char *) saveName,
-                sizeof saveName);
+        NETSNMP_KLOOKUP(ifnet.if_xname, (char *) saveName, sizeof saveName);
 #endif
         saveName[sizeof(saveName) - 1] = '\0';
 #else
-        klookup((unsigned long) ifnet.if_name, (char *) saveName,
-                sizeof saveName);
+        NETSNMP_KLOOKUP(ifnet.if_name, (char *) saveName, sizeof saveName);
 
         saveName[sizeof(saveName) - 1] = '\0';
         cp = strchr(saveName, '\0');
@@ -1954,8 +1951,7 @@ Interface_Scan_Next(short *Index,
             auto_nlist(IFADDR_SYMBOL, (char *) &ia, sizeof(ia));
 #endif
             while (ia) {
-                klookup((unsigned long) ia, (char *) &in_ifaddr,
-                        sizeof(in_ifaddr));
+                NETSNMP_KLOOKUP(ia, (char *) &in_ifaddr, sizeof(in_ifaddr));
                 {
 #ifdef netbsd1
 #define CP(x)	((char *)(x))
@@ -2147,8 +2143,7 @@ Interface_Get_Ether_By_Index(int Index, u_char * EtherAddr)
      */
 #ifndef linux
 #if !(defined(netbsd1) || defined(bsdi2) || defined(openbsd2))
-    klookup((unsigned long) saveifnetaddr, (char *) &arpcom,
-            sizeof arpcom);
+    NETSNMP_KLOOKUP(saveifnetaddr, (char *) &arpcom, sizeof arpcom);
 #else                           /* netbsd1 or bsdi2 or openbsd2 */
 
 #if defined(netbsd1) || defined(openbsd2)
@@ -2158,9 +2153,8 @@ Interface_Get_Ether_By_Index(int Index, u_char * EtherAddr)
 
     ifaddraddr = (unsigned long) saveifnet.if_addrlist;
     while (ifaddraddr) {
-        klookup(ifaddraddr, (char *) &ifaddr, sizeof ifaddr);
-        klookup((unsigned long) ifaddr.ifa_addr, (char *) &sadl,
-                sizeof sadl);
+        NETSNMP_KLOOKUP(ifaddraddr, (char *) &ifaddr, sizeof ifaddr);
+        NETSNMP_KLOOKUP(ifaddr.ifa_addr, (char *) &sadl, sizeof sadl);
         if (sadl.sdl_family == AF_LINK
             && (saveifnet.if_type == IFT_ETHER
                 || saveifnet.if_type == IFT_ISO88025
