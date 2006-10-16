@@ -262,7 +262,6 @@ try_getloadavg(double *r_ave, size_t s_ave)
     r_ave[1] = pst_buf.psd_avg_5_min;
     r_ave[2] = pst_buf.psd_avg_15_min;
 #elif !defined(cygwin)
-#ifdef NETSNMP_CAN_USE_NLIST
 #if defined(aix4) || defined(aix5)
     if(perfstat_cpu_total((perfstat_id_t *)NULL, &cs, sizeof(perfstat_cpu_total_t), 1) > 0) {
         r_ave[0] = cs.loadavg[0] / 65536.0;
@@ -271,6 +270,7 @@ try_getloadavg(double *r_ave, size_t s_ave)
     }
     return 0;
 #else
+#if defined(NETSNMP_CAN_USE_NLIST) && defined(LOADAVE_SYMBOL)
     if (auto_nlist(LOADAVE_SYMBOL, (char *) pave, sizeof(double) * s_ave)
         == 0)
 #endif
