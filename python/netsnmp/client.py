@@ -42,7 +42,7 @@ class Varbind(object):
     def __init__(self, tag=None, iid=None, val=None, type=None):
         self.tag = tag
         self.iid = str(iid)
-        self.val = val
+        self.val = str(val)
         self.type = type
         # parse iid out of tag if needed
         if iid == None and tag != None:
@@ -50,6 +50,9 @@ class Varbind(object):
             match = regex.match(tag)
             if match:
                 (self.tag, self.iid) = match.group(1,2)
+
+    def __setattr__(self, name, val):
+        self.__dict__[name] = str(val)
 
     def print_str(self):
         return self.tag, self.iid, self.val, self.type

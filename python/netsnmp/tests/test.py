@@ -4,6 +4,7 @@
 import sys
 import unittest
 import netsnmp
+import time
 
 class BasicTests(unittest.TestCase):
     def testFuncs(self):        
@@ -245,6 +246,76 @@ class BasicTests(unittest.TestCase):
         for var in vars:
             print "  ",var.tag, var.iid, "=", var.val, '(',var.type,')'
             
+
+class SetTests(unittest.TestCase):
+    def testFuncs(self):        
+        print "\n-------------- SET Test Start ----------------------------\n"
+
+        var = netsnmp.Varbind('sysUpTime','0')
+        res = netsnmp.snmpget(var, Version = 1, DestHost='localhost',
+                        Community='public')
+        print "uptime = ", res[0]
+
+        
+        var = netsnmp.Varbind('versionRestartAgent','0', 1)
+        res = netsnmp.snmpset(var, Version = 1, DestHost='localhost',
+                        Community='public')
+
+        var = netsnmp.Varbind('sysUpTime','0')
+        res = netsnmp.snmpget(var, Version = 1, DestHost='localhost',
+                        Community='public')
+        print "uptime = ", res[0]
+
+        var = netsnmp.Varbind('nsCacheEntry')
+        res = netsnmp.snmpgetnext(var, Version = 1, DestHost='localhost',
+                        Community='public')
+        print "var = ", var.tag, var.iid, "=", var.val, '(',var.type,')'
+
+        var.val = 65
+        res = netsnmp.snmpset(var, Version = 1, DestHost='localhost',
+                        Community='public')
+        res = netsnmp.snmpget(var, Version = 1, DestHost='localhost',
+                        Community='public')
+        print "var = ", var.tag, var.iid, "=", var.val, '(',var.type,')'
+
+        sess = netsnmp.Session(Version = 1, DestHost='localhost',
+                        Community='public')
+
+        vars = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.2.116.101.115.116','','.1.3.6.1.6.1.1'),
+                              netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.3.116.101.115.116','','1234'),
+                              netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.9.116.101.115.116','', 4))
+        res = sess.set(vars)
+
+        print "res = ", res
+
+        vars = netsnmp.VarList(netsnmp.Varbind('snmpTargetAddrTDomain'),
+                               netsnmp.Varbind('snmpTargetAddrTAddress'),
+                               netsnmp.Varbind('snmpTargetAddrRowStatus'))
+
+        res = sess.getnext(vars)
+
+        for var in vars:
+            print var.tag, var.iid, "=", var.val, '(',var.type,')'
+        print "\n"
+
+        vars = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.9.116.101.115.116','', 6))      
+
+        res = sess.set(vars)
+
+        print "res = ", res
+
+        vars = netsnmp.VarList(netsnmp.Varbind('snmpTargetAddrTDomain'),
+                               netsnmp.Varbind('snmpTargetAddrTAddress'),
+                               netsnmp.Varbind('snmpTargetAddrRowStatus'))
+
+        res = sess.getnext(vars)
+
+        for var in vars:
+            print var.tag, var.iid, "=", var.val, '(',var.type,')'
+        print "\n"
+
+        print "\n-------------- SET Test End ----------------------------\n"
+        
 
 if __name__=='__main__':
     unittest.main()
