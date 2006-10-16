@@ -122,6 +122,9 @@
 #if defined(aix4) || defined(aix5)
 #include <libperfstat.h>
 #endif
+#if HAVE_SYS_SYSGET_H
+#include <sys/sysget.h>
+#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -232,9 +235,13 @@ try_getloadavg(double *r_ave, size_t s_ave)
     perfstat_cpu_total_t cs;
 #endif
 #if defined(hpux10) || defined(hpux11)
-  struct pst_dynamic pst_buf;
+    struct pst_dynamic pst_buf;
 #endif
-#endif	/* HAVE_GETLOADAVG */
+#ifdef irix6
+    int             i, favenrun[3];
+    sgt_cookie_t    cookie;
+#endif
+#endif	/* !HAVE_GETLOADAVG */
 
 #ifdef HAVE_GETLOADAVG
     if (getloadavg(pave, s_ave) == -1)
@@ -261,19 +268,23 @@ try_getloadavg(double *r_ave, size_t s_ave)
     r_ave[0] = pst_buf.psd_avg_1_min;
     r_ave[1] = pst_buf.psd_avg_5_min;
     r_ave[2] = pst_buf.psd_avg_15_min;
-#elif !defined(cygwin)
-#if defined(aix4) || defined(aix5)
+#elif defined(aix4) || defined(aix5)
     if(perfstat_cpu_total((perfstat_id_t *)NULL, &cs, sizeof(perfstat_cpu_total_t), 1) > 0) {
         r_ave[0] = cs.loadavg[0] / 65536.0;
         r_ave[1] = cs.loadavg[1] / 65536.0;
         r_ave[2] = cs.loadavg[2] / 65536.0;
     }
-    return 0;
-#else
+#elif defined(irix6)
+    SGT_COOKIE_INIT(&cookie);
+    SGT_COOKIE_SET_KSYM(&cookie, "avenrun");
+    sysget(SGT_KSYM, (char*)favenrun, sizeof(favenrun), SGT_READ, &cookie);
+    for (i = 0; i < s_ave; i++)
+      r_ave[i] = favenrun[i] / 1000.0;
+    DEBUGMSGTL(("ucd-snmp/loadave", "irix6: %d %d %d\n", favenrun[0], favenrun[1], favenrun[2]));
+#elif !defined(cygwin)
 #if defined(NETSNMP_CAN_USE_NLIST) && defined(LOADAVE_SYMBOL)
     if (auto_nlist(LOADAVE_SYMBOL, (char *) pave, sizeof(double) * s_ave)
         == 0)
-#endif
 #endif
         return (-1);
 #endif
