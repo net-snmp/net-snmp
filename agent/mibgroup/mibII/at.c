@@ -568,12 +568,16 @@ ARP_Scan_Init(void)
 #else                           /* hpux11 */
 
     if (!at) {
+#ifdef ARPTAB_SIZE_SYMBOL
         auto_nlist(ARPTAB_SIZE_SYMBOL, (char *) &arptab_size,
                    sizeof arptab_size);
 #ifdef STRUCT_ARPHD_HAS_AT_NEXT
         at = (struct arphd *) malloc(arptab_size * sizeof(struct arphd));
 #else
         at = (struct arptab *) malloc(arptab_size * sizeof(struct arptab));
+#endif
+#else
+        return;
 #endif
     }
 #ifdef STRUCT_ARPHD_HAS_AT_NEXT
