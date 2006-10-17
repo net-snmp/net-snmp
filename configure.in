@@ -1887,6 +1887,11 @@ output_to=normal
 module_rules=module_rules.mk
 echo "# contents below built automatically by configure; do not edit by hand" > $module_rules
 
+for i in module_list_deps mib_module_list_deps agent_module_list_deps ; do
+  eval "$i=${i}.mk"
+  echo "# contents below built automatically by configure; do not edit by hand" > ${i}.mk
+done
+
 #---------------------
 # until we have an empty module list...
 #   (modules may add new modules, and until all dependencies are done...)
@@ -1978,9 +1983,13 @@ while test "x$new_module_list" != "x"; do
         eval "dl_${dltest}_files=\"$mod_files\""
 
         module_list="$module_list $i"
-        module_list_h="$module_list_h mibgroup/$i.h"
+	echo "read_config.lo: mibgroup/$i.h" >> $module_list_deps
+	if test $module_type = "agent_module" ; then
+ 	    echo "snmp_vars.lo: mibgroup/$i.h" >> $agent_module_list_deps
+        else
+ 	    echo "mib_modules.lo: mibgroup/$i.h" >> $mib_module_list_deps
+        fi
         eval ${module_type}_list="\"\$${module_type}_list $i\""
-        eval ${module_type}_list_h="\"\$${module_type}_list_h mibgroup/$i.h\""
         module_list_code="$module_list_code $i"
         eval ${module_type}_list_code="\"\$${module_type}_list_code $i\""
 
@@ -2134,9 +2143,14 @@ while test "x$new_module_list" != "x"; do
         #
         AC_MSG_MODULE_DBG("  $i added (based on $i.h)")
         module_list="$module_list $i"
-        module_list_h="$module_list_h mibgroup/$i.h"
         eval ${module_type}_list="\"\$${module_type}_list $i\""
-        eval ${module_type}_list_h="\"\$${module_type}_list_h mibgroup/$i.h\""
+
+	echo "read_config.lo: mibgroup/$i.h" >> $module_list_deps
+	if test $module_type = "agent_module" ; then
+ 	    echo "snmp_vars.lo: mibgroup/$i.h" >> $agent_module_list_deps
+        else
+ 	    echo "mib_modules.lo: mibgroup/$i.h" >> $mib_module_list_deps
+        fi
 
         #-------------------
         # check for unsupported config_load_mib
@@ -2427,6 +2441,9 @@ AC_SUBST(agent_module_list)
 AC_SUBST(default_mibs_install)
 AC_SUBST(dllcleans)
 AC_SUBST_FILE(module_rules)
+AC_SUBST_FILE(module_list_deps)
+AC_SUBST_FILE(mib_module_list_deps)
+AC_SUBST_FILE(agent_module_list_deps)
 
 AC_MSG_RESULT(.)
 
