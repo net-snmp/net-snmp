@@ -65,9 +65,6 @@
 #include <tlhelp32.h>
 #include <psapi.h>
 #endif
-#if defined(aix4) || defined(aix5)
-#include <procinfo.h>
-#endif
 
 #if _SLASH_PROC_METHOD_
 #include <procfs.h>
@@ -110,10 +107,6 @@ int             header_hrswrunEntry(struct variable *, oid *, size_t *,
 #ifdef dynix
 pid_t           nextproc;
 static prpsinfo_t lowpsinfo, mypsinfo;
-#endif
-#if defined(aix4) || defined(aix5)
-struct procsinfo pinfo, lowpinfo;
-pid_t		nextproc;
 #endif
 #ifdef cygwin
 static struct external_pinfo *curproc;
@@ -401,7 +394,7 @@ header_hrswrunEntry(struct variable *vp,
     for (;;) {
         pid = Get_Next_HR_SWRun();
 #ifndef linux
-#if !defined(dynix) && !defined(aix4) && !defined(aix5)
+#ifndef dynix
         DEBUGMSG(("host/hr_swrun",
                   "(index %d (entry #%d) ....", pid, current_proc_entry));
 #else
@@ -421,8 +414,6 @@ header_hrswrunEntry(struct variable *vp,
             lowproc = *curproc;
 #elif  dynix
             memcpy(&lowpsinfo, &mypsinfo, sizeof(prpsinfo_t));
-#elif defined(aix4) || defined(aix5)
-            memcpy(&lowpinfo, &pinfo, sizeof(struct procsinfo));
 #elif !defined(linux)
             LowProcIndex = current_proc_entry - 1;
 #endif
@@ -584,12 +575,6 @@ var_hrswrun(struct variable * vp,
         cp = strchr(string, ' ');
         if (cp != NULL)
             *cp = '\0';
-#elif defined(aix4) || defined(aix5)
-        snprintf(string, sizeof(string), "%s", lowpinfo.pi_comm);
-        string[ sizeof(string)-1 ] = 0;
-        cp = strchr(string, ' ');
-        if (cp != NULL)
-            *cp = '\0';
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
         if (proc_buf) { 
@@ -712,11 +697,6 @@ var_hrswrun(struct variable * vp,
         cp = strchr(string, ' ');
         if (cp != NULL)
             *cp = '\0';
-#elif defined(aix4) || defined(aix5)
-        /*
-         * Didn't find out how to get args
-         */
-        return NULL;
 #elif defined(solaris2)
 #ifdef _SLASH_PROC_METHOD_
         if (proc_buf)
@@ -824,8 +804,6 @@ var_hrswrun(struct variable * vp,
             sprintf(string, "%s", cp);
         } else
             string[0] = '\0';
-#elif defined(aix4) || defined(aix5)
-        return NULL;
 #elif defined(solaris2)
 #ifdef _SLASH_PROC_METHOD_
         if (proc_buf) {
@@ -989,8 +967,6 @@ var_hrswrun(struct variable * vp,
     #endif
 #elif defined(dynix)
         switch (lowpsinfo.pr_state) {
-#elif defined(aix4) || defined(aix5)
-        switch(lowpinfo.pi_state) {
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
         switch (proc_buf ? proc_buf->pr_lwp.pr_state : SIDL) {
@@ -1077,9 +1053,6 @@ var_hrswrun(struct variable * vp,
 #elif defined(dynix)
         long_return = lowpsinfo.pr_time.tv_sec * 100 +
             lowpsinfo.pr_time.tv_nsec / 10000000;
-#elif defined(aix4) || defined(aix5)
-        long_return = (lowpinfo.pi_ru.ru_utime.tv_sec + lowpinfo.pi_ru.ru_stime.tv_sec) * 100 +
-            (lowpinfo.pi_ru.ru_utime.tv_usec + lowpinfo.pi_ru.ru_stime.tv_usec) / 10000000;
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
         long_return = proc_buf ? proc_buf->pr_time.tv_sec * 100 +
@@ -1164,8 +1137,6 @@ var_hrswrun(struct variable * vp,
         long_return = (proc_buf.pst_rssize << PGSHIFT) / 1024;
 #elif defined(dynix)
         long_return = (lowpsinfo.pr_rssize * MMU_PAGESIZE) / 1024;
-#elif defined(aix4) || defined(aix5)
-        long_return = (lowpinfo.pi_size * getpagesize()) / 1024;
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
         long_return = proc_buf ? proc_buf->pr_rssize : 0;
@@ -1358,39 +1329,6 @@ End_HR_SWRun(void)
      */
 }
 
-#elif defined(aix4) || defined(aix5)
-
-void
-Init_HR_SWRun(void)
-{
-    nextproc = 0;
-}
-
-int
-Get_Next_HR_SWRun(void)
-{
-    DEBUGMSGTL(("host/hr_swrun::GetNextHR_SWRun",
-                "nextproc == %d... &nextproc = %u\n", nextproc,
-                &nextproc));
-
-    if(getprocs(&pinfo, sizeof(struct procsinfo), NULL, 0, &nextproc, 1) < 1) {
-        return -1;
-    } else {
-        DEBUGMSGTL(("host/hr_swrun::GetNextHR_SWRun",
-                    "getprocs returned %d\n", nextproc));
-        return pinfo.pi_pid;
-    }
-
-}
-
-void
-End_HR_SWRun(void)
-{
-    /*
-     * just a stub... because it's declared 
-     */
-}
-
 #else                           /* linux */
 
 static int      nproc;
@@ -1563,7 +1501,7 @@ End_HR_SWRun(void)
 int
 count_processes(void)
 {
-#if !(defined(linux) || defined(cygwin) || defined(hpux10) || defined(hpux11) || defined(solaris2) || HAVE_KVM_GETPROCS || defined(dynix) || defined(aix4) || defined(aix5))
+#if !(defined(linux) || defined(cygwin) || defined(hpux10) || defined(hpux11) || defined(solaris2) || HAVE_KVM_GETPROCS || defined(dynix))
     int             i;
 #endif
     int             total = 0;
@@ -1572,12 +1510,10 @@ count_processes(void)
 #if defined(hpux10) || defined(hpux11) || HAVE_KVM_GETPROCS || defined(solaris2)
     total = nproc;
 #else
-/* superseded code for AIX */
-/* #if defined(aix4) || defined(aix5)
+#if defined(aix4) || defined(aix5)
     for (i = 0; i < nproc; ++i) {
         if (proc_table[i].pi_state != 0)
-*/
-#if !defined(linux) && !defined(cygwin) && !defined(dynix) && !defined(aix4) && !defined(aix5)
+#elif !defined(linux) && !defined(cygwin) && !defined(dynix)
     for (i = 0; i < nproc; ++i) {
         if (proc_table[i].p_stat != 0)
 #else
