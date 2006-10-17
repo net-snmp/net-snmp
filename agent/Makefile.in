@@ -166,6 +166,10 @@ installmibgroupheaders:
                 done \
         fi
 
+@module_list_deps@
+@agent_module_list_deps@
+@mib_module_list_deps@
+
 #snmp_vars.lo: @agent_module_list_h@
 #mib_modules.lo: @mib_module_list_h@ mibgroup/mib_module_inits.h
 #
