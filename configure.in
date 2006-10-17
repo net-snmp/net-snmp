@@ -35,7 +35,6 @@ Compiler Options:
     [CC=$with_cc;export CC])
 
 AC_ARG_WITH(linkcc, [
-Compiler Options:
   --with-linkcc=CC                use CC to link (default=gcc).],
     [LINKCC=$with_linkcc;export LINKCC])
 
