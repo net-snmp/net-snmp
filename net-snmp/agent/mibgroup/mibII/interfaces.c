@@ -1477,7 +1477,7 @@ Interface_Scan_Init(void)
 
 #endif
 
-#if !defined(hpux11)
+#if !defined(hpux11) && defined(IFNET_SYMBOL)
     auto_nlist(IFNET_SYMBOL, (char *) &ifnetaddr, sizeof(ifnetaddr));
 #endif
     saveIndex = 0;
@@ -1947,7 +1947,7 @@ Interface_Scan_Next(short *Index,
 
 #ifdef netbsd1
             ia = (struct in_ifaddr *) ifnet.if_addrlist.tqh_first;
-#else
+#elif defined(IFADDR_SYMBOL)
             auto_nlist(IFADDR_SYMBOL, (char *) &ia, sizeof(ia));
 #endif
             while (ia) {
