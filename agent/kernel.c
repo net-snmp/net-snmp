@@ -171,6 +171,7 @@ klookup(unsigned long off, char *target, int siz)
     if (kmem < 0)
         return 0;
 
+    DEBUGMSGTL(("verbose:kernel:klookup", "klookup(%lx, %p, %d): calling klseek/klread", off, target, siz));
     if ((retsiz = klseek((off_t) off)) != off) {
         snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
         snmp_log_perror("klseek");
