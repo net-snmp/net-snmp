@@ -58,6 +58,9 @@ AC_ARG_WITH(ldflags,
 [  --with-ldflags=LDFLAGS          use LDFLAGS as link time arguments to ld.],
     [LDFLAGS=$with_ldflags; export LDFLAGS])
 
+AC_ARG_ENABLE(as-needed,
+[  --enable-as-needed              link libraries against other needed libraries.])
+
 AC_ARG_WITH(libs,
 [  --with-libs=LIBS                use LIBS as link time arguments to ld.],
     [LIBS=$with_libs; export LIBS])
@@ -2784,7 +2787,13 @@ if test $? -eq 0 ; then
         *)
             AC_CHECK_HEADER(sensors/sensors.h,,
                 [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find sensors/sensors.h])])
-            AC_CHECK_LIB(sensors, sensors_get_detected_chips, SENSORLIBS="-lsensors",
+            AC_CHECK_LIB(sensors, sensors_get_detected_chips, [
+		   if test "x$enable_as_needed" = "xyes" ; then
+		       SENSORLIBS="-lsensors" ;
+                   else
+		       LIBS="${LIBS} -lsensors" ;
+                   fi
+                ],
                 [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find -lsensors])])
             ;;
         esac
@@ -3375,7 +3384,12 @@ if test "x$useopenssl" != "xno" ; then
         encrmodes="[disabled]"
     fi
     AC_DEFINE(NETSNMP_USE_OPENSSL)
-    LIBCRYPTO="-lcrypto"
+	echo "here"
+    if test "x$enable_as_needed" = "xyes" ; then
+        LIBCRYPTO="-lcrypto" ;
+    else
+        LIBS="${LIBS} -lcrypto" ;
+    fi
     AC_MSG_RESULT(OpenSSL Support)
 elif test "x$usepkcs" != "xno" ; then
     authmodes="MD5 SHA1"
