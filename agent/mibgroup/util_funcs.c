@@ -381,11 +381,65 @@ get_exec_output(struct extensible *ex)
     return -1;
 #endif
 }
-
 int
 get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
 {
+/* 	Alexander Prömel, alexander@proemel.de 08/24/2006
+	The following code, is tested on picotux rev. 1.01.
+	I think, it will be better to put the named pipes, into /var/run or make it selectable via CONFIG file.
+	If the pipe file already exist, the creation will fail.
+	I put the pipes into /flash, the pipepath has to change in ucd-snmp/pass_persist.c too, if you change it here.
+*/
 #if HAVE_EXECV
+#ifdef __uClinux__ /* HAVE uClinux */
+	int in,out;
+	char fifo_in_path[256];
+	char fifo_out_path[256];
+	pid_t tpid;
+        
+    if ((tpid = vfork()) == 0) { /*temp child*/
+        execve(cmd, NULL,NULL);
+        perror(cmd);
+        exit(1);
+    } else { 
+		if(tpid > 0) {
+			/*initialize workspace*/
+			snprintf(fifo_in_path, 256, "/flash/cp_%d", tpid);
+			snprintf(fifo_out_path, 256, "/flash/pc_%d", tpid);
+
+			in = mkfifo(fifo_in_path, S_IRWXU);	/*Create Input Pipe, 700*/
+			if ( in ) {
+				perror("parent: inpipe");
+				exit(0);
+			}
+			out = mkfifo(fifo_out_path, S_IRWXU);	/*Create Output Pipe, 700*/
+			if ( out ) {
+				perror("parent: outpipe");
+				exit(0);
+			}
+						
+			in = open(fifo_in_path,O_RDONLY);	/*open the Input Pipe read Only*/
+			if(in < 0) {
+				perror("parent: input");
+				exit(0);
+			}
+			out = open(fifo_out_path,O_WRONLY); 	/*open the Output Pipe write Only*/
+			if(out < 0) {
+				perror("parent: output");
+				exit(0);
+			}
+			
+			*fdIn = in;	/*read*/
+			*fdOut = out;	/*write*/
+			*pid = tpid;	
+			return (1);     /* We are returning 0 for error... */
+		} else { /*pid < 0*/
+			setPerrorstatus("vfork");
+			return 0;
+		}
+
+    }
+#else /*HAVE x86*/
     int             fd[2][2], i, cnt;
     char            ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv,
         **aptr;
@@ -462,6 +516,7 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
         *fdOut = fd[0][1];
         return (1);             /* We are returning 0 for error... */
     }
+#endif				/* uClinux or x86 */
 #endif                          /* !HAVE_EXECV */
 #if defined(WIN32) && !defined (mingw32) && !defined(HAVE_EXECV)
 /* MSVC (MinGW not working but should use this code).  Cygwin already works as it has execv and fork */
