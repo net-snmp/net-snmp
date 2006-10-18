@@ -6,6 +6,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/agent_callbacks.h>
 #include "disman/event/mteObjects.h"
 #include "disman/event/mteObjectsConf.h"
 
@@ -29,6 +30,9 @@ init_mteObjectsConf(void)
      */
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                            store_mteOTable, NULL);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
+                           clear_mteOTable, NULL);
 }
 
 
@@ -148,5 +152,28 @@ store_mteOTable(int majorID, int minorID, void *serverarg, void *clientarg)
     }
 
     DEBUGMSGTL(("disman:event:conf", "  done.\n"));
+    return SNMPERR_SUCCESS;
+}
+
+int
+clear_mteOTable(int majorID, int minorID, void *serverarg, void *clientarg)
+{
+    netsnmp_tdata_row    *row;
+    netsnmp_variable_list owner_var;
+
+    /*
+     * We're only interested in entries set up via the config files
+     */
+    memset( &owner_var, 0, sizeof(netsnmp_variable_list));
+    snmp_set_var_typed_value( &owner_var,  ASN_OCTET_STR,
+                             "snmpd.conf", strlen("snmpd.conf"));
+    while (( row = netsnmp_tdata_row_next_byidx( objects_table_data,
+                                                &owner_var ))) {
+        /*
+         * XXX - check for owner of "snmpd.conf"
+         *       and break at the end of these
+         */
+        netsnmp_tdata_remove_and_delete_row( objects_table_data, row );
+    }
     return SNMPERR_SUCCESS;
 }

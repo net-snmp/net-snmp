@@ -18,5 +18,6 @@ void            parse_mteTBlTable(const char *, char *);
 void            parse_mteTThTable(const char *, char *);
 void            parse_mteTriggerTable(const char *, char *);
 SNMPCallback    store_mteTTable;
+SNMPCallback    clear_mteTTable;
 
 #endif                          /* MTETRIGGERCONF_H */
