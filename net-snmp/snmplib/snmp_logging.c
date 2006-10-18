@@ -126,6 +126,14 @@ init_snmp_logging(void)
 			 NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_LOG_TIMESTAMP);
 }
 
+void
+shutdown_snmp_logging(void)
+{
+   snmp_disable_log();
+   while(NULL != logh_head)
+      netsnmp_remove_loghandler( logh_head );
+}
+
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
  */
@@ -918,6 +926,7 @@ netsnmp_disable_loghandler( const char *token )
 int
 netsnmp_remove_loghandler( netsnmp_log_handler *logh )
 {
+    int i;
     if (!logh)
         return 0;
 
@@ -928,6 +937,12 @@ netsnmp_remove_loghandler( netsnmp_log_handler *logh )
 
     if (logh->next)
         logh->next->prev = logh->prev;
+
+    for (i=LOG_EMERG; i<=logh->priority; i++)
+        logh_priorities[i] = NULL;
+    SNMP_FREE(logh->token);
+    SNMP_FREE(logh);
+
     return 1;
 }
 
