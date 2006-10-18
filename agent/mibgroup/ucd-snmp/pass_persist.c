@@ -496,6 +496,12 @@ setPassPersist(int action,
                 return SNMP_ERR_NOTWRITABLE;
             } else if (!strncasecmp(buf, "wrong-type", 10)) {
                 return SNMP_ERR_WRONGTYPE;
+            } else if (!strncasecmp(buf, "wrong-length", 12)) {
+                return SNMP_ERR_WRONGLENGTH;
+            } else if (!strncasecmp(buf, "wrong-value", 11)) {
+                return SNMP_ERR_WRONGVALUE;
+            } else if (!strncasecmp(buf, "inconsistent-value", 18)) {
+                return SNMP_ERR_INCONSISTENTVALUE;
             }
             return SNMP_ERR_NOERROR;
         }
