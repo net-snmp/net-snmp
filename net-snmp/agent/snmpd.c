@@ -1063,6 +1063,9 @@ receive(void)
      */
     while (netsnmp_running) {
         if (reconfig) {
+#if HAVE_SIGHOLD
+            sighold(SIGHUP);
+#endif
             reconfig = 0;
             snmp_log(LOG_INFO, "Reconfiguring daemon\n");
 	    /*  Stop and restart logging.  This allows logfiles to be
@@ -1073,6 +1076,9 @@ receive(void)
 		     netsnmp_get_version());
             update_config();
             send_easy_trap(SNMP_TRAP_ENTERPRISESPECIFIC, 3);
+#if HAVE_SIGHOLD
+            sigrelse(SIGHUP);
+#endif
         }
 
         for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
