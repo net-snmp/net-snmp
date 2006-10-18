@@ -365,14 +365,24 @@ parse_mteMonitor(const char *token, char *line)
                 idx++;
                 cp     = copy_nword(cp, buf, SPRINT_MAX_LEN);
                 object = mteObjects_addOID( "snmpd.conf", tname, idx, buf, 0 );
-                idx    = object->mteOIndex;
+                if (!object) {
+                    snmp_log(LOG_ERR, "Unknown payload OID: %s\n", buf);
+                    config_perror("Unknown payload OID");
+                    mteObjects_removeEntries( "snmpd.conf", tname );
+                } else
+                    idx = object->mteOIndex;
                 break;
     
             case 'o':   /*  object  */
                 idx++;
                 cp     = copy_nword(cp, buf, SPRINT_MAX_LEN);
                 object = mteObjects_addOID( "snmpd.conf", tname, idx, buf, 1 );
-                idx    = object->mteOIndex;
+                if (!object) {
+                    snmp_log(LOG_ERR, "Unknown payload OID: %s\n", buf);
+                    config_perror("Unknown payload OID");
+                    mteObjects_removeEntries( "snmpd.conf", tname );
+                } else
+                    idx = object->mteOIndex;
                 break;
     
             case 'r':   /*  repeat frequency */
