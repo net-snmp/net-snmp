@@ -624,6 +624,7 @@ netsnmp_handler_registration_free(netsnmp_handler_registration *reginfo)
         SNMP_FREE(reginfo->handlerName);
         SNMP_FREE(reginfo->contextName);
         SNMP_FREE(reginfo->rootoid);
+        reginfo->rootoid_len = 0;
         SNMP_FREE(reginfo);
     }
 }
