@@ -956,10 +956,17 @@ agentx_check_session(unsigned int clientreg, void *clientarg)
         snmp_alarm_unregister(clientreg);       /* delete ping alarm timer */
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_INDEX_STOP, (void *) ss);
-        snmp_close(main_session);
         register_mib_detach();
+        if (main_session != NULL) {
+            remove_trap_session(ss);
+        snmp_close(main_session);
         main_session = NULL;
         agentx_reopen_session(0, NULL);
+        }
+        else {
+            snmp_close(main_session);
+            main_session = NULL;
+        }
     } else {
         DEBUGMSGTL(("agentx/subagent", "session %p responded to ping\n",
                     ss));
