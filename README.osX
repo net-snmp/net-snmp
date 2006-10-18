@@ -26,22 +26,28 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
          "-I -icmp" to the snmpd command line.
 
 
-  - 10.4.7 (Universal) and Leopard:
+  - 10.4.7 (Universal) and Leopard with 5.4 sources:
         [Supplied by Chris Jalbert]
 
-       - configure using:
-                        --with-mib-modules="host ucd-snmp/diskio" \
+       - build using gcc 4.0 (see below) and configure using:
+                        --with-persistent-directory=/var/db/net-snmp \
+                        --with-defaults \
+                        --without-rpm \
+                        --with-mib-modules="hardware/memory hardware/cpu host ucd-snmp/diskio ucd-snmp/loadave ucd-snmp/memory" \
                         --with-out-mib-modules="mibII/icmp host/hr_swrun" \
-                        --disable-embedded-perl \
-                        --disable-ucd-snmp-compatibility \
+                        --disable-static \
                         --enable-mini-agent \
                         --without-kmem-usage
 
-       The first line is because those modules appear to build properly;
-       the next line is necessary because those sub-modules don't.
+       The first line sets up persistent storage in the OS X standard location.
 
-       I disable Perl because of the information above, and ucd-snmp because
-       we don't use it (and we prefer our customers use the "modern" stuff).
+       The third line is necessary because RPM is not properly disabled.
+
+       The fourth line includes those modules appear to build properly and
+       mostly work. The next line is necessary because those sub-modules
+       do not build.
+
+       I disable static libraries because we don't use them.
 
        The final two lines are necessary because /dev/kmem was removed in
        the Intel / Universal builds of the OS, and I believe the APIs will
