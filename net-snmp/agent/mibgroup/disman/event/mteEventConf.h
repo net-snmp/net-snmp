@@ -15,5 +15,6 @@ void            parse_mteETable(   const char *, char *);
 void            parse_mteENotTable(const char *, char *);
 void            parse_mteESetTable(const char *, char *);
 SNMPCallback    store_mteETable;
+SNMPCallback    clear_mteETable;
 
 #endif                          /* MTEEVENTCONF_H */
