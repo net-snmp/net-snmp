@@ -857,7 +857,6 @@ snmp_shutdown(const char *type)
 {
     snmp_store(type);
     snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN, NULL);
-    shutdown_snmp_logging();
     snmp_alarm_unregister_all();
     snmp_close_sessions();
 #ifndef DISABLE_MIB_LOADING
