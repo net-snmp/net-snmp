@@ -6,6 +6,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/agent_callbacks.h>
 #include "utilities/iquery.h"
 #include "disman/event/mteObjects.h"
 #include "disman/event/mteTrigger.h"
@@ -56,6 +57,9 @@ init_mteTriggerConf(void)
      */
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                            store_mteTTable, NULL);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
+                           clear_mteTTable, NULL);
 }
 
 /* ==============================
@@ -1460,5 +1464,16 @@ store_mteTTable(int majorID, int minorID, void *serverarg, void *clientarg)
     }
 
     DEBUGMSGTL(("disman:event:conf", "  done.\n"));
+    return SNMPERR_SUCCESS;
+}
+
+int
+clear_mteTTable(int majorID, int minorID, void *serverarg, void *clientarg)
+{
+    netsnmp_tdata_row *row;
+
+    while (( row = netsnmp_tdata_row_first( trigger_table_data ))) {
+        netsnmp_tdata_remove_and_delete_row( trigger_table_data, row );
+    }
     return SNMPERR_SUCCESS;
 }
