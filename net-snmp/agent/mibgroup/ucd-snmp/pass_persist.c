@@ -274,6 +274,7 @@ var_extensible_pass_persist(struct variable *vp,
             /*
              * valid call.  Exec and get output 
              */
+		
             if ((file = persist_pipes[i].fIn)) {
                 if (fgets(buf, sizeof(buf), file) == NULL) {
                     *var_len = 0;
@@ -310,7 +311,6 @@ var_extensible_pass_persist(struct variable *vp,
                     close_persist_pipe(i);
                     return (NULL);
                 }
-
                 /*
                  * buf contains the return type, and buf2 contains the data 
                  */
@@ -752,6 +752,18 @@ write_persist_pipe(int iindex, const char *data)
 static void
 close_persist_pipe(int iindex)
 {
+/*	Alexander Prömel, alexander@proemel.de 08/24/2006
+	The hard coded pathnames, are temporary.
+	I'll fix it soon.
+	If you changed them here, you have to do it in ../util_funcs.c too.
+*/
+#ifdef __uClinux__
+	char fifo_in_path[256];
+	char fifo_out_path[256];
+
+	snprintf(fifo_in_path, 256, "/flash/cp_%d", persist_pipes[iindex].pid);
+	snprintf(fifo_out_path, 256, "/flash/pc_%d", persist_pipes[iindex].pid);
+#endif
 
     /*
      * Check and nix every item 
@@ -772,6 +784,12 @@ close_persist_pipe(int iindex)
         close(persist_pipes[iindex].fdIn);
         persist_pipes[iindex].fdIn = -1;
     }
+#ifdef __uClinux__
+	/*remove the pipes*/
+	unlink(fifo_in_path);
+	unlink(fifo_out_path);
+#endif
+
     if (persist_pipes[iindex].pid != -1) {
 #if HAVE_SYS_WAIT_H
         waitpid(persist_pipes[iindex].pid, 0, 0);
