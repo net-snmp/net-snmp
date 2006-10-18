@@ -89,10 +89,14 @@ netsnmp_subtree_free(netsnmp_subtree *a)
       SNMP_FREE(a->variables);
     }
     SNMP_FREE(a->name_a);
+    a->namelen = 0;
     SNMP_FREE(a->start_a);
+    a->start_len = 0;
     SNMP_FREE(a->end_a);
+    a->end_len = 0;
     SNMP_FREE(a->label_a);
     netsnmp_handler_registration_free(a->reginfo);
+    a->reginfo = NULL;
     SNMP_FREE(a);
   }
 }
