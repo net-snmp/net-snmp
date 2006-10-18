@@ -5353,6 +5353,12 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     }
   } else {
     if (sp->callback) {
+    /* to avoid subagent crash */ 
+    if (transport->sock < 0) { 
+        snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);
+        return 0; 
+    }
+
       /*
        * MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); 
        */
