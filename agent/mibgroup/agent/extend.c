@@ -3,6 +3,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/watcher.h>
+#include <net-snmp/agent/agent_callbacks.h>
 
 #include "agent/extend.h"
 #include "utilities/execute.h"
@@ -26,6 +27,7 @@ typedef struct extend_registration_block_s {
     size_t              oid_len;
     long                num_entries;
     netsnmp_extend     *ehead;
+    netsnmp_handler_registration       *reg[3];
     struct extend_registration_block_s *next;
 } extend_registration_block;
 extend_registration_block *ereg_head = NULL;
@@ -117,6 +119,7 @@ _register_extend( oid *base, size_t len )
                 "nsExtendConfigTable", handle_nsExtendConfigTable, 
                 oid_buf, len+1, HANDLER_CAN_RWRITE);
     netsnmp_register_table_data( reg, dinfo, tinfo );
+    eptr->reg[0] = reg;
 
         /*
          * Register the main output table
@@ -133,6 +136,7 @@ _register_extend( oid *base, size_t len )
                 "nsExtendOut1Table", handle_nsExtendOutput1Table, 
                 oid_buf, len+1, HANDLER_CAN_RONLY);
     netsnmp_register_table_data( reg, dinfo, tinfo );
+    eptr->reg[1] = reg;
 
         /*
          * Register the multi-line output table
@@ -151,6 +155,7 @@ _register_extend( oid *base, size_t len )
                 "nsExtendOut2Table", handle_nsExtendOutput2Table, 
                 oid_buf, len+1, HANDLER_CAN_RONLY);
     netsnmp_register_table( reg, tinfo );
+    eptr->reg[2] = reg;
 
         /*
          * Register a watched scalar to keep track of the number of entries
@@ -165,6 +170,23 @@ _register_extend( oid *base, size_t len )
     netsnmp_register_watched_scalar( reg, winfo );
 
     return eptr;
+}
+
+int
+extend_clear_callback(int majorID, int minorID,
+                    void *serverarg, void *clientarg)
+{
+    extend_registration_block *eptr, *enext = NULL;
+
+    for ( eptr=ereg_head; eptr; eptr=enext ) {
+        enext=eptr->next;
+        netsnmp_unregister_handler( eptr->reg[0] );
+        netsnmp_unregister_handler( eptr->reg[1] );
+        netsnmp_unregister_handler( eptr->reg[2] );
+        SNMP_FREE(eptr);
+    }
+    ereg_head = NULL;
+    return 0;
 }
 
 void init_extend( void )
@@ -186,6 +208,10 @@ void init_extend( void )
     REGISTER_MIB("ucd-extensible", old_extensible_variables,
                  variable2, old_extensible_variables_oid);
 #endif
+
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
+                           extend_clear_callback, NULL);
 }
 
         /*************************
