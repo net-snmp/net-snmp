@@ -126,6 +126,6 @@ print "updated default_store.xs\n";
 #
 # remove the temp files.
 #
-system("rm -rf NetSNMP");
+system("rm -rf NetSNMP-default_store");
 unlink("default_store.h");
 
