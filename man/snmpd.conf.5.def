@@ -1079,8 +1079,11 @@ If the assignment is successful, the command should print
 "DONE\\n" to stdout.
 Errors should be indicated by writing one of the strings
 .B not-writable, 
-or 
-.B wrong-type
+.B wrong-type,
+.B wrong-length,
+.B wrong-value
+or
+.B inconsistent-value
 to stdout,
 and the agent will generate the appropriate error response.
 In either case, the command should continue running.
