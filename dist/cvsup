@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # $Id$
 #
@@ -7,21 +7,21 @@ TAG=
 WO=0
 DEST=
 
-# gnu tar (as of 1.15.1) is unable to create portable tar archives, 
-# especially if long file names (>100 char) are present.
-# star is a better replacement.
-if [ -x /usr/bin/star ]; then
-    TAR='/usr/bin/star -Hustar -not -pat="*/CVS/*" -c -f'
-elif [ -x /bin/tar ]; then
-    TAR="/bin/tar --exclude=CVS -c -f"
-else
-    echo "neither /usr/bin/star nor /bin/tar found."
-    exit
-fi
-
 if [ "x$1" = "x-u" ]; then
     DEST=$2
     shift 2
+
+    # gnu tar (as of 1.15.1) is unable to create portable tar archives, 
+    # especially if long file names (>100 char) are present.
+    # star is a better replacement.
+    if [ -x /usr/bin/star ]; then
+        TAR='/usr/bin/star -Hustar -not -pat="*/CVS/*" -c -f'
+    elif [ -x /bin/tar ]; then
+        TAR="/bin/tar --exclude=CVS -c -f"
+    else
+        echo "neither /usr/bin/star nor /bin/tar found."
+        exit
+    fi
 fi
 
 if [ $# -eq 0 ]; then
