@@ -5353,12 +5353,6 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     sptr = find_sec_mod(pdu->securityModel);
     if (sptr) {
       if (sptr->pdu_free_state_ref) {
-    /* to avoid subagent crash */ 
-    if (transport->sock < 0) { 
-        snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);
-        return 0; 
-    }
-
 	(*sptr->pdu_free_state_ref) (pdu->securityStateRef);
       } else {
 	snmp_log(LOG_ERR,
@@ -5421,6 +5415,12 @@ _sess_read(void *sessp, fd_set * fdset)
     if (!sp || !isp || !transport) {
         DEBUGMSGTL(("sess_read", "read fail: closing...\n"));
         return 0;
+    }
+
+    /* to avoid subagent crash */ 
+    if (transport->sock < 0) { 
+        snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);
+        return 0; 
     }
 
     if (!fdset || !(FD_ISSET(transport->sock, fdset))) {
