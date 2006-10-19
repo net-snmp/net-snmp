@@ -88,103 +88,82 @@ config_exclude(mibII/interfaces)
         /*
          * ifDescr(2)/DisplayString/ASN_OCTET_STR/char(char)//L/A/w/e/R/d/h
          */
-#define ifDescr ifentry->descr
 
         /*
          * ifType(3)/INTEGER/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
          */
-#define ifType ifentry->type
 
         /*
          * ifMtu(4)/INTEGER/ASN_INTEGER/long(long)//l/A/w/e/r/d/h
          */
-#define ifMtu ifentry->mtu
 
         /*
          * ifSpeed(5)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifSpeed ifentry->speed
 
         /*
          * ifPhysAddress(6)/PhysAddress/ASN_OCTET_STR/char(char)//L/A/w/e/r/d/h
          */
-#define ifPhysAddress ifentry->paddr
-#define ifPhysAddress_len ifentry->paddr_len    /* # of char elements, not bytes */
 
         /*
          * ifAdminStatus(7)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
          */
-#define ifAdminStatus ifentry->admin_status
 
         /*
          * ifOperStatus(8)/INTEGER/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
          */
-#define ifOperStatus ifentry->oper_status
 
         /*
          * ifLastChange(9)/TICKS/ASN_TIMETICKS/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifLastChange ifentry->lastchange
 
         /*
          * ifInOctets(10)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInOctets ifentry->stats.ibytes.low
 
         /*
          * ifInUcastPkts(11)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInUcastPkts ifentry->stats.iucast.low
 
         /*
          * ifInNUcastPkts(12)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInNUcastPkts ifentry->stats.inucast
 
         /*
          * ifInDiscards(13)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInDiscards ifentry->stats.idiscards
 
         /*
          * ifInErrors(14)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInErrors ifentry->stats.ierrors
 
         /*
          * ifInUnknownProtos(15)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInUnknownProtos ifentry->stats.iunknown_protos
 
         /*
          * ifOutOctets(16)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutOctets ifentry->stats.obytes.low
 
         /*
          * ifOutUcastPkts(17)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutUcastPkts ifentry->stats.oucast.low
 
         /*
          * ifOutNUcastPkts(18)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutNUcastPkts ifentry->stats.onucast
 
         /*
          * ifOutDiscards(19)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutDiscards ifentry->stats.odiscards
 
         /*
          * ifOutErrors(20)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutErrors ifentry->stats.oerrors
 
         /*
          * ifOutQLen(21)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutQLen ifentry->stats.oqlen
 
         /*
          * ifSpecific(22)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/A/w/e/r/d/h
@@ -201,67 +180,54 @@ config_exclude(mibII/interfaces)
         /*
          * ifName(1)/DisplayString/ASN_OCTET_STR/char(char)//L/A/w/e/R/d/H
          */
-#define ifName ifentry->name
 
         /*
          * ifInMulticastPkts(2)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInMulticastPkts ifentry->stats.imcast.low
 
         /*
          * ifInBroadcastPkts(3)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInBroadcastPkts ifentry->stats.ibcast.low
 
         /*
          * ifOutMulticastPkts(4)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutMulticastPkts ifentry->stats.omcast.low
 
         /*
          * ifOutBroadcastPkts(5)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutBroadcastPkts ifentry->stats.obcast.low
 
         /*
          * ifHCInOctets(6)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCInOctets ifentry->stats.ibytes
 
         /*
          * ifHCInUcastPkts(7)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCInUcastPkts ifentry->stats.iucast
 
         /*
          * ifHCInMulticastPkts(8)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCInMulticastPkts ifentry->stats.imcast
 
         /*
          * ifHCInBroadcastPkts(9)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCInBroadcastPkts ifentry->stats.ibcast
 
         /*
          * ifHCOutOctets(10)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCOutOctets ifentry->stats.obytes
 
         /*
          * ifHCOutUcastPkts(11)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCOutUcastPkts ifentry->stats.oucast
 
         /*
          * ifHCOutMulticastPkts(12)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCOutMulticastPkts ifentry->stats.omcast
 
         /*
          * ifHCOutBroadcastPkts(13)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCOutBroadcastPkts ifentry->stats.obcast
 
         /*
          * ifLinkUpDownTrapEnable(14)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
@@ -271,17 +237,14 @@ config_exclude(mibII/interfaces)
         /*
          * ifHighSpeed(15)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifHighSpeed ifentry->speed_high
 
         /*
          * ifPromiscuousMode(16)/TruthValue/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
          */
-#define ifPromiscuousMode ifentry->promiscuous
 
         /*
          * ifConnectorPresent(17)/TruthValue/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
          */
-#define ifConnectorPresent ifentry->connector_present
 
         /*
          * ifAlias(18)/DisplayString/ASN_OCTET_STR/char(char)//L/A/W/e/R/d/H

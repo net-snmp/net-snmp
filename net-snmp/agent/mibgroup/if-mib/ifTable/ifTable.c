@@ -21,6 +21,7 @@
  * include our parent header 
  */
 #include "ifTable.h"
+#include "ifTable_defs.h"
 
 #include <net-snmp/agent/mib_modules.h>
 
