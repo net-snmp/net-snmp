@@ -133,7 +133,7 @@ snmpd$(EXEEXT):	${LAGENTOBJS} $(USELIBS) $(HELPERLIB) $(LIBTARG) ${INSTALLLIBS}
 
 
 libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LLIBAGENTOBJS}
-	$(LIB_LD_CMD) libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) ${LLIBAGENTOBJS}  $(LIB_LD_LIBS) helpers/libnetsnmphelpers.la
+	$(LIB_LD_CMD) libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) ${LLIBAGENTOBJS}  $(LIB_LD_LIBS)
 	$(RANLIB) libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
 
 libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
