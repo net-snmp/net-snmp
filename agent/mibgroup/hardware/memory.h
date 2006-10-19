@@ -3,6 +3,9 @@ config_require(hardware/memory/hw_mem)
 #if defined(linux)
 config_require(hardware/memory/memory_linux)
 
+#elif (defined(darwin7) || defined(darwin8) || defined(darwin9))
+config_require(hardware/memory/memory_darwin)
+
 #elif (defined(freebsd2) || defined(freebsd3) || defined(freebsd4)  || defined(freebsd5)|| defined(freebsd6))
 config_require(hardware/memory/memory_freebsd)
 
@@ -17,9 +20,6 @@ config_require(hardware/memory/memory_solaris)
 
 #elif (defined(irix6))
 config_require(hardware/memory/memory_irix)
-
-#elif (defined(darwin7) || defined(darwin8) || defined(darwin9))
-config_require(hardware/memory/memory_darwin)
 
 #elif (defined(dynix))
 config_require(hardware/memory/memory_dynix)
