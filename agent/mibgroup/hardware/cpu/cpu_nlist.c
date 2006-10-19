@@ -14,10 +14,12 @@
 #include <sys/resource.h>
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
+#ifdef HAVE_VM_VM_PARAM_H
 #include <vm/vm_param.h>
+#endif
+#ifdef HAVE_VM_VM_EXTERN_H
 #include <vm/vm_extern.h>
-
-#include <sys/sysctl.h>
+#endif
 
 #define CPU_SYMBOL  "cp_time"
 #define MEM_SYMBOL  "cnt"
