@@ -23,6 +23,7 @@
  * include our parent header 
  */
 #include "ifXTable.h"
+#include "if-mib/ifTable/ifTable_defs.h"
 
 #include <net-snmp/agent/mib_modules.h>
 
