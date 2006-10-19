@@ -27,11 +27,19 @@
 #define darwin 8
 
 /*
- * Enabling this forces the compiler to only use public APIs.
+ * Mac OS X should only use the modern API and definitions.
  */
-#ifndef __APPLE_API_STRICT_CONFORMANCE
-#define __APPLE_API_STRICT_CONFORMANCE 1
+#ifndef NETSNMP_NO_LEGACY_DEFINITIONS
+#define NETSNMP_NO_LEGACY_DEFINITIONS 1
 #endif
+
+/*
+ * (eventually) Enabling this forces the compiler to only use public APIs.
+ */
+/*#ifndef __APPLE_API_STRICT_CONFORMANCE
+ *#define __APPLE_API_STRICT_CONFORMANCE 1
+ *#endif
+ */
 
 /*
  * Although Darwin does have a kvm.h file, kvm_openfiles etc. always
@@ -68,5 +76,5 @@
  * i.e., IPv4 and IPv6 use the same structs.
  * This should eventually be replaced with a configure directive.
  */
-/* #define USE_UNIFIED_IPV6_STRUCTS 1 */
+//#define USE_UNIFIED_IPV6_STRUCTS 1
 #undef STRUCT_in6pcb_HAS_inp_vflag

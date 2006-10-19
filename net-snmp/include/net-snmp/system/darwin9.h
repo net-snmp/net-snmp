@@ -27,10 +27,20 @@
 #define darwin 9
 
 /*
- * Enabling this forces the compiler to only use public APIs.
+ * Mac OS X should only use the modern API and definitions.
+ */
+#ifndef NETSNMP_NO_LEGACY_DEFINITIONS
+#define NETSNMP_NO_LEGACY_DEFINITIONS 1
+#endif
+
+/*
+ * Enabling this restricts the compiler to mostly public APIs.
  */
 #ifndef __APPLE_API_STRICT_CONFORMANCE
 #define __APPLE_API_STRICT_CONFORMANCE 1
+#endif
+#ifndef __APPLE_API_UNSTABLE
+#define __APPLE_API_UNSTABLE 1
 #endif
 
 /*
