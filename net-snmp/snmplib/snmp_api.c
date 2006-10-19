@@ -5353,12 +5353,6 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     }
   } else {
     if (sp->callback) {
-    /* to avoid subagent crash */ 
-    if (transport->sock < 0) { 
-        snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);
-        return 0; 
-    }
-
       /*
        * MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); 
        */
@@ -5441,6 +5435,12 @@ _sess_read(void *sessp, fd_set * fdset)
     if (!sp || !isp || !transport) {
         DEBUGMSGTL(("sess_read", "read fail: closing...\n"));
         return 0;
+    }
+
+    /* to avoid subagent crash */ 
+    if (transport->sock < 0) { 
+        snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);
+        return 0; 
     }
 
     if (!fdset || !(FD_ISSET(transport->sock, fdset))) {
