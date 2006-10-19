@@ -5353,12 +5353,6 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
   return 0;
 }
 
-    /* to avoid subagent crash */ 
-    if (transport->sock < 0) { 
-        snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);
-        return 0; 
-    }
-
 /*
  * Checks to see if any of the fd's set in the fdset belong to
  * snmp.  Each socket with it's fd set has a packet read from it
@@ -5398,6 +5392,12 @@ _sess_read(void *sessp, fd_set * fdset)
     if (!sp || !isp || !transport) {
         DEBUGMSGTL(("sess_read", "read fail: closing...\n"));
         return 0;
+    }
+
+    /* to avoid subagent crash */ 
+    if (transport->sock < 0) { 
+        snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);
+        return 0; 
     }
 
     if (!fdset || !(FD_ISSET(transport->sock, fdset))) {
