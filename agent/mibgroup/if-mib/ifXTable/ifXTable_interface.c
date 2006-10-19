@@ -44,6 +44,7 @@
 
 #include "ifXTable_interface.h"
 #include "if-mib/ifTable/ifTable_interface.h"
+#include "if-mib/ifTable/ifTable_defs.h"
 
 #include <ctype.h>
 
