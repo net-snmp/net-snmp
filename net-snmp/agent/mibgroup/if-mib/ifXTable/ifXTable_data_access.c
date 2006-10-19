@@ -18,6 +18,7 @@
 
 
 #include "ifXTable_data_access.h"
+#include "if-mib/ifTable/ifTable_defs.h"
 
 /** @ingroup interface 
  * @addtogroup data_access data_access: Routines to access data
