@@ -15,6 +15,7 @@
  * include our parent header 
  */
 #include "ifTable.h"
+#include "ifTable_defs.h"
 
 #include "ifTable_data_access.h"
 
