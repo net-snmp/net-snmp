@@ -3,8 +3,9 @@ config_require(hardware/cpu/cpu)
 #if defined(linux)
 config_require(hardware/cpu/cpu_linux)
 
-#elif (defined(darwin6) || defined(darwin7))
-/* XXX: we need to come up with working code for OSX 10.2/10.3 */
+#elif defined(darwin)
+/* XXX: note this is a duplicate case (see darwin in net/open bsd below */
+/* XXX: we need to come up with working code for OSX */
 config_require(hardware/cpu/cpu_null)
 
 #elif (defined(netbsd) || defined(netbsd1) || defined(netbsdelf) || defined(netbsdelf2)|| defined(netbsdelf3) || defined(openbsd2)|| defined(openbsd3) || defined(openbsd4) || defined(darwin))
