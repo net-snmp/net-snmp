@@ -1,6 +1,6 @@
 /*
  *   nlist() interface
- *     e.g. Darwin, FreeBSD, OpenBSD
+ *     e.g. FreeBSD
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
