@@ -1,7 +1,738 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.4.pre2 -> V5.4.pre3
+Changes: V5.4.pre3 -> V5.4.pre4
 
+2006-10-19 22:10  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3,
+     netsnmp_agent_trap.3, netsnmp_asn1_packet_parse.3,
+     netsnmp_baby_steps.3, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3,
+     netsnmp_container.3, netsnmp_data_list.3,
+     netsnmp_debug.3, netsnmp_default_store.3,
+     netsnmp_handler.3, netsnmp_instance.3,
+     netsnmp_iterator_info_s.3, netsnmp_leaf.3,
+     netsnmp_library.3, netsnmp_mib_maintenance.3,
+     netsnmp_mib_utilities.3, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3,
+     netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3,
+     netsnmp_snmp_client.3, netsnmp_snmp_logging.3,
+     netsnmp_snmp_pdu.3, netsnmp_snmp_session.3,
+     netsnmp_stash_cache.3, netsnmp_stash_to_next.3,
+     netsnmp_table.3, netsnmp_table_array.3,
+     netsnmp_table_container.3, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_generic.3,
+     netsnmp_table_indexes.3, netsnmp_table_iterator.3,
+     netsnmp_table_iterator.h.3, netsnmp_table_maintenance.3
+, netsnmp_table_rows.3, netsnmp_tdata.3,
+     netsnmp_util.3, netsnmp_utilities.3,
+     netsnmp_variable_list.3, netsnmp_watcher.3:
+
+   documentation update
+
+2006-10-19 22:10  hardaker
+
+   * doxygen.conf:
+
+   - version tag ( 5.4.pre4 )
+
+2006-10-19 16:44  tanders
+
+   * agent/mibgroup/hardware/cpu/cpu_nlist.c:
+
+   fix up header inclusion a bit
+
+2006-10-19 15:38  rstory
+
+   * agent/mibgroup/hardware/memory.h:
+
+   test for darwing before freebsd, since darwin defines freebsd
+
+2006-10-19 14:42  hardaker
+
+   * agent/mibgroup/if-mib/ifXTable/: ifXTable.c,
+     ifXTable_data_access.c, ifXTable_interface.c:
+
+   fix broken bad evil ifTable.h usage
+
+2006-10-19 13:38  hardaker
+
+   * agent/mibgroup/if-mib/ifTable/: ifTable.c, ifTable.h
+, ifTable_data_access.c, ifTable_defs.h,
+     ifTable_interface.c:
+
+   don't let ifTable.h redefine random symbols affecting other code
+
+2006-10-19 08:50  hardaker
+
+   * agent/Makefile.in:
+
+   remove libhelpers from the link line of libagents
+
+2006-10-19 08:47  hardaker
+
+   * snmplib/snmp_api.c:
+
+   fix transport sock patch
+
+2006-10-19 07:15  hardaker
+
+   * include/net-snmp/system/: darwin8.h, darwin9.h:
+
+   CHANGES: snmpd: PATCH: 1579364: from jalbert: Updated darwin patch to fix compilation on Tiger and Leapord
+
+2006-10-18 16:52  alex_b
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Win32: winExtDLL:  Finish adding support for DLLs that support multiple
+   ranges.
+
+2006-10-18 14:11  dts12
+
+   * agent/mibgroup/disman/event/: mteEventConf.c,
+     mteEventConf.h, mteObjectsConf.c, mteObjectsConf.h
+, mteTriggerConf.c, mteTriggerConf.h:
+
+   Cleanly handle re-loading "monitor" (and related) directives.
+
+2006-10-18 14:09  dts12
+
+   * agent/mibgroup/disman/event/mteTriggerConf.c:
+
+   Handle invalid payload object OIDs.
+
+2006-10-18 12:07  dts12
+
+   * agent/mibgroup/agent/extend.c:
+
+   Cleanly handle re-loading "extend" directives.
+
+2006-10-18 07:45  rstory
+
+   * dist/cvsup:
+
+   - user /usr/bin/env for portability
+   - only test for tar if we're going to use it
+
+2006-10-18 03:29  tanders
+
+   * man/snmpd.conf.5.def:
+
+   document new pass_persist error messages introduced by patch 1568150
+
+2006-10-17 21:14  hardaker
+
+   * README.osX:
+
+   update from Chris Jalbert
+
+2006-10-17 20:19  hardaker
+
+   * agent/: agent_handler.c, agent_registry.c:
+
+   CHANGES: snmpd: PATCH 1565703: patch to fix rapid registrations/deregistration issues
+
+2006-10-17 20:12  hardaker
+
+   * agent/mibgroup/agentx/subagent.c:
+
+   NEWS: snmpd: PATCH 1562688: fix ping/reattach agentx code
+
+2006-10-17 20:03  hardaker
+
+   * snmplib/snmp_api.c:
+
+   CHANGES: snmplib: PATCH 1562168: check for a sock fd less than 0.
+
+2006-10-17 19:59  hardaker
+
+   * agent/mibgroup/: util_funcs.c, ucd-snmp/pass_persist.c
+:
+
+   using vfork and named pipes: NEWS: snmpd: PATCH: 1551948: from aproemel: Make pass_persist usable on uClinux
+
+2006-10-17 19:17  hardaker
+
+   * agent/mibgroup/ucd-snmp/pass_persist.c:
+
+   NEWS: snmpd: PATCH: 1568150: from gavin_han: Extend pass_persist error messages that can be passed back from the script
+
+2006-10-17 19:12  hardaker
+
+   * include/net-snmp/library/snmp_logging.h,
+     snmplib/snmp_api.c, snmplib/snmp_logging.c:
+
+   CHANGES: snmplib: PATCH: 1570650: from "Benoit Amiaux": create a logging shutdown function to propelry clean up log registrations if needed.
+
+2006-10-17 19:05  hardaker
+
+   * include/net-snmp/agent/table_iterator.h:
+
+   CHANGES: snmpd: PATCH: 1570650: from "Benoit Amiaux": make delete table function public
+
+2006-10-17 18:51  hardaker
+
+   * perl/SNMP/SNMP.xs:
+
+   CHANGES: perl: PATCH: 1575937: from martin987: fix usenumeric output in async varbinds so they return OIDs instead of empty strings.
+
+2006-10-17 18:46  hardaker
+
+   * agent/snmpd.c:
+
+   CHANGES: snmpd: PATCH: 1575984: from rtyle: block SIGHUP during reconfig
+
+2006-10-17 18:34  hardaker
+
+   * perl/default_store/gen:
+
+   remove correct sub directory
+
+2006-10-17 18:33  hardaker
+
+   * perl/agent/default_store/: default_store.pm,
+     default_store.xs, gen, test.pl:
+
+   update to latest ds_agent.h defines
+
+2006-10-17 16:53  hardaker
+
+   * perl/default_store/: default_store.pm, default_store.xs
+, gen, test.pl:
+
+   support latest h2xs; NEWS: perl: update default_store module to latest default_store c-binding tokens
+
+2006-10-17 16:05  hardaker
+
+   * Makefile.in:
+
+   remove config generated files on a make distclean
+
+2006-10-17 15:55  hardaker
+
+   * configure, configure.in, agent/Makefile.in
+:
+
+   properly fix the sed issues without removing functionality by using files instead of sed expressions
+
+2006-10-17 14:08  tanders
+
+   * agent/kernel.c:
+
+   make klookup debugging less verbose
+
+2006-10-17 13:32  tanders
+
+   * agent/kernel.c:
+
+   add klookup debugging
+
+2006-10-17 10:39  tanders
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   still build if kernel symbols undefined
+
+2006-10-17 09:16  dts12
+
+   * agent/snmp_agent.c, agent/mibgroup/ucd-snmp/proxy.c
+, include/net-snmp/agent/snmp_agent.h:
+
+   Associate errors from delegated requests with the correct varbind,
+   and fix problems with failed proxied requests timing out.
+   Reported by Pablo Passera  (See coders list - 5th Oct ff)
+
+2006-10-17 09:10  hardaker
+
+   * configure, configure.in:
+
+   NEWS: build: --enable-as-needed will try to link built libraries against needed libraries at library link time, rather than application link time.
+
+2006-10-17 07:55  hardaker
+
+   * configure.in:
+
+   remove duplicate 'compiler options' header in help output
+
+2006-10-17 07:26  tanders
+
+   * agent/mibgroup/host/hr_swrun.c:
+
+   back out host/hr_swrun part of the AIX jumbo patch since it overwrote a more complete, working implementation with a segfaulting one
+
+2006-10-16 16:36  tanders
+
+   * agent/mibgroup/ucd-snmp/loadave.c:
+
+   CHANGES: IRIX: proper implementation for UCD-SNMP-MIB::laTable (avoiding nlist)
+
+2006-10-16 11:43  marz
+
+   * python/netsnmp/: client.py, tests/test.py:
+
+   numeric and OID sets with testing
+
+2006-10-16 08:54  tanders
+
+   * agent/mibgroup/ucd-snmp/loadave.c:
+
+   disabling nlist shouldn't disable perfstat
+
+2006-10-16 08:21  tanders
+
+   * agent/mibgroup/mibII/at.c:
+
+   deal with missing ARPTAB_SIZE_SYMBOL
+
+2006-10-16 07:54  tanders
+
+   * include/net-snmp/system/osf5.h:
+
+   CHANGES: Tru64: - fix "auto_nlist failed on arptab_size at location 0" errors
+
+2006-10-15 17:23  alex_b
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Win32: winExtDLL fixes for snmpwalk / snmpgetnext.
+
+2006-10-15 14:44  dts12
+
+   * apps/snmptrapd_handlers.c:
+
+   Don't moan about normal connection-based transport activity
+   (and *do* moan sensibly about failed sends).
+
+2006-10-15 14:43  dts12
+
+   * snmplib/snmpTCPDomain.c:
+
+   Store TCP/IPv4 address information in the same format as UDP/IPv4.
+   This allows the community -> security name mapping to work correctly.
+   Fixes Bug #1571945.
+      A better (more modular) solution would be preferable (see discussions
+   on the mailing lists), but this should at least allow 5.4 to proceed.
+
+2006-10-15 10:03  tanders
+
+   * agent/kernel.h:
+
+   klookup takes three arguments, not one
+
+2006-10-14 14:28  tanders
+
+   * agent/: auto_nlist.c, kernel.h,
+     mibgroup/host/hr_swrun.c, mibgroup/mibII/at.c,
+     mibgroup/mibII/interfaces.c, mibgroup/mibII/ipAddr.c
+, mibgroup/mibII/ipv6.c, mibgroup/mibII/tcpTable.c
+, mibgroup/mibII/udpTable.c,
+     mibgroup/mibII/var_route.c:
+
+   prepare for 64-bit nlist changes
+
+2006-10-14 10:37  alex_b
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Win32: winExtDLL:  Fix OID sets, memory leaks.
+
+2006-10-14 06:49  alex_b
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Win32: winExtDLL: Use alarm instead of thread for traps.  Various trap
+   fixes.
+
+2006-10-13 16:13  alex_b
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Win32: winExtDLL:  Add trap support for remaining types, fix
+   ASN_IPADDRESS GET support.
+
+2006-10-13 15:16  tanders
+
+   * man/: snmpd.conf.5.def, snmpd.examples.5.def:
+
+   smuxsocket needs to be an IPv4 address
+
+2006-10-13 14:49  dts12
+
+   * README.osX:
+
+   Update with recent build reports from Chris Jalbert.
+
+2006-10-13 14:45  tanders
+
+   * testing/tests/: Sv3config, Sv3usmconfigagent,
+     Svanyconfig:
+
+   smuxsocket needs to be an IPv4 address
+
+2006-10-13 14:36  dts12
+
+   * agent/mibgroup/smux/smux.c:
+
+   Handle errors from recv() - see Bug #1527930
+
+2006-10-13 14:25  dts12
+
+   * man/snmpd.conf.5.def:
+
+   Explicitly referenced VNAME token when describing "view" token usage.
+   (Suggested by John Rouillard)
+
+2006-10-13 13:50  tanders
+
+   * perl/agent/default_store/: default_store.pm,
+     default_store.xs:
+
+   remove NETSNMP_DS_AGENT_H which isn't a default store variable
+
+2006-10-13 07:14  tanders
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   fix syntax typo
+
+2006-10-13 02:17  tanders
+
+   * agent/mibgroup/mibII/var_route.c:
+
+   don't commit boolean logic late at night
+
+2006-10-13 01:28  dts12
+
+   * man/snmpd.conf.5.def:
+
+   Clarify the parsing of boolean "monitor" expressions.
+
+2006-10-12 15:43  rstory
+
+   * agent/mibgroup/hardware/memory.h:
+
+   use memory_darwin for darwin7
+
+2006-10-12 15:21  dts12
+
+   * agent/mibgroup/utilities/iquery.c:
+
+   Ensure internal query configuration is available (and active)
+   *before* monitor directives attempt to use it.
+
+2006-10-12 15:19  tanders
+
+   * agent/mibgroup/mibII/var_route.c:
+
+   build fix for systems with no RTHOST_SYMBOL or no RTNET_SYMBOL (like AIX)
+
+2006-10-12 09:12  tanders
+
+   * agent/auto_nlist.c:
+
+   fix typo
+
+2006-10-12 09:03  tanders
+
+   * include/net-snmp/system/aix.h:
+
+   CHANGES: AIX: use correct ARPTAB_SYMBOL and ARPTAB_SIZE_SYMBOL
+
+2006-10-12 08:13  tanders
+
+   * agent/auto_nlist.c, include/net-snmp/system/aix.h:
+
+   CHANGES: AIX: BUG 1205300: nlist err: neither nproc nor _nproc found (same for rt_table, rthashsize, rthost, rtnet)
+
+2006-10-12 04:54  dts12
+
+   * configure.in, configure, agent/Makefile.in
+:
+
+   Suppress the substitution of the list of module header files.
+   This is purely a temporary stop-gap fix, to handle sed commands which
+   choke on over-long substitutions.  A better approach is needed.
+
+2006-10-12 04:40  dts12
+
+   * NEWS:
+
+   Document Hardware Abstraction Layer (including behaviour changes).
+
+2006-10-12 03:03  dts12
+
+   * agent/mibgroup/disman/event/mteTriggerTable.c:
+
+   Fix handling of assignments to mteTriggerValueID
+       [Bug #1574713, Patch #1574743, from Ross Tyler]
+
+2006-10-12 02:54  dts12
+
+   * Makefile.in, acconfig.h,
+     agent/mibgroup/host/hr_storage.c,
+     include/net-snmp/net-snmp-config.h.in,
+     include/net-snmp/system/darwin9.h:
+
+   Tweaks for Darwin 9 support - [Patch #1575433, from Chris Jalbert]
+
+2006-10-12 02:44  dts12
+
+   * include/net-snmp/system/darwin8.h:
+
+   Updated system header file for Darwin8 - [Patch 1575430, by Chris Jalbert]
+
+2006-10-12 02:17  dts12
+
+   * agent/mibgroup/hardware/: cpu.h, memory.h:
+
+   Include the appropriate HAL modules for Darwin (Darwin9) systems.
+   Supplied by Chris Jalbert.
+
+2006-10-11 09:21  rstory
+
+   * NEWS:
+
+   - add note that --enable-mfd-rewrites is needed for experimental if-mib ports
+   - remove line on patch to previously unrelease code
+
+2006-10-11 09:14  rstory
+
+   * include/net-snmp/system/: freebsd.h, openbsd.h:
+
+   include if-mib rewrites if mfd rewrites is defined
+
+2006-10-11 08:02  rstory
+
+   * include/net-snmp/system/solaris.h:
+
+   include if-mib rewrites if mfd rewrites is defined
+
+2006-10-10 17:12  tanders
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+   PrivoxyWindowOpen? Must have been missing a major feature addition:-)
+
+2006-10-10 15:32  tanders
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+   fix typos
+
+2006-10-10 14:13  tanders
+
+   * agent/mibgroup/: kernel_sunos5.c, kernel_sunos5.h,
+     tcp-mib/data_access/tcpConn.h,
+     tcp-mib/data_access/tcpConn_solaris2.c,
+     udp-mib/data_access/udp_endpoint.h,
+     udp-mib/data_access/udp_endpoint_solaris2.c:
+
+   NEWS: Solaris: PATCH: 1569537,1569539: new UDP-MIB and TCP-MIB implementation (enable through --with-mib-modules=udp-mib,tcp-mib)
+
+2006-10-10 13:14  rstory
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+   NEWS: snmpd: PATCH: 1570982 Solaris IF-MIB: Support for IPv6-only interfaces
+
+2006-10-10 07:32  tanders
+
+   * configure.in, configure,
+     include/net-snmp/net-snmp-config.h.in:
+
+   check for pread64 (AIX) and nlist64 (IRIX)
+
+2006-10-10 06:16  tanders
+
+   * acconfig.h, include/net-snmp/net-snmp-config.h.in:
+
+   add missing STRUCT_NLIST64_HAS_N_VALUE variable so that the test result is actually saved
+
+2006-10-10 03:52  tanders
+
+   * net-snmp-config.in:
+
+   fix shell syntax errors reported by Richard Chonak
+
+2006-10-09 06:10  tanders
+
+   * testing/tests/T150solarishostcpu:
+
+   more robust Solaris CPU testing: the index for the first CPU may vary across systems (CPU 0 = index 768, CPU 1 = index 769 etc.)
+
+2006-10-09 04:21  tanders
+
+   * dist/nsb-functions:
+
+   don't fail on DEBUGMSG*
+
+2006-10-08 13:25  dts12
+
+   * agent/mibgroup/hardware/: cpu.h, cpu/cpu_pstat.c:
+
+   Activate pstat-based CPU handling on HP-UX systems.
+
+2006-10-08 13:24  dts12
+
+   * include/net-snmp/system/hpux.h:
+
+   Don't redefine an existing token without undefining it first.
+
+2006-10-08 13:23  dts12
+
+   * agent/mibgroup/ucd-snmp/vmstat.c:
+
+   Ensure that historical data is available before we attempt to use it.
+
+2006-10-07 14:54  dts12
+
+   * snmplib/check_varbind.c:
+
+   Fix size check for specialised integer-based assignments.
+   (Bug #1572394 - patch provided by Phil Wilson)
+
+2006-10-07 06:49  dts12
+
+   * testing/tests/: T150solarishostcpu, T153solarisswap:
+
+   Adjust to changes in certain HostRes indexing.
+
+2006-10-05 15:44  dts12
+
+   * configure.in, configure:
+
+   What's a stray underscore here or there between friends?
+
+2006-10-05 08:53  dts12
+
+   * agent/mibgroup/hardware/cpu/: cpu.c, cpu_kstat.c:
+
+   Debugging code.
+
+2006-10-05 08:52  dts12
+
+   * agent/mibgroup/hardware/cpu/cpu_kstat.c:
+
+   Be consistent in the use of CPU indexing.
+
+2006-10-04 15:07  dts12
+
+   * agent/mibgroup/hardware/: memory.h, memory/memory_null.c
+:
+
+   Allow systems without an explicit HAL memory module to compile
+   (even if the agent can't report the relevant statistics).
+
+2006-10-04 14:51  dts12
+
+   * agent/mibgroup/hardware/: cpu.h, cpu/cpu_kstat.c:
+
+   Include kstat-based CPU processing on Solaris systems, and amend this code
+   to actually compile/work.  (Much of this supplied by Bruce Shaw)
+
+2006-10-03 11:30  dts12
+
+   * configure, configure.in:
+
+   Test for the actual behaviour of -Ux -Dx=x, and only use this if it works as expected.
+
+2006-10-01 08:43  alex_b
+
+   * win32/dist/installer/net-snmp.nsi:
+
+   Win32:  Add NSIS installer option for installing winExtDLL version of
+   snmpd.exe
+
+2006-10-01 06:42  alex_b
+
+   * NEWS, README.win32, agent/mibgroup/winExtDLL.c
+:
+
+   Win32:  Add trap support to winExtDLL and clean up debugging output.
+
+2006-09-29 19:00  alex_b
+
+   * README.win32, agent/mibgroup/winExtDLL.c:
+
+   Win32:  Remove winExtDLL snmpd.conf option, add SNMP v2 support.
+
+2006-09-29 13:28  marz
+
+   * python/netsnmp/: client_intf.c, tests/test.py:
+
+   test fix
+
+2006-09-29 13:18  hardaker
+
+   * python/netsnmp/: client_intf.c, client_intf.c:
+
+   remove debugging statements
+
+2006-09-29 13:18  hardaker
+
+   * python/netsnmp/tests/test.py:
+
+   testing updates
+
+2006-09-29 13:03  hardaker
+
+   * python/: README, netsnmp/client.py,
+     netsnmp/client_intf.c, netsnmp/tests/test.py:
+
+   support for a generic walk wrapper
+
+2006-09-29 12:31  marz
+
+   * python/netsnmp/: client_intf.c, tests/test.py:
+
+   cleanup
+
+2006-09-28 18:50  marz
+
+   * python/: README, netsnmp/client_intf.c:
+
+   added 'set' method, fixes/additions to readme
+
+2006-09-27 23:02  tanders
+
+   * agent/mibgroup/hardware/memory/memory_darwin.c:
+
+   CHANGES: MacOSX: PATCH: 1566777: from jalbert: build fixes for memory_darwin.c
+
+2006-09-27 15:21  tanders
+
+   * configure, configure.in:
+
+   minor rewording
+
+2006-09-27 14:32  hardaker
+
+   * FAQ, README, configure, configure.in
+, sedscript.in, snmplib/snmp_version.c,
+     dist/net-snmp.spec:
+
+   - version tag ( 5.4.pre3 )
+
+-------------------------------------------------------------------------------
+
+Changes: V5.4.pre2 -> V5.4.pre3
+	
 2006-09-27 14:28  hardaker
 
    * man/: netsnmp_agent.3, netsnmp_agent_registry.3,
