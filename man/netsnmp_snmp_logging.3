@@ -1,4 +1,4 @@
-.TH "generic logging for net-snmp" 3 "27 Sep 2006" "Version 5.4.pre3" "net-snmp" \" -*- nroff -*-
+.TH "generic logging for net-snmp" 3 "19 Oct 2006" "Version 5.4.pre4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -60,6 +60,9 @@ generic logging for net-snmp \-
 .br
 .ti -1c
 .RI "void \fBinit_snmp_logging\fP (void)"
+.br
+.ti -1c
+.RI "void \fBshutdown_snmp_logging\fP (void)"
 .br
 .ti -1c
 .RI "int \fBdecode_priority\fP (char *optarg, int *pri_max)"
@@ -189,7 +192,7 @@ generic logging for net-snmp \-
 .PP
 hmm, don't zero status isn't saved.. i think it's safer not to overwrite, in case a hup is just to re-read config files... 
 .PP
-Definition at line 605 of file snmp_logging.c.
+Definition at line 613 of file snmp_logging.c.
 .PP
 References netsnmp_log_handler_s::enabled, logh_head, netsnmp_log_handler_s::next, snmp_disable_syslog_entry(), snmp_enable_syslog_ident(), and netsnmp_log_handler_s::type.
 .SS "int snmp_get_do_logging (void)"
@@ -203,7 +206,7 @@ Returns 0 if logging is off, 1 when it is done.
 .PP
 
 .PP
-Definition at line 462 of file snmp_logging.c.
+Definition at line 470 of file snmp_logging.c.
 .PP
 References netsnmp_log_handler_s::enabled, logh_head, and netsnmp_log_handler_s::next.
 .PP
@@ -225,7 +228,7 @@ Calls the snmp_vlog function. The default logfile this function writes to is /va
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 1237 of file snmp_logging.c.
+Definition at line 1252 of file snmp_logging.c.
 .PP
 References snmp_vlog().
 .PP
@@ -286,7 +289,7 @@ Returns 0 on success, -1 when the code could not format the log- string, -2 when
 .PP
 
 .PP
-Definition at line 1176 of file snmp_logging.c.
+Definition at line 1191 of file snmp_logging.c.
 .PP
 References LOGLENGTH, NULL, snmp_log_string(), va_copy, and vsnprintf().
 .PP
