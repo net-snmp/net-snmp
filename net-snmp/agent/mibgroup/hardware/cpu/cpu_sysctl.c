@@ -1,6 +1,6 @@
 /*
  *   sysctl() interface
- *     e.g. BSD/OS
+ *     e.g. BSD/OS, NetBSD, OpenBSD, later Darwin releases
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
