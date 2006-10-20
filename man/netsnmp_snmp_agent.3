@@ -1,4 +1,4 @@
-.TH "net-snmp agent related processing" 3 "27 Sep 2006" "Version 5.4.pre3" "net-snmp" \" -*- nroff -*-
+.TH "net-snmp agent related processing" 3 "19 Oct 2006" "Version 5.4.pre4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -228,6 +228,10 @@ net-snmp agent related processing \-
 .RI "int \fBnetsnmp_request_set_error\fP (\fBnetsnmp_request_info\fP *request, int error_value)"
 .br
 .RI "\fIset error for a request \fP"
+.ti -1c
+.RI "int \fBnetsnmp_request_set_error_idx\fP (\fBnetsnmp_request_info\fP *request, int error_value, int idx)"
+.br
+.RI "\fIset error for a request within a request list \fP"
 .ti -1c
 .RI "NETSNMP_INLINE int \fBnetsnmp_request_set_error_all\fP (\fBnetsnmp_request_info\fP *requests, int error)"
 .br
@@ -503,11 +507,29 @@ SNMPERR_SUCCESS, or an error code
 .PP
 paranoid sanity checks 
 .PP
-Definition at line 3434 of file snmp_agent.c.
+Definition at line 3462 of file snmp_agent.c.
 .PP
 References _request_set_error(), netsnmp_request_info_s::agent_req_info, netsnmp_agent_request_info_s::mode, netsnmp_request_info_s::next, NULL, and snmp_log().
 .PP
 Referenced by netsnmp_cache_helper_handler(), netsnmp_multiplexer_helper_handler(), netsnmp_read_only_helper(), and netsnmp_set_all_requests_error().
+.SS "int netsnmp_request_set_error_idx (\fBnetsnmp_request_info\fP * request, int error_value, int idx)"
+.PP
+set error for a request within a request list 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrequest\fP head of the request list 
+.br
+\fIerror_value\fP error value for request 
+.br
+\fIidx\fP index of the request which has the error 
+.RE
+.PP
+
+.PP
+Definition at line 3434 of file snmp_agent.c.
+.PP
+References netsnmp_request_info_s::agent_req_info, and netsnmp_request_info_s::next.
 .SS "int netsnmp_set_all_requests_error (\fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests, int error_value)"
 .PP
 set error for all request 
@@ -533,7 +555,7 @@ error_value
 .PP
 
 .PP
-Definition at line 3608 of file snmp_agent.c.
+Definition at line 3636 of file snmp_agent.c.
 .PP
 References netsnmp_request_set_error_all().
 .SS "int netsnmp_set_mode_request_error (int mode, \fBnetsnmp_request_info\fP * request, int error_value)"
@@ -561,7 +583,7 @@ error_value
 .PP
 
 .PP
-Definition at line 3592 of file snmp_agent.c.
+Definition at line 3620 of file snmp_agent.c.
 .PP
 References _request_set_error().
 .SS "int netsnmp_set_request_error (\fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * request, int error_value)"
@@ -593,7 +615,7 @@ error_value
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 3573 of file snmp_agent.c.
+Definition at line 3601 of file snmp_agent.c.
 .PP
 References _request_set_error(), and netsnmp_agent_request_info_s::mode.
 .PP

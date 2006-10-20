@@ -1,4 +1,4 @@
-.TH "Net-SNMP Agent handler and extensibility API" 3 "27 Sep 2006" "Version 5.4.pre3" "net-snmp" \" -*- nroff -*-
+.TH "Net-SNMP Agent handler and extensibility API" 3 "19 Oct 2006" "Version 5.4.pre4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -345,7 +345,7 @@ References netsnmp_call_handler(), netsnmp_mib_handler_s::next, netsnmp_request_
 .PP
 clears the entire handler-registration list 
 .PP
-Definition at line 904 of file agent_handler.c.
+Definition at line 905 of file agent_handler.c.
 .PP
 References netsnmp_free_all_list_data(), and NULL.
 .PP
@@ -360,7 +360,7 @@ Use \fBnetsnmp_handler_check_cache()\fP later to make sure it's still valid befo
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 695 of file agent_handler.c.
+Definition at line 696 of file agent_handler.c.
 .PP
 References netsnmp_agent_request_info_s::asp, netsnmp_delegated_cache_s::handler, netsnmp_delegated_cache_s::localinfo, netsnmp_agent_session_s::pdu, netsnmp_delegated_cache_s::reginfo, netsnmp_delegated_cache_s::reqinfo, netsnmp_delegated_cache_s::requests, SNMP_MALLOC_TYPEDEF, netsnmp_delegated_cache_s::transaction_id, and snmp_pdu::transid.
 .SS "\fBnetsnmp_mib_handler\fP * netsnmp_create_handler (const char * name, \fBNetsnmp_Node_Handler\fP * handler_access_method)"
@@ -399,7 +399,7 @@ Referenced by get_old_api_handler(), netsnmp_baby_steps_access_multiplexer_get()
 .PP
 Returns a handler from a chain based on the name. 
 .PP
-Definition at line 837 of file agent_handler.c.
+Definition at line 838 of file agent_handler.c.
 .PP
 References netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::handler_name, netsnmp_mib_handler_s::next, and NULL.
 .PP
@@ -410,7 +410,7 @@ Returns a handler's void * pointer from a chain based on the name.
 .PP
 This probably shouldn't be used by the general public as the void * data may change as a handler evolves. Handlers should really advertise some function for you to use instead. 
 .PP
-Definition at line 854 of file agent_handler.c.
+Definition at line 855 of file agent_handler.c.
 .PP
 References netsnmp_mib_handler_s::myvoid, netsnmp_find_handler_by_name(), and NULL.
 .PP
@@ -423,21 +423,21 @@ frees a cache once you're finished using it
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 733 of file agent_handler.c.
+Definition at line 734 of file agent_handler.c.
 .PP
 References SNMP_FREE.
 .SS "NETSNMP_INLINE void netsnmp_free_request_data_set (\fBnetsnmp_request_info\fP * request)"
 .PP
 Free the extra data stored in a request. 
 .PP
-Definition at line 819 of file agent_handler.c.
+Definition at line 820 of file agent_handler.c.
 .PP
 References netsnmp_free_list_data(), and netsnmp_request_info_s::parent_data.
 .SS "NETSNMP_INLINE void netsnmp_free_request_data_sets (\fBnetsnmp_request_info\fP * request)"
 .PP
 Free the extra data stored in a bunch of requests (all data in the chain). 
 .PP
-Definition at line 827 of file agent_handler.c.
+Definition at line 828 of file agent_handler.c.
 .PP
 References netsnmp_free_all_list_data(), NULL, and netsnmp_request_info_s::parent_data.
 .PP
@@ -452,7 +452,7 @@ Returns NULL if it's no longer valid.
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 719 of file agent_handler.c.
+Definition at line 720 of file agent_handler.c.
 .PP
 References netsnmp_check_transaction_id(), NULL, and netsnmp_delegated_cache_s::transaction_id.
 .SS "\fBnetsnmp_mib_handler\fP * netsnmp_handler_dup (\fBnetsnmp_mib_handler\fP * handler)"
@@ -481,7 +481,7 @@ Referenced by handler_free_callback(), netsnmp_baby_steps_handler_get(), netsnmp
 .PP
 marks a list of requests as delegated (or not if isdelegaded = 0) 
 .PP
-Definition at line 747 of file agent_handler.c.
+Definition at line 748 of file agent_handler.c.
 .PP
 References netsnmp_request_info_s::delegated, and netsnmp_request_info_s::next.
 .SS "\fBnetsnmp_handler_registration\fP * netsnmp_handler_registration_create (const char * name, \fBnetsnmp_mib_handler\fP * handler, oid * reg_oid, size_t reg_oid_len, int modes)"
@@ -547,7 +547,7 @@ Referenced by netsnmp_create_handler_registration().
 .PP
 duplicates the handler registration object 
 .PP
-Definition at line 633 of file agent_handler.c.
+Definition at line 634 of file agent_handler.c.
 .PP
 References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::handler, netsnmp_handler_registration_s::handlerName, memdup(), netsnmp_handler_registration_s::modes, netsnmp_handler_dup(), netsnmp_handler_registration_free(), NULL, netsnmp_handler_registration_s::priority, netsnmp_handler_registration_s::range_subid, netsnmp_handler_registration_s::range_ubound, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and netsnmp_handler_registration_s::timeout.
 .PP
@@ -558,7 +558,7 @@ free the resources associated with a handler registration object
 .PP
 Definition at line 620 of file agent_handler.c.
 .PP
-References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::handler, netsnmp_handler_registration_s::handlerName, netsnmp_handler_free(), NULL, netsnmp_handler_registration_s::rootoid, and SNMP_FREE.
+References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::handler, netsnmp_handler_registration_s::handlerName, netsnmp_handler_free(), NULL, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and SNMP_FREE.
 .PP
 Referenced by netsnmp_handler_registration_dup(), netsnmp_register_mib(), netsnmp_subtree_free(), and unregister_mibs_by_session().
 .SS "int netsnmp_inject_handler (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_mib_handler\fP * handler)"
@@ -596,7 +596,7 @@ Referenced by netsnmp_cache_handler_register(), netsnmp_register_cache_handler()
 .PP
 registers a given handler by name so that it can be found easily later. 
 .PP
-Definition at line 892 of file agent_handler.c.
+Definition at line 893 of file agent_handler.c.
 .PP
 References handler_free_callback(), netsnmp_add_list_data(), and netsnmp_create_data_list().
 .PP
@@ -630,7 +630,7 @@ void
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 767 of file agent_handler.c.
+Definition at line 768 of file agent_handler.c.
 .PP
 References netsnmp_add_list_data(), and netsnmp_request_info_s::parent_data.
 .PP
@@ -657,7 +657,7 @@ a void pointer(request->parent_data->data), otherwise NULL is returned if reques
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 809 of file agent_handler.c.
+Definition at line 810 of file agent_handler.c.
 .PP
 References netsnmp_get_list_data(), NULL, and netsnmp_request_info_s::parent_data.
 .PP
@@ -680,7 +680,7 @@ remove data from a request
 .PP
 
 .PP
-Definition at line 788 of file agent_handler.c.
+Definition at line 789 of file agent_handler.c.
 .PP
 References netsnmp_remove_list_node(), NULL, and netsnmp_request_info_s::parent_data.
 .SS "int netsnmp_unregister_handler (\fBnetsnmp_handler_registration\fP * reginfo)"
