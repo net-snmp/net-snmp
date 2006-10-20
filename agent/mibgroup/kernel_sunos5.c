@@ -1537,7 +1537,7 @@ _dlpi_phys_address(int fd, char *addr, int maxlen, int *addrlen)
     if (getmsg(fd, &ctlbuf, NULL, &flag) != 0)
         return (-1);
 
-    if (ctlbuf.len < sizeof(t_uscalar_t))
+    if (ctlbuf.len < sizeof(uint32_t))
         return (-1);
     dlp = (union DL_primitives *)buf;
     switch (dlp->dl_primitive) {
@@ -1584,7 +1584,7 @@ _dlpi_attach(int fd, int ppa)
     if (getmsg(fd, &ctlbuf, NULL, &flag) != 0)
         return (-1);
 
-    if (ctlbuf.len < sizeof(t_uscalar_t))
+    if (ctlbuf.len < sizeof(uint32_t))
         return (-1); 
 
     dlp = (union DL_primitives *)buf;
