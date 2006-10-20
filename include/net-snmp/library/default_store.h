@@ -9,6 +9,12 @@
  * distributed with the Net-SNMP package.
  */
 /*
+ * Note:
+ *    If new default_store entries are added to this header file,
+ *    then remember to run 'perl/default_store/gen' to update the
+ *    corresponding perl interface.
+ */
+/*
  * @file default_store.h: storage space for defaults
  *
  * @addtogroup default_store

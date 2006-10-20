@@ -3,6 +3,12 @@
 /*
  * defines agent's default store registrations 
  */
+/*
+ * Note:
+ *    If new ds_agent entries are added to this header file,
+ *    then remember to run 'perl/agent/default_store/gen' to
+ *    update the corresponding perl interface.
+ */
 
 /*
  * booleans 
