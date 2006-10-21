@@ -145,6 +145,9 @@ Limitations
   Mib2DLLEntry, but the use for this function is not known so this may or may 
   not be related.  Other extensions are able to send traps without any issues.
 
+- When using HP Insight Agents, some parts of the enterprises.232 tree are not
+  accessible.  The cause of this is not known.
+
 
 Enabling the Windows SNMP extension agents
 ------------------------------------------
