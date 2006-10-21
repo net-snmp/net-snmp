@@ -1,6 +1,6 @@
 This file contains major changes in released revisions.  Please read
-the CHANGES file and the ChangeLog file for more detailed listings of
-changes/bug fixes.
+the CHANGES file and the ChangeLog file for a medium level detail and
+a very detailed level (respectively) of changes/bug fixes.
 
 *5.4*
 
@@ -24,6 +24,9 @@ changes/bug fixes.
         names as well as the autoconf variables can now be turned off
         easily within 3rd party code.
       - libtool update to 1.5.22
+      - enable-as-needed will try to link built libraries against needed
+	libraries at library link time, rather than application link time.
+        This is preliminary support for what will likely be better in 5.5.
 
     snmpd:
       - new MIB table for managing Net-SNMP access control extensions
@@ -44,6 +47,10 @@ changes/bug fixes.
         percentage usage calculated over the last minute on _all_ systems.
       - Agent builds default module list from a default_mibs.h rather than
         a hard coded configure list
+      - [PATCH 1562688]: fix ping/reattach agentx code
+      - [PATCH 1568150]: Extend pass_persist error messages that can be
+	passed back from the script
+      - [PATCH 1570982]: Solaris IF-MIB: Support for IPv6-only interfaces
 
     snmptrapd:
       - the traphandle directive now supports a -t switch to indicate
@@ -72,6 +79,8 @@ changes/bug fixes.
 
     perl:
       - gettable() now supports asynchronous callback functions
+      - update default_store module to latest default_store c-binding
+	tokens
 
  Ports:
    Linux:
@@ -80,11 +89,16 @@ changes/bug fixes.
    Solaris, FreeBSD, OpenBSD:
       - Experimental support for 64bit interface counters (ifXTable). Enable
         via '--with-mib-modules=if-mib --enable-mfd-rewrites'.
+      - [PATCH 1569537,1569539]: new UDP-MIB and TCP-MIB implementation
+	(enable through --with-mib-modules=udp-mib,tcp-mib)
 
    Win32:
       - new winExtDLL extension module to allow snmpd to load Windows SNMP
         Service extension DLLs to provide support for HOST-RESOURCES-MIB
         and other MIBs provided with Windows.
+
+   uCLinux
+      - [PATCH 1551948]: Make pass_persist usable on uClinux
 
   Fixes:
     snmpd:
