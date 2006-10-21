@@ -327,7 +327,7 @@ Function CreateAgentBats
   MessageBox MB_OK "Creating registeragent.bat for winExtDLL agent"
   FileWrite $0 "@echo off $\r$\n \
 		set cmdline=$\"$INSTDIR\bin\snmpd.exe$\" -register $\r$\n\
-		set additionaloptions= -Lf $\"$R0/log/snmpd.log$\" -Ivacm_conf,proxy,pass,pass_persist,winExtDLL,handler$\r$\n"
+		set additionaloptions= -Lf $\"$R0/log/snmpd.log$\" -I-udp,udpTable,tcp,tcpTable,icmp,ip,interfaces,system_mib,sysORTable$\r$\n"
   goto CreateAgentBats_continue
 
   CreateAgentBats_normal:

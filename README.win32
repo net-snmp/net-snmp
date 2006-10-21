@@ -11,7 +11,7 @@ included here.
 
 The remainder of this guide has the following sections :
 
-Status as of 28-May-2004 for Win32 platforms
+Status as of 14-Oct-2006 for Win32 platforms
 Interactions with Other Vendor's Products
 Running Net-SNMP as a replacement for the Microsoft SNMP service
 Co-existence with Microsoft SNMP services
@@ -38,7 +38,7 @@ Acknowledgements
 
 ***************************************************************************
 *
-* Status as of 28-May-2004 for Win32 platforms
+* Status as of 14-Oct-2006 for Win32 platforms
 *
 ***************************************************************************
 
@@ -62,6 +62,8 @@ Environment 2003 (MSVC 7.0/7.1), gcc under Cygwin, and gcc under MinGW.
      embedded spaces.  As this is not true for Cygwin "configure",
      the documented example scripts will refer to "c:/usr"
      as the base directory for installed Net-SNMP software.
+  -  When using the winExtDLL extension agent, the Net-SNMP agent will
+     load the Windows SNMP Service extension DLLs
 
 The next subsection relates to items that are built using Visual Studio
 
@@ -131,17 +133,69 @@ This is required so that the extension DLLs are available for loading, and
 also because this extension and the existing Windows extensions use the 
 Windows SNMP API from snmpapi.dll.
 
+An alternative to winExtDLL is to proxy requests from Net-SNMP to the Windows
+SNMP service.  See the section 'Co-existence with Microsoft SNMP services'.
+
+
+Limitations
+-----------
+
+- For an unknown reason, linkUp/Down generic traps are not received from the 
+  Windows SNMP RFC1156Agent extension.  The DLL has an exported function called
+  Mib2DLLEntry, but the use for this function is not known so this may or may 
+  not be related.  Other extensions are able to send traps without any issues.
+
 
 Enabling the Windows SNMP extension agents
 ------------------------------------------
 
 The recommended way to start snmpd is with the following command line:
 
- snmpd.exe -Ivacm_conf,proxy,pass,pass_persist,winExtDLL,handler
+ snmpd.exe -I-udp,udpTable,tcp,tcpTable,icmp,ip,interfaces,system_mib,sysORTable
 
-This will ensure that no Net-SNMP MIBs are loaded that could conflict with
-the Windows SNMP extensions.  If other third party / custom Net-SNMP modules
-are required, they can be added to the above command line.
+The above command will exclude all the Net-SNMP extensions that overlap with 
+the default Windows (2003) extensions included with Windows.  Other Net-SNMP 
+modules take precedence over the modules loaded by winExtDLL.
+
+The Windows DLL snmpmib.dll (SNMPMIB) contains SNMP traffic statistics
+(.1.3.6.1.2.1.11).  As we are using Net-SNMP and not the Windows SNMP Service,
+no values will be returned from the Windows extension.  To allow SNMP 
+statistics to be received, the Net-SNMP module snmp_mib is permitted to load 
+by not excluding it in the above command line.  As stated above, this module 
+will take precedence over the Windows module.
+
+
+Registry Information
+--------------------
+
+Warning:  Improper use of the registry editor can damage to your operating
+          system and should only be used by experienced users.
+
+The following registry keys are used by the Windows SNMP Service to determine
+what extension DLLs to load:
+
+HKLM\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ExtensionAgents
+       
+Each REG_SZ value contains the registry path to an extension agent which 
+contains the path to the DLL.  The name of the key is not important, only 
+the contents.  For example:
+
+Name    Type    Value
+1       REG_SZ  SOFTWARE\Microsoft\LANManagerMIB2Agent\CurrentVersion
+
+To prevent winExtDLL from loading the above extension, change the registry
+path to an invalid path such as:
+
+Name    Type    Value
+1       REG_SZ  SOFTWARE\Microsoft\LANManagerMIB2Agent\CurrentVersion!!!
+
+
+Service dependencies
+--------------------
+
+Services that depend on the SNMP Service will have to be modified to depend on
+Net-SNMP instead of SNMP by modifying the registry.  See Microsoft article 
+193888 for more information.
 
 
 Compiling Net-SNMP with the winExtDLL extension (MSVC)
@@ -149,17 +203,35 @@ Compiling Net-SNMP with the winExtDLL extension (MSVC)
 
 Microsoft PSDK required.
 
+Configure / nmake:
+
 -modify win32\net-snmp\net-snmp-config.h.in and add:
  #define USING_WINEXTDLL_MODULE 1
 
--modify win32\netsnmpmibssdk\Makefile.in
-  or
- modify win32\netsnmpmibssdk\netsnmpmibssdk.dsp 
- and uncomment winExtDLL lines
+-modify win32\netsnmpmibssdk\Makefile.in:
+ uncomment winExtDLL lines
 
--add to LIB32_FLAGS in win32\netsnmpmibssdk\Makefile.in: MgmtAPI.lib snmpapi.lib 
-  or
- add to # ADD LIB32 in win32\netsnmpmibssdk\netsnmpmibssdk.dsp: MgmtAPI.lib snmpapi.lib 
+ add to lines that contain LIB32_FLAGS (line that contains iphlpapi.lib): 
+  MgmtAPI.lib snmpapi.lib 
+
+Workspace:
+
+-modify win32\net-snmp\net-snmp-config.h and add:
+ #define USING_WINEXTDLL_MODULE 1
+
+-modify win32\netsnmpmibssdk\netsnmpmibssdk.dsp:
+ uncomment winExtDLL lines
+
+ add to lines that contain # ADD LIB32 (line that contains iphlpapi.lib): 
+  MgmtAPI.lib snmpapi.lib 
+ 
+ add near the bottom of the file:
+
+  # Begin Source File
+
+  SOURCE=..\..\agent\mibgroup\winExtDLL.c
+  # End Source File
+
 
 -This extension requires the PSDK including the Snmp.h header file.
  Including Snmp.h will conflict with existing Net-SNMP defines for
@@ -190,10 +262,12 @@ utilities will work against any SNMP agent.
 The main benefit of running the Microsoft SNMP agent instead of the Net-SNMP 
 agent is that many Windows applications such as Microsoft SQL Server, 
 Microsoft Exchange etc, extend the Microsoft agent.  Net-SNMP is NOT a drop 
-in replacement for the Microsoft agent.  Running Net-SNMP in place of the 
-Microsoft agent will prevent the other applications from working with SNMP.  
-Also, the Net-SNMP agent does not contain as many MIBs as the Microsoft agent.  
-For example, as of August 2005, the HOST-RESOURCES (host) MIB is not yet
+in replacement for the Microsoft agent unless the winExtDLL Net-SNMP extension
+is used (see the section 'Running Net-SNMP as a replacement for the Microsoft 
+SNMP service').  Running Net-SNMP in place of the Microsoft agent (without
+winExtDLL) will prevent the other applications from working with SNMP.  Also,
+the Net-SNMP agent does not contain as many MIBs as the Microsoft agent.  For
+example, as of August 2005, the HOST-RESOURCES (host) MIB is not yet 
 implemented in Net-SNMP.
 
 There are many benefits of running the Net-SNMP agent instead of the Microsoft
