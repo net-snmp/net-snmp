@@ -102,6 +102,7 @@ typedef struct {
 
 winExtensionAgents winExtensionAgent[MAX_WINEXT_DLLS];
 winExtensionAgents winExtensionAgent_temp;      /* For sorting */
+int winExtensionAgent_last = 0;
 
 char *extDLLs[MAX_WINEXT_DLLS];
 int extDLLs_index = 0;
@@ -296,8 +297,10 @@ void init_winExtDLL(void)
         // Get extra supported view
         result = xSnmpExtensionInitEx(&pSupportedView);
 
-        if (! (result))
+        if (! (result)) {
+          winExtensionAgent_num--;
           break;
+        }
 
         DEBUGMSGTL(("winExtDLL", "result of xSnmpExtensionInitEx: %d\n",result));
       
@@ -345,7 +348,13 @@ void init_winExtDLL(void)
         winExtensionAgent_num++;
       } 
     }
+    winExtensionAgent_num++;
   }
+
+
+  winExtensionAgent_last = winExtensionAgent_num-1;             // Array index
+  DEBUGMSGTL(("winExtDLL", "winExtensionAgent_last: %d\n",winExtensionAgent_last));
+
   /*
   DEBUGMSGTL(("winExtDLL", "\n\nDumping Windows extension OIDs\n"));
   for (i=0; winExtensionAgent[i].xSnmpExtensionInit; i++) {
@@ -443,11 +452,14 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     DWORD (WINAPI *xSnmpExtensionQueryEx)(DWORD, DWORD, SnmpVarBindList*, AsnOctetString*, AsnInteger32*, AsnInteger32*);
     DWORD (WINAPI *next_xSnmpExtensionQuery)(BYTE, SnmpVarBindList* ,AsnInteger32* ,AsnInteger32*);
     DWORD (WINAPI *next_xSnmpExtensionQueryEx)(DWORD, DWORD, SnmpVarBindList*, AsnOctetString*, AsnInteger32*, AsnInteger32*);
-    AsnObjectIdentifier winExtensionAgent_pSupportedView;                // Support view of this extension agent
+    AsnObjectIdentifier winExtensionAgent_pSupportedView;               // Support view of this extension agent
+    oid winExtensionAgent_name[MAX_OID_LEN];                            // Support view of this extension agent
+    size_t winExtensionAgent_name_length;                               // Support view of this extension agent
     AsnObjectIdentifier next_winExtensionAgent_pSupportedView;          // Support view of next extension agent
     oid next_winExtensionAgent_name[MAX_OID_LEN];                       // Support view of next extension agent
     size_t next_winExtensionAgent_name_length;                          // Support view of next extension agent
 
+    int match_winExtensionAgent_index = -1;
 
     DEBUGMSGTL(("winExtDLL", "-----------------------------------------\n"));
     DEBUGMSGTL(("winExtDLL", "var_winExtDLL handler starting, mode = %d\n",
@@ -463,7 +475,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         DEBUGMSGTL(("winExtDLL", "GETNEXT requested\n"));
       
       for (request = requests; request; request=request->next) {
-
+        
         var = request->requestvb;
 
         // Make copy of requested OID
@@ -484,47 +496,107 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         next_xSnmpExtensionQuery = NULL;
         next_xSnmpExtensionQueryEx = NULL;
 
-        for (i=0; winExtensionAgent[i].xSnmpExtensionInit && i < MAX_WINEXT_DLLS; i++) {
-
-          DEBUGMSGTL(("winExtDLL", "Looping through all the winExtensionAgent's looking for a matching handler.\n"));
+        // for (i=0; winExtensionAgent[i].xSnmpExtensionInit && i < MAX_WINEXT_DLLS; i++) {
+        // Search starting with lowest so a walk of .1.3 starts with the lowest extension
+        for (i = winExtensionAgent_last; winExtensionAgent[i].xSnmpExtensionInit && i >= 0; i--) {
           
-          //DEBUGMSGTL(("winExtDLL", "Length of var->name: %d\n",var->name_length));
-          //DEBUGMSGTL(("winExtDLL", "Length of winExtensionAgent[i].name_length: %d\n",winExtensionAgent[i].name_length));
+          DEBUGMSGTL(("winExtDLL", "Looping through all the winExtensionAgent's looking for a matching handler (exact).\n"));
+
+          DEBUGMSGTL(("winExtDLL", "Comparing: "));
+          DEBUGMSGOID(("winExtDLL", var->name, var->name_length));
+          DEBUGMSG(("winExtDLL", "\n"));       
+
+          DEBUGMSGTL(("winExtDLL", "to:        "));
+          DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
+          DEBUGMSG(("winExtDLL", "\n"));       
 
           if (snmp_oidtree_compare(var->name, var->name_length, winExtensionAgent[i].name, 
-                winExtensionAgent[i].name_length) >= 0) {
-            DEBUGMSGTL(("winExtDLL", "Found match: "));
+                winExtensionAgent[i].name_length) == 0) {
+
+            DEBUGMSGTL(("winExtDLL", "Found exact match: "));
             DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
             DEBUGMSG(("winExtDLL", "\n"));
-            xSnmpExtensionQuery = winExtensionAgent[i].xSnmpExtensionQuery;
-            xSnmpExtensionQueryEx = winExtensionAgent[i].xSnmpExtensionQueryEx;
-            SnmpUtilOidCpy(&winExtensionAgent_pSupportedView, &winExtensionAgent[i].pSupportedView);
-
-            if (winExtensionAgent[i].xSnmpExtensionInit && i >= 0) {
-              i--;
-              // Store next extension agent's functions and supported views
-              next_xSnmpExtensionQuery = winExtensionAgent[i].xSnmpExtensionQuery;
-              next_xSnmpExtensionQueryEx = winExtensionAgent[i].xSnmpExtensionQueryEx;
-              SnmpUtilOidCpy(&next_winExtensionAgent_pSupportedView, &winExtensionAgent[i].pSupportedView);
-
-              // Make copy of requested OID
-              for (j = 0; j < (winExtensionAgent[i].name_length > MAX_OID_LEN? MAX_OID_LEN: winExtensionAgent[i].name_length); j++) {
-                next_winExtensionAgent_name[j] = winExtensionAgent[i].name[j];
-              }
-              next_winExtensionAgent_name_length = j;
-
-              DEBUGMSGTL(("winExtDLL", "Next extension's OID: "));
-              DEBUGMSGWINOID(("winExtDLL", &next_winExtensionAgent_pSupportedView));
-              DEBUGMSG(("winExtDLL", "\n"));
-
-              DEBUGMSGTL(("winExtDLL", "Next extension's OID: "));
-              DEBUGMSGOID(("winExtDLL", next_winExtensionAgent_name, next_winExtensionAgent_name_length));
-              DEBUGMSG(("winExtDLL", "\n"));
-              i++;
-            }
-            break;                      // FIXME:  This should be removed, but if it is, a walk of .1.3 fails.
+            match_winExtensionAgent_index = i;
+            DEBUGMSG(("winExtDLL", "Index: %d\n",match_winExtensionAgent_index));
+            break;
           }
         }
+
+        if (match_winExtensionAgent_index == -1) {
+          for (i=0; winExtensionAgent[i].xSnmpExtensionInit && i < MAX_WINEXT_DLLS; i++) {
+            
+            DEBUGMSGTL(("winExtDLL", "Looping through all the winExtensionAgent's looking for a matching handler (next best).\n"));
+            
+            DEBUGMSGTL(("winExtDLL", "Comparing: "));
+            DEBUGMSGOID(("winExtDLL", var->name, var->name_length));
+            DEBUGMSG(("winExtDLL", "\n"));       
+            DEBUGMSGTL(("winExtDLL", "length: %d\n",var->name_length));
+            
+            DEBUGMSGTL(("winExtDLL", "to:        "));
+            DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
+            DEBUGMSG(("winExtDLL", "\n"));       
+            DEBUGMSGTL(("winExtDLL", "length: %d\n",winExtensionAgent[i].name_length));
+            DEBUGMSGTL(("winExtDLL", "and:       "));
+            DEBUGMSGOID(("winExtDLL", winExtensionAgent[i+1].name, winExtensionAgent[i+1].name_length));
+            DEBUGMSG(("winExtDLL", "\n"));       
+            DEBUGMSGTL(("winExtDLL", "length: %d\n",winExtensionAgent[i+1].name_length));
+
+
+            if (snmp_oidtree_compare(var->name, var->name_length, winExtensionAgent[i].name, 
+                  winExtensionAgent[i].name_length) <= 0 &&
+                snmp_oidtree_compare(var->name, var->name_length, winExtensionAgent[i+1].name, 
+                  winExtensionAgent[i+1].name_length) >= 0
+               ) {
+              DEBUGMSGTL(("winExtDLL", "Found best match: "));
+              DEBUGMSGOID(("winExtDLL", winExtensionAgent[i].name, winExtensionAgent[i].name_length));
+              DEBUGMSG(("winExtDLL", "\n"));
+              match_winExtensionAgent_index = i;
+              DEBUGMSG(("winExtDLL", "Index: %d\n",match_winExtensionAgent_index));
+              break;
+            }
+          }
+        }
+
+        DEBUGMSG(("winExtDLL", "Index: %d\n",match_winExtensionAgent_index));
+
+        if (match_winExtensionAgent_index == -1) {
+          DEBUGMSGTL(("winExtDLL","Could not find a handler for the requested OID.  This should never happen!!\n"));
+          return SNMP_ERR_GENERR;
+        }
+
+        // Make copy of current extension's OID
+        for (j = 0; j < (winExtensionAgent[i].name_length > MAX_OID_LEN? MAX_OID_LEN: winExtensionAgent[i].name_length); j++) {
+          winExtensionAgent_name[j] = winExtensionAgent[i].name[j];
+        }
+        winExtensionAgent_name_length = j;
+
+        xSnmpExtensionQuery = winExtensionAgent[i].xSnmpExtensionQuery;
+        xSnmpExtensionQueryEx = winExtensionAgent[i].xSnmpExtensionQueryEx;
+        SnmpUtilOidCpy(&winExtensionAgent_pSupportedView, &winExtensionAgent[i].pSupportedView);
+
+        if (winExtensionAgent[i].xSnmpExtensionInit && i >= 0) {
+          i--;
+          // Store next extension agent's functions and supported views
+          next_xSnmpExtensionQuery = winExtensionAgent[i].xSnmpExtensionQuery;
+          next_xSnmpExtensionQueryEx = winExtensionAgent[i].xSnmpExtensionQueryEx;
+          SnmpUtilOidCpy(&next_winExtensionAgent_pSupportedView, &winExtensionAgent[i].pSupportedView);
+
+          // Make copy of next extension's OID
+          for (j = 0; j < (winExtensionAgent[i].name_length > MAX_OID_LEN? MAX_OID_LEN: winExtensionAgent[i].name_length); j++) {
+            next_winExtensionAgent_name[j] = winExtensionAgent[i].name[j];
+          }
+          next_winExtensionAgent_name_length = j;
+
+          DEBUGMSGTL(("winExtDLL", "Next extension's OID: "));
+          DEBUGMSGWINOID(("winExtDLL", &next_winExtensionAgent_pSupportedView));
+          DEBUGMSG(("winExtDLL", "\n"));
+
+          DEBUGMSGTL(("winExtDLL", "Next extension's OID: "));
+          DEBUGMSGOID(("winExtDLL", next_winExtensionAgent_name, next_winExtensionAgent_name_length));
+          DEBUGMSG(("winExtDLL", "\n"));
+          i++;
+        }
+
         if (! (xSnmpExtensionQuery || xSnmpExtensionQueryEx)) {
           if (reqinfo->mode == MODE_GET) {
             DEBUGMSGTL(("winExtDLL","Could not find a handler for the requested OID.  This should never happen!!\n"));
@@ -583,7 +655,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
           } 
         }
         else if (reqinfo->mode == MODE_GETNEXT) {
-          DEBUGMSGTL(("winExtDLL", "win: MODE_GETNEXT\n"));
+          DEBUGMSGTL(("winExtDLL", "win: MODE_GETNEXT -\n"));
           result = xSnmpExtensionQuery(SNMP_PDU_GETNEXT, &pVarBindList, &pErrorStatus, &pErrorIndex);
 
           DEBUGMSGTL(("winExtDLL", "Windows OID returned from xSnmpExtensionQuery: "));
@@ -597,53 +669,48 @@ var_winExtDLL(netsnmp_mib_handler *handler,
           }
           var->name_length = i;
 
-          // If the OID of what we got back from the Windows extension is less than or equal to what we requested, 
-          // then it's time to move on to the next Windows extension that we are handling.  Net-SNMP obviously
-          // thinks that we are next in line, so there are no Net-SNMP extensions between the current Windows
-          // extension and the next Windows extension.
-          //
-          // or
-          //
-          // If the OID of what we got back from the Windows extension is greater than or equal to the next
-          // Windows extension's view, return OID of current extension's supported view +1 to allow Net-SNMP
-          // to decide what extension to call next.  This is needed when a Windows DLL supports multiple views 
-          // but there is another DLL supporting a view in between.
+          DEBUGMSGTL(("winExtDLL", "Comparing: "));
+          DEBUGMSGOID(("winExtDLL", var->name, var->name_length));
+          DEBUGMSG(("winExtDLL", "\n"));       
 
-          if ((snmp_oid_compare(var->name, var->name_length, oid_requested, oid_requested_length) <= 0) || 
-              (SnmpUtilOidCmp(&pVarBindList.list->name, &next_winExtensionAgent_pSupportedView) >= 0)) {
-            DEBUGMSGTL(("winExtDLL", "xSnmpExtensionQuery returned an OID less than or equal to what we requested or \n"));
-            DEBUGMSGTL(("winExtDLL", "xSnmpExtensionQuery returned an OID greater than or equal to the next extension's supported view\n"));
+          DEBUGMSGTL(("winExtDLL", "to:        "));
+          DEBUGMSGOID(("winExtDLL", winExtensionAgent_name, winExtensionAgent_name_length));
+          DEBUGMSG(("winExtDLL", "\n"));       
+          
 
-            DEBUGMSGTL(("winExtDLL", "Calling next Windows Extension agent supported by winExtDLL\n"));
+          // If the OID we got back is less than or equal to what we requested, increment the current supported view
+          // and send it back instead.
+          if (snmp_oid_compare(var->name, var->name_length, oid_requested, oid_requested_length) <= 0) {
+            DEBUGMSGTL(("winExtDLL", "xSnmpExtensionQuery returned an OID less than or equal to what we requested\n"));
 
-            SnmpUtilOidCpy(&pVarBindList.list->name, &next_winExtensionAgent_pSupportedView);
-
-            DEBUGMSGTL(("winExtDLL", "Windows OID passed to next_xSnmpExtensionQuery: "));
-            DEBUGMSGWINOID(("winExtDLL", pVarBindList.list));
-            DEBUGMSG(("winExtDLL", "\n"));
-
-            if (next_xSnmpExtensionQuery) {
-              DEBUGMSGTL(("winExtDLL", "Calling next_xSnmpExtensionQuery\n"));
-              result = next_xSnmpExtensionQuery(SNMP_PDU_GETNEXT, &pVarBindList, &pErrorStatus, &pErrorIndex);
-
-              DEBUGMSGTL(("winExtDLL", "Windows OID returned from next_xSnmpExtensionQuery: "));
-              DEBUGMSGWINOID(("winExtDLL", pVarBindList.list));
-              DEBUGMSG(("winExtDLL", "\n"));
-
+            // Set var->name to be equal to current supported view, plus one
+            for (i = 0; i < (winExtensionAgent_name_length > MAX_OID_LEN? MAX_OID_LEN: winExtensionAgent_name_length); i++) {
+              var->name[i] = winExtensionAgent_name[i];
             }
-            else {
-              DEBUGMSGTL(("winExtDLL", "No more Windows Extension agents supported by winExtDLL.  Returning SNMP_ERR_NOSUCHNAME\n"));
-              return SNMP_ERR_NOSUCHNAME;
-            }           
+            var->name_length = i;
+            var->name[i-1]++;
+
+            //return SNMP_ERR_NOSUCHNAME;
+            
           }
 
-          // Convert OID from Windows to Net-SNMP so Net-SNMP has the new 'next' OID
-          // FIXME:  Do we need to realloc var->name or is is MAX_OID_LEN?
-          for (i = 0; i < (pVarBindList.list->name.idLength > MAX_OID_LEN?MAX_OID_LEN:pVarBindList.list->name.idLength); i++) {
-            var->name[i] = (oid)pVarBindList.list->name.ids[i];
+          // If the OID we got back is outside our view, increment the current supported view and send it back instead.
+          // This is for Windows extension agents that support multiple views.  We want Net-SNMP to decide if we should be
+          // called for this OID, not the extension agent, just in case there is a Net-SNMP agent in between.
+          else if (snmp_oidtree_compare(var->name, var->name_length, winExtensionAgent_name, winExtensionAgent_name_length) > 0) {
+            DEBUGMSGTL(("winExtDLL", "xSnmpExtensionQuery returned an OID outside our view\n"));
+
+            // Set var->name to be equal to current supported view, plus one
+            for (i = 0; i < (winExtensionAgent_name_length > MAX_OID_LEN? MAX_OID_LEN: winExtensionAgent_name_length); i++) {
+              var->name[i] = winExtensionAgent_name[i];
+            }
+            var->name_length = i;
+            var->name[i-1]++;
+
+            //return SNMP_ERR_NOSUCHNAME;
+            
           }
-          var->name_length = i;
-        }       
+       }       
         DEBUGMSGTL(("winExtDLL", "OID being sent back to Net-SNMP: "));
         DEBUGMSGOID(("winExtDLL", var->name, var->name_length));
         DEBUGMSG(("winExtDLL", "\n"));
@@ -779,9 +846,10 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             //return SNMP_ERR_NOERROR;           
             
             break;
-
             
           default:
+            //return SNMP_ERR_NOSUCHNAME;         // snmpgetnext localhost .1.3.6.1.2.1.8
+            // What we should do is go to the next extension agent because .1.3.6.1.4.1.23.2.6 returned nothing.
             break;
         }
         if (&pVarBindList)
@@ -927,8 +995,8 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             DEBUGMSGTL(("winExtDLL", "String to write: %s\n",set_szbuf_temp));
             DEBUGMSGTL(("winExtDLL", "Length of string to write: %d\n",strlen(set_szbuf_temp)));
 
-            pVarBindList.list->value.asnValue.string.stream = stringtemp;
-            pVarBindList.list->value.asnValue.string.length = strlen(stringtemp);
+            pVarBindList.list->value.asnValue.string.stream = set_szbuf_temp;
+            pVarBindList.list->value.asnValue.string.length = strlen(set_szbuf_temp);
             pVarBindList.list->value.asnValue.string.dynamic = 0;
             
             break;
