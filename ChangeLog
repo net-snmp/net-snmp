@@ -2,6 +2,51 @@
 
 Changes: V5.4.pre3 -> V5.4.pre4
 
+2006-10-20 16:59  hardaker
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+   Patch from Anders Persson to change t_uscalar_t to something more portable (uint32_t)
+
+2006-10-20 13:43  dts12
+
+   * include/net-snmp/: agent/ds_agent.h,
+     library/default_store.h:
+
+   Document the need to update the corresponding perl interfaces
+   when changes are made.
+
+2006-10-20 08:51  rstory
+
+   * agent/mibgroup/hardware/cpu.h:
+
+   use cpu_null for all darwin, until code works
+
+2006-10-20 08:18  dts12
+
+   * agent/mibgroup/hardware/cpu/: cpu_nlist.c, cpu_sysctl.c
+:
+
+   Clarify comments to reflect reality.
+
+2006-10-20 08:13  tanders
+
+   * agent/mibgroup/hardware/cpu.h:
+
+   fix syntax error; make sure we get cpu_null for darwin6/7, cpu_sysctl for darwin8+
+
+2006-10-20 07:46  rstory
+
+   * agent/mibgroup/hardware/cpu.h:
+
+   use cpu_null for darwin7 and darwin6
+
+2006-10-20 01:44  tanders
+
+   * agent/mibgroup/hardware/cpu.h:
+
+   openbsd4 and darwin should use cpu_sysctl
+
 2006-10-19 22:10  hardaker
 
    * man/: netsnmp_agent.3, netsnmp_agent_registry.3,
