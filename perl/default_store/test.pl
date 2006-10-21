@@ -89,7 +89,6 @@ BEGIN { $| = 1;
                   "NETSNMP_DS_LIB_APPTYPES"                => 20,
                   "NETSNMP_DS_LIB_KSM_KEYTAB"              => 21,
                   "NETSNMP_DS_LIB_KSM_SERVICE_NAME"        => 22,
-                  "NETSNMP_DS_LIB_SBSM_LOCAL_PWD"          => 23,
 		  );
 
 	print "1.." . (scalar(keys(%tests)) + 10) . "\n"; 
