@@ -97,6 +97,9 @@ a very detailed level (respectively) of changes/bug fixes.
         Service extension DLLs to provide support for HOST-RESOURCES-MIB
         and other MIBs provided with Windows.
 
+   AIX:
+      - HOST-RESOURCES-MIB implementation added to default module list
+
    uCLinux
       - [PATCH 1551948]: Make pass_persist usable on uClinux
 
