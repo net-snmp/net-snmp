@@ -38,12 +38,16 @@ Requirements
  -gnu_regex.exe (0.12) - http://people.delphiforums.com/gjc/gnu_regex.html
  -Platform SDK
  -MSYS / MinGW -or- tar.exe and gzip.exe
+ -win32/dist folder from MAIN in CVS
 
 
 Building the main binaries
 --------------------------
 
 Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
+
+Part 1
+------
 
 1.  Extract source.  The location will be references as (source dir)
 
@@ -74,19 +78,19 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
     ==================================
     
     1. OpenSSL support:      		disabled
-    2. Platform SDK support: 		enabled
+    2. Platform SDK support: 		enabled         ***
     
     3. Install path:         		c:/usr
     4. Install after build:  		enabled
     
-    5. Perl modules:         		enabled
+    5. Perl modules:         		enabled         ***
     6. Install perl modules: 		disabled
     
     7. Quiet build (logged): 		enabled
     8. Debug mode:           		disabled
     9. IPv6 transports:      		disabled
 
-    10. Install development files   	enabled
+    10. Install development files   	enabled         ***
     
     F.  Finished - start build
     Q.  Quit - abort build
@@ -97,9 +101,50 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
 
 9.  Delete any generated config files from c:\usr\snmp\persist
 
+Part 2 - Compiling winExtDLL
+----------------------------
 
-Creating the Perl package
--------------------------
+10. Modify files as explained in README.win32 section 'Running Net-SNMP as
+    a replacement for the Microsoft SNMP service' - 'Compiling Net-SNMP with 
+    the winExtDLL extension (MSVC)'.
+
+11.  Set to the following:
+
+    Net-SNMP build and install options
+    ==================================
+    
+    1. OpenSSL support:      		disabled
+    2. Platform SDK support: 		enabled         ***
+    
+    3. Install path:         		c:/usr
+    4. Install after build:  		disabled        ***
+    
+    5. Perl modules:         		disabled
+    6. Install perl modules: 		disabled
+    
+    7. Quiet build (logged): 		enabled
+    8. Debug mode:           		disabled
+    9. IPv6 transports:      		disabled
+
+    10. Install development files   	disabled
+    
+    F.  Finished - start build
+    Q.  Quit - abort build
+    
+    Select option to set / toggle:
+
+12. F to start the build and verify everything was built ok
+
+13. Copy the new binary:
+
+    copy bin\release\snmpd.exe c:\usr\bin\snmpd-winExtDLL.exe
+
+14. Test each binary by running each one with -DwinExtDLL.  Make sure only the
+    winExtDLL version has debug output.
+
+
+Part 3 - Creating the Perl package
+----------------------------------
 
 1.  cd (source dir)
     cd perl
@@ -250,12 +295,20 @@ Note:  A temporary location of c:\temp\net-snmp is used.
 
 1.  Transfer /tmp/net-snmp/html from Linux to c:\temp\net-snmp\html
 
-2.  Copy the following files to c:\temp\net-snmp\html:
+2.  Grab the FAQ from the web site, strip out the includes and save as
+    c:\temp\net-snmp\html\FAQ.html and run:
+
+    tidy -asxhtml -m c:\temp\net-snmp\html\FAQ.html
+
+3.  Grab the Devloper FAQ from the web site, strip out the includes and save as
+    c:\temp\net-snmp\html\Developer_FAQ.html and run:
+
+    tidy -asxhtml -m c:\temp\net-snmp\html\Developer_FAQ.html
+
+4.  Copy the following files to c:\temp\net-snmp\html:
 
     cd (source dir)
     copy "win32\dist\htmlhelp\Configuration_Overview.html" c:\temp\net-snmp\html\
-    copy "win32\dist\htmlhelp\Developer_FAQ.html" c:\temp\net-snmp\html\
-    copy "win32\dist\htmlhelp\FAQ.html" c:\temp\net-snmp\html\
     copy "win32\dist\htmlhelp\Help_Caveats.html" c:\temp\net-snmp\html\
     copy "win32\dist\htmlhelp\Introduction.html" c:\temp\net-snmp\html\
     copy "win32\dist\htmlhelp\Net-SNMP.hhc" c:\temp\net-snmp\html\
@@ -265,7 +318,7 @@ Note:  A temporary location of c:\temp\net-snmp is used.
     copy "win32\dist\htmlhelp\snmpd.conf.win32.html" c:\temp\net-snmp\html\
     copy "win32\dist\htmlhelp\snmptrapd.conf.win32.html" c:\temp\net-snmp\html\
 
-3.  New configuration options may be available in the new release of
+5.  New configuration options may be available in the new release of
     Net-SNMP, so the *.conf.win32.html files should be updated.
 
     Create a text file with all the configuration options for snmpd and 
@@ -291,22 +344,22 @@ Note:  A temporary location of c:\temp\net-snmp is used.
     tidy -asxhtml -m c:\temp\net-snmp\html\snmpd.conf.win32.html
     tidy -asxhtml -m c:\temp\net-snmp\html\snmp.conf.win32.html
 
-4.  Edit c:\temp\net-snmp\html\Net-SNMP.hhp and update the version for the 
+6.  Edit c:\temp\net-snmp\html\Net-SNMP.hhp and update the version for the 
     'Title' variable.
 
-5.  Run HTML Workshop
+7.  Run HTML Workshop
 
-6.  Open c:\temp\net-snmp\html\Net-SNMP.hhp
+8.  Open c:\temp\net-snmp\html\Net-SNMP.hhp
 
-7.  Click File - Compile
+9.  Click File - Compile
 
-8.  Select 'C:\temp\net-snmp\html\Net-SNMP.hhp' as the filename
+10. Select 'C:\temp\net-snmp\html\Net-SNMP.hhp' as the filename
 
-9.  Click Compile
+11. Click Compile
 
-10. You should now have a c:\temp\net-snmp\html\Net-SNMP.chm file.
+12. You should now have a c:\temp\net-snmp\html\Net-SNMP.chm file.
 
-11. Launch the file and ensure every content item displays the correct page.
+13. Launch the file and ensure every content item displays the correct page.
 
 
 Combining the binaries and HTMLHelp files
@@ -315,8 +368,6 @@ Combining the binaries and HTMLHelp files
 1.  Copy the HTML Help file to c:\usr\docs:
 
     copy c:\temp\Net-SNMP\html\Net-SNMP.chm c:\usr\docs\
-
-2.  Create a .zip file of c:\usr for archive purposes.
 
 
 Bulding a NullSoft installer package
@@ -394,6 +445,8 @@ Requirements
     folder to ensure there are no missing MIB files etc.  Modify net-snmp.nsi
     and rebuild if required.
 
+12. Create a .zip file of c:\usr for archive purposes.
+
 
 Bulding an OpenSSL version
 ==========================
@@ -409,7 +462,10 @@ Requirements
 
 2.  Move c:\usr c:\usr.temp
 
-3.  Re-build the binary exactly as above except enable OpenSSL.
+3.  Re-build the binary by following the steps in the seciton 'Building the 
+    main binaries' except enable OpenSSL.  Be sure to undo the winExtDLL 
+    changes before starting by copying a fresh net-snmp-config.h.in and 
+    netsnmpmibssdk.dsp.
 
 4.  Copy contents of c:\usr to c:\usr.temp
 
@@ -455,4 +511,6 @@ Requirements
 16. Compare the directory contents of the compiled folder with the installed
     folder to ensure there are no missing MIB files etc.  Modify net-snmp.nsi
     and rebuild if required.
+
+17. Create a .zip file of c:\usr for archive purposes.
 
