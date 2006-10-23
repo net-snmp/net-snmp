@@ -14,7 +14,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
-#ifdef WIN32
+#ifdef HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
 
@@ -46,27 +46,6 @@ struct oid {
   { NULL }
 };
 
-#ifdef WIN32
-static void __stdcall _init_winsock(void)
-{
-WORD    wVersion = MAKEWORD(2, 2);
-WSADATA wsaData;
-DWORD   err;
-
-        /*---------------------------------------------------------------
-         * First try to initialize Winsock with version 2.2, then fall
-         * back to 1.1
-         */
-        if ( (err = (DWORD)WSAStartup(wVersion, &wsaData)) != 0 )
-        {
-        char    errbuf[256];
-
-                die("ERROR: initializing Winsock [%s]",
-                        printable_wserror(err, errbuf, sizeof errbuf));
-        }
-}
-#endif		/* WIN32 */
-
 /*
  * initialize
  */
@@ -74,10 +53,8 @@ void initialize (void)
 {
   struct oid *op = oids;
   
-#ifdef WIN32
   /* Win32: init winsock */
-  _init_winsock();
-#endif
+  SOCK_STARTUP;
 
   /* initialize library */
   init_snmp("asynchapp");
