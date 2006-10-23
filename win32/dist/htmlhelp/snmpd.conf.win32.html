@@ -43,6 +43,8 @@ quit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 &nbsp;&nbsp;&nbsp;
 leave_pidfile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 (1|yes|true|0|no|false)<br />
+&nbsp;&nbsp;&nbsp; dontLogTCPWrappersConnects
+(1|yes|true|0|no|false)<br />
 &nbsp;&nbsp;&nbsp;
 injectHandler&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 injectHandler NAME INTONAME [BEFORE_OTHER_NAME]<br />
@@ -53,6 +55,22 @@ tableoid<br />
 add_row&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 table_name indexes... values...<br />
 &nbsp;&nbsp;&nbsp;
+agentxsocket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AgentX bind address<br />
+&nbsp;&nbsp;&nbsp;
+master&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+specify 'agentx' for AgentX support<br />
+&nbsp;&nbsp;&nbsp;
+agentxperms&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AgentX socket permissions: socket_perms [directory_perms
+[username|userid [groupname|groupid]]]<br />
+&nbsp;&nbsp;&nbsp;
+agentxRetries&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AgentX Retries<br />
+&nbsp;&nbsp;&nbsp;
+agentxTimeout&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AgentX Timeout (seconds)<br />
+&nbsp;&nbsp;&nbsp;
 com2sec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 [-Cn CONTEXT] secName IPv4-network-address[/netmask]
 community<br />
@@ -60,14 +78,45 @@ community<br />
 createUser&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 username (MD5|SHA) passphrase [DES [passphrase]]<br />
 &nbsp;&nbsp;&nbsp;
+agentSecName&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+string<br />
+&nbsp;&nbsp;&nbsp;
+iquerySecName&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+string<br />
+&nbsp;&nbsp;&nbsp;
+iqueryVersion&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1 | 2c | 3<br />
+&nbsp;&nbsp;&nbsp;
+iquerySecLevel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+noAuthNoPriv | authNoPriv | authPriv<br />
+&nbsp;&nbsp;&nbsp;
 group&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 name v1|v2c|usm|... security<br />
 &nbsp;&nbsp;&nbsp;
 access&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-name context model level prefx read write notify<br />
+name context model level prefix read write notify<br />
+&nbsp;&nbsp;&nbsp;
+setaccess&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+name context model level prefix viewname viewval<br />
 &nbsp;&nbsp;&nbsp;
 view&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 name type subtree [mask]<br />
+&nbsp;&nbsp;&nbsp;
+authcommunity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+authtype1,authtype2 community [default|hostname|network/bits
+[oid|-V view]]<br />
+&nbsp;&nbsp;&nbsp;
+authuser&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+authtype1,authtype2 [-s secmodel] user [noauth|auth|priv [oid|-V
+view]]<br />
+&nbsp;&nbsp;&nbsp;
+authgroup&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+authtype1,authtype2 [-s secmodel] group [noauth|auth|priv [oid|-V
+view]]<br />
+&nbsp;&nbsp;&nbsp;
+authaccess&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+name authtype1,authtype2 [-s secmodel] group view [noauth|auth|priv
+[context|context*]]<br />
 &nbsp;&nbsp;&nbsp;
 rwcommunity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 community [default|hostname|network/bits [oid]]<br />
@@ -80,22 +129,6 @@ user [noauth|auth|priv [oid]]<br />
 &nbsp;&nbsp;&nbsp;
 rouser&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 user [noauth|auth|priv [oid]]<br />
-&nbsp;&nbsp;&nbsp;
-master&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-specify 'agentx' for AgentX support<br />
-&nbsp;&nbsp;&nbsp;
-agentxsocket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-AgentX bind address<br />
-&nbsp;&nbsp;&nbsp;
-agentxperms&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-AgentX socket permissions: socket_perms [directory_perms
-[username|userid [groupname|groupid]]]<br />
-&nbsp;&nbsp;&nbsp;
-agentxRetries&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-AgentX Retries<br />
-&nbsp;&nbsp;&nbsp;
-agentxTimeout&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-AgentX Timeout (seconds)<br />
 &nbsp;&nbsp;&nbsp;
 sysdescr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 description<br />
@@ -157,13 +190,16 @@ monitor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 defaultMonitors&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 yes|no<br />
 &nbsp;&nbsp;&nbsp;
-agentSecName&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-string<br />
-&nbsp;&nbsp;&nbsp;
 notificationEvent&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 notificationEvent NAME TRAP_OID [[-w] EXTRA_OID ...]<br />
 &nbsp;&nbsp;&nbsp; linkUpDownNotifications&nbsp;
 linkUpDownNotifications (yes|no)<br />
+&nbsp;&nbsp;&nbsp;
+defDomain&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+application domain<br />
+&nbsp;&nbsp;&nbsp;
+defTarget&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+application domain target<br />
 &nbsp;&nbsp;&nbsp;
 engineID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 string<br />

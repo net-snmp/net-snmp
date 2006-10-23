@@ -5,8 +5,8 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Net-SNMP"
 !define PRODUCT_MAJ_VERSION "5"
-!define PRODUCT_MIN_VERSION "3"
-!define PRODUCT_REVISION "dev"
+!define PRODUCT_MIN_VERSION "4"
+!define PRODUCT_REVISION "0.pre4"
 !define PRODUCT_EXE_VERSION "1"
 !define PRODUCT_WEB_SITE "http://www.net-snmp.org"
 !define PRODUCT_DIR_REGKEY "Software\Net-SNMP"
@@ -324,14 +324,12 @@ Function CreateAgentBats
   StrCmp $winExtDLL "1" CreateAgentBats_winExtDLL CreateAgentBats_normal
 
   CreateAgentBats_winExtDLL:
-  MessageBox MB_OK "Creating registeragent.bat for winExtDLL agent"
   FileWrite $0 "@echo off $\r$\n \
 		set cmdline=$\"$INSTDIR\bin\snmpd.exe$\" -register $\r$\n\
 		set additionaloptions= -Lf $\"$R0/log/snmpd.log$\" -I-udp,udpTable,tcp,tcpTable,icmp,ip,interfaces,system_mib,sysORTable$\r$\n"
   goto CreateAgentBats_continue
 
   CreateAgentBats_normal:
-  MessageBox MB_OK "Creating registeragent.bat for regular agent"
   FileWrite $0 "@echo off $\r$\n \
 		set cmdline=$\"$INSTDIR\bin\snmpd.exe$\" -register $\r$\n\
 		set additionaloptions= -Lf $\"$R0/log/snmpd.log$\"$\r$\n"
@@ -1033,13 +1031,11 @@ Function InstallAgent
   StrCmp $winExtDLL "1" sec02_winExtDLL sec02_normal
 
   sec02_winExtDLL:
-  ;MessageBox MB_OK "Installing winExtDLL agent"
   ;File "bin\snmpd-winExtDLL.exe"
   File /oname=snmpd.exe "bin\snmpd-winExtDLL.exe"
   goto sec02_continue
 
   sec02_normal:
-  ;MessageBox MB_OK "Installing normal agent"
   File "bin\snmpd.exe"
 
   sec02_continue:
