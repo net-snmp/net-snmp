@@ -682,7 +682,7 @@ name_hash(const char *name)
 }
 
 void
-init_mib_internals(void)
+netsnmp_init_mib_internals(void)
 {
     register struct tok *tp;
     register int    b, i;
@@ -722,6 +722,14 @@ init_mib_internals(void)
      * Relies on 'add_mibdir' having set up the modules 
      */
 }
+
+#ifndef NETSNMP_CLEAN_NAMESPACE
+void
+init_mib_internals(void)
+{
+    netsnmp_init_mib_internals();
+}
+#endif
 
 static void
 init_node_hash(struct node *nodes)
@@ -3789,7 +3797,7 @@ read_module_internal(const char *name)
     FILE           *fp;
     struct node    *np;
 
-    init_mib_internals();
+    netsnmp_init_mib_internals();
 
     for (mp = module_head; mp; mp = mp->next)
         if (!label_compare(mp->name, name)) {
@@ -4843,7 +4851,7 @@ main(int argc, char *argv[])
     struct tree    *tp;
     netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_WARNINGS, 2);
 
-    init_mib();
+    netsnmp_init_mib();
 
     if (argc == 1)
         (void) read_all_mibs();

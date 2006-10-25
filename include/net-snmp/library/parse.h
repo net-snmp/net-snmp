@@ -218,9 +218,10 @@ SOFTWARE.
     int             netsnmp_unload_module(const char *name);
 #ifndef NETSNMP_CLEAN_NAMESPACE
     int             unload_module(const char *name);
-#endif
-    void            unload_all_mibs(void);
     void            init_mib_internals(void);
+#endif
+    void            netsnmp_init_mib_internals(void);
+    void            unload_all_mibs(void);
     int             add_mibfile(const char*, const char*, FILE *);
     int             add_mibdir(const char *);
     void            add_module_replacement(const char *, const char *,

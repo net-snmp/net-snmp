@@ -179,7 +179,7 @@ nso_newptr(initstring)
     char *initstring
     CODE:
         if (get_tree_head() == NULL)
-            init_mib();
+            netsnmp_init_mib();
         RETVAL = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
         RETVAL->name = RETVAL->namebuf;
         RETVAL->len = sizeof(RETVAL->namebuf)/sizeof(RETVAL->namebuf[0]);

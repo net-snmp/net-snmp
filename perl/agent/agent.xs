@@ -448,6 +448,10 @@ __agent_check_and_process(block = 1)
 
 void
 init_mib()
+    CODE:
+    {
+        netsnmp_init_mib();
+    }
 
 int
 init_agent(name)

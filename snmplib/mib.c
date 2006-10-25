@@ -2521,7 +2521,7 @@ netsnmp_fixup_mib_directory(void)
  * Reads in all settings from the environment.
  */
 void
-init_mib(void)
+netsnmp_init_mib(void)
 {
     const char     *prefix;
     char           *env_var, *entry;
@@ -2530,7 +2530,7 @@ init_mib(void)
 
     if (Mib)
         return;
-    init_mib_internals();
+    netsnmp_init_mib_internals();
 
     /*
      * Initialise the MIB directory/ies 
@@ -2561,7 +2561,7 @@ init_mib(void)
         }
     }
 
-    init_mib_internals();
+    netsnmp_init_mib_internals();
 
     /*
      * Read in any modules or mibs requested 
@@ -2697,6 +2697,15 @@ init_mib(void)
         tree_top->child_list = tree_head;
     }
 }
+
+#ifndef NETSNMP_CLEAN_NAMESPACE
+void
+init_mib(void)
+{
+    netsnmp_init_mib();
+}
+#endif
+
 
 /**
  * Unloads all mibs.
@@ -5489,7 +5498,7 @@ main(int argc, char *argv[])
     int             count;
     netsnmp_variable_list variable;
 
-    init_mib();
+    netsnmp_init_mib();
     if (argc < 2)
         print_subtree(stdout, tree_head, 0);
     variable.type = ASN_INTEGER;
