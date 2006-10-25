@@ -31,12 +31,12 @@ INFORM, which is nothing more than an acknowledged TRAP.  IE, when the
 remote application receives the INFORM it sends back a "I got it"
 message.  This is nice because then the person sending the traps can
 keep trying until the trap gets through.  The net-snmp <a
-href="/man/snmptrap.1.html"><b>snmptrap</b></a> program can send both
+href="/docs/man/snmptrap.html"><b>snmptrap</b></a> program can send both
 TRAPs and INFORMs.  Add -Ci to the command line of snmptrap if you
 want it to send a an INFORM instead, or call the <b>snmpinform</b>
 command (which is functionally the same as snmptrap -Ci).  Note that
 you must use snmpv2c or snmpv3 to send INFORMs.  <a
-href="/man/snmptrapd.8.html">snmptrapd</a> is able to receive and
+href="/docs/man/snmptrapd.html">snmptrapd</a> is able to receive and
 display both INFORMs and TRAPs.
 <p>
 <b>Note:</b> snmptrapd will <b>not</b> display SNMPv3
@@ -45,6 +45,14 @@ the createUser directives discussed below.  They will be silently
 dropped by the snmptrapd program.  If your run snmptrapd with the
 -Dusm flag you'll get debugging output which says "no such user",
 which is exactly why they're being dropped.
+<p>
+<b>Note:</b> Starting with net-snmp 5.3, snmptrapd will no longer accept 
+all traps by default. It must be configured with authorized SNMPv1/v2c 
+community strings and/or SNMPv3 users. Non-authorized traps/informs will 
+be dropped. Please refer to the 
+<a href="/docs/man/snmptrapd.conf.html">snmptrapd.conf(5) manual page</a>
+for details.
+
 <p>
 <h2>SNMPv3, users and engineIDs</h2>
 <p>
