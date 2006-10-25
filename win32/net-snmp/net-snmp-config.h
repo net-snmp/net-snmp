@@ -1353,9 +1353,9 @@
 #endif
 
 /* If you have openssl 0.9.7 or above, you likely have AES support. */
-/* #undef USE_OPENSSL */
+/* #undef NETSNMP_USE_OPENSSL */
 
-#ifdef USE_OPENSSL
+#ifdef NETSNMP_USE_OPENSSL
 
 /* Define to 1 if you have the <openssl/dh.h> header file. */
 #define HAVE_OPENSSL_DH_H 1
