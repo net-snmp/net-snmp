@@ -722,9 +722,9 @@ Building the Perl module:
                             (Note: second arg not working since freeing previous
                              Mib is more involved than before).
 
-    &SNMP::initMib()     - calls library init_mib function if Mib not already
-                           loaded - does nothing if Mib already loaded. will
-                           parse directories and load modules according to
+    &SNMP::initMib()     - calls library netsnmp_init_mib function if MIB not 
+                           already loaded - does nothing if MIB already loaded.
+                           Will parse directories and load modules according to
                            environment variables described in Net-SNMP
                            documentations.
                            (see man mib_api, MIBDIRS, MIBS, MIBFILE(S), etc.)

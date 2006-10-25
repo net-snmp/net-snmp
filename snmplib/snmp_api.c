@@ -633,7 +633,7 @@ _init_snmp(void)
 
     snmp_res_init();            /* initialize the mt locking structures */
 #ifndef NETSNMP_DISABLE_MIB_LOADING
-    init_mib_internals();
+    netsnmp_init_mib_internals();
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
     netsnmp_tdomain_init();
 
@@ -851,7 +851,7 @@ init_snmp(const char *type)
 
     read_premib_configs();
 #ifndef NETSNMP_DISABLE_MIB_LOADING
-    init_mib();
+    netsnmp_init_mib();
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
 
     read_configs();
