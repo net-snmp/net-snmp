@@ -2976,7 +2976,7 @@ snmp_read_mib(mib_file, force=0)
         if ((mib_file == NULL) || (*mib_file == '\0')) {
            if (get_tree_head() == NULL) {
               if (verbose) warn("snmp_read_mib: initializing MIB\n");
-              init_mib();
+              netsnmp_init_mib();
               if (get_tree_head()) {
                  if (verbose) warn("done\n");
               } else {
