@@ -22,6 +22,16 @@
 /* #undef HAVE_NET_IF_MIB_H */
 
 /*
+ * This section adds the relevant definitions from generic.h
+ * (a file we don't include here)
+ */
+
+/*
+ * udp_inpcb list symbol, e.g. for mibII/udpTable.c
+ */
+#define INP_NEXT_SYMBOL inp_next
+
+/*
  * This section defines Mac OS X 10.4 (and later) specific additions.
  */
 #define darwin 8
@@ -76,5 +86,5 @@
  * i.e., IPv4 and IPv6 use the same structs.
  * This should eventually be replaced with a configure directive.
  */
-//#define USE_UNIFIED_IPV6_STRUCTS 1
+/* #define USE_UNIFIED_IPV6_STRUCTS 1 */
 #undef STRUCT_in6pcb_HAS_inp_vflag
