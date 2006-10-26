@@ -1075,8 +1075,8 @@ Optional Features:
   --disable-embedded-perl         Disable embedded Perl in the SNMP agent and
                                   snmptrapd. enabled by default
   --disable-perl-cc-checks        Disable configure checks for whether Perl's
-                                 C Compiler is compatible with ours when
-                                 embedded Perl is enabled.
+                                  C Compiler is compatible with ours when
+                                  embedded Perl is enabled.
   --enable-ucd-snmp-compatibility Install ucd-snmp look-alike headers and libs.
 
   --enable-shared[=PKGS]
@@ -1172,11 +1172,11 @@ Configuring the agent:
                 This transport is always compiled in.
     UDPIPv6     support for SNMP over UDP/IPv6.
                 This transport is available for Linux, Solaris and
-                FreeBSD.
+                FreeBSD at least.
                 It is never compiled in by default.
     TCPIPv6     support for SNMP over UDP/IPv6.
                 This transport is available for Linux, Solaris and
-                FreeBSD.
+                FreeBSD at least.
                 It is never compiled in by default.
     TCP         support for SNMP over TCP/IP.
                 This transport is compiled in by default, but may be omitted.
@@ -1233,19 +1233,24 @@ Configuring the agent:
   Optional modules for specific platforms
     Linux
       ucd-snmp/lmSensors   hardware monitoring (LM-SENSORS-MIB)
-      tunnel               Linux TUNNEL-MIB support (ifTable extension)
-      mibII/interfaces     (old ifTable implementation)
-      tcp-mib              (experimental) tcpConnectionTable and
-                           tcpListenerTable
-      udp-mib              (experimental) udpEndpointTable
       ip-mib/ipv4InterfaceTable  (experimental)
       ip-mib/ipv6InterfaceTable  (experimental)
+      tunnel               Linux TUNNEL-MIB support (ifTable extension)
+      mibII/interfaces     (old ifTable implementation)
       misc/ipfwacc         accounting rules IP firewall information
       ipfwchains/ipfwchains  firewall chains under ipfw
                              (See agent/mibgroup/ipfwchains/README)
 
     Solaris
       ucd-snmp/lmSensors   hardware monitoring (LM-SENSORS-MIB)
+      if-mib               IF-MIB rewrite (add --enable-mfd-rewrites)
+      tcp-mib              TCP-MIB rewrite (tcpConnectionTable and
+                             tcpListenerTable; add --enable-mfd-rewrites)
+      udp-mib              UDP-MIB rewrite (udpEndpointTable;
+                             add --enable-mfd-rewrites)
+
+    FreeBSD/OpenBSD
+      if-mib               IF-MIB rewrite (add --enable-mfd-rewrites)
 
   AgentX support:
     agentx/subagent        allows the agent to run as either a snmp agent
@@ -5323,7 +5328,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5326 "configure"' > conftest.$ac_ext
+  echo '#line 5331 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6820,7 +6825,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:6823:" \
+echo "$as_me:6828:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -7883,11 +7888,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7886: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7891: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7890: \$? = $ac_status" >&5
+   echo "$as_me:7895: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8151,11 +8156,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8154: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8159: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8158: \$? = $ac_status" >&5
+   echo "$as_me:8163: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8255,11 +8260,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8258: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8263: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8262: \$? = $ac_status" >&5
+   echo "$as_me:8267: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10600,7 +10605,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10603 "configure"
+#line 10608 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10700,7 +10705,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10703 "configure"
+#line 10708 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13040,11 +13045,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13043: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13048: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13047: \$? = $ac_status" >&5
+   echo "$as_me:13052: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13144,11 +13149,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13147: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13152: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13151: \$? = $ac_status" >&5
+   echo "$as_me:13156: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14714,11 +14719,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14717: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14722: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14721: \$? = $ac_status" >&5
+   echo "$as_me:14726: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14818,11 +14823,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14821: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14826: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14825: \$? = $ac_status" >&5
+   echo "$as_me:14830: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17021,11 +17026,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17024: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17029: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17028: \$? = $ac_status" >&5
+   echo "$as_me:17033: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17289,11 +17294,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17292: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17297: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17296: \$? = $ac_status" >&5
+   echo "$as_me:17301: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17393,11 +17398,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17396: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17401: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17400: \$? = $ac_status" >&5
+   echo "$as_me:17405: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -24511,6 +24516,7 @@ echo "$as_me: WARNING: Disabling Callback transport will disable AgentX support.
         new_with_out_mib_modules="agentx $new_with_out_mib_modules"
 fi
 
+# XXX: only add mibII/ipv6 on systems where it's known to build (i.e. Linux)?
 if test "x$enable_ipv6" = "xyes"; then
 	new_module_list="$new_module_list mibII/ipv6"
 fi
