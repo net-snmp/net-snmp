@@ -613,11 +613,11 @@ AC_ARG_WITH(out_transports,
                 This transport is always compiled in.
     UDPIPv6     support for SNMP over UDP/IPv6.
                 This transport is available for Linux, Solaris and
-                FreeBSD.
+                FreeBSD at least.
                 It is never compiled in by default.
     TCPIPv6     support for SNMP over UDP/IPv6.
                 This transport is available for Linux, Solaris and
-                FreeBSD.
+                FreeBSD at least.
                 It is never compiled in by default.
     TCP         support for SNMP over TCP/IP.
                 This transport is compiled in by default, but may be omitted.
@@ -698,19 +698,24 @@ AC_ARG_WITH(out_mib_modules,
   Optional modules for specific platforms
     Linux
       ucd-snmp/lmSensors   hardware monitoring (LM-SENSORS-MIB)
-      tunnel               Linux TUNNEL-MIB support (ifTable extension)
-      mibII/interfaces     (old ifTable implementation)
-      tcp-mib              (experimental) tcpConnectionTable and
-                           tcpListenerTable
-      udp-mib              (experimental) udpEndpointTable
       ip-mib/ipv4InterfaceTable  (experimental)
       ip-mib/ipv6InterfaceTable  (experimental)
+      tunnel               Linux TUNNEL-MIB support (ifTable extension)
+      mibII/interfaces     (old ifTable implementation)
       misc/ipfwacc         accounting rules IP firewall information
       ipfwchains/ipfwchains  firewall chains under ipfw
                              (See agent/mibgroup/ipfwchains/README)
 
     Solaris
       ucd-snmp/lmSensors   hardware monitoring (LM-SENSORS-MIB)
+      if-mib               IF-MIB rewrite (add --enable-mfd-rewrites)
+      tcp-mib              TCP-MIB rewrite (tcpConnectionTable and
+                             tcpListenerTable; add --enable-mfd-rewrites)
+      udp-mib              UDP-MIB rewrite (udpEndpointTable;
+                             add --enable-mfd-rewrites)
+
+    FreeBSD/OpenBSD
+      if-mib               IF-MIB rewrite (add --enable-mfd-rewrites)
 
   AgentX support:
     agentx/subagent        allows the agent to run as either a snmp agent
@@ -837,8 +842,8 @@ AC_ARG_ENABLE(embedded-perl,
 
 AC_ARG_ENABLE(perl-cc-checks,
 [  --disable-perl-cc-checks        Disable configure checks for whether Perl's
-                                 C Compiler is compatible with ours when
-                                 embedded Perl is enabled.])
+                                  C Compiler is compatible with ours when
+                                  embedded Perl is enabled.])
 
 # Common perl mistakes
 AC_ARG_ENABLE(perl-modules,,
@@ -1841,6 +1846,7 @@ if test "x$transport_callback_disabled" = "xyes"; then
         new_with_out_mib_modules="agentx $new_with_out_mib_modules"
 fi
 
+# XXX: only add mibII/ipv6 on systems where it's known to build (i.e. Linux)?
 if test "x$enable_ipv6" = "xyes"; then
 	new_module_list="$new_module_list mibII/ipv6"
 fi
