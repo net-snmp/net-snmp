@@ -383,6 +383,9 @@ Requirements
     HTMLHelp file' and 'Combining the binaries and HTMLHelp files'.  Net-SNMP
     should be located in c:\usr.
 
+1.1 Update the license in win32\dist\installer\net-snmp.nsi if needed and
+    commit to CVS.
+
 2.  Copy the following files to c:\usr:
 
     cd (source dir)
