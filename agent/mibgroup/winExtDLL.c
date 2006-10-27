@@ -722,6 +722,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             break;
           default:
             netsnmp_ASN_type = ASN_INTEGER;
+            DEBUGMSGTL(("winExtDLL", "unknown MS ASN type.  Defaulting to ASN_INTEGER\n"));
             break;
         }
 
@@ -798,6 +799,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             
           default:
             // The Windows agent didn't return data so set values to NULL
+            // FIXME:  We never get here.  We set it to INTEGER above..
             snmp_set_var_typed_value(var, NULL,
                 NULL,
                 NULL);
@@ -898,6 +900,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             break;
           default:
             windows_ASN_type = MS_ASN_INTEGER;
+            DEBUGMSGTL(("winExtDLL", "unknown MS ASN type.  Defaulting to ASN_INTEGER\n"));
             break;
         }
 
