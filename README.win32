@@ -148,6 +148,10 @@ Limitations
 - When using HP Insight Agents, some parts of the enterprises.232 tree are not
   accessible.  The cause of this is not known.
 
+- sysUpTime.0 does not report the correct uptime for the agent.  This is
+  because the Windows extension checks for the uptime of the SNMP service,
+  which is not running when Net-SNMP is running.
+
 
 Enabling the Windows SNMP extension agents
 ------------------------------------------
@@ -180,8 +184,7 @@ what extension DLLs to load:
 HKLM\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ExtensionAgents
        
 Each REG_SZ value contains the registry path to an extension agent which 
-contains the path to the DLL.  The name of the key is not important, only 
-the contents.  For example:
+contains the path to the DLL.  For example:
 
 Name    Type    Value
 1       REG_SZ  SOFTWARE\Microsoft\LANManagerMIB2Agent\CurrentVersion
