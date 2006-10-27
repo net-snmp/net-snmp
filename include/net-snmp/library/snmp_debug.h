@@ -270,8 +270,8 @@ typedef struct netsnmp_token_descr_s {
     char  enabled;
 } netsnmp_token_descr;
 
-extern int                 debug_num_tokens;
-extern netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
+NETSNMP_IMPORT int                 debug_num_tokens;
+NETSNMP_IMPORT netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
     
 #ifdef __cplusplus
 }

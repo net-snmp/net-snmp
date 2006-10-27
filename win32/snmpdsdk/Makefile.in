@@ -8,7 +8,7 @@ LINKTYPE=
 # Set to 1 to allow the building using the DLL version of SNMPLIB.  This is 
 # NOT supported as this program is NOT thread safe and it WILL cause
 # problems!
-ALLOW_DLL=0
+ALLOW_DLL=1
 
 !IF "$(OS)" == "Windows_NT"
 NULL=
@@ -45,6 +45,10 @@ CLEAN :
 
 CPP=cl.exe
 CPP_PROJ=/nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "HAVE_WIN32_PLATFORM_SDK" /Fp"$(INTDIR)\snmpd.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+
+!IF "$(LINKTYPE)" == "dynamic"
+CPP_PROJ=$(CPP_PROJ) /D "NMAKE_NETSNMP_USE_DLL"
+!ENDIF
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -132,6 +136,10 @@ CLEAN :
 
 CPP=cl.exe
 CPP_PROJ=/nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "HAVE_WIN32_PLATFORM_SDK" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\snmpd.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+
+!IF "$(LINKTYPE)" == "dynamic"
+CPP_PROJ=$(CPP_PROJ) /D "NMAKE_NETSNMP_USE_DLL"
+!ENDIF
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
