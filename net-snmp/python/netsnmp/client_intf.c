@@ -1934,12 +1934,21 @@ netsnmp_walk(PyObject *self, PyObject *args)
       if (!response || !response->variables ||
           (response->variables->name_length < oid_arr_len) ||
           (memcmp(oid_arr, response->variables->name,
-                  oid_arr_len * sizeof(oid)))) {
+                  oid_arr_len * sizeof(oid))) ||
+          status != STAT_SUCCESS ||
+          response->errstat != SNMP_ERR_NOERROR) {
           notdone = 0;
       } else {
         for(vars = (response ? response->variables : NULL), varlist_ind = 0;
     	vars && (varlist_ind <= varlist_len);
     	vars = vars->next_variable, varlist_ind++) {
+
+          if ((vars->type == SNMP_ENDOFMIBVIEW) ||
+              (vars->type == SNMP_NOSUCHOBJECT) ||
+              (vars->type == SNMP_NOSUCHINSTANCE)) {
+              notdone = 0;
+              break;
+          }
 
           varbind = py_netsnmp_construct_varbind();
 
