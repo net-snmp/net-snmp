@@ -14,7 +14,7 @@ extern          "C" {
  */
 
 #define TRANSPORT_DOMAIN_UDP_IPV6	1,3,6,1,2,1,100,1,2
-extern oid      netsnmp_UDPIPv6Domain[];
+NETSNMP_IMPORT oid      netsnmp_UDPIPv6Domain[];
 
 netsnmp_transport *snmp_udp6_transport(struct sockaddr_in6 *addr,
                                        int local);

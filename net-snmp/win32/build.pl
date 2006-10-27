@@ -17,6 +17,7 @@ my $logging = "enabled";
 my $debug = "disabled";
 my $configOpts = "";
 my $cTmp = "";
+my $linktype = "static";
 
 # Prepend win32\ if running from main directory
 my $current_pwd = `%COMSPEC% /c cd`;
@@ -50,7 +51,9 @@ while (1) {
   print "8.  Debug mode:                 " . $debug . "\n";
   print "9.  IPv6 transports:            " . $b_ipv6 . "\n";
   print "\n";
-  print "10. Install development files   " . $install_devel . "\n";
+  print "10. Link type:                  " . $linktype . "\n";
+  print "\n";
+  print "11. Install development files   " . $install_devel . "\n";
   print "\nF.  Finished - start build\n";
   print "Q.  Quit - abort build\n\n";
   print "Select option to set / toggle: ";
@@ -96,7 +99,7 @@ while (1) {
       $install = "enabled";
     }
   }
-  elsif ($option eq "10") {
+  elsif ($option eq "11") {
     if ($install_devel eq "enabled") {
       $install_devel = "disabled";
     }
@@ -134,6 +137,14 @@ while (1) {
     }
     else {
       $debug = "enabled";
+    }
+  }
+  elsif ($option eq "10") {
+    if ($linktype eq "static") {
+      $linktype = "dynamic";
+    }
+    else {
+      $linktype = "static";
     }
   }
   elsif (lc($option) eq "f") {
@@ -186,7 +197,7 @@ if ($logging eq "enabled") {
   system("del ..\\include\\net-snmp\\net-snmp-config.h > NUL: 2>&1");
   
   print "Running Configure...\n";
-  system("perl Configure $configOpts --linktype=static --prefix=\"$install_base\" > configure.out 2>&1") == 0 || die "Build error (see configure.out)";
+  system("perl Configure $configOpts --linktype=$linktype --prefix=\"$install_base\" > configure.out 2>&1") == 0 || die "Build error (see configure.out)";
 
   print "Cleaning...\n";
   system("nmake /nologo clean > clean.out 2>&1") == 0 || die "Build error (see clean.out)";
@@ -195,14 +206,16 @@ if ($logging eq "enabled") {
   system("nmake /nologo > make.out 2>&1") == 0 || die "Build error (see make.out)";
 
   if ($perl eq "enabled") {
-    print "Running Configure for DLL...\n";
-    system("perl Configure $configOpts --linktype=dynamic --prefix=\"$install_base\" > perlconfigure.out 2>&1") == 0 || die "Build error (see perlconfigure.out)";
-
-    print "Cleaning libraries...\n";
-    system("nmake /nologo libs_clean >> clean.out 2>&1") == 0 || die "Build error (see clean.out)";
-
-    print "Building DLL libraries...\n";
-    system("nmake /nologo libs > dll.out 2>&1") == 0 || die "Build error (see dll.out)";
+    if ($linktype eq "static") {
+      print "Running Configure for DLL...\n";
+      system("perl Configure $configOpts --linktype=dynamic --prefix=\"$install_base\" > perlconfigure.out 2>&1") == 0 || die "Build error (see perlconfigure.out)";
+      
+      print "Cleaning libraries...\n";
+      system("nmake /nologo libs_clean >> clean.out 2>&1") == 0 || die "Build error (see clean.out)";
+      
+      print "Building DLL libraries...\n";
+      system("nmake /nologo libs > dll.out 2>&1") == 0 || die "Build error (see dll.out)";
+    }
    
     print "Cleaning Perl....\n";
     system("nmake /nologo perl_clean >> clean.out 2>&1"); # If already cleaned, Makefile is gone so don't worry about errors!
@@ -248,15 +261,17 @@ else {
   # Delete net-snmp-config.h from main include folder just in case it was created by a Cygwin or MinGW build
   system("del ..\\include\\net-snmp\\net-snmp-config.h > NUL: 2>&1");
 
-  system("perl Configure $configOpts --linktype=static --prefix=\"$install_base\"") == 0 || die "Build error (see above)";
+  system("perl Configure $configOpts --linktype=$linktype --prefix=\"$install_base\"") == 0 || die "Build error (see above)";
   system("nmake /nologo clean") == 0 || die "Build error (see above)";
   system("nmake /nologo") == 0 || die "Build error (see above)";
   
   if ($perl eq "enabled") {
-    system("perl Configure $configOpts --linktype=dynamic --prefix=\"$install_base\"") == 0 || die "Build error (see above)";
-    system("nmake /nologo libs_clean") == 0 || die "Build error (see above)";
-    system("nmake /nologo libs") == 0 || die "Build error (see above)";
-    
+    if ($linktype eq "static") {      
+      system("perl Configure $configOpts --linktype=dynamic --prefix=\"$install_base\"") == 0 || die "Build error (see above)";
+      system("nmake /nologo libs_clean") == 0 || die "Build error (see above)";
+      system("nmake /nologo libs") == 0 || die "Build error (see above)";
+    }
+      
     system("nmake /nologo perl_clean"); # If already cleaned, Makefile is gone so don't worry about errors!
     system("nmake /nologo perl") == 0 || die "Build error (see above)";
 

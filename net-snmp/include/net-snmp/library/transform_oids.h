@@ -10,19 +10,19 @@ extern          "C" {
  * Numeric MIB names for auth and priv transforms.
  */
 
-extern oid      usmNoAuthProtocol[10];  /* == { 1,3,6,1,6,3,10,1,1,1 }; */
+NETSNMP_IMPORT oid      usmNoAuthProtocol[10];  /* == { 1,3,6,1,6,3,10,1,1,1 }; */
 #ifndef NETSNMP_DISABLE_MD5
-extern oid      usmHMACMD5AuthProtocol[10];     /* == { 1,3,6,1,6,3,10,1,1,2 }; */
+NETSNMP_IMPORT oid      usmHMACMD5AuthProtocol[10];     /* == { 1,3,6,1,6,3,10,1,1,2 }; */
 #endif
-extern oid      usmHMACSHA1AuthProtocol[10];    /* == { 1,3,6,1,6,3,10,1,1,3 }; */
-extern oid      usmNoPrivProtocol[10];  /* == { 1,3,6,1,6,3,10,1,2,1 }; */
+NETSNMP_IMPORT oid      usmHMACSHA1AuthProtocol[10];    /* == { 1,3,6,1,6,3,10,1,1,3 }; */
+NETSNMP_IMPORT oid      usmNoPrivProtocol[10];  /* == { 1,3,6,1,6,3,10,1,2,1 }; */
 #ifndef NETSNMP_DISABLE_DES
-extern oid      usmDESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,2 }; */
+NETSNMP_IMPORT oid      usmDESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,2 }; */
 #endif
 
 /* XXX: OIDs not defined yet */
-extern oid      usmAESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,4 }; */
-extern oid      *usmAES128PrivProtocol; /* backwards compat */
+NETSNMP_IMPORT oid      usmAESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,4 }; */
+NETSNMP_IMPORT oid      *usmAES128PrivProtocol; /* backwards compat */
 
 #define USM_AUTH_PROTO_NOAUTH_LEN 10
 #define USM_AUTH_PROTO_MD5_LEN 10
