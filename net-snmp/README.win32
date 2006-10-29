@@ -1219,6 +1219,7 @@ The following configure options creates a working set of programs:
 ./configure \
 	--with-mib-modules="host agentx disman/event-mib examples/example" \
 	--with-out-mib-modules=host/hr_network --with-libs="-lws2_32" \
+        --disable-embedded-perl --without-perl-modules \
 
 If you want to use SNMPv3 auth and privacy features, add:
 	--with-openssl="/usr" \
@@ -1297,6 +1298,7 @@ Note:  The source code should *not* be in a folder that contains a space.  For
 	./configure --prefix="$BASEDIR" \
 		--with-mibdirs="$BASEDIR/share/snmp/mibs" \
 	--with-mib-modules="agentx disman/event-mib examples/example" \
+        --disable-embedded-perl --without-perl-modules \
 
     [Sorry. the host resources MIB is not supported by MinGW]
 
