@@ -52,12 +52,58 @@ MAN5G = snmpd.conf.5 snmptrapd.conf.5 snmp.conf.5 snmp_config.5 variables.5 \
         mib2c.conf.5 snmpd.examples.5 snmpd.internal.5
 MAN8G = snmptrapd.8 snmpd.8
 
-MANALL = $(MAN1) $(MAN1G) $(MAN3) $(MAN3G) $(MAN5G) $(MAN8G)
+DEFAULT_STORE_ALIASES = netsnmp_ds_get_boolean.3 netsnmp_ds_get_int.3	\
+	netsnmp_ds_get_string.3 netsnmp_ds_register_config.3		\
+	netsnmp_ds_register_premib.3 netsnmp_ds_set_boolean.3 		\
+	netsnmp_ds_set_int.3						\
+	netsnmp_ds_set_string.3 netsnmp_ds_shutdown.3
+READ_CONFIG_ALIASES = config_perror.3 config_pwarn.3			\
+	read_config_print_usage.3 read_configs.3 read_premib_configs.3	\
+	register_app_config_handler.3 register_app_premib_handler.3	\
+	register_config_handler.3 register_mib_handlers.3 		\
+	register_premib_handler.3 					\
+	unregister_app_config_handler.3 unregister_config_handler.3
+SNMP_ALARM_ALIASES = snmp_alarm_register.3 snmp_alarm_register_hr.3 	\
+	snmp_alarm_unregister.3
+SNMP_SET_SAVE_DESCRIPTIONS_ALIASES = fprint_description.3 fprint_objid.3 \
+	fprint_value.3 fprint_variable.3 snprint_objid.3 snprint_value.3 \
+	snprint_variable.3 sprint_realloc_objid.3 sprint_realloc_value.3 \
+	sprint_realloc_variable.3
+SNMP_TRAP_API_ALIASES = send_easy_trap.3 send_trap_vars.3 send_v2trap.3
+
+
+
+MANALIASES=$(DEFAULT_STORE_ALIASES) $(READ_CONFIG_ALIASES) 		\
+	$(SNMP_ALARM_ALIASES) $(SNMP_SET_SAVE_DESCRIPTIONS_ALIASES) 	\
+	$(SNMP_TRAP_API_ALIASES)
+MANALL = $(MAN1) $(MAN1G) $(MAN3) $(MAN3G) $(MAN5G) $(MAN8G) $(MANALIASES)
 
 TARGETS = $(MAN5G) $(MAN1G) $(MAN3G) $(MAN8G)
-OTHERCLEANTARGETS=$(TARGETS) default_store.3.h
+OTHERCLEANTARGETS=$(TARGETS) default_store.3.h $(MANALIASES)
 
-all: $(TARGETS) standardall
+all: $(TARGETS) standardall manaliases
+
+manaliases:
+	@for i in $(DEFAULT_STORE_ALIASES) ; do				\
+		echo "making man page alias $$i -> default_store APIs" ; \
+		echo ".so man3/default_store.3" > $$i ; 		\
+	done
+	@for i in $(READ_CONFIG_ALIASES) ; do				\
+		echo "making man page alias $$i -> read_config APIs" ;	\
+		echo ".so man3/read_config.3" > $$i ; 			\
+	done
+	@for i in $(SNMP_ALARM_ALIASES) ; do				\
+		echo "making man page alias $$i -> snmp_alarm APIs" ;	\
+		echo ".so man3/snmp_alarm.3" > $$i ; 			\
+	done
+	@for i in $(SNMP_SET_SAVE_DESCRIPTIONS_ALIASES) ; do		\
+		echo "making man page alias $$i -> snmp_set_save_descriptions APIs" ; \
+		echo ".so man3/snmp_set_save_descriptions.3" > $$i ; 	\
+	done
+	@for i in $(SNMP_TRAP_API_ALIASES) ; do				\
+		echo "making man page alias $$i -> snmp_trap APIs" ;	\
+		echo ".so man3/snmp_trap.3" > $$i ; 			\
+	done
 
 snmpbulkget.1: $(srcdir)/snmpbulkget.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpbulkget.1.def > snmpbulkget.1
@@ -185,6 +231,8 @@ maninstall:  maninstalldirs $(MAN1) $(MAN1G) $(MAN3) $(MAN5G) $(MAN8)
 	@for i in $(MAN3) ; do $(INSTALL_DATA) $(srcdir)/$$i $(INSTALL_PREFIX)$(man3dir) ; echo "install:  installed $$i in $(INSTALL_PREFIX)$(man3dir)" ; done
 	@$(INSTALL_DATA) $(MAN3G) $(INSTALL_PREFIX)$(man3dir)
 	@for i in $(MAN3G) ; do echo "install:  installed $$i in $(INSTALL_PREFIX)$(man3dir)" ; done
+	@$(INSTALL_DATA) $(MANALIASES) $(INSTALL_PREFIX)$(man3dir)
+	@for i in $(MANALIASES) ; do echo "install:  installed $$i in $(INSTALL_PREFIX)$(man3dir)" ; done
 	-@$(INSTALL_DATA) $(MAN5G) $(INSTALL_PREFIX)$(man5dir)
 	@for i in $(MAN5G) ; do echo "install:  installed $$i in $(INSTALL_PREFIX)$(man5dir)" ; done
 	@$(INSTALL_DATA) $(MAN8G) $(INSTALL_PREFIX)$(man8dir)
@@ -192,7 +240,7 @@ maninstall:  maninstalldirs $(MAN1) $(MAN1G) $(MAN3) $(MAN5G) $(MAN8)
 
 manuninstall:
 	@for i in $(MAN1G) $(MAN1) ; do rm -f $(INSTALL_PREFIX)$(man1dir)/$$i ; echo "removed $$i from $(INSTALL_PREFIX)$(man1dir)" ; done
-	@for i in $(MAN3G) $(MAN3) ; do rm -f $(INSTALL_PREFIX)$(man3dir)/$$i ; echo "removed $$i from $(INSTALL_PREFIX)$(man3dir)" ; done
+	@for i in $(MAN3G) $(MAN3) $(MANALIASES); do rm -f $(INSTALL_PREFIX)$(man3dir)/$$i ; echo "removed $$i from $(INSTALL_PREFIX)$(man3dir)" ; done
 	@for i in $(MAN5G) ; do rm -f $(INSTALL_PREFIX)$(man5dir)/$$i ; echo "removed $$i from $(INSTALL_PREFIX)$(man5dir)" ; done
 	@for i in $(MAN8G) ; do rm -f $(INSTALL_PREFIX)$(man8dir)/$$i ; echo "removed $$i from $(INSTALL_PREFIX)$(man8dir)" ; done
 
