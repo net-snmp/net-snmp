@@ -3,6 +3,10 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/memory.h>
 
+#if HAVE_SYS_SWAP_H
+#include <sys/swap.h>
+#endif
+
 #if HAVE_SYS_SYSGET_H
 #include <sys/sysget.h>
 #endif
@@ -19,6 +23,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     netsnmp_memory_info *mem;
     struct rminfo meminfo; /* struct for getting memory info, see sys/sysmp.h */
     int pagesz, rminfosz;
+    off_t swaptotal, swapfree;
 
     /*
      * Retrieve the memory information from the underlying O/S...
@@ -32,6 +37,8 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
 	snmp_log(LOG_ERR, "memory_irix: sysmp failed!\n");
         return -1;
     }
+    swapctl(SC_GETSWAPTOT, &swaptotal);
+    swapctl(SC_GETFREESWAP, &swapfree);
 
     /*
      * ... and save this in a standard form.
@@ -55,8 +62,8 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     } else {
         if (!mem->descr)
              mem->descr = strdup("Virtual memory");
-        mem->units = pagesz;
-        mem->size  = meminfo.availsmem + (meminfo.physmem - meminfo.availrmem);
+        mem->units = pagesz;     /* swaptotal is in blocks, so adjust below */
+        mem->size  = meminfo.physmem + (swaptotal*512/pagesz);
         mem->free  = meminfo.availsmem;
         mem->other = -1;
         DEBUGMSGTL(("hardware/memory/memory_irix", "Virtual memory: size %u, free %u\n", mem->size, mem->free));
@@ -68,10 +75,11 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     } else {
         if (!mem->descr)
              mem->descr = strdup("Swap space");
-        mem->units = pagesz;
-        mem->size  = meminfo.availsmem - meminfo.availrmem;
-        mem->free  = meminfo.availsmem - meminfo.availrmem;
+        mem->units = 1024;
+        mem->size  = swaptotal/2; /* blocks to KB */
+        mem->free  = swapfree/2;  /* blocks to KB */
         mem->other = -1;
+        DEBUGMSGTL(("hardware/memory/memory_irix", "Swap: size %u, free %u\n", mem->size, mem->free));
     }
 
     return 0;
