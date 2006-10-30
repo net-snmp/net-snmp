@@ -140,8 +140,7 @@ handle_memory(netsnmp_mib_handler *handler,
             val *= (mem_info->units/1024);
             break;
         case MEMORY_FREE:
-                                          /* XXX - or NS_MEM_TYPE_VIRTMEM */
-            mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 0 );
+            mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_VIRTMEM, 0 );
             if (!mem_info)
                goto NOSUCH;
             val  =  mem_info->free;     /* memfree + swapfree */
