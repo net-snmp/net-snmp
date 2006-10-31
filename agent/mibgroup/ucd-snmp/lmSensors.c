@@ -590,6 +590,15 @@ process_individual_fan(picl_nodehdl_t childh,
   process_num_sensor(childh, propname, "AtoDSensorValue", FAN_TYPE, 1);
 }
 
+
+static int
+process_newtype_fan(picl_nodehdl_t childh,
+                     char propname[PICL_PROPNAMELEN_MAX])
+{
+  process_num_sensor(childh, propname, "Speed", FAN_TYPE, 1);
+}
+
+
 static int
 process_temperature_sensor(picl_nodehdl_t childh,
                                char propname[PICL_PROPNAMELEN_MAX])
@@ -691,6 +700,8 @@ process_sensors(int level, picl_nodehdl_t nodeh)
 
         if (strstr(propclass,"fan-tachometer"))
            process_individual_fan(childh,propname);
+        else if (strstr(propclass,"fan"))
+            process_newtype_fan(childh,propname);
         else if (strstr(propclass,"temperature-sensor"))
             process_temperature_sensor(childh,propname);
         else if (strstr(propclass,"voltage-sensor"))
