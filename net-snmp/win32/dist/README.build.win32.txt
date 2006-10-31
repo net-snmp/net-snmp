@@ -90,7 +90,9 @@ Part 1
     8. Debug mode:           		disabled
     9. IPv6 transports:      		disabled
 
-    10. Install development files   	enabled         ***
+    10. Link type:                      static
+
+    11. Install development files   	enabled         ***
     
     F.  Finished - start build
     Q.  Quit - abort build
@@ -126,7 +128,9 @@ Part 2 - Compiling winExtDLL
     8. Debug mode:           		disabled
     9. IPv6 transports:      		disabled
 
-    10. Install development files   	disabled
+    10. Link type:                      static
+
+    11. Install development files   	disabled
     
     F.  Finished - start build
     Q.  Quit - abort build
