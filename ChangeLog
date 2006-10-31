@@ -1,5 +1,244 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.4.pre4 -> V5.4.rc1
+
+2006-10-31 12:51  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3,
+     netsnmp_agent_trap.3, netsnmp_asn1_packet_parse.3,
+     netsnmp_baby_steps.3, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3,
+     netsnmp_container.3, netsnmp_data_list.3,
+     netsnmp_debug.3, netsnmp_default_store.3,
+     netsnmp_handler.3, netsnmp_instance.3,
+     netsnmp_iterator_info_s.3, netsnmp_leaf.3,
+     netsnmp_library.3, netsnmp_mib_maintenance.3,
+     netsnmp_mib_utilities.3, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3,
+     netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3,
+     netsnmp_snmp_client.3, netsnmp_snmp_logging.3,
+     netsnmp_snmp_pdu.3, netsnmp_snmp_session.3,
+     netsnmp_stash_cache.3, netsnmp_stash_to_next.3,
+     netsnmp_table.3, netsnmp_table_array.3,
+     netsnmp_table_container.3, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_generic.3,
+     netsnmp_table_indexes.3, netsnmp_table_iterator.3,
+     netsnmp_table_iterator.h.3, netsnmp_table_maintenance.3
+, netsnmp_table_rows.3, netsnmp_tdata.3,
+     netsnmp_util.3, netsnmp_utilities.3,
+     netsnmp_variable_list.3, netsnmp_watcher.3:
+
+   documentation update
+
+2006-10-31 12:51  hardaker
+
+   * doxygen.conf:
+
+   - version tag ( 5.4.rc1 )
+
+2006-10-31 12:35  hardaker
+
+   * agent/kernel.h:
+
+   remove the klookup define as (0) since Dave found definite spots where this was unsafe
+
+2006-10-31 07:32  hardaker
+
+   * agent/kernel.h:
+
+   Patch from Thomas Anders to attempt to fix lack of kmem support for various platforms when kmem isn't available
+
+2006-10-31 07:27  hardaker
+
+   * man/Makefile.in:
+
+   fix a problem with the man generation patch as pointed out by Chris Jalbert
+
+2006-10-31 07:16  hardaker
+
+   * agent/mibgroup/ucd-snmp/lmSensors.c:
+
+   minor patch from Bruce Shaw to fix lmsensors 240 class machines
+
+2006-10-30 13:43  tanders
+
+   * agent/mibgroup/ucd-snmp/memory.c:
+
+   CHANGES: snmpd: memTotalFree should report total virtual instead of physical memory
+
+2006-10-30 09:52  tanders
+
+   * agent/mibgroup/hardware/memory/memory_irix.c:
+
+   mem HAL fixes for IRIX
+
+2006-10-30 07:40  hardaker
+
+   * man/Makefile.in:
+
+   use generated alias man pages
+
+2006-10-28 18:23  alex_b
+
+   * README.win32:
+
+   Added --disable-embedded-perl --without-perl-modules for MinGW / Cygwin.
+
+2006-10-27 13:19  alex_b
+
+   * include/net-snmp/library/snmpTCPDomain.h,
+     include/net-snmp/library/snmpTCPIPv6Domain.h,
+     include/net-snmp/library/snmpUDPIPv6Domain.h,
+     include/net-snmp/library/snmpUnixDomain.h,
+     include/net-snmp/library/snmp_api.h,
+     include/net-snmp/library/snmp_debug.h,
+     include/net-snmp/library/snmp_transport.h,
+     include/net-snmp/library/transform_oids.h,
+     win32/Makefile-apps.in, win32/build.pl,
+     win32/libsnmp_dll/libsnmp.def,
+     win32/libsnmp_dll/libsnmp.def.in, win32/snmpd/Makefile.in
+, win32/snmpdsdk/Makefile.in,
+     win32/snmpnetstat/Makefile.in, win32/snmptrapd/Makefile.in
+:
+
+   -Allow building of applications with library DLL in build.bat build system.
+   -Fix DLL export/import variables for library DLL
+
+2006-10-27 07:47  hardaker
+
+   * python/netsnmp/client_intf.c:
+
+   fix walking off of a cliff
+
+2006-10-27 07:32  marz
+
+   * python/netsnmp/client.py:
+
+   client.py
+
+2006-10-27 02:04  tanders
+
+   * local/snmp-ucd.sh:
+
+   CHANGES: misc: BUGS: 1585250: don't use deprecated options in start script
+
+2006-10-26 17:50  alex_b
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Win32:  Add a couple DEBUG lines.
+
+2006-10-26 17:15  alex_b
+
+   * README.win32, win32/dist/README.build.win32.txt:
+
+   Win32: README update, build steps update.
+
+2006-10-26 09:21  tanders
+
+   * CodingStyle:
+
+   minor updates
+
+2006-10-26 04:14  tanders
+
+   * configure, configure.in:
+
+   minor fixes for "configure --help" output, especially for MIB modules
+
+2006-10-26 03:24  tanders
+
+   * include/net-snmp/system/: darwin8.h, darwin9.h:
+
+   CHANGES: MacOSX: build fix for mibII/udpTable
+
+2006-10-25 11:51  alex_b
+
+   * win32/net-snmp/: net-snmp-config.h, net-snmp-config.h.in
+:
+
+   NETSNMP_ prefix missing for OPENSSL.
+
+2006-10-25 09:16  tanders
+
+   * include/net-snmp/library/mib.h,
+     include/net-snmp/library/parse.h, perl/OID/OID.xs,
+     perl/SNMP/README, perl/SNMP/SNMP.xs,
+     perl/agent/agent.xs, snmplib/mib.c,
+     snmplib/parse.c, snmplib/snmp_api.c:
+
+   CHANGES: library: rename init_mib to netsnmp_init_mib to avoid symbol clash with HP-UX's libnm
+
+2006-10-23 14:00  tanders
+
+   * NEWS:
+
+   AIX ships host by default
+
+2006-10-22 18:01  alex_b
+
+   * win32/dist/: README.build.win32.txt,
+     htmlhelp/Developer_FAQ.html, htmlhelp/FAQ.html,
+     htmlhelp/snmp.conf.win32.html,
+     htmlhelp/snmpd.conf.win32.html,
+     htmlhelp/snmptrapd.conf.win32.html, installer/net-snmp.nsi
+:
+
+   Update Windows binary build files.
+
+2006-10-21 09:42  alex_b
+
+   * README.win32:
+
+   winExtDLL update.
+
+2006-10-21 09:36  alex_b
+
+   * README.win32, win32/dist/installer/net-snmp.nsi:
+
+   Readme update for winExtDLL, change command line for winExtDLL.
+
+2006-10-21 07:07  alex_b
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Code cleanup.  Add support for xSnmpExtensionQueryEx for SET/GETNEXT.
+
+2006-10-21 05:45  alex_b
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Win32: winExtDLL: snmpset string, DLL loading and snmpwalk fixes.
+
+2006-10-21 05:09  hardaker
+
+   * perl/default_store/test.pl:
+
+   remove not-existent SBSM definition from test cases
+
+2006-10-20 17:17  hardaker
+
+   * configure:
+
+   - version tag ( 5.4.pre4 )
+
+-------------------------------------------------------------------------------
+
 Changes: V5.4.pre3 -> V5.4.pre4
 
 2006-10-20 16:59  hardaker
