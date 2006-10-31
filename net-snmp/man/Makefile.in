@@ -224,7 +224,7 @@ mib2c.conf.5: $(top_srcdir)/local/mib2c mib2c.conf.5.in $(srcdir)/mib2c.extract.
 	  touch mib2c.conf.5 ; \
 	fi
 
-maninstall:  maninstalldirs $(MAN1) $(MAN1G) $(MAN3) $(MAN5G) $(MAN8)
+maninstall:  maninstalldirs $(MAN1) $(MAN1G) $(MAN3) $(MAN5G) $(MAN8) $(MANALIASES)
 	@for i in $(MAN1) ; do $(INSTALL_DATA) $(srcdir)/$$i $(INSTALL_PREFIX)$(man1dir) ; echo "install:  installed $$i in $(INSTALL_PREFIX)$(man1dir)" ; done
 	@$(INSTALL_DATA) $(MAN1G) $(INSTALL_PREFIX)$(man1dir)
 	@for i in $(MAN1G) ; do echo "install:  installed $$i in $(INSTALL_PREFIX)$(man1dir)" ; done
