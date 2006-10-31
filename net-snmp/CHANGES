@@ -68,15 +68,19 @@ too long for you.
       - [PATCH 1570650]: make delete table function public
       - [PATCH 1575984]: block SIGHUP during reconfig
       - [PATCH 1570982 ]: Solaris IF-MIB: Support for IPv6-only interfaces
+      - memTotalFree should report total virtual instead of physical memory
 
     snmplib:
       - [PATCH 1565293]: UDPIPv6 transport reports wrong port number
+      - rename init_mib to netsnmp_init_mib to avoid symbol clash with
+	HP-UX's libnm
 
     misc:
       - Most net-snmp specific defines are now (also) available under a
 	proper NETSNMP_ prefix. The older, potentially conflicting names as
 	well as the autoconf variables can now be turned off by a special
 	define.
+      - [BUG 1585250]: don't use deprecated options in start script
 
     agent:
       - [BUG 1427410]: Set auth engineID for SNMPv3 traps.
@@ -91,6 +95,7 @@ too long for you.
 
     MacOSX:
       - [PATCH 1566777]: build fixes for memory_darwin.c
+      - build fix for mibII/udpTable
 
     Tru64:
       - fix "auto_nlist failed on arptab_size at location 0" errors
