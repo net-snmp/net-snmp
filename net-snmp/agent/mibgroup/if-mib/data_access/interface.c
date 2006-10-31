@@ -121,6 +121,7 @@ netsnmp_access_interface_container_init(u_int flags)
             return NULL;
 
         container2->compare = _access_interface_entry_compare_name;
+        container2->container_name = strdup("if_name");
         
         netsnmp_container_add_index(container1, container2);
     }
