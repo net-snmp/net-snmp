@@ -3,8 +3,6 @@
 extern void     init_kmem(const char *);
 extern int      klookup(unsigned long, char *, int);
 #define NETSNMP_KLOOKUP(x,y,z) klookup((unsigned long) x,y,z)
-#else
-#define NETSNMP_KLOOKUP(x,y,z) (0)
 #endif
 
 #if HAVE_KVM_H
