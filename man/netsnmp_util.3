@@ -1,4 +1,4 @@
-.TH "Memory Utility Routines" 3 "20 Oct 2006" "Version 5.4.pre4" "net-snmp" \" -*- nroff -*-
+.TH "Memory Utility Routines" 3 "31 Oct 2006" "Version 5.4.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -262,7 +262,7 @@ Frees a pointer only if it is !NULL and sets its value to NULL.
 .PP
 Definition at line 53 of file tools.h.
 .PP
-Referenced by _sess_read(), build_oid_segment(), clear_context(), clear_lookup_cache(), convert_v2pdu_to_v1(), create_user_from_session(), dump_chunk(), fprint_description(), fprint_objid(), fprint_value(), fprint_variable(), free_agent_snmp_session(), get_module_node(), get_node(), init_mib(), netsnmp_agent_check_packet(), netsnmp_agent_check_parse(), netsnmp_cache_reqinfo_extract(), netsnmp_cache_reqinfo_insert(), netsnmp_config_remember_free_list(), netsnmp_create_handler(), netsnmp_fixup_mib_directory(), netsnmp_free_agent_request_info(), netsnmp_free_all_list_data(), netsnmp_free_cachemap(), netsnmp_free_delegated_cache(), netsnmp_free_list_data(), netsnmp_getenv(), netsnmp_handler_free(), netsnmp_handler_registration_free(), netsnmp_iterator_delete_table(), netsnmp_register_agent_nsap(), netsnmp_register_old_api(), netsnmp_remove_loghandler(), netsnmp_sess_log_error(), netsnmp_set_mib_directory(), netsnmp_set_row_column(), netsnmp_sprint_realloc_objid(), netsnmp_sprint_realloc_objid_tree(), netsnmp_subtree_free(), netsnmp_subtree_join(), netsnmp_subtree_split(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_delete_row(), netsnmp_table_data_delete_table(), netsnmp_table_data_set_helper_handler(), netsnmp_table_dataset_delete_data(), netsnmp_tcontainer_create_table(), netsnmp_tcontainer_delete_table(), netsnmp_tdata_clone_row(), netsnmp_tdata_delete_row(), netsnmp_tdata_delete_table(), netsnmp_wrap_up_request(), parse_octet_hint(), read_objid(), shutdown_mib(), snmp_add_var(), snmp_free_pdu(), snmp_free_var(), snmp_sess_close(), snmp_unregister_callback(), snmpv3_make_report(), snmpv3_parse(), table_helper_handler(), and unregister_config_handler().
+Referenced by _sess_read(), build_oid_segment(), clear_context(), clear_lookup_cache(), convert_v2pdu_to_v1(), create_user_from_session(), dump_chunk(), fprint_description(), fprint_objid(), fprint_value(), fprint_variable(), free_agent_snmp_session(), get_module_node(), get_node(), netsnmp_agent_check_packet(), netsnmp_agent_check_parse(), netsnmp_cache_reqinfo_extract(), netsnmp_cache_reqinfo_insert(), netsnmp_config_remember_free_list(), netsnmp_create_handler(), netsnmp_fixup_mib_directory(), netsnmp_free_agent_request_info(), netsnmp_free_all_list_data(), netsnmp_free_cachemap(), netsnmp_free_delegated_cache(), netsnmp_free_list_data(), netsnmp_getenv(), netsnmp_handler_free(), netsnmp_handler_registration_free(), netsnmp_init_mib(), netsnmp_iterator_delete_table(), netsnmp_register_agent_nsap(), netsnmp_register_old_api(), netsnmp_remove_loghandler(), netsnmp_sess_log_error(), netsnmp_set_mib_directory(), netsnmp_set_row_column(), netsnmp_sprint_realloc_objid(), netsnmp_sprint_realloc_objid_tree(), netsnmp_subtree_free(), netsnmp_subtree_join(), netsnmp_subtree_split(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_delete_row(), netsnmp_table_data_delete_table(), netsnmp_table_data_set_helper_handler(), netsnmp_table_dataset_delete_data(), netsnmp_tcontainer_create_table(), netsnmp_tcontainer_delete_table(), netsnmp_tdata_clone_row(), netsnmp_tdata_delete_row(), netsnmp_tdata_delete_table(), netsnmp_wrap_up_request(), parse_octet_hint(), read_objid(), shutdown_mib(), snmp_add_var(), snmp_free_pdu(), snmp_free_var(), snmp_sess_close(), snmp_unregister_callback(), snmpv3_make_report(), snmpv3_parse(), table_helper_handler(), and unregister_config_handler().
 .SS "#define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))"
 .PP
 Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it. 
@@ -466,7 +466,7 @@ Definition at line 925 of file tools.c.
 .PP
 References NULL, and SNMP_FREE.
 .PP
-Referenced by get_configuration_directory(), get_persistent_directory(), init_mib(), netsnmp_fixup_mib_directory(), netsnmp_get_mib_directory(), read_config_files(), and read_config_store().
+Referenced by get_configuration_directory(), get_persistent_directory(), netsnmp_fixup_mib_directory(), netsnmp_get_mib_directory(), netsnmp_init_mib(), read_config_files(), and read_config_store().
 .SS "int netsnmp_hex_to_binary (u_char ** buf, size_t * buf_len, size_t * offset, int allow_realloc, const char * hex, const char * delim)"
 .PP
 convert an ASCII hex string (with specified delimiters) to binary 
