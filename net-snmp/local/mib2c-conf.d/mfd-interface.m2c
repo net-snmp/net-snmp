@@ -850,7 +850,8 @@ _${context}_get_column( ${context}_rowreq_ctx *rowreq_ctx,
 @         if $m2c_node_needlength == 0@
 @            if "$node.perltype" eq "BITS"@
     {
-        $m2c_decl tmp = 0xff << ((sizeof($m2c_decl) - 1) * 8);
+        $m2c_decl mask = 0xff << ((sizeof($m2c_decl) - 1) * 8);
+        int       idx = 0;
 @            else@
     var->val_len = sizeof($m2c_decl);
 @            end@
@@ -862,10 +863,11 @@ rc = ${node}_get(rowreq_ctx, $m2c_node_var_ref );
          * check for length of bits string
          */
         var->val_len = 0;
-        while( 0 != tmp ) {
-            if ( *(($m2c_decl *) var->val.string) & tmp )
-                ++var->val_len;
-            tmp = tmp >> 8;
+        while( 0 != mask ) {
+            ++idx;
+            if ( *(($m2c_decl *) var->val.string) & mask )
+                var->val_len = idx;
+            mask = mask >> 8;
         }
     }
 @         end@
