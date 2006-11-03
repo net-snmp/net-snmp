@@ -1258,7 +1258,7 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
     goto end;
   }
 
-  session.peername = strdup(peer);
+  session.peername = peer;
   session.retries = retries; /* 5 */
   session.timeout = timeout; /* 1000000L */
   session.authenticator = NULL;
@@ -1291,10 +1291,8 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
 			     USM_AUTH_PROTO_SHA_LEN);
       session.securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
     } else if (!strcmp(auth_proto, "DEFAULT")) {
-      const oid *theoid =
-	get_default_authtype(&session.securityAuthProtoLen);
       session.securityAuthProto = 
-	snmp_duplicate_objid(theoid, session.securityAuthProtoLen);
+	get_default_authtype(&session.securityAuthProtoLen);
     } else {
       if (verbose)
 	printf("error:snmp_new_v3_session:Unsupported authentication protocol(%s)\n", auth_proto);
@@ -1328,10 +1326,8 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
 			     USM_PRIV_PROTO_AES_LEN);
       session.securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
     } else if (!strcmp(priv_proto, "DEFAULT")) {
-      const oid *theoid =
-	get_default_privtype(&session.securityPrivProtoLen);
       session.securityPrivProto = 
-	snmp_duplicate_objid(theoid, session.securityPrivProtoLen);
+	get_default_privtype(&session.securityPrivProtoLen);
     } else {
       if (verbose)
 	printf("error:snmp_new_v3_session:Unsupported privacy protocol(%s)\n", priv_proto);
@@ -1364,6 +1360,23 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
 
   return Py_BuildValue("i", (int)ss);
 }
+
+static PyObject *
+netsnmp_delete_session(PyObject *self, PyObject *args)
+{
+  PyObject *session;
+  SnmpSession *ss = NULL;
+
+  if (!PyArg_ParseTuple(args, "O", &session)) {
+    return NULL;
+  }
+
+  ss = (SnmpSession *)py_netsnmp_attr_long(session, "sess_ptr");
+
+  snmp_close(ss);
+  return (Py_BuildValue(""));
+}
+
 
 static PyObject *
 netsnmp_get(PyObject *self, PyObject *args)
@@ -2395,6 +2408,8 @@ static PyMethodDef ClientMethods[] = {
   {"session",  netsnmp_create_session, METH_VARARGS,
    "create a netsnmp session."},
   {"session_v3",  netsnmp_create_session_v3, METH_VARARGS,
+   "create a netsnmp session."},
+  {"delete_session",  netsnmp_delete_session, METH_VARARGS,
    "create a netsnmp session."},
   {"get",  netsnmp_get, METH_VARARGS,
    "perform an SNMP GET operation."},

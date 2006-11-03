@@ -173,6 +173,10 @@ class Session(object):
         res = client_intf.walk(self, varlist)
         return res
 
+    def __del__(self):
+        res = client_intf.delete_session(self)
+        return res
+
 import netsnmp
         
 def snmpget(*args, **kargs):
