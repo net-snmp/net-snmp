@@ -10,10 +10,10 @@ SKIPIF DISABLE_SNMPV1
 # Begin test
 #
 
-# standard V1 configuration: testcomunnity
+# standard V1 configuration: testcommunity
 . ./Sv1config
 # add in a v1 trap sink
-CONFIGAGENT trapsink localhost public $SNMP_SNMPTRAPD_PORT
+CONFIGAGENT trapsink $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT public
 CONFIGAGENT authtrapenable 1
 CONFIGTRAPD authcommunity log public
 CONFIGTRAPD agentxsocket /dev/null
