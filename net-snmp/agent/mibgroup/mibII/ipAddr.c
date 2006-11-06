@@ -384,7 +384,11 @@ Address_Scan_Next(Index, Retin_ifaddr)
         /*
          *      Get the "in_ifaddr" structure
          */
-        NETSNMP_KLOOKUP(in_ifaddraddr, (char *) &in_ifaddr, sizeof in_ifaddr);
+        if (!NETSNMP_KLOOKUP(in_ifaddraddr, (char *) &in_ifaddr, sizeof in_ifaddr)) {
+            DEBUGMSGTL(("mibII/ip:Address_Scan_Next", "klookup failed\n"));
+            return 0;
+        }
+
         in_ifaddraddr = in_ifaddr.ia_next;
 
         if (Retin_ifaddr)
@@ -397,7 +401,10 @@ Address_Scan_Next(Index, Retin_ifaddr)
 
         auto_nlist(IFNET_SYMBOL, (char *) &ifnetaddr, sizeof(ifnetaddr));
         while (ifnetaddr && ifnetaddr != in_ifaddr.ia_ifp) {
-            NETSNMP_KLOOKUP(ifnetaddr, (char *) &ifnet, sizeof ifnet);
+            if (!NETSNMP_KLOOKUP(ifnetaddr, (char *) &ifnet, sizeof ifnet)) {
+                DEBUGMSGTL(("mibII/ip:Address_Scan_Next", "klookup failed\n"));
+                return 0;
+            }
             ifnetaddr = ifnet.if_next;
             iindex++;
         }
