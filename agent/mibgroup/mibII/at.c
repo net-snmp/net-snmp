@@ -776,8 +776,15 @@ ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
             continue;
         }
 
-        NETSNMP_KLOOKUP(at_ptr, (char *) &at_entry, sizeof(struct arptab));
-        NETSNMP_KLOOKUP(at_entry.at_ac, (char *) &at_com, sizeof(struct arpcom));
+        if (!NETSNMP_KLOOKUP(at_ptr, (char *) &at_entry, sizeof(struct arptab))) {
+            DEBUGMSGTL(("mibII/at:ARP_Scan_Next", "klookup failed\n"));
+            break;
+        }
+
+        if (!NETSNMP_KLOOKUP(at_entry.at_ac, (char *) &at_com, sizeof(struct arpcom))) {
+            DEBUGMSGTL(("mibII/at:ARP_Scan_Next", "klookup failed\n"));
+            break;
+        }
 
         at_ptr = at_entry.at_next;
         atab = &at_entry;

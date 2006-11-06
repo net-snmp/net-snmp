@@ -789,8 +789,15 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
         if (!nnew)
             break;
-        NETSNMP_KLOOKUP(entry, (char *)&(nnew->pcb), sizeof(struct inpcb));
-        NETSNMP_KLOOKUP(nnew->pcb.inp_ppcb, (char *)&tcpcb, sizeof(struct tcpcb));
+        if (!NETSNMP_KLOOKUP(entry, (char *)&(nnew->pcb), sizeof(struct inpcb))) {
+            DEBUGMSGTL(("mibII/tcpTable:TcpTable_load", "klookup failed\n"));
+            break;
+        }
+
+        if (!NETSNMP_KLOOKUP(nnew->pcb.inp_ppcb, (char *)&tcpcb, sizeof(struct tcpcb))) {
+            DEBUGMSGTL(("mibII/tcpTable:TcpTable_load", "klookup failed\n"));
+            break;
+        }
 	nnew->state = StateMap[tcpcb.t_state];
         if (nnew->state == 5 /* established */ ||
             nnew->state == 8 /*  closeWait  */ )
@@ -843,8 +850,14 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
         if (!nnew)
             break;
-        NETSNMP_KLOOKUP(entry, (char *)&(nnew->pcb), sizeof(struct inpcb));
-        NETSNMP_KLOOKUP(nnew->pcb.inp_ppcb, (char *)&tcpcb, sizeof(struct tcpcb));
+        if (!NETSNMP_KLOOKUP(entry, (char *)&(nnew->pcb), sizeof(struct inpcb))) {
+            DEBUGMSGTL(("mibII/tcpTable:tcpTable_load", "klookup failed\n"));
+            break;
+        }
+        if (!NETSNMP_KLOOKUP(nnew->pcb.inp_ppcb, (char *)&tcpcb, sizeof(struct tcpcb))) {
+            DEBUGMSGTL(("mibII/tcpTable:tcpTable_load", "klookup failed\n"));
+            break;
+        }
 	nnew->state    = StateMap[tcpcb.t_state];
         if (nnew->state == 5 /* established */ ||
             nnew->state == 8 /*  closeWait  */ )

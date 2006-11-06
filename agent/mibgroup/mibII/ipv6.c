@@ -570,7 +570,10 @@ if_getifnet(int idx, struct ifnet *result)
     if (!auto_nlist("ifnet", (char *) &q, sizeof(q)))
         return -1;
     while (q) {
-        NETSNMP_KLOOKUP(q, (char *) &tmp, sizeof(tmp));
+        if (!NETSNMP_KLOOKUP(q, (char *) &tmp, sizeof(tmp))) {
+            DEBUGMSGTL(("mibII/ipv6:if_getifnet", "klookup failed\n"));
+            return -1;
+        }
         if (idx == tmp.if_index) {
             memcpy(result, &tmp, sizeof(tmp));
             return 0;
@@ -816,8 +819,14 @@ var_ifv6Entry(register struct variable * vp,
 # endif
 #endif
             while (ifa) {
-                NETSNMP_KLOOKUP(ifa, (char *) &ifaddr, sizeof(ifaddr));
-                NETSNMP_KLOOKUP(ifaddr.ifa_addr, (char *) &sdl, sizeof(sdl));
+                if (!NETSNMP_KLOOKUP(ifa, (char *) &ifaddr, sizeof(ifaddr))) {
+                    DEBUGMSGTL(("mibII/ipv6:var_ipv6", "klookup failed\n"));
+                    break;
+                }
+                if (!NETSNMP_KLOOKUP(ifaddr.ifa_addr, (char *) &sdl, sizeof(sdl));
+                    DEBUGMSGTL(("mibII/ipv6:var_ipv6", "klookup failed\n"));
+                    break;
+                }
                 if (sdl.sdl_family == AF_LINK) {
                     if (sizeof(sdl.sdl_data) < sdl.sdl_nlen + sdl.sdl_alen) {
                         ERROR_MSG("sdl_alen too long for interface\n");
@@ -1284,7 +1293,7 @@ var_udp6(register struct variable * vp,
         DEBUGMSGTL(("mibII/ipv6", "looping: p=%x\n", p));
 
 #if !(defined(__FreeBSD__) && __FreeBSD__ >= 3) && !defined(darwin)
-        if (NETSNMP_KLOOKUP(p, (char *) &in6pcb, sizeof(in6pcb)) < 0) {
+        if (!NETSNMP_KLOOKUP(p, (char *) &in6pcb, sizeof(in6pcb))) {
             DEBUGMSGTL(("mibII/ipv6", "klookup fail for udb6 at %x\n",
                         p));
             found = 0;
@@ -1474,7 +1483,7 @@ var_tcp6(register struct variable * vp,
         DEBUGMSGTL(("mibII/ipv6", "looping: p=%x\n", p));
 
 #if !(defined(__FreeBSD__) && __FreeBSD__ >= 3) && !defined(darwin)
-        if (NETSNMP_KLOOKUP(p, (char *) &in6pcb, sizeof(in6pcb)) < 0) {
+        if (!NETSNMP_KLOOKUP(p, (char *) &in6pcb, sizeof(in6pcb))) {
             DEBUGMSGTL(("mibII/ipv6", "klookup fail for tcb6 at %x\n",
                         p));
             found = 0;
@@ -1490,8 +1499,7 @@ var_tcp6(register struct variable * vp,
         if (0 == (in6pcb.inp_vflag & INP_IPV6))
             goto skip;
 #endif
-        if (NETSNMP_KLOOKUP(in6pcb.in6p_ppcb, (char *) &tcp6cb, sizeof(tcp6cb))
-            < 0) {
+        if (!NETSNMP_KLOOKUP(in6pcb.in6p_ppcb, (char *) &tcp6cb, sizeof(tcp6cb))) {
             DEBUGMSGTL(("mibII/ipv6", "klookup fail for tcb6.tcp6cb at %x\n",
                         in6pcb.in6p_ppcb));
             found = 0;
@@ -1697,7 +1705,7 @@ var_tcp6(register struct variable * vp,
         DEBUGMSGTL(("mibII/ipv6", "looping: p=%x\n", p));
 
 #if !(defined(__FreeBSD__) && __FreeBSD__ >= 3) && !defined(darwin)
-        if (NETSNMP_KLOOKUP(p, (char *) &in6pcb, sizeof(in6pcb)) < 0) {
+        if (!NETSNMP_KLOOKUP(p, (char *) &in6pcb, sizeof(in6pcb))) {
             DEBUGMSGTL(("mibII/ipv6", "klookup fail for tcb6 at %x\n",
                         p));
             found = 0;
@@ -1713,8 +1721,7 @@ var_tcp6(register struct variable * vp,
         if (0 == (in6pcb.inp_vflag & INP_IPV6))
             goto skip;
 #endif
-        if (NETSNMP_KLOOKUP(in6pcb.in6p_ppcb, (char *) &tcpcb, sizeof(tcpcb))
-            < 0) {
+        if (!NETSNMP_KLOOKUP(in6pcb.in6p_ppcb, (char *) &tcpcb, sizeof(tcpcb))) {
             DEBUGMSGTL(("mibII/ipv6", "klookup fail for tcb6.tcpcb at %x\n",
                         in6pcb.in6p_ppcb));
             found = 0;

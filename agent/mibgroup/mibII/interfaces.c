@@ -1804,8 +1804,15 @@ Interface_Scan_Next(short *Index,
          *      Get the "ifnet" structure and extract the device name
          */
 #ifndef linux
-        NETSNMP_KLOOKUP(ifnetaddr, (char *) &ifnet, sizeof ifnet);
-        NETSNMP_KLOOKUP(ifnet.if_name, (char *) saveName, sizeof saveName);
+        if (!NETSNMP_KLOOKUP(ifnetaddr, (char *) &ifnet, sizeof ifnet)) {
+            DEBUGMSGTL(("mibII/interfaces:Interface_Scan_Next", "klookup failed\n"));
+            break;
+        }
+
+        if (!NETSNMP_KLOOKUP(ifnet.if_name, (char *) saveName, sizeof saveName)) {
+            DEBUGMSGTL(("mibII/interfaces:Interface_Scan_Next", "klookup failed\n"));
+            break;
+        }
 
        /*
         * The purpose of this comparison is lost in the mists of time.
@@ -1925,16 +1932,25 @@ Interface_Scan_Next(short *Index,
         /*
          *      Get the "ifnet" structure and extract the device name
          */
-        NETSNMP_KLOOKUP(ifnetaddr, (char *) &ifnet, sizeof ifnet);
+        if (!NETSNMP_KLOOKUP(ifnetaddr, (char *) &ifnet, sizeof ifnet)) {
+            DEBUGMSGTL(("mibII/interfaces:Interface_Scan_Next", "klookup failed\n"));
+            break;
+        }
 #if STRUCT_IFNET_HAS_IF_XNAME
 #if defined(netbsd1) || defined(openbsd2)
         strncpy(saveName, ifnet.if_xname, sizeof saveName);
 #else
-        NETSNMP_KLOOKUP(ifnet.if_xname, (char *) saveName, sizeof saveName);
+        if (!NETSNMP_KLOOKUP(ifnet.if_xname, (char *) saveName, sizeof saveName)) {
+            DEBUGMSGTL(("mibII/interfaces:Interface_Scan_Next", "klookup failed\n"));
+            break;
+        }
 #endif
         saveName[sizeof(saveName) - 1] = '\0';
 #else
-        NETSNMP_KLOOKUP(ifnet.if_name, (char *) saveName, sizeof saveName);
+        if (!NETSNMP_KLOOKUP(ifnet.if_name, (char *) saveName, sizeof saveName)) {
+            DEBUGMSGTL(("mibII/interfaces:Interface_Scan_Next", "klookup failed\n"));
+            break;
+        }
 
         saveName[sizeof(saveName) - 1] = '\0';
         cp = strchr(saveName, '\0');
@@ -1951,7 +1967,10 @@ Interface_Scan_Next(short *Index,
             auto_nlist(IFADDR_SYMBOL, (char *) &ia, sizeof(ia));
 #endif
             while (ia) {
-                NETSNMP_KLOOKUP(ia, (char *) &in_ifaddr, sizeof(in_ifaddr));
+                if (!NETSNMP_KLOOKUP(ia, (char *) &in_ifaddr, sizeof(in_ifaddr))) {
+                    DEBUGMSGTL(("mibII/interfaces:Interface_Scan_Next", "klookup failed\n"));
+                    break;
+                }
                 {
 #ifdef netbsd1
 #define CP(x)	((char *)(x))
@@ -2143,7 +2162,10 @@ Interface_Get_Ether_By_Index(int Index, u_char * EtherAddr)
      */
 #ifndef linux
 #if !(defined(netbsd1) || defined(bsdi2) || defined(openbsd2))
-    NETSNMP_KLOOKUP(saveifnetaddr, (char *) &arpcom, sizeof arpcom);
+    if (!NETSNMP_KLOOKUP(saveifnetaddr, (char *) &arpcom, sizeof arpcom)) {
+        DEBUGMSGTL(("mibII/interfaces:Interface_Get_Ether_By_Index", "klookup failed\n"));
+        return 0;
+    }
 #else                           /* netbsd1 or bsdi2 or openbsd2 */
 
 #if defined(netbsd1) || defined(openbsd2)
@@ -2153,8 +2175,14 @@ Interface_Get_Ether_By_Index(int Index, u_char * EtherAddr)
 
     ifaddraddr = (unsigned long) saveifnet.if_addrlist;
     while (ifaddraddr) {
-        NETSNMP_KLOOKUP(ifaddraddr, (char *) &ifaddr, sizeof ifaddr);
-        NETSNMP_KLOOKUP(ifaddr.ifa_addr, (char *) &sadl, sizeof sadl);
+        if (!NETSNMP_KLOOKUP(ifaddraddr, (char *) &ifaddr, sizeof ifaddr)) {
+            DEBUGMSGTL(("mibII/interfaces:Interface_Get_Ether_By_Index", "klookup failed\n"));
+            break;
+        }
+        if (!NETSNMP_KLOOKUP(ifaddr.ifa_addr, (char *) &sadl, sizeof sadl)) {
+            DEBUGMSGTL(("mibII/interfaces:Interface_Get_Ether_By_Index", "klookup failed\n"));
+            break;
+        }
         if (sadl.sdl_family == AF_LINK
             && (saveifnet.if_type == IFT_ETHER
                 || saveifnet.if_type == IFT_ISO88025

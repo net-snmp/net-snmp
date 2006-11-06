@@ -404,9 +404,16 @@ static union {
 struct sockaddr_in *
 klgetsa(struct sockaddr_in *dst)
 {
-    NETSNMP_KLOOKUP(dst, (char *) &klgetsatmp.sin, sizeof klgetsatmp.sin);
-    if (klgetsatmp.sin.sin_len > sizeof(klgetsatmp.sin))
-        NETSNMP_KLOOKUP(dst, (char *) &klgetsatmp.sin, klgetsatmp.sin.sin_len);
+    if (!NETSNMP_KLOOKUP(dst, (char *) &klgetsatmp.sin, sizeof klgetsatmp.sin)) {
+        DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+        return NULL;
+    }
+    if (klgetsatmp.sin.sin_len > sizeof(klgetsatmp.sin)) {
+        if (!NETSNMP_KLOOKUP(dst, (char *) &klgetsatmp.sin, klgetsatmp.sin.sin_len)) {
+            DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+            return NULL;
+        }
+    }
     return (&klgetsatmp.sin);
 }
 #endif
@@ -652,10 +659,16 @@ var_ipRouteEntry(struct variable * vp,
             long_return = 0;    /* Default route */
         else {
 #ifndef linux
-            NETSNMP_KLOOKUP(rthead[RtIndex]->rt_ifp,
-                    (char *) &rt_ifnet, sizeof(rt_ifnet));
-            NETSNMP_KLOOKUP(rt_ifnet.if_addrlist,
-                    (char *) &rt_ifnetaddr, sizeof(rt_ifnetaddr));
+            if (!NETSNMP_KLOOKUP(rthead[RtIndex]->rt_ifp,
+                    (char *) &rt_ifnet, sizeof(rt_ifnet))) {
+                DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+                return NULL;
+            }
+            if (!NETSNMP_KLOOKUP(rt_ifnet.if_addrlist,
+                    (char *) &rt_ifnetaddr, sizeof(rt_ifnetaddr))) {
+                DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+                return NULL;
+            }
 
             long_return = rt_ifnetaddr.ia_subnetmask;
 #else                           /* linux */
@@ -882,19 +895,31 @@ load_rtentries(struct radix_node *pt)
         /*
          * get the route 
          */
-        NETSNMP_KLOOKUP(pt, (char *) &rt, sizeof(RTENTRY));
+        if (!NETSNMP_KLOOKUP(pt, (char *) &rt, sizeof(RTENTRY))) {
+            DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+            return;
+        }
 
         if (rt.rt_ifp != 0) {
-            NETSNMP_KLOOKUP(rt.rt_ifp, (char *) &ifnet, sizeof(ifnet));
+            if (!NETSNMP_KLOOKUP(rt.rt_ifp, (char *) &ifnet, sizeof(ifnet))) {
+                DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+                return;
+            }
 #if STRUCT_IFNET_HAS_IF_XNAME
 #if defined(netbsd1) || defined(openbsd2)
             strncpy(name, ifnet.if_xname, sizeof name);
 #else
-            NETSNMP_KLOOKUP(ifnet.if_xname, name, sizeof name);
+            if (!NETSNMP_KLOOKUP(ifnet.if_xname, name, sizeof name)) {
+                DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+                return;
+            }
 #endif
             name[sizeof(name) - 1] = '\0';
 #else
-            NETSNMP_KLOOKUP(ifnet.if_name, name, sizeof name);
+            if (!NETSNMP_KLOOKUP(ifnet.if_name, name, sizeof name)) {
+                DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+                return;
+            }
             name[sizeof(name) - 1] = '\0';
             cp = (char *) strchr(name, '\0');
             string_append_int(cp, ifnet.if_unit);
@@ -1062,13 +1087,22 @@ Route_Scan_Reload(void)
                 /*
                  *      Dig the route out of the kernel...
                  */
-                NETSNMP_KLOOKUP(m, (char *) &mb, sizeof(mb));
+                if (!NETSNMP_KLOOKUP(m, (char *) &mb, sizeof(mb))) {
+                    DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+                    return;
+                }
                 m = mb.rt_next;
 
                 rt = &mb;
                 if (rt->rt_ifp != 0) {
-                    NETSNMP_KLOOKUP(rt->rt_ifp, (char *) &ifnet, sizeof(ifnet));
-                    NETSNMP_KLOOKUP(ifnet.if_name, name, 16);
+                    if (!NETSNMP_KLOOKUP(rt->rt_ifp, (char *) &ifnet, sizeof(ifnet))) {
+                        DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+                        return;
+                    }
+                    if (!NETSNMP_KLOOKUP(ifnet.if_name, name, 16)) {
+                        DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+                        return;
+                    }
                     name[15] = '\0';
                     cp = (char *) strchr(name, '\0');
                     string_append_int(cp, ifnet.if_unit);
@@ -1179,14 +1213,23 @@ Route_Scan_Reload(void)
                 /*
                  *  Dig the route out of the kernel...
                  */
-                NETSNMP_KLOOKUP(m, (char *) &mb, sizeof(mb));
+                if (!NETSNMP_KLOOKUP(m, (char *) &mb, sizeof(mb))) {
+                    DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+                    return;
+                }
                 m = mb.m_next;
                 rt = mtod(&mb, RTENTRY *);
 
                 if (rt->rt_ifp != 0) {
 
-                    NETSNMP_KLOOKUP(rt->rt_ifp, (char *) &ifnet, sizeof(ifnet));
-                    NETSNMP_KLOOKUP(ifnet.if_name, name, 16);
+                    if (!NETSNMP_KLOOKUP(rt->rt_ifp, (char *) &ifnet, sizeof(ifnet))) {
+                        DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+                        return;
+                    }
+                    if (!NETSNMP_KLOOKUP(ifnet.if_name, name, 16)) {
+                        DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
+                        return;
+                    }
                     name[15] = '\0';
                     cp = (char *) strchr(name, '\0');
                     string_append_int(cp, ifnet.if_unit);
