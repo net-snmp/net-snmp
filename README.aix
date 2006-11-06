@@ -31,9 +31,10 @@ configure. The fix is to install GNU sed.
 3) nlist errors with 64-bit kernels
 
 Accessing certain MIB objects on AIX 5.x machines running a 64-bit kernel will
-trigger nlist errors. If the agent aborts due to those errors, you may want to 
-try running "snmpd -r ..." which instructs the agent to ignore them. Later
-net-snmp versions are expected to improve the support for AIX 64-bit kernels.
+trigger nlist errors. Starting from net-snmp 5.4, you can avoid those by using
+
+   ./configure --without-kmem-usage ...
+  
 
 4) IPv6
 

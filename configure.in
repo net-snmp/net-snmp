@@ -501,8 +501,7 @@ AC_ARG_ENABLE(root-access,,
 
 AC_ARG_WITH(kmem-usage,
 [  --without-kmem-usage            Do not include any code related to the use
-                                  of kmem. This option can only be used with
-                                  the option --enable-mini-agent.])
+                                  of kmem.])
 AC_ARG_ENABLE(kmem-usage,,
 	AC_MSG_ERROR([ Invalid option. Use --with-kmem-usage/--without-kmem-usage instead ]) )
 
