@@ -690,7 +690,10 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         if (!nnew)
             break;
 
-        NETSNMP_KLOOKUP(entry, (char *) nnew, sizeof(struct inpcb));
+        if (!NETSNMP_KLOOKUP(entry, (char *) nnew, sizeof(struct inpcb))) {
+            DEBUGMSGTL(("mibII/udpTable:udpTable_load", "klookup failed\n"));
+            break;
+        }
 
         entry    = nnew->inp_queue.cqe_next;	/* Next kernel entry */
 	nnew->inp_queue.cqe_next = udp_head;
@@ -733,7 +736,10 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         if (!nnew)
             break;
 
-        NETSNMP_KLOOKUP(entry, (char *) nnew, sizeof(struct inpcb));
+        if (!NETSNMP_KLOOKUP(entry, (char *) nnew, sizeof(struct inpcb))) {
+            DEBUGMSGTL(("mibII/udpTable:udpTable_load", "klookup failed\n"));
+            break;
+        }
 
         entry    = nnew->INP_NEXT_SYMBOL;		/* Next kernel entry */
 	nnew->INP_NEXT_SYMBOL = udp_head;
