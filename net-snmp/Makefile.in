@@ -257,8 +257,7 @@ configclean: makefileclean
 		agent/mibgroup/mib_module_inits.h 	\
 		agent/mibgroup/mib_module_shutdown.h 	\
 		agent/mibgroup/mib_module_dot_conf.h
-	rm -f module_rules.mk mib_module_list_deps.mk module_list_deps.mk \
-		agent_module_list_deps.mk
+	rm -rf mk
 	rm -f *.core
 
 #

@@ -1818,11 +1818,8 @@ if test "x$enable_mfd_rewrites" = "xyes"; then
 fi
 
 module_list=""
-module_list_code=""
 mib_module_list=""
-mib_module_list_code=""
 agent_module_list=""
-agent_module_list_code=""
 new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
 new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
 
@@ -1852,7 +1849,6 @@ fi
 
 test_modules="$new_module_list"
 new_module_list=""
-module_list_h=""
 
 # remove modules that were explicity excluded
 for i in $test_modules
@@ -1887,15 +1883,36 @@ else
    module_debug=0
 fi
 first_pass=1
-
 output_to=normal
-module_rules=module_rules.mk
+
+if test ! -d mk ; then
+  mkdir mk
+fi
+
+
+module_rules=mk/module_rules.mk
 echo "# contents below built automatically by configure; do not edit by hand" > $module_rules
 
+#
+# make file sub-pieces
+#
 for i in module_list_deps mib_module_list_deps agent_module_list_deps ; do
-  eval "$i=${i}.mk"
-  echo "# contents below built automatically by configure; do not edit by hand" > ${i}.mk
+  eval "$i=mk/${i}.mk"
+  echo "# contents below built automatically by configure; do not edit by hand" > mk/${i}.mk
 done
+
+#
+# variable settings sub-pieces
+#
+for i in module_list_code mib_module_list_code agent_module_list_code module_list mib_module_list agent_module_list ; do
+  eval "$i=mk/${i}.mk"
+  echo "# contents below built automatically by configure; do not edit by hand" > mk/${i}.mk
+  echo "$i= \\" >> mk/${i}.mk
+done
+
+echo $ECHO_N "echo " $ECHO_C > mk/MODULE_LIST.mk
+MODULE_LIST=mk/MODULE_LIST.mk
+
 
 #---------------------
 # until we have an empty module list...
@@ -1995,8 +2012,10 @@ while test "x$new_module_list" != "x"; do
  	    echo "mib_modules.lo: mibgroup/$i.h" >> $mib_module_list_deps
         fi
         eval ${module_type}_list="\"\$${module_type}_list $i\""
-        module_list_code="$module_list_code $i"
-        eval ${module_type}_list_code="\"\$${module_type}_list_code $i\""
+	echo "	$i \\" >> $module_list_code
+	echo $ECHO_N " $i" $ECHO_C >> $MODULE_LIST
+        eval tmpfilevar=\$`echo ${module_type}_list_code`
+        echo "	$i \\" >> $tmpfilevar
 
 	# XXX: add this to the main init list; this is possible not
 	# quite in the right spot any longer but we're stuck with it.
@@ -2222,8 +2241,10 @@ while test "x$new_module_list" != "x"; do
       has_c_code=no
       if test -f $srcdir/$mibdir/$i.c; then
         if test "x$output_to" = "xnormal" ; then
-          module_list_code="$module_list_code $i"
-          eval ${module_type}_list_code="\"\$${module_type}_list_code $i\""
+	  echo "	$i \\" >> $module_list_code
+  	  echo $ECHO_N " $i" $ECHO_C >> $MODULE_LIST
+          eval tmpfilevar=\$`echo ${module_type}_list_code`
+          echo "	$i \\" >> $tmpfilevar
         else
           eval "dl_${dl_name}_files=\"\$dl_${dl_name}_files $i\""
           saved_sublist_code="$saved_sublist_code $i"
@@ -2394,25 +2415,38 @@ done
 # cleanup
 rm -f module_tmp_header.h
 
+for i in module_list_code agent_module_list_code mib_module_list_code mib_module_list agent_module_list ; do
+	echo "" >> mk/$i.mk
+	echo "# end configure generated code" >> mk/$i.mk
+done
+
 #-------------------
 # build module lists for Makefiles
 #
 changequote(, )
-module_list_o=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.o /g'`
-module_list_lo=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.lo /g'`
-module_list_c=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
 
-mib_module_list_o=`echo "$mib_module_list_code " | sed 's/\([^ ]\) /\1.o /g'`
-mib_module_list_lo=`echo "$mib_module_list_code " | sed 's/\([^ ]\) /\1.lo /g'`
-mib_module_list_c=`echo "$mib_module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
-mibgroup_list_o=`echo " $mib_module_list_o " | sed 's@ \([^ ]*\)\.o@ mibgroup/\1.o @g'`
-mibgroup_list_lo=`echo " $mib_module_list_lo " | sed 's@ \([^ ]*\)\.lo@ mibgroup/\1.lo @g'`
+for i in module_list_o module_list_c module_list_lo mib_module_list_o mib_module_list_c mib_module_list_lo mibgroup_list_o mibgroup_list_lo agent_module_list_o agent_module_list_c agent_module_list_lo agentgroup_list_o agentgroup_list_lo ; do
+  eval "$i=mk/${i}.mk"
+done
 
-agent_module_list_o=`echo "$agent_module_list_code " | sed 's/\([^ ]\) /\1.o /g'`
-agent_module_list_lo=`echo "$agent_module_list_code " | sed 's/\([^ ]\) /\1.lo /g'`
-agent_module_list_c=`echo "$agent_module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
-agentgroup_list_o=`echo " $agent_module_list_o " | sed 's@ \([^ ]*\)\.o@ mibgroup/\1.o @g'`
-agentgroup_list_lo=`echo " $agent_module_list_lo " | sed 's@ \([^ ]*\)\.lo@ mibgroup/\1.lo @g'`
+sed 's/^module_list_code/module_list_o/;s/\([^=]\)  *\\/\1.o \\/g'  < $module_list_code  > $module_list_o
+sed 's/^module_list_code/module_list_c/;s/\([^=]\)  *\\/\1.c \\/g'  < $module_list_code  > $module_list_c
+sed 's/^module_list_code/module_list_lo/;s/\([^=]\)  *\\/\1.lo \\/g' < $module_list_code  > $module_list_lo
+
+sed 's/^mib_module_list_code/mib_module_list_o/;s/\([^=]\)  *\\/\1.o \\/g'  < $mib_module_list_code  > $mib_module_list_o
+sed 's/^mib_module_list_code/mib_module_list_c/;s/\([^=]\)  *\\/\1.c \\/g'  < $mib_module_list_code  > $mib_module_list_c
+sed 's/^mib_module_list_code/mib_module_list_lo/;s/\([^=]\)  *\\/\1.lo \\/g' < $mib_module_list_code  > $mib_module_list_lo
+
+sed 's/^mib_module_list_o/mibgroup_list_o/;s@\([^ 	]*\)\.o@mibgroup/\1.o@g' < $mib_module_list_o > $mibgroup_list_o
+sed 's/^mib_module_list_lo/mibgroup_list_lo/;s@\([^ 	]*\)\.lo@mibgroup/\1.lo@g' < $mib_module_list_lo > $mibgroup_list_lo
+
+sed 's/^agent_module_list_code/agent_module_list_o/;s/\([^=]\)  *\\/\1.o \\/g'  < $agent_module_list_code  > $agent_module_list_o
+sed 's/^agent_module_list_code/agent_module_list_c/;s/\([^=]\)  *\\/\1.c \\/g'  < $agent_module_list_code  > $agent_module_list_c
+sed 's/^agent_module_list_code/agent_module_list_lo/;s/\([^=]\)  *\\/\1.lo \\/g' < $agent_module_list_code  > $agent_module_list_lo
+
+sed 's/^agent_module_list_o/agentgroup_list_o/;s@\([^ 	]*\)\.o@mibgroup/\1.o@g' < $agent_module_list_o > $agentgroup_list_o
+sed 's/^agent_module_list_lo/agentgroup_list_lo/;s@\([^ 	]*\)\.lo@mibgroup/\1.lo@g' < $agent_module_list_lo > $agentgroup_list_lo
+
 changequote([, ])
 
 if test $module_debug -eq 1; then
@@ -2422,27 +2456,24 @@ fi
 if test "x$with_mib_cfg_checks" = "xyes"; then
   AC_MSG_CACHE_ADD([Agent Module list: $module_list_code])
 fi
-MODULE_LIST=$module_list_code
-AC_SUBST(MODULE_LIST)
-AC_SUBST(module_list_c)
-#AC_SUBST(module_list_h)
-AC_SUBST(module_list_o)
-AC_SUBST(module_list_lo)
-AC_SUBST(mib_module_list_c)
-#AC_SUBST(mib_module_list_h)
-AC_SUBST(mib_module_list_o)
-AC_SUBST(mib_module_list_lo)
-AC_SUBST(agent_module_list_c)
-#AC_SUBST(agent_module_list_h)
-AC_SUBST(agent_module_list_o)
-AC_SUBST(agent_module_list_lo)
-AC_SUBST(mibgroup_list_o)
-AC_SUBST(mibgroup_list_lo)
-AC_SUBST(agentgroup_list_o)
-AC_SUBST(agentgroup_list_lo)
-AC_SUBST(module_list)
-AC_SUBST(mib_module_list)
-AC_SUBST(agent_module_list)
+AC_SUBST_FILE(MODULE_LIST)
+AC_SUBST_FILE(module_list_c)
+AC_SUBST_FILE(module_list_o)
+AC_SUBST_FILE(module_list_lo)
+AC_SUBST_FILE(mib_module_list_c)
+AC_SUBST_FILE(mib_module_list_o)
+AC_SUBST_FILE(mib_module_list_lo)
+AC_SUBST_FILE(agent_module_list_c)
+AC_SUBST_FILE(agent_module_list_o)
+AC_SUBST_FILE(agent_module_list_lo)
+AC_SUBST_FILE(mibgroup_list_o)
+AC_SUBST_FILE(mibgroup_list_lo)
+AC_SUBST_FILE(agentgroup_list_o)
+AC_SUBST_FILE(agentgroup_list_lo)
+AC_SUBST_FILE(agent_module_list)
+
+#AC_SUBST_FILE(mib_module_list)
+#AC_SUBST(module_list)
 AC_SUBST(default_mibs_install)
 AC_SUBST(dllcleans)
 AC_SUBST_FILE(module_rules)
@@ -3406,7 +3437,6 @@ if test "x$useopenssl" != "xno" ; then
         encrmodes="[disabled]"
     fi
     AC_DEFINE(NETSNMP_USE_OPENSSL)
-	echo "here"
     if test "x$enable_as_needed" = "xyes" ; then
         LIBCRYPTO="-lcrypto" ;
     else
