@@ -85,7 +85,7 @@ else
       echo @CONFIGURE_OPTIONS@
       ;;
     --snmpd-module-list|--mod*)
-      echo @MODULE_LIST@
+      @MODULE_LIST@
       ;;
     --default-mibs|--mibs|--MIBS)
       echo @DEFAULT_MIBS@
