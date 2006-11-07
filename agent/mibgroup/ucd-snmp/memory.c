@@ -28,7 +28,7 @@ init_memory(void)
         netsnmp_create_handler_registration("memory", handle_memory,
                                  memory_oid, memory_object_index,
                                              HANDLER_CAN_RONLY),
-                                 1, 15);
+                                 1, 17);
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("memSwapError", handle_memory,
                            memSwapError_oid, memory_object_index+1,
@@ -118,11 +118,19 @@ handle_memory(netsnmp_mib_handler *handler,
             val  =  mem_info->size;
             val *= (mem_info->units/1024);
             break;
-        case MEMORY_STXT_AVAIL:    /* XXX - Or used ? */
+        case MEMORY_STXT_AVAIL:
+        case MEMORY_STXT_USED:
+            /*
+             *   The original MIB description of memAvailSwapTXT
+             * was inconsistent with that implied by the name.
+             *   Retain the actual behaviour for the (sole)
+             * implementation of this object, but deprecate it in
+             * favour of a more consistently named replacement object.
+             */
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_STEXT, 0 );
             if (!mem_info)
                goto NOSUCH;
-            val  =  mem_info->free;  /* XXX - Or size-free ? */
+            val  = (mem_info->size - mem_info->free);
             val *= (mem_info->units/1024);
             break;
         case MEMORY_RTXT_TOTAL:
@@ -132,11 +140,19 @@ handle_memory(netsnmp_mib_handler *handler,
             val  =  mem_info->size;
             val *= (mem_info->units/1024);
             break;
-        case MEMORY_RTXT_AVAIL:    /* XXX - Or used ? */
+        case MEMORY_STXT_AVAIL:
+        case MEMORY_STXT_USED:
+            /*
+             *   The original MIB description of memAvailRealTXT
+             * was inconsistent with that implied by the name.
+             *   Retain the actual behaviour for the (sole)
+             * implementation of this object, but deprecate it in
+             * favour of a more consistently named replacement object.
+             */
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_RTEXT, 0 );
             if (!mem_info)
                goto NOSUCH;
-            val  =  mem_info->free;  /* XXX - Or size-free ? */
+            val  = (mem_info->size - mem_info->free);
             val *= (mem_info->units/1024);
             break;
         case MEMORY_FREE:

@@ -37,7 +37,7 @@ IMPORTS
 	FROM SNMPv2-TC;
 
 ucdavis MODULE-IDENTITY
-    LAST-UPDATED "200209050000Z"
+    LAST-UPDATED "200611070000Z"
     ORGANIZATION "University of California, Davis"
     CONTACT-INFO    
 	"This mib is no longer being maintained by the University of
@@ -52,6 +52,9 @@ ucdavis MODULE-IDENTITY
 
          email:    net-snmp-coders@lists.sourceforge.net
         "
+    DESCRIPTION
+	"Clarify behaviour of mem*Text objects (& provide updated versions)."
+    REVISION	 "200611070000Z"
     DESCRIPTION
 	"Added ssCpuRawSoftIRQ for Linux (2.6) and forgotten raw swap counters."
     REVISION	 "200404070000Z"
@@ -432,9 +435,14 @@ memTotalSwapTXT OBJECT-TYPE
 memAvailSwapTXT OBJECT-TYPE
     SYNTAX	Integer32
     MAX-ACCESS	read-only
-    STATUS	current
+    STATUS	deprecated
     DESCRIPTION	
-	"Active virtual memory used by text."
+	"Active virtual memory used by text.
+         Note that despite the name of the object,
+         this value did in practise monitor the
+         memory *used* rather than available.
+         For clarity, this object is being deprecated
+         in favour of 'memUsedSwapTXT(16)."
     ::= { memory 8 }
 
 memTotalRealTXT OBJECT-TYPE
@@ -448,9 +456,14 @@ memTotalRealTXT OBJECT-TYPE
 memAvailRealTXT OBJECT-TYPE
     SYNTAX	Integer32
     MAX-ACCESS	read-only
-    STATUS	current
+    STATUS	deprecated
     DESCRIPTION
-	"Active Real/Physical Memory Space used by text."
+	"Active Real/Physical Memory Space used by text.
+         Note that despite the name of the object,
+         this value did in practise monitor the
+         memory *used* rather than available.
+         For clarity, this object is being deprecated
+         in favour of 'memUsedRealTXT(17)."
     ::= { memory 10 }
 
 memTotalFree OBJECT-TYPE
@@ -494,6 +507,22 @@ memCached OBJECT-TYPE
     DESCRIPTION
 	"Total Cached Memory"
     ::= { memory 15 }
+
+memUsedSwapTXT OBJECT-TYPE
+    SYNTAX	Integer32
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION	
+	"Active virtual memory used by text."
+    ::= { memory 16 }
+
+memUsedRealTXT OBJECT-TYPE
+    SYNTAX	Integer32
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"Active Real/Physical Memory Space used by text."
+    ::= { memory 17 }
 
 memSwapError OBJECT-TYPE
     SYNTAX	Integer32
