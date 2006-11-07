@@ -60,7 +60,7 @@ Float ::= TEXTUAL-CONVENTION
          '42f60000'h.) The BER serialization of value
          '9f780442f60000'h of data type Opaque is
          '44079f780442f60000'h. (The tag is '44'h; the length
-         is '07'h; and the value is '9f780442f60000'h."
+         is '07'h; and the value is '9f780442f60000'h.)"
     SYNTAX Opaque (SIZE (7))
 
 
