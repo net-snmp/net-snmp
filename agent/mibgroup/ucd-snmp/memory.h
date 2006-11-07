@@ -22,14 +22,16 @@ Netsnmp_Node_Handler handle_memory;
 #define MEMORY_REAL_TOTAL    5
 #define MEMORY_REAL_AVAIL    6
 #define MEMORY_STXT_TOTAL    7
-#define MEMORY_STXT_AVAIL    8
+#define MEMORY_STXT_AVAIL    8   /* Deprecated */
 #define MEMORY_RTXT_TOTAL    9
-#define MEMORY_RTXT_AVAIL   10
+#define MEMORY_RTXT_AVAIL   10   /* Deprecated */
 #define MEMORY_FREE         11
 #define MEMORY_SWAP_MIN     12
 #define MEMORY_SHARED       13
 #define MEMORY_BUFFER       14
 #define MEMORY_CACHED       15
+#define MEMORY_STXT_USED    16
+#define MEMORY_RTXT_USED    17
 #define MEMORY_SWAP_ERROR  100
 #define MEMORY_SWAP_ERRMSG 101
 #endif                          /* MEMORY_H */
