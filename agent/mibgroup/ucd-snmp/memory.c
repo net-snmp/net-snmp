@@ -118,7 +118,7 @@ handle_memory(netsnmp_mib_handler *handler,
             val  =  mem_info->size;
             val *= (mem_info->units/1024);
             break;
-        case MEMORY_STXT_AVAIL:
+        case MEMORY_STXT_AVAIL:    /* Deprecated */
         case MEMORY_STXT_USED:
             /*
              *   The original MIB description of memAvailSwapTXT
@@ -140,8 +140,8 @@ handle_memory(netsnmp_mib_handler *handler,
             val  =  mem_info->size;
             val *= (mem_info->units/1024);
             break;
-        case MEMORY_STXT_AVAIL:
-        case MEMORY_STXT_USED:
+        case MEMORY_RTXT_AVAIL:    /* Deprecated */
+        case MEMORY_RTXT_USED:
             /*
              *   The original MIB description of memAvailRealTXT
              * was inconsistent with that implied by the name.
