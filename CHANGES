@@ -33,6 +33,11 @@ too long for you.
       - [PATCH 1562168]: check for a sock fd less than 0.
       - [PATCH 1570650]: create a logging shutdown function to propelry
 	clean up log registrations if needed.
+      - [PATCH 1565293]: UDPIPv6 transport reports wrong port number
+      - rename init_mib to netsnmp_init_mib to avoid symbol clash with
+	HP-UX's libnm
+      - [PATCH 1509943]: responses will get sent from the original dest IP
+	address when possible.
 
     mib2c:
       - [BUG 1479916]: Restore consistency in row creation code.
@@ -69,11 +74,12 @@ too long for you.
       - [PATCH 1575984]: block SIGHUP during reconfig
       - [PATCH 1570982 ]: Solaris IF-MIB: Support for IPv6-only interfaces
       - memTotalFree should report total virtual instead of physical memory
-
-    snmplib:
-      - [PATCH 1565293]: UDPIPv6 transport reports wrong port number
-      - rename init_mib to netsnmp_init_mib to avoid symbol clash with
-	HP-UX's libnm
+      - build fix for --without-kmem-usage
+      - [BUG 1585815]: fix mfd bits length calculation
+      - [BUG 1427410]: Set auth engineID for SNMPv3 traps.
+      - [BUG 1502267]: Build access list in the correct order.
+      - [PATCH 1554827]: from rtyle: fix handling of failed proxy SET
+	requests
 
     misc:
       - Most net-snmp specific defines are now (also) available under a
@@ -81,17 +87,7 @@ too long for you.
 	well as the autoconf variables can now be turned off by a special
 	define.
       - [BUG 1585250]: don't use deprecated options in start script
-
-    agent:
-      - [BUG 1427410]: Set auth engineID for SNMPv3 traps.
-      - [BUG 1502267]: Build access list in the correct order.
-
-    unspecified:
-
-      - [PATCH 1509943]: responses will get sent from the original dest IP
-	address when possible.
-      - [PATCH 1554827]: from rtyle: fix handling of failed proxy SET
-	requests
+      - "make test" fixes for non-UDP transports
 
     MacOSX:
       - [PATCH 1566777]: build fixes for memory_darwin.c
