@@ -195,6 +195,8 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
      */
     if(count == 1) {
         rm_status->count = count;
+        if (requests->processed)
+            return SNMP_ERR_NOERROR;
         return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     }
 
