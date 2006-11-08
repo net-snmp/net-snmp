@@ -1,5 +1,165 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.4.rc1 -> V5.4.rc2
+
+2006-11-08 07:56  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3,
+     netsnmp_agent_trap.3, netsnmp_asn1_packet_parse.3,
+     netsnmp_baby_steps.3, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3,
+     netsnmp_container.3, netsnmp_data_list.3,
+     netsnmp_debug.3, netsnmp_default_store.3,
+     netsnmp_handler.3, netsnmp_instance.3,
+     netsnmp_iterator_info_s.3, netsnmp_leaf.3,
+     netsnmp_library.3, netsnmp_mib_maintenance.3,
+     netsnmp_mib_utilities.3, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3,
+     netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3,
+     netsnmp_snmp_client.3, netsnmp_snmp_logging.3,
+     netsnmp_snmp_pdu.3, netsnmp_snmp_session.3,
+     netsnmp_stash_cache.3, netsnmp_stash_to_next.3,
+     netsnmp_table.3, netsnmp_table_array.3,
+     netsnmp_table_container.3, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_generic.3,
+     netsnmp_table_indexes.3, netsnmp_table_iterator.3,
+     netsnmp_table_iterator.h.3, netsnmp_table_maintenance.3
+, netsnmp_table_rows.3, netsnmp_tdata.3,
+     netsnmp_util.3, netsnmp_utilities.3,
+     netsnmp_variable_list.3, netsnmp_watcher.3:
+
+   documentation update
+
+2006-11-08 07:55  hardaker
+
+   * doxygen.conf:
+
+   - version tag ( 5.4.rc2 )
+
+2006-11-08 07:27  hardaker
+
+   * agent/helpers/row_merge.c:
+
+   Patch from Robert to check processed flag before proceeding
+
+2006-11-07 15:33  dts12
+
+   * agent/mibgroup/ucd-snmp/memory.c:
+
+   Fix duplicate case statements (and indicate which are the deprecated objects)
+
+2006-11-07 14:14  dts12
+
+   * agent/mibgroup/ucd-snmp/memory.c,
+     agent/mibgroup/ucd-snmp/memory.h, mibs/UCD-SNMP-MIB.txt
+:
+
+   Clarify meaning of mem*Text objects (and define new consistent versions).
+
+2006-11-07 06:54  hardaker
+
+   * mibs/NET-SNMP-TC.txt:
+
+   add a missing paren to a description field
+
+2006-11-07 06:54  hardaker
+
+   * configure.in, configure, Makefile.in,
+     net-snmp-config.in, agent/Makefile.in:
+
+   patch to fix sed usage on systems with a very old sed
+
+2006-11-06 15:50  tanders
+
+   * README.irix:
+
+   mention --without-kmem-usage
+
+2006-11-06 15:43  tanders
+
+   * agent/mibgroup/mibII/: at.c, interfaces.c, ipAddr.c
+, ipv6.c, tcpTable.c, udpTable.c,
+     var_route.c:
+
+   improved klookup error handling
+
+2006-11-06 15:41  tanders
+
+   * configure, README.aix, configure.in,
+     agent/kernel.h:
+
+   CHANGES: snmpd: build fix for --without-kmem-usage
+
+2006-11-06 07:16  tanders
+
+   * testing/tests/: T120proxyget, T121proxyset,
+     T122proxysetfail:
+
+   sh doesn't like "==", of course.
+
+2006-11-06 03:16  tanders
+
+   * testing/tests/: T120proxyget, T121proxyset,
+     T122proxysetfail:
+
+   skip proxy tests for TCP because the proxy code doesn't support TCP yet
+
+2006-11-03 17:39  tanders
+
+   * testing/tests/: T058agentauthtrap, T065agentextend,
+     T200snmpv2cwalkall:
+
+   CHANGES: misc: "make test" fixes for non-UDP transports
+
+2006-11-03 08:40  marz
+
+   * python/netsnmp/: client.py, client_intf.c:
+
+   memory leak fixes for python interface
+
+2006-11-02 15:30  tanders
+
+   * man/.cvsignore:
+
+   add new man page aliases
+
+2006-11-01 15:53  tanders
+
+   * ChangeLog:
+
+   ChangeLog shall only document changes of the branch it's contained in
+
+2006-11-01 08:36  rstory
+
+   * local/mib2c-conf.d/mfd-interface.m2c:
+
+   CHANGES: BUG: 1585815: fix mfd bits length calculation
+
+2006-10-31 14:29  hardaker
+
+   * FAQ, README, configure, configure.in
+, sedscript.in, snmplib/snmp_version.c,
+     dist/net-snmp.spec:
+
+   - version tag ( 5.4.rc1 )
+
+-------------------------------------------------------------------------------
+
 Changes: V5.4.pre4 -> V5.4.rc1
 
 2006-10-31 12:51  hardaker
