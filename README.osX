@@ -33,10 +33,9 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
                         --with-persistent-directory=/var/db/net-snmp \
                         --with-defaults \
                         --without-rpm \
-                        --with-mib-modules="hardware/memory hardware/cpu host ucd-snmp/diskio ucd-snmp/loadave ucd-snmp/memory" \
+                        --with-mib-modules="host ucd-snmp/diskio" \
                         --with-out-mib-modules="mibII/icmp host/hr_swrun" \
                         --disable-static \
-                        --enable-mini-agent \
                         --without-kmem-usage
 
        The first line sets up persistent storage in the OS X standard location.
@@ -49,10 +48,10 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
 
        I disable static libraries because we don't use them.
 
-       The final two lines are necessary because /dev/kmem was removed in
+       The final line is necessary because /dev/kmem was removed in
        the Intel / Universal builds of the OS, and I believe the APIs will
        be removed in Leopard.
-         These two lines are the most critical for proper building on OS X.
+         This line is the most critical for proper building on OS X.
 
 
   - 10.3.x and earlier
