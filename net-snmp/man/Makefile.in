@@ -102,7 +102,7 @@ manaliases:
 	done
 	@for i in $(SNMP_TRAP_API_ALIASES) ; do				\
 		echo "making man page alias $$i -> snmp_trap APIs" ;	\
-		echo ".so man3/snmp_trap.3" > $$i ; 			\
+		echo ".so man3/snmp_trap_api.3" > $$i ;			\
 	done
 
 snmpbulkget.1: $(srcdir)/snmpbulkget.1.def ../sedscript
