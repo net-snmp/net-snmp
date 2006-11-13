@@ -58,14 +58,9 @@ perl :
 	-@echo .
 !ELSE	# dynamic/static check
 	-@echo .
-	-@echo WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 	-@echo ===============================================================
 	-@echo Building Perl modules using dynamic (DLL) SNMPLIB library.
 	-@echo .
-	-@echo Net-SNMP is NOT a thread safe program, which is a requirement
-	-@echo for any application using a dynamic link library (DLL). 
-	-@echo Running multiple programs (including multiple Perl scripts)
-	-@echo that use NETSNMP.DLL can result in unpredictable results.
 	-@echo ===============================================================
 	-@echo .
 	-@echo .

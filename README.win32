@@ -74,12 +74,6 @@ The next subsection relates to items that are built using Visual Studio
      d) Debug versions build source browsing and debugging information;
      e) Provide consistent include search paths.
 
-  -  Building netsnmp.dll is only supported for compiling libagent, 
-     libhelpers, libsnmp_dll, libnetsnmptrapd and netsnmpmibs for use with 
-     the Perl module.  Using netsnmp.dll for other components is not 
-     supported as the DLL does not prevent corruption of dynamically changing 
-     shared data.
-
   -  All Debug and Release targets linked with libsnmp project targets
      build without errors, and are fully functional.
 
@@ -473,12 +467,7 @@ Microsoft's MSDN SDK Update site when using Microsoft Visual Studio 6.0.
 Win32sdk.dsw is for those who have or who are using the Microsoft Development 
 Environment 2002/2003 (MSVC 7.0/7.1), Cygwin (gcc) or MinGW (gcc).
 
-Libdll.dsw compiles a DLL version of snmplib (netsnmp.dll) which should 
-only be used for the Perl module.  Using netsnmp.dll for other components 
-is not supported as the DLL does not prevent corruption of dynamically 
-changing shared data.  Although the same problems can occur using the Perl 
-modules, the Perl modules will not function correctly without a shared 
-snmplib library or DLL.
+Libdll.dsw compiles a DLL version of snmplib (netsnmp.dll).
 
 There is one core development library ('libsnmp'), together with a number 
 of utility projects for the individual executable commands ('snmpget', 
@@ -580,8 +569,10 @@ steps to build using build.bat:
     7.  Quiet build (logged):       enabled
     8.  Debug mode:                 disabled
     9.  IPv6 transports:            disabled
+
+    10. Link type:                  static
     
-    10. Install development files   disabled
+    11. Install development files   disabled
     
     F.  Finished - start build
     Q.  Quit - abort build
@@ -703,12 +694,6 @@ Note:  The Configure option --linktype=static (or not specifying a linktype)
        The Configure option --linktype=dynamic will result in libsnmp_dll 
        (netsnmp.dll) being compiled and all other components being dynamically 
        linked to it.
-
-       Building netsnmp.dll is only supported for compiling libagent, 
-       libhelpers, libsnmp_dll, libnetsnmptrapd and netsnmpmibs for use with 
-       the Perl module.  Using netsnmp.dll for other components is not 
-       supported as the DLL does not prevent corruption of dynamically changing 
-       shared data.
 
 
 ***************************************************************************
