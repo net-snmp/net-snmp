@@ -97,11 +97,11 @@ while(1) {
   print "got something\n";
 }
 
-use Data::Dumper;
+#use Data::Dumper;
 sub testsub {
     print STDERR "in perl handler sub\n";
     print STDERR "  args: ", join(", ", @_), "\n";
-    print STDERR "  dumped args: ", Dumper(@_);
+    #print STDERR "  dumped args: ", Dumper(@_);
     $oid= $_[3]->getOID();
     print STDERR "  request oid: ", ref($oid), " -> ", $oid, "\n";
     print STDERR "  mode: ", $_[2]->getMode(),"\n";
