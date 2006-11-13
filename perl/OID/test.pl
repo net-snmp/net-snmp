@@ -8,7 +8,6 @@
 use Test;
 BEGIN { eval "use Cwd qw(abs_path)"; plan tests => 38 ; $ENV{'SNMPCONFPATH'} = 'nopath' ; $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs"); };
 use NetSNMP::OID;
-use Data::Dumper;
 
 ok(1); # If we made it this far, we're ok.
 
