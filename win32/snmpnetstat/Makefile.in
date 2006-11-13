@@ -5,9 +5,7 @@ INTDIR=
 SSL=
 LINKTYPE=
 
-# Set to 1 to allow the building using the DLL version of SNMPLIB.  This is 
-# NOT supported as this program is NOT thread safe and it WILL cause
-# problems!
+# Set to 1 to allow the building using the DLL version of SNMPLIB.
 ALLOW_DLL=1
 
 !IF "$(OS)" == "Windows_NT"
