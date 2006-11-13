@@ -8,7 +8,6 @@
 use Test;
 BEGIN { plan tests => 38 ; $ENV{'SNMPCONFPATH'} = 'nopath'};
 use NetSNMP::OID;
-use Data::Dumper;
 
 ok(1); # If we made it this far, we're ok.
 
