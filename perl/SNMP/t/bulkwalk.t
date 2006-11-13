@@ -116,8 +116,8 @@ if (defined($list[3][0])) {
   $loopback = $list[3][0]->val;
   if ($^O =~ /win32/i) {
     ok(($loopback =~ /loopback/i));
-  } elsif ($^O =~ /irix/i) {
-    # IRIX usually has lo0 at the *end* of the interface list,
+  } elsif ($^O =~ /(irix|hpux)/i) {
+    # IRIX/HP-UX may have lo0 at the *end* of the interface list,
     # so just check for a non-empty string
     ok(($loopback ne ''));
   } else {
@@ -297,8 +297,8 @@ sub async_cb1 {
 
       # This might fail on systems that don't have lo0/loopback as their first
       # interface. Please adjust accordingly.
-      if ($^O =~ /irix/i) {
-        # IRIX usually has lo0 at the *end* of the interface list,
+      if ($^O =~ /(irix|hpux)/i) {
+        # IRIX/HP-UX may have lo0 at the *end* of the interface list,
         # so just check for a non-empty string
         ok(($vbr->val ne ''));
       } else {
