@@ -117,16 +117,16 @@ static int __snprint_value _((char *, size_t,
                               netsnmp_variable_list*, struct tree *,
                              int, int));
 static int __sprint_num_objid _((char *, oid *, int));
-static int __scan_num_objid _((char *, oid *, int *));
+static int __scan_num_objid _((char *, oid *, size_t *));
 static int __get_type_str _((int, char *));
 static int __get_label_iid _((char *, char **, char **, int));
-static int __oid_cmp _((oid *, int, oid *, int));
+static int __oid_cmp _((oid *, size_t, oid *, size_t));
 static int __tp_sprint_num_objid _((char*,SnmpMibNode *));
 static SnmpMibNode * __get_next_mib_node _((SnmpMibNode *));
 static struct tree * __oid2tp _((oid*, int, struct tree *, int*));
-static struct tree * __tag2oid _((char *, char *, oid  *, int  *, int *, int));
-static int __concat_oid_str _((oid *, int *, char *));
-static int __add_var_val_str _((netsnmp_pdu *, oid *, int, char *,
+static struct tree * __tag2oid _((char *, char *, oid  *, size_t *, int *, int));
+static int __concat_oid_str _((oid *, size_t *, char *));
+static int __add_var_val_str _((netsnmp_pdu *, oid *, size_t, char *,
                                  int, int));
 static int __send_sync_pdu _((netsnmp_session *, netsnmp_pdu *,
                               netsnmp_pdu **, int , SV *, SV *, SV *));
@@ -149,8 +149,8 @@ typedef struct bulktbl {
    oid	req_oid[MAX_OID_LEN];	/* The OID originally requested.    */
    oid	last_oid[MAX_OID_LEN];	/* Last-seen OID under this branch. */
    AV	*vars;			/* Array of Varbinds for this OID.  */
-   int	req_len;		/* Length of requested OID.         */
-   int	last_len;		/* Length of last-seen OID.         */
+   size_t req_len;		/* Length of requested OID.         */
+   size_t last_len;		/* Length of last-seen OID.         */
    char norepeat;		/* Is this a non-repeater OID?      */
    char	complete;		/* Non-zero if this tree complete.  */
    char	ignore;			/* Ignore this OID, not requested.  */
@@ -585,7 +585,7 @@ static int
 __scan_num_objid (buf, objid, len)
 char *buf;
 oid *objid;
-int *len;
+size_t *len;
 {
    char *cp;
    *len = 0;
@@ -798,9 +798,9 @@ int flag;
 static int
 __oid_cmp(oida_arr, oida_arr_len, oidb_arr, oidb_arr_len)
 oid *oida_arr;
-int oida_arr_len;
+size_t oida_arr_len;
 oid *oidb_arr;
-int oidb_arr_len;
+size_t oidb_arr_len;
 {
    for (;oida_arr_len && oidb_arr_len;
 	oida_arr++, oida_arr_len--, oidb_arr++, oidb_arr_len--) {
@@ -876,14 +876,14 @@ __tag2oid(tag, iid, oid_arr, oid_arr_len, type, best_guess)
 char * tag;
 char * iid;
 oid  * oid_arr;
-int  * oid_arr_len;
+size_t * oid_arr_len;
 int  * type;
 int    best_guess;
 {
    struct tree *tp = NULL;
    struct tree *rtp = NULL;
    oid newname[MAX_OID_LEN], *op;
-   int newname_len = 0;
+   size_t newname_len = 0;
    const char *cp = NULL;
    char *module = NULL;
 
@@ -1024,7 +1024,7 @@ found:
 static int
 __concat_oid_str(doid_arr, doid_arr_len, soid_str)
 oid *doid_arr;
-int *doid_arr_len;
+size_t *doid_arr_len;
 char * soid_str;
 {
    char soid_buf[STR_BUF_SIZE];
@@ -1050,7 +1050,7 @@ static int
 __add_var_val_str(pdu, name, name_length, val, len, type)
     netsnmp_pdu *pdu;
     oid *name;
-    int name_length;
+    size_t name_length;
     char * val;
     int len;
     int type;
@@ -2202,7 +2202,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 ** assume that we've walked past the end of the subtree.  Set this
 	 ** subtree to be completed, and go on to the next variable.
 	 */
-	 if (((int)vars->name_length < expect->req_len) ||
+	 if ((vars->name_length < expect->req_len) ||
 	     (memcmp(vars->name, expect->req_oid, expect->req_len*sizeof(oid))))
 	 {
 	    DBPRT(2,(DBOUT "      walked off branch - marking subtree as complete.\n"));
@@ -3041,7 +3041,7 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
            netsnmp_pdu *pdu, *response;
            struct tree *tp;
 	   oid *oid_arr;
-	   int oid_arr_len = MAX_OID_LEN;
+	   size_t oid_arr_len = MAX_OID_LEN;
            char *tag_pv;
            snmp_xs_cb_data *xs_cb_data;
            SV **sess_ptr_sv;
@@ -3242,7 +3242,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
            struct tree *tp;
            int len;
 	   oid *oid_arr;
-	   int oid_arr_len = MAX_OID_LEN;
+	   size_t oid_arr_len = MAX_OID_LEN;
            SV *tmp_sv;
            int type;
 	   char tmp_type_str[MAX_TYPE_NAME_LEN];
@@ -3460,7 +3460,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            struct tree *tp;
            int len;
 	   oid *oid_arr;
-	   int oid_arr_len = MAX_OID_LEN;
+	   size_t oid_arr_len = MAX_OID_LEN;
            SV *tmp_sv;
            int type;
 	   char tmp_type_str[MAX_TYPE_NAME_LEN];
@@ -3704,7 +3704,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
            struct tree *tp;
            int len;
 	   oid *oid_arr;
-	   int oid_arr_len = MAX_OID_LEN;
+	   size_t oid_arr_len = MAX_OID_LEN;
            SV *tmp_sv;
            int type;
 	   char tmp_type_str[MAX_TYPE_NAME_LEN];
@@ -3932,7 +3932,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
            netsnmp_session *ss;
            netsnmp_pdu *pdu = NULL;
 	   oid oid_arr[MAX_OID_LEN];
-	   int oid_arr_len;
+	   size_t oid_arr_len;
            SV **sess_ptr_sv;
            SV **err_str_svp;
            SV **err_num_svp;
@@ -4243,7 +4243,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
            netsnmp_pdu *pdu = NULL;
            struct tree *tp;
 	   oid *oid_arr;
-	   int oid_arr_len = MAX_OID_LEN;
+	   size_t oid_arr_len = MAX_OID_LEN;
            SV **sess_ptr_sv;
            SV **err_str_svp;
            SV **err_num_svp;
@@ -4382,7 +4382,7 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
            netsnmp_pdu *pdu = NULL;
            struct tree *tp;
 	   oid *oid_arr;
-	   int oid_arr_len = MAX_OID_LEN;
+	   size_t oid_arr_len = MAX_OID_LEN;
            SV **sess_ptr_sv;
            SV **err_str_svp;
            SV **err_num_svp;
@@ -4519,7 +4519,7 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref,perl_callback)
            netsnmp_pdu *response;
            struct tree *tp;
 	   oid *oid_arr;
-	   int oid_arr_len = MAX_OID_LEN;
+	   size_t oid_arr_len = MAX_OID_LEN;
            snmp_xs_cb_data *xs_cb_data;
            SV **sess_ptr_sv;
            SV **err_str_svp;
@@ -4750,7 +4750,7 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
            char str_buf[STR_BUF_SIZE];
            char str_buf_temp[STR_BUF_SIZE];
            oid oid_arr[MAX_OID_LEN];
-           int oid_arr_len = MAX_OID_LEN;
+           size_t oid_arr_len = MAX_OID_LEN;
            char * label;
            char * iid;
            int status = FAILURE;
