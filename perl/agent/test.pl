@@ -66,6 +66,8 @@ print it((MODE_GET == 0xa0 &&
 	  SNMP_ERR_NOTWRITABLE == 17
 	 ), 2);
 
+netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_NO_ROOT_ACCESS, 1);
 my $agent = new NetSNMP::agent('Name' => 'test',
 			       'Ports' => '9161');
 print it($agent, 3);
