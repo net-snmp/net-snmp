@@ -17,15 +17,15 @@ print_description, fprint_description - mib_api functions
 .PP
 .B "void init_mib(void);
 .br
-.BI "int add_mibdir(char *" "dirname" );
+.BI "int add_mibdir(const char *" "dirname" );
 .br
-.BI "int add_module_replacement(char *" "old_module" ", char *" "new_module" ", char *" "tag" ", int " "len" );
+.BI "int add_module_replacement(const char *" "old_module" ", const char *" "new_module" ", const char *" "tag" ", int " "len" );
 .br
 .B "void init_mib_internals(void);
 .br
-.BI "struct tree *read_module(char *" "name" );
+.BI "struct tree *read_module(const char *" "name" );
 .br
-.BI "struct tree *read_mib(char *" "filename" );
+.BI "struct tree *read_mib(const char *" "filename" );
 .br
 .B "struct tree *read_all_mibs(void);
 .PP
@@ -33,7 +33,7 @@ print_description, fprint_description - mib_api functions
 .PP
 .BI "void print_mib(FILE *" "fp" );
 .PP
-.BI "int read_objid(char *" "input" ", oid *" "output" ", size_t *" "out_len" );
+.BI "int read_objid(const char *" "input" ", oid *" "output" ", size_t *" "out_len" );
 .br
 .BI "int get_module_node(const char *" "name" ", const char *" "module" ", oid *" "objid" ", size_t *" "objidlen" );
 .PP
