@@ -160,6 +160,11 @@ ipCidrRouteTable_rowreq_ctx_cleanup(ipCidrRouteTable_rowreq_ctx *
     /*
      * TODO:211:o: |-> Perform extra ipCidrRouteTable rowreq cleanup.
      */
+    if (NULL != rowreq_ctx->data) {
+        ipCidrRouteTable_release_data(rowreq_ctx->data);
+        rowreq_ctx->data = NULL;
+    }
+
 }                               /* ipCidrRouteTable_rowreq_ctx_cleanup */
 
 /**
