@@ -9,8 +9,10 @@ HEADER "if snmpnetstat finds the running agent in udpTable"
 case "x`uname -s`" in
   xAIX)     [ "x`id -u`" != "x0" ] && SKIP;;
   xHP-UX)   [ "x`id -u`" != "x0" ] && SKIP;;
+  xIRIX)    [ "x`id -u`" != "x0" ] && SKIP;;
   xNetBSD)  [ "x`id -u`" != "x0" ] && SKIP;;
   xOpenBSD) [ "x`id -u`" != "x0" ] && SKIP;;
+  xOSF1)    [ "x`id -u`" != "x0" ] && SKIP;;
 esac
 
 SKIPIF DISABLE_SNMPV2C
