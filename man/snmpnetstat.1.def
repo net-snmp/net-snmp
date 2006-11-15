@@ -58,22 +58,22 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPNETSTAT 1 "25 Oct 2003" VVERSIONINFO "Net-SNMP"
+.TH SNMPNETSTAT 1 "16 Nov 2006" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
 snmpnetstat \- display networking status and configuration information from a network entity via SNMP
 .SH SYNOPSIS
 .B snmpnetstat
-[common options] [-a] [-n] AGENT
+[common options] [-Ca] [-Cn] AGENT
 .br
 .B snmpnetstat
-[common options] [-iorns] AGENT
+[common options] [-Ci] [-Co] [-Cr] [-Cn] [-Cs] AGENT
 .br
 .B snmpnetstat
-[common options] [-in] [-I interface] AGENT [interval]
+[common options] [-Ci] [-Cn] [-CI interface] AGENT [interval]
 .br
 .B snmpnetstat
-[common options] [-an] [-s] [-P protocol] AGENT
+[common options] [-Ca] [-Cn] [-Cs] [-CP protocol] AGENT
 .SH DESCRIPTION
 The
 .B snmpnetstat 
@@ -110,37 +110,37 @@ The options have the following meaning:
 for a list of possible values for common options
 as well as their descriptions.
 .PP
-.B \-a
+.B \-Ca
 With the default display,
 show the state of all sockets; normally sockets used by
 server processes are not shown.
 .PP
-.B \-i
+.B \-Ci
 Show the state of all of the network interfaces.
 The  interface  display  provides  a  table  of cumulative
 statistics regarding packets transferred, errors, and collisions.
 The  network addresses of the interface and the maximum transmission 
 unit (``mtu'') are also displayed.
 .PP
-.B \-o
+.B \-Co
 Show an abbreviated interface status, giving octets in place of packets.
 This is useful when enquiring virtual interfaces (such as Frame-Relay circuits)
 on a router.
 .PP
-.BI \-I " interface"
+.BI \-CI " interface"
 Show information only about this interface;
 used with an
 .I interval
 as described below.
 .PP
-.B \-n
+.B \-Cn
 Show network addresses as numbers (normally 
 .I snmpnetstat
 interprets addresses and attempts to display them
 symbolically).
 This option may be used with any of the display formats.
 .PP
-.BI \-P " protocol"
+.BI \-CP " protocol"
 Show statistics about 
 .IR protocol,
 which is either a well-known name for a protocol or an alias for it.  Some
@@ -152,15 +152,15 @@ The program will complain if
 .I protocol
 is unknown or if there is no statistics routine for it.
 .PP
-.B \-s
+.B \-Cs
 Show per-protocol statistics.  When used with the
-.B \-r
+.B \-Cr
 option, show routing statistics instead.
 .PP
-.B \-r
+.B \-Cr
 Show the routing tables.
 When
-.B \-s
+.B \-Cs
 is also present, show per-protocol routing statistics instead of 
 the routing tables.
 .PP
@@ -184,7 +184,7 @@ according   to  the  data  bases
 .IR /etc/networks,
 respectively.  If a symbolic  name  for  an
 address  is unknown, or if the
-.B \-n
+.B \-Cn
 option is specified, the
 address is printed numerically, according to  the  address
 family.  For more information regarding the Internet ``dot
@@ -226,7 +226,7 @@ interfaces.   This  display  consists  of a column for the
 primary interface and a column summarizing information for
 all  interfaces.   The  primary  interface may be replaced
 with another interface with the
-.B \-I
+.B \-CI
 option.  The first line
 of each screen of information contains a summary since the
 system was last rebooted.  Subsequent lines of output show
@@ -236,15 +236,15 @@ values accumulated over the preceding interval.
 .I Single Protocol
 .PP
 When a protocol is specified with the
-.B \-P
+.B \-CP
 option, the
 information displayed is similar to that in the
 default display for active sockets, except the
 display is limited to the given protocol.
 .SH EXAMPLES
-Example of using snmpnetstat to displaly active sockets (default):
+Example of using snmpnetstat to display active sockets (default):
 .PP
-% snmpnetstat -v 2c -c public -a testhost
+% snmpnetstat -v 2c -c public -Ca testhost
 .PP
 .nf
 Active Internet (tcp) Connections (including servers)
@@ -268,7 +268,7 @@ udp    *.time
 \&...
 .fi
 .PP
-% snmpnetstat -v 2c -c public -i testhost
+% snmpnetstat -v 2c -c public -Ci testhost
 .PP
 .nf
 Name     Mtu Network    Address          Ipkts   Ierrs    Opkts Oerrs Queue
@@ -279,7 +279,7 @@ lo0     8232 127        localhost      7530982       0  7530982     0    0
 Example of using snmpnetstat to show statistics about a specific protocol:
 .PP
 .nf
-% snmpnetstat -v 2c -c public -P tcp testhost
+% snmpnetstat -v 2c -c public -CP tcp testhost
 
 Active Internet (tcp) Connections
 Proto Local Address                Foreign Address                 (state)
