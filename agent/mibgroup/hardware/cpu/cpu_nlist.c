@@ -38,8 +38,10 @@ void init_cpu_nlist( void ) {
     netsnmp_cpu_info     *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
     strcpy(cpu->name, "Overall CPU statistics");
 
-    sysctl(ncpu_mib,  2, &n,    sizeof(n),     NULL, 0);
-    sysctl(model_mib, 2, descr, sizeof(descr), NULL, 0);
+    i = sizeof(n);
+    sysctl(ncpu_mib,  2, &n,    &i, NULL, 0);
+    i = sizeof(descr);
+    sysctl(model_mib, 2, descr, &i, NULL, 0);
 
     if ( n <= 0 )
         n = 1;   /* Single CPU system */
