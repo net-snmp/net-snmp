@@ -696,7 +696,7 @@ get_boottime(void)
 #ifdef	NETSNMP_CAN_USE_SYSCTL
     int             mib[2];
     size_t          len;
-#else
+#elif NETSNMP_CAN_USE_NLIST
     int             kmem;
     static struct nlist nl[] = {
 #if !defined(hpux)
@@ -716,8 +716,7 @@ get_boottime(void)
 #if defined(hpux10) || defined(hpux11)
     pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0);
     boottime_csecs = pst_buf.boot_time * 100;
-#else
-#ifdef NETSNMP_CAN_USE_SYSCTL
+#elif NETSNMP_CAN_USE_SYSCTL
     mib[0] = CTL_KERN;
     mib[1] = KERN_BOOTTIME;
 
@@ -725,7 +724,7 @@ get_boottime(void)
 
     sysctl(mib, 2, &boottime, &len, NULL, 0);
     boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
-#else                           /* NETSNMP_CAN_USE_SYSCTL */
+#elif NETSNMP_CAN_USE_NLIST
     if ((kmem = open("/dev/kmem", 0)) < 0)
         return 0;
     nlist(KERNEL_LOC, nl);
@@ -738,7 +737,8 @@ get_boottime(void)
     read(kmem, &boottime, sizeof(boottime));
     close(kmem);
     boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
-#endif                          /* NETSNMP_CAN_USE_SYSCTL */
+#else
+    return 0;
 #endif                          /* hpux10 || hpux 11 */
 
     return (boottime_csecs);
