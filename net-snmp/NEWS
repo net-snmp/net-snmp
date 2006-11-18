@@ -81,6 +81,7 @@ a very detailed level (respectively) of changes/bug fixes.
       - gettable() now supports asynchronous callback functions
       - update default_store module to latest default_store c-binding
 	tokens
+      - fixes for 64-bit platforms
 
  Ports:
    Linux:
