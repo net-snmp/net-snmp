@@ -24,6 +24,10 @@ too long for you.
 	return OIDs instead of empty strings.
       - update default_store module to latest default_store c-binding
 	tokens
+      - make perltest fixes for Solaris 2.6 and earlier
+      - fixes for 64-bit platforms
+      - make perltest fixes for HP-UX
+      - make perltest fixes for IRIX
 
     snmplib:
       - [PATCH 1282566]: to rework transport creation to allow for
@@ -88,6 +92,10 @@ too long for you.
 	define.
       - [BUG 1585250]: don't use deprecated options in start script
       - "make test" fixes for non-UDP transports
+      - [BUG 1577913]: add missing manual pages for executables, supplied
+	by Debian
+      - [PATCH 1596028]: from "Stephen J. Friedl": const fixes for the
+	mib_api(3) manual page
 
     MacOSX:
       - [PATCH 1566777]: build fixes for memory_darwin.c
