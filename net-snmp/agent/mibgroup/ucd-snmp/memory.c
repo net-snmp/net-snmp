@@ -181,7 +181,7 @@ handle_memory(netsnmp_mib_handler *handler,
             break;
         case MEMORY_CACHED:
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_CACHED, 0 );
-            if (!mem_info || mem_info->other == -1)
+            if (!mem_info || mem_info->size== -1)
                goto NOSUCH;
             val  =  mem_info->size;     /* cached */
             val *= (mem_info->units/1024);
