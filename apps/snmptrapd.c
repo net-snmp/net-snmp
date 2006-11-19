@@ -303,6 +303,7 @@ usage(void)
     fprintf(stderr, "\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "  -a\t\t\tignore authentication failure traps\n");
+    fprintf(stderr, "  -A\t\t\tappend to log file rather than truncating it\n");
     fprintf(stderr, "  -c FILE\t\tread FILE as a configuration file\n");
     fprintf(stderr,
             "  -C\t\t\tdo not read the default configuration files\n");
@@ -584,7 +585,7 @@ SnmpTrapdMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "ac:CdD::efF:hHI:L:m:M:no:PqsS:tvx:O:-:";
+    char            options[128] = "aAc:CdD::efF:hHI:L:m:M:no:PqsS:tvx:O:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
     int             arg, i = 0, depmsg = 0;
