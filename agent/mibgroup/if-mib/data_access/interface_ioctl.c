@@ -379,7 +379,7 @@ netsnmp_access_interface_ioctl_ifindex_get(int fd, const char *name)
     struct ifreq    ifrq;
     int rc = 0;
 
-    DEBUGMSGTL(("access:interface:ioctl", "mtu_get\n"));
+    DEBUGMSGTL(("access:interface:ioctl", "ifindex_get\n"));
 
     rc = _ioctl_get(fd, SIOCGIFINDEX, &ifrq, name);
     if (rc < 0)
