@@ -19,7 +19,7 @@ SHELL = /bin/sh
 NAME = net-snmp
 
 # Define the default RPM release number. Set by VersionMunge.pl
-VERSION = 5.4.dev
+VERSION = 5.4
 
 VERSION_TAG=`echo Ext-$(VERSION) | sed 's/\./-/g;'`
 
