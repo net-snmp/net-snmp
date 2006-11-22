@@ -19,3 +19,4 @@ net-snmp-config
 net-snmp-config-x
 sedscript
 autom4te.cache
+mk
