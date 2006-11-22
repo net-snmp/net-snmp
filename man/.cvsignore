@@ -36,6 +36,12 @@ snmptrapd.conf.5
 snmpvacm.1
 snmpusm.1
 snmpwalk.1
+encode_keychange.1
+fixproc.1
+mib2c-update.1
+net-snmp-config.1
+tkmib.1
+traptoemail.1
 variables.5
 mib2c.conf.5
 config_perror.3
