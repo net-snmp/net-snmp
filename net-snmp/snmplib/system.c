@@ -696,7 +696,7 @@ get_boottime(void)
 #ifdef	NETSNMP_CAN_USE_SYSCTL
     int             mib[2];
     size_t          len;
-#elif NETSNMP_CAN_USE_NLIST
+#elif defined(NETSNMP_CAN_USE_NLIST)
     int             kmem;
     static struct nlist nl[] = {
 #if !defined(hpux)
@@ -724,7 +724,7 @@ get_boottime(void)
 
     sysctl(mib, 2, &boottime, &len, NULL, 0);
     boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
-#elif NETSNMP_CAN_USE_NLIST
+#elif defined(NETSNMP_CAN_USE_NLIST)
     if ((kmem = open("/dev/kmem", 0)) < 0)
         return 0;
     nlist(KERNEL_LOC, nl);
