@@ -81,11 +81,12 @@ MANALIASES=$(DEFAULT_STORE_ALIASES) $(READ_CONFIG_ALIASES) 		\
 MANALL = $(MAN1) $(MAN1G) $(MAN3) $(MAN3G) $(MAN5G) $(MAN8G) $(MANALIASES)
 
 TARGETS = $(MAN5G) $(MAN1G) $(MAN3G) $(MAN8G)
-OTHERCLEANTARGETS=$(TARGETS) default_store.3.h $(MANALIASES)
+OTHERCLEANTARGETS=$(TARGETS) default_store.3.h $(MANALIASES) manaliases
 
 all: $(TARGETS) standardall manaliases
 
-manaliases:
+manaliases: Makefile
+	touch manaliases
 	@for i in $(DEFAULT_STORE_ALIASES) ; do				\
 		echo "making man page alias $$i -> default_store APIs" ; \
 		echo ".so man3/default_store.3" > $$i ; 		\
