@@ -187,14 +187,12 @@ handle_memory(netsnmp_mib_handler *handler,
             val *= (mem_info->units/1024);
             break;
         case MEMORY_SWAP_ERROR:
-                                          /* XXX - or NS_MEM_TYPE_PHYSMEM */
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 0 );
             if (!mem_info)
                goto NOSUCH;
             val = ((mem_info->units / 1024) * mem_info->free > minimum_swap) ? 0 : 1;
             break;
         case MEMORY_SWAP_ERRMSG:
-                                          /* XXX - or NS_MEM_TYPE_PHYSMEM */
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 0 );
             if (!mem_info)
                goto NOSUCH;
