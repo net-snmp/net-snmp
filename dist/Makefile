@@ -24,7 +24,7 @@ VERSION = 5.4
 VERSION_TAG=`echo Ext-$(VERSION) | sed 's/\./-/g;'`
 
 WITH_PERL=1
-EMBED_PERL=0
+EMBED_PERL=1
 
 # Define the RPM architecture, i.e., 'ppc', 'i386', etc.
 ARCH = `uname -i`
@@ -83,11 +83,11 @@ $(GZIP_TAR):
 # stripping of binaries, but still retain the compression of
 # manual pages.
 #
-ifeq ($(WITH_PERL),1)
-PERLOPTS = --with perl_modules
+ifeq ($(WITH_PERL),0)
+PERLOPTS = --without perl_modules
 endif
-ifeq ($(EMBED_PERL),1)
-PERLOPTS += --with embedded_perl
+ifeq ($(EMBED_PERL),0)
+PERLOPTS += --without embedded_perl
 endif
 
 RPM_OPTS := \
