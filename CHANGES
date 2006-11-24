@@ -5,29 +5,10 @@ too long for you.
 
 *5.4*
 
-    snmptrapd:
-      - the traphandle directive now supports a -t switch to indicate
-	matching any OID in the tree below the specified OID
-      - [PATCH 1536773]: support partial oid matching
-
     build:
       - [BUG 1416481]: Support specifying an explicit linker.
       - enable-as-needed will try to link built libraries against needed
 	libraries at library link time, rather than application link time.
-
-    snmpdf:
-      - [BUG 1515507]: Handle failed requests better
-
-    perl:
-      - Fixed the perl bulkwalk function
-      - [PATCH 1575937]: fix usenumeric output in async varbinds so they
-	return OIDs instead of empty strings.
-      - update default_store module to latest default_store c-binding
-	tokens
-      - make perltest fixes for Solaris 2.6 and earlier
-      - fixes for 64-bit platforms
-      - make perltest fixes for HP-UX
-      - make perltest fixes for IRIX
 
     snmplib:
       - [PATCH 1282566]: to rework transport creation to allow for
@@ -42,9 +23,6 @@ too long for you.
 	HP-UX's libnm
       - [PATCH 1509943]: responses will get sent from the original dest IP
 	address when possible.
-
-    mib2c:
-      - [BUG 1479916]: Restore consistency in row creation code.
 
     snmpd:
       - [PATCH 1550725]: A new uint instance helper to match the existing
@@ -84,6 +62,31 @@ too long for you.
       - [BUG 1502267]: Build access list in the correct order.
       - [PATCH 1554827]: from rtyle: fix handling of failed proxy SET
 	requests
+      - [PATCH 1598966]: Fix bug #1598927: #elif build fix
+
+    snmptrapd:
+      - the traphandle directive now supports a -t switch to indicate
+	matching any OID in the tree below the specified OID
+      - [PATCH 1536773]: support partial oid matching
+      - [PATCH 1598968]: Fix bug #1587759: snmptrapd doesn't recognize -A
+	option
+
+    snmpdf:
+      - [BUG 1515507]: Handle failed requests better
+
+    perl:
+      - Fixed the perl bulkwalk function
+      - [PATCH 1575937]: fix usenumeric output in async varbinds so they
+	return OIDs instead of empty strings.
+      - update default_store module to latest default_store c-binding
+	tokens
+      - make perltest fixes for Solaris 2.6 and earlier
+      - fixes for 64-bit platforms
+      - make perltest fixes for HP-UX
+      - make perltest fixes for IRIX
+
+    mib2c:
+      - [BUG 1479916]: Restore consistency in row creation code.
 
     misc:
       - Most net-snmp specific defines are now (also) available under a
@@ -96,6 +99,7 @@ too long for you.
 	by Debian
       - [PATCH 1596028]: from "Stephen J. Friedl": const fixes for the
 	mib_api(3) manual page
+      - RPM spec file fixes for 64-bit platforms
 
     MacOSX:
       - [PATCH 1566777]: build fixes for memory_darwin.c
