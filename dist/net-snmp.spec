@@ -120,12 +120,12 @@ perl -i -p -e 's@/usr/local/share/snmp/@/etc/snmp/@g;s@usr/local@%{_prefix}@g' d
 install -m 755 dist/snmpd-init.d $RPM_BUILD_ROOT/etc/rc.d/init.d/snmpd
 
 %if %{netsnmp_include_perl}
-# unneeded perl stuff
-find $RPM_BUILD_ROOT/usr/lib/perl5/ -name Bundle -type d | xargs rm -rf
-find $RPM_BUILD_ROOT/usr/lib/perl5/ -name perllocal.pod | xargs rm -f
+# unneeded Perl stuff
+find $RPM_BUILD_ROOT/%{_libdir}/perl5/ -name Bundle -type d | xargs rm -rf
+find $RPM_BUILD_ROOT/%{_libdir}/perl5/ -name perllocal.pod | xargs rm -f
 
-# store a copy of installed perl stuff.  It's too complex to predict
-(xxdir=`pwd` && cd $RPM_BUILD_ROOT && find usr/lib/perl5 -type f | sed 's/^/\//' > $xxdir/net-snmp-perl-files)
+# store a copy of installed Perl stuff.  It's too complex to predict
+(xxdir=`pwd` && cd $RPM_BUILD_ROOT && find usr/lib*/perl5 -type f | sed 's/^/\//' > $xxdir/net-snmp-perl-files)
 %endif
 
 %post
@@ -176,11 +176,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}
 %{_sbindir}
 %{_mandir}/man1/*
-# don't include perl man pages, which start with caps
+# don't include Perl man pages, which start with caps
 %{_mandir}/man3/[^A-Z]*
 %{_mandir}/man5/*
 %{_mandir}/man8/*
-/usr/lib/*.so*
+%{_libdir}/*.so*
 /etc/rc.d/init.d/snmpd
 
 %files devel
@@ -201,8 +201,8 @@ rm -rf $RPM_BUILD_ROOT
 echo "No additional verification is done for net-snmp"
 
 %changelog
-* Wed Nov 22 2006 Thomas Anders <tanders@users.sf.net>
-- fixes for 5.4
+* Wed Nov 23 2006 Thomas Anders <tanders@users.sf.net>
+- fixes for 5.4 and 64-bit platforms
 - enable Perl by default, but allow for --without perl_modules|embedded_perl
 - add netsnmp_ prefix for local defines
 
