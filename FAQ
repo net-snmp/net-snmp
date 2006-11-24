@@ -140,9 +140,7 @@ TABLE OF CONTENTS
    Where should I put the files produced by 'mib2c'?
    I've created a new module with 'mib2c' but it doesn't work.  Why not?
    I've added my code to this template and it still doesn't work.  Why not?
-   Mib2c only handles a single table in my MIB. How can I fix this?
    Why does the iterator call my get_{first,next} routines so often?
-   How can I support a large table, with more than 256 column objects?
    How can I get the agent to generate a trap (or inform)?
    How can I get the agent to send an SNMPv1 (or SNMPv2c) trap?
    How can I get the agent to include varbinds with an SNMPv1 trap?
@@ -152,7 +150,6 @@ TABLE OF CONTENTS
    What if I'm using an AgentX sub-agent instead?
    How can I register a MIB module in a different (SNMPv3) context?
  MISC
-   Why are packets requesting the same information larger with UC-Davis SNMP?
    What ASN.1 parser is used?
    What is the Official Slogan of the net-snmp-coders list?
 
@@ -3376,27 +3373,6 @@ I've added my code to this template and it still doesn't work.  Why not?
 
 
 
-Mib2c only handles a single table in my MIB. How can I fix this?
----------------------------------------------------------------
-
-    This was a bug in the mib2c script, which was corrected with
-  the 4.2 release.  Earlier versions can be fixed by applying the
-  following patch:
-
-	$ diff -u mib2c.cln mib2c
-	--- mib2c.cln   Wed Nov 29 15:12:47 2000
-	+++ mib2c       Wed Nov 29 15:13:18 2000
-	@@ -132,6 +132,6 @@
-	 #============================================
-	 foreach $vtable (@table_list) {
-	     foreach $ptable (@processtable) {
-	-       $variables{$ptable}{'processed'} = 
-	+       $variables{$ptable}{'processed'} .= 
-	            (eval "\"$variables{$ptable}{'code'}\"") . "\n\n";
-	     }
-
-
-
 Why does the iterator call my get_{first,next} routines so often?
 -----------------------------------------------------------------------
 
@@ -3421,45 +3397,6 @@ Why does the iterator call my get_{first,next} routines so often?
     But the iterator helper is inherently a relatively inefficient
   mechanism, and it may be worth looking at one of the other helpers,
   particularly if the data will be held within the agent itself.
-
-
-
-How can I support a large table, with more than 256 column objects?
-------------------------------------------------------------------
-
-    This is a problem (at least apparently) with the v4 UCD module
-  API, which uses a "magic number" to distinguish between the various
-  column objects implemented by a common variable handling routine.
-  Since this field is defined as an unsigned character, it can only
-  take values 0-255.   So at first sight, it would appear that the
-  agent cannot support tables (or scalar groups) with more than 256
-  objects, since this would start to duplicate these magic numbers.
-
-    However, the agent doesn't actually care which routine implements
-  a given object, and magic numbers only need to be unique within a
-  single variable handling routine.  So it is actually perfectly
-  possible to implement a larger table by splitting it between two
-  (or more) variable handling routines.  These can then re-use the
-  magic numbers quite safely:
-
-    struct variable1 [] = {
-       {MAGIC1,   ASN_INTEGER, RWRITE, var_myfirst,  1, {  1}},
-       {MAGIC2,   ASN_INTEGER, RWRITE, var_myfirst,  1, {  2}},
-    		:
-       {MAGIC255, ASN_INTEGER, RWRITE, var_myfirst,  1, {255}},
-       {MAGIC1,   ASN_INTEGER, RWRITE, var_mysecond, 1, {256}},
-       {MAGIC2,   ASN_INTEGER, RWRITE, var_mysecond, 1, {257}},
-    		:
-       {MAGIC255, ASN_INTEGER, RWRITE, var_mysecond, 1, {510}}
-    };
-
-  All that matters is that a given magic number isn't re-used within
-  the same variable handling routine.  The v5 table handlers typically
-  use an integer variable for holding column information, so aren't
-  subject to the same limitations.
-
-    Though I'd have to question whether having such a wide table is
-  necessarily a particularly good design strategy!
 
 
 
@@ -3668,26 +3605,6 @@ How can I register a MIB module in a different (SNMPv3) context?
 
 MISC
 ======
-
-Why are packets requesting the same information larger with UC-Davis SNMP?
--------------------------------------------------------------------------
-
-    This shouldn't happen with version 4.2 or later, but for older
-  version the following still applies:
-
-    Some users note that UCD-SNMP applications always generate larger PDUs
-  than other SNMP packages, even if the information requested is the same.
-  Further, there are some agents that refuse PDUs from UCD-SNMP applications
-  but accept PDUs from other applications.
-
-  UCD-SNMP is based on the CMU code from a long time ago which encoded things
-  using the long form of length encoding.  Some agents use the short form
-  of length encoding only, and do not understand the long form.
-
-    This should not be a problem with UCD v4.2 or higher, or the Net-SNMP
-  releases.
-
-
 
 What ASN.1 parser is used?
 -------------------------
