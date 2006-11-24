@@ -2610,24 +2610,24 @@ How do I get percentage CPU utilization using ssCpuRawIdle?
 What about multi-processor systems?
 ----------------------------------
 
-    Sorry - the CPU statistics (both original percentages, and the
-  newer raw statistics) both refer to the system as a whole.  There
-  is currently no way to access individual statistics for a particular
-  processor (except on Solaris systems - see below).
+  The CPU objects (both percentages and raw counters) were designed to
+  monitor the overall CPU activity of a system, and typically reflect
+  whatever the underlying operating system reports for the (single)
+  CPU statistics information.  How these are handled for a multi-CPU
+  system will probably differ from one O/S to another, and will need
+  to be investigated for each system individually.
 
-    Note that although the Host Resources table includes a hrProcessorTable,
-  the current implementation suffers from two major flaws.  Firstly, it
-  doesn't currently recognise the presence of multiple processors, and
-  simply assumes that all systems have precisely one CPU.  Secondly, it
-  doesn't calculate the hrProcessorLoad value correctly, and either returns
-  a dummy value (based on the load average) or nothing at all.
+  The htProcessorTable was designed to handle monitoring multi-CPU
+  machines, but the Net-SNMP implementation has up to now treated
+  most systems (with the honourable exception of Solaris, and more
+  recently Linux) as implicitly single-CPU.
 
-    As of net-snmp version 5.1, the Solaris operating system delivers some
-  information about multiple CPU's such as speed and type.
-
-    Other than that, to monitor a multi-processor system, you're currently
-  out of luck.  We hope to address this in a future release of the agent.
-  But you've got the source, so you can always have a go yourself :-)
+  With the 5.4 release, there is now a cleaner framework for reporting
+  on multi-CPU equipment, and it is hoped that an increasing number
+  of systems will be able to report suitable processor information.
+  Also with the 5.4 release, for the first time the agent will report
+  the hrProcessorLoad value properly, which should provide some simple
+  per-CPU statistics.
 
 
 
@@ -2639,10 +2639,10 @@ The speed/type of my network interfaces is wrong - how can I fix it?
   cases, the agent attempts to guess the most appropriate values,
   usually based on the name of the interface.
 
-    Version 4.2 allows you to override these guessed values, using the
-  configuration directive 'interface', specifying the name, type and
-  speed of a particular interface.  This is particularly useful for
-  fast-ethernet, or dial-up interfaces, where the speed cannot be
+  The snmpd.conf directive "interface" allows you to override these
+  guessed values, and provide alternative values for the name, type
+  and speed of a particular interface.  This is particularly useful
+  for fast-ethernet, or dial-up interfaces, where the speed cannot be
   guessed from the name.
 
     See the snmpd.conf(5) man page for details.
@@ -2747,9 +2747,15 @@ The agent is complaining about 'snmpd.conf'.  Where is this?
 
   It doesn't exist in the distribution as shipped.  You need to
   create it to reflect your local requirement.
-    To get started, you can either just create this as an empty file,
-  or run snmpconf to help you create one.
-    See the snmpd.conf(5) manual page for further details.
+    To get started, you can either just create this file manually,
+  or run snmpconf to help you create one.  At the very least, you
+  will need some form of access control configuration, if the agent
+  is to be of any use whatsoever.  This can be as simple as:
+
+       rocommunity public
+
+    See the snmpd.conf(5) manual page or relevant entries in this
+  FAQ for further details.
 
 
 
@@ -2763,7 +2769,7 @@ The system uptime (sysUpTime) returned is wrong!
 
   In other words, when the snmp agent was started, not when the
   system itself last booted.  This latter information is available
-  in the Host Resources MIB as "host.hrSystem.hrSystemUpTime"
+  in the Host Resources MIB as "hrSystemUpTime.0"
   Note that even if the full Host Resources is not supported on
   your system, it's worth configuring in the system portion using
 
