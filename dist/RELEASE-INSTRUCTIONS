@@ -417,7 +417,7 @@ CREATING BINARY DISTRIBUTIONS
   7) RPMS [do this in main line even if its for a patch branch]:
      $ cd dist
      $ cp ../net-snmp-5.0.8.tar.gz rpm/SOURCES
-     $ make RELEASE=1 WITH_PERL=1 EMBED_PERL=1
+     $ make RELEASE=1
      
      This should put multiple binary rpm files in:
        dist/rpm/RPMS/i386/
