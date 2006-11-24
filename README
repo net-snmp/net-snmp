@@ -65,8 +65,10 @@ AVAILABILITY
     - ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/
   Web page:
     - http://www.net-snmp.org/
+  Project Wiki:
+    - http://www.net-snmp.org/wiki/
   Sourceforge Project page:
-    - http://www.net-snmp.org/project/
+    - http://sourceforge.net/projects/net-snmp
   Mirrors:
     - US:        ftp://ftp.freesnmp.com/mirrors/net-snmp/
     - Bulgaria:  http://rtfm.uni-svishtov.bg/net-snmp/
@@ -78,11 +80,8 @@ AVAILABILITY
 WEB PAGES
 
   http://www.net-snmp.org/
-  http://www.net-snmp.org/project/
-
-  Make sure you check out the logo there, which is created using
-  postcards submitted from various locations that make use of the
-  net-snmp package.
+  http://sourceforge.net/projects/net-snmp
+  http://www.net-snmp.org/wiki/
 
 INSTALLATION
 
@@ -95,6 +94,11 @@ COPYING AND COPYRIGHTS
 FREQUENTLY ASKED QUESTIONS
 
   See the FAQ file distributed with this package.
+  This is also available on the project Wiki at
+
+     http://www.net-snmp.org/wiki/index.php/FAQ
+
+  so that the wider Net-SNMP community can help maintain it!
 
 HELPING OUT
 
