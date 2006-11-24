@@ -410,6 +410,10 @@ SOURCE=..\..\agent\mibgroup\smux\smux.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\smux\winExtDLL.c
+# End Source File
+# Begin Source File
+
 #SOURCE=..\..\agent\mibgroup\winExtDLL.c
 # End Source File
 # End Target

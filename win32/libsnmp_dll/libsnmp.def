@@ -263,6 +263,7 @@ EXPORTS
 	vacm_parse_config_access
 	vacm_parse_config_group
 	vacm_parse_config_view
+	vacm_parse_config_auth_access
 	store_vacm
 	vacm_scanGroupInit
 	vacm_scanGroupNext
@@ -271,7 +272,6 @@ EXPORTS
 	vacm_scanViewInit
 	vacm_scanViewNext
 	vacm_checkSubtree
-	vacm_parse_config_auth_access
 	snmp_synch_response_cb
 	snmp_clone_varbind
 	snmp_free_varbind
@@ -431,20 +431,6 @@ EXPORTS
         snmp_add_full
         netsnmp_transport_open_client
         snmp_oidsubtree_compare
-        snmp_disable_syslog
-        snmp_stderrlog_status
-        sa_find_specific
-        check_rowstatus_transition
-        check_storage_transition
-        netsnmp_view_get
-        netsnmp_check_vb_rowstatus_value
-        netsnmp_check_vb_type_and_size
-        netsnmp_check_vb_type_and_max_size
-        read_config_save_objid
-        print_oid_report_enable_mibchildoid
-        netsnmp_query_walk
-        netsnmp_query_getnext
-        netsnmp_query_get
         snmp_disable_syslog
         snmp_stderrlog_status
         sa_find_specific
