@@ -19,6 +19,7 @@ Installing Platform SDK
 Microsoft Visual C++ - Overview
 Microsoft Visual C++ - Configure / nmake - Building
 Microsoft Visual C++ - Workspace - Building
+Microsoft Visual C++ - Workspace - Building the DLL
 Microsoft Visual C++ - Workspace - Building the Perl SNMP modules
 Microsoft Visual C++ - Workspace - Installing
 Microsoft Visual C++ - Building with OpenSSL
@@ -737,6 +738,9 @@ features may be disabled if the Platform SDK is not used.  See the section
 
 4. Build the applications
 
+   Static build (does not use NetSNMP.DLL)
+   =======================================
+
    MS VC++ 6.0:
    ------------
    a. Open win32.dsw or win32sdk.dsw.
@@ -766,6 +770,52 @@ features may be disabled if the Platform SDK is not used.  See the section
    l.  When building is done, View the Output window, clip and
        save to a text file if there is some information to share.
    m.  Click "File->Close Solution".
+
+   Dynamic build (uses NetSNMP.DLL)
+   ================================
+
+   Complete the section 'Microsoft Visual C++ - Workspace - Building the DLL'.
+   This will create the Net-SNMP library DLL which is needed by the 
+   applications and will enable DLL support in net-snmp-config.h.
+
+   MS VC++ 6.0:
+   ------------
+   a. Open win32.dsw or win32sdk.dsw.
+   b. Click "Build->Batch Build..."  
+   c. Set Release and/or Debug in 'Project configurations' to suit for the 
+      applications.  Make sure the following are NOT selected:
+
+      libagent
+      libhelpers
+      libsnmp
+      netsnmpmib(sdk)
+      libnetsnmptrapd
+
+   d. Click "ReBuild All".
+   e. When building is done, View the Output window, clip and
+      save to a text file if there is some information to share.
+   f. Click "File->Close Workspace".
+
+   MS VC++ 7.0+:
+   -------------
+   a. Open win32.dsw or win32sdk.dsw.
+   b. Click "Yes to All" to convert the workspace
+   c. Click "Build->Configuration Manager" and select either Release or Debug for 
+      'Active Solution Configuration' and click "Close"
+   d. Click "Build->Batch Build..." 
+   e. Set Release and/or Debug in 'Project configurations' to suit for the 
+      applications.  Make sure the following are NOT selected:
+
+      libagent
+      libhelpers
+      libsnmp
+      netsnmpmib(sdk)
+      libnetsnmptrapd
+
+   f. Click "Rebuild".
+   g. When building is done, View the Output window, clip and
+      save to a text file if there is some information to share.
+   h. Click "File->Close Solution".
   
 5.  If the Perl modules are required, continue with the next section:
     'Microsoft Visual C++ - Building the Perl SNMP modules'.
@@ -776,30 +826,19 @@ features may be disabled if the Platform SDK is not used.  See the section
 
 ***************************************************************************
 *
-* Microsoft Visual C++ - Workspace - Building the Perl SNMP modules
+* Microsoft Visual C++ - Workspace - Building the DLL
 *
 ***************************************************************************
 
-The Perl modules should be compiled against the DLL version of snmplib.
-Compiling against a static version is possible, but each module will
-load it's own copy of the MIB, and sharing data between modules will
-not be possible.  For example, the conf module tests will fail.
-
-1.  Complete the section 'Microsoft Visual C++ - Building'.  This will build
-    the static version of the applications.  
-
-    Note:  SNMPD.EXE and SNMPTRAPD.EXE are required for running the tests 
-           against the SNMP Perl module.
-
-2.  Make a backup of the existing net-snmp-config.h which contains settings
-    for a static build of Net-SNMP:
+1.  Optional: Make a backup of the existing net-snmp-config.h which contains 
+    settings for a static build of Net-SNMP:
 
     Copy win32\net-snmp\net-snmp-config.h to 
     win32\net-snmp\static-config.h.
 
-3.  Open win32\net-snmp\net-snmp-config.h using a text editor.
+2.  Open win32\net-snmp\net-snmp-config.h using a text editor.
 
-4.  *Change* the following line which is located near the top of the file:
+3.  *Change* the following line which is located near the top of the file:
 
         /* #undef NETSNMP_USE_DLL */
 
@@ -807,13 +846,13 @@ not be possible.  For example, the conf module tests will fail.
 
         #define NETSNMP_USE_DLL 1
 
-5.  Make a backup of the new net-snmp-config.h which contains settings
-    for a DLL build of Net-SNMP:
+4.  Optional: Make a backup of the new net-snmp-config.h which contains 
+    settings for a DLL build of Net-SNMP:
 
     Copy win32\net-snmp\net-snmp-config.h to 
     win32\net-snmp\dll-config.h.
 
-6. Build the DLL
+5. Build the DLL
 
    MS VC++ 6.0:
    ------------
@@ -840,10 +879,33 @@ not be possible.  For example, the conf module tests will fail.
       save to a text file if there is some information to share.
    i. Click "File->Close Solution".
 
-7.  Install Net-SNMP as described in the 'Microsoft Visual C++ - Installing'
+
+***************************************************************************
+*
+* Microsoft Visual C++ - Workspace - Building the Perl SNMP modules
+*
+***************************************************************************
+
+The Perl modules should be compiled against the DLL version of snmplib.
+Compiling against a static version is possible, but each module will
+load it's own copy of the MIB, and sharing data between modules will
+not be possible.  For example, the conf module tests will fail.
+
+1.  Complete the section 'Microsoft Visual C++ - Building'.  This will build
+    the applications.  
+
+    Note:  SNMPD.EXE and SNMPTRAPD.EXE are required for running the tests 
+           against the SNMP Perl module.
+
+2.  Complete the section 'Microsoft Visual C++ - Workspace - Building the DLL'.
+    This will create the Net-SNMP library DLL which is needed for the Perl 
+    modules.  Note:  This step can be skipped if the DLL was already created
+    in step 1.
+
+3.  Install Net-SNMP as described in the 'Microsoft Visual C++ - Installing'
     section to install the applications, the DLL and the .lib files.
 
-8.  Continue with the Win32 section of the Perl README file located in 
+4.  Continue with the Win32 section of the Perl README file located in 
     perl\SNMP\README.
 
 
