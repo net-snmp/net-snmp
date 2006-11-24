@@ -53,14 +53,14 @@ TABLE OF CONTENTS
    Applications complain about entries in your example 'snmp.conf' file.  Why?
    OK, what should I put in snmp.conf?
  PERL
-   Where can I get the perl SNMP package?
+   Where can I get the Perl SNMP package?
    How do I install the Perl SNMP modules?
    But compiling this fails! Why?
-   Compiling the perl module works OK, but 'make test' fails. Why?
+   Compiling the Perl module works OK, but 'make test' fails. Why?
    I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
    I'm trying to use mib2c (or tkmib) and it can't load SNMP.so?
    I'm trying to use tkmib and it can't locate Tk.pm?
-   I'm trying to install your RPM, but it complains about missing perl modules. Why?
+   I'm trying to install your RPM, but it complains about missing Perl modules. Why?
    I've got a problem with the Net-SNMP module.  Can you help?
  MIBS
    Where can I find a MIB compiler?
@@ -282,10 +282,10 @@ What operating systems does it run on?
 	* HP-UX (10.20 to 9.01 and 11.23 to 11.0 -- see README.hpux11)
 	* Mac OS X (10.4 to 10.1) -- see README.osX
 	* NetBSD (2.0 to 1.0)
-	* FreeBSD (6.0 to 2.2)
+	* FreeBSD (6.1 to 2.2)
 	* OpenBSD (4.0 to 2.6)
 	* BSDi (4.0.1 to 2.1)
-	* AIX (5.2, 5.1, 4.1.5, 3.2.5) -- see README.aix
+	* AIX (5.3, 5.2, 5.1, 4.3.3, 4.1.5, 3.2.5) -- see README.aix
 	* IRIX (6.5 to 5.1)
 	* OSF (4.0, 3.2 and Tru64 Unix 5.1B -- see README.tru64)
 	* SunOS 4 (4.1.4 to 4.1.2)
@@ -1259,12 +1259,12 @@ OK, what should I put in snmp.conf?
 PERL
 ====
 
-Where can I get the perl SNMP package?
+Where can I get the Perl SNMP package?
 -------------------------------------
 
-  Joe Marzot's excellent perl 'SNMP' module, is included in the Net-SNMP
+  Joe Marzot's excellent Perl 'SNMP' module, is included in the Net-SNMP
   source releases.  It can be found located in the perl/SNMP subdirectory
-  of the source tree.  This is accompanied by a number of perl modules
+  of the source tree.  This is accompanied by a number of Perl modules
   grouped together under the NetSNMP namespace.
 
   The basic SNMP module (though not the NetSNMP additions), can also
@@ -1272,16 +1272,16 @@ Where can I get the perl SNMP package?
   under modules/by-module/SNMP.  To find the CPAN site nearest you,
   please see http://www.cpan.org/SITES.html.
 
-  These perl modules need to be used in conjunction with a compatible
+  These Perl modules need to be used in conjunction with a compatible
   version of the Net-SNMP library.  Consult the README file in the SNMP
-  perl distribution to find out which version of the library it needs.
+  Perl distribution to find out which version of the library it needs.
 
 
 
 How do I install the Perl SNMP modules?
 --------------------------------------
 
-  Assuming you have a reasonably new (and properly configured) perl system,
+  Assuming you have a reasonably new (and properly configured) Perl system,
   this should be simply:
 
         cd perl
@@ -1299,7 +1299,7 @@ How do I install the Perl SNMP modules?
   but this has not been reliably tested, and very much relies on
   having the correct version of the Net-SNMP library.
 
-  There may also be appropriate pre-compiled versions of the perl modules
+  There may also be appropriate pre-compiled versions of the Perl modules
   available from the Net-SNMP project website, or your O/S vendor.
 
 
@@ -1307,18 +1307,18 @@ How do I install the Perl SNMP modules?
 But compiling this fails! Why?
 -----------------------------
 
-  The perl module tends to delve quite deeply into the internals of the
+  The Perl module tends to delve quite deeply into the internals of the
   main Net-SNMP library, and so is quite sensitive to changes within the
   library.  It's important to use the correct version of the module, that
   corresponds to the version of the library you have installed.  If you're
   working with a Net-SNMP source distribution, the appropriate version of
-  the perl modules are shipped as part of the source code, but you *must*
+  the Perl modules are shipped as part of the source code, but you *must*
   have run "make install" on the main Net-SNMP distribution *first*.
 
   If you're working with a ready-installed version of the library, make
-  sure you obtain a compatible version of the perl module.
+  sure you obtain a compatible version of the Perl module.
 
-    Note that the perl modules will be compiled using the compiler
+    Note that the Perl modules will be compiled using the compiler
   (and compiler settings) used for compiling the original perl binary,
   *not* those used for compiling the Net-SNMP (or UCD) library.
   If these are different (e.g. 'gcc' used for one and 'cc' for the other)
@@ -1327,20 +1327,20 @@ But compiling this fails! Why?
   the README.solaris file.
 
     Also note that the v5 Net-SNMP suite *must* be configured to provide
-  shared libraries in order for the perl modules to work correctly.  This
+  shared libraries in order for the Perl modules to work correctly.  This
   is not necessary with the v4 UCD-SNMP libraries.
 
 
 
-Compiling the perl module works OK, but 'make test' fails. Why?
+Compiling the Perl module works OK, but 'make test' fails. Why?
 --------------------------------------------------------------
 
   That's difficult to answer in general.
-  Some of the perl tests are rather picky, so this may simply be
+  Some of the Perl tests are rather picky, so this may simply be
   some minor inconsistency between your precise setup, and the
   expectations of the test environment.
 
-    Check that you are working with the perl distribution that matches
+    Check that you are working with the Perl distribution that matches
   the SNMP libraries (use the 'perl/SNMP' in preference to CPAN), and
   that you have installed the main libraries successfully (uninstall
   any old versions if you're having trouble).
@@ -1380,13 +1380,13 @@ I'm trying to use tkmib and it can't locate Tk.pm?
 
 
 
-I'm trying to install your RPM, but it complains about missing perl modules. Why?
+I'm trying to install your RPM, but it complains about missing Perl modules. Why?
 --------------------------------------------------------------------------------
 
   This has been particularly noted on RedHat 9, complaining about the
   module "perl(Term::ReadKey)" - even if this is actually present (e.g.
   having been installed directly from CPAN).  In fact, this is not
-  specific to perl modules - the same issue can potentially arise with
+  specific to Perl modules - the same issue can potentially arise with
   other RPM dependencies.
 
   The problem is that the RPM mechanism keeps a local database of what
@@ -1741,7 +1741,7 @@ How do I configure the agent?
   That depends on what you want it to do.  See the snmpd.conf(5) manual
   page for the possibilities.
 
-  You can also run the "snmpconf" perl script to help you create this
+  You can also run the "snmpconf" Perl script to help you create this
   file.  Start off with 'snmpconf -g basic_setup' to get you going.
 
 
