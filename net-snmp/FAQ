@@ -132,7 +132,6 @@ TABLE OF CONTENTS
    Mib2c complains about not having a "valid OID" - what does this mean?
    Why doesn't mib2c like the MIB file I'm giving it?
    Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
-   Mib2c complains about "configuration files". What's this for?
    What's the difference between the various mib2c configuration files?
    Which mib2c configuration file should I use?
    How can I have mib2c generate code for both scalars and tables?
@@ -3035,49 +3034,48 @@ CODING
 How do I write C code to integrate with the agent?
 -------------------------------------------------
 
-  At the moment, there are three methods for integrating external C code
+  There are three main methods for integrating external C code
   within the agent.
 
-    The code can be included within the agent itself, statically configured
-  and linked in when the agent is compiled.  Alternatively, with the 4.2
-  release of the agent, it's possible to dynamically load MIB modules once
-  the agent is running.  Finally, the agent can be configured to pass certain
-  portions of the MIB tree off to one or more subagents.  See the earlier
-  question on AgentX, SMUX and proxied SNMP for more details.
+    The code can be compiled directly into the agent itself, it
+  can be loaded dynamically while the agent is running, or it can
+  be compiled into a separate application (a "subagent") which
+  communicates with the main master agent.  All three approaches
+  have been touched on elsewhere within this FAQ.
 
-    All three mechanisms use the same module API.  This is described (in
-  excruciating detail) in the file AGENT.txt, shipped with the standard
-  distribution.  There is also an HTML version accessible via the project
-  web page.  This task can be aided using the tool 'mib2c' which generates
-  most of the necessary skeleton code from the description in the MIB file.
+    As far as the module code is concerned, all three mechanisms
+  use exactly the same module API.  So a module developed for use
+  directly within the agent, could also be included within a subagent,
+  or loaded dynamically with no (or minimal) code changes needed.
 
-    Note that the UCD suite does not include support for SMUX subagents.
+    Most of this section is concerned with more detailed aspects
+  of developing such code - including the 'mib2c' tool, which can
+  handle generating a basic code framework for implementing a
+  given set of MIB objects.
 
 
 
 How does the agent fetch the value of a MIB variable from the system?
 --------------------------------------------------------------------
 
-  This depends on the MIB variable (and the operating system).
+  That's typically the hardest bit of implementing a new MIB module,
+  and is the one thing that 'mib2c' can't help with.  It very much
+  depends on the MIB variable concerned (and often the underlying
+  operating system as well).
 
-    Much of the 'mib-2' information is extracted from kernel memory - 
-  often by seeking to the appropriate location in the kernel itself and
-  reading the data structures directly.
+  Relatively few MIB modules are completely self-contained, with all
+  the information held internally within the agent, and all updates
+  being done via SNMP requests.  Such MIB modules can be implemented
+  fairly easily.
 
-    Some systems provide cleaner interfaces to such kernel information
-  (it would be hard to think of a less clean interface!), via ioctl()
-  calls or similar system routines.  Such mechanisms are usually used
-  in preference.
+  More commonly, the agent needs to provide an SNMP-based interface to
+  information held elsewhere, perhaps in the operating system kernel or
+  some other application.  Handling this is much more complex - since
+  a lot depends on what mechanisms are provided for retrieving (and
+  possibly updating) this information.
 
-    Some other MIBs may be implemented completely within the agent
-  itself, where the necessary information is already being held
-  internally.  This particularly holds for MIBs relating to the
-  operation of SNMP directly.  Other MIBs may involve communicating
-  with another running process, or using a variety of other sources.
-
-    There's no simple answer to this question, and obtaining the
-  necessary information is often the hardest part of implementing
-  a MIB.  Writing the code is straightforward by comparison!
+  See the existing MIB modules in the Net-SNMP source tree for various
+  examples of assorted approaches to this task.
 
 
 
@@ -3145,24 +3143,12 @@ Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
 
 
 
-Mib2c complains about "configuration files". What's this for?
-------------------------------------------------------------
-
-    You've probably upgraded to the v5 net-snmp release (from the
-  v4 ucd-snmp release).  This introduced a new approach to agent
-  module development, including a number of different "helpers".
-  The mib2c tool comes with configurations to generate code for
-  many of these, but you'll need to select which is most convenient
-  for your particular case.
-
-
-
 What's the difference between the various mib2c configuration files?
 -------------------------------------------------------------------
 
-    There are various alternative configuration templates for mib2c,
-  mostly concerned with implementing MIB tables.  These basically
-  fall into four distinct categories.
+    Most of the mib2c config files are concerned with implementing
+  MIB tables, and generate various alternative code templates.
+  These basically fall into four distinct categories.
 
     'mib2c.raw-table.conf' is the lightest of the templates, and
   just provides a fairly basic table framework.  Most of the work
@@ -3207,6 +3193,7 @@ What's the difference between the various mib2c configuration files?
   standard and table-specific processing, at a much finer level of
   detail than the others.
 
+
     The other mib2c config templates are concerned with implementing
   scalar objects ('scalar', 'int_watch'), code to generating traps
   ('notify'), and various specialised requirements.  There is also a
@@ -3217,8 +3204,8 @@ What's the difference between the various mib2c configuration files?
 
 
 
-Which one should I use?
-----------------------
+Which mib2c configuration file should I use?
+-------------------------------------------
 
     The answer to that heavily depends on the characteristics of the
   MIB objects being implemented.  Of the handler-based table frameworks,
@@ -3271,17 +3258,20 @@ How can I have mib2c generate code for both scalars and tables?
 Are there any examples, or documentation?
 -------------------------------------------
 
-    Most of the MIB modules shipped with the Net-SNMP agent still
-  use the v4 "traditional" MIB module API, but a few use one of the
-  newer v5 helper-based handlers.
+    Many of the MIB modules shipped with the Net-SNMP agent still
+  use the v4 "traditional" MIB module API, but an increasing number
+  use one of the newer v5 helper-based handlers.  All of these can
+  be found under 'agent/mibgroup'
 
-    The dataset handler is used in the two DISMAN-EVENT-MIB modules
-  (disman/mteEventTable and disman/mteEventNotificationTable), as
-  well as the 'snmptrapd' implementation of logging incoming traps
-  (apps/notification_log)
-
+    The 'tdata' helper is used in the new DisMan Event, Expression
+  and Schedule MIB modules (see 'disman/{event,expr,schedule}/*').
+  The similar 'dataset' helper is used in the older DisMan Event
+  MIB implementation (see 'disman/mteEvent*') and the Notification
+  Log MIB (see 'notification-log-mib/*'), used by 'snmptrapd' to
+  log incoming traps.
+ 
     The basic iterator handler is used in a number of modules, such
-  as the latest TCP and UDP table implementations (mibII/tcpTable &
+  as the TCP and UDP table implementations (mibII/tcpTable &
   mibII/udpTable), VACM context handling (mibII/vacm_context) and
   various tables relating to agent internals (agent/*).  These show
   a number of different approaches to using the iterator helper, so
@@ -3289,6 +3279,12 @@ Are there any examples, or documentation?
 
     The two examples/netSnmpHostsTable* modules provide a contrast
   between the iterator and iterator_access helpers.
+
+    There are an ever-increasing number of examples based on the
+  MfD framework (see '{if,ip,tcp,udp}-mib/').  Much of this code
+  is not intended to be viewed directly, but these individual files
+  are clearly commented to distinguish between internal implementation
+  and public code.
 
     The Net-SNMP agent does not currently include any MIB modules
   using the array-user container-based helper.  The best examples
@@ -3403,23 +3399,27 @@ Why does the iterator call my get_{first,next} routines so often?
 How can I get the agent to generate a trap (or inform)?
 ------------------------------------------------------
 
-    Generating a trap is reasonably simple - just call one of the
-  trap API routines 'send_easy_trap()' or 'send_v2trap' with the
-  relevant information (generic and specific trap values, or a
-  varbind list respectively).  See the 'snmp_trap_api(3)' man page
-  for details.
+    There are two aspects to generating a trap - knowing *how* to
+  do this, and knowing *when* to do so.
+
+    How to generate a trap is reasonably simple - just call one of
+  the trap API routines ('send_easy_trap()' or 'send_v2trap') with
+  the relevant information (generic and specific trap values, or a
+  varbind list respectively).
 
     The 'mib2c.notify.conf' configuration file can be used to
   construct a suitable template routine for generating a trap,
   including building the variable list from the MIB trap
   definition.  These variables can then be given suitable values,
   before invoking the 'send_v2trap' call to actually send the trap.
+  See the 'snmp_trap_api(3)' man page for further details.
 
     Note that these APIs are only available within the agent (or
   subagents), and are not available to stand-alone applications.
   The code for 'snmptrap' shows an approach to use in such a case.
 
-    Determining _when_ to generate the trap (either directly or
+
+    Determining *when* to generate the trap (either directly or
   via the mib2c-generated routine) is often harder.  If the trap
   is generated in response to some action within the agent, (e.g.
   as the result of a SET), then this isn't too much of a problem.
@@ -3430,12 +3430,18 @@ How can I get the agent to generate a trap (or inform)?
   poll the value(s) on a regular basis, save the results and compare
   them with the new values the next time round.
 
-    With the v4 UCD agent, this would have to be done manually,
-  using the routines documented in 'snmp_alarm(3)'.  The v5 Net-SNMP
-  agent has implemented the Distributed Management Event MIB, which
-  provides this functionality in a flexible, standardised manner.
-  See the 'snmpd.conf(5)' man page (under DISMAN-EVENT-MIB) for
-  details (including the need for an 'agentSecName' setting).
+    The simplest way to handle this is via the DisMan Event MIB,
+  which is designed for exactly this purpose.  As long as you can
+  specify MIB object(s) to monitor, and the values or thresholds
+  that should trigger a notification, then this module can check
+  these values regularly, and automatically send a suitable trap
+  when appropriate.  See the 'snmpd.conf(5)' man page (under
+  ACTIVE MONITORING) for details.
+  
+    Otherwise, you'd need to use the routines documented in
+  'snmp_alarm(3)' to regularly invoke a monitoring routine. This
+  could check the necessary conditions (which need not be MIB
+  objects), and call the 'send_xxx_trap()' routine when appropriate.
 
 
 
@@ -3450,6 +3456,10 @@ How can I get the agent to send an SNMPv1 (or SNMPv2c) trap?
   an SNMPv1 trap.  If this file contains 'trap2sink', then the
   agent will send an SNMPv2c trap.  And if this file contains
   both, then the agent will send *two* copies of this trap.
+
+  See the entry
+     Where are these traps sent to?
+  in the AGENT section for details.
 
 
 
