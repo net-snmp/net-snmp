@@ -28,6 +28,13 @@ a very detailed level (respectively) of changes/bug fixes.
 	libraries at library link time, rather than application link time.
         This is preliminary support for what will likely be better in 5.5.
 
+    snmplib:
+      - [PATCH 1282566]: to rework transport creation to allow for
+        alternative interpretations of the address and a more flexible
+        transport registration system
+      - [PATCH 1509943]: responses will get sent from the original dest IP
+        address when possible.
+
     snmpd:
       - new MIB table for managing Net-SNMP access control extensions
         (see NET-SNMP-VACM-MIB).  These extensions to the VACM MIB are
@@ -47,7 +54,6 @@ a very detailed level (respectively) of changes/bug fixes.
         percentage usage calculated over the last minute on _all_ systems.
       - Agent builds default module list from a default_mibs.h rather than
         a hard coded configure list
-      - [PATCH 1562688]: fix ping/reattach agentx code
       - [PATCH 1568150]: Extend pass_persist error messages that can be
 	passed back from the script
       - [PATCH 1570982]: Solaris IF-MIB: Support for IPv6-only interfaces
@@ -55,20 +61,6 @@ a very detailed level (respectively) of changes/bug fixes.
     snmptrapd:
       - the traphandle directive now supports a -t switch to indicate
         matching any OID in the tree below the specified OID
-
-    snmplib:
-      - [PATCH 1282566]: to rework transport creation to allow for
-        alternative interpretations of the address and a more flexible
-        transport registration system
-      - [PATCH 1509943]: responses will get sent from the original dest IP
-        address when possible.
-
-    snmpusm:
-      - performance improvement when changing localized keys
-      - new option -Cp to set usmUserPublic value
-
-    snmpvacm:
-      - new commands to manipulate Net-SNMP access control extensions
 
     mib2c:
       - New mib2c.emulation.conf provides a quick way to do simplistic
@@ -81,7 +73,13 @@ a very detailed level (respectively) of changes/bug fixes.
       - gettable() now supports asynchronous callback functions
       - update default_store module to latest default_store c-binding
 	tokens
-      - fixes for 64-bit platforms
+
+    snmpusm:
+      - performance improvement when changing localized keys
+      - new option -Cp to set usmUserPublic value
+
+    snmpvacm:
+      - new commands to manipulate Net-SNMP access control extensions
 
  Ports:
    Linux:
@@ -105,6 +103,11 @@ a very detailed level (respectively) of changes/bug fixes.
       - [PATCH 1551948]: Make pass_persist usable on uClinux
 
   Fixes:
+    snmplib:
+      - fix OID lookups for fully qualified object names (eg .iso.org)
+        (official patch 1421725)
+      - UDPIPv6 and TCPIPv6 transports now compile on recent UN*X platforms
+
     snmpd:
       - fix disman/event monitoring crashes (official patch 1429059)
       - fix re-init of daemons after SIGHUP (official patch 1473289)
@@ -113,21 +116,18 @@ a very detailed level (respectively) of changes/bug fixes.
       - [BUG 1427410]: Set auth engineID for SNMPv3 traps.
       - [BUG 1535903]: Support spaces within security names
       - fix 8 byte IpAddress in at, ip and route MIBs.
+      - [PATCH 1562688]: fix ping/reattach agentx code
 
     snmptrapd:
       - fix bug 1420758/1458815: snmptrapd aborts/loops in select()
         (official patch 1420758)
       - fix re-init of daemons after SIGHUP (official patch 1473289)
 
-    snmplib:
-      - fix OID lookups for fully qualified object names (eg .iso.org)
-        (official patch 1421725)
-      - UDPIPv6 and TCPIPv6 transports now compile on recent UN*X platforms
-
     perl:
       - Fixed the perl bulkwalk function
       - gettable() was fairly broken in prior versions 
       - OID handling was fully broken on various 64bit platforms
+      - fixes for 64-bit platforms
 
     misc:
       - Many misc fixes

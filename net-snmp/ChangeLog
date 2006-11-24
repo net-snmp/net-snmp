@@ -1,5 +1,225 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.4.rc3 -> V5.4
+
+2006-11-24 09:44  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3,
+     netsnmp_agent_trap.3, netsnmp_asn1_packet_parse.3,
+     netsnmp_baby_steps.3, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3,
+     netsnmp_container.3, netsnmp_data_list.3,
+     netsnmp_debug.3, netsnmp_default_store.3,
+     netsnmp_handler.3, netsnmp_instance.3,
+     netsnmp_iterator_info_s.3, netsnmp_leaf.3,
+     netsnmp_library.3, netsnmp_mib_maintenance.3,
+     netsnmp_mib_utilities.3, netsnmp_mode_end_call.3,
+     netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3,
+     netsnmp_row_merge.3, netsnmp_scalar.3,
+     netsnmp_scalar_group_group.3, netsnmp_serialize.3,
+     netsnmp_snmp_agent.3, netsnmp_snmp_alarm.3,
+     netsnmp_snmp_client.3, netsnmp_snmp_logging.3,
+     netsnmp_snmp_pdu.3, netsnmp_snmp_session.3,
+     netsnmp_stash_cache.3, netsnmp_stash_to_next.3,
+     netsnmp_table.3, netsnmp_table_array.3,
+     netsnmp_table_container.3, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_generic.3,
+     netsnmp_table_indexes.3, netsnmp_table_iterator.3,
+     netsnmp_table_iterator.h.3, netsnmp_table_maintenance.3
+, netsnmp_table_rows.3, netsnmp_tdata.3,
+     netsnmp_util.3, netsnmp_utilities.3,
+     netsnmp_variable_list.3, netsnmp_watcher.3:
+
+   documentation update
+
+2006-11-24 09:43  hardaker
+
+   * doxygen.conf:
+
+   - version tag ( 5.4 )
+
+2006-11-24 09:19  hardaker
+
+   * README.win32, win32/libsnmp_dll/libsnmp.def,
+     win32/libsnmp_dll/libsnmp_dll.dsp,
+     win32/netsnmpmibssdk/netsnmpmibssdk.dsp:
+
+   patch from Alex Burger to fix MSVC issues
+
+2006-11-24 08:09  dts12
+
+   * FAQ:
+
+   Updates to the CODING section.
+   I'm sure there are more changes that could usefully be made,
+   but Life's Too Short.   OK, Wes - it's all yours....
+
+2006-11-24 07:38  dts12
+
+   * README:
+
+   Tweak web links slightly, and mention the Wiki.
+
+2006-11-24 07:09  hardaker
+
+   * dist/RELEASE-INSTRUCTIONS:
+
+   doc update based on perl changes
+
+2006-11-24 06:26  dts12
+
+   * FAQ:
+
+   Drop obsolete entries.
+
+2006-11-24 06:23  dts12
+
+   * FAQ:
+
+   Updates to the COMPILING section.
+
+2006-11-24 06:02  dts12
+
+   * FAQ:
+
+   Updates to the rest of the AGENTS section.
+
+2006-11-24 05:41  dts12
+
+   * FAQ:
+
+   Commit revisions to the MIBS and (most of) the AGENTS sections.
+   43 pages down, 18 to go....
+
+2006-11-24 05:13  tanders
+
+   * FAQ:
+
+   add some more working platforms; perl -> Perl
+
+2006-11-24 03:21  dts12
+
+   * FAQ:
+
+   Revision of the first three sections (GENERAL, APPLICATIONS, PERL).
+   Probably racing a losing battle against packaging the upcoming release!
+
+2006-11-23 19:30  tanders
+
+   * README.solaris:
+
+   updates and cleanup for 5.4
+
+2006-11-23 17:11  tanders
+
+   * agent/mibgroup/README.smux:
+
+   CHANGES: documentation: PATCH: 1601261: from "Stephen J. Friedl": update README.smux
+
+2006-11-23 16:38  tanders
+
+   * dist/net-snmp.spec:
+
+   CHANGES: misc: RPM spec file fixes for 64-bit platforms
+
+2006-11-23 01:07  dts12
+
+   * agent/mibgroup/ucd-snmp/memory.c:
+
+   Remove irrelevant comments (left over from the development phase).
+
+2006-11-22 16:06  hardaker
+
+   * dist/Makefile:
+
+   use --without for perl now if off
+
+2006-11-22 15:54  hardaker
+
+   * dist/Makefile:
+
+   final verison change
+
+2006-11-22 15:25  tanders
+
+   * dist/net-snmp.spec:
+
+   revert to correct version
+
+2006-11-22 15:23  tanders
+
+   * dist/net-snmp.spec:
+
+   - remove bad patch reference
+   - enable Perl by default, but allow for --without perl_modules|embedded_perl
+   - add netsnmp_ prefix for local defines
+
+2006-11-22 08:49  dts12
+
+   * mibs/UCD-SNMP-MIB.txt:
+
+   Clarification of the behaviour of objects in the memory & systemStats groups,
+   and objects used for reporting/fixing errors.
+
+2006-11-22 07:07  hardaker
+
+   * man/: .cvsignore, Makefile.in:
+
+   manalias always-made fix; now touches a temp file (and cleans later)
+
+2006-11-22 05:25  tanders
+
+   * .cvsignore:
+
+   add new 'mk' subdir
+
+2006-11-22 05:24  tanders
+
+   * man/.cvsignore:
+
+   add new manual pages
+
+2006-11-22 05:03  tanders
+
+   * snmplib/system.c:
+
+   CHANGES: snmpd: PATCH: 1598966: from "Peter Eckel": Fix bug #1598927: #elif build fix
+
+2006-11-22 04:58  tanders
+
+   * apps/snmptrapd.c:
+
+   CHANGES: snmptrapd: PATCH: 1598968: from "Peter Eckel": Fix bug #1587759: snmptrapd doesn't recognize -A option
+
+2006-11-18 09:56  marz
+
+   * python/netsnmp/client_intf.c:
+
+   fixes for None return tpye and octet val handling
+
+2006-11-18 07:28  hardaker
+
+   * FAQ, README, configure, configure.in
+, sedscript.in, snmplib/snmp_version.c,
+     dist/net-snmp.spec:
+
+   - version tag ( 5.4.rc3 )
+
+-------------------------------------------------------------------------------
+
 Changes: V5.4.rc2 -> V5.4.rc3
 
 2006-11-18 07:14  hardaker
