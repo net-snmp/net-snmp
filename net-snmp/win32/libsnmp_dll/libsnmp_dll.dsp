@@ -298,6 +298,10 @@ SOURCE=..\..\snmplib\vacm.c
 
 SOURCE=..\..\snmplib\winpipe.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\fd_event_manager.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
