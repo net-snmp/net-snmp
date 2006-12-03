@@ -387,9 +387,6 @@ Requirements
     HTMLHelp file' and 'Combining the binaries and HTMLHelp files'.  Net-SNMP
     should be located in c:\usr.
 
-1.1 Update the license in win32\dist\installer\net-snmp.nsi if needed and
-    commit to CVS.
-
 2.  Copy the following files to c:\usr:
 
     cd (source dir)
@@ -469,7 +466,7 @@ Requirements
 
 2.  Move c:\usr c:\usr.temp
 
-3.  Re-build the binary by following the steps in the seciton 'Building the 
+3.  Re-build the binary by following the steps in the section 'Building the 
     main binaries' except enable OpenSSL.  Be sure to undo the winExtDLL 
     changes before starting by copying a fresh net-snmp-config.h.in and 
     netsnmpmibssdk.dsp.
