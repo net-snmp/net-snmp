@@ -147,7 +147,7 @@ typedef struct _agent_nsap {
 
 static agent_nsap *agent_nsap_list = NULL;
 static netsnmp_agent_session *agent_session_list = NULL;
-netsnmp_agent_session *netsnmp_processing_set = NULL;
+static netsnmp_agent_session *netsnmp_processing_set = NULL;
 netsnmp_agent_session *agent_delegated_list = NULL;
 netsnmp_agent_session *netsnmp_agent_queued_list = NULL;
 
