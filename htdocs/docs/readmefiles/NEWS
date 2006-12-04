@@ -1,5 +1,148 @@
 This file contains major changes in released revisions.  Please read
-the ChangeLog file for a more detailed listing of changes/bug fixes.
+the CHANGES file and the ChangeLog file for a medium level detail and
+a very detailed level (respectively) of changes/bug fixes.
+
+*5.4*
+
+  Important Changes:
+    - The default configuration now enables embedded Perl and the Perl
+      modules by default when possible unless explicitly disabled. You
+      may use the --disable-embedded-perl and --without-perl-modules
+      configure options, respectively, to revert to the former default
+      configuration.
+
+  New:
+    python:
+      - Python bindings to the Net-SNMP project are now available in
+        the python sub-directory.  See the README file there for details. 
+
+    build:
+      - Some preliminary support for automatic building of dynamically
+        loadable mib module code.
+      - Most net-snmp specific defines are now (also) available under
+        a proper NETSNMP_ prefix. The older, potentially conflicting
+        names as well as the autoconf variables can now be turned off
+        easily within 3rd party code.
+      - libtool update to 1.5.22
+      - enable-as-needed will try to link built libraries against needed
+	libraries at library link time, rather than application link time.
+        This is preliminary support for what will likely be better in 5.5.
+
+    snmplib:
+      - [PATCH 1282566]: to rework transport creation to allow for
+        alternative interpretations of the address and a more flexible
+        transport registration system
+      - [PATCH 1509943]: responses will get sent from the original dest IP
+        address when possible.
+
+    snmpd:
+      - new MIB table for managing Net-SNMP access control extensions
+        (see NET-SNMP-VACM-MIB).  These extensions to the VACM MIB are
+        Net-SNMP specific and are used primarily by snmptrapd at this point.
+      - [PATCH 1550725]: A new uint instance helper to match the existing
+        int, long and ulong helpers
+      - [PATCH 1534877]: to add support for skipping NFS entries in the
+        host resources hrStorageTable.	See the skipNFSInHostResources
+        token in the snmpd.conf file for details.
+      - A &quot;hardware abstraction layer&quot;, to localise the O/S-specific
+        aspects of retrieving system data.  This first appeared in the
+        5.3.x line, but this release now starts to actively use it for
+        implementing particular MIB modules.
+        This has resulted in some minor changes in behaviour - some index
+        values in the hrStorageTable have changed from earlier releases,
+        and the (non-raw) memory statistics are now consistent, reporting
+        percentage usage calculated over the last minute on _all_ systems.
+      - Agent builds default module list from a default_mibs.h rather than
+        a hard coded configure list
+      - [PATCH 1568150]: Extend pass_persist error messages that can be
+	passed back from the script
+      - [PATCH 1570982]: Solaris IF-MIB: Support for IPv6-only interfaces
+
+    snmptrapd:
+      - the traphandle directive now supports a -t switch to indicate
+        matching any OID in the tree below the specified OID
+
+    mib2c:
+      - New mib2c.emulation.conf provides a quick way to do simplistic
+        emulation of an entire MIB or MIB branch.
+      - A new perl module NetSNMP::agent::Support provides easier embedded 
+        perl support. (patch 1369996 from Peter Martin)
+        Run &quot;mib2c -c mib2c.perl.conf OID&quot; to help you start using it.
+
+    perl:
+      - gettable() now supports asynchronous callback functions
+      - update default_store module to latest default_store c-binding
+	tokens
+
+    snmpusm:
+      - performance improvement when changing localized keys
+      - new option -Cp to set usmUserPublic value
+
+    snmpvacm:
+      - new commands to manipulate Net-SNMP access control extensions
+
+ Ports:
+   Linux:
+      - add IPv6 aware UDP and TCP mibs to default module list
+
+   Solaris, FreeBSD, OpenBSD:
+      - Experimental support for 64bit interface counters (ifXTable). Enable
+        via '--with-mib-modules=if-mib --enable-mfd-rewrites'.
+      - [PATCH 1569537,1569539]: new UDP-MIB and TCP-MIB implementation
+	(enable through --with-mib-modules=udp-mib,tcp-mib)
+
+   Win32:
+      - new winExtDLL extension module to allow snmpd to load Windows SNMP
+        Service extension DLLs to provide support for HOST-RESOURCES-MIB
+        and other MIBs provided with Windows.
+
+   AIX:
+      - HOST-RESOURCES-MIB implementation added to default module list
+
+   uCLinux
+      - [PATCH 1551948]: Make pass_persist usable on uClinux
+
+  Fixes:
+    snmplib:
+      - fix OID lookups for fully qualified object names (eg .iso.org)
+        (official patch 1421725)
+      - UDPIPv6 and TCPIPv6 transports now compile on recent UN*X platforms
+
+    snmpd:
+      - fix disman/event monitoring crashes (official patch 1429059)
+      - fix re-init of daemons after SIGHUP (official patch 1473289)
+      - fix trap processing from SMUX peers (patch 1430824)
+      - [BUG 1527930]: fix smux authentication
+      - [BUG 1427410]: Set auth engineID for SNMPv3 traps.
+      - [BUG 1535903]: Support spaces within security names
+      - fix 8 byte IpAddress in at, ip and route MIBs.
+      - [PATCH 1562688]: fix ping/reattach agentx code
+
+    snmptrapd:
+      - fix bug 1420758/1458815: snmptrapd aborts/loops in select()
+        (official patch 1420758)
+      - fix re-init of daemons after SIGHUP (official patch 1473289)
+
+    perl:
+      - Fixed the perl bulkwalk function
+      - gettable() was fairly broken in prior versions 
+      - OID handling was fully broken on various 64bit platforms
+      - fixes for 64-bit platforms
+
+    misc:
+      - Many misc fixes
+
+*5.3.0.1*
+
+  *** Security Fix ***
+
+    - In version 5.3 much of the authorization control was rewritten.
+      There was a bug in the new code that resulted in granting write
+      access to read-only users or communities which were configured
+      using the &quot;rocommunity&quot; or &quot;rouser&quot; snmpd.conf tokens.  5.3.0.1
+      fixes this problem.  Users are encouraged to immediately update
+      their installations if they use either of these tokens.
+
 
 *5.3*
 
@@ -113,7 +256,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - Embedded perl support for trap handlers (much faster than traphandles).
           (configure --with-embedded-perl ; see 'perldoc NetSNMP::TrapReceiver')
       - the snmptrapd usmUser table can be controlled through SNMP &amp; AgentX
-	  (the snmptrapd registers MIBs under the &quot;snmptrapd&quot; SNMPv3 context)
+          (the snmptrapd registers MIBs under the &quot;snmptrapd&quot; SNMPv3 context)
 
     agent:
       - community strings can be mapped to individual SNMPv3 contexts
@@ -1217,4 +1360,4 @@ UCD-SNMP NEWS:
 
 *3.0*
 
-	Initial (public) Release
+        Initial (public) Release

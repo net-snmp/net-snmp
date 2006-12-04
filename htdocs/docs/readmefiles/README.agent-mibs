@@ -129,8 +129,10 @@ IF-MIB
  ifNumber.0                   U $2      ~3.2    O mibII/interfaces.c
  ifTableLastChange.0          ---
  ifTable (old)                U $2      ~3.5    O mibII/interfaces.c
- ifTable (new)                L         5.2     M if-mib/ifXTable/*
+ ifTable (new)                L         5.2     M if-mib/ifTable/*
+ ifTable (new)                 FO       5.4     M if-mib/ifTable/*
  ifXTable                     L         5.2     M if-mib/ifXTable/*
+ ifXTable                      FO       5.4     M if-mib/ifXTable/*
  ifStackLastChange.0          ---
  ifStackTable                 ---
  ifTestTable                  ---
@@ -367,6 +369,10 @@ NET-SNMP-AGENT-MIB
  netSnmpIETFWGTable           A         5.0     D examples/data_set.c
  netSnmpHostsTable            A         5.0     A examples/=*
  nstAgentModules              A         5.0     O 
+
+------------------------------------------------------------------------------
+NET-SNMP-VACM-MIB
+ nsVacmAccessTable            A         5.4     I agent/nsVacmAccessTable.c
 
 ------------------------------------------------------------------------------
 MTA-MIB

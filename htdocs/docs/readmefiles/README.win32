@@ -11,13 +11,15 @@ included here.
 
 The remainder of this guide has the following sections :
 
-Status as of 28-May-2004 for Win32 platforms
+Status as of 14-Oct-2006 for Win32 platforms
 Interactions with Other Vendor's Products
+Running Net-SNMP as a replacement for the Microsoft SNMP service
 Co-existence with Microsoft SNMP services
 Installing Platform SDK
 Microsoft Visual C++ - Overview
 Microsoft Visual C++ - Configure / nmake - Building
 Microsoft Visual C++ - Workspace - Building
+Microsoft Visual C++ - Workspace - Building the DLL
 Microsoft Visual C++ - Workspace - Building the Perl SNMP modules
 Microsoft Visual C++ - Workspace - Installing
 Microsoft Visual C++ - Building with OpenSSL
@@ -37,7 +39,7 @@ Acknowledgements
 
 ***************************************************************************
 *
-* Status as of 28-May-2004 for Win32 platforms
+* Status as of 14-Oct-2006 for Win32 platforms
 *
 ***************************************************************************
 
@@ -61,6 +63,8 @@ Environment 2003 (MSVC 7.0/7.1), gcc under Cygwin, and gcc under MinGW.
      embedded spaces.  As this is not true for Cygwin &quot;configure&quot;,
      the documented example scripts will refer to &quot;c:/usr&quot;
      as the base directory for installed Net-SNMP software.
+  -  When using the winExtDLL extension agent, the Net-SNMP agent will
+     load the Windows SNMP Service extension DLLs
 
 The next subsection relates to items that are built using Visual Studio
 
@@ -70,12 +74,6 @@ The next subsection relates to items that are built using Visual Studio
      c) Remove unnecessary references to GDI, ODBC, and &quot;C&quot; libraries;
      d) Debug versions build source browsing and debugging information;
      e) Provide consistent include search paths.
-
-  -  Building netsnmp.dll is only supported for compiling libagent, 
-     libhelpers, libsnmp_dll, libnetsnmptrapd and netsnmpmibs for use with 
-     the Perl module.  Using netsnmp.dll for other components is not 
-     supported as the DLL does not prevent corruption of dynamically changing 
-     shared data.
 
   -  All Debug and Release targets linked with libsnmp project targets
      build without errors, and are fully functional.
@@ -118,6 +116,133 @@ The next subsection relates to items that are built using Visual Studio
 
 ***************************************************************************
 *
+* Running Net-SNMP as a replacement for the Microsoft SNMP service
+*
+***************************************************************************
+
+As of Net-SNMP 5.4, the Net-SNMP agent is able to load the Windows SNMP
+service extension DLLs by using the Net-SNMP winExtDLL extension.
+
+The Windows SNMP service must be installed, but the service must be disabled.  
+This is required so that the extension DLLs are available for loading, and 
+also because this extension and the existing Windows extensions use the 
+Windows SNMP API from snmpapi.dll.
+
+An alternative to winExtDLL is to proxy requests from Net-SNMP to the Windows
+SNMP service.  See the section 'Co-existence with Microsoft SNMP services'.
+
+
+Limitations
+-----------
+
+- For an unknown reason, linkUp/Down generic traps are not received from the 
+  Windows SNMP RFC1156Agent extension.  The DLL has an exported function called
+  Mib2DLLEntry, but the use for this function is not known so this may or may 
+  not be related.  Other extensions are able to send traps without any issues.
+
+- When using HP Insight Agents, some parts of the enterprises.232 tree are not
+  accessible.  The cause of this is not known.
+
+- sysUpTime.0 does not report the correct uptime for the agent.  This is
+  because the Windows extension checks for the uptime of the SNMP service,
+  which is not running when Net-SNMP is running.
+
+
+Enabling the Windows SNMP extension agents
+------------------------------------------
+
+The recommended way to start snmpd is with the following command line:
+
+ snmpd.exe -I-udp,udpTable,tcp,tcpTable,icmp,ip,interfaces,system_mib,sysORTable
+
+The above command will exclude all the Net-SNMP extensions that overlap with 
+the default Windows (2003) extensions included with Windows.  Other Net-SNMP 
+modules take precedence over the modules loaded by winExtDLL.
+
+The Windows DLL snmpmib.dll (SNMPMIB) contains SNMP traffic statistics
+(.1.3.6.1.2.1.11).  As we are using Net-SNMP and not the Windows SNMP Service,
+no values will be returned from the Windows extension.  To allow SNMP 
+statistics to be received, the Net-SNMP module snmp_mib is permitted to load 
+by not excluding it in the above command line.  As stated above, this module 
+will take precedence over the Windows module.
+
+
+Registry Information
+--------------------
+
+Warning:  Improper use of the registry editor can damage to your operating
+          system and should only be used by experienced users.
+
+The following registry keys are used by the Windows SNMP Service to determine
+what extension DLLs to load:
+
+HKLM\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ExtensionAgents
+       
+Each REG_SZ value contains the registry path to an extension agent which 
+contains the path to the DLL.  For example:
+
+Name    Type    Value
+1       REG_SZ  SOFTWARE\Microsoft\LANManagerMIB2Agent\CurrentVersion
+
+To prevent winExtDLL from loading the above extension, change the registry
+path to an invalid path such as:
+
+Name    Type    Value
+1       REG_SZ  SOFTWARE\Microsoft\LANManagerMIB2Agent\CurrentVersion!!!
+
+
+Service dependencies
+--------------------
+
+Services that depend on the SNMP Service will have to be modified to depend on
+Net-SNMP instead of SNMP by modifying the registry.  See Microsoft article 
+193888 for more information.
+
+
+Compiling Net-SNMP with the winExtDLL extension (MSVC)
+------------------------------------------------------
+
+Microsoft PSDK required.
+
+Configure / nmake:
+
+-modify win32\net-snmp\net-snmp-config.h.in and add:
+ #define USING_WINEXTDLL_MODULE 1
+
+-modify win32\netsnmpmibssdk\Makefile.in:
+ uncomment winExtDLL lines
+
+ add to lines that contain LIB32_FLAGS (line that contains iphlpapi.lib): 
+  MgmtAPI.lib snmpapi.lib 
+
+Workspace:
+
+-modify win32\net-snmp\net-snmp-config.h and add:
+ #define USING_WINEXTDLL_MODULE 1
+
+-modify win32\netsnmpmibssdk\netsnmpmibssdk.dsp:
+ uncomment winExtDLL lines
+
+ add to lines that contain # ADD LIB32 (line that contains iphlpapi.lib): 
+  MgmtAPI.lib snmpapi.lib 
+ 
+ add near the bottom of the file:
+
+  # Begin Source File
+
+  SOURCE=..\..\agent\mibgroup\winExtDLL.c
+  # End Source File
+
+
+-This extension requires the PSDK including the Snmp.h header file.
+ Including Snmp.h will conflict with existing Net-SNMP defines for
+ ASN_OCTETSTRING etc.  To resolve this, create a copy of Snmp.h in
+ the PSDK include/ folder called Snmp-winExtDLL.h and change all
+ occurances of ASN_ to MS_ASN_
+
+
+***************************************************************************
+*
 * Co-existence with Microsoft SNMP services
 *
 ***************************************************************************
@@ -138,10 +263,12 @@ utilities will work against any SNMP agent.
 The main benefit of running the Microsoft SNMP agent instead of the Net-SNMP 
 agent is that many Windows applications such as Microsoft SQL Server, 
 Microsoft Exchange etc, extend the Microsoft agent.  Net-SNMP is NOT a drop 
-in replacement for the Microsoft agent.  Running Net-SNMP in place of the 
-Microsoft agent will prevent the other applications from working with SNMP.  
-Also, the Net-SNMP agent does not contain as many MIBs as the Microsoft agent.  
-For example, as of August 2005, the HOST-RESOURCES (host) MIB is not yet
+in replacement for the Microsoft agent unless the winExtDLL Net-SNMP extension
+is used (see the section 'Running Net-SNMP as a replacement for the Microsoft 
+SNMP service').  Running Net-SNMP in place of the Microsoft agent (without
+winExtDLL) will prevent the other applications from working with SNMP.  Also,
+the Net-SNMP agent does not contain as many MIBs as the Microsoft agent.  For
+example, as of August 2005, the HOST-RESOURCES (host) MIB is not yet 
 implemented in Net-SNMP.
 
 There are many benefits of running the Net-SNMP agent instead of the Microsoft
@@ -279,25 +406,16 @@ which use the &quot;IP Helper API&quot; (IPHLPAPI).
 To determine what code is disabled when the PSDK is not used, search the
 source code for HAVE_WIN32_PLATFORM_SDK.
 
-The PSDK can be downloaded from:
+The PSDK can be downloaded from the MSDN site.  Go to http://msdn.microsoft.com 
+and do a search for 'psdk download' (without the quotes).  You should find both
+a web install and a full install.  
 
-    http://msdn.microsoft.com/downloads/
+When installing the SDK, all that is required is the 'Core'.
 
-as follows:
-
-    -  Using Internet Explorer (Netscape / Mozilla won't work), go to the 
-       above URL
-    -  From the menu at the left, Click &quot;Downloads by Topic&quot;;
-            From the main window, Click &quot;Platform SDK&quot;.
-    -  From the new window that appears, select &quot;Core SDK&quot;.
-    -  The full Core SDK is ~240Mb (expanding to ~560Mb on installation).
-       In fact, the only portion that's required is the basic &quot;Build
-       Environment&quot; (36Mb) So it's safe to deselect the pre-release version,
-       documentation, sample code and 64-bit elements.
-
-    -  Once this package has installed, from the Start Menu run
-       &quot;Programs -&gt;Microsoft Platform SDK... -&gt; Visual Studio Registration
-       -&gt;Register PSDK Directories with Visual Studio&quot;
+Once this package has installed, from the Start Menu run 
+  &quot;Programs -&gt;Microsoft Platform SDK... -&gt; 
+   Visual Studio Registration -&gt;
+   Register PSDK Directories with Visual Studio&quot;
 
 If you are compiling using any of the following systems, the PSDK download
 is not necessary, as the required parts of the PSDK are included with the 
@@ -350,12 +468,7 @@ Microsoft's MSDN SDK Update site when using Microsoft Visual Studio 6.0.
 Win32sdk.dsw is for those who have or who are using the Microsoft Development 
 Environment 2002/2003 (MSVC 7.0/7.1), Cygwin (gcc) or MinGW (gcc).
 
-Libdll.dsw compiles a DLL version of snmplib (netsnmp.dll) which should 
-only be used for the Perl module.  Using netsnmp.dll for other components 
-is not supported as the DLL does not prevent corruption of dynamically 
-changing shared data.  Although the same problems can occur using the Perl 
-modules, the Perl modules will not function correctly without a shared 
-snmplib library or DLL.
+Libdll.dsw compiles a DLL version of snmplib (netsnmp.dll).
 
 There is one core development library ('libsnmp'), together with a number 
 of utility projects for the individual executable commands ('snmpget', 
@@ -457,8 +570,10 @@ steps to build using build.bat:
     7.  Quiet build (logged):       enabled
     8.  Debug mode:                 disabled
     9.  IPv6 transports:            disabled
+
+    10. Link type:                  static
     
-    10. Install development files   disabled
+    11. Install development files   disabled
     
     F.  Finished - start build
     Q.  Quit - abort build
@@ -581,12 +696,6 @@ Note:  The Configure option --linktype=static (or not specifying a linktype)
        (netsnmp.dll) being compiled and all other components being dynamically 
        linked to it.
 
-       Building netsnmp.dll is only supported for compiling libagent, 
-       libhelpers, libsnmp_dll, libnetsnmptrapd and netsnmpmibs for use with 
-       the Perl module.  Using netsnmp.dll for other components is not 
-       supported as the DLL does not prevent corruption of dynamically changing 
-       shared data.
-
 
 ***************************************************************************
 *
@@ -629,6 +738,9 @@ features may be disabled if the Platform SDK is not used.  See the section
 
 4. Build the applications
 
+   Static build (does not use NetSNMP.DLL)
+   =======================================
+
    MS VC++ 6.0:
    ------------
    a. Open win32.dsw or win32sdk.dsw.
@@ -658,6 +770,52 @@ features may be disabled if the Platform SDK is not used.  See the section
    l.  When building is done, View the Output window, clip and
        save to a text file if there is some information to share.
    m.  Click &quot;File-&gt;Close Solution&quot;.
+
+   Dynamic build (uses NetSNMP.DLL)
+   ================================
+
+   Complete the section 'Microsoft Visual C++ - Workspace - Building the DLL'.
+   This will create the Net-SNMP library DLL which is needed by the 
+   applications and will enable DLL support in net-snmp-config.h.
+
+   MS VC++ 6.0:
+   ------------
+   a. Open win32.dsw or win32sdk.dsw.
+   b. Click &quot;Build-&gt;Batch Build...&quot;  
+   c. Set Release and/or Debug in 'Project configurations' to suit for the 
+      applications.  Make sure the following are NOT selected:
+
+      libagent
+      libhelpers
+      libsnmp
+      netsnmpmib(sdk)
+      libnetsnmptrapd
+
+   d. Click &quot;ReBuild All&quot;.
+   e. When building is done, View the Output window, clip and
+      save to a text file if there is some information to share.
+   f. Click &quot;File-&gt;Close Workspace&quot;.
+
+   MS VC++ 7.0+:
+   -------------
+   a. Open win32.dsw or win32sdk.dsw.
+   b. Click &quot;Yes to All&quot; to convert the workspace
+   c. Click &quot;Build-&gt;Configuration Manager&quot; and select either Release or Debug for 
+      'Active Solution Configuration' and click &quot;Close&quot;
+   d. Click &quot;Build-&gt;Batch Build...&quot; 
+   e. Set Release and/or Debug in 'Project configurations' to suit for the 
+      applications.  Make sure the following are NOT selected:
+
+      libagent
+      libhelpers
+      libsnmp
+      netsnmpmib(sdk)
+      libnetsnmptrapd
+
+   f. Click &quot;Rebuild&quot;.
+   g. When building is done, View the Output window, clip and
+      save to a text file if there is some information to share.
+   h. Click &quot;File-&gt;Close Solution&quot;.
   
 5.  If the Perl modules are required, continue with the next section:
     'Microsoft Visual C++ - Building the Perl SNMP modules'.
@@ -668,30 +826,19 @@ features may be disabled if the Platform SDK is not used.  See the section
 
 ***************************************************************************
 *
-* Microsoft Visual C++ - Workspace - Building the Perl SNMP modules
+* Microsoft Visual C++ - Workspace - Building the DLL
 *
 ***************************************************************************
 
-The Perl modules should be compiled against the DLL version of snmplib.
-Compiling against a static version is possible, but each module will
-load it's own copy of the MIB, and sharing data between modules will
-not be possible.  For example, the conf module tests will fail.
-
-1.  Complete the section 'Microsoft Visual C++ - Building'.  This will build
-    the static version of the applications.  
-
-    Note:  SNMPD.EXE and SNMPTRAPD.EXE are required for running the tests 
-           against the SNMP Perl module.
-
-2.  Make a backup of the existing net-snmp-config.h which contains settings
-    for a static build of Net-SNMP:
+1.  Optional: Make a backup of the existing net-snmp-config.h which contains 
+    settings for a static build of Net-SNMP:
 
     Copy win32\net-snmp\net-snmp-config.h to 
     win32\net-snmp\static-config.h.
 
-3.  Open win32\net-snmp\net-snmp-config.h using a text editor.
+2.  Open win32\net-snmp\net-snmp-config.h using a text editor.
 
-4.  *Change* the following line which is located near the top of the file:
+3.  *Change* the following line which is located near the top of the file:
 
         /* #undef NETSNMP_USE_DLL */
 
@@ -699,13 +846,13 @@ not be possible.  For example, the conf module tests will fail.
 
         #define NETSNMP_USE_DLL 1
 
-5.  Make a backup of the new net-snmp-config.h which contains settings
-    for a DLL build of Net-SNMP:
+4.  Optional: Make a backup of the new net-snmp-config.h which contains 
+    settings for a DLL build of Net-SNMP:
 
     Copy win32\net-snmp\net-snmp-config.h to 
     win32\net-snmp\dll-config.h.
 
-6. Build the DLL
+5. Build the DLL
 
    MS VC++ 6.0:
    ------------
@@ -732,10 +879,33 @@ not be possible.  For example, the conf module tests will fail.
       save to a text file if there is some information to share.
    i. Click &quot;File-&gt;Close Solution&quot;.
 
-7.  Install Net-SNMP as described in the 'Microsoft Visual C++ - Installing'
+
+***************************************************************************
+*
+* Microsoft Visual C++ - Workspace - Building the Perl SNMP modules
+*
+***************************************************************************
+
+The Perl modules should be compiled against the DLL version of snmplib.
+Compiling against a static version is possible, but each module will
+load it's own copy of the MIB, and sharing data between modules will
+not be possible.  For example, the conf module tests will fail.
+
+1.  Complete the section 'Microsoft Visual C++ - Building'.  This will build
+    the applications.  
+
+    Note:  SNMPD.EXE and SNMPTRAPD.EXE are required for running the tests 
+           against the SNMP Perl module.
+
+2.  Complete the section 'Microsoft Visual C++ - Workspace - Building the DLL'.
+    This will create the Net-SNMP library DLL which is needed for the Perl 
+    modules.  Note:  This step can be skipped if the DLL was already created
+    in step 1.
+
+3.  Install Net-SNMP as described in the 'Microsoft Visual C++ - Installing'
     section to install the applications, the DLL and the .lib files.
 
-8.  Continue with the Win32 section of the Perl README file located in 
+4.  Continue with the Win32 section of the Perl README file located in 
     perl\SNMP\README.
 
 
@@ -909,7 +1079,7 @@ Project changes
 
  1. Edit the win32\net-snmp\net-snmp-config.h header file.  Add:
 
-	#define USE_OPENSSL 1
+	#define NETSNMP_USE_OPENSSL 1
 
  2. Open Visual Studio, add the link line to the Project Settings
     for all the applications, and especially for the libsnmp_dll project,
@@ -1096,6 +1266,7 @@ The following configure options creates a working set of programs:
 ./configure \
 	--with-mib-modules=&quot;host agentx disman/event-mib examples/example&quot; \
 	--with-out-mib-modules=host/hr_network --with-libs=&quot;-lws2_32&quot; \
+        --disable-embedded-perl --without-perl-modules \
 
 If you want to use SNMPv3 auth and privacy features, add:
 	--with-openssl=&quot;/usr&quot; \
@@ -1174,6 +1345,7 @@ Note:  The source code should *not* be in a folder that contains a space.  For
 	./configure --prefix=&quot;$BASEDIR&quot; \
 		--with-mibdirs=&quot;$BASEDIR/share/snmp/mibs&quot; \
 	--with-mib-modules=&quot;agentx disman/event-mib examples/example&quot; \
+        --disable-embedded-perl --without-perl-modules \
 
     [Sorry. the host resources MIB is not supported by MinGW]
 
