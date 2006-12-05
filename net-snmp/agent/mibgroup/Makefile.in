@@ -22,9 +22,13 @@ OTHERCLEANTARGETS=@dllcleans@
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
-OBJS  = @mib_module_list_o@
-LOBJS = @mib_module_list_lo@
-SRCS  = @mib_module_list_c@
+@mib_module_list_o@
+@mib_module_list_lo@
+@mib_module_list_c@
+
+OBJS  = $(mib_module_list_o)
+LOBJS = $(mib_module_list_lo)
+SRCS  = $(mib_module_list_c)
 
 all: standardall $(LOBJS)
 
