@@ -371,7 +371,10 @@ RELEASING:
      htdocs/page-top.html
 
  16) For a major new-feature release (eg 5.3), create the patches
-     branch immediately after the final release.
+     branch 1 week after the final release.  The 1 week delay is to
+     enforce a continued code freeze to ensure focus on immediate
+     problems following the release.  After 1 week, the branch should
+     be created and the code freeze is officially ended on MAIN.
 
 	$ cvs rtag -r Ext-5-3 -b V5-3-patches net-snmp
 
@@ -432,10 +435,24 @@ CREATING BINARY DISTRIBUTIONS
 CLEANING UP
 
   1) remove any official patches that apply to old releases?
-     (we need to set a policy about whether to do this)
 
-  2) delete any pre-release files from the download page using the
-     admin interface
+     All patches that apply to previous versions within a branch
+     should be down-shifted.  Specifically:
+
+     a) priority 5 patches are for the "last" release in a branch
+     b) priority 9 patches are for the "current" release in a branch
+
+     Thus right after a release (in order):
+
+     - close all priority 5 patches
+     - change all priority 9 patches to priority 5
+
+     [this is documented at the top of the "official pages" page too]
+
+  2) Hide the pre-release file repository using the admin interface.
+
+     [this step used to say "delete" the files, which is the wrong
+     thing to do; you should "hide" the containing group instead]
 
   3) remove older-binaries for older releases if you updated with newer
      binaries (don't remove any until there are newer ones for an 
