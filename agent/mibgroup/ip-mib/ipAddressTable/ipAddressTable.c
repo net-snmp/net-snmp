@@ -156,6 +156,10 @@ ipAddressTable_rowreq_ctx_cleanup(ipAddressTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:211:o: |-> Perform extra ipAddressTable rowreq cleanup.
      */
+    if (NULL != rowreq_ctx->data) {
+        ipAddressTable_release_data(rowreq_ctx->data);
+        rowreq_ctx->data = NULL;
+    }
 }                               /* ipAddressTable_rowreq_ctx_cleanup */
 
 /**
