@@ -77,6 +77,7 @@
 
 #ifdef USING_IF_MIB_IFTABLE_IFTABLE_MODULE
 #include "if-mib/ifTable/ifTable.h"
+#include "if-mib/ifTable/ifTable_defs.h"
 #else
 /*
  * This is used, because the TUNNEL-MIB augments ifTable. 
