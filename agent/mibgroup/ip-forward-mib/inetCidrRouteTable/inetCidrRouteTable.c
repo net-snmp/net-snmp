@@ -205,6 +205,10 @@ inetCidrRouteTable_rowreq_ctx_cleanup(inetCidrRouteTable_rowreq_ctx *
     /*
      * TODO:211:o: |-> Perform extra inetCidrRouteTable rowreq cleanup.
      */
+    if (NULL != rowreq_ctx->data) {
+        inetCidrRouteTable_release_data(rowreq_ctx->data);
+        rowreq_ctx->data = NULL;
+    }
 }                               /* inetCidrRouteTable_rowreq_ctx_cleanup */
 
 /**
