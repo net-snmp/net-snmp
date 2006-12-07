@@ -1547,13 +1547,13 @@ default 'DES', privacy protocol [DES, AES] (v3)
 
 default <none>, privacy passphrase (v3)
 
-=item authMasterKey
+=item AuthMasterKey
 
-=item privMasterKey
+=item PrivMasterKey
 
-=item authLocalizedKey
+=item AuthLocalizedKey
 
-=item privLocalizedKey
+=item PrivLocalizedKey
 
 Directly specified SNMPv3 USM user keys (used if you want to specify
 the keys instead of deriving them from a password as above).
