@@ -486,7 +486,7 @@ sub new {
        $this->{Context} ||= 
 	   NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		         NetSNMP::default_store::NETSNMP_DS_LIB_CONTEXT()) || '';
-       $this->{AuthProto} ||= 'DEFAULT'; # defaults to the library's default
+       $this->{AuthProto} ||= 'DEFAULT'; # use the library's default
        $this->{AuthPass} ||=
        NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		     NetSNMP::default_store::NETSNMP_DS_LIB_AUTHPASSPHRASE()) ||
@@ -498,7 +498,7 @@ sub new {
        $this->{AuthLocalizedKey} ||= '';
        $this->{PrivLocalizedKey} ||= '';
 
-       $this->{PrivProto} ||= 'DEFAULT';  # defaults to hte library's default
+       $this->{PrivProto} ||= 'DEFAULT';  # use the library's default
        $this->{PrivPass} ||=
        NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		     NetSNMP::default_store::NETSNMP_DS_LIB_PRIVPASSPHRASE()) ||
