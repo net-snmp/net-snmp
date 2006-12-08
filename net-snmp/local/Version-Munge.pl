@@ -41,7 +41,7 @@ my @exprs = (
 
 	     # documentation files
 	     { type => 'docs',
-	       expr => 'Version: [\.0-9a-zA-Z]+' =>
+	       expr => 'Version: [\.0-9a-zA-Z]+',
 	       repl => 'Version: $VERSION', 
 	       files => [qw(README FAQ dist/net-snmp.spec)],
 	       not_required => {'dist/net-snmp.spec' => 1}
@@ -49,14 +49,14 @@ my @exprs = (
 
 	     # sed files
 	     { type => 'sed',
-	       expr => '^s\/VERSIONINFO\/[^\/]*' =>
+	       expr => '^s\/VERSIONINFO\/[^\/]*',
 	       repl => 's\/VERSIONINFO\/$VERSION',
 	       files => [qw(sedscript.in)]},
 
 	     # Makefiles
 	     { type => 'Makefile',
-	       expr => 'VERSION = \'(.*)\'',
-	       repl => 'VERSION = \'$VERSION\'',
+	       expr => 'VERSION = [\.0-9a-zA-Z]+',
+	       repl => 'VERSION = $VERSION',
 	       files => [qw(dist/Makefile)],
 	       not_required => {'dist/Makefile' => 1}
 	     },
