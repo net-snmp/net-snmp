@@ -275,15 +275,6 @@ _load6(netsnmp_container *container, u_int load_flags)
     if (0 == log_open_err)
         log_open_err = 1;
     
-    netsnmp_assert(NULL != container);
-
-#undef PROCFILE
-#define PROCFILE "/proc/net/tcp6"
-    if (!(in = fopen(PROCFILE, "r"))) {
-        snmp_log(LOG_ERR,"could not open " PROCFILE "\n");
-        return -2;
-    }
-    
     fgets(line, sizeof(line), in); /* skip header */
 
     /*
