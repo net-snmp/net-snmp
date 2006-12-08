@@ -328,10 +328,10 @@ sub Check_Version {
 	    # version formatting of net-snmp itself.
 	    $perlver =~ s/(\.\d{5}).*/\1/;
 	    $perlver =~ s/0*$//;
-	    if ($srcver ne $perlver) {
+	    if ($srcfloat ne $perlver) {
 		if (!$foundversion) {
 		    print STDERR "ERROR:
-Net-SNMP installed version: $srcver
+Net-SNMP installed version: $srcver => $srcfloat
 Perl Module Version:        $perlver
 
 These versions must match for perfect support of the module.  It is possible
