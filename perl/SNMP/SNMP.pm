@@ -7,7 +7,7 @@
 #     modify it under the same terms as Perl itself.
 
 package SNMP;
-$VERSION = '5.04';   # current release version number
+$VERSION = '5.05';   # current release version number
 
 require Exporter;
 require DynaLoader;
@@ -1849,7 +1849,7 @@ which are passed to getnext/getbulk as appropriate.
 
 Note 2: callback support is only available in the SNMP module version
 5.04 and above.  To test for this in code intending to support both
-versions prior to 5.04 and and 5.04 and up, the following should work:
+versions prior to 5.04 and 5.04 and up, the following should work:
 
   if ($response = $sess->gettable('ifTable', callback => \&my_sub)) {
       # got a response, gettable doesn't support callback
