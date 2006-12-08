@@ -385,6 +385,17 @@ RELEASING:
        any given branch should be downgraded to 5, and all older than
        that should be downgraded to 1 and closed.
 
+ 18) Update CVS MAIN to a new 5.x.dev version number (e.g 5.4.dev):
+
+         $ local/Version-Munge.pl -v 5.4.dev -M -P -C
+
+ 19) Clean up the 'dist' dir of the latest V5-x-patches branch
+     (e.g. V5-3-patches). Only leave the following files:
+
+     changelogfix  cvsshow  cvsup  net-snmp.spec  
+     snmpd-init.d  snmptrapd-init.d
+
+
 ***************************************************************************
 CREATING BINARY DISTRIBUTIONS
 
