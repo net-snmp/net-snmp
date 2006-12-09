@@ -60,6 +60,9 @@ Updating Documentation / Man pages
  -cd (source dir)
  -make sedscript
  -cd (source dir)/man
+ -make all
+ -make install prefix=`pwd`
+ -mv man/man? ../
  -make html
  -find . -name '*.html' | ../local/html-add-header-footer.pl --section=documentation --body --tidy
  -cp *.html to web site /docs/man

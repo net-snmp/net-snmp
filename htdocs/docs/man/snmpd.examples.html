@@ -5,18 +5,18 @@
     Updated: 05 Dec 2005<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>snmpd.examples - example configuration for the Net-SNMP agent <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmpd.examples - example configuration for the Net-SNMP agent <a name="lbAC" id="lbAC"> </a>
 
     <h2>DESCRIPTION</h2>The <i><a href="snmpd.conf.html">snmpd.conf</a>(5)</i> man page defines the syntax and behaviour of the
     various configuration directives that can be used to control the operation of the Net-SNMP agent, and the management
     information it provides.
 
     <p>This companion man page illustrates these directives, showing some practical examples of how they might be used. <a name=
-    "lbAD" id="lbAD"> </a></p>
+    "lbAD" id="lbAD"> </a></p>
 
-    <h2>AGENT BEHAVIOUR</h2><a name="lbAE" id="lbAE"> </a>
+    <h2>AGENT BEHAVIOUR</h2><a name="lbAE" id="lbAE"> </a>
 
     <h3>Listening addresses</h3>The default agent behaviour (listing on the standard SNMP UDP port on all interfaces) is
     equivalent to the directive:
@@ -40,7 +40,7 @@
 
     <dl compact="compact">
       <dd>agentaddress udp:161,tcp:161,udp6:161,tcp6:161</dd>
-    </dl>Other combinations are also valid. <a name="lbAF" id="lbAF"> </a>
+    </dl>Other combinations are also valid. <a name="lbAF" id="lbAF"> </a>
 
     <h3>Run-time privileges</h3>The agent can be configured to relinquish any privileged access once it has opened the initial
     listening ports. Given a suitable "snmp" group (defined in <i>/etc/group</i>), this could be done using the directives:
@@ -61,7 +61,7 @@ agentuser  #10
 agentgroup #10
 </pre>
       </dd>
-    </dl><a name="lbAG" id="lbAG"> </a>
+    </dl><a name="lbAG" id="lbAG"> </a>
 
     <h3>SNMPv3 Configuration</h3>Rather than being generated pseudo-randomly, the engine ID for the agent could be calculated
     based on the MAC address of the second network interface (<i>eth1</i>), using the directives:
@@ -76,9 +76,9 @@ agentgroup #10
 
     <dl compact="compact">
       <dd>engineID "XXX - WHAT FORMAT"</dd>
-    </dl><a name="lbAH" id="lbAH"> </a>
+    </dl><a name="lbAH" id="lbAH"> </a>
 
-    <h2>ACCESS CONTROL</h2><a name="lbAI" id="lbAI"> </a>
+    <h2>ACCESS CONTROL</h2><a name="lbAI" id="lbAI"> </a>
 
     <h3>SNMPv3 Users</h3>The following directives will create three users, all using exactly the same authentication and
     encryption settings:
@@ -99,7 +99,7 @@ createUser andI   MD5 "single pass phrase" DES "single pass phrase"
     <dl compact="compact">
       <dd>createUser onering SHA "to rule them all" AES "to bind them"</dd>
     </dl>Remember that these <i>createUser</i> directives should be defined in the /var/net-snmp/snmpd.conf file, rather than the
-    usual location. <a name="lbAJ" id="lbAJ"> </a>
+    usual location. <a name="lbAJ" id="lbAJ"> </a>
 
     <h3>Traditional Access Control</h3>The SNMPv3 users defined above can be granted access to the full MIB tree using the
     directives:
@@ -164,7 +164,7 @@ rwcommunity private
 
     <dl compact="compact">
       <dd>rwcommunity private 10.10.10.0/24</dd>
-    </dl>or a combination of the two. <a name="lbAK" id="lbAK"> </a>
+    </dl>or a combination of the two. <a name="lbAK" id="lbAK"> </a>
 
     <h3>VACM Configuration</h3>This last pair of settings are equivalent to the full VACM definitions:
 
@@ -207,7 +207,7 @@ access  myGroup     ""  any  noauth  exact   all     all    none
 
     <p>In general, it is advisible not to mix traditional and VACM-based access configuration settings, as these can sometimes
     interfere with each other in unexpected ways. Choose a particular style of access configuration, and stick to it. <a name=
-    "lbAL" id="lbAL"> </a></p>
+    "lbAL" id="lbAL"> </a></p>
 
     <h3>Typed-View Configuration</h3>A similar configuration could also be configured as follows:
 
@@ -226,9 +226,9 @@ authcommunity read,write private 10.10.10.0/8
     <p>This mechanism allows multi-subtree (or other non-simple) views to be used with the one-line <i>rocommunity</i> style of
     configuration.</p>
 
-    <p>It would also support configuring "write-only" access, should this be required. <a name="lbAM" id="lbAM"> </a></p>
+    <p>It would also support configuring "write-only" access, should this be required. <a name="lbAM" id="lbAM"> </a></p>
 
-    <h2>SYSTEM INFORMATION</h2><a name="lbAN" id="lbAN"> </a>
+    <h2>SYSTEM INFORMATION</h2><a name="lbAN" id="lbAN"> </a>
 
     <h3>System Group</h3>The full contents of the 'system' group (with the exception of sysUpTime) can be explicitly configured
     using:
@@ -249,7 +249,7 @@ sysLocation  An idea in the mind of AT
 sysServices  72
 </pre>
       </dd>
-    </dl><a name="lbAO" id="lbAO"> </a>
+    </dl><a name="lbAO" id="lbAO"> </a>
 
     <h3>Host Resources Group</h3>The list of devices probed for potential inclusion in the hrDiskStorageTable (and hrDeviceTable)
     can be amended using any of the following directives:
@@ -274,7 +274,7 @@ ignoredisk /dev/rdsk/c0t[0-57-9a-f]d0
     <dl compact="compact">
       <dd>ignoredisk /dev/rdsk/c?t0d0</dd>
     </dl>which prevents all devices <i>/dev/rdsk/c</i>X<i>t0d0</i> (where 'X' is any single character) from being scanned.
-    <a name="lbAP" id="lbAP"> </a>
+    <a name="lbAP" id="lbAP"> </a>
 
     <h3>Process Monitoring</h3>The list of services running on a system can be monitored (and provision made for correcting any
     problems), using:
@@ -296,7 +296,7 @@ procfix sendmail  /etc/rc.d/init.d/sendmail stop
 proc    snmpd    1  1
 </pre>
       </dd>
-    </dl>Also see the "DisMan Event MIB" section later on. <a name="lbAQ" id="lbAQ"> </a>
+    </dl>Also see the "DisMan Event MIB" section later on. <a name="lbAQ" id="lbAQ"> </a>
 
     <h3>Disk Usage Monitoring</h3>The state of disk storage can be monitored using:
 
@@ -310,7 +310,7 @@ disk /usr  3%
 disk /mnt/crash  100000
 </pre>
       </dd>
-    </dl><a name="lbAR" id="lbAR"> </a>
+    </dl><a name="lbAR" id="lbAR"> </a>
 
     <h3>System Load Monitoring</h3>A simple check for an overloaded system might be:
 
@@ -320,7 +320,7 @@ disk /mnt/crash  100000
 
     <dl compact="compact">
       <dd>load 30 10 5</dd>
-    </dl><a name="lbAS" id="lbAS"> </a>
+    </dl><a name="lbAS" id="lbAS"> </a>
 
     <h3>Log File Monitoring</h3><i>TODO</i>
 
@@ -330,9 +330,9 @@ disk /mnt/crash  100000
 
     <dl compact="compact">
       <dd>logmatch NAME PATH CYCLETIME REGEX</dd>
-    </dl><a name="lbAT" id="lbAT"> </a>
+    </dl><a name="lbAT" id="lbAT"> </a>
 
-    <h2>ACTIVE MONITORING</h2><a name="lbAU" id="lbAU"> </a>
+    <h2>ACTIVE MONITORING</h2><a name="lbAU" id="lbAU"> </a>
 
     <h3>Notification Handling</h3>Configuring the agent to report invalid access attempts might be done by:
 
@@ -368,7 +368,7 @@ informsink     localhost
 
     <p><i>TODO - mention trapd access configuration</i></p>
 
-    <p><a name="lbAV" id="lbAV"> </a></p>
+    <p><a name="lbAV" id="lbAV"> </a></p>
 
     <h3>DisMan Event MIB</h3>The simplest configuration for active self-monitoring of the agent, by the agent, for the agent, is
     probably:
@@ -468,7 +468,7 @@ setEvent   prFixIt  prErrFix = 1
 monitor -e prFixIt "procTable" prErrorFlag   != 0
 </pre>
       </dd>
-    </dl>(and similarly for any of the other <i>defaultMonitor</i> entries). <a name="lbAW" id="lbAW"> </a>
+    </dl>(and similarly for any of the other <i>defaultMonitor</i> entries). <a name="lbAW" id="lbAW"> </a>
 
     <h3>DisMan Schedule MIB</h3>The agent could be configured to reload its configuration once an hour, using:
 
@@ -487,9 +487,9 @@ monitor -e prFixIt "procTable" prErrorFlag   != 0
 
     <dl compact="compact">
       <dd>at 13 13 13 * 5 snmpVirus.0 = 1</dd>
-    </dl><a name="lbAX" id="lbAX"> </a>
+    </dl><a name="lbAX" id="lbAX"> </a>
 
-    <h2>EXTENDING AGENT FUNCTIONALITY</h2><a name="lbAY" id="lbAY"> </a>
+    <h2>EXTENDING AGENT FUNCTIONALITY</h2><a name="lbAY" id="lbAY"> </a>
 
     <h3>Arbitrary Extension Commands</h3><i>Old Style</i>
 
@@ -510,7 +510,7 @@ extend [MIBOID] NAME PROG ARGS"
 extendfix [MIBOID] NAME PROG ARGS"
 </pre>
       </dd>
-    </dl><a name="lbAZ" id="lbAZ"> </a>
+    </dl><a name="lbAZ" id="lbAZ"> </a>
 
     <h3>MIB-Specific Extension Commands</h3><i>One-Shot</i>
 
@@ -526,7 +526,7 @@ extendfix [MIBOID] NAME PROG ARGS"
           <dd>"pass_persist [-p priority] MIBOID PROG"</dd>
         </dl>
       </dd>
-    </dl><a name="lbBA" id="lbBA"> </a>
+    </dl><a name="lbBA" id="lbBA"> </a>
 
     <h3>Embedded Perl Support</h3>If embedded perl support is enabled in the agent, the default initialisation is equivalent to
     the directives:
@@ -565,13 +565,13 @@ perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
 
     <dl compact="compact">
       <dd>perl 'do /usr/local/share/snmp/perl_example.pl';</dd>
-    </dl><a name="lbBB" id="lbBB"> </a>
+    </dl><a name="lbBB" id="lbBB"> </a>
 
     <h3>Dynamically Loadable Modules</h3><i>TODO</i>
 
     <dl compact="compact">
       <dd>dlmod NAME PATH"</dd>
-    </dl><a name="lbBC" id="lbBC"> </a>
+    </dl><a name="lbBC" id="lbBC"> </a>
 
     <h3>Proxy Support</h3>A configuration for acting as a simple proxy for two other SNMP agents (running on remote systems)
     might be:
@@ -613,18 +613,18 @@ proxy -Cn rem2context  -v 1 -c public  remotehost2  .1.3
 proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
 </pre>
       </dd>
-    </dl><a name="lbBD" id="lbBD"> </a>
+    </dl><a name="lbBD" id="lbBD"> </a>
 
     <h3>SMUX Sub-Agents</h3>
 
     <dl compact="compact">
       <dd>
         <pre>
-smuxsocket [&lt;transport-specifier&gt;:]&lt;transport-address&gt;[,...]"
+smuxsocket 127.0.0.1
 smuxpeer .1.3.6.1.2.1.14 ospf_pass
 </pre>
       </dd>
-    </dl><a name="lbBE" id="lbBE"> </a>
+    </dl><a name="lbBE" id="lbBE"> </a>
 
     <h3>AgentX Sub-Agents</h3>The Net-SNMP agent could be configured to operate as an AgentX master agent (listening on a
     non-standard named socket, and running using the access privileges defined earlier), using:
@@ -667,14 +667,14 @@ agentXRetries  2
 agentXSocket   tcp:localhost:705
 agentXTimeout  10
 agentXRetries  1
-agentPingInterval 600
+agentXPingInterval 600
 </pre>
       </dd>
     </dl>on the client.
 
     <p>Note that the timeout and retry settings can be asymmetric for the two directions, and the sub-agent can poll the master
-    agent at regular intervals (600s = every 10 minutes), to ensure the connection is still working. <a name="lbBF" id="lbBF">
-    </a></p>
+    agent at regular intervals (600s = every 10 minutes), to ensure the connection is still working. <a name="lbBF" id=
+    "lbBF"> </a></p>
 
     <h2>OTHER CONFIGURATION</h2>
 
@@ -684,15 +684,15 @@ agentPingInterval 600
 
     <dl compact="compact">
       <dd>injectHandler stash_cache NAME table_iterator</dd>
-    </dl><a name="lbBG" id="lbBG"> </a>
+    </dl><a name="lbBG" id="lbBG"> </a>
 
-    <h2>FILES</h2>/usr/local/etc/snmp/snmpd.conf <a name="lbBH" id="lbBH"> </a>
+    <h2>FILES</h2>/usr/local/etc/snmp/snmpd.conf <a name="lbBH" id="lbBH"> </a>
 
     <h2>SEE ALSO</h2><a href="snmpconf.html">snmpconf</a>(1), <a href="snmpd.conf.html">snmpd.conf</a>(5), <a href=
     "snmp.conf.html">snmp.conf</a>(5), <a href="snmp_config.html">snmp_config</a>(5), <a href="snmpd.html">snmpd</a>(8),
     EXAMPLE.conf, <a href="read_config.html">read_config</a>(3).
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -785,7 +785,7 @@ agentPingInterval 600
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 19:22:04 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

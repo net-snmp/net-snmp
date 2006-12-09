@@ -2,18 +2,18 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>SNMPNETSTAT</h1>Section: Net-SNMP (1)<br />
-    Updated: 25 Oct 2003<br />
+    Updated: 16 Nov 2006<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
     <h2>NAME</h2>snmpnetstat - display networking status and configuration information from a network entity via SNMP <a name=
-    "lbAC" id="lbAC"> </a>
+    "lbAC" id="lbAC"> </a>
 
-    <h2>SYNOPSIS</h2><b>snmpnetstat</b> [common options] [-a] [-n] AGENT<br />
-    <b>snmpnetstat</b> [common options] [-iorns] AGENT<br />
-    <b>snmpnetstat</b> [common options] [-in] [-I interface] AGENT [interval]<br />
-    <b>snmpnetstat</b> [common options] [-an] [-s] [-P protocol] AGENT <a name="lbAD" id="lbAD"> </a>
+    <h2>SYNOPSIS</h2><b>snmpnetstat</b> [common options] [-Ca] [-Cn] AGENT<br />
+    <b>snmpnetstat</b> [common options] [-Ci] [-Co] [-Cr] [-Cn] [-Cs] AGENT<br />
+    <b>snmpnetstat</b> [common options] [-Ci] [-Cn] [-CI interface] AGENT [interval]<br />
+    <b>snmpnetstat</b> [common options] [-Ca] [-Cn] [-Cs] [-CP protocol] AGENT <a name="lbAD" id="lbAD"> </a>
 
     <h2>DESCRIPTION</h2>The <b>snmpnetstat</b> command symbolically displays the values of various network-related information
     retrieved from a remote system using the SNMP protocol. There are a number of output formats, depending on the options for
@@ -27,38 +27,38 @@
     the agent, using UDP/IPv4 to port 161 of the given target host. See <a href="snmpcmd.html">snmpcmd</a>(1) for a full list of
     the possible formats for AGENT.</p>
 
-    <p><a name="lbAE" id="lbAE"> </a></p>
+    <p><a name="lbAE" id="lbAE"> </a></p>
 
     <h2>OPTIONS</h2>The options have the following meaning:
 
     <p><b>common options</b><br />
-     Please see <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> for a list of possible values for common options as well as their
+     Please see <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> for a list of possible values for common options as well as their
     descriptions.</p>
 
-    <p><b>-a</b> With the default display, show the state of all sockets; normally sockets used by server processes are not
+    <p><b>-Ca</b> With the default display, show the state of all sockets; normally sockets used by server processes are not
     shown.</p>
 
-    <p><b>-i</b> Show the state of all of the network interfaces. The interface display provides a table of cumulative statistics
-    regarding packets transferred, errors, and collisions. The network addresses of the interface and the maximum transmission
-    unit (``mtu'') are also displayed.</p>
+    <p><b>-Ci</b> Show the state of all of the network interfaces. The interface display provides a table of cumulative
+    statistics regarding packets transferred, errors, and collisions. The network addresses of the interface and the maximum
+    transmission unit (``mtu'') are also displayed.</p>
 
-    <p><b>-o</b> Show an abbreviated interface status, giving octets in place of packets. This is useful when enquiring virtual
+    <p><b>-Co</b> Show an abbreviated interface status, giving octets in place of packets. This is useful when enquiring virtual
     interfaces (such as Frame-Relay circuits) on a router.</p>
 
-    <p><b>-I</b> <i>interface</i> Show information only about this interface; used with an <i>interval</i> as described
+    <p><b>-CI</b> <i>interface</i> Show information only about this interface; used with an <i>interval</i> as described
     below.</p>
 
-    <p><b>-n</b> Show network addresses as numbers (normally <i>snmpnetstat</i> interprets addresses and attempts to display them
-    symbolically). This option may be used with any of the display formats.</p>
+    <p><b>-Cn</b> Show network addresses as numbers (normally <i>snmpnetstat</i> interprets addresses and attempts to display
+    them symbolically). This option may be used with any of the display formats.</p>
 
-    <p><b>-P</b> <i>protocol</i> Show statistics about <i>protocol,</i> which is either a well-known name for a protocol or an
+    <p><b>-CP</b> <i>protocol</i> Show statistics about <i>protocol,</i> which is either a well-known name for a protocol or an
     alias for it. Some protocol names and aliases are listed in the file <i>/etc/protocols</i>. A null response typically means
     that there are no interesting numbers to report. The program will complain if <i>protocol</i> is unknown or if there is no
     statistics routine for it.</p>
 
-    <p><b>-s</b> Show per-protocol statistics. When used with the <b>-r</b> option, show routing statistics instead.</p>
+    <p><b>-Cs</b> Show per-protocol statistics. When used with the <b>-Cr</b> option, show routing statistics instead.</p>
 
-    <p><b>-r</b> Show the routing tables. When <b>-s</b> is also present, show per-protocol routing statistics instead of the
+    <p><b>-Cr</b> Show the routing tables. When <b>-Cs</b> is also present, show per-protocol routing statistics instead of the
     routing tables.</p>
 
     <p>When snmpnetstat is invoked with an interval argument, it displays a running count of statistics related to network
@@ -69,7 +69,7 @@
     <p>The default display, for active sockets, shows the local and remote addresses, protocol, and the internal state of the
     protocol. Address formats are of the form ``host.port'' or ``network.port'' if a socket's address specifies a network but no
     specific host address. When known, the host and network addresses are displayed symbolically according to the data bases
-    <i>/etc/hosts and</i> <i>/etc/networks,</i> respectively. If a symbolic name for an address is unknown, or if the <b>-n</b>
+    <i>/etc/hosts and</i> <i>/etc/networks,</i> respectively. If a symbolic name for an address is unknown, or if the <b>-Cn</b>
     option is specified, the address is printed numerically, according to the address family. For more information regarding the
     Internet ``dot format,'' refer to <i><a href="../man3N/inet.3N.html">inet</a>(3N).</i> Unspecified, or ``wildcard'',
     addresses and ports appear as ``*''.</p>
@@ -92,18 +92,18 @@
 
     <p>When <i>snmpnetstat</i> is invoked with an <i>interval</i> argument, it displays a running count of statistics related to
     network interfaces. This display consists of a column for the primary interface and a column summarizing information for all
-    interfaces. The primary interface may be replaced with another interface with the <b>-I</b> option. The first line of each
+    interfaces. The primary interface may be replaced with another interface with the <b>-CI</b> option. The first line of each
     screen of information contains a summary since the system was last rebooted. Subsequent lines of output show values
     accumulated over the preceding interval.</p>
 
     <p><i>The Active Sockets Display for a</i> <i>Single Protocol</i></p>
 
-    <p>When a protocol is specified with the <b>-P</b> option, the information displayed is similar to that in the default
-    display for active sockets, except the display is limited to the given protocol. <a name="lbAF" id="lbAF"> </a></p>
+    <p>When a protocol is specified with the <b>-CP</b> option, the information displayed is similar to that in the default
+    display for active sockets, except the display is limited to the given protocol. <a name="lbAF" id="lbAF"> </a></p>
 
-    <h2>EXAMPLES</h2>Example of using snmpnetstat to displaly active sockets (default):
+    <h2>EXAMPLES</h2>Example of using snmpnetstat to display active sockets (default):
 
-    <p>% snmpnetstat -v 2c -c public -a testhost</p>
+    <p>% snmpnetstat -v 2c -c public -Ca testhost</p>
     <pre>
 Active Internet (tcp) Connections (including servers)
 Proto Local Address                Foreign Address                 (state)
@@ -114,6 +114,7 @@ tcp   *.chargen                     *.*                            LISTEN
 tcp   *.ftp                         *.*                            LISTEN
 tcp   *.telnet                      *.*                            LISTEN
 tcp   *.smtp                        *.*                            LISTEN
+...
 
 Active Internet (udp) Connections
 Proto Local Address
@@ -122,9 +123,10 @@ udp    *.discard
 udp    *.daytime
 udp    *.chargen
 udp    *.time
+...
 </pre>
 
-    <p>% snmpnetstat -v 2c -c public -i testhost</p>
+    <p>% snmpnetstat -v 2c -c public -Ci testhost</p>
     <pre>
 Name     Mtu Network    Address          Ipkts   Ierrs    Opkts Oerrs Queue
 eri0    1500 10.6.9/24  testhost     170548881  245601   687976     0    0
@@ -133,7 +135,7 @@ lo0     8232 127        localhost      7530982       0  7530982     0    0
 
     <p>Example of using snmpnetstat to show statistics about a specific protocol:</p>
     <pre>
-% snmpnetstat -v 2c -c public -P tcp testhost
+% snmpnetstat -v 2c -c public -CP tcp testhost
 
 Active Internet (tcp) Connections
 Proto Local Address                Foreign Address                 (state)
@@ -144,15 +146,16 @@ tcp   *.chargen                     *.*                            LISTEN
 tcp   *.ftp                         *.*                            LISTEN
 tcp   *.telnet                      *.*                            LISTEN
 tcp   *.smtp                        *.*                            LISTEN
-</pre><a name="lbAG" id="lbAG"> </a>
+...
+</pre><a name="lbAG" id="lbAG"> </a>
 
     <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="iostat.html">iostat</a>(1), <a href=
     "vmstat.html">vmstat</a>(1), <a href="hosts.html">hosts</a>(5), <a href="networks.html">networks</a>(5), <a href=
-    "protocols.html">protocols</a>(5), <a href="services.html">services</a>(5). <a name="lbAH" id="lbAH"> </a>
+    "protocols.html">protocols</a>(5), <a href="services.html">services</a>(5). <a name="lbAH" id="lbAH"> </a>
 
     <h2>BUGS</h2>The notion of errors is ill-defined.
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -173,7 +176,7 @@ tcp   *.smtp                        *.*                            LISTEN
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:32 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

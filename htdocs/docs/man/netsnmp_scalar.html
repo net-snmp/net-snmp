@@ -1,13 +1,15 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>scalar: process scalars easily.</h1>Section: net-snmp (3)<br />
-    Updated: 28 Dec 2005<br />
+    <h1>scalar</h1>Section: net-snmp (3)<br />
+    Updated: 24 Nov 2006<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>scalar: process scalars easily. - <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>scalar - Process scalars easily.
+
+    <p><a name="lbAC" id="lbAC"> </a></p>
 
     <h3>Functions</h3>
 
@@ -21,46 +23,45 @@
     <i>This function registers a read only scalar helper handler.</i><br />
     int <b>netsnmp_scalar_helper_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
     <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <a name="lbAD" id="lbAD"> </a></p>
+    <a name="lbAD" id="lbAD"> </a></p>
+
+    <h2>Detailed Description</h2>
+
+    <p>Process scalars easily.</p>
+
+    <p><a name="lbAE" id="lbAE"> </a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAE" id="lbAE"> </a></p>
+    <p><a name="lbAF" id="lbAF"> </a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_scalar_handler (void)</h3>
 
     <p>Creates a scalar handler calling netsnmp_create_handler with a handler name defaulted to 'scalar' and access method,
     netsnmp_scalar_helper_handler.</p>
 
-    <p><b>Parameters:</b></p>
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method</dd>
+    </dl>
+
+    <p><b>See also:</b></p>
 
     <dl compact="compact">
       <dd>
-        <i>void</i> .RE
+        <b>netsnmp_get_scalar_handler</b>
 
-        <p><b>Returns:</b></p>
-
-        <dl compact="compact">
-          <dd>Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method</dd>
-        </dl>
-
-        <p><b>See also:</b></p>
-
-        <dl compact="compact">
-          <dd>
-            <b>netsnmp_get_scalar_handler</b>
-
-            <p><b>netsnmp_register_scalar</b></p>
-          </dd>
-        </dl>
-
-        <p>Definition at line 47 of file scalar.c.</p>
-
-        <p>References netsnmp_create_handler().</p>
-
-        <p>Referenced by netsnmp_register_read_only_scalar(), and netsnmp_register_scalar().</p>
+        <p><b>netsnmp_register_scalar</b></p>
       </dd>
-    </dl><a name="lbAF" id="lbAF"> </a>
+    </dl>
+
+    <p>Definition at line 46 of file scalar.c.</p>
+
+    <p>References netsnmp_create_handler(), and netsnmp_scalar_helper_handler().</p>
+
+    <p>Referenced by netsnmp_register_read_only_scalar(), netsnmp_register_scalar(), and netsnmp_register_scalar_group().
+    <a name="lbAG" id="lbAG"> </a></p>
 
     <h3>int netsnmp_register_read_only_scalar (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
@@ -93,11 +94,11 @@
       </dd>
     </dl>
 
-    <p>Definition at line 110 of file scalar.c.</p>
+    <p>Definition at line 109 of file scalar.c.</p>
 
     <p>References netsnmp_get_instance_handler(), netsnmp_get_read_only_handler(), netsnmp_get_scalar_handler(),
-    netsnmp_handler_registration, netsnmp_inject_handler(), netsnmp_register_serialize(),
-    netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len. <a name="lbAG" id="lbAG"> </a></p>
+    netsnmp_inject_handler(), netsnmp_register_serialize(), netsnmp_handler_registration_s::rootoid, and
+    netsnmp_handler_registration_s::rootoid_len. <a name="lbAH" id="lbAH"> </a></p>
 
     <h3>int netsnmp_register_scalar (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
@@ -133,13 +134,14 @@
       </dd>
     </dl>
 
-    <p>Definition at line 75 of file scalar.c.</p>
+    <p>Definition at line 74 of file scalar.c.</p>
 
-    <p>References netsnmp_get_instance_handler(), netsnmp_get_scalar_handler(), netsnmp_handler_registration,
-    netsnmp_inject_handler(), netsnmp_register_serialize(), netsnmp_handler_registration_s::rootoid, and
-    netsnmp_handler_registration_s::rootoid_len.</p>
+    <p>References netsnmp_get_instance_handler(), netsnmp_get_scalar_handler(), netsnmp_inject_handler(),
+    netsnmp_register_serialize(), netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len.</p>
+
+    <p>Referenced by netsnmp_register_watched_scalar(), and netsnmp_watched_timestamp_register().</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -152,21 +154,23 @@
         </dl>
       </dd>
 
-      <dt><a href="#lbAD">Function Documentation</a></dt>
+      <dt><a href="#lbAD">Detailed Description</a></dt>
+
+      <dt><a href="#lbAE">Function Documentation</a></dt>
 
       <dd>
         <dl>
-          <dt><a href="#lbAE"><b>netsnmp_mib_handler</b>* netsnmp_get_scalar_handler (void)</a></dt>
+          <dt><a href="#lbAF"><b>netsnmp_mib_handler</b>* netsnmp_get_scalar_handler (void)</a></dt>
 
-          <dt><a href="#lbAF">int netsnmp_register_read_only_scalar (<b>netsnmp_handler_registration</b> * reginfo)</a></dt>
+          <dt><a href="#lbAG">int netsnmp_register_read_only_scalar (<b>netsnmp_handler_registration</b> * reginfo)</a></dt>
 
-          <dt><a href="#lbAG">int netsnmp_register_scalar (<b>netsnmp_handler_registration</b> * reginfo)</a></dt>
+          <dt><a href="#lbAH">int netsnmp_register_scalar (<b>netsnmp_handler_registration</b> * reginfo)</a></dt>
         </dl>
       </dd>
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:33 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

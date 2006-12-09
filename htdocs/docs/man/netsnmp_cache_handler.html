@@ -1,38 +1,36 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>cache_handler: Maintains a cache of data for use by lower level handlers.</h1>Section: net-snmp (3)<br />
-    Updated: 28 Dec 2005<br />
+    <h1>cache_handler</h1>Section: net-snmp (3)<br />
+    Updated: 24 Nov 2006<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>cache_handler: Maintains a cache of data for use by lower level handlers. - This helper checks to see whether
-    the data has been loaded 'recently' (according to the timeout for that particular cache) and calls the registered
-    'load_cache' routine if necessary.
+    <h2>NAME</h2>cache_handler - Maintains a cache of data for use by lower level handlers.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC"> </a></p>
 
     <h3>Functions</h3>
 
     <p><br />
-    netsnmp_cache * <b>netsnmp_cache_get_head</b> (void)<br />
+    <b>netsnmp_cache</b> * <b>netsnmp_cache_get_head</b> (void)<br />
     <i>get cache head</i><br />
-    netsnmp_cache * <b>netsnmp_cache_find_by_oid</b> (oid *rootoid, int rootoid_len)<br />
+    <b>netsnmp_cache</b> * <b>netsnmp_cache_find_by_oid</b> (oid *rootoid, int rootoid_len)<br />
     <i>find existing cache</i><br />
-    netsnmp_cache * <b>netsnmp_cache_create</b> (int timeout, NetsnmpCacheLoad *load_hook, NetsnmpCacheFree *free_hook, oid
-    *rootoid, int rootoid_len)<br />
+    <b>netsnmp_cache</b> * <b>netsnmp_cache_create</b> (int timeout, NetsnmpCacheLoad *load_hook, NetsnmpCacheFree *free_hook,
+    oid *rootoid, int rootoid_len)<br />
     <i>returns a cache</i><br />
-    unsigned int <b>netsnmp_cache_timer_start</b> (netsnmp_cache *cache)<br />
+    unsigned int <b>netsnmp_cache_timer_start</b> (<b>netsnmp_cache</b> *cache)<br />
     <i>starts the recurring cache_load callback</i><br />
-    void <b>netsnmp_cache_timer_stop</b> (netsnmp_cache *cache)<br />
+    void <b>netsnmp_cache_timer_stop</b> (<b>netsnmp_cache</b> *cache)<br />
     <i>stops the recurring cache_load callback</i><br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_cache_handler_get</b> (netsnmp_cache *cache)<br />
+    <b>netsnmp_mib_handler</b> * <b>netsnmp_cache_handler_get</b> (<b>netsnmp_cache</b> *cache)<br />
     <i>returns a cache handler that can be injected into a given handler chain.</i><br />
     <b>netsnmp_mib_handler</b> * <b>netsnmp_get_cache_handler</b> (int timeout, NetsnmpCacheLoad *load_hook, NetsnmpCacheFree
     *free_hook, oid *rootoid, int rootoid_len)<br />
     <i>returns a cache handler that can be injected into a given handler chain.</i><br />
-    int <b>netsnmp_cache_handler_register</b> (<b>netsnmp_handler_registration</b> *reginfo, netsnmp_cache *cache)<br />
+    int <b>netsnmp_cache_handler_register</b> (<b>netsnmp_handler_registration</b> *reginfo, <b>netsnmp_cache</b> *cache)<br />
     <i>functionally the same as calling</i> <b>netsnmp_register_handler()</b> but also injects a cache handler at the same time
     for you.<br />
     int <b>netsnmp_register_cache_handler</b> (<b>netsnmp_handler_registration</b> *reginfo, int timeout, NetsnmpCacheLoad
@@ -41,16 +39,17 @@
     for you.<br />
     NETSNMP_STATIC_INLINE char * <b>_build_cache_name</b> (const char *name)<br />
     <br />
-    void <b>netsnmp_cache_reqinfo_insert</b> (netsnmp_cache *cache, <b>netsnmp_agent_request_info</b> *reqinfo, const char
+    void <b>netsnmp_cache_reqinfo_insert</b> (<b>netsnmp_cache</b> *cache, <b>netsnmp_agent_request_info</b> *reqinfo, const char
     *name)<br />
     <i>Insert the cache information for a given request (PDU).</i><br />
-    netsnmp_cache * <b>netsnmp_cache_reqinfo_extract</b> (<b>netsnmp_agent_request_info</b> *reqinfo, const char *name)<br />
+    <b>netsnmp_cache</b> * <b>netsnmp_cache_reqinfo_extract</b> (<b>netsnmp_agent_request_info</b> *reqinfo, const char
+    *name)<br />
     <i>Extract the cache information for a given request (PDU).</i><br />
-    netsnmp_cache * <b>netsnmp_extract_cache_info</b> (<b>netsnmp_agent_request_info</b> *reqinfo)<br />
+    <b>netsnmp_cache</b> * <b>netsnmp_extract_cache_info</b> (<b>netsnmp_agent_request_info</b> *reqinfo)<br />
     <i>Extract the cache information for a given request (PDU).</i><br />
-    int <b>netsnmp_cache_check_expired</b> (netsnmp_cache *cache)<br />
+    int <b>netsnmp_cache_check_expired</b> (<b>netsnmp_cache</b> *cache)<br />
     <i>Check if the cache timeout has passed.</i><br />
-    int <b>netsnmp_cache_check_and_reload</b> (netsnmp_cache *cache)<br />
+    int <b>netsnmp_cache_check_and_reload</b> (<b>netsnmp_cache</b> *cache)<br />
     <i>Reload the cache if required.</i><br />
     int <b>netsnmp_cache_is_valid</b> (<b>netsnmp_agent_request_info</b> *reqinfo, const char *name)<br />
     <i>Is the cache valid for a given request?</i><br />
@@ -60,14 +59,14 @@
     <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
     <i>Implements the cache handler.</i><br />
     void <b>release_cached_resources</b> (unsigned int regNo, void *clientargs)<br />
-    <i>run regularly to automatically release cached resources.</i> <a name="lbAD" id="lbAD"> </a></p>
+    <i>run regularly to automatically release cached resources.</i> <a name="lbAD" id="lbAD"> </a></p>
 
     <h2>Detailed Description</h2>
 
-    <p>This helper checks to see whether the data has been loaded 'recently' (according to the timeout for that particular cache)
-    and calls the registered 'load_cache' routine if necessary.</p>
+    <p>Maintains a cache of data for use by lower level handlers.</p>
 
-    <p>The lower handlers can then work with this local cached data.</p>
+    <p>This helper checks to see whether the data has been loaded 'recently' (according to the timeout for that particular cache)
+    and calls the registered 'load_cache' routine if necessary. The lower handlers can then work with this local cached data.</p>
 
     <p>A timeout value of -1 will cause <b>netsnmp_cache_check_expired()</b> to always return true, and thus the cache will be
     reloaded for every request.</p>
@@ -115,82 +114,86 @@
     changes (eg a <i>LastChanged</i> object). You will need to prevent the agent from flushing the cache when it expires. Set the
     cache timeout to the frequency, in seconds, that you wish to reload your cache, and set the following flags:</p>
 
-    <p>NETSNMP_CACHE_DONT_FREE_EXPIRED NETSNMP_CACHE_DONT_AUTO_RELEASE NETSNMP_CACHE_AUTO_RELOAD <a name="lbAE" id="lbAE">
-    </a></p>
+    <p>NETSNMP_CACHE_DONT_FREE_EXPIRED NETSNMP_CACHE_DONT_AUTO_RELEASE NETSNMP_CACHE_AUTO_RELOAD <a name="lbAE" id=
+    "lbAE"> </a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAF" id="lbAF"> </a></p>
+    <p><a name="lbAF" id="lbAF"> </a></p>
 
-    <h3>int netsnmp_cache_check_and_reload (netsnmp_cache * cache)</h3>
+    <h3>int netsnmp_cache_check_and_reload (<b>netsnmp_cache</b> * cache)</h3>
 
     <p>Reload the cache if required.</p>
 
-    <p>Definition at line 384 of file cache_handler.c.</p>
+    <p>Definition at line 385 of file cache_handler.c.</p>
 
-    <p>References netsnmp_cache_check_expired().</p>
+    <p>References netsnmp_cache_check_expired(), and netsnmp_cache_s::valid.</p>
 
-    <p>Referenced by netsnmp_cache_helper_handler(). <a name="lbAG" id="lbAG"> </a></p>
+    <p>Referenced by netsnmp_cache_helper_handler(). <a name="lbAG" id="lbAG"> </a></p>
 
-    <h3>int netsnmp_cache_check_expired (netsnmp_cache * cache)</h3>
+    <h3>int netsnmp_cache_check_expired (<b>netsnmp_cache</b> * cache)</h3>
 
     <p>Check if the cache timeout has passed.</p>
 
     <p>Sets and return the expired flag.</p>
 
-    <p>Definition at line 369 of file cache_handler.c.</p>
+    <p>Definition at line 370 of file cache_handler.c.</p>
 
-    <p>References atime_ready().</p>
+    <p>References atime_ready(), netsnmp_cache_s::expired, NULL, netsnmp_cache_s::timeout, netsnmp_cache_s::timestamp, and
+    netsnmp_cache_s::valid.</p>
 
-    <p>Referenced by netsnmp_cache_check_and_reload(), and release_cached_resources(). <a name="lbAH" id="lbAH"> </a></p>
+    <p>Referenced by netsnmp_cache_check_and_reload(), and release_cached_resources(). <a name="lbAH" id="lbAH"> </a></p>
 
-    <h3>netsnmp_cache* netsnmp_cache_create (int timeout, NetsnmpCacheLoad * load_hook, NetsnmpCacheFree * free_hook, oid *
-    rootoid, int rootoid_len)</h3>
+    <h3><b>netsnmp_cache</b>* netsnmp_cache_create (int timeout, NetsnmpCacheLoad * load_hook, NetsnmpCacheFree * free_hook, oid
+    * rootoid, int rootoid_len)</h3>
 
     <p>returns a cache</p>
 
-    <p>Definition at line 135 of file cache_handler.c.</p>
+    <p>Definition at line 136 of file cache_handler.c.</p>
 
-    <p>References snmp_log(), and SNMP_MALLOC_TYPEDEF.</p>
+    <p>References netsnmp_cache_s::enabled, netsnmp_cache_s::free_cache, netsnmp_cache_s::load_cache, netsnmp_ds_get_int(),
+    netsnmp_cache_s::next, NULL, netsnmp_cache_s::prev, netsnmp_cache_s::rootoid, netsnmp_cache_s::rootoid_len,
+    snmp_duplicate_objid(), snmp_log(), SNMP_MALLOC_TYPEDEF, and netsnmp_cache_s::timeout.</p>
 
-    <p>Referenced by netsnmp_get_cache_handler(), and netsnmp_get_timed_bare_stash_cache_handler(). <a name="lbAI" id="lbAI">
-    </a></p>
+    <p>Referenced by netsnmp_get_cache_handler(), and netsnmp_get_timed_bare_stash_cache_handler(). <a name="lbAI" id=
+    "lbAI"> </a></p>
 
-    <h3>netsnmp_cache* netsnmp_cache_find_by_oid (oid * rootoid, int rootoid_len)</h3>
+    <h3><b>netsnmp_cache</b>* netsnmp_cache_find_by_oid (oid * rootoid, int rootoid_len)</h3>
 
     <p>find existing cache</p>
 
-    <p>Definition at line 119 of file cache_handler.c.</p>
+    <p>Definition at line 120 of file cache_handler.c.</p>
 
-    <p>References netsnmp_oid_equals(). <a name="lbAJ" id="lbAJ"> </a></p>
+    <p>References netsnmp_oid_equals(), netsnmp_cache_s::next, netsnmp_cache_s::rootoid, and netsnmp_cache_s::rootoid_len.
+    <a name="lbAJ" id="lbAJ"> </a></p>
 
-    <h3>netsnmp_cache* netsnmp_cache_get_head (void)</h3>
+    <h3><b>netsnmp_cache</b>* netsnmp_cache_get_head (void)</h3>
 
     <p>get cache head</p>
 
-    <p>Definition at line 111 of file cache_handler.c. <a name="lbAK" id="lbAK"> </a></p>
+    <p>Definition at line 112 of file cache_handler.c. <a name="lbAK" id="lbAK"> </a></p>
 
-    <h3><b>netsnmp_mib_handler</b>* netsnmp_cache_handler_get (netsnmp_cache * cache)</h3>
+    <h3><b>netsnmp_mib_handler</b>* netsnmp_cache_handler_get (<b>netsnmp_cache</b> * cache)</h3>
 
     <p>returns a cache handler that can be injected into a given handler chain.</p>
 
-    <p>Definition at line 246 of file cache_handler.c.</p>
+    <p>Definition at line 247 of file cache_handler.c.</p>
 
-    <p>References netsnmp_mib_handler_s::flags, netsnmp_mib_handler_s::myvoid, netsnmp_cache_timer_start(),
-    netsnmp_create_handler(), and netsnmp_mib_handler.</p>
+    <p>References netsnmp_mib_handler_s::flags, netsnmp_cache_s::flags, MIB_HANDLER_AUTO_NEXT, netsnmp_mib_handler_s::myvoid,
+    netsnmp_cache_helper_handler(), netsnmp_cache_timer_start(), netsnmp_create_handler(), NULL, and netsnmp_cache_s::valid.</p>
 
     <p>Referenced by netsnmp_cache_handler_register(), netsnmp_get_cache_handler(), and
-    netsnmp_get_timed_bare_stash_cache_handler(). <a name="lbAL" id="lbAL"> </a></p>
+    netsnmp_get_timed_bare_stash_cache_handler(). <a name="lbAL" id="lbAL"> </a></p>
 
-    <h3>int netsnmp_cache_handler_register (<b>netsnmp_handler_registration</b> * reginfo, netsnmp_cache * cache)</h3>
+    <h3>int netsnmp_cache_handler_register (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_cache</b> * cache)</h3>
 
     <p>functionally the same as calling <b>netsnmp_register_handler()</b> but also injects a cache handler at the same time for
     you.</p>
 
-    <p>Definition at line 294 of file cache_handler.c.</p>
+    <p>Definition at line 295 of file cache_handler.c.</p>
 
-    <p>References netsnmp_cache_handler_get(), netsnmp_handler_registration, netsnmp_inject_handler(), netsnmp_mib_handler, and
-    netsnmp_register_handler(). <a name="lbAM" id="lbAM"> </a></p>
+    <p>References netsnmp_cache_handler_get(), netsnmp_inject_handler(), netsnmp_register_handler(), and NULL. <a name="lbAM" id=
+    "lbAM"> </a></p>
 
     <h3>int netsnmp_cache_helper_handler (<b>netsnmp_mib_handler</b> * handler, <b>netsnmp_handler_registration</b> * reginfo,
     <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
@@ -203,81 +206,89 @@
 
     <p>next handler called automatically - 'AUTO_NEXT'</p>
 
-    <p>Definition at line 419 of file cache_handler.c.</p>
+    <p>Definition at line 420 of file cache_handler.c.</p>
 
-    <p>References netsnmp_mib_handler_s::flags, netsnmp_handler_registration_s::handlerName, netsnmp_agent_request_info_s::mode,
+    <p>References netsnmp_cache_s::cache_hint, netsnmp_cache_s::enabled, netsnmp_cache_s::flags, netsnmp_mib_handler_s::flags,
+    netsnmp_cache_s::free_cache, netsnmp_handler_args_s::handler, netsnmp_handler_registration_s::handlerName,
+    netsnmp_cache_s::load_cache, netsnmp_cache_s::magic, MIB_HANDLER_AUTO_NEXT, netsnmp_agent_request_info_s::mode,
     netsnmp_mib_handler_s::myvoid, netsnmp_cache_check_and_reload(), netsnmp_cache_is_valid(), netsnmp_cache_reqinfo_insert(),
-    netsnmp_handler_registration, netsnmp_mib_handler, netsnmp_request_set_error_all(), netsnmp_handler_registration_s::rootoid,
-    netsnmp_handler_registration_s::rootoid_len, and snmp_log(). <a name="lbAN" id="lbAN"> </a></p>
+    netsnmp_ds_get_boolean(), netsnmp_request_set_error_all(), NULL, netsnmp_handler_args_s::reginfo,
+    netsnmp_handler_args_s::reqinfo, netsnmp_handler_args_s::requests, netsnmp_handler_registration_s::rootoid,
+    netsnmp_handler_registration_s::rootoid_len, snmp_log(), and netsnmp_cache_s::valid.</p>
+
+    <p>Referenced by netsnmp_cache_handler_get(). <a name="lbAN" id="lbAN"> </a></p>
 
     <h3>int netsnmp_cache_is_valid (<b>netsnmp_agent_request_info</b> * reqinfo, const char * name)</h3>
 
     <p>Is the cache valid for a given request?</p>
 
-    <p>Definition at line 401 of file cache_handler.c.</p>
+    <p>Definition at line 402 of file cache_handler.c.</p>
 
-    <p>References netsnmp_cache_reqinfo_extract().</p>
+    <p>References netsnmp_cache_reqinfo_extract(), and netsnmp_cache_s::valid.</p>
 
-    <p>Referenced by netsnmp_cache_helper_handler(), and netsnmp_is_cache_valid(). <a name="lbAO" id="lbAO"> </a></p>
+    <p>Referenced by netsnmp_cache_helper_handler(), and netsnmp_is_cache_valid(). <a name="lbAO" id="lbAO"> </a></p>
 
-    <h3>netsnmp_cache* netsnmp_cache_reqinfo_extract (<b>netsnmp_agent_request_info</b> * reqinfo, const char * name)</h3>
+    <h3><b>netsnmp_cache</b>* netsnmp_cache_reqinfo_extract (<b>netsnmp_agent_request_info</b> * reqinfo, const char * name)</h3>
 
     <p>Extract the cache information for a given request (PDU).</p>
 
-    <p>Definition at line 349 of file cache_handler.c.</p>
+    <p>Definition at line 350 of file cache_handler.c.</p>
 
-    <p>References SNMP_FREE.</p>
+    <p>References _build_cache_name(), netsnmp_agent_get_list_data(), and SNMP_FREE.</p>
 
-    <p>Referenced by netsnmp_cache_is_valid(), and netsnmp_extract_cache_info(). <a name="lbAP" id="lbAP"> </a></p>
+    <p>Referenced by netsnmp_cache_is_valid(), netsnmp_extract_cache_info(), and netsnmp_stash_cache_helper(). <a name="lbAP" id=
+    "lbAP"> </a></p>
 
-    <h3>void netsnmp_cache_reqinfo_insert (netsnmp_cache * cache, <b>netsnmp_agent_request_info</b> * reqinfo, const char *
-    name)</h3>
+    <h3>void netsnmp_cache_reqinfo_insert (<b>netsnmp_cache</b> * cache, <b>netsnmp_agent_request_info</b> * reqinfo, const char
+    * name)</h3>
 
     <p>Insert the cache information for a given request (PDU).</p>
 
-    <p>Definition at line 332 of file cache_handler.c.</p>
+    <p>Definition at line 333 of file cache_handler.c.</p>
 
-    <p>References netsnmp_create_data_list(), and SNMP_FREE.</p>
+    <p>References _build_cache_name(), netsnmp_agent_add_list_data(), netsnmp_agent_get_list_data(), netsnmp_create_data_list(),
+    NULL, and SNMP_FREE.</p>
 
-    <p>Referenced by netsnmp_cache_helper_handler(). <a name="lbAQ" id="lbAQ"> </a></p>
+    <p>Referenced by netsnmp_cache_helper_handler(). <a name="lbAQ" id="lbAQ"> </a></p>
 
-    <h3>unsigned int netsnmp_cache_timer_start (netsnmp_cache * cache)</h3>
+    <h3>unsigned int netsnmp_cache_timer_start (<b>netsnmp_cache</b> * cache)</h3>
 
     <p>starts the recurring cache_load callback</p>
 
-    <p>Definition at line 190 of file cache_handler.c.</p>
+    <p>Definition at line 191 of file cache_handler.c.</p>
 
-    <p>References snmp_alarm_register(), and snmp_log().</p>
+    <p>References netsnmp_cache_s::flags, NULL, netsnmp_cache_s::rootoid, netsnmp_cache_s::rootoid_len, snmp_alarm_register(),
+    snmp_log(), netsnmp_cache_s::timeout, and netsnmp_cache_s::timer_id.</p>
 
-    <p>Referenced by netsnmp_cache_handler_get(). <a name="lbAR" id="lbAR"> </a></p>
+    <p>Referenced by netsnmp_cache_handler_get(). <a name="lbAR" id="lbAR"> </a></p>
 
-    <h3>void netsnmp_cache_timer_stop (netsnmp_cache * cache)</h3>
+    <h3>void netsnmp_cache_timer_stop (<b>netsnmp_cache</b> * cache)</h3>
 
     <p>stops the recurring cache_load callback</p>
 
-    <p>Definition at line 225 of file cache_handler.c.</p>
+    <p>Definition at line 226 of file cache_handler.c.</p>
 
-    <p>References snmp_alarm_unregister(), and snmp_log(). <a name="lbAS" id="lbAS"> </a></p>
+    <p>References netsnmp_cache_s::flags, NULL, snmp_alarm_unregister(), snmp_log(), and netsnmp_cache_s::timer_id. <a name=
+    "lbAS" id="lbAS"> </a></p>
 
-    <h3>netsnmp_cache* netsnmp_extract_cache_info (<b>netsnmp_agent_request_info</b> * reqinfo)</h3>
+    <h3><b>netsnmp_cache</b>* netsnmp_extract_cache_info (<b>netsnmp_agent_request_info</b> * reqinfo)</h3>
 
     <p>Extract the cache information for a given request (PDU).</p>
 
-    <p>Definition at line 361 of file cache_handler.c.</p>
+    <p>Definition at line 362 of file cache_handler.c.</p>
 
-    <p>References netsnmp_cache_reqinfo_extract(). <a name="lbAT" id="lbAT"> </a></p>
+    <p>References netsnmp_cache_reqinfo_extract(). <a name="lbAT" id="lbAT"> </a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_cache_handler (int timeout, NetsnmpCacheLoad * load_hook, NetsnmpCacheFree *
     free_hook, oid * rootoid, int rootoid_len)</h3>
 
     <p>returns a cache handler that can be injected into a given handler chain.</p>
 
-    <p>Definition at line 275 of file cache_handler.c.</p>
+    <p>Definition at line 276 of file cache_handler.c.</p>
 
-    <p>References netsnmp_mib_handler_s::myvoid, netsnmp_cache_create(), netsnmp_cache_handler_get(), and
-    netsnmp_mib_handler.</p>
+    <p>References netsnmp_mib_handler_s::myvoid, netsnmp_cache_create(), netsnmp_cache_handler_get(), and NULL.</p>
 
-    <p>Referenced by netsnmp_register_cache_handler(). <a name="lbAU" id="lbAU"> </a></p>
+    <p>Referenced by netsnmp_register_cache_handler(). <a name="lbAU" id="lbAU"> </a></p>
 
     <h3>int netsnmp_is_cache_valid (<b>netsnmp_agent_request_info</b> * reqinfo)</h3>
 
@@ -285,9 +296,9 @@
 
     <p><b>netsnmp_cache_is_valid()</b> is preferred.</p>
 
-    <p>Definition at line 412 of file cache_handler.c.</p>
+    <p>Definition at line 413 of file cache_handler.c.</p>
 
-    <p>References netsnmp_cache_is_valid(). <a name="lbAV" id="lbAV"> </a></p>
+    <p>References netsnmp_cache_is_valid(). <a name="lbAV" id="lbAV"> </a></p>
 
     <h3>int netsnmp_register_cache_handler (<b>netsnmp_handler_registration</b> * reginfo, int timeout, NetsnmpCacheLoad *
     load_hook, NetsnmpCacheFree * free_hook)</h3>
@@ -295,11 +306,10 @@
     <p>functionally the same as calling <b>netsnmp_register_handler()</b> but also injects a cache handler at the same time for
     you.</p>
 
-    <p>Definition at line 307 of file cache_handler.c.</p>
+    <p>Definition at line 308 of file cache_handler.c.</p>
 
-    <p>References netsnmp_get_cache_handler(), netsnmp_handler_registration, netsnmp_inject_handler(), netsnmp_mib_handler,
-    netsnmp_register_handler(), netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len.
-    <a name="lbAW" id="lbAW"> </a></p>
+    <p>References netsnmp_get_cache_handler(), netsnmp_inject_handler(), netsnmp_register_handler(), NULL,
+    netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len. <a name="lbAW" id="lbAW"> </a></p>
 
     <h3>void release_cached_resources (unsigned int regNo, void * clientargs)</h3>
 
@@ -309,13 +319,12 @@
     flag, which would be cleared when request finished (which could be acomplished by a dummy data list item in agent req info
     &amp; custom free function).</p>
 
-    <p>Definition at line 576 of file cache_handler.c.</p>
+    <p>Definition at line 577 of file cache_handler.c.</p>
 
-    <p>References netsnmp_cache_check_expired(), release_cached_resources(), and snmp_alarm_register().</p>
-
-    <p>Referenced by release_cached_resources().</p>
+    <p>References netsnmp_cache_s::flags, netsnmp_cache_check_expired(), netsnmp_cache_s::next, NULL, and
+    netsnmp_cache_s::valid.</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -334,21 +343,21 @@
 
       <dd>
         <dl>
-          <dt><a href="#lbAF">int netsnmp_cache_check_and_reload (netsnmp_cache * cache)</a></dt>
+          <dt><a href="#lbAF">int netsnmp_cache_check_and_reload (<b>netsnmp_cache</b> * cache)</a></dt>
 
-          <dt><a href="#lbAG">int netsnmp_cache_check_expired (netsnmp_cache * cache)</a></dt>
+          <dt><a href="#lbAG">int netsnmp_cache_check_expired (<b>netsnmp_cache</b> * cache)</a></dt>
 
-          <dt><a href="#lbAH">netsnmp_cache* netsnmp_cache_create (int timeout, NetsnmpCacheLoad * load_hook, NetsnmpCacheFree *
-          free_hook, oid * rootoid, int rootoid_len)</a></dt>
+          <dt><a href="#lbAH"><b>netsnmp_cache</b>* netsnmp_cache_create (int timeout, NetsnmpCacheLoad * load_hook,
+          NetsnmpCacheFree * free_hook, oid * rootoid, int rootoid_len)</a></dt>
 
-          <dt><a href="#lbAI">netsnmp_cache* netsnmp_cache_find_by_oid (oid * rootoid, int rootoid_len)</a></dt>
+          <dt><a href="#lbAI"><b>netsnmp_cache</b>* netsnmp_cache_find_by_oid (oid * rootoid, int rootoid_len)</a></dt>
 
-          <dt><a href="#lbAJ">netsnmp_cache* netsnmp_cache_get_head (void)</a></dt>
+          <dt><a href="#lbAJ"><b>netsnmp_cache</b>* netsnmp_cache_get_head (void)</a></dt>
 
-          <dt><a href="#lbAK"><b>netsnmp_mib_handler</b>* netsnmp_cache_handler_get (netsnmp_cache * cache)</a></dt>
+          <dt><a href="#lbAK"><b>netsnmp_mib_handler</b>* netsnmp_cache_handler_get (<b>netsnmp_cache</b> * cache)</a></dt>
 
-          <dt><a href="#lbAL">int netsnmp_cache_handler_register (<b>netsnmp_handler_registration</b> * reginfo, netsnmp_cache *
-          cache)</a></dt>
+          <dt><a href="#lbAL">int netsnmp_cache_handler_register (<b>netsnmp_handler_registration</b> * reginfo,
+          <b>netsnmp_cache</b> * cache)</a></dt>
 
           <dt><a href="#lbAM">int netsnmp_cache_helper_handler (<b>netsnmp_mib_handler</b> * handler,
           <b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b>
@@ -357,17 +366,18 @@
           <dt><a href="#lbAN">int netsnmp_cache_is_valid (<b>netsnmp_agent_request_info</b> * reqinfo, const char *
           name)</a></dt>
 
-          <dt><a href="#lbAO">netsnmp_cache* netsnmp_cache_reqinfo_extract (<b>netsnmp_agent_request_info</b> * reqinfo, const
-          char * name)</a></dt>
+          <dt><a href="#lbAO"><b>netsnmp_cache</b>* netsnmp_cache_reqinfo_extract (<b>netsnmp_agent_request_info</b> * reqinfo,
+          const char * name)</a></dt>
 
-          <dt><a href="#lbAP">void netsnmp_cache_reqinfo_insert (netsnmp_cache * cache, <b>netsnmp_agent_request_info</b> *
-          reqinfo, const char * name)</a></dt>
+          <dt><a href="#lbAP">void netsnmp_cache_reqinfo_insert (<b>netsnmp_cache</b> * cache, <b>netsnmp_agent_request_info</b>
+          * reqinfo, const char * name)</a></dt>
 
-          <dt><a href="#lbAQ">unsigned int netsnmp_cache_timer_start (netsnmp_cache * cache)</a></dt>
+          <dt><a href="#lbAQ">unsigned int netsnmp_cache_timer_start (<b>netsnmp_cache</b> * cache)</a></dt>
 
-          <dt><a href="#lbAR">void netsnmp_cache_timer_stop (netsnmp_cache * cache)</a></dt>
+          <dt><a href="#lbAR">void netsnmp_cache_timer_stop (<b>netsnmp_cache</b> * cache)</a></dt>
 
-          <dt><a href="#lbAS">netsnmp_cache* netsnmp_extract_cache_info (<b>netsnmp_agent_request_info</b> * reqinfo)</a></dt>
+          <dt><a href="#lbAS"><b>netsnmp_cache</b>* netsnmp_extract_cache_info (<b>netsnmp_agent_request_info</b> *
+          reqinfo)</a></dt>
 
           <dt><a href="#lbAT"><b>netsnmp_mib_handler</b>* netsnmp_get_cache_handler (int timeout, NetsnmpCacheLoad * load_hook,
           NetsnmpCacheFree * free_hook, oid * rootoid, int rootoid_len)</a></dt>
@@ -383,7 +393,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:33 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

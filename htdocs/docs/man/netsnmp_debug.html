@@ -1,16 +1,15 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>debug: print out debugging information about the handler chain being called.</h1>Section: net-snmp (3)<br />
-    Updated: 28 Dec 2005<br />
+    <h1>debug</h1>Section: net-snmp (3)<br />
+    Updated: 24 Nov 2006<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>debug: print out debugging information about the handler chain being called. - This is a useful module for
-    run-time debugging of requests as the pass this handler in a calling chain.
+    <h2>NAME</h2>debug - Print out debugging information about the handler chain being called.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC"> </a></p>
 
     <h3>handler</h3>
 
@@ -30,7 +29,7 @@
     <i>initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for
     configuration file use.</i><br />
     void <b>netsnmp_init_helpers</b> (void)<br />
-    <i>call the initialization sequence for all handlers with init_ routines.</i> <a name="lbAD" id="lbAD"> </a></p>
+    <i>call the initialization sequence for all handlers with init_ routines.</i> <a name="lbAD" id="lbAD"> </a></p>
 
     <h3>Functions</h3>
 
@@ -44,16 +43,16 @@
     <br />
     void <b>netsnmp_init_debug_helper</b> (void)<br />
     <i>initializes the debug helper which then registers a debug handler as a run-time injectable handler for configuration file
-    use.</i> <a name="lbAE" id="lbAE"> </a></p>
+    use.</i> <a name="lbAE" id="lbAE"> </a></p>
 
     <h2>Detailed Description</h2>
 
-    <p>This is a useful module for run-time debugging of requests as the pass this handler in a calling chain.</p>
+    <p>Print out debugging information about the handler chain being called.</p>
 
-    <p>All debugging output is done via the standard debugging routines with a token name of 'helper:debug', so use the
-    -Dhelper:debug command line flag to see the output when running the snmpd demon. It's not recommended you compile this into a
-    handler chain during compile time, but instead use the 'injectHandler' token in the snmpd.conf file (or similar) to add it to
-    the chain later:</p>
+    <p>This is a useful module for run-time debugging of requests as the pass this handler in a calling chain. All debugging
+    output is done via the standard debugging routines with a token name of 'helper:debug', so use the -Dhelper:debug command
+    line flag to see the output when running the snmpd demon. It's not recommended you compile this into a handler chain during
+    compile time, but instead use the 'injectHandler' token in the snmpd.conf file (or similar) to add it to the chain later:</p>
 
     <p>injectHandler debug my_module_name</p>
 
@@ -61,39 +60,39 @@
 
     <p>injectHandler debug mibII/system</p>
 
-    <p>and then run snmpwalk on the 'system' group. <a name="lbAF" id="lbAF"> </a></p>
+    <p>and then run snmpwalk on the 'system' group. <a name="lbAF" id="lbAF"> </a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAG" id="lbAG"> </a></p>
+    <p><a name="lbAG" id="lbAG"> </a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_debug_handler (void)</h3>
 
     <p>returns a debug handler that can be injected into a given handler chain.</p>
 
-    <p>Definition at line 50 of file debug_handler.c.</p>
+    <p>Definition at line 51 of file debug_handler.c.</p>
 
-    <p>References netsnmp_create_handler().</p>
+    <p>References netsnmp_create_handler(), and netsnmp_debug_helper().</p>
 
-    <p>Referenced by netsnmp_init_debug_helper(). <a name="lbAH" id="lbAH"> </a></p>
+    <p>Referenced by netsnmp_init_debug_helper(). <a name="lbAH" id="lbAH"> </a></p>
 
     <h3>void netsnmp_init_bulk_to_next_helper (void)</h3>
 
     <p>initializes the bulk_to_next helper which then registers a bulk_to_next handler as a run-time injectable handler for
     configuration file use.</p>
 
-    <p>Definition at line 122 of file bulk_to_next.c.</p>
+    <p>Definition at line 139 of file bulk_to_next.c.</p>
 
-    <p>Referenced by netsnmp_init_helpers(). <a name="lbAI" id="lbAI"> </a></p>
+    <p>Referenced by netsnmp_init_helpers(). <a name="lbAI" id="lbAI"> </a></p>
 
     <h3>void netsnmp_init_debug_helper (void)</h3>
 
     <p>initializes the debug helper which then registers a debug handler as a run-time injectable handler for configuration file
     use.</p>
 
-    <p>Definition at line 154 of file debug_handler.c.</p>
+    <p>Definition at line 155 of file debug_handler.c.</p>
 
-    <p>References netsnmp_get_debug_handler(), and netsnmp_register_handler_by_name(). <a name="lbAJ" id="lbAJ"> </a></p>
+    <p>References netsnmp_get_debug_handler(), and netsnmp_register_handler_by_name(). <a name="lbAJ" id="lbAJ"> </a></p>
 
     <h3>void netsnmp_init_helpers (void)</h3>
 
@@ -102,40 +101,40 @@
     <p>Definition at line 36 of file all_helpers.c.</p>
 
     <p>References netsnmp_init_bulk_to_next_helper(), netsnmp_init_debug_helper(), netsnmp_init_read_only_helper(),
-    netsnmp_init_serialize(), and netsnmp_init_stash_cache_helper().</p>
+    netsnmp_init_serialize(), netsnmp_init_stash_cache_helper(), and netsnmp_init_table_dataset().</p>
 
-    <p>Referenced by init_agent(). <a name="lbAK" id="lbAK"> </a></p>
+    <p>Referenced by init_agent(). <a name="lbAK" id="lbAK"> </a></p>
 
     <h3>void netsnmp_init_read_only_helper (void)</h3>
 
     <p>initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for
     configuration file use.</p>
 
-    <p>Definition at line 80 of file read_only.c.</p>
+    <p>Definition at line 81 of file read_only.c.</p>
 
-    <p>Referenced by netsnmp_init_helpers(). <a name="lbAL" id="lbAL"> </a></p>
+    <p>Referenced by netsnmp_init_helpers(). <a name="lbAL" id="lbAL"> </a></p>
 
     <h3>void netsnmp_init_serialize (void)</h3>
 
     <p>initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for
     configuration file use.</p>
 
-    <p>Definition at line 92 of file serialize.c.</p>
+    <p>Definition at line 93 of file serialize.c.</p>
 
-    <p>Referenced by netsnmp_init_helpers(). <a name="lbAM" id="lbAM"> </a></p>
+    <p>Referenced by netsnmp_init_helpers(). <a name="lbAM" id="lbAM"> </a></p>
 
     <h3>void netsnmp_init_stash_cache_helper (void)</h3>
 
     <p>initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for
     configuration file use.</p>
 
-    <p>Definition at line 231 of file stash_cache.c.</p>
+    <p>Definition at line 233 of file stash_cache.c.</p>
 
     <p>References netsnmp_get_stash_cache_handler(), and netsnmp_register_handler_by_name().</p>
 
     <p>Referenced by netsnmp_init_helpers().</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -174,7 +173,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:32 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

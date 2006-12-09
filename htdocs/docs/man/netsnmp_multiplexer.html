@@ -1,16 +1,15 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>multiplexer: splits mode requests into calls to different handlers.</h1>Section: net-snmp (3)<br />
-    Updated: 28 Dec 2005<br />
+    <h1>multiplexer</h1>Section: net-snmp (3)<br />
+    Updated: 24 Nov 2006<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>multiplexer: splits mode requests into calls to different handlers. - The multiplexer helper lets you split the
-    calling chain depending on the calling mode (get vs getnext vs set).
+    <h2>NAME</h2>multiplexer - Splits mode requests into calls to different handlers.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC"> </a></p>
 
     <h3>Functions</h3>
 
@@ -19,14 +18,15 @@
     <i>returns a multiplixer handler given a</i> <b>netsnmp_mib_handler_methods</b> structure of subhandlers.<br />
     int <b>netsnmp_multiplexer_helper_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b>
     *reginfo, <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <i>implements the multiplexer helper</i> <a name="lbAD" id="lbAD"> </a></p>
+    <i>implements the multiplexer helper</i> <a name="lbAD" id="lbAD"> </a></p>
 
     <h2>Detailed Description</h2>
 
-    <p>The multiplexer helper lets you split the calling chain depending on the calling mode (get vs getnext vs set).</p>
+    <p>Splits mode requests into calls to different handlers.</p>
 
-    <p>Useful if you want different routines to handle different aspects of SNMP requests, which is very common for GET vs SET
-    type actions.</p>
+    <p>The multiplexer helper lets you split the calling chain depending on the calling mode (get vs getnext vs set). Useful if
+    you want different routines to handle different aspects of SNMP requests, which is very common for GET vs SET type
+    actions.</p>
 
     <p>Functionally:</p>
 
@@ -49,32 +49,34 @@
       <dd>SET requests call the set_method, or if not present return a SNMP_ERR_NOTWRITABLE error.</dd>
     </dl>
 
-    <p><a name="lbAE" id="lbAE"> </a></p>
+    <p><a name="lbAE" id="lbAE"> </a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAF" id="lbAF"> </a></p>
+    <p><a name="lbAF" id="lbAF"> </a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_multiplexer_handler (<b>netsnmp_mib_handler_methods</b> * req)</h3>
 
     <p>returns a multiplixer handler given a <b>netsnmp_mib_handler_methods</b> structure of subhandlers.</p>
 
-    <p>Definition at line 32 of file multiplexer.c.</p>
+    <p>Definition at line 33 of file multiplexer.c.</p>
 
-    <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_mib_handler, and snmp_log(). <a name="lbAG"
-    id="lbAG"> </a></p>
+    <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_multiplexer_helper_handler(), NULL, and
+    snmp_log(). <a name="lbAG" id="lbAG"> </a></p>
 
     <h3>int netsnmp_multiplexer_helper_handler (<b>netsnmp_mib_handler</b> * handler, <b>netsnmp_handler_registration</b> *
     reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
 
     <p>implements the multiplexer helper</p>
 
-    <p>Definition at line 53 of file multiplexer.c.</p>
+    <p>Definition at line 54 of file multiplexer.c.</p>
 
     <p>References netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, netsnmp_call_handler(),
-    netsnmp_handler_registration, netsnmp_mib_handler, netsnmp_request_set_error_all(), and snmp_log().</p>
+    netsnmp_request_set_error_all(), and snmp_log().</p>
+
+    <p>Referenced by netsnmp_get_multiplexer_handler().</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -104,7 +106,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:33 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

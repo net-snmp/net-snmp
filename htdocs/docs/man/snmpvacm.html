@@ -5,10 +5,10 @@
     Updated: 30 May 2003<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
     <h2>NAME</h2>snmpvacm - creates and maintains SNMPv3 View-based Access Control entries on a network entity <a name="lbAC" id=
-    "lbAC"> </a>
+    "lbAC"> </a>
 
     <h2>SYNOPSIS</h2><b>snmpvacm</b> [COMMON OPTIONS] <b>createSec2Group</b> MODEL SECURITYNAME GROUPNAME<br />
     <b>snmpvacm</b> [COMMON OPTIONS] <b>deleteSec2Group</b> MODEL SECURITYNAME<br />
@@ -16,9 +16,11 @@
     <b>snmpvacm</b> [COMMON OPTIONS] <b>deleteView</b> NAME SUBTREE<br />
     <b>snmpvacm</b> [COMMON OPTIONS] <b>createAccess</b> GROUPNAME [CONTEXTPREFIX] MODEL LEVEL CONTEXTMATCH READVIEW WRITEVIEW
     NOTIFYVIEW<br />
-    <b>snmpvacm</b> [COMMON OPTIONS] <b>deleteAccess</b> GROUPNAME [CONTEXTPREFIX] MODEL LEVEL
+    <b>snmpvacm</b> [COMMON OPTIONS] <b>deleteAccess</b> GROUPNAME [CONTEXTPREFIX] MODEL LEVEL<br />
+    <b>snmpvacm</b> [COMMON OPTIONS] <b>createAuth</b> GROUPNAME [CONTEXTPREFIX] MODEL LEVEL AUTHTYPE CONTEXTMATCH VIEW<br />
+    <b>snmpvacm</b> [COMMON OPTIONS] <b>deleteAuth</b> GROUPNAME [CONTEXTPREFIX] MODEL LEVEL AUTHTYPE
 
-    <p><a name="lbAD" id="lbAD"> </a></p>
+    <p><a name="lbAD" id="lbAD"> </a></p>
 
     <h2>DESCRIPTION</h2><b>snmpvacm</b> is an SNMP application that can be used to do simple maintenance on the View-based
     Control Module (VACM) tables of an SNMP agent. The SNMPv3 VACM specifications (see RFC2575) define assorted tables to specify
@@ -26,11 +28,11 @@
     in the appropriate one of these tables, and match the equivalent configure directives which are documented in the <i><a href=
     "snmpd.conf.html">snmpd.conf</a>(5)</i> man page.
 
-    <p>A fuller explanation of how these operate can be found in the project FAQ. <a name="lbAE" id="lbAE"> </a></p>
+    <p>A fuller explanation of how these operate can be found in the project FAQ. <a name="lbAE" id="lbAE"> </a></p>
 
     <h2>SUB-COMMANDS</h2>
 
-    <p><a name="lbAF" id="lbAF"> </a></p>
+    <p><a name="lbAF" id="lbAF"> </a></p>
 
     <h3>createSec2Group MODEL SECURITYNAME GROUPNAME</h3>
 
@@ -60,7 +62,7 @@
       then be referenced in the access table (see <b>createAccess</b> below).</dd>
     </dl>
 
-    <p><a name="lbAG" id="lbAG"> </a></p>
+    <p><a name="lbAG" id="lbAG"> </a></p>
 
     <h3>deleteSec2Group MODEL SECURITYNAME</h3>
 
@@ -68,7 +70,7 @@
     principal. The entry to be removed is indexed by the MODEL and SECURITYNAME values, which should match those used in the
     corresponding <b>createSec2Group</b> command (or equivalent).</p>
 
-    <p><a name="lbAH" id="lbAH"> </a></p>
+    <p><a name="lbAH" id="lbAH"> </a></p>
 
     <h3>createView [-Ce] NAME SUBTREE MASK</h3>
 
@@ -101,7 +103,7 @@
 
     <dl compact="compact">
       <dd>A bit mask indicating which sub-identifiers of the associated subtree OID should be regarded as significant.</dd>
-    </dl><a name="lbAI" id="lbAI"> </a>
+    </dl><a name="lbAI" id="lbAI"> </a>
 
     <h3>deleteView NAME SUBTREE</h3>Delete an entry from the SNMPv3 view table, thus removing the subtree from the given MIB
     view. Removing the final (or only) subtree will result in the deletion of the view. The entry to be removed is indexed by the
@@ -110,7 +112,7 @@
     <p>When removing subtrees from a mixed view (i.e. containing both included and excluded subtrees), the included subtrees
     should be removed first.</p>
 
-    <p><a name="lbAJ" id="lbAJ"> </a></p>
+    <p><a name="lbAJ" id="lbAJ"> </a></p>
 
     <h3>createAccess GROUPNAME [CONTEXTPREFIX] MODEL LEVEL CONTEXTMATCH READVIEW WRITEVIEW NOTIFYVIEW</h3>Create an entry in the
     SNMPv3 access table, thus allowing a certain level of access to particular MIB views for the principals in the specified
@@ -191,12 +193,40 @@
       in notification request.</dd>
 
       <dd>Note that this aspect of access control is not currently supported.</dd>
-    </dl><a name="lbAK" id="lbAK"> </a>
+    </dl><a name="lbAK" id="lbAK"> </a>
 
     <h3>deleteAccess GROUPNAME [CONTEXTPREFIX] MODEL LEVEL</h3>Delete an entry from the SNMPv3 access table, thus removing the
     specified access control settings. The entry to be removed is indexed by the group name, context prefix, security model and
     security level values, which should match those used in the corresponding <b>createAccess</b> command (or equivalent).
-    <a name="lbAL" id="lbAL"> </a>
+
+    <p><a name="lbAL" id="lbAL"> </a></p>
+
+    <h3>createAuth GROUPNAME [CONTEXTPREFIX] MODEL LEVEL AUTHTYPE CONTEXTMATCH VIEW</h3>Create an entry in the Net-SNMP extension
+    to the standard access table, thus allowing a certain type of access to the MIB view for the principals in the specified
+    group. The interpretation of GROUPNAME, CONTEXTPREFIX, MODEL, LEVEL and CONTEXTMATCH are the same as for the
+    <b>createAccess</b> directive. The extension access table is indexed by the group name, context prefix, security model,
+    security level and authtype values.
+
+    <p>AUTHTYPE</p>
+
+    <dl compact="compact">
+      <dd>The style of access that this entry should be applied to. See <i><a href="snmpd.conf.html">snmpd.conf</a>(5)</i> and
+      <i><a href="snmptrapd.conf.html">snmptrapd.conf</a>(5)</i> for details of valid tokens.</dd>
+    </dl>
+
+    <p>VIEW</p>
+
+    <dl compact="compact">
+      <dd>The name of the MIB view (as set up by <b>createView</b> or equivalent) defining the MIB objects for which this style
+      of access is authorized.</dd>
+    </dl><a name="lbAM" id="lbAM"> </a>
+
+    <h3>deleteAuth GROUPNAME [CONTEXTPREFIX] MODEL LEVEL AUTHTYPE</h3>Delete an entry from the extension access table, thus
+    removing the specified access control settings. The entry to be removed is indexed by the group name, context prefix,
+    security model, security level and authtype values, which should match those used in the corresponding <b>createAuth</b>
+    command (or equivalent).
+
+    <p><a name="lbAN" id="lbAN"> </a></p>
 
     <h2>EXAMPLES</h2>
 
@@ -231,7 +261,7 @@
     ".mib-2.html">.mib-2</a>(1)<a href=".system.html">.system</a>(1)</i> , and then allows those users in the group "ROGroup"
     (i.e. "wes") read-access, but not write-access to the view "sysView" (i.e. the system group).</p>
 
-    <p><a name="lbAM" id="lbAM"> </a></p>
+    <p><a name="lbAO" id="lbAO"> </a></p>
 
     <h2>EXIT STATUS</h2>
 
@@ -243,7 +273,7 @@
 
     <p>2 - An error occurred while executing the command (which also displays a suitable error message).</p>
 
-    <p><a name="lbAN" id="lbAN"> </a></p>
+    <p><a name="lbAP" id="lbAP"> </a></p>
 
     <h2>LIMITATIONS</h2>
 
@@ -256,12 +286,12 @@
 
     <p>There is (currently) no equivalent to the one-shot configure directives <i>rouser</i> and <i>rwuser.</i></p>
 
-    <p><a name="lbAO" id="lbAO"> </a></p>
+    <p><a name="lbAQ" id="lbAQ"> </a></p>
 
     <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="snmpusm.html">snmpusm</a>(1), <a href=
     "snmpd.conf.html">snmpd.conf</a>(5), <a href="snmp.conf.html">snmp.conf</a>(5), RFC 2575, Net-SNMP project FAQ
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -288,20 +318,24 @@
           NOTIFYVIEW</a></dt>
 
           <dt><a href="#lbAK">deleteAccess GROUPNAME [CONTEXTPREFIX] MODEL LEVEL</a></dt>
+
+          <dt><a href="#lbAL">createAuth GROUPNAME [CONTEXTPREFIX] MODEL LEVEL AUTHTYPE CONTEXTMATCH VIEW</a></dt>
+
+          <dt><a href="#lbAM">deleteAuth GROUPNAME [CONTEXTPREFIX] MODEL LEVEL AUTHTYPE</a></dt>
         </dl>
       </dd>
 
-      <dt><a href="#lbAL">EXAMPLES</a></dt>
+      <dt><a href="#lbAN">EXAMPLES</a></dt>
 
-      <dt><a href="#lbAM">EXIT STATUS</a></dt>
+      <dt><a href="#lbAO">EXIT STATUS</a></dt>
 
-      <dt><a href="#lbAN">LIMITATIONS</a></dt>
+      <dt><a href="#lbAP">LIMITATIONS</a></dt>
 
-      <dt><a href="#lbAO">SEE ALSO</a></dt>
+      <dt><a href="#lbAQ">SEE ALSO</a></dt>
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:32 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

@@ -1,48 +1,46 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>mode_end_call: at the end of a series of requests, call another handler hook.</h1>Section: net-snmp (3)<br />
-    Updated: 28 Dec 2005<br />
+    <h1>mode_end_call</h1>Section: net-snmp (3)<br />
+    Updated: 24 Nov 2006<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>mode_end_call: at the end of a series of requests, call another handler hook. - Handlers that want to loop
-    through a series of requests and then receive a callback at the end of a particular MODE can use this helper to make this
-    possible.
+    <h2>NAME</h2>mode_end_call - At the end of a series of requests, call another handler hook.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC"> </a></p>
 
     <h3>Functions</h3>
 
     <p><br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_mode_end_call_handler</b> (netsnmp_mode_handler_list *endlist)<br />
+    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_mode_end_call_handler</b> (<b>netsnmp_mode_handler_list</b> *endlist)<br />
     <i>returns a mode_end_call handler that can be injected into a given handler chain.</i><br />
-    netsnmp_mode_handler_list * <b>netsnmp_mode_end_call_add_mode_callback</b> (netsnmp_mode_handler_list *endlist, int mode,
-    <b>netsnmp_mib_handler</b> *callbackh)<br />
+    <b>netsnmp_mode_handler_list</b> * <b>netsnmp_mode_end_call_add_mode_callback</b> (<b>netsnmp_mode_handler_list</b> *endlist,
+    int mode, <b>netsnmp_mib_handler</b> *callbackh)<br />
     <i>adds a mode specific callback to the callback list.</i><br />
     int <b>netsnmp_mode_end_call_helper</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
     <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <a name="lbAD" id="lbAD"> </a></p>
+    <a name="lbAD" id="lbAD"> </a></p>
 
     <h2>Detailed Description</h2>
 
-    <p>Handlers that want to loop through a series of requests and then receive a callback at the end of a particular MODE can
-    use this helper to make this possible.</p>
+    <p>At the end of a series of requests, call another handler hook.</p>
 
-    <p>For most modules, this is not needed as the handler itself could perform a for() loop around the request list and then
-    perform its actions afterwards. However, if something like the serialize helper is in use this isn't possible because not all
-    the requests for a given handler are being passed downward in a single group. Thus, this helper *must* be added above other
-    helpers like the serialize helper to be useful.</p>
+    <p>Handlers that want to loop through a series of requests and then receive a callback at the end of a particular MODE can
+    use this helper to make this possible. For most modules, this is not needed as the handler itself could perform a for() loop
+    around the request list and then perform its actions afterwards. However, if something like the serialize helper is in use
+    this isn't possible because not all the requests for a given handler are being passed downward in a single group. Thus, this
+    helper *must* be added above other helpers like the serialize helper to be useful.</p>
 
     <p>Multiple mode specific handlers can be registered and will be called in the order they were regestered in. Callbacks
-    regesterd with a mode of NETSNMP_MODE_END_ALL_MODES will be called for all modes. <a name="lbAE" id="lbAE"> </a></p>
+    regesterd with a mode of NETSNMP_MODE_END_ALL_MODES will be called for all modes. <a name="lbAE" id="lbAE"> </a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAF" id="lbAF"> </a></p>
+    <p><a name="lbAF" id="lbAF"> </a></p>
 
-    <h3><b>netsnmp_mib_handler</b>* netsnmp_get_mode_end_call_handler (netsnmp_mode_handler_list * endlist)</h3>
+    <h3><b>netsnmp_mib_handler</b>* netsnmp_get_mode_end_call_handler (<b>netsnmp_mode_handler_list</b> * endlist)</h3>
 
     <p>returns a mode_end_call handler that can be injected into a given handler chain.</p>
 
@@ -58,20 +56,20 @@
       <dd>An injectable Net-SNMP handler.</dd>
     </dl>
 
-    <p>Definition at line 44 of file mode_end_call.c.</p>
+    <p>Definition at line 45 of file mode_end_call.c.</p>
 
-    <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), and netsnmp_mib_handler. <a name="lbAG" id="lbAG">
-    </a></p>
+    <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_mode_end_call_helper(), and NULL. <a name=
+    "lbAG" id="lbAG"> </a></p>
 
-    <h3>netsnmp_mode_handler_list* netsnmp_mode_end_call_add_mode_callback (netsnmp_mode_handler_list * endlist, int mode,
-    <b>netsnmp_mib_handler</b> * callbackh)</h3>
+    <h3><b>netsnmp_mode_handler_list</b>* netsnmp_mode_end_call_add_mode_callback (<b>netsnmp_mode_handler_list</b> * endlist,
+    int mode, <b>netsnmp_mib_handler</b> * callbackh)</h3>
 
     <p>adds a mode specific callback to the callback list.</p>
 
     <p><b>Parameters:</b></p>
 
     <dl compact="compact">
-      <dd><i>endinfo</i> the information structure for the mode_end_call helper. Can be NULL to create a new list.<br />
+      <dd><i>endlist</i> the information structure for the mode_end_call helper. Can be NULL to create a new list.<br />
       <i>mode</i> the mode to be called upon. A mode of NETSNMP_MODE_END_ALL_MODES = all modes.<br />
       <i>callbackh</i> the netsnmp_mib_handler callback to call.</dd>
     </dl>
@@ -82,11 +80,12 @@
       <dd>the new registration information list upon success.</dd>
     </dl>
 
-    <p>Definition at line 64 of file mode_end_call.c.</p>
+    <p>Definition at line 65 of file mode_end_call.c.</p>
 
-    <p>References netsnmp_mib_handler, netsnmp_mib_handler_s::next, and SNMP_MALLOC_TYPEDEF.</p>
+    <p>References netsnmp_mode_handler_list_s::callback_handler, netsnmp_mode_handler_list_s::mode,
+    netsnmp_mode_handler_list_s::next, NULL, and SNMP_MALLOC_TYPEDEF.</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -105,17 +104,17 @@
 
       <dd>
         <dl>
-          <dt><a href="#lbAF"><b>netsnmp_mib_handler</b>* netsnmp_get_mode_end_call_handler (netsnmp_mode_handler_list *
+          <dt><a href="#lbAF"><b>netsnmp_mib_handler</b>* netsnmp_get_mode_end_call_handler (<b>netsnmp_mode_handler_list</b> *
           endlist)</a></dt>
 
-          <dt><a href="#lbAG">netsnmp_mode_handler_list* netsnmp_mode_end_call_add_mode_callback (netsnmp_mode_handler_list *
-          endlist, int mode, <b>netsnmp_mib_handler</b> * callbackh)</a></dt>
+          <dt><a href="#lbAG"><b>netsnmp_mode_handler_list</b>* netsnmp_mode_end_call_add_mode_callback
+          (<b>netsnmp_mode_handler_list</b> * endlist, int mode, <b>netsnmp_mib_handler</b> * callbackh)</a></dt>
         </dl>
       </dd>
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:33 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

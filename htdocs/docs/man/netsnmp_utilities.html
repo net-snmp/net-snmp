@@ -1,69 +1,67 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>utility_handlers: simplify request processing</h1>Section: net-snmp (3)<br />
-    Updated: 28 Dec 2005<br />
+    <h1>utility_handlers</h1>Section: net-snmp (3)<br />
+    Updated: 24 Nov 2006<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>utility_handlers: simplify request processing - A group of handlers intended to simplify certain aspects of
+    <h2>NAME</h2>utility_handlers - Simplify request processing A group of handlers intended to simplify certain aspects of
     processing a request for a MIB object.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC"> </a></p>
 
     <h3>Modules</h3>
 
     <p><br />
-    group <b>bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler.</b><br />
-    <i>The only purpose of this handler is to convert a GETBULK request to a GETNEXT request.</i></p>
+    <b>bulk_to_next</b><br />
+    <i>Convert GETBULK requests into GETNEXT requests for the handler.</i></p>
 
     <p><br />
-    group <b>cache_handler: Maintains a cache of data for use by lower level handlers.</b><br />
-    <i>This helper checks to see whether the data has been loaded 'recently' (according to the timeout for that particular cache)
-    and calls the registered 'load_cache' routine if necessary.</i></p>
+    <b>cache_handler</b><br />
+    <i>Maintains a cache of data for use by lower level handlers.</i></p>
 
     <p><br />
-    group <b>debug: print out debugging information about the handler chain being called.</b><br />
-    <i>This is a useful module for run-time debugging of requests as the pass this handler in a calling chain.</i></p>
+    <b>debug</b><br />
+    <i>Print out debugging information about the handler chain being called.</i></p>
 
     <p><br />
-    group <b>mode_end_call: at the end of a series of requests, call another handler hook.</b><br />
-    <i>Handlers that want to loop through a series of requests and then receive a callback at the end of a particular MODE can
-    use this helper to make this possible.</i></p>
+    <b>mode_end_call</b><br />
+    <i>At the end of a series of requests, call another handler hook.</i></p>
 
     <p><br />
-    group <b>multiplexer: splits mode requests into calls to different handlers.</b><br />
-    <i>The multiplexer helper lets you split the calling chain depending on the calling mode (get vs getnext vs set).</i></p>
+    <b>multiplexer</b><br />
+    <i>Splits mode requests into calls to different handlers.</i></p>
 
     <p><br />
-    group <b>read_only: make your handler read_only automatically</b><br />
-    <i>The only purpose of this handler is to return an appropriate error for any requests passed to it in a SET mode.</i></p>
+    <b>read_only</b><br />
+    <i>Make your handler read_only automatically The only purpose of this handler is to return an appropriate error for any
+    requests passed to it in a SET mode.</i></p>
 
     <p><br />
-    group <b>row_merge: Calls sub handlers with request for one row at a time.</b><br />
-    <i>This helper splits a whole bunch of requests into chunks based on the row index that they refer to, and passes all
-    requests for a given row to the lower handlers.</i></p>
+    <b>row_merge</b><br />
+    <i>Calls sub handlers with request for one row at a time.</i></p>
 
     <p><br />
-    group <b>serialize: Calls sub handlers one request at a time.</b><br />
-    <i>This functionally passes in one request at a time into lower handlers rather than a whole bunch of requests at
-    once.</i></p>
+    <b>serialize</b><br />
+    <i>Calls sub handlers one request at a time.</i></p>
 
     <p><br />
-    group <b>stash_to_next: convert GET_STASH requests into GETNEXT requests for the handler.</b><br />
-    <i>The purpose of this handler is to convert a GET_STASH auto-cache request to a series of GETNEXT requests.</i></p>
+    <b>stash_to_next</b><br />
+    <i>Convert GET_STASH requests into GETNEXT requests for the handler.</i></p>
 
-    <p><a name="lbAD" id="lbAD"> </a></p>
+    <p><a name="lbAD" id="lbAD"> </a></p>
 
     <h2>Detailed Description</h2>
 
-    <p>A group of handlers intended to simplify certain aspects of processing a request for a MIB object.</p>
+    <p>Simplify request processing A group of handlers intended to simplify certain aspects of processing a request for a MIB
+    object.</p>
 
     <p>These helpers do not implement any MIB objects themselves. Rather they handle specific generic situations, either
     returning an error, or passing a (possibly simpler) request down to lower level handlers.</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -80,7 +78,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:33 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

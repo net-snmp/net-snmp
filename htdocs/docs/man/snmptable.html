@@ -5,12 +5,12 @@
     Updated: 25 Jul 2003<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>snmptable - retrieve an SNMP table and display it in tabular form <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmptable - retrieve an SNMP table and display it in tabular form <a name="lbAC" id="lbAC"> </a>
 
     <h2>SYNOPSIS</h2><b>snmptable</b> [COMMON OPTIONS] [-Cb] [-CB] [-Ch] [-CH] [-Ci] [-Cf STRING] [-Cw WIDTH] AGENT TABLE-OID
-    <a name="lbAD" id="lbAD"> </a>
+    <a name="lbAD" id="lbAD"> </a>
 
     <h2>DESCRIPTION</h2><b>snmptable</b> is an SNMP application that repeatedly uses the SNMP GETNEXT or GETBULK requests to
     query for information on a network entity. The parameter <i>TABLE-OID</i> must specify an SNMP table.
@@ -21,7 +21,7 @@
     <p>AGENT identifies a target SNMP agent, which is instrumented to monitor the gievn objects. At its simplest, the AGENT
     specification will consist of a hostname or an IPv4 address. In this situation, the command will attempt communication with
     the agent, using UDP/IPv4 to port 161 of the given target host. See <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> for a full
-    list of the possible formats for AGENT. <a name="lbAE" id="lbAE"> </a></p>
+    list of the possible formats for AGENT. <a name="lbAE" id="lbAE"> </a></p>
 
     <h2>OPTIONS</h2>
 
@@ -77,14 +77,14 @@
       then that single column will still be printed.</dd>
     </dl>
 
-    <p><a name="lbAF" id="lbAF"> </a></p>
+    <p><a name="lbAF" id="lbAF"> </a></p>
 
     <h2>EXAMPLES</h2>$ snmptable -v 2c -c public localhost at.atTable
 
     <p>SNMP table: at.atTable RFC1213-MIB::atTable</p>
 
     <p>atIfIndex atPhysAddress atNetAddress<br />
-            1  8:0:20:20:0:ab 130.225.243.33</p>
+            1  8:0:20:20:0:ab 130.225.243.33</p>
 
     <p>$ snmptable -v 2c -c public -Cf + localhost at.atTable</p>
 
@@ -119,16 +119,16 @@ index: [2]
 65897282        ?               0               0               
 0               zeroDotZero     
 
-</pre><a name="lbAG" id="lbAG"> </a>
+</pre><a name="lbAG" id="lbAG"> </a>
 
     <h2>BUGS</h2>The test for <i>TABLE-OID</i> actually specifying a table is rather heuristic. Note also that the test requires
     the defining MIB file to be loaded.
 
-    <p><a name="lbAH" id="lbAH"> </a></p>
+    <p><a name="lbAH" id="lbAH"> </a></p>
 
     <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="variables.html">variables</a>(5).
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -149,7 +149,7 @@ index: [2]
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:32 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

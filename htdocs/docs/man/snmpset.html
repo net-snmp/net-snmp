@@ -5,11 +5,11 @@
     Updated: 08 Feb 2002<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>snmpset - communicates with a network entity using SNMP SET requests <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmpset - communicates with a network entity using SNMP SET requests <a name="lbAC" id="lbAC"> </a>
 
-    <h2>SYNOPSIS</h2><b>snmpset</b> [COMMON OPTIONS] OID TYPE VALUE [OID TYPE VALUE]... <a name="lbAD" id="lbAD"> </a>
+    <h2>SYNOPSIS</h2><b>snmpset</b> [COMMON OPTIONS] OID TYPE VALUE [OID TYPE VALUE]... <a name="lbAD" id="lbAD"> </a>
 
     <h2>DESCRIPTION</h2><b>snmpset</b> is an SNMP application that uses the SNMP SET request to set information on a network
     entity. One or more object identifiers (OIDs) must be given as arguments on the command line. A type and a value to be set
@@ -62,8 +62,8 @@
           <dd>BITS</dd>
         </dl>
       </dd>
-    </dl>Most of these will use the obvious corresponding ASN.1 type. value, and the 'u' unsigned type is also used for handling
-    Gauge32 values.
+    </dl>Most of these will use the obvious corresponding ASN.1 type. 's', 'x', 'd' and 'b' are all different ways of specifying
+    an OCTET STRING value, and the 'u' unsigned type is also used for handling Gauge32 values.
 
     <p>If you have the proper MIB file loaded, you can, in most cases, replace the type with an '=' sign. For an object of type
     OCTET STRING this will assume a string like the 's' type notation. For other types it will do "The Right Thing".</p>
@@ -79,14 +79,14 @@
     ip.ipForwarding.0 = INTEGER: <a href="not-forwarding.html">not-forwarding</a>(2)</p>
 
     <p>If the network entity has an error processing the request packet, an error packet will be returned and a message will be
-    shown, helping to pinpoint in what way the request was malformed. <a name="lbAE" id="lbAE"> </a></p>
+    shown, helping to pinpoint in what way the request was malformed. <a name="lbAE" id="lbAE"> </a></p>
 
     <h2>OPTIONS</h2><b>snmpset</b> takes the common options described in the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual
-    page. <a name="lbAF" id="lbAF"> </a>
+    page. <a name="lbAF" id="lbAF"> </a>
 
     <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="variables.html">variables</a>(5).
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -103,7 +103,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:32 GMT, December 30, 2005
+    Time: 16:55:08 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

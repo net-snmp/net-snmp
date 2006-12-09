@@ -5,14 +5,14 @@
     Updated: 29 Jun 2005<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>snmptrapd.conf - configuration file for the Net-SNMP notification receiver <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmptrapd.conf - configuration file for the Net-SNMP notification receiver <a name="lbAC" id="lbAC"> </a>
 
     <h2>DESCRIPTION</h2>The Net-SNMP notification receiver (trap daemon) uses one or more configuration files to control its
     operation and how incoming traps (and INFORM requests) should be processed. This file (<b>snmptrapd.conf</b>) can be located
     in one of several locations, as described in the <i><a href="snmp_config.html">snmp_config</a>(5)</i> manual page. <a name=
-    "lbAD" id="lbAD"> </a>
+    "lbAD" id="lbAD"> </a>
 
     <h2>IMPORTANT</h2>Previously, <b>snmptrapd</b> would accept all incoming notifications, and log them automatically (even if
     no explicit configuration was provided). Starting with release 5.3, access control checks will be applied to incoming
@@ -20,7 +20,7 @@
     such traps <b>WILL NOT</b> be processed. See the section <b>ACCESS CONTROL</b> for more details.
 
     <p>As with the agent configuration, the <i>snmptrapd.conf</i> directives can be divided into four distinct groups. <a name=
-    "lbAE" id="lbAE"> </a></p>
+    "lbAE" id="lbAE"> </a></p>
 
     <h2>TRAPD BEHAVIOUR</h2>
 
@@ -53,7 +53,7 @@
       <dt>pidFile PATH</dt>
 
       <dd>defines a file in which to store the process ID of the notification receiver. By default, this ID is not saved.</dd>
-    </dl><a name="lbAF" id="lbAF"> </a>
+    </dl><a name="lbAF" id="lbAF"> </a>
 
     <h2>ACCESS CONTROL</h2>Starting with release 5.3, it is necessary to explicitly specify who is authorised to send traps and
     informs to the notification receiver (and what types of processing these are allowed to trigger). This uses an extension of
@@ -132,7 +132,7 @@
 
       <dd>will disable the above access control checks, and revert to the previous behaviour of accepting all incoming
       notifications.</dd>
-    </dl><a name="lbAG" id="lbAG"> </a>
+    </dl><a name="lbAG" id="lbAG"> </a>
 
     <h2>LOGGING</h2>
 
@@ -178,7 +178,7 @@
       <dt>printEventNumbers yes</dt>
 
       <dd>enables specialised logging of event-related notifications from the (long obsolete) M2M-MIB.</dd>
-    </dl><a name="lbAH" id="lbAH"> </a>
+    </dl><a name="lbAH" id="lbAH"> </a>
 
     <h2>NOTIFICATION PROCESSING</h2>As well as logging incoming notifications, they can also be forwarded on to another
     notification receiver, or passed to an external program for specialised processing.
@@ -186,63 +186,65 @@
     <dl compact="compact">
       <dt>traphandle OID|default PROGRAM [ARGS ...]</dt>
 
+      <dd>invokes the specified program (with the given arguments) whenever a notification is received that matches the OID
+      token. For SNMPv2c and SNMPv3 notifications, this token will be compared against the snmpTrapOID value taken from the
+      notification. For SNMPv1 traps, the generic and specific trap values and the enterprise OID will be converted into the
+      equivalent OID (following RFC 2576).</dd>
+
+      <dd>Typically, the OID token will be the name (or numeric OID) of a NOTIFICATION-TYPE object, and the specified program
+      will be invoked for notifications that match this OID exactly. However this token also supports a simple form of wildcard
+      suffixing. By appending the character notification based within subtree rooted at the specified OID. For example, an OID
+      token of .1.3.6.1.4.1* would match any enterprise specific notification (including the specified OID itself). An OID token
+      of .1.3.6.1.4.1.* would would work in much the same way, but would not match this exact OID - just notifications that lay
+      strictly below this root. Note that this syntax does not support full regular expressions or wildcards - an OID token of
+      the form oid.*.subids is <b>not</b> valid.</dd>
+
+      <dd>If the OID field is the token <i>default</i> then the program will be invoked for any notification not matching another
+      (OID specific) <i>traphandle</i> entry.</dd>
+    </dl>
+
+    <p>Details of the notification are fed to the program via its standard input. Note that this will always use the SNMPv2-style
+    notification format, with SNMPv1 traps being converted as per RFC 2576, before being passed to the program. The input format
+    is as follows, one entry per line:</p>
+
+    <dl compact="compact">
       <dd>
-        invokes the specified program (with the given arguments) whenever a notification is received with a snmpTrapOID value
-        matching the OID token. If this field is <i>default</i> then the program will be invoked for any notification not
-        matching another (OID specific) <i>traphandle</i> entry.
-
         <dl compact="compact">
+          <dt>HOSTNAME</dt>
+
+          <dd>The name of the host that sent the notification, as determined by <i><a href=
+          "gethostbyaddr.html">gethostbyaddr</a>(3)</i>.<br /></dd>
+
+          <dt>IPADDRESS</dt>
+
+          <dd>The IP address of the host that sent the notification.</dd>
+
+          <dt>VARBINDS</dt>
+
+          <dd>A list of variable bindings describing the contents of the notification, one per line. The first token on each line
+          (up until a space) is the OID of the varind, and the remainder of the line is its value. The format of both of these
+          are controlled by the <i>outputOption</i> directive (or similar configuration).</dd>
+
+          <dd>The first OID should always be SNMPv2-MIB::sysUpTime.0, and the second should be SNMPv2-MIB::snmpTrapOID.0. The
+          remaining lines will contain the payload varbind list. For SNMPv1 traps, the final OID will be
+          SNMPv2-MIB::snmpTrapEnterprise.0.<br /></dd>
+
+          <dt>Example:</dt>
+
           <dd>
+            A <b>traptoemail</b> script has been included in the Net-SNMP package that can be used within a <i>traphandle</i>
+            directive:<br />
+
             <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>An SNMPv1 trap will be converted to an equivalent SNMPv2-style notification (following RFC 2576), before
-              selecting the trap handler(s) to call. This will affect both the OIDs listed in <i>traphandle</i> entries, and the
-              format of the data passed to the trap handler program.</dd>
-            </dl>
-          </dd>
-        </dl>The program is fed details about the notification to its standard input, in the following format, one entry per
-        line:
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>HOSTNAME</dt>
-
-              <dd>The name of the host that sent the notification, as determined by <i><a href=
-              "gethostbyaddr.html">gethostbyaddr</a>(3)</i>.<br /></dd>
-
-              <dt>IPADDRESS</dt>
-
-              <dd>The IP address of the host that sent the notification.</dd>
-
-              <dt>VARBINDS</dt>
-
-              <dd>A list of variable bindings describing the contents of the notification, one per line. The first token on each
-              line (up until a space) is the OID of the varind, and the remainder of the line is its value. The format of both of
-              these are controlled by the <i>outputOption</i> directive (or similar configuration).</dd>
-
-              <dd>The first OID should always be SNMPv2-MIB::sysUpTime.0, and the second should be SNMPv2-MIB::snmpTrapOID.0. The
-              remaining lines will contain the payload varbind list. For SNMPv1 traps, the final OID will be
-              SNMPv2-MIB::snmpTrapEnterprise.0.<br /></dd>
-
-              <dt>Example:</dt>
-
-              <dd>
-                A <b>traptoemail</b> script has been included in the Net-SNMP package that can be used within a <i>traphandle</i>
-                directive:<br />
-
-                <dl compact="compact">
-                  <dd>traphandle default /usr/bin/perl /usr/local/bin/traptoemail -s mysmtp.somewhere.com -f <a href=
-                  "mailto:admin@somewhere.com">admin@somewhere.com</a> <a href=
-                  "mailto:me@somewhere.com">me@somewhere.com</a></dd>
-                </dl>
-              </dd>
+              <dd>traphandle default /usr/bin/perl /usr/local/bin/traptoemail -s mysmtp.somewhere.com -f <a href=
+              "mailto:admin@somewhere.com">admin@somewhere.com</a> <a href="mailto:me@somewhere.com">me@somewhere.com</a></dd>
             </dl>
           </dd>
         </dl>
       </dd>
+    </dl>
 
+    <dl compact="compact">
       <dt>forward OID|default DESTINATION</dt>
 
       <dd>forwards notifications that match the specified OID to another receiver listening on DESTINATION. The interpretation of
@@ -250,7 +252,7 @@
 
       <dd>See the section <b>LISTENING ADDRESSES</b> in the <i><a href="snmpd.html">snmpd</a>(8)</i> manual page for more
       information about the format of listening addresses.</dd>
-    </dl><a name="lbAI" id="lbAI"> </a>
+    </dl><a name="lbAI" id="lbAI"> </a>
 
     <h2>NOTES</h2>
 
@@ -266,15 +268,15 @@
       <i>1</i>, <i>yes</i> or <i>true</i> to enable the corresponding behaviour, or any of <i>0</i>, <i>no</i> or <i>false</i> to
       disable it. The default in each case is for the feature to be turned off, so these directives are typically only used to
       enable the appropriate behaviour.</dd>
-    </dl><a name="lbAJ" id="lbAJ"> </a>
+    </dl><a name="lbAJ" id="lbAJ"> </a>
 
-    <h2>FILES</h2>/usr/local/etc/snmp/snmptrapd.conf <a name="lbAK" id="lbAK"> </a>
+    <h2>FILES</h2>/usr/local/etc/snmp/snmptrapd.conf <a name="lbAK" id="lbAK"> </a>
 
     <h2>SEE ALSO</h2><a href="snmp_config.html">snmp_config</a>(5), <a href="snmptrapd.html">snmptrapd</a>(8), <a href=
     "syslog.html">syslog</a>(8), <a href="variables.html">variables</a>(5), <a href="snmpd.conf.html">snmpd.conf</a>(5), <a href=
     "read_config.html">read_config</a>(3).
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -301,7 +303,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:34 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

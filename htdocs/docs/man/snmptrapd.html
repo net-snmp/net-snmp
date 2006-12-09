@@ -5,16 +5,16 @@
     Updated: 15 Jan 2004<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>snmptrapd - Receive and log SNMP trap messages. <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmptrapd - Receive and log SNMP trap messages. <a name="lbAC" id="lbAC"> </a>
 
-    <h2>SYNOPSIS</h2><b>snmptrapd</b> [OPTIONS] [LISTENING ADDRESSES] <a name="lbAD" id="lbAD"> </a>
+    <h2>SYNOPSIS</h2><b>snmptrapd</b> [OPTIONS] [LISTENING ADDRESSES] <a name="lbAD" id="lbAD"> </a>
 
     <h2>DESCRIPTION</h2><b>snmptrapd</b> is an SNMP application that receives and logs SNMP TRAP and INFORM messages.
 
     <p>Note: the default is to listen on UDP port 162 on all IPv4 interfaces. Since 162 is a privileged port, <b>snmptrapd</b>
-    must typically be run as root. <a name="lbAE" id="lbAE"> </a></p>
+    must typically be run as root. <a name="lbAE" id="lbAE"> </a></p>
 
     <h2>OPTIONS</h2>
 
@@ -68,11 +68,11 @@
       <dt><b>-I</b> <i>[-]INITLIST</i></dt>
 
       <dd>
-        Specifies which modules should (or should not) be initialized when the agent starts up. If the comma-separated
+        Specifies which modules should (or should not) be initialized when snmptrapd starts up. If the comma-separated
         <i>INITLIST</i> is preceded with a '-', it is the list of modules that should <i>not</i> be started. <i>not</i> want to
         be started. Otherwise, <i>INITLIST</i> Otherwise this is the list of the <i>only</i> modules that should be started.
 
-        <p>To get a list of compiled modules, run the agent with the arguments <i>-Dmib_init -H</i> (assuming debugging support
+        <p>To get a list of compiled modules, run snmptrapd with the arguments <i>-Dmib_init -H</i> (assuming debugging support
         has been compiled in).</p>
       </dd>
 
@@ -115,7 +115,7 @@
 
       <dt><b>-x</b> <i>ADDRESS</i></dt>
 
-      <dd>Connect to the AgentX master agent on the specified address, rather than the default '/var/agentx/master'. See
+      <dd>Connect to the AgentX master agent on the specified address, rather than the default "/var/agentx/master". See
       <i><a href="snmpd.html">snmpd</a>(8)</i> for details of the format of such addresses.</dd>
 
       <dt><b>--</b><i>name=value</i></dt>
@@ -123,7 +123,7 @@
       <dd>Allows to specify any token ("name") supported in the <i>snmptrapd.conf</i> file and sets its value to "value".
       Overrides the corresponding token in the <i>snmptrapd.conf</i> file. See <i><a href=
       "snmptrapd.conf.html">snmptrapd.conf</a>(5)</i> for the full list of tokens.</dd>
-    </dl><a name="lbAF" id="lbAF"> </a>
+    </dl><a name="lbAF" id="lbAF"> </a>
 
     <h2>FORMAT SPECIFICATIONS</h2>
 
@@ -273,7 +273,7 @@
       <dd>The variable-bindings will be a comma-separated list (rather than a tab-separated one)</dd>
 
       <dd>The system uptime will be broken down into a human-meaningful format (rather than being a simple integer)</dd>
-    </dl><a name="lbAG" id="lbAG"> </a>
+    </dl><a name="lbAG" id="lbAG"> </a>
 
     <h3>Examples:</h3>
 
@@ -295,27 +295,27 @@ snmptrapd -P -F "%02.2h:%02.2j TRAP%w.%q from %A\n"
 snmptrapd -P -F "%#02.2h:%#02.2j TRAP%w.%q from %A\n"
 </pre>
       </dd>
-    </dl><a name="lbAH" id="lbAH"> </a>
+    </dl><a name="lbAH" id="lbAH"> </a>
 
     <h2>LISTENING ADDRESSES</h2>By default, <b>snmptrapd</b> listens for incoming SNMP TRAP and INFORM packets on UDP port 162 on
     all IPv4 interfaces. However, it is possible to modify this behaviour by specifying one or more listening addresses as
     arguments to <b>snmptrapd</b>. See the <i><a href="snmpd.html">snmpd</a>(8)</i> manual page for more information about the
-    format of listening addresses. <a name="lbAI" id="lbAI"> </a>
+    format of listening addresses. <a name="lbAI" id="lbAI"> </a>
 
     <h2>NOTIFICATION-LOG-MIB SUPPORT</h2>As of net-snmp 5.0, the snmptrapd application supports the NOTIFICATION-LOG-MIB. It does
     this by opening an AgentX subagent connection to the master snmpd agent and registering the notification log tables. As long
     as the snmpd application is started first, it will attach itself to it and thus you should be able to view the last recorded
     notifications via the nlmLogTable and nlmLogVariableTable. See the snmptrapd.conf file and the "dontRetainLogs" token for
-    turning off this support. See the NOTIFICATION-LOG-MIB for more details about the MIB itself. <a name="lbAJ" id="lbAJ"> </a>
+    turning off this support. See the NOTIFICATION-LOG-MIB for more details about the MIB itself. <a name="lbAJ" id="lbAJ"> </a>
 
     <h2>EXTENSIBILITY AND CONFIGURATION</h2>See the <i><a href="snmptrapd.conf.html">snmptrapd.conf</a>(5)</i> manual page.
-    <a name="lbAK" id="lbAK"> </a>
+    <a name="lbAK" id="lbAK"> </a>
 
     <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="snmpd.html">snmpd</a>(8), <a href=
     "printf.html">printf</a>(3), <a href="snmptrapd.conf.html">snmptrapd.conf</a>(5), <a href="syslog.html">syslog</a>(8),
     <a href="variables.html">variables</a>(5)
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -346,7 +346,7 @@ snmptrapd -P -F "%#02.2h:%#02.2j TRAP%w.%q from %A\n"
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:34 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

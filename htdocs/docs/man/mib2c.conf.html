@@ -1,28 +1,28 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>MIB2C.CONF</h1>Section: Net-SNMP (1)<br />
+    <h1>MIB2C.CONF</h1>Section: Net-SNMP (5)<br />
     Updated: 28 Apr 2004<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>mib2c.conf -- How to write mib2c.conf files to do ANYTHING based on MIB input. <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>mib2c.conf -- How to write mib2c.conf files to do ANYTHING based on MIB input. <a name="lbAC" id="lbAC"> </a>
 
     <h2>SYNOPSIS</h2>% cat &gt; mib2c.test.conf &lt;&lt; EOF @foreach $t table@<br />
-      Starting table $t<br />
-      @foreach $c column@<br />
-        echo $t has column $c which has a syntax of $c.syntax<br />
-      @end@
+      Starting table $t<br />
+      @foreach $c column@<br />
+        echo $t has column $c which has a syntax of $c.syntax<br />
+      @end@
 
     <p>@end@ EOF</p>
 
-    <p>% mib2c -c mib2c.test.conf internet <a name="lbAD" id="lbAD"> </a></p>
+    <p>% mib2c -c mib2c.test.conf internet <a name="lbAD" id="lbAD"> </a></p>
 
     <h2>DESCRIPTION</h2>The mib2c.conf script language is a MIB-particular language designed to easily process MIB nodes in ways
     that you want. mib2c is a misnomer (for historical purposes), because you can produce anything (not just C code). Look in the
     Net-SNMP "local" directory for a bunch of example mib2c.*.conf files and behold the power before you. <a name="lbAE" id=
-    "lbAE"> </a>
+    "lbAE"> </a>
 
     <h2>COMMANDS</h2>
 
@@ -113,13 +113,13 @@
 
       <dt>@eval $VAR = expression@</dt>
 
-      <dd>evaluates expression and assigns the results to $VAR. This is not a full perl eval, but sort of a "psuedo" eval useful
-      for simple expressions while keeping the same variable name space. See below for a full-blown export to perl.</dd>
+      <dd>evaluates expression and assigns the results to $VAR. This is not a full perl eval, but sort of a ""psuedo"" eval
+      useful for simple expressions while keeping the same variable name space. See below for a full-blown export to perl.</dd>
 
       <dt>@perleval STUFF@</dt>
 
       <dd>evaluates STUFF directly in perl. Note that all mib2c variables interpereted within .conf files are in $vars{NAME} and
-      that a warning will be printed if STUFF does not return 0. (adding a</dd>
+      that a warning will be printed if STUFF does not return 0. (adding a 'return 0;' at the end of STUFF is a workaround.</dd>
 
       <dt>@startperl@</dt>
 
@@ -152,7 +152,7 @@
 
       <dt>@enddefine@</dt>
 
-      <dd>Memorizes "stuff" between the define and enddefine tags for later calling as NAME by @calldefine NAME@.</dd>
+      <dd>Memorizes ""stuff"" between the define and enddefine tags for later calling as NAME by @calldefine NAME@.</dd>
 
       <dt>@calldefine NAME@</dt>
 
@@ -185,7 +185,7 @@
       <dt>@exit@</dt>
 
       <dd>Bail out!</dd>
-    </dl><a name="lbAF" id="lbAF"> </a>
+    </dl><a name="lbAF" id="lbAF"> </a>
 
     <h2>VARIABLES</h2>
 
@@ -277,8 +277,8 @@
 
       <dt>$var.rowstatus</dt>
 
-      <dd>1 if an object is a RowStatus object, 0 if not to indicate whether it contains writable, creatable or RowStatus column
-      objects</dd>
+      <dd>1 if an object is a RowStatus object, 0 if not 'settable', 'creatable' and 'rowstatus' can also be used with table
+      variables to indicate whether it contains writable, creatable or RowStatus column objects</dd>
 
       <dt>$var.hasdefval</dt>
 
@@ -323,13 +323,13 @@
       <dt>$var.description</dt>
 
       <dd>node's description</dd>
-    </dl><a name="lbAG" id="lbAG"> </a>
+    </dl><a name="lbAG" id="lbAG"> </a>
 
     <h2>SEE ALSO</h2>
 
     <p><a href="mib2c.html">mib2c</a>(1)</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index"> </a>
 
     <h2>Index</h2>
 
@@ -348,7 +348,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 17:34:34 GMT, December 30, 2005
+    Time: 16:55:09 GMT, December 09, 2006
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 
