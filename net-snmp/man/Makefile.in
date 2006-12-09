@@ -274,11 +274,11 @@ maninstalldirs:
 #
 html: $(MANALL)
 	for i in $(MANALL); do \
-	   if test `wc -l $$i | awk '{print $$1}'` != 1 ; then \
+#	   if test `wc -l $$i | awk '{print $$1}'` != 1 ; then \
 		   base=`echo $$i | sed 's/.[0-9]$$//;'` ; \
 		   echo "<HTML><BODY bgcolor=\"#ffffff\" background=\"../ucd-snmp-bg3.gif\"><PRE>" > $$base.html; \
 		   man2html -r ./$$i | $(PERL) -p -e 's/HREF=\"..\/man.\//HREF=\"/g;s/\.[1-9]\.html/.html/g;' | grep -v 'Content-type:' >> $$base.html; \
 		   a="$$a $$i"; \
-	   fi ; \
+#	   fi ; \
 	done ;\
 	$(PERL) make_index.pl man_sections.txt $$a > index.html
