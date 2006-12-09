@@ -52,6 +52,17 @@
  */
 
 /*
+ * Darwin's tools are capable of building multiple architectures in one pass.
+ * As a result, platform definitions should be deferred until compile time.
+ */
+#ifdef BYTE_ORDER
+# undef WORDS_BIGENDIAN
+# if BYTE_ORDER == BIG_ENDIAN
+#  define WORDS_BIGENDIAN 1
+# endif
+#endif
+
+/*
  * Although Darwin does have a kvm.h file, kvm_openfiles etc. always
  * return null because /dev/kmem was removed in OS X 10.4 for Intel.
  */
