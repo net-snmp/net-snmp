@@ -90,7 +90,7 @@ Bogus Name. This should always return the string 'swap'.
     <td>.1.3.6.1.4.1.2021.4.3</td>
 <td>
 <pre>
-Total Swap Size configured for the host.
+The total amount of swap space configured for this host.
 </pre>
 </td>
   </tr>
@@ -107,7 +107,7 @@ Total Swap Size configured for the host.
     <td>.1.3.6.1.4.1.2021.4.4</td>
 <td>
 <pre>
-Available Swap Space on the host.
+The amount of swap space currently unused or available.
 </pre>
 </td>
   </tr>
@@ -124,7 +124,8 @@ Available Swap Space on the host.
     <td>.1.3.6.1.4.1.2021.4.5</td>
 <td>
 <pre>
-Total Real/Physical Memory Size on the host.
+The total amount of real/physical memory installed
+on this host.
 </pre>
 </td>
   </tr>
@@ -141,7 +142,8 @@ Total Real/Physical Memory Size on the host.
     <td>.1.3.6.1.4.1.2021.4.6</td>
 <td>
 <pre>
-Available Real/Physical Memory Space on the host.
+The amount of real/physical memory currently unused
+or available.
 </pre>
 </td>
   </tr>
@@ -158,24 +160,12 @@ Available Real/Physical Memory Space on the host.
     <td>.1.3.6.1.4.1.2021.4.7</td>
 <td>
 <pre>
-Total virtual memory used by text.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="memAvailSwapTXT" />
-8
-<br /><b>memAvailSwapTXT</b>
+The total amount of swap space or virtual memory allocated
+for text pages on this host.
 
-</td><td>
-  INTEGER32
-
-  </td><td>ReadOnly</td>
-    <td>.1.3.6.1.4.1.2021.4.8</td>
-<td>
-<pre>
-Active virtual memory used by text.
+This object will not be implemented on hosts where the
+underlying operating system does not distinguish text
+pages from other uses of swap space or virtual memory.
 </pre>
 </td>
   </tr>
@@ -192,24 +182,12 @@ Active virtual memory used by text.
     <td>.1.3.6.1.4.1.2021.4.9</td>
 <td>
 <pre>
-Total Real/Physical Memory Size used by text.
-</pre>
-</td>
-  </tr>
-  <tr>
-  <td>
-<a name="memAvailRealTXT" />
-10
-<br /><b>memAvailRealTXT</b>
+The total amount of real/physical memory allocated
+for text pages on this host.
 
-</td><td>
-  INTEGER32
-
-  </td><td>ReadOnly</td>
-    <td>.1.3.6.1.4.1.2021.4.10</td>
-<td>
-<pre>
-Active Real/Physical Memory Space used by text.
+This object will not be implemented on hosts where the
+underlying operating system does not distinguish text
+pages from other uses of physical memory.
 </pre>
 </td>
   </tr>
@@ -226,7 +204,9 @@ Active Real/Physical Memory Space used by text.
     <td>.1.3.6.1.4.1.2021.4.11</td>
 <td>
 <pre>
-Total Available Memory on the host
+The total amount of memory free or available for use on
+this host.  This value typically covers both real memory
+and swap space or virtual memory.
 </pre>
 </td>
   </tr>
@@ -243,9 +223,13 @@ Total Available Memory on the host
     <td>.1.3.6.1.4.1.2021.4.12</td>
 <td>
 <pre>
-Minimum amount of free swap required to be free
-or else memErrorSwap is set to 1 and an error string is
-returned memSwapErrorMsg.
+The minimum amount of swap space expected to be kept
+free or available during normal operation of this host.
+
+If this value (as reported by 'memAvailSwap(4)') falls
+below the specified level, then 'memSwapError(100)' will
+be set to 1 and an error message made available via
+'memSwapErrorMsg(101)'.
 </pre>
 </td>
   </tr>
@@ -262,7 +246,12 @@ returned memSwapErrorMsg.
     <td>.1.3.6.1.4.1.2021.4.13</td>
 <td>
 <pre>
-Total Shared Memory
+The total amount of real or virtual memory currently
+allocated for use as shared memory.
+
+This object will not be implemented on hosts where the
+underlying operating system does not explicitly identify
+memory as specifically reserved for this purpose.
 </pre>
 </td>
   </tr>
@@ -279,7 +268,12 @@ Total Shared Memory
     <td>.1.3.6.1.4.1.2021.4.14</td>
 <td>
 <pre>
-Total Buffered Memory
+The total amount of real or virtual memory currently
+allocated for use as memory buffers.
+
+This object will not be implemented on hosts where the
+underlying operating system does not explicitly identify
+memory as specifically reserved for this purpose.
 </pre>
 </td>
   </tr>
@@ -296,7 +290,56 @@ Total Buffered Memory
     <td>.1.3.6.1.4.1.2021.4.15</td>
 <td>
 <pre>
-Total Cached Memory
+The total amount of real or virtual memory currently
+allocated for use as cached memory.
+
+This object will not be implemented on hosts where the
+underlying operating system does not explicitly identify
+memory as specifically reserved for this purpose.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memUsedSwapTXT" />
+16
+<br /><b>memUsedSwapTXT</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.16</td>
+<td>
+<pre>
+The amount of swap space or virtual memory currently
+being used by text pages on this host.
+
+This object will not be implemented on hosts where the
+underlying operating system does not distinguish text
+pages from other uses of swap space or virtual memory.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memUsedRealTXT" />
+17
+<br /><b>memUsedRealTXT</b>
+
+</td><td>
+  INTEGER32
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.17</td>
+<td>
+<pre>
+The amount of real/physical memory currently being
+used by text pages on this host.
+
+This object will not be implemented on hosts where the
+underlying operating system does not distinguish text
+pages from other uses of physical memory.
 </pre>
 </td>
   </tr>
@@ -307,13 +350,21 @@ Total Cached Memory
 <br /><b>memSwapError</b>
 
 </td><td>
-  INTEGER32
+  INTEGER
+ <br>
+ <a href="#UCDErrorFlag">UCDErrorFlag</a>
+     <br>(ENUM list below)
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.4.100</td>
 <td>
+<p>
+Note: this object is based on the <a href="#UCDErrorFlag"> UCDErrorFlag TEXTUAL-CONVENTION</a>.
+</p>
 <pre>
-Error flag.  1 indicates very little swap space left
+Indicates whether the amount of available swap space
+(as reported by 'memAvailSwap(4)'), is less than the
+desired minimum (specified by 'memMinimumSwap(12)').
 </pre>
 </td>
   </tr>
@@ -337,7 +388,9 @@ Error flag.  1 indicates very little swap space left
 Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-Error message describing the Error Flag condition
+Describes whether the amount of available swap space
+(as reported by 'memAvailSwap(4)'), is less than the
+desired minimum (specified by 'memMinimumSwap(12)').
 </pre>
 </td>
   </tr>
@@ -354,7 +407,7 @@ Error message describing the Error Flag condition
     <td>.1.3.6.1.4.1.2021.11.1</td>
 <td>
 <pre>
-Reference Index for each observed systemStat (1).
+Bogus Index.  This should always return the integer 1.
 </pre>
 </td>
   </tr>
@@ -378,7 +431,7 @@ Reference Index for each observed systemStat (1).
 Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-The list of systemStats names (vmstat) we're Counting.
+Bogus Name. This should always return the string 'systemStats'.
 </pre>
 </td>
   </tr>
@@ -395,7 +448,8 @@ The list of systemStats names (vmstat) we're Counting.
     <td>.1.3.6.1.4.1.2021.11.3</td>
 <td>
 <pre>
-Amount of memory swapped in from disk (kB/s).
+The average amount of memory swapped in from disk,
+calculated over the last minute.
 </pre>
 </td>
   </tr>
@@ -412,7 +466,8 @@ Amount of memory swapped in from disk (kB/s).
     <td>.1.3.6.1.4.1.2021.11.4</td>
 <td>
 <pre>
-Amount of memory swapped to disk (kB/s).
+The average amount of memory swapped out to disk,
+calculated over the last minute.
 </pre>
 </td>
   </tr>
@@ -429,7 +484,12 @@ Amount of memory swapped to disk (kB/s).
     <td>.1.3.6.1.4.1.2021.11.50</td>
 <td>
 <pre>
-user CPU time.
+The number of 'ticks' (typically 1/100s) spent
+processing user-level code.
+
+On a multi-processor system, the 'ssCpuRaw*'
+counters are cumulative over all CPUs, so their
+sum will typically be N*100 (for N processors).
 </pre>
 </td>
   </tr>
@@ -446,7 +506,16 @@ user CPU time.
     <td>.1.3.6.1.4.1.2021.11.51</td>
 <td>
 <pre>
-nice CPU time.
+The number of 'ticks' (typically 1/100s) spent
+processing reduced-priority code.
+
+This object will not be implemented on hosts where
+the underlying operating system does not measure
+this particular CPU metric.
+
+On a multi-processor system, the 'ssCpuRaw*'
+counters are cumulative over all CPUs, so their
+sum will typically be N*100 (for N processors).
 </pre>
 </td>
   </tr>
@@ -463,7 +532,17 @@ nice CPU time.
     <td>.1.3.6.1.4.1.2021.11.52</td>
 <td>
 <pre>
-system CPU time.
+The number of 'ticks' (typically 1/100s) spent
+processing system-level code.
+
+On a multi-processor system, the 'ssCpuRaw*'
+counters are cumulative over all CPUs, so their
+sum will typically be N*100 (for N processors).
+
+This object may sometimes be implemented as the
+combination of the 'ssCpuRawWait(54)' and
+'ssCpuRawKernel(55)' counters, so care must be
+taken when summing the overall raw counters.
 </pre>
 </td>
   </tr>
@@ -480,7 +559,12 @@ system CPU time.
     <td>.1.3.6.1.4.1.2021.11.53</td>
 <td>
 <pre>
-idle CPU time.
+The number of 'ticks' (typically 1/100s) spent
+idle.
+
+On a multi-processor system, the 'ssCpuRaw*'
+counters are cumulative over all CPUs, so their
+sum will typically be N*100 (for N processors).
 </pre>
 </td>
   </tr>
@@ -497,7 +581,17 @@ idle CPU time.
     <td>.1.3.6.1.4.1.2021.11.54</td>
 <td>
 <pre>
-iowait CPU time. This is primarily a SysV thingie
+The number of 'ticks' (typically 1/100s) spent
+waiting for IO.
+
+This object will not be implemented on hosts where
+the underlying operating system does not measure
+this particular CPU metric.  This time may also be
+included within the 'ssCpuRawSystem(52)' counter.
+
+On a multi-processor system, the 'ssCpuRaw*'
+counters are cumulative over all CPUs, so their
+sum will typically be N*100 (for N processors).
 </pre>
 </td>
   </tr>
@@ -514,7 +608,17 @@ iowait CPU time. This is primarily a SysV thingie
     <td>.1.3.6.1.4.1.2021.11.55</td>
 <td>
 <pre>
-kernel CPU time.
+The number of 'ticks' (typically 1/100s) spent
+processing kernel-level code.
+
+This object will not be implemented on hosts where
+the underlying operating system does not measure
+this particular CPU metric.  This time may also be
+included within the 'ssCpuRawSystem(52)' counter.
+
+On a multi-processor system, the 'ssCpuRaw*'
+counters are cumulative over all CPUs, so their
+sum will typically be N*100 (for N processors).
 </pre>
 </td>
   </tr>
@@ -531,7 +635,16 @@ kernel CPU time.
     <td>.1.3.6.1.4.1.2021.11.56</td>
 <td>
 <pre>
-interruptlevel CPU time. This is primarily a BSD thingie
+The number of 'ticks' (typically 1/100s) spent
+processing hardware interrupts.
+
+This object will not be implemented on hosts where
+the underlying operating system does not measure
+this particular CPU metric.
+
+On a multi-processor system, the 'ssCpuRaw*'
+counters are cumulative over all CPUs, so their
+sum will typically be N*100 (for N processors).
 </pre>
 </td>
   </tr>
@@ -616,7 +729,16 @@ Number of context switches
     <td>.1.3.6.1.4.1.2021.11.61</td>
 <td>
 <pre>
-Soft IRQ CPU time. This is for Linux 2.6
+The number of 'ticks' (typically 1/100s) spent
+processing software interrupts.
+
+This object will not be implemented on hosts where
+the underlying operating system does not measure
+this particular CPU metric.
+
+On a multi-processor system, the 'ssCpuRaw*'
+counters are cumulative over all CPUs, so their
+sum will typically be N*100 (for N processors).
 </pre>
 </td>
   </tr>
@@ -943,11 +1065,17 @@ snmp
 <br /><b>snmperrErrorFlag</b>
 
 </td><td>
-  INTEGER32
+  INTEGER
+ <br>
+ <a href="#UCDErrorFlag">UCDErrorFlag</a>
+     <br>(ENUM list below)
 
   </td><td>ReadOnly</td>
     <td>.1.3.6.1.4.1.2021.101.100</td>
 <td>
+<p>
+Note: this object is based on the <a href="#UCDErrorFlag"> UCDErrorFlag TEXTUAL-CONVENTION</a>.
+</p>
 <pre>
 A Error flag to indicate trouble with the agent.  It
 goes to 1 if there is an error, 0 if no error.
@@ -1119,10 +1247,16 @@ in question.
 <br /><b>prErrorFlag</b>
 
 </td><td>
-  INTEGER32
+  INTEGER
+ <br>
+ <a href="#UCDErrorFlag">UCDErrorFlag</a>
+     <br>(ENUM list below)
 
   </td><td>ReadOnly</td>
 <td>
+<p>
+Note: this object is based on the <a href="#UCDErrorFlag"> UCDErrorFlag TEXTUAL-CONVENTION</a>.
+</p>
 <pre>
 A Error flag to indicate trouble with a process.  It
 goes to 1 if there is an error, 0 if no error.
@@ -1159,10 +1293,16 @@ An error message describing the problem (if one exists).
 <br /><b>prErrFix</b>
 
 </td><td>
-  INTEGER32
+  INTEGER
+ <br>
+ <a href="#UCDErrorFix">UCDErrorFix</a>
+     <br>(ENUM list below)
 
   </td><td>ReadWrite</td>
 <td>
+<p>
+Note: this object is based on the <a href="#UCDErrorFix"> UCDErrorFix TEXTUAL-CONVENTION</a>.
+</p>
 <pre>
 Setting this to one will try to fix the problem if
 the agent has been configured with a script to call
@@ -1341,10 +1481,16 @@ The first line of output of the executed command.
 <br /><b>extErrFix</b>
 
 </td><td>
-  INTEGER32
+  INTEGER
+ <br>
+ <a href="#UCDErrorFix">UCDErrorFix</a>
+     <br>(ENUM list below)
 
   </td><td>ReadWrite</td>
 <td>
+<p>
+Note: this object is based on the <a href="#UCDErrorFix"> UCDErrorFix TEXTUAL-CONVENTION</a>.
+</p>
 <pre>
 Setting this to one will try to fix the problem if
 the agent has been configured with a script to call
@@ -1598,10 +1744,16 @@ Percentage of inodes used on disk
 <br /><b>dskErrorFlag</b>
 
 </td><td>
-  INTEGER32
+  INTEGER
+ <br>
+ <a href="#UCDErrorFlag">UCDErrorFlag</a>
+     <br>(ENUM list below)
 
   </td><td>ReadOnly</td>
 <td>
+<p>
+Note: this object is based on the <a href="#UCDErrorFlag"> UCDErrorFlag TEXTUAL-CONVENTION</a>.
+</p>
 <pre>
 Error flag signaling that the disk or partition is under
 the minimum required space configured for it.
@@ -1804,10 +1956,16 @@ wrapped floating point number.
 <br /><b>laErrorFlag</b>
 
 </td><td>
-  INTEGER32
+  INTEGER
+ <br>
+ <a href="#UCDErrorFlag">UCDErrorFlag</a>
+     <br>(ENUM list below)
 
   </td><td>ReadOnly</td>
 <td>
+<p>
+Note: this object is based on the <a href="#UCDErrorFlag"> UCDErrorFlag TEXTUAL-CONVENTION</a>.
+</p>
 <pre>
 A Error flag to indicate the load-average has crossed
 its threshold value defined in the snmpd.conf file.
@@ -1954,13 +2112,13 @@ Limit of filesize (kB)
 </td><td>
   INTEGER
  <br>
- <a href="#TruthValue">TruthValue</a>
+ <a href="#UCDErrorFlag">UCDErrorFlag</a>
      <br>(ENUM list below)
 
   </td><td>ReadOnly</td>
 <td>
 <p>
-Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+Note: this object is based on the <a href="#UCDErrorFlag"> UCDErrorFlag TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
 Limit exceeded flag
@@ -2233,13 +2391,13 @@ time between updates (if not queried) in seconds
 </td><td>
   INTEGER
  <br>
- <a href="#TruthValue">TruthValue</a>
+ <a href="#UCDErrorFlag">UCDErrorFlag</a>
      <br>(ENUM list below)
 
   </td><td>ReadOnly</td>
 <td>
 <p>
-Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+Note: this object is based on the <a href="#UCDErrorFlag"> UCDErrorFlag TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
 errorflag: is this line configured correctly?
@@ -2356,121 +2514,210 @@ The module name that registered this OID.
 <table>
 <tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
-  <td>
+  <td class="deprecated">
+<a name="memAvailSwapTXT" />
+8
+<br /><b>memAvailSwapTXT</b>
+
+</td><td>
+<font color="red">DEPRECATED</font><br />
+  INTEGER32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The amount of swap space or virtual memory currently
+being used by text pages on this host.
+
+This object will not be implemented on hosts where the
+underlying operating system does not distinguish text
+pages from other uses of swap space or virtual memory.
+
+Note that (despite the name), this value reports the
+amount used, rather than the amount free or available
+for use.  For clarity, this object is being deprecated
+in favour of 'memUsedSwapTXT(16).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td class="deprecated">
+<a name="memAvailRealTXT" />
+10
+<br /><b>memAvailRealTXT</b>
+
+</td><td>
+<font color="red">DEPRECATED</font><br />
+  INTEGER32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The amount of real/physical memory currently being
+used by text pages on this host.
+
+This object will not be implemented on hosts where the
+underlying operating system does not distinguish text
+pages from other uses of physical memory.
+
+Note that (despite the name), this value reports the
+amount used, rather than the amount free or available
+for use.  For clarity, this object is being deprecated
+in favour of 'memUsedRealTXT(17).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td class="deprecated">
 <a name="ssIOSent" />
 5
 <br /><b>ssIOSent</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   INTEGER32
 
   </td><td>ReadOnly</td>
 <td>
 <pre>
-Blocks sent to a block device (blocks/s). Deprecated, replaced by
-the ssIORawSent object
+The average amount of data written to disk or other
+block device, calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+'ssIORawSent(57)', which can be used to calculate
+the same metric, but over any desired time period.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ssIOReceive" />
 6
 <br /><b>ssIOReceive</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   INTEGER32
 
   </td><td>ReadOnly</td>
 <td>
 <pre>
-Blocks received from a block device (blocks/s). Deprecated, replaced by
-the ssIORawReceived object
+The average amount of data read from disk or other
+block device, calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+'ssIORawReceived(58)', which can be used to calculate
+the same metric, but over any desired time period.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ssSysInterrupts" />
 7
 <br /><b>ssSysInterrupts</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   INTEGER32
 
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The number of interrupts per second, including the clock.
-Deprecated, replaced by ssRawInterrupts
+The average rate of interrupts processed (including
+the clock) calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+'ssRawInterrupts(59)', which can be used to calculate
+the same metric, but over any desired time period.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ssSysContext" />
 8
 <br /><b>ssSysContext</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   INTEGER32
 
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The number of context switches per second.
-Deprecated, replaced by ssRawContext
+The average rate of context switches,
+calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+'ssRawContext(60)', which can be used to calculate
+the same metric, but over any desired time period.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ssCpuUser" />
 9
 <br /><b>ssCpuUser</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   INTEGER32
 
   </td><td>ReadOnly</td>
 <td>
 <pre>
-percentages of user CPU time. Deprecated, replaced by the ssCpuRawUser
-object
+The percentage of CPU time spent processing
+user-level code, calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+'ssCpuRawUser(50)', which can be used to calculate
+the same metric, but over any desired time period.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ssCpuSystem" />
 10
 <br /><b>ssCpuSystem</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   INTEGER32
 
   </td><td>ReadOnly</td>
 <td>
 <pre>
-percentages of system CPU time. Deprecated, replaced by of the
-ssCpuRawSystem object
+The percentage of CPU time spent processing
+system-level code, calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+'ssCpuRawSystem(52)', which can be used to calculate
+the same metric, but over any desired time period.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ssCpuIdle" />
 11
 <br /><b>ssCpuIdle</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   INTEGER32
 
   </td><td>ReadOnly</td>
 <td>
 <pre>
-percentages of idle CPU time. Deprecated, replaced by of the
-ssCpuRawIdle object
+The percentage of processor time spent idle,
+calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+'ssCpuRawIdle(53)', which can be used to calculate
+the same metric, but over any desired time period.
 </pre>
 </td>
   </tr>
@@ -2495,7 +2742,7 @@ ssCpuRawIdle object
   <tr><td class="label">Notification Description</td>
 <td>
 <pre>
-
+This trap could in principle be sent when the agent start
 </pre>
 </td>
   </tr>
@@ -2536,9 +2783,46 @@ objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
 <table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="Float">Float</td><td>OPAQUE</td><td><pre></pre></td></tr>
-<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="Float">Float</td><td>OPAQUE</td><td><pre>A single precision floating-point number.  The semantics
+and encoding are identical for type 'single' defined in
+IEEE Standard for Binary Floating-Point,
+ANSI/IEEE Std 754-1985.
+The value is restricted to the BER serialization of
+the following ASN.1 type:
+    FLOATTYPE ::= [120] IMPLICIT FloatType
+(note: the value 120 is the sum of '30'h and '48'h)
+The BER serialization of the length for values of
+this type must use the definite length, short
+encoding form.
+
+For example, the BER serialization of value 123
+of type FLOATTYPE is '9f780442f60000'h.  (The tag
+is '9f78'h; the length is '04'h; and the value is
+'42f60000'h.) The BER serialization of value
+'9f780442f60000'h of data type Opaque is
+'44079f780442f60000'h. (The tag is '44'h; the length
+is '07'h; and the value is '9f780442f60000'h.</pre></td></tr>
+<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre>Represents textual information taken from the NVT ASCII
+character set, as defined in pages 4, 10-11 of RFC 854.
+To summarize RFC 854, the NVT ASCII repertoire specifies:
+  - the use of character codes 0-127 (decimal)
+  - the graphics characters (32-126) are interpreted as
+                US ASCII
+  - NUL, LF, CR, BEL, BS, HT, VT and FF have the special
+                meanings specified in RFC 854
+  - the other 25 codes have no standard interpretation
+  - the sequence 'CR LF' means newline
+  - the sequence 'CR NUL' means carriage-return
+  - an 'LF' not preceded by a 'CR' means moving to the
+                same column on the next line.
+  - the sequence 'CR x' for any x other than LF or NUL is
+                illegal.  (Note that this also means that a string may
+                end with either 'CR LF' or 'CR NUL', but not with CR.)
+Any object defined using this syntax may not exceed 255
+            characters in length.</pre></td></tr>
+<tr><td><a name="UCDErrorFlag">UCDErrorFlag</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>noError</td></tr><tr><td>1</td><td>error</td></tr></table></td><td><pre>Represents a possible error condition</pre></td></tr>
+<tr><td><a name="UCDErrorFix">UCDErrorFix</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>noError</td></tr><tr><td>1</td><td>runFix</td></tr></table></td><td><pre>Represents a 'push-button' object, to invoke a suitable
+configured action.  Will always return 0 when read.</pre></td></tr>
 </table></ul>
 
 <a name="treeview" />
@@ -2560,11 +2844,15 @@ clause as well as the DESCRIPTION clause of the object itself.
    |     +-- -R-- Integer32 <a href="#prMin">prMin</a>(3)
    |     +-- -R-- Integer32 <a href="#prMax">prMax</a>(4)
    |     +-- -R-- Integer32 <a href="#prCount">prCount</a>(5)
-   |     +-- -R-- Integer32 <a href="#prErrorFlag">prErrorFlag</a>(100)
+   |     +-- -R-- EnumVal   <a href="#prErrorFlag">prErrorFlag</a>(100)
+   |     |        Textual Convention: <a href="#UCDErrorFlag">UCDErrorFlag</a>
+   |     |        Values: noError(0), error(1)
    |     +-- -R-- String    <a href="#prErrMessage">prErrMessage</a>(101)
    |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
    |     |        Size: 0..255
-   |     +-- -RW- Integer32 <a href="#prErrFix">prErrFix</a>(102)
+   |     +-- -RW- EnumVal   <a href="#prErrFix">prErrFix</a>(102)
+   |     |        Textual Convention: <a href="#UCDErrorFix">UCDErrorFix</a>
+   |     |        Values: noError(0), runFix(1)
    |     +-- -R-- String    <a href="#prErrFixCmd">prErrFixCmd</a>(103)
    |              Textual Convention: <a href="#DisplayString">DisplayString</a>
    |              Size: 0..255
@@ -2588,7 +2876,11 @@ clause as well as the DESCRIPTION clause of the object itself.
    |  +-- -R-- Integer32 <a href="#memShared">memShared</a>(13)
    |  +-- -R-- Integer32 <a href="#memBuffer">memBuffer</a>(14)
    |  +-- -R-- Integer32 <a href="#memCached">memCached</a>(15)
-   |  +-- -R-- Integer32 <a href="#memSwapError">memSwapError</a>(100)
+   |  +-- -R-- Integer32 <a href="#memUsedSwapTXT">memUsedSwapTXT</a>(16)
+   |  +-- -R-- Integer32 <a href="#memUsedRealTXT">memUsedRealTXT</a>(17)
+   |  +-- -R-- EnumVal   <a href="#memSwapError">memSwapError</a>(100)
+   |  |        Textual Convention: <a href="#UCDErrorFlag">UCDErrorFlag</a>
+   |  |        Values: noError(0), error(1)
    |  +-- -R-- String    <a href="#memSwapErrorMsg">memSwapErrorMsg</a>(101)
    |           Textual Convention: <a href="#DisplayString">DisplayString</a>
    |           Size: 0..255
@@ -2610,7 +2902,9 @@ clause as well as the DESCRIPTION clause of the object itself.
    |     +-- -R-- String    <a href="#extOutput">extOutput</a>(101)
    |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
    |     |        Size: 0..255
-   |     +-- -RW- Integer32 <a href="#extErrFix">extErrFix</a>(102)
+   |     +-- -RW- EnumVal   <a href="#extErrFix">extErrFix</a>(102)
+   |     |        Textual Convention: <a href="#UCDErrorFix">UCDErrorFix</a>
+   |     |        Values: noError(0), runFix(1)
    |     +-- -R-- String    <a href="#extErrFixCmd">extErrFixCmd</a>(103)
    |              Textual Convention: <a href="#DisplayString">DisplayString</a>
    |              Size: 0..255
@@ -2635,7 +2929,9 @@ clause as well as the DESCRIPTION clause of the object itself.
    |     +-- -R-- Integer32 <a href="#dskUsed">dskUsed</a>(8)
    |     +-- -R-- Integer32 <a href="#dskPercent">dskPercent</a>(9)
    |     +-- -R-- Integer32 <a href="#dskPercentNode">dskPercentNode</a>(10)
-   |     +-- -R-- Integer32 <a href="#dskErrorFlag">dskErrorFlag</a>(100)
+   |     +-- -R-- EnumVal   <a href="#dskErrorFlag">dskErrorFlag</a>(100)
+   |     |        Textual Convention: <a href="#UCDErrorFlag">UCDErrorFlag</a>
+   |     |        Values: noError(0), error(1)
    |     +-- -R-- String    <a href="#dskErrorMsg">dskErrorMsg</a>(101)
    |              Textual Convention: <a href="#DisplayString">DisplayString</a>
    |              Size: 0..255
@@ -2660,7 +2956,9 @@ clause as well as the DESCRIPTION clause of the object itself.
    |     +-- -R-- Opaque    <a href="#laLoadFloat">laLoadFloat</a>(6)
    |     |        Textual Convention: <a href="#Float">Float</a>
    |     |        Size: 7
-   |     +-- -R-- Integer32 <a href="#laErrorFlag">laErrorFlag</a>(100)
+   |     +-- -R-- EnumVal   <a href="#laErrorFlag">laErrorFlag</a>(100)
+   |     |        Textual Convention: <a href="#UCDErrorFlag">UCDErrorFlag</a>
+   |     |        Values: noError(0), error(1)
    |     +-- -R-- String    <a href="#laErrMessage">laErrMessage</a>(101)
    |              Textual Convention: <a href="#DisplayString">DisplayString</a>
    |              Size: 0..255
@@ -2712,8 +3010,8 @@ clause as well as the DESCRIPTION clause of the object itself.
    |     +-- -R-- Integer32 <a href="#fileSize">fileSize</a>(3)
    |     +-- -R-- Integer32 <a href="#fileMax">fileMax</a>(4)
    |     +-- -R-- EnumVal   <a href="#fileErrorFlag">fileErrorFlag</a>(100)
-   |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
-   |     |        Values: true(1), false(2)
+   |     |        Textual Convention: <a href="#UCDErrorFlag">UCDErrorFlag</a>
+   |     |        Values: noError(0), error(1)
    |     +-- -R-- String    <a href="#fileErrorMsg">fileErrorMsg</a>(101)
    |              Textual Convention: <a href="#DisplayString">DisplayString</a>
    |              Size: 0..255
@@ -2746,8 +3044,8 @@ clause as well as the DESCRIPTION clause of the object itself.
    |        +-- -R-- Integer32 <a href="#logMatchCount">logMatchCount</a>(10)
    |        +-- -R-- Integer32 <a href="#logMatchCycle">logMatchCycle</a>(11)
    |        +-- -R-- EnumVal   <a href="#logMatchErrorFlag">logMatchErrorFlag</a>(100)
-   |        |        Textual Convention: <a href="#TruthValue">TruthValue</a>
-   |        |        Values: true(1), false(2)
+   |        |        Textual Convention: <a href="#UCDErrorFlag">UCDErrorFlag</a>
+   |        |        Values: noError(0), error(1)
    |        +-- -R-- String    <a href="#logMatchRegExCompilation">logMatchRegExCompilation</a>(101)
    |                 Textual Convention: <a href="#DisplayString">DisplayString</a>
    |                 Size: 0..255
@@ -2782,7 +3080,9 @@ clause as well as the DESCRIPTION clause of the object itself.
    |  +-- -R-- String    <a href="#snmperrNames">snmperrNames</a>(2)
    |  |        Textual Convention: <a href="#DisplayString">DisplayString</a>
    |  |        Size: 0..255
-   |  +-- -R-- Integer32 <a href="#snmperrErrorFlag">snmperrErrorFlag</a>(100)
+   |  +-- -R-- EnumVal   <a href="#snmperrErrorFlag">snmperrErrorFlag</a>(100)
+   |  |        Textual Convention: <a href="#UCDErrorFlag">UCDErrorFlag</a>
+   |  |        Values: noError(0), error(1)
    |  +-- -R-- String    <a href="#snmperrErrMessage">snmperrErrMessage</a>(101)
    |           Textual Convention: <a href="#DisplayString">DisplayString</a>
    |           Size: 0..255

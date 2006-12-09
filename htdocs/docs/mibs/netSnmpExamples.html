@@ -405,10 +405,150 @@ objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
 <table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="InetAddress">InetAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre>Describes the memory realization of a conceptual row.  A
+row which is volatile(2) is lost upon reboot.  A row which
+is either nonVolatile(3), permanent(4) or readOnly(5), is
+backed up by stable storage.  A row which is permanent(4)
+can be changed but not deleted.  A row which is readOnly(5)
+cannot be changed nor deleted.
+
+If the value of an object with this syntax is either
+permanent(4) or readOnly(5), it cannot be written.
+Conversely, if the value is either other(1), volatile(2) or
+nonVolatile(3), it cannot be modified to be permanent(4) or
+readOnly(5).  (All illegal modifications result in a
+'wrongValue' error.)
+
+Every usage of this textual convention is required to
+specify the columnar objects which a permanent(4) row must
+at a minimum allow to be writable.</pre></td></tr>
+<tr><td><a name="InetAddress">InetAddress</td><td>OCTETSTR</td><td><pre>Denotes a generic Internet address.
+An InetAddress value is always interpreted within the context
+         of an InetAddressType value.  Every usage of the InetAddress
+         textual convention is required to specify the InetAddressType
+         object that provides the context.  It is suggested that the
+         InetAddressType object be logically registered before the
+         object(s) that use the InetAddress textual convention, if
+         they appear in the same logical row.
+The value of an InetAddress object must always be
+         consistent with the value of the associated InetAddressType
+         object.  Attempts to set an InetAddress object to a value
+         inconsistent with the associated InetAddressType
+         must fail with an inconsistentValue error.
+When this textual convention is used as the syntax of an
+         index object, there may be issues with the limit of 128
+         sub-identifiers specified in SMIv2, STD 58.  In this case,
+         the object definition MUST include a 'SIZE' clause to
+         limit the number of potential instance sub-identifiers;
+         otherwise the applicable constraints MUST be stated in
+         the appropriate conceptual row DESCRIPTION clauses, or
+         in the surrounding documentation if there is no single
+         DESCRIPTION clause that is appropriate.</pre></td></tr>
+<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre>A value that represents a type of Internet address.
+unknown(0)  An unknown address type.  This value MUST
+                     be used if the value of the corresponding
+                     InetAddress object is a zero-length string.
+                     It may also be used to indicate an IP address
+                     that is not in one of the formats defined
+                     below.
+ipv4(1)     An IPv4 address as defined by the
+                     InetAddressIPv4 textual convention.
+ipv6(2)     An IPv6 address as defined by the
+                     InetAddressIPv6 textual convention.
+ipv4z(3)    A non-global IPv4 address including a zone
+                     index as defined by the InetAddressIPv4z
+                     textual convention.
+ipv6z(4)    A non-global IPv6 address including a zone
+                     index as defined by the InetAddressIPv6z
+                     textual convention.
+dns(16)     A DNS domain name as defined by the
+                     InetAddressDNS textual convention.
+Each definition of a concrete InetAddressType value must be
+         accompanied by a definition of a textual convention for use
+         with that InetAddressType.
+To support future extensions, the InetAddressType textual
+         convention SHOULD NOT be sub-typed in object type definitions.
+         It MAY be sub-typed in compliance statements in order to
+         require only a subset of these address types for a compliant
+         implementation.
+Implementations must ensure that InetAddressType objects
+         and any dependent objects (e.g., InetAddress objects) are
+         consistent.  An inconsistentValue error must be generated
+         if an attempt to change an InetAddressType object would,
+         for example, lead to an undefined InetAddress value.  In
+particular, InetAddressType/InetAddress pairs must be
+         changed together if the address type changes (e.g., from
+         ipv6(2) to ipv4(1)).</pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre>The RowStatus textual convention is used to manage the
+creation and deletion of conceptual rows, and is used as the
+value of the SYNTAX clause for the status column of a
+conceptual row (as described in Section 7.7.1 of [2].)
+
+The status column has six defined values:
+
+     - `active', which indicates that the conceptual row is
+     available for use by the managed device;
+
+     - `notInService', which indicates that the conceptual
+     row exists in the agent, but is unavailable for use by
+     the managed device (see NOTE below); 'notInService' has
+     no implication regarding the internal consistency of
+     the row, availability of resources, or consistency with
+     the current state of the managed device;
+
+     - `notReady', which indicates that the conceptual row
+     exists in the agent, but is missing information
+     necessary in order to be available for use by the
+     managed device (i.e., one or more required columns in
+     the conceptual row have not been instanciated);
+
+     - `createAndGo', which is supplied by a management
+     station wishing to create a new instance of a
+     conceptual row and to have its status automatically set
+     to active, making it available for use by the managed
+     device;
+
+     - `createAndWait', which is supplied by a management
+     station wishing to create a new instance of a
+     conceptual row (but not make it available for use by
+     the managed device); and,
+     - `destroy', which is supplied by a management station
+     wishing to delete all of the instances associated with
+     an existing conceptual row.
+
+Whereas five of the six values (all except `notReady') may
+be specified in a management protocol set operation, only
+three values will be returned in response to a management
+protocol retrieval operation:  `notReady', `notInService' or
+`active'.  That is, when queried, an existing conceptual row
+has only three states:  it is either available for use by
+the managed device (the status column has value `active');
+it is not available for use by the managed device, though
+the agent has sufficient information to attempt to make it
+so (the status column has value `notInService'); or, it is
+not available for use by the managed device, and an attempt
+to make it so would fail because the agent has insufficient
+information (the state column has value `notReady').
+
+                         NOTE WELL
+
+     This textual convention may be used for a MIB table,
+     irrespective of whether the values of that table's
+     conceptual rows are able to be modified while it is
+     active, or whether its conceptual rows must be taken
+     out of service in order to be modified.  That is, it is
+     the responsibility of the DESCRIPTION clause of the
+     status column to specify whether the status column must
+     not be `active' in order for the value of some other
+     column of the same conceptual row to be modified.  If
+     such a specification is made, affected columns may be
+     changed by an SNMP set PDU if the RowStatus would not
+     be equal to `active' either immediately before or after
+     processing the PDU.  In other words, if the PDU also
+     contained a varbind that would change the RowStatus
+     value, the column in question may be changed if the
+     RowStatus was not equal to `active' as the PDU was
+     received, or if the varbind sets the status</pre></td></tr>
 </table></ul>
 
 <a name="treeview" />

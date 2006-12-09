@@ -734,7 +734,15 @@ objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
 <table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="Ipv6IfIndex">Ipv6IfIndex</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<tr><td><a name="Ipv6IfIndex">Ipv6IfIndex</td><td>INTEGER32</td><td><pre>A unique value, greater than zero for each
+internetwork-layer interface in the managed
+system. It is recommended that values are assigned
+contiguously starting from 1. The value for each
+internetwork-layer interface must remain constant
+at least from one re-initialization of the entity's
+network management system to the next
+
+re-initialization.</pre></td></tr>
 </table></ul>
 
 <a name="treeview" />

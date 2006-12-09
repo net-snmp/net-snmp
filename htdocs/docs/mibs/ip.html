@@ -65,7 +65,7 @@ by, but not addressed to, this entity.  IPv4 routers forward
 datagrams.  IPv4 hosts do not (except those source-routed
 via the host).
 
-When this object is written the entity should save the
+When this object is written, the entity should save the
 change to non-volatile storage and restore the object from
 non-volatile storage upon re-initialization of the system.
 Note: a stronger requirement is not used because this object
@@ -91,9 +91,12 @@ was previously defined.
 The default value inserted into the Time-To-Live field of
 the IPv4 header of datagrams originated at this entity,
 whenever a TTL value is not supplied by the transport layer
+
+
+
 protocol.
 
-When this object is written the entity should save the
+When this object is written, the entity should save the
 change to non-volatile storage and restore the object from
 non-volatile storage upon re-initialization of the system.
 Note: a stronger requirement is not used because this object
@@ -114,7 +117,7 @@ was previously defined.
     <td>.1.3.6.1.2.1.4.13</td>
 <td>
 <pre>
-The maximum number of seconds which received fragments are
+The maximum number of seconds that received fragments are
 held while they are awaiting reassembly at this entity.
 </pre>
 </td>
@@ -143,7 +146,7 @@ datagrams received by, but not addressed to, this entity.
 IPv6 routers forward datagrams.  IPv6 hosts do not (except
 those source-routed via the host).
 
-When this object is written the entity SHOULD save the
+When this object is written, the entity SHOULD save the
 change to non-volatile storage and restore the object from
 non-volatile storage upon re-initialization of the system.
 </pre>
@@ -165,14 +168,19 @@ non-volatile storage upon re-initialization of the system.
 <td>
 <pre>
 The default value inserted into the Hop Limit field of the
-IPv6 header of datagrams originated at this entity, whenever
+IPv6 header of datagrams originated at this entity whenever
 a Hop Limit value is not supplied by the transport layer
 protocol.
 
-When this object is written the entity SHOULD save the
+When this object is written, the entity SHOULD save the
 change to non-volatile storage and restore the object from
 non-volatile storage upon re-initialization of the system.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461 Section 6.3.2
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -194,13 +202,13 @@ Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVEN
 </p>
 <pre>
 The value of sysUpTime on the most recent occasion at which
-a row in the ipv4InterfaceTable was added or deleted or when
-an ipv4InterfaceReasmMaxSize or an ipv4InterfaceEnableStatus
-object was modified.
+a row in the ipv4InterfaceTable was added or deleted, or
+when an ipv4InterfaceReasmMaxSize or an
+ipv4InterfaceEnableStatus object was modified.
 
-If new objects are added to the ipv6InterfaceTable that
-require the ipv6InterfaceTableLastChange to be updated when
-they are modified they must specify that requirement in
+If new objects are added to the ipv4InterfaceTable that
+require the ipv4InterfaceTableLastChange to be updated when
+they are modified, they must specify that requirement in
 their description clause.
 </pre>
 </td>
@@ -227,12 +235,12 @@ The value of sysUpTime on the most recent occasion at which
 a row in the ipv6InterfaceTable was added or deleted or when
 an ipv6InterfaceReasmMaxSize, ipv6InterfaceIdentifier,
 ipv6InterfaceEnableStatus, ipv6InterfaceReachableTime,
-ipv6InterfaceRetransmitTime or ipv6InterfaceForwarding
+ipv6InterfaceRetransmitTime, or ipv6InterfaceForwarding
 object was modified.
 
 If new objects are added to the ipv6InterfaceTable that
 require the ipv6InterfaceTableLastChange to be updated when
-they are modified they must specify that requirement in
+they are modified, they must specify that requirement in
 their description clause.
 </pre>
 </td>
@@ -260,7 +268,7 @@ a row in the ipIfStatsTable was added or deleted.
 
 If new objects are added to the ipIfStatsTable that require
 the ipIfStatsTableLastChange to be updated when they are
-modified they must specify that requirement in their
+modified, they must specify that requirement in their
 description clause.
 </pre>
 </td>
@@ -290,17 +298,17 @@ coordinate their use of the set operation in creating or
 modifying rows within this table.
 
 In order to use this lock to coordinate the use of set
-operations managers should first retrieve
-ipvAddressTableSpinLock.  They should then determine the
-appropriate row to create or modify.  Finally they should
-issue the appropriate set command including the retrieved
+operations, managers should first retrieve
+ipAddressTableSpinLock.  They should then determine the
+appropriate row to create or modify.  Finally, they should
+issue the appropriate set command, including the retrieved
 value of ipAddressSpinLock.  If another manager has altered
 the table in the meantime, then the value of
-ipAddressSpinLock will have changed and the creation will
+ipAddressSpinLock will have changed, and the creation will
 fail as it will be specifying an incorrect value for
 ipAddressSpinLock.  It is suggested, but not required, that
 the ipAddressSpinLock be the first var bind for each set of
-objects representing a 'row' in a PDU.  
+objects representing a 'row' in a PDU.
 </pre>
 </td>
   </tr>
@@ -329,9 +337,9 @@ coordinate their use of the set operation in creating or
 modifying rows within this table.
 
 In order to use this lock to coordinate the use of set
-operations managers should first retrieve
+operations, managers should first retrieve
 ipv6RouterAdvertSpinLock.  They should then determine the
-appropriate row to create or modify.  Finally they should
+appropriate row to create or modify.  Finally, they should
 issue the appropriate set command including the retrieved
 value of ipv6RouterAdvertSpinLock.  If another manager has
 altered the table in the meantime, then the value of
@@ -340,7 +348,6 @@ will fail as it will be specifying an incorrect value for
 ipv6RouterAdvertSpinLock.  It is suggested, but not
 required, that the ipv6RouterAdvertSpinLock be the first var
 bind for each set of objects representing a 'row' in a PDU.
-
 </pre>
 </td>
   </tr>
@@ -395,7 +402,7 @@ interface.
 Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-The index value which uniquely identifies the interface to
+The index value that uniquely identifies the interface to
 which this entry is applicable.  The interface identified by
 a particular value of this index is the same interface as
 identified by the same value of the IF-MIB's ifIndex.
@@ -421,7 +428,7 @@ identified by the same value of the IF-MIB's ifIndex.
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The size of the largest IPv4 datagram which this entity can
+The size of the largest IPv4 datagram that this entity can
 re-assemble from incoming IPv4 fragmented datagrams received
 on this interface.
 </pre>
@@ -468,6 +475,11 @@ The time between retransmissions of ARP requests to a
 neighbor when resolving the address or when probing the
 reachability of a neighbor.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 1122
+</pre>
+</i></p>
 </td>
   </tr>
 </table>
@@ -519,7 +531,7 @@ interface.
 Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-The index value which uniquely identifies the interface to
+The index value that uniquely identifies the interface to
 which this entry is applicable.  The interface identified by
 a particular value of this index is the same interface as
 identified by the same value of the IF-MIB's ifIndex.
@@ -545,7 +557,7 @@ identified by the same value of the IF-MIB's ifIndex.
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The size of the largest IPv6 datagram which this entity can
+The size of the largest IPv6 datagram that this entity can
 re-assemble from incoming IPv6 fragmented datagrams received
 on this interface.
 </pre>
@@ -575,8 +587,11 @@ Identifier is combined with an address prefix to form an
 interface address.
 
 By default, the Interface Identifier is auto-configured
-according to the rules of the link type this interface is
-attached to.
+according to the rules of the link type to which this
+interface is attached.
+
+
+
 
 A zero length identifier may be used where appropriate.  One
 possible example is a loopback interface.
@@ -606,7 +621,7 @@ state of the interface itself, only its connection to an
 IPv6 stack.  The IF-MIB should be used to control the state
 of the interface.
 
-When this object is written the entity SHOULD save the
+When this object is written, the entity SHOULD save the
 change to non-volatile storage and restore the object from
 non-volatile storage upon re-initialization of the system.
 </pre>
@@ -627,6 +642,11 @@ non-volatile storage upon re-initialization of the system.
 The time a neighbor is considered reachable after receiving
 a reachability confirmation.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461, Section 6.3.2
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -645,6 +665,11 @@ The time between retransmissions of Neighbor Solicitation
 messages to a neighbor when resolving the address or when
 probing the reachability of a neighbor.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461, Section 6.3.2
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -677,7 +702,7 @@ forwarding function should set this object to forwarding for
 all interfaces and allow the ipv6IpForwarding object to
 control the forwarding capability.
 
-When this object is written the entity SHOULD save the
+When this object is written, the entity SHOULD save the
 change to non-volatile storage and restore the object from
 non-volatile storage upon re-initialization of the system.
 </pre>
@@ -698,7 +723,7 @@ The table containing system wide, IP version specific
 traffic statistics.  This table and the ipIfStatsTable
 contain similar objects whose difference is in their
 granularity.  Where this table contains system wide traffic
-statistics the ipIfStatsTable contains the same statistics
+statistics, the ipIfStatsTable contains the same statistics
 but counted on a per-interface basis.
 </pre>
 </td>
@@ -780,7 +805,7 @@ ipSystemStatsDiscontinuityTime.
 <pre>
 The total number of input IP datagrams received, including
 those received in error.  This object counts the same
-datagrams as ipSystemStatsInReceives but allows for larger
+datagrams as ipSystemStatsInReceives, but allows for larger
 values.
 
 Discontinuities in the value of this counter can occur at
@@ -827,7 +852,10 @@ ipSystemStatsDiscontinuityTime.
 <pre>
 The total number of octets received in input IP datagrams,
 including those received in error.  This object counts the
-same octets as ipSystemStatsInOctets but allows for larger
+same octets as ipSystemStatsInOctets, but allows for larger
+
+
+
 values.
 
 Discontinuities in the value of this counter can occur at
@@ -898,10 +926,12 @@ ipSystemStatsDiscontinuityTime.
 The number of input IP datagrams discarded because the IP
 address in their IP header's destination field was not a
 valid address to be received at this entity.  This count
-includes invalid addresses (e.g., ::0) and unsupported
-addresses (e.g., addresses with unallocated prefixes).  For
-entities which are not IP routers and therefore do not
-forward datagrams, this counter includes datagrams discarded
+includes invalid addresses (e.g., ::0).  For entities
+that are not IP routers and therefore do not forward
+
+
+
+datagrams, this counter includes datagrams discarded
 because the destination address was not a local address.
 
 Discontinuities in the value of this counter can occur at
@@ -927,7 +957,7 @@ The number of locally-addressed IP datagrams received
 successfully but discarded because of an unknown or
 unsupported protocol.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 interface to which these datagrams were addressed is
 incremented.  This interface might not be the same as the
 input interface for some of the datagrams.
@@ -976,12 +1006,12 @@ ipSystemStatsDiscontinuityTime.
 The number of input datagrams for which this entity was not
 their final IP destination and for which this entity
 attempted to find a route to forward them to that final
-destination.  In entities which do not act as IP routers,
-this counter will include only those datagrams which were
+destination.  In entities that do not act as IP routers,
+this counter will include only those datagrams that were
 Source-Routed via this entity, and the Source-Route
 processing was successful.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 incoming interface is incremented for each datagram.
 
 Discontinuities in the value of this counter can occur at
@@ -1007,7 +1037,7 @@ The number of input datagrams for which this entity was not
 their final IP destination and for which this entity
 attempted to find a route to forward them to that final
 destination.  This object counts the same packets as
-ipSystemStatsInForwDatagrams but allows for larger values.
+ipSystemStatsInForwDatagrams, but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -1028,15 +1058,18 @@ ipSystemStatsDiscontinuityTime.
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The number of IP fragments received which needed to be
+The number of IP fragments received that needed to be
 reassembled at this interface.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 interface to which these fragments were addressed is
 incremented.  This interface might not be the same as the
 input interface for some of the fragments.
 
 Discontinuities in the value of this counter can occur at
+
+
+
 re-initialization of the management system, and at other
 times as indicated by the value of
 ipSystemStatsDiscontinuityTime.
@@ -1056,7 +1089,7 @@ ipSystemStatsDiscontinuityTime.
 <td>
 <pre>
 The number of IP datagrams successfully reassembled.
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
             interface to which these datagrams were addressed is
             incremented.  This interface might not be the same as the
             input interface for some of the datagrams.
@@ -1086,7 +1119,7 @@ fragments since some algorithms (notably the algorithm in
 RFC 815) can lose track of the number of fragments by
 combining them as they are received.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 interface to which these fragments were addressed is
 incremented.  This interface might not be the same as the
 input interface for some of the fragments.
@@ -1111,7 +1144,7 @@ ipSystemStatsDiscontinuityTime.
 <td>
 <pre>
 The number of input IP datagrams for which no problems were
-encountered to prevent their continued processing, but which
+encountered to prevent their continued processing, but
 were discarded (e.g., for lack of buffer space).  Note that
 this counter does not include any datagrams discarded while
 awaiting re-assembly.
@@ -1138,7 +1171,7 @@ ipSystemStatsDiscontinuityTime.
 The total number of datagrams successfully delivered to IP
 user-protocols (including ICMP).
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 interface to which these datagrams were addressed is
 incremented.  This interface might not be the same as the
 input interface for some of the datagrams.
@@ -1164,7 +1197,7 @@ ipSystemStatsDiscontinuityTime.
 <pre>
 The total number of datagrams successfully delivered to IP
 user-protocols (including ICMP).  This object counts the
-same packets as ipSystemStatsInDelivers but allows for
+same packets as ipSystemStatsInDelivers, but allows for
 larger values.
 
 Discontinuities in the value of this counter can occur at
@@ -1186,7 +1219,7 @@ ipSystemStatsDiscontinuityTime.
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The total number of IP datagrams which local IP user-
+The total number of IP datagrams that local IP user-
 protocols (including ICMP) supplied to IP in requests for
 transmission.  Note that this counter does not include any
 datagrams counted in ipSystemStatsOutForwDatagrams.
@@ -1210,10 +1243,10 @@ ipSystemStatsDiscontinuityTime.
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The total number of IP datagrams which local IP user-
+The total number of IP datagrams that local IP user-
 protocols (including ICMP) supplied to IP in requests for
 transmission.  This object counts the same packets as
-ipSystemStatsHCOutRequests but allows for larger values.
+ipSystemStatsOutRequests, but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -1260,11 +1293,11 @@ ipSystemStatsDiscontinuityTime.
 The number of datagrams for which this entity was not their
 final IP destination and for which it was successful in
 finding a path to their final destination.  In entities
-which do not act as IP routers, this counter will include
-only those datagrams which were Source-Routed via this
+that do not act as IP routers, this counter will include
+only those datagrams that were Source-Routed via this
 entity, and the Source-Route processing was successful.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 outgoing interface is incremented for a successfully
 forwarded datagram.
 
@@ -1290,8 +1323,8 @@ ipSystemStatsDiscontinuityTime.
 The number of datagrams for which this entity was not their
 final IP destination and for which it was successful in
 finding a path to their final destination.  This object
-counts the same packets as ipSystemStatsOutForwDatagrams but
-allows for larger values.
+counts the same packets as ipSystemStatsOutForwDatagrams,
+but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -1314,8 +1347,11 @@ ipSystemStatsDiscontinuityTime.
 <pre>
 The number of output IP datagrams for which no problem was
 encountered to prevent their transmission to their
-destination, but which were discarded (e.g., for lack of
+destination, but were discarded (e.g., for lack of
 buffer space).  Note that this counter would include
+
+
+
 datagrams counted in ipSystemStatsOutForwDatagrams if any
 such datagrams met this (discretionary) discard criterion.
 
@@ -1341,7 +1377,7 @@ ipSystemStatsDiscontinuityTime.
 The number of IP datagrams that would require fragmentation
 in order to be transmitted.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 outgoing interface is incremented for a successfully
 fragmented datagram.
 
@@ -1367,7 +1403,7 @@ ipSystemStatsDiscontinuityTime.
 The number of IP datagrams that have been successfully
 fragmented.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 outgoing interface is incremented for a successfully
 fragmented datagram.
 
@@ -1396,7 +1432,7 @@ includes IPv4 packets that have the DF bit set and IPv6
 packets that are being forwarded and exceed the outgoing
 link MTU.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 outgoing interface is incremented for an unsuccessfully
 fragmented datagram.
 
@@ -1422,7 +1458,7 @@ ipSystemStatsDiscontinuityTime.
 The number of output datagram fragments that have been
 generated as a result of IP fragmentation.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 outgoing interface is incremented for a successfully
 fragmented datagram.
 
@@ -1447,11 +1483,14 @@ ipSystemStatsDiscontinuityTime.
 <pre>
 The total number of IP datagrams that this entity supplied
 to the lower layers for transmission.  This includes
-datagrams generated local and those forwarded by this
+datagrams generated locally and those forwarded by this
 entity.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
+
+
+
 times as indicated by the value of
 ipSystemStatsDiscontinuityTime.
 </pre>
@@ -1471,7 +1510,7 @@ ipSystemStatsDiscontinuityTime.
 <pre>
 The total number of IP datagrams that this entity supplied
 to the lower layers for transmission.  This object counts
-the same datagrams as ipSystemStatsOutTransmits but allows
+the same datagrams as ipSystemStatsOutTransmits, but allows
 for larger values.
 
 Discontinuities in the value of this counter can occur at
@@ -1518,12 +1557,15 @@ ipSystemStatsDiscontinuityTime.
 <pre>
 The total number of octets in IP datagrams delivered to the
 lower layers for transmission.  This objects counts the same
-octets as ipSystemStatsOutOctets but allows for larger
+octets as ipSystemStatsOutOctets, but allows for larger
 values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
 times as indicated by the value of
+
+
+
 ipSystemStatsDiscontinuityTime.
 </pre>
 </td>
@@ -1585,7 +1627,7 @@ ipSystemStatsDiscontinuityTime.
 <pre>
 The total number of octets received in IP multicast
 datagrams.  Octets from datagrams counted in
-ipSystemStatsOutMcastPkts MUST be counted here.
+ipSystemStatsInMcastPkts MUST be counted here.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -1608,7 +1650,7 @@ ipSystemStatsDiscontinuityTime.
 <pre>
 The total number of octets received in IP multicast
 datagrams.  This object counts the same octets as
-ipSystemStatsInMcastOctets but allows for larger values.
+ipSystemStatsInMcastOctets, but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -1651,7 +1693,7 @@ Discontinuities in the value of this counter can occur at
 <pre>
 The number of IP multicast datagrams transmitted.  This
 object counts the same datagrams as
-ipSystemStatsOutMcastPkts but allows for larger values.
+ipSystemStatsOutMcastPkts, but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -1674,7 +1716,10 @@ ipSystemStatsDiscontinuityTime.
 <pre>
 The total number of octets transmitted in IP multicast
 datagrams.  Octets from datagrams counted in
-ipSystemStatsInMcastPkts MUST be counted here.
+
+
+
+ipSystemStatsOutMcastPkts MUST be counted here.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -1697,7 +1742,7 @@ ipSystemStatsDiscontinuityTime.
 <pre>
 The total number of octets transmitted in IP multicast
 datagrams.  This object counts the same octets as
-ipSystemStatsOutMcastOctets but allows for larger values.
+ipSystemStatsOutMcastOctets, but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -1745,6 +1790,9 @@ allows for larger values.
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
 times as indicated by the value of
+
+
+
 ipSystemStatsDiscontinuityTime.
 </pre>
 </td>
@@ -1783,7 +1831,7 @@ Discontinuities in the value of this counter can occur at
 <pre>
 The number of IP broadcast datagrams transmitted.  This
 object counts the same datagrams as
-ipSystemStatsOutBcastPkts but allows for larger values.
+ipSystemStatsOutBcastPkts, but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -1851,8 +1899,8 @@ time required to update the counters in this entry.
 The table containing per-interface traffic statistics.  This
 table and the ipSystemStatsTable contain similar objects
 whose difference is in their granularity.  Where this table
-contains per-interface statistics the ipSystemStatsTable
-contains the same statistics but counted on a system wide
+contains per-interface statistics, the ipSystemStatsTable
+contains the same statistics, but counted on a system wide
 basis.
 </pre>
 </td>
@@ -1912,7 +1960,7 @@ The IP version of this row.
 Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-The index value which uniquely identifies the interface to
+The index value that uniquely identifies the interface to
 which this entry is applicable.  The interface identified by
 a particular value of this index is the same interface as
 identified by the same value of the IF-MIB's ifIndex.
@@ -1960,7 +2008,7 @@ ipIfStatsDiscontinuityTime.
 <pre>
 The total number of input IP datagrams received, including
 those received in error.  This object counts the same
-datagrams as ipIfStatsInReceives but allows for larger
+datagrams as ipIfStatsInReceives, but allows for larger
 values.
 
 Discontinuities in the value of this counter can occur at
@@ -2007,7 +2055,7 @@ ipIfStatsDiscontinuityTime.
 <pre>
 The total number of octets received in input IP datagrams,
 including those received in error.  This object counts the
-same octets as ipIfStatsInOctets but allows for larger
+same octets as ipIfStatsInOctets, but allows for larger
 values.
 
 Discontinuities in the value of this counter can occur at
@@ -2078,7 +2126,7 @@ ipIfStatsDiscontinuityTime.
 The number of input IP datagrams discarded because the IP
 address in their IP header's destination field was not a
 valid address to be received at this entity.  This count
-includes invalid addresses (e.g., ::0).  For entities which
+includes invalid addresses (e.g., ::0).  For entities that
 are not IP routers and therefore do not forward datagrams,
 this counter includes datagrams discarded because the
 destination address was not a local address.
@@ -2106,7 +2154,7 @@ The number of locally-addressed IP datagrams received
 successfully but discarded because of an unknown or
 unsupported protocol.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 interface to which these datagrams were addressed is
 incremented.  This interface might not be the same as the
 input interface for some of the datagrams.
@@ -2114,6 +2162,9 @@ input interface for some of the datagrams.
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
 times as indicated by the value of
+
+
+
 ipIfStatsDiscontinuityTime.
 </pre>
 </td>
@@ -2155,12 +2206,12 @@ ipIfStatsDiscontinuityTime.
 The number of input datagrams for which this entity was not
 their final IP destination and for which this entity
 attempted to find a route to forward them to that final
-destination.  In entities which do not act as IP routers,
-this counter will include only those datagrams which were
+destination.  In entities that do not act as IP routers,
+this counter will include only those datagrams that were
 Source-Routed via this entity, and the Source-Route
 processing was successful.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 incoming interface is incremented for each datagram.
 
 Discontinuities in the value of this counter can occur at
@@ -2186,12 +2237,15 @@ The number of input datagrams for which this entity was not
 their final IP destination and for which this entity
 attempted to find a route to forward them to that final
 destination.  This object counts the same packets as
-ipIfInForwDatagrams but allows for larger values.
+
+
+
+ipIfStatsInForwDatagrams, but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
 times as indicated by the value of
-ipSystemStatsDiscontinuityTime.
+ipIfStatsDiscontinuityTime.
 </pre>
 </td>
   </tr>
@@ -2207,10 +2261,10 @@ ipSystemStatsDiscontinuityTime.
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The number of IP fragments received which needed to be
+The number of IP fragments received that needed to be
 reassembled at this interface.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 interface to which these fragments were addressed is
 incremented.  This interface might not be the same as the
 input interface for some of the fragments.
@@ -2235,7 +2289,7 @@ ipIfStatsDiscontinuityTime.
 <td>
 <pre>
 The number of IP datagrams successfully reassembled.
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
             interface to which these datagrams were addressed is
             incremented.  This interface might not be the same as the
             input interface for some of the datagrams.
@@ -2265,7 +2319,7 @@ fragments since some algorithms (notably the algorithm in
 RFC 815) can lose track of the number of fragments by
 combining them as they are received.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 interface to which these fragments were addressed is
 incremented.  This interface might not be the same as the
 input interface for some of the fragments.
@@ -2290,7 +2344,7 @@ ipIfStatsDiscontinuityTime.
 <td>
 <pre>
 The number of input IP datagrams for which no problems were
-encountered to prevent their continued processing, but which
+encountered to prevent their continued processing, but
 were discarded (e.g., for lack of buffer space).  Note that
 this counter does not include any datagrams discarded while
 awaiting re-assembly.
@@ -2317,9 +2371,12 @@ ipIfStatsDiscontinuityTime.
 The total number of datagrams successfully delivered to IP
 user-protocols (including ICMP).
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 interface to which these datagrams were addressed is
 incremented.  This interface might not be the same as the
+
+
+
 input interface for some of the datagrams.
 
 Discontinuities in the value of this counter can occur at
@@ -2343,13 +2400,13 @@ ipIfStatsDiscontinuityTime.
 <pre>
 The total number of datagrams successfully delivered to IP
 user-protocols (including ICMP).  This object counts the
-same packets as ipIfStatsInDelivers but allows for larger
+same packets as ipIfStatsInDelivers, but allows for larger
 values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
 times as indicated by the value of
-ipSystemStatsDiscontinuityTime.
+ipIfStatsDiscontinuityTime.
 </pre>
 </td>
   </tr>
@@ -2365,7 +2422,7 @@ ipSystemStatsDiscontinuityTime.
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The total number of IP datagrams which local IP user-
+The total number of IP datagrams that local IP user-
 protocols (including ICMP) supplied to IP in requests for
 transmission.  Note that this counter does not include any
 datagrams counted in ipIfStatsOutForwDatagrams.
@@ -2389,15 +2446,18 @@ ipIfStatsDiscontinuityTime.
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The total number of IP datagrams which local IP user-
+The total number of IP datagrams that local IP user-
 protocols (including ICMP) supplied to IP in requests for
 transmission.  This object counts the same packets as
-ipIfStatsHCOutRequests but allows for larger values.
+
+
+
+ipIfStatsOutRequests, but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
 times as indicated by the value of
-ipSystemStatsDiscontinuityTime.
+ipIfStatsDiscontinuityTime.
 </pre>
 </td>
   </tr>
@@ -2416,11 +2476,11 @@ ipSystemStatsDiscontinuityTime.
 The number of datagrams for which this entity was not their
 final IP destination and for which it was successful in
 finding a path to their final destination.  In entities
-which do not act as IP routers, this counter will include
-only those datagrams which were Source-Routed via this
+that do not act as IP routers, this counter will include
+only those datagrams that were Source-Routed via this
 entity, and the Source-Route processing was successful.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 outgoing interface is incremented for a successfully
 forwarded datagram.
 
@@ -2446,13 +2506,16 @@ ipIfStatsDiscontinuityTime.
 The number of datagrams for which this entity was not their
 final IP destination and for which it was successful in
 finding a path to their final destination.  This object
-counts the same packets as ipIfStatsOutForwDatagrams but
+counts the same packets as ipIfStatsOutForwDatagrams, but
 allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
 times as indicated by the value of
-ipSystemStatsDiscontinuityTime.
+
+
+
+ipIfStatsDiscontinuityTime.
 </pre>
 </td>
   </tr>
@@ -2470,7 +2533,7 @@ ipSystemStatsDiscontinuityTime.
 <pre>
 The number of output IP datagrams for which no problem was
 encountered to prevent their transmission to their
-destination, but which were discarded (e.g., for lack of
+destination, but were discarded (e.g., for lack of
 buffer space).  Note that this counter would include
 datagrams counted in ipIfStatsOutForwDatagrams if any such
 datagrams met this (discretionary) discard criterion.
@@ -2497,7 +2560,7 @@ ipIfStatsDiscontinuityTime.
 The number of IP datagrams that would require fragmentation
 in order to be transmitted.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 outgoing interface is incremented for a successfully
 fragmented datagram.
 
@@ -2523,7 +2586,10 @@ ipIfStatsDiscontinuityTime.
 The number of IP datagrams that have been successfully
 fragmented.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
+
+
+
 outgoing interface is incremented for a successfully
 fragmented datagram.
 
@@ -2552,7 +2618,7 @@ includes IPv4 packets that have the DF bit set and IPv6
 packets that are being forwarded and exceed the outgoing
 link MTU.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 outgoing interface is incremented for an unsuccessfully
 fragmented datagram.
 
@@ -2578,7 +2644,7 @@ ipIfStatsDiscontinuityTime.
 The number of output datagram fragments that have been
 generated as a result of IP fragmentation.
 
-When tracking interface statistics the counter of the
+When tracking interface statistics, the counter of the
 outgoing interface is incremented for a successfully
 fragmented datagram.
 
@@ -2603,7 +2669,7 @@ ipIfStatsDiscontinuityTime.
 <pre>
 The total number of IP datagrams that this entity supplied
 to the lower layers for transmission.  This includes
-datagrams generated local and those forwarded by this
+datagrams generated locally and those forwarded by this
 entity.
 
 Discontinuities in the value of this counter can occur at
@@ -2627,7 +2693,7 @@ ipIfStatsDiscontinuityTime.
 <pre>
 The total number of IP datagrams that this entity supplied
 to the lower layers for transmission.  This object counts
-the same datagrams as ipIfStatsOutTransmits but allows for
+the same datagrams as ipIfStatsOutTransmits, but allows for
 larger values.
 
 Discontinuities in the value of this counter can occur at
@@ -2674,7 +2740,7 @@ ipIfStatsDiscontinuityTime.
 <pre>
 The total number of octets in IP datagrams delivered to the
 lower layers for transmission.  This objects counts the same
-octets as ipIfStatsOutOctets but allows for larger values.
+octets as ipIfStatsOutOctets, but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -2716,8 +2782,8 @@ Discontinuities in the value of this counter can occur at
 <td>
 <pre>
 The number of IP multicast datagrams received.  This object
-counts the same datagrams as ipIfStatsInMcastPkts but allows
-for larger values.
+counts the same datagrams as ipIfStatsInMcastPkts, but
+allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -2740,12 +2806,12 @@ ipIfStatsDiscontinuityTime.
 <pre>
 The total number of octets received in IP multicast
 datagrams.  Octets from datagrams counted in
-ipIfStatsOutMcastPkts MUST be counted here.
+            ipIfStatsInMcastPkts MUST be counted here.
 
-Discontinuities in the value of this counter can occur at
-re-initialization of the management system, and at other
-times as indicated by the value of
-ipIfStatsDiscontinuityTime.
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            ipIfStatsDiscontinuityTime.
 </pre>
 </td>
   </tr>
@@ -2763,7 +2829,7 @@ ipIfStatsDiscontinuityTime.
 <pre>
 The total number of octets received in IP multicast
 datagrams.  This object counts the same octets as
-ipIfStatsInMcastOctets but allows for larger values.
+ipIfStatsInMcastOctets, but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -2805,11 +2871,14 @@ Discontinuities in the value of this counter can occur at
 <td>
 <pre>
 The number of IP multicast datagrams transmitted.  This
-object counts the same datagrams as ipIfStatsOutMcastPkts
+object counts the same datagrams as ipIfStatsOutMcastPkts,
 but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
+
+
+
 times as indicated by the value of
 ipIfStatsDiscontinuityTime.
 </pre>
@@ -2829,7 +2898,7 @@ ipIfStatsDiscontinuityTime.
 <pre>
 The total number of octets transmitted in IP multicast
 datagrams.  Octets from datagrams counted in
-ipIfStatsInMcastPkts MUST be counted here.
+ipIfStatsOutMcastPkts MUST be counted here.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -2852,7 +2921,7 @@ ipIfStatsDiscontinuityTime.
 <pre>
 The total number of octets transmitted in IP multicast
 datagrams.  This object counts the same octets as
-ipIfStatsOutMcastOctets but allows for larger values.
+ipIfStatsOutMcastOctets, but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -2894,8 +2963,8 @@ Discontinuities in the value of this counter can occur at
 <td>
 <pre>
 The number of IP broadcast datagrams received.  This object
-counts the same datagrams as ipIfStatsInBcastPkts but allows
-for larger values.
+counts the same datagrams as ipIfStatsInBcastPkts, but
+allows for larger values.
 
 Discontinuities in the value of this counter can occur at
 re-initialization of the management system, and at other
@@ -2937,7 +3006,7 @@ Discontinuities in the value of this counter can occur at
 <td>
 <pre>
 The number of IP broadcast datagrams transmitted.  This
-object counts the same datagrams as ipIfStatsOutBcastPkts
+object counts the same datagrams as ipIfStatsOutBcastPkts,
 but allows for larger values.
 
 Discontinuities in the value of this counter can occur at
@@ -2966,11 +3035,11 @@ Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVEN
 <pre>
 The value of sysUpTime on the most recent occasion at which
 any one or more of this entry's counters suffered a
-discontinuity.
+            discontinuity.
 
-If no such discontinuities have occurred since the last re-
-initialization of the local management subsystem, then this
-object contains a zero value.
+            If no such discontinuities have occurred since the last re-
+            initialization of the local management subsystem, then this
+            object contains a zero value.
 </pre>
 </td>
   </tr>
@@ -3004,17 +3073,18 @@ time required to update the counters in this entry.
 <td>
 <pre>
 This table allows the user to determine the source of an IP
-address or set of IP addresses and allows other tables to
+address or set of IP addresses, and allows other tables to
 share the information via pointer rather than by copying.
 
-For example when the node configures both a unicast and
-anycast address for a prefix the ipAddressPrefix objects for
-those addresses will point to a single row in this table.
+For example, when the node configures both a unicast and
+anycast address for a prefix, the ipAddressPrefix objects
+for those addresses will point to a single row in this
+table.
 
-This table primarily provides support for IPv6 prefixes and
+This table primarily provides support for IPv6 prefixes, and
 several of the objects are less meaningful for IPv4.  The
 table continues to allow IPv4 addresses to allow future
-flexibility.  In order to promote a common configuration
+flexibility.  In order to promote a common configuration,
 this document includes suggestions for default values for
 IPv4 prefixes.  Each of these values may be overridden if an
 object is meaningful to the node.
@@ -3022,7 +3092,10 @@ object is meaningful to the node.
 All prefixes used by this entity should be included in this
 table independent of how the entity learned the prefix.
 (This table isn't limited to prefixes learned from router
-advertisements.)  
+
+
+
+advertisements.)
 </pre>
 </td>
 </tr>
@@ -3058,7 +3131,7 @@ An entry in the ipAddressPrefixTable.
 Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-The index value which uniquely identifies the interface on
+The index value that uniquely identifies the interface on
 which this prefix is configured.  The interface identified
 by a particular value of this index is the same interface as
 identified by the same value of the IF-MIB's ifIndex.
@@ -3111,11 +3184,11 @@ specified in ipAddressPrefixType.  The length of this object
 is the standard length for objects of that type (4 or 16
 bytes).  Any bits after ipAddressPrefixLength must be zero.
 
-Implementors need to be aware that if the size of
-ipAddressPrefixPrefix exceeds 114 octets then OIDS of
+Implementors need to be aware that, if the size of
+ipAddressPrefixPrefix exceeds 114 octets, then OIDS of
 instances of columns in this row will have more than 128
-sub-identifiers and cannot be accessed using SNMPv1, SNMPv2c
-or SNMPv3.
+sub-identifiers and cannot be accessed using SNMPv1,
+SNMPv2c, or SNMPv3.
 </pre>
 </td>
   </tr>
@@ -3190,11 +3263,17 @@ Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONV
 </p>
 <pre>
 This object has the value 'true(1)', if this prefix can be
-used  for on-link determination and the value 'false(2)'
-otherwise.
+used for on-link determination; otherwise, the value is
+'false(2)'.
 
 The default for IPv4 prefixes is 'true(1)'.
 </pre>
+<p><i>Also see Reference:
+<pre>
+For IPv6 RFC 2461, especially sections 2 and 4.6.2 and
+RFC 2462
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -3215,14 +3294,20 @@ The default for IPv4 prefixes is 'true(1)'.
 Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-Autonomous address configuration flag. When true(1),
+Autonomous address configuration flag.  When true(1),
 indicates that this prefix can be used for autonomous
-address configuration (i.e. can be used to form a local
+address configuration (i.e., can be used to form a local
 interface address).  If false(2), it is not used to auto-
 configure a local interface address.
 
 The default for IPv4 prefixes is 'false(2)'.
 </pre>
+<p><i>Also see Reference:
+<pre>
+For IPv6 RFC 2461, especially sections 2 and 4.6.2 and
+RFC 2462
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -3237,8 +3322,8 @@ The default for IPv4 prefixes is 'false(2)'.
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The remaining length of time in seconds that this prefix
-will continue to be preferred, i.e. time until deprecation.
+The remaining length of time, in seconds, that this prefix
+will continue to be preferred, i.e., time until deprecation.
 
 A value of 4,294,967,295 represents infinity.
 
@@ -3249,6 +3334,12 @@ expected.
 
 The default for IPv4 prefixes is 4,294,967,295 (infinity).
 </pre>
+<p><i>Also see Reference:
+<pre>
+For IPv6 RFC 2461, especially sections 2 and 4.6.2 and
+RFC 2462
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -3264,14 +3355,23 @@ The default for IPv4 prefixes is 4,294,967,295 (infinity).
 <td>
 <pre>
 The remaining length of time, in seconds, that this prefix
-will continue to be valid, i.e. time until invalidation.  A
+will continue to be valid, i.e., time until invalidation.  A
 value of 4,294,967,295 represents infinity.
 
 The address generated from an invalidated prefix should not
 appear as the destination or source address of a packet.
 
+
+
+
 The default for IPv4 prefixes is 4,294,967,295 (infinity).
 </pre>
+<p><i>Also see Reference:
+<pre>
+For IPv6 RFC 2461, especially sections 2 and 4.6.2 and
+RFC 2462
+</pre>
+</i></p>
 </td>
   </tr>
 </table>
@@ -3290,22 +3390,24 @@ entity's interfaces.
 
 This table does not contain multicast address information.
 Tables for such information should be contained in multicast
-specific MIBs such as RFC3019.
+specific MIBs, such as RFC 3019.
 
-While this table is writable the user will note that several
-objects, such as ipAddressOrigin, are not.  The intention in
-allowing a user to write to this table is to allow them to
-add or remove any entry that isn't permanent.  The user
-should be  allowed to modify objects and entries when that
-would not cause inconsistencies within the table.  Allowing
-write access to objects such as ipAddressOrigin could allow
-a user to insert an entry and then label it incorrectly.
+While this table is writable, the user will note that
+several objects, such as ipAddressOrigin, are not.  The
+intention in allowing a user to write to this table is to
+allow them to add or remove any entry that isn't
+
+
+
+permanent.  The user should be allowed to modify objects
+and entries when that would not cause inconsistencies
+within the table.  Allowing write access to objects, such
+as ipAddressOrigin, could allow a user to insert an entry
+and then label it incorrectly.
 
 Note well: When including IPv6 link-local addresses in this
-table the entry must use an InetAddressType of 'ipv6z' in
+table, the entry must use an InetAddressType of 'ipv6z' in
 order to differentiate between the possible interfaces.
-
-
 </pre>
 </td>
 </tr>
@@ -3365,12 +3467,12 @@ Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CO
 <pre>
 The IP address to which this entry's addressing information
 pertains.  The address type of this object is specified in
-ipAddressAddrType.
+            ipAddressAddrType.
 
-Implementors need to be aware that if the size of
-ipAddressAddr exceeds 116 octets then OIDS of instances of
-columns in this row will have more than 128 sub-identifiers
-and cannot be accessed using SNMPv1, SNMPv2c or SNMPv3.
+            Implementors need to be aware that if the size of
+            ipAddressAddr exceeds 116 octets, then OIDS of instances of
+            columns in this row will have more than 128 sub-identifiers
+            and cannot be accessed using SNMPv1, SNMPv2c, or SNMPv3.
 </pre>
 </td>
   </tr>
@@ -3398,7 +3500,7 @@ and cannot be accessed using SNMPv1, SNMPv2c or SNMPv3.
 Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-The index value which uniquely identifies the interface to
+The index value that uniquely identifies the interface to
 which this entry is applicable.  The interface identified by
 a particular value of this index is the same interface as
 identified by the same value of the IF-MIB's ifIndex.
@@ -3424,7 +3526,7 @@ identified by the same value of the IF-MIB's ifIndex.
 <td>
 <pre>
 The type of address.  broadcast(3) is not a valid value for
-IPv6 addresses (RFC3513).  
+IPv6 addresses (RFC 3513).
 </pre>
 </td>
   </tr>
@@ -3567,11 +3669,13 @@ Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVEN
 The status of this conceptual row.
 The RowStatus TC requires that this DESCRIPTION clause
             states under which circumstances other objects in this row
-            can be modified.  The value of this object has no effect on
+
+
+can be modified.  The value of this object has no effect on
             whether other objects in this conceptual row can be
             modified.
 A conceptual row can not be made active until the
-            ipAddressIfIndex has been set to a valid index.  
+            ipAddressIfIndex has been set to a valid index.
 </pre>
 </td>
   </tr>
@@ -3594,7 +3698,7 @@ Note: this object is based on the <a href="#StorageType"> StorageType TEXTUAL-CO
 </p>
 <pre>
 The storage type for this conceptual row.  If this object
-has a value of 'permanent' then no other objects are
+has a value of 'permanent', then no other objects are
 required to be able to be modified.
 </pre>
 </td>
@@ -3621,9 +3725,14 @@ interfaces are of this type, then the Address Translation
 table is empty, i.e., has zero entries.
 
 While many protocols may be used to populate this table, ARP
-[10] and Neighbor Discovery [4] are the most likely
+and Neighbor Discovery are the most likely
 options.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 826 and RFC 2461
+</pre>
+</i></p>
 </td>
 </tr>
 <tr><td class="label"><a name="ipNetToPhysicalEntry" />Row Description</td>
@@ -3659,7 +3768,7 @@ equivalence.
 Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-The index value which uniquely identifies the interface to
+The index value that uniquely identifies the interface to
 which this entry is applicable.  The interface identified by
 a particular value of this index is the same interface as
 identified by the same value of the IF-MIB's ifIndex.
@@ -3712,10 +3821,13 @@ The IP Address corresponding to the media-dependent
 specified in ipNetToPhysicalAddressType.
 
 Implementors need to be aware that if the size of
-ipNetToPhysicalNetAddress exceeds 115 octets then OIDS of
+
+
+
+ipNetToPhysicalNetAddress exceeds 115 octets, then OIDS of
 instances of columns in this row will have more than 128
-sub-identifiers and cannot be accessed using SNMPv1, SNMPv2c
-or SNMPv3.
+sub-identifiers and cannot be accessed using SNMPv1,
+SNMPv2c, or SNMPv3.
 </pre>
 </td>
   </tr>
@@ -3800,8 +3912,10 @@ Setting this object to the value invalid(2) has the effect
             ipNetToPhysicalTable.  That is, it effectively dis-
             associates the interface identified with said entry from the
             mapping identified with said entry.  It is an
-            implementation- specific matter as to whether the agent
-            removes an invalidated entry from the table.  Accordingly,
+            implementation-specific matter as to whether the agent
+
+
+removes an invalidated entry from the table.  Accordingly,
             management stations must be prepared to receive tabular
             information from agents that corresponds to entries not
             currently in use.  Proper interpretation of such entries
@@ -3809,7 +3923,8 @@ Setting this object to the value invalid(2) has the effect
             object.
 The 'dynamic(3)' type indicates that the IP address to
             physical addresses mapping has been dynamically resolved
-            using e.g. IPv4 ARP or the IPv6 Neighbor Discovery protocol.
+            using e.g., IPv4 ARP or the IPv6 Neighbor Discovery
+            protocol.
 The 'static(4)' type indicates that the mapping has been
             statically configured.  Both of these refer to entries that
             provide mappings for other entities addresses.
@@ -3843,11 +3958,16 @@ As the entries in this table are typically not persistent
   </td><td>ReadOnly</td>
 <td>
 <pre>
-The Neighbor Unreachability Detection [4] state for the
+The Neighbor Unreachability Detection state for the
 interface when the address mapping in this entry is used.
 If Neighbor Unreachability Detection is not in use (e.g. for
 IPv4), this object is always unknown(6).
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -3876,9 +3996,9 @@ The RowStatus TC requires that this DESCRIPTION clause
             modified.
 A conceptual row can not be made active until the
             ipNetToPhysicalPhysAddress object has been set.
-Note that if the ipNetToPhysicalType is set to 'invalid' the
-            managed node may delete the entry independent of the state
-            of this object.
+Note that if the ipNetToPhysicalType is set to 'invalid',
+            the managed node may delete the entry independent of the
+            state of this object.
 </pre>
 </td>
   </tr>
@@ -3896,10 +4016,15 @@ Note that if the ipNetToPhysicalType is set to 'invalid' the
 The table used to describe IPv6 unicast and multicast scope
 zones.
 
-For those objects that have names rather than numbers the
+For those objects that have names rather than numbers, the
 names were chosen to coincide with the names used in the
-IPv6 address architecture document, [17]. 
+IPv6 address architecture document. 
 </pre>
+<p><i>Also see Reference:
+<pre>
+Section 2.7 of RFC 4291
+</pre>
+</i></p>
 </td>
 </tr>
 <tr><td class="label"><a name="ipv6ScopeZoneIndexEntry" />Row Description</td>
@@ -3935,7 +4060,7 @@ interface.
 Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-The index value which uniquely identifies the interface to
+The index value that uniquely identifies the interface to
 which these scopes belong.  The interface identified by a
 particular value of this index is the same interface as
 identified by the same value of the IF-MIB's ifIndex.
@@ -3985,8 +4110,7 @@ The zone index for the link-local scope on this interface.
 Note: this object is based on the <a href="#InetZoneIndex"> InetZoneIndex TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-The zone index for the subnet-local scope on this
-interface.
+The zone index for scope 3 on this interface.
 </pre>
 </td>
   </tr>
@@ -4277,10 +4401,10 @@ row.  The address type of this object is specified in
 ipDefaultRouterAddressType.
 
 Implementers need to be aware that if the size of
-ipDefaultRouterAddress exceeds 115 octets then OIDS of
+ipDefaultRouterAddress exceeds 115 octets, then OIDS of
 instances of columns in this row will have more than 128
-sub-identifiers and cannot be accessed using SNMPv1, SNMPv2c
-or SNMPv3.
+sub-identifiers and cannot be accessed using SNMPv1,
+SNMPv2c, or SNMPv3.
 </pre>
 </td>
   </tr>
@@ -4303,7 +4427,7 @@ or SNMPv3.
 Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-The index value which uniquely identifies the interface by
+The index value that uniquely identifies the interface by
 which the router can be reached.  The interface identified
 by a particular value of this index is the same interface as
 identified by the same value of the IF-MIB's ifIndex.
@@ -4336,9 +4460,14 @@ router.  It is left to the implementer of the MIB as to
 whether a router with a lifetime of zero is removed from the
 list.
 
-For IPv6 this value should be extracted from the router
-advertisement messages.  
+For IPv6, this value should be extracted from the router
+advertisement messages.
 </pre>
+<p><i>Also see Reference:
+<pre>
+For IPv6 RFC 2462 sections 4.2 and 6.3.4
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -4361,14 +4490,20 @@ advertisement messages.
 <td>
 <pre>
 An indication of preference given to this router as a
-default router as described in [8]. Treating the value as a
+default router as described in he Default Router
+Preferences document.  Treating the value as a
 2 bit signed integer allows for simple arithmetic
 comparisons.
 
 For IPv4 routers or IPv6 routers that are not using the
-updated router advertisement format this object is set to
-medium (0).  
+updated router advertisement format, this object is set to
+medium (0).
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 4291, section 2.1
+</pre>
+</i></p>
 </td>
   </tr>
 </table>
@@ -4393,9 +4528,9 @@ advertisements.
 An entry containing information used to construct router
 advertisements.
 
-Information in this table is persistent and when this object
-is written the entity SHOULD save the change to non-volatile
-storage.
+Information in this table is persistent, and when this
+object is written, the entity SHOULD save the change to
+non-volatile storage.
 </pre>
 </td>
 </tr>
@@ -4424,7 +4559,7 @@ storage.
 Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-The index value which uniquely identifies the interface on
+The index value that uniquely identifies the interface on
 which router advertisements constructed with this
 information will be transmitted.  The interface identified
 by a particular value of this index is the same interface as
@@ -4455,10 +4590,15 @@ identified by the same value of the IF-MIB's ifIndex.
 Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
 </p>
 <pre>
-A flag indicating whether or not the router sends periodic
+A flag indicating whether the router sends periodic
 router advertisements and responds to router solicitations
 on this interface.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461 Section 6.2.1
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -4478,6 +4618,11 @@ on this interface.
 The maximum time allowed between sending unsolicited router
 advertisements from this interface.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461 Section 6.2.1
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -4497,10 +4642,15 @@ advertisements from this interface.
 The minimum time allowed between sending unsolicited router
 advertisements from this interface.
 
-The default is 0.33 * ipv6RouterAdvertMaxInterval, however
-in the case of a low value for ipv6RouterAdvertMaxInterval
+The default is 0.33 * ipv6RouterAdvertMaxInterval, however,
+in the case of a low value for ipv6RouterAdvertMaxInterval,
 the minimum value for this object is restricted to 3.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461 Section 6.2.1
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -4525,6 +4675,11 @@ The true/false value to be placed into the 'managed address
 configuration' flag field in router advertisements sent from
 this interface.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461 Section 6.2.1
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -4549,6 +4704,11 @@ The true/false value to be placed into the 'other stateful
 configuration' flag field in router advertisements sent from
 this interface.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461 Section 6.2.1
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -4568,6 +4728,11 @@ this interface.
 
 A value of zero indicates that no MTU options are sent.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461 Section 6.2.1
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -4591,6 +4756,11 @@ A value of zero in the router advertisement indicates that
 the advertisement isn't specifying a value for reachable
 time.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461 Section 6.2.1
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -4612,6 +4782,11 @@ A value of zero in the router advertisement indicates that
 the advertisement isn't specifying a value for retrans
 time.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461 Section 6.2.1
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -4630,6 +4805,9 @@ time.
 <pre>
 The default value to be placed in the current hop limit
 field in router advertisements sent from this interface.
+
+
+
 The value should be set to the current diameter of the
 Internet.
 
@@ -4639,6 +4817,11 @@ the advertisement isn't specifying a value for curHopLimit.
 The default should be set to the value specified in the IANA
 web pages (www.iana.org) at the time of implementation.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461 Section 6.2.1
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -4667,6 +4850,11 @@ as a default router.
 
 The default is 3 * ipv6RouterAdvertMaxInterval.
 </pre>
+<p><i>Also see Reference:
+<pre>
+RFC 2461 Section 6.2.1
+</pre>
+</i></p>
 </td>
   </tr>
   <tr>
@@ -4688,7 +4876,7 @@ Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVEN
 </p>
 <pre>
 The status of this conceptual row.
-As all objects in this conceptual row have default values a
+As all objects in this conceptual row have default values, a
             row can be created and made active by setting this object
             appropriately.
 The RowStatus TC requires that this DESCRIPTION clause
@@ -4712,12 +4900,13 @@ The RowStatus TC requires that this DESCRIPTION clause
 <table>
 <tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipInReceives" />
 3
 <br /><b>ipInReceives</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -4726,19 +4915,23 @@ The RowStatus TC requires that this DESCRIPTION clause
 The total number of input datagrams received from
 interfaces, including those received in error.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
+
+
+
 table has been added.  It is loosely replaced by
-ipSystemStatsInRecieves.  
+ipSystemStatsInRecieves.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipInHdrErrors" />
 4
 <br /><b>ipInHdrErrors</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -4749,19 +4942,20 @@ their IPv4 headers, including bad checksums, version number
 mismatch, other format errors, time-to-live exceeded, errors
 discovered in processing their IPv4 options, etc.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated as a new IP version-neutral
 table has been added.  It is loosely replaced by
 ipSystemStatsInHdrErrors.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipInAddrErrors" />
 5
 <br /><b>ipInAddrErrors</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -4772,23 +4966,24 @@ address in their IPv4 header's destination field was not a
 valid address to be received at this entity.  This count
 includes invalid addresses (e.g., 0.0.0.0) and addresses of
 unsupported Classes (e.g., Class E).  For entities which are
-not IPv4 routers and therefore do not forward datagrams,
+not IPv4 routers, and therefore do not forward datagrams,
 this counter includes datagrams discarded because the
 destination address was not a local address.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
 table has been added.  It is loosely replaced by
 ipSystemStatsInAddrErrors.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipForwDatagrams" />
 6
 <br /><b>ipForwDatagrams</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -4799,22 +4994,26 @@ their final IPv4 destination, as a result of which an
 attempt was made to find a route to forward them to that
 final destination.  In entities which do not act as IPv4
 routers, this counter will include only those packets which
+
+
+
 were Source-Routed via this entity, and the Source-Route
 option processing was successful.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
 table has been added.  It is loosely replaced by
-ipSystemStatsInForwDatagrams.  
+ipSystemStatsInForwDatagrams.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipInUnknownProtos" />
 7
 <br /><b>ipInUnknownProtos</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -4824,19 +5023,20 @@ The number of locally-addressed datagrams received
 successfully but discarded because of an unknown or
 unsupported protocol.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
 table has been added.  It is loosely replaced by
-ipSystemStatsInUnknownProtos.  
+ipSystemStatsInUnknownProtos.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipInDiscards" />
 8
 <br /><b>ipInDiscards</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -4848,19 +5048,20 @@ which were discarded (e.g., for lack of buffer space).  Note
 that this counter does not include any datagrams discarded
 while awaiting re-assembly.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
 table has been added.  It is loosely replaced by
-ipSystemStatsInDiscards.  
+ipSystemStatsInDiscards.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipInDelivers" />
 9
 <br /><b>ipInDelivers</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -4871,17 +5072,21 @@ to IPv4 user-protocols (including ICMP).
 
 This object has been deprecated as a new IP version neutral
 table has been added.  It is loosely replaced by
-ipSystemStatsIndelivers.  
+
+
+
+ipSystemStatsIndelivers.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipOutRequests" />
 10
 <br /><b>ipOutRequests</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -4892,19 +5097,20 @@ protocols (including ICMP) supplied to IPv4 in requests for
 transmission.  Note that this counter does not include any
 datagrams counted in ipForwDatagrams.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
 table has been added.  It is loosely replaced by
-ipSystemStatsOutRequests.  
+ipSystemStatsOutRequests.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipOutDiscards" />
 11
 <br /><b>ipOutDiscards</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -4917,19 +5123,20 @@ buffer space).  Note that this counter would include
 datagrams counted in ipForwDatagrams if any such packets met
 this (discretionary) discard criterion.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
 table has been added.  It is loosely replaced by
-ipSystemStatsOutDiscards.  
+ipSystemStatsOutDiscards.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipOutNoRoutes" />
 12
 <br /><b>ipOutNoRoutes</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -4942,19 +5149,23 @@ ipForwDatagrams which meet this `no-route' criterion.  Note
 that this includes any datagrams which a host cannot route
 because all of its default routers are down.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
+
+
+
 table has been added.  It is loosely replaced by
-ipSystemStatsOutNoRoutes.  
+ipSystemStatsOutNoRoutes.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipReasmReqds" />
 14
 <br /><b>ipReasmReqds</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -4963,38 +5174,40 @@ ipSystemStatsOutNoRoutes.
 The number of IPv4 fragments received which needed to be
 reassembled at this entity.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
 table has been added.  It is loosely replaced by
-ipSystemStatsReasmReqds.  
+ipSystemStatsReasmReqds.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipReasmOKs" />
 15
 <br /><b>ipReasmOKs</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
 <td>
 <pre>
 The number of IPv4 datagrams successfully re-assembled.
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsReasmOKs.  
+            ipSystemStatsReasmOKs.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipReasmFails" />
 16
 <br /><b>ipReasmFails</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -5007,19 +5220,20 @@ fragments since some algorithms (notably the algorithm in
 RFC 815) can lose track of the number of fragments by
 combining them as they are received.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
 table has been added.  It is loosely replaced by
-ipSystemStatsReasmFails.  
+ipSystemStatsReasmFails.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipFragOKs" />
 17
 <br /><b>ipFragOKs</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -5028,19 +5242,20 @@ ipSystemStatsReasmFails.
 The number of IPv4 datagrams that have been successfully
 fragmented at this entity.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
 table has been added.  It is loosely replaced by
-ipSystemStatsOutFragOKs.  
+ipSystemStatsOutFragOKs.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipFragFails" />
 18
 <br /><b>ipFragFails</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -5051,19 +5266,20 @@ because they needed to be fragmented at this entity but
 could not be, e.g., because their Don't Fragment flag was
 set.
 
-This object has been deprecated as a new IP version neutral
+This object has been deprecated, as a new IP version-neutral
 table has been added.  It is loosely replaced by
-ipSystemStatsOutFragFails.  
+ipSystemStatsOutFragFails.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipFragCreates" />
 19
 <br /><b>ipFragCreates</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -5074,17 +5290,18 @@ generated as a result of fragmentation at this entity.
 
 This object has been deprecated as a new IP version neutral
 table has been added.  It is loosely replaced by
-ipSystemStatsOutFragCreates.  
+ipSystemStatsOutFragCreates.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipRoutingDiscards" />
 23
 <br /><b>ipRoutingDiscards</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   COUNTER
 
   </td><td>ReadOnly</td>
@@ -5095,10 +5312,12 @@ discarded even though they are valid.  One possible reason
 for discarding such an entry could be to free-up buffer
 space for other routing entries.
 
+
+
 This object was defined in pre-IPv6 versions of the IP MIB.
-It was implicitly IPv4 only but the original specifications
+It was implicitly IPv4 only, but the original specifications
 did not indicate this protocol restriction.  In order to
-clarify the specifications this object has been deprecated
+clarify the specifications, this object has been deprecated
 and a similar, but more thoroughly clarified, object has
 been added to the IP-FORWARD-MIB.
 </pre>
@@ -5120,12 +5339,11 @@ been added to the IP-FORWARD-MIB.
 The table of addressing information relevant to this
 entity's IPv4 addresses.
 
-This table has been deprecated as a new IP version neutral
+This table has been deprecated, as a new IP version-neutral
 table has been added.  It is loosely replaced by the
 ipAddressTable although several objects that weren't deemed
 useful weren't carried forward while another
 (ipAdEntReasmMaxSize) was moved to the ipv4InterfaceTable.
-
 </pre>
 </td>
 </tr>
@@ -5144,12 +5362,13 @@ addresses.
 <table>
 <tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipAdEntAddr" />
 1
 <br /><b>ipAdEntAddr</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   IPADDR
 
   </td><td>ReadOnly</td>
@@ -5166,12 +5385,13 @@ information pertains.
 <table>
 <tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipAdEntIfIndex" />
 2
 <br /><b>ipAdEntIfIndex</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   INTEGER
       <br />Legal values:
         1 .. 2147483647
@@ -5187,12 +5407,13 @@ identified by the same value of the IF-MIB's ifIndex.
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipAdEntNetMask" />
 3
 <br /><b>ipAdEntNetMask</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   IPADDR
 
   </td><td>ReadOnly</td>
@@ -5205,12 +5426,13 @@ the network bits set to 1 and all the hosts bits set to 0.
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipAdEntBcastAddr" />
 4
 <br /><b>ipAdEntBcastAddr</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   INTEGER
       <br />Legal values:
         0 .. 1
@@ -5223,18 +5445,19 @@ address used for sending datagrams on the (logical)
 interface associated with the IPv4 address of this entry.
 For example, when the Internet standard all-ones broadcast
 address is used, the value will be 1.  This value applies to
-both the subnet and network broadcasts addresses used by the
+both the subnet and network broadcast addresses used by the
 entity on this (logical) interface.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipAdEntReasmMaxSize" />
 5
 <br /><b>ipAdEntReasmMaxSize</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   INTEGER
       <br />Legal values:
         0 .. 65535
@@ -5262,9 +5485,9 @@ on this interface.
 The IPv4 Address Translation table used for mapping from
 IPv4 addresses to physical addresses.
 
-This table has been deprecated as a new IP version neutral
+This table has been deprecated, as a new IP version-neutral
 table has been added.  It is loosely replaced by the
-ipNetToPhysicalTable.  
+ipNetToPhysicalTable.
 </pre>
 </td>
 </tr>
@@ -5283,12 +5506,13 @@ equivalence.
 <table>
 <tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipNetToMediaIfIndex" />
 1
 <br /><b>ipNetToMediaIfIndex</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   INTEGER
       <br />Legal values:
         1 .. 2147483647
@@ -5299,21 +5523,25 @@ equivalence.
 The interface on which this entry's equivalence is
 effective.  The interface identified by a particular value
 of this index is the same interface as identified by the
+
+
+
 same value of the IF-MIB's ifIndex.
 
 This object predates the rule limiting index objects to a
-max access value of 'not-accessible' and so continue to use
+max access value of 'not-accessible' and so continues to use
 a value of 'read-create'.
 </pre>
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipNetToMediaNetAddress" />
 3
 <br /><b>ipNetToMediaNetAddress</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   IPADDR
 
   </td><td>Create</td>
@@ -5323,7 +5551,7 @@ The IpAddress corresponding to the media-dependent
 `physical' address.
 
 This object predates the rule limiting index objects to a
-max access value of 'not-accessible' and so continue to use
+max access value of 'not-accessible' and so continues to use
 a value of 'read-create'.
 </pre>
 </td>
@@ -5334,12 +5562,13 @@ a value of 'read-create'.
 <table>
 <tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipNetToMediaPhysAddress" />
 2
 <br /><b>ipNetToMediaPhysAddress</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   OCTETSTR
       <br />Legal Lengths:
         0 .. 65535
@@ -5364,12 +5593,13 @@ defined.
 </td>
   </tr>
   <tr>
-  <td>
+  <td class="deprecated">
 <a name="ipNetToMediaType" />
 4
 <br /><b>ipNetToMediaType</b>
 
 </td><td>
+<font color="red">DEPRECATED</font><br />
   INTEGER
       <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
@@ -5384,7 +5614,9 @@ defined.
 <pre>
 The type of mapping.
 Setting this object to the value invalid(2) has the effect
-            of invalidating the corresponding entry in the
+
+
+of invalidating the corresponding entry in the
             ipNetToMediaTable.  That is, it effectively dis-associates
             the interface identified with said entry from the mapping
             identified with said entry.  It is an implementation-
@@ -5428,23 +5660,333 @@ objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
 <table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="InterfaceIndex">InterfaceIndex</td><td>INTEGER32</td><td><pre></pre></td></tr>
-<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre></pre></td></tr>
-<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="IpAddressPrefixOriginTC">IpAddressPrefixOriginTC</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>manual</td></tr><tr><td>3</td><td>wellknown</td></tr><tr><td>4</td><td>dhcp</td></tr><tr><td>5</td><td>routeradv</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="IpAddressStatusTC">IpAddressStatusTC</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>preferred</td></tr><tr><td>3</td><td>invalid</td></tr><tr><td>4</td><td>inaccessible</td></tr><tr><td>5</td><td>unknown</td></tr><tr><td>6</td><td>tentative</td></tr><tr><td>7</td><td>duplicate</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="IpAddressOriginTC">IpAddressOriginTC</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>manual</td></tr><tr><td>4</td><td>dhcp</td></tr><tr><td>5</td><td>linklayer</td></tr><tr><td>6</td><td>random</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="InetVersion">InetVersion</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="InetAddress">InetAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="InetAddressPrefixLength">InetAddressPrefixLength</td><td>UNSIGNED32</td><td><pre></pre></td></tr>
-<tr><td><a name="TestAndIncr">TestAndIncr</td><td>INTEGER</td><td><pre></pre></td></tr>
-<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="Ipv6AddressIfIdentifierTC">Ipv6AddressIfIdentifierTC</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="InetZoneIndex">InetZoneIndex</td><td>UNSIGNED32</td><td><pre></pre></td></tr>
-<tr><td><a name="PhysAddress">PhysAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="RowPointer">RowPointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<tr><td><a name="IpAddressStatusTC">IpAddressStatusTC</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>preferred</td></tr><tr><td>2</td><td>deprecated</td></tr><tr><td>3</td><td>invalid</td></tr><tr><td>4</td><td>inaccessible</td></tr><tr><td>5</td><td>unknown</td></tr><tr><td>6</td><td>tentative</td></tr><tr><td>7</td><td>duplicate</td></tr><tr><td>8</td><td>optimistic</td></tr></table></td><td><pre>The status of an address.  Most of the states correspond to
+states from the IPv6 Stateless Address Autoconfiguration
+protocol.
+
+The preferred(1) state indicates that this is a valid
+address that can appear as the destination or source address
+of a packet.
+
+The deprecated(2) state indicates that this is a valid but
+deprecated address that should no longer be used as a source
+address in new communications, but packets addressed to such
+an address are processed as expected.
+
+The invalid(3) state indicates that this isn't a valid
+address and it shouldn't appear as the destination or source
+address of a packet.
+
+The inaccessible(4) state indicates that the address is not
+accessible because the interface to which this address is
+assigned is not operational.
+
+The unknown(5) state indicates that the status cannot be
+determined for some reason.
+
+The tentative(6) state indicates that the uniqueness of the
+address on the link is being verified.  Addresses in this
+state should not be used for general communication and
+should only be used to determine the uniqueness of the
+address.
+
+The duplicate(7) state indicates the address has been
+determined to be non-unique on the link and so must not be
+
+
+
+used.
+
+The optimistic(8) state indicates the address is available
+for use, subject to restrictions, while its uniqueness on
+a link is being verified.
+
+In the absence of other information, an IPv4 address is
+always preferred(1).</pre></td></tr>
+<tr><td><a name="TestAndIncr">TestAndIncr</td><td>INTEGER</td><td><pre>Represents integer-valued information used for atomic
+operations.  When the management protocol is used to specify
+that an object instance having this syntax is to be
+modified, the new value supplied via the management protocol
+must precisely match the value presently held by the
+instance.  If not, the management protocol set operation
+fails with an error of `inconsistentValue'.  Otherwise, if
+the current value is the maximum value of 2^31-1 (2147483647
+decimal), then the value held by the instance is wrapped to
+zero; otherwise, the value held by the instance is
+incremented by one.  (Note that regardless of whether the
+management protocol set operation succeeds, the variable-
+binding in the request and response PDUs are identical.)
+
+The value of the ACCESS clause for objects having this
+syntax is either `read-write' or `read-create'.  When an
+instance of a columnar object having this syntax is created,
+any value may be supplied via the management protocol.
+
+When the network management portion of the system is re-
+initialized, the value of every object instance having this
+syntax must either be incremented from its value prior to
+the re-initialization, or (if the value prior to the re-
+initialization is unknown) be set to a pseudo-randomly
+generated value.</pre></td></tr>
+<tr><td><a name="IpAddressOriginTC">IpAddressOriginTC</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>manual</td></tr><tr><td>4</td><td>dhcp</td></tr><tr><td>5</td><td>linklayer</td></tr><tr><td>6</td><td>random</td></tr></table></td><td><pre>The origin of the address.
+manual(2) indicates that the address was manually configured
+            to a specified address, e.g., by user configuration.
+dhcp(4) indicates an address that was assigned to this
+            system by a DHCP server.
+linklayer(5) indicates an address created by IPv6 stateless
+
+
+auto-configuration.
+random(6) indicates an address chosen by the system at
+            random, e.g., an IPv4 address within 169.254/16, or an RFC
+            3041 privacy address.</pre></td></tr>
+<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre>A value that represents a type of Internet address.
+unknown(0)  An unknown address type.  This value MUST
+                     be used if the value of the corresponding
+                     InetAddress object is a zero-length string.
+                     It may also be used to indicate an IP address
+                     that is not in one of the formats defined
+                     below.
+ipv4(1)     An IPv4 address as defined by the
+                     InetAddressIPv4 textual convention.
+ipv6(2)     An IPv6 address as defined by the
+                     InetAddressIPv6 textual convention.
+ipv4z(3)    A non-global IPv4 address including a zone
+                     index as defined by the InetAddressIPv4z
+                     textual convention.
+ipv6z(4)    A non-global IPv6 address including a zone
+                     index as defined by the InetAddressIPv6z
+                     textual convention.
+dns(16)     A DNS domain name as defined by the
+                     InetAddressDNS textual convention.
+Each definition of a concrete InetAddressType value must be
+         accompanied by a definition of a textual convention for use
+         with that InetAddressType.
+To support future extensions, the InetAddressType textual
+         convention SHOULD NOT be sub-typed in object type definitions.
+         It MAY be sub-typed in compliance statements in order to
+         require only a subset of these address types for a compliant
+         implementation.
+Implementations must ensure that InetAddressType objects
+         and any dependent objects (e.g., InetAddress objects) are
+         consistent.  An inconsistentValue error must be generated
+         if an attempt to change an InetAddressType object would,
+         for example, lead to an undefined InetAddress value.  In
+particular, InetAddressType/InetAddress pairs must be
+         changed together if the address type changes (e.g., from
+         ipv6(2) to ipv4(1)).</pre></td></tr>
+<tr><td><a name="InetAddressPrefixLength">InetAddressPrefixLength</td><td>UNSIGNED32</td><td><pre>Denotes the length of a generic Internet network address
+prefix.  A value of n corresponds to an IP address mask
+that has n contiguous 1-bits from the most significant
+bit (MSB), with all other bits set to 0.
+
+An InetAddressPrefixLength value is always interpreted within
+the context of an InetAddressType value.  Every usage of the
+InetAddressPrefixLength textual convention is required to
+specify the InetAddressType object that provides the
+context.  It is suggested that the InetAddressType object be
+logically registered before the object(s) that use the
+InetAddressPrefixLength textual convention, if they appear
+in the same logical row.
+
+InetAddressPrefixLength values larger than
+the maximum length of an IP address for a specific
+InetAddressType are treated as the maximum significant
+value applicable for the InetAddressType.  The maximum
+significant value is 32 for the InetAddressType
+'ipv4(1)' and 'ipv4z(3)' and 128 for the InetAddressType
+'ipv6(2)' and 'ipv6z(4)'.  The maximum significant value
+for the InetAddressType 'dns(16)' is 0.
+
+The value zero is object-specific and must be defined as
+part of the description of any object that uses this
+syntax.  Examples of the usage of zero might include
+situations where the Internet network address prefix
+is unknown or does not apply.
+
+The upper bound of the prefix length has been chosen to
+be consistent with the maximum size of an InetAddress.</pre></td></tr>
+<tr><td><a name="InetZoneIndex">InetZoneIndex</td><td>UNSIGNED32</td><td><pre>A zone index identifies an instance of a zone of a
+specific scope.
+
+The zone index MUST disambiguate identical address
+values.  For link-local addresses, the zone index will
+typically be the interface index (ifIndex as defined in the
+IF-MIB) of the interface on which the address is configured.
+
+The zone index may contain the special value 0, which refers
+to the default zone.  The default zone may be used in cases
+where the valid zone index is not known (e.g., when a
+management application has to write a link-local IPv6
+address without knowing the interface index value).  The
+default zone SHOULD NOT be used as an easy way out in
+cases where the zone index for a non-global IPv6 address
+is known.</pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre>Represents a boolean value.</pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre>The RowStatus textual convention is used to manage the
+creation and deletion of conceptual rows, and is used as the
+value of the SYNTAX clause for the status column of a
+conceptual row (as described in Section 7.7.1 of [2].)
+
+The status column has six defined values:
+
+     - `active', which indicates that the conceptual row is
+     available for use by the managed device;
+
+     - `notInService', which indicates that the conceptual
+     row exists in the agent, but is unavailable for use by
+     the managed device (see NOTE below); 'notInService' has
+     no implication regarding the internal consistency of
+     the row, availability of resources, or consistency with
+     the current state of the managed device;
+
+     - `notReady', which indicates that the conceptual row
+     exists in the agent, but is missing information
+     necessary in order to be available for use by the
+     managed device (i.e., one or more required columns in
+     the conceptual row have not been instanciated);
+
+     - `createAndGo', which is supplied by a management
+     station wishing to create a new instance of a
+     conceptual row and to have its status automatically set
+     to active, making it available for use by the managed
+     device;
+
+     - `createAndWait', which is supplied by a management
+     station wishing to create a new instance of a
+     conceptual row (but not make it available for use by
+     the managed device); and,
+     - `destroy', which is supplied by a management station
+     wishing to delete all of the instances associated with
+     an existing conceptual row.
+
+Whereas five of the six values (all except `notReady') may
+be specified in a management protocol set operation, only
+three values will be returned in response to a management
+protocol retrieval operation:  `notReady', `notInService' or
+`active'.  That is, when queried, an existing conceptual row
+has only three states:  it is either available for use by
+the managed device (the status column has value `active');
+it is not available for use by the managed device, though
+the agent has sufficient information to attempt to make it
+so (the status column has value `notInService'); or, it is
+not available for use by the managed device, and an attempt
+to make it so would fail because the agent has insufficient
+information (the state column has value `notReady').
+
+                         NOTE WELL
+
+     This textual convention may be used for a MIB table,
+     irrespective of whether the values of that table's
+     conceptual rows are able to be modified while it is
+     active, or whether its conceptual rows must be taken
+     out of service in order to be modified.  That is, it is
+     the responsibility of the DESCRIPTION clause of the
+     status column to specify whether the status column must
+     not be `active' in order for the value of some other
+     column of the same conceptual row to be modified.  If
+     such a specification is made, affected columns may be
+     changed by an SNMP set PDU if the RowStatus would not
+     be equal to `active' either immediately before or after
+     processing the PDU.  In other words, if the PDU also
+     contained a varbind that would change the RowStatus
+     value, the column in question may be changed if the
+     RowStatus was not equal to `active' as the PDU was
+     received, or if the varbind sets the status</pre></td></tr>
+<tr><td><a name="Ipv6AddressIfIdentifierTC">Ipv6AddressIfIdentifierTC</td><td>OCTETSTR</td><td><pre>This data type is used to model IPv6 address
+interface identifiers.  This is a binary string
+of up to 8 octets in network byte-order.</pre></td></tr>
+<tr><td><a name="InetVersion">InetVersion</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr></table></td><td><pre>A value representing a version of the IP protocol.
+unknown(0)  An unknown or unspecified version of the IP
+                     protocol.
+ipv4(1)     The IPv4 protocol as defined in RFC 791 (STD 5).
+ipv6(2)     The IPv6 protocol as defined in RFC 2460.
+Note that this textual convention SHOULD NOT be used to
+         distinguish different address types associated with IP
+         protocols.  The InetAddressType has been designed for this
+         purpose.</pre></td></tr>
+<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre>The value of the sysUpTime object at which a specific
+occurrence happened.  The specific occurrence must be
+
+defined in the description of any object defined using this
+type.
+
+If sysUpTime is reset to zero as a result of a re-
+initialization of the network management (sub)system, then
+the values of all TimeStamp objects are also reset.
+However, after approximately 497 days without a re-
+initialization, the sysUpTime object will reach 2^^32-1 and
+then increment around to zero; in this case, existing values
+of TimeStamp objects do not change.  This can lead to
+ambiguities in the value of TimeStamp objects.</pre></td></tr>
+<tr><td><a name="InterfaceIndex">InterfaceIndex</td><td>INTEGER32</td><td><pre>A unique value, greater than zero, for each interface or
+interface sub-layer in the managed system.  It is
+recommended that values are assigned contiguously starting
+from 1.  The value for each interface sub-layer must remain
+constant at least from one re-initialization of the entity's
+network management system to the next re-initialization.</pre></td></tr>
+<tr><td><a name="InetAddress">InetAddress</td><td>OCTETSTR</td><td><pre>Denotes a generic Internet address.
+An InetAddress value is always interpreted within the context
+         of an InetAddressType value.  Every usage of the InetAddress
+         textual convention is required to specify the InetAddressType
+         object that provides the context.  It is suggested that the
+         InetAddressType object be logically registered before the
+         object(s) that use the InetAddress textual convention, if
+         they appear in the same logical row.
+The value of an InetAddress object must always be
+         consistent with the value of the associated InetAddressType
+         object.  Attempts to set an InetAddress object to a value
+         inconsistent with the associated InetAddressType
+         must fail with an inconsistentValue error.
+When this textual convention is used as the syntax of an
+         index object, there may be issues with the limit of 128
+         sub-identifiers specified in SMIv2, STD 58.  In this case,
+         the object definition MUST include a 'SIZE' clause to
+         limit the number of potential instance sub-identifiers;
+         otherwise the applicable constraints MUST be stated in
+         the appropriate conceptual row DESCRIPTION clauses, or
+         in the surrounding documentation if there is no single
+         DESCRIPTION clause that is appropriate.</pre></td></tr>
+<tr><td><a name="PhysAddress">PhysAddress</td><td>OCTETSTR</td><td><pre>Represents media- or physical-level addresses.</pre></td></tr>
+<tr><td><a name="IpAddressPrefixOriginTC">IpAddressPrefixOriginTC</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>manual</td></tr><tr><td>3</td><td>wellknown</td></tr><tr><td>4</td><td>dhcp</td></tr><tr><td>5</td><td>routeradv</td></tr></table></td><td><pre>The origin of this prefix.
+manual(2) indicates a prefix that was manually configured.
+wellknown(3) indicates a well-known prefix, e.g., 169.254/16
+            for IPv4 auto-configuration or fe80::/10 for IPv6 link-local
+            addresses.  Well known prefixes may be assigned by IANA,
+            the address registries, or by specification in a standards
+            track RFC.
+dhcp(4) indicates a prefix that was assigned by a DHCP
+            server.
+routeradv(5) indicates a prefix learned from a router
+            advertisement.
+Note: while IpAddressOriginTC and IpAddressPrefixOriginTC
+            are similar, they are not identical.  The first defines how
+            an address was created, while the second defines how a
+            prefix was found.</pre></td></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre>Describes the memory realization of a conceptual row.  A
+row which is volatile(2) is lost upon reboot.  A row which
+is either nonVolatile(3), permanent(4) or readOnly(5), is
+backed up by stable storage.  A row which is permanent(4)
+can be changed but not deleted.  A row which is readOnly(5)
+cannot be changed nor deleted.
+
+If the value of an object with this syntax is either
+permanent(4) or readOnly(5), it cannot be written.
+Conversely, if the value is either other(1), volatile(2) or
+nonVolatile(3), it cannot be modified to be permanent(4) or
+readOnly(5).  (All illegal modifications result in a
+'wrongValue' error.)
+
+Every usage of this textual convention is required to
+specify the columnar objects which a permanent(4) row must
+at a minimum allow to be writable.</pre></td></tr>
+<tr><td><a name="RowPointer">RowPointer</td><td>OBJECTID</td><td><pre>Represents a pointer to a conceptual row.  The value is the
+name of the instance of the first accessible columnar object
+in the conceptual row.
+
+For example, ifIndex.3 would point to the 3rd row in the
+ifTable (note that if ifIndex were not-accessible, then
+ifDescr.3 would be used instead).</pre></td></tr>
 </table></ul>
 
 <a name="treeview" />
@@ -5721,7 +6263,7 @@ clause as well as the DESCRIPTION clause of the object itself.
    |     |        Values: other(1), manual(2), dhcp(4), linklayer(5), random(6)
    |     +-- CR-- EnumVal   <a href="#ipAddressStatus">ipAddressStatus</a>(7)
    |     |        Textual Convention: <a href="#IpAddressStatusTC">IpAddressStatusTC</a>
-   |     |        Values: preferred(1), invalid(3), inaccessible(4), unknown(5), tentative(6), duplicate(7)
+   |     |        Values: preferred(1), deprecated(2), invalid(3), inaccessible(4), unknown(5), tentative(6), duplicate(7), optimistic(8)
    |     +-- -R-- TimeTicks <a href="#ipAddressCreated">ipAddressCreated</a>(8)
    |     |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
    |     +-- -R-- TimeTicks <a href="#ipAddressLastChanged">ipAddressLastChanged</a>(9)

@@ -207,7 +207,7 @@ and is destroyed when the transport connection is terminated.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. 2147483647
+        1 .. -1
 
   </td><td>NoAccess</td>
 <td>
@@ -343,7 +343,7 @@ has terminated or when the subagent session is closed.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. 2147483647
+        1 .. -1
 
   </td><td>NoAccess</td>
 <td>
@@ -366,7 +366,7 @@ connection is constant for the lifetime of that connection.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        0 .. 2147483647
+        0 .. -1
 
   </td><td>NoAccess</td>
 <td>
@@ -573,7 +573,7 @@ or the subagent connection is closed.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. 2147483647
+        1 .. -1
 
   </td><td>NoAccess</td>
 <td>
@@ -596,7 +596,7 @@ connection is constant for the lifetime of that connection.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        0 .. 2147483647
+        0 .. -1
 
   </td><td>NoAccess</td>
 <td>
@@ -620,7 +620,7 @@ to be compatible with the definition of h.sessionId.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. 2147483647
+        1 .. -1
 
   </td><td>NoAccess</td>
 <td>
@@ -827,11 +827,82 @@ objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
 <table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="TDomain">TDomain</td><td>OBJECTID</td><td><pre></pre></td></tr>
-<tr><td><a name="AgentxTAddress">AgentxTAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre></pre></td></tr>
+<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre>The value of the sysUpTime object at which a specific
+occurrence happened.  The specific occurrence must be
+
+defined in the description of any object defined using this
+type.
+
+If sysUpTime is reset to zero as a result of a re-
+initialization of the network management (sub)system, then
+the values of all TimeStamp objects are also reset.
+However, after approximately 497 days without a re-
+initialization, the sysUpTime object will reach 2^^32-1 and
+then increment around to zero; in this case, existing values
+of TimeStamp objects do not change.  This can lead to
+ambiguities in the value of TimeStamp objects.</pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre>Represents a boolean value.</pre></td></tr>
+<tr><td><a name="TDomain">TDomain</td><td>OBJECTID</td><td><pre>Denotes a kind of transport service.
+Some possible values, such as snmpUDPDomain, are defined in
+          the SNMPv2-TM MIB module.  Other possible values are defined
+          in other MIB modules.</pre></td></tr>
+<tr><td><a name="AgentxTAddress">AgentxTAddress</td><td>OCTETSTR</td><td><pre>Denotes a transport service address.  This is identical to
+the TAddress textual convention (SNMPv2-SMI) except that
+zero-length values are permitted.
+     </pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre>An octet string containing administrative
+information, preferably in human-readable form.
+
+To facilitate internationalization, this
+information is represented using the ISO/IEC
+IS 10646-1 character set, encoded as an octet
+string using the UTF-8 transformation format
+described in [RFC2279].
+
+Since additional code points are added by
+amendments to the 10646 standard from time
+to time, implementations must be prepared to
+encounter any code point from 0x00000000 to
+0x7fffffff.  Byte sequences that do not
+correspond to the valid UTF-8 encoding of a
+code point or are outside this range are
+prohibited.
+
+The use of control codes should be avoided.
+
+When it is necessary to represent a newline,
+the control code sequence CR LF should be used.
+
+The use of leading or trailing white space should
+be avoided.
+
+For code points not directly supported by user
+interface hardware or software, an alternative
+means of entry and display, such as hexadecimal,
+may be provided.
+
+For information encoded in 7-bit US-ASCII,
+the UTF-8 encoding is identical to the
+US-ASCII encoding.
+
+UTF-8 may require multiple bytes to represent a
+single character / code point; thus the length
+of this object in octets may be different from
+the number of characters encoded.  Similarly,
+size constraints refer to the number of encoded
+octets, not the number of characters represented
+by an encoding.
+
+Note that when this TC is used for an object that
+is used or envisioned to be used as an index, then
+a SIZE restriction MUST be specified so that the
+number of sub-identifiers for any object instance
+does not exceed the limit of 128, as defined by
+[RFC3416].
+
+Note that the size of an SnmpAdminString object is
+measured in octets, not characters.
+                </pre></td></tr>
 </table></ul>
 
 <a name="treeview" />
@@ -860,7 +931,7 @@ clause as well as the DESCRIPTION clause of the object itself.
    |  |        |  Index: agentxConnIndex
    |  |        |
    |  |        +-- ---- Unsigned  <a href="#agentxConnIndex">agentxConnIndex</a>(1)
-   |  |        |        Range: 1..2147483647
+   |  |        |        Range: 1..-1
    |  |        +-- -R-- TimeTicks <a href="#agentxConnOpenTime">agentxConnOpenTime</a>(2)
    |  |        |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
    |  |        +-- -R-- ObjID     <a href="#agentxConnTransportDomain">agentxConnTransportDomain</a>(3)
@@ -880,7 +951,7 @@ clause as well as the DESCRIPTION clause of the object itself.
    |  |        |  Index: agentxConnIndex, agentxSessionIndex
    |  |        |
    |  |        +-- ---- Unsigned  <a href="#agentxSessionIndex">agentxSessionIndex</a>(1)
-   |  |        |        Range: 0..2147483647
+   |  |        |        Range: 0..-1
    |  |        +-- -R-- ObjID     <a href="#agentxSessionObjectID">agentxSessionObjectID</a>(2)
    |  |        +-- -R-- String    <a href="#agentxSessionDescr">agentxSessionDescr</a>(3)
    |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
@@ -905,7 +976,7 @@ clause as well as the DESCRIPTION clause of the object itself.
    |           |  Index: agentxConnIndex, agentxSessionIndex, agentxRegIndex
    |           |
    |           +-- ---- Unsigned  <a href="#agentxRegIndex">agentxRegIndex</a>(1)
-   |           |        Range: 1..2147483647
+   |           |        Range: 1..-1
    |           +-- -R-- String    <a href="#agentxRegContext">agentxRegContext</a>(2)
    |           +-- -R-- ObjID     <a href="#agentxRegStart">agentxRegStart</a>(3)
    |           +-- -R-- Unsigned  <a href="#agentxRegRangeSubId">agentxRegRangeSubId</a>(4)

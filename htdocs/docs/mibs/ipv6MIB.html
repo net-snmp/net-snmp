@@ -1327,6 +1327,7 @@ address is an anycast address and the value
       <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>preferred</td></tr>
+        <tr><td>2</td><td>deprecated</td></tr>
         <tr><td>3</td><td>invalid</td></tr>
         <tr><td>4</td><td>inaccessible</td></tr>
         <tr><td>5</td><td>unknown</td></tr>
@@ -2037,17 +2038,78 @@ objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
 <table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="Ipv6IfIndex">Ipv6IfIndex</td><td>INTEGER32</td><td><pre></pre></td></tr>
-<tr><td><a name="Ipv6IfIndexOrZero">Ipv6IfIndexOrZero</td><td>INTEGER32</td><td><pre></pre></td></tr>
-<tr><td><a name="PhysAddress">PhysAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre></pre></td></tr>
-<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="Ipv6AddressPrefix">Ipv6AddressPrefix</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="Ipv6Address">Ipv6Address</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="Ipv6AddressIfIdentifier">Ipv6AddressIfIdentifier</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="VariablePointer">VariablePointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
-<tr><td><a name="RowPointer">RowPointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre>The value of the sysUpTime object at which a specific
+occurrence happened.  The specific occurrence must be
+
+defined in the description of any object defined using this
+type.
+
+If sysUpTime is reset to zero as a result of a re-
+initialization of the network management (sub)system, then
+the values of all TimeStamp objects are also reset.
+However, after approximately 497 days without a re-
+initialization, the sysUpTime object will reach 2^^32-1 and
+then increment around to zero; in this case, existing values
+of TimeStamp objects do not change.  This can lead to
+ambiguities in the value of TimeStamp objects.</pre></td></tr>
+<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre>Represents textual information taken from the NVT ASCII
+character set, as defined in pages 4, 10-11 of RFC 854.
+To summarize RFC 854, the NVT ASCII repertoire specifies:
+  - the use of character codes 0-127 (decimal)
+  - the graphics characters (32-126) are interpreted as
+                US ASCII
+  - NUL, LF, CR, BEL, BS, HT, VT and FF have the special
+                meanings specified in RFC 854
+  - the other 25 codes have no standard interpretation
+  - the sequence 'CR LF' means newline
+  - the sequence 'CR NUL' means carriage-return
+  - an 'LF' not preceded by a 'CR' means moving to the
+                same column on the next line.
+  - the sequence 'CR x' for any x other than LF or NUL is
+                illegal.  (Note that this also means that a string may
+                end with either 'CR LF' or 'CR NUL', but not with CR.)
+Any object defined using this syntax may not exceed 255
+            characters in length.</pre></td></tr>
+<tr><td><a name="PhysAddress">PhysAddress</td><td>OCTETSTR</td><td><pre>Represents media- or physical-level addresses.</pre></td></tr>
+<tr><td><a name="Ipv6AddressPrefix">Ipv6AddressPrefix</td><td>OCTETSTR</td><td><pre>This data type is used to model IPv6 address
+prefixes. This is a binary string of up to 16
+octets in network byte-order.</pre></td></tr>
+<tr><td><a name="Ipv6IfIndexOrZero">Ipv6IfIndexOrZero</td><td>INTEGER32</td><td><pre>This textual convention is an extension of the
+Ipv6IfIndex convention.  The latter defines
+a greater than zero value used to identify an IPv6
+interface in the managed system.  This extension
+permits the additional value of zero.  The value
+zero is object-specific and must therefore be
+defined as part of the description of any object
+which uses this syntax.  Examples of the usage of
+zero might include situations where interface was
+unknown, or when none or all interfaces need to be
+referenced.</pre></td></tr>
+<tr><td><a name="Ipv6IfIndex">Ipv6IfIndex</td><td>INTEGER32</td><td><pre>A unique value, greater than zero for each
+internetwork-layer interface in the managed
+system. It is recommended that values are assigned
+contiguously starting from 1. The value for each
+internetwork-layer interface must remain constant
+at least from one re-initialization of the entity's
+network management system to the next
+
+re-initialization.</pre></td></tr>
+<tr><td><a name="Ipv6Address">Ipv6Address</td><td>OCTETSTR</td><td><pre>This data type is used to model IPv6 addresses.
+This is a binary string of 16 octets in network
+byte-order.</pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre>Represents a boolean value.</pre></td></tr>
+<tr><td><a name="Ipv6AddressIfIdentifier">Ipv6AddressIfIdentifier</td><td>OCTETSTR</td><td><pre>This data type is used to model IPv6 address
+interface identifiers. This is a binary string
+ of up to 8 octets in network byte-order.</pre></td></tr>
+<tr><td><a name="RowPointer">RowPointer</td><td>OBJECTID</td><td><pre>Represents a pointer to a conceptual row.  The value is the
+name of the instance of the first accessible columnar object
+in the conceptual row.
+
+For example, ifIndex.3 would point to the 3rd row in the
+ifTable (note that if ifIndex were not-accessible, then
+ifDescr.3 would be used instead).</pre></td></tr>
+<tr><td><a name="VariablePointer">VariablePointer</td><td>OBJECTID</td><td><pre>A pointer to a specific object instance.  For example,
+sysContact.0 or ifInOctets.3.</pre></td></tr>
 </table></ul>
 
 <a name="treeview" />
@@ -2156,7 +2218,7 @@ clause as well as the DESCRIPTION clause of the object itself.
    |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
    |  |     |        Values: true(1), false(2)
    |  |     +-- -R-- EnumVal   <a href="#ipv6AddrStatus">ipv6AddrStatus</a>(5)
-   |  |              Values: preferred(1), invalid(3), inaccessible(4), unknown(5)
+   |  |              Values: preferred(1), deprecated(2), invalid(3), inaccessible(4), unknown(5)
    |  |
    |  +-- -R-- Gauge     <a href="#ipv6RouteNumber">ipv6RouteNumber</a>(9)
    |  +-- -R-- Counter   <a href="#ipv6DiscardedRoutes">ipv6DiscardedRoutes</a>(10)
@@ -2228,7 +2290,6 @@ clause as well as the DESCRIPTION clause of the object itself.
       +--<a href="#ipv6Groups">ipv6Groups</a>(2)
          |
          +--<a href="#ipv6GeneralGroup">ipv6GeneralGroup</a>(1)
-         |
          +--<a href="#ipv6NotificationGroup">ipv6NotificationGroup</a>(2)
 </pre>
 <!-- CONTENT END -->

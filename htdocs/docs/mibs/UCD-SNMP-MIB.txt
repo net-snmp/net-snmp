@@ -37,7 +37,7 @@ IMPORTS
 	FROM SNMPv2-TC;
 
 ucdavis MODULE-IDENTITY
-    LAST-UPDATED "200209050000Z"
+    LAST-UPDATED "200611220000Z"
     ORGANIZATION "University of California, Davis"
     CONTACT-INFO    
 	"This mib is no longer being maintained by the University of
@@ -52,6 +52,11 @@ ucdavis MODULE-IDENTITY
 
          email:    net-snmp-coders@lists.sourceforge.net
         "
+    DESCRIPTION
+	"Clarify behaviour of objects in the memory & systemStats groups
+         (including updated versions of malnamed mem*Text objects).
+         Define suitable TCs to describe error reporting/fix behaviour."
+    REVISION	 "200611220000Z"
     DESCRIPTION
 	"Added ssCpuRawSoftIRQ for Linux (2.6) and forgotten raw swap counters."
     REVISION	 "200404070000Z"
@@ -154,6 +159,19 @@ Float ::= TEXTUAL-CONVENTION
          is '07'h; and the value is '9f780442f60000'h."
     SYNTAX Opaque (SIZE (7))
 
+UCDErrorFlag ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION
+        "Represents a possible error condition"
+    SYNTAX INTEGER  { noError(0),  error(1) }
+
+UCDErrorFix ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION
+        "Represents a 'push-button' object, to invoke a suitable
+         configured action.  Will always return 0 when read."
+    SYNTAX INTEGER  { noError(0),  runFix(1) }
+
 --
 -- Process table checks
 --
@@ -186,9 +204,9 @@ PrEntry ::= SEQUENCE {
     prMin		Integer32,
     prMax		Integer32,
     prCount		Integer32,
-    prErrorFlag		Integer32,
+    prErrorFlag		UCDErrorFlag,
     prErrMessage	DisplayString,
-    prErrFix		Integer32,
+    prErrFix		UCDErrorFix,
     prErrFixCmd		DisplayString
 }
 
@@ -238,7 +256,7 @@ prCount OBJECT-TYPE
     ::= { prEntry 5 }
 
 prErrorFlag OBJECT-TYPE
-    SYNTAX	Integer32
+    SYNTAX	UCDErrorFlag
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -255,7 +273,7 @@ prErrMessage OBJECT-TYPE
     ::= { prEntry 101 }
 
 prErrFix OBJECT-TYPE
-    SYNTAX	Integer32
+    SYNTAX	UCDErrorFix
     MAX-ACCESS	read-write
     STATUS	current
     DESCRIPTION
@@ -301,7 +319,7 @@ ExtEntry ::= SEQUENCE {
     extCommand		DisplayString,
     extResult		Integer32,
     extOutput		DisplayString,
-    extErrFix		Integer32,
+    extErrFix		UCDErrorFix,
     extErrFixCmd	DisplayString
 }
 
@@ -347,7 +365,7 @@ extOutput OBJECT-TYPE
     ::= { extEntry 101 }
 
 extErrFix OBJECT-TYPE
-    SYNTAX	Integer32
+    SYNTAX	UCDErrorFix
     MAX-ACCESS	read-write
     STATUS	current
     DESCRIPTION
@@ -391,116 +409,212 @@ memErrorName OBJECT-TYPE
 
 memTotalSwap OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Total Swap Size configured for the host."
+	"The total amount of swap space configured for this host."
     ::= { memory 3 }
 
 memAvailSwap OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Available Swap Space on the host."
+	"The amount of swap space currently unused or available."
     ::= { memory 4 }
 
 memTotalReal OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Total Real/Physical Memory Size on the host."
+	"The total amount of real/physical memory installed
+         on this host."
     ::= { memory 5 }
 
 memAvailReal OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Available Real/Physical Memory Space on the host."
+	"The amount of real/physical memory currently unused
+         or available."
     ::= { memory 6 }
 
 memTotalSwapTXT OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Total virtual memory used by text."
+	"The total amount of swap space or virtual memory allocated
+         for text pages on this host.
+
+         This object will not be implemented on hosts where the
+         underlying operating system does not distinguish text
+         pages from other uses of swap space or virtual memory."
     ::= { memory 7 }
 
 memAvailSwapTXT OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
-    STATUS	current
+    STATUS	deprecated
     DESCRIPTION	
-	"Active virtual memory used by text."
+	"The amount of swap space or virtual memory currently
+         being used by text pages on this host.
+
+         This object will not be implemented on hosts where the
+         underlying operating system does not distinguish text
+         pages from other uses of swap space or virtual memory.
+
+         Note that (despite the name), this value reports the
+         amount used, rather than the amount free or available
+         for use.  For clarity, this object is being deprecated
+         in favour of 'memUsedSwapTXT(16)."
     ::= { memory 8 }
 
 memTotalRealTXT OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Total Real/Physical Memory Size used by text."
+	"The total amount of real/physical memory allocated
+         for text pages on this host.
+
+         This object will not be implemented on hosts where the
+         underlying operating system does not distinguish text
+         pages from other uses of physical memory."
     ::= { memory 9 }
 
 memAvailRealTXT OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
-    STATUS	current
+    STATUS	deprecated
     DESCRIPTION
-	"Active Real/Physical Memory Space used by text."
+	"The amount of real/physical memory currently being
+         used by text pages on this host.
+
+         This object will not be implemented on hosts where the
+         underlying operating system does not distinguish text
+         pages from other uses of physical memory.
+
+         Note that (despite the name), this value reports the
+         amount used, rather than the amount free or available
+         for use.  For clarity, this object is being deprecated
+         in favour of 'memUsedRealTXT(17)."
     ::= { memory 10 }
 
 memTotalFree OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Total Available Memory on the host"
+        "The total amount of memory free or available for use on
+         this host.  This value typically covers both real memory
+         and swap space or virtual memory."
     ::= { memory 11 }
 
 memMinimumSwap OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Minimum amount of free swap required to be free
-	 or else memErrorSwap is set to 1 and an error string is
-	 returned memSwapErrorMsg."
+	"The minimum amount of swap space expected to be kept
+         free or available during normal operation of this host.
+
+         If this value (as reported by 'memAvailSwap(4)') falls
+         below the specified level, then 'memSwapError(100)' will
+         be set to 1 and an error message made available via
+         'memSwapErrorMsg(101)'."
     ::= { memory 12 }
 
 memShared OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Total Shared Memory"
+        "The total amount of real or virtual memory currently
+         allocated for use as shared memory.
+
+         This object will not be implemented on hosts where the
+         underlying operating system does not explicitly identify
+         memory as specifically reserved for this purpose."
     ::= { memory 13 }
 
 memBuffer OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Total Buffered Memory"
+        "The total amount of real or virtual memory currently
+         allocated for use as memory buffers.
+
+         This object will not be implemented on hosts where the
+         underlying operating system does not explicitly identify
+         memory as specifically reserved for this purpose."
     ::= { memory 14 }
 
 memCached OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Total Cached Memory"
+        "The total amount of real or virtual memory currently
+         allocated for use as cached memory.
+
+         This object will not be implemented on hosts where the
+         underlying operating system does not explicitly identify
+         memory as specifically reserved for this purpose."
     ::= { memory 15 }
 
-memSwapError OBJECT-TYPE
+memUsedSwapTXT OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION	
+	"The amount of swap space or virtual memory currently
+         being used by text pages on this host.
+
+         This object will not be implemented on hosts where the
+         underlying operating system does not distinguish text
+         pages from other uses of swap space or virtual memory."
+    ::= { memory 16 }
+
+memUsedRealTXT OBJECT-TYPE
+    SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Error flag.  1 indicates very little swap space left"
+	"The amount of real/physical memory currently being
+         used by text pages on this host.
+
+         This object will not be implemented on hosts where the
+         underlying operating system does not distinguish text
+         pages from other uses of physical memory."
+    ::= { memory 17 }
+
+memSwapError OBJECT-TYPE
+    SYNTAX	UCDErrorFlag
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"Indicates whether the amount of available swap space
+         (as reported by 'memAvailSwap(4)'), is less than the
+         desired minimum (specified by 'memMinimumSwap(12)')."
     ::= { memory 100 }
 	
 memSwapErrorMsg OBJECT-TYPE
@@ -508,7 +622,9 @@ memSwapErrorMsg OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Error message describing the Error Flag condition"
+	"Describes whether the amount of available swap space
+         (as reported by 'memAvailSwap(4)'), is less than the
+         desired minimum (specified by 'memMinimumSwap(12)')."
     ::= { memory 101 } 
 
 
@@ -541,7 +657,7 @@ DskEntry ::= SEQUENCE {
     dskUsed		Integer32,
     dskPercent		Integer32,
     dskPercentNode	Integer32,
-    dskErrorFlag	Integer32,
+    dskErrorFlag	UCDErrorFlag,
     dskErrorMsg		DisplayString
 }
 
@@ -630,7 +746,7 @@ dskPercentNode OBJECT-TYPE
     ::= { dskEntry 10 } 
 
 dskErrorFlag OBJECT-TYPE
-    SYNTAX	Integer32
+    SYNTAX	UCDErrorFlag
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION  
@@ -671,7 +787,7 @@ LaEntry ::= SEQUENCE {
     laConfig		DisplayString,
     laLoadInt		Integer32,
     laLoadFloat		Float,
-    laErrorFlag		Integer32,
+    laErrorFlag		UCDErrorFlag,
     laErrMessage	DisplayString
 }
 
@@ -730,7 +846,7 @@ laLoadFloat OBJECT-TYPE
     ::= { laEntry 6 }
 
 laErrorFlag OBJECT-TYPE
-    SYNTAX	Integer32
+    SYNTAX	UCDErrorFlag
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -860,7 +976,7 @@ snmperrNames OBJECT-TYPE
     ::= { snmperrs 2 }
 
 snmperrErrorFlag OBJECT-TYPE
-    SYNTAX	Integer32
+    SYNTAX	UCDErrorFlag
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -924,7 +1040,7 @@ ssIndex OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Reference Index for each observed systemStat (1)."
+	"Bogus Index.  This should always return the integer 1."
     ::= { systemStats 1 }
 
 ssErrorName OBJECT-TYPE
@@ -932,59 +1048,83 @@ ssErrorName OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"The list of systemStats names (vmstat) we're Counting."
+	"Bogus Name. This should always return the string 'systemStats'."
     ::= { systemStats 2 }
 
 ssSwapIn OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Amount of memory swapped in from disk (kB/s)."
+	"The average amount of memory swapped in from disk,
+         calculated over the last minute."
     ::= { systemStats 3 }
 
 ssSwapOut OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Amount of memory swapped to disk (kB/s)."
+	"The average amount of memory swapped out to disk,
+         calculated over the last minute."
     ::= { systemStats 4 }
 
 ssIOSent OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "blocks/s"
     MAX-ACCESS	read-only
     STATUS	deprecated
     DESCRIPTION
-	"Blocks sent to a block device (blocks/s). Deprecated, replaced by
-	the ssIORawSent object"
+	"The average amount of data written to disk or other
+         block device, calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+         'ssIORawSent(57)', which can be used to calculate
+         the same metric, but over any desired time period."
     ::= { systemStats 5 }
 
 ssIOReceive OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "blocks/s"
     MAX-ACCESS	read-only
     STATUS	deprecated
     DESCRIPTION
-	"Blocks received from a block device (blocks/s). Deprecated, replaced by
-	the ssIORawReceived object"
+	"The average amount of data read from disk or other
+         block device, calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+         'ssIORawReceived(58)', which can be used to calculate
+         the same metric, but over any desired time period."
     ::= { systemStats 6 }
 
 ssSysInterrupts OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "interrupts/s"
     MAX-ACCESS	read-only
     STATUS	deprecated
     DESCRIPTION
-	"The number of interrupts per second, including the clock.
-	Deprecated, replaced by ssRawInterrupts"
+	"The average rate of interrupts processed (including
+         the clock) calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+         'ssRawInterrupts(59)', which can be used to calculate
+         the same metric, but over any desired time period."
     ::= { systemStats 7 }
 
 ssSysContext OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "switches/s"
     MAX-ACCESS	read-only
     STATUS	deprecated
     DESCRIPTION
-	"The number of context switches per second.
-	Deprecated, replaced by ssRawContext"
+	"The average rate of context switches,
+         calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+         'ssRawContext(60)', which can be used to calculate
+         the same metric, but over any desired time period."
     ::= { systemStats 8 }
 
 ssCpuUser OBJECT-TYPE
@@ -992,8 +1132,12 @@ ssCpuUser OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	deprecated
     DESCRIPTION
-	"percentages of user CPU time. Deprecated, replaced by the ssCpuRawUser
-	object"
+	"The percentage of CPU time spent processing
+         user-level code, calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+         'ssCpuRawUser(50)', which can be used to calculate
+         the same metric, but over any desired time period."
     ::= { systemStats 9 }
 
 ssCpuSystem OBJECT-TYPE
@@ -1001,8 +1145,12 @@ ssCpuSystem OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	deprecated
     DESCRIPTION
-	"percentages of system CPU time. Deprecated, replaced by of the
-	ssCpuRawSystem object"
+	"The percentage of CPU time spent processing
+         system-level code, calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+         'ssCpuRawSystem(52)', which can be used to calculate
+         the same metric, but over any desired time period."
     ::= { systemStats 10 }
 
 ssCpuIdle OBJECT-TYPE
@@ -1010,8 +1158,12 @@ ssCpuIdle OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	deprecated
     DESCRIPTION
-	"percentages of idle CPU time. Deprecated, replaced by of the
-	ssCpuRawIdle object"
+	"The percentage of processor time spent idle,
+         calculated over the last minute.
+       
+	 This object has been deprecated in favour of
+         'ssCpuRawIdle(53)', which can be used to calculate
+         the same metric, but over any desired time period."
     ::= { systemStats 11 }
 
 -- The agent only implements those of the following counters that the
@@ -1022,7 +1174,12 @@ ssCpuRawUser OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "user CPU time."
+        "The number of 'ticks' (typically 1/100s) spent
+         processing user-level code.
+
+         On a multi-processor system, the 'ssCpuRaw*'
+         counters are cumulative over all CPUs, so their
+         sum will typically be N*100 (for N processors)."
     ::= { systemStats 50 }
 
 ssCpuRawNice OBJECT-TYPE
@@ -1030,7 +1187,16 @@ ssCpuRawNice OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "nice CPU time."
+        "The number of 'ticks' (typically 1/100s) spent
+         processing reduced-priority code.
+
+         This object will not be implemented on hosts where
+         the underlying operating system does not measure
+         this particular CPU metric.
+
+         On a multi-processor system, the 'ssCpuRaw*'
+         counters are cumulative over all CPUs, so their
+         sum will typically be N*100 (for N processors)."
     ::= { systemStats 51 }
 
 ssCpuRawSystem OBJECT-TYPE
@@ -1038,7 +1204,17 @@ ssCpuRawSystem OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "system CPU time."
+        "The number of 'ticks' (typically 1/100s) spent
+         processing system-level code.
+
+         On a multi-processor system, the 'ssCpuRaw*'
+         counters are cumulative over all CPUs, so their
+         sum will typically be N*100 (for N processors).
+
+         This object may sometimes be implemented as the
+         combination of the 'ssCpuRawWait(54)' and
+         'ssCpuRawKernel(55)' counters, so care must be
+         taken when summing the overall raw counters."
     ::= { systemStats 52 }
 
 ssCpuRawIdle OBJECT-TYPE
@@ -1046,7 +1222,12 @@ ssCpuRawIdle OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "idle CPU time."
+        "The number of 'ticks' (typically 1/100s) spent
+         idle.
+
+         On a multi-processor system, the 'ssCpuRaw*'
+         counters are cumulative over all CPUs, so their
+         sum will typically be N*100 (for N processors)."
     ::= { systemStats 53 }
 
 ssCpuRawWait OBJECT-TYPE
@@ -1054,7 +1235,17 @@ ssCpuRawWait OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "iowait CPU time. This is primarily a SysV thingie"
+        "The number of 'ticks' (typically 1/100s) spent
+         waiting for IO.
+
+         This object will not be implemented on hosts where
+         the underlying operating system does not measure
+         this particular CPU metric.  This time may also be
+         included within the 'ssCpuRawSystem(52)' counter.
+
+         On a multi-processor system, the 'ssCpuRaw*'
+         counters are cumulative over all CPUs, so their
+         sum will typically be N*100 (for N processors)."
     ::= { systemStats 54 }
 
 ssCpuRawKernel OBJECT-TYPE
@@ -1062,7 +1253,17 @@ ssCpuRawKernel OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "kernel CPU time."
+        "The number of 'ticks' (typically 1/100s) spent
+         processing kernel-level code.
+
+         This object will not be implemented on hosts where
+         the underlying operating system does not measure
+         this particular CPU metric.  This time may also be
+         included within the 'ssCpuRawSystem(52)' counter.
+
+         On a multi-processor system, the 'ssCpuRaw*'
+         counters are cumulative over all CPUs, so their
+         sum will typically be N*100 (for N processors)."
     ::= { systemStats 55 }
 
 ssCpuRawInterrupt OBJECT-TYPE
@@ -1070,7 +1271,16 @@ ssCpuRawInterrupt OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "interruptlevel CPU time. This is primarily a BSD thingie"
+        "The number of 'ticks' (typically 1/100s) spent
+         processing hardware interrupts.
+
+         This object will not be implemented on hosts where
+         the underlying operating system does not measure
+         this particular CPU metric.
+
+         On a multi-processor system, the 'ssCpuRaw*'
+         counters are cumulative over all CPUs, so their
+         sum will typically be N*100 (for N processors)."
     ::= { systemStats 56 }
 
 ssIORawSent OBJECT-TYPE
@@ -1110,7 +1320,16 @@ ssCpuRawSoftIRQ OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "Soft IRQ CPU time. This is for Linux 2.6"
+        "The number of 'ticks' (typically 1/100s) spent
+         processing software interrupts.
+
+         This object will not be implemented on hosts where
+         the underlying operating system does not measure
+         this particular CPU metric.
+
+         On a multi-processor system, the 'ssCpuRaw*'
+         counters are cumulative over all CPUs, so their
+         sum will typically be N*100 (for N processors)."
     ::= { systemStats 61 }
 
 ssRawSwapIn OBJECT-TYPE
@@ -1132,7 +1351,7 @@ ssRawSwapOut OBJECT-TYPE
 -- possibly used in the future:
 --
 -- ssErrorFlag OBJECT-TYPE
---     SYNTAX	   Integer32
+--     SYNTAX	   UCDErrorFlag
 --     MAX-ACCESS  read-only
 --     STATUS      current
 --     DESCRIPTION
@@ -1153,7 +1372,7 @@ ucdTraps OBJECT IDENTIFIER ::= { ucdavis 251 }
 ucdStart NOTIFICATION-TYPE
     STATUS	current
     DESCRIPTION
-	""
+	"This trap could in principle be sent when the agent start"
     ::= { ucdTraps 1 }
     
 ucdShutdown	NOTIFICATION-TYPE
@@ -1188,7 +1407,7 @@ FileEntry ::= SEQUENCE {
     fileName		DisplayString,
     fileSize		Integer32,
     fileMax		Integer32,
-    fileErrorFlag	TruthValue,
+    fileErrorFlag	UCDErrorFlag,
     fileErrorMsg	DisplayString
 }
 
@@ -1227,7 +1446,7 @@ fileMax	OBJECT-TYPE
     ::= { fileEntry 4 }
 
 fileErrorFlag OBJECT-TYPE
-    SYNTAX	TruthValue
+    SYNTAX	UCDErrorFlag
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -1295,7 +1514,7 @@ LogMatchEntry ::=
 		logMatchCycle
 			Integer32,
 		logMatchErrorFlag
-			TruthValue,
+			UCDErrorFlag,
 		logMatchRegExCompilation
 			DisplayString
 	 }
@@ -1391,7 +1610,7 @@ logMatchCycle OBJECT-TYPE
 	::= { logMatchEntry 11 }
 
 logMatchErrorFlag OBJECT-TYPE
-	SYNTAX TruthValue
+	SYNTAX UCDErrorFlag
 	MAX-ACCESS read-only
 	STATUS current
 	DESCRIPTION

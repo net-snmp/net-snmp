@@ -16,38 +16,33 @@ IMPORTS
     InterfaceIndex                     FROM IF-MIB;
 
 ipMIB MODULE-IDENTITY
-    LAST-UPDATED "200404260000Z"
+    LAST-UPDATED "200602020000Z"
     ORGANIZATION "IETF IPv6 MIB Revision Team"
     CONTACT-INFO
            "Editor:
-            Shawn A. Routhier
-            Wind River
-            500 Wind River Way
-            Alameda, CA
-            USA
 
-            Phone: +1 510 749 2095
-            EMail: <shawn.routhier@windriver.com>"
+
+
+            Shawn A. Routhier
+            Interworking Labs
+            108 Whispering Pines Dr. Suite 235
+            Scotts Valley, CA 95066
+            USA
+            EMail: <sar@iwl.com>"
     DESCRIPTION
            "The MIB module for managing IP and ICMP implementations, but
             excluding their management of IP routes.
 
-            Copyright (C) The Internet Society (2004).  This version of
-            this MIB module is part of RFC xxxx; see the RFC itself for
+            Copyright (C) The Internet Society (2006).  This version of
+            this MIB module is part of RFC 4293; see the RFC itself for
             full legal notices."
--- RFC Editor
--- Please update this reference as the RFC number is assigned.
---
-    REVISION      "200404260000Z"
+
+    REVISION      "200602020000Z"
     DESCRIPTION
            "The IP version neutral revision with added IPv6 objects for
-            ND, default routers and router advertisements.  As well as
-            being the successor to RFC2011 this MIB is also the
-            successor to RFC2465 and RFC 2466.  Published as RFC xxxx."
-
--- RFC Editor
--- Please update this reference as the RFC number is assigned.
---
+            ND, default routers, and router advertisements.  As well as
+            being the successor to RFC 2011, this MIB is also the
+            successor to RFCs 2465 and 2466.  Published as RFC 4293."
 
     REVISION      "199411010000Z"
     DESCRIPTION
@@ -70,16 +65,19 @@ IpAddressOriginTC ::= TEXTUAL-CONVENTION
            "The origin of the address.
 
             manual(2) indicates that the address was manually configured
-            to a specified address, e.g. by user configuration.
+            to a specified address, e.g., by user configuration.
 
             dhcp(4) indicates an address that was assigned to this
             system by a DHCP server.
 
             linklayer(5) indicates an address created by IPv6 stateless
+
+
+
             auto-configuration.
 
             random(6) indicates an address chosen by the system at
-            random, e.g. an IPv4 address within 169.254/16, or an RFC
+            random, e.g., an IPv4 address within 169.254/16, or an RFC
             3041 privacy address."
     SYNTAX     INTEGER {
         other(1),
@@ -94,7 +92,7 @@ IpAddressStatusTC ::= TEXTUAL-CONVENTION
     DESCRIPTION
            "The status of an address.  Most of the states correspond to
             states from the IPv6 Stateless Address Autoconfiguration
-            protocol [5].
+            protocol.
 
             The preferred(1) state indicates that this is a valid
             address that can appear as the destination or source address
@@ -113,10 +111,10 @@ IpAddressStatusTC ::= TEXTUAL-CONVENTION
             accessible because the interface to which this address is
             assigned is not operational.
 
-            The unknown(5) state indicates that the status can not be
+            The unknown(5) state indicates that the status cannot be
             determined for some reason.
 
-            The tentative(6) state indicates the uniqueness of the
+            The tentative(6) state indicates that the uniqueness of the
             address on the link is being verified.  Addresses in this
             state should not be used for general communication and
             should only be used to determine the uniqueness of the
@@ -124,7 +122,14 @@ IpAddressStatusTC ::= TEXTUAL-CONVENTION
 
             The duplicate(7) state indicates the address has been
             determined to be non-unique on the link and so must not be
+
+
+
             used.
+
+            The optimistic(8) state indicates the address is available
+            for use, subject to restrictions, while its uniqueness on
+            a link is being verified.
 
             In the absence of other information, an IPv4 address is
             always preferred(1)."
@@ -136,7 +141,8 @@ IpAddressStatusTC ::= TEXTUAL-CONVENTION
         inaccessible(4),
         unknown(5),
         tentative(6),
-        duplicate(7)
+        duplicate(7),
+        optimistic(8)
     }
 
 IpAddressPrefixOriginTC ::= TEXTUAL-CONVENTION
@@ -146,10 +152,10 @@ IpAddressPrefixOriginTC ::= TEXTUAL-CONVENTION
 
             manual(2) indicates a prefix that was manually configured.
 
-            wellknown(3) indicates a well-known prefix, e.g. 169.254/16
+            wellknown(3) indicates a well-known prefix, e.g., 169.254/16
             for IPv4 auto-configuration or fe80::/10 for IPv6 link-local
-            addresses.  Well known prefixes may be assigned by IANA or
-            the address registries or by specification in a standards
+            addresses.  Well known prefixes may be assigned by IANA,
+            the address registries, or by specification in a standards
             track RFC.
 
             dhcp(4) indicates a prefix that was assigned by a DHCP
@@ -159,14 +165,17 @@ IpAddressPrefixOriginTC ::= TEXTUAL-CONVENTION
             advertisement.
 
             Note: while IpAddressOriginTC and IpAddressPrefixOriginTC
-            are similar they are not identical.  The first defines how
-            an address was created while the second defines how a prefix
-            was found."
+            are similar, they are not identical.  The first defines how
+            an address was created, while the second defines how a
+            prefix was found."
     SYNTAX     INTEGER {
         other(1),
         manual(2),
         wellknown(3),
         dhcp(4),
+
+
+
         routeradv(5)
     }
 
@@ -175,8 +184,8 @@ Ipv6AddressIfIdentifierTC ::= TEXTUAL-CONVENTION
      STATUS       current
      DESCRIPTION
        "This data type is used to model IPv6 address
-       interface identifiers. This is a binary string
-        of up to 8 octets in network byte-order."
+       interface identifiers.  This is a binary string
+       of up to 8 octets in network byte-order."
      SYNTAX      OCTET STRING (SIZE (0..8))
 
 --
@@ -200,7 +209,7 @@ ipForwarding OBJECT-TYPE
             datagrams.  IPv4 hosts do not (except those source-routed
             via the host).
 
-            When this object is written the entity should save the
+            When this object is written, the entity should save the
             change to non-volatile storage and restore the object from
             non-volatile storage upon re-initialization of the system.
             Note: a stronger requirement is not used because this object
@@ -215,9 +224,12 @@ ipDefaultTTL OBJECT-TYPE
            "The default value inserted into the Time-To-Live field of
             the IPv4 header of datagrams originated at this entity,
             whenever a TTL value is not supplied by the transport layer
+
+
+
             protocol.
 
-            When this object is written the entity should save the
+            When this object is written, the entity should save the
             change to non-volatile storage and restore the object from
             non-volatile storage upon re-initialization of the system.
             Note: a stronger requirement is not used because this object
@@ -226,11 +238,11 @@ ipDefaultTTL OBJECT-TYPE
 
 ipReasmTimeout OBJECT-TYPE
     SYNTAX     Integer32
-    UNITS "seconds"
+    UNITS      "seconds"
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The maximum number of seconds which received fragments are
+           "The maximum number of seconds that received fragments are
             held while they are awaiting reassembly at this entity."
     ::= { ip 13 }
 
@@ -253,7 +265,7 @@ ipv6IpForwarding OBJECT-TYPE
             IPv6 routers forward datagrams.  IPv6 hosts do not (except
             those source-routed via the host).
 
-            When this object is written the entity SHOULD save the
+            When this object is written, the entity SHOULD save the
             change to non-volatile storage and restore the object from
             non-volatile storage upon re-initialization of the system."
     ::= { ip 25 }
@@ -263,15 +275,18 @@ ipv6IpDefaultHopLimit OBJECT-TYPE
     MAX-ACCESS read-write
     STATUS     current
     DESCRIPTION
+
+
+
            "The default value inserted into the Hop Limit field of the
-            IPv6 header of datagrams originated at this entity, whenever
+            IPv6 header of datagrams originated at this entity whenever
             a Hop Limit value is not supplied by the transport layer
             protocol.
 
-            When this object is written the entity SHOULD save the
+            When this object is written, the entity SHOULD save the
             change to non-volatile storage and restore the object from
             non-volatile storage upon re-initialization of the system."
-    REFERENCE "RFC2461 Section 6.3.2"
+    REFERENCE "RFC 2461 Section 6.3.2"
     ::= { ip 26 }
 
 --
@@ -284,13 +299,13 @@ ipv4InterfaceTableLastChange OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The value of sysUpTime on the most recent occasion at which
-            a row in the ipv4InterfaceTable was added or deleted or when
-            an ipv4InterfaceReasmMaxSize or an ipv4InterfaceEnableStatus
-            object was modified.
+            a row in the ipv4InterfaceTable was added or deleted, or
+            when an ipv4InterfaceReasmMaxSize or an
+            ipv4InterfaceEnableStatus object was modified.
 
-            If new objects are added to the ipv6InterfaceTable that
-            require the ipv6InterfaceTableLastChange to be updated when
-            they are modified they must specify that requirement in
+            If new objects are added to the ipv4InterfaceTable that
+            require the ipv4InterfaceTableLastChange to be updated when
+            they are modified, they must specify that requirement in
             their description clause."
     ::= { ip 27 }
 
@@ -311,6 +326,9 @@ ipv4InterfaceEntry OBJECT-TYPE
            "An entry containing IPv4-specific information for a specific
             interface."
     INDEX { ipv4InterfaceIfIndex }
+
+
+
     ::= { ipv4InterfaceTable 1 }
 
 Ipv4InterfaceEntry ::= SEQUENCE {
@@ -325,7 +343,7 @@ ipv4InterfaceIfIndex OBJECT-TYPE
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
-           "The index value which uniquely identifies the interface to
+           "The index value that uniquely identifies the interface to
             which this entry is applicable.  The interface identified by
             a particular value of this index is the same interface as
             identified by the same value of the IF-MIB's ifIndex."
@@ -336,7 +354,7 @@ ipv4InterfaceReasmMaxSize OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The size of the largest IPv4 datagram which this entity can
+           "The size of the largest IPv4 datagram that this entity can
             re-assemble from incoming IPv4 fragmented datagrams received
             on this interface."
     ::= { ipv4InterfaceEntry 2 }
@@ -358,14 +376,17 @@ ipv4InterfaceEnableStatus OBJECT-TYPE
 
 ipv4InterfaceRetransmitTime OBJECT-TYPE
     SYNTAX     Unsigned32
-    UNITS "milliseconds"
+    UNITS      "milliseconds"
+
+
+
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
            "The time between retransmissions of ARP requests to a
             neighbor when resolving the address or when probing the
             reachability of a neighbor."
-    REFERENCE "RFC1122"
+    REFERENCE "RFC 1122"
     DEFVAL { 1000 }
     ::= { ipv4InterfaceEntry 4 }
 
@@ -382,12 +403,12 @@ ipv6InterfaceTableLastChange OBJECT-TYPE
             a row in the ipv6InterfaceTable was added or deleted or when
             an ipv6InterfaceReasmMaxSize, ipv6InterfaceIdentifier,
             ipv6InterfaceEnableStatus, ipv6InterfaceReachableTime,
-            ipv6InterfaceRetransmitTime or ipv6InterfaceForwarding
+            ipv6InterfaceRetransmitTime, or ipv6InterfaceForwarding
             object was modified.
 
             If new objects are added to the ipv6InterfaceTable that
             require the ipv6InterfaceTableLastChange to be updated when
-            they are modified they must specify that requirement in
+            they are modified, they must specify that requirement in
             their description clause."
     ::= { ip 29 }
 
@@ -407,6 +428,9 @@ ipv6InterfaceEntry OBJECT-TYPE
     DESCRIPTION
            "An entry containing IPv6-specific information for a given
             interface."
+
+
+
     INDEX { ipv6InterfaceIfIndex }
     ::= { ipv6InterfaceTable 1 }
 
@@ -425,7 +449,7 @@ ipv6InterfaceIfIndex OBJECT-TYPE
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
-           "The index value which uniquely identifies the interface to
+           "The index value that uniquely identifies the interface to
             which this entry is applicable.  The interface identified by
             a particular value of this index is the same interface as
             identified by the same value of the IF-MIB's ifIndex."
@@ -433,11 +457,11 @@ ipv6InterfaceIfIndex OBJECT-TYPE
 
 ipv6InterfaceReasmMaxSize OBJECT-TYPE
     SYNTAX     Unsigned32 (1500..65535)
-    UNITS       "octets"
+    UNITS      "octets"
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The size of the largest IPv6 datagram which this entity can
+           "The size of the largest IPv6 datagram that this entity can
             re-assemble from incoming IPv6 fragmented datagrams received
             on this interface."
     ::= { ipv6InterfaceEntry 2 }
@@ -452,18 +476,22 @@ ipv6InterfaceIdentifier OBJECT-TYPE
             interface address.
 
             By default, the Interface Identifier is auto-configured
-            according to the rules of the link type this interface is
-            attached to.
+            according to the rules of the link type to which this
+            interface is attached.
+
+
+
 
             A zero length identifier may be used where appropriate.  One
             possible example is a loopback interface."
     ::= { ipv6InterfaceEntry 3 }
 
--- This object ID is reserved as it was used in earlier drafts of
--- the MIB module.  In theory OIDs are not assigned until the specification
--- is released as an RFC, however as some companies may have shipped
--- code based on earlier versiosn of the MIB it seems best to reserve
--- this OID.  This OID had been ipv6InterfacePhysicalAddress
+-- This object ID is reserved as it was used in earlier versions of
+-- the MIB module.  In theory, OIDs are not assigned until the
+-- specification is released as an RFC; however, as some companies
+-- may have shipped code based on earlier versions of the MIB, it
+-- seems best to reserve this OID.  This OID had been
+-- ipv6InterfacePhysicalAddress.
 -- ::= { ipv6InterfaceEntry 4}
 
 ipv6InterfaceEnableStatus OBJECT-TYPE
@@ -480,32 +508,35 @@ ipv6InterfaceEnableStatus OBJECT-TYPE
             IPv6 stack.  The IF-MIB should be used to control the state
             of the interface.
 
-            When this object is written the entity SHOULD save the
+            When this object is written, the entity SHOULD save the
             change to non-volatile storage and restore the object from
             non-volatile storage upon re-initialization of the system."
     ::= { ipv6InterfaceEntry 5 }
 
 ipv6InterfaceReachableTime OBJECT-TYPE
     SYNTAX     Unsigned32
-    UNITS "milliseconds"
+    UNITS      "milliseconds"
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
            "The time a neighbor is considered reachable after receiving
             a reachability confirmation."
-    REFERENCE "RFC2461, Section 6.3.2"
+    REFERENCE "RFC 2461, Section 6.3.2"
     ::= { ipv6InterfaceEntry 6 }
 
 ipv6InterfaceRetransmitTime OBJECT-TYPE
     SYNTAX     Unsigned32
-    UNITS "milliseconds"
+    UNITS      "milliseconds"
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
+
+
+
            "The time between retransmissions of Neighbor Solicitation
             messages to a neighbor when resolving the address or when
             probing the reachability of a neighbor."
-    REFERENCE "RFC2461, Section 6.3.2"
+    REFERENCE "RFC 2461, Section 6.3.2"
     ::= { ipv6InterfaceEntry 7 }
 
 ipv6InterfaceForwarding OBJECT-TYPE
@@ -529,7 +560,7 @@ ipv6InterfaceForwarding OBJECT-TYPE
             all interfaces and allow the ipv6IpForwarding object to
             control the forwarding capability.
 
-            When this object is written the entity SHOULD save the
+            When this object is written, the entity SHOULD save the
             change to non-volatile storage and restore the object from
             non-volatile storage upon re-initialization of the system."
     ::= { ipv6InterfaceEntry 8 }
@@ -537,23 +568,26 @@ ipv6InterfaceForwarding OBJECT-TYPE
 --
 -- Per-Interface or System-Wide IP statistics.
 --
--- The following two tables, ipSystemStatsTable and ipIfStatsTable
+-- The following two tables, ipSystemStatsTable and ipIfStatsTable,
 -- are intended to provide the same counters at different granularities.
 -- The ipSystemStatsTable provides system wide counters aggregating
 -- the traffic counters for all interfaces for a given address type.
 -- The ipIfStatsTable provides the same counters but for specific
 -- interfaces rather than as an aggregate.
 --
--- Note well: If a system provides both system-wide and interface-specific
--- values the system-wide value may not be equal to the sum of the
--- interface-specific values across all interfaces due to e.g. dynamic
--- interface creation/deletion.
+-- Note well: If a system provides both system-wide and interface-
+-- specific values, the system-wide value may not be equal to the sum
+-- of the interface-specific values across all interfaces due to e.g.,
+-- dynamic interface creation/deletion.
 --
--- Note well: Both of these tables contain some items that are represented
--- by two objects, representing the value in either 32 or 64 bits.  For
--- those objects the 32 bit value MUST be the low order 32 bits of the
--- 64 bit value.  Also note that the 32 bit counters must be when the
--- 64 bit counters are included.
+-- Note well: Both of these tables contain some items that are
+
+
+
+-- represented by two objects, representing the value in either 32
+-- or 64 bits.  For those objects, the 32-bit value MUST be the low
+-- order 32 bits of the 64-bit value.  Also note that the 32-bit
+-- counters must be included when the 64-bit counters are included.
 
 ipTrafficStats OBJECT IDENTIFIER ::= { ip 31 }
 
@@ -566,7 +600,7 @@ ipSystemStatsTable OBJECT-TYPE
             traffic statistics.  This table and the ipIfStatsTable
             contain similar objects whose difference is in their
             granularity.  Where this table contains system wide traffic
-            statistics the ipIfStatsTable contains the same statistics
+            statistics, the ipIfStatsTable contains the same statistics
             but counted on a per-interface basis."
     ::= { ipTrafficStats 1 }
 
@@ -598,6 +632,9 @@ IpSystemStatsEntry ::= SEQUENCE {
         ipSystemStatsReasmFails          Counter32,
         ipSystemStatsInDiscards          Counter32,
         ipSystemStatsInDelivers          Counter32,
+
+
+
         ipSystemStatsHCInDelivers        Counter64,
         ipSystemStatsOutRequests         Counter32,
         ipSystemStatsHCOutRequests       Counter64,
@@ -646,6 +683,9 @@ ipSystemStatsInReceives OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
+
+
+
            "The total number of input IP datagrams received, including
             those received in error.
 
@@ -662,7 +702,7 @@ ipSystemStatsHCInReceives OBJECT-TYPE
     DESCRIPTION
            "The total number of input IP datagrams received, including
             those received in error.  This object counts the same
-            datagrams as ipSystemStatsInReceives but allows for larger
+            datagrams as ipSystemStatsInReceives, but allows for larger
             values.
 
             Discontinuities in the value of this counter can occur at
@@ -693,7 +733,10 @@ ipSystemStatsHCInOctets OBJECT-TYPE
     DESCRIPTION
            "The total number of octets received in input IP datagrams,
             including those received in error.  This object counts the
-            same octets as ipSystemStatsInOctets but allows for larger
+            same octets as ipSystemStatsInOctets, but allows for larger
+
+
+
             values.
 
             Discontinuities in the value of this counter can occur at
@@ -740,10 +783,12 @@ ipSystemStatsInAddrErrors OBJECT-TYPE
            "The number of input IP datagrams discarded because the IP
             address in their IP header's destination field was not a
             valid address to be received at this entity.  This count
-            includes invalid addresses (e.g., ::0) and unsupported
-            addresses (e.g., addresses with unallocated prefixes).  For
-            entities which are not IP routers and therefore do not
-            forward datagrams, this counter includes datagrams discarded
+            includes invalid addresses (e.g., ::0).  For entities
+            that are not IP routers and therefore do not forward
+
+
+
+            datagrams, this counter includes datagrams discarded
             because the destination address was not a local address.
 
             Discontinuities in the value of this counter can occur at
@@ -761,7 +806,7 @@ ipSystemStatsInUnknownProtos OBJECT-TYPE
             successfully but discarded because of an unknown or
             unsupported protocol.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             interface to which these datagrams were addressed is
             incremented.  This interface might not be the same as the
             input interface for some of the datagrams.
@@ -791,15 +836,18 @@ ipSystemStatsInForwDatagrams OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
+
+
+
            "The number of input datagrams for which this entity was not
             their final IP destination and for which this entity
             attempted to find a route to forward them to that final
-            destination.  In entities which do not act as IP routers,
-            this counter will include only those datagrams which were
+            destination.  In entities that do not act as IP routers,
+            this counter will include only those datagrams that were
             Source-Routed via this entity, and the Source-Route
             processing was successful.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             incoming interface is incremented for each datagram.
 
             Discontinuities in the value of this counter can occur at
@@ -817,7 +865,7 @@ ipSystemStatsHCInForwDatagrams OBJECT-TYPE
             their final IP destination and for which this entity
             attempted to find a route to forward them to that final
             destination.  This object counts the same packets as
-            ipSystemStatsInForwDatagrams but allows for larger values.
+            ipSystemStatsInForwDatagrams, but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -830,15 +878,18 @@ ipSystemStatsReasmReqds OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The number of IP fragments received which needed to be
+           "The number of IP fragments received that needed to be
             reassembled at this interface.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             interface to which these fragments were addressed is
             incremented.  This interface might not be the same as the
             input interface for some of the fragments.
 
             Discontinuities in the value of this counter can occur at
+
+
+
             re-initialization of the management system, and at other
             times as indicated by the value of
             ipSystemStatsDiscontinuityTime."
@@ -851,7 +902,7 @@ ipSystemStatsReasmOKs OBJECT-TYPE
     DESCRIPTION
            "The number of IP datagrams successfully reassembled.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             interface to which these datagrams were addressed is
             incremented.  This interface might not be the same as the
             input interface for some of the datagrams.
@@ -874,7 +925,7 @@ ipSystemStatsReasmFails OBJECT-TYPE
             RFC 815) can lose track of the number of fragments by
             combining them as they are received.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             interface to which these fragments were addressed is
             incremented.  This interface might not be the same as the
             input interface for some of the fragments.
@@ -887,11 +938,14 @@ ipSystemStatsReasmFails OBJECT-TYPE
 
 ipSystemStatsInDiscards OBJECT-TYPE
     SYNTAX     Counter32
+
+
+
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
            "The number of input IP datagrams for which no problems were
-            encountered to prevent their continued processing, but which
+            encountered to prevent their continued processing, but
             were discarded (e.g., for lack of buffer space).  Note that
             this counter does not include any datagrams discarded while
             awaiting re-assembly.
@@ -910,7 +964,7 @@ ipSystemStatsInDelivers OBJECT-TYPE
            "The total number of datagrams successfully delivered to IP
             user-protocols (including ICMP).
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             interface to which these datagrams were addressed is
             incremented.  This interface might not be the same as the
             input interface for some of the datagrams.
@@ -928,13 +982,16 @@ ipSystemStatsHCInDelivers OBJECT-TYPE
     DESCRIPTION
            "The total number of datagrams successfully delivered to IP
             user-protocols (including ICMP).  This object counts the
-            same packets as ipSystemStatsInDelivers but allows for
+            same packets as ipSystemStatsInDelivers, but allows for
             larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
             times as indicated by the value of
             ipSystemStatsDiscontinuityTime."
+
+
+
     ::= { ipSystemStatsEntry 19 }
 
 ipSystemStatsOutRequests OBJECT-TYPE
@@ -942,7 +999,7 @@ ipSystemStatsOutRequests OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The total number of IP datagrams which local IP user-
+           "The total number of IP datagrams that local IP user-
             protocols (including ICMP) supplied to IP in requests for
             transmission.  Note that this counter does not include any
             datagrams counted in ipSystemStatsOutForwDatagrams.
@@ -958,10 +1015,10 @@ ipSystemStatsHCOutRequests OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The total number of IP datagrams which local IP user-
+           "The total number of IP datagrams that local IP user-
             protocols (including ICMP) supplied to IP in requests for
             transmission.  This object counts the same packets as
-            ipSystemStatsHCOutRequests but allows for larger values.
+            ipSystemStatsOutRequests, but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -984,6 +1041,8 @@ ipSystemStatsOutNoRoutes OBJECT-TYPE
             ipSystemStatsDiscontinuityTime."
     ::= { ipSystemStatsEntry 22 }
 
+
+
 ipSystemStatsOutForwDatagrams OBJECT-TYPE
     SYNTAX     Counter32
     MAX-ACCESS read-only
@@ -992,11 +1051,11 @@ ipSystemStatsOutForwDatagrams OBJECT-TYPE
            "The number of datagrams for which this entity was not their
             final IP destination and for which it was successful in
             finding a path to their final destination.  In entities
-            which do not act as IP routers, this counter will include
-            only those datagrams which were Source-Routed via this
+            that do not act as IP routers, this counter will include
+            only those datagrams that were Source-Routed via this
             entity, and the Source-Route processing was successful.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             outgoing interface is incremented for a successfully
             forwarded datagram.
 
@@ -1014,8 +1073,8 @@ ipSystemStatsHCOutForwDatagrams OBJECT-TYPE
            "The number of datagrams for which this entity was not their
             final IP destination and for which it was successful in
             finding a path to their final destination.  This object
-            counts the same packets as ipSystemStatsOutForwDatagrams but
-            allows for larger values.
+            counts the same packets as ipSystemStatsOutForwDatagrams,
+            but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -1030,8 +1089,11 @@ ipSystemStatsOutDiscards OBJECT-TYPE
     DESCRIPTION
            "The number of output IP datagrams for which no problem was
             encountered to prevent their transmission to their
-            destination, but which were discarded (e.g., for lack of
+            destination, but were discarded (e.g., for lack of
             buffer space).  Note that this counter would include
+
+
+
             datagrams counted in ipSystemStatsOutForwDatagrams if any
             such datagrams met this (discretionary) discard criterion.
 
@@ -1049,7 +1111,7 @@ ipSystemStatsOutFragReqds OBJECT-TYPE
            "The number of IP datagrams that would require fragmentation
             in order to be transmitted.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             outgoing interface is incremented for a successfully
             fragmented datagram.
 
@@ -1067,7 +1129,7 @@ ipSystemStatsOutFragOKs OBJECT-TYPE
            "The number of IP datagrams that have been successfully
             fragmented.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             outgoing interface is incremented for a successfully
             fragmented datagram.
 
@@ -1080,6 +1142,9 @@ ipSystemStatsOutFragOKs OBJECT-TYPE
 ipSystemStatsOutFragFails OBJECT-TYPE
     SYNTAX     Counter32
     MAX-ACCESS read-only
+
+
+
     STATUS     current
     DESCRIPTION
            "The number of IP datagrams that have been discarded because
@@ -1088,7 +1153,7 @@ ipSystemStatsOutFragFails OBJECT-TYPE
             packets that are being forwarded and exceed the outgoing
             link MTU.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             outgoing interface is incremented for an unsuccessfully
             fragmented datagram.
 
@@ -1106,7 +1171,7 @@ ipSystemStatsOutFragCreates OBJECT-TYPE
            "The number of output datagram fragments that have been
             generated as a result of IP fragmentation.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             outgoing interface is incremented for a successfully
             fragmented datagram.
 
@@ -1123,11 +1188,14 @@ ipSystemStatsOutTransmits OBJECT-TYPE
     DESCRIPTION
            "The total number of IP datagrams that this entity supplied
             to the lower layers for transmission.  This includes
-            datagrams generated local and those forwarded by this
+            datagrams generated locally and those forwarded by this
             entity.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
+
+
+
             times as indicated by the value of
             ipSystemStatsDiscontinuityTime."
     ::= { ipSystemStatsEntry 30 }
@@ -1139,7 +1207,7 @@ ipSystemStatsHCOutTransmits OBJECT-TYPE
     DESCRIPTION
            "The total number of IP datagrams that this entity supplied
             to the lower layers for transmission.  This object counts
-            the same datagrams as ipSystemStatsOutTransmits but allows
+            the same datagrams as ipSystemStatsOutTransmits, but allows
             for larger values.
 
             Discontinuities in the value of this counter can occur at
@@ -1170,12 +1238,15 @@ ipSystemStatsHCOutOctets OBJECT-TYPE
     DESCRIPTION
            "The total number of octets in IP datagrams delivered to the
             lower layers for transmission.  This objects counts the same
-            octets as ipSystemStatsOutOctets but allows for larger
+            octets as ipSystemStatsOutOctets, but allows for larger
             values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
             times as indicated by the value of
+
+
+
             ipSystemStatsDiscontinuityTime."
     ::= { ipSystemStatsEntry 33 }
 
@@ -1214,7 +1285,7 @@ ipSystemStatsInMcastOctets OBJECT-TYPE
     DESCRIPTION
            "The total number of octets received in IP multicast
             datagrams.  Octets from datagrams counted in
-            ipSystemStatsOutMcastPkts MUST be counted here.
+            ipSystemStatsInMcastPkts MUST be counted here.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -1224,12 +1295,15 @@ ipSystemStatsInMcastOctets OBJECT-TYPE
 
 ipSystemStatsHCInMcastOctets OBJECT-TYPE
     SYNTAX     Counter64
+
+
+
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
            "The total number of octets received in IP multicast
             datagrams.  This object counts the same octets as
-            ipSystemStatsInMcastOctets but allows for larger values.
+            ipSystemStatsInMcastOctets, but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -1257,7 +1331,7 @@ ipSystemStatsHCOutMcastPkts OBJECT-TYPE
     DESCRIPTION
            "The number of IP multicast datagrams transmitted.  This
             object counts the same datagrams as
-            ipSystemStatsOutMcastPkts but allows for larger values.
+            ipSystemStatsOutMcastPkts, but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -1272,7 +1346,10 @@ ipSystemStatsOutMcastOctets OBJECT-TYPE
     DESCRIPTION
            "The total number of octets transmitted in IP multicast
             datagrams.  Octets from datagrams counted in
-            ipSystemStatsInMcastPkts MUST be counted here.
+
+
+
+            ipSystemStatsOutMcastPkts MUST be counted here.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -1287,7 +1364,7 @@ ipSystemStatsHCOutMcastOctets OBJECT-TYPE
     DESCRIPTION
            "The total number of octets transmitted in IP multicast
             datagrams.  This object counts the same octets as
-            ipSystemStatsOutMcastOctets but allows for larger values.
+            ipSystemStatsOutMcastOctets, but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -1320,6 +1397,9 @@ ipSystemStatsHCInBcastPkts OBJECT-TYPE
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
             times as indicated by the value of
+
+
+
             ipSystemStatsDiscontinuityTime."
     ::= { ipSystemStatsEntry 43 }
 
@@ -1343,7 +1423,7 @@ ipSystemStatsHCOutBcastPkts OBJECT-TYPE
     DESCRIPTION
            "The number of IP broadcast datagrams transmitted.  This
             object counts the same datagrams as
-            ipSystemStatsOutBcastPkts but allows for larger values.
+            ipSystemStatsOutBcastPkts, but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -1367,7 +1447,10 @@ ipSystemStatsDiscontinuityTime OBJECT-TYPE
 
 ipSystemStatsRefreshRate OBJECT-TYPE
     SYNTAX     Unsigned32
-    UNITS "milli-seconds"
+    UNITS      "milli-seconds"
+
+
+
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
@@ -1386,7 +1469,7 @@ ipIfStatsTableLastChange OBJECT-TYPE
 
             If new objects are added to the ipIfStatsTable that require
             the ipIfStatsTableLastChange to be updated when they are
-            modified they must specify that requirement in their
+            modified, they must specify that requirement in their
             description clause."
     ::= { ipTrafficStats 2 }
 
@@ -1398,8 +1481,8 @@ ipIfStatsTable OBJECT-TYPE
            "The table containing per-interface traffic statistics.  This
             table and the ipSystemStatsTable contain similar objects
             whose difference is in their granularity.  Where this table
-            contains per-interface statistics the ipSystemStatsTable
-            contains the same statistics but counted on a system wide
+            contains per-interface statistics, the ipSystemStatsTable
+            contains the same statistics, but counted on a system wide
             basis."
     ::= { ipTrafficStats 3 }
 
@@ -1416,6 +1499,9 @@ ipIfStatsEntry OBJECT-TYPE
 IpIfStatsEntry ::= SEQUENCE {
         ipIfStatsIPVersion           InetVersion,
         ipIfStatsIfIndex             InterfaceIndex,
+
+
+
         ipIfStatsInReceives          Counter32,
         ipIfStatsHCInReceives        Counter64,
         ipIfStatsInOctets            Counter32,
@@ -1464,6 +1550,9 @@ IpIfStatsEntry ::= SEQUENCE {
 
 ipIfStatsIPVersion OBJECT-TYPE
     SYNTAX     InetVersion
+
+
+
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
@@ -1475,7 +1564,7 @@ ipIfStatsIfIndex OBJECT-TYPE
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
-           "The index value which uniquely identifies the interface to
+           "The index value that uniquely identifies the interface to
             which this entry is applicable.  The interface identified by
             a particular value of this index is the same interface as
             identified by the same value of the IF-MIB's ifIndex."
@@ -1502,7 +1591,7 @@ ipIfStatsHCInReceives OBJECT-TYPE
     DESCRIPTION
            "The total number of input IP datagrams received, including
             those received in error.  This object counts the same
-            datagrams as ipIfStatsInReceives but allows for larger
+            datagrams as ipIfStatsInReceives, but allows for larger
             values.
 
             Discontinuities in the value of this counter can occur at
@@ -1512,6 +1601,9 @@ ipIfStatsHCInReceives OBJECT-TYPE
     ::= { ipIfStatsEntry 4 }
 
 ipIfStatsInOctets OBJECT-TYPE
+
+
+
     SYNTAX     Counter32
     MAX-ACCESS read-only
     STATUS     current
@@ -1533,7 +1625,7 @@ ipIfStatsHCInOctets OBJECT-TYPE
     DESCRIPTION
            "The total number of octets received in input IP datagrams,
             including those received in error.  This object counts the
-            same octets as ipIfStatsInOctets but allows for larger
+            same octets as ipIfStatsInOctets, but allows for larger
             values.
 
             Discontinuities in the value of this counter can occur at
@@ -1560,6 +1652,9 @@ ipIfStatsInHdrErrors OBJECT-TYPE
 
 ipIfStatsInNoRoutes OBJECT-TYPE
     SYNTAX     Counter32
+
+
+
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
@@ -1580,7 +1675,7 @@ ipIfStatsInAddrErrors OBJECT-TYPE
            "The number of input IP datagrams discarded because the IP
             address in their IP header's destination field was not a
             valid address to be received at this entity.  This count
-            includes invalid addresses (e.g., ::0).  For entities which
+            includes invalid addresses (e.g., ::0).  For entities that
             are not IP routers and therefore do not forward datagrams,
             this counter includes datagrams discarded because the
             destination address was not a local address.
@@ -1600,7 +1695,7 @@ ipIfStatsInUnknownProtos OBJECT-TYPE
             successfully but discarded because of an unknown or
             unsupported protocol.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             interface to which these datagrams were addressed is
             incremented.  This interface might not be the same as the
             input interface for some of the datagrams.
@@ -1608,6 +1703,9 @@ ipIfStatsInUnknownProtos OBJECT-TYPE
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
             times as indicated by the value of
+
+
+
             ipIfStatsDiscontinuityTime."
     ::= { ipIfStatsEntry 10 }
 
@@ -1633,12 +1731,12 @@ ipIfStatsInForwDatagrams OBJECT-TYPE
            "The number of input datagrams for which this entity was not
             their final IP destination and for which this entity
             attempted to find a route to forward them to that final
-            destination.  In entities which do not act as IP routers,
-            this counter will include only those datagrams which were
+            destination.  In entities that do not act as IP routers,
+            this counter will include only those datagrams that were
             Source-Routed via this entity, and the Source-Route
             processing was successful.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             incoming interface is incremented for each datagram.
 
             Discontinuities in the value of this counter can occur at
@@ -1656,12 +1754,15 @@ ipIfStatsHCInForwDatagrams OBJECT-TYPE
             their final IP destination and for which this entity
             attempted to find a route to forward them to that final
             destination.  This object counts the same packets as
-            ipIfInForwDatagrams but allows for larger values.
+
+
+
+            ipIfStatsInForwDatagrams, but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
             times as indicated by the value of
-            ipSystemStatsDiscontinuityTime."
+            ipIfStatsDiscontinuityTime."
     ::= { ipIfStatsEntry 13 }
 
 ipIfStatsReasmReqds OBJECT-TYPE
@@ -1669,10 +1770,10 @@ ipIfStatsReasmReqds OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The number of IP fragments received which needed to be
+           "The number of IP fragments received that needed to be
             reassembled at this interface.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             interface to which these fragments were addressed is
             incremented.  This interface might not be the same as the
             input interface for some of the fragments.
@@ -1690,7 +1791,7 @@ ipIfStatsReasmOKs OBJECT-TYPE
     DESCRIPTION
            "The number of IP datagrams successfully reassembled.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             interface to which these datagrams were addressed is
             incremented.  This interface might not be the same as the
             input interface for some of the datagrams.
@@ -1704,6 +1805,9 @@ ipIfStatsReasmOKs OBJECT-TYPE
 ipIfStatsReasmFails OBJECT-TYPE
     SYNTAX     Counter32
     MAX-ACCESS read-only
+
+
+
     STATUS     current
     DESCRIPTION
            "The number of failures detected by the IP re-assembly
@@ -1713,7 +1817,7 @@ ipIfStatsReasmFails OBJECT-TYPE
             RFC 815) can lose track of the number of fragments by
             combining them as they are received.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             interface to which these fragments were addressed is
             incremented.  This interface might not be the same as the
             input interface for some of the fragments.
@@ -1730,7 +1834,7 @@ ipIfStatsInDiscards OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The number of input IP datagrams for which no problems were
-            encountered to prevent their continued processing, but which
+            encountered to prevent their continued processing, but
             were discarded (e.g., for lack of buffer space).  Note that
             this counter does not include any datagrams discarded while
             awaiting re-assembly.
@@ -1749,9 +1853,12 @@ ipIfStatsInDelivers OBJECT-TYPE
            "The total number of datagrams successfully delivered to IP
             user-protocols (including ICMP).
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             interface to which these datagrams were addressed is
             incremented.  This interface might not be the same as the
+
+
+
             input interface for some of the datagrams.
 
             Discontinuities in the value of this counter can occur at
@@ -1767,13 +1874,13 @@ ipIfStatsHCInDelivers OBJECT-TYPE
     DESCRIPTION
            "The total number of datagrams successfully delivered to IP
             user-protocols (including ICMP).  This object counts the
-            same packets as ipIfStatsInDelivers but allows for larger
+            same packets as ipIfStatsInDelivers, but allows for larger
             values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
             times as indicated by the value of
-            ipSystemStatsDiscontinuityTime."
+            ipIfStatsDiscontinuityTime."
     ::= { ipIfStatsEntry 19 }
 
 ipIfStatsOutRequests OBJECT-TYPE
@@ -1781,7 +1888,7 @@ ipIfStatsOutRequests OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The total number of IP datagrams which local IP user-
+           "The total number of IP datagrams that local IP user-
             protocols (including ICMP) supplied to IP in requests for
             transmission.  Note that this counter does not include any
             datagrams counted in ipIfStatsOutForwDatagrams.
@@ -1797,15 +1904,18 @@ ipIfStatsHCOutRequests OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The total number of IP datagrams which local IP user-
+           "The total number of IP datagrams that local IP user-
             protocols (including ICMP) supplied to IP in requests for
             transmission.  This object counts the same packets as
-            ipIfStatsHCOutRequests but allows for larger values.
+
+
+
+            ipIfStatsOutRequests, but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
             times as indicated by the value of
-            ipSystemStatsDiscontinuityTime."
+            ipIfStatsDiscontinuityTime."
     ::= { ipIfStatsEntry 21 }
 
 -- This object ID is reserved to allow the IDs for this table's objects
@@ -1820,11 +1930,11 @@ ipIfStatsOutForwDatagrams OBJECT-TYPE
            "The number of datagrams for which this entity was not their
             final IP destination and for which it was successful in
             finding a path to their final destination.  In entities
-            which do not act as IP routers, this counter will include
-            only those datagrams which were Source-Routed via this
+            that do not act as IP routers, this counter will include
+            only those datagrams that were Source-Routed via this
             entity, and the Source-Route processing was successful.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             outgoing interface is incremented for a successfully
             forwarded datagram.
 
@@ -1842,13 +1952,16 @@ ipIfStatsHCOutForwDatagrams OBJECT-TYPE
            "The number of datagrams for which this entity was not their
             final IP destination and for which it was successful in
             finding a path to their final destination.  This object
-            counts the same packets as ipIfStatsOutForwDatagrams but
+            counts the same packets as ipIfStatsOutForwDatagrams, but
             allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
             times as indicated by the value of
-            ipSystemStatsDiscontinuityTime."
+
+
+
+            ipIfStatsDiscontinuityTime."
     ::= { ipIfStatsEntry 24 }
 
 ipIfStatsOutDiscards OBJECT-TYPE
@@ -1858,7 +1971,7 @@ ipIfStatsOutDiscards OBJECT-TYPE
     DESCRIPTION
            "The number of output IP datagrams for which no problem was
             encountered to prevent their transmission to their
-            destination, but which were discarded (e.g., for lack of
+            destination, but were discarded (e.g., for lack of
             buffer space).  Note that this counter would include
             datagrams counted in ipIfStatsOutForwDatagrams if any such
             datagrams met this (discretionary) discard criterion.
@@ -1877,7 +1990,7 @@ ipIfStatsOutFragReqds OBJECT-TYPE
            "The number of IP datagrams that would require fragmentation
             in order to be transmitted.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             outgoing interface is incremented for a successfully
             fragmented datagram.
 
@@ -1895,7 +2008,10 @@ ipIfStatsOutFragOKs OBJECT-TYPE
            "The number of IP datagrams that have been successfully
             fragmented.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
+
+
+
             outgoing interface is incremented for a successfully
             fragmented datagram.
 
@@ -1916,7 +2032,7 @@ ipIfStatsOutFragFails OBJECT-TYPE
             packets that are being forwarded and exceed the outgoing
             link MTU.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             outgoing interface is incremented for an unsuccessfully
             fragmented datagram.
 
@@ -1934,7 +2050,7 @@ ipIfStatsOutFragCreates OBJECT-TYPE
            "The number of output datagram fragments that have been
             generated as a result of IP fragmentation.
 
-            When tracking interface statistics the counter of the
+            When tracking interface statistics, the counter of the
             outgoing interface is incremented for a successfully
             fragmented datagram.
 
@@ -1944,6 +2060,9 @@ ipIfStatsOutFragCreates OBJECT-TYPE
             ipIfStatsDiscontinuityTime."
     ::= { ipIfStatsEntry 29 }
 
+
+
+
 ipIfStatsOutTransmits OBJECT-TYPE
     SYNTAX     Counter32
     MAX-ACCESS read-only
@@ -1951,7 +2070,7 @@ ipIfStatsOutTransmits OBJECT-TYPE
     DESCRIPTION
            "The total number of IP datagrams that this entity supplied
             to the lower layers for transmission.  This includes
-            datagrams generated local and those forwarded by this
+            datagrams generated locally and those forwarded by this
             entity.
 
             Discontinuities in the value of this counter can occur at
@@ -1967,7 +2086,7 @@ ipIfStatsHCOutTransmits OBJECT-TYPE
     DESCRIPTION
            "The total number of IP datagrams that this entity supplied
             to the lower layers for transmission.  This object counts
-            the same datagrams as ipIfStatsOutTransmits but allows for
+            the same datagrams as ipIfStatsOutTransmits, but allows for
             larger values.
 
             Discontinuities in the value of this counter can occur at
@@ -1992,13 +2111,16 @@ ipIfStatsOutOctets OBJECT-TYPE
     ::= { ipIfStatsEntry 32 }
 
 ipIfStatsHCOutOctets OBJECT-TYPE
+
+
+
     SYNTAX     Counter64
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
            "The total number of octets in IP datagrams delivered to the
             lower layers for transmission.  This objects counts the same
-            octets as ipIfStatsOutOctets but allows for larger values.
+            octets as ipIfStatsOutOctets, but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -2025,8 +2147,8 @@ ipIfStatsHCInMcastPkts OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The number of IP multicast datagrams received.  This object
-            counts the same datagrams as ipIfStatsInMcastPkts but allows
-            for larger values.
+            counts the same datagrams as ipIfStatsInMcastPkts, but
+            allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -2040,8 +2162,11 @@ ipIfStatsInMcastOctets OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The total number of octets received in IP multicast
+
+
+
             datagrams.  Octets from datagrams counted in
-            ipIfStatsOutMcastPkts MUST be counted here.
+            ipIfStatsInMcastPkts MUST be counted here.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -2056,7 +2181,7 @@ ipIfStatsHCInMcastOctets OBJECT-TYPE
     DESCRIPTION
            "The total number of octets received in IP multicast
             datagrams.  This object counts the same octets as
-            ipIfStatsInMcastOctets but allows for larger values.
+            ipIfStatsInMcastOctets, but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -2083,11 +2208,14 @@ ipIfStatsHCOutMcastPkts OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The number of IP multicast datagrams transmitted.  This
-            object counts the same datagrams as ipIfStatsOutMcastPkts
+            object counts the same datagrams as ipIfStatsOutMcastPkts,
             but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
+
+
+
             times as indicated by the value of
             ipIfStatsDiscontinuityTime."
     ::= { ipIfStatsEntry 39 }
@@ -2099,7 +2227,7 @@ ipIfStatsOutMcastOctets OBJECT-TYPE
     DESCRIPTION
            "The total number of octets transmitted in IP multicast
             datagrams.  Octets from datagrams counted in
-            ipIfStatsInMcastPkts MUST be counted here.
+            ipIfStatsOutMcastPkts MUST be counted here.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -2114,7 +2242,7 @@ ipIfStatsHCOutMcastOctets OBJECT-TYPE
     DESCRIPTION
            "The total number of octets transmitted in IP multicast
             datagrams.  This object counts the same octets as
-            ipIfStatsOutMcastOctets but allows for larger values.
+            ipIfStatsOutMcastOctets, but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -2136,13 +2264,16 @@ ipIfStatsInBcastPkts OBJECT-TYPE
     ::= { ipIfStatsEntry 42 }
 
 ipIfStatsHCInBcastPkts OBJECT-TYPE
+
+
+
     SYNTAX     Counter64
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
            "The number of IP broadcast datagrams received.  This object
-            counts the same datagrams as ipIfStatsInBcastPkts but allows
-            for larger values.
+            counts the same datagrams as ipIfStatsInBcastPkts, but
+            allows for larger values.
 
             Discontinuities in the value of this counter can occur at
             re-initialization of the management system, and at other
@@ -2169,7 +2300,7 @@ ipIfStatsHCOutBcastPkts OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The number of IP broadcast datagrams transmitted.  This
-            object counts the same datagrams as ipIfStatsOutBcastPkts
+            object counts the same datagrams as ipIfStatsOutBcastPkts,
             but allows for larger values.
 
             Discontinuities in the value of this counter can occur at
@@ -2184,6 +2315,9 @@ ipIfStatsDiscontinuityTime OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The value of sysUpTime on the most recent occasion at which
+
+
+
             any one or more of this entry's counters suffered a
             discontinuity.
 
@@ -2213,17 +2347,18 @@ ipAddressPrefixTable OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "This table allows the user to determine the source of an IP
-            address or set of IP addresses and allows other tables to
+            address or set of IP addresses, and allows other tables to
             share the information via pointer rather than by copying.
 
-            For example when the node configures both a unicast and
-            anycast address for a prefix the ipAddressPrefix objects for
-            those addresses will point to a single row in this table.
+            For example, when the node configures both a unicast and
+            anycast address for a prefix, the ipAddressPrefix objects
+            for those addresses will point to a single row in this
+            table.
 
-            This table primarily provides support for IPv6 prefixes and
+            This table primarily provides support for IPv6 prefixes, and
             several of the objects are less meaningful for IPv4.  The
             table continues to allow IPv4 addresses to allow future
-            flexibility.  In order to promote a common configuration
+            flexibility.  In order to promote a common configuration,
             this document includes suggestions for default values for
             IPv4 prefixes.  Each of these values may be overridden if an
             object is meaningful to the node.
@@ -2231,7 +2366,10 @@ ipAddressPrefixTable OBJECT-TYPE
             All prefixes used by this entity should be included in this
             table independent of how the entity learned the prefix.
             (This table isn't limited to prefixes learned from router
-            advertisements.)  "
+
+
+
+            advertisements.)"
     ::= { ip 32 }
 
 ipAddressPrefixEntry OBJECT-TYPE
@@ -2261,7 +2399,7 @@ ipAddressPrefixIfIndex OBJECT-TYPE
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
-           "The index value which uniquely identifies the interface on
+           "The index value that uniquely identifies the interface on
             which this prefix is configured.  The interface identified
             by a particular value of this index is the same interface as
             identified by the same value of the IF-MIB's ifIndex."
@@ -2279,17 +2417,20 @@ ipAddressPrefixPrefix OBJECT-TYPE
     SYNTAX     InetAddress
     MAX-ACCESS not-accessible
     STATUS     current
+
+
+
     DESCRIPTION
            "The address prefix.  The address type of this object is
             specified in ipAddressPrefixType.  The length of this object
             is the standard length for objects of that type (4 or 16
             bytes).  Any bits after ipAddressPrefixLength must be zero.
 
-            Implementors need to be aware that if the size of
-            ipAddressPrefixPrefix exceeds 114 octets then OIDS of
+            Implementors need to be aware that, if the size of
+            ipAddressPrefixPrefix exceeds 114 octets, then OIDS of
             instances of columns in this row will have more than 128
-            sub-identifiers and cannot be accessed using SNMPv1, SNMPv2c
-            or SNMPv3."
+            sub-identifiers and cannot be accessed using SNMPv1,
+            SNMPv2c, or SNMPv3."
     ::= { ipAddressPrefixEntry 3 }
 
 ipAddressPrefixLength OBJECT-TYPE
@@ -2317,38 +2458,41 @@ ipAddressPrefixOnLinkFlag OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "This object has the value 'true(1)', if this prefix can be
-            used  for on-link determination and the value 'false(2)'
-            otherwise.
+            used for on-link determination; otherwise, the value is
+            'false(2)'.
 
             The default for IPv4 prefixes is 'true(1)'."
-    REFERENCE "For IPv6 RFC2461, especially sections 2 and 4.6.2 and
-RFC2462"
+    REFERENCE "For IPv6 RFC 2461, especially sections 2 and 4.6.2 and
+               RFC 2462"
     ::= { ipAddressPrefixEntry 6 }
 
 ipAddressPrefixAutonomousFlag OBJECT-TYPE
     SYNTAX     TruthValue
+
+
+
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "Autonomous address configuration flag. When true(1),
+           "Autonomous address configuration flag.  When true(1),
             indicates that this prefix can be used for autonomous
-            address configuration (i.e. can be used to form a local
+            address configuration (i.e., can be used to form a local
             interface address).  If false(2), it is not used to auto-
             configure a local interface address.
 
             The default for IPv4 prefixes is 'false(2)'."
-    REFERENCE "For IPv6 RFC2461, especially sections 2 and 4.6.2 and
-RFC2462"
+    REFERENCE "For IPv6 RFC 2461, especially sections 2 and 4.6.2 and
+               RFC 2462"
     ::= { ipAddressPrefixEntry 7 }
 
 ipAddressPrefixAdvPreferredLifetime OBJECT-TYPE
     SYNTAX     Unsigned32
-    UNITS       "seconds"
+    UNITS      "seconds"
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The remaining length of time in seconds that this prefix
-            will continue to be preferred, i.e. time until deprecation.
+           "The remaining length of time, in seconds, that this prefix
+            will continue to be preferred, i.e., time until deprecation.
 
             A value of 4,294,967,295 represents infinity.
 
@@ -2358,8 +2502,8 @@ ipAddressPrefixAdvPreferredLifetime OBJECT-TYPE
             expected.
 
             The default for IPv4 prefixes is 4,294,967,295 (infinity)."
-    REFERENCE "For IPv6 RFC2461, especially sections 2 and 4.6.2 and
-RFC2462"
+    REFERENCE "For IPv6 RFC 2461, especially sections 2 and 4.6.2 and
+               RFC 2462"
     ::= { ipAddressPrefixEntry 8 }
 
 ipAddressPrefixAdvValidLifetime OBJECT-TYPE
@@ -2369,15 +2513,18 @@ ipAddressPrefixAdvValidLifetime OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The remaining length of time, in seconds, that this prefix
-            will continue to be valid, i.e. time until invalidation.  A
+            will continue to be valid, i.e., time until invalidation.  A
             value of 4,294,967,295 represents infinity.
 
             The address generated from an invalidated prefix should not
             appear as the destination or source address of a packet.
 
+
+
+
             The default for IPv4 prefixes is 4,294,967,295 (infinity)."
-    REFERENCE "For IPv6 RFC2461, especially sections 2 and 4.6.2 and
-RFC2462"
+    REFERENCE "For IPv6 RFC 2461, especially sections 2 and 4.6.2 and
+               RFC 2462"
     ::= { ipAddressPrefixEntry 9 }
 
 --
@@ -2394,17 +2541,17 @@ ipAddressSpinLock OBJECT-TYPE
             modifying rows within this table.
 
             In order to use this lock to coordinate the use of set
-            operations managers should first retrieve
-            ipvAddressTableSpinLock.  They should then determine the
-            appropriate row to create or modify.  Finally they should
-            issue the appropriate set command including the retrieved
+            operations, managers should first retrieve
+            ipAddressTableSpinLock.  They should then determine the
+            appropriate row to create or modify.  Finally, they should
+            issue the appropriate set command, including the retrieved
             value of ipAddressSpinLock.  If another manager has altered
             the table in the meantime, then the value of
-            ipAddressSpinLock will have changed and the creation will
+            ipAddressSpinLock will have changed, and the creation will
             fail as it will be specifying an incorrect value for
             ipAddressSpinLock.  It is suggested, but not required, that
             the ipAddressSpinLock be the first var bind for each set of
-            objects representing a 'row' in a PDU.  "
+            objects representing a 'row' in a PDU."
     ::= { ip 33 }
 
 ipAddressTable OBJECT-TYPE
@@ -2417,22 +2564,24 @@ ipAddressTable OBJECT-TYPE
 
             This table does not contain multicast address information.
             Tables for such information should be contained in multicast
-            specific MIBs such as RFC3019.
+            specific MIBs, such as RFC 3019.
 
-            While this table is writable the user will note that several
-            objects, such as ipAddressOrigin, are not.  The intention in
-            allowing a user to write to this table is to allow them to
-            add or remove any entry that isn't permanent.  The user
-            should be  allowed to modify objects and entries when that
-            would not cause inconsistencies within the table.  Allowing
-            write access to objects such as ipAddressOrigin could allow
-            a user to insert an entry and then label it incorrectly.
+            While this table is writable, the user will note that
+            several objects, such as ipAddressOrigin, are not.  The
+            intention in allowing a user to write to this table is to
+            allow them to add or remove any entry that isn't
+
+
+
+            permanent.  The user should be allowed to modify objects
+            and entries when that would not cause inconsistencies
+            within the table.  Allowing write access to objects, such
+            as ipAddressOrigin, could allow a user to insert an entry
+            and then label it incorrectly.
 
             Note well: When including IPv6 link-local addresses in this
-            table the entry must use an InetAddressType of 'ipv6z' in
-            order to differentiate between the possible interfaces.
-
-            "
+            table, the entry must use an InetAddressType of 'ipv6z' in
+            order to differentiate between the possible interfaces."
     ::= { ip 34 }
 
 ipAddressEntry OBJECT-TYPE
@@ -2472,13 +2621,16 @@ ipAddressAddr OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The IP address to which this entry's addressing information
+
+
+
             pertains.  The address type of this object is specified in
             ipAddressAddrType.
 
             Implementors need to be aware that if the size of
-            ipAddressAddr exceeds 116 octets then OIDS of instances of
+            ipAddressAddr exceeds 116 octets, then OIDS of instances of
             columns in this row will have more than 128 sub-identifiers
-            and cannot be accessed using SNMPv1, SNMPv2c or SNMPv3."
+            and cannot be accessed using SNMPv1, SNMPv2c, or SNMPv3."
     ::= { ipAddressEntry 2 }
 
 ipAddressIfIndex OBJECT-TYPE
@@ -2486,7 +2638,7 @@ ipAddressIfIndex OBJECT-TYPE
     MAX-ACCESS read-create
     STATUS     current
     DESCRIPTION
-           "The index value which uniquely identifies the interface to
+           "The index value that uniquely identifies the interface to
             which this entry is applicable.  The interface identified by
             a particular value of this index is the same interface as
             identified by the same value of the IF-MIB's ifIndex."
@@ -2502,7 +2654,7 @@ ipAddressType OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The type of address.  broadcast(3) is not a valid value for
-            IPv6 addresses (RFC3513).  "
+            IPv6 addresses (RFC 3513)."
     DEFVAL { unicast }
     ::= { ipAddressEntry 4 }
 
@@ -2520,6 +2672,9 @@ ipAddressOrigin OBJECT-TYPE
     SYNTAX     IpAddressOriginTC
     MAX-ACCESS read-only
     STATUS     current
+
+
+
     DESCRIPTION
            "The origin of the address."
     ::= { ipAddressEntry 6 }
@@ -2568,12 +2723,15 @@ ipAddressRowStatus OBJECT-TYPE
 
             The RowStatus TC requires that this DESCRIPTION clause
             states under which circumstances other objects in this row
+
+
+
             can be modified.  The value of this object has no effect on
             whether other objects in this conceptual row can be
             modified.
 
             A conceptual row can not be made active until the
-            ipAddressIfIndex has been set to a valid index.  "
+            ipAddressIfIndex has been set to a valid index."
     ::= { ipAddressEntry 10 }
 
 ipAddressStorageType OBJECT-TYPE
@@ -2582,7 +2740,7 @@ ipAddressStorageType OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The storage type for this conceptual row.  If this object
-            has a value of 'permanent' then no other objects are
+            has a value of 'permanent', then no other objects are
             required to be able to be modified."
     DEFVAL { volatile }
     ::= { ipAddressEntry 11 }
@@ -2607,15 +2765,18 @@ ipNetToPhysicalTable OBJECT-TYPE
             table is empty, i.e., has zero entries.
 
             While many protocols may be used to populate this table, ARP
-            [10] and Neighbor Discovery [4] are the most likely
+            and Neighbor Discovery are the most likely
             options."
-    REFERENCE "RFC0826 and RFC2461"
+    REFERENCE "RFC 826 and RFC 2461"
     ::= { ip 35 }
 
 ipNetToPhysicalEntry OBJECT-TYPE
     SYNTAX     IpNetToPhysicalEntry
     MAX-ACCESS not-accessible
     STATUS     current
+
+
+
     DESCRIPTION
            "Each entry contains one IP address to `physical' address
             equivalence."
@@ -2640,7 +2801,7 @@ ipNetToPhysicalIfIndex OBJECT-TYPE
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
-           "The index value which uniquely identifies the interface to
+           "The index value that uniquely identifies the interface to
             which this entry is applicable.  The interface identified by
             a particular value of this index is the same interface as
             identified by the same value of the IF-MIB's ifIndex."
@@ -2664,10 +2825,13 @@ ipNetToPhysicalNetAddress OBJECT-TYPE
             specified in ipNetToPhysicalAddressType.
 
             Implementors need to be aware that if the size of
-            ipNetToPhysicalNetAddress exceeds 115 octets then OIDS of
+
+
+
+            ipNetToPhysicalNetAddress exceeds 115 octets, then OIDS of
             instances of columns in this row will have more than 128
-            sub-identifiers and cannot be accessed using SNMPv1, SNMPv2c
-            or SNMPv3."
+            sub-identifiers and cannot be accessed using SNMPv1,
+            SNMPv2c, or SNMPv3."
     ::= { ipNetToPhysicalEntry 3 }
 
 ipNetToPhysicalPhysAddress OBJECT-TYPE
@@ -2711,7 +2875,10 @@ ipNetToPhysicalType OBJECT-TYPE
             ipNetToPhysicalTable.  That is, it effectively dis-
             associates the interface identified with said entry from the
             mapping identified with said entry.  It is an
-            implementation- specific matter as to whether the agent
+            implementation-specific matter as to whether the agent
+
+
+
             removes an invalidated entry from the table.  Accordingly,
             management stations must be prepared to receive tabular
             information from agents that corresponds to entries not
@@ -2721,7 +2888,8 @@ ipNetToPhysicalType OBJECT-TYPE
 
             The 'dynamic(3)' type indicates that the IP address to
             physical addresses mapping has been dynamically resolved
-            using e.g. IPv4 ARP or the IPv6 Neighbor Discovery protocol.
+            using e.g., IPv4 ARP or the IPv6 Neighbor Discovery
+            protocol.
 
             The 'static(4)' type indicates that the mapping has been
             statically configured.  Both of these refer to entries that
@@ -2753,16 +2921,20 @@ ipNetToPhysicalState OBJECT-TYPE
                      unknown(6),   -- state can not be determined
                                    -- for some reason.
 
-                     incomplete(7) -- address resolution is being performed.
+                     incomplete(7) -- address resolution is being
+                                   -- performed.
                     }
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The Neighbor Unreachability Detection [4] state for the
+
+
+
+           "The Neighbor Unreachability Detection state for the
             interface when the address mapping in this entry is used.
             If Neighbor Unreachability Detection is not in use (e.g. for
             IPv4), this object is always unknown(6)."
-    REFERENCE "RFC2461"
+    REFERENCE "RFC 2461"
     ::= { ipNetToPhysicalEntry 7 }
 
 ipNetToPhysicalRowStatus OBJECT-TYPE
@@ -2781,9 +2953,9 @@ ipNetToPhysicalRowStatus OBJECT-TYPE
             A conceptual row can not be made active until the
             ipNetToPhysicalPhysAddress object has been set.
 
-            Note that if the ipNetToPhysicalType is set to 'invalid' the
-            managed node may delete the entry independent of the state
-            of this object."
+            Note that if the ipNetToPhysicalType is set to 'invalid',
+            the managed node may delete the entry independent of the
+            state of this object."
     ::= { ipNetToPhysicalEntry 8 }
 
 --
@@ -2798,17 +2970,17 @@ ipv6ScopeZoneIndexTable OBJECT-TYPE
            "The table used to describe IPv6 unicast and multicast scope
             zones.
 
-            For those objects that have names rather than numbers the
+            For those objects that have names rather than numbers, the
             names were chosen to coincide with the names used in the
-            IPv6 address architecture document, [17]. "
-    REFERENCE "Section 2.7 of draft-ietf-ipv6-addr-arch-v4-00.txt"
--- RFC Editor
--- If the address architecture document precedes this document as an RFC
--- please update this reference to use the proper RFC number.
+            IPv6 address architecture document. "
+    REFERENCE "Section 2.7 of RFC 4291"
     ::= { ip 36 }
 
 ipv6ScopeZoneIndexEntry OBJECT-TYPE
     SYNTAX     Ipv6ScopeZoneIndexEntry
+
+
+
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
@@ -2838,7 +3010,7 @@ ipv6ScopeZoneIndexIfIndex OBJECT-TYPE
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
-           "The index value which uniquely identifies the interface to
+           "The index value that uniquely identifies the interface to
             which these scopes belong.  The interface identified by a
             particular value of this index is the same interface as
             identified by the same value of the IF-MIB's ifIndex."
@@ -2857,8 +3029,10 @@ ipv6ScopeZoneIndex3 OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The zone index for the subnet-local scope on this
-            interface."
+
+
+
+           "The zone index for scope 3 on this interface."
     ::= { ipv6ScopeZoneIndexEntry 3 }
 
 ipv6ScopeZoneIndexAdminLocal OBJECT-TYPE
@@ -2906,6 +3080,9 @@ ipv6ScopeZoneIndex9 OBJECT-TYPE
     SYNTAX     InetZoneIndex
     MAX-ACCESS read-only
     STATUS     current
+
+
+
     DESCRIPTION
            "The zone index for scope 9 on this interface."
     ::= { ipv6ScopeZoneIndexEntry 9 }
@@ -2944,8 +3121,8 @@ ipv6ScopeZoneIndexD OBJECT-TYPE
 
 --
 -- The Default Router Table
--- This table simply lists the default routers, for more information
--- about routing tables see the routing MIBs
+-- This table simply lists the default routers; for more information
+-- about routing tables, see the routing MIBs
 --
 
 ipDefaultRouterTable OBJECT-TYPE
@@ -2954,6 +3131,9 @@ ipDefaultRouterTable OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The table used to describe the default routers known to this
+
+
+
             entity."
     ::= { ip 37 }
 
@@ -2994,18 +3174,21 @@ ipDefaultRouterAddress OBJECT-TYPE
             ipDefaultRouterAddressType.
 
             Implementers need to be aware that if the size of
-            ipDefaultRouterAddress exceeds 115 octets then OIDS of
+            ipDefaultRouterAddress exceeds 115 octets, then OIDS of
             instances of columns in this row will have more than 128
-            sub-identifiers and cannot be accessed using SNMPv1, SNMPv2c
-            or SNMPv3."
+            sub-identifiers and cannot be accessed using SNMPv1,
+            SNMPv2c, or SNMPv3."
     ::= { ipDefaultRouterEntry 2 }
 
 ipDefaultRouterIfIndex OBJECT-TYPE
     SYNTAX     InterfaceIndex
+
+
+
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
-           "The index value which uniquely identifies the interface by
+           "The index value that uniquely identifies the interface by
             which the router can be reached.  The interface identified
             by a particular value of this index is the same interface as
             identified by the same value of the IF-MIB's ifIndex."
@@ -3013,7 +3196,7 @@ ipDefaultRouterIfIndex OBJECT-TYPE
 
 ipDefaultRouterLifetime OBJECT-TYPE
     SYNTAX     Unsigned32 (0..65535)
-    UNITS       "seconds"
+    UNITS      "seconds"
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
@@ -3024,9 +3207,9 @@ ipDefaultRouterLifetime OBJECT-TYPE
             whether a router with a lifetime of zero is removed from the
             list.
 
-            For IPv6 this value should be extracted from the router
-            advertisement messages.  "
-    REFERENCE "For IPv6 RFC2462 sections 4.2 and 6.3.4"
+            For IPv6, this value should be extracted from the router
+            advertisement messages."
+    REFERENCE "For IPv6 RFC 2462 sections 4.2 and 6.3.4"
     ::= { ipDefaultRouterEntry 4 }
 
 ipDefaultRouterPreference OBJECT-TYPE
@@ -3040,19 +3223,18 @@ ipDefaultRouterPreference OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "An indication of preference given to this router as a
-            default router as described in [8]. Treating the value as a
+            default router as described in he Default Router
+            Preferences document.  Treating the value as a
             2 bit signed integer allows for simple arithmetic
             comparisons.
 
             For IPv4 routers or IPv6 routers that are not using the
-            updated router advertisement format this object is set to
-            medium (0).  "
-    REFERENCE "draft-ietf-ipv6-router-selection-02.txt, section 2.1"
--- RFC Editor
--- Please update this reference as the RFC number is assigned.
---
-
+            updated router advertisement format, this object is set to
+            medium (0)."
+    REFERENCE "RFC 4291, section 2.1"
     ::= { ipDefaultRouterEntry 5 }
+
+
 
 --
 -- Configuration information for constructing router advertisements
@@ -3068,9 +3250,9 @@ ipv6RouterAdvertSpinLock OBJECT-TYPE
             modifying rows within this table.
 
             In order to use this lock to coordinate the use of set
-            operations managers should first retrieve
+            operations, managers should first retrieve
             ipv6RouterAdvertSpinLock.  They should then determine the
-            appropriate row to create or modify.  Finally they should
+            appropriate row to create or modify.  Finally, they should
             issue the appropriate set command including the retrieved
             value of ipv6RouterAdvertSpinLock.  If another manager has
             altered the table in the meantime, then the value of
@@ -3078,8 +3260,7 @@ ipv6RouterAdvertSpinLock OBJECT-TYPE
             will fail as it will be specifying an incorrect value for
             ipv6RouterAdvertSpinLock.  It is suggested, but not
             required, that the ipv6RouterAdvertSpinLock be the first var
-            bind for each set of objects representing a 'row' in a PDU.
-            "
+            bind for each set of objects representing a 'row' in a PDU."
     ::= { ip 38 }
 
 ipv6RouterAdvertTable OBJECT-TYPE
@@ -3099,10 +3280,13 @@ ipv6RouterAdvertEntry OBJECT-TYPE
            "An entry containing information used to construct router
             advertisements.
 
-            Information in this table is persistent and when this object
-            is written the entity SHOULD save the change to non-volatile
-            storage."
+            Information in this table is persistent, and when this
+            object is written, the entity SHOULD save the change to
+            non-volatile storage."
     INDEX { ipv6RouterAdvertIfIndex }
+
+
+
     ::= { ipv6RouterAdvertTable 1 }
 
 Ipv6RouterAdvertEntry ::= SEQUENCE {
@@ -3125,7 +3309,7 @@ ipv6RouterAdvertIfIndex OBJECT-TYPE
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
-           "The index value which uniquely identifies the interface on
+           "The index value that uniquely identifies the interface on
             which router advertisements constructed with this
             information will be transmitted.  The interface identified
             by a particular value of this index is the same interface as
@@ -3137,38 +3321,41 @@ ipv6RouterAdvertSendAdverts OBJECT-TYPE
     MAX-ACCESS read-create
     STATUS     current
     DESCRIPTION
-           "A flag indicating whether or not the router sends periodic
+           "A flag indicating whether the router sends periodic
             router advertisements and responds to router solicitations
             on this interface."
-    REFERENCE "RFC2461 Section 6.2.1"
+    REFERENCE "RFC 2461 Section 6.2.1"
     DEFVAL { false }
     ::= { ipv6RouterAdvertEntry 2 }
 
 ipv6RouterAdvertMaxInterval OBJECT-TYPE
     SYNTAX     Unsigned32 (4..1800)
-    UNITS       "seconds"
+    UNITS      "seconds"
     MAX-ACCESS read-create
     STATUS     current
     DESCRIPTION
            "The maximum time allowed between sending unsolicited router
+
+
+
             advertisements from this interface."
-    REFERENCE "RFC2461 Section 6.2.1"
+    REFERENCE "RFC 2461 Section 6.2.1"
     DEFVAL { 600 }
     ::= { ipv6RouterAdvertEntry 3 }
 
 ipv6RouterAdvertMinInterval OBJECT-TYPE
     SYNTAX     Unsigned32 (3..1350)
-    UNITS       "seconds"
+    UNITS      "seconds"
     MAX-ACCESS read-create
     STATUS     current
     DESCRIPTION
            "The minimum time allowed between sending unsolicited router
             advertisements from this interface.
 
-            The default is 0.33 * ipv6RouterAdvertMaxInterval, however
-            in the case of a low value for ipv6RouterAdvertMaxInterval
+            The default is 0.33 * ipv6RouterAdvertMaxInterval, however,
+            in the case of a low value for ipv6RouterAdvertMaxInterval,
             the minimum value for this object is restricted to 3."
-    REFERENCE "RFC2461 Section 6.2.1"
+    REFERENCE "RFC 2461 Section 6.2.1"
     ::= { ipv6RouterAdvertEntry 4 }
 
 ipv6RouterAdvertManagedFlag OBJECT-TYPE
@@ -3179,7 +3366,7 @@ ipv6RouterAdvertManagedFlag OBJECT-TYPE
            "The true/false value to be placed into the 'managed address
             configuration' flag field in router advertisements sent from
             this interface."
-    REFERENCE "RFC2461 Section 6.2.1"
+    REFERENCE "RFC 2461 Section 6.2.1"
     DEFVAL { false }
     ::= { ipv6RouterAdvertEntry 5 }
 
@@ -3191,7 +3378,7 @@ ipv6RouterAdvertOtherConfigFlag OBJECT-TYPE
            "The true/false value to be placed into the 'other stateful
             configuration' flag field in router advertisements sent from
             this interface."
-    REFERENCE "RFC2461 Section 6.2.1"
+    REFERENCE "RFC 2461 Section 6.2.1"
     DEFVAL { false }
     ::= { ipv6RouterAdvertEntry 6 }
 
@@ -3199,18 +3386,21 @@ ipv6RouterAdvertLinkMTU OBJECT-TYPE
     SYNTAX     Unsigned32
     MAX-ACCESS read-create
     STATUS     current
+
+
+
     DESCRIPTION
            "The value to be placed in MTU options sent by the router on
             this interface.
 
             A value of zero indicates that no MTU options are sent."
-    REFERENCE "RFC2461 Section 6.2.1"
+    REFERENCE "RFC 2461 Section 6.2.1"
     DEFVAL { 0 }
     ::= { ipv6RouterAdvertEntry 7 }
 
 ipv6RouterAdvertReachableTime OBJECT-TYPE
     SYNTAX     Unsigned32 (0..3600000)
-    UNITS "milliseconds"
+    UNITS      "milliseconds"
     MAX-ACCESS read-create
     STATUS     current
     DESCRIPTION
@@ -3220,13 +3410,13 @@ ipv6RouterAdvertReachableTime OBJECT-TYPE
             A value of zero in the router advertisement indicates that
             the advertisement isn't specifying a value for reachable
             time."
-    REFERENCE "RFC2461 Section 6.2.1"
+    REFERENCE "RFC 2461 Section 6.2.1"
     DEFVAL { 0 }
     ::= { ipv6RouterAdvertEntry 8 }
 
 ipv6RouterAdvertRetransmitTime OBJECT-TYPE
     SYNTAX     Unsigned32
-    UNITS "milliseconds"
+    UNITS      "milliseconds"
     MAX-ACCESS read-create
     STATUS     current
     DESCRIPTION
@@ -3236,7 +3426,7 @@ ipv6RouterAdvertRetransmitTime OBJECT-TYPE
             A value of zero in the router advertisement indicates that
             the advertisement isn't specifying a value for retrans
             time."
-    REFERENCE "RFC2461 Section 6.2.1"
+    REFERENCE "RFC 2461 Section 6.2.1"
     DEFVAL { 0 }
     ::= { ipv6RouterAdvertEntry 9 }
 
@@ -3247,6 +3437,9 @@ ipv6RouterAdvertCurHopLimit OBJECT-TYPE
     DESCRIPTION
            "The default value to be placed in the current hop limit
             field in router advertisements sent from this interface.
+
+
+
             The value should be set to the current diameter of the
             Internet.
 
@@ -3255,12 +3448,12 @@ ipv6RouterAdvertCurHopLimit OBJECT-TYPE
 
             The default should be set to the value specified in the IANA
             web pages (www.iana.org) at the time of implementation."
-    REFERENCE "RFC2461 Section 6.2.1"
+    REFERENCE "RFC 2461 Section 6.2.1"
     ::= { ipv6RouterAdvertEntry 10 }
 
 ipv6RouterAdvertDefaultLifetime OBJECT-TYPE
     SYNTAX     Unsigned32 (0|4..9000)
-    UNITS "seconds"
+    UNITS      "seconds"
     MAX-ACCESS read-create
     STATUS     current
     DESCRIPTION
@@ -3273,7 +3466,7 @@ ipv6RouterAdvertDefaultLifetime OBJECT-TYPE
             as a default router.
 
             The default is 3 * ipv6RouterAdvertMaxInterval."
-    REFERENCE "RFC2461 Section 6.2.1"
+    REFERENCE "RFC 2461 Section 6.2.1"
     ::= { ipv6RouterAdvertEntry 11 }
 
 ipv6RouterAdvertRowStatus OBJECT-TYPE
@@ -3283,7 +3476,7 @@ ipv6RouterAdvertRowStatus OBJECT-TYPE
     DESCRIPTION
            "The status of this conceptual row.
 
-            As all objects in this conceptual row have default values a
+            As all objects in this conceptual row have default values, a
             row can be created and made active by setting this object
             appropriately.
 
@@ -3295,6 +3488,9 @@ ipv6RouterAdvertRowStatus OBJECT-TYPE
     ::= { ipv6RouterAdvertEntry 12 }
 
 --
+
+
+
 -- ICMP section
 --
 
@@ -3304,11 +3500,11 @@ icmp     OBJECT IDENTIFIER ::= { mib-2 5 }
 -- ICMP non-message-specific counters
 --
 
--- These object IDs are reserved as they were used in earlier drafts of
--- the MIB module.  In theory OIDs are not assigned until the specification
--- is released as an RFC, however as some companies may have shipped
--- code based on earlier versiosn of the MIB it seems best to reserve
--- these OIDs.
+-- These object IDs are reserved, as they were used in earlier
+-- versions of the MIB module.  In theory, OIDs are not assigned
+-- until the specification is released as an RFC; however, as some
+-- companies may have shipped code based on earlier versions of
+-- the MIB, it seems best to reserve these OIDs.
 -- ::= { icmp 27 }
 -- ::= { icmp 28 }
 
@@ -3343,6 +3539,9 @@ icmpStatsIPVersion OBJECT-TYPE
     STATUS     current
     DESCRIPTION
            "The IP version of the statistics."
+
+
+
     ::= { icmpStatsEntry 1 }
 
 icmpStatsInMsgs OBJECT-TYPE
@@ -3350,7 +3549,7 @@ icmpStatsInMsgs OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The total number of ICMP messages which the entity received.
+           "The total number of ICMP messages that the entity received.
             Note that this counter includes all those counted by
             icmpStatsInErrors."
     ::= { icmpStatsEntry 2 }
@@ -3360,7 +3559,7 @@ icmpStatsInErrors OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The number of ICMP messages which the entity received but
+           "The number of ICMP messages that the entity received but
             determined as having ICMP-specific errors (bad ICMP
             checksums, bad length, etc.)."
     ::= { icmpStatsEntry 3 }
@@ -3370,7 +3569,7 @@ icmpStatsOutMsgs OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The total number of ICMP messages which the entity attempted
+           "The total number of ICMP messages that the entity attempted
             to send.  Note that this counter includes all those counted
             by icmpStatsOutErrors."
     ::= { icmpStatsEntry 4 }
@@ -3380,17 +3579,20 @@ icmpStatsOutErrors OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-           "The number of ICMP messages which this entity did not send
-            due to problems discovered within ICMP such as a lack of
+           "The number of ICMP messages that this entity did not send
+            due to problems discovered within ICMP, such as a lack of
             buffers.  This value should not include errors discovered
-            outside the ICMP layer such as the inability of IP to route
-            the resultant datagram.  In some implementations there may
-            be no types of error which contribute to this counter's
+            outside the ICMP layer, such as the inability of IP to route
+            the resultant datagram.  In some implementations, there may
+            be no types of error that contribute to this counter's
             value."
     ::= { icmpStatsEntry 5 }
 
 --
 -- per-version, per-message type ICMP counters
+
+
+
 --
 
 icmpMsgStatsTable OBJECT-TYPE
@@ -3410,7 +3612,14 @@ icmpMsgStatsEntry OBJECT-TYPE
            "A conceptual row in the icmpMsgStatsTable.
 
             The system should track each ICMP type value, even if that
-            ICMP type is not supported by the system."
+            ICMP type is not supported by the system.  However, a
+            given row need not be instantiated unless a message of that
+            type has been processed, i.e., the row for
+            icmpMsgStatsType=X MAY be instantiated before but MUST be
+            instantiated after the first message with Type=X is
+            received or transmitted.  After receiving or transmitting
+            any succeeding messages with Type=X, the relevant counter
+            must be incremented."
     INDEX { icmpMsgStatsIPVersion, icmpMsgStatsType }
     ::= { icmpMsgStatsTable 1 }
 
@@ -3432,6 +3641,9 @@ icmpMsgStatsIPVersion OBJECT-TYPE
 icmpMsgStatsType OBJECT-TYPE
     SYNTAX     Integer32 (0..255)
     MAX-ACCESS not-accessible
+
+
+
     STATUS     current
     DESCRIPTION
            "The ICMP type field of the message type being counted by
@@ -3440,7 +3652,7 @@ icmpMsgStatsType OBJECT-TYPE
             Note that ICMP message types are scoped by the address type
             in use."
     REFERENCE "http://www.iana.org/assignments/icmp-parameters and
->                http://www.iana.org/assignments/icmpv6-parameters"
+               http://www.iana.org/assignments/icmpv6-parameters"
     ::= { icmpMsgStatsEntry 2 }
 
 icmpMsgStatsInPkts OBJECT-TYPE
@@ -3458,7 +3670,6 @@ icmpMsgStatsOutPkts OBJECT-TYPE
     DESCRIPTION
            "The number of output packets for this AF and type."
     ::= { icmpMsgStatsEntry 4 }
-
 --
 -- conformance information
 --
@@ -3472,96 +3683,99 @@ ipMIBGroups      OBJECT IDENTIFIER ::= { ipMIBConformance 2 }
 ipMIBCompliance2 MODULE-COMPLIANCE
     STATUS     current
     DESCRIPTION
-            "The compliance statement for systems which implement IP -
-either
-            IPv4 or IPv6.
+            "The compliance statement for systems that implement IP -
+             either IPv4 or IPv6.
 
-            There are a number of INDEX objects that cannot be represented
-in
-            the form of OBJECT clauses in SMIv2, but for which we have the
-            following compliance requirements, expressed in OBJECT clause
-form
-            in this description clause:
+            There are a number of INDEX objects that cannot be
+            represented in the form of OBJECT clauses in SMIv2, but
+            for which we have the following compliance requirements,
+            expressed in OBJECT clause form in this description
+            clause:
+
+
+
 
             -- OBJECT        ipSystemStatsIPVersion
             -- SYNTAX        InetVersion {ipv4(1), ipv6(2)}
             -- DESCRIPTION
             --     This MIB requires support for only IPv4 and IPv6
-versions.
+            --     versions.
             --
             -- OBJECT        ipIfStatsIPVersion
             -- SYNTAX        InetVersion {ipv4(1), ipv6(2)}
             -- DESCRIPTION
             --     This MIB requires support for only IPv4 and IPv6
-versions.
+            --     versions.
             --
             -- OBJECT        icmpStatsIPVersion
             -- SYNTAX        InetVersion {ipv4(1), ipv6(2)}
             -- DESCRIPTION
             --     This MIB requires support for only IPv4 and IPv6
-versions.
+            --     versions.
             --
             -- OBJECT        icmpMsgStatsIPVersion
             -- SYNTAX        InetVersion {ipv4(1), ipv6(2)}
             -- DESCRIPTION
             --     This MIB requires support for only IPv4 and IPv6
-versions.
+            --     versions.
             --
             -- OBJECT        ipAddressPrefixType
             -- SYNTAX        InetAddressType {ipv4(1), ipv6(2)}
             -- DESCRIPTION
-            --     This MIB requires support for only global IPv4 and IPv6
-            --     address types.
+            --     This MIB requires support for only global IPv4 and
+            --     IPv6 address types.
             --
             -- OBJECT        ipAddressPrefixPrefix
             -- SYNTAX        InetAddress (Size(4 | 16))
             -- DESCRIPTION
-            --     This MIB requires support for only global IPv4 and IPv6
-            --     address and so the size can be either 4 or 16 bytes.
+            --     This MIB requires support for only global IPv4 and
+            --     IPv6 addresses and so the size can be either 4 or
+            --     16 bytes.
             --
             -- OBJECT        ipAddressAddrType
             -- SYNTAX        InetAddressType {ipv4(1), ipv6(2),
             --                                ipv4z(3), ipv6z(4)}
             -- DESCRIPTION
-            --     This MIB requires support for only global and non-global
-            --     IPv4 and IPv6 address types.
+            --     This MIB requires support for only global and
+            --     non-global IPv4 and IPv6 address types.
             --
             -- OBJECT        ipAddressAddr
             -- SYNTAX        InetAddress (Size(4 | 8 | 16 | 20))
             -- DESCRIPTION
-            --     This MIB requires support for only global and non-global
-            --     IPv4 and IPv6 address and so the size can be 4, 8 16 or
-            --     20 bytes.
+            --     This MIB requires support for only global and
+
+
+
+            --     non-global IPv4 and IPv6 addresses and so the size
+            --     can be 4, 8, 16, or 20 bytes.
             --
             -- OBJECT        ipNetToPhysicalNetAddressType
             -- SYNTAX        InetAddressType {ipv4(1), ipv6(2),
             --                                ipv4z(3), ipv6z(4)}
             -- DESCRIPTION
-            --     This MIB requires support for only global and non-global
-            --     IPv4 and IPv6 address types.
+            --     This MIB requires support for only global and
+            --     non-global IPv4 and IPv6 address types.
             --
             -- OBJECT        ipNetToPhysicalNetAddress
             -- SYNTAX        InetAddress (Size(4 | 8 | 16 | 20))
             -- DESCRIPTION
-            --     This MIB requires support for only global and non-global
-            --     IPv4 and IPv6 address and so the size can be 4, 8 16 or
-            --     20 bytes.
+            --     This MIB requires support for only global and
+            --     non-global IPv4 and IPv6 addresses and so the size
+            --     can be 4, 8, 16, or 20 bytes.
             --
             -- OBJECT        ipDefaultRouterAddressType
             -- SYNTAX        InetAddressType {ipv4(1), ipv6(2),
             --                                ipv4z(3), ipv6z(4)}
             -- DESCRIPTION
-            --     This MIB requires support for only global and non-global
-            --     IPv4 and IPv6 address types.
+            --     This MIB requires support for only global and
+            --     non-global IPv4 and IPv6 address types.
             --
             -- OBJECT        ipDefaultRouterAddress
             -- SYNTAX        InetAddress (Size(4 | 8 | 16 | 20))
             -- DESCRIPTION
-            --     This MIB requires support for only global and non-global
-            --     IPv4 and IPv6 address and so the size can be 4, 8 16 or
-            --     20 bytes.
-
-            "
+            --     This MIB requires support for only global and
+            --     non-global IPv4 and IPv6 addresses and so the size
+            --     can be 4, 8, 16, or 20 bytes."
 
     MODULE -- this module
 
@@ -3572,16 +3786,19 @@ versions.
     GROUP ipSystemStatsHCOctetGroup
     DESCRIPTION
            "This group is mandatory for systems that have an aggregate
-            bandwidth greater than 20MB.  Including this group does not
-            allow an entity to neglect the 32 bit versions of these
+            bandwidth of greater than 20MB.  Including this group does
+            not allow an entity to neglect the 32 bit versions of these
             objects."
 
     GROUP ipSystemStatsHCPacketGroup
     DESCRIPTION
            "This group is mandatory for systems that have an aggregate
-            bandwidth greater than 650MB.  Including this group does not
-            allow an entity to neglect the 32 bit versions of these
-            objects."
+            bandwidth of greater than 650MB.  Including this group
+
+
+
+            does not allow an entity to neglect the 32 bit versions of
+            these objects."
 
     GROUP ipIfStatsGroup
     DESCRIPTION
@@ -3590,14 +3807,14 @@ versions.
     GROUP ipIfStatsHCOctetGroup
     DESCRIPTION
            "This group is mandatory for systems that include the
-            ipIfStatsGroup and include links with bandwidths greater
+            ipIfStatsGroup and include links with bandwidths of greater
             than 20MB.  Including this group does not allow an entity to
             neglect the 32 bit versions of these objects."
 
     GROUP ipIfStatsHCPacketGroup
     DESCRIPTION
            "This group is mandatory for systems that include the
-            ipIfStatsGroup and include links with bandwidths greater
+            ipIfStatsGroup and include links with bandwidths of greater
             than 650MB.  Including this group does not allow an entity
             to neglect the 32 bit versions of these objects."
 
@@ -3616,7 +3833,7 @@ versions.
     GROUP ipv4SystemStatsHCPacketGroup
     DESCRIPTION
            "This group is mandatory for all systems supporting IPv4 and
-            that have an aggregate bandwidth greater than 650MB.
+            that have an aggregate bandwidth of greater than 650MB.
             Including this group does not allow an entity to neglect the
             32 bit versions of these objects."
 
@@ -3628,6 +3845,9 @@ versions.
     GROUP ipv4IfStatsHCPacketGroup
     DESCRIPTION
            "This group is mandatory for all systems supporting IPv4 and
+
+
+
             including the ipIfStatsHCPacketGroup.  Including this group
             does not allow an entity to neglect the 32 bit versions of
             these objects."
@@ -3660,38 +3880,42 @@ versions.
     MIN-ACCESS read-only
     DESCRIPTION
            "An agent is not required to provide write access to this
-            object"
+            object."
 
     OBJECT     ipv6IpDefaultHopLimit
     MIN-ACCESS read-only
     DESCRIPTION
            "An agent is not required to provide write access to this
-            object"
+            object."
 
     OBJECT     ipv4InterfaceEnableStatus
     MIN-ACCESS read-only
     DESCRIPTION
            "An agent is not required to provide write access to this
-            object"
+            object."
 
     OBJECT     ipv6InterfaceEnableStatus
     MIN-ACCESS read-only
+
+
+
     DESCRIPTION
            "An agent is not required to provide write access to this
-            object"
+            object."
 
     OBJECT     ipv6InterfaceForwarding
     MIN-ACCESS read-only
     DESCRIPTION
            "An agent is not required to provide write access to this
-            object"
+            object."
+
     OBJECT     ipAddressSpinLock
     MIN-ACCESS not-accessible
     DESCRIPTION
            "An agent is not required to provide write access to this
-            object.  However if an agent provides write access to any of
-            the other objects in the ipAddressGroup it SHOULD provide
-            write access to this object as well."
+            object.  However, if an agent provides write access to any
+            of the other objects in the ipAddressGroup, it SHOULD
+            provide write access to this object as well."
 
     OBJECT     ipAddressIfIndex
     MIN-ACCESS read-only
@@ -3724,15 +3948,18 @@ versions.
            "An agent is not required to provide write or create access
             to this object.
 
-            If an agent allows this object to be written or created it
+
+
+            If an agent allows this object to be written or created, it
             is not required to allow this object to be set to readOnly,
-            permanent or nonVolatile."
+            permanent, or nonVolatile."
 
     OBJECT     ipNetToPhysicalPhysAddress
     MIN-ACCESS read-only
     DESCRIPTION
            "An agent is not required to provide write or create access
-            to this object"
+            to this object."
+
     OBJECT     ipNetToPhysicalType
     MIN-ACCESS read-only
     DESCRIPTION
@@ -3743,9 +3970,9 @@ versions.
     MIN-ACCESS read-only
     DESCRIPTION
            "An agent is not required to provide write access to this
-            object.  However if an agent provides write access to any of
-            the other objects in the ipv6RouterAdvertGroup it SHOULD
-            provide write access to this object as well."
+            object.  However, if an agent provides write access to
+            any of the other objects in the ipv6RouterAdvertGroup, it
+            SHOULD provide write access to this object as well."
 
     OBJECT     ipv6RouterAdvertSendAdverts
     MIN-ACCESS read-only
@@ -3770,6 +3997,9 @@ versions.
     DESCRIPTION
            "An agent is not required to provide write access to this
             object."
+
+
+
 
     OBJECT     ipv6RouterAdvertOtherConfigFlag
     MIN-ACCESS read-only
@@ -3819,6 +4049,9 @@ versions.
 
 ipv4GeneralGroup OBJECT-GROUP
     OBJECTS   { ipForwarding, ipDefaultTTL, ipReasmTimeout }
+
+
+
     STATUS     current
     DESCRIPTION
            "The group of IPv4-specific objects for basic management of
@@ -3853,7 +4086,8 @@ ipv6IfGroup OBJECT-GROUP
     ::= { ipMIBGroups 6 }
 
 ipLastChangeGroup OBJECT-GROUP
-    OBJECTS   { ipv4InterfaceTableLastChange, ipv6InterfaceTableLastChange,
+    OBJECTS   { ipv4InterfaceTableLastChange,
+                ipv6InterfaceTableLastChange,
                 ipIfStatsTableLastChange }
     STATUS     current
     DESCRIPTION
@@ -3867,22 +4101,37 @@ ipLastChangeGroup OBJECT-GROUP
             value."
     ::= { ipMIBGroups 7 }
 
+
+
 ipSystemStatsGroup OBJECT-GROUP
-    OBJECTS   { ipSystemStatsInReceives,      ipSystemStatsInOctets,
-                ipSystemStatsInHdrErrors,     ipSystemStatsInNoRoutes,
-                ipSystemStatsInAddrErrors,    ipSystemStatsInUnknownProtos,
-                ipSystemStatsInTruncatedPkts, ipSystemStatsInForwDatagrams,
-                ipSystemStatsReasmReqds,      ipSystemStatsReasmOKs,
-                ipSystemStatsReasmFails,      ipSystemStatsInDiscards,
-                ipSystemStatsInDelivers,      ipSystemStatsOutRequests,
-                ipSystemStatsOutNoRoutes,     ipSystemStatsOutForwDatagrams,
-                ipSystemStatsOutDiscards,     ipSystemStatsOutFragReqds,
-                ipSystemStatsOutFragOKs,      ipSystemStatsOutFragFails,
-                ipSystemStatsOutFragCreates,  ipSystemStatsOutTransmits,
-                ipSystemStatsOutOctets,       ipSystemStatsInMcastPkts,
-                ipSystemStatsInMcastOctets,   ipSystemStatsOutMcastPkts,
+    OBJECTS   { ipSystemStatsInReceives,
+                ipSystemStatsInOctets,
+                ipSystemStatsInHdrErrors,
+                ipSystemStatsInNoRoutes,
+                ipSystemStatsInAddrErrors,
+                ipSystemStatsInUnknownProtos,
+                ipSystemStatsInTruncatedPkts,
+                ipSystemStatsInForwDatagrams,
+                ipSystemStatsReasmReqds,
+                ipSystemStatsReasmOKs,
+                ipSystemStatsReasmFails,
+                ipSystemStatsInDiscards,
+                ipSystemStatsInDelivers,
+                ipSystemStatsOutRequests,
+                ipSystemStatsOutNoRoutes,
+                ipSystemStatsOutForwDatagrams,
+                ipSystemStatsOutDiscards,
+                ipSystemStatsOutFragReqds,
+                ipSystemStatsOutFragOKs,
+                ipSystemStatsOutFragFails,
+                ipSystemStatsOutFragCreates,
+                ipSystemStatsOutTransmits,
+                ipSystemStatsOutOctets,
+                ipSystemStatsInMcastPkts,
+                ipSystemStatsInMcastOctets,
+                ipSystemStatsOutMcastPkts,
                 ipSystemStatsOutMcastOctets,
-ipSystemStatsDiscontinuityTime,
+                ipSystemStatsDiscontinuityTime,
                 ipSystemStatsRefreshRate }
     STATUS     current
     DESCRIPTION
@@ -3893,13 +4142,18 @@ ipv4SystemStatsGroup OBJECT-GROUP
     OBJECTS   { ipSystemStatsInBcastPkts, ipSystemStatsOutBcastPkts }
     STATUS     current
     DESCRIPTION
-           "IPv4 only System wide statistics."
+           "IPv4 only system wide statistics."
     ::= { ipMIBGroups 9 }
 
 ipSystemStatsHCOctetGroup OBJECT-GROUP
-    OBJECTS   { ipSystemStatsHCInOctets,      ipSystemStatsHCOutOctets,
-                ipSystemStatsHCInMcastOctets, ipSystemStatsHCOutMcastOctets
+    OBJECTS   { ipSystemStatsHCInOctets,
+                ipSystemStatsHCOutOctets,
+                ipSystemStatsHCInMcastOctets,
+                ipSystemStatsHCOutMcastOctets
 }
+
+
+
     STATUS     current
     DESCRIPTION
            "IP system wide statistics for systems that may overflow the
@@ -3908,11 +4162,13 @@ ipSystemStatsHCOctetGroup OBJECT-GROUP
 
 ipSystemStatsHCPacketGroup OBJECT-GROUP
     OBJECTS   { ipSystemStatsHCInReceives,
-ipSystemStatsHCInForwDatagrams,
-                ipSystemStatsHCInDelivers,       ipSystemStatsHCOutRequests,
+                ipSystemStatsHCInForwDatagrams,
+                ipSystemStatsHCInDelivers,
+                ipSystemStatsHCOutRequests,
                 ipSystemStatsHCOutForwDatagrams,
-ipSystemStatsHCOutTransmits,
-                ipSystemStatsHCInMcastPkts,      ipSystemStatsHCOutMcastPkts
+                ipSystemStatsHCOutTransmits,
+                ipSystemStatsHCInMcastPkts,
+                ipSystemStatsHCOutMcastPkts
 }
     STATUS     current
     DESCRIPTION
@@ -3921,7 +4177,8 @@ ipSystemStatsHCOutTransmits,
     ::= { ipMIBGroups 11 }
 
 ipv4SystemStatsHCPacketGroup OBJECT-GROUP
-    OBJECTS   { ipSystemStatsHCInBcastPkts, ipSystemStatsHCOutBcastPkts }
+    OBJECTS   { ipSystemStatsHCInBcastPkts,
+                ipSystemStatsHCOutBcastPkts }
     STATUS     current
     DESCRIPTION
            "IPv4 only system wide statistics for systems that may
@@ -3945,6 +4202,9 @@ ipIfStatsGroup OBJECT-GROUP
                 ipIfStatsDiscontinuityTime, ipIfStatsRefreshRate }
     STATUS     current
     DESCRIPTION
+
+
+
            "IP per-interface statistics."
     ::= { ipMIBGroups 13 }
 
@@ -3961,8 +4221,8 @@ ipIfStatsHCOctetGroup OBJECT-GROUP
     STATUS     current
     DESCRIPTION
            "IP per-interfaces statistics for systems that include
-            interfaces that may overflow the may overflow the standard
-            octet counters within 1 hour."
+            interfaces that may overflow the standard octet
+            counters within 1 hour."
     ::= { ipMIBGroups 15 }
 
 ipIfStatsHCPacketGroup OBJECT-GROUP
@@ -3970,7 +4230,6 @@ ipIfStatsHCPacketGroup OBJECT-GROUP
                 ipIfStatsHCInDelivers,       ipIfStatsHCOutRequests,
                 ipIfStatsHCOutForwDatagrams, ipIfStatsHCOutTransmits,
                 ipIfStatsHCInMcastPkts,      ipIfStatsHCOutMcastPkts }
-
     STATUS     current
     DESCRIPTION
            "IP per-interfaces statistics for systems that include
@@ -3994,6 +4253,9 @@ ipAddressPrefixGroup OBJECT-GROUP
                 ipAddressPrefixAdvPreferredLifetime,
                 ipAddressPrefixAdvValidLifetime }
     STATUS     current
+
+
+
     DESCRIPTION
            "The group of objects for providing information about address
             prefixes used by this node."
@@ -4023,13 +4285,18 @@ ipNetToPhysicalGroup OBJECT-GROUP
     ::= { ipMIBGroups 20 }
 
 ipv6ScopeGroup OBJECT-GROUP
-    OBJECTS   { ipv6ScopeZoneIndexLinkLocal,     ipv6ScopeZoneIndex3,
+    OBJECTS   { ipv6ScopeZoneIndexLinkLocal,
+                ipv6ScopeZoneIndex3,
                 ipv6ScopeZoneIndexAdminLocal,
-ipv6ScopeZoneIndexSiteLocal,
-                ipv6ScopeZoneIndex6,             ipv6ScopeZoneIndex7,
-                ipv6ScopeZoneIndexOrganizationLocal, ipv6ScopeZoneIndex9,
-                ipv6ScopeZoneIndexA,             ipv6ScopeZoneIndexB,
-                ipv6ScopeZoneIndexC,             ipv6ScopeZoneIndexD }
+                ipv6ScopeZoneIndexSiteLocal,
+                ipv6ScopeZoneIndex6,
+                ipv6ScopeZoneIndex7,
+                ipv6ScopeZoneIndexOrganizationLocal,
+                ipv6ScopeZoneIndex9,
+                ipv6ScopeZoneIndexA,
+                ipv6ScopeZoneIndexB,
+                ipv6ScopeZoneIndexC,
+                ipv6ScopeZoneIndexD }
     STATUS     current
     DESCRIPTION
            "The group of objects for managing IPv6 scope zones."
@@ -4037,6 +4304,9 @@ ipv6ScopeZoneIndexSiteLocal,
 
 ipDefaultRouterGroup OBJECT-GROUP
     OBJECTS   { ipDefaultRouterLifetime, ipDefaultRouterPreference }
+
+
+
     STATUS     current
     DESCRIPTION
            "The group of objects for providing information about default
@@ -4044,15 +4314,18 @@ ipDefaultRouterGroup OBJECT-GROUP
     ::= { ipMIBGroups 22 }
 
 ipv6RouterAdvertGroup OBJECT-GROUP
-    OBJECTS   { ipv6RouterAdvertSpinLock,      ipv6RouterAdvertSendAdverts,
-                ipv6RouterAdvertMaxInterval,   ipv6RouterAdvertMinInterval,
+    OBJECTS   { ipv6RouterAdvertSpinLock,
+                ipv6RouterAdvertSendAdverts,
+                ipv6RouterAdvertMaxInterval,
+                ipv6RouterAdvertMinInterval,
                 ipv6RouterAdvertManagedFlag,
-ipv6RouterAdvertOtherConfigFlag,
+                ipv6RouterAdvertOtherConfigFlag,
                 ipv6RouterAdvertLinkMTU,
-ipv6RouterAdvertReachableTime,
+                ipv6RouterAdvertReachableTime,
                 ipv6RouterAdvertRetransmitTime,
-ipv6RouterAdvertCurHopLimit,
-                ipv6RouterAdvertDefaultLifetime, ipv6RouterAdvertRowStatus
+                ipv6RouterAdvertCurHopLimit,
+                ipv6RouterAdvertDefaultLifetime,
+                ipv6RouterAdvertRowStatus
 }
     STATUS     current
     DESCRIPTION
@@ -4081,9 +4354,12 @@ ipInReceives OBJECT-TYPE
            "The total number of input datagrams received from
             interfaces, including those received in error.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
+
+
+
             table has been added.  It is loosely replaced by
-            ipSystemStatsInRecieves.  "
+            ipSystemStatsInRecieves."
     ::= { ip 3 }
 
 ipInHdrErrors OBJECT-TYPE
@@ -4096,7 +4372,7 @@ ipInHdrErrors OBJECT-TYPE
             mismatch, other format errors, time-to-live exceeded, errors
             discovered in processing their IPv4 options, etc.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated as a new IP version-neutral
             table has been added.  It is loosely replaced by
             ipSystemStatsInHdrErrors."
     ::= { ip 4 }
@@ -4111,11 +4387,11 @@ ipInAddrErrors OBJECT-TYPE
             valid address to be received at this entity.  This count
             includes invalid addresses (e.g., 0.0.0.0) and addresses of
             unsupported Classes (e.g., Class E).  For entities which are
-            not IPv4 routers and therefore do not forward datagrams,
+            not IPv4 routers, and therefore do not forward datagrams,
             this counter includes datagrams discarded because the
             destination address was not a local address.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
             ipSystemStatsInAddrErrors."
     ::= { ip 5 }
@@ -4130,12 +4406,15 @@ ipForwDatagrams OBJECT-TYPE
             attempt was made to find a route to forward them to that
             final destination.  In entities which do not act as IPv4
             routers, this counter will include only those packets which
+
+
+
             were Source-Routed via this entity, and the Source-Route
             option processing was successful.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsInForwDatagrams.  "
+            ipSystemStatsInForwDatagrams."
     ::= { ip 6 }
 
 ipInUnknownProtos OBJECT-TYPE
@@ -4147,9 +4426,9 @@ ipInUnknownProtos OBJECT-TYPE
             successfully but discarded because of an unknown or
             unsupported protocol.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsInUnknownProtos.  "
+            ipSystemStatsInUnknownProtos."
     ::= { ip 7 }
 
 ipInDiscards OBJECT-TYPE
@@ -4163,9 +4442,9 @@ ipInDiscards OBJECT-TYPE
             that this counter does not include any datagrams discarded
             while awaiting re-assembly.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsInDiscards.  "
+            ipSystemStatsInDiscards."
     ::= { ip 8 }
 
 ipInDelivers OBJECT-TYPE
@@ -4178,7 +4457,10 @@ ipInDelivers OBJECT-TYPE
 
             This object has been deprecated as a new IP version neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsIndelivers.  "
+
+
+
+            ipSystemStatsIndelivers."
     ::= { ip 9 }
 
 ipOutRequests OBJECT-TYPE
@@ -4191,9 +4473,9 @@ ipOutRequests OBJECT-TYPE
             transmission.  Note that this counter does not include any
             datagrams counted in ipForwDatagrams.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsOutRequests.  "
+            ipSystemStatsOutRequests."
     ::= { ip 10 }
 
 ipOutDiscards OBJECT-TYPE
@@ -4208,9 +4490,9 @@ ipOutDiscards OBJECT-TYPE
             datagrams counted in ipForwDatagrams if any such packets met
             this (discretionary) discard criterion.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsOutDiscards.  "
+            ipSystemStatsOutDiscards."
     ::= { ip 11 }
 
 ipOutNoRoutes OBJECT-TYPE
@@ -4225,9 +4507,12 @@ ipOutNoRoutes OBJECT-TYPE
             that this includes any datagrams which a host cannot route
             because all of its default routers are down.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
+
+
+
             table has been added.  It is loosely replaced by
-            ipSystemStatsOutNoRoutes.  "
+            ipSystemStatsOutNoRoutes."
     ::= { ip 12 }
 
 ipReasmReqds OBJECT-TYPE
@@ -4238,9 +4523,9 @@ ipReasmReqds OBJECT-TYPE
            "The number of IPv4 fragments received which needed to be
             reassembled at this entity.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsReasmReqds.  "
+            ipSystemStatsReasmReqds."
     ::= { ip 14 }
 
 ipReasmOKs OBJECT-TYPE
@@ -4250,9 +4535,9 @@ ipReasmOKs OBJECT-TYPE
     DESCRIPTION
            "The number of IPv4 datagrams successfully re-assembled.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsReasmOKs.  "
+            ipSystemStatsReasmOKs."
     ::= { ip 15 }
 
 ipReasmFails OBJECT-TYPE
@@ -4267,22 +4552,25 @@ ipReasmFails OBJECT-TYPE
             RFC 815) can lose track of the number of fragments by
             combining them as they are received.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsReasmFails.  "
+            ipSystemStatsReasmFails."
     ::= { ip 16 }
 
 ipFragOKs OBJECT-TYPE
     SYNTAX     Counter32
+
+
+
     MAX-ACCESS read-only
     STATUS     deprecated
     DESCRIPTION
            "The number of IPv4 datagrams that have been successfully
             fragmented at this entity.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsOutFragOKs.  "
+            ipSystemStatsOutFragOKs."
     ::= { ip 17 }
 
 ipFragFails OBJECT-TYPE
@@ -4295,9 +4583,9 @@ ipFragFails OBJECT-TYPE
             could not be, e.g., because their Don't Fragment flag was
             set.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsOutFragFails.  "
+            ipSystemStatsOutFragFails."
     ::= { ip 18 }
 
 ipFragCreates OBJECT-TYPE
@@ -4310,7 +4598,7 @@ ipFragCreates OBJECT-TYPE
 
             This object has been deprecated as a new IP version neutral
             table has been added.  It is loosely replaced by
-            ipSystemStatsOutFragCreates.  "
+            ipSystemStatsOutFragCreates."
     ::= { ip 19 }
 
 ipRoutingDiscards OBJECT-TYPE
@@ -4323,10 +4611,12 @@ ipRoutingDiscards OBJECT-TYPE
             for discarding such an entry could be to free-up buffer
             space for other routing entries.
 
+
+
             This object was defined in pre-IPv6 versions of the IP MIB.
-            It was implicitly IPv4 only but the original specifications
+            It was implicitly IPv4 only, but the original specifications
             did not indicate this protocol restriction.  In order to
-            clarify the specifications this object has been deprecated
+            clarify the specifications, this object has been deprecated
             and a similar, but more thoroughly clarified, object has
             been added to the IP-FORWARD-MIB."
     ::= { ip 23 }
@@ -4341,12 +4631,11 @@ ipAddrTable OBJECT-TYPE
            "The table of addressing information relevant to this
             entity's IPv4 addresses.
 
-            This table has been deprecated as a new IP version neutral
+            This table has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by the
             ipAddressTable although several objects that weren't deemed
             useful weren't carried forward while another
-            (ipAdEntReasmMaxSize) was moved to the ipv4InterfaceTable.
-            "
+            (ipAdEntReasmMaxSize) was moved to the ipv4InterfaceTable."
     ::= { ip 20 }
 
 ipAddrEntry OBJECT-TYPE
@@ -4372,6 +4661,9 @@ ipAdEntAddr OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     deprecated
     DESCRIPTION
+
+
+
            "The IPv4 address to which this entry's addressing
             information pertains."
     ::= { ipAddrEntry 1 }
@@ -4407,7 +4699,7 @@ ipAdEntBcastAddr OBJECT-TYPE
             interface associated with the IPv4 address of this entry.
             For example, when the Internet standard all-ones broadcast
             address is used, the value will be 1.  This value applies to
-            both the subnet and network broadcasts addresses used by the
+            both the subnet and network broadcast addresses used by the
             entity on this (logical) interface."
     ::= { ipAddrEntry 4 }
 
@@ -4420,6 +4712,8 @@ ipAdEntReasmMaxSize OBJECT-TYPE
             re-assemble from incoming IPv4 fragmented datagrams received
             on this interface."
     ::= { ipAddrEntry 5 }
+
+
 
 -- the deprecated IPv4 Address Translation table
 
@@ -4438,9 +4732,9 @@ ipNetToMediaTable OBJECT-TYPE
            "The IPv4 Address Translation table used for mapping from
             IPv4 addresses to physical addresses.
 
-            This table has been deprecated as a new IP version neutral
+            This table has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by the
-            ipNetToPhysicalTable.  "
+            ipNetToPhysicalTable."
     ::= { ip 22 }
 
 ipNetToMediaEntry OBJECT-TYPE
@@ -4469,10 +4763,13 @@ ipNetToMediaIfIndex OBJECT-TYPE
            "The interface on which this entry's equivalence is
             effective.  The interface identified by a particular value
             of this index is the same interface as identified by the
+
+
+
             same value of the IF-MIB's ifIndex.
 
             This object predates the rule limiting index objects to a
-            max access value of 'not-accessible' and so continue to use
+            max access value of 'not-accessible' and so continues to use
             a value of 'read-create'."
     ::= { ipNetToMediaEntry 1 }
 
@@ -4500,7 +4797,7 @@ ipNetToMediaNetAddress OBJECT-TYPE
             `physical' address.
 
             This object predates the rule limiting index objects to a
-            max access value of 'not-accessible' and so continue to use
+            max access value of 'not-accessible' and so continues to use
             a value of 'read-create'."
     ::= { ipNetToMediaEntry 3 }
 
@@ -4517,6 +4814,9 @@ ipNetToMediaType OBJECT-TYPE
            "The type of mapping.
 
             Setting this object to the value invalid(2) has the effect
+
+
+
             of invalidating the corresponding entry in the
             ipNetToMediaTable.  That is, it effectively dis-associates
             the interface identified with said entry from the mapping
@@ -4546,9 +4846,9 @@ icmpInMsgs OBJECT-TYPE
             Note that this counter includes all those counted by
             icmpInErrors.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            icmpStatsInMsgs.  "
+            icmpStatsInMsgs."
     ::= { icmp 1 }
 
 icmpInErrors OBJECT-TYPE
@@ -4560,10 +4860,13 @@ icmpInErrors OBJECT-TYPE
             determined as having ICMP-specific errors (bad ICMP
             checksums, bad length, etc.).
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
-            icmpStatsInErrors.  "
+            icmpStatsInErrors."
     ::= { icmp 2 }
+
+
+
 
 icmpInDestUnreachs OBJECT-TYPE
     SYNTAX     Counter32
@@ -4573,7 +4876,7 @@ icmpInDestUnreachs OBJECT-TYPE
            "The number of ICMP Destination Unreachable messages
             received.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 3 }
@@ -4585,7 +4888,7 @@ icmpInTimeExcds OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Time Exceeded messages received.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 4 }
@@ -4597,7 +4900,7 @@ icmpInParmProbs OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Parameter Problem messages received.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 5 }
@@ -4609,10 +4912,12 @@ icmpInSrcQuenchs OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Source Quench messages received.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 6 }
+
+
 
 icmpInRedirects OBJECT-TYPE
     SYNTAX     Counter32
@@ -4621,7 +4926,7 @@ icmpInRedirects OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Redirect messages received.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 7 }
@@ -4633,7 +4938,7 @@ icmpInEchos OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Echo (request) messages received.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 8 }
@@ -4645,7 +4950,7 @@ icmpInEchoReps OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Echo Reply messages received.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 9 }
@@ -4657,10 +4962,13 @@ icmpInTimestamps OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Timestamp (request) messages received.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 10 }
+
+
+
 
 icmpInTimestampReps OBJECT-TYPE
     SYNTAX     Counter32
@@ -4669,7 +4977,7 @@ icmpInTimestampReps OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Timestamp Reply messages received.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 11 }
@@ -4681,7 +4989,7 @@ icmpInAddrMasks OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Address Mask Request messages received.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 12 }
@@ -4693,7 +5001,7 @@ icmpInAddrMaskReps OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Address Mask Reply messages received.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 13 }
@@ -4707,9 +5015,12 @@ icmpOutMsgs OBJECT-TYPE
             attempted to send.  Note that this counter includes all
             those counted by icmpOutErrors.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
             icmpStatsOutMsgs."
+
+
+
     ::= { icmp 14 }
 
 icmpOutErrors OBJECT-TYPE
@@ -4718,14 +5029,14 @@ icmpOutErrors OBJECT-TYPE
     STATUS     deprecated
     DESCRIPTION
            "The number of ICMP messages which this entity did not send
-            due to problems discovered within ICMP such as a lack of
+            due to problems discovered within ICMP, such as a lack of
             buffers.  This value should not include errors discovered
-            outside the ICMP layer such as the inability of IP to route
-            the resultant datagram.  In some implementations there may
+            outside the ICMP layer, such as the inability of IP to route
+            the resultant datagram.  In some implementations, there may
             be no types of error which contribute to this counter's
             value.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by
             icmpStatsOutErrors."
     ::= { icmp 15 }
@@ -4737,7 +5048,7 @@ icmpOutDestUnreachs OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Destination Unreachable messages sent.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 16 }
@@ -4749,7 +5060,7 @@ icmpOutTimeExcds OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Time Exceeded messages sent.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 17 }
@@ -4758,10 +5069,13 @@ icmpOutParmProbs OBJECT-TYPE
     SYNTAX     Counter32
     MAX-ACCESS read-only
     STATUS     deprecated
+
+
+
     DESCRIPTION
            "The number of ICMP Parameter Problem messages sent.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 18 }
@@ -4773,7 +5087,7 @@ icmpOutSrcQuenchs OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Source Quench messages sent.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 19 }
@@ -4787,7 +5101,7 @@ icmpOutRedirects OBJECT-TYPE
             object will always be zero, since hosts do not send
             redirects.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 20 }
@@ -4799,19 +5113,22 @@ icmpOutEchos OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Echo (request) messages sent.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 21 }
 
 icmpOutEchoReps OBJECT-TYPE
     SYNTAX     Counter32
+
+
+
     MAX-ACCESS read-only
     STATUS     deprecated
     DESCRIPTION
            "The number of ICMP Echo Reply messages sent.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 22 }
@@ -4823,7 +5140,7 @@ icmpOutTimestamps OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Timestamp (request) messages sent.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 23 }
@@ -4835,7 +5152,7 @@ icmpOutTimestampReps OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Timestamp Reply messages sent.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 24 }
@@ -4847,19 +5164,22 @@ icmpOutAddrMasks OBJECT-TYPE
     DESCRIPTION
            "The number of ICMP Address Mask Request messages sent.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 25 }
 
 icmpOutAddrMaskReps OBJECT-TYPE
     SYNTAX     Counter32
+
+
+
     MAX-ACCESS read-only
     STATUS     deprecated
     DESCRIPTION
            "The number of ICMP Address Mask Reply messages sent.
 
-            This object has been deprecated as a new IP version neutral
+            This object has been deprecated, as a new IP version-neutral
             table has been added.  It is loosely replaced by a column in
             the icmpMsgStatsTable."
     ::= { icmp 26 }
@@ -4870,7 +5190,7 @@ icmpOutAddrMaskReps OBJECT-TYPE
 ipMIBCompliance MODULE-COMPLIANCE
     STATUS     deprecated
     DESCRIPTION
-           "The compliance statement for systems which implement only
+           "The compliance statement for systems that implement only
             IPv4.  For version-independence, this compliance statement
             is deprecated in favor of ipMIBCompliance2."
     MODULE  -- this module
@@ -4881,24 +5201,31 @@ ipMIBCompliance MODULE-COMPLIANCE
 -- deprecated units of conformance
 
 ipGroup OBJECT-GROUP
-    OBJECTS   { ipForwarding,           ipDefaultTTL,     ipInReceives,
-                ipInHdrErrors,          ipInAddrErrors,   ipForwDatagrams,
-                ipInUnknownProtos,      ipInDiscards,     ipInDelivers,
-                ipOutRequests,          ipOutDiscards,    ipOutNoRoutes,
-                ipReasmTimeout,         ipReasmReqds,     ipReasmOKs,
-                ipReasmFails,           ipFragOKs,        ipFragFails,
-                ipFragCreates,          ipAdEntAddr,      ipAdEntIfIndex,
-                ipAdEntNetMask,         ipAdEntBcastAddr,
-ipAdEntReasmMaxSize,
+    OBJECTS   { ipForwarding,           ipDefaultTTL,
+                ipInReceives,           ipInHdrErrors,
+                ipInAddrErrors,         ipForwDatagrams,
+                ipInUnknownProtos,      ipInDiscards,
+                ipInDelivers,           ipOutRequests,
+                ipOutDiscards,          ipOutNoRoutes,
+                ipReasmTimeout,         ipReasmReqds,
+                ipReasmOKs,             ipReasmFails,
+                ipFragOKs,              ipFragFails,
+                ipFragCreates,          ipAdEntAddr,
+                ipAdEntIfIndex,         ipAdEntNetMask,
+                ipAdEntBcastAddr,       ipAdEntReasmMaxSize,
                 ipNetToMediaIfIndex,    ipNetToMediaPhysAddress,
-                ipNetToMediaNetAddress, ipNetToMediaType, ipRoutingDiscards
+                ipNetToMediaNetAddress, ipNetToMediaType,
+                ipRoutingDiscards
 }
     STATUS     deprecated
     DESCRIPTION
            "The ip group of objects providing for basic management of IP
             entities, exclusive of the management of IP routes.
 
-            As part of the version independence this group has been
+
+
+
+            As part of the version independence, this group has been
             deprecated.  "
     ::= { ipMIBGroups 1 }
 
@@ -4920,7 +5247,7 @@ icmpGroup OBJECT-GROUP
     DESCRIPTION
            "The icmp group of objects providing ICMP statistics.
 
-            As part of the version independence this group has been
+            As part of the version independence, this group has been
             deprecated.  "
     ::= { ipMIBGroups 2 }
 

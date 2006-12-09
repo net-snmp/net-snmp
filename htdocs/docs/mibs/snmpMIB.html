@@ -164,7 +164,31 @@ objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
 <table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="TestAndIncr">TestAndIncr</td><td>INTEGER</td><td><pre></pre></td></tr>
+<tr><td><a name="TestAndIncr">TestAndIncr</td><td>INTEGER</td><td><pre>Represents integer-valued information used for atomic
+operations.  When the management protocol is used to specify
+that an object instance having this syntax is to be
+modified, the new value supplied via the management protocol
+must precisely match the value presently held by the
+instance.  If not, the management protocol set operation
+fails with an error of `inconsistentValue'.  Otherwise, if
+the current value is the maximum value of 2^31-1 (2147483647
+decimal), then the value held by the instance is wrapped to
+zero; otherwise, the value held by the instance is
+incremented by one.  (Note that regardless of whether the
+management protocol set operation succeeds, the variable-
+binding in the request and response PDUs are identical.)
+
+The value of the ACCESS clause for objects having this
+syntax is either `read-write' or `read-create'.  When an
+instance of a columnar object having this syntax is created,
+any value may be supplied via the management protocol.
+
+When the network management portion of the system is re-
+initialized, the value of every object instance having this
+syntax must either be incremented from its value prior to
+the re-initialization, or (if the value prior to the re-
+initialization is unknown) be set to a pseudo-randomly
+generated value.</pre></td></tr>
 </table></ul>
 
 <a name="treeview" />
@@ -203,15 +227,11 @@ clause as well as the DESCRIPTION clause of the object itself.
          |
          +--<a href="#snmpSetGroup">snmpSetGroup</a>(5)
          +--<a href="#systemGroup">systemGroup</a>(6)
-         |
          +--<a href="#snmpBasicNotificationsGroup">snmpBasicNotificationsGroup</a>(7)
-         |
          +--<a href="#snmpGroup">snmpGroup</a>(8)
          +--<a href="#snmpCommunityGroup">snmpCommunityGroup</a>(9)
          +--<a href="#snmpObsoleteGroup">snmpObsoleteGroup</a>(10)
-         |
          +--<a href="#snmpWarmStartNotificationGroup">snmpWarmStartNotificationGroup</a>(11)
-         |
          +--<a href="#snmpNotificationGroup">snmpNotificationGroup</a>(12)
 </pre>
 <!-- CONTENT END -->

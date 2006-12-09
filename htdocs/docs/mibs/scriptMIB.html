@@ -979,7 +979,7 @@ map to the same name in non-volatile storage.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. 2147483647
+        1 .. -1
 
   </td><td>NoAccess</td>
 <td>
@@ -1216,7 +1216,7 @@ the smRunArgument object.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. 2147483647
+        1 .. -1
 
   </td><td>Create</td>
 <td>
@@ -1237,7 +1237,7 @@ that are already executing.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. 2147483647
+        1 .. -1
 
   </td><td>Create</td>
 <td>
@@ -2371,12 +2371,187 @@ objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
 <table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="DateAndTime">DateAndTime</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
-<tr><td><a name="TimeInterval">TimeInterval</td><td>INTEGER</td><td><pre></pre></td></tr>
-<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
-<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre>Describes the memory realization of a conceptual row.  A
+row which is volatile(2) is lost upon reboot.  A row which
+is either nonVolatile(3), permanent(4) or readOnly(5), is
+backed up by stable storage.  A row which is permanent(4)
+can be changed but not deleted.  A row which is readOnly(5)
+cannot be changed nor deleted.
+
+If the value of an object with this syntax is either
+permanent(4) or readOnly(5), it cannot be written.
+Conversely, if the value is either other(1), volatile(2) or
+nonVolatile(3), it cannot be modified to be permanent(4) or
+readOnly(5).  (All illegal modifications result in a
+'wrongValue' error.)
+
+Every usage of this textual convention is required to
+specify the columnar objects which a permanent(4) row must
+at a minimum allow to be writable.</pre></td></tr>
+<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre>Represents textual information taken from the NVT ASCII
+character set, as defined in pages 4, 10-11 of RFC 854.
+To summarize RFC 854, the NVT ASCII repertoire specifies:
+  - the use of character codes 0-127 (decimal)
+  - the graphics characters (32-126) are interpreted as
+                US ASCII
+  - NUL, LF, CR, BEL, BS, HT, VT and FF have the special
+                meanings specified in RFC 854
+  - the other 25 codes have no standard interpretation
+  - the sequence 'CR LF' means newline
+  - the sequence 'CR NUL' means carriage-return
+  - an 'LF' not preceded by a 'CR' means moving to the
+                same column on the next line.
+  - the sequence 'CR x' for any x other than LF or NUL is
+                illegal.  (Note that this also means that a string may
+                end with either 'CR LF' or 'CR NUL', but not with CR.)
+Any object defined using this syntax may not exceed 255
+            characters in length.</pre></td></tr>
+<tr><td><a name="DateAndTime">DateAndTime</td><td>OCTETSTR</td><td><pre>A date-time specification.
+field  octets  contents                  range
+            -----  ------  --------                  -----
+              1      1-2   year*                     0..65536
+              2       3    month                     1..12
+              3       4    day                       1..31
+              4       5    hour                      0..23
+              5       6    minutes                   0..59
+              6       7    seconds                   0..60
+                           (use 60 for leap-second)
+              7       8    deci-seconds              0..9
+              8       9    direction from UTC        '+' / '-'
+              9      10    hours from UTC*           0..13
+             10      11    minutes from UTC          0..59
+* Notes:
+            - the value of year is in network-byte order
+            - daylight saving time in New Zealand is +13
+For example, Tuesday May 26, 1992 at 1:30:15 PM EDT would be
+            displayed as:
+                 1992-5-26,13:30:15.0,-4:0
+Note that if only local time is known, then timezone
+            information (fields 8-10) is not present.</pre></td></tr>
+<tr><td><a name="TimeInterval">TimeInterval</td><td>INTEGER</td><td><pre>A period of time, measured in units of 0.01 seconds.</pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre>The RowStatus textual convention is used to manage the
+creation and deletion of conceptual rows, and is used as the
+value of the SYNTAX clause for the status column of a
+conceptual row (as described in Section 7.7.1 of [2].)
+
+The status column has six defined values:
+
+     - `active', which indicates that the conceptual row is
+     available for use by the managed device;
+
+     - `notInService', which indicates that the conceptual
+     row exists in the agent, but is unavailable for use by
+     the managed device (see NOTE below); 'notInService' has
+     no implication regarding the internal consistency of
+     the row, availability of resources, or consistency with
+     the current state of the managed device;
+
+     - `notReady', which indicates that the conceptual row
+     exists in the agent, but is missing information
+     necessary in order to be available for use by the
+     managed device (i.e., one or more required columns in
+     the conceptual row have not been instanciated);
+
+     - `createAndGo', which is supplied by a management
+     station wishing to create a new instance of a
+     conceptual row and to have its status automatically set
+     to active, making it available for use by the managed
+     device;
+
+     - `createAndWait', which is supplied by a management
+     station wishing to create a new instance of a
+     conceptual row (but not make it available for use by
+     the managed device); and,
+     - `destroy', which is supplied by a management station
+     wishing to delete all of the instances associated with
+     an existing conceptual row.
+
+Whereas five of the six values (all except `notReady') may
+be specified in a management protocol set operation, only
+three values will be returned in response to a management
+protocol retrieval operation:  `notReady', `notInService' or
+`active'.  That is, when queried, an existing conceptual row
+has only three states:  it is either available for use by
+the managed device (the status column has value `active');
+it is not available for use by the managed device, though
+the agent has sufficient information to attempt to make it
+so (the status column has value `notInService'); or, it is
+not available for use by the managed device, and an attempt
+to make it so would fail because the agent has insufficient
+information (the state column has value `notReady').
+
+                         NOTE WELL
+
+     This textual convention may be used for a MIB table,
+     irrespective of whether the values of that table's
+     conceptual rows are able to be modified while it is
+     active, or whether its conceptual rows must be taken
+     out of service in order to be modified.  That is, it is
+     the responsibility of the DESCRIPTION clause of the
+     status column to specify whether the status column must
+     not be `active' in order for the value of some other
+     column of the same conceptual row to be modified.  If
+     such a specification is made, affected columns may be
+     changed by an SNMP set PDU if the RowStatus would not
+     be equal to `active' either immediately before or after
+     processing the PDU.  In other words, if the PDU also
+     contained a varbind that would change the RowStatus
+     value, the column in question may be changed if the
+     RowStatus was not equal to `active' as the PDU was
+     received, or if the varbind sets the status</pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre>An octet string containing administrative
+information, preferably in human-readable form.
+
+To facilitate internationalization, this
+information is represented using the ISO/IEC
+IS 10646-1 character set, encoded as an octet
+string using the UTF-8 transformation format
+described in [RFC2279].
+
+Since additional code points are added by
+amendments to the 10646 standard from time
+to time, implementations must be prepared to
+encounter any code point from 0x00000000 to
+0x7fffffff.  Byte sequences that do not
+correspond to the valid UTF-8 encoding of a
+code point or are outside this range are
+prohibited.
+
+The use of control codes should be avoided.
+
+When it is necessary to represent a newline,
+the control code sequence CR LF should be used.
+
+The use of leading or trailing white space should
+be avoided.
+
+For code points not directly supported by user
+interface hardware or software, an alternative
+means of entry and display, such as hexadecimal,
+may be provided.
+
+For information encoded in 7-bit US-ASCII,
+the UTF-8 encoding is identical to the
+US-ASCII encoding.
+
+UTF-8 may require multiple bytes to represent a
+single character / code point; thus the length
+of this object in octets may be different from
+the number of characters encoded.  Similarly,
+size constraints refer to the number of encoded
+octets, not the number of characters represented
+by an encoding.
+
+Note that when this TC is used for an object that
+is used or envisioned to be used as an index, then
+a SIZE restriction MUST be specified so that the
+number of sub-identifiers for any object instance
+does not exceed the limit of 128, as defined by
+[RFC3416].
+
+Note that the size of an SnmpAdminString object is
+measured in octets, not characters.
+                </pre></td></tr>
 </table></ul>
 
 <a name="treeview" />
@@ -2469,7 +2644,7 @@ clause as well as the DESCRIPTION clause of the object itself.
    |  |        |  Index: smScriptOwner, smScriptName, smCodeIndex
    |  |        |
    |  |        +-- ---- Unsigned  <a href="#smCodeIndex">smCodeIndex</a>(1)
-   |  |        |        Range: 1..2147483647
+   |  |        |        Range: 1..-1
    |  |        +-- CR-- String    <a href="#smCodeText">smCodeText</a>(2)
    |  |        |        Size: 1..1024
    |  |        +-- CR-- EnumVal   <a href="#smCodeRowStatus">smCodeRowStatus</a>(3)
@@ -2497,9 +2672,9 @@ clause as well as the DESCRIPTION clause of the object itself.
    |     |     |        Size: 0..32
    |     |     +-- CR-- String    <a href="#smLaunchArgument">smLaunchArgument</a>(5)
    |     |     +-- CR-- Unsigned  <a href="#smLaunchMaxRunning">smLaunchMaxRunning</a>(6)
-   |     |     |        Range: 1..2147483647
+   |     |     |        Range: 1..-1
    |     |     +-- CR-- Unsigned  <a href="#smLaunchMaxCompleted">smLaunchMaxCompleted</a>(7)
-   |     |     |        Range: 1..2147483647
+   |     |     |        Range: 1..-1
    |     |     +-- CR-- INTEGER   <a href="#smLaunchLifeTime">smLaunchLifeTime</a>(8)
    |     |     |        Textual Convention: <a href="#TimeInterval">TimeInterval</a>
    |     |     |        Range: 0..2147483647
@@ -2591,13 +2766,10 @@ clause as well as the DESCRIPTION clause of the object itself.
          +--<a href="#smCodeGroup">smCodeGroup</a>(3)
          +--<a href="#smLaunchGroup">smLaunchGroup</a>(4)
          +--<a href="#smRunGroup">smRunGroup</a>(5)
-         |
          +--<a href="#smNotificationsGroup">smNotificationsGroup</a>(6)
-         |
          +--<a href="#smScriptGroup2">smScriptGroup2</a>(7)
          +--<a href="#smLaunchGroup2">smLaunchGroup2</a>(8)
          +--<a href="#smRunGroup2">smRunGroup2</a>(9)
-         |
          +--<a href="#smNotificationsGroup2">smNotificationsGroup2</a>(10)
 </pre>
 <!-- CONTENT END -->
