@@ -634,6 +634,8 @@ really_try_next:
         if (store_idx > HRS_TYPE_FIXED_MAX)
             if (storageUseNFS && Check_HR_FileSys_NFS())
                 storage_type_id[storage_type_len - 1] = 10;     /* Network Disk */
+            else if (hasmntopt(HRFS_entry, "loop") != NULL)
+                storage_type_id[storage_type_len - 1] = 5;      /* Removable Disk */
             else
                 storage_type_id[storage_type_len - 1] = 4;      /* Assume fixed */
         else
