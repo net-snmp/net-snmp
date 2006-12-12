@@ -58,7 +58,7 @@
 /* #undef CMU_COMPATIBLE */
 
 /* add in recent resource lock functions (not complete) */
-/* #undef _REENTRANT */
+/* #undef NETSNMP_REENTRANT */
 
 /* debugging stuff */
 /* if defined, we optimize the code to exclude all debugging calls. */
@@ -1366,16 +1366,17 @@
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 #define HAVE_AES_CFB128_ENCRYPT 1
 
-#else /* ! USE_OPENSSL */
+#if defined(HAVE_OPENSSL_AES_H) && defined(HAVE_AES_CFB128_ENCRYPT)
+#define HAVE_AES 1
+#endif
+
+#else /* ! NETSNMP_USE_OPENSSL */
 
 /* define if you are using the MD5 code ...*/
 #define NETSNMP_USE_INTERNAL_MD5 1
 
-#endif /* ! USE_OPENSSL */
+#endif /* ! NETSNMP_USE_OPENSSL */
 
-#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_AES_H) && defined(HAVE_AES_CFB128_ENCRYPT)
-#define HAVE_AES 1
-#endif
 
 /* define random functions */
 
