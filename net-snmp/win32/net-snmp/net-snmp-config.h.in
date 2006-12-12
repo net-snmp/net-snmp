@@ -1689,6 +1689,7 @@ typedef unsigned short   uint16_t;
 /*
  * Module configuration and control ends here.
  */
+#define UDP_ADDRESSES_IN_HOST_ORDER 1
 
 #endif /* NET_SNMP_CONFIG_H */
 
