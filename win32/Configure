@@ -355,7 +355,7 @@ while (<MAKE_IN>)
       s/^.*#undef NETSNMP_USE_OPENSSL.*/#define NETSNMP_USE_OPENSSL 1/;
     }
     if ($b_ipv6 == 1) {
-      s/^.*#undef INET6.*/#define INET6 1/;
+      s/^.*#undef NETSNMP_ENABLE_IPV6.*/#define NETSNMP_ENABLE_IPV6 1/;
     }
 
     print FILE_OUT $_ . "\n";
