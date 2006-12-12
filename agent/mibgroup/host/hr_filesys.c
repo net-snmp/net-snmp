@@ -555,7 +555,10 @@ const char     *HRFS_ignores[] = {
 #ifdef linux
     "devpts",
     "devfs",
+    "sysfs",
+    "usbfs",
     "usbdevfs",
+    "binfmt_misc",
     "tmpfs",
     "shm",
 #endif
