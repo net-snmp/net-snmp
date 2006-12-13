@@ -119,11 +119,11 @@ install -m 755 dist/snmpd-init.d $RPM_BUILD_ROOT/etc/rc.d/init.d/snmpd
 
 %if %{include_perl}
 # unneeded perl stuff
-find $RPM_BUILD_ROOT/usr/lib/perl5/ -name Bundle -type d | xargs rm -rf
-find $RPM_BUILD_ROOT/usr/lib/perl5/ -name perllocal.pod | xargs rm -f
+find $RPM_BUILD_ROOT/%{_libdir}/perl5/ -name Bundle -type d | xargs rm -rf
+find $RPM_BUILD_ROOT/%{_libdir}/perl5/ -name perllocal.pod | xargs rm -f
 
 # store a copy of installed perl stuff.  It's too complex to predict
-(xxdir=`pwd` && cd $RPM_BUILD_ROOT && find usr/lib/perl5 -type f | sed 's/^/\//' > $xxdir/net-snmp-perl-files)
+(xxdir=`pwd` && cd $RPM_BUILD_ROOT && find usr/lib*/perl5 -type f | sed 's/^/\//' > $xxdir/net-snmp-perl-files)
 %endif
 
 %post
@@ -178,7 +178,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/[^A-Z]*
 %{_mandir}/man5/*
 %{_mandir}/man8/*
-/usr/lib/*.so*
+%{_libdir}/*.so*
 /etc/rc.d/init.d/snmpd
 
 %files devel
