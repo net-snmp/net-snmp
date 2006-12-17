@@ -292,7 +292,7 @@ What operating systems does it run on?
   We have also been informed about a port to the Stratus VOS.
   See http://ftp.stratus.com/vos/network/network.html for details.
 
-  See the next question but one for the status of Windows support.
+  See the next question for the status of Windows support.
 
   Certain systems fail to compile particular portions of the agent.
   These can usually be persuaded to compile (at the loss of some
@@ -342,20 +342,24 @@ What happens if mine isn't listed?
 Does it run on Windows?
 ----------------------
 
-    The suite should compile and run on Win32 platforms, including
+  The suite will compile and run on Win32 platforms, including
   the library, command-line tools and the basic agent framework.
   Note that the agent now includes support for the MIB-II module,
   but this requires Microsoft's Core Platform SDK.  Instructions
   for how to install this are given in README.win32.
+            
+  Pre-compiled binaries are available from the Net-SNMP web site.
 
-    Some other MIB modules, including the UCD pass-through extensions,
+  As of Net-SNMP 5.4, the Net-SNMP agent is able to load the Windows
+  SNMP service extension DLLs by using the Net-SNMP winExtDLL extension.
+      
+  Some Net-SNMP MIB modules, including the UCD pass-through extensions,
   do not currently work under Windows.  Volunteers to assist in
   these missing modules are likely to welcomed with open arms :-)
-
-    Further details of Windows support (currently Visual C++, MinGW
-  and Cygnus cygwin32) is available in the file README.win32
-
-
+    
+  Further details of Windows support (currently Visual C++, MinGW
+  and Cygnus cygwin32) is available in the file README.win32.
+                                                        
 
 <a name="How_do_I_find_out_about_new_releases_"></a>
 How do I find out about new releases?
