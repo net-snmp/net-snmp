@@ -11,7 +11,7 @@ NULL=nul
 !ENDIF 
 
 !IF $(SSL) == 1
-OPENSSL="libeay32.lib"
+OPENSSL=libeay32.lib gdi32.lib
 !ELSE
 OPENSSL=""
 !ENDIF
