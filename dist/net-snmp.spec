@@ -163,7 +163,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc EXAMPLE.conf.def FAQ INSTALL NEWS PORTING TODO
 %doc README README.agentx README.hpux11 README.krb5
 %doc README.snmpv3 README.solaris README.thread README.win32
-%doc README.aix README.osX README.tru64 README.irix README.agent-mibs
+%doc README.aix README.osX README.tru64 README.agent-mibs
 %doc README.Panasonic_AM3X.txt
 	 
 #%config(noreplace) /etc/net-snmp/snmpd.conf
