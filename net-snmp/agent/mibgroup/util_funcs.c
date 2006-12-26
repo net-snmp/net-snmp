@@ -221,12 +221,28 @@ get_exten_instance(struct extensible *exten, size_t inst)
 void
 wait_on_exec(struct extensible *ex)
 {
+#if defined(WIN32) && !defined (mingw32)
+  int rc;
+  if (ex->tid != 0 && ex->pid != 0) {
+    HANDLE hThread = (HANDLE) ex->tid;
+    HANDLE hProcess = (HANDLE) ex->pid;
+    rc = WaitForSingleObject(hProcess, NETSNMP_TIMEOUT_WAITFORSINGLEOBJECT);
+    DEBUGMSGT(("exec:wait_on_exec","WaitForSingleObject rc=(%d)\n",rc ));
+    rc = CloseHandle( hThread );
+    DEBUGMSGT(("exec:wait_on_exec","CloseHandle hThread=(%d)\n",rc ));
+    rc = CloseHandle( hProcess );
+    DEBUGMSGT(("exec:wait_on_exec","CloseHandle hProcess=(%d)\n",rc ));
+    ex->pid = 0;
+    ex->tid = 0;
+  }
+#else
 #ifndef NETSNMP_EXCACHETIME
     if (ex->pid && waitpid(ex->pid, &ex->result, 0) < 0) {
         setPerrorstatus("waitpid");
     }
     ex->pid = 0;
-#endif
+#endif  /* NETSNMP_EXCACHETIME */
+#endif  /* WIN32 */
 }
 
 #define MAXARGS 30
@@ -361,6 +377,7 @@ get_exec_output(struct extensible *ex)
     
     /* Set global child process handle */
     ex->pid = (int)pi.hProcess;
+    ex->tid = (int)pi.hThread;
 
     /* Close pipe handles to make sure that no handles to the write end of the
      * output pipe are maintained in this process or else the pipe will

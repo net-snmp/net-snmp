@@ -450,6 +450,7 @@ run_exec_command( char *command, char *input,
     /*
      * If necessary, fall back to using 'system'
      */
+    DEBUGMSGTL(("run:exec", "running shell command '%s'\n", command));
     return run_shell_command( command, input, output, out_len );
 #endif
 }
