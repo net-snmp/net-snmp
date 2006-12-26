@@ -1691,5 +1691,9 @@ typedef unsigned short   uint16_t;
  */
 #define UDP_ADDRESSES_IN_HOST_ORDER 1
 
+/* Timeout in milliseconds for Win32 function WaitForSingleObject.
+   Used by agent pass. */
+#define NETSNMP_TIMEOUT_WAITFORSINGLEOBJECT 5000
+
 #endif /* NET_SNMP_CONFIG_H */
 
