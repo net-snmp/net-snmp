@@ -15,6 +15,8 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include "mibII_common.h" /* for NETSNMP_KLOOKUP */
+
 #if HAVE_STRING_H
 #include <string.h>
 #else
