@@ -586,28 +586,24 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
     int             rc = 0;
     char           *str = NULL;
     char           *client_socket = NULL;
-    netsnmp_udp_addr_pair *addr_pair = NULL;
+    netsnmp_udp_addr_pair addr_pair;
 
     if (addr == NULL || addr->sin_family != AF_INET) {
         return NULL;
     }
 
-    addr_pair = (netsnmp_udp_addr_pair *) malloc(sizeof(netsnmp_udp_addr_pair));
-    if (addr_pair == NULL) {
-        return NULL;
-    }
-    memset(addr_pair, 0, sizeof(netsnmp_udp_addr_pair));
-    memcpy(&(addr_pair->remote_addr), addr, sizeof(struct sockaddr_in));
+    memset(&addr_pair, 0, sizeof(netsnmp_udp_addr_pair));
+    memcpy(&(addr_pair.remote_addr), addr, sizeof(struct sockaddr_in));
 
     t = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
     if (t == NULL) {
         return NULL;
     }
 
-    str = netsnmp_udp_fmtaddr(NULL, (void *)addr_pair, 
+    str = netsnmp_udp_fmtaddr(NULL, (void *)&addr_pair,
                                  sizeof(netsnmp_udp_addr_pair));
-    DEBUGMSGTL(("netsnmp_udp", "open %s %s:%d\n", local ? "local" : "remote",
-                str,addr->sin_port));
+    DEBUGMSGTL(("netsnmp_udp", "open %s %s\n", local ? "local" : "remote",
+                str));
     free(str);
 
     memset(t, 0, sizeof(netsnmp_transport));
@@ -690,7 +686,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
         t->remote[4] = (htons(addr->sin_port) & 0xff00) >> 8;
         t->remote[5] = (htons(addr->sin_port) & 0x00ff) >> 0;
         t->remote_length = 6;
-        memcpy(t->data, addr_pair, sizeof(netsnmp_udp_addr_pair));
+        memcpy(t->data, &addr_pair, sizeof(netsnmp_udp_addr_pair));
         t->data_length = sizeof(netsnmp_udp_addr_pair);
     }
 
