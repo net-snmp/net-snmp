@@ -529,9 +529,9 @@ var_hrswrun(struct variable * vp,
             ret =  read(procfd, proc_buf, sizeof(*proc_buf));
             close(procfd);
             if (ret != sizeof(*proc_buf))
-                return NULL;
+                proc_buf = NULL;
         } else
-            return NULL;
+            proc_buf =  NULL;
 #else
         if (kd == NULL)
             return NULL;
