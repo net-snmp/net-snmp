@@ -19,6 +19,7 @@ TABLE OF CONTENTS
    What happens if mine isn't listed?
    Does it run on Windows?
    How do I find out about new releases?
+   How can I find out what other people are doing?
    How do I submit a patch or bug report?
    Can I reuse the code in my commercial application?
    What's the difference between SNMPv1, SNMPv2 and SNMPv3?
@@ -33,13 +34,13 @@ TABLE OF CONTENTS
    Why can't I see anything from the agent?
    Why doesn't the agent respond?
    I can see the system group, but nothing else.  Why?
-   Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
+   Why can't I see values in the <ENTERPRISE> tree?
    The agent worked for a while, then stopped responding.  Why?
    Requesting an object fails with "Unknown Object Identifier"  Why?
    Why do I get "noSuchName" when asking for "sysUpTime" (or similar)?
    Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
    How do I use SNMPv3?
-   I cannot set any variables in the MIB.
+   Why can't I set any variables in the MIB?
    Variables seem to disappear when I try to set them.  Why?
    Why can't I change sysLocation (or sysContact)?
    I get an error when trying to set a negative value - why?
@@ -56,10 +57,10 @@ TABLE OF CONTENTS
    How do I install the Perl SNMP modules?
    But compiling this fails! Why?
    Compiling the Perl module works OK, but 'make test' fails. Why?
-   I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
-   I'm trying to use mib2c (or tkmib) and it can't load SNMP.so?
-   I'm trying to use tkmib and it can't locate Tk.pm?
-   I'm trying to install your RPM, but it complains about missing Perl modules. Why?
+   Why can't mib2c (or tkmib) locate SNMP.pm?
+   Why can't mib2c (or tkmib) load SNMP.so?
+   Why can't tkmib locate Tk.pm?
+   Why does your RPM complain about missing Perl modules?
    I've got a problem with the Net-SNMP module.  Can you help?
  MIBS
    Where can I find a MIB compiler?
@@ -221,7 +222,14 @@ Are there binaries available?
 ----------------------------
 
   There are binaries for some versions/systems available under
-  the "net-snmp binaries" package on the project download site.
+  the "net-snmp binaries" package on the SourceForge "Files"
+  page, which is linked to from the main project download web
+  page at http://www.net-snmp.org/download.html.
+
+  These binaries are also available on the project FTP site,
+  with a link on the same web page.
+
+  There is also a mirror at ftp://ftp.freesnmp.org/mirrors/net-snmp/
 
 
 
@@ -285,7 +293,7 @@ What operating systems does it run on?
   We have also been informed about a port to the Stratus VOS.
   See http://ftp.stratus.com/vos/network/network.html for details.
 
-  See the next question for the status of Windows support.
+  See the next question but one for the status of Windows support.
 
   Certain systems fail to compile particular portions of the agent.
   These can usually be persuaded to compile (at the loss of some
@@ -293,10 +301,10 @@ What operating systems does it run on?
   See the next question for more details.
 
   Also note that the presence of a particular configuration in this
-  list does not imply a perfect or complete implementation.  This is
-  simply what various people have reported as seeming to work. (Or more
-  frequently, the configurations people have reported problems which
-  that we think we've fixed!)
+  list does not imply a perfect or complete implementation.  This
+  is simply what various people have reported as seeming to work.
+ (Or more frequently, the configurations where people have reported
+  problems that we think we've subsequently fixed!)
 
 
 
@@ -333,20 +341,20 @@ What happens if mine isn't listed?
 Does it run on Windows?
 ----------------------
 
-    The suite will compile and run on Win32 platforms, including
+    The suite should compile and run on Win32 platforms, including
   the library, command-line tools and the basic agent framework.
   Note that the agent now includes support for the MIB-II module,
   but this requires Microsoft's Core Platform SDK.  Instructions
   for how to install this are given in README.win32.
 
-    Pre-compiled binaries are available from the Net-SNMP web site.
+    Pre-compiled binaries are available from the project web site.
 
-    As of Net-SNMP 5.4, the Net-SNMP agent is able to load the Windows 
-  SNMP service extension DLLs by using the Net-SNMP winExtDLL extension.
+    As of v5.4, the Net-SNMP agent is able to load the Windows SNMP
+  service extension DLLs by using the Net-SNMP winExtDLL extension.
 
-    Some Net-SNMP MIB modules, including the UCD pass-through extensions,
-  do not currently work under Windows.  Volunteers to assist in
-  these missing modules are likely to welcomed with open arms :-)
+    Some other Net-SNMP MIB modules, including the UCD pass-through
+  extensions, do not currently work under Windows.  Volunteers to assist
+  with these missing modules are likely to welcomed with open arms :-)
 
     Further details of Windows support (currently Visual C++, MinGW
   and Cygnus cygwin32) is available in the file README.win32.
@@ -548,7 +556,7 @@ Where can I find more information about network management?
 ----------------------------------------------------------
 
   There are a number of sites with network management information on
-  the World Wide Web.  A couple of the most useful are
+  the World Wide Web.  Some of the most useful are
 
       http://www.simpleweb.org/
       http://www.snmplink.org/
@@ -707,11 +715,11 @@ Why can't I see anything from the agent?
 Why doesn't the agent respond?
 -----------------------------
 
-  Assuming that the agent is actually sending the request (see the
-  previous entry), there are two main likely causes for the agent not
-  to respond.  Either it doesn't receive the request (e.g. it's being
-  blocked by a firewall or packet filtering), or it receives it, but
-  is unwilling (or unable) to process it.
+  Assuming that the client application is actually sending the request
+ (see the previous entry), there are two main likely causes for the agent
+  not to respond.  Either it doesn't receive the request (e.g. it's being
+  blocked by a firewall or packet filtering), or it receives the request,
+  but is unwilling (or unable) to process it.
 
     If the remote system is running the Net-SNMP agent, then the easiest
   way to check what's going wrong is to shut down the agent, and re-start
@@ -768,7 +776,7 @@ I can see the system group, but nothing else.  Why?
 
 
 
-Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
+Why can't I see values in the <ENTERPRISE> tree?
 -----------------------------------------------------------
 
   If you're walking a specific tree, but failing to see anything in
@@ -786,7 +794,7 @@ Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
   of the IETF-standard management information supported by the agent.
   When the agent reaches the end of this tree, it will return the first
   enterprise-specific value, and 'snmpwalk' will recognise that this
-  marks the end of the (implicitly) request tree, and stop.  No
+  marks the end of the (implicit) request tree, and stop.  No
   enterprise-specific information will be displayed.
 
     To walk the whole tree, and see *all* the information that the
@@ -951,8 +959,8 @@ How do I use SNMPv3?
  
 
 
-I cannot set any variables in the MIB.
--------------------------------------
+Why can't I set any variables in the MIB?
+----------------------------------------
 
   There are three possible reasons for this:
 
@@ -1232,7 +1240,7 @@ OK, what should I put in snmp.conf?
     This is used to set common configuration values for most of the
   applications, to avoid having to specify them every time.  Examples
   are the SNMPv3 settings mentioned above, defaults for which MIBs to
-  load and where from (see the second entry in the APPLICATIONS section),
+  load and where from (see the second entry in this section),
   and the default SNMP version, port and (if appropriate) community
   string to use.
 
@@ -1305,7 +1313,7 @@ But compiling this fails! Why?
   main Net-SNMP library, and so is quite sensitive to changes within the
   library.  It's important to use the correct version of the module, that
   corresponds to the version of the library you have installed.  If you're
-  working with a Net-SNMP source distribution, the appropriate version of
+  working with a Net-SNMP source distribution, the appropriate versions of
   the Perl modules are shipped as part of the source code, but you *must*
   have run "make install" on the main Net-SNMP distribution *first*.
 
@@ -1344,18 +1352,20 @@ Compiling the Perl module works OK, but 'make test' fails. Why?
 
 
 
-I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
-------------------------------------------------------------
+Why can't mib2c (or tkmib) locate SNMP.pm?
+-----------------------------------------
 
-  That's probably because the SNMP perl module hasn't been installed.
-  It's not part of the standard perl distribution, nor is it installed
-  by default in many vendor distributions.
-    You'll need to install it.  See the previous questions.
+  That's probably because the SNMP Perl module hasn't been installed.
+  It's not part of the standard Perl distribution, nor is it included
+  in the default Fedora Linux installation (for example).
+  You'll need to install it yourself.
+
+  See the second entry in this section.
 
 
 
-I'm trying to use mib2c (or tkmib) and it can't load SNMP.so?
-------------------------------------------------------------
+Why can't mib2c (or tkmib) load SNMP.so?
+---------------------------------------
 
     This is probably the same problem.  Either the SNMP module
   hasn't been installed, or it's the wrong version.  See the
@@ -1363,8 +1373,8 @@ I'm trying to use mib2c (or tkmib) and it can't load SNMP.so?
 
 
 
-I'm trying to use tkmib and it can't locate Tk.pm?
--------------------------------------------------
+Why can't tkmib locate Tk.pm?
+----------------------------
 
   Tk.pm is another Perl package that needs to be installed before tkmib
   will run.  It's also available on Perl CPAN.  We suggest using version
@@ -1709,7 +1719,7 @@ How do I remove a MIB from the agent?
   actually implements these objects.  There are three ways to do this:
                                                                                 
     1) re-run 'configure' to exclude the given MIB module(s) from the
-       build configuration, recompile, and reinstall:
+       build configuration, then recompile and reinstall:
 
 	  ./configure --with-out-mib-modules=host   ....
 	  make
@@ -2011,18 +2021,19 @@ How can I run AgentX with a different socket address?
   With the example subagent code from the Net-SNMP tutorial, this line
   would be added immediately before the 'init_agent' call.
 
+  But also see the mention of AgentX security (or the lack of it!)
+  in the earlier entry.
+
   The same approach can also be used to listen on a different named
   socket, using:
 		agentxsocket /tmp/agentx
-		agentxperms 777 777 myuser mygroup
+		agentxperms 770 770 myuser mygroup
   or
 		snmpd -x /tmp/agentx ....
   or
      netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_X_SOCKET, "/tmp/agentx");
   as appropriate.
-  But also see the mention of AgentX security (or the lack of it!)
-  in the earlier entry.
 
 
 
@@ -2095,15 +2106,14 @@ What traps are sent by the agent?
   (rather than the standard 'coldStart(0)' or 'warmStart(1)' traps) on
   receiving a HUP signal - typically after being re-configured.
 
-    The agent does not send 'linkUp' or 'linkDown' traps by default.  The
-  Net-SNMP agent can be configured to do this using the config directive
-  'linkUpDownNotifications'.  See the 'snmpd.conf(5)' man page (under
-  ACTIVE MONITORING) for details.
+    The agent does not send 'linkUp' or 'linkDown' traps by default. It can
+  be configured to do this using the directive 'linkUpDownNotifications'.
+  See the 'snmpd.conf(5)' man page (under ACTIVE MONITORING) for details.
 
     Similarly, it does not generate traps by default when one of the
   monitored characteristics (disk usage, running processes, etc) enters or
   leaves an error state.  This can be configured using the 'defaultMonitors'
-  config directive (also documented under ACTIVE MONITORING).
+  directive (again documented under ACTIVE MONITORING).
 
   Note that these facilities are only available with the v5 Net-SNMP
   agent, and are not supported by the v4 UCD agent.
@@ -2131,7 +2141,7 @@ Where are these traps sent to?
         informsink localhost
 
   will result in *three* notifications being sent for each call to
-  'send_easy_trap' (or 'send_v2trap').  Probably not what was wanted!
+  'send_easy_trap()' (or 'send_v2trap()').  Probably not what was wanted!
  
 
 
@@ -2146,7 +2156,7 @@ How can I send a particular trap to selected destinations?
   which is designed to allow this sort of selective trap direction.
   However this is not currently active.  (The tables are present and
   can be manipulated and updated, but the information is not consulted)
-  Documentation on how to use this facility will appear once the
+  Documentation on how to use this mechanism will appear once the
   functionality is working properly.
 
 
@@ -2207,8 +2217,8 @@ How can I stop other people getting at my agent?
   Firstly, are you concerned with read access or write access?
 
   As far as changing things on the agent is concerned, there is relatively
-  little that can actually be altered (see the answer to " I cannot set
-  any variables in the MIB" above).
+  little that can actually be altered (see the entry "Why can't I set
+  any variables in the MIB?" above).
 
     If you are using the example config file, this is set up to allow
   read access from your local network, and write access only from the
@@ -2252,7 +2262,7 @@ How can I listen on just one particular interface?
 
 			snmpd 10.0.0.1:6161
 
-  will listen on port 6161, on the (internal network) interface with
+  would listen on port 6161, on the (internal network) interface with
   address 10.0.0.1.   To listen on both of these interfaces (and no others)
   provide a list of all the desired addresses:
 
@@ -2285,7 +2295,7 @@ How do I configure access control?
   Only use both settings when specifying *different* community names.
     The same holds true for rouser and rwuser.
 
-  The two community directives can be restricted to allow requests
+  The two community directives can be restricted to only allow requests
   from particular sources, and all four can be restricted to a particular
   subtrees or (from v5.3) a named view.  See 'snmpd.conf(5)' for details.
 
@@ -2294,7 +2304,7 @@ How do I configure access control?
   and 'access' to provide a more efficient and flexible control
   over who can access which portions of the tree.
 
-    See the next question for the gory details.
+    See the next entry for the gory details.
 
 
 
@@ -2773,8 +2783,8 @@ The system uptime (sysUpTime) returned is wrong!
 
 		'--with-mib-modules=host/hr_system'
 
-  and recompiling.  This particular group is reasonably likely to
-  work, even if some of the other more system-specific groups don't.
+  and recompiling.  This particular group is reasonably likely to work,
+  even if some of the other more architecture-specific groups don't.
 
 
 
@@ -2927,8 +2937,7 @@ How can I reduce the memory footprint?
 How can I reduce the installation footprint or speed up compilation?
 -------------------------------------------------------------------
 
-  If you are using net-snmp v5.1 or above, then the following
-  configure options may be useful to you:
+  The following configure options may also be useful:
                                                                                 
   --disable-agent                 Do not build the agent (snmpd).
   --disable-applications          Do not build the apps (snmpget, ...).
@@ -3040,13 +3049,11 @@ How do I write C code to integrate with the agent?
 -------------------------------------------------
 
   There are three main methods for integrating external C code
-  within the agent.
-
-    The code can be compiled directly into the agent itself, it
-  can be loaded dynamically while the agent is running, or it can
-  be compiled into a separate application (a "subagent") which
-  communicates with the main master agent.  All three approaches
-  have been touched on elsewhere within this FAQ.
+  within the agent.  The code can be compiled directly into the
+  agent itself, it can be loaded dynamically while the agent is
+  running, or it can be compiled into a separate application
+  (a "subagent") which communicates with the main master agent.
+  All three approaches have been touched on elsewhere within this FAQ.
 
     As far as the module code is concerned, all three mechanisms
   use exactly the same module API.  So a module developed for use
@@ -3287,8 +3294,8 @@ Are there any examples, or documentation?
 
     There are an ever-increasing number of examples based on the
   MfD framework (see '{if,ip,tcp,udp}-mib/').  Much of this code
-  is not intended to be viewed directly, but these individual files
-  are clearly commented to distinguish between internal implementation
+  is not intended to be viewed directly, but individual files are
+  clearly commented to distinguish between internal implementation
   and public code.
 
     The Net-SNMP agent does not currently include any MIB modules
@@ -3356,9 +3363,9 @@ I've added my code to this template and it still doesn't work.  Why not?
          as a matter of course, don't you?)
 
     - Has the module been registered with the agent?
-        (Try walking the NET-SNMP-MIB::nsModuleTable)
+        (Try walking the NET-SNMP-MIB::nsModuleTable.
         This will also check whether the agent accepts
-        requests for enterprise-specific OIDs.
+        requests for enterprise-specific OIDs)
 
     - Is the module handler actually being called at all?
         (Activate the debugging code that you put into this
@@ -3404,19 +3411,19 @@ Why does the iterator call my get_{first,next} routines so often?
 How can I get the agent to generate a trap (or inform)?
 ------------------------------------------------------
 
-    There are two aspects to generating a trap - knowing *how* to
-  do this, and knowing *when* to do so.
+    There are two aspects to having the agent generate a trap -
+  knowing *how* to do this, and knowing *when* to do so.
 
-    How to generate a trap is reasonably simple - just call one of
-  the trap API routines ('send_easy_trap()' or 'send_v2trap') with
-  the relevant information (generic and specific trap values, or a
-  varbind list respectively).
+    Actually generating a trap is reasonably simple - just call one
+  of the trap API routines ('send_easy_trap()' or 'send_v2trap()')
+  with the relevant information (generic and specific trap values,
+  or a varbind list respectively).
 
     The 'mib2c.notify.conf' configuration file can be used to
   construct a suitable template routine for generating a trap,
   including building the variable list from the MIB trap
   definition.  These variables can then be given suitable values,
-  before invoking the 'send_v2trap' call to actually send the trap.
+  before invoking the 'send_v2trap()' call to actually send the trap.
   See the 'snmp_trap_api(3)' man page for further details.
 
     Note that these APIs are only available within the agent (or
@@ -3446,7 +3453,8 @@ How can I get the agent to generate a trap (or inform)?
     Otherwise, you'd need to use the routines documented in
   'snmp_alarm(3)' to regularly invoke a monitoring routine. This
   could check the necessary conditions (which need not be MIB
-  objects), and call the 'send_xxx_trap()' routine when appropriate.
+  objects), and call the 'send_xxx_trap()' routine (as generated
+  by 'mib2c.notify.conf') when appropriate.
 
 
 
@@ -3454,8 +3462,8 @@ How can I get the agent to send an SNMPv1 (or SNMPv2c) trap?
 -----------------------------------------------------------
 
     It doesn't make any difference whether you use the v1-style
-  API call 'send_easy_trap' or the v2-style 'send_v2trap' - what
-  matters is the directive(s) in the snmpd.conf file.
+  API call 'send_easy_trap()' or the v2-style 'send_v2trap()'.
+  What matters is the directive(s) in the snmpd.conf file.
 
     If this file contains 'trapsink', then the agent will send
   an SNMPv1 trap.  If this file contains 'trap2sink', then the
@@ -3472,13 +3480,13 @@ How can I get the agent to include varbinds with an SNMPv1 trap?
 ---------------------------------------------------------------
 
     There are two ways to do this.  You can either use the
-  'send_v2trap' call and give a varbind list, starting with
+  'send_v2trap()' call and give a varbind list, starting with
   the v2-equivalent of the SNMPv1 trap, followed by the
   additional varbinds.
 
-    Alternatively, you can use the API call 'send_trap_vars'
+    Alternatively, you can use the API call 'send_trap_vars()'
   which takes the same generic/specific trap values as
-  'send_easy_trap', plus the list of additional varbinds.
+  'send_easy_trap()', plus the list of additional varbinds.
 
     In either case, you also need to have 'trapsink' in the
   snmpd.conf file.  The resulting trap will be identical,
@@ -3490,13 +3498,13 @@ How can I get the agent to send an SNMPv1 enterprise-specific trap?
 ------------------------------------------------------------------
 
     There are two ways to do this.  You can either use the
-  'send_v2trap' call and give a varbind list, starting with
-  the v2-equivalent of the SNMPv1 trap, followed by the
+  'send_v2trap()' call and give a varbind list, starting
+  with the v2-equivalent of the SNMPv1 trap, followed by the
   additional varbinds.
 
     Alternatively, you can use the (undocumented) API call
-  'send_enterprise_trap_vars' which takes the same parameters
-  as 'send_trap_vars', plus the enterprise OID to use (in the
+  'send_enterprise_trap_vars()' which takes the same parameters
+  as 'send_trap_vars()', plus the enterprise OID to use (in the
   usual name/length form).  See the code file 'agent_trap.c'
 
     In either case, you also need to have 'trapsink' in the
@@ -3509,7 +3517,7 @@ How can I get the agent to send an SNMPv3 trap (or inform)?
 ----------------------------------------------------------
 
     It doesn't matter which API call you use to specify the
-  trap - 'send_easy_trap', 'send_v2trap' or one of the other
+  trap - 'send_easy_trap()', 'send_v2trap()' or one of the other
   calls mentioned above.  Generating an SNMPv3 notification
   (rather than a community-based one) is controlled by the
   snmpd.conf file.
@@ -3629,7 +3637,7 @@ What ASN.1 parser is used?
   the available MIBs should be included, and to handle duplicate object
   subidentifiers.
     The source code can be found in the snmplib directory (in 'parse.c'),
-  and the parser is usually bundled into the library 'libsnmp.a'
+  and the parser is usually bundled into the library 'libnetsnmp.a'
 
     Note that the parser attempts to be fairly forgiving of some common
   errors and incompatibilities in MIB files.  The Net-SNMP tools accepting
