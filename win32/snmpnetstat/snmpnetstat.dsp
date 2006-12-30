@@ -124,6 +124,10 @@ SOURCE=..\..\apps\snmpnetstat\strlcpy.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\apps\snmpnetstat\strtok_r.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\apps\snmpnetstat\winstub.c
 # End Source File
 # End Target
