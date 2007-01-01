@@ -374,14 +374,17 @@ int
 add_agent_caps_list(netsnmp_session * session, netsnmp_pdu *pdu)
 {
     netsnmp_session *sp;
+    char *cp;
 
     sp = find_agentx_session(session, pdu->sessid);
     if (sp == NULL)
         return AGENTX_ERR_NOT_OPEN;
 
+    cp = netsnmp_strdup_and_null(pdu->variables->val.string,
+                                 pdu->variables->val_len);
     register_sysORTable_sess(pdu->variables->name,
-                             pdu->variables->name_length,
-                             (char *) pdu->variables->val.string, sp);
+                             pdu->variables->name_length, cp, sp);
+    free(cp);
     return AGENTX_ERR_NOERROR;
 }
 
