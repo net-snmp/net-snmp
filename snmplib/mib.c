@@ -2845,7 +2845,8 @@ netsnmp_mibindex_new( const char *dirname )
     }
     DEBUGMSGTL(("mibindex", "new: %s (%s)\n", dirname, cp ));
     fp = fopen( cp, "w" );
-    fprintf( fp, "DIR %s\n", dirname );
+    if (fp)
+        fprintf( fp, "DIR %s\n", dirname );
     return fp;
 }
 
