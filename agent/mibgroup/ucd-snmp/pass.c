@@ -151,6 +151,54 @@ bin2asc(char *p, size_t n)
     return 3 * n - 1;
 }
 
+/*
+ * This is also called from pass_persist.c 
+ */
+int
+netsnmp_pass_str_to_errno(const char *buf)
+{
+    if (!strncasecmp(buf, "too-big", 7)) {
+        /* Shouldn't happen */
+        return SNMP_ERR_TOOBIG;
+    } else if (!strncasecmp(buf, "no-such-name", 12)) {
+        return SNMP_ERR_NOSUCHNAME;
+    } else if (!strncasecmp(buf, "bad-value", 9)) {
+        return SNMP_ERR_BADVALUE;
+    } else if (!strncasecmp(buf, "read-only", 9)) {
+        return SNMP_ERR_READONLY;
+    } else if (!strncasecmp(buf, "gen-error", 9)) {
+        return SNMP_ERR_GENERR;
+    } else if (!strncasecmp(buf, "no-access", 9)) {
+        return SNMP_ERR_NOACCESS;
+    } else if (!strncasecmp(buf, "wrong-type", 10)) {
+        return SNMP_ERR_WRONGTYPE;
+    } else if (!strncasecmp(buf, "wrong-length", 12)) {
+        return SNMP_ERR_WRONGLENGTH;
+    } else if (!strncasecmp(buf, "wrong-encoding", 14)) {
+        return SNMP_ERR_WRONGENCODING;
+    } else if (!strncasecmp(buf, "wrong-value", 11)) {
+        return SNMP_ERR_WRONGVALUE;
+    } else if (!strncasecmp(buf, "no-creation", 11)) {
+        return SNMP_ERR_NOCREATION;
+    } else if (!strncasecmp(buf, "inconsistent-value", 18)) {
+        return SNMP_ERR_INCONSISTENTVALUE;
+    } else if (!strncasecmp(buf, "resource-unavailable", 20)) {
+        return SNMP_ERR_RESOURCEUNAVAILABLE;
+    } else if (!strncasecmp(buf, "commit-failed", 13)) {
+        return SNMP_ERR_COMMITFAILED;
+    } else if (!strncasecmp(buf, "undo-failed", 11)) {
+        return SNMP_ERR_UNDOFAILED;
+    } else if (!strncasecmp(buf, "authorization-error", 19)) {
+        return SNMP_ERR_AUTHORIZATIONERROR;
+    } else if (!strncasecmp(buf, "not-writable", 12)) {
+        return SNMP_ERR_NOTWRITABLE;
+    } else if (!strncasecmp(buf, "inconsistent-name", 17)) {
+        return SNMP_ERR_INCONSISTENTNAME;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
 void
 init_pass(void)
 {
@@ -514,12 +562,7 @@ setPass(int action,
             exec_command(passthru);
             DEBUGMSGTL(("ucd-snmp/pass", "pass-running returned: %s",
                         passthru->output));
-            if (!strncasecmp(passthru->output, "not-writable", 12)) {
-                return SNMP_ERR_NOTWRITABLE;
-            } else if (!strncasecmp(passthru->output, "wrong-type", 10)) {
-                return SNMP_ERR_WRONGTYPE;
-            }
-            return SNMP_ERR_NOERROR;
+            return netsnmp_pass_str_to_errno(passthru->output);
         }
     }
     if (snmp_get_do_debugging()) {
