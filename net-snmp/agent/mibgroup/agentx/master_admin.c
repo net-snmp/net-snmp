@@ -390,10 +390,12 @@ add_agent_caps_list(netsnmp_session * session, netsnmp_pdu *pdu)
 
     parms.OR_oid = pdu->variables->name;
     parms.OR_oidlen = pdu->variables->name_length;
-    parms.OR_descr = (char *) pdu->variables->val.string;
+    parms.OR_descr  = netsnmp_strdup_and_null(pdu->variables->val.string,
+                                              pdu->variables->val_len);
     parms.OR_sess = sp;
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_REQ_REG_SYSOR, (void*)&parms);
+    free(parms.OR_descr);
     return AGENTX_ERR_NOERROR;
 }
 
