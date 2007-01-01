@@ -4713,8 +4713,8 @@ add_mibdir(const char *dirname)
     char            tmpstr[300];
     int             count = 0;
     int             fname_len = 0;
+    char           *token;
 #if !(defined(WIN32) || defined(cygwin))
-    char            token[MAXTOKEN];
     char space;
     char newline;
     struct stat     dir_stat, idx_stat;
@@ -4723,12 +4723,12 @@ add_mibdir(const char *dirname)
 
     DEBUGMSGTL(("parse-mibs", "Scanning directory %s\n", dirname));
 #if !(defined(WIN32) || defined(cygwin))
-    snprintf(token, sizeof(token), "%s/%s", dirname, ".index");
-    token[ sizeof(token)-1 ] = 0;
-    if (stat(token, &idx_stat) == 0 && stat(dirname, &dir_stat) == 0) {
+    token = netsnmp_mibindex_lookup( dirname );
+    if (token && stat(token, &idx_stat) == 0 && stat(dirname, &dir_stat) == 0) {
         if (dir_stat.st_mtime < idx_stat.st_mtime) {
             DEBUGMSGTL(("parse-mibs", "The index is good\n"));
             if ((ip = fopen(token, "r")) != NULL) {
+                fgets(tmpstr, sizeof(tmpstr), ip); /* Skip dir line */
                 while (fscanf(ip, "%127s%c%299s%c", token, &space, tmpstr,
 		    &newline) == 4) {
 
@@ -4761,9 +4761,7 @@ add_mibdir(const char *dirname)
 #endif
 
     if ((dir = opendir(dirname))) {
-        snprintf(tmpstr, sizeof(tmpstr), "%s/.index", dirname);
-        tmpstr[ sizeof(tmpstr)-1 ] = 0;
-        ip = fopen(tmpstr, "w");
+        ip = netsnmp_mibindex_new( dirname );
         while ((file = readdir(dir))) {
             /*
              * Only parse file names that don't begin with a '.' 

@@ -118,6 +118,9 @@ SOFTWARE.
     void            netsnmp_set_mib_directory(const char *dir);
     char            *netsnmp_get_mib_directory(void);
     void            netsnmp_fixup_mib_directory(void);
+    void            netsnmp_mibindex_load( void );
+    char *          netsnmp_mibindex_lookup( const char * );
+    FILE *          netsnmp_mibindex_new( const char * );
     void            netsnmp_init_mib(void);
 #ifndef NETSNMP_CLEAN_NAMESPACE
     void            init_mib(void);
