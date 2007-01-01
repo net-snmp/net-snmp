@@ -1235,6 +1235,7 @@ retry:
                     break;
                 }
                 vtmp = vb2->next_variable;
+                snmp_free_var_internals( vb2 );
                 snmp_clone_var( vb1, vb2 );
                 vb2->next_variable = vtmp;
             }

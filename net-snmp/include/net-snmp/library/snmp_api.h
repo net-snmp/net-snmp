@@ -625,6 +625,7 @@ struct variable_list {
      */
     void            snmp_free_pdu(netsnmp_pdu *);
 
+    void            snmp_free_var_internals(netsnmp_variable_list *);     /* frees contents only */
     void            snmp_free_var(netsnmp_variable_list *);     /* frees just this one */
 
     void            snmp_free_varbind(netsnmp_variable_list * var);     /* frees all in list */
