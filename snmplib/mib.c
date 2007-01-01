@@ -5290,12 +5290,24 @@ _add_strings_to_oid(void *tp, char *cp,
             if (check && tp->ranges) {
                 struct range_list *rp = tp->ranges;
                 int             ok = 0;
-                while (!ok && rp)
+                if (tp->type == TYPE_INTEGER ||
+                    tp->type == TYPE_INTEGER32) {
+                  while (!ok && rp) {
                     if ((rp->low <= (int) subid)
                         && ((int) subid <= rp->high))
                         ok = 1;
                     else
                         rp = rp->next;
+                  }
+                } else { /* check unsigned range */
+                  while (!ok && rp) {
+                    if (((unsigned int)rp->low <= subid)
+                        && (subid <= (unsigned int)rp->high))
+                        ok = 1;
+                    else
+                        rp = rp->next;
+                  }
+                }
                 if (!ok)
                     goto bad_id;
             }
