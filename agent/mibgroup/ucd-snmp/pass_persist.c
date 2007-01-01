@@ -61,6 +61,7 @@ static int      write_persist_pipe(int iindex, const char *data);
  */
 extern int      asc2bin(char *p);
 extern int      bin2asc(char *p, size_t n);
+extern int      netsnmp_pass_str_to_errno(const char *buf);
 extern int      snmp_oid_min_compare(const oid *, size_t, const oid *,
                                      size_t);
 
@@ -492,18 +493,7 @@ setPassPersist(int action,
                 return SNMP_ERR_NOTWRITABLE;
             }
 
-            if (!strncasecmp(buf, "not-writable", 12)) {
-                return SNMP_ERR_NOTWRITABLE;
-            } else if (!strncasecmp(buf, "wrong-type", 10)) {
-                return SNMP_ERR_WRONGTYPE;
-            } else if (!strncasecmp(buf, "wrong-length", 12)) {
-                return SNMP_ERR_WRONGLENGTH;
-            } else if (!strncasecmp(buf, "wrong-value", 11)) {
-                return SNMP_ERR_WRONGVALUE;
-            } else if (!strncasecmp(buf, "inconsistent-value", 18)) {
-                return SNMP_ERR_INCONSISTENTVALUE;
-            }
-            return SNMP_ERR_NOERROR;
+            return netsnmp_pass_str_to_errno(buf);
         }
     }
     if (snmp_get_do_debugging()) {
