@@ -82,8 +82,6 @@ SOFTWARE.
 
 #include <net-snmp/net-snmp-includes.h>
 
-int             failures = 0;
-
 void
 usage(void)
 {
