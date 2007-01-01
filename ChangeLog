@@ -2,6 +2,67 @@
 
 Changes: V4.2.6 -> V4.2.7
 
+2007/01/01 11:40  dts12
+
+   * NEWS:
+
+   Document snmpnetstat rewrite, and closure of 4.2.x development.
+
+2007-01-01 11:33  dts12
+
+   * FAQ, README, sedscript.in,
+     version.h, perl/SNMP/SNMP.pm:
+
+   - (version.h sedscript.in): version tag ( 4.2.7 )
+
+2007-01-01 11:31  dts12
+
+   * agent/mibgroup/agentx/master_admin.c:
+
+   Ensure sysORDescriptions are null-terminated, so they can be
+   safely passed to 'strdup()'.  Reported by Wolfgang Pedot.
+   (Includes 'netsnmp_strdup_and_null()' code copied from
+    v5 Net-SNMP library - tools.c)
+
+2006-12-30 18:23  dts12
+
+   * win32/libsnmp_dll/libsnmp.def,
+     apps/snmpnetstat/strtok_r.c,
+     win32/snmpnetstat/snmpnetstat.dsp:
+
+   Ensure snmpnetstat (and Release version of snmpd) compile under MSVC++
+
+2006-12-04 17:53  hardaker
+
+   * COPYING, makefileindepend.pl:
+
+   remove obsolete history section
+
+2006-06-21 16:14  dts12
+
+   * agent/mibgroup/ucd-snmp/proxy.c:
+
+   Apply patch #850716 to fix bug #850185
+
+2006-06-20 16:58  dts12
+
+   * agent/mibgroup/versiontag:
+
+   SourceForge have changed the naming scheme for CVS hosts.
+
+2006-06-20 16:46  dts12
+
+   * FAQ, README, sedscript.in,
+     version.h, perl/SNMP/SNMP.pm:
+
+   - (version.h sedscript.in): version tag ( 4.2.7.rc2 )
+
+2006-06-20 16:44  dts12
+
+   * ChangeLog:
+
+   Latest changes, ready for 4.2.7.rc2
+
 2006-06-20 10:35  dts12
 
    * agent/mibgroup/ucd_snmp.h:
@@ -10,8 +71,7 @@ Changes: V4.2.6 -> V4.2.7
 
 2006-06-20 10:29  dts12
 
-   * agent/mibgroup/host/: hr_filesys.c, hr_storage.c
-:
+   * agent/mibgroup/host/: hr_filesys.c, hr_storage.c:
 
    Backport trontor's fix for bug #942498, for NetBSD
 
