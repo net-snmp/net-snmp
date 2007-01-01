@@ -4998,7 +4998,7 @@ snmp_sess_async_send(void *sessp,
  * Frees the variable and any malloc'd data associated with it.
  */
 void
-snmp_free_var(netsnmp_variable_list * var)
+snmp_free_var_internals(netsnmp_variable_list * var)
 {
     if (!var)
         return;
@@ -5015,7 +5015,12 @@ snmp_free_var(netsnmp_variable_list * var)
             SNMP_FREE(var->data);
         }
     }
+}
 
+void
+snmp_free_var(netsnmp_variable_list * var)
+{
+    snmp_free_var_internals(var);
     free((char *) var);
 }
 
