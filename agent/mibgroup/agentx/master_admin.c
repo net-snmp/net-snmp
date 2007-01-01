@@ -292,18 +292,49 @@ release_idx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     return AGENTX_ERR_NOERROR;
 }
 
+
+    /*
+     *  Copied from the 5.x Net-SNMP library 'tools.c'
+     */
+/** copies a (possible) unterminated string of a given length into a
+ *  new buffer and null terminates it as well (new buffer MAY be one
+ *  byte longer to account for this */
+static char *
+netsnmp_strdup_and_null(const u_char * from, size_t from_len)
+{
+    char         *ret;
+
+    if (from_len == 0 || from[from_len - 1] != '\0') {
+        ret = (char *)malloc(from_len + 1);
+        if (!ret)
+            return NULL;
+        ret[from_len] = '\0';
+    } else {
+        ret = (char *)malloc(from_len);
+        if (!ret)
+            return NULL;
+        ret[from_len - 1] = '\0';
+    }
+    memcpy(ret, from, from_len);
+    return ret;
+}
+
+
 int
 add_agent_caps_list(struct snmp_session *session, struct snmp_pdu *pdu)
 {
     struct snmp_session *sp;
+    char *cp;
 
     sp = find_agentx_session( session, pdu->sessid );
     if ( sp == NULL )
         return AGENTX_ERR_NOT_OPEN;
 
+    cp = netsnmp_strdup_and_null(pdu->variables->val.string,
+                                 pdu->variables->val_len);
     register_sysORTable_sess(pdu->variables->name,
-    			pdu->variables->name_length,
-			(char *)pdu->variables->val.string, sp);
+    			pdu->variables->name_length, cp, sp);
+    free(cp);
     return AGENTX_ERR_NOERROR;
 }
 
