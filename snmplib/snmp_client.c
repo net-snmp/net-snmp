@@ -1235,6 +1235,13 @@ retry:
                     break;
                 }
                 vtmp = vb2->next_variable;
+                /* free old data before overwriting */
+                if (vb2->val.string) {
+                    if (vb2->val.string != &vb2->buf[0]) {
+                        free(vb2->val.string);
+                        vb2->val.string = NULL;
+                    }
+                }
                 snmp_clone_var( vb1, vb2 );
                 vb2->next_variable = vtmp;
             }
