@@ -28,6 +28,7 @@ netsnmp_register_default_domain(const char* application, const char* domain)
     if (run && strcmp(run->application, application) == 0) {
       if (run->domain != NULL) {
 	  free (run->domain);
+	  run->domain=NULL;
 	  res = 1;
       }
     } else {
@@ -187,6 +188,7 @@ netsnmp_register_default_target(const char* application, const char* domain,
     if (run && i == 0 && strcmp(run->domain, domain) == 0) {
       if (run->target != NULL) {
 	    free(run->target);
+	    run->target = NULL;
 	    res = 1;
       }
     } else {
