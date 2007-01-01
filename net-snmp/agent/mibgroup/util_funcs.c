@@ -515,6 +515,17 @@ restart_doit(int a)
 {
     snmp_shutdown("snmpd");
 
+    /*  This signal handler may run with SIGALARM blocked.
+     *  Since the signal mask is preserved accross execv(), we must 
+     *  make sure that SIGALARM is unblocked prior of execv'ing.
+     *  Otherwise SIGALARM will be ignored in the next incarnation
+     *  of snmpd, because the signal is blocked. And thus, the 
+     *  restart doesn't work anymore. 
+     */ 
+#if HAVE_SIGBLOCK 
+    sigsetmask(0);
+#endif 
+
     /*
      * do the exec 
      */
