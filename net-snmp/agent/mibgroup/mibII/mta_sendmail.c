@@ -298,7 +298,7 @@ static void print_error(va_alist)
   format      = va_arg(ap, char *);
 #endif
 
-  vsprintf(buffer, format, ap);
+  vsnprintf(buffer, sizeof(buffer), format, ap);
 
   if (config)
   {
@@ -565,13 +565,15 @@ static BOOL read_sendmailcf(BOOL config)
             if (strncasecmp(line + 2, "StatusFile", 10) == 0)
             {
 
-              strcpy(sendmailst_fn, filename);
+              strncpy(sendmailst_fn, filename, sizeof(sendmailst_fn));
+              sendmailst_fn[ sizeof(sendmailst_fn)-1 ] = 0;
               found_sendmailst = TRUE;
               DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf","found statatistics file \"%s\"\n", sendmailst_fn));
             }
             else if (strncasecmp(line + 2, "QueueDirectory", 14) == 0)
             {
-              strcpy(mqueue_dn, filename);
+              strncpy(mqueue_dn, filename, sizeof(mqueue_dn));
+              mqueue_dn[ sizeof(mqueue_dn)-1 ] = 0;
               found_mqueue = TRUE;
               DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf","found mailqueue directory \"%s\"\n", mqueue_dn));
             } else {
@@ -661,7 +663,7 @@ static BOOL read_sendmailcf(BOOL config)
  *    sendmail_stats_t - the time (in seconds) to cache statistics
  *    sendmail_queue_t - the time (in seconds) to cache the directory scanning results
  *
- *    For "sendmail_config", "sendmail_stats" and "sendmail_queue", the copy_word
+ *    For "sendmail_config", "sendmail_stats" and "sendmail_queue", the copy_nword
  *    function is used to copy the filename.
  *
  *  Parameters:
@@ -690,7 +692,7 @@ static void mta_sendmail_parse_config(const char *token, char *line)
     {
       line++;
     }
-    copy_word(line, sendmailst_fn);
+    copy_nword(line, sendmailst_fn, sizeof(sendmailst_fn));
 
     open_sendmailst(TRUE);
 
@@ -711,7 +713,7 @@ static void mta_sendmail_parse_config(const char *token, char *line)
     {
       line++;
     }
-    copy_word(line, sendmailcf_fn);
+    copy_nword(line, sendmailcf_fn, sizeof(sendmailcf_fn));
 
     read_sendmailcf(TRUE);
 
@@ -724,7 +726,7 @@ static void mta_sendmail_parse_config(const char *token, char *line)
     {
       line++;
     }
-    copy_word(line, mqueue_dn);
+    copy_nword(line, mqueue_dn, sizeof(mqueue_dn));
 
     if (mqueue_dp != NULL)
     {

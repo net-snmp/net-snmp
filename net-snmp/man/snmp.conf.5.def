@@ -3,9 +3,7 @@
 .ds ]W VVERSIONINFO
 .UC 4
 .SH NAME
-DATADIR/snmp/snmp.conf - configuration file for the ucd-snmp applications.
-.br
-~/.snmp/snmp.conf - personal configuration file.
+DATADIR/snmp/snmp.conf, ~/.snmp/snmp.conf - configuration files for the ucd-snmp applications.
 .SH DESCRIPTION
 .B snmp.conf
 is the configuration file which define how the ucd-snmp SNMP
@@ -13,6 +11,11 @@ applications operate.  Tokens that can be put in them are described in
 the
 .B DIRECTIVES
 section below.
+.PP
+SYSCONFDIR/snmp/snmp.conf is a common file, shared by all users of the system.
+.br
+~/.snmp/snmp.conf is a personal file, with configuration settings for a
+particular user.
 .SH PLEASE READ FIRST
 Make sure you make these files read-only by the user if you are
 storing sensitive information in them like pass-phrases!
@@ -103,7 +106,7 @@ equivalent to -OS.
 Equivalent to -OX
 .IP "noRangeCheck (1|yes|true|0|no|false)"
 disables the validation of values that is done by snmpset before issuing
-the reuqest to the agent.
+the request to the agent.
 .IP "dumpPacket      (1|yes|true|0|no|false)"
 Whether the commands should dump packets by default.
 .IP "doDebugging (1|0)"

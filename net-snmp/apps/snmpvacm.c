@@ -61,7 +61,6 @@
 #include "tools.h"
 #include "keytools.h"
 #include "snmp-tc.h"
-#include "transform_oids.h"
 #include "snmpv3.h"
 #include "default_store.h"
 #include "getopt.h"
@@ -108,7 +107,7 @@ static oid  vacmGroupName[MAX_OID_LEN]			= {1,3,6,1,6,3,16,1,2,1,3},
 	    vacmAccessStatus[MAX_OID_LEN]	    	= {1,3,6,1,6,3,16,1,4,1,9},
 	    vacmViewTreeFamilyMask[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,5,2,1,3},
 	    vacmViewTreeFamilyType[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,5,2,1,4},
-	    vacmViewTreeFamilyStorageType[MAX_OID_LEN]= {1,3,6,1,6,3,16,1,5,2,1,5},
+	    vacmViewTreeFamilyStorageType[MAX_OID_LEN]  = {1,3,6,1,6,3,16,1,5,2,1,5},
 	    vacmViewTreeFamilyStatus[MAX_OID_LEN]	= {1,3,6,1,6,3,16,1,5,2,1,6}
 ;
 
@@ -126,7 +125,7 @@ usage (void)
   fprintf(stderr, "  deleteAccess  GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL\n");
   fprintf(stderr, "  createSec2Group  MODEL SECURITYNAME  GROUPNAME\n");
   fprintf(stderr, "  deleteSec2Group  MODEL SECURITYNAME\n");
-  fprintf(stderr, "  createView  [-e] NAME SUBTREE MASK\n");
+  fprintf(stderr, "  createView  [-Ce] NAME SUBTREE MASK\n");
   fprintf(stderr, "  deleteView  NAME SUBTREE\n"); 
 }
 
@@ -190,16 +189,17 @@ view_oid(oid *it, size_t *len, const char *viewName,char *viewSubtree)
 	exit(1);
   }
 
-  *len = itIndex + 1 + strlen(viewName)+c_oid_length;
+  *len = itIndex + 2 + strlen(viewName)+c_oid_length;
 
   it[itIndex++] = strlen(viewName);
   for(i=0; i < (int)strlen(viewName); i++)
     it[itIndex++] = viewName[i];
     
+  it[itIndex++] = c_oid_length;
   for(i=0; i < (int)c_oid_length; i++)
     it[itIndex++] = c_oid[i];
 
- /* sprint_objid(c_oid, it, *len); */
+ /* snprint_objid(c_oid, sizeof(c_oid), it, *len); */
 }
 
 static void optProc(int argc, char *const *argv, int opt)
@@ -214,8 +214,7 @@ static void optProc(int argc, char *const *argv, int opt)
 
                     default:
                         fprintf(stderr,
-                                "Unknown flag passed to -C: %c\n", *optarg);
-                        usage();
+                                "Unknown flag passed to -C: %c\n", optarg[-1]);
                         exit(1);
                 }
             }
@@ -534,6 +533,17 @@ main(int argc, char *argv[])
 	    {
 	      fprintf(stderr, "Error in packet.\nReason: %s\n",
 				    snmp_errstring(response->errstat));
+	      if (response->errindex != 0){
+		int count;
+		struct variable_list *vars = response->variables;
+		fprintf(stderr, "Failed object: ");
+		for(count = 1; vars && (count != response->errindex);
+		    vars = vars->next_variable, count++)
+			;
+		if (vars)
+		  fprint_objid(stderr, vars->name, vars->name_length);
+		fprintf(stderr, "\n");
+	      }
 	      exitval = 2;
 	    }
 	  }

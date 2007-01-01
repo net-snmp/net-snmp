@@ -20,7 +20,7 @@ AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib"
 STARTAGENT
 
 # test to see that the current agent doesn't support the system mib
-CAPTURE "snmpget $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost system.sysUpTime.0"
+CAPTURE "snmpget -t 3 $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost system.sysUpTime.0"
 
 CHECK "system.sysUpTime.0 = No Such Object"
 

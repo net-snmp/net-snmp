@@ -108,6 +108,10 @@ SOFTWARE.
 #include <sys/stat.h>
 #endif
 
+#if defined(hpux10) || defined(hpux11)
+#include <sys/pstat.h>
+#endif
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "tools.h"
@@ -331,7 +335,41 @@ in_addr_t get_myaddr(void)
 
 long get_uptime (void)
 {
-    return (0); /* not implemented */
+  long             return_value = 0;
+  DWORD            buffersize   = (sizeof(PERF_DATA_BLOCK)+
+                                  sizeof(PERF_OBJECT_TYPE)),
+                   type         = REG_EXPAND_SZ;
+  PPERF_DATA_BLOCK perfdata     = NULL;
+
+  /* min requirement is one PERF_DATA_BLOCK plus one PERF_OBJECT_TYPE */ 
+  perfdata = (PPERF_DATA_BLOCK) malloc(buffersize);
+
+
+  memset(perfdata,0,buffersize);
+
+  RegQueryValueEx( HKEY_PERFORMANCE_DATA,
+                   "Global",
+                   NULL,
+                   &type,
+                   (LPBYTE) perfdata,
+                   &buffersize );
+
+  /* we can not rely on the return value since there is always more so
+     we check the signature */
+
+  if (wcsncmp(perfdata->Signature,L"PERF",4)==0)
+  {
+     /* signature ok, and all we need is in the in the PERF_DATA_BLOCK */
+     return_value = (long)((perfdata->PerfTime100nSec.QuadPart / 
+                           (LONGLONG)100000));
+  }
+  else
+    return_value = GetTickCount()/10;
+
+  RegCloseKey(HKEY_PERFORMANCE_DATA);
+  free(perfdata);
+
+  return return_value;
 }
 
 char *
@@ -421,6 +459,9 @@ in_addr_t get_myaddr (void)
 long get_boottime (void)
 {
     static long boottime_csecs = 0;
+#if defined(hpux10) || defined(hpux11)
+    struct pst_static pst_buf;
+#else
     struct timeval boottime;
 #ifdef	CAN_USE_SYSCTL
     int	    mib[2];
@@ -435,12 +476,17 @@ long get_boottime (void)
 #endif
 	    { (char*)"" }
 	};
-#endif
+#endif						/* CAN_USE_SYSCTL */
+#endif						/* hpux10 || hpux11 */
 
 
     if ( boottime_csecs != 0 )
 	return( boottime_csecs );
 
+#if defined(hpux10) || defined(hpux11)
+    pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0);
+    boottime_csecs = pst_buf.boot_time * 100;
+#else
 #ifdef CAN_USE_SYSCTL
     mib[0] = CTL_KERN;
     mib[1] = KERN_BOOTTIME;
@@ -463,6 +509,7 @@ long get_boottime (void)
     close(kmem);
     boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
 #endif						/* CAN_USE_SYSCTL */
+#endif						/* hpux10 || hpux11 */
 
     return( boottime_csecs );
 }
@@ -593,11 +640,11 @@ strdup(const char *src)
 }
 #endif	/* HAVE_STRDUP */
 
-#ifndef HAVE_SETENV
-int setenv(const char *name,
-	   const char *value,
-	   int overwrite)
+int snmp_setenv(const char *name,
+		const char *value,
+		int overwrite)
 {
+#ifndef HAVE_SETENV
     char *cp;
     int ret;
 
@@ -609,11 +656,13 @@ int setenv(const char *name,
     sprintf(cp, "%s=%s", name, value);
     ret = putenv(cp);
 #ifdef WIN32
-	free(cp);
-#endif
+    free(cp);
+#endif /* WIN32 */
     return ret;
-}
+#else /* HAVE_SETENV */
+    return setenv(name, value, overwrite);
 #endif /* HAVE_SETENV */
+}
 
 int
 calculate_time_diff(struct timeval *now, struct timeval *then)
@@ -696,7 +745,10 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast) {
 #ifdef WIN32
 	    CreateDirectory(buf, NULL);
 #else
-            mkdir(buf, mode);
+            if (mkdir(buf, mode) == -1 ) {
+                free(ourcopy);
+                return SNMPERR_GENERR;
+	    }
 #endif
         } else {
             /* exists, is it a file? */

@@ -67,6 +67,9 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #if HAVE_BASETSD_H
 #include <basetsd.h>
 #define ssize_t SSIZE_T
@@ -74,10 +77,13 @@
 #if HAVE_RAISE
 #define alarm raise
 #endif
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 #include "mibincl.h"
 #include "struct.h"
 #include "util_funcs.h"
-#include "../../snmplib/system.h"
+#include "system.h"
 #if HAVE_LIMITS_H
 #include "limits.h"
 #endif
@@ -101,14 +107,42 @@ Exit(int var)
   exit(var);
 }
 
+static const char *
+make_tempfile(void)
+{
+  static char	name[32];
+  int		fd = -1;
+
+  strcpy(name, "/tmp/snmpdXXXXXX");
+#ifdef HAVE_MKSTEMP
+  fd = mkstemp(name);
+#else
+  if (mktemp(name))
+    fd = open(name, O_CREAT|O_EXCL|O_WRONLY);
+#endif
+  if (fd >= 0) {
+    close(fd);
+    return name;
+  }
+  return NULL;
+}
+
 int shell_command(struct extensible *ex)
 {
 #if HAVE_SYSTEM
-  const char *ofname = "/tmp/shoutput";
+  const char *ofname;
   char shellline[STRMAX];
   FILE *shellout;
   
-  sprintf(shellline,"%s > %s",ex->command, ofname);
+  ofname = make_tempfile();
+  if (ofname == NULL) {
+    ex->output[0] = 0;
+    ex->result = 127;
+    return ex->result;
+  }
+
+  snprintf(shellline, sizeof(shellline), "%s > %s",ex->command, ofname);
+  shellline[ sizeof(shellline)-1 ] = 0;
   ex->result = system(shellline);
   ex->result = WEXITSTATUS(ex->result);
   shellout = fopen(ofname,"r");
@@ -134,7 +168,7 @@ int exec_command(struct extensible *ex)
   int fd;
   FILE *file;
   
-  if ((fd = get_exec_output(ex))) {
+  if ((fd = get_exec_output(ex)) != -1) {
     file = fdopen(fd,"r");
     if (fgets(ex->output,sizeof(ex->output),file) == NULL) {
       ex->output[0] = 0;
@@ -192,7 +226,7 @@ int get_exec_output(struct extensible *ex)
 #ifdef EXCACHETIME
         cachetime = 0;
 #endif
-        return 0;
+        return -1;
       }
     if ((ex->pid = fork()) == 0) 
       {
@@ -200,7 +234,7 @@ int get_exec_output(struct extensible *ex)
         if (dup(fd[1]) != 1)
           {
             setPerrorstatus("dup");
-            return 0;
+            return -1;
           }
 
         /* write standard output and standard error to pipe. */
@@ -213,21 +247,24 @@ int get_exec_output(struct extensible *ex)
         close(0);
         (void) open("/dev/null", O_RDWR);
 
-        for(cnt=1,cptr1 = ex->command, cptr2 = argvs; *cptr1 != 0;
+        for(cnt=1,cptr1 = ex->command, cptr2 = argvs; cptr1 && *cptr1 != 0;
             cptr2++, cptr1++) {
           *cptr2 = *cptr1;
           if (*cptr1 == ' ') {
             *(cptr2++) = 0;
-            cptr1 = skip_white(cptr1);
-            *cptr2 = *cptr1;
-            if (*cptr1 != 0) cnt++;
+            if ((cptr1 = skip_white(cptr1)) == NULL)
+                break;
+            if (cptr1) {
+                *cptr2 = *cptr1;
+                if (*cptr1 != 0) cnt++;
+            }
           }
         }
         *cptr2 = 0;
         *(cptr2+1) = 0;
         argv = (char **) malloc((cnt+2) * sizeof(char *));
         if (argv == NULL)
-          return 0; /* memory alloc error */
+          return -1; /* memory alloc error */
         aptr = argv;
         *(aptr++) = argvs;
         for (cptr2 = argvs, i=1; i != cnt; cptr2++)
@@ -237,7 +274,7 @@ int get_exec_output(struct extensible *ex)
           }
         while (*cptr2 != 0) cptr2++;
         *(aptr++) = NULL;
-        copy_word(ex->command,ctmp);
+        copy_nword(ex->command,ctmp, sizeof(ctmp));
         execv(ctmp,argv);
         perror(ctmp);
         exit(1);
@@ -251,15 +288,15 @@ int get_exec_output(struct extensible *ex)
 #ifdef EXCACHETIME
           cachetime = 0;
 #endif
-          return 0;
+          return -1;
         }
 #ifdef EXCACHETIME
         unlink(cachefile);
 	/* XXX  Use SNMP_FILEMODE_CLOSED instead of 644? */
         if ((cfd = open(cachefile,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
-          setPerrorstatus("open");
+          setPerrorstatus(cachefile);
           cachetime = 0;
-          return 0;
+          return -1;
         }
         fcntl(fd[0],F_SETFL,O_NONBLOCK);  /* don't block on reads */
 #ifdef HAVE_USLEEP
@@ -290,7 +327,7 @@ int get_exec_output(struct extensible *ex)
         if (ex->pid > 0 && waitpid(ex->pid,&ex->result,0) < 0) {
           setPerrorstatus("waitpid()");
           cachetime = 0;
-          return 0;
+          return -1;
         }
         ex->pid = 0;
         ex->result = WEXITSTATUS(ex->result);
@@ -305,14 +342,14 @@ int get_exec_output(struct extensible *ex)
       ex->result = lastresult;
   }
   if ((cfd = open(cachefile,O_RDONLY)) < 0) {
-    setPerrorstatus("open");
-    return 0;
+    setPerrorstatus(cachefile);
+    return -1;
   }
   return(cfd);
 #endif
 
 #else /* !HAVE_EXECV */
-  return 0;
+  return -1;
 #endif
 }
 
@@ -336,13 +373,13 @@ int get_exec_pipes(char *cmd,
       close(0);
       if (dup(fd[0][0]) != 0)
         {
-          setPerrorstatus("dup");
+          setPerrorstatus("dup 0");
           return 0;
         }
       close(1);
       if (dup(fd[1][1]) != 1)
         {
-          setPerrorstatus("dup");
+          setPerrorstatus("dup 1");
           return 0;
         }
 
@@ -357,7 +394,8 @@ int get_exec_pipes(char *cmd,
         *cptr2 = *cptr1;
         if (*cptr1 == ' ') {
           *(cptr2++) = 0;
-          cptr1 = skip_white(cptr1);
+          if ((cptr1 = skip_white(cptr1)) == NULL)
+              break;
           *cptr2 = *cptr1;
           if (*cptr1 != 0) cnt++;
         }
@@ -376,9 +414,9 @@ int get_exec_pipes(char *cmd,
         }
       while (*cptr2 != 0) cptr2++;
       *(aptr++) = NULL;
-      copy_word(cmd,ctmp);
+      copy_nword(cmd,ctmp, sizeof(ctmp));
       execv(ctmp,argv);
-      perror("execv");
+      perror(ctmp);
       exit(1);
     }
   else
@@ -427,16 +465,12 @@ char **argvrestartp, *argvrestartname, *argvrestart;
 
 RETSIGTYPE restart_doit(int a)
 {
-  int i;
-  
-  /* close everything open */
-  for (i=0; i<= 2; i++)
-    close(i);
+    snmp_shutdown("snmpd");
 
   /* do the exec */
 #if HAVE_EXECV
   execv(argvrestartname,argvrestartp);
-  setPerrorstatus("execv");
+  setPerrorstatus(argvrestartname);
 #endif
 }
 
@@ -471,7 +505,7 @@ print_mib_oid(oid name[],
 	      size_t len)
 {
   char *buffer;
-  buffer=malloc(11*len); /* maximum digit lengths for int32 + a '.' */
+  buffer=(char*)malloc(11*len); /* maximum digit lengths for int32 + a '.' */
   if (!buffer) {
     snmp_log(LOG_ERR, "Malloc failed - out of memory?");
     return;
@@ -541,7 +575,6 @@ int header_simple_table(struct variable *vp, oid *name, size_t *length,
     }
   }
   if (rtest > 0 ||
-      (rtest == 0 && !exact && (int)(vp->namelen+1) < (int) *length) ||
     (exact == 1 && (rtest || (int)*length != (int)(vp->namelen+1)))) {
     if (var_len)
 	*var_len = 0;
@@ -554,16 +587,24 @@ int header_simple_table(struct variable *vp, oid *name, size_t *length,
     memmove(newname, vp->name, (int)vp->namelen * sizeof (oid));
     newname[vp->namelen] = 1;
     *length = vp->namelen+1;
+  } else if (((int)*length) > (int)vp->namelen+1) {  /* exact case checked earlier */
+    *length = vp->namelen+1;
+    memmove(newname, name, (*length) * sizeof(oid));
+    if (name[*length-1] < ULONG_MAX )
+      newname[*length-1] = name[*length-1] + 1;
+    else
+      newname[*length-1] = name[*length-1];  /* Careful not to overflow */
   }
   else {
     *length = vp->namelen+1;
     memmove(newname, name, (*length) * sizeof(oid));
-    if (!exact)
+    if (!exact && name[*length-1] < ULONG_MAX )
       newname[*length-1] = name[*length-1] + 1;
     else
       newname[*length-1] = name[*length-1];
   }  
-  if (max >= 0 && ((int)newname[*length-1] > max)) {
+  if ((max >= 0 && (newname[*length-1] > max)) ||
+              (0 == newname[*length-1] )) {
     if(var_len)
       *var_len = 0;
     return MATCH_FAILED;
@@ -887,10 +928,10 @@ void *Retrieve_Table_Data( mib_table_t t, int* max_idx)
 extern struct timeval starttime;
 
 		/* Return the value of 'sysUpTime' at the given marker */
-int
+u_long
 marker_uptime( marker_t pm )
 {
-    int res;
+    u_long res;
     marker_t start = (marker_t)&starttime;
 
     res = atime_diff( start, pm );
@@ -898,10 +939,10 @@ marker_uptime( marker_t pm )
 }
 
 		/* Return the number of timeTicks since the given marker */
-int
+u_long
 marker_tticks( marker_t pm )
 {
-    int res;
+    u_long res;
     marker_t now = atime_newMarker();
 
     res = atime_diff( pm, now );
@@ -910,12 +951,12 @@ marker_tticks( marker_t pm )
 }
 
 			/* struct timeval equivalents of these */
-int timeval_uptime( struct timeval *tv )
+u_long timeval_uptime( struct timeval *tv )
 {
     return marker_uptime((marker_t)tv);
 }
 
-int timeval_tticks( struct timeval *tv )
+u_long timeval_tticks( struct timeval *tv )
 {
     return marker_tticks((marker_t)tv);
 }

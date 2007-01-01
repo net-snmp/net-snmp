@@ -1,11 +1,52 @@
-		      ucd-snmp Version: 4.2
+		      ucd-snmp Version: 4.2.7
+
+		     ******************************
+		     ***  IMPORTANT:  SECURITY  ***
+		     ******************************
+
+  Version 4.2.1 and below of the ucd-snmp package contain some
+  critical security related bugs.  You MUST upgrade your ucd-snmp
+  software to ucd-snmp version 4.2.2 or higher (or net-snmp 5.0 or
+  higher) immediately.  Fortunately, if you are reading this you're
+  probably in the process of doing just that.
+
+                      ****************************
+                      ***    END OF v4 LINE    ***
+                      ****************************
+
+  The ucd-snmp project has now moved from UCDavis, and is now based
+  at SourceForge (www.sourceforge.net), under the new name 'net-snmp'.
+  The 4.2 line is the last release line that will use the ucd-snmp name.
+  4.2.1 and any subsequent ucd-snmp releases will be bug-fixes only.
+  All further developments will be released under the net-snmp name.
+
+  The 4.2.7 release is intended as a consolidated 'bug-fix' update
+  to the previous 4.2.6 version.  Active development has been
+  concentrating on the v5 'net-snmp' releases for some time, and
+  although some fixes have been applied to the v4 line, there are many
+  new features and bug fixes that are only available in v5 releases.
+  There are no significant changes to the APIs in this release.
+
+  This marks the end of development of the ucd-snmp v4 code. The
+  intention is that (barring major problems), this will be the last
+  release made under the 'ucd-snmp' banner.  All future development
+  will be applied to v5 lines only, and there will be no further
+  work on the v4 code.  Anyone still using this line is *strongly*
+  encouraged to upgrade as soon as possible.
+
 DISCLAIMER
 
-  The Authors, the University of California, and the University of
-  California at Davis assume no responsibility for damage or loss of
-  system performance as a direct or indirect result of the use of this
+  The Authors assume no responsibility for damage or loss of system
+  performance as a direct or indirect result of the use of this
   software.  This software is provided "as is" without express or
   implied warranty.
+
+  Despite the name, this software package has no connection with the
+  University of California, or the University of California at Davis.
+  These bodies also assume no responsibility for damage or loss of
+  system performance as a direct or indirect result of the use of this
+  software.
+
 
 TABLE OF CONTENTS
 
@@ -35,7 +76,8 @@ INTRODUCTION
   This package was originally based on the CMU 2.1.2.1 snmp code.  It
   has been greatly modified, restructured, enhanced and fixed.  It
   hardly looks the same as anything that CMU has ever released.  It
-  was renamed from ucd-snmp to net-snmp in November 2000.
+  was renamed from cmu-snmp to ucd-snmp in 1995 and later renamed from
+  ucd-snmp to net-snmp in November 2000.
 
 SUPPORTED ARCHITECTURES
 
@@ -48,26 +90,23 @@ SUPPORTED ARCHITECTURES
 
 AVAILABILITY
 
-  WWW:
-    Download:
-      - http://download.sourceforge.net/net-snmp/
-    Web page:
-      - http://www.netsnmp.org/
-    Project page:
-      - http://sourceforge.net/projects/net-snmp/
+  Download:
+    - http://www.net-snmp.org/download/
+    - ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/ucd-snmp.tar.gz
+  Mirrors:
+    - US:          ftp://ftp.freesnmp.com/mirrors/net-snmp/
+    - Bulgaria:    http://rtfm.uni-svishtov.bg/net-snmp/
+    - Germany:     ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/
 
-  FTP:
-    - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
-    - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
-    - ftp://ftp.win.ne.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
-    - ftp://ftp.chg.ru/pub/networking/management/snmp/ucd-snmp/ucd-snmp.tar.gz
-    - ftp://mirror.aarnet.edu.au/pub/ucd-snmp/ucd-snmp.tar.gz
-    - ftp://archive.logicnet.ro/mirrors/ucd-snmp.ucdavis.edu/
+  The old ucd-snmp.ucdavis.edu web site and ftp server is now
+  offline and should not be accessed any longer.
 
 WEB PAGES
 
-  http://www.netsnmp.org/
-  http://sourceforge.net/projects/net-snmp/
+  Web page:
+    - http://www.net-snmp.org/
+  Sourceforge Project page:
+    - http://www.net-snmp.org/project/
 
   Make sure you check out the logo there, which is created using
   postcards submitted from various locations that make use of the
@@ -93,7 +132,20 @@ HELPING OUT
   going to work on to make sure no one else is already doing so!
   You'll also need to keep up to date with the latest code snap shot,
   which can be obtained from CVS using the information found at
-  http://net-snmp.ucdavis.edu/cvs/?group_id=12694
+  http://www.net-snmp.org/cvs/.
+
+  Contributions to the Net-SNMP source code in any form are greatly
+  appreciated.  We expect the parties providing such contributions to
+  have the right to contribute them to the Net-SNMP project or that
+  the parties that do have the right have directed the person
+  submitting the contribution to do so.  In addition, all contributors
+  need to be aware that if the contribution is accepted and
+  incorporated into the Net-SNMP project, it will be redistributed
+  under the terms of the license agreement used for the entire body of
+  work that comprises the Net-SNMP project (see the COPYING file for
+  details).  If this license agreement ever changes the contribution
+  will continue to be released under any new licenses as well.  Thank
+  you, in advance, for your gracious contributions.
 
 CODE UPDATE ANNOUNCEMENTS
 
@@ -116,25 +168,43 @@ MAILING LISTS
 
   The lists:
 
-    The following mailing lists have been created for your use:
+    A number of mailing lists have been created for support of the project.
+    The main ones are:
 
-      net-snmp-announce@lists.sourcerforge.net  -- For announcements
-      net-snmp-users@lists.sourcerforge.net     -- For usage discussions
-      net-snmp-coders@lists.sourcerforge.net    -- For development discussions
-      net-snmp-cvs@lists.sourcerforge.net       -- For cvs update announcements
+      net-snmp-announce@lists.sourceforge.net  -- For announcements
+      net-snmp-users@lists.sourceforge.net     -- For usage discussions
+      net-snmp-coders@lists.sourceforge.net    -- For development discussions
 
-    To subscribe to these lists, please see:
+    The -coders list is intended for discussion on development of code
+    that will be shipped as part of the package.  The -users list is
+    for general discussion on configuring and using the package,
+    including issues with coding user-developed applications (clients,
+    managers, MIB modules, etc).
+
+    Please do *NOT* send messages to both -users and -coders lists.
+    This is completely unnecessary, and simply serves to further
+    overload (and annoy) the core development team.   If in doubt,
+    just use the -users list.
+
+
+    The other lists of possible interest are:
+
+      net-snmp-cvs@lists.sourceforge.net       -- For cvs update announcements
+      net-snmp-bugs@lists.sourceforge.net      -- For Bug database update announcements
+      net-snmp-patches@lists.sourceforge.net   -- For Patch database update announcements
+
+    Please do NOT post messages to these lists (or to the announce list above).
+    Bug reports and Patches should be submitted via the Source Forge tracker
+    system.  See the main project web pages for details.
+
+    To subscribe to any of these lists, please see:
   
-      http://sourceforge.net/mail/?group_id=12694
-
-    The lists you definitely want to subscribe to is the
-    net-snmp-announce@lists.sourceforge.net list and the
-    net-snmp-users@lists.sourceforge.net list.
+      http://www.net-snmp.org/lists/
 
   Archives:
     The archives for these mailing lists can be found by following links at
 
-      http://sourceforge.net/mail/?group_id=12694
+      http://www.net-snmp.org/lists/
 
 AGENT EXTENSIBILITY
 
@@ -147,7 +217,7 @@ AGENT EXTENSIBILITY
   re-run configure and re-compile (or link against its libraries).  No
   modification of the distributed source files are necessary.  See the
   following files for details on how to go about this:
-  http://www.netsnmp.org/tutorial/toolkit/, AGENT.txt,
+  http://www.net-snmp.org/tutorial/toolkit/, AGENT.txt,
   agent/mibgroup/examples/example.c, and agent/mibgroup/examples/example.h.
 
   Also, see the local/mib2c program and its README file for help in
@@ -157,7 +227,7 @@ AGENT EXTENSIBILITY
   agent can run as both a master agent and a subagent.  Additionally,
   a toolkit is provided that enables users of it to easily embed a
   agentx client into external applications.  See the tutorial at
-  http://ucd-snmp.ucdavis.edu/tutorial/toolkit/ for an example of how
+  http://www.net-snmp.org/tutorial/toolkit/ for an example of how
   go about doing this.
 
 CONFIGURATION
@@ -178,14 +248,14 @@ SUBMITTING BUG REPORTS
   as detailed information about exactly what is wrong.
 
   To submit a bug report, please use the web interface at
-  http://sourceforge.net/bugs/?group_id=12694.  It is a full-fledged
+  http://www.net-snmp.org/bugs/ .  It is a full-fledged
   bug-tracking system that will allow you to search for already
   existing bug reports as well as track the status of your report as
   it is processed by the core developers.
 
   If you intend to submit a patch as well, please read the PORTING
   file before you do so and then submit it to
-  http://sourceforge.net/patch/?group_id=12694.
+  http://www.net-snmp.org/patches/ .
 
 CLOSING
 
@@ -199,8 +269,7 @@ CLOSING
 
   Have fun and may it make your life easier,
 
-    Wes Hardaker
-    ucd-snmp-coders@lists.sourceforge.net
+    The net-snmp developers
 
 THANKS
 
@@ -213,10 +282,11 @@ THANKS
 
   Major Contributors:  (in no particular order)
 
-    Dan A. Dickey <ddickey@transition.com>
+    Steve Waldbusser <waldbusser@nextbeacon.com>
     Dave Shield <D.T.Shield@csc.liv.ac.uk>
-    Giovanni S. Marzot <gmarzot@nortelnetworks.com>
     Niels Baggesen <recnba@mediator.uni-c.dk>
+    Dan A. Dickey <ddickey@transition.com>
+    Giovanni S. Marzot <gmarzot@nortelnetworks.com>
     Simon Leinen <simon@limmat.switch.ch>
     David T. Perkins <dperkins@dsperkins.com>
     Mike Perik <mikep@crt.com>
@@ -268,6 +338,11 @@ THANKS
     Arne Oesleboe <Arne.Oesleboe@item.ntnu.no>
     Jeff Cours <jeff@ultradns.com>
     Karl Schilke <karl_schilke@eli.net>
+    Harrie Hazewinkel <harrie@@users.sourceforge.net>
+    Ron Mevissen <ron.mevissen@eed.ericsson.se>
+    T.J. Mather <tjmather@tjmather.com>
+    Johannes Schmidt-Fischer <jsf@InterFace-AG.com>
+    Latha Prabhu <agentcoder@yahoo.com>
 
   We've probably forgotten people on this list.  Let us know if you've
   contributed code and we've left you out.

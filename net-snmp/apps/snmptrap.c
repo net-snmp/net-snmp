@@ -92,14 +92,14 @@ void usage(void)
 {
     fprintf(stderr,"Usage: %s ", inform ? "snmpinform" : "snmptrap");
     snmp_parse_args_usage(stderr);
-    fprintf(stderr," [<trap parameters> ...]\n\n");
+    fprintf(stderr," TRAP-PARAMETERS\n\n");
     snmp_parse_args_descriptions(stderr);
-    fprintf(stderr, "  -C <APPOPTS>  Toggle various application specific behaviour:\n");
+    fprintf(stderr, "  -C <APPOPTS>\tsnmptrap specific options\n");
     fprintf(stderr, "\t\t  APPOPTS values:\n");
-    fprintf(stderr,"\t\t      i: Send an snmp INFORM instead of an snmp TRAP.\n");
-    fprintf(stderr, "  -v 1 trap parameters:\n\t enterprise-oid agent trap-type specific-type uptime [ var ]...\n");
+    fprintf(stderr, "\t\t      i: send an snmp INFORM instead of an snmp TRAP\n");
+    fprintf(stderr, "\n  -v 1 trap parameters:\n\t enterprise-oid agent trap-type specific-type uptime [OID TYPE VALUE]...\n");
     fprintf(stderr, "  or\n");
-    fprintf(stderr, "  -v 2 trap parameters:\n\t uptime trapoid [ var ] ...\n");
+    fprintf(stderr, "  -v 2 trap parameters:\n\t uptime trapoid [OID TRAP VALUE] ...\n");
 }
 
 int snmp_input(int operation,
@@ -141,8 +141,7 @@ static void optProc(int argc, char *const *argv, int opt)
                         break;
                     default:
                         fprintf(stderr,
-                                "Unknown flag passed to -C: %c\n", *optarg);
-                        usage();
+                                "Unknown flag passed to -C: %c\n", optarg[-1]);
                         exit(1);
                 }
             }
@@ -166,6 +165,8 @@ int main(int argc, char *argv[])
     prognam = strrchr(argv[0], '/');
     if (prognam) prognam++;
     else prognam = argv[0];
+
+    putenv(strdup("POSIXLY_CORRECT=1"));
 
     if (strcmp(prognam, "snmpinform") == 0) inform = 1;
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {

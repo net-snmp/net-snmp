@@ -1,4 +1,4 @@
-.TH SNMPTRAPD.CONF 5 "16 Nov 2000"
+.TH SNMPTRAPD.CONF 5 "28 Aug 2001"
 .ds )H U.C. Davis
 .ds ]W VVERSIONINFO
 .UC 4
@@ -41,8 +41,8 @@ The IP address of the host that sent the trap.
 A list of variable bindings that describe the trap and the variables
 enclosed in it.  The first token on the line, up until the space, in
 the OID and the remainder of the line is its value.  The first OID
-should be the system.sysUpTime.0 OID, and the second should be the
-\...snmpTrap.snmpTrapOID.0 OID.  The remainder of the OIDs, with the
+should be the system.sysUpTime.0 OID, and the second should be
+the ...snmpTrap.snmpTrapOID.0 OID.  The remainder of the OIDs, with the
 possible exception of the last one, are the variable bindings
 contained within the trap.  For SNMPv1 traps, the very last OID will
 be the ...snmpTrap.snmpTrapEnterprise OID and its value.  Essentially, 

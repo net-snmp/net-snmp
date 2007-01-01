@@ -29,7 +29,7 @@ extern FindVarMethod var_atEntry;
 # define ATF_COM	0x02
 #endif /*  ATF_COM */
 
-#ifdef linux
+#if defined(linux) || defined(irix6)
 /*
  * arp struct to pass flags, hw-addr and ip-addr in bsd manner:
  */
@@ -37,6 +37,7 @@ struct arptab {
   int at_flags;
   char at_enaddr [6];
   struct in_addr at_iaddr;
+  int if_index;
 };
 #endif
 #endif /* _MIBGROUP_AT_H */

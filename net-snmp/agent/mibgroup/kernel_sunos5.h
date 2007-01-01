@@ -140,6 +140,7 @@ extern "C" {
 		   req_e req_type, int (*comp)(void *, void *), void *arg);
   int	Get_everything(void *, void *);
   int	getKstatInt(const char *classname, const char *statname, const char *varname, int *value);
+  int	getKstatRaw(const char *classname, const char *statname, size_t len, void *buf);
 
 #ifdef _STDC_COMPAT
 #ifdef __cplusplus

@@ -404,7 +404,7 @@ MDsign(u_char *data, size_t len, u_char *mac, size_t maclen,
   if (rc) goto update_end;
 
   i = len;
-  if (((unsigned int)data)%32 != 0) {
+  if (((unsigned int)data)%sizeof(long) != 0) {
       /* this relies on the ability to use integer math and thus we
          must rely on data that aligns on 32-bit-word-boundries */
       memdup(&newdata, data, len);

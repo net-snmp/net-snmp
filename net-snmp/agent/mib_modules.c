@@ -14,11 +14,29 @@
 #include <unistd.h>
 #endif
 #include <sys/types.h>
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
+#endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include "asn1.h"
@@ -54,9 +72,13 @@ void
 add_to_init_list(const char *module_list) {
     struct module_init_list *newitem, **list;
     char *cp;
-    char *buf;
 
-    cp = buf = strdup(module_list);
+    if (module_list == NULL) {
+      return;
+    } else {
+      cp = (char *)module_list;
+    }
+
     if (*cp == '-' || *cp == '!') {
         cp++;
         list = &noinitlist;
@@ -66,7 +88,7 @@ add_to_init_list(const char *module_list) {
 
     cp = strtok(cp, ", :");
     while(cp) {
-        newitem = calloc(1, sizeof (*initlist));
+        newitem = (struct module_init_list *)calloc(1, sizeof (*initlist));
         newitem->module_name = strdup(cp);
         newitem->next = *list;
         *list = newitem;

@@ -19,9 +19,8 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
-
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
+#if HAVE_STRING_H
+#include <string.h>
 #endif
 
 #include "mibincl.h"
@@ -31,6 +30,10 @@
 #include "file.h"
 #include "agent_read_config.h"
 #include "util_funcs.h"
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
 
 #define MAXFILE   20
 

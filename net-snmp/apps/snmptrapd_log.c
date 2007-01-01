@@ -146,6 +146,7 @@ typedef enum {
   CHR_PDU_IP     = 'b',       /* PDU's IP address */
   CHR_PDU_NAME   = 'B',       /* PDU's host name if available */
   CHR_PDU_ENT    = 'N',       /* PDU's enterprise string */
+  CHR_PDU_WRAP	 = 'P',       /* PDU's wrapper info (community, security) */
   CHR_TRAP_NUM   = 'w',       /* trap number */
   CHR_TRAP_DESC  = 'W',       /* trap's description (textual) */
   CHR_TRAP_STYPE = 'q',       /* trap's subtype */
@@ -235,6 +236,7 @@ typedef enum {
 			  || is_agent_cmd (chr)     \
 			  || is_pdu_ip_cmd (chr)    \
                           || ((chr) == CHR_PDU_ENT) \
+                          || ((chr) == CHR_PDU_WRAP) \
 			  || is_trap_cmd (chr)) ? TRUE : FALSE)
      /*
       * Function:
@@ -271,7 +273,8 @@ typedef enum {
 /* prototypes */
 extern const char * trap_description (int trap);
 
-static void init_options (options_type * options)
+static void
+init_options (options_type *options)
 
      /*
       * Function:
@@ -292,110 +295,110 @@ static void init_options (options_type * options)
   return;
 }
 
-static void str_append (char * dest,
-			unsigned long * tail,
-			unsigned long limit,
-			const char * source)
 
-     /*
-      * Function:
-      *    This function is similar to strncpy, in that it copies
-      * characters, up to the specified limit, from the source string.
-      * It copies them onto the destination starting at the index
-      * "tail". This copy operation does NOT include the terminating
-      * null character.  The routine updates the contents of "tail"
-      * after the copy operation.
-      *
-      * Input Parameters:
-      *    dest   - copy onto this string
-      *    tail   - last character in the destination buffer
-      *    limit  - copy up to this many characters 
-      *    source - copy characters from this string
-      */
-{
-  unsigned long copy_count = 0;           /* number of characters copied */
-
-  /* copy characters until we hit a null or a limit */
-  for (copy_count = 0;
-       source[copy_count] != '\0' && *tail < limit;
-       copy_count++)
-    {
-      dest[*tail] = source[copy_count];
-      (*tail)++;
-    }
-}
-
-static void output_temp_bfr (char * bfr,
-			     unsigned long * tail,
-			     unsigned long len,
-			     char * temp_bfr,
-			     options_type * options)
+static int
+realloc_output_temp_bfr(u_char **buf, size_t *buf_len, size_t *out_len,
+			int allow_realloc,
+			u_char **temp_buf, options_type *options)
 
      /*
       * Function:
       *    Append the contents of the temporary buffer to the specified
       * buffer using the correct justification, leading zeroes, width,
       * precision, and other characteristics specified in the options
-      * structure. This routine modifies the contents of "tail" to point
-      * to the new tail of the buffer. It does NOT append the terminating
-      * null character.
+      * structure.
       *
-      *    bfr      - append data to this buffer
-      *    tail     - points one character beyond current last char in bfr
-      *    len      - length of buffer - truncate after this point
-      *    temp_bfr - String to append onto output buffer. THIS ROUTINE
-      *               MAY CHANGE THE CONTENTS OF THIS BUFFER.
+      *	   buf, buf_len, out_len, allow_realloc - standard relocatable
+      *                                           buffer parameters
+      *    temp_buf - pointer to string to append onto output buffer.  THIS
+      *               STRING IS free()d BY THIS FUNCTION.
       *    options  - what options to use when appending string
       */
 {
-  int temp_len;           /* length of temporary buffer */
-  int temp_to_write;      /* # of chars to write from temp bfr */
-  int char_to_write;      /* # of other chars to write */
-  int zeroes_to_write;    /* fill to precision with zeroes for numbers */
+  size_t temp_len;           /* length of temporary buffer */
+  size_t temp_to_write;      /* # of chars to write from temp bfr */
+  size_t char_to_write;      /* # of other chars to write */
+  size_t zeroes_to_write;    /* fill to precision with zeroes for numbers */
+
+  if (temp_buf == NULL || *temp_buf == NULL) {
+    return 1;
+  }
 
   /* 
    * Figure out how many characters are in the temporary buffer now,
    * and how many of them we'll write.
    */
-  temp_len = (int) strlen (temp_bfr);
+  temp_len = strlen((char*)*temp_buf);
   temp_to_write = temp_len;
-  if (temp_to_write > options->precision && options->precision != UNDEF_PRECISION)
-    temp_to_write = options->precision;
 
-  /* handle leading characters */
-  if ((! options->left_justify) && (temp_to_write < options->width)) {
+  if (options->precision != UNDEF_PRECISION && 
+      (int)temp_to_write > options->precision) {
+    temp_to_write = options->precision;
+  }
+
+  /*  Handle leading characters.  */
+  if ((!options->left_justify) && ((int)temp_to_write < options->width)) {
     zeroes_to_write = options->precision - temp_to_write;
-    if (!is_numeric_cmd(options->cmd)) zeroes_to_write = 0;
+    if (!is_numeric_cmd(options->cmd)) {
+      zeroes_to_write = 0;
+    }
+
     for (char_to_write = options->width - temp_to_write;
 	 char_to_write > 0;
 	 char_to_write--) {
-      if (options->leading_zeroes || zeroes_to_write-- > 0)
-	str_append (bfr, tail, len, "0");
-      else
-	str_append (bfr, tail, len, " ");
+      if ((*out_len + 1) >= *buf_len) {
+	if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	  *(*buf + *out_len) = '\0';
+	  free(*temp_buf);
+	  return 0;
+	}
+      }
+      if (options->leading_zeroes || zeroes_to_write-- > 0) {
+	*(*buf + *out_len) = '0';
+      } else {
+	*(*buf + *out_len) = ' ';
+      }
+      (*out_len)++;
     }
   }
 
-  /* truncate the temporary buffer and append its contents */
-  temp_bfr[temp_to_write] = '\0';
-  str_append (bfr, tail, len, temp_bfr);
+  /*  Truncate the temporary buffer and append its contents.  */
+  *(*temp_buf + temp_to_write) = '\0';
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, *temp_buf)) {
+    free(*temp_buf);
+    return 0;
+  }
 
-  /* handle trailing characters */
-  if ((options->left_justify) && (temp_to_write < options->width)) {
+  /*  Handle trailing characters.  */
+  if ((options->left_justify) && ((int)temp_to_write < options->width)) {
     for (char_to_write = options->width - temp_to_write;
 	 char_to_write > 0;
-	 char_to_write--)
-      str_append (bfr, tail, len, "0");
+	 char_to_write--) {
+      if ((*out_len + 1) >= *buf_len) {
+	if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	  *(*buf + *out_len) = '\0';
+	  free(*temp_buf);
+	  return 0;
+	}
+      }
+      *(*buf + *out_len) = '0';
+      (*out_len)++;
+    }
   }
-    
-  return;
+
+  /*  Slap on a trailing \0 for good measure.  */
+
+  *(*buf + *out_len) = '\0';  
+  free(*temp_buf);
+  *temp_buf = NULL;
+  return 1;
 }
 
-static void handle_time_fmt (char * bfr,
-			     unsigned long * tail,
-			     unsigned long len,
-			     options_type * options,
-			     struct snmp_pdu * pdu)
+
+static int
+realloc_handle_time_fmt (u_char **buf, size_t *buf_len, size_t *out_len,
+			 int allow_realloc,
+			 options_type *options, struct snmp_pdu *pdu)
 
      /*
       * Function:
@@ -404,128 +407,138 @@ static void handle_time_fmt (char * bfr,
       * buffer's length limit.
       *
       * Input Parameters:
-      *    bfr     - append the results to this buffer
-      *    tail    - index of one character beyond last buffer element
-      *    len     - length of the buffer
+      *	   buf, buf_len, out_len, allow_realloc - standard relocatable
+      *                                           buffer parameters
       *    options - options governing how to write the field
       *    pdu     - information about this trap
       */
 {
   time_t        time_val;           /* the time value to output */
+  unsigned long	time_ul;	    /* u_long time/timeticks */
   struct tm *   parsed_time;        /* parsed version of current time */
-  char          safe_bfr[30];       /* temporary string-building buffer */
+  char	*safe_bfr = NULL;
   char          fmt_cmd = options->cmd; /* the format command to use */
   int           offset = 0;         /* offset into string to display */
   int           year_len;           /* length of year string */
 
-  /* get the time field to output */
-  if (is_up_time_cmd (fmt_cmd))
-    time_val = pdu->time;
-  else
-    time (&time_val);
+  if ((safe_bfr = (char *)calloc(30, 1)) == NULL) {
+      return 0;
+  }
 
-  /* handle output in Unix time format */
-  if (fmt_cmd == CHR_CUR_TIME)
-    sprintf (safe_bfr, "%ld", (long) time_val);
-  else if ((fmt_cmd == CHR_UP_TIME) && !options->alt_format)
-    sprintf (safe_bfr, "%ld", (long) time_val);
-  else if (fmt_cmd == CHR_UP_TIME) {
-    int centisecs, seconds, minutes, hours, days;
+  /*  Get the time field to output.  */
+  if (is_up_time_cmd(fmt_cmd)) {
+    time_ul = pdu->time;
+  } else {
+    /*  Note: a time_t is a signed long.  */
+    time(&time_val);
+    time_ul = (unsigned long)time_val;
+  }
 
-    centisecs = time_val % 100;
-    time_val /= 100;
-    days = time_val / (60 * 60 * 24);
-    time_val %= (60 * 60 * 24);
+  /*  Handle output in Unix time format.  */
+  if (fmt_cmd == CHR_CUR_TIME) {
+    sprintf(safe_bfr, "%lu", time_ul);
+  } else if (fmt_cmd == CHR_UP_TIME && !options->alt_format) {
+    sprintf(safe_bfr, "%lu", time_ul);
+  } else if (fmt_cmd == CHR_UP_TIME) {
+    unsigned int centisecs, seconds, minutes, hours, days;
 
-    hours = time_val / (60 * 60);
-    time_val %= (60 * 60);
+    centisecs = time_ul % 100;
+    time_ul /= 100;
+    days = time_ul / (60 * 60 * 24);
+    time_ul %= (60 * 60 * 24);
 
-    minutes = time_val / 60;
-    seconds = time_val % 60;
+    hours = time_ul / (60 * 60);
+    time_ul %= (60 * 60);
+
+    minutes = time_ul / 60;
+    seconds = time_ul % 60;
 
     switch (days) {
     case 0:
-      sprintf(safe_bfr, "%d:%02d:%02d.%02d", hours, minutes, seconds, centisecs);
+      sprintf(safe_bfr, "%u:%02u:%02u.%02u",
+	      hours, minutes, seconds, centisecs);
       break;
     case 1:
-      sprintf(safe_bfr, "1 day, %d:%02d:%02d.%02d", hours, minutes, seconds, centisecs);
+      sprintf(safe_bfr, "1 day, %u:%02u:%02u.%02u",
+	      hours, minutes, seconds, centisecs);
       break;
     default:
-      sprintf(safe_bfr, "%d days, %d:%02d:%02d.%02d",
+      sprintf(safe_bfr, "%u days, %u:%02u:%02u.%02u",
 	      days, hours, minutes, seconds, centisecs);
     }
-  }
+  } else {
+    /*  Handle other time fields.  */
 
-  /* handle other time fields */
-  else {
-    if (options->alt_format)
-      parsed_time = gmtime (&time_val);
-    else
-      parsed_time = localtime (&time_val);
-    switch (fmt_cmd) 
-      {
+    if (options->alt_format) {
+      parsed_time = gmtime(&time_val);
+    } else {
+      parsed_time = localtime(&time_val);
+    }
+
+    switch (fmt_cmd) {
+
       /* 
        * Output year. The year field is unusual: if there's a restriction 
        * on precision, we want to truncate from the left of the number,
        * not the right, so someone printing the year 1972 with 2 digit 
        * precision gets "72" not "19".
        */
-      case CHR_CUR_YEAR:
-      case CHR_UP_YEAR:
-	sprintf (safe_bfr, "%d", parsed_time->tm_year + 1900);
+    case CHR_CUR_YEAR:
+    case CHR_UP_YEAR:
+	sprintf(safe_bfr, "%d", parsed_time->tm_year + 1900);
 	if (options->precision != UNDEF_PRECISION) {
-	  year_len = (unsigned long) strlen (safe_bfr);
-	  if (year_len > options->precision)
-	    offset = year_len - options->precision;
+	    year_len = (unsigned long)strlen(safe_bfr);
+	    if (year_len > options->precision)
+		offset = year_len - options->precision;
 	}
 	break;
 
-      /* output month */
-      case CHR_CUR_MONTH:
-      case CHR_UP_MONTH:
-	sprintf (safe_bfr, "%d", parsed_time->tm_mon + 1);
+	/* output month */
+    case CHR_CUR_MONTH:
+    case CHR_UP_MONTH:
+	sprintf(safe_bfr, "%d", parsed_time->tm_mon + 1);
 	break;
 
-      /* output day of month */
-      case CHR_CUR_MDAY:
-      case CHR_UP_MDAY:
-	sprintf (safe_bfr, "%d", parsed_time->tm_mday);
+	/* output day of month */
+    case CHR_CUR_MDAY:
+    case CHR_UP_MDAY:
+	sprintf(safe_bfr, "%d", parsed_time->tm_mday);
 	break;
 
-      /* output hour */
-      case CHR_CUR_HOUR:
-      case CHR_UP_HOUR:
-	sprintf (safe_bfr, "%d", parsed_time->tm_hour);
+	/* output hour */
+    case CHR_CUR_HOUR:
+    case CHR_UP_HOUR:
+	sprintf(safe_bfr, "%d", parsed_time->tm_hour);
 	break;
 
-      /* output minute */
-      case CHR_CUR_MIN:
-      case CHR_UP_MIN:
-	sprintf (safe_bfr, "%d", parsed_time->tm_min);
+	/* output minute */
+    case CHR_CUR_MIN:
+    case CHR_UP_MIN:
+	sprintf(safe_bfr, "%d", parsed_time->tm_min);
 	break;
 
       /* output second */
-      case CHR_CUR_SEC:
-      case CHR_UP_SEC:
-	sprintf (safe_bfr, "%d", parsed_time->tm_sec);
+    case CHR_CUR_SEC:
+    case CHR_UP_SEC:
+	sprintf(safe_bfr, "%d", parsed_time->tm_sec);
 	break;
 
-      /* unknown format command - just output the character */
-      default:
-	sprintf (safe_bfr, "%c", fmt_cmd);
-      }
+	/* unknown format command - just output the character */
+    default:
+	sprintf(safe_bfr, "%c", fmt_cmd);
+    }
   }
 
-  /* output with correct justification, leading zeroes, etc. */
-  output_temp_bfr (bfr, tail, len, &(safe_bfr[offset]), options);
-  return;
+  /*  Output with correct justification, leading zeroes, etc.  */
+  return realloc_output_temp_bfr(buf, buf_len, out_len, allow_realloc,
+				 (u_char**)&safe_bfr, options);
 }
 
-static void handle_ip_fmt (char * bfr,
-			   unsigned long * tail,
-			   unsigned long len,
-			   options_type * options,
-			   struct snmp_pdu * pdu)
+
+static int
+realloc_handle_ip_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
+		      int allow_realloc,
+		      options_type *options, struct snmp_pdu *pdu)
 
      /*
       * Function:
@@ -534,60 +547,82 @@ static void handle_ip_fmt (char * bfr,
       * the buffer's length limit.
       *
       * Input Parameters:
-      *    bfr     - append the results to this buffer
-      *    tail    - index of one character beyond last buffer element
-      *    len     - length of the buffer
-      *    options - options governing how to write the field
-      *    pdu     - information about this trap 
+      *	   buf, buf_len, out_len, allow_realloc - standard relocatable
+      *                                           buffer parameters
+      *    options   - options governing how to write the field
+      *    pdu       - information about this trap 
       */
 {
   struct sockaddr_in * ip_addr;       /* IP address to output */
   struct hostent *     host;          /* corresponding host name */
-  char                 safe_bfr[200]; /* temporary string-building buffer */
   char                 fmt_cmd = options->cmd; /* what we're formatting */
+  u_char *temp_buf = NULL;
+  size_t temp_buf_len = 64, temp_out_len = 0;
 
-  /* figure out which IP address to write */
-  if (is_agent_cmd (fmt_cmd))
+  if ((temp_buf = (u_char*)calloc(temp_buf_len, 1)) == NULL) {
+    return 0;
+  }
+
+  /*  Figure out which IP address to write.  */
+  if (is_agent_cmd(fmt_cmd)) {
     ip_addr = (struct sockaddr_in *) &(pdu->agent_addr);
-  else
+  } else {
     ip_addr = (struct sockaddr_in *) &(pdu->address);
+  }
 
-  /* decide exactly what to output */
-  switch (fmt_cmd)
-    {
-    /* write an IP address */
-    case CHR_AGENT_IP:
-    case CHR_PDU_IP:
-      sprintf (safe_bfr, "%s", inet_ntoa (ip_addr->sin_addr));
-      break;
+  /*  Decide exactly what to output.  */
+  switch (fmt_cmd) {
+  case CHR_AGENT_IP:
+  case CHR_PDU_IP:
+    /*  Write a numerical address.  */
+    if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len, 1,
+		     (u_char*)inet_ntoa(ip_addr->sin_addr))) {
+      if (temp_buf != NULL) {
+	free(temp_buf);
+      }
+      return 0;
+    }
+    break;
 
-    /* write a host name */
-    case CHR_AGENT_NAME:
-    case CHR_PDU_NAME:
-      host = gethostbyaddr ((char *) &(ip_addr->sin_addr),
-			    sizeof (ip_addr->sin_addr),
-			    AF_INET);
-      if (host != (struct hostent *) NULL)
-	sprintf (safe_bfr, "%s", host->h_name);
-      else
-	sprintf (safe_bfr, "%s", inet_ntoa (ip_addr->sin_addr));
-      break;
+  case CHR_AGENT_NAME:
+  case CHR_PDU_NAME:
+    /*  Write a host name.  */
+    host = gethostbyaddr((char *) &(ip_addr->sin_addr),
+			 sizeof(ip_addr->sin_addr), AF_INET);
+    if (host != NULL) {
+      if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len, 1,
+		       (u_char*)host->h_name)) {
+	if (temp_buf != NULL) {
+	  free(temp_buf);
+	}
+	return 0;
+      }
+    } else {
+      if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len, 1,
+		       (u_char*)inet_ntoa(ip_addr->sin_addr))) {
+	if (temp_buf != NULL) {
+	  free(temp_buf);
+	}
+	return 0;
+      }
+    }
+    break;
 
-    /* don't know how to handle this command - write the character itself */
+    /*  Don't know how to handle this command - write the character itself.  */
     default:
-      sprintf (safe_bfr, "%c", fmt_cmd);
+      temp_buf[0] = fmt_cmd;
     }
 
-  /* output with correct justification, leading zeroes, etc. */
-  output_temp_bfr (bfr, tail, len, safe_bfr, options);
-  return;
+  /*  Output with correct justification, leading zeroes, etc.  */
+  return realloc_output_temp_bfr(buf, buf_len, out_len, allow_realloc,
+				 &temp_buf, options);
 }
 
-static void handle_ent_fmt (char * bfr,
-			    unsigned long * tail,
-			    unsigned long len,
-			    options_type * options,
-			    struct snmp_pdu * pdu)
+
+static int
+realloc_handle_ent_fmt (u_char **buf, size_t *buf_len, size_t *out_len,
+			int allow_realloc, 
+			options_type *options, struct snmp_pdu *pdu)
 
      /*
       * Function:
@@ -596,39 +631,46 @@ static void handle_ent_fmt (char * bfr,
       * buffer's length limit.
       *
       * Input Parameters:
-      *    bfr     - append the results to this buffer
-      *    tail    - index of one character beyond last buffer element
-      *    len     - length of the buffer
+      *	   buf, buf_len, out_len, allow_realloc - standard relocatable
+      *                                           buffer parameters
       *    options - options governing how to write the field
       *    pdu     - information about this trap 
       */
 {
-  char safe_bfr[SPRINT_MAX_LEN]; /* temporary string-building buffer */
   char fmt_cmd = options->cmd;   /* what we're formatting */
+  u_char *temp_buf = NULL;
+  size_t temp_buf_len = 64, temp_out_len = 0;
 
-  /* decide exactly what to output */
-  switch (fmt_cmd)
-    {
-    /* write the enterprise string */
-    case CHR_PDU_ENT:
-      sprint_objid (safe_bfr, pdu->enterprise, pdu->enterprise_length);
-      break;
+  if ((temp_buf = (u_char*)calloc(temp_buf_len, 1)) == NULL) {
+    return 0;
+  }
 
-    /* don't know how to handle this command - write the character itself */
+  /*  Decide exactly what to output.  */
+  switch (fmt_cmd) {
+  case CHR_PDU_ENT:
+    /*  Write the enterprise oid.  */
+    if (!sprint_realloc_objid(&temp_buf, &temp_buf_len, &temp_out_len, 1,
+			      pdu->enterprise, pdu->enterprise_length)) {
+      free(temp_buf);
+      return 0;
+    }
+    break;
+
+    /*  Don't know how to handle this command - write the character itself.  */
     default:
-      sprintf (safe_bfr, "%c", fmt_cmd);
+      temp_buf[0] = fmt_cmd;
     }
 
-  /* output with correct justification, leading zeroes, etc. */
-  output_temp_bfr (bfr, tail, len, safe_bfr, options);
-  return;
+  /*  Output with correct justification, leading zeroes, etc.  */
+  return realloc_output_temp_bfr(buf, buf_len, out_len, allow_realloc,
+				 &temp_buf, options);
 }
 
-static void handle_trap_fmt (char * bfr,
-			     unsigned long * tail,
-			     unsigned long len,
-			     options_type * options,
-			     struct snmp_pdu * pdu)
+
+static int
+realloc_handle_trap_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
+			int allow_realloc,
+			options_type *options, struct snmp_pdu *pdu)
 
      /*
       * Function:
@@ -637,145 +679,284 @@ static void handle_trap_fmt (char * bfr,
       * length limit.
       *
       * Input Parameters:
-      *    bfr     - append the results to this buffer
-      *    tail    - index of one character beyond last buffer element
-      *    len     - length of the buffer
+      *	   buf, buf_len, out_len, allow_realloc - standard relocatable
+      *                                           buffer parameters
       *    options - options governing how to write the field
       *    pdu     - information about this trap 
       */
 {
-  oid                    trap_oid[MAX_OID_LEN]; /* holds obj id for trap */
-  unsigned long          trap_oid_len;          /* length of object ID */
   struct variable_list * vars;                  /* variables assoc with trap */
-  char                   sprint_bfr[SPRINT_MAX_LEN]; /* string-building bfr */
-  char                   safe_bfr[SNMP_MAXBUF]; /* string-building bfr */
-  char *                 out_ptr = safe_bfr;    /* points to str to output */
-  unsigned long          safe_tail;             /* end of safe buffer */
   char                   fmt_cmd = options->cmd; /* what we're outputting */
+  u_char 	         *temp_buf = NULL;
+  size_t		 tbuf_len = 64, tout_len = 0;
 
-  /* decide exactly what to output */
-  switch (fmt_cmd)
-    {
-    /* write the trap's number */
-    case CHR_TRAP_NUM:
-      sprintf (safe_bfr, "%ld", pdu->trap_type);
-      break;
-
-    /* write the trap's description */
-    case CHR_TRAP_DESC:
-      sprintf (safe_bfr, "%s", trap_description (pdu->trap_type));
-      break;
-
-    /* write the trap's subtype */
-    case CHR_TRAP_STYPE:
-      if (pdu->trap_type != SNMP_TRAP_ENTERPRISESPECIFIC) {
-	sprintf (safe_bfr, "%ld", pdu->specific_type);
-      }
-      else {
-	
-	/* get object ID for the trap */
-	trap_oid_len = pdu->enterprise_length;
-	memcpy (trap_oid, pdu->enterprise, sizeof (oid) * trap_oid_len);
-	if (trap_oid[trap_oid_len - 1] != 0) {
-	  trap_oid[trap_oid_len] = 0;
-	  trap_oid_len++;
-	}
-	trap_oid[trap_oid_len] = pdu->specific_type;
-	trap_oid_len++;
-
-	/* find the element after the last dot */
-	sprint_objid (sprint_bfr, trap_oid, trap_oid_len);
-	out_ptr = strrchr (sprint_bfr, '.');
-	if (out_ptr != (char *) NULL)
-	  out_ptr++;
-	else
-	  out_ptr = sprint_bfr;
-      }
-      break;
-
-    /* write the trap's variables */
-    case CHR_TRAP_VARS:
-      safe_tail = 0;
-      for (vars = pdu->variables;
-	   vars != (struct variable_list *) NULL && safe_tail < SNMP_MAXBUF;
-	   vars = vars->next_variable) {
-	if (options->alt_format)
-	  str_append (safe_bfr, &safe_tail, SNMP_MAXBUF, ", ");
-	else
-	  str_append (safe_bfr, &safe_tail, SNMP_MAXBUF, "\t");
-	sprint_variable (sprint_bfr, vars->name, vars->name_length, vars);
-	str_append (safe_bfr, &safe_tail, SNMP_MAXBUF, sprint_bfr);
-      }
-      if (safe_tail < SNMP_MAXBUF) {
-	safe_bfr[safe_tail] = '\0';
-	safe_tail++;
-      }
-      else
-          safe_bfr[safe_tail - 1] = '\0';
-      break;
-
-    /* don't know how to handle this command - write the character itself */
-    default:
-      sprintf (safe_bfr, "%c", fmt_cmd);
-    }
-
-  /* output with correct justification, leading zeroes, etc. */
-  output_temp_bfr (bfr, tail, len, out_ptr, options);
-  if (*tail < len) {
-      bfr[*tail] = '\0';
-  } else {
-      bfr[len-1] = '\0';
+  if ((temp_buf = (u_char *)calloc(tbuf_len, 1)) == NULL) {
+    return 0;
   }
 
-  return;
+  /*  Decide exactly what to output.  */
+  switch (fmt_cmd) {
+  case CHR_TRAP_NUM:
+    /*  Write the trap's number.  */
+      tout_len = sprintf((char*)temp_buf, "%ld", pdu->trap_type);
+    break;
+
+  case CHR_TRAP_DESC:
+    /*  Write the trap's description.  */
+    tout_len = sprintf((char*)temp_buf, "%s", trap_description(pdu->trap_type));
+    break;
+
+  case CHR_TRAP_STYPE:
+    /*  Write the trap's subtype.  */
+    if (pdu->trap_type != SNMP_TRAP_ENTERPRISESPECIFIC) {
+      tout_len = sprintf((char*)temp_buf, "%ld", pdu->specific_type);
+    } else {
+      /*  Get object ID for the trap.  */
+      size_t obuf_len = 64, oout_len = 0, trap_oid_len = 0;
+      oid trap_oid[MAX_OID_LEN + 2] = { 0 };
+      u_char *obuf = NULL;
+      char *ptr = NULL;
+
+      if ((obuf = (u_char *)calloc(obuf_len, 1)) == NULL) {
+	free(temp_buf);
+	return 0;
+      }
+
+      trap_oid_len = pdu->enterprise_length;
+      memcpy(trap_oid, pdu->enterprise, trap_oid_len*sizeof(oid));
+      if (trap_oid[trap_oid_len - 1] != 0) {
+	trap_oid[trap_oid_len] = 0;
+	trap_oid_len++;
+      }
+      trap_oid[trap_oid_len] = pdu->specific_type;
+      trap_oid_len++;
+
+      /*  Find the element after the last dot.  */
+      if (!sprint_realloc_objid(&obuf, &obuf_len, &oout_len, 1,
+				trap_oid, trap_oid_len)) {
+	if (obuf != NULL) {
+	  free(obuf);
+	}
+	free(temp_buf);
+	return 0;
+      }
+
+      ptr = strrchr((char *)obuf, '.');
+      if (ptr != NULL) {
+	if (!snmp_strcat(&temp_buf, &tbuf_len, &tout_len, 1, (u_char*)ptr)) {
+	  free(obuf);
+	  if (temp_buf != NULL) {	
+	    free(temp_buf);
+	  }
+	  return 0;
+	}
+	free(obuf);
+      } else {
+	free(temp_buf);
+	temp_buf = obuf;
+	tbuf_len = obuf_len;
+	tout_len = oout_len;
+      }
+    }
+    break;
+
+  case CHR_TRAP_VARS:
+    /*  Write the trap's variables.  */
+    for (vars = pdu->variables; vars != NULL; vars = vars->next_variable) {
+      if (options->alt_format) {
+	if (!snmp_strcat(&temp_buf, &tbuf_len, &tout_len, 1, (const u_char*)", ")) {
+	  if (temp_buf != NULL) {
+	    free(temp_buf);
+	  }
+	  return 0;
+	}
+      } else {
+	if (!snmp_strcat(&temp_buf, &tbuf_len, &tout_len, 1, (const u_char*)"\t")) {
+	  if (temp_buf != NULL) {
+	    free(temp_buf);
+	  }
+	  return 0;
+	}
+      }
+      if (!sprint_realloc_variable(&temp_buf, &tbuf_len, &tout_len, 1,
+				   vars->name, vars->name_length, vars)) {
+	if (temp_buf != NULL) {
+	  free(temp_buf);
+	}
+	return 0;
+      }
+    }
+    break;
+
+  default:
+    /*  Don't know how to handle this command - write the character itself.  */
+    temp_buf[0] = fmt_cmd;
+  }
+
+  /*  Output with correct justification, leading zeroes, etc.  */
+  return realloc_output_temp_bfr(buf, buf_len, out_len, allow_realloc,
+				 &temp_buf, options);
 }
 
-static void dispatch_format_cmd (char * bfr,
-				 unsigned long * tail,
-				 unsigned long len,
-				 options_type * options,
-				 struct snmp_pdu * pdu)
+
+static int
+realloc_handle_wrap_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
+			int allow_realloc, struct snmp_pdu *pdu)
+{
+  size_t i = 0;
+  
+  switch (pdu->command) {
+  case SNMP_MSG_TRAP:
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"TRAP")) {
+      return 0;
+    }
+    break;
+  case SNMP_MSG_TRAP2:
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"TRAP2")) {
+      return 0;
+    }
+    break;
+  case SNMP_MSG_INFORM:
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"INFORM")) {
+      return 0;
+    }
+    break;
+  }
+
+  switch (pdu->version) {
+  case SNMP_VERSION_1:
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)", SNMP v1")) {
+      return 0;
+    }
+    break;
+  case SNMP_VERSION_2c:
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)", SNMP v2c")) {
+      return 0;
+    }
+    break;
+  case SNMP_VERSION_3:
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)", SNMP v3")) {
+      return 0;
+    }
+    break;
+  }
+
+  switch (pdu->version) {
+  case SNMP_VERSION_1:
+  case SNMP_VERSION_2c:
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)", community ")) {
+      return 0;
+    }
+
+    while ((*out_len + pdu->community_len + 1) >= *buf_len) {
+      if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	return 0;
+      }
+    }
+
+    for (i = 0; i < pdu->community_len; i++) {
+      if (isprint(pdu->community[i])) {
+	*(*buf + *out_len) = pdu->community[i];
+      } else {
+	*(*buf + *out_len) = '.';
+      }
+      (*out_len)++;
+    }
+    *(*buf + *out_len) = '\0';
+    break;
+  case SNMP_VERSION_3:
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)", user ")) {
+      return 0;
+    }
+
+    while ((*out_len + pdu->securityNameLen + 1) >= *buf_len) {
+      if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	return 0;
+      }
+    }
+
+    for (i = 0; i < pdu->securityNameLen; i++) {
+      if (isprint(pdu->securityName[i])) { 
+	*(*buf + *out_len) = pdu->securityName[i];
+      } else {
+	*(*buf + *out_len) = '.';
+      }
+      (*out_len)++;
+    }
+    *(*buf + *out_len) = '\0';
+
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)", context ")) {
+      return 0;
+    }
+
+    while ((*out_len + pdu->contextNameLen + 1) >= *buf_len) {
+      if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	return 0;
+      }
+    }
+
+    for (i = 0; i < pdu->contextNameLen; i++) {
+      if (isprint(pdu->contextName[i])) {
+	*(*buf + *out_len) = pdu->contextName[i];
+      } else {
+	*(*buf + *out_len) = '.';
+      }
+      (*out_len)++;
+    }
+    *(*buf + *out_len) = '\0';
+  }
+  return 1;
+}
+
+
+static int
+realloc_dispatch_format_cmd(u_char **buf, size_t *buf_len, size_t *out_len,
+			    int allow_realloc,
+			    options_type *options, struct snmp_pdu *pdu)
 
      /*
       * Function:
       *     Dispatch a format command to the appropriate command handler.
       *
       * Input Parameters:
-      *    bfr     - append the results to this buffer
-      *    tail    - index of one character beyond last buffer element
-      *    len     - length of the buffer
-      *    options - options governing how to write the field
-      *    pdu     - information about this trap 
+      *	   buf, buf_len, out_len, allow_realloc - standard relocatable
+      *                                           buffer parameters
+      *    options   - options governing how to write the field
+      *    pdu       - information about this trap
       */
 {
   char fmt_cmd = options->cmd;          /* for speed */
 
   /* choose the appropriate command handler */
-  if (is_cur_time_cmd (fmt_cmd) || is_up_time_cmd (fmt_cmd))
-    handle_time_fmt (bfr, tail, len, options, pdu);
-  else if (is_agent_cmd (fmt_cmd) || is_pdu_ip_cmd (fmt_cmd))
-    handle_ip_fmt (bfr, tail, len, options, pdu);
-  else if (is_trap_cmd (fmt_cmd))
-    handle_trap_fmt (bfr, tail, len, options, pdu);
-  else if (fmt_cmd == CHR_PDU_ENT)
-    handle_ent_fmt (bfr, tail, len, options, pdu);
 
-  /* unknown command */
-  else {
-    if (*tail < len) {
-      bfr[*tail] = fmt_cmd;
-      (*tail)++;
-    }
+  if (is_cur_time_cmd(fmt_cmd) || is_up_time_cmd(fmt_cmd)) {
+    return realloc_handle_time_fmt(buf, buf_len, out_len, allow_realloc,
+				   options, pdu);
+  } else if (is_agent_cmd(fmt_cmd) || is_pdu_ip_cmd(fmt_cmd)) {
+    return realloc_handle_ip_fmt(buf, buf_len, out_len, allow_realloc, 
+				 options, pdu);
+  } else if (is_trap_cmd(fmt_cmd)) {
+    return realloc_handle_trap_fmt(buf, buf_len, out_len, allow_realloc, 
+				   options, pdu);
+  } else if (fmt_cmd == CHR_PDU_ENT) {
+    return realloc_handle_ent_fmt(buf, buf_len, out_len, allow_realloc,
+				  options, pdu);
+  } else if (fmt_cmd == CHR_PDU_WRAP) {
+    return realloc_handle_wrap_fmt(buf, buf_len, out_len, allow_realloc,
+				   pdu);
+  } else {
+    /* unknown format command - just output the character */
+    char fmt_cmd_string[2] = { 0, 0 };
+    fmt_cmd_string[0] = fmt_cmd;
+
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)fmt_cmd_string);
   }
-
-  return;
 }
 
 
-static void handle_backslash (char * bfr,
-			      unsigned long * tail,
-			      unsigned long len,
-			      char fmt_cmd)
+static int
+realloc_handle_backslash(u_char **buf, size_t *buf_len, size_t *out_len,
+			 int allow_realloc, char fmt_cmd)
 
      /*
       * Function:
@@ -785,152 +966,182 @@ static void handle_backslash (char * bfr,
       * \nnn or \xhh formats.
       *
       * Input Parameters:
-      *    bfr     - append the results to this buffer
-      *    tail    - index of one character beyond last buffer element
-      *    len     - length of the buffer
+      *	   buf, buf_len, out_len, allow_realloc - standard relocatable
+      *                                           buffer parameters
       *    fmt_cmd - the character after the backslash
       */
 {
   char temp_bfr[3];                     /* for bulding temporary strings */
 
   /* select the proper output character(s) */
-  switch (fmt_cmd)
-    {
-    case 'a':
-      str_append (bfr, tail, len, "\a");
-      break;
-    case 'b':
-      str_append (bfr, tail, len, "\b");
-      break;
-    case 'f':
-      str_append (bfr, tail, len, "\f");
-      break;
-    case 'n':
-      str_append (bfr, tail, len, "\n");
-      break;
-    case 'r':
-      str_append (bfr, tail, len, "\r");
-      break;
-    case 't':
-      str_append (bfr, tail, len, "\t");
-      break;
-    case 'v':
-      str_append (bfr, tail, len, "\v");
-      break;
-    case '\\':
-      str_append (bfr, tail, len, "\\");
-      break;
-    case '?':
-      str_append (bfr, tail, len, "\?");
-      break;
-    case '\'':
-      str_append (bfr, tail, len, "\'");
-      break;
-    case '"':
-      str_append (bfr, tail, len, "\"");
-      break;
-    default:
-      sprintf (temp_bfr, "\\%c", fmt_cmd);
-      str_append (bfr, tail, len, temp_bfr);
-    }
-
-  return;
+  switch (fmt_cmd) {
+  case 'a':
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\a");
+  case 'b':
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\b");
+  case 'f':
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\f");
+  case 'n':
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\n");
+  case 'r':
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\r");
+  case 't':
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\t");
+  case 'v':
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\v");
+  case '\\':
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\\");
+  case '?':
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\?");
+  case '\'':
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\'");
+  case '"':
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\"");
+  default:
+    sprintf(temp_bfr, "\\%c", fmt_cmd);
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)temp_bfr);
+  }
 }
 
-unsigned long format_plain_trap (char * bfr,
-				 unsigned long len,
-				 struct snmp_pdu * pdu)
+
+int
+realloc_format_plain_trap (u_char **buf, size_t *buf_len, size_t *out_len,
+			   int allow_realloc,
+			   struct snmp_pdu *pdu)
 
      /*
       * Function:
       *    Format the trap information in the default way and put the results
       * into the buffer, truncating at the buffer's length limit. This
-      * routine returns the number of characters that it puts into the buffer.
+      * routine returns 1 if the output was completed successfully or
+      * 0 if it is truncated due to a memory allocation failure.
       *
       * Input Parameters:
-      *    bfr - where to put the formatted trap info
-      *    len - how many bytes of buffer space are available
-      *    pdu - the pdu information
+      *	   buf, buf_len, out_len, allow_realloc - standard relocatable
+      *                                           buffer parameters
+      *    pdu       - the pdu information
       */
 {
   time_t                 now;                   /* the current time */
   struct tm *            now_parsed;            /* time in struct format */
-  char                   sprint_bfr[SPRINT_MAX_LEN]; /* holds sprint strings */
   char                   safe_bfr[200];         /* holds other strings */
-  unsigned long          tail = 0;              /* points to end of buffer */
   struct sockaddr_in *   agent_ip;              /* agent's IP info */
   struct sockaddr_in *   pdu_ip;                /* PDU's IP info */
   struct hostent *       host;                  /* host name */
-  oid                    trap_oid[MAX_OID_LEN]; /* holds obj ID for trap */
-  unsigned long          trap_oid_len;          /* length of object ID */
-  char *                 ent_spec_code;         /* for ent. specific traps */
   struct variable_list * vars;                  /* variables assoc with trap */
 
-  /* If the output buffer's pathologically short, RETURN EARLY. */
-  if (len == 0)
+  if (buf == NULL) {
     return 0;
+  }
 
   /* 
    * Print the current time. Since we don't know how long the buffer is,
    * and snprintf isn't yet standard, build the timestamp in a separate
    * buffer of guaranteed length and then copy it to the output buffer.
    */
-  time (&now);
-  now_parsed = localtime (&now);
-  sprintf (safe_bfr, 
-	   "%.4d-%.2d-%.2d %.2d:%.2d:%.2d ",
-	   now_parsed->tm_year + 1900,
-	   now_parsed->tm_mon + 1,
-	   now_parsed->tm_mday,
-	   now_parsed->tm_hour,
-	   now_parsed->tm_min,
-	   now_parsed->tm_sec);
-  str_append (bfr, &tail, len, safe_bfr);
-
-  /* get info about the sender */
-  agent_ip = (struct sockaddr_in *) &(pdu->agent_addr);
-  host = gethostbyaddr ((char *) &(agent_ip->sin_addr),
-			sizeof (agent_ip->sin_addr),
-			AF_INET);
-  if (host != (struct hostent *) NULL)
-    str_append (bfr, &tail, len, host->h_name);
-  else
-    str_append (bfr, &tail, len, inet_ntoa (agent_ip->sin_addr));
-  str_append (bfr, &tail, len, " [");
-  str_append (bfr, &tail, len, inet_ntoa (agent_ip->sin_addr));
-  str_append (bfr, &tail, len, "] ");
-
-  /* append PDU IP info if necessary */
-  pdu_ip = (struct sockaddr_in *) &(pdu->address);
-  if (agent_ip->sin_addr.s_addr != pdu_ip->sin_addr.s_addr) {
-    str_append (bfr, &tail, len, "(via ");
-    host = gethostbyaddr ((char *) &(pdu_ip->sin_addr),
-			  sizeof (pdu_ip->sin_addr),
-			  AF_INET);
-    if (host != (struct hostent *) NULL)
-      str_append (bfr, &tail, len, host->h_name);
-    else
-      str_append (bfr, &tail, len, inet_ntoa (pdu_ip->sin_addr));
-    str_append (bfr, &tail, len, " [");
-    str_append (bfr, &tail, len, inet_ntoa (pdu_ip->sin_addr));
-    str_append (bfr, &tail, len, "]) ");
+  time(&now);
+  now_parsed = localtime(&now);
+  sprintf(safe_bfr, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d ",
+	  now_parsed->tm_year + 1900, now_parsed->tm_mon + 1,
+	  now_parsed->tm_mday, now_parsed->tm_hour,
+	  now_parsed->tm_min, now_parsed->tm_sec);
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)safe_bfr)) {
+    return 0;
   }
 
-  /* append enterprise information and end the line */
-  str_append (bfr, &tail, len, " ");
-  sprint_objid (sprint_bfr, pdu->enterprise, pdu->enterprise_length);
-  str_append (bfr, &tail, len, sprint_bfr);
-  str_append (bfr, &tail, len, "\n");
+  /*  Get info about the sender.  */
+  agent_ip = (struct sockaddr_in *)&(pdu->agent_addr);
+  host = gethostbyaddr((char *)&(agent_ip->sin_addr),
+			sizeof(agent_ip->sin_addr), AF_INET);
+  if (host != (struct hostent *)NULL) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)host->h_name)) {
+      return 0;
+    }
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" [")) {
+      return 0;
+    }
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
+		     (const u_char*)inet_ntoa(agent_ip->sin_addr))) {
+      return 0;
+    }
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"] ")) {
+      return 0;
+    }
+  } else {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
+		     (const u_char*)inet_ntoa(agent_ip->sin_addr))) {
+      return 0;
+    }
+  }
 
-  /* handle enterprise specific traps */
-  str_append (bfr, &tail, len, "\t");
-  str_append (bfr, &tail, len, trap_description (pdu->trap_type));
-  str_append (bfr, &tail, len, " Trap (");
+  /*  Append PDU IP info if necessary.  */
+  pdu_ip = (struct sockaddr_in *) &(pdu->address);
+  if (agent_ip->sin_addr.s_addr != pdu_ip->sin_addr.s_addr) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"(via ")) {
+      return 0;
+    }
+    host = gethostbyaddr((char *) &(pdu_ip->sin_addr),
+			  sizeof(pdu_ip->sin_addr), AF_INET);
+    if (host != (struct hostent *) NULL) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)host->h_name)) {
+	return 0;
+      }
+    } else {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)inet_ntoa(pdu_ip->sin_addr))) {
+	return 0;
+      }
+    }
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" [")) {
+      return 0;
+    }
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)inet_ntoa(pdu_ip->sin_addr))) {
+      return 0;
+    }
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"]) ")) {
+      return 0;
+    }
+  }
+
+  /*  Add security wrapper information.  */
+  if (!realloc_handle_wrap_fmt(buf, buf_len, out_len, allow_realloc, pdu)) {
+    return 0;
+  }
+
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\n\t")) {
+    return 0;
+  }
+
+  /*  Add enterprise information.  */
+  if (!sprint_realloc_objid(buf, buf_len, out_len, allow_realloc,
+			    pdu->enterprise, pdu->enterprise_length)) {
+    return 0;
+  }
+
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ")) {
+    return 0;
+  }
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
+		   (const u_char*)trap_description(pdu->trap_type))) {
+    return 0;
+  }
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*) " Trap (")) {
+    return 0;
+  }
+
+  /*  Handle enterprise specific traps.  */
   if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+    size_t obuf_len = 64, oout_len = 0, trap_oid_len = 0;
+    oid trap_oid[MAX_OID_LEN + 2] = { 0 };
+    char *ent_spec_code = NULL;
+    u_char *obuf = NULL;
 
-    /* get object ID for the trap */
+    if ((obuf = (u_char *)calloc(obuf_len, 1)) == NULL) {
+      return 0;
+    }
+
+    /*  Get object ID for the trap.  */
     trap_oid_len = pdu->enterprise_length;
-    memcpy (trap_oid, pdu->enterprise, sizeof (oid) * trap_oid_len);
+    memcpy(trap_oid, pdu->enterprise, trap_oid_len*sizeof(oid));
     if (trap_oid[trap_oid_len - 1] != 0) {
       trap_oid[trap_oid_len] = 0;
       trap_oid_len++;
@@ -938,207 +1149,234 @@ unsigned long format_plain_trap (char * bfr,
     trap_oid[trap_oid_len] = pdu->specific_type;
     trap_oid_len++;
 
-    /* find the element after the last dot */
-    sprint_objid (sprint_bfr, trap_oid, trap_oid_len);
-    ent_spec_code = strrchr (sprint_bfr, '.');
-    if (ent_spec_code != (char *) NULL)
+    /*  Find the element after the last dot.  */
+    if (!sprint_realloc_objid(&obuf, &obuf_len, &oout_len, 1,
+			      trap_oid, trap_oid_len)) {
+      if (obuf != NULL) {
+	free(obuf);
+      }
+      return 0;
+    } 
+    ent_spec_code = strrchr((char *)obuf, '.');
+    if (ent_spec_code != NULL) {
       ent_spec_code++;
-    else
-      ent_spec_code = sprint_bfr;
+    } else {
+      ent_spec_code = (char*)obuf;
+    }
 
-    /* print trap info */
-    str_append (bfr, &tail, len, ent_spec_code);
+    /*  Print trap info.  */
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)ent_spec_code)) {
+      free(obuf);
+      return 0;
+    }
+    free(obuf);
+  } else {
+    /*  Handle traps that aren't enterprise specific.  */
+    sprintf(safe_bfr, "%ld", pdu->specific_type);
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)safe_bfr)) {
+      return 0;
+    }
   }
 
-  /* handle traps that aren't enterprise specific */
-  else {
-    sprintf (safe_bfr, "%ld", pdu->specific_type);
-    str_append (bfr, &tail, len, safe_bfr);
+  /*  Finish the line.  */
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)") Uptime: ")) {
+    return 0;
+  }
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
+		   (const u_char*)uptime_string(pdu->time, safe_bfr))) {
+    return 0;
+  }
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\n")) {
+    return 0;
   }
 
-  /* finish the line */
-  str_append (bfr, &tail, len, ") Uptime: ");
-  str_append (bfr, &tail, len, uptime_string (pdu->time, safe_bfr));
-  str_append (bfr, &tail, len, "\n");
-
-  /* output the PDU variables */
-  for (vars = pdu->variables; 
-       vars != (struct variable_list *) NULL;
-       vars = vars->next_variable) {
-    str_append (bfr, &tail, len, "\t");
-    sprint_variable (sprint_bfr, vars->name, vars->name_length, vars);
-    str_append (bfr, &tail, len, sprint_bfr);
+  /*  Finally, output the PDU variables. */
+  for (vars = pdu->variables; vars != NULL; vars = vars->next_variable) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\t")) {
+      return 0;
+    }
+    if (!sprint_realloc_variable(buf, buf_len, out_len, allow_realloc,
+				 vars->name, vars->name_length, vars)) {
+      return 0;
+    }
   }
-  str_append (bfr, &tail, len, "\n");
-
-  /* add the null terminator */
-  if (tail < len) {
-    bfr[tail] = '\0';
-    tail++;
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\n")) {
+    return 0;
   }
-  else 
-    bfr[tail - 1] = '\0';
 
-  return tail;
+  /*  String is already null-terminated.  That's all folks!  */
+  return 1;
 }
 
-unsigned long format_trap (char * bfr,
-			   unsigned long len,
-			   const char * format_str,
-			   struct snmp_pdu * pdu)
+
+int
+realloc_format_trap (u_char **buf, size_t *buf_len, size_t *out_len,
+		     int allow_realloc, const char *format_str,
+		     struct snmp_pdu *pdu)
 
      /*
       * Function:
       *    Format the trap information for display in a log. Place the results
-      * in the specified buffer (truncating to the length of the buffer).
+      *    in the specified buffer (truncating to the length of the buffer).
       *    Returns the number of characters it put in the buffer.
       *
       * Input Parameters:
-      *    bfr        - where to put the formatted trap info
-      *    len        - how many bytes of buffer space are available
+      *	   buf, buf_len, out_len, allow_realloc - standard relocatable
+      *                                           buffer parameters
       *    format_str - specifies how to format the trap info
       *    pdu        - the pdu information
       */
 {
-  unsigned long    tail = 0;             /* points to the end of the buffer */
   unsigned long    fmt_idx = 0;          /* index into the format string */
   options_type     options;              /* formatting options */
   parse_state_type state = PARSE_NORMAL; /* state of the parser */
   char             next_chr;             /* for speed */
   int              reset_options = TRUE; /* reset opts on next NORMAL state */
 
-  /* if the buffer's pathologically short, RETURN EARLY */
-  if (len == 0)
+  if (buf == NULL) {
     return 0;
+  }
 
-  /* go until we reach the end of the format string */
-  for (fmt_idx = 0;
-       (format_str[fmt_idx] != '\0') && (tail < len);
-       fmt_idx++) {
+  /*  Go until we reach the end of the format string:  */
+  for (fmt_idx = 0;  format_str[fmt_idx] != '\0'; fmt_idx++) {
     next_chr = format_str[fmt_idx];
-    switch (state)
-      {
-      /* looking for next character */
-      case PARSE_NORMAL:
-	if (reset_options) {
-	  init_options (&options);
-	  reset_options = FALSE;
-	}
-	if (next_chr == '\\') {
-	  state = PARSE_BACKSLASH;
-	}
-	else if (next_chr == CHR_FMT_DELIM) {
-	  state = PARSE_IN_FORMAT;
-	}
-	else {
-	  if (tail < len) {
-	    bfr[tail] = next_chr;
-	    tail++;
+    switch (state) {
+    case PARSE_NORMAL:
+      /*  Looking for next character.  */
+      if (reset_options) {
+	init_options(&options);
+	reset_options = FALSE;
+      }
+      if (next_chr == '\\') {
+	state = PARSE_BACKSLASH;
+      } else if (next_chr == CHR_FMT_DELIM) {
+	state = PARSE_IN_FORMAT;
+      }	else {
+	if ((*out_len + 1) >= *buf_len) {
+	  if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	    return 0;
 	  }
 	}
-	break;
+	*(*buf + *out_len) = next_chr;
+	(*out_len)++;
+      }
+      break;
 
-      /* found a backslash */
-      case PARSE_BACKSLASH:
-	handle_backslash (bfr, &tail, len, next_chr);
-	state = PARSE_NORMAL;
-	break;
+    case PARSE_BACKSLASH:
+      /*  Found a backslash.  */
+      if (!realloc_handle_backslash(buf, buf_len, out_len, allow_realloc,
+				    next_chr)) {
+	return 0;
+      }
+      state = PARSE_NORMAL;
+      break;
 	
-      /* in a format command */
-      case PARSE_IN_FORMAT:
-	reset_options = TRUE;
-	if (next_chr == CHR_LEFT_JUST)
-	  options.left_justify = TRUE;
-	else if (next_chr == CHR_LEAD_ZERO)
-	  options.leading_zeroes = TRUE;
-	else if (next_chr == CHR_ALT_FORM)
-	  options.alt_format = TRUE;
-	else if (next_chr == CHR_FIELD_SEP)
-	  state = PARSE_GET_PRECISION;
-	else if ((next_chr >= '1') && (next_chr <= '9')) {
-	  options.width = ((unsigned long) next_chr) - ((unsigned long) '0');
-	  state = PARSE_GET_WIDTH;
+    case PARSE_IN_FORMAT:
+      /*  In a format command.  */
+      reset_options = TRUE;
+      if (next_chr == CHR_LEFT_JUST) {
+	options.left_justify = TRUE;
+      } else if (next_chr == CHR_LEAD_ZERO) {
+	options.leading_zeroes = TRUE;
+      } else if (next_chr == CHR_ALT_FORM) {
+	options.alt_format = TRUE;
+      } else if (next_chr == CHR_FIELD_SEP) {
+	state = PARSE_GET_PRECISION;
+      } else if ((next_chr >= '1') && (next_chr <= '9')) {
+	options.width = ((unsigned long) next_chr) - ((unsigned long) '0');
+	state = PARSE_GET_WIDTH;
+      } else if (is_fmt_cmd(next_chr)) {
+	options.cmd = next_chr;
+	if (!realloc_dispatch_format_cmd(buf, buf_len, out_len, allow_realloc,
+					 &options, pdu)) {
+	  return 0;
 	}
-	else if (is_fmt_cmd (next_chr)) {
-	  options.cmd = next_chr;
-	  dispatch_format_cmd (bfr, &tail, len, &options, pdu);
-	  state = PARSE_NORMAL;
-	}
-	else {
-	  if (tail < len) {
-	    bfr[tail] = next_chr;
-	    tail++;
-	  }
-	  state = PARSE_NORMAL;
-	}
-	break;
-
-      /* parsing a width field */
-      case PARSE_GET_WIDTH:
-	reset_options = TRUE;
-	if (isdigit (next_chr)) {
-	  options.width *= 10;
-	  options.width += (unsigned long) next_chr - (unsigned long) '0';
-	}
-	else if (next_chr == CHR_FIELD_SEP)
-	  state = PARSE_GET_PRECISION;
-	else if (is_fmt_cmd (next_chr)) {
-	  options.cmd = next_chr;
-	  dispatch_format_cmd (bfr, &tail, len, &options, pdu);
-	  state = PARSE_NORMAL;
-	}
-	else {
-	  if (tail < len) {
-	    bfr[tail] = next_chr;
-	    tail++;
-	  }
-	  state = PARSE_NORMAL;
-	}
-	break;
-
-      /* parsing a precision field */
-      case PARSE_GET_PRECISION:
-	reset_options = TRUE;
-	if (isdigit (next_chr)) {
-	  if (options.precision == UNDEF_PRECISION)
-	    options.precision = (unsigned long) next_chr - (unsigned long) '0';
-	  else {
-	    options.precision *= 10;
-	    options.precision += (unsigned long) next_chr - (unsigned long) '0';
+	state = PARSE_NORMAL;
+      }	else {
+	if ((*out_len + 1) >= *buf_len) {
+	  if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	    return 0;
 	  }
 	}
-	else if (is_fmt_cmd (next_chr)) {
-	  options.cmd = next_chr;
-	  dispatch_format_cmd (bfr, &tail, len, &options, pdu);
-	  state = PARSE_NORMAL;
-	}
-	else {
-	  if (tail < len) {
-	    bfr[tail] = next_chr;
-	    tail++;
-	  }
-	  state = PARSE_NORMAL;
-	}
-	break;
-
-      /* unknown state */
-      default:
-	reset_options = TRUE;
-	if (tail < len) {
-	  bfr[tail] = next_chr;
-	  tail++;
-	}
+	*(*buf + *out_len) = next_chr;
+	(*out_len)++;
 	state = PARSE_NORMAL;
       }
-  }
+      break;
 
-  /* append the null terminator */
-  if (tail < len) {
-    bfr[tail] = '\0';
-    tail++;
-  }
-  else 
-    bfr[tail - 1] = '\0';
+    case PARSE_GET_WIDTH:
+      /*  Parsing a width field.  */
+      reset_options = TRUE;
+      if (isdigit(next_chr)) {
+	options.width *= 10;
+	options.width += (unsigned long) next_chr - (unsigned long) '0';
+      }	else if (next_chr == CHR_FIELD_SEP) {
+	state = PARSE_GET_PRECISION;
+      } else if (is_fmt_cmd(next_chr)) {
+	options.cmd = next_chr;
+	if (!realloc_dispatch_format_cmd(buf, buf_len, out_len, allow_realloc,
+					 &options, pdu)) {
+	  return 0;
+	}
+	state = PARSE_NORMAL;
+      } else {
+	if ((*out_len + 1) >= *buf_len) {
+	  if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	    return 0;
+	  }
+	}
+	*(*buf + *out_len) = next_chr;
+	(*out_len)++;
+	state = PARSE_NORMAL;
+      }
+      break;
 
-  return tail;
+    case PARSE_GET_PRECISION:
+      /*  Parsing a precision field.  */
+      reset_options = TRUE;
+      if (isdigit(next_chr)) {
+	if (options.precision == UNDEF_PRECISION) {
+	  options.precision = (unsigned long) next_chr - (unsigned long) '0';
+	} else {
+	  options.precision *= 10;
+	  options.precision += (unsigned long) next_chr - (unsigned long) '0';
+	}
+      } else if (is_fmt_cmd(next_chr)) {
+	options.cmd = next_chr;
+	if (options.width < options.precision) {
+	  options.width = options.precision;
+	}
+	if (!realloc_dispatch_format_cmd(buf, buf_len, out_len, allow_realloc,
+					 &options, pdu)) {
+	  return 0;
+	}
+	state = PARSE_NORMAL;
+      }	else {
+	if ((*out_len + 1) >= *buf_len) {
+	  if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	    return 0;
+	  }
+	}
+	*(*buf + *out_len) = next_chr;
+	(*out_len)++;
+	state = PARSE_NORMAL;
+      }
+      break;
+
+    default:
+      /*  Unknown state.  */
+      reset_options = TRUE;
+      if ((*out_len + 1) >= *buf_len) {
+	if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	  return 0;
+	}
+      }
+      *(*buf + *out_len) = next_chr;
+      (*out_len)++;
+      state = PARSE_NORMAL;
+    }
+  }
+  
+  *(*buf + *out_len) = '\0';
+  return 1;
 }

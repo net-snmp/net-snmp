@@ -1,10 +1,122 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*4.2.7*
+ Due to a copyright statement that didn't allow modifications,
+     snmpnetstat has been completely rewritten.  The new binary is
+     named snmpnetstat53, and we've provided a snmpnetstat wrapper
+     script to make the command line options backwards compatible.
+     As a side effect, however, it now finally supports SNMPv3.
+ Assorted bug fixes - mostly back-ported from the v5 code
+    - plug various memory leaks
+    - more robust on error situations
+    - improve 64-bit support (though v5 line is better still)
+    - Many other misc fixes.
+ This line is now officially closed.
+
+*4.2.6*
+ Big fixes:
+    - Fixes to the Tunnel mib.
+    - Deprecated the non-raw objects in the system stats MIB portion.
+    - Testing harness fixes.
+    - Network file system improvements fro the hrStorageTable. 
+    - fixed snmptable.
+    - fixed the memory table (again) locking to 2^31 in value.
+    - Misc documentation fixes and clean-ups.
+    - Many other misc fixes.
+
+*4.2.5*
+ Bug fixes:
+    - The perl module actually works.  Sorry about that.
+    - don't overwrite the PID of an already-running snmpd with the PID
+      of an abortive snmpd.
+    - a 64 bit architecture socket fix
+    - smux authentication fixed for multiple connected sessions.
+    - dynamic module support testing in the configure
+    - memory values > 32bits are now reported as a maxed out 32bit number
+
+*4.2.4*
+ New:
+    - badCommunityNames and badCommunityUses Counters supported.
+    - tcp_wrappers support for snmptrapd.
+
+ Bug fixes:
+    - A security issue involving the snmpnetstat command accepting
+      illegal data from a faked snmp server.
+    - RPM library support fixes.
+    - shared libraries built by default.
+    - many bug fixes for conformance of target, notification, and vacm tables
+    - many other fixes.
+
+ Ports:
+    - HPUX 11
+    - Dynix/PTX 4.4
+    - The snmpd demon can properly run as a windows service
+
+*4.2.3*
+ New:
+    - sysLocation, sysContact, sysName and snmpEnableAuthenTraps are
+      persistent after being set remotely.
+    - New "ignoredisk" directive to ignore disks in the host resources mib.
+
+ Bug Fixes:
+    - The ifTable on Linux no longer reports duplicate interfaces.
+    - perl scripts print better error messages if needed modules
+      aren't available.
+    - trap sinks aren't duplicated after a SIGHUP. 
+    - misc other fixes.
+
+ Ports:
+    - improved irix support.
+    - more mibII support for windows.
+
+*4.2.2*
+ Security Bug Fixes:
+    - A few security bugs have been found and fixed. No known exploits
+      have been released to date. However, users are encouraged to
+      upgrade to the 4.2.2 release as soon as possible.
+ 
+ Bug fixes:
+    - many misc bug fixes.
+    - misc documentation corrections.
+    - updated libtool to 1.4.  This fixes a couple of platforms (eg, NetBSD).
+
+ Ports:
+    - mibII support for win32
+    - It should compile and work on MacOS X (Darwin)
+    - udpTable supported on solaris.
+    - win32 borland compiler supported (see win32/config.h.borland)
+
+ New:
+    - tkmib supports SETs and saving of configuration data.
+    - snmpwalk detects out of order OIDs being returned from an agent.
+    - snmpset accepts the '=' sign for a datatype if the mib is
+      available to extract the datatype from instead.
+
+*4.2.1*
+ Administrative:
+    - The http://www.net-snmp.org/ web site and domain name is now active.
+    - Copyright statement for changes beyond 4.2 is now a true BSD license.
+      (see the COPYING file for details)
+
+ Major Bug fixes:
+    - AgentX master agent no longer crashes when a subagent disconnects.
+    - counter64 encoding fixed.
+    - oids with large numbers embedded in them should work properly (again).
+    - Fixed behavior of agent_check_and_process() and alarms.
+    - mib2c handles more variable types.
+    - traps/informs are sent properly from agentx subagents.
+    - many many more bug fixes have gone into this release.
+
+ New:
+    - The snmpconf configuration file editor can create snmptrapd.conf files.
+    - AgentX support is compiled in by default, but must be configured now.
+      (Add "master on" to your snmpd.conf file to enable agentx support)
+
 *4.2*
 
  Administrative:
-    - project services moved to http://sourceforge.net/projects/net-snmp.
+    - project services moved to http://www.net-snmp.org/project/
 
  Features:
     - Packets sequences are now shorter when possible, reducing packet sizes.
@@ -87,7 +199,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - The tools support regex matching of oids on the command line.
       (see the snmpcmd(1) manual page on the -Ib option)
     - A ucd-snmp usage tutorial has been placed on the main web page.
-      (see http://ucd-snmp.ucdavis.edu/tutorial)
+      (see http://www.net-snmp.org/tutorial)
     - snmptable is much smarter and handles sparse tables better.
     - tkmib supports snmpv3.
     - New agent libraries to embed SNMP and AgentX agents into other programs.

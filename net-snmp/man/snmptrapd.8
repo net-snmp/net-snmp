@@ -19,12 +19,12 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAPD 8 "15 May 2000"
+.TH SNMPTRAPD 8 "07 Aug 2001"
 .UC 4
 .SH NAME
 snmptrapd - Receive and log snmp trap messages.
 .SH SYNOPSIS
-snmptrapd [-h] [-P] [-s] [-p port] [-d] [-e] [-D tokens] [-l [d0-7]] [-f] [-H] [-a] [-O oidopts] [-C] [-c confFile] [-F FORMAT]
+snmptrapd [common options] [-P] [-o file] [-s] [-f] [-p port] [-e] [-l [d0-7]] [-a] [-C] [-c confFile] [-F FORMAT]
 .SH DESCRIPTION
 Snmptrapd
 is an SNMP application that receives and logs snmp trap messages
@@ -39,10 +39,13 @@ The log messages are of the form:
 .I Snmptrapd
 must be run as root so that UDP port 162 can be opened.
 .SH COMMAND LINE ARGUMENTS
-.IP "-h"
-Print a usage summary and exit.
+In addition to the command arguments described under
+.IR snmpcmd (1)
+the following arguments are understood:
 .IP "-P"
-Print the logged messages to stdout.
+Print the logged messages to stderr.
+.IP "-o file"
+Logs messages to a given file.
 .IP "-p port"
 Specifies the port to run on, if the default 162 is not desired.
 .IP "-s"
@@ -50,7 +53,9 @@ Log the messages to syslog(8).  These syslog messages are sent with
 the level of LOG_WARNING, and to the LOG_LOCAL0 facility (by
 default).  The demon will also fork away from its caller when
 the syslog facilities are used.
-This is the default unless the '-P' flag is used.
+This is the default unless the '-P' flag or '-o' flag is used.
+.IP "-n"
+Don't do reverse translation from IP address to host name.
 .IP "-l [d0-7]"
 Specifies the syslog facility to use, demon or local[0-7].
 .IP "-a"
@@ -63,8 +68,6 @@ Causes the application to dump input and output packets.
 Turn debugging output on.
 .IP "-f"
 Don't fork away from the caller when using syslog().
-.IP "-O oidopts"
-Set OID printing options (see snmpcmd(1))
 .IP "-C"
 Don't read the default set of configuration files.
 .IP "-c confFile"
@@ -74,7 +77,7 @@ When logging to standard output, use the format in the string FORMAT.
 .PP
 FORMAT is a printf-like string. 
 .I Snmptrapd 
-interprets the following command sequences:
+interprets the following formatting sequences:
 .TP
 %%
 a literal %
@@ -145,6 +148,10 @@ Trap description
 %q
 Trap sub-type (numeric, in decimal)
 .TP
+%P
+Security information from the PDU (community name for v1/v2c,
+user and context for v3)
+.TP
 %v
 list of trap's variables
 .PP
@@ -174,17 +181,17 @@ To get a message like "14:03 TRAP3.1 from humpty.ucd.edu" you
 could use something like this:
 .PP
 .RS
-.NF
+.nf
 snmptrapd -P -F "%02.2h:%02.2j TRAP%w.%q from %A\en"
-.FI
+.fi
 .RE
 .PP
 If you want the same thing but in GMT rather than local time, use
 .PP
 .RS
-.NF
+.nf
 snmptrapd -P -F "%#02.2h:%#02.2j TRAP%w.%q from %A\en"
-.FI
+.fi
 .RE
 .PP
 .SH EXTENSIBILITY AND CONFIGURATION

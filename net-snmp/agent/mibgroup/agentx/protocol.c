@@ -35,6 +35,10 @@
 #include <arpa/inet.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -410,7 +414,7 @@ agentx_build_header(struct snmp_pdu *pdu, u_char *bufp, size_t *out_length)
 
     *bufp = 1;			bufp++;		/* version */
     *bufp = pdu->command;	bufp++;		/* type    */
-    *bufp = pdu->flags & AGENTX_MSG_FLAGS_MASK;
+    *bufp = (u_char)(pdu->flags & AGENTX_MSG_FLAGS_MASK);
     				bufp++;		/* AgentX flags */
     *bufp = 0;			bufp++;		/* <reserved> */
     *out_length -=4;
@@ -500,7 +504,7 @@ _agentx_build(struct snmp_session        *session,
 			/* Timeout */
 	    if ( *out_length < 4 )
 	        return -1;
-	    *bufp = pdu->time;		bufp++;
+	    *bufp = (u_char)pdu->time;		bufp++;
 	    *bufp = 0;			bufp++;
 	    *bufp = 0;			bufp++;
 	    *bufp = 0;			bufp++;
@@ -530,7 +534,7 @@ _agentx_build(struct snmp_session        *session,
 			/* Reason */
 	    if ( *out_length < 4 )
 	        return -1;
-	    *bufp = pdu->errstat;	bufp++;
+	    *bufp = (u_char)pdu->errstat;	bufp++;
 	    *bufp = 0;			bufp++;
 	    *bufp = 0;			bufp++;
 	    *bufp = 0;			bufp++;
@@ -545,7 +549,7 @@ _agentx_build(struct snmp_session        *session,
 	case AGENTX_MSG_UNREGISTER:
 	    if ( *out_length < 4 )
 	        return -1;
-	    *bufp = pdu->time;		bufp++;	    /* Timeout (Register only) */
+	    *bufp = (u_char)pdu->time;		bufp++;	    /* Timeout (Register only) */
 	    *bufp = pdu->priority;		bufp++;
 	    range_ptr = bufp;	 	/* Points to the 'range_subid' field */
 	    *bufp = pdu->range_subid;	bufp++;
@@ -583,14 +587,6 @@ _agentx_build(struct snmp_session        *session,
 		DEBUGINDENTLESS();
 		bufp        += 4;
 		*out_length -= 4;
-
-			/* If the OID has been 'compacted', then tweak
-			     the packet's 'range_subid' to reflect this */
-		if ( *prefix_ptr ) {
-		     *range_ptr -= 5;
-		     DEBUGPRINTINDENT("dumpv_send");
-		     DEBUGMSG(("dumpv_send", "  Range SubID tweaked:\t%d\n", *(range_ptr) ));
-		}
 	    }
 	    break;
 	    
@@ -839,7 +835,7 @@ agentx_parse_oid( u_char *data, size_t *length, int *inc,
       buf_ptr += 4;
      *length -= 4;
 
-     if ( n_subid == 0 ) {
+     if (n_subid == 0 && prefix == 0) {
 		/* Null OID */
          *oid_ptr = 0;		oid_ptr++;
          *oid_ptr = 0;		oid_ptr++;
@@ -865,7 +861,7 @@ agentx_parse_oid( u_char *data, size_t *length, int *inc,
      }
 
 
-     for ( i = 0  ; i<n_subid ; i++ ) {
+     for ( i = 0  ; i < (int)n_subid ; i++ ) {
         oid_ptr[i] = agentx_parse_int( buf_ptr, network_byte_order );
 	buf_ptr += 4;
 	*length -= 4;
@@ -933,13 +929,15 @@ agentx_parse_opaque(u_char *data, size_t *length, int *type,
 	char	c[sizeof(double)];
     } fu;
     int tmp;
-    u_char buf[BUFSIZ];
-    char *cp;
+    u_char *buf;
+    u_char *cp;
 
     cp = agentx_parse_string( data, length,
 				opaque_buf, opaque_len, network_byte_order);
     if ( cp == NULL )
 	return NULL;
+
+	buf = opaque_buf;
 
 #ifdef OPAQUE_SPECIAL_TYPES
     if (( buf[0] != ASN_OPAQUE_TAG1 ) || ( *opaque_len <= 3 ))
@@ -1301,10 +1299,6 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
                 }
 
 		if ( pdu->range_subid ) {
-		
-			if ( *prefix_ptr ) {
-			    pdu->range_subid += 5;
-			}
     			range_bound = agentx_parse_int( bufp,
 				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
 			bufp    += 4;
@@ -1420,7 +1414,7 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
 			    return SNMPERR_ASN_PARSE_ERR;
                     }
 		    snmp_pdu_add_variable( pdu, oid_buffer, oid_buf_len,
-				type, buffer, buf_len);
+				(u_char)type, buffer, buf_len);
 
 		    oid_buf_len = MAX_OID_LEN;
 		    buf_len     = BUFSIZ;

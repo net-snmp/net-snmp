@@ -23,7 +23,11 @@
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
  
+#if HAVE_SYS_VMPARAM_H
+#include <sys/vmparam.h>
+#else
 #include <vm/vm_param.h>
+#endif
  
 #include <time.h>
 #include <nlist.h>
@@ -46,6 +50,7 @@
 #include "auto_nlist.h"
 
 #include "memory.h"
+#include "memory_freebsd2.h"
 
 /* nlist symbols */
 #define SUM_SYMBOL      "cnt"
@@ -63,6 +68,8 @@ long minimumswap;
 quad_t swapTotal;
 quad_t swapUsed;
 quad_t swapFree;
+
+static FindVarMethod var_extensible_mem;
 
 void init_memory_freebsd2(void) 
 {
@@ -122,7 +129,7 @@ void swapmode(void)
 
   strcpy(ext.command, "/usr/sbin/swapinfo -k");
 
-  if ( (fd = get_exec_output(&ext)) )
+  if ( (fd = get_exec_output(&ext)) != -1 )
   {
       file = fdopen(fd,"r");
 
@@ -150,11 +157,9 @@ void swapmode(void)
 
 void swapmode(void)
 {
-    char *header;
-    int hlen, nswdev, dmmax;
-    int i, idiv, n;
+    int nswdev, dmmax, pagesize;
+    int i, n;
     struct swdevt *sw;
-    long blocksize;
     static kvm_t *kd = NULL;
     struct kvm_swap kswap[16];
 
@@ -189,14 +194,11 @@ void swapmode(void)
     swapUsed = swapTotal - swapFree;
 
     /* Convert to kb */
-    header = getbsize(&hlen, &blocksize);
-    idiv = blocksize / 512;
+    pagesize = getpagesize() / 1024;
 
-    if (idiv > 0) {
-        swapTotal /= idiv;
-        swapUsed /= idiv;
-        swapFree /= idiv;
-    }
+    swapTotal *= pagesize;
+    swapUsed  *= pagesize;
+    swapFree  *= pagesize;
 
     free(sw); 
 }
@@ -215,7 +217,7 @@ void swapmode(void)
   
 */
 
-unsigned char *var_extensible_mem(struct variable *vp,
+static unsigned char *var_extensible_mem(struct variable *vp,
 				  oid *name,
 				  size_t *length,
 				  int exact,
@@ -313,7 +315,11 @@ unsigned char *var_extensible_mem(struct variable *vp,
 #endif
 #ifndef openbsd2
     case MEMCACHED:
+#ifdef darwin
+	long_ret = ptok(mem.v_lookups);
+#else
 	long_ret = ptok(mem.v_cache_count);
+#endif
 	return((u_char *) (&long_ret));
 #endif
     case ERRORFLAG:

@@ -40,11 +40,12 @@ HEADER() {
 	exit 0;
     else
 	ECHO "testing $*...  "
+	headerStr="testing $*"
     fi
 }
 
 
-#------------------------------------ -o- 
+#------------------------------------ -o-
 #
 OUTPUT() {	# <any_arguments>
 	cat <<GRONK
@@ -57,7 +58,7 @@ GRONK
 }
 
 
-#------------------------------------ -o- 
+#------------------------------------ -o-
 #
 SUCCESS() {	# <any_arguments>
 	[ "$failcount" -ne 0 ] && return
@@ -70,7 +71,7 @@ GROINK
 
 
 
-#------------------------------------ -o- 
+#------------------------------------ -o-
 #
 FAILED() {	# <return_value>, <any_arguments>
 	[ "$1" -eq 0 ] && return
@@ -96,7 +97,7 @@ SKIPIFNOT() {
 }
 	
 
-#------------------------------------ -o- 
+#------------------------------------ -o-
 #
 VERIFY() {	# <path_to_file(s)>
 	local	missingfiles=
@@ -111,7 +112,7 @@ VERIFY() {	# <path_to_file(s)>
 }
 
 
-#------------------------------------ -o- 
+#------------------------------------ -o-
 #
 STARTTEST() {	
 	[ ! -e "$junkoutputfile" ] && {
@@ -123,14 +124,14 @@ STARTTEST() {
 }
 
 
-#------------------------------------ -o- 
+#------------------------------------ -o-
 #
 STOPTEST() {
-	rm -rf "$junkoutputfile"
+	rm -f "$junkoutputfile"
 }
 
 
-#------------------------------------ -o- 
+#------------------------------------ -o-
 #
 REMOVETESTDATA() {
 #	ECHO "removing $SNMP_TMPDIR  "
@@ -138,9 +139,11 @@ REMOVETESTDATA() {
 }
 
 
-#------------------------------------ -o- 
+#------------------------------------ -o-
 #
 CAPTURE() {	# <command_with_arguments_to_execute>
+    echo $* >> $SNMP_TMPDIR/invoked
+
 	if [ $SNMP_VERBOSE -gt 0 ]; then
 		cat <<KNORG
 
@@ -160,6 +163,13 @@ KNORG
 	fi
 }
 
+#------------------------------------ -o-
+# Delay to let processes settle
+DELAY() {
+    if [ $SNMP_SLEEP -ne 0 ] ; then
+	sleep $SNMP_SLEEP
+    fi
+}
 
 #
 # Checks the output result against what we expect.
@@ -173,23 +183,23 @@ EXPECTRESULT() {
     fi
 }
 
-#------------------------------------ -o- 
+#------------------------------------ -o-
 # Returns: Count of matched lines.
 #
 CHECK() {	# <pattern_to_match>
-	if [ $SNMP_VERBOSE -gt 0 ]; then
-	    echo -n "checking output for \"$*\"..."
-	fi
+    if [ $SNMP_VERBOSE -gt 0 ]; then
+	echo -n "checking output for \"$*\"..."
+    fi
 
-	rval=`grep -c "$*" "$junkoutputfile" 2>/dev/null`
+    rval=`grep -c "$*" "$junkoutputfile" 2>/dev/null`
 
-	if [ $SNMP_VERBOSE -gt 0 ]; then
-	    echo "$rval matches found"
-	fi
+    if [ $SNMP_VERBOSE -gt 0 ]; then
+	echo "$rval matches found"
+    fi
 
-	snmp_last_test_result=$rval
-	EXPECTRESULT 1  # default
-	return $rval
+    snmp_last_test_result=$rval
+    EXPECTRESULT 1  # default
+    return $rval
 }
 
 
@@ -200,7 +210,7 @@ CHECKTRAPD() {
     junkoutputfile=$oldjunkoutputfile
 }
 
-#------------------------------------ -o- 
+#------------------------------------ -o-
 # Returns: Count of matched lines.
 #
 CHECKEXACT() {	# <pattern_to_match_exactly>
@@ -226,60 +236,70 @@ CONFIGTRAPD() {
     echo $* >> $SNMPTRAPD_CONFIG_FILE
 }
 
+#
+# common to STARTAGENT and STARTTRAPD
+# log command to "invoked" file
+# delay after command to allow for settle
+#
+STARTPROG() {
+    if [ $SNMP_VERBOSE -gt 1 ]; then
+	echo "$CFG_FILE contains: "
+	if [ -f $CFG_FILE ]; then
+	    cat $CFG_FILE
+	else
+	    echo "[no config file]"
+	fi
+    fi
+    if test -f $CFG_FILE; then
+	COMMAND="$COMMAND -C -c $CFG_FILE"
+    fi
+    if [ $SNMP_VERBOSE -gt 0 ]; then
+	echo "running: $COMMAND"
+    fi
+    echo $COMMAND >> $SNMP_TMPDIR/invoked
+    $COMMAND > $LOG_FILE.stdout 2>&1
+
+    DELAY
+}
+
+#------------------------------------ -o-
 STARTAGENT() {
-    if [ $SNMP_VERBOSE -gt 1 ]; then
-	echo "agent config: "
-        if [ -f $SNMP_CONFIG_FILE ]; then
-    	    cat $SNMP_CONFIG_FILE
-	else
-	    echo "[no config file]"
-	fi
-    fi
-    COMMANDARGS="$SNMP_FLAGS -r -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE $AGENT_FLAGS"
-    if test -f $SNMP_CONFIG_FILE; then
-      COMMANDARGS="$COMMANDARGS -C -c $SNMP_CONFIG_FILE"
-    fi
-#    VERBOSE_OUT 2 "starting agent: snmpd $SNMP_FLAGS -r -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE"
-   if [ $SNMP_VERBOSE -gt 0 ]; then
-	echo "running: snmpd $COMMANDARGS"
-   fi
-   snmpd $COMMANDARGS > $SNMP_SNMPD_LOG_FILE.stdout 2>&1
+    COMMAND="snmpd $SNMP_FLAGS -r -U -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE $AGENT_FLAGS"
+    CFG_FILE=$SNMP_CONFIG_FILE
+    LOG_FILE=$SNMP_SNMPD_LOG_FILE
 
-    ## Give some agents time to settle ... A Better Way Will Be Found
-    if [ `uname -s` = "AIX" ]; then
-	sleep 4;
-    fi
+    STARTPROG
 }
 
+#------------------------------------ -o-
 STARTTRAPD() {
-    if [ $SNMP_VERBOSE -gt 1 ]; then
-	echo "trapd config: "
-        if [ -f $SNMPTRAPD_CONFIG_FILE ]; then
-    	    cat $SNMPTRAPD_CONFIG_FILE
-	else
-	    echo "[no config file]"
-	fi
-    fi
-    COMMANDARGS="-d $SNMP_SNMPTRAPD_PORT -u $SNMP_SNMPTRAPD_PID_FILE -o $SNMP_SNMPTRAPD_LOG_FILE"
-    if test -f $SNMPTRAPD_CONFIG_FILE; then
-      COMMANDARGS="$COMMANDARGS -C -c $SNMPTRAPD_CONFIG_FILE"
-    fi
-   if [ $SNMP_VERBOSE -gt 0 ]; then
-	echo "running: snmptrapd $COMMANDARGS"
-   fi
-   snmptrapd $COMMANDARGS > $SNMP_SNMPTRAPD_LOG_FILE.stdout 2>&1
+    COMMAND="snmptrapd -d $SNMP_SNMPTRAPD_PORT -u $SNMP_SNMPTRAPD_PID_FILE -o $SNMP_SNMPTRAPD_LOG_FILE"
+    CFG_FILE=$SNMPTRAPD_CONFIG_FILE
+    LOG_FILE=$SNMP_SNMPTRAPD_LOG_FILE
 
-    ## Give some agents time to settle ... A Better Way Will Be Found
-    if [ `uname -s` = "AIX" ]; then
-	sleep 4;
+    STARTPROG
+}
+
+
+## used by STOPAGENT and STOPTRAPD
+# delay before kill to allow previous action to finish
+#    this is especially important for interaction between
+#    master agent and sub agent.
+STOPPROG() {
+    if [ -f $1 ]; then
+	COMMAND="kill -TERM `cat $1`"
+	echo $COMMAND >> $SNMP_TMPDIR/invoked
+
+	DELAY
+	$COMMAND > /dev/null 2>&1
+	DELAY
     fi
 }
 
+#------------------------------------ -o-
+#
 STOPAGENT() {
-    if [ -f $SNMP_SNMPD_PID_FILE ]; then
-	kill `cat $SNMP_SNMPD_PID_FILE`
-	# XXX: kill -9 later (after sleep and ps grok?)?
-    fi
+    STOPPROG $SNMP_SNMPD_PID_FILE
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "Agent Output:"
 	echo "$seperator [stdout]"
@@ -288,14 +308,12 @@ STOPAGENT() {
 	cat $SNMP_SNMPD_LOG_FILE
 	echo "$seperator"
     fi
-    rm $SNMP_SNMPD_PID_FILE
 }
 
+#------------------------------------ -o-
+#
 STOPTRAPD() {
-    if [ -f $SNMP_SNMPTRAPD_PID_FILE ]; then
-	kill `cat $SNMP_SNMPTRAPD_PID_FILE`
-	# XXX: kill -9 later (after sleep and ps grok?)?
-    fi
+    STOPPROG $SNMP_SNMPTRAPD_PID_FILE
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "snmptrapd Output:"
 	echo "$seperator [stdout]"
@@ -304,27 +322,44 @@ STOPTRAPD() {
 	cat $SNMP_SNMPTRAPD_LOG_FILE
 	echo "$seperator"
     fi
-    rm $SNMP_SNMPTRAPD_PID_FILE
 }
 
+#------------------------------------ -o-
+#
 FINISHED() {
+    for pfile in $SNMP_TMPDIR/*pid* ; do
+	pid=`cat $pfile`
+	ps -e | egrep "^[ ]*$pid" > /dev/null 2>&1
+	if [ $? = 0 ] ; then
+	    SNMP_SAVE_TMPDIR=yes
+	    COMMAND="kill -9 $pid"
+	    echo $COMMAND "($pfile)" >> $SNMP_TMPDIR/invoked
+	    $COMMAND > /dev/null 2>&1
+	    return_value=1
+	fi
+    done
     if [ "x$return_value" != "x0" ]; then
 	if [ -s core ] ; then
-		cp core $SNMP_TMPDIR
-		rm -f core
+	    # XX hope that only one prog cores !
+	    cp core $SNMP_TMPDIR/core.$$
+	    rm -f core
 	fi
 	echo "FAIL"
+	echo "$headerStr...FAIL" >> $SNMP_TMPDIR/invoked
 	exit $return_value
     fi
+
+    echo "ok"
+    echo "$headerStr...ok" >> $SNMP_TMPDIR/invoked
 
     if [ "x$SNMP_SAVE_TMPDIR" != "xyes" ]; then
 	REMOVETESTDATA
     fi
-    echo "ok"
     exit $return_value
-	
 }
 
+#------------------------------------ -o-
+#
 VERBOSE_OUT() {
     if [ $SNMP_VERBOSE > $1 ]; then
 	shift

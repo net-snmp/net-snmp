@@ -27,6 +27,7 @@ INSTALLHEADERS=\
 	snmp_impl.h \
 	snmp_logging.h \
 	snmp_parse_args.h \
+	snmp-tc.h \
 	snmpusm.h \
 	snmpv3.h \
 	system.h \
@@ -119,7 +120,7 @@ default_store.lo:   asn1.h
 default_store.lo: snmp_api.h snmp_debug.h snmp_logging.h
 default_store.lo: tools.h read_config.h default_store.h system.h
 int64.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
-int64.lo: asn1.h int64.h
+int64.lo:   asn1.h int64.h
 keytools.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 keytools.lo: ../m/generic.h  
 keytools.lo:  asn1.h snmp_api.h
@@ -128,110 +129,97 @@ keytools.lo: snmp_debug.h snmp_logging.h
 keytools.lo:  transform_oids.h
 lcd_time.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 lcd_time.lo: ../m/generic.h  
-lcd_time.lo:   asn1.h
-lcd_time.lo: snmp_api.h callback.h snmpusm.h lcd_time.h snmp_debug.h tools.h
-lcd_time.lo: scapi.h transform_oids.h
+lcd_time.lo:  asn1.h snmp_api.h callback.h
+lcd_time.lo: snmpusm.h lcd_time.h snmp_debug.h tools.h scapi.h
+lcd_time.lo: transform_oids.h
 md5.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
-md5.lo:   md5.h
+md5.lo:  md5.h tools.h
 mib.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
-mib.lo: asn1.h snmp_api.h mib.h snmp.h snmp_impl.h parse.h int64.h system.h
-mib.lo: read_config.h snmp_debug.h default_store.h
+mib.lo:   asn1.h snmp_api.h mib.h
+mib.lo: snmp.h snmp_impl.h parse.h int64.h tools.h system.h read_config.h
+mib.lo: snmp_debug.h default_store.h snmp_logging.h 
 mt_support.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 mt_support.lo: ../m/generic.h  
 mt_support.lo:  mt_support.h
 parse.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
 parse.lo: snmp_logging.h  
-parse.lo:  system.h 
-parse.lo:  parse.h asn1.h mib.h snmp_api.h
-parse.lo: snmp_debug.h default_store.h tools.h
+parse.lo:   system.h parse.h
+parse.lo: asn1.h mib.h snmp_api.h snmp_debug.h default_store.h tools.h
 read_config.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 read_config.lo: ../m/generic.h  
-read_config.lo:  ./getopt.h
-read_config.lo:  asn1.h mib.h parse.h system.h
-read_config.lo: snmp_api.h snmp_debug.h snmp_logging.h 
-read_config.lo:  snmp_impl.h default_store.h
-read_config.lo: callback.h read_config.h tools.h
+read_config.lo:   asn1.h
+read_config.lo: mib.h parse.h system.h snmp_api.h snmp_debug.h snmp_logging.h
+read_config.lo:   snmp_impl.h
+read_config.lo: default_store.h callback.h read_config.h tools.h
 scapi.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
 scapi.lo:  asn1.h tools.h snmp_api.h callback.h
 scapi.lo: snmpusm.h keytools.h snmp_debug.h scapi.h snmp_impl.h
-scapi.lo:  system.h transform_oids.h
-snmp.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
-snmp.lo:   asn1.h snmp.h
-snmp.lo: snmp_api.h snmp_impl.h snmp_logging.h 
-snmp.lo:  snmp_debug.h mib.h
+scapi.lo: system.h mib.h snmp_logging.h 
+scapi.lo:  transform_oids.h
 snmp_alarm.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 snmp_alarm.lo: ../m/generic.h  
-snmp_alarm.lo:  ./getopt.h 
-snmp_alarm.lo:   asn1.h
-snmp_alarm.lo: snmp_api.h snmp_debug.h tools.h default_store.h callback.h
-snmp_alarm.lo: snmp_alarm.h
+snmp_alarm.lo:  asn1.h snmp_api.h snmp_debug.h
+snmp_alarm.lo: tools.h default_store.h callback.h snmp_alarm.h
 snmp_api.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 snmp_api.lo: ../m/generic.h  
-snmp_api.lo:  ./getopt.h 
-snmp_api.lo:   asn1.h snmp.h
-snmp_api.lo: snmp_api.h snmp_client.h snmp_impl.h parse.h mib.h system.h
-snmp_api.lo: int64.h snmpv3.h read_config.h snmp_debug.h callback.h snmpusm.h
-snmp_api.lo: tools.h keytools.h lcd_time.h snmp_alarm.h snmp_logging.h
+snmp_api.lo:  asn1.h snmp.h snmp_api.h
+snmp_api.lo: snmp_client.h snmp_impl.h parse.h mib.h system.h int64.h
+snmp_api.lo: snmpv3.h read_config.h snmp_debug.h callback.h snmpusm.h tools.h
+snmp_api.lo: keytools.h lcd_time.h snmp_alarm.h snmp_logging.h
 snmp_api.lo:   default_store.h
-snmp_api.lo: mt_support.h snmp-tc.h transform_oids.h
+snmp_api.lo: mt_support.h snmp-tc.h snmp_parse_args.h transform_oids.h
 snmp_auth.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 snmp_auth.lo: ../m/generic.h  
 snmp_auth.lo:   asn1.h
 snmp_auth.lo: snmp.h snmp_api.h snmp_impl.h mib.h md5.h system.h tools.h
 snmp_auth.lo: snmp_debug.h scapi.h
+snmp.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
+snmp.lo:  asn1.h snmp.h snmp_api.h snmp_impl.h
+snmp.lo: snmp_logging.h  
+snmp.lo: snmp_debug.h mib.h
 snmp_client.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 snmp_client.lo: ../m/generic.h  
-snmp_client.lo: ./getopt.h  
-snmp_client.lo:   asn1.h
-snmp_client.lo: snmp.h snmp_api.h snmp_impl.h snmp_client.h mib.h
+snmp_client.lo:  asn1.h snmp.h snmp_api.h snmp_impl.h
+snmp_client.lo: snmp_client.h mib.h
 snmp_debug.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 snmp_debug.lo: ../m/generic.h  
 snmp_debug.lo:  asn1.h mib.h snmp_api.h
 snmp_debug.lo: read_config.h snmp_debug.h snmp_impl.h snmp_logging.h
 snmp_logging.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 snmp_logging.lo: ../m/generic.h  
-snmp_logging.lo:   asn1.h
-snmp_logging.lo: default_store.h snmp_logging.h callback.h system.h
+snmp_logging.lo:  asn1.h default_store.h
+snmp_logging.lo: snmp_logging.h callback.h system.h
 snmp_parse_args.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 snmp_parse_args.lo: ../m/generic.h 
-snmp_parse_args.lo:  ./getopt.h
-snmp_parse_args.lo:  asn1.h snmp_api.h snmp_impl.h
-snmp_parse_args.lo: snmp_client.h mib.h snmp.h scapi.h keytools.h
+snmp_parse_args.lo:  ./getopt.h asn1.h snmp_api.h
+snmp_parse_args.lo: snmp_impl.h snmp_client.h mib.h snmp.h scapi.h keytools.h
 snmp_parse_args.lo: snmp_parse_args.h snmp_logging.h 
 snmp_parse_args.lo:  ../version.h system.h parse.h
 snmp_parse_args.lo: read_config.h snmp_debug.h snmpv3.h default_store.h
 snmpusm.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 snmpusm.lo: ../m/generic.h  
-snmpusm.lo:   asn1.h
-snmpusm.lo: snmp_api.h snmp_debug.h callback.h tools.h keytools.h snmp.h
-snmpusm.lo: read_config.h snmpv3.h snmp-tc.h lcd_time.h scapi.h
-snmpusm.lo: default_store.h snmpusm.h transform_oids.h
+snmpusm.lo:  asn1.h snmp_api.h snmp_debug.h
+snmpusm.lo: callback.h tools.h keytools.h snmp.h read_config.h snmpv3.h
+snmpusm.lo: snmp-tc.h lcd_time.h scapi.h default_store.h snmpusm.h
+snmpusm.lo: transform_oids.h
 snmpv3.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
-snmpv3.lo:  ./getopt.h 
-snmpv3.lo:  system.h asn1.h snmpv3.h callback.h snmp.h
-snmpv3.lo: snmp_api.h snmp_impl.h read_config.h lcd_time.h scapi.h tools.h
-snmpv3.lo: keytools.h snmp_debug.h snmp_logging.h 
-snmpv3.lo:  default_store.h snmpusm.h
-snmpv3.lo: transform_oids.h
+snmpv3.lo:   system.h
+snmpv3.lo: asn1.h snmpv3.h callback.h snmp.h snmp_api.h snmp_impl.h
+snmpv3.lo: read_config.h lcd_time.h scapi.h tools.h keytools.h snmp_debug.h
+snmpv3.lo: snmp_logging.h  
+snmpv3.lo: default_store.h snmpusm.h transform_oids.h
 snprintf.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 snprintf.lo: ../m/generic.h
 strtol.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
 strtoul.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 strtoul.lo: ../m/generic.h
 system.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
-system.lo: ./getopt.h  
-system.lo:   asn1.h snmp_api.h
-system.lo: tools.h system.h snmp_logging.h 
-testmib.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
-testmib.lo: ../m/generic.h  
-testmib.lo:  asn1.h mib.h
-testutil.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
-testutil.lo: ../m/generic.h  
-testutil.lo:  default_store.h
+system.lo:  asn1.h snmp_api.h tools.h system.h
+system.lo: snmp_logging.h  
 tools.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
 tools.lo:   asn1.h
 tools.lo: system.h snmp_api.h snmp_debug.h tools.h mib.h scapi.h
 vacm.lo: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
-vacm.lo: ./getopt.h 
 vacm.lo:  asn1.h snmp.h snmp_api.h vacm.h
 vacm.lo: snmp_debug.h snmp-tc.h read_config.h default_store.h
+winservice.lo: winservice.h

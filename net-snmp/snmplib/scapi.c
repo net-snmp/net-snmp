@@ -48,13 +48,25 @@
 #include "scapi.h"
 #include "snmp_impl.h"
 #include "system.h"
-
+#include "mib.h"
+#include "snmp_logging.h"
 #include "transform_oids.h"
 
 #ifdef USE_OPENSSL
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
+#include <openssl/des.h>
+
+#ifdef STRUCT_DES_KS_STRUCT_HAS_WEAK_KEY
+/* these are older names for newer structures that exist in openssl .9.7 */
+#define DES_key_schedule    des_key_schedule 
+#define DES_cblock          des_cblock 
+#define DES_key_sched       des_key_sched 
+#define DES_ncbc_encrypt    des_ncbc_encrypt
+#define DES_cbc_encrypt    des_cbc_encrypt
+#define OLD_DES
+#endif
 #endif
 
 #ifdef QUITFUN
@@ -320,9 +332,10 @@ sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
 {
   int   rval       = SNMPERR_SUCCESS;
 
-#ifdef USE_OPENSSL 
-  EVP_MD *hash(void);
-  HMAC_CTX *c = NULL; 
+#ifdef USE_OPENSSL
+  const EVP_MD         *hashfn;
+  EVP_MD_CTX     ctx, *cptr;
+  unsigned int   tmp_len;
 #endif
 
   DEBUGTRACE;
@@ -332,27 +345,56 @@ sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
       (int)(*MAC_len) < sc_get_properlength(hashtype, hashtypelen))
     return (SNMPERR_GENERR);
 
-#ifdef USE_OPENSSL 
-  /*
-   * Determine transform type.
-   */
-  c = malloc(sizeof(HMAC_CTX));
-  if (c == NULL)
-    return (SNMPERR_GENERR);
+#ifdef USE_OPENSSL
+    /*
+     * Determine transform type.
+     */
+    if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
+        hashfn = (const EVP_MD *) EVP_md5();
+    } else if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
+        hashfn = (const EVP_MD *) EVP_sha1();
+    } else {
+        return (SNMPERR_GENERR);
+    }
 
-  if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
-    EVP_DigestInit(&c->md_ctx, (const EVP_MD *) EVP_md5());
-  }
-  else if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
-    EVP_DigestInit(&c->md_ctx, (const EVP_MD *) EVP_sha1());
-  }
-  else {
-    return(SNMPERR_GENERR);
-  }
-  EVP_DigestUpdate(&c->md_ctx, buf, buf_len);
-  EVP_DigestFinal(&(c->md_ctx), MAC, MAC_len);
-  free(c);
-  return (rval);
+/** initialize the pointer */
+    memset(&ctx, 0, sizeof(ctx));
+    cptr = &ctx;
+#if defined(OLD_DES)
+    EVP_DigestInit(cptr, hashfn);
+#else /* !OLD_DES */
+    /* this is needed if the runtime library is different than the compiled
+       library since the openssl versions are very different. */
+    if (SSLeay() < 0x907000) {
+        /* the old version of the struct was bigger and thus more
+           memory is needed. should be 152, but we use 256 for safety. */
+        cptr = malloc(256);
+        EVP_DigestInit(cptr, hashfn);
+    } else {
+        EVP_MD_CTX_init(cptr);
+        EVP_DigestInit(cptr, hashfn);
+    }
+#endif
+
+/** pass the data */
+    EVP_DigestUpdate(cptr, buf, buf_len);
+
+/** do the final pass */
+#if defined(OLD_DES)
+    EVP_DigestFinal(cptr, MAC, &tmp_len);
+    *MAC_len = tmp_len;
+#else /* !OLD_DES */
+    if (SSLeay() < 0x907000) {
+        EVP_DigestFinal(cptr, MAC, &tmp_len);
+        *MAC_len = tmp_len;
+        free(cptr);
+    } else {
+        EVP_DigestFinal_ex(cptr, MAC, &tmp_len);
+        *MAC_len = tmp_len;
+        EVP_MD_CTX_cleanup(cptr);
+    }
+#endif                          /* OLD_DES */
+    return (rval);
 #else /* USE_INTERNAL_MD5 */
 
   if (MDchecksum(buf, buf_len, MAC, *MAC_len)) {
@@ -499,8 +541,13 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 	u_char		pad_block[32];  /* bigger than anything I need */
 	u_char          my_iv[32];      /* ditto */
 	int		pad, plast, pad_size;
-	des_key_schedule key_sch;
-	des_cblock      key_struct;
+#ifdef OLD_DES
+	DES_key_schedule key_sch;
+#else
+	DES_key_schedule key_sched_store;
+	DES_key_schedule *key_sch = &key_sched_store;
+#endif
+	DES_cblock      key_struct;
 
         DEBUGTRACE;
 
@@ -508,6 +555,7 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 	 * Sanity check.
 	 */
 #if	!defined(SCAPI_AUTHPRIV)
+		snmp_log(LOG_ERR, "Encryption support not enabled.\n");
 		return SNMPERR_SC_NOT_CONFIGURED;
 #endif
 
@@ -524,15 +572,34 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 
 #ifdef SNMP_TESTING_CODE
 {
-        char buf[SNMP_MAXBUF];
+        size_t buf_len = 128, out_len = 0;
+        u_char *buf = (u_char *)malloc(buf_len);
 
-	sprint_hexstring(buf, iv, ivlen);
-        DEBUGMSGTL(("scapi", "encrypt: IV: %s/ ", buf));
-	sprint_hexstring(buf, key, keylen);
-        DEBUGMSG(("scapi","%s\n", buf));
-
-	sprint_hexstring(buf, plaintext, 16);
-        DEBUGMSGTL(("scapi","encrypt: string: %s\n", buf));
+	if (buf != NULL) {
+	    if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
+					 iv, ivlen)) {
+		DEBUGMSGTL(("scapi", "encrypt: IV: %s/", buf));
+	    } else {
+		DEBUGMSGTL(("scapi", "encrypt: IV: %s [TRUNCATED]/", buf));
+	    }
+	    out_len = 0;
+	    if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
+					 key, keylen)) {
+		DEBUGMSG(("scapi","%s\n", buf));
+	    } else {
+		DEBUGMSG(("scapi","%s [TRUNCATED]\n", buf));
+	    }
+	    out_len = 0;
+	    if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
+					 plaintext, 16)) {
+		DEBUGMSGTL(("scapi","encrypt: string: %s\n", buf));
+	    } else {
+		DEBUGMSGTL(("scapi","encrypt: string: %s [TRUNCATED]\n", buf));
+	    }
+	    free(buf);
+	} else {
+	    DEBUGMSGTL(("scapi", "encrypt: malloc fail for debug output\n"));
+	}
 }
 #endif /* SNMP_TESTING_CODE */
 
@@ -568,16 +635,16 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 
 	if ( ISTRANSFORM(privtype, DESPriv) ) {
                 memcpy(key_struct, key, sizeof(key_struct));
-		(void) des_key_sched(&key_struct, key_sch);
+		(void) DES_key_sched(&key_struct, key_sch);
 
 		memcpy(my_iv, iv, ivlen);
 		/* encrypt the data */
-		des_ncbc_encrypt(plaintext, ciphertext, plast, key_sch, 
-				 (des_cblock *) my_iv, DES_ENCRYPT);
+		DES_ncbc_encrypt(plaintext, ciphertext, plast, key_sch, 
+				 (DES_cblock *) my_iv, DES_ENCRYPT);
                 if (pad > 0) {
                     /* then encrypt the pad block */
-                    des_ncbc_encrypt(pad_block, ciphertext+plast, pad_size, 
-                                     key_sch, (des_cblock *)my_iv, DES_ENCRYPT);
+                    DES_ncbc_encrypt(pad_block, ciphertext+plast, pad_size, 
+                                     key_sch, (DES_cblock *)my_iv, DES_ENCRYPT);
                     *ctlen = plast + pad_size;
                 } else {
                     *ctlen = plast;
@@ -588,7 +655,11 @@ sc_encrypt_quit:
 	memset(my_iv, 0, sizeof(my_iv));
 	memset(pad_block, 0, sizeof(pad_block));
 	memset(key_struct, 0, sizeof(key_struct));
-	memset(key_sch, 0, sizeof(key_sch));
+#ifdef OLD_DES
+	memset(&key_sch, 0, sizeof(key_sch));
+#else
+	memset(&key_sched_store, 0, sizeof(key_sched_store));
+#endif
 	return rval;
 
 }  /* end sc_encrypt() */
@@ -597,6 +668,7 @@ sc_encrypt_quit:
 {
 #	if USE_INTERNAL_MD5
 	{
+		snmp_log(LOG_ERR, "Encryption support not enabled.\n");
 		DEBUGMSGTL(("scapi","Encrypt function not defined.\n"));
 		return SNMPERR_SC_GENERAL_FAILURE;
 	}
@@ -646,8 +718,13 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 
 	int rval = SNMPERR_SUCCESS;
 	u_char *my_iv[32];
-	des_key_schedule key_sch;
-	des_cblock  key_struct;
+#ifdef OLD_DES
+	DES_key_schedule key_sch;
+#else
+	DES_key_schedule key_sched_store;
+	DES_key_schedule *key_sch = &key_sched_store;
+#endif
+	DES_cblock  key_struct;
 	u_int		properlength,
 			properlength_iv;
 
@@ -690,17 +767,21 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 	memset(my_iv, 0, sizeof(my_iv));
 	if (ISTRANSFORM(privtype, DESPriv)) {
                 memcpy(key_struct, key, sizeof(key_struct));
-		(void) des_key_sched(&key_struct, key_sch);
+		(void) DES_key_sched(&key_struct, key_sch);
 	
 		memcpy(my_iv, iv, ivlen);
-		des_cbc_encrypt(ciphertext, plaintext, ctlen, key_sch, 
-				(des_cblock *) my_iv, DES_DECRYPT);
+		DES_cbc_encrypt(ciphertext, plaintext, ctlen, key_sch, 
+				(DES_cblock *) my_iv, DES_DECRYPT);
                 *ptlen = ctlen;
 	}
 
 /* exit cond */
 sc_decrypt_quit:
-	memset(key_sch, 0, sizeof(key_sch));
+#ifdef OLD_DES
+	memset(&key_sch, 0, sizeof(key_sch));
+#else
+	memset(&key_sched_store, 0, sizeof(key_sched_store));
+#endif
 	memset(key_struct, 0, sizeof(key_struct));
 	memset(my_iv, 0, sizeof(my_iv));
 	return rval;
@@ -708,6 +789,7 @@ sc_decrypt_quit:
 #else   /* USE OPEN_SSL */
 {
 #if	!defined(SCAPI_AUTHPRIV)
+		snmp_log(LOG_ERR, "Encryption support not enabled.\n");
 		return SNMPERR_SC_NOT_CONFIGURED;
 #else
 #	if USE_INTERNAL_MD5

@@ -22,6 +22,12 @@
 #include <winsock.h>
 #endif
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -43,6 +49,10 @@ static int   debug_print_everything=0;
 static int debugindent=0;
 #define INDENTMAX 80
 static char debugindentchars[] = "                                                                                ";
+
+/* Prototype definitions */
+void debug_config_register_tokens(const char *configtoken, char *tokens);
+void debug_config_turn_on_debugging(const char *configtoken, char *line);
 
 char *
 debug_indent(void) {
@@ -87,7 +97,7 @@ DEBUGPOID(oid *theoid,
 	  size_t len)
 {
   char c_oid[SPRINT_MAX_LEN];
-  sprint_objid(c_oid,theoid,len);
+  snprint_objid(c_oid, sizeof(c_oid), theoid, len);
   DEBUGP(c_oid);
 }
 
@@ -191,7 +201,7 @@ void
 debugmsg_oid(const char *token, oid *theoid, size_t len) {
   char c_oid[SPRINT_MAX_LEN];
   
-  sprint_objid(c_oid, theoid, len);
+  snprint_objid(c_oid, sizeof(c_oid), theoid, len);
   debugmsg(token, c_oid);
 }
 
@@ -199,7 +209,13 @@ void
 debugmsg_hex(const char *token, u_char *thedata, size_t len) {
   char buf[SPRINT_MAX_LEN];
   
-  sprint_hexstring(buf, thedata, len);
+  if (len > SPRINT_MAX_LEN/5) {
+      /* hex is long, so print only a certain amount (1/5th of size to
+         be safer than is needed) */
+      len = SPRINT_MAX_LEN/5;
+      debugmsg(token, "[truncated hex:]");
+  }
+  snprint_hexstring(buf, sizeof(buf), thedata, len);
   debugmsg(token, buf);
 }
 
@@ -216,7 +232,7 @@ debugmsg_hextli(const char *token, u_char *thedata, size_t len) {
       /*XXnext two lines were DEBUGPRINTINDENT(token);*/
       sprintf(buf, "dumpx%s", token);
       debugmsg(buf, "%s: %s", token2, debug_indent());
-      sprint_hexstring(buf, thedata, incr);
+      snprint_hexstring(buf, sizeof(buf), thedata, incr);
       debugmsg(token2, buf);
     }
   }

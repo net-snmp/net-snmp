@@ -1,9 +1,11 @@
 #include <config.h>
 
+#if HAVE_IO_H
+#include <io.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#include <stdio.h>
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -187,9 +189,12 @@ u_char *var_extensible_pass_persist(struct variable *vp,
       }
 
       if (exact)
-        sprintf(persistpassthru->command,"get\n%s\n",buf);
+        snprintf(persistpassthru->command, sizeof(persistpassthru->command),
+                 "get\n%s\n",buf);
       else
-        sprintf(persistpassthru->command,"getnext\n%s\n",buf);
+        snprintf(persistpassthru->command, sizeof(persistpassthru->command),
+                 "getnext\n%s\n",buf);
+      persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
 
       DEBUGMSGTL(("ucd-snmp/pass_persist", "persistpass-sending:\n%s",persistpassthru->command));
       if( ! write_persist_pipe( i, persistpassthru->command ) ) {
@@ -327,7 +332,9 @@ setPassPersist(int action,
         sprint_mib_oid(buf, persistpassthru->miboid, persistpassthru->miblen);
       else
         sprint_mib_oid(buf, name, name_len);
-      sprintf(persistpassthru->command,"set\n%s\n ",buf);
+      snprintf(persistpassthru->command, sizeof(persistpassthru->command),
+               "set\n%s\n",buf);
+      persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
       switch(var_val_type) {
         case ASN_INTEGER:
         case ASN_COUNTER:
@@ -361,18 +368,25 @@ setPassPersist(int action,
         case ASN_OCTET_STR:
 	  itmp = sizeof(buf2);
           memcpy(buf2, var_val, var_val_len);
-          if (bin2asc(buf2, var_val_len) == (int)var_val_len)
-              sprintf(buf,"string %s",buf2);
+          if (var_val_len == 0)
+              sprintf(buf,"string \"\"");
+          else if (bin2asc(buf2, var_val_len) == (int)var_val_len)
+              snprintf(buf, sizeof(buf), "string \"%s\"",buf2);
           else
-              sprintf(buf,"octet %s",buf2);
+              snprintf(buf, sizeof(buf), "octet \"%s\"",buf2);
+          buf[ sizeof(buf)-1 ] = 0;
           break;
         case ASN_OBJECT_ID:
           sprint_mib_oid(buf2, (oid *)var_val, var_val_len);
-          sprintf(buf,"objectid \"%s\"",buf2);
+          snprintf(buf, sizeof(buf), "objectid \"%s\"",buf2);
+          buf[ sizeof(buf)-1 ] = 0;
           break;
       }
-      strcat(persistpassthru->command,buf);
-      strcat(persistpassthru->command,"\n");
+      strncat(persistpassthru->command,buf,
+              sizeof(persistpassthru->command) -
+              strlen(persistpassthru->command) - 2);
+      persistpassthru->command[ sizeof(persistpassthru->command)-2 ] = '\n';
+      persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
 
       if( ! open_persist_pipe( i, persistpassthru->name ) ) {
         return SNMP_ERR_NOTWRITABLE;
@@ -534,6 +548,7 @@ void sigpipe_handler (int sig, siginfo_t *sip, void *uap)
 
 static int write_persist_pipe(int iindex, const char *data)
 {
+#if HAVE_SIGNAL
   struct sigaction sa, osa;
   int wret = 0, werrno = 0;
 
@@ -570,7 +585,7 @@ static int write_persist_pipe(int iindex, const char *data)
     close_persist_pipe(iindex);
     return 0;
   }
-
+#endif /* HAVE_SIGNAL */
   return 1;
 }
 
@@ -595,7 +610,9 @@ static void close_persist_pipe(int iindex)
     persist_pipes[iindex].fdIn = -1;
   }
   if( persist_pipes[iindex].pid != -1 ) {
+#if HAVE_SYS_WAIT_H
     waitpid(persist_pipes[iindex].pid,0,0);
+#endif
     persist_pipes[iindex].pid = -1;
   }
 

@@ -1,8 +1,10 @@
-RFCHOST =	ftp.nordu.net
+RFCHOST =	ftp://ftp.nordu.net	# ftp.ietf.org
 RFCDIR =	rfc
 
-IANAHOST =	ftp.iana.org
-IANADIR =	mib
+IANAHOST =	ftp://ftp.iana.org
+IANADIR =	assignments
+
+ALLDIR =	/usr/local/share/snmp/rfc.orig
 
 MIBS =	SNMPv2-TC.txt SNMPv2-TM.txt SNMPv2-SMI.txt SNMPv2-MIB.txt \
 	SNMPv2-CONF.txt HCNUM-TC.txt INET-ADDRESS-MIB.txt \
@@ -25,6 +27,8 @@ MIBS =	SNMPv2-TC.txt SNMPv2-TM.txt SNMPv2-SMI.txt SNMPv2-MIB.txt \
 MIBDEPS = Makefile.mib mibfetch smistrip
 
 all:	$(MIBS)
+
+allmibs:	ianamibs rfcmibs
 
 clean:
 	rm $(MIBS)
@@ -69,10 +73,10 @@ SMUX-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 1227 SMUX-MIB
 
 DISMAN-SCHEDULE-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2591
+	./mibfetch $(RFCHOST) $(RFCDIR) 3231
 
 DISMAN-SCRIPT-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2592
+	./mibfetch $(RFCHOST) $(RFCDIR) 3165
 
 IF-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2863
@@ -84,19 +88,19 @@ HCNUM-TC.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2856
 
 INET-ADDRESS-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2851
+	./mibfetch $(RFCHOST) $(RFCDIR) 3291
 
 EtherLike-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2665
 
 IANAifType-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(IANAHOST) $(IANADIR) ianaiftype.mib
+	./mibfetch -x $(IANAHOST) $(IANADIR) ianaiftype-mib
 
 IANA-LANGUAGE-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(IANAHOST) $(IANADIR) ianalanguage.mib
+	./mibfetch -x $(IANAHOST) $(IANADIR) ianalanguage-mib
 
 IANA-ADDRESS-FAMILY-NUMBERS-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(IANAHOST) $(IANADIR) ianaaddressfamilynumbers.mib
+	./mibfetch -x $(IANAHOST) $(IANADIR) ianaaddressfamilynumbers-mib
 
 IP-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2011
@@ -126,7 +130,7 @@ HOST-RESOURCES-MIB.txt HOST-RESOURCES-TYPES.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2790
 
 RMON-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 1757
+	./mibfetch $(RFCHOST) $(RFCDIR) 2819
 
 NETWORK-SERVICES-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2788
@@ -139,3 +143,23 @@ RFC1155-SMI.txt:	$(MIBDEPS)
 
 RFC1213-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 1213
+
+ianamibs:	ianalist
+	[ -d $(ALLDIR) ] || mkdir $(ALLDIR)
+	cat ianalist | while read file mibs; \
+		do \
+		  if [ "$$file" != "#" ]; \
+		  then \
+		    ./mibfetch -d $(ALLDIR) -x $(IANAHOST) $(IANADIR) $$file $$mibs; \
+		  fi; \
+		done
+
+rfcmibs:	rfclist
+	[ -d $(ALLDIR) ] || mkdir $(ALLDIR)
+	cat rfclist | while read rfc mibs; \
+		do \
+		  if [ "$$rfc" != "#" ]; \
+		  then \
+		    ./mibfetch -d $(ALLDIR) $(RFCHOST) $(RFCDIR) $$rfc $$mibs; \
+		  fi; \
+		done

@@ -20,8 +20,13 @@
 #include <sys/vmmeter.h>
 #include <sys/sched.h>
 
-#include <vm/vm_param.h>
+#if defined(HAVE_UVM_UVM_PARAM_H) && defined(HAVE_UVM_UVM_EXTERN_H)
+#include <uvm/uvm_param.h>
 #include <uvm/uvm_extern.h>
+#elif defined(HAVE_VM_VM_PARAM_H) && defined(HAVE_VM_VM_EXTERN_H)
+#include <vm/vm_param.h>
+#include <vm/vm_extern.h>
+#endif
 
 #include <time.h>
 #include <nlist.h>
@@ -47,6 +52,8 @@
 #define CPTIME_SYMBOL	"cp_time"
 #define BOOTTIME_SYMBOL	"boottime"
 
+static FindVarMethod var_extensible_vmstat;
+
 void init_vmstat_netbsd1(void) 
 {
 
@@ -66,6 +73,8 @@ void init_vmstat_netbsd1(void)
     {CPURAWNICE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWNICE}},
     {CPURAWSYSTEM, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWSYSTEM}},
     {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
+    {CPURAWKERNEL, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWKERNEL}},
+    {CPURAWINTR, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWINTR}},
 
 /* Future use: */
 /*
@@ -100,6 +109,7 @@ getuptime(void )
 	return(uptime);
 }
 
+static
 unsigned char *var_extensible_vmstat(struct variable *vp,
 				     oid *name,
 				     size_t *length,
@@ -114,16 +124,21 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
     static time_t time_old;
     static time_t time_diff;
 
-#ifdef KERN_CP_TIME
+#if defined(KERN_CP_TIME)
     static u_int64_t cpu_old[CPUSTATES];
     static u_int64_t cpu_new[CPUSTATES];
     static u_int64_t cpu_diff[CPUSTATES];
     static u_int64_t cpu_total;
+#elif defined(KERN_CPTIME)
+    static long cpu_old[CPUSTATES];
+    static long cpu_new[CPUSTATES];
+    static long cpu_diff[CPUSTATES];
+    static long cpu_total;
 #else
     static long cpu_old[CPUSTATES];
-    long cpu_new[CPUSTATES];
-    long cpu_diff[CPUSTATES];
-    long cpu_total;
+    static long cpu_new[CPUSTATES];
+    static long cpu_diff[CPUSTATES];
+    static long cpu_total;
 #endif
     long cpu_sum;
     double cpu_prc;
@@ -145,6 +160,12 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
     {
 #ifdef KERN_CP_TIME
         int mib[2] = { CTL_KERN, KERN_CP_TIME };
+	int ssize = sizeof(cpu_new);
+
+	if (sysctl(mib, 2, cpu_new, &ssize, NULL, 0) < 0)
+	    memset(cpu_new, 0, sizeof(cpu_new));
+#elif defined(KERN_CPTIME)
+        int mib[2] = { CTL_KERN, KERN_CPTIME };
 	int ssize = sizeof(cpu_new);
 
 	if (sysctl(mib, 2, cpu_new, &ssize, NULL, 0) < 0)
@@ -239,6 +260,12 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 	return((u_char *) (&long_ret));
     case CPURAWIDLE:
 	long_ret = cpu_new[CP_IDLE];
+	return((u_char *) (&long_ret));
+    case CPURAWKERNEL:
+	long_ret = cpu_new[CP_SYS];
+	return((u_char *) (&long_ret));
+    case CPURAWINTR:
+	long_ret = cpu_new[CP_INTR];
 	return((u_char *) (&long_ret));
 /* reserved for future use */
 /*

@@ -58,10 +58,17 @@ PERFORMANCE OF THIS SOFTWARE.
 #  include <time.h>
 # endif
 #endif
+#if HAVE_WINSOCK_H
+# include <winsock.h>
+#endif
 #if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#elif HAVE_WINSOCK_H
-#include <winsock.h>
+# include <sys/socket.h>
+#endif
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
+#if HAVE_SYS_SOCKETVAR_H
+# include <sys/socketvar.h>
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -79,9 +86,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
-#endif
-#if HAVE_SYS_STREAM_H
-#include <sys/stream.h>
 #endif
 #if HAVE_NET_ROUTE_H
 #include <net/route.h>
@@ -345,7 +349,7 @@ search_subtree_vars(struct subtree *tp,
 			 */
 		    if ( access && snmp_oid_compare(name, *namelen,
 						    tp->end, tp->end_len) > 0) {
-			memcpy(name, tp->end, tp->end_len);
+			memcpy(name, tp->end, tp->end_len * sizeof(oid));
 			access = 0;
 		    }
 #if MIB_CLIENTS_ARE_EVIL
@@ -366,7 +370,11 @@ search_subtree_vars(struct subtree *tp,
                     /* check for permission to view this part of the OID tree */
 		    if ((access != NULL || (*write_method != NULL && exact)) &&
                         in_a_view(name, namelen, pdu, cvp->type)) {
-			if ( access && !exact ) {
+			if ( access && !exact
+#ifdef USING_AGENTX_MASTER_MODULE
+                             && ((AddVarMethod*)access!=agentx_add_request)
+#endif
+                            ) {
 				/*
 				 * We've got an answer, but shouldn't use it.
 				 * But we *might* be able to use a later
@@ -402,6 +410,7 @@ search_subtree_vars(struct subtree *tp,
 	    if (access != NULL || (exact && *write_method != NULL)) {
 	        *type = cvp->type;
 		*acl = cvp->acl;
+		*noSuchObject = FALSE;
 		return access;
 	    }
 	    return NULL;

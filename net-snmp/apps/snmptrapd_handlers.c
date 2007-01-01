@@ -20,6 +20,12 @@
 #include <netdb.h>
 #endif
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "asn1.h"
 #include "mib.h"
 #include "snmp_api.h"
@@ -80,6 +86,10 @@ snmptrapd_traphandle(const char *token, char *line)
   if (*ttmp == NULL) {
     /* it doesn't, so allocate a new one. */
     *ttmp = (struct traphandle *) malloc(sizeof(struct traphandle));
+    if (!*ttmp) {
+        config_perror("malloc failed");
+        return;
+    }
     memset(*ttmp, 0, sizeof(struct traphandle));
   } else {
     if ((*ttmp)->exec)
@@ -90,7 +100,9 @@ snmptrapd_traphandle(const char *token, char *line)
     (*ttmp)->traplen = MAX_OID_LEN;
     if (!read_objid(buf,(*ttmp)->trap, &((*ttmp)->traplen))) {
       char buf1[STRINGMAX];
-      sprintf(buf1, "Bad trap OID in traphandle directive: %s", buf);
+      snprintf(buf1, sizeof(buf1),
+              "Bad trap OID in traphandle directive: %s", buf);
+      buf1[ sizeof(buf1)-1 ] = 0;
       config_perror(buf1);
       return;
     }

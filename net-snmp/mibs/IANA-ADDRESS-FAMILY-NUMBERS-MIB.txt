@@ -6,7 +6,7 @@
       TEXTUAL-CONVENTION                  FROM SNMPv2-TC;
 
   ianaAddressFamilyNumbers MODULE-IDENTITY
-      LAST-UPDATED "200009080000Z"  -- September 8, 2000
+      LAST-UPDATED "200203140000Z"  -- March 14, 2002
       ORGANIZATION "IANA"
       CONTACT-INFO
           "Postal:    Internet Assigned Numbers Authority
@@ -24,20 +24,26 @@
 
       -- revision history
 
+      REVISION     "200203140000Z"  -- March 14, 2002
+      DESCRIPTION  "AddressFamilyNumbers assignment 22 to 
+                   fibreChannelWWPN. AddressFamilyNumbers 
+                   assignment 23 to fibreChannelWWNN.
+                   AddressFamilyNumers assignment 24 to gwid."
+
       REVISION     "200009080000Z"  -- September 8, 2000
-      DESCRIPTION  "AddressFamilyNumbers assignments 19 to
-                   xtpoveripv4, 20 to xtpoveripv6, and 21 to
-                   xtpnativemodextp." 
+      DESCRIPTION  "AddressFamilyNumbers assignment 19 to xtpOverIpv4.  
+                   AddressFamilyNumbers assignment 20 to xtpOverIpv6.  
+                   AddressFamilyNumbers assignment 21 to xtpNativeModeXTP."
 
       REVISION     "200003010000Z"  -- March 1, 2000
-      DESCRIPTION  "AddressFamilyNumbers assignment 17 to distinguishedname. 
-                   AddressFamilyNumbers assignment 18 to asnumber."
+      DESCRIPTION  "AddressFamilyNumbers assignment 17 to distinguishedName. 
+                   AddressFamilyNumbers assignment 18 to asNumber."
 
       REVISION     "200002040000Z"  -- February 4, 2000
       DESCRIPTION  "AddressFamilyNumbers assignment 16 to dns."
 
       REVISION     "9908260000Z"  -- August 26, 1999
-      DESCRIPTION  "Initial version, for more explanation, see RFC 2677."
+      DESCRIPTION  "Initial version, published as RFC 2677."
       ::= { mib-2 72 }
 
   AddressFamilyNumbers ::= TEXTUAL-CONVENTION
@@ -66,14 +72,20 @@
           f69(9),      -- (Telex)
           x121(10),    -- (X.25, Frame Relay)
           ipx(11),     -- IPX (Internet Protocol Exchange)
-          appletalk(12),  -- Apple Talk
+          appleTalk(12),  -- Apple Talk
           decnetIV(13),   -- DEC Net Phase IV
           banyanVines(14),  -- Banyan Vines
           e164withNsap(15),
                        -- (E.164 with NSAP format subaddress)
           dns(16),     -- (Domain Name System)
-          distinguishedname(17), -- (Distinguished Name, per X.500)
-          asnumber(18), -- (16-bit quantity, per the AS number space)
+          distinguishedName(17), -- (Distinguished Name, per X.500)
+          asNumber(18), -- (16-bit quantity, per the AS number space)
+          xtpOverIpv4(19),  -- XTP over IP version 4
+          xtpOverIpv6(20),  -- XTP over IP version 6
+          xtpNativeModeXTP(21),  -- XTP native mode XTP
+          fibreChannelWWPN(22),  -- Fibre Channel World-Wide Port Name 
+          fibreChannelWWNN(23),  -- Fibre Channel World-Wide Node Name
+          gwid(24),    -- Gateway Identifier 
           reserved(65535)
 
           Requests for new values should be made to IANA via
@@ -91,16 +103,19 @@
                   f69(9),
                   x121(10),
                   ipx(11),
-                  appletalk(12),
+                  appleTalk(12),
                   decnetIV(13),
                   banyanVines(14),
                   e164withNsap(15),
                   dns(16),
-                  distinguishedname(17), -- (Distinguished Name, per X.500)
-                  asnumber(18), -- (16-bit quantity, per the AS numberspace)
-                  xtpoveripv4(19), -- XTP over version 4
-                  xtpoveripv6(20), -- XTP over version 6
-                  xtpnativemodextp(21), -- XTP native mode XTP 
+                  distinguishedName(17), -- (Distinguished Name, per X.500)
+                  asNumber(18), -- (16-bit quantity, per the AS number space)
+                  xtpOverIpv4(19),
+                  xtpOverIpv6(20),
+                  xtpNativeModeXTP(21),
+                  fibreChannelWWPN(22),
+                  fibreChannelWWNN(23),
+                  gwid(24),
                   reserved(65535)
               }
       END

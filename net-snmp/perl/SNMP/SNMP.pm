@@ -7,7 +7,7 @@
 #     modify it under the same terms as Perl itself.
 
 package SNMP;
-$VERSION = '4.2.0';   # current release version number
+$VERSION = '4.2.7';   # current release version number
 
 require Exporter;
 require DynaLoader;
@@ -1749,7 +1749,7 @@ returns hash ref {tag => num, ...}
 
 =item ranges
 
-returns array ref [[low1, high1], [low2, high2], ...]
+returns array ref of hash ref [{low => num, high => num}, ...]
 
 =item description
 

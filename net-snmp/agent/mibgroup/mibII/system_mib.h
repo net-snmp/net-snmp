@@ -13,8 +13,9 @@ void init_system_mib (void);
 extern FindVarMethod var_system;
 
 /* config file parsing routines */
-void system_parse_config_sysloc (const char *, char *);
-void system_parse_config_syscon (const char *, char *);
+void system_parse_config_sysloc  (const char *, char *);
+void system_parse_config_syscon  (const char *, char *);
+void system_parse_config_sysname (const char *, char *);
 
 #define	VERSION_DESCR		1
 #define	VERSIONID		2

@@ -52,7 +52,7 @@
 #include <dmalloc.h>
 #endif
 
-#ifdef WIN32
+#if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
 
@@ -69,6 +69,11 @@ static int do_stderrlogging=1;
 static int do_log_callback=0;
 static int newline = 1;
 static FILE *logfile;
+
+#ifndef HAVE_VSNPRINTF
+		/* Need to use the UCD-provided one */
+int vsnprintf (char *str, size_t count, const char *fmt, va_list arg);
+#endif
 
 void
 init_snmp_logging(void) {
@@ -139,9 +144,15 @@ snmp_disable_log(void) {
 void
 snmp_enable_syslog(void)
 {
+  snmp_enable_syslog_ident("ucd-snmp", LOG_DAEMON);
+}
+
+void
+snmp_enable_syslog_ident(const char* ident, const int facility)
+{
   snmp_disable_syslog();
 #if HAVE_SYSLOG_H
-  openlog("ucd-snmp", LOG_CONS|LOG_PID, LOG_DAEMON);
+  openlog(ident, LOG_CONS|LOG_PID, facility);
   do_syslogging=1;
 #endif
 }
@@ -154,7 +165,16 @@ snmp_enable_filelog(const char *logfilename, int dont_zero_log)
   logfile=fopen(logfilename, dont_zero_log ? "a" : "w");
   if (logfile) {
     do_filelogging=1;
+#ifdef WIN32
+    /*
+     * Apparently, "line buffering" under Windows is
+     *  actually implemented as "full buffering".
+     *  Let's try turning off buffering completely.
+     */
+    setvbuf(logfile, NULL, _IONBF, BUFSIZ);
+#else
     setvbuf(logfile, NULL, _IOLBF, BUFSIZ);
+#endif
   }
   else
     do_filelogging=0;
@@ -187,14 +207,23 @@ snmp_log_string (int priority, const char *string)
 
 #if HAVE_SYSLOG_H
   if (do_syslogging) {
-    syslog(priority, string);
+    syslog(priority, "%s", string);
   }
 #endif
 
   if (do_log_callback) {
+      int dodebug = snmp_get_do_debugging();
       slm.priority = priority;
       slm.msg = string;
+      /*
+       * Turn off debugging inside callbacks,
+       * otherwise this will loop.
+       */
+      if (dodebug)
+          snmp_set_do_debugging(0);
       snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_LOGGING, &slm);
+      if (dodebug)
+          snmp_set_do_debugging(dodebug);
   }
 
   if (do_filelogging || do_stderrlogging) {

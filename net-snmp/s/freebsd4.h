@@ -14,3 +14,5 @@
 #define NPROC_SYMBOL "nprocs"
 
 #undef TOTAL_MEMORY_SYMBOL
+
+#undef MBSTAT_SYMBOL

@@ -3,6 +3,10 @@
 QUOTEFILES="version.h"
 SEDFILES="sedscript.in"
 COLONFILES="README FAQ"
+PERLFILES="perl/SNMP/SNMP.pm"
+if [ "x$CVSUSER" = "x" ] ; then
+  CVSUSER=hardaker
+fi
 
 DOIT=
 
@@ -21,10 +25,11 @@ else
 fi
 
 if [ $2 = "add" -o $2 = "reverse" ]; then
-  $DOIT perl -p -i.bak -e 's/VersionInfo=([^"]*)"(.*)"/VersionInfo=$1"'$VERSION'"/;' $QUOTEFILES
+  $DOIT perl -p -i.bak -e 's/VersionInfo(\s*=\s*[^"]*)"(.*)"/VersionInfo$1"'$VERSION'"/;' $QUOTEFILES
   $DOIT perl -p -i.bak -e 's/Version: [\.0-9a-zA-Z]+/Version: '$VERSION'/;' $COLONFILES
   $DOIT perl -p -i.bak -e 's#^s/VERSIONINFO/.*#s/VERSIONINFO/'$VERSION'/g#;' $SEDFILES
-  $DOIT cvs commit -m "- ($QUOTEFILES $SEDFILES): version tag ( $VERSION )" $QUOTEFILES $SEDFILES $COLONFILES
+  $DOIT perl -p -i.bak -e "s/VERSION = \'(.*)\'/VERSION = \'$VERSION\'/;" $PERLFILES
+  $DOIT cvs commit -m "- ($QUOTEFILES $SEDFILES): version tag ( $VERSION )" $QUOTEFILES $SEDFILES $COLONFILES $PERLFILES
 fi
 
 if [ $2 = "tag" ]; then
@@ -32,7 +37,7 @@ if [ $2 = "tag" ]; then
 fi
 
 if [ $2 = "tar" ]; then
-    $DOIT cvs -d hardaker@cvs.net-snmp.sourceforge.net:/cvsroot/net-snmp export -d ucd-snmp-$VERSION -r $VERSIONTAG net-snmp
+    $DOIT cvs -d $CVSUSER@net-snmp.cvs.sourceforge.net:/cvsroot/net-snmp export -d ucd-snmp-$VERSION -r $VERSIONTAG net-snmp
     $DOIT ucd-snmp-$VERSION/remove-files ucd-snmp-$VERSION
     $DOIT tar czf ucd-snmp-$VERSION.tar.gz ucd-snmp-$VERSION
 fi

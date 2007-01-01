@@ -13,17 +13,30 @@
 #include <stdlib.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
-#  include <sys/time.h>
+#  include <sys/time.h> 
 # else
 #  include <time.h>
 # endif
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include "asn1.h"
@@ -52,7 +65,6 @@ struct snmp_session *
 find_agentx_session( struct snmp_session *session, int sessid)
 {
     struct snmp_session *sp;
-    
     for ( sp = session->subsession ; sp != NULL ; sp = sp->next ) {
         if ( sp->sessid == sessid )
 	    return sp;
@@ -67,6 +79,7 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
     struct snmp_session *sp;
     struct timeval now;
 
+    DEBUGMSGTL(("agentx:open_agentx_session","open %p\n", session));
     sp = (struct snmp_session *)malloc( sizeof( struct snmp_session ));
     if ( sp == NULL ) {
         session->s_snmp_errno = AGENTX_ERR_OPEN_FAILED;
@@ -89,14 +102,17 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
     sp->securityAuthProto =
 	snmp_duplicate_objid(pdu->variables->name, pdu->variables->name_length);
     sp->securityAuthProtoLen = pdu->variables->name_length;
-    sp->securityName = strdup( pdu->variables->val.string );
+    sp->securityName = strdup((char *) pdu->variables->val.string );
     gettimeofday(&now, NULL);
     sp->engineTime = calculate_time_diff( &now, &starttime );
 
     sp->subsession = session;			/* link back to head */
     sp->flags     |= SNMP_FLAGS_SUBSESSION;
+    sp->flags     &= ~AGENTX_FLAGS_NETWORK_BYTE_ORDER;
+    sp->flags     |= (pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
     sp->next       = session->subsession;
     session->subsession = sp;
+    DEBUGMSGTL(("agentx:open_agentx_session","opened %p = %d\n", sp, sp->sessid));
 
     return sp->sessid;
 }
@@ -106,6 +122,7 @@ close_agentx_session(struct snmp_session *session, int sessid)
 {
     struct snmp_session *sp, *prev = NULL;
     
+    DEBUGMSGTL(("agentx:close_agentx_session","close %p, %d\n", session, sessid));
     if ( sessid == -1 ) {
 	unregister_mibs_by_session( session );
 	unregister_index_by_session( session );
@@ -113,7 +130,7 @@ close_agentx_session(struct snmp_session *session, int sessid)
 
 	return AGENTX_ERR_NOERROR;
     }
-    else
+
     for ( sp = session->subsession ; sp != NULL ; prev = sp, sp = sp->next ) {
         if ( sp->sessid == sessid ) {
 
@@ -124,6 +141,10 @@ close_agentx_session(struct snmp_session *session, int sessid)
 	        prev->next = sp->next;
 	    else
 	    	session->subsession = sp->next;
+	    if (sp->securityAuthProto)
+		free(sp->securityAuthProto);
+	    if (sp->securityName)
+		free(sp->securityName);
 	    free( sp );
 	    
 	    return AGENTX_ERR_NOERROR;
@@ -157,7 +178,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 			 sizeof(agentx_varlist[0]), 1,
 			 pdu->variables->name, pdu->variables->name_length,
 			 pdu->priority, pdu->range_subid, ubound, sp,
-			 pdu->community, pdu->time,
+			 (char *)pdu->community, pdu->time,
 			 pdu->flags&AGENTX_MSG_FLAG_INSTANCE_REGISTER)) {
 
 	case MIB_REGISTERED_OK:
@@ -189,7 +210,7 @@ unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     switch (unregister_mib_context(pdu->variables->name,
     		       pdu->variables->name_length,
 		       pdu->priority, pdu->range_subid, ubound,
-		       pdu->community)) {
+		       (char *)pdu->community)) {
 	case MIB_UNREGISTERED_OK:
 				return AGENTX_ERR_NOERROR;
 	case MIB_NO_SUCH_REGISTRATION:
@@ -271,18 +292,49 @@ release_idx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     return AGENTX_ERR_NOERROR;
 }
 
+
+    /*
+     *  Copied from the 5.x Net-SNMP library 'tools.c'
+     */
+/** copies a (possible) unterminated string of a given length into a
+ *  new buffer and null terminates it as well (new buffer MAY be one
+ *  byte longer to account for this */
+static char *
+netsnmp_strdup_and_null(const u_char * from, size_t from_len)
+{
+    char         *ret;
+
+    if (from_len == 0 || from[from_len - 1] != '\0') {
+        ret = (char *)malloc(from_len + 1);
+        if (!ret)
+            return NULL;
+        ret[from_len] = '\0';
+    } else {
+        ret = (char *)malloc(from_len);
+        if (!ret)
+            return NULL;
+        ret[from_len - 1] = '\0';
+    }
+    memcpy(ret, from, from_len);
+    return ret;
+}
+
+
 int
 add_agent_caps_list(struct snmp_session *session, struct snmp_pdu *pdu)
 {
     struct snmp_session *sp;
+    char *cp;
 
     sp = find_agentx_session( session, pdu->sessid );
     if ( sp == NULL )
         return AGENTX_ERR_NOT_OPEN;
 
+    cp = netsnmp_strdup_and_null(pdu->variables->val.string,
+                                 pdu->variables->val_len);
     register_sysORTable_sess(pdu->variables->name,
-    			pdu->variables->name_length,
-			(char *)pdu->variables->val.string, sp);
+    			pdu->variables->name_length, cp, sp);
+    free(cp);
     return AGENTX_ERR_NOERROR;
 }
 

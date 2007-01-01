@@ -1,11 +1,11 @@
-.TH SNMPD 1 "09 Sep 1995"
+.TH SNMPD 1 "21 Jun 2001"
 .ds )H U.C. Davis
 .ds ]W VVERSIONINFO
 .UC 4
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS
-.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p [(udp|tcp):]port[@address][,...]] [-x agentx-socket] [-f] [-l logfile] [-L] [-c file] [-C] [-r] [-I [-]module_list]"
+.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p [{udp|tcp}:]port[@address][,...]] [-x agentx-socket] [-f] [-l logfile] [-L] [-c file] [-C] [-r] [-I [-]module_list]"
 .SH DESCRIPTION
 .B snmpd
 is a SNMP agent which binds to a port and awaits requests from
@@ -33,7 +33,7 @@ Print simpler output for easier automated parsing.
 .B -D
 Turn on debugging output
 .TP
-.B -p [(udp|tcp):]port[@address][,...]
+.B -p [{udp|tcp}:]port[@address][,...]
 Makes the agent list on the specified list of sockets instead of the
 default port, which is port 161.  Multiple ports can be separated by
 commas.  Transports can be specified by prepending the port number
@@ -67,9 +67,16 @@ is given, then the agent will listen on the default AgentX port, 705.
 Don't fork() from the calling shell.
 .TP
 .B -l logfile
-Logss all output from the agent (including stdout/stderr) to 
+Logs all output from the agent (including stdout/stderr) to 
 .I logfile.
 Defaults to a compiled option.
+.TP
+.B -s
+Use syslog for logging.
+.TP
+.B -P pidfile
+Save the process ID of the daemon in
+.I pidfile.
 .TP
 .B -g groupid
 Change to this gid after opening port.
@@ -89,8 +96,14 @@ Read
 as a configuration file.
 .TP
 .B -C
-Don't read any configuration files except the one optionally specified by the 
+Don't read any configuration files except the ones optionally specified by the 
 .B -c 
+option.
+Note that this behaviour also covers the persistent configuration files.
+This may result in dynamically-assigned values being reset following an
+agent restart, unless the relevant persistent config files are
+explicitly loaded using the
+.B -c
 option.
 .TP
 .B -r

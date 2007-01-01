@@ -5,6 +5,23 @@
 
 #include <config.h>
 
+#ifdef hpux11
+#include <sys/mib.h>
+#include <netinet/mib_kern.h>
+#endif
+
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "host_res.h"
 #include "mibII/interfaces.h"
 #include "hr_network.h"
@@ -172,10 +189,21 @@ var_hrnet(struct variable *vp,
 #ifndef solaris2
 static short		HRN_index;
 #endif
+#ifdef hpux11
+static char		HRN_name[MAX_PHYSADDR_LEN];
+static nmapi_phystat	HRN_ifnet;
+#define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_Next(a, b, c)
+#else	/* hpux11 */
 static char		HRN_name[16];
 static struct ifnet	HRN_ifnet;
+#define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_Next(a, b, c, d)
+#endif
 
+#ifdef hpux11
+static char		HRN_savedName[MAX_PHYSADDR_LEN];
+#else
 static char		HRN_savedName[16];
+#endif
 static u_short		HRN_savedFlags;
 static int		HRN_savedErrors;
 
@@ -192,7 +220,7 @@ int
 Get_Next_HR_Network (void)
 {
 #ifndef solaris2
-    if (Interface_Scan_Next( &HRN_index, HRN_name, &HRN_ifnet, NULL))
+    if (M_Interface_Scan_Next( &HRN_index, HRN_name, &HRN_ifnet, NULL))
         return ( HRDEV_NETWORK << HRDEV_TYPE_SHIFT ) + HRN_index;
     else
 #endif
@@ -203,8 +231,14 @@ void
 Save_HR_Network_Info (void)
 {
    strcpy( HRN_savedName, HRN_name);
+#ifdef hpux11
+   HRN_savedFlags  = HRN_ifnet.if_entry.ifOper;
+   HRN_savedErrors = HRN_ifnet.if_entry.ifInErrors +
+	HRN_ifnet.if_entry.ifOutErrors;
+#else	/* hpux11 */
    HRN_savedFlags  = HRN_ifnet.if_flags;
    HRN_savedErrors = HRN_ifnet.if_ierrors + HRN_ifnet.if_oerrors;
+#endif	/* hpux11 */
 }
 
 
@@ -213,7 +247,8 @@ describe_networkIF(int idx)
 {
     static char string[100];
 
-    sprintf( string, "network interface %s", HRN_savedName );
+    snprintf( string, sizeof(string)-1, "network interface %s", HRN_savedName );
+     string[ sizeof(string)-1 ] = 0;
     return string;
 }
 
@@ -221,7 +256,11 @@ describe_networkIF(int idx)
 int
 network_status(int idx)
 {
+#ifdef hpux11
+    if ( HRN_savedFlags == LINK_UP )
+#else
     if ( HRN_savedFlags & IFF_UP )
+#endif
 	return 2;		/* running */
     else
 	return 5;		/* down */

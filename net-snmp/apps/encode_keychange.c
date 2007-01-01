@@ -141,6 +141,10 @@ main(int argc, char **argv)
  	local_progname = argv[0];
 	local_passphrase_filename = (char *)malloc(sizeof(PASSPHRASE_DIR) +
 					   sizeof(PASSPHRASE_FILE) + 4);
+        if (!local_passphrase_filename) {
+            fprintf(stderr, "%s: out of memory!", local_progname);
+            exit(-1);
+        }
 	sprintf(local_passphrase_filename, "%s/%s",
 					   PASSPHRASE_DIR, PASSPHRASE_FILE);
 
@@ -480,7 +484,8 @@ get_user_passphrases(void)
 	 * if the permissions are wrong.
 	 */
 	s = getenv("HOME");
-	sprintf(path, "%s/%s", s, PASSPHRASE_DIR);
+	snprintf(path, sizeof(path), "%s/%s", s, PASSPHRASE_DIR);
+        path[ sizeof(path)-1 ] = 0;
 
 							/* Test directory. */
 	if ( stat(path, &statbuf) < 0 ) {
@@ -496,7 +501,8 @@ get_user_passphrases(void)
 	}
 
 							/* Test file. */
-	sprintf(path, "%s/%s", s, local_passphrase_filename);
+	snprintf(path, sizeof(path), "%s/%s", s, local_passphrase_filename);
+        path[ sizeof(path)-1 ] = 0;
 	if ( stat(path, &statbuf) < 0 ) {
 		fprintf(stderr, "Cannot access file \"%s\".\n", path);
 		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
@@ -526,7 +532,8 @@ get_user_passphrases(void)
 		len = strlen(buf);
 		if ( buf[len-1] == '\n' )	buf[--len] = '\0';
 		oldpass = (char *)calloc(1,len+1);
-		memcpy(oldpass, buf, len+1);
+		if (oldpass)
+		    memcpy(oldpass, buf, len+1);
 	}
 							/* Read 2nd line. */
 	if ( !fgets(buf, sizeof(buf), fp) ) {		
@@ -539,7 +546,8 @@ get_user_passphrases(void)
 		len = strlen(buf);
 		if ( buf[len-1] == '\n' )	buf[--len] = '\0';
 		newpass = (char *)calloc(1,len+1);
-		memcpy(newpass, buf, len+1);
+		if (newpass)
+		    memcpy(newpass, buf, len+1);
 	}
 
 	if ( oldpass && newpass )	goto get_user_passphrases_quit;
@@ -723,7 +731,8 @@ snmp_getpassphrase(const char *prompt, int bvisible)
 	if ( buffer[len-1] == '\n' )	buffer[--len] = '\0';
 
 	bufp = (char *)calloc(1,len+1);
-	memcpy(bufp, buffer, len+1);
+	if (bufp)
+	    memcpy(bufp, buffer, len+1);
 
 	SNMP_ZERO(buffer, SNMP_MAXBUF);
 
@@ -746,7 +755,7 @@ char *getpass( const char * prompt )
 	int ch, lim;
 
 	_cputs(prompt);
-	for (ch=0, lim=0; ch != '\n' && lim < sizeof(pbuf); )
+	for (ch=0, lim=0; ch != '\n' && lim < sizeof(pbuf)-1; )
 	{
 		ch = _getch();  /* look ma, no echo ! */
 		if (ch == '\r' || ch == '\n' || ch == '\b')

@@ -17,14 +17,21 @@ struct inpcb {
 };
 #endif
 
+#ifdef hpux11
+#include <sys/mib.h>
+#endif
 
 #ifndef solaris2
-#ifndef linux
+#if !defined(linux) && !defined(hpux11)
 extern int TCP_Count_Connections (void);
 #endif
 extern  void TCP_Scan_Init (void);
+#ifdef hpux11
+extern  int TCP_Scan_Next (mib_tcpConnEnt *);
+#else
 struct inpcb;
 extern  int TCP_Scan_Next (int *, struct inpcb *);
+#endif
 #endif
 
 config_arch_require(solaris2, kernel_sunos5)

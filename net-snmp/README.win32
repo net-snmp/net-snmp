@@ -3,12 +3,13 @@ the gcc compiler from Cygwin.  As developers build with
 other Win32 environments, their notes will be included here.
 
 ----
-Status as of 1-Jul-2000 for Win32 platforms
+
+Status as of 5-Nov-2001 for Win32 platforms
 
   -  the client applications work
   -  the core framework of the agent works
-  -  the 'system' and 'snmp' mibgroups work
-  -  no other elements of the standard agent distribution work
+  -  the system, snmp, ip, tcp, udp, icmp mibgroups work
+  -  the target, agentx, smux, notification groups compile
   -  extending the agent to support enterprise-specific MIBs works
   -  running the agent on a non-standard port works
   -  running the UCD agent instead of the MS supplied one "works"
@@ -18,15 +19,7 @@ Status as of 1-Jul-2000 for Win32 platforms
   -  running the UCD agent as a subagent of an AgentX master "works"
           (bearing in mind this support is alpha-code)
 
-All applications build with MSVC++ and Cygwin.
-
-The applications build and run fine.  The agent builds and runs,
-but there is no support for MIB-II, which means no
-interface or route information can be had from this agent.
-
-When an interface to the NT registry is built (volunteers needed!),
-then the agent will need to be developed to obtain more useful
-system information.
+All applications build with both MS VC++ and Cygwin.
 
 Note: The agent cannot be built as an extensible SNMP agent that
 will work with Microsoft's agent.
@@ -37,8 +30,11 @@ Snmptrapd does not "share" nor multiplex traps with SNMPTRAP.EXE,
 a program that is available from Microsoft or ACE#COMM.
 
 ----
+
 The remainder of this guide has the following sections :
 
+Installing Platform SDK
+Removing agentx from MS VC++ build
 Building with MS VC++
 Building with OpenSSL with MS VC++
 Installing from MS VC++ build
@@ -47,14 +43,60 @@ Installing with Cygwin
 Build script for use with Cygwin
 Acknowledgements
 
+----
+Installing Platform SDK
+
+The core elements of the mibII group of the agent, use the "IP Helper API"
+which is part of Microsoft's "Core Platform SDK".  This is typically
+not installed by default, but can be downloaded from
+		http://msdn.microsoft.com/downloads/
+as follows:
+
+    -  Using Internet Explorer (Netscape won't work), go to the above URL
+    -  From the menu at the left, select
+		"Software Development Kits"
+		"Platform SDK"
+    -  From the new window that appears, select "Core SDK".
+    -  The full Core SDK is ~240Mb (expanding to ~560Mb on installation).
+       In fact, the only portion that's required is the basic "Build Environment" (36Mb)
+       so it's safe to deselect the pre-release version, documentation, sample code
+       and 64-bit elements.
+
+    -  Once this package has installed, from the Start Menu run
+	"Register PSDK directories with Visual Studio"
+
+The full agent should now compile successfully.
 
 ----
-Building with MS VC++
+Removing agentx from MS VC++ build
 
-The win32 directory contains a Microsoft VC++ (5.0,6.0) workspace and
+Since this was added near the release date, we are compelled
+to offer this note.
+
+If you add the agentX modules (default), you will need to
+add "-r" to your command invocation for master agent,
+otherwise it will not start.
+
+To Remove agentx
+
+ 1. Edit win32/*.h.  Remove references to "agentx", "master", 
+    and "subagent" from these files.  Undefine the USING lines
+    that refer to AGENTX.
+
+ 2. Start Visual Studio.  Focus the libucdmibs project.
+    Remove all "agentx" related files from the project.
+
+Building with MS VC++
+---------------------
+
+The win32 directory contains a Microsoft VC++ (6.0) workspace and
 project files to build both static and DLL versions of the UCD SNMP
-library and the applications. Building with earlier compiler versions
-has not been attempted.  Success stories are welcomed.
+library and the applications. Until recently it is known to build with
+VC++ 5.0 too, unfortunately none of the developers have this version around
+anymore.
+
+Building with earlier compiler versions has not been attempted.  Success
+stories are welcomed.
 
 A manually generated config.h file has been provided for use with the
 win32 build since the basic win32 environment does not support autoconf.
@@ -63,8 +105,7 @@ editing win32/config.h.  Note that the install instructions below
 should be adjusted when changes are made to paths.
 
 To build the libraries and applications, open the workspace file
-"win32\win32.dsw" from VC++.  If you use Version 6.0, answer "yes"
-to convert the workspace and project files from 5.0 to 6.0 format.
+"win32\win32.dsw" from VC++.
 
 Note there is a Debug version and Release
 version for each subproject.  Due to the way the libraries are
@@ -111,7 +152,6 @@ application. If you get an error message along the lines of
 'debugging information not available in file vc60.pdb, make sure the
 library debug option is set to 'C7 compatible'.
 
-
 To build the Release versions:
 Click Build->Batch Build. Uncheck all Debug and libsnmp versions.
 Make sure libsnmp_dll Release and all other Release versions
@@ -128,8 +168,8 @@ Click Build->Batch Build.  Check all versions.  Uncheck
 "libsnmp Release" and "libsnmp_dll Debug" versions only.
 Then click Release All.
 
-----
 Building with OpenSSL with MS VC++
+----------------------------------
 
 OpenSSL is required to support the encryption capabilities in SNMPv3
 (and will also support MD5 authentication). The win32 version of OpenSSL
@@ -167,9 +207,8 @@ libeay32.lib
 when installing be sure to place libeay32.dll on your search path (e.g.,
 usr\bin)
 
-
-----
 Installing from MS VC++ build
+-----------------------------
 
 Create these subdirectories on the root directory of the
 volume you wish to hold the UC-Davis SNMP applications :
@@ -189,118 +228,149 @@ Copy libeay32.lib to usr\lib
 Installing is complete.  You may want to create a compressed
 archive of the \usr hierarchy.
 
-----
 Building with Cygwin
+--------------------
 
-An alternate way to build UCD SNMP for win32 is to use
-Cygnus's cygwin32 environment.  Make sure to get the 'full' version.
-The 'user' version does not contain the programs necessary to run
-the GNU configure mechanism, which is used by UCD SNMP.  Information
-on the Cygnus cygwin32 environment is available on the web at :
-http://sourceware.cygnus.com/cygwin/.
+An alternate way to build UCD SNMP for win32 is to use Cygnus's cygwin32
+environment.  Information on the Cygnus cygwin32 environment is available
+on the web at: http://sources.redhat.com/cygwin/.
 
-Get full.exe from Cygnus.  Some developers have used Cygwin BETA 20
-with success.  Install the cygwin environment.
-Unzip the UC-Davis SNMP tar file.  cd to the SNMP base directory.
-Create a subdirectory 'cyg' and cd to it. Then run the script
-attached to this guide.
+Cygwin allows you to compile almost the complete agent and applications.
+The following configure options creates a working set of programs:
 
-The attached script will build the UC-Davis SNMP package,
-copy everything needed for installation into a "usr" subdirectory,
-and display any error lines in the build log, which is saved
-in "nohup.out".  Errors and warnings only are copied to "nerrs"
-for further review.
+./configure --with-mib-modules="host agentx smux examples/example" \
+ 	--with-out-mib-modules=host/hr_network \
+	--with-libs="-lregex -liphlpapi"
 
-----
-Installing with Cygwin
+This has been tested for Windows 98 and Windows NT 4.0.  In order for
+the process part of the host resources MIB to work under NT you will need
+to get hold of the PSAPI.DLL. This available under the download section
+of www.microsoft.com. The DLL is included with Windows 2000 and XP,
+and is also part of the VC++ distribution.  The IPHLPAPI library is
+part of the "Microsoft Platform SDK", which is also available from
+www.microsoft.com.  See above for details.
 
-From the "cyg" directory, type "make install".  This will
-populate a hierarchy that mimics the other platforms.
-A usr/local subdirectory has all of the installable files,
-except for usr/local/share/snmp/*.conf {snmpd.conf, snmp.conf}.
-snmpd.conf can be made using EXAMPLE.conf after reading the
-manual pages and FAQ.
-
-  usr/local/bin - most applications
-  usr/local/sbin  - snmpd,  snmptrapd
-  usr/local/share/snmp - place to store snmpd.conf, snmp.conf if desired
-  usr/local/share/snmp/mibs - the MIB files
-
-
-Installing is complete.  You may want to create a compressed
-archive of the \usr hierarchy.
-
----
-Build script for use with Cygwin
-
-The script distills information filtered from discussions on the
-ucd-snmp and ucd-snmp-coders e-mail lists.  The important parts
-are the tokens that have "mibII" in them.  The with.. and with-out..
-lines avoid the non-Win32 portions of the agent.
-
-The script runs without modification in a nearly stock Cygwin B20
-environment using 3.6.1 or later source bases.
-
-
------------- cut here ----------------
-:
-PATH=/usr/local/bin:/usr/ccs/bin:/usr/bin:/bin
-export PATH
-#
-# Always configure.
-# some changes need to refresh the configuration.
-CSTRICT=
-CSTRICT="-Wwrite-strings -Wno-unused -Wno-char-subscripts"
-PEDAN="-pedantic"
-PEDAN=
-CFLAGS="-g -O2 -Wall -Wshadow -Wstrict-prototypes \
-               -Wpointer-arith -Wcast-qual -Wcast-align $CSTRICT $PEDAN"
-export CFLAGS
-
-if [ ! -f ./config.h ] ; then
-rm -f ucd-snmp-config.h  # insurance
-CC=gcc ../configure --with-sys-contact="System Administrator" \
-                    --with-sys-location="Location" \
-    --with-out-mib-modules="mibII" \
-    --with-mib-modules="smux target examples/example examples/ucdDemoPublic mibII/snmp_mib mibII/system_mib mibII/sysORTable mibII/vacm_vars" \
-                    --with-defaults
-fi
-
-#vi config.h
-#vi agent/Makefile
-#
-
-if [ "X"$1 != "Xno" ] ; then
-  ## Enable the next line if autoconf or autoheader aren't working.
-  make -k touchit
-  ## Clean up previous attempts; Remove old installs
-  nohup make clean
-  rm -fr usr
-fi
-
-rm -f nohup.out
-#
-## full build with install. usr subdir will be available to package
-nohup make install prefix=`pwd`/usr/local exec_prefix=`pwd`/usr/local
-#
-# check for errors, but not in system headers
-egrep "Error|warning|No rule|exists" nohup.out > allerrs
-egrep -v "^/usr" allerrs > nerrs
-#
-# show any errors. if user sees prompt, the build/install didn't find errors.
-egrep -v "warn" nerrs
-#
-# do optional verification of installation.
-# check recent install adds
-#
------------- cut here ----------------
-
-----
 Acknowledgements
+----------------
+
 These people are known to have contributed to one or more of
 the Win32 platform ports.  If you have, and your name is not here,
 please accept our apologies, and tell us so we can add your name.
 
 David Perkins, Joe Marzot, Wes Hardaker, Niels Baggesen, Dave Shield,
-Robert Story, Suvrit Sra, Mike Slifcak
-,
+Robert Story, Suvrit Sra, Mike Slifcak.
+
+A very special thank you goes to Latha Prabhu who contributed the complete
+MIB-II support, including write support. This has put the Windows port
+in the top support class for net-snmp.
+
+Notes on SET support for WIN32 ports
+------------------------------------
+
+Requirements:
+
+  Windows NT/2000 or later: Requires Windows NT 4.0 SP4 or later. 
+  Windows 95/98/Me: Requires Windows 98 or later. 
+  Library: Use IPHLPAPI.LIB 
+
+Note: IPHLPAPI.LIB is part of the "Microsoft Platform SDK", which may be
+      freely downloaded from www.microsoft.com.  See above for details.
+
+Windows support for SET on following groups:
+
+interfaces:
+----------
+ifAdminStatus is read-write. Status can be set with either 'up' or
+'down'. (IE, 'testing' status is not supported.)
+
+
+ip group:
+--------
+Scalar objects: 
+ipForwarding:Currently windows supports only ON->OFF (IE,
+enable->disable). For any other value, it returns with failure.
+
+ipDefaultTTL: Supports value greater than or equal to 0. 
+
+Table objects:
+-------------
+1. ipRouteTable:
+   ------------
+route_write.c implements this.
+
+ipRouteDest: Setting this value, updates row with new ipRouteDest and all other
+             entries will be same as old row. 
+    EX:
+    Consider there is an entry with ipRouteDest = 10.0.0.20
+    Request, snmpset localhost private ip.ipRouteTable.ipRouteEntry.ipRouteDest.10.0.0.20 -a 10.0.0.16
+    Updates that row with ipRouteDest = 10.0.0.16
+
+ipRouteIfIndex:Write supported.
+
+ipRouteMetric1: Supports value greater than or equal to -1
+
+ipRouteMetric2, ipRouteMetric3, ipRouteMetric4, ipRouteMetric5: Even though
+		call returns with success, Windows doesn't change these (as
+		these are not used in Windows)
+
+ipRouteNextHop: Write supported.
+
+ipRouteType: Write Supported. If value is 2, IE 'invalid', it deletes the entry.
+
+ipRouteAge: Whenever any row is updated this will be automatically reset.
+
+ipRouteMask: Write Supported.
+
+Creation of ipRouteTable row:
+-----------------------------
+snmpset request for non existent OID with ipRouteIfIndex, ipRouteMetric1, 
+ipRouteNextHop and ipRouteMask varbinds, creates a row.
+
+snmpset with create option is not supported, as row creation requires 
+ipRouteIfIndex, ipRouteMetric1, ipRouteNextHop and ipRouteMask  in a single 
+request.
+
+Example to create a row:
+-----------------------
+Consider there is no entry for 10.0.0.18
+
+snmpset localhost private ip.ipRouteTable.ipRouteEntry.ipRouteIfIndex.10.0.0.18 i 2 4.21.1.ipRouteMask.10.0.0.18 a 255.255.255.255 4.21.1.ipRouteNextHop.10.0.0.0 a 10.0.0.0 4.21.1.ipRouteMetric1.10.0.0.18 i 1
+
+If ipRouteIfIndex is valid then creates row with:
+ipRouteIfIndex = 2
+ipRouteMask = 255.255.255.255
+ipRouteNextHop = 10.0.0.0
+ipRouteMetric1 = 1
+
+2. ipNetToMediaTable:
+--------------------
+ipNetToMediaIfIndex: write supported
+ipNetToMediaPhysAddress: write supported
+ipNetToMediaNetAddress: write supported
+ipNetToMediaType: write supported, setting with value 2, deletes the row.
+
+Creation of row:
+--------------------
+snmpset request for non existent OID with ipNetToMediaPhysAddress varbind
+creates a row.
+
+snmpset with create option is not supported, as row creation requires 
+ipNetToMediaPhysAddress in a request 
+request.
+
+Example to create a row:
+-----------------------
+Consider there is no entry for 10.0.0.32
+
+snmpset localhost private ip.ipNetToMediaTable.ipNetToMediaEntry.ipNetToMediaPhysAddress.2.10.0.0.32 x efcd12130103
+
+If ipNetToMediaIfIndex is valid then creates row with:
+ipNetToMediaIfIndex = 2
+ipNetToMediaPhysAddress = ef:cd:12:12:01:03
+ipNetToMediaNetAddress = 10.0.0.32
+ipNetToMediaType = 4
+
+TCP:
+---
+tcpConnState of tcpConnTable is writable and the only value which may
+be set by a management station is deleteTCB(12)
