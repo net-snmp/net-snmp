@@ -505,7 +505,7 @@ sub skippart {
 	elsif (/\@\s*elsif\s+([^\@]+)\@/) {
 	    return "else" if (($endcount == 1) && ($rtnelse == 1) && (eval(process_vars($1))));
 	}
-	elsif (/\@\s*(foreach|if)/) {
+	elsif (/\@\s*(foreach|if|while)/) {
 	    $endcount++;
 	}
     }
