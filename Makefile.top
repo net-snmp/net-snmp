@@ -15,6 +15,7 @@ exec_prefix	= @exec_prefix@
 bindir		= @bindir@
 sbindir		= @sbindir@
 libdir		= @libdir@
+datarootdir	= @datarootdir@
 datadir		= @datadir@
 includedir	= @includedir@/net-snmp
 ucdincludedir	= @includedir@/ucd-snmp
