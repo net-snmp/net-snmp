@@ -200,15 +200,17 @@ netsnmp_get_or_add_local_cachid(netsnmp_cachemap **cache_store,
     netsnmp_cachemap *tmpp;
 
     tmpp = SNMP_MALLOC_TYPEDEF(netsnmp_cachemap);
-    if (*cache_store) {
-        tmpp->next = *cache_store;
-        *cache_store = tmpp;
-    } else {
-        *cache_store = tmpp;
-    }
+    if (tmpp != NULL) {
+        if (*cache_store) {
+            tmpp->next = *cache_store;
+            *cache_store = tmpp;
+        } else {
+            *cache_store = tmpp;
+        }
 
-    tmpp->globalid = globalid;
-    tmpp->cacheid = localid;
+        tmpp->globalid = globalid;
+        tmpp->cacheid = localid;
+    }
     return tmpp;
 }
 
@@ -2316,6 +2318,10 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
     asp->treecache =
         (netsnmp_tree_cache *) calloc(asp->treecache_len,
                                       sizeof(netsnmp_tree_cache));
+
+    if (asp->treecache == NULL)
+        return SNMP_ERR_GENERR;
+
     asp->treecache_num = -1;
     if (asp->cache_store) {
         netsnmp_free_cachemap(asp->cache_store);
