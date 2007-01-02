@@ -458,7 +458,7 @@ netsnmp_unix_ctor(void)
 
 #define EXAMPLE_COMMUNITY "COMMUNITY"
 typedef struct _com2SecUnixEntry {
-    char            community[VACMSTRINGLEN];
+    char            community[COMMUNITY_MAX_LEN];
     char            sockpath[sizeof(struct sockaddr_un)];
     unsigned long   pathlen;
     char            secName[VACMSTRINGLEN];
@@ -543,7 +543,7 @@ netsnmp_unix_getSecName(void *opaque, int olength,
 void
 netsnmp_unix_parse_security(const char *token, char *param)
 {
-    char              secName[VACMSTRINGLEN + 1], community[VACMSTRINGLEN + 1];
+    char              secName[VACMSTRINGLEN + 1], community[COMMUNITY_MAX_LEN + 1];
     char              contextName[VACMSTRINGLEN + 1];
     char              sockpath[sizeof(struct sockaddr_un) + 1];
     com2SecUnixEntry *e = NULL;
@@ -581,7 +581,7 @@ netsnmp_unix_parse_security(const char *token, char *param)
         sockpath[0] = 0;
     }
 
-    param = copy_nword(param, community, VACMSTRINGLEN);
+    param = copy_nword(param, community, COMMUNITY_MAX_LEN);
     if (community[0] == '\0') {
         config_perror("missing COMMUNITY parameter\n");
         return;
@@ -590,7 +590,7 @@ netsnmp_unix_parse_security(const char *token, char *param)
                == 0) {
         config_perror("example config COMMUNITY not properly configured");
         return;
-    } else if (strlen(community) > (VACMSTRINGLEN - 1)) {
+    } else if (strlen(community) > (COMMUNITY_MAX_LEN - 1)) {
         config_perror("community name too long");
         return;
     }
