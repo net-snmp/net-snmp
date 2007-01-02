@@ -102,15 +102,13 @@
 #if defined(CTL_HW) && defined(HW_PAGESIZE)
 #define USE_SYSCTL
 #endif
-#if defined(CTL_VM) && (defined(VM_METER) || defined(VM_UVMEXP)) && !defined(darwin8)
+#if USE_MACH_HOST_STATISTICS
+#include <mach/mach.h>
+#elif defined(CTL_VM) && (defined(VM_METER) || defined(VM_UVMEXP))
 #define USE_SYSCTL_VM
 #endif
-#endif
+#endif                          /* if HAVE_SYS_SYSCTL_H */
 #endif                          /* ifndef dynix */
-
-#if defined(darwin8) /* This is to use host_statistics on OS X */
-#include <mach/mach.h>
-#endif
 
 #include "host_res.h"
 #include "hr_storage.h"
@@ -227,7 +225,7 @@ extern struct mntent *HRFS_entry;
 
 #endif
 	
-#if defined(darwin8) /* This is to use host_statistics() on OS X */
+#if defined(USE_MACH_HOST_STATISTICS)
 mach_port_t myHost;
 #endif
 
@@ -346,7 +344,7 @@ init_hr_storage(void)
     auto_nlist(MBSTAT_SYMBOL, 0, 0);
 #endif
 
-#if defined(darwin8)
+#if defined(USE_MACH_HOST_STATISTICS)
     myHost = mach_host_self();
 #endif
 
@@ -519,7 +517,7 @@ var_hrstore(struct variable *vp,
     int             swap_total, swap_used;
 #elif defined(hpux10) || defined(hpux11)
     struct pst_dynamic pst_buf;
-#elif defined(darwin8)
+#elif defined(USE_MACH_HOST_STATISTICS)
     vm_statistics_data_t vm_stat;
     int count = HOST_VM_INFO_COUNT;
 #elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
@@ -579,7 +577,7 @@ really_try_next:
                     sysctl(mib, 2, &uvmexp_totals, &len, NULL, 0);
 #endif
                 }
-#elif defined(darwin8)
+#elif defined(USE_MACH_HOST_STATISTICS)
 		host_statistics(myHost,HOST_VM_INFO,&vm_stat,&count);
 #elif defined(hpux10) || defined(hpux11)
                 pstat_getdynamic(&pst_buf, sizeof(struct pst_dynamic), 1, 0);
@@ -727,7 +725,7 @@ really_try_next:
             case HRS_TYPE_SWAP:
                 long_return = pst_buf.psd_vm;
                 break;
-#elif defined(darwin8)
+#elif defined(USE_MACH_HOST_STATISTICS)
             case HRS_TYPE_MEM:
                 long_return = physmem;
                 break;
@@ -816,7 +814,7 @@ really_try_next:
             case HRS_TYPE_SWAP:
                 long_return = pst_buf.psd_avm;
                 break;
-#elif defined(darwin8)
+#elif defined(USE_MACH_HOST_STATISTICS)
 	    case HRS_TYPE_MEM:
 		long_return = vm_stat.active_count + vm_stat.inactive_count + vm_stat.wire_count;
 		break;

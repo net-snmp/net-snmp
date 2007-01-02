@@ -9,3 +9,5 @@
 #define TCPTV_MIN       (  1*PR_SLOWHZ)         /* minimum allowable value */
 #define TCPTV_REXMTMAX  ( 64*PR_SLOWHZ)         /* max allowable REXMT value */
 
+
+#define USE_MACH_HOST_STATISTICS  1
