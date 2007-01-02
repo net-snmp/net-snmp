@@ -345,6 +345,8 @@ netsnmp_iterator_remember(netsnmp_request_info *request,
     /* no existing cached state.  make a new one. */
     if (!ti_info) {
         ti_info = SNMP_MALLOC_TYPEDEF(ti_cache_info);
+        if (ti_info == NULL)
+            return NULL;
         netsnmp_request_add_list_data(request,
                                       netsnmp_create_data_list
                                       (TI_REQUEST_CACHE,
@@ -407,7 +409,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     
     iinfo = (netsnmp_iterator_info *) handler->myvoid;
     if (!iinfo || !reginfo || !reqinfo)
-        return SNMPERR_GENERR;
+        return SNMP_ERR_GENERR;
 
     tbl_info = iinfo->table_reginfo;
 
@@ -436,6 +438,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 
         /* XXX: move this malloc to stash_cache handler? */
         reqtmp = SNMP_MALLOC_TYPEDEF(netsnmp_request_info);
+        if (reqtmp == NULL)
+            return SNMP_ERR_GENERR;
         reqtmp->subtree = requests->subtree;
         table_info = netsnmp_extract_table_info(requests);
         netsnmp_request_add_list_data(reqtmp,
@@ -452,6 +456,14 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
             if (request->processed)
                 continue;
             table_info = netsnmp_extract_table_info(request);
+            if (table_info == NULL) {
+                /*
+                 * Cleanup 
+                 */
+                if (free_this_index_search)
+                    snmp_free_varbind(free_this_index_search);
+                return SNMP_ERR_GENERR;
+            }
             if (table_info->colnum < tbl_info->min_column - 1) {
                 /* XXX: optimize better than this */
                 /* for now, just increase to colnum-1 */
@@ -466,6 +478,14 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
             if (!ti_info) {
                 ti_info = SNMP_MALLOC_TYPEDEF(ti_cache_info);
+                if (ti_info == NULL) {
+                    /*
+                     * Cleanup 
+                     */
+                    if (free_this_index_search)
+                        snmp_free_varbind(free_this_index_search);
+                    return SNMP_ERR_GENERR;
+                }
                 netsnmp_request_add_list_data(request,
                                               netsnmp_create_data_list
                                               (TI_REQUEST_CACHE,
@@ -555,6 +575,14 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 
                     /* XXX: store in an array for faster retrival */
                     table_info = netsnmp_extract_table_info(request);
+                    if (table_info == NULL) {
+                        /*
+                         * Cleanup 
+                         */
+                        if (free_this_index_search)
+                            snmp_free_varbind(free_this_index_search);
+                        return SNMP_ERR_GENERR;
+                    }
                     coloid[reginfo->rootoid_len + 1] = table_info->colnum;
 
                     ti_info =
@@ -569,11 +597,23 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         if (snmp_oid_compare(myname, myname_len,
                                              request->requestvb->name,
                                              request->requestvb->name_length) == 0) {
-                            /* keep this */
-                            netsnmp_iterator_remember(request,
-                                                      myname, myname_len,
-                                                      callback_data_context,
-                                                      callback_loop_context, iinfo);
+                            /* 
+                             * keep this
+                             */
+                            if (netsnmp_iterator_remember(request,
+                                                          myname,
+                                                          myname_len,
+                                                          callback_data_context,
+                                                          callback_loop_context,
+                                                          iinfo) == NULL) {
+                                /*
+                                 * Cleanup 
+                                 */
+                                if (free_this_index_search)
+                                    snmp_free_varbind
+                                        (free_this_index_search);
+                                return SNMP_ERR_GENERR;
+                            }
                             request_count--;   /* One less to look for */
                         } else {
                             if (iinfo->free_data_context && callback_data_context) {
@@ -610,6 +650,15 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                             table_info->colnum = i;
                             vb = reqtmp->requestvb =
                                 SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
+                            if (vb == NULL) {
+                                /*
+                                 * Cleanup 
+                                 */
+                                if (free_this_index_search)
+                                    snmp_free_varbind
+                                        (free_this_index_search);
+                                return SNMP_ERR_GENERR;
+                            }
                             vb->type = ASN_NULL;
                             snmp_set_var_objid(vb, myname, myname_len);
                             netsnmp_call_next_handler(handler, reginfo,
@@ -631,11 +680,23 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         if (netsnmp_check_getnext_reply
                             (request, coloid, coloid_len, index_search,
                              &ti_info->results)) {
-                            netsnmp_iterator_remember(request,
-                                                      ti_info->results->name,
-                                                      ti_info->results->name_length,
-                                                      callback_data_context,
-                                                      callback_loop_context, iinfo);
+                            if (netsnmp_iterator_remember(request,
+                                                          ti_info->
+                                                          results->name,
+                                                          ti_info->
+                                                          results->
+                                                          name_length,
+                                                          callback_data_context,
+                                                          callback_loop_context,
+                                                          iinfo) == NULL) {
+                                /*
+                                 * Cleanup 
+                                 */
+                                if (free_this_index_search)
+                                    snmp_free_varbind
+                                        (free_this_index_search);
+                                return SNMP_ERR_GENERR;
+                            }
                             /*
                              *  If we've been told that the rows are sorted,
                              *   then the first valid one we find

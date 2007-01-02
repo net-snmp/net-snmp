@@ -599,8 +599,10 @@ netsnmp_config_remember_in_list(char *line,
         mem = &((*mem)->next);
 
     *mem = SNMP_MALLOC_STRUCT(read_config_memory);
-    if (line)
-        (*mem)->line = strdup(line);
+    if (*mem != NULL) {
+        if (line)
+            (*mem)->line = strdup(line);
+    }
 }
 
 void

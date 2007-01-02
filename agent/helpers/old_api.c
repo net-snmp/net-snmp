@@ -67,6 +67,8 @@ netsnmp_register_old_api(const char *moduleName,
         struct variable *vp;
         netsnmp_handler_registration *reginfo =
             SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
+        if (reginfo == NULL)
+            return SNMP_ERR_GENERR;
 
         memdup((void *) &vp,
                (void *) (struct variable *) ((char *) var + varsize * i),
@@ -77,6 +79,8 @@ netsnmp_register_old_api(const char *moduleName,
         reginfo->rootoid_len = (mibloclen + vp->namelen);
         reginfo->rootoid =
             (oid *) malloc(reginfo->rootoid_len * sizeof(oid));
+        if (reginfo->rootoid == NULL)
+            return SNMP_ERR_GENERR;
 
         memcpy(reginfo->rootoid, mibloc, mibloclen * sizeof(oid));
         memcpy(reginfo->rootoid + mibloclen, vp->name, vp->namelen

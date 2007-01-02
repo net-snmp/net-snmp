@@ -148,6 +148,9 @@ netsnmp_subtree_find_first(const char *context_name)
 {
     subtree_context_cache *ptr;
 
+    if (ptr == NULL)
+        return NULL;
+
     if (!context_name) {
         context_name = "";
     }

@@ -642,6 +642,8 @@ write_mteObjectsEntryStatus(int action,
 
 
             StorageNew = SNMP_MALLOC_STRUCT(mteObjectsTable_data);
+            if (StorageNew == NULL)
+                return SNMP_ERR_GENERR;
             StorageNew->mteOwner = netsnmp_strdup_and_null(vp->val.string,
                                                            vp->val_len);
             StorageNew->mteOwnerLen = vp->val_len;
@@ -889,6 +891,8 @@ mte_add_object_to_table(const char *owner, const char *objname,
      * malloc initial struct 
      */
     StorageNew = SNMP_MALLOC_STRUCT(mteObjectsTable_data);
+    if (StorageNew == NULL)
+        return SNMP_ERR_GENERR;
     StorageNew->mteOwner = netsnmp_strdup_and_null(owner, strlen(owner));
     StorageNew->mteOwnerLen = strlen(owner);
     StorageNew->mteObjectsName = netsnmp_strdup_and_null(objname,
