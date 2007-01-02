@@ -37,15 +37,16 @@ netsnmp_create_watcher_info(void *data, size_t size, u_char type, int flags)
 {
     netsnmp_watcher_info *winfo = SNMP_MALLOC_TYPEDEF(netsnmp_watcher_info);
 
-    winfo->data      = data;
-    winfo->data_size = size;
-    winfo->max_size  = size;	/* Probably wrong for non-fixed size data */
-    winfo->type      = type;
-    if (flags)
-        winfo->flags = flags;
-    else
-        winfo->flags = WATCHER_FIXED_SIZE;
-
+    if (winfo != NULL) {
+        winfo->data = data;
+        winfo->data_size = size;
+        winfo->max_size = size; /* Probably wrong for non-fixed size data */
+        winfo->type = type;
+        if (flags)
+            winfo->flags = flags;
+        else
+            winfo->flags = WATCHER_FIXED_SIZE;
+    }
     return winfo;
 }
 

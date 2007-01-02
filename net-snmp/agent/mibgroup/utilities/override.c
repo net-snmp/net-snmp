@@ -157,7 +157,6 @@ netsnmp_parse_override(const char *token, char *line)
         config_perror("memory allocation failure");
         return;
     }
-
     thedata->type = type;
 
     switch (type) {

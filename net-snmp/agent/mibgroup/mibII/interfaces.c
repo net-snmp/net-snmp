@@ -1890,10 +1890,13 @@ Interface_Scan_Next(short *Index, char *Name, nmapi_phystat * Retifnet)
     int             ret;
 
     if (!if_ptr) {
-        if (count)
+        if (count) {
             if_ptr =
                 (nmapi_phystat *) malloc(sizeof(nmapi_phystat) * count);
-        else
+            if (if_ptr == NULL)
+                return (0);
+
+        } else
             return (0);         /* EOF */
     }
 

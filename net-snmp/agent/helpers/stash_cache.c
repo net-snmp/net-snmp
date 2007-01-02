@@ -32,7 +32,8 @@ netsnmp_get_new_stash_cache(void)
     netsnmp_stash_cache_info *cinfo;
 
     cinfo = SNMP_MALLOC_TYPEDEF(netsnmp_stash_cache_info);
-    cinfo->cache_length = 30;
+    if (cinfo != NULL)
+        cinfo->cache_length = 30;
     return cinfo;
 }
 

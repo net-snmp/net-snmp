@@ -439,10 +439,14 @@ netsnmp_ds_register_config(u_char type, const char *ftype, const char *token,
 
     if (netsnmp_ds_configs == NULL) {
         netsnmp_ds_configs = SNMP_MALLOC_TYPEDEF(netsnmp_ds_read_config);
+        if (netsnmp_ds_configs == NULL)
+            return SNMPERR_GENERR;
         drsp = netsnmp_ds_configs;
     } else {
         for (drsp = netsnmp_ds_configs; drsp->next != NULL; drsp = drsp->next);
         drsp->next = SNMP_MALLOC_TYPEDEF(netsnmp_ds_read_config);
+        if (drsp->next == NULL)
+            return SNMPERR_GENERR;
         drsp = drsp->next;
     }
 
@@ -485,10 +489,14 @@ netsnmp_ds_register_premib(u_char type, const char *ftype, const char *token,
 
     if (netsnmp_ds_configs == NULL) {
         netsnmp_ds_configs = SNMP_MALLOC_TYPEDEF(netsnmp_ds_read_config);
+        if (netsnmp_ds_configs == NULL)
+            return SNMPERR_GENERR;
         drsp = netsnmp_ds_configs;
     } else {
         for (drsp = netsnmp_ds_configs; drsp->next != NULL; drsp = drsp->next);
         drsp->next = SNMP_MALLOC_TYPEDEF(netsnmp_ds_read_config);
+        if (drsp->next == NULL)
+            return SNMPERR_GENERR;
         drsp = drsp->next;
     }
 

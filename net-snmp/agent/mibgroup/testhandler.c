@@ -74,6 +74,8 @@ init_testhandler(void)
         return;
 
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+    if (table_info == NULL)
+        return;
 
     netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, ASN_INTEGER,
                                      0);
@@ -123,6 +125,8 @@ init_testhandler(void)
      * automatically parsed column and index information 
      */
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+    if (table_info == NULL)
+        return;
 
     netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER,
                                      ASN_OCTET_STR, 0);
