@@ -1017,6 +1017,7 @@ AC_PROG_MAKE_SET
 AC_PROG_EGREP
 AC_PATH_PROG([PSPROG],ps)
 AC_PATH_PROG([PERLPROG],perl)
+AC_PATH_PROG([PYTHONPROG],python)
 AC_CHECK_PROGS(WHOAMI, whoami logname, whoami)
 AC_CHECK_PROGS(SED,sed gsed)
 AC_CHECK_PROGS(FIND,find)
@@ -3139,7 +3140,7 @@ if test "x$install_python" = "xyes" ; then
     PYTHONINSTALLTARGS="pythoninstall"
     PYTHONUNINSTALLTARGS="pythonuninstall"
     PYTHONCLEANTARGS="pythonclean"
-    AC_MSG_CACHE_ADD(SNMP Python modules:        building)
+    AC_MSG_CACHE_ADD(SNMP Python modules:        building for $PYTHONPROG)
     AC_MSG_RESULT([yes])
 else
     AC_MSG_CACHE_ADD(SNMP Python modules:        disabled)
