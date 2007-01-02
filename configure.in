@@ -735,13 +735,15 @@ Perl:
                                   of the net-snmp toolkit.  If ARGS is
                                   specified, they're passed to the
                                   Makefile.PL script.],[
+  if test "$withval" = "no"; then
+    install_perl=no
+  else
     install_perl=yes
-    if test "$withval" = yes; then
-      PERLARGS=""
-    else
+    if test "$withval" != "yes"; then
       PERLARGS="$withval"
     fi
-])
+  fi
+], install_perl="try")
 
 AC_ARG_ENABLE(embedded-perl,
 [
