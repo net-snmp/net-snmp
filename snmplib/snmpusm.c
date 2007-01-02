@@ -2722,6 +2722,8 @@ init_usm(void)
      * register ourselves as a security service 
      */
     def = SNMP_MALLOC_STRUCT(snmp_secmod_def);
+    if (def == NULL)
+        return;
     /*
      * XXX: def->init_sess_secmod move stuff from snmp_api.c 
      */

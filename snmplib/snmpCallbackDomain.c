@@ -102,6 +102,8 @@ callback_push_queue(int num, netsnmp_callback_pass *item)
     callback_queue *newitem = SNMP_MALLOC_TYPEDEF(callback_queue);
     callback_queue *ptr;
 
+    if (newitem == NULL)
+        return;
     newitem->callback_num = num;
     newitem->item = item;
     if (thequeue) {
@@ -387,6 +389,8 @@ netsnmp_callback_transport(int to)
      * our stuff 
      */
     mydata = SNMP_MALLOC_TYPEDEF(netsnmp_callback_info);
+    if (!mydata)
+        return NULL;
     mydata->linkedto = to;
     mydata->callback_num = ++callback_count;
     mydata->data = NULL;
@@ -446,6 +450,8 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
      * function 
      */
     callback_hack  *ch = SNMP_MALLOC_TYPEDEF(callback_hack);
+    if (ch == NULL)
+        return -1;
     DEBUGMSGTL(("transport_callback", "hook_build enter\n"));
     ch->pdu = pdu;
     ch->orig_transport_data = pdu->transport_data;

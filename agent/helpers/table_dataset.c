@@ -272,6 +272,8 @@ netsnmp_table_set_add_default_row(netsnmp_table_data_set *table_set,
     }
 
     new_col = SNMP_MALLOC_TYPEDEF(netsnmp_table_data_set_storage);
+    if (new_col == NULL)
+        return SNMPERR_GENERR;
     new_col->type = type;
     new_col->writable = writable;
     new_col->column = column;
@@ -388,6 +390,8 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
          * allocate the table if one wasn't allocated 
          */
         table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+        if (table_info == NULL)
+            return SNMP_ERR_GENERR;
     }
 
     if (NULL == table_info->indexes && data_set->table->indexes_template) {
@@ -431,11 +435,14 @@ netsnmp_table_data_set_create_newrowstash
     netsnmp_table_row *newrow   = NULL;
 
     newrowstash = SNMP_MALLOC_TYPEDEF(newrow_stash);
-    newrowstash->created = 1;
-    newrow = netsnmp_table_data_set_create_row_from_defaults
-                        (datatable->default_row);
-    newrow->indexes = snmp_clone_varbind(table_info->indexes);
-    newrowstash->newrow = newrow;
+
+    if (newrowstash != NULL) {
+        newrowstash->created = 1;
+        newrow = netsnmp_table_data_set_create_row_from_defaults
+            (datatable->default_row);
+        newrow->indexes = snmp_clone_varbind(table_info->indexes);
+        newrowstash->newrow = newrow;
+    }
 
     return newrowstash;
 }
@@ -542,6 +549,11 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                      * existing row that needs to be modified 
                      */
                     newrowstash = SNMP_MALLOC_TYPEDEF(newrow_stash);
+                    if (newrowstash == NULL) {
+                        netsnmp_set_request_error(reqinfo, request,
+                                                  SNMP_ERR_GENERR);
+                        continue;
+                    }
                     newrow = netsnmp_table_data_set_clone_row(row);
                     newrowstash->newrow = newrow;
                 }

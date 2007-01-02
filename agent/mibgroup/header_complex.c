@@ -400,6 +400,8 @@ header_complex_add_data_by_oid(struct header_complex_index **thedata,
      */
     ourself = (struct header_complex_index *)
         SNMP_MALLOC_STRUCT(header_complex_index);
+    if (ourself == NULL)
+        return NULL;
 
     /*
      * change our pointers 

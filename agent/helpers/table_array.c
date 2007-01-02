@@ -570,6 +570,8 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
             DEBUGMSG(("table_array:group", "\n"));
             g = (netsnmp_request_group *) tmp;
             i = SNMP_MALLOC_TYPEDEF(netsnmp_request_group_item);
+            if (i == NULL)
+                return;
             i->ri = current;
             i->tri = tblreq_info;
             i->next = g->list;
@@ -585,6 +587,8 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
         DEBUGMSG(("table_array:group", "\n"));
         g = SNMP_MALLOC_TYPEDEF(netsnmp_request_group);
         i = SNMP_MALLOC_TYPEDEF(netsnmp_request_group_item);
+        if (i == NULL || g == NULL)
+            return;
         g->list = i;
         g->table = tad->table;
         i->ri = current;
