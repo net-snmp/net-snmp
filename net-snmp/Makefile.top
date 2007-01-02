@@ -40,6 +40,7 @@ LN_S		= @LN_S@
 AUTOCONF	= @AUTOCONF@
 AUTOHEADER	= @AUTOHEADER@
 PERL            = @PERLPROG@
+PYTHON          = @PYTHONPROG@
 FIND            = @FIND@
 
 #
