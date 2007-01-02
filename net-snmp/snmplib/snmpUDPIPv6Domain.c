@@ -923,7 +923,7 @@ masked_address_are_equal(int af, struct sockaddr_storage *from,
 #define EXAMPLE_COMMUNITY     "COMMUNITY"
 
 typedef struct _com2Sec6Entry {
-    char            community[VACMSTRINGLEN];
+    char            community[COMMUNITY_MAX_LEN];
     struct sockaddr_in6 network;
     struct sockaddr_in6 mask;
     char            secName[VACMSTRINGLEN];
@@ -959,7 +959,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
 {
     char            secName[VACMSTRINGLEN];
     char            contextName[VACMSTRINGLEN];
-    char            community[VACMSTRINGLEN];
+    char            community[COMMUNITY_MAX_LEN];
     char            source[IPV6_STRING_LEN];
     char           *cp = NULL, *strnetwork = NULL, *strmask = NULL;
     com2Sec6Entry  *e = NULL;
@@ -1014,7 +1014,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             == 0) {
         config_perror("example config COMMUNITY not properly configured");
         return;
-    } else if (strlen(community) > (VACMSTRINGLEN - 1)) {
+    } else if (strlen(community) > (COMMUNITY_MAX_LEN - 1)) {
         config_perror("community name too long");
         return;
     }
