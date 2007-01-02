@@ -6476,15 +6476,17 @@ netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
     int i;
     size_t min_size;
 
-    if (!in_name1 || !in_name2)
+    if (!in_name1 || !in_name2 || !len1 || !len2)
         return -1;
 
+    if (in_name1[0] != in_name2[0])
+        return 0;   /* No match */
     min_size = SNMP_MIN(len1, len2);
     for(i = 0; i < (int)min_size; i++) {
         if (in_name1[i] != in_name2[i])
-            return i + 1;
+            return i + 1;    /* Why +1 ?? */
     }
-    return 0;
+    return min_size;    /* or +1? - the spec isn't totally clear */
 }
 
 static int _check_range(struct tree *tp, long ltmp, int *resptr,
