@@ -557,8 +557,7 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
     var = find_varbind_in_list( template_v2pdu->variables,
                                 snmptrapenterprise_oid,
                                 snmptrapenterprise_oid_len);
-    if (!var && 
-        template_v1pdu->trap_type != SNMP_TRAP_ENTERPRISESPECIFIC) {
+    if (!var) {
         if (!snmp_varlist_add_variable( &(template_v2pdu->variables),
                  snmptrapenterprise_oid, snmptrapenterprise_oid_len,
                  ASN_OBJECT_ID,
