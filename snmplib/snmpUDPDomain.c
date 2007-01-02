@@ -872,7 +872,7 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
 #define EXAMPLE_COMMUNITY	"COMMUNITY"
 
 typedef struct _com2SecEntry {
-    char            community[VACMSTRINGLEN];
+    char            community[COMMUNITY_MAX_LEN];
     unsigned long   network;
     unsigned long   mask;
     char            secName[VACMSTRINGLEN];
@@ -887,7 +887,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
 {
     char            secName[VACMSTRINGLEN];
     char            contextName[VACMSTRINGLEN];
-    char            community[VACMSTRINGLEN];
+    char            community[COMMUNITY_MAX_LEN];
     char            source[SNMP_MAXBUF_SMALL];
     char           *cp = NULL;
     const char     *strmask = NULL;
@@ -935,7 +935,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
             == 0) {
         config_perror("example config COMMUNITY not properly configured");
         return;
-    } else if (strlen(community) > (VACMSTRINGLEN - 1)) {
+    } else if (strlen(community) > (COMMUNITY_MAX_LEN - 1)) {
         config_perror("community name too long");
         return;
     }
