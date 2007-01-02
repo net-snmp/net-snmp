@@ -60,7 +60,7 @@
 void
 real_init_master(void)
 {
-    netsnmp_session sess, *session;
+    netsnmp_session sess, *session = NULL;
     char *agentx_sockets;
     char *cp1, *cp2;
 
