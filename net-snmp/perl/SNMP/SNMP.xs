@@ -915,7 +915,7 @@ int    best_guess;
       }
    }
  done:
-   if (iid && *iid) __concat_oid_str(oid_arr, oid_arr_len, iid);
+   if (iid && *iid && oid_arr_len) __concat_oid_str(oid_arr, oid_arr_len, iid);
    return(rtp);
 }
 /* searches down the mib tree for the given oid
