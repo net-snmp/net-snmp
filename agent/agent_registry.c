@@ -321,9 +321,7 @@ netsnmp_subtree_split(netsnmp_subtree *current, oid name[], int name_len)
 	return NULL;
     }
 
-    if (current->end_a != NULL) {
-	SNMP_FREE(current->end_a);
-    }
+    SNMP_FREE(current->end_a);
     current->end_a = tmp_a;
     current->end_len = name_len;
     if (new_sub->start_a != NULL) {
