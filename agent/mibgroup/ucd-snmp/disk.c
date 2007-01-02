@@ -4,6 +4,12 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+/* workaround for bug in autoconf 2.60b and 2.61 */
+#ifdef HAVE_GETMNTENT
+#undef HAVE_GETMNTENT
+#define HAVE_GETMNTENT 1 /* previously might be only "#define HAVE_GETMNTENT" */
+#endif
+
 #include <stdio.h>
 
 #if HAVE_STDLIB_H
