@@ -200,7 +200,6 @@ perlrealclean:
 #
 # python specific build rules
 #
-# override LD_RUN_PATH to avoid dependencies on the build directory
 PYMAKE=$(PYTHON) setup.py $(PYTHONARGS)
 pythonmodules: 
 	@(cd python ; $(PYMAKE) build) ; \
