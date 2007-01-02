@@ -1050,7 +1050,6 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
             /*
              * DNE, make it 
              */
-            snmp_log(LOG_INFO, "Creating directory: %s\n", buf);
 #ifdef WIN32
             if (CreateDirectory(buf, NULL) == 0)
 #else
@@ -1059,6 +1058,8 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
             {
                 free(ourcopy);
                 return SNMPERR_GENERR;
+            } else {
+                snmp_log(LOG_INFO, "Created directory: %s\n", buf);
             }
         } else {
             /*
