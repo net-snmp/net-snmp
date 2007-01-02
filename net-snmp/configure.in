@@ -2563,13 +2563,19 @@ AC_DEFINE_UNQUOTED(KERNEL_LOC,"$ac_cv_KERNEL_LOC")
 
 AC_CACHE_CHECK(for mount table location,ac_cv_ETC_MNTTAB,
 [ac_cv_ETC_MNTTAB="unknown"
-for i in /etc/mnttab /etc/mtab /etc/filesystems
+AC_ARG_WITH(mnttab,
+[  --with-mnttab=\"/etc/mnttab\"  Mount table location.
+                                 The default is to autodetect this.],
+	[ac_cv_ETC_MNTTAB="$with_mnttab"])
+if test "$ac_cv_ETC_MNTTAB" = "unknown"; then
+ for i in /etc/mnttab /etc/mtab /etc/filesystems
   do
   if test -f $i; then
     ac_cv_ETC_MNTTAB="$i"
     break;
   fi
-done
+ done
+fi
 ])
 
 AC_DEFINE_UNQUOTED(ETC_MNTTAB,"$ac_cv_ETC_MNTTAB")
