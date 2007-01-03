@@ -65,7 +65,8 @@ netsnmp_arch_tcpconn_delete(netsnmp_tcpconn_entry *entry)
  * @retval !0 errors
  */
 int
-netsnmp_arch_tcpconn_container_load(netsnmp_container *container)
+netsnmp_arch_tcpconn_container_load(netsnmp_container *container,
+                                    u_int load_flags)
 {
     int             rc = 0;
     FILE           *in;
