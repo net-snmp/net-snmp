@@ -538,14 +538,15 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
 		    snmp_errstring(pdu->errstat), pdu->errindex));
 		netsnmp_handler_mark_requests_as_delegated(
 		    requests, REQUEST_IS_NOT_DELEGATED);
-		/*
-		 * XXX - both here and below, shouldn't the error be set
-		 * on the request with request->index == pdu->errindex ?
-		 */
-		netsnmp_set_request_error(cache->reqinfo, requests, pdu->errstat);
+		netsnmp_request_set_error_idx(requests, pdu->errstat,
+                                                        pdu->errindex);
 	    }
-            else
-                netsnmp_set_request_error(cache->reqinfo, requests, pdu->errstat);
+            else {
+		netsnmp_handler_mark_requests_as_delegated( requests,
+                                             REQUEST_IS_NOT_DELEGATED);
+		netsnmp_request_set_error_idx(requests, pdu->errstat,
+                                                        pdu->errindex);
+            }
 
         /*
          * update the original request varbinds with the results 

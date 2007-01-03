@@ -3406,6 +3406,34 @@ netsnmp_request_set_error(netsnmp_request_info *request, int error_value)
                               error_value);
 }
 
+/** set error for a request within a request list
+ * @param request head of the request list
+ * @param error_value error value for request
+ * @param idx index of the request which has the error
+ */
+int
+netsnmp_request_set_error_idx(netsnmp_request_info *request,
+                              int error_value, int idx)
+{
+    int i;
+    netsnmp_request_info *req = request;
+
+    if (!request || !request->agent_req_info)
+        return SNMPERR_NO_VARS;
+
+    /*
+     * Skip to the indicated varbind
+     */
+    for ( i=2; i<idx; i++) {
+        req = req->next;
+        if (!req)
+            return SNMPERR_NO_VARS;
+    }
+    
+    return _request_set_error(req, request->agent_req_info->mode,
+                              error_value);
+}
+
 /** set error for all requests
  * @param requests request list
  * @param error error value for requests
