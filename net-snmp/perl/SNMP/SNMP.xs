@@ -4709,7 +4709,7 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
            str_buf_temp[0] = '\0';
 
 	   if (auto_init)
-	     netsnmp_init_mib(); // vestigial 
+	     netsnmp_init_mib(); /* vestigial */
 
            /* Save old output format and set to FULL so long_names works */
            old_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
