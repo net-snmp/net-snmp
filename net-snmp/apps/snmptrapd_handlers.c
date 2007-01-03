@@ -1120,6 +1120,16 @@ t        *     d) any other global handlers
     case NETSNMP_CALLBACK_OP_TIMED_OUT:
         snmp_log(LOG_ERR, "Timeout: This shouldn't happen!\n");
         break;
+
+    case NETSNMP_CALLBACK_OP_SEND_FAILED:
+        snmp_log(LOG_ERR, "Send Failed: This shouldn't happen either!\n");
+        break;
+
+    case NETSNMP_CALLBACK_OP_CONNECT:
+    case NETSNMP_CALLBACK_OP_DISCONNECT:
+        /* Ignore silently */
+        break;
+
     default:
         snmp_log(LOG_ERR, "Unknown operation (%d): This shouldn't happen!\n", op);
         break;
