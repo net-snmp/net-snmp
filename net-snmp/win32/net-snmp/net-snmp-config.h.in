@@ -1684,5 +1684,7 @@ typedef __int64 int64_t;
  * Module configuration and control ends here.
  */
 
+#define UDP_ADDRESSES_IN_HOST_ORDER 1
+
 #endif /* NET_SNMP_CONFIG_H */
 

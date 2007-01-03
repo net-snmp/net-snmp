@@ -69,3 +69,4 @@ struct timezone {
 	int tz_dsttime;
 };
 
+#define UDP_ADDRESSES_IN_HOST_ORDER 1
