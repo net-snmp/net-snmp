@@ -1382,6 +1382,12 @@ Init_HR_SWRun(void)
         while ((dp = readdir(f)) != NULL && current_proc_entry < nproc)
             if (dp->d_name[0] != '.')
                 proc_table[current_proc_entry++] = atoi(dp->d_name);
+        /*
+         * if we are in a Solaris zone, nproc > current_proc_entry !
+         * but we only want the processes from the local zone
+         */
+        if (current_proc_entry != nproc)
+            nproc = current_proc_entry;
         closedir(f);
     }
 #elif defined(aix4) || defined(aix5)
