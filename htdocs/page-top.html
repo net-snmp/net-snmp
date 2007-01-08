@@ -166,6 +166,23 @@
           <span id="Label">Require all words?</span>   
         </form>
       </div>
+      <br />
+
+      <div id="SiteSearch">
+          <form method=GET action="http://www.google.com/search">
+          <span class="small">Site Search:</span>
+          
+          <input type=hidden name=ie value=UTF-8>
+          <input type=hidden name=oe value=UTF-8>
+          <input type="text" name=q size=15 maxlength=255 value="" /><br />
+          <input type=hidden name=sitesearch value="www.net-snmp.org">
+          <input type=submit name=btnG VALUE="Google Search">
+          <a href="http://www.google.com/">
+            <img src="http://www.google.com/logos/Logo_25wht.gif" border="0" alt="Google" align="absmiddle"></A>
+
+        </form>
+      </div>
+
 
       <!--#if expr="$hidelogo != yes" -->
       <div id="MenuSFLogo">

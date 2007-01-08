@@ -219,6 +219,15 @@ body>#MenuSFLogo {width:150px;}
 /* Again, "be nice to Opera 5". */
 body>#ListSearch {width:150px;}
 
+#SiteSearch {
+  padding:10px;
+  background-color:#fafafa;
+  border:1px dashed #999;
+  font-size: 0.8em;
+}
+/* Again, "be nice to Opera 5". */
+body>#SiteSearch {width:150px;}
+
 #ModificationDate {
   margin:0px 50px 20px 200px;
 }
