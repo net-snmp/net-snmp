@@ -76,6 +76,9 @@ INSTALLUCDHEADERS= \
 #
 USELIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 HELPERLIB	= helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
+AGENTLIB	= libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+MIBLIB		= libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+
 LOCAL_LIBS	= 
 PERLLDOPTS      = @PERLLDOPTS@
 LIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @AGENTLIBS@ $(PERLLDOPTS)
@@ -115,7 +118,7 @@ OBJS		= $(LIBAGENTOBJS)  $(AGENTOBJS)  mib_modules.o  auto_nlist.o
 LOBJS		= $(LLIBAGENTOBJS) $(LAGENTOBJS) mib_modules.lo auto_nlist.lo
 
 
-all: standardall
+all: agentlib subdirs miblib $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
 
 #
 # build stuff targets
@@ -137,16 +140,16 @@ snmpd$(EXEEXT):	${LAGENTOBJS} $(USELIBS) $(HELPERLIB) $(LIBTARG) ${INSTALLLIBS}
 
 
 libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LLIBAGENTOBJS}
-	$(LIB_LD_CMD) libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) ${LLIBAGENTOBJS}  $(LIB_LD_LIBS)
-	$(RANLIB) libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+	$(LIB_LD_CMD) $(AGENTLIB) ${LLIBAGENTOBJS}  $(LIB_LD_LIBS)
+	$(RANLIB) $(AGENTLIB)
 
 libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
-	$(LIB_LD_CMD) libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION) ${LMIBOBJS}  $(LIB_LD_LIBS) @SENSORLIBS@
-	$(RANLIB) libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+	$(LIB_LD_CMD) $(MIBLIB) ${LMIBOBJS}  $(LIB_LD_LIBS) @SENSORLIBS@
+	$(RANLIB) $(MIBLIB)
 
-agentlib: libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+agentlib: $(AGENTLIB)
 
-miblib: libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+miblib: $(MIBLIB)
 
 libs: $(INSTALLLIBS)
 
