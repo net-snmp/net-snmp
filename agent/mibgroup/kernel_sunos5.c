@@ -1452,6 +1452,7 @@ get_if_stats(mib2_ifEntry_t *ifp)
 
     ifp->ifOutNUcastPkts = (uint32_t)(ifp->ifHCOutBroadcastPkts + 
                                       ifp->ifHCOutMulticastPkts);
+    return(0);
 }
 
 /*
