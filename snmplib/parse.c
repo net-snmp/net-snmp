@@ -258,6 +258,7 @@ struct objgroup {
 #define VARIABLES	103
 #define UNSIGNED32	(104 | SYNTAX_MASK)
 #define INTEGER32	(105 | SYNTAX_MASK)
+#define OBJIDENTITY	106
 /*
  * Beware of reaching SYNTAX_MASK (0x80) 
  */
@@ -320,7 +321,7 @@ static struct tok tokens[] = {
     ,
     {"OBJECT-GROUP", sizeof("OBJECT-GROUP") - 1, OBJGROUP}
     ,
-    {"OBJECT-IDENTITY", sizeof("OBJECT-IDENTITY") - 1, OBJGROUP}
+    {"OBJECT-IDENTITY", sizeof("OBJECT-IDENTITY") - 1, OBJIDENTITY}
     ,
     {"IDENTIFIER", sizeof("IDENTIFIER") - 1, IDENTIFIER}
     ,
@@ -1067,11 +1068,17 @@ build_translation_table()
         case NOTIFTYPE:
             translation_table[count] = TYPE_NOTIFTYPE;
             break;
+        case NOTIFGROUP:
+            translation_table[count] = TYPE_NOTIFGROUP;
+            break;
         case OBJGROUP:
             translation_table[count] = TYPE_OBJGROUP;
             break;
         case MODULEIDENTITY:
             translation_table[count] = TYPE_MODID;
+            break;
+        case OBJIDENTITY:
+            translation_table[count] = TYPE_OBJIDENTITY;
             break;
         case AGENTCAP:
             translation_table[count] = TYPE_AGENTCAP;
@@ -4366,6 +4373,13 @@ parse(FILE * fp, struct node *root)
             nnp = parse_moduleIdentity(fp, name);
             if (nnp == NULL) {
                 print_error("Bad parse of MODULE-IDENTITY", NULL, type);
+                return NULL;
+            }
+            break;
+        case OBJIDENTITY:
+            nnp = parse_objectgroup(fp, name, OBJECTS, &objects);
+            if (nnp == NULL) {
+                print_error("Bad parse of OBJECT-IDENTITY", NULL, type);
                 return NULL;
             }
             break;
