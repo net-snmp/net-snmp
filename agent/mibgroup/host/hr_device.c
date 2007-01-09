@@ -225,6 +225,7 @@ var_hrdevice(struct variable *vp,
     char           *tmp_str;
     static char     string[1024];
 
+really_try_next:
     dev_idx =
         header_hrdevice(vp, name, length, exact, var_len, write_method);
     if (dev_idx == MATCH_FAILED)
@@ -247,7 +248,7 @@ var_hrdevice(struct variable *vp,
             string[ sizeof(string)-1] = 0;
         } else
 #if NO_DUMMY_VALUES
-            return NULL;
+            goto try_next;
 #else
             sprintf(string, "a black box of some sort");
 #endif
@@ -266,17 +267,19 @@ var_hrdevice(struct variable *vp,
             long_return = ((*device_status[type]) (dev_idx));
         else
 #if NO_DUMMY_VALUES
-            return NULL;
+            goto try_next;
 #else
             long_return = 2;    /* Assume running */
 #endif
+        if (!long_return)
+            goto try_next;
         return (u_char *) & long_return;
     case HRDEV_ERRORS:
         if (device_errors[type] != NULL)
             long_return = (*device_errors[type]) (dev_idx);
         else
 #if NO_DUMMY_VALUES
-            return NULL;
+            goto try_next;
 #else
             long_return = 0;    /* Assume OK */
 #endif
@@ -285,6 +288,9 @@ var_hrdevice(struct variable *vp,
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrdevice\n",
                     vp->magic));
     }
+try_next:
+    if (!exact)
+        goto really_try_next;
     return NULL;
 }
 
