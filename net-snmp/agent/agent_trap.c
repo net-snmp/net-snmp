@@ -1152,6 +1152,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     char           *argv[MAX_ARGS], *cp = cptr, tmp[SPRINT_MAX_LEN];
     int             argn, arg;
     netsnmp_session session, *ss;
+    size_t          len;
 
     /*
      * inform or trap?  default to trap 
@@ -1179,6 +1180,18 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
             ("snmpd: failed to parse this line or the remote trap receiver is down.  Possible cause:");
         snmp_sess_perror("snmpd: snmpd_parse_config_trapsess()", &session);
         return;
+    }
+
+    /*
+     * If this is an SNMPv3 TRAP session, then the agent is
+     *   the authoritative engine, so set the engineID accordingly
+     */
+    if (ss->version == SNMP_VERSION_3 &&
+        traptype != SNMP_MSG_INFORM   &&
+        ss->securityEngineIDLen == 0) {
+            len = snmpv3_get_engineID( tmp, sizeof(tmp));
+            memdup(&ss->securityEngineID, tmp, len);
+            ss->securityEngineIDLen = len;
     }
 
 #ifndef DISABLE_SNMPV1
