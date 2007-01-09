@@ -44,6 +44,12 @@
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpTCPDomain.h>
 
+/* Copied from snmpUDPDomain.c */
+typedef struct netsnmp_udp_addr_pair_s {
+    struct sockaddr_in remote_addr;
+    struct in_addr local_addr;
+} netsnmp_udp_addr_pair;
+
 oid netsnmp_snmpTCPDomain[] = { TRANSPORT_DOMAIN_TCP_IP };
 static netsnmp_tdomain tcpDomain;
 
@@ -55,18 +61,23 @@ static netsnmp_tdomain tcpDomain;
 static char *
 netsnmp_tcp_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
-    struct sockaddr_in *to = NULL;
+    netsnmp_udp_addr_pair *addr_pair = NULL;
 
-    if (data != NULL && len == sizeof(struct sockaddr_in)) {
-        to = (struct sockaddr_in *) data;
-    } else if (t != NULL && t->data != NULL &&
-               t->data_length == sizeof(struct sockaddr_in)) {
-        to = (struct sockaddr_in *) t->data;
+    if (data != NULL && len == sizeof(netsnmp_udp_addr_pair)) {
+	addr_pair = (netsnmp_udp_addr_pair *) data;
+    } else if (t != NULL && t->data != NULL) {
+	addr_pair = (netsnmp_udp_addr_pair *) t->data;
     }
-    if (to == NULL) {
+
+    if (addr_pair == NULL) {
         return strdup("TCP: unknown");
     } else {
-        char tmp[64];
+        struct sockaddr_in *to = NULL;
+	char tmp[64];
+        to = (struct sockaddr_in *) &(addr_pair->remote_addr);
+        if (to == NULL) {
+             return strdup("TCP: unknown");
+        }
 
         sprintf(tmp, "TCP: [%s]:%hd",
                 inet_ntoa(to->sin_addr), ntohs(to->sin_port));
@@ -163,19 +174,21 @@ static int
 netsnmp_tcp_accept(netsnmp_transport *t)
 {
     struct sockaddr *farend = NULL;
+    netsnmp_udp_addr_pair *addr_pair = NULL;
     int             newsock = -1, sockflags = 0;
     socklen_t       farendlen = sizeof(struct sockaddr_in);
     char           *str = NULL;
 
-    farend = (struct sockaddr *) malloc(sizeof(struct sockaddr_in));
+    addr_pair = (netsnmp_udp_addr_pair *)malloc(sizeof(netsnmp_udp_addr_pair));
 
-    if (farend == NULL) {
+    if (addr_pair == NULL) {
         /*
          * Indicate that the acceptance of this socket failed.  
          */
         DEBUGMSGTL(("netsnmp_tcp", "accept: malloc failed\n"));
         return -1;
     }
+    farend = (struct sockaddr_in *) &(addr_pair->remote_addr);
 
     if (t != NULL && t->sock >= 0) {
         newsock = accept(t->sock, farend, &farendlen);
@@ -191,8 +204,8 @@ netsnmp_tcp_accept(netsnmp_transport *t)
             free(t->data);
         }
 
-        t->data = farend;
-        t->data_length = farendlen;
+        t->data = addr_pair;
+        t->data_length = sizeof(netsnmp_udp_addr_pair);
         str = netsnmp_tcp_fmtaddr(NULL, farend, farendlen);
         DEBUGMSGTL(("netsnmp_tcp", "accept succeeded (from %s)\n", str));
         free(str);
@@ -238,6 +251,7 @@ netsnmp_transport *
 netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
+    netsnmp_udp_addr_pair *addr_pair = NULL;
     int rc = 0;
 
 
@@ -251,13 +265,14 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
     }
     memset(t, 0, sizeof(netsnmp_transport));
 
-    t->data = malloc(sizeof(struct sockaddr_in));
-    if (t->data == NULL) {
+    addr_pair = (netsnmp_udp_addr_pair *)malloc(sizeof(netsnmp_udp_addr_pair));
+    if (addr_pair == NULL) {
         netsnmp_transport_free(t);
         return NULL;
     }
-    t->data_length = sizeof(struct sockaddr_in);
-    memcpy(t->data, addr, sizeof(struct sockaddr_in));
+    t->data = addr_pair;
+    t->data_length = sizeof(netsnmp_udp_addr_pair);
+    memcpy(&(addr_pair->remote_addr), addr, sizeof(struct sockaddr_in));
 
     t->domain = netsnmp_snmpTCPDomain;
     t->domain_length =
