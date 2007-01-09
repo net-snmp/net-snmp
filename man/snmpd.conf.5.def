@@ -297,22 +297,42 @@ the incoming pdu, either \fIexact\fR or \fIprefix\fR.
 READ, WRITE and NOTIFY specifies the view to be used for the corresponding 
 access.
 For v1 or v2c access, LEVEL will be noauth, and CONTEXT will be empty.
-.IP "view NAME TYPE SUBTREE [MASK]"
-This defines the named view. TYPE is either \fIincluded\fR or \fIexcluded\fR.
-MASK is a list of hex octets, separated by '.' or ':'.  The MASK
-defaults to "ff" if not specified.
+.IP "view VNAME TYPE OID [MASK]"
+defines a named "view" - a subset of the overall OID tree.  This is most
+commonly a single subtree, but several \fIview\fR directives can be given
+with the same view name (VNAME), to build up a more complex collection of OIDs.
+TYPE is either \fIincluded\fR or \fIexcluded\fR, which can again define
+a more complex view (e.g. by excluding certain sensitive objects
+from an otherwise accessible subtree).
 .IP
-The reason for the mask is, that it allows you to control access to
-one row in a table, in a relatively simple way. As an example, as an ISP
-you might consider giving each customer access to his or her own interface:
+MASK is a list of hex octets (optionally separated by '.' or ':') with
+the set bits indicating which subidentifiers in the view OID to match
+against.  If not specified, this defaults to matching the OID exactly
+(all bits set), thus defining a simple OID subtree.  So:
+.RS
+.RS
+view iso1 included .iso  0xf0
+.br
+view iso2 included .iso
+.br
+view iso3 included .iso.org.dod.mgmt  0xf0
+.RE
+.RE
 .IP
-.nf
-view cust1 included interfaces.ifTable.ifEntry.ifIndex.1 ff.a0
-view cust2 included interfaces.ifTable.ifEntry.ifIndex.2 ff.a0
+would all define the same view, covering the whole of the 'iso(1)' subtree
+(with the third example ignoring the subidentifiers not covered by the mask).
 .IP
-(interfaces.ifTable.ifEntry.ifIndex.1 == .1.3.6.1.2.1.2.2.1.1.1,
-ff.a0 == 11111111.10100000. which nicely covers up and including
-the row index, but lets the user vary the field of the row)
+More usefully, the mask can be used to define a view covering a particular
+row (or rows) in a table, by matching against the appropriate table index
+value, but skipping the column subidentifier:
+.RS
+.RS
+.IP "view ifRow4 included .1.3.6.1.2.1.2.2.1.0.4  0xff:a0"
+.RE
+.RE
+.IP
+Note that a mask longer than 8 bits must use ':' to separate the individual
+octets.
 .IP "VACM Examples:"
 .nf
 #        sec.name  source          community
