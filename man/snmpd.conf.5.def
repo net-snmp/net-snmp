@@ -234,16 +234,39 @@ accompanied by \fBtwo\fR \fIgroup\fR directives.
 .IP "view VNAME TYPE OID [MASK]"
 defines a named "view" - a subset of the overall OID tree. This is most
 commonly a single subtree, but several \fIview\fR directives can be given
-with the same view name, to build up a more complex collection of OIDs.
+with the same view name (VNAME), to build up a more complex collection of OIDs.
 TYPE is either \fIincluded\fR or \fIexcluded\fR, which can again define
 a more complex view (e.g by excluding certain sensitive objects
 from an otherwise accessible subtree).
 .IP
-MASK is a list of hex octets (separated by '.' or ':') with the set bits
-indicating which subidentifiers in the view OID to match against.  This
-can be used to define a view covering a particular row (or rows) in a
-table.  If not specified, this defaults to matching the OID exactly
-(all bits set), thus defining a simple OID subtree.
+MASK is a list of hex octets (optionally separated by '.' or ':') with
+the set bits indicating which subidentifiers in the view OID to match
+against.  If not specified, this defaults to matching the OID exactly
+(all bits set), thus defining a simple OID subtree.  So:
+.RS
+.RS
+view iso1 included .iso  0xf0
+.br
+view iso2 included .iso
+.br
+view iso3 included .iso.org.dod.mgmt  0xf0
+.RE
+.RE
+.IP
+would all define the same view, covering the whole of the 'iso(1)' subtree
+(with the third example ignoring the subidentifiers not covered by the mask).
+.IP
+More usefully, the mask can be used to define a view covering a particular
+row (or rows) in a table, by matching against the appropriate table index
+value, but skipping the column subidentifier:
+.RS
+.RS
+.IP "view ifRow4 included .1.3.6.1.2.1.2.2.1.0.4  0xff:a0"
+.RE
+.RE
+.IP
+Note that a mask longer than 8 bits must use ':' to separate the individual
+octets.
 .IP "access GROUP CONTEXT {any|v1|v2c|usm} LEVEL PREFX READ WRITE NOTIFY"
 maps from a group of users/communities (with a particular security model
 and minimum security level, and in a specific context) to one of three views,
