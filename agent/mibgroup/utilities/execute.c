@@ -61,7 +61,7 @@ run_shell_command( char *command, char *input,
     if (input) {
         FILE       *file;
 
-        ifname = make_tempfile();
+        ifname = netsnmp_mktemp();
         if(NULL == ifname)
             return -1;
         file = fopen(ifname, "w");
@@ -74,7 +74,7 @@ run_shell_command( char *command, char *input,
         fclose( file );
 
         if (output) {
-            ofname = make_tempfile();
+            ofname = netsnmp_mktemp();
             if(NULL == ofname) {
                 if(ifname)
                     unlink(ifname);
@@ -90,7 +90,7 @@ run_shell_command( char *command, char *input,
     } else {
         ifname = NULL;   /* Just to shut the compiler up! */
         if (output) {
-            ofname = make_tempfile();
+            ofname = netsnmp_mktemp();
             if(NULL == ofname)
                 return -1;
             snprintf( shellline, sizeof(shellline), "(%s) > \"%s\"",
