@@ -196,7 +196,7 @@ netsnmp_tcp_accept(netsnmp_transport *t)
         DEBUGMSGTL(("netsnmp_tcp", "accept: malloc failed\n"));
         return -1;
     }
-    farend = (struct sockaddr_in *) &(addr_pair->remote_addr);
+    farend = (struct sockaddr *) &(addr_pair->remote_addr);
 
     if (t != NULL && t->sock >= 0) {
         newsock = accept(t->sock, farend, &farendlen);

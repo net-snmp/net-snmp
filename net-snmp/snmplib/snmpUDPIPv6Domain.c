@@ -287,7 +287,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
             netsnmp_transport_free(t);
             return NULL;
         }
-        t->local = malloc(18);
+        t->local = (unsigned char*)malloc(18);
         if (t->local == NULL) {
             netsnmp_udp6_close(t);
             netsnmp_transport_free(t);
@@ -313,7 +313,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
         }
         memcpy(t->data, addr, sizeof(struct sockaddr_in6));
         t->data_length = sizeof(struct sockaddr_in6);
-        t->remote = malloc(18);
+        t->remote = (unsigned char*)malloc(18);
         if (t->remote == NULL) {
             netsnmp_udp6_close(t);
             netsnmp_transport_free(t);
@@ -1363,7 +1363,7 @@ netsnmp_udp6_ctor(void)
     udp6Domain.name_length = sizeof(netsnmp_UDPIPv6Domain) / sizeof(oid);
     udp6Domain.f_create_from_tstring_new = netsnmp_udp6_create_tstring;
     udp6Domain.f_create_from_ostring = netsnmp_udp6_create_ostring;
-    udp6Domain.prefix = calloc(5, sizeof(char *));
+    udp6Domain.prefix = (const char**)calloc(5, sizeof(char *));
     udp6Domain.prefix[0] = "udp6";
     udp6Domain.prefix[1] = "ipv6";
     udp6Domain.prefix[2] = "udpv6";

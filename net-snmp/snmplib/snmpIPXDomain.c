@@ -76,7 +76,8 @@ static int
 netsnmp_ipx_recv(netsnmp_transport *t, void *buf, int size,
 		 void **opaque, int *olength)
 {
-    int rc = -1, fromlen = sizeof(struct sockaddr);
+    int		     rc = -1;
+    socklen_t	     fromlen = sizeof(struct sockaddr);
     struct sockaddr *from;
 
     if (t != NULL && t->sock >= 0) {
@@ -203,7 +204,7 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
     }
 
     if (local) {
-        t->local = malloc(12);
+        t->local = (unsigned char*)malloc(12);
         if (t->local == NULL) {
             netsnmp_transport_free(t);
             return NULL;
@@ -229,7 +230,7 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
         t->data = NULL;
         t->data_length = 0;
     } else {
-        t->remote = malloc(12);
+        t->remote = (unsigned char*)malloc(12);
         if (t->remote == NULL) {
             netsnmp_transport_free(t);
             return NULL;
@@ -442,7 +443,7 @@ netsnmp_ipx_ctor(void)
 {
     ipxDomain.name = netsnmpIPXDomain;
     ipxDomain.name_length = netsnmpIPXDomain_len;
-    ipxDomain.prefix = calloc(2, sizeof(char *));
+    ipxDomain.prefix = (const char**)calloc(2, sizeof(char *));
     ipxDomain.prefix[0] = "ipx";
 
     ipxDomain.f_create_from_tstring_new = netsnmp_ipx_create_tstring;
