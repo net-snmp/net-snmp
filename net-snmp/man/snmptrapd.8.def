@@ -90,9 +90,6 @@ when snmptrapd starts up.  If the comma-separated
 .I INITLIST
 is preceded
 with a '-', it is the list of modules that should \fInot\fR be started.
-.I not
-want to be started.  Otherwise,
-.I INITLIST
 Otherwise this is the list of the \fIonly\fR modules that should be started.
 
 To get a list of compiled modules, run snmptrapd with the arguments
