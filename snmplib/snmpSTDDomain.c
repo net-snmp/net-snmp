@@ -42,8 +42,8 @@ netsnmp_std_fmtaddr(netsnmp_transport *t, void *data, int len)
     char *buf;
     DEBUGMSGTL(("domain:std","formatting addr.  data=%x\n",t->data));
     if (t->data) {
-        netsnmp_std_data *data = t->data;
-        buf = malloc(SNMP_MAXBUF_MEDIUM);
+        netsnmp_std_data *data = (netsnmp_std_data*)t->data;
+        buf = (char*)malloc(SNMP_MAXBUF_MEDIUM);
         if (!buf)
             return strdup("STDInOut");
         snprintf(buf, SNMP_MAXBUF_MEDIUM, "STD:%s", data->prog);
@@ -97,7 +97,7 @@ netsnmp_std_send(netsnmp_transport *t, void *buf, int size,
     DEBUGMSGTL(("domain:std","send on sock.  data=%x\n", t->data));
     while (rc < 0) {
         if (t->data) {
-            netsnmp_std_data *data = t->data;
+            netsnmp_std_data *data = (netsnmp_std_data*)t->data;
             rc = write(data->outfd, buf, size);
         } else {
             /* straight to stdout */
@@ -115,7 +115,7 @@ netsnmp_std_close(netsnmp_transport *t)
 {
     DEBUGMSGTL(("domain:std","close.  data=%x\n", t->data));
     if (t->data) {
-        netsnmp_std_data *data = t->data;
+        netsnmp_std_data *data = (netsnmp_std_data*)t->data;
         close(data->outfd);
         close(t->sock);
 
@@ -217,7 +217,7 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
                 return NULL;
             }
             t->data = data;
-            t->data_length = sizeof(netsnmp_transport_free);
+            t->data_length = sizeof(netsnmp_std_data);
             t->sock = outfd[0];
             data->prog = strdup(instring);
             data->outfd = infd[1];
@@ -266,7 +266,7 @@ netsnmp_std_create_tstring(const char *instring, int local,
 netsnmp_transport *
 netsnmp_std_create_ostring(const u_char * o, size_t o_len, int local)
 {
-    return netsnmp_std_transport(o, o_len, NULL);
+    return netsnmp_std_transport((const char*)o, o_len, NULL);
 }
 
 void
@@ -274,7 +274,7 @@ netsnmp_std_ctor(void)
 {
     stdDomain.name = netsnmp_snmpSTDDomain;
     stdDomain.name_length = sizeof(netsnmp_snmpSTDDomain) / sizeof(oid);
-    stdDomain.prefix = calloc(2, sizeof(char *));
+    stdDomain.prefix = (const char **)calloc(2, sizeof(char *));
     stdDomain.prefix[0] = "std";
 
     stdDomain.f_create_from_tstring_new = netsnmp_std_create_tstring;

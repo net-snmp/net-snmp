@@ -116,7 +116,7 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 
 # define netsnmp_dstaddr(x) (&(((struct in_pktinfo *)(CMSG_DATA(x)))->ipi_addr))
 
-static int netsnmp_udp_recvfrom(int s, char *buf, int len, struct sockaddr *from, socklen_t *fromlen, struct in_addr *dstip)
+static int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, socklen_t *fromlen, struct in_addr *dstip)
 {
     int r;
     struct iovec iov[1];
@@ -153,32 +153,30 @@ static int netsnmp_udp_recvfrom(int s, char *buf, int len, struct sockaddr *from
 }
 
 static int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
-			char *data, int len)
+			void *data, int len)
 {
     struct iovec iov = { data, len };
     struct {
         struct cmsghdr cm;
         struct in_pktinfo ipi;
-    } cmsg = {
-        .cm = {
-            .cmsg_len	= sizeof(struct cmsghdr) + sizeof(struct in_pktinfo),
-            .cmsg_level	= SOL_IP,
-            .cmsg_type	= IP_PKTINFO,
-        },
-        .ipi = {
-            .ipi_ifindex	= 0,
-            .ipi_spec_dst	= srcip ? srcip->s_addr : 0,
-        },
-    };
-    struct msghdr m = {
-        .msg_name	= remote,
-        .msg_namelen	= sizeof(struct sockaddr_in),
-        .msg_iov	= &iov,
-        .msg_iovlen	= 1,
-        .msg_control	= &cmsg,
-        .msg_controllen	= sizeof(cmsg),
-        .msg_flags	= 0,
-    };
+    } cmsg;
+
+    cmsg.cm.cmsg_len = sizeof(struct cmsghdr) + sizeof(struct in_pktinfo);
+    cmsg.cm.cmsg_level = SOL_IP;
+    cmsg.cm.cmsg_type = IP_PKTINFO;
+    cmsg.ipi.ipi_ifindex = 0;
+    cmsg.ipi.ipi_spec_dst.s_addr = (srcip ? srcip->s_addr : INADDR_ANY);
+
+    struct msghdr m;
+
+    m.msg_name		= remote;
+    m.msg_namelen	= sizeof(struct sockaddr_in);
+    m.msg_iov		= &iov;
+    m.msg_iovlen	= 1;
+    m.msg_control	= &cmsg;
+    m.msg_controllen	= sizeof(cmsg);
+    m.msg_flags		= 0;
+
     return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
 }
 #endif /* linux && IP_PKTINFO */
