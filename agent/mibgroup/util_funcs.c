@@ -117,6 +117,7 @@ Exit(int var)
     exit(var);
 }
 
+/** deprecated, use netsnmp_mktemp instead */
 const char *
 make_tempfile(void)
 {
