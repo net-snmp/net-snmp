@@ -322,7 +322,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
 #endif
 
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
-        t->local = malloc(18);
+        t->local = (unsigned char*)malloc(18);
         if (t->local == NULL) {
             netsnmp_tcp6_close(t);
             netsnmp_transport_free(t);
@@ -379,7 +379,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
          */
 
     } else {
-        t->remote = malloc(18);
+        t->remote = (unsigned char*)malloc(18);
         if (t->remote == NULL) {
             netsnmp_tcp6_close(t);
             netsnmp_transport_free(t);
@@ -484,7 +484,7 @@ netsnmp_tcp6_ctor(void)
     tcp6Domain.name_length = sizeof(netsnmp_TCPIPv6Domain) / sizeof(oid);
     tcp6Domain.f_create_from_tstring_new = netsnmp_tcp6_create_tstring;
     tcp6Domain.f_create_from_ostring = netsnmp_tcp6_create_ostring;
-    tcp6Domain.prefix = calloc(4, sizeof(char *));
+    tcp6Domain.prefix = (const char**)calloc(4, sizeof(char *));
     tcp6Domain.prefix[0] = "tcp6";
     tcp6Domain.prefix[1] = "tcpv6";
     tcp6Domain.prefix[2] = "tcpipv6";

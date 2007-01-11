@@ -216,7 +216,7 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
     }
 
     if (local) {
-        t->local = malloc(8);
+        t->local = (unsigned char*)malloc(8);
         if (t->local == NULL) {
             netsnmp_transport_free(t);
             return NULL;
@@ -240,7 +240,7 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
             return NULL;
         }
     } else {
-        t->remote = malloc(8);
+        t->remote = (unsigned char*)malloc(8);
         if (t->remote == NULL) {
             netsnmp_transport_free(t);
             return NULL;
@@ -346,7 +346,7 @@ netsnmp_aal5pvc_ctor(void)
 {
     aal5pvcDomain.name = netsnmp_AAL5PVCDomain;
     aal5pvcDomain.name_length = sizeof(netsnmp_AAL5PVCDomain) / sizeof(oid);
-    aal5pvcDomain.prefix = calloc(3, sizeof(char *));
+    aal5pvcDomain.prefix = (const char**)calloc(3, sizeof(char *));
     aal5pvcDomain.prefix[0] = "aal5pvc";
     aal5pvcDomain.prefix[1] = "pvc";
 
