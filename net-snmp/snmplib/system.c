@@ -144,6 +144,7 @@ SOFTWARE.
 #include <net-snmp/library/system.h>    /* for "internal" definitions */
 
 #include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/read_config.h> /* for get_temp_file_pattern() */
 
 #ifndef IFF_LOOPBACK
 #	define IFF_LOOPBACK 0
@@ -1077,6 +1078,46 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     return SNMPERR_SUCCESS;
 }
 
+/**
+ * netsnmp_mktemp creates a temporary file based on the
+ *                 configured tempFilePattern
+ *
+ * @return file descriptor
+ */
+const char     *
+netsnmp_mktemp(void)
+{
+    static char     name[32];
+    int             fd = -1;
+
+    strcpy(name, get_temp_file_pattern());
+#ifdef HAVE_MKSTEMP
+    fd = mkstemp(name);
+#else
+    if (mktemp(name)) {
+# ifndef WIN32
+        fd = open(name, O_CREAT | O_EXCL | O_WRONLY);
+# else
+        /*
+         * Win32 needs _S_IREAD | _S_IWRITE to set permissions on file
+         * after closing
+         */
+        fd = _open(name, _O_CREAT,
+                   _S_IREAD | _S_IWRITE | _O_EXCL | _O_WRONLY);
+# endif
+    }
+#endif
+    if (fd >= 0) {
+        close(fd);
+        DEBUGMSGTL(("netsnmp_mktemp", "temp file created: %s\n",
+                    name));
+        return name;
+    }
+    snmp_log(LOG_ERR, "netsnmp_mktemp: error creating file %s\n",
+             name);
+    return NULL;
+}
+
 /*
  * This function was created to differentiate actions
  * that are appropriate for Linux 2.4 kernels, but not later kernels.
@@ -1146,3 +1187,4 @@ netsnmp_os_kernel_width(void)
   return -1;
 #endif
 }
+
