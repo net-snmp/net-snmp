@@ -24,6 +24,9 @@
 #ifdef NETSNMP_TRANSPORT_TLS_DOMAIN
 #include <net-snmp/library/snmpTLSDomain.h>
 #endif
+#ifdef NETSNMP_TRANSPORT_STD_DOMAIN
+#include <net-snmp/library/snmpSTDDomain.h>
+#endif
 #ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
 #include <net-snmp/library/snmpTCPDomain.h>
 #endif

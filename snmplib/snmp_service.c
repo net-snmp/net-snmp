@@ -32,7 +32,7 @@ netsnmp_register_default_domain(const char* application, const char* domain)
 	  res = 1;
       }
     } else {
-	run = malloc(sizeof(struct netsnmp_lookup_domain));
+	run = SNMP_MALLOC_STRUCT(netsnmp_lookup_domain);
 	run->application = strdup(application);
 	run->userDomain = NULL;
 	if (prev) {
@@ -74,8 +74,8 @@ netsnmp_register_user_domain(const char* token, char* cptr)
 {
     struct netsnmp_lookup_domain *run = domains, *prev = NULL;
     size_t len = strlen(cptr) + 1;
-    char* application = malloc(len);
-    char* domain = malloc(len);
+    char* application = (char*)malloc(len);
+    char* domain = (char*)malloc(len);
 
     {
 	char* cp = copy_nword(cptr, application, len);
@@ -95,7 +95,7 @@ netsnmp_register_user_domain(const char* token, char* cptr)
 	    goto done;
 	}
     } else {
-	run = malloc(sizeof(struct netsnmp_lookup_domain));
+	run = SNMP_MALLOC_STRUCT(netsnmp_lookup_domain);
 	run->application = strdup(application);
 	run->domain = NULL;
 	if (prev) {
@@ -192,7 +192,7 @@ netsnmp_register_default_target(const char* application, const char* domain,
 	    res = 1;
       }
     } else {
-	run = malloc(sizeof(struct netsnmp_lookup_target));
+	run = SNMP_MALLOC_STRUCT(netsnmp_lookup_target);
 	run->application = strdup(application);
 	run->domain = strdup(domain);
 	run->userTarget = NULL;
@@ -237,9 +237,9 @@ netsnmp_register_user_target(const char* token, char* cptr)
 {
     struct netsnmp_lookup_target *run = targets, *prev = NULL;
     size_t len = strlen(cptr) + 1;
-    char* application = malloc(len);
-    char* domain = malloc(len);
-    char* target = malloc(len);
+    char* application = (char*)malloc(len);
+    char* domain = (char*)malloc(len);
+    char* target = (char*)malloc(len);
     int i;
 
     {
@@ -262,7 +262,7 @@ netsnmp_register_user_target(const char* token, char* cptr)
 	    goto done;
 	}
     } else {
-	run = malloc(sizeof(struct netsnmp_lookup_target));
+	run = SNMP_MALLOC_STRUCT(netsnmp_lookup_target);
 	run->application = strdup(application);
 	run->domain = strdup(domain);
 	run->target = NULL;
