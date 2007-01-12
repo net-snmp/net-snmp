@@ -790,7 +790,7 @@ Perl:
       PERLARGS="$withval"
     fi
   fi
-], install_perl="try")
+], install_perl="no")
 
 AC_ARG_ENABLE(embedded-perl,
 [  --enable-embedded-perl          Embed perl in the SNMP agent and snmptrapd.
