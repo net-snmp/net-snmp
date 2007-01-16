@@ -282,12 +282,12 @@ var_diskio(struct variable * vp,
         long_ret = (uint32_t) kio.nwritten;
         return (u_char *) & long_ret;
     case DISKIO_NREADX:
-        *var_len = 8;
+        *var_len = sizeof(struct counter64);
         c64_ret.low = kio.nread & 0xffffffff;;
         c64_ret.high = kio.nread >> 32;
         return (u_char *) & c64_ret;
     case DISKIO_NWRITTENX:
-        *var_len = 8;
+        *var_len = sizeof(struct counter64);
         c64_ret.low = kio.nwritten & 0xffffffff;;
         c64_ret.high = kio.nwritten >> 32;
         return (u_char *) & c64_ret;
@@ -608,7 +608,7 @@ var_diskio(struct variable * vp,
 #endif
         return (u_char *) & long_ret;
     case DISKIO_NREADX:
-        *var_len = 8;
+        *var_len = sizeof(struct counter64);
 #if defined(freebsd5) && __FreeBSD_version >= 500107
         longlong_ret = stat->dinfo->devices[indx].bytes[DEVSTAT_READ];
 #else
@@ -618,7 +618,7 @@ var_diskio(struct variable * vp,
         c64_ret.high = longlong_ret >> 32;
         return (u_char *) & c64_ret;
     case DISKIO_NWRITTENX:
-        *var_len = 8;
+        *var_len = sizeof(struct counter64);
 #if defined(freebsd5) && __FreeBSD_version >= 500107
         longlong_ret = stat->dinfo->devices[indx].bytes[DEVSTAT_WRITE];
 #else
@@ -823,12 +823,12 @@ var_diskio(struct variable * vp,
       long_ret = head.indices[indx].wio;
       return (u_char *) & long_ret;
     case DISKIO_NREADX:
-      *var_len = 8;
+      *var_len = sizeof(struct counter64);
       c64_ret.low = head.indices[indx].rsect * 512 & 0xffffffff;
       c64_ret.high = head.indices[indx].rsect >> (32 - 9);
       return (u_char *) & c64_ret;
     case DISKIO_NWRITTENX:
-      *var_len = 8;
+      *var_len = sizeof(struct counter64);
       c64_ret.low = head.indices[indx].wsect * 512 & 0xffffffff;
       c64_ret.high = head.indices[indx].wsect >> (32 - 9);
       return (u_char *) & c64_ret;
@@ -1149,12 +1149,12 @@ var_diskio(struct variable * vp,
         long_ret = (signed long) 0;	/* AIX has just one value for read/write transfers */
         return (u_char *) & long_ret;
     case DISKIO_NREADX:
-        *var_len = 8;
+        *var_len = sizeof(struct counter64);
         c64_ret.low = (ps_disk[indx].rblks * ps_disk[indx].bsize) & 0xffffffff;;
         c64_ret.high = (ps_disk[indx].rblks * ps_disk[indx].bsize) >> 32;
         return (u_char *) & c64_ret;
     case DISKIO_NWRITTENX:
-        *var_len = 8;
+        *var_len = sizeof(struct counter64);
         c64_ret.low = (ps_disk[indx].wblks * ps_disk[indx].bsize) & 0xffffffff;;
         c64_ret.high = (ps_disk[indx].wblks * ps_disk[indx].bsize) >> 32;
         return (u_char *) & c64_ret;
