@@ -223,6 +223,7 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg)
          */
 
         for (sptr = sess; sptr; sptr = sptr->next) {
+            send = 0;
 #ifndef NETSNMP_DISABLE_SNMPV1
             if (sptr->version == SNMP_VERSION_1 &&
                 minor == SNMPD_CALLBACK_SEND_TRAP1) {
