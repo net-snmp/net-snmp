@@ -876,6 +876,9 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
     if (sess->version == SNMP_VERSION_1 &&
         (template_pdu->command != SNMP_MSG_TRAP))
         return;                 /* Skip v1 sinks for v2 only traps */
+    if (sess->version != SNMP_VERSION_1 &&
+        (template_pdu->command == SNMP_MSG_TRAP))
+        return;                 /* Skip v2+ sinks for v1 only traps */
 #endif
     template_pdu->version = sess->version;
     pdu = snmp_clone_pdu(template_pdu);
