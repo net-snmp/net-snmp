@@ -42,6 +42,9 @@ char *syslog_format2 = NULL;
 char *print_format1  = NULL;
 char *print_format2  = NULL;
 
+int   SyslogTrap;
+int   dropauth;
+
 const char     *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n";
 const char     *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
 
@@ -562,7 +565,6 @@ int   syslog_handler(  netsnmp_pdu           *pdu,
     u_char         *rbuf = NULL;
     size_t          r_len = 64, o_len = 0;
     int             trunc = 0;
-    extern int      SyslogTrap;
 
     DEBUGMSGTL(( "snmptrapd", "syslog_handler\n"));
 
@@ -645,7 +647,6 @@ int   print_handler(   netsnmp_pdu           *pdu,
     u_char         *rbuf = NULL;
     size_t          r_len = 64, o_len = 0;
     int             trunc = 0;
-    extern int      dropauth;
 
     DEBUGMSGTL(( "snmptrapd", "print_handler\n"));
 
