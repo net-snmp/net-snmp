@@ -62,11 +62,6 @@ Try
 .IR ALL
 for extremely verbose output.
 .TP
-.B -e
-Print event numbers (rising/falling alarm etc.) from the (obsolete) M2M-MIB.
-.br
-This functionality is being deprecated and will be removed in due course.
-.TP
 .B -f
 Do not fork() from the calling shell.
 .TP

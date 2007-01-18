@@ -156,13 +156,6 @@ specifies various characteristics of how OIDs and other values
 should be displayed.
 See the section OUTPUT OPTIONS in the
 \fIsnmpcmd(1)\fR manual page for details.
-.IP "printEventNumbers yes"
-enables specialised logging of event-related notifications from
-the (long obsolete) M2M-MIB.
-.\"
-.\" XXX - CHECK EXACTLY WHICH TRAPS
-.\" XXX - THIS FEELS OBSOLETE TO ME!
-.\"
 .SH NOTIFICATION PROCESSING
 As well as logging incoming notifications, they can also
 be forwarded on to another notification receiver, or passed

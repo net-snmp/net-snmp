@@ -925,23 +925,6 @@ int   command_handler( netsnmp_pdu           *pdu,
 
 
 /*
- *  Trap handler for doing something with "event" traps
- *      (not entirely clear what this is about ???)
- */
-	/* XXX - in snmptrapd.c */
-void event_input(netsnmp_variable_list * vp);
-
-int   event_handler( netsnmp_pdu           *pdu,
-                     netsnmp_transport     *transport,
-                     netsnmp_trapd_handler *handler)
-{
-    DEBUGMSGTL(( "snmptrapd", "event_handler\n"));
-    event_input(pdu->variables);
-    return NETSNMPTRAPD_HANDLER_OK;
-}
-
-
-/*
  *  Trap handler for forwarding to the AgentX master agent
  */
 int axforward_handler( netsnmp_pdu           *pdu,

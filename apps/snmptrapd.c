@@ -138,7 +138,6 @@ typedef long    fd_mask;
 
 char           *logfile = 0;
 int             SyslogTrap = 0;
-int             Event = 0;
 int             dropauth = 0;
 int             reconfig = 0;
 char            ddefault_port[] = "udp:162";	/* Default default port */
@@ -202,7 +201,7 @@ int Facility = LOG_DAEMON;
 #define SNMPTRAPD_RUNNING 1
 #define SNMPTRAPD_STOPPED 0
 int             trapd_status = SNMPTRAPD_STOPPED;
-/* app_name_long used for Event Log (syslog), SCM, registry etc */
+/* app_name_long used for SCM, registry etc */
 LPTSTR          app_name_long = _T("Net-SNMP Trap Handler");     /* Application Name */
 #endif
 
@@ -228,72 +227,6 @@ int             main(int, char **);
 extern void            subagent_init(void);
 #endif
 
-void
-event_input(netsnmp_variable_list * vp)
-{
-    int             eventid = 0;
-    oid             variable[MAX_OID_LEN];
-    int             variablelen = 0;
-    u_long          destip = 0;
-    int             sampletype = 0;
-    int             value = 0;
-    int             threshold = 0;
-    int             i;
-    int             nvars = 0;
-
-    netsnmp_variable_list	*vp2 = vp;
-    
-    oid            *op = NULL;
-
-    /* Make sure there are 5 variables.  Otherwise, don't bother */
-    for (i=1; i <= 5; i++) {
-      vp2 = vp2->next_variable;
-      if (!vp2) {
-	nvars = -1;
-	break;
-      }
-    }
-    
-    if (nvars != -1)
-    {
-      vp = vp->next_variable;     /* skip sysUptime */
-      if (vp->val_len != sizeof(risingAlarm) ||
-	  !memcmp(vp->val.objid, risingAlarm, sizeof(risingAlarm)))
-	eventid = 1;
-      else if (vp->val_len != sizeof(risingAlarm) ||
-	  !memcmp(vp->val.objid, fallingAlarm, sizeof(fallingAlarm)))
-	eventid = 2;
-      else if (vp->val_len != sizeof(risingAlarm) ||
-	  !memcmp(vp->val.objid, unavailableAlarm, sizeof(unavailableAlarm)))
-	eventid = 3;
-      else {
-	fprintf(stderr, "unknown event\n");
-	eventid = 0;
-      }
-      
-      vp = vp->next_variable;
-      memmove(variable, vp->val.objid, vp->val_len * sizeof(oid));
-      variablelen = vp->val_len;
-      op = vp->name + 22;
-      destip = 0;
-      destip |= (*op++) << 24;
-      destip |= (*op++) << 16;
-      destip |= (*op++) << 8;
-      destip |= *op++;
-      
-      vp = vp->next_variable;
-      sampletype = *vp->val.integer;
-      
-      vp = vp->next_variable;
-      value = *vp->val.integer;
-      
-      vp = vp->next_variable;
-      threshold = *vp->val.integer;
-    }
-    printf("%d: 0x%02lX %d %d %d\n", eventid, destip, sampletype, value,
-	threshold);
-}
-
 
 void
 usage(void)
@@ -315,8 +248,6 @@ usage(void)
             "  -C\t\t\tdo not read the default configuration files\n");
     fprintf(stderr, "  -d\t\t\tdump sent and received SNMP packets\n");
     fprintf(stderr, "  -D\t\t\tturn on debugging output\n");
-    fprintf(stderr,
-            "  -e\t\t\tprint event # (rising/falling alarm, etc.)\n");
     fprintf(stderr, "  -f\t\t\tdo not fork from the shell\n");
     fprintf(stderr,
             "  -F FORMAT\t\tuse specified format for logging to standard error\n");
@@ -608,13 +539,6 @@ parse_config_doNotFork(const char *token, char *cptr)
 }
 
 void
-parse_config_printEventNumbers(const char *token, char *cptr)
-{
-  if (netsnmp_ds_parse_boolean(cptr) == 1)
-    Event++;
-}
-
-void
 parse_config_ignoreAuthFailure(const char *token, char *cptr)
 {
   if (netsnmp_ds_parse_boolean(cptr) == 1)
@@ -714,9 +638,6 @@ main(int argc, char *argv[])
     register_config_handler("snmptrapd", "doNotFork",
                             parse_config_doNotFork, NULL, "(1|yes|true|0|no|false)");
 
-    register_config_handler("snmptrapd", "printEventNumbers",
-                            parse_config_printEventNumbers, NULL, "(1|yes|true|0|no|false)");
-
     register_config_handler("snmptrapd", "ignoreAuthFailure",
                             parse_config_ignoreAuthFailure, NULL, "(1|yes|true|0|no|false)");
 
@@ -792,10 +713,6 @@ main(int argc, char *argv[])
         case 'D':
             debug_register_tokens(optarg);
             snmp_set_do_debugging(1);
-            break;
-
-        case 'e':
-            Event++;
             break;
 
         case 'f':
@@ -1075,24 +992,6 @@ main(int argc, char *argv[])
         traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER,
                                                print_handler);
         traph->authtypes = TRAP_AUTH_LOG;
-    }
-
-    if (Event) {
-        traph = netsnmp_add_traphandler(event_handler, risingAlarm,
-                                        OID_LENGTH(risingAlarm));
-        traph->authtypes = TRAP_AUTH_LOG;
-
-        traph = netsnmp_add_traphandler(event_handler, fallingAlarm,
-                                        OID_LENGTH(fallingAlarm));
-        traph->authtypes = TRAP_AUTH_LOG;
-
-        traph = netsnmp_add_traphandler(event_handler, unavailableAlarm,
-                                        OID_LENGTH(unavailableAlarm));
-        traph->authtypes = TRAP_AUTH_LOG;
-	/* XXX - might be worth setting some "magic data"
-	 * in the traphandler structure that 'event_handler'
-	 * can use to avoid checking the trap OID values.
-	 */
     }
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
