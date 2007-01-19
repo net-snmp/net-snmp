@@ -473,9 +473,11 @@ var_hrfilesys(struct variable *vp,
 #elif defined(cygwin)
         long_return = 1;
 #else
+#if HAVE_HASMNTOPT
         if (hasmntopt(HRFS_entry, "ro") != NULL)
             long_return = 2;    /* Read Only */
         else
+#endif
             long_return = 1;    /* Read-Write */
 #endif
         return (u_char *) & long_return;
