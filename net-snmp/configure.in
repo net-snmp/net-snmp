@@ -3230,7 +3230,7 @@ AC_CHECK_HEADERS(ufs/ufs/dinode.h ufs/ufs/quota.h ufs/ufs/inode.h ufs/ffs/fs.h,,
 #endif
 ]])
 # FreeBSD required headers
-AC_CHECK_HEADERS(malloc.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h sys/queue.h osreldate.h machine/types.h sys/user.h sys/proc.h sys/mbuf.h sys/mount.h,,,
+AC_CHECK_HEADERS(malloc.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h sys/queue.h osreldate.h machine/types.h sys/user.h sys/proc.h sys/mbuf.h sys/mount.h sys/dkstat.h,,,
 [[
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
