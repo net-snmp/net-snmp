@@ -519,9 +519,11 @@ var_hrfilesys(struct variable *vp,
 #elif defined(aix4) || defined(aix5)
         long_return = (HRFS_entry->HRFS_flags & MNT_READONLY) == 0 ? 1 : 2;
 #else
+#if HAVE_HASMNTOPT
         if (hasmntopt(HRFS_entry, "ro") != NULL)
             long_return = 2;    /* Read Only */
         else
+#endif
             long_return = 1;    /* Read-Write */
 #endif
         return (u_char *) & long_return;
