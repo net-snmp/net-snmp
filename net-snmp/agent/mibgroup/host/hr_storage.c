@@ -558,8 +558,10 @@ really_try_next:
         if (store_idx > NETSNMP_MEM_TYPE_MAX)
             if (storageUseNFS && Check_HR_FileSys_NFS())
                 storage_type_id[storage_type_len - 1] = 10;     /* Network Disk */
+#if HAVE_HASMNTOPT
             else if (hasmntopt(HRFS_entry, "loop") != NULL)
                 storage_type_id[storage_type_len - 1] = 5;      /* Removable Disk */
+#endif
             else
                 storage_type_id[storage_type_len - 1] = 4;      /* Assume fixed */
         else
