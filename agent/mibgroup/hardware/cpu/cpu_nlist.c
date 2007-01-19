@@ -10,10 +10,17 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
-
 #include <sys/resource.h>
+
+#ifdef HAVE_SYS_DKSTAT_H
+#include <sys/dkstat.h>
+#endif
+#ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
+#endif
+#ifdef HAVE_SYS_VMMETER_H
 #include <sys/vmmeter.h>
+#endif
 #ifdef HAVE_VM_VM_PARAM_H
 #include <vm/vm_param.h>
 #endif
