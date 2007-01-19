@@ -23,11 +23,11 @@
 #include <sys/types.h>
 
 #ifdef HAVE_LINUX_ETHTOOL_H
-#include <sys/types.h>
-typedef unsigned long long u64;         /* hack, so we may include kernel's ethtool.h */
-typedef __uint32_t u32;         /* ditto */
-typedef __uint16_t u16;         /* ditto */
-typedef __uint8_t u8;           /* ditto */
+#include <linux/types.h>
+typedef __u64 u64;         /* hack, so we may include kernel's ethtool.h */
+typedef __u32 u32;         /* ditto */
+typedef __u16 u16;         /* ditto */
+typedef __u8 u8;           /* ditto */
 #include <linux/ethtool.h>
 #endif /* HAVE_LINUX_ETHTOOL_H */
 #include <linux/sockios.h>
