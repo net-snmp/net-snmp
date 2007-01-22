@@ -136,14 +136,6 @@ close_agentx_session(netsnmp_session * session, int sessid)
 
     DEBUGMSGTL(("agentx/master", "close %08p, %d\n", session, sessid));
     if (sessid == -1) {
-        unregister_mibs_by_session(session);
-        unregister_index_by_session(session);
-        snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
-                            SNMPD_CALLBACK_REQ_UNREG_SYSOR_SESS,
-                            (void*)session);
-	if (session->myvoid != NULL) {
-	  free(session->myvoid);
-	}
         /*
          * The following is necessary to avoid locking up the agent when
          * a sugagent dies during a set request. We must clean up the
@@ -158,6 +150,12 @@ close_agentx_session(netsnmp_session * session, int sessid)
             }
         }
                 
+        unregister_mibs_by_session(session);
+        unregister_index_by_session(session);
+        snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                            SNMPD_CALLBACK_REQ_UNREG_SYSOR_SESS,
+                            (void*)session);
+	SNMP_FREE(session->myvoid);
         return AGENTX_ERR_NOERROR;
     }
 
