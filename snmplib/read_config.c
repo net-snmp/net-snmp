@@ -967,7 +967,7 @@ get_persistent_directory()
 {
     if (NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				      NETSNMP_DS_LIB_PERSISTENT_DIR)) {
-        char *persdir = netsnmp_getenv("SNMP_PERSISTENT_DIR");
+        const char *persdir = netsnmp_getenv("SNMP_PERSISTENT_DIR");
         if (NULL == persdir)
             persdir = NETSNMP_PERSISTENT_DIRECTORY;
         set_persistent_directory(persdir);
