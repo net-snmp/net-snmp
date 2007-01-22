@@ -236,6 +236,12 @@ agentx_got_response(int operation,
             DEBUGMSGTL(("agentx/master", "timeout on session %08p\n",
                         session));
 
+            netsnmp_handler_mark_requests_as_delegated(requests,
+                                       REQUEST_IS_NOT_DELEGATED);
+            netsnmp_set_request_error(cache->reqinfo, requests,
+                                      /* XXXWWW: should be index=0 */
+                                      SNMP_ERR_GENERR);
+
             /*
              * This is a bit sledgehammer because the other sessions on this
              * transport may be okay (e.g. some thread in the subagent has
@@ -256,10 +262,6 @@ agentx_got_response(int operation,
             } else {
                 DEBUGMSGTL(("agentx/master", "NULL sess_pointer??\n"));
             }
-            netsnmp_handler_mark_requests_as_delegated(requests,
-                                                       REQUEST_IS_NOT_DELEGATED);
-            netsnmp_set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index=0 */
-                                      SNMP_ERR_GENERR);
             ax_session = (netsnmp_session *) cache->localinfo;
             netsnmp_free_agent_snmp_session_by_session(ax_session, NULL);
             netsnmp_free_delegated_cache(cache);
