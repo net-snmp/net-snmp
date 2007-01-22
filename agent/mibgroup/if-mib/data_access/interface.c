@@ -113,6 +113,7 @@ netsnmp_access_interface_container_init(u_int flags)
     container1 = netsnmp_container_find("access_interface:table_container");
     if (NULL == container1)
         return NULL;
+
     container1->container_name = strdup("interface container");
     if (flags & NETSNMP_ACCESS_INTERFACE_INIT_ADDL_IDX_BY_NAME) {
         netsnmp_container *container2 =
@@ -120,7 +121,7 @@ netsnmp_access_interface_container_init(u_int flags)
         if (NULL == container2)
             return NULL;
 
-        container1->container_name = strdup("interface name container");
+        container2->container_name = strdup("interface name container");
         container2->compare = _access_interface_entry_compare_name;
         
         netsnmp_container_add_index(container1, container2);
