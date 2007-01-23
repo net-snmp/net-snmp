@@ -2123,7 +2123,8 @@ _mfd_ipCidrRouteTable_irreversible_commit(netsnmp_mib_handler *handler, netsnmp_
      * and update column exist flags...
      */
     if (rowreq_ctx->rowreq_flags & MFD_ROW_DELETED) {
-        CONTAINER_REMOVE(ipCidrRouteTable_if_ctx.container, rowreq_ctx);
+        if (!(rowreq_ctx->rowreq_flags & MFD_ROW_CREATED))
+            CONTAINER_REMOVE(ipCidrRouteTable_if_ctx.container, rowreq_ctx);
     } else {
         if (rowreq_ctx->column_set_flags) {
             rowreq_ctx->column_set_flags = 0;
