@@ -1357,7 +1357,7 @@ snmpv3_engineID_probe(struct session_list *slp,
         if (create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
             in_session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;       /* XX?? */
             DEBUGMSGTL(("snmp_api",
-                        "snmp_sess_open(): failed(2) to create a new user from session\n"));
+                        "snmpv3_engine_probe(): failed(2) to create a new user from session\n"));
             return 0;
         }
     }
@@ -1431,13 +1431,14 @@ _sess_open(netsnmp_session * in_session)
 
     if (!snmpv3_engineID_probe(slp, in_session)) {
         snmp_sess_close(slp);
-        return 0;
+        return NULL;
     }
     if (create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
         in_session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;       /* XX?? */
         DEBUGMSGTL(("snmp_api",
                     "_sess_open(): failed(2) to create a new user from session\n"));
-        return 0;
+        snmp_sess_close(slp);
+        return NULL;
     }
     
     session->flags &= ~SNMP_FLAGS_DONT_PROBE;
@@ -1570,13 +1571,14 @@ snmp_sess_add_ex(netsnmp_session * in_session,
         if (!snmpv3_engineID_probe(slp, in_session)) {
             DEBUGMSGTL(("snmp_sess_add", "engine ID probe failed\n"));
             snmp_sess_close(slp);
-            slp = NULL;
+            return NULL;
         }
         if (create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
-            slp->session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;
+            in_session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;
             DEBUGMSGTL(("snmp_api",
-                        "_sess_open(): failed(2) to create a new user from session\n"));
-            return 0;
+                        "snmp_sess_add(): failed(2) to create a new user from session\n"));
+            snmp_sess_close(slp);
+            return NULL;
         }
     }
 
@@ -4725,7 +4727,7 @@ _sess_async_send(void *sessp,
     if (create_user_from_session(session) != SNMPERR_SUCCESS) {
         session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;  /* XX?? */
         DEBUGMSGTL(("snmp_api",
-                    "snmp_sess_open(): failed(2) to create a new user from session\n"));
+                    "snmp_send(): failed(2) to create a new user from session\n"));
         return 0;
     }
 
