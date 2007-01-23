@@ -730,15 +730,20 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
              * transport_data but never mind -- the alternative is a lot of
              * munging strings from f_fmtaddr.  
              */
-            struct sockaddr_in *addr =
-                (struct sockaddr_in *) pdu->transport_data;
+typedef struct netsnmp_udp_addr_pair_s {   /* From snmpUDPDomain.c */
+    struct sockaddr_in remote_addr;
+    struct in_addr local_addr;
+} netsnmp_udp_addr_pair;
+
+            netsnmp_udp_addr_pair *addr =
+                (netsnmp_udp_addr_pair *) pdu->transport_data;
             if (addr != NULL
                 && pdu->transport_data_length ==
-                sizeof(struct sockaddr_in)) {
+                sizeof(netsnmp_udp_addr_pair)) {
                 if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
                                             NETSNMP_DS_APP_NUMERIC_IP)) {
                     host =
-                        gethostbyaddr((char *) &(addr->sin_addr),
+                        gethostbyaddr((char *) &(addr->remote_addr.sin_addr),
                                       sizeof(struct in_addr), AF_INET);
                 }
                 if (host != NULL) {
@@ -753,7 +758,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                 } else {
                     if (!snmp_strcat
                         (&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                         (u_char *)inet_ntoa(addr->sin_addr))) {
+                         (u_char *)inet_ntoa(addr->remote_addr.sin_addr))) {
                         if (temp_buf != NULL) {
                             free(temp_buf);
                         }
