@@ -61,12 +61,14 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
          * check tag list to see if we match 
          */
         if (targaddrs->tagList) {
+            int matched = 0;
+
             /*
              * loop through tag list looking for requested tags 
              */
-            for (cp = targaddrs->tagList; cp;) {
+            for (cp = targaddrs->tagList; cp && !matched;) {
                 cp = copy_nword(cp, buf, sizeof(buf));
-                for (i = 0; i < numtags; i++) {
+                for (i = 0; i < numtags && !matched; i++) {
                     if (strcmp(buf, tags[i]) == 0) {
                         /*
                          * found a valid target table entry 
@@ -99,6 +101,12 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                               filterArg)) {
                             continue;
                         }
+
+                        /*
+                         * Only one notification per TargetAddrEntry,
+                         * rather than one per tag
+                         */
+                        matched = 1;
 
                         if (targaddrs->storageType != ST_READONLY &&
                             targaddrs->sess &&
@@ -196,9 +204,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                 targaddrs->sess->paramName =
                                     strdup(param->paramName);
 
-                            if (ret) {
-                                targaddrs->sess->next = ret;
-                            }
+                            targaddrs->sess->next = ret;
                             ret = targaddrs->sess;
                         } else {
                             snmp_sess_perror("target session", &thissess);
