@@ -1795,7 +1795,8 @@ _mfd_inetNetToMediaTable_irreversible_commit(netsnmp_mib_handler *handler, netsn
      * and update column exist flags...
      */
     if (rowreq_ctx->rowreq_flags & MFD_ROW_DELETED) {
-        CONTAINER_REMOVE(inetNetToMediaTable_if_ctx.container, rowreq_ctx);
+        if (!(rowreq_ctx->rowreq_flags & MFD_ROW_CREATED))
+            CONTAINER_REMOVE(inetNetToMediaTable_if_ctx.container, rowreq_ctx);
     } else {
         if (rowreq_ctx->column_set_flags) {
             rowreq_ctx->column_set_flags = 0;
