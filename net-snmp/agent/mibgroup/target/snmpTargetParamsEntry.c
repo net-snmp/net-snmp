@@ -579,7 +579,7 @@ store_snmpTargetParamsEntry(int majorID, int minorID, void *serverarg,
                 &&
                 (curr_struct->rowStatus == SNMP_ROW_ACTIVE ||
                  curr_struct->rowStatus == SNMP_ROW_NOTINSERVICE)) {
-                snprintf(&line[strlen(line)], sizeof(line)-strlen(line)-1,
+                snprintf(line, sizeof(line),
                         "targetParams %s %i %i %s %i %i %i\n",
                         curr_struct->paramName, curr_struct->mpModel,
                         curr_struct->secModel, curr_struct->secName,
