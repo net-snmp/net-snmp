@@ -386,6 +386,23 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
     }
 
     /*
+     * Check the v2 varbind list for any varbinds
+     *  that are not valid in an SNMPv1 trap.
+     *  This basically means Counter64 values.
+     *
+     * RFC 2089 said to omit such varbinds from the list.
+     * RFC 2576/3584 say to drop the trap completely.
+     */
+    for (var = vblist->next_variable; var; var = var->next_variable) {
+        if ( var->type == ASN_COUNTER64 ) {
+            snmp_log(LOG_WARNING,
+                     "send_trap: v1 traps can't carry Counter64 varbinds\n");
+            snmp_free_pdu(template_v1pdu);
+            return NULL;
+        }
+    }
+
+    /*
      * Set the generic & specific trap types,
      *    and the enterprise field from the v2 varbind list.
      * If there's an agentIPAddress varbind, set the agent_addr too
