@@ -98,6 +98,9 @@ snmpTargetAddrTable_create(void)
 void
 snmpTargetAddrTable_dispose(struct targetAddrTable_struct *reaped)
 {
+    if (reaped->sess != NULL) {
+        snmp_close(reaped->sess);
+    }
     SNMP_FREE(reaped->name);
     SNMP_FREE(reaped->tAddress);
     SNMP_FREE(reaped->tagList);
