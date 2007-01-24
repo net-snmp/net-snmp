@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #----------------------------------------------------------------------
 # $Id$
 # Author: Robert Story <rstory@freesnmp.com>
@@ -434,11 +434,11 @@ nsb-build()
         if [ "x$PWD" = "/" ]; then
            nsb-abort "Not running rm -fR from /"
         fi
-        nsb-info "rm -fR * .[a-zA-Z]* 2>&1 > /dev/null"
-        rm -fR * .[a-zA-Z]* 2>&1 > /dev/null
+        nsb-info "rm -fR * .[a-zA-Z]* > /dev/null 2>&1"
+        rm -fR * .[a-zA-Z]* > /dev/null 2>&1
       else
-        nsb-info "rm -fR nsb-* $dest_dir 2>&1 > /dev/null"
-        rm -fR nsb-* $dest_dir 2>&1 > /dev/null
+        nsb-info "rm -fR nsb-* $dest_dir > /dev/null 2>&1"
+        rm -fR nsb-* $dest_dir > /dev/null 2>&1
         if [ -f Makefile ]; then
             nsb-make NOAUTODEPS=y distclean
             nsb_build_rc=$?
