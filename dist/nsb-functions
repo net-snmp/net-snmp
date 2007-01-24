@@ -7,7 +7,7 @@
 #
 # source user config
 if [ -f $HOME/.snmp/nsb-rc ]; then
-   source $HOME/.snmp/nsb-rc
+   . $HOME/.snmp/nsb-rc
 fi
 
 
