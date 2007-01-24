@@ -87,6 +87,7 @@ static char *
 netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
     netsnmp_udp_addr_pair *addr_pair = NULL;
+    struct hostent *host;
 
     if (data != NULL && len == sizeof(netsnmp_udp_addr_pair)) {
 	addr_pair = (netsnmp_udp_addr_pair *) data;
@@ -104,6 +105,10 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
             return strdup("UDP: unknown");
         }
 
+        if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
+            host = gethostbyaddr((char *)to, 4, AF_INET);
+            return (host ? strdup(host->h_name) : NULL); 
+        }
         sprintf(tmp, "UDP: [%s]:%hu",
                 inet_ntoa(to->sin_addr), ntohs(to->sin_port));
         return strdup(tmp);
