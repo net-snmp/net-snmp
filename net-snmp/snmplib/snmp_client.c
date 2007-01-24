@@ -1162,14 +1162,17 @@ snmp_errstring(int errstat)
  *  over the specified SNMP session.
  *
  */
+#include <net-snmp/library/snmp_debug.h>
 static netsnmp_session *_def_query_session = NULL;
 void
 netsnmp_query_set_default_session( netsnmp_session *sess) {
+    DEBUGMSGTL(("iquery", "set default session %x\n", sess));
     _def_query_session = sess;
 }
 
 netsnmp_session *
 netsnmp_query_get_default_session( void ) {
+    DEBUGMSGTL(("iquery", "get default session %x\n", _def_query_session));
     return _def_query_session;
 }
 
