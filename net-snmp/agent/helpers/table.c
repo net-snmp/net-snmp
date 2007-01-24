@@ -112,6 +112,15 @@ netsnmp_register_table(netsnmp_handler_registration *reginfo,
     return netsnmp_register_handler(reginfo);
 }
 
+int
+netsnmp_unregister_table(netsnmp_handler_registration *reginfo)
+{
+    // Locate "this" reginfo
+    //SNMP_FREE(reginfo->myvoid);
+    //reginfo->myvoid = NULL;
+    return netsnmp_unregister_handler(reginfo);
+}
+
 /** Extracts the processed table information from a given request.
  *  Call this from subhandlers on a request to extract the processed
  *  netsnmp_request_info information.  The resulting information includes the

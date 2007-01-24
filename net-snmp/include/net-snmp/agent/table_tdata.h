@@ -83,9 +83,10 @@ typedef  struct netsnmp_tdata_s     netsnmp_table_data2;
 
     netsnmp_mib_handler *netsnmp_get_tdata_handler(netsnmp_tdata *table);
 
-    int netsnmp_tdata_register(netsnmp_handler_registration *reginfo,
-                               netsnmp_tdata                *table,
-                               netsnmp_table_registration_info *table_info);
+    int netsnmp_tdata_register(  netsnmp_handler_registration    *reginfo,
+                                 netsnmp_tdata                   *table,
+                                 netsnmp_table_registration_info *table_info);
+    int netsnmp_tdata_unregister(netsnmp_handler_registration    *reginfo);
 
     netsnmp_tdata      *netsnmp_tdata_extract_table(    netsnmp_request_info *);
     netsnmp_container  *netsnmp_tdata_extract_container(netsnmp_request_info *);

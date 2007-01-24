@@ -357,6 +357,13 @@ netsnmp_tdata_register(netsnmp_handler_registration    *reginfo,
                   table->container, TABLE_CONTAINER_KEY_NETSNMP_INDEX);
 }
 
+int
+netsnmp_tdata_unregister(netsnmp_handler_registration    *reginfo)
+{
+    // free table;
+    return netsnmp_container_table_unregister(reginfo);
+}
+
 /** extracts the tdata table from the request structure */
 netsnmp_tdata *
 netsnmp_tdata_extract_table(netsnmp_request_info *request)
