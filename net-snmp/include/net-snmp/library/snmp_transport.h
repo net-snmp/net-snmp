@@ -19,6 +19,7 @@ extern          "C" {
 #define		NETSNMP_TRANSPORT_FLAG_STREAM	0x01
 #define		NETSNMP_TRANSPORT_FLAG_LISTEN	0x02
 #define		NETSNMP_TRANSPORT_FLAG_TUNNELED	0x04
+#define		NETSNMP_TRANSPORT_FLAG_HOSTNAME	0x80  /* for fmtaddr hook */
 
 /*  The standard SNMP domains.  */
 
