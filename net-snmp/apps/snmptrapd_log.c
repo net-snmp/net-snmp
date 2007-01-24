@@ -626,6 +626,8 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     char            fmt_cmd = options->cmd;     /* what we're formatting */
     u_char         *temp_buf = NULL;
     size_t          temp_buf_len = 64, temp_out_len = 0;
+    char           *tstr;
+    unsigned int    oflags;
 
     if ((temp_buf = calloc(temp_buf_len, 1)) == NULL) {
         return 0;
@@ -681,130 +683,59 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
          * Write the numerical transport information.  
          */
         if (transport != NULL && transport->f_fmtaddr != NULL) {
-            char           *tstr =
-                transport->f_fmtaddr(transport, pdu->transport_data,
-                                     pdu->transport_data_length);
-            if (!snmp_strcat
-                (&temp_buf, &temp_buf_len, &temp_out_len, 1, (u_char *)tstr)) {
-                if (tstr != NULL) {
-                    free(tstr);
-                }
-                if (temp_buf != NULL) {
-                    free(temp_buf);
-                }
+            oflags = transport->flags;
+            transport->flags &= ~NETSNMP_TRANSPORT_FLAG_HOSTNAME;
+            tstr = transport->f_fmtaddr(transport, pdu->transport_data,
+                                        pdu->transport_data_length);
+            transport->flags = oflags;
+          
+            if (!tstr) goto noip;
+            if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len,
+                             1, (u_char *)tstr)) {
+                SNMP_FREE(temp_buf);
+                SNMP_FREE(tstr);
                 return 0;
             }
-            if (tstr != NULL) {
-                free(tstr);
-            }
+            SNMP_FREE(tstr);
         } else {
-            if (!snmp_strcat
-                (&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                 (const u_char*)"<UNKNOWN>")) {
-                if (temp_buf != NULL) {
-                    free(temp_buf);
-                }
+noip:
+            if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len, 1,
+                             (const u_char*)"<UNKNOWN>")) {
+                SNMP_FREE(temp_buf);
                 return 0;
             }
         }
         break;
 
-        /*
-         * Write a host name.  
-         */
     case CHR_PDU_NAME:
         /*
-         * Right, apparently a name lookup is wanted.  This is only reasonable
-         * for the UDP and TCP transport domains (we don't want to try to be
-         * too clever here).  
+         * Try to convert the numerical transport information
+         *  into a hostname.  Or rather, have the transport-specific
+         *  address formatting routine do this.
+         * Otherwise falls back to the numeric address format.
          */
-#ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
-        if (transport != NULL && (transport->domain == netsnmpUDPDomain ||
-                                  transport->domain ==
-                                  netsnmp_snmpTCPDomain)) {
-#else
-        if (transport != NULL && transport->domain == netsnmpUDPDomain) {
-#endif
-            /*
-             * This is kind of bletcherous -- it breaks the opacity of
-             * transport_data but never mind -- the alternative is a lot of
-             * munging strings from f_fmtaddr.  
-             */
-typedef struct netsnmp_udp_addr_pair_s {   /* From snmpUDPDomain.c */
-    struct sockaddr_in remote_addr;
-    struct in_addr local_addr;
-} netsnmp_udp_addr_pair;
-
-            netsnmp_udp_addr_pair *addr =
-                (netsnmp_udp_addr_pair *) pdu->transport_data;
-            if (addr != NULL
-                && pdu->transport_data_length ==
-                sizeof(netsnmp_udp_addr_pair)) {
-                if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-                                            NETSNMP_DS_APP_NUMERIC_IP)) {
-                    host =
-                        gethostbyaddr((char *) &(addr->remote_addr.sin_addr),
-                                      sizeof(struct in_addr), AF_INET);
-                }
-                if (host != NULL) {
-                    if (!snmp_strcat
-                        (&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                         (u_char *)host->h_name)) {
-                        if (temp_buf != NULL) {
-                            free(temp_buf);
-                        }
-                        return 0;
-                    }
-                } else {
-                    if (!snmp_strcat
-                        (&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                         (u_char *)inet_ntoa(addr->remote_addr.sin_addr))) {
-                        if (temp_buf != NULL) {
-                            free(temp_buf);
-                        }
-                        return 0;
-                    }
-                }
-            } else {
-                if (!snmp_strcat
-                    (&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                     (const u_char*)"<UNKNOWN>")) {
-                    if (temp_buf != NULL) {
-                        free(temp_buf);
-                    }
-                    return 0;
-                }
-            }
-        } else if (transport != NULL && transport->f_fmtaddr != NULL) {
-            /*
-             * Some other domain for which we do not know how to do a name
-             * lookup.  Fall back to the formatted transport address.  
-             */
-            char           *tstr =
-                transport->f_fmtaddr(transport, pdu->transport_data,
-                                     pdu->transport_data_length);
-            if (!snmp_strcat
-                (&temp_buf, &temp_buf_len, &temp_out_len, 1, (u_char *)tstr)) {
-                if (tstr != NULL) {
-                    free(tstr);
-                }
-                if (temp_buf != NULL) {
-                    free(temp_buf);
-                }
+        if (transport != NULL && transport->f_fmtaddr != NULL) {
+            oflags = transport->flags;
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+                                        NETSNMP_DS_APP_NUMERIC_IP))
+                transport->flags |= NETSNMP_TRANSPORT_FLAG_HOSTNAME;
+            tstr = transport->f_fmtaddr(transport, pdu->transport_data,
+                                        pdu->transport_data_length);
+            transport->flags = oflags;
+          
+            if (!tstr) goto nohost;
+            if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len,
+                             1, (u_char *)tstr)) {
+                SNMP_FREE(temp_buf);
+                SNMP_FREE(tstr);
                 return 0;
             }
-            if (tstr != NULL) {
-                free(tstr);
-            }
+            SNMP_FREE(tstr);
         } else {
-            /*
-             * We are kind of stuck!  
-             */
+nohost:
             if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len, 1,
                              (const u_char*)"<UNKNOWN>")) {
-                if (temp_buf != NULL) {
-                    free(temp_buf);
-                }
+                SNMP_FREE(temp_buf);
                 return 0;
             }
         }
