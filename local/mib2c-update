@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # $Id$
 #
@@ -39,7 +39,7 @@ debug()
 
 error()
 {
-    echo "ERROR: $@" > /dev/stderr
+    echo "ERROR: $@" >2
 }
 
 die()
