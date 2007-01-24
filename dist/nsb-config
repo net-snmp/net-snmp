@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # $Id$
 # Author: Robert Story <rstory@freesnmp.com>
@@ -21,7 +21,7 @@ usage()
 
 
 #
-# find nsb-platform based on te path to this script
+# find nsb-platform based on the path to this script
 #
 EXE_PATH=${0%nsb-config}
 EXE_PATH=${EXE_PATH%/}

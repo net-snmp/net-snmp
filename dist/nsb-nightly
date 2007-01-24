@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #
 # $Id$
 # Author: Robert Story <rstory@freesnmp.com>
