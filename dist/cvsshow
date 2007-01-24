@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 #
 # $Id$
 #
-export CVS_RSH=ssh
+CVS_RSH=ssh; export CVS_RSH
 TAG=
 
 if [ $# -eq 0 ]; then
