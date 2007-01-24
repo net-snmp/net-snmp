@@ -423,7 +423,7 @@ int disk_exists(char *path)
 {
   int index;
   for(index = 0; index < numdisks; index++) {
-    DEBUGMSGTL(("ucd-snmp/disk:", "Checking for %s. Found %s at %d ", path, disks[index].path, index));
+    DEBUGMSGTL(("ucd-snmp/disk", "Checking for %s. Found %s at %d\n", path, disks[index].path, index));
     if(strcmp(path, disks[index].path) == 0) {
       return index;
     }
