@@ -115,15 +115,12 @@ extern          "C" {
     netsnmp_mib_handler
         *netsnmp_get_table_handler(netsnmp_table_registration_info
                                    *tabreq);
-    int             netsnmp_register_table(netsnmp_handler_registration
-                                           *reginfo,
-                                           netsnmp_table_registration_info
-                                           *tabreq);
-    int             netsnmp_table_build_oid(netsnmp_handler_registration
-                                            *reginfo,
-                                            netsnmp_request_info *reqinfo,
-                                            netsnmp_table_request_info
-                                            *table_info);
+    int   netsnmp_register_table(  netsnmp_handler_registration    *reginfo,
+                                   netsnmp_table_registration_info *tabreq);
+    int   netsnmp_unregister_table(netsnmp_handler_registration    *reginfo);
+    int   netsnmp_table_build_oid( netsnmp_handler_registration    *reginfo,
+                                   netsnmp_request_info            *reqinfo,
+                                   netsnmp_table_request_info   *table_info);
     int            
         netsnmp_table_build_oid_from_index(netsnmp_handler_registration
                                            *reginfo,

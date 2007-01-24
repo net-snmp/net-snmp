@@ -410,6 +410,13 @@ netsnmp_register_read_only_table_data(netsnmp_handler_registration *reginfo,
     return netsnmp_register_table_data(reginfo, table, table_info);
 }
 
+int
+netsnmp_unregister_table_data(netsnmp_handler_registration *reginfo)
+{
+    // free table;
+    return netsnmp_unregister_table(reginfo);
+}
+
 /*
  * The helper handler that takes care of passing a specific row of
  * data down to the lower handler(s).  It sets request->processed if
