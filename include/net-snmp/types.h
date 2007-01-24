@@ -129,7 +129,7 @@ typedef unsigned INT64_T uint64_t;
 #ifndef HAVE_UINTPTR_T
 #if SIZEOF_LONG == 8
 /* likely 64bit machine with 64bit addressing? */
-    typedef long uintptr_t;
+    typedef unsigned long uintptr_t;
 #else
     typedef unsigned uintptr_t;
 #endif
