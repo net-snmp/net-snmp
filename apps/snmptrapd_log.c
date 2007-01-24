@@ -700,7 +700,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         } else {
             if (!snmp_strcat
                 (&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                 "<UNKNOWN>")) {
+                 (const u_char*)"<UNKNOWN>")) {
                 if (temp_buf != NULL) {
                     free(temp_buf);
                 }
@@ -768,7 +768,7 @@ typedef struct netsnmp_udp_addr_pair_s {   /* From snmpUDPDomain.c */
             } else {
                 if (!snmp_strcat
                     (&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                     "<UNKNOWN>")) {
+                     (const u_char*)"<UNKNOWN>")) {
                     if (temp_buf != NULL) {
                         free(temp_buf);
                     }
@@ -801,7 +801,7 @@ typedef struct netsnmp_udp_addr_pair_s {   /* From snmpUDPDomain.c */
              * We are kind of stuck!  
              */
             if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                             "<UNKNOWN>")) {
+                             (const u_char*)"<UNKNOWN>")) {
                 if (temp_buf != NULL) {
                     free(temp_buf);
                 }
@@ -920,7 +920,7 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         /*
          * Write the trap's number.  
          */
-        tout_len = sprintf(temp_buf, "%ld", pdu->trap_type);
+        tout_len = sprintf((char*)temp_buf, "%ld", pdu->trap_type);
         break;
 
     case CHR_TRAP_DESC:
@@ -928,7 +928,7 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
          * Write the trap's description.  
          */
         tout_len =
-            sprintf(temp_buf, "%s", trap_description(pdu->trap_type));
+            sprintf((char*)temp_buf, "%s", trap_description(pdu->trap_type));
         break;
 
     case CHR_TRAP_STYPE:
@@ -936,7 +936,7 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
          * Write the trap's subtype.  
          */
         if (pdu->trap_type != SNMP_TRAP_ENTERPRISESPECIFIC) {
-            tout_len = sprintf(temp_buf, "%ld", pdu->specific_type);
+            tout_len = sprintf((char*)temp_buf, "%ld", pdu->specific_type);
         } else {
             /*
              * Get object ID for the trap.  
@@ -1006,7 +1006,7 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
              */
             if (options->alt_format ||
                 vars != pdu->variables ) {
-                if (!snmp_strcat(&temp_buf, &tbuf_len, &tout_len, 1, (u_char *)sep)) {
+                if (!snmp_strcat(&temp_buf, &tbuf_len, &tout_len, 1, (const u_char *)sep)) {
                     if (temp_buf != NULL) {
                         free(temp_buf);
                     }
@@ -1056,13 +1056,9 @@ realloc_handle_auth_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
       *    pdu     - information about this trap 
       */
 {
-    netsnmp_variable_list *vars;        /* variables assoc with trap */
     char            fmt_cmd = options->cmd;     /* what we're outputting */
     u_char         *temp_buf = NULL;
-    size_t          tbuf_len = 64, tout_len = 0;
-    const char           *sep = separator;
-    const char           *default_sep = "\t";
-    const char           *default_alt_sep = ", ";
+    size_t          tbuf_len = 64;
 
     if ((temp_buf = calloc(tbuf_len, 1)) == NULL) {
         return 0;
@@ -1072,7 +1068,7 @@ realloc_handle_auth_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     switch (pdu->command) {
 
     case CHR_SNMP_VERSION:
-        *out_len = snprintf(temp_buf, tbuf_len, "%ld", pdu->version);
+        *out_len = snprintf((char*)temp_buf, tbuf_len, "%ld", pdu->version);
         break;
 
     default:
@@ -1487,7 +1483,7 @@ realloc_format_plain_trap(u_char ** buf, size_t * buf_len,
         return 0;
     }
     if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                     (u_char *)trap_description(pdu->trap_type))) {
+                     (const u_char *)trap_description(pdu->trap_type))) {
         return 0;
     }
     if (!snmp_strcat
