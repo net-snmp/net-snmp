@@ -41,8 +41,7 @@ usage()
 #
 # find nsb-platform based on the path to this script
 #
-EXE_PATH=${0%nsb-package}
-EXE_PATH=${EXE_PATH%/}
+EXE_PATH=`dirname $0`
 if [ ! -f $EXE_PATH/nsb-functions ];then
    if [ -f $HOME/bin/nsb-functions ]; then
       EXE_PATH=$HOME/bin
@@ -58,7 +57,7 @@ if [ "x$1" = "x-C" ]; then
     shift
 else
     if [ -f $HOME/.snmp/nsb-package ];then
-        source $HOME/.snmp/nsb-package
+        . $HOME/.snmp/nsb-package
     fi
 fi
 
@@ -97,7 +96,7 @@ fi
 
 NSB_VERSION=$1
 
-source $EXE_PATH/nsb-functions
+. $EXE_PATH/nsb-functions
 
 nsb-default-paths
 
