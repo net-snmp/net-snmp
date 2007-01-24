@@ -315,6 +315,23 @@ netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
     return netsnmp_register_table(reginfo, tabreg);
 }
 
+int
+netsnmp_container_table_unregister(netsnmp_handler_registration *reginfo)
+{
+    container_table_data *tad;
+
+    if (!reginfo)
+        return MIB_UNREGISTRATION_FAILED;
+    tad = (container_table_data *)reginfo->handler->myvoid;
+    if (tad) {
+        CONTAINER_FREE( tad->table );
+        tad->table = NULL;
+        free(tad);
+        reginfo->handler->myvoid = NULL;
+    }
+    return netsnmp_unregister_table( reginfo );
+}
+
 /** retrieve the container used by the table_container helper */
 netsnmp_container*
 netsnmp_container_table_container_extract(netsnmp_request_info *request)
