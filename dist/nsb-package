@@ -98,7 +98,7 @@ NSB_VERSION=$1
 
 . $EXE_PATH/nsb-functions
 
-nsb-default-paths
+nsb_default_paths
 
 if [ $NSB_CLEAN -eq 1 ]; then
    if [ $NSB_SKIP_CONFIG -eq 1 ]; then
@@ -111,20 +111,20 @@ fi
 
 ########################################################################
 ########################################################################
-nsb-prompt "press enter to build $NSB_SRC_DIR in $NSB_BUILD_DIR, and install in $NSB_INSTALL_DIR"
-nsb-build $NSB_VERSION $NSB_SRC_DIR $NSB_BUILD_DIR $NSB_INSTALL_DIR $NSB_CONFIG_ALL
+nsb_prompt "press enter to build $NSB_SRC_DIR in $NSB_BUILD_DIR, and install in $NSB_INSTALL_DIR"
+nsb_build $NSB_VERSION $NSB_SRC_DIR $NSB_BUILD_DIR $NSB_INSTALL_DIR $NSB_CONFIG_ALL
 rc=$?
 if [ ! -z $NSB_SCP_HOST ]; then
-   nsb-upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_HOST/
+   nsb_upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_HOST/
 fi
 if [ $rc -eq 0 ] && [ $REMOVE_SUCCESS -eq 1 ];then
-    nsb-prompt "press enter to remove $NSB_BUILD_DIR"
+    nsb_prompt "press enter to remove $NSB_BUILD_DIR"
     if [ "x$NSB_BUILD_DIR" = "/" ]; then
-       nsb-abort "Not running rm -fR from /"
+       nsb_abort "Not running rm -fR from /"
     else
        /bin/rm -fR $NSB_BUILD_DIR > /dev/null 2>&1
     fi
 fi
 
-nsb-prompt "press enter to exit with rc $RC"
+nsb_prompt "press enter to exit with rc $RC"
 exit $rc
