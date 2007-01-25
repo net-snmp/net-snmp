@@ -596,7 +596,7 @@ find_device(char *path)
 
 #elif HAVE_STATFS
   if (statfs(path, &statf) == 0) {
-    copy_word(statf.f_mntfromname, device);
+    copy_nword(statf.f_mntfromname, device, sizeof(device));
     DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",
 		statf.f_mntfromname));
   }
