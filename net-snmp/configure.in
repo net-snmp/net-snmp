@@ -2631,7 +2631,7 @@ AC_CHECK_HEADERS(ufs/ufs/dinode.h ufs/ufs/quota.h ufs/ufs/inode.h ufs/ffs/fs.h,,
 #endif
 ]])
 # FreeBSD required headers
-AC_CHECK_HEADERS(malloc.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h sys/queue.h osreldate.h machine/types.h sys/user.h sys/proc.h sys/mbuf.h sys/mount.h,,,
+AC_CHECK_HEADERS(malloc.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h sys/queue.h osreldate.h machine/types.h sys/user.h sys/proc.h sys/mbuf.h sys/mount.h sys/conf.h,,,
 [[
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -2641,7 +2641,7 @@ AC_CHECK_HEADERS(malloc.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h sys/q
 #endif
 ]])
 # Linux
-AC_CHECK_HEADERS(sys/conf.h netinet/tcp_fsm.h sys/protosw.h nlist.h ioctls.h asm/page.h asm/types.h netipx/ipx.h pci/pci.h)
+AC_CHECK_HEADERS(netinet/tcp_fsm.h sys/protosw.h nlist.h ioctls.h asm/page.h asm/types.h netipx/ipx.h pci/pci.h)
 # Solaris
 AC_CHECK_HEADERS(inet/mib2.h)
 # NetBSD required headers
@@ -3503,6 +3503,12 @@ AC_CHECK_STRUCT_FOR([
 ],arphd,at_next)
 
 AC_CHECK_STRUCT_FOR([
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #if HAVE_SYS_CONF_H
 #include <sys/conf.h>
 #endif
