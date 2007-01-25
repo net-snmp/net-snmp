@@ -76,7 +76,7 @@ fi
 ########################################################################
 ########################################################################
 if [ $NSB_CONFIG_ALL -eq 0 ];then
-    nsb-config-dist $SRCD
+    nsb_config_dist $SRCD
 else
-    nsb-config-all $SRCD
+    nsb_config_all $SRCD
 fi

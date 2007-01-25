@@ -13,7 +13,7 @@ fi
 
 #----------------------------------------------------------------------
 #
-nsb-sysname()
+nsb_sysname()
 {
    echo `uname -mrs | tr ' /' '__'`
 }
@@ -27,7 +27,7 @@ NSB_BUILD_DIR=${NSB_BUILD_DIR:=""}
 NSB_BUILD_SUFFIX=${NSB_BUILD_SUFFIX:=""}
 NSB_SRC_DIR=${NSB_SRC_DIR:=""}
 NSB_INSTALL_DIR=${NSB_INSTALL_DIR:=""}
-NSB_PLATFORM=${NSB_PLATFORM:=`nsb-sysname`}
+NSB_PLATFORM=${NSB_PLATFORM:=`nsb_sysname`}
 # sun doesn't support hostname -s
 NSB_HOST=${NSB_HOST:=`hostname | cut -f1 -d.`}
 NSB_QUIET=${NSB_QUIET:=0}
@@ -53,7 +53,7 @@ NSB_FLOW=
 NSB_DATE=${NSB_DATE:=`date +%y%m%d_%H%M`}
 
 ## embedded perl
-NSB_DIRLINK_DIRS="perl mibs include"
+NSB_DIRLINK_DIRS="perl mibs include python"
 NSB_PERL=${NSB_PERL:=""}
 #NSB_PERL=${NSB_PERL:="--enable-embedded-perl"}
 if [ "x$NSB_PERL" != "x" ]; then
@@ -82,21 +82,21 @@ esac
 # Utility functions
 #
 
-nsb-abort()
+nsb_abort()
 {
    echo
    echo "ABORTING: $@" >&2
    exit 255
 }
 
-nsb-info()
+nsb_info()
 {
    if [ $NSB_QUIET -ne 1 ]; then
       echo $@
    fi
 }
 
-nsb-prompt()
+nsb_prompt()
 {
    if [ "x$1" = "x-f" ]; then
       shift 1
@@ -112,7 +112,7 @@ nsb-prompt()
    fi
 }
 
-nsb-flow()
+nsb_flow()
 {
     NSB_FLOW=$NSB_FLOW:$@
     echo "Running $@" >&2
@@ -120,22 +120,22 @@ nsb-flow()
 
 #----------------------------------------------------------------------
 #
-nsb-config-dist()
+nsb_config_dist()
 {
-   nsb-flow config-dist
+   nsb_flow config_dist
    if [ $# -lt 1 ]; then
-      nsb-abort "usage: nsb-config-dist src_dir"
+      nsb_abort "usage: nsb_config_dist src_dir"
    fi
    ngc_src=$1
    if [ ! -d $ngc_src ]; then
-      nsb-abort "$ngc_src does not exist!"
+      nsb_abort "$ngc_src does not exist!"
    fi
    if [ ! -d $ngc_src/agent/mibgroup ]; then
-      nsb-abort "agent/mibgroup directory in $ngc_src does not exist!"
+      nsb_abort "agent/mibgroup directory in $ngc_src does not exist!"
    fi
    ngc_dest=$2
    if [ ! -d $ngc_dest ]; then
-      nsb-abort "$ngc_dest does not exist!"
+      nsb_abort "$ngc_dest does not exist!"
    fi
 
    #
@@ -164,30 +164,30 @@ nsb-config-dist()
       --disable-developer $NSB_EXTRA_CONFIG \
       --with-sys-contact='System Administrator' \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
-   # I'd like to add ' | tee nsb-config.$NSB_DATE' to save output, but then
+   # I'd like to add ' | tee nsb_config.$NSB_DATE' to save output, but then
    # I'd lose the rc from configure, which I need... sigh
    ngc_rc=$?
    if [ $ngc_rc -ne 0 ];then
-      nsb-abort "Error during configure dist (rc=$ngc_rc)"
+      nsb_abort "Error during configure dist (rc=$ngc_rc)"
    fi
 }
 
-nsb-config-all()
+nsb_config_all()
 {
-   nsb-flow config-all
+   nsb_flow config_all
    if [ $# -lt 1 ]; then
-      nsb-abort "usage: nsb-config-all src_dir"
+      nsb_abort "usage: nsb_config_all src_dir"
    fi
    ngc_src=$1
    if [ ! -d $ngc_src ]; then
-      nsb-abort "$ngc_src does not exist!"
+      nsb_abort "$ngc_src does not exist!"
    fi
    if [ ! -d $ngc_src/agent/mibgroup ]; then
-      nsb-abort "agent/mibgroup directory in $ngc_src does not exist!"
+      nsb_abort "agent/mibgroup directory in $ngc_src does not exist!"
    fi
    ngc_dest=$2
    if [ ! -d $ngc_dest ]; then
-      nsb-abort "$ngc_dest does not exist!"
+      nsb_abort "$ngc_dest does not exist!"
    fi
 
    #
@@ -246,18 +246,18 @@ nsb-config-all()
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
       $NSB_SHARED $NSB_IPV6 $NSB_PERL
-   # I'd like to add ' | tee nsb-config.$NSB_DATE' to save output, but then
+   # I'd like to add ' | tee nsb_config.$NSB_DATE' to save output, but then
    # I'd lose the rc from configure, which I need... sigh
    ngc_rc=$?
    if [ $ngc_rc -ne 0 ];then
-      nsb-abort "Error during configure all (rc=$ngc_rc)"
+      nsb_abort "Error during configure all (rc=$ngc_rc)"
    fi
 }
 
-nsb-zip()
+nsb_zip()
 {
    if [ $# -ne 3 ]; then
-      nsb-abort "usage: $0 release build_directory dest_dir"
+      nsb_abort "usage: $0 release build_directory dest_dir"
    fi
 
    release=$1
@@ -267,20 +267,20 @@ nsb-zip()
    build=$build_dir/$NSB_PLATFORM
 
    if [ ! -d $build ]; then
-      nsb-abort "$build directory does not exist!"
+      nsb_abort "$build directory does not exist!"
    fi
 
    if [ ! -d $build/usr ]; then
-      nsb-abort "install directory $build/usr directory does not exist!"
+      nsb_abort "install directory $build/usr directory does not exist!"
    fi
 
    cd $build
 
    rm -f $dest_dir/$release-$NSB_PLATFORM.tar
-   nsb-info "tar cf $dest_dir/$release-$NSB_PLATFORM.tar usr"
+   nsb_info "tar cf $dest_dir/$release-$NSB_PLATFORM.tar usr"
    tar cf $dest_dir/$release-$NSB_PLATFORM.tar usr
 
-   nsb-info "gzip --best $dest_dir/$release-$NSB_PLATFORM.tar"
+   nsb_info "gzip --best $dest_dir/$release-$NSB_PLATFORM.tar"
    gzip --best $dest_dir/$release-$NSB_PLATFORM.tar
 
    if [ $NSB_QUIET -ne 1 ]; then
@@ -288,49 +288,53 @@ nsb-zip()
    fi
 }
 
-nsb-upload()
+nsb_upload()
 {
    build_dir=$1
    target=$2
-   nsb-flow upload to $target: config.log configure-summary nsb-make-all.$NSB_DATE nsb-make-test.$NSB_DATE
+   nsb_flow upload to $target: config.log configure-summary nsb_make-all.$NSB_DATE nsb_make-test.$NSB_DATE
    dir=$PWD
    cd $build_dir
-   /usr/bin/scp config.log configure-summary nsb-make-all.$NSB_DATE nsb-make-test.$NSB_DATE\
+   /usr/bin/scp config.log configure-summary nsb_make-all.$NSB_DATE nsb_make-test.$NSB_DATE\
                  $target
    cd $dir
 }
 
-nsb-dir-link()
+nsb_dir_link()
 {
   if [ $# -lt 2 ]; then
-    nsb-abort "usage: nsb-dir-link src_dir dst_dir"
+    nsb_abort "usage: nsb_dir_link src_dir dst_dir"
   fi
   link_src_dir=$1
   link_dst_dir=$2
-  nsb-flow set up shadow directory $link_dst_dir
-  $NSB_DIRLINK $link_src_dir $link_dst_dir
-  rc=$?
-  if [ $rc -ne 0 ];then
-    nsb-abort "Error during nsb-link-dir (rc=$rc)"
+  if [ -d $link_src_dir ]; then
+    nsb_flow set up shadow directory $link_dst_dir
+    $NSB_DIRLINK $link_src_dir $link_dst_dir
+    rc=$?
+    if [ $rc -ne 0 ];then
+      nsb_abort "Error during nsb_link-dir (rc=$rc)"
+    fi
+  else
+    nsb_info "Skipping $link_src_dir"
   fi
-}
+  }
 
-nsb-make()
+nsb_make()
 {
-   nsb-flow make $1
+   nsb_flow make $1
    target=$1
    shift 1
    parms=$@
 
    if [ -z $NSB_MAKE ];then
-      #nsb-info "Searching for GNU make (set NSB_MAKE to skip this step)"
+      #nsb_info "Searching for GNU make (set NSB_MAKE to skip this step)"
       for p in `echo $PATH | tr ':' ' '`
       do
          #echo $p
          if [ -x $p/make ];then
             dummy=`$p/make --version 2>&1 | grep GNU`
             if [ $? -eq 0 ];then
-	       #nsb-info "using $p/make ($dummy)"
+	       #nsb_info "using $p/make ($dummy)"
                NSB_MAKE=$p/make
                break
             fi
@@ -338,19 +342,19 @@ nsb-make()
          if [ -x $p/gmake ];then
             dummy=`$p/gmake --version 2>&1 | grep GNU`
             if [ $? -eq 0 ];then
-	       #nsb-info "using $p/gmake ($dummy)"
+	       #nsb_info "using $p/gmake ($dummy)"
                NSB_MAKE=$p/gmake
                break
             fi
          fi
       done
       if [ -z $NSB_MAKE ];then
-         nsb-abort "GNU make not found. Set NSB_MAKE to your make executable."
+         nsb_abort "GNU make not found. Set NSB_MAKE to your make executable."
       fi
    fi
 
-   nsb_make_OUTPUT=nsb-make-$target.$NSB_DATE
-   nsb-info "Making $target... (log is $nsb_make_OUTPUT)"
+   nsb_make_OUTPUT=nsb_make-$target.$NSB_DATE
+   nsb_info "Making $target... (log is $nsb_make_OUTPUT)"
    #
    if [ "x$target" = "xall" ]; then
       $NSB_MAKE NOAUTODEPS=y touchit 2>&1 | tee $nsb_make_OUTPUT
@@ -358,26 +362,26 @@ nsb-make()
    $NSB_MAKE $NSB_MAKE_EXTRA NOAUTODEPS=y start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
    # checking $? would only get us the rc from tee, which is useless
 
-   nsb-info "Checking for errors..."
+   nsb_info "Checking for errors..."
    egrep -i "error|fail|warn|no such|exists|t find |ermission denied|\*\*\*" $nsb_make_OUTPUT \
-         > nsb-make-$target-allerrs.$NSB_DATE
+         > nsb_make-$target-allerrs.$NSB_DATE
    # allow for a few exceptions
-   egrep -v -i "testing .*failure|[a-z&_](fail|error)|warn|error(mib|\.3)|(LOG|SNMP)_ERR|In function|= FAILURE|DEBUGMSG|/\*" nsb-make-$target-allerrs.$NSB_DATE \
-         > nsb-make-$target-errs.$NSB_DATE
-   if [ -s nsb-make-$target-errs.$NSB_DATE ]; then
-      nsb-prompt "press enter to view errors"
-#      grep ':' $nsb_make_OUTPUT > nsb-make-$target-errs2.$NSB_DATE
-#      tail -n $NSB_ERR_CTX_LINES nsb-make-$target-errs2.$NSB_DATE >&2
-      tail $NSB_TAIL_ARGS nsb-make-$target-errs.$NSB_DATE >&2
-      nsb-abort "Error(s) during make $target"
+   egrep -v -i "testing .*failure|[a-z&_](fail|error)|warn|error(mib|\.3)|(LOG|SNMP)_ERR|In function|= FAILURE|DEBUGMSG|/\*" nsb_make-$target-allerrs.$NSB_DATE \
+         > nsb_make-$target-errs.$NSB_DATE
+   if [ -s nsb_make-$target-errs.$NSB_DATE ]; then
+      nsb_prompt "press enter to view errors"
+#      grep ':' $nsb_make_OUTPUT > nsb_make-$target-errs2.$NSB_DATE
+#      tail -n $NSB_ERR_CTX_LINES nsb_make-$target-errs2.$NSB_DATE >&2
+      tail $NSB_TAIL_ARGS nsb_make-$target-errs.$NSB_DATE >&2
+      nsb_abort "Error(s) during make $target"
    fi
 
    if [ -f build-in-progress-flag ];then
-     nsb-abort "make $target incomplete"
+     nsb_abort "make $target incomplete"
    fi
 }
 
-nsb-default-paths()
+nsb_default_paths()
 {
    if [ -z "$NSB_VERSION" ]; then
       NSB_VERSION="unknown-version"
@@ -396,10 +400,10 @@ nsb-default-paths()
    fi
 }
 
-nsb-build()
+nsb_build()
 {
    if [ $# -lt 5 ]; then
-      nsb-abort "usage: $0 release src_dir build_directory dest_dir config_all_flag ($@)"
+      nsb_abort "usage: $0 release src_dir build_directory dest_dir config_all_flag ($@)"
    fi
 
    nsb_config_all=0
@@ -410,40 +414,40 @@ nsb-build()
    nsb_config_all=$5
    shift 5
 
-   nsb-flow build in $build_dir
-   nsb-flow host $NSB_HOST
-   nsb-flow platform $NSB_PLATFORM
+   nsb_flow build in $build_dir
+   nsb_flow host $NSB_HOST
+   nsb_flow platform $NSB_PLATFORM
 
    if [ ! -d $src_dir ]; then
-      nsb-abort "$src_dir does not exist!"
+      nsb_abort "$src_dir does not exist!"
    fi
 
    if [ ! -d $build_dir ]; then
       mkdir $build_dir
       if [ ! -d $build_dir ]; then
-         nsb-abort "$build_dir directory does not exist!"
+         nsb_abort "$build_dir directory does not exist!"
       fi
    fi
 
-   nsb-info "Changing directories to $build_dir"
+   nsb_info "Changing directories to $build_dir"
    cd $build_dir
 
    if [ $NSB_CLEAN -gt 0 ]; then
-      nsb-info "Cleaning up..."
+      nsb_info "Cleaning up..."
       if [ $NSB_CLEAN -eq 2 ];then
         if [ "x$PWD" = "/" ]; then
-           nsb-abort "Not running rm -fR from /"
+           nsb_abort "Not running rm -fR from /"
         fi
-        nsb-info "rm -fR * .[a-zA-Z]* > /dev/null 2>&1"
+        nsb_info "rm -fR * .[a-zA-Z]* > /dev/null 2>&1"
         rm -fR * .[a-zA-Z]* > /dev/null 2>&1
       else
-        nsb-info "rm -fR nsb-* $dest_dir > /dev/null 2>&1"
-        rm -fR nsb-* $dest_dir > /dev/null 2>&1
+        nsb_info "rm -fR nsb_* $dest_dir > /dev/null 2>&1"
+        rm -fR nsb_* $dest_dir > /dev/null 2>&1
         if [ -f Makefile ]; then
-            nsb-make NOAUTODEPS=y distclean
+            nsb_make NOAUTODEPS=y distclean
             nsb_build_rc=$?
             if [ $nsb_build_rc -ne 0 ]; then
-                nsb-abort "Error during make distclean (rc=$nsb_build_rc)"
+                nsb_abort "Error during make distclean (rc=$nsb_build_rc)"
             fi
         fi
       fi
@@ -452,49 +456,49 @@ nsb-build()
    if [ ! -d $dest_dir ]; then
       mkdir -p $dest_dir
       if [ ! -d $dest_dir ]; then
-         nsb-abort "$dest_dir directory does not exist!"
+         nsb_abort "$dest_dir directory does not exist!"
       fi
    fi
 
    if [ $NSB_SKIP_DIRLINK -eq 1 ]; then
-      nsb-info "Skipping nsb-dir-link"
+      nsb_info "Skipping nsb_dir_link"
    else
       for d in $NSB_DIRLINK_DIRS; do
-        nsb-dir-link $src_dir/$d $build_dir/$d
+        nsb_dir_link $src_dir/$d $build_dir/$d
       done
    fi
 
    if [ $NSB_SKIP_CONFIG -ne 1 ]; then
-      nsb-info "Configuring... (log is nsb-config.$NSB_DATE)"
+      nsb_info "Configuring... (log is nsb_config.$NSB_DATE)"
       if [ $nsb_config_all -eq 0 ]; then
-          nsb-config-dist $src_dir $dest_dir
+          nsb_config_dist $src_dir $dest_dir
       else
-          nsb-config-all $src_dir $dest_dir
+          nsb_config_all $src_dir $dest_dir
       fi
-      nsb-prompt "press enter to continue"
+      nsb_prompt "press enter to continue"
    fi
 
    if [ $NSB_SKIP_BUILD -eq 1 ]; then
-      nsb-info "Skipping 'make all'"
+      nsb_info "Skipping 'make all'"
    else
-      nsb-make all
+      nsb_make all
    fi
 
    if [ $NSB_SKIP_TEST -eq 1 ]; then
-      nsb-info "Skipping 'make test'"
+      nsb_info "Skipping 'make test'"
    else
-      nsb-prompt "No errors found, press enter to run tests"
+      nsb_prompt "No errors found, press enter to run tests"
       SNMP_TMPDIR_BASE=$build_dir/tests
       export SNMP_TMPDIR_BASE
-      nsb-make test
+      nsb_make test
    fi
 
    if [ $NSB_SKIP_INSTALL -eq 1 ]; then
-      nsb-info "Skipping 'make install'"
+      nsb_info "Skipping 'make install'"
    else
-      nsb-prompt "No errors found, press enter to install"
+      nsb_prompt "No errors found, press enter to install"
       # DESTDIR makes sure the perl stuff goes into $dest_dir, too
-      nsb-make install DESTDIR=$dest_dir $NSB_EXTRA_INSTALL
+      nsb_make install DESTDIR=$dest_dir $NSB_EXTRA_INSTALL
    fi
 
    return 0

@@ -96,7 +96,7 @@ NSB_VERSION=$1
 
 . $EXE_PATH/nsb-functions
 
-nsb-default-paths
+nsb_default_paths
 
 PARMS="$PARMS -b $NSB_BUILD_DIR -s $NSB_SRC_DIR"
 
@@ -121,7 +121,7 @@ case $RC in
        NSB_RESULTS_TO=$NSB_ERR_RESULTS_TO
        FILES=`ls nsb-make-*-errs.* 2>/dev/null`
        if [ ! -z $NSB_SCP_HOST ]; then
-          nsb-upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_SUFFIX
+          nsb_upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_SUFFIX
        fi
         ;;
 esac
@@ -172,7 +172,7 @@ fi
 
 if [ $RC -eq 0 ]; then
         if [ "x$NSB_BUILD_DIR" = "/" ]; then
-            nsb-abort "Not running rm -fR from /"
+            nsb_abort "Not running rm -fR from /"
         else
             /bin/rm -fR $NSB_BUILD_DIR > /dev/null 2>&1
         fi
