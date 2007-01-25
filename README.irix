@@ -12,14 +12,25 @@ MIPSpro C compiler 7.4.4m in C99 mode:
 Please note that the "host" module doesn't compile on IRIX, so you *cannot*
 configure with "--with-mib-modules=host".
 
+Compiling with gcc may be possible, but is unsupported at this point in time
+due to difficulties with the IRIX system headers. Brent Bice has reported
+a successful build of net-snmp 5.4 with gcc 3.4.6 on a IP30 machine using:
+
+	CFLAGS="-D_PAGESZ=16384 -D_MIPS3_ADDRSPACE -DIP30 -DR10000 -DMP \
+	        -DCELL_PREPARE -DBHV_PREPARE" ./configure ...
+
+See http://techpubs.sgi.com/library/tpl/cgi-bin/getdoc.cgi/0620/bks/\
+SGI_Developer/books/DevDriver_PG/sgi_html/ch10.html and 
+/var/sysgen/Makefile.kernio .
 
 2. Known Issues
 ---------------
 
 Accessing certain MIB objects on IRIX64 machines (i.e. when running a 64-bit 
-kernel will trigger nlist errors. The agent will not return proper values for
-the affected MIB objects (e.g. tcpConnTable, udpTable). Starting from 
-net-snmp 5.4, you can avoid nlist altogether (recommended for IRIX64) by using
+kernel will trigger nlist/klookup errors. The agent will not return proper 
+values for the affected MIB objects (e.g. tcpConnTable, udpTable). 
+Starting from net-snmp 5.4, you can avoid nlist altogether (recommended for 
+IRIX64) by using
 
    ./configure --without-kmem-usage ...
 
