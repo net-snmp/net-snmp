@@ -326,7 +326,7 @@ nsb_make()
    shift 1
    parms=$@
 
-   if [ -z $NSB_MAKE ];then
+   if [ "x$NSB_MAKE" = "x" ];then
       #nsb_info "Searching for GNU make (set NSB_MAKE to skip this step)"
       for p in `echo $PATH | tr ':' ' '`
       do
@@ -348,7 +348,7 @@ nsb_make()
             fi
          fi
       done
-      if [ -z $NSB_MAKE ];then
+      if [ "x$NSB_MAKE" = "x" ];then
          nsb_abort "GNU make not found. Set NSB_MAKE to your make executable."
       fi
    fi
@@ -383,19 +383,19 @@ nsb_make()
 
 nsb_default_paths()
 {
-   if [ -z "$NSB_VERSION" ]; then
+   if [ "x$NSB_VERSION" = "x" ]; then
       NSB_VERSION="unknown-version"
    fi
-   if [ -z "$NSB_SRC_DIR" ]; then
+   if [ "x$NSB_SRC_DIR" = "x" ]; then
       NSB_SRC_DIR=$HOME/src/net-snmp-$NSB_VERSION
    fi
-   if [ -z "$NSB_BUILD_DIR" ]; then
+   if [ "x$NSB_BUILD_DIR" = "x" ]; then
       NSB_BUILD_DIR=$HOME/build/$NSB_VERSION
-      if [ ! -z "$NSB_SUFFIX" ]; then
+      if [ "x$NSB_SUFFIX" != "x" ]; then
          NSB_BUILD_DIR=$NSB_BUILD_DIR/$NSB_SUFFIX
       fi
    fi
-   if [ -z "$NSB_INSTALL_DIR" ]; then
+   if [ "x$NSB_INSTALL_DIR" = "x" ]; then
       NSB_INSTALL_DIR=$NSB_BUILD_DIR/usr/local
    fi
 }
