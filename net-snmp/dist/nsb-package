@@ -114,7 +114,7 @@ fi
 nsb_prompt "press enter to build $NSB_SRC_DIR in $NSB_BUILD_DIR, and install in $NSB_INSTALL_DIR"
 nsb_build $NSB_VERSION $NSB_SRC_DIR $NSB_BUILD_DIR $NSB_INSTALL_DIR $NSB_CONFIG_ALL
 rc=$?
-if [ ! -z $NSB_SCP_HOST ]; then
+if [ "x$NSB_SCP_HOST" != "x" ]; then
    nsb_upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_HOST/
 fi
 if [ $rc -eq 0 ] && [ $REMOVE_SUCCESS -eq 1 ];then

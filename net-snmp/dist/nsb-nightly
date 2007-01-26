@@ -120,14 +120,14 @@ case $RC in
     *) RESULT="Error (rc $RC)"
        NSB_RESULTS_TO=$NSB_ERR_RESULTS_TO
        FILES=`ls nsb-make-*-errs.* 2>/dev/null`
-       if [ ! -z $NSB_SCP_HOST ]; then
+       if [ "x$NSB_SCP_HOST" != §x" ]; then
           nsb_upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_SUFFIX
        fi
         ;;
 esac
 echo "Result: $RESULT"
 
-if [ ! -z $NSB_RESULTS_TO ]; then
+if [ "x$NSB_RESULTS_TO" != "x" ]; then
    SUBJECT="$NSB_VERSION $RESULT on $NSB_HOST ($NSB_PLATFORM)"
    echo "Sending mail to $NSB_RESULTS_TO: $SUBJECT"
    case `uname -s` in
@@ -142,7 +142,7 @@ if [ ! -z $NSB_RESULTS_TO ]; then
          echo "" >> mail.results
          grep CONFIGURE_OPTIONS include/net-snmp/net-snmp-config.h|sed 's:/home/[^ ]*/build:$HOME:g' >> mail.results
          echo "Result: $RESULT" >> mail.results
-         if [ ! -z "$FILES" ]; then
+         if [ "x$FILES" != "x" ]; then
             cat $FILES >> mail.results
          fi
          sendmail -t < mail.results
@@ -155,14 +155,14 @@ if [ ! -z $NSB_RESULTS_TO ]; then
          echo "" >> mail.results
          grep CONFIGURE_OPTIONS include/net-snmp/net-snmp-config.h|sed 's:/home/[^ ]*/build:$HOME:g' >> mail.results
          echo "Result: $RESULT" >> mail.results
-         if [ ! -z "$FILES" ]; then
+         if [ "x$FILES" != "x" ]; then
             cat $FILES >> mail.results
          fi
          mail -t $NSB_RESULTS_TO < mail.results
          ;;
       *)
          echo "Result: $RESULT" >> mail.results
-         if [ ! -z "$FILES" ]; then
+         if [ "x$FILES" != "x" ]; then
             cat $FILES >> mail.results
          fi
          mail -s "$SUBJECT" $NSB_RESULTS_TO < mail.results
