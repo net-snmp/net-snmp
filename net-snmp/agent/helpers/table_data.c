@@ -413,7 +413,7 @@ netsnmp_register_read_only_table_data(netsnmp_handler_registration *reginfo,
 int
 netsnmp_unregister_table_data(netsnmp_handler_registration *reginfo)
 {
-    // free table;
+    /* free table; */
     return netsnmp_unregister_table(reginfo);
 }
 
