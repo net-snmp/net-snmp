@@ -120,7 +120,7 @@ case $RC in
     *) RESULT="Error (rc $RC)"
        NSB_RESULTS_TO=$NSB_ERR_RESULTS_TO
        FILES=`ls nsb-make-*-errs.* 2>/dev/null`
-       if [ "x$NSB_SCP_HOST" != §x" ]; then
+       if [ "x$NSB_SCP_HOST" != "x" ]; then
           nsb_upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_SUFFIX
        fi
         ;;
