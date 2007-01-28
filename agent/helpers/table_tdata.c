@@ -360,7 +360,7 @@ netsnmp_tdata_register(netsnmp_handler_registration    *reginfo,
 int
 netsnmp_tdata_unregister(netsnmp_handler_registration    *reginfo)
 {
-    // free table;
+    /* free table; */
     return netsnmp_container_table_unregister(reginfo);
 }
 
