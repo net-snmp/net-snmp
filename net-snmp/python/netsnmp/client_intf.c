@@ -1488,7 +1488,7 @@ netsnmp_get(PyObject *self, PyObject *args)
     }
 
     val_tuple = PyTuple_New(varlist_len);
-    // initialize return tuple
+    /* initialize return tuple */
     for (varlist_ind = 0; varlist_ind < varlist_len; varlist_ind++) {
       PyTuple_SetItem(val_tuple, varlist_ind, Py_BuildValue(""));
     }
@@ -1696,7 +1696,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
     }
 
     val_tuple = PyTuple_New(varlist_len);
-    // initialize return tuple
+    /* initialize return tuple */
     val_tuple = PyTuple_New(varlist_len);
     for (varlist_ind = 0; varlist_ind < varlist_len; varlist_ind++) {
       PyTuple_SetItem(val_tuple, varlist_ind, Py_BuildValue(""));
@@ -2309,7 +2309,7 @@ netsnmp_set(PyObject *self, PyObject *args)
 
     ss = (SnmpSession *)py_netsnmp_attr_long(session, "sess_ptr");
 
-    // PyObject_SetAttrString();
+    /* PyObject_SetAttrString(); */
     strcpy(err_str, py_netsnmp_attr_string(session, "ErrorStr"));
     err_num = py_netsnmp_attr_long(session, "ErrorNum");
     err_ind = py_netsnmp_attr_long(session, "ErrorInd");
