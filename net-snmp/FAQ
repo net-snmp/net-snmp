@@ -925,17 +925,21 @@ Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
 How do I use SNMPv3?
 -------------------
 
-    The simplest form of SNMPv3 request (unauthenticated, unencrypted)
-  would be something like:
+    The simplest form of SNMPv3 request is unauthenticated and unencrypted
+  (noAuthNoPriv). It still requires a user name (and the agent must be
+  configured to allow unauthenticated requests from that user). Such a
+  request would look something like:
 
-	snmpget -v 3 -l noAuthNoPriv localhost sysUpTime.0
+	snmpget -v 3 -l noAuthNoPriv -u dave localhost sysUpTime.0
 
-    An authenticated request would specify a username and pass phrase:
+    An authenticated request (authNoPriv) would specify a pass phrase to
+  authenticate with:
 
 	snmpget -v 3 -l authNoPriv -u dave -A "Open the Door"
 				localhost sysUpTime.0
 
-    A fully secure request would also specify the privacy pass phrase:
+    A fully secure request (authPriv) would also specify the privacy
+  pass phrase:
 
 	snmpget -v 3 -l authPriv -u dave -A "Open the Door"
 			-X "Bet you can't see me"  localhost sysUpTime.0
