@@ -2872,13 +2872,17 @@ The compilation is complaining about missing libraries. Why?
   or O/S's may use different names, but the basic idea should be the
   same.
 
-  A alternative quick fix is to add the missing symbolic link, using
+  If the compilation is complaining about a missing .so file, then an
+  alternative quick fix is to add the missing symbolic link, using
   something like:
           ln -s libelf.so.1 /usr/lib/libelf.so
 
   giving the appropriate generic library name from the error message,
   and the correct number for whichever version of this library you
   have installed.
+
+  If the compilation is complaining about a .la file, then you should
+  install the relevant development package, as listed above.
 
 
 
