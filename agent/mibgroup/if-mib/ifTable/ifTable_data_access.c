@@ -204,8 +204,11 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
         DEBUGMSGTL(("ifTable:access", "updating existing entry\n"));
 
 #ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
-        netsnmp_assert(strcmp(rowreq_ctx->data.ifName,
-                              ifentry->name) == 0);
+        {
+            int rc = strcmp(rowreq_ctx->data.ifName,
+                            ifentry->name);
+            netsnmp_assert(rc == 0);
+        }
 #endif
         /*
          * if the interface was missing, but came back, clear the
