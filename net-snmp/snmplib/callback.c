@@ -88,7 +88,7 @@ static const char *lib[MAX_CALLBACK_SUBIDS] = {
  * has been evaluated for use in a multi-threaded environment.
  * In 5.2, it was a single lock. For 5.3, it has been updated to
  * a lock per callback, since a particular callback may trigger
- * registration/unregistartion of other callbacks (eg AgentX
+ * registration/unregistration of other callbacks (eg AgentX
  * subagents do this).
  */
 #define LOCK_PER_CALLBACK_SUBID 1
@@ -96,10 +96,12 @@ static const char *lib[MAX_CALLBACK_SUBIDS] = {
 static int _locks[MAX_CALLBACK_IDS][MAX_CALLBACK_SUBIDS];
 #define CALLBACK_LOCK(maj,min) ++_locks[major][minor]
 #define CALLBACK_UNLOCK(maj,min) --_locks[major][minor]
+#define CALLBACK_LOCK_COUNT(maj,min) _locks[major][minor]
 #else
 static int _lock;
 #define CALLBACK_LOCK(maj,min) ++_lock
 #define CALLBACK_UNLOCK(maj,min) --_lock
+#define CALLBACK_LOCK_COUNT(maj,min) _lock
 #endif
 
 NETSNMP_STATIC_INLINE int
@@ -123,7 +125,7 @@ _callback_lock(int major, int minor, const char* warn, int assert)
             snmp_log(LOG_WARNING,
                      "_callback_lock already locket in %s\n", warn);
         if (assert)
-            netsnmp_assert(1==_locks[major][minor]);
+            netsnmp_assert(1==CALLBACK_LOCK_COUNT(major,minor));
         
         return 1;
     }
@@ -169,7 +171,11 @@ init_callbacks(void)
     _callback_need_init = 0;
     
     memset(thecallbacks, 0, sizeof(thecallbacks)); 
+#ifdef LOCK_PER_CALLBACK_SUBID
     memset(_locks, 0, sizeof(_locks));
+#else
+    _lock = 0;
+#endif
     
     DEBUGMSGTL(("callback", "initialized\n"));
 }
@@ -425,7 +431,7 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
             (!matchargs || (scp->sc_client_arg == arg))) {
             DEBUGMSGTL(("callback", "unregistering (%d,%d) at %p\n", major,
                         minor, scp));
-            if(1 == _locks[major][minor]) {
+            if(1 == CALLBACK_LOCK_COUNT(major,minor)) {
                 *prevNext = scp->next;
                 SNMP_FREE(scp);
                 scp = *prevNext;
