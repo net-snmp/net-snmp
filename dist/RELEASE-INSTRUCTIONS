@@ -85,7 +85,7 @@ TESTING:
      Change the libtool version information in Makefile.top.
 
       - If any interfaces/structures have been removed or changed since the
-        last update, increment current, and set age and revision to 0. Stop!
+        last update, increment current (+5), and set age and revision to 0. Stop!
 
       - If any interfaces have been added since the last public release, then
         increment current and age, and set revision to 0. Stop!
@@ -95,6 +95,10 @@ TESTING:
 
       Note: maintenance releases (eg 5.2.x) should never have changes
             that would require current to be incremented.
+
+     The check-api-changes script in the dist directory will construct
+     a diff of all headers, which can be useful for determining if
+     anything needs bumping.
 
      Update these variables now, so that when you run
      make in a second to test things you can spot libtool yelling
