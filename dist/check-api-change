@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # simplistic script to check all header files for
 # differences. Intended to help detect api changes
