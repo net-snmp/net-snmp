@@ -68,6 +68,14 @@ static struct vacm_viewEntry *viewList = NULL, *viewScanPtr = NULL;
 static struct vacm_accessEntry *accessList = NULL, *accessScanPtr = NULL;
 static struct vacm_groupEntry *groupList = NULL, *groupScanPtr = NULL;
 
+/*
+ * Macro to extend view masks with 1 bits when shorter than subtree lengths
+ * REF: vacmViewTreeFamilyMask [RFC3415], snmpNotifyFilterMask [RFC3413]
+ */
+
+#define VIEW_MASK(viewPtr, idx, mask) \
+    ((idx >= viewPtr->viewMaskLen) ? mask : (viewPtr->viewMask[idx] & mask))
+
 /**
  * Initilizes the VACM code.
  * Specifically:
@@ -449,7 +457,7 @@ netsnmp_view_get(struct vacm_viewEntry *head, const char *viewName,
                 for (oidpos = 0;
                      found && oidpos < (int) vp->viewSubtreeLen - 1;
                      oidpos++) {
-                    if ((vp->viewMask[maskpos] & mask) != 0) {
+                    if (VIEW_MASK(vp, maskpos, mask) != 0) {
                         if (viewSubtree[oidpos] !=
                             vp->viewSubtree[oidpos + 1])
                             found = 0;
@@ -541,7 +549,7 @@ netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
                 for (oidpos = 0;
                      found && oidpos < (int) vp->viewSubtreeLen - 1;
                      oidpos++) {
-                    if ((vp->viewMask[maskpos] & mask) != 0) {
+                    if (VIEW_MASK(vp, maskpos, mask) != 0) {
                         if (viewSubtree[oidpos] !=
                             vp->viewSubtree[oidpos + 1])
                             found = 0;
@@ -589,7 +597,7 @@ netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
                 for (oidpos = 0;
                      found && oidpos < (int) viewSubtreeLen;
                      oidpos++) {
-                    if ((vp->viewMask[maskpos] & mask) != 0) {
+                    if (VIEW_MASK(vp, maskpos, mask) != 0) {
                         if (viewSubtree[oidpos] !=
                             vp->viewSubtree[oidpos + 1])
                             found = 0;
