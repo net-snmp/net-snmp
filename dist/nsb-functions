@@ -223,7 +223,7 @@ nsb_config_all()
    NSB_FINAL_MODULES=
    for ncd_x in $NSB_DIST_MODULES $NSB_EXTRA_MODULES
    do
-	if [ -a $ngc_src/agent/mibgroup/$ncd_x.h ]; then
+	if [ -r $ngc_src/agent/mibgroup/$ncd_x.h ]; then
 		NSB_FINAL_MODULES="$NSB_FINAL_MODULES $ncd_x"
 	fi
    done
@@ -470,7 +470,7 @@ nsb_build()
 
    if [ $NSB_SKIP_CONFIG -ne 1 ]; then
       nsb_info "Configuring... (log is nsb_config.$NSB_DATE)"
-      if [ $nsb_config_all_flag -eq 0 ]; then
+      if [ "x$nsb_config_all_flag" = "x0" ]; then
           nsb_config_dist $src_dir $dest_dir
       else
           nsb_config_all $src_dir $dest_dir
