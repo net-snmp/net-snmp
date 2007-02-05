@@ -2693,7 +2693,7 @@ Does the agent support the RMON-MIB?
   the Net-SNMP agent code avoids this problem, by using random data.
 
     Some of the functionality of the RMON-MIB, such as the alarm and
-  event groups, has since been superceded by the work of the DisMan
+  event groups, has since been superseded by the work of the DisMan
   IETF working group.  The Net-SNMP agent does implement these (more
   general) MIB modules.  But the statistics gathering aspects of
   the RMON-MIB are not readily available.
