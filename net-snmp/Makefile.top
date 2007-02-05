@@ -61,7 +61,7 @@ LINKCC	        = @LINKCC@
 # The (slightly clarified) rules:
 #
 # - If any interfaces/structures have been removed or changed since the
-#   last update, increment current, and set age and revision to 0. Stop.
+#   last update, increment current (+5), and set age and revision to 0. Stop.
 #
 # - If any interfaces have been added since the last public release, then
 #   increment current and age, and set revision to 0. Stop.
