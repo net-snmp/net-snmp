@@ -773,6 +773,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                                                       newrow, row);
                     netsnmp_table_dataset_delete_row(newrow);
                 }
+                newrow = NULL;
             }
             break;
 
@@ -780,10 +781,28 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
             if (newrowstash->state != STATE_COMMIT) {
                 newrowstash->state = STATE_COMMIT;
                 if (!newrowstash->created) {
+		    netsnmp_request_info       *req;
                     netsnmp_table_dataset_delete_row(row);
+
+		    /* Walk the request list to update the reference to the old row w/ th new one */
+    		    for (req = requests; req; req=req->next) {
+        
+		    	/*
+         			* For requests that have the old row values,
+         			* so add the newly-created row information.
+         	    	*/
+        	    	if ((netsnmp_table_row *) netsnmp_extract_table_row(req) == row) {
+	    			netsnmp_request_remove_list_data(req, TABLE_DATA_ROW);
+            			netsnmp_request_add_list_data(req,
+                		    netsnmp_create_data_list(TABLE_DATA_ROW, newrow, NULL));
+        	    	}
+    		    }
+
+		    row = NULL;
                 }
                 if (newrowstash->deleted) {
                     netsnmp_table_dataset_remove_and_delete_row(datatable, newrow);
+                    newrow = NULL;
                 }
             }
             break;
@@ -792,6 +811,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
             if (newrowstash && newrowstash->state != STATE_FREE) {
                 newrowstash->state = STATE_FREE;
                 netsnmp_table_dataset_delete_row(newrow);
+		newrow = NULL;
             }
             break;
         }
