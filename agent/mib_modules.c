@@ -40,6 +40,9 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "m2m.h"
+#ifdef USING_IF_MIB_DATA_ACCESS_INTERFACE_MODULE
+#include <net-snmp/data_access/interface.h>
+#endif
 
 #include "mibgroup/struct.h"
 #include <net-snmp/agent/mib_modules.h>
