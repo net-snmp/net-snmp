@@ -393,6 +393,7 @@ main(int argc, char *argv[])
         snmp_free_pdu(response);
 
     snmp_close(ss);
+    snmp_shutdown("snnmpapp");
     SOCK_CLEANUP;
     return exitval;
 }
