@@ -226,10 +226,12 @@ agentx_realloc_build_oid(u_char ** buf, size_t * buf_len, size_t * out_len,
     DEBUGMSGOID(("dumpv_send", name, name_len));
     DEBUGMSG(("dumpv_send", "\n"));
 
-    if (name_len == 2 && (name[0] == 0 && name[1] == 0)) {
-        name_len = 0;           /* Null OID */
+    /* It appears that the "null Object Identifier" mentioned
+       in RFC 2471, section 5.1 probably refers to one with
+       length 0, rather than the OID {0, 0}
+     */
+    if (name_len == 0)
         inclusive = 0;
-    }
 
     /*
      * 'Compact' internet OIDs 
