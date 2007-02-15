@@ -1,4 +1,4 @@
 # Redirect for transition from old site
 # For Redirect line, escape all &s
-RedirectMatch /tutorial/index.html /tutorial/tutorial-5/
+RedirectMatch /tutorial/index.html /wiki/index.php/Tutorials
 
