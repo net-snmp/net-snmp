@@ -28,6 +28,11 @@
     /*
      * Initialise the list of CPUs on the system
      *   (including descriptions)
+     *
+     * XXX - Assumes x86-style /proc/cpuinfo format
+     *       See CPUinfo database at
+     *           http://www.rush3d.com/gcc/
+     *                for info on alternative styles
      */
 void init_cpu_linux( void ) {
     FILE *fp;
@@ -37,6 +42,10 @@ void init_cpu_linux( void ) {
     strcpy(cpu->name, "Overall CPU statistics");
 
     fp = fopen( CPU_FILE, "r" );
+    if (!fp) {
+        snmp_log(LOG_ERR, "Can't open procinfo file %s\n", CPU_FILE);
+        return;
+    }
     while ( fgets( buf, sizeof(buf), fp)) {
         if ( sscanf( buf, "processor : %d", &i ) == 1)  {
             n++;
@@ -116,7 +125,8 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
             b1 = b2+4; /* Skip "cpu " */
         } else {
             sscanf( b2, "cpu%d", &i );
-            cpu = netsnmp_cpu_get_byIdx( i, 0 );
+                       /* Create on the fly to support non-x86 systems - see init */
+            cpu = netsnmp_cpu_get_byIdx( i, 1 );
             if (!cpu) {
                 snmp_log_perror("Missing CPU info entry");
                 break;
