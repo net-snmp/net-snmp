@@ -424,6 +424,12 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
          *   into enterprise and specific trap
          */
         len = vblist->val_len / sizeof(oid);
+        if ( len <= 2 ) {
+            snmp_log(LOG_WARNING,
+                     "send_trap: v2 trapOID too short (%d)\n", len);
+            snmp_free_pdu(template_v1pdu);
+            return NULL;
+        }
         template_v1pdu->trap_type     = SNMP_TRAP_ENTERPRISESPECIFIC;
         template_v1pdu->specific_type = vblist->val.objid[len - 1];
         len--;
@@ -723,8 +729,6 @@ netsnmp_send_traps(int trap, int specific,
         if (!template_v1pdu) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to convert v2->v1 template PDU\n");
-            snmp_free_pdu(template_v2pdu);
-            return -1;
         }
 
     } else {
@@ -763,26 +767,26 @@ netsnmp_send_traps(int trap, int specific,
         if (!template_v2pdu) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to convert v1->v2 template PDU\n");
-            snmp_free_pdu(template_v1pdu);
-            return -1;
         }
     }
 
     /*
      * Check whether we're ignoring authFail traps
      */
-    if (template_v1pdu->trap_type == SNMP_TRAP_AUTHFAIL &&
+    if (template_v1pdu) {
+      if (template_v1pdu->trap_type == SNMP_TRAP_AUTHFAIL &&
         snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_DISABLED) {
         snmp_free_pdu(template_v1pdu);
         snmp_free_pdu(template_v2pdu);
         return 0;
-    }
+      }
 
     /*
      * Ensure that the v1 trap PDU includes the local IP address
      */
-     pdu_in_addr_t = (in_addr_t *) template_v1pdu->agent_addr;
-    *pdu_in_addr_t = get_myaddr();
+       pdu_in_addr_t = (in_addr_t *) template_v1pdu->agent_addr;
+      *pdu_in_addr_t = get_myaddr();
+    }
 
 
     /*
@@ -793,18 +797,24 @@ netsnmp_send_traps(int trap, int specific,
     for (sink = sinks; sink; sink = sink->next) {
 #ifndef DISABLE_SNMPV1
         if (sink->version == SNMP_VERSION_1) {
+          if (template_v1pdu) {
             send_trap_to_sess(sink->sesp, template_v1pdu);
+          }
         } else {
 #endif
+          if (template_v2pdu) {
             template_v2pdu->command = sink->pdutype;
             send_trap_to_sess(sink->sesp, template_v2pdu);
+          }
 #ifndef DISABLE_SNMPV1
         }
 #endif
     }
-    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+    if (template_v1pdu)
+        snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_SEND_TRAP1, template_v1pdu);
-    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+    if (template_v2pdu)
+        snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_SEND_TRAP2, template_v2pdu);
     snmp_free_pdu(template_v1pdu);
     snmp_free_pdu(template_v2pdu);
