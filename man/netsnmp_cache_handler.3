@@ -1,4 +1,4 @@
-.TH "cache_handler" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "cache_handler" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -118,7 +118,7 @@ NETSNMP_CACHE_DONT_FREE_EXPIRED NETSNMP_CACHE_DONT_AUTO_RELEASE
 .PP
 Constant (periodic) reload: If you want the cache kept up to date regularly, even if no requests for the table are received, you can have your cache load routine called periodically. This is very useful if you need to monitor the data for changes (eg a \fILastChanged\fP object). You will need to prevent the agent from flushing the cache when it expires. Set the cache timeout to the frequency, in seconds, that you wish to reload your cache, and set the following flags:
 .PP
-NETSNMP_CACHE_DONT_FREE_EXPIRED NETSNMP_CACHE_DONT_AUTO_RELEASE NETSNMP_CACHE_AUTO_RELOAD 
+NETSNMP_CACHE_DONT_FREE_EXPIRED NETSNMP_CACHE_DONT_AUTO_RELEASE NETSNMP_CACHE_AUTO_RELOAD
 .SH "Function Documentation"
 .PP 
 .SS "int netsnmp_cache_check_and_reload (\fBnetsnmp_cache\fP * cache)"
@@ -156,7 +156,7 @@ find existing cache
 .PP
 Definition at line 124 of file cache_handler.c.
 .PP
-References netsnmp_oid_equals(), netsnmp_cache_s::next, netsnmp_cache_s::rootoid, and netsnmp_cache_s::rootoid_len.
+References netsnmp_oid_equals(), netsnmp_cache_s::next, NULL, netsnmp_cache_s::rootoid, and netsnmp_cache_s::rootoid_len.
 .SS "\fBnetsnmp_cache\fP* netsnmp_cache_get_head (void)"
 .PP
 get cache head 
@@ -256,7 +256,7 @@ Referenced by netsnmp_register_cache_handler().
 .PP
 for backwards compat 
 .PP
-\fBnetsnmp_cache_is_valid()\fP is preferred. 
+\fBnetsnmp_cache_is_valid()\fP is preferred.
 .PP
 Definition at line 411 of file cache_handler.c.
 .PP
@@ -272,8 +272,8 @@ References netsnmp_get_cache_handler(), netsnmp_inject_handler(), netsnmp_regist
 .PP
 run regularly to automatically release cached resources. 
 .PP
-xxx - method to prevent cache from expiring while a request is being processed (e.g. delegated request). proposal: set a flag, which would be cleared when request finished (which could be acomplished by a dummy data list item in agent req info & custom free function). 
+xxx - method to prevent cache from expiring while a request is being processed (e.g. delegated request). proposal: set a flag, which would be cleared when request finished (which could be acomplished by a dummy data list item in agent req info & custom free function).
 .PP
 Definition at line 575 of file cache_handler.c.
 .PP
-References netsnmp_cache_s::flags, netsnmp_cache_check_expired(), netsnmp_cache_s::next, NULL, and netsnmp_cache_s::valid.
+References netsnmp_cache_s::flags, netsnmp_cache_check_expired(), netsnmp_cache_s::next, NULL, snmp_alarm_register(), and netsnmp_cache_s::valid.

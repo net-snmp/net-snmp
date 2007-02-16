@@ -1,4 +1,4 @@
-.TH "A generic callback mechanism" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -53,14 +53,14 @@ find and clear client args that match ptr
 .br
 \fIi\fP callback id to start at 
 .br
-\fIj\fP callback subid to start at 
+\fIj\fP callback subid to start at
 .RE
 .PP
 
 .PP
 Definition at line 346 of file callback.c.
 .PP
-References NULL, snmp_gen_callback::sc_callback, and snmp_gen_callback::sc_client_arg.
+References snmp_gen_callback::next, NULL, snmp_gen_callback::sc_callback, and snmp_gen_callback::sc_client_arg.
 .PP
 Referenced by clear_callback().
 .SS "int snmp_call_callbacks (int major, int minor, void * caller_arg)"
@@ -85,7 +85,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 .RS 4
 \fBsnmp_register_callback\fP 
 .PP
-\fBsnmp_unregister_callback\fP 
+\fBsnmp_unregister_callback\fP
 .RE
 .PP
 
@@ -94,7 +94,7 @@ Definition at line 182 of file callback.c.
 .PP
 References snmp_gen_callback::next, NULL, snmp_gen_callback::sc_callback, snmp_gen_callback::sc_client_arg, and snmp_log().
 .PP
-Referenced by add_trap_session(), check_access(), in_a_view(), log_handler_callback(), netsnmp_acm_check_subtree(), read_configs(), read_premib_configs(), snmp_shutdown(), and snmp_store().
+Referenced by add_trap_session(), check_access(), in_a_view(), log_handler_callback(), netsnmp_acm_check_subtree(), netsnmp_register_mib(), netsnmp_register_mib_table_row(), netsnmp_send_traps(), netsnmp_unregister_mib_table_row(), read_configs(), read_premib_configs(), snmp_shutdown(), snmp_store(), unregister_mib_context(), and unregister_mibs_by_session().
 .SS "int snmp_register_callback (int major, int minor, SNMPCallback * new_callback, void * arg)"
 .PP
 This function registers a generic callback function. 
@@ -149,7 +149,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 .RS 4
 \fBsnmp_call_callbacks\fP 
 .PP
-\fBsnmp_unregister_callback\fP 
+\fBsnmp_unregister_callback\fP
 .RE
 .PP
 

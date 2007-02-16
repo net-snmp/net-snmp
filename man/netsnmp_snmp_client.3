@@ -1,4 +1,4 @@
-.TH "various PDU processing routines" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -131,7 +131,7 @@ Used to return data to the snmp request via the netsnmp_request_info structure's
 .PP
 \fBReturns:\fP
 .RS 4
-returns 0 on success and 1 on a malloc error 
+returns 0 on success and 1 on a malloc error
 .RE
 .PP
 
@@ -144,7 +144,7 @@ Definition at line 686 of file snmp_client.c.
 .PP
 References snmp_set_var_value(), and variable_list::type.
 .PP
-Referenced by _reorder_getbulk(), check_getnext_results(), handle_pdu(), netsnmp_check_getnext_reply(), netsnmp_instance_counter32_handler(), netsnmp_instance_int_handler(), netsnmp_instance_long_handler(), netsnmp_instance_ulong_handler(), netsnmp_stash_cache_helper(), netsnmp_table_build_result(), netsnmp_table_data_build_result(), netsnmp_watched_timestamp_handler(), netsnmp_watcher_helper_handler(), snmp_replace_var_types(), and snmp_reset_var_types().
+Referenced by _reorder_getbulk(), check_acm(), check_getnext_results(), handle_pdu(), netsnmp_check_getnext_reply(), netsnmp_create_subtree_cache(), netsnmp_instance_counter32_handler(), netsnmp_instance_int_handler(), netsnmp_instance_long_handler(), netsnmp_instance_ulong_handler(), netsnmp_old_api_helper(), netsnmp_stash_cache_helper(), netsnmp_table_build_result(), netsnmp_table_data_build_result(), netsnmp_watched_timestamp_handler(), netsnmp_watcher_helper_handler(), snmp_replace_var_types(), and snmp_reset_var_types().
 .SS "int snmp_set_var_value (\fBnetsnmp_variable_list\fP * vars, const u_char * value, size_t len)"
 .PP
 FALL THROUGH 

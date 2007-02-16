@@ -1,4 +1,4 @@
-.TH "table_container" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "table_container" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -22,7 +22,7 @@ Helps you implement a table when data can be found via a netsnmp_container.
 .PP
 The table_container handler is used (automatically) in conjuntion with the \fBtable\fP handler.
 .PP
-This handler will use the index information provided by the \fBtable\fP handler to find the row needed to process the request.
+This handler will use the index information provided by the \fB\fP handler to find the row needed to process the request.
 .PP
 The container must use one of 3 key types. It is the sub-handler's responsibility to ensure that the container and key type match (unless neither is specified, in which case a default will be used.)
 .PP
@@ -52,7 +52,7 @@ SET If the hander did not register with the HANDLER_CAN_NOT_CREATE flag set in t
 .PP
 If a row is found, it will be inserted into the request's data list. The sub-handler may retrieve it by calling netsnmp_container_table_extract_context(request); * NOTE NOTE NOTE:
 .PP
-This helper and it's API are still being tested and are subject to change. 
+This helper and it's API are still being tested and are subject to change.
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_container_table_handler_get (\fBnetsnmp_table_registration_info\fP * tabreg, \fBnetsnmp_container\fP * container, char key_type)"

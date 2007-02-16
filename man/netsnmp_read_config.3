@@ -1,4 +1,4 @@
-.TH "parsing various configuration files at run time" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "parsing various configuration files at run time" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -212,7 +212,7 @@ Finally storing is done using read_config_store(type, buffer); type is the appli
 .PP
 netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_APPTYPE);
 .PP
-Now, reading back the data: This is done by registering a config handler for your token using the register_config_handler function. Your handler will be invoked and you can parse in the data using the read_config_read APIs. 
+Now, reading back the data: This is done by registering a config handler for your token using the register_config_handler function. Your handler will be invoked and you can parse in the data using the read_config_read APIs.
 .SH "Function Documentation"
 .PP 
 .SS "char* read_config_read_data (int type, char * readfrom, void * dataptr, size_t * len)"
@@ -248,7 +248,7 @@ ASN_OBJECT_ID
 .PP
 \fBReturns:\fP
 .RS 4
-the next token in the configuration line. NULL if none left or if an unknown type. 
+the next token in the configuration line. NULL if none left or if an unknown type.
 .RE
 .PP
 
@@ -273,7 +273,7 @@ Appends line to a file named either ENV(SNMP_PERSISTENT_FILE) or '<PERSISTENT_DI
 .PP
 \fBReturns:\fP
 .RS 4
-void 
+void
 .RE
 .PP
 
@@ -282,7 +282,7 @@ Definition at line 1202 of file read_config.c.
 .PP
 References get_persistent_directory(), netsnmp_ds_get_boolean(), netsnmp_getenv(), NULL, and snmp_log().
 .PP
-Referenced by netsnmp_oid_stash_store(), netsnmp_save_all_data(), and read_app_config_store().
+Referenced by netsnmp_oid_stash_store(), netsnmp_save_all_data(), read_app_config_store(), and snmp_save_persistent().
 .SS "char* read_config_store_data (int type, char * storeto, void * dataptr, size_t * len)"
 .PP
 read_config_store_data stores data of a given type to a configuration line into the storeto buffer. 
@@ -316,7 +316,7 @@ ASN_OBJECT_ID
 .PP
 \fBReturns:\fP
 .RS 4
-character pointer to the end of the line. NULL if an unknown type. 
+character pointer to the end of the line. NULL if an unknown type.
 .RE
 .PP
 
@@ -345,14 +345,14 @@ Allows a module writer use/register multiple configuration files based off of th
 .PP
 \fBReturns:\fP
 .RS 4
-Pointer to a new config line entry or NULL on error. 
+Pointer to a new config line entry or NULL on error.
 .RE
 .PP
 
 .PP
 Definition at line 196 of file read_config.c.
 .PP
-References config_files, netsnmp_ds_get_string(), NULL, and register_config_handler().
+References netsnmp_ds_get_string(), NULL, and register_config_handler().
 .PP
 Referenced by netsnmp_ds_register_config(), netsnmp_register_save_list(), register_app_config_handler(), register_config_handler(), register_mib_handlers(), and register_prenetsnmp_mib_handler().
 .SS "void unregister_config_handler (const char * type_param, const char * token)"
@@ -368,13 +368,13 @@ uregister_config_handler un-registers handlers given a specific type_param and t
 .PP
 \fBReturns:\fP
 .RS 4
-void 
+void
 .RE
 .PP
 
 .PP
 Definition at line 301 of file read_config.c.
 .PP
-References config_files, netsnmp_ds_get_string(), config_line::next, NULL, SNMP_FREE, and unregister_config_handler().
+References netsnmp_ds_get_string(), config_line::next, NULL, SNMP_FREE, and unregister_config_handler().
 .PP
 Referenced by netsnmp_ds_shutdown(), unregister_all_config_handlers(), unregister_app_config_handler(), and unregister_config_handler().

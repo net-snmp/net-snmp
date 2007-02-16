@@ -1,4 +1,4 @@
-.TH "generic library based alarm timers for various parts of an application" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "generic library based alarm timers for various parts of an application" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -78,7 +78,7 @@ Returns a unique unsigned integer(which is also passed as the first argument of 
 .PP
 \fBsnmp_alarm_register_hr\fP 
 .PP
-\fBsnmp_alarm_unregister_all\fP 
+\fBsnmp_alarm_unregister_all\fP
 .RE
 .PP
 
@@ -91,7 +91,7 @@ Definition at line 403 of file snmp_alarm.c.
 .PP
 References NULL, sa_update_entry(), set_an_alarm(), and SNMP_MALLOC_STRUCT.
 .PP
-Referenced by netsnmp_cache_timer_start().
+Referenced by netsnmp_cache_timer_start(), and release_cached_resources().
 .SS "unsigned int snmp_alarm_register_hr (struct timeval t, unsigned int flags, SNMPAlarmCallback * cb, void * cd)"
 .PP
 This function offers finer granularity as to when the callback function is called by making use of t->tv_usec value forming the 'when' aspect of \fBsnmp_alarm_register()\fP. 
@@ -118,7 +118,7 @@ Returns a unique unsigned integer(which is also passed as the first argument of 
 .PP
 \fBsnmp_alarm_unregister\fP 
 .PP
-\fBsnmp_alarm_unregister_all\fP 
+\fBsnmp_alarm_unregister_all\fP
 .RE
 .PP
 
@@ -146,7 +146,7 @@ void
 .PP
 \fBsnmp_alarm_register_hr\fP 
 .PP
-\fBsnmp_alarm_unregister_all\fP 
+\fBsnmp_alarm_unregister_all\fP
 .RE
 .PP
 
@@ -171,7 +171,7 @@ void
 .PP
 \fBsnmp_alarm_register_hr\fP 
 .PP
-\fBsnmp_alarm_unregister\fP 
+\fBsnmp_alarm_unregister\fP
 .RE
 .PP
 

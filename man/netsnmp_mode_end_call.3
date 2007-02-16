@@ -1,4 +1,4 @@
-.TH "mode_end_call" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "mode_end_call" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -26,7 +26,7 @@ At the end of a series of requests, call another handler hook.
 .PP
 Handlers that want to loop through a series of requests and then receive a callback at the end of a particular MODE can use this helper to make this possible. For most modules, this is not needed as the handler itself could perform a for() loop around the request list and then perform its actions afterwards. However, if something like the serialize helper is in use this isn't possible because not all the requests for a given handler are being passed downward in a single group. Thus, this helper *must* be added above other helpers like the serialize helper to be useful.
 .PP
-Multiple mode specific handlers can be registered and will be called in the order they were regestered in. Callbacks regesterd with a mode of NETSNMP_MODE_END_ALL_MODES will be called for all modes. 
+Multiple mode specific handlers can be registered and will be called in the order they were regestered in. Callbacks regesterd with a mode of NETSNMP_MODE_END_ALL_MODES will be called for all modes.
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_mode_end_call_handler (\fBnetsnmp_mode_handler_list\fP * endlist)"
@@ -40,7 +40,7 @@ returns a mode_end_call handler that can be injected into a given handler chain.
 .PP
 \fBReturns:\fP
 .RS 4
-An injectable Net-SNMP handler. 
+An injectable Net-SNMP handler.
 .RE
 .PP
 
@@ -63,7 +63,7 @@ adds a mode specific callback to the callback list.
 .PP
 \fBReturns:\fP
 .RS 4
-the new registration information list upon success. 
+the new registration information list upon success.
 .RE
 .PP
 

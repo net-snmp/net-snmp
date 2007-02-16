@@ -1,4 +1,4 @@
-.TH "snmp_session" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "snmp_session" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -340,7 +340,7 @@ copy of library errno
 .PP
 Definition at line 222 of file snmp_api.h.
 .PP
-Referenced by _sess_read(), handle_snmp_packet(), snmp_build(), snmp_error(), snmp_sess_async_send(), snmp_sess_open(), snmp_sess_read(), and snmpv3_engineID_probe().
+Referenced by _sess_read(), handle_snmp_packet(), snmp_build(), snmp_error(), snmp_sess_add_ex(), snmp_sess_async_send(), snmp_sess_open(), snmp_sess_read(), and snmpv3_engineID_probe().
 .SS "u_char \fBsnmp_session::securityAuthKey\fP[USM_AUTH_KU_LEN]"
 .PP
 Ku for auth protocol XXX. 
@@ -389,14 +389,14 @@ authoritative snmpEngineID
 .PP
 Definition at line 256 of file snmp_api.h.
 .PP
-Referenced by create_user_from_session(), and snmpv3_engineID_probe().
+Referenced by create_user_from_session(), snmpd_parse_config_trapsess(), and snmpv3_engineID_probe().
 .SS "size_t \fBsnmp_session::securityEngineIDLen\fP"
 .PP
 Length of contextEngineID. 
 .PP
 Definition at line 258 of file snmp_api.h.
 .PP
-Referenced by create_user_from_session(), and snmpv3_engineID_probe().
+Referenced by create_user_from_session(), snmpd_parse_config_trapsess(), and snmpv3_engineID_probe().
 .SS "void* \fBsnmp_session::securityInfo\fP"
 .PP
 security module specific 
@@ -413,7 +413,7 @@ snmp security model, v1, v2c, usm
 .PP
 Definition at line 291 of file snmp_api.h.
 .PP
-Referenced by snmp_sess_close(), and snmp_sess_init().
+Referenced by create_user_from_session(), snmp_sess_close(), and snmp_sess_init().
 .SS "char* \fBsnmp_session::securityName\fP"
 .PP
 on behalf of this principal 
@@ -495,7 +495,7 @@ snmp version
 .PP
 Definition at line 192 of file snmp_api.h.
 .PP
-Referenced by add_trap_session(), create_trap_session(), netsnmp_register_agent_nsap(), send_trap_to_sess(), snmp_sess_add_ex(), snmp_sess_init(), and snmpv3_engineID_probe().
+Referenced by add_trap_session(), create_trap_session(), create_user_from_session(), netsnmp_register_agent_nsap(), send_trap_to_sess(), snmp_sess_add_ex(), snmp_sess_init(), snmpd_parse_config_trapsess(), and snmpv3_engineID_probe().
 
 .SH "Author"
 .PP 
