@@ -1,16 +1,25 @@
-This file contains major changes in released revisions.  Please read
-the ChangeLog file for a more detailed listing of changes/bug fixes.
+This file contains a summary of the major changes in released revisions.
+Please see the CHANGES file for a more detailed list of specific bugs/patches
+that have been fixed/applied, and the ChangeLog file for a comprehensive
+listing of all changes made to the code.
 
 
 *5.2.4*
 
+    snmpd:
+      - handle row deletion issues in dataset tables
+      - [BUG 1527930]: fix smux authentication
+
     library:
       - *really* make SNMPv3 traps work again (user creation; 
         announced as fixed in 5.2.3, but this wasn't the case)
+      - [PATCH 1553447]: responses will get sent from the
+        original dest IP address when possible.
 
     Perl:
       - gettable() was fairly broken in the 5.3.1 release.
-      - OID handling was fully broken on various 64bit platforms
+      - OID handling and NMP.pm fixes for 64-bit platforms
+      - Fixed the perl bulkwalk function
 
 *5.2.3*
 
