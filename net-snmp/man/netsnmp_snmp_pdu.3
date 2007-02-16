@@ -1,4 +1,4 @@
-.TH "snmp_pdu" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "snmp_pdu" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -168,7 +168,7 @@ Type of this PDU.
 .PP
 Definition at line 83 of file snmp_api.h.
 .PP
-Referenced by convert_v1pdu_to_v2(), convert_v2pdu_to_v1(), handle_pdu(), handle_snmp_packet(), netsnmp_add_varbind_to_cache(), netsnmp_agent_check_parse(), netsnmp_create_subtree_cache(), netsnmp_handle_request(), netsnmp_wrap_up_request(), save_set_cache(), send_trap_to_sess(), snmp_fix_pdu(), snmp_pdu_build(), snmp_pdu_create(), snmp_pdu_parse(), snmpv3_make_report(), and snmpv3_scopedPDU_parse().
+Referenced by convert_v1pdu_to_v2(), convert_v2pdu_to_v1(), handle_pdu(), handle_snmp_packet(), netsnmp_add_varbind_to_cache(), netsnmp_agent_check_parse(), netsnmp_check_outstanding_agent_requests(), netsnmp_create_subtree_cache(), netsnmp_handle_request(), netsnmp_send_traps(), netsnmp_wrap_up_request(), save_set_cache(), send_trap_to_sess(), snmp_fix_pdu(), snmp_pdu_build(), snmp_pdu_create(), snmp_pdu_parse(), snmpv3_make_report(), and snmpv3_scopedPDU_parse().
 .SS "u_char* \fBsnmp_pdu::community\fP"
 .PP
 community for outgoing requests. 
@@ -203,7 +203,7 @@ authoritative contextName
 .PP
 Definition at line 152 of file snmp_api.h.
 .PP
-Referenced by snmp_free_pdu(), snmpv3_make_report(), and snmpv3_scopedPDU_parse().
+Referenced by netsnmp_create_subtree_cache(), snmp_free_pdu(), snmpv3_make_report(), and snmpv3_scopedPDU_parse().
 .SS "size_t \fBsnmp_pdu::contextNameLen\fP"
 .PP
 Length of contextName. 
@@ -299,7 +299,7 @@ Referenced by convert_v1pdu_to_v2(), convert_v2pdu_to_v1(), netsnmp_send_traps()
 .PP
 The actual transport domain. 
 .PP
-This SHOULD NOT BE FREE()D. 
+This SHOULD NOT BE FREE()D.
 .PP
 Definition at line 117 of file snmp_api.h.
 .PP
@@ -317,12 +317,12 @@ Unique ID for incoming transactions.
 .PP
 Definition at line 89 of file snmp_api.h.
 .PP
-Referenced by check_delayed_request(), get_set_cache(), netsnmp_create_delegated_cache(), and save_set_cache().
+Referenced by check_delayed_request(), get_set_cache(), netsnmp_check_transaction_id(), netsnmp_create_delegated_cache(), and save_set_cache().
 .SS "void* \fBsnmp_pdu::transport_data\fP"
 .PP
 Transport-specific opaque data. 
 .PP
-This replaces the IP-centric address field. 
+This replaces the IP-centric address field.
 .PP
 Definition at line 110 of file snmp_api.h.
 .PP

@@ -1,4 +1,4 @@
-.TH "Trap generation routines for mib modules to use" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "Trap generation routines for mib modules to use" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -197,7 +197,7 @@ Trap generation routines for mib modules to use \-
 .PP
 Captures responses or the lack there of from INFORMs that were sent 1) a response is received from an INFORM 2) one isn't received and the retries/timeouts have failed. 
 .PP
-Definition at line 834 of file agent_trap.c.
+Definition at line 861 of file agent_trap.c.
 .PP
 References snmp_increment_statistic().
 .PP
@@ -249,14 +249,14 @@ void
 .RS 4
 \fBsend_easy_trap\fP 
 .PP
-\fBsend_v2trap\fP 
+\fBsend_v2trap\fP
 .RE
 .PP
 
 .PP
-Definition at line 617 of file agent_trap.c.
+Definition at line 640 of file agent_trap.c.
 .PP
-References snmp_pdu::agent_addr, convert_v1pdu_to_v2(), convert_v2pdu_to_v1(), snmp_pdu::enterprise, snmp_pdu::enterprise_length, find_varbind_in_list(), snmp_pdu::flags, variable_list::name, variable_list::name_length, netsnmp_get_agent_uptime(), trap_sink::next, variable_list::next_variable, NULL, netsnmp_vardata::objid, send_trap_to_sess(), trap_sink::sesp, sinks, SNMP_AUTHENTICATED_TRAPS_DISABLED, snmp_clone_mem(), snmp_clone_varbind(), snmp_enableauthentraps, snmp_free_pdu(), snmp_free_varbind(), snmp_log(), snmp_oid_compare(), snmp_pdu_create(), snmp_varlist_add_variable(), snmptrap_oid, snmptrap_oid_len, snmptrapenterprise_oid, snmptrapenterprise_oid_len, snmp_pdu::specific_type, sysuptime_oid, sysuptime_oid_len, snmp_pdu::time, trap_prefix, snmp_pdu::trap_type, variable_list::val, snmp_pdu::variables, and trap_sink::version.
+References snmp_pdu::agent_addr, snmp_pdu::command, convert_v1pdu_to_v2(), convert_v2pdu_to_v1(), snmp_pdu::enterprise, snmp_pdu::enterprise_length, find_varbind_in_list(), snmp_pdu::flags, variable_list::name, variable_list::name_length, netsnmp_get_agent_uptime(), trap_sink::next, variable_list::next_variable, NULL, netsnmp_vardata::objid, trap_sink::pdutype, send_trap_to_sess(), trap_sink::sesp, SNMP_AUTHENTICATED_TRAPS_DISABLED, snmp_call_callbacks(), snmp_clone_mem(), snmp_clone_varbind(), snmp_enableauthentraps, snmp_free_pdu(), snmp_free_varbind(), snmp_log(), snmp_oid_compare(), snmp_pdu_create(), snmp_varlist_add_variable(), snmptrap_oid, snmptrap_oid_len, snmptrapenterprise_oid, snmptrapenterprise_oid_len, snmp_pdu::specific_type, sysuptime_oid, sysuptime_oid_len, snmp_pdu::time, trap_prefix, snmp_pdu::trap_type, variable_list::val, snmp_pdu::variables, and trap_sink::version.
 .PP
 Referenced by send_enterprise_trap_vars().
 .SS "void send_easy_trap (int trap, int specific)"
@@ -281,12 +281,12 @@ void
 .RS 4
 \fBsend_enterprise_trap_vars\fP 
 .PP
-\fBsend_v2trap\fP 
+\fBsend_v2trap\fP
 .RE
 .PP
 
 .PP
-Definition at line 948 of file agent_trap.c.
+Definition at line 978 of file agent_trap.c.
 .PP
 References NULL, and send_trap_vars().
 .PP
@@ -313,7 +313,7 @@ void
 .RS 4
 \fBsend_easy_trap\fP 
 .PP
-\fBsend_enterprise_trap_vars\fP 
+\fBsend_enterprise_trap_vars\fP
 .RE
 .PP
 
@@ -322,7 +322,7 @@ void
 .in +1c
 \fBnotification.c\fP.
 .PP
-Definition at line 977 of file agent_trap.c.
+Definition at line 1007 of file agent_trap.c.
 .PP
 References send_trap_vars().
 .SH "Variable Documentation"
@@ -336,6 +336,6 @@ References send_trap_vars().
     { SNMPV2_TRAP_OBJS_PREFIX, 3, 0 }
 .fi
 .PP
-Definition at line 102 of file agent_trap.c.
+Definition at line 103 of file agent_trap.c.
 .PP
 Referenced by convert_v1pdu_to_v2(), convert_v2pdu_to_v1(), init_traps(), and netsnmp_send_traps().

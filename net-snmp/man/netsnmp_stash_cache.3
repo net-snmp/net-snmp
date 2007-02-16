@@ -1,4 +1,4 @@
-.TH "stash_cache" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "stash_cache" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -35,7 +35,7 @@ stash_cache \- Automatically caches data for certain handlers.
 .PP 
 Automatically caches data for certain handlers. 
 .PP
-This handler caches data in an optimized way which may aleviate the need for the lower level handlers to perform as much optimization. Specifically, somewhere in the lower level handlers must be a handler that supports the MODE_GET_STASH operation. Note that the table_iterator helper supports this. 
+This handler caches data in an optimized way which may aleviate the need for the lower level handlers to perform as much optimization. Specifically, somewhere in the lower level handlers must be a handler that supports the MODE_GET_STASH operation. Note that the table_iterator helper supports this.
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_oid_stash_node\fP** netsnmp_extract_stash_cache (\fBnetsnmp_agent_request_info\fP * reqinfo)"

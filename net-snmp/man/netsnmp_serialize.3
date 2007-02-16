@@ -1,4 +1,4 @@
-.TH "serialize" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "serialize" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -29,7 +29,7 @@ serialize \- Calls sub handlers one request at a time.
 .PP 
 Calls sub handlers one request at a time. 
 .PP
-This functionally passes in one request at a time into lower handlers rather than a whole bunch of requests at once. This is useful for handlers that don't want to iterate through the request lists themselves. Generally, this is probably less efficient so use with caution. The serialize handler might be useable to dynamically fix handlers with broken looping code, however. 
+This functionally passes in one request at a time into lower handlers rather than a whole bunch of requests at once. This is useful for handlers that don't want to iterate through the request lists themselves. Generally, this is probably less efficient so use with caution. The serialize handler might be useable to dynamically fix handlers with broken looping code, however.
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_serialize_handler (void)"

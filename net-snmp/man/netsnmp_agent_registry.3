@@ -1,4 +1,4 @@
-.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "14 Jul 2006" "Version 5.2.3" "net-snmp" \" -*- nroff -*-
+.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -271,12 +271,12 @@ If the entire subtree is not-in-view we can use this information to skip calling
 .PP
 \fBReturns:\fP
 .RS 4
-0 if entire subtree is accessible, 5 if not and 7 if portions are both. 1 on error (illegal pdu version). 
+0 if entire subtree is accessible, 5 if not and 7 if portions are both. 1 on error (illegal pdu version).
 .RE
 .PP
 
 .PP
-Definition at line 1272 of file agent_registry.c.
+Definition at line 1276 of file agent_registry.c.
 .PP
 References view_parameters::check_subtree, view_parameters::errorcode, snmp_pdu::flags, view_parameters::name, view_parameters::namelen, view_parameters::pdu, snmp_call_callbacks(), and snmp_pdu::version.
 .PP
@@ -287,12 +287,12 @@ retrieves the current value of the lookup cache size
 .PP
 \fBReturns:\fP
 .RS 4
-the current lookup cache size 
+the current lookup cache size
 .RE
 .PP
 
 .PP
-Definition at line 1345 of file agent_registry.c.
+Definition at line 1349 of file agent_registry.c.
 .PP
 Referenced by netsnmp_register_mib(), and unregister_mib_context().
 .SS "void netsnmp_set_lookup_cache_size (int newsize)"
@@ -301,12 +301,12 @@ set the lookup cache size for optimized agent registration performance.
 .PP
 \fBParameters:\fP
 .RS 4
-\fInewsize\fP set to the maximum size of a cache for a given context. Set to 0 to completely disable caching, or to -1 to set to the default cache size (8), or to a number of your chosing. The rough guide is that it should be equal to the maximum number of simultanious managers you expect to talk to the agent (M) times 80% (or so, he says randomly) the average number (N) of varbinds you expect to receive in a given request for a manager. ie, M times N. Bigger does NOT necessarily mean better. Certainly 16 should be an upper limit. 32 is the hard coded limit. 
+\fInewsize\fP set to the maximum size of a cache for a given context. Set to 0 to completely disable caching, or to -1 to set to the default cache size (8), or to a number of your chosing. The rough guide is that it should be equal to the maximum number of simultanious managers you expect to talk to the agent (M) times 80% (or so, he says randomly) the average number (N) of varbinds you expect to receive in a given request for a manager. ie, M times N. Bigger does NOT necessarily mean better. Certainly 16 should be an upper limit. 32 is the hard coded limit.
 .RE
 .PP
 
 .PP
-Definition at line 1332 of file agent_registry.c.
+Definition at line 1336 of file agent_registry.c.
 .PP
 References SUBTREE_DEFAULT_CACHE_SIZE, and SUBTREE_MAX_CACHE_SIZE.
 .PP
@@ -338,8 +338,8 @@ Typically used when a module has multiple contexts defined. The parameters prior
 .PP
 
 .PP
-Definition at line 938 of file agent_registry.c.
+Definition at line 942 of file agent_registry.c.
 .PP
-References netsnmp_subtree_s::children, netsnmp_get_lookup_cache_size(), netsnmp_oid_equals(), netsnmp_set_lookup_cache_size(), netsnmp_subtree_find(), netsnmp_subtree_find_first(), and NULL.
+References netsnmp_subtree_s::children, invalidate_lookup_cache(), netsnmp_subtree_s::name_a, netsnmp_subtree_s::namelen, netsnmp_get_lookup_cache_size(), netsnmp_oid_equals(), netsnmp_set_lookup_cache_size(), netsnmp_subtree_find(), netsnmp_subtree_find_first(), netsnmp_subtree_free(), netsnmp_subtree_unload(), netsnmp_subtree_s::next, NULL, netsnmp_subtree_s::priority, and snmp_call_callbacks().
 .PP
 Referenced by netsnmp_register_mib(), netsnmp_unregister_handler(), remove_tree_entry(), and unregister_mib_range().
