@@ -230,12 +230,25 @@ agentx_realloc_build_oid(u_char ** buf, size_t * buf_len, size_t * out_len,
     DEBUGMSGOID(("dumpv_send", name, name_len));
     DEBUGMSG(("dumpv_send", "\n"));
 
-    /* It appears that the "null Object Identifier" mentioned
-       in RFC 2471, section 5.1 probably refers to one with
-       length 0, rather than the OID {0, 0}
+    /*
+     * Clarification from the AgentX mailing list.
+     * The "null Object Identifier" mentioned in RFC 2471,
+     * section 5.1 does indeed refer to {0, 0}, so the
+     * previous Net-SNMP behaviour was (almost) correct.
+     *
+     * However, for compatability with other implementations
+     * that have interpreted this differently, offer the
+     * option of turning this compression off.
      */
+#ifdef NO_COMPRESS_NULL_OID
     if (name_len == 0)
         inclusive = 0;
+#else
+    if (name_len == 2 && (name[0] == 0 && name[1] == 0)) {
+        name_len  = 0;
+        inclusive = 0;
+    }
+#endif
 
     /*
      * 'Compact' internet OIDs 
