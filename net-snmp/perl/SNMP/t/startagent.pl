@@ -9,6 +9,11 @@ $comm3 = 'v3_private';
 $sec_name = 'v3_user';
 $oid = '.1.3.6.1.2.1.1.1';
 $name = 'sysDescr';
+$name_module = 'RFC1213-MIB::sysDescr';
+$name_module2 = 'SNMPv2-MIB::sysDescr';
+$name_long = '.iso.org.dod.internet.mgmt.mib-2.system.sysDescr';
+$name_module_long = 'RFC1213-MIB::.iso.org.dod.internet.mgmt.mib-2.system.sysDescr';
+$name_module_long2 = 'SNMPv2-MIB::.iso.org.dod.internet.mgmt.mib-2.system.sysDescr';
 $auth_pass = 'test_pass_auth';
 $priv_pass = 'test_pass_priv';
 
@@ -101,15 +106,14 @@ if ($^O !~ /win32/i) {
     if (-r $snmpd_cmd and -x $snmpd_cmd) {
       $basedir = `pwd`;
       chomp $basedir;
-      #print STDERR "running: $snmpd_cmd -r -l t/snmptest.log -C -c $basedir/t/snmptest.conf -P $basedir/t/snmpd.pid/t/snmpd.pid $agent_port > /dev/null 2>&1\n";
-      system "$snmpd_cmd -r -l t/snmptest.log -C -c $basedir/t/snmptest.conf -P $basedir/t/snmpd.pid $agent_port > /dev/null 2>&1";
+      system "$snmpd_cmd -r -Lf t/snmptest.log -C -c $basedir/t/snmptest.conf -p $basedir/t/snmpd.pid ${agent_host}:${agent_port} > /dev/null 2>&1";
     } else {
       warn("Couldn't run snmpd\n");
     }
   }
   if ($snmptrapd_cmd) {
     if (-r $snmptrapd_cmd and -x $snmptrapd_cmd) {
-      system "$snmptrapd_cmd -u t/snmptrapd.pid -c t/snmptest.conf -C $trap_port > /dev/null 2>&1";
+      system "$snmptrapd_cmd -p t/snmptrapd.pid -C -c t/snmptest.conf -C ${agent_host}:${trap_port} > /dev/null 2>&1";
     } else {
       warn("Couldn't run snmptrapd\n");
     }
@@ -127,8 +131,8 @@ else {
   }
   if ($snmptrapd_cmd) {
     if (-r $snmptrapd_cmd) {
-      #print STDERR "start /min \"SNMPTRAPD\" \"$snmptrapd_cmd\" -Lf t/snmptrapdtest.log -p t/snmptrapd.pid -C -c t/snmptest.conf -C $trap_port > nul\n";
-      system "start /min \"SNMPTRAPD\" \"$snmptrapd_cmd\" -Lf t/snmptrapdtest.log -p t/snmptrapd.pid -C -c t/snmptest.conf -C $trap_port > nul";
+      #print STDERR "start /min \"SNMPTRAPD\" \"$snmptrapd_cmd\" -Lf t/snmptrapdtest.log -p t/snmptrapd.pid -C -c t/snmptest.conf $trap_port > nul\n";
+      system "start /min \"SNMPTRAPD\" \"$snmptrapd_cmd\" -Lf t/snmptrapdtest.log -p t/snmptrapd.pid -C -c t/snmptest.conf $trap_port > nul";
     } else {
       warn("Couldn't run snmptrapd\n");
     }

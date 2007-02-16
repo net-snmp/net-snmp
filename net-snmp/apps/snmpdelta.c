@@ -243,10 +243,10 @@ print_log(char *file, char *message)
 void
 sprint_descriptor(char *buffer, struct varInfo *vip)
 {
-    u_char         *buf = NULL, *cp = NULL;
+    char           *buf = NULL, *cp = NULL;
     size_t          buf_len = 0, out_len = 0;
 
-    if (!sprint_realloc_objid(&buf, &buf_len, &out_len, 1,
+    if (!sprint_realloc_objid((u_char **)&buf, &buf_len, &out_len, 1,
                               vip->info_oid, vip->oidlen)) {
         if (buf != NULL) {
             free(buf);
@@ -317,6 +317,9 @@ processFileArgs(char *fileName)
 void
 wait_for_period(int period)
 {
+#ifdef WIN32
+    Sleep(period * 1000);
+#else                   /* WIN32 */
     struct timeval  m_time, *tv = &m_time;
     struct tm       tm;
     int             count;
@@ -367,6 +370,7 @@ wait_for_period(int period)
             break;
         }
     }
+#endif                   /* WIN32 */
 }
 
 oid             sysUpTimeOid[9] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };

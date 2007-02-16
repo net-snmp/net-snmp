@@ -68,6 +68,14 @@ static struct vacm_viewEntry *viewList = NULL, *viewScanPtr = NULL;
 static struct vacm_accessEntry *accessList = NULL, *accessScanPtr = NULL;
 static struct vacm_groupEntry *groupList = NULL, *groupScanPtr = NULL;
 
+/*
+ * Macro to extend view masks with 1 bits when shorter than subtree lengths
+ * REF: vacmViewTreeFamilyMask [RFC3415], snmpNotifyFilterMask [RFC3413]
+ */
+
+#define VIEW_MASK(viewPtr, idx, mask) \
+    ((idx >= viewPtr->viewMaskLen) ? mask : (viewPtr->viewMask[idx] & mask))
+
 void
 vacm_save(const char *token, const char *type)
 {
@@ -109,7 +117,7 @@ vacm_save_view(struct vacm_viewEntry *view, const char *token,
 
     cptr =
         read_config_save_octet_string(cptr, (u_char *) view->viewName + 1,
-                                      view->viewName[0] + 1);
+                                      view->viewName[0]);
     *cptr++ = ' ';
     cptr =
         read_config_save_objid(cptr, view->viewSubtree+1,
@@ -137,6 +145,7 @@ vacm_parse_config_view(const char *token, char *line)
     line = skip_token(line);
     view.viewType = atoi(line);
     line = skip_token(line);
+    len = sizeof(view.viewName);
     line =
         read_config_read_octet_string(line, (u_char **) & viewName, &len);
     view.viewSubtreeLen = MAX_OID_LEN;
@@ -147,8 +156,9 @@ vacm_parse_config_view(const char *token, char *line)
     vptr =
         vacm_createViewEntry(view.viewName, view.viewSubtree,
                              view.viewSubtreeLen);
-    if (!vptr)
+    if (!vptr) {
         return;
+    }
 
     vptr->viewStatus = view.viewStatus;
     vptr->viewStorageType = view.viewStorageType;
@@ -221,8 +231,10 @@ vacm_parse_config_access(const char *token, char *line)
     line = skip_token(line);
     access.contextMatch = atoi(line);
     line = skip_token(line);
+    len = sizeof(access.groupName);
     line =
         read_config_read_octet_string(line, (u_char **) & groupName, &len);
+    len = sizeof(access.contextPrefix);
     line =
         read_config_read_octet_string(line, (u_char **) & contextPrefix,
                                       &len);
@@ -239,12 +251,15 @@ vacm_parse_config_access(const char *token, char *line)
     aptr->securityLevel = access.securityLevel;
     aptr->contextMatch = access.contextMatch;
     readView = (char *) aptr->readView;
+    len = sizeof(aptr->readView);
     line =
         read_config_read_octet_string(line, (u_char **) & readView, &len);
     writeView = (char *) aptr->writeView;
+    len = sizeof(aptr->writeView);
     line =
         read_config_read_octet_string(line, (u_char **) & writeView, &len);
     notifyView = (char *) aptr->notifyView;
+    len = sizeof(aptr->notifyView);
     line =
         read_config_read_octet_string(line, (u_char **) & notifyView,
                                       &len);
@@ -293,6 +308,7 @@ vacm_parse_config_group(const char *token, char *line)
     line = skip_token(line);
     group.securityModel = atoi(line);
     line = skip_token(line);
+    len = sizeof(group.securityName);
     line =
         read_config_read_octet_string(line, (u_char **) & securityName,
                                       &len);
@@ -304,6 +320,7 @@ vacm_parse_config_group(const char *token, char *line)
     gptr->status = group.status;
     gptr->storageType = group.storageType;
     groupName = (char *) gptr->groupName;
+    len = sizeof(group.groupName);
     line =
         read_config_read_octet_string(line, (u_char **) & groupName, &len);
 }
@@ -333,7 +350,7 @@ vacm_getViewEntry(const char *viewName,
                 for (oidpos = 0;
                      found && oidpos < (int) vp->viewSubtreeLen - 1;
                      oidpos++) {
-                    if ((vp->viewMask[maskpos] & mask) != 0) {
+                    if (VIEW_MASK(vp, maskpos, mask) != 0) {
                         if (viewSubtree[oidpos] !=
                             vp->viewSubtree[oidpos + 1])
                             found = 0;
@@ -424,7 +441,7 @@ vacm_checkSubtree(const char *viewName,
                 for (oidpos = 0;
                      found && oidpos < (int) vp->viewSubtreeLen - 1;
                      oidpos++) {
-                    if ((vp->viewMask[maskpos] & mask) != 0) {
+                    if (VIEW_MASK(vp, maskpos, mask) != 0) {
                         if (viewSubtree[oidpos] !=
                             vp->viewSubtree[oidpos + 1])
                             found = 0;
@@ -471,7 +488,7 @@ vacm_checkSubtree(const char *viewName,
                 for (oidpos = 0;
                      found && oidpos < (int) viewSubtreeLen;
                      oidpos++) {
-                    if ((vp->viewMask[maskpos] & mask) != 0) {
+                    if (VIEW_MASK(vp, maskpos, mask) != 0) {
                         if (viewSubtree[oidpos] !=
                             vp->viewSubtree[oidpos + 1])
                             found = 0;
@@ -614,7 +631,7 @@ vacm_destroyViewEntry(const char *viewName,
                 break;
             lastvp = vp;
         }
-        if (!vp)
+        if (!vp || !lastvp)
             return;
         lastvp->next = vp->next;
     }
@@ -737,7 +754,7 @@ vacm_destroyGroupEntry(int securityModel, const char *securityName)
                 break;
             lastvp = vp;
         }
-        if (!vp)
+        if (!vp || !lastvp)
             return;
         lastvp->next = vp->next;
     }
@@ -860,11 +877,11 @@ vacm_createAccessEntry(const char *groupName,
             break;
         if (cmp < 0)
             goto next;
-        if (lp->securityModel < securityModel)
-            break;
         if (lp->securityModel > securityModel)
+            break;
+        if (lp->securityModel < securityModel)
             goto next;
-        if (lp->securityLevel < securityLevel)
+        if (lp->securityLevel > securityLevel)
             break;
       next:
         op = lp;
@@ -900,7 +917,7 @@ vacm_destroyAccessEntry(const char *groupName,
                 break;
             lastvp = vp;
         }
-        if (!vp)
+        if (!vp || !lastvp)
             return;
         lastvp->next = vp->next;
     }

@@ -121,7 +121,6 @@
 #include "sysORTable.h"
 
 #ifdef cygwin
-#define WIN32
 #include <windows.h>
 #endif
 
@@ -144,7 +143,7 @@
 	 *
 	 *********************/
 
-#ifndef WIN32
+#if !defined (WIN32) && !defined (cygwin)
 
 #if !defined(CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
 #ifndef solaris2
@@ -298,6 +297,7 @@ var_ipAddrEntry(struct variable *vp,
         long_return = lowin_ifaddr.Addr;
         return (u_char *) & long_return;
 #elif defined(linux) || defined(sunV3)
+        *var_len = sizeof(((struct sockaddr_in *) &lowin_ifnet.if_addr)->sin_addr.s_addr);
         return (u_char *) & ((struct sockaddr_in *) &lowin_ifnet.if_addr)->
             sin_addr.s_addr;
 #else
@@ -312,6 +312,7 @@ var_ipAddrEntry(struct variable *vp,
         long_return = lowin_ifaddr.NetMask;
         return (u_char *) & long_return;
 #elif defined(linux)
+        *var_len = sizeof(((struct sockaddr_in *) &lowin_ifnet.ia_subnetmask)->sin_addr.s_addr);
         return (u_char *) & ((struct sockaddr_in *) &lowin_ifnet.
                              ia_subnetmask)->sin_addr.s_addr;
 #elif !defined(sunV3)
@@ -320,8 +321,9 @@ var_ipAddrEntry(struct variable *vp,
 #endif
     case IPADBCASTADDR:
 #ifdef hpux11
-        long_return = lowin_ifaddr.BcastAddr;
+        long_return = lowin_ifaddr.BcastAddr & 1;
 #elif defined(linux) || defined(sunV3)
+        *var_len = sizeof(long_return);
         long_return =
             ntohl(((struct sockaddr_in *) &lowin_ifnet.ifu_broadaddr)->
                   sin_addr.s_addr) & 1;
@@ -622,7 +624,7 @@ var_ipAddrEntry(struct variable * vp,
     static mib2_ipAddrEntry_t Lowentry;
     int             Found = 0;
     req_e           req_type;
-    unsigned int    ipaddr_return;
+    static uint32_t ipaddr_return;
 
     /*
      * fill in object part of name for current (less sizeof instance part) 
@@ -702,8 +704,8 @@ var_ipAddrEntry(struct variable * vp,
         ipaddr_return = Lowentry.ipAdEntNetMask;
         return (u_char *) & ipaddr_return;
     case IPADBCASTADDR:
-	*var_len = sizeof(Lowentry.ipAdEntBcastAddr);
-        return (u_char *)&Lowentry.ipAdEntBcastAddr;
+	long_return = Lowentry.ipAdEntBcastAddr;
+	return (u_char *) & long_return;
     case IPADREASMMAX:
 	long_return = Lowentry.ipAdEntReasmMaxSize;
 	return (u_char *) & long_return;
@@ -943,7 +945,7 @@ var_ipAddrEntry(struct variable *vp,
 
 #endif                          /* CAN_USE_SYSCTL && IPCTL_STATS */
 
-#else                           /* WIN32 */
+#else                           /* WIN32 cygwin */
 #include <iphlpapi.h>
 u_char         *
 var_ipAddrEntry(struct variable *vp,
@@ -1049,4 +1051,4 @@ var_ipAddrEntry(struct variable *vp,
     }
     return NULL;
 }
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */

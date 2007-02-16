@@ -60,7 +60,7 @@ nsExtendConfigEntry     OBJECT-TYPE
     INDEX       { nsExtendToken }
     ::= { nsExtendConfigTable 1 }
 
-NsExtendEntry ::= SEQUENCE {
+NsExtendConfigEntry ::= SEQUENCE {
     nsExtendToken       DisplayString,
     nsExtendCommand     DisplayString,
     nsExtendArgs        DisplayString,
@@ -209,10 +209,10 @@ nsExtendOutput1Entry     OBJECT-TYPE
     ::= { nsExtendOutput1Table 1 }
 
 NsExtendOutput1Entry ::= SEQUENCE {
-    nsExtendOutput1Line OCTET STRING,
-    nsExtendOutputFull  OCTET STRING,
+    nsExtendOutput1Line DisplayString,
+    nsExtendOutputFull  DisplayString,
     nsExtendOutNumLines INTEGER,
-    nsExtendResult      INTEGER,
+    nsExtendResult      INTEGER
 }
 
 nsExtendOutput1Line OBJECT-TYPE

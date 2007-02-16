@@ -298,6 +298,9 @@ var_usmUser(struct variable * vp,
     static u_char   string[1];
     static oid      objid[2];   /* for .0.0 */
 
+    if (!vp || !name || !length || !var_len)
+        return NULL;
+
     *write_method = 0;          /* assume it isnt writable for the time being */
     *var_len = sizeof(long_ret);        /* assume an integer and change later if not */
 

@@ -230,9 +230,25 @@ agentx_realloc_build_oid(u_char ** buf, size_t * buf_len, size_t * out_len,
     DEBUGMSGOID(("dumpv_send", name, name_len));
     DEBUGMSG(("dumpv_send", "\n"));
 
+    /*
+     * Clarification from the AgentX mailing list.
+     * The "null Object Identifier" mentioned in RFC 2471,
+     * section 5.1 does indeed refer to {0, 0}, so the
+     * previous Net-SNMP behaviour was (almost) correct.
+     *
+     * However, for compatability with other implementations
+     * that have interpreted this differently, offer the
+     * option of turning this compression off.
+     */
+#ifdef NO_COMPRESS_NULL_OID
+    if (name_len == 0)
+        inclusive = 0;
+#else
     if (name_len == 2 && (name[0] == 0 && name[1] == 0)) {
-        name_len = 0;           /* Null OID */
+        name_len  = 0;
+        inclusive = 0;
     }
+#endif
 
     /*
      * 'Compact' internet OIDs 
@@ -1337,6 +1353,7 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
     u_int           int_val;
     int            int_offset;
     u_int          *int_ptr = (u_int *) data_buf;
+    struct counter64 tmp64;
 
     DEBUGDUMPHEADER("recv", "VarBind:");
     DEBUGDUMPHEADER("recv", "Type");
@@ -1388,38 +1405,17 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
         break;
 
     case ASN_COUNTER64:
-        /*
-         * Set up offset to be 2 for 64-bit, 1 for 32-bit.
-         * Use this value in formulas to correctly put integer values
-         * extracted from buffer into correct place in byte buffer.
-         */
-        int_offset = sizeof(long) == 8 ? 2 : 1;
+        memset(&tmp64, 0, sizeof(tmp64));
 	if (network_byte_order) {
-            /*
-             * For 64-bit, clear integers 2 & 3, then place values in 0 & 1.
-             * For 32-bit, clear integers 0 & 1, then overwrite with values.
-             * Could also put a conditional in here to skip clearing 0 & 1.
-             */
-	    int_ptr[(2 * int_offset) - 2] = 0;
-	    int_ptr[(2 * int_offset) - 1] = 0;
-	    int_ptr[0] = agentx_parse_int(bufp, network_byte_order);
-	    int_ptr[1] = agentx_parse_int(bufp + 4, network_byte_order);
-	} else {
-            /*
-             * For 64-bit, clear integers 0 & 1, then place values in 2 & 3.
-             * For 32-bit, clear integers 0 & 1, then overwrite with values.
-             * Could also put a conditional in here to skip clearing 0 & 1.
-             */
-	    int_ptr[0] = 0;
-	    int_ptr[1] = 0;
-	    int_ptr[(2 * int_offset) - 2] = agentx_parse_int(bufp + 4,
-                                                            network_byte_order);
-	    int_ptr[(2 * int_offset) - 1] = agentx_parse_int(bufp,
-                                                            network_byte_order);
-	}
+	    tmp64.high = agentx_parse_int(bufp,   network_byte_order);
+            tmp64.low  = agentx_parse_int(bufp+4, network_byte_order);
+        } else {
+            tmp64.high = agentx_parse_int(bufp+4, network_byte_order);
+            tmp64.low  = agentx_parse_int(bufp,   network_byte_order);
+        }
 
-        /* return data_len 2*8 if 64-bit, 2*4 if 32-bit */
-	*data_len = 2 * sizeof(long);
+        memcpy(data_buf, &tmp64, sizeof(tmp64));
+        *data_len = sizeof(tmp64);
 	bufp += 2 * sizeof(long);
 	*length -= 8;
         break;

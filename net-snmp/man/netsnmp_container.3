@@ -1,17 +1,21 @@
-.TH "null_container: Helps you implement specialized" 3 "5 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "null_container" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-null_container: Helps you implement specialized \- containers.  
+null_container \- Helps you implement specialized containers
+.PP
+This is a simple container that doesn't actually contain anything.  
 
 .PP
 .SS "Modules"
 
 .in +1c
 .ti -1c
-.RI "group\fBnull_container: Helps you implement specialized\fP"
+.RI "\fBnull_container\fP"
 .br
-.RI "\fIcontainers. \fP"
+.RI "\fIHelps you implement specialized containers
+.PP
+This is a simple container that doesn't actually contain anything. \fP"
 .PP
 
 .in -1c
@@ -19,10 +23,10 @@ null_container: Helps you implement specialized \- containers.
 
 .in +1c
 .ti -1c
-.RI "netsnmp_container * \fBnetsnmp_container_get_null\fP (void)"
+.RI "\fBnetsnmp_container\fP * \fBnetsnmp_container_get_null\fP (void)"
 .br
 .ti -1c
-.RI "netsnmp_factory * \fBnetsnmp_container_get_null_factory\fP (void)"
+.RI "\fBnetsnmp_factory\fP * \fBnetsnmp_container_get_null_factory\fP (void)"
 .br
 .ti -1c
 .RI "void \fBnetsnmp_container_null_init\fP (void)"
@@ -30,8 +34,12 @@ null_container: Helps you implement specialized \- containers.
 .in -1c
 .SH "Detailed Description"
 .PP 
-containers. This is a simple container that doesn't actually contain anything. All the methods simply log a debug message and return.
+Helps you implement specialized containers
+.PP
+This is a simple container that doesn't actually contain anything. 
+.PP
+All the methods simply log a debug message and return.
 .PP
 The original intent for this container is as a wrapper for a specialized container. Implement the functions you need, create a null_container, and override the default functions with your specialized versions.
 .PP
-You can use the 'container:null' debug token to see what functions are being called, to help determine if you need to implement them. 
+You can use the 'container:null' debug token to see what functions are being called, to help determine if you need to implement them.

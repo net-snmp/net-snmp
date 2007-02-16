@@ -71,7 +71,7 @@ extern          "C" {
         Netsnmp_First_Data_Point *get_first_data_point;
 
        /** Given the previous loop context, this should return the
-           next loop context, assiocated index set and optionally a
+           next loop context, associated index set and optionally a
            data context */
         Netsnmp_Next_Data_Point *get_next_data_point;
 

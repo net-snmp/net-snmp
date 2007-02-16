@@ -2,7 +2,7 @@
  * snmpusm.c - send snmp SET requests to a network entity to change the
  *             usm user database
  *
- * XXX get engineID dynamicly.
+ * XXX get engineID dynamically.
  * XXX read passwords from prompts
  * XXX customize responses with user names, etc.
  */
@@ -123,6 +123,9 @@ oid            *authKeyChange = authKeyOid, *privKeyChange = privKeyOid;
 oid            *dhauthKeyChange = usmDHUserAuthKeyChange,
                *dhprivKeyChange = usmDHUserPrivKeyChange;
 int             doauthkey = 0, doprivkey = 0, uselocalizedkey = 0;
+size_t          usmUserEngineIDLen = 0;
+u_char         *usmUserEngineID = NULL;
+
 
 void
 usage(void)
@@ -132,19 +135,21 @@ usage(void)
     fprintf(stderr, " COMMAND\n\n");
     snmp_parse_args_descriptions(stderr);
     fprintf(stderr, "\nsnmpusm commands:\n");
-    fprintf(stderr, "  create     USER [CLONEFROM-USER]\n");
-    fprintf(stderr, "  delete     USER\n");
-    fprintf(stderr, "  cloneFrom  USER CLONEFROM-USER\n");
-    fprintf(stderr, "  activate   USER\n");
-    fprintf(stderr, "  deactivate USER\n");
-    fprintf(stderr, "  [-Ca] [-Cx] changekey [USER]\n");
+    fprintf(stderr, "  [-CE ENGINE-ID] create     USER [CLONEFROM-USER]\n");
+    fprintf(stderr, "  [-CE ENGINE-ID] delete     USER\n");
+    fprintf(stderr, "  [-CE ENGINE-ID] cloneFrom  USER CLONEFROM-USER\n");
+    fprintf(stderr, "  [-CE ENGINE-ID] activate   USER\n");
+    fprintf(stderr, "  [-CE ENGINE-ID] deactivate USER\n");
+    fprintf(stderr, "  [-CE ENGINE-ID] [-Ca] [-Cx] changekey [USER]\n");
     fprintf(stderr,
-            "  [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]\n");
+            "  [-CE ENGINE-ID] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]\n");
     fprintf(stderr,
-            "  <-Ca | -Cx> -Ck passwd OLD-LOCALIZED-KEY NEW-PASSPHRASE [USER]\n");
+            "  [-CE ENGINE-ID] (-Ca|-Cx) -Ck passwd OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]\n");
+    fprintf(stderr, "\t\t-CE ENGINE-ID\tSet usmUserEngineID (e.g. 800000020109840301).\n");
     fprintf(stderr, "\t\t-Cx\t\tChange the privacy key.\n");
     fprintf(stderr, "\t\t-Ca\t\tChange the authentication key.\n");
-    fprintf(stderr, "\t\t-Ck\t\tUse old localized key instead of old passphrase.\n");
+    fprintf(stderr, "\t\t-Ck\t\tAllows to use localized key (must start with 0x)\n");
+    fprintf(stderr, "\t\t\t\tinstead of passphrase.\n");
 }
 
 /*
@@ -185,27 +190,35 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
                size_t outkey_len,
                netsnmp_pdu *pdu, const char *keyname,
                oid *keyoid, size_t keyoid_len) {
-    char *dhkeychange;
+    u_char *dhkeychange;
     DH *dh;
     BIGNUM *other_pub;
     u_char *key;
     size_t key_len;
     unsigned char *cp;
             
-    dhkeychange = (char *) malloc(2 * vars->val_len * sizeof(char));
+    dhkeychange = (u_char *) malloc(2 * vars->val_len * sizeof(char));
+    if (!dhkeychange)
+        return SNMPERR_GENERR;
     memcpy(dhkeychange, vars->val.string, vars->val_len);
 
     cp = dhvar->val.string;
     dh = d2i_DHparams(NULL, (const unsigned char **) &cp,
                       dhvar->val_len);
 
-    if (!dh || !dh->g || !dh->p)
+    if (!dh || !dh->g || !dh->p) {
+        SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
+    }
+    
     DH_generate_key(dh);
-    if (!dh->pub_key)
+    if (!dh->pub_key) {
+        SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
+    }
             
     if (vars->val_len != BN_num_bytes(dh->pub_key)) {
+        SNMP_FREE(dhkeychange);
         fprintf(stderr,"incorrect diffie-helman lengths (%d != %d)\n",
                 vars->val_len, BN_num_bytes(dh->pub_key));
         return SNMPERR_GENERR;
@@ -214,13 +227,23 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     BN_bn2bin(dh->pub_key, dhkeychange + vars->val_len);
 
     key_len = DH_size(dh);
-    if (!key_len)
+    if (!key_len) {
+        SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
+    }
     key = (u_char *) malloc(key_len * sizeof(u_char));
 
-    other_pub = BN_bin2bn(vars->val.string, vars->val_len, NULL);
-    if (!other_pub)
+    if (!key) {
+        SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
+    }
+
+    other_pub = BN_bin2bn(vars->val.string, vars->val_len, NULL);
+    if (!other_pub) {
+        SNMP_FREE(dhkeychange);
+        SNMP_FREE(key);
+        return SNMPERR_GENERR;
+    }
 
     if (DH_compute_key(key, other_pub, dh)) {
         u_char *kp;
@@ -236,6 +259,10 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     snmp_pdu_add_variable(pdu, keyoid, keyoid_len,
                           ASN_OCTET_STR, dhkeychange,
                           2 * vars->val_len);
+
+    SNMP_FREE(dhkeychange);
+    SNMP_FREE(other_pub);
+    SNMP_FREE(key);
 
     return SNMPERR_SUCCESS;
 }
@@ -260,6 +287,38 @@ optProc(int argc, char *const *argv, int opt)
 	        uselocalizedkey = 1;
 		break;
 
+	    case 'E': {
+	        size_t ebuf_len = 32; /* XXX: MAX_ENGINEID_LENGTH */
+                u_char *ebuf;
+                if (optind < argc) {
+                    if (argv[optind]) {
+                        ebuf = (u_char *)malloc(ebuf_len);
+                        if (ebuf == NULL) {
+                            fprintf(stderr, 
+                                    "malloc failure processing -CE option.\n");
+                            exit(1);
+                        }
+		        if (!snmp_hex_to_binary(&ebuf, &ebuf_len,
+                                                &usmUserEngineIDLen, 1, argv[optind])) {
+                            fprintf(stderr, 
+                                    "Bad usmUserEngineID value after -CE option.\n");
+		            free(ebuf);
+		            exit(1);
+		        }
+		        usmUserEngineID = ebuf;
+		        DEBUGMSGTL(("snmpusm", "usmUserEngineID set to: "));
+		        DEBUGMSGHEX(("snmpusm", usmUserEngineID, usmUserEngineIDLen));
+		        DEBUGMSG(("snmpusm", "\n"));
+
+                    }
+                } else {
+                    fprintf(stderr, "Bad -CE option: no argument given\n");
+                    exit(1);
+                }
+                optind++;
+                break;
+            }
+
             default:
                 fprintf(stderr, "Unknown flag passed to -C: %c\n",
                         optarg[-1]);
@@ -275,21 +334,8 @@ main(int argc, char *argv[])
 {
     netsnmp_session session, *ss;
     netsnmp_pdu    *pdu = NULL, *response = NULL;
-#ifdef notused
-    netsnmp_variable_list *vars;
-#endif
 
     int             arg;
-#ifdef notused
-    int             count;
-    int             current_name = 0;
-    int             current_type = 0;
-    int             current_value = 0;
-    char           *names[128];
-    char            types[128];
-    char           *values[128];
-    oid             name[MAX_OID_LEN];
-#endif
     size_t          name_length = USM_OID_LEN;
     size_t          name_length2 = USM_OID_LEN;
     int             status;
@@ -332,14 +378,21 @@ main(int argc, char *argv[])
         break;
     }
 
+    if (arg >= argc) {
+        fprintf(stderr, "Please specify an operation to perform.\n");
+        usage();
+        exit(1);
+    }
+
     SOCK_STARTUP;
 
     /*
      * open an SNMP session 
      */
     /*
-     * Note:  this wil obtain the engineID needed below 
+     * Note:  this needs to obtain the engineID used below 
      */
+    session.flags &= ~SNMP_FLAGS_DONT_PROBE;
     ss = snmp_open(&session);
     if (ss == NULL) {
         /*
@@ -350,15 +403,19 @@ main(int argc, char *argv[])
     }
 
     /*
+     * set usmUserEngineID from ss->contextEngineID
+     *   if not already set (via -CE)
+     */
+    if (usmUserEngineID == NULL) {
+      usmUserEngineID    = ss->contextEngineID;
+      usmUserEngineIDLen = ss->contextEngineIDLen;
+    }
+
+    /*
      * create PDU for SET request and add object names and values to request 
      */
     pdu = snmp_pdu_create(SNMP_MSG_SET);
 
-    if (arg >= argc) {
-        fprintf(stderr, "Please specify a operation to perform.\n");
-        usage();
-        exit(1);
-    }
 
     if (strcmp(argv[arg], CMD_PASSWD_NAME) == 0) {
 
@@ -456,7 +513,7 @@ main(int argc, char *argv[])
             exit(1);
         }
 
-	if (uselocalizedkey) {
+	if (uselocalizedkey && (strncmp(oldpass, "0x", 2) == 0)) {
 	    /*
 	     * use the localized key from the command line
 	     */
@@ -494,7 +551,7 @@ main(int argc, char *argv[])
 	     */
 	    rval = generate_kul(session.securityAuthProto,
 				session.securityAuthProtoLen,
-				ss->contextEngineID, ss->contextEngineIDLen,
+				usmUserEngineID, usmUserEngineIDLen,
 				oldKu, oldKu_len, oldkul, &oldkul_len);
 	    
 	    if (rval != SNMPERR_SUCCESS) {
@@ -503,17 +560,35 @@ main(int argc, char *argv[])
 		exit(1);
 	    }
 	}
+	if (uselocalizedkey && (strncmp(newpass, "0x", 2) == 0)) {
+	    /*
+	     * use the localized key from the command line
+	     */
+	    u_char *buf;
+	    size_t buf_len = SNMP_MAXBUF_SMALL;
+	    buf = (u_char *) malloc (buf_len * sizeof(u_char));
 
-        rval = generate_kul(session.securityAuthProto,
-                            session.securityAuthProtoLen,
-                            ss->contextEngineID, ss->contextEngineIDLen,
-                            newKu, newKu_len, newkul, &newkul_len);
+	    newkul_len = 0; /* initialize the offset */
+	    if (!snmp_hex_to_binary((u_char **) (&buf), &buf_len, &newkul_len, 0, newpass)) {
+	      snmp_perror(argv[0]);
+	      fprintf(stderr, "generating the new Kul from localized key failed\n");
+	      exit(1);
+	    }
+	    
+	    memcpy(newkul, buf, newkul_len);
+	    SNMP_FREE(buf);
+	} else {
+	    rval = generate_kul(session.securityAuthProto,
+				session.securityAuthProtoLen,
+				usmUserEngineID, usmUserEngineIDLen,
+				newKu, newKu_len, newkul, &newkul_len);
 
-        if (rval != SNMPERR_SUCCESS) {
-            snmp_perror(argv[0]);
-            fprintf(stderr, "generating the new Kul failed\n");
-            exit(1);
-        }
+	    if (rval != SNMPERR_SUCCESS) {
+	        snmp_perror(argv[0]);
+		fprintf(stderr, "generating the new Kul failed\n");
+		exit(1);
+	    }
+	}
 
         /*
          * for encryption, we may need to truncate the key to the proper length
@@ -582,14 +657,14 @@ main(int argc, char *argv[])
          */
         if (doauthkey) {
             setup_oid(authKeyChange, &name_length,
-                      ss->contextEngineID, ss->contextEngineIDLen,
+                      usmUserEngineID, usmUserEngineIDLen,
                       session.securityName);
             snmp_pdu_add_variable(pdu, authKeyChange, name_length,
                                   ASN_OCTET_STR, keychange, keychange_len);
         }
         if (doprivkey) {
             setup_oid(privKeyChange, &name_length2,
-                      ss->contextEngineID, ss->contextEngineIDLen,
+                      usmUserEngineID, usmUserEngineIDLen,
                       session.securityName);
             snmp_pdu_add_variable(pdu, privKeyChange, name_length2,
                                   ASN_OCTET_STR,
@@ -616,7 +691,7 @@ main(int argc, char *argv[])
              *   (and make them active immediately)
              */
             setup_oid(usmUserStatus, &name_length,
-                      ss->contextEngineID, ss->contextEngineIDLen, argv[arg-1]);
+                      usmUserEngineID, usmUserEngineIDLen, argv[arg-1]);
             longvar = RS_CREATEANDGO;
             snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                                   ASN_INTEGER, (u_char *) & longvar,
@@ -624,10 +699,10 @@ main(int argc, char *argv[])
 
             name_length = USM_OID_LEN;
             setup_oid(usmUserCloneFrom, &name_length,
-                      ss->contextEngineID, ss->contextEngineIDLen,
+                      usmUserEngineID, usmUserEngineIDLen,
                       argv[arg - 1]);
             setup_oid(usmUserSecurityName, &name_length2,
-                      ss->contextEngineID, ss->contextEngineIDLen,
+                      usmUserEngineID, usmUserEngineIDLen,
                       argv[arg]);
             snmp_pdu_add_variable(pdu, usmUserCloneFrom, name_length,
                                   ASN_OBJECT_ID,
@@ -639,7 +714,7 @@ main(int argc, char *argv[])
              * The Net-SNMP agent won't allow such a user to be made active.
              */
             setup_oid(usmUserStatus, &name_length,
-                      ss->contextEngineID, ss->contextEngineIDLen, argv[arg-1]);
+                      usmUserEngineID, usmUserEngineIDLen, argv[arg-1]);
             longvar = RS_CREATEANDWAIT;
             snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                                   ASN_INTEGER, (u_char *) & longvar,
@@ -661,14 +736,14 @@ main(int argc, char *argv[])
 
         command = CMD_CLONEFROM;
         setup_oid(usmUserStatus, &name_length,
-                  ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
+                  usmUserEngineID, usmUserEngineIDLen, argv[arg]);
         longvar = RS_ACTIVE;
         snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                               ASN_INTEGER, (u_char *) & longvar,
                               sizeof(longvar));
         name_length = USM_OID_LEN;
         setup_oid(usmUserCloneFrom, &name_length,
-                  ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
+                  usmUserEngineID, usmUserEngineIDLen, argv[arg]);
 
         if (++arg >= argc) {
             fprintf(stderr,
@@ -678,7 +753,7 @@ main(int argc, char *argv[])
         }
 
         setup_oid(usmUserSecurityName, &name_length2,
-                  ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
+                  usmUserEngineID, usmUserEngineIDLen, argv[arg]);
         snmp_pdu_add_variable(pdu, usmUserCloneFrom, name_length,
                               ASN_OBJECT_ID,
                               (u_char *) usmUserSecurityName,
@@ -697,7 +772,7 @@ main(int argc, char *argv[])
 
         command = CMD_DELETE;
         setup_oid(usmUserStatus, &name_length,
-                  ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
+                  usmUserEngineID, usmUserEngineIDLen, argv[arg]);
         longvar = RS_DESTROY;
         snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                               ASN_INTEGER, (u_char *) & longvar,
@@ -715,7 +790,7 @@ main(int argc, char *argv[])
 
         command = CMD_ACTIVATE;
         setup_oid(usmUserStatus, &name_length,
-                  ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
+                  usmUserEngineID, usmUserEngineIDLen, argv[arg]);
         longvar = RS_ACTIVE;
         snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                               ASN_INTEGER, (u_char *) & longvar,
@@ -733,7 +808,7 @@ main(int argc, char *argv[])
 
         command = CMD_DEACTIVATE;
         setup_oid(usmUserStatus, &name_length,
-                  ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
+                  usmUserEngineID, usmUserEngineIDLen, argv[arg]);
         longvar = RS_NOTINSERVICE;
         snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                               ASN_INTEGER, (u_char *) & longvar,
@@ -788,7 +863,7 @@ main(int argc, char *argv[])
         /* maybe the auth key public value */
         if (doauthkey) {
             setup_oid(dhauthKeyChange, &name_length,
-                      ss->contextEngineID, ss->contextEngineIDLen,
+                      usmUserEngineID, usmUserEngineIDLen,
                       session.securityName);
             snmp_add_null_var(dhpdu, dhauthKeyChange, name_length);
         }
@@ -796,7 +871,7 @@ main(int argc, char *argv[])
         /* maybe the priv key public value */
         if (doprivkey) {
             setup_oid(dhprivKeyChange, &name_length2,
-                      ss->contextEngineID, ss->contextEngineIDLen,
+                      usmUserEngineID, usmUserEngineIDLen,
                       session.securityName);
             snmp_add_null_var(dhpdu, dhprivKeyChange, name_length2);
         }
@@ -868,7 +943,7 @@ main(int argc, char *argv[])
     if (status == STAT_SUCCESS) {
         if (response) {
             if (response->errstat == SNMP_ERR_NOERROR) {
-                fprintf(stderr, "%s\n", successNotes[command - 1]);
+                fprintf(stdout, "%s\n", successNotes[command - 1]);
             } else {
                 fprintf(stderr, "Error in packet.\nReason: %s\n",
                         snmp_errstring(response->errstat));

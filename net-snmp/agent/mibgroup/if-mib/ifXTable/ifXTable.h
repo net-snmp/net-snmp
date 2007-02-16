@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @defgroup misc misc: Miscellaneous routines
  *
  * @{
  */

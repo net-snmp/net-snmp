@@ -33,6 +33,9 @@ CLEAN :
 	-@erase "$(INTDIR)\inet6.obj"
 	-@erase "$(INTDIR)\main.obj"
 	-@erase "$(INTDIR)\route.obj"
+	-@erase "$(INTDIR)\ffs.obj"
+	-@erase "$(INTDIR)\iquery.obj"
+	-@erase "$(INTDIR)\iquery.obj"
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\winstub.obj"
 	-@erase "$(INTDIR)\$(PROGNAME).pch"
@@ -90,6 +93,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\inet6.obj" \
 	"$(INTDIR)\main.obj" \
 	"$(INTDIR)\route.obj" \
+	"$(INTDIR)\ffs.obj" \
+	"$(INTDIR)\iquery.obj" \
 	"$(INTDIR)\winstub.obj"
 
 "..\bin\$(OUTDIR)\$(PROGNAME).exe" : "..\bin\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
@@ -119,6 +124,10 @@ CLEAN :
 	-@erase "$(INTDIR)\main.sbr"
 	-@erase "$(INTDIR)\route.obj"
 	-@erase "$(INTDIR)\route.sbr"
+	-@erase "$(INTDIR)\ffs.obj"
+	-@erase "$(INTDIR)\iquery.obj"
+	-@erase "$(INTDIR)\ffs.sbr"
+	-@erase "$(INTDIR)\iquery.sbr"
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\vc??.pdb"
 	-@erase "$(INTDIR)\winstub.obj"
@@ -176,6 +185,8 @@ BSC32_SBRS= \
 	"$(INTDIR)\inet6.sbr" \
 	"$(INTDIR)\main.sbr" \
 	"$(INTDIR)\route.sbr" \
+	"$(INTDIR)\ffs.sbr" \
+	"$(INTDIR)\iquery.sbr" \
 	"$(INTDIR)\winstub.sbr"
 
 "$(INTDIR)\$(PROGNAME).bsc" : "..\bin\$(OUTDIR)" $(BSC32_SBRS)
@@ -191,6 +202,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\inet6.obj" \
 	"$(INTDIR)\main.obj" \
 	"$(INTDIR)\route.obj" \
+	"$(INTDIR)\ffs.obj" \
+	"$(INTDIR)\iquery.obj" \
 	"$(INTDIR)\winstub.obj"
 
 "..\bin\$(OUTDIR)\$(PROGNAME).exe" : "..\bin\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
@@ -302,6 +315,42 @@ SOURCE=..\..\apps\$(PROGNAME)\route.c
 
 
 "$(INTDIR)\route.obj"	"$(INTDIR)\route.sbr" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+!ENDIF 
+
+SOURCE=..\..\apps\$(PROGNAME)\ffs.c
+
+!IF  "$(CFG)" == "release"
+
+
+"$(INTDIR)\ffs.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+!ELSEIF  "$(CFG)" == "debug"
+
+
+"$(INTDIR)\ffs.obj"	"$(INTDIR)\ffs.sbr" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+!ENDIF 
+
+SOURCE=..\..\apps\$(PROGNAME)\iquery.c
+
+!IF  "$(CFG)" == "release"
+
+
+"$(INTDIR)\iquery.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+!ELSEIF  "$(CFG)" == "debug"
+
+
+"$(INTDIR)\iquery.obj"	"$(INTDIR)\iquery.sbr" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

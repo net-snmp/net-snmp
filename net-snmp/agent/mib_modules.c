@@ -44,6 +44,9 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "m2m.h"
+#ifdef USING_IF_MIB_DATA_ACCESS_INTERFACE_MODULE
+#include <net-snmp/data_access/interface.h>
+#endif
 
 #include "mibgroup/struct.h"
 #include <net-snmp/agent/mib_modules.h>
@@ -54,83 +57,6 @@
 #include "mibgroup/agentx/subagent.h"
 #endif
 
-struct module_init_list *initlist = NULL;
-struct module_init_list *noinitlist = NULL;
-
-
-void
-add_to_init_list(char *module_list)
-{
-    struct module_init_list *newitem, **list;
-    char           *cp;
-    char           *st;
-
-    if (module_list == NULL) {
-        return;
-    } else {
-        cp = (char *) module_list;
-    }
-
-    if (*cp == '-' || *cp == '!') {
-        cp++;
-        list = &noinitlist;
-    } else {
-        list = &initlist;
-    }
-
-    cp = strtok_r(cp, ", :", &st);
-    while (cp) {
-        newitem = (struct module_init_list *) calloc(1, sizeof(*initlist));
-        newitem->module_name = strdup(cp);
-        newitem->next = *list;
-        *list = newitem;
-        cp = strtok_r(NULL, ", :", &st);
-    }
-}
-
-int
-should_init(const char *module_name)
-{
-    struct module_init_list *listp;
-
-    /*
-     * a definitive list takes priority 
-     */
-    if (initlist) {
-        listp = initlist;
-        while (listp) {
-            if (strcmp(listp->module_name, module_name) == 0) {
-                DEBUGMSGTL(("mib_init", "initializing: %s\n",
-                            module_name));
-                return DO_INITIALIZE;
-            }
-            listp = listp->next;
-        }
-        DEBUGMSGTL(("mib_init", "skipping:     %s\n", module_name));
-        return DONT_INITIALIZE;
-    }
-
-    /*
-     * initialize it only if not on the bad list (bad module, no bone) 
-     */
-    if (noinitlist) {
-        listp = noinitlist;
-        while (listp) {
-            if (strcmp(listp->module_name, module_name) == 0) {
-                DEBUGMSGTL(("mib_init", "skipping:     %s\n",
-                            module_name));
-                return DONT_INITIALIZE;
-            }
-            listp = listp->next;
-        }
-    }
-    DEBUGMSGTL(("mib_init", "initializing: %s\n", module_name));
-
-    /*
-     * initialize it 
-     */
-    return DO_INITIALIZE;
-}
 
 void
 init_mib_modules(void)

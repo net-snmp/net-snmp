@@ -5,6 +5,9 @@ BEGIN {
         chdir 't' if -d 't';
         @INC = '../lib' if -d '../lib';
     }
+    eval "use Cwd qw(abs_path)";
+    $ENV{'SNMPCONFPATH'} = 'nopath';
+    $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");
 }
 
 use Test;
@@ -66,7 +69,12 @@ SNMP::loadModules("IP-MIB", "IF-MIB", "IANAifType-MIB", "RFC1213-MIB");
 #SNMP::unloadModules(RMON-MIB);
 #etherStatsDataSource shouldn't be found.
 #present only in 1271 & RMON-MIB.
-$res = $SNMP::MIB{etherStatsDataSource};
+#
+# XXX: because we can't count on user .conf files, we should turn off
+# support for them (maybe set SNMPCONFPATH at the top of this
+# script?).  But for the mean time just search for a bogus node that
+# will never exist.
+$res = $SNMP::MIB{bogusetherStatsDataSource};
 
 ok(!defined($res));
 

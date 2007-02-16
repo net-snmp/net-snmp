@@ -6,7 +6,7 @@
 ###############################################################################
 #
 # This file is intended to only be an example.  If, however, you want
-# to use it, it should be placed in SYSCONFDIR/share/snmp/snmpd.conf.
+# to use it, it should be placed in SYSCONFDIR/snmp/snmpd.conf.
 # When the snmpd agent starts up, this is where it will look for it.
 #
 # You might be interested in generating your own snmpd.conf file using
@@ -392,21 +392,12 @@ load 12 14 14
 
 # The agent can support subagents using a number of extension mechanisms.
 # From the 4.2.1 release, AgentX support is being compiled in by default.
-# However, this is still experimental code, so should not be used on
-# critical production systems.
-#   Please see the file README.agentx for more details.
-#
-# If having read, marked, learnt and inwardly digested this information,
-# you decide that you do wish to make use of this mechanism, simply
-# uncomment the following directive.
+# To use this mechanism, simply uncomment the following directive.
 #
 #  master  agentx
 #
-# I repeat - this is *NOT* regarded as suitable for front-line production
-# systems, though it is probably stable enough for day-to-day use.
-# Probably.
+#   Please see the file README.agentx for more details.
 #
-# No refunds will be given.
 
 
 ###############################################################################

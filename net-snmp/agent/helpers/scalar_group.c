@@ -19,7 +19,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup scalar_group_group scalar_group: process groups of scalars.
+/** @defgroup scalar_group_group scalar_group
+ *  Process groups of scalars.
  *  @ingroup leaf
  *  @{
  */
@@ -171,9 +172,10 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
          * If we didn't get an answer (due to holes in the group)
 	 *   set things up to retry again.
          */
-        if (requests->requestvb->type == ASN_NULL ||
-            requests->requestvb->type == SNMP_NOSUCHOBJECT ||
-            requests->requestvb->type == SNMP_NOSUCHINSTANCE) {
+        if (!requests->delegated &&
+            (requests->requestvb->type == ASN_NULL ||
+             requests->requestvb->type == SNMP_NOSUCHOBJECT ||
+             requests->requestvb->type == SNMP_NOSUCHINSTANCE)) {
             snmp_set_var_objid(requests->requestvb,
                                reginfo->rootoid, reginfo->rootoid_len);
             requests->requestvb->name[reginfo->rootoid_len-1] = ++subid;
@@ -189,6 +191,5 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_GENERR;
 }
 
-/*
- * @} 
+/** @} 
  */

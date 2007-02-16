@@ -178,7 +178,6 @@ typedef long    fd_mask;
 #define TIMETICK         500000L
 
 int             snmp_dump_packet;
-int             running = 1;
 int             reconfig = 0;
 int             Facility = LOG_DAEMON;
 
@@ -191,9 +190,10 @@ int             Facility = LOG_DAEMON;
 int             agent_status = AGENT_STOPPED;
 LPTSTR          app_name = _T("Net-SNMP Agent");     /* Application Name */
 #else
-char           *app_name = "snmpd";
+const char     *app_name = "snmpd";
 #endif
 
+extern int      netsnmp_running;
 extern char   **argvrestartp;
 extern char    *argvrestart;
 extern char    *argvrestartname;
@@ -201,6 +201,7 @@ extern char    *argvrestartname;
 #define NUM_SOCKETS	32
 
 #ifdef USING_SMUX_MODULE
+#include <mibgroup/smux/smux.h>
 static int      sdlist[NUM_SOCKETS], sdlen = 0;
 #endif                          /* USING_SMUX_MODULE */
 
@@ -275,10 +276,11 @@ usage(char *prog)
     printf("\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
     printf("\n  -a\t\t\tlog addresses\n");
     printf("  -A\t\t\tappend to the logfile rather than truncating it\n");
-    printf("  -c FILE\t\tread FILE as a configuration file\n");
+    printf("  -c FILE[,...]\t\tread FILE(s) as configuration file(s)\n");
     printf("  -C\t\t\tdo not read the default configuration files\n");
     printf("  -d\t\t\tdump sent and received SNMP packets\n");
-    printf("  -D\t\t\tturn on debugging output\n");
+    printf("  -D TOKEN[,...]\tturn on debugging output for the given TOKEN(s)\n"
+	   "\t\t\t  (try ALL for extremely verbose output)\n");
     printf("  -f\t\t\tdo not fork from the shell\n");
 #if HAVE_UNISTD_H
     printf("  -g GID\t\tchange to this numeric gid after opening\n"
@@ -345,7 +347,7 @@ SnmpdShutDown(int a)
 #ifdef WIN32SERVICE
     extern netsnmp_session *main_session;
 #endif
-    running = 0;
+    netsnmp_running = 0;
 #ifdef WIN32SERVICE
     /*
      * In case of windows, select() in receive() function will not return 
@@ -395,13 +397,17 @@ SnmpTrapNodeDown(void)
      */
 }
 
+/*
+ * dummy1 used to be stderr_log, but that was never set. So, ignore the
+ * value here, instead of always disabling stderr logging (which might
+ * have been set up using the new log handler methods).
+ */
 static void
-setup_log(int restart, int dont_zero, int stderr_log, int syslog_log, 
+setup_log(int restart, int dont_zero, int dummy1, int syslog_log, 
 	  char *logfile)
 {
     static char logfile_s[PATH_MAX + 1] = { 0 };
     static int dont_zero_s  = 0;
-    static int stderr_log_s = 0;
     static int syslog_log_s = 0;
 
     if (restart == 0) {
@@ -409,14 +415,7 @@ setup_log(int restart, int dont_zero, int stderr_log, int syslog_log,
 	    strncpy(logfile_s, logfile, PATH_MAX);
 	}
 	dont_zero_s  = dont_zero;
-	stderr_log_s = stderr_log;
 	syslog_log_s = syslog_log;
-    }
-
-    if (stderr_log_s) {
-	snmp_enable_stderrlog();
-    } else {
-	snmp_disable_stderrlog();
     }
 
     if (logfile_s[0]) {
@@ -455,7 +454,7 @@ main(int argc, char *argv[])
     int             arg, i, ret;
     int             dont_fork = 0;
     int             dont_zero_log = 0;
-    int             stderr_log = 0, syslog_log = 0;
+    int             syslog_log = 0;
     int             uid = 0, gid = 0;
     int             agent_mode = -1;
     char            logfile[PATH_MAX + 1] = { 0 };
@@ -465,6 +464,44 @@ main(int argc, char *argv[])
 #if HAVE_GETPID
     int fd;
     FILE           *PID;
+#endif
+
+#ifndef WIN32
+    /*
+     * close all non-standard file descriptors we may have
+     * inherited from the shell.
+     */
+    for (i = getdtablesize() - 1; i > 2; --i) {
+        (void) close(i);
+    }
+#endif				/* #WIN32 */
+    
+    /*
+     * register signals ASAP to prevent default action (usually core)
+     * for signals during startup...
+     */
+#ifdef SIGTERM
+    DEBUGMSGTL(("signal", "registering SIGTERM signal handler\n"));
+    signal(SIGTERM, SnmpdShutDown);
+#endif
+#ifdef SIGINT
+    DEBUGMSGTL(("signal", "registering SIGINT signal handler\n"));
+    signal(SIGINT, SnmpdShutDown);
+#endif
+#ifdef SIGHUP
+    DEBUGMSGTL(("signal", "registering SIGHUP signal handler\n"));
+    signal(SIGHUP, SnmpdReconfig);
+#endif
+#ifdef SIGUSR1
+    DEBUGMSGTL(("signal", "registering SIGUSR1 signal handler\n"));
+    signal(SIGUSR1, SnmpdDump);
+#endif
+#ifdef SIGPIPE
+    DEBUGMSGTL(("signal", "registering SIGPIPE signal handler\n"));
+    signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
+#endif
+#ifdef SIGXFSZ
+    signal(SIGXFSZ, SnmpdCatchRandomSignal);
 #endif
 
 #ifdef LOGFILE
@@ -616,9 +653,6 @@ main(int argc, char *argv[])
             break;
 
         case 'L':
-	    /*
-            stderr_log = 1;
-	     */
 	    if  (snmp_log_options( optarg, argc, argv ) < 0 ) {
                 usage(argv[0]);
             }
@@ -810,7 +844,7 @@ main(int argc, char *argv[])
 					  NETSNMP_DS_AGENT_PORTS)));
     }
 
-    setup_log(0, dont_zero_log, stderr_log, syslog_log, logfile);
+    setup_log(0, dont_zero_log, 0, syslog_log, logfile);
 
     /*
      * Initialize a argv set to the current for restarting the agent.   
@@ -857,7 +891,7 @@ main(int argc, char *argv[])
     if(!dont_fork) {
         int quit = ! netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                             NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
-        ret = netsnmp_daemonize(quit, stderr_log);
+        ret = netsnmp_daemonize(quit, snmp_stderrlog_status());
         /*
          * xxx-rks: do we care if fork fails? I think we should...
          */
@@ -880,29 +914,6 @@ main(int argc, char *argv[])
          */
         Exit(1);                /*  Exit logs exit val for us  */
     }
-#ifdef SIGTERM
-    DEBUGMSGTL(("signal", "registering SIGTERM signal handler\n"));
-    signal(SIGTERM, SnmpdShutDown);
-#endif
-#ifdef SIGINT
-    DEBUGMSGTL(("signal", "registering SIGINT signal handler\n"));
-    signal(SIGINT, SnmpdShutDown);
-#endif
-#ifdef SIGHUP
-    DEBUGMSGTL(("signal", "registering SIGHUP signal handler\n"));
-    signal(SIGHUP, SnmpdReconfig);
-#endif
-#ifdef SIGUSR1
-    DEBUGMSGTL(("signal", "registering SIGUSR1 signal handler\n"));
-    signal(SIGUSR1, SnmpdDump);
-#endif
-#ifdef SIGPIPE
-    DEBUGMSGTL(("signal", "registering SIGPIPE signal handler\n"));
-    signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
-#endif
-#ifdef SIGXFSZ
-    signal(SIGXFSZ, SnmpdCatchRandomSignal);
-#endif
 
     /*
      * Store persistent data immediately in case we crash later.  
@@ -1014,6 +1025,7 @@ main(int argc, char *argv[])
     SNMP_FREE(argvrestartname);
     SNMP_FREE(argvrestart);
     SNMP_FREE(argvrestartp);
+    SOCK_CLEANUP;
     return 0;
 }                               /* End main() -- snmpd */
 
@@ -1042,10 +1054,18 @@ receive(void)
 #endif                          /* USING_SMUX_MODULE */
 
     /*
+     * ignore early sighup during startup
+     */
+    reconfig = 0;
+
+    /*
      * Loop-forever: execute message handlers for sockets with data
      */
-    while (running) {
+    while (netsnmp_running) {
         if (reconfig) {
+#if HAVE_SIGHOLD
+            sighold(SIGHUP);
+#endif
             reconfig = 0;
             snmp_log(LOG_INFO, "Reconfiguring daemon\n");
 	    /*  Stop and restart logging.  This allows logfiles to be
@@ -1056,6 +1076,9 @@ receive(void)
 		     netsnmp_get_version());
             update_config();
             send_easy_trap(SNMP_TRAP_ENTERPRISESPECIFIC, 3);
+#if HAVE_SIGHOLD
+            sigrelse(SIGHUP);
+#endif
         }
 
         for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
@@ -1066,10 +1089,12 @@ receive(void)
         }
 
         /*
-         * default to sleeping for a really long time
+         * default to sleeping for a really long time. INT_MAX
+         * should be sufficient (eg we don't care if time_t is
+         * a long that's bigger than an int).
          */
         tvp = &timeout;
-        tvp->tv_sec = LONG_MAX;
+        tvp->tv_sec = INT_MAX;
         tvp->tv_usec = 0;
 
         numfds = 0;
@@ -1191,7 +1216,7 @@ receive(void)
                      * likely that we got a signal. Check our special signal
                      * flags before retrying select.
                      */
-		    if (running && !reconfig) {
+		    if (netsnmp_running && !reconfig) {
                         goto reselect;
 		    }
                     continue;

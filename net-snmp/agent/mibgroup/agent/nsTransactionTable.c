@@ -39,8 +39,13 @@ initialize_table_nsTransactionTable(void)
                                                      nsTransactionTable_oid_len,
                                                      HANDLER_CAN_RONLY);
 
-    if (!my_handler || !table_info || !iinfo)
+    if (!my_handler || !table_info || !iinfo) {
+        if (my_handler)
+            netsnmp_handler_registration_free(my_handler);
+        SNMP_FREE(table_info);
+        SNMP_FREE(iinfo);
         return;                 /* mallocs failed */
+    }
 
     /***************************************************
      * Setting up the table's definition

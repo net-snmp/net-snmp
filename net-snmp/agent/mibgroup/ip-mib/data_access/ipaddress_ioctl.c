@@ -299,7 +299,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
  * find unused alias number
  */
 static int
-_next_alias(char *if_name)
+_next_alias(const char *if_name)
 {
     int             i, j, k, sd, interfaces = 0, len;
     struct ifconf   ifc;
@@ -400,7 +400,7 @@ _netsnmp_ioctl_ipaddress_set_v4(netsnmp_ipaddress_entry * entry)
     memset(&ifrq, 0, sizeof(ifrq));
 
     if ('\0' == extras->name[0]) {
-        char *name = netsnmp_access_interface_name_find(entry->if_index);
+        const char *name = netsnmp_access_interface_name_find(entry->if_index);
         int   alias_idx;
 
         if (NULL == name) {

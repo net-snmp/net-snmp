@@ -21,7 +21,7 @@ check_build_dir()
          return
       fi
       # make sure we can find build dir
-      if ! test -d $build_dir/snmplib/.libs ; then
+      if test ! -d $build_dir/snmplib/.libs ; then
          echo "$build_dir does not appear to be a build directory."
          exit 1
       fi
@@ -35,15 +35,15 @@ NSC_LDFLAGS="@LDFLAGS@"
 NSC_INCLUDEDIR=${includedir}
 NSC_LIBDIR=-L${libdir}
 NSC_LIBS="@LIBS@ @WRAPLIBS@"
-NSC_AGENTLIBS="@AGENTLIBS@ @WRAPLIBS@"
+NSC_AGENTLIBS="@AGENTLIBS@ @WRAPLIBS@ @PERLLDOPTS@"
 NSC_PREFIX=$prefix
 NSC_EXEC_PREFIX=$exec_prefix
 NSC_SRCDIR=@srcdir@
 NSC_INCDIR=${NSC_PREFIX}/include
 NSC_BASE_SUBAGENT_LIBS="-lnetsnmpagent -lnetsnmphelpers -lnetsnmp"
-NSC_BASE_AGENT_LIBS="-lnetsnmpagent -lnetsnmpmibs -lnetsnmphelpers -lnetsnmp"
+NSC_BASE_AGENT_LIBS="-lnetsnmpmibs -lnetsnmpagent -lnetsnmphelpers -lnetsnmp"
 NSC_SRC_LIBDIRS="agent/.libs snmplib/.libs agent/helpers/.libs"
-NSC_SRC_LIBDEPS="agent/.libs/libnetsnmpagent.a agent/.libs/libnetsnmpmibs.a snmplib/.libs/libnetsnmp.a agent/helpers/.libs/libnetsnmphelpers.a"
+NSC_SRC_LIBDEPS="agent/.libs/libnetsnmpmibs.a agent/.libs/libnetsnmpagent.a agent/helpers/.libs/libnetsnmphelpers.a snmplib/.libs/libnetsnmp.a"
 
 if test "x$NSC_SRCDIR" = "x." ; then
    NSC_SRCDIR="NET-SNMP-SOURCE-DIR"
@@ -87,6 +87,18 @@ else
     --snmpd-module-list|--mod*)
       echo @MODULE_LIST@
       ;;
+    --default-mibs|--mibs|--MIBS)
+      echo @DEFAULT_MIBS@
+      ;;
+    --default-mibdirs|--mibdirs|--MIBDIRS)
+      echo @DEFAULT_MIBDIRS@
+      ;;
+    --snmpconfpath|--SNMPCONFPATH)
+      echo "@SNMPCONFPATH@@ENV_SEPARATOR@@SNMPSHAREPATH@@ENV_SEPARATOR@@SNMPLIBPATH@@ENV_SEPARATOR@$HOME/.snmp@ENV_SEPARATOR@@PERSISTENT_DIRECTORY@"
+      ;;
+    --persistent-directory|--persistent-dir)
+      echo @PERSISTENT_DIRECTORY@
+      ;;
     #################################################### compile
     --base-cflags)
       echo @CFLAGS@ @CPPFLAGS@ -I${NSC_INCLUDEDIR}
@@ -98,7 +110,7 @@ else
       echo $NSC_SRCDIR
       ;;
     #################################################### linking
-    --lib-dir)
+    --libdir|--lib-dir)
       echo $NSC_LIBDIR
       ;;
     --ldflags|--ld*)
@@ -273,10 +285,10 @@ else
       echo "adding the following line to $outfile:"
       echo "  " $line
       # in case it hasn't ever been started yet, start it.
-      if ! test -d $outdir ; then
+      if test ! -d $outdir ; then
           mkdir $outdir
       fi
-      if ! test -d $outfile ; then
+      if test ! -d $outfile ; then
           touch $outfile
       fi
       echo $line >> $outfile
@@ -285,7 +297,7 @@ else
       line="$token $user"
       echo "adding the following line to $outfile:"
       echo "  " $line
-      if ! test -d $outfile ; then
+      if test ! -d $outfile ; then
           touch $outfile
       fi
       echo $line >> $outfile
@@ -399,6 +411,9 @@ main (int argc, char **argv) {
  /* we are a subagent */
   netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
 
+  /* initialize tcpip, if necessary */
+  SOCK_STARTUP;
+
   /* initialize the agent library */
   init_agent("$outname");
 
@@ -418,7 +433,7 @@ EOF
     # finish file
     cat >> $tmpfile <<EOF
 
-  /* ustMain will be used to read ustMain.conf files. */
+  /* $outname will be used to read $outname.conf files. */
   init_snmp("$outname");
 
   /* In case we recevie a request to stop (kill -TERM or kill -INT) */
@@ -437,6 +452,7 @@ EOF
 
   /* at shutdown time */
   snmp_shutdown("$outname");
+  SOCK_CLEANUP;
   exit(0);
 }
 
@@ -445,7 +461,7 @@ EOF
         echo "Ack.  Can't create $tmpfile."
 	exit 1
       fi
-      cmd="@CC@ $cflags @CFLAGS@ @DEVFLAGS@ -I. -I${NSC_INCLUDEDIR} -o $outname $tmpfile $cfiles $NSC_LDFLAGS -L$NSC_EXEC_PREFIX/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp $NSC_AGENTLIBS $ldflags"
+      cmd="@CC@ $cflags @CFLAGS@ @DEVFLAGS@ -I. -I${NSC_INCLUDEDIR} -o $outname $tmpfile $cfiles $NSC_LDFLAGS $NSC_LIBDIR $NSC_BASE_AGENT_LIBS $NSC_AGENTLIBS $ldflags"
       echo "running: $cmd"
       `$cmd`
       if test "x$norm" != "x1" ; then
@@ -528,11 +544,15 @@ if test "x$usage" = "xyes"; then
   echo "         --cflags flags   extra cflags to use (e.g. -I...)."
   echo "         --ldflags flags  extra ld flags to use (e.g. -L... -l...)."
   echo ""
-  echo "  Details on how the net-nsmp package was compiled:"
+  echo "  Details on how the net-snmp package was compiled:"
   echo ""
-  echo "    --configure-options   Display original configure arguments"
-  echo "    --snmpd-module-list   Display the modules compiled into the agent"
-  echo "    --prefix              Display the installation prefix"
+  echo "    --configure-options   display original configure arguments"
+  echo "    --prefix              display the installation prefix"
+  echo "    --snmpd-module-list   display the modules compiled into the agent"
+  echo "    --default-mibs        display default list of MIBs"
+  echo "    --default-mibdirs     display default list of MIB directories"
+  echo "    --snmpconfpath        display default SNMPCONFPATH"
+  echo "    --persistent-directory display default persistent directory"
   echo ""
   exit
 fi  

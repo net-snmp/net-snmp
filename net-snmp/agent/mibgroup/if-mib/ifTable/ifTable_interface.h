@@ -68,6 +68,11 @@ extern          "C" {
      */
     void            ifTable_valid_columns_set(netsnmp_column_info *vc);
 
+    /*
+     * special container init for shared ifTable/ifXTable container
+     */
+    void            if_mib_container_init(void);
+
 
 #ifdef __cplusplus
 }

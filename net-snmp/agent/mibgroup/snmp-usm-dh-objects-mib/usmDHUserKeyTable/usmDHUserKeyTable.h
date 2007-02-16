@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @defgroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -143,7 +143,7 @@ config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_
 
 
         /*
-         * flags per row. Currently, the first 8 bits are reserverd
+         * flags per row. Currently, the first (lower) 8 bits are reserved
          * for the user. See mfd.h for other flags.
          */
         u_int           rowreq_flags;

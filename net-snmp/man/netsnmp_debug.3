@@ -1,8 +1,8 @@
-.TH "debug: print out debugging information about the handler chain being called." 3 "5 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "debug" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-debug: print out debugging information about the handler chain being called. \- This is a useful module for run-time debugging of requests as the pass this handler in a calling chain.  
+debug \- Print out debugging information about the handler chain being called.  
 
 .PP
 .SS "handler"
@@ -52,6 +52,8 @@ debug: print out debugging information about the handler chain being called. \- 
 .in -1c
 .SH "Detailed Description"
 .PP 
+Print out debugging information about the handler chain being called. 
+.PP
 This is a useful module for run-time debugging of requests as the pass this handler in a calling chain. All debugging output is done via the standard debugging routines with a token name of 'helper:debug', so use the -Dhelper:debug command line flag to see the output when running the snmpd demon. It's not recommended you compile this into a handler chain during compile time, but instead use the 'injectHandler' token in the snmpd.conf file (or similar) to add it to the chain later:
 .PP
 injectHandler debug my_module_name
@@ -60,46 +62,60 @@ to see an example output, try:
 .PP
 injectHandler debug mibII/system
 .PP
-and then run snmpwalk on the 'system' group. 
+and then run snmpwalk on the 'system' group.
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_debug_handler (void)"
 .PP
-returns a debug handler that can be injected into a given handler chain. Definition at line 54 of file debug_handler.c.
+returns a debug handler that can be injected into a given handler chain. 
 .PP
-References netsnmp_create_handler().
+Definition at line 55 of file debug_handler.c.
+.PP
+References netsnmp_create_handler(), and netsnmp_debug_helper().
 .PP
 Referenced by netsnmp_init_debug_helper().
 .SS "void netsnmp_init_bulk_to_next_helper (void)"
 .PP
-initializes the bulk_to_next helper which then registers a bulk_to_next handler as a run-time injectable handler for configuration file use. Definition at line 114 of file bulk_to_next.c.
+initializes the bulk_to_next helper which then registers a bulk_to_next handler as a run-time injectable handler for configuration file use. 
+.PP
+Definition at line 115 of file bulk_to_next.c.
 .PP
 Referenced by netsnmp_init_helpers().
 .SS "void netsnmp_init_debug_helper (void)"
 .PP
-initializes the debug helper which then registers a debug handler as a run-time injectable handler for configuration file use. Definition at line 158 of file debug_handler.c.
+initializes the debug helper which then registers a debug handler as a run-time injectable handler for configuration file use. 
+.PP
+Definition at line 160 of file debug_handler.c.
 .PP
 References netsnmp_get_debug_handler(), and netsnmp_register_handler_by_name().
 .SS "void netsnmp_init_helpers (void)"
 .PP
-call the initialization sequence for all handlers with init_ routines. Definition at line 34 of file all_helpers.c.
+call the initialization sequence for all handlers with init_ routines. 
 .PP
-References netsnmp_init_bulk_to_next_helper(), netsnmp_init_debug_helper(), netsnmp_init_read_only_helper(), netsnmp_init_serialize(), and netsnmp_init_stash_cache_helper().
+Definition at line 36 of file all_helpers.c.
+.PP
+References netsnmp_init_bulk_to_next_helper(), netsnmp_init_debug_helper(), netsnmp_init_read_only_helper(), netsnmp_init_serialize(), netsnmp_init_stash_cache_helper(), and netsnmp_init_table_dataset().
 .PP
 Referenced by init_agent().
 .SS "void netsnmp_init_read_only_helper (void)"
 .PP
-initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for configuration file use. Definition at line 86 of file read_only.c.
+initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for configuration file use. 
+.PP
+Definition at line 87 of file read_only.c.
 .PP
 Referenced by netsnmp_init_helpers().
 .SS "void netsnmp_init_serialize (void)"
 .PP
-initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use. Definition at line 96 of file serialize.c.
+initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use. 
+.PP
+Definition at line 97 of file serialize.c.
 .PP
 Referenced by netsnmp_init_helpers().
 .SS "void netsnmp_init_stash_cache_helper (void)"
 .PP
-initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for configuration file use. Definition at line 188 of file stash_cache.c.
+initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for configuration file use. 
+.PP
+Definition at line 189 of file stash_cache.c.
 .PP
 References netsnmp_get_stash_cache_handler(), and netsnmp_register_handler_by_name().
 .PP

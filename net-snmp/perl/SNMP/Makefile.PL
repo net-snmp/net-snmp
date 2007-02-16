@@ -2,6 +2,7 @@ use ExtUtils::MakeMaker;
 require 5;
 use Config;
 use Getopt::Long;
+my $lib_version;
 my %MakeParams = ();
 my $opts;
 
@@ -11,6 +12,8 @@ my $opts;
 %MakeParams = InitMakeParams();
 
 WriteMakefile(%MakeParams);
+
+Check_Version();
 
 GetTestInfo();
 
@@ -87,13 +90,14 @@ sub InitMakeParams {
 	} else {
 	    $Params{'CCFLAGS'} = $ENV{'NETSNMP_CCFLAGS'};
 	}
+        $lib_version = `$opts->{'nsconfig'} --version`;
 	if (lc($opts->{'insource'}) eq "true") {
 	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 #	} else {
 #	    $Params{'PREREQ_PM'} = { 'NetSNMP::default_store' => 0.01 };
 	}
-	$Params{'CCFLAGS'} =~ s/ -W[-\w]+//g; # ignore developer warnings
+	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
 	if (!$ENV{'NETSNMP_PREFIX'}) {
 	    $prefix            = `$opts->{'nsconfig'} --prefix`;
 	    chomp($prefix);
@@ -258,7 +262,10 @@ sub NetSNMPGetOpts {
       $basedir =~ /(.*?)\\perl.*/;
       $basedir = $1;
       print "Net-SNMP base directory: $basedir\n";
-
+      if ($basedir =~ / /) {
+        die "\nA space has been detected in the base directory.  This is not " .
+            "supported\nPlease rename the folder and try again.\n\n";
+      }
     }
     else
     {
@@ -304,3 +311,52 @@ sub find_files {
     }
 }
 
+
+sub Check_Version {
+  if (($Config{'osname'} ne 'MSWin32' || $ENV{'OSTYPE'} eq 'msys')) {
+    my $foundversion = 0;
+    return if ($ENV{'NETSNMP_DONT_CHECK_VERSION'});
+    open(I,"<Makefile");
+    while (<I>) {
+	if (/^VERSION = (.*)/) {
+	    my $perlver = $1;
+	    my $srcver = $lib_version;
+	    chomp($srcver);
+	    my $srcfloat = floatize_version($srcver);
+	    $perlver =~ s/pre/0./;
+	    # we allow for perl/CPAN-only revisions beyond the default
+	    # version formatting of net-snmp itself.
+	    $perlver =~ s/(\.\d{5}).*/\1/;
+	    $perlver =~ s/0*$//;
+	    if ($srcfloat ne $perlver) {
+		if (!$foundversion) {
+		    print STDERR "ERROR:
+Net-SNMP installed version: $srcver => $srcfloat
+Perl Module Version:        $perlver
+
+These versions must match for perfect support of the module.  It is possible
+that different versions may work together, but it is strongly recommended
+that you make these two versions identical.  You can get the Net-SNMP
+source code and the associated perl modules directly from 
+
+   http://www.net-snmp.org/
+
+If you want to continue anyway please set the NETSNMP_DONT_CHECK_VERSION
+environmental variable to 1 and re-run the Makefile.PL script.\n";
+		    exit(1);
+		}
+	    }
+	    $foundversion = 1;
+	    last;
+	}
+    }
+    close(I);
+    die "ERROR: Couldn't find version number of this module\n" 
+      if (!$foundversion);
+  }
+}
+
+sub floatize_version {
+    my ($major, $minor, $patch, $opps) = ($_[0] =~ /^(\d+)\.(\d+)\.?(\d*)\.?(\d*)/);
+    return $major + $minor/100 + $patch/10000 + $opps/100000;
+}

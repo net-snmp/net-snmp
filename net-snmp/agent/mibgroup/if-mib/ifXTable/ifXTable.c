@@ -109,7 +109,13 @@ initialize_table_ifXTable(void)
      * call interface initialization code
      */
     _ifXTable_initialize_interface(user_context, flags);
-    netsnmp_assert(NULL != _ifXTable_container_get());
+
+    /*
+     * if there is no container, bail. otherwise, register the callbacks
+     * for persistent storage.
+     */
+    if (NULL == _ifXTable_container_get())
+        return; /* msg already logged */
 
     register_config_handler(NULL, "ifXTable", _ifXTable_restore, NULL,
                             NULL);
@@ -1154,6 +1160,9 @@ ifLinkUpDownTrapEnable_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     netsnmp_assert(NULL != rowreq_ctx);
 
+    if (0 == rowreq_ctx->data.ifLinkUpDownTrapEnable)
+        return MFD_SKIP;
+
     /*
      * TODO:231:o: |-> Extract the current value of the ifLinkUpDownTrapEnable data.
      * set (* ifLinkUpDownTrapEnable_val_ptr ) from rowreq_ctx->data
@@ -1218,7 +1227,10 @@ ifHighSpeed_get(ifXTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ifHighSpeed data.
      * set (* ifHighSpeed_val_ptr ) from rowreq_ctx->data
      */
-    (*ifHighSpeed_val_ptr) = rowreq_ctx->data.ifHighSpeed;
+    if (0 == rowreq_ctx->data.ifHighSpeed)
+        (*ifHighSpeed_val_ptr) = rowreq_ctx->data.ifSpeed / 100000;
+    else
+        (*ifHighSpeed_val_ptr) = rowreq_ctx->data.ifHighSpeed;
 
     return MFD_SUCCESS;
 }                               /* ifHighSpeed_get */
@@ -1280,7 +1292,11 @@ ifPromiscuousMode_get(ifXTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ifPromiscuousMode data.
      * set (* ifPromiscuousMode_val_ptr ) from rowreq_ctx->data
      */
-    (*ifPromiscuousMode_val_ptr) = rowreq_ctx->data.ifPromiscuousMode;
+    /** this is coming from the interface entry, which is a boolean */
+    if (rowreq_ctx->data.ifPromiscuousMode)
+        (*ifPromiscuousMode_val_ptr) = 1;
+    else
+        (*ifPromiscuousMode_val_ptr) = 2;
 
     return MFD_SUCCESS;
 }                               /* ifPromiscuousMode_get */
@@ -1330,6 +1346,9 @@ ifConnectorPresent_get(ifXTable_rowreq_ctx * rowreq_ctx,
     DEBUGMSGTL(("verbose:ifXTable:ifConnectorPresent_get", "called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
+
+    if (0 == rowreq_ctx->data.ifConnectorPresent)
+        return MFD_SKIP;
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifConnectorPresent data.
@@ -2136,6 +2155,7 @@ ifPromiscuousMode_undo_setup(ifXTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:455:o: |-> Setup ifPromiscuousMode undo.
      */
+#ifdef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
     /*
      * copy ifPromiscuousMode data
      * set rowreq_ctx->undo->ifPromiscuousMode from rowreq_ctx->data.ifPromiscuousMode
@@ -2144,7 +2164,6 @@ ifPromiscuousMode_undo_setup(ifXTable_rowreq_ctx * rowreq_ctx)
         rowreq_ctx->data.ifPromiscuousMode;
 
 
-#ifdef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
     return MFD_SUCCESS;
 #else
     return MFD_NOT_VALID_EVER;
@@ -2196,13 +2215,14 @@ ifPromiscuousMode_undo(ifXTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:456:o: |-> Clean up ifPromiscuousMode undo.
      */
+#ifdef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
     /*
      * copy ifPromiscuousMode data
      * set rowreq_ctx->data.ifPromiscuousMode from rowreq_ctx->undo->ifPromiscuousMode
      */
     rowreq_ctx->data.ifPromiscuousMode =
         rowreq_ctx->undo->ifPromiscuousMode;
-
+#endif
 
     return MFD_SUCCESS;
 }                               /* ifPromiscuousMode_undo */
@@ -2472,7 +2492,7 @@ _ifXTable_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
     size = sizeof(row_token) + 1 +      /* 'ifXTable ' */
         13 +                    /* ifIndex value + ' ' */
         13 +                    /* col #, + ':' */
-        rowreq_ctx->data.ifAlias_len + 2 +      /* [0|1] + ' ' */
+        (rowreq_ctx->data.ifAlias_len * 2) + 2 +      /* [0|1] + ' ' */
         4;                      /* '\n\0' & possible quoting */
 
     /*

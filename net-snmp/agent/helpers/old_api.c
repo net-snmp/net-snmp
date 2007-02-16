@@ -24,7 +24,8 @@
 void            set_current_agent_session(netsnmp_agent_session *asp);
 netsnmp_agent_session *netsnmp_get_current_agent_session(void);
 
-/** @defgroup old_api old_api: Calls mib module code written in the old style of code.
+/** @defgroup old_api old_api
+ *  Calls mib module code written in the old style of code.
  *  @ingroup handler
  *  This is a backwards compatilibity module that allows code written
  *  in the old API to be run under the new handler based architecture.
@@ -216,6 +217,7 @@ netsnmp_register_mib_table_row(const char *moduleName,
         reg_parms.range_subid = var_subid;
         reg_parms.range_ubound = ubound;
         reg_parms.timeout = timeout;
+        reg_parms.contextName = context;
         rc = snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                                  SNMPD_CALLBACK_REGISTER_OID, &reg_parms);
     }

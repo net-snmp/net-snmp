@@ -42,6 +42,7 @@
 #include <net-snmp/library/container.h>
 
 #include "ifXTable_interface.h"
+#include "if-mib/ifTable/ifTable_interface.h"
 
 /**********************************************************************
  **********************************************************************
@@ -112,6 +113,12 @@ _ifXTable_initialize_interface(ifXTable_registration_ptr reg_ptr,
     DEBUGMSGTL(("internal:ifXTable:_ifXTable_initialize_interface",
                 "called\n"));
 
+    /*
+     * make sure the ifTable container has been initialized, since
+     * we use its container, and we can't guarantee that it has
+     * already been initialized.
+     */
+    (void)if_mib_container_init();
 
     /*************************************************
      *
@@ -145,10 +152,8 @@ _ifXTable_initialize_interface(ifXTable_registration_ptr reg_ptr,
      * set up the container
      */
     _ifXTable_container_init(&ifXTable_if_ctx);
-    if (NULL == ifXTable_if_ctx.container) {
-        snmp_log(LOG_ERR, "could not initialize container for ifXTable\n");
-        return;
-    }
+    if (NULL == ifXTable_if_ctx.container)
+        return; /* msg already logged */
 
     /*
      * access_multiplexer: REQUIRED wrapper for get request handling
@@ -321,7 +326,7 @@ ifXTable_index_to_oid(netsnmp_index * oid_idx,
     err = build_oid_noalloc(oid_idx->oids, oid_idx->len, &oid_idx->len,
                             NULL, 0, &var_ifIndex);
     if (err)
-        snmp_log(LOG_ERR, "error %d converting index to oid\n");
+        snmp_log(LOG_ERR, "error %d converting index to oid\n", err);
 
     /*
      * parsing may have allocated memory. free it.

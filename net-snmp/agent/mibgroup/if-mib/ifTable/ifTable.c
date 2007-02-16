@@ -329,15 +329,19 @@ ifDescr_get(ifTable_rowreq_ctx * rowreq_ctx, char **ifDescr_val_ptr_ptr,
     /*
      * if ifDescr is NULL, use the ifName
      */
+    if (NULL == rowreq_ctx->data.ifDescr) {
 #ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
-    if (NULL == rowreq_ctx->data.ifDescr)
         tmp_descr = rowreq_ctx->data.ifName;
-    else
+#else
+        tmp_descr = NULL;
 #endif
+    } else
         tmp_descr = rowreq_ctx->data.ifDescr;
 
     if (NULL != tmp_descr)
         tmp_len = strlen(tmp_descr);
+    else
+        tmp_len = 0;
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifDescr data.
@@ -1775,14 +1779,6 @@ ifTable_undo_setup(ifTable_rowreq_ctx * rowreq_ctx)
      * TODO:451:M: |-> Setup ifTable undo.
      * set up ifTable undo information, in preparation for a set.
      */
-    rowreq_ctx->undo->ifentry =
-        netsnmp_access_interface_entry_create(rowreq_ctx->data.ifentry->
-                                              name, rowreq_ctx->data.ifentry->index);
-    if (NULL == rowreq_ctx->undo->ifentry)
-        rc = MFD_ERROR;
-    else
-        netsnmp_access_interface_entry_copy(rowreq_ctx->undo->ifentry,
-                                            rowreq_ctx->data.ifentry);
 
     return rc;
 }                               /* ifTable_undo_setup */

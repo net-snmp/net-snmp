@@ -19,6 +19,7 @@ top_builddir=..
 # source dir...
 @GNU_vpath@ %.h $(srcdir)
 @GNU_vpath@ %.c $(srcdir)
+@GNU_vpath@ %.rc $(srcdir)
 # fallback to regular VPATH for non-gnu...
 @NON_GNU_VPATH@ $(srcdir)
 
@@ -146,7 +147,7 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 
 OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	snmp_auth.o asn1.o md5.o snmp_parse_args.o		\
-	system.o vacm.o int64.o read_config.o 			\
+	system.o vacm.o int64.o read_config.o pkcs.o		\
 	snmp_debug.o tools.o  snmp_logging.o			\
 	snmpv3.o lcd_time.o keytools.o		                \
 	scapi.o callback.o default_store.o snmp_alarm.o		\
@@ -159,12 +160,12 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	container_null.o container_list_ssll.o container_iterator.o \
 	cmu_compat.o ucd_compat.o @other_objs_list@
 
-LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 		\
+LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 	\
 	snmp_auth.lo asn1.lo md5.lo snmp_parse_args.lo		\
-	system.lo vacm.lo int64.lo read_config.lo 			\
+	system.lo vacm.lo int64.lo read_config.lo pkcs.lo	\
 	snmp_debug.lo tools.lo  snmp_logging.lo			\
-	snmpv3.lo lcd_time.lo keytools.lo		                \
-	scapi.lo callback.lo default_store.lo snmp_alarm.lo		\
+	snmpv3.lo lcd_time.lo keytools.lo		        \
+	scapi.lo callback.lo default_store.lo snmp_alarm.lo	\
 	data_list.lo oid_stash.lo 				\
 	mt_support.lo snmp_enum.lo snmp-tc.lo 			\
 	snprintf.lo strlcpy.lo strtol.lo strtoul.lo strtok_r.lo	\

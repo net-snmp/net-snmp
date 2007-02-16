@@ -69,6 +69,7 @@ extern const char *inet_ntop(int, const void*, char*, size_t);
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 #include <net-snmp/library/snmpTCPIPv6Domain.h>
 
@@ -187,7 +188,7 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
     struct sockaddr_in6 *farend = NULL;
     int             newsock = -1, sockflags = 0;
     socklen_t       farendlen = sizeof(struct sockaddr_in6);
-    char           *string = NULL;
+    char           *str = NULL;
 
     farend = (struct sockaddr_in6 *) malloc(sizeof(struct sockaddr_in6));
 
@@ -215,9 +216,9 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
 
         t->data = farend;
         t->data_length = farendlen;
-        string = netsnmp_tcp6_fmtaddr(NULL, farend, farendlen);
-        DEBUGMSGTL(("netsnmp_tcp6", "accept succeeded (from %s)\n", string));
-        free(string);
+        str = netsnmp_tcp6_fmtaddr(NULL, farend, farendlen);
+        DEBUGMSGTL(("netsnmp_tcp6", "accept succeeded (from %s)\n", str));
+        free(str);
 
         /*
          * Try to make the new socket blocking.  
@@ -262,7 +263,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
 {
     netsnmp_transport *t = NULL;
     int             rc = 0;
-    char           *string = NULL;
+    char           *str = NULL;
 
     if (addr == NULL || addr->sin6_family != AF_INET6) {
         return NULL;
@@ -274,11 +275,11 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
     }
     memset(t, 0, sizeof(netsnmp_transport));
 
-    string = netsnmp_tcp6_fmtaddr(NULL, (void *)addr,
+    str = netsnmp_tcp6_fmtaddr(NULL, (void *)addr,
 				  sizeof(struct sockaddr_in6));
     DEBUGMSGTL(("netsnmp_tcp6", "open %s %s\n", local ? "local" : "remote",
-                string));
-    free(string);
+                str));
+    free(str);
 
     memset(t, 0, sizeof(netsnmp_transport));
 
@@ -309,6 +310,16 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
          * given IP address, which may include an interface address, or could
          * be INADDR_ANY, but certainly includes a port number.
          */
+
+#ifdef IPV6_V6ONLY
+        /* Try to restrict PF_INET6 socket to IPv6 communications only. */
+        {
+	  int one=1;
+	  if (setsockopt(t->sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&one, sizeof(one)) != 0) {
+	    DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_V6ONLY to %d bytes: %s\n", one, strerror(errno)));
+	  } 
+	}
+#endif
 
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
         t->local = malloc(18);
@@ -424,11 +435,11 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
 
 
 netsnmp_transport *
-netsnmp_tcp6_create_tstring(const char *string, int local)
+netsnmp_tcp6_create_tstring(const char *str, int local)
 {
     struct sockaddr_in6 addr;
 
-    if (netsnmp_sockaddr_in6(&addr, string, 0)) {
+    if (netsnmp_sockaddr_in6(&addr, str, 0)) {
         return netsnmp_tcp6_transport(&addr, local);
     } else {
         return NULL;

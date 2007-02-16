@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @defgroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -124,7 +124,7 @@ extern          "C" {
         /*
          * ifInNUcastPkts(12)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifInNUcastPkts;
+#define ifInNUcastPkts ifentry->stats.inucast
 
         /*
          * ifInDiscards(13)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
@@ -191,22 +191,22 @@ extern          "C" {
         /*
          * ifInMulticastPkts(2)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifInMulticastPkts;
+#define ifInMulticastPkts ifentry->stats.imcast.low
 
         /*
          * ifInBroadcastPkts(3)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifInBroadcastPkts;
+#define ifInBroadcastPkts ifentry->stats.ibcast.low
 
         /*
          * ifOutMulticastPkts(4)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifOutMulticastPkts;
+#define ifOutMulticastPkts ifentry->stats.omcast.low
 
         /*
          * ifOutBroadcastPkts(5)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifOutBroadcastPkts;
+#define ifOutBroadcastPkts ifentry->stats.obcast.low
 
         /*
          * ifHCInOctets(6)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
@@ -256,12 +256,13 @@ extern          "C" {
         /*
          * ifHighSpeed(15)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ifHighSpeed;
+#define ifHighSpeed ifentry->speed_high
 
         /*
          * ifPromiscuousMode(16)/TruthValue/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
          */
-        u_long          ifPromiscuousMode;
+        u_long          dummy_to_keep_struct_size;
+#define ifPromiscuousMode ifentry->promiscuous
 
         /*
          * ifConnectorPresent(17)/TruthValue/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
@@ -374,9 +375,10 @@ extern          "C" {
     int             ifTable_post_request(ifTable_registration_ptr
                                          user_context);
 
-    int             ifTable_init_rowreq_ctx(ifTable_rowreq_ctx *
-                                            rowreq_ctx);
-    void            ifTable_cleanup_rowreq_ctx(ifTable_rowreq_ctx *
+    int             ifTable_rowreq_ctx_init(ifTable_rowreq_ctx *
+                                            rowreq_ctx,
+                                            void *userreq_ctx);
+    void            ifTable_rowreq_ctx_cleanup(ifTable_rowreq_ctx *
                                                rowreq_ctx);
 
     int             ifTable_check_dependencies(ifTable_rowreq_ctx *

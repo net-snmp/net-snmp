@@ -1,21 +1,6 @@
 /*
  * parse.c
  *
- * Update: 1998-09-22 <mslifcak@iss.net>
- * Clear nbuckets in init_node_hash.
- * New method xcalloc returns zeroed data structures.
- * New method alloc_node encapsulates common node creation.
- * New method to configure terminate comment at end of line.
- * New method to configure accept underscore in labels.
- *
- * Update: 1998-10-10 <daves@csc.liv.ac.uk>
- * fully qualified OID parsing patch
- *
- * Update: 1998-10-20 <daves@csc.liv.ac.uk>
- * merge_anon_children patch
- *
- * Update: 1998-10-21 <mslifcak@iss.net>
- * Merge_parse_objectid associates information with last node in chain.
  */
 /* Portions of this file are subject to the following copyrights.  See
  * the Net-SNMP's COPYING file for more details and other copyrights
@@ -62,7 +47,9 @@ SOFTWARE.
 #endif
 #include <ctype.h>
 #include <sys/types.h>
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
 
 /*
  * Wow.  This is ugly.  -- Wes 
@@ -109,6 +96,8 @@ SOFTWARE.
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
+
+#include <errno.h>
 
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
@@ -269,6 +258,7 @@ struct objgroup {
 #define VARIABLES	103
 #define UNSIGNED32	(104 | SYNTAX_MASK)
 #define INTEGER32	(105 | SYNTAX_MASK)
+#define OBJIDENTITY	106
 /*
  * Beware of reaching SYNTAX_MASK (0x80) 
  */
@@ -331,7 +321,7 @@ static struct tok tokens[] = {
     ,
     {"OBJECT-GROUP", sizeof("OBJECT-GROUP") - 1, OBJGROUP}
     ,
-    {"OBJECT-IDENTITY", sizeof("OBJECT-IDENTITY") - 1, OBJGROUP}
+    {"OBJECT-IDENTITY", sizeof("OBJECT-IDENTITY") - 1, OBJIDENTITY}
     ,
     {"IDENTIFIER", sizeof("IDENTIFIER") - 1, IDENTIFIER}
     ,
@@ -756,18 +746,18 @@ get_mib_parse_error_count(void)
 
 
 static void
-print_error(const char *string, const char *token, int type)
+print_error(const char *str, const char *token, int type)
 {
     erroneousMibs++;
     DEBUGMSGTL(("parse-mibs", "\n"));
     if (type == ENDOFFILE)
-        snmp_log(LOG_ERR, "%s (EOF): At line %d in %s\n", string, mibLine,
+        snmp_log(LOG_ERR, "%s (EOF): At line %d in %s\n", str, mibLine,
                  File);
     else if (token && *token)
-        snmp_log(LOG_ERR, "%s (%s): At line %d in %s\n", string, token,
+        snmp_log(LOG_ERR, "%s (%s): At line %d in %s\n", str, token,
                  mibLine, File);
     else
-        snmp_log(LOG_ERR, "%s: At line %d in %s\n", string, mibLine, File);
+        snmp_log(LOG_ERR, "%s: At line %d in %s\n", str, mibLine, File);
 }
 
 static void
@@ -1078,11 +1068,17 @@ build_translation_table()
         case NOTIFTYPE:
             translation_table[count] = TYPE_NOTIFTYPE;
             break;
+        case NOTIFGROUP:
+            translation_table[count] = TYPE_NOTIFGROUP;
+            break;
         case OBJGROUP:
             translation_table[count] = TYPE_OBJGROUP;
             break;
         case MODULEIDENTITY:
             translation_table[count] = TYPE_MODID;
+            break;
+        case OBJIDENTITY:
+            translation_table[count] = TYPE_OBJIDENTITY;
             break;
         case AGENTCAP:
             translation_table[count] = TYPE_AGENTCAP;
@@ -2164,7 +2160,15 @@ parse_ranges(FILE * fp, struct range_list **retp)
         nexttype = get_token(fp, nexttoken, MAXTOKEN);
         if (nexttype == RANGE) {
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
+            errno = 0;
             high = strtol(nexttoken, NULL, 10);
+            if ( errno == ERANGE ) {
+                if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_MIB_WARNINGS))
+                    snmp_log(LOG_WARNING,
+                             "Warning: Upper bound not handled correctly (%s != %d): At line %d in %s\n",
+                                 nexttoken, high, mibLine, File);
+            }
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
         }
         *rpp = (struct range_list *) calloc(1, sizeof(struct range_list));
@@ -2700,6 +2704,10 @@ parse_objectgroup(FILE * fp, char *name, int what, struct objgroup **ol)
                 goto skip;
             }
             o = (struct objgroup *) malloc(sizeof(struct objgroup));
+            if (!o) {
+                print_error("Resource failure", token, type);
+                goto skip;
+            }
             o->line = mibLine;
             o->name = strdup(token);
             o->next = *ol;
@@ -2998,6 +3006,8 @@ compliance_lookup(const char *name, int modid)
     if (modid == -1) {
         struct objgroup *op =
             (struct objgroup *) malloc(sizeof(struct objgroup));
+        if (!op)
+            return 0;
         op->next = objgroups;
         op->name = strdup(name);
         op->line = mibLine;
@@ -3484,18 +3494,27 @@ parse_macro(FILE * fp, char *name)
     while (type != EQUALS && type != ENDOFFILE) {
         type = get_token(fp, token, sizeof(token));
     }
-    if (type != EQUALS)
+    if (type != EQUALS) {
+        if (np)
+            free_node(np);
         return NULL;
+    }
     while (type != BEGIN && type != ENDOFFILE) {
         type = get_token(fp, token, sizeof(token));
     }
-    if (type != BEGIN)
+    if (type != BEGIN) {
+        if (np)
+            free_node(np);
         return NULL;
+    }
     while (type != END && type != ENDOFFILE) {
         type = get_token(fp, token, sizeof(token));
     }
-    if (type != END)
+    if (type != END) {
+        if (np)
+            free_node(np);
         return NULL;
+    }
 
     if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 			   NETSNMP_DS_LIB_MIB_WARNINGS)) {
@@ -4357,6 +4376,13 @@ parse(FILE * fp, struct node *root)
                 return NULL;
             }
             break;
+        case OBJIDENTITY:
+            nnp = parse_objectgroup(fp, name, OBJECTS, &objects);
+            if (nnp == NULL) {
+                print_error("Bad parse of OBJECT-IDENTITY", NULL, type);
+                return NULL;
+            }
+            break;
         case OBJECT:
             type = get_token(fp, token, MAXTOKEN);
             if (type != IDENTIFIER) {
@@ -4385,14 +4411,14 @@ parse(FILE * fp, struct node *root)
             return NULL;
         }
         if (nnp) {
-            if (nnp->type == TYPE_OTHER)
-                nnp->type = type;
             if (np)
                 np->next = nnp;
             else
                 np = root = nnp;
             while (np->next)
                 np = np->next;
+            if (np->type == TYPE_OTHER)
+                np->type = type;
         }
     }
     DEBUGMSGTL(("parse-file", "End of file (%s)\n", File));

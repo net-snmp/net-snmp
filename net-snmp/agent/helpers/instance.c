@@ -28,7 +28,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup instance instance: process individual MIB instances easily.
+/** @defgroup instance instance
+ *  Process individual MIB instances easily.
  *  @ingroup leaf
  *  @{
  */
@@ -36,8 +37,6 @@
 /**
  * Creates an instance helper handler, calls netsnmp_create_handler, which
  * then could be registered, using netsnmp_register_handler().
- *
- * @param void
  *
  * @return Returns a pointer to a netsnmp_mib_handler struct which contains
  *	the handler's name and the access method
@@ -175,7 +174,7 @@ netsnmp_register_read_only_counter32_instance(const char *name,
     netsnmp_handler_registration *myreg;
 
     myreg = get_reg(name, "counter32_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, netsnmp_instance_counter32_handler,
+                    HANDLER_CAN_RONLY, netsnmp_instance_counter32_handler,
                     subhandler, NULL);
     return netsnmp_register_read_only_instance(myreg);
 }
@@ -281,7 +280,7 @@ netsnmp_register_read_only_counter32_instance_context(const char *name,
     netsnmp_handler_registration *myreg;
 
     myreg = get_reg(name, "counter32_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, netsnmp_instance_counter32_handler,
+                    HANDLER_CAN_RONLY, netsnmp_instance_counter32_handler,
                     subhandler, contextName);
     return netsnmp_register_read_only_instance(myreg);
 }
@@ -316,6 +315,22 @@ netsnmp_register_long_instance_context(const char *name,
                     HANDLER_CAN_RWRITE, netsnmp_instance_long_handler,
                     subhandler, contextName);
     return netsnmp_register_instance(myreg);
+}
+
+int
+netsnmp_register_int_instance_context(const char *name,
+                                      oid * reg_oid,
+                                      size_t reg_oid_len,
+                                      int *it,
+                                      Netsnmp_Node_Handler * subhandler,
+                                      const char *contextName)
+{
+    netsnmp_handler_registration *myreg;
+
+    myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RWRITE, netsnmp_instance_int_handler,
+                    subhandler, contextName);
+    return netsnmp_register_read_only_instance(myreg);
 }
 
 int
@@ -593,7 +608,7 @@ netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
 	 */
 	tmp_it = *it;
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &tmp_it, sizeof(long));
+                                 (u_char *) &tmp_it, sizeof(tmp_it));
         break;
 
         /*
@@ -706,6 +721,12 @@ netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
                 netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                           requests);
             reqinfo->mode = MODE_GETNEXT;
+            if (!requests->delegated &&
+                (requests->requestvb->type == ASN_NULL ||
+                 requests->requestvb->type == SNMP_NOSUCHINSTANCE ||
+                 requests->requestvb->type == SNMP_NOSUCHOBJECT)) {
+                requests->requestvb->type = ASN_PRIV_RETRY;
+            }
             return ret;
         } else {
             return SNMP_ERR_NOERROR;
@@ -718,6 +739,5 @@ netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_GENERR;
 }
 
-/*
- * @} 
+/** @} 
  */

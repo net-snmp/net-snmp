@@ -192,7 +192,7 @@ optProc(int argc, char *const *argv, int opt)
 			max_getbulk = atoi(argv[optind]);
 			if (max_getbulk == 0) {
 			    usage();
-			    fprintf(stderr, "Bad -Cc option: %s\n", 
+			    fprintf(stderr, "Bad -Cr option: %s\n", 
 				    argv[optind]);
 			    exit(1);
 			}
@@ -455,7 +455,7 @@ print_table(void)
 void
 get_field_names(void)
 {
-    u_char         *buf = NULL, *name_p = NULL;
+    char           *buf = NULL, *name_p = NULL;
     size_t          buf_len = 0, out_len = 0;
 #ifndef DISABLE_MIB_LOADING
     struct tree    *tbl = NULL;
@@ -477,7 +477,7 @@ get_field_names(void)
 #endif /* DISABLE_MIB_LOADING */
 
     if (sprint_realloc_objid
-        (&buf, &buf_len, &out_len, 1, root, rootlen - 1)) {
+        ((u_char **)&buf, &buf_len, &out_len, 1, root, rootlen - 1)) {
         table_name = buf;
         buf = NULL;
         buf_len = out_len = 0;
@@ -511,7 +511,7 @@ get_field_names(void)
 #endif /* DISABLE_MIB_LOADING */
         out_len = 0;
         if (sprint_realloc_objid
-            (&buf, &buf_len, &out_len, 1, root, rootlen + 1)) {
+            ((u_char **)&buf, &buf_len, &out_len, 1, root, rootlen + 1)) {
             name_p = strrchr(buf, '.');
             if (name_p == NULL) {
                 name_p = strrchr(buf, ':');
@@ -546,15 +546,17 @@ get_field_names(void)
         fprintf(stderr, "Was that a table? %s\n", table_name);
         exit(1);
     }
-    *name_p = 0;
-    memmove(name, root, rootlen * sizeof(oid));
-    name_length = rootlen + 1;
-    name_p = strrchr(buf, '.');
-    if (name_p == NULL) {
-        name_p = strrchr(buf, ':');
-    }
-    if (name_p != NULL) {
+    if (name_p) {
         *name_p = 0;
+        memmove(name, root, rootlen * sizeof(oid));
+        name_length = rootlen + 1;
+        name_p = strrchr(buf, '.');
+        if (name_p == NULL) {
+            name_p = strrchr(buf, ':');
+        }
+        if (name_p != NULL) {
+            *name_p = 0;
+        }
     }
     if (brief && fields > 1) {
         char           *f1, *f2;
@@ -590,7 +592,7 @@ get_table_entries(netsnmp_session * ss)
     int             status;
     int             i;
     int             col;
-    u_char         *buf = NULL;
+    char           *buf = NULL;
     size_t          out_len = 0, buf_len = 0;
     char           *cp;
     char           *name_p = NULL;
@@ -690,7 +692,7 @@ get_table_entries(netsnmp_session * ss)
                                name_length * sizeof(oid));
                         out_len = 0;
                         if (!sprint_realloc_objid
-                            (&buf, &buf_len, &out_len, 1, vars->name,
+                            ((u_char **)&buf, &buf_len, &out_len, 1, vars->name,
                              vars->name_length)) {
                             break;
                         }
@@ -739,7 +741,7 @@ get_table_entries(netsnmp_session * ss)
                         printf("%s => taken\n", buf);
                     }
                     out_len = 0;
-                    sprint_realloc_value(&buf, &buf_len, &out_len, 1,
+                    sprint_realloc_value((u_char **)&buf, &buf_len, &out_len, 1,
                                          vars->name, vars->name_length,
                                          vars);
                     for (cp = buf; *cp; cp++) {
@@ -819,7 +821,7 @@ getbulk_table_entries(netsnmp_session * ss)
     int             status;
     int             i;
     int             row, col;
-    u_char         *buf = NULL;
+    char           *buf = NULL;
     size_t          buf_len = 0, out_len = 0;
     char           *cp;
     char           *name_p = NULL;
@@ -847,7 +849,7 @@ getbulk_table_entries(netsnmp_session * ss)
                 last_var = NULL;
                 while (vars) {
                     out_len = 0;
-                    sprint_realloc_objid(&buf, &buf_len, &out_len, 1,
+                    sprint_realloc_objid((u_char **)&buf, &buf_len, &out_len, 1,
                                          vars->name, vars->name_length);
                     if (vars->type == SNMP_ENDOFMIBVIEW ||
                         memcmp(vars->name, name,
@@ -930,7 +932,7 @@ getbulk_table_entries(netsnmp_session * ss)
                     }
                     dp = data + row * fields;
                     out_len = 0;
-                    sprint_realloc_value(&buf, &buf_len, &out_len, 1,
+                    sprint_realloc_value((u_char **)&buf, &buf_len, &out_len, 1,
                                          vars->name, vars->name_length,
                                          vars);
                     for (cp = buf; *cp; cp++)

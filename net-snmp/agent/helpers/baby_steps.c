@@ -49,7 +49,8 @@ _baby_steps_access_multiplexer(netsnmp_mib_handler *handler,
                                netsnmp_agent_request_info *reqinfo,
                                netsnmp_request_info *requests);
     
-/** @defgroup baby_steps baby_steps: calls your handler in baby_steps for set processing.
+/** @defgroup baby_steps baby_steps
+ *  Calls your handler in baby_steps for set processing.
  *  @ingroup handler
  *  @{
  */
@@ -291,11 +292,12 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
         }
 
         /*
-         * check for errors in any of the requests for reserve1,
+         * check for errors in any of the requests for GET-like, reserve1,
          * reserve2 and action. (there is no recovery from errors
          * in commit, free or undo.)
          */
-        if (save_mode < SNMP_MSG_INTERNAL_SET_COMMIT) {
+        if (MODE_IS_GET(save_mode)
+            || (save_mode < SNMP_MSG_INTERNAL_SET_COMMIT)) {
             rc = netsnmp_check_requests_error(requests);
             if(rc) {
                 DEBUGMSGTL(("baby_steps", "   ERROR:request error\n"));
@@ -326,8 +328,8 @@ netsnmp_baby_steps_handler_init(void)
 
 /** @} */
 
-/** @defgroup baby_steps baby_steps_access_multiplexer: calls individual access methods based on baby_step mode.
- *  @ingroup handler
+/** @defgroup access_multiplexer baby_steps_access_multiplexer: calls individual access methods based on baby_step mode.
+ *  @ingroup baby_steps
  *  @{
  */
 
@@ -516,3 +518,5 @@ netsnmp_baby_step_mode2flag( u_int mode )
     }
     return 0;
 }
+/**  @} */
+

@@ -43,6 +43,7 @@ char *print_format2  = NULL;
 const char     *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n";
 const char     *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
 
+void snmptrapd_free_traphandle(void);
 
 const char *
 trap_description(int trap)
@@ -226,7 +227,8 @@ void
 snmptrapd_register_configs( void )
 {
     register_config_handler("snmptrapd", "traphandle",
-                            snmptrapd_parse_traphandle, NULL,
+                            snmptrapd_parse_traphandle,
+                            snmptrapd_free_traphandle,
                             "oid|\"default\" program [args ...] ");
     register_config_handler("snmptrapd", "format1",
                             parse_trap1_fmt, free_trap1_fmt, "format");
@@ -407,6 +409,47 @@ netsnmp_add_traphandler(Netsnmp_Trap_Handler handler,
     return traph;
 }
 
+void
+snmptrapd_free_traphandle(void)
+{
+    netsnmp_trapd_handler *traph = NULL, *nextt = NULL, *nexth = NULL;
+
+    DEBUGMSGTL(("snmptrapd", "Freeing trap handler lists\n"));
+
+    /*
+     * Free default trap handlers
+     */
+    traph = netsnmp_default_traphandlers;
+   /* loop over handlers */
+    while (traph) {
+       DEBUGMSG(("snmptrapd", "Freeing default trap handler\n"));
+	nexth = traph->nexth;
+	SNMP_FREE(traph->token);
+	SNMP_FREE(traph);
+	traph = nexth;
+    }
+    netsnmp_default_traphandlers = NULL;
+
+    /* 
+     * Free specific trap handlers
+     */
+    traph = netsnmp_specific_traphandlers;
+    /* loop over traps */
+    while (traph) {
+        nextt = traph->nextt;
+        /* loop over handlers for this trap */
+	while (traph) {
+	    DEBUGMSG(("snmptrapd", "Freeing specific trap handler\n"));
+	    nexth = traph->nexth;
+	    SNMP_FREE(traph->token);
+	    SNMP_FREE(traph->trapoid);
+	    SNMP_FREE(traph);
+	    traph = nexth;
+	}
+	traph = nextt;
+    }
+    netsnmp_specific_traphandlers = NULL;
+}
 
 /*
  * Locate the list of handlers for this particular Trap OID
@@ -810,7 +853,7 @@ int   command_handler( netsnmp_pdu           *pdu,
         /*
          *  and pass this formatted string to the command specified
          */
-        run_exec_command(handler->token, rbuf, NULL, 0);   /* Not interested in output */
+        run_shell_command(handler->token, (char*)rbuf, NULL, 0);   /* Not interested in output */
         snmp_set_quick_print(oldquick);
         if (pdu->command == SNMP_MSG_TRAP)
             snmp_free_pdu(v2_pdu);
@@ -862,6 +905,12 @@ int   forward_handler( netsnmp_pdu           *pdu,
     session.peername = cp;
     session.version  = pdu->version;
     ss = snmp_open( &session );
+    if (!ss)
+        return NETSNMPTRAPD_HANDLER_FAIL;
+
+    /* XXX: wjh we should be caching sessions here and not always
+       reopening a session.  It's very ineffecient, especially with v3
+       INFORMS which may require engineID probing */
 
     pdu2 = snmp_clone_pdu(pdu);
     if (pdu2->transport_data) {
@@ -905,6 +954,14 @@ snmp_input(int op, netsnmp_session *session,
 
     switch (op) {
     case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+        /*
+         * Drops packets with reception problems
+         */
+        if (session->s_snmp_errno) {
+            /* drop problem packets */
+            return 1;
+        }
+
         /*
 	 * Determine the OID that identifies the trap being handled
 	 */
@@ -1063,6 +1120,16 @@ t        *     d) any other global handlers
     case NETSNMP_CALLBACK_OP_TIMED_OUT:
         snmp_log(LOG_ERR, "Timeout: This shouldn't happen!\n");
         break;
+
+    case NETSNMP_CALLBACK_OP_SEND_FAILED:
+        snmp_log(LOG_ERR, "Send Failed: This shouldn't happen either!\n");
+        break;
+
+    case NETSNMP_CALLBACK_OP_CONNECT:
+    case NETSNMP_CALLBACK_OP_DISCONNECT:
+        /* Ignore silently */
+        break;
+
     default:
         snmp_log(LOG_ERR, "Unknown operation (%d): This shouldn't happen!\n", op);
         break;

@@ -42,7 +42,7 @@
 #include <sys/socket.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
+# if defined (WIN32) || defined (cygwin)
 #  include <sys/timeb.h>
 # else
 # include <sys/time.h>
@@ -178,7 +178,6 @@
 #endif
 
 #ifdef cygwin
-#define WIN32
 #include <windows.h>
 #endif
 

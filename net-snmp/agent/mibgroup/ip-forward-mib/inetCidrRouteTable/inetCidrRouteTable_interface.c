@@ -412,7 +412,7 @@ inetCidrRouteTable_index_to_oid(netsnmp_index * oid_idx,
     err = build_oid_noalloc(oid_idx->oids, oid_idx->len, &oid_idx->len,
                             NULL, 0, &var_inetCidrRouteDestType);
     if (err)
-        snmp_log(LOG_ERR, "error %d converting index to oid\n");
+        snmp_log(LOG_ERR, "error %d converting index to oid\n", err);
 
     /*
      * parsing may have allocated memory. free it.
@@ -582,6 +582,7 @@ inetCidrRouteTable_allocate_rowreq_ctx(inetCidrRouteTable_data * data)
     if (NULL == rowreq_ctx) {
         snmp_log(LOG_ERR, "Couldn't allocate memory for a "
                  "inetCidrRouteTable_rowreq_ctx.\n");
+        return NULL;
     } else {
         if (NULL != data) {
             rowreq_ctx->data = data;

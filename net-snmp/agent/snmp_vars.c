@@ -158,6 +158,9 @@ PERFORMANCE OF THIS SOFTWARE.
 
 static char     done_init_agent = 0;
 
+struct module_init_list *initlist = NULL;
+struct module_init_list *noinitlist = NULL;
+
 /*
  * mib clients are passed a pointer to a oid buffer.  Some mib clients
  * * (namely, those first noticed in mibII/vacm.c) modify this oid buffer
@@ -335,6 +338,15 @@ init_agent(const char *app)
     init_perl();
 #endif
 
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+    /*
+     * don't init agent modules for a sub-agent
+     */
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_ROLE) == SUB_AGENT)
+        return r;
+#endif
+
 #  include "agent_module_inits.h"
 
     return r;
@@ -360,4 +372,80 @@ shutdown_agent(void) {
 
     done_init_agent = 0;
 }
+
+
+void
+add_to_init_list(char *module_list)
+{
+    struct module_init_list *newitem, **list;
+    char           *cp;
+    char           *st;
+
+    if (module_list == NULL) {
+        return;
+    } else {
+        cp = (char *) module_list;
+    }
+
+    if (*cp == '-' || *cp == '!') {
+        cp++;
+        list = &noinitlist;
+    } else {
+        list = &initlist;
+    }
+
+    cp = strtok_r(cp, ", :", &st);
+    while (cp) {
+        newitem = (struct module_init_list *) calloc(1, sizeof(*initlist));
+        newitem->module_name = strdup(cp);
+        newitem->next = *list;
+        *list = newitem;
+        cp = strtok_r(NULL, ", :", &st);
+    }
+}
+
+int
+should_init(const char *module_name)
+{
+    struct module_init_list *listp;
+
+    /*
+     * a definitive list takes priority 
+     */
+    if (initlist) {
+        listp = initlist;
+        while (listp) {
+            if (strcmp(listp->module_name, module_name) == 0) {
+                DEBUGMSGTL(("mib_init", "initializing: %s\n",
+                            module_name));
+                return DO_INITIALIZE;
+            }
+            listp = listp->next;
+        }
+        DEBUGMSGTL(("mib_init", "skipping:     %s\n", module_name));
+        return DONT_INITIALIZE;
+    }
+
+    /*
+     * initialize it only if not on the bad list (bad module, no bone) 
+     */
+    if (noinitlist) {
+        listp = noinitlist;
+        while (listp) {
+            if (strcmp(listp->module_name, module_name) == 0) {
+                DEBUGMSGTL(("mib_init", "skipping:     %s\n",
+                            module_name));
+                return DONT_INITIALIZE;
+            }
+            listp = listp->next;
+        }
+    }
+    DEBUGMSGTL(("mib_init", "initializing: %s\n", module_name));
+
+    /*
+     * initialize it 
+     */
+    return DO_INITIALIZE;
+}
+/**  @} */
 

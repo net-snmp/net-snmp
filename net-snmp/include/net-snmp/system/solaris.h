@@ -20,3 +20,10 @@
 #undef PROC_SYMBOL
 #undef TOTAL_MEMORY_SYMBOL
 #undef MBSTAT_SYMBOL
+
+#define UDP_ADDRESSES_IN_HOST_ORDER 1
+#define UDP_PORTS_IN_HOST_ORDER 1
+
+/* get some required prototypes (strtok_r) from include files */
+#define __EXTENSIONS__
+

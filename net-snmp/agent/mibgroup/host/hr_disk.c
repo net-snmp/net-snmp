@@ -232,7 +232,7 @@ typedef struct _conf_disk_list {
     conf_disk_item *list_item;
     struct _conf_disk_list *list_next;
 } conf_disk_list;
-static conf_disk_list *conf_list;
+static conf_disk_list *conf_list = NULL;
 
 static int      match_disk_config(const char *);
 static int      match_disk_config_item(const char *, conf_disk_item *);
@@ -240,12 +240,12 @@ static int      match_disk_config_item(const char *, conf_disk_item *);
 static void
 parse_disk_config(const char *token, char *cptr)
 {
-    conf_disk_list *d_new;
-    conf_disk_item *di_curr;
-    details_set    *d_set;
-    char           *name, *p, *d_str, c;
+    conf_disk_list *d_new = 0;
+    conf_disk_item *di_curr = 0;
+    details_set    *d_set = 0;
+    char           *name = 0, *p = 0, *d_str = 0, c;
     unsigned int    i, neg, c1, c2;
-    char           *st;
+    char           *st = 0;
 
     name = strtok_r(cptr, " \t", &st);
     if (!name) {
@@ -259,10 +259,13 @@ parse_disk_config(const char *token, char *cptr)
     }
     di_curr = (conf_disk_item *) malloc(sizeof(conf_disk_item));
     if (!di_curr) {
+        SNMP_FREE(d_new);
         config_perror("Out of memory");
         return;
     }
     d_new->list_item = di_curr;
+    /* XXX: on error/return conditions we need to free the entire new
+       list, not just the last node like this is doing! */
     for (;;) {
         if (*name == '?') {
             di_curr->item_type = ITEM_ANY;
@@ -276,6 +279,10 @@ parse_disk_config(const char *token, char *cptr)
             d_set = (details_set *) malloc(sizeof(details_set));
             if (!d_set) {
                 config_perror("Out of memory");
+                SNMP_FREE(d_new);
+                SNMP_FREE(di_curr);
+                SNMP_FREE(d_set);
+                SNMP_FREE(d_str);
                 return;
             }
             for (i = 0; i < sizeof(details_set); i++)
@@ -301,6 +308,10 @@ parse_disk_config(const char *token, char *cptr)
             if (*name != ']') {
                 config_perror
                     ("Syntax error in NAME: invalid set specified");
+                SNMP_FREE(d_new);
+                SNMP_FREE(di_curr);
+                SNMP_FREE(d_set);
+                SNMP_FREE(d_str);
                 return;
             }
             if (neg) {
@@ -317,6 +328,10 @@ parse_disk_config(const char *token, char *cptr)
             *p = '\0';
             d_str = (char *) malloc(strlen(name) + 1);
             if (!d_str) {
+                SNMP_FREE(d_new);
+                SNMP_FREE(d_str);
+                SNMP_FREE(di_curr);
+                SNMP_FREE(d_set);
                 config_perror("Out of memory");
                 return;
             }
@@ -333,6 +348,11 @@ parse_disk_config(const char *token, char *cptr)
         di_curr->item_next =
             (conf_disk_item *) malloc(sizeof(conf_disk_item));
         if (!di_curr->item_next) {
+            SNMP_FREE(di_curr->item_next);
+            SNMP_FREE(d_new);
+            SNMP_FREE(di_curr);
+            SNMP_FREE(d_set);
+            SNMP_FREE(d_str);
             config_perror("Out of memory");
             return;
         }

@@ -8,6 +8,9 @@ SKIPIFNOT USING_UCD_SNMP_PROXY_MODULE
 SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
 SKIPIF DISABLE_SNMPV2C
 
+# XXX: ucd-snmp/proxy doesn't properly support TCP -- remove this once it does
+[ "x$SNMP_TRANSPORT_SPEC" = "xtcp" ] && SKIPIFNOT XXXYYYZZZ
+
 #
 # Begin test
 #

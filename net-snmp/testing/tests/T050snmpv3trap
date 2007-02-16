@@ -9,6 +9,7 @@ HEADER SNMPv3 traps received and sent by tools
 #
 
 CONFIGTRAPD createUser -e 0x001122 testuser
+CONFIGTRAPD agentxsocket /dev/null
 
 STARTTRAPD
 

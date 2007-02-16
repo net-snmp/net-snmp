@@ -6,3 +6,4 @@
 .new
 .patch
 .orig
+.libs

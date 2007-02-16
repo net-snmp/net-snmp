@@ -187,6 +187,10 @@ parse_snmpNotifyFilterProfileTable(const char *token, char *line)
         read_config_read_data(ASN_OCTET_STR, line,
                               &StorageTmp->snmpNotifyFilterProfileName,
                               &StorageTmp->snmpNotifyFilterProfileNameLen);
+    if (StorageTmp->snmpNotifyFilterProfileName == NULL) {
+        config_perror("invalid specification for snmpNotifyFilterProfileName");
+        return;
+    }
 
     line =
         read_config_read_data(ASN_INTEGER, line,
@@ -228,7 +232,8 @@ store_snmpNotifyFilterProfileTable(int majorID, int minorID,
         StorageTmp =
             (struct snmpNotifyFilterProfileTable_data *) hcindex->data;
 
-        if (StorageTmp->snmpNotifyFilterProfileStorType == ST_NONVOLATILE) {
+        if ((StorageTmp->snmpNotifyFilterProfileStorType == ST_NONVOLATILE) ||
+            (StorageTmp->snmpNotifyFilterProfileStorType == ST_PERMANENT)) {
 
             memset(line, 0, sizeof(line));
             strcat(line, "snmpNotifyFilterProfileTable ");
@@ -282,6 +287,7 @@ var_snmpNotifyFilterProfileTable(struct variable *vp,
 
 
     struct snmpNotifyFilterProfileTable_data *StorageTmp = NULL;
+    int found = 1;
 
 
     DEBUGMSGTL(("snmpNotifyFilterProfileTable",
@@ -293,8 +299,27 @@ var_snmpNotifyFilterProfileTable(struct variable *vp,
          header_complex((struct header_complex_index *)
                         snmpNotifyFilterProfileTableStorage, vp, name,
                         length, exact, var_len, write_method)) == NULL) {
-        if (vp->magic == SNMPNOTIFYFILTERPROFILEROWSTATUS)
-            *write_method = write_snmpNotifyFilterProfileRowStatus;
+        found = 0;
+    }
+
+    switch (vp->magic) {
+    case SNMPNOTIFYFILTERPROFILENAME:
+        *write_method = write_snmpNotifyFilterProfileName;
+        break;
+
+    case SNMPNOTIFYFILTERPROFILESTORTYPE:
+        *write_method = write_snmpNotifyFilterProfileStorType;
+        break;
+
+    case SNMPNOTIFYFILTERPROFILEROWSTATUS:
+        *write_method = write_snmpNotifyFilterProfileRowStatus;
+        break;
+
+    default:
+        *write_method = NULL;
+    }
+
+    if (!found) {
         return NULL;
     }
 
@@ -304,17 +329,14 @@ var_snmpNotifyFilterProfileTable(struct variable *vp,
     switch (vp->magic) {
 
     case SNMPNOTIFYFILTERPROFILENAME:
-        *write_method = write_snmpNotifyFilterProfileName;
         *var_len = StorageTmp->snmpNotifyFilterProfileNameLen;
         return (u_char *) StorageTmp->snmpNotifyFilterProfileName;
 
     case SNMPNOTIFYFILTERPROFILESTORTYPE:
-        *write_method = write_snmpNotifyFilterProfileStorType;
         *var_len = sizeof(StorageTmp->snmpNotifyFilterProfileStorType);
         return (u_char *) & StorageTmp->snmpNotifyFilterProfileStorType;
 
     case SNMPNOTIFYFILTERPROFILEROWSTATUS:
-        *write_method = write_snmpNotifyFilterProfileRowStatus;
         *var_len = sizeof(StorageTmp->snmpNotifyFilterProfileRowStatus);
         return (u_char *) & StorageTmp->snmpNotifyFilterProfileRowStatus;
 
@@ -327,6 +349,7 @@ var_snmpNotifyFilterProfileTable(struct variable *vp,
 
 
 
+static struct snmpNotifyFilterProfileTable_data *StorageNew;
 
 int
 write_snmpNotifyFilterProfileName(int action,
@@ -348,22 +371,26 @@ write_snmpNotifyFilterProfileName(int action,
     DEBUGMSGTL(("snmpNotifyFilterProfileTable",
                 "write_snmpNotifyFilterProfileName entering action=%d...  \n",
                 action));
-    if ((StorageTmp = (struct snmpNotifyFilterProfileTable_data *)
+    if (action != RESERVE1 &&
+        (StorageTmp = (struct snmpNotifyFilterProfileTable_data *)
          header_complex((struct header_complex_index *)
                         snmpNotifyFilterProfileTableStorage, NULL,
                         &name[sizeof
                               (snmpNotifyFilterProfileTable_variables_oid)
                               / sizeof(oid) + 3 - 1], &newlen, 1, NULL,
-                        NULL)) == NULL)
-        return SNMP_ERR_NOSUCHNAME;     /* remove if you support creation here */
+                        NULL)) == NULL) {
+        if ((StorageTmp = StorageNew) == NULL)
+            return SNMP_ERR_NOSUCHNAME;     /* remove if you support creation here */
+    }
 
 
     switch (action) {
     case RESERVE1:
         if (var_val_type != ASN_OCTET_STR) {
-            fprintf(stderr,
-                    "write to snmpNotifyFilterProfileName not ASN_OCTET_STR\n");
             return SNMP_ERR_WRONGTYPE;
+        }
+        if (var_val_len < 1 || var_val_len > 32) {
+            return SNMP_ERR_WRONGLENGTH;
         }
         break;
 
@@ -372,6 +399,11 @@ write_snmpNotifyFilterProfileName(int action,
         /*
          * memory reseveration, final preparation... 
          */
+        tmpvar = StorageTmp->snmpNotifyFilterProfileName;
+        tmplen = StorageTmp->snmpNotifyFilterProfileNameLen;
+        StorageTmp->snmpNotifyFilterProfileName = calloc(1, var_val_len + 1);
+        if (NULL == StorageTmp->snmpNotifyFilterProfileName)
+            return SNMP_ERR_RESOURCEUNAVAILABLE;
         break;
 
 
@@ -388,10 +420,7 @@ write_snmpNotifyFilterProfileName(int action,
          * you to use, and you have just been asked to do something with
          * it.  Note that anything done here must be reversable in the UNDO case 
          */
-        tmpvar = StorageTmp->snmpNotifyFilterProfileName;
-        tmplen = StorageTmp->snmpNotifyFilterProfileNameLen;
-        memdup((u_char **) & StorageTmp->snmpNotifyFilterProfileName,
-               var_val, var_val_len);
+        memcpy(StorageTmp->snmpNotifyFilterProfileName, var_val, var_val_len);
         StorageTmp->snmpNotifyFilterProfileNameLen = var_val_len;
         break;
 
@@ -428,6 +457,7 @@ write_snmpNotifyFilterProfileStorType(int action,
                                       oid * name, size_t name_len)
 {
     static int      tmpvar;
+    long            value = *((long *) var_val);
     struct snmpNotifyFilterProfileTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
@@ -438,22 +468,29 @@ write_snmpNotifyFilterProfileStorType(int action,
     DEBUGMSGTL(("snmpNotifyFilterProfileTable",
                 "write_snmpNotifyFilterProfileStorType entering action=%d...  \n",
                 action));
-    if ((StorageTmp = (struct snmpNotifyFilterProfileTable_data *)
+    if (action != RESERVE1 &&
+        (StorageTmp = (struct snmpNotifyFilterProfileTable_data *)
          header_complex((struct header_complex_index *)
                         snmpNotifyFilterProfileTableStorage, NULL,
                         &name[sizeof
                               (snmpNotifyFilterProfileTable_variables_oid)
                               / sizeof(oid) + 3 - 1], &newlen, 1, NULL,
-                        NULL)) == NULL)
-        return SNMP_ERR_NOSUCHNAME;     /* remove if you support creation here */
-
+                        NULL)) == NULL) {
+        if ((StorageTmp = StorageNew) == NULL)
+            return SNMP_ERR_NOSUCHNAME;     /* remove if you support creation here */
+    }
 
     switch (action) {
     case RESERVE1:
         if (var_val_type != ASN_INTEGER) {
-            fprintf(stderr,
-                    "write to snmpNotifyFilterProfileStorType not ASN_INTEGER\n");
             return SNMP_ERR_WRONGTYPE;
+        }
+        if (var_val_len != sizeof(long)) {
+            return SNMP_ERR_WRONGLENGTH;
+        }
+        if (value != SNMP_STORAGE_OTHER && value != SNMP_STORAGE_VOLATILE
+            && value != SNMP_STORAGE_NONVOLATILE) {
+            return SNMP_ERR_WRONGVALUE;
         }
         break;
 
@@ -516,18 +553,20 @@ write_snmpNotifyFilterProfileRowStatus(int action,
                                        oid * name, size_t name_len)
 {
     struct snmpNotifyFilterProfileTable_data *StorageTmp = NULL;
-    static struct snmpNotifyFilterProfileTable_data *StorageNew,
-        *StorageDel;
+    static struct snmpNotifyFilterProfileTable_data *StorageDel;
     size_t          newlen =
         name_len -
         (sizeof(snmpNotifyFilterProfileTable_variables_oid) / sizeof(oid) +
          3 - 1);
     static int      old_value;
-    int             set_value;
+    int             set_value = *((long *) var_val);
     netsnmp_variable_list *vars;
     struct header_complex_index *hciptr;
 
 
+    DEBUGMSGTL(("snmpNotifyFilterProfileTable",
+                "write_snmpNotifyFilterProfileRowStatus entering action=%d...  \n",
+                action));
     StorageTmp = (struct snmpNotifyFilterProfileTable_data *)
         header_complex((struct header_complex_index *)
                        snmpNotifyFilterProfileTableStorage, NULL,
@@ -535,26 +574,17 @@ write_snmpNotifyFilterProfileRowStatus(int action,
                              (snmpNotifyFilterProfileTable_variables_oid) /
                              sizeof(oid) + 3 - 1], &newlen, 1, NULL, NULL);
 
-
-
-
-    if (var_val_type != ASN_INTEGER || var_val == NULL) {
-        fprintf(stderr,
-                "write to snmpNotifyFilterProfileRowStatus not ASN_INTEGER\n");
-        return SNMP_ERR_WRONGTYPE;
-    }
-    set_value = *((long *) var_val);
-
-
-    /*
-     * check legal range, and notReady is reserved for us, not a user 
-     */
-    if (set_value < 1 || set_value > 6 || set_value == RS_NOTREADY)
-        return SNMP_ERR_INCONSISTENTVALUE;
-
-
     switch (action) {
     case RESERVE1:
+        if (var_val_type != ASN_INTEGER || var_val == NULL) {
+            return SNMP_ERR_WRONGTYPE;
+        }
+        if (var_val_len != sizeof(long)) {
+            return SNMP_ERR_WRONGLENGTH;
+        }
+        if (set_value < 1 || set_value > 6 || set_value == RS_NOTREADY) {
+            return SNMP_ERR_WRONGVALUE;
+        }
         /*
          * stage one: test validity 
          */
@@ -567,9 +597,9 @@ write_snmpNotifyFilterProfileRowStatus(int action,
             /*
              * ditch illegal values now 
              */
-            if (set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE)
+            if (set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE) {
                 return SNMP_ERR_INCONSISTENTVALUE;
-
+            }
         } else {
             /*
              * row exists.  Check for a valid state change 
@@ -581,16 +611,18 @@ write_snmpNotifyFilterProfileRowStatus(int action,
                  */
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
+            if ((set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE) &&
+                StorageTmp->snmpNotifyFilterProfileNameLen == 0) {
+                /*
+                 * can't activate row without a profile name
+                 */
+                return SNMP_ERR_INCONSISTENTVALUE;
+            }
             /*
              * XXX: interaction with row storage type needed 
              */
         }
-        break;
 
-
-
-
-    case RESERVE2:
         /*
          * memory reseveration, final preparation... 
          */
@@ -621,15 +653,15 @@ write_snmpNotifyFilterProfileRowStatus(int action,
             StorageNew->snmpTargetParamsNameLen = vars->val_len;
             StorageNew->snmpNotifyFilterProfileStorType = ST_NONVOLATILE;
 
-            StorageNew->snmpNotifyFilterProfileRowStatus = set_value;
+            StorageNew->snmpNotifyFilterProfileRowStatus = RS_NOTREADY;
             snmp_free_var(vars);
         }
 
 
         break;
 
-
-
+    case RESERVE2:
+        break;
 
     case FREE:
         /*
@@ -638,6 +670,12 @@ write_snmpNotifyFilterProfileRowStatus(int action,
         /*
          * Release any resources that have been allocated 
          */
+        if (StorageNew != NULL) {
+            SNMP_FREE(StorageNew->snmpTargetParamsName);
+            SNMP_FREE(StorageNew->snmpNotifyFilterProfileName);
+            free(StorageNew);
+            StorageNew = NULL;
+        }
         break;
 
 
@@ -650,7 +688,6 @@ write_snmpNotifyFilterProfileRowStatus(int action,
          * it.  Note that anything done here must be reversable in
          * the UNDO case 
          */
-
 
         if (StorageTmp == NULL &&
             (set_value == RS_CREATEANDGO ||
@@ -667,6 +704,9 @@ write_snmpNotifyFilterProfileRowStatus(int action,
             /*
              * set the flag? 
              */
+            if (StorageTmp == NULL)
+                return SNMP_ERR_GENERR; /* should never ever get here */
+            
             old_value = StorageTmp->snmpNotifyFilterProfileRowStatus;
             StorageTmp->snmpNotifyFilterProfileRowStatus =
                 *((long *) var_val);
@@ -687,9 +727,6 @@ write_snmpNotifyFilterProfileRowStatus(int action,
 
         }
         break;
-
-
-
 
     case UNDO:
         /*
@@ -719,7 +756,8 @@ write_snmpNotifyFilterProfileRowStatus(int action,
             snmpNotifyFilterProfileTable_add(StorageDel);
             StorageDel = NULL;
         } else if (set_value != RS_DESTROY) {
-            StorageTmp->snmpNotifyFilterProfileRowStatus = old_value;
+            if (StorageTmp)
+                StorageTmp->snmpNotifyFilterProfileRowStatus = old_value;
         }
         break;
 
@@ -732,19 +770,19 @@ write_snmpNotifyFilterProfileRowStatus(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         if (StorageDel != NULL) {
+            SNMP_FREE(StorageDel->snmpTargetParamsName);
+            SNMP_FREE(StorageDel->snmpNotifyFilterProfileName);
+            free(StorageDel);
             StorageDel = NULL;
-            /*
-             * XXX: free it, its dead 
-             */
         }
-        if (StorageTmp
-            && StorageTmp->snmpNotifyFilterProfileRowStatus ==
-            RS_CREATEANDGO) {
-            StorageTmp->snmpNotifyFilterProfileRowStatus = RS_ACTIVE;
-        } else if (StorageTmp &&
-                   StorageTmp->snmpNotifyFilterProfileRowStatus ==
-                   RS_CREATEANDWAIT) {
-            StorageTmp->snmpNotifyFilterProfileRowStatus = RS_NOTINSERVICE;
+        if (StorageTmp && set_value == RS_CREATEANDGO) {
+            if (StorageTmp->snmpNotifyFilterProfileNameLen)
+                StorageTmp->snmpNotifyFilterProfileRowStatus = RS_ACTIVE;
+            StorageNew = NULL;
+        } else if (StorageTmp && set_value == RS_CREATEANDWAIT) {
+            if (StorageTmp->snmpNotifyFilterProfileNameLen)
+                StorageTmp->snmpNotifyFilterProfileRowStatus = RS_NOTINSERVICE;
+            StorageNew = NULL;
         }
         break;
     }

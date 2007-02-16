@@ -1,29 +1,43 @@
-.TH "leaf_handlers: process individual leaf objects" 3 "5 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "leaf_handlers" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-leaf_handlers: process individual leaf objects \- A group of handlers to implement individual leaf objects and instances (both scalar objects, and individual objects and instances within a table).  
+leaf_handlers \- Process individual leaf objects A group of handlers to implement individual leaf objects and instances (both scalar objects, and individual objects and instances within a table).  
 
 .PP
 .SS "Modules"
 
 .in +1c
 .ti -1c
-.RI "group\fBinstance: process individual MIB instances easily.\fP"
+.RI "\fBinstance\fP"
 .br
+.RI "\fIProcess individual MIB instances easily. \fP"
+.PP
+.in +1c
+
 .ti -1c
-.RI "group\fBscalar: process scalars easily.\fP"
+.RI "\fBscalar\fP"
 .br
+.RI "\fIProcess scalars easily. \fP"
+.PP
+.in +1c
+
 .ti -1c
-.RI "group\fBscalar_group: process groups of scalars.\fP"
+.RI "\fBscalar_group\fP"
 .br
+.RI "\fIProcess groups of scalars. \fP"
+.PP
+.in +1c
+
 .ti -1c
-.RI "group\fBwatcher: watch a specified variable and process\fP"
+.RI "\fBwatcher\fP"
 .br
-.RI "\fIit as an instance or scalar object \fP"
+.RI "\fIWatch a specified variable and process it as an instance or scalar object. \fP"
 .PP
 
 .in -1c
 .SH "Detailed Description"
 .PP 
-A group of handlers to implement individual leaf objects and instances (both scalar objects, and individual objects and instances within a table). These handlers will typically allow control to be passed down to a lower level, user-provided handler, but this is (usually) optional. 
+Process individual leaf objects A group of handlers to implement individual leaf objects and instances (both scalar objects, and individual objects and instances within a table). 
+.PP
+These handlers will typically allow control to be passed down to a lower level, user-provided handler, but this is (usually) optional.

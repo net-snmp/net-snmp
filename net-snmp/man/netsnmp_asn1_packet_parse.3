@@ -1,13 +1,27 @@
-.TH "asn1 parsing and datatype manipulation routines." 3 "5 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "asn1 parsing and datatype manipulation routines." 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-asn1 parsing and datatype manipulation routines. \- 
+asn1 parsing and datatype manipulation routines. \- Note on.  
+
+.PP
 .SS "Defines"
 
 .in +1c
 .ti -1c
 .RI "#define \fBNULL\fP   0"
+.br
+.ti -1c
+.RI "#define \fBINT32_MAX\fP   2147483647"
+.br
+.ti -1c
+.RI "#define \fBINT32_MIN\fP   (0 - INT32_MAX - 1)"
+.br
+.ti -1c
+.RI "#define \fBCHECK_OVERFLOW_S\fP(x, y)"
+.br
+.ti -1c
+.RI "#define \fBCHECK_OVERFLOW_U\fP(x, y)"
 .br
 .in -1c
 .SS "Functions"
@@ -29,10 +43,10 @@ asn1 parsing and datatype manipulation routines. \-
 .RI "u_char * \fBasn_build_unsigned_int\fP (u_char *data, size_t *datalength, u_char type, const u_long *intp, size_t intsize)"
 .br
 .ti -1c
-.RI "u_char * \fBasn_parse_string\fP (u_char *data, size_t *datalength, u_char *type, u_char *string, size_t *strlength)"
+.RI "u_char * \fBasn_parse_string\fP (u_char *data, size_t *datalength, u_char *type, u_char *str, size_t *strlength)"
 .br
 .ti -1c
-.RI "u_char * \fBasn_build_string\fP (u_char *data, size_t *datalength, u_char type, const u_char *string, size_t strlength)"
+.RI "u_char * \fBasn_build_string\fP (u_char *data, size_t *datalength, u_char type, const u_char *str, size_t strlength)"
 .br
 .ti -1c
 .RI "u_char * \fBasn_parse_header\fP (u_char *data, size_t *datalength, u_char *type)"
@@ -65,16 +79,16 @@ asn1 parsing and datatype manipulation routines. \-
 .RI "u_char * \fBasn_build_null\fP (u_char *data, size_t *datalength, u_char type)"
 .br
 .ti -1c
-.RI "u_char * \fBasn_parse_bitstring\fP (u_char *data, size_t *datalength, u_char *type, u_char *string, size_t *strlength)"
+.RI "u_char * \fBasn_parse_bitstring\fP (u_char *data, size_t *datalength, u_char *type, u_char *str, size_t *strlength)"
 .br
 .ti -1c
-.RI "u_char * \fBasn_build_bitstring\fP (u_char *data, size_t *datalength, u_char type, const u_char *string, size_t strlength)"
+.RI "u_char * \fBasn_build_bitstring\fP (u_char *data, size_t *datalength, u_char type, const u_char *str, size_t strlength)"
 .br
 .ti -1c
-.RI "u_char * \fBasn_parse_unsigned_int64\fP (u_char *data, size_t *datalength, u_char *type, struct counter64 *cp, size_t countersize)"
+.RI "u_char * \fBasn_parse_unsigned_int64\fP (u_char *data, size_t *datalength, u_char *type, struct \fBcounter64\fP *cp, size_t countersize)"
 .br
 .ti -1c
-.RI "u_char * \fBasn_build_unsigned_int64\fP (u_char *data, size_t *datalength, u_char type, const struct counter64 *cp, size_t countersize)"
+.RI "u_char * \fBasn_build_unsigned_int64\fP (u_char *data, size_t *datalength, u_char type, const struct \fBcounter64\fP *cp, size_t countersize)"
 .br
 .ti -1c
 .RI "int \fBasn_realloc\fP (u_char **pkt, size_t *pkt_len)"
@@ -82,7 +96,7 @@ asn1 parsing and datatype manipulation routines. \-
 .in -1c
 .SH "Detailed Description"
 .PP 
-Note on
+Note on. 
 .PP
 Re-allocating reverse ASN.1 encoder functions. Synopsis:
 .PP
@@ -98,6 +112,7 @@ Re-allocating reverse ASN.1 encoder functions. Synopsis:
                             type, &data, sizeof(long)) == 0) {
      error;
  }
+.fi
 .PP
 .PP
 NOTE WELL: after calling one of these functions with allow_realloc non-zero, buf might have moved, buf_len might have grown and offset will have increased by the size of the encoded data. You should **NEVER** do something like this:
@@ -119,6 +134,7 @@ NOTE WELL: after calling one of these functions with allow_realloc non-zero, buf
  rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
                               type, &data2, sizeof(long));
  make use of ptr here;
+.fi
 .PP
 .PP
 ptr is **INVALID** at this point. In general, you should store the offset value and compute pointers when you need them:
@@ -141,6 +157,7 @@ ptr is **INVALID** at this point. In general, you should store the offset value 
                               type, &data2, sizeof(long));
  ptr = buf + buf_len - ptr_offset
  make use of ptr here;
+.fi
 .PP
 .PP
 Here, you can see that ptr will be a valid pointer even if the block of memory has been moved, as it may well have been. Plenty of examples of usage all over \fBasn1.c\fP, \fBsnmp_api.c\fP, \fBsnmpusm.c\fP.
@@ -160,6 +177,7 @@ Of course, you can pass allow_realloc as zero, to indicate that you do not wish 
  if (cp == NULL) {
  error;
  }
+.fi
 .PP
 .PP
 IS EQUIVALENT TO:
@@ -177,5 +195,45 @@ IS EQUIVALENT TO:
  if (rc == 0) {
    error;
  }
+.fi
 .PP
 
+.SH "Define Documentation"
+.PP 
+.SS "#define CHECK_OVERFLOW_S(x, y)"
+.PP
+\fBValue:\fP
+.PP
+.nf
+do { int trunc = 0;                     \
+        if (x > INT32_MAX) {                                            \
+            trunc = 1;                                                  \
+            x &= 0xffffffff;                                            \
+        } else if (x < INT32_MIN) {                                     \
+            trunc = 1;                                                  \
+            x = 0 - (x & 0xffffffff);                                   \
+        }                                                               \
+        if (trunc)                                                      \
+            snmp_log(LOG_ERR,'truncating signed value to 32 bits (%d)\n',y); \
+    } while(0)
+.fi
+.PP
+Definition at line 214 of file asn1.c.
+.PP
+Referenced by asn_build_int(), and asn_parse_int().
+.SS "#define CHECK_OVERFLOW_U(x, y)"
+.PP
+\fBValue:\fP
+.PP
+.nf
+do {                                    \
+        if (x > UINT32_MAX) {                                           \
+            x &= 0xffffffff;                                            \
+            snmp_log(LOG_ERR,'truncating unsigned value to 32 bits (%d)\n',y); \
+        }                                                               \
+    } while(0)
+.fi
+.PP
+Definition at line 226 of file asn1.c.
+.PP
+Referenced by asn_build_objid(), asn_build_unsigned_int(), asn_build_unsigned_int64(), asn_parse_unsigned_int(), and asn_parse_unsigned_int64().

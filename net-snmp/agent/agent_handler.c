@@ -74,8 +74,8 @@ static netsnmp_mib_handler *_clone_handler(netsnmp_mib_handler *it);
  *  iterate through data stored elsewhere (like in a kernel) that is
  *  not in OID lexographical order (ie, don't write your own index/oid
  *  sorting routine, use this helper instead).  The beauty of the
- *  @link table_iterator table_iterator helper@, as well as the @link
- *  instance instance@ helper is that they take care of the complex
+ *  @link table_iterator table_iterator helper@endlink, as well as the @link
+ *  instance instance@endlink helper is that they take care of the complex
  *  GETNEXT processing entirely for you and hand you everything you
  *  need to merely return the data as if it was a GET request.  Much
  *  less code and hair pulling.  I've pulled all my hair out to help
@@ -127,7 +127,7 @@ netsnmp_create_handler(const char *name,
  *  @param name is the handler name and is copied then assigned to
  *              netsnmp_handler_registration->handlerName.
  *
- *  @param handler_access_method is a function pointer used as the access
+ *  @param handler is a function pointer used as the access
  *	method for this handler registration instance for whatever required
  *	needs.
  *
@@ -234,7 +234,7 @@ netsnmp_register_handler(netsnmp_handler_registration *reginfo)
     if (0 == reginfo->modes) {
         reginfo->modes = HANDLER_CAN_DEFAULT;
         snmp_log(LOG_WARNING, "no registration modes specified for %s. "
-                 "Defaulting to %p\n", reginfo->handlerName, reginfo->modes);
+                 "Defaulting to 0x%x\n", reginfo->handlerName, reginfo->modes);
     }
 
     /*
@@ -612,6 +612,7 @@ netsnmp_handler_registration_free(netsnmp_handler_registration *reginfo)
         SNMP_FREE(reginfo->handlerName);
         SNMP_FREE(reginfo->contextName);
         SNMP_FREE(reginfo->rootoid);
+        reginfo->rootoid_len = 0;
         SNMP_FREE(reginfo);
     }
 }
@@ -743,7 +744,7 @@ netsnmp_handler_mark_requests_as_delegated(netsnmp_request_info *requests,
 
 /** add data to a request that can be extracted later by submodules
  *
- * @param requset the netsnmp request info structure
+ * @param request the netsnmp request info structure
  *
  * @param node this is the data to be added to the linked list
  *             request->parent_data
@@ -765,7 +766,7 @@ netsnmp_request_add_list_data(netsnmp_request_info *request,
 
 /** remove data from a request
  *
- * @param requset the netsnmp request info structure
+ * @param request the netsnmp request info structure
  *
  * @param name this is the name of the previously added data
  *

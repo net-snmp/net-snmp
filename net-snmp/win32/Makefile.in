@@ -451,6 +451,8 @@ help ::
         @-echo "                                                              "
         @-echo "install         Install Net-SNMP without Perl                 "
         @-echo "                                                              "
+        @-echo "install_devel   Install Development files                     "
+        @-echo "                                                              "
         @-echo "perl            Configure (in source) and then nmake          "
         @-echo "perl_clean      Perl clean                                    "
         @-echo "perl_test       Perl tests                                    "
@@ -471,6 +473,7 @@ install ::
         @-mkdir $(PREFIX_DOS)\share\snmp\snmpconf-data\snmp-data > NUL:
         @-mkdir $(PREFIX_DOS)\share\snmp\snmpconf-data\snmpd-data > NUL:
         @-mkdir $(PREFIX_DOS)\share\snmp\snmpconf-data\snmptrapd-data > NUL:
+        @-mkdir $(PREFIX_DOS)\share\snmp\mib2c-data  > NUL:
         @-mkdir $(PREFIX_DOS)\snmp > NUL:
         @-mkdir $(PREFIX_DOS)\snmp\persist > NUL:
         @-mkdir $(PREFIX_DOS)\temp > NUL:
@@ -499,6 +502,7 @@ install ::
 
 	@-echo Copying mib2c config files to $(PREFIX_DOS)\share\snmp
         @-Copy local\mib2c*.conf $(PREFIX_DOS)\share\snmp > NUL:
+        @-Copy local\mib2c-conf.d\*.* $(PREFIX_DOS)\share\snmp\mib2c-data > NUL:
 
 	@-echo Copying header files to $(PREFIX_DOS)\include
         @-copy win32\net-snmp\*.h $(PREFIX_DOS)\include\net-snmp > NUL:
@@ -509,6 +513,26 @@ install ::
 
 	@-echo Copying DLL files to %SYSTEMROOT%\System32
         @-Copy win32\bin\$(CFG)\*.dll %SYSTEMROOT%\System32 > NUL:
+
+        @-echo Done copying files to $(PREFIX_DOS)
+        cd win32
+
+
+install_devel ::
+	cd ..
+        @-echo Creating $(PREFIX_DOS) sub-directories
+        @-mkdir $(PREFIX_DOS) > NUL:
+        @-mkdir $(PREFIX_DOS)\lib > NUL:
+        @-mkdir $(PREFIX_DOS)\include > NUL:
+        @-mkdir $(PREFIX_DOS)\include\net-snmp > NUL:
+
+	@-echo Copying library files to $(PREFIX_DOS)\lib
+        @-copy win32\lib\$(CFG)\*.lib $(PREFIX_DOS)\lib > NUL:
+
+	@-echo Copying header files to $(PREFIX_DOS)\include
+        @-xcopy include\net-snmp\*.h $(PREFIX_DOS)\include\net-snmp /s /y > NUL:
+        @-copy win32\net-snmp\*.h $(PREFIX_DOS)\include\net-snmp > NUL:
+        @-copy win32\net-snmp\agent\*.h $(PREFIX_DOS)\include\net-snmp\agent > NUL:
 
         @-echo Done copying files to $(PREFIX_DOS)
         cd win32

@@ -2,8 +2,12 @@
 Makefile
 default_store.3
 default_store.3.h
+encode_keychange.1
+fixproc.1
 mib2c.1
+mib2c-update.1
 mib_api.3
+net-snmp-config.1
 read_config.3
 snmp.conf.5
 snmp_agent_api.3
@@ -18,8 +22,11 @@ snmpcmd.1
 snmpconf.1
 snmpd.8
 snmpd.conf.5
+snmpdelta.1
+snmpdf.1
 snmpget.1
 snmpgetnext.1
+snmpnetstat.1
 snmpset.1
 snmpstatus.1
 snmptable.1
@@ -31,4 +38,7 @@ snmptrapd.conf.5
 snmpvacm.1
 snmpusm.1
 snmpwalk.1
+tkmib.1
+traptoemail.1
 variables.5
+mib2c.conf.5

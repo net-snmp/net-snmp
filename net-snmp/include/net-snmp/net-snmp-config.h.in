@@ -13,7 +13,7 @@
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
-/* config.h:  a general config file */
+/* net-snmp/net-snmp-config.h:  net-snmp configuration */
 
 /* Default (SNMP) version number for the tools to use */
 #define DEFAULT_SNMP_VERSION 3
@@ -206,6 +206,9 @@
 /* Define to 1 if you have the <asm/page.h> header file. */
 #undef HAVE_ASM_PAGE_H
 
+/* Define to 1 if you have the <asm/types.h> header file. */
+#undef HAVE_ASM_TYPES_H
+
 /* Define to 1 if you have the `bcopy' function. */
 #undef HAVE_BCOPY
 
@@ -282,11 +285,17 @@
 /* Define to 1 if you have the <grp.h> header file. */
 #undef HAVE_GRP_H
 
+/* Define to 1 if you have the `hasmntopt' function. */
+#undef HAVE_HASMNTOPT
+
 /* Define to 1 if you have the `if_freenameindex' function. */
 #undef HAVE_IF_FREENAMEINDEX
 
 /* Define to 1 if you have the `if_nameindex' function. */
 #undef HAVE_IF_NAMEINDEX
+
+/* Define to 1 if you have the `if_nametoindex' function. */
+#undef HAVE_IF_NAMETOINDEX
 
 /* Define to 1 if you have the `index' function. */
 #undef HAVE_INDEX
@@ -299,6 +308,9 @@
 
 /* Define to 1 if the system has the type `int64_t'. */
 #undef HAVE_INT64_T
+
+/* Define to 1 if the system has the type `intptr_t'. */
+#undef HAVE_INTPTR_T
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -317,6 +329,9 @@
 
 /* Define to 1 if you have the `kvm_getprocs' function. */
 #undef HAVE_KVM_GETPROCS
+
+/* Define to 1 if you have the `kvm_getswapinfo' function. */
+#undef HAVE_KVM_GETSWAPINFO
 
 /* Define to 1 if you have the <kvm.h> header file. */
 #undef HAVE_KVM_H
@@ -368,6 +383,9 @@
 
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
+
+/* Define to 1 if you have the <linux/ethtool.h> header file. */
+#undef HAVE_LINUX_ETHTOOL_H
 
 /* Define to 1 if you have the <linux/hdreg.h> header file. */
 #undef HAVE_LINUX_HDREG_H
@@ -540,6 +558,9 @@
 /* Define to 1 if you have the <osreldate.h> header file. */
 #undef HAVE_OSRELDATE_H
 
+/* Define to 1 if you have the <pci/pci.h> header file. */
+#undef HAVE_PCI_PCI_H
+
 /* Define to 1 if you have the `perl_eval_pv' function. */
 #undef HAVE_PERL_EVAL_PV
 
@@ -573,8 +594,14 @@
 /* Define to 1 if you have the `rpmGetPath' function. */
 #undef HAVE_RPMGETPATH
 
+/* Define to 1 if you have the <rpm/header.h> header file. */
+#undef HAVE_RPM_HEADER_H
+
 /* Define to 1 if you have the <rpm/rpmdb.h> header file. */
 #undef HAVE_RPM_RPMDB_H
+
+/* Define to 1 if you have the <rpm/rpmlib.h> header file. */
+#undef HAVE_RPM_RPMLIB_H
 
 /* Define to 1 if you have the <search.h> header file. */
 #undef HAVE_SEARCH_H
@@ -806,6 +833,9 @@
 /* Define to 1 if you have the <sys/tcpipstats.h> header file. */
 #undef HAVE_SYS_TCPIPSTATS_H
 
+/* Define to 1 if you have the <sys/timeout.h> header file. */
+#undef HAVE_SYS_TIMEOUT_H
+
 /* Define to 1 if you have the <sys/times.h> header file. */
 #undef HAVE_SYS_TIMES_H
 
@@ -875,6 +905,9 @@
 /* Define to 1 if the system has the type `uint64_t'. */
 #undef HAVE_UINT64_T
 
+/* Define to 1 if the system has the type `uintptr_t'. */
+#undef HAVE_UINTPTR_T
+
 /* Define to 1 if you have the `uname' function. */
 #undef HAVE_UNAME
 
@@ -924,19 +957,29 @@
 #undef HAVE_XTI_H
 
 /* Define to the address where bug reports for this package should be sent. */
+#ifndef PACKAGE_BUGREPORT
 #undef PACKAGE_BUGREPORT
+#endif
 
 /* Define to the full name of this package. */
+#ifndef PACKAGE_NAME
 #undef PACKAGE_NAME
+#endif
 
 /* Define to the full name and version of this package. */
+#ifndef PACKAGE_STRING
 #undef PACKAGE_STRING
+#endif
 
 /* Define to the one symbol short name of this package. */
+#ifndef PACKAGE_TARNAME
 #undef PACKAGE_TARNAME
+#endif
 
 /* Define to the version of this package. */
+#ifndef PACKAGE_VERSION
 #undef PACKAGE_VERSION
+#endif
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
@@ -1010,6 +1053,12 @@
 
 /* define if you have type u_int64_t */
 #undef HAVE_U_INT64_T
+
+/* define if you have type intptr_t */
+#undef HAVE_INTPTR_T
+
+/* define if you have type uintptr_t */
+#undef HAVE_UINTPTR_T
 
 /* define if you have getdevs() */
 #undef HAVE_GETDEVS
@@ -1196,6 +1245,8 @@
 #define OPENBSDID 12
 #define WIN32ID 13
 #define HPUX11ID 14
+#define AIXID 15
+#define MACOSXID 16
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -1219,7 +1270,7 @@
 #ifdef ultrix4
 #define OSTYPE ULTRIXID
 #endif
-#ifdef netbsd1
+#if defined(netbsd1) || defined(netbsd2)
 #define OSTYPE NETBSD1ID
 #endif
 #if defined(__FreeBSD__)
@@ -1234,11 +1285,17 @@
 #if defined(bsdi2) || defined(bsdi3) || defined(bsdi4)
 #define OSTYPE BSDIID
 #endif
-#ifdef openbsd2
+#if defined(openbsd2) || defined(openbsd3)
 #define OSTYPE OPENBSDID
 #endif
 #ifdef WIN32
 #define OSTYPE WIN32ID
+#endif
+#if defined(aix3) || defined(aix4) || defined(aix5)
+#define OSTYPE AIXID
+#endif
+#ifdef darwin8
+#define OSTYPE MACOSXID
 #endif
 /* unknown */
 #ifndef OSTYPE
@@ -1355,8 +1412,13 @@
 
 #ifndef HAVE_INDEX
 #ifdef HAVE_STRCHR
+#ifdef mingw32
+# define index(a,b) strchr(a,b)
+# define rindex(a,b) strrchr(a,b)
+#else
 # define index strchr
 # define rindex strrchr
+#endif
 #endif
 #endif
 
@@ -1410,8 +1472,9 @@
 #endif
 #endif
 
-/* define if you have librpm and libdb */
+/* define if you have libdb, libnm or librpm, respectively */
 #undef HAVE_LIBDB
+#undef HAVE_LIBNM
 #undef HAVE_LIBRPM
 
 /* define if you have pkginfo */
@@ -1566,6 +1629,9 @@
 
 /* define if agentx transport is to use domain sockets only */
 #undef AGENTX_DOM_SOCK_ONLY
+
+/* define if you do not want snmptrapd to register as an AgentX subagent */
+#undef SNMPTRAPD_DISABLE_AGENTX
 
 #undef HEIMDAL
 

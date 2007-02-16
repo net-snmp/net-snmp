@@ -38,7 +38,10 @@ netsnmp_arch_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
                                   netsnmp_ipaddress_entry *rhs);
 extern void
 netsnmp_arch_ipaddress_entry_cleanup(netsnmp_ipaddress_entry *entry);
-
+extern int
+netsnmp_arch_ipaddress_create(netsnmp_ipaddress_entry *entry);
+extern int
+netsnmp_arch_ipaddress_delete(netsnmp_ipaddress_entry *entry);
 
 
 /**---------------------------------------------------------------------*/
@@ -130,7 +133,8 @@ netsnmp_access_ipaddress_container_free(netsnmp_container *container, u_int free
                         NULL);
     }
 
-    CONTAINER_FREE(container);
+    if(! (free_flags & NETSNMP_ACCESS_IPADDRESS_FREE_KEEP_CONTAINER))
+        CONTAINER_FREE(container);
 }
 
 /**---------------------------------------------------------------------*/
@@ -162,6 +166,7 @@ netsnmp_access_ipaddress_entry_create(void)
     if (SNMP_ERR_NOERROR != rc) {
         DEBUGMSGT(("access:ipaddress:create","error %d in arch init\n"));
         netsnmp_access_ipaddress_entry_free(entry);
+        entry = NULL;
     }
 
     return entry;

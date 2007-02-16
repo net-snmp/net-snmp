@@ -62,7 +62,7 @@
 #include <sys/var.h>
 #include <time.h>
 #include <unistd.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/openpromio.h>
 #endif
@@ -93,8 +93,8 @@ struct utmp    *getutent(void);
 static struct openpromio * op_malloc(size_t size);
 static void op_free(struct openpromio *op);
 static int set_solaris_bootcommand_parameter(int action, u_char * var_val, u_char var_val_type, size_t var_val_len, u_char * statP, oid * name, size_t name_len);
-static int set_solaris_eeprom_parameter(char *key,char *value,size_t value_len);
-static int get_solaris_eeprom_parameter(char *parameter,char *output);
+static int set_solaris_eeprom_parameter(const char *key, const char *value, size_t value_len);
+static int get_solaris_eeprom_parameter(const char *parameter, char *output);
 static long     get_max_solaris_processes(void);
 #endif
 static int      get_load_dev(void);
@@ -203,13 +203,13 @@ var_hrsys(struct variable * vp,
           size_t * length,
           int exact, size_t * var_len, WriteMethod ** write_method)
 {
-    static char     string[1024];
+    static char     string[129]; /* per MIB, max size is 128 */
 #if defined(solaris2)
     /* max size of nvram property */
     char bootparam[8192];
 #endif
     time_t          now;
-#ifndef NR_TASKS
+#if !(defined(NR_TASKS) || defined(solaris2) || defined(hpux10) || defined(hpux11))
     int             nproc = 0;
 #endif
 #ifdef linux
@@ -402,7 +402,8 @@ set_solaris_bootcommand_parameter(int action,
     return SNMP_ERR_NOERROR;
 }
 
-static int set_solaris_eeprom_parameter(char *key,char *value,size_t var_val_len) {
+static int set_solaris_eeprom_parameter(const char *key, const char *value,
+                                        size_t var_val_len) {
 
     int status=0;
     char buffer[1024],*pbuffer=buffer;
@@ -421,25 +422,26 @@ static int set_solaris_eeprom_parameter(char *key,char *value,size_t var_val_len
     if(pbuffer!=buffer) free(pbuffer);
     return status;
 }
-static int get_solaris_eeprom_parameter(char *parameter,char *outbuffer) {
+
+static int get_solaris_eeprom_parameter(const char *parameter, char *outbuffer) {
 
     int fd=0,status=0;
     struct openpromio *openprominfo=NULL;
 
     fd=open("/dev/openprom",O_RDONLY);
     if ( fd == -1 ) {
-        snmp_log(LOG_ERR,"cannot open /dev/openprom\n");
+        snmp_log_perror("/dev/openprom");
         return 1;
     }
 
-    openprominfo=(struct openpromio *)op_malloc(8192);
+    openprominfo = op_malloc(8192);
     if(!openprominfo) return 1;
 
     strcpy(openprominfo->oprom_array,parameter);
 
     status=ioctl(fd,OPROMGETOPT,openprominfo);
     if ( status == -1 ) {
-        snmp_log(LOG_ERR,"cannot read from /dev/openprom\n");
+        snmp_log_perror("/dev/openprom");
         close(fd);
         op_free(openprominfo);
         return 1;
@@ -453,6 +455,7 @@ static int get_solaris_eeprom_parameter(char *parameter,char *outbuffer) {
 
     return(0);
 }
+
 static long get_max_solaris_processes(void) {
 
     kstat_ctl_t *ksc=NULL;

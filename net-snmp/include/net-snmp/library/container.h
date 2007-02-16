@@ -267,6 +267,11 @@ extern "C" {
 #define CONTAINER_COMPARE(x,l,r)    (x)->compare(l,r)
 #define CONTAINER_FOR_EACH(x,f,c)   (x)->for_each(x,f,c)
 
+/*
+ * container optionflags
+ */
+#define CONTAINER_KEY_ALLOW_DUPLICATES             0x00000001
+
     /*
      * if you are getting multiple definitions of these three
      * inline functions, you most likely have optimizations turned off.

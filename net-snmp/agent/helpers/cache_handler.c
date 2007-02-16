@@ -24,7 +24,8 @@ static int             _cache_load( netsnmp_cache *cache );
 void            release_cached_resources(unsigned int regNo,
                                          void *clientargs);
 
-/** @defgroup cache_handler cache_handler: Maintains a cache of data for use by lower level handlers.
+/** @defgroup cache_handler cache_handler
+ *  Maintains a cache of data for use by lower level handlers.
  *  @ingroup utilities
  *  This helper checks to see whether the data has been loaded "recently"
  *  (according to the timeout for that particular cache) and calls the
@@ -606,3 +607,5 @@ release_cached_resources(unsigned int regNo, void *clientargs)
                             0, release_cached_resources, NULL);
     }
 }
+/**  @} */
+

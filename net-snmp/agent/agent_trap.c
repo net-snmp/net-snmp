@@ -66,6 +66,7 @@
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/agent_callbacks.h>
 
+#include <net-snmp/agent/agent_module_config.h>
 #include <net-snmp/agent/mib_module_config.h>
 
 #ifdef USING_AGENTX_PROTOCOL_MODULE
@@ -235,12 +236,15 @@ create_trap_session(char *sink, u_short sinkport,
 {
     netsnmp_session session, *sesp;
     char           *peername = NULL;
+    int             len;
 
-    if ((peername = malloc(strlen(sink) + 4 + 32)) == NULL) {
+    len = strlen(sink) + 4 + 32;
+    if ((peername = malloc(len)) == NULL) {
         return 0;
+    } else if (NULL != strchr(sink,':')) {
+        snprintf(peername, len, "%s", sink);
     } else {
-        snprintf(peername, strlen(sink) + 4 + 32, "udp:%s:%hu", sink,
-                 sinkport);
+        snprintf(peername, len, "udp:%s:%hu", sink, sinkport);
     }
 
     memset(&session, 0, sizeof(netsnmp_session));
@@ -250,12 +254,21 @@ create_trap_session(char *sink, u_short sinkport,
         session.community = (u_char *) com;
         session.community_len = strlen(com);
     }
+
     /*
-     * for traps (not informs), there is no response. thus we don't
-     * need to listen to any address for a response, and should
-     * set the clientaddress to localhost, to reduce open ports.
+     * for informs, set retries to default
      */
-    if (pdutype != SNMP_MSG_INFORM)
+    if (SNMP_MSG_INFORM == pdutype) {
+        session.timeout = SNMP_DEFAULT_TIMEOUT;
+        session.retries = SNMP_DEFAULT_RETRIES;
+    }
+
+    /*
+     * if the sink is localhost, bind to localhost, to reduce open ports.
+     */
+    if ((NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_CLIENT_ADDR)) && 
+        ((0 == strcmp("localhost",sink)) || (0 == strcmp("127.0.0.1",sink))))
         session.localname = "localhost";
     sesp = snmp_open(&session);
     free(peername);
@@ -298,46 +311,6 @@ create_v2_inform_session(char *sink, u_short sinkport, char *com)
 }
 #endif
 
-/**
- * This function allows you to make a distinction between generic 
- * traps from different classes of equipment. For example, you may want 
- * to handle a SNMP_TRAP_LINKDOWN trap for a particular device in a 
- * different manner to a generic system SNMP_TRAP_LINKDOWN trap.
- *   
- *
- *  @param trap is the generic trap type.  The trap types are:
- *		- SNMP_TRAP_COLDSTART:
- *			cold start
- *		- SNMP_TRAP_WARMSTART:
- *			warm start
- *		- SNMP_TRAP_LINKDOWN:
- *			link down
- *		- SNMP_TRAP_LINKUP:
- *			link up
- *		- SNMP_TRAP_AUTHFAIL:
- *			authentication failure
- *		- SNMP_TRAP_EGPNEIGHBORLOSS:
- *			egp neighbor loss
- *		- SNMP_TRAP_ENTERPRISESPECIFIC:
- *			enterprise specific
- *			
- *  @param specific is the specific trap value.
- *
- *  @param enterprise is an enterprise oid in which you want to send specifc 
- *	traps from. 
- *
- *  @param enterprise_length is the length of the enterprise oid, use macro,
- *	OID_LENGTH, to compute length.
- *
- *  @param vars is used to supply list of variable bindings to form an SNMPv2 
- *	trap.
- *
- *  @return void
- *
- *  @see send_easy_trap
- *  @see send_v2trap
-
- */
 void
 snmpd_free_trapsinks(void)
 {
@@ -420,6 +393,23 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
     }
 
     /*
+     * Check the v2 varbind list for any varbinds
+     *  that are not valid in an SNMPv1 trap.
+     *  This basically means Counter64 values.
+     *
+     * RFC 2089 said to omit such varbinds from the list.
+     * RFC 2576/3584 say to drop the trap completely.
+     */
+    for (var = vblist->next_variable; var; var = var->next_variable) {
+        if ( var->type == ASN_COUNTER64 ) {
+            snmp_log(LOG_WARNING,
+                     "send_trap: v1 traps can't carry Counter64 varbinds\n");
+            snmp_free_pdu(template_v1pdu);
+            return NULL;
+        }
+    }
+
+    /*
      * Set the generic & specific trap types,
      *    and the enterprise field from the v2 varbind list.
      * If there's an agentIPAddress varbind, set the agent_addr too
@@ -452,6 +442,12 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
          *   into enterprise and specific trap
          */
         len = vblist->val_len / sizeof(oid);
+        if ( len <= 2 ) {
+            snmp_log(LOG_WARNING,
+                     "send_trap: v2 trapOID too short (%d)\n", len);
+            snmp_free_pdu(template_v1pdu);
+            return NULL;
+        }
         template_v1pdu->trap_type     = SNMP_TRAP_ENTERPRISESPECIFIC;
         template_v1pdu->specific_type = vblist->val.objid[len - 1];
         len--;
@@ -585,8 +581,7 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
     var = find_varbind_in_list( template_v2pdu->variables,
                                 snmptrapenterprise_oid,
                                 snmptrapenterprise_oid_len);
-    if (!var && 
-        template_v1pdu->trap_type != SNMP_TRAP_ENTERPRISESPECIFIC) {
+    if (!var) {
         if (!snmp_varlist_add_variable( &(template_v2pdu->variables),
                  snmptrapenterprise_oid, snmptrapenterprise_oid_len,
                  ASN_OBJECT_ID,
@@ -598,11 +593,53 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
     return template_v2pdu;
 }
 
+/**
+ * This function allows you to make a distinction between generic 
+ * traps from different classes of equipment. For example, you may want 
+ * to handle a SNMP_TRAP_LINKDOWN trap for a particular device in a 
+ * different manner to a generic system SNMP_TRAP_LINKDOWN trap.
+ *   
+ *
+ * @param trap is the generic trap type.  The trap types are:
+ *		- SNMP_TRAP_COLDSTART:
+ *			cold start
+ *		- SNMP_TRAP_WARMSTART:
+ *			warm start
+ *		- SNMP_TRAP_LINKDOWN:
+ *			link down
+ *		- SNMP_TRAP_LINKUP:
+ *			link up
+ *		- SNMP_TRAP_AUTHFAIL:
+ *			authentication failure
+ *		- SNMP_TRAP_EGPNEIGHBORLOSS:
+ *			egp neighbor loss
+ *		- SNMP_TRAP_ENTERPRISESPECIFIC:
+ *			enterprise specific
+ *			
+ * @param specific is the specific trap value.
+ *
+ * @param enterprise is an enterprise oid in which you want to send specifc 
+ *	traps from. 
+ *
+ * @param enterprise_length is the length of the enterprise oid, use macro,
+ *	OID_LENGTH, to compute length.
+ *
+ * @param vars is used to supply list of variable bindings to form an SNMPv2 
+ *	trap.
+ *
+ * @param context currently unused 
+ *
+ * @param flags currently unused 
+ *
+ * @return void
+ *
+ * @see send_easy_trap
+ * @see send_v2trap
+ */
 int
 netsnmp_send_traps(int trap, int specific,
                           oid * enterprise, int enterprise_length,
                           netsnmp_variable_list * vars,
-                          /* These next two are currently unused */
                           char * context, int flags)
 {
     netsnmp_pdu           *template_v1pdu;
@@ -616,7 +653,7 @@ netsnmp_send_traps(int trap, int specific,
 
     DEBUGMSGTL(( "trap", "send_trap %d %d ", trap, specific));
     DEBUGMSGOID(("trap", enterprise, enterprise_length));
-    DEBUGMSGTL(( "trap", "\n"));
+    DEBUGMSG(( "trap", "\n"));
 
     if (vars) {
         vblist = snmp_clone_varbind( vars );
@@ -640,6 +677,7 @@ netsnmp_send_traps(int trap, int specific,
         if (!template_v2pdu) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to construct v2 template PDU\n");
+            snmp_free_varbind(vblist);
             return -1;
         }
 
@@ -662,6 +700,7 @@ netsnmp_send_traps(int trap, int specific,
                 snmp_log(LOG_WARNING,
                      "send_trap: failed to insert sysUptime varbind\n");
                 snmp_free_pdu(template_v2pdu);
+                snmp_free_varbind(vblist);
                 return -1;
             }
             template_v2pdu->variables = var;
@@ -708,8 +747,6 @@ netsnmp_send_traps(int trap, int specific,
         if (!template_v1pdu) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to convert v2->v1 template PDU\n");
-            snmp_free_pdu(template_v2pdu);
-            return -1;
         }
 
     } else {
@@ -720,6 +757,7 @@ netsnmp_send_traps(int trap, int specific,
         if (!template_v1pdu) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to construct v1 template PDU\n");
+            snmp_free_varbind(vblist);
             return -1;
         }
         template_v1pdu->trap_type     = trap;
@@ -730,6 +768,7 @@ netsnmp_send_traps(int trap, int specific,
                        enterprise, enterprise_length * sizeof(oid))) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to set v1 enterprise OID\n");
+            snmp_free_varbind(vblist);
             snmp_free_pdu(template_v1pdu);
             return -1;
         }
@@ -746,15 +785,26 @@ netsnmp_send_traps(int trap, int specific,
         if (!template_v2pdu) {
             snmp_log(LOG_WARNING,
                      "send_trap: failed to convert v1->v2 template PDU\n");
-            snmp_free_pdu(template_v1pdu);
-            return -1;
         }
     }
+
+    /*
+     * Check whether we're ignoring authFail traps
+     */
+    if (template_v1pdu) {
+      if (template_v1pdu->trap_type == SNMP_TRAP_AUTHFAIL &&
+        snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_DISABLED) {
+        snmp_free_pdu(template_v1pdu);
+        snmp_free_pdu(template_v2pdu);
+        return 0;
+      }
+
     /*
      * Ensure that the v1 trap PDU includes the local IP address
      */
-     pdu_in_addr_t = (in_addr_t *) template_v1pdu->agent_addr;
-    *pdu_in_addr_t = get_myaddr();
+       pdu_in_addr_t = (in_addr_t *) template_v1pdu->agent_addr;
+      *pdu_in_addr_t = get_myaddr();
+    }
 
 
     /*
@@ -765,18 +815,24 @@ netsnmp_send_traps(int trap, int specific,
     for (sink = sinks; sink; sink = sink->next) {
 #ifndef DISABLE_SNMPV1
         if (sink->version == SNMP_VERSION_1) {
+          if (template_v1pdu) {
             send_trap_to_sess(sink->sesp, template_v1pdu);
+          }
         } else {
 #endif
+          if (template_v2pdu) {
             template_v2pdu->command = sink->pdutype;
             send_trap_to_sess(sink->sesp, template_v2pdu);
+          }
 #ifndef DISABLE_SNMPV1
         }
 #endif
     }
-    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+    if (template_v1pdu)
+        snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_SEND_TRAP1, template_v1pdu);
-    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+    if (template_v2pdu)
+        snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_SEND_TRAP2, template_v2pdu);
     snmp_free_pdu(template_v1pdu);
     snmp_free_pdu(template_v2pdu);
@@ -796,6 +852,45 @@ send_enterprise_trap_vars(int trap,
     return;
 }
 
+/**
+ * Captures responses or the lack there of from INFORMs that were sent
+ * 1) a response is received from an INFORM
+ * 2) one isn't received and the retries/timeouts have failed
+*/
+int
+handle_inform_response(int op, netsnmp_session * session,
+                       int reqid, netsnmp_pdu *pdu,
+                       void *magic)
+{
+    /* XXX: possibly stats update */
+    switch (op) {
+
+    case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+        snmp_increment_statistic(STAT_SNMPINPKTS);
+        DEBUGMSGTL(("trap", "received the inform response for reqid=%d\n",
+                    reqid));
+        break;
+
+    case NETSNMP_CALLBACK_OP_TIMED_OUT:
+        DEBUGMSGTL(("trap",
+                    "received a timeout sending an inform for reqid=%d\n",
+                    reqid));
+        break;
+
+    case NETSNMP_CALLBACK_OP_SEND_FAILED:
+        DEBUGMSGTL(("trap",
+                    "failed to send an inform for reqid=%d\n",
+                    reqid));
+        break;
+
+    default:
+        DEBUGMSGTL(("trap", "received op=%d for reqid=%d when trying to send an inform\n", op, reqid));
+    }
+
+    return 1;
+}
+
+
 /*
  * send_trap_to_sess: sends a trap to a session but assumes that the
  * pdu is constructed correctly for the session type. 
@@ -804,7 +899,6 @@ void
 send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
 {
     netsnmp_pdu    *pdu;
-    netsnmp_pdu    *response;
     int            result;
 
     if (!sess || !template_pdu)
@@ -817,6 +911,9 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
     if (sess->version == SNMP_VERSION_1 &&
         (template_pdu->command != SNMP_MSG_TRAP))
         return;                 /* Skip v1 sinks for v2 only traps */
+    if (sess->version != SNMP_VERSION_1 &&
+        (template_pdu->command == SNMP_MSG_TRAP))
+        return;                 /* Skip v2+ sinks for v1 only traps */
 #endif
     template_pdu->version = sess->version;
     pdu = snmp_clone_pdu(template_pdu);
@@ -827,13 +924,16 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
          || template_pdu->command == AGENTX_MSG_NOTIFY
 #endif
        ) {
-        result = snmp_synch_response(sess, pdu, &response);
-        result = !result;	/* XXX - different return code :-( */
-    } else
+        result =
+            snmp_async_send(sess, pdu, &handle_inform_response, NULL);
+        
+    } else {
         result = snmp_send(sess, pdu);
+    }
+
     if (result == 0) {
         snmp_sess_perror("snmpd: send_trap", sess);
-        /* snmp_free_pdu(pdu); */
+        snmp_free_pdu(pdu);
     } else {
         snmp_increment_statistic(STAT_SNMPOUTTRAPS);
         snmp_increment_statistic(STAT_SNMPOUTPKTS);
@@ -1101,6 +1201,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     char           *argv[MAX_ARGS], *cp = cptr, tmp[SPRINT_MAX_LEN];
     int             argn, arg;
     netsnmp_session session, *ss;
+    size_t          len;
 
     /*
      * inform or trap?  default to trap 
@@ -1128,6 +1229,18 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
             ("snmpd: failed to parse this line or the remote trap receiver is down.  Possible cause:");
         snmp_sess_perror("snmpd: snmpd_parse_config_trapsess()", &session);
         return;
+    }
+
+    /*
+     * If this is an SNMPv3 TRAP session, then the agent is
+     *   the authoritative engine, so set the engineID accordingly
+     */
+    if (ss->version == SNMP_VERSION_3 &&
+        traptype != SNMP_MSG_INFORM   &&
+        ss->securityEngineIDLen == 0) {
+            len = snmpv3_get_engineID( tmp, sizeof(tmp));
+            memdup(&ss->securityEngineID, tmp, len);
+            ss->securityEngineIDLen = len;
     }
 
 #ifndef DISABLE_SNMPV1

@@ -100,7 +100,6 @@ static int ps_numdisks;			/* number of disks in system, may change while running
 static mach_port_t masterPort;		/* to communicate with I/O Kit	*/
 #endif                          /* darwin */
 
-static char     type[20];
 void            diskio_parse_config(const char *, char *);
 
 #if defined (freebsd4) || defined(freebsd5)
@@ -175,17 +174,11 @@ init_diskio(void)
     REGISTER_MIB("diskio", diskio_variables, variable2,
                  diskio_variables_oid);
 
-    /*
-     * Added to parse snmpd.conf - abby
-     */
-    snmpd_register_config_handler("diskio", diskio_parse_config,
-                                  NULL, "diskio [device-type]");
-
 #ifdef solaris2
     kc = kstat_open();
 
     if (kc == NULL)
-        snmp_log(LOG_ERR, "diskio: Couln't open kstat\n");
+        snmp_log(LOG_ERR, "diskio: Couldn't open kstat\n");
 #endif
 
 #ifdef darwin
@@ -209,12 +202,6 @@ init_diskio(void)
 	snmp_alarm_register(DISKIO_SAMPLE_INTERVAL, SA_REPEAT, devla_getstats, NULL);
 #endif
 
-}
-
-void
-diskio_parse_config(const char *token, char *cptr)
-{
-    copy_nword(cptr, type, sizeof(type));
 }
 
 #ifdef solaris2
@@ -424,7 +411,11 @@ var_diskio(struct variable * vp,
 /* disk load average patch by Rojer */
 
 struct dev_la {
+#if ( defined(freebsd5) && __FreeBSD_version >= 500107 )
+        struct bintime prev;
+#else
         struct timeval prev;
+#endif
         double la1,la5,la15;
         char name[DEVSTAT_NAME_LEN+5];
         };
@@ -432,6 +423,7 @@ struct dev_la {
 static struct dev_la *devloads = NULL;
 static int ndevs = 0;
 
+#if ! ( defined(freebsd5) && __FreeBSD_version >= 500107 )
 double devla_timeval_diff(struct timeval *t1, struct timeval *t2) {
 
         double dt1 = (double) t1->tv_sec + (double) t1->tv_usec * 0.000001;
@@ -440,6 +432,7 @@ double devla_timeval_diff(struct timeval *t1, struct timeval *t2) {
         return dt2-dt1;
 
         }
+#endif
 
 void devla_getstats(unsigned int regno, void *dummy) {
 
@@ -452,14 +445,13 @@ void devla_getstats(unsigned int regno, void *dummy) {
 	if (lastat == NULL) {
 	    lastat = (struct statinfo *) malloc(sizeof(struct statinfo));
 	    if (lastat != NULL)
-		lastat->dinfo = (struct devinfo *) malloc(sizeof(struct devinfo));
+		lastat->dinfo = (struct devinfo *) calloc(sizeof(struct devinfo), 1);
 	    if (lastat == NULL || lastat->dinfo == NULL) {
 		    SNMP_FREE(lastat);
 		    ERROR_MSG("Memory alloc failure - devla_getstats()\n");
 		    return;
 	    }
 	}
-	memset(lastat->dinfo, 0, sizeof(struct devinfo));
 
         if ((GETDEVS(lastat)) == -1) {
                 ERROR_MSG("can't do getdevs()\n");
@@ -482,7 +474,8 @@ void devla_getstats(unsigned int regno, void *dummy) {
                 devloads = (struct dev_la *) malloc(ndevs * sizeof(struct dev_la));
                 bzero(devloads, ndevs * sizeof(struct dev_la));
                 for (i=0; i < ndevs; i++) {
-                        memcpy(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time, sizeof(struct timeval));
+                        devloads[i].la1 = devloads[i].la5 = devloads[i].la15 = 0;
+                        memcpy(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time, sizeof(devloads[i].prev));
                         snprintf(devloads[i].name, sizeof(devloads[i].name), "%s%d",
                                 lastat->dinfo->devices[i].device_name, lastat->dinfo->devices[i].unit_number);
                         }
@@ -492,13 +485,19 @@ void devla_getstats(unsigned int regno, void *dummy) {
                 }
 
         for (i=0; i<ndevs; i++) {
+#if defined(freebsd5) && __FreeBSD_version >= 500107
+                busy_time = devstat_compute_etime(&lastat->dinfo->devices[i].busy_time, &devloads[i].prev);
+#else
                 busy_time = devla_timeval_diff(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time);
+#endif
+                if ( busy_time < 0 )
+                    busy_time = 0;   /* Account for possible FP loss of precision near zero */
                 busy_percent = busy_time * 100 / DISKIO_SAMPLE_INTERVAL;
                 devloads[i].la1 = devloads[i].la1 * expon1 + busy_percent * (1 - expon1);
 /*		fprintf(stderr, "(%d) %s: update la1=%.2lf%%\n", i, devloads[i].name, expon1); */
                 devloads[i].la5 = devloads[i].la5 * expon5 + busy_percent * (1 - expon5);
                 devloads[i].la15 = devloads[i].la15 * expon15 + busy_percent * (1 - expon15);
-                memcpy(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time, sizeof(struct timeval));
+                memcpy(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time, sizeof(devloads[i].prev));
                 }
 
         }
@@ -522,14 +521,13 @@ getstats(void)
     if (stat == NULL) {
         stat = (struct statinfo *) malloc(sizeof(struct statinfo));
         if (stat != NULL)
-            stat->dinfo = (struct devinfo *) malloc(sizeof(struct devinfo));
+            stat->dinfo = (struct devinfo *) calloc(sizeof(struct devinfo), 1);
         if (stat == NULL || stat->dinfo == NULL) {
 		SNMP_FREE(stat);
         	ERROR_MSG("Memory alloc failure - getstats\n");
 		return 1;
 	}
     }
-    memset(stat->dinfo, 0, sizeof(struct devinfo));
 
     if (GETDEVS(stat) == -1) {
         fprintf(stderr, "Can't get devices:%s\n", devstat_errbuf);
@@ -689,13 +687,11 @@ int getstats(void)
 	    }
 	    pTemp = &head.indices[head.length];
 	    sscanf (buffer, "%d %d", &pTemp->major, &pTemp->minor);
-	    if (pTemp->minor == 0)
-		sscanf (buffer, "%d %d %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+ 	    if (sscanf (buffer, "%d %d %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		    &pTemp->major, &pTemp->minor, pTemp->name,
 		    &pTemp->rio, &pTemp->rmerge, &pTemp->rsect, &pTemp->ruse,
 		    &pTemp->wio, &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,
-		    &pTemp->running, &pTemp->use, &pTemp->aveq);
-	    else
+ 		    &pTemp->running, &pTemp->use, &pTemp->aveq) != 14)
 		sscanf (buffer, "%d %d %s %lu %lu %lu %lu\n",
 		    &pTemp->major, &pTemp->minor, pTemp->name,
 		    &pTemp->rio, &pTemp->rsect,
@@ -706,6 +702,7 @@ int getstats(void)
     else {
 	/* See if a 2.4 kernel */
 	char buffer[1024];
+	int rc;
 	parts = fopen("/proc/partitions", "r");
 	if (!parts) {
 	    snmp_log_perror("/proc/partitions");
@@ -727,11 +724,15 @@ int getstats(void)
 	    }
 	    pTemp = &head.indices[head.length];
 
-	    fscanf (parts, "%d %d %lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+	    rc = fscanf (parts, "%d %d %lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		    &pTemp->major, &pTemp->minor, &pTemp->blocks, pTemp->name,
 		    &pTemp->rio, &pTemp->rmerge, &pTemp->rsect, &pTemp->ruse,
 		    &pTemp->wio, &pTemp->wmerge, &pTemp->wsect, &pTemp->wuse,
 		    &pTemp->running, &pTemp->use, &pTemp->aveq);
+            if (rc != 15) {
+               snmp_log(LOG_ERR, "diskio.c: cannot find statistics in /proc/partitions\n");
+               return 1;
+            }
 	    head.length++;
 	}
     }

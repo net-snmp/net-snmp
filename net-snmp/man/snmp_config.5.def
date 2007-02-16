@@ -1,7 +1,7 @@
-.TH SNMP.CONF 5 "28 Aug 2001" VVERSIONINFO "Net-SNMP"
+.TH SNMP.CONF 5 "5 May 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-snmp_config - describes how to configure the Net-SNMP applications.
+snmp_config - handling of Net-SNMP configuration files
 .SH DESCRIPTION
 The Net-SNMP package uses various configuration files to configure its 
 applications.  This manual page merely describes the overall nature of 
@@ -20,10 +20,54 @@ configuration file type.
 .PP
 Additionally, the above default search path can be overridden by
 setting the environment variable SNMPCONFPATH to a colon-separated
-list of directories to search for.
+list of directories to search for.  The path for the persistent
+data should be included when running applications that use
+persistent storage, such as snmpd.
 .PP
-Finally, applications that store persistent data will also look in the 
-PERSISTENT_DIRECTORY directory for configuration files there.
+Applications will read persistent configuration files 
+in the following order of preference:
+.RS
+.PP
+file in 
+.B SNMP_PERSISTENT_FILE
+environment variable
+.PP
+directories in 
+.B SNMPCONFPATH
+environment variable
+.PP
+directory defined by 
+.B
+persistentDir 
+snmp.conf variable
+.PP
+default 
+.B
+PERSISTENT_DIRECTORY 
+directory
+.RE
+.PP
+Finally, applications will write persistent configuration files 
+in the following order of preference:
+.RS
+.PP
+file in 
+.B SNMP_PERSISTENT_FILE
+environment variable
+.PP
+directory defined by 
+.B
+persistentDir 
+snmp.conf variable
+.PP
+default 
+.B
+PERSISTENT_DIRECTORY 
+directory
+.RE
+.PP
+Note:  When using SNMP_PERSISTENT_FILE, the filename should match the 
+application name.  For example, /var/net-snmp/snmpd.conf.
 .SH "CONFIGURATION FILE TYPES"
 Each application may use multiple configuration files, which will
 configure various different aspects of the application.  For instance, 

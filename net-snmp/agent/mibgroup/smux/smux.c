@@ -68,6 +68,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/tools.h>
 
 #include "smux.h"
 #include "util_funcs.h"
@@ -83,7 +84,7 @@ u_char          smux_str[SMUXMAXSTRLEN];
 int             smux_listen_sd = -1;
 
 static struct timeval smux_rcv_timeout;
-static u_long   smux_reqid;
+static long   smux_reqid;
 
 void            init_smux(void);
 static u_char  *smux_open_process(int, u_char *, size_t *, int *);
@@ -98,7 +99,7 @@ static void     smux_list_detach(smux_reg **, smux_reg **);
 static void     smux_replace_active(smux_reg *, smux_reg *);
 static void     smux_peer_cleanup(int);
 static int      smux_auth_peer(oid *, size_t, char *, int);
-static int      smux_build(u_char, u_long, oid *,
+static int      smux_build(u_char, long, oid *,
                            size_t *, u_char, u_char *, size_t, u_char *,
                            size_t *);
 static int      smux_list_add(smux_reg **, smux_reg *);
@@ -137,11 +138,17 @@ void
 smux_parse_peer_auth(const char *token, char *cptr)
 {
     smux_peer_auth *aptr;
+    char           *password_cptr;
+    int             cptr_len;
 
     if ((aptr =
          (smux_peer_auth *) calloc(1, sizeof(smux_peer_auth))) == NULL) {
         snmp_log_perror("smux_parse_peer_auth: malloc");
         return;
+    }
+    if (nauths == SMUX_MAX_PEERS) {
+	config_perror("Too many smuxpeers");
+	return;
     }
     aptr->sa_active_fd = -1;
     if (!cptr) {
@@ -153,24 +160,24 @@ smux_parse_peer_auth(const char *token, char *cptr)
         return;
     }
 
-    if (*cptr == '.')
-        cptr++;
-
-    if (!isdigit(*cptr)) {
-        config_perror("second token is not an OID");
-        free((char *) aptr);
-        return;
-    }
     /*
      * oid 
      */
-    aptr->sa_oid_len = parse_miboid(cptr, aptr->sa_oid);
+    password_cptr = strchr(cptr, ' ');
+    cptr_len = strlen(cptr);
+    if (password_cptr)
+        *password_cptr = 0x0;
+
+    aptr->sa_oid_len = MAX_OID_LEN;
+    read_objid( cptr, aptr->sa_oid, &aptr->sa_oid_len );
 
     DEBUGMSGTL(("smux_conf", "parsing registration for: %s\n", cptr));
 
-    while (isdigit(*cptr) || *cptr == '.')
-        cptr++;
-    cptr = skip_white(cptr);
+    if ((&password_cptr - &cptr + 1) < cptr_len) {
+        cptr = ++password_cptr;
+        DEBUGMSGTL(("smux_conf", "password is: %s\n",
+                    ( cptr ? cptr : "(null)")));
+    }
 
     /*
      * password 
@@ -1545,7 +1552,7 @@ smux_parse_var(u_char * varbind,
  */
 static int
 smux_build(u_char type,
-           u_long reqid,
+           long reqid,
            oid * objid,
            size_t * oidlen,
            u_char val_type,
@@ -1566,7 +1573,7 @@ smux_build(u_char type,
     /*
      * build reqid 
      */
-    ptr = asn_build_unsigned_int(ptr, &len,
+    ptr = asn_build_int(ptr, &len,
                                  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                            ASN_INTEGER), &reqid,
                                  sizeof(reqid));
@@ -1919,10 +1926,10 @@ smux_trap_process(u_char * rsp, size_t * len)
             snmptrap_ptr = snmptrap_ptr->next_variable;
         }
 
-        snmp_set_var_objid(snmptrap_ptr, var_name, var_name_len);
-        snmp_set_var_value(snmptrap_ptr, (char *) var_val, var_val_len);
         snmptrap_ptr->type = vartype;
         snmptrap_ptr->next_variable = NULL;
+        snmp_set_var_objid(snmptrap_ptr, var_name, var_name_len);
+        snmp_set_var_value(snmptrap_ptr, (char *) var_val, var_val_len);
 
     }
 

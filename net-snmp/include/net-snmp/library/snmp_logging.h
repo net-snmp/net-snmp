@@ -49,8 +49,15 @@ extern          "C" {
     void            snmp_enable_stderrlog(void);
     void            snmp_enable_calllog(void);
 
+    int             snmp_stderrlog_status(void);
+
 #if HAVE_STDARG_H
+# if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
     int             snmp_log(int priority, const char *format, ...);
+# else
+    int             snmp_log(int priority, const char *format, ...)
+                    	__attribute__ ((__format__ (__printf__, 2, 3)));
+# endif
 #else
     int             snmp_log(va_alist);
 #endif
@@ -81,7 +88,7 @@ extern          "C" {
 
     int snmp_log_options(char *optarg, int argc, char *const *argv);
     void snmp_log_options_usage(const char *lead, FILE *outf);
-    char *snmp_log_syslogname(char *syslogname);
+    char *snmp_log_syslogname(const char *syslogname);
     typedef struct netsnmp_log_handler_s netsnmp_log_handler; 
     typedef int (NetsnmpLogHandler)(netsnmp_log_handler*, int, const char *);
 

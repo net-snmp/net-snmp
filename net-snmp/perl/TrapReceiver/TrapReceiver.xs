@@ -18,9 +18,9 @@ typedef struct trapd_cb_data_s {
 } trapd_cb_data;
 
 typedef struct netsnmp_oid_s {
-    unsigned int        *name;
-    unsigned int         len;
-    unsigned int         namebuf[ MAX_OID_LEN ];
+    oid                 *name;
+    size_t               len;
+    oid                  namebuf[ MAX_OID_LEN ];
 } netsnmp_oid;
 
 int   perl_trapd_handler( netsnmp_pdu           *pdu,
@@ -40,6 +40,10 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
     AV *varbinds;
     HV *pduinfo;
 
+    dSP;
+    ENTER;
+    SAVETMPS;
+
     if (!pdu || !handler)
         return 0;
 
@@ -52,11 +56,6 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         return 0;
 
     pcallback = cb_data->perl_cb;
-
-  {
-    dSP;
-    ENTER;
-    SAVETMPS;
 
     /* get PDU related info */
     pduinfo = newHV();
@@ -73,12 +72,19 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
     if (pdu->version == 3) {
         STOREPDUi("securitymodel", pdu->securityModel);
         STOREPDUi("securitylevel", pdu->securityLevel);
-        STOREPDU("contextName", newSVpv(pdu->contextName, pdu->contextNameLen));
-        STOREPDU("contextEngineID", newSVpv(pdu->contextEngineID, pdu->contextEngineIDLen));
-        STOREPDU("securityEngineID", newSVpv(pdu->securityEngineID, pdu->securityEngineIDLen));
-        STOREPDU("securityName", newSVpv(pdu->securityName, pdu->securityNameLen));
+        STOREPDU("contextName",
+                 newSVpv(pdu->contextName, pdu->contextNameLen));
+        STOREPDU("contextEngineID",
+                 newSVpv(pdu->contextEngineID,
+                                    pdu->contextEngineIDLen));
+        STOREPDU("securityEngineID",
+                 newSVpv(pdu->securityEngineID,
+                                    pdu->securityEngineIDLen));
+        STOREPDU("securityName",
+                 newSVpv(pdu->securityName, pdu->securityNameLen));
     } else {
-        STOREPDU("community", newSVpv(pdu->community, pdu->community_len));
+        STOREPDU("community",
+                 newSVpv(pdu->community, pdu->community_len));
     }
 
     if (transport && transport->f_fmtaddr) {
@@ -88,22 +94,30 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         free(tstr);
     }
 
+
+    /*
+     * collect OID objects in a temp array first
+     */
     /* get VARBIND related info */
     i = count_varbinds(pdu->variables);
     tmparray = malloc(sizeof(*tmparray) * i);
 
-    varbinds = newAV();
     for(vb = pdu->variables; vb; vb = vb->next_variable) {
 
-        PUSHMARK(sp);
-        /* get the oid */ o = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
+        /* get the oid */
+        o = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
         o->name = o->namebuf;
         o->len = vb->name_length;
         memcpy(o->name, vb->name, vb->name_length * sizeof(oid));
 
-        rarg = newSViv((int) 0);
-        arg = newSVrv(rarg, "netsnmp_oidPtr");
-        sv_setiv(arg, (int) o);
+#undef CALL_EXTERNAL_OID_NEW
+
+#ifdef CALL_EXTERNAL_OID_NEW
+        PUSHMARK(sp);
+
+        rarg = sv_2mortal(newSViv((IV) 0));
+        arg = sv_2mortal(newSVrv(rarg, "netsnmp_oidPtr"));
+        sv_setiv(arg, (IV) o);
         XPUSHs(rarg);
 
         PUTBACK;
@@ -114,11 +128,29 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
             snmp_log(LOG_ERR, "unhandled OID error.\n");
             /* ack XXX */
         }
-        tmparray[c++] = POPs;
         /* get the value */
+        tmparray[c++] = POPs;
+        SvREFCNT_inc(tmparray[c-1]);
+        PUTBACK;
+#else /* build it and bless ourselves */
+        {
+            HV *hv = newHV();
+            SV *rv = newRV_noinc((SV *) hv);
+            SV *rvsub = newRV_noinc((SV *) newSViv((UV) o));
+            SV *sv;
+            rvsub = sv_bless(rvsub, gv_stashpv("netsnmp_oidPtr", 1));
+            hv_store(hv, "oidptr", 6,  rvsub, 0);
+            rv = sv_bless(rv, gv_stashpv("NetSNMP::OID", 1));
+            tmparray[c++] = rv;
+        }
+        
+#endif /* build oid ourselves */
     }
 
-    PUSHMARK(sp);
+    /*
+     * build the varbind lists
+     */
+    varbinds = newAV();
     for(vb = pdu->variables, i = 0; vb; vb = vb->next_variable, i++) {
         /* push the oid */
         AV *vba;
@@ -133,17 +165,22 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
                                vb, 0, 0, 0);
 
         av_push(vba,tmparray[i]);
-        av_push(vba,sv_2mortal(newSVpv(outbuf, oo_len)));
-        av_push(vba,sv_2mortal(newSViv(vb->type)));
-        av_push(varbinds, newRV((SV*)vba));
+        av_push(vba,newSVpvn(outbuf, oo_len));
+        free(outbuf);
+        av_push(vba,newSViv(vb->type));
+        av_push(varbinds, (SV *) newRV_noinc((SV *) vba));
     }
 
+    PUSHMARK(sp);
+
     /* store the collected information on the stack */
-    XPUSHs(newRV((SV*)pduinfo));
-    XPUSHs(newRV((SV*)varbinds));
+    XPUSHs(sv_2mortal(newRV_noinc((SV*) pduinfo)));
+    XPUSHs(sv_2mortal(newRV_noinc((SV*) varbinds)));
+
+    /* put the stack back in order */
+    PUTBACK;
 
     /* actually call the callback function */
-    PUTBACK;
     if (SvTYPE(pcallback) == SVt_PVCV) {
         perl_call_sv(pcallback, G_DISCARD);
         /* XXX: it discards the results, which isn't right */
@@ -151,16 +188,35 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         /* reference to code */
         perl_call_sv(SvRV(pcallback), G_DISCARD);
     } else {
-        snmp_log(LOG_ERR, " tried to call a perl function but failed to understand its type: (ref = %x, svrok: %d, SVTYPE: %d)\n", pcallback, SvROK(pcallback), SvTYPE(pcallback));
+        snmp_log(LOG_ERR, " tried to call a perl function but failed to understand its type: (ref = %x, svrok: %lu, SVTYPE: %lu)\n", (uintptr_t)pcallback, SvROK(pcallback), SvTYPE(pcallback));
     }
 
+#ifdef DUMPIT
+    fprintf(stderr, "DUMPDUMPDUMPDUMPDUMPDUMP\n");
+    sv_dump(pduinfo);
+    fprintf(stderr, "--------------------\n");
+    sv_dump(varbinds);
+#endif
+    
+    /* svREFCNT_dec((SV *) pduinfo); */
+#ifdef NOT_THIS
+    {
+        SV *vba;
+        while(vba = av_pop(varbinds)) {
+            av_undef((AV *) vba);
+        }
+    }
+    av_undef(varbinds);
+#endif    
     free(tmparray);
 
-    SPAGAIN;
-    PUTBACK;
-    FREETMPS;
+    /* Not needed because of the G_DISCARD flag (I think) */
+    /* SPAGAIN; */
+    /* PUTBACK; */
+#ifndef __x86_64__
+    FREETMPS; /* FIXME: known to cause a segfault on x86-64 */
+#endif
     LEAVE;
-  }
     return NETSNMPTRAPD_HANDLER_OK;
 }
 
@@ -194,7 +250,7 @@ trapd_register(regoid, perlcallback)
                     netsnmp_add_default_traphandler(perl_trapd_handler);
             } else if (!snmp_parse_oid(regoid, myoid, &myoid_len)) {
                 snmp_log(LOG_ERR,
-                         "Failed to parse oid for perl registration: %s %d\n",
+                         "Failed to parse oid for perl registration: %s\n",
                          regoid);
                 RETVAL = 0;
                 return;

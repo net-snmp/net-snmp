@@ -73,8 +73,6 @@ SOFTWARE.
 
 #include <net-snmp/net-snmp-includes.h>
 
-int             failures = 0;
-
 #define NETSNMP_DS_APP_DONT_FIX_PDUS 0
 
 static void
@@ -125,6 +123,7 @@ main(int argc, char *argv[])
     oid             name[MAX_OID_LEN];
     size_t          name_length;
     int             status;
+    int             failures = 0;
     int             exitval = 0;
 
     /*
@@ -188,6 +187,7 @@ main(int argc, char *argv[])
             snmp_add_null_var(pdu, name, name_length);
     }
     if (failures) {
+        snmp_close(ss);
         SOCK_CLEANUP;
         exit(1);
     }

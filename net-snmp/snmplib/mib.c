@@ -239,7 +239,7 @@ uptimeString(u_long timeticks, char *buf)
 static void
 sprint_char(char *buf, const u_char ch)
 {
-    if (isprint(ch)) {
+    if (isprint(ch) || isspace(ch)) {
         sprintf(buf, "%c", (int) ch);
     } else {
         sprintf(buf, ".");
@@ -262,7 +262,7 @@ sprint_char(char *buf, const u_char ch)
  * @param allow_realloc if not zero reallocate the buffer to fit the 
  *                      needed size.
  * @param cp       the array of characters to encode.
- * @param len      the array length of cp.
+ * @param line_len the array length of cp.
  * 
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
@@ -317,8 +317,6 @@ _sprint_hexstring_line(u_char ** buf, size_t * buf_len, size_t * out_len,
         sprintf((char *) (*buf + *out_len), "]");
         *out_len += strlen((char *) (*buf + *out_len));
     }
-    *(*buf + (*out_len)++) = '\n';
-    *(*buf + *out_len) = 0;
     return 1;
 }
 
@@ -332,10 +330,16 @@ sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
         line_len=len;
 
     for (; (int)len > line_len; len -= line_len) {
-        _sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, line_len);
+        if(!_sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, line_len))
+            return 0;
+        *(*buf + (*out_len)++) = '\n';
+        *(*buf + *out_len) = 0;
         cp += line_len;
     }
-    return _sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, len);
+    if(!_sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, len))
+        return 0;
+    *(*buf + *out_len) = 0;
+    return 1;
 }
 
 
@@ -367,7 +371,7 @@ sprint_realloc_asciistring(u_char ** buf, size_t * buf_len,
     int             i;
 
     for (i = 0; i < (int) len; i++) {
-        if (isprint(*cp)) {
+        if (isprint(*cp) || isspace(*cp)) {
             if (*cp == '\\' || *cp == '"') {
                 if ((*out_len >= *buf_len) &&
                     !(allow_realloc && snmp_realloc(buf, buf_len))) {
@@ -484,7 +488,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                     term = *hint++;
                 else
                     term = 0;
-                if (width == 0)
+                if (width == 0) /* Handle malformed hint strings */
                     width = 1;
             }
 
@@ -1202,8 +1206,8 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
  * @param out_len  Incremented by the number of characters printed.
  * @param allow_realloc if not zero reallocate the buffer to fit the 
  *                      needed size.
- * @param var      The variable to encode.
- * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param val      The variable to encode.
+ * @param decimaltype The enumeration ff this variable is enumerated. may be NULL.
  * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
  *                 See RFC 1903 Section 3.1 for details. may _NOT_ be NULL.
  * @param units    Contents of the UNITS clause of the MIB. may be NULL.
@@ -2073,12 +2077,22 @@ handle_mibdirs_conf(const char *token, char *line)
                 sprintf(ctmp, "%s%c%s", line, ENV_SEPARATOR_CHAR, confmibdir);
         } else {
             ctmp = strdup(line);
+            if (!ctmp) {
+                DEBUGMSGTL(("read_config:initmib",
+                            "mibdir conf malloc failed"));
+                return;
+            }
         }
         SNMP_FREE(confmibdir);
-        confmibdir = ctmp;
     } else {
-        confmibdir = strdup(line);
+        ctmp = strdup(line);
+        if (!ctmp) {
+            DEBUGMSGTL(("read_config:initmib",
+                        "mibdir conf malloc failed"));
+            return;
+        }
     }
+    confmibdir = ctmp;
     DEBUGMSGTL(("read_config:initmib", "using mibdirs: %s\n", confmibdir));
 }
 
@@ -2088,19 +2102,33 @@ handle_mibs_conf(const char *token, char *line)
     char           *ctmp;
 
     if (confmibs) {
-        ctmp = (char *) malloc(strlen(confmibs) + strlen(line) + 2);
+        if ((*line == '+') || (*line == '-')) {
+            ctmp = (char *) malloc(strlen(confmibs) + strlen(line) + 2);
+            if (!ctmp) {
+                DEBUGMSGTL(("read_config:initmib", "mibs conf malloc failed"));
+                return;
+            }
+            if (*line++ == '+')
+                sprintf(ctmp, "%s%c%s", confmibs, ENV_SEPARATOR_CHAR, line);
+            else
+                sprintf(ctmp, "%s%c%s", line, ENV_SEPARATOR_CHAR, confmibs);
+        }
+        else {
+            ctmp = strdup(line);
+            if (!ctmp) {
+                DEBUGMSGTL(("read_config:initmib", "mibs conf malloc failed"));
+                return;
+            }
+        }
+        SNMP_FREE(confmibs);
+    } else {
+        ctmp = strdup(line);
         if (!ctmp) {
             DEBUGMSGTL(("read_config:initmib", "mibs conf malloc failed"));
             return;
         }
-        if (*line == '+')
-            line++;
-        sprintf(ctmp, "%s%c%s", confmibs, ENV_SEPARATOR_CHAR, line);
-        SNMP_FREE(confmibs);
-        confmibs = ctmp;
-    } else {
-        confmibs = strdup(line);
     }
+    confmibs = ctmp;
     DEBUGMSGTL(("read_config:initmib", "using mibs: %s\n", confmibs));
 }
 
@@ -2589,15 +2617,21 @@ init_mib(void)
     } else {
         env_var = strdup(env_var);
     }
-    if (env_var && *env_var == '+') {
+    if (env_var && ((*env_var == '+') || (*env_var == '-'))) {
         entry =
             (char *) malloc(strlen(DEFAULT_MIBS) + strlen(env_var) + 2);
         if (!entry) {
             DEBUGMSGTL(("init_mib", "env mibs malloc failed"));
+            SNMP_FREE(env_var);
             return;
-        } else
-            sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR,
-                env_var + 1);
+        } else {
+            if (*env_var == '+')
+                sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR,
+                        env_var+1);
+            else
+                sprintf(entry, "%s%c%s", env_var+1, ENV_SEPARATOR_CHAR,
+                        DEFAULT_MIBS );
+        }
         SNMP_FREE(env_var);
         env_var = entry;
     }
@@ -2621,16 +2655,21 @@ init_mib(void)
 
     env_var = netsnmp_getenv("MIBFILES");
     if (env_var != NULL) {
-        if (*env_var == '+') {
+        if ((*env_var == '+') || (*env_var == '-')) {
 #ifdef DEFAULT_MIBFILES
             entry =
                 (char *) malloc(strlen(DEFAULT_MIBFILES) +
                                 strlen(env_var) + 2);
             if (!entry) {
                 DEBUGMSGTL(("init_mib", "env mibfiles malloc failed"));
-            } else
-                sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
-                    env_var + 1);
+            } else {
+                if (*env_var++ == '+')
+                    sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
+                            env_var );
+                else
+                    sprintf(entry, "%s%c%s", env_var, ENV_SEPARATOR_CHAR,
+                            DEFAULT_MIBFILES );
+            }
             SNMP_FREE(env_var);
             env_var = entry;
 #else
@@ -3786,7 +3825,7 @@ dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t o
     if (buf) {
         int             i, len;
         char            intbuf[64], * p;
-        int             zone;
+        unsigned long   zone;
 
         memset(intbuf, 0, 64);
 
@@ -3803,7 +3842,7 @@ dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t o
                 len = sprintf(p, "%lu.%lu.%lu.%lu", objid[0], objid[1], objid[2], objid[3]);
                 p += len;
                 if (addr_type == IPV4Z) {
-                    zone = ntohl(*((int *) &(objid[4])));
+                    zone = ntohl((long)objid[4]);
                     len = sprintf(p, "%%%lu", zone);
                     p += len;
                 }
@@ -3818,13 +3857,13 @@ dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t o
 
                 len = 0;
                 for (i = 0; i < 16; i ++) {
-                    len = snprintf(p, 4, "%02x:", objid[i]);
+                    len = snprintf(p, 4, "%02lx:", objid[i]);
                     p += len;
                 }
                 p-- ; /* do not include the last ':' */
 
                 if (addr_type == IPV6Z) {
-                    zone = ntohl(*((int *) &(objid[16])));
+                    zone = ntohl((long)objid[16]);
                     len = sprintf(p, "%%%lu", zone);
                     p += len;
                 }
@@ -4166,6 +4205,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                          * use the normal_handling. 
                          */
                         if (tp->next_peer &&
+                            tp->tc_index != -1 &&
+                            next_peer->tc_index != -1 &&
                             strcmp(get_tc_descriptor(tp->tc_index), "InetAddress") == 0 &&
                             strcmp(get_tc_descriptor(next_peer->tc_index), 
                                     "InetAddressType") == 0 ) {
@@ -4347,11 +4388,6 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
     return NULL;
 }
 
-/**
- * Clone of get_symbol that doesn't take a buffer argument.
- *
- * @see get_symbol
- */
 struct tree    *
 get_tree(const oid * objid, size_t objidlen, struct tree *subtree)
 {
@@ -4465,6 +4501,9 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
             break;
         case TYPE_MODID:
             cp = " MODULE-IDENTITY";
+            break;
+        case TYPE_OBJIDENTITY:
+            cp = " OBJECT-IDENTITY";
             break;
         case TYPE_MODCOMP:
             cp = " MODULE-COMPLIANCE";
@@ -4711,8 +4750,8 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 return 0;
         if (tp->units)
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                             "  UNITS\t\"") ||
-                !snmp_strcat(buf, buf_len, out_len, allow_realloc, tp->hint) ||
+                             "  UNITS\t\t\"") ||
+                !snmp_strcat(buf, buf_len, out_len, allow_realloc, tp->units) ||
                 !snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"\n"))
                 return 0;
         switch (tp->access) {
@@ -5119,12 +5158,24 @@ _add_strings_to_oid(void *tp, char *cp,
             if (check && tp->ranges) {
                 struct range_list *rp = tp->ranges;
                 int             ok = 0;
-                while (!ok && rp)
+                if (tp->type == TYPE_INTEGER ||
+                    tp->type == TYPE_INTEGER32) {
+                  while (!ok && rp) {
                     if ((rp->low <= (int) subid)
                         && ((int) subid <= rp->high))
                         ok = 1;
                     else
                         rp = rp->next;
+                  }
+                } else { /* check unsigned range */
+                  while (!ok && rp) {
+                    if (((unsigned int)rp->low <= subid)
+                        && (subid <= (unsigned int)rp->high))
+                        ok = 1;
+                    else
+                        rp = rp->next;
+                  }
+                }
                 if (!ok)
                     goto bad_id;
             }
@@ -6467,3 +6518,5 @@ snprint_double(char *buf, size_t buf_len,
         return -1;
 }
 #endif
+/** @} */
+

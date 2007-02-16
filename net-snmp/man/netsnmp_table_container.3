@@ -1,24 +1,28 @@
-.TH "table_container: Helps you implement a table when data can be found via a netsnmp_container." 3 "5 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "table_container" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-table_container: Helps you implement a table when data can be found via a netsnmp_container. \- The table_container handler is used (automatically) in conjuntion with the \fBtable\fP handler.  
+table_container \- Helps you implement a table when data can be found via a netsnmp_container.  
 
 .PP
 .SS "Functions"
 
 .in +1c
 .ti -1c
-.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_container_table_handler_get\fP (\fBnetsnmp_table_registration_info\fP *tabreg, netsnmp_container *container, char key_type)"
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_container_table_handler_get\fP (\fBnetsnmp_table_registration_info\fP *tabreg, \fBnetsnmp_container\fP *container, char key_type)"
 .br
 .RI "\fIregister specified callbacks for the specified table/oid. \fP"
 .ti -1c
-.RI "int \fBnetsnmp_container_table_register\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_table_registration_info\fP *tabreg, netsnmp_container *container, char key_type)"
+.RI "int \fBnetsnmp_container_table_register\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_table_registration_info\fP *tabreg, \fBnetsnmp_container\fP *container, char key_type)"
 .br
 .in -1c
 .SH "Detailed Description"
 .PP 
-The table_container handler is used (automatically) in conjuntion with the \fBtable\fP handler. This handler will use the index information provided by the \fB\fP handler to find the row needed to process the request.
+Helps you implement a table when data can be found via a netsnmp_container. 
+.PP
+The table_container handler is used (automatically) in conjuntion with the \fBtable\fP handler.
+.PP
+This handler will use the index information provided by the \fB\fP handler to find the row needed to process the request.
 .PP
 The container must use one of 3 key types. It is the sub-handler's responsibility to ensure that the container and key type match (unless neither is specified, in which case a default will be used.)
 .PP
@@ -30,7 +34,7 @@ TABLE_CONTAINER_KEY_VARBIND_INDEX The container should do comparisons based on a
 .PP
 TABLE_CONTAINER_KEY_VARBIND_RAW (NOTE: unimplemented) While not yet implemented, future plans include passing the request varbind with the full OID to a container.
 .PP
-If a key type is not specified at registration time, the default ket type of TABLE_CONTAINER_KEY_NETSNMP_INDEX will be used. If a container is provided, or the handler name is aliased to a container type, the container must use a netsnmp index.
+If a key type is not specified at registration time, the default key type of TABLE_CONTAINER_KEY_NETSNMP_INDEX will be used. If a container is provided, or the handler name is aliased to a container type, the container must use a netsnmp index.
 .PP
 If no container is provided, a lookup will be made based on the sub-handler's name, or if that isn't found, 'table_container'. The table_container key type will be netsnmp_index.
 .PP
@@ -48,11 +52,15 @@ SET If the hander did not register with the HANDLER_CAN_NOT_CREATE flag set in t
 .PP
 If a row is found, it will be inserted into the request's data list. The sub-handler may retrieve it by calling netsnmp_container_table_extract_context(request); * NOTE NOTE NOTE:
 .PP
-This helper and it's API are still being tested and are subject to change. 
+This helper and it's API are still being tested and are subject to change.
 .SH "Function Documentation"
 .PP 
-.SS "\fBnetsnmp_mib_handler\fP* netsnmp_container_table_handler_get (\fBnetsnmp_table_registration_info\fP * tabreg, netsnmp_container * container, char key_type)"
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_container_table_handler_get (\fBnetsnmp_table_registration_info\fP * tabreg, \fBnetsnmp_container\fP * container, char key_type)"
 .PP
-register specified callbacks for the specified table/oid. Definition at line 156 of file table_container.c.
+register specified callbacks for the specified table/oid. 
 .PP
-References netsnmp_mib_handler_s::flags, netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_mib_handler, snmp_log(), and SNMP_MALLOC_TYPEDEF.
+Definition at line 157 of file table_container.c.
+.PP
+References netsnmp_container_s::compare, netsnmp_mib_handler_s::flags, container_table_data_s::key_type, MIB_HANDLER_AUTO_NEXT, netsnmp_mib_handler_s::myvoid, netsnmp_container_s::ncompare, netsnmp_create_handler(), NULL, snmp_log(), SNMP_MALLOC_TYPEDEF, container_table_data_s::table, and container_table_data_s::tblreg_info.
+.PP
+Referenced by netsnmp_container_table_register().

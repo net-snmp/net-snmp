@@ -27,7 +27,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPCMD 1 "09 Jan 2004" VVERSIONINFO "Net-SNMP"
+.TH SNMPCMD 1 "29 Jun 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpcmd - options and behaviour common to most of the Net-SNMP command-line tools
@@ -55,15 +55,19 @@ respectively) or set the localized authentication and encryption keys
 (-3k and -3K respectively).  SNMPv3 keys can be either passed in by
 hand using these flags, or by the use of keys generated from passwords
 using the -A and -X flags discussed below.  For further details on
-SNMPv3 and it's usage of keying information, see the Net-SNMP tutorial
-web site ( http://www.Net-SNMP.org/tutorial-5/commands/ ).  See the
-snmp.conf manual page on the defAuthMasterKey and related tokens for
-more information as well.
+SNMPv3 and its usage of keying information, see the Net-SNMP tutorial
+web site ( http://www.Net-SNMP.org/tutorial-5/commands/ ). 
+Overrides the defAuthMasterKey (-3m), defPrivMasterKey (-3M), 
+defAuthLocalizedKey (-3k) or defPrivLocalizedKey (-3K) tokens, respectively, 
+in the
+.I snmp.conf
+file, see
+.I snmp.conf(5).
 .TP
 .BI -a " authProtocol"
-Set the authentication protocol (MD5|SHA) used for authenticated SNMPv3
+Set the authentication protocol (MD5 or SHA) used for authenticated SNMPv3
 messages. Overrides the defAuthType token in the
-.I  snmp.conf
+.I snmp.conf
 file.
 .TP
 .BI -A " authPassword"
@@ -142,7 +146,8 @@ addition to MIB modules specified in the environment variable MIBS.
 If a
 .I mibfile
 token is specified in the
-.I snmp.conf file,
+.I snmp.conf
+file,
 the 
 .I -m MIB
 option overrides the 
@@ -221,6 +226,9 @@ Display version information for the application and then exit.
 .TP
 .BI -x " privProtocol"
 Set the privacy protocol (DES) used for encrypted SNMPv3 messages.
+Overrides the defPrivType token in the
+.I snmp.conf
+file. Only valid if OpenSSL is available.
 .TP
 .BI -X " privPassword"
 Set the privacy pass phrase used for encrypted SNMPv3 messages.
@@ -236,6 +244,17 @@ messages.  This will initialize the local notion of the agents
 boots/time with an authenticated value stored in the LCD.
 It is typically not necessary to specify this option, as these values
 will usually be discovered automatically.
+.TP
+.BI -Y "name"="value"
+.TP
+.BI -- "name"="value"
+Allows to specify any token ("name") supported in the
+.I snmp.conf
+file and sets its value to "value". Overrides the corresponding token in the
+.I snmp.conf
+file. See
+.I snmp.conf(5)
+for the full list of tokens.
 
 .SH AGENT SPECIFICATION
 .PP
@@ -468,7 +487,7 @@ That means removing a series of "standard" prefixes, if relevant,
 and breaking down the OID into the displayable pieces.  For example,
 the OID vacmSecruityModel.0.3.119.101.115 is broken down by default
 and the string hidden in the OID is shown.  The result would
-look like: vacmSecurityModel.0."test".  The -Ob option disables this
+look like: vacmSecurityModel.0."wes".  The -Ob option disables this
 feature.
 .br
 system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
@@ -552,8 +571,8 @@ system.sysUpTime.0 = 14096763
 .PP
 Note that most of these options can be turned on or off by default by
 tuning the
-.I snmp.conf file.
-See the
+.I snmp.conf
+file. See the
 .I snmp.conf(5)
 manual page for details.
 
@@ -681,7 +700,12 @@ best result is currently calculated as the one that matches the closest
 to the beginning of the node name and the highest in the tree.  A
 current side effect of this option is that you cannot specify indexes
 or multiple nodes, since the '.' is treated as part of the regular
-expression.
+expression.  The result of that match will thus only
+match a single node.  Specifying MIB names, or trailing nodes/numbers
+will not succeed.  Thus, matching on SNMPv2-MIB::sys.*ontact will not
+match sysContact even though sys.*ontact would.  Similarly,
+sys.*ontact.0 will also not match sysContact.0 (though it could match
+sysContactX0 if such a node existed).
 .TP
 .B -Iu
 Use the traditional UCD-style input approach of assuming that OIDs

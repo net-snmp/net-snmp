@@ -71,8 +71,6 @@ SOFTWARE.
 
 #include <net-snmp/net-snmp-includes.h>
 
-int             failures = 0;
-
 void
 usage(void)
 {
@@ -135,6 +133,7 @@ main(int argc, char *argv[])
     oid             name[MAX_OID_LEN];
     size_t          name_length;
     int             status;
+    int             failures = 0;
     int             exitval = 0;
 
     putenv(strdup("POSIXLY_CORRECT=1"));
@@ -242,6 +241,7 @@ main(int argc, char *argv[])
     }
 
     if (failures) {
+        snmp_close(ss);
         SOCK_CLEANUP;
         exit(1);
     }

@@ -708,6 +708,12 @@ ServiceMain (DWORD argc, LPTSTR argv[])
 	       * Allocate memory to hold strings 
 	       */
 	      ArgArray = (LPTSTR *) malloc (sizeof (LPTSTR) * ArgCount);
+	      if (ArgArray == 0)
+                {
+                  WriteToEventLog (EVENTLOG_ERROR_TYPE,
+		       _T ("Resource failure"));
+                  return;
+                }
 
 	      /*
 	       * Copy first argument 

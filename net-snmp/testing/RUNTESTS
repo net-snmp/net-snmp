@@ -60,7 +60,7 @@ export SNMP_PREFER_NEAR_MIBS
 ORIGDIR=`pwd`		## this script may be invoked with relative path
 SNMP_UPDIR=..		## building from the source tree
 interactive=no
-SNMP_VERBOSE=0
+SNMP_VERBOSE=${SNMP_VERBOSE:=0}
 SNMP_SLEEP=${SNMP_SLEEP:=1} 	## default seconds to sleep
 SH_DEBUG=0
 
@@ -352,7 +352,7 @@ for testfile in $do_tests; do
     if [ "x$interactive" = "xyes" ]; then
 
         if [ $SH_DEBUG = 1 ] ; then
-	    sh -x eval_onescript.sh $testfile $num "yes"
+	    sh -x "${SNMP_BASEDIR}/eval_onescript.sh" $testfile $num "yes"
 	else
 	    eval_onescript.sh $testfile $num "yes"
 	fi
@@ -366,7 +366,7 @@ for testfile in $do_tests; do
   
     if [ "x$dothisone" = "xyes" ]; then
         if [ $SH_DEBUG = 1 ] ; then
-	    sh -x eval_onescript.sh $testfile $num "no"
+	    sh -x "${SNMP_BASEDIR}/eval_onescript.sh" $testfile $num "no"
 	else
 	    eval_onescript.sh $testfile $num "no"
 	fi

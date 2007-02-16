@@ -53,7 +53,8 @@ typedef struct container_table_data_s {
 
 } container_table_data;
 
-/** @defgroup table_container table_container: Helps you implement a table when data can be found via a netsnmp_container.
+/** @defgroup table_container table_container
+ *  Helps you implement a table when data can be found via a netsnmp_container.
  *  @ingroup table
  *
  *  The table_container handler is used (automatically) in conjuntion
@@ -83,7 +84,7 @@ typedef struct container_table_data_s {
  *        While not yet implemented, future plans include passing the request
  *        varbind with the full OID to a container.
  *
- *  If a key type is not specified at registration time, the default ket type
+ *  If a key type is not specified at registration time, the default key type
  *  of TABLE_CONTAINER_KEY_NETSNMP_INDEX will be used. If a container is
  *  provided, or the handler name is aliased to a container type, the container
  *  must use a netsnmp index.
@@ -219,7 +220,7 @@ netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
 
 /** @} */
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/** @cond */
 /**********************************************************************
  **********************************************************************
  *                                                                    *
@@ -518,6 +519,7 @@ _container_table_handler(netsnmp_mib_handler *handler,
 
     return rc;
 }
+/** @endcond */
 
 /** retrieve the container used by the table_container helper */
 netsnmp_container*
@@ -575,6 +577,8 @@ netsnmp_container_table_row_insert(netsnmp_request_info *request,
      * (by constructing OIDs from these index values)
      */
     for (; req; req=req->next) {
+        if (req->processed)
+            continue;
         table_info = netsnmp_extract_table_info(req);
         that_index = table_info->indexes;
         build_oid_noalloc(that_oid, MAX_OID_LEN, &that_oid_len,
@@ -604,5 +608,3 @@ netsnmp_container_table_row_extract(netsnmp_request_info *request)
     return netsnmp_request_get_list_data(request, TABLE_CONTAINER_ROW);
 }
 #endif /* inline */
-
-#endif /** DOXYGEN_SHOULD_SKIP_THIS */

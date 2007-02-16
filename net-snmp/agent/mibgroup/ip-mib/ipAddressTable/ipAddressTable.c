@@ -255,7 +255,7 @@ ipAddressAddrType_map(u_long * mib_ipAddressAddrType_val_ptr,
         break;
 
     default:
-        snmp_log(LOG_ERR, "couldn't map value %d for ipAddressAddrType\n",
+        snmp_log(LOG_ERR, "couldn't map value %lu for ipAddressAddrType\n",
                  raw_ipAddressAddrType_val);
         *mib_ipAddressAddrType_val_ptr = INETADDRESSTYPE_UNKNOWN;
     }

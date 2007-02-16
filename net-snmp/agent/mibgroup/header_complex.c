@@ -432,13 +432,15 @@ header_complex_extract_entry(struct header_complex_index **thetop,
                              struct header_complex_index *thespot)
 {
     struct header_complex_index *hciptrp, *hciptrn;
-    void           *retdata = thespot->data;
+    void           *retdata;
 
     if (thespot == NULL) {
         DEBUGMSGTL(("header_complex_extract_entry",
                     "Null pointer asked to be extracted\n"));
         return NULL;
     }
+
+    retdata = thespot->data;
 
     hciptrp = thespot->prev;
     hciptrn = thespot->next;

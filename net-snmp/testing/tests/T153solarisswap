@@ -9,21 +9,20 @@ if test `uname -s` != "SunOS" ; then
     SKIPIFNOT XXXYYYZZZ
 fi
 
-SKIPIFNOT USING_HOST_MODULE
+SKIPIFNOT USING_HOST_HR_STORAGE_MODULE
 
-SKIPIF DISABLE_SNMPV2C
+SKIPIF DISABLE_SNMPV1
 
 #
 # Begin test
 #
 
-# standard V1 configuration: testcomunnity
+# standard V1 configuration: testcommunity
 . ./Sv1config
 
 STARTAGENT
 
-# ask for the description of the first CPU in the system
-
+# ask for hrStorageSize.3 which is considered swap size on Solaris
 CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 1 $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.25.2.3.1.5.3"
 
 STOPAGENT

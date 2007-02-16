@@ -317,13 +317,13 @@ ipCidrRouteTable_index_to_oid(netsnmp_index * oid_idx,
      * set up varbinds
      */
     memset(&var_ipCidrRouteDest, 0x00, sizeof(var_ipCidrRouteDest));
-    var_ipCidrRouteDest.type = ASN_IPADDRESS;
+    var_ipCidrRouteDest.type = ASN_PRIV_IMPLIED_OCTET_STR;
     memset(&var_ipCidrRouteMask, 0x00, sizeof(var_ipCidrRouteMask));
-    var_ipCidrRouteMask.type = ASN_IPADDRESS;
+    var_ipCidrRouteMask.type = ASN_PRIV_IMPLIED_OCTET_STR;
     memset(&var_ipCidrRouteTos, 0x00, sizeof(var_ipCidrRouteTos));
     var_ipCidrRouteTos.type = ASN_INTEGER;
     memset(&var_ipCidrRouteNextHop, 0x00, sizeof(var_ipCidrRouteNextHop));
-    var_ipCidrRouteNextHop.type = ASN_IPADDRESS;
+    var_ipCidrRouteNextHop.type = ASN_PRIV_IMPLIED_OCTET_STR;
 
     /*
      * chain temp index varbinds together
@@ -369,7 +369,7 @@ ipCidrRouteTable_index_to_oid(netsnmp_index * oid_idx,
     err = build_oid_noalloc(oid_idx->oids, oid_idx->len, &oid_idx->len,
                             NULL, 0, &var_ipCidrRouteDest);
     if (err)
-        snmp_log(LOG_ERR, "error %d converting index to oid\n");
+        snmp_log(LOG_ERR, "error %d converting index to oid\n", err);
 
     /*
      * parsing may have allocated memory. free it.
@@ -481,6 +481,7 @@ ipCidrRouteTable_allocate_rowreq_ctx(ipCidrRouteTable_data * data)
     if (NULL == rowreq_ctx) {
         snmp_log(LOG_ERR, "Couldn't allocate memory for a "
                  "ipCidrRouteTable_rowreq_ctx.\n");
+        return NULL;
     } else {
         if (NULL != data) {
             rowreq_ctx->data = data;
