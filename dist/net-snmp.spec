@@ -200,7 +200,7 @@ echo "No additional verification is done for net-snmp"
 
 %changelog
 * Fri Sep  1 2006 Thomas Anders <tanders@users.sf.net>
-- Versioh changed to 5.2.3 for the 5.2.x branch
+- Version changed to 5.2.3 for the 5.2.x branch
 - introduce %{libcurrent}
 - add: README.aix README.osX README.tru64 README.irix README.agent-mibs
   README.Panasonic_AM3X.txt
