@@ -108,7 +108,7 @@ System("release:versionstamp",
 System("release:tag",
        "cvs tag -F $vtag");
 
-my $me = `whoami`;
+my $me = $ENV{'CVSUSER'} || `whoami`;
 chomp($me);
 
 #
