@@ -323,12 +323,12 @@ TAGS:
 #
 # Internal distribution packaging, etc.
 #
-tag:
-	@if test "x$(VERSION)" = "x"; then \
-	  echo "you need to supply a VERSION string."; \
-	  exit 2; \
-	fi
-	${srcdir}/agent/mibgroup/versiontag $(VERSION) tag
+#tag:
+#	@if test "x$(VERSION)" = "x"; then \
+#	  echo "you need to supply a VERSION string."; \
+#	  exit 2; \
+#	fi
+#	${srcdir}/agent/mibgroup/versiontag $(VERSION) tag
 
 tar:
 	@if test "x$(VERSION)" = "x"; then \
@@ -363,7 +363,7 @@ makefilecheck:
 	@grep -n "\.c=" `$(FIND) $(top_srcdir) -name "Makefile.*"`
 	@exit 1
 
-dist: tag tar
+dist: tar
 
 FAQ.html:
 	local/FAQ2HTML FAQ
