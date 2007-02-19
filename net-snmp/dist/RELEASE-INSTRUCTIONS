@@ -208,6 +208,9 @@ RELEASE TESTING:
      changelogfix  cvsshow  cvsup  extractnews  makerelease
      net-snmp.spec  snmpd-init.d  snmptrapd-init.d
 
+     Note that any files removed should also be deleted from
+     CVS repository.
+
 
 ***************************************************************************
 CREATING BINARY DISTRIBUTIONS
