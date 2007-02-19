@@ -10,11 +10,16 @@ else
     case "$1" in
     Ext*) ;;
     *)  echo "VERSION must begin with Ext"
-        exit 0 ;;
+        exit 1 ;;
     esac
 
     VERSION="$1"
     VERSIONTAG=`echo Ext-$1 | sed 's/\./-/g;'`
+fi
+
+if [ $2 = "tag" ]; then
+    echo "ERROR: tagging is now handled by the 'makerelease' script."
+    exit 1
 fi
 
 if [ $2 = "tar" ]; then
@@ -29,7 +34,7 @@ if [ $2 = "tar" ]; then
         TAR="/bin/tar czf"
     else
         echo "neither /usr/bin/star nor /bin/tar found."
-        exit 0
+        exit 1
     fi
     if [ -d CVS ]; then
         $DOIT cvs export -d net-snmp-$VERSION -r $VERSIONTAG net-snmp
