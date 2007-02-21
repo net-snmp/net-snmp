@@ -446,6 +446,11 @@ snmp_parse_args(int argc,
                     free(ebuf);
                     return (-1);
                 }
+                if ((eout_len < 5) || (eout_len > 32)) {
+                    fprintf(stderr, "Invalid engine ID value after -e flag.\n");
+                    free(ebuf);
+                    return (-1);
+                }
                 session->securityEngineID = ebuf;
                 session->securityEngineIDLen = eout_len;
                 break;
@@ -462,6 +467,11 @@ snmp_parse_args(int argc,
                 if (!snmp_hex_to_binary(&ebuf, &ebuf_len,
 					&eout_len, 1, optarg)) {
                     fprintf(stderr, "Bad engine ID value after -E flag.\n");
+                    free(ebuf);
+                    return (-1);
+                }
+                if ((eout_len < 5) || (eout_len > 32)) {
+                    fprintf(stderr, "Invalid engine ID value after -E flag.\n");
                     free(ebuf);
                     return (-1);
                 }
