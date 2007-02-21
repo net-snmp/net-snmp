@@ -391,20 +391,23 @@ in recognition of the (ahem) diversity in compliance expressed in MIB
 files, additional options provide more flexibility in reading MIB files.
 .TP
 .B "-Pc"
-Allow ASN.1 comments to extend to the end of the MIB source line.
+Toggles whether ASN.1 comments should extend to the end of the MIB
+source line.
 Strictly speaking, a second appearance of "--" should terminate the
 comment, but this breaks some MIB files.
-This behaviour can also be set with the configuration token \fIstrictCommentTerm\fR.
+The default behaviour (to interpret comments correctly) can also
+be set with the (misnamed) configuration token \fIstrictCommentTerm\fR.
 .TP
 .B "-Pd"
-Disables saving the DESCRIPTION of MIB objects when parsing MIB files,
-reducing the amount of memory used by the running application.
+Disables the loading of MIB object DESCRIPTIONs when parsing MIB files.
+This reduces the amount of memory used by the running application.
 .TP
 .B "-Pe"
-Show errors encountered when parsing MIB files.  These include
+Toggles whether to show errors encountered when parsing MIB files.
+These include
 references to IMPORTed modules and MIB objects that cannot be
 located in the MIB directory search list.
-This can also be set with the configuration token \fIshowMibErrors\fR.
+The default behaviour can also be set with the configuration token \fIshowMibErrors\fR.
 .TP
 .B "-PR"
 If the same MIB object (parent name and sub-identifier) appears multiple
@@ -421,10 +424,11 @@ of the same basic MIB object).
 .\" XXX - Why?
 .TP
 .B "-Pu"
-Allow the underline character in MIB object names and other symbols.
+Toggles whether to allow the underline character in MIB object names
+and other symbols.
 Strictly speaking, this is not valid SMI syntax, but some vendor MIB
 files define such names.
-This can also be set with the configuration token \fImibAllowUnderline\fR.
+The default behaviour can also be set with the configuration token \fImibAllowUnderline\fR.
 .TP
 .B "-Pw"
 Show various warning messages in parsing MIB files and building
