@@ -393,53 +393,57 @@ Information (SMI).  As that specification has changed through time, and
 in recognition of the (ahem) diversity in compliance expressed in MIB
 files, additional options provide more flexibility in reading MIB files.
 .TP
-.B "-Pw"
-Show some warning messages in resolving the MIB files.
-Can be also set with the configuration token "mibWarningLevel".
-.TP
-.B "-PW"
-Show additional warning messages.
-Can be also set with the configuration token "mibWarningLevel".
-.TP
-.B "-Pe"
-Show MIB errors.
-Can be also set with the configuration token "showMibErrors".
-An example of an error that would be shown is if an imported
-module is not found during MIB parsing.
-.TP
 .B "-Pc"
-Allow ASN.1 comment to extend to the end of the MIB source line
-(i.e. disallow the use of "--" to terminate comments).
-This overcomes some problems with manually maintained MIB files.
-Can be also set with the configuration token "strictCommentTerm".
+Toggles whether ASN.1 comments should extend to the end of the MIB
+source line.
+Strictly speaking, a second appearance of "--" should terminate the
+comment, but this breaks some MIB files.
+The default behaviour (to interpret comments correctly) can also
+be set with the (misnamed) configuration token \fIstrictCommentTerm\fR.
 .TP
 .B "-Pd"
-Toggles the default of whether or not to save the DESCRIPTIONs
-of the MIB objects when parsing.  Since the default is to save
-the DESCRIPTIONS, specifying -Pd will cause the DESCRIPTIONs not
-to be saved during MIB parsing.  For example:
-
-snmptranslate -Td -OS -IR system.sysDescr.0
-
-will show a description, while
-
-snmptranslate -Td -OS -IR -Pd system.sysDescr.0
-
-will not show a description.  Collecting the
-DESCRIPTION information into the parsed hierarchy
-increases the memory used by the size of each DESCRIPTION clause.
+Disables the loading of MIB object DESCRIPTIONs when parsing MIB files.
+This reduces the amount of memory used by the running application.
 .TP
-.B "-Pu"
-Allow underline characters in symbols.
-Can be also set with the configuration token "mibAllowUnderline".
+.B "-Pe"
+Toggles whether to show errors encountered when parsing MIB files.
+These include
+references to IMPORTed modules and MIB objects that cannot be
+located in the MIB directory search list.
+The default behaviour can also be set with the configuration token \fIshowMibErrors\fR.
 .TP
 .B "-PR"
-Replace MIB objects using the last read MIB file.
-The parser will replace MIB objects in its hierarchy whenever
-it sees a sub-identifier and name match.  
-.B WARNING:
-Setting this option may result in an incorrect hierarchy.
-Can be also set with the configuration token "mibReplaceWithLatest".
+If the same MIB object (parent name and sub-identifier) appears multiple
+times in the list of MIB definitions loaded, use the last version to be
+read in.  By default, the first version will be used, and any duplicates
+discarded. 
+This behaviour can also be set with the configuration token \fImibReplaceWithLatest\fR.
+
+Such ordering is normally only relevant if there are two MIB files with
+conflicting object definitions for the same OID (or different revisions
+of the same basic MIB object).
+.\" .B WARNING:
+.\" Setting this option may result in an incorrect hierarchy.
+.\" XXX - Why?
+.TP
+.B "-Pu"
+Toggles whether to allow the underline character in MIB object names
+and other symbols.
+Strictly speaking, this is not valid SMI syntax, but some vendor MIB
+files define such names.
+The default behaviour can also be set with the configuration token \fImibAllowUnderline\fR.
+.TP
+.B "-Pw"
+Show various warning messages in parsing MIB files and building
+the overall OID tree.
+This can also be set with the configuration directive
+\fImibWarningLevel 1\fR
+.TP
+.B "-PW"
+Show some additional warning messages, mostly relating to parsing
+individual MIB objects.
+This can also be set with the configuration directive
+\fImibWarningLevel 2\fR
 
 .SH "OUTPUT OPTIONS"
 Output display can be controlled by passing various parameters to the

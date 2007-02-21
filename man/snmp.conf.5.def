@@ -105,6 +105,9 @@ run.
 Whether or not MIBs that are parsed should be strict about comment
 termination.  "--" terminates a comment if this is true.  Many
 MIBs have broken comments in them, hence this option.
+.br
+Note that this directive is poorly named, since a value of "true"
+will turn \fIoff\fP the strict interpretation of MIB comments.
 .IP "mibAllowUnderline (1|yes|true|0|no|false)"
 Allow underline characters in MIBs (illegal).
 .IP "mibWarningLevel integerValue"
