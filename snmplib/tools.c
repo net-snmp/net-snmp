@@ -437,7 +437,8 @@ netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     while (*cp != '\0') {
-        if (!isxdigit((int) *cp)) {
+        if (!isxdigit((int) *cp) ||
+            !isxdigit((int) *(cp+1))) {
             if ((NULL != delim) && (NULL != strchr(delim, *cp))) {
                 cp++;
                 continue;
