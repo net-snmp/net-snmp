@@ -2683,6 +2683,9 @@ if test "${enable_logfile+set}" = set; then
 echo "$as_me: error:  Invalid option. Use --with-logfile/--without-logfile instead " >&2;}
    { (exit 1); exit 1; }; }
 fi;
+if test $ac_cv_user_prompt_LOGFILE = "no"; then
+    ac_cv_user_prompt_LOGFILE="none"
+fi
 
 # This can't be within AC_ARG_WITH.  I don't want to read autoconf m4
 # to find out why.
@@ -5941,7 +5944,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5944 "configure"' > conftest.$ac_ext
+  echo '#line 5947 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6513,7 +6516,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:6516: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:6519: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -8477,7 +8480,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8480 "configure"
+#line 8483 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -8575,7 +8578,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8578 "configure"
+#line 8581 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
