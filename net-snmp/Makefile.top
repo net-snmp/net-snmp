@@ -82,7 +82,7 @@ RANLIB		= :
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 .rc.lo:
-	$(LIBTOOL) --mode=compile windres $(CPPFLAGS) -o $@ -i $<
+	$(LIBTOOL) --mode=compile windres -o $@ -i $<
 
 # include paths
 #
