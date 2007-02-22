@@ -2451,7 +2451,7 @@ for i in module_list_o module_list_c module_list_lo mib_module_list_o mib_module
 	# line even when the next line contains nothing but
 	# whitespace.
 	lasttoken=`tail -1 mk/$i.mk | awk '{print $1}'`
-	sed "s#$lasttoken \\#$lasttoken#" < mk/$i.mk > mk/$i.mk.tmp
+	sed "s#$lasttoken \\\\#$lasttoken#" < mk/$i.mk > mk/$i.mk.tmp
 	mv mk/$i.mk.tmp mk/$i.mk
 
 	# add a closing comment
