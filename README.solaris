@@ -497,11 +497,27 @@ Sun's mib and may cause a conflict.
 # agents #
 ##########
  
+# The following 3 macros are predefined:
+#
+#       mib-2      =    1.3.6.1.2.1
+#       enterprise =    1.3.6.1.4.1
+#       sun        =    1.3.6.1.4.1.42
+#
+# You can define your own macros, so that you can
+# manipulate strings instead of OIDs in defining the agent.
+# See the "agent" section below.
+
+macros =
+{
+        host = mib-2.25
+        ucd  = enterprise.2021
+}
+
 agents =
 {
         {
                  name = "net-snmp"
-                 subtrees = { 1.3.6.1.2.1.25,1.3.6.1.4.1.2021 } # hostmib, ucd
+                 subtrees = { host,ucd }
                  timeout = 2000000
                  watch-dog-time = 86400
         }
