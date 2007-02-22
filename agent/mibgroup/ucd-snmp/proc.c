@@ -399,6 +399,34 @@ sh_count_procs(char *procname)
     return ret;
 }
 
+#elif defined(aix4) || defined(aix5)
+#include <procinfo.h>
+#include <sys/types.h>
+
+struct procsinfo pinfo;
+char pinfo_name[256];
+
+int
+sh_count_procs(char *procname)
+{
+    pid_t index;
+    int count;
+    char *sep;
+    
+    index = 0;
+    count = 0;
+
+    while(getprocs(&pinfo, sizeof(pinfo), NULL, 0, &index, 1) == 1) {
+        strncpy(pinfo_name, pinfo.pi_comm, 256);
+        pinfo_name[255] = 0;
+        sep = strchr(pinfo_name, ' ');
+        if(sep != NULL) *sep = 0;
+        if(strcmp(procname, pinfo_name) == 0) count++;
+    }
+
+    return count;
+}
+
 #elif OSTYPE == NETSNMP_LINUXID
 
 #include <dirent.h>
