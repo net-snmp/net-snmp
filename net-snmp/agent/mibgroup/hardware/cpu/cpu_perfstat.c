@@ -55,10 +55,11 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
                      sizeof(perfstat_cpu_total_t), 1) > 0) {
 
         /* Returns 'u_longlong_t' statistics */
-        cpu->user_ticks = (unsigned long)cs.user;
-        cpu->sys_ticks  = (unsigned long)cs.sys;
-        cpu->wait_ticks = (unsigned long)cs.wait;
-        cpu->idle_ticks = (unsigned long)cs.idle;
+        cpu->user_ticks = (unsigned long)cs.user / cs.ncpus;
+        cpu->sys_ticks  = ((unsigned long)cs.sys + (unsigned long)cs.wait) / cs.ncpus;
+        cpu->kern_ticks = (unsigned long)cs.sys / cs.ncpus;
+        cpu->wait_ticks = (unsigned long)cs.wait / cs.ncpus;
+        cpu->idle_ticks = (unsigned long)cs.idle / cs.ncpus;
         /* intrpt_ticks, sirq_ticks, nice_ticks unused */
     
         /*
@@ -88,7 +89,8 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
         for ( i = 0; i < n; i++ ) {
             cpu = netsnmp_cpu_get_byIdx( i, 0 );
             cpu->user_ticks = (unsigned long)cs2[i].user;
-            cpu->sys_ticks  = (unsigned long)cs2[i].sys;
+            cpu->sys_ticks  = (unsigned long)cs2[i].sys + (unsigned long)cs2[i].wait;
+            cpu->kern_ticks = (unsigned long)cs2[i].sys;
             cpu->wait_ticks = (unsigned long)cs2[i].wait;
             cpu->idle_ticks = (unsigned long)cs2[i].idle;
             cpu->pageIn     = (unsigned long)cs2[i].sysread;
