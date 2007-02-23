@@ -594,7 +594,7 @@ AC_ARG_WITH(logfile,
     ac_cv_user_prompt_NETSNMP_LOGFILE="$with_logfile")
 AC_ARG_ENABLE(logfile,,
 	AC_MSG_ERROR([ Invalid option. Use --with-logfile/--without-logfile instead ]) )
-if test $ac_cv_user_prompt_NETSNMP_LOGFILE = "no"; then
+if test "$ac_cv_user_prompt_NETSNMP_LOGFILE" = "no"; then
     ac_cv_user_prompt_NETSNMP_LOGFILE="none"
 fi
 
