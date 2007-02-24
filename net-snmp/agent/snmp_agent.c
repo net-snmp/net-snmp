@@ -2811,7 +2811,18 @@ check_getnext_results(netsnmp_agent_session *asp)
                 DEBUGMSGTL(("check_getnext_results",
                             "request response %d out of range\n",
                             request->index));
-                request->inclusive = 1;
+                /*
+                 * I'm not sure why inclusive is set unconditionally here (see
+                 * comments for revision 1.161), but it causes a problem for
+                 * GETBULK over an overridden variable. The bulk-to-next
+                 * handler re-uses the same request for multiple varbinds,
+                 * and once inclusive was set, it was never cleared. So, a
+                 * hack. Instead of setting it to 1, set it to 2, so bulk-to
+                 * next can clear it later. As of the time of this hack, all
+                 * checks of this var are boolean checks (not == 1), so this
+                 * should be safe. Cross your fingers.
+                 */
+                request->inclusive = 2;
                 /*
                  * XXX: should set this to the original OID? 
                  */
