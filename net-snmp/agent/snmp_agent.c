@@ -2768,7 +2768,18 @@ check_getnext_results(netsnmp_agent_session *asp)
                 DEBUGMSGTL(("check_getnext_results",
                             "request response %d out of range\n",
                             request->index));
-                request->inclusive = 1;
+                /*
+                 * I'm not sure why inclusive is set unconditionally here (see
+                 * comments for revision 1.161), but it causes a problem for
+                 * GETBULK over an overridden variable. The bulk-to-next
+                 * handler re-uses the same request for multiple varbinds,
+                 * and once inclusive was set, it was never cleared. So, a
+                 * hack. Instead of setting it to 1, set it to 2, so bulk-to
+                 * next can clear it later. As of the time of this hack, all
+                 * checks of this var are boolean checks (not == 1), so this
+                 * should be safe. Cross your fingers.
+                 */
+                request->inclusive = 2;
                 /*
                  * XXX: should set this to the original OID? 
                  */
@@ -3357,6 +3368,34 @@ netsnmp_request_set_error(netsnmp_request_info *request, int error_value)
         return SNMPERR_NO_VARS;
 
     return _request_set_error(request, request->agent_req_info->mode,
+                              error_value);
+}
+
+/** set error for a request within a request list
+ * @param request head of the request list
+ * @param error_value error value for request
+ * @param idx index of the request which has the error
+ */
+int
+netsnmp_request_set_error_idx(netsnmp_request_info *request,
+                              int error_value, int idx)
+{
+    int i;
+    netsnmp_request_info *req = request;
+
+    if (!request || !request->agent_req_info)
+        return SNMPERR_NO_VARS;
+
+    /*
+     * Skip to the indicated varbind
+     */
+    for ( i=2; i<idx; i++) {
+        req = req->next;
+        if (!req)
+            return SNMPERR_NO_VARS;
+    }
+    
+    return _request_set_error(req, request->agent_req_info->mode,
                               error_value);
 }
 
