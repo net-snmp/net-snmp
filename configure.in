@@ -1674,11 +1674,11 @@ new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
 new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
 
 if test "x$mini_agent" = "xyes"; then
-new_module_list="snmpv3mibs mibII/snmp_mib mibII/system_mib mibII/sysORTable mibII/vacm_vars utilities/execute $new_with_mib_modules"
+default_module_list=" snmpv3mibs mibII/snmp_mib mibII/system_mib mibII/sysORTable mibII/vacm_vars utilities/execute "
 default_mibs=SNMPv2-MIB:RFC1213-MIB
 default_mibs_install=" "
 else
-new_module_list="mibII ucd_snmp snmpv3mibs notification target agent_mibs agentx utilities $new_with_mib_modules"
+default_module_list=" mibII ucd_snmp snmpv3mibs notification target agent_mibs agentx utilities "
 default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:HOST-RESOURCES-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB
 fi
 
@@ -1690,10 +1690,18 @@ if test "x$transport_callback_disabled" = "xyes"; then
 fi
 
 if test "x$enable_ipv6" = "xyes"; then
-	new_module_list="$new_module_list mibII/ipv6"
+	default_module_list="$default_module_list mibII/ipv6"
 fi
 
-test_modules="$new_module_list"
+for i in $new_with_out_mib_modules
+ do
+  if echo "$default_module_list" | grep " $i " > /dev/null; then
+    tmp_module_list=`echo "$default_module_list" | sed "s/ $i / /"`
+    default_module_list=$tmp_module_list
+  fi
+ done
+
+test_modules="$default_module_list $new_with_mib_modules"
 new_module_list=""
 module_list_h=""
 
