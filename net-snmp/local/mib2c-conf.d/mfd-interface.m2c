@@ -663,11 +663,31 @@ _${context}_get_column( ${context}_rowreq_ctx *rowreq_ctx,
 
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
+##         use sizeof except for BITS
 @         if $m2c_node_needlength == 0@
+@            if "$node.perltype" eq "BITS"@
+    {
+        $m2c_decl mask = 0xff << ((sizeof($m2c_decl) - 1) * 8);
+        int       idx = 0;
+@            else@
     var->val_len = sizeof($m2c_decl);
+@            end@
 @         end@
     var->type = $node.type;
 rc = ${node}_get(rowreq_ctx, $m2c_node_var_ref );
+@         if ($m2c_node_needlength == 0) && ("$node.perltype" eq "BITS")@
+        /*
+         * check for length of bits string
+         */
+        var->val_len = 0;
+        while( 0 != mask ) {
+            ++idx;
+            if ( *(($m2c_decl *) var->val.string) & mask )
+                var->val_len = idx;
+            mask = mask >> 8;
+        }
+    }
+@         end@
         break;
  @      end@ # accessible
 @   end@ # for each column
