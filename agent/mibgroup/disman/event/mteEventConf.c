@@ -131,7 +131,9 @@ parse_notificationEvent( const char *token, char *line )
     int    wild = 1;
     int    idx  = 0;
     char  *cp;
+#ifndef DISABLE_MIB_LOADING
     struct tree         *tp;
+#endif
     struct varbind_list *var;
 
     DEBUGMSGTL(("disman:event:conf", "Parsing notificationEvent config\n"));
@@ -171,6 +173,10 @@ parse_notificationEvent( const char *token, char *line )
      *  ... and the relevant object/instances.
      */
     if ( cp && *cp=='-' && *(cp+1)=='m' ) {
+#ifdef DISABLE_MIB_LOADING
+        config_perror("Can't use -m if MIB loading is disabled");
+        return;
+#else
         /*
          * Use the MIB definition to add the standard
          *   notification payload to the mteObjectsTable.
@@ -187,6 +193,7 @@ parse_notificationEvent( const char *token, char *line )
                                          var->vblabel, wild );
             idx    = object->mteOIndex;
         }
+#endif
     }
     while (cp) {
         if ( *cp == '-' ) {
