@@ -571,9 +571,15 @@ _ipv6InterfaceTable_get_column(ipv6InterfaceTable_rowreq_ctx * rowreq_ctx,
         break;
 
     default:
-        snmp_log(LOG_ERR,
-                 "unknown column %d in _ipv6InterfaceTable_get_column\n",
-                 column);
+        if (COLUMN_IPV6INTERFACEREASMMAXSIZE <= column && column <= COLUMN_IPV6INTERFACEFORWARDING) {
+            DEBUGMSGTL(("internal:${context}:_ipv6InterfaceTable_get_column",
+                "assume column %d is reserved\n", column));
+            rc = MFD_SKIP;
+        } else {
+            snmp_log(LOG_ERR,
+                     "unknown column %d in _ipv6InterfaceTable_get_column\n",
+                     column);
+        }
         break;
     }
 
