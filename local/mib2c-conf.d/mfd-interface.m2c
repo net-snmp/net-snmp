@@ -876,8 +876,15 @@ rc = ${node}_get(rowreq_ctx, $m2c_node_var_ref );
 @   end@ # for each column
 
      default:
-         snmp_log(LOG_ERR,"unknown column %d in _${context}_get_column\n", column);
-         break;
+        if ($context.uc_MIN_COL <= column && column <= $context.uc_MAX_COL) {
+            DEBUGMSGTL(("internal:${context}:_mfd_${context}_get_column",
+                "assume column %d is reserved\n", column));
+            rc = MFD_SKIP;
+        } else {
+            snmp_log(LOG_ERR,
+                "unknown column %d in _${context}_get_column\n", column);
+        }
+        break;
     }
 
     return rc;
