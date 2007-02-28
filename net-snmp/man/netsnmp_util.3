@@ -1,4 +1,4 @@
-.TH "Memory Utility Routines" 3 "15 Feb 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "Memory Utility Routines" 3 "28 Feb 2007" "Version 5.2.4.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -298,7 +298,7 @@ Definition at line 72 of file tools.h.
 .PP
 Returns the difference (in msec) between the two markers. 
 .PP
-Definition at line 794 of file tools.c.
+Definition at line 795 of file tools.c.
 .PP
 Referenced by atime_ready(), and marker_tticks().
 .SS "\fBmarker_t\fP atime_newMarker (void)"
@@ -307,14 +307,14 @@ create a new time marker.
 .PP
 NOTE: Caller must free time marker when no longer needed.
 .PP
-Definition at line 770 of file tools.c.
+Definition at line 771 of file tools.c.
 .PP
 Referenced by atime_ready(), marker_tticks(), netsnmp_stash_cache_update(), and uatime_ready().
 .SS "int atime_ready (\fBmarker_t\fP pm, int deltaT)"
 .PP
 Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). 
 .PP
-Definition at line 849 of file tools.c.
+Definition at line 850 of file tools.c.
 .PP
 References atime_diff(), and atime_newMarker().
 .PP
@@ -323,7 +323,7 @@ Referenced by netsnmp_cache_check_expired(), and netsnmp_stash_cache_update().
 .PP
 set a time marker. 
 .PP
-Definition at line 781 of file tools.c.
+Definition at line 782 of file tools.c.
 .PP
 Referenced by netsnmp_stash_cache_update().
 .SS "u_int binary_to_hex (const u_char * input, size_t len, char ** output)"
@@ -417,7 +417,7 @@ References free_zero(), and NULL.
 .PP
 Return the number of timeTicks since the given marker. 
 .PP
-Definition at line 897 of file tools.c.
+Definition at line 898 of file tools.c.
 .PP
 References atime_diff(), and atime_newMarker().
 .PP
@@ -455,7 +455,7 @@ Non Windows: Returns a pointer to the desired environment variable or NULL if th
 .PP
 Windows: Returns a pointer to the desired environment variable if it exists. If it does not, the variable is looked up in the registry in HKCU\\Net-SNMP or HKLM\\Net-SNMP (whichever it finds first) and stores the result in the environment variable. It then returns a pointer to environment variable.
 .PP
-Definition at line 925 of file tools.c.
+Definition at line 926 of file tools.c.
 .PP
 References NULL, and SNMP_FREE.
 .PP
@@ -522,7 +522,7 @@ See netsnmp_hex_to_binary for parameter descriptions.
 .PP
 
 .PP
-Definition at line 484 of file tools.c.
+Definition at line 485 of file tools.c.
 .PP
 References netsnmp_hex_to_binary().
 .PP
@@ -556,20 +556,20 @@ Referenced by _sprint_hexstring_line(), asn_realloc(), dump_realloc_oid_to_strin
 .PP
 Returns the difference (in u_long msec) between the two markers. 
 .PP
-Definition at line 811 of file tools.c.
+Definition at line 812 of file tools.c.
 .PP
 Referenced by uatime_ready().
 .SS "u_long uatime_hdiff (\fBmarker_t\fP first, \fBmarker_t\fP second)"
 .PP
 Returns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs). 
 .PP
-Definition at line 829 of file tools.c.
+Definition at line 830 of file tools.c.
 .PP
 Referenced by netsnmp_marker_uptime().
 .SS "int uatime_ready (\fBmarker_t\fP pm, unsigned int deltaT)"
 .PP
 Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). 
 .PP
-Definition at line 871 of file tools.c.
+Definition at line 872 of file tools.c.
 .PP
 References atime_newMarker(), and uatime_diff().
