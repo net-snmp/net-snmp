@@ -1,7 +1,121 @@
-This file contains major and medium level changes in released
-revisions.  Please read the ChangeLog file for a more detailed listing
-of changes/bug fixes.  Or the higher level NEWS file if this one is
-too long for you.
+This file contains a list of specific bugs that have been fixed, and patches
+that have been applied in released versions.  Please see the NEWS file for
+a summary of the major changes, and the ChangeLog file for a comprehensive
+listing of all changes made to the code.
+
+
+*5.5.dev*      (SVN snapshot)
+
+    snmplib:
+      - [BUG 1600171]: Support longer community strings in VACM config.
+      - [BUG 1660061]: Validate engineIDs more strictly.
+      - [PATCH 1548670]: Fix range checks for unsigned integers
+      - [PATCH 1592706]: Fix memory leak when cloning varbinds.
+      - [PATCH 1616912]: fix memory leak in snmp_udp_transport
+      - [PATCH 1634620]: Fix leaks from create_user_from_session failure.
+      - [PATCH 1640114]: Don't store trailing null character.
+      - [PATCH 1641895]: Extend short view masks (as per RFC specs)
+      - [PATCH 1641972]: add missing const
+      - library layering improvements: introduce netsnmp_mktemp to prevent
+	libnetsnmpagent from depending on libnetsnmpmibs
+
+    snmpd:
+      - [BUG 1397895]: include missing interface declarations
+      - [BUG 1416276]: Handle dependency on MIB parsing API.
+      - [BUG 1546817]: Fix snmpEnterprise varbind when forwarding v1 traps.
+      - [BUG 1600261]: Handle non-x86 /proc/cpuinfo format
+      - [BUG 1600432]: Handle signals properly when restarting the agent.
+      - [BUG 1633595]: Fix AgentX handling of Counter64 values
+      - [PATCH 1585146]: Extend range of available error codes
+      - [PATCH 1601188]: Handle signals properly when restarting the agent.
+      - [PATCH 1601453]: Dynamic Memory failure handling improvements
+      - [PATCH 1637287]: Handle multiple target tags correctly.
+      - [PATCH 1639282]: Save persistent snmpTargetParamsTable settings correctly.
+      - [PATCH 1639360]: Fix snmpNotifyFilterProfileTable row creation.
+      - [PATCH 1641332]: Include missing agent config definitions.
+      - [PATCH 1641685]: Handle unresponsive AgentX subagents more reliably.
+      - [PATCH 1644714]: replace last remaining instance of deprecated
+	   copy_word by copy_nword
+      - patch from Wojtek Jawor to handle row deletion issues in dataset tables
+
+    snmptrapd:
+      - [BUG 1638225]: Fix interpretation of transport address data.
+
+
+    apps:
+      - [PATCH 1529523]: Close SNMP session on failure.
+
+    build:
+      - [BUG 1096166]: Handle --without-logfile correctly.
+      - [BUG 1647976]: Cygwin/MinGW Windows build fails due to libtool error
+      - [PATCH 1624406]: option to hardcode location of mount table
+      - [PATCH 1625135]: configure location of python interpreter
+      - add configure check for hasmntopt to fix the build on systems that lack it
+      - add workaround for AC_FUNC_GETMNTENT() bug in autoconf 2.60b and 2.61
+           (see Debian bugs #403243, #403079)
+      - library layering improvements: build libraries in the correct order
+	   (libnetsnmpagent before libnetsnmphelpers before libnetsnmpmibs)
+      - update to autoconf 2.61
+      - yet another fix to address build issues with ethtool (on RH9).
+
+    documentation:
+      - [BUG 1247164]: Document use of OID macros
+      - [BUG 1407476]: Clarify MIB parsing toggle options and MIB comment handling.
+      - [BUG 1614104]: broken snmpd(8) manual page in 5.4
+      - [PATCH 1604580]: SNMP(3) manual page corrections (spotted by tek-ops)
+      - [PATCH 1644735]: add gcc build instructions for IRIX
+
+    mib2c:
+      - [BUG 1429472]: Protect against missing instances (and invalid objects)
+      - [BUG 1582972]: Handle @while@/@end@ properly.
+      - [PATCH 1668171]: skip unknown cols in min/max range for tables,
+	   instead of error
+
+    perl:
+      - [BUG 1450669]:   from martin987: a perl agentx consumes memory
+      - [PATCH 1627949]: from martin987: a perl agentx consumes memory
+
+    unspecified:
+      - [BUG 1558823]: fix ipAddressTable memory leak
+      - [BUG 1596638]: memory leak in ipCidrRouteTable, inetCidrRouteTable
+      - [BUG 1600093]: autoconf 2.60 breaks the build
+      - [BUG 1611524]: fix tcp connection table fd leak
+      - [BUG 1633483]: Support CPU HAL on FreeBSD4.x
+      - [PATCH 1601453]: from "Robert Wilcox": Dynamic Memory failure
+	handling improvements
+
+
+    AIX:
+      - [PATCH 1665079]: AIX patches for cpu stats and process monitoring
+
+    FreeBSD:
+      - fix configure warning for sys/conf.h
+
+    Linux:
+      - [BUG 1666005]: Fail to walk ipv6InterfaceTable on Linux
+      - [PATCH 1581294]: host-resources improvements
+      - fix ethtool configure check for recent systems (e.g. FC6, RHEL5).
+
+    MacOSX:
+      - [PATCH 1600453]: OS X compile-time endian determination
+      - [PATCH 1600522]: CPU HAL implementation for mach/darwin
+
+    Ports:
+      - [PATCH 1623874]: add GNU/kFreeBSD support
+
+    Solaris:
+      - [BUG 1626153]: no hrSWRun informations on Solaris zones
+      - [PATCH 1623447]: hrSWRun fix: <exited> instead of endOfTable for
+	   terminated processes
+      - IF-MIB fix: add missing return at end of get_if_stats
+
+    Win32:
+      - [BUG 1662987]: compile error on Cygwin
+      - [PATCH 1622080]: pass Win32 handles remain open.
+      - fix AES support
+      - fix win32/Configure --with-ipv6
+
+
 
 *5.4*
 

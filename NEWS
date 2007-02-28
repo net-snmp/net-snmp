@@ -1,6 +1,34 @@
-This file contains major changes in released revisions.  Please read
-the CHANGES file and the ChangeLog file for a medium level detail and
-a very detailed level (respectively) of changes/bug fixes.
+This file contains a summary of the major changes in released revisions.
+Please see the CHANGES file for a more detailed list of specific bugs/patches
+that have been fixed/applied, and the ChangeLog file for a comprehensive
+listing of all changes made to the code.
+
+
+*5.5.dev*      (SVN snapshot)
+
+    snmplib:
+      - [PATCH 1592706]: Fix memory leak when cloning varbinds.
+
+    snmpd:
+      - [PATCH 1585146]: Extend range of available error codes
+      - patch from Wojtek Jawor to handle row deletion issues in dataset tables
+
+    unspecified:
+      - [BUG 1558823]: fix ipAddressTable memory leak
+      - [BUG 1596638]: memory leak in ipCidrRouteTable, inetCidrRouteTable
+      - [BUG 1611524]: fix tcp connection table fd leak
+      - [BUG 1633483]: Support CPU HAL on FreeBSD4.x
+
+    MacOSX:
+      - [PATCH 1600522]: CPU HAL implementation for mach/darwin
+
+    Ports:
+      - [PATCH 1623874]: add GNU/kFreeBSD support
+
+    Win32:
+      - fix AES support
+
+
 
 *5.4*
 
