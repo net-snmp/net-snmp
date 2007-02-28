@@ -2,6 +2,262 @@
 
 Changes: V5.2.3 -> V5.2.4.pre1
 
+2007-02-28 11:00  dts12
+
+   * agent/Makefile.depend, agent/helpers/Makefile.depend,
+     agent/mibgroup/Makefile.depend,
+     apps/snmpnetstat/Makefile.depend,
+     apps/Makefile.depend, snmplib/Makefile.depend:
+
+   make depend
+
+2007-02-28 10:56  dts12
+
+   * man/: netsnmp_agent.3, netsnmp_agent_registry.3
+, netsnmp_agent_trap.3,
+     netsnmp_asn1_packet_parse.3, netsnmp_baby_steps.3
+, netsnmp_bulk_to_next.3,
+     netsnmp_cache_handler.3, netsnmp_callback.3
+, netsnmp_container.3, netsnmp_data_list.3
+, netsnmp_debug.3, netsnmp_default_store.3
+, netsnmp_handler.3, netsnmp_instance.3
+, netsnmp_iterator_info_s.3, netsnmp_leaf.3
+, netsnmp_library.3,
+     netsnmp_mib_utilities.3, netsnmp_mode_end_call.3
+, netsnmp_multiplexer.3,
+     netsnmp_netsnmp_agent_request_info_s.3,
+     netsnmp_netsnmp_column_info_t.3,
+     netsnmp_netsnmp_data_list_s.3,
+     netsnmp_netsnmp_handler_registration_s.3,
+     netsnmp_netsnmp_iterator_info_s.3,
+     netsnmp_netsnmp_mib_handler_access_methods.3,
+     netsnmp_netsnmp_mib_handler_methods.3,
+     netsnmp_netsnmp_mib_handler_s.3,
+     netsnmp_netsnmp_request_info_s.3,
+     netsnmp_netsnmp_table_registration_info_s.3,
+     netsnmp_netsnmp_table_request_info_s.3,
+     netsnmp_oid_stash.3, netsnmp_old_api.3,
+     netsnmp_read_config.3, netsnmp_read_only.3
+, netsnmp_row_merge.3, netsnmp_scalar.3
+, netsnmp_scalar_group_group.3,
+     netsnmp_serialize.3, netsnmp_snmp_agent.3,
+     netsnmp_snmp_alarm.3, netsnmp_snmp_client.3
+, netsnmp_snmp_logging.3, netsnmp_snmp_pdu.3
+, netsnmp_snmp_session.3,
+     netsnmp_stash_cache.3, netsnmp_table.3,
+     netsnmp_table_array.3, netsnmp_table_container.3
+, netsnmp_table_data.3,
+     netsnmp_table_dataset.3, netsnmp_table_iterator.3
+, netsnmp_table_iterator.h.3,
+     netsnmp_util.3, netsnmp_utilities.3,
+     netsnmp_variable_list.3, netsnmp_watcher.3:
+
+   documentation update
+
+2007-02-28 10:55  dts12
+
+   * doxygen.conf:
+
+   - version tag ( 5.2.4.pre2 )
+
+2007-02-28 09:27  dts12
+
+   * include/net-snmp/agent/snmp_agent.h:
+
+   Provide missing (new?) API declaration.
+   Might not actually belong in the 5.2.x line,
+   but it should be mostly harmless to leave it in.
+
+2007-02-28 09:18  dts12
+
+   * agent/mibgroup/ucd-snmp/diskio.c:
+
+   CHANGES: snmpd: PATCH: 1520286: Prevent potential crash in Darwin.
+
+2007-02-27 16:39  dts12
+
+   * local/: mib2c.container.conf, mib2c.table_data.conf:
+
+   Improve handling of variable-length index and column values.
+
+2007-02-27 13:30  dts12
+
+   * local/: mib2c.container.conf, mib2c.table_data.conf:
+
+   Fix typo when defining range of valid columns.
+
+2007-02-27 13:17  rstory
+
+   * local/mib2c-conf.d/mfd-interface.m2c:
+
+   CHANGES: mib2c: PATCH: 1668171: skip unknown cols in min/max range for tables, instead of error
+
+2007-02-26 14:55  dts12
+
+   * agent/mibgroup/agentx/protocol.c:
+
+   Re-correct interpretation of "null OID" in the AgentX specs.
+
+2007-02-26 14:37  dts12
+
+   * include/ucd-snmp/util_funcs.h:
+
+   Fix reference to Net-SNMP include locations
+
+2007-02-26 12:47  dts12
+
+   * perl/: ASN/Makefile.PL, OID/Makefile.PL,
+     SNMP/Makefile.PL, agent/Makefile.PL,
+     default_store/Makefile.PL, TrapReceiver/Makefile.PL,
+     agent/default_store/Makefile.PL:
+
+   Prompting for a single directory, not an array.
+
+2007-02-26 11:51  dts12
+
+   * local/mib2c-conf.d/mfd-interface.m2c:
+
+   CHANGES: mib2c: BUG: 1585815: fix mfd bits length calculation
+
+2007-02-26 11:32  dts12
+
+   * local/: mib2c.container.conf, mib2c.iterate.conf,
+     mib2c.table_data.conf:
+
+   CHANGES: mib2c: BUG: 1429472: Protect against missing instances (and invalid objects)
+
+2007-02-26 11:29  dts12
+
+   * local/mib2c.mfd.conf:
+
+   Fix invalid mib2c directive.
+
+2007-02-24 13:56  dts12
+
+   * agent/helpers/instance.c:
+
+   CHANGES: agent: BUG: 711465: Fix BulkGet handling of override entries.
+   (Backport from 5.4 line)
+
+2007-02-24 13:56  dts12
+
+   * agent/: snmp_agent.c, helpers/bulk_to_next.c:
+
+   CHANGES: snmpd: BUG: 711465: Fix BulkGet handling of override entries.
+   (Backport from 5.4 line)
+
+2007-02-24 13:27  dts12
+
+   * configure.in, configure:
+
+   Don't complain about explicit conflicts when removing modules
+   from the default list.
+
+2007-02-23 22:02  tanders
+
+   * configure.in, configure:
+
+   add quotes to fix shell syntax error when empty
+
+2007-02-23 00:05  tanders
+
+   * testing/tests/T050snmpv3trap:
+
+   fix engine ID to comply with current restrictive checks
+
+2007-02-22 15:38  dts12
+
+   * README.solaris:
+
+   CHANGES: documentation: BUG: 1247164: Document use of OID macros
+
+2007-02-21 15:39  tanders
+
+   * Makefile.top:
+
+   CHANGES: Win32: BUG: 1662987: compile error on Cygwin
+
+2007-02-21 13:56  dts12
+
+   * snmplib/: snmp_parse_args.c, tools.c:
+
+   CHANGES: library: BUG: 1660061: Validate engineIDs more strictly.
+
+2007-02-21 13:52  dts12
+
+   * man/: snmpcmd.1.def, snmp.conf.5.def:
+
+   CHANGES: documentation: BUG: 1407476: Clarify MIB parsing toggle options and MIB comment handling.
+
+2007-02-21 13:41  dts12
+
+   * configure.in, configure:
+
+   CHANGES: build: BUG: 1096166: Handle --without-logfile correctly.
+
+2007-02-19 10:51  dts12
+
+   * dist/makerelease:
+
+   Ensure release script is available for earlier branches.
+
+2007-02-19 10:49  dts12
+
+   * dist/makerelease:
+
+   file makerelease was added on branch V5-2-patches on 2007-02-19 10:51:19 +0000
+
+2007-02-19 10:42  dts12
+
+   * dist/extractnews:
+
+   Provide a version of 'extractnews' for older branches.
+   (Since 'makerelease' assumes it will be present).
+
+2007-02-19 10:41  dts12
+
+   * dist/extractnews:
+
+   file extractnews was added on branch V5-2-patches on 2007-02-19 10:42:07 +0000
+
+2007-02-19 10:06  dts12
+
+   * Makefile.in:
+
+   Don't invoke 'versiontag' for tagging the CVS tree.
+   It doesn't handle this any more. (Use 'makerelease' instead)
+
+2007-02-19 10:02  dts12
+
+   * agent/mibgroup/versiontag:
+
+   Don't fail silently when called to tag the CVS tree.
+   Return indication of failure to the calling application (e.g. make)
+
+2007-02-16 21:37  tanders
+
+   * dist/net-snmp.spec:
+
+   fix typo
+
+2007-02-16 16:45  dts12
+
+   * FAQ, README, configure,
+     sedscript.in, dist/net-snmp.spec,
+     perl/ASN/ASN.pm, perl/AnyData_SNMP/Storage.pm,
+     perl/agent/agent.pm, snmplib/snmp_version.c, perl/OID/OID.pm,
+     perl/SNMP/SNMP.pm, perl/TrapReceiver/TrapReceiver.pm,
+     perl/agent/default_store/default_store.pm,
+     perl/default_store/default_store.pm:
+
+   - version tag ( 5.2.4.pre1 )
+
+2007-02-16 14:53  dts12
+
+   * CHANGES, NEWS, ChangeLog:
+
+   Version update
+
 2007-02-16 13:28  dts12
 
    * Makefile.top, configure.in, configure, doxygen.conf:
