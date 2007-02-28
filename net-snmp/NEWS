@@ -18,7 +18,7 @@ listing of all changes made to the code.
 
     Perl:
       - gettable() was fairly broken in the 5.3.1 release.
-      - OID handling and NMP.pm fixes for 64-bit platforms
+      - OID handling and SNMP.pm fixes for 64-bit platforms
       - Fixed the perl bulkwalk function
 
 *5.2.3*

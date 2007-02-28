@@ -19,9 +19,11 @@ listing of all changes made to the code.
       - [BUG 1540745]: Fix missing MIB parsing tokens
       - [BUG 1554989]: Fix handling of OID comparisons.
       - [BUG 1600171]: Support longer community strings in VACM config.
+      - [BUG 1660061]: Validate engineIDs more strictly.
 
     snmpd:
       - [PATCH 1047706]: make end-of-mib-view RFC compliant about the variable name it returns
+      - [PATCH 1520286]: Prevent potential crash in Darwin.
       - [PATCH 1554827]: fix handling of failed proxy SET requests
       - [PATCH 1562688]: fix ping/reattach agentx code
       - [PATCH 1565703]: patch to fix rapid registrations/deregistration issues
@@ -33,6 +35,7 @@ listing of all changes made to the code.
       - [PATCH 1641332]: Include missing agent config definitions.
       - [PATCH 1641685]: Handle unresponsive AgentX subagents more reliably.
       - [PATCH 1644714]: replace last remaining instance of deprecated copy_word by copy_nword
+      - [BUG 711465]: Fix BulkGet handling of override entries.
       - [BUG 1397895]: include missing interface declarations
       - [BUG 1427410]: Set auth engineID for SNMPv3 traps.
       - [BUG 1502267]: Build access list in the correct order.
@@ -51,20 +54,26 @@ listing of all changes made to the code.
 
 
     build:
+      - [BUG 1096166]: Handle --without-logfile correctly.
       - [BUG 1564233]: Have configure test for rpm headers not just the libraries
       - [BUG 1585156]: Fix --without-perl-modules
-      - yet another fix to address build issues with ethtool (on RH9).
       - add configure check for hasmntopt to fix the build on systems that lack it
+      - yet another fix to address build issues with ethtool (on RH9).
 
     documentation:
       - [PATCH 1596028]: const fixes for the mib_api(3) manual page
       - [PATCH 1601261]: update README.smux
       - [PATCH 1604580]: SNMP(3) manual page corrections (spotted by tek-ops)
+      - [BUG 1247164]: Document use of OID macros
+      - [BUG 1407476]: Clarify MIB parsing toggle options and MIB comment handling.
       - [BUG 1577913]: add missing manual pages for executables, supplied by Debian
 
     mib2c:
+      - [PATCH 1668171]: skip unknown cols in min/max range for tables, instead of error
+      - [BUG 1429472]: Protect against missing instances (and invalid objects)
       - [BUG 1479916]: Restore consistency in row creation code.
       - [BUG 1582972]: Handle @while@/@end@ properly.
+      - [BUG 1585815]: fix mfd bits length calculation
 
     misc:
       - [BUG 1585250]: don't use deprecated options in start script
@@ -75,10 +84,10 @@ listing of all changes made to the code.
       - [PATCH 1575937]: fix usenumeric output in async varbinds so they
       - [PATCH 1627949]: from martin987: a perl agentx consumes memory
       - [BUG 1450669]: from martin987: a perl agentx consumes memory
-      - make perltest fixes for Solaris 2.6 and earlier, HP-UX, and IRIX
-      - NMP.pm fixes for 64-bit platforms
-      -	return OIDs instead of empty strings.
       - Fixed the perl bulkwalk function
+      - SNMP.pm fixes for 64-bit platforms
+      - make perltest fixes for Solaris 2.6 and earlier, HP-UX, and IRIX
+      -	return OIDs instead of empty strings.
 
 
     FreeBSD:
@@ -91,3 +100,6 @@ listing of all changes made to the code.
     Solaris:
       - [PATCH 1623447]: hrSWRun fix: <exited> instead of endOfTable for terminated processes
       - [BUG 1626153]: no hrSWRun informations on Solaris zones
+
+    Win32:
+      - [BUG 1662987]: compile error on Cygwin
