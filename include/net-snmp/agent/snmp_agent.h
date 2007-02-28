@@ -240,6 +240,8 @@ extern          "C" {
         netsnmp_set_all_requests_error(netsnmp_agent_request_info *reqinfo,
                                        netsnmp_request_info *requests,
                                        int error_value);
+    int netsnmp_request_set_error_idx(netsnmp_request_info *requests,
+                                       int error_value, int idx);
     int
         netsnmp_request_set_error_all(netsnmp_request_info *requests,
                                        int error_value);
