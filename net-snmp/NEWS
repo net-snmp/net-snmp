@@ -1,14 +1,34 @@
-This file contains major changes in released revisions.  Please read
-the ChangeLog file for a more detailed listing of changes/bug fixes.
+This file contains a summary of the major changes in released revisions.
+Please see the CHANGES file for a more detailed list of specific bugs/patches
+that have been fixed/applied, and the ChangeLog file for a comprehensive
+listing of all changes made to the code.
 
-*5.3.2*
+
+*5.3.x*      (SVN snapshot)
+
+    snmplib:
+      - [PATCH 1553447]: responses will get sent from the original
+	   dest IP address when possible.
+      - [PATCH 1592706]: Fix memory leak when cloning varbinds.
+
+    snmpd:
+      - [BUG 1527930]: fix smux authentication
+      - [BUG 1558823]: fix ipAddressTable memory leak
+      - [PATCH 1520292]: hr_storage.c fix for Darwin / OS X
+      - [PATCH 1561277]: use net.ipv6.neigh.lo.base_reachable_time_ms
+	   instead of deprecated base_reachable_time
 
     snmptrapd:
       - disabling AgentX broke snmptrapd auth
 
-    Perl:
+    perl:
+      - Fixed the perl bulkwalk function
       - gettable() was fairly broken in the 5.3.1 release.
-      - OID handling was fully broken on various 64bit platforms
+      - OID and SNMP handling was fully broken on various 64bit platforms
+
+    Linux:
+      - [BUG 1596638]: fix memory leak in pCidrRouteTable, inetCidrRouteTable
+
 
 
 *5.3.1*
