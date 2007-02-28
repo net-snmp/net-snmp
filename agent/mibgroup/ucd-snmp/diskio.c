@@ -887,7 +887,7 @@ static int
 handle_drive(io_registry_entry_t drive, struct drivestats * dstat)
 {
     io_registry_entry_t parent;
-    CFDictionaryRef     properties;
+    CFMutableDictionaryRef     properties;
     CFStringRef         name;
     CFNumberRef         number;
     kern_return_t       status;
@@ -903,7 +903,7 @@ handle_drive(io_registry_entry_t drive, struct drivestats * dstat)
     if (IOObjectConformsTo(parent, "IOBlockStorageDriver")) {
 
 	/* get drive properties */
-	status = IORegistryEntryCreateCFProperties(drive, (CFMutableDictionaryRef *)&properties,
+	status = IORegistryEntryCreateCFProperties(drive, &properties,
 					    kCFAllocatorDefault, kNilOptions);
 	if (status != KERN_SUCCESS) {
 	    snmp_log(LOG_ERR, "diskio: device has no properties\n");
@@ -918,7 +918,7 @@ handle_drive(io_registry_entry_t drive, struct drivestats * dstat)
 					    CFSTR(kIOBSDUnitKey));
 
 	/* Collect stats and if succesful store them with the name and unitnumber */
-	if (!collect_drive_stats(parent, dstat->stats)) {
+	if (name && number && !collect_drive_stats(parent, dstat->stats)) {
 
 	    CFStringGetCString(name, dstat->name, MAXDRIVENAME, CFStringGetSystemEncoding());
 	    CFNumberGetValue(number, kCFNumberSInt32Type, &dstat->bsd_unit_number);
