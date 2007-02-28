@@ -185,13 +185,17 @@ netsnmp_unix_close(netsnmp_transport *t)
         t->sock = -1;
         if (sup != NULL) {
             if (sup->local) {
-                DEBUGMSGTL(("netsnmp_unix", "close: server unlink(\"%s\")\n",
-                            sup->server.sun_path));
-                unlink(sup->server.sun_path);
+                if (sup->server.sun_path[0] != 0) {
+                  DEBUGMSGTL(("netsnmp_unix", "close: server unlink(\"%s\")\n",
+                              sup->server.sun_path));
+                  unlink(sup->server.sun_path);
+                }
             } else {
-                DEBUGMSGTL(("netsnmp_unix", "close: client unlink(\"%s\")\n",
-                            sup->client.sun_path));
-                unlink(sup->client.sun_path);
+                if (sup->client.sun_path[0] != 0) {
+                  DEBUGMSGTL(("netsnmp_unix", "close: client unlink(\"%s\")\n",
+                              sup->client.sun_path));
+                  unlink(sup->client.sun_path);
+                }
             }
         }
         return rc;
@@ -260,7 +264,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
     netsnmp_transport *t = NULL;
     sockaddr_un_pair *sup = NULL;
     int             rc = 0;
-    char           *string = NULL;
+    char           *str = NULL;
 
     if (addr == NULL || addr->sun_family != AF_UNIX) {
         return NULL;
@@ -271,11 +275,11 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         return NULL;
     }
 
-    string = netsnmp_unix_fmtaddr(NULL, (void *)addr,
+    str = netsnmp_unix_fmtaddr(NULL, (void *)addr,
                                   sizeof(struct sockaddr_un));
     DEBUGMSGTL(("netsnmp_unix", "open %s %s\n", local ? "local" : "remote",
-                string));
-    free(string);
+                str));
+    free(str);
 
     memset(t, 0, sizeof(netsnmp_transport));
 
@@ -347,6 +351,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
                         addr->sun_path, errno, strerror(errno)));
             netsnmp_unix_close(t);
             netsnmp_transport_free(t);
+            return NULL;
         }
 
     } else {
@@ -395,17 +400,17 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
 }
 
 netsnmp_transport *
-netsnmp_unix_create_tstring(const char *string, int local)
+netsnmp_unix_create_tstring(const char *str, int local)
 {
     struct sockaddr_un addr;
 
-    if ((string != NULL) && (strlen(string) < sizeof(addr.sun_path))) {
+    if ((str != NULL) && (strlen(str) < sizeof(addr.sun_path))) {
         addr.sun_family = AF_UNIX;
         memset(addr.sun_path, 0, sizeof(addr.sun_path));
-        strncpy(addr.sun_path, string, sizeof(addr.sun_path) - 1);
+        strncpy(addr.sun_path, str, sizeof(addr.sun_path) - 1);
         return netsnmp_unix_transport(&addr, local);
     } else {
-        if (string != NULL) {
+        if (str != NULL) {
             snmp_log(LOG_ERR, "Path too long for Unix domain transport\n");
         }
         return NULL;
@@ -453,7 +458,7 @@ netsnmp_unix_ctor(void)
 
 #define EXAMPLE_COMMUNITY "COMMUNITY"
 typedef struct _com2SecUnixEntry {
-    char            community[VACMSTRINGLEN];
+    char            community[COMMUNITY_MAX_LEN];
     char            sockpath[sizeof(struct sockaddr_un)];
     unsigned long   pathlen;
     char            secName[VACMSTRINGLEN];
@@ -538,7 +543,7 @@ netsnmp_unix_getSecName(void *opaque, int olength,
 void
 netsnmp_unix_parse_security(const char *token, char *param)
 {
-    char              secName[VACMSTRINGLEN + 1], community[VACMSTRINGLEN + 1];
+    char              secName[VACMSTRINGLEN + 1], community[COMMUNITY_MAX_LEN + 1];
     char              contextName[VACMSTRINGLEN + 1];
     char              sockpath[sizeof(struct sockaddr_un) + 1];
     com2SecUnixEntry *e = NULL;
@@ -576,7 +581,7 @@ netsnmp_unix_parse_security(const char *token, char *param)
         sockpath[0] = 0;
     }
 
-    param = copy_nword(param, community, VACMSTRINGLEN);
+    param = copy_nword(param, community, COMMUNITY_MAX_LEN);
     if (community[0] == '\0') {
         config_perror("missing COMMUNITY parameter\n");
         return;
@@ -585,7 +590,7 @@ netsnmp_unix_parse_security(const char *token, char *param)
                == 0) {
         config_perror("example config COMMUNITY not properly configured");
         return;
-    } else if (strlen(community) > (VACMSTRINGLEN - 1)) {
+    } else if (strlen(community) > (COMMUNITY_MAX_LEN - 1)) {
         config_perror("community name too long");
         return;
     }

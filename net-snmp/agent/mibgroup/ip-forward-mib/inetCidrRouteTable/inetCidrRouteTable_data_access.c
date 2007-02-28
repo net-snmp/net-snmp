@@ -212,7 +212,6 @@ _snarf_route_entry(netsnmp_route_entry * route_entry,
 int
 inetCidrRouteTable_cache_load(netsnmp_container * container)
 {
-    inetCidrRouteTable_rowreq_ctx *rowreq_ctx;
     netsnmp_container *route_container;
 
     DEBUGMSGTL(("verbose:inetCidrRouteTable:inetCidrRouteTable_cache_load",

@@ -16,11 +16,11 @@ CPP		= @CPP@ 					        \
 INSTALLHEADERS=version.h
 INCLUDESUBDIR=system
 INCLUDESUBDIRHEADERS= aix.h bsd.h bsdi3.h bsdi4.h bsdi.h cygwin.h \
-	darwin.h darwin7.h freebsd5.h freebsd6.h \
+	darwin.h darwin7.h darwin8.h freebsd5.h freebsd6.h \
 	dynix.h freebsd2.h freebsd3.h freebsd4.h freebsd.h generic.h hpux.h \
 	irix.h linux.h mingw32.h mips.h netbsd.h openbsd.h osf5.h \
-	solaris2.6.h solaris2.7.h solaris2.8.h solaris2.9.h solaris.h \
-	sunos.h svr5.h sysv.h ultrix4.h
+	solaris2.6.h solaris2.7.h solaris2.8.h solaris2.9.h solaris2.10.h \
+	solaris.h sunos.h svr5.h sysv.h ultrix4.h
 INCLUDESUBDIR2=machine
 INCLUDESUBDIRHEADERS2=generic.h
 INSTALLBUILTHEADERS=include/net-snmp/net-snmp-config.h
@@ -61,6 +61,27 @@ end-flag:
 
 libtool:	$(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
+
+
+snmplib:
+	@(cd snmplib; $(MAKE) )
+
+agent:
+	@(cd snmplib; $(MAKE) )
+	@(cd agent; $(MAKE) )
+
+apps:
+	@(cd snmplib; $(MAKE) )
+	@(cd apps; $(MAKE) )
+
+snmpget snmpbulkget snmpwalk snmpbulkwalk snmptranslate snmpstatus snmpdelta snmptable snmptest snmpset snmpusm snmpvacm snmpgetnext encode_keychange snmpdf snmptrap:
+	@(cd snmplib; $(MAKE) )
+	@(cd apps; $(MAKE) $@ )
+
+snmptrapd:
+	@(cd snmplib; $(MAKE) )
+	@(cd agent; $(MAKE) libs)
+	@(cd apps; $(MAKE) $@ )
 
 #
 # local build rules
@@ -129,13 +150,14 @@ OTHERCLEANTODOS=perlclean
 #
 # perl specific build rules
 #
+# override LD_RUN_PATH to avoid dependencies on the build directory
 perlmodules: perlmakefiles
-	@(cd perl ; $(MAKE)) ; \
+	@(cd perl ; $(MAKE) LD_RUN_PATH="$(libdir):`$(PERL) -e 'use Config; print qq($$Config{archlibexp}/CORE);'`") ; \
         if test $$? != 0 ; then \
            exit 1 ; \
         fi
 
-perlmakefiles:
+perlmakefiles: net-snmp-config-x
 	@if test ! -f perl/Makefile; then \
 	  (dir=`pwd`; \
 	   cd perl ; \
@@ -266,19 +288,12 @@ TAGS:
 #
 # Internal distribution packaging, etc.
 #
-version:
-	@if test "x$(VERSION)" = "x"; then \
-	  echo "you need to supply a VERSION string."; \
-	  exit 2; \
-	fi
-	perl local/Version-Munge.pl -T $(VERSION) -M -V -D -C
-
-tag:
-	@if test "x$(VERSION)" = "x"; then \
-	  echo "you need to supply a VERSION string."; \
-	  exit 2; \
-	fi
-	${srcdir}/agent/mibgroup/versiontag $(VERSION) tag
+#tag:
+#	@if test "x$(VERSION)" = "x"; then \
+#	  echo "you need to supply a VERSION string."; \
+#	  exit 2; \
+#	fi
+#	${srcdir}/agent/mibgroup/versiontag $(VERSION) tag
 
 tar:
 	@if test "x$(VERSION)" = "x"; then \
@@ -293,7 +308,13 @@ tarclean:
 	fi
 
 checks:
-	$(MAKE) -k makefilecheck commentcheck warningcheck
+	$(MAKE) -k makefilecheck commentcheck warningcheck dependcheck
+
+# always exit 1, since I can't figure out how to invert grep rc
+dependcheck:
+	@echo "Checking for full paths in dependency files..."
+	@grep -n -E "^/" `find . -name Makefile.depend`
+	@exit 1
 
 # always exit 1, since I can't figure out how to invert grep rc
 warningcheck:
@@ -313,10 +334,14 @@ makefilecheck:
 	@grep -n "\.c=" `find . -name "Makefile.*"` && exit 1
 	@exit 1
 
-dist: version tag tar
+dist: tar
 
 FAQ.html:
 	local/FAQ2HTML FAQ
 
 .PHONY: docs docsdir mancp testdirs test TAGS
 # note: tags and docs are phony to force rebulding
+.PHONY: snmplib agent apps \
+	snmpget snmpbulkget snmpwalk snmpbulkwalk snmptranslate snmpstatus \
+	snmpdelta snmptable snmptest snmpset snmpusm snmpvacm snmpgetnext \
+	encode_keychange snmpdf snmptrap snmptrapd

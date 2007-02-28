@@ -4,6 +4,15 @@
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
+/* Define HAVE_WIN32_PLATFORM_SDK if you have:
+ * Microsoft Visual Studio MSVC 6.0 and the Platform SDK (PSDK)
+ * Microsoft Visual Studio.Net 2002
+ * Microsoft Visual Studio.Net 2003
+ * Cygwin
+ * MinGW 
+ */
+/* #undef HAVE_WIN32_PLATFORM_SDK */
+
 #define INSTALL_BASE "c:/usr"
 
 /* config.h:  a general config file */
@@ -1295,7 +1304,9 @@
 #define CONFIGURE_OPTIONS ""
 
 /* got socklen_t? */
+#ifdef HAVE_WIN32_PLATFORM_SDK
 #define HAVE_SOCKLEN_T 1
+#endif
 
 /* got in_addr_t? */
 /* #undef HAVE_IN_ADDR_T */
@@ -1305,15 +1316,15 @@
 
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
-# define strchr index
-# define strrchr rindex
+# define strchr(a,b) index(a,b)
+# define strrchr(a,b) rindex(a,b)
 #endif
 #endif
 
 #ifndef HAVE_INDEX
 #ifdef HAVE_STRCHR
-# define index strchr
-# define rindex strrchr
+# define index(a,b) strchr(a,b)
+# define rindex(a,b) strrchr(a,b)
 #endif
 #endif
 
@@ -1348,6 +1359,9 @@
 
 /* Define to 1 if you have the <openssl/dh.h> header file. */
 #define HAVE_OPENSSL_DH_H 1
+
+/* Define to 1 if you have the <openssl/aes.h> header file. */
+#define HAVE_OPENSSL_AES_H 1
 
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 #define HAVE_AES_CFB128_ENCRYPT 1
@@ -1632,6 +1646,10 @@ typedef __int64 int64_t;
   #endif
 #endif
 
+#ifndef NI_MAXHOST
+#define NI_MAXHOST	1025
+#endif
+
 /*
  * Module configuration and control starts here.
  *
@@ -1665,6 +1683,8 @@ typedef __int64 int64_t;
 /*
  * Module configuration and control ends here.
  */
+
+#define UDP_ADDRESSES_IN_HOST_ORDER 1
 
 #endif /* NET_SNMP_CONFIG_H */
 

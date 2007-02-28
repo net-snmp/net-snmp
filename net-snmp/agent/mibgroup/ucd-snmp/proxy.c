@@ -259,6 +259,7 @@ proxy_fill_in_session(netsnmp_mib_handler *handler,
         return 0;
     }
 
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     if (session->version == SNMP_VERSION_1 ||
         session->version == SNMP_VERSION_2c) {
 
@@ -284,6 +285,7 @@ proxy_fill_in_session(netsnmp_mib_handler *handler,
                     session->community_len);
         }
     }
+#endif
 
     return 1;
 }
@@ -484,9 +486,12 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
         DEBUGMSGTL(("proxy", "got timed out... requests = %08p\n", requests));
 
         netsnmp_handler_mark_requests_as_delegated(requests,
-						   REQUEST_IS_NOT_DELEGATED);
-        netsnmp_set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index = 0 */
-				  SNMP_ERR_GENERR);
+                                                   REQUEST_IS_NOT_DELEGATED);
+        if(cache->reqinfo->mode != MODE_GETNEXT) {
+            DEBUGMSGTL(("proxy", "  ignoring timeout\n"));
+            netsnmp_set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index = 0 */
+                                      SNMP_ERR_GENERR);
+        }
         netsnmp_free_delegated_cache(cache);
         return 0;
 
@@ -497,9 +502,43 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
             /*
              *  If we receive an error from the proxy agent, pass it on up.
              *  The higher-level processing seems to Do The Right Thing.
+             *
+             * 2005/06 rks: actually, it doesn't do the right thing for
+             * a get-next request that returns NOSUCHNAME. If we do nothing,
+             * it passes that error back to the comman initiator. What it should
+             * do is ignore the error and move on to the next tree. To
+             * accomplish that, all we need to do is clear the delegated flag.
+             * Not sure if any other error codes need the same treatment. Left
+             * as an exercise to the reader...
              */
             DEBUGMSGTL(("proxy", "got error response (%d)\n", pdu->errstat));
-            netsnmp_set_request_error(cache->reqinfo, requests, pdu->errstat);
+            if((cache->reqinfo->mode == MODE_GETNEXT) &&
+               (SNMP_ERR_NOSUCHNAME == pdu->errstat)) {
+                DEBUGMSGTL(("proxy", "  ignoring error response\n"));
+                netsnmp_handler_mark_requests_as_delegated(requests,
+                                                           REQUEST_IS_NOT_DELEGATED);
+            }
+	    else if ((cache->reqinfo->mode == MODE_SET_ACTION)) {
+		/*
+		 * In order for netsnmp_wrap_up_request to consider the
+		 * SET request complete,
+		 * there must be no delegated requests pending.
+		 * https://sourceforge.net/tracker/
+		 *	?func=detail&atid=112694&aid=1554261&group_id=12694
+		 */
+		DEBUGMSGTL(("proxy",
+		    "got SET error %s, index %d\n",
+		    snmp_errstring(pdu->errstat), pdu->errindex));
+		netsnmp_handler_mark_requests_as_delegated(
+		    requests, REQUEST_IS_NOT_DELEGATED);
+		/*
+		 * XXX - both here and below, shouldn't the error be set
+		 * on the request with request->index == pdu->errindex ?
+		 */
+		netsnmp_set_request_error(cache->reqinfo, requests, pdu->errstat);
+	    }
+            else
+                netsnmp_set_request_error(cache->reqinfo, requests, pdu->errstat);
 
         /*
          * update the original request varbinds with the results 

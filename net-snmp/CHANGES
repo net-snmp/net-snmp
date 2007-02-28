@@ -1,0 +1,105 @@
+This file contains a list of specific bugs that have been fixed, and patches
+that have been applied in released versions.  Please see the NEWS file for
+a summary of the major changes, and the ChangeLog file for a comprehensive
+listing of all changes made to the code.
+
+
+*5.2.4*
+
+    snmplib:
+      - [PATCH 1548670]: Fix range checks for unsigned integers
+      - [PATCH 1553447]: responses will get sent from the original dest IP address when possible.
+      - [PATCH 1562168]: check for a sock fd less than 0.
+      - [PATCH 1565293]: UDPIPv6 transport reports wrong port number
+      - [PATCH 1570650]: create a logging shutdown function to properly clean up log registrations if needed.
+      - [PATCH 1634620]: Fix leaks from create_user_from_session failure.
+      - [PATCH 1640114]: Don't store trailing null character.
+      - [PATCH 1641895]: Extend short view masks (as per RFC specs)
+      - [BUG 1537459]: Fix missing MIB parsing tokens
+      - [BUG 1540745]: Fix missing MIB parsing tokens
+      - [BUG 1554989]: Fix handling of OID comparisons.
+      - [BUG 1600171]: Support longer community strings in VACM config.
+      - [BUG 1660061]: Validate engineIDs more strictly.
+
+    snmpd:
+      - [PATCH 1047706]: make end-of-mib-view RFC compliant about the variable name it returns
+      - [PATCH 1520286]: Prevent potential crash in Darwin.
+      - [PATCH 1554827]: fix handling of failed proxy SET requests
+      - [PATCH 1562688]: fix ping/reattach agentx code
+      - [PATCH 1565703]: patch to fix rapid registrations/deregistration issues
+      - [PATCH 1575984]: block SIGHUP during reconfig
+      - [PATCH 1601188]: Handle signals properly when restarting the agent.
+      - [PATCH 1637287]: Handle multiple target tags correctly.
+      - [PATCH 1639282]: Save persistent snmpTargetParamsTable settings correctly.
+      - [PATCH 1639360]: Fix snmpNotifyFilterProfileTable row creation.
+      - [PATCH 1641332]: Include missing agent config definitions.
+      - [PATCH 1641685]: Handle unresponsive AgentX subagents more reliably.
+      - [PATCH 1644714]: replace last remaining instance of deprecated copy_word by copy_nword
+      - [BUG 711465]: Fix BulkGet handling of override entries.
+      - [BUG 1397895]: include missing interface declarations
+      - [BUG 1427410]: Set auth engineID for SNMPv3 traps.
+      - [BUG 1502267]: Build access list in the correct order.
+      - [BUG 1527930]: fix smux authentication
+      - [BUG 1546817]: Fix snmpEnterprise varbind when forwarding v1 traps.
+      - [BUG 1559358]: check scanf results for diskio scanning
+      - [BUG 1600432]: Handle signals properly when restarting the agent.
+      - [BUG 1633595]: Fix AgentX handling of Counter64 values
+      - patch from Wojtek Jawor to handle row deletion issues in dataset tables
+
+    snmpdf:
+      - [BUG 1515507]: Handle failed requests better
+
+    snmptrapd:
+      - [BUG 1638225]: Fix interpretation of transport address data.
+
+
+    build:
+      - [BUG 1096166]: Handle --without-logfile correctly.
+      - [BUG 1564233]: Have configure test for rpm headers not just the libraries
+      - [BUG 1585156]: Fix --without-perl-modules
+      - add configure check for hasmntopt to fix the build on systems that lack it
+      - yet another fix to address build issues with ethtool (on RH9).
+
+    documentation:
+      - [PATCH 1596028]: const fixes for the mib_api(3) manual page
+      - [PATCH 1601261]: update README.smux
+      - [PATCH 1604580]: SNMP(3) manual page corrections (spotted by tek-ops)
+      - [BUG 1247164]: Document use of OID macros
+      - [BUG 1407476]: Clarify MIB parsing toggle options and MIB comment handling.
+      - [BUG 1577913]: add missing manual pages for executables, supplied by Debian
+
+    mib2c:
+      - [PATCH 1668171]: skip unknown cols in min/max range for tables, instead of error
+      - [BUG 1429472]: Protect against missing instances (and invalid objects)
+      - [BUG 1479916]: Restore consistency in row creation code.
+      - [BUG 1582972]: Handle @while@/@end@ properly.
+      - [BUG 1585815]: fix mfd bits length calculation
+
+    misc:
+      - [BUG 1585250]: don't use deprecated options in start script
+      - RPM spec file fixes for 64-bit platforms
+      - "make test" fixes for non-UDP transports
+
+    perl:
+      - [PATCH 1575937]: fix usenumeric output in async varbinds so they
+      - [PATCH 1627949]: from martin987: a perl agentx consumes memory
+      - [BUG 1450669]: from martin987: a perl agentx consumes memory
+      - Fixed the perl bulkwalk function
+      - SNMP.pm fixes for 64-bit platforms
+      - make perltest fixes for Solaris 2.6 and earlier, HP-UX, and IRIX
+      -	return OIDs instead of empty strings.
+
+
+    FreeBSD:
+      - fix configure warning for sys/conf.h
+
+    Linux:
+      - [PATCH 1581294]: host-resources improvements
+      - fix ethtool configure check for recent systems (e.g. FC6, RHEL5).
+
+    Solaris:
+      - [PATCH 1623447]: hrSWRun fix: <exited> instead of endOfTable for terminated processes
+      - [BUG 1626153]: no hrSWRun informations on Solaris zones
+
+    Win32:
+      - [BUG 1662987]: compile error on Cygwin

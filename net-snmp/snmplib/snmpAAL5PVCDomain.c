@@ -86,11 +86,11 @@ netsnmp_aal5pvc_recv(netsnmp_transport *t, void *buf, int size,
 	}
 
         if (rc >= 0) {
-            char *string = netsnmp_aal5pvc_fmtaddr(t, NULL, 0);
+            char *str = netsnmp_aal5pvc_fmtaddr(t, NULL, 0);
             DEBUGMSGTL(("netsnmp_aal5pvc",
 			"recv on fd %d got %d bytes (from %s)\n", t->sock,
-                        rc, string));
-            free(string);
+                        rc, str));
+            free(str);
         } else {
             DEBUGMSGTL(("netsnmp_aal5pvc", "recv on fd %d err %d (\"%s\")\n", 
 			t->sock, errno, strerror(errno)));
@@ -119,11 +119,11 @@ netsnmp_aal5pvc_send(netsnmp_transport *t, void *buf, int size,
     }
 
     if (to != NULL && t != NULL && t->sock >= 0) {
-        char *string = netsnmp_aal5pvc_fmtaddr(NULL, (void *)to,
+        char *str = netsnmp_aal5pvc_fmtaddr(NULL, (void *)to,
 					    sizeof(struct sockaddr_atmpvc));
         DEBUGMSGTL(("netsnmp_aal5pvc","send %d bytes from %p to %s on fd %d\n",
-		    size, buf, string, t->sock));
-        free(string);
+		    size, buf, str, t->sock));
+        free(str);
 	while (rc < 0) {
 	    rc = send(t->sock, buf, size, 0);
 	    if (rc < 0 && errno != EINTR) {
@@ -164,7 +164,7 @@ netsnmp_aal5pvc_close(netsnmp_transport *t)
 netsnmp_transport *
 netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
 {
-    char           *string = NULL;
+    char           *str = NULL;
     struct atm_qos  qos;
     netsnmp_transport *t = NULL;
 
@@ -177,11 +177,11 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
         return NULL;
     }
 
-    string = netsnmp_aal5pvc_fmtaddr(NULL, (void *) addr,
+    str = netsnmp_aal5pvc_fmtaddr(NULL, (void *) addr,
                                   sizeof(struct sockaddr_atmpvc));
     DEBUGMSGTL(("netsnmp_aal5pvc", "open %s %s\n", local ? "local" : "remote",
-                string));
-    free(string);
+                str));
+    free(str);
 
     memset(t, 0, sizeof(netsnmp_transport));
 
@@ -290,21 +290,21 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
 
 
 netsnmp_transport *
-netsnmp_aal5pvc_create_tstring(const char *string, int local)
+netsnmp_aal5pvc_create_tstring(const char *str, int local)
 {
     struct sockaddr_atmpvc addr;
 
-    if (string != NULL) {
+    if (str != NULL) {
         addr.sap_family = AF_ATMPVC;
 
-        if (sscanf(string, "%hd.%hd.%d", &(addr.sap_addr.itf),
+        if (sscanf(str, "%hd.%hd.%d", &(addr.sap_addr.itf),
                    &(addr.sap_addr.vpi), &(addr.sap_addr.vci)) == 3) {
             return netsnmp_aal5pvc_transport(&addr, local);
-        } else if (sscanf(string, "%hd.%d", &(addr.sap_addr.vpi),
+        } else if (sscanf(str, "%hd.%d", &(addr.sap_addr.vpi),
                           &(addr.sap_addr.vci)) == 2) {
             addr.sap_addr.itf = 0;
             return netsnmp_aal5pvc_transport(&addr, local);
-        } else if (sscanf(string, "%d", &(addr.sap_addr.vci)) == 1) {
+        } else if (sscanf(str, "%d", &(addr.sap_addr.vci)) == 1) {
             addr.sap_addr.itf = 0;
             addr.sap_addr.vpi = 0;
             return netsnmp_aal5pvc_transport(&addr, local);

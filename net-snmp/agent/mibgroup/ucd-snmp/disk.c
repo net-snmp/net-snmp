@@ -73,14 +73,16 @@
 #if HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #endif
-#if (!defined(HAVE_STATVFS)) && defined(HAVE_STATFS)
+#if defined(HAVE_STATFS)
 #if HAVE_SYS_MOUNT_H
 #include <sys/mount.h>
 #endif
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
+#if !defined(HAVE_STATVFS)
 #define statvfs statfs
+#endif
 #endif
 #if HAVE_VM_VM_H
 #include <vm/vm.h>
@@ -156,7 +158,7 @@ static void       add_device(char *path, char *device,
 static void       modify_disk_parameters(int index, int minspace,
 	                                 int minpercent);
 static int        disk_exists(char *path);
-static u_char    *find_device(char *path);
+static char      *find_device(char *path);
 
 struct diskpart {
     char            device[STRMAX];
@@ -363,7 +365,7 @@ int disk_exists(char *path)
 {
   int index;
   for(index = 0; index < numdisks; index++) {
-    DEBUGMSGTL(("ucd-snmp/disk:", "Checking for %s. Found %s at %d ", path, disks[index].path, index));
+    DEBUGMSGTL(("ucd-snmp/disk", "Checking for %s. Found %s at %d\n", path, disks[index].path, index));
     if(strcmp(path, disks[index].path) == 0) {
       return index;
     }
@@ -465,7 +467,7 @@ find_and_add_allDisks(int minpercent)
  
 }
 
-static u_char *
+static char *
 find_device(char *path)
 {
 #if HAVE_GETMNTENT
@@ -542,7 +544,7 @@ find_device(char *path)
 
 #elif HAVE_STATFS
   if (statfs(path, &statf) == 0) {
-    copy_word(statf.f_mntfromname, device);
+    copy_nword(statf.f_mntfromname, device, sizeof(device));
     DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",
 		statf.f_mntfromname));
   }

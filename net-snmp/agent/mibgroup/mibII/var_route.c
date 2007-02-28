@@ -73,7 +73,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 extern WriteMethod write_rte;
 
-#ifndef WIN32
+#if !defined (WIN32) && !defined (cygwin)
 
 #ifdef USE_SYSCTL_ROUTE_DUMP
 
@@ -529,6 +529,7 @@ var_ipRouteEntry(struct variable * vp,
 
     switch (vp->magic) {
     case IPROUTEDEST:
+        *var_len = 4;
 #if NEED_KLGETSA
         sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
         return (u_char *) & (sa->sin_addr.s_addr);
@@ -587,6 +588,7 @@ var_ipRouteEntry(struct variable * vp,
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTENEXTHOP:
+        *var_len = 4;
 #if NEED_KLGETSA
         sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
         return (u_char *) & (sa->sin_addr.s_addr);
@@ -629,6 +631,7 @@ var_ipRouteEntry(struct variable * vp,
         long_return = 0;
         return (u_char *) & long_return;
     case IPROUTEMASK:
+        *var_len = 4;
 #if NEED_KLGETSA
         /*
          * XXX - Almost certainly not right
@@ -1235,11 +1238,8 @@ Route_Scan_Reload(void)
     static int      Time_Of_Last_Reload = 0;
     struct timeval  now;
 
-    /*
-     * allow 20 seconds in cache: 
-     */
     gettimeofday(&now, (struct timezone *) 0);
-    if (Time_Of_Last_Reload + 20 > now.tv_sec)
+    if (Time_Of_Last_Reload + CACHE_TIME > now.tv_sec)
         return;
     Time_Of_Last_Reload = now.tv_sec;
 
@@ -1396,7 +1396,7 @@ qsort_compare(const void *v1, const void *v2)
 
 #endif                          /* solaris2 */
 
-#else                           /* WIN32 */
+#else                           /* WIN32 cygwin */
 #include <iphlpapi.h>
 #ifndef MIB_IPPROTO_NETMGMT
 #define MIB_IPPROTO_NETMGMT 3
@@ -1620,7 +1620,7 @@ var_ipRouteEntry(struct variable *vp,
     return NULL;
 }
 
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */
 
 #else                           /* CAN_USE_SYSCTL */
 
@@ -1960,7 +1960,7 @@ snmp_socket_length(int family)
 
     switch (family) {
 #ifndef cygwin
-#ifndef WIN32
+#if !defined (WIN32) && !defined (cygwin)
 #ifdef AF_UNIX
     case AF_UNIX:
         length = sizeof(struct sockaddr_un);

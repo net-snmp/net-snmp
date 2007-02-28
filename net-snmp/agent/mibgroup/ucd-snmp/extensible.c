@@ -278,15 +278,23 @@ extensible_parse_config(const char *token, char *cptr)
     sprintf(ptmp->fixcmd, EXECFIXCMD, ptmp->name);
 #endif
     if (ptmp->miblen > 0) {
+      /*
+       * For relocatable "exec" entries,
+       * register the new (not-strictly-valid) MIB subtree...
+       */
         register_mib(token,
                      (struct variable *) extensible_relocatable_variables,
                      sizeof(struct variable2), 
                      sizeof(extensible_relocatable_variables) /
                      sizeof(*extensible_relocatable_variables),
                      ptmp->miboid, ptmp->miblen);
-    }
 
-    if (scount > 1) {
+      /*
+       * ... and ensure the entries are sorted by OID.
+       * This isn't needed for entries in the main extTable (which
+       * don't have MIB OIDs explicitly associated with them anyway)
+       */
+      if (scount > 1) {
         int i;
         struct extensible **etmp = (struct extensible **)
             malloc(((sizeof(struct extensible *)) * scount));
@@ -306,6 +314,7 @@ extensible_parse_config(const char *token, char *cptr)
         }
         ptmp->next = NULL;
         free(etmp);
+      }
     }
 }
 
@@ -544,6 +553,8 @@ var_extensible_relocatable(struct variable *vp,
     long_ret = *length;
     for (i = 1; i <= (int) numrelocs; i++) {
         exten = get_exten_instance(relocs, i);
+        if (!exten)
+            continue;
         if ((int) exten->miblen == (int) vp->namelen - 1) {
             memcpy(myvp.name, exten->miboid, exten->miblen * sizeof(oid));
             myvp.namelen = exten->miblen;
@@ -655,6 +666,8 @@ find_extensible(netsnmp_subtree *tp, oid *tname, size_t tnamelen, int exact)
 
     for (i = 1; i <= (int) numrelocs; i++) {
         exten = get_exten_instance(relocs, i);
+        if (!exten)
+            continue;
         if (exten->miblen != 0) {
             memcpy(myvp.name, exten->miboid, exten->miblen * sizeof(oid));
             memcpy(name, tname, tnamelen * sizeof(oid));

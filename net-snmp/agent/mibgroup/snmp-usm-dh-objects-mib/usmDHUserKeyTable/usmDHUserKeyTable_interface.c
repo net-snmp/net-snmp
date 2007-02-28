@@ -461,6 +461,7 @@ usmDHUserKeyTable_allocate_rowreq_ctx(usmDHUserKeyTable_data * data)
     if (NULL == rowreq_ctx) {
         snmp_log(LOG_ERR, "Couldn't allocate memory for a "
                  "usmDHUserKeyTable_rowreq_ctx.\n");
+        return NULL;
     } else {
         if (NULL != data) {
             /*
@@ -570,12 +571,22 @@ _mfd_usmDHUserKeyTable_post_request(netsnmp_mib_handler *handler,
     }
 
     /*
-     * if it was set, clear row created flag.
+     * if there are no errors, check for and handle row creation/deletion
      */
-    rowreq_ctx = netsnmp_container_table_row_extract(requests);
-    if ((NULL != rowreq_ctx)
-        && (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED))
+    rc = netsnmp_check_requests_error(requests);
+    if ((SNMP_ERR_NOERROR == rc) &&
+        (NULL !=
+         (rowreq_ctx = netsnmp_container_table_row_extract(requests)))) {
+        if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
         rowreq_ctx->rowreq_flags &= ~MFD_ROW_CREATED;
+            CONTAINER_INSERT(usmDHUserKeyTable_if_ctx.container,
+                             rowreq_ctx);
+        } else if (rowreq_ctx->rowreq_flags & MFD_ROW_DELETED) {
+            CONTAINER_REMOVE(usmDHUserKeyTable_if_ctx.container,
+                             rowreq_ctx);
+            usmDHUserKeyTable_release_rowreq_ctx(rowreq_ctx);
+        }
+    }
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_usmDHUserKeyTable_post_request */

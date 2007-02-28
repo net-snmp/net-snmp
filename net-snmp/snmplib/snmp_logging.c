@@ -86,11 +86,22 @@
 #include <net-snmp/library/callback.h>
 #define LOGLENGTH 1024
 
+#ifdef va_copy
+#define NEED_VA_END_AFTER_VA_COPY
+#else
+#ifdef __vacopy
+#define vacopy __vacopy
+#define NEED_VA_END_AFTER_VA_COPY
+#else
+#define va_copy(dest, src) memcpy (&dest, &src, sizeof (va_list))
+#endif
+#endif
+
 /*
  * logh_head:  A list of all log handlers, in increasing order of priority
  * logh_priorities:  'Indexes' into this list, by priority
  */
-netsnmp_log_handler *logh_head;
+netsnmp_log_handler *logh_head = NULL;
 netsnmp_log_handler *logh_priorities[LOG_DEBUG+1];
 
 static int      newline = 1;	 /* MTCRITICAL_RESOURCE */
@@ -283,7 +294,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      * Finally, handle ".... -Lx value ...." syntax
      *   (*without* surrounding quotes)
      */
-    if (!*optarg) {
+    if ((!*optarg) && (NULL != argv)) {
         /*
          * We've run off the end of the argument
          *  so move on to the next.
@@ -336,7 +347,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      */
     case 'F':
         priority = decode_priority( optarg, &pri_max );
-        if (priority == -1)  return -1;
+        if (priority == -1 || !argv)  return -1;
         optarg = argv[++optind];
         /* Fallthrough */
     case 'f':
@@ -358,7 +369,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      */
     case 'S':
         priority = decode_priority( optarg, &pri_max );
-        if (priority == -1)  return -1;
+        if (priority == -1 || !argv)  return -1;
         optarg = argv[++optind];
         /* Fallthrough */
     case 's':
@@ -389,6 +400,13 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
             optind++;
         /* Fallthrough */
     case 'n':
+        /*
+         * disable all logs to clean them up (close files, etc),
+         * remove all log handlers, then register a null handler.
+         */
+        snmp_disable_log();
+        while(NULL != logh_head)
+            netsnmp_remove_loghandler( logh_head );
         logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_NONE, priority);
         if (logh) {
             logh->pri_max = pri_max;
@@ -403,7 +421,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
 }
 
 char *
-snmp_log_syslogname(char *pstr)
+snmp_log_syslogname(const char *pstr)
 {
   if (pstr)
     strncpy (syslogname, pstr, sizeof(syslogname));
@@ -429,35 +447,10 @@ snmp_log_options_usage(const char *lead, FILE * outf)
 }
 
 /**
- * This snmp logging function allows variable argument list given the
- * specified priority, format and a populated va_list structure.
- * The default logfile this function writes to is /var/log/snmpd.log.
+ * Is logging done?
  *
- * @param priority is an integer representing the type of message to be written
- *	to the snmp log file.  The types are errors, warning, and information.
- *      	The error types are:
- *		- LOG_EMERG       system is unusable 
- *		- LOG_ALERT       action must be taken immediately 
- *		- LOG_CRIT        critical conditions 
- *		- LOG_ERR         error conditions
- *	The warning type is:
- *              - LOG_WARNING     warning conditions 
- *	The information types are:
- *		- LOG_NOTICE      normal but significant condition
- *		- LOG_INFO        informational
- *      	- LOG_DEBUG       debug-level messages
+ * @return Returns 0 if logging is off, 1 when it is done.
  *
- * @param format is a pointer to a char representing the variable argument list
- *	format used.
- *
- * @param ap is a va_list type used to traverse the list of arguments.
- *
- * @return Returns 0 on success, -1 when the code could not format the log-
- *         string, -2 when dynamic memory could not be allocated if the length
- *         of the log buffer is greater then 1024 bytes.  For each of these
- *         errors a LOG_ERR messgae is written to the logfile.
- *
- * @see snmp_log
  */
 int
 snmp_get_do_logging(void)
@@ -539,6 +532,26 @@ snmp_disable_filelog(void)
     for (logh = logh_head; logh; logh = logh->next)
         if (logh->enabled && logh->type == NETSNMP_LOGHANDLER_FILE)
             snmp_disable_filelog_entry(logh);
+}
+
+/*
+ * returns that status of stderr logging
+ *
+ * @retval 0 : stderr logging disabled
+ * @retval 1 : stderr logging enabled
+ */
+int
+snmp_stderrlog_status(void)
+{
+    netsnmp_log_handler *logh;
+
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->enabled && (logh->type == NETSNMP_LOGHANDLER_STDOUT ||
+                              logh->type == NETSNMP_LOGHANDLER_STDERR)) {
+            return 1;
+       }
+
+    return 0;
 }
 
 void
@@ -666,7 +679,14 @@ snmp_enable_filelog(const char *logfilename, int dont_zero_log)
 {
     netsnmp_log_handler *logh;
 
-    snmp_disable_filelog();	/* XXX ??? */
+    /*
+     * don't disable ALL filelogs whenever a new one is enabled.
+     * this prevents '-Lf file' from working in snmpd, as the
+     * call to set up /var/log/snmpd.log will disable the previous
+     * log setup. again, this new linked list of log handlers
+     * needs rethinking/cleanup. xxx-rks
+     * snmp_disable_filelog();
+     */
 
     if (logfilename) {
         logh = netsnmp_find_loghandler( logfilename );
@@ -882,7 +902,7 @@ netsnmp_remove_loghandler( netsnmp_log_handler *logh )
 /* ==================================================== */
 
 int
-log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *string)
+log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *str)
 {
     char            sbuf[40];
 
@@ -892,12 +912,12 @@ log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *string)
     } else {
         strcpy(sbuf, "");
     }
-    newline = string[strlen(string) - 1] == '\n';	/* XXX - Eh ? */
+    newline = str[strlen(str) - 1] == '\n';	/* XXX - Eh ? */
 
     if (logh->imagic)
-       printf(         "%s%s", sbuf, string);
+       printf(         "%s%s", sbuf, str);
     else
-       fprintf(stderr, "%s%s", sbuf, string);
+       fprintf(stderr, "%s%s", sbuf, str);
 
     return 1;
 }
@@ -905,7 +925,7 @@ log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *string)
 
 #ifdef WIN32
 int
-log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
+log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *str)
 {
     WORD            etype;
     LPCTSTR         event_msg[2];
@@ -946,7 +966,7 @@ log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
             etype = EVENTLOG_INFORMATION_TYPE;
             break;
     }
-    event_msg[0] = string;
+    event_msg[0] = str;
     event_msg[1] = NULL;
     /* NOTE: 4th parameter must match winservice.mc:MessageId value */
     if (!ReportEvent(eventlog_h, etype, 0, 100, NULL, 1, 0, event_msg, NULL)) {
@@ -962,7 +982,7 @@ log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
 }
 #else
 int
-log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
+log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *str)
 {
 	/*
 	 * XXX
@@ -982,14 +1002,14 @@ log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
         openlog(ident, LOG_CONS | LOG_PID, facility);
         logh->imagic = 1;
     }
-    syslog( pri, "%s", string );
+    syslog( pri, "%s", str );
     return 1;
 }
 #endif /* !WIN32 */
 
 
 int
-log_handler_file(    netsnmp_log_handler* logh, int pri, const char *string)
+log_handler_file(    netsnmp_log_handler* logh, int pri, const char *str)
 {
     FILE           *fhandle;
     char            sbuf[40];
@@ -1019,14 +1039,14 @@ log_handler_file(    netsnmp_log_handler* logh, int pri, const char *string)
             return 0;
         logh->magic = (void*)fhandle;
     }
-    fprintf(fhandle, "%s%s", sbuf, string);
+    fprintf(fhandle, "%s%s", sbuf, str);
     fflush(fhandle);
-    logh->imagic = string[strlen(string) - 1] == '\n';
+    logh->imagic = str[strlen(str) - 1] == '\n';
     return 1;
 }
 
 int
-log_handler_callback(netsnmp_log_handler* logh, int pri, const char *string)
+log_handler_callback(netsnmp_log_handler* logh, int pri, const char *str)
 {
 	/*
 	 * XXX - perhaps replace 'snmp_call_callbacks' processing
@@ -1036,7 +1056,7 @@ log_handler_callback(netsnmp_log_handler* logh, int pri, const char *string)
     int             dodebug = snmp_get_do_debugging();
 
     slm.priority = pri;
-    slm.msg = string;
+    slm.msg = str;
     if (dodebug)            /* turn off debugging inside the callbacks else will loop */
         snmp_set_do_debugging(0);
     snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_LOGGING, &slm);
@@ -1046,7 +1066,7 @@ log_handler_callback(netsnmp_log_handler* logh, int pri, const char *string)
 }
 
 int
-log_handler_null(    netsnmp_log_handler* logh, int pri, const char *string)
+log_handler_null(    netsnmp_log_handler* logh, int pri, const char *str)
 {
     /*
      * Dummy log handler - just throw away the error completely
@@ -1056,7 +1076,7 @@ log_handler_null(    netsnmp_log_handler* logh, int pri, const char *string)
 }
 
 void
-snmp_log_string(int priority, const char *string)
+snmp_log_string(int priority, const char *str)
 {
     netsnmp_log_handler *logh;
 
@@ -1077,35 +1097,81 @@ snmp_log_string(int priority, const char *string)
     for ( ; logh; logh = logh->next ) {
         /*
          * ... but skipping any handlers with a "maximum priority"
-	 *     that we have already exceeded.
+         *     that we have already exceeded. And don't forget to
+         *     ensure this logging is turned on (see snmp_disable_stderrlog
+         *     and its cohorts).
          */
-        if (priority >= logh->pri_max)
-            logh->handler( logh, priority, string );
+        if (logh->enabled && (priority >= logh->pri_max))
+            logh->handler( logh, priority, str );
     }
 }
 
 /* ==================================================== */
 
 
+/**
+ * This snmp logging function allows variable argument list given the
+ * specified priority, format and a populated va_list structure.
+ * The default logfile this function writes to is /var/log/snmpd.log.
+ *
+ * @param priority is an integer representing the type of message to be written
+ *	to the snmp log file.  The types are errors, warning, and information.
+ *      - The error types are:
+ *        - LOG_EMERG       system is unusable 
+ *        - LOG_ALERT       action must be taken immediately 
+ *        - LOG_CRIT        critical conditions 
+ *        - LOG_ERR         error conditions
+ *      - The warning type is:
+ *        - LOG_WARNING     warning conditions 
+ *      - The information types are:
+ *        - LOG_NOTICE      normal but significant condition
+ *        - LOG_INFO        informational
+ *        - LOG_DEBUG       debug-level messages
+ *
+ * @param format is a pointer to a char representing the variable argument list
+ *	format used.
+ *
+ * @param ap is a va_list type used to traverse the list of arguments.
+ *
+ * @return Returns 0 on success, -1 when the code could not format the log-
+ *         string, -2 when dynamic memory could not be allocated if the length
+ *         of the log buffer is greater then 1024 bytes.  For each of these
+ *         errors a LOG_ERR messgae is written to the logfile.
+ *
+ * @see snmp_log
+ */
 int
 snmp_vlog(int priority, const char *format, va_list ap)
 {
     char            buffer[LOGLENGTH];
     int             length;
     char           *dynamic;
+    va_list         aq;
 
+    va_copy(aq, ap);
     length = vsnprintf(buffer, LOGLENGTH, format, ap);
+    va_end(ap);
 
-    if (length == 0)
+    if (length == 0) {
+#ifdef NEED_VA_END_AFTER_VA_COPY
+        va_end(aq);
+#endif
         return (0);             /* Empty string */
+    }
 
     if (length == -1) {
         snmp_log_string(LOG_ERR, "Could not format log-string\n");
+#ifdef NEED_VA_END_AFTER_VA_COPY
+        va_end(aq);
+#endif
         return (-1);
     }
 
     if (length < LOGLENGTH) {
         snmp_log_string(priority, buffer);
+#ifdef NEED_VA_END_AFTER_VA_COPY
+        va_end(aq);
+#endif
         return (0);
     }
 
@@ -1114,12 +1180,16 @@ snmp_vlog(int priority, const char *format, va_list ap)
         snmp_log_string(LOG_ERR,
                         "Could not allocate memory for log-message\n");
         snmp_log_string(priority, buffer);
+#ifdef NEED_VA_END_AFTER_VA_COPY
+        va_end(aq);
+#endif
         return (-2);
     }
 
-    vsnprintf(dynamic, length + 1, format, ap);
+    vsnprintf(dynamic, length + 1, format, aq);
     snmp_log_string(priority, dynamic);
     free(dynamic);
+    va_end(aq);
     return 0;
 }
 

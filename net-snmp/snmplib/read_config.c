@@ -172,7 +172,7 @@ register_app_prenetsnmp_mib_handler(const char *token,
  * management of where to put tokens as the module or modules get more complex
  * in regard to handling token registrations.
  *
- * @param type     the configuration file used, e.g., if snmp.conf is the file
+ * @param type_param the configuration file used, e.g., if snmp.conf is the file
  *                 where the token is located use "snmp" here.
  *                 If NULL the configuration file used will be snmpd.conf.
  *
@@ -432,15 +432,21 @@ read_config_get_handlers(const char *type)
 }
 
 void
-read_config_with_type(const char *filename, const char *type)
+read_config_with_type_when(const char *filename, const char *type, int when)
 {
     struct config_line *ctmp = read_config_get_handlers(type);
     if (ctmp)
-        read_config(filename, ctmp, EITHER_CONFIG);
+        read_config(filename, ctmp, when);
     else
         DEBUGMSGTL(("read_config",
                     "read_config: I have no registrations for type:%s,file:%s\n",
                     type, filename));
+}
+
+void
+read_config_with_type(const char *filename, const char *type)
+{
+    read_config_with_type_when(filename, type, EITHER_CONFIG);
 }
 
 
@@ -605,8 +611,7 @@ netsnmp_config_remember_free_list(struct read_config_memory **mem)
         SNMP_FREE((*mem)->line);
         tmpmem = (*mem)->next;
         SNMP_FREE(*mem);
-        *mem = NULL;
-        mem = &tmpmem;
+        *mem = tmpmem;
     }
 }
 
@@ -796,13 +801,42 @@ free_config(void)
 }
 
 void
+read_configs_optional(const char *optional_config, int when)
+{
+    char *newp, *cp, *st;
+    char *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				       NETSNMP_DS_LIB_APPTYPE);
+
+    if ((NULL == optional_config) || (NULL == type))
+        return;
+
+    DEBUGMSGTL(("read_configs_optional",
+                "reading optional configuration tokens for %s\n", type));
+    
+    newp = strdup(optional_config);      /* strtok_r messes it up */
+    cp = strtok_r(newp, ",", &st);
+    while (cp) {
+        struct stat     statbuf;
+        if (stat(cp, &statbuf)) {
+            DEBUGMSGTL(("read_config",
+                        "Optional File \"%s\" does not exist.\n", cp));
+            snmp_log_perror(cp);
+        } else {
+            DEBUGMSGTL(("read_config",
+                        "Reading optional config file: \"%s\"\n", cp));
+            read_config_with_type_when(cp, type, when);
+        }
+        cp = strtok_r(NULL, ",", &st);
+    }
+    free(newp);
+    
+}
+
+void
 read_configs(void)
 {
     char *optional_config = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					       NETSNMP_DS_LIB_OPTIONALCONFIG);
-    char *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-				       NETSNMP_DS_LIB_APPTYPE);
-    char *st;
 
     DEBUGMSGTL(("read_config", "reading normal configuration tokens\n"));
 
@@ -814,27 +848,8 @@ read_configs(void)
     /*
      * do this even when the normal above wasn't done 
      */
-    if (optional_config && type) {
-      char           *newp, *cp;
-      newp = strdup(optional_config);      /* strtok_r messes it up */
-      cp = strtok_r(newp, ",", &st);
-      while (cp) {
-        struct stat     statbuf;
-        if (stat(cp, &statbuf)) {
-            DEBUGMSGTL(("read_config",
-                        "Optional File \"%s\" does not exist.\n",
-                        cp));
-            snmp_log_perror(cp);
-        } else {
-            DEBUGMSGTL(("read_config",
-                        "Reading optional config file: \"%s\"\n",
-                        cp));
-            read_config_with_type(cp, type);
-        }
-        cp = strtok_r(NULL, ",", &st);
-      }
-      free(newp);
-    }
+    if (NULL != optional_config)
+        read_configs_optional(optional_config, NORMAL_CONFIG);
 
     netsnmp_config_process_memories_when(NORMAL_CONFIG, 1);
 
@@ -847,12 +862,18 @@ read_configs(void)
 void
 read_premib_configs(void)
 {
+    char *optional_config = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+					       NETSNMP_DS_LIB_OPTIONALCONFIG);
+
     DEBUGMSGTL(("read_config", "reading premib configuration tokens\n"));
 
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 				NETSNMP_DS_LIB_DONT_READ_CONFIGS)) {
         read_config_files(PREMIB_CONFIG);
     }
+
+    if (NULL != optional_config)
+        read_configs_optional(optional_config, PREMIB_CONFIG);
 
     netsnmp_config_process_memories_when(PREMIB_CONFIG, 0);
 
@@ -1065,7 +1086,7 @@ read_config_files(int when)
 	    envconfpath = strdup(envconfpath);
         }
 
-        DEBUGMSGTL(("read_config", "config path used:%s\n", envconfpath));
+        DEBUGMSGTL(("read_config", "config path used: %s\n", envconfpath));
         cptr1 = cptr2 = envconfpath;
         i = 1;
         while (i && *cptr2 != 0) {
@@ -1353,18 +1374,18 @@ snmp_clean_persistent(const char *type)
  * line number of a .conf file and increments the error count. 
  */
 void
-config_perror(const char *string)
+config_perror(const char *str)
 {
     snmp_log(LOG_ERR, "%s: line %d: Error: %s\n", curfilename, linecount,
-             string);
+             str);
     config_errors++;
 }
 
 void
-config_pwarn(const char *string)
+config_pwarn(const char *str)
 {
     snmp_log(LOG_WARNING, "%s: line %d: Warning: %s\n", curfilename,
-             linecount, string);
+             linecount, str);
 }
 
 /*
@@ -1563,6 +1584,7 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
             ilen = strlen(readfrom);
 
         if (ilen % 2) {
+            snmp_log(LOG_WARNING,"invalid hex string: wrong length\n");
             DEBUGMSGTL(("read_config_read_octet_string",
                         "invalid hex string: wrong length"));
             return NULL;
@@ -1578,8 +1600,18 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
             }
             *str = cptr;
         } else {
-            if (ilen >= *len)
-                ilen = *len-1;
+            /*
+             * don't require caller to have +1 for good measure, and 
+             * bail if not enough space.
+             */
+            if (ilen > *len) {
+                snmp_log(LOG_WARNING,"buffer too small to read octet string (%d < %d)\n",
+                         *len, ilen);
+                DEBUGMSGTL(("read_config_read_octet_string",
+                            "buffer too small (%d < %d)", *len, ilen));
+                cptr1 = skip_not_white(readfrom);
+                return skip_white(cptr1);
+            }
             cptr = *str;
         }
         *len = ilen;
@@ -1621,7 +1653,7 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
             }
         } else {
             readfrom = copy_nword(readfrom, (char *) *str, *len);
-            *len = strlen(*str);
+            *len = strlen((char *)*str);
         }
     }
 
@@ -1706,7 +1738,7 @@ read_config_read_objid(char *readfrom, oid ** objid, size_t * len)
  *
  * @param type the asn data type to be read in.
  *
- * @param readform the configuration line data to be read.
+ * @param readfrom the configuration line data to be read.
  *
  * @param dataptr an allocated pointer expected to match the type being read
  *        (int *, u_int *, char **, oid **)

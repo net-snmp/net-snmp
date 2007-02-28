@@ -929,6 +929,9 @@ write_snmpNotifyRowStatus(int action,
             /*
              * set the flag? 
              */
+            if (StorageTmp == NULL)
+                return SNMP_ERR_GENERR; /* should never ever get here */
+            
             old_value = StorageTmp->snmpNotifyRowStatus;
             StorageTmp->snmpNotifyRowStatus = *((long *) var_val);
         } else {
@@ -971,7 +974,8 @@ write_snmpNotifyRowStatus(int action,
              */
             snmpNotifyTable_add(StorageDel);
         } else if (set_value != RS_DESTROY) {
-            StorageTmp->snmpNotifyRowStatus = old_value;
+            if (StorageTmp)
+                StorageTmp->snmpNotifyRowStatus = old_value;
         }
         break;
 

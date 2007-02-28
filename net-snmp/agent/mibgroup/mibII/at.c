@@ -29,7 +29,7 @@
 #endif
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
-# ifdef WIN32
+# if defined (WIN32) || defined (cygwin)
 #  include <sys/timeb.h>
 # else
 # include <sys/time.h>
@@ -113,7 +113,6 @@
 #endif
 
 #ifdef cygwin
-#define WIN32
 #include <windows.h>
 #endif
 
@@ -124,7 +123,7 @@
 	 *
 	 *********************/
 
-#ifndef WIN32
+#if !defined (WIN32) && !defined (cygwin)
 #ifndef solaris2
 static void     ARP_Scan_Init(void);
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
@@ -169,7 +168,7 @@ init_at(void)
 #endif
 }
 
-#ifndef WIN32
+#if !defined (WIN32) && !defined (cygwin)
 #ifndef solaris2
 
 /*
@@ -804,7 +803,7 @@ ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
 }
 #endif                          /* solaris2 */
 
-#else                           /* WIN32 */
+#else                           /* WIN32 cygwin */
 #include <iphlpapi.h>
 
 extern WriteMethod write_arp;
@@ -1221,4 +1220,4 @@ write_arp(int action,
     }
     return retval;
 }
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */

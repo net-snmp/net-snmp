@@ -66,7 +66,8 @@ typedef struct table_container_data_s {
 
 } table_container_data;
 
-/** @defgroup table_array table_array: Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups.
+/** @defgroup table_array table_array
+ *  Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups.
  *  @ingroup table
  *
  *  The table_array handler is used (automatically) in conjuntion
@@ -99,7 +100,7 @@ typedef struct table_container_data_s {
  *
  *  The generated code will also have code to handle SNMP-SET processing.
  *  If your table does not support any SET operations, simply comment
- *  out the #define <PREFIX>_SET_HANDLING (where <PREFIX> is your
+ *  out the \#define \<PREFIX\>_SET_HANDLING (where \<PREFIX\> is your
  *  table name) in the header file.
  *
  *  SET processing modifies the row in-place. The duplicate_row
@@ -109,13 +110,13 @@ typedef struct table_container_data_s {
  *  from the copy.
  *
  *  Code will be generated to handle row creation. This code may be
- *  disabled by commenting out the #define <PREFIX>_ROW_CREATION
+ *  disabled by commenting out the \#define \<PREFIX\>_ROW_CREATION
  *  in the header file.
  *
  *  If your table contains a RowStatus object, by default the
  *  code will not allow object in an active row to be modified.
  *  To allow active rows to be modified, remove the comment block
- *  around the #define <PREFIX>_CAN_MODIFY_ACTIVE_ROW in the header
+ *  around the \#define \<PREFIX\>_CAN_MODIFY_ACTIVE_ROW in the header
  *  file.
  *
  *  Code will be generated to maintain a secondary index for all
@@ -162,6 +163,7 @@ netsnmp_table_container_register(netsnmp_handler_registration *reginfo,
 
     if (!cb) {
         snmp_log(LOG_ERR, "table_array registration with no callbacks\n" );
+        free(tad); /* SNMP_FREE is overkill for local var */
         return SNMPERR_GENERR;
     }
     /*
@@ -172,17 +174,21 @@ netsnmp_table_container_register(netsnmp_handler_registration *reginfo,
           (NULL==cb->row_copy)) )) {
         snmp_log(LOG_ERR, "table_array registration with incomplete "
                  "callback structure.\n");
+        free(tad); /* SNMP_FREE is overkill for local var */
         return SNMPERR_GENERR;
     }
 
-    if (NULL==container)
+    if (NULL==container) {
         tad->table = netsnmp_container_find("table_array");
-    else
+        snmp_log(LOG_ERR, "table_array couldn't allocate container\n" );
+        free(tad); /* SNMP_FREE is overkill for local var */
+        return SNMPERR_GENERR;
+    } else
         tad->table = container;
-    if (NULL==container->compare)
-        container->compare = netsnmp_compare_netsnmp_index;
-    if (NULL==container->ncompare)
-        container->ncompare = netsnmp_ncompare_netsnmp_index;
+    if (NULL==tad->table->compare)
+        tad->table->compare = netsnmp_compare_netsnmp_index;
+    if (NULL==tad->table->ncompare)
+        tad->table->ncompare = netsnmp_ncompare_netsnmp_index;
     
     tad->cb = cb;
 
@@ -297,7 +303,7 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
 
 /** @} */
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/** @cond */
 /**********************************************************************
  **********************************************************************
  **********************************************************************
@@ -702,6 +708,11 @@ process_set_group(netsnmp_index *o, void *c)
                 netsnmp_monitor_notify(EVENT_ROW_ADD);
         }
 #endif
+
+        if ((ag->row_created == 0) && (ag->row_deleted == 1)) {
+            context->tad->cb->delete_row(ag->existing_row);
+            ag->existing_row = NULL;
+        }
         break;
 
     case MODE_SET_FREE:/** FINAL CHANCE ON FAILURE */
@@ -722,31 +733,6 @@ process_set_group(netsnmp_index *o, void *c)
         break;
 
     case MODE_SET_UNDO:/** FINAL CHANCE ON FAILURE */
-        if (ag->row_created == 0) {
-            /*
-             * this row existed before.
-             */
-            if (ag->row_deleted == 1) {
-                /*
-                 * re-insert undo_info
-                 */
-                DEBUGMSGT((TABLE_ARRAY_NAME, "undo: re-inserting row\n"));
-                if (CONTAINER_INSERT(ag->table, ag->existing_row) != 0) {
-                    rc = SNMP_ERR_UNDOFAILED;
-                    break;
-                }
-            }
-        } else if (ag->row_deleted == 0) {
-            /*
-             * new row that wasn't deleted should be removed
-             */
-            DEBUGMSGT((TABLE_ARRAY_NAME, "undo: removing new row\n"));
-            if (CONTAINER_REMOVE(ag->table, ag->existing_row) != 0) {
-                rc = SNMP_ERR_UNDOFAILED;
-                break;
-            }
-        }
-
         /*
          * status already set - don't change it now
          */
@@ -891,4 +877,4 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
     
     return rc;
 }
-#endif /** DOXYGEN_SHOULD_SKIP_THIS */
+/** @endcond */

@@ -55,6 +55,10 @@
 			<param name="Local" value="readme-README.agentx.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="README.agent-mibs">
+			<param name="Local" value="readme-README.agent-mibs.html">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="README.krb5">
 			<param name="Local" value="readme-README.krb5.html">
 			</OBJECT>

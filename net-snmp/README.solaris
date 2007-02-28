@@ -107,15 +107,10 @@ functionality is turned on by default and may be unnecessary if
 you aren't using ORACLE's Enterprise Manager.  Refer to ORACLE's
 documentation on how to disable it.
 
-C.  gnu tar
-
-At present the application will not untar properly using Sun's tar.
-The problem may be related to path length.  A working tar
-is available at www.sunfreeware.com.
 
 If you have decided to compile your own net-snmp, you will need ...
 
-D.  A compilation environment
+C.  A compilation environment
 
 -a compiler (gcc or Sun's Forte cc) or the gcc libraries
    (note, the cc in /usr/ucb is NOT a full-blown compiler)
@@ -220,7 +215,7 @@ components of the development environment.
 
 If you are using FORTE:
 
-PATH=/usr/bin:/usr/sbin:/usr/ccs/bin/:opt/SUNWspro/bin:/usr/local/bin:
+PATH=/usr/bin:/usr/sbin:/usr/ccs/bin:/opt/SUNWspro/bin:/usr/local/bin:
 
 If you are using gcc:
 
@@ -230,9 +225,6 @@ Obtain a current version of net-snmp (which, if you're reading this,
 presumably you have - don't you love recursion?) www.net-snmp.org/download/
 
 Uncompress it and untar it in a working directory eg. /usr/local/src/net-snmp
-
-Note:  Sun's tar (/usr/bin/tar) may have problem with long directory
-paths.  You may need to install gnu tar available from www.sunfreeware.com.
 
 In order to save a lot of typing, you should create a "configure" 
 script eg. bcc.sh in the directory below eg. /usr/local/src.
@@ -347,8 +339,6 @@ Type the following: (using the sample above)
    tar -xvf /usr/local/dist/net-snmp-5.0.9-SunOS_5.8_sun4u.tar
 
 The binaries, libraries, etc. will be installed in /usr/local.
-
-There may be a problem with Sun's tar.  See discussion above.
 
 Remove the tar file to save space.  Create an snmpd.conf (see below)
 or use an existing one from another machine.
@@ -482,7 +472,7 @@ modify snmpd.conf with the correct:
    trap-community
    managers (leave blank for all)
 
-modify snmpd.acl with the correct:
+modify snmpdx.acl with the correct:
 
    trap-community
    trap-recipients
@@ -491,7 +481,7 @@ modify snmpd.acl with the correct:
 
 Make sure that in snmpdx.reg the port is 161.
 
-You will now need to add two files - net-snmp.reg and net-snmp.rscs
+You will now need to add two files - net-snmp.reg and net-snmp.rsrc
 
 In this example, "subtrees" is set for HOST-RESOURCES-MIB, and UCD-SNMP-MIB.
 Do not use net-snmp's MIB-2 information as this is already provided by 
@@ -506,12 +496,28 @@ Sun's mib and may cause a conflict.
 ##########
 # agents #
 ##########
+
+# The following 3 macros are predefined:
+#
+#       mib-2      =    1.3.6.1.2.1
+#       enterprise =    1.3.6.1.4.1
+#       sun        =    1.3.6.1.4.1.42
+#
+# You can define your own macros, so that you can
+# manipulate strings instead of OIDs in defining the agent.
+# See the "agent" section below.
+
+macros =
+{
+        host = mib-2.25
+        ucd  = enterprise.2021
+}
  
 agents =
 {
         {
                  name = "net-snmp"
-                 subtrees = { 1.3.6.1.2.1.25,1.3.6.1.4.1.2021 } # hostmib, ucd
+                 subtrees = { host,ucd }
                  timeout = 2000000
                  watch-dog-time = 86400
         }
@@ -519,18 +525,18 @@ agents =
 
 ::::::::::::::::::
 
-::::: net-snmp.rscs ::::::
+::::: net-snmp.rsrc ::::::
 
 # /etc/snmp/conf/net-snmp.rsrc
 
 resource =
 {
         {
-   registration_file = "/etc/snmp/conf/net-snmp.reg"
-   policy = "spawn"
-   type = "legacy"
-   command = "/usr/local/sbin/snmpd -p $PORT"  
-      }
+                registration_file = "/etc/snmp/conf/net-snmp.reg"
+                policy = "spawn"
+                type = "legacy"
+                command = "/usr/local/sbin/snmpd $PORT"  
+        }
  
 }
 

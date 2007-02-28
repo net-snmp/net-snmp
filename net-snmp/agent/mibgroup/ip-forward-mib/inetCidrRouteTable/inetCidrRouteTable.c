@@ -1261,7 +1261,6 @@ inetCidrRouteTable_commit(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
      * 3) set the column's flag in column_set_flags if it needs undo
      *    processing in case of a failure.
      */
-#warning inetCidrRouteTable commit
     if (save_flags & FLAG_INETCIDRROUTEIFINDEX) {
         save_flags &= ~FLAG_INETCIDRROUTEIFINDEX;       /* clear inetCidrRouteIfIndex */
         /*

@@ -43,6 +43,9 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#ifdef cygwin
+#include <windows.h>
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -251,7 +254,7 @@ memdup(u_char ** to, const u_char * from, size_t size)
 char           *
 netsnmp_strdup_and_null(const u_char * from, size_t from_len)
 {
-    u_char         *ret;
+    char         *ret;
 
     if (from_len == 0 || from[from_len - 1] != '\0') {
         ret = malloc(from_len + 1);
@@ -434,7 +437,8 @@ netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     while (*cp != '\0') {
-        if (!isxdigit((int) *cp)) {
+        if (!isxdigit((int) *cp) ||
+            !isxdigit((int) *(cp+1))) {
             if ((NULL != delim) && (NULL != strchr(delim, *cp))) {
                 cp++;
                 continue;
@@ -913,7 +917,7 @@ timeval_tticks(struct timeval *tv)
  *               
  * Windows:      Returns a pointer to the desired environment variable  
  *               if it exists.  If it does not, the variable is looked up
- *               in the registry in HKCU\Net-SNMP or HKLM\Net-SNMP
+ *               in the registry in HKCU\\Net-SNMP or HKLM\\Net-SNMP
  *               (whichever it finds first) and stores the result in the 
  *               environment variable.  It then returns a pointer to 
  *               environment variable.
@@ -921,7 +925,7 @@ timeval_tticks(struct timeval *tv)
 
 char *netsnmp_getenv(const char *name)
 {
-#ifndef WIN32
+#if !defined (WIN32) && !defined (cygwin)
   return (getenv(name));
 #else
   char *temp = NULL;  
@@ -929,6 +933,7 @@ char *netsnmp_getenv(const char *name)
   unsigned char * key_value = NULL;
   DWORD key_value_size = 0;
   DWORD key_value_type = 0;
+  DWORD getenv_worked = 0;
 
   DEBUGMSGTL(("read_config", "netsnmp_getenv called with name: %s\n",name));
 
@@ -937,8 +942,10 @@ char *netsnmp_getenv(const char *name)
   
   /* Try environment variable first */ 
   temp = getenv(name);
-  if (temp)
+  if (temp) {
+    getenv_worked = 1;
     DEBUGMSGTL(("read_config", "netsnmp_getenv will return from ENV: %s\n",temp));
+  }
   
   /* Next try HKCU */
   if (temp == NULL)
@@ -1025,7 +1032,7 @@ char *netsnmp_getenv(const char *name)
     }
   }
   
-  if (temp) {
+  if (temp && !getenv_worked) {
     setenv(name, temp, 1);
     SNMP_FREE(temp);
   }

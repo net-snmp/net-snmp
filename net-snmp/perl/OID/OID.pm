@@ -91,7 +91,7 @@ use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 	snmp_oid_compare
         compare
 );
-$VERSION = '5.2.rc4';
+$VERSION = '5.0204';
 
 sub new {
     my $type = shift;
@@ -212,6 +212,9 @@ NetSNMP::OID - Perl extension for manipulating OIDs
 
   $len = $oid3->length();
   # -> 7
+
+  # retrieving indexes from an oid:
+  $arrayref = $tableoid->get_indexes()
 
 =head1 DESCRIPTION
 

@@ -53,6 +53,16 @@
 #endif
 
 
+static int
+_register_sysOR_callback(int majorID, int minorID,
+                         void *serverarg, void *clientarg);
+static int
+_unregister_sysOR_callback(int majorID, int minorID,
+                            void *serverarg, void *clientarg);
+static int
+_unregister_sysOR_by_session_callback(int majorID, int minorID,
+                                      void *serverarg, void *clientarg);
+
 struct timeval  sysOR_lastchange;
 static struct sysORTable *table = NULL;
 static int      numEntries = 0;
@@ -100,6 +110,16 @@ init_sysORTable(void)
 #endif
         REGISTER_MIB("mibII/sysORTable", sysORTable_variables, variable1,
                      sysORTable_variables_oid);
+
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_REQ_REG_SYSOR,
+                           _register_sysOR_callback, NULL);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_REQ_UNREG_SYSOR,
+                           _unregister_sysOR_callback, NULL);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_REQ_UNREG_SYSOR_SESS,
+                           _unregister_sysOR_by_session_callback, NULL);
 
 #ifdef USING_MIBII_SYSTEM_MIB_MODULE
     if (++system_module_count == 3)
@@ -293,3 +313,36 @@ unregister_sysORTable_by_session(netsnmp_session * ss)
             prev = ptr;
     }
 }
+
+static int
+_register_sysOR_callback(int majorID, int minorID, void *serverarg,
+                         void *clientarg)
+{
+    struct sysORTable *parms = (struct sysORTable *) serverarg;
+
+    return register_sysORTable_sess(parms->OR_oid, parms->OR_oidlen,
+                                    parms->OR_descr, parms->OR_sess);
+}
+
+static int
+_unregister_sysOR_by_session_callback(int majorID, int minorID,
+                                      void *serverarg, void *clientarg)
+{
+    netsnmp_session *session = (netsnmp_session *) serverarg;
+
+    unregister_sysORTable_by_session(session);
+
+    return 0;
+}
+
+static int
+_unregister_sysOR_callback(int majorID, int minorID, void *serverarg,
+                       void *clientarg)
+{
+    struct sysORTable *parms = (struct sysORTable *) serverarg;
+
+    return unregister_sysORTable_sess(parms->OR_oid,
+                                      parms->OR_oidlen,
+                                      parms->OR_sess);
+}
+

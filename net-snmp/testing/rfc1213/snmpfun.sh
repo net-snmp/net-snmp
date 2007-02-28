@@ -55,7 +55,7 @@ get_snmp_table()
 {
 	test_start "Access table $2 by SNMPv$1..."
 	CAPTURE "snmpgetnext -Of -v $1 -c test $myport $2"
-        CHECKFILE "\.$d\."
+        CHECKFILE '' "\.$2\."
         if [ "$snmp_last_test_result" = 0 ] ; then
 		test_finish FAIL
 	else
@@ -68,7 +68,7 @@ get_snmpv3_table()
 {
   	test_start "Access table $2 by SNMPv3..."
 	CAPTURE "snmpgetnext -Of -v 3 -u testrwuser $TEST_AUTHPRIV_PARMS $myport $2"
-        CHECKFILE "\.$d\."
+        CHECKFILE '' "\.$2\."
         if [ "$snmp_last_test_result" = 0 ] ; then
 		test_finish FAIL
 	else

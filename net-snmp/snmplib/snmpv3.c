@@ -3,6 +3,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <errno.h>
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -262,16 +263,22 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
     switch (*cp) {
 
     case 'Z':
-        session->engineBoots = strtoul(optarg, NULL, 10);
-        if (session->engineBoots == 0 || !isdigit(optarg[0])) {
+        errno = 0;
+        session->engineBoots = strtoul(optarg, &cp, 10);
+        if (errno || cp == optarg) {
             fprintf(stderr, "Need engine boots value after -3Z flag.\n");
             return (-1);
         }
-        cp = strchr(optarg, ',');
-        if (cp && *(++cp) && isdigit(*cp))
-            session->engineTime = strtoul(cp, NULL, 10);
-        else {
-            fprintf(stderr, "Need engine time value after -3Z flag.\n");
+        if (*cp == ',') {
+            char *endptr;
+            cp++;
+            session->engineTime = strtoul(cp, &endptr, 10);
+            if (errno || cp == endptr) {
+                fprintf(stderr, "Need engine time after \"-3Z engineBoots\".\n");
+                return (-1);
+            }
+        } else {
+            fprintf(stderr, "Need engine time after \"-3Z engineBoots\".\n");
             return (-1);
         }
         break;
@@ -560,6 +567,11 @@ setup_engineID(u_char ** eidp, const char *text)
     len = 5;                    /* always have 5 leading bytes */
     switch (localEngineIDType) {
     case ENGINEID_TYPE_TEXT:
+        if (NULL == text) {
+            snmp_log(LOG_ERR,
+                     "Can't set up engineID of type text from an empty string.\n");
+            return -1;
+        }
         len += strlen(text);    /* 5 leading bytes+text. No NULL char */
         break;
 #if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
@@ -643,7 +655,7 @@ setup_engineID(u_char ** eidp, const char *text)
         break;
     case ENGINEID_TYPE_TEXT:
         bufp[4] = ENGINEID_TYPE_TEXT;
-        memcpy((char *) bufp + 5, text, strlen(text));
+        memcpy((char *) bufp + 5, (text), strlen(text));
         break;
 #ifdef HAVE_GETHOSTNAME
 #ifdef AF_INET6
@@ -749,6 +761,7 @@ usm_parse_create_usmUser(const char *token, char *line)
     size_t          userKeyLen = SNMP_MAXBUF_SMALL;
     size_t          privKeyLen = 0;
     size_t          ret;
+    int             ret2;
     int             testcase;
 
     newuser = usm_create_user();
@@ -843,11 +856,11 @@ usm_parse_create_usmUser(const char *token, char *line)
     } else if (strcmp(buf,"-l") != 0) {
         /* a password is specified */
         userKeyLen = sizeof(userKey);
-        ret = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
+        ret2 = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
                           (u_char *) buf, strlen(buf), userKey, &userKeyLen);
-        if (ret != SNMPERR_SUCCESS) {
+        if (ret2 != SNMPERR_SUCCESS) {
             config_perror("could not generate the authentication key from the "
-                          "suppiled pass phrase.");
+                          "supplied pass phrase.");
             usm_free_user(newuser);
             return;
         }
@@ -856,19 +869,19 @@ usm_parse_create_usmUser(const char *token, char *line)
     /*
      * And turn it into a localized key 
      */
-    ret =
-        sc_get_properlength(newuser->authProtocol,
-                            newuser->authProtocolLen);
-    if (ret <= 0) {
+    ret2 = sc_get_properlength(newuser->authProtocol,
+                               newuser->authProtocolLen);
+    if (ret2 <= 0) {
         config_perror("Could not get proper authentication protocol key length");
         return;
     }
-    newuser->authKey = (u_char *) malloc(ret);
+    newuser->authKey = (u_char *) malloc(ret2);
 
     if (strcmp(buf,"-l") == 0) {
         /* a local key is directly specified */
         cp = copy_nword(cp, buf, sizeof(buf));
         newuser->authKeyLen = 0;
+        ret = ret2;
         if (!snmp_hex_to_binary(&newuser->authKey, &ret,
                                 &newuser->authKeyLen, 0, buf)) {
             config_perror("invalid key value argument to -l");
@@ -881,12 +894,12 @@ usm_parse_create_usmUser(const char *token, char *line)
             return;
         }
     } else {
-        newuser->authKeyLen = ret;
-        ret = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
-                           newuser->engineID, newuser->engineIDLen,
-                           userKey, userKeyLen,
-                           newuser->authKey, &newuser->authKeyLen);
-        if (ret != SNMPERR_SUCCESS) {
+        newuser->authKeyLen = ret2;
+        ret2 = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
+                            newuser->engineID, newuser->engineIDLen,
+                            userKey, userKeyLen,
+                            newuser->authKey, &newuser->authKeyLen);
+        if (ret2 != SNMPERR_SUCCESS) {
             config_perror("could not generate localized authentication key "
                           "(Kul) from the master key (Ku).");
             usm_free_user(newuser);
@@ -952,11 +965,11 @@ usm_parse_create_usmUser(const char *token, char *line)
         } else if (strcmp(buf,"-l") != 0) {
             /* a password is specified */
             userKeyLen = sizeof(userKey);
-            ret = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
+            ret2 = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
                               (u_char *) buf, strlen(buf), userKey, &userKeyLen);
-            if (ret != SNMPERR_SUCCESS) {
+            if (ret2 != SNMPERR_SUCCESS) {
                 config_perror("could not generate the privacy key from the "
-                              "suppiled pass phrase.");
+                              "supplied pass phrase.");
                 usm_free_user(newuser);
                 return;
             }
@@ -965,20 +978,20 @@ usm_parse_create_usmUser(const char *token, char *line)
         /*
          * And turn it into a localized key 
          */
-        ret =
-            sc_get_properlength(newuser->authProtocol,
-                                newuser->authProtocolLen);
-        if (ret < 0) {
+        ret2 = sc_get_properlength(newuser->authProtocol,
+                                   newuser->authProtocolLen);
+        if (ret2 < 0) {
             config_perror("could not get proper key length to use for the "
                           "privacy algorithm.");
             usm_free_user(newuser);
             return;
         }
-        newuser->privKey = (u_char *) malloc(ret);
+        newuser->privKey = (u_char *) malloc(ret2);
 
         if (strcmp(buf,"-l") == 0) {
             /* a local key is directly specified */
             cp = copy_nword(cp, buf, sizeof(buf));
+            ret = ret2;
             newuser->privKeyLen = 0;
             if (!snmp_hex_to_binary(&newuser->privKey, &ret,
                                     &newuser->privKeyLen, 0, buf)) {
@@ -987,12 +1000,12 @@ usm_parse_create_usmUser(const char *token, char *line)
                 return;
             }
         } else {
-            newuser->privKeyLen = ret;
-            ret = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
-                               newuser->engineID, newuser->engineIDLen,
-                               userKey, userKeyLen,
-                               newuser->privKey, &newuser->privKeyLen);
-            if (ret != SNMPERR_SUCCESS) {
+            newuser->privKeyLen = ret2;
+            ret2 = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
+                                newuser->engineID, newuser->engineIDLen,
+                                userKey, userKeyLen,
+                                newuser->privKey, &newuser->privKeyLen);
+            if (ret2 != SNMPERR_SUCCESS) {
                 config_perror("could not generate localized privacy key "
                               "(Kul) from the master key (Ku).");
                 usm_free_user(newuser);
@@ -1311,9 +1324,9 @@ init_snmpv3(const char *type)
     register_config_handler("snmp", "defPrivType", snmpv3_privtype_conf,
                             NULL,
 #ifdef HAVE_AES
-                            "DES (AES support not available)");
-#else
                             "DES|AES");
+#else
+                            "DES (AES support not available)");
 #endif
     register_config_handler("snmp", "defSecurityLevel",
                             snmpv3_secLevel_conf, NULL,
@@ -1347,10 +1360,11 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
 
     c_engineID = snmpv3_generate_engineID(&engineIDLen);
 
-    if (engineIDLen == 0) {
+    if (engineIDLen == 0 || !c_engineID) {
         /*
          * Somethine went wrong - help! 
          */
+        SNMP_FREE(c_engineID);
         return SNMPERR_GENERR;
     }
 
@@ -1509,7 +1523,7 @@ snmpv3_clone_engineID(u_char ** dest, size_t * destlen, u_char * src,
  *
  * Generates a malloced copy of our engineID.
  *
- * 'length' is set to the length of engineID  -OR-  < 0 on failure.
+ * 'length' is set to the length of engineID  -OR-  0 on failure.
  */
 u_char         *
 snmpv3_generate_engineID(size_t * length)

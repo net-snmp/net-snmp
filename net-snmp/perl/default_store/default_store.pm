@@ -145,7 +145,7 @@ use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 				   NETSNMP_DS_LIB_SECMODEL
 				   NETSNMP_DS_LIB_MIBDIRS
 );
-$VERSION = '5.2.rc4';
+$VERSION = '5.0204';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -189,11 +189,11 @@ __END__
 
 =head1 NAME
 
-NetSNMP::default_store - Perl extension for blah blah blah
+NetSNMP::default_store - Perl extension for Net-SNMP generic storage of global data
 
 =head1 SYNOPSIS
 
-  use NetSNMP::default_store;
+  use NetSNMP::default_store qw(:all);
   $port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT);
   netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT, 161);
 

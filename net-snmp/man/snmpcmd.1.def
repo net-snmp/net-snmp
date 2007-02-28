@@ -27,7 +27,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPCMD 1 "09 Jan 2004" VVERSIONINFO "Net-SNMP"
+.TH SNMPCMD 1 "29 Jun 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpcmd - options and behaviour common to most of the Net-SNMP command-line tools
@@ -55,15 +55,19 @@ respectively) or set the localized authentication and encryption keys
 (-3k and -3K respectively).  SNMPv3 keys can be either passed in by
 hand using these flags, or by the use of keys generated from passwords
 using the -A and -X flags discussed below.  For further details on
-SNMPv3 and it's usage of keying information, see the Net-SNMP tutorial
-web site ( http://www.Net-SNMP.org/tutorial-5/commands/ ).  See the
-snmp.conf manual page on the defAuthMasterKey and related tokens for
-more information as well.
+SNMPv3 and its usage of keying information, see the Net-SNMP tutorial
+web site ( http://www.Net-SNMP.org/tutorial-5/commands/ ). 
+Overrides the defAuthMasterKey (-3m), defPrivMasterKey (-3M), 
+defAuthLocalizedKey (-3k) or defPrivLocalizedKey (-3K) tokens, respectively, 
+in the
+.I snmp.conf
+file, see
+.I snmp.conf(5).
 .TP
 .BI -a " authProtocol"
-Set the authentication protocol (MD5|SHA) used for authenticated SNMPv3
+Set the authentication protocol (MD5 or SHA) used for authenticated SNMPv3
 messages. Overrides the defAuthType token in the
-.I  snmp.conf
+.I snmp.conf
 file.
 .TP
 .BI -A " authPassword"
@@ -142,7 +146,8 @@ addition to MIB modules specified in the environment variable MIBS.
 If a
 .I mibfile
 token is specified in the
-.I snmp.conf file,
+.I snmp.conf
+file,
 the 
 .I -m MIB
 option overrides the 
@@ -221,6 +226,9 @@ Display version information for the application and then exit.
 .TP
 .BI -x " privProtocol"
 Set the privacy protocol (DES) used for encrypted SNMPv3 messages.
+Overrides the defPrivType token in the
+.I snmp.conf
+file. Only valid if OpenSSL is available.
 .TP
 .BI -X " privPassword"
 Set the privacy pass phrase used for encrypted SNMPv3 messages.
@@ -236,6 +244,17 @@ messages.  This will initialize the local notion of the agents
 boots/time with an authenticated value stored in the LCD.
 It is typically not necessary to specify this option, as these values
 will usually be discovered automatically.
+.TP
+.BI -Y "name"="value"
+.TP
+.BI -- "name"="value"
+Allows to specify any token ("name") supported in the
+.I snmp.conf
+file and sets its value to "value". Overrides the corresponding token in the
+.I snmp.conf
+file. See
+.I snmp.conf(5)
+for the full list of tokens.
 
 .SH AGENT SPECIFICATION
 .PP
@@ -374,53 +393,57 @@ Information (SMI).  As that specification has changed through time, and
 in recognition of the (ahem) diversity in compliance expressed in MIB
 files, additional options provide more flexibility in reading MIB files.
 .TP
-.B "-Pw"
-Show some warning messages in resolving the MIB files.
-Can be also set with the configuration token "mibWarningLevel".
-.TP
-.B "-PW"
-Show additional warning messages.
-Can be also set with the configuration token "mibWarningLevel".
-.TP
-.B "-Pe"
-Show MIB errors.
-Can be also set with the configuration token "showMibErrors".
-An example of an error that would be shown is if an imported
-module is not found during MIB parsing.
-.TP
 .B "-Pc"
-Allow ASN.1 comment to extend to the end of the MIB source line
-(i.e. disallow the use of "--" to terminate comments).
-This overcomes some problems with manually maintained MIB files.
-Can be also set with the configuration token "strictCommentTerm".
+Toggles whether ASN.1 comments should extend to the end of the MIB
+source line.
+Strictly speaking, a second appearance of "--" should terminate the
+comment, but this breaks some MIB files.
+The default behaviour (to interpret comments correctly) can also
+be set with the (misnamed) configuration token \fIstrictCommentTerm\fR.
 .TP
 .B "-Pd"
-Toggles the default of whether or not to save the DESCRIPTIONs
-of the MIB objects when parsing.  Since the default is to save
-the DESCRIPTIONS, specifying -Pd will cause the DESCRIPTIONs not
-to be saved during MIB parsing.  For example:
-
-snmptranslate -Td -OS -IR system.sysDescr.0
-
-will show a description, while
-
-snmptranslate -Td -OS -IR -Pd system.sysDescr.0
-
-will not show a description.  Collecting the
-DESCRIPTION information into the parsed hierarchy
-increases the memory used by the size of each DESCRIPTION clause.
+Disables the loading of MIB object DESCRIPTIONs when parsing MIB files.
+This reduces the amount of memory used by the running application.
 .TP
-.B "-Pu"
-Allow underline characters in symbols.
-Can be also set with the configuration token "mibAllowUnderline".
+.B "-Pe"
+Toggles whether to show errors encountered when parsing MIB files.
+These include
+references to IMPORTed modules and MIB objects that cannot be
+located in the MIB directory search list.
+The default behaviour can also be set with the configuration token \fIshowMibErrors\fR.
 .TP
 .B "-PR"
-Replace MIB objects using the last read MIB file.
-The parser will replace MIB objects in its hierarchy whenever
-it sees a sub-identifier and name match.  
-.B WARNING:
-Setting this option may result in an incorrect hierarchy.
-Can be also set with the configuration token "mibReplaceWithLatest".
+If the same MIB object (parent name and sub-identifier) appears multiple
+times in the list of MIB definitions loaded, use the last version to be
+read in.  By default, the first version will be used, and any duplicates
+discarded. 
+This behaviour can also be set with the configuration token \fImibReplaceWithLatest\fR.
+
+Such ordering is normally only relevant if there are two MIB files with
+conflicting object definitions for the same OID (or different revisions
+of the same basic MIB object).
+.\" .B WARNING:
+.\" Setting this option may result in an incorrect hierarchy.
+.\" XXX - Why?
+.TP
+.B "-Pu"
+Toggles whether to allow the underline character in MIB object names
+and other symbols.
+Strictly speaking, this is not valid SMI syntax, but some vendor MIB
+files define such names.
+The default behaviour can also be set with the configuration token \fImibAllowUnderline\fR.
+.TP
+.B "-Pw"
+Show various warning messages in parsing MIB files and building
+the overall OID tree.
+This can also be set with the configuration directive
+\fImibWarningLevel 1\fR
+.TP
+.B "-PW"
+Show some additional warning messages, mostly relating to parsing
+individual MIB objects.
+This can also be set with the configuration directive
+\fImibWarningLevel 2\fR
 
 .SH "OUTPUT OPTIONS"
 Output display can be controlled by passing various parameters to the
@@ -468,7 +491,7 @@ That means removing a series of "standard" prefixes, if relevant,
 and breaking down the OID into the displayable pieces.  For example,
 the OID vacmSecruityModel.0.3.119.101.115 is broken down by default
 and the string hidden in the OID is shown.  The result would
-look like: vacmSecurityModel.0."test".  The -Ob option disables this
+look like: vacmSecurityModel.0."wes".  The -Ob option disables this
 feature.
 .br
 system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
@@ -552,8 +575,8 @@ system.sysUpTime.0 = 14096763
 .PP
 Note that most of these options can be turned on or off by default by
 tuning the
-.I snmp.conf file.
-See the
+.I snmp.conf
+file. See the
 .I snmp.conf(5)
 manual page for details.
 
@@ -681,7 +704,12 @@ best result is currently calculated as the one that matches the closest
 to the beginning of the node name and the highest in the tree.  A
 current side effect of this option is that you cannot specify indexes
 or multiple nodes, since the '.' is treated as part of the regular
-expression.
+expression.  The result of that match will thus only
+match a single node.  Specifying MIB names, or trailing nodes/numbers
+will not succeed.  Thus, matching on SNMPv2-MIB::sys.*ontact will not
+match sysContact even though sys.*ontact would.  Similarly,
+sys.*ontact.0 will also not match sysContact.0 (though it could match
+sysContactX0 if such a node existed).
 .TP
 .B -Iu
 Use the traditional UCD-style input approach of assuming that OIDs

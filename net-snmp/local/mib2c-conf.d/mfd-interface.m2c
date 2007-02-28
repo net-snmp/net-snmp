@@ -344,7 +344,8 @@ ${context}_valid_columns_set(netsnmp_column_info *vc)
 ########################################################################
 ##
 @    if (($m2c_data_allocate == 1) || ($m2c_undo_embed == 0)) && ("$m2c_data_context" eq "generated")@
-@        include generic-data-allocate.m2i@
+@        eval $m2c_gda_todo_suppress = 1@ # no todo comments
+@        include generic-data-allocate.m2i@ # resets suppress
 @    end@
 ########################################################################
 /* *********************************************************************
@@ -372,6 +373,7 @@ ${context}_allocate_rowreq_ctx($m2c_tmp)
     if(NULL == rowreq_ctx) {
         snmp_log(LOG_ERR,"Couldn't allocate memory for a "
                  "${context}_rowreq_ctx.\n");
+        return NULL;
     }
 @if $m2c_data_allocate == 1@
     else {
@@ -499,11 +501,21 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
     }
     
     /*
-     * if it was set, clear row created flag.
+     * if there are no errors, check for and handle row creation/deletion
      */
-    rowreq_ctx = netsnmp_container_table_row_extract(requests);
-    if ((NULL != rowreq_ctx) && (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED))
-        rowreq_ctx->rowreq_flags &= ~MFD_ROW_CREATED;
+    rc = netsnmp_check_requests_error(requests);
+    if ((SNMP_ERR_NOERROR == rc) &&
+        (NULL !=
+         (rowreq_ctx = netsnmp_container_table_row_extract(requests)))) {
+        if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
+            rowreq_ctx->rowreq_flags &= ~MFD_ROW_CREATED;
+            CONTAINER_INSERT(${context}_if_ctx.container, rowreq_ctx);
+        }
+        else if (rowreq_ctx->rowreq_flags & MFD_ROW_DELETED) {
+            CONTAINER_REMOVE(${context}_if_ctx.container, rowreq_ctx);
+            ${context}_release_rowreq_ctx(rowreq_ctx);
+        }
+    }
 
     return SNMP_ERR_NOERROR;
 } /* _mfd_${context}_post_request */
@@ -651,18 +663,45 @@ _${context}_get_column( ${context}_rowreq_ctx *rowreq_ctx,
 
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
+##         use sizeof except for BITS
 @         if $m2c_node_needlength == 0@
+@            if "$node.perltype" eq "BITS"@
+    {
+        $m2c_decl mask = 0xff << ((sizeof($m2c_decl) - 1) * 8);
+        int       idx = 0;
+@            else@
     var->val_len = sizeof($m2c_decl);
+@            end@
 @         end@
     var->type = $node.type;
 rc = ${node}_get(rowreq_ctx, $m2c_node_var_ref );
+@         if ($m2c_node_needlength == 0) && ("$node.perltype" eq "BITS")@
+        /*
+         * check for length of bits string
+         */
+        var->val_len = 0;
+        while( 0 != mask ) {
+            ++idx;
+            if ( *(($m2c_decl *) var->val.string) & mask )
+                var->val_len = idx;
+            mask = mask >> 8;
+        }
+    }
+@         end@
         break;
  @      end@ # accessible
 @   end@ # for each column
 
      default:
-         snmp_log(LOG_ERR,"unknown column %d in _${context}_get_column\n", column);
-         break;
+        if ($context.uc_MIN_COL <= column && column <= $context.uc_MAX_COL) {
+            DEBUGMSGTL(("internal:${context}:_${context}_get_column",
+                "assume column %d is reserved\n", column));
+            rc = MFD_SKIP;
+        } else {
+            snmp_log(LOG_ERR,
+                "unknown column %d in _${context}_get_column\n", column);
+        }
+        break;
     }
 
     return rc;

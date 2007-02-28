@@ -441,7 +441,19 @@ var_hrswinst(struct variable * vp,
                 free(catg);
             }
 #else
+# ifdef HAVE_LIBRPM
+            char *rpm_groups;
+            if ( headerGetEntry(swi->swi_h, RPMTAG_GROUP, NULL, (void **) &rpm_groups, NULL) ) {
+                if ( strstr(rpm_groups, "System Environment") != NULL )
+                    long_return = 2;	/* operatingSystem */
+                else
+                    long_return = 4;	/* applcation */
+            } else {
+                long_return = 1;    /* unknown */
+            }
+# else
             long_return = 1;    /* unknown */
+# endif
 #endif
             ret = (u_char *) & long_return;
         }
@@ -450,9 +462,7 @@ var_hrswinst(struct variable * vp,
         {
 #ifdef HAVE_LIBRPM
             int_32         *rpm_data;
-            headerGetEntry(swi->swi_h, RPMTAG_INSTALLTIME, NULL,
-                           (void **) &rpm_data, NULL);
-            if (rpm_data != NULL) {
+            if ( headerGetEntry(swi->swi_h, RPMTAG_INSTALLTIME, NULL, (void **) &rpm_data, NULL) ) {
                 time_t          installTime = *rpm_data;
                 ret = date_n_time(&installTime, var_len);
             } else {
@@ -508,6 +518,7 @@ Check_HRSW_cache(void *xxx)
         if (swi->swi_timestamp == sb.st_mtime)
             return;
         swi->swi_timestamp = sb.st_mtime;
+        swi->swi_maxrec = 0;
     }
 
     /*

@@ -55,12 +55,19 @@
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPDomain.h>
+#include <net-snmp/library/system.h>
+#include <net-snmp/library/tools.h>
 
 #ifndef INADDR_NONE
 #define INADDR_NONE	-1
 #endif
 
 static netsnmp_tdomain udpDomain;
+
+typedef struct netsnmp_udp_addr_pair_s {
+    struct sockaddr_in remote_addr;
+    struct in_addr local_addr;
+} netsnmp_udp_addr_pair;
 
 /*
  * not static, since snmpUDPIPv6Domain needs it, but not public, either.
@@ -76,17 +83,23 @@ void _netsnmp_udp_sockopt_set(int fd, int server);
 static char *
 netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
-    struct sockaddr_in *to = NULL;
+    netsnmp_udp_addr_pair *addr_pair = NULL;
 
-    if (data != NULL && len == sizeof(struct sockaddr_in)) {
-        to = (struct sockaddr_in *) data;
+    if (data != NULL && len == sizeof(netsnmp_udp_addr_pair)) {
+	addr_pair = (netsnmp_udp_addr_pair *) data;
     } else if (t != NULL && t->data != NULL) {
-        to = (struct sockaddr_in *) t->data;
+	addr_pair = (netsnmp_udp_addr_pair *) t->data;
     }
-    if (to == NULL) {
+
+    if (addr_pair == NULL) {
         return strdup("UDP: unknown");
     } else {
+        struct sockaddr_in *to = NULL;
 	char tmp[64];
+        to = (struct sockaddr_in *) &(addr_pair->remote_addr);
+        if (to == NULL) {
+            return strdup("UDP: unknown");
+        }
 
         sprintf(tmp, "UDP: [%s]:%hd",
                 inet_ntoa(to->sin_addr), ntohs(to->sin_port));
@@ -95,6 +108,77 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 }
 
 
+
+#ifdef IP_PKTINFO
+
+# define netsnmp_dstaddr(x) (&(((struct in_pktinfo *)(CMSG_DATA(x)))->ipi_addr))
+
+static int netsnmp_udp_recvfrom(int s, char *buf, int len, struct sockaddr *from, int *fromlen, struct in_addr *dstip)
+{
+    int r;
+    struct iovec iov[1];
+    char cmsg[CMSG_SPACE(sizeof(struct in_pktinfo))];
+    struct cmsghdr *cmsgptr;
+    struct msghdr msg;
+
+    iov[0].iov_base = buf;
+    iov[0].iov_len = len;
+
+    memset(&msg, 0, sizeof msg);
+    msg.msg_name = from;
+    msg.msg_namelen = *fromlen;
+    msg.msg_iov = iov;
+    msg.msg_iovlen = 1;
+    msg.msg_control = &cmsg;
+    msg.msg_controllen = sizeof(cmsg);
+
+    r = recvmsg(s, &msg, 0);
+
+    if (r == -1) {
+        return -1;
+    }
+    
+    DEBUGMSGTL(("netsnmp_udp", "got source addr: %s\n", inet_ntoa(((struct sockaddr_in *)from)->sin_addr)));
+    for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
+        if (cmsgptr->cmsg_level == SOL_IP && cmsgptr->cmsg_type == IP_PKTINFO) {
+            memcpy((void *) dstip, netsnmp_dstaddr(cmsgptr), sizeof(struct in_addr));
+            DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s\n",
+                    inet_ntoa(*dstip)));
+        }
+    }
+    return r;
+}
+
+static int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
+			char *data, int len)
+{
+    struct iovec iov = { data, len };
+    struct {
+        struct cmsghdr cm;
+        struct in_pktinfo ipi;
+    } cmsg = {
+        .cm = {
+            .cmsg_len	= sizeof(struct cmsghdr) + sizeof(struct in_pktinfo),
+            .cmsg_level	= SOL_IP,
+            .cmsg_type	= IP_PKTINFO,
+        },
+        .ipi = {
+            .ipi_ifindex	= 0,
+            .ipi_spec_dst	= srcip ? srcip->s_addr : 0,
+        },
+    };
+    struct msghdr m = {
+        .msg_name	= remote,
+        .msg_namelen	= sizeof(struct sockaddr_in),
+        .msg_iov	= &iov,
+        .msg_iovlen	= 1,
+        .msg_control	= &cmsg,
+        .msg_controllen	= sizeof(cmsg),
+        .msg_flags	= 0,
+    };
+    return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+}
+#endif /* IP_PKTINFO */
 
 /*
  * You can write something into opaque that will subsequently get passed back 
@@ -108,37 +192,43 @@ netsnmp_udp_recv(netsnmp_transport *t, void *buf, int size,
 {
     int             rc = -1;
     socklen_t       fromlen = sizeof(struct sockaddr);
+    netsnmp_udp_addr_pair *addr_pair = NULL;
     struct sockaddr *from;
 
     if (t != NULL && t->sock >= 0) {
-        from = (struct sockaddr *) malloc(sizeof(struct sockaddr_in));
-        if (from == NULL) {
+        addr_pair = (netsnmp_udp_addr_pair *) malloc(sizeof(netsnmp_udp_addr_pair));
+        if (addr_pair == NULL) {
             *opaque = NULL;
             *olength = 0;
             return -1;
         } else {
-            memset(from, 0, fromlen);
+            memset(addr_pair, 0, sizeof(netsnmp_udp_addr_pair));
+            from = (struct sockaddr *) &(addr_pair->remote_addr);
         }
 
 	while (rc < 0) {
-	    rc = recvfrom(t->sock, buf, size, 0, from, &fromlen);
+#if defined IP_PKTINFO
+            rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen, &(addr_pair->local_addr));
+#else
+            rc = recvfrom(t->sock, buf, size, 0, from, &fromlen);
+#endif /* IP_PKTINFO */
 	    if (rc < 0 && errno != EINTR) {
 		break;
 	    }
 	}
 
         if (rc >= 0) {
-            char *string = netsnmp_udp_fmtaddr(NULL, from, fromlen);
+            char *str = netsnmp_udp_fmtaddr(NULL, addr_pair, sizeof(netsnmp_udp_addr_pair));
             DEBUGMSGTL(("netsnmp_udp",
 			"recvfrom fd %d got %d bytes (from %s)\n",
-			t->sock, rc, string));
-            free(string);
+			t->sock, rc, str));
+            free(str);
         } else {
             DEBUGMSGTL(("netsnmp_udp", "recvfrom fd %d err %d (\"%s\")\n",
                         t->sock, errno, strerror(errno)));
         }
-        *opaque = (void *)from;
-        *olength = sizeof(struct sockaddr_in);
+        *opaque = (void *)addr_pair;
+        *olength = sizeof(netsnmp_udp_addr_pair);
     }
     return rc;
 }
@@ -150,24 +240,31 @@ netsnmp_udp_send(netsnmp_transport *t, void *buf, int size,
 		 void **opaque, int *olength)
 {
     int rc = -1;
+    netsnmp_udp_addr_pair *addr_pair = NULL;
     struct sockaddr *to = NULL;
 
     if (opaque != NULL && *opaque != NULL &&
-        *olength == sizeof(struct sockaddr_in)) {
-        to = (struct sockaddr *) (*opaque);
+        *olength == sizeof(netsnmp_udp_addr_pair)) {
+        addr_pair = (netsnmp_udp_addr_pair *) (*opaque);
     } else if (t != NULL && t->data != NULL &&
-               t->data_length == sizeof(struct sockaddr_in)) {
-        to = (struct sockaddr *) (t->data);
+                t->data_length == sizeof(netsnmp_udp_addr_pair)) {
+        addr_pair = (netsnmp_udp_addr_pair *) (t->data);
     }
 
+    to = (struct sockaddr *) &(addr_pair->remote_addr);
+
     if (to != NULL && t != NULL && t->sock >= 0) {
-        char *string = netsnmp_udp_fmtaddr(NULL, (void *) to,
-					sizeof(struct sockaddr_in));
+        char *str = netsnmp_udp_fmtaddr(NULL, (void *) addr_pair,
+                                        sizeof(netsnmp_udp_addr_pair));
         DEBUGMSGTL(("netsnmp_udp", "send %d bytes from %p to %s on fd %d\n",
-                    size, buf, string, t->sock));
-        free(string);
+                    size, buf, str, t->sock));
+        free(str);
 	while (rc < 0) {
-	    rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
+#if defined IP_PKTINFO
+            rc = netsnmp_udp_sendto(t->sock, addr_pair ? &(addr_pair->local_addr) : NULL, to, buf, size);
+#else
+            rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
+#endif /* IP_PKTINFO */
 	    if (rc < 0 && errno != EINTR) {
 		break;
 	    }
@@ -203,7 +300,8 @@ netsnmp_udp_close(netsnmp_transport *t)
 static int
 _sock_buffer_maximize(int s, int optname, const char *buftype, int size)
 {
-    int            curbuf = 0, curbuflen = sizeof(int);
+    int            curbuf = 0;
+    size_t         curbuflen = sizeof(int);
     int            lo, mid, hi;
 
     /*
@@ -362,7 +460,8 @@ netsnmp_sock_buffer_set(int s, int optname, int local, int size)
     return -1;
 #else
     const char     *buftype;
-    int            curbuf = 0, curbuflen = sizeof(int);
+    int            curbuf = 0;
+    size_t         curbuflen = sizeof(int);
 
 #   ifndef  SO_SNDBUF
     if (SO_SNDBUF == optname) {
@@ -480,23 +579,31 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
     int             rc = 0;
-    char           *string = NULL;
+    char           *str = NULL;
     char           *client_socket = NULL;
+    netsnmp_udp_addr_pair *addr_pair = NULL;
 
     if (addr == NULL || addr->sin_family != AF_INET) {
         return NULL;
     }
+
+    addr_pair = (struct	udp_addr_pair *) malloc(sizeof(netsnmp_udp_addr_pair));
+    if (addr_pair == NULL) {
+        return NULL;
+    }
+    memset(addr_pair, 0, sizeof(netsnmp_udp_addr_pair));
+    memcpy(&(addr_pair->remote_addr), addr, sizeof(struct sockaddr_in));
 
     t = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
     if (t == NULL) {
         return NULL;
     }
 
-    string = netsnmp_udp_fmtaddr(NULL, (void *)addr, 
-				 sizeof(struct sockaddr_in));
+    str = netsnmp_udp_fmtaddr(NULL, (void *)addr_pair, 
+                                 sizeof(netsnmp_udp_addr_pair));
     DEBUGMSGTL(("netsnmp_udp", "open %s %s:%d\n", local ? "local" : "remote",
-                string,addr->sin_port));
-    free(string);
+                str,addr->sin_port));
+    free(str);
 
     memset(t, 0, sizeof(netsnmp_transport));
 
@@ -528,6 +635,18 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
         t->local[5] = (htons(addr->sin_port) & 0x00ff) >> 0;
         t->local_length = 6;
 
+#ifdef  IP_PKTINFO
+        { 
+            int sockopt = 1;
+            int sockoptlen = sizeof(int);
+            if (setsockopt(t->sock, SOL_IP, IP_PKTINFO, &sockopt, sizeof sockopt) == -1) {
+                DEBUGMSGTL(("netsnmp_udp", "couldn't set IP_PKTINFO: %s\n",
+                    strerror(errno)));
+                return NULL;
+            }
+            DEBUGMSGTL(("netsnmp_udp", "set IP_PKTINFO\n"));
+        }
+#endif
         rc = bind(t->sock, (struct sockaddr *) addr,
                   sizeof(struct sockaddr));
         if (rc != 0) {
@@ -557,7 +676,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
          * transport-specific data pointer for later use by netsnmp_udp_send.
          */
 
-        t->data = malloc(sizeof(struct sockaddr_in));
+        t->data = malloc(sizeof(netsnmp_udp_addr_pair));
         t->remote = malloc(6);
         if (t->data == NULL || t->remote == NULL) {
             netsnmp_transport_free(t);
@@ -567,8 +686,8 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
         t->remote[4] = (htons(addr->sin_port) & 0xff00) >> 8;
         t->remote[5] = (htons(addr->sin_port) & 0x00ff) >> 0;
         t->remote_length = 6;
-        memcpy(t->data, addr, sizeof(struct sockaddr_in));
-        t->data_length = sizeof(struct sockaddr_in);
+        memcpy(t->data, addr_pair, sizeof(netsnmp_udp_addr_pair));
+        t->data_length = sizeof(netsnmp_udp_addr_pair);
     }
 
     /*
@@ -751,7 +870,7 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
 #define EXAMPLE_COMMUNITY	"COMMUNITY"
 
 typedef struct _com2SecEntry {
-    char            community[VACMSTRINGLEN];
+    char            community[COMMUNITY_MAX_LEN];
     unsigned long   network;
     unsigned long   mask;
     char            secName[VACMSTRINGLEN];
@@ -766,8 +885,8 @@ netsnmp_udp_parse_security(const char *token, char *param)
 {
     char            secName[VACMSTRINGLEN];
     char            contextName[VACMSTRINGLEN];
-    char            community[VACMSTRINGLEN];
-    char            source[VACMSTRINGLEN];
+    char            community[COMMUNITY_MAX_LEN];
+    char            source[SNMP_MAXBUF_SMALL];
     char           *cp = NULL;
     const char     *strmask = NULL;
     com2SecEntry   *e = NULL;
@@ -814,7 +933,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
             == 0) {
         config_perror("example config COMMUNITY not properly configured");
         return;
-    } else if (strlen(community) > (VACMSTRINGLEN - 1)) {
+    } else if (strlen(community) > (COMMUNITY_MAX_LEN - 1)) {
         config_perror("community name too long");
         return;
     }
@@ -989,7 +1108,8 @@ netsnmp_udp_getSecName(void *opaque, int olength,
                        char **contextName)
 {
     com2SecEntry   *c;
-    struct sockaddr_in *from = (struct sockaddr_in *) opaque;
+    netsnmp_udp_addr_pair *addr_pair = (netsnmp_udp_addr_pair *) opaque;
+    struct sockaddr_in *from = (struct sockaddr_in *) &(addr_pair->remote_addr);
     char           *ztcommunity = NULL;
 
     if (secName != NULL) {
@@ -1011,7 +1131,7 @@ netsnmp_udp_getSecName(void *opaque, int olength,
      * name.  
      */
 
-    if (opaque == NULL || olength != sizeof(struct sockaddr_in) ||
+    if (opaque == NULL || olength != sizeof(netsnmp_udp_addr_pair) ||
         from->sin_family != AF_INET) {
         DEBUGMSGTL(("netsnmp_udp_getSecName",
 		    "no IPv4 source address in PDU?\n"));
@@ -1054,11 +1174,11 @@ netsnmp_udp_getSecName(void *opaque, int olength,
 
 
 netsnmp_transport *
-netsnmp_udp_create_tstring(const char *string, int local)
+netsnmp_udp_create_tstring(const char *str, int local)
 {
     struct sockaddr_in addr;
 
-    if (netsnmp_sockaddr_in(&addr, string, 0)) {
+    if (netsnmp_sockaddr_in(&addr, str, 0)) {
         return netsnmp_udp_transport(&addr, local);
     } else {
         return NULL;

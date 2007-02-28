@@ -2,7 +2,7 @@
 
 . ../eval_tools.sh
 
-HEADER SNMPv2 bulkget of system components
+HEADER SNMPv2c bulkget of system components
 
 SKIPIF DISABLE_SNMPV2C
 

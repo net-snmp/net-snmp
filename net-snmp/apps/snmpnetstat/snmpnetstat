@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+#
+#  Compatability wrapper for new Net-SNMP
+#    (redistributable) snmpnetstat re-write
+#
+
+$cmd=$0;
+$cmd=~s/snmpnetstat$/snmpnetstat53/;
+
+$i=0;
+while ( $i < $#ARGV ) {
+    $ARGV[$i] =~ s/^-a/-Ca/;
+    $ARGV[$i] =~ s/^-i/-Ci/;
+    $ARGV[$i] =~ s/^-n/-Cn/;
+    $ARGV[$i] =~ s/^-o/-Co/;
+    $ARGV[$i] =~ s/^-r/-Cr/;
+    $ARGV[$i] =~ s/^-s/-Cs/;
+    $ARGV[$i] =~ s/^-I/-CI/;
+    $ARGV[$i] =~ s/^-P/-Cp/;
+    $i++;
+}
+
+system $cmd, @ARGV;

@@ -248,6 +248,8 @@ get_exec_output(struct extensible *ex)
     int             readcount;
 #endif
 
+    DEBUGMSGTL(("exec:get_exec_output","calling %s\n", ex->command));
+
 #ifdef EXCACHETIME
     sprintf(cachefile, "%s/%s", get_persistent_directory(), CACHEFILE);
     curtime = time(NULL);
@@ -337,6 +339,7 @@ get_exec_output(struct extensible *ex)
             if ((cfd =
                  open(cachefile, O_WRONLY | O_TRUNC | O_CREAT,
                       0644)) < 0) {
+                snmp_log(LOG_ERR,"can not create cache file\n");
                 setPerrorstatus(cachefile);
                 cachetime = 0;
                 return -1;
@@ -384,7 +387,9 @@ get_exec_output(struct extensible *ex)
     } else {
         ex->result = lastresult;
     }
+    DEBUGMSGTL(("exec:get_exec_output","using cached value\n"));
     if ((cfd = open(cachefile, O_RDONLY)) < 0) {
+        snmp_log(LOG_ERR,"can not open cache file\n");
         setPerrorstatus(cachefile);
         return -1;
     }
@@ -509,6 +514,17 @@ RETSIGTYPE
 restart_doit(int a)
 {
     snmp_shutdown("snmpd");
+
+    /*  This signal handler may run with SIGALARM blocked.
+     *  Since the signal mask is preserved accross execv(), we must 
+     *  make sure that SIGALARM is unblocked prior of execv'ing.
+     *  Otherwise SIGALARM will be ignored in the next incarnation
+     *  of snmpd, because the signal is blocked. And thus, the 
+     *  restart doesn't work anymore. 
+     */ 
+#if HAVE_SIGBLOCK 
+    sigsetmask(0);
+#endif 
 
     /*
      * do the exec 

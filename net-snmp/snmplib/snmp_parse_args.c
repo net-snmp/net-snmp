@@ -13,6 +13,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <errno.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -163,6 +164,8 @@ handle_long_opt(const char *myoptarg)
      * else it's a long option, so process it like name=value 
      */
     cp = malloc(strlen(myoptarg) + 3);
+    if (!cp)
+        return;
     strcpy(cp, myoptarg);
     cp2 = strchr(cp, '=');
     if (!cp2 && !strchr(cp, ' ')) {
@@ -399,21 +402,32 @@ snmp_parse_args(int argc,
 #define SNMPV3_CMD_OPTIONS
 #ifdef  SNMPV3_CMD_OPTIONS
         case 'Z':
-            session->engineBoots = strtoul(optarg, NULL, 10);
-            if (session->engineBoots == 0 || !isdigit(optarg[0])) {
+            errno = 0;
+            session->engineBoots = strtoul(optarg, &cp, 10);
+            if (errno || cp == optarg) {
                 fprintf(stderr, "Need engine boots value after -Z flag.\n");
                 return (-1);
             }
-            cp = strchr(optarg, ',');
-            if (cp && *(++cp) && isdigit(*cp))
-                session->engineTime = strtoul(cp, NULL, 10);
+            if (*cp == ',') {
+                char *endptr;
+                cp++;
+                session->engineTime = strtoul(cp, &endptr, 10);
+                if (errno || cp == endptr) {
+                    fprintf(stderr, "Need engine time after \"-Z engineBoots\".\n");
+                    return (-1);
+                }
+            }
             /*
              * Handle previous '-Z boot time' syntax 
              */
-            else if ((optind < argc) && isdigit(argv[optind][0]))
-                session->engineTime = strtoul(argv[optind], NULL, 10);
-            else {
-                fprintf(stderr, "Need engine time value after -Z flag.\n");
+            else if (optind < argc) {
+                session->engineTime = strtoul(argv[optind], &cp, 10);
+                if (errno || cp == argv[optind]) {
+                    fprintf(stderr, "Need engine time after \"-Z engineBoots\".\n");
+                    return (-1);
+                }
+            } else {
+                fprintf(stderr, "Need engine time after \"-Z engineBoots\".\n");
                 return (-1);
             }
             break;
@@ -429,6 +443,11 @@ snmp_parse_args(int argc,
                 if (!snmp_hex_to_binary
                     (&ebuf, &ebuf_len, &eout_len, 1, optarg)) {
                     fprintf(stderr, "Bad engine ID value after -e flag.\n");
+                    free(ebuf);
+                    return (-1);
+                }
+                if ((eout_len < 5) || (eout_len > 32)) {
+                    fprintf(stderr, "Invalid engine ID value after -e flag.\n");
                     free(ebuf);
                     return (-1);
                 }
@@ -448,6 +467,11 @@ snmp_parse_args(int argc,
                 if (!snmp_hex_to_binary(&ebuf, &ebuf_len,
 					&eout_len, 1, optarg)) {
                     fprintf(stderr, "Bad engine ID value after -E flag.\n");
+                    free(ebuf);
+                    return (-1);
+                }
+                if ((eout_len < 5) || (eout_len > 32)) {
+                    fprintf(stderr, "Invalid engine ID value after -E flag.\n");
                     free(ebuf);
                     return (-1);
                 }

@@ -47,6 +47,7 @@
 #include "snmpd.h"
 #include "agentx/protocol.h"
 #include "agentx/client.h"
+#include "agentx/agentx_config.h"
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_trap.h>
 #ifdef USING_MIBII_SYSORTABLE_MODULE
@@ -97,6 +98,9 @@ init_subagent(void)
                "the callback transport is not available.\n");
     return;
 #else
+    agentx_register_config_handler("agentxsocket",
+                                  agentx_parse_agentx_socket, NULL,
+                                  "AgentX bind address");
     if (agentx_callback_sess == NULL) {
         agentx_callback_sess = netsnmp_callback_open(callback_master_num,
                                                      handle_subagent_response,
@@ -319,6 +323,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         break;
 
     case AGENTX_MSG_RESPONSE:
+        SNMP_FREE(smagic);
         DEBUGMSGTL(("agentx/subagent", "  -> response\n"));
         return 1;
 
@@ -329,6 +334,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         DEBUGMSGTL(("agentx/subagent", "  -> testset\n"));
         asi = save_set_vars(session, pdu);
         if (asi == NULL) {
+            SNMP_FREE(smagic);
             snmp_log(LOG_WARNING, "save_set_vars() failed\n");
             return 1;
         }
@@ -341,10 +347,12 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         DEBUGMSGTL(("agentx/subagent", "  -> commitset\n"));
         asi = restore_set_vars(session, pdu);
         if (asi == NULL) {
+            SNMP_FREE(smagic);
             snmp_log(LOG_WARNING, "restore_set_vars() failed\n");
             return 1;
         }
         if (asi->mode != SNMP_MSG_INTERNAL_SET_RESERVE2) {
+            SNMP_FREE(smagic);
             snmp_log(LOG_WARNING,
                      "dropping bad AgentX request (wrong mode %d)\n",
                      asi->mode);
@@ -359,6 +367,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         DEBUGMSGTL(("agentx/subagent", "  -> cleanupset\n"));
         asi = restore_set_vars(session, pdu);
         if (asi == NULL) {
+            SNMP_FREE(smagic);
             snmp_log(LOG_WARNING, "restore_set_vars() failed\n");
             return 1;
         }
@@ -371,6 +380,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
             snmp_log(LOG_WARNING,
                      "dropping bad AgentX request (wrong mode %d)\n",
                      asi->mode);
+            SNMP_FREE(retmagic);
             return 1;
         }
         mycallback = handle_subagent_set_response;
@@ -381,6 +391,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         DEBUGMSGTL(("agentx/subagent", "  -> undoset\n"));
         asi = restore_set_vars(session, pdu);
         if (asi == NULL) {
+            SNMP_FREE(smagic);
             snmp_log(LOG_WARNING, "restore_set_vars() failed\n");
             return 1;
         }
@@ -390,6 +401,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         break;
 
     default:
+        SNMP_FREE(smagic);
         DEBUGMSGTL(("agentx/subagent", "  -> unknown command %d (%02x)\n",
                     pdu->command, pdu->command));
         return 0;
@@ -725,14 +737,17 @@ subagent_open_master_session(void)
          * netsnmp_session pointer.  
          */
         if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS)) {
+            char buf[1024];
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                netsnmp_sess_log_error(LOG_WARNING,
-                                       "Error: Failed to connect to the agentx master agent",
-                                       &sess);
+                snprintf(buf, sizeof(buf), "Warning: "
+                         "Failed to connect to the agentx master agent (%s)",
+                         sess.peername);
+                netsnmp_sess_log_error(LOG_WARNING, buf, &sess);
             } else {
-                snmp_sess_perror
-                    ("Error: Failed to connect to the agentx master agent",
-                     &sess);
+                snprintf(buf, sizeof(buf), "Error: "
+                         "Failed to connect to the agentx master agent (%s)",
+                         sess.peername);
+                snmp_sess_perror(buf, &sess);
             }
         }
         if (sess.peername)
@@ -770,6 +785,8 @@ subagent_open_master_session(void)
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_INDEX_START, (void *) main_session);
 
+    snmp_log(LOG_INFO, "NET-SNMP version %s AgentX subagent connected\n",
+             netsnmp_get_version());
     DEBUGMSGTL(("agentx/subagent", "opening session...  DONE (%p)\n",
                 main_session));
 
@@ -940,10 +957,17 @@ agentx_check_session(unsigned int clientreg, void *clientarg)
         snmp_alarm_unregister(clientreg);       /* delete ping alarm timer */
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_INDEX_STOP, (void *) ss);
-        snmp_close(main_session);
         register_mib_detach();
+        if (main_session != NULL) {
+            remove_trap_session(ss);
+        snmp_close(main_session);
         main_session = NULL;
         agentx_reopen_session(0, NULL);
+        }
+        else {
+            snmp_close(main_session);
+            main_session = NULL;
+        }
     } else {
         DEBUGMSGTL(("agentx/subagent", "session %p responded to ping\n",
                     ss));

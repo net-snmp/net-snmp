@@ -6,7 +6,11 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..5\n"; }
+BEGIN { $| = 1; 
+        $ENV{'SNMPCONFPATH'} = 'nopath';
+        $ENV{'MIBS'} = '';
+        print "1..5\n";
+      }
 END {print "not ok 1\n" unless $loaded;}
 use NetSNMP::agent (':all');
 use NetSNMP::default_store (':all');
@@ -62,6 +66,8 @@ print it((MODE_GET == 0xa0 &&
 	  SNMP_ERR_NOTWRITABLE == 17
 	 ), 2);
 
+netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_NO_ROOT_ACCESS, 1);
 my $agent = new NetSNMP::agent('Name' => 'test',
 			       'Ports' => '9161');
 print it($agent, 3);
@@ -93,11 +99,11 @@ while(1) {
   print "got something\n";
 }
 
-use Data::Dumper;
+#use Data::Dumper;
 sub testsub {
     print STDERR "in perl handler sub\n";
     print STDERR "  args: ", join(", ", @_), "\n";
-    print STDERR "  dumped args: ", Dumper(@_);
+    #print STDERR "  dumped args: ", Dumper(@_);
     $oid= $_[3]->getOID();
     print STDERR "  request oid: ", ref($oid), " -> ", $oid, "\n";
     print STDERR "  mode: ", $_[2]->getMode(),"\n";

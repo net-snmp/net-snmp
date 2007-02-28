@@ -98,7 +98,8 @@ netsnmp_access_arp_container_free(netsnmp_container *container, u_int free_flags
                         NULL);
     }
 
-    CONTAINER_FREE(container);
+    if(! (free_flags & NETSNMP_ACCESS_ARP_FREE_KEEP_CONTAINER))
+        CONTAINER_FREE(container);
 }
 
 /**---------------------------------------------------------------------*/

@@ -5,6 +5,8 @@
 #ifndef _MIBGROUP_HRPRINT_H
 #define _MIBGROUP_HRPRINT_H
 
+config_require(host/hr_device)
+
 extern void     init_hr_print(void);
 extern FindVarMethod var_hrprint;
 

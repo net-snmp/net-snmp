@@ -153,11 +153,12 @@ netsnmp_parse_override(const char *token, char *line)
         buf[0] = 0;
 
     thedata = SNMP_MALLOC_TYPEDEF(override_data);
-    thedata->type = type;
     if (!thedata) {
         config_perror("memory allocation failure");
         return;
     }
+
+    thedata->type = type;
 
     switch (type) {
     case ASN_INTEGER:
@@ -197,6 +198,7 @@ netsnmp_parse_override(const char *token, char *line)
         break;
 
     default:
+        SNMP_FREE(thedata);
         config_perror("illegal/unsupported type specified");
         return;
     }
@@ -222,7 +224,12 @@ netsnmp_parse_override(const char *token, char *line)
     memdup((u_char **) & the_reg->rootoid, (const u_char *) oidbuf,
            oidbuf_len * sizeof(oid));
     the_reg->rootoid_len = oidbuf_len;
-    if (!the_reg->rootoid) {
+    if (!the_reg->rootoid || !the_reg->handler || !the_reg->handlerName) {
+        if (the_reg->handler)
+            SNMP_FREE(the_reg->handler->handler_name);
+        SNMP_FREE(the_reg->handler);
+        SNMP_FREE(the_reg->handlerName);
+        SNMP_FREE(the_reg);
         config_perror("memory allocation failure");
         free(thedata);
         return;

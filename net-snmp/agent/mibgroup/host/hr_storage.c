@@ -30,6 +30,14 @@
 #  include <time.h>
 # endif
 #endif
+
+#ifndef mingw32
+#if HAVE_UTMPX_H
+#include <utmpx.h>
+#else
+#include <utmp.h>
+#endif
+#endif /* mingw32 */
 #ifndef dynix
 #if HAVE_SYS_VM_H
 #include <sys/vm.h>
@@ -63,6 +71,19 @@
 #endif
 #endif                          /* vm/vm.h */
 #endif                          /* sys/vm.h */
+#if defined(HAVE_UVM_UVM_PARAM_H) && defined(HAVE_UVM_UVM_EXTERN_H)
+#include <uvm/uvm_param.h>
+#include <uvm/uvm_extern.h>
+#elif defined(HAVE_VM_VM_PARAM_H) && defined(HAVE_VM_VM_EXTERN_H)
+#include <vm/vm_param.h>
+#include <vm/vm_extern.h>
+#endif
+#if HAVE_KVM_H
+#include <kvm.h>
+#endif
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 #if HAVE_SYS_POOL_H
 #if defined(MBPOOL_SYMBOL) && defined(MCLPOOL_SYMBOL)
 #define __POOL_EXPOSE
@@ -79,7 +100,7 @@
 #if defined(CTL_HW) && defined(HW_PAGESIZE)
 #define USE_SYSCTL
 #endif
-#if defined(CTL_VM) && defined(VM_METER)
+#if defined(CTL_VM) && (defined(VM_METER) || defined(VM_UVMEXP))
 #define USE_SYSCTL_VM
 #endif
 #endif
@@ -164,7 +185,7 @@ extern int      fscount;
 #define HRFS_mount	f_mntonname
 #define HRFS_HAS_FRSIZE STRUCT_STATVFS_HAS_F_FRSIZE
 
-#elif defined(HAVE_STATVFS)
+#elif defined(HAVE_STATVFS) && defined(STRUCT_STATVFS_HAS_MNT_DIR)
 
 extern struct mntent *HRFS_entry;
 extern int      fscount;
@@ -470,7 +491,14 @@ var_hrstore(struct variable *vp,
 #elif defined(hpux10) || defined(hpux11)
     struct pst_dynamic pst_buf;
 #elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
+#ifdef VM_UVMEXP
+    struct uvmexp   uvmexp_totals;
+#endif
     struct vmtotal  memory_totals;
+#endif
+#if HAVE_KVM_GETSWAPINFO
+    struct kvm_swap swapinfo;
+    static kvm_t *kd = NULL;
 #endif
 #if HAVE_SYS_POOL_H
     struct pool     mbpool, mclpool;
@@ -513,12 +541,29 @@ really_try_next:
                     mib[0] = CTL_VM;
                     mib[1] = VM_METER;
                     sysctl(mib, 2, &memory_totals, &len, NULL, 0);
+#ifdef VM_UVMEXP
+                    mib[1] = VM_UVMEXP;
+		    len = sizeof(uvmexp_totals);
+                    sysctl(mib, 2, &uvmexp_totals, &len, NULL, 0);
+#endif
                 }
 #elif defined(hpux10) || defined(hpux11)
                 pstat_getdynamic(&pst_buf, sizeof(struct pst_dynamic), 1, 0);
 #elif defined(TOTAL_MEMORY_SYMBOL)
                 auto_nlist(TOTAL_MEMORY_SYMBOL, (char *) &memory_totals,
                            sizeof(struct vmtotal));
+#endif
+#if HAVE_KVM_GETSWAPINFO
+		if (kd == NULL)
+		    kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, NULL);
+		if (!kd) {
+		    snmp_log_perror("kvm_openfiles");
+		    goto try_next;
+		}
+		if (kvm_getswapinfo(kd, &swapinfo, 1, 0) < 0) {
+		    snmp_log_perror("kvm_getswapinfo");
+		    goto try_next;
+		}
 #endif
                 break;
 #if !defined(hpux10) && !defined(hpux11)
@@ -555,6 +600,10 @@ really_try_next:
         if (store_idx > HRS_TYPE_FIXED_MAX)
             if (storageUseNFS && Check_HR_FileSys_NFS())
                 storage_type_id[storage_type_len - 1] = 10;     /* Network Disk */
+#if HAVE_HASMNTOPT
+            else if (hasmntopt(HRFS_entry, "loop") != NULL)
+                storage_type_id[storage_type_len - 1] = 5;      /* Removable Disk */
+#endif
             else
                 storage_type_id[storage_type_len - 1] = 4;      /* Assume fixed */
         else
@@ -627,7 +676,6 @@ really_try_next:
         else
             switch (store_idx) {
 #if defined(linux)
-            case HRS_TYPE_MBUF:
             case HRS_TYPE_MEM:
             case HRS_TYPE_SWAP:
                 long_return = linux_mem(store_idx, HRSTORE_SIZE);
@@ -652,7 +700,13 @@ really_try_next:
                 long_return = memory_totals.t_rm;
                 break;
             case HRS_TYPE_SWAP:
+#if HAVE_KVM_GETSWAPINFO
+		long_return = swapinfo.ksw_total;
+#elif defined(VM_UVMEXP)
+                long_return = uvmexp_totals.swpages;
+#else
                 long_return = memory_totals.t_vm;
+#endif
                 break;
 #else               /* !linux && !solaris2 && !hpux10 && !hpux11 && ... */
             case HRS_TYPE_MEM:
@@ -664,15 +718,18 @@ really_try_next:
 #endif
                 long_return = 0;
                 break;
+#endif              /* !linux && !solaris2 && !hpux10 && !hpux11 && ... */
             case HRS_TYPE_MBUF:
-#if HAVE_SYS_POOL_H
+#ifdef linux
+                long_return = linux_mem(store_idx, HRSTORE_SIZE);
+#elif HAVE_SYS_POOL_H
                 long_return = 0;
                 for (i = 0;
                      i <
                      sizeof(mbstat.m_mtypes) / sizeof(mbstat.m_mtypes[0]);
                      i++)
                     long_return += mbstat.m_mtypes[i];
-#elif defined(MBSTAT_SYMBOL)
+#elif defined(MBSTAT_SYMBOL) && defined(STRUCT_MBSTAT_HAS_M_MBUFS)
                 long_return = mbstat.m_mbufs;
 #elif defined(NO_DUMMY_VALUES)
                 goto try_next;
@@ -680,7 +737,6 @@ really_try_next:
                 long_return = 0;
 #endif
                 break;
-#endif              /* !linux && !solaris2 && !hpux10 && !hpux11 && ... */
             default:
 #if NO_DUMMY_VALUES
                 goto try_next;
@@ -721,16 +777,27 @@ really_try_next:
                 long_return = memory_totals.t_arm;
                 break;
             case HRS_TYPE_SWAP:
+#if HAVE_KVM_GETSWAPINFO
+		long_return = swapinfo.ksw_used;
+#elif defined(VM_UVMEXP)
+		long_return = uvmexp_totals.swpginuse;
+#else
                 long_return = memory_totals.t_avm;
+#endif
                 break;
 #endif              /* linux || solaris2 || hpux10 || hpux11 || ... */
 
 #if !defined(linux) && !defined(solaris2) && !defined(hpux10) && !defined(hpux11)
             case HRS_TYPE_MBUF:
 #if HAVE_SYS_POOL_H
-                long_return = (mbpool.pr_nget - mbpool.pr_nput)
-                    * mbpool.pr_size + (mclpool.pr_nget - mclpool.pr_nput)
-                    * mclpool.pr_size;
+                long_return =
+		    (mbpool.pr_nget - mbpool.pr_nput) * mbpool.pr_size +
+		    (mclpool.pr_nget - mclpool.pr_nput) * mclpool.pr_size;
+#ifdef MSIZE
+		long_return /= MSIZE;
+#else
+		long_return /= 256;
+#endif
 #elif defined(MBSTAT_SYMBOL) && defined(STRUCT_MBSTAT_HAS_M_CLUSTERS)
                 long_return = mbstat.m_clusters - mbstat.m_clfree;      /* unlikely, but... */
 #elif defined(NO_DUMMY_VALUES)

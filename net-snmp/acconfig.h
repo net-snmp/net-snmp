@@ -12,7 +12,7 @@
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
-/* config.h:  a general config file */
+/* net-snmp/net-snmp-config.h:  net-snmp configuration */
 
 /* Default (SNMP) version number for the tools to use */
 #define DEFAULT_SNMP_VERSION 3
@@ -185,6 +185,12 @@
 
 /* define if you have type u_int64_t */
 #undef HAVE_U_INT64_T
+
+/* define if you have type intptr_t */
+#undef HAVE_INTPTR_T
+
+/* define if you have type uintptr_t */
+#undef HAVE_UINTPTR_T
 
 /* define if you have getdevs() */
 #undef HAVE_GETDEVS
@@ -371,6 +377,8 @@
 #define OPENBSDID 12
 #define WIN32ID 13
 #define HPUX11ID 14
+#define AIXID 15
+#define MACOSXID 16
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -394,7 +402,7 @@
 #ifdef ultrix4
 #define OSTYPE ULTRIXID
 #endif
-#ifdef netbsd1
+#if defined(netbsd1) || defined(netbsd2)
 #define OSTYPE NETBSD1ID
 #endif
 #if defined(__FreeBSD__)
@@ -409,11 +417,17 @@
 #if defined(bsdi2) || defined(bsdi3) || defined(bsdi4)
 #define OSTYPE BSDIID
 #endif
-#ifdef openbsd2
+#if defined(openbsd2) || defined(openbsd3)
 #define OSTYPE OPENBSDID
 #endif
 #ifdef WIN32
 #define OSTYPE WIN32ID
+#endif
+#if defined(aix3) || defined(aix4) || defined(aix5)
+#define OSTYPE AIXID
+#endif
+#ifdef darwin8
+#define OSTYPE MACOSXID
 #endif
 /* unknown */
 #ifndef OSTYPE
@@ -530,8 +544,13 @@
 
 #ifndef HAVE_INDEX
 #ifdef HAVE_STRCHR
+#ifdef mingw32
+# define index(a,b) strchr(a,b)
+# define rindex(a,b) strrchr(a,b)
+#else
 # define index strchr
 # define rindex strrchr
+#endif
 #endif
 #endif
 
@@ -585,8 +604,9 @@
 #endif
 #endif
 
-/* define if you have librpm and libdb */
+/* define if you have libdb, libnm or librpm, respectively */
 #undef HAVE_LIBDB
+#undef HAVE_LIBNM
 #undef HAVE_LIBRPM
 
 /* define if you have pkginfo */
@@ -741,6 +761,9 @@
 
 /* define if agentx transport is to use domain sockets only */
 #undef AGENTX_DOM_SOCK_ONLY
+
+/* define if you do not want snmptrapd to register as an AgentX subagent */
+#undef SNMPTRAPD_DISABLE_AGENTX
 
 #undef HEIMDAL
 

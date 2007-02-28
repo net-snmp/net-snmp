@@ -399,8 +399,10 @@ my_data_table_handler(netsnmp_mib_handler *handler,
     netsnmp_table_row *row;
 
     while (requests) {
-        if (requests->processed)
+        if (requests->processed) {
+            requests = requests->next;
             continue;
+        }
 
         /*
          * extract our stored data and table info 

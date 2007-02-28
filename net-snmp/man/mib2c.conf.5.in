@@ -1,4 +1,4 @@
-.TH MIB2C.CONF 1 "28 Apr 2004" V5.2 "Net-SNMP"
+.TH MIB2C.CONF 5 "28 Apr 2004" V5.2 "Net-SNMP"
 .UC 4
 .SH NAME
 mib2c.conf -- How to write mib2c.conf files to do ANYTHING based on MIB input.

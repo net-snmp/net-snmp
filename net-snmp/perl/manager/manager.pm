@@ -1,5 +1,3 @@
-#!/usr/local/bin/perl
-
 package NetSNMP::manager;
 
 use strict ();

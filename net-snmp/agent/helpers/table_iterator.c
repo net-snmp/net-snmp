@@ -12,7 +12,8 @@
  * distributed with the Net-SNMP package.
  */
 
-/** @defgroup table_iterator table_iterator: The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.
+/** @defgroup table_iterator table_iterator
+ *  The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.
  *  @ingroup table
     Functionally, it is a specialized version of the more
     generic table helper but easies the burden of GETNEXT processing by
@@ -105,11 +106,16 @@
 netsnmp_mib_handler *
 netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
 {
-    netsnmp_mib_handler *me =
+    netsnmp_mib_handler *me;
+
+    if (!iinfo)
+        return;
+
+    me =
         netsnmp_create_handler(TABLE_ITERATOR_NAME,
                                netsnmp_table_iterator_helper_handler);
 
-    if (!me || !iinfo)
+    if (!me)
         return NULL;
 
     me->myvoid = iinfo;
@@ -420,6 +426,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
          *   so that we'll know when we're finished
          */
         for(request = requests ; request; request = request->next)
+          if (!request->processed)
             request_count++;
         notdone = 1;
         while(notdone) {
@@ -431,7 +438,19 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     /* previously done */
                     index_search = free_this_index_search;
                 } else {
-                    table_info = netsnmp_extract_table_info(requests);
+                    for(request = requests ; request; request = request->next) {
+                        table_info = netsnmp_extract_table_info(request);
+                        if (table_info)
+                            break;
+                    }
+                    if (!table_info) {
+                        snmp_log(LOG_WARNING,
+                                 "no valid requests for iterator table %s\n",
+                                 reginfo->handlerName);
+                        netsnmp_free_request_data_sets(reqtmp);
+                        SNMP_FREE(reqtmp);
+                        return SNMP_ERR_NOERROR;
+                    }
                     index_search = snmp_clone_varbind(table_info->indexes);
                     free_this_index_search = index_search;
 
@@ -443,6 +462,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         snmp_log(LOG_WARNING,
                                  "invalid index list or failed malloc for table %s\n",
                                  reginfo->handlerName);
+                        netsnmp_free_request_data_sets(reqtmp);
+                        SNMP_FREE(reqtmp);
                         return SNMP_ERR_NOERROR;
                     }
                 }
@@ -499,9 +520,10 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         build_oid_noalloc(myname, MAX_OID_LEN, &myname_len,
                                           coloid, coloid_len, index_search);
                         reqinfo->mode = MODE_GET;
-                        ldata =
-                            netsnmp_get_list_node(reqtmp->parent_data,
-                                                  TABLE_ITERATOR_NAME);
+                        if (reqtmp)
+                            ldata =
+                                netsnmp_get_list_node(reqtmp->parent_data,
+                                                      TABLE_ITERATOR_NAME);
                         if (!ldata) {
                             netsnmp_request_add_list_data(reqtmp,
                                                           netsnmp_create_data_list
@@ -609,15 +631,17 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         netsnmp_request_get_list_data(request,
                                                       TI_REQUEST_CACHE);
                     if (!ti_info->results) {
+                      int nc;
                         table_info = netsnmp_extract_table_info(request);
-                        if (table_info->colnum == tbl_info->max_column) {
+                        nc = netsnmp_table_next_column(table_info);
+                        if (0 == nc) {
                             coloid[reginfo->rootoid_len+1] = table_info->colnum+1;
                             snmp_set_var_objid(request->requestvb,
                                                coloid, reginfo->rootoid_len+2);
                             request->processed = TABLE_ITERATOR_NOTAGAIN;
                             break;
                         } else {
-                            table_info->colnum++;
+                          table_info->colnum = nc;
                             notdone = 1;
                         }
                     }
@@ -648,7 +672,13 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     snmp_set_var_objid(request->requestvb, ti_info->best_match,
                                        ti_info->best_match_len);
                 else {
-                    coloid[reginfo->rootoid_len+1] = table_info->colnum+1;
+                    coloid[reginfo->rootoid_len+1] = 
+                        netsnmp_table_next_column(table_info);
+                    if (0 == coloid[reginfo->rootoid_len+1]) {
+                        /* out of range. */
+                        coloid[reginfo->rootoid_len+1] = tbl_info->max_column + 1;
+                        request->processed = TABLE_ITERATOR_NOTAGAIN;
+                    }
                     snmp_set_var_objid(request->requestvb,
                                        coloid, reginfo->rootoid_len+2);
                     request->processed = 1;

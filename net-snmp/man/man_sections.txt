@@ -1,4 +1,4 @@
-# SNMP basic application manual pages
+# SNMP basic applications
 snmpcmd
 snmptranslate
 snmpget
@@ -8,16 +8,18 @@ snmpwalk
 snmpbulkwalk
 snmpset
 snmptest
-snmptrap
+# SNMP "second-level" applications
 snmptable
 snmpdelta
 snmpusm
 snmpvacm
 snmpstatus
-mib2c
-# Unix replacement tools which make use of SNMP
 snmpnetstat
 snmpdf
+# Notification manual pages
+snmptrap
+snmptrapd
+snmptrapd.conf
 # SNMP application configuration manual pages
 snmpconf
 snmp_config
@@ -25,9 +27,8 @@ snmp.conf
 # Agent manual pages
 snmpd
 snmpd.conf
-# Notification receiver manual pages
-snmptrapd
-snmptrapd.conf
+mib2c
+mib2c.conf
 # SNMP base library APIs
 netsnmp_library
 read_config
@@ -39,7 +40,6 @@ snmp_alarm
 default_store
 netsnmp_mib_utilities
 netsnmp_debug
-netsnmp_deprecated
 # Agent API manuals
 netsnmp_agent
 snmp_agent_api
@@ -71,5 +71,3 @@ netsnmp_leaf
 netsnmp_instance
 netsnmp_container
 netsnmp_mode_end_call
-# Project files
-netsnmp_todo

@@ -104,6 +104,14 @@ SOURCE=..\..\apps\snmpnetstat\route.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\apps\snmpnetstat\ffs.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\apps\snmpnetstat\iquery.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\apps\snmpnetstat\winstub.c
 # End Source File
 # End Target

@@ -1,7 +1,7 @@
       Frequently Asked Questions (FAQ) for the UCD/Net-SNMP package
       =============================================================
 		       FAQ Author: Dave Shield
-	        net-snmp Version: 5.2.rc4 CVS branch
+	        net-snmp Version: 5.2.4.pre2 CVS branch
 	    net-snmp/ucd-snmp Project Leader: Wes Hardaker
 	     Email: net-snmp-coders@lists.sourceforge.net
 
@@ -280,18 +280,20 @@ What operating systems does it run on?
   Both the applications and the agent have been reported as running
   (at least in part) on the following operating systems:
 
-	* HP-UX (10.20 to 9.01 and 11.0 -- see README.hpux11)
+	* HP-UX (10.20 to 9.01 and 11.11 to 11.0 -- see README.hpux11)
 	* Ultrix (4.5 to 4.2)
-	* Solaris SPARC/ULTRA (2.8 to 2.3), Intel (2.9) and SunOS (4.1.4 to 4.1.2)
-	* OSF (4.0, 3.2)
-	* NetBSD (1.5alpha to 1.0)
-	* FreeBSD (4.1 to 2.2)
+	* Solaris/SPARC (11 to 2.3), Solaris/Intel (10, 9) -- see 
+	  README.solaris
+	* SunOS (4.1.4 to 4.1.2)
+	* OSF (4.0, 3.2 and Tru64 Unix 5.1B -- see README.tru64)
+	* NetBSD (2.0 to 1.0)
+	* FreeBSD (5.3 to 2.2)
 	* BSDi (4.0.1 to 2.1)
-	* Linux (kernels 2.4 to 1.3)
-	* AIX (4.1.5, 3.2.5)
-	* OpenBSD (2.8, 2.6)
-	* Irix (6.5 to 5.1)
-	* OS X (10.1.1 and 10.1.2)
+	* Linux (kernels 2.6 to 1.3)
+	* AIX (5.2, 5.1, 4.1.5, 3.2.5) -- see README.aix
+	* OpenBSD (3.7, 2.8, 2.6)
+	* IRIX (6.5 to 5.1)
+	* OS X (10.4 to 10.1) -- see README.osX
 	* Dynix/PTX 4.4
 	* QNX 6.2.1A
 

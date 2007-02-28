@@ -5,6 +5,9 @@ BEGIN {
         chdir 't' if -d 't';
         @INC = '../lib' if -d '../lib';
     }
+    eval "use Cwd qw(abs_path)";
+    $ENV{'SNMPCONFPATH'} = 'nopath';
+    $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");
 }
 use Test;
 BEGIN { $n = 10; plan tests => $n }
@@ -90,6 +93,6 @@ if (defined($s3)) {
     print "res = $res\n";
 }
   
-ok($res =~ /^0 but true/);
+ok(defined($res) && ($res =~ /^0 but true/));
 
 snmptest_cleanup();

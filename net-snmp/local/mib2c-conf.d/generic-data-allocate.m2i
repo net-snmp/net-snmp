@@ -8,9 +8,6 @@
 @end@
 ########################################################################
 ##
-/* ---------------------------------------------------------------------
- * TODO:200:r: Implement $context data context functions.
- */
 /*
  * ${context}_allocate_data
  *
@@ -19,9 +16,11 @@
 ${context}_data *
 ${context}_allocate_data(void)
 {
+@if $m2c_gda_todo_suppress != 1@
     /*
      * TODO:201:r: |-> allocate memory for the $context data context.
      */
+@end@
 @if $m2c_data_context != "generated"@
     /** this might not be right for $m2c_data_context */
 @end@
@@ -47,12 +46,15 @@ ${context}_release_data(${context}_data *data)
 {
     DEBUGMSGTL(("verbose:${context}:${context}_release_data","called\n"));
 
+@if $m2c_gda_todo_suppress != 1@
     /*
      * TODO:202:r: |-> release memory for the $context data context.
      */
+@end@
     free(data);
 } /* ${context}_release_data */
 
+@eval $m2c_gda_todo_suppress = 0@ # reset
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@

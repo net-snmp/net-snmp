@@ -12,7 +12,7 @@ extern          "C" {
 #endif
 
 
-/** @defgroup misc misc: Miscelaneous routines
+/** @defgroup misc misc: Miscellaneous routines
  *
  * @{
  */
@@ -96,12 +96,12 @@ extern          "C" {
         /*
          * ipCidrRouteDest(1)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ipCidrRouteDest;
+        uint32_t        ipCidrRouteDest;
 
         /*
          * ipCidrRouteMask(2)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ipCidrRouteMask;
+        uint32_t        ipCidrRouteMask;
 
         /*
          * ipCidrRouteTos(3)/INTEGER32/ASN_INTEGER/long(long)//l/A/w/e/R/d/h
@@ -111,7 +111,7 @@ extern          "C" {
         /*
          * ipCidrRouteNextHop(4)/IPADDR/ASN_IPADDRESS/u_long(u_long)//l/A/w/e/r/d/h
          */
-        u_long          ipCidrRouteNextHop;
+        uint32_t        ipCidrRouteNextHop;
 
 
     } ipCidrRouteTable_mib_index;

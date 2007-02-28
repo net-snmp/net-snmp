@@ -1,15 +1,17 @@
-#!/usr/local/bin/perl
+#!./perl
 #
 # $Id$
 #
 # Test bulkwalk functionality.
-use Data::Dumper;
 
 BEGIN {
     unless(grep /blib/, @INC) {
         chdir 't' if -d 't';
         @INC = '../lib' if -d '../lib';
     }
+    eval "use Cwd qw(abs_path)";
+    $ENV{'SNMPCONFPATH'} = 'nopath';
+    $ENV{'MIBDIRS'} = '+' . abs_path("../../mibs");
 }
 use Test;
 BEGIN { $num = 62; plan test => $num; }
@@ -109,12 +111,16 @@ if (defined($list[3][0])) {
   # The first interface is probably loopback.  Check this.
   ok($list[3][0]->type eq "OCTETSTR");		# Description is a string.
 
-  # This might fail for some weird (Windows?) systems.  Can be safely ignored.
+  # This might fail on systems that don't have lo0/loopback as their first
+  # interface. Please adjust accordingly.
   $loopback = $list[3][0]->val;
   if ($^O =~ /win32/i) {
-    ok(($loopback =~ /loopback/i));  
-  }
-  else {
+    ok(($loopback =~ /loopback/i));
+  } elsif ($^O =~ /(irix|hpux)/i) {
+    # IRIX/HP-UX may have lo0 at the *end* of the interface list,
+    # so just check for a non-empty string
+    ok(($loopback ne ''));
+  } else {
     ok(($loopback =~ /^lo/));
   }
 }
@@ -289,8 +295,15 @@ sub async_cb1 {
       # The first interface is probably loopback.  Check this.
       ok($vbr->type eq "OCTETSTR");
 
-      # This might fail for some weird (Windows?) systems.  Can be safely ignored.
-      ok(($vbr->val =~ /^lo/));
+      # This might fail on systems that don't have lo0/loopback as their first
+      # interface. Please adjust accordingly.
+      if ($^O =~ /(irix|hpux)/i) {
+        # IRIX/HP-UX may have lo0 at the *end* of the interface list,
+        # so just check for a non-empty string
+        ok(($vbr->val ne ''));
+      } else {
+        ok(($vbr->val =~ /^lo/));
+      }
     }
     else {
       ok(0);

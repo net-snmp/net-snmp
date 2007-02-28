@@ -1,7 +1,7 @@
 .TH SNMPD.CONF 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-SYSCONFDIR/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent.
+snmpd.conf - configuration file for the Net-SNMP SNMP agent
 .SH DESCRIPTION
 .B snmpd.conf
 is the configuration file which defines how the Net-SNMP SNMP agent
@@ -47,7 +47,7 @@ This is a DISPLAY-STRING describing any error triggering the errorFlag above.
 If this entry is set to the integer value of 1 AND the errorFlag
 defined above is indeed a 1, a program or script will get executed
 with the table entry name from above as the argument.  The program to
-be executed is configured in the config.h file at compile time.
+be executed is configured in the net-snmp-config.h file at compile time.
 .SS Directives
 .IP "proc NAME"
 .IP "proc NAME MAX"
@@ -70,7 +70,7 @@ This registers a command that knows how to fix errors with the given
 process NAME.  When EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFIX for a given
 NAMEd program is set to the integer value of 1, this command will be
 called.  It defaults to a compiled value set using the PROCFIXCMD
-definition in the config.h file.
+definition in the net-snmp-config.h file.
 .IP "exec NAME PROG ARGS"
 .IP "exec MIBNUM NAME PROG ARGS"
 .IP
@@ -88,6 +88,13 @@ contains the entire STDOUT output, one MIB table entry per line of
 output (ie, the first line is output as MIBNUM.ERRORMSG.1, the second
 at MIBNUM.ERRORMSG.2, etc...).
 .RS
+.IP Note:
+The PROG argument must be a full path to a real binary, as it is
+executed under the exec() system call.  IE, you can not specify a path
+to a shell script.  If you want to invoke a shell script, please
+specify a path to the interpreter first as the PROG argument and then
+a path to the shell script.  IE:  "exec myscript /bin/sh
+/path/to/script arg1 ..."
 .IP Note:
 The MIBNUM must be specified in dotted-integer notation and can
 not be specified as ".iso.org.dod.internet..." (should instead
@@ -112,7 +119,7 @@ This registers a command that knows how to fix errors with the given
 exec or sh NAME.  When EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFIX for a
 given NAMEd entry is set to the integer value of 1, this command will
 be called.  It defaults to a compiled value set using the EXECFIXCMD
-definition in the config.h file.
+definition in the net-snmp-config.h file.
 .IP "disk PATH"
 .IP "disk PATH [ MINSPACE | MINPERCENT% ]"
 .IP
@@ -160,6 +167,9 @@ Monitors file sizes and makes sure they don't grow beyond a certain
 size (in kilobytes).  MAXSIZE defaults to infinite if not specified,
 and only monitors the size without reporting errors about it.
 A maximum of 20 files can be monitored.
+.IP "logmatch NAME PATH CYCLETIME REGEX"
+Configures log file monitoring that can be queried via the
+UCD-SNMP-MIB::logMatchTable.
 .SS "Errors"
 .PP
 Any errors in obtaining the above information are reported via the
@@ -181,10 +191,14 @@ Default is 1 second.
 .IP "AgentXRetries addr"
 Defines the number of retries for an AgentX request.
 Default is 5 retries.
+.IP "agentxperms socket_perms [directory_perms [username|userid [groupname|groupid]]]"
+Defines the permissions of the AgentX socket. socket_perms and directory_perms must be octal digits (see 
+.I chmod(1)
+).
 .P
 You can also put the following in your subagent.conf file (where
 "subagent" is the name you used in your init_snmp("subagent") api call:
-.IP "agentPingInterval NUM"
+.IP "agentXPingInterval NUM"
 This makes the subagent try and reconnect every NUM seconds to the
 master if it ever becomes (or starts) disconnected.
 .SH SMUX SUB-AGENTS
@@ -268,6 +282,8 @@ mapped to the SNMPv3 CONTEXT of the same name, otherwise the default context
 This directive is the IPv6 version of \fIcom2sec\fR.
 A subnet can be specified as IPv6/IPv6MASK or IPv6/BITS.
 It is only valid in specifing \fIUDPIPv6\fR as transport domain.
+.IP "com2secunix [-Cn CONTEXT] NAME SOCKPATH COMMUNITY"
+This directive is the Unix domain sockets version of \fIcom2sec\fR.
 .IP "group NAME MODEL SECURITY"
 This directive defines the mapping from securitymodel/securityname to group.
 MODEL is one of \fIv1\fR, \fIv2c\fR, or \fIusm\fR.
@@ -281,22 +297,42 @@ the incoming pdu, either \fIexact\fR or \fIprefix\fR.
 READ, WRITE and NOTIFY specifies the view to be used for the corresponding 
 access.
 For v1 or v2c access, LEVEL will be noauth, and CONTEXT will be empty.
-.IP "view NAME TYPE SUBTREE [MASK]"
-This defines the named view. TYPE is either \fIincluded\fR or \fIexcluded\fR.
-MASK is a list of hex octets, separated by '.' or ':'.  The MASK
-defaults to "ff" if not specified.
+.IP "view VNAME TYPE OID [MASK]"
+defines a named "view" - a subset of the overall OID tree.  This is most
+commonly a single subtree, but several \fIview\fR directives can be given
+with the same view name (VNAME), to build up a more complex collection of OIDs.
+TYPE is either \fIincluded\fR or \fIexcluded\fR, which can again define
+a more complex view (e.g. by excluding certain sensitive objects
+from an otherwise accessible subtree).
 .IP
-The reason for the mask is, that it allows you to control access to
-one row in a table, in a relatively simple way. As an example, as an ISP
-you might consider giving each customer access to his or her own interface:
+MASK is a list of hex octets (optionally separated by '.' or ':') with
+the set bits indicating which subidentifiers in the view OID to match
+against.  If not specified, this defaults to matching the OID exactly
+(all bits set), thus defining a simple OID subtree.  So:
+.RS
+.RS
+view iso1 included .iso  0xf0
+.br
+view iso2 included .iso
+.br
+view iso3 included .iso.org.dod.mgmt  0xf0
+.RE
+.RE
 .IP
-.nf
-view cust1 included interfaces.ifTable.ifEntry.ifIndex.1 ff.a0
-view cust2 included interfaces.ifTable.ifEntry.ifIndex.2 ff.a0
+would all define the same view, covering the whole of the 'iso(1)' subtree
+(with the third example ignoring the subidentifiers not covered by the mask).
 .IP
-(interfaces.ifTable.ifEntry.ifIndex.1 == .1.3.6.1.2.1.2.2.1.1.1,
-ff.a0 == 11111111.10100000. which nicely covers up and including
-the row index, but lets the user vary the field of the row)
+More usefully, the mask can be used to define a view covering a particular
+row (or rows) in a table, by matching against the appropriate table index
+value, but skipping the column subidentifier:
+.RS
+.RS
+.IP "view ifRow4 included .1.3.6.1.2.1.2.2.1.0.4  0xff:a0"
+.RE
+.RE
+.IP
+Note that a mask longer than 8 bits must use ':' to separate the individual
+octets.
 .IP "VACM Examples:"
 .nf
 #        sec.name  source          community
@@ -340,21 +376,29 @@ access	public	""	any	noauth	exact	all	none	none
 .SH SNMPv3 CONFIGURATION
 .PP
 .IP "engineID STRING"
-The snmpd agent needs to be configured with an engineID to be able to
+The snmpd agent needs to be configured with a unique engineID to be able to
 respond to SNMPv3 messages.  With this configuration file line, the
-engineID will be configured from STRING.  If this directive is omitted,
-the default value of the engineID is built from 2 fairly random elements:
-a random number and the current time in seconds.
-.IP "createUser [-e ENGINEID] username (MD5|SHA) authpassphrase [DES] [privpassphrase]"
+engineID will be configured from STRING. 
+.IP "engineIDType 1|2|3"
+Defines that the engineID should be built from the IPv4 address (1), IPv6 address (2) or MAC address (3). Beware that you might run into trouble on IP 
+address changes!
+.IP "engineIDNic interface"
+Defines the interface (e.g. "eth1") that should be used to determine the MAC address in case of "engineIDType 3". Default is eth0.
+.P
+If neither an engineID, engineIDType or engineIDNic directive is present, 
+the value of the engineID is built from 2 fairly random elements:
+a random number and the current time in seconds. This is the recommended
+approach.
+.IP "createUser [-e ENGINEID] username (MD5|SHA) authpassphrase [DES|AES] [privpassphrase]"
 .IP
-MD5 and SHA are the authentication types to use.  The
-only privacy protocol currently supported is DES.  If the privacy
+MD5 and SHA are the authentication types to use.  DES and AES are the
+privacy protocols to use.  If the privacy
 passphrase is not specified, it is assumed to be the same as the
 authentication passphrase.  Note that the users created will be
 useless unless they are also added to the VACM access control tables
 described above.
 .IP
-SHA authentication and DES privacy require OpenSSL to be installed and
+SHA authentication and DES/AES privacy require OpenSSL to be installed and
 the agent to be built with OpenSSL support.  MD5 authentication may be
 used without OpenSSL.
 .IP
@@ -422,6 +466,9 @@ Sets the system description or object ID for the agent.
 Although these values are not SNMP-writable, it is conceivable
 that a network administrator may wish to configure them to something
 other than the default values.
+.IP "leave_pidfile yes"
+Instructs the agent to not remove its pid file on shutdown. Equivalent to
+specifying "-U" on the command line.
 .IP "agentaddress [<transport-specifier>:]<transport-address>[,...]"
 Makes the agent list on the specified comma-separated list of
 listening addresses instead of the default behaviour, which is to
@@ -568,7 +615,8 @@ version number of v2c or v3 as well).
 .IP "proxy [-Cn CONTEXTNAME] [SNMPCMD ARGS] HOST OID [REMOTEOID]"
 .IP
 This token specifies that any incoming requests under OID should be
-proxied on to another HOST instead.  If a CONTEXTNAME is specified, it
+proxied on to another HOST instead.  Use OID .1.3 (not just .1) to proxy 
+the entire MIB tree. If a CONTEXTNAME is specified, it
 assigns the proxied tree to a particular context name within the local
 agent.  This is the proper way to query multiple agents through a
 single proxy.  Assign each remote agent to a different context name.
@@ -585,7 +633,6 @@ manual page for details.
 .IP
 Examples:
 .RS
-.IP
 .nf
 # assigns the entire mib tree on remotehost1 to the context of the
 # same name:
@@ -743,26 +790,20 @@ Calls perl to evaluate an expression.  Normally you'd want to do
 something like register a function to call when an OID is requested,
 but you can really do anything perl related you want.  For example:
 .IP
-.RS
 perl print "hello world\\n";
-.RE
 .IP
 is the most basic hello world example.
 .IP
 The init script by default initializes a $agent variable which
 is a pointer to a NetSnmp::agent object through which you can register
 callbacks when a section of the OID tree is hit:
-.IP
-.RS
 .nf
 perl use Data::Dumper;
 perl sub myroutine  { print "got called: ",Dumper(@_),"\\n"; }
 perl $agent->register('mylink', '.1.3.6.1.8765', \\&myroutine);
 .fi
-.RE
 .IP
 Sourcing an external file:
-.IP
 .RS
 .nf
 perl 'do /path/to/file.pl';

@@ -82,7 +82,7 @@ struct variable1 iproute_variables[] = {
 
 struct variable1 ipmedia_variables[] = {
 #ifdef USING_MIBII_AT_MODULE
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     {IPMEDIAIFINDEX,     ASN_INTEGER,   RWRITE, var_atEntry, 1, {1}},
     {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, RWRITE, var_atEntry, 1, {2}},
     {IPMEDIANETADDRESS,  ASN_IPADDRESS, RWRITE, var_atEntry, 1, {3}},
@@ -188,13 +188,13 @@ init_ip(void)
 #define	USES_SNMP_DESIGNED_IPSTAT
 #endif
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
 #include <iphlpapi.h>
 #define IP_STAT_STRUCTURE MIB_IPSTATS
 long            ipForwarding;
 long            oldipForwarding;
 long            ipTTL, oldipTTL;
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */
 
 #ifdef HAVE_SYS_TCPIPSTATS_H
 #define IP_STAT_STRUCTURE	struct kna
@@ -494,7 +494,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         break;
 #else                  /* hpux11 */
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     case IPFORWARDING:
         ipForwarding = ipstat.dwForwarding;
         ret_value    = ipstat.dwForwarding;
@@ -560,7 +560,7 @@ ip_handler(netsnmp_mib_handler          *handler,
     case IPROUTEDISCARDS:
         ret_value = ipstat.dwRoutingDiscards;
         break;
-#endif                  /* WIN32 */
+#endif                  /* WIN32 || cygwin */
 #endif                  /* hpux11 */
 #endif                  /* USE_TRADITIONAL_IPSTAT */
 #endif			/* USES_SNMP_DESIGNED_IPSTAT */
@@ -739,7 +739,7 @@ ip_load(netsnmp_cache *cache, void *vmagic)
     return ret_value;
 }
 #else                           /* solaris2 */
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
 int
 ip_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -754,7 +754,7 @@ ip_load(netsnmp_cache *cache, void *vmagic)
     }
     return ret_value;
 }
-#else                           /* WIN32 */
+#else                           /* WIN32 cygwin */
 #if (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS))
 int
 ip_load(netsnmp_cache *cache, void *vmagic)
@@ -882,7 +882,7 @@ ip_load(netsnmp_cache *cache, void *vmagic)
 #endif                          /* hpux11 */
 #endif                          /* linux */
 #endif                          /* solaris2 */
-#endif                          /* WIN32 */
+#endif                          /* WIN32 cygwin */
 
 void
 ip_free(netsnmp_cache *cache, void *magic)

@@ -75,50 +75,75 @@ typedef long ssize_t;
      * Try to ensure we have 32-bit (and hopefully 64-bit)
      *    integer types available.
      */
+
 #ifndef HAVE_INT32_T
 #if   SIZEOF_INT == 4
-typedef int int32_t
+#define INT32_T int 
 #elif SIZEOF_LONG == 4
-typedef long int32_t
+#define INT32_T long 
 #elif SIZEOF_SHORT == 4
-typedef short int32_t
+#define INT32_T short 
 #else
-typedef int int32_t
 #define _INT32_IS_NOT_32BIT
+#define INT32_T int 
 #endif
-#endif
+typedef INT32_T int32_t;
+#endif /* !HAVE_INT32_T */
 
 #ifndef HAVE_UINT32_T
 #ifdef HAVE_U_INT32_T
-typedef u_int32_t        uint32_t
+typedef u_int32_t        uint32_t;
 #else
-typedef unsigned int32_t uint32_t
+#ifdef INT32_T
+typedef unsigned INT32_T uint32_t;
+#else
+typedef unsigned int     uint32_t;
 #endif
 #endif
+#endif /* !HAVE_UINT32_T */
 
 #ifndef HAVE_INT64_T
 #if SIZEOF_LONG == 8
-typedef long int64_t
+#define INT64_T long 
 #elif SIZEOF_LONG_LONG == 8
-typedef long long int64_t
+#define INT64_T long long
 #elif   SIZEOF_INT == 8
-typedef int int64_t
+#define INT64_T int 
 #elif SIZEOF_LONG >= 8
-typedef long int64_t
+#define INT64_T long 
 #define _INT64_IS_NOT_64BIT
-#else
-#define _NO_64BIT_TYPE 1
 #endif
+#ifdef INT64_T
+typedef INT64_T int64_t;
 #endif
+#endif /* !HAVE_INT64_T */
 
 #ifndef HAVE_UINT64_T
 #ifdef HAVE_U_INT64_T
-typedef u_int64_t        uint64_t
-#elif !defined(_NO_64BIT_TYPE)
-typedef unsigned int64_t uint64_t
+typedef u_int64_t        uint64_t;
+#elif defined(INT64_T)
+typedef unsigned INT64_T uint64_t;
 #endif
 #endif
 
+#ifndef HAVE_UINTPTR_T
+#if SIZEOF_LONG == 8
+/* likely 64bit machine with 64bit addressing? */
+    typedef unsigned long uintptr_t;
+#else
+    typedef unsigned uintptr_t;
+#endif
+#endif
+
+#ifndef HAVE_INTPTR_T
+#if SIZEOF_LONG == 8
+/* likely 64bit machine with 64bit addressing? */
+    typedef long intptr_t;
+#else
+    typedef int intptr_t;
+#endif
+#endif
+    
     /*
      *  For the initial release, this will just refer to the
      *  relevant UCD header files.

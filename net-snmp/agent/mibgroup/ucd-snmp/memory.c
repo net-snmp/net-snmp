@@ -274,6 +274,7 @@ getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared
     int         statfd;
     static char *buff = NULL;
     static int  bsize = 0;
+    int len;
 
     if ((statfd = open(MEMINFO_FILE, O_RDONLY, 0)) != -1) {
         char *b;
@@ -281,13 +282,14 @@ getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared
             bsize = 128;
             buff = malloc(bsize);
         }
-        while (read(statfd, buff, bsize) == bsize) {
+        while ((len = read(statfd, buff, bsize)) == bsize) {
             bsize += 256;
             buff = realloc(buff, bsize);
             close(statfd);
             statfd = open(MEMINFO_FILE, O_RDONLY, 0);
         }
         close(statfd);
+	buff[len] = 0;
         b = strstr(buff, "MemTotal: ");
         if (b) 
             sscanf(b, "MemTotal: %lu", memtotal);

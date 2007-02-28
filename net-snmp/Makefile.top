@@ -26,7 +26,8 @@ man8dir		= $(mandir)/man8
 snmplibdir	= $(datadir)/snmp
 mibdir		= $(snmplibdir)/mibs
 persistentdir	= @PERSISTENT_DIRECTORY@
-INSTALL_PREFIX  = @INSTALL_PREFIX@
+DESTDIR         = @INSTALL_PREFIX@
+INSTALL_PREFIX  = $(DESTDIR)
 
 #
 # Programs
@@ -38,6 +39,7 @@ SED		= @SED@
 LN_S		= @LN_S@
 AUTOCONF	= @AUTOCONF@
 AUTOHEADER	= @AUTOHEADER@
+PERL            = @PERLPROG@
 
 #
 # Compiler arguments
@@ -51,24 +53,21 @@ EXEEXT		= @EXEEXT@
 # Misc Compiling Stuff
 CC	        = @CC@
 
-# ok, use libtool versioning, but not quite the way they recommend.
-# The shared library version number will be:
+# use libtool versioning the way they recommend.
+# The (slightly clarified) rules:
 #
-#   (CURRENT-AGE).AGE.REVISION
+# - If any interfaces/structures have been removed or changed since the
+#   last update, increment current, and set age and revision to 0. Stop.
 #
-# *** THIS MEANS YOU MAY NEED TO DECREMENT CURRENT FOR A NEW RELEASE ***
-#
-# examples:
-#   C.A.R   library name
-#  -------  ---------------
-#   5.0.9   libxxx.so.5.0.9
-#   6.1.2   libxxx.so.5.1.2
-#   7.2.8   libxxx.so.5.2.8
-#   6.0.0   libxxx.so.6.0.0
+# - If any interfaces have been added since the last public release, then
+#   increment current and age, and set revision to 0. Stop.
 # 
-LIBCURRENT  = 7
-LIBAGE      = 2
-LIBREVISION = 0
+# - If the source code has changed at all since the last update,
+#   then increment revision (c:r:a becomes c:r+1:a). 
+#
+LIBCURRENT  = 9
+LIBAGE      = 0
+LIBREVISION = 2
 
 LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) -o
 LIB_EXTENSION   = la
@@ -83,7 +82,7 @@ RANLIB		= :
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 .rc.lo:
-	$(LIBTOOL) --mode=compile windres -o $@ $<
+	$(LIBTOOL) --mode=compile windres -o $@ -i $<
 
 # include paths
 #

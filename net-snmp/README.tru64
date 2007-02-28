@@ -1,0 +1,40 @@
+Some notes for the Tru64 Unix 5.x port
+======================================
+
+1. Compiling
+------------
+
+You need at least net-snmp version 5.1.3 to compile on Tru64 Unix 5.x.
+Version 5.2.2 or later is recommended, see below.
+
+The following procedure has been proven to successfully compile net-snmp 
+5.1.3.dev on Tru64 Unix 5.1B (Alpha EV5.6) using the Compaq C 6.5 compiler:
+
+	CC=cc ./configure --with-out-mib-modules="mibII/tcpTable mibII/udpTable"
+	make
+	su -
+	make install
+
+A recent GNU C compiler (gcc) will probably work, too.
+
+Starting with version 5.2.2, net-snmp will build with the default options
+(just "./configure" will do).
+
+Please note that the "host" module doesn't compile on Tru64, so you *can't*
+configure with "--with-mib-modules=host".
+
+2. Testing
+----------
+
+"make test" reports a number of problems on Tru64 Unix. It is yet to be checked
+whether these are problems in the test scripts or the toolkit.
+
+
+3. Feedback
+-----------
+
+Please also see README and PORTING.
+
+If you have questions, additional insights or (even better) patches regarding
+net-snmp on Tru64 Unix, please refer to the net-snmp mailing lists (see 
+http://www.net-snmp.org/lists).

@@ -17,7 +17,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup table_data table_data: Helps you implement a table with datamatted storage.
+/** @defgroup table_data table_data
+ *  Helps you implement a table with datamatted storage.
  *  @ingroup table
  *
  *  This helper helps you implement a table where all the indexes are
@@ -71,7 +72,7 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
 
     if (!row->index_oid) {
         snmp_log(LOG_ERR,
-                 "illegal data attempted to be added to table %s\n",
+                 "illegal data attempted to be added to table %s (no index)\n",
                  table->name);
         return SNMPERR_GENERR;
     }
@@ -116,7 +117,7 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
          * exact match.  Duplicate entries illegal 
          */
         snmp_log(LOG_WARNING,
-                 "duplicate table data attempted to be entered\n");
+                 "duplicate table data attempted to be entered. row exists\n");
         return SNMPERR_GENERR;
     }
 
@@ -256,6 +257,25 @@ netsnmp_table_data_get_from_oid(netsnmp_table_data *table,
             return row;
     }
     return NULL;
+}
+
+/** returns the first row in the table */
+netsnmp_table_row *
+netsnmp_table_data_get_first_row(netsnmp_table_data *table)
+{
+    if (!table)
+        return NULL;
+    return table->first_row;
+}
+
+/** returns the next row in the table */
+netsnmp_table_row *
+netsnmp_table_data_get_next_row(netsnmp_table_data *table,
+                                netsnmp_table_row  *row)
+{
+    if (!row)
+        return NULL;
+    return row->next;
 }
 
 /** Creates a table_data handler and returns it */
@@ -727,6 +747,5 @@ netsnmp_table_data_num_rows(netsnmp_table_data *table)
     }
     return i;
 }
-/*
- * @} 
+/** @} 
  */

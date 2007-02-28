@@ -7,6 +7,9 @@ if [ "x$snmp_version" = "x" ]; then
   snmp_version="any"
 fi
 
+[ "x$SNMP_SMUX_SOCKET" = "x" ] && SNMP_SMUX_SOCKET=1.0.0.0
+CONFIGAGENT smuxsocket $SNMP_SMUX_SOCKET
+
 CONFIGAGENT com2sec testcommunitysec  default testcommunity
 if [ "$SNMP_TRANSPORT_SPEC" = "udp6" -o "$SNMP_TRANSPORT_SPEC" = "tcp6" ];then 
 	CONFIGAGENT com2sec6 testcommunitysec  default testcommunity

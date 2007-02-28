@@ -240,7 +240,7 @@ getKstatInt(const char *classname, const char *statname,
     kstat_t        *ks;
     kid_t           kid;
     kstat_named_t  *named;
-    int             ret = 0;        /* fail unless ... */
+    int             ret = -1;        /* fail unless ... */
 
     if (kstat_fd == 0) {
 	kstat_fd = kstat_open();
@@ -253,18 +253,26 @@ getKstatInt(const char *classname, const char *statname,
     }
     ks = kstat_lookup(ksc, classname, -1, statname);
     if (ks == NULL) {
+	DEBUGMSGTL(("kernel_sunos5", "class %s, stat %s not found\n",
+		classname ? classname : "NULL",
+		statname ? statname : "NULL"));
 	goto Return;
     }
     kid = kstat_read(ksc, ks, NULL);
     if (kid == -1) {
+	DEBUGMSGTL(("kernel_sunos5", "cannot read class %s stats %s\n",
+		classname ? classname : "NULL", statname ? statname : "NULL"));
 	goto Return;
     }
     named = kstat_data_lookup(ks, varname);
     if (named == NULL) {
+	DEBUGMSGTL(("kernel_sunos5", "no var %s for class %s stat %s\n",
+		varname, classname ? classname : "NULL",
+		statname ? statname : "NULL"));
 	goto Return;
     }
 
-    ret = 1;                /* maybe successful */
+    ret = 0;                /* maybe successful */
     switch (named->data_type) {
 #ifdef KSTAT_DATA_INT32         /* Solaris 2.6 and up */
     case KSTAT_DATA_INT32:
@@ -294,10 +302,12 @@ getKstatInt(const char *classname, const char *statname,
 	break;
 #endif
     default:
-	DEBUGMSGTL(("kernel_sunos5", 
-		    "non-int type in kstat data: \"%s\" \"%s\" \"%s\" %d\n",
-		    classname, statname, varname, named->data_type));
-	ret = 0;            /* fail */
+	snmp_log(LOG_ERR,
+		"non-int type in kstat data: \"%s\" \"%s\" \"%s\" %d\n",
+		classname ? classname : "NULL",
+		statname ? statname : "NULL",
+		varname ? varname : "NULL", named->data_type);
+	ret = -1;            /* fail */
 	break;
     }
  Return:
@@ -1014,7 +1024,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 
 	if (ioctl(ifsd, SIOCGIFFLAGS, ifrp) < 0) {
 	    ret = -1;
-	    DEBUGMSGTL(("kernel_sunos5", "...... SIOCGIFFLAGS failed\n"));
+	    snmp_log(LOG_ERR, "SIOCGIFFLAGS %s: %s\n", ifrp->ifr_name, strerror(errno));
 	    goto Return;
 	}
 
@@ -1120,44 +1130,44 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	if (!strchr(ifrp->ifr_name, ':')) {
 	    Counter l_tmp;
 
-	    if (getKstatInt(NULL,ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) < 0){
+	    if (getKstatInt(NULL,ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) != 0){
 		ret = -1;
 		goto Return;
 	    }
             
-	    if (getKstatInt(NULL,ifrp->ifr_name, "rbytes", &ifp->ifInOctets) < 0) {
-                    ifp->ifInOctets = ifp->ifInUcastPkts * 308; /* XXX */
+	    if (getKstatInt(NULL,ifrp->ifr_name, "rbytes", &ifp->ifInOctets) != 0) {
+                    ifp->ifInOctets = ifp->ifInUcastPkts * 308; 
 	    }
             
-	    if (getKstatInt(NULL,ifrp->ifr_name, "opackets",&ifp->ifOutUcastPkts) < 0){
+	    if (getKstatInt(NULL,ifrp->ifr_name, "opackets",&ifp->ifOutUcastPkts) != 0){
 		ret = -1;
 		goto Return;
 	    }
             
-	    if (getKstatInt(NULL,ifrp->ifr_name, "obytes", &ifp->ifOutOctets) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "obytes", &ifp->ifOutOctets) != 0) {
 		ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;       /* XXX */
 	    }
 
 	    if (ifp->ifType == 24)  /* Loopback */
 		continue;
 
-	    if (getKstatInt(NULL,ifrp->ifr_name, "ierrors", &ifp->ifInErrors) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "ierrors", &ifp->ifInErrors) != 0) {
 		ret = -1;
 		goto Return;
 	    }
 
-	    if (getKstatInt(NULL,ifrp->ifr_name, "oerrors", &ifp->ifOutErrors) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "oerrors", &ifp->ifOutErrors) != 0) {
 		ret = -1;
 		goto Return;
 	    }
 
-	    if (getKstatInt(NULL,ifrp->ifr_name, "brdcstrcv",&ifp->ifInNUcastPkts)==1&&
-		getKstatInt(NULL,ifrp->ifr_name, "multircv", &l_tmp) == 1) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "brdcstrcv",&ifp->ifInNUcastPkts) == 0 &&
+		getKstatInt(NULL,ifrp->ifr_name, "multircv", &l_tmp) == 0) {
 		ifp->ifInNUcastPkts += l_tmp;
 	    }
 
-	    if (getKstatInt(NULL,ifrp->ifr_name,"brdcstxmt",&ifp->ifOutNUcastPkts)==1&&
-		getKstatInt(NULL,ifrp->ifr_name, "multixmt", &l_tmp) == 1) {
+	    if (getKstatInt(NULL,ifrp->ifr_name,"brdcstxmt",&ifp->ifOutNUcastPkts) == 0 &&
+		getKstatInt(NULL,ifrp->ifr_name, "multixmt", &l_tmp) == 0) {
 		ifp->ifOutNUcastPkts += l_tmp;
 	    }
 	}

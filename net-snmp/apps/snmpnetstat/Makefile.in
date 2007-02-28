@@ -3,7 +3,8 @@
 #
 
 top_builddir=../..
-INSTALLBINPROGS=snmpnetstat$(EXEEXT)
+INSTALLBINPROGS=snmpnetstat53$(EXEEXT)
+INSTALLBINSCRIPTS=$(srcdir)/snmpnetstat
 
 # use GNU vpath, if available, to only set a path for source and headers
 # VPATH will pick up objects too, which is bad if you are sharing a
@@ -16,10 +17,10 @@ INSTALLBINPROGS=snmpnetstat$(EXEEXT)
 #
 # build info
 #
-SRCS=	inet.c inet6.c if.c main.c route.c winstub.c
-OBJS=	inet.o inet6.o if.o main.o route.o winstub.o
-LOBJS=	inet.lo inet6.lo if.lo main.lo route.lo winstub.lo
-TARG= snmpnetstat$(EXEEXT)
+SRCS=	inet.c inet6.c if.c main.c route.c winstub.c ffs.c iquery.c
+OBJS=	inet.o inet6.o if.o main.o route.o winstub.o ffs.o iquery.o
+LOBJS=	inet.lo inet6.lo if.lo main.lo route.lo winstub.lo ffs.lo iquery.lo
+TARG= snmpnetstat53$(EXEEXT)
 
 CPPFLAGS= $(TOP_INCLUDES)  @CPPFLAGS@
 
@@ -28,5 +29,5 @@ LIBS=	 ../../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @LIBS@
 
 all: standardall
 
-snmpnetstat$(EXEEXT): ${LOBJS} ${USELIBS}
+snmpnetstat53$(EXEEXT): ${LOBJS} ${USELIBS}
 	${LINK} -o $@ ${LOBJS} ${LOCAL_LIBS} ${LDFLAGS} ${LIBS}

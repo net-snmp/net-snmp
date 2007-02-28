@@ -166,6 +166,15 @@ This option is being deprecated, and '-p FILE' should be used instead.
 .TP
 .B -v, --version
 Print version information for the trap daemon and then exit.
+.TP
+.BI -- "name"="value"
+Allows to specify any token ("name") supported in the
+.I snmptrapd.conf
+file and sets its value to "value". Overrides the corresponding token in the
+.I snmptrapd.conf
+file. See
+.I snmptrapd.conf(5)
+for the full list of tokens.
 .PP
 In addition,
 .B snmptrapd

@@ -24,7 +24,7 @@ typedef struct extend_registration_block_s {
     netsnmp_table_data *dinfo;
     oid                *root_oid;
     size_t              oid_len;
-    int                 num_entries;
+    long                num_entries;
     netsnmp_extend     *ehead;
     struct extend_registration_block_s *next;
 } extend_registration_block;
@@ -290,6 +290,11 @@ _free_extension( netsnmp_extend *extension, extend_registration_block *ereg )
                 break;
             eprev = eptr;
         }
+        if (!eptr) {
+            snmp_log(LOG_ERR,
+                     "extend: fell off end of list before finding extension\n");
+            return;
+        }
         if (eprev)
             eprev->next = eptr->next;
         else
@@ -336,7 +341,12 @@ _new_extension( char *exec_name, int exec_flags, extend_registration_block *ereg
     extension->row = row;
     netsnmp_table_row_add_index( row, ASN_OCTET_STR,
                                  exec_name, strlen(exec_name));
-    netsnmp_table_data_add_row( dinfo, row);
+    if ( netsnmp_table_data_add_row( dinfo, row) != SNMPERR_SUCCESS ) {
+        /* _free_extension( extension, ereg ); */
+        SNMP_FREE( extension );  /* Probably not sufficient */
+        SNMP_FREE( row );
+        return NULL;
+    }
 
     ereg->num_entries++;
         /*
@@ -379,7 +389,7 @@ extend_parse_config(const char *token, char *cptr)
 
     cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
     if ( *exec_name == '.' ) {
-        oid_len = MAX_OID_LEN;
+        oid_len = MAX_OID_LEN - 2;
         read_objid( exec_name, oid_buf, &oid_len );
         cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
     } else {
@@ -835,8 +845,17 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
 
             case COLUMN_EXTCFG_RUNTYPE:
                 i = *request->requestvb->val.integer;
-                if ( i == 3 )
+                switch (i) {
+                case 1:
+                    extension->flags &= ~NS_EXTEND_FLAGS_WRITEABLE;
+                    break;
+                case 2:
+                    extension->flags |=  NS_EXTEND_FLAGS_WRITEABLE;
+                    break;
+                case 3:
                     (void)netsnmp_cache_check_and_reload( extension->cache );
+                    break;
+                }
                 break;
 
             case COLUMN_EXTCFG_EXECTYPE:
@@ -1119,6 +1138,9 @@ _extend_find_entry( netsnmp_request_info       *request,
                 line_idx = 1;
             }
 
+            if (!eptr)
+                return NULL;    /* (assuming there is one) */
+
             /*
              *  If we're working with the same entry that was requested,
              *  see whether we've reached the end of the output...
@@ -1152,8 +1174,9 @@ _extend_find_entry( netsnmp_request_info       *request,
              * now we've found the appropriate entry (and line),
              * we need to update the varbind OID ...
              */
-            memcpy( oid_buf, extend_out2_oid, sizeof(extend_out2_oid));
-            oid_len = OID_LENGTH(extend_out2_oid);
+            oid_len = ereg->oid_len;
+            memcpy( oid_buf, ereg->root_oid, oid_len*sizeof(oid));
+            oid_buf[ oid_len++ ] = 4;    /* nsExtendOutput2Table */
             oid_buf[ oid_len++ ] = 1;    /* nsExtendOutput2Entry */
             oid_buf[ oid_len++ ] = COLUMN_EXTOUT2_OUTLINE;
                                          /* string token index */

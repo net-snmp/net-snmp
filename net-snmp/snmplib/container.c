@@ -20,8 +20,9 @@ netsnmp_container_get_factory(const char *type);
 /*------------------------------------------------------------------
  */
 static void 
-_factory_free(container_type *data, void *context)
+_factory_free(void *dat, void *context)
 {
+    container_type *data = (container_type *)dat;
     if (data == NULL)
 	return;
     

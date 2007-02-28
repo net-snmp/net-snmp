@@ -183,6 +183,7 @@ main(int argc, char *argv[])
             snmp_add_null_var(pdu, name, name_length);
     }
     if (failures) {
+        snmp_close(ss);
         SOCK_CLEANUP;
         exit(1);
     }

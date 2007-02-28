@@ -7,7 +7,7 @@
 #     modify it under the same terms as Perl itself.
 
 package SNMP;
-$VERSION = '5.2.rc4';   # current release version number
+$VERSION = '5.0204';   # current release version number
 
 require Exporter;
 require DynaLoader;
@@ -379,6 +379,37 @@ sub _tie {
     tie($_[0],$_[1],$_[2],$_[3]);
 }
 
+sub split_vars {
+    # This sub holds the regex that is used throughout this module  
+    #  to parse the base part of an OID from the IID.
+    #  eg: portName.9.30 -> ['portName','9.30'] 
+    my $vars = shift;
+
+    # The regex was changed to this simple form by patch 722075 for some reason.
+    # Testing shows now (2/05) that it is not needed, and that the long expression 
+    # works fine.  AB
+    # my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
+    
+    # These following two are the same.  Broken down for easier maintenance
+    # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+    my ($tag, $iid) =
+        ($vars =~ /^(               # Capture $1
+                    # 1. either this 5.5.5.5
+                     (?:\.\d+)+     # for grouping, won't increment $1
+                    |
+                    # 2. or asdf-asdf-asdf-asdf
+                     (?:            # grouping again
+                        \w+         # needs some letters followed by
+                        (?:\-*\w+)+ #  zero or more dashes, one or more letters
+                     )
+                    )
+                    \.?             # optionally match a dot
+                    (.*)            # whatever is left in the string is our iid ($2)
+                   $/x
+    );
+    return [$tag,$iid];
+}
+
 package SNMP::Session;
 
 sub new {
@@ -567,10 +598,11 @@ sub set {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);     
+     #$varbind_list_ref = [[$tag, $iid, $val]];
+     my $split_vars = SNMP::split_vars($vars);
      my $val = shift;
-     $varbind_list_ref = [[$tag, $iid, $val]];
+     push @$split_vars,$val;
+     $varbind_list_ref = [$split_vars];
    }
    my $cb = shift;
 
@@ -590,9 +622,7 @@ sub get {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -615,7 +645,8 @@ sub gettable {
     # i.e. we have reached the end of this table.
     #
 
-    my ($this, $root_oid, $options) = @_;
+    my ($this, $root_oid, %options) = @_;
+    my $options = \%options;
     my ($textnode, $stopconds, $varbinds, $vbl, $res, %result_hash, $repeat);
 
     # translate the OID into numeric form if its not
@@ -664,6 +695,14 @@ sub gettable {
     } else {
 	# XXX: requires specification in numeric OID...  ack.!
 	@columns = @{$options->{'columns'}};
+
+	# if the columns aren't numeric, we need to turn them into
+	# numeric columns...
+	map {
+	    if ($_ !~ /\.1\.3/) {
+		$_ = $SNMP::MIB{$_}{'objectID'};
+	    }
+	} @columns;
     }
 
     # create the initial walking info.
@@ -674,7 +713,7 @@ sub gettable {
     $vbl = $varbinds;
 	
     my $repeatcount;
-    if ($opts->{nogetbulk}) {
+    if ($this->{Version} == 1 || $options->{nogetbulk}) {
 	$repeatcount = 1;
     } elsif ($options->{'repeat'}) {
 	$repeatcount = $options->{'repeat'};
@@ -694,7 +733,7 @@ sub gettable {
     }
 
     while ($#$vbl > -1 && !$this->{ErrorNum}) {
-	if ($#$vbl + 1 != ($#$stopconds + 1) * $repeatcount) {
+	if (($#$vbl + 1) % ($#$stopconds + 1) != 0) {
 	    print STDERR "ack: gettable results not appropriate\n";
 	    my @k = keys(%result_hash);
 	    last if ($#k > -1);  # bail with what we have
@@ -713,12 +752,12 @@ sub gettable {
 	    my $row_value = $vbl->[$i][2];
 	    my $row_type = $vbl->[$i][3];
 
-	    if ($row_oid =~ /^$stopconds->[$i % ($#$stopconds+1)]/) {
-
+	    if ($row_oid =~ /^$stopconds->[$i % ($#$stopconds+1)]/ &&
+		$row_value ne 'ENDOFMIBVIEW') {
 		if ($row_type eq "OBJECTID") {
 
-				# If the value returned is an OID, translate this
-				# back in to a textual OID
+		    # If the value returned is an OID, translate this
+		    # back in to a textual OID
 
 		    $row_value = SNMP::translateObj($row_value);
 
@@ -764,7 +803,7 @@ sub gettable {
 	    my $nindexes = $noid->get_indexes();
 	    if (!$nindexes || ref($nindexes) ne 'ARRAY' ||
 		$#indexes != $#$nindexes) {
-		print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes: $noid => " . ref($nindexes) . " [should be an ARRAY], expended # indexes = $#indexes\n";
+		print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes:\n  $noid => " . ref($nindexes) . "\n   [should be an ARRAY]\n  expended # indexes = $#indexes\n";
 		if (ref($nindexes) eq 'ARRAY') {
 		    print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes: " . ref($nindexes) . " $#indexes $#$nindexes\n";
 		}
@@ -793,9 +832,7 @@ sub fget {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -825,9 +862,7 @@ sub getnext {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -850,9 +885,7 @@ sub fgetnext {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -884,9 +917,7 @@ sub getbulk {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -1421,13 +1452,13 @@ default 'DES', privacy protocol [DES, AES] (v3)
 
 default <none>, privacy passphrase (v3)
 
-=item authMasterKey
+=item AuthMasterKey
 
-=item privMasterKey
+=item PrivMasterKey
 
-=item authLocalizedKey
+=item AuthLocalizedKey
 
-=item privLocalizedKey
+=item PrivLocalizedKey
 
 Directly specified SNMPv3 USM user keys (used if you want to specify
 the keys instead of deriving them from a password as above).
@@ -1624,6 +1655,82 @@ use '$numInts + 1' for the max_repeaters value.  This asks the
 agent to include one additional (unrelated) variable that signals
 the end of the sub-tree, allowing bulkwalk() to determine that
 the request is complete.
+
+=item $results = $sess->gettable(E<lt>TABLE OIDE<gt>, E<lt>OPTIONS<gt>)
+
+This will retrieve an entire table of data and return a hash reference
+to that data.  The returned hash reference will have indexes of the
+OID suffixes for the index data as the key.  The value for each entry
+will be another hash containing the data for a given row.  The keys to
+that hash will be the column names, and the values will be the data.
+
+Example:
+
+  #!/usr/bin/perl
+
+  use SNMP;
+  use Data::Dumper;
+
+  my $s = new SNMP::Session(DestHost => 'localhost');
+
+  print Dumper($s->gettable('ifTable'));
+
+On my machine produces:
+
+  $VAR1 = {
+            '6' => {
+                     'ifMtu' => '1500',
+                     'ifPhysAddress' => 'PV',
+                     # ...
+                     'ifInUnknownProtos' => '0'
+                   },
+            '4' => {
+                     'ifMtu' => '1480',
+                     'ifPhysAddress' => '',
+                     # ...
+                     'ifInUnknownProtos' => '0'
+                   },
+            # ...
+           };
+
+By default, it will try to do as optimized retrieval as possible.
+It'll request multiple columns at once, and use GETBULK if possible.
+A few options may be specified by passing in an I<OPTIONS> hash
+containing various parameters:
+
+=over
+
+=item noindexes => 1
+
+Instructs the code not to parse the indexes and place the results in
+the second hash.  If you don't need the index data, this will be
+faster.
+
+=item columns => [ colname1, ... ]
+
+This specifies which columns to collect.  By default, it will try to
+collect all the columns defined in the MIB table.
+
+=item repeat => I<COUNT>
+
+Specifies a GETBULK repeat I<COUNT>.  IE, it will request this many
+varbinds back per column when using the GETBULK operation.  Shortening
+this will mean smaller packets which may help going through some
+systems.  By default, this value is calculated and attepmts to guess
+at what will fit all the results into 1000 bytes.  This calculation is
+fairly safe, hopefully, but you can either raise or lower the number
+using this option if desired.  In lossy networks, you want to make
+sure that the packets don't get fragmented and lowering this value is
+one way to help that.
+
+=item nogetbulk => 1
+
+Force the use of GETNEXT rather than GETBULK.  (always true for
+SNMPv1, as it doesn't have GETBULK anyway).  Some agents are great
+implementers of GETBULK and this allows you to force the use of
+GETNEXT oprations instead.
+
+=back
 
 =back
 

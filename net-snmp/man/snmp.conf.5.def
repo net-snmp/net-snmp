@@ -1,7 +1,7 @@
-.TH SNMP.CONF 5 "11 Dec 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMP.CONF 5 "29 Jun 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-SYSCONFDIR/snmp/snmp.conf, ~/.snmp/snmp.conf - configuration files for the Net-SNMP applications.
+snmp.conf - configuration files for the Net-SNMP applications
 .SH DESCRIPTION
 .B snmp.conf
 is the configuration file which define how the Net-SNMP applications
@@ -50,12 +50,19 @@ files.
 .IP "tempFilePattern pattern"
 The file pattern used by snmptrapd to create temporary files.  Example:
 /tmp/snmpdXXXXXX.  Used by mkstemp() and mktemp() functions.
+.IP "clientaddr [<transport-specifier>:]<transport-address>"
+Specify source address used by command-line tools, see
+.I snmpcmd(1)
+, and by snmpd when sending notifications.
 .IP "defaultPort port"
 The default port number that all SNMP applications and daemons should use.
 .IP "defVersion (1|2c|3)"
 The default SNMP version to use.
 .IP "defCommunity string"
 The default SNMPv1 and SNMPv2c community string to use.
+.IP "defSecurityModel string"
+The SNMP security model to use. Defaults to "usm" which is the only widely 
+used security model for SNMPv3.
 .IP "defSecurityName string"
 The default SNMPv3 USM security name you want to use for SNMPv3 requests.
 .IP "defContext string"
@@ -69,9 +76,8 @@ will be used for both authentication and privacy pass phrases if it is
 specified.
 .IP "defAuthType MD5|SHA"
 The SNMPv3 USM authentication type to use.
-.IP "defPrivType DES"
-The SNMPv3 USM privacy type to use.  Currently, DES is the only
-possible value.
+.IP "defPrivType DES|AES"
+The SNMPv3 USM privacy type to use.
 .IP "defSecurityLevel noAuthNoPriv|authNoPriv|authPriv"
 The SNMPv3 default security level to use.
 .IP "defAuthMasterKey 0xHEXSTRING"
@@ -99,6 +105,9 @@ run.
 Whether or not MIBs that are parsed should be strict about comment
 termination.  "--" terminates a comment if this is true.  Many
 MIBs have broken comments in them, hence this option.
+.br
+Note that this directive is poorly named, since a value of "true"
+will turn \fIoff\fP the strict interpretation of MIB comments.
 .IP "mibAllowUnderline (1|yes|true|0|no|false)"
 Allow underline characters in MIBs (illegal).
 .IP "mibWarningLevel integerValue"
@@ -124,18 +133,27 @@ Equivalent to
 .IP "quickPrinting (1|yes|true|0|no|false)"
 Equivalent to
 .BR -Oq .
+.IP "printValueOnly (1|yes|true|0|no|false)"
+Equivalent to
+.BR -Ov .
 .IP "dontPrintUnits (1|yes|true|0|no|false)"
 Equivalent to
 .BR -OU .
+.IP "numericTimeticks (1|yes|true|0|no|false)"
+Equivalent to
+.BR -Ot .
 .IP "printHexText (1|yes|true|0|no|false)"
 Equivalent to
 .BR -OT .
+.IP "hexOutputLength integer"
+Specifies where to break up the output of hexadecimal strings.  
+Set to 0 to disable line breaks.  Defaults to 16.
 .IP "suffixPrinting (0|1|2)"
 If the value is 1, its equivalent to
 .B -Os
 and if the value is 2 it's equivalent to
 .BR -OS .
-.IP "oidOutputFormat (1|2|3|4|5|6)
+.IP "oidOutputFormat (1|2|3|4|5|6)"
 Maps -O options as follow: -Os=1, -OS=2, -Of=3, -On=4, -Ou=5.
 The value 6 has no matching -O option. It suppresses output.
 .IP "extendedIndex (1|yes|true|0|no|false)"
@@ -169,7 +187,7 @@ the resulting buffer will be lowered so it is close to the hard limit.
 Some platforms may decide to increment the actual buffersize themselves 
 for internal housekeeping.
 This directive will be ignored on platforms that don't support
-..I setsockopt()
+.I setsockopt()
 .IP "serverSendBuf integer"
 Similar to serverRecvBuf, but this directive applies to the send 
 buffer of server sockets. 
@@ -179,6 +197,17 @@ buffer of client sockets (eg. snmpget).
 .IP "clientSendBuf integer"
 Similar to serverRecvBuf, but this directive applies to the send 
 buffer of client sockets. 
+.IP "reverseEncodeBER (1|yes|true|0|no|false)"
+Encode packets from back to front. Defaults to true. You'll rarely want to
+change that.
+.IP "16bitIDs (1|yes|true|0|no|false)"
+Restrict requestIDs, etc to 16-bit values.
+.IP "noTokenWarnings"
+Do not warn about unknown config file tokens.
+.SH FILES
+SYSCONFDIR/snmp/snmp.conf,
+SYSCONFDIR/snmp/snmp.conf.local - common configuration settings
+~/.snmp/snmp.conf - user-specific configuration settings
 .SH "SEE ALSO"
 snmp_config(5), read_config(3), snmpcmd(1).
 .\" Local Variables:

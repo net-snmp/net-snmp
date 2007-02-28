@@ -7,7 +7,7 @@ use Getopt::Std;
 %opts = ( M => ".",
 	  D => "html");
 
-getopts("M:D:WH:", \%opts) || die "usage: makehtml.pl [-M MIBDIR] [-D OUTDIR]";
+getopts("M:D:WH:", \%opts) || die "usage: makehtml.pl -W [-M MIBDIR] [-D OUTDIR] files > index.html";
 
 $SNMP::save_descriptions = 1;
 
@@ -39,20 +39,17 @@ if (-f "nodemap") {
     close(I);
 }
 
-if ($opts{'H'}) {
-    open(I,"$opts{'H'}");
-    while (<I>) {
-	print;
-    }
-    close(I);
-} else {
-    print "<head><title>Net-SNMP Distributed MIBs</title></head>\n";
-    print "<body bgcolor=\"#ffffff\">\n";
-    print "<h1>Net-SNMP Distributed MIBs</h1>\n";
-    print "<p>The following are the MIB files distributed with Net-SNMP.  Note that because they are distributed with Net-SNMP does not mean the agent implements them all.  Another good place for finding other MIB definitions can be found <a href=\"http://www.mibdepot.com/\">at the MIB depot</a>.</p>\n";
+if ($opts{'W'}) {
+  print '<p class="SectionTitle">
+Net-SNMP Distributed MIBs
+</p>
+
+<p>The following are the MIB files distributed with Net-SNMP.  Note that because they are distributed with Net-SNMP does not mean the agent implements them all.  Another good place for finding other MIB definitions can be found <a href="http://www.mibdepot.com/">at the MIB depot</a>.</p>
+
+<table border="2" bgcolor="#dddddd">
+  <tr><th>MIB</th><th>RFC</th><th>Description</th></tr>
+';
 }
-print "<table border=2 bgcolor=\"#dddddd\">\n";
-print "<tr><th>MIB</th><th>RFC</th><th>Description</th>\n";
 
 my %didit;
 
@@ -86,24 +83,29 @@ foreach my $mibf (@ARGV) {
 	$node = $nodemap{$mib};
     }
 
+    # Change tabs to spaces
     $desc =~ s/\t/        /g;
+
+    # Clean up formatting
     my ($s) = ($desc =~ /\n(\s+)/);
     $desc =~ s/^$s//gm;
 
-    print "<tr><td><a href=\"$node.html\">$mib</a>\n";
-    print "<br><a href=\"$mib.txt\">[mib file]</a></td>\n";
-    print "<td><a href=\"http://www.ietf.org/rfc/rfc$mibs{$mib}.txt\">rfc$mibs{$mib}</a></td>\n" if ($mibs{$mib});
-    print "<td>&nbsp</td>\n" if (!$mibs{$mib});
-    print "<td><pre>$desc</pre></td></tr>\n";
+    $desc =~ s/&/&amp;/g;
+    $desc =~ s/</&lt;/g;
+    $desc =~ s/>/&gt;/g;
+    
+    print "  <tr>\n";
+    print "    <td><a href=\"$node.html\">$mib</a><br />\n";
+    print "        <a href=\"$mib.txt\">[mib file]</a></td>\n";
+    print "    <td><a href=\"http://www.ietf.org/rfc/rfc$mibs{$mib}.txt\">rfc$mibs{$mib}</a></td>\n" if ($mibs{$mib});
+    print "    <td>&nbsp;</td>\n" if (!$mibs{$mib});
+    print "    <td><pre>$desc</pre></td>\n";
+    print "  </tr>\n";
 
     system("MIBS=$mib mib2c -c mib2c.genhtml.conf $node");
     system("mv $node.html $opts{D}");
-    if ($opts{'W'}) {
-	open(O,">>$opts{D}/$node.html");
-	print O "<!--#include virtual=\"/sfbutton.html\" -->\n";
-	close(O);
-    }
 }
 
-print "</table>";
-print "<!--#include virtual=\"/sfbutton.html\" -->\n" if ($opts{'W'});
+print "</table>\n";
+
+

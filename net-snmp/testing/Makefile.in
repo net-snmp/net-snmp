@@ -59,10 +59,10 @@ depend: dependlocal
 
 nosysdepend: 
 	makedepend $(CPPFLAGS) -o.lo *.c
-	perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile
+	$(PERL) -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile
 
 makefileindepend: nosysdepend
-	perl $(top_srcdir)/makefileindepend.pl
+	$(PERL) $(top_srcdir)/makefileindepend.pl
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

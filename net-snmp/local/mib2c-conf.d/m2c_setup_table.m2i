@@ -34,6 +34,7 @@
 @    eval $m2c_data_transient = $mfd_default_data_transient@
 @    eval $m2c_include_examples = $mfd_default_include_examples@
 @    eval $m2c_irreversible_commit = 0@
+@    eval $m2c_gda_todo_suppress = 0@ # todo comments
 ##
 ##   allow for user override, or save defaults
 ##

@@ -36,6 +36,7 @@
 @   else@ // enums
      * Integer based value can usually just do a direct copy.
      */
+@   include generic-ctx-get.m2i@
 @   end@ 
 @end@ // mapping
 ##

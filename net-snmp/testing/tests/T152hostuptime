@@ -4,15 +4,15 @@
 
 HEADER uptime using HOST-RESOURCES
 
-SKIPIFNOT USING_HOST_MODULE
+SKIPIFNOT USING_HOST_HR_SYSTEM_MODULE
 
-SKIPIF DISABLE_SNMPV2C
+SKIPIF DISABLE_SNMPV1
 
 #
 # Begin test
 #
 
-# standard V1 configuration: testcomunnity
+# standard V1 configuration: testcommunity
 . ./Sv1config
 
 STARTAGENT
