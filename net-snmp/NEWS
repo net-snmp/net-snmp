@@ -6,6 +6,9 @@ listing of all changes made to the code.
 
 *5.5.dev*      (SVN snapshot)
 
+    administrative:
+      - Code repository moved to SVN from CVS on SourceForge.net
+
     snmplib:
       - [PATCH 1592706]: Fix memory leak when cloning varbinds.
 
