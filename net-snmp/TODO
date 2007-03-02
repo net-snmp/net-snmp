@@ -24,8 +24,8 @@ Agent MIBs:
   Tunnel
   WWW-MIB
   Hardware Abstraction Layer:
-    HostRes	(convert to use HAL and clean up)
-    UCDavis	(convert to use HAL and update structures)
+    HostRes	(convert to use HAL and clean up - in progress)
+    UCDavis	(convert to use HAL and update structures - in progress)
 
 Extensibility:
   AgentX	(reasonably stable now)
