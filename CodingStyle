@@ -43,7 +43,7 @@ Briefly, here's a description of the style:
 		Procedure return type on a separate line to the procedure name
 		Four character basic and continuation line indent
                 No tabs used in the file, always use 8 spaces instead.
-		Continuation paramters lined up with opening parenthesis
+		Continuation parameters lined up with opening parenthesis
 
 ----------------------------------------------------------------------
 Function names and Variable names:
