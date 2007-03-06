@@ -846,9 +846,11 @@ netsnmp_agent_check_packet(netsnmp_session * session,
             ;
         else if (hosts_ctl(name, STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
             snmp_log(allow_severity, "Connection from <UNKNOWN> (%s)\n", addr_string);
+            SNMP_FREE(addr_string);
             addr_string = strdup("<UNKNOWN>");
         } else {
             snmp_log(deny_severity, "Connection from <UNKNOWN> (%s) REFUSED\n", addr_string);
+            SNMP_FREE(addr_string);
             return 0;
         }
     }
