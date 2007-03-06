@@ -861,9 +861,11 @@ netsnmp_agent_check_packet(netsnmp_session * session,
             if (!not_log_connection) {
                 snmp_log(allow_severity, "Connection from <UNKNOWN> (%s)\n", addr_string);
             };
+            SNMP_FREE(addr_string);
             addr_string = strdup("<UNKNOWN>");
         } else {
             snmp_log(deny_severity, "Connection from <UNKNOWN> (%s) REFUSED\n", addr_string);
+            SNMP_FREE(addr_string);
             return 0;
         }
     }
