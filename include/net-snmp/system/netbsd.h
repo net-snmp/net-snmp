@@ -37,3 +37,6 @@
 #ifndef netbsd1
 # define netbsd1 netbsd1
 #endif
+
+/* define the extra mib modules that are supported */
+#define NETSNMP_INCLUDE_HOST_RESOURCES
