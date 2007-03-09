@@ -342,7 +342,6 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
     netsnmp_pdu           *template_v1pdu;
     netsnmp_variable_list *first_vb, *vblist;
     netsnmp_variable_list *var;
-    size_t                 len;
 
     /*
      * Make a copy of the v2 Trap PDU
@@ -434,7 +433,7 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
          * For enterprise-specific traps, split the snmpTrapOID value
          *   into enterprise and specific trap
          */
-        len = vblist->val_len / sizeof(oid);
+        size_t len = vblist->val_len / sizeof(oid);
         if ( len <= 2 ) {
             snmp_log(LOG_WARNING,
                      "send_trap: v2 trapOID too short (%d)\n", len);
