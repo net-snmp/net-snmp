@@ -301,7 +301,7 @@ ipv6InterfaceReasmMaxSize_get(ipv6InterfaceTable_rowreq_ctx * rowreq_ctx,
 
     if (!
         (rowreq_ctx->data.ifentry->
-         ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V4_REASMMAX))
+         ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_V6_REASMMAX))
         return MFD_SKIP;
 
     /*
