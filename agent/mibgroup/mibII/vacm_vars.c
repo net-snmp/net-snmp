@@ -534,7 +534,7 @@ var_vacm_view(struct variable * vp,
                 return NULL;
             }
 
-            gp = vacm_getViewEntry(viewName, subtree, subtreeLen,
+            gp = vacm_getViewEntry(viewName, &subtree[1], subtreeLen-1,
                                    VACM_MODE_IGNORE_MASK);
             if (gp != NULL) {
                 if (gp->viewSubtreeLen != subtreeLen) {
@@ -1581,7 +1581,7 @@ view_parse_viewEntry(oid * name, size_t name_len)
         return NULL;
 
     vptr =
-        vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen,
+        vacm_getViewEntry(newViewName, &newViewSubtree[1], viewSubtreeLen-1,
                           VACM_MODE_IGNORE_MASK);
     free(newViewName);
     free(newViewSubtree);
@@ -1637,7 +1637,7 @@ write_vacmViewStatus(int action,
          * Now see if a group already exists with these index values.  
          */
         vptr =
-            vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen,
+            vacm_getViewEntry(newViewName, &newViewSubtree[1], viewSubtreeLen-1,
                               VACM_MODE_IGNORE_MASK);
         if (vptr &&
             netsnmp_oid_equals(vptr->viewSubtree + 1, vptr->viewSubtreeLen - 1,
@@ -1691,7 +1691,7 @@ write_vacmViewStatus(int action,
                        (oid **) & newViewSubtree, &viewSubtreeLen);
 
         vptr =
-            vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen,
+            vacm_getViewEntry(newViewName, &newViewSubtree[1], viewSubtreeLen-1,
                               VACM_MODE_IGNORE_MASK);
 
         if (vptr != NULL) {
@@ -1717,7 +1717,7 @@ write_vacmViewStatus(int action,
                        (oid **) & newViewSubtree, &viewSubtreeLen);
 
         vptr =
-            vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen,
+            vacm_getViewEntry(newViewName, &newViewSubtree[1], viewSubtreeLen-1,
                               VACM_MODE_IGNORE_MASK);
 
         if (vptr != NULL) {
@@ -1735,8 +1735,8 @@ write_vacmViewStatus(int action,
                            (u_char **) & newViewName, &viewNameLen,
                            (oid **) & newViewSubtree, &viewSubtreeLen);
 
-            vptr = vacm_getViewEntry(newViewName, newViewSubtree,
-                                     viewSubtreeLen, VACM_MODE_IGNORE_MASK);
+            vptr = vacm_getViewEntry(newViewName, &newViewSubtree[1],
+                                     viewSubtreeLen-1, VACM_MODE_IGNORE_MASK);
 
             if (vptr != NULL) {
                 vacm_destroyViewEntry(newViewName, newViewSubtree,

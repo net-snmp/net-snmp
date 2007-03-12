@@ -346,22 +346,21 @@ vacm_getViewEntry(const char *viewName,
             int             oidpos;
             found = 1;
 
-            if (mode != VACM_MODE_IGNORE_MASK) {  /* check the mask */
-                for (oidpos = 0;
-                     found && oidpos < (int) vp->viewSubtreeLen - 1;
-                     oidpos++) {
-                    if (VIEW_MASK(vp, maskpos, mask) != 0) {
-                        if (viewSubtree[oidpos] !=
-                            vp->viewSubtree[oidpos + 1])
-                            found = 0;
-                    }
-                    if (mask == 1) {
-                        mask = 0x80;
-                        maskpos++;
-                    } else
-                        mask >>= 1;
+            for (oidpos = 0;
+                 found && oidpos < (int) vp->viewSubtreeLen - 1;
+                 oidpos++) {
+                if (mode==VACM_MODE_IGNORE_MASK || (VIEW_MASK(vp, maskpos, mask)) != 0) {
+                    if (viewSubtree[oidpos] !=
+                        vp->viewSubtree[oidpos + 1])
+                        found = 0;
                 }
+                if (mask == 1) {
+                    mask = 0x80;
+                    maskpos++;
+                } else
+                    mask >>= 1;
             }
+
             if (found) {
                 /*
                  * match successful, keep this node if its longer than
