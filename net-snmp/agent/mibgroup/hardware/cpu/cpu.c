@@ -6,13 +6,13 @@
 extern NetsnmpCacheLoad netsnmp_cpu_arch_load;
 static void _cpu_update_stats( unsigned int, void* );
 
-int _cpuAutoUpdate =  5;
-int _cpuHistoryLen;
+static int _cpuAutoUpdate =  5;
+static int _cpuHistoryLen;
 int  cpu_num = 0;
 
-netsnmp_cpu_info *_cpu_head  = NULL;
-netsnmp_cpu_info *_cpu_tail  = NULL;
-netsnmp_cache    *_cpu_cache = NULL;
+static netsnmp_cpu_info *_cpu_head  = NULL;
+static netsnmp_cpu_info *_cpu_tail  = NULL;
+static netsnmp_cache    *_cpu_cache = NULL;
 
 void init_cpu( void ) {
     /*
@@ -30,13 +30,24 @@ void init_cpu( void ) {
     if ( _cpuAutoUpdate ) {
          
         _cpuHistoryLen = 60/_cpuAutoUpdate;
-        snmp_alarm_register(_cpuAutoUpdate, SA_REPEAT, _cpu_update_stats, NULL);
+        snmp_alarm_register( _cpuAutoUpdate, SA_REPEAT, _cpu_update_stats,
+                             NULL );
         if ( _cpu_head )
             _cpu_update_stats( 0, NULL );
     } else
-    _cpu_cache = netsnmp_cache_create( 5, netsnmp_cpu_arch_load, NULL, NULL, 0);
+        _cpu_cache = netsnmp_cache_create( 5, netsnmp_cpu_arch_load,
+                                           NULL, NULL, 0 );
 }
 
+void shutdown_cpu( void ) {
+    while ( _cpu_head ) {
+        netsnmp_cpu_info *tmp = _cpu_head;
+        _cpu_head = _cpu_head->next;
+        SNMP_FREE(tmp->history);
+        SNMP_FREE(tmp);
+    }
+    _cpu_tail = NULL;
+}
 
 
 netsnmp_cpu_info *netsnmp_cpu_get_first( void ) {
