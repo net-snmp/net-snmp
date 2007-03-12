@@ -413,6 +413,19 @@ var_extensible_pass(struct variable *vp,
                     *var_len = strlen(buf2);
                     vp->type = ASN_OCTET_STR;
                     return ((unsigned char *) buf2);
+                } else if (!strncasecmp(buf, "integer64", 9)) {
+                    static struct counter64 c64;
+                    unsigned long long v64 = strtoull(buf2, NULL, 10);
+                    if (sizeof(long) > 4) {    // 64-bit machine
+                        c64.high = v64 >> 32;
+                        c64.low = v64 & 0xffffffff;
+                    }
+                    else {    // 32-bit machine
+                        *((unsigned long long *) &c64) = v64;
+                    }
+                    *var_len = sizeof(c64);
+                    vp->type = ASN_INTEGER64;
+                    return ((unsigned char *) &c64);
                 } else if (!strncasecmp(buf, "integer", 7)) {
                     *var_len = sizeof(long_ret);
                     long_ret = strtol(buf2, NULL, 10);
@@ -423,6 +436,19 @@ var_extensible_pass(struct variable *vp,
                     long_ret = strtoul(buf2, NULL, 10);
                     vp->type = ASN_UNSIGNED;
                     return ((unsigned char *) &long_ret);
+                } else if (!strncasecmp(buf, "counter64", 9)) {
+                    static struct counter64 c64;
+                    unsigned long long v64 = strtoull(buf2, NULL, 10);
+                    if (sizeof(long) > 4) {    // 64-bit machine
+                        c64.high = v64 >> 32;
+                        c64.low = v64 & 0xffffffff;
+                    }
+                    else {    // 32-bit machine
+                        *((unsigned long long *) &c64) = v64;
+                    }
+                    *var_len = sizeof(c64);
+                    vp->type = ASN_COUNTER64;
+                    return ((unsigned char *) &c64);
                 } else if (!strncasecmp(buf, "counter", 7)) {
                     *var_len = sizeof(long_ret);
                     long_ret = strtoul(buf2, NULL, 10);
