@@ -361,6 +361,10 @@ add_device(char *path, char *device, int minspace, int minpercent, int override)
 {
   int index;
 
+  if (!path || !strcmp(path, "none")) {
+    DEBUGMSGTL(("ucd-snmp/disk", "Skipping null path device (%s)\n", device));
+    return;
+  }
   if (numdisks == maxdisks) {
       if (maxdisks == 0) {
           maxdisks = 50;
