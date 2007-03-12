@@ -2775,6 +2775,7 @@ netsnmp_mibindex_load( void )
         (void)_mibindex_add( tmpbuf2+4, i );  /* Skip 'DIR ' */
         fclose( fp );
     }
+    closedir( dir );
 }
 
 char *
