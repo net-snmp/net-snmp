@@ -21,12 +21,19 @@ handle_ipv6IpForwarding(netsnmp_mib_handler *handler,
 void
 init_ip_scalars(void)
 {
+    static oid      ipReasmTimeout_oid[] = { 1, 3, 6, 1, 2, 1, 4, 13, 0 };
     static oid      ipv6IpForwarding_oid[] = { 1, 3, 6, 1, 2, 1, 4, 25 };
     static oid      ipv6IpDefaultHopLimit_oid[] =
         { 1, 3, 6, 1, 2, 1, 4, 26, 0 };
 
     DEBUGMSGTL(("ip_scalar", "Initializing\n"));
 
+    netsnmp_register_num_file_instance
+        ("ipReasmTimeout",
+         ipReasmTimeout_oid, OID_LENGTH(ipReasmTimeout_oid),
+         "/proc/sys/net/ipv4/ipfrag_time", ASN_INTEGER,
+         HANDLER_CAN_RONLY, NULL, NULL);
+                                       
     netsnmp_register_scalar(netsnmp_create_handler_registration
                             ("ipv6IpForwarding", handle_ipv6IpForwarding,
                              ipv6IpForwarding_oid,
