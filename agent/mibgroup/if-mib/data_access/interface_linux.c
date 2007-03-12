@@ -658,6 +658,9 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          * (see ip_frag_reasm: if(len > 65535) goto out_oversize;)
          */
         entry->reasm_max_v4 = entry->reasm_max_v6 = 65535;
+        entry->ns_flags |= 
+            NETSNMP_INTERFACE_FLAGS_HAS_V4_REASMMAX |
+            NETSNMP_INTERFACE_FLAGS_HAS_V6_REASMMAX;
 
         netsnmp_access_interface_entry_overrides(entry);
 

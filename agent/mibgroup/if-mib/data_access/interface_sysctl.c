@@ -445,8 +445,10 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
             entry->oper_status = IFOPERSTATUS_DOWN;
         }
 
-        entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V4_REASMMAX;
         entry->reasm_max_v4 = entry->reasm_max_v6 = IP_MAXPACKET;
+        entry->ns_flags |= 
+            NETSNMP_INTERFACE_FLAGS_HAS_V4_REASMMAX |
+            NETSNMP_INTERFACE_FLAGS_HAS_V6_REASMMAX;
 
         /* get counters */
         entry->stats.ibytes.low = ifp->ifm_data.ifi_ibytes;

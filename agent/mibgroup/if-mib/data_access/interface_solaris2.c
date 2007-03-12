@@ -241,15 +241,14 @@ _set_ip_flags_v4(netsnmp_interface_entry *entry, mib2_ifEntry_t *ife)
 
     if (_get_v4addr(ife, &ipv4e) > 0) {
         entry->reasm_max_v4 = ipv4e.ipAdEntReasmMaxSize;
-#if defined( SOLARIS_HAVE_RFC4293_SUPPORT )
-        entry->retransmit_v4 = ipv4e.ipAdEntRetransmitTime;
-#endif
         entry->ns_flags |= 
             NETSNMP_INTERFACE_FLAGS_HAS_IPV4 |
-#if defined( SOLARIS_HAVE_RFC4293_SUPPORT )
-            NETSNMP_INTERFACE_FLAGS_HAS_V4_RETRANSMIT |
-#endif
             NETSNMP_INTERFACE_FLAGS_HAS_V4_REASMMAX;
+#if defined( SOLARIS_HAVE_RFC4293_SUPPORT )
+        entry->retransmit_v4 = ipv4e.ipAdEntRetransmitTime;
+        entry->ns_flags |= 
+            NETSNMP_INTERFACE_FLAGS_HAS_V4_RETRANSMIT;
+#endif
         return (1);
     }
     return (0);
@@ -287,6 +286,8 @@ _set_ip_flags_v6(netsnmp_interface_entry *entry, mib2_ifEntry_t *ife)
 #else
         /* XXX Don't have this info, 1500 is the minimum */
         entry->reasm_max_v6 = 1500; 
+        entry->ns_flags |= 
+            NETSNMP_INTERFACE_FLAGS_HAS_V6_REASMMAX; /* ??? */
 #endif /* SOLARIS_HAVE_RFC4293_SUPPORT */
         return (1);
     }
