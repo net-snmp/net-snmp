@@ -175,7 +175,7 @@ var_extensible_mem(struct variable *vp,
 
     long            phys_mem;
     size_t          phys_mem_size = sizeof(phys_mem);
-    int             phys_mem_mib[] = { CTL_HW, HW_USERMEM };
+    int             phys_mem_mib[] = { CTL_HW, HW_PHYSMEM };
 
     if (header_generic(vp, name, length, exact, var_len, write_method))
         return (NULL);
