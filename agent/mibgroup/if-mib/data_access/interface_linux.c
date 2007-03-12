@@ -36,6 +36,7 @@ typedef __u8 u8;           /* ditto */
 #include <unistd.h>
 
 #include <linux/sockios.h>
+#include <linux/if_ether.h>
 
 unsigned int
 netsnmp_linux_interface_get_if_speed(int fd, const char *name);
@@ -617,6 +618,31 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
             }
             if(NULL == pm->mi_name)
                 entry->type = IANAIFTYPE_OTHER;
+        }
+
+        /*
+         * interface identifier is specified based on physaddr and type
+         */
+        switch (entry->type) {
+        case IANAIFTYPE_ETHERNETCSMACD:
+        case IANAIFTYPE_ETHERNET3MBIT:
+        case IANAIFTYPE_FASTETHER:
+        case IANAIFTYPE_FASTETHERFX:
+        case IANAIFTYPE_GIGABITETHERNET:
+        case IANAIFTYPE_FDDI:
+        case IANAIFTYPE_ISO88025TOKENRING:
+            if (NULL != entry->paddr && ETH_ALEN != entry->paddr_len)
+                break;
+
+            entry->v6_if_id_len = entry->paddr_len + 2;
+            memcpy(entry->v6_if_id, entry->paddr, 3);
+            memcpy(entry->v6_if_id + 5, entry->paddr + 3, 3);
+            entry->v6_if_id[0] ^= 2;
+            entry->v6_if_id[3] = 0xFF;
+            entry->v6_if_id[4] = 0xFE;
+
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID;
+            break;
         }
 
         if (IANAIFTYPE_ETHERNETCSMACD == entry->type)
