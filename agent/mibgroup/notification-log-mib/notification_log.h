@@ -9,6 +9,8 @@ extern          "C" {
  * function declarations 
  */
 void            init_notification_log(void);
+void            shutdown_notification_log(void);
+
 Netsnmp_Node_Handler nlmLogTable_handler;
 Netsnmp_Node_Handler nlmLogVariableTable_handler;
 
