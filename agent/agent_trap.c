@@ -892,6 +892,9 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
 {
     netsnmp_pdu    *pdu;
     int            result;
+    char           tmp[SPRINT_MAX_LEN];
+    int            len;
+
 
     if (!sess || !template_pdu)
         return;
@@ -920,6 +923,14 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
             snmp_async_send(sess, pdu, &handle_inform_response, NULL);
         
     } else {
+        if ((sess->version == SNMP_VERSION_3) &&
+                (pdu->command == SNMP_MSG_TRAP2) &&
+                (pdu->securityEngineIDLen == 0)) {
+            len = snmpv3_get_engineID(tmp, sizeof(tmp));
+            memdup(&pdu->securityEngineID, tmp, len);
+            pdu->securityEngineIDLen = len;
+        }
+
         result = snmp_send(sess, pdu);
     }
 
