@@ -365,9 +365,9 @@ else
       cat > $tmpfile <<EOF
 /* generated from net-snmp-config */
 #include <net-snmp/net-snmp-config.h>
-#ifdef HAVE_SIGNAL_H
+#ifdef HAVE_SIGNAL
 #include <signal.h>
-#endif /* HAVE_SIGNAL_H */
+#endif /* HAVE_SIGNAL */
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 EOF
