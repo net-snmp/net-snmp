@@ -530,6 +530,13 @@ init_notification_log(void)
 }
 
 void
+shutdown_notification_log(void)
+{
+    max_logged = 0;
+    check_log_size(0, NULL);
+}
+
+void
 log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
 {
     long            tmpl;
