@@ -150,42 +150,40 @@ smux_parse_peer_auth(const char *token, char *cptr)
 	config_perror("Too many smuxpeers");
 	return;
     }
-    aptr->sa_active_fd = -1;
-    if (!cptr) {
-        /*
-         * null passwords OK 
-         */
-        Auths[nauths++] = aptr;
-        DEBUGMSGTL(("smux_conf", "null password\n"));
-        return;
-    }
 
     /*
      * oid 
      */
-    password_cptr = strchr(cptr, ' ');
-    cptr_len = strlen(cptr);
-    if (password_cptr)
-        *password_cptr = 0x0;
-
+    aptr->sa_active_fd = -1;
     aptr->sa_oid_len = MAX_OID_LEN;
     read_objid( cptr, aptr->sa_oid, &aptr->sa_oid_len );
-
     DEBUGMSGTL(("smux_conf", "parsing registration for: %s\n", cptr));
 
-    if ((&password_cptr - &cptr + 1) < cptr_len) {
-        cptr = ++password_cptr;
-        DEBUGMSGTL(("smux_conf", "password is: %s\n",
-                    SNMP_STRORNULL(cptr)));
+    password_cptr = strchr(cptr, ' ');
+    cptr_len = strlen(cptr);
+
+    if (password_cptr != NULL) {    /* Do we have a password or not? */
+        *password_cptr = 0x0;
+	if ((&password_cptr - &cptr + 1) < cptr_len) {
+	    cptr = ++password_cptr;
+	    DEBUGMSGTL(("smux_conf", "password is: %s\n",
+	                SNMP_STRORNULL(cptr)));
+	}
+
+        /*
+         * password 
+         */
+        if (cptr)
+            strcpy(aptr->sa_passwd, cptr);
+    } else {
+        /*
+         * null passwords OK 
+         */
+        DEBUGMSGTL(("smux_conf", "null password\n"));
     }
 
-    /*
-     * password 
-     */
-    if (cptr)
-        strcpy(aptr->sa_passwd, cptr);
-
     Auths[nauths++] = aptr;
+    return;
 }
 
 void
