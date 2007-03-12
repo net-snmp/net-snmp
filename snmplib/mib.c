@@ -2812,6 +2812,7 @@ set_function(struct tree *subtree)
         subtree->printomat = sprint_realloc_by_type;
         break;
     }
+    closedir( dir );
 }
 
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
