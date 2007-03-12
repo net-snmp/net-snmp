@@ -164,7 +164,7 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
             DEBUGMSGTL(("ifTable:access", "updating missing entry\n"));
             rowreq_ctx->known_missing = 1;
             rowreq_ctx->data.ifAdminStatus = IFADMINSTATUS_DOWN;
-            if ((!(ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE))
+            if ((!(rowreq_ctx->data.ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE))
                 && (rowreq_ctx->data.ifOperStatus != IFOPERSTATUS_DOWN))
                 oper_changed = 1;
             rowreq_ctx->data.ifOperStatus = IFOPERSTATUS_DOWN;
