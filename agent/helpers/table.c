@@ -574,7 +574,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                             tbl_req_info->colnum,
                             tbl_req_info->number_indexes));
                 for (vb = tbl_req_info->indexes, count = 0;
-                     vb && count < tbl_info->number_indexes;
+                     vb && count < tbl_req_info->number_indexes;
                      count++, vb = vb->next_variable) {
                     out_len = 0;
                     if (sprint_realloc_by_type(&buf, &buf_len, &out_len, 1,
