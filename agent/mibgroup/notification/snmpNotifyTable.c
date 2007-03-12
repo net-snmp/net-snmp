@@ -96,11 +96,11 @@ _checkFilter(const char* paramName, netsnmp_pdu *pdu)
     /*
      * find appropriate filterProfileEntry
      */
-    netsnmp_variable_list *var;
+    netsnmp_variable_list *var, *trap_var;
     char                  *profileName;
     size_t                 profileNameLen;
     struct vacm_viewEntry *vp, *head;
-    int                    trap_oid_included = 0, vb_oid_excluded = 0;
+    int                    vb_oid_excluded = 0;
     extern oid             snmptrap_oid[];
     extern size_t          snmptrap_oid_len;
 
@@ -150,26 +150,25 @@ _checkFilter(const char* paramName, netsnmp_pdu *pdu)
    variable-bindings of the notification are specifically excluded by
    the matching entries.
      */
-    var = find_varbind_in_list( pdu->variables,
+    trap_var = find_varbind_in_list( pdu->variables,
                                 snmptrap_oid,
                                 snmptrap_oid_len);
-    if (NULL != var) {
+    if (NULL != trap_var) {
         /*
                              For a notification name, if none match,
    then the notification name is considered excluded, and the
    notification should not be sent to this management target.
          */
-        vp = netsnmp_view_get(head, profileName, var->val.objid,
-                              var->val_len / sizeof(oid), VACM_MODE_FIND);
+        vp = netsnmp_view_get(head, profileName, trap_var->val.objid,
+                              trap_var->val_len / sizeof(oid), VACM_MODE_FIND);
         if ((NULL == vp) || (SNMP_VIEW_INCLUDED != vp->viewType)) {
             DEBUGMSGTL(("send_notifications", "  filtered (snmpTrapOID.0 "));
-            DEBUGMSGOID(("send_notifications",var->val.objid,
-                         var->val_len / sizeof(oid)));
+            DEBUGMSGOID(("send_notifications",trap_var->val.objid,
+                         trap_var->val_len / sizeof(oid)));
             DEBUGMSG(("send_notifications", " not included)\n"));
             free(head);
             return 1;
         }
-        trap_oid_included = 1;
     }
 
     /*
@@ -181,6 +180,11 @@ _checkFilter(const char* paramName, netsnmp_pdu *pdu)
    object instance, if none match, the object instance is considered
    included, and the notification may be sent to this management target.
          */
+
+        if (var == trap_var) {
+            continue;
+        }
+
         vp = netsnmp_view_get(head, profileName, var->name,
                               var->name_length, VACM_MODE_FIND);
         if ((NULL != vp) && (SNMP_VIEW_EXCLUDED == vp->viewType)) {
