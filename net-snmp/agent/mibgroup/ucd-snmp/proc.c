@@ -414,6 +414,7 @@ sh_count_procs(char *procname)
 {
     DIR *dir;
     char cmdline[512], *tmpc;
+    char state[64];
     struct dirent *ent;
 #ifdef USE_PROC_CMDLINE
     int fd;
@@ -444,8 +445,16 @@ sh_count_procs(char *procname)
           fclose(status);
           break;
       }
+      /* Grab the state of the process as well
+       * (so we can ignore zombie processes)
+       * XXX: Assumes the second line is the status
+       */
+      if (fgets(state, sizeof(state), status) == NULL) {
+          state[0]='\0';
+      }
       fclose(status);
       cmdline[sizeof(cmdline)-1] = '\0';
+      state[sizeof(state)-1] = '\0';
       /* XXX: assumes Name: is first */
       if (strncmp("Name:",cmdline, 5) != 0)
           break;
@@ -460,8 +469,13 @@ sh_count_procs(char *procname)
       DEBUGMSGTL(("proc","Comparing wanted %s against %s\n",
                   procname, tmpc));
       if(len==plen && !strncmp(tmpc,procname,plen)) {
-          total++;
-          DEBUGMSGTL(("proc", " Matched.  total count now=%d\n", total));
+          /* Do not count zombie process as they are not running processes */
+          if ( strstr(state, "zombie") == NULL ) {
+              total++;
+              DEBUGMSGTL(("proc", " Matched.  total count now=%d\n", total));
+          } else {
+              DEBUGMSGTL(("proc", " Skipping zombie process.\n"));
+          }
       }
 #endif      
     }
