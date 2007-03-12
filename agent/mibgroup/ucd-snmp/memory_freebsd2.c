@@ -256,7 +256,7 @@ var_extensible_mem(struct variable *vp,
 
     u_long          phys_mem;
     size_t          phys_mem_size = sizeof(phys_mem);
-    int             phys_mem_mib[] = { CTL_HW, HW_USERMEM };
+    int             phys_mem_mib[] = { CTL_HW, HW_PHYSMEM };
 
 #ifdef BUFSPACE_SYMBOL
     long            bufspace;
