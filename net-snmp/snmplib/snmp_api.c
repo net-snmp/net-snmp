@@ -1835,13 +1835,12 @@ create_user_from_session(netsnmp_session * session)
         }
     }
 
-    user->userStatus = RS_ACTIVE;
-    user->userStorageType = ST_READONLY;
-
     if (user_just_created) {
         /*
          * add the user into the database 
          */
+        user->userStatus = RS_ACTIVE;
+        user->userStorageType = ST_READONLY;
         usm_add_user(user);
     }
 
