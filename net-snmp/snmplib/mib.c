@@ -2737,7 +2737,6 @@ init_mib(void)
         tree_top->label = strdup("(top)");
         tree_top->child_list = tree_head;
     }
-    closedir( dir );
 }
 
 /**
