@@ -662,7 +662,9 @@ var_extensible_disk(struct variable *vp,
     vfs.f_bfree = vfs.f_spare[1];
     vfs.f_bavail = vfs.f_spare[2];
 #endif
-    percent = vfs.f_bavail <= 0 ? 100 :
+    percent =
+       vfs.f_blocks == 0 ? 0 :
+       vfs.f_bavail <= 0 ? 100 :
         (int) ((double) (vfs.f_blocks - vfs.f_bfree) /
                (double) (vfs.f_blocks -
                          (vfs.f_bfree - vfs.f_bavail)) * 100.0 + 0.5);
@@ -752,8 +754,9 @@ var_extensible_disk(struct variable *vp,
     availblks = totalblks * (100 - filesys.fs_minfree) / 100;
     avail = availblks > used ? availblks - used : 0;
     percent =
-        availblks ==
-        0 ? 100 : (int) ((double) used / (double) totalblks * 100.0 + 0.5);
+        totalblks == 0 ? 0 :
+        availblks == 0 ? 100 :
+        (int) ((double) used / (double) totalblks * 100.0 + 0.5);
     multiplier = (float)filesys.fs_fsize / (float)1024.0;
     iserror =
         (disks[disknum].minimumspace >= 0
