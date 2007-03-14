@@ -1,16 +1,11 @@
 #include <net-snmp/net-snmp-config.h>
 
-#if HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include <net-snmp/agent/stash_cache.h>
 #include <net-snmp/agent/stash_to_next.h>
+
+#include <net-snmp/agent/stash_cache.h>
 
 /** @defgroup stash_to_next stash_to_next
  *  Convert GET_STASH requests into GETNEXT requests for the handler.
