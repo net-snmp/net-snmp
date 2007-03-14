@@ -23,7 +23,16 @@ See http://techpubs.sgi.com/library/tpl/cgi-bin/getdoc.cgi/0620/bks/\
 SGI_Developer/books/DevDriver_PG/sgi_html/ch10.html and 
 /var/sysgen/Makefile.kernio .
 
-2. Known Issues
+2. CPU stats
+------------
+
+net-snmp 5.4.1 and later can report CPU statistics on IRIX. For full discussion
+and build instructions see Patch #1675869: 
+
+  http://sf.net/support/tracker.php?aid=1675869
+
+
+3. Known Issues
 ---------------
 
 Accessing certain MIB objects on IRIX64 machines (i.e. when running a 64-bit 
