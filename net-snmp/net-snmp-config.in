@@ -27,6 +27,20 @@ check_build_dir()
       fi
 }
 
+# usage: index n arguments
+# effect: returns the (n+1)th argument
+index()
+{
+    eval echo \$`expr $1 + 1`
+}
+
+# usage: count arguments
+# effect: returns the number of arguments
+count()
+{
+    echo $#
+}
+
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 includedir=@includedir@
@@ -598,10 +612,9 @@ EOF
       if grep "init_$name" $i ; then
         echo "  init_${name}();" >> $tmpfile
       fi
-      shift
     done
 
-    # finish file
+    # handle the main loop
     cat >> $tmpfile <<EOF
 
   /* $outname will be used to read $outname.conf files. */
@@ -629,6 +642,28 @@ EOF
 
   /* at shutdown time */
   snmp_shutdown(app_name);
+
+  /* deinitialize your mib code here */
+EOF
+
+    # add shutdown routines
+
+    i=`count $cfiles`
+    while [ $i -gt 0 ] ; do
+      fullname=`index $i $cfiles`
+      name=`basename $fullname | sed 's/\.[co]$//'`
+      echo checking for shutdown_$name in $fullname
+      if grep "shutdown_$name" $fullname ; then
+        echo "  shutdown_${name}();" >> $tmpfile
+      fi
+      i=`expr $i - 1`
+    done
+
+    # finish file
+    cat >> $tmpfile <<EOF
+
+  /* shutdown the agent library */
+  shutdown_agent();
   SOCK_CLEANUP;
   exit(0);
 }
