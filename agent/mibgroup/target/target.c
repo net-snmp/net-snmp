@@ -195,8 +195,10 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
 #endif
                             }
 
+                            thissess.flags |= SNMP_FLAGS_DONT_PROBE;
                             targaddrs->sess = snmp_add(&thissess, t,
                                                        NULL, NULL);
+                            thissess.flags &= ~SNMP_FLAGS_DONT_PROBE;
                             targaddrs->sessionCreationTime = time(NULL);
                         }
                         if (targaddrs->sess) {
