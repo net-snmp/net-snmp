@@ -6,6 +6,9 @@ config_require(hardware/cpu/cpu_linux)
 #elif defined(darwin)
 config_require(hardware/cpu/cpu_mach)
 
+#elif (defined(irix6) && defined(NETSNMP_ENABLE_HARDWARE_CPU_PCP_MODULE))
+config_require(hardware/cpu/cpu_pcp)
+
 #elif (defined(netbsd) || defined(netbsd1) || defined(netbsdelf) || defined(netbsdelf2)|| defined(netbsdelf3) || defined(openbsd2)|| defined(openbsd3) || defined(openbsd4))
 config_require(hardware/cpu/cpu_sysctl)
 
