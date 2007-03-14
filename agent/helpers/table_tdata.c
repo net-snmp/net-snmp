@@ -1,16 +1,17 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#include <net-snmp/agent/table_tdata.h>
+
 #if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-
 #include <net-snmp/agent/table.h>
-#include <net-snmp/agent/table_tdata.h>
 #include <net-snmp/agent/table_container.h>
 #include <net-snmp/agent/read_only.h>
 
