@@ -7,6 +7,10 @@ config_require(agentx/protocol)
 config_require(agentx/client)
 config_require(agentx/agentx_config)
 
+#ifndef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
+config_error(agentx/subagent depends on the Callback transport)
+#endif
+
      int             subagent_init(void);
      int             handle_agentx_packet(int, netsnmp_session *, int,
                                           netsnmp_pdu *, void *);
