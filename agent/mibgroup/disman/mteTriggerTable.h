@@ -16,6 +16,10 @@
 config_require(header_complex)
 config_require(utilities/iquery)
 
+#ifndef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
+config_error(disman/mteTriggerTable depends on the Callback transport)
+#endif
+
     /*
      * our storage structure(s) 
      */
