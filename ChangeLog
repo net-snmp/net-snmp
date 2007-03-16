@@ -1,6 +1,140 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.2.3 -> V5.2.4.pre2
+Changes: V5.2.3 -> V5.2.4.pre3
+
+2007-03-14 16:12  dts12
+
+   * agent/mibgroup/target/target.c:
+
+   CHANGES: snmpd: PATCHES: 1644280: Don't automatically probe for v3 EngineIDs.
+
+2007-03-13 10:26  dts12
+
+   * agent/mibgroup/ucd-snmp/disk.c:
+
+   Check for zero-size pseudo-filesystems. Report them as empty
+   rather than full, so they won't be treated as an error.
+
+2007-03-13 09:11  tanders
+
+   * snmplib/mib.c:
+
+   Back out changes to branches done in SVN 15953 (patch 1678302)
+   because they are only appropriate for MAIN
+
+2007-03-12 22:57  tanders
+
+   * snmplib/mib.c:
+
+   [CHANGES: PATCH: 1678302: from magfr: netsnmp_mibindex_load leaks memory - removed]
+
+2007-03-12 22:31  tanders
+
+   * net-snmp-config.in:
+
+   CHANGES: configure: PATCH: 1678298: from magfr: compile-subagent checks for bad HAVE_SIGNAL_H
+
+2007-03-12 21:37  dts12
+
+   * agent/helpers/table.c:
+
+   CHANGES: snmpd: BUG: 1413728: Reference index values in debug output correctly.
+
+2007-03-12 21:34  dts12
+
+   * agent/mibgroup/ucd-snmp/disk.c:
+
+   CHANGES: snmpd: BUG: 1102058: Skip non-mounted disks (e.g. swap partitions)
+
+2007-03-12 19:56  dts12
+
+   * agent/mibgroup/ucd-snmp/proc.c:
+
+   CHANGES: snmpd: PATCHES: 1668952: Ignore zombie processes.
+
+2007-03-12 19:51  dts12
+
+   * agent/mibgroup/mibII/vacm_vars.c, snmplib/vacm.c:
+
+   CHANGES: library: PATCHES: 1665543: Handle VACM checks correctly.
+   CHANGES: snmpd: PATCHES: 1665549: Handle creating VACM entries correctly.
+   [Both patches are required for correct operation]
+
+2007-03-12 19:47  dts12
+
+   * agent/mibgroup/smux/smux.c:
+
+   CHANGES: snmpd: PATCHES: 1659623: Handle SMUX peers with an empty password.
+
+2007-03-12 19:40  dts12
+
+   * agent/agent_trap.c:
+
+   CHANGES: snmpd: PATCHES: 1644280: Use the correct engineID when sending v3 traps.
+
+2007-03-12 19:32  dts12
+
+   * snmplib/snmp_api.c:
+
+   CHANGES: library: PATCHES: 1642071: Don't fiddle with the storage of pre-existing users.
+
+2007-03-12 19:25  dts12
+
+   *  agent/mibgroup/ucd-snmp/memory_freebsd2.c,
+      agent/mibgroup/ucd-snmp/memory_netbsd1.c:
+
+   CHANGES: snmpd: PATCHES: 1639726: Report physical memory correctly on *BSD
+
+2007-03-12 18:39  tanders
+
+   * agent/mibgroup/if-mib/ifTable/ifTable_data_access.c:
+
+   Patch from robert to fix a potential NULL dereference.
+   Backport from 5.3.x and up.
+
+2007-03-06 13:51  dts12
+
+   * agent/snmp_agent.c:
+
+   CHANGES: snmpd: BUG: 1159908: Fix memory leak
+
+2007-03-02 23:00  tanders
+
+   * snmplib/MSG00001.bin:
+
+   de-mange binary file
+
+2007-03-02 13:40  tanders
+
+   * CodingStyle:
+
+   fix typo
+
+2007-02-28 11:21  dts12
+
+   *  FAQ, README, configure, configure.in, dist/net-snmp.spec,
+      sedscript.in, snmplib/snmp_version.c:
+
+   - version tag ( 5.2.4.pre2 )
+
+2007-02-28 11:20  dts12
+
+   * CHANGES, NEWS:
+
+   version update
+
+2007-02-28 11:06  dts12
+
+   * ChangeLog:
+
+   Version update
+
+2007-02-28 11:05  dts12
+
+   * ChangeLog:
+
+   version update
+
 
 2007-02-28 11:00  dts12
 
