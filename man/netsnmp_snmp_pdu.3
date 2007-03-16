@@ -1,4 +1,4 @@
-.TH "snmp_pdu" 3 "28 Feb 2007" "Version 5.2.4.pre2" "net-snmp" \" -*- nroff -*-
+.TH "snmp_pdu" 3 "16 Mar 2007" "Version 5.2.4.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -252,14 +252,14 @@ authoritative snmpEngineID for security
 .PP
 Definition at line 156 of file snmp_api.h.
 .PP
-Referenced by snmp_free_pdu(), snmpv3_make_report(), snmpv3_packet_build(), snmpv3_parse(), and snmpv3_scopedPDU_parse().
+Referenced by send_trap_to_sess(), snmp_free_pdu(), snmpv3_make_report(), snmpv3_packet_build(), snmpv3_parse(), and snmpv3_scopedPDU_parse().
 .SS "size_t \fBsnmp_pdu::securityEngineIDLen\fP"
 .PP
 Length of securityEngineID. 
 .PP
 Definition at line 158 of file snmp_api.h.
 .PP
-Referenced by snmpv3_make_report(), snmpv3_packet_build(), snmpv3_parse(), and snmpv3_scopedPDU_parse().
+Referenced by send_trap_to_sess(), snmpv3_make_report(), snmpv3_packet_build(), snmpv3_parse(), and snmpv3_scopedPDU_parse().
 .SS "int \fBsnmp_pdu::securityLevel\fP"
 .PP
 noAuthNoPriv, authNoPriv, authPriv 
