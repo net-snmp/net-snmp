@@ -6,6 +6,14 @@ Invoke this script as:
 
         makerelease 5.x.y
 
+For pre-releases and release candidates, append the relevant suffix:
+
+	makerelease 5.x.y.preN
+or	makerelease 5.x.y.rcN
+
+Any mention of "5.x.y" or "5-x-y" in these intructions should have the
+appropriate suffix appended, in the obvious manner.
+
 Certain stages need to be handled manually - there are further
 details about these particular steps later on in this file.
 
@@ -20,13 +28,15 @@ IMPORTANT NOTE:
 ***************************************************************************
 TESTING:
 
-  1) Update the source tree to catch all recent commits.
+  1) Update the source tree to catch all recent commits,
+     and check that all local changes have been committed.
 
-     $ cvs update
+     $ svn -u status
+     $ svn    update
 
   2) Change the libtool version information in Makefile.top.
-     See MANUAL - STEP 1 later in this file.
-     This file will then be automatically committed.
+     See MANUAL - STEP 1 later in these instructions.
+     'makerelease' will commit this file automatically.
 
   3) Configure the suite with as many modules as possible,
      build and test it.  The makerelease script will use
@@ -46,13 +56,14 @@ TESTING:
 ***************************************************************************
 DOCUMENTATION:
 
-  4)  Update the version number in the doxygen.conf file (handled
-      automatically) and generate the doxygen extracted manual pages.
+  4)  Update the version number in the doxygen.conf file
+      (handled automatically by 'makerelease') and generate
+      the doxygen extracted manual pages.
 
         $ make docs
         $ make mancp
 
-     These files will then be automatically committed.
+     'makerelease' will commit this file automatically.
      Note that any new man pages should be added to Makefile.in.
      This is *NOT* currently handled by the makerelease script.
 
@@ -65,15 +76,16 @@ DOCUMENTATION:
 
         $ make distdepend
 
-     These dependencies will then be automatically committed.
+     'makerelease' will commit these dependencies automatically.
 
   7) Update the ChangeLog file with details of all (recent) changes
-     to the suite.  See MANUAL - STEP 2 later in this file.
-     The ChangeLog file will then be automatically committed.
+     to the suite.  See MANUAL - STEP 2 later in these instructions.
+     'makerelease' will commit this file automatically.
 
   8) Update the README, NEWS, and CHANGES files with details of
      significant changes to the suite.  See MANUAL - STEP 3 later
-     in this file.  These files will then be automatically committed.
+     in these instructions.
+     'makerelease' will commit these files automatically.
 
 
 ***************************************************************************
@@ -81,30 +93,28 @@ RELEASE:
 
   9) Make sure all changes are checked in:
 
-       $ cvs update
-       $ cvs update
+       $ svn -u status
+       $ svn    update
 
-     (yes, twice) search for lines beginning with 'M' to make
-     sure there are no significant changes outstanding.
      [Note that this step is omitted when running "makerelease"]
 
- 10) Change the version number in various files (README, FAQ,
-     configure.in, sedscript.in, net-snmp.spec, snmplib/version.c
-     and assorted Perl modules).
-     These files will be automatically updated and committed.
+ 10) Change the version number in various files
+       (README, FAQ, configure.in, sedscript.in, net-snmp.spec,
+        snmplib/version.c and assorted Perl modules).
+     'makerelease' will update and commit these files automatically.
 
- 11) Tag all files as relating to this release
+ 11) Create a tag checkpoint for this release:
 
-       $ cvs tag -F Ext-5-x-y
-
-     [Note this step is no longer handled by "make dist"]
+       $ svn copy  /trunk                 /tags/Ext-5-x-y
+     or
+       $ svn copy  /branches/V5-x-patches /tags/Ext-5-x-y
 
  12) Construct the tarball:
 
-        $ make dist VERSION=Ext-5-x-y CVSUSER=user
-     or
-        $ make dist VERSION=Ext-5-x-y-preN CVSUSER=user
-     (for pre-release tarballs)
+        $ svn checkout /tags/Ext-5-x-y/net-snmp net-snmp-5.x.y
+        $ tar -c -z -f net-snmp-5.x.y.tar.gz    net-snmp-5.x.y
+
+     [Ideally use "star artype=ustar ..." for optimal portability]
 
  13) Sign (or checksum) the package:
 
@@ -123,7 +133,7 @@ RELEASE TESTING:
  15) Double-check that there are no outstanding changes that have
      been missed from the CVS checkin:
 
-        $ cvs -q update
+        $ cvs -u status
 
  15) Upload the tarball (and signature file) to the SourceForge server:
  
