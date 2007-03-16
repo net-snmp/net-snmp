@@ -8,10 +8,10 @@ $0 [-v VERSION] -R -C -M -D -h
 
   -M           Modify the files with a new version (-v required)
   -v VERSION   Use VERSION as the version string
-  -T TAG       Use TAG as CVS tag (must being with Ext-)
+  -T TAG       Use TAG as SVN tag (must being with Ext-)
   -C           Commit changes to the files
-  -R           Reverse files (rm and cvs update)
-  -D           Compare files (cvs diff)
+  -R           Revert changes to the files
+  -D           Compare files (svn diff)
   -f FILE      Just do a particular file
   -t TYPE      Just do a particular type of file
   -P           Print resulting modified lines
@@ -131,11 +131,10 @@ for ($i = 0; $i <= $#exprs; $i++) {
 	# skip files that weren't specifically in the todo list if need be
 	next if ($opts{'f'} && $f ne $opts{'f'});
 
-	# remove the changes and revert to CVS
+	# remove the changes and revert to SVN
 	if ($opts{'R'}) {
 	    print "removing changes and updating $f\n" if ($opts{'V'});
-	    unlink($f);
-	    system("cvs update $f");
+	    system("svn revert $f");
 	}
 
 	# make sure it exists
@@ -170,10 +169,10 @@ for ($i = 0; $i <= $#exprs; $i++) {
 	    print "modified $f using s/$exprs[$i]->{'expr'}/$exprs[$i]->{'repl'}/\n" if ($opts{'V'});
 	}
 
-	# run CVS diff if requested.
+	# run diff if requested.
 	if ($opts{'D'}) {
 	    print "diffing $f\n" if ($opts{'V'});
-	    system("cvs diff $f");
+	    system("svn diff $f");
 	}
     }
     system($exprs[$i]->{'exec'}) if ($exprs[$i]->{'exec'});
@@ -181,12 +180,12 @@ for ($i = 0; $i <= $#exprs; $i++) {
 }
 
 #
-# CVS commit the modified files
+# commit the modified files
 #
 if ($opts{'C'}) {
     my $files = join(" ",@files);
     print "committing $files\n" if ($opts{'V'});
-    $ret = system("cvs commit -m \"- version tag ( $VERSION )\" $files");
+    $ret = system("svn commit -m \"- version tag ( $VERSION )\" $files");
     exit($ret);
 }
 
