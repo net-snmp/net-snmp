@@ -1841,11 +1841,6 @@ elif test "x$mini_agent" = "xyes"; then
    MODULECPP="$MODULECPP -DNETSNMP_MINI_AGENT"
 fi
 
-if test "x$transport_callback_disabled" = "xyes"; then
-        AC_MSG_WARN(Disabling Callback transport will disable AgentX support.)
-        new_with_out_mib_modules="agentx $new_with_out_mib_modules"
-fi
-
 # XXX: only add mibII/ipv6 on systems where it's known to build (i.e. Linux)?
 if test "x$enable_ipv6" = "xyes"; then
 	new_module_list="$new_module_list mibII/ipv6"
@@ -1971,8 +1966,10 @@ while test "x$new_module_list" != "x"; do
     #---------------------
     # build a pseudo include header that includes current config and
     # system symbols:
-    echo "#include "'"'"$ac_cv_NETSNMP_SYSTEM_INCLUDE_FILE"'"' > module_tmp_header.h
-    echo "#include "'"'"$srcdir/$mibdir/$i.h"'"' >> module_tmp_header.h
+    AC_LANG_CONFTEST(AC_LANG_SOURCE([[
+#include NETSNMP_SYSTEM_INCLUDE_FILE
+#include "$srcdir/$mibdir/$i.h"]]))
+    mv conftest.$ac_ext module_tmp_header.h
 
     #---------------------
     # macro: config_belongs_in(ARG)

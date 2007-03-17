@@ -3,6 +3,10 @@
 
 config_belongs_in(agent_module)
 
+#ifndef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
+config_error(utilities/iquery depends on the Callback transport)
+#endif
+
 void init_iquery(void);
 
 netsnmp_session *netsnmp_iquery_user_session(      char* secName);
