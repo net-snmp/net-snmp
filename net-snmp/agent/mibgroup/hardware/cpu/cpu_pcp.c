@@ -115,7 +115,7 @@ void init_cpu_pcp( void ) {
        exit (1);
     }
     cpu_num = resp->vset[NCPU]->vlist[0].value.lval;
-    free(resp);
+    pmFreeResult(resp);
 
     for (i=0; i<cpu_num ; i++) {
        cpu = netsnmp_cpu_get_byIdx( i, 1 );
@@ -181,7 +181,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
      */
 
     /* free pcp response */
-    free (resp);
+    pmFreeResult(resp);
 
     first = 0;
     return 0;
