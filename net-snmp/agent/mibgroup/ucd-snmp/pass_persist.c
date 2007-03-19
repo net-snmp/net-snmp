@@ -323,11 +323,11 @@ var_extensible_pass_persist(struct variable *vp,
                 } else if (!strncasecmp(buf, "integer64", 9)) {
                     static struct counter64 c64;
                     unsigned long long v64 = strtoull(buf2, NULL, 10);
-                    if (sizeof(long) > 4) {    // 64-bit machine
+                    if (sizeof(long) > 4) {    /* 64-bit machine */
                         c64.high = v64 >> 32;
                         c64.low = v64 & 0xffffffff;
                     }
-                    else {    // 32-bit machine
+                    else {    /* 32-bit machine */
                         *((unsigned long long *) &c64) = v64;
                     }
                     *var_len = sizeof(c64);
@@ -346,11 +346,11 @@ var_extensible_pass_persist(struct variable *vp,
                 } else if (!strncasecmp(buf, "counter64", 9)) {
                     static struct counter64 c64;
                     unsigned long long v64 = strtoull(buf2, NULL, 10);
-                    if (sizeof(long) > 4) {    // 64-bit machine
+                    if (sizeof(long) > 4) {    /* 64-bit machine */
                         c64.high = v64 >> 32;
                         c64.low = v64 & 0xffffffff;
                     }
-                    else {    // 32-bit machine
+                    else {    /* 32-bit machine */
                         *((unsigned long long *) &c64) = v64;
                     }
                     *var_len = sizeof(c64);
