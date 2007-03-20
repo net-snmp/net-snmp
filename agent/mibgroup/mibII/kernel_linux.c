@@ -28,20 +28,27 @@ struct udp_mib  cached_udp_mib;
 #define ICMP_STATS_LINE	"Icmp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu"
 #define TCP_STATS_LINE	"Tcp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu"
 #define UDP_STATS_LINE	"Udp: %lu %lu %lu %lu"
+#define UDP6_STATS_LINE "Udp6"
 
 #define IP_STATS_PREFIX_LEN	4
 #define ICMP_STATS_PREFIX_LEN	6
 #define TCP_STATS_PREFIX_LEN	5
 #define UDP_STATS_PREFIX_LEN	5
+#define UDP6_STATS_PREFIX_LEN   4
 
 
 int
 linux_read_mibII_stats(void)
 {
     FILE           *in = fopen("/proc/net/snmp", "r");
+#ifdef NETSNMP_ENABLE_IPV6
+    FILE           *in6;
+    unsigned long   value;
+#endif
     char            line[1024];
 
     if (!in) {
+        DEBUGMSGTL(("mibII/kernel_linux","Unable to open /proc/net/snmp"));
         return -1;
     }
 
@@ -124,6 +131,35 @@ linux_read_mibII_stats(void)
         }
     }
     fclose(in);
+
+#ifdef NETSNMP_ENABLE_IPV6
+    in6 = fopen("/proc/net/snmp6", "r");
+    if (in6) {
+      
+        while (line == fgets(line, sizeof(line), in6)) {
+
+            if (('U' != line[0]) ||
+                (0 != strncmp(line, UDP6_STATS_LINE, UDP6_STATS_PREFIX_LEN)))
+                continue;
+
+            sscanf(line, "%*s %lu" , &value);
+                 
+            if ('O' == line[4]) /* Udp6OutDatagrams */
+                cached_udp_mib.udpOutDatagrams += value;
+            else if ('N' == line[4]) /* Udp6NoPorts */
+                cached_udp_mib.udpNoPorts += value;
+            else if ('D' == line[6]) /* Udp6InDatagrams */
+                cached_udp_mib.udpInDatagrams += value;
+            else if ('E' == line[6]) /* Udp6InErrors */
+                cached_udp_mib.udpInErrors += value;
+
+        }
+        fclose(in6);
+    } else {
+        DEBUGMSGTL(("mibII/kernel_linux","Unable to open /proc/net/snmp6"));
+    }
+
+#endif
 
     /*
      * Tweak illegal values:
