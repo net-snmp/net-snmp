@@ -357,12 +357,12 @@ EXPORTS
 	optind                  DATA
 	optopt                  DATA
 	optreset                DATA
-	usmNoAuthProtocol
-	usmHMACMD5AuthProtocol
-	usmHMACSHA1AuthProtocol
-	usmNoPrivProtocol
-	usmDESPrivProtocol
-	usmAESPrivProtocol
+	usmNoAuthProtocol       DATA
+	usmHMACMD5AuthProtocol  DATA
+	usmHMACSHA1AuthProtocol DATA
+	usmNoPrivProtocol       DATA
+	usmDESPrivProtocol      DATA
+	usmAESPrivProtocol      DATA
 	snprint_bitstring
 	snprint_value
 	snprint_objid
