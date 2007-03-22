@@ -197,12 +197,9 @@ extern char   **argvrestartp;
 extern char    *argvrestart;
 extern char    *argvrestartname;
 
-#define NUM_SOCKETS	32
-
 #ifdef USING_SMUX_MODULE
 #include <mibgroup/smux/smux.h>
-static int      sdlist[NUM_SOCKETS], sdlen = 0;
-#endif                          /* USING_SMUX_MODULE */
+#endif /* USING_SMUX_MODULE */
 
 /*
  * Prototypes.
@@ -1122,9 +1119,14 @@ receive(void)
             FD_SET(smux_listen_sd, &readfds);
             numfds =
                 smux_listen_sd >= numfds ? smux_listen_sd + 1 : numfds;
-            for (i = 0; i < sdlen; i++) {
-                FD_SET(sdlist[i], &readfds);
-                numfds = sdlist[i] >= numfds ? sdlist[i] + 1 : numfds;
+
+            for (i = 0; i < smux_snmp_select_list_get_length(); i++) {
+                sd = smux_snmp_select_list_get_SD_from_List(i);
+                if (sd != 0)
+                {
+                   FD_SET(sd, &readfds);
+                   numfds = sd >= numfds ? sd + 1 : numfds;
+                }
             }
         }
 #endif                          /* USING_SMUX_MODULE */
@@ -1146,13 +1148,11 @@ receive(void)
              * handle the SMUX sd's 
              */
             if (smux_listen_sd >= 0) {
-                for (i = 0; i < sdlen; i++) {
-                    if (FD_ISSET(sdlist[i], &readfds)) {
-                        if (smux_process(sdlist[i]) < 0) {
-                            for (; i < (sdlen - 1); i++) {
-                                sdlist[i] = sdlist[i + 1];
-                            }
-                            sdlen--;
+                for (i = 0; i < smux_snmp_select_list_get_length(); i++) {
+                    sd = smux_snmp_select_list_get_SD_from_List(i);
+                    if (FD_ISSET(sd, &readfds)) {
+                        if (smux_process(sd) < 0) {
+                            smux_snmp_select_list_del(sd);
                         }
                     }
                 }
@@ -1161,10 +1161,11 @@ receive(void)
                  */
                 if (FD_ISSET(smux_listen_sd, &readfds)) {
                     if ((sd = smux_accept(smux_listen_sd)) >= 0) {
-                        sdlist[sdlen++] = sd;
+                        smux_snmp_select_list_add(sd);
                     }
                 }
             }
+
 #endif                          /* USING_SMUX_MODULE */
             netsnmp_dispatch_external_events(&count, &readfds,
                                            &writefds, &exceptfds);
