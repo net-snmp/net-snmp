@@ -115,6 +115,8 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
     char                 *ptr, *sep;
     u_char               *u_ptr;
     size_t                u_ptr_len, offset, len;
+    unsigned long long    inode;
+    size_t                count = 0;
 
     /*
      * skip 'sl'
@@ -210,10 +212,15 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
     ep->state = strtol(ptr, &ptr, 16);
 
     /*
-     * no support for instance, just set it to zero to obtain the
-     * original behavior.
+     * Use inode as instance value.
      */
-    ep->instance = 0;
+    while (count != 5) {
+	ptr = skip_white(ptr);
+	ptr = skip_not_white(ptr);
+	count++;
+    }
+    inode = strtoull(ptr, &ptr, 0);
+    ep->instance = (u_int)inode;
 
     ep->index = (u_int)(lpi->user_context);
     lpi->user_context = (void*)((u_int)(lpi->user_context) + 1);
