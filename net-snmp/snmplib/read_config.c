@@ -172,9 +172,11 @@ register_app_prenetsnmp_mib_handler(const char *token,
  * management of where to put tokens as the module or modules get more complex
  * in regard to handling token registrations.
  *
- * @param type_param the configuration file used, e.g., if snmp.conf is the file
- *                 where the token is located use "snmp" here.
- *                 If NULL the configuration file used will be snmpd.conf.
+ * @param type_param the configuration file used, e.g., if snmp.conf is the
+ *                 file where the token is located use "snmp" here.
+ *                 Multiple colon separated tokens might be used.
+ *                 If NULL or "" then the configuration file used will be
+ *                 <application>.conf.
  *
  * @param token    the token being parsed from the file.  Must be non-NULL.
  *
@@ -199,12 +201,10 @@ register_config_handler(const char *type_param,
                         void (*releaser) (void), const char *help)
 {
     struct config_files **ctmp = &config_files;
-    struct config_line **ltmp, *ltmp2;
-    const char     *type = type_param;
-    char           *cptr, buf[STRINGMAX];
-    char           *st;
+    struct config_line  **ltmp;
+    const char           *type = type_param;
 
-    if (type == NULL) {
+    if (type == NULL || *type == '\0') {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				     NETSNMP_DS_LIB_APPTYPE);
     }
@@ -212,15 +212,20 @@ register_config_handler(const char *type_param,
     /*
      * Handle multiple types (recursively)
      */
-    cptr = strchr( type, ':' );
-    if (cptr) {
-        strncpy(buf, type, STRINGMAX);
+    if (strchr(type, ':')) {
+        struct config_line *ltmp2 = NULL;
+        char                buf[STRINGMAX];
+        char               *cptr = buf;
+        strncpy(buf, type, STRINGMAX - 1);
         buf[STRINGMAX - 1] = '\0';
-        ltmp2 = NULL;
-        cptr = strtok_r(buf, ":", &st);
         while (cptr) {
-            ltmp2 = register_config_handler(cptr, token, parser, releaser, help);
-            cptr  = strtok_r(NULL, ":", &st);
+            char* c = cptr;
+            cptr = strchr(cptr, ':');
+            if(cptr) {
+                *cptr = '\0';
+                ++cptr;
+            }
+            ltmp2 = register_config_handler(c, token, parser, releaser, help);
         }
         return ltmp2;
     }
