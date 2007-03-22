@@ -350,7 +350,7 @@ var_smux_write(int action,
     u_char          buf[SMUXMAXPKTSIZE], *ptr, sout[3], type;
     int             reterr;
     size_t          var_len, datalen, name_length, packet_len;
-    ssize_t         len;
+    ssize_t         len, tmp_len;
     long            reqid, errsts, erridx;
     u_char          var_type, *dataptr;
 
@@ -426,12 +426,17 @@ var_smux_write(int action,
              */
             if ((len = recv(rptr->sr_fd, buf,
                             SMUXMAXPKTSIZE, MSG_PEEK)) <= 0) {
+                if ((len == -1) && ((errno == EINTR) || (errno == EAGAIN)))
+                {
+                   continue;
+                }
                 DEBUGMSGTL(("smux",
                             "[var_smux_write] peek failed or timed out\n"));
                 /*
                  * do we need to do a peer cleanup in this case?? 
                  */
                 smux_peer_cleanup(rptr->sr_fd);
+                smux_snmp_select_list_del(rptr->sr_fd);
                 return SNMP_ERR_GENERR;
             }
 
@@ -455,13 +460,19 @@ var_smux_write(int action,
             /*
              * receive the first packet 
              */
-            if ((len = recv(rptr->sr_fd, buf, len, 0)) <= 0) {
+            tmp_len = len;
+            do
+            {
+               len = tmp_len;
+               len = recv(rptr->sr_fd, buf, len, 0);
+            }
+            while((len == -1) && ((errno == EINTR) || (errno == EAGAIN)));
+
+            if (len <= 0) {
                 DEBUGMSGTL(("smux",
                             "[var_smux_write] recv failed or timed out\n"));
-                /*
-                 * do we need to do a peer cleanup in this case?? 
-                 */
                 smux_peer_cleanup(rptr->sr_fd);
+                smux_snmp_select_list_del(rptr->sr_fd);
                 return SNMP_ERR_GENERR;
             }
 
@@ -593,7 +604,13 @@ smux_accept(int sd)
         /*
          * now block for an OpenPDU 
          */
-        if ((length = recv(fd, (char *) data, SMUXMAXPKTSIZE, 0)) <= 0) {
+        do
+        {
+           length = recv(fd, (char *) data, SMUXMAXPKTSIZE, 0);
+        }
+        while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
+
+        if (length <= 0) {
             DEBUGMSGTL(("smux",
                         "[smux_accept] peer on fd %d died or timed out\n",
                         fd));
@@ -660,10 +677,45 @@ smux_accept(int sd)
 int
 smux_process(int fd)
 {
-    int             length;
+    int             length, tmp_length;
     u_char          data[SMUXMAXPKTSIZE];
+    u_char          type, *ptr;
+    size_t          packet_len;
 
-    length = recv(fd, (char *) data, SMUXMAXPKTSIZE, 0);
+    do
+    {
+       length = recv(fd, (char *) data, SMUXMAXPKTSIZE, MSG_PEEK);
+    }
+    while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
+
+    if (length <= 0)
+    {
+       snmp_log_perror("[smux_process] peek failed");
+       smux_peer_cleanup(fd);
+       return -1;
+    }
+
+    /*
+     * determine if we received more than one packet 
+     */
+    packet_len = length;
+    ptr = asn_parse_header(data, &packet_len, &type);
+    packet_len += (ptr - data);
+    if (length > packet_len) {
+        /*
+         * set length to receive only the first packet 
+         */
+        length = packet_len;
+    }
+
+    tmp_length = length;
+    do
+    {
+       length = tmp_length;
+       length = recv(fd, (char *) data, length, 0);
+    }
+    while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
+
     if (length <= 0) {
         /*
          * the peer went away, close this descriptor 
@@ -729,7 +781,16 @@ smux_pdu_process(int fd, u_char * data, size_t length)
             break;
         case SMUX_TRAP:
             snmp_log(LOG_INFO, "Got trap from peer on fd %d\n", fd);
-            ptr = smux_trap_process(ptr, &len);
+            if (ptr != 0)
+            {
+               DEBUGMSGTL(("smux", "[smux_pdu_process] call smux_trap_process.\n"));
+               ptr = smux_trap_process(ptr, &len);
+            }
+            else
+            {
+               DEBUGMSGTL(("smux", "[smux_pdu_process] smux_trap_process not called: ptr=NULL.\n"));
+               DEBUGMSGTL(("smux", "[smux_pdu_process] Error: \n%s\n", snmp_api_errstring(0)));
+            }
             /*
              * watch out for close on top of this...should return correct end 
              */
@@ -1263,6 +1324,7 @@ smux_snmp_process(int exact,
 {
     u_char          packet[SMUXMAXPKTSIZE], *ptr, result[SMUXMAXPKTSIZE];
     int             length = SMUXMAXPKTSIZE;
+    int             tmp_length;
     u_char          type;
     size_t          packet_len;
 
@@ -1298,10 +1360,18 @@ smux_snmp_process(int exact,
          * peek at what's received 
          */
         length = recv(sd, (char *) result, SMUXMAXPKTSIZE, MSG_PEEK);
-        if (length < 0) {
-            snmp_log_perror("[smux_snmp_process] peek failed");
-            smux_peer_cleanup(sd);
-            return NULL;
+        if (length <= 0) {
+            if ((length == -1) && ((errno == EINTR) || (errno == EAGAIN)))
+            {
+               continue;
+            }
+            else
+            {
+               snmp_log_perror("[smux_snmp_process] peek failed");
+               smux_peer_cleanup(sd);
+               smux_snmp_select_list_del(sd);
+               return NULL;
+            }
         }
 
         DEBUGMSGTL(("smux", "[smux_snmp_process] Peeked at %d bytes\n",
@@ -1324,11 +1394,19 @@ smux_snmp_process(int exact,
         /*
          * receive the first packet 
          */
-        length = recv(sd, (char *) result, length, 0);
-        if (length < 0) {
-            snmp_log_perror("[smux_snmp_process] recv failed");
-            smux_peer_cleanup(sd);
-            return NULL;
+        tmp_length = length;
+        do
+        {
+           length = tmp_length;
+           length = recv(sd, (char *) result, length, 0);
+        }
+        while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
+
+        if (length <= 0) {
+           snmp_log_perror("[smux_snmp_process] recv failed");
+           smux_peer_cleanup(sd);
+           smux_snmp_select_list_del(sd);
+           return NULL;
         }
 
         DEBUGMSGTL(("smux", "[smux_snmp_process] Received %d bytes\n",
@@ -1946,3 +2024,50 @@ smux_trap_process(u_char * rsp, size_t * len)
 
 }
 
+#define NUM_SOCKETS	32
+static int      sdlist[NUM_SOCKETS], sdlen = 0;
+
+int smux_snmp_select_list_add(int sd)
+{
+   if (sdlen < NUM_SOCKETS)
+   {
+      sdlist[sdlen++] = sd;
+      return(1);
+   }
+   return(0);
+}
+
+int smux_snmp_select_list_del(int sd)
+{
+   int i, found=0;
+
+   for (i = 0; i < (sdlen); i++) {
+      if (sdlist[i] == sd)
+      {
+         sdlist[i] = 0;
+         found = 1;
+      }
+      if ((found) &&(i < (sdlen - 1)))
+         sdlist[i] = sdlist[i + 1];
+   }
+   if (found)
+   {
+      sdlen--;
+      return(1);
+   }
+   return(0);
+}
+
+int smux_snmp_select_list_get_length()
+{
+   return(sdlen);
+}
+
+int smux_snmp_select_list_get_SD_from_List(int pos)
+{
+   if (pos < NUM_SOCKETS)
+   {
+      return(sdlist[pos]);
+   }
+   return(0);
+}
