@@ -2087,8 +2087,10 @@ _snmpNotifyFilterTable_container_row_save(snmpNotifyFilterTable_rowreq_ctx
      * column values, 12 bytes [11 for oid + 1 for ':'] per
      * column are added).
      */
-        /** xxx: add storage for external index(s)! */
+
 #define MAX_ROW_SIZE (sizeof(row_token) + 1 +  \
+        ( 12 * 128 ) + /* ASN_OBJECT_ID snmpNotifyFilterSubtree and */ \
+                       /* ASN_OCTET_STR snmpNotifyFilterProfileName indices */ \
         ( ( 2 * sizeof(rowreq_ctx->data.snmpNotifyFilterMask) ) + 3 ) + /* ASN_OCTET_STR */ \
         ( 12 ) + /* ASN_INTEGER snmpNotifyFilterType */ \
         ( 12 ) + /* ASN_INTEGER snmpNotifyFilterStorageType */ \
