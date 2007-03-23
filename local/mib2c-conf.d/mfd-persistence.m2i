@@ -171,6 +171,7 @@ _${context}_container_row_save(
         /** xxx: add storage for external index(s)! */
 #define MAX_ROW_SIZE (sizeof(row_token) + 1 +  \
 @   if $ext_index != 0@
+        ( 12 * 128 ) + /* external interfaces - max 128 subids */ \
 @   end@
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
