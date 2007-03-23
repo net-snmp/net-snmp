@@ -908,6 +908,9 @@
 /* Define to 1 if you have the <sys/sema.h> header file. */
 #undef HAVE_SYS_SEMA_H
 
+/* Define to 1 if you have the <sys/poll.h> header file. */
+#undef HAVE_SYS_POLL_H
+
 /* Define to 1 if you have the <sys/socketvar.h> header file. */
 #undef HAVE_SYS_SOCKETVAR_H
 
