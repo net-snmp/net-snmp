@@ -198,9 +198,9 @@ struct snmp_session {
     struct snmp_session *subsession;
     struct snmp_session *next;
 
-    /** Domain name or dotted IP address of default peer */
+    /** name or address of default peer (may include transport specifier and/or port number) */
     char           *peername;
-    /** UDP port number of peer. */
+    /** UDP port number of peer. (NO LONGER USED - USE peername INSTEAD) */
     u_short         remote_port;
     /** My Domain name or dotted IP address, 0 for default */
     char           *localname;
