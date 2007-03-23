@@ -1582,6 +1582,8 @@ snmp_sess_add_ex(netsnmp_session * in_session,
         }
     }
 
+    slp->session->flags &= ~SNMP_FLAGS_DONT_PROBE;
+
     return (void *) slp;
 }                               /*  end snmp_sess_add_ex()  */
 
