@@ -196,7 +196,7 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
                     offset, line_info->start));
         return PMLP_RC_MEMORY_UNUSED;
     }
-    ep->loc_addr_len = offset;
+    ep->rmt_addr_len = offset;
     ptr += (offset * 2);
     ++ptr; /* skip ':' */
 
