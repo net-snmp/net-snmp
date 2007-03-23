@@ -273,7 +273,6 @@ update_config(void)
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_PRE_UPDATE_CONFIG, NULL);
     free_config();
-    vacm_standard_views(0,0,NULL,NULL);
     read_configs();
 }
 
