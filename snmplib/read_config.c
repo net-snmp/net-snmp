@@ -845,6 +845,9 @@ read_configs(void)
     char *optional_config = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					       NETSNMP_DS_LIB_OPTIONALCONFIG);
 
+    snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
+                        SNMP_CALLBACK_PRE_READ_CONFIG, NULL);
+
     DEBUGMSGTL(("read_config", "reading normal configuration tokens\n"));
 
     if ((NULL != optional_config) && (*optional_config == '-')) {
@@ -873,6 +876,9 @@ read_premib_configs(void)
 {
     char *optional_config = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					       NETSNMP_DS_LIB_OPTIONALCONFIG);
+
+    snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
+                        SNMP_CALLBACK_PRE_PREMIB_READ_CONFIG, NULL);
 
     DEBUGMSGTL(("read_config", "reading premib configuration tokens\n"));
 
