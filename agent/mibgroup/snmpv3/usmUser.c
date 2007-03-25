@@ -1352,6 +1352,8 @@ write_usmUserStatus(int action,
         if (usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
                           &engineID, &engineIDLen, (u_char **) & newName,
                           &nameLen)) {
+            DEBUGMSGTL(("usmUser",
+                        "can't parse the OID for engineID or name\n"));
             return SNMP_ERR_INCONSISTENTNAME;
         }
 
@@ -1462,9 +1464,12 @@ write_usmUserStatus(int action,
             }
         }
     } else if (action == UNDO || action == FREE) {
-        usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
+        if (usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
                       &engineID, &engineIDLen, (u_char **) & newName,
-                      &nameLen);
+                      &nameLen)) {
+            /* Can't extract engine info from the OID - nothing to undo */
+            return SNMP_ERR_NOERROR;
+        }
         uptr = usm_get_user(engineID, engineIDLen, newName);
         SNMP_FREE(engineID);
         SNMP_FREE(newName);
