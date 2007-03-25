@@ -346,15 +346,15 @@ write_rte(int action,
 
         if (action == RESERVE1) {
 
-            if (var_val_type != ASN_OCTET_STR) {
-                snmp_log(LOG_ERR, "not octet");
+            if (var_val_type != ASN_IPADDRESS) {
+                snmp_log(LOG_ERR, "not IP address");
                 return SNMP_ERR_WRONGTYPE;
             }
 
             memcpy(buf, var_val, (var_val_len > 8) ? 8 : var_val_len);
 
-            if (var_val_type != ASN_OCTET_STR) {
-                snmp_log(LOG_ERR, "not octet2");
+            if (var_val_type != ASN_IPADDRESS) {
+                snmp_log(LOG_ERR, "not IP address 2");
                 return SNMP_ERR_WRONGTYPE;
             }
 
@@ -421,14 +421,14 @@ write_rte(int action,
 
         if (action == RESERVE1) {
 
-            if (var_val_type != ASN_OCTET_STR) {
+            if (var_val_type != ASN_IPADDRESS) {
                 snmp_log(LOG_ERR, "not right4");
                 return SNMP_ERR_WRONGTYPE;
             }
 
             memcpy(buf, var_val, (var_val_len > 8) ? 8 : var_val_len);
 
-            if (var_val_type != ASN_OCTET_STR) {
+            if (var_val_type != ASN_IPADDRESS) {
                 snmp_log(LOG_ERR, "not right5");
                 return SNMP_ERR_WRONGTYPE;
             }
