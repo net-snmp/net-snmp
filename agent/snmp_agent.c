@@ -2177,6 +2177,10 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
                 (netsnmp_variable_list **) malloc(asp->pdu->errindex * r *
                                                   sizeof(struct
                                                          varbind_list *));
+            if (!asp->bulkcache) {
+                DEBUGMSGTL(("snmp_agent", "Bulkcache malloc failed\n"));
+                return SNMP_ERR_GENERR;
+            }
         }
         DEBUGMSGTL(("snmp_agent", "GETBULK N = %d, M = %d, R = %d\n",
                     n, asp->pdu->errindex, r));
@@ -2214,12 +2218,13 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
                             SNMP_MALLOC_STRUCT(variable_list);
                         /*
                          * don't clone the oid as it's got to be
-                         * overwwritten anyway 
+                         * overwritten anyway 
                          */
                         if (!vbptr->next_variable) {
                             /*
                              * XXXWWW: ack!!! 
                              */
+                            DEBUGMSGTL(("snmp_agent", "NextVar malloc failed\n"));
                         } else {
                             vbptr = vbptr->next_variable;
                             vbptr->name_length = 0;
