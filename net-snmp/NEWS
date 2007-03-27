@@ -7,14 +7,16 @@ listing of all changes made to the code.
 *5.2.4*
 
     snmpd:
-      - handle row deletion issues in dataset tables
+      - [PATCH 1666737]: include ipv6 counts in udp statistics
       - [BUG 1527930]: fix smux authentication
+      - handle row deletion issues in dataset tables
+
 
     library:
+      - [PATCH 1553447]: responses will get sent from the
+                         original dest IP address when possible.
       - *really* make SNMPv3 traps work again (user creation; 
         announced as fixed in 5.2.3, but this wasn't the case)
-      - [PATCH 1553447]: responses will get sent from the
-        original dest IP address when possible.
 
     Perl:
       - gettable() was fairly broken in the 5.3.1 release.

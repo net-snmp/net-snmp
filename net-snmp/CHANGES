@@ -18,12 +18,15 @@ listing of all changes made to the code.
       - [PATCH 1640114]: Don't store trailing null character.
       - [PATCH 1641895]: Extend short view masks (as per RFC specs)
       - [PATCH 1642071]: Don't fiddle with the storage of pre-existing users.
+      - [PATCH 1653670]: Consistent SNMPv3 behaviour when opening sessions.
       - [PATCH 1665543]: Handle VACM checks correctly.
+      - [PATCH 1681030]: Better handling of empty apptype configs.
       - [BUG 1537459]: Fix missing MIB parsing tokens
       - [BUG 1540745]: Fix missing MIB parsing tokens
       - [BUG 1554989]: Fix handling of OID comparisons.
       - [BUG 1600171]: Support longer community strings in VACM config.
       - [BUG 1660061]: Validate engineIDs more strictly.
+      - [BUG 1686384]: Document non-use of 'remote_port' field.
 
     snmpd:
       - [PATCH 1047706]: make end-of-mib-view RFC compliant
@@ -46,6 +49,7 @@ listing of all changes made to the code.
                          deprecated copy_word by copy_nword.
       - [PATCH 1659623]: Handle SMUX peers with an empty password.
       - [PATCH 1665549]: Handle creating VACM entries correctly.
+      - [PATCH 1666737]: include ipv6 counts in udp statistics.
       - [PATCH 1668952]: Ignore zombie processes.
       - [BUG  711465]: Fix BulkGet handling of override entries.
       - [BUG 1102058]: Skip non-mounted disks (e.g. swap partitions)
@@ -59,6 +63,8 @@ listing of all changes made to the code.
       - [BUG 1559358]: check scanf results for diskio scanning
       - [BUG 1600432]: Handle signals properly when restarting the agent.
       - [BUG 1633595]: Fix AgentX handling of Counter64 values
+      - [BUG 1677063]: Check for failed malloc calls.
+      - [BUG 1685081]: Check for valid OID on Free/Undo passes.
       - patch from Wojtek Jawor to handle row deletion issues in dataset tables
 
     snmpdf:
@@ -72,6 +78,7 @@ listing of all changes made to the code.
       - [PATCH 1678298]: compile-subagent checks for bad HAVE_SIGNAL_H
       - [BUG 1096166]: Handle --without-logfile correctly.
       - [BUG 1564233]: Have configure test for rpm headers not just the libraries
+      - [BUG 1567324]: Clarify prompting for user-supplied values.
       - [BUG 1585156]: Fix --without-perl-modules
       - add configure check for hasmntopt to fix the build on systems that lack it
       - yet another fix to address build issues with ethtool (on RH9).
@@ -85,7 +92,9 @@ listing of all changes made to the code.
       - [BUG 1577913]: add missing manual pages for executables, supplied by Debian
 
     mib2c:
+      - [PATCH 1427712]: Better handling of non-integer values and valid column range.
       - [PATCH 1668171]: skip unknown cols in min/max range for tables, instead of error
+      - [BUG 833673]: More focused size checks.
       - [BUG 1429472]: Protect against missing instances (and invalid objects)
       - [BUG 1479916]: Restore consistency in row creation code.
       - [BUG 1582972]: Handle @while@/@end@ properly.
