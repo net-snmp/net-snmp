@@ -1,0 +1,619 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>netSnmpVacmMIB</b>
+MIB object, which is defined within the <b>NET-SNMP-VACM-MIB</b> MIB
+document as <b>.1.3.6.1.4.1.8072.1.9</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#nsVacmAccessTable">nsVacmAccessTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="nsVacmAccessTable" /><h3>Table nsVacmAccessTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>nsVacmAccessTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>NET-SNMP-VACM-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.8072.1.9.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Net-SNMP extensions to vacmAccessTable.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="nsVacmAccessEntry" />Row Description</td>
+<td>
+<pre>
+Net-SNMP extensions to vacmAccessTable.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>nsVacmAccessTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="vacmGroupName" />
+3
+<br /><b>vacmGroupName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of the group to which this entry (e.g., the
+combination of securityModel and securityName)
+belongs.
+
+This groupName is used as index into the
+vacmAccessTable to select an access control policy.
+However, a value in this table does not imply that an
+instance with the value exists in table vacmAccesTable.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmAccessContextPrefix" />
+1
+<br /><b>vacmAccessContextPrefix</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+In order to gain the access rights allowed by this
+conceptual row, a contextName must match exactly
+(if the value of vacmAccessContextMatch is 'exact')
+or partially (if the value of vacmAccessContextMatch
+is 'prefix') to the value of the instance of this
+object.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmAccessSecurityModel" />
+2
+<br /><b>vacmAccessSecurityModel</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#SnmpSecurityModel">SnmpSecurityModel</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpSecurityModel"> SnmpSecurityModel TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+In order to gain the access rights allowed by this
+conceptual row, this securityModel must be in use.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmAccessSecurityLevel" />
+3
+<br /><b>vacmAccessSecurityLevel</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#SnmpSecurityLevel">SnmpSecurityLevel</a>
+     <br>(ENUM list below)
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpSecurityLevel"> SnmpSecurityLevel TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The minimum level of security required in order to
+gain the access rights allowed by this conceptual
+row.  A securityLevel of noAuthNoPriv is less than
+authNoPriv which in turn is less than authPriv.
+
+If multiple entries are equally indexed except for
+this vacmAccessSecurityLevel index, then the entry
+which has the highest value for
+vacmAccessSecurityLevel is selected.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="nsVacmAuthType" />
+1
+<br /><b>nsVacmAuthType</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The type of processing that the specified view
+should be applied to.   See 'snmpd.conf(5)' and
+'snmptrapd.conf(5)' for details.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other nsVacmAccessTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="nsVacmContextMatch" />
+2
+<br /><b>nsVacmContextMatch</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>exact</td></tr>
+        <tr><td>2</td><td>prefix</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+If the value of this object is exact(1), then all
+rows where the contextName exactly matches
+vacmAccessContextPrefix are selected.
+
+If the value of this object is prefix(2), then all
+rows where the contextName whose starting octets
+exactly match vacmAccessContextPrefix are selected.
+This allows for a simple form of wildcarding.
+
+The value of this object should be consistent across
+all nsVacmAccessEntries corresponding to a single
+row of the vacmAccessTable.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="nsVacmViewName" />
+3
+<br /><b>nsVacmViewName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The MIB view authorised for the appropriate style
+of processing (as indicated by nsVacmToken).
+
+The interpretation of this value is the same as for
+the standard VACM ViewName objects.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="nsVacmStorageType" />
+4
+<br /><b>nsVacmStorageType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#StorageType">StorageType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#StorageType"> StorageType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The storage type for this (group of) conceptual rows.
+Conceptual rows having the value 'permanent' need not
+                 allow write-access to any columnar objects in the row.
+The value of this object should be consistent across
+                 all nsVacmAccessEntries corresponding to a single
+                 row of the vacmAccessTable.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="nsVacmStatus" />
+5
+<br /><b>nsVacmStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The status of this (group of) conceptual rows.
+The  RowStatus TC [RFC2579] requires that this
+                 DESCRIPTION clause states under which circumstances
+                 other objects in this row can be modified:
+The value of this object has no effect on whether
+                 other objects in this conceptual row can be modified.
+The value of this object should be consistent across
+                 all nsVacmAccessEntries corresponding to a single
+                 row of the vacmAccessTable.
+                
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <br>
+  <table bgcolor="#ffdddd" border=1><tr><td>
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+  </table>
+<hr />
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<hr />
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="SnmpSecurityLevel">SnmpSecurityLevel</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>noAuthNoPriv</td></tr><tr><td>2</td><td>authNoPriv</td></tr><tr><td>3</td><td>authPriv</td></tr></table></td><td><pre>A Level of Security at which SNMP messages can be
+sent or with which operations are being processed;
+in particular, one of:
+
+  noAuthNoPriv - without authentication and
+                 without privacy,
+  authNoPriv   - with authentication but
+                 without privacy,
+  authPriv     - with authentication and
+                 with privacy.
+
+These three values are ordered such that
+noAuthNoPriv is less than authNoPriv and
+authNoPriv is less than authPriv.
+                </pre></td></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre>Describes the memory realization of a conceptual row.  A
+row which is volatile(2) is lost upon reboot.  A row which
+is either nonVolatile(3), permanent(4) or readOnly(5), is
+backed up by stable storage.  A row which is permanent(4)
+can be changed but not deleted.  A row which is readOnly(5)
+cannot be changed nor deleted.
+
+If the value of an object with this syntax is either
+permanent(4) or readOnly(5), it cannot be written.
+Conversely, if the value is either other(1), volatile(2) or
+nonVolatile(3), it cannot be modified to be permanent(4) or
+readOnly(5).  (All illegal modifications result in a
+'wrongValue' error.)
+
+Every usage of this textual convention is required to
+specify the columnar objects which a permanent(4) row must
+at a minimum allow to be writable.</pre></td></tr>
+<tr><td><a name="SnmpSecurityModel">SnmpSecurityModel</td><td>INTEGER</td><td><pre>An identifier that uniquely identifies a
+Security Model of the Security Subsystem within
+this SNMP Management Architecture.
+
+The values for securityModel are allocated as
+follows:
+
+- The zero value does not identify any particular
+  security model.
+
+- Values between 1 and 255, inclusive, are reserved
+  for standards-track Security Models and are
+  managed by the Internet Assigned Numbers Authority
+  (IANA).
+- Values greater than 255 are allocated to
+  enterprise-specific Security Models.  An
+  enterprise-specific securityModel value is defined
+  to be:
+
+  enterpriseID * 256 + security model within
+  enterprise
+
+  For example, the fourth Security Model defined by
+  the enterprise whose enterpriseID is 1 would be
+  259.
+
+This scheme for allocation of securityModel
+values allows for a maximum of 255 standards-
+based Security Models, and for a maximum of
+256 Security Models per enterprise.
+
+It is believed that the assignment of new
+securityModel values will be rare in practice
+because the larger the number of simultaneously
+utilized Security Models, the larger the
+chance that interoperability will suffer.
+Consequently, it is believed that such a range
+will be sufficient.  In the unlikely event that
+the standards committee finds this number to be
+insufficient over time, an enterprise number
+can be allocated to obtain an additional 256
+possible values.
+
+Note that the most significant bit must be zero;
+hence, there are 23 bits allocated for various
+organizations to design and define non-standard
+
+securityModels.  This limits the ability to
+define new proprietary implementations of Security
+Models to the first 8,388,608 enterprises.
+
+It is worthwhile to note that, in its encoded
+form, the securityModel value will normally
+require only a single byte since, in practice,
+the leftmost bits will be zero for most messages
+and sign extension is suppressed by the encoding
+rules.
+
+As of this writing, there are several values
+of securityModel defined for use with SNMP or
+reserved for use with supporting MIB objects.
+They are as follows:
+
+    0  reserved for 'any'
+    1  reserved for SNMPv1
+    2  reserved for SNMPv2c
+    3  User-Based Security Model (USM)
+                </pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre>The RowStatus textual convention is used to manage the
+creation and deletion of conceptual rows, and is used as the
+value of the SYNTAX clause for the status column of a
+conceptual row (as described in Section 7.7.1 of [2].)
+
+The status column has six defined values:
+
+     - `active', which indicates that the conceptual row is
+     available for use by the managed device;
+
+     - `notInService', which indicates that the conceptual
+     row exists in the agent, but is unavailable for use by
+     the managed device (see NOTE below); 'notInService' has
+     no implication regarding the internal consistency of
+     the row, availability of resources, or consistency with
+     the current state of the managed device;
+
+     - `notReady', which indicates that the conceptual row
+     exists in the agent, but is missing information
+     necessary in order to be available for use by the
+     managed device (i.e., one or more required columns in
+     the conceptual row have not been instanciated);
+
+     - `createAndGo', which is supplied by a management
+     station wishing to create a new instance of a
+     conceptual row and to have its status automatically set
+     to active, making it available for use by the managed
+     device;
+
+     - `createAndWait', which is supplied by a management
+     station wishing to create a new instance of a
+     conceptual row (but not make it available for use by
+     the managed device); and,
+     - `destroy', which is supplied by a management station
+     wishing to delete all of the instances associated with
+     an existing conceptual row.
+
+Whereas five of the six values (all except `notReady') may
+be specified in a management protocol set operation, only
+three values will be returned in response to a management
+protocol retrieval operation:  `notReady', `notInService' or
+`active'.  That is, when queried, an existing conceptual row
+has only three states:  it is either available for use by
+the managed device (the status column has value `active');
+it is not available for use by the managed device, though
+the agent has sufficient information to attempt to make it
+so (the status column has value `notInService'); or, it is
+not available for use by the managed device, and an attempt
+to make it so would fail because the agent has insufficient
+information (the state column has value `notReady').
+
+                         NOTE WELL
+
+     This textual convention may be used for a MIB table,
+     irrespective of whether the values of that table's
+     conceptual rows are able to be modified while it is
+     active, or whether its conceptual rows must be taken
+     out of service in order to be modified.  That is, it is
+     the responsibility of the DESCRIPTION clause of the
+     status column to specify whether the status column must
+     not be `active' in order for the value of some other
+     column of the same conceptual row to be modified.  If
+     such a specification is made, affected columns may be
+     changed by an SNMP set PDU if the RowStatus would not
+     be equal to `active' either immediately before or after
+     processing the PDU.  In other words, if the PDU also
+     contained a varbind that would change the RowStatus
+     value, the column in question may be changed if the
+     RowStatus was not equal to `active' as the PDU was
+     received, or if the varbind sets the status</pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre>An octet string containing administrative
+information, preferably in human-readable form.
+
+To facilitate internationalization, this
+information is represented using the ISO/IEC
+IS 10646-1 character set, encoded as an octet
+string using the UTF-8 transformation format
+described in [RFC2279].
+
+Since additional code points are added by
+amendments to the 10646 standard from time
+to time, implementations must be prepared to
+encounter any code point from 0x00000000 to
+0x7fffffff.  Byte sequences that do not
+correspond to the valid UTF-8 encoding of a
+code point or are outside this range are
+prohibited.
+
+The use of control codes should be avoided.
+
+When it is necessary to represent a newline,
+the control code sequence CR LF should be used.
+
+The use of leading or trailing white space should
+be avoided.
+
+For code points not directly supported by user
+interface hardware or software, an alternative
+means of entry and display, such as hexadecimal,
+may be provided.
+
+For information encoded in 7-bit US-ASCII,
+the UTF-8 encoding is identical to the
+US-ASCII encoding.
+
+UTF-8 may require multiple bytes to represent a
+single character / code point; thus the length
+of this object in octets may be different from
+the number of characters encoded.  Similarly,
+size constraints refer to the number of encoded
+octets, not the number of characters represented
+by an encoding.
+
+Note that when this TC is used for an object that
+is used or envisioned to be used as an index, then
+a SIZE restriction MUST be specified so that the
+number of sub-identifiers for any object instance
+does not exceed the limit of 128, as defined by
+[RFC3416].
+
+Note that the size of an SnmpAdminString object is
+measured in octets, not characters.
+                </pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp NET-SNMP-VACM-MIB::netSnmpVacmMIB</b></p>
+<pre>
++--<a href="#netSnmpVacmMIB">netSnmpVacmMIB</a>(9)
+   |
+   +--<a href="#nsVacmAccessTable">nsVacmAccessTable</a>(1)
+      |
+      +--<a href="#nsVacmAccessEntry">nsVacmAccessEntry</a>(1)
+         |  Index: vacmGroupName, vacmAccessContextPrefix, vacmAccessSecurityModel, vacmAccessSecurityLevel, nsVacmAuthType
+         |
+         +-- ---- String    <a href="#nsVacmAuthType">nsVacmAuthType</a>(1)
+         |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+         |        Size: 0..32
+         +-- CR-- EnumVal   <a href="#nsVacmContextMatch">nsVacmContextMatch</a>(2)
+         |        Values: exact(1), prefix(2)
+         +-- CR-- String    <a href="#nsVacmViewName">nsVacmViewName</a>(3)
+         |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+         |        Size: 0..32
+         +-- CR-- EnumVal   <a href="#nsVacmStorageType">nsVacmStorageType</a>(4)
+         |        Textual Convention: <a href="#StorageType">StorageType</a>
+         |        Values: other(1), volatile(2), nonVolatile(3), permanent(4), readOnly(5)
+         +-- CR-- EnumVal   <a href="#nsVacmStatus">nsVacmStatus</a>(5)
+                  Textual Convention: <a href="#RowStatus">RowStatus</a>
+                  Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
