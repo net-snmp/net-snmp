@@ -12,7 +12,7 @@ dnl <<
 [
 if test "x$defaults" = "xno"; then
 echo $ECHO_N "$2 ($3): $ECHO_C"
-read tmpinput
+read tmpinput <&AS_ORIGINAL_STDIN_FD
 if test "$tmpinput" = "" -a "$3" != ""; then
   tmpinput="$3"
 fi
