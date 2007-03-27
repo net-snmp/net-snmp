@@ -4482,7 +4482,7 @@ if test "x$ac_cv_user_prompt_NETSNMP_LOGFILE" = "x" -o "x$ac_cv_user_prompt_NETS
 AC_CACHE_CHECK(whether to prompt for values, ac_cv_have_warned,
 [
 if test "x$defaults" = "xno"; then
-cat << EOF
+AC_MSG_NOTICE([
 
 	 ************** Configuration Section **************
 
@@ -4496,9 +4496,9 @@ modify.  Be careful if you re-run configure though, since net-snmp-config.h
 will be overwritten.
 
 -Press return to continue-
-EOF
+])
 
-read tmpinput
+read tmpinput <&AS_ORIGINAL_STDIN_FD
 ac_cv_have_warned="yes"
 else
   ac_cv_have_warned="no"
