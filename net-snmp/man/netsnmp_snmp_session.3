@@ -1,4 +1,4 @@
-.TH "snmp_session" 3 "16 Mar 2007" "Version 5.2.4.pre3" "net-snmp" \" -*- nroff -*-
+.TH "snmp_session" 3 "27 Mar 2007" "Version 5.2.4.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -37,7 +37,7 @@ snmp_session \- The snmp session structure.
 .ti -1c
 .RI "char * \fBpeername\fP"
 .br
-.RI "\fIDomain name or dotted IP address of default peer. \fP"
+.RI "\fIname or address of default peer (may include transport specifier and/or port number) \fP"
 .ti -1c
 .RI "u_short \fBremote_port\fP"
 .br
@@ -301,7 +301,7 @@ use as you want data
 Definition at line 303 of file snmp_api.h.
 .SS "char* \fBsnmp_session::peername\fP"
 .PP
-Domain name or dotted IP address of default peer. 
+name or address of default peer (may include transport specifier and/or port number) 
 .PP
 Definition at line 202 of file snmp_api.h.
 .PP
@@ -316,6 +316,8 @@ Referenced by snmp_sess_add_ex(), and snmp_sess_init().
 .SS "u_short \fBsnmp_session::remote_port\fP"
 .PP
 UDP port number of peer. 
+.PP
+(NO LONGER USED - USE peername INSTEAD) 
 .PP
 Definition at line 204 of file snmp_api.h.
 .PP
