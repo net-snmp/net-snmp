@@ -570,7 +570,7 @@ AC_ARG_ENABLE(default-snmp-version,,
 # we test this now and later as well.  we test it now so configure can die
 # early on with an error rather than waiting till the end of the script.
 if test "x$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "x"; then
-  if test "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" == "2c"; then
+  if test "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" = "2c"; then
     ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION="2"
   fi
   if test "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "1" -a "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "2" -a "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "3"; then
@@ -4532,7 +4532,7 @@ will avoid this prompt.
 Default version of SNMP to use],3,unquoted)
 
 # we tested this above before the prompt, but the prompt may give a new value.
-if test "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" == "2c"; then
+if test "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" = "2c"; then
   ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION="2"
 fi
 if test "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "1" -a "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "2" -a "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "3"; then
