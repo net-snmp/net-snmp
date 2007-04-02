@@ -1172,7 +1172,7 @@ smux_list_detach(smux_reg ** head, smux_reg ** m_remove)
 static int
 smux_list_add(smux_reg ** head, smux_reg * add)
 {
-    smux_reg       *rptr;
+    smux_reg       *rptr, *prev;
     int             result;
 
     if (*head == NULL) {
@@ -1180,6 +1180,7 @@ smux_list_add(smux_reg ** head, smux_reg * add)
         (*head)->sr_next = NULL;
         return 0;
     }
+    prev = NULL;
     for (rptr = *head; rptr->sr_next; rptr = rptr->sr_next) {
         result = snmp_oid_compare(add->sr_name, add->sr_name_len,
                                   rptr->sr_name, rptr->sr_name_len);
@@ -1205,15 +1206,22 @@ smux_list_add(smux_reg ** head, smux_reg * add)
             rptr->sr_next = add;
             return 0;
         }
+        prev = rptr;
     }
     /*
      * compare the last one 
      */
-    if ((snmp_oid_compare(add->sr_name, add->sr_name_len, rptr->sr_name,
-                          rptr->sr_name_len) == 0)
-        && add->sr_priority == rptr->sr_priority)
+    result = snmp_oid_compare(add->sr_name, add->sr_name_len, rptr->sr_name, rptr->sr_name_len);
+    if ((result == 0) && add->sr_priority == rptr->sr_priority)
         return -1;
-    else {
+    else  if (result < 0 ) {
+        add->sr_next = rptr;
+        if ( prev ) {
+            prev->sr_next = add
+        } else {
+            *head = add;
+        }
+    } else {
         rptr->sr_next = add;
         add->sr_next = NULL;
     }
