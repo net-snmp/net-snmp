@@ -78,6 +78,10 @@ mteObjectsTable_handler(netsnmp_mib_handler *handler,
             entry = (struct mteObject *) netsnmp_tdata_extract_entry(request);
             tinfo = netsnmp_extract_table_info(request);
 
+            if (!entry) {
+                netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHINSTANCE);
+                continue;
+            }
             switch (tinfo->colnum) {
             case COLUMN_MTEOBJECTSID:
                 snmp_set_var_typed_value(request->requestvb, ASN_OBJECT_ID,
