@@ -58,11 +58,11 @@ System("version:commit",
        "svn commit -m \"version update\" Makefile.top");
 
 # Step 3) configure and build and test it
-my $configureargs = "--cache=config.cache --with-defaults \
-     --with-mib-modules='host examples examples/example   \
-       testhandler smux Rmon disman/event-mib'            \
-     --with-transports=IPX --enable-ipv6                  \
-     --enable-embedded-perl --enable-shared";
+my $configureargs = "--cache=config.cache --with-defaults ".
+    "--with-mib-modules='host examples examples/example   ".
+    "  testhandler smux Rmon disman/event-mib'            ".
+    "--with-transports=IPX --enable-ipv6                  ".
+    "--enable-embedded-perl --enable-shared";
 System("build:distclean","make distclean") if (-f 'Makefile');
 System("build:configure","./configure $configureargs");
 System("build:make","make");
@@ -77,7 +77,7 @@ System("docs:doxygenconf",
 System("docs:make","make docs");
 System("docs:mancp","make mancp");
 System("docs:update","svn -u status man");
-manualstep('human:docs',
+manualstep('docs:manualaddnewman',
   "Update man/Makefile.in with details of any new man pages,
   and run 'svn add' on them.
   I'll commit these changes for you after you're done
@@ -127,7 +127,7 @@ System("release:versionstamp",
        "perl local/Version-Munge.pl -v $version -M -P -C");
 
 # Step 11)  Create the release tag checkpoint
-my $root="https://net-snmp.svn.sourceforge.net/svnroot/net-snmp"
+my $root="https://net-snmp.svn.sourceforge.net/svnroot/net-snmp";
 if ( $branch ) {
     System("release:tag",
        "svn copy -m \"$version release\" $root/branches/$branch $root/tags/$vtag");
