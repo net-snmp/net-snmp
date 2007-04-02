@@ -1061,7 +1061,7 @@ var_hrswrun(struct variable * vp,
         long_return = proc_buf->p_utime * 100 + proc_buf->p_stime * 100;
 #endif
 #elif HAVE_KVM_GETPROCS
-    #if defined(freebsd5) && __FreeBSD_version >= 500014
+    #if defined(NOT_DEFINED) && defined(freebsd5) && __FreeBSD_version >= 500014
         /* XXX: Accessing ki_paddr causes sig10 ...
         long_return = proc_table[LowProcIndex].ki_paddr->p_uticks +
             proc_table[LowProcIndex].ki_paddr->p_sticks +
@@ -1146,7 +1146,7 @@ var_hrswrun(struct variable * vp,
 #elif defined(aix4) || defined(aix5)
         long_return = proc_table[LowProcIndex].pi_size * getpagesize() / 1024;
 #elif HAVE_KVM_GETPROCS && !defined(darwin8)
-  #if defined(freebsd5) && __FreeBSD_version >= 500014
+  #if defined(NOT_DEFINED) && defined(freebsd5) && __FreeBSD_version >= 500014
 	    /* XXX
 	    long_return = proc_table[LowProcIndex].ki_vmspace->vm_tsize +
 			  proc_table[LowProcIndex].ki_vmspace->vm_ssize +
