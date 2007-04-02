@@ -180,6 +180,8 @@ var_vacm_sec2group(struct variable * vp,
         secmodel = name[11];
         groupSubtree = name + 13;
         groupSubtreeLen = *length - 13;
+        if ( name[12] != groupSubtreeLen )
+            return 0;		/* Either extra subids, or an incomplete string */
         cp = secname;
         while (groupSubtreeLen-- > 0) {
             if (*groupSubtree > 255)
@@ -307,6 +309,9 @@ var_vacm_access(struct variable * vp,
         if (*length < 15)
             return NULL;
 
+        /*
+         * Extract the group name index from the requested OID ....
+         */
         op = name + 11;
         len = *op++;
         if (len > VACM_MAX_STRING)
@@ -318,6 +323,10 @@ var_vacm_access(struct variable * vp,
             *cp++ = (char) *op++;
         }
         *cp = 0;
+
+        /*
+         * ... followed by the context index ...
+         */
         len = *op++;
         if (len > VACM_MAX_STRING)
             return 0;
@@ -328,6 +337,10 @@ var_vacm_access(struct variable * vp,
             *cp++ = (char) *op++;
         }
         *cp = 0;
+
+        /*
+         * ... and the secModel and secLevel index values.
+         */
         secmodel = *op++;
         seclevel = *op++;
         if (op != name + *length) {
@@ -336,6 +349,9 @@ var_vacm_access(struct variable * vp,
 
         gp = vacm_getAccessEntry(groupName, contextPrefix, secmodel,
                                  seclevel);
+        if ( gp && gp->securityLevel != seclevel )
+            return NULL;     /* This isn't strictly what was asked for */
+
     } else {
         secmodel = seclevel = 0;
         groupName[0] = 0;
@@ -506,6 +522,9 @@ var_vacm_view(struct variable * vp,
             if (*length < 15)
                 return NULL;
 
+            /*
+             * Extract the view name index from the requested OID ....
+             */
             op = name + 12;
             len = *op++;
             if (len > VACM_MAX_STRING)
@@ -517,17 +536,20 @@ var_vacm_view(struct variable * vp,
                 *cp++ = (char) *op++;
             }
             *cp = 0;
+
+            /*
+             * ... followed by the view OID index.
+             */
             subtree[0] = len = *op++;
             subtreeLen = 1;
             if (len > MAX_OID_LEN)
                 return 0;
+            if ( (op+len) != (name + *length) )
+                return NULL;     /* Declared length doesn't match what we actually got */
             op1 = &(subtree[1]);
             while (len-- > 0) {
-                *op1++ = (op != name + *length) ? *op++ : 0;
+                *op1++ = *op++;
                 subtreeLen++;
-            }
-            if (op != name + *length) {
-                return NULL;
             }
 
             gp = vacm_getViewEntry(viewName, &subtree[1], subtreeLen-1,
