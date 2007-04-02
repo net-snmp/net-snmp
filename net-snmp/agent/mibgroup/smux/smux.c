@@ -1233,7 +1233,7 @@ smux_list_detach(smux_reg ** head, smux_reg ** m_remove)
 static int
 smux_list_add(smux_reg ** head, smux_reg * add)
 {
-    smux_reg       *rptr;
+    smux_reg       *rptr, *prev;
     int             result;
 
     if (*head == NULL) {
@@ -1241,43 +1241,61 @@ smux_list_add(smux_reg ** head, smux_reg * add)
         (*head)->sr_next = NULL;
         return 0;
     }
-    for (rptr = *head; rptr->sr_next; rptr = rptr->sr_next) {
+    prev = NULL;
+    for (rptr = *head; rptr; rptr = rptr->sr_next) {
         result = snmp_oid_compare(add->sr_name, add->sr_name_len,
                                   rptr->sr_name, rptr->sr_name_len);
-        if ((result == 0) && (add->sr_priority == rptr->sr_priority)) {
+        if (result == 0) {
             /*
-             * same tree, same pri, nope 
+             * Same tree...
              */
-            return -1;
+            if (add->sr_priority == rptr->sr_priority) {
+                /*
+                 * ... same pri : nope 
+                 */
+                return -1;
+            } else if (add->sr_priority < rptr->sr_priority) {
+                /*
+                 * ... lower pri : insert and return
+                 */
+                add->sr_next = rptr;
+                if ( prev ) { prev->sr_next = add; }
+                else        {         *head = add; }
+                return 0;
+#ifdef XXX
+            } else {
+                /*
+                 * ... higher pri : put after 
+                 */
+                add->sr_next  = rptr->sr_next;
+                rptr->sr_next = add;
+#endif
+            }
         } else if (result < 0) {
             /*
-             * this can only happen if we go before the head 
+             * Earlier tree : insert and return
              */
-            add->sr_next = *head;
-            *head = add;
+            add->sr_next = rptr;
+            if ( prev ) { prev->sr_next = add; }
+            else        {         *head = add; }
             return 0;
-        } else if ((snmp_oid_compare(add->sr_name, add->sr_name_len,
-                                     rptr->sr_next->sr_name,
-                                     rptr->sr_next->sr_name_len)) < 0) {
+#ifdef XXX
+        } else  {
             /*
-             * insert here 
+             * Later tree : put after
              */
             add->sr_next = rptr->sr_next;
             rptr->sr_next = add;
             return 0;
+#endif
         }
+        prev = rptr;
     }
     /*
-     * compare the last one 
+     * Otherwise, this entry must come last
      */
-    if ((snmp_oid_compare(add->sr_name, add->sr_name_len, rptr->sr_name,
-                          rptr->sr_name_len) == 0)
-        && add->sr_priority == rptr->sr_priority)
-        return -1;
-    else {
-        rptr->sr_next = add;
-        add->sr_next = NULL;
-    }
+    if ( prev ) { prev->sr_next = add; }
+    else        {         *head = add; }
     return 0;
 }
 
