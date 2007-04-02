@@ -794,10 +794,6 @@ smux_pdu_process(int fd, u_char * data, size_t length)
             /*
              * watch out for close on top of this...should return correct end 
              */
-            /*
-             * debug this... 
-             */
-            ptr = NULL;
             break;
         default:
             smux_send_close(fd, SMUXC_PACKETFORMAT);
