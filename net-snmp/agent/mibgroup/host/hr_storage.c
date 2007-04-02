@@ -405,6 +405,8 @@ header_hrstoreEntry(struct variable *vp,
          * Otherwise, retrieve the requested
          *  (or following) row as appropriate.
          */
+        if ( exact && *length > HRSTORE_ENTRY_NAME_LENGTH+1 )
+            return NULL;   /* Too long for a valid instance */
         idx = name[ HRSTORE_ENTRY_NAME_LENGTH ];
         if ( idx < NETSNMP_MEM_TYPE_MAX ) {
             netsnmp_memory_load();
