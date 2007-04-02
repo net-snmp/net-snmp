@@ -224,6 +224,7 @@ disk_free_config(void)
     disks[i].minimumspace = -1;
     disks[i].minpercent = -1;
   }
+  allDisksIncluded = 0;
 }
 
 static void 
