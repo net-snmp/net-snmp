@@ -669,6 +669,7 @@ var_extensible_disk(struct variable *vp,
 #endif
 #endif
 
+tryAgain:
     if (header_simple_table
         (vp, name, length, exact, var_len, write_method, numdisks))
         return (NULL);
@@ -700,6 +701,8 @@ var_extensible_disk(struct variable *vp,
         snmp_log(LOG_ERR, "Couldn't open device %s\n",
                  disks[disknum].device);
         setPerrorstatus("statvfs dev/disk");
+        if (!exact)
+            goto tryAgain;
         return NULL;
     }
 #ifdef STAT_STATFS_FS_DATA
@@ -787,6 +790,8 @@ var_extensible_disk(struct variable *vp,
         snmp_log(LOG_ERR, "Couldn't open device %s\n",
                  disks[disknum].device);
         setPerrorstatus("open dev/disk");
+        if (!exact)
+            goto tryAgain;
         return (NULL);
     }
     lseek(file, (long) (SBLOCK * DEV_BSIZE), 0);
@@ -795,6 +800,8 @@ var_extensible_disk(struct variable *vp,
         snmp_log(LOG_ERR, "Error reading device %s\n",
                  disks[disknum].device);
         close(file);
+        if (!exact)
+            goto tryAgain;
         return (NULL);
     }
     close(file);
