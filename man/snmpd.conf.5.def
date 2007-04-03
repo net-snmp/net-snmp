@@ -831,9 +831,10 @@ trap is sent.  See the DISMAN-EVENT-MIB documentation for more
 details. This can be configured either using the MIB tables themselves
 or by using these special key words:
 .IP "agentSecName NAME"
-The DISMAN-EVENT-MIB support requires a valid user name for which to
-scan your agent with.  This can either be specified using the
-agentSecName token or by explicitly list one on the "monitor" lines
+The DISMAN-EVENT-MIB support requires a valid SNMPv3 user name with
+which to scan your agent (even if you normally use SNMPv1 or SNMPv2c
+for querying the agent).  This user can either be specified using the
+agentSecName token or by explicitly listing one on the "monitor" lines
 described below using the -u switch.  Either way, a "rouser" line (or
 equivalent access control settings) must also be specified with the
 same security name name.  If you need an example, just do something
