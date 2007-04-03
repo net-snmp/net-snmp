@@ -1274,7 +1274,7 @@ smux_list_add(smux_reg ** head, smux_reg * add)
     else  if (result < 0 ) {
         add->sr_next = rptr;
         if ( prev ) {
-            prev->sr_next = add
+            prev->sr_next = add;
         } else {
             *head = add;
         }
