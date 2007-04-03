@@ -636,6 +636,8 @@ existing scripts may possibly need some minor adjustments.
 specifies the default SNMPv3 username, to be used when making internal
 queries to retrieve any necessary information (either for evaluating
 the monitored expression, or building a notification payload).
+These internal queries always use SNMPv3, even if normal querying
+of the agent is done using SNMPv1 or SNMPv2c.
 .IP
 Note that this user must also be explicitly created (\fIcreateUser\fR)
 and given appropriate access rights (e.g. \fIrouser\fR).  This
@@ -657,18 +659,22 @@ first matches.  This monitor entry will not fire again until the
 monitored condition first becomes false, and then matches again.
 NAME is an administrative name for this expression, and is used for
 indexing the \fCmteTriggerTable\fR (and related tables).
+Note also that such monitors use an internal SNMPv3 request to retrieve
+the values being monitored (even if normal agent queries typically use
+SNMPv1 or SNMPv2c).  See the \fIiquerySecName\fP token described above.
 .IP "\fIEXPRESSION\fR"
 There are three types of monitor expression supported by the Event MIB -
 existence, boolean and threshold tests.
 .RS
-.IP "OID | !OID | !=OID"
+.IP "OID | ! OID | != OID"
 defines an \fIexistence(0)\fR monitor test.
 A bare OID specifies a \fIpresent(0)\fR test, which will fire when
 (an instance of) the monitored OID is created.
-An expression of the form \fI!OID\fR specifies an \fIabsent(1)\fR test,
+An expression of the form \fI! OID\fR specifies an \fIabsent(1)\fR test,
 which will fire when the monitored OID is delected.
-An expression of the form \fI!=OID\fR specifies a \fIchanged(2)\fR test,
+An expression of the form \fI!= OID\fR specifies a \fIchanged(2)\fR test,
 which will fire whenever the monitored value(s) change.
+Note that there \fBmust\fP be whitespace before the OID token.
 .IP "OID OP VALUE"
 defines a \fIboolean(1)\fR monitor test.
 OP should be one of the defined
