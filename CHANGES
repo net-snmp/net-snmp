@@ -64,6 +64,7 @@ listing of all changes made to the code.
       - [BUG 1600432]: Handle signals properly when restarting the agent.
       - [BUG 1633595]: Fix AgentX handling of Counter64 values
       - [BUG 1677063]: Check for failed malloc calls.
+      - [BUG 1685067]: More precise handling of SNMPv3-admin MIB tables.
       - [BUG 1685081]: Check for valid OID on Free/Undo passes.
       - patch from Wojtek Jawor to handle row deletion issues in dataset tables
 
