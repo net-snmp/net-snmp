@@ -102,10 +102,25 @@ if [ ! -z $DEST ]; then
     #echo $PWD
     DATE=`date +%Y%m%d_%H%M`
     SOURCE=net-snmp-svn-$TAG"_$DATE"
-    set -x
     $TAR /tmp/$SOURCE.tar $SUBD
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "skipping upload due to rc $rc from tar command"
+      rm -f /tmp/$SOURCE.tar.gz
+      exit $rc
+    fi
     gzip -f --best /tmp/$SOURCE.tar
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "skipping upload due to rc $rc from gzip command"
+      rm -f /tmp/$SOURCE.tar.gz
+      exit $rc
+    fi
     scp /tmp/$SOURCE.tar.gz $DEST
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "warning: rc $rc from scp command"
+    fi
     rm -f /tmp/$SOURCE.tar.gz
   fi
 fi
