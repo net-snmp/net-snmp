@@ -1,3 +1,21 @@
+/*
+ * The Win32 API is maintained by the MinGW developers.
+ * The licensing for the Win32 API is defined in the
+ * MinGW file README.w32api, which states:
+
+   "Unless otherwise stated in individual source files,
+
+    THIS SOFTWARE IS NOT COPYRIGHTED
+
+    This source code is offered for use in the public domain.  You may use,
+    modify or distribute it freely.
+
+    This source code is distributed in the hope that it will be useful but
+    WITHOUT ANY WARRANTY.  ALL WARRANTIES, EXPRESS OR IMPLIED ARE HEREBY
+    DISCLAIMED.  This includes but is not limited to warranties of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+ 
+ */
 #include <net-snmp/system/generic.h>
 
 #ifdef HAVE_STDINT_H
@@ -47,7 +65,7 @@
 /* got socklen_t? */
 #define HAVE_SOCKLEN_T 1
 
-/* This was taken from the win32 config file. */
+/* This was taken from the win32 config file - see licensing information above */
 #define EADDRINUSE		WSAEADDRINUSE
 
 /*
