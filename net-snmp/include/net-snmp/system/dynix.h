@@ -40,7 +40,9 @@
 #endif
 
 /*
- * stole these from Solaris... 
+ * These definitions date from early BSD-based headers,
+ *   and are included in modern NetBSD and OpenBSD distributions.
+ * As such, the relevant copyright probably resides with UCB.
  */
 #ifndef TCPTV_MIN
 #define TCPTV_MIN       (1*PR_SLOWHZ)   /* minimum allowable value */
