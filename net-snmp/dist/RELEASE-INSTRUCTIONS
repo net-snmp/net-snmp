@@ -310,25 +310,22 @@ MANUAL - STEP 2
   Changing the libtool version information in Makefile.top.
   Updating the ChangeLog file
 
-      - The ChangeLog entries for the main development line
-        are extracted (normally automatically) using the command:
+      - The ChangeLog entries are extracted (normally automatically)
+        using the command:
 
-          $ cvs2cl -r -b -f ChangeLog.add --follow-only trunk --no-wrap -S
+          $ svn2cl -f ChangeLog.add --break-before-msg --stop-on-copy
 
-        those for a branch are extracted using:
-
-          $ cvs2cl -r -f ChangeLog.add -F V5-x-patches --no-ancestors \
-             --no-hide-branch-additions --no-wrap -S
-
-        If you don't have cvs2cl installed, you can try and find a
+        If you don't have svn2cl installed, you can try and find a
         suitable binary package for your architecture, or you can
         get it directly from
-              http://www.red-bean.com/cvs2cl/
-        You may need to rename the script from 'cvs2cl.pl' to 'cvs2cl'
+              http://ch.tudelft.nl/~arthur/svn2cl
+        You may need to rename the script from 'svn2cl.sh' to 'svn2cl'
 
       - In either case, they are fixed up (automatically) using:
 
           $ perl dist/changelogfix < ChangeLog.add > ChangeLog.reallyadd
+        or
+          $ perl dist/changelogfix V5-{N}-patches < ChangeLog.add > ChangeLog.reallyadd
 
       - The manual processing step is to insert the appropriate portion
         of the file 'ChangeLog.reallyadd' into 'ChangeLog'.  You can
