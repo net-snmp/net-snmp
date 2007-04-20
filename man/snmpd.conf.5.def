@@ -494,6 +494,10 @@ If the MAX15 threshold is omitted, it will default to the MAX5 value.
 If both MAX5 and MAX15 are omitted, they will default to the MAX1 value.
 If this directive is not specified, all three thresholds will
 default to a value of DEFMAXLOADAVE.
+.IP
+If a threshold value of 0 is given, the agent will not report errors
+via the relevant \fClaErrorFlag\fR or \fClaErrMessage\fR instances,
+regardless of the current load.
 .PP
 Unlike the \fIproc\fR and \fIdisk\fR directives, walking the
 walking the \fClaTable\fR will succeed (assuming the
