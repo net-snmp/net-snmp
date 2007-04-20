@@ -812,7 +812,7 @@ laLoad OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"The 1,5 and 10 minute load averages (one per row)."
+	"The 1,5 and 15 minute load averages (one per row)."
     ::= { laEntry 3 }
 
 laConfig OBJECT-TYPE
@@ -830,7 +830,7 @@ laLoadInt OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"The 1,5 and 10 minute load averages as an integer.
+	"The 1,5 and 15 minute load averages as an integer.
 	 This is computed by taking the floating point
 	 loadaverage value and multiplying by 100, then
 	 converting the value to an integer."
@@ -841,7 +841,7 @@ laLoadFloat OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"The 1,5 and 10 minute load averages as an opaquely
+	"The 1,5 and 15 minute load averages as an opaquely
 	 wrapped floating point number."
     ::= { laEntry 6 }
 
