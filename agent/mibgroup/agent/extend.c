@@ -240,6 +240,8 @@ extend_load_cache(netsnmp_cache *cache, void *magic)
             extension->lines = calloc( sizeof(char *), extension->numlines );
             memcpy( extension->lines, line_buf,
                                        sizeof(char *) * extension->numlines );
+        } else {
+            extension->lines = &extension->output;
         }
     }
     extension->result = ret;
@@ -258,10 +260,10 @@ extend_free_cache(netsnmp_cache *cache, void *magic)
         SNMP_FREE(extension->output);
         extension->output = NULL;
     }
-    if (extension->lines) {
+    if ( extension->numlines > 1 ) {
         SNMP_FREE(extension->lines);
-        extension->lines  = NULL;
     }
+    extension->lines  = NULL;
     extension->out_len  = 0;
     extension->numlines = 0;
 }
@@ -1050,6 +1052,7 @@ _extend_find_entry( netsnmp_request_info       *request,
     int oid_len;
     int i;
     char *token;
+    int   token_len;
 
     if (!request || !table_info || !table_info->indexes
                  || !table_info->indexes->next_variable) {
@@ -1108,8 +1111,9 @@ _extend_find_entry( netsnmp_request_info       *request,
                 }
             }
         } else {
-            token    =  table_info->indexes->val.string,
-            line_idx = *table_info->indexes->next_variable->val.integer;
+            token     =  table_info->indexes->val.string;
+            token_len =  table_info->indexes->val_len;
+            line_idx  = *table_info->indexes->next_variable->val.integer;
             DEBUGMSGTL(( "nsExtendTable:output2", "GETNEXT: %s / %d\n ",
                           token, line_idx ));
             /*
@@ -1117,9 +1121,9 @@ _extend_find_entry( netsnmp_request_info       *request,
              * than the requested token...
              */
             for (eptr = ereg->ehead; eptr; eptr = eptr->next ) {
-                if ( strlen(eptr->token) > strlen( token ))
+                if ( strlen(eptr->token) > token_len )
                     break;
-                if ( strlen(eptr->token) == strlen( token ) &&
+                if ( strlen(eptr->token) == token_len &&
                      strcmp(eptr->token, token) >= 0 )
                     break;
             }
@@ -1165,6 +1169,13 @@ _extend_find_entry( netsnmp_request_info       *request,
                     line_idx++;
                 }
             }
+            else {
+                /*
+                 * If this is not the same entry that was requested,
+                 * then we should return the first line.
+                 */
+                line_idx = 1;
+            }
         }
         if (eptr) {
             DEBUGMSGTL(( "nsExtendTable:output2", "GETNEXT -> %s / %d\n ",
@@ -1174,6 +1185,7 @@ _extend_find_entry( netsnmp_request_info       *request,
              * now we've found the appropriate entry (and line),
              * we need to update the varbind OID ...
              */
+            memset(oid_buf, 0, sizeof(oid_buf));
             oid_len = ereg->oid_len;
             memcpy( oid_buf, ereg->root_oid, oid_len*sizeof(oid));
             oid_buf[ oid_len++ ] = 4;    /* nsExtendOutput2Table */
@@ -1192,7 +1204,8 @@ _extend_find_entry( netsnmp_request_info       *request,
              */
             snmp_set_var_value( table_info->indexes,
                                 eptr->token, strlen(eptr->token));
-            *table_info->indexes->next_variable->val.integer = line_idx;
+            snmp_set_var_value( table_info->indexes->next_variable,
+                                &line_idx, sizeof(line_idx));
         }
         return eptr;  /* Finally, signal success */
     }
@@ -1247,10 +1260,7 @@ handle_nsExtendOutput2Table(netsnmp_mib_handler          *handler,
                  * Determine which line we've been asked for....
                  */
                 line_idx = *table_info->indexes->next_variable->val.integer;
-                if (extension->lines)
-                    cp  = extension->lines[line_idx-1];
-                else
-                    cp  = extension->output;
+                cp  = extension->lines[line_idx-1];
 
                 /* 
                  * ... and how long it is.
