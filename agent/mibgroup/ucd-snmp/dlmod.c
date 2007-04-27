@@ -206,11 +206,18 @@ dlmod_unload_module(struct dlmod *dlm)
 
     snprintf(sym_deinit, sizeof(sym_deinit), "deinit_%s", dlm->name);
     dl_deinit = dlsym(dlm->handle, sym_deinit);
-    if (dl_deinit == NULL) {
-        snprintf(dlm->error, sizeof(dlm->error),
-                 "dlsym failed: can't find \'%s\'", sym_deinit);
-    } else {
+    if (dl_deinit) {
+        DEBUGMSGTL(("dlmod", "Calling deinit_%s()\n", dlm->name));
         dl_deinit();
+    } else {
+        snprintf(sym_deinit, sizeof(sym_deinit), "shutdown_%s", dlm->name);
+        dl_deinit = dlsym(dlm->handle, sym_deinit);
+        if (dl_deinit) {
+            DEBUGMSGTL(("dlmod", "Calling shutdown_%s()\n", dlm->name));
+            dl_deinit();
+        } else {
+            DEBUGMSGTL(("dlmod", "No destructor for %s\n", dlm->name));
+        }
     }
     dlclose(dlm->handle);
     dlm->status = DLMOD_UNLOADED;
