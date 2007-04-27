@@ -1,6 +1,7 @@
-This file contains major changes in released revisions.  Please read
-the CHANGES file and the ChangeLog file for a medium level detail and
-a very detailed level (respectively) of changes/bug fixes.
+This file contains a summary of the major changes in released revisions.
+Please see the CHANGES file for a more detailed list of specific bugs/patches
+that have been fixed/applied, and the ChangeLog file for a comprehensive
+listing of all changes made to the code.
 
 *5.4*
 
