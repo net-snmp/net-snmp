@@ -150,55 +150,66 @@ RELEASE TESTING:
  16) Announce the release on the appropriate list.
      Pre-release announcements (and a call for testing) should be
      sent to net-snmp-coders, release-candidates to net-snmp-users.
-     That concludes the process for non-full releases.
 
      Full releases should be announced on net-snmp-users, and as a
      news item on the project home page - including the NEWS snippet
      of significant changes since the last release.
-       Then wait a week to ensure that there are no major problems,
-     before continuing with the remaining steps.
 
- 17) Once this week has elapsed, submit an announement of the new
-     release to net-snmp-announce.  This message will need to be
-     explicitly authorized via MailMan.
-        If there are problems and another release is planned to fix
-     them, don't announce the broken version - wait for the updated
+ 17) Update the following htdocs files (in the main SVN trunk):
+         htdocs/download.html
+         htdocs/dev/schedule.html
+
+     [Make sure you have permissions set up properly on the web
+      server so that files created become group-writable!!!]
+
+     That concludes the process for pre-releases and release-candidates.
+     For full releases, wait a week to ensure that there are no major
+     problems, before continuing with the remaining steps.
+
+        If there are known problems and another release is planned to
+     fix them, don't announce the broken version - wait for the updated
      one instead.
 
- 18) Once the release has been formally advertised on the announce
-     list, start bugging Wes to update the freshmeat entries and the
-     open source developers web page entries. 
+ 18) Once this week has elapsed, submit an announement of the new
+     release to net-snmp-announce.  This message will need to be
+     explicitly authorized via MailMan.
 
- 19) Update the following htdocs files:
+     Also update the IRC topic to include mention of this release.
 
-         htdocs/NEWS
-         htdocs/CHANGES
-         htdocs/ChangeLog
-         htdocs/README*
-         htdocs/COPYING
-         htdocs/dev/schedule.html
-         htdocs/download/index.html
-         htdocs/page-top.html   (for the latest final release)
+ 19) For a release on the most recent development line, start bugging
+     Wes to update the freshmeat entries and the open source developers
+     web page entries. 
 
-     and the IRC topic
+ 20) For a release on the most recent development line, update the
+     'htdocs/page-top.html' file (in the main SVN trunk) to reference
+     the latest version.
+
+     Update the following files with any changes:
+
+         htdocs/readmefiles/NEWS
+         htdocs/readmefiles/CHANGES
+         htdocs/readmefiles/ChangeLog
+         htdocs/readmefiles/README*
+         htdocs/readmefiles/COPYING
 
      [Make sure you have permissions set up properly on the web
       server so that files created become group-writable!!!]
          
- 20) For a major new-feature release (i.e. 5.x), create the patches
+
+ 21) For a major new-feature release (i.e. 5.x), create the patches
      branch:
 
-	$ cvs rtag -r Ext-5-x -b V5-x-patches net-snmp
+        $ svn copy  /tags/Ext-5-x   /branches/V5-x-patches
+
+     and update the SVN main trunk with a new version number:
+
+        $ local/Version-Munge.pl -v 5.(x+1).dev -M -P -C
 
      The 1 week delay (and continued code freeze) is to to ensure that
      developer effort is concentrated on immediate problems following
      the release.  Any major problems should hopefully come to light
      during this period, so after a week it should be safe to create
      the patches branch and officially end the code freeze on MAIN.
-
- 21) Update CVS MAIN to a new version number:
-
-         $ local/Version-Munge.pl -v 5.(x+1).dev -M -P -C
 
  22) Update the official patches tracker set:
 
@@ -209,17 +220,20 @@ RELEASE TESTING:
      - all patches for earlier releases on this line should
        be marked at priority 1, and closed
 
+     If a line has been designated closed, then all official
+     patches for that line should be marked as closed as well.
+
  23) Hide the pre-release repository from the File Releases
      admin pages.
 
- 23) Clean up the 'dist' dir of the latest V5-x-patches branch.
+ 23) Clean up the 'dist' dir of the relevant V5-x-patches branch.
      Only leave the following files:
 
      changelogfix  cvsshow  cvsup  extractnews  makerelease
      net-snmp.spec  snmpd-init.d  snmptrapd-init.d
 
      Note that any files removed should also be deleted from
-     CVS repository.
+     SVN repository.
 
 
 ***************************************************************************
