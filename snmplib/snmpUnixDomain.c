@@ -432,7 +432,7 @@ netsnmp_unix_create_ostring(const u_char * o, size_t o_len, int local)
     if (o_len > 0 && o_len < (sizeof(addr.sun_path) - 1)) {
         addr.sun_family = AF_UNIX;
         memset(addr.sun_path, 0, sizeof(addr.sun_path));
-        strncpy(addr.sun_path, o, o_len);
+        strncpy(addr.sun_path, (const char *)o, o_len);
         return netsnmp_unix_transport(&addr, local);
     } else {
         if (o_len > 0) {

@@ -6857,7 +6857,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             itmp = value_len;
             buf_ptr = buf;
         } else if (type == 's') {
-            buf_ptr = (u_char *)value;
+            buf_ptr = (const u_char *)value;
             value_len = strlen(value);
         }
 #ifndef DISABLE_MIB_LOADING
