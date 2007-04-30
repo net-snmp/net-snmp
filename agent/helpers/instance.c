@@ -330,7 +330,7 @@ netsnmp_register_int_instance_context(const char *name,
     myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
                     HANDLER_CAN_RWRITE, netsnmp_instance_int_handler,
                     subhandler, contextName);
-    return netsnmp_register_read_only_instance(myreg);
+    return netsnmp_register_instance(myreg);
 }
 
 int
