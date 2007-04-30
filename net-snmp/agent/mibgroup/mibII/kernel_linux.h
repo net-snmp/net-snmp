@@ -29,6 +29,31 @@ struct ip_mib {
     unsigned long   ipRoutingDiscards;
 };
 
+struct ip6_mib {
+    unsigned long ip6InReceives;
+    unsigned long ip6InHdrErrors;
+    unsigned long ip6InTooBigErrors;
+    unsigned long ip6InNoRoutes;
+    unsigned long ip6InAddrErrors;
+    unsigned long ip6InUnknownProtos;
+    unsigned long ip6InTruncatedPkts;
+    unsigned long ip6InDiscards;
+    unsigned long ip6InDelivers;
+    unsigned long ip6OutForwDatagrams;
+    unsigned long ip6OutRequests;
+    unsigned long ip6OutDiscards;
+    unsigned long ip6OutNoRoutes;
+    unsigned long ip6ReasmTimeout;
+    unsigned long ip6ReasmReqds;
+    unsigned long ip6ReasmOKs;
+    unsigned long ip6ReasmFails;
+    unsigned long ip6FragOKs;
+    unsigned long ip6FragFails;
+    unsigned long ip6FragCreates;
+    unsigned long ip6InMcastPkts;
+    unsigned long ip6OutMcastPkts;
+};
+
 struct icmp_mib {
     unsigned long   icmpInMsgs;
     unsigned long   icmpInErrors;
@@ -58,11 +83,53 @@ struct icmp_mib {
     unsigned long   icmpOutAddrMaskReps;
 };
 
+struct icmp6_mib {
+    unsigned long icmp6InMsgs;
+    unsigned long icmp6InErrors;
+    unsigned long icmp6InDestUnreachs;
+    unsigned long icmp6InPktTooBigs;
+    unsigned long icmp6InTimeExcds;
+    unsigned long icmp6InParmProblems;
+    unsigned long icmp6InEchos;
+    unsigned long icmp6InEchoReplies;
+    unsigned long icmp6InGroupMembQueries;
+    unsigned long icmp6InGroupMembResponses;
+    unsigned long icmp6InGroupMembReductions;
+    unsigned long icmp6InRouterSolicits;
+    unsigned long icmp6InRouterAdvertisements;
+    unsigned long icmp6InNeighborSolicits;
+    unsigned long icmp6InNeighborAdvertisements;
+    unsigned long icmp6InRedirects;
+    unsigned long icmp6OutMsgs;
+    unsigned long icmp6OutDestUnreachs;
+    unsigned long icmp6OutPktTooBigs;
+    unsigned long icmp6OutTimeExcds;
+    unsigned long icmp6OutParmProblems;
+    unsigned long icmp6OutEchoReplies;
+    unsigned long icmp6OutRouterSolicits;
+    unsigned long icmp6OutNeighborSolicits;
+    unsigned long icmp6OutNeighborAdvertisements;
+    unsigned long icmp6OutRedirects;
+    unsigned long icmp6OutGroupMembResponses;
+    unsigned long icmp6OutGroupMembReductions;
+};
+
 struct udp_mib {
     unsigned long   udpInDatagrams;
     unsigned long   udpNoPorts;
     unsigned long   udpInErrors;
     unsigned long   udpOutDatagrams;
+};
+
+struct udp6_mib {
+    unsigned long udp6InDatagrams;
+    unsigned long udp6NoPorts;
+    unsigned long udp6InErrors;
+    unsigned long udp6OutDatagrams;
+    unsigned long udpLite6InDatagrams;
+    unsigned long udpLite6NoPorts;
+    unsigned long udpLite6InErrors;
+    unsigned long udpLite6OutDatagrams;
 };
 
 struct tcp_mib {
@@ -86,8 +153,11 @@ struct tcp_mib {
 
 
 int             linux_read_ip_stat(struct ip_mib *);
+int             linux_read_ip6_stat(struct ip6_mib *);
 int             linux_read_icmp_stat(struct icmp_mib *);
+int             linux_read_icmp6_stat(struct icmp6_mib *);
 int             linux_read_udp_stat(struct udp_mib *);
+int             linux_read_udp6_stat(struct udp6_mib *);
 int             linux_read_tcp_stat(struct tcp_mib *);
 
 #endif                          /* _MIBGROUP_KERNEL_LINUX_H */

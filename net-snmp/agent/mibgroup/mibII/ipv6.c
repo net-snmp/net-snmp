@@ -1850,7 +1850,7 @@ linux_read_ip6_stat_ulong(const char *file)
     return value;
 }
 
-void
+static void
 linux_read_ip6_stat(struct ip6_mib *ip6stat)
 {
     if (!ip6stat)
