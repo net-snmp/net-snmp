@@ -19,6 +19,7 @@
 #if defined (NETSNMP_ENABLE_IPV6)
 #include <linux/types.h>
 #include <asm/types.h>
+#include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #endif
 
@@ -269,7 +270,9 @@ _load_v6(netsnmp_container *container, int idx_offset)
          */
         entry->if_index = netsnmp_access_interface_index_find(if_name);
         memset(&addr_info, 0, sizeof(struct address_flag_info));
+#if defined (NETSNMP_ENABLE_IPV6)
         addr_info = netsnmp_access_other_info_get(entry->if_index, AF_INET6);
+#endif
 
         /*
           #define IPADDRESSSTATUSTC_PREFERRED  1
@@ -343,7 +346,6 @@ _load_v6(netsnmp_container *container, int idx_offset)
 
     return idx_offset;
 }
-#endif
 
 struct address_flag_info
 netsnmp_access_other_info_get(int index, int family)
@@ -432,4 +434,5 @@ netsnmp_access_other_info_get(int index, int family)
     close(sd);
     return addr;
 }
+#endif
 
