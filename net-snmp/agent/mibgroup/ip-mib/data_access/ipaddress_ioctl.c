@@ -219,6 +219,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
          * get broadcast
          */
         memset(&addr_info, 0, sizeof(struct address_flag_info));
+#if defined (NETSNMP_ENABLE_IPV6)
         addr_info = netsnmp_access_other_info_get(entry->if_index, AF_INET);
         if(addr_info.bcastflg) {
            bcastentry = netsnmp_access_ipaddress_entry_create();
@@ -232,7 +233,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
            memcpy(bcastentry->ia_address, &addr_info.inp->s_addr,
                   bcastentry->ia_address_len);
         }
-
+#endif
 
         /*
          * get netmask
