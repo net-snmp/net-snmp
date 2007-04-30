@@ -18,7 +18,7 @@ static int     setserialno;
      * so we need config handling routines to load and save the
      * current value (incrementing this whenever it's loaded).
      */
-void
+static void
 setserial_parse_config( const char *token, char *cptr )
 {
     setserialno = atoi(cptr);
@@ -26,7 +26,7 @@ setserial_parse_config( const char *token, char *cptr )
     DEBUGMSGTL(("snmpSetSerialNo",
                 "Re-setting SnmpSetSerialNo to %d\n", setserialno));
 }
-int
+static int
 setserial_store_config( int a, int b, void *c, void *d )
 {
     char line[SNMP_MAXBUF_SMALL];
