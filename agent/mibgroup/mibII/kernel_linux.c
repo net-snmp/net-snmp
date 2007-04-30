@@ -20,9 +20,12 @@
 #include "kernel_linux.h"
 
 struct ip_mib   cached_ip_mib;
+struct ip6_mib   cached_ip6_mib;
 struct icmp_mib cached_icmp_mib;
+struct icmp6_mib cached_icmp6_mib;
 struct tcp_mib  cached_tcp_mib;
 struct udp_mib  cached_udp_mib;
+struct udp6_mib  cached_udp6_mib;
 
 #define IP_STATS_LINE	"Ip: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu"
 #define ICMP_STATS_LINE	"Icmp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu"
@@ -46,7 +49,9 @@ linux_read_mibII_stats(void)
     unsigned long   value;
 #endif
     char            line[1024];
-
+    unsigned long *snmp6_ptr = NULL;
+    int i;
+    int ret = -1;
     if (!in) {
         DEBUGMSGTL(("mibII/kernel_linux","Unable to open /proc/net/snmp"));
         return -1;
@@ -176,7 +181,50 @@ linux_read_mibII_stats(void)
      */
     if (!cached_tcp_mib.tcpRtoAlgorithm)
         cached_tcp_mib.tcpRtoAlgorithm = 1;
-    return 0;
+
+    DEBUGMSGTL(("mibII/kernel_linux","Reading /proc/net/snmp6 stats"));
+    in = fopen("/proc/net/snmp6","r");
+
+    if (!in)
+       return -1;
+
+    /*
+     * lets try to accelerate this a bit
+     * by assuming we know the order that 
+     * the file is in (which we really should)
+     */
+    for (snmp6_ptr = (unsigned long *)&cached_ip6_mib, i=0;
+	 i < (sizeof(struct ip6_mib)/sizeof(unsigned long));
+         snmp6_ptr++, i++) {
+
+        if (EOF == fscanf(in, "%*s %lu",snmp6_ptr))
+		goto out;
+        DEBUGMSGTL(("mibII/kernel_linux","Reading IPv6 value #%d = %lu", i, *snmp6_ptr));
+    }
+
+    for (snmp6_ptr = (unsigned long *)&cached_icmp6_mib, i=0;
+         i < (sizeof(struct icmp6_mib)/sizeof(unsigned long));
+         snmp6_ptr++, i++) {
+
+        if (EOF == fscanf(in, "%*s %lu\n",snmp6_ptr))
+		goto out;
+        DEBUGMSGTL(("mibII/kernel_linux","Reading ICMPv6 value #%d = %lu", i, *snmp6_ptr));
+    }
+
+    for (snmp6_ptr = (unsigned long *)&cached_udp6_mib, i=0;
+         i < (sizeof(struct udp6_mib)/sizeof(unsigned long));
+         snmp6_ptr++, i++) {
+
+        if (EOF == fscanf(in, "%*s %lu\n",snmp6_ptr))
+		goto out;
+        DEBUGMSGTL(("mibII/kernel_linux","Reading UDPv6 value #%d = %lu", i, *snmp6_ptr));
+    }
+ 
+    ret = 0; 
+out: 
+    fclose(in);
+ 
+    return ret;
 }
 
 int
@@ -189,6 +237,15 @@ linux_read_ip_stat(struct ip_mib *ipstat)
     return 0;
 }
 
+int linux_read_ip6_stat( struct ip6_mib *ip6stat)
+{
+
+    memset((char *) ip6stat, (0), sizeof(*ip6stat));
+    if (linux_read_mibII_stats() == -1)
+        return -1;
+    memcpy((char *) ip6stat, (char *) &cached_ip6_mib, sizeof(*ip6stat));
+}
+
 int
 linux_read_icmp_stat(struct icmp_mib *icmpstat)
 {
@@ -197,6 +254,18 @@ linux_read_icmp_stat(struct icmp_mib *icmpstat)
         return -1;
     memcpy((char *) icmpstat, (char *) &cached_icmp_mib,
            sizeof(*icmpstat));
+    return 0;
+}
+
+
+int
+linux_read_icmp6_stat(struct icmp6_mib *icmp6stat)
+{
+    memset((char *) icmp6stat, (0), sizeof(*icmp6stat));
+    if (linux_read_mibII_stats() == -1)
+        return -1;
+    memcpy((char *) icmp6stat, (char *) &cached_icmp6_mib,
+           sizeof(*icmp6stat));
     return 0;
 }
 
@@ -217,5 +286,15 @@ linux_read_udp_stat(struct udp_mib *udpstat)
     if (linux_read_mibII_stats() == -1)
         return -1;
     memcpy((char *) udpstat, (char *) &cached_udp_mib, sizeof(*udpstat));
+    return 0;
+}
+
+int
+linux_read_udp6_stat(struct udp6_mib *udp6stat)
+{
+    memset((char *) udp6stat, (0), sizeof(*udp6stat));
+    if (linux_read_mibII_stats() == -1)
+        return -1;
+    memcpy((char *) udp6stat, (char *) &cached_udp6_mib, sizeof(*udp6stat));
     return 0;
 }
