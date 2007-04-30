@@ -359,14 +359,14 @@ netsnmp_ipaddress_prefix_copy(u_char *dst, u_char *src, int addr_len, int pfx_le
 
     memcpy(dst, src, bytes);
 
+    if (bytes < addr_len)
+        memset(&dst[bytes],0x0, addr_len - bytes);
+
     if (bits) {
-        u_char mask = (0xff >> bits);
+        u_char mask = (0xff << (8-bits));
         
         dst[bytes] = (src[bytes] & mask);
     }
-
-    if (bytes < addr_len)
-        memset(&dst[bytes],0x0, addr_len - bytes);
 
     return pfx_len;
 }
