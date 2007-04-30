@@ -942,7 +942,10 @@ ipAddressRowStatus_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
     netsnmp_assert(NULL != ipAddressRowStatus_val_ptr);
 
     /** WARNING: this code might not work for netsnmp_ipaddress_entry */
-    (*ipAddressRowStatus_val_ptr) = rowreq_ctx->ipAddressRowStatus;
+    if(rowreq_ctx->data->if_index)
+       (*ipAddressRowStatus_val_ptr) = rowreq_ctx->ipAddressRowStatus;
+    else
+       (*ipAddressRowStatus_val_ptr) = ROWSTATUS_NOTREADY;
 
     return MFD_SUCCESS;
 }                               /* ipAddressRowStatus_get */
