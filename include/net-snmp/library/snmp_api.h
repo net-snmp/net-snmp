@@ -999,6 +999,7 @@ struct pollfdarr {
     int             snmp_sess_select_info(void *, int *, fd_set *,
                                           struct timeval *, int *);
     int             snmp_sess_read(void *, fd_set *);
+    void            snmp_sess_read_extd(void *sessp, struct pollfd fds[], nfds_t nfds);
     void            snmp_sess_timeout(void *);
     int             snmp_sess_close(void *);
 
