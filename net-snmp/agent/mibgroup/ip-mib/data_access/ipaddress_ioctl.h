@@ -2,6 +2,17 @@
 extern          "C" {
 #endif
 
+/*
+ * struct for netlink extras
+ */
+struct address_flag_info {
+    int bcastflg;
+    int anycastflg;
+    struct in_addr *inp;
+};
+ 
+#define IS_APIPA(a)  (((in_addr_t)(a << 16)) == 0xFEA90000)
+
 int
 _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
                                                   int idx_offset);
@@ -13,6 +24,8 @@ _netsnmp_ioctl_ipaddress_remove_v4(netsnmp_ipaddress_entry * entry);
 int
 netsnmp_access_ipaddress_ioctl_get_interface_count(int sd, struct ifconf * ifc);
 
+struct address_flag_info
+netsnmp_access_other_info_get(int index, int family);
 
 /*
  * struct ioctl for arch_data
