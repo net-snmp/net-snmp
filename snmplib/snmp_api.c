@@ -5941,50 +5941,6 @@ snmp_select_info(int *numfds,
                                  block);
 }
 
-    int
-snmp_poll_info(struct pollfdarr *fdarr, int *timeout, int *block)
-/*
- * same as snmp_select_info but with poll() interface.
- * Appends filedescriptors for snmp at the end of fdarr
- * increasing the size of the array when necessary.
- */
-{
-    int numfds = 0;
-    struct timeval stimeout;
-    int numsessions = _sess_selpol_info(NULL, &stimeout, block,
-            &numfds, NULL, fdarr);
-    if (numfds) { /* something went wrong, only nfds should be set. */
-        DEBUGMSGTL(("snmp_select_info_extd", 
-                    "error in call of _sess_select_info\n"));
-    }
-    if (!block) {
-        int rettimeout = stimeout.tv_sec * 1000 + stimeout.tv_usec / 1000;
-        if ((rettimeout > 0) &&
-            (rettimeout < *timeout)) {
-            *timeout = rettimeout;
-        }
-    }
-
-    return numsessions;
-}
-
-/*
- * Same as snmp_select_info, but works just one session. 
- */
-int
-snmp_sess_select_info(void *sessp,
-                      int *numfds,
-                      fd_set * fdset, struct timeval *timeout, int *block)
-{
-    nfds_t nfds = 0;
-    int numsessions = _sess_selpol_info(sessp, timeout, block, numfds, fdset, NULL);
-    if (nfds) {
-    DEBUGMSGTL(("snmp_sess_select_info", 
-      "error in call of _sess_select_info\n"));
-    }
-    return numsessions;
-}
-
 /*
  * Implements snmp_sess_select_info and snmp_sess_poll_info
  * (two interfaces for the same functionality, just the poll interface
@@ -5994,7 +5950,7 @@ snmp_sess_select_info(void *sessp,
  * number of elements in the fds list (and numfds is zero).
  * If the poll() interface is used, the array is resized when necessary.
  */
-int
+static int
 _sess_selpol_info(void *sessp, struct timeval *timeout, int *block,
                   int *numfds, fd_set *fdset, struct pollfdarr *fdarr)
 {
@@ -6190,6 +6146,51 @@ _sess_selpol_info(void *sessp, struct timeval *timeout, int *block,
     }
     return active;
 }
+
+int
+snmp_poll_info(struct pollfdarr *fdarr, int *timeout, int *block)
+/*
+ * same as snmp_select_info but with poll() interface.
+ * Appends filedescriptors for snmp at the end of fdarr
+ * increasing the size of the array when necessary.
+ */
+{
+    int numfds = 0;
+    struct timeval stimeout;
+    int numsessions = _sess_selpol_info(NULL, &stimeout, block,
+            &numfds, NULL, fdarr);
+    if (numfds) { /* something went wrong, only nfds should be set. */
+        DEBUGMSGTL(("snmp_select_info_extd", 
+                    "error in call of _sess_select_info\n"));
+    }
+    if (!block) {
+        int rettimeout = stimeout.tv_sec * 1000 + stimeout.tv_usec / 1000;
+        if ((rettimeout > 0) &&
+            (rettimeout < *timeout)) {
+            *timeout = rettimeout;
+        }
+    }
+
+    return numsessions;
+}
+
+/*
+ * Same as snmp_select_info, but works just one session. 
+ */
+int
+snmp_sess_select_info(void *sessp,
+                      int *numfds,
+                      fd_set * fdset, struct timeval *timeout, int *block)
+{
+    nfds_t nfds = 0;
+    int numsessions = _sess_selpol_info(sessp, timeout, block, numfds, fdset, NULL);
+    if (nfds) {
+    DEBUGMSGTL(("snmp_sess_select_info", 
+      "error in call of _sess_select_info\n"));
+    }
+    return numsessions;
+}
+
 
 /*
  * snmp_timeout should be called whenever the timeout from snmp_select_info
