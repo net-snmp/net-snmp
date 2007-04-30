@@ -44,13 +44,11 @@ int
 linux_read_mibII_stats(void)
 {
     FILE           *in = fopen("/proc/net/snmp", "r");
-#ifdef NETSNMP_ENABLE_IPV6
-    FILE           *in6;
-    unsigned long   value;
-#endif
     char            line[1024];
+#ifdef NETSNMP_ENABLE_IPV6
     unsigned long *snmp6_ptr = NULL;
     int i;
+#endif
     int ret = -1;
     if (!in) {
         DEBUGMSGTL(("mibII/kernel_linux","Unable to open /proc/net/snmp"));
@@ -136,35 +134,7 @@ linux_read_mibII_stats(void)
         }
     }
     fclose(in);
-
-#ifdef NETSNMP_ENABLE_IPV6
-    in6 = fopen("/proc/net/snmp6", "r");
-    if (in6) {
-      
-        while (line == fgets(line, sizeof(line), in6)) {
-
-            if (('U' != line[0]) ||
-                (0 != strncmp(line, UDP6_STATS_LINE, UDP6_STATS_PREFIX_LEN)))
-                continue;
-
-            sscanf(line, "%*s %lu" , &value);
-                 
-            if ('O' == line[4]) /* Udp6OutDatagrams */
-                cached_udp_mib.udpOutDatagrams += value;
-            else if ('N' == line[4]) /* Udp6NoPorts */
-                cached_udp_mib.udpNoPorts += value;
-            else if ('D' == line[6]) /* Udp6InDatagrams */
-                cached_udp_mib.udpInDatagrams += value;
-            else if ('E' == line[6]) /* Udp6InErrors */
-                cached_udp_mib.udpInErrors += value;
-
-        }
-        fclose(in6);
-    } else {
-        DEBUGMSGTL(("mibII/kernel_linux","Unable to open /proc/net/snmp6"));
-    }
-
-#endif
+    ret = 0;
 
     /*
      * Tweak illegal values:
@@ -182,8 +152,10 @@ linux_read_mibII_stats(void)
     if (!cached_tcp_mib.tcpRtoAlgorithm)
         cached_tcp_mib.tcpRtoAlgorithm = 1;
 
+#ifdef NETSNMP_ENABLE_IPV6
     DEBUGMSGTL(("mibII/kernel_linux","Reading /proc/net/snmp6 stats"));
     in = fopen("/proc/net/snmp6","r");
+    ret = -1;
 
     if (!in)
        return -1;
@@ -220,9 +192,15 @@ linux_read_mibII_stats(void)
         DEBUGMSGTL(("mibII/kernel_linux","Reading UDPv6 value #%d = %lu", i, *snmp6_ptr));
     }
  
+    cached_udp_mib.udpOutDatagrams += cached_udp6_mib.udp6OutDatagrams;
+    cached_udp_mib.udpNoPorts      += cached_udp6_mib.udp6NoPorts;
+    cached_udp_mib.udpInDatagrams  += cached_udp6_mib.udp6InDatagrams;
+    cached_udp_mib.udpInErrors     += cached_udp6_mib.udp6InErrors;
+ 
     ret = 0; 
 out: 
     fclose(in);
+#endif 
  
     return ret;
 }
@@ -244,6 +222,7 @@ int linux_read_ip6_stat( struct ip6_mib *ip6stat)
     if (linux_read_mibII_stats() == -1)
         return -1;
     memcpy((char *) ip6stat, (char *) &cached_ip6_mib, sizeof(*ip6stat));
+    return 0;
 }
 
 int
