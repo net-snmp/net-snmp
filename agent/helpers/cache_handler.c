@@ -536,8 +536,7 @@ _cache_load( netsnmp_cache *cache )
     if ( cache->load_cache)
         ret = cache->load_cache(cache, cache->magic);
     if (ret < 0) {
-        DEBUGMSG(("helper:cache_handler", " load failed (%d)\n",
-                  ret));
+        DEBUGMSGT(("helper:cache_handler", " load failed (%d)\n", ret));
         cache->valid = 0;
         return ret;
     }
@@ -558,8 +557,7 @@ _cache_load( netsnmp_cache *cache )
         atime_setMarker(cache->timestamp);
     else
         cache->timestamp = atime_newMarker();
-    DEBUGMSG(("helper:cache_handler", " loaded (%d)\n",
-              cache->timeout));
+    DEBUGMSGT(("helper:cache_handler", " loaded (%d)\n", cache->timeout));
 
     return ret;
 }
