@@ -54,22 +54,146 @@ perfstat_id_t ps_name;
 	 *********************/
 
 
-
 /*
  * Define the OID pointer to the top of the mib tree that we're
  * registering underneath 
  */
 oid             icmp_oid[] = { SNMP_OID_MIB2, 5 };
+oid             icmp_stats_tbl_oid[] = { SNMP_OID_MIB2, 5, 29 };
 #ifdef USING_MIBII_IP_MODULE
 extern oid      ip_module_oid[];
 extern int      ip_module_oid_len;
 extern int      ip_module_count;
 #endif
 
+#ifdef linux
+struct icmp_stats_table_entry {
+	__uint32_t ipVer;
+        __uint32_t icmpStatsInMsgs;
+        __uint32_t icmpStatsInErrors;
+        __uint32_t icmpStatsOutMsgs;
+        __uint32_t icmpStatsOutErrors;
+};
+
+struct icmp_stats_table_entry icmp_stats_table[3];
+ 
+int
+icmp_stats_load(netsnmp_cache *cache, void *vmagic)
+{
+
+	/*
+         * note don't bother using the passed in cache
+	 * and vmagic pointers.  They are useless as they 
+	 * currently point to the icmp system stats cache	
+	 * since I see little point in registering another
+	 * cache for this table.  Its not really needed
+	 */
+
+	int i;
+	struct icmp_mib v4icmp;
+	struct icmp6_mib v6icmp;
+	for(i=0;i<3;i++) {
+		switch(i) {
+			case 1:
+				linux_read_icmp_stat(&v4icmp);
+				icmp_stats_table[i].icmpStatsInMsgs = v4icmp.icmpInMsgs;
+				icmp_stats_table[i].icmpStatsInErrors = v4icmp.icmpInErrors;
+				icmp_stats_table[i].icmpStatsOutMsgs = v4icmp.icmpOutMsgs;
+				icmp_stats_table[i].icmpStatsOutErrors = v4icmp.icmpOutErrors;
+				break;
+			default:
+				memset(&icmp_stats_table[i],0,
+					sizeof(struct icmp_stats_table_entry));
+				linux_read_icmp6_stat(&v6icmp);
+				icmp_stats_table[i].icmpStatsInMsgs = v6icmp.icmp6InMsgs;
+				icmp_stats_table[i].icmpStatsInErrors = v6icmp.icmp6InErrors;
+				icmp_stats_table[i].icmpStatsOutMsgs = v6icmp.icmp6OutMsgs;
+				icmp_stats_table[i].icmpStatsOutErrors = v6icmp.icmp6OutDestUnreachs +
+					v6icmp.icmp6OutPktTooBigs +  v6icmp.icmp6OutTimeExcds +
+					v6icmp.icmp6OutParmProblems;
+				break;
+		}
+		icmp_stats_table[i].ipVer=i;
+	}
+
+	return 0;
+}
+
+netsnmp_variable_list *
+icmp_stats_next_entry( void **loop_context,
+                     void **data_context,
+                     netsnmp_variable_list *index,
+                     netsnmp_iterator_info *data)
+{
+	int i = (int)(*loop_context);
+	netsnmp_variable_list *idx = index;
+
+	if(i > 2)
+		return NULL;
+
+
+	/*
+	 *set IP version
+	 */
+	snmp_set_var_typed_value(idx, ASN_INTEGER, (u_char *)&icmp_stats_table[i].ipVer,
+                                sizeof(__uint32_t));
+	idx = idx->next_variable;
+
+
+	/*
+	 * set icmpStatsInMsgs
+	 */
+	snmp_set_var_typed_value(idx, ASN_COUNTER, (u_char *)&icmp_stats_table[i].icmpStatsInMsgs,
+                                sizeof(__uint32_t));
+	idx = idx->next_variable;
+
+	/*
+	 * set icmpStatsInErrors
+	 */
+	snmp_set_var_typed_value(idx, ASN_COUNTER, (u_char *)&icmp_stats_table[i].icmpStatsInErrors,
+                                sizeof(__uint32_t));
+	idx = idx->next_variable;
+
+	/*
+	 * set icmpStatsOutMsgs
+	 */
+	snmp_set_var_typed_value(idx, ASN_COUNTER, (u_char *)&icmp_stats_table[i].icmpStatsOutMsgs,
+                                sizeof(__uint32_t));
+	idx = idx->next_variable;
+
+	/*
+	 * set icmpStatsOutErrors
+	 */
+	snmp_set_var_typed_value(idx, ASN_COUNTER, (u_char *)&icmp_stats_table[i].icmpStatsOutErrors,
+                                sizeof(__uint32_t));
+
+	*data_context = &icmp_stats_table[i];
+
+	*loop_context = (void *)(++i);
+	
+	return index;
+}
+
+
+netsnmp_variable_list *
+icmp_stats_first_entry( void **loop_context,
+                     void **data_context,
+                     netsnmp_variable_list *index,
+                     netsnmp_iterator_info *data)
+{
+
+        *loop_context = 0;
+        *data_context = NULL;
+        return icmp_stats_next_entry(loop_context, data_context, index, data);
+}
+#endif
+
 void
 init_icmp(void)
 {
     netsnmp_handler_registration *reginfo;
+    netsnmp_iterator_info *iinfo;
+    netsnmp_table_registration_info *table_info;
 
     /*
      * register ourselves with the agent as a group of scalars...
@@ -89,6 +213,35 @@ init_icmp(void)
 					icmp_oid, OID_LENGTH(icmp_oid)));
 #endif
 
+#ifdef linux
+    reginfo = netsnmp_create_handler_registration("icmpStatsTable",
+		icmp_stats_table_handler, icmp_stats_tbl_oid,
+		OID_LENGTH(icmp_stats_tbl_oid), HANDLER_CAN_RONLY);
+
+    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+    if (!table_info) {
+        return;
+    }
+
+    netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER,
+                                                 ASN_COUNTER,
+                                                 ASN_COUNTER,
+                                                 ASN_COUNTER,
+                                                 ASN_COUNTER, 0);
+    table_info->min_column = 1;
+    table_info->max_column = 5;
+
+
+    iinfo      = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
+    if (!iinfo) {
+        return;
+    }
+    iinfo->get_first_data_point = icmp_stats_first_entry;
+    iinfo->get_next_data_point  = icmp_stats_next_entry;
+    iinfo->table_reginfo        = table_info;
+
+    netsnmp_register_table_iterator(reginfo, iinfo);
+#endif
 #ifdef USING_MIBII_IP_MODULE
     if (++ip_module_count == 2)
         REGISTER_SYSOR_TABLE(ip_module_oid, ip_module_oid_len,
@@ -551,6 +704,75 @@ icmp_handler(netsnmp_mib_handler          *handler,
 }
 
 
+int
+icmp_stats_table_handler(netsnmp_mib_handler  *handler,
+                 netsnmp_handler_registration *reginfo,
+                 netsnmp_agent_request_info   *reqinfo,
+                 netsnmp_request_info         *requests)
+{
+	netsnmp_request_info  *request;
+	netsnmp_variable_list *requestvb;
+	netsnmp_table_request_info *table_info;
+	struct icmp_stats_table_entry   *entry;
+	oid      subid;
+
+	switch (reqinfo->mode) {
+		case MODE_GET:
+			for (request=requests; request; request=request->next) {
+				requestvb = request->requestvb;
+				entry = (struct icmp_stats_table_entry *)netsnmp_extract_iterator_context(request);
+				if (!entry)
+					continue;
+				table_info = netsnmp_extract_table_info(request);
+				subid      = table_info->colnum;
+
+				switch (subid) {
+					case ICMP_STAT_IPVER:
+						snmp_set_var_typed_value(requestvb, ASN_INTEGER,
+							(u_char *)&entry->ipVer, sizeof(__uint32_t));
+						break;
+					case ICMP_STAT_INMSG:
+						snmp_set_var_typed_value(requestvb, ASN_COUNTER,
+							(u_char *)&entry->icmpStatsInMsgs, sizeof(__uint32_t));
+						break;	
+					case ICMP_STAT_INERR:
+						snmp_set_var_typed_value(requestvb, ASN_COUNTER,
+							(u_char *)&entry->icmpStatsInErrors, sizeof(__uint32_t));
+						break;
+					case ICMP_STAT_OUTMSG:
+						snmp_set_var_typed_value(requestvb, ASN_COUNTER,
+							(u_char *)&entry->icmpStatsOutMsgs, sizeof(__uint32_t));
+						break;
+					case ICMP_STAT_OUTERR:
+						snmp_set_var_typed_value(requestvb, ASN_COUNTER,
+							(u_char *)&entry->icmpStatsOutErrors, sizeof(__uint32_t));
+						break;
+					default:
+						snmp_log(LOG_WARNING, "mibII/icmpStatsTable: Unrecognised column (%d)\n",(int)subid);
+				}
+			}
+			break;
+		case MODE_GETNEXT:
+		case MODE_GETBULK:
+		case MODE_SET_RESERVE1:
+		case MODE_SET_RESERVE2:
+		case MODE_SET_ACTION:
+		case MODE_SET_COMMIT:
+		case MODE_SET_FREE:
+		case MODE_SET_UNDO:
+			snmp_log(LOG_WARNING, "mibII/icmpStatsTable: Unsupported mode (%d)\n",
+				reqinfo->mode);
+			break;
+		default:
+			snmp_log(LOG_WARNING, "mibII/icmpStatsTable: Unrecognised mode (%d)\n",
+				reqinfo->mode);
+			break;
+
+	}
+
+	return SNMP_ERR_NOERROR;
+}
+
         /*********************
 	 *
 	 *  Internal implementation functions
@@ -680,6 +902,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     } else {
         DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (linux)\n"));
     }
+    icmp_stats_load(cache, vmagic);
     return ret_value;
 }
 #elif defined(solaris2)
