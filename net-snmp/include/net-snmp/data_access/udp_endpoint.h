@@ -41,6 +41,7 @@ extern          "C" {
         u_short   rmt_port;
 
         u_int     instance;
+        u_int     pid;
    
     } netsnmp_udp_endpoint_entry;
 

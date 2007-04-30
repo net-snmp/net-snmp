@@ -86,6 +86,20 @@
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#if HAVE_DIRENT_H
+#include <dirent.h>
+#else
+# define dirent direct
+# if HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# if HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# if HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -1188,3 +1202,89 @@ Retrieve_Table_Data(mib_table_t t, int *max_idx)
     *max_idx = table->next_index - 1;
     return table->data;
 }
+
+#ifdef linux
+# define PROC_PATH          "/proc"
+# define FILE_DISP          "fd/"
+# define SOCKET_TYPE_1      "socket:["
+# define SOCKET_TYPE_2      "[0000]:"
+
+unsigned long long
+extract_inode(char *format)
+{
+    unsigned long long ret = 0;
+
+    if (!strncmp(format, SOCKET_TYPE_1, 8)) {
+        ret = strtoull(format + 8, NULL, 0);
+    } else if (!strncmp(format, SOCKET_TYPE_2, 7)) {
+        ret = strtoull(format + 7, NULL, 0);
+    }
+
+    return ret;
+}
+
+unsigned int
+get_pid_from_inode(unsigned long long inode)
+{
+    DIR            *procdirs = NULL, *piddirs = NULL;
+    char           *name = NULL;
+    char            path_name[PATH_MAX + 1];
+    char            socket_lnk[NAME_MAX + 1];
+    int             filelen = 0, readlen = 0, iflag = 0;
+    struct dirent  *procinfo, *pidinfo;
+    unsigned int    pid;
+    unsigned long long temp_inode;
+
+    if (!(procdirs = opendir(PROC_PATH))) {
+        snmp_log(LOG_ERR, "snmpd: cannot open /proc\n");       
+        return 0;
+    }
+
+    while ((procinfo = readdir(procdirs)) != NULL) {
+        name = procinfo->d_name;
+        for (; *name; name++) {
+            if (!isdigit(*name))
+                break;
+        }
+        if(*name)
+            continue;
+
+        memset(path_name, '\0', PATH_MAX + 1);
+        filelen = snprintf(path_name, PATH_MAX,
+                           PROC_PATH "/%s/" FILE_DISP, procinfo->d_name);
+        if (filelen <= 0 || PATH_MAX < filelen)
+            continue;
+
+        pid = strtoul(procinfo->d_name, NULL, 0);
+
+        if (!(piddirs = opendir(path_name)))
+            continue;
+
+        while ((pidinfo = readdir(piddirs)) != NULL) {
+            if (filelen + strlen(pidinfo->d_name) > PATH_MAX)
+                continue;
+
+            strcpy(path_name + filelen, pidinfo->d_name);
+
+            memset(socket_lnk, '\0', NAME_MAX + 1);
+            readlen = readlink(path_name, socket_lnk, NAME_MAX);
+            if (readlen < 0)
+                continue;
+            socket_lnk[readlen] = '\0';
+
+            temp_inode = extract_inode(socket_lnk);
+            if (inode == temp_inode) {
+                iflag = 1;
+                break;
+            }
+        }
+        closedir(piddirs);
+        if (iflag == 1)
+            break;
+    }
+    if (procdirs)
+        closedir(procdirs);
+    return pid;
+}
+
+#endif  /* #ifdef linux */
