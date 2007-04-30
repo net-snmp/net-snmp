@@ -129,7 +129,6 @@ extern int      numextens;      /* ditto */
 extern int      numrelocs;      /* ditto */
 extern struct extensible *passthrus;    /* In pass.c */
 extern int      numpassthrus;   /* ditto */
-extern char     sysName[];
 extern netsnmp_subtree *subtrees;
 extern struct variable2 extensible_relocatable_variables[];
 extern struct variable2 extensible_passthru_variables[];
