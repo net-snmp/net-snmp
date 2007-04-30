@@ -135,7 +135,9 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
     struct ifreq   *ifrp;
     struct sockaddr save_addr;
     struct sockaddr_in * si;
-    netsnmp_ipaddress_entry *entry;
+    netsnmp_ipaddress_entry *entry, *bcastentry;
+    struct address_flag_info addr_info;
+    in_addr_t       ipval;
     _ioctl_extras           *extras;
 
     if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -184,6 +186,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         netsnmp_assert(AF_INET == ifrp->ifr_addr.sa_family);
         si = (struct sockaddr_in *) &ifrp->ifr_addr;
         entry->ia_address_len = sizeof(si->sin_addr.s_addr);
+        ipval = si->sin_addr.s_addr;
         memcpy(entry->ia_address, &si->sin_addr.s_addr,
                entry->ia_address_len);
 
@@ -213,6 +216,25 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         }
 
         /*
+         * get broadcast
+         */
+        memset(&addr_info, 0, sizeof(struct address_flag_info));
+        addr_info = netsnmp_access_other_info_get(entry->if_index, AF_INET);
+        if(addr_info.bcastflg) {
+           bcastentry = netsnmp_access_ipaddress_entry_create();
+           if(NULL == entry) {
+              rc = -3;
+              break;
+           }
+           bcastentry->if_index = entry->if_index;
+           bcastentry->ns_ia_index = ++idx_offset;
+           bcastentry->ia_address_len = sizeof(addr_info.inp);
+           memcpy(bcastentry->ia_address, &addr_info.inp->s_addr,
+                  bcastentry->ia_address_len);
+        }
+
+
+        /*
          * get netmask
          */
         ifrp->ifr_addr = save_addr;
@@ -225,7 +247,10 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         netsnmp_assert(AF_INET == ifrp->ifr_addr.sa_family);
         si = (struct sockaddr_in *) &ifrp->ifr_addr;
         entry->ia_prefix_len =
-            netsnmp_ipaddress_ipv4_prefix_len(si->sin_addr.s_addr);
+            netsnmp_ipaddress_ipv4_prefix_len(ntohl(si->sin_addr.s_addr));
+        if(addr_info.bcastflg)
+           bcastentry->ia_prefix_len = entry->ia_prefix_len;
+
 
         /*
          * get flags
@@ -239,7 +264,12 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         }
         extras->flags = ifrp->ifr_flags;
 
-        entry->ia_type = IPADDRESSTYPE_UNICAST; /* assume unicast? */
+        if(addr_info.bcastflg)
+           bcastentry->ia_type = IPADDRESSTYPE_BROADCAST;
+        if(addr_info.anycastflg)
+           entry->ia_type = IPADDRESSTYPE_ANYCAST;
+        else
+           entry->ia_type = IPADDRESSTYPE_UNICAST;
 
         /** entry->ia_prefix_oid ? */
 
@@ -249,12 +279,23 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
          *   always preferred(1).
          */
         entry->ia_status = IPADDRESSSTATUSTC_PREFERRED;
+        if(addr_info.bcastflg)
+           bcastentry->ia_status = IPADDRESSSTATUSTC_PREFERRED;
 
         /*
          * can we figure out if an address is from DHCP?
          * use manual until then...
          */
-        entry->ia_origin = IPADDRESSORIGINTC_MANUAL;
+        if(IS_APIPA(ipval)) {
+           entry->ia_origin = IPADDRESSORIGINTC_RANDOM;
+           if(addr_info.bcastflg)
+              bcastentry->ia_origin = IPADDRESSORIGINTC_RANDOM;
+        }
+        else {
+           entry->ia_origin = IPADDRESSORIGINTC_MANUAL;
+           if(addr_info.bcastflg)
+              bcastentry->ia_origin = IPADDRESSORIGINTC_MANUAL;
+        }
 
         DEBUGIF("access:ipaddress:container") {
             DEBUGMSGT_NC(("access:ipaddress:container",
@@ -272,6 +313,10 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         /*
          * add entry to container
          */
+        if(addr_info.bcastflg){
+           CONTAINER_INSERT(container, bcastentry);
+        }
+
         CONTAINER_INSERT(container, entry);
     }
 
@@ -581,4 +626,3 @@ _print_flags(short flags)
     if(unknown)
         DEBUGMSGT_NC(("access:ipaddress:container","  unknown 0x%x\n", unknown));
 }
-

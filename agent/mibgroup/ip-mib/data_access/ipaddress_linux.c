@@ -187,6 +187,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
     netsnmp_ipaddress_entry *entry;
     _ioctl_extras           *extras;
     static int      log_open_err = 1;
+    struct address_flag_info addr_info;
     
     netsnmp_assert(NULL != container);
 
@@ -267,6 +268,8 @@ _load_v6(netsnmp_container *container, int idx_offset)
          * every time it is called.
          */
         entry->if_index = netsnmp_access_interface_index_find(if_name);
+        memset(&addr_info, 0, sizeof(struct address_flag_info));
+        addr_info = netsnmp_access_other_info_get(entry->if_index, AF_INET6);
 
         /*
           #define IPADDRESSSTATUSTC_PREFERRED  1
@@ -277,7 +280,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
           #define IPADDRESSSTATUSTC_TENTATIVE  6
           #define IPADDRESSSTATUSTC_DUPLICATE  7
         */
-        if(flags & IFA_F_PERMANENT)
+        if((flags & IFA_F_PERMANENT) || (!flags) || (flags & IFA_F_TEMPORARY))
             entry->ia_status = IPADDRESSSTATUSTC_PREFERRED; /* ?? */
         else if(flags & IFA_F_DEPRECATED)
             entry->ia_status = IPADDRESSSTATUSTC_DEPRECATED;
@@ -293,7 +296,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
          * if it's not multi, it must be uni.
          *  (an ipv6 address is never broadcast)
          */
-        if (IN6_IS_ADDR_MULTICAST(entry->ia_address))
+        if(addr_info.anycastflg)
             entry->ia_type = IPADDRESSTYPE_ANYCAST;
         else
             entry->ia_type = IPADDRESSTYPE_UNICAST;
@@ -313,11 +316,17 @@ _load_v6(netsnmp_container *container, int idx_offset)
          *
          * are 'local' address assigned by link layer??
          */
-        if (IN6_IS_ADDR_LINKLOCAL(entry->ia_address) ||
-            IN6_IS_ADDR_SITELOCAL(entry->ia_address))
-            entry->ia_origin = IPADDRESSORIGINTC_LINKLAYER;
-        else
-            entry->ia_origin = IPADDRESSORIGINTC_MANUAL;
+         if (!flags)
+             entry->ia_origin = IPADDRESSORIGINTC_LINKLAYER;
+         else if (flags & IFA_F_TEMPORARY)
+             entry->ia_origin = IPADDRESSORIGINTC_RANDOM;
+         else if (IN6_IS_ADDR_LINKLOCAL(entry->ia_address))
+             entry->ia_origin = IPADDRESSORIGINTC_LINKLAYER;
+         else
+             entry->ia_origin = IPADDRESSORIGINTC_MANUAL;
+
+         if(entry->ia_origin == IPADDRESSORIGINTC_LINKLAYER)
+            entry->ia_storagetype = STORAGETYPE_PERMANENT;
 
         /* xxx-rks: what can we do with scope? */
 
@@ -335,3 +344,92 @@ _load_v6(netsnmp_container *container, int idx_offset)
     return idx_offset;
 }
 #endif
+
+struct address_flag_info
+netsnmp_access_other_info_get(int index, int family)
+{
+   struct {
+           struct nlmsghdr n;
+           struct ifaddrmsg r;
+           char   buf[1024];
+   } req;
+   struct address_flag_info addr;
+   struct rtattr    *rta;
+   int    status;
+   char   buf[16384];
+   struct nlmsghdr  *nlmp;
+   struct ifaddrmsg *rtmp;
+   struct rtattr    *rtatp;
+   int    rtattrlen;
+   int    sd;
+
+   memset(&addr, 0, sizeof(struct address_flag_info));
+   sd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
+   if(sd < 0) {
+      snmp_log(LOG_ERR, "could not open netlink socket\n");
+      return addr;
+   }
+
+   memset(&req, 0, sizeof(req));
+   req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct ifaddrmsg));
+   req.n.nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
+   req.n.nlmsg_type = RTM_GETADDR;
+   req.r.ifa_family = family;
+   rta = (struct rtattr *)(((char *)&req) + NLMSG_ALIGN(req.n.nlmsg_len));
+   if(family == AF_INET)
+      rta->rta_len = RTA_LENGTH(4);
+   else
+      rta->rta_len = RTA_LENGTH(16);
+
+    status = send(sd, &req, req.n.nlmsg_len, 0);
+    if (status < 0) {
+        snmp_log(LOG_ERR, "could not send netlink request\n");
+        return addr;
+    }
+
+    status = recv(sd, buf, sizeof(buf), 0);
+    if (status < 0) {
+        snmp_log (LOG_ERR, "could not recieve netlink request\n");
+        return addr;
+    }
+
+    if(status == 0) {
+       snmp_log (LOG_ERR, "nothing to read\n");
+       return addr;
+    }
+
+    for(nlmp = (struct nlmsghdr *)buf; status > sizeof(*nlmp);) {
+        int len = nlmp->nlmsg_len;
+        int req_len = len - sizeof(*nlmp);
+
+        if (req_len < 0 || len > status) {
+            snmp_log (LOG_ERR, "invalid netlink message\n");
+            return addr;
+        }
+
+        if (!NLMSG_OK(nlmp, status)) {
+            snmp_log (LOG_ERR, "invalid NLMSG message\n");
+            return addr;
+        }
+        rtmp = (struct ifaddrmsg *)NLMSG_DATA(nlmp);
+        rtatp = (struct rtattr *)IFA_RTA(rtmp);
+        rtattrlen = IFA_PAYLOAD(nlmp);
+        if(index == rtmp->ifa_index){
+           for (; RTA_OK(rtatp, rtattrlen); rtatp = RTA_NEXT(rtatp, rtattrlen)) {
+                if(rtatp->rta_type == IFA_BROADCAST){
+                   addr.inp = (struct in_addr *)RTA_DATA(rtatp);
+                   addr.bcastflg = 1;
+                }
+                if(rtatp->rta_type == IFA_ANYCAST){
+                   addr.inp = (struct in_addr *)RTA_DATA(rtatp);
+                   addr.anycastflg = 1;
+                }
+           }
+        }
+        status -= NLMSG_ALIGN(len);
+        nlmp = (struct nlmsghdr*)((char*)nlmp + NLMSG_ALIGN(len));
+    }
+    close(sd);
+    return addr;
+}
+
