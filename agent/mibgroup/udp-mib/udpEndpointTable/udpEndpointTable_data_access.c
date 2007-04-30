@@ -265,7 +265,8 @@ udpEndpointTable_container_load(netsnmp_container *container)
                                          ep->rmt_addr,
                                          ep->rmt_addr_len,
                                          ep->rmt_port,
-                                         ep->instance)) {
+                                         ep->instance,
+                                         ep->pid)) {
             snmp_log(LOG_ERR,
                      "error setting index while loading "
                      "udpEndpointTable data.\n");
