@@ -6004,7 +6004,6 @@ _sess_selpol_info(void *sessp, struct timeval *timeout, int *block,
     struct timeval  now, earliest, delta;
     int             active = 0, requests = 0;
     int             next_alarm = 0;
-    int             fdssize = 0;
 
     timerclear(&earliest);
 
