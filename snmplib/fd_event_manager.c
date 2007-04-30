@@ -194,7 +194,7 @@ void netsnmp_dispatch_external_events(int *count, fd_set *readfds, fd_set *write
           external_readfdfunc[i] (external_readfd[i],
                                   external_readfd_data[i]);
           FD_CLR(external_readfd[i], readfds);
-          *count--;
+          (*count)--;
       }
   }
   for (i = 0;
@@ -205,7 +205,7 @@ void netsnmp_dispatch_external_events(int *count, fd_set *readfds, fd_set *write
           external_writefdfunc[i] (external_writefd[i],
                                    external_writefd_data[i]);
           FD_CLR(external_writefd[i], writefds);
-          *count--;
+          (*count)--;
       }
   }
   for (i = 0;
@@ -216,7 +216,7 @@ void netsnmp_dispatch_external_events(int *count, fd_set *readfds, fd_set *write
           external_exceptfdfunc[i] (external_exceptfd[i],
                                     external_exceptfd_data[i]);
           FD_CLR(external_exceptfd[i], exceptfds);
-          *count--;
+          (*count)--;
       }
   }
 }
