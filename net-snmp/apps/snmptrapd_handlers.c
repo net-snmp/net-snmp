@@ -135,9 +135,12 @@ parse_forward(const char *token, char *line)
     char            buf[STRINGMAX];
     oid             obuf[MAX_OID_LEN];
     size_t          olen = MAX_OID_LEN;
-    char           *cptr;
+    char           *cptr, *cp;
     netsnmp_trapd_handler *traph;
+    int             flags = 0;
 
+    memset( buf, 0, sizeof(buf));
+    memset(obuf, 0, sizeof(obuf));
     cptr = copy_nword(line, buf, sizeof(buf));
     DEBUGMSGTL(("read_config:forward", "registering forward for: "));
     if (!strcmp(buf, "default")) {
@@ -147,6 +150,18 @@ parse_forward(const char *token, char *line)
         else
             traph = netsnmp_add_default_traphandler( forward_handler );
     } else {
+        cp = buf+strlen(buf)-1;
+        if ( *cp == '*' ) {
+            flags |= NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE;
+            *(cp--) = '\0';
+            if ( *cp == '.' ) {
+                /* 
+                 * Distinguish between 'oid.*' & 'oid*'
+                 */
+                flags |= NETSNMP_TRAPHANDLER_FLAG_STRICT_SUBTREE;
+                *(cp--) = '\0';
+            }
+        }
 
         if (!read_objid(buf, obuf, &olen)) {
             char            buf1[STRINGMAX];
@@ -166,6 +181,7 @@ parse_forward(const char *token, char *line)
     DEBUGMSG(("read_config:forward", "\n"));
 
     if (traph) {
+        traph->flags = flags;
         traph->authtypes = TRAP_AUTH_NET;
         traph->token = strdup(cptr);
     }
