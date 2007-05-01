@@ -270,9 +270,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
          */
         entry->if_index = netsnmp_access_interface_index_find(if_name);
         memset(&addr_info, 0, sizeof(struct address_flag_info));
-#if defined (NETSNMP_ENABLE_IPV6)
         addr_info = netsnmp_access_other_info_get(entry->if_index, AF_INET6);
-#endif
 
         /*
           #define IPADDRESSSTATUSTC_PREFERRED  1
@@ -283,8 +281,12 @@ _load_v6(netsnmp_container *container, int idx_offset)
           #define IPADDRESSSTATUSTC_TENTATIVE  6
           #define IPADDRESSSTATUSTC_DUPLICATE  7
         */
-        if((flags & IFA_F_PERMANENT) || (!flags) || (flags & IFA_F_TEMPORARY))
+        if((flags & IFA_F_PERMANENT) || (!flags))
             entry->ia_status = IPADDRESSSTATUSTC_PREFERRED; /* ?? */
+#ifdef IFA_F_TEMPORARY
+        else if(flags & IFA_F_TEMPORARY)
+            entry->ia_status = IPADDRESSSTATUSTC_PREFERRED; /* ?? */
+#endif
         else if(flags & IFA_F_DEPRECATED)
             entry->ia_status = IPADDRESSSTATUSTC_DEPRECATED;
         else if(flags & IFA_F_TENTATIVE)
@@ -321,8 +323,10 @@ _load_v6(netsnmp_container *container, int idx_offset)
          */
          if (!flags)
              entry->ia_origin = IPADDRESSORIGINTC_LINKLAYER;
+#ifdef IFA_F_TEMPORARY
          else if (flags & IFA_F_TEMPORARY)
              entry->ia_origin = IPADDRESSORIGINTC_RANDOM;
+#endif
          else if (IN6_IS_ADDR_LINKLOCAL(entry->ia_address))
              entry->ia_origin = IPADDRESSORIGINTC_LINKLAYER;
          else
