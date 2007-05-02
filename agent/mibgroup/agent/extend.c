@@ -1019,7 +1019,7 @@ handle_nsExtendOutput1Table(netsnmp_mib_handler          *handler,
                  * find the length of the first one.
                  * Otherwise find the length of the whole string.
                  */
-                if (extension->lines) {
+                if (extension->numlines > 0) {
                     len = (extension->lines[1])-(extension->output) -1;
                 } else if (extension->output) {
                     len = strlen(extension->output);
@@ -1034,7 +1034,7 @@ handle_nsExtendOutput1Table(netsnmp_mib_handler          *handler,
                 snmp_set_var_typed_value(
                      request->requestvb, ASN_OCTET_STR,
                      extension->output,
-                    (extension->output)?strlen(extension->output):0);
+                    (extension->output)?extension->out_len:0);
                 break;
             case COLUMN_EXTOUT1_NUMLINES:
                 snmp_set_var_typed_value(
