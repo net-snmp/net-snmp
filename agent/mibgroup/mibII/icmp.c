@@ -68,11 +68,11 @@ extern int      ip_module_count;
 
 #ifdef linux
 struct icmp_stats_table_entry {
-	__uint32_t ipVer;
-        __uint32_t icmpStatsInMsgs;
-        __uint32_t icmpStatsInErrors;
-        __uint32_t icmpStatsOutMsgs;
-        __uint32_t icmpStatsOutErrors;
+	uint32_t ipVer;
+        uint32_t icmpStatsInMsgs;
+        uint32_t icmpStatsInErrors;
+        uint32_t icmpStatsOutMsgs;
+        uint32_t icmpStatsOutErrors;
 };
 
 struct icmp_stats_table_entry icmp_stats_table[3];
@@ -136,7 +136,7 @@ icmp_stats_next_entry( void **loop_context,
 	 *set IP version
 	 */
 	snmp_set_var_typed_value(idx, ASN_INTEGER, (u_char *)&icmp_stats_table[i].ipVer,
-                                sizeof(__uint32_t));
+                                sizeof(uint32_t));
 	idx = idx->next_variable;
 
 
@@ -144,28 +144,28 @@ icmp_stats_next_entry( void **loop_context,
 	 * set icmpStatsInMsgs
 	 */
 	snmp_set_var_typed_value(idx, ASN_COUNTER, (u_char *)&icmp_stats_table[i].icmpStatsInMsgs,
-                                sizeof(__uint32_t));
+                                sizeof(uint32_t));
 	idx = idx->next_variable;
 
 	/*
 	 * set icmpStatsInErrors
 	 */
 	snmp_set_var_typed_value(idx, ASN_COUNTER, (u_char *)&icmp_stats_table[i].icmpStatsInErrors,
-                                sizeof(__uint32_t));
+                                sizeof(uint32_t));
 	idx = idx->next_variable;
 
 	/*
 	 * set icmpStatsOutMsgs
 	 */
 	snmp_set_var_typed_value(idx, ASN_COUNTER, (u_char *)&icmp_stats_table[i].icmpStatsOutMsgs,
-                                sizeof(__uint32_t));
+                                sizeof(uint32_t));
 	idx = idx->next_variable;
 
 	/*
 	 * set icmpStatsOutErrors
 	 */
 	snmp_set_var_typed_value(idx, ASN_COUNTER, (u_char *)&icmp_stats_table[i].icmpStatsOutErrors,
-                                sizeof(__uint32_t));
+                                sizeof(uint32_t));
 
 	*data_context = &icmp_stats_table[i];
 
@@ -729,23 +729,23 @@ icmp_stats_table_handler(netsnmp_mib_handler  *handler,
 				switch (subid) {
 					case ICMP_STAT_IPVER:
 						snmp_set_var_typed_value(requestvb, ASN_INTEGER,
-							(u_char *)&entry->ipVer, sizeof(__uint32_t));
+							(u_char *)&entry->ipVer, sizeof(uint32_t));
 						break;
 					case ICMP_STAT_INMSG:
 						snmp_set_var_typed_value(requestvb, ASN_COUNTER,
-							(u_char *)&entry->icmpStatsInMsgs, sizeof(__uint32_t));
+							(u_char *)&entry->icmpStatsInMsgs, sizeof(uint32_t));
 						break;	
 					case ICMP_STAT_INERR:
 						snmp_set_var_typed_value(requestvb, ASN_COUNTER,
-							(u_char *)&entry->icmpStatsInErrors, sizeof(__uint32_t));
+							(u_char *)&entry->icmpStatsInErrors, sizeof(uint32_t));
 						break;
 					case ICMP_STAT_OUTMSG:
 						snmp_set_var_typed_value(requestvb, ASN_COUNTER,
-							(u_char *)&entry->icmpStatsOutMsgs, sizeof(__uint32_t));
+							(u_char *)&entry->icmpStatsOutMsgs, sizeof(uint32_t));
 						break;
 					case ICMP_STAT_OUTERR:
 						snmp_set_var_typed_value(requestvb, ASN_COUNTER,
-							(u_char *)&entry->icmpStatsOutErrors, sizeof(__uint32_t));
+							(u_char *)&entry->icmpStatsOutErrors, sizeof(uint32_t));
 						break;
 					default:
 						snmp_log(LOG_WARNING, "mibII/icmpStatsTable: Unrecognised column (%d)\n",(int)subid);
