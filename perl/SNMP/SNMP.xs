@@ -1084,7 +1084,7 @@ OCT:
             ret = FAILURE;
             *(vars->val.integer) = 0;
         }
-        vars->val_len = sizeof(long);
+        vars->val_len = sizeof(in_addr_t);
         break;
 
       case TYPE_OBJID:
