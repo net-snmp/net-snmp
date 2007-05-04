@@ -20,7 +20,7 @@ INCLUDESUBDIRHEADERS= aix.h bsd.h bsdi3.h bsdi4.h bsdi.h cygwin.h \
 	dynix.h freebsd2.h freebsd3.h freebsd4.h freebsd.h generic.h hpux.h \
 	irix.h linux.h mingw32.h mips.h netbsd.h openbsd.h osf5.h \
 	solaris2.3.h solaris2.4.h solaris2.5.h solaris2.6.h \
-	solaris.h sunos.h svr5.h sysv.h ultrix4.h
+	solaris.h sunos.h svr5.h sysv.h ultrix4.h dragonfly.h
 INCLUDESUBDIR2=machine
 INCLUDESUBDIRHEADERS2=generic.h
 INSTALLBUILTHEADERS=include/net-snmp/net-snmp-config.h
