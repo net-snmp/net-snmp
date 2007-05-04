@@ -1079,7 +1079,7 @@ OCT:
 
       case TYPE_IPADDR:
         vars->type = ASN_IPADDRESS;
-        vars->val.integer = (long *)malloc(sizeof(long));
+        vars->val.integer = (long *)malloc(sizeof(in_addr_t));
         if (val)
             *(vars->val.integer) = inet_addr(val);
         else {
