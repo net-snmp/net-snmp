@@ -5,6 +5,7 @@
 TAG=
 WO=0
 DEST=
+TMPDIR=/tmp
 
 if [ "x$1" = "x-u" ]; then
     DEST=$2
@@ -102,25 +103,26 @@ if [ ! -z $DEST ]; then
     #echo $PWD
     DATE=`date +%Y%m%d_%H%M`
     SOURCE=net-snmp-svn-$TAG"_$DATE"
-    $TAR /tmp/$SOURCE.tar $SUBD
+    $TAR $TMPDIR/$SOURCE.tar $SUBD
     rc=$?
     if [ $rc -ne 0 ]; then
       echo "skipping upload due to rc $rc from tar command"
-      rm -f /tmp/$SOURCE.tar.gz
+      rm -f $TMPDIR/$SOURCE.tar.gz
       exit $rc
     fi
-    gzip -f --best /tmp/$SOURCE.tar
+    gzip -f --best $TMPDIR/$SOURCE.tar
     rc=$?
     if [ $rc -ne 0 ]; then
       echo "skipping upload due to rc $rc from gzip command"
-      rm -f /tmp/$SOURCE.tar.gz
+      rm -f $TMPDIR/$SOURCE.tar.gz
       exit $rc
     fi
-    scp /tmp/$SOURCE.tar.gz $DEST
+    scp $TMPDIR/$SOURCE.tar.gz $DEST
     rc=$?
     if [ $rc -ne 0 ]; then
-      echo "warning: rc $rc from scp command"
+      echo "warning: rc $rc from scp command (tarball in $TMPDIR)"
+    else
+      rm -f $TMPDIR/$SOURCE.tar.gz
     fi
-    rm -f /tmp/$SOURCE.tar.gz
   fi
 fi
