@@ -43,7 +43,7 @@ GetOptions(\%opts,
 	   ['b|braches=s',     'Branches to apply to (eg 5.1,5.2,...)'],
 	   ['m|commit-msg=s',  'Default commit message to use'],
 	   ['D|subdir=s',      'Apply patches to a subdirectory'],
-	   ['u|no-update',     'Do not run cvs update in the directory first.  Only use this if it\'s known clean.'],
+	   ['u|no-update',     'Do not run svn status/update in the directory first.  Only use this if it\'s known clean.'],
 	  );
 
 my %bs;
@@ -55,7 +55,7 @@ my $qw = new QWizard();
 my $pris = load_primaries();
 $qw->{'primaries'} = $pris;
 
-$qw->qwparam('cvscommit',$opts{'m'}) if ($opts{'m'});
+$qw->qwparam('svncommit',$opts{'m'}) if ($opts{'m'});
 
 $qw->magic('top');
 
@@ -84,7 +84,7 @@ sub load_primaries {
 			 check_value => sub { 
 			     return "patch file doesn't exist" if (! -f qwparam('patchfile'))
 			 }),
-		  qw_checkbox('noupdate','Don\'t run cvs update/revert first:', 
+		  qw_checkbox('noupdate','Don\'t run svn update/revert first:', 
 			      1, 0, default => $opts{'u'} || 0)],
 		  [],[],sub_modules => ['commit', 'commitmsg', 'maketest',
 					'edit', 'applying', 'check',
@@ -116,14 +116,14 @@ sub load_primaries {
 				width => 80,
 				height => 60,
 			       ),
-		   qw_paragraph('cvs update:',
+		   qw_paragraph('svn update:',
 				sub {
 				    my ($res, $one);
 				    foreach my $k (@codetrees) {
 					next if (!qwparam($k));
 					$res .= "$k:\n";
 					$one = capturedir($codetrees{$k}, 
-							  "cvs update");
+							  "svn update");
 					$res .= $one;
 					my @files = $one =~ m/^M (.*)$/gm;
 					if ($#files > -1) {
@@ -131,7 +131,7 @@ sub load_primaries {
 							       "rm -f ",
 							       @files);
 					    $res .= capturedir($codetrees{$k}, 
-							       "cvs update", 
+							       "svn update", 
 							       @files);
 					} else {
 					    $res .= "$codetrees{$k} is up to date\n";
@@ -239,17 +239,18 @@ sub load_primaries {
 
        commitmsg =>
        qw_primary("commitmsg", 'Commit info:', '',
-		  [qw_text('cvscommit','Commit message',
-			   default => qwparam('cvscommit') || $opts{'m'}),
+		  [qw_text('svncommit','Commit message',
+			   default => qwparam('svncommit') || $opts{'m'}),
 		  {type => 'dynamic',
 		   values => sub { my @tops = make_tops(1); return \@tops}}]),
 
        commit =>
        qw_primary("commit", 'running commit:', '',
 		  [qw_paragraph('committing files:',
-			       sub { my $msg = qwparam('cvscommit');
+			       sub { my $msg = qwparam('svncommit');
 				     $msg =~ s/\'/\'\"\'\"\'/g; # escape 's
-				     return captureeachdir('cvs commit -m \'' . $msg . '\''); },
+				     return capturedir($opts{'d'},
+						       'svn commit -m \'' . $msg . '\' ' . get_codedirs_str()); },
 				preformatted => 1,
 				width => 80,
 				height => 20,
@@ -295,6 +296,16 @@ sub capturedir {
     chdir($newdir);
     $res .= capture(@_);
     chdir($olddir);
+    return $res;
+}
+
+sub get_codedirs_str() {
+    my $res = "";
+    foreach my $k (@codetrees) {
+	next if (!qwparam($k));
+	$res .= " $k";
+    }
+    $res =~ s/^ //;
     return $res;
 }
 
