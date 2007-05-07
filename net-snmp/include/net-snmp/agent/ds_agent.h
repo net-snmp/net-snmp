@@ -51,5 +51,7 @@
 #define NETSNMP_DS_AGENT_CACHE_TIMEOUT  10      /* default cache timeout */
 #define NETSNMP_DS_AGENT_INTERNAL_VERSION  11   /* used by internal queries */
 #define NETSNMP_DS_AGENT_INTERNAL_SECLEVEL 12   /* used by internal queries */
+#define NETSNMP_DS_AGENT_MAX_GETBULKREPEATS 13 /* max getbulk repeats */
+#define NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES 14   /* max getbulk respones */
 
 #endif
