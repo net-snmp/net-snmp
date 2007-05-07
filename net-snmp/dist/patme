@@ -14,6 +14,7 @@ use strict;
 our %opts =
 (
  'd' => $ENV{'HOME'} . "/src/snmp/patme/",
+ 'b' => 'main,5.4,5.3,5.2',
  'p' => '-p1',
 );
 
@@ -52,6 +53,7 @@ my %bs;
 if ($opts{'b'}) {
     map { $bs{$_} = 1; } split(/,\s*/,$opts{'b'}); 
 }
+$opts{'d'} .= "/" if ($opts{'d'} !~ /\/$/);
 
 my $qw = new QWizard();
 my $pris = load_primaries();
@@ -291,8 +293,11 @@ sub capture {
 
 sub capturedir {
     my $dir = shift;
+    $dir .= "/" if ($dir !~ /\/$/);
+    my $basedir = qwparam('basedir');
+    $basedir .= "/" if ($basedir !~ /\/$/);
     my $olddir = getcwd();
-    my $newdir = qwparam('basedir') . "/" . $dir . "/" . qwparam('subdir');
+    my $newdir = "$basedir$dir" . qwparam('subdir');
     my $res = "changing to: $newdir\n";
     print $res;
     chdir($newdir);
@@ -305,7 +310,7 @@ sub get_codedirs_str() {
     my $res = "";
     foreach my $k (@codetrees) {
 	next if (!qwparam($k));
-	$res .= " $k";
+	$res .= " $opts{'d'}$codetrees{$k}";
     }
     $res =~ s/^ //;
     return $res;
