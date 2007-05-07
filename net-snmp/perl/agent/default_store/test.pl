@@ -42,6 +42,8 @@ BEGIN { $| = 1;
                   "NETSNMP_DS_AGENT_CACHE_TIMEOUT"         => 10,
                   "NETSNMP_DS_AGENT_INTERNAL_VERSION"      => 11,
                   "NETSNMP_DS_AGENT_INTERNAL_SECLEVEL"     => 12,
+                  "NETSNMP_DS_AGENT_MAX_GETBULKREPEATS"    => 13,
+                  "NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES"  => 14,
 		  );
 
 	print "1.." . (scalar(keys(%tests)) + 2) . "\n"; 
