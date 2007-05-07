@@ -19,18 +19,20 @@ our %opts =
 
 # sets the order shown
 our @codetrees = ('main',
+		  '5.4',
 		  '5.3',
 		  '5.2',
 		  '5.1',
 		  '5.0',
 		  'UCD');
 
-our %codetrees = ('5.0' => 'net-snmp-50-patches',
-		  '5.1' => 'net-snmp-51-patches',
-		  '5.2' => 'net-snmp-52-patches',
-		  '5.3' => 'net-snmp-53-patches',
-		  'main' => 'net-snmp-main',
-		  'UCD' => 'net-snmp-ucd');
+our %codetrees = ('5.0' => 'V5-0-patches',
+		  '5.1' => 'V5-1-patches',
+		  '5.2' => 'V5-2-patches',
+		  '5.3' => 'V5-3-patches',
+		  '5.4' => 'V5-4-patches',
+		  'main' => 'net-snmp',
+		  'UCD' => 'V4-2-patches');
 
 our (@captures, $capfilt, $result, %captures, $capturenum);
 
