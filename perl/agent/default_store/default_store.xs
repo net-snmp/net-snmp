@@ -302,6 +302,8 @@ my @names = (qw(NETSNMP_DS_AGENT_AGENTX_MASTER
 	       NETSNMP_DS_AGENT_INTERNAL_SECLEVEL
 	       NETSNMP_DS_AGENT_INTERNAL_SECNAME
 	       NETSNMP_DS_AGENT_INTERNAL_VERSION NETSNMP_DS_AGENT_LEAVE_PIDFILE
+	       NETSNMP_DS_AGENT_MAX_GETBULKREPEATS
+	       NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES
 	       NETSNMP_DS_AGENT_NO_CACHING
 	       NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS
 	       NETSNMP_DS_AGENT_NO_ROOT_ACCESS NETSNMP_DS_AGENT_PERL_INIT_FILE
@@ -505,14 +507,44 @@ __END__
 #endif
     }
     break;
-  case 37:
-    if (memEQ(name, "NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL", 37)) {
-#ifdef NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL
-      *iv_return = NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL;
+  case 35:
+    if (memEQ(name, "NETSNMP_DS_AGENT_MAX_GETBULKREPEATS", 35)) {
+#ifdef NETSNMP_DS_AGENT_MAX_GETBULKREPEATS
+      *iv_return = NETSNMP_DS_AGENT_MAX_GETBULKREPEATS;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
 #endif
+    }
+    break;
+  case 37:
+    /* Names all of length 37.  */
+    /* NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL
+       NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES */
+    /* Offset 26 gives the best switch position.  */
+    switch (name[26]) {
+    case 'L':
+      if (memEQ(name, "NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES", 37)) {
+      /*                                         ^                 */
+#ifdef NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES
+        *iv_return = NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES;
+        return PERL_constant_ISIV;
+#else
+        return PERL_constant_NOTDEF;
+#endif
+      }
+      break;
+    case 'N':
+      if (memEQ(name, "NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL", 37)) {
+      /*                                         ^                 */
+#ifdef NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL
+        *iv_return = NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL;
+        return PERL_constant_ISIV;
+#else
+        return PERL_constant_NOTDEF;
+#endif
+      }
+      break;
     }
     break;
   case 39:
