@@ -583,6 +583,28 @@ Note that setting an object to "null" effectively delete's it as being
 accessible.  No VALUE needs to be given if the object type is null.
 .IP
 More types should be available in the future.
+.IP "maxGetbulkRepeats NUM"
+Sets the maximum number of responses allowed for a single variable in
+a getbulk request.  Set to 0 to enable the default and set it to -1 to
+enable unlimited.  Because memory is allocated ahead of time, sitting
+this to unlimited is not considered safe if your user population can
+not be trusted.  A repeat number greater than this will be truncated
+to this value.
+.IP
+This is set by default to -1.
+.IP "maxGetbulkResponses NUM"
+Sets the maximum number of responses allowed for a getbulk request.
+This is set by default to 100.  Set to 0 to enable the default and set
+it to -1 to enable unlimited.  Because memory is allocated ahead of
+time, sitting this to unlimited is not considered safe if your user
+population can not be trusted.
+.IP
+In general, the total number of responses will not be allowed to
+exceed the maxGetbulkResponses number and the total number returned
+will be an integer multiple of the number of variables requested times
+the calculated number of repeats allow to fit below this number.
+.IP
+Also not that processing of maxGetbulkRepeats is handled first.
 .SH "SETTING UP TRAP AND/OR INFORM DESTINATIONS"
 .IP "trapcommunity STRING"
 This defines the default community string to be used when sending traps.

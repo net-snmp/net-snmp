@@ -41,5 +41,7 @@
 #define NETSNMP_DS_AGENT_X_SOCK_USER     8      /* ownership for the   */
 #define NETSNMP_DS_AGENT_X_SOCK_GROUP    9      /*     AgentX socket   */
 #define NETSNMP_DS_AGENT_CACHE_TIMEOUT  10      /* default cache timeout */
+#define NETSNMP_DS_AGENT_MAX_GETBULKREPEATS 13 /* max getbulk repeats */
+#define NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES 14   /* max getbulk respones */
 
 #endif
