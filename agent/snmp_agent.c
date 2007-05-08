@@ -2203,8 +2203,6 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
         }
         DEBUGMSGTL(("snmp_agent", "GETBULK N = %d, M = %d, R = %d\n",
                     n, asp->pdu->errindex, r));
-        fprintf(stderr, "GETBULK N = %d, M = %d, R = %d\n",
-                n, asp->pdu->errindex, r);
     }
 
     /*
