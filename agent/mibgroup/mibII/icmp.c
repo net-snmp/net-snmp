@@ -704,6 +704,7 @@ icmp_handler(netsnmp_mib_handler          *handler,
 }
 
 
+#ifdef linux
 int
 icmp_stats_table_handler(netsnmp_mib_handler  *handler,
                  netsnmp_handler_registration *reginfo,
@@ -772,6 +773,7 @@ icmp_stats_table_handler(netsnmp_mib_handler  *handler,
 
 	return SNMP_ERR_NOERROR;
 }
+#endif		/* linux */
 
         /*********************
 	 *
