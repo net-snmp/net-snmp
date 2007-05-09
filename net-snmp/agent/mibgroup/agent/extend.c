@@ -1019,7 +1019,7 @@ handle_nsExtendOutput1Table(netsnmp_mib_handler          *handler,
                  * find the length of the first one.
                  * Otherwise find the length of the whole string.
                  */
-                if (extension->numlines > 0) {
+                if (extension->numlines > 1) {
                     len = (extension->lines[1])-(extension->output) -1;
                 } else if (extension->output) {
                     len = strlen(extension->output);
