@@ -202,13 +202,13 @@ perlrealclean:
 #
 PYMAKE=$(PYTHON) setup.py $(PYTHONARGS)
 pythonmodules: 
-	@(cd python ; $(PYMAKE) build) ; \
+	@(dir=`pwd`; cd python; $(PYMAKE) build --basedir=$$dir) ; \
         if test $$? != 0 ; then \
            exit 1 ; \
         fi
 
 pythoninstall:
-	@(cd python ; $(PYMAKE) install) ; \
+	@(dir=`pwd`; cd python; $(PYMAKE) install --basedir=$$dir) ; \
         if test $$? != 0 ; then \
            exit 1 ; \
         fi
@@ -217,13 +217,13 @@ pythonuninstall:
 	echo "WARNING: python doesn't support uninstall"
 
 pythontest:
-	@(cd python ; $(PYMAKE) test) ; \
+	@(dir=`pwd`; cd python; $(PYMAKE) test --basedir=$$dir) ; \
 	if test $$? != 0 ; then \
 	   exit 1 ; \
 	fi
 
 pythonclean:
-	@( cd python ; $(PYMAKE) clean )
+	@(dir=`pwd`; cd python; $(PYMAKE) clean --basedir=$$dir)
 
 
 #
