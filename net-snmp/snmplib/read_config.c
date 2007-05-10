@@ -306,10 +306,10 @@ void
 unregister_config_handler(const char *type_param, const char *token)
 {
     struct config_files **ctmp = &config_files;
-    struct config_line **ltmp, *ltmp2;
-    const char     *type = type_param;
-    char           *cptr, buf[STRINGMAX];
-    char           *st;
+    struct config_line  **ltmp;
+    const char           *type = type_param;
+    char                 *cptr, buf[STRINGMAX];
+    char                 *st;
 
     if (type == NULL) {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
@@ -356,7 +356,7 @@ unregister_config_handler(const char *type_param, const char *token)
         /*
          * found it at the top of the list 
          */
-        ltmp2 = (*ltmp)->next;
+        struct config_line *ltmp2 = (*ltmp)->next;
         SNMP_FREE((*ltmp)->config_token);
         SNMP_FREE((*ltmp)->help);
         SNMP_FREE(*ltmp);
@@ -368,9 +368,9 @@ unregister_config_handler(const char *type_param, const char *token)
         ltmp = &((*ltmp)->next);
     }
     if ((*ltmp)->next != NULL) {
+        struct config_line *ltmp2 = (*ltmp)->next->next;
         SNMP_FREE((*ltmp)->next->config_token);
         SNMP_FREE((*ltmp)->next->help);
-        ltmp2 = (*ltmp)->next->next;
         SNMP_FREE((*ltmp)->next);
         (*ltmp)->next = ltmp2;
     }
