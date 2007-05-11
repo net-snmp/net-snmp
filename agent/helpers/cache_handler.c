@@ -383,14 +383,14 @@ int
 netsnmp_cache_check_and_reload(netsnmp_cache * cache)
 {
     if (!cache) {
-        DEBUGMSG(("helper:cache_handler", " no cache\n"));
+        DEBUGMSGT(("helper:cache_handler", " no cache\n"));
         return 0;	/* ?? or -1 */
     }
     if (!cache->valid || netsnmp_cache_check_expired(cache))
         return _cache_load( cache );
     else {
-        DEBUGMSG(("helper:cache_handler", " cached (%d)\n",
-                  cache->timeout));
+        DEBUGMSGT(("helper:cache_handler", " cached (%d)\n",
+                   cache->timeout));
         return 0;
     }
 }
@@ -433,8 +433,8 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_NO_CACHING) ||
         !cache || !cache->enabled || !cache->load_cache) {
-        DEBUGMSG(("helper:cache_handler", " caching disabled or "
-                  "cache not found, disabled or had no load method\n"));
+        DEBUGMSGT(("helper:cache_handler", " caching disabled or "
+                   "cache not found, disabled or had no load method\n"));
         return SNMP_ERR_NOERROR;
     }
 
