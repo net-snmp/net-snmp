@@ -139,66 +139,12 @@ static int      config_errors;
 
 struct config_files *config_files = NULL;
 
-struct config_line *
-register_prenetsnmp_mib_handler(const char *type,
-                                const char *token,
-                                void (*parser) (const char *, char *),
-                                void (*releaser) (void), const char *help)
-{
-    struct config_line *ltmp;
-    ltmp = register_config_handler(type, token, parser, releaser, help);
-    if (ltmp != NULL)
-        ltmp->config_time = PREMIB_CONFIG;
-    return (ltmp);
-}
-
-struct config_line *
-register_app_prenetsnmp_mib_handler(const char *token,
-                                    void (*parser) (const char *, char *),
-                                    void (*releaser) (void),
-                                    const char *help)
-{
-    return (register_prenetsnmp_mib_handler
-            (NULL, token, parser, releaser, help));
-}
-
-/**
- * register_config_handler registers handlers for certain tokens specified in
- * certain types of files.
- *
- * Allows a module writer use/register multiple configuration files based off
- * of the type parameter.  A module writer may want to set up multiple
- * configuration files to separate out related tasks/variables or just for
- * management of where to put tokens as the module or modules get more complex
- * in regard to handling token registrations.
- *
- * @param type_param the configuration file used, e.g., if snmp.conf is the
- *                 file where the token is located use "snmp" here.
- *                 Multiple colon separated tokens might be used.
- *                 If NULL or "" then the configuration file used will be
- *                 <application>.conf.
- *
- * @param token    the token being parsed from the file.  Must be non-NULL.
- *
- * @param parser   the handler function pointer that use  the specified
- *                 token and the rest of the line to do whatever is required
- *                 Should be non-NULL in order to make use of this API.
- *
- * @param releaser if non-NULL, the function specified is called if
- *                 and when the configuration files are re-read.  This function
- *                 should free any resources allocated by the token handler
- *                 function.
- *
- * @param help     if non-NULL, used to display help information on the expected 
- *	           arguments after the token.
- *      
- * @return Pointer to a new config line entry or NULL on error.
- */
-struct config_line *
-register_config_handler(const char *type_param,
-                        const char *token,
-                        void (*parser) (const char *, char *),
-                        void (*releaser) (void), const char *help)
+static struct config_line *
+internal_register_config_handler(const char *type_param,
+				 const char *token,
+				 void (*parser) (const char *, char *),
+				 void (*releaser) (void), const char *help,
+				 int when)
 {
     struct config_files **ctmp = &config_files;
     struct config_line  **ltmp;
@@ -264,7 +210,7 @@ register_config_handler(const char *type_param,
             return NULL;
         }
 
-        (*ltmp)->config_time = NORMAL_CONFIG;
+        (*ltmp)->config_time = when;
         (*ltmp)->config_token = strdup(token);
         if (help != NULL)
             (*ltmp)->help = strdup(help);
@@ -280,6 +226,68 @@ register_config_handler(const char *type_param,
     return (*ltmp);
 
 }                               /* end register_config_handler() */
+
+struct config_line *
+register_prenetsnmp_mib_handler(const char *type,
+                                const char *token,
+                                void (*parser) (const char *, char *),
+                                void (*releaser) (void), const char *help)
+{
+    return internal_register_config_handler(type, token, parser, releaser,
+					    help, PREMIB_CONFIG);
+}
+
+struct config_line *
+register_app_prenetsnmp_mib_handler(const char *token,
+                                    void (*parser) (const char *, char *),
+                                    void (*releaser) (void),
+                                    const char *help)
+{
+    return (register_prenetsnmp_mib_handler
+            (NULL, token, parser, releaser, help));
+}
+
+/**
+ * register_config_handler registers handlers for certain tokens specified in
+ * certain types of files.
+ *
+ * Allows a module writer use/register multiple configuration files based off
+ * of the type parameter.  A module writer may want to set up multiple
+ * configuration files to separate out related tasks/variables or just for
+ * management of where to put tokens as the module or modules get more complex
+ * in regard to handling token registrations.
+ *
+ * @param type_param the configuration file used, e.g., if snmp.conf is the
+ *                 file where the token is located use "snmp" here.
+ *                 Multiple colon separated tokens might be used.
+ *                 If NULL or "" then the configuration file used will be
+ *                 <application>.conf.
+ *
+ * @param token    the token being parsed from the file.  Must be non-NULL.
+ *
+ * @param parser   the handler function pointer that use  the specified
+ *                 token and the rest of the line to do whatever is required
+ *                 Should be non-NULL in order to make use of this API.
+ *
+ * @param releaser if non-NULL, the function specified is called if
+ *                 and when the configuration files are re-read.  This function
+ *                 should free any resources allocated by the token handler
+ *                 function.
+ *
+ * @param help     if non-NULL, used to display help information on the
+ *                 expected arguments after the token.
+ *
+ * @return Pointer to a new config line entry or NULL on error.
+ */
+struct config_line *
+register_config_handler(const char *type,
+			const char *token,
+			void (*parser) (const char *, char *),
+			void (*releaser) (void), const char *help)
+{
+    return internal_register_config_handler(type, token, parser, releaser,
+					    help, NORMAL_CONFIG);
+}
 
 struct config_line *
 register_app_config_handler(const char *token,
