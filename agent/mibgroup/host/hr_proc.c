@@ -185,7 +185,7 @@ var_hrproc(struct variable * vp,
             long_return = 0;
         return (u_char *) & long_return;
     default:
-        DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrproc\n",
+        DEBUGMSGTL(("host/hr_proc", "unknown sub-id %d in var_hrproc\n",
                     vp->magic));
     }
     return NULL;
