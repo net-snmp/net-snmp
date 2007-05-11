@@ -74,6 +74,20 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->other = -1;
     }
 
+#ifdef SC_AINFO
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_VIRTMEM, 1 );
+    if (!mem) {
+        snmp_log_perror("No Virtual Memory info entry");
+    } else {
+        if (!mem->descr)
+            mem->descr = strdup( " Virtual memory" );
+        mem->units = pagesize;		/* or 1024? */
+        mem->size  = ai_ani_max;
+        mem->free  = (ai.ani_max - ai.ani_resv);
+        mem->other = -1;
+    }
+#endif
+
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SWAP, 1 );
     if (!mem) {
         snmp_log_perror("No Swap info entry");
