@@ -308,10 +308,8 @@ unregister_config_handler(const char *type_param, const char *token)
     struct config_files **ctmp = &config_files;
     struct config_line  **ltmp;
     const char           *type = type_param;
-    char                 *cptr, buf[STRINGMAX];
-    char                 *st;
 
-    if (type == NULL) {
+    if (type == NULL || *type == '\0') {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				     NETSNMP_DS_LIB_APPTYPE);
     }
@@ -319,14 +317,19 @@ unregister_config_handler(const char *type_param, const char *token)
     /*
      * Handle multiple types (recursively)
      */
-    cptr = strchr( type, ':' );
-    if (cptr) {
-        strncpy(buf, type, STRINGMAX);
+    if (strchr(type, ':')) {
+        char                buf[STRINGMAX];
+        char               *cptr = buf;
+        strncpy(buf, type, STRINGMAX - 1);
         buf[STRINGMAX - 1] = '\0';
-        cptr = strtok_r(buf, ":", &st);
         while (cptr) {
-            unregister_config_handler(cptr, token);
-            cptr  = strtok_r(NULL, ":", &st);
+            char* c = cptr;
+            cptr = strchr(cptr, ':');
+            if(cptr) {
+                *cptr = '\0';
+                ++cptr;
+            }
+            unregister_config_handler(c, token);
         }
         return;
     }
