@@ -181,15 +181,13 @@ agentx_register_config_handler(const char *token,
 {
     DEBUGMSGTL(("agentx_register_app_config_handler",
                 "registering .conf token for \"%s\"\n", token));
-    register_app_config_handler(token, parser, releaser, help);
-    register_config_handler("agentx", token, parser, releaser, help);
+    register_config_handler(":agentx", token, parser, releaser, help);
 }
 
 void
 agentx_unregister_config_handler(const char *token)
 {
-    unregister_app_config_handler(token);
-    unregister_config_handler("agentx", token);
+    unregister_config_handler(":agentx", token);
 }
 
 void
