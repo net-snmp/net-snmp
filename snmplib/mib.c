@@ -2867,6 +2867,15 @@ shutdown_mib(void)
     }
     tree_head = NULL;
     Mib = NULL;
+    if (_mibindexes) {
+        int i;
+        for (i = 0; i < _mibindex; ++i)
+            SNMP_FREE(_mibindexes[i]);
+        free(_mibindexes);
+        _mibindex = 0;
+        _mibindex_max = 0;
+        _mibindexes = NULL;
+    }
     if (Prefix != NULL && Prefix != &Standard_Prefix[0])
         SNMP_FREE(Prefix);
     if (Prefix)
