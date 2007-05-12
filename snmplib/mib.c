@@ -2726,6 +2726,8 @@ shutdown_mib(void)
         SNMP_FREE(Prefix);
     if (Prefix)
         Prefix = NULL;
+    SNMP_FREE(confmibs);
+    SNMP_FREE(confmibdir);
 }
 
 /**
