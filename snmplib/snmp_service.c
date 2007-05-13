@@ -339,11 +339,11 @@ netsnmp_lookup_default_target(const char* application, const char* domain)
 void
 netsnmp_register_service_handlers(void)
 {
-    register_config_handler(NULL, "defDomain",
+    register_config_handler("snmp:", "defDomain",
 			    netsnmp_register_user_domain,
 			    netsnmp_clear_user_domain,
 			    "application domain");
-    register_config_handler(NULL, "defTarget",
+    register_config_handler("snmp:", "defTarget",
 			    netsnmp_register_user_target,
 			    netsnmp_clear_user_target,
 			    "application domain target");
