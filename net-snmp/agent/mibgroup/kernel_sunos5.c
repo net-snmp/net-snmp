@@ -149,7 +149,7 @@ getentry(req_e req_type, void *bufaddr, size_t len, size_t entrysize,
          void *resp, int (*comp)(void *, void *), void *arg);
 
 static int
-getmib(int groupname, int subgroupname, void *statbuf, size_t size,
+getmib(int groupname, int subgroupname, void **statbuf, size_t *size,
        size_t entrysize, req_e req_type, void *resp, size_t *length,
        int (*comp)(void *, void *), void *arg);
 
@@ -695,8 +695,8 @@ getMibstat(mibgroup_e grid, void *resp, size_t entrysize,
 		       cachep->cache_size, req_type,
 		       (mib2_ifEntry_t *) & ep, &length, comp, arg);
 	} else {
-	    rc = getmib(mibgr, mibtb, cachep->cache_addr,
-			cachep->cache_size, entrysize, req_type, &ep,
+	    rc = getmib(mibgr, mibtb, &(cachep->cache_addr),
+			&(cachep->cache_size), entrysize, req_type, &ep,
 			&length, comp, arg);
 	}
 
@@ -838,7 +838,7 @@ init_mibcache_element(mibcache * cp)
  */
 
 static int
-getmib(int groupname, int subgroupname, void *statbuf, size_t size,
+getmib(int groupname, int subgroupname, void **statbuf, size_t *size,
        size_t entrysize, req_e req_type, void *resp,
        size_t *length, int (*comp)(void *, void *), void *arg)
 {
@@ -850,6 +850,7 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
     struct T_error_ack *tea = (struct T_error_ack *) buf;
     struct opthdr  *req;
     found_e         result = FOUND;
+    size_t oldsize;
 
     DEBUGMSGTL(("kernel_sunos5", "...... getmib (%d, %d, ...)\n",
 		groupname, subgroupname));
@@ -954,8 +955,8 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
 	 * reducing the number of getmsg calls
 	 */
 
-	strbuf.buf = statbuf;
-	strbuf.maxlen = size;
+	strbuf.buf = *statbuf;
+	strbuf.maxlen = *size;
 	strbuf.len = 0;
 	flags = 0;
 	do {
@@ -970,7 +971,22 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
 		goto Return;
 
 	    case MOREDATA:
+		oldsize = ( ((void *)strbuf.buf) - *statbuf) + strbuf.len;
+		strbuf.buf = (void *)realloc(*statbuf,oldsize+4096);
+		if(strbuf.buf != NULL) {
+		    *statbuf = strbuf.buf;
+		    *size = oldsize + 4096;
+		    strbuf.buf = *statbuf + oldsize;
+		    strbuf.maxlen = 4096;
+		    break;
+		}
+		strbuf.buf = *statbuf + (oldsize - strbuf.len);
 	    case 0:
+		/* fix buffer to real size & position */
+		strbuf.len += ((void *)strbuf.buf) - *statbuf;
+		strbuf.buf = *statbuf;
+		strbuf.maxlen = *size;
+
 		if (req_type == GET_NEXT && result == NEED_NEXT)
 		    /*
 		     * End of buffer, so "next" is the first item in the next
@@ -983,6 +999,8 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
 		break;
 	    }
 	} while (rc == MOREDATA && result != FOUND);
+
+	DEBUGMSGTL(("kernel_sunos5", "...... getmib buffer size is %d\n", *size));
 
 	if (result == FOUND) {      /* Search is successful */
 	    if (rc != MOREDATA) {
