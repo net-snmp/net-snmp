@@ -29,4 +29,4 @@ LIBS=	 ../../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @LIBS@
 all: standardall
 
 snmpnetstat$(EXEEXT): ${LOBJS} ${USELIBS}
-	${LINK} -o $@ ${LOBJS} ${LOCAL_LIBS} ${LDFLAGS} ${LIBS}
+	${LINK} ${CFLAGS} -o $@ ${LOBJS} ${LOCAL_LIBS} ${LDFLAGS} ${LIBS}
