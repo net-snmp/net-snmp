@@ -1076,6 +1076,12 @@
 /* Define to 1 if you have the <xti.h> header file. */
 #undef HAVE_XTI_H
 
+/* Define to 1 if you have <inet/ip.h> header file. */
+#undef HAVE_INET_IP_H
+
+/* define to 1 if you have IRE_CACHE defined in <inet/ip.h> header file. */
+#undef HAVE_DEFINED_IRE_CACHE
+
 /* Unix domain socket for AgentX master-subagent communication */
 #undef NETSNMP_AGENTX_SOCKET
 
