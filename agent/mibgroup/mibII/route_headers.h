@@ -161,6 +161,9 @@
 
 #ifdef solaris2
 #include "kernel_sunos5.h"
+#ifdef HAVE_INET_IP_H
+#include <inet/ip.h>
+#endif /* HAVE_INET_IP_H */
 #endif
 
 #ifdef HAVE_SYS_SYSCTL_H

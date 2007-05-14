@@ -759,6 +759,10 @@ var_ipRouteEntry(struct variable * vp,
         if (getMibstat(MIB_IP_ROUTE, &entry, sizeof(mib2_ipRouteEntry_t),
                        req_type, &IP_Cmp_Route, &Nextentry) != 0)
             break;
+#ifdef HAVE_DEFINED_IRE_CACHE
+        if(entry.ipRouteInfo.re_ire_type&IRE_CACHE)
+            continue;
+#endif /* HAVE_DEFINED_IRE_CACHE */
         COPY_IPADDR(cp, (u_char *) & entry.ipRouteDest, op,
                     current + IP_ROUTEADDR_OFF);
         if (exact) {
