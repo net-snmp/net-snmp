@@ -2754,6 +2754,13 @@ check_delayed_request(netsnmp_agent_session *asp)
     case MODE_SET_ACTION:
     case MODE_SET_FREE:
       settop:
+        /* If we should do only one pass, this mean we */
+        /* should not reenter this function */
+        if ((asp->pdu->flags & UCD_MSG_FLAG_ONE_PASS_ONLY)) {
+            /* We should have finished the processing after the first */
+            /* handle_set_loop, so just wrap up */
+            break;
+        }
         handle_set_loop(asp);
         if (asp->mode != FINISHED_SUCCESS && asp->mode != FINISHED_FAILURE) {
 
