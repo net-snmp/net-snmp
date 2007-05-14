@@ -84,59 +84,59 @@ OTHERUNINSTALL=snmpinformuninstall snmptrapdperluninstall
 # build rules
 #
 snmpwalk$(EXEEXT):    snmpwalk.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmpwalk.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmpwalk.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpbulkwalk$(EXEEXT):    snmpbulkwalk.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmpbulkwalk.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmpbulkwalk.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpbulkget$(EXEEXT):    snmpbulkget.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmpbulkget.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmpbulkget.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptranslate$(EXEEXT):    snmptranslate.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmptranslate.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmptranslate.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpstatus$(EXEEXT):    snmpstatus.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmpstatus.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmpstatus.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpget$(EXEEXT):    snmpget.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmpget.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmpget.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpdelta$(EXEEXT):    snmpdelta.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmpdelta.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmpdelta.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptable$(EXEEXT):    snmptable.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmptable.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmptable.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptest$(EXEEXT):    snmptest.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmptest.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmptest.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptrapd$(EXEEXT):    $(TRAPD_OBJECTS) $(USETRAPLIBS) $(INSTALLLIBS)
-	$(LINK) -o $@ $(TRAPD_OBJECTS) $(INSTALLLIBS) $(LOCAL_LIBS) ${LDFLAGS} ${TRAPLIBS}
+	$(LINK) ${CFLAGS} -o $@ $(TRAPD_OBJECTS) $(INSTALLLIBS) $(LOCAL_LIBS) ${LDFLAGS} ${TRAPLIBS}
 
 snmptrap$(EXEEXT):    snmptrap.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmptrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmptrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpinform$(EXEEXT): snmptrap$(EXEEXT)
 	rm -f snmpinform
 	$(LN_S) snmptrap$(EXEEXT) snmpinform$(EXEEXT)
 
 snmpset$(EXEEXT):    snmpset.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmpset.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmpset.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpusm$(EXEEXT):    snmpusm.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmpusm.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmpusm.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpvacm$(EXEEXT):    snmpvacm.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmpvacm.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmpvacm.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpgetnext$(EXEEXT):    snmpgetnext.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmpgetnext.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmpgetnext.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 encode_keychange$(EXEEXT):    encode_keychange.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ encode_keychange.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ encode_keychange.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpdf$(EXEEXT):    snmpdf.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmpdf.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) ${CFLAGS} -o $@ snmpdf.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION): $(LLIBTRAPD_OBJS)
 	$(LIB_LD_CMD) libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION) ${LLIBTRAPD_OBJS}  $(LIB_LD_LIBS)
