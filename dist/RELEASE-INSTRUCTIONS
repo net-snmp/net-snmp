@@ -133,7 +133,7 @@ RELEASE TESTING:
  15) Double-check that there are no outstanding changes that have
      been missed from the CVS checkin:
 
-        $ cvs -u status
+        $ svn status
 
  15) Upload the tarball (and signature file) to the SourceForge server:
  
@@ -244,7 +244,7 @@ CREATING BINARY DISTRIBUTIONS
      binaries again.  This ensures that everything (especially perl
      modules) are properly linked against the right libraries.
 
-  1) always build releases from a tarball, not from CVS.
+  1) always build releases from a tarball, not from SVN.
 
   2) Add mib modules that are common.  Basically, add:
 
@@ -353,7 +353,7 @@ MANUAL - STEP 2
 
       - Check in the new ChangeLog:
 
-          $ cvs commit -m "update for release X" ChangeLog
+          $ svn commit -m "update for release X" ChangeLog
 
         This is done automatically by "makerelease"
 
@@ -363,7 +363,15 @@ MANUAL - STEP 3
 
 Updating README, NEWS, and CHANGES files
 
-  CVS commit messages that generate auto-NEWS and auto-CHANGES
+  [ This information has been moved to:
+
+  http://www.net-snmp.org/wiki/index.php/Commit_message_auto-extraction_formats
+
+  ]
+
+However, leaving some examples here for quick referral:
+
+  SVN commit messages that generate auto-NEWS and auto-CHANGES
   extractions should be formatted like the following examples:
 
     NEWS: snmpd: I did something really cool to the agent
@@ -372,38 +380,3 @@ Updating README, NEWS, and CHANGES files
     CHANGES: BUG: 13: Fixed bug 13 & secured the world at large against hackers
     NEWS: perl: PATCH: 123: from Robert: did something
     NEWS: perl: PATCH: 123: from "Robert Story": did something else
-
-  All entries marked CHANGES will go into the CHANGES file.
-  All entries marked NEWS go into both the NEWS and CHANGES file.
-  Any text before the formatting above will be ignored, as will
-  any text on subsequent lines.  So everything for a particular
-  entry should go on a single line (which will be auto-line-wrapped).
-
-  The extraction script is actually fairly lenient but please try
-  to stick to the formats shown.  See the dist/extractnews file for
-  nasty regexp details.
-
-  The second field is a token, used to group related entries together.
-  This should preferably be chosen from the following list:
-
-      snmpd
-      snmptrapd
-      snmplib
-      apps
-      snmpusm, snmpget, ...           # if it applies to just one
-      building
-      documentation
-      perl
-      mib2c
-      Linux, Solaris, Win32, FreeBSD, OpenBSD, Etc
-      misc
-
-  (although it can technically be anything).  For O/S-specific
-  entries, please ensure that the token starts with an upper-case
-  letter.   (And for non-O/S-specific entries, that it doesn't!)
-
-  The release maintainer will doubtless need to edit and re-classify
-  these entries further, of course, but this mechanism provides a
-  start for them.
-
-
