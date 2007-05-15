@@ -82,7 +82,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         if (!mem->descr)
             mem->descr = strdup( " Virtual memory" );
         mem->units = pagesize;		/* or 1024? */
-        mem->size  = ai_ani_max;
+        mem->size  = ai.ani_max;
         mem->free  = (ai.ani_max - ai.ani_resv);
         mem->other = -1;
     }
