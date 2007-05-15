@@ -18,6 +18,7 @@ if [ "x$1" = "x-u" ]; then
         TAR='/usr/bin/star -Hustar -not -pat="*/CVS/*" -c -f'
     elif [ -x /bin/tar ]; then
         TAR="/bin/tar --exclude=CVS -c -f"
+        echo "warning: star not available, using (less portable) tar..."
     else
         echo "neither /usr/bin/star nor /bin/tar found."
         exit
