@@ -15,9 +15,10 @@ if [ "x$1" = "x-u" ]; then
     # especially if long file names (>100 char) are present.
     # star is a better replacement.
     if [ -x /usr/bin/star ]; then
-        TAR='/usr/bin/star -Hustar -not -pat="*/.svn/*" -c -f'
+        TAR='/usr/bin/star -Hustar -not -pat=*/.svn/* -c -f'
     elif [ -x /bin/tar ]; then
         TAR="/bin/tar --exclude=.svn -c -f"
+        echo "warning: star not available, using (less portable) tar..."
     else
         echo "neither /usr/bin/star nor /bin/tar found."
         exit
