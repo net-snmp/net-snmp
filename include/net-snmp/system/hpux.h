@@ -7,6 +7,13 @@
 #define NETSNMP_DONT_USE_NLIST 1
 #endif
 
+/* 
+ * HP-UX needs _REENTRANT defined to pick up strtok_r.
+ * Otherwise, at least for 64-bit code, strtok_r will not work 
+ * and will make net-snmp segfault.
+ */
+#define _REENTRANT 1
+
 #undef TCP_TTL_SYMBOL
 #ifndef hpux11
 #define TCP_TTL_SYMBOL "ipDefaultTTL"
