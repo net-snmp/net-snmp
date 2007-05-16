@@ -3348,7 +3348,7 @@ AC_CHECK_HEADERS(winsock.h,[
         esac
 ])
 AC_CHECK_HEADERS(io.h)
-# SCO
+# SCO, Solaris
 AC_CHECK_HEADERS(sys/stream.h)
 # KAME
 AC_CHECK_HEADERS(netinet/ip6.h netinet6/in6_var.h netinet6/in6_pcb.h netinet6/ip6_var.h netinet6/tcp6.h netinet6/tcp6_fsm.h netinet6/nd6.h netinet6/tcp6_timer.h netinet6/tcp6_var.h,,,
@@ -4472,11 +4472,20 @@ fi
 #
 case $target_os in
   solaris*)
-    AC_CHECK_HEADER(inet/ip.h,ac_inet_ip_h=yes,ac_inet_ip_h=no)
+    # at least Solaris 2.6/7 needs inet/common.h (mblk_t) to compile inet/ip.h
+    AC_CHECK_HEADERS(inet/common.h)
+    AC_CHECK_HEADERS(inet/ip.h,ac_inet_ip_h=yes,ac_inet_ip_h=no,
+AC_INCLUDES_DEFAULT([])
+[
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
+#if HAVE_INET_COMMON_H
+#include <inet/common.h>
+#endif
+])
     if test $ac_inet_ip_h = yes ; then
-      AC_DEFINE(HAVE_INET_IP_H)
-
-      AC_CACHE_CHECK(whether mib2_ipRouteEntry_t have re_ire_type,ac_cv_mib2_ipRouteEntry_t,[
+      AC_CACHE_CHECK(for mib2_ipRouteEntry_t in inet/mib2.h,ac_cv_mib2_ipRouteEntry_t,[
 AC_TRY_COMPILE([
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
@@ -4501,11 +4510,11 @@ AC_TRY_COMPILE([
       fi
 
       if test "x$ac_cv_ire_cache" = "xyes" ; then
-        AC_DEFINE(HAVE_DEFINED_IRE_CACHE)
+        AC_DEFINE(HAVE_DEFINED_IRE_CACHE,[],[define to 1 if you have IRE_CACHE defined in <inet/ip.h> header file.])
       else
         AC_MSG_WARN([It seems that you have inet/ip.h, but IRE_CACHE is not defined. \
 That means that your query to ipRoute MIB could generate over 20k results! And this \
-can be wery slow.])
+can be very slow.])
       fi
     fi
     ;;

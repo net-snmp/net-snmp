@@ -161,6 +161,14 @@
 
 #ifdef solaris2
 #include "kernel_sunos5.h"
+/* Solaris 2.6/7 need sys/stream.h (mblk_t) to include inet/ip.h */
+#ifdef HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
+/* Solaris 2.6 needs inet/common.h (u16) to include inet/ip.h */
+#ifdef HAVE_INET_COMMON_H
+#include <inet/common.h>
+#endif
 #ifdef HAVE_INET_IP_H
 #include <inet/ip.h>
 #endif /* HAVE_INET_IP_H */

@@ -308,6 +308,9 @@
 /* Define to 1 if the system has the type `Counter64'. */
 #undef HAVE_COUNTER64
 
+/* define to 1 if you have IRE_CACHE defined in <inet/ip.h> header file. */
+#undef HAVE_DEFINED_IRE_CACHE
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
@@ -392,6 +395,12 @@
 
 /* Define to 1 if you have the `index' function. */
 #undef HAVE_INDEX
+
+/* Define to 1 if you have the <inet/common.h> header file. */
+#undef HAVE_INET_COMMON_H
+
+/* Define to 1 if you have the <inet/ip.h> header file. */
+#undef HAVE_INET_IP_H
 
 /* Define to 1 if you have the <inet/mib2.h> header file. */
 #undef HAVE_INET_MIB2_H
@@ -672,6 +681,9 @@
 /* Define to 1 if you have the <pkglocs.h> header file. */
 #undef HAVE_PKGLOCS_H
 
+/* Define to 1 if you have the `poll' function. */
+#undef HAVE_POLL
+
 /* Define to 1 if you have the `pread64' function. */
 #undef HAVE_PREAD64
 
@@ -887,6 +899,9 @@
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
 
+/* Define to 1 if you have the <sys/poll.h> header file. */
+#undef HAVE_SYS_POLL_H
+
 /* Define to 1 if you have the <sys/pool.h> header file. */
 #undef HAVE_SYS_POOL_H
 
@@ -907,9 +922,6 @@
 
 /* Define to 1 if you have the <sys/sema.h> header file. */
 #undef HAVE_SYS_SEMA_H
-
-/* Define to 1 if you have the <sys/poll.h> header file. */
-#undef HAVE_SYS_POLL_H
 
 /* Define to 1 if you have the <sys/socketvar.h> header file. */
 #undef HAVE_SYS_SOCKETVAR_H
@@ -1075,12 +1087,6 @@
 
 /* Define to 1 if you have the <xti.h> header file. */
 #undef HAVE_XTI_H
-
-/* Define to 1 if you have <inet/ip.h> header file. */
-#undef HAVE_INET_IP_H
-
-/* define to 1 if you have IRE_CACHE defined in <inet/ip.h> header file. */
-#undef HAVE_DEFINED_IRE_CACHE
 
 /* Unix domain socket for AgentX master-subagent communication */
 #undef NETSNMP_AGENTX_SOCKET
