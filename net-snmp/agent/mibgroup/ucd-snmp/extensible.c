@@ -293,7 +293,7 @@ extensible_parse_config(const char *token, char *cptr)
        * This isn't needed for entries in the main extTable (which
        * don't have MIB OIDs explicitly associated with them anyway)
        */
-      if (scount > 1) {
+      if (scount > 1 && pp != &extens) {
         int i;
         struct extensible **etmp = (struct extensible **)
             malloc(((sizeof(struct extensible *)) * scount));
