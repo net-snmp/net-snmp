@@ -229,7 +229,11 @@ _add_new_entry(netsnmp_ipaddress_entry * ipaddress_entry,
                                     ipaddress_entry->ia_address_len,
                                     ipaddress_entry->ia_address,
                                     ipaddress_entry->ia_address_len))) {
-        CONTAINER_INSERT(container, rowreq_ctx);
+        if (CONTAINER_INSERT(container, rowreq_ctx) < 0) {
+            DEBUGMSGTL (("ipAddressTable:access","container insert failed for new entry\n"));
+            ipAddressTable_release_rowreq_ctx(rowreq_ctx);
+            return;
+        }
         rowreq_ctx->ipAddressLastChanged =
             rowreq_ctx->ipAddressCreated = netsnmp_get_agent_uptime();
     } else {
