@@ -1412,72 +1412,51 @@ snmpv3_engineID_probe(struct session_list *slp,
 static void    *
 _sess_open(netsnmp_session * in_session)
 {
-    struct session_list *slp;
-    netsnmp_session *session;
-    char            *clientaddr_save = NULL;
+    netsnmp_transport *transport = NULL;
 
     in_session->s_snmp_errno = 0;
     in_session->s_errno = 0;
 
     _init_snmp();
 
-    if ((slp = snmp_sess_copy(in_session)) == NULL) {
-        return (NULL);
+    {
+        char *clientaddr_save = NULL;
+
+        if (NULL != in_session->localname) {
+            clientaddr_save =
+                netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                      NETSNMP_DS_LIB_CLIENT_ADDR);
+            netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                                  NETSNMP_DS_LIB_CLIENT_ADDR,
+                                  in_session->localname);
+        }
+
+        if (in_session->flags & SNMP_FLAGS_STREAM_SOCKET) {
+            transport =
+                netsnmp_tdomain_transport_full("snmp", in_session->peername,
+                                               in_session->local_port, "tcp",
+                                               NULL);
+        } else {
+            transport =
+                netsnmp_tdomain_transport_full("snmp", in_session->peername,
+                                               in_session->local_port, "udp",
+                                               NULL);
+        }
+
+        if (NULL != clientaddr_save)
+            netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                                  NETSNMP_DS_LIB_CLIENT_ADDR, clientaddr_save);
     }
-    session = slp->session;
-    slp->transport = NULL;
-
-    if (NULL != session->localname) {
-        clientaddr_save = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                                NETSNMP_DS_LIB_CLIENT_ADDR);
-        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
-                              NETSNMP_DS_LIB_CLIENT_ADDR, session->localname);
-    }
-
-    if (session->flags & SNMP_FLAGS_STREAM_SOCKET) {
-        slp->transport =
-	  netsnmp_tdomain_transport_full("snmp", session->peername,
-					 session->local_port, "tcp", NULL);
-    } else {
-        slp->transport =
-	  netsnmp_tdomain_transport_full("snmp", session->peername,
-					 session->local_port, "udp", NULL);
-    }
-
-    if (NULL != session->localname)
-        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
-                              NETSNMP_DS_LIB_CLIENT_ADDR, clientaddr_save);
-
-    if (slp->transport == NULL) {
+    if (transport == NULL) {
         DEBUGMSGTL(("_sess_open", "couldn't interpret peername\n"));
         in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
         in_session->s_errno = errno;
-        snmp_set_detail(session->peername);
-        snmp_sess_close(slp);
+        snmp_set_detail(in_session->peername);
         return NULL;
     }
 
-    session->rcvMsgMaxSize = slp->transport->msgMaxSize;
-
-    if (!snmpv3_engineID_probe(slp, in_session)) {
-        snmp_sess_close(slp);
-        return NULL;
-    }
-    if (create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
-        in_session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;       /* XX?? */
-        DEBUGMSGTL(("snmp_api",
-                    "_sess_open(): failed(2) to create a new user from session\n"));
-        snmp_sess_close(slp);
-        return NULL;
-    }
-    
-    session->flags &= ~SNMP_FLAGS_DONT_PROBE;
-
-
-    return (void *) slp;
-}                               /* end snmp_sess_open() */
-
-
+    return snmp_sess_add(in_session, transport, NULL, NULL);
+}
 
 /*
  * EXPERIMENTAL API EXTENSIONS ------------------------------------------ 
