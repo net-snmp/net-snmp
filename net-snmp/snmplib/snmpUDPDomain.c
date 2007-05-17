@@ -780,18 +780,19 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
                 addr, inpeername ? inpeername : "[NIL]",
                 default_target ? default_target : "[NIL]"));
 
-    if (default_target == NULL ||
-	netsnmp_sockaddr_in2(addr, default_target, NULL) == 0) {
-	int port;
+    memset(addr, 0, sizeof(struct sockaddr_in));
+    addr->sin_addr.s_addr = htonl(INADDR_ANY);
+    addr->sin_family = AF_INET;
+    addr->sin_port = htons((u_short)SNMP_PORT);
 
-	memset(addr, 0, sizeof(struct sockaddr_in));
-	addr->sin_addr.s_addr = htonl(INADDR_ANY);
-	addr->sin_family = AF_INET;
-	port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
-				  NETSNMP_DS_LIB_DEFAULT_PORT);
-	if (port == 0)
-	    port = SNMP_PORT;
-	addr->sin_port = htons((u_short)port);
+    {
+	int port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+				      NETSNMP_DS_LIB_DEFAULT_PORT);
+
+	if (port != 0) {
+	    addr->sin_port = htons((u_short)port);
+	} else if (default_target != NULL)
+	    netsnmp_sockaddr_in2(addr, default_target, NULL);
     }
 
     if (inpeername != NULL && *inpeername != '\0') {
