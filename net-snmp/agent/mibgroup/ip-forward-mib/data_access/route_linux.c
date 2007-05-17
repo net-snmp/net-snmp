@@ -95,6 +95,8 @@ _load_ipv4(netsnmp_container* container, u_long *index )
             snmp_log(LOG_ERR,
                      "/proc/net/route data format error (%d!=8), line ==|%s|",
                      rc, line);
+            
+            netsnmp_access_route_entry_free(entry);        
             continue;
         }
 
@@ -182,7 +184,12 @@ _load_ipv4(netsnmp_container* container, u_long *index )
         /*
          * insert into container
          */
-        CONTAINER_INSERT(container, entry);
+        if (CONTAINER_INSERT(container, entry) < 0)
+        {
+            DEBUGMSGTL(("access:route:container", "error with route_entry: insert into container failed.\n"));
+            netsnmp_access_route_entry_free(entry);
+            continue;
+        }
     }
 
     fclose(in);
