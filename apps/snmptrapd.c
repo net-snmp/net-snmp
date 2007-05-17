@@ -1187,26 +1187,15 @@ main(int argc, char *argv[])
 
     while (cp != NULL) {
         char *sep = strchr(cp, ',');
-        char  listen_name[128];
-        char *cp2 = strchr(cp, ':');
 
         if (sep != NULL) {
             *sep = 0;
         }
 
-           /*
-            * Make sure this defaults to listening on port 162
-            */
-        if (!cp2) {
-            snprintf(listen_name, sizeof(listen_name), "%s:162", cp);
-            cp2 = listen_name;
-        } else {
-            cp2 = cp;
-        }
-        transport = netsnmp_transport_open_server("snmptrap", cp2);
+        transport = netsnmp_transport_open_server("snmptrap", cp);
         if (transport == NULL) {
             snmp_log(LOG_ERR, "couldn't open %s -- errno %d (\"%s\")\n",
-                     cp2, errno, strerror(errno));
+                     cp, errno, strerror(errno));
             snmptrapd_close_sessions(sess_list);
             SOCK_CLEANUP;
             exit(1);
