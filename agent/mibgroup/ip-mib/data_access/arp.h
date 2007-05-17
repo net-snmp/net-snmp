@@ -23,8 +23,7 @@ config_require(ip-mib/data_access/arp_linux)
 #else
 /*
  * couldn't determine the correct file!
- * require a bogus file to generate an error.
  */
-config_require(ip-mib/data_access/arp-unknown-arch)
+config_error(the arp data access library is not available in this environment.)
 #endif
 
