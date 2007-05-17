@@ -178,7 +178,12 @@ _load_v4(netsnmp_container *container, int idx_offset)
         /*
          * add entry to container
          */
-        CONTAINER_INSERT(container, entry);
+        if (CONTAINER_INSERT(container, entry) < 0)
+        {
+            DEBUGMSGTL(("access:arp:container","error with arp_entry: insert into container failed.\n"));
+            netsnmp_access_arp_entry_free(entry);
+            continue;
+        }
     }
 
     fclose(in);

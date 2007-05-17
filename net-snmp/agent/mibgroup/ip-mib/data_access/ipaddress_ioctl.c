@@ -315,10 +315,19 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
          * add entry to container
          */
         if(addr_info.bcastflg){
-           CONTAINER_INSERT(container, bcastentry);
+            if (CONTAINER_INSERT(container, bcastentry) < 0) {
+                DEBUGMSGTL(("access:ipaddress:container","error with ipaddress_entry: insert broadcast entry into container failed.\n"));
+                netsnmp_access_ipaddress_entry_free(bcastentry);
+                netsnmp_access_ipaddress_entry_free(entry);
+                continue;
+            }
         }
 
-        CONTAINER_INSERT(container, entry);
+        if (CONTAINER_INSERT(container, entry) < 0) {
+            DEBUGMSGTL(("access:ipaddress:container","error with ipaddress_entry: insert into container failed.\n"));
+            netsnmp_access_ipaddress_entry_free(entry);
+            continue;
+        }
     }
 
     /*
