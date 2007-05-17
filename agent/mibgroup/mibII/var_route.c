@@ -72,6 +72,14 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <netinet/mib_kern.h>
 #endif                          /* hpux */
 
+#ifdef linux
+#include <asm/types.h>
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
+#include <sys/socket.h>
+#include <errno.h>
+#endif
+
 extern WriteMethod write_rte;
 
 #if !defined (WIN32) && !defined (cygwin)
@@ -415,6 +423,282 @@ klgetsa(struct sockaddr_in *dst)
         }
     }
     return (&klgetsatmp.sin);
+}
+#endif
+
+#ifdef linux
+/*
+ * Helper functions for the defaultRouterTable
+ */
+struct ipDflRtTblEntry {
+	struct ipDflRtTblEntry *next;
+	unsigned int addr_type; /* can be 0, 1, 2 (unknown, ipv4, ipv6*/
+	char address[256]; /*router address represented as a string*/
+	unsigned int ifindex; /*interface index to send to this router*/
+	unsigned int lifetime; /*time before route expiration*/
+	int preference; /*can be -2 to 1*/
+};
+
+void freeDflRoutes(struct ipDflRtTblEntry *list, unsigned int *length)
+{
+	struct ipDflRtTblEntry *tmp = list->next;
+
+	while(list != NULL) {
+		free(list);
+		list = tmp;
+		if (list)
+			tmp = list->next;
+	}
+	*length = 0;
+}
+
+struct ipDflRtTblEntry * getDflRoutes(unsigned int *list_length)
+{
+	int nlsk;
+	struct sockaddr_nl addr;
+	unsigned char rcv_buf[1024];
+	unsigned char snd_buf[512];
+	struct nlmsghdr *hdr;
+	struct rtmsg *rthdr;
+	int count;
+	struct ipDflRtTblEntry *list = NULL;
+	int end_of_message = 0;
+
+	*list_length = 0;
+
+	/*
+	 * Open the socket
+	 */
+	nlsk = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
+	if (nlsk < 0) {
+		snmp_log(LOG_ERR, "Could not open netlink socket\n");
+		goto out;
+	}
+
+	memset(&addr,0,sizeof(struct sockaddr_nl));
+	addr.nl_family = AF_NETLINK;
+
+	memset(snd_buf, 0, 512);
+	hdr = (struct nlmsghdr *)snd_buf;
+	hdr->nlmsg_type = RTM_GETROUTE;
+	hdr->nlmsg_pid = getpid();
+	hdr->nlmsg_seq = 0;
+	hdr->nlmsg_flags = (NLM_F_REQUEST|NLM_F_DUMP);	
+	hdr->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
+	rthdr = (struct rtmsg *)NLMSG_DATA(hdr);
+	rthdr->rtm_table = RT_TABLE_MAIN;
+
+	/*
+	 * Send a request to the kernel to dump the routing table to us
+	 */
+	count = sendto(nlsk, snd_buf, hdr->nlmsg_len, 0, (struct sockaddr *)&addr, sizeof (struct sockaddr_nl));
+	if (count < 0) {
+		snmp_log(LOG_ERR, "Unable to send netlink message to kernel\n");
+		goto out_close;
+	}
+
+	/*
+	 * Now listen for responses
+	 */
+	do {
+		struct nlmsghdr *nlmhp;
+		struct rtmsg *rtmp;
+		struct rtattr *rtap;
+		struct ipDflRtTblEntry tmp_rt;
+		socklen_t sock_len;
+		int rtcount;
+
+		memset(rcv_buf, 0, 1024);
+
+		/*
+		 * Get the message
+		 */
+		count = recvfrom(nlsk, rcv_buf, 1024, 0, (struct sockaddr *)&addr, &sock_len);
+		if (count < 0) {
+			snmp_log(LOG_ERR, "unable to receive netlink messages: %s\n",strerror(errno));
+			goto out_free;
+		}
+		/*
+		 *Walk all of the returned messages
+		 */
+		nlmhp = (struct nlmsghdr *)rcv_buf;
+		while (NLMSG_OK(nlmhp, count)) {
+			/*
+			 * Make sure the message is ok
+			 */
+			if (nlmhp->nlmsg_type == NLMSG_ERROR) {
+				snmp_log(LOG_ERR, "kernel produced nlmsg error\n");
+				goto out_free;
+			}
+
+			
+			if (nlmhp->nlmsg_type & NLMSG_DONE) {
+				/*
+				 * End of message, we're done
+				 */
+				end_of_message = 1;
+				goto out_close;
+			}
+
+			if (!nlmhp->nlmsg_flags & NLM_F_MULTI)
+				end_of_message = 1;
+
+			/*
+			 * Get the pointer to the rtmsg struct
+			 */
+			rtmp = NLMSG_DATA(nlmhp);
+
+			/*
+			 * Start scanning the attributes for needed info
+			 */
+			memset(&tmp_rt, 0, sizeof(struct ipDflRtTblEntry));
+
+			if (rtmp->rtm_family == AF_INET6)
+				tmp_rt.addr_type = 2; /*IPv6*/
+			else if (rtmp->rtm_family == AF_INET)
+				tmp_rt.addr_type = 1; /*IPv4*/
+			else
+				goto next_nlmsghdr; /*skip it, we don't care about this route*/
+
+			rtap = RTM_RTA(rtmp);
+			rtcount = RTM_PAYLOAD(nlmhp);
+			while (RTA_OK(rtap, rtcount)) {
+				switch (rtap->rta_type) {
+					case RTA_OIF:
+						tmp_rt.ifindex = *(int *)(RTA_DATA(rtap));
+						break;
+					case RTA_GATEWAY:
+						if (rtmp->rtm_family == AF_INET6) {
+							struct sockaddr_in6 *ap = RTA_DATA(rtap);
+							inet_ntop(AF_INET6, ap, tmp_rt.address, 256);
+						} else {
+							struct sockaddr_in *ap = RTA_DATA(rtap);
+							inet_ntop(AF_INET, ap, tmp_rt.address, 256);
+						}
+						break;
+					case RTA_PRIORITY:
+						tmp_rt.preference = *(int *)(RTA_DATA(rtap));
+						break;
+					default:
+						break;
+				} /*switch*/
+
+				rtap = RTA_NEXT(rtap, rtcount);
+			} /*while RTA_OK(rtap)*/
+
+			/*
+			 * zero length dst. is a default route
+			 */
+			if (rtmp->rtm_dst_len == 0) {
+				/*
+				 * We should add this to our list
+				 */
+				tmp_rt.next = list;
+				list = malloc(sizeof(struct ipDflRtTblEntry));
+				if (!list)
+					goto out_free;
+				memcpy(list,&tmp_rt,sizeof(struct ipDflRtTblEntry));
+				*list_length = *list_length+1;
+			}
+
+next_nlmsghdr:
+			nlmhp = NLMSG_NEXT(nlmhp, count);
+		} /*while NLMSG_OK(nlmhp)*/
+
+	} while (!end_of_message);
+out_close:
+	close(nlsk);
+out:
+	return list;
+out_free:
+	if (list)
+		freeDflRoutes(list, list_length);
+	list = NULL;
+	goto out_close;
+}
+
+static struct ipDflRtTblEntry *route_list = NULL;
+static unsigned int route_list_length = 0;
+
+u_char		*
+var_ipDflRtTblEntry(struct variable *vp,
+			oid * name,
+			size_t * length,
+			int exact, size_t * var_len, WriteMethod **write_method)
+{
+	unsigned char route_index = 1;
+	struct ipDflRtTblEntry *rt_ptr;
+	oid newname[MAX_OID_LEN];
+	int i;
+	int result;
+	/*
+	 * OID format is
+	 * 1.3.6.1.2.1.4.37.1.?.X
+	 * Where X is the row number
+	 */
+
+	*write_method = NULL;
+
+	/*
+	 * Find the most appropriate match for the input OID
+	 */
+	memcpy((char *) newname, (char *) vp->name,
+           (int) vp->namelen * sizeof(oid));
+
+	if (!route_list)
+		route_list = getDflRoutes(&route_list_length);
+
+	for (route_index=1;route_index <= route_list_length;route_index++) {
+		newname[10] = (oid)route_index;
+		result =
+			snmp_oid_compare(name, *length, newname,
+			     (int) vp->namelen + 1);
+		if ((exact && (result == 0)) || (!exact && (result < 0)))
+		    break;
+	}
+
+	if (route_index > route_list_length)
+		return NULL;
+
+	if ((route_index == 1) || (exact)) {
+		if (route_list)
+			freeDflRoutes(route_list, &route_list_length);
+		route_list = getDflRoutes(&route_list_length);
+	}
+	memcpy((char *) name, (char *) newname,
+           ((int) vp->namelen + 1) * sizeof(oid));
+	*length = vp->namelen +1;
+
+	/*
+	 * Now move the route pointer to the appropriate entry
+	 */
+	for(rt_ptr=route_list,i=1;
+		i != route_index;
+		rt_ptr=rt_ptr->next,i++);
+	/*
+	 * Now look at the vp->magic to determine what value we return
+	 */	
+	switch (vp->magic) {
+		case IPDFL_RT_TBL_ADDRTYPE:
+			*var_len = sizeof(uint32_t);
+			return (u_char *)&rt_ptr->addr_type;
+		case IPDFL_RT_TBL_ADDR:
+			*var_len = strnlen(rt_ptr->address, 256);
+			return (u_char *)rt_ptr->address;
+		case IPDFL_RT_TBL_IFIDX:
+			*var_len = sizeof(uint32_t);
+			return (u_char *)&rt_ptr->ifindex;
+		case IPDFL_RT_TBL_LIFE:
+			*var_len = sizeof(uint32_t);
+			return (u_char *)&rt_ptr->lifetime;
+		case IPDFL_RT_TBL_PREF:
+			*var_len = sizeof(uint32_t);
+			return (u_char *)&rt_ptr->preference;
+		default:
+			snmp_log(LOG_ERR, "Unknown table column index at this oid: %d\n",vp->magic);
+			*var_len = 0;
+			return NULL;
+	}
 }
 #endif
 
