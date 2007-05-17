@@ -1484,7 +1484,7 @@ other_lagentobjs=""
 other_trapd_objects=""
 
 # Win32 service code
-if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
   other_src_list="$other_src_list winservice.c winservicerc.rc"
   other_objs_list="$other_objs_list winservice.o winservicerc.o"
   other_lobjs_list="$other_lobjs_list winservice.lo winservicerc.lo"
