@@ -456,8 +456,7 @@ main(int argc, char *argv[])
     signal(SIGINT, SnmpdShutDown);
 #endif
 #ifdef SIGHUP
-    DEBUGMSGTL(("signal", "registering SIGHUP signal handler\n"));
-    signal(SIGHUP, SnmpdReconfig);
+    signal(SIGHUP, SIG_IGN);   /* do not terminate on early SIGHUP */
 #endif
 #ifdef SIGUSR1
     DEBUGMSGTL(("signal", "registering SIGUSR1 signal handler\n"));
@@ -916,6 +915,11 @@ main(int argc, char *argv[])
      * Store persistent data immediately in case we crash later.  
      */
     snmp_store(app_name);
+
+#ifdef SIGHUP
+    DEBUGMSGTL(("signal", "registering SIGHUP signal handler\n"));
+    signal(SIGHUP, SnmpdReconfig);
+#endif
 
     /*
      * Send coldstart trap if possible.  
