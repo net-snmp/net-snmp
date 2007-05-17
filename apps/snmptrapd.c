@@ -602,7 +602,7 @@ main(int argc, char *argv[])
     signal(SIGTERM, term_handler);
 #endif
 #ifdef SIGHUP
-    signal(SIGHUP, hup_handler);
+    signal(SIGHUP, SIG_IGN);   /* do not terminate on early SIGHUP */
 #endif
 #ifdef SIGINT
     signal(SIGINT, term_handler);
@@ -1065,6 +1065,10 @@ main(int argc, char *argv[])
      * Initialize the world.
      */
     init_snmp("snmptrapd");
+
+#ifdef SIGHUP
+    signal(SIGHUP, hup_handler);
+#endif
 
     if (trap1_fmt_str_remember) {
         free_trap1_fmt();
