@@ -107,7 +107,7 @@ static int      HRD_index;
 static char     HRD_savedModel[40];
 static long     HRD_savedCapacity = 1044;
 static int      HRD_savedFlags;
-static time_t   HRD_history[HRDEV_TYPE_MASK];
+static time_t   HRD_history[HRDEV_TYPE_MASK + 1];
 
 #ifdef DIOC_DESCRIBE
 static disk_describe_type HRD_info;
