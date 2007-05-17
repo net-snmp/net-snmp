@@ -191,7 +191,7 @@ likely to be needed. (e.g. A TruthValue object will hold the value
 
 @        prompt $ans Select your choice : @
 @        if $ans == 2@
-@          eval $m2c_temp_skip_mapping = -1@
+@          eval $m2c_temp_table_skip_mapping = -1@
 @        end@
 
 
