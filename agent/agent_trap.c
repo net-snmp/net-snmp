@@ -1192,8 +1192,10 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     }
 
     arg = snmp_parse_args(argn, argv, &session, "C:", trapOptProc);
-    ss = snmp_open(&session);
 
+    ss = snmp_add(&session,
+		  netsnmp_transport_open_client("snmptrap", session.peername),
+		  NULL, NULL);
     for (; argn > 0; argn--) {
         free(argv[argn - 1]);
     }

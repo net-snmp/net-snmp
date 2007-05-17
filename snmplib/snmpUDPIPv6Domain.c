@@ -370,19 +370,18 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                 addr, inpeername ? inpeername : "[NIL]",
 		default_target ? default_target : "[NIL]"));
 
-    if (default_target == NULL ||
-	netsnmp_sockaddr_in6_2(addr, default_target, NULL) == 0) {
-	int port;
-	memset(addr, 0, sizeof(struct sockaddr_in6));
-	addr->sin6_family = AF_INET6;
-	addr->sin6_addr = in6addr_any;
+    memset(addr, 0, sizeof(struct sockaddr_in6));
+    addr->sin6_family = AF_INET6;
+    addr->sin6_addr = in6addr_any;
+    addr->sin6_port = htons((u_short)SNMP_PORT);
 
-	port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
-				  NETSNMP_DS_LIB_DEFAULT_PORT);
-	if (port <= 0)
-	    port = SNMP_PORT;
-
+    {
+      int port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+				    NETSNMP_DS_LIB_DEFAULT_PORT);
+      if (port != 0)
         addr->sin6_port = htons((u_short)port);
+      else if (default_target == NULL)
+	netsnmp_sockaddr_in6_2(addr, default_target, NULL);
     }
 
     if (inpeername != NULL) {

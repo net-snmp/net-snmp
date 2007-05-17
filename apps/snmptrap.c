@@ -185,8 +185,6 @@ main(int argc, char *argv[])
 
     session.callback = snmp_input;
     session.callback_magic = NULL;
-    netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DEFAULT_PORT, 
-		       SNMP_TRAP_PORT);
 
     if (session.version == SNMP_VERSION_3 && !inform) {
         /*
@@ -239,10 +237,13 @@ main(int argc, char *argv[])
             session.engineTime = get_uptime();  /* but it'll work. Sort of. */
     }
 
-    ss = snmp_open(&session);
+    ss = snmp_add(&session,
+                  netsnmp_transport_open_client("snmptrap", session.peername),
+                  NULL, NULL);
     if (ss == NULL) {
         /*
-         * diagnose snmp_open errors with the input netsnmp_session pointer 
+         * diagnose netsnmp_transport_open_client and snmp_add errors with
+         * the input netsnmp_session pointer
          */
         snmp_sess_perror("snmptrap", &session);
         SOCK_CLEANUP;

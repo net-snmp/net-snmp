@@ -624,7 +624,6 @@ _init_snmp(void)
 
     struct timeval  tv;
     long            tmpReqid, tmpMsgid;
-    u_short         s_port = SNMP_PORT;
 
     if (have_done_init)
         return;
@@ -674,13 +673,17 @@ _init_snmp(void)
         /*
          * store it in host byte order 
          */
-        s_port = ntohs(servp->s_port);
+        char buf[32];
+        sprintf(buf, ":%hu", ntohs(servp->s_port));
+        netsnmp_register_default_target("snmp", "udp", buf);
+        netsnmp_register_default_target("snmp", "udp6", buf);
     }
+#else
+    netsnmp_register_default_target("snmp", "udp", ":161");
+    netsnmp_register_default_target("snmp", "udp6", ":161");
 #endif
 
-    netsnmp_register_default_target("snmp", "udp", ":161");
     netsnmp_register_default_target("snmp", "tcp", ":161");
-    netsnmp_register_default_target("snmp", "udp6", ":161");
     netsnmp_register_default_target("snmp", "tcp6", ":161");
     netsnmp_register_default_target("snmp", "ipx", "/36879");
     netsnmp_register_default_target("snmptrap", "udp", ":162");
@@ -689,8 +692,6 @@ _init_snmp(void)
     netsnmp_register_default_target("snmptrap", "tcp6", ":162");
     netsnmp_register_default_target("snmptrap", "ipx", "/36880");
 
-    netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
-		       NETSNMP_DS_LIB_DEFAULT_PORT, s_port);
     netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
                        NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH, 16);
 
