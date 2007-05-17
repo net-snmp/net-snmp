@@ -3418,7 +3418,7 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
      */
-    register u_long low = cp->low, high = cp->high;
+    register long low = cp->low, high = cp->high;
     size_t          intsize, start_offset = *offset;
     int             count, testvalue = (high & 0x80000000) ? -1 : 0;
 
@@ -3441,7 +3441,7 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
     low >>= 8;
     count = 1;
 
-    while ((int) low != testvalue) {
+    while ((int) low != testvalue && count < 4) {
         count++;
         if (((*pkt_len - *offset) < 1)
             && !(r && asn_realloc(pkt, pkt_len))) {
@@ -3454,7 +3454,7 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
     /*
      * Then the high byte if present.  
      */
-    if (high) {
+    if (high != testvalue) {
         /*
          * Do the rest of the low byte.  
          */
@@ -3486,7 +3486,7 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
         }
     }
 
-    if ((*(*pkt + *pkt_len - *offset) & 0x80) != (0 & 0x80)) {
+    if ((*(*pkt + *pkt_len - *offset) & 0x80) != (testvalue & 0x80)) {
         /*
          * Make sure left most bit is representational of the rest of the bits
          * that aren't encoded.  
