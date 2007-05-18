@@ -173,17 +173,6 @@ init_icmp(void)
     reginfo = netsnmp_create_handler_registration("icmp", icmp_handler,
 		    icmp_oid, OID_LENGTH(icmp_oid), HANDLER_CAN_RONLY);
     netsnmp_register_scalar_group(reginfo, ICMPINMSGS, ICMPOUTADDRMASKREPS);
-    /*
-     * .... with a local cache
-     *    (except for HP-UX 11, which extracts objects individually)
-     */
-#ifndef hpux11
-    netsnmp_inject_handler( reginfo,
-		    netsnmp_get_cache_handler(ICMP_STATS_CACHE_TIMEOUT,
-			   		icmp_load, icmp_free,
-					icmp_oid, OID_LENGTH(icmp_oid)));
-#endif
-
 #ifdef linux
     reginfo = netsnmp_create_handler_registration("icmpStatsTable",
 		icmp_stats_table_handler, icmp_stats_tbl_oid,
@@ -208,6 +197,16 @@ init_icmp(void)
     iinfo->table_reginfo        = table_info;
 
     netsnmp_register_table_iterator(reginfo, iinfo);
+#endif
+    /*
+     * .... with a local cache
+     *    (except for HP-UX 11, which extracts objects individually)
+     */
+#ifndef hpux11
+    netsnmp_inject_handler( reginfo,
+		    netsnmp_get_cache_handler(ICMP_STATS_CACHE_TIMEOUT,
+			   		icmp_load, icmp_free,
+					icmp_oid, OID_LENGTH(icmp_oid)));
 #endif
 #ifdef USING_MIBII_IP_MODULE
     if (++ip_module_count == 2)
