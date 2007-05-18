@@ -126,10 +126,6 @@ struct udp6_mib {
     unsigned long udp6NoPorts;
     unsigned long udp6InErrors;
     unsigned long udp6OutDatagrams;
-    unsigned long udpLite6InDatagrams;
-    unsigned long udpLite6NoPorts;
-    unsigned long udpLite6InErrors;
-    unsigned long udpLite6OutDatagrams;
 };
 
 struct tcp_mib {
