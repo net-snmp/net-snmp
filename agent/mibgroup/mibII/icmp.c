@@ -75,7 +75,7 @@ struct icmp_stats_table_entry {
         uint32_t icmpStatsOutErrors;
 };
 
-struct icmp_stats_table_entry icmp_stats_table[3];
+struct icmp_stats_table_entry icmp_stats_table[2];
  
 int
 icmp_stats_load(netsnmp_cache *cache, void *vmagic)
@@ -92,9 +92,9 @@ icmp_stats_load(netsnmp_cache *cache, void *vmagic)
 	int i;
 	struct icmp_mib v4icmp;
 	struct icmp6_mib v6icmp;
-	for(i=0;i<3;i++) {
+	for(i=0;i<2;i++) {
 		switch(i) {
-			case 1:
+			case 0:
 				linux_read_icmp_stat(&v4icmp);
 				icmp_stats_table[i].icmpStatsInMsgs = v4icmp.icmpInMsgs;
 				icmp_stats_table[i].icmpStatsInErrors = v4icmp.icmpInErrors;
@@ -113,7 +113,7 @@ icmp_stats_load(netsnmp_cache *cache, void *vmagic)
 					v6icmp.icmp6OutParmProblems;
 				break;
 		}
-		icmp_stats_table[i].ipVer=i;
+		icmp_stats_table[i].ipVer=i+1;
 	}
 
 	return 0;
@@ -128,7 +128,7 @@ icmp_stats_next_entry( void **loop_context,
 	int i = (int)(*loop_context);
 	netsnmp_variable_list *idx = index;
 
-	if(i > 2)
+	if(i > 1)
 		return NULL;
 
 
@@ -138,34 +138,6 @@ icmp_stats_next_entry( void **loop_context,
 	snmp_set_var_typed_value(idx, ASN_INTEGER, (u_char *)&icmp_stats_table[i].ipVer,
                                 sizeof(uint32_t));
 	idx = idx->next_variable;
-
-
-	/*
-	 * set icmpStatsInMsgs
-	 */
-	snmp_set_var_typed_value(idx, ASN_COUNTER, (u_char *)&icmp_stats_table[i].icmpStatsInMsgs,
-                                sizeof(uint32_t));
-	idx = idx->next_variable;
-
-	/*
-	 * set icmpStatsInErrors
-	 */
-	snmp_set_var_typed_value(idx, ASN_COUNTER, (u_char *)&icmp_stats_table[i].icmpStatsInErrors,
-                                sizeof(uint32_t));
-	idx = idx->next_variable;
-
-	/*
-	 * set icmpStatsOutMsgs
-	 */
-	snmp_set_var_typed_value(idx, ASN_COUNTER, (u_char *)&icmp_stats_table[i].icmpStatsOutMsgs,
-                                sizeof(uint32_t));
-	idx = idx->next_variable;
-
-	/*
-	 * set icmpStatsOutErrors
-	 */
-	snmp_set_var_typed_value(idx, ASN_COUNTER, (u_char *)&icmp_stats_table[i].icmpStatsOutErrors,
-                                sizeof(uint32_t));
 
 	*data_context = &icmp_stats_table[i];
 
@@ -223,13 +195,9 @@ init_icmp(void)
         return;
     }
 
-    netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER,
-                                                 ASN_COUNTER,
-                                                 ASN_COUNTER,
-                                                 ASN_COUNTER,
-                                                 ASN_COUNTER, 0);
-    table_info->min_column = 1;
-    table_info->max_column = 5;
+    netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, 0);
+    table_info->min_column = ICMP_STAT_INMSG;
+    table_info->max_column = ICMP_STAT_OUTERR;
 
 
     iinfo      = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
@@ -728,10 +696,6 @@ icmp_stats_table_handler(netsnmp_mib_handler  *handler,
 				subid      = table_info->colnum;
 
 				switch (subid) {
-					case ICMP_STAT_IPVER:
-						snmp_set_var_typed_value(requestvb, ASN_INTEGER,
-							(u_char *)&entry->ipVer, sizeof(uint32_t));
-						break;
 					case ICMP_STAT_INMSG:
 						snmp_set_var_typed_value(requestvb, ASN_COUNTER,
 							(u_char *)&entry->icmpStatsInMsgs, sizeof(uint32_t));
