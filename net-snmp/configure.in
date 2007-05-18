@@ -4276,125 +4276,21 @@ AC_CHECK_STRUCT_FOR([
 ],nlist64, n_value)
 
 # check struct ipstat for various things
-AC_CHECK_STRUCT_FOR([
-#include <sys/types.h>
-#if HAVE_NETINET_IN_H
+AC_CHECK_MEMBERS([
+        struct ipstat.ips_cantforward, struct ipstat.ips_cantfrag,
+        struct ipstat.ips_delivered, struct ipstat.ips_fragdropped,
+        struct ipstat.ips_fragtimeout, struct ipstat.ips_fragmented,
+        struct ipstat.ips_localout, struct ipstat.ips_noproto,
+        struct ipstat.ips_noroute, struct ipstat.ips_odropped,
+        struct ipstat.ips_ofragments, struct ipstat.ips_reassembled],,,[
+AC_INCLUDES_DEFAULT()
+[#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
-], ipstat, ips_cantforward)
-
-AC_CHECK_STRUCT_FOR([
-#include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-], ipstat, ips_cantfrag)
-
-AC_CHECK_STRUCT_FOR([
-#include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-], ipstat, ips_delivered)
-
-AC_CHECK_STRUCT_FOR([
-#include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-], ipstat, ips_fragdropped)
-
-AC_CHECK_STRUCT_FOR([
-#include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-], ipstat, ips_fragtimeout)
-
-AC_CHECK_STRUCT_FOR([
-#include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-], ipstat, ips_fragmented)
-
-AC_CHECK_STRUCT_FOR([
-#include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-], ipstat, ips_localout)
-
-AC_CHECK_STRUCT_FOR([
-#include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-], ipstat, ips_noproto)
-
-AC_CHECK_STRUCT_FOR([
-#include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-], ipstat, ips_noroute)
-
-AC_CHECK_STRUCT_FOR([
-#include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-], ipstat, ips_odropped)
-
-AC_CHECK_STRUCT_FOR([
-#include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-], ipstat, ips_ofragments)
-
-AC_CHECK_STRUCT_FOR([
-#include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-], ipstat, ips_reassembled)
+]])
 
 # check for the des_ks_struct.weak_key attribute, which indicates the 
 # older openssl version is being used.
