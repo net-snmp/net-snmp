@@ -284,9 +284,6 @@ init_hr_storage(void)
     REGISTER_MIB("host/hr_storage", hrstore_variables, variable4,
                  hrstore_variables_oid);
 
-    snmpd_register_config_handler("skipNFSInHostResources", parse_storage_config, NULL,
-	"1 | 2\t\t(1 = enable, 2 = disable)");
-
     appname = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                     NETSNMP_DS_LIB_APPTYPE);
     netsnmp_ds_register_config(ASN_BOOLEAN, appname, "skipNFSInHostResources", 
@@ -298,7 +295,6 @@ init_hr_storage(void)
 }
 
 static int storageUseNFS = 0;	/* initially disabled */
-static int skipNFSInHostResources = 0;	/* initially disabled */
 
 static void
 parse_storage_config(const char *token, char *cptr)
@@ -674,10 +670,18 @@ Get_Next_HR_Store(void)
     /*
      * File-based storage 
      */
-    HRS_index = Get_Next_HR_FileSys();
-    if (HRS_index >= 0)
-        return HRS_index + NETSNMP_MEM_TYPE_MAX;
-    return -1;
+	for (;;) {
+    	HRS_index = Get_Next_HR_FileSys();
+		if (HRS_index >= 0) {
+			if (!(netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+							NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) && 
+						Check_HR_FileSys_NFS())) {
+				return HRS_index + NETSNMP_MEM_TYPE_MAX;	
+			}
+		} else {
+			return -1;
+		}	
+	}
 }
 
 #ifdef solaris2
