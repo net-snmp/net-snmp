@@ -999,7 +999,7 @@ else
 fi
 
 if test "x$developer" != "xno" -a -f $srcdir/remove-files; then
-  # turn on the developer flag when taken from a CVS checkout (not a release)
+  # turn on the developer flag when taken from a SVN checkout (not a release)
   developer="yes"
 fi
 
@@ -1009,6 +1009,47 @@ AC_PROG_CPP
 LINKCC=${LINKCC-"$CC"}
 AC_SUBST(LINKCC)
 AC_AIX
+
+# system check
+AC_CANONICAL_TARGET
+changequote(, )
+PARTIALTARGETOS=`echo $target_os | sed 's/[-._].*//'`
+changequote([, ])
+
+# platform-specific compiler flags
+if test "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+	CFLAGS="$CFLAGS -Dmingw32"
+fi
+
+# platform-specific linker flags
+case $target_os in
+    aix4.2*|aix4.3*|aix5*)
+        AC_MSG_CHECKING([whether we need to add linker flags to enable runtime linking on AIX])
+        for ld_flag in $LDFLAGS; do
+            if (test $ld_flag = "-brtl" || test $ld_flag = "-Wl,-brtl"); then
+                ns_aix_runtimelinking_flags_ok=yes
+                break
+            fi
+        done
+        if test "Xns_aix_runtimelinking_flags_ok" != "Xyes"; then
+            LDFLAGS="-Wl,-brtl $LDFLAGS"
+	    AC_MSG_RESULT([yes])
+	else
+	    AC_MSG_RESULT([no])
+	fi
+	;;
+    darwin8*)
+        AC_MSG_CHECKING([whether darwin ld might need -flat_namespace])
+	if test -z "$MACOSX_DEPLOYMENT_TARGET"; then
+		LDFLAGS="-flat_namespace $LDFLAGS"
+		AC_MSG_RESULT([yes])
+	else
+		AC_MSG_RESULT([no])
+	fi
+	;;
+    *)
+        ;;
+esac
 
 # libtool stuff for shared/static libraries.
 AC_LIBTOOL_DLOPEN
@@ -1111,18 +1152,9 @@ AC_SUBST(GNU_vpath)
 AC_SUBST(NON_GNU_VPATH)
 
 
-# system check
-AC_CANONICAL_TARGET
-changequote(, )
-PARTIALTARGETOS=`echo $target_os | sed 's/[-._].*//'`
-if test "x$PARTIALTARGETOS" = "xmingw32msvc"; then
-	CFLAGS="$CFLAGS -Dmingw32"
-fi
-
 #
 # Check whether we can use -Ux -Dx=x with the expected behaviour
 #
-changequote([, ])
 AC_MSG_CHECKING([whether to un-define target system token (before redefining)])
 OLD_CPPFLAGS="$CPPFLAGS"
 CPPFLAGS="-U$PARTIALTARGETOS -D$PARTIALTARGETOS=$PARTIALTARGETOS"
@@ -1140,25 +1172,6 @@ CFLAGS="$CFLAGS $PARTIALTARGETFLAGS"
 CPPFLAGS="$OLD_CPPFLAGS"
 AC_MSG_CACHE_ADD(Building for:               $PARTIALTARGETOS)
 
-# AIX has problems with shared libs
-case $target_os in
-    aix*)
-        AC_MSG_CHECKING([whether using AIX and if we should disable shared libraries])
-	AC_MSG_RESULT([yes])
-	enable_shared=no
-        ;;
-    darwin8*)
-        AC_MSG_CHECKING([whether darwin ld might need -flat_namespace])
-	if test -z "$MACOSX_DEPLOYMENT_TARGET"; then
-		LDFLAGS="-flat_namespace $LDFLAGS"
-		AC_MSG_RESULT([yes])
-	else
-		AC_MSG_RESULT([no])
-	fi
-	;;
-    *)
-        ;;
-esac
 
 #
 # check for special includes and pick one
