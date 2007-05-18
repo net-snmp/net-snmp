@@ -46,7 +46,7 @@ BLIK
     exit 0
 }
 
-trap "exit 1;" 1 2 3 9 13 15 17
+trap "exit 1;" 1 2 3 9 13 15
 
 SNMP_BASEDIR=`dirname $0`
 SNMP_PREFER_NEAR_MIBS=1	## prefer MIB files found in source hierarchy
