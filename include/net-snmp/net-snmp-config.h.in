@@ -208,19 +208,6 @@
 /* nlist64.n_value */
 #undef STRUCT_NLIST64_HAS_N_VALUE
 
-/* ipstat structure tests */
-#undef HAVE_STRUCT_IPSTAT_IPS_CANTFORWARD
-#undef HAVE_STRUCT_IPSTAT_IPS_CANTFRAG
-#undef HAVE_STRUCT_IPSTAT_IPS_DELIVERED
-#undef HAVE_STRUCT_IPSTAT_IPS_FRAGDROPPED
-#undef HAVE_STRUCT_IPSTAT_IPS_FRAGTIMEOUT
-#undef HAVE_STRUCT_IPSTAT_IPS_LOCALOUT
-#undef HAVE_STRUCT_IPSTAT_IPS_NOPROTO
-#undef HAVE_STRUCT_IPSTAT_IPS_NOROUTE
-#undef HAVE_STRUCT_IPSTAT_IPS_ODROPPED
-#undef HAVE_STRUCT_IPSTAT_IPS_OFRAGMENTS
-#undef HAVE_STRUCT_IPSTAT_IPS_REASSEMBLED
-
 /* vfsstat.f_frsize */
 #undef STRUCT_STATVFS_HAS_F_FRSIZE
 
@@ -827,6 +814,42 @@
 
 /* Define to 1 if you have the `strtoul' function. */
 #undef HAVE_STRTOUL
+
+/* Define to 1 if `ips_cantforward' is member of `struct ipstat'. */
+#undef HAVE_STRUCT_IPSTAT_IPS_CANTFORWARD
+
+/* Define to 1 if `ips_cantfrag' is member of `struct ipstat'. */
+#undef HAVE_STRUCT_IPSTAT_IPS_CANTFRAG
+
+/* Define to 1 if `ips_delivered' is member of `struct ipstat'. */
+#undef HAVE_STRUCT_IPSTAT_IPS_DELIVERED
+
+/* Define to 1 if `ips_fragdropped' is member of `struct ipstat'. */
+#undef HAVE_STRUCT_IPSTAT_IPS_FRAGDROPPED
+
+/* Define to 1 if `ips_fragmented' is member of `struct ipstat'. */
+#undef HAVE_STRUCT_IPSTAT_IPS_FRAGMENTED
+
+/* Define to 1 if `ips_fragtimeout' is member of `struct ipstat'. */
+#undef HAVE_STRUCT_IPSTAT_IPS_FRAGTIMEOUT
+
+/* Define to 1 if `ips_localout' is member of `struct ipstat'. */
+#undef HAVE_STRUCT_IPSTAT_IPS_LOCALOUT
+
+/* Define to 1 if `ips_noproto' is member of `struct ipstat'. */
+#undef HAVE_STRUCT_IPSTAT_IPS_NOPROTO
+
+/* Define to 1 if `ips_noroute' is member of `struct ipstat'. */
+#undef HAVE_STRUCT_IPSTAT_IPS_NOROUTE
+
+/* Define to 1 if `ips_odropped' is member of `struct ipstat'. */
+#undef HAVE_STRUCT_IPSTAT_IPS_ODROPPED
+
+/* Define to 1 if `ips_ofragments' is member of `struct ipstat'. */
+#undef HAVE_STRUCT_IPSTAT_IPS_OFRAGMENTS
+
+/* Define to 1 if `ips_reassembled' is member of `struct ipstat'. */
+#undef HAVE_STRUCT_IPSTAT_IPS_REASSEMBLED
 
 /* Define to 1 if you have the `sysconf' function. */
 #undef HAVE_SYSCONF
