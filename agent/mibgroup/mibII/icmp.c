@@ -1,6 +1,5 @@
 /*
  *  ICMP MIB group implementation - icmp.c
- *
  */
 
 #include <net-snmp/net-snmp-config.h>
