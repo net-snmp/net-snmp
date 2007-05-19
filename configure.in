@@ -3708,21 +3708,20 @@ fi
 # on SCO Unixware 7.1.4 (SCO compiler), "static inline" functions
 # are not supported, so this disables the whole inline thing if it
 # doesn't work properly. Should have no effect on other platforms.
-AC_MSG_CHECKING([whether static inline functions are broken (Unixware)])
-AC_TRY_COMPILE(,[
-  static inline int nested_inline_function(void) {
-    return 0;
-  }
-  inline int main_inline_function( void ) {
-    return nested_inline_function();
-  }
-],ac_cv_BROKEN_INLINE=no, ac_cv_BROKEN_INLINE=yes)
+AC_CACHE_CHECK([[whether static inline functions are broken (Unixware)]],
+    [netsnmp_cv_c_broken_inline],
+AC_COMPILE_IFELSE([[
+static inline int nested_inline_function(void) {
+  return 0;
+}
+inline int main_inline_function( void ) {
+  return nested_inline_function();
+}
+]], netsnmp_cv_broken_inline=no, netsnmp_cv_broken_inline=yes))
 
-if test "x$ac_cv_BROKEN_INLINE" = x"yes" ; then
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(NETSNMP_BROKEN_INLINE)
-else
-  AC_MSG_RESULT(no)
+if test "$netsnmp_cv_broken_inline" = yes ; then
+  AC_DEFINE(NETSNMP_BROKEN_INLINE, 1,
+        [Define if static inline functions are unsupported])
 fi
 
 # openbsd seems to have dropped m_clusters and m_clfree from mbstat
