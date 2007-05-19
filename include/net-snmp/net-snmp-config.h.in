@@ -1111,6 +1111,9 @@
 /* Unix domain socket for AgentX master-subagent communication */
 #undef NETSNMP_AGENTX_SOCKET
 
+/* Define if static inline functions are unsupported */
+#undef NETSNMP_BROKEN_INLINE
+
 /* Define if DES encryption should not be supported */
 #undef NETSNMP_DISABLE_DES
 
@@ -1706,7 +1709,6 @@
  *    static NETSNMP_INLINE function(int parm) { return parm -1; }
  *
  */
-#undef NETSNMP_BROKEN_INLINE
 #ifdef NETSNMP_BROKEN_INLINE
 #   define NETSNMP_ENABLE_INLINE 0
 #else
