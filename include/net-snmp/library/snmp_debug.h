@@ -121,9 +121,9 @@ extern          "C" {
 #define __DBGMSGL_NC(x)  __DBGTRACE; debugmsg x
 #define __DBGMSGTL_NC(x) __DBGTRACE; debug_combo_nc x
 
-#ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
-#define __DBGTRACE       __DBGMSGT(("trace","%s(): %s, %d:\n",__FUNCTION__,\
-                                 __FILE__,__LINE__))
+#ifdef  NETSNMP_FUNCTION
+#define __DBGTRACE       __DBGMSGT(("trace","%s(): %s, %d:\n",\
+				NETSNMP_FUNCTION,__FILE__,__LINE__))
 #else
 #define __DBGTRACE       __DBGMSGT(("trace"," %s, %d:\n", __FILE__,__LINE__))
 #endif

@@ -69,9 +69,6 @@
 /* define if you have <sys/disklabel.h> */
 #undef HAVE_SYS_DISKLABEL_H
 
-/* define if your compiler (processor) defines __FUNCTION__ for you */
-#undef HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
-
 /* on aix, if you have perfstat */
 #undef HAVE_PERFSTAT
 
@@ -1131,6 +1128,9 @@
 
 /* Define if SNMPv2c code should not be included */
 #undef NETSNMP_DISABLE_SNMPV2C
+
+/* Should evaluate to the name of the current function if defined */
+#undef NETSNMP_FUNCTION
 
 /* Define to the address where bug reports for this package should be sent. */
 #ifndef PACKAGE_BUGREPORT

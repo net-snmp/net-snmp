@@ -68,9 +68,6 @@
 /* define if you have <sys/disklabel.h> */
 #undef HAVE_SYS_DISKLABEL_H
 
-/* define if your compiler (processor) defines __FUNCTION__ for you */
-#undef HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
-
 /* on aix, if you have perfstat */
 #undef HAVE_PERFSTAT
 
