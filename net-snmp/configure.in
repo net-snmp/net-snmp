@@ -3688,15 +3688,20 @@ if test $fu_cv_sys_stat_fs_data = yes; then
   AC_DEFINE(STAT_STATFS_FS_DATA)
 fi
 
-# check if compiler pre-processor defines __FUNCTION__
-AC_CACHE_CHECK(if __FUNCTION__ is defined,ac_cv_HAVE_CPP_UNDERBAR_FUNCTION_DEFINED,
-[
-AC_TRY_COMPILE(,[
-    char *cp = __FUNCTION__;
-], ac_cv_HAVE_CPP_UNDERBAR_FUNCTION_DEFINED=yes, ac_cv_HAVE_CPP_UNDERBAR_FUNCTION_DEFINED=no)])
-
-if test "x$ac_cv_HAVE_CPP_UNDERBAR_FUNCTION_DEFINED" = "xyes"; then
-  AC_DEFINE(HAVE_CPP_UNDERBAR_FUNCTION_DEFINED)
+AC_CACHE_CHECK([how to get the name of the current function],
+               [netsnmp_cv__func__name],[
+netsnmp_cv__func__name=no
+AC_COMPILE_IFELSE(
+        AC_LANG_PROGRAM(,[[const char* cp = __func__;]]),
+        [netsnmp_cv__func__name=__func__])
+if test "$netsnmp_cv__func__name" = no ; then
+AC_COMPILE_IFELSE(
+        AC_LANG_PROGRAM(,[[const char* cp = __FUNCTION__;]]),
+        [netsnmp_cv__func__name=__FUNCTION__])
+fi])
+if test "$netsnmp_cv__func__name" != no; then
+    AC_DEFINE_UNQUOTED([NETSNMP_FUNCTION],[$netsnmp_cv__func__name],
+        [Should evaluate to the name of the current function if defined])
 fi
 
 #--------------------------------------------------------------

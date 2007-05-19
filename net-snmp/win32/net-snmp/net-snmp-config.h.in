@@ -1106,9 +1106,6 @@
 /* define if SIOCGIFADDR exists in sys/ioctl.h */
 /* #undef SYS_IOCTL_H_HAS_SIOCGIFADDR */
 
-/* define if your compiler (processor) defines __FUNCTION__ for you */
-/* #undef HAVE_CPP_UNDERBAR_FUNCTION_DEFINED */
-
 /* Mib-2 tree Info */
 /* These are the system information variables. */
 

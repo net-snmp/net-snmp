@@ -34,13 +34,14 @@
  *  if asserts weren't requested, just log, unless NETSNMP_NO_DEBUGGING specified
  */
 #   ifndef NETSNMP_NO_DEBUGGING
-#      ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
+#      ifdef  NETSNMP_FUNCTION
 #         define netsnmp_assert(x)  do { \
                  if ( x ) \
                     ; \
                  else \
                     snmp_log(LOG_ERR,"netsnmp_assert %s failed %s:%d %s()\n", \
-                             __STRING(x),__FILE__,__LINE__,__FUNCTION__); \
+                             __STRING(x),__FILE__,__LINE__, \
+                             NETSNMP_FUNCTION); \
               }while(0)
 #      else
 #         define netsnmp_assert(x)  do { \
