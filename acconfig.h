@@ -767,7 +767,6 @@
  *    static NETSNMP_INLINE function(int parm) { return parm -1; }
  *
  */
-#undef NETSNMP_BROKEN_INLINE
 #ifdef NETSNMP_BROKEN_INLINE
 #   define NETSNMP_ENABLE_INLINE 0
 #else
