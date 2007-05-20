@@ -2823,13 +2823,13 @@ if test "x$with_rpm" != "xno" && \
   # now check for rpm using the appropriate libraries.
   AC_CHECK_LIB(rpm, rpmGetFilesystemList,[
     AC_DEFINE(HAVE_LIBRPM)
-    LIBS="-lrpm $_rpmlibs $LIBS"
+    LMIBLIBS="-lrpm $_rpmlibs $LMIBLIBS"
     CFLAGS="$CFLAGS -I/usr/include/rpm"
   ],[
     # rpm-4.0.3 librpmdb actually contains what we need.
     AC_CHECK_LIB(rpmdb, rpmdbOpen,[
       AC_DEFINE(HAVE_LIBRPM)
-      LIBS="-lrpmdb -lrpm $_rpmlibs $LIBS"
+      LMIBLIBS="-lrpmdb -lrpm $_rpmlibs $LMIBLIBS"
       CFLAGS="$CFLAGS -I/usr/include/rpm"
     ],,-lrpm $_rpmlibs)
   ])
@@ -2847,10 +2847,10 @@ echo " $module_list " | grep " ucd-snmp/diskio " >/dev/null
 if test $? -eq 0 ; then
 	AC_CHECK_FUNC(getdevs, AC_DEFINE(HAVE_GETDEVS),
 		AC_CHECK_LIB(devstat, getdevs, AC_DEFINE(HAVE_GETDEVS)
-		LIBS="${LIBS} -ldevstat"))
+		LMIBLIBS="${LMIBLIBS} -ldevstat"))
 	AC_CHECK_FUNC(getdevs, AC_DEFINE(HAVE_DEVSTAT_GETDEVS),
 		AC_CHECK_LIB(devstat, devstat_getdevs, AC_DEFINE(HAVE_DEVSTAT_GETDEVS)
-		LIBS="${LIBS} -ldevstat"))
+		LMIBLIBS="${LMIBLIBS} -ldevstat"))
 fi
 
 # LM-SENSORS-MIB support
@@ -2859,24 +2859,19 @@ if test $? -eq 0 ; then
         AC_MSG_CHECKING([for sensors support])
         case $target_os in
           solaris*)
-            AC_CHECK_HEADER(picl.h,LIBS="${LIBS} -lpicl",)
+            AC_CHECK_HEADER(picl.h, LMIBLIBS="${LMIBLIBS} -lpicl",)
             AC_CHECK_HEADERS(picl.h)
             ;;
         *)
             AC_CHECK_HEADER(sensors/sensors.h,,
                 [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find sensors/sensors.h])])
             AC_CHECK_LIB(sensors, sensors_get_detected_chips, [
-		   if test "x$enable_as_needed" = "xyes" ; then
-		       SENSORLIBS="-lsensors" ;
-                   else
-		       LIBS="${LIBS} -lsensors" ;
-                   fi
+		   LMIBLIBS="${LMIBLIBS} -lsensors" ;
                 ],
                 [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find -lsensors])])
             ;;
         esac
 fi
-AC_SUBST(SENSORLIBS)
 
 ######################################################################
 # PERL SUPPORT
@@ -3321,14 +3316,13 @@ AC_CHECK_HEADERS(sys/dkio.h sys/diskio.h sys/pstat.h linux/hdreg.h pkglocs.h)
 # for HostRes (Solaris 2.x at least)
 AC_CHECK_HEADERS(pkginfo.h,
     AC_CHECK_LIB(adm, pkginfo, AC_DEFINE(HAVE_PKGINFO)
-    LIBS="${LIBS} -ladm"
-    AGENTLIBS="${AGENTLIBS} -ladm"))
+    LMIBLIBS="${LMIBLIBS} -ladm"))
 
 case $target_os in
     aix*) # AIX perfstat library, needed for CPU/memory statistics
         AC_CHECK_HEADERS(libperfstat.h,
             AC_CHECK_LIB(perfstat, perfstat_cpu_total, AC_DEFINE(HAVE_PERFSTAT)
-            AGENTLIBS="${AGENTLIBS} -lperfstat"), AC_MSG_ERROR([
+            LMIBLIBS="${LMIBLIBS} -lperfstat"), AC_MSG_ERROR([
 
 *** To monitor CPU/memory values in AIX you need to install
 *** libperfstat which can be found in bos.perf
@@ -3336,7 +3330,7 @@ case $target_os in
         ;;
     hpux*) # HP-UX agent needs open_mib
         AC_CHECK_LIB(nm, open_mib, AC_DEFINE(HAVE_LIBNM)
-            AGENTLIBS="${AGENTLIBS} -lnm")
+            LMIBLIBS="${LMIBLIBS} -lnm")
         ;;
     *)
         ;;
@@ -3462,11 +3456,7 @@ if test "x$useopenssl" != "xno" ; then
         encrmodes="[disabled]"
     fi
     AC_DEFINE(NETSNMP_USE_OPENSSL)
-    if test "x$enable_as_needed" = "xyes" ; then
-        LIBCRYPTO="-lcrypto" ;
-    else
-        LIBS="${LIBS} -lcrypto" ;
-    fi
+    LIBCRYPTO="-lcrypto" ;
     AC_MSG_RESULT(OpenSSL Support)
 elif test "x$usepkcs" != "xno" ; then
     authmodes="MD5 SHA1"
@@ -3610,7 +3600,7 @@ AC_CHECK_FUNCS(lseek64 pread64)
 if test "x$with_rpm" != "xno" && \
         echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
   OLDLIBS=$LIBS
-  LIBS=$AGENTLIBS
+  LIBS=$LMIBLIBS
   AC_CHECK_FUNCS(rpmGetPath)
   LIBS=$OLDLIBS
 fi
@@ -4474,8 +4464,9 @@ if test "x$ac_cv_TCPTV_NEEDS_HZ" = "xyes"; then
 fi
 
 #
-# define the agent libraries variable
+# define the agent libraries variables
 #
+AC_SUBST(LMIBLIBS)
 AC_SUBST(AGENTLIBS)
 AC_SUBST(OTHERAGENTLIBOBJS)
 AC_SUBST(OTHERAGENTLIBLOBJS)
