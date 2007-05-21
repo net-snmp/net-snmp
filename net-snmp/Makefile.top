@@ -76,7 +76,7 @@ LINKCC	        = @LINKCC@
 # changes for past releases if absolutely necessary.
 # 
 LIBCURRENT  = 15
-LIBAGE      = 0
+LIBAGE      = 1
 LIBREVISION = 0
 
 LIB_LD_CMD      = $(LIBTOOL) --mode=link $(LINKCC) $(CFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) -o
