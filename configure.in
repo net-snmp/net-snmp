@@ -2952,6 +2952,16 @@ inline int main_inline_function( void ) {
 }
 ]], netsnmp_cv_broken_inline=no, netsnmp_cv_broken_inline=yes))
 
+# But, sadly, the usage of inline in NET_SNMP disagrees seriously with at least
+# solaris2, so disable it for now.
+case "$target_os" in
+    solaris*)
+        netsnmp_cv_broken_inline=yes
+        ;;
+    *)
+        ;;
+esac
+
 if test "$netsnmp_cv_broken_inline" = yes ; then
   AC_DEFINE(NETSNMP_BROKEN_INLINE, 1,
         [Define if static inline functions are unsupported])
