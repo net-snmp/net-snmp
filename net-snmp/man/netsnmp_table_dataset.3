@@ -1,4 +1,4 @@
-.TH "table_dataset" 3 "24 Nov 2006" "Version 5.4" "net-snmp" \" -*- nroff -*-
+.TH "table_dataset" 3 "21 May 2007" "Version 5.4.1.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -151,14 +151,14 @@ Referenced by netsnmp_config_parse_table_set().
 .PP
 extracts a netsnmp_table_data_set pointer from a given request 
 .PP
-Definition at line 796 of file table_dataset.c.
+Definition at line 816 of file table_dataset.c.
 .PP
 References netsnmp_request_get_list_data().
 .SS "\fBnetsnmp_table_data_set_storage\fP* netsnmp_extract_table_data_set_column (\fBnetsnmp_request_info\fP * request, unsigned int column)"
 .PP
 extracts a netsnmp_table_data_set pointer from a given request 
 .PP
-Definition at line 806 of file table_dataset.c.
+Definition at line 826 of file table_dataset.c.
 .PP
 References netsnmp_extract_table_row_data(), and netsnmp_table_data_set_find_column().
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_table_data_set_handler (\fBnetsnmp_table_data_set\fP * data_set)"
@@ -178,7 +178,7 @@ marks a given column in a row as writable or not.
 .in +1c
 \fBdata_set.c\fP.
 .PP
-Definition at line 1167 of file table_dataset.c.
+Definition at line 1187 of file table_dataset.c.
 .PP
 References netsnmp_table_data_set_storage_s::column, netsnmp_table_row_s::data, netsnmp_table_data_set_find_column(), netsnmp_table_data_set_storage_s::next, snmp_log(), SNMP_MALLOC_TYPEDEF, and netsnmp_table_data_set_storage_s::writable.
 .PP
@@ -200,7 +200,7 @@ create a properly free'ing registeration pointer for the datalist, and get the d
 .in +1c
 \fBdata_set.c\fP.
 .PP
-Definition at line 833 of file table_dataset.c.
+Definition at line 853 of file table_dataset.c.
 .PP
 References netsnmp_table_data_s::name, netsnmp_add_list_data(), netsnmp_create_data_list(), NULL, SNMP_MALLOC_TYPEDEF, netsnmp_table_data_set_s::table, and data_set_tables_s::table_set.
 .PP
@@ -230,7 +230,7 @@ Data is memdup'ed by the function.
 .in +1c
 \fBdata_set.c\fP.
 .PP
-Definition at line 1202 of file table_dataset.c.
+Definition at line 1222 of file table_dataset.c.
 .PP
 References netsnmp_table_data_set_storage_s::column, netsnmp_table_row_s::data, netsnmp_table_data_set_storage_s::data, netsnmp_table_data_set_storage_s::data_len, memdup(), netsnmp_table_data_set_find_column(), netsnmp_table_data_set_storage_s::next, SNMP_FREE, snmp_log(), SNMP_MALLOC_TYPEDEF, netsnmp_table_data_set_storage_s::string, netsnmp_table_data_set_storage_s::type, and netsnmp_table_data_set_storage_s::voidp.
 .PP
@@ -257,7 +257,7 @@ Referenced by netsnmp_table_data_set_create_newrowstash().
 .PP
 Finds a column within a given storage set, given the pointer to the start of the storage set list. 
 .PP
-Definition at line 1155 of file table_dataset.c.
+Definition at line 1175 of file table_dataset.c.
 .PP
 References netsnmp_table_data_set_storage_s::column, and netsnmp_table_data_set_storage_s::next.
 .PP
@@ -266,14 +266,14 @@ Referenced by netsnmp_extract_table_data_set_column(), netsnmp_mark_row_column_w
 .PP
 returns the first row in the table 
 .PP
-Definition at line 1124 of file table_dataset.c.
+Definition at line 1144 of file table_dataset.c.
 .PP
 References netsnmp_table_data_get_first_row(), and netsnmp_table_data_set_s::table.
 .SS "\fBnetsnmp_table_row\fP* netsnmp_table_data_set_get_next_row (\fBnetsnmp_table_data_set\fP * table, \fBnetsnmp_table_row\fP * row)"
 .PP
 returns the next row in the table 
 .PP
-Definition at line 1131 of file table_dataset.c.
+Definition at line 1151 of file table_dataset.c.
 .PP
 References netsnmp_table_data_get_next_row(), and netsnmp_table_data_set_s::table.
 .SS "NETSNMP_INLINE void netsnmp_table_dataset_add_index (\fBnetsnmp_table_data_set\fP * table, u_char type)"
@@ -286,7 +286,7 @@ Call this repeatly for each index.
 .in +1c
 \fBdata_set.c\fP.
 .PP
-Definition at line 1256 of file table_dataset.c.
+Definition at line 1276 of file table_dataset.c.
 .PP
 References netsnmp_table_data_set_s::table.
 .PP
@@ -377,7 +377,7 @@ adds multiple indexes to a table_dataset helper object.
 .PP
 To end the list, use a 0 after the list of ASN index types. 
 .PP
-Definition at line 1267 of file table_dataset.c.
+Definition at line 1287 of file table_dataset.c.
 .PP
 References netsnmp_table_dataset_add_index().
 .SS "void netsnmp_table_set_multi_add_default_row (\fBnetsnmp_table_data_set\fP * tset,  ...)"

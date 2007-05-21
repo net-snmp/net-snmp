@@ -1,4 +1,4 @@
-.TH "generic linked-list data handling with a string as a key." 3 "24 Nov 2006" "Version 5.4" "net-snmp" \" -*- nroff -*-
+.TH "generic linked-list data handling with a string as a key." 3 "21 May 2007" "Version 5.4.1.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -249,8 +249,10 @@ registers to store a data_list set of data at persistent storage time
 .br
 \fIdata_list_read_ptr\fP a function pointer which can read the remainder of a saved line and return the application specific void * pointer. 
 .br
-\fIdata_list_free_ptr\fP a function pointer which will be passed to the data node for freeing it in the future when/if the list/node is cleaned up or destroyed.
+\fIdata_list_free_ptr\fP a function pointer which will be passed to the data node for freeing it in the future when/if the list/node is cleaned up or destroyed. 
 .RE
+.PP
+
 .PP
 \fBTodo\fP
 .RS 4

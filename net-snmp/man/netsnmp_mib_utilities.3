@@ -1,4 +1,4 @@
-.TH "mib parsing and datatype manipulation routines." 3 "24 Nov 2006" "Version 5.4" "net-snmp" \" -*- nroff -*-
+.TH "mib parsing and datatype manipulation routines." 3 "21 May 2007" "Version 5.4.1.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -260,6 +260,12 @@ mib parsing and datatype manipulation routines. \-
 .ti -1c
 .RI "int \fBget_wild_node\fP (const char *name, oid *objid, size_t *objidlen)"
 .br
+.RI "\fI\fBSee also:\fP
+.RS 4
+comments on find_best_tree_node for usage after first time. 
+.RE
+.PP
+\fP"
 .ti -1c
 .RI "int \fBget_node\fP (const char *name, oid *objid, size_t *objidlen)"
 .br
@@ -421,14 +427,12 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 Definition at line 271 of file mib.c.
 .PP
-References snmp_realloc().
+References netsnmp_ds_get_boolean(), and snmp_realloc().
 .PP
 Referenced by sprint_realloc_hexstring().
 .SS "int build_oid (oid ** out, size_t * out_len, oid * prefix, size_t prefix_len, \fBnetsnmp_variable_list\fP * indexes)"
 .PP
-xxx-rks: should free previous value? 
-.PP
-Definition at line 3567 of file mib.c.
+Definition at line 3569 of file mib.c.
 .PP
 References build_oid_noalloc(), tree::indexes, and snmp_clone_mem().
 .PP
@@ -449,7 +453,7 @@ SNMPERR_SUCCESS or SNMPERR_GENERR
 .PP
 
 .PP
-Definition at line 3431 of file mib.c.
+Definition at line 3433 of file mib.c.
 .PP
 References netsnmp_vardata::integer, variable_list::name, variable_list::name_length, variable_list::name_loc, NULL, netsnmp_vardata::objid, SNMP_FREE, netsnmp_vardata::string, variable_list::type, variable_list::val, and variable_list::val_len.
 .PP
@@ -471,7 +475,7 @@ Prints on oid description into a file descriptor.
 .PP
 
 .PP
-Definition at line 4426 of file mib.c.
+Definition at line 4428 of file mib.c.
 .PP
 References NULL, SNMP_FREE, and sprint_realloc_description().
 .PP
@@ -491,7 +495,7 @@ Prints an oid to a file descriptor.
 .PP
 
 .PP
-Definition at line 3159 of file mib.c.
+Definition at line 3161 of file mib.c.
 .PP
 References netsnmp_sprint_realloc_objid_tree(), NULL, and SNMP_FREE.
 .PP
@@ -513,7 +517,7 @@ Prints a variable to a file descriptor.
 .PP
 
 .PP
-Definition at line 3306 of file mib.c.
+Definition at line 3308 of file mib.c.
 .PP
 References NULL, SNMP_FREE, and sprint_realloc_variable().
 .PP
@@ -543,14 +547,12 @@ comments on find_best_tree_node for usage after first time.
 .PP
 
 .PP
-Definition at line 5434 of file mib.c.
+Definition at line 5448 of file mib.c.
 .PP
 References get_node(), tree::label, NULL, and tree_head.
 .PP
 Referenced by snmp_parse_oid().
 .SS "void netsnmp_fixup_mib_directory (void)"
-.PP
-swap in the new value and repeat 
 .PP
 Definition at line 2477 of file mib.c.
 .PP
@@ -558,10 +560,6 @@ References netsnmp_get_mib_directory(), netsnmp_getenv(), netsnmp_set_mib_direct
 .PP
 Referenced by netsnmp_init_mib().
 .SS "char* netsnmp_get_mib_directory (void)"
-.PP
-Check if the environment variable is set
-.PP
-Not set use hard coded path 
 .PP
 Definition at line 2430 of file mib.c.
 .PP
@@ -596,12 +594,14 @@ in example 5 . 1 . 2 . 3 . 4 . 5 = 12345
 .PP
 \fBReturns:\fP
 .RS 4
-0 on Sucess, 1 on failure.
+0 on Sucess, 1 on failure. 
 .RE
+.PP
+
 .PP
 length 
 .PP
-Definition at line 6221 of file mib.c.
+Definition at line 6235 of file mib.c.
 .PP
 Referenced by netsnmp_oid2str().
 .SS "int netsnmp_oid2str (char * S, int L, oid * O)"
@@ -626,16 +626,10 @@ in example 5 . 'h' . 'e' . 'l' . 'l' . 'o' = 'hello\\0' (null terminated)
 .PP
 
 .PP
-Definition at line 6249 of file mib.c.
+Definition at line 6263 of file mib.c.
 .PP
 References netsnmp_oid2chars().
 .SS "void netsnmp_set_mib_directory (const char * dir)"
-.PP
-New dir starts with '+', thus we add it.
-.PP
-If dir starts with '+' skip '+' it.
-.PP
-set_string calls strdup, so if we allocated memory, free it 
 .PP
 Definition at line 2375 of file mib.c.
 .PP
@@ -664,7 +658,7 @@ in example 'hello' = 5 . 'h' . 'e' . 'l' . 'l' . 'o'
 .PP
 
 .PP
-Definition at line 6186 of file mib.c.
+Definition at line 6200 of file mib.c.
 .SS "void print_description (oid * objid, size_t objidlen, int width)"
 .PP
 Prints on oid description on stdout. 
@@ -676,7 +670,7 @@ Prints on oid description on stdout.
 .PP
 
 .PP
-Definition at line 4410 of file mib.c.
+Definition at line 4412 of file mib.c.
 .PP
 References fprint_description().
 .SS "void print_mib (FILE * fp)"
@@ -690,7 +684,7 @@ Prints the MIBs to the file fp.
 .PP
 
 .PP
-Definition at line 2737 of file mib.c.
+Definition at line 2739 of file mib.c.
 .PP
 References tree_head.
 .SS "void print_objid (const oid * objid, size_t objidlen)"
@@ -706,7 +700,7 @@ Prints an oid to stdout.
 .PP
 
 .PP
-Definition at line 3145 of file mib.c.
+Definition at line 3147 of file mib.c.
 .PP
 References fprint_objid().
 .SS "void print_variable (const oid * objid, size_t objidlen, const \fBnetsnmp_variable_list\fP * variable)"
@@ -724,7 +718,7 @@ Prints a variable to stdout.
 .PP
 
 .PP
-Definition at line 3290 of file mib.c.
+Definition at line 3292 of file mib.c.
 .PP
 References fprint_variable().
 .SS "int read_objid (const char * input, oid * output, size_t * out_len)"
@@ -749,7 +743,7 @@ When called, out_len must hold the maximum length of the output array.
 .PP
 If an error occurs, this function returns 0 and MAY set snmp_errno. snmp_errno is NOT set if SET_SNMP_ERROR evaluates to nothing. This can make multi-threaded use a tiny bit more robust. 
 .PP
-Definition at line 2835 of file mib.c.
+Definition at line 2837 of file mib.c.
 .PP
 References get_node(), netsnmp_ds_get_boolean(), NULL, SNMP_FREE, and tree_head.
 .PP
@@ -765,7 +759,7 @@ Set's the printing function printomat in a subtree according it's type.
 .PP
 
 .PP
-Definition at line 2758 of file mib.c.
+Definition at line 2760 of file mib.c.
 .PP
 References NULL, tree::printer, tree::printomat, sprint_realloc_bitstring(), sprint_realloc_by_type(), sprint_realloc_counter(), sprint_realloc_counter64(), sprint_realloc_gauge(), sprint_realloc_integer(), sprint_realloc_ipaddress(), sprint_realloc_networkaddress(), sprint_realloc_nsapaddress(), sprint_realloc_null(), sprint_realloc_object_identifier(), sprint_realloc_octet_string(), sprint_realloc_opaque(), sprint_realloc_timeticks(), sprint_realloc_uinteger(), and tree::type.
 .SS "void shutdown_mib (void)"
@@ -813,7 +807,7 @@ The root oid pointer if successful, or NULL otherwise.
 .PP
 
 .PP
-Definition at line 5792 of file mib.c.
+Definition at line 5806 of file mib.c.
 .PP
 References clear_tree_flags(), get_node(), get_wild_node(), netsnmp_ds_get_boolean(), netsnmp_ds_get_string(), NULL, read_objid(), and tree_head.
 .PP
@@ -852,7 +846,7 @@ Definition at line 367 of file mib.c.
 .PP
 References snmp_realloc().
 .PP
-Referenced by asn_build_string(), asn_parse_string(), and snprint_asciistring().
+Referenced by asn_build_string(), asn_parse_string(), snprint_asciistring(), and sprint_realloc_octet_string().
 .SS "int sprint_realloc_badtype (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct \fBenum_list\fP * enums, const char * hint, const char * units)"
 .PP
 Fallback routine for a bad type, prints 'Variable has bad type' into a buffer. 
@@ -1335,7 +1329,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 Definition at line 427 of file mib.c.
 .PP
-References netsnmp_ds_get_boolean(), NULL, snmp_cstrcat, snmp_realloc(), sprint_realloc_by_type(), sprint_realloc_octet_string(), netsnmp_vardata::string, variable_list::type, variable_list::val, and variable_list::val_len.
+References netsnmp_ds_get_boolean(), netsnmp_ds_get_int(), NULL, snmp_cstrcat, snmp_realloc(), sprint_realloc_asciistring(), sprint_realloc_by_type(), sprint_realloc_hexstring(), sprint_realloc_octet_string(), netsnmp_vardata::string, variable_list::type, variable_list::val, and variable_list::val_len.
 .PP
 Referenced by set_function(), snprint_octet_string(), sprint_realloc_by_type(), and sprint_realloc_octet_string().
 .SS "int sprint_realloc_opaque (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct \fBenum_list\fP * enums, const char * hint, const char * units)"
@@ -1474,7 +1468,7 @@ uptimeString
 .PP
 
 .PP
-Definition at line 5757 of file mib.c.
+Definition at line 5771 of file mib.c.
 .PP
 References uptime_string_n().
 .SH "Variable Documentation"
@@ -1497,4 +1491,4 @@ References uptime_string_n().
 .PP
 Definition at line 160 of file mib.c.
 .PP
-Referenced by netsnmp_init_mib().
+Referenced by netsnmp_init_mib(), and netsnmp_sprint_realloc_objid_tree().
