@@ -98,7 +98,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic )
     cpu->wait_ticks   = (unsigned long) sinfo_gen->cpu[CPU_WAIT];
     cpu->idle_ticks = (unsigned long) sinfo_gen->cpu[CPU_IDLE];
 
-    // XXX - Do these really belong here ?
+    /* XXX - Do these really belong here ? */
     cpu->pageIn  = (unsigned long)0;
     cpu->pageOut = (unsigned long)0;
     cpu->swapIn  = (unsigned long)sinfo_gen->swapin;
