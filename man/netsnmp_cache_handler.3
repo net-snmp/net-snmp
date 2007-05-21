@@ -1,4 +1,4 @@
-.TH "cache_handler" 3 "24 Nov 2006" "Version 5.4" "net-snmp" \" -*- nroff -*-
+.TH "cache_handler" 3 "21 May 2007" "Version 5.4.1.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -156,7 +156,7 @@ find existing cache
 .PP
 Definition at line 120 of file cache_handler.c.
 .PP
-References netsnmp_oid_equals(), netsnmp_cache_s::next, netsnmp_cache_s::rootoid, and netsnmp_cache_s::rootoid_len.
+References netsnmp_oid_equals(), netsnmp_cache_s::next, NULL, netsnmp_cache_s::rootoid, and netsnmp_cache_s::rootoid_len.
 .SS "\fBnetsnmp_cache\fP* netsnmp_cache_get_head (void)"
 .PP
 get cache head 
@@ -274,6 +274,6 @@ run regularly to automatically release cached resources.
 .PP
 xxx - method to prevent cache from expiring while a request is being processed (e.g. delegated request). proposal: set a flag, which would be cleared when request finished (which could be acomplished by a dummy data list item in agent req info & custom free function). 
 .PP
-Definition at line 577 of file cache_handler.c.
+Definition at line 575 of file cache_handler.c.
 .PP
 References netsnmp_cache_s::flags, netsnmp_cache_check_expired(), netsnmp_cache_s::next, NULL, and netsnmp_cache_s::valid.

@@ -1,4 +1,4 @@
-.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "24 Nov 2006" "Version 5.4" "net-snmp" \" -*- nroff -*-
+.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "21 May 2007" "Version 5.4.1.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -210,7 +210,7 @@ Maintain a registry of MIB subtrees, together with related information regarding
 .RI "int \fBexternal_signal_scheduled\fP [NUM_EXTERNAL_SIGS]"
 .br
 .ti -1c
-.RI "void(* \fBexternal_signal_handler\fP [NUM_EXTERNAL_SIGS])(int)"
+.RI "void(*[NUM_EXTERNAL_SIGS]) \fBexternal_signal_handler\fP (int)"
 .br
 .in -1c
 .SH "Function Documentation"

@@ -1,4 +1,4 @@
-.TH "netsnmp_iterator_info_s" 3 "24 Nov 2006" "Version 5.4" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_iterator_info_s" 3 "21 May 2007" "Version 5.4.1.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -64,27 +64,6 @@ The netsnmp_iterator_info typedef can be used instead of directly calling this s
 Definition at line 53 of file table_iterator.h.
 .SH "Field Documentation"
 .PP 
-.SS "\fBNetsnmp_Free_Data_Context\fP* \fBnetsnmp_iterator_info_s::free_data_context\fP"
-.PP
-Frees a data context. 
-.PP
-This will be called at any time a data context needs to be freed. This may be at the same time as a correspondng loop context is freed, or much much later. Multiple data contexts may be kept in existence at any time. 
-.PP
-Definition at line 82 of file table_iterator.h.
-.SS "\fBNetsnmp_Free_Loop_Context\fP* \fBnetsnmp_iterator_info_s::free_loop_context\fP"
-.PP
-A function which should free the loop context. 
-.PP
-This function is called at *each* iteration step, which is not-optimal for speed purposes. The use of free_loop_context_at_end instead is strongly encouraged. This can be set to NULL to avoid its usage. 
-.PP
-Definition at line 75 of file table_iterator.h.
-.SS "\fBNetsnmp_Free_Loop_Context\fP* \fBnetsnmp_iterator_info_s::free_loop_context_at_end\fP"
-.PP
-Frees a loop context at the end of the entire iteration sequence. 
-.PP
-Generally, this would free the loop context allocated by the get_first_data_point function (which would then be updated by each call to the get_next_data_point function). It is not called until the get_next_data_point function returns a NULL 
-.PP
-Definition at line 90 of file table_iterator.h.
 .SS "\fBNetsnmp_First_Data_Point\fP* \fBnetsnmp_iterator_info_s::get_first_data_point\fP"
 .PP
 Responsible for: returning the first set of 'index' data, a loop-context pointer, and optionally a data context pointer. 
@@ -104,6 +83,27 @@ Referenced by netsnmp_iterator_create_table(), netsnmp_iterator_row_count(), net
 If a data context wasn't supplied by the get_first_data_point or get_next_data_point functions and the make_data_context pointer is defined, it will be called to convert a loop context into a data context. 
 .PP
 Definition at line 68 of file table_iterator.h.
+.SS "\fBNetsnmp_Free_Loop_Context\fP* \fBnetsnmp_iterator_info_s::free_loop_context\fP"
+.PP
+A function which should free the loop context. 
+.PP
+This function is called at *each* iteration step, which is not-optimal for speed purposes. The use of free_loop_context_at_end instead is strongly encouraged. This can be set to NULL to avoid its usage. 
+.PP
+Definition at line 75 of file table_iterator.h.
+.SS "\fBNetsnmp_Free_Data_Context\fP* \fBnetsnmp_iterator_info_s::free_data_context\fP"
+.PP
+Frees a data context. 
+.PP
+This will be called at any time a data context needs to be freed. This may be at the same time as a correspondng loop context is freed, or much much later. Multiple data contexts may be kept in existence at any time. 
+.PP
+Definition at line 82 of file table_iterator.h.
+.SS "\fBNetsnmp_Free_Loop_Context\fP* \fBnetsnmp_iterator_info_s::free_loop_context_at_end\fP"
+.PP
+Frees a loop context at the end of the entire iteration sequence. 
+.PP
+Generally, this would free the loop context allocated by the get_first_data_point function (which would then be updated by each call to the get_next_data_point function). It is not called until the get_next_data_point function returns a NULL 
+.PP
+Definition at line 90 of file table_iterator.h.
 .SS "void* \fBnetsnmp_iterator_info_s::myvoid\fP"
 .PP
 This can be used by client handlers to store any information they need. 

@@ -1,4 +1,4 @@
-.TH "row_merge" 3 "24 Nov 2006" "Version 5.4" "net-snmp" \" -*- nroff -*-
+.TH "row_merge" 3 "21 May 2007" "Version 5.4.1.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -89,7 +89,7 @@ Implements the row_merge handler.
 .PP
 Definition at line 154 of file row_merge.c.
 .PP
-References netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_row_merge_status_get(), netsnmp_request_info_s::next, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len.
+References netsnmp_row_merge_status_x::count, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_call_next_handler(), netsnmp_row_merge_status_get(), netsnmp_request_info_s::next, NULL, netsnmp_request_info_s::prev, netsnmp_request_info_s::processed, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, ROW_MERGE_DONE, ROW_MERGE_WAITING, netsnmp_row_merge_status_x::rows, netsnmp_row_merge_status_x::saved_requests, netsnmp_row_merge_status_x::saved_status, and SNMP_FREE.
 .PP
 Referenced by netsnmp_get_row_merge_handler().
 .SS "int netsnmp_row_merge_status_first (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo)"

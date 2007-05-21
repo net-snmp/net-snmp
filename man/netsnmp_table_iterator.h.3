@@ -1,4 +1,4 @@
-.TH "table_iterator.h" 3 "24 Nov 2006" "Version 5.4" "net-snmp" \" -*- nroff -*-
+.TH "table_iterator.h" 3 "21 May 2007" "Version 5.4.1.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -28,19 +28,19 @@ table_iterator.h \-
 
 .in +1c
 .ti -1c
-.RI "typedef \fBnetsnmp_variable_list\fP *() \fBNetsnmp_First_Data_Point\fP (void **loop_context, void **data_context, \fBnetsnmp_variable_list\fP *, struct \fBnetsnmp_iterator_info_s\fP *)"
+.RI "typedef \fBnetsnmp_variable_list\fP *( \fBNetsnmp_First_Data_Point\fP )(void **loop_context, void **data_context, \fBnetsnmp_variable_list\fP *, struct \fBnetsnmp_iterator_info_s\fP *)"
 .br
 .ti -1c
-.RI "typedef \fBnetsnmp_variable_list\fP *() \fBNetsnmp_Next_Data_Point\fP (void **loop_context, void **data_context, \fBnetsnmp_variable_list\fP *, struct \fBnetsnmp_iterator_info_s\fP *)"
+.RI "typedef \fBnetsnmp_variable_list\fP *( \fBNetsnmp_Next_Data_Point\fP )(void **loop_context, void **data_context, \fBnetsnmp_variable_list\fP *, struct \fBnetsnmp_iterator_info_s\fP *)"
 .br
 .ti -1c
-.RI "typedef void *() \fBNetsnmp_Make_Data_Context\fP (void *loop_context, struct \fBnetsnmp_iterator_info_s\fP *)"
+.RI "typedef void *( \fBNetsnmp_Make_Data_Context\fP )(void *loop_context, struct \fBnetsnmp_iterator_info_s\fP *)"
 .br
 .ti -1c
-.RI "typedef void() \fBNetsnmp_Free_Loop_Context\fP (void *, struct \fBnetsnmp_iterator_info_s\fP *)"
+.RI "typedef void( \fBNetsnmp_Free_Loop_Context\fP )(void *, struct \fBnetsnmp_iterator_info_s\fP *)"
 .br
 .ti -1c
-.RI "typedef void() \fBNetsnmp_Free_Data_Context\fP (void *, struct \fBnetsnmp_iterator_info_s\fP *)"
+.RI "typedef void( \fBNetsnmp_Free_Data_Context\fP )(void *, struct \fBnetsnmp_iterator_info_s\fP *)"
 .br
 .ti -1c
 .RI "typedef \fBnetsnmp_iterator_info_s\fP \fBnetsnmp_iterator_info\fP"
