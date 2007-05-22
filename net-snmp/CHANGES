@@ -4,7 +4,7 @@ a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
 
-*5.4.x*      (SVN snapshot)
+*5.4.1*      (SVN snapshot)
 
     snmplib:
       - [BUG 1600171]: Support longer community strings in VACM config.
@@ -18,6 +18,18 @@ listing of all changes made to the code.
       - [PATCH 1641972]: add missing const
       - library layering improvements: introduce netsnmp_mktemp to prevent
 	libnetsnmpagent from depending on libnetsnmpmibs
+      - Deallocate the confmibs and confmibdirs
+      - Read the config parameters defTarget and
+      - [BUG 1619827]: link against needed external
+      - [PATCH 1620424]: Honor
+      - [PATCH 1653670]: Consistent SNMPv3 behaviour
+      - [PATCH 1681030]: Better handling of empty
+      - [PATCH 1687316]: Don't drop const from casts.
+      - [PATCH 1687325]: Fix problem with operator
+      - patch: 1645698: fix 64-bit signed integer
+      - [PATCH 1642071]: Don't fiddle with the storage
+      - [PATCH 1665543]: Handle VACM checks correctly.
+
 
     snmpd:
       - [BUG 1397895]: include missing interface declarations
@@ -35,10 +47,55 @@ listing of all changes made to the code.
       - [PATCH 1644714]: replace last remaining instance of deprecated
 	   copy_word by copy_nword
       - patch from Wojtek Jawor to handle row deletion issues in dataset tables
+      - Correct the dependency information for
+      - [BUG 1046327]: Reset "includeAllDisks" flag when
+      - [BUG 1073782]: Restore PerfStat values for FreeBSD
+      - [BUG 1102058]: Skip non-mounted disks (e.g. swap
+      - [BUG 1159908]: Fix memory leak
+      - [BUG 1413728]: Reference index values in debug
+      - [BUG 1602286]: Don't let table holes block later
+      - [BUG 1628613]: Restore memTotalFree.0 on Solaris
+      - [BUG 1677063]: Check for failed malloc calls.
+      - [BUG 1685067]: More precise handling of
+      - [BUG 1685081]: Check for valid OID on Free/Undo
+      - [BUG 1712988]: default and configurable maximum
+      - [BUG 902610]: Don't discard pending data following
+      - [BUG 902801]: Fix ordering of SMUX-registered
+      - [PATCH 1620424]: Fix notification sending so that
+      - [PATCH 1639726]: Report physical memory
+      - [PATCH 1641865]: Don't double check snmpTrapOID
+      - [PATCH 1642255]: Handle saving long
+      - [PATCH 1644280]: Don't automatically probe for
+      - [PATCH 1644280]: Use the correct engineID when
+      - [PATCH 1659623]: Handle SMUX peers with an empty
+      - [PATCH 1665549]: Handle creating VACM entries
+      - [PATCH 1665985]: Implement ipReasmTimeout
+      - [PATCH 1666737]: include ipv6 counts in
+      - [PATCH 1668193]: Fix check for v6 ReasmMaxSize
+      - [PATCH 1668193]: Update registration of
+      - [PATCH 1668952]: Ignore zombie processes.
+      - [PATCH 1676478]: fix udpEndpointRemoteAddress
+      - [PATCH 1678788]: Better handling of SMUX socket
+      - [PATCH 1683054]: set udpEndpointInstance to
+      - [PATCH 1687336]: Start using the enhanced
+      - [PATCH 1692768]: Fix copying of non-octet-aligned
+      - [PATCH 1698184]: Register non-default context
+      - [PATCH 1700730]: Remove unused extern declaration.
+      - [PATCH 1700732]: Fix debug output statements.
+      - [PATCH 1700737]: Tidy up setSerialNo
+      - patch: 1225440: Apply intent of patch: to delay
+      - patch: 1595568: from cyril_margaria: fix
+      - patch: 1617255: fix length of the history array
+      - patch: 1700157: from afrika: fixes ordering of exec
+      - patch: 1710632: from mavarley: fix memory leak on
+      - patch: 1719253: from "Christian Jung": fix
+      - patch: 1719254: from "Christan Jung": update
 
     snmptrapd:
       - [BUG 1638225]: Fix interpretation of transport address data.
-
+      - [PATCH 1620424]: Fix notification reception so
+      - patch: 1225440: Apply intent of patch: to
+      - upport for forwarding traps by OID subtree.
 
     apps:
       - [PATCH 1529523]: Close SNMP session on failure.
@@ -49,6 +106,9 @@ listing of all changes made to the code.
       - [PATCH 1625135]: configure location of python interpreter
       - add configure check for hasmntopt to fix the build on systems that lack it
       - yet another fix to address build issues with ethtool (on RH9).
+      - [PATCH 1681073]: #ifdef based config_error instead
+      - Check for support of static inline functions
+      - [BUG 1567324]: Clarify prompting for
 
     documentation:
       - [BUG 1247164]: Document use of OID macros
@@ -62,10 +122,15 @@ listing of all changes made to the code.
       - [BUG 1582972]: Handle @while@/@end@ properly.
       - [PATCH 1668171]: skip unknown cols in min/max range for tables,
 	   instead of error
+      - [BUG 833673]: More focused size checks.
 
     perl:
       - [BUG 1450669]: from martin987: a perl agentx consumes memory
       - [PATCH 1627949]: from martin987: a perl agentx consumes memory
+      - fix SNMP SET for IP addresses on 64-bit
+
+    python:
+      - [PATCH 1716114]: Let python build in source tree
 
     unspecified:
       - [BUG 1558823]: fix ipAddressTable memory leak
@@ -73,10 +138,17 @@ listing of all changes made to the code.
       - [BUG 1600093]: autoconf 2.60 breaks the build
       - [BUG 1611524]: fix tcp connection table fd leak
       - [BUG 1633483]: Support CPU HAL on FreeBSD4.x
-
+      - [BUG 1710910]: initial support for DragonFly BSD
+      - [PATCH 1678298]: from magfr: compile-subagent checks for
+      - [PATCH 1678301]: from magfr: deallocate domain registry
+      - [PATCH 1678302]: from magfr: netsnmp_mibindex_load leaks
+      - [PATCH 1678305]: from magfr: Deallocate the cache in
+      - [PATCH 1678306]: from magfr: Deallocate the log in
+      - [PATCH 1719244]: fix mfd generating map function
 
     AIX:
       - [PATCH 1665079]: AIX patches for cpu stats and process monitoring
+      - fix default shared library building instead of forcing
 
     FreeBSD:
       - fix configure warning for sys/conf.h
@@ -102,6 +174,15 @@ listing of all changes made to the code.
       - fix AES support
       - fix win32/Configure --with-ipv6
 
+    IRIX:
+      - [PATCH 1709748]: Optimized IRIX cpu stats
+      - [PATCH 1675869]: CPU statistics for IRIX
+
+    HP:
+      - UX: HP-UX needs _REENTRANT defined to pick up
+
+    ports:
+      - patch: 1706344: from naylor: fix compilation with
 
 *5.4*
 

@@ -4,10 +4,11 @@ that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
 
-*5.4.x*      (SVN snapshot)
+*5.4.1*
 
     snmplib:
       - [PATCH 1592706]: Fix memory leak when cloning varbinds.
+      - [BUG 1619827]: link against needed external
 
     snmpd:
       - [BUG 1558823]: fix ipAddressTable memory leak
@@ -15,12 +16,29 @@ listing of all changes made to the code.
       - [BUG 1611524]: fix tcp connection table fd leak
       - [BUG 1633483]: Support CPU HAL on FreeBSD4.x
       - patch from Wojtek Jawor to handle row deletion issues in dataset tables
+      - [BUG 1712988]: default and configurable maximum
+      - [PATCH 1666737]: include ipv6 counts in
+      - patch: 1700157: from afrika: fixes ordering of exec
+      - patch: 1719253: from "Christian Jung": fix
+
+    python:
+      - [PATCH 1716114]: Let python build in source tree
 
     MacOSX:
       - [PATCH 1600522]: CPU HAL implementation for mach/darwin
 
     Win32:
       - fix AES support
+
+    irix:
+      - [PATCH 1709748]: Optimized IRIX cpu stats
+      - [PATCH 1675869]: CPU statistics for IRIX
+
+    AIX:
+      - fix default shared library building instead of forcing
+
+    ports:
+      - patch: 1706344: from naylor: fix compilation with
 
 
 *5.4*
