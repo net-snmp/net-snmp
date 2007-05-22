@@ -354,7 +354,7 @@ warningcheck:
 
 commentcheck:
 	@echo "Checking for C++ style comments..."
-	@grep -n -E "([^:)n]|^)//" `$(FIND) $(top_srcdir) -path './win32' -prune -o -name \*.\[ch\]` && exit 1
+	@grep -n -E "([^:)n]|^)//" `$(FIND) $(top_srcdir) -path './win32' -prune -o -name \*.\[ch\] | grep -v agent/mibgroup/winExtDLL.c` && exit 1
 
 # always exit 1, since I can't figure out how to invert grep rc
 makefilecheck:
