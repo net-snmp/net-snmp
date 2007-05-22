@@ -139,7 +139,7 @@ if ( $branch ) {
 # Step 12)  Construct the tarball
 my $tar = "star artype=ustar";    # XXX - check for star/gtar/etc
 System("release:makedist",
-       "svn checkout $root/tags/${vtag}/net-snmp net-snmp-$version");
+       "svn export $root/tags/${vtag}/net-snmp net-snmp-$version");
 System("release:makedist",
        "$tar -c -z -f net-snmp-${version}.tar.gz  net-snmp-$version");
 
