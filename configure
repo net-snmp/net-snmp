@@ -919,7 +919,7 @@ PYTHONUNINSTALLTARGS
 PYTHONCLEANTARGS
 PYTHONARGS
 LPSTAT_PATH
-LIBCRYPTO
+LNETSNMPLIBS
 PSCMD
 ALLOCA
 LIBOBJS
@@ -27240,8 +27240,7 @@ fi
 fi
 
 
-# Replace `main' with a function in -lkstat:
-
+# Solaris kstat
 { echo "$as_me:$LINENO: checking for kstat_lookup in -lkstat" >&5
 echo $ECHO_N "checking for kstat_lookup in -lkstat... $ECHO_C" >&6; }
 if test "${ac_cv_lib_kstat_kstat_lookup+set}" = set; then
@@ -27304,20 +27303,22 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_lib_kstat_kstat_lookup" >&5
 echo "${ECHO_T}$ac_cv_lib_kstat_kstat_lookup" >&6; }
 if test $ac_cv_lib_kstat_kstat_lookup = yes; then
-  cat >>confdefs.h <<_ACEOF
+  cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBKSTAT 1
 _ACEOF
 
-  LIBS="-lkstat $LIBS"
-
+        LNETSNMPLIBS="${LNETSNMPLIBS} -lkstat"
 fi
 
+
+# Check for libraries that the agent needs
+# saving old libraries
+NONAGENTLIBS=$LIBS
 
 # Check for security related functions
 if test "x$tryopenssl" != "xno"; then
     if test "x$askedopenssl" != "xyes" -a "x$askedpkcs" = "xyes"; then
-
-{ echo "$as_me:$LINENO: checking for C_Initialize in -lpkcs11" >&5
+      { echo "$as_me:$LINENO: checking for C_Initialize in -lpkcs11" >&5
 echo $ECHO_N "checking for C_Initialize in -lpkcs11... $ECHO_C" >&6; }
 if test "${ac_cv_lib_pkcs11_C_Initialize+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -27379,12 +27380,11 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_lib_pkcs11_C_Initialize" >&5
 echo "${ECHO_T}$ac_cv_lib_pkcs11_C_Initialize" >&6; }
 if test $ac_cv_lib_pkcs11_C_Initialize = yes; then
-  cat >>confdefs.h <<_ACEOF
+  cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBPKCS11 1
 _ACEOF
 
-  LIBS="-lpkcs11 $LIBS"
-
+              LIBPKCS11="-lpkcs11"
 fi
 
     else
@@ -27533,8 +27533,7 @@ fi
 
       fi
 
-
-{ echo "$as_me:$LINENO: checking for EVP_md5 in -lcrypto" >&5
+      { echo "$as_me:$LINENO: checking for EVP_md5 in -lcrypto" >&5
 echo $ECHO_N "checking for EVP_md5 in -lcrypto... $ECHO_C" >&6; }
 if test "${ac_cv_lib_crypto_EVP_md5+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -27596,45 +27595,26 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_lib_crypto_EVP_md5" >&5
 echo "${ECHO_T}$ac_cv_lib_crypto_EVP_md5" >&6; }
 if test $ac_cv_lib_crypto_EVP_md5 = yes; then
-  cat >>confdefs.h <<_ACEOF
+  cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBCRYPTO 1
 _ACEOF
 
-  LIBS="-lcrypto $LIBS"
-
+              LIBCRYPTO="-lcrypto"
 fi
 
-
-for ac_func in AES_cfb128_encrypt
-do
-as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
-{ echo "$as_me:$LINENO: checking for $ac_func" >&5
-echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6; }
-if { as_var=$as_ac_var; eval "test \"\${$as_var+set}\" = set"; }; then
+      { echo "$as_me:$LINENO: checking for AES_cfb128_encrypt in -lcrypto" >&5
+echo $ECHO_N "checking for AES_cfb128_encrypt in -lcrypto... $ECHO_C" >&6; }
+if test "${ac_cv_lib_crypto_AES_cfb128_encrypt+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  cat >conftest.$ac_ext <<_ACEOF
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcrypto  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-/* Define $ac_func to an innocuous variant, in case <limits.h> declares $ac_func.
-   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
-#define $ac_func innocuous_$ac_func
-
-/* System header to define __stub macros and hopefully few prototypes,
-    which can conflict with char $ac_func (); below.
-    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
-    <limits.h> exists even on freestanding compilers.  */
-
-#ifdef __STDC__
-# include <limits.h>
-#else
-# include <assert.h>
-#endif
-
-#undef $ac_func
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
@@ -27642,18 +27622,11 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef __cplusplus
 extern "C"
 #endif
-char $ac_func ();
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined __stub_$ac_func || defined __stub___$ac_func
-choke me
-#endif
-
+char AES_cfb128_encrypt ();
 int
 main ()
 {
-return $ac_func ();
+return AES_cfb128_encrypt ();
   ;
   return 0;
 }
@@ -27676,32 +27649,30 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
-  eval "$as_ac_var=yes"
+  ac_cv_lib_crypto_AES_cfb128_encrypt=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-	eval "$as_ac_var=no"
+	ac_cv_lib_crypto_AES_cfb128_encrypt=no
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
 fi
-ac_res=`eval echo '${'$as_ac_var'}'`
-	       { echo "$as_me:$LINENO: result: $ac_res" >&5
-echo "${ECHO_T}$ac_res" >&6; }
-if test `eval echo '${'$as_ac_var'}'` = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_crypto_AES_cfb128_encrypt" >&5
+echo "${ECHO_T}$ac_cv_lib_crypto_AES_cfb128_encrypt" >&6; }
+if test $ac_cv_lib_crypto_AES_cfb128_encrypt = yes; then
+  cat >>confdefs.h <<\_ACEOF
+#define HAVE_AES_CFB128_ENCRYPT 1
 _ACEOF
 
 fi
-done
 
     fi
 elif test "x$askedpkcs" = "xyes"; then
-
-{ echo "$as_me:$LINENO: checking for C_Initialize in -lpkcs11" >&5
+    { echo "$as_me:$LINENO: checking for C_Initialize in -lpkcs11" >&5
 echo $ECHO_N "checking for C_Initialize in -lpkcs11... $ECHO_C" >&6; }
 if test "${ac_cv_lib_pkcs11_C_Initialize+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -27763,19 +27734,16 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_lib_pkcs11_C_Initialize" >&5
 echo "${ECHO_T}$ac_cv_lib_pkcs11_C_Initialize" >&6; }
 if test $ac_cv_lib_pkcs11_C_Initialize = yes; then
-  cat >>confdefs.h <<_ACEOF
+  cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBPKCS11 1
 _ACEOF
 
-  LIBS="-lpkcs11 $LIBS"
-
+            LIBPKCS11="-lpkcs11"
 fi
 
 fi
 
-# Check for libraries that the agent needs
-# saving old libraries
-NONAGENTLIBS=$LIBS
+LIBS=$NONAGENTLIBS
 
 # check for tcp wrapper support
 _cppflags="${CPPFLAGS}"
@@ -36474,7 +36442,7 @@ if test "x$useopenssl" != "xno" ; then
 #define NETSNMP_USE_OPENSSL 1
 _ACEOF
 
-    LIBCRYPTO="-lcrypto" ;
+    LNETSNMPLIBS="$LNETSNMPLIBS $LIBCRYPTO"
     { echo "$as_me:$LINENO: result: OpenSSL Support" >&5
 echo "${ECHO_T}OpenSSL Support" >&6; }
 elif test "x$usepkcs" != "xno" ; then
@@ -36488,6 +36456,7 @@ elif test "x$usepkcs" != "xno" ; then
 #define NETSNMP_USE_PKCS11 1
 _ACEOF
 
+    LNETSNMPLIBS="$LNETSNMPLIBS $LIBPKCS11"
     { echo "$as_me:$LINENO: result: PKCS11 Support" >&5
 echo "${ECHO_T}PKCS11 Support" >&6; }
 elif test "x$enable_md5" != "xno"; then
@@ -37771,7 +37740,7 @@ if test "$ac_res" != no; then
   ac_cv_func_getmntent=yes
 
 cat >>confdefs.h <<\_ACEOF
-#define HAVE_GETMNTENT 1
+#define HAVE_GETMNTENT
 _ACEOF
 
 else
@@ -48962,7 +48931,7 @@ PYTHONUNINSTALLTARGS!$PYTHONUNINSTALLTARGS$ac_delim
 PYTHONCLEANTARGS!$PYTHONCLEANTARGS$ac_delim
 PYTHONARGS!$PYTHONARGS$ac_delim
 LPSTAT_PATH!$LPSTAT_PATH$ac_delim
-LIBCRYPTO!$LIBCRYPTO$ac_delim
+LNETSNMPLIBS!$LNETSNMPLIBS$ac_delim
 PSCMD!$PSCMD$ac_delim
 ALLOCA!$ALLOCA$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim

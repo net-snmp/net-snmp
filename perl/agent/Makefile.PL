@@ -79,7 +79,7 @@ sub InitMakeParams {
     }
     else {
 	$opts = NetSNMPGetOpts();
-	$Params{'LIBS'}    = `$opts->{'nsconfig'} --agent-libs`;
+	$Params{'LIBS'}    = `$opts->{'nsconfig'} --base-agent-libs`;
 	chomp($Params{'LIBS'});
 	$Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
 	chomp($Params{'CCFLAGS'});
@@ -89,6 +89,7 @@ sub InitMakeParams {
 	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ -L../../agent/.libs -L../../agent/ -L../../agent/helpers/.libs -L../../agent/helpers/ " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 #	} else {
+	    $Params{'LIBS'} = `$opts->{'nsconfig'} --libdir` . $Params{'LIBS'};
 #	    $Params{'PREREQ_PM'} = {'NetSNMP::OID' => '0.1'};
 	}
 	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
