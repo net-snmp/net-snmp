@@ -46,7 +46,10 @@ SUBDIRS		= snmpnetstat
 
 # USELIBS/USEAGENTLIBS are for dependencies
 USELIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) 
-USEAGENTLIBS	= ../agent/libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) ../agent/libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION) ../agent/helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION) $(USELIBS)
+HELPERLIB       = ../agent/helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
+AGENTLIB        = ../agent/libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+MIBLIB          = ../agent/libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+USEAGENTLIBS	= $(MIBLIB) $(HELPERLIB) $(AGENTLIB) $(USELIBS)
 
 #
 # link path in src dir
@@ -139,7 +142,7 @@ snmpdf$(EXEEXT):    snmpdf.$(OSUFFIX) $(USELIBS)
 	$(LINK) ${CFLAGS} -o $@ snmpdf.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION): $(LLIBTRAPD_OBJS)
-	$(LIB_LD_CMD) libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION) ${LLIBTRAPD_OBJS}  $(LIB_LD_LIBS)
+	$(LIB_LD_CMD) libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION) ${LLIBTRAPD_OBJS} $(MIBLIB) $(USELIBS) $(LIB_LD_LIBS)
 	$(RANLIB) libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION)
 
 snmpinforminstall:

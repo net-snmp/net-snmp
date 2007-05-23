@@ -18,8 +18,8 @@ top_builddir	= ..
 SUBDIRS=helpers mibgroup
 
 INSTALLSBINPROGS= @SNMPD@
-INSTALLLIBS	= libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION) \
-		  libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+INSTALLLIBS	= libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+INSTALLPOSTLIBS	= libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
 INCLUDESUBDIR=agent
 INCLUDESUBDIRHEADERS=agent_read_config.h \
@@ -76,11 +76,14 @@ INSTALLUCDHEADERS= \
 #
 USELIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 HELPERLIB	= helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
+AGENTLIB	= libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+MIBLIB		= libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+
 LOCAL_LIBS	= 
 LMIBLIBS	= @LMIBLIBS@
 PERLLDOPTS      = @PERLLDOPTS@
-LIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @AGENTLIBS@ $(PERLLDOPTS)
-OUR_AGENT_LIBS	= $(INSTALLLIBS) $(HELPERLIB) @WRAPLIBS@ $(LIBS) @DLLIBS@
+LIBS		= $(USELIBS) @AGENTLIBS@ $(PERLLDOPTS)
+OUR_AGENT_LIBS	= $(AGENTLIB) $(HELPERLIB) $(MIBLIB) @WRAPLIBS@ $(LIBS) @DLLIBS@
 CPPFLAGS	= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 		  $(SNMPLIB_INCLUDES) @CPPFLAGS@ 
 
@@ -89,7 +92,7 @@ CPPFLAGS	= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 # Objects
 #
 
-# libnetsnmpmib objects.
+# libnetsnmpmibs objects.
 @mibgroup_list_lo@
 @mibgroup_list_o@
 @agentgroup_list_lo@
@@ -116,7 +119,7 @@ OBJS		= $(LIBAGENTOBJS)  $(AGENTOBJS)  mib_modules.o  auto_nlist.o
 LOBJS		= $(LLIBAGENTOBJS) $(LAGENTOBJS) mib_modules.lo auto_nlist.lo
 
 
-all: standardall
+all: agentlib subdirs miblib $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
 
 #
 # build stuff targets
@@ -133,21 +136,21 @@ getmibstat: getmibstat.o
 getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
-snmpd$(EXEEXT):	${LAGENTOBJS} $(USELIBS) $(HELPERLIB) $(LIBTARG) ${INSTALLLIBS}
+snmpd$(EXEEXT):	${LAGENTOBJS} $(USELIBS) $(AGENTLIB) $(HELPERLIB) $(MIBLIB) $(LIBTARG) 
 	$(LINK) $(CFLAGS) -o $@ ${LAGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${OUR_AGENT_LIBS}
 
 
-libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LLIBAGENTOBJS}
-	$(LIB_LD_CMD) libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) ${LLIBAGENTOBJS}  $(LIB_LD_LIBS)
-	$(RANLIB) libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LLIBAGENTOBJS} $(USELIBS)
+	$(LIB_LD_CMD) $(AGENTLIB) ${LLIBAGENTOBJS} $(USELIBS) $(LIB_LD_LIBS)
+	$(RANLIB) $(AGENTLIB)
 
-libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
-	$(LIB_LD_CMD) libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION) ${LMIBOBJS} ${LMIBLIBS} $(LIB_LD_LIBS)
-	$(RANLIB) libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION): ${LMIBOBJS} $(HELPERLIB) $(AGENTLIB) $(USELIBS)
+	$(LIB_LD_CMD) $(MIBLIB) ${LMIBOBJS} $(HELPERLIB) $(AGENTLIB) $(USELIBS) ${LMIBLIBS} $(LIB_LD_LIBS)
+	$(RANLIB) $(MIBLIB)
 
-agentlib: libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+agentlib: $(AGENTLIB)
 
-miblib: libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+miblib: $(MIBLIB)
 
 libs: $(INSTALLLIBS)
 
