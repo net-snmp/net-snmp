@@ -44,6 +44,10 @@ INCLUDESUBDIRHEADERS=all_helpers.h \
 #
 # Build info
 #
+NETSNMPLIB      = ../../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
+HELPERLIB       = libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
+AGENTLIB        = ../libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+MIBLIB          = ../libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 # -I. -I.. -I../..
 CPPFLAGS= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 	$(SNMPLIB_INCLUDES) @CPPFLAGS@
@@ -132,5 +136,5 @@ LOBJS = all_helpers.lo \
 all: standardall
 
 libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION):    ${LOBJS}
-	$(LIB_LD_CMD) libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION) ${LOBJS}  $(LIB_LD_LIBS)
-	$(RANLIB) libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
+	$(LIB_LD_CMD) $(HELPERLIB) ${LOBJS} $(AGENTLIB) $(NETSNMPLIB) $(LIB_LD_LIBS)
+	$(RANLIB) $(HELPERLIB)

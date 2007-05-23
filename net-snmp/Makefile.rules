@@ -8,7 +8,7 @@
 
 # the standard items to build: libraries, bins, and sbins
 STANDARDTARGETS     =$(INSTALLLIBS) $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
-STANDARDCLEANTARGETS=$(INSTALLLIBS) $(INSTALLBINPROGS) $(INSTALLSBINPROGS) $(INSTALLUCDLIBS)
+STANDARDCLEANTARGETS=$(INSTALLLIBS) $(INSTALLPOSTLIBS) $(INSTALLBINPROGS) $(INSTALLSBINPROGS) $(INSTALLUCDLIBS)
 
 standardall: subdirs $(STANDARDTARGETS)
 
@@ -161,13 +161,25 @@ uninstallheaders:
 #
 # set INSTALLLIBS to a list of things to install in each makefile.
 #
-installlibs: installlocallibs @installucdlibs@ installsubdirlibs
+installlibs: installlocallibs @installucdlibs@ installsubdirlibs installpostlibs
 
 installlocallibs: $(INSTALLLIBS)
 	@if test "$(INSTALLLIBS)" != ""; then \
 		it="$(INSTALLLIBS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(libdir) ; \
 		$(INSTALL) $(INSTALLLIBS) $(INSTALL_PREFIX)$(libdir) ; \
+		for i in $$it ; do \
+			echo "installing $$i in $(INSTALL_PREFIX)$(libdir)"; \
+			$(RANLIB) $(INSTALL_PREFIX)$(libdir)/$$i ; \
+		done ; \
+		$(LIB_LDCONFIG_CMD) ; \
+	fi
+
+installpostlibs: $(INSTALLPOSTLIBS)
+	@if test "$(INSTALLPOSTLIBS)" != ""; then \
+		it="$(INSTALLPOSTLIBS)" ; \
+		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(libdir) ; \
+		$(INSTALL) $(INSTALLPOSTLIBS) $(INSTALL_PREFIX)$(libdir) ; \
 		for i in $$it ; do \
 			echo "installing $$i in $(INSTALL_PREFIX)$(libdir)"; \
 			$(RANLIB) $(INSTALL_PREFIX)$(libdir)/$$i ; \
