@@ -156,7 +156,7 @@ OTHERCLEANTODOS=perlclean @PYTHONCLEANTARGS@
 # perl specific build rules
 #
 # override LD_RUN_PATH to avoid dependencies on the build directory
-perlmodules: perlmakefiles
+perlmodules: perlmakefiles subdirs
 	@(cd perl ; $(MAKE) LD_RUN_PATH="$(libdir):`$(PERL) -e 'use Config; print qq($$Config{archlibexp}/CORE);'`") ; \
         if test $$? != 0 ; then \
            exit 1 ; \

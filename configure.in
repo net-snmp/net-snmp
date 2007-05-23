@@ -2681,29 +2681,37 @@ AC_CHECK_FUNC(getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME),
 	AC_CHECK_LIB(socket, getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME)
 	LIBS="${LIBS} -lsocket"))
 
-# Replace `main' with a function in -lkstat:
-AC_CHECK_LIB(kstat, kstat_lookup)
+# Solaris kstat
+AC_CHECK_LIB(kstat, kstat_lookup,
+        AC_DEFINE(HAVE_LIBKSTAT)
+        LNETSNMPLIBS="${LNETSNMPLIBS} -lkstat")
+
+# Check for libraries that the agent needs
+# saving old libraries
+NONAGENTLIBS=$LIBS
 
 # Check for security related functions
 if test "x$tryopenssl" != "xno"; then
     if test "x$askedopenssl" != "xyes" -a "x$askedpkcs" = "xyes"; then
-      AC_CHECK_LIB(pkcs11, C_Initialize)
+      AC_CHECK_LIB(pkcs11, C_Initialize, AC_DEFINE(HAVE_LIBPKCS11)
+              LIBPKCS11="-lpkcs11")
     else 
       if test "x$tryrsaref" != "xno"; then
          AC_CHECK_LIB(rsaref, RSAPrivateDecrypt)
          AC_CHECK_LIB(RSAglue, RSA_PKCS1_RSAref)
       fi
 
-      AC_CHECK_LIB(crypto, EVP_md5)
-      AC_CHECK_FUNCS(AES_cfb128_encrypt)
+      AC_CHECK_LIB(crypto, EVP_md5, AC_DEFINE(HAVE_LIBCRYPTO)
+              LIBCRYPTO="-lcrypto")
+      AC_CHECK_LIB(crypto, AES_cfb128_encrypt, 
+              AC_DEFINE(HAVE_AES_CFB128_ENCRYPT))
     fi
 elif test "x$askedpkcs" = "xyes"; then
-    AC_CHECK_LIB(pkcs11, C_Initialize)
+    AC_CHECK_LIB(pkcs11, C_Initialize, AC_DEFINE(HAVE_LIBPKCS11)
+            LIBPKCS11="-lpkcs11")
 fi
 
-# Check for libraries that the agent needs
-# saving old libraries
-NONAGENTLIBS=$LIBS
+LIBS=$NONAGENTLIBS
 
 # check for tcp wrapper support
 _cppflags="${CPPFLAGS}"
@@ -3462,7 +3470,7 @@ if test "x$useopenssl" != "xno" ; then
         encrmodes="[disabled]"
     fi
     AC_DEFINE(NETSNMP_USE_OPENSSL)
-    LIBCRYPTO="-lcrypto" ;
+    LNETSNMPLIBS="$LNETSNMPLIBS $LIBCRYPTO"
     AC_MSG_RESULT(OpenSSL Support)
 elif test "x$usepkcs" != "xno" ; then
     authmodes="MD5 SHA1"
@@ -3472,6 +3480,7 @@ elif test "x$usepkcs" != "xno" ; then
         encrmodes="[disabled]"
     fi
     AC_DEFINE(NETSNMP_USE_PKCS11)
+    LNETSNMPLIBS="$LNETSNMPLIBS $LIBPKCS11"
     AC_MSG_RESULT(PKCS11 Support)
 elif test "x$enable_md5" != "xno"; then
     authmodes="MD5"
@@ -3482,7 +3491,7 @@ fi
 if test "x$enable_md5" = "xno"; then
     authmodes=`echo $authmodes | sed 's/MD5 *//;'`
 fi
-AC_SUBST(LIBCRYPTO)
+AC_SUBST(LNETSNMPLIBS)
 
 AC_MSG_CACHE_ADD(Authentication support:     $authmodes)
 AC_MSG_CACHE_ADD(Encryption support:         $encrmodes)
