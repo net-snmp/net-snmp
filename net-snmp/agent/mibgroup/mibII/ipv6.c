@@ -823,7 +823,8 @@ var_ifv6Entry(register struct variable * vp,
                     DEBUGMSGTL(("mibII/ipv6:var_ipv6", "klookup failed\n"));
                     break;
                 }
-                if (!NETSNMP_KLOOKUP(ifaddr.ifa_addr, (char *) &sdl, sizeof(sdl));
+                if (!NETSNMP_KLOOKUP(ifaddr.ifa_addr,
+                                     (char *) &sdl, sizeof(sdl))) {
                     DEBUGMSGTL(("mibII/ipv6:var_ipv6", "klookup failed\n"));
                     break;
                 }
