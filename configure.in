@@ -1857,11 +1857,6 @@ elif test "x$mini_agent" = "xyes"; then
    MODULECPP="$MODULECPP -DNETSNMP_MINI_AGENT"
 fi
 
-# XXX: only add mibII/ipv6 on systems where it's known to build (i.e. Linux)?
-if test "x$enable_ipv6" = "xyes"; then
-	new_module_list="$new_module_list mibII/ipv6"
-fi
-
 test_modules="$new_module_list"
 new_module_list=""
 
@@ -2849,7 +2844,7 @@ if test "x$with_rpm" != "xno" && \
   ])
 fi
   
-# Replace `main' with a function in -lkvm:
+# libkvm
 AC_CHECK_LIB(kvm, kvm_read)
 # DYNAMIC MODULE SUPPORT
 AC_CHECK_LIB(dl, dlopen)
