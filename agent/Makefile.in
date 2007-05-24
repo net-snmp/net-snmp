@@ -79,7 +79,7 @@ HELPERLIB	= helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 AGENTLIB	= libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
 MIBLIB		= libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
-LOCAL_LIBS	= 
+LOCAL_LIBS	= -L../snmplib/.libs -L../snmplib -L./.libs -L./helpers/.libs -L./helpers
 LMIBLIBS	= @LMIBLIBS@
 PERLLDOPTS      = @PERLLDOPTS@
 LIBS		= $(USELIBS) @AGENTLIBS@ $(PERLLDOPTS)
