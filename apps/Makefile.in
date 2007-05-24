@@ -53,7 +53,7 @@ USEAGENTLIBS	= $(MIBLIB) $(HELPERLIB) $(AGENTLIB) $(USELIBS)
 
 #
 # link path in src dir
-LOCAL_LIBS	= -L../snmplib -L../agent -L../agent/helpers
+LOCAL_LIBS	= -L../snmplib/.libs -L../snmplib -L../agent/.libs -L../agent -L../agent/helpers/.libs -L../agent/helpers
 LIBS		= $(USELIBS) @LIBS@
 PERLLDOPTS      = @PERLLDOPTS@
 
