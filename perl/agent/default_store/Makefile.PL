@@ -69,7 +69,7 @@ sub InitMakeParams {
     }
     else {
 	$opts = NetSNMPGetOpts("../../");
-	$Params{'LIBS'}    = `$opts->{'nsconfig'} --netsnmp-libs`;
+	$Params{'LIBS'}    = `$opts->{'nsconfig'} --libs`;
 	chomp($Params{'LIBS'});
 	$Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
 	chomp($Params{'CCFLAGS'});
