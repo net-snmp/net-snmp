@@ -76,7 +76,7 @@ LINKCC	        = @LINKCC@
 # 5.3 was at 10, 5.4 is at 15, ...  This leaves some room for needed
 # changes for past releases if absolutely necessary.
 # 
-LIBCURRENT  = 15
+LIBCURRENT  = 20
 LIBAGE      = 0
 LIBREVISION = 0
 
