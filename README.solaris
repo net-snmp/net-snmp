@@ -1239,11 +1239,12 @@ Thanks to Dave Shield and Johannes Schmidt-Fischer
 
 15. IPv6
 
-Starting with net-snmp 5.4 you can enable the UDPIPv6 and TCPIPv6 transports
-on Solaris. There's no support for the IPv6 MIBs, though, so you'll have to 
-configure like this:
+Starting with net-snmp 5.4 you can enable the UDPIPv6 and TCPIPv6 
+transports on Solaris:
 
-  ./configure --enable-ipv6 --with-out-mib-modules="mibII/ipv6"
+   ./configure --enable-ipv6
+
+There's no support for the mibII/ipv6 mib module, though.
 
 
  -- Thomas Anders <tanders@users.sourceforge.net>
