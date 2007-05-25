@@ -6,26 +6,26 @@
 #define DEMO_USE_SNMP_VERSION_3
 
 #ifdef DEMO_USE_SNMP_VERSION_3
-const char *our_v3_passphrase = "The UCD Demo Password";
+const char *our_v3_passphrase = "The Net-SNMP Demo Password";
 #endif
 
 int main(int argc, char ** argv)
 {
-    struct snmp_session session, *ss;
-    struct snmp_pdu *pdu;
-    struct snmp_pdu *response;
+    netsnmp_session session, *ss;
+    netsnmp_pdu *pdu;
+    netsnmp_pdu *response;
 
     oid anOID[MAX_OID_LEN];
     size_t anOID_len = MAX_OID_LEN;
 
-    struct variable_list *vars;
+    netsnmp_variable_list *vars;
     int status;
     int count=1;
 
     /*
      * Initialize the SNMP library
      */
-    init_snmp("snmpapp");
+    init_snmp("snmpdemoapp");
 
     /*
      * Initialize a "session" that defines who we're going to talk to
@@ -55,7 +55,7 @@ int main(int argc, char ** argv)
     session.securityAuthKeyLen = USM_AUTH_KU_LEN;
 
     /* set the authentication key to a MD5 hashed version of our
-       passphrase "The UCD Demo Password" (which must be at least 8
+       passphrase "The Net-SNMP Demo Password" (which must be at least 8
        characters long) */
     if (generate_Ku(session.securityAuthProto,
                     session.securityAuthProtoLen,
@@ -86,9 +86,9 @@ int main(int argc, char ** argv)
     ss = snmp_open(&session);                     /* establish the session */
 
     if (!ss) {
-        snmp_perror("ack");
-        snmp_log(LOG_ERR, "something horrible happened!!!\n");
-        exit(2);
+      snmp_sess_perror("ack", &session);
+      SOCK_CLEANUP;
+      exit(1);
     }
     
     /*
@@ -96,9 +96,13 @@ int main(int argc, char ** argv)
      *   1) We're going to GET the system.sysDescr.0 node.
      */
     pdu = snmp_pdu_create(SNMP_MSG_GET);
-    read_objid(".1.3.6.1.2.1.1.1.0", anOID, &anOID_len);
-
+    if (!snmp_parse_oid(".1.3.6.1.2.1.1.1.0", anOID, &anOID_len)) {
+      snmp_perror(".1.3.6.1.2.1.1.1.0");
+      SOCK_CLEANUP;
+      exit(1);
+    }
 #if OTHER_METHODS
+    read_objid(".1.3.6.1.2.1.1.1.0", anOID, &anOID_len);
     get_node("sysDescr.0", anOID, &anOID_len);
     read_objid("system.sysDescr.0", anOID, &anOID_len);
 #endif
@@ -141,8 +145,11 @@ int main(int argc, char ** argv)
       if (status == STAT_SUCCESS)
         fprintf(stderr, "Error in packet\nReason: %s\n",
                 snmp_errstring(response->errstat));
+      else if (status == STAT_TIMEOUT)
+        fprintf(stderr, "Timeout: No response from %s.\n",
+                session.peername);
       else
-        snmp_sess_perror("snmpget", ss);
+        snmp_sess_perror("snmpdemoapp", ss);
 
     }
 
