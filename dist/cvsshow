@@ -1,7 +1,5 @@
 #!/bin/sh
 #
-# $Id$
-#
 export CVS_RSH=ssh
 TAG=
 
@@ -38,6 +36,13 @@ do_svn()
    fi
 
    ROOT=`grep url $DIR/.svn/entries|cut -f2 -d\"`
+   if [ -z "$ROOT" ]; then
+      ROOT=`grep https $DIR/.svn/entries|head -n 1`
+   fi
+   if [ -z "$ROOT" ]; then
+      echo "Couldn't find root from $DIR/.svn/entries"
+      exit 1
+   fi
 
    echo "Directory $DIR is rooted at $ROOT..."
    echo "   update with svn co $ROOT $DIR"
