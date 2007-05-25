@@ -8,12 +8,12 @@ There are the following known problems on AIX:
 
 1) Shared libraries / embedded perl
 
-Building net-snmp on AIX with shared libraries is known to either make the
-applications not start at all or segfault. The workaround is to disable shared
-libraries as well as embedded perl (which requires shared libraries):
+Up to (and including) net-snmp 5.4, configure had forced a static build
+on AIX which caused embedded Perl to be disabled as well.
 
-   ./configure --disable-shared --disable-embedded-perl
-
+Starting with net-snmp 5.4.1, we build shared libraries by default on AIX
+(like on any other platform) using run-time linking. configure forces the
+use of the required "-brtl" linker flag.
 
 2) "grep: capacity exceeded" or "sed: Command line is too long" during configure
 
@@ -31,7 +31,8 @@ configure. The fix is to install GNU sed.
 3) nlist errors with 64-bit kernels
 
 Accessing certain MIB objects on AIX 5.x machines running a 64-bit kernel will
-trigger nlist errors. Starting from net-snmp 5.4, you can avoid those by using
+trigger nlist/klookup errors. Starting from net-snmp 5.4, you can avoid those 
+by using
 
    ./configure --without-kmem-usage ...
   
@@ -39,11 +40,11 @@ trigger nlist errors. Starting from net-snmp 5.4, you can avoid those by using
 4) IPv6
 
 Starting with net-snmp 5.4 you can enable the UDPIPv6 and TCPIPv6 transports 
-on AIX 5.x. There's no support for the IPv6 MIBs, though, so you'll have to 
-configure like this:
+on AIX 5.x:
 
-  ./configure --disable-shared --disable-embedded-perl --enable-ipv6 \
-              --with-out-mib-modules="mibII/ipv6"
+   ./configure --enable-ipv6
+
+There's no support for the IPv6 MIBs, though.
 
 
 2. Patches
