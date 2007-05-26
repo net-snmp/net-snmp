@@ -1695,5 +1695,7 @@ typedef unsigned short   uint16_t;
    Used by agent pass. */
 #define NETSNMP_TIMEOUT_WAITFORSINGLEOBJECT 5000
 
+#define SS_FAMILY ss_family
+
 #endif /* NET_SNMP_CONFIG_H */
 
