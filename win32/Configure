@@ -37,7 +37,7 @@ Options:
     --prefix=\"path\"                  Set INSTALL_BASE path (install path)
     --destdir=\"path\"                 Same as --prefix
     --with-ssl                       Link against OpenSSL
-    --with-ipv6                      Build in IPv6 transports
+    --with-ipv6                      Build in IPv6 transports (enables SDK)
     --help                           This help screen
 /;
 
@@ -356,6 +356,10 @@ while (<MAKE_IN>)
     }
     if ($b_ipv6 == 1) {
       s/^.*#undef NETSNMP_ENABLE_IPV6.*/#define NETSNMP_ENABLE_IPV6 1/;
+      if ($sdk == 0) {
+        s/^.*#undef HAVE_WIN32_PLATFORM_SDK.*/#define HAVE_WIN32_PLATFORM_SDK 1/;
+        $sdk = 1;
+      }
     }
 
     print FILE_OUT $_ . "\n";
