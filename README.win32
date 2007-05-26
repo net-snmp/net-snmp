@@ -1125,8 +1125,9 @@ Project changes
 
 The default build configuration supports SNMP over IPv4-based transports.
 However, Windows XP and Windows 2000 include an IPv6-capable stack, which
-can be used to provide SNMP over IPv6.   This requires the following
-changes to the Net-SNMP win32 Visual C++ configuration:
+can be used to provide SNMP over IPv6.  To enable IPv6, the Microsoft PSDK 
+is required and the following changes to the Net-SNMP win32 Visual C++ 
+configuration are needed:
 
 Project changes
 ===============

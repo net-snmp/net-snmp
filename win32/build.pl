@@ -38,22 +38,22 @@ if (! (-d $ENV{MSVCDir})) {
 while (1) {
   print "\n\nNet-SNMP build and install options\n";
   print "==================================\n\n";
-  print "1.  OpenSSL support:            " . $openssl. "\n";
-  print "2.  Platform SDK support:       " . $sdk . "\n";
+  print "1.  OpenSSL support:                " . $openssl. "\n";
+  print "2.  Platform SDK support:           " . $sdk . "\n";
   print "\n";
-  print "3.  Install path:               " . $install_base . "\n";
-  print "4.  Install after build:        " . $install . "\n";
+  print "3.  Install path:                   " . $install_base . "\n";
+  print "4.  Install after build:            " . $install . "\n";
   print "\n";
-  print "5.  Perl modules:               " . $perl . "\n";
-  print "6.  Install perl modules:       " . $perl_install . "\n";
+  print "5.  Perl modules:                   " . $perl . "\n";
+  print "6.  Install perl modules:           " . $perl_install . "\n";
   print "\n";
-  print "7.  Quiet build (logged):       " . $logging . "\n";
-  print "8.  Debug mode:                 " . $debug . "\n";
-  print "9.  IPv6 transports:            " . $b_ipv6 . "\n";
+  print "7.  Quiet build (logged):           " . $logging . "\n";
+  print "8.  Debug mode:                     " . $debug . "\n";
+  print "9.  IPv6 transports (requires SDK): " . $b_ipv6 . "\n";
   print "\n";
-  print "10. Link type:                  " . $linktype . "\n";
+  print "10. Link type:                      " . $linktype . "\n";
   print "\n";
-  print "11. Install development files   " . $install_devel . "\n";
+  print "11. Install development files       " . $install_devel . "\n";
   print "\nF.  Finished - start build\n";
   print "Q.  Quit - abort build\n\n";
   print "Select option to set / toggle: ";
@@ -81,6 +81,10 @@ while (1) {
     }
     else {
       $b_ipv6 = "enabled";
+      if ($sdk = "disabled") {
+        print "\n\n* SDK required for IPv6 and has been automatically enabled";
+        $sdk = "enabled";
+      }
     }
   }
   elsif ($option eq "3") {
