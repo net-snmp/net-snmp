@@ -1692,7 +1692,9 @@ typedef unsigned short   uint16_t;
    Used by agent pass. */
 #define NETSNMP_TIMEOUT_WAITFORSINGLEOBJECT 5000
 
-#define SS_FAMILY ss_family
+#ifdef HAVE_WIN32_PLATFORM_SDK
+#define STRUCT_SOCKADDR_STORAGE_HAS_SS_FAMILY 1
+#endif
 
 #endif /* NET_SNMP_CONFIG_H */
 
