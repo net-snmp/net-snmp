@@ -429,6 +429,9 @@ main(int argc, char *argv[])
     int fd;
     FILE           *PID;
 #endif
+#if HAVE_GETPWNAM && HAVE_PWD_H
+    struct passwd  *info;
+#endif
 
 #ifndef WIN32
     /*
@@ -735,7 +738,6 @@ main(int argc, char *argv[])
                 uid = strtoul(optarg, &ecp, 10);
                 if (*ecp) {
 #if HAVE_GETPWNAM && HAVE_PWD_H
-                    struct passwd  *info;
                     info = getpwnam(optarg);
                     if (info) {
                         uid = info->pw_uid;
@@ -980,6 +982,19 @@ main(int argc, char *argv[])
                 exit(1);
             }
         }
+#if HAVE_GETPWNAM && HAVE_PWD_H && HAVE_INITGROUPS
+        info = getpwuid(uid);
+        if (info) {
+            DEBUGMSGTL(("snmpd/main", "Supplementary groups for %s.\n", info->pw_name));
+            if (initgroups(info->pw_name, (gid != 0 ? gid : info->pw_gid)) == -1) {
+                snmp_log_perror("initgroups failed");
+                if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+                                            NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+                    exit(1);
+                }
+            }
+        }
+#endif
     }
 #endif
 #endif
