@@ -3630,7 +3630,7 @@ AC_CHECK_FUNCS(if_nameindex if_freenameindex)
 # solaris checks
 AC_CHECK_FUNCS(getpagesize)
 AC_CHECK_FUNCS(mkstemp)
-AC_CHECK_FUNCS(getpwnam getgrnam setgid setuid setgroups)
+AC_CHECK_FUNCS(getpwnam getgrnam setgid setuid setgroups initgroups)
 # High resolution alarm support
 AC_CHECK_FUNCS(setitimer)
 # functions to support the clock.
