@@ -2743,6 +2743,7 @@ netsnmp_mibindex_load( void )
     char tmpbuf[ 300];
     char tmpbuf2[300];
     int  i;
+    char *cp;
 
     /*
      * Open the MIB index directory, or create it (empty)
@@ -2769,7 +2770,12 @@ netsnmp_mibindex_load( void )
               get_persistent_directory(), i );
         tmpbuf[sizeof(tmpbuf)-1] = 0;
         fp = fopen( tmpbuf, "r" );
-        fgets( tmpbuf2, sizeof(tmpbuf2), fp );
+        cp = fgets( tmpbuf2, sizeof(tmpbuf2), fp );
+        if ( !cp ) {
+            DEBUGMSGTL(("mibindex", "Empty MIB index (%d)\n", i));
+            fclose(fp);
+            continue;
+        }
         tmpbuf2[strlen(tmpbuf2)-1] = 0;
         DEBUGMSGTL(("mibindex", "load: (%d) %s\n", i, tmpbuf2));
         (void)_mibindex_add( tmpbuf2+4, i );  /* Skip 'DIR ' */
