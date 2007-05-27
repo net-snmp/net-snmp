@@ -719,6 +719,9 @@
 /* Define to 1 if you have the `setgroups' function. */
 #undef HAVE_SETGROUPS
 
+/* Define to 1 if you have the `initgroups' function. */
+#undef HAVE_INITGROUPS
+
 /* Define to 1 if you have the `setitimer' function. */
 #undef HAVE_SETITIMER
 
