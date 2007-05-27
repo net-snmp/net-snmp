@@ -2639,7 +2639,7 @@ fi
 
 # Checks for libraries.
 # AC_CHECK_LIB(des, main)
-AC_CHECK_LIB(m, asin)
+# AC_CHECK_LIB(m, asin)
 
 AC_ARG_WITH(elf,
 	[AS_HELP_STRING(--without-elf,[use elf libraries])],,
@@ -2679,7 +2679,7 @@ AC_CHECK_FUNC(getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME),
 
 # Solaris kstat
 AC_CHECK_LIB(kstat, kstat_lookup,
-        AC_DEFINE(HAVE_LIBKSTAT)
+        AC_DEFINE(HAVE_LIBKSTAT, [], [Define to 1 if you have the `kstat' library (-lkstat).])
         LNETSNMPLIBS="${LNETSNMPLIBS} -lkstat")
 
 # Check for libraries that the agent needs
@@ -2689,7 +2689,7 @@ NONAGENTLIBS=$LIBS
 # Check for security related functions
 if test "x$tryopenssl" != "xno"; then
     if test "x$askedopenssl" != "xyes" -a "x$askedpkcs" = "xyes"; then
-      AC_CHECK_LIB(pkcs11, C_Initialize, AC_DEFINE(HAVE_LIBPKCS11)
+      AC_CHECK_LIB(pkcs11, C_Initialize, AC_DEFINE(HAVE_LIBPKCS11, [], [Define to 1 if you have the `pkcs11' library (-lpkcs11).])
               LIBPKCS11="-lpkcs11")
     else 
       if test "x$tryrsaref" != "xno"; then
@@ -2697,10 +2697,10 @@ if test "x$tryopenssl" != "xno"; then
          AC_CHECK_LIB(RSAglue, RSA_PKCS1_RSAref)
       fi
 
-      AC_CHECK_LIB(crypto, EVP_md5, AC_DEFINE(HAVE_LIBCRYPTO)
+      AC_CHECK_LIB(crypto, EVP_md5, AC_DEFINE(HAVE_LIBCRYPTO, [], [Define to 1 if you have the `crypto' library (-lcrypto).])
               LIBCRYPTO="-lcrypto")
       AC_CHECK_LIB(crypto, AES_cfb128_encrypt, 
-              AC_DEFINE(HAVE_AES_CFB128_ENCRYPT))
+              AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, [], [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
     fi
 elif test "x$askedpkcs" = "xyes"; then
     AC_CHECK_LIB(pkcs11, C_Initialize, AC_DEFINE(HAVE_LIBPKCS11)
