@@ -107,8 +107,9 @@ sub InitMakeParams {
     }
     else {
 	$opts = NetSNMPGetOpts();
-
-	$Params{'LIBS'} = '-lnetsnmptrapd -lnetsnmpagent -lnetsnmp';
+	$Params{'LIBS'} = `$opts->{'nsconfig'} --ldflags`;
+	chomp($Params{'LIBS'});
+	$Params{'LIBS'} .= ' -lnetsnmptrapd -lnetsnmpagent -lnetsnmp';
 	chomp($Params{'LIBS'});
 	if (!$ENV{'NETSNMP_CCFLAGS'}) {
 	    $Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
@@ -119,10 +120,10 @@ sub InitMakeParams {
 	}
 
 	if (lc($opts->{'insource'}) eq "true") {
-            $Params{'LIBS'} = "-L../../apps/.libs -L../../apps/ -L../../agent/.libs -L../../agent/ -L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};
+            $Params{'LIBS'} = "-L../../apps/.libs -L../../apps -L../../agent/.libs -L../../agent -L../../agent/helpers/.libs -L../../agent/helpers -L../../snmplib/.libs -L../../snmplib " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 	} else {
-            $Params{'LIBS'} = `$opts->{'nsconfig'} --libdir` . $Params{'LIBS'};
+            $Params{'LIBS'} = `$opts->{'nsconfig'} --libdir` . " $Params{'LIBS'}";
         }
 
 	$Params{'CCFLAGS'} =~ s/ -W(all|inline|strict-prototypes|write-strings|cast-qual|no-char-subscripts)//g; # ignore developer warnings
