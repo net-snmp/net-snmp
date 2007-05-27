@@ -20,6 +20,8 @@
 config_require(ip-mib/data_access/systemstats_common)
 #if defined( linux )
 config_require(ip-mib/data_access/systemstats_linux)
+#elif defined( solaris2 )
+config_require(ip-mib/data_access/systemstats_solaris2)
 #else
 config_error(the systemstats data access library is not available in this environment.)
 #endif

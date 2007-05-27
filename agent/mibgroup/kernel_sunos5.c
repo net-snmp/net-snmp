@@ -45,6 +45,7 @@
 #include <kstat.h>
 #include <errno.h>
 #include <time.h>
+#include <ctype.h>
 
 #include <sys/sockio.h>
 #include <sys/socket.h>
@@ -103,6 +104,13 @@ mibcache        Mibcache[MIBCACHE_SIZE+1] = {
     {MIB_TRANSMISSION, 0, (void *) -1, 0, 0, 0, 0},
     {MIB_SNMP, 0, (void *) -1, 0, 0, 0, 0},
 #ifdef SOLARIS_HAVE_IPV6_MIB_SUPPORT
+#ifdef SOLARIS_HAVE_RFC4293_SUPPORT
+    {MIB_IP_TRAFFIC_STATS, 20 * sizeof(mib2_ipIfStatsEntry_t), (void *)-1, 0,
+     30, 0, 0},
+    {MIB_IP6, 20 * sizeof(mib2_ipIfStatsEntry_t), (void *)-1, 0, 30, 0, 0},
+#else
+    {MIB_IP6, 20 * sizeof(mib2_ipv6IfStatsEntry_t), (void *)-1, 0, 30, 0, 0},
+#endif
     {MIB_IP6_ADDR, 20 * sizeof(mib2_ipv6AddrEntry_t), (void *)-1, 0, 30, 0, 0},
     {MIB_TCP6_CONN, 1000 * sizeof(mib2_tcp6ConnEntry_t), (void *) -1, 0, 30,
      0, 0},
@@ -131,6 +139,10 @@ mibmap          Mibmap[MIBCACHE_SIZE+1] = {
     {MIB2_TRANSMISSION, 0,},
     {MIB2_SNMP, 0,},
 #ifdef SOLARIS_HAVE_IPV6_MIB_SUPPORT
+#ifdef SOLARIS_HAVE_RFC4293_SUPPORT
+    {MIB2_IP, MIB2_IP_TRAFFIC_STATS},
+#endif
+    {MIB2_IP6, 0},
     {MIB2_IP6, MIB2_IP6_ADDR},
     {MIB2_TCP6, MIB2_TCP6_CONN},
     {MIB2_UDP6, MIB2_UDP6_ENTRY},
@@ -343,7 +355,8 @@ getKstat(const char *statname, const char *varname, void *value)
     kstat_ctl_t    *ksc;
     kstat_t        *ks, *kstat_data;
     kstat_named_t  *d;
-    size_t          i, instance;
+    uint_t          i;
+    int             instance;
     char            module_name[64];
     int             ret;
     u_longlong_t    val;    /* The largest value */
@@ -900,7 +913,11 @@ getmib(int groupname, int subgroupname, void **statbuf, size_t *size,
     req = (struct opthdr *)(tor + 1);
     req->level = groupname;
     req->name = subgroupname;
+#if defined( SOLARIS_HAVE_RFC4293_SUPPORT )
+    req->len = 1; /* Used as a flag for S10 to grab extra data */
+#else
     req->len = 0;
+#endif
     strbuf.len = tor->OPT_length + tor->OPT_offset;
     flags = 0;
     if ((rc = putmsg(sd, &strbuf, NULL, flags))) {
