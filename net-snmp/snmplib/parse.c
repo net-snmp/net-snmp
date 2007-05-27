@@ -4689,6 +4689,7 @@ add_mibdir(const char *dirname)
     char newline;
     struct stat     dir_stat, idx_stat;
     char            tmpstr1[300];
+    int empty = 1;
 #endif
 
     DEBUGMSGTL(("parse-mibs", "Scanning directory %s\n", dirname));
@@ -4702,6 +4703,7 @@ add_mibdir(const char *dirname)
                 while (fscanf(ip, "%127s%c%299s%c", token, &space, tmpstr,
 		    &newline) == 4) {
 
+                    empty = 0;
 		    /*
 		     * If an overflow of the token or tmpstr buffers has been
 		     * found log a message and break out of the while loop,
@@ -4721,7 +4723,10 @@ add_mibdir(const char *dirname)
                     count++;
                 }
                 fclose(ip);
-                return count;
+                if ( !empty ) {
+                    return count;
+                }
+                DEBUGMSGTL(("parse-mibs", "Empty MIB index\n"));
             } else
                 DEBUGMSGTL(("parse-mibs", "Can't read index\n"));
         } else
