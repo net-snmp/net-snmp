@@ -30,3 +30,10 @@ config_require(if-mib)
 #if defined( linux )
 config_require(ip-mib ip-forward-mib tcp-mib udp-mib)
 #endif
+
+/*
+ * For Solaris, enable additional tables when it has extended MIB support.
+ */
+#if defined( solaris2 ) && defined( HAVE_MIB2_IPIFSTATSENTRY_T )
+config_require(ip-mib/ipSystemStatsTable ip-mib/ipAddressTable)
+#endif

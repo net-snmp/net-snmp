@@ -3,9 +3,9 @@
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
-#include "mibII/mibII_common.h"
 #include "if-mib/ifTable/ifTable_constants.h"
 #include "kernel_sunos5.h"
+#include "mibII/mibII_common.h"
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
