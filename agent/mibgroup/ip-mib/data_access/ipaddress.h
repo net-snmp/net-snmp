@@ -20,6 +20,8 @@
 config_require(ip-mib/data_access/ipaddress_common)
 #if defined( linux )
 config_require(ip-mib/data_access/ipaddress_linux)
+#elif defined( solaris2 )
+config_require(ip-mib/data_access/ipaddress_solaris2)
 #else
 config_error(the ipaddress data access library is not available in this environment.)
 #endif
