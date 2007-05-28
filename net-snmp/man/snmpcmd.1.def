@@ -396,7 +396,7 @@ source line.
 Strictly speaking, a second appearance of "--" should terminate the
 comment, but this breaks some MIB files.
 The default behaviour (to interpret comments correctly) can also
-be set with the (misnamed) configuration token \fIstrictCommentTerm\fR.
+be set with the configuration token \fIcommentToEOL\fR.
 .TP
 .B "-Pd"
 Disables the loading of MIB object DESCRIPTIONs when parsing MIB files.

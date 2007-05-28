@@ -2340,7 +2340,9 @@ register_mib_handlers(void)
 
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "showMibErrors",
                        NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_ERRORS);
-    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "strictCommentTerm",
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "commentToEOL",     /* Describes actual behaviour */
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_COMMENT_TERM);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "strictCommentTerm",    /* Backward compatibility */
                        NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_COMMENT_TERM);
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "mibAllowUnderline",
                        NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_PARSE_LABEL);
