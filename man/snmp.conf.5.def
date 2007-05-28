@@ -253,14 +253,15 @@ Note that this value can be overridden by the
 environment variable.
 .IP "showMibErrors (1|yes|true|0|no|false)"
 whether to display MIB parsing errors.
-.IP "strictCommentTerm (1|yes|true|0|no|false)"
+.IP "commentToEOL (1|yes|true|0|no|false)"
 whether MIB parsing should be strict about comment termination.
 Many MIB writers assume that ASN.1 comments extend to the end of
 the text line, rather than being terminated by the next "--" token.
 This token can be used to accept such (strictly incorrect) MIBs.
 .br
-Note that this directive is poorly named, since a value of "true"
-will turn \fIoff\fP the strict interpretation of MIB comments.
+Note that this directive was previous (mis-)named \fIstrictCommentTerm\fR,
+but with the reverse behaviour from that implied by the name.
+This earlier token is still accepted for backwards compatibility.
 .IP "mibAllowUnderline (1|yes|true|0|no|false)"
 whether to allow underline characters in MIB object names and
 enumeration values.
