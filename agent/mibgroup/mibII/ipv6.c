@@ -4,7 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
@@ -891,7 +891,7 @@ var_ifv6Entry(register struct variable * vp,
                 }
             }
 #endif
-#ifdef STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
+#ifdef HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_SEC
             if (!gotanswer) {
                 struct ifnet    ifnet;
 

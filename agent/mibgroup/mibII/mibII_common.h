@@ -28,7 +28,7 @@
 #if HAVE_SYS_TCPIPSTATS_H
 #include <sys/tcpipstats.h>
 #endif
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif

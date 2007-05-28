@@ -636,7 +636,7 @@ get_myaddr(void)
 
     for (ifrp = ifc.ifc_req;
         (char *)ifrp < (char *)ifc.ifc_req + ifc.ifc_len;
-#ifdef STRUCT_SOCKADDR_HAS_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
         ifrp = (struct ifreq *)(((char *) ifrp) +
                                 sizeof(ifrp->ifr_name) +
                                 ifrp->ifr_addr.sa_len)

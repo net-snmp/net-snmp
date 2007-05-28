@@ -932,7 +932,7 @@ Get_FSSize(char *dev)
   		 * in case of 512 (f_blocks/2) is returned
   		 * otherwise (f_blocks*(f_bsize/1024)) is returned
   		 */
-#if defined(solaris2) && defined(STRUCT_STATVFS_HAS_F_FRSIZE)
+#if defined(solaris2) && defined(HAVE_STRUCT_STATVFS_F_FRSIZE)
                 return (statfs_buf.f_blocks*(statfs_buf.f_frsize/1024));
 #else
   		if (statfs_buf.f_bsize == 512)

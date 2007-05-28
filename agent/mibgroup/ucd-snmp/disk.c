@@ -648,7 +648,7 @@ var_extensible_disk(struct variable *vp,
     double          totalblks, free, used, avail, availblks;
 #else
     static long     avail;
-#if defined(STRUCT_STATVFS_HAS_F_FILES) || defined(STRUCT_STATFS_HAS_F_FILES)
+#if defined(HAVE_STRUCT_STATVFS_F_FILES) || defined(HAVE_STRUCT_STATFS_F_FILES)
     int             percent_inode;
 #endif
 #endif
@@ -730,7 +730,7 @@ tryAgain:
                (double) (vfs.f_blocks -
                          (vfs.f_bfree - vfs.f_bavail)) * 100.0 + 0.5);
     multiplier = (float)vfs.f_bsize / (float)1024.0;
-#ifdef STRUCT_STATVFS_HAS_F_FRSIZE
+#ifdef HAVE_STRUCT_STATVFS_F_FRSIZE
     if (vfs.f_frsize > 255)
         multiplier = (float)vfs.f_frsize / (float)1024.0;
 #endif
@@ -738,18 +738,18 @@ tryAgain:
     iserror = (disks[disknum].minimumspace >= 0 ?
                avail < disks[disknum].minimumspace :
                100 - percent <= disks[disknum].minpercent) ? 1 : 0;
-#if defined(STRUCT_STATVFS_HAS_F_FILES) || defined STRUCT_STATFS_HAS_F_FAVAIL
+#if defined(HAVE_STRUCT_STATVFS_F_FILES) || defined HAVE_STRUCT_STATFS_F_FAVAIL
     percent_inode = vfs.f_favail <= 0 ? 100 :
         (int) ((double) (vfs.f_files - vfs.f_ffree) /
                (double) (vfs.f_files -
                          (vfs.f_ffree - vfs.f_favail)) * 100.0 + 0.5);
 #else
-#if defined(STRUCT_STATFS_HAS_F_FILES) && defined(STRUCT_STATFS_HAS_F_FFREE)
+#if defined(HAVE_STRUCT_STATFS_F_FILES) && defined(HAVE_STRUCT_STATFS_F_FFREE)
    percent_inode = vfs.f_files == 0 ? 100.0 :
       (int) ((double) (vfs.f_files - vfs.f_ffree) /
 	          (double) (vfs.f_files) * 100.0 + 0.5);
 #endif 
-#endif /* defined(STRUCT_STATVFS_HAS_F_FILES) */ 
+#endif /* defined(HAVE_STRUCT_STATVFS_F_FILES) */
     switch (vp->magic) {
     case DISKTOTAL:
         long_ret = (long)(vfs.f_blocks * multiplier);
@@ -762,7 +762,7 @@ tryAgain:
     case DISKPERCENT:
         long_ret = percent;
         return ((u_char *) (&long_ret));
-#if defined(STRUCT_STATVFS_HAS_F_FILES) || defined (STRUCT_STATFS_HAS_F_FILES)
+#if defined(HAVE_STRUCT_STATVFS_F_FILES) || defined (HAVE_STRUCT_STATFS_F_FILES)
     case DISKPERCENTNODE:
         long_ret = percent_inode;
         return ((u_char *) (&long_ret));

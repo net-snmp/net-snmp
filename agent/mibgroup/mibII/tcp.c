@@ -380,7 +380,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
         break;
     case TCPINERRS:
         ret_value = tcpstat.tcps_rcvbadsum + tcpstat.tcps_rcvbadoff
-#ifdef STRUCT_TCPSTAT_HAS_TCPS_RCVMEMDROP
+#ifdef HAVE_STRUCT_TCPSTAT_TCPS_RCVMEMDROP
             + tcpstat.tcps_rcvmemdrop
 #endif
             + tcpstat.tcps_rcvshort;

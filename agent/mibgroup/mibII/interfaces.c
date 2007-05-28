@@ -16,7 +16,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && !defined(IFNET_NEEDS_KERNEL_LATE)
+#if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && !defined(NETSNMP_IFNET_NEEDS_KERNEL_LATE)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
@@ -40,7 +40,7 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && defined(IFNET_NEEDS_KERNEL_LATE)
+#if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && defined(NETSNMP_IFNET_NEEDS_KERNEL_LATE)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
@@ -594,7 +594,7 @@ var_ifEntry(struct variable *vp,
         if (if_ptr)
             long_return = if_ptr->speed;
         else {
-#if STRUCT_IFNET_HAS_IF_BAUDRATE_IFS_VALUE
+#if HAVE_STRUCT_IFNET_IF_BAUDRATE_IFS_VALUE
         long_return = (u_long) if_msg.ifm_data.ifi_baudrate.ifs_value <<
             if_msg.ifm_data.ifi_baudrate.ifs_log2;
 #else
@@ -736,7 +736,7 @@ var_ifEntry(struct variable *vp,
     static char     Name[16];
     char           *cp;
     conf_if_list   *if_ptr;
-#if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
+#if HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_SEC
     struct timeval  now;
 #endif
 
@@ -760,7 +760,7 @@ var_ifEntry(struct variable *vp,
         if (if_ptr)
             long_return = if_ptr->type;
         else {
-#if STRUCT_IFNET_HAS_IF_TYPE
+#if HAVE_STRUCT_IFNET_IF_TYPE
             long_return = ifnet.if_type;
 #else
             long_return = 1;    /* OTHER */
@@ -775,11 +775,11 @@ var_ifEntry(struct variable *vp,
         if (if_ptr)
             long_return = if_ptr->speed;
         else {
-#if STRUCT_IFNET_HAS_IF_BAUDRATE
+#if HAVE_STRUCT_IFNET_IF_BAUDRATE
             long_return = ifnet.if_baudrate;
-#elif STRUCT_IFNET_HAS_IF_SPEED
+#elif HAVE_STRUCT_IFNET_IF_SPEED
             long_return = ifnet.if_speed;
-#elif STRUCT_IFNET_HAS_IF_TYPE && defined(IFT_ETHER)
+#elif HAVE_STRUCT_IFNET_IF_TYPE && defined(IFT_ETHER)
             if (ifnet.if_type == IFT_ETHER)
                 long_return = 10000000;
             if (ifnet.if_type == IFT_P10)
@@ -818,7 +818,7 @@ var_ifEntry(struct variable *vp,
         long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
         return (u_char *) & long_return;
     case IFLASTCHANGE:
-#if defined(STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC) && !(defined(freebsd2) && __FreeBSD_version < 199607)
+#if defined(HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_SEC) && !(defined(freebsd2) && __FreeBSD_version < 199607)
         /*
          * XXX - SNMP's ifLastchange is time when op. status changed
          * * FreeBSD's if_lastchange is time when packet was input or output
@@ -848,7 +848,7 @@ var_ifEntry(struct variable *vp,
 #endif
         return (u_char *) & long_return;
     case IFINOCTETS:
-#ifdef STRUCT_IFNET_HAS_IF_IBYTES
+#ifdef HAVE_STRUCT_IFNET_IF_IBYTES
 #if defined(aix4) || defined(aix5)
         long_return = (u_long) ifnet.if_ibytes & 0xffffffff;
 #else
@@ -868,7 +868,7 @@ var_ifEntry(struct variable *vp,
 #else
             long_return = (u_long) ifnet.if_ipackets;
 #endif
-#if STRUCT_IFNET_HAS_IF_IMCASTS
+#if HAVE_STRUCT_IFNET_IF_IMCASTS
 #if defined(aix4) || defined(aix5)
             long_return -= (u_long) ifnet.if_imcasts & 0xffffffff;
 #else
@@ -878,7 +878,7 @@ var_ifEntry(struct variable *vp,
         }
         return (u_char *) & long_return;
     case IFINNUCASTPKTS:
-#if STRUCT_IFNET_HAS_IF_IMCASTS
+#if HAVE_STRUCT_IFNET_IF_IMCASTS
 #if defined(aix4) || defined(aix5)
         long_return = (u_long) ifnet.if_imcasts & 0xffffffff;
 #else
@@ -892,7 +892,7 @@ var_ifEntry(struct variable *vp,
 #endif
         return (u_char *) & long_return;
     case IFINDISCARDS:
-#if STRUCT_IFNET_HAS_IF_IQDROPS
+#if HAVE_STRUCT_IFNET_IF_IQDROPS
 #if defined(aix4) || defined(aix5)
         long_return = (u_long) ifnet.if_iqdrops & 0xffffffff;
 #else
@@ -913,7 +913,7 @@ var_ifEntry(struct variable *vp,
 #endif
         return (u_char *) & long_return;
     case IFINUNKNOWNPROTOS:
-#if STRUCT_IFNET_HAS_IF_NOPROTO
+#if HAVE_STRUCT_IFNET_IF_NOPROTO
 #if defined(aix4) || defined(aix5)
         long_return = (u_long) ifnet.if_noproto & 0xffffffff;
 #else
@@ -927,7 +927,7 @@ var_ifEntry(struct variable *vp,
 #endif
         return (u_char *) & long_return;
     case IFOUTOCTETS:
-#ifdef STRUCT_IFNET_HAS_IF_OBYTES
+#ifdef HAVE_STRUCT_IFNET_IF_OBYTES
 #if defined(aix4) || defined(aix5)
         long_return = (u_long) ifnet.if_obytes & 0xffffffff;
 #else
@@ -947,7 +947,7 @@ var_ifEntry(struct variable *vp,
 #else
             long_return = (u_long) ifnet.if_opackets;
 #endif
-#if STRUCT_IFNET_HAS_IF_OMCASTS
+#if HAVE_STRUCT_IFNET_IF_OMCASTS
 #if defined(aix4) || defined(aix5)
             long_return -= (u_long) ifnet.if_omcasts & 0xffffffff;
 #else
@@ -957,7 +957,7 @@ var_ifEntry(struct variable *vp,
         }
         return (u_char *) & long_return;
     case IFOUTNUCASTPKTS:
-#if STRUCT_IFNET_HAS_IF_OMCASTS
+#if HAVE_STRUCT_IFNET_IF_OMCASTS
 #if defined(aix4) || defined(aix5)
         long_return = (u_long) ifnet.if_omcasts & 0xffffffff;
 #else
@@ -1024,7 +1024,7 @@ var_ifEntry(struct variable *vp,
     static char     Name[16];
 #endif
     register char  *cp;
-#if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
+#if HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_SEC
     struct timeval  now;
 #endif
 #if !defined(hpux11)
@@ -1927,7 +1927,7 @@ Interface_Scan_Next(short *Index,
     struct ifnet    ifnet;
     struct in_ifaddr *ia, in_ifaddr;
     short           has_ipaddr = 0;
-#if !STRUCT_IFNET_HAS_IF_XNAME
+#if !HAVE_STRUCT_IFNET_IF_XNAME
     register char  *cp;
 #endif
 
@@ -1939,7 +1939,7 @@ Interface_Scan_Next(short *Index,
             DEBUGMSGTL(("mibII/interfaces:Interface_Scan_Next", "klookup failed\n"));
             break;
         }
-#if STRUCT_IFNET_HAS_IF_XNAME
+#if HAVE_STRUCT_IFNET_IF_XNAME
 #if defined(netbsd1) || defined(openbsd2)
         strncpy(saveName, ifnet.if_xname, sizeof saveName);
 #else
@@ -1998,7 +1998,7 @@ Interface_Scan_Next(short *Index,
 #endif
             }
 
-#if !defined(netbsd1) && !defined(freebsd2) && !defined(openbsd2) && !defined(STRUCT_IFNET_HAS_IF_ADDRLIST)
+#if !defined(netbsd1) && !defined(freebsd2) && !defined(openbsd2) && !defined(HAVE_STRUCT_IFNET_IF_ADDRLIST)
             ifnet.if_addrlist = (struct ifaddr *) ia;   /* WRONG DATA TYPE; ONLY A FLAG */
 #endif
             /*

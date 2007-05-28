@@ -67,9 +67,9 @@ const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #include <dmalloc.h>
 #endif
 
-#if STRUCT_SOCKADDR_STORAGE_HAS_SS_FAMILY
+#if HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY
 #define SS_FAMILY ss_family
-#elif STRUCT_SOCKADDR_STORAGE_HAS___SS_FAMILY
+#elif HAVE_STRUCT_SOCKADDR_STORAGE___SS_FAMILY
 #define SS_FAMILY __ss_family
 #endif
 
