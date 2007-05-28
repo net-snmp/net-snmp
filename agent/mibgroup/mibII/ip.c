@@ -89,16 +89,6 @@ struct variable1 iproute_variables[] = {
     {IPROUTEINFO,    ASN_OBJECT_ID, RONLY,  var_ipRouteEntry, 1, {13}}
 };
 
-#ifdef linux
-struct variable1 ip_dfl_rt_table_variables[] = {
-    {IPDFL_RT_TBL_ADDRTYPE, ASN_INTEGER,   RONLY, var_ipDflRtTblEntry, 1, {1}},
-    {IPDFL_RT_TBL_ADDR,     ASN_OCTET_STR, RONLY, var_ipDflRtTblEntry, 1, {2}},
-    {IPDFL_RT_TBL_IFIDX,    ASN_INTEGER,   RONLY, var_ipDflRtTblEntry, 1, {3}},
-    {IPDFL_RT_TBL_LIFE,     ASN_GAUGE,   RONLY, var_ipDflRtTblEntry, 1, {4}},
-    {IPDFL_RT_TBL_PREF,     ASN_INTEGER,   RONLY, var_ipDflRtTblEntry, 1, {5}}
-};
-#endif
-
 struct variable1 ipmedia_variables[] = {
 #ifdef USING_MIBII_AT_MODULE
 #if defined (WIN32) || defined (cygwin)
@@ -124,7 +114,6 @@ oid             ip_oid[]                = { SNMP_OID_MIB2, 4 };
 oid             ipaddr_variables_oid[]  = { SNMP_OID_MIB2, 4, 20, 1 };
 oid             iproute_variables_oid[] = { SNMP_OID_MIB2, 4, 21, 1 };
 oid             ipmedia_variables_oid[] = { SNMP_OID_MIB2, 4, 22, 1 };
-oid             ip_dfl_rt_tbl_variables_oid[] = { SNMP_OID_MIB2, 4, 37, 1 };
 oid             ip_module_oid[] = { SNMP_OID_MIB2, 4 };
 oid             ip_module_oid_len = sizeof(ip_module_oid) / sizeof(oid);
 int             ip_module_count = 0;    /* Need to liaise with icmp.c */
@@ -162,11 +151,6 @@ init_ip(void)
                        variable1, iproute_variables_oid);
     REGISTER_MIB("mibII/ipmedia", ipmedia_variables,
                        variable1, ipmedia_variables_oid);
-#ifdef linux
-    REGISTER_MIB("mibII/ipDefaultRouteTable", ip_dfl_rt_table_variables,
-                       variable1, ip_dfl_rt_tbl_variables_oid);
-#endif
-
     if (++ip_module_count == 2)
         REGISTER_SYSOR_ENTRY(ip_module_oid,
                              "The MIB module for managing IP and ICMP implementations");

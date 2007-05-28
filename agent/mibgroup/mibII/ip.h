@@ -72,13 +72,6 @@ extern NetsnmpCacheFree ip_free;
 #define IPROUTEMETRIC5	 12
 #define IPROUTEINFO	 13
 
-#define IPDFL_RT_TBL_ADDRTYPE 1
-#define IPDFL_RT_TBL_ADDR     2 
-#define IPDFL_RT_TBL_IFIDX    3 
-#define IPDFL_RT_TBL_LIFE     4
-#define IPDFL_RT_TBL_PREF     5 
-
-
 /* #define IPMEDIAIFINDEX		1 */
 /* #define IPMEDIAPHYSADDRESS	2 */
 /* #define IPMEDIANETADDRESS	3 */
