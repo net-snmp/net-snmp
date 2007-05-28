@@ -64,6 +64,11 @@ acting illegally.  Use
 .B -Cc
 to turn off this check.
 .TP
+.B -CE {OID}
+End the walk at the specified OID, rather than a simple subtree.
+This can be used to walk a partial subtree, selected columns of
+a table, or even two or more tables within a single command.
+.TP
 .B -Ci
 Include the given OID in the search range.  Normally
 .B snmpwalk
@@ -97,7 +102,7 @@ In addition to these options,
 takes the common options described in the 
 .I snmpcmd(1)
 manual page.
-.SH EXAMPLE
+.SH EXAMPLES
 The command:
 .PP
 snmpwalk -Os -c public -v 1 zeus system
@@ -117,5 +122,13 @@ sysName.0 = STRING: "zeus.net.cmu.edu"
 sysLocation.0 = STRING: ""
 .br
 sysServices.0 = INTEGER: 72
+.br
+(plus the contents of the sysORTable).
+
+The command:
+.PP
+snmpwalk -Os -c public -v 1 -CE sysORTable zeus system
+.PP
+will retrieve the scalar values, but omit the sysORTable.
 .SH "SEE ALSO"
 snmpcmd(1), snmpbulkwalk(1), variables(5).
