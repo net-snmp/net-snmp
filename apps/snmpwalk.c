@@ -98,6 +98,7 @@ usage(void)
             "\t\t\t  c:  do not check returned OIDs are increasing\n");
     fprintf(stderr,
             "\t\t\t  t:  Display wall-clock time to complete the request\n");
+    fprintf(stderr, "\t\t\t  E {OID}:  End the walk at the specified OID\n");
 }
 
 void
