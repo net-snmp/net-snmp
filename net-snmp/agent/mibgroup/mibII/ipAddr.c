@@ -16,7 +16,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
@@ -220,7 +220,7 @@ var_ipAddrEntry(struct variable *vp,
 #if !defined(freebsd2) && !defined(hpux11) && !defined(linux)
         if (Interface_Scan_Next(&interface, NULL, &ifnet, &in_ifaddr) == 0)
             break;
-#ifdef STRUCT_IFNET_HAS_IF_ADDRLIST
+#ifdef HAVE_STRUCT_IFNET_IF_ADDRLIST
         if (ifnet.if_addrlist == 0)
             continue;           /* No address found for interface */
 #endif

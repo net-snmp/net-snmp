@@ -18,7 +18,7 @@
 /*
  * lie about this next define to avoid sa_len and sa_family MACROS !! 
  */
-#define STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2 1
+#define HAVE_STRUCT_SOCKADDR_SA_UNION_SA_GENERIC_SA_FAMILY2 1
 
 /*
  * this header requires queue_t, not easily done without kernel headers 

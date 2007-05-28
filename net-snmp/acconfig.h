@@ -121,106 +121,6 @@
    field, which exists in linux kernels 2.2 and greater. */
 #undef PROC_NET_DEV_HAS_COMPRESSED
 
-/* define rtentry to ortentry on SYSV machines (alphas) */
-#undef RTENTRY
-
-/* Use BSD 4.4 routing table entries? */
-#undef RTENTRY_4_4
-
-/* Does struct sigaction have a sa_sigaction field? */
-#undef STRUCT_SIGACTION_HAS_SA_SIGACTION
-
-/* Does struct tm have a tm_gmtoff field? */
-#undef STRUCT_TM_HAS_TM_GMTOFFF
-
-/* Does struct sockaddr have a sa_len field? */
-#undef STRUCT_SOCKADDR_HAS_SA_LEN
-
-/* Does struct sockaddr have a sa_family2 field? */
-#undef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2
-
-/* Does struct sockaddr_storage have a ss_family field? */
-#undef STRUCT_SOCKADDR_STORAGE_HAS_SS_FAMILY
-
-/* Does struct sockaddr_storage have a __ss_family field? */
-#undef STRUCT_SOCKADDR_STORAGE_HAS___SS_FAMILY
-
-/* Does struct in6_addr have a s6_un.sa6_ladd field? */
-#undef STRUCT_IN6_ADDR_HAS_S6_UN_SA6_LADDR
-
-/* rtentry structure tests */
-#undef RTENTRY_RT_NEXT
-#undef STRUCT_RTENTRY_HAS_RT_DST
-#undef STRUCT_RTENTRY_HAS_RT_UNIT
-#undef STRUCT_RTENTRY_HAS_RT_USE
-#undef STRUCT_RTENTRY_HAS_RT_REFCNT
-#undef STRUCT_RTENTRY_HAS_RT_HASH
-
-/* ifnet structure tests */
-#undef STRUCT_IFNET_HAS_IF_BAUDRATE
-#undef STRUCT_IFNET_HAS_IF_BAUDRATE_IFS_VALUE
-#undef STRUCT_IFNET_HAS_IF_SPEED
-#undef STRUCT_IFNET_HAS_IF_TYPE
-#undef STRUCT_IFNET_HAS_IF_IMCASTS
-#undef STRUCT_IFNET_HAS_IF_IQDROPS
-#undef STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
-#undef STRUCT_IFNET_HAS_IF_NOPROTO
-#undef STRUCT_IFNET_HAS_IF_OMCASTS
-#undef STRUCT_IFNET_HAS_IF_XNAME
-#undef STRUCT_IFNET_HAS_IF_OBYTES
-#undef STRUCT_IFNET_HAS_IF_IBYTES
-#undef STRUCT_IFNET_HAS_IF_ADDRLIST
-
-/* tcpstat.tcps_rcvmemdrop */
-#undef STRUCT_TCPSTAT_HAS_TCPS_RCVMEMDROP
-
-/* udpstat.udps_discard */
-#undef STRUCT_UDPSTAT_HAS_UDPS_DISCARD
-
-/* udpstat.udps_discard */
-#undef STRUCT_UDPSTAT_HAS_UDPS_NOPORT
-
-/* udpstat.udps_discard */
-#undef STRUCT_UDPSTAT_HAS_UDPS_NOPORTBCAST
-
-/* udpstat.udps_discard */
-#undef STRUCT_UDPSTAT_HAS_UDPS_FULLSOCK
-
-/* arphd.at_next */
-#undef STRUCT_ARPHD_HAS_AT_NEXT
-
-/* ifaddr.ifa_next */
-#undef STRUCT_IFADDR_HAS_IFA_NEXT
-
-/* ifnet.if_mtu */
-#undef STRUCT_IFNET_HAS_IF_MTU
-
-/* swdevt.sw_nblksenabled */
-#undef STRUCT_SWDEVT_HAS_SW_NBLKSENABLED
-
-/* nlist.n_value */
-#undef STRUCT_NLIST_HAS_N_VALUE
-
-/* nlist64.n_value */
-#undef STRUCT_NLIST64_HAS_N_VALUE
-
-/* vfsstat.f_frsize */
-#undef STRUCT_STATVFS_HAS_F_FRSIZE
-
-/* vfsstat.f_files */
-#undef STRUCT_STATVFS_HAS_F_FILES
-
-/* statfs inode structure tests*/
-#undef STRUCT_STATFS_HAS_F_FILES
-#undef STRUCT_STATFS_HAS_F_FFREE
-#undef STRUCT_STATFS_HAS_F_FAVAIL
-
-/* des_ks_struct.weak_key */
-#undef STRUCT_DES_KS_STRUCT_HAS_WEAK_KEY
-
-/* ifnet needs to have _KERNEL defined */
-#undef IFNET_NEEDS_KERNEL
-
 /* sysctl works to get boottime, etc... */
 #undef NETSNMP_CAN_USE_SYSCTL
 
@@ -803,7 +703,7 @@
 #undef CMU_COMPATIBLE
 
 /* final conclusion on nlist usage */
-#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(NETSNMP_DONT_USE_NLIST) && !defined(NETSNMP_NO_KMEM_USAGE)
+#if defined(HAVE_NLIST) && defined(HAVE_STRUCT_NLIST_N_VALUE) && !defined(NETSNMP_DONT_USE_NLIST) && !defined(NETSNMP_NO_KMEM_USAGE)
 #define NETSNMP_CAN_USE_NLIST
 #endif
 

@@ -76,7 +76,7 @@
 #endif
 
 #ifndef NETSNMP_DISABLE_DES
-#ifdef STRUCT_DES_KS_STRUCT_HAS_WEAK_KEY
+#ifdef HAVE_STRUCT_DES_KS_STRUCT_WEAK_KEY
 /* these are older names for newer structures that exist in openssl .9.7 */
 #define DES_key_schedule    des_key_schedule 
 #define DES_cblock          des_cblock 

@@ -682,7 +682,7 @@ open_persist_pipe(int iindex, char *command)
     return 1;
 }
 
-#if STRUCT_SIGACTION_HAS_SA_SIGACTION
+#if HAVE_STRUCT_SIGACTION_SA_SIGACTION
 /*
  * Generic handler 
  */
@@ -711,7 +711,7 @@ write_persist_pipe(int iindex, const char *data)
      * Setup our signal action to catch SIGPIPEs 
      */
     sa.sa_handler = NULL;
-#if STRUCT_SIGACTION_HAS_SA_SIGACTION
+#if HAVE_STRUCT_SIGACTION_SA_SIGACTION
     sa.sa_sigaction = &sigpipe_handler;
 #endif
     sigemptyset(&sa.sa_mask);
