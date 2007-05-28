@@ -1065,6 +1065,25 @@ read_config_files_in_path(const char *path, struct config_files *ctmp,
             done = 1;
         else
             *cptr1 = 0;
+
+        DEBUGMSGTL(("read_config", " config dir: %s\n", cptr2 ));
+        if (stat(cptr2, &statbuf) != 0) {
+            /*
+             * Directory not there, continue 
+             */
+            DEBUGMSGTL(("read_config", " Directory not present: %s\n", cptr2 ));
+            cptr2 = ++cptr1;
+            continue;
+        }
+        if (!S_ISDIR(statbuf.st_mode)) {
+            /*
+             * Not a directory, continue 
+             */
+            DEBUGMSGTL(("read_config", " Not a directory: %s\n", cptr2 ));
+            cptr2 = ++cptr1;
+            continue;
+        }
+
         /*
          * for proper persistent storage retrival, we need to read old backup
          * copies of the previous storage files.  If the application in
