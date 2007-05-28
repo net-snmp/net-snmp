@@ -19,10 +19,6 @@ config_arch_require(solaris2, kernel_sunos5)
 
      extern FindVarMethod var_ipRouteEntry;
 
-#ifdef linux
-     extern FindVarMethod var_ipDflRtTblEntry;
-#endif
-
 #if !defined(hpux11) && !defined(solaris2)
      RTENTRY **netsnmp_get_routes(size_t *out_numroutes);
 #endif
