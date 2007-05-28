@@ -164,7 +164,7 @@ date_n_time(time_t * when, size_t * length)
      * Timezone offset
      */
     {
-#ifdef STRUCT_TM_HAS_TM_GMTOFF
+#ifdef HAVE_STRUCT_TM_TM_GMTOFF
     const int tzoffset = tm_p->tm_gmtoff;
 #else
     const int tzoffset = timezone;

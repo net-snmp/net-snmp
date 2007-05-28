@@ -4,5 +4,5 @@
 
 /* don't define _KERNEL on FreeBSD 5.3 even if configure thinks we need it */
 #ifdef freebsd5
-#undef IFNET_NEEDS_KERNEL
+#undef NETSNMP_IFNET_NEEDS_KERNEL
 #endif

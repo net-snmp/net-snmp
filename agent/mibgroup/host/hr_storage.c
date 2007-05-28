@@ -8,7 +8,7 @@
 #if defined(freebsd5)
 /* undefine these in order to use getfsstat */
 #undef HAVE_STATVFS
-#undef STRUCT_STATVFS_HAS_F_FRSIZE
+#undef HAVE_STRUCT_STATVFS_F_FRSIZE
 #endif
 
 #include <sys/types.h>
@@ -189,7 +189,7 @@
 extern struct mnttab *HRFS_entry;
 #define HRFS_mount	mnt_mountp
 #define HRFS_statfs	statvfs
-#define HRFS_HAS_FRSIZE STRUCT_STATVFS_HAS_F_FRSIZE
+#define HRFS_HAS_FRSIZE HAVE_STRUCT_STATVFS_F_FRSIZE
 
 #elif defined(WIN32)
 /* fake block size */
@@ -205,15 +205,15 @@ extern struct statvfs *HRFS_entry;
 extern int      fscount;
 #define HRFS_statfs	statvfs
 #define HRFS_mount	f_mntonname
-#define HRFS_HAS_FRSIZE STRUCT_STATVFS_HAS_F_FRSIZE
+#define HRFS_HAS_FRSIZE HAVE_STRUCT_STATVFS_F_FRSIZE
 
-#elif defined(HAVE_STATVFS)  && defined(STRUCT_STATVFS_HAS_MNT_DIR)
+#elif defined(HAVE_STATVFS)  && defined(HAVE_STRUCT_STATVFS_MNT_DIR)
 
 extern struct mntent *HRFS_entry;
 extern int      fscount;
 #define HRFS_statfs	statvfs
 #define HRFS_mount	mnt_dir
-#define HRFS_HAS_FRSIZE STRUCT_STATVFS_HAS_F_FRSIZE
+#define HRFS_HAS_FRSIZE HAVE_STRUCT_STATVFS_F_FRSIZE
 
 #elif defined(HAVE_GETFSSTAT)
 
@@ -221,14 +221,14 @@ extern struct statfs *HRFS_entry;
 extern int      fscount;
 #define HRFS_statfs	statfs
 #define HRFS_mount	f_mntonname
-#define HRFS_HAS_FRSIZE STRUCT_STATFS_HAS_F_FRSIZE
+#define HRFS_HAS_FRSIZE HAVE_STRUCT_STATFS_F_FRSIZE
 
 #else
 
 extern struct mntent *HRFS_entry;
 #define HRFS_mount	mnt_dir
 #define HRFS_statfs	statfs
-#define HRFS_HAS_FRSIZE STRUCT_STATFS_HAS_F_FRSIZE
+#define HRFS_HAS_FRSIZE HAVE_STRUCT_STATFS_F_FRSIZE
 
 #endif
 	

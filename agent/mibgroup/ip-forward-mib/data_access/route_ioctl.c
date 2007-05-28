@@ -69,10 +69,10 @@
 #include <windows.h>
 #endif
 
-#ifndef STRUCT_RTENTRY_HAS_RT_DST
+#ifndef HAVE_STRUCT_RTENTRY_RT_DST
 #   define rt_dst rt_nodes->rn_key
 #endif
-#ifndef STRUCT_RTENTRY_HAS_RT_HASH
+#ifndef HAVE_STRUCT_RTENTRY_RT_HASH
 #   define rt_hash rt_pad1
 #endif
 

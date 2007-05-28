@@ -25,7 +25,7 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
@@ -503,7 +503,7 @@ static int      arptab_size, arptab_current;
 static char    *lim, *rtnext;
 static char    *at = 0;
 #else
-#ifdef STRUCT_ARPHD_HAS_AT_NEXT
+#ifdef HAVE_STRUCT_ARPHD_AT_NEXT
 static struct arphd *at = 0;
 static struct arptab *at_ptr, at_entry;
 static struct arpcom at_com;
@@ -573,7 +573,7 @@ ARP_Scan_Init(void)
 #ifdef ARPTAB_SIZE_SYMBOL
         auto_nlist(ARPTAB_SIZE_SYMBOL, (char *) &arptab_size,
                    sizeof arptab_size);
-#ifdef STRUCT_ARPHD_HAS_AT_NEXT
+#ifdef HAVE_STRUCT_ARPHD_AT_NEXT
         at = (struct arphd *) malloc(arptab_size * sizeof(struct arphd));
 #else
         at = (struct arptab *) malloc(arptab_size * sizeof(struct arptab));
@@ -582,7 +582,7 @@ ARP_Scan_Init(void)
         return;
 #endif
     }
-#ifdef STRUCT_ARPHD_HAS_AT_NEXT
+#ifdef HAVE_STRUCT_ARPHD_AT_NEXT
     auto_nlist(ARPTAB_SYMBOL, (char *) at,
                arptab_size * sizeof(struct arphd));
     at_ptr = at[0].at_next;
@@ -762,7 +762,7 @@ ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
     register struct arptab *atab;
 
     while (arptab_current < arptab_size) {
-#ifdef STRUCT_ARPHD_HAS_AT_NEXT
+#ifdef HAVE_STRUCT_ARPHD_AT_NEXT
         /*
          * The arp table is an array of linked lists of arptab entries.
          * Unused slots have pointers back to the array entry itself 
@@ -791,9 +791,9 @@ ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
         at_ptr = at_entry.at_next;
         atab = &at_entry;
         *ifIndex = at_com.ac_if.if_index;       /* not strictly ARPHD */
-#else                           /* STRUCT_ARPHD_HAS_AT_NEXT */
+#else                           /* HAVE_STRUCT_ARPHD_AT_NEXT */
         atab = &at[arptab_current++];
-#endif                          /* STRUCT_ARPHD_HAS_AT_NEXT */
+#endif                          /* HAVE_STRUCT_ARPHD_AT_NEXT */
         if (!(atab->at_flags & ATF_COM))
             continue;
         *ifType = (atab->at_flags & ATF_PERM) ? 4 : 3;

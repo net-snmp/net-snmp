@@ -876,7 +876,7 @@ load_rtentries(struct radix_node *pt)
     RTENTRY         rt;
     struct ifnet    ifnet;
     char            name[16], temp[16];
-#if !STRUCT_IFNET_HAS_IF_XNAME
+#if !HAVE_STRUCT_IFNET_IF_XNAME
     register char  *cp;
 #endif
 
@@ -909,7 +909,7 @@ load_rtentries(struct radix_node *pt)
                 DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
                 return;
             }
-#if STRUCT_IFNET_HAS_IF_XNAME
+#if HAVE_STRUCT_IFNET_IF_XNAME
 #if defined(netbsd1) || defined(openbsd2)
             strncpy(name, ifnet.if_xname, sizeof name);
 #else
