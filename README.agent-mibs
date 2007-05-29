@@ -131,9 +131,9 @@ IF-MIB
  ifTableLastChange.0          ---
  ifTable (old)                U $2      ~3.5    O mibII/interfaces.c
  ifTable (new)                L         5.2     M if-mib/ifTable/*
- ifTable (new)                 FO       5.4     M if-mib/ifTable/*
+ ifTable (new)                 FOS      5.4     M if-mib/ifTable/*
  ifXTable                     L         5.2     M if-mib/ifXTable/*
- ifXTable                      FO       5.4     M if-mib/ifXTable/*
+ ifXTable                      FOS      5.4     M if-mib/ifXTable/*
  ifStackLastChange.0          ---
  ifStackTable                 ---
  ifTestTable                  ---
@@ -151,19 +151,21 @@ IP-MIB
  icmp.*.0                     U $2      ~3.2    G mibII/icmp.c
 
  ipSystemStatsTable           L         5.2     M ip-mib/=/*
+ ipSystemStatsTable            S        5.5     M ip-mib/=/*
  ipIfStatsTableLastChange.0   ---
  ipIfStatsTable               ---
 
  ipAddrTable (D)              U $2      4.2     O mibII/ipAddr.c
  ipAddressSpinLock.0          ---
  ipAddressTable               L         5.2     M ip-mib/=/*
+ ipAddressTable                S        5.5     M ip-mib/=/*
  ipAddressPrefixTable         L         5.3     M ip-mib/=/*
 
  ipRouteTable (D)             U $2      ~3.5    O mibII/*route*.c
  ipNetToMediaTable (D)        U $2      ~3.5    O mibII/at.c
  ipNetToPhysicalTable         (implemented as inetNetToMediaTable)
  inetNetToMediaTable          L         5.2     M ip-mib/=/*
- ipDefaultRouterTable         ---
+ ipDefaultRouterTable         L         5.5     M ip-mib/=/*
 
  icmpStatsTable               ---
  icmpMsgStatsTable            ---
@@ -218,11 +220,14 @@ TCP-MIB
  tcp.*.0                      U $2      ~3.2    G mibII/tcp.c
  tcpConnTable (D)             U $2      4.2     I mibII/tcpTable.c
  tcpConnectionTable           L         5.3     M tcp-mib/=/*
+ tcpConnectionTable            S        5.4     M tcp-mib/=/*
  tcpListenerTable             L         5.3     M tcp-mib/=/*
+ tcpListenerTable              S        5.4     M tcp-mib/=/*
 
 ------------------------------------------------------------------------------
 UDP-MIB
  udpEndpointTable             L         5.3     M udp-mib/=/*
+ udpEndpointTable              S        5.4     M udp-mib/=/*
  udp.*.0                      U $2      ~3.2    G mibII/udp.c
  udpTable (D)                 U $2      4.2     I mibII/udpTable.c
 
