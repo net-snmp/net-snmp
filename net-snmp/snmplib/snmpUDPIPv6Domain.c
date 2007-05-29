@@ -380,7 +380,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
 				    NETSNMP_DS_LIB_DEFAULT_PORT);
       if (port != 0)
         addr->sin6_port = htons((u_short)port);
-      else if (default_target == NULL)
+      else if (default_target != NULL)
 	netsnmp_sockaddr_in6_2(addr, default_target, NULL);
     }
 
