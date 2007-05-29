@@ -1061,12 +1061,13 @@ AC_SUBST(LIBTOOL_DEPS)
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
+AC_PROG_GREP
 AC_PROG_EGREP
 AC_PATH_PROG([PSPROG],ps)
 AC_PATH_PROG([PERLPROG],perl)
 AC_PATH_PROG([PYTHONPROG],python)
 AC_CHECK_PROGS(WHOAMI, whoami logname, whoami)
-AC_CHECK_PROGS(SED,sed gsed)
+AC_PROG_SED
 AC_CHECK_PROGS(FIND,find)
 AC_PATH_PROG(AUTOCONF, autoconf)
 AC_PATH_PROG(AUTOHEADER, autoheader)
@@ -1088,13 +1089,13 @@ AC_C_INLINE
 
 # get version number.
 AC_MSG_CHECKING([for net-snmp version number])
-VERSION=`grep NetSnmpVersionInfo.*= $srcdir/snmplib/snmp_version.c | sed 's/";.*//;s/.*"//;'`
+VERSION=`$GREP NetSnmpVersionInfo.*= $srcdir/snmplib/snmp_version.c | $SED 's/";.*//;s/.*"//;'`
 
 # create the release version number....  I'm not sure this is used
 # anywhere any longer.
-_release_version=`echo $VERSION | sed 's/";.*//;s/.*"//;s/pre/0./;'`
+_release_version=`echo $VERSION | $SED 's/";.*//;s/.*"//;s/pre/0./;'`
 changequote(, )
-RELEASEVERSION=`echo $_release_version | sed 's/^\([0-9]\)\.\([0-9]\)/\1:\2:0/'`
+RELEASEVERSION=`echo $_release_version | $SED 's/^\([0-9]\)\.\([0-9]\)/\1:\2:0/'`
 changequote([, ])
 
 AC_SUBST(VERSION)
@@ -1136,7 +1137,7 @@ SNMPLIB_INCLUDES=BLD_SNMPLIB_INCLUDES
 AGENT_INCLUDES=BLD_AGENT_INCLUDES
 HELPER_INCLUDES=BLD_HELPER_INCLUDES
 MIBGROUP_INCLUDES=BLD_MIBGROUP_INCLUDES
-make -v -f /dev/null 2>/dev/null | grep GNU >/dev/null
+make -v -f /dev/null 2>/dev/null | $GREP GNU >/dev/null
 have_gnu_make=$?
 if test $have_gnu_make -eq 0 ; then
     NON_GNU_VPATH="#VPATH ="
@@ -1181,16 +1182,16 @@ AC_MSG_CHECKING([for system include file])
 changequote(, )
 filebase=$target_os
 # ignore binary format indication
-filebase=`echo $filebase | sed 's/elf//'`
-filebase=`echo $filebase | sed 's/aout//'`
-filebase=`echo $filebase | sed 's/ecoff//'`
-filebase=`echo $filebase | sed 's/coff//'`
+filebase=`echo $filebase | $SED 's/elf//'`
+filebase=`echo $filebase | $SED 's/aout//'`
+filebase=`echo $filebase | $SED 's/ecoff//'`
+filebase=`echo $filebase | $SED 's/coff//'`
 while test "x$filebase" != "x$last" -a ! -f $srcdir/include/net-snmp/system/$filebase.h
 do
     last=$filebase
-    filebase=`echo $filebase | sed 's/[-._][^-._]*$//'`
+    filebase=`echo $filebase | $SED 's/[-._][^-._]*$//'`
     if test "x$filebase" = "x$last"; then
-	filebase=`echo $filebase | sed 's/[0-9]*$//'`
+	filebase=`echo $filebase | $SED 's/[0-9]*$//'`
     fi
 done
 
@@ -1211,7 +1212,7 @@ filebase=$target_cpu
 while test "x$filebase" != "x$last" -a ! -f $srcdir/include/net-snmp/machine/$filebase.h
 do
     last=$filebase
-    filebase=`echo $filebase | sed 's/[-._][^-._]*$//'`
+    filebase=`echo $filebase | $SED 's/[-._][^-._]*$//'`
 done
 
 if test "x$filebase" = "x$last"; then
@@ -1272,9 +1273,9 @@ if test "x$prefix" = "xNONE"; then
   prefix=/usr/local
 fi
 
-fch=`echo $prefix | sed 's/\(.\).*/\1/'`
+fch=`echo $prefix | $SED 's/\(.\).*/\1/'`
 if test "x$fch" != "x/" ; then
-   sch=`echo $prefix | sed 's/.\(.\).*/\1/'`
+   sch=`echo $prefix | $SED 's/.\(.\).*/\1/'`
    if test "x$sch" != "x:" ; then
       prefix=`pwd`/$prefix
       echo "adjusting prefix to $prefix"
@@ -1285,9 +1286,9 @@ if test "x$exec_prefix" = "xNONE"; then
   exec_prefix=$prefix
 fi
 
-fch=`echo $exec_prefix | sed 's/\(.\).*/\1/'`
+fch=`echo $exec_prefix | $SED 's/\(.\).*/\1/'`
 if test "x$fch" != "x/" ; then
-   sch=`echo $exec_prefix | sed 's/.\(.\).*/\1/'`
+   sch=`echo $exec_prefix | $SED 's/.\(.\).*/\1/'`
    if test "x$sch" != "x:" ; then
       exec_prefix=`pwd`/$exec_prefix
       echo "adjusting exec_prefix to $exec_prefix"
@@ -1540,8 +1541,8 @@ transport_def_list=""
 transport_result_list=""
 transport_add_list=""
 transport_callback_disabled=""
-new_with_transport_list=`echo $with_transports | sed 's/,/ /g;'`
-new_with_out_transport_list=`echo $with_out_transports | sed 's/,/ /g;'`
+new_with_transport_list=`echo $with_transports | $SED 's/,/ /g;'`
+new_with_out_transport_list=`echo $with_out_transports | $SED 's/,/ /g;'`
 
 #
 # Add the default transports to the list
@@ -1557,7 +1558,7 @@ if test "x$enable_ipv6" = "xyes"; then
   transport_default_list="UDPIPv6 TCPIPv6 $transport_default_list"
 fi
 for i in $transport_default_list; do
-  if echo " $new_with_transport_list " | grep " $i " >/dev/null; then
+  if echo " $new_with_transport_list " | $GREP " $i " >/dev/null; then
     :
   else
     transport_add_list="$i $transport_add_list"
@@ -1566,7 +1567,7 @@ done
 new_transport_list="$transport_add_list $new_with_transport_list"
 
 for i in $new_transport_list; do
-  if echo " $new_with_out_transport_list " | grep " $i " >/dev/null; then
+  if echo " $new_with_out_transport_list " | $GREP " $i " >/dev/null; then
     if test "x$i" = "xUDP"; then
       echo
       AC_MSG_ERROR(It is not possible to compile without UDP/IP support.)
@@ -1612,7 +1613,7 @@ for i in $new_transport_list; do
       if test -f "$srcdir/$rel_transport_hdr"; then
         transport_hdr_list="$transport_hdr $transport_hdr_list"
       fi
-      transport_def=`echo $i | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
+      transport_def=`echo $i | $SED 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
       transport_def_list="NETSNMP_TRANSPORT_"$transport_def"_DOMAIN $transport_def_list"
     else
       echo
@@ -1620,12 +1621,12 @@ for i in $new_transport_list; do
     fi
   fi
 done
-transport_obj_list=`echo " $transport_src_list " | sed 's/\.c/\.o/g'` 	 
-transport_lobj_list=`echo " $transport_src_list " | sed 's/\.c/\.lo/g'`
+transport_obj_list=`echo " $transport_src_list " | $SED 's/\.c/\.o/g'` 	 
+transport_lobj_list=`echo " $transport_src_list " | $SED 's/\.c/\.lo/g'`
 
 ## win32 platforms require inet_ntop etc.
 if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
-  if echo "$transport_def_list" | grep "IPV6" >/dev/null; then
+  if echo "$transport_def_list" | $GREP "IPV6" >/dev/null; then
     transport_obj_list="$transport_obj_list inet_ntop.o inet_pton.o"
     transport_lobj_list="$transport_lobj_list inet_ntop.lo inet_pton.lo"
   fi
@@ -1652,8 +1653,8 @@ security_obj_list=""
 security_lobj_list=""
 security_init_file="snmplib/snmpsm_init.h"
 security_incl_file="include/net-snmp/library/snmpv3-security-includes.h"
-new_with_security=`echo $with_security_modules | sed 's/,/ /g;'`
-new_with_out_security=`echo $with_out_security_modules | sed 's/,/ /g;'`
+new_with_security=`echo $with_security_modules | $SED 's/,/ /g;'`
+new_with_out_security=`echo $with_out_security_modules | $SED 's/,/ /g;'`
 
 if test ! -d include; then
   mkdir include
@@ -1678,7 +1679,7 @@ echo "/* This file is automatically generated by configure.  Do not modify by ha
 echo "/* This file is automatically generated by configure.  Do not modify by hand. */" > $security_incl_file
 
 for i in $security_def_list; do
-  if echo " $new_with_out_security " | grep " $i " > /dev/null; then
+  if echo " $new_with_out_security " | $GREP " $i " > /dev/null; then
     if test "x$i" = "xusm"; then
 	echo
         AC_MSG_ERROR(The USM security module is mandatory)
@@ -1847,8 +1848,8 @@ fi
 module_list=""
 mib_module_list=""
 agent_module_list=""
-new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
-new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
+new_with_mib_modules=`echo $with_mib_modules | $SED 's/,/ /g;'`
+new_with_out_mib_modules=`echo $with_out_mib_modules | $SED 's/,/ /g;'`
 
 # set up initial module list
 new_module_list="$new_with_mib_modules default_modules"
@@ -1870,7 +1871,7 @@ new_module_list=""
 # remove modules that were explicity excluded
 for i in $test_modules
  do
-  if echo " $new_with_out_mib_modules " | grep " $i " > /dev/null; then
+  if echo " $new_with_out_mib_modules " | $GREP " $i " > /dev/null; then
     mib_cfg_msg="mib module '$i' is both included and excluded."
     AC_MSG_WARN([mib module conflict])
     if test "x$with_mib_cfg_checks" = "xyes"; then
@@ -1947,14 +1948,14 @@ while test "x$new_module_list" != "x"; do
 
     #---------------------
     # figure out which sub-blocks to build in parts
-    if echo "$j" | grep "=" ; then
+    if echo "$j" | $GREP "=" ; then
        # build a shared object file
        # format: sofilename=module1:module2
        # XXX: currently doesn't do this
-       dl_name=`echo $j | sed 's/=.*//'`
+       dl_name=`echo $j | $SED 's/=.*//'`
        dl_names="$dl_names $dl_name"
-       dl_objects=`echo $j | sed 's/.*=//'`
-       module_sublist=`echo $dl_objects | sed 's/:/ /g'`
+       dl_objects=`echo $j | $SED 's/.*=//'`
+       module_sublist=`echo $dl_objects | $SED 's/:/ /g'`
        saved_sublist=""
        saved_sublist_code=""
        output_to=separate
@@ -1998,7 +1999,7 @@ while test "x$new_module_list" != "x"; do
     module_type=mib_module
     if test -f $srcdir/$mibdir/$i.h; then
       changequote(, )
-      module_type=`$MODULECPP module_tmp_header.h | grep config_belongs_in | sed 's@.*config_belongs_in(\([^)]*\)).*@\1@'`
+      module_type=`$MODULECPP module_tmp_header.h | $GREP config_belongs_in | $SED 's@.*config_belongs_in(\([^)]*\)).*@\1@'`
       changequote([, ])
     fi
     if test "x$module_type" = "x" ; then
@@ -2015,11 +2016,11 @@ while test "x$new_module_list" != "x"; do
     dblfix=""
     for dltest in $dl_names ; do
       eval mod_files="\"\$dl_${dltest}_files\""
-      if echo " $mod_files " | grep " $i " > /dev/null; then
+      if echo " $mod_files " | $GREP " $i " > /dev/null; then
         # some dll module has already seen this, unload it from that list
         # and include it in the core (again)
         AC_MSG_MODULE_DBG("removing $i from $dltest")
-        mod_files=`echo " $mod_files " | sed "s@ $i @@"`
+        mod_files=`echo " $mod_files " | $SED "s@ $i @@"`
         dblfix="__XXX__"
         eval "dl_${dltest}_files=\"$mod_files\""
 
@@ -2041,7 +2042,7 @@ while test "x$new_module_list" != "x"; do
 	# Adding it back to the original ordered spot would be a
 	# nightmare.  Ok, we're already in nightmare code so that
 	# wolud have to be a night-terror.
-        mnm=`echo $i | sed 's/.*\///;s/\.c$//;'`
+        mnm=`echo $i | $SED 's/.*\///;s/\.c$//;'`
 	output_inits_tmp="$mibdir/${module_type}_inits.h"
 	echo "  if (should_init(\"$mnm\")) init_$mnm();" >> $output_inits_tmp
         # XXX: even worse, we loose whether the header is needed or not.
@@ -2055,9 +2056,9 @@ while test "x$new_module_list" != "x"; do
     #
     if test "x$dblfix" != "x" ; then
       AC_MSG_MODULE_DBG("$i was duplicated -- putting into main")
-    elif echo " $new_with_out_mib_modules " | grep " $i " > /dev/null; then
+    elif echo " $new_with_out_mib_modules " | $GREP " $i " > /dev/null; then
       AC_MSG_MODULE_DBG("$i was excluded")
-    elif echo " $module_list " | grep " $i " > /dev/null; then
+    elif echo " $module_list " | $GREP " $i " > /dev/null; then
       AC_MSG_MODULE_DBG("$i already tested")
     else
 
@@ -2078,12 +2079,12 @@ while test "x$new_module_list" != "x"; do
       	#
         # check if $i has any conflicts
         #
-	new_list_excl=`$MODULECPP module_tmp_header.h | grep config_exclude | sed 's/.*config_exclude(\(.*\)).*/\1/'`
+	new_list_excl=`$MODULECPP module_tmp_header.h | $GREP config_exclude | $SED 's/.*config_exclude(\(.*\)).*/\1/'`
 	if test "x$new_list_excl" != "x"; then
           AC_MSG_MODULE_DBG("$i excludes $new_list_excl")
 	  for j in $new_list_excl
 	    do
-	    if echo " $module_list $new_mib_module_list $new_list_two " | grep " $j " > /dev/null; then
+	    if echo " $module_list $new_mib_module_list $new_list_two " | $GREP " $j " > /dev/null; then
               mib_cfg_msg="mib module '$i' excludes module '$j' but another module requires it"
               AC_MSG_WARN([mib module error])
               if test "x$with_mib_cfg_checks" = "xyes"; then
@@ -2106,16 +2107,16 @@ while test "x$new_module_list" != "x"; do
         # check if $i has any architecture specific requirements
         #
         changequote(, )
-        new_list_arch=`$MODULECPP module_tmp_header.h | grep config_arch_require | sed 's/.*config_arch_require( *\([^ ]*\) *, *\([^ ]*\) *).*/\1-xarchx-\2/'`
+        new_list_arch=`$MODULECPP module_tmp_header.h | $GREP config_arch_require | $SED 's/.*config_arch_require( *\([^ ]*\) *, *\([^ ]*\) *).*/\1-xarchx-\2/'`
         changequote([, ])
 	if test "x$new_list_arch" != "x"; then
           for j in $new_list_arch
 	    do
-	    archtest=`echo $j | sed 's/-xarchx-.*//'`
+	    archtest=`echo $j | $SED 's/-xarchx-.*//'`
 	    # target_os may have been changed to a #define of 1...
 	    if test "x$archtest" = "x1" -o "x$target_os" = "x$archtest" -o "x$PARTIALTARGETOS" = "x$archtest"; then
-	      new_list="$new_list `echo $j | sed 's/.*-xarchx-//'`"
-              AC_MSG_MODULE_DBG(" $i required adding arch files: `echo $j | sed 's/.*-xarchx-//'`")
+	      new_list="$new_list `echo $j | $SED 's/.*-xarchx-//'`"
+              AC_MSG_MODULE_DBG(" $i required adding arch files: `echo $j | $SED 's/.*-xarchx-//'`")
 	    fi
 	  done
 	fi
@@ -2127,7 +2128,7 @@ while test "x$new_module_list" != "x"; do
         #
         # check if $i has any other required modules
         #
-	new_list="$new_list `$MODULECPP module_tmp_header.h | grep config_require | sed 's/.*config_require(\(.*\)).*/\1/'`"
+	new_list="$new_list `$MODULECPP module_tmp_header.h | $GREP config_require | $SED 's/.*config_require(\(.*\)).*/\1/'`"
         AC_MSG_MODULE_DBG(" $i will test: $new_list")
 	if test "x$new_list" != "x"; then
 	  for j in $new_list
@@ -2136,7 +2137,7 @@ while test "x$new_module_list" != "x"; do
 	    if test ! -f $srcdir/$mibdir/$j.h -a ! -f $srcdir/$mibdir/$j.c; then
               AC_MSG_WARN([mib module error])
 	      AC_MSG_ERROR([mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir])
-	    elif echo " $new_with_out_mib_modules " | grep " $j " > /dev/null; then
+	    elif echo " $new_with_out_mib_modules " | $GREP " $j " > /dev/null; then
 	      if test "x$i" != "xdefault_modules" ; then
                 mib_cfg_msg="mib module '$i' requires module '$j' but someone told me to compile without it"
                 AC_MSG_WARN([mib module error])
@@ -2146,7 +2147,7 @@ while test "x$new_module_list" != "x"; do
                   AC_MSG_WARN([$mib_cfg_msg])
                   AC_MSG_CACHE_ADD([*** MIB Module warning *** $mib_cfg_msg])
                 fi
-#	    elif echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
+#	    elif echo " $module_list $new_list_two $new_module_list " | $GREP " $j " > /dev/null; then
 #              AC_MSG_MODULE_DBG("  $j included previously")
               fi
 	    else
@@ -2162,15 +2163,15 @@ while test "x$new_module_list" != "x"; do
         #
         # check if $i has any mibs to add
         #
-	new_mibs=`$MODULECPP module_tmp_header.h | grep config_add_mib | sed 's/.*config_add_mib(\(.*\)).*/\1/'`
+	new_mibs=`$MODULECPP module_tmp_header.h | $GREP config_add_mib | $SED 's/.*config_add_mib(\(.*\)).*/\1/'`
 	if test "x$new_mibs" != "x"; then
 	    for j in $new_mibs
 		do
-		if test "x`echo :$default_mibs: | grep :$j:`" = "x"; then
+		if test "x`echo :$default_mibs: | $GREP :$j:`" = "x"; then
 		    default_mibs="$default_mibs:$j"
 		fi
 		if test -f $srcdir/mibs/$j.txt; then
-		    if echo $default_mibs_install | grep " $j " > /dev/null; then
+		    if echo $default_mibs_install | $GREP " $j " > /dev/null; then
 			    :
 		    else
 			    default_mibs_install="$default_mibs_install $j.txt"
@@ -2198,7 +2199,7 @@ while test "x$new_module_list" != "x"; do
         #-------------------
         # check for unsupported config_load_mib
         #
-        if $MODULECPP module_tmp_header.h | grep config_load_mib > /dev/null 2>&1; then
+        if $MODULECPP module_tmp_header.h | $GREP config_load_mib > /dev/null 2>&1; then
           AC_MSG_WARN([mib module error])
       	  AC_MSG_WARN([mib module "$i" uses the "config_load_mib" directive, which is no longer supported.  It probably won't work.])
         fi # grep config_load_mib
@@ -2208,7 +2209,7 @@ while test "x$new_module_list" != "x"; do
         #  (generally not used any longer; old auto-load a .conf token)
         #
         changequote(, )
-        $MODULECPP module_tmp_header.h | grep config_parse_dot_conf | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
+        $MODULECPP module_tmp_header.h | $GREP config_parse_dot_conf | $SED 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
 	changequote([, ])
 
         #---------------------
@@ -2217,7 +2218,7 @@ while test "x$new_module_list" != "x"; do
         #
         # check if $i has any errors, or warnings
         #
-	error=`$MODULECPP module_tmp_header.h | grep config_error | sed 's/.*config_error(\(.*\)).*/\1/'`
+	error=`$MODULECPP module_tmp_header.h | $GREP config_error | $SED 's/.*config_error(\(.*\)).*/\1/'`
 	if test "x$error" != "x"; then
           echo
           echo
@@ -2228,7 +2229,7 @@ while test "x$new_module_list" != "x"; do
       	# macro: config_warning(warning text)
       	#  - used to signal a configuration "warning" to be printed to the user
         #
-	warning=`$MODULECPP module_tmp_header.h | grep config_warning | sed 's/.*config_warning(\(.*\)).*/\1/'`
+	warning=`$MODULECPP module_tmp_header.h | $GREP config_warning | $SED 's/.*config_warning(\(.*\)).*/\1/'`
 	if test "x$warning" != "x"; then
           all_warnings="$all_warnings $warning
 "
@@ -2238,7 +2239,7 @@ while test "x$new_module_list" != "x"; do
       # Check for a .c file if the .h didn't exist
       #
       elif test -f $srcdir/$mibdir/$i.c; then
-        if echo " $module_list $new_list_two $new_module_list " | grep " $i      " > /dev/null; then
+        if echo " $module_list $new_list_two $new_module_list " | $GREP " $i      " > /dev/null; then
            AC_MSG_MODULE_DBG("  $i already included")
         else
            AC_MSG_MODULE_DBG("  $i added (based on $i.c)")
@@ -2268,19 +2269,19 @@ while test "x$new_module_list" != "x"; do
           eval "dl_${dl_name}_files=\"\$dl_${dl_name}_files $i\""
           saved_sublist_code="$saved_sublist_code $i"
         fi
-        mnm=`echo $i | sed 's/.*\///;s/\.c$//;'`
+        mnm=`echo $i | $SED 's/.*\///;s/\.c$//;'`
         AC_MSG_MODULE_DBG(-e "\nchecking '$srcdir/$mibdir/$i.c' ($mnm/`basename $i`) C file for init/shutdown")
         if test "x$mnm" != "x`basename $i`"; then
            AC_MSG_WARN([mib module error])
 	   AC_MSG_ERROR([conflicting names: $mnm != `basename $i`])
         fi
-        temp_init=`grep init_$mnm $srcdir/$mibdir/$i.c | grep -v _init_$mnm`
+        temp_init=`$GREP init_$mnm $srcdir/$mibdir/$i.c | $GREP -v _init_$mnm`
 	if test "x$temp_init" != "x"; then
             AC_MSG_MODULE_DBG(-e "adding init_$mnm() to list")
             need_header=1
 	    echo "  if (should_init(\"$mnm\")) init_$mnm();" >> $output_inits
 	fi
-	grep shutdown_$mnm $srcdir/$mibdir/$i.c > /dev/null
+	$GREP shutdown_$mnm $srcdir/$mibdir/$i.c > /dev/null
         if test $? -eq 0 ; then
             if test $module_debug -eq 1; then
               echo -e "\nadding shutdown_$mnm() to list"
@@ -2303,8 +2304,8 @@ while test "x$new_module_list" != "x"; do
       # check for output directory (for building outside of source tree
       #
       changequote(, )
-      if test "x`echo $i | sed 's/\///g;'`" != "x$i"; then
-	mnd=`echo $i | sed 's/\/[^/]*$//;'`
+      if test "x`echo $i | $SED 's/\///g;'`" != "x$i"; then
+	mnd=`echo $i | $SED 's/\/[^/]*$//;'`
 	if test ! -d ./$mibdir/$mnd; then
 	    module_directories="$module_directories ./$mibdir/$mnd"
 	fi
@@ -2315,7 +2316,7 @@ while test "x$new_module_list" != "x"; do
       # define USING_*_MODULE
       #
       changequote(, )
-      sym="`echo ${i} | sed 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
+      sym="`echo ${i} | $SED 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
       changequote([, ])
       echo "/* Define if compiling with the ${i} module files.  */" >> include/net-snmp/agent/${module_type}_config.h
       echo "#define USING_${sym}_MODULE 1" >> include/net-snmp/agent/${module_type}_config.h
@@ -2382,7 +2383,7 @@ for i in $dl_names ; do
   AC_MSG_MODULE_DBG("creating dll file: $output_inits")
   for ofile in $output_inits $output_hdrs ; do
     if test -f $ofile ; then
-      if grep "this file created automatically by configure" $ofile > /dev/null 2>&1 ; then
+      if $GREP "this file created automatically by configure" $ofile > /dev/null 2>&1 ; then
   	:
       else
   	AC_MSG_ERROR([$ofile already existed ; can't build dll object $i])
@@ -2403,7 +2404,7 @@ init_$i(void) {
 EOFOC
 
   # create the .so rule
-  saved_sublist_o=`echo "$mod_files " | sed 's/^ *//g;s/  */.o /g;'`
+  saved_sublist_o=`echo "$mod_files " | $SED 's/^ *//g;s/  */.o /g;'`
 
   # create the rules for each object
   for j in $mod_files ; do
@@ -2412,7 +2413,7 @@ $j.o: $j.c
 	\$(CC) -c \$(CPPFLAGS) \$(CFLAGS) \$(DLFLAGS) -o \$@ \$<
 
 EOFR
-    mnm=`echo $j | sed 's/.*\///;s/\.c$//;'`
+    mnm=`echo $j | $SED 's/.*\///;s/\.c$//;'`
     echo "  if (should_init(\"$mnm\")) init_$mnm();" >> $output_inits
   done
 
@@ -2443,30 +2444,30 @@ for i in module_list_o module_list_c module_list_lo mib_module_list_o mib_module
   eval "$i=mk/${i}.mk"
 done
 
-sed 's/^module_list_code/module_list_o/;s/\([^=]\)  *\\/\1.o \\/g'  < $module_list_code  > $module_list_o
-sed 's/^module_list_code/module_list_c/;s/\([^=]\)  *\\/\1.c \\/g'  < $module_list_code  > $module_list_c
-sed 's/^module_list_code/module_list_lo/;s/\([^=]\)  *\\/\1.lo \\/g' < $module_list_code  > $module_list_lo
+$SED 's/^module_list_code/module_list_o/;s/\([^=]\)  *\\/\1.o \\/g'  < $module_list_code  > $module_list_o
+$SED 's/^module_list_code/module_list_c/;s/\([^=]\)  *\\/\1.c \\/g'  < $module_list_code  > $module_list_c
+$SED 's/^module_list_code/module_list_lo/;s/\([^=]\)  *\\/\1.lo \\/g' < $module_list_code  > $module_list_lo
 
-sed 's/^mib_module_list_code/mib_module_list_o/;s/\([^=]\)  *\\/\1.o \\/g'  < $mib_module_list_code  > $mib_module_list_o
-sed 's/^mib_module_list_code/mib_module_list_c/;s/\([^=]\)  *\\/\1.c \\/g'  < $mib_module_list_code  > $mib_module_list_c
-sed 's/^mib_module_list_code/mib_module_list_lo/;s/\([^=]\)  *\\/\1.lo \\/g' < $mib_module_list_code  > $mib_module_list_lo
+$SED 's/^mib_module_list_code/mib_module_list_o/;s/\([^=]\)  *\\/\1.o \\/g'  < $mib_module_list_code  > $mib_module_list_o
+$SED 's/^mib_module_list_code/mib_module_list_c/;s/\([^=]\)  *\\/\1.c \\/g'  < $mib_module_list_code  > $mib_module_list_c
+$SED 's/^mib_module_list_code/mib_module_list_lo/;s/\([^=]\)  *\\/\1.lo \\/g' < $mib_module_list_code  > $mib_module_list_lo
 
-sed 's/^mib_module_list_o/mibgroup_list_o/;s@\([^ 	]*\)\.o@mibgroup/\1.o@g' < $mib_module_list_o > $mibgroup_list_o
-sed 's/^mib_module_list_lo/mibgroup_list_lo/;s@\([^ 	]*\)\.lo@mibgroup/\1.lo@g' < $mib_module_list_lo > $mibgroup_list_lo
+$SED 's/^mib_module_list_o/mibgroup_list_o/;s@\([^ 	]*\)\.o@mibgroup/\1.o@g' < $mib_module_list_o > $mibgroup_list_o
+$SED 's/^mib_module_list_lo/mibgroup_list_lo/;s@\([^ 	]*\)\.lo@mibgroup/\1.lo@g' < $mib_module_list_lo > $mibgroup_list_lo
 
-sed 's/^agent_module_list_code/agent_module_list_o/;s/\([^=]\)  *\\/\1.o \\/g'  < $agent_module_list_code  > $agent_module_list_o
-sed 's/^agent_module_list_code/agent_module_list_c/;s/\([^=]\)  *\\/\1.c \\/g'  < $agent_module_list_code  > $agent_module_list_c
-sed 's/^agent_module_list_code/agent_module_list_lo/;s/\([^=]\)  *\\/\1.lo \\/g' < $agent_module_list_code  > $agent_module_list_lo
+$SED 's/^agent_module_list_code/agent_module_list_o/;s/\([^=]\)  *\\/\1.o \\/g'  < $agent_module_list_code  > $agent_module_list_o
+$SED 's/^agent_module_list_code/agent_module_list_c/;s/\([^=]\)  *\\/\1.c \\/g'  < $agent_module_list_code  > $agent_module_list_c
+$SED 's/^agent_module_list_code/agent_module_list_lo/;s/\([^=]\)  *\\/\1.lo \\/g' < $agent_module_list_code  > $agent_module_list_lo
 
-sed 's/^agent_module_list_o/agentgroup_list_o/;s@\([^ 	]*\)\.o@mibgroup/\1.o@g' < $agent_module_list_o > $agentgroup_list_o
-sed 's/^agent_module_list_lo/agentgroup_list_lo/;s@\([^ 	]*\)\.lo@mibgroup/\1.lo@g' < $agent_module_list_lo > $agentgroup_list_lo
+$SED 's/^agent_module_list_o/agentgroup_list_o/;s@\([^ 	]*\)\.o@mibgroup/\1.o@g' < $agent_module_list_o > $agentgroup_list_o
+$SED 's/^agent_module_list_lo/agentgroup_list_lo/;s@\([^ 	]*\)\.lo@mibgroup/\1.lo@g' < $agent_module_list_lo > $agentgroup_list_lo
 
 for i in module_list_o module_list_c module_list_lo mib_module_list_o mib_module_list_c mib_module_list_lo mibgroup_list_o mibgroup_list_lo agent_module_list_o agent_module_list_c agent_module_list_lo agentgroup_list_o agentgroup_list_lo ; do
 	# hpux make (at least) doesn't like a trailing \ on the last
 	# line even when the next line contains nothing but
 	# whitespace.
 	lasttoken=`tail -1 mk/$i.mk | awk '{print $1}'`
-	sed "s#$lasttoken \\\\#$lasttoken#" < mk/$i.mk > mk/$i.mk.tmp
+	$SED "s#$lasttoken \\\\#$lasttoken#" < mk/$i.mk > mk/$i.mk.tmp
 	mv mk/$i.mk.tmp mk/$i.mk
 
 	# add a closing comment
@@ -2533,8 +2534,8 @@ fi
 if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
   # mingw32 and cygwin use ';' as the environment variable separator char
   ENV_SEPARATOR=";"
-  NETSNMP_DEFAULT_MIBS=`echo "$NETSNMP_DEFAULT_MIBS" | sed 's/:/;/g'`
-  default_mibs=`echo "$default_mibs" | sed 's/:/;/g'`
+  NETSNMP_DEFAULT_MIBS=`echo "$NETSNMP_DEFAULT_MIBS" | $SED 's/:/;/g'`
+  default_mibs=`echo "$default_mibs" | $SED 's/:/;/g'`
 else
   ENV_SEPARATOR=":"
 fi
@@ -2544,7 +2545,7 @@ AC_SUBST(NETSNMP_DEFAULT_MIBS)
 AC_MSG_RESULT($NETSNMP_DEFAULT_MIBS)
 
 AC_MSG_CHECKING([whether we have to build PIC code])
-echo " $module_list " | grep " ucd-snmp/dlmod " >/dev/null
+echo " $module_list " | $GREP " ucd-snmp/dlmod " >/dev/null
 if test $? -eq 0 ; then
         LIB_CFLAGS="$LIB_CFLAGS $SHLIB_CFLAGS"
 	AC_MSG_RESULT(yes)
@@ -2786,7 +2787,7 @@ fi
 # installed tables (on linux in particular)
 #
 if test "x$with_rpm" != "xno" && \
-        echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
+        echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
   # ARG.  RPM is a real pain.
   # FWIW librpm.la, librpmio.la, and libpopt.la have correct dependencies.
   _rpmlibs=""
@@ -2858,7 +2859,7 @@ AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_FUNCS(dlopen)
 
 AC_CHECK_FUNCS(kvm_openfiles nlist nlist64 knlist kvm_getprocs kvm_getswapinfo)
-echo " $module_list " | grep " ucd-snmp/diskio " >/dev/null
+echo " $module_list " | $GREP " ucd-snmp/diskio " >/dev/null
 # whether we need -ldevstat for diskio MIB
 if test $? -eq 0 ; then
 	AC_CHECK_FUNC(getdevs, AC_DEFINE(HAVE_GETDEVS),
@@ -2870,7 +2871,7 @@ if test $? -eq 0 ; then
 fi
 
 # LM-SENSORS-MIB support
-echo " $module_list " | grep " ucd-snmp/lmSensors " > /dev/null
+echo " $module_list " | $GREP " ucd-snmp/lmSensors " > /dev/null
 if test $? -eq 0 ; then
         AC_MSG_CHECKING([for sensors support])
         case $target_os in
@@ -3023,7 +3024,7 @@ case $target_os in
           # Perl cc checks
           #
           AC_MSG_CHECKING([for problematic Perl cc flags on Suns])
-          if $myperl -V:ccflags | grep LARGEFILE > /dev/null ; then
+          if $myperl -V:ccflags | $GREP LARGEFILE > /dev/null ; then
             if test "x$embed_perl" = "xtry" ; then
               embed_perl="no"
             else
@@ -3390,7 +3391,7 @@ AC_CHECK_HEADERS(search.h)
 
 # RPM subdirectory path (sigh)
 if test "x$with_rpm" != "xno" && \
-        echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
+        echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
   AC_CHECK_HEADERS(rpm/rpmdb.h)
 fi
 
@@ -3491,7 +3492,7 @@ elif test "x$enable_md5" != "xno"; then
     AC_MSG_RESULT(Internal MD5 Support)
 fi
 if test "x$enable_md5" = "xno"; then
-    authmodes=`echo $authmodes | sed 's/MD5 *//;'`
+    authmodes=`echo $authmodes | $SED 's/MD5 *//;'`
 fi
 AC_SUBST(LNETSNMPLIBS)
 
@@ -3615,7 +3616,7 @@ AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(execv system fork getpid strncasecmp sigalrm)
 AC_CHECK_FUNCS(lseek64 pread64)
 if test "x$with_rpm" != "xno" && \
-        echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
+        echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
   OLDLIBS=$LIBS
   LIBS=$LMIBLIBS
   AC_CHECK_FUNCS(rpmGetPath)
@@ -4301,7 +4302,7 @@ fi
 
 ME=`$WHOAMI`
 if test -f /etc/resolv.conf; then
-  LOC=`cat /etc/resolv.conf | grep '^domain' | tail -1 | awk '{print $NF}'`
+  LOC=`cat /etc/resolv.conf | $GREP '^domain' | tail -1 | awk '{print $NF}'`
 else
   LOC="@no.where"
 fi
