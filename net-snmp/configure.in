@@ -1032,7 +1032,7 @@ case $target_os in
             fi
         done
         if test "Xns_aix_runtimelinking_flags_ok" != "Xyes"; then
-            LDFLAGS="-Wl,-brtl $LDFLAGS"
+            LDFLAGS="-brtl $LDFLAGS"
 	    AC_MSG_RESULT([yes])
 	else
 	    AC_MSG_RESULT([no])
