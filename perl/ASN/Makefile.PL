@@ -74,6 +74,7 @@ sub InitMakeParams {
     else
     {
       $opts = NetSNMPGetOpts();
+      $Params{'LDDLFLAGS'} = "$Config{lddlflags} " . `$opts->{'nsconfig'} --ldflags`;
       $Params{'LIBS'}    = `$opts->{'nsconfig'} --libs`;
       chomp($Params{'LIBS'});
       $Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
