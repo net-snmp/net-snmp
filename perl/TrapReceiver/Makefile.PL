@@ -107,9 +107,8 @@ sub InitMakeParams {
     }
     else {
 	$opts = NetSNMPGetOpts();
-	$Params{'LIBS'} = `$opts->{'nsconfig'} --ldflags`;
-	chomp($Params{'LIBS'});
-	$Params{'LIBS'} .= ' -lnetsnmptrapd -lnetsnmpagent -lnetsnmp';
+	$Params{'LDDLFLAGS'} = "$Config{lddlflags} " . `$opts->{'nsconfig'} --ldflags`;
+	$Params{'LIBS'} = '-lnetsnmptrapd -lnetsnmpagent -lnetsnmp';
 	chomp($Params{'LIBS'});
 	if (!$ENV{'NETSNMP_CCFLAGS'}) {
 	    $Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
