@@ -3791,9 +3791,9 @@ AC_INCLUDES_DEFAULT()
 # Check struct rtentry for various things.
 AC_CHECK_MEMBERS([struct rtentry.rt_dst, struct rtentry.rt_unit,
                   struct rtentry.rt_refcnt, struct rtentry.rt_hash,
-                  struct rtentry.rt_use, struct rtentry.rt_next],,,[
-AC_INCLUDES_DEFAULT()
-[#ifdef HAVE_SYS_PARAM_H
+                  struct rtentry.rt_use, struct rtentry.rt_next],,,
+[#include<sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
@@ -3805,7 +3805,7 @@ AC_INCLUDES_DEFAULT()
 #endif
 #ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
-#endif]])
+#endif])
 
 # checking for 4.3 vs 4.4 rtentry.
 AC_CACHE_CHECK([type of rtentry structure], [ac_cv_RTENTRY_TYPE],
