@@ -302,8 +302,7 @@ struct variable1 system_variables[] = {
     {SYSCONTACT, ASN_OCTET_STR, RWRITE, var_system, 1, {4}},
     {SYSTEMNAME, ASN_OCTET_STR, RWRITE, var_system, 1, {5}},
     {SYSLOCATION, ASN_OCTET_STR, RWRITE, var_system, 1, {6}},
-    {SYSSERVICES, ASN_INTEGER, RONLY, var_system, 1, {7}},
-    {SYSORLASTCHANGE, ASN_TIMETICKS, RONLY, var_system, 1, {8}}
+    {SYSSERVICES, ASN_INTEGER, RONLY, var_system, 1, {7}}
 };
 /*
  * Define the OID pointer to the top of the mib tree that we're
@@ -465,10 +464,6 @@ init_system_mib(void)
 	 *
 	 *********************/
 
-#ifdef USING_MIBII_SYSORTABLE_MODULE
-extern struct timeval sysOR_lastchange;
-#endif
-
 u_char         *
 var_system(struct variable *vp,
            oid * name,
@@ -510,12 +505,6 @@ var_system(struct variable *vp,
 #endif
         long_return = sysServices;
         return (u_char *) & long_return;
-
-#ifdef USING_MIBII_SYSORTABLE_MODULE
-    case SYSORLASTCHANGE:
-        ulret = netsnmp_timeval_uptime(&sysOR_lastchange);
-        return ((u_char *) & ulret);
-#endif
 
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_system\n",
@@ -559,7 +548,6 @@ writeSystem(int action,
         setvar = &sysLocationSet;
         break;
     case SYSSERVICES:
-    case SYSORLASTCHANGE:
         snmp_log(LOG_ERR, "Attempt to write to R/O OID\n");
         return SNMP_ERR_NOTWRITABLE;
     default:
