@@ -601,10 +601,6 @@ if test "$ac_cv_user_prompt_NETSNMP_LOGFILE" = "no"; then
     ac_cv_user_prompt_NETSNMP_LOGFILE="none"
 fi
 
-# This can't be within AC_ARG_WITH.  I don't want to read autoconf m4
-# to find out why.
-AC_SUBST(WRAPLIBS)
-
 AC_ARG_WITH(transports,
 [  --with-transports=\"t1 t2 ...\"   Compile in the given SNMP transport
                                     modules (space separated list).])
@@ -2686,7 +2682,7 @@ AC_CHECK_FUNC(getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME),
 
 # Solaris kstat
 AC_CHECK_LIB(kstat, kstat_lookup,
-        AC_DEFINE(HAVE_LIBKSTAT, [], [Define to 1 if you have the `kstat' library (-lkstat).])
+        AC_DEFINE(HAVE_LIBKSTAT, 1, [Define to 1 if you have the `kstat' library (-lkstat).])
         LNETSNMPLIBS="${LNETSNMPLIBS} -lkstat")
 
 # Check for libraries that the agent needs
@@ -2696,7 +2692,7 @@ NONAGENTLIBS=$LIBS
 # Check for security related functions
 if test "x$tryopenssl" != "xno"; then
     if test "x$askedopenssl" != "xyes" -a "x$askedpkcs" = "xyes"; then
-      AC_CHECK_LIB(pkcs11, C_Initialize, AC_DEFINE(HAVE_LIBPKCS11, [], [Define to 1 if you have the `pkcs11' library (-lpkcs11).])
+      AC_CHECK_LIB(pkcs11, C_Initialize, AC_DEFINE(HAVE_LIBPKCS11, 1, [Define to 1 if you have the `pkcs11' library (-lpkcs11).])
               LIBPKCS11="-lpkcs11")
     else 
       if test "x$tryrsaref" != "xno"; then
@@ -2704,10 +2700,10 @@ if test "x$tryopenssl" != "xno"; then
          AC_CHECK_LIB(RSAglue, RSA_PKCS1_RSAref)
       fi
 
-      AC_CHECK_LIB(crypto, EVP_md5, AC_DEFINE(HAVE_LIBCRYPTO, [], [Define to 1 if you have the `crypto' library (-lcrypto).])
+      AC_CHECK_LIB(crypto, EVP_md5, AC_DEFINE(HAVE_LIBCRYPTO, 1, [Define to 1 if you have the `crypto' library (-lcrypto).])
               LIBCRYPTO="-lcrypto")
       AC_CHECK_LIB(crypto, AES_cfb128_encrypt, 
-              AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, [], [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
+              AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1, [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
     fi
 elif test "x$askedpkcs" = "xyes"; then
     AC_CHECK_LIB(pkcs11, C_Initialize, AC_DEFINE(HAVE_LIBPKCS11)
@@ -2734,6 +2730,7 @@ AC_ARG_WITH(libwrap,
 
     LIBS="$LIBS -lwrap"
 	AC_MSG_CHECKING([for TCP wrappers library -lwrap])
+	# XXX: should check for hosts_ctl
 	AC_TRY_LINK([#include <sys/types.h>
 		     #include <tcpd.h>
 		     int allow_severity = 0;
@@ -2742,8 +2739,8 @@ AC_ARG_WITH(libwrap,
 
 	    AC_MSG_RESULT([yes])
 	    AC_DEFINE(NETSNMP_USE_LIBWRAP)
-	    test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
-	    WRAPLIBS="$WRAPLIBS -lwrap"],
+	    test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
+	    _wraplibs="$_wraplibs -lwrap"],
         [
 	    AC_MSG_RESULT([no])
 	    # Linux RedHat 6.1 won't link libwrap without libnsl
@@ -2758,11 +2755,12 @@ AC_ARG_WITH(libwrap,
 
 			AC_MSG_RESULT(yes)
 			AC_DEFINE(NETSNMP_USE_LIBWRAP)
-			test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
-			WRAPLIBS="$WRAPLIBS -lwrap -lnsl",
+			test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
+			_wraplibs="$_wraplibs -lwrap -lnsl",
 
 			AC_MSG_RESULT(no)
 			AC_MSG_ERROR(Asked to use libwrap but I couldn't find it.))])
+    LAGENTLIBS="$_wraplibs"
     CPPFLAGS=${_cppflags}
     LDFLAGS=${_ldflags}
     LIBS=${_libs}
@@ -2853,14 +2851,30 @@ if test "x$with_rpm" != "xno" && \
 fi
   
 # libkvm
-AC_CHECK_LIB(kvm, kvm_read)
+AC_CHECK_LIB(kvm, kvm_read, [_libkvm="-lkvm"])
+AC_CHECK_FUNC(kvm_openfiles, AC_DEFINE(HAVE_KVM_OPENFILES, 1, [Define to 1 if you have the `kvm_openfiles' function.]),
+	AC_CHECK_LIB(kvm, kvm_openfiles, AC_DEFINE(HAVE_KVM_OPENFILES, 1, [Define to 1 if you have the `kvm_openfiles' function.])
+	_libkvm="-lkvm"))
+AC_CHECK_FUNC(kvm_getprocs, AC_DEFINE(HAVE_KVM_GETPROCS, 1, [Define to 1 if you have the `kvm_getprocs' function.]),
+	AC_CHECK_LIB(kvm, kvm_getprocs, AC_DEFINE(HAVE_KVM_GETPROCS, 1, [Define to 1 if you have the `kvm_getprocs' function.])
+	_libkvm="-lkvm"))
+AC_CHECK_FUNC(kvm_getswapinfo, AC_DEFINE(HAVE_KVM_GETSWAPINFO, 1, [Define to 1 if you have the `kvm_getswapinfo' function.]),
+	AC_CHECK_LIB(kvm, kvm_getswapinfo, AC_DEFINE(HAVE_KVM_GETSWAPINFO, 1, [Define to 1 if you have the `kvm_getswapinfo' function.])
+	_libkvm="-lkvm"))
+if test "x${_libkvm}" != "x"; then
+	AC_DEFINE(HAVE_LIBKVM, 1, [Define to 1 if you have the `kvm' library (-lkvm).])
+	LAGENTLIBS="$LAGENTLIBS ${_libkvm}"
+fi
+
 # DYNAMIC MODULE SUPPORT
 AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_FUNCS(dlopen)
 
-AC_CHECK_FUNCS(kvm_openfiles nlist nlist64 knlist kvm_getprocs kvm_getswapinfo)
-echo " $module_list " | $GREP " ucd-snmp/diskio " >/dev/null
+# nlist
+AC_CHECK_FUNCS(nlist nlist64 knlist)
+
 # whether we need -ldevstat for diskio MIB
+echo " $module_list " | $GREP " ucd-snmp/diskio " >/dev/null
 if test $? -eq 0 ; then
 	AC_CHECK_FUNC(getdevs, AC_DEFINE(HAVE_GETDEVS),
 		AC_CHECK_LIB(devstat, getdevs, AC_DEFINE(HAVE_GETDEVS)
@@ -3495,6 +3509,7 @@ if test "x$enable_md5" = "xno"; then
     authmodes=`echo $authmodes | $SED 's/MD5 *//;'`
 fi
 AC_SUBST(LNETSNMPLIBS)
+AC_SUBST(LAGENTLIBS)
 
 AC_MSG_CACHE_ADD(Authentication support:     $authmodes)
 AC_MSG_CACHE_ADD(Encryption support:         $encrmodes)
