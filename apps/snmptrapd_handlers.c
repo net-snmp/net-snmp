@@ -41,6 +41,8 @@ char *syslog_format1 = NULL;
 char *syslog_format2 = NULL;
 char *print_format1  = NULL;
 char *print_format2  = NULL;
+char *exec_format1   = NULL;
+char *exec_format2   = NULL;
 
 int   SyslogTrap;
 int   dropauth;
@@ -233,6 +235,13 @@ parse_format(const char *token, char *line)
     else if (!strcmp( line, "syslog")) {
         syslog_format1 = strdup(cp);
         syslog_format2 = strdup(cp);
+    } else if (!strcmp( line, "execute1"))
+        exec_format1 = strdup(cp);
+    else if (!strcmp( line, "execute2"))
+        exec_format2 = strdup(cp);
+    else if (!strcmp( line, "execute")) {
+        exec_format1 = strdup(cp);
+        exec_format2 = strdup(cp);
     }
 }
 
@@ -282,7 +291,7 @@ snmptrapd_register_configs( void )
                             parse_trap2_fmt, free_trap2_fmt, "format");
     register_config_handler("snmptrapd", "format",
                             parse_format, NULL,
-			    "[print{,1,2}|syslog{,1,2}] format");
+			    "[print{,1,2}|syslog{,1,2}|execute{,1,2}] format");
     register_config_handler("snmptrapd", "forward",
                             parse_forward, NULL, "OID|\"default\" destination");
 }
@@ -920,10 +929,19 @@ int   command_handler( netsnmp_pdu           *pdu,
                                              handler->format,
                                              v2_pdu, transport);
         } else {
-            DEBUGMSGTL(( "snmptrapd", "execute format\n"));
-            realloc_format_trap(&rbuf, &r_len, &o_len, 1,
-                                             EXECUTE_FORMAT,
+	    if ( pdu->command == SNMP_MSG_TRAP && exec_format1 ) {
+                DEBUGMSGTL(( "snmptrapd", "exec v1 = '%s'\n", exec_format1));
+                !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+                                             exec_format1, pdu, transport);
+	    } else if ( pdu->command != SNMP_MSG_TRAP && exec_format2 ) {
+                DEBUGMSGTL(( "snmptrapd", "exec v2/3 = '%s'\n", exec_format2));
+                !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+                                             exec_format2, pdu, transport);
+	    } else {
+                DEBUGMSGTL(( "snmptrapd", "execute format\n"));
+                realloc_format_trap(&rbuf, &r_len, &o_len, 1, EXECUTE_FORMAT,
                                              v2_pdu, transport);
+            }
 	}
 
         /*
