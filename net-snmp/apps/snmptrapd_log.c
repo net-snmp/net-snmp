@@ -1064,7 +1064,6 @@ realloc_handle_auth_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         return 0;
     }
 
-    fprintf(stderr, "here\n\n");
     switch (pdu->command) {
 
     case CHR_SNMP_VERSION:
