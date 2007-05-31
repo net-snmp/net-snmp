@@ -26,6 +26,5 @@ config_require(util_funcs)
 #define SYSTEMNAME		5
 #define SYSLOCATION		6
 #define SYSSERVICES		7
-#define SYSORLASTCHANGE		8
 
 #endif                          /* _MIBGROUP_SYSTEM_MIB_H */
