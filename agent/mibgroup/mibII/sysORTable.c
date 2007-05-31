@@ -6,32 +6,10 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#include <sys/types.h>
-#if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
 #if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
-#endif
-
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
 #endif
 
 #include <net-snmp/net-snmp-includes.h>
@@ -59,7 +37,7 @@ static int
 _unregister_sysOR_by_session_callback(int majorID, int minorID,
                                       void *serverarg, void *clientarg);
 
-struct timeval  sysOR_lastchange;
+static u_long sysORLastChange;
 static struct sysORTable *table = NULL;
 static int      numEntries = 0;
 
@@ -87,9 +65,19 @@ extern int      system_module_count;
 void
 init_sysORTable(void)
 {
+    oid sysORLastChange_oid[] = { SNMP_OID_MIB2, 1, 8 };
     /*
      * register ourselves with the agent to handle our mib tree 
      */
+
+    netsnmp_register_watched_scalar(
+        netsnmp_create_handler_registration(
+            "mibII/sysORLastChange", NULL,
+            sysORLastChange_oid, OID_LENGTH(sysORLastChange_oid),
+            HANDLER_CAN_RONLY),
+        netsnmp_create_watcher_info(
+            &sysORLastChange, sizeof(u_long),
+            ASN_TIMETICKS, WATCHER_FIXED_SIZE));
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) == MASTER_AGENT)
@@ -117,13 +105,13 @@ init_sysORTable(void)
                            SNMPD_CALLBACK_REQ_UNREG_SYSOR_SESS,
                            _unregister_sysOR_by_session_callback, NULL);
 
+    sysORLastChange = netsnmp_get_agent_uptime();
+
 #ifdef USING_MIBII_SYSTEM_MIB_MODULE
     if (++system_module_count == 3)
         REGISTER_SYSOR_TABLE(system_module_oid, system_module_oid_len,
                              "The MIB module for SNMPv2 entities");
 #endif
-
-    gettimeofday(&sysOR_lastchange, NULL);
 }
 
         /*********************
@@ -208,7 +196,7 @@ register_sysORTable_sess(oid * oidin,
     }
     memcpy(ptr->OR_oid, oidin, sizeof(oid) * oidlen);
     gettimeofday(&(ptr->OR_uptime), NULL);
-    gettimeofday(&(sysOR_lastchange), NULL);
+    sysORLastChange = netsnmp_get_agent_uptime();
     ptr->OR_sess = ss;
     ptr->next = NULL;
     numEntries++;
@@ -263,7 +251,7 @@ unregister_sysORTable_sess(oid * oidin,
             free(ptr->OR_descr);
             free(ptr);
             numEntries--;
-            gettimeofday(&(sysOR_lastchange), NULL);
+            sysORLastChange = netsnmp_get_agent_uptime();
             found = SYS_ORTABLE_UNREGISTERED_OK;
             break;
         } else
@@ -304,7 +292,7 @@ unregister_sysORTable_by_session(netsnmp_session * ss)
             free(ptr->OR_descr);
             free(ptr);
             numEntries--;
-            gettimeofday(&(sysOR_lastchange), NULL);
+            sysORLastChange = netsnmp_get_agent_uptime();
         } else
             prev = ptr;
     }

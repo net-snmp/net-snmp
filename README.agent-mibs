@@ -63,7 +63,8 @@ A number after a platform indicates notes at the bottom of the file.
  table/object group           OS       Rel   Styl File
 ==============================================================================
 SNMPv2-MIB
- system.*.0                   A         3.2     O mibII/system_mib.c
+ system.?.0                   A         3.2     O mibII/system_mib.c
+ .sysORLastChange.0           A         5.5     W mibII/sysORTable.c
  sysORTable                   A         3.4     O mibII/sysORTable.c
  snmp.*.0                     A         3.2     O mibII/snmp_mib.c
  setSerialNo.0                A         5.0     W mibII/setSerialNo.c
