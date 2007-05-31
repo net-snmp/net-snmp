@@ -238,9 +238,8 @@ typedef enum {
       */
 
 #define is_auth_cmd(chr) ((((chr) == CHR_SNMP_VERSION       \
-                            || (chr) == CHR_SNMP_VERSION     \
-                            || (chr) == CHR_SNMP_USER                   \
-                            || (chr) == CHR_TRAP_CONTEXTID)) ? TRUE : FALSE)
+                            || (chr) == CHR_SNMP_SECMOD     \
+                            || (chr) == CHR_SNMP_USER)) ? TRUE : FALSE)
 
      /*
       * Function:
@@ -270,6 +269,7 @@ typedef enum {
 			  || is_agent_cmd (chr)     \
 			  || is_pdu_ip_cmd (chr)    \
                           || ((chr) == CHR_PDU_ENT) \
+                          || ((chr) == CHR_TRAP_CONTEXTID) \
                           || ((chr) == CHR_PDU_WRAP) \
 			  || is_trap_cmd (chr)) ? TRUE : FALSE)
      /*
@@ -763,8 +763,8 @@ realloc_handle_ent_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
 
      /*
       * Function:
-      *     Handle a format command that deals with the enterprise 
-      * string.  Append the information to the buffer subject to the
+      *     Handle a format command that deals with OID strings. 
+      * Append the information to the buffer subject to the
       * buffer's length limit.
       *
       * Input Parameters:
@@ -793,6 +793,18 @@ realloc_handle_ent_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         if (!sprint_realloc_objid
             (&temp_buf, &temp_buf_len, &temp_out_len, 1, pdu->enterprise,
              pdu->enterprise_length)) {
+            free(temp_buf);
+            return 0;
+        }
+        break;
+
+    case CHR_TRAP_CONTEXTID:
+        /*
+         * Write the context oid.  
+         */
+        if (!sprint_realloc_objid
+            (&temp_buf, &temp_buf_len, &temp_out_len, 1, pdu->contextEngineID,
+             pdu->contextEngineIDLen)) {
             free(temp_buf);
             return 0;
         }
@@ -989,16 +1001,43 @@ realloc_handle_auth_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
 {
     char            fmt_cmd = options->cmd;     /* what we're outputting */
     u_char         *temp_buf = NULL;
-    size_t          tbuf_len = 64;
+    size_t          tbuf_len = 64, tout_len = 0;
+    int             i;
 
     if ((temp_buf = calloc(tbuf_len, 1)) == NULL) {
         return 0;
     }
 
-    switch (pdu->command) {
+    switch (fmt_cmd) {
 
     case CHR_SNMP_VERSION:
-        *out_len = snprintf((char*)temp_buf, tbuf_len, "%ld", pdu->version);
+        tout_len = snprintf((char*)temp_buf, tbuf_len, "%ld", pdu->version);
+        break;
+
+    case CHR_SNMP_SECMOD:
+        tout_len = snprintf((char*)temp_buf, tbuf_len, "%d", pdu->securityModel);
+        break;
+
+    case CHR_SNMP_USER:
+        if ( pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c ) {
+            while ((*out_len + pdu->community_len + 1) >= *buf_len) {
+                if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+                    return 0;
+                }
+            }
+
+            for (i = 0; i < pdu->community_len; i++) {
+                if (isprint(pdu->community[i])) {
+                    *(*buf + *out_len) = pdu->community[i];
+                } else {
+                    *(*buf + *out_len) = '.';
+                }
+                (*out_len)++;
+            }
+            *(*buf + *out_len) = '\0';
+        } else {
+            tout_len = snprintf((char*)temp_buf, tbuf_len, "%s", pdu->securityName);
+        }
         break;
 
     default:
@@ -1189,7 +1228,7 @@ realloc_dispatch_format_cmd(u_char ** buf, size_t * buf_len,
     } else if (is_auth_cmd(fmt_cmd)) {
         return realloc_handle_auth_fmt(buf, buf_len, out_len,
                                        allow_realloc, options, pdu);
-    } else if (fmt_cmd == CHR_PDU_ENT) {
+    } else if (fmt_cmd == CHR_PDU_ENT || fmt_cmd == CHR_TRAP_CONTEXTID) {
         return realloc_handle_ent_fmt(buf, buf_len, out_len, allow_realloc,
                                       options, pdu);
     } else if (fmt_cmd == CHR_PDU_WRAP) {
