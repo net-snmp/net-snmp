@@ -292,11 +292,6 @@ usage(void)
     fprintf(stderr,
             "  -L <LOGOPTS>\t\ttoggle options controlling where to log to\n");
     snmp_log_options_usage("\t\t\t", stderr);
-    fprintf(stderr, "\n  Deprecated options:\n");
-    fprintf(stderr, "  -o FILE\t\tuse -Lf <FILE> instead\n");
-    fprintf(stderr, "  -P\t\t\tuse -f -Le  instead\n");
-    fprintf(stderr, "  -s\t\t\tuse -Lsd instead\n");
-    fprintf(stderr, "  -S d|i|0-7\t\tuse -Ls <facility> instead\n");
 }
 
 static void
@@ -584,7 +579,7 @@ main(int argc, char *argv[])
     char            options[128] = "aAc:CdD::efF:g:hHI:L:m:M:no:O:PqsS:tu:vx:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
-    int             arg, i = 0, depmsg = 0;
+    int             arg, i = 0;
     int             uid = 0, gid = 0;
     int             count, numfds, block;
     fd_set          readfds,writefds,exceptfds;
@@ -768,52 +763,8 @@ main(int argc, char *argv[])
 
 	case 'S':
             fprintf(stderr,
-                    "Warning: -S option is deprecated; use -Ls <facility> instead\n");
-            depmsg = 1;
-            if (optarg != NULL) {
-                switch (*optarg) {
-                case 'd':
-                case 'D':
-                    Facility = LOG_DAEMON;
-                    break;
-                case 'i':
-                case 'I':
-                    Facility = LOG_INFO;
-                    break;
-                case '0':
-                    Facility = LOG_LOCAL0;
-                    break;
-                case '1':
-                    Facility = LOG_LOCAL1;
-                    break;
-                case '2':
-                    Facility = LOG_LOCAL2;
-                    break;
-                case '3':
-                    Facility = LOG_LOCAL3;
-                    break;
-                case '4':
-                    Facility = LOG_LOCAL4;
-                    break;
-                case '5':
-                    Facility = LOG_LOCAL5;
-                    break;
-                case '6':
-                    Facility = LOG_LOCAL6;
-                    break;
-                case '7':
-                    Facility = LOG_LOCAL7;
-                    break;
-                default:
-                    fprintf(stderr, "invalid syslog facility: -S%c\n",*optarg);
-                    usage();
-                    exit(1);
-                }
-            } else {
-                fprintf(stderr, "no syslog facility specified\n");
-                usage();
-                exit(1);
-            }
+                    "Warning: -S option has been withdrawn; use -Ls <facility> instead\n");
+            exit(1);
             break;
 
         case 'm':
@@ -841,16 +792,8 @@ main(int argc, char *argv[])
 
         case 'o':
             fprintf(stderr,
-                    "Warning: -o option is deprecated; use -Lf <file> instead\n");
-            if (optarg != NULL) {
-                logfile = optarg;
-                snmp_enable_filelog(optarg, 
-                                    netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                                                           NETSNMP_DS_LIB_APPEND_LOGFILES));
-            } else {
-                usage();
-                exit(1);
-            }
+                    "Warning: -o option has been withdrawn; use -Lf <file> instead\n");
+            exit(1);
             break;
 
         case 'O':
@@ -883,20 +826,14 @@ main(int argc, char *argv[])
 
         case 'P':
             fprintf(stderr,
-                    "Warning: -P option is deprecated; use -f -Le instead\n");
-            dofork = 0;
-            snmp_enable_stderrlog();
+                    "Warning: -P option has been withdrawn; use -f -Le instead\n");
+            exit(1);
             break;
 
         case 's':
             fprintf(stderr,
-                    "Warning: -s option is deprecated; use -Lsd instead\n");
-            depmsg = 1;
-#ifdef WIN32
-            snmp_enable_syslog_ident(app_name_long, Facility);
-#else
-            snmp_enable_syslog_ident(app_name, Facility);
-#endif
+                    "Warning: -s option has been withdrawn; use -Lsd instead\n");
+            exit(1);
             break;
 
         case 't':
@@ -1174,10 +1111,6 @@ main(int argc, char *argv[])
 #endif
 
     snmp_log(LOG_INFO, "NET-SNMP version %s\n", netsnmp_get_version());
-    if (depmsg) {
-        snmp_log(LOG_WARNING, "-s and -S options are deprecated; use -Ls <facility> instead\n");
-    }
-    
     SOCK_STARTUP;
 
     if (listen_ports)
