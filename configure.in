@@ -2853,8 +2853,10 @@ if test "x${_libkvm}" != "x"; then
 fi
 
 # DYNAMIC MODULE SUPPORT
-AC_CHECK_LIB(dl, dlopen)
-AC_CHECK_FUNCS(dlopen)
+AC_CHECK_FUNC(dlopen, AC_DEFINE(HAVE_DLOPEN, 1, [Define to 1 if you have the `dlopen' function.]),
+	AC_CHECK_LIB(dl, dlopen, AC_DEFINE(HAVE_DLOPEN, 1, [Define to 1 if you have the `dlopen' function.])
+	AC_DEFINE(HAVE_LIBDL, 1, [Define to 1 if you have the `dl' library (-ldl).])
+	LMIBLIBS="${LMIBLIBS} -ldl"))
 
 # nlist
 AC_CHECK_FUNCS(nlist nlist64 knlist)
