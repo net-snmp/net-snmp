@@ -4000,7 +4000,9 @@ AC_CHECK_MEMBERS([struct ifnet.if_mtu, struct ifnet.if_baudrate,
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define _KERNEL 1
 #endif
-]AC_INCLUDES_DEFAULT()[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
