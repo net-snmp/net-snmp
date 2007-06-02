@@ -41,9 +41,6 @@
 /* Define if you have the gethostname function.  */
 #define HAVE_GETHOSTNAME 1
 
-/* Define if you have the getservbyname function.  */
-#define HAVE_GETSERVBYNAME 1
-
 /* Define if you have raise() instead of alarm() */
 #define HAVE_RAISE 1
 
