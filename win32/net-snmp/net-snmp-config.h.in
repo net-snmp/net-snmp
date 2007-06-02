@@ -1410,9 +1410,6 @@
 /* define if you have gethostbyname */
 #define HAVE_GETHOSTBYNAME 1
 
-/* define if you have getservbyname */
-#define HAVE_GETSERVBYNAME 1
-
 /* printing system */
 /* #undef HAVE_LPSTAT */
 /* #undef LPSTAT_PATH */

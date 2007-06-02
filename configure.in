@@ -2662,10 +2662,6 @@ AC_CHECK_FUNC(gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME),
 	AC_CHECK_LIB(socket, gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME)
 	LIBS="${LIBS} -lsocket"))
 
-AC_CHECK_FUNC(getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME),
-	AC_CHECK_LIB(socket, getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME)
-	LIBS="${LIBS} -lsocket"))
-
 # Solaris kstat
 AC_CHECK_LIB(kstat, kstat_lookup,
         AC_DEFINE(HAVE_LIBKSTAT, 1, [Define to 1 if you have the `kstat' library (-lkstat).])
