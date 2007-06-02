@@ -95,11 +95,6 @@
 #define HAVE_GETHOSTBYNAME 1
 
 /*
- * lives in libsocket.so 
- */
-#define HAVE_GETSERVBYNAME 1
-
-/*
  * Might as well include this here, since a significant
  * number of files seem to need it.  DTS 
  */
