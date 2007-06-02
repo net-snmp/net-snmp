@@ -617,9 +617,6 @@ snmp_sess_perror(const char *prog_string, netsnmp_session * ss)
 static void
 _init_snmp(void)
 {
-#ifdef  HAVE_GETSERVBYNAME
-    struct servent *servp;
-#endif
     static char     have_done_init = 0;
 
     struct timeval  tv;
@@ -667,23 +664,9 @@ _init_snmp(void)
     netsnmp_register_default_domain("snmp", "udp");
     netsnmp_register_default_domain("snmptrap", "udp");
 
-#ifdef HAVE_GETSERVBYNAME
-    servp = getservbyname("snmp", "udp");
-    if (servp) {
-        /*
-         * store it in host byte order 
-         */
-        char buf[32];
-        sprintf(buf, ":%hu", ntohs(servp->s_port));
-        netsnmp_register_default_target("snmp", "udp", buf);
-        netsnmp_register_default_target("snmp", "udp6", buf);
-    }
-#else
     netsnmp_register_default_target("snmp", "udp", ":161");
-    netsnmp_register_default_target("snmp", "udp6", ":161");
-#endif
-
     netsnmp_register_default_target("snmp", "tcp", ":161");
+    netsnmp_register_default_target("snmp", "udp6", ":161");
     netsnmp_register_default_target("snmp", "tcp6", ":161");
     netsnmp_register_default_target("snmp", "ipx", "/36879");
     netsnmp_register_default_target("snmptrap", "udp", ":162");
