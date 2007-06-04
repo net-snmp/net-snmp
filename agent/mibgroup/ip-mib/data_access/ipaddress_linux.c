@@ -19,8 +19,10 @@
 #if defined (NETSNMP_ENABLE_IPV6)
 #include <linux/types.h>
 #include <asm/types.h>
+#ifdef HAVE_LINUX_RTNETLINK_H
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
+#endif
 #endif
 
 #include "ipaddress_ioctl.h"
@@ -180,6 +182,12 @@ netsnmp_arch_ipaddress_container_load(netsnmp_container *container,
 int
 _load_v6(netsnmp_container *container, int idx_offset)
 {
+#ifndef HAVE_LINUX_RTNETLINK_H
+    DEBUGMSGTL(("access:ipaddress:container",
+                "cannot get ip address information"
+                "as netlink socket is not available\n"));
+    return -1;
+#else
     FILE           *in;
     char            line[80], addr[40], if_name[IFNAMSIZ];
     u_char          *buf;
@@ -437,6 +445,7 @@ netsnmp_access_other_info_get(int index, int family)
     }
     close(sd);
     return addr;
+#endif
 }
 #endif
 
