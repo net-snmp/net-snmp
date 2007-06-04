@@ -1,5 +1,282 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.4.1.pre1 -> V5.4.1.pre2
+
+2007-06-04 13:09  tanders
+
+   *
+
+   CHANGES: build: PATCH: 1728237: from mitsuru_chinen: Move
+   variable declaration at the top of netsnmp_udp_sendto
+
+2007-06-04 12:13  tanders
+
+   *
+
+   CHANGES: build: PATCH: 1728230: from mitsuru_chinen: add
+   configure check for gai_strerror()
+
+2007-06-04 10:35  tanders
+
+   *
+
+   CHANGES: build: PATCH: 1728226: from mitsuru_chinen: make sure
+   IF_NAMESIZE is defined
+
+2007-06-04 09:47  tanders
+
+   *
+
+   also skip this test on IRIX64
+
+2007-06-02 08:24  magfr
+
+   *
+
+   CHANGES: snmpapi: Do not use getservbyname to find default port
+   numbers, just hardcode them and let the user override them if
+   needed.
+
+2007-06-01 22:55  tanders
+
+   *
+
+   CHANGES: build: Link libdl against libnetsnmpmibs instead of
+   snmpd.
+   Fixes the build on (some) Solaris systems.
+
+2007-06-01 21:36  dts12
+
+   *
+
+   CHANGES: snmplib: FEATURES: 1041888: Check directory paths for
+   config files.
+   Backport from main development trunk of bug fix.
+
+2007-06-01 21:23  dts12
+
+   *
+
+   CHANGES: snmplib: FEATURES: 851887: Report range information for
+   invalid SET requests.
+   Backport from main trunk of bug fix.
+
+2007-05-31 23:51  tanders
+
+   *
+
+   CHANGES: build: Link libkvm and libwrap to libnetsnmpagent
+   instead of snmpd.
+   Fixes test #44 (Perl subagent) on systems using one of those
+   libraries.
+
+2007-05-31 14:39  dts12
+
+   *
+
+   Fix logging of authentication information.
+
+2007-05-31 10:10  dts12
+
+   *
+
+   Remove bogus debug output.
+
+2007-05-30 22:53  tanders
+
+   *
+
+   CHANGES: AIX: build fixes for embedded Perl
+
+2007-05-29 22:42  magfr
+
+   *
+
+   CHANGES: snmplib: Use the default_target argument if it is
+   non-NULL, not if it is NULL.
+
+2007-05-29 10:27  tanders
+
+   *
+
+   add recent mfd rewrites
+
+2007-05-27 21:42  tanders
+
+   *
+
+   Some lame linkers (e.g. on HP-UX 11.23/IA64) need quite a bit of
+   help to successfully link the Perl modules.
+
+2007-05-27 20:52  tanders
+
+   *
+
+   Add descriptions to AC_DEFINE; drop obsolete AC_CHECK_LIB(m,
+   asin).
+
+2007-05-27 19:54  dts12
+
+   *
+
+   CHANGES: library: FEATURES: 454028: Detect and handle empty MIB
+   index files.
+
+2007-05-27 06:20  tanders
+
+   *
+
+   grammar fix
+
+2007-05-26 16:41  alex_b
+
+   *
+
+   Win32 IPv6 build fixes. IPv6 now requires PSDK.
+
+2007-05-26 15:14  alex_b
+
+   *
+
+   IPv6 build fixes for build.bat, Configure and README.win32.
+
+2007-05-25 23:03  tanders
+
+   *
+
+   Documentation update w.r.t. recent changes (mibII/ipv6 and AIX
+   shared library building).
+
+2007-05-25 15:28  tanders
+
+   *
+
+   Some systems (e.g. HP-UX 11.23/IA64) currently still need
+   "net-snmp-config --libs" (instead of just --netsnmp-libs) for
+   linking
+   libnetsnmp to a Perl module.
+
+2007-05-24 23:55  tanders
+
+   *
+
+   CHANGES: build: only enable mibII/ipv6 through --enable-ipv6 on
+   systems it builds properly on (Linux and *BSD)
+
+2007-05-24 23:15  tanders
+
+   *
+
+   Some systems (e.g. HP-UX 11.23/IA64) currently still need
+   "net-snmp-config --libs" (instead of just --netsnmp-libs) for
+   linking libsnmpagent to a Perl module.
+
+2007-05-24 22:01  magfr
+
+   *
+
+   Correct obviously broken use of the KLOOKUP macro to be
+   consistent at least
+
+2007-05-24 20:51  tanders
+
+   *
+
+   CHANGES: FreeBSD: add initial support for upcoming FreeBSD 7
+
+2007-05-24 12:48  tanders
+
+   *
+
+   fix library linking on HP-UX 11.23/IA64
+
+2007-05-24 08:36  tanders
+
+   *
+
+   CHANGES: snmplib: increment "current" and "age" according to
+   libtool
+   versioning policy, since interfaces have been added since 5.4.
+   We now build libnetsnmp.so.15.1.0.
+   5.4.1.pre1 was broken in this regard.
+
+2007-05-23 19:05  tanders
+
+   *
+
+   NEWS: snmplib: BUG: 1619827: link net-snmp libraries and binaries
+   against the net-snmp libraries they really depend on
+   - reflect library interdependencies at link time
+   - fix dependencies on libcrypto, libpkcs11 and libkstat
+   - install libraries in correct order (important for libtool
+   relinking)
+   NEWS: Perl: link Perl modules against the exact set of libraries
+   they depend on
+
+2007-05-22 14:40  hardaker
+
+   *
+
+   version stamp 5.4.1.pre1
+
+2007-05-22 00:24  hardaker
+
+   *
+
+   version update
+
+2007-05-22 00:19  hardaker
+
+   *
+
+   version update
+
+2007-05-22 00:01  hardaker
+
+   *
+
+   make depend
+
+2007-05-22 00:00  hardaker
+
+   *
+
+   ignore winExtDLL in comment check
+
+2007-05-21 23:54  hardaker
+
+   *
+
+   // -> C comment
+
+2007-05-21 23:51  hardaker
+
+   *
+
+   documentation update
+
+2007-05-21 23:11  magfr
+
+   *
+
+   CHANGES: building: Disable inlining on solaris as there are some
+   linking errors that show up if the inline support is left
+   enabled.
+
+2007-05-21 22:46  hardaker
+
+   *
+
+   - version tag ( 5.4.1.pre1 )
+
+2007-05-21 22:22  hardaker
+
+   *
+
+   version update
+
+-------------------------------------------------------------------------------
+
 Changes: V5-4-patches branch created -> V5.4.1.pre1
 
 2007-05-20 21:34  tanders
