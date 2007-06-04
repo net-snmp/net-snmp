@@ -2998,7 +2998,7 @@ if test "x$with_rpm" != "xno" && \
 fi
 
 AC_CHECK_FUNCS(getloadavg)
-AC_CHECK_FUNCS(getaddrinfo getipnodebyname)
+AC_CHECK_FUNCS(getaddrinfo getipnodebyname gai_strerror)
 # BSDi2 functions differ
 AC_CHECK_FUNCS(statvfs statfs)
 AC_CHECK_FUNCS(getdtablesize)

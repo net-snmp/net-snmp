@@ -1033,10 +1033,16 @@ Host_serv(const char *host, const char *serv, int family, int socktype)
     hints.ai_socktype = socktype;       /* 0, SOCK_STREAM, SOCK_DGRAM, etc. */
 
     if ((n = getaddrinfo(host, serv, &hints, &res)) != 0)
+#if HAVE_GAI_STRERROR
         printf("host_serv error for %s, %s: %s",
                (host == NULL) ? "(no hostname)" : host,
                (serv == NULL) ? "(no service name)" : serv,
                gai_strerror(n));
+#else
+        printf("host_serv error for %s, %s",
+               (host == NULL) ? "(no hostname)" : host,
+               (serv == NULL) ? "(no service name)" : serv);
+#endif
 
     return (res);               /* return pointer to first on linked list */
 }
