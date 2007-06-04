@@ -66,6 +66,7 @@ interactive=no
 SNMP_VERBOSE=${SNMP_VERBOSE:=0}
 SNMP_SLEEP=${SNMP_SLEEP:=1} 	## default seconds to sleep
 SH_DEBUG=0
+USE_TEST_NUMS=0
 
 while [ -n "$1" ]; do
     case "$1" in
@@ -139,6 +140,9 @@ while [ -n "$1" ]; do
 	    SNMP_PREFER_NEAR_MIBS=0
 	    ;;
 
+	-n)
+	    USE_TEST_NUMS=1
+	    ;;
     esac
 
     shift
@@ -349,13 +353,17 @@ fi
 cntr=0
 for testfile in $do_tests; do
     dothisone="yes"
-    id_x=0
-    for itest in $inp; do
-        if [ "$cntr" = "$id_x" ] ; then
-            num="$itest"
-        fi
-    id_x=`expr $id_x + 1`
-    done
+    if [ $USE_TEST_NUMS = 1 ] ; then
+	num=`echo $testfile | sed -e 's/^T//;s/[a-zA-Z].*//;'`
+    else
+        id_x=0
+        for itest in $inp; do
+            if [ "$cntr" = "$id_x" ] ; then
+                num="$itest"
+            fi
+            id_x=`expr $id_x + 1`
+        done
+    fi
     if [ "x$interactive" = "xyes" ]; then
 
         if [ $SH_DEBUG = 1 ] ; then
