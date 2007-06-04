@@ -160,14 +160,13 @@ static int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *re
         struct cmsghdr cm;
         struct in_pktinfo ipi;
     } cmsg;
+    struct msghdr m;
 
     cmsg.cm.cmsg_len = sizeof(struct cmsghdr) + sizeof(struct in_pktinfo);
     cmsg.cm.cmsg_level = SOL_IP;
     cmsg.cm.cmsg_type = IP_PKTINFO;
     cmsg.ipi.ipi_ifindex = 0;
     cmsg.ipi.ipi_spec_dst.s_addr = (srcip ? srcip->s_addr : INADDR_ANY);
-
-    struct msghdr m;
 
     m.msg_name		= remote;
     m.msg_namelen	= sizeof(struct sockaddr_in);
