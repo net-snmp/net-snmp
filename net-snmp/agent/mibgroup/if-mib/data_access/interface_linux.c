@@ -38,6 +38,10 @@ typedef __u8 u8;           /* ditto */
 #include <linux/sockios.h>
 #include <linux/if_ether.h>
 
+#ifndef IF_NAMESIZE
+#define IF_NAMESIZE 16
+#endif
+
 unsigned int
 netsnmp_linux_interface_get_if_speed(int fd, const char *name);
 #ifdef HAVE_LINUX_ETHTOOL_H
