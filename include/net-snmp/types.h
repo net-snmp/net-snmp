@@ -71,6 +71,10 @@ typedef long ssize_t;
 #endif
 #endif
 
+#ifndef HAVE_NFDS_T
+typedef unsigned long int nfds_t;
+#endif
+
     /*
      * Try to ensure we have 32-bit (and hopefully 64-bit)
      *    integer types available.
