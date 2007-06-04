@@ -29,7 +29,13 @@ listing of all changes made to the code.
       - patch: 1645698: fix 64-bit signed integer
       - [PATCH 1642071]: Don't fiddle with the storage
       - [PATCH 1665543]: Handle VACM checks correctly.
-
+      - FEATURES: 1041888: Check directory paths for
+      - FEATURES: 851887: Report range information for
+      - Use the default_target argument if it is
+      - [BUG 1619827]: link net-snmp libraries and binaries
+      - increment "current" and "age" according to
+      - Do not use getservbyname to find default port
+      - FEATURES: 454028: Detect and handle empty MIB
 
     snmpd:
       - [BUG 1397895]: include missing interface declarations
@@ -109,6 +115,13 @@ listing of all changes made to the code.
       - [PATCH 1681073]: #ifdef based config_error instead
       - Check for support of static inline functions
       - [BUG 1567324]: Clarify prompting for
+      - Link libdl against libnetsnmpmibs instead of
+      - Link libkvm and libwrap to libnetsnmpagent
+      - [PATCH 1728226]: make sure
+      - [PATCH 1728230]: add
+      - [PATCH 1728237]: Move
+      - only enable mibII/ipv6 through --enable-ipv6 on
+      - Disable inlining on solaris as there are some
 
     documentation:
       - [BUG 1247164]: Document use of OID macros
@@ -128,6 +141,7 @@ listing of all changes made to the code.
       - [BUG 1450669]: from martin987: a perl agentx consumes memory
       - [PATCH 1627949]: from martin987: a perl agentx consumes memory
       - fix SNMP SET for IP addresses on 64-bit
+      - link Perl modules against the exact set of libraries
 
     python:
       - [PATCH 1716114]: Let python build in source tree
@@ -149,9 +163,11 @@ listing of all changes made to the code.
     AIX:
       - [PATCH 1665079]: AIX patches for cpu stats and process monitoring
       - fix default shared library building instead of forcing
+      - build fixes for embedded Perl
 
     FreeBSD:
       - fix configure warning for sys/conf.h
+      - add initial support for upcoming FreeBSD 7
 
     Linux:
       - [BUG 1666005]: Fail to walk ipv6InterfaceTable on Linux
