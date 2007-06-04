@@ -1335,6 +1335,7 @@ AC_CHECK_TYPES([int32_t, uint32_t, u_int32_t])
 AC_CHECK_TYPES([int64_t, uint64_t, u_int64_t])
 AC_CHECK_TYPES([off64_t])
 AC_CHECK_TYPES([uintptr_t, intptr_t])
+AC_CHECK_TYPES([nfds_t],,,[#include <sys/poll.h>])
 
 # solaris specific types
 AC_CHECK_TYPES([Counter64],,,[#include <inet/mib2.h>])

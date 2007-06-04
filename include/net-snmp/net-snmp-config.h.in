@@ -532,6 +532,9 @@
 /* Define to 1 if you have the <net/route.h> header file. */
 #undef HAVE_NET_ROUTE_H
 
+/* Define to 1 if the system has the type `nfds_t'. */
+#undef HAVE_NFDS_T
+
 /* Define to 1 if you have the `nlist' function. */
 #undef HAVE_NLIST
 
