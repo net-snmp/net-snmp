@@ -2666,16 +2666,11 @@ case $target_os in
 esac
 fi
  
-
-# On some platforms (Irix) libnsl and libsocket should not be used.
-AC_CHECK_FUNC(gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME),
-	AC_CHECK_LIB(nsl, gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME)
-	LIBS="${LIBS} -lnsl"))
-
-# SCO Unixware 7.1.4 finds gethostbyname() in -lsocket
-AC_CHECK_FUNC(gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME),
-	AC_CHECK_LIB(socket, gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME)
-	LIBS="${LIBS} -lsocket"))
+# Solaris needs -lsocket for, among other things, socket(2)
+AC_SEARCH_LIBS(socket, socket,,AC_MSG_ERROR([socket(2) not found.]))
+# gethostbyname(3) is in -lnsl on Solaris and in -lsocket on some other OSes
+AC_SEARCH_LIBS(gethostbyname, [nsl socket])
+AC_CHECK_FUNCS(gethostbyname)
 
 # Solaris kstat
 AC_CHECK_LIB(kstat, kstat_lookup,

@@ -79,9 +79,6 @@
 /* define if you have pkginfo */
 #undef HAVE_PKGINFO
 
-/* define if you have gethostbyname */
-#undef HAVE_GETHOSTBYNAME
-
 /* define if you have the perl_eval_pv() function */
 #undef HAVE_PERL_EVAL_PV_LC
 
