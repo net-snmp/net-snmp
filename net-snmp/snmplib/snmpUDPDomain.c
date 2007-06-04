@@ -868,8 +868,13 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
 
             err = getaddrinfo(peername, NULL, &hint, &addrs);
             if (err != 0) {
+#if HAVE_GAI_STRERROR
                 snmp_log(LOG_ERR, "getaddrinfo: %s %s\n", peername,
                          gai_strerror(err));
+#else
+                snmp_log(LOG_ERR, "getaddrinfo: %s (error %d)\n", peername,
+                         err);
+#endif
                 free(peername);
                 return 0;
             }
