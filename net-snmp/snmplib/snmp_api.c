@@ -1557,13 +1557,20 @@ snmp_sess_add_ex(netsnmp_session * in_session,
 
     _init_snmp();
 
-    if (in_session == NULL || transport == NULL) {
+    if (transport == NULL)
+        return NULL;
+
+    if (in_session == NULL) {
+        transport->f_close(transport);
+        netsnmp_transport_free(transport);
         return NULL;
     }
 
     DEBUGMSGTL(("snmp_sess_add", "fd %d\n", transport->sock));
 
     if ((slp = snmp_sess_copy(in_session)) == NULL) {
+        transport->f_close(transport);
+        netsnmp_transport_free(transport);
         return (NULL);
     }
 
@@ -5496,9 +5503,6 @@ _sess_read(void *sessp, fd_set * fdset)
                     (void)nslp->session->callback(NETSNMP_CALLBACK_OP_CONNECT,
                                                   nslp->session, 0, NULL,
                                                   sp->callback_magic);
-                } else {
-                    new_transport->f_close(new_transport);
-                    netsnmp_transport_free(new_transport);
                 }
                 return 0;
             } else {
