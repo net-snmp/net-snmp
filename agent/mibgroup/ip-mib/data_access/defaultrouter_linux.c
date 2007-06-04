@@ -12,8 +12,10 @@
 #include "ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.h"
 
 #include <asm/types.h>
+#ifdef HAVE_LINUX_RTNETLINK_H
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
+#endif
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <errno.h>
@@ -80,6 +82,12 @@ netsnmp_arch_defaultrouter_container_load(netsnmp_container *container,
 static int
 _load(netsnmp_container *container)
 {
+#ifndef HAVE_LINUX_RTNETLINK_H
+    DEBUGMSGTL(("access:defaultrouter",
+                "cannot get default router information"
+                "as netlink socket is not available\n"));
+    return -1;
+#else
     int rc = 0;
     int idx_offset = 0;
     netsnmp_defaultrouter_entry *entry;
@@ -309,4 +317,5 @@ next_nlmsghdr:
 
     close(nlsk);
     return rc;
+#endif  /* HAVE_LINUX_RTNETLINK_H */
 }
