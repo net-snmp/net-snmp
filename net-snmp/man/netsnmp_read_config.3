@@ -1,4 +1,4 @@
-.TH "parsing various configuration files at run time" 3 "21 May 2007" "Version 5.4.1.pre1" "net-snmp" \" -*- nroff -*-
+.TH "parsing various configuration files at run time" 3 "4 Jun 2007" "Version 5.4.1.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -253,7 +253,7 @@ the next token in the configuration line. NULL if none left or if an unknown typ
 .PP
 
 .PP
-Definition at line 1809 of file read_config.c.
+Definition at line 1828 of file read_config.c.
 .PP
 References NULL, read_config_read_objid(), read_config_read_octet_string(), and skip_token().
 .PP
@@ -278,7 +278,7 @@ void
 .PP
 
 .PP
-Definition at line 1245 of file read_config.c.
+Definition at line 1264 of file read_config.c.
 .PP
 References get_persistent_directory(), netsnmp_ds_get_boolean(), netsnmp_getenv(), NULL, and snmp_log().
 .PP
@@ -321,7 +321,7 @@ character pointer to the end of the line. NULL if an unknown type.
 .PP
 
 .PP
-Definition at line 1968 of file read_config.c.
+Definition at line 1987 of file read_config.c.
 .PP
 References read_config_store_data_prefix().
 .SS "struct \fBconfig_line\fP* register_config_handler (const char * type, const char * token, void(*)(const char *, char *) parser, void(*)(void) releaser, const char * help)"
