@@ -425,6 +425,7 @@ EOF
 
       cat >> $tmpfile <<EOF
 const char *app_name = "$outname";
+int reconfig = 0;
 
 extern int netsnmp_running;
 
@@ -438,6 +439,15 @@ RETSIGTYPE
 stop_server(UNUSED int a) {
     netsnmp_running = 0;
 }
+
+#ifdef SIGHUP
+RETSIGTYPE
+hup_handler(int sig)
+{
+    reconfig = 1;
+    signal(SIGHUP, hup_handler);
+}
+#endif
 
 static void
 usage(const char *prog)
@@ -637,9 +647,17 @@ EOF
 #ifdef SIGINT
   signal(SIGINT, stop_server);
 #endif
+#ifdef SIGHUP
+  signal(SIGHUP, hup_handler);
+#endif
 
   /* main loop here... */
   while(netsnmp_running) {
+    if (reconfig) {
+      free_config();
+      read_configs();
+      reconfig = 0;
+    }
     agent_check_and_process(1);
   }
 
