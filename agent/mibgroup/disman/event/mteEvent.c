@@ -328,7 +328,7 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
                        struct mteTrigger *trigger,   /* Trigger that fired */
                        oid *suffix, size_t sfx_len ) /* Matching instance  */
 {
-    netsnmp_variable_list var, *v2;
+    netsnmp_variable_list *var, *v2;
     oid    snmptrap_oid[]   = { 1,3,6,1,6,3,1,1,4,1,0 };
     size_t snmptrap_oid_len = OID_LENGTH(snmptrap_oid);
          /*
@@ -341,12 +341,16 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
                              NETSNMP_DS_APPLICATION_ID,
                              NETSNMP_DS_AGENT_STRICT_DISMAN);
 
+    var = (netsnmp_variable_list *)SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
+    if (!var)
+        return;
+
     /*
      * Set the basic notification OID...
      */
-    memset(&var, 0, sizeof(netsnmp_variable_list));
-    snmp_set_var_objid( &var, snmptrap_oid, snmptrap_oid_len );
-    snmp_set_var_typed_value( &var, ASN_OBJECT_ID,
+    memset(var, 0, sizeof(netsnmp_variable_list));
+    snmp_set_var_objid( var, snmptrap_oid, snmptrap_oid_len );
+    snmp_set_var_typed_value( var, ASN_OBJECT_ID,
                     (u_char *)entry->mteNotification,
                               entry->mteNotification_len*sizeof(oid));
 
@@ -362,24 +366,24 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
     if (!strictOrdering) {
         DEBUGMSGTL(("disman:event:fire", "Adding event objects (first)\n"));
         if (strcmp(entry->mteNotifyOwner, "_snmpd") != 0)
-            mteObjects_vblist( &var, entry->mteNotifyOwner,
+            mteObjects_vblist( var, entry->mteNotifyOwner,
                                      entry->mteNotifyObjects,
                                      suffix, sfx_len );
     }
 
     DEBUGMSGTL(("disman:event:fire", "Adding trigger objects (general)\n"));
-    mteObjects_vblist( &var, trigger->mteTriggerOOwner,
+    mteObjects_vblist( var, trigger->mteTriggerOOwner,
                              trigger->mteTriggerObjects,
                              suffix, sfx_len );
     DEBUGMSGTL(("disman:event:fire", "Adding trigger objects (specific)\n"));
-    mteObjects_vblist( &var, trigger->mteTriggerXOwner,
+    mteObjects_vblist( var, trigger->mteTriggerXOwner,
                              trigger->mteTriggerXObjects,
                              suffix, sfx_len );
 
     if (strictOrdering) {
         DEBUGMSGTL(("disman:event:fire", "Adding event objects (last)\n"));
         if (strcmp(entry->mteNotifyOwner, "_snmpd") != 0)
-            mteObjects_vblist( &var, entry->mteNotifyOwner,
+            mteObjects_vblist( var, entry->mteNotifyOwner,
                                      entry->mteNotifyObjects,
                                      suffix, sfx_len );
     }
@@ -388,7 +392,7 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
      * Query the agent to retrieve the necessary values...
      *   (skipping the initial snmpTrapOID varbind)
      */
-    v2 = var.next_variable;
+    v2 = var->next_variable;
     if (entry->session)
         netsnmp_query_get( v2, entry->session );
     else
@@ -401,9 +405,9 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
     if (strcmp(entry->mteNotifyOwner, "_snmpd") == 0) {
         DEBUGMSGTL(("disman:event:fire", "Adding event objects (internal)\n"));
         if ( !strictOrdering ) {
-            mteObjects_internal_vblist(&var, entry->mteNotifyObjects, trigger);
+            mteObjects_internal_vblist(var, entry->mteNotifyObjects, trigger);
         } else {
-            for (v2 = &var; v2 && v2->next_variable; v2=v2->next_variable)
+            for (v2 = var; v2 && v2->next_variable; v2=v2->next_variable)
                 ;
             mteObjects_internal_vblist(v2, entry->mteNotifyObjects, trigger);
         }
@@ -412,8 +416,8 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
     /*
      * ... and send the resulting varbind list as a notification
      */
-    send_v2trap( &var );
-    snmp_free_varbind( var.next_variable );
+    send_v2trap( var );
+    snmp_free_varbind( var );
     return 0;
 }
 
