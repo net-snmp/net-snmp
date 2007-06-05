@@ -86,11 +86,17 @@ snmptrapd_parse_traphandle(const char *token, char *line)
     char           *cptr, *cp;
     netsnmp_trapd_handler *traph;
     int             flags = 0;
+    char           *format = NULL;
 
     memset( buf, 0, sizeof(buf));
     memset(obuf, 0, sizeof(obuf));
     cptr = copy_nword(line, buf, sizeof(buf));
 
+    if ( buf[0] == '-' && buf[1] == 'F' ) {
+        cptr = copy_nword(cptr, buf, sizeof(buf));
+        format = strdup( buf );
+        cptr = copy_nword(cptr, buf, sizeof(buf));
+    }
     DEBUGMSGTL(("read_config:traphandle", "registering handler for: "));
 
     if (!strcmp(buf, "default")) {
@@ -127,6 +133,8 @@ snmptrapd_parse_traphandle(const char *token, char *line)
         traph->flags = flags;
         traph->authtypes = TRAP_AUTH_EXE;
         traph->token = strdup(cptr);
+        if (format)
+            traph->format = format;
     }
 }
 
@@ -140,10 +148,17 @@ parse_forward(const char *token, char *line)
     char           *cptr, *cp;
     netsnmp_trapd_handler *traph;
     int             flags = 0;
+    char           *format;
 
     memset( buf, 0, sizeof(buf));
     memset(obuf, 0, sizeof(obuf));
     cptr = copy_nword(line, buf, sizeof(buf));
+
+    if ( buf[0] == '-' && buf[1] == 'F' ) {
+        cptr = copy_nword(cptr, buf, sizeof(buf));
+        format = strdup( buf );
+        cptr = copy_nword(cptr, buf, sizeof(buf));
+    }
     DEBUGMSGTL(("read_config:forward", "registering forward for: "));
     if (!strcmp(buf, "default")) {
         DEBUGMSG(("read_config:forward", "default"));
@@ -186,6 +201,8 @@ parse_forward(const char *token, char *line)
         traph->flags = flags;
         traph->authtypes = TRAP_AUTH_NET;
         traph->token = strdup(cptr);
+        if (format)
+            traph->format = format;
     }
 }
 
