@@ -160,6 +160,7 @@ snmp_add_null_var(netsnmp_pdu *pdu, const oid * name, size_t name_length)
 }
 
 
+#include <net-snmp/library/snmp_debug.h>
 static int
 snmp_synch_input(int op,
                  netsnmp_session * session,
@@ -169,10 +170,14 @@ snmp_synch_input(int op,
     int             rpt_type;
 
     if (reqid != state->reqid && pdu && pdu->command != SNMP_MSG_REPORT) {
+        DEBUGMSGTL(("snmp_synch", "Unexpected response (ReqID: %d,%d - Cmd %d)\n",
+                                   reqid, state->reqid, pdu->command ));
         return 0;
     }
 
     state->waiting = 0;
+    DEBUGMSGTL(("snmp_synch", "Response (ReqID: %d - Cmd %d)\n",
+                               reqid, (pdu ? pdu->command : -1)));
 
     if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE && pdu) {
         if (pdu->command == SNMP_MSG_REPORT) {
@@ -884,7 +889,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
             vars->val.string = (u_char *) malloc(vars->val_len + 1);
         }
         if (vars->val.string == NULL) {
-            snmp_log(LOG_ERR,"no storage for OID\n");
+            snmp_log(LOG_ERR,"no storage for string\n");
             return 1;
         }
         memmove(vars->val.string, value, vars->val_len);
@@ -942,7 +947,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
 #endif                          /* NETSNMP_WITH_OPAQUE_SPECIAL_TYPES */
 
     default:
-        snmp_log(LOG_ERR,"no storage for OID\n");
+        snmp_log(LOG_ERR,"Internal error in type switching\n");
         snmp_set_detail("Internal error in type switching\n");
         return (1);
     }
@@ -1189,6 +1194,7 @@ static int _query(netsnmp_variable_list *list,
     netsnmp_variable_list *vb1, *vb2, *vtmp;
     int ret;
 
+    DEBUGMSGTL(("iquery", "query on session %x\n", session));
     /*
      * Clone the varbind list into the request PDU...
      */
