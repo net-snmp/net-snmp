@@ -61,9 +61,6 @@
 /* define if you have the Perl_eval_pv() function */
 #undef HAVE_PERL_EVAL_PV_UC
 
-/* Define to 1 if you have the `perl_eval_pv' function. */
-#undef HAVE_PERL_EVAL_PV
-
 /* printing system */
 #undef HAVE_LPSTAT
 #undef LPSTAT_PATH
