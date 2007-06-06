@@ -1012,7 +1012,7 @@ int   forward_handler( netsnmp_pdu           *pdu,
     return NETSNMPTRAPD_HANDLER_OK;
 }
 
-#if defined(USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE) && defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+#if defined(USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE) && defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
 /*
  *  "Notification" handler for implementing NOTIFICATION-MIB
  *  		(presumably)
