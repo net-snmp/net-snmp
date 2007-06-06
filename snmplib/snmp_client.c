@@ -863,7 +863,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
             vars->val.string = (u_char *) malloc(vars->val_len + 1);
         }
         if (vars->val.string == NULL) {
-            snmp_log(LOG_ERR,"no storage for OID\n");
+            snmp_log(LOG_ERR,"no storage for string\n");
             return 1;
         }
         memmove(vars->val.string, value, vars->val_len);
@@ -921,7 +921,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
 #endif                          /* OPAQUE_SPECIAL_TYPES */
 
     default:
-        snmp_log(LOG_ERR,"no storage for OID\n");
+        snmp_log(LOG_ERR,"Internal error in type switching\n");
         snmp_set_detail("Internal error in type switching\n");
         return (1);
     }
