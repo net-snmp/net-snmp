@@ -223,7 +223,7 @@ int __cdecl     _tmain(int argc, TCHAR * argv[]);
 int             main(int, char **);
 #endif
 
-#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
 extern void            subagent_init(void);
 #endif
 
@@ -283,7 +283,7 @@ usage(void)
     fprintf(stderr, "  \t\t\t  (followed -quiet to prevent message popups)\n");
 #endif
     fprintf(stderr, "  -v, --version\t\tdisplay version information\n");
-#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
     fprintf(stderr, "  -x ADDRESS\t\tuse ADDRESS as AgentX address\n");
 #endif
     fprintf(stderr,
@@ -585,7 +585,7 @@ main(int argc, char *argv[])
     fd_set          readfds,writefds,exceptfds;
     struct timeval  timeout, *tvp;
     char           *cp, *listen_ports = NULL;
-#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
     int             agentx_subagent = 1;
 #endif
     netsnmp_trapd_handler *traph;
@@ -932,7 +932,7 @@ main(int argc, char *argv[])
         traph->authtypes = TRAP_AUTH_LOG;
     }
 
-#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
     /*
      * we're an agentx subagent? 
      */
@@ -961,7 +961,7 @@ main(int argc, char *argv[])
      */
     init_agent("snmptrapd");
 
-#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
     /*
      * initialize local modules 
      */
@@ -991,12 +991,12 @@ main(int argc, char *argv[])
         register_snmpEngine_scalars_context("snmptrapd");
 #endif
     }
-#endif /* USING_AGENTX_SUBAGENT_MODULE && !SNMPTRAPD_DISABLE_AGENTX */
+#endif /* USING_AGENTX_SUBAGENT_MODULE && !NETSNMP_SNMPTRAPD_DISABLE_AGENTX */
 
     /* register our authorization handler */
     init_netsnmp_trapd_auth();
 
-#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(SNMPTRAPD_DISABLE_AGENTX)
+#if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
     if (agentx_subagent) {
 #ifdef USING_AGENT_NSVACMACCESSTABLE_MODULE
         extern void init_register_nsVacm_context(const char *);
