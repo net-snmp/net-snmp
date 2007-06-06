@@ -1020,18 +1020,23 @@ fi
 # platform-specific linker flags
 case $target_os in
     aix4.2*|aix4.3*|aix5*)
-        AC_MSG_CHECKING([whether we need to add linker flags to enable runtime linking on AIX])
+        AC_MSG_CHECKING([what linker flags to add to enable runtime linking on AIX])
         for ld_flag in $LDFLAGS; do
             if (test $ld_flag = "-brtl" || test $ld_flag = "-Wl,-brtl"); then
-                ns_aix_runtimelinking_flags_ok=yes
+                netsnmp_aix_runtimelinking_flags_ok=yes
                 break
             fi
         done
-        if test "Xns_aix_runtimelinking_flags_ok" != "Xyes"; then
-            LDFLAGS="-brtl $LDFLAGS"
-	    AC_MSG_RESULT([yes])
+        if test "X$netsnmp_aix_runtimelinking_flags_ok" != "Xyes"; then
+	    if test "x$GCC" = "xyes"; then
+	        netsnmp_aix_ldflags="-Wl,-brtl"
+	    else
+                netsnmp_aix_ldflags="-brtl"
+	    fi
+            LDFLAGS="$netsnmp_aix_ldflags $LDFLAGS"
+	    AC_MSG_RESULT($netsnmp_aix_ldflags)
 	else
-	    AC_MSG_RESULT([no])
+	    AC_MSG_RESULT([none])
 	fi
 	;;
     darwin8*)
