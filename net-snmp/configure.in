@@ -1053,7 +1053,6 @@ case $target_os in
 esac
 
 # libtool stuff for shared/static libraries.
-AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
