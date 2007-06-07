@@ -1075,6 +1075,7 @@ read_config_files_in_path(const char *path, struct config_files *ctmp,
             cptr2 = ++cptr1;
             continue;
         }
+#ifdef S_ISDIR
         if (!S_ISDIR(statbuf.st_mode)) {
             /*
              * Not a directory, continue 
@@ -1083,6 +1084,7 @@ read_config_files_in_path(const char *path, struct config_files *ctmp,
             cptr2 = ++cptr1;
             continue;
         }
+#endif
 
         /*
          * for proper persistent storage retrival, we need to read old backup
