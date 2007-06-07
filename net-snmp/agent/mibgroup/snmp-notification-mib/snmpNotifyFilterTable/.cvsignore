@@ -1,5 +1,0 @@
-*.txt
-snmpNotifyFilterTable_subagent.c
-snmpNotifyFilterTable_Makefile
-.libs
-*.lo
