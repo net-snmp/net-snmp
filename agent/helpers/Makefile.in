@@ -29,14 +29,18 @@ HEADERS=all_helpers.h \
 	scalar.h \
 	scalar_group.h \
         serialize.h \
+	stash_cache.h \
+	stash_to_next.h \
         table.h \
 	table_array.h \
 	table_container.h \
         table_data.h \
         table_dataset.h \
-        table_tdata.h \
         table_iterator.h \
-	watcher.h \
+        table_tdata.h \
+	watcher.h
+
+# No header 'table_row.h'
 
 HEADERSONLY=mfd.h set_helper.h
 INCLUDESUBDIRHEADERS=$(HEADERS) $(HEADERSONLY)
