@@ -107,7 +107,10 @@ unregister_sec_mod(int secmod)
     for (sptr = registered_services, lptr = NULL; sptr;
          lptr = sptr, sptr = sptr->next) {
         if (sptr->securityModel == secmod) {
-            lptr->next = sptr->next;
+            if ( lptr )
+                lptr->next = sptr->next;
+            else
+                registered_services = sptr->next;
 	    SNMP_FREE(sptr->secDef);
             SNMP_FREE(sptr);
             return SNMPERR_SUCCESS;
