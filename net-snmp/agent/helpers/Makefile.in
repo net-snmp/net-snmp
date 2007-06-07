@@ -14,13 +14,12 @@ top_builddir=../..
 
 INSTALLLIBS=libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 INCLUDESUBDIR=agent
-INCLUDESUBDIRHEADERS=all_helpers.h \
+HEADERS=all_helpers.h \
 	baby_steps.h \
 	bulk_to_next.h \
 	cache_handler.h \
         debug_handler.h \
 	instance.h \
-	mfd.h \
 	mode_end_call.h \
         multiplexer.h \
         null.h \
@@ -30,7 +29,6 @@ INCLUDESUBDIRHEADERS=all_helpers.h \
 	scalar.h \
 	scalar_group.h \
         serialize.h \
-        set_helper.h \
         table.h \
 	table_array.h \
 	table_container.h \
@@ -40,6 +38,8 @@ INCLUDESUBDIRHEADERS=all_helpers.h \
         table_tdata.h \
 	watcher.h
 
+HEADERSONLY=mfd.h set_helper.h
+INCLUDESUBDIRHEADERS=$(HEADERS) $(HEADERSONLY)
 
 #
 # Build info
