@@ -16,29 +16,29 @@ INSTALLLIBS=libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 INCLUDESUBDIR=agent
 INCLUDESUBDIRHEADERS=all_helpers.h \
 	baby_steps.h \
-	cache_handler.h \
-	instance.h \
-	scalar.h \
-	scalar_group.h \
-	watcher.h \
-        multiplexer.h \
 	bulk_to_next.h \
-        null.h \
+	cache_handler.h \
         debug_handler.h \
+	instance.h \
+	mfd.h \
+	mode_end_call.h \
+        multiplexer.h \
+        null.h \
         old_api.h \
         read_only.h \
         row_merge.h \
+	scalar.h \
+	scalar_group.h \
         serialize.h \
         set_helper.h \
+        table.h \
+	table_array.h \
+	table_container.h \
         table_data.h \
         table_dataset.h \
         table_tdata.h \
-	table_array.h \
-	table_container.h \
-        table.h \
         table_iterator.h \
-	mfd.h \
-	mode_end_call.h
+	watcher.h \
 
 
 #
@@ -54,84 +54,84 @@ CPPFLAGS= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 
 SRCS =  all_helpers.c \
 	baby_steps.c \
-	cache_handler.c \
-	multiplexer.c \
-	read_only.c \
 	bulk_to_next.c \
+	cache_handler.c \
+	debug_handler.c \
 	instance.c \
+	mode_end_call.c \
+	multiplexer.c \
+	null.c \
+	old_api.c \
+	read_only.c \
+	row_merge.c \
 	scalar.c \
 	scalar_group.c \
-	watcher.c \
-	null.c \
-	debug_handler.c \
-	old_api.c \
-	row_merge.c \
 	serialize.c \
 	stash_cache.c \
 	stash_to_next.c \
+	table.c \
 	table_array.c \
 	table_container.c \
-	table_iterator.c \
 	table_data.c \
 	table_dataset.c \
-	table_tdata.c \
+	table_iterator.c \
 	table_row.c \
-	table.c \
-	mode_end_call.c
+	table_tdata.c \
+	watcher.c
 
 OBJS =  all_helpers.o \
 	baby_steps.o \
-	cache_handler.o \
-	multiplexer.o \
-	read_only.o \
 	bulk_to_next.o \
+	cache_handler.o \
+	debug_handler.o \
 	instance.o \
+	mode_end_call.o \
+	multiplexer.o \
+	null.o \
+	old_api.o \
+	read_only.o \
+	row_merge.o \
 	scalar.o \
 	scalar_group.o \
-	watcher.o \
-	null.o \
-	debug_handler.o \
-	old_api.o \
-	row_merge.o \
 	serialize.o \
 	stash_cache.o \
 	stash_to_next.o \
+	table.o \
 	table_array.o \
 	table_container.o \
-	table_iterator.o \
 	table_data.o \
 	table_dataset.o \
-	table_tdata.o \
+	table_iterator.o \
 	table_row.o \
-	table.o \
-	mode_end_call.o
+	table_tdata.o \
+	watcher.o
 
 LOBJS = all_helpers.lo \
 	baby_steps.lo \
-	cache_handler.lo \
-	multiplexer.lo \
-	read_only.lo \
 	bulk_to_next.lo \
+	cache_handler.lo \
+	debug_handler.lo \
 	instance.lo \
+	mode_end_call.lo \
+	multiplexer.lo \
+	null.lo \
+	old_api.lo \
+	read_only.lo \
+	row_merge.lo \
 	scalar.lo \
 	scalar_group.lo \
-	watcher.lo \
-	null.lo \
-	debug_handler.lo \
-	old_api.lo \
-	row_merge.lo \
 	serialize.lo \
 	stash_cache.lo \
 	stash_to_next.lo \
+	table.lo \
 	table_array.lo \
 	table_container.lo \
-	table_iterator.lo \
 	table_data.lo \
 	table_dataset.lo \
-	table_tdata.lo \
+	table_iterator.lo \
 	table_row.lo \
-	table.lo \
-	mode_end_call.lo
+	table_tdata.lo \
+	watcher.lo
 
 all: standardall
 
