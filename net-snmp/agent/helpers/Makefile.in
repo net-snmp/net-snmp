@@ -29,6 +29,7 @@ HEADERS=all_helpers.h \
 	scalar.h \
 	scalar_group.h \
         serialize.h \
+	stash_cache.h \
         table.h \
 	table_array.h \
 	table_container.h \
