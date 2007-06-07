@@ -1,7 +1,0 @@
-.backup
-.merged
-.new
-.orig
-*.lo
-Makefile
-.libs
