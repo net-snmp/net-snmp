@@ -206,28 +206,35 @@ parse_format(const char *token, char *line)
         return;
     }
 
-    *cp = '\0';
-    cp++;
+    *(cp++) = '\0';
+    while (*cp && !isspace(*cp))
+        cp++;
 
     /*
      * OK - now "line" contains the format type,
      *      and cp points to the actual format string.
      * So update the appropriate pointer(s).
-     *
-     * XXX - the previous values really need to be freed too
      */
-    if (!strcmp( line, "print1"))
+    if (!strcmp( line, "print1")) {
+        SNMP_FREE( print_format1 );
         print_format1 = strdup(cp);
-    else if (!strcmp( line, "print2"))
+    } else if (!strcmp( line, "print2")) {
+        SNMP_FREE( print_format2 );
         print_format2 = strdup(cp);
-    else if (!strcmp( line, "print")) {
+    } else if (!strcmp( line, "print")) {
+        SNMP_FREE( print_format1 );
+        SNMP_FREE( print_format2 );
         print_format1 = strdup(cp);
         print_format2 = strdup(cp);
-    } else if (!strcmp( line, "syslog1"))
+    } else if (!strcmp( line, "syslog1")) {
+        SNMP_FREE( syslog_format1 );
         syslog_format1 = strdup(cp);
-    else if (!strcmp( line, "syslog2"))
+    } else if (!strcmp( line, "syslog2")) {
+        SNMP_FREE( syslog_format2 );
         syslog_format2 = strdup(cp);
-    else if (!strcmp( line, "syslog")) {
+    } else if (!strcmp( line, "syslog")) {
+        SNMP_FREE( syslog_format1 );
+        SNMP_FREE( syslog_format2 );
         syslog_format1 = strdup(cp);
         syslog_format2 = strdup(cp);
     }
