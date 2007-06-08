@@ -2801,7 +2801,8 @@ if test "x$with_rpm" != "xno" && \
 
   # dunno if this is needed for rpm-4.0.x, earlier probably needs.
   AC_CHECK_HEADER(zlib.h,
-      AC_CHECK_LIB(z, gzread, , CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
+      NETSNMP_SEARCH_LIBS(gzread, z,,
+          CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}, $LMIBLIBS, _rpmlibs),
       CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
 
   # two variants of bzip2 need checking.
@@ -2812,39 +2813,32 @@ if test "x$with_rpm" != "xno" && \
       LDFLAGS="${LDFLAGS} -L$withval/lib"
     fi
     if test "x$with_bzip2" != "xno"; then
-  AC_CHECK_LIB(bz2, bzread, [_rpmlibs="$_rpmlibs -lbz2"],
-     AC_CHECK_LIB(bz2, BZ2_bzread, [_rpmlibs="$_rpmlibs -lbz2"],))
+      NETSNMP_SEARCH_LIBS(bzread, bz2,,, $LMIBLIBS, _rpmlibs)
+      NETSNMP_SEARCH_LIBS(BZ2_bzread, bz2,,, $LMIBLIBS, _rpmlibs)
     fi
   ])
 
 
   # two variants of db1 need checking.
-  AC_CHECK_LIB(db1, dbopen, [_rpmlibs="-ldb1 $_rpmlibs"],
-     AC_CHECK_LIB(db, dbopen, [_rpmlibs="-ldb $_rpmlibs"]))
+  NETSNMP_SEARCH_LIBS(dbopen, [db1 db],,, $LMIBLIBS, _rpmlibs)
 
   # two variants of db3 need checking.
-  AC_CHECK_LIB(db-3.1, db_create, [_rpmlibs="-ldb-3.1 $_rpmlibs"],
-    AC_CHECK_LIB(db-3.0, db_create, [_rpmlibs="-ldb-3.0 $_rpmlibs"]))
+  NETSNMP_SEARCH_LIBS(db_create, [db-3.1 db-3.0],,, $LMIBLIBS, _rpmlibs)
   
   # rpm-3.0.5 and later needs popt.
-  AC_CHECK_LIB(popt, poptParseArgvString, [_rpmlibs="-lpopt $_rpmlibs"])
+  NETSNMP_SEARCH_LIBS(poptParseArgvString, popt,,, $LMIBLIBS, _rpmlibs)
   
   # rpm-4.0.x needs rpmio.
-  AC_CHECK_LIB(rpmio, Fopen, [_rpmlibs="-lrpmio $_rpmlibs"],,$_rpmlibs)
+  NETSNMP_SEARCH_LIBS(Fopen, rpmio,,, $LMIBLIBS, _rpmlibs)
   
+  # rpm-4.0.3 librpmdb actually contains what we need.
+  NETSNMP_SEARCH_LIBS(rpmdbOpen, rpmdb,,, $LMIBLIBS, _rpmlibs)
   # now check for rpm using the appropriate libraries.
-  AC_CHECK_LIB(rpm, rpmGetFilesystemList,[
+  NETSNMP_SEARCH_LIBS(rpmGetFilesystemList, rpm, [
     AC_DEFINE(HAVE_LIBRPM)
-    LMIBLIBS="-lrpm $_rpmlibs $LMIBLIBS"
+    LMIBLIBS="$_rpmlibs $LMIBLIBS"
     CFLAGS="$CFLAGS -I/usr/include/rpm"
-  ],[
-    # rpm-4.0.3 librpmdb actually contains what we need.
-    AC_CHECK_LIB(rpmdb, rpmdbOpen,[
-      AC_DEFINE(HAVE_LIBRPM)
-      LMIBLIBS="-lrpmdb -lrpm $_rpmlibs $LMIBLIBS"
-      CFLAGS="$CFLAGS -I/usr/include/rpm"
-    ],,-lrpm $_rpmlibs)
-  ])
+  ],, $LMIBLIBS, _rpmlibs)
 fi
   
 # libkvm
