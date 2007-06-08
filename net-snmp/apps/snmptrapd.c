@@ -1211,7 +1211,9 @@ main(int argc, char *argv[])
             trapd_update_config();
             if (trap1_fmt_str_remember) {
                 free_trap1_fmt();
+                free_trap2_fmt();
                 print_format1 = strdup(trap1_fmt_str_remember);
+                print_format2 = strdup(trap1_fmt_str_remember);
             }
             reconfig = 0;
         }
