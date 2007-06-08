@@ -146,6 +146,7 @@ char           *default_port = ddefault_port;
     FILE           *PID;
     char           *pid_file = NULL;
 #endif
+extern void parse_format(const char *token, char *line);
 char           *trap1_fmt_str_remember = NULL;
 int             dofork = 1;
 
@@ -717,7 +718,19 @@ main(int argc, char *argv[])
 
         case 'F':
             if (optarg != NULL) {
-                trap1_fmt_str_remember = optarg;
+                if (( strncmp( optarg, "print",   5 ) == 0 ) ||
+                    ( strncmp( optarg, "syslog",  6 ) == 0 ) ||
+                    ( strncmp( optarg, "execute", 7 ) == 0 )) {
+                    /* New style: "type=format" */
+                    trap1_fmt_str_remember = strdup(optarg);
+                    cp = strchr( trap1_fmt_str_remember, '=' );
+                    if (cp)
+                        *cp = ' ';
+                } else {
+                    /* Old style: implicitly "print=format" */
+                    trap1_fmt_str_remember = malloc(strlen(optarg) + 7);
+                    sprintf( trap1_fmt_str_remember, "print %s", optarg );
+                }
             } else {
                 usage();
                 exit(1);
@@ -1037,10 +1050,7 @@ main(int argc, char *argv[])
 #endif
 
     if (trap1_fmt_str_remember) {
-        free_trap1_fmt();
-        free_trap2_fmt();
-        print_format1 = strdup(trap1_fmt_str_remember);
-        print_format2 = strdup(trap1_fmt_str_remember);
+        parse_format( NULL, trap1_fmt_str_remember );
     }
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
@@ -1217,8 +1227,7 @@ main(int argc, char *argv[])
                          netsnmp_get_version());
             trapd_update_config();
             if (trap1_fmt_str_remember) {
-                free_trap1_fmt();
-                print_format1 = strdup(trap1_fmt_str_remember);
+                parse_format( NULL, trap1_fmt_str_remember );
             }
             reconfig = 0;
         }

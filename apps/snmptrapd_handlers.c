@@ -207,10 +207,10 @@ parse_forward(const char *token, char *line)
 }
 
 
-static void
+void
 parse_format(const char *token, char *line)
 {
-    char *cp;
+    char *cp, *sep;
 
     /*
      * Extract the first token from the value
@@ -228,6 +228,7 @@ parse_format(const char *token, char *line)
         return;
     }
 
+    sep = cp;
     *(cp++) = '\0';
     while (*cp && isspace(*cp))
         cp++;
@@ -271,6 +272,8 @@ parse_format(const char *token, char *line)
         exec_format1 = strdup(cp);
         exec_format2 = strdup(cp);
     }
+
+    *sep = ' ';
 }
 
 
