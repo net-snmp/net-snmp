@@ -550,9 +550,6 @@
 /* Define to 1 if you have the <osreldate.h> header file. */
 /* #undef HAVE_OSRELDATE_H */
 
-/* Define to 1 if you have the `perl_eval_pv' function. */
-/* #undef HAVE_PERL_EVAL_PV */
-
 /* Define to 1 if you have the <pkginfo.h> header file. */
 /* #undef HAVE_PKGINFO_H */
 
