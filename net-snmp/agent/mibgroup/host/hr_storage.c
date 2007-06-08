@@ -294,7 +294,7 @@ init_hr_storage(void)
 	"1 | 2\t\t(1 = enable, 2 = disable)");
 }
 
-static int storageUseNFS = 0;	/* initially disabled */
+static int storageUseNFS = 1;	/* Default to reporting NFS mounts as NetworkDisk */
 
 static void
 parse_storage_config(const char *token, char *cptr)
