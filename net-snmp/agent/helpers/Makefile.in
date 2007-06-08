@@ -20,7 +20,7 @@ HEADERS=all_helpers.h \
 	cache_handler.h \
         debug_handler.h \
 	instance.h \
-	mode_end_call.h
+	mode_end_call.h \
         multiplexer.h \
         null.h \
         old_api.h \
