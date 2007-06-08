@@ -2677,9 +2677,10 @@ AC_SEARCH_LIBS(gethostbyname, [nsl socket])
 AC_CHECK_FUNCS(gethostbyname)
 
 # Solaris kstat
-AC_CHECK_LIB(kstat, kstat_lookup,
-        AC_DEFINE(HAVE_LIBKSTAT, 1, [Define to 1 if you have the `kstat' library (-lkstat).])
-        LNETSNMPLIBS="${LNETSNMPLIBS} -lkstat")
+NETSNMP_SEARCH_LIBS(kstat_lookup, kstat,
+        AC_DEFINE(HAVE_LIBKSTAT, 1,
+        	[Define to 1 if you have the `kstat' library (-lkstat).]),,,
+        LNETSNMPLIBS)
 
 # Check for libraries that the agent needs
 # saving old libraries
