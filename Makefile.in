@@ -93,7 +93,7 @@ copypersistentfiles:
 # test targets
 #
 test: all testdirs
-	( cd testing; $(MAKE) test TESTOPTS=$(TESTOPTS) )
+	( cd testing; $(MAKE) test )
 
 testdirs:
 	for i in $(TESTDIRS) ; do	\
