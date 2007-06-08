@@ -376,9 +376,6 @@
 /* Define to 1 if you have the `sensors' library (-lsensors). */
 /* #undef HAVE_LIBSENSORS */
 
-/* Define to 1 if you have the `z' library (-lz). */
-/* #undef HAVE_LIBZ */
-
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
 
