@@ -349,9 +349,6 @@
 /* Define to 1 if you have the `kstat' library (-lkstat). */
 /* #undef HAVE_LIBKSTAT */
 
-/* Define to 1 if you have the `kvm' library (-lkvm). */
-/* #undef HAVE_LIBKVM */
-
 /* Define to 1 if you have the `m' library (-lm). */
 /* #undef HAVE_LIBM */
 
