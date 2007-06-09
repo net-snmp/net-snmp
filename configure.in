@@ -2842,20 +2842,15 @@ if test "x$with_rpm" != "xno" && \
 fi
   
 # libkvm
-AC_CHECK_LIB(kvm, kvm_read, [_libkvm="-lkvm"])
-AC_CHECK_FUNC(kvm_openfiles, AC_DEFINE(HAVE_KVM_OPENFILES, 1, [Define to 1 if you have the `kvm_openfiles' function.]),
-	AC_CHECK_LIB(kvm, kvm_openfiles, AC_DEFINE(HAVE_KVM_OPENFILES, 1, [Define to 1 if you have the `kvm_openfiles' function.])
-	_libkvm="-lkvm"))
-AC_CHECK_FUNC(kvm_getprocs, AC_DEFINE(HAVE_KVM_GETPROCS, 1, [Define to 1 if you have the `kvm_getprocs' function.]),
-	AC_CHECK_LIB(kvm, kvm_getprocs, AC_DEFINE(HAVE_KVM_GETPROCS, 1, [Define to 1 if you have the `kvm_getprocs' function.])
-	_libkvm="-lkvm"))
-AC_CHECK_FUNC(kvm_getswapinfo, AC_DEFINE(HAVE_KVM_GETSWAPINFO, 1, [Define to 1 if you have the `kvm_getswapinfo' function.]),
-	AC_CHECK_LIB(kvm, kvm_getswapinfo, AC_DEFINE(HAVE_KVM_GETSWAPINFO, 1, [Define to 1 if you have the `kvm_getswapinfo' function.])
-	_libkvm="-lkvm"))
-if test "x${_libkvm}" != "x"; then
-	AC_DEFINE(HAVE_LIBKVM, 1, [Define to 1 if you have the `kvm' library (-lkvm).])
-	LAGENTLIBS="$LAGENTLIBS ${_libkvm}"
-fi
+NETSNMP_SEARCH_LIBS(kvm_read, kvm,,, $LAGENTLIBS, _libkvm)
+NETSNMP_SEARCH_LIBS(kvm_openfiles, kvm,,, $LAGENTLIBS, _libkvm)
+NETSNMP_SEARCH_LIBS(kvm_getprocs, kvm,,, $LAGENTLIBS, _libkvm)
+NETSNMP_SEARCH_LIBS(kvm_getswapinfo, kvm,,, $LAGENTLIBS, _libkvm)
+netsnmp_save_LIBS="$LIBS"
+LIBS="$_libkvm $LIBS"
+AC_CHECK_FUNCS([kvm_openfiles kvm_getprocs kvm_getswapinfo],
+        [LAGENTLIBS="$_libkvm $LAGENTLIBS"])
+LIBS="$netsnmp_save_LIBS"
 
 # DYNAMIC MODULE SUPPORT
 AC_CHECK_FUNC(dlopen, AC_DEFINE(HAVE_DLOPEN, 1, [Define to 1 if you have the `dlopen' function.]),
