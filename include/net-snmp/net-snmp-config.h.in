@@ -33,12 +33,6 @@
 /* got ssize_t? */
 #undef HAVE_SSIZE_T
 
-/* define if you have getdevs() */
-#undef HAVE_GETDEVS
-
-/* define if you have devstat_getdevs() */
-#undef HAVE_DEVSTAT_GETDEVS
-
 /* define if you have <netinet/in_pcb.h> */
 #undef HAVE_NETINET_IN_PCB_H
 
@@ -162,6 +156,9 @@
 /* define to 1 if you have IRE_CACHE defined in <inet/ip.h> header file. */
 #undef HAVE_DEFINED_IRE_CACHE
 
+/* define if you have devstat_getdevs() */
+#undef HAVE_DEVSTAT_GETDEVS
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
@@ -195,6 +192,9 @@
 
 /* Define to 1 if you have the `getaddrinfo' function. */
 #undef HAVE_GETADDRINFO
+
+/* define if you have getdevs() */
+#undef HAVE_GETDEVS
 
 /* Define to 1 if you have the `getdtablesize' function. */
 #undef HAVE_GETDTABLESIZE

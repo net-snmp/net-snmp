@@ -32,12 +32,6 @@
 /* got ssize_t? */
 #undef HAVE_SSIZE_T
 
-/* define if you have getdevs() */
-#undef HAVE_GETDEVS
-
-/* define if you have devstat_getdevs() */
-#undef HAVE_DEVSTAT_GETDEVS
-
 /* define if you have <netinet/in_pcb.h> */
 #undef HAVE_NETINET_IN_PCB_H
 
