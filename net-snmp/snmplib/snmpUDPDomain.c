@@ -39,6 +39,9 @@
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
+#if HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
 
 #if HAVE_WINSOCK_H
 #include <winsock2.h>

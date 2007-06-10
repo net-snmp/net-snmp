@@ -3191,7 +3191,7 @@ AC_SUBST(PYTHONARGS)
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(stdarg.h string.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h sys/dmap.h machine/pte.h xti.h sys/sockio.h sys/socket.h sys/param.h)
+AC_CHECK_HEADERS(stdarg.h string.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h sys/dmap.h machine/pte.h xti.h sys/sockio.h sys/socket.h sys/param.h sys/uio.h)
 # at least Solaris 9 needs sys/socket.h to compile sys/socketvar.h
 AC_CHECK_HEADERS(sys/socketvar.h,,,
 AC_INCLUDES_DEFAULT([])
