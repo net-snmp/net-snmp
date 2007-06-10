@@ -3357,22 +3357,24 @@ AC_CHECK_HEADERS(sys/statfs.h)
 AC_CHECK_HEADERS(sys/dkio.h sys/diskio.h sys/pstat.h linux/hdreg.h pkglocs.h)
 # for HostRes (Solaris 2.x at least)
 AC_CHECK_HEADERS(pkginfo.h,
-    AC_CHECK_LIB(adm, pkginfo, AC_DEFINE(HAVE_PKGINFO)
-    LMIBLIBS="${LMIBLIBS} -ladm"))
+    NETSNMP_SEARCH_LIBS(pkginfo, adm,
+        AC_DEFINE(HAVE_PKGINFO, 1, [define if you have pkginfo]),,,LMIBLIBS))
 
 case $target_os in
     aix*) # AIX perfstat library, needed for CPU/memory statistics
         AC_CHECK_HEADERS(libperfstat.h,
-            AC_CHECK_LIB(perfstat, perfstat_cpu_total, AC_DEFINE(HAVE_PERFSTAT)
-            LMIBLIBS="${LMIBLIBS} -lperfstat"), AC_MSG_ERROR([
+            NETSNMP_SEARCH_LIBS(perfstat_cpu_total, perfstat,
+                AC_DEFINE(HAVE_PERFSTAT, 1, [on aix, if you have perfstat]),
+                AC_MSG_ERROR([
 
 *** To monitor CPU/memory values in AIX you need to install
 *** libperfstat which can be found in bos.perf
-]))
+]),,
+                LMIBLIBS))
         ;;
     hpux*) # HP-UX agent needs open_mib
-        AC_CHECK_LIB(nm, open_mib, AC_DEFINE(HAVE_LIBNM)
-            LMIBLIBS="${LMIBLIBS} -lnm")
+        NETSNMP_SEARCH_LIBS(open_mib, nm,
+            AC_DEFINE(HAVE_LIBNM, 1, [define if you have libnm]),,,LMIBLIBS)
         ;;
     *)
         ;;
