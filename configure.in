@@ -2853,10 +2853,11 @@ AC_CHECK_FUNCS([kvm_openfiles kvm_getprocs kvm_getswapinfo],
 LIBS="$netsnmp_save_LIBS"
 
 # DYNAMIC MODULE SUPPORT
-AC_CHECK_FUNC(dlopen, AC_DEFINE(HAVE_DLOPEN, 1, [Define to 1 if you have the `dlopen' function.]),
-	AC_CHECK_LIB(dl, dlopen, AC_DEFINE(HAVE_DLOPEN, 1, [Define to 1 if you have the `dlopen' function.])
-	AC_DEFINE(HAVE_LIBDL, 1, [Define to 1 if you have the `dl' library (-ldl).])
-	LMIBLIBS="${LMIBLIBS} -ldl"))
+NETSNMP_SEARCH_LIBS(dlopen, dl,,,,LMIBLIBS)
+netsnmp_save_LIBS="$LIBS"
+LIBS="$LMIBLIBS $LIBS"
+AC_CHECK_FUNCS([dlopen])
+LIBS="$netsnmp_save_LIBS"
 
 # nlist
 AC_CHECK_FUNCS(nlist nlist64 knlist)
