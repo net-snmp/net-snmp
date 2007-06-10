@@ -2865,12 +2865,12 @@ AC_CHECK_FUNCS(nlist nlist64 knlist)
 # whether we need -ldevstat for diskio MIB
 echo " $module_list " | $GREP " ucd-snmp/diskio " >/dev/null
 if test $? -eq 0 ; then
-	AC_CHECK_FUNC(getdevs, AC_DEFINE(HAVE_GETDEVS),
-		AC_CHECK_LIB(devstat, getdevs, AC_DEFINE(HAVE_GETDEVS)
-		LMIBLIBS="${LMIBLIBS} -ldevstat"))
-	AC_CHECK_FUNC(getdevs, AC_DEFINE(HAVE_DEVSTAT_GETDEVS),
-		AC_CHECK_LIB(devstat, devstat_getdevs, AC_DEFINE(HAVE_DEVSTAT_GETDEVS)
-		LMIBLIBS="${LMIBLIBS} -ldevstat"))
+	NETSNMP_SEARCH_LIBS(getdevs, devstat,
+                AC_DEFINE(HAVE_GETDEVS, 1,
+                        [define if you have getdevs()]),,,LMIBLIBS)
+	NETSNMP_SEARCH_LIBS(devstat_getdevs, devstat,
+                AC_DEFINE(HAVE_DEVSTAT_GETDEVS, 1,
+                        [define if you have devstat_getdevs()]),,,LMIBLIBS)
 fi
 
 # LM-SENSORS-MIB support
