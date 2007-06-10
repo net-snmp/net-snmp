@@ -430,7 +430,7 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                                     "IPv6 address with port suffix :%d\n",
                                     atoi(cp + 2)));
                         addr->sin6_port = htons(atoi(cp + 2));
-#ifdef HAVE_IF_NAMETOINDEX
+#if defined(HAVE_IF_NAMETOINDEX) && defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
                         addr->sin6_scope_id = if_index;
 #endif
                         goto resolved;
@@ -446,7 +446,7 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                         if (portno <= 0)
                             portno = SNMP_PORT;
                         addr->sin6_port = htons(portno);
-#ifdef HAVE_IF_NAMETOINDEX
+#if defined(HAVE_IF_NAMETOINDEX) && defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
                         addr->sin6_scope_id = if_index;
 #endif
                         goto resolved;
@@ -480,7 +480,7 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                             "IPv6 address with port suffix :%d\n",
                             atoi(cp + 1)));
                 addr->sin6_port = htons(atoi(cp + 1));
-#ifdef HAVE_IF_NAMETOINDEX
+#if defined(HAVE_IF_NAMETOINDEX) && defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
                 addr->sin6_scope_id = if_index;
 #endif
                 goto resolved;
