@@ -1236,9 +1236,12 @@ AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(long long)
+AC_CHECK_TYPES([int8_t,  uint8_t,  u_int8_t])
+AC_CHECK_TYPES([int16_t, uint16_t, u_int16_t])
 AC_CHECK_TYPES([int32_t, uint32_t, u_int32_t])
 AC_CHECK_TYPES([int64_t, uint64_t, u_int64_t])
 AC_CHECK_TYPES([uintptr_t, intptr_t])
+AC_CHECK_TYPES([intmax_t, uintmax_t])
 
 # guess IPv6 stack type.
 if test "x$enable_ipv6" = "xyes"; then

@@ -76,6 +76,42 @@ typedef long ssize_t;
      *    integer types available.
      */
 
+#ifndef HAVE_INT8_T
+typedef signed char int8_t;
+#endif /* !HAVE_INT8_T */
+
+#ifndef HAVE_UINT8_T
+#ifdef HAVE_U_INT8_T
+typedef u_int8_t      uint8_t;
+#else
+typedef unsigned char uint8_t;
+#endif
+#endif /* !HAVE_UINT8_T */
+
+#ifndef HAVE_INT16_T
+#if   SIZEOF_INT == 2
+#define INT16_T int
+#elif SIZEOF_SHORT == 2
+#define INT16_T short
+#else
+#define _INT16_IS_NOT_16BIT
+#define INT16_T short
+#endif
+typedef INT16_T int16_t;
+#endif /* !HAVE_INT16_T */
+
+#ifndef HAVE_UINT16_T
+#ifdef HAVE_U_INT16_T
+typedef u_int16_t        uint16_t;
+#else
+#ifdef INT16_T
+typedef unsigned INT16_T uint16_t;
+#else
+typedef unsigned short   uint16_t;
+#endif
+#endif
+#endif /* !HAVE_UINT16_T */
+
 #ifndef HAVE_INT32_T
 #if   SIZEOF_INT == 4
 #define INT32_T int 
@@ -123,6 +159,22 @@ typedef INT64_T int64_t;
 typedef u_int64_t        uint64_t;
 #elif defined(INT64_T)
 typedef unsigned INT64_T uint64_t;
+#endif
+#endif
+
+#ifndef HAVE_INTMAX_T
+#ifdef SIZEOF_LONG_LONG
+typedef long long intmax_t;
+#else
+typedef long      intmax_t;
+#endif
+#endif
+
+#ifndef HAVE_INTMAX_T
+#ifdef SIZEOF_LONG_LONG
+typedef unsigned long long uintmax_t;
+#else
+typedef unsigned long      uintmax_t;
 #endif
 #endif
 
