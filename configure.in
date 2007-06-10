@@ -3816,6 +3816,20 @@ AC_INCLUDES_DEFAULT()
 #endif
 ]])
 
+# Check sin6_scope_id member specified in RFC2553 additionally
+AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id],,,[
+AC_INCLUDES_DEFAULT()
+[#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
+
 # Check struct rtentry for various things.
 AC_CHECK_MEMBERS([struct rtentry.rt_dst, struct rtentry.rt_unit,
                   struct rtentry.rt_refcnt, struct rtentry.rt_hash,
