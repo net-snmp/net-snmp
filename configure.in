@@ -2885,10 +2885,9 @@ if test $? -eq 0 ; then
         *)
             AC_CHECK_HEADER(sensors/sensors.h,,
                 [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find sensors/sensors.h])])
-            AC_CHECK_LIB(sensors, sensors_get_detected_chips, [
-		   LMIBLIBS="${LMIBLIBS} -lsensors" ;
-                ],
-                [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find -lsensors])])
+            NETSNMP_SEARCH_LIBS(sensors_get_detected_chips, sensors,,
+                [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find -lsensors])],,
+                LMIBLIBS)
             ;;
         esac
 fi
