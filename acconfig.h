@@ -38,16 +38,9 @@
 /* define if you have <sys/disklabel.h> */
 #undef HAVE_SYS_DISKLABEL_H
 
-/* on aix, if you have perfstat */
-#undef HAVE_PERFSTAT
-
-/* define if you have libdb, libnm or librpm, respectively */
+/* define if you have libdb or librpm, respectively */
 #undef HAVE_LIBDB
-#undef HAVE_LIBNM
 #undef HAVE_LIBRPM
-
-/* define if you have pkginfo */
-#undef HAVE_PKGINFO
 
 /* define if you have the perl_eval_pv() function */
 #undef HAVE_PERL_EVAL_PV_LC
