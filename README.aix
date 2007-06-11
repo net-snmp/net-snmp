@@ -46,6 +46,16 @@ on AIX 5.x:
 
 There's no support for the IPv6 MIBs, though.
 
+5) Compiler for Perl
+
+In general, Perl modules need to be compiled with the same compiler and 
+compiler options as Perl itself. configure detects some mismatches (gcc vs. 
+vendor compiler), but treats different incarnations of the same compiler type
+as similar. If your version of Perl (e.g. the one supplied by IBM for AIX 5.x)
+has been compiled with cc_r on AIX, please make sure you also use CC=cc_r when
+building net-snmp. Building with xlc in this case is known to fail (see bug
+#1600099).
+
 
 2. Patches
 ----------
