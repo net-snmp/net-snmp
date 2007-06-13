@@ -2851,14 +2851,13 @@ if test "x$with_rpm" != "xno" && \
 fi
   
 # libkvm
-NETSNMP_SEARCH_LIBS(kvm_read, kvm,,, $LAGENTLIBS, _libkvm)
-NETSNMP_SEARCH_LIBS(kvm_openfiles, kvm,,, $LAGENTLIBS, _libkvm)
-NETSNMP_SEARCH_LIBS(kvm_getprocs, kvm,,, $LAGENTLIBS, _libkvm)
-NETSNMP_SEARCH_LIBS(kvm_getswapinfo, kvm,,, $LAGENTLIBS, _libkvm)
+NETSNMP_SEARCH_LIBS(kvm_read, kvm,,,, LAGENTLIBS)
+NETSNMP_SEARCH_LIBS(kvm_openfiles, kvm,,,, LAGENTLIBS)
+NETSNMP_SEARCH_LIBS(kvm_getprocs, kvm,,,, LAGENTLIBS)
+NETSNMP_SEARCH_LIBS(kvm_getswapinfo, kvm,,,, LAGENTLIBS)
 netsnmp_save_LIBS="$LIBS"
-LIBS="$_libkvm $LIBS"
-AC_CHECK_FUNCS([kvm_openfiles kvm_getprocs kvm_getswapinfo],
-        [LAGENTLIBS="$_libkvm $LAGENTLIBS"])
+LIBS="$LAGENTLIBS $LIBS"
+AC_CHECK_FUNCS([kvm_openfiles kvm_getprocs kvm_getswapinfo])
 LIBS="$netsnmp_save_LIBS"
 
 # DYNAMIC MODULE SUPPORT
