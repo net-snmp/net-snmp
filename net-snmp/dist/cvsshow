@@ -30,15 +30,12 @@ do_cvs()
 do_svn()
 {
    DIR=$1
-   if [ ! -f $DIR/.svn/entries ]; then
-	echo "'$DIR' has no .svn/entries!"
+   if [ ! -d $DIR/.svn ]; then
+	echo "'$DIR' has no .svn/ subdir!"
 	exit
    fi
 
-   ROOT=`grep url $DIR/.svn/entries|cut -f2 -d\"`
-   if [ -z "$ROOT" ]; then
-      ROOT=`grep https $DIR/.svn/entries|head -n 1`
-   fi
+   ROOT=`svn info | grep URL|cut -f2 -d " "`
    if [ -z "$ROOT" ]; then
       echo "Couldn't find root from $DIR/.svn/entries"
       exit 1
