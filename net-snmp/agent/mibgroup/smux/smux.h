@@ -75,7 +75,7 @@ int smux_snmp_select_list_add(int sd);
 int smux_snmp_select_list_del(int sd);
 
 /* Returns the count of added socket-fd's in the list */
-int smux_snmp_select_list_get_length();
+int smux_snmp_select_list_get_length(void);
 
 /* Returns the socket-fd number from the position of the list */
 int smux_snmp_select_list_get_SD_from_List(int pos);
