@@ -3070,10 +3070,10 @@ fi
 # check the ldflags
 if test "x$embed_perl" != "xno" ; then
     AC_MSG_CHECKING([for Perl LDFLAGS])
-    perlldopts=`$myperl -MExtUtils::Embed -e ldopts`
-    if test "x$perlldopts" != "x" ; then
-      AC_MSG_RESULT([$perlldopts])
-      PERLLDOPTS="$perlldopts"
+    netsnmp_perlldopts=`$myperl -MExtUtils::Embed -e ldopts`
+    if test "x$netsnmp_perlldopts" != "x" ; then
+      AC_MSG_RESULT([$netsnmp_perlldopts])
+      PERLLDOPTS="$netsnmp_perlldopts"
     else
       if test "x$embed_perl" = "xtry" ; then
         embed_perl="no"
@@ -3081,6 +3081,13 @@ if test "x$embed_perl" != "xno" ; then
         AC_MSG_ERROR([Could not determine the linker options that were used to build $myperl. Either set the environment variable PERLPROG to a different Perl binary or use --disable-embedded-perl to turn off embedded Perl functionality altogether.])
       fi
     fi
+    # Perl ccdlflags (RPATH to libperl, hopefully)
+    AC_MSG_CHECKING([for Perl CCDLFLAGS])
+    changequote(, )
+    netsnmp_perlccdlflags=`$myperl -V:ccdlflags | $myperl -n -e 'print $1 '"if (/^\s*ccdlflags='([^']+)';/);"`
+    changequote([, ])
+    AC_MSG_RESULT([$netsnmp_perlccdlflags])
+    PERLCCDLFLAGS="$netsnmp_perlccdlflags"
 fi
 
 # check needed functions
@@ -3125,6 +3132,7 @@ fi
 AC_SUBST(EMBEDPERLINSTALL)
 AC_SUBST(EMBEDPERLUNINSTALL)
 AC_SUBST(PERLLDOPTS)
+AC_SUBST(PERLCCDLFLAGS)
 
 # embedded Perl results
 AC_MSG_CHECKING([for potential embedded Perl support])
