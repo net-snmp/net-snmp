@@ -9,6 +9,9 @@ listing of all changes made to the code.
     snmplib:
       - [PATCH 1592706]: Fix memory leak when cloning varbinds.
       - [BUG 1619827]: link libraries against needed external libraries
+      - Change snmp_sess_add_ex to consistently close and delete the
+        transport argument on failure, earlier the liveness of the
+        transport argument was undecided.
 
     snmpd:
       - [BUG 1558823]: fix ipAddressTable memory leak
@@ -27,6 +30,7 @@ listing of all changes made to the code.
 
     perl:
       - link Perl modules against the exact set of libraries needed
+      - patch: 1725049: fix bulkwalk in cases of non-repeater
 
     python:
       - [PATCH 1716114]: Let python build in the Net-SNMP source tree
