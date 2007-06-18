@@ -137,12 +137,8 @@ LOBJS = all_helpers.lo \
 	table_tdata.lo \
 	watcher.lo
 
-USELIBS = $(top_builddir)/snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
-LIBS = $(USELIBS)
-
-
 all: standardall
 
 libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION):    $(LOBJS)
-	$(LIB_LD_CMD) $@ $(LOBJS) $(LIBS) $(AGENTLIB) $(NETSNMPLIB) $(LIB_LD_LIBS)
+	$(LIB_LD_CMD) $@ $(LOBJS) $(AGENTLIB) $(NETSNMPLIB) $(LIB_LD_LIBS)
 	$(RANLIB) $@
