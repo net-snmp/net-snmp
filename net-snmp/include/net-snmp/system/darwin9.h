@@ -44,6 +44,12 @@
 #endif
 
 /*
+ * looks like the IFTable stuff works better than the mibII versions
+ */
+ 
+#define NETSNMP_INCLUDE_IFTABLE_REWRITES
+
+/*
  * Enabling this restricts the compiler to mostly public APIs.
  */
 #ifndef __APPLE_API_STRICT_CONFORMANCE
