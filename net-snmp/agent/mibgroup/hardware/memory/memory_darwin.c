@@ -44,7 +44,7 @@ int pages_swapped(void) {
      mach_port = mach_host_self();
      error = host_processor_sets(mach_port, &psets, &pcnt);
      if (error != KERN_SUCCESS) {
-        sprintf(errmsg, "Error in host_processor_sets(): %s\n", mach_error_string(error));
+        snprintf(errmsg, sizeof(errmsg), "Error in host_processor_sets(): %s\n", mach_error_string(error));
         snmp_log_perror(errmsg);
         return(0);
      }
@@ -52,14 +52,14 @@ int pages_swapped(void) {
      for (i = 0; i < pcnt; i++) {
         error = host_processor_set_priv(mach_port, psets[i], &pset);
         if (error != KERN_SUCCESS) {
-            sprintf(errmsg,"Error in host_processor_set_priv(): %s\n", mach_error_string(error));
+            snprintf(errmsg, sizeof(errmsg),"Error in host_processor_set_priv(): %s\n", mach_error_string(error));
             snmp_log_perror(errmsg);
             return(0);
         }
 
         error = processor_set_tasks(pset, &tasks, &tcnt);
         if (error != KERN_SUCCESS) {
-            sprintf(errmsg,"Error in processor_set_tasks(): %s\n", mach_error_string(error));
+            snprintf(errmsg, sizeof(errmsg),"Error in processor_set_tasks(): %s\n", mach_error_string(error));
             snmp_log_perror(errmsg);
             return(0);
         }
@@ -120,10 +120,10 @@ swapsize(void)
 	 * we want to stat the file to get it's size
 	 */
 	if(strspn(dp->d_name,(char *) SWAPFILE_PREFIX) == strlen((char *) SWAPFILE_PREFIX)) {
-		sprintf(full_name,"%s/%s",SWAPFILE_DIR,dp->d_name);
+                snprintf(full_name, sizeof(full_name),"%s/%s",SWAPFILE_DIR,dp->d_name);
 		/* we need to stat each swapfile to get it's size */
 		if(stat(full_name,&buf) != 0) {
-        		sprintf(errmsg, "swapsize: can't stat file %s",full_name);
+                        snprintf(errmsg, sizeof(errmsg), "swapsize: can't stat file %s",full_name);
 	    		snmp_log_perror(errmsg);
 		} else {
 			/* total swap allocated is the size of
@@ -136,6 +136,10 @@ swapsize(void)
 
     }
     closedir(dirp);
+    
+#else
+    /* we set the size to -1 if we're not supported */
+    swapSize = -1;
 #endif
 
     return swapSize;
@@ -143,31 +147,33 @@ swapsize(void)
 
     /*
      * Load the latest memory usage statistics
+     *
+     * HW_PHYSMEM is capped at 2 Gigs so we use HW_MEMSIZE
      */
 int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
 
     netsnmp_memory_info *mem;
 
-    u_long          phys_mem;
+    uint64_t        phys_mem;  /* bytes        */
     size_t          phys_mem_size  = sizeof(phys_mem);
-    int             phys_mem_mib[] = { CTL_HW, HW_PHYSMEM };
+    int             phys_mem_mib[] = { CTL_HW, HW_MEMSIZE };
 
-    int             pagesize;
+    int             pagesize;  /* bytes        */
     size_t          pagesize_size  = sizeof(pagesize);
-    int             pagesize_mib[] = { CTL_VM, HW_PAGESIZE };
+    int             pagesize_mib[] = { CTL_HW, HW_PAGESIZE };
 
-    u_long          pages_used;
+    uint64_t        pages_used;
     off_t           swapSize;
     off_t           swapUsed;
     vm_statistics_data_t vm_stat;
-    int count = HOST_VM_INFO_COUNT;
+    unsigned int count = HOST_VM_INFO_COUNT;
 
     sysctl(phys_mem_mib, 2, &phys_mem, &phys_mem_size, NULL, 0);
     sysctl(pagesize_mib, 2, &pagesize, &pagesize_size, NULL, 0);
     host_statistics(mach_host_self(),HOST_VM_INFO,(host_info_t)&vm_stat,&count);
     pages_used = vm_stat.active_count + vm_stat.inactive_count
                                       + vm_stat.wire_count;
-    swapSize = swapsize();   /* in 'pagesize'? */
+    swapSize = swapsize();   /* in bytes */
     swapUsed = pages_swapped();
 
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 1 );
@@ -176,9 +182,9 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     } else {
         if (!mem->descr)
             mem->descr = strdup( "Physical memory" );
-        mem->units = pagesize;   /* XXX - ??? */
-        mem->size  = phys_mem;
-        mem->free  = phys_mem - pages_used;
+        mem->units = pagesize;   /* 4096 */
+        mem->size  = phys_mem/pagesize;
+        mem->free  = (phys_mem/pagesize) - pages_used;                 
         mem->other = -1;
     }
 
@@ -188,9 +194,9 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     } else {
         if (!mem->descr)
             mem->descr = strdup( "Swap space" );
-        mem->units = pagesize;   /* XXX - ??? */
-        mem->size  = swapSize;
-        mem->free  = swapSize - swapUsed;
+        mem->units = pagesize;   /* 4096 */
+        mem->size  = swapSize/pagesize;                
+        mem->free  = (swapSize/pagesize) - swapUsed;
         mem->other = -1;
     }
 
