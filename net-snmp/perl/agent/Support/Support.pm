@@ -22,7 +22,7 @@ use XML::Simple;
 use IO::File;
 
 
-use vars (@ISA @EXPORT @EXPORT_OK $VERSION);
+use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
 @ISA       = qw(Exporter getLeaf);
 @EXPORT    = qw(registerAgent getOidElement setOidElement);
