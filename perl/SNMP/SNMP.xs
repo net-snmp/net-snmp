@@ -207,7 +207,7 @@ static int _debug_level = 0;
 
 char	_debugx[1024];	/* Space to sprintf() into - used by sprint_objid(). */
 
-/* wrapper around snprint_objid to snprint_objid to return the pointer  */
+/* wrapper around snprint_objid to snprint_objid to return the pointer 
    instead of length */
 
 static char *
