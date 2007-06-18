@@ -276,6 +276,7 @@ snmp_parse_args(int argc,
             break;
 
         case 'M':
+            netsnmp_get_mib_directory(); /* prepare the default directories */
             netsnmp_set_mib_directory(optarg);
             break;
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
