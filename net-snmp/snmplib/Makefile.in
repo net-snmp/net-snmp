@@ -187,21 +187,21 @@ CPPFLAGS = $(TOP_INCLUDES) -I. 	$(SNMPLIB_INCLUDES) @CPPFLAGS@
 all: standardall
 
 # how to build the libraries.
-libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    ${TOBJS}
-	$(LIB_LD_CMD) libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) ${TOBJS} ${LDFLAGS} @LNETSNMPLIBS@
-	$(RANLIB) libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
+libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    $(TOBJS)
+	$(LIB_LD_CMD) $@ $(TOBJS) $(LDFLAGS) @LNETSNMPLIBS@
+	$(RANLIB) $@
 
-libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    ${TOBJS}
-	$(LIB_LD_CMD) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) ${TOBJS} ${LDFLAGS} @LNETSNMPLIBS@
-	$(RANLIB) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
+libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    $(TOBJS)
+	$(LIB_LD_CMD) $@ $(TOBJS) $(LDFLAGS) @LNETSNMPLIBS@
+	$(RANLIB) $@
 
 #
 # internal test objects
 #
 parse:  mib.o parse.c
-	$(CC) $(CFLAGS) -DTEST parse.c -o parse \
+	$(CC) $(CFLAGS) -DTEST parse.c -o $@ \
 		`$(top_srcdir)/net-snmp-config --libs`
 
 test_binary_array: test_binary_array.c
-	$(CC) $(CFLAGS) test_binary_array.c  -o $@ \
+	$(CC) $(CFLAGS) test_binary_array.c -o $@ \
 		`$(top_srcdir)/net-snmp-config --libs`
