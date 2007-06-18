@@ -36,6 +36,7 @@ listing of all changes made to the code.
       - increment "current" and "age" according to
       - Do not use getservbyname to find default port
       - FEATURES: 454028: Detect and handle empty MIB
+      - Change snmp_sess_add_ex to consistently close and
 
     snmpd:
       - [BUG 1397895]: include missing interface declarations
@@ -96,6 +97,7 @@ listing of all changes made to the code.
       - patch: 1710632: from mavarley: fix memory leak on
       - patch: 1719253: from "Christian Jung": fix
       - patch: 1719254: from "Christan Jung": update
+      - [PATCH 1729629]: Fix memory leak in disman
 
     snmptrapd:
       - [BUG 1638225]: Fix interpretation of transport address data.
@@ -105,6 +107,7 @@ listing of all changes made to the code.
 
     apps:
       - [PATCH 1529523]: Close SNMP session on failure.
+      - fix the -M switch for setting MIBDIRs
 
     build:
       - [BUG 1096166]: Handle --without-logfile correctly.
@@ -122,6 +125,10 @@ listing of all changes made to the code.
       - [PATCH 1728237]: Move
       - only enable mibII/ipv6 through --enable-ipv6 on
       - Disable inlining on solaris as there are some
+      - [PATCH 1728244]: Add
+      - [PATCH 1728247]: Add type
+      - patch from apple to simplify makefile target
+      - [PATCH 1728241]: from mitsuru_chinen: add configure check
 
     documentation:
       - [BUG 1247164]: Document use of OID macros
@@ -142,6 +149,9 @@ listing of all changes made to the code.
       - [PATCH 1627949]: from martin987: a perl agentx consumes memory
       - fix SNMP SET for IP addresses on 64-bit
       - link Perl modules against the exact set of libraries
+      - fix prerequisites for NetSNMP::TrapReceiver
+      - fix syntax error in NetSNMP::agent::Support
+      - patch: 1725049: fix bulkwalk in cases of non-repeater
 
     python:
       - [PATCH 1716114]: Let python build in source tree
@@ -164,6 +174,7 @@ listing of all changes made to the code.
       - [PATCH 1665079]: AIX patches for cpu stats and process monitoring
       - fix default shared library building instead of forcing
       - build fixes for embedded Perl
+      - use "-Wl,-brtl" when compiling with gcc
 
     FreeBSD:
       - fix configure warning for sys/conf.h
@@ -177,6 +188,9 @@ listing of all changes made to the code.
     MacOSX:
       - [PATCH 1600453]: OS X compile-time endian determination
       - [PATCH 1600522]: CPU HAL implementation for mach/darwin
+      - patch from apple to fix cross-compile builds in apples
+      - patch from apple to fix minor documentation bugs.
+      - patch from apple to improve memory reporting
 
     Solaris:
       - [BUG 1626153]: no hrSWRun informations on Solaris zones
@@ -297,6 +311,7 @@ listing of all changes made to the code.
       - [PATCH 1596028]: from "Stephen J. Friedl": const fixes for the
 	mib_api(3) manual page
       - RPM spec file fixes for 64-bit platforms
+      - Don't use the legacy symbol
 
     MacOSX:
       - [PATCH 1566777]: build fixes for memory_darwin.c
