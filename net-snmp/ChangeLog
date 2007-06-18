@@ -1,5 +1,224 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.4.1.pre2 -> V5.4.1.pre3
+
+2007-06-18 21:34  hardaker
+
+   *
+
+   CHANGES: build: patch from apple to simplify makefile target
+   references in some rules.
+
+2007-06-18 21:17  hardaker
+
+   *
+
+   CHANGES: patch from apple to fix minor documentation bugs.
+
+2007-06-18 21:13  hardaker
+
+   * patch from apple to turn on rewrites for the iftable because they
+     work significantly better than the older code.
+
+2007-06-18 21:12  hardaker
+
+   *
+
+   CHANGES: patch from apple to improve memory reporting
+
+2007-06-18 21:09  hardaker
+
+   *
+
+   CHANGES: patch from apple to fix cross-compile builds in apples
+   build environment.
+
+2007-06-18 20:54  hardaker
+
+   *
+
+   CHANGES: patch: 1737085: from jsafranek: fix the -M switch for
+   mib parsing by loading defaults first before performing the set
+   so it does not get overwritten by the defaults later.
+
+2007-06-18 20:50  hardaker
+
+   *
+
+   NEWS: perl: patch: 1725049: fix bulkwalk in cases of non-repeater
+   usage.
+
+2007-06-18 14:10  tanders
+
+   *
+
+   CHANGES: perl: fix prerequisites for NetSNMP::TrapReceiver
+
+2007-06-18 13:39  tanders
+
+   *
+
+   CHANGES: perl: fix syntax error in NetSNMP::agent::Support
+
+2007-06-14 15:41  rstory
+
+   *
+
+   fix typo in user output, as noted on coders
+
+2007-06-14 04:37  magfr
+
+   *
+
+   Add missing argument type in order to silence a gcc warning
+
+2007-06-11 10:11  tanders
+
+   *
+
+   document xlc<->cc_r compiler issues with Perl on AIX (see bug
+   #1600099)
+
+2007-06-10 22:29  tanders
+
+   *
+
+   CHANGES: build: PATCH: 1728247: from mitsuru_chinen: Add type
+   check for int??_t and uint??_t
+
+2007-06-10 22:22  tanders
+
+   *
+
+   CHANGES: build: PATCH: 1728244: from mitsuru_chinen: Add
+   configure check for sin6_scope_id
+
+2007-06-10 22:15  tanders
+
+   *
+
+   CHANGES: PATCH: 1728241: from mitsuru_chinen: add configure check
+   for <sys/uio.h> (make sure iov structure is declared)
+
+2007-06-08 20:32  tanders
+
+   *
+
+   Fix regression introduced by r16479: 'make test TESTOPTS="-T
+   tcp"' now
+   works again. makerelease now uses the right option.
+
+2007-06-08 10:44  dts12
+
+   *
+
+   Improve memory handling of style-specific format strings.
+
+2007-06-08 10:33  dts12
+
+   *
+
+   Default to reporting NFS mounts as NetworkDisk.
+
+2007-06-08 05:16  magfr
+
+   *
+
+   Remove the unused undef HAVE_PERL_EVAL_PV.
+   The Perl_eval_pv functions are handled by the
+   HAVE_PERL_EVAL_PV_[UL]C defines,
+   this one is never set by our configure script.
+
+2007-06-07 16:02  dts12
+
+   *
+
+   Remove redundant CVS-admin files.
+
+2007-06-07 12:56  dts12
+
+   *
+
+   Handle unregistering the first Security Model in the list.
+   Reported by Aleksandr Lomanov.
+
+2007-06-07 09:13  dts12
+
+   *
+
+   Install header files for stash_cache and stash_to_next helpers.
+
+2007-06-07 09:07  dts12
+
+   *
+
+   Separate out header files that don't have a corresponding C
+   source file.
+
+2007-06-07 08:59  dts12
+
+   *
+
+   Sort lists of helpers (source code, object files and headers).
+   This should make it easier to spot files that have been omitted.
+
+2007-06-07 08:42  dts12
+
+   *
+
+   Protect against systems without S_ISDIR.
+
+2007-06-06 12:37  tanders
+
+   *
+
+   CHANGES: AIX: use "-Wl,-brtl" when compiling with gcc
+
+2007-06-06 10:20  dts12
+
+   *
+
+   Ensure output is properly directed to syslog.
+   Otherwise, problems in the config environment can trigger
+   errors being directed to stderr, and subsequent logging
+   output gets lost.
+
+2007-06-06 10:13  dts12
+
+   *
+
+   More helpful debugging output.
+
+2007-06-06 05:53  magfr
+
+   *
+
+   CHANGES: misc: Don't use the legacy symbol
+   SNMPTRAPD_DISABLE_AGENTX
+
+2007-06-05 15:59  dts12
+
+   *
+
+   CHANGES: snmpd: PATCHES: 1729629: Fix memory leak in disman
+   agent.
+
+2007-06-04 22:06  magfr
+
+   *
+
+   NEWS: snmplib: Change snmp_sess_add_ex to consistently close and
+   delete the transport argument on failure, earlier the liveness of
+   the transport argument was undecided.
+
+2007-06-04 15:50  hardaker
+
+   *
+
+   - version tag ( 5.4.1.pre2 )
+
+-------------------------------------------------------------------------------
+
 Changes: V5.4.1.pre1 -> V5.4.1.pre2
 
 2007-06-04 13:09  tanders
