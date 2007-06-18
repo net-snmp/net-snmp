@@ -207,6 +207,16 @@ static int _debug_level = 0;
 
 char	_debugx[1024];	/* Space to sprintf() into - used by sprint_objid(). */
 #define DBDCL(x) x
+
+/* wrapper around snprint_objid to snprint_objid to return the pointer  */
+   instead of length */
+
+static char *
+__snprint_oid(const oid *objid, size_t objidlen) {
+  snprint_objid(_debugx, sizeof(_debugx), objid, objidlen);
+  return _debugx;
+}
+ 
 #else	/* DEBUGGING */
 #define DBDCL(x) 
 #define DBOUT
@@ -1613,8 +1623,7 @@ _bulkwalk_done(walk_context *context)
  	*/
  	DBPRT(1, (DBOUT "Ignoring %s request oid %s\n",
  	      bt_entry->norepeat? "nonrepeater" : "completed",
- 	      snprint_objid(_debugx, sizeof(_debugx), bt_entry->req_oid,
- 				    bt_entry->req_len)));
+ 	      __snprint_oid(bt_entry->req_oid, bt_entry->req_len)));
 
  	/* Ignore this OID in any further packets. */
  	bt_entry->ignore = 1;
@@ -1654,7 +1663,7 @@ _bulkwalk_async_cb(int		op,
    */
 
    DBPRT(2, (DBOUT "bulkwalk_async_cb(op %d, reqid 0x%08X, context 0x%p)\n",
-							op, reqid, context_ptr));
+	     op, reqid, context_ptr));
 
    context = (walk_context *)context_ptr;
 
@@ -1822,8 +1831,8 @@ _bulkwalk_send_pdu(walk_context *context)
 
       nvars ++;
 
-      DBPRT(1, (DBOUT "   Add %srepeater %s\n", bt_entry->norepeat ? "non" : "",
-	         snprint_objid(_debugx, sizeof(_debugx), bt_entry->last_oid, bt_entry->last_len)));
+      DBPRT(1, (DBOUT "   Add %srepeater %s\n", bt_entry->norepeat ? "non" : "", 
+		__snprint_oid(bt_entry->last_oid, bt_entry->last_len)));
    }
 
    /* Make sure variables are actually being requested in the packet. */
@@ -2000,42 +2009,34 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 ** are OID's for trees that have been completed sometime in this
 	 ** response, but must be looked at to maintain ordering.
 	 */
+	 /* In previous version we started from 1st repeater any time when
+	 ** pix == 0. But if 1st repeater is ignored we can get wrong results,
+	 ** because it was not included in 2nd and later request. So we set
+	 ** expect to repbase-1 and then search for 1st non-ignored repeater.
+	 ** repbase-1 is nessessary because we're starting search in loop below
+	 ** from ++expect and it will be exactly repbase on 1st search pass.
+	 */
+	 if (pix == 0)
+	    expect = context->repbase - 1;
 
-	 if (pix == 0) {
-	    /* Special case code for no non-repeater case.  This
-	    ** is necessary because expect normally points to the
-	    ** last non-repeater upon entry to this code (so the
-	    ** '++expect' below increments it into the repeaters
-	    ** section of the req_oids[] array).
-	    ** If there are no non-repeaters, the expect pointer
-	    ** is never initialized.  This addresses this problem.
-	    */
-	    expect = context->reqbase;
+	 /* Find the repeater OID we expect to see.  Ignore any
+	 ** OID's marked 'ignore' -- these have been completed
+	 ** and were not requested in this iteration.
+	 */
+	 for (i = 0; i < context->repeaters; i++) {
 
-	 } else {
+	    /* Loop around to first repeater if we hit the end. */
+	    if (++ expect == &context->req_oids[context->nreq_oids])
+	       expect = context->reqbase = context->repbase;
 
-	    /* Find the repeater OID we expect to see.  Ignore any
-	    ** OID's marked 'ignore' -- these have been completed
-	    ** and were not requested in this iteration.
-	    */
-	    for (i = 0; i < context->repeaters; i++) {
-
-	       /* Loop around to first repeater if we hit the end. */
-	       if (++ expect == &context->req_oids[context->nreq_oids])
-		  expect = context->reqbase = context->repbase;
-
-	       /* Stop if this OID is not being ignored. */
-	       if (!expect->ignore)
-		  break;
-	    }
-
-	    /* Make sure we did find an expected OID. */
-	    assert(i <= context->repeaters);
+	    /* Stop if this OID is not being ignored. */
+	    if (!expect->ignore)
+	       break;
 	 }
       }
 
-      DBPRT(2, (DBOUT "Var %03d request %s\n", pix, snprint_objid(_debugx, sizeof(_debugx), 
-					     expect->req_oid, expect->req_len)));
+      DBPRT(2, (DBOUT "Var %03d request %s\n", pix,
+		__snprint_oid(expect->req_oid, expect->req_len)));
 
       /* Did we receive an error condition for this variable?
       ** If it's a repeated variable, mark it as complete and
@@ -2056,7 +2057,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 {
 	    expect->complete = 1;
 	    DBPRT(2, (DBOUT "Ran out of tree for oid %s\n",
-			   snprint_objid(_debugx, sizeof(_debugx), vars->name,vars->name_length)));
+		      __snprint_oid(vars->name,vars->name_length)));
 
 	    context->req_remain --;
 
@@ -2084,8 +2085,8 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 {
             if (check) 
             {
-               DBPRT(2, (DBOUT "Error: OID not increasing: %s\n",
-                         snprint_objid(_debugx, sizeof(_debugx), vars->name,vars->name_length)));
+	      DBPRT(2, (DBOUT "Error: OID not increasing: %s\n",
+			__snprint_oid(vars->name,vars->name_length)));
                sv_setpv(*err_str_svp, (char*)snmp_api_errstring(SNMPERR_OID_NONINCREASING));
                sv_setiv(*err_num_svp, SNMPERR_OID_NONINCREASING);
                sv_setiv(*err_ind_svp, pix);
@@ -2093,7 +2094,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
             }
               
 	    DBPRT(2, (DBOUT "Ignoring repeat oid: %s\n",
-			snprint_objid(_debugx, sizeof(_debugx), vars->name,vars->name_length)));
+			__snprint_oid(vars->name,vars->name_length)));
 
 	    continue;
 	 }
@@ -2110,12 +2111,12 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
       ** XXX Can we use 'expect' instead of 'context->req_oids[pix]'?
       */
       if (context->oid_saved < context->non_reps) {
-	 DBPRT(2, (DBOUT "   expected var %s (nonrepeater %d/%d)\n",
-		     snprint_objid(_debugx, sizeof(_debugx), context->req_oids[pix].req_oid,
-					   context->req_oids[pix].req_len),
-		     pix, context->non_reps));
-	 DBPRT(2, (DBOUT "   received var %s\n",
-		     snprint_objid(_debugx, sizeof(_debugx), vars->name, vars->name_length)));
+	DBPRT(2, (DBOUT "   expected var %s (nonrepeater %d/%d)\n",
+		  __snprint_oid(context->req_oids[pix].req_oid,
+			 context->req_oids[pix].req_len),
+		  pix, context->non_reps));
+	DBPRT(2, (DBOUT "   received var %s\n",
+		  __snprint_oid(vars->name, vars->name_length)));
 
 	 /* This non-repeater has now been seen, so mark the sub-tree as
 	 ** completed.  Note that this may not be the same oid as requested,
@@ -2126,8 +2127,8 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 
       } else {		/* Must be a repeater variable. */
 
-	 DBPRT(2, (DBOUT "   received oid %s\n",
-	       snprint_objid(_debugx, sizeof(_debugx), vars->name, vars->name_length)));
+	DBPRT(2, (DBOUT "   received oid %s\n",
+		  __snprint_oid(vars->name, vars->name_length)));
 
 	 /* Are we already done with this tree?  If so, just ignore this
 	 ** variable and move on to the next expected variable.
@@ -2155,7 +2156,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 ** packet.
 	 */
 	 (void)memcpy(expect->last_oid, vars->name,
-					     vars->name_length * sizeof(oid));
+		      vars->name_length * sizeof(oid));
 	 expect->last_len = vars->name_length;
 
       }
@@ -2337,10 +2338,10 @@ _bulkwalk_finish(walk_context *context, int okay)
 	  bt_entry = &context->req_oids[i];
 
 	  DBPRT(2, (DBOUT "  %sreq #%d (%s) => %d var%s\n",
-		 bt_entry->complete ? "" : "incomplete ", i,
-		 snprint_objid(_debugx, sizeof(_debugx), bt_entry->req_oid, bt_entry->req_len),
-		 (int)av_len(bt_entry->vars) + 1,
-		 (int)av_len(bt_entry->vars) > 0 ? "s" : ""));
+		    bt_entry->complete ? "" : "incomplete ", i,
+		    __snprint_oid(bt_entry->req_oid, bt_entry->req_len),
+		    (int)av_len(bt_entry->vars) + 1,
+		    (int)av_len(bt_entry->vars) > 0 ? "s" : ""));
 
 	  if (async && ary == NULL) {
 	     DBPRT(2,(DBOUT "    [dropped due to newAV() failure]\n"));
@@ -4034,6 +4035,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 
 	      } else {
 		 bt_entry->norepeat = 1;
+		 DBPRT(1,(DBOUT "HERE 1\n"));
 		 DBPRT(1,(DBOUT "(nonrepeater) "));
 	      }
 
@@ -4046,9 +4048,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 		 sv_setiv(*err_num_svp, SNMPERR_MALLOC);
 		 goto err;
 	      }
-
-	      DBPRT(1,(DBOUT "%s\n", snprint_objid(_debugx, sizeof(_debugx), oid_arr, oid_arr_len)));
-
+	      DBPRT(1,(DBOUT "%s\n", __snprint_oid(oid_arr, oid_arr_len)));
 	      context->nreq_oids ++;
 	   }
 
