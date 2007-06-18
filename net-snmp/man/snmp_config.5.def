@@ -1,4 +1,4 @@
-.TH SNMP.CONF 5 "5 May 2005" VVERSIONINFO "Net-SNMP"
+.TH SNMP_CONFIG 5 "5 May 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmp_config - handling of Net-SNMP configuration files
@@ -150,7 +150,10 @@ either the agent's MIB modules or in applications can be found in the
 .I read_config(3)
 manual page.
 .SH "SEE ALSO"
-read_config(3).
+snmpconf(1),
+read_config(3),
+snmp.conf(5),
+snmpd.conf(5)
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:
