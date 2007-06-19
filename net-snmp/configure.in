@@ -2972,7 +2972,7 @@ if test "x$install_perl" != "xno" ; then
         if test "x$install_perl" = "xtry" ; then
           install_perl="no"
         else
-          AC_MSG_ERROR([Could not determine the compiler that was used to build $myperl. Either set the environment variable PERLPROG to a different perl binary or use --disable-embedded-perl to turn off embedded Perl functionality altogether.])
+          AC_MSG_ERROR([Could not determine the compiler that was used to build $myperl. Either set the environment variable PERLPROG to a different perl binary or use --without-perl-modules to build without Perl.])
         fi
       fi
 fi
@@ -2993,7 +2993,7 @@ if test "x$install_perl" != "xno" ; then
       	if test "x$install_perl" = "xtry" ; then
       	  install_perl="no"
       	else
-      	  AC_MSG_ERROR([This build is using a GNU C compiler ($CC) while Perl has been compiled with a non-GNU (or non-working) compiler ($PERLCC). This likely won't work for embedded Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or disable embedded Perl functionality altogether (--disable-embedded-perl).])
+      	  AC_MSG_ERROR([This build is using a GNU C compiler ($CC) while Perl has been compiled with a non-GNU (or non-working) compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules).])
       	fi
       fi
 fi
@@ -3004,7 +3004,7 @@ if test "x$install_perl" != "xno" ; then
       	if test "x$install_perl" = "xtry" ; then
       	  install_perl="no"
       	else
-          AC_MSG_ERROR([This build is using a non-GNU C compiler ($CC) while Perl has been compiled with a GNU compiler ($PERLCC). This likely won't work for embedded Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or disable embedded Perl functionality altogether (--disable-embedded-perl).])
+          AC_MSG_ERROR([This build is using a non-GNU C compiler ($CC) while Perl has been compiled with a GNU compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules).])
       	fi
       fi
 fi
