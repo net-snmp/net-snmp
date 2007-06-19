@@ -25,7 +25,7 @@
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
 Version: 5.2.4
-# update release for vendor release. (eg 1.rh9, 1.rh72, 1.ydl3, 1.ydl23)
+# update release for vendor release. (eg 1.fc6, 1.rh72, 1.ydl3, 1.ydl23)
 Release: 1
 URL: http://www.net-snmp.org/
 License: BSDish
@@ -42,6 +42,7 @@ AutoReqProv: no
 Requires: openssl, popt, rpm, zlib, bzip2-libs, beecrypt, elfutils-libelf, glibc
 Provides: net-snmp, net-snmp-utils, libnetsnmp.so.%{libcurrent}, libnetsnmpagent.so.%{libcurrent}, libnetsnmphelpers.so.%{libcurrent}, libnetsnmpmibs.so.%{libcurrent}, libnetsnmptrapd.so.%{libcurrent}
 %if %{embedded_perl}
+BuildRequires: perl-ExtUtils-Embed
 Requires: perl
 %endif
 
@@ -199,6 +200,9 @@ rm -rf $RPM_BUILD_ROOT
 echo "No additional verification is done for net-snmp"
 
 %changelog
+* Tue Jun 19 2007 Thomas Anders <tanders@users.sf.net>
+- add "BuildRequires: perl-ExtUtils-Embed", e.g. for Fedora 7
+
 * Fri Sep  1 2006 Thomas Anders <tanders@users.sf.net>
 - Version changed to 5.2.3 for the 5.2.x branch
 - introduce %{libcurrent}
