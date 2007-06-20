@@ -229,7 +229,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         CONTAINER_INSERT(container, entry);
         DEBUGMSGTL(("access:interface:container:arch",
                     "created entry %u for %s\n", entry->index, entry->name));
-    } /* for (each interfac entry) */
+    } /* for (each interface entry) */
 
     /* pass 2: walk addresses */
     for (cp = if_list; cp < if_list + if_list_size; cp += ifa->ifam_msglen) {
