@@ -24,6 +24,4 @@
 
 /* define the extra mib modules that are supported */
 #define NETSNMP_INCLUDE_HOST_RESOURCES
-#ifdef NETSNMP_ENABLE_MFD_REWRITES
 #define NETSNMP_INCLUDE_IFTABLE_REWRITES
-#endif
