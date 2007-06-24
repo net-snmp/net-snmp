@@ -530,9 +530,6 @@
 /* got in_addr_t? */
 #undef HAVE_IN_ADDR_T
 
-/* got ssize_t? */
-#undef HAVE_SSIZE_T
-
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
 # define strchr index
