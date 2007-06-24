@@ -29,9 +29,6 @@
 /* got in_addr_t? */
 #undef HAVE_IN_ADDR_T
 
-/* got ssize_t? */
-#undef HAVE_SSIZE_T
-
 /* define if you have <netinet/in_pcb.h> */
 #undef HAVE_NETINET_IN_PCB_H
 
