@@ -2935,7 +2935,7 @@ AC_CACHE_VAL(ac_cv_type_$1,
 
 AC_MSG_RESULT([$ac_cv_type_ssize_t])
 if test $ac_cv_type_ssize_t = yes; then
-  AC_DEFINE(HAVE_SSIZE_T)
+  AC_DEFINE(HAVE_SSIZE_T, 1, [Define if type ssize_t is available])
 fi
 
 # Check ps args
