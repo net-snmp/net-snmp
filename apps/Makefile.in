@@ -49,7 +49,7 @@ USELIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 HELPERLIB       = ../agent/helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 AGENTLIB        = ../agent/libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
 MIBLIB          = ../agent/libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
-USEAGENTLIBS	= $(MIBLIB) $(HELPERLIB) $(AGENTLIB) $(USELIBS)
+USEAGENTLIBS	= $(MIBLIB) $(AGENTLIB) $(HELPERLIB) $(USELIBS)
 
 #
 # link path in src dir
