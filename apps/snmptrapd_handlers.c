@@ -44,8 +44,8 @@ char *print_format2  = NULL;
 char *exec_format1   = NULL;
 char *exec_format2   = NULL;
 
-int   SyslogTrap;
-int   dropauth;
+int   SyslogTrap = 0;
+int   dropauth = 0;
 
 const char     *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n";
 const char     *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
