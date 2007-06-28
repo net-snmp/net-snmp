@@ -20,11 +20,22 @@ extern          "C" {
      * the macros below. 
      */
 #if HAVE_STDARG_H
+# if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
     void            debugmsg(const char *token, const char *format, ...);
     void            debugmsgtoken(const char *token, const char *format,
                                   ...);
     void            debug_combo_nc(const char *token, const char *format,
                                    ...);
+# else
+    void            debugmsg(const char *token, const char *format, ...)
+                        __attribute__ ((__format__ (__printf__, 2, 3)));
+    void            debugmsgtoken(const char *token, const char *format,
+                                  ...)
+                        __attribute__ ((__format__ (__printf__, 2, 3)));
+    void            debug_combo_nc(const char *token, const char *format,
+                                   ...)
+                        __attribute__ ((__format__ (__printf__, 2, 3)));
+# endif
 #else
     void            debugmsg(va_alist);
     void            debugmsgtoken(va_alist);
