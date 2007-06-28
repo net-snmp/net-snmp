@@ -88,10 +88,10 @@ else
       @MODULE_LIST@
       ;;
     --default-mibs|--mibs|--MIBS)
-      echo @DEFAULT_MIBS@
+      echo @NETSNMP_DEFAULT_MIBS@
       ;;
     --default-mibdirs|--mibdirs|--MIBDIRS)
-      echo @DEFAULT_MIBDIRS@
+      echo @NETSNMP_DEFAULT_MIBDIRS@
       ;;
     --snmpconfpath|--SNMPCONFPATH)
       echo "@SNMPCONFPATH@@ENV_SEPARATOR@@SNMPSHAREPATH@@ENV_SEPARATOR@@SNMPLIBPATH@@ENV_SEPARATOR@$HOME/.snmp@ENV_SEPARATOR@@PERSISTENT_DIRECTORY@"
