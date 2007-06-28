@@ -814,11 +814,11 @@ int   command_handler( netsnmp_pdu           *pdu,
         } else {
 	    if ( pdu->command == SNMP_MSG_TRAP && exec_format1 ) {
                 DEBUGMSGTL(( "snmptrapd", "exec v1 = '%s'\n", exec_format1));
-                !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+                realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              exec_format1, pdu, transport);
 	    } else if ( pdu->command != SNMP_MSG_TRAP && exec_format2 ) {
                 DEBUGMSGTL(( "snmptrapd", "exec v2/3 = '%s'\n", exec_format2));
-                !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+                realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              exec_format2, pdu, transport);
 	    } else {
                 DEBUGMSGTL(( "snmptrapd", "execute format\n"));
