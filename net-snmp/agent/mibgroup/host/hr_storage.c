@@ -489,15 +489,6 @@ int             storage_type_len =
 	 *
 	 *********************/
 
-static const char *hrs_descr[] = {
-    NULL,
-    "Memory Buffers",           /* HRS_TYPE_MBUF */
-    "Real Memory",              /* HRS_TYPE_MEM */
-    "Swap Space"                /* HRS_TYPE_SWAP */
-};
-
-
-
 u_char         *
 var_hrstore(struct variable *vp,
             oid * name,
@@ -654,7 +645,6 @@ really_try_next:
 	 *
 	 *********************/
 
-static int      FS_storage;
 static int      HRS_index;
 
 void

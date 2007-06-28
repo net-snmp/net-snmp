@@ -1337,8 +1337,6 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
 {
     u_char         *bufp = data;
     u_int           int_val;
-    int            int_offset;
-    u_int          *int_ptr = (u_int *) data_buf;
     struct counter64 tmp64;
 
     DEBUGDUMPHEADER("recv", "VarBind:");
