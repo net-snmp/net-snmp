@@ -241,7 +241,7 @@ var_hrsys(struct variable * vp,
 #if defined(HAVE_MKTIME) && defined(HAVE_STIME)
         *write_method=ns_set_time;
 #endif
-        (void *) time(&now);
+        time(&now);
         return (u_char *) date_n_time(&now, var_len);
     case HRSYS_LOAD_DEV:
         long_return = get_load_dev();
