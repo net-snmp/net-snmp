@@ -665,7 +665,7 @@ Get_Next_HR_Disk(void)
     time_t          now;
 
     HRD_index++;
-    (void *) time(&now);
+    time(&now);
     DEBUGMSGTL(("host/hr_disk", "Next_Disk type %d of %d\n",
                 HRD_type_index, HR_number_disk_types));
     while (HRD_type_index < HR_number_disk_types) {
