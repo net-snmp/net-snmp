@@ -1,5 +1,93 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.4.1.pre3 -> V5.4.1.rc1
+
+2007-06-29 22:18  tanders
+
+   *
+
+   NEWS: perl: BUG: 1619827: link libnetsnmpagent/libnetsnmptrapd
+   (rather than snmpd/snmptrapd) against libperl when configured
+   with --enable-as-needed
+
+2007-06-28 22:09  tanders
+
+   *
+
+   rename last occurence of DEFAULT_MIB[DIR]S to
+   NETSNMP_DEFAULT_MIB[DIR]S
+
+2007-06-26 22:12  tanders
+
+   *
+
+   CHANGES: build: work around libnetsnmpagent/libnetsnmphelpers
+   dependency issues when linking snmptrapd
+
+2007-06-26 21:45  tanders
+
+   *
+
+   CHANGES: build: use LDFLAGS when building agent, helpers and mib
+   lib to be consistent with libnetnmp
+
+2007-06-26 21:28  tanders
+
+   *
+
+   minor updates
+
+2007-06-24 12:57  tanders
+
+   *
+
+   HAVE_SSIZE_T cleanup
+
+2007-06-23 22:56  tanders
+
+   *
+
+   don't suggest --with-libs=-lnm
+
+2007-06-22 15:09  dts12
+
+   *
+
+   Enforce DOS-style line endings, to keep Visual Studio happy.
+
+2007-06-20 21:34  tanders
+
+   *
+
+   fix typo
+
+2007-06-19 22:23  tanders
+
+   *
+
+   fix Perl-related autoconf messages
+
+2007-06-19 15:08  tanders
+
+   *
+
+   CHANGES: build: add "BuildRequires: perl-ExtUtils-Embed" to the
+   spec file, e.g. for Fedora 7
+
+2007-06-18 22:28  hardaker
+
+   *
+
+   fix broken comment.
+
+2007-06-18 22:04  hardaker
+
+   *
+
+   - version tag ( 5.4.1.pre3 )
+
+-------------------------------------------------------------------------------
+
 Changes: V5.4.1.pre2 -> V5.4.1.pre3
 
 2007-06-18 21:34  hardaker
