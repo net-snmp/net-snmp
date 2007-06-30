@@ -97,7 +97,7 @@ exit 1
 	--enable-shared \
 	%{?netsnmp_perl_modules: --with-perl-modules="PREFIX=$RPM_BUILD_ROOT%{_prefix} INSTALLDIRS=vendor"} \
 	%{!?netsnmp_perl_modules: --without-perl-modules} \
-	%{?netsnmp_embedded_perl: --enable-embedded-perl} \
+	%{?netsnmp_embedded_perl: --enable-as-needed --enable-embedded-perl} \
 	%{!?netsnmp_embedded_perl: --disable-embedded-perl} \
 	--with-cflags="$RPM_OPT_FLAGS"
 
@@ -202,8 +202,9 @@ rm -rf $RPM_BUILD_ROOT
 echo "No additional verification is done for net-snmp"
 
 %changelog
-* Tue Jun 19 2007 Thomas Anders <tanders@users.sf.net>
+* Tue Jun 30 2007 Thomas Anders <tanders@users.sf.net>
 - add "BuildRequires: perl-ExtUtils-Embed", e.g. for Fedora 7
+- add --enable-as-needed if building with embedded Perl support
 
 * Wed Nov 23 2006 Thomas Anders <tanders@users.sf.net>
 - fixes for 5.4 and 64-bit platforms
