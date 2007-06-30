@@ -129,6 +129,9 @@ listing of all changes made to the code.
       - [PATCH 1728247]: Add type
       - patch from apple to simplify makefile target
       - [PATCH 1728241]: from mitsuru_chinen: add configure check
+      - add "BuildRequires: perl-ExtUtils-Embed" to the
+      - use LDFLAGS when building agent, helpers and mib
+      - work around libnetsnmpagent/libnetsnmphelpers
 
     documentation:
       - [BUG 1247164]: Document use of OID macros
@@ -152,6 +155,7 @@ listing of all changes made to the code.
       - fix prerequisites for NetSNMP::TrapReceiver
       - fix syntax error in NetSNMP::agent::Support
       - patch: 1725049: fix bulkwalk in cases of non-repeater
+      - [BUG 1619827]: link libnetsnmpagent/libnetsnmptrapd
 
     python:
       - [PATCH 1716114]: Let python build in source tree
