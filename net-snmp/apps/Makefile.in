@@ -55,8 +55,8 @@ USEAGENTLIBS	= $(MIBLIB) $(AGENTLIB) $(HELPERLIB) $(USELIBS)
 # link path in src dir
 LOCAL_LIBS	= -L../snmplib/.libs -L../snmplib -L../agent/.libs -L../agent -L../agent/helpers/.libs -L../agent/helpers
 LIBS		= $(USELIBS) @LIBS@
-PERLLDOPTS      = @PERLLDOPTS@
-PERLCCDLFLAGS   = @PERLCCDLFLAGS@
+PERLLDOPTS_FOR_APPS = @PERLLDOPTS_FOR_APPS@
+PERLLDOPTS_FOR_LIBS = @PERLLDOPTS_FOR_LIBS@
 
 #
 # hack for compiling trapd when agent is disabled
@@ -64,7 +64,7 @@ TRAPDWITHAGENT  = $(USETRAPLIBS) @AGENTLIBS@
 TRAPDWITHOUTAGENT = $(LIBS)
 
 # these will be set by configure to one of the above 2 lines
-TRAPLIBS	= @TRAPLIBS@ $(PERLCCDLFLAGS)
+TRAPLIBS	= @TRAPLIBS@ $(PERLLDOPTS_FOR_APPS)
 USETRAPLIBS	= @USETRAPLIBS@
 
 CPPFLAGS	= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(HELPER_INCLUDES) \
@@ -143,7 +143,7 @@ snmpdf$(EXEEXT):    snmpdf.$(OSUFFIX) $(USELIBS)
 	$(LINK) ${CFLAGS} -o $@ snmpdf.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION): $(LLIBTRAPD_OBJS)
-	$(LIB_LD_CMD) $@ ${LLIBTRAPD_OBJS} $(MIBLIB) $(USELIBS) $(PERLLDOPTS) $(LIB_LD_LIBS)
+	$(LIB_LD_CMD) $@ ${LLIBTRAPD_OBJS} $(MIBLIB) $(USELIBS) $(PERLLDOPTS_FOR_LIBS) $(LIB_LD_LIBS)
 	$(RANLIB) $@
 
 snmpinforminstall:

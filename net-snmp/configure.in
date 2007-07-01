@@ -59,7 +59,9 @@ AC_ARG_WITH(ldflags,
     [LDFLAGS=$with_ldflags; export LDFLAGS])
 
 AC_ARG_ENABLE(as-needed,
-[  --enable-as-needed              link libraries against other needed libraries.])
+[  --disable-as-needed             Link libperl against applications rather
+                                  than Net-SNMP libraries. Use only if the other
+                                  way doesn't work.])
 
 AC_ARG_WITH(libs,
 [  --with-libs=LIBS                use LIBS as link time arguments to ld.],
@@ -3073,7 +3075,6 @@ if test "x$embed_perl" != "xno" ; then
     netsnmp_perlldopts=`$myperl -MExtUtils::Embed -e ldopts`
     if test "x$netsnmp_perlldopts" != "x" ; then
       AC_MSG_RESULT([$netsnmp_perlldopts])
-      PERLLDOPTS="$netsnmp_perlldopts"
     else
       if test "x$embed_perl" = "xtry" ; then
         embed_perl="no"
@@ -3081,19 +3082,26 @@ if test "x$embed_perl" != "xno" ; then
         AC_MSG_ERROR([Could not determine the linker options that were used to build $myperl. Either set the environment variable PERLPROG to a different Perl binary or use --disable-embedded-perl to turn off embedded Perl functionality altogether.])
       fi
     fi
-    # Perl ccdlflags (RPATH to libperl, hopefully)
-    AC_MSG_CHECKING([for Perl CCDLFLAGS])
-    changequote(, )
-    netsnmp_perlccdlflags=`$myperl -V:ccdlflags | $myperl -n -e 'print $1 '"if (/^\s*ccdlflags='([^']+)';/);"`
-    changequote([, ])
-    AC_MSG_RESULT([$netsnmp_perlccdlflags])
-    PERLCCDLFLAGS="$netsnmp_perlccdlflags"
+    if test "x$enable_as_needed" != "xno" ; then
+      # link *libraries* with libperl
+      PERLLDOPTS_FOR_LIBS="$netsnmp_perlldopts"
+      # Perl ccdlflags (RPATH to libperl, hopefully)
+      AC_MSG_CHECKING([for Perl CCDLFLAGS])
+      changequote(, )
+      netsnmp_perlccdlflags=`$myperl -V:ccdlflags | $myperl -n -e 'print $1 '"if (/^\s*ccdlflags='([^']+)';/);"`
+      changequote([, ])
+      AC_MSG_RESULT([$netsnmp_perlccdlflags])
+      PERLLDOPTS_FOR_APPS="$netsnmp_perlccdlflags"
+    else
+      # link *applications* against libperl
+      PERLLDOPTS_FOR_APPS="$netsnmp_perlldopts"
+    fi
 fi
 
 # check needed functions
 if test "x$embed_perl" != "xno" ; then
     OLDLDFLAGS="$LDFLAGS"
-    LDFLAGS="$LDFLAGS $PERLLDOPTS"
+    LDFLAGS="$LDFLAGS $netsnmp_perlldopts"
 
     # newer perl vs older perl call functions
     AC_CHECK_FUNCS(eval_pv)
@@ -3131,8 +3139,8 @@ else
 fi
 AC_SUBST(EMBEDPERLINSTALL)
 AC_SUBST(EMBEDPERLUNINSTALL)
-AC_SUBST(PERLLDOPTS)
-AC_SUBST(PERLCCDLFLAGS)
+AC_SUBST(PERLLDOPTS_FOR_LIBS)
+AC_SUBST(PERLLDOPTS_FOR_APPS)
 
 # embedded Perl results
 AC_MSG_CHECKING([for potential embedded Perl support])
