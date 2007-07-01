@@ -59,9 +59,9 @@ AC_ARG_WITH(ldflags,
     [LDFLAGS=$with_ldflags; export LDFLAGS])
 
 AC_ARG_ENABLE(as-needed,
-[  --enable-as-needed              link libperl against Net-SNMP libraries 
-                                 rather than applications. We recommend to
-                                 use this option if it works.])
+[  --enable-as-needed              Link libperl against Net-SNMP libraries 
+                                  rather than applications. We recommend to
+                                  use this option if it works.])
 
 AC_ARG_WITH(libs,
 [  --with-libs=LIBS                use LIBS as link time arguments to ld.],
