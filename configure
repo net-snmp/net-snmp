@@ -907,8 +907,8 @@ ENV_SEPARATOR
 NETSNMP_DEFAULT_MIBS
 EMBEDPERLINSTALL
 EMBEDPERLUNINSTALL
-PERLLDOPTS
-PERLCCDLFLAGS
+PERLLDOPTS_FOR_LIBS
+PERLLDOPTS_FOR_APPS
 PERLTARGS
 PERLINSTALLTARGS
 PERLUNINSTALLTARGS
@@ -1542,7 +1542,9 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-as-needed              link libraries against other needed libraries.
+  --disable-as-needed             Link libperl against applications rather
+                                  than Net-SNMP libraries. Use only if the other
+                                  way doesn't work.
   --enable-silent-libtool         Pass --silent to libtool.
 
   --enable-mini-agent             Build a minimal agent.
@@ -6100,7 +6102,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6103 "configure"' > conftest.$ac_ext
+  echo '#line 6105 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8793,11 +8795,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8796: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8798: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8800: \$? = $ac_status" >&5
+   echo "$as_me:8802: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9083,11 +9085,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9086: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9088: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9090: \$? = $ac_status" >&5
+   echo "$as_me:9092: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9187,11 +9189,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9190: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9192: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9194: \$? = $ac_status" >&5
+   echo "$as_me:9196: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11536,7 +11538,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11539 "configure"
+#line 11541 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11636,7 +11638,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11639 "configure"
+#line 11641 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14056,11 +14058,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14059: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14061: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14063: \$? = $ac_status" >&5
+   echo "$as_me:14065: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14160,11 +14162,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14163: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14165: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14167: \$? = $ac_status" >&5
+   echo "$as_me:14169: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15722,11 +15724,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15725: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15727: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15729: \$? = $ac_status" >&5
+   echo "$as_me:15731: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15826,11 +15828,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15829: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15831: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15833: \$? = $ac_status" >&5
+   echo "$as_me:15835: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18013,11 +18015,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18016: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18018: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18020: \$? = $ac_status" >&5
+   echo "$as_me:18022: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18303,11 +18305,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18306: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18308: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18310: \$? = $ac_status" >&5
+   echo "$as_me:18312: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18407,11 +18409,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18410: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18412: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18414: \$? = $ac_status" >&5
+   echo "$as_me:18416: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -33024,7 +33026,6 @@ echo $ECHO_N "checking for Perl LDFLAGS... $ECHO_C" >&6; }
     if test "x$netsnmp_perlldopts" != "x" ; then
       { echo "$as_me:$LINENO: result: $netsnmp_perlldopts" >&5
 echo "${ECHO_T}$netsnmp_perlldopts" >&6; }
-      PERLLDOPTS="$netsnmp_perlldopts"
     else
       if test "x$embed_perl" = "xtry" ; then
         embed_perl="no"
@@ -33034,21 +33035,28 @@ echo "$as_me: error: Could not determine the linker options that were used to bu
    { (exit 1); exit 1; }; }
       fi
     fi
-    # Perl ccdlflags (RPATH to libperl, hopefully)
-    { echo "$as_me:$LINENO: checking for Perl CCDLFLAGS" >&5
+    if test "x$enable_as_needed" != "xno" ; then
+      # link *libraries* with libperl
+      PERLLDOPTS_FOR_LIBS="$netsnmp_perlldopts"
+      # Perl ccdlflags (RPATH to libperl, hopefully)
+      { echo "$as_me:$LINENO: checking for Perl CCDLFLAGS" >&5
 echo $ECHO_N "checking for Perl CCDLFLAGS... $ECHO_C" >&6; }
 
-    netsnmp_perlccdlflags=`$myperl -V:ccdlflags | $myperl -n -e 'print $1 '"if (/^\s*ccdlflags='([^']+)';/);"`
+      netsnmp_perlccdlflags=`$myperl -V:ccdlflags | $myperl -n -e 'print $1 '"if (/^\s*ccdlflags='([^']+)';/);"`
 
-    { echo "$as_me:$LINENO: result: $netsnmp_perlccdlflags" >&5
+      { echo "$as_me:$LINENO: result: $netsnmp_perlccdlflags" >&5
 echo "${ECHO_T}$netsnmp_perlccdlflags" >&6; }
-    PERLCCDLFLAGS="$netsnmp_perlccdlflags"
+      PERLLDOPTS_FOR_APPS="$netsnmp_perlccdlflags"
+    else
+      # link *applications* against libperl
+      PERLLDOPTS_FOR_APPS="$netsnmp_perlldopts"
+    fi
 fi
 
 # check needed functions
 if test "x$embed_perl" != "xno" ; then
     OLDLDFLAGS="$LDFLAGS"
-    LDFLAGS="$LDFLAGS $PERLLDOPTS"
+    LDFLAGS="$LDFLAGS $netsnmp_perlldopts"
 
     # newer perl vs older perl call functions
 
@@ -53799,8 +53807,8 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
-PERLLDOPTS!$PERLLDOPTS$ac_delim
-PERLCCDLFLAGS!$PERLCCDLFLAGS$ac_delim
+PERLLDOPTS_FOR_LIBS!$PERLLDOPTS_FOR_LIBS$ac_delim
+PERLLDOPTS_FOR_APPS!$PERLLDOPTS_FOR_APPS$ac_delim
 PERLTARGS!$PERLTARGS$ac_delim
 PERLINSTALLTARGS!$PERLINSTALLTARGS$ac_delim
 PERLUNINSTALLTARGS!$PERLUNINSTALLTARGS$ac_delim
