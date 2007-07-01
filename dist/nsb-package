@@ -38,6 +38,13 @@ usage()
 
 #set -x
 
+# make getopts work on Tru64 by respawning in Posix mode
+if [ "`uname`" = "OSF1" -a "$BIN_SH" != "xpg4" ]; then
+    BIN_SH=xpg4
+    export BIN_SH
+    exec $0 $*
+fi
+
 #
 # find nsb-platform based on the path to this script
 #
