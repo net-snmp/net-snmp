@@ -343,7 +343,7 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
 
     var = (netsnmp_variable_list *)SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
     if (!var)
-        return;
+        return -1;
 
     /*
      * Set the basic notification OID...
