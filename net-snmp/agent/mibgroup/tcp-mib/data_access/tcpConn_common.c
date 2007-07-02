@@ -15,8 +15,6 @@
 /*
  * local static prototypes
  */
-static int _access_tcpconn_entry_compare_addr(const void *lhs,
-                                                const void *rhs);
 static void _access_tcpconn_entry_release(netsnmp_tcpconn_entry * entry,
                                             void *unused);
 
