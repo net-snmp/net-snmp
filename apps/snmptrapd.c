@@ -212,10 +212,6 @@ struct timeval  Now;
 
 void            trapd_update_config(void);
 
-static oid      risingAlarm[] = { 1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 1 };
-static oid      fallingAlarm[] = { 1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 2 };
-static oid      unavailableAlarm[] = { 1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 3 };
-
 #ifdef WIN32SERVICE
 void            StopSnmpTrapd(void);
 int             SnmpTrapdMain(int argc, TCHAR * argv[]);

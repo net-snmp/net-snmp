@@ -90,19 +90,15 @@ static const char *successNotes[CMD_NUM] = {
 
 static oid      vacmGroupName[MAX_OID_LEN] =
     { 1, 3, 6, 1, 6, 3, 16, 1, 2, 1, 3 },
-    vacmSec2GroupStorageType[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 16, 1, 2, 1, 4}, vacmSec2GroupStatus[MAX_OID_LEN] = {
+    vacmSec2GroupStatus[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 2, 1, 5}, vacmAccessContextMatch[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 4}, vacmAccessReadViewName[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 5}, vacmAccessWriteViewName[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 6}, vacmAccessNotifyViewName[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 7}, vacmAccessStorageType[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 8}, vacmAccessStatus[MAX_OID_LEN] = {
+1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 7}, vacmAccessStatus[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 4, 1, 9}, vacmViewTreeFamilyMask[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 5, 2, 1, 3}, vacmViewTreeFamilyType[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 5, 2, 1, 4},
-    vacmViewTreeFamilyStorageType[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 16, 1, 5, 2, 1, 5},
     vacmViewTreeFamilyStatus[MAX_OID_LEN] = {
 1, 3, 6, 1, 6, 3, 16, 1, 5, 2, 1, 6}
 
@@ -111,7 +107,6 @@ static oid      vacmGroupName[MAX_OID_LEN] =
 #define NSVACMACCESSTABLE    1, 3, 6, 1, 4, 1, 8072, 1, 9, 1
 static oid nsVacmContextPfx[MAX_OID_LEN]  = { NSVACMACCESSTABLE, 1, 2 };
 static oid nsVacmViewName[MAX_OID_LEN]    = { NSVACMACCESSTABLE, 1, 3 };
-static oid nsVacmStorageType[MAX_OID_LEN] = { NSVACMACCESSTABLE, 1, 4 };
 static oid nsVacmRowStatus[MAX_OID_LEN]   = { NSVACMACCESSTABLE, 1, 5 };
 
 int             viewTreeFamilyType = 1;
