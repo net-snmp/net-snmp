@@ -151,6 +151,7 @@ typedef unsigned int     uint32_t;
 #endif
 #ifdef INT64_T
 typedef INT64_T int64_t;
+#define HAVE_INT64_T 1
 #endif
 #endif /* !HAVE_INT64_T */
 
@@ -160,22 +161,32 @@ typedef u_int64_t        uint64_t;
 #elif defined(INT64_T)
 typedef unsigned INT64_T uint64_t;
 #endif
+#define HAVE_UINT64_T 1
 #endif
 
 #ifndef HAVE_INTMAX_T
 #ifdef SIZEOF_LONG_LONG
 typedef long long intmax_t;
+#define SIZEOF_INTMAX_T SIZEOF_LONG_LONG
+#elif defined(HAVE_INT64_T) && !defined(_INT64_IS_NOT_64BIT)
+typedef int64_t   intmax_t;
+#define SIZEOF_INTMAX_T 8
 #else
 typedef long      intmax_t;
+#define SIZEOF_INTMAX_T SIZEOF_LONG
 #endif
+#define HAVE_INTMAX_T 1
 #endif
 
-#ifndef HAVE_INTMAX_T
+#ifndef HAVE_UINTMAX_T
 #ifdef SIZEOF_LONG_LONG
 typedef unsigned long long uintmax_t;
+#elif defined(HAVE_UINT64_T) && !defined(_INT64_IS_NOT_64BIT)
+typedef uint64_t           uintmax_t;
 #else
 typedef unsigned long      uintmax_t;
 #endif
+#define HAVE_UINTMAX_T 1
 #endif
 
 #ifndef HAVE_UINTPTR_T
