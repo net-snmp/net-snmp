@@ -7,19 +7,7 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
 
   - ALL
 
-    - Test 44 (Perl AgentX Subagent) fails.
-
-      - There are 2 issues here. One is the perl can't find the
-        net-snmp shared libraries, because they aren't installed yet.
-        Setting DYLD_LIBRARY_PATH helps here, but one link error
-        remains:
-
-           /usr/bin/perl Undefined symbols: _boot_DynaLoader
-
-        Unless you need a perl based AgentX subagent, you can ignore
-        this error.
-
-     - nlist doesn't support icmpstat
+    - nlist doesn't support icmpstat
 
        - disable the icmp module during configure by specifying
          "--with-out-mib-modules=mibII/icmp", or at startup by adding
