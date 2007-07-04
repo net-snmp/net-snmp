@@ -158,7 +158,7 @@ libs: $(INSTALLLIBS)
 
 embedperlinstall:
 	  @$(SHELL) $(srcdir)/../mkinstalldirs $(INSTALL_PREFIX)$(snmplibdir)
-	  @$(INSTALL) $(srcdir)/snmp_perl.pl $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl.pl
+	  @$(INSTALL_DATA) $(srcdir)/snmp_perl.pl $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl.pl
 	  @echo "install:  installed snmp_perl.pl in $(INSTALL_PREFIX)$(snmplibdir)"
 
 embedperluninstall:
