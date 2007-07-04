@@ -148,7 +148,7 @@ snmpinformuninstall:
 	rm -f $(INSTALL_PREFIX)$(bindir)/snmpinform$(EXEEXT)
 
 snmptrapdperlinstall: installdirs
-	  @$(INSTALL) $(srcdir)/snmp_perl_trapd.pl $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl_trapd.pl
+	  @$(INSTALL_DATA) $(srcdir)/snmp_perl_trapd.pl $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl_trapd.pl
 	  @echo "install:  installed snmp_perl_trapd.pl in $(INSTALL_PREFIX)$(snmplibdir)"
 
 snmptrapdperluninstall: installdirs
