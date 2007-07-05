@@ -20,11 +20,20 @@ od=$1
 nd=$2
 DIR=/tmp
 OUTPUT=$DIR/api-diff.pat
-NDT=$DIR/api-nd
 ODT=$DIR/api-od
 
+if [ ! -d $od ]; then
+   echo "old dir $od doesn't exist"
+   exit 1
+fi
+
+if [ ! -d $nd ]; then
+   echo "old dir $nd doesn't exist"
+   exit 1
+fi
+
 # find header in nd
-rm -f $OUTPUT $NDT $ODT 2>/dev/null
+rm -f $OUTPUT $ODT 2>/dev/null
 (cd $od && find . -type f -name "*.h"|sort > $ODT)
 
 OH=`cat $ODT`
