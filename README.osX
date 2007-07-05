@@ -23,7 +23,6 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
                         --without-rpm \
                         --with-mib-modules="host ucd-snmp/diskio" \
                         --with-out-mib-modules="mibII/icmp host/hr_swrun" \
-                        --disable-static \
                         --without-kmem-usage
 
        The first line sets up persistent storage in the OS X standard location.
@@ -33,8 +32,6 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
        The fourth line includes those modules appear to build properly and
        mostly work. The next line is necessary because those sub-modules
        do not build.
-
-       I disable static libraries because we don't use them.
 
        The final line is necessary because /dev/kmem was removed in
        the Intel / Universal builds of the OS, and I believe the APIs will
