@@ -334,6 +334,11 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
     while (*stats == ' ')
         stats++;
 
+    if ((*stats == 'N') &&
+        (0 == strncmp(stats, "No statistics available",
+                      sizeof("No statistics available"))))
+        return -1;
+
     /*
      * Now parse the rest of the line (i.e. starting from 'stats')
      *      to extract the relevant statistics, and populate
