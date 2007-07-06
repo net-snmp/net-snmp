@@ -379,7 +379,6 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
         snmp_log(LOG_ERR,
                  "error scanning interface data (expected %d, got %d)\n",
                  expected, scan_count);
-        netsnmp_access_interface_entry_free(entry);
         return scan_count;
     }
     entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_ACTIVE;
