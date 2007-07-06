@@ -924,8 +924,8 @@
 /* The size of a `long', as computed by sizeof. */
 #define SIZEOF_LONG 4
 
-/* The size of a `long long', as computed by sizeof. */
-#define SIZEOF_LONG_LONG 8
+/* The size of a `intmax_t', as computed by sizeof. */
+#define SIZEOF_INTMAX_T 8
 
 /* The size of a `short', as computed by sizeof. */
 #define SIZEOF_SHORT 2
@@ -1528,6 +1528,8 @@ typedef unsigned __int32 uint32_t;
 typedef long int32_t;
 typedef unsigned __int64 uint64_t;
 typedef __int64 int64_t;
+typedef unsigned __int64 uintmax_t;
+typedef __int64 intmax_t;
 typedef unsigned short   uint16_t;
 
 /* Define if you have the closesocket function.  */
