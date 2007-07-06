@@ -327,8 +327,7 @@ uninstallsubdirs:
 # cleaning targets
 #
 clean: cleansubdirs $(OTHERCLEANTODOS)
-	rm -f core ${OBJS} ${LOBJS} $(STANDARDCLEANTARGETS) $(OTHERCLEANTARGETS)
-	rm -rf .libs
+	$(LIBTOOLCLEAN) ${OBJS} ${LOBJS} core $(STANDARDCLEANTARGETS) $(OTHERCLEANTARGETS)
 
 cleansubdirs:
 	@if test "$(SUBDIRS)" != ""; then \
