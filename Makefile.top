@@ -34,6 +34,7 @@ INSTALL_PREFIX  = $(DESTDIR)
 #
 INSTALL		= $(LIBTOOL) --mode=install @INSTALL@
 UNINSTALL	= $(LIBTOOL) --mode=uninstall rm -f
+LIBTOOLCLEAN	= $(LIBTOOL) --mode=clean rm -f
 INSTALL_DATA    = @INSTALL_DATA@
 SED		= @SED@
 LN_S		= @LN_S@
