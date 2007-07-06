@@ -129,17 +129,9 @@ sub load_primaries {
 					$one = capturedir($codetrees{$k}, 
 							  "svn update");
 					$res .= $one;
-					my @files = $one =~ m/^M (.*)$/gm;
-					if ($#files > -1) {
-					    $res .= capturedir($codetrees{$k}, 
-							       "rm -f ",
-							       @files);
-					    $res .= capturedir($codetrees{$k}, 
-							       "svn update", 
-							       @files);
-					} else {
-					    $res .= "$codetrees{$k} is up to date\n";
-					}
+					$one = capturedir($codetrees{$k}, 
+							  "svn revert -R .");
+					$res .= $one;
 				    }
 				    return $res;
 				  },
@@ -200,9 +192,9 @@ sub load_primaries {
 		       if (qwparam('edithem')) {
 			   foreach my $k (keys(%captures)) {
 			       foreach my $f (@{$captures{$k}}) {
-				   my $file = qwparam('basedir') . "/" .
-				     $codetrees{$k} . "/" .
-				       qwparam('subdir') . "/" . $f->[0];
+				   my $file = qwparam('basedir') .
+				     $codetrees{$k} .
+				       qwparam('subdir') . '/' . $f->[0];
 				   print STDERR "editing: $file\n";
 				   system(qwparam('editor') . " " . $file);
 			       }
