@@ -1329,7 +1329,7 @@ var_extensible_old(struct variable * vp,
             return ((u_char *) (&long_ret));
         case ERRORMSG:         /* first line of text returned from the process */
             netsnmp_cache_check_and_reload( exten->exec_entry->cache );
-            if (exten->exec_entry->lines) {
+            if (exten->exec_entry->numlines > 1) {
                 *var_len = (exten->exec_entry->lines[1])-
                            (exten->exec_entry->output) -1;
             } else if (exten->exec_entry->output) {
