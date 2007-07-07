@@ -37,6 +37,7 @@ listing of all changes made to the code.
       - Do not use getservbyname to find default port
       - FEATURES: 454028: Detect and handle empty MIB
       - Change snmp_sess_add_ex to consistently close and
+      - Patch from "Mitsuru Chinen": cleans up the
 
     snmpd:
       - [BUG 1397895]: include missing interface declarations
@@ -98,6 +99,7 @@ listing of all changes made to the code.
       - patch: 1719253: from "Christian Jung": fix
       - patch: 1719254: from "Christan Jung": update
       - [PATCH 1729629]: Fix memory leak in disman
+      - [BUG 1745113]: Handle single-line (and zero-line)
 
     snmptrapd:
       - [BUG 1638225]: Fix interpretation of transport address data.
@@ -132,6 +134,7 @@ listing of all changes made to the code.
       - add "BuildRequires: perl-ExtUtils-Embed" to the
       - use LDFLAGS when building agent, helpers and mib
       - work around libnetsnmpagent/libnetsnmphelpers
+      - use libtool clean for removing files to ensure we
 
     documentation:
       - [BUG 1247164]: Document use of OID macros
@@ -156,6 +159,7 @@ listing of all changes made to the code.
       - fix syntax error in NetSNMP::agent::Support
       - patch: 1725049: fix bulkwalk in cases of non-repeater
       - [BUG 1619827]: link libnetsnmpagent/libnetsnmptrapd
+      - install embedded perl init files for
 
     python:
       - [PATCH 1716114]: Let python build in source tree
