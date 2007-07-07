@@ -1,5 +1,106 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.4.1.rc1 -> V5.4.1.rc2
+
+2007-07-06 23:39  hardaker
+
+   *
+
+   CHANGES: build: use libtool clean for removing files to ensure we
+   delete all libtool temporary files.
+
+2007-07-06 21:22  rstory
+
+   *
+
+   stop searching paths when done
+
+2007-07-06 21:14  rstory
+
+   *
+
+   do not free interface entry just because we can not get stats for
+   it
+
+2007-07-06 15:32  dts12
+
+   *
+
+   CHANGES: snmpd: BUG 1745113: Handle single-line (and zero-line)
+   output in UCD compatability mode.
+
+2007-07-05 14:45  rstory
+
+   *
+
+   r20044@dhcp211: rstory | 2007-07-05 10:44:01 -0400
+   remove disable-static from recommended options
+
+2007-07-05 11:05  rstory
+
+   *
+
+   skip stats parsing on interfaces with no statistics
+
+2007-07-04 23:26  tanders
+
+   *
+
+   CHANGES: perl: install embedded perl init files for
+   snmpd/snmptrapd with mode 644 instead of 755
+
+2007-07-04 21:42  tanders
+
+   *
+
+   Perl problems (believed to be) fixed
+
+2007-07-03 22:36  hardaker
+
+   *
+
+   CHANGES: library: Patch from "Mitsuru Chinen": cleans up the
+   int64 type checking and usage for building packets especially
+   under MSVC.
+
+2007-07-03 12:56  tanders
+
+   *
+
+   remove executable flag from SVN properties
+
+2007-07-02 06:02  magfr
+
+   *
+
+   Add missing return value to _mteEvent_fire_notify.
+
+2007-07-02 05:31  magfr
+
+   *
+
+   Remove the declaration of an undefined static function.
+
+2007-07-01 19:59  tanders
+
+   *
+
+   minor help text formatting fix
+
+2007-06-30 05:34  tanders
+
+   *
+
+   add --enable-as-needed if building with embedded Perl support
+
+2007-06-30 04:37  hardaker
+
+   *
+
+   - version tag ( 5.4.1.rc1 )
+
+-------------------------------------------------------------------------------
+
 Changes: V5.4.1.pre3 -> V5.4.1.rc1
 
 2007-06-29 22:18  tanders
