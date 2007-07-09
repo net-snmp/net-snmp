@@ -162,11 +162,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         }
     }
 
-    if ((*stats == 'N') &&
-        (0 == strncmp(stats, "No statistics available",
-                      sizeof("No statistics available"))))
-        return -1;
-
     /*
      * The rest of the file provides the statistics for each interface.
      * Read in each line in turn, isolate the interface name
@@ -180,6 +175,11 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 
         while (*ifstart && *ifstart == ' ')
             ifstart++;
+
+        if ((*ifstart == 'N') &&
+            (0 == strncmp(ifstart, "No statistics available",
+                          sizeof("No statistics available"))))
+            continue;
 
         if ((!*ifstart) || ((stats = strrchr(ifstart, ':')) == NULL)) {
             snmp_log(LOG_ERR,
