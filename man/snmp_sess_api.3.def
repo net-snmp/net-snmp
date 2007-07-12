@@ -53,7 +53,7 @@ snmp_sess_timeout, snmp_sess_close, snmp_sess_error - session functions
 .br
 .BI "                          int *" block ");"
 .PP
-.BI "void snmp_sess_read(void *" handle ", fd_set *" fdset ");"
+.BI "int snmp_sess_read(void *" handle ", fd_set *" fdset ");"
 .PP
 .BI "void snmp_sess_timeout(void *" handle ");"
 .PP
