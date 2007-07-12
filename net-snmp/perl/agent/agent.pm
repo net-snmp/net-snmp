@@ -234,6 +234,7 @@ module implements in a perl-way, and a perl specific tutorial at:
 =head2 Sub-agent example
 
     	use NetSNMP::agent (':all');
+    	use NetSNMP::ASN qw(ASN_OCTET_STR);
 
         my $value = "hello world";
 	sub myhandler {
