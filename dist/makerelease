@@ -144,22 +144,31 @@ System("release:removefiles",
        "net-snmp-$version/remove-files net-snmp-$version");
 System("release:makedist",
        "$tar -c -z -f net-snmp-${version}.tar.gz  net-snmp-$version");
+System("release:makezipclean",
+       "rm -f net-snmp-${version}.zip");
+System("release:makezip",
+       "zip -r net-snmp-${version}.zip  net-snmp-$version");
 
 
 # Step 13)  Sign (or checksum) the package
-my $sig;
-my $pkg = "net-snmp-${version}.tar.gz";
+my $sig1;
+my $sig2;
+my $pkg1 = "net-snmp-${version}.tar.gz";
+my $pkg2 = "net-snmp-${version}.zip";
 
 System("release:searching-gpg-keys",
        "gpg --list-secret-keys net-snmp-admin");
 if($? != 0) {
-    $sig = "${pkg}.md5";
-    System("release:md5","md5sum $pkg > $sig");
+    $sig1 = "${pkg1}.md5";
+    System("release:md5","md5sum $pkg1 > $sig1");
+    System("release:md5","md5sum $pkg2 > $sig2");
 } else {
     # currently only rstory and hardaker have the gpg keys till Wes
     # sees someone else in person ;-)
-    $sig = "${pkg}.asc";
-    System("release:gpg","gpg -u net-snmp-admin -a --detach-sign $pkg");
+    $sig1 = "${pkg1}.asc";
+    System("release:gpg","gpg -u net-snmp-admin -a --detach-sign $pkg1");
+    $sig2 = "${pkg2}.asc";
+    System("release:gpg","gpg -u net-snmp-admin -a --detach-sign $pkg2");
 }
 
 #
@@ -184,7 +193,7 @@ System("release:update","svn -u status");
 print STDERR "**************************************** FINISHED ********************\n";
 print STDERR "\nDouble check the SVN status output above for any outstanding changes\n\n";
 print STDERR "Run the following command to upload the relase to SF:\n";
-print STDERR "  ncftpput upload.sf.net incoming net-snmp-${version}.tar.gz $sig\n";
+print STDERR "  ncftpput upload.sf.net incoming $pkg1 $pkg2 $sig1 $sig2\n";
 print STDERR "See RELEASE-INSTRUCTIONS for any additional steps\n";
 
 
