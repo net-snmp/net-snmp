@@ -105,7 +105,7 @@ netsnmp_data_list_add_node(netsnmp_data_list **head, netsnmp_data_list *node)
 
     DEBUGMSGTL(("data_list","adding key '%s'\n", node->name));
     if (0 == strcmp(node->name, (*head)->name)) {
-        netsnmp_assert("list key" == "is unique"); /* always fail */
+        netsnmp_assert(!"list key == is unique"); /* always fail */
         snmp_log(LOG_WARNING,
                  "WARNING: adding duplicate key '%s' to data list\n",
                  node->name);
@@ -114,7 +114,7 @@ netsnmp_data_list_add_node(netsnmp_data_list **head, netsnmp_data_list *node)
     for (ptr = *head; ptr->next != NULL; ptr = ptr->next) {
         netsnmp_assert(NULL != ptr->name);
         if (0 == strcmp(node->name, ptr->name)) {
-            netsnmp_assert("list key" == "is unique"); /* always fail */
+            netsnmp_assert(!"list key == is unique"); /* always fail */
             snmp_log(LOG_WARNING,
                      "WARNING: adding duplicate key '%s' to data list\n",
                      node->name);

@@ -513,7 +513,7 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	
 	    if (next && (next->namelen  == new_sub->namelen) &&
 		(next->priority == new_sub->priority)) {
-                netsnmp_assert("registration" != "duplicate");
+                netsnmp_assert(!"registration != duplicate"); /* always false */
 		return MIB_DUPLICATE_REGISTRATION;
 	    }
 
@@ -607,7 +607,7 @@ netsnmp_register_mib(const char *moduleName,
         snmp_log(LOG_WARNING,"context passed during registration does not "
                  "equal the reginfo contextName! ('%s' != '%s')\n",
                  context, reginfo->contextName);
-        netsnmp_assert("register context" == "reginfo->contextName");
+        netsnmp_assert(!"register context == reginfo->contextName"); /* always false */
     }
 
     /*  Create the new subtree node being registered.  */
