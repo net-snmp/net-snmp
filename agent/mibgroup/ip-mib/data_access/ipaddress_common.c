@@ -239,7 +239,7 @@ netsnmp_access_ipaddress_entry_set(netsnmp_ipaddress_entry * entry)
     }
     else {
         snmp_log(LOG_ERR,"netsnmp_access_ipaddress_entry_set with no mode\n");
-        netsnmp_assert("ipaddress_entry_set" == "unknown mode"); 
+        netsnmp_assert(!"ipaddress_entry_set == unknown mode"); /* always false */
         rc = -1;
     }
     
