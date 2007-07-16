@@ -237,7 +237,7 @@ ip_handler(netsnmp_mib_handler          *handler,
      */
 #ifndef hpux11
     if (!netsnmp_cache_is_valid(reqinfo, reginfo->handlerName)) {
-        netsnmp_assert("cache" == "valid"); /* always false */
+        netsnmp_assert(!"cache == valid"); /* always false */
         ip_load( NULL, NULL );	/* XXX - check for failure */
     }
 #endif
