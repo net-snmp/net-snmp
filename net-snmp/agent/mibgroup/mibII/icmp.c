@@ -178,7 +178,6 @@ icmp_handler(netsnmp_mib_handler          *handler,
     icmp_load(NULL, NULL);
 #elif !defined(hpux11)
     if (!netsnmp_cache_is_valid(reqinfo, reginfo->handlerName)) {
-        netsnmp_assert("cache" == "valid"); /* always false */
         icmp_load( NULL, NULL );	/* XXX - check for failure */
     }
 #endif
