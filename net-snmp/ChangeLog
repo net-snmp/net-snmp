@@ -1,3 +1,42 @@
+	
+-------------------------------------------------------------------------------
+
+Changes: V5.4.1.rc2 -> V5.4.1.rc3
+	
+2007-07-16 23:59  hardaker
+
+   *
+
+   Apply (correct) patch from Marcus Rueckert to remove asserts
+   using sort-o-illegal C string compares
+
+2007-07-16 23:59  hardaker
+
+   *
+
+   Remove previous patch which was the wrong version
+
+2007-07-16 23:57  hardaker
+
+   *
+
+   Apply patch from Marcus Rueckert to remove asserts using
+   sort-o-illegal C string compares
+
+2007-07-12 21:51  tanders
+
+   *
+
+   fix subagent example (documentation)
+
+2007-07-12 21:27  tanders
+
+   *
+
+   snmp_sess_read returns int, not void
+
+
+	
 -------------------------------------------------------------------------------
 
 Changes: V5.4.1.rc1 -> V5.4.1.rc2
