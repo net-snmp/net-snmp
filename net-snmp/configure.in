@@ -3668,6 +3668,8 @@ AC_CHECK_FUNCS(setitimer)
 AC_CHECK_FUNCS(mktime stime times sysconf)
 # missing from hp-ux
 AC_CHECK_FUNCS(if_nametoindex)
+# missing from MinGW
+AC_CHECK_FUNCS(chown localtime_r)
 
 AC_MSG_CHECKING([[for SIOCGIFADDR in sys/ioctl.h]])
 AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,
