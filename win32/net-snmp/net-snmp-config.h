@@ -210,8 +210,10 @@
 /* Define to 1 if you have the `cgetnext' function. */
 /* #undef HAVE_CGETNEXT */
 
-/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
-   */
+/* Define to 1 if you have the `chown' function. */
+/* #undef HAVE_CHOWN */
+
+/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.  */
 /* #undef HAVE_DIRENT_H */
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
@@ -390,6 +392,9 @@
 
 /* Define to 1 if you have the <locale.h> header file. */
 #define HAVE_LOCALE_H 1
+
+/* Define to 1 if you have the `localtime_r' function. */
+/* #undef HAVE_LOCALTIME_R */
 
 /* Define to 1 if you have the `lrand48' function. */
 /* #undef HAVE_LRAND48 */
