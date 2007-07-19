@@ -949,8 +949,10 @@ main(int argc, char *argv[])
     gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 			     NETSNMP_DS_AGENT_GROUPID);
     
+#ifdef HAVE_CHOWN
     if ( uid != 0 || gid != 0 )
         chown( cptr, uid, gid );
+#endif
 
 #ifdef HAVE_SETGID
     if ((gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
