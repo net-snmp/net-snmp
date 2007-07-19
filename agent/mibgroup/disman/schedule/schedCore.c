@@ -239,6 +239,20 @@ _bit_next_day( char *day_pattern, char weekday_pattern,
 }
 
 
+#ifndef HAVE_LOCALTIME_R
+struct tm *
+localtime_r(const time_t *timep, struct tm *result) {
+    struct tm *tmp;
+
+    tmp = localtime( timep );
+    if ( tmp && result ) {
+        memcpy( result, tmp, sizeof(struct tm));
+    }
+
+    return (tmp ? result : NULL );
+}
+#endif
+
 /*
  * determine the time for the next scheduled action of a given entry
  */
