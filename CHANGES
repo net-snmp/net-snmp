@@ -135,6 +135,7 @@ listing of all changes made to the code.
       - use LDFLAGS when building agent, helpers and mib
       - work around libnetsnmpagent/libnetsnmphelpers
       - use libtool clean for removing files to ensure we
+      - update to libtool 1.5.24 (from 1.5.22)
 
     documentation:
       - [BUG 1247164]: Document use of OID macros
@@ -218,6 +219,7 @@ listing of all changes made to the code.
 
     HP:
       - UX: HP-UX needs _REENTRANT defined to pick up
+      - UX: BUG: 1742278: compile error on HP-UX 11.23 (IA64)
 
     ports:
       - patch: 1706344: from naylor: fix compilation with

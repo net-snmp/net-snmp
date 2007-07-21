@@ -33,6 +33,9 @@ listing of all changes made to the code.
       - patch: 1725049: fix bulkwalk in cases of non-repeater
       - [BUG 1619827]: link libnetsnmpagent/libnetsnmptrapd
 
+    build:
+      - update to libtool 1.5.24 (from 1.5.22)
+
     python:
       - [PATCH 1716114]: Let python build in the Net-SNMP source tree
 
