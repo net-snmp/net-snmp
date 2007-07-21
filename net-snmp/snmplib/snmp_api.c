@@ -3036,7 +3036,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             DEBUGDUMPHEADER("send", "SNMP Version Number");
 
             version = pdu->version;
-            cp = asn_build_int(*pkt, pkt_len,
+            cp = asn_build_int(cp, pkt_len,
                                (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                          ASN_INTEGER), (long *) &version,
                                sizeof(version));
@@ -3048,7 +3048,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
              * store the community string 
              */
             DEBUGDUMPHEADER("send", "Community String");
-            cp = asn_build_string(*pkt, pkt_len,
+            cp = asn_build_string(cp, pkt_len,
                                   (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                             ASN_OCTET_STR), pdu->community,
                                   pdu->community_len);
