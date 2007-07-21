@@ -1,3 +1,45 @@
+-------------------------------------------------------------------------------
+
+Changes: V5.4.1.rc3 -> V5.4.1.rc4
+
+2007-07-21 14:51  hardaker
+
+   *
+
+   patch to fix forwarding encoding
+
+2007-07-20 08:21  dts12
+
+   *
+
+   Tweak warning message for (old-style, invalid format) "exec OID"
+   directives.
+
+2007-07-19 21:16  tanders
+
+   *
+
+   NEWS: build: update to libtool 1.5.24 (from 1.5.22)
+   CHANGES: HP-UX: BUG: 1742278: compile error on HP-UX 11.23 (IA64)
+
+2007-07-19 21:01  dts12
+
+   *
+
+   Check for presence of 'chown' and 'localtime_r' routines before
+   using them.
+
+2007-07-19 21:00  dts12
+
+   *
+
+   Configure checks for 'chown' and 'localtime_r' functions
+
+2007-07-17 00:20  hardaker
+
+   *
+
+   - version tag ( 5.4.1.rc3 )
 	
 -------------------------------------------------------------------------------
 
