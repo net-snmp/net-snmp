@@ -7,7 +7,8 @@ listing of all changes made to the code.
 *5.4.1*
 
     snmplib:
-      - [PATCH 1592706]: Fix memory leak when cloning varbinds.
+      - [PATCH 1616912]: fix memory leak in UDP transport code
+      - [PATCH 1592706]: fix memory leak when cloning varbinds
       - [BUG 1619827]: link libraries against needed external libraries
       - Change snmp_sess_add_ex to consistently close and delete the
         transport argument on failure, earlier the liveness of the
@@ -17,21 +18,20 @@ listing of all changes made to the code.
       - [BUG 1558823]: fix ipAddressTable memory leak
       - [BUG 1596638]: fix memory leak in ipCidrRouteTable, inetCidrRouteTable
       - [BUG 1611524]: fix tcp connection table file descriptor leak
-      - patch from Wojtek Jawor to handle row deletion issues in dataset tables
+      - handle row deletion issues in dataset tables
       - [BUG 1712988]: default and configurable maximum number of
         varbinds returnable to a GETBULK request.
       - [PATCH 1666737]: include ipv6 counts in
 	udpInDatagrams, udpNoPorts, udpInErrors, udpOutDatagrams
-      - patch: 1700157: from afrika: fixes ordering of exec tokens in
-	the resulting mib tree
-      - patch: 1719253: from "Christian Jung": fix
-	skipNFSInHostResources so it does not break on the second walk of
-	the table.
+      - [PATCH 1700157]: fixes ordering of exec tokens in the resulting mib tree
+      - [PATCH 1719253]: fix skipNFSInHostResources so it does not break on the
+	second walk of the table.
 
     perl:
       - link Perl modules against the exact set of libraries needed
-      - patch: 1725049: fix bulkwalk in cases of non-repeater
-      - [BUG 1619827]: link libnetsnmpagent/libnetsnmptrapd
+      - [PATCH 1725049]: fix bulkwalk in cases of non-repeater
+      - [BUG 1619827]: properly link against libperl when configured with
+	--enable-as-needed
 
     build:
       - update to libtool 1.5.24 (from 1.5.22)
@@ -39,14 +39,19 @@ listing of all changes made to the code.
     python:
       - [PATCH 1716114]: Let python build in the Net-SNMP source tree
 
+    build:
+      - libtool update to 1.5.24
+
     MacOSX:
       - [PATCH 1600522]: CPU Hardware Abstraction Layer (HAL)
         implementation for mach/darwin
+      - IF-MIB rewrite now enabled by default
 
     Win32:
       - fix AES support
+      - [PATCH 1706344]: fix compilation with cygwin
 
-    irix:
+    IRIX:
       - [PATCH 1709748]: Optimized IRIX cpu stats
 
     AIX:
@@ -55,8 +60,6 @@ listing of all changes made to the code.
     FreeBSD:
       - [BUG 1633483]: Support CPU HAL on FreeBSD4.x
 
-    ports:
-      - patch: 1706344: from naylor: fix compilation with cygwin
 
 *5.4*
 
