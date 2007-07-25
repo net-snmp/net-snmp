@@ -494,7 +494,7 @@ handle_subagent_response(int op, netsnmp_session * session, int reqid,
     }
 
     if (smagic->original_command == AGENTX_MSG_GETNEXT) {
-        DEBUGMSGTL(("agentx/subgaent",
+        DEBUGMSGTL(("agentx/subagent",
                     "do getNext scope processing %p %p\n", smagic->ovars,
                     pdu->variables));
         for (u = smagic->ovars, v = pdu->variables; u != NULL && v != NULL;
