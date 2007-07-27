@@ -2,6 +2,34 @@
 
 Changes: V5.4.1.rc3 -> V5.4.1.rc4
 
+2007-07-25 22:41  tanders
+
+   *
+
+   CHANGES: snmpd: BUG: 1760633: fix typo in debug message
+
+2007-07-22 00:55  tanders
+
+   *
+
+   remove duplicate entry
+
+2007-07-22 00:52  tanders
+
+   *
+
+   improve NEWS section for 5.4.1
+
+2007-07-21 16:17  hardaker
+
+   *
+
+   - version tag ( 5.4.1.rc4 )
+
+-------------------------------------------------------------------------------
+
+Changes: V5.4.1.rc3 -> V5.4.1.rc4
+
 2007-07-21 14:51  hardaker
 
    *
