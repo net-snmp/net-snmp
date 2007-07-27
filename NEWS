@@ -7,9 +7,9 @@ listing of all changes made to the code.
 *5.4.1*
 
     snmplib:
+      - [BUG 1619827]: link libraries against needed external libraries
       - [PATCH 1616912]: fix memory leak in UDP transport code
       - [PATCH 1592706]: fix memory leak when cloning varbinds
-      - [BUG 1619827]: link libraries against needed external libraries
       - Change snmp_sess_add_ex to consistently close and delete the
         transport argument on failure, earlier the liveness of the
         transport argument was undecided.
@@ -29,9 +29,9 @@ listing of all changes made to the code.
 
     perl:
       - link Perl modules against the exact set of libraries needed
-      - [PATCH 1725049]: fix bulkwalk in cases of non-repeater
       - [BUG 1619827]: properly link against libperl when configured with
 	--enable-as-needed
+      - [PATCH 1725049]: fix bulkwalk in cases of non-repeater
 
     build:
       - update to libtool 1.5.24 (from 1.5.22)
