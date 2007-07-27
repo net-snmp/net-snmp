@@ -4,25 +4,17 @@ Changes: V5.4.1.rc4 -> V5.4.1
 
 2007-07-25 22:41  tanders
 
-   *
-
    CHANGES: snmpd: BUG: 1760633: fix typo in debug message
 
 2007-07-22 00:55  tanders
-
-   *
 
    remove duplicate entry
 
 2007-07-22 00:52  tanders
 
-   *
-
    improve NEWS section for 5.4.1
 
 2007-07-21 16:17  hardaker
-
-   *
 
    - version tag ( 5.4.1.rc4 )
 
@@ -32,40 +24,28 @@ Changes: V5.4.1.rc3 -> V5.4.1.rc4
 
 2007-07-21 14:51  hardaker
 
-   *
-
    patch to fix forwarding encoding
 
 2007-07-20 08:21  dts12
-
-   *
 
    Tweak warning message for (old-style, invalid format) "exec OID"
    directives.
 
 2007-07-19 21:16  tanders
 
-   *
-
    NEWS: build: update to libtool 1.5.24 (from 1.5.22)
    CHANGES: HP-UX: BUG: 1742278: compile error on HP-UX 11.23 (IA64)
 
 2007-07-19 21:01  dts12
-
-   *
 
    Check for presence of 'chown' and 'localtime_r' routines before
    using them.
 
 2007-07-19 21:00  dts12
 
-   *
-
    Configure checks for 'chown' and 'localtime_r' functions
 
 2007-07-17 00:20  hardaker
-
-   *
 
    - version tag ( 5.4.1.rc3 )
 	
@@ -75,33 +55,23 @@ Changes: V5.4.1.rc2 -> V5.4.1.rc3
 	
 2007-07-16 23:59  hardaker
 
-   *
-
    Apply (correct) patch from Marcus Rueckert to remove asserts
    using sort-o-illegal C string compares
 
 2007-07-16 23:59  hardaker
 
-   *
-
    Remove previous patch which was the wrong version
 
 2007-07-16 23:57  hardaker
-
-   *
 
    Apply patch from Marcus Rueckert to remove asserts using
    sort-o-illegal C string compares
 
 2007-07-12 21:51  tanders
 
-   *
-
    fix subagent example (documentation)
 
 2007-07-12 21:27  tanders
-
-   *
 
    snmp_sess_read returns int, not void
 
@@ -113,60 +83,42 @@ Changes: V5.4.1.rc1 -> V5.4.1.rc2
 
 2007-07-06 23:39  hardaker
 
-   *
-
    CHANGES: build: use libtool clean for removing files to ensure we
    delete all libtool temporary files.
 
 2007-07-06 21:22  rstory
 
-   *
-
    stop searching paths when done
 
 2007-07-06 21:14  rstory
-
-   *
 
    do not free interface entry just because we can not get stats for
    it
 
 2007-07-06 15:32  dts12
 
-   *
-
    CHANGES: snmpd: BUG 1745113: Handle single-line (and zero-line)
    output in UCD compatability mode.
 
 2007-07-05 14:45  rstory
-
-   *
 
    r20044@dhcp211: rstory | 2007-07-05 10:44:01 -0400
    remove disable-static from recommended options
 
 2007-07-05 11:05  rstory
 
-   *
-
    skip stats parsing on interfaces with no statistics
 
 2007-07-04 23:26  tanders
-
-   *
 
    CHANGES: perl: install embedded perl init files for
    snmpd/snmptrapd with mode 644 instead of 755
 
 2007-07-04 21:42  tanders
 
-   *
-
    Perl problems (believed to be) fixed
 
 2007-07-03 22:36  hardaker
-
-   *
 
    CHANGES: library: Patch from "Mitsuru Chinen": cleans up the
    int64 type checking and usage for building packets especially
@@ -174,37 +126,25 @@ Changes: V5.4.1.rc1 -> V5.4.1.rc2
 
 2007-07-03 12:56  tanders
 
-   *
-
    remove executable flag from SVN properties
 
 2007-07-02 06:02  magfr
-
-   *
 
    Add missing return value to _mteEvent_fire_notify.
 
 2007-07-02 05:31  magfr
 
-   *
-
    Remove the declaration of an undefined static function.
 
 2007-07-01 19:59  tanders
-
-   *
 
    minor help text formatting fix
 
 2007-06-30 05:34  tanders
 
-   *
-
    add --enable-as-needed if building with embedded Perl support
 
 2007-06-30 04:37  hardaker
-
-   *
 
    - version tag ( 5.4.1.rc1 )
 
@@ -214,85 +154,59 @@ Changes: V5.4.1.pre3 -> V5.4.1.rc1
 
 2007-06-29 22:18  tanders
 
-   *
-
    NEWS: perl: BUG: 1619827: link libnetsnmpagent/libnetsnmptrapd
    (rather than snmpd/snmptrapd) against libperl when configured
    with --enable-as-needed
 
 2007-06-28 22:09  tanders
 
-   *
-
    rename last occurence of DEFAULT_MIB[DIR]S to
    NETSNMP_DEFAULT_MIB[DIR]S
 
 2007-06-26 22:12  tanders
-
-   *
 
    CHANGES: build: work around libnetsnmpagent/libnetsnmphelpers
    dependency issues when linking snmptrapd
 
 2007-06-26 21:45  tanders
 
-   *
-
    CHANGES: build: use LDFLAGS when building agent, helpers and mib
    lib to be consistent with libnetnmp
 
 2007-06-26 21:28  tanders
 
-   *
-
    minor updates
 
 2007-06-24 12:57  tanders
-
-   *
 
    HAVE_SSIZE_T cleanup
 
 2007-06-23 22:56  tanders
 
-   *
-
    don't suggest --with-libs=-lnm
 
 2007-06-22 15:09  dts12
-
-   *
 
    Enforce DOS-style line endings, to keep Visual Studio happy.
 
 2007-06-20 21:34  tanders
 
-   *
-
    fix typo
 
 2007-06-19 22:23  tanders
 
-   *
-
    fix Perl-related autoconf messages
 
 2007-06-19 15:08  tanders
-
-   *
 
    CHANGES: build: add "BuildRequires: perl-ExtUtils-Embed" to the
    spec file, e.g. for Fedora 7
 
 2007-06-18 22:28  hardaker
 
-   *
-
    fix broken comment.
 
 2007-06-18 22:04  hardaker
-
-   *
 
    - version tag ( 5.4.1.pre3 )
 
@@ -302,14 +216,10 @@ Changes: V5.4.1.pre2 -> V5.4.1.pre3
 
 2007-06-18 21:34  hardaker
 
-   *
-
    CHANGES: build: patch from apple to simplify makefile target
    references in some rules.
 
 2007-06-18 21:17  hardaker
-
-   *
 
    CHANGES: patch from apple to fix minor documentation bugs.
 
@@ -320,20 +230,14 @@ Changes: V5.4.1.pre2 -> V5.4.1.pre3
 
 2007-06-18 21:12  hardaker
 
-   *
-
    CHANGES: patch from apple to improve memory reporting
 
 2007-06-18 21:09  hardaker
-
-   *
 
    CHANGES: patch from apple to fix cross-compile builds in apples
    build environment.
 
 2007-06-18 20:54  hardaker
-
-   *
 
    CHANGES: patch: 1737085: from jsafranek: fix the -M switch for
    mib parsing by loading defaults first before performing the set
@@ -341,66 +245,46 @@ Changes: V5.4.1.pre2 -> V5.4.1.pre3
 
 2007-06-18 20:50  hardaker
 
-   *
-
    NEWS: perl: patch: 1725049: fix bulkwalk in cases of non-repeater
    usage.
 
 2007-06-18 14:10  tanders
 
-   *
-
    CHANGES: perl: fix prerequisites for NetSNMP::TrapReceiver
 
 2007-06-18 13:39  tanders
-
-   *
 
    CHANGES: perl: fix syntax error in NetSNMP::agent::Support
 
 2007-06-14 15:41  rstory
 
-   *
-
    fix typo in user output, as noted on coders
 
 2007-06-14 04:37  magfr
 
-   *
-
    Add missing argument type in order to silence a gcc warning
 
 2007-06-11 10:11  tanders
-
-   *
 
    document xlc<->cc_r compiler issues with Perl on AIX (see bug
    #1600099)
 
 2007-06-10 22:29  tanders
 
-   *
-
    CHANGES: build: PATCH: 1728247: from mitsuru_chinen: Add type
    check for int??_t and uint??_t
 
 2007-06-10 22:22  tanders
-
-   *
 
    CHANGES: build: PATCH: 1728244: from mitsuru_chinen: Add
    configure check for sin6_scope_id
 
 2007-06-10 22:15  tanders
 
-   *
-
    CHANGES: PATCH: 1728241: from mitsuru_chinen: add configure check
    for <sys/uio.h> (make sure iov structure is declared)
 
 2007-06-08 20:32  tanders
-
-   *
 
    Fix regression introduced by r16479: 'make test TESTOPTS="-T
    tcp"' now
@@ -408,19 +292,13 @@ Changes: V5.4.1.pre2 -> V5.4.1.pre3
 
 2007-06-08 10:44  dts12
 
-   *
-
    Improve memory handling of style-specific format strings.
 
 2007-06-08 10:33  dts12
 
-   *
-
    Default to reporting NFS mounts as NetworkDisk.
 
 2007-06-08 05:16  magfr
-
-   *
 
    Remove the unused undef HAVE_PERL_EVAL_PV.
    The Perl_eval_pv functions are handled by the
@@ -429,52 +307,36 @@ Changes: V5.4.1.pre2 -> V5.4.1.pre3
 
 2007-06-07 16:02  dts12
 
-   *
-
    Remove redundant CVS-admin files.
 
 2007-06-07 12:56  dts12
-
-   *
 
    Handle unregistering the first Security Model in the list.
    Reported by Aleksandr Lomanov.
 
 2007-06-07 09:13  dts12
 
-   *
-
    Install header files for stash_cache and stash_to_next helpers.
 
 2007-06-07 09:07  dts12
-
-   *
 
    Separate out header files that don't have a corresponding C
    source file.
 
 2007-06-07 08:59  dts12
 
-   *
-
    Sort lists of helpers (source code, object files and headers).
    This should make it easier to spot files that have been omitted.
 
 2007-06-07 08:42  dts12
 
-   *
-
    Protect against systems without S_ISDIR.
 
 2007-06-06 12:37  tanders
 
-   *
-
    CHANGES: AIX: use "-Wl,-brtl" when compiling with gcc
 
 2007-06-06 10:20  dts12
-
-   *
 
    Ensure output is properly directed to syslog.
    Otherwise, problems in the config environment can trigger
@@ -483,35 +345,25 @@ Changes: V5.4.1.pre2 -> V5.4.1.pre3
 
 2007-06-06 10:13  dts12
 
-   *
-
    More helpful debugging output.
 
 2007-06-06 05:53  magfr
-
-   *
 
    CHANGES: misc: Don't use the legacy symbol
    SNMPTRAPD_DISABLE_AGENTX
 
 2007-06-05 15:59  dts12
 
-   *
-
    CHANGES: snmpd: PATCHES: 1729629: Fix memory leak in disman
    agent.
 
 2007-06-04 22:06  magfr
-
-   *
 
    NEWS: snmplib: Change snmp_sess_add_ex to consistently close and
    delete the transport argument on failure, earlier the liveness of
    the transport argument was undecided.
 
 2007-06-04 15:50  hardaker
-
-   *
 
    - version tag ( 5.4.1.pre2 )
 
@@ -521,34 +373,24 @@ Changes: V5.4.1.pre1 -> V5.4.1.pre2
 
 2007-06-04 13:09  tanders
 
-   *
-
    CHANGES: build: PATCH: 1728237: from mitsuru_chinen: Move
    variable declaration at the top of netsnmp_udp_sendto
 
 2007-06-04 12:13  tanders
-
-   *
 
    CHANGES: build: PATCH: 1728230: from mitsuru_chinen: add
    configure check for gai_strerror()
 
 2007-06-04 10:35  tanders
 
-   *
-
    CHANGES: build: PATCH: 1728226: from mitsuru_chinen: make sure
    IF_NAMESIZE is defined
 
 2007-06-04 09:47  tanders
 
-   *
-
    also skip this test on IRIX64
 
 2007-06-02 08:24  magfr
-
-   *
 
    CHANGES: snmpapi: Do not use getservbyname to find default port
    numbers, just hardcode them and let the user override them if
@@ -556,15 +398,11 @@ Changes: V5.4.1.pre1 -> V5.4.1.pre2
 
 2007-06-01 22:55  tanders
 
-   *
-
    CHANGES: build: Link libdl against libnetsnmpmibs instead of
    snmpd.
    Fixes the build on (some) Solaris systems.
 
 2007-06-01 21:36  dts12
-
-   *
 
    CHANGES: snmplib: FEATURES: 1041888: Check directory paths for
    config files.
@@ -572,15 +410,11 @@ Changes: V5.4.1.pre1 -> V5.4.1.pre2
 
 2007-06-01 21:23  dts12
 
-   *
-
    CHANGES: snmplib: FEATURES: 851887: Report range information for
    invalid SET requests.
    Backport from main trunk of bug fix.
 
 2007-05-31 23:51  tanders
-
-   *
 
    CHANGES: build: Link libkvm and libwrap to libnetsnmpagent
    instead of snmpd.
@@ -589,84 +423,58 @@ Changes: V5.4.1.pre1 -> V5.4.1.pre2
 
 2007-05-31 14:39  dts12
 
-   *
-
    Fix logging of authentication information.
 
 2007-05-31 10:10  dts12
-
-   *
 
    Remove bogus debug output.
 
 2007-05-30 22:53  tanders
 
-   *
-
    CHANGES: AIX: build fixes for embedded Perl
 
 2007-05-29 22:42  magfr
-
-   *
 
    CHANGES: snmplib: Use the default_target argument if it is
    non-NULL, not if it is NULL.
 
 2007-05-29 10:27  tanders
 
-   *
-
    add recent mfd rewrites
 
 2007-05-27 21:42  tanders
-
-   *
 
    Some lame linkers (e.g. on HP-UX 11.23/IA64) need quite a bit of
    help to successfully link the Perl modules.
 
 2007-05-27 20:52  tanders
 
-   *
-
    Add descriptions to AC_DEFINE; drop obsolete AC_CHECK_LIB(m,
    asin).
 
 2007-05-27 19:54  dts12
-
-   *
 
    CHANGES: library: FEATURES: 454028: Detect and handle empty MIB
    index files.
 
 2007-05-27 06:20  tanders
 
-   *
-
    grammar fix
 
 2007-05-26 16:41  alex_b
-
-   *
 
    Win32 IPv6 build fixes. IPv6 now requires PSDK.
 
 2007-05-26 15:14  alex_b
 
-   *
-
    IPv6 build fixes for build.bat, Configure and README.win32.
 
 2007-05-25 23:03  tanders
-
-   *
 
    Documentation update w.r.t. recent changes (mibII/ipv6 and AIX
    shared library building).
 
 2007-05-25 15:28  tanders
-
-   *
 
    Some systems (e.g. HP-UX 11.23/IA64) currently still need
    "net-snmp-config --libs" (instead of just --netsnmp-libs) for
@@ -675,14 +483,10 @@ Changes: V5.4.1.pre1 -> V5.4.1.pre2
 
 2007-05-24 23:55  tanders
 
-   *
-
    CHANGES: build: only enable mibII/ipv6 through --enable-ipv6 on
    systems it builds properly on (Linux and *BSD)
 
 2007-05-24 23:15  tanders
-
-   *
 
    Some systems (e.g. HP-UX 11.23/IA64) currently still need
    "net-snmp-config --libs" (instead of just --netsnmp-libs) for
@@ -690,26 +494,18 @@ Changes: V5.4.1.pre1 -> V5.4.1.pre2
 
 2007-05-24 22:01  magfr
 
-   *
-
    Correct obviously broken use of the KLOOKUP macro to be
    consistent at least
 
 2007-05-24 20:51  tanders
 
-   *
-
    CHANGES: FreeBSD: add initial support for upcoming FreeBSD 7
 
 2007-05-24 12:48  tanders
 
-   *
-
    fix library linking on HP-UX 11.23/IA64
 
 2007-05-24 08:36  tanders
-
-   *
 
    CHANGES: snmplib: increment "current" and "age" according to
    libtool
@@ -718,8 +514,6 @@ Changes: V5.4.1.pre1 -> V5.4.1.pre2
    5.4.1.pre1 was broken in this regard.
 
 2007-05-23 19:05  tanders
-
-   *
 
    NEWS: snmplib: BUG: 1619827: link net-snmp libraries and binaries
    against the net-snmp libraries they really depend on
@@ -732,49 +526,33 @@ Changes: V5.4.1.pre1 -> V5.4.1.pre2
 
 2007-05-22 14:40  hardaker
 
-   *
-
    version stamp 5.4.1.pre1
 
 2007-05-22 00:24  hardaker
-
-   *
 
    version update
 
 2007-05-22 00:19  hardaker
 
-   *
-
    version update
 
 2007-05-22 00:01  hardaker
-
-   *
 
    make depend
 
 2007-05-22 00:00  hardaker
 
-   *
-
    ignore winExtDLL in comment check
 
 2007-05-21 23:54  hardaker
-
-   *
 
    // -> C comment
 
 2007-05-21 23:51  hardaker
 
-   *
-
    documentation update
 
 2007-05-21 23:11  magfr
-
-   *
 
    CHANGES: building: Disable inlining on solaris as there are some
    linking errors that show up if the inline support is left
@@ -782,13 +560,9 @@ Changes: V5.4.1.pre1 -> V5.4.1.pre2
 
 2007-05-21 22:46  hardaker
 
-   *
-
    - version tag ( 5.4.1.pre1 )
 
 2007-05-21 22:22  hardaker
-
-   *
 
    version update
 
@@ -1799,7 +1573,6 @@ Changes: V5.4 -> SVN checkpoint (V5-4-patches branch)
 
 2007-01-25 22:05  tanders
 
-   *
      agent/mibgroup/ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_subagent.c
 , local/mib2c-conf.d/subagent.m2c:
 
@@ -6131,7 +5904,6 @@ Changes: V5.3 -> V5.4.pre1
 
 2006-08-17 07:50  rstory
 
-   *
      agent/mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_interface.c
 , local/mib2c-conf.d/mfd-interface.m2c:
 
@@ -7134,7 +6906,6 @@ Changes: V5.3 -> V5.4.pre1
 
 2006-06-12 13:05  rstory
 
-   *
      agent/mibgroup/ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable.c
 :
 
@@ -9127,7 +8898,6 @@ Changes: V5.3 -> V5.4.pre1
 
 2006-01-10 03:07  tanders
 
-   *
      agent/mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access.c
 :
 
@@ -9135,7 +8905,6 @@ Changes: V5.3 -> V5.4.pre1
 
 2006-01-09 17:41  tanders
 
-   *
      agent/mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access.c
 :
 
@@ -10147,7 +9916,6 @@ Changes: V5.2 -> V5.3
 
 2005-12-09 20:58  rstory
 
-   *
      agent/mibgroup/ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_data_access.c
 :
 
@@ -10170,7 +9938,6 @@ Changes: V5.2 -> V5.3
 
 2005-12-09 20:57  rstory
 
-   *
      agent/mibgroup/ip-mib/ipv6InterfaceTable/ipv6InterfaceTable_interface.c
 :
 
@@ -11451,7 +11218,6 @@ Changes: V5.2 -> V5.3
 
 2005-11-16 15:18  rstory
 
-   *
      agent/mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_interface.c
 :
 
@@ -11591,7 +11357,6 @@ Changes: V5.2 -> V5.3
 
 2005-11-15 21:14  rstory
 
-   *
      agent/mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface.c
 :
 
@@ -11605,7 +11370,6 @@ Changes: V5.2 -> V5.3
 
 2005-11-15 21:08  rstory
 
-   *
      agent/mibgroup/ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable.c
 :
 
@@ -11635,7 +11399,6 @@ Changes: V5.2 -> V5.3
 
 2005-11-15 19:24  rstory
 
-   *
      agent/mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_data_access.c
 :
 
@@ -11752,7 +11515,6 @@ Changes: V5.2 -> V5.3
 
 2005-11-14 17:28  rstory
 
-   *
      agent/mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access.c
 :
 
@@ -13034,7 +12796,6 @@ Changes: V5.2 -> V5.3
 
 2005-10-28 23:27  rstory
 
-   *
      agent/mibgroup/ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_interface.h
 :
 
@@ -13042,7 +12803,6 @@ Changes: V5.2 -> V5.3
 
 2005-10-28 23:26  rstory
 
-   *
      agent/mibgroup/ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_interface.c
 :
 
@@ -15111,7 +14871,6 @@ Changes: V5.2 -> V5.3
 
 2005-09-27 19:25  rstory
 
-   *
      agent/mibgroup/ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable.c
 :
 
@@ -15824,7 +15583,6 @@ Changes: V5.2 -> V5.3
 
 2005-09-06 19:17  tanders
 
-   *
      agent/mibgroup/snmp-notification-mib/snmpNotifyFilterTable/.cvsignore
 :
 
@@ -15937,7 +15695,6 @@ Changes: V5.2 -> V5.3
 
 2005-08-30 08:06  rstory
 
-   *
      agent/mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_constants.h
 :
 
@@ -18774,7 +18531,6 @@ Changes: V5.2 -> V5.3
 
 2005-03-28 14:29  rstory
 
-   *
      agent/mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_data_access.c
 :
 
@@ -18815,7 +18571,6 @@ Changes: V5.2 -> V5.3
 
 2005-03-24 16:48  rstory
 
-   *
      agent/mibgroup/snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_access.c
 :
 
@@ -19553,7 +19308,6 @@ Changes: V5.2 -> V5.3
 
 2005-01-27 22:52  rstory
 
-   *
      agent/mibgroup/snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_access.c
 :
 
@@ -21309,7 +21063,6 @@ Changes: V5.1 -> V5.2
 
 2004-10-17 20:56  rstory
 
-   *
      agent/mibgroup/ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_data_access.c
 :
 
@@ -21730,7 +21483,6 @@ Changes: V5.1 -> V5.2
 
 2004-10-14 18:15  rstory
 
-   *
      agent/mibgroup/ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable.h
 :
 
@@ -22079,7 +21831,6 @@ Changes: V5.1 -> V5.2
 
 2004-10-08 19:27  rstory
 
-   *
      agent/mibgroup/snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_interface.c
 :
 
@@ -22087,7 +21838,6 @@ Changes: V5.1 -> V5.2
 
 2004-10-08 19:25  rstory
 
-   *
      agent/mibgroup/snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_interface.c
 :
 
@@ -23141,7 +22891,6 @@ Changes: V5.1 -> V5.2
 
 2004-09-24 09:15  rstory
 
-   *
      agent/mibgroup/ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access.c
 :
 
@@ -23201,7 +22950,6 @@ Changes: V5.1 -> V5.2
 
 2004-09-23 13:24  rstory
 
-   *
      agent/mibgroup/snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_set.c
 :
 
@@ -23378,7 +23126,6 @@ Changes: V5.1 -> V5.2
 
 2004-09-21 06:43  hardaker
 
-   *
      agent/mibgroup/snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_get.c
 :
 
@@ -24571,7 +24318,6 @@ Changes: V5.1 -> V5.2
 
 2004-08-27 23:22  rstory
 
-   *
      agent/mibgroup/ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_data_access.c
 :
 
@@ -25432,7 +25178,6 @@ Changes: V5.1 -> V5.2
 
 2004-07-10 19:51  rstory
 
-   *
      agent/mibgroup/ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable_data_access.c
 :
 
@@ -25517,7 +25262,6 @@ Changes: V5.1 -> V5.2
 
 2004-07-09 22:58  hardaker
 
-   *
      agent/mibgroup/snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_set.c
 :
 
@@ -25596,7 +25340,6 @@ Changes: V5.1 -> V5.2
 
 2004-07-09 09:57  hardaker
 
-   *
      agent/mibgroup/snmp-usm-dh-objects-mib/usmDHUserKeyTable/.cvsignore
 :
 
@@ -25740,7 +25483,6 @@ Changes: V5.1 -> V5.2
 
 2004-07-07 13:41  rstory
 
-   *
      agent/mibgroup/ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable_interface.c
 :
 
@@ -26568,7 +26310,6 @@ Changes: V5.1 -> V5.2
 
 2004-06-28 15:11  rstory
 
-   *
      agent/mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_constants.h
 :
 
@@ -29239,7 +28980,6 @@ Changes: V5.1 -> V5.2
 
 2004-04-13 11:44  rstory
 
-   *
      agent/mibgroup/ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_interface.c
 :
 
@@ -29247,7 +28987,6 @@ Changes: V5.1 -> V5.2
 
 2004-04-13 11:43  rstory
 
-   *
      agent/mibgroup/ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable.c
 :
 
