@@ -57,7 +57,7 @@ if [ ! -f $DIR/.svn/entries ]; then
     exit
 fi
 
-SVNURL=`grep url $DIR/.svn/entries|cut -f2 -d\"`
+SVNURL=`svn info $DIR| grep URL|cut -f2 -d " "`
 SVNTLD=`echo $SVNURL | sed 's:.*svnroot/net-snmp/\([^/]*\).*:\1:'`
 if [ "x$SVNTLD" = "xtrunk" ]; then
    TAG="main"
@@ -65,6 +65,12 @@ else
    TAG=`echo $SVNURL | sed 's:.*svnroot/net-snmp/[^/]*/\([^/]*\).*:\1:'`
 fi
 
+if [ ! -z $DEST ]; then
+    if [ -z $TAG ]; then
+        echo "no TAG found in $DIR!"
+        exit 1
+    fi
+fi
 
 COMMAND="svn update -q $SVNURL $DIR"
 
@@ -91,11 +97,6 @@ if [ $WO -eq 1 ]; then
 fi
 
 if [ ! -z $DEST ]; then
-    if [ -z $TAG ]; then
-        echo "no TAG found!"
-        exit 1
-    fi
-
   if [ $rc -ne 0 ]; then
     echo "skipping upload due to rc $rc from svn command"
     exit $rc
