@@ -90,7 +90,7 @@ Part 1
     8. Debug mode:           		disabled
     9. IPv6 transports:      		disabled
 
-    10. Link type:                      static
+    10. Link type:                      dynamic
 
     11. Install development files   	enabled         ***
     
@@ -128,7 +128,7 @@ Part 2 - Compiling winExtDLL
     8. Debug mode:           		disabled
     9. IPv6 transports:      		disabled
 
-    10. Link type:                      static
+    10. Link type:                      dynamic
 
     11. Install development files   	disabled
     
