@@ -1118,7 +1118,16 @@ vacm_warn_if_not_configured(int majorID, int minorID, void *serverarg,
         name = "snmpd";
     
     if (!vacm_is_configured()) {
-        if (MASTER_AGENT == agent_mode) {
+        /*
+         *  An AgentX subagent relies on the master agent to apply suitable
+         *    access control checks, so doesn't need local VACM configuration.
+         *  The trap daemon has a separate check (see below).
+         *
+         *  Otherwise, an AgentX master or SNMP standalone agent requires some
+         *    form of VACM configuration.  No config means that no incoming
+         *    requests will be accepted, so warn the user accordingly.
+         */
+        if ((MASTER_AGENT == agent_mode) && (strcmp(name, "snmptrapd") != 0)) {
             snmp_log(LOG_WARNING,
                  "Warning: no access control information configured.\n  It's "
                  "unlikely this agent can serve any useful purpose in this "
@@ -1126,11 +1135,15 @@ vacm_warn_if_not_configured(int majorID, int minorID, void *serverarg,
                  "configure the %s.conf file for this agent.\n", name );
         }
 
-/*
- * XXX - HACK ALERT!!
- *
- * This duplicates a definition from "apps/snmptrapd_ds.h"
- */
+        /*
+         *  The trap daemon implements VACM-style access control for incoming
+         *    notifications, but offers a way of turning this off (for backwards
+         *    compatability).  Check for this explicitly, and warn if necessary.
+         *
+         *  NB:  The NETSNMP_DS_APP_NO_AUTHORIZATION definition is a duplicate
+         *       of an identical setting in "apps/snmptrapd_ds.h".
+         *       These two need to be kept in synch.
+         */
 #ifndef NETSNMP_DS_APP_NO_AUTHORIZATION
 #define NETSNMP_DS_APP_NO_AUTHORIZATION 17
 #endif
