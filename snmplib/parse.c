@@ -4752,7 +4752,7 @@ add_mibdir(const char *dirname)
                      */
                     closedir(dir2);
                 } else {
-                    if ( add_mibfile( tmpstr, file->d_name, ip ))
+                    if ( !add_mibfile( tmpstr, file->d_name, ip ))
                         count++;
                 }
             }
