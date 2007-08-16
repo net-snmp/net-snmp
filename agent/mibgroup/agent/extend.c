@@ -421,6 +421,7 @@ extend_parse_config(const char *token, char *cptr)
             extension->args = strdup( cptr );
     } else {
         snmp_log(LOG_ERR, "Failed to register extend entry '%s' - possibly duplicate name.\n", exec_name );
+        return;
     }
 
 #ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
