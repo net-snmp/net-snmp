@@ -2079,7 +2079,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
       if ((context->pkts_exch > 1) && (pix < context->repeaters)) {
 	 if (__oid_cmp(vars->name, vars->name_length,
 				   context->reqbase[pix].last_oid,
-				   context->reqbase[pix].last_len) == 0)
+				   context->reqbase[pix].last_len) <= 0)
 	 {
 	    DBPRT(2, (DBOUT "Ignoring repeat oid: %s\n",
 			__snprint_oid(vars->name,vars->name_length)));
