@@ -689,6 +689,7 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
                  */
                 DEBUGMSGTL(("notification_log",
                             "skipping type %d\n", vptr->type));
+                (void)netsnmp_table_dataset_delete_row(myrow);
                 continue;
             }
             netsnmp_set_row_column(myrow, COLUMN_NLMLOGVARIABLEVALUETYPE,
