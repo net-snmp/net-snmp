@@ -105,15 +105,16 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 	char tmp[64];
         to = (struct sockaddr_in *) &(addr_pair->remote_addr);
         if (to == NULL) {
-            return strdup("UDP: unknown");
-        }
-
-        if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
+            sprintf(tmp, "UDP: [%s]->unknown",
+                strdup(inet_ntoa(addr_pair->local_addr)));
+        } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
             host = gethostbyaddr((char *)to, 4, AF_INET);
             return (host ? strdup(host->h_name) : NULL); 
-        }
-        sprintf(tmp, "UDP: [%s]:%hu",
+        } else {
+            sprintf(tmp, "UDP: [%s]->[%s]:%hd",
+                strdup(inet_ntoa(addr_pair->local_addr)),
                 inet_ntoa(to->sin_addr), ntohs(to->sin_port));
+        }
         return strdup(tmp);
     }
 }
@@ -672,10 +673,24 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
         if (client_socket) {
             struct sockaddr_in client_addr;
             netsnmp_sockaddr_in2(&client_addr, client_socket, NULL);
+            addr_pair.local_addr = client_addr.sin_addr;
             client_addr.sin_port = 0;
-            bind(t->sock, (struct sockaddr *)&client_addr,
+            rc = bind(t->sock, (struct sockaddr *)&client_addr,
                   sizeof(struct sockaddr));
+            if ( rc != 0 ) {
+                DEBUGMSGTL(("netsnmp_udp", "failed to bind for clientaddr: %d %s\n",
+                            errno, strerror(errno)));
+                netsnmp_udp_close(t);
+                netsnmp_transport_free(t);
+                return NULL;
+            }
         }
+
+        str = netsnmp_udp_fmtaddr(NULL, (void *)&addr_pair,
+                 sizeof(netsnmp_udp_addr_pair));
+        DEBUGMSGTL(("netsnmp_udp", "client open %s\n", str));
+        free(str);
+
         /*
          * Save the (remote) address in the
          * transport-specific data pointer for later use by netsnmp_udp_send.
