@@ -23,7 +23,7 @@ void _expValue_setError( struct expExpression *exp, int reason,
 int ops[128];   /* mapping from operator characters to numeric
                    tokens (ordered by priority). */
 
-
+void
 init_expValue(void)
 {
 DEBUGMSGTL(("disman:expr:eval", "Init expValue"));
@@ -322,9 +322,9 @@ _expValue_evalExpr(  netsnmp_variable_list *expIdx,
 {
     netsnmp_variable_list *exprAlDente = NULL;
     netsnmp_variable_list *vtail = NULL;
-    char *cp1, *cp2, *cp3;
+    char *cp1, *cp2;
     netsnmp_variable_list *var = NULL;
-    int   i, n, level;
+    int   i, n;
     int   neg = 0;
     oid   oid_buf[MAX_OID_LEN];
 
