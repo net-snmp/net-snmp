@@ -338,9 +338,11 @@ agentx_got_response(int operation,
         ret = 0;
         for (request = requests, i = 1; request;
              request = request->next, i++) {
-            if (request->index == pdu->errindex) {
+            if (i == pdu->errindex) {
                 /*
-                 * mark this one as the one generating the error
+                 * Mark this varbind as the one generating the error.
+                 * Note that the AgentX errindex may not match the
+                 * position in the original SNMP PDU (request->index)
                  */
                 netsnmp_set_request_error(cache->reqinfo, request,
                                           err);
