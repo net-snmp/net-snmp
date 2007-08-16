@@ -1083,7 +1083,7 @@ check_and_reload_table(struct internal_mib_table *table)
     }
     table->current_index = 1;
     if (table->compare != NULL) /* Sort the table */
-        qsort(TABLE_START(table), table->next_index,
+        qsort(TABLE_START(table), table->next_index-1,
               table->data_size, table->compare);
     return 1;
 }
