@@ -98,11 +98,13 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 	char tmp[64];
         to = (struct sockaddr_in *) &(addr_pair->remote_addr);
         if (to == NULL) {
-            return strdup("UDP: unknown");
-        }
-
-        sprintf(tmp, "UDP: [%s]:%hd",
+            sprintf(tmp, "UDP: [%s]->unknown",
+                strdup(inet_ntoa(addr_pair->local_addr)));
+        } else {
+            sprintf(tmp, "UDP: [%s]->[%s]:%hd",
+                strdup(inet_ntoa(addr_pair->local_addr)),
                 inet_ntoa(to->sin_addr), ntohs(to->sin_port));
+        }
         return strdup(tmp);
     }
 }
@@ -587,7 +589,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
         return NULL;
     }
 
-    addr_pair = (struct	udp_addr_pair *) malloc(sizeof(netsnmp_udp_addr_pair));
+    addr_pair = (netsnmp_udp_addr_pair *) malloc(sizeof(netsnmp_udp_addr_pair));
     if (addr_pair == NULL) {
         return NULL;
     }
@@ -667,10 +669,24 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
         if (client_socket) {
             struct sockaddr_in client_addr;
             netsnmp_sockaddr_in( &client_addr, client_socket, 0);
+            addr_pair->local_addr = client_addr.sin_addr;
             client_addr.sin_port = 0;
-            bind(t->sock, (struct sockaddr *)&client_addr,
+            rc = bind(t->sock, (struct sockaddr *)&client_addr,
                   sizeof(struct sockaddr));
+            if ( rc != 0 ) {
+                DEBUGMSGTL(("netsnmp_udp", "failed to bind for clientaddr: %d %s\n",
+                            errno, strerror(errno)));
+                netsnmp_udp_close(t);
+                netsnmp_transport_free(t);
+                return NULL;
+            }
         }
+
+        str = netsnmp_udp_fmtaddr(NULL, (void *)addr_pair,
+                 sizeof(netsnmp_udp_addr_pair));
+        DEBUGMSGTL(("netsnmp_udp", "client open %s\n", str));
+        free(str);
+
         /*
          * Save the (remote) address in the
          * transport-specific data pointer for later use by netsnmp_udp_send.
