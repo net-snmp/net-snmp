@@ -598,6 +598,16 @@ main(int argc, char *argv[])
 #endif
     netsnmp_trapd_handler *traph;
 
+#ifndef WIN32
+    /*
+     * close all non-standard file descriptors we may have
+     * inherited from the shell.
+     */
+    for (i = getdtablesize() - 1; i > 2; --i) {
+        (void) close(i);
+    }
+#endif /* #WIN32 */
+    
 #ifdef SIGTERM
     signal(SIGTERM, term_handler);
 #endif
