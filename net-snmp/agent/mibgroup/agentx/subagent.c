@@ -746,7 +746,7 @@ subagent_open_master_session(void)
 
     if (main_session) {
         snmp_log(LOG_WARNING,
-                 "AgentX session to master agent attempted to be re-opened.");
+                 "AgentX session to master agent attempted to be re-opened.\n");
         return -1;
     }
 
@@ -812,6 +812,16 @@ subagent_open_master_session(void)
         main_session = NULL;
         return -1;
     }
+
+    /*
+     * subagent_register_ping_alarm assumes that securityModel will
+     *  be set to SNMP_DEFAULT_SECMODEL on new AgentX sessions.
+     *  This field is then (ab)used to hold the alarm stash.
+     *
+     * Why is the securityModel field used for this purpose, I hear you ask.
+     * Damn good question!   (See SVN revision 4886)
+     */
+    main_session->securityModel = SNMP_DEFAULT_SECMODEL;
 
     if (add_trap_session(main_session, AGENTX_MSG_NOTIFY, 1,
                          AGENTX_VERSION_1)) {
