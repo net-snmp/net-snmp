@@ -719,7 +719,9 @@ Why doesn't the agent respond?
  (see the previous entry), there are two main likely causes for the agent
   not to respond.  Either it doesn't receive the request (e.g. it's being
   blocked by a firewall or packet filtering), or it receives the request,
-  but is unwilling (or unable) to process it.
+  but is unwilling (or unable) to process it.  Note that if an agent
+  receives an SNMPv1 or SNMPv2c request with an unknown community string,
+  then it will not return an error response - the request simply times out.
 
     If the remote system is running the Net-SNMP agent, then the easiest
   way to check what's going wrong is to shut down the agent, and re-start
