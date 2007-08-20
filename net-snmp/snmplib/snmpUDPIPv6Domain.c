@@ -110,7 +110,7 @@ netsnmp_udp6_fmtaddr(netsnmp_transport *t, void *data, int len)
         return strdup("UDP/IPv6: unknown");
     } else {
         char addr[INET6_ADDRSTRLEN];
-        char tmp[INET6_ADDRSTRLEN + 8];
+        char tmp[INET6_ADDRSTRLEN + 18];
 
         sprintf(tmp, "UDP/IPv6: [%s]:%hu",
                 inet_ntop(AF_INET6, (void *) &(to->sin6_addr), addr,
