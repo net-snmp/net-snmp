@@ -530,7 +530,8 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	
 	    if (next && (next->namelen  == new_sub->namelen) &&
 		(next->priority == new_sub->priority)) {
-                netsnmp_assert(!"registration != duplicate"); /* always false */
+                if (new_sub->namelen != 1) /* ignore root OID dups */
+                    netsnmp_assert(!"registration != duplicate"); /* always false */
 		return MIB_DUPLICATE_REGISTRATION;
 	    }
 
