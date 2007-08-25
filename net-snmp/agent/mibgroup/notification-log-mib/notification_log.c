@@ -18,16 +18,46 @@
 #include <net-snmp/agent/table_dataset.h>
 #include "notification_log.h"
 
+/*
+ * column number definitions for table nlmLogTable
+ */
+
+#define COLUMN_NLMLOGINDEX		1
+#define COLUMN_NLMLOGTIME		2
+#define COLUMN_NLMLOGDATEANDTIME	3
+#define COLUMN_NLMLOGENGINEID		4
+#define COLUMN_NLMLOGENGINETADDRESS	5
+#define COLUMN_NLMLOGENGINETDOMAIN	6
+#define COLUMN_NLMLOGCONTEXTENGINEID	7
+#define COLUMN_NLMLOGCONTEXTNAME	8
+#define COLUMN_NLMLOGNOTIFICATIONID	9
+
+/*
+ * column number definitions for table nlmLogVariableTable
+ */
+#define COLUMN_NLMLOGVARIABLEINDEX		1
+#define COLUMN_NLMLOGVARIABLEID			2
+#define COLUMN_NLMLOGVARIABLEVALUETYPE		3
+#define COLUMN_NLMLOGVARIABLECOUNTER32VAL	4
+#define COLUMN_NLMLOGVARIABLEUNSIGNED32VAL	5
+#define COLUMN_NLMLOGVARIABLETIMETICKSVAL	6
+#define COLUMN_NLMLOGVARIABLEINTEGER32VAL	7
+#define COLUMN_NLMLOGVARIABLEOCTETSTRINGVAL	8
+#define COLUMN_NLMLOGVARIABLEIPADDRESSVAL	9
+#define COLUMN_NLMLOGVARIABLEOIDVAL		10
+#define COLUMN_NLMLOGVARIABLECOUNTER64VAL	11
+#define COLUMN_NLMLOGVARIABLEOPAQUEVAL		12
+
 static u_long   num_received = 0;
 static u_long   num_deleted = 0;
 
 static u_long   max_logged = 1000;      /* goes against the mib default of infinite */
 static u_long   max_age = 1440; /* 1440 = 24 hours, which is the mib default */
 
-netsnmp_table_data_set *nlmLogTable;
-netsnmp_table_data_set *nlmLogVarTable;
+static netsnmp_table_data_set *nlmLogTable;
+static netsnmp_table_data_set *nlmLogVarTable;
 
-void
+static void
 netsnmp_notif_log_remove_oldest(int count)
 {
     netsnmp_table_row *deleterow, *tmprow, *deletevarrow;
@@ -90,7 +120,7 @@ netsnmp_notif_log_remove_oldest(int count)
     netsnmp_assert(0 == count);
 }
 
-void
+static void
 check_log_size(unsigned int clientreg, void *clientarg)
 {
     netsnmp_table_row *row;
@@ -148,7 +178,7 @@ check_log_size(unsigned int clientreg, void *clientarg)
 
 
 /** Initialize the nlmLogVariableTable table by defining its contents and how it's structured */
-void
+static void
 initialize_table_nlmLogVariableTable(const char * context)
 {
     static oid      nlmLogVariableTable_oid[] =
@@ -304,7 +334,7 @@ initialize_table_nlmLogVariableTable(const char * context)
      */
     reginfo =
         netsnmp_create_handler_registration ("nlmLogVariableTable",
-                                             nlmLogVariableTable_handler,
+                                             NULL,
                                              nlmLogVariableTable_oid,
                                              nlmLogVariableTable_oid_len,
                                              HANDLER_CAN_RWRITE);
@@ -314,7 +344,7 @@ initialize_table_nlmLogVariableTable(const char * context)
 }
 
 /** Initialize the nlmLogTable table by defining its contents and how it's structured */
-void
+static void
 initialize_table_nlmLogTable(const char * context)
 {
     static oid      nlmLogTable_oid[] = { 1, 3, 6, 1, 2, 1, 92, 1, 3, 1 };
@@ -419,7 +449,7 @@ initialize_table_nlmLogTable(const char * context)
      * the request, change nlmLogTable_handler to "NULL" 
      */
     reginfo =
-        netsnmp_create_handler_registration("nlmLogTable", nlmLogTable_handler,
+        netsnmp_create_handler_registration("nlmLogTable", NULL,
                                             nlmLogTable_oid,
                                             nlmLogTable_oid_len,
                                             HANDLER_CAN_RWRITE);
@@ -434,7 +464,7 @@ initialize_table_nlmLogTable(const char * context)
     snmp_alarm_register(300, SA_REPEAT, check_log_size, NULL);
 }
 
-int
+static int
 notification_log_config_handler(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info *reqinfo,
@@ -710,36 +740,4 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
 
     check_log_size(0, NULL);
     DEBUGMSGTL(("notification_log", "done logging something\n"));
-}
-
-/** handles requests for the nlmLogTable table, if anything else needs to be done */
-int
-nlmLogTable_handler(netsnmp_mib_handler *handler,
-                    netsnmp_handler_registration *reginfo,
-                    netsnmp_agent_request_info *reqinfo,
-                    netsnmp_request_info *requests)
-{
-    /*
-     * perform anything here that you need to do.  The requests have
-     * already been processed by the master table_dataset handler, but
-     * this gives you chance to act on the request in some other way if
-     * need be. 
-     */
-    return SNMP_ERR_NOERROR;
-}
-
-/** handles requests for the nlmLogVariableTable table, if anything else needs to be done */
-int
-nlmLogVariableTable_handler(netsnmp_mib_handler *handler,
-                            netsnmp_handler_registration *reginfo,
-                            netsnmp_agent_request_info *reqinfo,
-                            netsnmp_request_info *requests)
-{
-    /*
-     * perform anything here that you need to do.  The requests have
-     * already been processed by the master table_dataset handler, but
-     * this gives you chance to act on the request in some other way if
-     * need be. 
-     */
-    return SNMP_ERR_NOERROR;
 }
