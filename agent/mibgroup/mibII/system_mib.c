@@ -120,145 +120,73 @@ system_parse_config_sysdescr(const char *token, char *cptr)
     }
 }
 
-void
-system_parse_config_sysloc(const char *token, char *cptr)
+NETSNMP_STATIC_INLINE void
+system_parse_config_string(const char *token, char *cptr,
+                           const char *name, char* value, size_t size,
+                           int* guard)
 {
     char            tmpbuf[1024];
 
-    if (strlen(cptr) >= sizeof(sysLocation)) {
+    if (strlen(cptr) >= size) {
         snprintf(tmpbuf, 1024,
-                 "syslocation token too long (must be < %lu):\n\t%s",
-                 (unsigned long)sizeof(sysLocation), cptr);
+                 "%s token too long (must be < %lu):\n\t%s",
+                 token, size, cptr);
         config_perror(tmpbuf);
     }
 
-    if (strcmp(token, "psyslocation") == 0) {
-        if (sysLocationSet < 0) {
+    if (*token == 'p' && strcasecmp(token + 1, name) == 0) {
+        if (*guard < 0) {
             /*
-             * This is bogus (and shouldn't happen anyway) -- the sysLocation
-             * is already configured read-only.  
+             * This is bogus (and shouldn't happen anyway) -- the value is
+             * already configured read-only.
              */
             snmp_log(LOG_WARNING,
-                     "ignoring attempted override of read-only sysLocation.0\n");
+                     "ignoring attempted override of read-only %s.0\n", name);
             return;
         } else {
-            sysLocationSet++;
+            ++(*guard);
         }
     } else {
-        if (sysLocationSet > 0) {
+        if (*guard > 0) {
             /*
              * This is bogus (and shouldn't happen anyway) -- we already read a
-             * persistent value of sysLocation, which we should ignore in
-             * favour of this one.  
+             * persistent value which we should ignore in favour of this one.
              */
             snmp_log(LOG_WARNING,
-                     "ignoring attempted override of read-only sysLocation.0\n");
+                     "ignoring attempted override of read-only %s.0\n", name);
             /*
-             * Fall through and copy in this value.  
+             * Fall through and copy in this value.
              */
         }
-        sysLocationSet = -1;
+        *guard = -1;
     }
 
     if (strcmp(cptr, "\"\"") == 0) {
-        sysLocation[0] = '\0';
-    } else if (strlen(cptr) < sizeof(sysLocation)) {
-        strcpy(sysLocation, cptr);
+        *value = '\0';
+    } else if (strlen(cptr) < size) {
+        strcpy(value, cptr);
     }
+}
+
+void
+system_parse_config_sysloc(const char *token, char *cptr)
+{
+    system_parse_config_string(token, cptr, "sysLocation", sysLocation,
+                               sizeof(sysLocation), &sysLocationSet);
 }
 
 void
 system_parse_config_syscon(const char *token, char *cptr)
 {
-    char            tmpbuf[1024];
-
-    if (strlen(cptr) >= sizeof(sysContact)) {
-        snprintf(tmpbuf, 1024,
-                 "syscontact token too long (must be < %lu):\n\t%s",
-                 (unsigned long)sizeof(sysContact), cptr);
-        config_perror(tmpbuf);
-    }
-
-    if (strcmp(token, "psyscontact") == 0) {
-        if (sysContactSet < 0) {
-            /*
-             * This is bogus (and shouldn't happen anyway) -- the sysContact
-             * is already configured read-only.  
-             */
-            snmp_log(LOG_WARNING,
-                     "ignoring attempted override of read-only sysContact.0\n");
-            return;
-        } else {
-            sysContactSet++;
-        }
-    } else {
-        if (sysContactSet > 0) {
-            /*
-             * This is bogus (and shouldn't happen anyway) -- we already read a
-             * persistent value of sysContact, which we should ignore in favour
-             * of this one.  
-             */
-            snmp_log(LOG_WARNING,
-                     "ignoring attempted override of read-only sysContact.0\n");
-            /*
-             * Fall through and copy in this value.  
-             */
-        }
-        sysContactSet = -1;
-    }
-
-    if (strcmp(cptr, "\"\"") == 0) {
-        sysContact[0] = '\0';
-    } else if (strlen(cptr) < sizeof(sysContact)) {
-        strcpy(sysContact, cptr);
-    }
+    system_parse_config_string(token, cptr, "sysContact", sysContact,
+                               sizeof(sysContact), &sysContactSet);
 }
 
 void
 system_parse_config_sysname(const char *token, char *cptr)
 {
-    char            tmpbuf[1024];
-
-    if (strlen(cptr) >= sizeof(sysName)) {
-        snprintf(tmpbuf, 1024,
-                 "sysname token too long (must be < %lu):\n\t%s",
-                 (unsigned long)sizeof(sysName), cptr);
-        config_perror(tmpbuf);
-    }
-
-    if (strcmp(token, "psysname") == 0) {
-        if (sysNameSet < 0) {
-            /*
-             * This is bogus (and shouldn't happen anyway) -- the sysName
-             * is already configured read-only.  
-             */
-            snmp_log(LOG_WARNING,
-                     "ignoring attempted override of read-only sysName.0\n");
-            return;
-        } else {
-            sysNameSet++;
-        }
-    } else {
-        if (sysNameSet > 0) {
-            /*
-             * This is bogus (and shouldn't happen anyway) -- we already read a
-             * persistent value of sysName, which we should ignore in favour
-             * of this one.  
-             */
-            snmp_log(LOG_WARNING,
-                     "ignoring attempted override of read-only sysName.0\n");
-            /*
-             * Fall through and copy in this value.  
-             */
-        }
-        sysNameSet = -1;
-    }
-
-    if (strcmp(cptr, "\"\"") == 0) {
-        sysName[0] = '\0';
-    } else if (strlen(cptr) < sizeof(sysName)) {
-        strcpy(sysName, cptr);
-    }
+    system_parse_config_string(token, cptr, "sysName", sysName,
+                               sizeof(sysName), &sysNameSet);
 }
 
 void
