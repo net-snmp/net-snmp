@@ -1,4 +1,4 @@
-.TH "read_only" 3 "13 Jul 2006" "Version 5.3.1" "net-snmp" \" -*- nroff -*-
+.TH "read_only" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -33,13 +33,9 @@ returns a read_only handler that can be injected into a given handler chain.
 .PP
 Definition at line 29 of file read_only.c.
 .PP
-References netsnmp_mib_handler_s::flags, MIB_HANDLER_AUTO_NEXT, netsnmp_create_handler(), netsnmp_read_only_helper(), and NULL.
-.PP
 Referenced by netsnmp_init_read_only_helper(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(), and netsnmp_register_read_only_table_data().
 .SS "void netsnmp_init_read_only_helper (void)"
 .PP
 initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 81 of file read_only.c.
-.PP
-References netsnmp_get_read_only_handler(), and netsnmp_register_handler_by_name().
