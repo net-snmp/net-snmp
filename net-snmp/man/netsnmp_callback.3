@@ -1,4 +1,4 @@
-.TH "A generic callback mechanism" 3 "13 Jul 2006" "Version 5.3.1" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -17,6 +17,9 @@ A generic callback mechanism \-
 .br
 .ti -1c
 .RI "#define \fBCALLBACK_UNLOCK\fP(maj, min)   --_locks[major][minor]"
+.br
+.ti -1c
+.RI "#define \fBCALLBACK_LOCK_COUNT\fP(maj, min)   _locks[major][minor]"
 .br
 .in -1c
 .SS "Functions"
@@ -60,7 +63,7 @@ A generic callback mechanism \-
 .RI "void \fBclear_callback\fP (void)"
 .br
 .ti -1c
-.RI "\fBsnmp_gen_callback\fP * \fBsnmp_callback_list\fP (int major, int minor)"
+.RI "struct \fBsnmp_gen_callback\fP * \fBsnmp_callback_list\fP (int major, int minor)"
 .br
 .in -1c
 .SH "Function Documentation"
@@ -80,9 +83,7 @@ find and clear client args that match ptr
 .PP
 
 .PP
-Definition at line 456 of file callback.c.
-.PP
-References NULL, snmp_gen_callback::sc_callback, and snmp_gen_callback::sc_client_arg.
+Definition at line 462 of file callback.c.
 .PP
 Referenced by clear_callback().
 .SS "int snmp_call_callbacks (int major, int minor, void * caller_arg)"
@@ -112,11 +113,9 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 .PP
 
 .PP
-Definition at line 280 of file callback.c.
+Definition at line 286 of file callback.c.
 .PP
-References _callback_lock(), init_callbacks(), snmp_gen_callback::next, NULL, snmp_gen_callback::sc_callback, and snmp_gen_callback::sc_client_arg.
-.PP
-Referenced by add_trap_session(), check_access(), in_a_view(), log_handler_callback(), netsnmp_acm_check_subtree(), read_configs(), read_premib_configs(), snmp_shutdown(), and snmp_store().
+Referenced by add_trap_session(), check_access(), in_a_view(), log_handler_callback(), netsnmp_acm_check_subtree(), netsnmp_register_mib(), netsnmp_register_mib_table_row(), netsnmp_send_traps(), netsnmp_unregister_mib_table_row(), read_configs(), read_premib_configs(), snmp_shutdown(), snmp_store(), unregister_mib_context(), and unregister_mibs_by_session().
 .SS "int snmp_register_callback (int major, int minor, SNMPCallback * new_callback, void * arg)"
 .PP
 This function registers a generic callback function. 
@@ -176,9 +175,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 .PP
 
 .PP
-Definition at line 212 of file callback.c.
-.PP
-References netsnmp_register_callback().
+Definition at line 218 of file callback.c.
 .PP
 Referenced by init_snmp_alarm(), netsnmp_init_handler_conf(), and netsnmp_register_save_list().
 .SS "int snmp_unregister_callback (int major, int minor, SNMPCallback * target, void * arg, int matchargs)"
@@ -195,9 +192,9 @@ Note: no bound checking on major and minor.
 .br
 \fItarget\fP is the callback function that will be unregistered.
 .br
-\fIarg\fP is a void pointer used for comparison against the registered callback's sc_client_arg variable.
+\fIarg\fP is a void pointer used for comparison against the registered callback's sc_client_arg \fBvariable\fP.
 .br
-\fImatchargs\fP is an integer used to bypass the comparison of arg and the callback's sc_client_arg variable only when matchargs is set to 0.
+\fImatchargs\fP is an integer used to bypass the comparison of arg and the callback's sc_client_arg \fBvariable\fP only when matchargs is set to 0.
 .RE
 .PP
 \fBReturns:\fP
@@ -209,11 +206,11 @@ Returns the number of callbacks that were unregistered.
 .RS 4
 \fBsnmp_register_callback\fP 
 .PP
-\fBsnmp_call_callbacks\fP
+\fBsnmp_call_callbacks\fP 
 .RE
+.PP
+
 .PP
 set cleanup flag? 
 .PP
-Definition at line 400 of file callback.c.
-.PP
-References _callback_lock(), _callback_unlock(), init_callbacks(), snmp_gen_callback::next, NULL, snmp_gen_callback::sc_callback, snmp_gen_callback::sc_client_arg, and SNMP_FREE.
+Definition at line 406 of file callback.c.

@@ -1,4 +1,4 @@
-.TH "row_merge" 3 "13 Jul 2006" "Version 5.3.1" "net-snmp" \" -*- nroff -*-
+.TH "row_merge" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -66,30 +66,26 @@ returns a row_merge handler that can be injected into a given handler chain.
 .PP
 Definition at line 28 of file row_merge.c.
 .PP
-References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_row_merge_helper_handler(), and NULL.
-.PP
 Referenced by netsnmp_init_row_merge(), and netsnmp_register_row_merge().
 .SS "void netsnmp_init_row_merge (void)"
 .PP
 initializes the row_merge helper which then registers a row_merge handler as a run-time injectable handler for configuration file use. 
 .PP
-Definition at line 353 of file row_merge.c.
-.PP
-References netsnmp_get_row_merge_handler(), and netsnmp_register_handler_by_name().
+Definition at line 358 of file row_merge.c.
 .SS "int netsnmp_register_row_merge (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 functionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a row_merge handler at the same time for you. 
 .PP
-Definition at line 42 of file row_merge.c.
+
 .PP
-References netsnmp_get_row_merge_handler(), netsnmp_inject_handler(), netsnmp_register_handler(), and netsnmp_handler_registration_s::rootoid_len.
+Definition at line 42 of file row_merge.c.
 .SS "int netsnmp_row_merge_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
 Implements the row_merge handler. 
 .PP
 Definition at line 154 of file row_merge.c.
 .PP
-References netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_row_merge_status_get(), netsnmp_request_info_s::next, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len.
+References netsnmp_row_merge_status::count, netsnmp_row_merge_status::current, netsnmp_agent_request_info::mode, netsnmp_mib_handler::myvoid, variable_list::name, variable_list::name_length, netsnmp_call_next_handler(), netsnmp_row_merge_status_get(), netsnmp_request_info::next, NULL, netsnmp_request_info::prev, netsnmp_request_info::processed, netsnmp_request_info::requestvb, netsnmp_handler_registration::rootoid, netsnmp_handler_registration::rootoid_len, ROW_MERGE_ACTIVE, ROW_MERGE_DONE, ROW_MERGE_HEAD, ROW_MERGE_WAITING, netsnmp_row_merge_status::rows, netsnmp_row_merge_status::saved_requests, netsnmp_row_merge_status::saved_status, SNMP_FREE, snmp_log(), and snmp_oid_compare().
 .PP
 Referenced by netsnmp_get_row_merge_handler().
 .SS "int netsnmp_row_merge_status_first (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo)"
@@ -99,8 +95,6 @@ Determine if this is the first row.
 returns 1 if this is the first row for this pass of the handler. 
 .PP
 Definition at line 110 of file row_merge.c.
-.PP
-References netsnmp_row_merge_status_x::count, netsnmp_row_merge_status_x::current, netsnmp_row_merge_status_get(), and NULL.
 .SS "\fBnetsnmp_row_merge_status\fP* netsnmp_row_merge_status_get (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, int create_missing)"
 .PP
 retrieve row_merge_status 
@@ -117,5 +111,3 @@ Determine if this is the last row.
 returns 1 if this is the last row for this pass of the handler. 
 .PP
 Definition at line 130 of file row_merge.c.
-.PP
-References netsnmp_row_merge_status_x::count, netsnmp_row_merge_status_x::current, netsnmp_row_merge_status_get(), NULL, and netsnmp_row_merge_status_x::rows.

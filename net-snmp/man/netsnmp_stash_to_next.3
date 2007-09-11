@@ -1,4 +1,4 @@
-.TH "stash_to_next" 3 "13 Jul 2006" "Version 5.3.1" "net-snmp" \" -*- nroff -*-
+.TH "stash_to_next" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -28,7 +28,5 @@ The purpose of this handler is to convert a GET_STASH auto-cache request to a se
 returns a stash_to_next handler that can be injected into a given handler chain. 
 .PP
 Definition at line 28 of file stash_to_next.c.
-.PP
-References netsnmp_mib_handler_s::flags, MIB_HANDLER_AUTO_NEXT, netsnmp_create_handler(), netsnmp_stash_to_next_helper(), and NULL.
 .PP
 Referenced by netsnmp_get_stash_cache_handler(), and netsnmp_get_timed_stash_cache_handler().
