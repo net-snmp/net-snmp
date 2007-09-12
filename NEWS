@@ -3,6 +3,31 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.3.2*      
+
+    snmplib:
+      - [PATCH 1553447]: responses will get sent from the
+      - [PATCH 1592706]: Fix memory leak when cloning
+      - fix potential buffer overflow in sprintf for
+
+    snmpd:
+      - [BUG 1527930]: fix smux authentication
+      - [BUG 1558823]: fix ipAddressTable memory leak
+      - [BUG 1712988]: default and configurable maximum
+      - [PATCH 1520292]: hr_storage.c fix for Darwin / OS X
+      - [PATCH 1561277]: use
+      - [PATCH 1666737]: include ipv6 counts in
+      - patch: 1700157: from afrika: fixes ordering of exec
+      - suppress annoying "registration != duplicate"
+
+    perl:
+      - Fixed the perl bulkwalk function
+      - NMP.pm fixes for 64-bit platforms
+      - patch: 1725049: fix bulkwalk in cases of non-repeater
+
+    Linux:
+      - [BUG 1596638]: fix memory leak in pCidrRouteTable,
+
 
 *5.3.x*      (SVN snapshot)
 
