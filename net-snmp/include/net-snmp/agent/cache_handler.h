@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright (C) 2007 Apple, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #ifndef NETSNMP_CACHE_HANDLER_H
 #define NETSNMP_CACHE_HANDLER_H
 
@@ -85,6 +95,8 @@ extern          "C" {
     netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
                          NetsnmpCacheFree * free_hook,
                          oid * rootoid, int rootoid_len);
+    int netsnmp_cache_free(netsnmp_cache *cache);
+
     netsnmp_mib_handler *
     netsnmp_cache_handler_get(netsnmp_cache* cache);
 
