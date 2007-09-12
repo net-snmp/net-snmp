@@ -859,12 +859,12 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
                 if (host == NULL) {
                     DEBUGMSGTL(("netsnmp_sockaddr_in",
                                 "servname not numeric, "
-				"check if it really is a destination)"));
+				"check if it really is a destination)\n"));
                     host = port;
                     port = NULL;
                 } else {
                     DEBUGMSGTL(("netsnmp_sockaddr_in",
-                                "servname not numeric"));
+                                "servname not numeric\n"));
                     free(peername);
                     return 0;
                 }
