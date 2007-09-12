@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright (C) 2007 Apple, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <net-snmp/net-snmp-includes.h>
@@ -171,6 +181,31 @@ netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
     }
 
     return cache;
+}
+
+/** frees a cache
+ */
+int
+netsnmp_cache_free(netsnmp_cache *cache)
+{
+    netsnmp_cache  *pos;
+
+    if (NULL == cache)
+        return SNMPERR_SUCCESS;
+
+    for (pos = cache_head; pos; pos = pos->next) {
+        if (pos == cache) {
+            snmp_log(LOG_WARNING, "not freeing cache (still in list)\n");
+            return SNMP_ERR_GENERR;
+        }
+    }
+
+    if (cache->rootoid)
+        free(cache->rootoid);
+
+    free(cache);
+
+    return SNMPERR_SUCCESS;
 }
 
 /** callback function to call cache load function */
