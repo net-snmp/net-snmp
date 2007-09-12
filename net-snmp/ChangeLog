@@ -1,5 +1,1141 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.3.1 -> V5.3.2
+
+2007-08-25 14:24  magfr
+
+   *
+
+   Make most of notification_log static. Minimize the header file.
+
+2007-08-22 21:56  tanders
+
+   *
+
+   NEWS: agent: suppress annoying "registration != duplicate"
+   warning for root oids
+   (otherwise, you'll get this message on almost every startup)
+
+2007-08-20 08:06  tanders
+
+   *
+
+   NEWS: snmplib: fix potential buffer overflow in sprintf for
+   UDP/IPv6
+
+2007-08-17 09:10  dts12
+
+   *
+
+   Subversion, not CVS.
+
+2007-08-16 15:36  dts12
+
+   *
+
+   Don't just report the problem - it might be sensible to avoid
+   crashing the agent as well!
+
+2007-08-16 15:35  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1744157: Report duplicate "extend/exec"
+   identifiers.
+
+2007-08-16 15:24  dts12
+
+   *
+
+   CHANGES: snmptrapd: PATCH: 1746992: Improve snmptrapd
+   access-control error messages.
+
+2007-08-16 14:12  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1752934: Fix off-by-one qsort error in
+   table utilities.
+
+2007-08-16 13:31  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1753437: Fix error index on failing SET
+   requests
+
+2007-08-16 13:25  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1753449: Fix AgentX error propagation
+
+2007-08-16 12:34  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1753463: Fix AgentX subagent ping alarm
+   handling
+
+2007-08-16 12:13  dts12
+
+   *
+   *
+
+   CHANGES: snmpd: PATCH: 1758208: Fix memory leak
+
+2007-08-16 12:03  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1774612: More resilient process status
+   handling
+
+2007-08-16 11:58  dts12
+
+   *
+
+   CHANGES: snmplib: PATCH: 1775124: Fix clientaddr functionality
+
+2007-08-16 09:38  dts12
+
+   *
+
+   CHANGES: snmplib: PATCH: 1768285: Count MIB files correctly in
+   add_mibdir()
+
+2007-08-16 09:35  dts12
+
+   *
+
+   CHANGES: snmptrapd: PATCH: 1767725: Close all non standard file
+   handles
+
+2007-08-16 09:00  dts12
+
+   *
+
+   Declare initialisation routine correctly, and omit unused
+   variables.
+   Patch from Magnus Fromreide.
+
+2007-08-16 08:55  dts12
+
+
+   *
+
+   Read in agent configuration settings *before* the header
+   files that might rely on them.
+
+2007-08-02 13:46  dts12
+
+   *
+
+   It might be slightly less confusing if the netSnmpExampleString
+   MIB object did actually take string values. Picky, I know....
+
+2007-07-25 22:41  tanders
+
+   *
+
+   CHANGES: snmpd: BUG: 1760633: fix typo in debug message
+
+2007-07-21 21:36  tanders
+
+   *
+
+   CHANGES: snmplib: fix forwarding encoding
+
+2007-07-16 23:59  hardaker
+
+   *
+
+   Apply (correct) patch from Marcus Rueckert to remove asserts
+   using sort-o-illegal C string compares
+
+2007-07-16 23:59  hardaker
+
+   *
+
+   Remove previous patch which was the wrong version
+
+2007-07-16 23:57  hardaker
+
+
+   *
+
+   Apply patch from Marcus Rueckert to remove asserts using
+   sort-o-illegal C string compares
+
+2007-07-12 21:51  tanders
+
+   *
+
+   fix subagent example (documentation)
+
+2007-07-12 21:27  tanders
+
+   *
+
+   snmp_sess_read returns int, not void
+
+2007-07-06 23:39  hardaker
+
+   *
+
+   CHANGES: build: use libtool clean for removing files to ensure we
+   delete all libtool temporary files.
+
+2007-07-06 21:22  rstory
+
+   *
+
+   stop searching paths when done
+
+2007-07-06 21:14  rstory
+
+   *
+
+   do not free interface entry just because we can not get stats for
+   it
+
+2007-07-06 15:32  dts12
+
+
+   *
+
+   CHANGES: snmpd: BUG 1745113: Handle single-line (and zero-line)
+   output in UCD compatability mode.
+
+2007-07-05 11:05  rstory
+
+   *
+
+   skip stats parsing on interfaces with no statistics
+
+2007-07-04 23:26  tanders
+
+   *
+
+   CHANGES: perl: install embedded perl init files for
+   snmpd/snmptrapd with mode 644 instead of 755
+
+2007-07-03 22:36  hardaker
+
+   *
+
+   CHANGES: library: Patch from "Mitsuru Chinen": cleans up the
+   int64 type checking and usage for building packets especially
+   under MSVC.
+
+2007-07-02 06:02  magfr
+
+   *
+
+   Add missing return value to _mteEvent_fire_notify.
+
+2007-07-02 05:31  magfr
+
+   *
+
+   Remove the declaration of an undefined static function.
+
+
+
+2007-06-26 21:28  tanders
+
+   *
+
+   minor updates
+
+2007-06-24 12:57  tanders
+
+   *
+
+   HAVE_SSIZE_T cleanup
+
+2007-06-22 15:09  dts12
+
+   *
+
+   Enforce DOS-style line endings, to keep Visual Studio happy.
+
+2007-06-19 15:08  tanders
+
+   *
+
+   CHANGES: build: add "BuildRequires: perl-ExtUtils-Embed" to the
+   spec file, e.g. for Fedora 7
+
+2007-06-18 22:28  hardaker
+
+   *
+
+   fix broken comment.
+
+2007-06-18 20:54  hardaker
+
+   *
+
+   CHANGES: patch: 1737085: from jsafranek: fix the -M switch for
+   mib parsing by loading defaults first before performing the set
+   so it does not get overwritten by the defaults later.
+
+
+
+2007-06-18 20:50  hardaker
+
+   *
+
+   NEWS: perl: patch: 1725049: fix bulkwalk in cases of non-repeater
+   usage.
+
+2007-06-18 14:10  tanders
+
+   *
+
+   CHANGES: perl: fix prerequisites for NetSNMP::TrapReceiver
+
+2007-06-14 15:41  rstory
+
+   *
+
+   fix typo in user output, as noted on coders
+
+2007-06-10 22:29  tanders
+
+   *
+
+   CHANGES: build: PATCH: 1728247: from mitsuru_chinen: Add type
+   check for int??_t and uint??_t
+
+2007-06-10 22:22  tanders
+
+   *
+
+   CHANGES: build: PATCH: 1728244: from mitsuru_chinen: Add
+   configure check for sin6_scope_id
+
+2007-06-10 22:15  tanders
+
+   *
+
+   CHANGES: PATCH: 1728241: from mitsuru_chinen: add configure check
+   for <sys/uio.h> (make sure iov structure is declared)
+
+
+2007-06-08 20:32  tanders
+
+   *
+
+   Fix regression introduced by r16479: 'make test TESTOPTS="-T
+   tcp"' now
+   works again. makerelease now uses the right option.
+
+2007-06-08 10:44  dts12
+
+   *
+
+   Improve memory handling of style-specific format strings.
+
+2007-06-08 10:33  dts12
+
+   *
+
+   Default to reporting NFS mounts as NetworkDisk.
+
+2007-06-07 16:02  dts12
+
+   *
+
+   Remove redundant CVS-admin files.
+
+2007-06-07 12:56  dts12
+
+   *
+
+   Handle unregistering the first Security Model in the list.
+   Reported by Aleksandr Lomanov.
+
+2007-06-07 09:13  dts12
+
+   *
+
+   Install header files for stash_cache and stash_to_next helpers.
+
+
+2007-06-07 09:07  dts12
+
+   *
+
+   Separate out header files that don't have a corresponding C
+   source file.
+
+2007-06-07 08:59  dts12
+
+   *
+
+   Sort lists of helpers (source code, object files and headers).
+   This should make it easier to spot files that have been omitted.
+
+2007-06-07 08:42  dts12
+
+   *
+
+   Protect against systems without S_ISDIR.
+
+2007-06-06 10:20  dts12
+
+   *
+
+   Ensure output is properly directed to syslog.
+   Otherwise, problems in the config environment can trigger
+   errors being directed to stderr, and subsequent logging
+   output gets lost.
+
+2007-06-06 10:13  dts12
+
+   *
+
+   More helpful debugging output.
+
+2007-06-05 15:59  dts12
+
+   *
+
+
+   CHANGES: snmpd: PATCHES: 1729629: Fix memory leak in disman
+   agent.
+
+2007-06-04 14:36  hardaker
+
+   *
+
+   CHANGES: test: support a -n flag to RUNTESTS to print the test
+   number found in the test file as opposed to the numerical count
+
+2007-06-04 12:13  tanders
+
+   *
+
+   CHANGES: build: PATCH: 1728230: from mitsuru_chinen: add
+   configure check for gai_strerror()
+
+2007-06-04 10:35  tanders
+
+   *
+
+   CHANGES: build: PATCH: 1728226: from mitsuru_chinen: make sure
+   IF_NAMESIZE is defined
+
+2007-06-04 09:47  tanders
+
+   *
+
+   also skip this test on IRIX64
+
+2007-06-01 21:36  dts12
+
+   *
+
+   CHANGES: snmplib: FEATURES: 1041888: Check directory paths for
+   config files.
+   Backport from main development trunk of bug fix.
+
+2007-06-01 21:23  dts12
+
+   *
+
+   CHANGES: snmplib: FEATURES: 851887: Report range information for
+   invalid SET requests.
+   Backport from main trunk of bug fix.
+
+2007-05-31 14:39  dts12
+
+   *
+
+   Fix logging of authentication information.
+
+2007-05-31 10:10  dts12
+
+   *
+
+   Remove bogus debug output.
+
+2007-05-27 19:54  dts12
+
+   *
+
+   CHANGES: library: FEATURES: 454028: Detect and handle empty MIB
+   index files.
+
+2007-05-21 23:11  magfr
+
+   *
+
+   CHANGES: building: Disable inlining on solaris as there are some
+   linking errors that show up if the inline support is left
+   enabled.
+
+2007-05-20 21:41  tanders
+
+   *
+   re-generate with autoconf 2.59 instead of 2.61
+
+2007-05-20 07:52  magfr
+
+   *
+
+   CHANGES: snmpd: Revert faulty change to dependency information
+   for V5-3-patches
+
+2007-05-19 15:27  magfr
+
+   *
+
+   CHANGES: building: Check for support of static inline functions
+   instead of nested static inline functions when determining if
+   static inline functions work
+
+2007-05-18 18:08  hardaker
+
+   *
+
+   CHANGES: snmpd: patch: 1719254: from "Christan Jung": update
+   HRFS_ignore list to current linux likelyhoods
+
+2007-05-18 10:22  magfr
+
+   *
+
+   CHANGES: snmpd: Correct the dependency information for
+   host/hr_storage
+
+2007-05-17 21:53  hardaker
+
+   *
+
+   CHANGES: snmpd: patch: 1710632: from mavarley: fix memory leak on
+   broken container insertions for the ipAddressTable
+
+2007-05-17 18:06  rstory
+
+
+   *
+
+   CHANGES: PATCH: 1719244: fix mfd generating map function
+
+2007-05-17 16:22  hardaker
+
+   *
+
+   NEWS: snmpd: patch: 1700157: from afrika: fixes ordering of exec
+   tokens in the resulting mib tree
+
+2007-05-17 15:53  hardaker
+
+   *
+
+   CHANGES: snmpd: patch: 1617255: fix length of the history array
+   to match code.
+
+2007-05-17 13:53  hardaker
+
+   *
+
+   CHANGES: snmpd: patch: 1225440: Apply intent of patch: to delay
+   sighup till it is safe.
+   CHANGES: snmptrapd: patch: 1225440: Apply intent of patch: to
+   delay sighup till it is safe.
+
+2007-05-17 04:39  hardaker
+
+   *
+
+   CHANGES: snmplib: patch: 1645698: fix 64-bit signed integer
+   encoding
+
+2007-05-16 23:53  tanders
+
+   *
+
+
+
+   CHANGES: HP-UX: HP-UX needs _REENTRANT defined to pick up
+   strtok_r.
+   Otherwise, at least for 64-bit code, strtok_r will not work
+   and will make net-snmp segfault.
+
+2007-05-14 21:49  tanders
+
+   *
+
+   add missing CFLAGS to link line
+
+2007-05-14 21:48  tanders
+
+   *
+
+   add missing CFLAGS to link line
+
+2007-05-14 14:50  hardaker
+
+   *
+
+   CHANGES: snmpd: patch: 1595568: from cyril_margaria: fix
+   delegated SET requests from agentx subagents
+
+2007-05-12 11:14  magfr
+
+   *
+
+   CHANGES: snmplib: Deallocate the confmibs and confmibdirs
+   variables in shutdown_mib to make for a cleaner exit of the
+   library
+
+2007-05-11 21:06  magfr
+
+   *
+
+   CHANGES: snmpd: PATCH: 1687336: Start using the enhanced
+   read_config interface
+
+
+
+2007-05-11 20:33  magfr
+
+   *
+
+   PATCH 1687329: Applied part 2 of the patch - When registering
+   multiple premib handlers only the last one was registered premib,
+   the others were registerd at the normal time. This patch puts all
+   registration in one function that takes the problematic value as
+   an argument and makes the old functions thin wrappers of the new
+   one
+
+2007-05-11 20:24  magfr
+
+   *
+
+   CHANGE: snmplib: PATCH 1687329: Applied part 3 of the patch - use
+   the same algorithm to determine what to unregister as is used to
+   determine what to regster
+
+2007-05-11 16:32  magfr
+
+   *
+
+   Don't log host/hr_proc events in the snmpd domain
+
+2007-05-11 16:27  magfr
+
+   *
+
+   Decorate more debug lines with the tag that controls the log
+
+2007-05-11 08:37  dts12
+
+   *
+
+   Fixed version to update agent::default_store perl module for new
+   defs
+
+2007-05-10 05:18  magfr
+
+
+   *
+
+   PATCH 1687329: Applied part 1 of the patch - lessens the scope of
+   the ltmp2 variable
+
+2007-05-08 19:48  magfr
+
+   *
+
+   Revert mistakenly committed extra trace logs
+
+2007-05-07 20:46  hardaker
+
+   *
+
+   update agent::default_store perl module for new defs
+
+2007-05-07 20:23  hardaker
+
+   *
+
+   NEWS: snmpd: BUG: 1712988: default and configurable maximum
+   number of varbinds returnable to a GETBULK request
+
+2007-05-04 20:27  tanders
+
+   *
+
+   CHANGES: perl: fix SNMP SET for IP addresses on 64-bit
+
+2007-05-03 22:10  tanders
+
+   *
+
+   CHANGES: perl: fix SNMP SET for IP addresses on 64-bit
+   Patch proposed by Jeff Lange.
+
+2007-05-02 13:13  dts12
+
+
+   *
+
+   Fix problems with single-line extend scripts.
+
+2007-04-30 13:26  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1700737: Tidy up setSerialNo
+   implementations.
+
+2007-04-30 13:06  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1700732: Fix debug output statements.
+
+2007-04-30 13:02  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1700730: Remove unused extern declaration.
+
+2007-04-30 11:32  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1698184: Register non-default context
+   integers as writable.
+   Patch provided by Mark Naylor.
+
+2007-04-30 11:04  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1692768: Fix copying of non-octet-aligned
+   IP address prefixes.
+
+2007-04-30 10:25  dts12
+
+   *
+
+   CHANGES: snmplib: PATCH: 1687325: Fix problem with operator
+   precedence.
+
+2007-04-30 10:07  dts12
+
+   *
+
+   CHANGES: snmplib: PATCH: 1687316: Don't drop const from casts.
+
+2007-04-24 12:35  dts12
+
+   *
+
+   Fix incomplete OID handling of single-line extend scripts.
+   Reported by Max on coders list, 7th April. See thread
+   "... segfault .. when attempting SNMP GET on extend or exec item"
+
+2007-04-20 08:30  dts12
+
+   *
+
+   Document the behaviour of a load threshold of 0.
+   Reported by Fong Tsui.
+
+2007-04-20 08:21  dts12
+
+   *
+
+   Long-term load average is calculated over 15 minutes, not 10.
+   Reported by Fong Tsui
+
+2007-04-10 14:16  dts12
+
+   *
+
+   Detect OID retracking (as well as simple repetitions) when
+   bulkwalking an OID tree.
+   See users thread "missing indices in bulkwalk result".
+
+2007-04-10 11:49  dts12
+
+   *
+
+   Clarify copyright status of Win32 API definitions.
+
+2007-04-10 11:27  dts12
+
+   *
+
+   Clarify copyright status of BSD-derived TCPTV* definitions.
+
+2007-04-03 08:59  tanders
+
+   *
+
+   fix syntax error introduced by last patch
+
+2007-04-03 08:54  dts12
+
+   *
+
+   Emphasise the use of SNMPv3 in DisMan monitoring.
+   Fix the syntax of non-existance/value-change tests.
+
+2007-04-02 14:55  dts12
+
+   *
+
+   CHANGES: snmpd: BUG: 1046327: Reset "includeAllDisks" flag when
+   reloading.
+
+2007-04-02 14:45  dts12
+
+   *
+
+
+   CHANGES: snmpd: BUG: 1602286: Don't let table holes block later
+   rows.
+
+2007-04-02 13:51  dts12
+
+   *
+
+   CHANGES: snmpd: BUG: 1073782: Restore PerfStat values for FreeBSD
+   5.x systems.
+   It's unclear why the "new" calculation was a) proposed, b)
+   withdrawn,
+   and c) what was wrong with the previous calculation (which seems
+   to
+   match the output of 'ps')
+
+2007-04-02 13:06  dts12
+
+   *
+
+   CHANGES: snmpd: BUG: 902610: Don't discard pending data following
+   a TRAP.
+
+2007-04-02 12:56  dts12
+
+   *
+
+   CHANGES: snmpd: BUG: 902801: Fix ordering of SMUX-registered
+   subtrees.
+
+2007-04-02 12:35  dts12
+
+   *
+
+   CHANGES: snmpd: BUG: 1685067: More precise handling of
+   SNMPv3-admin MIB tables.
+   This actually fixes three separate problems:
+   *
+
+
+
+   *
+
+   Prevent crash when walking (invalid?) Event-MIB Objects Table.
+
+2007-04-02 11:30  dts12
+
+   *
+
+   Fix a couple of typos in the re-worked makerelease script.
+
+2007-03-29 12:14  tanders
+
+   *
+
+   fix syntax error ("==" is bad)
+
+2007-03-27 09:20  dts12
+
+   *
+
+   CHANGES: mib2c: PATCH: 1427712: Better handling of non-integer
+   values and valid column range.
+   (backport from 5.4.x line)
+
+2007-03-27 08:38  dts12
+
+   *
+
+   Accept '2c' as a valid response when choosing the default version
+
+2007-03-27 08:29  dts12
+
+   *
+
+   CHANGES: configure: BUG: 1567324: Clarify prompting for
+   user-supplied values.
+   Now only remembers (and uses) previous values when explicitly
+   told to do so,
+   e.g. configure -C
+
+2007-03-25 22:28  dts12
+
+   *
+
+   CHANGES: mib2c: BUG: 833673: More focused size checks.
+
+2007-03-25 21:25  dts12
+
+   *
+
+   CHANGES: snmpd: BUG: 1677063: Check for failed malloc calls.
+
+2007-03-25 19:03  dts12
+
+   *
+
+   Check SET requests against the correct type (IP Address != Octet
+   Str)
+
+2007-03-25 18:55  dts12
+
+   *
+
+   CHANGES: snmpd: BUG: 1685081: Check for valid OID on Free/Undo
+   passes.
+
+2007-03-23 09:44  dts12
+
+   *
+
+   CHANEGS: snmplib: BUG: 1686384: Document non-use of 'remote_port'
+   field.
+
+2007-03-23 09:19  dts12
+
+   *
+
+   Allow space for external indexes when saving table entries.
+   (See patch #1642255)
+
+2007-03-23 09:15  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1642255: Handle saving long
+   snmpNotifyFilterTable entries.
+
+2007-03-23 09:06  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1676478: fix udpEndpointRemoteAddress
+   CHANGES: snmpd: BUG: 1676476: fix udpEndpointRemoteAddress
+
+2007-03-23 09:01  dts12
+
+   *
+
+   CHANGES: snmplib: PATCH: 1653670: Consistent SNMPv3 behaviour
+   when opening sessions.
+
+2007-03-22 19:14  dts12
+
+   *
+
+   CHANGES: snmplib: PATCH: 1681030: Better handling of empty
+   apptype configs.
+
+2007-03-21 12:35  dts12
+
+   *
+
+   Declare OID constants as such (rather than API calls).
+   Proposed by Alex Burger
+
+2007-03-20 20:07  rstory
+
+
+   *
+
+   NEWS: snmpd: PATCH: 1666737: include ipv6 counts in
+   udpInDatagrams, udpNoPorts, udpInErrors, udpOutDatagrams
+
+2007-03-16 14:04  dts12
+
+   *
+
+   Convert build system to SVN version.
+
+2007-03-14 16:12  dts12
+
+   *
+
+   CHANGES: snmpd: PATCHES: 1644280: Don't automatically probe for
+   v3 EngineIDs.
+
+2007-03-13 10:26  dts12
+
+   *
+
+   Check for zero-size pseudo-filesystems. Report them as empty
+   rather than full, so they won't be treated as an error.
+
+2007-03-13 09:11  tanders
+
+   *
+
+   Back out changes to branches done in SVN 15953 (patch 1678302)
+   because they are only appropriate for MAIN
+
+2007-03-13 05:59  tanders
+
+   *
+
+   CHANGES: PATCH: 1678305: from magfr: Deallocate the cache in
+   hardware/cpu/cpu on shutdown (header part)
+
+
+2007-03-12 23:09  tanders
+
+   *
+
+   CHANGES: PATCH: 1678306: from magfr: Deallocate the log in
+   notification-log-mib/notification_log
+
+2007-03-12 23:04  tanders
+
+   *
+
+   CHANGES: PATCH: 1678305: from magfr: Deallocate the cache in
+   hardware/cpu/cpu on shutdown
+
+2007-03-12 22:57  tanders
+
+   *
+
+   CHANGES: PATCH: 1678302: from magfr: netsnmp_mibindex_load leaks
+   memory
+
+2007-03-12 22:31  tanders
+
+   *
+
+   CHANGES: PATCH: 1678298: from magfr: compile-subagent checks for
+   bad HAVE_SIGNAL_H
+
+2007-03-12 21:37  dts12
+
+   *
+
+   CHANGES: snmpd: BUG: 1413728: Reference index values in debug
+   output correctly.
+
+2007-03-12 21:34  dts12
+
+   *
+
+
+   CHANGES: snmpd: BUG: 1102058: Skip non-mounted disks (e.g. swap
+   partitions)
+
+2007-03-12 21:28  dts12
+
+   *
+
+   CHANGES: snmpd: PATCHES: 1668193: Fix check for v6 ReasmMaxSize
+   support.
+
+2007-03-12 19:56  dts12
+
+   *
+
+   CHANGES: snmpd: PATCHES: 1668952: Ignore zombie processes.
+
+2007-03-12 19:54  dts12
+
+   *
+
+   CHANGES: snmpd: PATCHES: 1665985: Implement ipReasmTimeout
+   Though this registers an instance, rather than the full scalar
+   object
+
+2007-03-12 19:51  dts12
+
+   *
+
+   CHANGES: library: PATCHES: 1665543: Handle VACM checks correctly.
+   CHANGES: snmpd: PATCHES: 1665549: Handle creating VACM entries
+   correctly.
+   [Both patches are required for correct operation]
+
+2007-03-12 19:47  dts12
+
+   *
+
+   CHANGES: snmpd: PATCHES: 1659623: Handle SMUX peers with an empty
+   password.
+
+2007-03-12 19:40  dts12
+
+   *
+
+   CHANGES: snmpd: PATCHES: 1644280: Use the correct engineID when
+   sending v3 traps.
+
+2007-03-12 19:32  dts12
+
+   *
+
+   CHANGES: library: PATCHES: 1642071: Don't fiddle with the storage
+   of pre-existing users.
+
+2007-03-12 19:30  dts12
+
+   *
+
+   CHANGES: snmpd: PATCHES: 1641865: Don't double check snmpTrapOID
+   in the filter table.
+
+2007-03-12 19:25  dts12
+
+   *
+
+   CHANGES: snmpd: PATCHES: 1639726: Report physical memory
+   correctly on *BSD
+
+2007-03-06 13:51  dts12
+
+   *
+
+   CHANGES: snmpd: BUG: 1159908: Fix memory leak
+
+2007-03-02 22:59  tanders
+
+   *
+
+
+   de-mange binary file
+
+2007-03-02 13:30  tanders
+
+   *
+
+   fix typo
+
+2007-02-28 15:27  dts12
+
+   *
+
+   Checkpoint summary of CVS changes, preparatory for the SVN
+   switch.
+
+
+-------------------------------------------------------------------------------
+
 Changes: V5.3.1 -> SVN checkpoint (V5-3-patches branch)
 
 2007-02-27 13:36  rstory
