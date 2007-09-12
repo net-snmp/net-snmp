@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright (C) 2007 Apple, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #ifndef NETSNMP_CONTAINER_H
 #define NETSNMP_CONTAINER_H
 
@@ -275,6 +285,9 @@ extern "C" {
     /** useful for octet strings */
     int netsnmp_compare_mem(const char * lhs, size_t lhs_len,
                             const char * rhs, size_t rhs_len);
+
+    /** no structure, just 'char *' pointers */
+    int netsnmp_compare_direct_cstring(const void * lhs, const void * rhs);
 
     /** for_each callback to call free on data item */
     void  netsnmp_container_simple_free(void *data, void *context);

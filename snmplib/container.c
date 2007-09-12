@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright (C) 2007 Apple, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/container.h>
@@ -68,10 +78,14 @@ netsnmp_container_init_list(void)
                                netsnmp_container_get_factory("sorted_singly_linked_list"));
 
     netsnmp_container_register_with_compare
+        ("cstring", netsnmp_container_get_factory("binary_array"),
+         netsnmp_compare_direct_cstring);
+
+    netsnmp_container_register_with_compare
         ("string", netsnmp_container_get_factory("binary_array"),
          netsnmp_compare_cstring);
     netsnmp_container_register_with_compare
-        ("string:binary_array", netsnmp_container_get_factory("binary_array"),
+        ("string_binary_array", netsnmp_container_get_factory("binary_array"),
          netsnmp_compare_cstring);
 
 }
@@ -471,6 +485,12 @@ netsnmp_ncompare_cstring(const void * lhs, const void * rhs)
     return strncmp(((const container_type*)lhs)->name,
                    ((const container_type*)rhs)->name,
                    strlen(((const container_type*)rhs)->name));
+}
+
+int
+netsnmp_compare_direct_cstring(const void * lhs, const void * rhs)
+{
+    return strcmp((const char*)lhs, (const char*)rhs);
 }
 
 /*
