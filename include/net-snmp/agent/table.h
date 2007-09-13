@@ -9,6 +9,12 @@
  * distributed with the Net-SNMP package.
  */
 /*
+ * Portions of this file are copyrighted by:
+ * Copyright (C) 2007 Apple, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/*
  * @file table.h
  *
  * @addtogroup table
@@ -144,6 +150,8 @@ extern          "C" {
     netsnmp_table_registration_info
         *netsnmp_find_table_registration_info(netsnmp_handler_registration
                                               *reginfo);
+    void netsnmp_table_registration_info_free(netsnmp_table_registration_info *);
+
     netsnmp_index * netsnmp_table_index_find_next_row(netsnmp_container *c,
                                                       netsnmp_table_request_info *tblreq);
 
