@@ -12,6 +12,12 @@
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright (C) 2007 Apple, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -108,7 +114,10 @@ int
 netsnmp_register_table(netsnmp_handler_registration *reginfo,
                        netsnmp_table_registration_info *tabreq)
 {
-    netsnmp_inject_handler(reginfo, netsnmp_get_table_handler(tabreq));
+    int rc = netsnmp_inject_handler(reginfo, netsnmp_get_table_handler(tabreq));
+    if (SNMPERR_SUCCESS != rc)
+        return rc;
+
     return netsnmp_register_handler(reginfo);
 }
 
@@ -747,10 +756,35 @@ int
 netsnmp_sparse_table_register(netsnmp_handler_registration *reginfo,
                        netsnmp_table_registration_info *tabreq)
 {
-    netsnmp_inject_handler(reginfo,
-        netsnmp_create_handler(SPARSE_TABLE_HANDLER_NAME,
-                               sparse_table_helper_handler));
-    netsnmp_inject_handler(reginfo, netsnmp_get_table_handler(tabreq));
+    netsnmp_mib_handler *handler1, *handler2;
+    int rc;
+
+    handler1 = netsnmp_create_handler(SPARSE_TABLE_HANDLER_NAME,
+                                     sparse_table_helper_handler);
+    if (NULL == handler1)
+        return SNMP_ERR_GENERR;
+
+    handler2 = netsnmp_get_table_handler(tabreq);
+    if (NULL == handler2 ) {
+        netsnmp_handler_free(handler1);
+        return SNMP_ERR_GENERR;
+    }
+
+    rc = netsnmp_inject_handler(reginfo, handler1);
+    if (SNMPERR_SUCCESS != rc) {
+        netsnmp_handler_free(handler1);
+        netsnmp_handler_free(handler2);
+        return rc;
+    }
+
+    rc = netsnmp_inject_handler(reginfo, handler2);
+    if (SNMPERR_SUCCESS != rc) {
+        /** handler1 is in reginfo... remove and free?? */
+        netsnmp_handler_free(handler2);
+        return rc;
+    }
+
+    /** both handlers now in reginfo, so nothing to do on error */
     return netsnmp_register_handler(reginfo);
 }
 
@@ -944,6 +978,26 @@ netsnmp_check_getnext_reply(netsnmp_request_info *request,
         }
     }
     return 0;
+}
+
+void
+netsnmp_table_registration_info_free(netsnmp_table_registration_info *tri)
+{
+    if (NULL == tri)
+        return;
+
+    if (NULL != tri->indexes)
+        snmp_free_varbind(tri->indexes);
+
+#if 0
+    /*
+     * sigh... example use of valid_columns points to static memory,
+     * so freeing it would be bad... we'll just have to live with any
+     * leaks, for now...
+     */
+#endif
+
+    free(tri);
 }
 
 /** @} */
