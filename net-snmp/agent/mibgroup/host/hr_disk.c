@@ -2,6 +2,16 @@
  *  Host Resources MIB - disk device group implementation - hr_disk.c
  *
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright (C) 2007 Apple, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
 #include "host_res.h"
@@ -65,6 +75,15 @@
 #include <limits.h>
 #endif
 
+#ifdef darwin
+#include <CoreFoundation/CoreFoundation.h>
+#include <IOKit/IOKitLib.h>
+#include <IOKit/storage/IOBlockStorageDriver.h>
+#include <IOKit/storage/IOMedia.h>
+#include <IOKit/IOBSD.h>
+#include <DiskArbitration/DADisk.h>
+#endif
+
 #ifdef linux
 /*
  * define BLKGETSIZE from <linux/fs.h>:
@@ -78,6 +97,27 @@
 #include <net-snmp/library/read_config.h>
 
 #define HRD_MONOTONICALLY_INCREASING
+
+/*************************************************************
+ * constants for enums for the MIB node
+ * hrDiskStorageAccess (INTEGER / ASN_INTEGER)
+ */
+#define HRDISKSTORAGEACCESS_READWRITE  1
+#define HRDISKSTORAGEACCESS_READONLY  2
+
+
+/*************************************************************
+ * constants for enums for the MIB node
+ * hrDiskStorageMedia (INTEGER / ASN_INTEGER)
+ */
+#define HRDISKSTORAGEMEDIA_OTHER  1
+#define HRDISKSTORAGEMEDIA_UNKNOWN  2
+#define HRDISKSTORAGEMEDIA_HARDDISK  3
+#define HRDISKSTORAGEMEDIA_FLOPPYDISK  4
+#define HRDISKSTORAGEMEDIA_OPTICALDISKROM  5
+#define HRDISKSTORAGEMEDIA_OPTICALDISKWORM  6
+#define HRDISKSTORAGEMEDIA_OPTICALDISKRW  7
+#define HRDISKSTORAGEMEDIA_RAMDISK  8
 
         /*********************
 	 *
@@ -130,6 +170,19 @@ static struct hd_driveid HRD_info;
 
 #ifdef DIOCGDINFO
 static struct disklabel HRD_info;
+#endif
+
+#ifdef darwin
+static int64_t  HRD_cap;
+static int      HRD_access;
+static int      HRD_type;
+static int      HRD_removeble;
+static char     HRD_model[40];
+static int      HRD_saved_access;
+static int      HRD_saved_type;
+static int      HRD_saved_removeble;
+static int _get_type_from_protocol( const char *prot );
+static int _get_type_value( const char *str_type );
 #endif
 
 static void     parse_disk_config(const char *, char *);
@@ -185,6 +238,8 @@ init_hr_disk(void)
                       "/dev/rdsk/c%dt%dd0s0", 0, 7);
     Add_HR_Disk_entry("/dev/rdsk/c%dd%ds%d", 0, 7, 0, 15,
                       "/dev/rdsk/c%dd%ds0", 0, 7);
+#elif defined(darwin)
+    Add_HR_Disk_entry("/dev/disk%ds%d", -1, -1, 0, 32, "/dev/disk%d", 1, 32);
 #elif defined(freebsd4) || defined(freebsd5)
     Add_HR_Disk_entry("/dev/ad%ds%d%c", 0, 1, 1, 4, "/dev/ad%ds%d", 'a', 'h');
     Add_HR_Disk_entry("/dev/da%ds%d%c", 0, 1, 1, 4, "/dev/da%ds%d", 'a', 'h');
@@ -484,6 +539,7 @@ header_hrdisk(struct variable *vp,
     Init_HR_Disk();
     for (;;) {
         disk_idx = Get_Next_HR_Disk();
+        DEBUGMSGTL(("host/hr_disk", "... index %d\n", disk_idx));
         if (disk_idx == -1)
             break;
         newname[HRDISK_ENTRY_NAME_LENGTH] = disk_idx;
@@ -749,6 +805,12 @@ Get_Next_HR_Disk(void)
                     HRD_history[iindex] = 0;
                     return ((HRDEV_DISK << HRDEV_TYPE_SHIFT) + iindex);
                 }
+                DEBUGMSGTL(("host/hr_disk",
+                            "Get_Next_HR_Disk: can't query %s\n", string));
+            }
+            else {
+                DEBUGMSGTL(("host/hr_disk",
+                            "Get_Next_HR_Disk: can't open %s\n", string));
             }
             HRD_history[iindex] = now;
             HRD_index++;
@@ -801,6 +863,66 @@ Get_Next_HR_Disk_Partition(char *string, size_t str_len, int HRP_index)
     return 0;
 }
 
+#ifdef darwin
+int
+Get_HR_Disk_Label(char *string, size_t str_len, const char *devfull)
+{
+    DASessionRef        sess_ref;
+    DADiskRef           disk;
+    CFDictionaryRef     desc;
+    CFStringRef         str_ref;
+    CFStringEncoding    sys_encoding = CFStringGetSystemEncoding();
+
+    DEBUGMSGTL(("host/hr_disk", "Disk Label type %s\n", devfull));
+
+    sess_ref = DASessionCreate( NULL );
+    if (NULL == sess_ref) {
+        strncpy(string, devfull, str_len);
+        string[str_len-1] = 0;
+        return -1;
+    }
+
+    disk = DADiskCreateFromBSDName( NULL, sess_ref, devfull );
+    if (NULL == disk) {
+        CFRelease(sess_ref);
+        strncpy(string, devfull, str_len);
+        string[str_len-1] = 0;
+        return -1;
+    }
+
+    desc = DADiskCopyDescription( disk );
+    if (NULL == desc) {
+        snmp_log(LOG_ERR,
+                 "diskmgr: couldn't get disk description for %s, skipping\n",
+                 devfull);
+        CFRelease(disk);
+        CFRelease(sess_ref);
+        strncpy(string, devfull, str_len);
+        return -1;
+    }
+
+    /** model */
+    str_ref = (CFStringRef)
+        CFDictionaryGetValue(desc, kDADiskDescriptionMediaNameKey);
+    if (str_ref) {
+        strncpy(string, CFStringGetCStringPtr(str_ref, sys_encoding),
+                str_len);
+        string[str_len-1] = 0;
+        DEBUGMSGTL(("verbose:diskmgr:darwin", " name %s\n", string));
+    }
+    else {
+        strncpy(string, devfull, str_len);
+        string[str_len-1] = 0;
+    }
+    
+    CFRelease(disk);
+    CFRelease(desc);
+    CFRelease(sess_ref);
+    
+    return 0;
+}
+#endif
+
 static void
 Save_HR_Disk_Specific(void)
 {
@@ -822,6 +944,13 @@ Save_HR_Disk_Specific(void)
 #ifdef DIOCGDINFO
     HRD_savedCapacity = HRD_info.d_secperunit / 2;
 #endif
+#ifdef darwin
+    HRD_savedCapacity = HRD_cap / 1024;
+    HRD_saved_access = HRD_access;
+    HRD_saved_type = HRD_type;
+    HRD_saved_removeble = HRD_removeble;
+#endif
+
 }
 
 static void
@@ -842,6 +971,11 @@ Save_HR_Disk_General(void)
 #endif
 #ifdef DIOCGDINFO
     strncpy(HRD_savedModel, dktypenames[HRD_info.d_type],
+                    sizeof(HRD_savedModel)-1);
+    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
+#endif
+#ifdef darwin
+    strncpy(HRD_savedModel, HRD_model,
                     sizeof(HRD_savedModel)-1);
     HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
 #endif
@@ -900,6 +1034,104 @@ Query_Disk(int fd, const char *devfull)
     result = ioctl(fd, DIOCGDINFO, &HRD_info);
 #endif
 
+#ifdef darwin
+    DASessionRef        sess_ref;
+    DADiskRef           disk;
+    CFDictionaryRef     desc;
+    CFStringRef         str_ref;
+    CFNumberRef         number_ref;
+    CFBooleanRef        bool_ref;
+    CFStringEncoding    sys_encoding = CFStringGetSystemEncoding();
+
+    sess_ref = DASessionCreate( NULL );
+    if (NULL == sess_ref)
+        return -1;
+
+    disk = DADiskCreateFromBSDName( NULL, sess_ref, devfull );
+    if (NULL == disk) {
+        CFRelease(sess_ref);
+        return -1;
+    }
+
+    desc = DADiskCopyDescription( disk );
+    if (NULL == desc) {
+        CFRelease(disk);
+        CFRelease(sess_ref);
+        return -1;
+    }
+
+    number_ref = (CFNumberRef)
+        CFDictionaryGetValue(desc, kDADiskDescriptionMediaSizeKey);
+    if (number_ref)
+        CFNumberGetValue(number_ref, kCFNumberSInt64Type, &HRD_cap);
+    else
+        HRD_cap = 0;
+    DEBUGMSGTL(("verbose:diskmgr:darwin", " size %lld\n", HRD_cap));
+
+    /** writable?  */
+    bool_ref = (CFBooleanRef)
+        CFDictionaryGetValue(desc, kDADiskDescriptionMediaWritableKey);
+    if (bool_ref) {
+        HRD_access = CFBooleanGetValue(bool_ref);
+    }
+    else
+        HRD_access = 0;
+    DEBUGMSGTL(("verbose:diskmgr:darwin", " writable %d\n",
+                HRD_access));
+
+    /** removable?  */
+    bool_ref = (CFBooleanRef)
+        CFDictionaryGetValue(desc, kDADiskDescriptionMediaRemovableKey);
+    if (bool_ref) {
+        HRD_removeble = CFBooleanGetValue(bool_ref);
+    }
+    else
+        HRD_removeble = 0;
+    DEBUGMSGTL(("verbose:diskmgr:darwin", " removable %d\n",
+                HRD_removeble));
+
+    /** get type */
+    str_ref = (CFStringRef)
+        CFDictionaryGetValue(desc, kDADiskDescriptionMediaTypeKey);
+    if (str_ref) {
+        HRD_type = _get_type_value(CFStringGetCStringPtr(str_ref,
+                                                         sys_encoding));
+        DEBUGMSGTL(("verbose:diskmgr:darwin", " type %s / %d\n",
+                    CFStringGetCStringPtr(str_ref, sys_encoding),
+                    HRD_type));
+    }
+    else {
+        str_ref = (CFStringRef)
+            CFDictionaryGetValue(desc, kDADiskDescriptionDeviceProtocolKey);
+        if (str_ref) {
+            HRD_type = 
+                _get_type_from_protocol(CFStringGetCStringPtr(str_ref,
+                                                              sys_encoding));
+            DEBUGMSGTL(("verbose:diskmgr:darwin", " type %s / %d\n",
+                        CFStringGetCStringPtr(str_ref, sys_encoding),
+                        HRD_type));
+        }
+        else
+            HRD_type = HRDISKSTORAGEMEDIA_UNKNOWN;
+    }
+
+    /** model */
+    str_ref = (CFStringRef)
+        CFDictionaryGetValue(desc, kDADiskDescriptionDeviceModelKey);
+    if (str_ref) {
+        strncpy(HRD_model, CFStringGetCStringPtr(str_ref, sys_encoding),
+                sizeof(HRD_model));
+        HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
+        DEBUGMSGTL(("verbose:diskmgr:darwin", " model %s\n", HRD_model));
+    }
+    else
+        HRD_model[0] = 0;
+    CFRelease(disk);
+    CFRelease(desc);
+    CFRelease(sess_ref);
+    result = 0;
+#endif
+
     return (result);
 }
 
@@ -916,6 +1148,11 @@ Is_It_Writeable(void)
 #ifdef DKIOCINFO
     if (HRD_savedCtrl_type == DKC_CDROM)
         return (2);             /* read only */
+#endif
+
+#ifdef darwin
+    if (!HRD_access)
+        return (2);
 #endif
 
     return (1);                 /* read-write */
@@ -990,6 +1227,9 @@ What_Type_Disk(void)
     }
 #endif
 
+#ifdef darwin
+    return HRD_type;
+#endif
 
     return (2);                 /* Unknown */
 }
@@ -1020,5 +1260,63 @@ Is_It_Removeable(void)
         return (1);             /* true */
 #endif
 
+#ifdef darwin
+    if (HRD_removeble)
+        return (1);
+#endif
+
     return (2);                 /* false */
 }
+
+#ifdef darwin
+typedef struct type_value_map_s {
+     const char *type;
+     uint32_t    value;
+} type_value_map;
+
+static type_value_map media_type_map[] = {
+    { "CD-ROM", HRDISKSTORAGEMEDIA_OPTICALDISKROM},
+    { "DVD-R", HRDISKSTORAGEMEDIA_OPTICALDISKWORM},
+    { "DVD+R", HRDISKSTORAGEMEDIA_OPTICALDISKWORM},
+};  
+static int media_types = sizeof(media_type_map)/sizeof(media_type_map[0]);
+
+static int
+_get_type_value( const char *str_type )
+{
+    int           i, len;
+    
+    if (NULL == str_type)
+        return HRDISKSTORAGEMEDIA_UNKNOWN;
+
+    len = strlen(str_type);
+    for(i=0; i < media_types; ++i) {
+        if (0 == strcmp(media_type_map[i].type, str_type))
+            return media_type_map[i].value;
+    }
+
+    return HRDISKSTORAGEMEDIA_UNKNOWN;
+}
+
+static type_value_map proto_map[] = {
+    { "ATA", HRDISKSTORAGEMEDIA_HARDDISK},
+    { "ATAPI", HRDISKSTORAGEMEDIA_OPTICALDISKROM}
+};
+static int proto_maps = sizeof(proto_map)/sizeof(proto_map[0]);
+
+static int _get_type_from_protocol( const char *prot )
+{   
+    int           i, len;
+
+    if (NULL == prot)
+        return TV_FALSE;
+
+    len = strlen(prot);
+    for(i=0; i < proto_maps; ++i) {
+        if (0 == strcmp(proto_map[i].type, prot))
+            return proto_map[i].value;
+    }
+
+    return HRDISKSTORAGEMEDIA_UNKNOWN;
+}
+#endif
