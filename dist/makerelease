@@ -16,6 +16,8 @@ LocalGetOptions(\%opts,
 
 my $version = shift;
 die "No version supplied" if (!$version);
+my $extrajunk = shift;
+die "Unexpected argument ($extrajunk)" if ($extrajunk);
 my $vtag   = $version;
 my $branch = "";
 # Ensure we have both numeric and tag-style version labels
