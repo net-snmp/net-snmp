@@ -105,23 +105,27 @@ RELEASE:
 
  11) Create a tag checkpoint for this release:
 
-       $ svn copy  /trunk                 /tags/Ext-5-x-y
+       $ svn copy  /trunk                 /tags/Ext-5-x
      or
        $ svn copy  /branches/V5-x-patches /tags/Ext-5-x-y
 
- 12) Construct the tarball:
+ 12) Construct the source packages:
 
-        $ svn checkout /tags/Ext-5-x-y/net-snmp net-snmp-5.x.y
-        $ tar -c -z -f net-snmp-5.x.y.tar.gz    net-snmp-5.x.y
+        $ svn export /tags/Ext-5-x-y/net-snmp net-snmp-5.x.y
+        $ net-snmp-5.x.y/remove-files         net-snmp-5.x.y
+        $ star artype=ustar -c -z -f net-snmp-5.x.y.tar.gz    net-snmp-5.x.y
+        $ rm -f net-snmp-5.x.y.zip"
+        $ zip -r net-snmp-5.x.y.zip net-snmp-5.x.y"
 
-     [Ideally use "star artype=ustar ..." for optimal portability]
 
- 13) Sign (or checksum) the package:
+ 13) Sign (or checksum) the packages:
 
      Wes/Robert:
         $ gpg -u net-snmp-admin -a --detach-sign net-snmp-5.x.y.tar.gz
+        $ gpg -u net-snmp-admin -a --detach-sign net-snmp-5.x.y.zip
      Others:
         $ md5sum net-snmp-5.x.y.tar.gz > net-snmp-5.x.y.tar.gz.md5
+        $ md5sum net-snmp-5.x.y.zip    > net-snmp-5.x.y.zip.md5
 
 
 ***************************************************************************
@@ -135,17 +139,19 @@ RELEASE TESTING:
 
         $ svn status
 
- 15) Upload the tarball (and signature file) to the SourceForge server:
+Note:  This is the last stage that is handled by the "makerelease" script
+       Everything following will need to be done manually.
+
+ 15) Upload the packages (and signature files) to the SourceForge server:
  
         $ ncftpput upload.sf.net incoming net-snmp-5.x.y.tar.gz
+        $ ncftpput upload.sf.net incoming net-snmp-5.x.y.zip
         * SF pages:  "Admin" -> "File Releases"
         * net-snmp:  "Add Release" (or "Edit Release")
         * Create (or choose) an appropriate release name
              e.g.  "5.x.y source code"  (or "5.x.y pre-releases")
         * "Edit This Release"
         * Select the tarball and/or other relevant files
-
-     This step (and those that follow) are *NOT* covered by "makerelease"
 
  16) Announce the release on the appropriate list.
      Pre-release announcements (and a call for testing) should be
