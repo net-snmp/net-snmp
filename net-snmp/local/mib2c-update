@@ -96,7 +96,7 @@ check_setup()
 #        rc=0
 #    fi
 
-    if [[ $rc -eq 0 && $UPDATE_NOPROBE -ne 1 ]]; then
+    if [ $rc -eq 0 ] && [ $UPDATE_NOPROBE -ne 1 ]; then
         mib2c -c unknown  > /dev/null 2>&1
         if [ $? -eq 0 ]; then
             error "WARNING: mib2c returns 0 on error conditions!"
@@ -131,7 +131,7 @@ do_diff()
             diff -U $FUZZ -p -b -w --show-c-function \
                 -I "$""Id:" $f $DD_CURR/$f >> $DD_OUTPUT
             rc=$?
-            (( rcs = $rcs + $rc ))
+            rcs=`expr $rcs + $rc`
             if [ $rc -eq 1 ]; then
                 echo "   $f is different"
             fi
@@ -330,10 +330,10 @@ if [ -f .M2C-UPDATE-MERGE-FAILED ]; then
         echo "[q)uit]"
         echo "(c|r|q) ?"
         read ans
-        if [ "x$ans" == "xr" ]; then
+        if [ "x$ans" = "xr" ]; then
             rm .M2C-UPDATE-MERGE-FAILED
             break
-        elif [ "x$ans" == "xc" ]; then
+        elif [ "x$ans" = "xc" ]; then
             echo "Have you have manually merged all the"
             echo "changes into the merged directory?"
             echo "(y|n)"
