@@ -169,6 +169,41 @@ real_init_master(void)
                 netsnmp_sess_log_error(LOG_WARNING, buf, &sess);
             }
         } else {
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
+            if (t->domain == netsnmp_UnixDomain && t->local != NULL) {
+                char name[sizeof(struct sockaddr_un) + 1];
+                memcpy(name, t->local, t->local_length);
+                name[t->local_length] = '\0';
+                /*
+                 * Apply any settings to the ownership/permissions of the
+                 * AgentX socket
+                 */
+                agentx_sock_perm =
+                    netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                                       NETSNMP_DS_AGENT_X_SOCK_PERM);
+                agentx_sock_user =
+                    netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                                       NETSNMP_DS_AGENT_X_SOCK_USER);
+                agentx_sock_group =
+                    netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                                       NETSNMP_DS_AGENT_X_SOCK_GROUP);
+
+                if (agentx_sock_perm != 0)
+                    chmod(name, agentx_sock_perm);
+
+                if (agentx_sock_user || agentx_sock_group) {
+                    /*
+                     * If either of user or group haven't been set,
+                     *  then leave them unchanged.
+                     */
+                    if (agentx_sock_user == 0 )
+                        agentx_sock_user = -1;
+                    if (agentx_sock_group == 0 )
+                        agentx_sock_group = -1;
+                    chown(name, agentx_sock_user, agentx_sock_group);
+                }
+            }
+#endif
             session =
                 snmp_add_full(&sess, t, NULL, agentx_parse, NULL, NULL,
                               agentx_realloc_build, agentx_check_packet, NULL);
@@ -176,32 +211,6 @@ real_init_master(void)
         if (session == NULL) {
             netsnmp_transport_free(t);
         }
-
-#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
-        /*
-         * Apply any settings to the ownership/permissions of the AgentX socket
-         */
-        agentx_sock_perm = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
-                                              NETSNMP_DS_AGENT_X_SOCK_PERM);
-        agentx_sock_user = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
-                                              NETSNMP_DS_AGENT_X_SOCK_USER);
-        agentx_sock_group = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
-                                               NETSNMP_DS_AGENT_X_SOCK_GROUP);
-
-        if (agentx_sock_perm != 0)
-            chmod(sess.peername, agentx_sock_perm);
-        if (agentx_sock_user || agentx_sock_group) {
-            /*
-             * If either of user or group haven't been set,
-             *  then leave them unchanged.
-             */
-            if (agentx_sock_user == 0 )
-                agentx_sock_user = -1;
-            if (agentx_sock_group == 0 )
-                agentx_sock_group = -1;
-            chown(sess.peername, agentx_sock_user, agentx_sock_group);
-        }
-#endif
     }
 
     SNMP_FREE(agentx_sockets);
