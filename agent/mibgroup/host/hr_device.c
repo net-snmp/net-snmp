@@ -222,7 +222,7 @@ var_hrdevice(struct variable *vp,
 {
     int             dev_idx, type;
     oid            *oid_p;
-    char           *tmp_str;
+    const char     *tmp_str;
     static char     string[1024];
 
 really_try_next:
