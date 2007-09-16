@@ -6730,7 +6730,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         }
 #endif /* DISABLE_MIB_LOADING */
         atmp = inet_addr(value);
-        if (atmp != (long) -1 || !strcmp(value, "255.255.255.255"))
+        if (atmp != (in_addr_t) -1 || !strcmp(value, "255.255.255.255"))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS,
                                   (u_char *) & atmp, sizeof(atmp));
         else
