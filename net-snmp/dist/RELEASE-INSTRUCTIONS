@@ -232,7 +232,7 @@ Note:  This is the last stage that is handled by the "makerelease" script
  23) Hide the pre-release repository from the File Releases
      admin pages.
 
- 23) Clean up the 'dist' dir of the relevant V5-x-patches branch.
+ 24) Clean up the 'dist' dir of the relevant V5-x-patches branch.
      Only leave the following files:
 
      changelogfix  cvsshow  cvsup  extractnews  makerelease
@@ -288,7 +288,7 @@ CREATING BINARY DISTRIBUTIONS
 
          EG: ...i386.rpm needs to become ...fc5.i386.rpm
 
-  7) Remove (or hide) binaries from older releases of the same line,
+  8) Remove (or hide) binaries from older releases of the same line,
      where you have submitted a newer binary for the same architecture.
      Once the last binary for a particular release version has been
      removed, hide that repository.
