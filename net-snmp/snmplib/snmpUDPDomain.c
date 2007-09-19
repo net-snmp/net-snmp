@@ -644,6 +644,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
             if (setsockopt(t->sock, SOL_IP, IP_PKTINFO, &sockopt, sizeof sockopt) == -1) {
                 DEBUGMSGTL(("netsnmp_udp", "couldn't set IP_PKTINFO: %s\n",
                     strerror(errno)));
+                netsnmp_transport_free(t);
                 return NULL;
             }
             DEBUGMSGTL(("netsnmp_udp", "set IP_PKTINFO\n"));
