@@ -696,6 +696,9 @@
 /* Define to 1 if `weak_key' is member of `struct des_ks_struct'. */
 #undef HAVE_STRUCT_DES_KS_STRUCT_WEAK_KEY
 
+/* Define to 1 if `d_type' is member of `struct dirent'. */
+#undef HAVE_STRUCT_DIRENT_D_TYPE
+
 /* Define to 1 if `ifa_next' is member of `struct ifaddr'. */
 #undef HAVE_STRUCT_IFADDR_IFA_NEXT
 
@@ -1197,6 +1200,9 @@
 
 /* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT
+
+/* The size of `intmax_t', as computed by sizeof. */
+#undef SIZEOF_INTMAX_T
 
 /* The size of `long', as computed by sizeof. */
 #undef SIZEOF_LONG

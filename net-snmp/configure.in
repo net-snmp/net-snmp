@@ -3791,6 +3791,13 @@ if test "$netsnmp_cv_broken_inline" = yes ; then
         [Define if static inline functions are unsupported])
 fi
 
+AC_CHECK_MEMBERS([struct dirent.d_type],,,[
+AC_INCLUDES_DEFAULT()
+[#if HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+]])
+
 AC_CHECK_MEMBERS([struct mbstat.m_clusters, struct mbstat.m_clfree,
                   struct mbstat.m_mbufs],,,[
 AC_INCLUDES_DEFAULT()
