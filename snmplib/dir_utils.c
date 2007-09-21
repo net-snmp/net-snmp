@@ -56,6 +56,9 @@ netsnmp_directory_container_read(netsnmp_container *user_container,
     char               path[PATH_MAX];
     u_char             dirname_len;
     int                rc;
+#if !(defined(HAVE_STRUCT_DIRENT_D_TYPE) && defined(DT_DIR)) && defined(S_ISDIR)
+    struct stat        statbuf;
+#endif
 
     DEBUGMSGTL(("directory:container", "reading %s\n", dirname));
 
@@ -101,7 +104,13 @@ netsnmp_directory_container_read(netsnmp_container *user_container,
 
         strncpy(&path[dirname_len], file->d_name, sizeof(path) - dirname_len);
         DEBUGMSGTL(("9:directory:container", "  found %s\n", path));
+#if defined(HAVE_STRUCT_DIRENT_D_TYPE) && defined(DT_DIR)
         if ((file->d_type == DT_DIR) && (flags & NETSNMP_DIR_RECURSE)) {
+#elif S_ISDIR
+        if ((flags & NETSNMP_DIR_RECURSE) && (stat(file->d_name, &statbuf) != 0) && (S_ISDIR(statbuf.st_mode))) {
+#else
+        if (flags & NETSNMP_DIR_RECURSE) {
+#endif
             /** xxx add the dir as well? not for now.. maybe another flag? */
             tmp_c = netsnmp_directory_container_read(container, path, flags);
         }
