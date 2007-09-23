@@ -106,7 +106,7 @@ netsnmp_directory_container_read(netsnmp_container *user_container,
         DEBUGMSGTL(("9:directory:container", "  found %s\n", path));
 #if defined(HAVE_STRUCT_DIRENT_D_TYPE) && defined(DT_DIR)
         if ((file->d_type == DT_DIR) && (flags & NETSNMP_DIR_RECURSE)) {
-#elif S_ISDIR
+#elif defined(S_ISDIR)
         if ((flags & NETSNMP_DIR_RECURSE) && (stat(file->d_name, &statbuf) != 0) && (S_ISDIR(statbuf.st_mode))) {
 #else
         if (flags & NETSNMP_DIR_RECURSE) {
